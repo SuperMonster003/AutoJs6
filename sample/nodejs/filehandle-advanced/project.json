@@ -1,0 +1,16 @@
+{
+  "name": "filehandle-advanced",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["fs-promises", "filehandle"],
+    "expectedProvider": "Embedded Node scoped filesystem facade",
+    "packagedSupport": "main-app example only in this phase",
+    "securityLimitations": ["project-relative files only", "no host filesystem escape"]
+  }
+}

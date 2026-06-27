@@ -1,0 +1,16 @@
+{
+  "name": "inspector-debug",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["inspector"],
+    "expectedProvider": "design-gated debug-only inspector",
+    "packagedSupport": "not supported in release builds",
+    "securityLimitations": ["no release inspector listener", "NODE_OPTIONS inspector flags remain filtered"]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "typescript-esm",
+  "type": "node",
+  "main": "main.mts",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["typescript", "esm"],
+    "expectedProvider": "Embedded Node partial ESM plus lightweight TypeScript stripper",
+    "packagedSupport": "supported for local project files",
+    "securityLimitations": ["local project graph only", "no TSX", "disabled builtins remain denied"]
+  }
+}

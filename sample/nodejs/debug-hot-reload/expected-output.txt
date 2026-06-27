@@ -1,0 +1,1 @@
+sample.debug-hot-reload=PASS

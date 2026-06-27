@@ -1,0 +1,4 @@
+sample.live-websocket.provider=controlled-websocket
+sample.live-websocket.limit=<provider default max message bytes>
+sample.live-websocket.closed=<true or unavailable marker>
+sample.live-websocket=PASS

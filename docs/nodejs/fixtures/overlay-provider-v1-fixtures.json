@@ -1,0 +1,204 @@
+{
+  "schema": "autojs6-node-overlay-provider-v1-fixtures",
+  "accepted": [
+    {
+      "id": "status-panel",
+      "descriptor": {
+        "content": {
+          "type": "Column",
+          "children": [
+            {
+              "id": "status",
+              "type": "Text",
+              "text": "Running"
+            },
+            {
+              "id": "stop",
+              "type": "Button",
+              "text": "Stop"
+            }
+          ]
+        },
+        "window": {
+          "width": 240,
+          "height": 120,
+          "x": 24,
+          "y": 96,
+          "touchable": true,
+          "focusable": false,
+          "draggable": true,
+          "visible": true
+        },
+        "disclosure": {
+          "title": "AutoJs6 overlay",
+          "text": "Script overlay is visible"
+        }
+      },
+      "patches": [
+        {
+          "id": "status",
+          "text": "Done"
+        }
+      ],
+      "events": [
+        {
+          "type": "click",
+          "overlayId": "overlay-1",
+          "targetId": "stop",
+          "eventTime": 123456999
+        }
+      ]
+    },
+    {
+      "id": "readonly-progress",
+      "descriptor": {
+        "content": {
+          "type": "Column",
+          "children": [
+            {
+              "id": "message",
+              "type": "Text",
+              "text": "Uploading"
+            },
+            {
+              "id": "progress",
+              "type": "Progress",
+              "progress": 20,
+              "max": 100
+            }
+          ]
+        },
+        "window": {
+          "width": "wrap_content",
+          "height": "wrap_content",
+          "touchable": false,
+          "focusable": false,
+          "visible": true
+        },
+        "disclosure": {
+          "title": "AutoJs6 progress",
+          "text": "A script-owned overlay is visible"
+        }
+      },
+      "patches": [
+        {
+          "id": "progress",
+          "progress": 75
+        }
+      ],
+      "events": []
+    }
+  ],
+  "rejected": [
+    {
+      "id": "xml-raw-string",
+      "input": "<vertical><button id=\"stop\" text=\"Stop\" /></vertical>",
+      "reason": "Rhino XML literals and raw XML strings are not JSON overlay descriptors."
+    },
+    {
+      "id": "executable-attribute",
+      "descriptor": {
+        "content": {
+          "type": "Button",
+          "id": "stop",
+          "text": "Stop",
+          "onClick": "window.close()"
+        },
+        "disclosure": {
+          "title": "AutoJs6 overlay",
+          "text": "Script overlay is visible"
+        }
+      },
+      "reason": "Executable attributes and JavaScript snippets are rejected before bridge dispatch."
+    },
+    {
+      "id": "hidden-overlay",
+      "descriptor": {
+        "content": {
+          "type": "Text",
+          "text": "Hidden"
+        },
+        "window": {
+          "visible": false,
+          "alpha": 0
+        },
+        "disclosure": {
+          "title": "Hidden",
+          "text": "Hidden overlay"
+        }
+      },
+      "reason": "Hidden, invisible, or fully transparent overlays are not allowed."
+    },
+    {
+      "id": "missing-disclosure",
+      "descriptor": {
+        "content": {
+          "type": "Text",
+          "text": "No disclosure"
+        }
+      },
+      "reason": "User-visible disclosure title and text are required."
+    },
+    {
+      "id": "raw-window-flags",
+      "descriptor": {
+        "content": {
+          "type": "Text",
+          "text": "Raw"
+        },
+        "window": {
+          "layoutParams": {
+            "flags": 40
+          },
+          "type": "WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY"
+        },
+        "disclosure": {
+          "title": "Raw",
+          "text": "Raw window flags"
+        }
+      },
+      "reason": "Raw WindowManager.LayoutParams, flag integers, and platform constants never cross the bridge."
+    },
+    {
+      "id": "native-view",
+      "descriptor": {
+        "content": {
+          "type": "NativeView",
+          "id": "legacy"
+        },
+        "disclosure": {
+          "title": "Native",
+          "text": "Native view"
+        }
+      },
+      "reason": "Rhino NativeView and Android View objects never cross into Node."
+    }
+  ],
+  "migrationHints": [
+    {
+      "rhino": "floaty.window(<vertical>...</vertical>)",
+      "node": "uiOverlay.show({ content: { type: \"Column\", children: [...] }, disclosure: { title, text } })",
+      "status": "provider_path_json_descriptor_only"
+    },
+    {
+      "rhino": "floaty.rawWindow(<frame>...</frame>)",
+      "node": "blocked_by_design: raw window flags and raw view access are not exposed",
+      "status": "blocked_by_design"
+    },
+    {
+      "rhino": "floaty.closeAll()",
+      "node": "uiOverlay.closeAll() closes only overlays owned by the current Node execution",
+      "status": "provider_path"
+    },
+    {
+      "rhino": "floaty.hasPermission() / floaty.requestPermission()",
+      "node": "uiOverlay.hasPermission() and explicit uiOverlay.openPermissionSettings()",
+      "status": "provider_path_explicit_user_action"
+    },
+    {
+      "rhino": "floaty.getClip()",
+      "node": "require(\"clipboard\").getText() or require(\"autojs6:compat\").getClip()",
+      "status": "renamed"
+    }
+  ]
+}

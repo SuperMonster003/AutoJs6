@@ -4,6 +4,7 @@ import org.autojs.autojs6.BuildConfig
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -26,6 +27,10 @@ class NodeWorkerThreadsDesignGateInstrumentationTest {
     @Test
     fun workerThreadsRemainDesignGatedAndDisabledByDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads design gate")
+        assumeTrue(
+            "Default worker_threads design gate runs only when the build-level experimental flag is disabled.",
+            !BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        )
         assertFalse(BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED)
         assertTrue(
             NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY] == false,
@@ -80,8 +85,16 @@ class NodeWorkerThreadsDesignGateInstrumentationTest {
                 console.log("worker.profileFrozen=" + Object.isFrozen(profile.experimentalFlags));
 
                 expectDenied("requireBare", () => require("worker_threads"));
-                expectDenied("requireNodePrefix", () => require("node:worker_threads"));
                 expectDenied("resolveBare", () => require.resolve("worker_threads"));
+                const workerFacade = require("node:worker_threads");
+                console.log("worker.nodePrefixFacade=" + [
+                  require.resolve("node:worker_threads"),
+                  workerFacade.shadowed !== true,
+                  typeof workerFacade.Worker,
+                  typeof workerFacade.MessageChannel,
+                  workerFacade.nativeAvailable === false,
+                  workerFacade.policy.nativeAvailable === false
+                ].join("|"));
 
                 console.log("worker.ready=true");
             """.trimIndent()
@@ -97,8 +110,8 @@ class NodeWorkerThreadsDesignGateInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("worker.profile=false/false/false/true"))
             assertTrue(result.stdout, result.stdout.contains("worker.profileFrozen=true"))
             assertTrue(result.stdout, result.stdout.contains("worker.requireBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
-            assertTrue(result.stdout, result.stdout.contains("worker.requireNodePrefix=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
             assertTrue(result.stdout, result.stdout.contains("worker.resolveBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
+            assertTrue(result.stdout, result.stdout.contains("worker.nodePrefixFacade=worker_threads|true|function|function|true|true"))
             assertTrue(result.stdout, result.stdout.contains("worker.ready=true"))
         } finally {
             workDir.deleteRecursively()

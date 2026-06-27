@@ -1,0 +1,16 @@
+{
+  "name": "database",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 15000,
+    "permissions": ["database"]
+  },
+  "example": {
+    "capabilities": ["database"],
+    "expectedProvider": "app-private Android SQLite bridge",
+    "packagedSupport": "future gated until packaged live database authority is accepted",
+    "securityLimitations": ["database names are scoped", "ATTACH and DETACH are denied", "native sqlite extensions are denied"]
+  }
+}

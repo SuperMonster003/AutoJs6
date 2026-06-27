@@ -1,0 +1,5 @@
+{
+  "name": "execution-queue",
+  "type": "node",
+  "main": "main.cjs"
+}

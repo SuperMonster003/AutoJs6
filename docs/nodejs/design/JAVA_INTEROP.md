@@ -30,7 +30,21 @@ packagedApkOverrideAllowed: false
 status: experimental
 ```
 
-With the flag off, the runtime keeps `require("java")`, `$autojs.java`, `Packages`, `importClass`, direct `java.*`, direct `android.*`, reflection, and Rhino Java adapter style APIs unavailable. With the flag on, only `require("java")` is exposed, and it is restricted to a bridge-backed allowlist.
+With the flag off, the runtime keeps `require("java")`, `$autojs.java`,
+`Packages`, `importClass`, direct `java.*`, direct `android.*`, reflection, and
+Rhino Java adapter style APIs unavailable. With the flag on, `require("java")`
+and the gated `$autojs.java` facade are restricted to a bridge-backed allowlist.
+P13-14 can additionally expose `Packages`, `java`, and `android` JavaScript
+proxies only through explicit `rhino.install({ experimental: true })`; those
+proxies still route through the same allowlist. P13-15 keeps Rhino
+`importClass` / `importPackage` semantics unsupported and returns the stable
+`ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED` error from explicit `require("rhino")`
+helpers.
+P13-16 keeps Rhino `JavaAdapter` unsupported in Node with
+`ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED` and reserves
+`java.defineClass()` / `$autojs.java.defineClass()` as the future
+proxy-interface migration name. The reserved methods currently throw
+`ERR_AUTOJS6_JAVA_METHOD_DENIED` and do not dispatch to the bridge.
 
 ## Mode Comparison
 
@@ -163,6 +177,10 @@ Current experimental MVP:
 - `java.lang.Math` selected static numeric helpers
 - `java.util.UUID` selected static UUID helpers
 - `android.graphics.Rect` construction as an opaque provider-owned handle
+- P13-13 Rect handle calls: selected instance methods, field reads, and
+  explicit `release` / `dispose` cleanup
+- P13-16 `defineClass` is a reserved stable denial only; it does not load
+  bytecode, define classes, or register callbacks yet
 
 The phrase `java.util.*` must not mean package-wide authority. It can only mean selected classes and selected methods documented in an allowlist table.
 
@@ -190,6 +208,11 @@ const java = require("java");
 
 const uuid = await java.callStatic("java.util.UUID", "randomUUID", []);
 console.log(String(uuid));
+
+const rect = await java.new("android.graphics.Rect", [1, 2, 3, 4]);
+console.log(await rect.call("width"));
+console.log(await java.getField(rect, "left"));
+await rect.release();
 ```
 
 Current constraints:
@@ -201,6 +224,11 @@ Current constraints:
 - no constructor or method is callable unless listed
 - no object can reveal its runtime class or class loader
 - no generic method invocation, reflection bridge, or property traversal exists
+- P13-13 handle helpers are limited to provider-owned Rect handles and do not
+  introduce generic Java reflection or arbitrary field traversal
+- P13-16 reserves `java.defineClass()` / `$autojs.java.defineClass()` for a
+  future bounded proxy-interface provider; current calls throw
+  `ERR_AUTOJS6_JAVA_METHOD_DENIED` without bridge dispatch
 
 An even safer first step is to avoid generic Java calls and expose named bridge modules instead, such as `rect`, `uuid`, or additional `image` value helpers.
 
@@ -214,6 +242,9 @@ Rhino-era scripts may use:
 - `java.*`
 - `android.*`
 - `$autojs.java`
+- `JavaAdapter`
+- `java.defineClass()` / `$autojs.java.defineClass()` until the P13-16
+  replacement provider is implemented
 
 Node must not silently emulate these in-process. If a compatibility shim is ever added, it should:
 

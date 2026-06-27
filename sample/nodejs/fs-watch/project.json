@@ -1,0 +1,16 @@
+{
+  "name": "fs-watch",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["fs-watch"],
+    "expectedProvider": "Embedded Node scoped filesystem watcher facade",
+    "packagedSupport": "main-app example only in this phase",
+    "securityLimitations": ["project-relative watch targets only", "watcher quota remains enforced"]
+  }
+}

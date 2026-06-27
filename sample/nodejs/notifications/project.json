@@ -1,0 +1,5 @@
+{
+  "name": "notifications",
+  "type": "node",
+  "main": "main.cjs"
+}

@@ -1,0 +1,1 @@
+realnpm.typescript-wasm-package=ts-wasm:typed/11

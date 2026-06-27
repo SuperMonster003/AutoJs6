@@ -1,0 +1,16 @@
+{
+  "name": "sandboxed-script",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["hardened-sandbox", "capability-broker"],
+    "expectedProvider": "hardened isolated runtime policy gate",
+    "packagedSupport": "not supported for user code in this phase",
+    "securityLimitations": ["no direct app permissions", "all Android capabilities must be brokered"]
+  }
+}

@@ -1,0 +1,1 @@
+realnpm.adapter-diagnostics-helper=adapter:surface_only/legacy_jni/blocked

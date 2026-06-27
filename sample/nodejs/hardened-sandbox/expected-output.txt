@@ -1,0 +1,1 @@
+sample.hardened-sandbox=PASS

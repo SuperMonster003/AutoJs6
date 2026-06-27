@@ -2,8 +2,14 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import android.os.Build
+import org.autojs.autojs.engine.NodeBridgePermissionManifest
+import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
+import org.autojs.autojs.engine.NodePrivacyDisclosurePolicy
+import org.autojs.autojs.engine.NodeProfileRollbackPolicy
+import org.autojs.autojs.engine.NodeProfileSelectionDiagnostics
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
+import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
@@ -17,7 +23,11 @@ object NodeDoctorReportGenerator {
         val jsonFile: File,
     )
 
-    fun generate(context: Context, includeNativeProbe: Boolean = true): ReportFiles {
+    fun generate(
+        context: Context,
+        includeNativeProbe: Boolean = true,
+        projectRoot: File? = null,
+    ): ReportFiles {
         val appContext = context.applicationContext
         val generatedAt = ZonedDateTime.now().toString()
         val probeResult = if (includeNativeProbe) {
@@ -26,7 +36,7 @@ object NodeDoctorReportGenerator {
         } else {
             null
         }
-        val reportJson = buildJson(appContext, generatedAt, probeResult, includeNativeProbe)
+        val reportJson = buildJson(appContext, generatedAt, probeResult, includeNativeProbe, projectRoot)
         val reportText = buildText(appContext, generatedAt, reportJson)
         val reportDir = File(appContext.filesDir, REPORT_DIR_NAME).apply { mkdirs() }
         val textFile = File(reportDir, "node-doctor-report.txt")
@@ -41,6 +51,7 @@ object NodeDoctorReportGenerator {
         generatedAt: String,
         probeResult: NativeNodeEmbeddedRuntimeBridge.ProbeResult?,
         includeNativeProbe: Boolean,
+        projectRoot: File?,
     ): JSONObject {
         return JSONObject().apply {
             put("schema", "autojs6-node-doctor-device-v1")
@@ -48,9 +59,15 @@ object NodeDoctorReportGenerator {
             put("privacy", privacyJson())
             put("app", appJson(context))
             put("runtime", runtimeJson(probeResult))
+            put("compileCache", compileCacheJson(context))
             put("featureFlags", featureFlagsJson())
+            put("profileSelection", profileSelectionJson(projectRoot))
+            put("profileRollbackPolicy", NodeProfileRollbackPolicy.toJsonObject())
+            put("privacyDisclosurePolicy", NodePrivacyDisclosurePolicy.toJsonObject())
             put("nativeLibraries", nativeLibrariesJson(context, probeResult))
             put("capabilityProfile", capabilityProfileJson())
+            put("bridgeCapabilities", bridgeCapabilitiesJson())
+            put("bridgeProviders", bridgeProvidersJson(context))
             put("packagedTemplate", packagedTemplateJson(context))
             put("lastNodeError", lastErrorJson())
             put(
@@ -84,6 +101,10 @@ object NodeDoctorReportGenerator {
         put("profileName", NodeRuntimeCapabilities.PROFILE_NAME)
         put("engineVersion", NodeRuntimeCapabilities.ENGINE_VERSION)
         put("backend", BuildConfig.NODEJS_RUNTIME_BACKEND)
+        put("runtimeSlot", BuildConfig.NODEJS_RUNTIME_SLOT)
+        put("runtimeSlotTargetVersion", BuildConfig.NODEJS_RUNTIME_SLOT_TARGET_VERSION)
+        put("runtimeSlotBuildOnly", BuildConfig.NODEJS_RUNTIME_SLOT_BUILD_ONLY)
+        put("runtimeSlotUserSelectable", BuildConfig.NODEJS_RUNTIME_SLOT_USER_SELECTABLE)
         put("embeddedScriptExecutionEnabled", BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED)
         put("nodeExpectedPrefix", NodeRuntimeCapabilities.NODE_VERSION_EXPECTED_PREFIX)
         put("nodeHeaderVersion", NodeRuntimeCapabilities.NODE_HEADER_VERSION)
@@ -92,6 +113,22 @@ object NodeDoctorReportGenerator {
         put("selectedAbi", probeResult?.currentAbi ?: Build.SUPPORTED_ABIS.firstOrNull().orEmpty())
         put("androidSdk", Build.VERSION.SDK_INT)
         put("device", listOf(Build.MANUFACTURER, Build.MODEL).filter { it.isNotBlank() }.joinToString(" "))
+        put("compatibilityDescriptor", NodeProjectRuntimeCompatibilityDescriptor.currentJson())
+    }
+
+    private fun compileCacheJson(context: Context) = JSONObject().apply {
+        put("schema", NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_SCHEMA_VERSION)
+        put("status", if (BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED) "enabled" else "disabled")
+        put("defaultEnabled", BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED)
+        put("appPrivateOnly", true)
+        put("userControlExposed", false)
+        put("baseDir", NativeNodeEmbeddedRuntimeBridge.compileCacheBaseDir(context).absolutePath.redactPath(context))
+        put("maxBytes", NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_MAX_BYTES)
+        put("maxProjectDirs", NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_MAX_PROJECT_DIRS)
+        put("runtimeApi", "node:module.enableCompileCache")
+        put("location", "app-private-code-cache")
+        put("hitMissStatus", "embedded-script diagnostics report status; custom-loader hit/miss counters are unavailable")
+        put("diagnosticPrefix", "embedded_script.compile_cache")
     }
 
     private fun featureFlagsJson() = JSONArray().apply {
@@ -117,9 +154,20 @@ object NodeDoctorReportGenerator {
         "esm" -> BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED
         "dynamic_import" -> BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED
         "network" -> BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED
+        "raw_node_network_modules" -> BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED
         "worker_threads" -> BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED
+        "child_process" -> BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED
         "java_interop" -> BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED
         else -> NodeRuntimeCapabilities.featureFlagsById[id]?.defaultEnabled ?: false
+    }
+
+    private fun profileSelectionJson(projectRoot: File?): JSONObject {
+        val diagnostics = if (projectRoot != null) {
+            NodeProfileSelectionDiagnostics.fromWorkingDirectory(projectRoot.absolutePath)
+        } else {
+            NodeProfileSelectionDiagnostics.fromManifest(NodeBridgePermissionManifest.Manifest.empty(), "runtime_default")
+        }
+        return diagnostics.toJsonObject()
     }
 
     private fun nativeLibrariesJson(
@@ -145,14 +193,61 @@ object NodeDoctorReportGenerator {
         put("commonJsExtensions", JSONArray(NodeRuntimeCapabilities.commonJsModuleExtensions.sorted()))
         put("directBuiltins", JSONArray(NodeRuntimeCapabilities.directBuiltinAliases.keys.sorted()))
         put("limitedBuiltins", JSONArray(NodeRuntimeCapabilities.limitedBuiltinModuleNames.sorted()))
-        put("disabledBuiltins", JSONArray(NodeRuntimeCapabilities.disabledBuiltinModuleNames.sorted()))
+        put("disabledBuiltins", JSONArray(disabledBuiltinModuleNames().sorted()))
         put("networkBuiltins", JSONArray(NodeRuntimeCapabilities.networkBuiltinModuleNames.sorted()))
         put("disabledProcessApis", JSONArray(NodeRuntimeCapabilities.disabledProcessApis.sorted()))
         put("scopedFs", true)
         put("commonJs", true)
-        put("esmDefaultEnabled", false)
+        put("esmDefaultEnabled", NodeRuntimeCapabilities.featureFlagsById.getValue("esm").defaultEnabled)
         put("nativeAddonDefaultEnabled", false)
         put("childProcessDefaultEnabled", false)
+    }
+
+    private fun disabledBuiltinModuleNames(): Set<String> {
+        return NodeRuntimeCapabilities.disabledBuiltinModuleNames
+            .filterNot { it == "worker_threads" && BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED }
+            .filterNot { it == "child_process" && BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED }
+            .toSet()
+    }
+
+    private fun bridgeCapabilitiesJson() = JSONObject().apply {
+        put("manifestVersion", 1)
+        put("projectManifestSupported", true)
+        put("enforcedWhenDeclared", true)
+        put(
+            "declarationKeys",
+            JSONArray(
+                listOf(
+                    "project.json:node.permissions",
+                    "package.json:autojs6.node.permissions",
+                ),
+            ),
+        )
+        put("knownCapabilities", JSONArray(NodeBridgePermissionManifest.definedCapabilities))
+        put("network", networkCapabilityJson())
+    }
+
+    private fun networkCapabilityJson(): JSONObject {
+        val requiredAndroidPermissions = NodeBridgePermissionManifest.androidPermissionsForCapabilities(
+            listOf(NodeBridgePermissionManifest.NETWORK),
+        )
+        return JSONObject().apply {
+            put("capability", NodeBridgePermissionManifest.NETWORK)
+            put("requiresDeclaration", true)
+            put("providerFeatureFlag", "autojs.nodejs.network.experimental")
+            put("providerEnabled", BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
+            put("requiredAndroidPermissions", JSONArray(requiredAndroidPermissions))
+            put(
+                "requiresAndroidInternet",
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET in requiredAndroidPermissions,
+            )
+            put("controlledModules", JSONArray(listOf("fetch", "axios", "websocket")))
+            put("rawNodeNetworkModulesEnabled", BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED)
+        }
+    }
+
+    private fun bridgeProvidersJson(context: Context): JSONArray {
+        return NodeBridgeProviderRegistry.toJsonArray(NodeBridgeProviderRegistry.androidHealth(context))
     }
 
     private fun packagedTemplateJson(context: Context) = JSONObject().apply {
@@ -171,10 +266,21 @@ object NodeDoctorReportGenerator {
 
     private fun buildText(context: Context, generatedAt: String, json: JSONObject): String {
         val runtime = json.getJSONObject("runtime")
+        val compileCache = json.getJSONObject("compileCache")
+        val profileSelection = json.getJSONObject("profileSelection")
+        val profileRollbackPolicy = json.getJSONObject("profileRollbackPolicy")
+        val privacyDisclosurePolicy = json.getJSONObject("privacyDisclosurePolicy")
         val nativeLibraries = json.getJSONObject("nativeLibraries")
         val packagedTemplate = json.getJSONObject("packagedTemplate")
         val lastNodeError = json.getJSONObject("lastNodeError")
         val nativeProbe = json.getJSONObject("nativeProbe")
+        val disclosureSurfaces = privacyDisclosurePolicy.getJSONArray("surfaces")
+        val promptRequiredSurfaces = (0 until disclosureSurfaces.length()).count { index ->
+            disclosureSurfaces.getJSONObject(index).getBoolean("requiresUserPrompt")
+        }
+        val foregroundDisclosureSurfaces = (0 until disclosureSurfaces.length()).count { index ->
+            disclosureSurfaces.getJSONObject(index).getBoolean("requiresForegroundDisclosure")
+        }
         return buildString {
             appendLine("AutoJs6 Node Doctor Report")
             appendLine("Generated at: $generatedAt")
@@ -195,6 +301,60 @@ object NodeDoctorReportGenerator {
             appendLine("  observed Node: ${runtime.getString("nodeObservedVersion")}")
             appendLine("  selected ABI: ${runtime.getString("selectedAbi")}")
             appendLine("  supported ABIs: ${runtime.getJSONArray("deviceSupportedAbis").join(", ")}")
+            val compatibilityDescriptor = runtime.getJSONObject("compatibilityDescriptor")
+            val runtimeVersions = compatibilityDescriptor.getJSONObject("versions")
+            appendLine()
+            appendLine("Runtime Compatibility:")
+            appendLine("  schema: ${compatibilityDescriptor.getString("schema")}")
+            appendLine("  profile: ${compatibilityDescriptor.getString("nodeProfile")}")
+            appendLine("  bootstrap: ${runtimeVersions.getString("bootstrap")}")
+            appendLine("  commonjs loader: ${runtimeVersions.getString("commonJsLoader")}")
+            appendLine("  esm loader: ${runtimeVersions.getString("esmLoader")}")
+            appendLine("  dynamic import: ${runtimeVersions.getString("dynamicImport")}")
+            appendLine("  bridge protocol: ${runtimeVersions.getString("bridgeProtocol")}")
+            appendLine("  moduleSources schema: ${runtimeVersions.getString("moduleSourcesSchema")}")
+            appendLine()
+            appendLine("Profile Selection:")
+            appendLine("  status: ${profileSelection.getString("status")}")
+            appendLine("  effective profile: ${profileSelection.getString("effectiveProfile")}")
+            appendLine("  requested profiles: ${profileSelection.getJSONArray("requestedProfiles").join(", ")}")
+            appendLine("  selection mode: ${profileSelection.getString("selectionMode")}")
+            appendLine("  profile promotion: ${profileSelection.getBoolean("profilePromotion")}")
+            appendLine("  user selectable: ${profileSelection.getBoolean("userSelectable")}")
+            appendLine("  declared node permissions: ${profileSelection.getJSONArray("declaredNodePermissions").join(", ")}")
+            appendLine("  high-risk capabilities: ${profileSelection.getJSONArray("highRiskCapabilities").length()}")
+            appendLine("  blocked profile promotions: ${profileSelection.getJSONArray("blockedProfilePromotions").join(", ")}")
+            appendLine()
+            appendLine("Profile Rollback Policy:")
+            appendLine("  status: ${profileRollbackPolicy.getString("status")}")
+            appendLine("  rollback target: ${profileRollbackPolicy.getString("rollbackTargetProfile")}")
+            appendLine("  crash fallback: ${profileRollbackPolicy.getString("crashFallbackProfile")}")
+            appendLine("  stress fallback: ${profileRollbackPolicy.getString("stressFallbackProfile")}")
+            appendLine("  profile promotion: ${profileRollbackPolicy.getBoolean("profilePromotion")}")
+            appendLine("  independent profile disable: ${profileRollbackPolicy.getBoolean("independentProfileDisable")}")
+            appendLine("  profile switches: ${profileRollbackPolicy.getJSONObject("profileKillSwitches").keys().asSequence().joinToString(", ")}")
+            appendLine("  capability switches: ${profileRollbackPolicy.getJSONObject("capabilityKillSwitches").keys().asSequence().joinToString(", ")}")
+            appendLine("  packaged downgrade: ${profileRollbackPolicy.getJSONObject("packagedDowngrade").getString("strategy")}")
+            appendLine()
+            appendLine("Privacy Disclosure Policy:")
+            appendLine("  status: ${privacyDisclosurePolicy.getString("status")}")
+            appendLine("  effective profile: ${privacyDisclosurePolicy.getString("effectiveProfile")}")
+            appendLine("  metadata only: ${privacyDisclosurePolicy.getBoolean("metadataOnly")}")
+            appendLine("  grants authority: ${privacyDisclosurePolicy.getBoolean("grantsAuthority")}")
+            appendLine("  implicit high privilege denied: ${privacyDisclosurePolicy.getBoolean("implicitHighPrivilegeDenied")}")
+            appendLine("  packaged implicit high privilege denied: ${privacyDisclosurePolicy.getBoolean("packagedImplicitHighPrivilegeDenied")}")
+            appendLine("  surfaces: ${disclosureSurfaces.length()}")
+            appendLine("  prompt-required surfaces: $promptRequiredSurfaces")
+            appendLine("  foreground-disclosure surfaces: $foregroundDisclosureSurfaces")
+            appendLine("  packaged default action: ${privacyDisclosurePolicy.getJSONObject("packagedPolicy").getString("defaultAction")}")
+            appendLine()
+            appendLine("Compile Cache:")
+            appendLine("  status: ${compileCache.getString("status")}")
+            appendLine("  app-private only: ${compileCache.getBoolean("appPrivateOnly")}")
+            appendLine("  user control exposed: ${compileCache.getBoolean("userControlExposed")}")
+            appendLine("  base dir: ${compileCache.getString("baseDir")}")
+            appendLine("  quota: ${compileCache.getLong("maxBytes")} bytes / ${compileCache.getInt("maxProjectDirs")} project dirs")
+            appendLine("  hit/miss: ${compileCache.getString("hitMissStatus")}")
             appendLine()
             appendLine("Native Libraries:")
             appendLine("  native dir: ${nativeLibraries.getString("nativeLibraryDir")}")
@@ -220,6 +380,44 @@ object NodeDoctorReportGenerator {
             appendLine("  direct builtins: ${json.getJSONObject("capabilityProfile").getJSONArray("directBuiltins").length()}")
             appendLine("  limited builtins: ${json.getJSONObject("capabilityProfile").getJSONArray("limitedBuiltins").length()}")
             appendLine("  disabled builtins: ${json.getJSONObject("capabilityProfile").getJSONArray("disabledBuiltins").join(", ")}")
+            appendLine()
+            val bridgeCapabilities = json.getJSONObject("bridgeCapabilities")
+            val networkCapability = bridgeCapabilities.getJSONObject("network")
+            appendLine("Bridge Capabilities:")
+            appendLine("  manifest supported: ${bridgeCapabilities.getBoolean("projectManifestSupported")}")
+            appendLine("  enforced when declared: ${bridgeCapabilities.getBoolean("enforcedWhenDeclared")}")
+            appendLine(
+                "  network capability: requires declaration=${networkCapability.getBoolean("requiresDeclaration")} " +
+                        "provider enabled=${networkCapability.getBoolean("providerEnabled")}",
+            )
+            appendLine("  network Android permissions: ${networkCapability.getJSONArray("requiredAndroidPermissions").join(", ")}")
+            appendLine("  controlled network modules: ${networkCapability.getJSONArray("controlledModules").join(", ")}")
+            appendLine("  raw Node network modules enabled: ${networkCapability.getBoolean("rawNodeNetworkModulesEnabled")}")
+            appendLine()
+            appendLine("Bridge Providers:")
+            val bridgeProviders = json.getJSONArray("bridgeProviders")
+            for (index in 0 until bridgeProviders.length()) {
+                val provider = bridgeProviders.getJSONObject(index)
+                appendLine(
+                    "  ${provider.getString("displayName")}: status=${provider.getString("status")} " +
+                            "statusCode=${provider.optString("statusCode", provider.getString("status"))} " +
+                            "version=${provider.getString("version")} active=${provider.getInt("activeResourceCount")}",
+                )
+                provider.optJSONObject("packagedSupport")?.let { packagedSupport ->
+                    appendLine(
+                        "    packaged: ${packagedSupport.optString("status", "unknown")} " +
+                                packagedSupport.optString("notes").takeIf { it.isNotBlank() }.orEmpty(),
+                    )
+                }
+                val details = provider.optJSONObject("details")
+                if (details != null && details.length() > 0) {
+                    appendLine(
+                        "    details: " + details.keys().asSequence()
+                            .map { key -> "$key=${details.optString(key)}" }
+                            .joinToString(", "),
+                    )
+                }
+            }
             appendLine()
             appendLine("Packaged Template:")
             appendLine("  ${packagedTemplate.getString("templateAsset")}: ${packagedTemplate.getString("status")}")

@@ -1,0 +1,1 @@
+realnpm.fetch-adapter-v2=controlled-fetch-adapter/no-network-call

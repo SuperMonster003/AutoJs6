@@ -1,0 +1,12 @@
+{
+  "name": "org.example.wasm_math",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "index.cjs",
+  "autojs6": {
+    "pluginKind": "js-wasm-policy",
+    "capabilities": ["wasm"],
+    "nativeAddons": false
+  }
+}

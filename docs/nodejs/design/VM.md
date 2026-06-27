@@ -1,10 +1,10 @@
-# Embedded Node `vm` Design Gate
+# Embedded Node `vm` Native Availability
 
-`vm` is disabled in the AutoJs6 Safe Node Profile. This task records the decision boundary and does not change runtime behavior.
+`vm` is enabled in the AutoJs6 Node profile as the native Node builtin. P13-36 promotes this surface for desktop npm compatibility, especially packages such as DOM/test tooling that compile snippets with `vm.Script`.
 
-## Why `vm` Is High Risk
+## Why `vm` Remains High Risk
 
-Node's `vm` module is useful for feature detection, bundlers, test runners, and packages that compile snippets with `vm.Script`. It is also easy to misunderstand as a sandbox. In an embedded Android automation runtime, a second JavaScript context is not enough to protect:
+Node's `vm` module is useful for feature detection, bundlers, test runners, and packages that compile snippets with `vm.Script`. It is also easy to misunderstand as a sandbox. In an embedded Android automation runtime, a second JavaScript context is not a security boundary and is not enough to protect:
 
 - `process`, global, and prototype leakage
 - AutoJs bridge modules and pending provider handles
@@ -13,47 +13,39 @@ Node's `vm` module is useful for feature detection, bundlers, test runners, and 
 - timeout and lifecycle ownership
 - memory pressure from repeated contexts or compiled scripts
 
-The current runtime already executes inside a V8 isolate and a Node environment owned by the embedded service. Adding another context would still share native process state unless a much stricter membrane is designed.
+The current runtime already executes inside a V8 isolate and a Node environment owned by the embedded service. A VM context still shares native process state unless a stricter membrane is introduced in a future profile.
 
 ## Current Decision
 
-Keep `vm` disabled by default.
+Expose the native Node `vm` builtin by default.
 
 Current behavior:
 
-- `require("vm")` rejects with the disabled-builtin error shape.
-- `require("node:vm")` rejects with the same error shape.
-- `require.resolve("vm")` and `require.resolve("node:vm")` reject before local package shadowing.
-- `node_modules/vm` cannot replace the disabled builtin.
-- `require("autojs6:profile").featureFlags.vm.enabled` is `false`.
-- `NodeRuntimeCapabilities.featureFlagsById["vm"]` is `status=disabled`, `securityLevel=high`, and has no build/project/packaged override.
+- `require("vm")` returns Node's native `vm` module.
+- `require("node:vm")` returns the same native module.
+- `require.resolve("vm")` and `require.resolve("node:vm")` both return `vm`.
+- `node_modules/vm` cannot replace or shadow the builtin.
+- `vm.Script`, `createContext`, `runInContext`, `runInNewContext`, `compileFunction`, `SyntheticModule`, `SourceTextModule`, and native timeout options follow Node's implementation.
+- AutoJs6 does not inject raw Android or AutoJs bridge objects into VM contexts.
+- `require("autojs6:profile").featureFlags.vm.enabled` is `true`.
+- `NodeRuntimeCapabilities.featureFlagsById["vm"]` is `status=partial`, `securityLevel=high`, and has no build/project/packaged override.
 
-## Deferred Options
+## Boundaries
 
-If future npm compatibility requires a limited surface, evaluate one of these options behind a new experimental gate:
+The native module is available for compatibility, not isolation. Scripts must not treat `vm` as a permission boundary. AutoJs6 keeps the surrounding loader and process policy in force:
 
-- expose nothing and keep improving the disabled error and feature-detection story
-- expose only a non-context `vm.Script` compile/run path that uses the current global context
-- expose a separate context only after a strict membrane, timeout, memory, and bridge-denial model exists
+- no access to raw Android or AutoJs bridge objects is injected
+- no bypass of scoped filesystem policy is granted by the loader
+- disabled builtins such as `child_process`, `inspector`, `wasi`, and default-off `worker_threads` remain governed by their own policies
+- VM code that uses native timeout options is still owned by the embedded script lifecycle
+- memory and compiled-script follow-up limits remain open
+- packaged APK behavior and diagnostics need focused smoke evidence
 
-Do not expose these APIs without a new design task:
+## Follow-Up Evidence
 
-- `createContext`
-- `runInContext`
-- `runInNewContext`
-- `compileFunction`
-- `SyntheticModule`
-- `SourceTextModule`
-- dynamic import hooks
+Future hardening should add:
 
-## Acceptance For Any Future Enablement
-
-Future enablement must prove:
-
-- no access to raw Android or AutoJs bridge objects
-- no bypass of scoped filesystem
-- no access to disabled builtins or process internals
-- deterministic timeout and lifecycle cancellation
-- memory and compiled-script limits
-- packaged APK behavior and diagnostics
-- positive and negative instrumentation coverage
+- memory and compiled-script budget tests for repeated `vm.Script` and context workloads
+- packaged APK smoke coverage for npm packages that exercise `vm`
+- bridge/process/global leakage probes that document the native Node boundary clearly
+- timeout and lifecycle cancellation stress evidence for long-running VM code

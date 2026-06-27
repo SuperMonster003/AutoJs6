@@ -1,0 +1,16 @@
+{
+  "name": "typescript-cjs",
+  "type": "node",
+  "main": "main.cts",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["typescript", "commonjs"],
+    "expectedProvider": "Embedded Node lightweight TypeScript stripper",
+    "packagedSupport": "supported when packaged as project assets or moduleSources",
+    "securityLimitations": ["erasable syntax only", "no TSX", "no enum or decorator transforms"]
+  }
+}

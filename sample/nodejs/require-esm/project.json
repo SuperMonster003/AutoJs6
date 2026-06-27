@@ -1,0 +1,16 @@
+{
+  "name": "require-esm",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["commonjs", "esm", "require-esm"],
+    "expectedProvider": "Embedded Node partial ESM loader",
+    "packagedSupport": "main-app example only in this phase",
+    "securityLimitations": ["local project graph only", "no remote imports", "disabled builtins remain denied"]
+  }
+}

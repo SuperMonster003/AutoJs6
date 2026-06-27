@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/stdlib-digest-stream-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "digest-stream-probe": "1.0.0"
+  }
+}

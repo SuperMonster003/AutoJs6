@@ -3,6 +3,7 @@ package org.autojs.autojs.engine
 import android.content.Context
 import android.util.Log
 import org.autojs.autojs.core.console.GlobalConsole
+import org.json.JSONArray
 import org.json.JSONObject
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.pio.PFiles
@@ -10,8 +11,43 @@ import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.NodeProjectLaunchSource
+import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.BuildConfig
 import java.io.File
+import java.util.UUID
+
+internal fun nodeEmbeddedConsoleOutputLines(text: String): Sequence<String> {
+    if (text.isEmpty()) {
+        return emptySequence()
+    }
+    val output = text.stripSingleTrailingLineTerminator()
+    if (output.isEmpty()) {
+        return sequenceOf("")
+    }
+    return sequence {
+        var start = 0
+        var index = 0
+        while (index < output.length) {
+            val ch = output[index]
+            if (ch == '\n' || ch == '\r') {
+                yield(output.substring(start, index))
+                index += if (ch == '\r' && index + 1 < output.length && output[index + 1] == '\n') 2 else 1
+                start = index
+                continue
+            }
+            index += 1
+        }
+        yield(output.substring(start))
+    }
+}
+
+private fun String.stripSingleTrailingLineTerminator(): String {
+    return when {
+        endsWith("\r\n") -> dropLast(2)
+        endsWith('\n') || endsWith('\r') -> dropLast(1)
+        else -> this
+    }
+}
 
 class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : RhinoJavaScriptEngine(androidContext) {
 
@@ -27,15 +63,74 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     var lastEmbeddedScriptResultNativeValues: Map<String, String> = emptyMap()
         private set
 
+    @Volatile
+    private var activeEmbeddedExecutionId: String? = null
+
     override fun doExecution(source: JavaScriptSource): Any? {
         lastNodeProjectRunnerDescriptor = null
         lastEmbeddedScriptResultNativeValues = emptyMap()
         tryRunNodeProjectLaunch(source)?.let { return it }
         tryRunNodeProjectFile(source)?.let { return it }
 
+        val executionId = newEmbeddedExecutionId()
         val request = buildEmbeddedScriptRequest(source)
-        val result = NativeNodeEmbeddedScriptService.runScript(androidContext, request)
+            .copy(executionId = executionId)
+        val result = withActiveEmbeddedExecutionId(executionId) {
+            NativeNodeEmbeddedScriptService.runScript(androidContext, request)
+        }
         return finishEmbeddedScriptExecution(request, result)
+    }
+
+    override fun forceStop() {
+        activeEmbeddedExecutionId?.let { executionId ->
+            NativeNodeEmbeddedScriptService.cancelRunningScript(androidContext, executionId)
+        }
+        super.forceStop()
+    }
+
+    private inline fun <T> withActiveEmbeddedExecutionId(executionId: String, block: () -> T): T {
+        activeEmbeddedExecutionId = executionId
+        try {
+            return block()
+        } finally {
+            if (activeEmbeddedExecutionId == executionId) {
+                activeEmbeddedExecutionId = null
+            }
+        }
+    }
+
+    fun prepareNodeProjectLaunchRequest(
+        source: JavaScriptSource,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest? {
+        val launchSource = source as? NodeProjectLaunchSource ?: return null
+        val fileSource = source as? JavaScriptFileSource ?: return null
+        val projectRoot = launchSource.nodeProjectRootFile.normalizedCanonicalFile()
+        val sourceLaunchKind = launchSource.nodeProjectLaunchKind
+        val baseRequest = NativeNodeEmbeddedProjectRunner.buildProjectRequest(launchSource, projectRoot)
+        val basePlan = NativeNodeEmbeddedProjectRunner.resolveProjectLaunchPlanWithDescriptor(baseRequest)
+        val preparation = prepareNodeProjectRun(fileSource, projectRoot, basePlan.entryFile)
+        val plan = basePlan.copy(
+            moduleSources = preparation.preload.moduleSources,
+            runtimeModuleSources = preparation.runtimeModuleSources,
+            entrySource = preparation.entrySource,
+        )
+        Log.i(
+            TAG,
+            "embedded node project launch request prepared for external service " +
+                    "projectRoot=${preparation.workingDirectory} " +
+                    "sourceName=${preparation.sourceName} " +
+                    "sourceLaunchKind=${sourceLaunchKind.descriptorValue} " +
+                    "launchKind=${plan.kind} " +
+                    "executionMode=${plan.executionMode} " +
+                    "moduleSources=${preparation.preload.moduleSources.size} " +
+                    "runtimeModuleSources=${preparation.runtimeModuleSources.size} " +
+                    "runtimeFirst=${preparation.runtimeModuleSources.keys.firstOrNull().orEmpty()}",
+        )
+        lastCommonJsPreloadDiagnostics = preparation.preload.diagnostics
+        lastNodeProjectRunnerDescriptor = NativeNodeEmbeddedProjectRunner.describe(plan)
+        return NativeNodeEmbeddedProjectRunner
+            .buildResolvedProjectLaunchRequest(plan)
+            .copy(spawnDepth = currentSpawnDepth())
     }
 
     private fun tryRunNodeProjectLaunch(source: JavaScriptSource): Any? {
@@ -64,8 +159,15 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         )
         lastCommonJsPreloadDiagnostics = preparation.preload.diagnostics
         lastNodeProjectRunnerDescriptor = NativeNodeEmbeddedProjectRunner.describe(plan)
-        val result = NativeNodeEmbeddedProjectRunner.runResolvedProjectLaunchPlan(androidContext, plan)
-        return finishEmbeddedScriptExecution(preparation.toBridgeRequest(plan.timeoutMs, currentSpawnDepth()), result)
+        val executionId = newEmbeddedExecutionId()
+        val result = withActiveEmbeddedExecutionId(executionId) {
+            NativeNodeEmbeddedProjectRunner.runResolvedProjectLaunchPlan(androidContext, plan, executionId)
+        }
+        return finishEmbeddedScriptExecution(
+            preparation.toBridgeRequest(plan.timeoutMs, currentSpawnDepth(), plan.executionMode)
+                .copy(executionId = executionId),
+            result,
+        )
     }
 
     private fun tryRunNodeProjectFile(source: JavaScriptSource): Any? {
@@ -96,8 +198,15 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             entrySource = preparation.entrySource,
         )
         lastNodeProjectRunnerDescriptor = NativeNodeEmbeddedProjectRunner.describe(request)
-        val result = NativeNodeEmbeddedProjectRunner.run(androidContext, request)
-        return finishEmbeddedScriptExecution(preparation.toBridgeRequest(request.timeoutMs, currentSpawnDepth()), result)
+        val executionId = newEmbeddedExecutionId()
+        val result = withActiveEmbeddedExecutionId(executionId) {
+            NativeNodeEmbeddedProjectRunner.run(androidContext, request, executionId)
+        }
+        return finishEmbeddedScriptExecution(
+            preparation.toBridgeRequest(request.timeoutMs, currentSpawnDepth())
+                .copy(executionId = executionId),
+            result,
+        )
     }
 
     private fun prepareNodeProjectRun(
@@ -143,8 +252,10 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                     "succeeded=${result.succeeded} elapsed=${result.elapsedMs}ms",
         )
         lastEmbeddedScriptResultNativeValues = result.nativeValues
-        printScriptOutput(Log.INFO, result.stdout)
-        printScriptOutput(Log.ERROR, result.stderr)
+        if (!printStructuredConsoleOutput(result.nativeValues)) {
+            printScriptOutput(Log.DEBUG, result.stdout)
+            printScriptOutput(Log.ERROR, result.stderr)
+        }
         if (!result.succeeded) {
             result.errorStack?.takeIf { it.isNotBlank() }?.let { printScriptOutput(Log.ERROR, it) }
             val failureEnvelope = buildFailureEnvelope(request, result)
@@ -196,6 +307,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             result.pendingScopedFsCallbacks?.let { append(" pendingScopedFsCallbacks=").append(it) }
             result.pendingCryptoCallbacks?.let { append(" pendingCryptoCallbacks=").append(it) }
             result.pendingZlibCallbacks?.let { append(" pendingZlibCallbacks=").append(it) }
+            result.pendingZlibStreamCount?.let { append(" pendingZlibStreamCount=").append(it) }
             result.pendingAsyncCallbacks?.let { append(" pendingAsyncCallbacks=").append(it) }
             result.pendingCallbacks?.let { append(" pendingCallbacks=").append(it) }
         }
@@ -211,7 +323,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             return
         }
         val console = runCatching { runtime.console }.getOrNull()
-        text.lineSequence().forEach { line ->
+        nodeEmbeddedConsoleOutputLines(text).forEach { line ->
             if (line.isEmpty()) {
                 printScriptOutputChunk(level, line, console)
                 return@forEach
@@ -222,6 +334,42 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                 printScriptOutputChunk(level, line.substring(start, end), console)
                 start = end
             }
+        }
+    }
+
+    private fun printStructuredConsoleOutput(nativeValues: Map<String, String>): Boolean {
+        val eventsJson = embeddedConsoleEventsJson(nativeValues)
+            ?: return false
+        val events = runCatching { JSONArray(eventsJson) }.getOrNull() ?: return false
+        if (events.length() == 0) {
+            return false
+        }
+        for (index in 0 until events.length()) {
+            val event = events.optJSONObject(index) ?: continue
+            printScriptOutput(
+                nodeConsoleLevel(event.optString("level")),
+                event.optString("text"),
+            )
+        }
+        return true
+    }
+
+    private fun embeddedConsoleEventsJson(nativeValues: Map<String, String>): String? {
+        nativeValues["embedded_script.console_events_json"].takeUnless { it.isNullOrBlank() }?.let { return it }
+        val resultJson = nativeValues["embedded_script.result_json"].takeUnless { it.isNullOrBlank() } ?: return null
+        return runCatching { JSONObject(resultJson).optString("consoleEventsJson") }
+            .getOrNull()
+            ?.takeUnless { it.isBlank() }
+    }
+
+    private fun nodeConsoleLevel(level: String): Int {
+        return when (level.uppercase()) {
+            "VERBOSE" -> Log.VERBOSE
+            "INFO" -> Log.INFO
+            "WARN" -> Log.WARN
+            "ERROR" -> Log.ERROR
+            "ASSERT" -> Log.ASSERT
+            else -> Log.DEBUG
         }
     }
 
@@ -250,6 +398,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         val requestSource = normalizeEmbeddedSource(sourceText(source))
         val requestSourceName = sourceName(source)
         val requestWorkingDirectory = workingDirectory(source)
+        val requestSandboxRoot = sandboxRoot(requestWorkingDirectory)
         val preload = collectCommonJsModuleSources(
             source = requestSource,
             sourceName = requestSourceName,
@@ -273,6 +422,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             source = requestSource,
             sourceName = requestSourceName,
             workingDirectory = requestWorkingDirectory,
+            sandboxRoot = requestSandboxRoot,
             moduleSources = preload.moduleSources,
             runtimeModuleSources = runtimeModuleSources,
             spawnDepth = currentSpawnDepth(),
@@ -333,7 +483,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     ): CommonJsPreloadResult {
         val startedAt = android.os.SystemClock.elapsedRealtime()
         val stats = CommonJsPreloadStats(source.toByteArray(Charsets.UTF_8).size)
-        if (File(sourceName).extension.equals(MJS_EXTENSION, ignoreCase = true)) {
+        if (isEsmSourceName(sourceName, workingDirectory)) {
             return CommonJsPreloadResult(
                 moduleSources = emptyMap(),
                 diagnostics = stats.toDiagnostics(sourceName, workingDirectory, emptyList(), startedAt),
@@ -387,6 +537,8 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             ?.normalizedCanonicalFile()
             ?.takeIf { it.isFile && it.isInsideOrSame(root) }
             ?: (source as? JavaScriptFileSource)?.file
+                ?.normalizedCanonicalFile()
+                ?.takeIf { it.isFile && it.isInsideOrSame(root) }
             ?: File(sourceName).takeIf { it.isAbsolute && it.isFile && it.isInsideOrSame(root) }
             ?: return emptyMap()
         val excluded = moduleSources.keys.toMutableSet()
@@ -403,7 +555,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
         val runtimeSources = linkedMapOf<String, String>()
         root.walkTopDown()
-            .filter { file -> file.isFile && file.extension.lowercase() in COMMON_JS_MODULE_EXTENSIONS }
+            .filter { file -> file.isFile && file.extension.lowercase() in RUNTIME_MODULE_SOURCE_EXTENSIONS }
             .map { file -> file to file.relativePathInside(root) }
             .sortedWith(
                 compareBy<Pair<File, String>>(
@@ -433,6 +585,39 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         return runtimeSources
     }
 
+    private fun isEsmSourceName(sourceName: String, workingDirectory: String?): Boolean {
+        val extension = File(sourceName).extension.lowercase()
+        if (extension == MJS_EXTENSION || extension == MTS_EXTENSION) {
+            return true
+        }
+        if (extension != JS_EXTENSION && extension != TS_EXTENSION) {
+            return false
+        }
+        val root = workingDirectory
+            ?.takeIf { it.isNotBlank() }
+            ?.let { File(it).normalizedCanonicalFile() }
+            ?: return false
+        val file = File(sourceName).takeIf { it.isAbsolute }?.normalizedCanonicalFile() ?: return false
+        return packageTypeModuleForFile(file, root)
+    }
+
+    private fun packageTypeModuleForFile(file: File, root: File): Boolean {
+        var current = file.parentFile?.normalizedCanonicalFile() ?: root
+        while (current.isInsideOrSame(root)) {
+            val packageJson = File(current, PACKAGE_JSON).normalizedCanonicalFile()
+            if (packageJson.isFile && packageJson.isInsideOrSame(root) && packageJson.isInsideOrSame(current)) {
+                return runCatching {
+                    JSONObject(sourceText(packageJson)).optString("type") == "module"
+                }.getOrDefault(false)
+            }
+            if (current == root) {
+                break
+            }
+            current = current.parentFile?.normalizedCanonicalFile() ?: break
+        }
+        return false
+    }
+
     private fun collectCommonJsModuleSources(
         source: String,
         parentDirectory: File,
@@ -442,10 +627,13 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         stats: CommonJsPreloadStats,
         depth: Int,
     ) {
-        val requireMatches = COMMON_JS_REQUIRE_PATTERN.findAll(source).toList()
-        stats.recordRequireScan(source, requireMatches.size)
-        requireMatches
-            .map { match -> match.groupValues[1].ifEmpty { match.groupValues[2] } }
+        val requireReferences = commonJsRequireReferences(source)
+        stats.recordRequireScan(
+            staticCount = requireReferences.count { it.moduleName != null },
+            requireCallCount = requireReferences.size,
+        )
+        requireReferences
+            .mapNotNull { it.moduleName }
             .forEach { moduleName ->
                 val moduleFiles = resolveCommonJsModuleFiles(parentDirectory, rootDirectory, moduleName)
                 if (moduleFiles.isEmpty()) {
@@ -901,6 +1089,9 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     }
 
     private fun sourceName(source: JavaScriptSource): String {
+        source.semanticFileFromOverriddenFullPath()?.normalizedAbsolutePath()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { return it }
         (source as? JavaScriptFileSource)?.file?.normalizedAbsolutePath()
             ?.takeIf { it.isNotBlank() }
             ?.let { return it }
@@ -910,11 +1101,45 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     }
 
     private fun workingDirectory(source: JavaScriptSource): String? {
+        source.semanticFileFromOverriddenFullPath()
+            ?.parentFile
+            ?.normalizedAbsolutePath()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { return it }
+        cwd().takeUnless { it.isNullOrBlank() }?.let { return it }
         val file = (source as? JavaScriptFileSource)?.file
         file?.parentFile?.normalizedAbsolutePath()?.takeIf { it.isNotBlank() }?.let { return it }
-        cwd().takeUnless { it.isNullOrBlank() }?.let { return it }
         return source.fullPath.takeIf { it.isNotBlank() }
             ?.let { runCatching { File(it).parentFile?.absolutePath }.getOrNull() }
+    }
+
+    private fun sandboxRoot(workingDirectory: String?): String? {
+        val cwd = workingDirectory
+            ?.takeIf { it.isNotBlank() }
+            ?.let { File(it).normalizedCanonicalFile() }
+            ?: return null
+        val defaultRoot = WorkingDirectoryUtils.path
+            .takeIf { it.isNotBlank() }
+            ?.let { File(it).normalizedCanonicalFile() }
+        return if (defaultRoot != null && cwd.isInsideOrSame(defaultRoot)) {
+            defaultRoot.normalizedAbsolutePath()
+        } else {
+            cwd.normalizedAbsolutePath()
+        }
+    }
+
+    private fun JavaScriptSource.semanticFileFromOverriddenFullPath(): File? {
+        return overriddenFullPath
+            ?.takeIf { it.isNotBlank() }
+            ?.let { File(it) }
+            ?.takeIf { it.isAbsolute }
+    }
+
+    private fun newEmbeddedExecutionId(): String {
+        val engineId = id.takeIf { it != org.autojs.autojs.execution.ScriptExecution.NO_ID }
+            ?.toString()
+            ?: "no-id"
+        return "engine-$engineId-${UUID.randomUUID()}"
     }
 
     private fun File.normalizedAbsolutePath(): String {
@@ -999,6 +1224,9 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         const val JS_EXTENSION = "js"
         const val CJS_EXTENSION = "cjs"
         const val MJS_EXTENSION = "mjs"
+        const val TS_EXTENSION = "ts"
+        const val CTS_EXTENSION = "cts"
+        const val MTS_EXTENSION = "mts"
         const val JSON_EXTENSION = "json"
         const val PACKAGE_JSON = "package.json"
         const val PACKAGE_JSON_NAME = "name"
@@ -1010,17 +1238,253 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         const val RUNTIME_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
         const val RUNTIME_MODULE_SOURCE_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT
         val COMMON_JS_MODULE_EXTENSIONS = NodeRuntimeCapabilities.commonJsModuleExtensions
+        val RUNTIME_MODULE_SOURCE_EXTENSIONS = COMMON_JS_MODULE_EXTENSIONS + MJS_EXTENSION + MTS_EXTENSION
         val COMMON_JS_RECURSIVE_SOURCE_EXTENSIONS = NodeRuntimeCapabilities.commonJsRecursiveSourceExtensions
         val PACKAGE_JSON_EXPORT_CONDITIONS = NodeRuntimeCapabilities.packageJsonExportConditions
-        const val COMMON_JS_REQUIRE_SEPARATOR = """(?:\s|/\*[\s\S]*?\*/|//[^\r\n]*(?:\r?\n|$))*"""
-        val COMMON_JS_REQUIRE_CALL_PATTERN = Regex(
-            """(?<![\w$.])(?:require|module\s*\.\s*require)$COMMON_JS_REQUIRE_SEPARATOR\(""",
-        )
-        val COMMON_JS_REQUIRE_PATTERN = Regex(
-            """(?<![\w$.])(?:require|module\s*\.\s*require)$COMMON_JS_REQUIRE_SEPARATOR\($COMMON_JS_REQUIRE_SEPARATOR(?:"([^"]+)"|'([^']+)')$COMMON_JS_REQUIRE_SEPARATOR\)""",
-        )
         val COMMON_JS_PROTOCOL_SPECIFIER_PATTERN = Regex("""^[A-Za-z][A-Za-z0-9+.-]*:""")
         val COMMON_JS_BUILTIN_MODULE_NAMES = NodeRuntimeCapabilities.commonJsBuiltinModuleNames
+
+        private fun commonJsRequireReferences(source: String): List<CommonJsRequireReference> {
+            if (source.isEmpty()) {
+                return emptyList()
+            }
+            val references = mutableListOf<CommonJsRequireReference>()
+            var index = 0
+            while (index < source.length) {
+                val ch = source[index]
+                index = when {
+                    ch == '"' || ch == '\'' -> skipQuotedJavaScriptString(source, index)
+                    ch == '`' -> skipJavaScriptTemplateLiteral(source, index)
+                    ch == '/' && index + 1 < source.length && source[index + 1] == '/' -> skipJavaScriptLineComment(source, index)
+                    ch == '/' && index + 1 < source.length && source[index + 1] == '*' -> skipJavaScriptBlockComment(source, index)
+                    ch == '/' && looksLikeJavaScriptRegexLiteral(source, index) -> skipJavaScriptRegexLiteral(source, index)
+                    ch.isJavaScriptIdentifierStart() -> {
+                        val identifier = readJavaScriptIdentifier(source, index)
+                        val parsed = when {
+                            !isJavaScriptRequireBoundaryBefore(source, index) -> null
+                            identifier.name == "require" -> parseCommonJsRequireCall(source, identifier.endIndex)
+                            identifier.name == "module" -> parseCommonJsModuleRequireCall(source, identifier.endIndex)
+                            else -> null
+                        }
+                        if (parsed != null) {
+                            references += CommonJsRequireReference(parsed.moduleName)
+                            parsed.endIndex.coerceAtLeast(identifier.endIndex)
+                        } else {
+                            identifier.endIndex
+                        }
+                    }
+                    else -> index + 1
+                }
+            }
+            return references
+        }
+
+        private fun parseCommonJsModuleRequireCall(source: String, moduleIdentifierEnd: Int): CommonJsRequireParseResult? {
+            var index = skipJavaScriptWhitespaceAndComments(source, moduleIdentifierEnd)
+            if (index >= source.length || source[index] != '.') {
+                return null
+            }
+            index = skipJavaScriptWhitespaceAndComments(source, index + 1)
+            if (index >= source.length || !source[index].isJavaScriptIdentifierStart()) {
+                return null
+            }
+            val requireIdentifier = readJavaScriptIdentifier(source, index)
+            if (requireIdentifier.name != "require") {
+                return null
+            }
+            return parseCommonJsRequireCall(source, requireIdentifier.endIndex)
+        }
+
+        private fun parseCommonJsRequireCall(source: String, requireIdentifierEnd: Int): CommonJsRequireParseResult? {
+            var index = skipJavaScriptWhitespaceAndComments(source, requireIdentifierEnd)
+            if (index >= source.length || source[index] != '(') {
+                return null
+            }
+            index = skipJavaScriptWhitespaceAndComments(source, index + 1)
+            val literal = parseJavaScriptStringLiteral(source, index) ?: return CommonJsRequireParseResult(null, index)
+            index = skipJavaScriptWhitespaceAndComments(source, literal.endIndex)
+            if (index >= source.length || source[index] != ')') {
+                return CommonJsRequireParseResult(null, literal.endIndex)
+            }
+            return CommonJsRequireParseResult(literal.value, index + 1)
+        }
+
+        private fun skipJavaScriptWhitespaceAndComments(source: String, startIndex: Int): Int {
+            var index = startIndex
+            while (index < source.length) {
+                val ch = source[index]
+                index = when {
+                    ch.isWhitespace() -> index + 1
+                    ch == '/' && index + 1 < source.length && source[index + 1] == '/' -> skipJavaScriptLineComment(source, index)
+                    ch == '/' && index + 1 < source.length && source[index + 1] == '*' -> skipJavaScriptBlockComment(source, index)
+                    else -> return index
+                }
+            }
+            return index
+        }
+
+        private fun skipQuotedJavaScriptString(source: String, startIndex: Int): Int {
+            val quote = source[startIndex]
+            var index = startIndex + 1
+            while (index < source.length) {
+                val ch = source[index]
+                when {
+                    ch == '\\' -> index = (index + 2).coerceAtMost(source.length)
+                    ch == quote -> return index + 1
+                    else -> index += 1
+                }
+            }
+            return source.length
+        }
+
+        private fun parseJavaScriptStringLiteral(source: String, startIndex: Int): JavaScriptStringLiteral? {
+            if (startIndex >= source.length) {
+                return null
+            }
+            val quote = source[startIndex]
+            if (quote != '"' && quote != '\'') {
+                return null
+            }
+            val value = StringBuilder()
+            var index = startIndex + 1
+            while (index < source.length) {
+                val ch = source[index]
+                when {
+                    ch == '\\' -> {
+                        if (index + 1 >= source.length) {
+                            return null
+                        }
+                        value.append(source[index + 1])
+                        index += 2
+                    }
+                    ch == quote -> return JavaScriptStringLiteral(value.toString(), index + 1)
+                    else -> {
+                        value.append(ch)
+                        index += 1
+                    }
+                }
+            }
+            return null
+        }
+
+        private fun skipJavaScriptTemplateLiteral(source: String, startIndex: Int): Int {
+            var index = startIndex + 1
+            while (index < source.length) {
+                val ch = source[index]
+                index = when {
+                    ch == '\\' -> (index + 2).coerceAtMost(source.length)
+                    ch == '`' -> return index + 1
+                    else -> index + 1
+                }
+            }
+            return source.length
+        }
+
+        private fun skipJavaScriptLineComment(source: String, startIndex: Int): Int {
+            var index = startIndex + 2
+            while (index < source.length && source[index] != '\n' && source[index] != '\r') {
+                index += 1
+            }
+            return index
+        }
+
+        private fun skipJavaScriptBlockComment(source: String, startIndex: Int): Int {
+            var index = startIndex + 2
+            while (index + 1 < source.length) {
+                if (source[index] == '*' && source[index + 1] == '/') {
+                    return index + 2
+                }
+                index += 1
+            }
+            return source.length
+        }
+
+        private fun skipJavaScriptRegexLiteral(source: String, startIndex: Int): Int {
+            var index = startIndex + 1
+            var inCharacterClass = false
+            while (index < source.length) {
+                val ch = source[index]
+                when {
+                    ch == '\\' -> index = (index + 2).coerceAtMost(source.length)
+                    ch == '[' -> {
+                        inCharacterClass = true
+                        index += 1
+                    }
+                    ch == ']' -> {
+                        inCharacterClass = false
+                        index += 1
+                    }
+                    ch == '/' && !inCharacterClass -> {
+                        index += 1
+                        while (index < source.length && source[index].isJavaScriptIdentifierPart()) {
+                            index += 1
+                        }
+                        return index
+                    }
+                    ch == '\n' || ch == '\r' -> return index
+                    else -> index += 1
+                }
+            }
+            return source.length
+        }
+
+        private fun looksLikeJavaScriptRegexLiteral(source: String, slashIndex: Int): Boolean {
+            val previous = previousJavaScriptSignificantToken(source, slashIndex) ?: return true
+            if (previous.text in JAVASCRIPT_REGEX_PREFIX_KEYWORDS) {
+                return true
+            }
+            return previous.text.length == 1 && previous.text[0] in JAVASCRIPT_REGEX_PREFIX_CHARS
+        }
+
+        private fun previousJavaScriptSignificantToken(source: String, beforeIndex: Int): JavaScriptToken? {
+            var index = beforeIndex - 1
+            while (index >= 0 && source[index].isWhitespace()) {
+                index -= 1
+            }
+            if (index < 0) {
+                return null
+            }
+            val ch = source[index]
+            if (ch.isJavaScriptIdentifierPart()) {
+                val end = index + 1
+                while (index >= 0 && source[index].isJavaScriptIdentifierPart()) {
+                    index -= 1
+                }
+                return JavaScriptToken(source.substring(index + 1, end))
+            }
+            return JavaScriptToken(ch.toString())
+        }
+
+        private fun readJavaScriptIdentifier(source: String, startIndex: Int): JavaScriptIdentifier {
+            var index = startIndex + 1
+            while (index < source.length && source[index].isJavaScriptIdentifierPart()) {
+                index += 1
+            }
+            return JavaScriptIdentifier(source.substring(startIndex, index), index)
+        }
+
+        private fun isJavaScriptRequireBoundaryBefore(source: String, index: Int): Boolean {
+            if (index <= 0) {
+                return true
+            }
+            val previous = source[index - 1]
+            return !previous.isJavaScriptIdentifierPart() && previous != '.'
+        }
+
+        private fun Char.isJavaScriptIdentifierStart(): Boolean {
+            return this == '_' || this == '$' || isLetter()
+        }
+
+        private fun Char.isJavaScriptIdentifierPart(): Boolean {
+            return isJavaScriptIdentifierStart() || isDigit()
+        }
+
+        private val JAVASCRIPT_REGEX_PREFIX_CHARS = setOf(
+            '(', '{', '[', '=', ':', ',', ';', '!', '?', '&', '|', '+', '-', '*', '~', '^', '<', '>',
+        )
+        private val JAVASCRIPT_REGEX_PREFIX_KEYWORDS = setOf(
+            "return", "throw", "case", "delete", "void", "typeof", "yield", "await", "else", "do", "in", "of",
+        )
     }
 
     data class CommonJsPreloadDiagnostics(
@@ -1060,6 +1524,29 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
     }
 
+    private data class CommonJsRequireReference(
+        val moduleName: String?,
+    )
+
+    private data class CommonJsRequireParseResult(
+        val moduleName: String?,
+        val endIndex: Int,
+    )
+
+    private data class JavaScriptIdentifier(
+        val name: String,
+        val endIndex: Int,
+    )
+
+    private data class JavaScriptStringLiteral(
+        val value: String,
+        val endIndex: Int,
+    )
+
+    private data class JavaScriptToken(
+        val text: String,
+    )
+
     private data class CommonJsPreloadResult(
         val moduleSources: Map<String, String>,
         val diagnostics: CommonJsPreloadDiagnostics,
@@ -1072,11 +1559,17 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         val preload: CommonJsPreloadResult,
         val runtimeModuleSources: Map<String, String>,
     ) {
-        fun toBridgeRequest(timeoutMs: Long, spawnDepth: Int = 0): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
+        fun toBridgeRequest(
+            timeoutMs: Long,
+            spawnDepth: Int = 0,
+            executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
             return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
                 source = entrySource,
                 sourceName = sourceName,
                 workingDirectory = workingDirectory,
+                sandboxRoot = workingDirectory,
+                executionMode = NodeExecutionModePolicy.normalize(executionMode),
                 timeoutMs = timeoutMs,
                 moduleSources = preload.moduleSources,
                 runtimeModuleSources = runtimeModuleSources,
@@ -1096,9 +1589,8 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         var dynamicRequireIgnoredCount = 0
         var unresolvedStaticRequireCount = 0
 
-        fun recordRequireScan(source: String, staticCount: Int) {
+        fun recordRequireScan(staticCount: Int, requireCallCount: Int) {
             staticRequireCount += staticCount
-            val requireCallCount = COMMON_JS_REQUIRE_CALL_PATTERN.findAll(source).count()
             dynamicRequireIgnoredCount += (requireCallCount - staticCount).coerceAtLeast(0)
         }
 

@@ -1,0 +1,2 @@
+sample.wasi-scoped-fs.facade=design-gated
+sample.wasi-scoped-fs=PASS

@@ -1,0 +1,5 @@
+{
+  "name": "sensor-monitor",
+  "type": "node",
+  "main": "main.cjs"
+}

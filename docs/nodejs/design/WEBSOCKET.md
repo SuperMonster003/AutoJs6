@@ -1,6 +1,6 @@
 # Controlled WebSocket Design Gate
 
-Status: experimental MVP, live provider disabled by default. This document defines the boundary for the controlled WebSocket module without enabling raw `net` or `tls`.
+Status: experimental MVP, live provider disabled by default, explicit live-provider subgate available. This document defines the boundary for the controlled WebSocket module without enabling raw `net` or `tls`.
 
 ## Goal
 
@@ -70,10 +70,16 @@ interface WebSocketConnection {
   id: string;
   url: string;
   readyState: "connecting" | "open" | "closing" | "closed";
+  onopen: (() => void) | null;
+  onmessage: ((message: WebSocketMessage) => void) | null;
+  onclose: ((event: { type: "close"; code: number; reason: string }) => void) | null;
+  onerror: ((error: Error) => void) | null;
   send(data: string | Buffer | ArrayBuffer | Uint8Array): Promise<void>;
   close(code?: number, reason?: string): Promise<void>;
   on(event: "open" | "message" | "close" | "error", listener: Function): this;
   off(event: "open" | "message" | "close" | "error", listener: Function): this;
+  addEventListener(event: "open" | "message" | "close" | "error", listener: Function): this;
+  removeEventListener(event: "open" | "message" | "close" | "error", listener: Function): this;
 }
 
 function connect(url: WebSocketUrl, options?: ConnectOptions): Promise<WebSocketConnection>;
@@ -215,8 +221,12 @@ Covered paths:
 - experimental state visible in `require("autojs6:profile")`
 - `require("websocket")` reserved by the Safe Node Profile
 - fake provider connect/open/close
+- connect descriptor headers, protocols, and max queue size
 - send text
 - receive text
+- send/receive binary Base64 payloads
+- `on`/`off`, `addEventListener`/`removeEventListener`, and `onopen`/`onmessage`/`onerror`/`onclose` handler properties
+- close event object and error event delivery
 - max connection rejection
 - max message size rejection
 - unsupported scheme rejection
@@ -226,6 +236,20 @@ Covered paths:
 - raw `tls.connect()` remains denied
 - normal Android provider rejects with `ERR_AUTOJS6_NETWORK_DISABLED`
 - packaged verifier reports `android.permission.INTERNET` only when project metadata opts in
+
+Current live-provider instrumentation:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+```
+
+This explicit experimental subgate uses an on-device loopback WebSocket server
+and the Android OkHttp provider. It covers connect, headers, protocol
+negotiation, text and binary messages, close, inbound message-size rejection,
+connect timeout, raw `net`/`tls` denial, diagnostics, and provider destroy
+cleanup. It does not make controlled WebSocket default-on and does not expose
+raw socket modules.
 
 ## Non-Goals
 

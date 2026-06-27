@@ -1,0 +1,1 @@
+realnpm.test-runner-package=tests:3/3

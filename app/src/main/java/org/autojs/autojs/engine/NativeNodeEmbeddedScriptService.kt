@@ -1,6 +1,10 @@
 ﻿package org.autojs.autojs.engine
 
+import android.app.Notification
+import android.app.PendingIntent
 import android.app.Service
+import android.content.ComponentCallbacks2
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,31 +17,60 @@ import android.os.Looper
 import android.os.Process
 import android.os.ResultReceiver
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import org.autojs.autojs.App
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.ForegroundServiceCreator
 import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.util.ForegroundServiceUtils
 import org.autojs.autojs.util.ForegroundServiceUtils.FOREGROUND_SERVICE_TYPE_UNKNOWN
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import java.util.UUID
 import kotlin.system.exitProcess
 
-class NativeNodeEmbeddedScriptService : Service() {
+open class NativeNodeEmbeddedScriptService : Service() {
 
     @Volatile
     private var exitScheduled = false
     @Volatile
     private var activeLifecycle: NodeEmbeddedRuntimeLifecycle? = null
+    @Volatile
+    private var activeCrashMarker: NodeCrashEvidenceStore.Marker? = null
+    @Volatile
+    private var activeExecutionId: String? = null
+    @Volatile
+    private var activeExecutionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT
+    @Volatile
+    private var activeSourceName: String = DEFAULT_SOURCE_NAME
+    @Volatile
+    private var activeWorkingDirectory: String? = null
+    @Volatile
+    private var activeStartedAtEpochMs: Long = 0L
+    @Volatile
+    private var activeHeartbeatMonitor: NodeInteractiveHeartbeatMonitor? = null
+    @Volatile
+    private var activeLifecycleStopRequestFile: File? = null
+    @Volatile
+    private var prewarmActive = false
+    @Volatile
+    private var prewarmStartedAtElapsedMs = 0L
+    @Volatile
+    private var prewarmStartId = 0
     private var foregroundServiceCreator: ForegroundServiceCreator? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var prewarmStopRunnable: Runnable? = null
 
     private val foregroundServiceType = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> FOREGROUND_SERVICE_TYPE_SPECIAL_USE
@@ -48,11 +81,23 @@ class NativeNodeEmbeddedScriptService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.i(
+            TAG,
+            "android.policy.embedded_service " +
+                    NodeAndroidRuntimePolicy.embeddedServiceDiagnostics(
+                        this,
+                        javaClass,
+                        foregroundServiceType,
+                    ),
+        )
         startScriptForeground()
         Log.i(TAG, "PROCESS STARTED processName=${currentProcessName()} pid=${Process.myPid()}")
     }
 
     override fun onDestroy() {
+        val interactiveExecutionId = activeExecutionId
+            ?.takeIf { activeExecutionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING }
+        clearPrewarmState("service.onDestroy")
         cancelAllQueuedExecutionsInService()
         activeLifecycle?.let { lifecycle ->
             if (lifecycle.state !in setOf(
@@ -65,7 +110,42 @@ class NativeNodeEmbeddedScriptService : Service() {
             }
             lifecycle.transition(NodeEmbeddedRuntimeState.DESTROYED, "service.onDestroy")
         }
+        val terminalNativeValues = activeHeartbeatMonitor?.nativeValuesSnapshot("destroyed")
+            ?: activeLifecycle?.nativeValues().orEmpty()
+        NodeCrashEvidenceStore.markServiceDestroy(
+            context = this,
+            marker = activeCrashMarker,
+            reason = "embedded_script_service.onDestroy",
+            nativeValues = terminalNativeValues,
+        )
+        activeCrashMarker = null
+        activeHeartbeatMonitor?.stop("service.onDestroy")
+        activeHeartbeatMonitor = null
+        interactiveExecutionId?.let { executionId ->
+            val currentStatus = NodeInteractiveLongRunningStatusStore.read(this, executionId)
+            val currentState = currentStatus?.optString("state").orEmpty()
+            if (currentState !in setOf(
+                    NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
+                    NodeInteractiveLongRunningStatusStore.STATE_TIMED_OUT,
+                    NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                )
+            ) {
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
+                    sourceName = activeSourceName,
+                    workingDirectory = activeWorkingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    stopRequested = true,
+                    message = "service.onDestroy",
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("destroyed", terminalNativeValues),
+                    nativeValues = terminalNativeValues,
+                )
+            }
+        }
         activeLifecycle = null
+        clearActiveInteractiveSession(interactiveExecutionId)
         foregroundServiceCreator?.stopForeground(STOP_FOREGROUND_REMOVE)
         foregroundServiceCreator = null
         scheduleProcessExit(0)
@@ -74,6 +154,10 @@ class NativeNodeEmbeddedScriptService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return when (intent?.action) {
+            ACTION_PREWARM_RUNTIME -> {
+                handlePrewarmRuntime(intent, startId)
+                START_NOT_STICKY
+            }
             ACTION_RUN_SCRIPT -> {
                 Thread {
                     runScript(intent, startId)
@@ -83,6 +167,18 @@ class NativeNodeEmbeddedScriptService : Service() {
                 }
                 START_NOT_STICKY
             }
+            ACTION_STOP_INTERACTIVE -> {
+                stopInteractiveLongRunning(intent, startId)
+                START_NOT_STICKY
+            }
+            ACTION_SIMULATE_FOREGROUND_TIMEOUT -> {
+                handleForegroundServiceTimeout(
+                    startId = startId,
+                    foregroundServiceType = intent.getIntExtra(EXTRA_FOREGROUND_SERVICE_TYPE, foregroundServiceType),
+                    source = "test.simulated",
+                )
+                START_NOT_STICKY
+            }
             else -> {
                 stopSelf(startId)
                 START_NOT_STICKY
@@ -90,7 +186,32 @@ class NativeNodeEmbeddedScriptService : Service() {
         }
     }
 
+    override fun onTimeout(startId: Int) {
+        handleForegroundServiceTimeout(
+            startId = startId,
+            foregroundServiceType = foregroundServiceType,
+            source = "system.onTimeout",
+        )
+    }
+
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        handleForegroundServiceTimeout(
+            startId = startId,
+            foregroundServiceType = fgsType,
+            source = "system.onTimeout",
+        )
+    }
+
+    @Suppress("DEPRECATION")
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+            expirePrewarm("low_memory_$level", prewarmStartId)
+        }
+    }
+
     private fun runScript(intent: Intent, startId: Int) {
+        val prewarmLease = consumePrewarmForExecution()
         val receiver = intent.resultReceiverExtra(EXTRA_RESULT_RECEIVER)
         val startedAt = android.os.SystemClock.elapsedRealtime()
         val serviceRequest = try {
@@ -103,39 +224,121 @@ class NativeNodeEmbeddedScriptService : Service() {
                     intent = intent,
                     throwable = e,
                     startedAt = startedAt,
-                ).toBundle(),
+                ).withPrewarmLease(prewarmLease).toBundle(),
             )
             stopServiceIfQueueIdle(startId)
             return
         }
-        val source = serviceRequest.source
-        val sourceName = serviceRequest.sourceName.ifBlank { DEFAULT_SOURCE_NAME }
-        val workingDirectory = serviceRequest.workingDirectory?.takeIf { it.isNotBlank() }
-        val timeoutMs = serviceRequest.timeoutMs.coerceAtLeast(1L)
-        val esmExperimentalEnabled = serviceRequest.esmExperimentalEnabled
-        val dynamicImportExperimentalEnabled = serviceRequest.dynamicImportExperimentalEnabled
-        val workerThreadsExperimentalEnabled = serviceRequest.workerThreadsExperimentalEnabled
-        val javaInteropExperimentalEnabled = serviceRequest.javaInteropExperimentalEnabled
-        val spawnDepth = serviceRequest.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
-        val env = serviceRequest.env
-        val moduleSources = serviceRequest.moduleSources
-        val runtimeModuleSources = serviceRequest.runtimeModuleSources
+        val preparedServiceRequest = try {
+            NativeNodeEmbeddedRuntimeBridge.prepareEmbeddedScriptRequest(serviceRequest)
+        } catch (e: Throwable) {
+            receiver?.send(
+                RESULT_SCRIPT,
+                NativeNodeEmbeddedRuntimeBridge
+                    .embeddedScriptRequestPreparationFailure(serviceRequest, e, startedAt)
+                    .withPrewarmLease(prewarmLease)
+                    .toBundle(),
+            )
+            stopServiceIfQueueIdle(startId)
+            return
+        }
+        val launchSurface = intent.getStringExtra(EXTRA_LAUNCH_SURFACE)
+            ?.takeIf { it.isNotBlank() }
+            ?: NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT
+        NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(preparedServiceRequest, launchSurface)?.let { failure ->
+            receiver?.send(RESULT_SCRIPT, failure.withPrewarmLease(prewarmLease).toBundle())
+            stopServiceIfQueueIdle(startId)
+            return
+        }
+        val source = preparedServiceRequest.source
+        val sourceName = preparedServiceRequest.sourceName.ifBlank { DEFAULT_SOURCE_NAME }
+        val workingDirectory = preparedServiceRequest.workingDirectory?.takeIf { it.isNotBlank() }
+        val executionMode = NodeExecutionModePolicy.normalize(preparedServiceRequest.executionMode)
+        val timeoutMs = preparedServiceRequest.timeoutMs.coerceAtLeast(1L)
+        val esmExperimentalEnabled = preparedServiceRequest.esmExperimentalEnabled
+        val dynamicImportLocalEnabled = BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED
+        val dynamicImportExperimentalEnabled = preparedServiceRequest.dynamicImportExperimentalEnabled
+        val rawNodeNetworkModulesExperimentalEnabled = preparedServiceRequest.rawNodeNetworkModulesExperimentalEnabled
+        val workerThreadsExperimentalEnabled = preparedServiceRequest.workerThreadsExperimentalEnabled
+        val childProcessExperimentalEnabled = preparedServiceRequest.childProcessExperimentalEnabled
+        val javaInteropExperimentalEnabled = preparedServiceRequest.javaInteropExperimentalEnabled
+        val spawnDepth = preparedServiceRequest.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
+        val env = preparedServiceRequest.env
+        val moduleSources = preparedServiceRequest.moduleSources
+        val runtimeModuleSources = preparedServiceRequest.runtimeModuleSources
         val bridgeLimits = NodeBridgeLimits.fromRuntimeModuleOrWorkingDirectory(
             runtimeModuleSources[NodeBridgeLimits.RUNTIME_MODULE_NAME],
             workingDirectory,
         )
-        val executionId = serviceRequest.executionId?.takeIf { it.isNotBlank() }
+        val runtimeBudget = NodeRuntimeBudgetPolicy.fromRuntimeModuleOrWorkingDirectory(
+            runtimeModuleSources[NodeRuntimeBudgetPolicy.RUNTIME_MODULE_NAME],
+            workingDirectory,
+            executionMode,
+            timeoutMs,
+            bridgeLimits,
+        )
+        val executionId = preparedServiceRequest.executionId?.takeIf { it.isNotBlank() }
             ?: newExecutionId()
+        val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
+            context = this,
+            executionMode = executionMode,
+            launchSurface = launchSurface,
+            currentServiceClassName = javaClass.name,
+            requestedSlotId = preparedServiceRequest.processPoolSlot,
+            slotSelectionSource = preparedServiceRequest.processPoolSlotSource,
+            defaultSchedulerEnabled = preparedServiceRequest.processPoolSlotSource ==
+                    NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+        )
+        val interactiveSession = executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
+            NodeExecutionModePolicy.isInteractiveLongRunningLaunchSurface(launchSurface)
+        if (interactiveSession) {
+            activeExecutionId = executionId
+            activeExecutionMode = executionMode
+            activeSourceName = sourceName
+            activeWorkingDirectory = workingDirectory
+            activeStartedAtEpochMs = System.currentTimeMillis()
+            NodeInteractiveLongRunningStatusStore.write(
+                context = this,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_STARTING,
+                sourceName = sourceName,
+                workingDirectory = workingDirectory,
+                startedAtEpochMs = activeStartedAtEpochMs,
+                launchSurface = launchSurface,
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("starting"),
+            )
+            updateInteractiveForeground(executionId, sourceName)
+        }
         val processName = currentProcessName()
         val pid = Process.myPid()
-        val queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY
-        val queueTimeoutMs = 0L
+        val queueMode = NodeExecutionQueuePolicy.normalizeMode(preparedServiceRequest.queueMode)
+        val queueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(
+            queueMode,
+            preparedServiceRequest.queueTimeoutMs,
+        )
         val slotDecision = acquireExecutionSlot(
             executionId = executionId,
             queueMode = queueMode,
             queueTimeoutMs = queueTimeoutMs,
         )
         if (slotDecision is ExecutionSlotDecision.Rejected) {
+            if (interactiveSession) {
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = sourceName,
+                    workingDirectory = workingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    launchSurface = launchSurface,
+                    message = slotDecision.failure.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("queue_rejected"),
+                    nativeValues = processPoolPlan.nativeValues() + mapOf(
+                        "embedded_script.error_code" to slotDecision.failure.errorCode,
+                        "embedded_script.queue_rejected" to "true",
+                    ),
+                )
+            }
             receiver?.send(
                 RESULT_SCRIPT,
                 queueFailureResult(
@@ -146,7 +349,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     startedAt = startedAt,
                     processName = processName,
                     pid = pid,
-                ).toBundle(),
+                ).withProcessPoolPlan(processPoolPlan).withPrewarmLease(prewarmLease).toBundle(),
             )
             stopServiceIfQueueIdle(startId)
             return
@@ -157,11 +360,23 @@ class NativeNodeEmbeddedScriptService : Service() {
             id = executionId,
             sourceName = sourceName,
             cwd = workingDirectory.orEmpty(),
+            executionMode = executionMode,
+            launchSurface = launchSurface,
             spawnDepth = spawnDepth,
             processName = processName,
             pid = pid,
             startedAt = System.currentTimeMillis(),
         )
+        val lifecycleStopRequestFile = if (interactiveSession) {
+            File(cacheDir, "embedded-node-lifecycle/$executionId/stop-request.json")
+        } else {
+            null
+        }
+        if (interactiveSession) {
+            lifecycleStopRequestFile?.parentFile?.deleteRecursively()
+            lifecycleStopRequestFile?.parentFile?.mkdirs()
+            activeLifecycleStopRequestFile = lifecycleStopRequestFile
+        }
         val bridgeSession = NodeBridgeFileTransportSession(
             root = File(cacheDir, "embedded-node-bridge/$executionId"),
             bridgeLimits = bridgeLimits,
@@ -176,13 +391,24 @@ class NativeNodeEmbeddedScriptService : Service() {
             .withHostAppInfo()
             .withDeviceInfo()
             .withEngineInfo(engineInfo.toJson())
-            .withBridgePermissionManifest(workingDirectory)
+            .withBridgePermissionManifest(workingDirectory, preparedServiceRequest.sandboxRoot)
             .withBridgeLimitPolicy(bridgeLimits)
             .withBridgeLiveConfig(bridgeSession.configJson())
+            .withLifecycleConfig(
+                NodeLifecycleCheckpointStore.runtimeModuleSource(
+                    context = this,
+                    engineInfo = engineInfo,
+                    executionMode = executionMode,
+                    launchSurface = launchSurface,
+                    stopRequestFile = lifecycleStopRequestFile,
+                ),
+            )
         val request = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
             source = source,
             sourceName = sourceName,
             workingDirectory = workingDirectory,
+            sandboxRoot = serviceRequest.sandboxRoot,
+            executionMode = executionMode,
             timeoutMs = timeoutMs,
             captureStdout = serviceRequest.captureStdout,
             captureStderr = serviceRequest.captureStderr,
@@ -191,13 +417,31 @@ class NativeNodeEmbeddedScriptService : Service() {
             runtimeModuleSources = enrichedRuntimeModuleSources,
             esmExperimentalEnabled = esmExperimentalEnabled,
             dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled,
+            rawNodeNetworkModulesExperimentalEnabled = rawNodeNetworkModulesExperimentalEnabled,
             workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
+            childProcessExperimentalEnabled = childProcessExperimentalEnabled,
             javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
             executionId = executionId,
             queueMode = queueMode,
-            queueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(queueMode, queueTimeoutMs),
+            queueTimeoutMs = queueTimeoutMs,
+            runtimeAdapter = preparedServiceRequest.runtimeAdapter,
+            processPoolSlot = preparedServiceRequest.processPoolSlot,
+            processPoolSlotSource = preparedServiceRequest.processPoolSlotSource,
         )
         val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
+        val crashMarker = NodeCrashEvidenceStore.begin(
+            context = this,
+            executionId = executionId,
+            sourceName = sourceName,
+            workingDirectory = workingDirectory,
+            executionMode = executionMode,
+            launchSurface = launchSurface,
+            timeoutMs = timeoutMs,
+            runtimeAdapter = request.runtimeAdapter,
+            runtimeSlotId = processPoolPlan.selectedSlot.id,
+            scenario = "embedded_script_service",
+        )
+        activeCrashMarker = crashMarker
         val timeline = NodeEmbeddedRuntimeTimeline.create(
             env = env,
             executionId = executionId,
@@ -211,6 +455,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             mapOf(
                 "startId" to startId,
                 "workingDirectory" to workingDirectory.orEmpty(),
+                "executionMode" to executionMode,
                 "timeoutMs" to timeoutMs,
                 "moduleSourceCount" to moduleSources.size,
                 "runtimeModuleSourceCount" to enrichedRuntimeModuleSources.size,
@@ -231,19 +476,59 @@ class NativeNodeEmbeddedScriptService : Service() {
             TAG,
                     "script.enter executionId=$executionId processName=$processName pid=$pid sourceName=$sourceName " +
                     "env=${env.size} moduleSources=${moduleSources.size} runtimeModuleSources=${enrichedRuntimeModuleSources.size} " +
+                    "sandboxRoot=${request.sandboxRoot.orEmpty()} " +
                     "esmExperimentalEnabled=$esmExperimentalEnabled " +
+                    "dynamicImportLocalEnabled=$dynamicImportLocalEnabled " +
                     "dynamicImportExperimentalEnabled=$dynamicImportExperimentalEnabled " +
+                    "rawNodeNetworkModulesExperimentalEnabled=$rawNodeNetworkModulesExperimentalEnabled " +
                     "workerThreadsExperimentalEnabled=$workerThreadsExperimentalEnabled " +
+                    "childProcessExperimentalEnabled=$childProcessExperimentalEnabled " +
                     "javaInteropExperimentalEnabled=$javaInteropExperimentalEnabled " +
                     "queueMode=$queueMode queued=${slotLease.queued} queueWaitMs=${slotLease.queueWaitMs} " +
+                    "executionMode=$executionMode " +
+                    "processPool=${processPoolPlan.mode}/${processPoolPlan.selectedSlot.id} " +
                     "bridgeLimits=${bridgeLimits.toJson()} " +
+                    "runtimeBudget=${runtimeBudget.toJsonObject()} " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
+        var terminalCrashEvidenceMarked = false
         try {
             timeline?.mark("bridge_transport_start", mapOf("transport" to "file"))
             bridgeSession.start()
             timeline?.mark("bridge_transport_ready", mapOf("transport" to "file"))
             lifecycle.transition(NodeEmbeddedRuntimeState.RUNNING, "native.enter")
+            val heartbeatMonitor = if (interactiveSession) {
+                NodeInteractiveHeartbeatMonitor(
+                    context = this,
+                    executionId = executionId,
+                    sourceName = sourceName,
+                    workingDirectory = workingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L } ?: System.currentTimeMillis(),
+                    lifecycle = lifecycle,
+                    runtimeBudget = runtimeBudget,
+                    bridgeSession = bridgeSession,
+                ).also { monitor ->
+                    activeHeartbeatMonitor = monitor
+                    monitor.start()
+                }
+            } else {
+                null
+            }
+            if (interactiveSession) {
+                val runningNativeValues = heartbeatMonitor?.nativeValuesSnapshot("running")
+                    ?: (lifecycle.nativeValues() + runtimeBudget.nativeDiagnostics())
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_RUNNING,
+                    sourceName = sourceName,
+                    workingDirectory = workingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    launchSurface = launchSurface,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("running", runningNativeValues),
+                    nativeValues = runningNativeValues,
+                )
+            }
             timeline?.mark("native_enter")
             val nativeResult = NativeNodeEmbeddedRuntimeBridge.runEmbeddedScriptInCurrentProcess(
                 context = this,
@@ -251,6 +536,9 @@ class NativeNodeEmbeddedScriptService : Service() {
             )
             timeline?.recordNativeResult(nativeResult)
             val result = dispatchQueuedBridgeRequests(bridgeSession.appendNativeValues(nativeResult))
+                .withExecutionMode(executionMode, launchSurface)
+                .withRuntimeBudget(runtimeBudget)
+                .withProcessPoolPlan(processPoolPlan)
             timeline?.recordBridge(result)
             val completed = when {
                 result.succeeded -> {
@@ -273,8 +561,35 @@ class NativeNodeEmbeddedScriptService : Service() {
                     result
                 }
             }
+            if (interactiveSession) {
+                val state = when {
+                    completed.succeeded -> NodeInteractiveLongRunningStatusStore.STATE_STOPPED
+                    completed.timedOut -> NodeInteractiveLongRunningStatusStore.STATE_TIMED_OUT
+                    else -> NodeInteractiveLongRunningStatusStore.STATE_FAILED
+                }
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = state,
+                    sourceName = sourceName,
+                    workingDirectory = workingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    launchSurface = launchSurface,
+                    message = completed.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary(state, completed.nativeValues),
+                    nativeValues = lifecycle.nativeValues() + completed.nativeValues,
+                )
+            }
             timeline?.mark("destroy_complete", mapOf("state" to lifecycle.state.name))
-            receiver?.send(RESULT_SCRIPT, completed.withLifecycle(lifecycle).withQueueLease(slotLease).withTimeline(timeline).toBundle())
+            val evidenceResult = completed
+                .withLifecycle(lifecycle)
+                .withQueueLease(slotLease)
+                .withPrewarmLease(prewarmLease)
+                .withCrashEvidence(crashMarker)
+                .withTimeline(timeline)
+            NodeCrashEvidenceStore.markEmbeddedResult(this, crashMarker, evidenceResult)
+            terminalCrashEvidenceMarked = true
+            receiver?.send(RESULT_SCRIPT, evidenceResult.toBundle())
         } catch (e: Throwable) {
             timeline?.mark(
                 "stop_requested",
@@ -287,29 +602,61 @@ class NativeNodeEmbeddedScriptService : Service() {
             lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "service.exception")
             Log.e(TAG, "Native Node embedded script service failed.", e)
             timeline?.mark("destroy_complete", mapOf("state" to lifecycle.state.name))
-            receiver?.send(
-                RESULT_SCRIPT,
-                NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
-                    succeeded = false,
-                    exitCode = 1,
-                    resultText = null,
-                    stdout = "",
-                    stderr = "",
-                    errorName = e.javaClass.simpleName,
-                    errorMessage = e.message ?: e.javaClass.name,
-                    errorStack = e.stackTraceToString(),
-                    elapsedMs = android.os.SystemClock.elapsedRealtime() - startedAt,
-                    processName = processName,
-                    pid = pid,
+            if (interactiveSession) {
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
                     sourceName = sourceName,
-                    nativeValues = emptyMap(),
-                ).withLifecycle(lifecycle).withQueueLease(slotLease).withTimeline(timeline).toBundle(),
+                    workingDirectory = workingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    launchSurface = launchSurface,
+                    message = e.message ?: e.javaClass.name,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("exception"),
+                    nativeValues = lifecycle.nativeValues(),
+                )
+            }
+            val failureResult = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+                succeeded = false,
+                exitCode = 1,
+                resultText = null,
+                stdout = "",
+                stderr = "",
+                errorName = e.javaClass.simpleName,
+                errorMessage = e.message ?: e.javaClass.name,
+                errorStack = e.stackTraceToString(),
+                elapsedMs = android.os.SystemClock.elapsedRealtime() - startedAt,
+                processName = processName,
+                pid = pid,
+                sourceName = sourceName,
+                nativeValues = emptyMap(),
             )
+                .withLifecycle(lifecycle)
+                .withQueueLease(slotLease)
+                .withPrewarmLease(prewarmLease)
+                .withRuntimeBudget(runtimeBudget)
+                .withCrashEvidence(crashMarker)
+                .withTimeline(timeline)
+            NodeCrashEvidenceStore.markEmbeddedResult(this, crashMarker, failureResult)
+            terminalCrashEvidenceMarked = true
+            receiver?.send(RESULT_SCRIPT, failureResult.toBundle())
         } finally {
             File(File(cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId)).deleteRecursively()
+            activeHeartbeatMonitor?.stop("script.finally")
+            activeHeartbeatMonitor = null
+            lifecycleStopRequestFile?.parentFile?.deleteRecursively()
             bridgeSession.stop()
             val queueStatus = releaseExecutionSlot(executionId)
             val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
+            if (!terminalCrashEvidenceMarked) {
+                NodeCrashEvidenceStore.markServiceDestroy(
+                    context = this,
+                    marker = crashMarker,
+                    reason = "embedded_script_service.finally",
+                    nativeValues = lifecycle.nativeValues(),
+                )
+            }
+            activeCrashMarker = null
             Log.i(
                 TAG,
                 "script.exit executionId=$executionId processName=$processName pid=$pid " +
@@ -322,10 +669,172 @@ class NativeNodeEmbeddedScriptService : Service() {
                 Log.i(
                     TAG,
                     "script.queue.keep_service_alive executionId=$executionId active=${queueStatus.activeExecutionId.orEmpty()} " +
-                        "queued=${queueStatus.queuedCount}",
+                    "queued=${queueStatus.queuedCount}",
                 )
             }
+            if (interactiveSession) {
+                clearActiveInteractiveSession(executionId)
+            }
         }
+    }
+
+    @Synchronized
+    private fun handlePrewarmRuntime(intent: Intent, startId: Int) {
+        val receiver = intent.resultReceiverExtra(EXTRA_RESULT_RECEIVER)
+        val ttlMs = normalizedPrewarmTtlMs(intent.getLongExtra(EXTRA_PREWARM_TTL_MS, DEFAULT_PREWARM_TTL_MS))
+        val queueStatus = queueStatusSnapshot()
+        if (!queueStatus.idle) {
+            receiver?.send(
+                RESULT_PREWARM,
+                prewarmResultBundle(
+                    started = false,
+                    status = "busy",
+                    ttlMs = ttlMs,
+                    reason = "active_or_queued_execution",
+                ),
+            )
+            return
+        }
+        prewarmStopRunnable?.let(mainHandler::removeCallbacks)
+        prewarmActive = true
+        prewarmStartedAtElapsedMs = android.os.SystemClock.elapsedRealtime()
+        prewarmStartId = startId
+        val runnable = Runnable {
+            expirePrewarm("ttl_expired", startId)
+        }
+        prewarmStopRunnable = runnable
+        mainHandler.postDelayed(runnable, ttlMs)
+        Log.i(TAG, "prewarm.ready processName=${currentProcessName()} pid=${Process.myPid()} ttlMs=$ttlMs")
+        receiver?.send(
+            RESULT_PREWARM,
+            prewarmResultBundle(
+                started = true,
+                status = "ready",
+                ttlMs = ttlMs,
+                reason = "process_prewarmed",
+            ),
+        )
+    }
+
+    @Synchronized
+    private fun consumePrewarmForExecution(): PrewarmLease {
+        if (!prewarmActive) {
+            return PrewarmLease(
+                status = "not_requested",
+                consumed = false,
+                ageMs = 0L,
+            )
+        }
+        val now = android.os.SystemClock.elapsedRealtime()
+        val ageMs = (now - prewarmStartedAtElapsedMs).coerceAtLeast(0L)
+        prewarmStopRunnable?.let(mainHandler::removeCallbacks)
+        prewarmStopRunnable = null
+        prewarmActive = false
+        prewarmStartedAtElapsedMs = 0L
+        prewarmStartId = 0
+        Log.i(TAG, "prewarm.consumed processName=${currentProcessName()} pid=${Process.myPid()} ageMs=$ageMs")
+        return PrewarmLease(
+            status = "consumed",
+            consumed = true,
+            ageMs = ageMs,
+        )
+    }
+
+    @Synchronized
+    private fun expirePrewarm(reason: String, startId: Int) {
+        if (!prewarmActive) {
+            return
+        }
+        val ageMs = (android.os.SystemClock.elapsedRealtime() - prewarmStartedAtElapsedMs).coerceAtLeast(0L)
+        clearPrewarmState(reason)
+        Log.i(TAG, "prewarm.expired reason=$reason processName=${currentProcessName()} pid=${Process.myPid()} ageMs=$ageMs")
+        if (queueStatusSnapshot().idle) {
+            stopSelf(startId)
+            scheduleProcessExit(0)
+        }
+    }
+
+    @Synchronized
+    private fun clearPrewarmState(reason: String) {
+        prewarmStopRunnable?.let(mainHandler::removeCallbacks)
+        prewarmStopRunnable = null
+        if (prewarmActive) {
+            Log.i(TAG, "prewarm.clear reason=$reason processName=${currentProcessName()} pid=${Process.myPid()}")
+        }
+        prewarmActive = false
+        prewarmStartedAtElapsedMs = 0L
+        prewarmStartId = 0
+    }
+
+    private fun prewarmResultBundle(
+        started: Boolean,
+        status: String,
+        ttlMs: Long,
+        reason: String,
+    ): Bundle {
+        return Bundle().apply {
+            putBoolean(EXTRA_PREWARM_STARTED, started)
+            putString(EXTRA_PREWARM_STATUS, status)
+            putString(EXTRA_PREWARM_REASON, reason)
+            putLong(EXTRA_PREWARM_TTL_MS, ttlMs)
+            putLong(EXTRA_PREWARM_STARTED_AT_ELAPSED_MS, prewarmStartedAtElapsedMs)
+            putString(EXTRA_PREWARM_PROCESS_NAME, currentProcessName())
+            putInt(EXTRA_PREWARM_PID, Process.myPid())
+            putBoolean(EXTRA_PREWARM_PROCESS_ONLY, true)
+            putBoolean(EXTRA_PREWARM_RUNTIME_LOADED, false)
+            putStringArray(
+                EXTRA_PREWARM_NATIVE_PAYLOAD,
+                prewarmNativeValues(
+                    started = started,
+                    status = status,
+                    ttlMs = ttlMs,
+                    reason = reason,
+                    ageMs = 0L,
+                ).map { (key, value) -> "$key=$value" }.toTypedArray(),
+            )
+        }
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withPrewarmLease(
+        lease: PrewarmLease,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(nativeValues)
+                putAll(
+                    prewarmNativeValues(
+                        started = lease.consumed,
+                        status = lease.status,
+                        ttlMs = 0L,
+                        reason = if (lease.consumed) "consumed_by_execution" else "no_active_prewarm",
+                        ageMs = lease.ageMs,
+                    ),
+                )
+            },
+        )
+    }
+
+    private fun prewarmNativeValues(
+        started: Boolean,
+        status: String,
+        ttlMs: Long,
+        reason: String,
+        ageMs: Long,
+    ): Map<String, String> {
+        return linkedMapOf(
+            "embedded_script.prewarm_pool.enabled" to "true",
+            "embedded_script.prewarm_pool.status" to status,
+            "embedded_script.prewarm_pool.started" to started.toString(),
+            "embedded_script.prewarm_pool.consumed" to (status == "consumed").toString(),
+            "embedded_script.prewarm_pool.process_only" to "true",
+            "embedded_script.prewarm_pool.runtime_loaded_before_execution" to "false",
+            "embedded_script.prewarm_pool.capabilities_granted" to "false",
+            "embedded_script.prewarm_pool.user_modules_loaded" to "false",
+            "embedded_script.prewarm_pool.ttl_ms" to ttlMs.toString(),
+            "embedded_script.prewarm_pool.age_ms" to ageMs.toString(),
+            "embedded_script.prewarm_pool.reason" to reason,
+            "embedded_script.prewarm_pool.policy" to "single-use-process-only",
+        )
     }
 
     private fun requestTransportFailureResult(
@@ -486,13 +995,27 @@ class NativeNodeEmbeddedScriptService : Service() {
         }
     }
 
-    private fun Map<String, String>.withBridgePermissionManifest(workingDirectory: String?): Map<String, String> {
+    private fun Map<String, String>.withLifecycleConfig(configJson: String): Map<String, String> {
+        return linkedMapOf<String, String>().apply {
+            putAll(this@withLifecycleConfig)
+            put(NodeLifecycleCheckpointStore.RUNTIME_MODULE_NAME, configJson)
+        }
+    }
+
+    private fun Map<String, String>.withBridgePermissionManifest(
+        workingDirectory: String?,
+        sandboxRoot: String?,
+    ): Map<String, String> {
         return linkedMapOf<String, String>().apply {
             putAll(this@withBridgePermissionManifest)
             if (!containsKey(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME)) {
                 put(
                     NodeBridgePermissionManifest.RUNTIME_MODULE_NAME,
-                    NodeBridgePermissionManifest.runtimeModuleSourceForWorkingDirectory(workingDirectory),
+                    NodeBridgePermissionManifest.runtimeModuleSourceForWorkingDirectory(
+                        workingDirectory,
+                        sandboxRoot,
+                        includeBuildNetworkPolicy = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+                    ),
                 )
             }
         }
@@ -588,6 +1111,41 @@ class NativeNodeEmbeddedScriptService : Service() {
         )
     }
 
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withExecutionMode(
+        executionMode: String,
+        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(nativeValues)
+                putAll(NodeExecutionModePolicy.nativeValues(executionMode, launchSurface))
+            },
+        )
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withRuntimeBudget(
+        runtimeBudget: NodeRuntimeBudgetPolicy.Policy,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        val budgetValues = NodeRuntimeBudgetPolicy.completionNativeValues(runtimeBudget, nativeValues, elapsedMs)
+        return copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(nativeValues)
+                putAll(budgetValues)
+            },
+        )
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withCrashEvidence(
+        marker: NodeCrashEvidenceStore.Marker?,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(nativeValues)
+                putAll(NodeCrashEvidenceStore.nativeValues(marker))
+            },
+        )
+    }
+
     private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withTimeline(
         timeline: NodeEmbeddedRuntimeTimeline?,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
@@ -602,6 +1160,88 @@ class NativeNodeEmbeddedScriptService : Service() {
         )
     }
 
+    private class NodeInteractiveHeartbeatMonitor(
+        context: Context,
+        private val executionId: String,
+        private val sourceName: String,
+        private val workingDirectory: String?,
+        private val startedAtEpochMs: Long,
+        private val lifecycle: NodeEmbeddedRuntimeLifecycle,
+        private val runtimeBudget: NodeRuntimeBudgetPolicy.Policy,
+        private val bridgeSession: NodeBridgeFileTransportSession,
+    ) {
+        private val appContext = context.applicationContext
+        private val running = AtomicBoolean(false)
+        private val sequence = AtomicInteger(0)
+        private val thread = Thread {
+            loop()
+        }.apply {
+            name = "AutoJs6NodeRuntimeHeartbeat-$executionId"
+            isDaemon = true
+        }
+
+        fun start() {
+            if (running.compareAndSet(false, true)) {
+                write("running")
+                thread.start()
+            }
+        }
+
+        fun stop(reason: String) {
+            if (running.compareAndSet(true, false)) {
+                runCatching { thread.join(HEARTBEAT_STOP_JOIN_MS) }
+            }
+            Log.i(TAG, "runtime.heartbeat.stop executionId=$executionId reason=$reason sequence=${sequence.get()}")
+        }
+
+        fun nativeValuesSnapshot(status: String): Map<String, String> {
+            val baseValues = linkedMapOf<String, String>().apply {
+                putAll(lifecycle.nativeValues())
+                putAll(bridgeSession.nativeValuesSnapshot())
+                putAll(runtimeBudget.nativeDiagnostics())
+            }
+            val snapshot = NodeRuntimeBudgetPolicy.heartbeatSnapshot(
+                policy = runtimeBudget,
+                nativeValues = baseValues,
+                executionId = executionId,
+                executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+                lifecycleState = lifecycle.state.name,
+                sequence = sequence.incrementAndGet(),
+                startedAtEpochMs = startedAtEpochMs,
+                nowEpochMs = System.currentTimeMillis(),
+            )
+            return linkedMapOf<String, String>().apply {
+                putAll(baseValues)
+                putAll(NodeRuntimeBudgetPolicy.heartbeatNativeValues(snapshot))
+                put("embedded_script.runtime_heartbeat.status_label", status)
+            }
+        }
+
+        private fun loop() {
+            while (running.get()) {
+                Thread.sleep(runtimeBudget.heartbeatIntervalMs)
+                if (running.get()) {
+                    write("running")
+                }
+            }
+        }
+
+        private fun write(status: String) {
+            val nativeValues = nativeValuesSnapshot(status)
+            NodeInteractiveLongRunningStatusStore.write(
+                context = appContext,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_RUNNING,
+                sourceName = sourceName,
+                workingDirectory = workingDirectory,
+                startedAtEpochMs = startedAtEpochMs,
+                stopRequested = false,
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary(status, nativeValues),
+                nativeValues = nativeValues,
+            )
+        }
+    }
+
     private class NodeBridgeFileTransportSession(
         root: File,
         private val bridgeLimits: NodeBridgeLimits.Policy,
@@ -614,6 +1254,11 @@ class NativeNodeEmbeddedScriptService : Service() {
         private val failed = AtomicInteger(0)
         private val pending = AtomicInteger(0)
         private val resourceLimited = AtomicInteger(0)
+        private val pollCount = AtomicInteger(0)
+        private val lastPollAtEpochMs = AtomicLong(0L)
+        private val lastRequestAtEpochMs = AtomicLong(0L)
+        private val lastResponseAtEpochMs = AtomicLong(0L)
+        private val startedAtEpochMs = System.currentTimeMillis()
         private val seen = mutableSetOf<String>()
         private val responsesLock = Any()
         private val responses = mutableListOf<NodeBridgeResponse>()
@@ -661,28 +1306,41 @@ class NativeNodeEmbeddedScriptService : Service() {
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
             val nativeValues = linkedMapOf<String, String>().apply {
                 putAll(result.nativeValues)
-                put("embedded_script.bridge_live_enabled", "true")
-                put("embedded_script.bridge_live_dispatch_count", completed.get().toString())
-                put("embedded_script.bridge_live_dispatch_failed_count", failed.get().toString())
-                put("embedded_script.bridge_live_dispatch_pending_count", pending.get().coerceAtLeast(0).toString())
-                put("embedded_script.bridge_live_dispatch_pending_limit", bridgeLimits.maxPendingBridgeCalls.toString())
-                put("embedded_script.bridge_live_dispatch_resource_limited_count", resourceLimited.get().toString())
-                put(
-                    "embedded_script.bridge_live_dispatch_status",
-                    if (pending.get() <= 0) "done" else "pending",
-                )
-                put("embedded_script.bridge_live_responses_json", bridgeResponsesJsonSnapshot())
-                putAll(provider.nativeDiagnostics())
+                putAll(nativeValuesSnapshot())
             }
             return result.copy(nativeValues = nativeValues)
         }
 
+        fun nativeValuesSnapshot(): Map<String, String> = linkedMapOf<String, String>().apply {
+            put("embedded_script.bridge_live_enabled", "true")
+            put("embedded_script.bridge_live_dispatch_count", completed.get().toString())
+            put("embedded_script.bridge_live_dispatch_failed_count", failed.get().toString())
+            put("embedded_script.bridge_live_dispatch_pending_count", pending.get().coerceAtLeast(0).toString())
+            put("embedded_script.bridge_live_dispatch_pending_limit", bridgeLimits.maxPendingBridgeCalls.toString())
+            put("embedded_script.bridge_live_dispatch_resource_limited_count", resourceLimited.get().toString())
+            put("embedded_script.bridge_live_dispatch_poll_count", pollCount.get().toString())
+            put("embedded_script.bridge_live_dispatch_started_at_epoch_ms", startedAtEpochMs.toString())
+            put("embedded_script.bridge_live_dispatch_last_poll_at_epoch_ms", lastPollAtEpochMs.get().toString())
+            put("embedded_script.bridge_live_dispatch_last_request_at_epoch_ms", lastRequestAtEpochMs.get().toString())
+            put("embedded_script.bridge_live_dispatch_last_response_at_epoch_ms", lastResponseAtEpochMs.get().toString())
+            put(
+                "embedded_script.bridge_live_dispatch_status",
+                if (pending.get() <= 0) "done" else "pending",
+            )
+            put("embedded_script.bridge_live_responses_json", bridgeResponsesJsonSnapshot())
+            putAll(provider.nativeDiagnostics())
+        }
+
         private fun loop() {
             while (running.get()) {
+                pollCount.incrementAndGet()
+                lastPollAtEpochMs.set(System.currentTimeMillis())
                 drainRequestFiles()
                 Thread.sleep(BRIDGE_LIVE_POLL_INTERVAL_MS)
             }
             repeat(BRIDGE_LIVE_DRAIN_ITERATIONS) {
+                pollCount.incrementAndGet()
+                lastPollAtEpochMs.set(System.currentTimeMillis())
                 drainRequestFiles()
                 if (pending.get() <= 0) {
                     return
@@ -717,6 +1375,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 file.delete()
                 return
             }
+            lastRequestAtEpochMs.set(System.currentTimeMillis())
             val responded = AtomicBoolean(false)
             if (pending.get() >= bridgeLimits.maxPendingBridgeCalls) {
                 resourceLimited.incrementAndGet()
@@ -767,6 +1426,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             synchronized(responsesLock) {
                 responses += response
             }
+            lastResponseAtEpochMs.set(System.currentTimeMillis())
             writeResponse(response)
             completed.incrementAndGet()
             if (!response.ok) {
@@ -808,7 +1468,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             return
         }
         exitScheduled = true
-        Handler(Looper.getMainLooper()).postDelayed({
+        mainHandler.postDelayed({
             exitProcess(status)
         }, PROCESS_EXIT_DELAY_MS)
     }
@@ -836,6 +1496,18 @@ class NativeNodeEmbeddedScriptService : Service() {
         data class Rejected(val failure: ExecutionSlotFailure) : ExecutionSlotDecision()
     }
 
+    private sealed class DefaultProcessPoolSlotDecision {
+
+        data class Acquired(val lease: DefaultProcessPoolSlotLease) : DefaultProcessPoolSlotDecision()
+
+        data class Rejected(
+            val failure: ExecutionSlotFailure,
+            val activeSlotIds: List<String>,
+        ) : DefaultProcessPoolSlotDecision()
+
+        object NotEligible : DefaultProcessPoolSlotDecision()
+    }
+
     private data class ExecutionSlotLease(
         val executionId: String,
         val queueMode: String,
@@ -843,6 +1515,16 @@ class NativeNodeEmbeddedScriptService : Service() {
         val queueWaitMs: Long,
         val queuePosition: Int,
         val maxQueuedExecutions: Int,
+    )
+
+    private data class DefaultProcessPoolSlotLease(
+        val executionId: String,
+        val slot: NodeEmbeddedProcessPoolPolicy.ProcessSlot,
+        val activeSlotIdsAtAcquire: List<String>,
+        val acquiredAtElapsedMs: Long,
+        val queueMode: String,
+        val queued: Boolean,
+        val queueWaitMs: Long,
     )
 
     private data class ExecutionSlotFailure(
@@ -857,26 +1539,241 @@ class NativeNodeEmbeddedScriptService : Service() {
         val maxQueuedExecutions: Int,
     )
 
+    private data class PrewarmLease(
+        val status: String,
+        val consumed: Boolean,
+        val ageMs: Long,
+    )
+
+    private fun stopInteractiveLongRunning(intent: Intent, startId: Int) {
+        val requestedExecutionId = intent.getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() }
+        val executionId = activeExecutionId
+        if (executionId == null || (requestedExecutionId != null && requestedExecutionId != executionId)) {
+            Log.w(
+                TAG,
+                "interactive.stop.ignored requested=${requestedExecutionId.orEmpty()} active=${executionId.orEmpty()}",
+            )
+            stopSelf(startId)
+            return
+        }
+        activeLifecycle?.let { lifecycle ->
+            if (lifecycle.state !in setOf(
+                    NodeEmbeddedRuntimeState.STOPPING,
+                    NodeEmbeddedRuntimeState.STOPPED,
+                    NodeEmbeddedRuntimeState.DESTROYED,
+                )
+            ) {
+                lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "interactive.stop")
+            }
+        }
+        val stoppingNativeValues = activeHeartbeatMonitor?.nativeValuesSnapshot("stopping")
+            ?: activeLifecycle?.nativeValues().orEmpty()
+        activeHeartbeatMonitor?.stop("interactive.stop")
+        activeHeartbeatMonitor = null
+        NodeLifecycleCheckpointStore.writeStopRequest(
+            file = activeLifecycleStopRequestFile,
+            executionId = executionId,
+            reason = "interactive.stop.requested",
+        )
+        NodeInteractiveLongRunningStatusStore.write(
+            context = this,
+            executionId = executionId,
+            state = NodeInteractiveLongRunningStatusStore.STATE_STOPPING,
+            sourceName = activeSourceName,
+            workingDirectory = activeWorkingDirectory,
+            startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+            stopRequested = true,
+            message = "interactive.stop.requested",
+            activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("stopping", stoppingNativeValues),
+            nativeValues = stoppingNativeValues,
+        )
+        val sourceName = activeSourceName
+        val workingDirectory = activeWorkingDirectory
+        val startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L }
+        Handler(Looper.getMainLooper()).postDelayed({
+            NodeInteractiveLongRunningStatusStore.write(
+                context = this,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
+                sourceName = sourceName,
+                workingDirectory = workingDirectory,
+                startedAtEpochMs = startedAtEpochMs,
+                stopRequested = true,
+                message = "interactive.stop.accepted",
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("process_exit_scheduled", stoppingNativeValues),
+                nativeValues = stoppingNativeValues,
+            )
+            stopSelf(startId)
+            scheduleProcessExit(0)
+        }, NodeLifecycleCheckpointStore.STOP_GRACE_MS)
+    }
+
+    private fun handleForegroundServiceTimeout(
+        startId: Int,
+        foregroundServiceType: Int,
+        source: String,
+    ) {
+        val diagnostics = NodeAndroidRuntimePolicy.foregroundServiceTimeoutDiagnostics(
+            startId = startId,
+            foregroundServiceType = foregroundServiceType,
+            serviceClassName = NativeNodeEmbeddedScriptService::class.java.name,
+        )
+        Log.w(TAG, "android.policy.foreground_timeout source=$source diagnostics=$diagnostics")
+        cancelAllQueuedExecutionsInService()
+        activeLifecycle?.let { lifecycle ->
+            if (lifecycle.state !in setOf(
+                    NodeEmbeddedRuntimeState.TIMED_OUT,
+                    NodeEmbeddedRuntimeState.STOPPING,
+                    NodeEmbeddedRuntimeState.STOPPED,
+                    NodeEmbeddedRuntimeState.DESTROYED,
+                )
+            ) {
+                lifecycle.transition(NodeEmbeddedRuntimeState.TIMED_OUT, source)
+            }
+            if (lifecycle.state !in setOf(
+                    NodeEmbeddedRuntimeState.STOPPING,
+                    NodeEmbeddedRuntimeState.STOPPED,
+                    NodeEmbeddedRuntimeState.DESTROYED,
+                )
+            ) {
+                lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "$source.cleanup")
+            }
+        }
+        activeExecutionId
+            ?.takeIf { activeExecutionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING }
+            ?.let { executionId ->
+                val heartbeatValues = activeHeartbeatMonitor?.nativeValuesSnapshot("foreground_service_timeout")
+                    ?: activeLifecycle?.nativeValues().orEmpty()
+                activeHeartbeatMonitor?.stop("foreground_service_timeout")
+                activeHeartbeatMonitor = null
+                val nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(heartbeatValues)
+                    putAll(NodeAndroidRuntimePolicy.nativeValues("embedded_script.android_foreground_timeout", diagnostics))
+                    put("embedded_script.foreground_service_timeout", "true")
+                }
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_TIMED_OUT,
+                    sourceName = activeSourceName,
+                    workingDirectory = activeWorkingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    stopRequested = true,
+                    message = "$source foreground service timeout; stopSelf cleanup requested",
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("foreground_service_timeout", nativeValues),
+                    nativeValues = nativeValues,
+                )
+                NodeCrashEvidenceStore.markTimeout(
+                    context = this,
+                    marker = activeCrashMarker,
+                    reason = "foreground_service_timeout",
+                    nativeValues = nativeValues,
+                )
+            }
+        foregroundServiceCreator?.stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf(startId)
+        scheduleProcessExit(0)
+    }
+
+    private fun updateInteractiveForeground(executionId: String, sourceName: String) {
+        ForegroundServiceUtils.createNotificationChannelIfNeeded(
+            this,
+            NativeNodeEmbeddedScriptService::class.java,
+            "AutoJs6 interactive Node runtime",
+            "Runs user-visible long-running Node automation",
+        )
+        val channelId = ForegroundServiceUtils.getChannelId(NativeNodeEmbeddedScriptService::class.java)
+        val contentIntent = PendingIntent.getActivity(
+            this,
+            INTERACTIVE_CONTENT_REQUEST_CODE,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val stopIntent = Intent(this, NativeNodeEmbeddedScriptService::class.java).apply {
+            action = ACTION_STOP_INTERACTIVE
+            putExtra(EXTRA_EXECUTION_ID, executionId)
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this,
+            INTERACTIVE_STOP_REQUEST_CODE,
+            stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val displayName = sourceName.ifBlank { DEFAULT_SOURCE_NAME }
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("AutoJs6 interactive Node runtime")
+            .setContentText("Running $displayName")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("Running $displayName"))
+            .setContentIntent(contentIntent)
+            .setSmallIcon(R.drawable.autojs6_status_bar_icon)
+            .setOngoing(true)
+            .setSilent(true)
+            .setWhen(System.currentTimeMillis())
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setChannelId(channelId)
+            .addAction(R.drawable.ic_stop_black_48dp, "Stop", stopPendingIntent)
+            .build()
+            .apply { flags = flags or Notification.FLAG_FOREGROUND_SERVICE }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && foregroundServiceType != FOREGROUND_SERVICE_TYPE_UNKNOWN) {
+            startForeground(NOTIFICATION_ID, notification, foregroundServiceType)
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
+    }
+
+    private fun clearActiveInteractiveSession(executionId: String?) {
+        if (executionId != null && activeExecutionId != executionId) {
+            return
+        }
+        activeExecutionId = null
+        activeExecutionMode = NodeExecutionModePolicy.MODE_ONE_SHOT
+        activeSourceName = DEFAULT_SOURCE_NAME
+        activeWorkingDirectory = null
+        activeStartedAtEpochMs = 0L
+        activeLifecycleStopRequestFile = null
+    }
+
     companion object {
 
         private const val TAG = "NativeNodeEmbeddedScriptService"
         private val ACTIVE_EXECUTION_ID = AtomicReference<String?>(null)
         @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
         private val EXECUTION_QUEUE_LOCK = Object()
+        @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+        private val DEFAULT_PROCESS_POOL_LOCK = Object()
         private val QUEUED_EXECUTION_IDS = ArrayDeque<String>()
         private val CANCELLED_QUEUED_EXECUTION_IDS = mutableSetOf<String>()
+        private val DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS = linkedSetOf<String>()
+        private val DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS = linkedMapOf<String, Long>()
+        private val CLIENT_RUNNING_SCRIPT_COMPONENTS = ConcurrentHashMap<String, ComponentName>()
+        private const val ACTION_PREWARM_RUNTIME = "org.autojs.autojs.engine.action.PREWARM_NATIVE_NODE_RUNTIME"
         private const val ACTION_RUN_SCRIPT = "org.autojs.autojs.engine.action.RUN_NATIVE_NODE_EMBEDDED_SCRIPT"
+        private const val ACTION_STOP_INTERACTIVE = NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME
+        private const val ACTION_SIMULATE_FOREGROUND_TIMEOUT =
+            "org.autojs.autojs.engine.action.SIMULATE_NATIVE_NODE_FOREGROUND_TIMEOUT"
         private const val EXTRA_RESULT_RECEIVER = "result_receiver"
         private const val EXTRA_SOURCE = "source"
         private const val EXTRA_SOURCE_NAME = "source_name"
         private const val EXTRA_WORKING_DIRECTORY = "working_directory"
+        private const val EXTRA_SANDBOX_ROOT = "sandbox_root"
+        private const val EXTRA_EXECUTION_MODE = "execution_mode"
+        private const val EXTRA_LAUNCH_SURFACE = "launch_surface"
         private const val EXTRA_TIMEOUT_MS = "timeout_ms"
         private const val EXTRA_ESM_EXPERIMENTAL_ENABLED = "esm_experimental_enabled"
         private const val EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED = "dynamic_import_experimental_enabled"
+        private const val EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED =
+            "raw_node_network_modules_experimental_enabled"
         private const val EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED = "worker_threads_experimental_enabled"
+        private const val EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED = "child_process_experimental_enabled"
         private const val EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED = "java_interop_experimental_enabled"
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
+        private const val EXTRA_RUNTIME_ADAPTER = "runtime_adapter"
+        private const val EXTRA_PROCESS_POOL_SLOT = "process_pool_slot"
+        private const val EXTRA_PROCESS_POOL_SLOT_SOURCE = "process_pool_slot_source"
         private const val EXTRA_EXECUTION_ID = "execution_id"
+        private const val EXTRA_FOREGROUND_SERVICE_TYPE = "foreground_service_type"
+        private const val EXTRA_PREWARM_TTL_MS = "prewarm_ttl_ms"
         private const val EXTRA_ENV_NAMES = "env_names"
         private const val EXTRA_ENV_VALUES = "env_values"
         private const val EXTRA_MODULE_SOURCE_NAMES = "module_source_names"
@@ -892,28 +1789,80 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val REQUEST_SPOOL_FILE_NAME = "request.json"
         private const val REQUEST_SPOOL_VERSION = 1
         private const val RESULT_SCRIPT = 1
+        private const val RESULT_PREWARM = 2
         private const val NOTIFICATION_ID = 0xA6E4
+        private const val INTERACTIVE_CONTENT_REQUEST_CODE = 0xA6E5
+        private const val INTERACTIVE_STOP_REQUEST_CODE = 0xA6E6
         private const val PROCESS_EXIT_DELAY_MS = 250L
+        private const val DEFAULT_PREWARM_TTL_MS = 5_000L
+        private const val MAX_PREWARM_TTL_MS = 30_000L
+        private const val DEFAULT_INTERACTIVE_TIMEOUT_MS = 3_600_000L
         private const val CLIENT_QUEUE_PROCESS_SETTLE_MS = 650L
         private const val BRIDGE_DISPATCH_WAIT_MS = 1000L
         private const val BRIDGE_LIVE_POLL_INTERVAL_MS = 10L
         private const val BRIDGE_LIVE_STOP_JOIN_MS = 1000L
         private const val BRIDGE_LIVE_DRAIN_ITERATIONS = 25
+        private const val HEARTBEAT_STOP_JOIN_MS = 250L
         private const val RESULT_TRANSPORT_STRING_MAX_CHARS = 32_768
+        private const val RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS = 65_536
+        private const val RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES = 512
+        private const val RESULT_TRANSPORT_OMITTED_KEYS_MAX_CHARS = 4_096
         private const val CLIENT_SERVICE_START_GRACE_MS = 10_000L
+        private const val DEFAULT_PROCESS_POOL_STOP_COOLDOWN_MS = 10_000L
         private const val TIMEOUT_EXIT_CODE = 124
         private const val TIMEOUT_ERROR_CODE = NodeRuntimeErrorCodes.LEGACY_SCRIPT_TIMEOUT
         private const val DEFAULT_SOURCE_NAME = "<embedded-script>"
-        private const val DEFAULT_TIMEOUT_MS = 3000L
+        private const val DEFAULT_TIMEOUT_MS = NativeNodeEmbeddedRuntimeBridge.DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS
+        private val RESULT_TRANSPORT_NATIVE_PAYLOAD_DEDICATED_KEYS = setOf(
+            "embedded_script.result_json",
+            "embedded_script.result_text",
+            "embedded_script.error_message",
+            "embedded_script.error_stack",
+            "embedded_script.stdout",
+            "embedded_script.stderr",
+            "embedded_script.bridge_requests_json",
+            "stdout_capture.text",
+            "stdout_capture.text.hex",
+            "stderr_capture.text",
+            "stderr_capture.text.hex",
+        )
+        private val RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS = listOf(
+            "embedded_script.runtime_state",
+            "embedded_script.lifecycle_transitions",
+            "embedded_script.source_name",
+            "embedded_script.working_directory",
+            "embedded_script.sandbox_root",
+            "embedded_script.current_working_directory",
+            "embedded_script.esm_enabled",
+            "embedded_script.esm_entry",
+            "embedded_script.esm_module_graph_root",
+            "embedded_script.dynamic_import_enabled",
+            "embedded_script.package_type_module_policy",
+            "embedded_script.console_events_json",
+            "embedded_script.console_event_count",
+            "embedded_script.console_events_truncated",
+        )
+        private const val EXTRA_PREWARM_STARTED = "prewarm_started"
+        private const val EXTRA_PREWARM_STATUS = "prewarm_status"
+        private const val EXTRA_PREWARM_REASON = "prewarm_reason"
+        private const val EXTRA_PREWARM_STARTED_AT_ELAPSED_MS = "prewarm_started_at_elapsed_ms"
+        private const val EXTRA_PREWARM_PROCESS_NAME = "prewarm_process_name"
+        private const val EXTRA_PREWARM_PID = "prewarm_pid"
+        private const val EXTRA_PREWARM_PROCESS_ONLY = "prewarm_process_only"
+        private const val EXTRA_PREWARM_RUNTIME_LOADED = "prewarm_runtime_loaded"
+        private const val EXTRA_PREWARM_NATIVE_PAYLOAD = "prewarm_native_payload"
         private val TIMER_SOURCE_HINT_PATTERN = Regex("""\bset(?:Timeout|Interval|Immediate)\s*\(""")
         private val FS_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bfs\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
+        private val FS_STREAM_SOURCE_HINT_PATTERN = Regex("""\b(?:fs|nodeFs)\.create(?:Read|Write)Stream\s*\(""")
         private val CRYPTO_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bcrypto\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
         private val DNS_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bdns\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
         private val ZLIB_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bzlib\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
+        private val ZLIB_STREAM_SOURCE_HINT_PATTERN = Regex("""\bzlib\.create(?:Gzip|Gunzip|Deflate|Inflate|DeflateRaw|InflateRaw|BrotliCompress|BrotliDecompress)\s*\(""")
 
         fun enqueueScript(
             context: Context,
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
             val queueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(
@@ -943,6 +1892,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                         queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
                         queueTimeoutMs = 0L,
                     ),
+                    launchSurface,
                 ).withClientQueueLease(slotLease)
             } finally {
                 settleBetweenQueuedExecutions()
@@ -965,16 +1915,157 @@ class NativeNodeEmbeddedScriptService : Service() {
             return cancelQueuedExecutionInService(executionId)
         }
 
+        data class PrewarmRuntimeResult(
+            val started: Boolean,
+            val status: String,
+            val reason: String,
+            val ttlMs: Long,
+            val processName: String,
+            val pid: Int,
+            val processOnly: Boolean,
+            val runtimeLoaded: Boolean,
+            val nativeValues: Map<String, String>,
+        )
+
+        fun prewarmRuntime(
+            context: Context,
+            ttlMs: Long = DEFAULT_PREWARM_TTL_MS,
+            timeoutMs: Long = NodeExecutionQueuePolicy.CONTROL_TIMEOUT_MS,
+        ): PrewarmRuntimeResult {
+            val appContext = context.applicationContext
+            val completion = CountDownLatch(1)
+            val result = AtomicReference<PrewarmRuntimeResult>()
+            val receiver = object : ResultReceiver(null) {
+                override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                    if (resultCode != RESULT_PREWARM) {
+                        return
+                    }
+                    result.set(resultData.toPrewarmRuntimeResult())
+                    completion.countDown()
+                }
+            }
+            val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
+                action = ACTION_PREWARM_RUNTIME
+                putExtra(EXTRA_RESULT_RECEIVER, receiver)
+                putExtra(EXTRA_PREWARM_TTL_MS, normalizedPrewarmTtlMs(ttlMs))
+            }
+            val startOutcome = startEmbeddedScriptService(appContext, intent)
+            if (startOutcome.component == null) {
+                return PrewarmRuntimeResult(
+                    started = false,
+                    status = "start_failed",
+                    reason = startOutcome.diagnostics.optString("message").ifBlank { "service_start_failed" },
+                    ttlMs = normalizedPrewarmTtlMs(ttlMs),
+                    processName = currentProcessNameCompat(),
+                    pid = Process.myPid(),
+                    processOnly = true,
+                    runtimeLoaded = false,
+                    nativeValues = startOutcome.nativeValues(),
+                )
+            }
+            val completed = runCatching {
+                completion.await(timeoutMs.coerceAtLeast(1L), TimeUnit.MILLISECONDS)
+            }.getOrElse { error ->
+                if (error is InterruptedException) {
+                    Thread.currentThread().interrupt()
+                }
+                false
+            }
+            if (!completed) {
+                return PrewarmRuntimeResult(
+                    started = false,
+                    status = "timeout",
+                    reason = "prewarm_result_timeout",
+                    ttlMs = normalizedPrewarmTtlMs(ttlMs),
+                    processName = currentProcessNameCompat(),
+                    pid = Process.myPid(),
+                    processOnly = true,
+                    runtimeLoaded = false,
+                    nativeValues = mapOf(
+                        "embedded_script.prewarm_pool.enabled" to "true",
+                        "embedded_script.prewarm_pool.status" to "timeout",
+                        "embedded_script.prewarm_pool.reason" to "prewarm_result_timeout",
+                    ),
+                )
+            }
+            return result.get() ?: PrewarmRuntimeResult(
+                started = false,
+                status = "missing_result",
+                reason = "prewarm_result_missing",
+                ttlMs = normalizedPrewarmTtlMs(ttlMs),
+                processName = currentProcessNameCompat(),
+                pid = Process.myPid(),
+                processOnly = true,
+                runtimeLoaded = false,
+                nativeValues = emptyMap(),
+            )
+        }
+
         fun runScript(
             context: Context,
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
-            NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(request)?.let {
+            val requestWithExecutionId = request.copy(executionId = executionId)
+            val requestForService = try {
+                NativeNodeEmbeddedRuntimeBridge.prepareEmbeddedScriptRequest(requestWithExecutionId)
+            } catch (error: Throwable) {
+                return NativeNodeEmbeddedRuntimeBridge
+                    .embeddedScriptRequestPreparationFailure(requestWithExecutionId, error)
+                    .withLifecycle(preflightFailureLifecycle(executionId, requestWithExecutionId))
+            }
+            NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(requestForService, launchSurface)?.let {
                 return it.withLifecycle(preflightFailureLifecycle(executionId, request))
             }
-            val startedAt = android.os.SystemClock.elapsedRealtime()
             val appContext = context.applicationContext
+            val requestQueueMode = NodeExecutionQueuePolicy.normalizeMode(requestForService.queueMode)
+            val defaultSchedulerEligible = requestForService.processPoolSlot.isNullOrBlank() &&
+                    NodeEmbeddedProcessPoolPolicy.defaultSchedulerEligible(
+                        context = appContext,
+                        executionMode = requestForService.executionMode,
+                        launchSurface = launchSurface,
+                    )
+            if (
+                requestQueueMode == NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY &&
+                !defaultSchedulerEligible
+            ) {
+                return enqueueScript(
+                    context = appContext,
+                    request = requestForService,
+                    launchSurface = launchSurface,
+                )
+            }
+            val startedAt = android.os.SystemClock.elapsedRealtime()
+            val defaultSlotDecision = acquireDefaultProcessPoolSlot(
+                context = appContext,
+                executionId = executionId,
+                request = requestForService,
+                launchSurface = launchSurface,
+            )
+            if (defaultSlotDecision is DefaultProcessPoolSlotDecision.Rejected) {
+                return defaultProcessPoolFailureResult(
+                    context = appContext,
+                    request = requestForService,
+                    executionId = executionId,
+                    startedAt = startedAt,
+                    launchSurface = launchSurface,
+                    failure = defaultSlotDecision.failure,
+                    activeSlotIds = defaultSlotDecision.activeSlotIds,
+                )
+            }
+            val defaultSlotLease = (defaultSlotDecision as? DefaultProcessPoolSlotDecision.Acquired)?.lease
+            val scheduledRequestForService = defaultSlotLease?.let { lease ->
+                requestForService.copy(
+                    processPoolSlot = lease.slot.id,
+                    processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+                    queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                    queueTimeoutMs = 0L,
+                )
+            } ?: requestForService.copy(
+                queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                queueTimeoutMs = 0L,
+            )
             val completion = CountDownLatch(1)
             val result = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
             val receiver = object : ResultReceiver(null) {
@@ -986,41 +2077,72 @@ class NativeNodeEmbeddedScriptService : Service() {
                     completion.countDown()
                 }
             }
-            val requestForService = request.copy(executionId = executionId)
             var requestSpoolFile: File? = null
             val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
                 action = ACTION_RUN_SCRIPT
                 putExtra(EXTRA_RESULT_RECEIVER, receiver)
-                putExtra(EXTRA_SOURCE_NAME, request.sourceName)
-                putExtra(EXTRA_WORKING_DIRECTORY, request.workingDirectory)
-                putExtra(EXTRA_TIMEOUT_MS, request.timeoutMs.coerceAtLeast(1L))
-                putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, request.esmExperimentalEnabled)
-                putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, request.dynamicImportExperimentalEnabled)
-                putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, request.workerThreadsExperimentalEnabled)
-                putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, request.javaInteropExperimentalEnabled)
-                putExtra(EXTRA_SPAWN_DEPTH, request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
+                putExtra(EXTRA_SOURCE_NAME, scheduledRequestForService.sourceName)
+                putExtra(EXTRA_WORKING_DIRECTORY, scheduledRequestForService.workingDirectory)
+                putExtra(EXTRA_SANDBOX_ROOT, scheduledRequestForService.sandboxRoot)
+                putExtra(EXTRA_EXECUTION_MODE, scheduledRequestForService.executionMode)
+                putExtra(EXTRA_LAUNCH_SURFACE, launchSurface)
+                putExtra(EXTRA_TIMEOUT_MS, scheduledRequestForService.timeoutMs.coerceAtLeast(1L))
+                putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, scheduledRequestForService.esmExperimentalEnabled)
+                putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, scheduledRequestForService.dynamicImportExperimentalEnabled)
+                putExtra(
+                    EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                    scheduledRequestForService.rawNodeNetworkModulesExperimentalEnabled,
+                )
+                putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, scheduledRequestForService.workerThreadsExperimentalEnabled)
+                putExtra(EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED, scheduledRequestForService.childProcessExperimentalEnabled)
+                putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, scheduledRequestForService.javaInteropExperimentalEnabled)
+                putExtra(
+                    EXTRA_SPAWN_DEPTH,
+                    scheduledRequestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
+                )
+                putExtra(EXTRA_RUNTIME_ADAPTER, scheduledRequestForService.runtimeAdapter)
+                putExtra(EXTRA_PROCESS_POOL_SLOT, scheduledRequestForService.processPoolSlot)
+                putExtra(EXTRA_PROCESS_POOL_SLOT_SOURCE, scheduledRequestForService.processPoolSlotSource)
                 putExtra(EXTRA_EXECUTION_ID, executionId)
             }
+            val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
+                context = appContext,
+                executionMode = scheduledRequestForService.executionMode,
+                launchSurface = launchSurface,
+                requestedSlotId = scheduledRequestForService.processPoolSlot,
+                slotSelectionSource = scheduledRequestForService.processPoolSlotSource,
+                defaultSchedulerEnabled = defaultSlotLease != null,
+            )
             var component: android.content.ComponentName? = null
             try {
-                requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, requestForService)
+                requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, scheduledRequestForService)
                 intent.putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
-                component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    appContext.startForegroundService(intent)
-                } else {
-                    appContext.startService(intent)
-                } ?: return processCrashedOrTimedOut(
+                val startOutcome = startEmbeddedScriptService(
+                    appContext,
+                    intent,
+                    serviceClass = processPoolPlan.selectedSlot.serviceClass,
+                )
+                component = startOutcome.component ?: return serviceStartFailureResult(
                     request = request,
                     message = "Failed to start embedded script service.",
                     startedAt = startedAt,
                     executionId = executionId,
+                    startOutcome = startOutcome,
                 )
-                val completed = completion.await(clientAwaitTimeoutMs(request.timeoutMs), TimeUnit.MILLISECONDS)
+                CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] = component
+                val completed = completion.await(
+                    clientAwaitTimeoutMs(
+                        request = scheduledRequestForService,
+                        includeQueueTimeout = defaultSlotLease == null,
+                    ),
+                    TimeUnit.MILLISECONDS,
+                )
                 if (!completed) {
+                    coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.timeout")
                     appContext.stopService(Intent().setComponent(component))
-                    val lifecycle = timeoutLifecycle(executionId, request)
+                    val lifecycle = timeoutLifecycle(executionId, scheduledRequestForService)
                     return processCrashedOrTimedOut(
-                        request = request,
+                        request = scheduledRequestForService,
                         message = "Embedded script process crashed or timed out.",
                         startedAt = startedAt,
                         timedOut = true,
@@ -1029,27 +2151,647 @@ class NativeNodeEmbeddedScriptService : Service() {
                     )
                 }
             } catch (e: InterruptedException) {
+                coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.interrupted")
                 component?.let { appContext.stopService(Intent().setComponent(it)) }
                 Thread.currentThread().interrupt()
                 throw ScriptInterruptedException(e)
             } catch (e: Throwable) {
+                coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.throwable")
                 component?.let { appContext.stopService(Intent().setComponent(it)) }
                 return processCrashedOrTimedOut(
-                    request,
+                    scheduledRequestForService,
                     "Embedded script process crashed or timed out.\n${e.message ?: e.javaClass.name}",
                     e,
                     startedAt = startedAt,
                     executionId = executionId,
                 )
             } finally {
+                component?.let { CLIENT_RUNNING_SCRIPT_COMPONENTS.remove(executionId, it) }
                 requestSpoolFile?.parentFile?.deleteRecursively()
+                if (defaultSlotLease != null && component != null) {
+                    settleBetweenQueuedExecutions()
+                }
+                releaseDefaultProcessPoolSlot(defaultSlotLease)
             }
-            return result.get() ?: processCrashedOrTimedOut(
-                request = request,
+            val scriptResult = result.get() ?: processCrashedOrTimedOut(
+                request = scheduledRequestForService,
                 message = "Embedded script process crashed or timed out.",
                 startedAt = startedAt,
                 executionId = executionId,
             )
+            return scriptResult
+                .withProcessPoolPlan(processPoolPlan)
+                .withDefaultProcessPoolLease(defaultSlotLease)
+        }
+
+        fun cancelRunningScript(context: Context, executionId: String): Boolean {
+            val component = CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] ?: return false
+            return runCatching {
+                context.applicationContext.stopService(Intent().setComponent(component))
+            }.onSuccess {
+                Log.i(TAG, "client.cancel requested executionId=$executionId component=${component.flattenToShortString()}")
+            }.onFailure {
+                Log.w(TAG, "Failed to cancel embedded script executionId=$executionId.", it)
+            }.getOrDefault(false)
+        }
+
+        data class InteractiveLongRunningSession(
+            val executionId: String,
+            val started: Boolean,
+            val status: JSONObject?,
+            val error: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null,
+        )
+
+        fun startInteractiveLongRunning(
+            context: Context,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        ): InteractiveLongRunningSession {
+            return startLongRunning(
+                context = context,
+                request = request,
+                launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+            )
+        }
+
+        fun startPackagedLongRunning(
+            context: Context,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        ): InteractiveLongRunningSession {
+            return startLongRunning(
+                context = context,
+                request = request,
+                launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING,
+            )
+        }
+
+        private fun startLongRunning(
+            context: Context,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            launchSurface: String,
+        ): InteractiveLongRunningSession {
+            val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
+            val appContext = context.applicationContext
+            val startedAt = android.os.SystemClock.elapsedRealtime()
+            val requestWithExecutionId = request.copy(
+                executionId = executionId,
+                executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+                timeoutMs = request.timeoutMs.takeIf { it > 0L } ?: DEFAULT_INTERACTIVE_TIMEOUT_MS,
+                queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                queueTimeoutMs = 0L,
+            )
+            val requestForService = try {
+                NativeNodeEmbeddedRuntimeBridge.prepareEmbeddedScriptRequest(requestWithExecutionId)
+            } catch (error: Throwable) {
+                val failure = NativeNodeEmbeddedRuntimeBridge.embeddedScriptRequestPreparationFailure(
+                    requestWithExecutionId,
+                    error,
+                )
+                val status = NodeInteractiveLongRunningStatusStore.write(
+                    context = appContext,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = requestWithExecutionId.sourceName,
+                    workingDirectory = requestWithExecutionId.workingDirectory,
+                    launchSurface = launchSurface,
+                    message = failure.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("preflight_failed"),
+                    nativeValues = failure.nativeValues,
+                )
+                return InteractiveLongRunningSession(
+                    executionId = executionId,
+                    started = false,
+                    status = status,
+                    error = failure.withLifecycle(preflightFailureLifecycle(executionId, requestWithExecutionId)),
+                )
+            }
+            NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(
+                requestForService,
+                launchSurface,
+            )?.let { failure ->
+                val status = NodeInteractiveLongRunningStatusStore.write(
+                    context = appContext,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = requestForService.sourceName,
+                    workingDirectory = requestForService.workingDirectory,
+                    launchSurface = launchSurface,
+                    message = failure.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("preflight_failed"),
+                    nativeValues = failure.nativeValues,
+                )
+                return InteractiveLongRunningSession(
+                    executionId = executionId,
+                    started = false,
+                    status = status,
+                    error = failure.withLifecycle(preflightFailureLifecycle(executionId, requestForService)),
+                )
+            }
+            NodeInteractiveLongRunningStatusStore.write(
+                context = appContext,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_STARTING,
+                sourceName = requestForService.sourceName,
+                workingDirectory = requestForService.workingDirectory,
+                launchSurface = launchSurface,
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("client_starting"),
+            )
+            var requestSpoolFile: File? = null
+            try {
+                requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, requestForService)
+                val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
+                    action = ACTION_RUN_SCRIPT
+                    putExtra(EXTRA_SOURCE_NAME, requestForService.sourceName)
+                    putExtra(EXTRA_WORKING_DIRECTORY, requestForService.workingDirectory)
+                    putExtra(EXTRA_SANDBOX_ROOT, requestForService.sandboxRoot)
+                    putExtra(EXTRA_EXECUTION_MODE, requestForService.executionMode)
+                    putExtra(EXTRA_LAUNCH_SURFACE, launchSurface)
+                    putExtra(EXTRA_TIMEOUT_MS, requestForService.timeoutMs.coerceAtLeast(1L))
+                    putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, requestForService.esmExperimentalEnabled)
+                    putExtra(
+                        EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+                        requestForService.dynamicImportExperimentalEnabled,
+                    )
+                    putExtra(
+                        EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                        requestForService.rawNodeNetworkModulesExperimentalEnabled,
+                    )
+                    putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, requestForService.workerThreadsExperimentalEnabled)
+                    putExtra(EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED, requestForService.childProcessExperimentalEnabled)
+                    putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
+                    putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
+                    putExtra(EXTRA_RUNTIME_ADAPTER, requestForService.runtimeAdapter)
+                    putExtra(EXTRA_PROCESS_POOL_SLOT, requestForService.processPoolSlot)
+                    putExtra(EXTRA_PROCESS_POOL_SLOT_SOURCE, requestForService.processPoolSlotSource)
+                    putExtra(EXTRA_EXECUTION_ID, executionId)
+                    putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
+                }
+                val startOutcome = startEmbeddedScriptService(appContext, intent)
+                if (startOutcome.component == null) {
+                    val failure = serviceStartFailureResult(
+                        request = requestForService,
+                        message = "Failed to start interactive embedded script service.",
+                        startedAt = startedAt,
+                        executionId = executionId,
+                        startOutcome = startOutcome,
+                    )
+                    val status = NodeInteractiveLongRunningStatusStore.write(
+                        context = appContext,
+                        executionId = executionId,
+                        state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                        sourceName = requestForService.sourceName,
+                        workingDirectory = requestForService.workingDirectory,
+                        launchSurface = launchSurface,
+                        message = failure.errorMessage,
+                        activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("service_start_failed"),
+                        nativeValues = failure.nativeValues,
+                    )
+                    requestSpoolFile.parentFile?.deleteRecursively()
+                    return InteractiveLongRunningSession(executionId, false, status, failure)
+                }
+                return InteractiveLongRunningSession(
+                    executionId = executionId,
+                    started = true,
+                    status = NodeInteractiveLongRunningStatusStore.read(appContext, executionId),
+                )
+            } catch (e: Throwable) {
+                requestSpoolFile?.parentFile?.deleteRecursively()
+                val failure = processCrashedOrTimedOut(
+                    request = requestForService,
+                    message = "Interactive embedded script service failed to start.\n${e.message ?: e.javaClass.name}",
+                    throwable = e,
+                    startedAt = startedAt,
+                    executionId = executionId,
+                )
+                val status = NodeInteractiveLongRunningStatusStore.write(
+                    context = appContext,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = requestForService.sourceName,
+                    workingDirectory = requestForService.workingDirectory,
+                    launchSurface = launchSurface,
+                    message = failure.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("service_start_exception"),
+                    nativeValues = failure.nativeValues,
+                )
+                return InteractiveLongRunningSession(executionId, false, status, failure)
+            }
+        }
+
+        fun stopInteractiveLongRunning(context: Context, executionId: String): Boolean {
+            val appContext = context.applicationContext
+            val current = NodeInteractiveLongRunningStatusStore.read(appContext, executionId)
+            NodeInteractiveLongRunningStatusStore.write(
+                context = appContext,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_STOPPING,
+                sourceName = current?.optString("sourceName").orEmpty().ifBlank { DEFAULT_SOURCE_NAME },
+                workingDirectory = current?.optString("workingDirectory")?.takeIf { it.isNotBlank() },
+                startedAtEpochMs = current?.optLong("startedAtEpochMs")?.takeIf { it > 0L },
+                stopRequested = true,
+                message = "client.stop.requested",
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("client_stopping"),
+            )
+            val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
+                action = ACTION_STOP_INTERACTIVE
+                putExtra(EXTRA_EXECUTION_ID, executionId)
+            }
+            val startOutcome = startEmbeddedScriptService(appContext, intent, foreground = false)
+            if (startOutcome.component == null) {
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = appContext,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = current?.optString("sourceName").orEmpty().ifBlank { DEFAULT_SOURCE_NAME },
+                    workingDirectory = current?.optString("workingDirectory")?.takeIf { it.isNotBlank() },
+                    startedAtEpochMs = current?.optLong("startedAtEpochMs")?.takeIf { it > 0L },
+                    stopRequested = true,
+                    message = startOutcome.diagnostics.optString("message").ifBlank {
+                        "client.stop.service_start_failed"
+                    },
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("client_stop_failed"),
+                    nativeValues = startOutcome.nativeValues(),
+                )
+            }
+            return startOutcome.component != null
+        }
+
+        fun interactiveLongRunningStatus(context: Context, executionId: String): JSONObject? {
+            return NodeInteractiveLongRunningStatusStore.read(context.applicationContext, executionId)
+        }
+
+        fun simulateForegroundServiceTimeoutForTest(
+            context: Context,
+            executionId: String,
+            foregroundServiceType: Int = embeddedForegroundServiceTypeForCurrentSdk(),
+        ): Boolean {
+            val appContext = context.applicationContext
+            val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
+                action = ACTION_SIMULATE_FOREGROUND_TIMEOUT
+                putExtra(EXTRA_EXECUTION_ID, executionId)
+                putExtra(EXTRA_FOREGROUND_SERVICE_TYPE, foregroundServiceType)
+            }
+            return runCatching { appContext.startService(intent) != null }.getOrDefault(false)
+        }
+
+        private data class ServiceStartOutcome(
+            val component: ComponentName?,
+            val diagnostics: JSONObject,
+            val serviceDiagnostics: JSONObject,
+            val throwable: Throwable? = null,
+        ) {
+            fun nativeValues(): Map<String, String> {
+                return linkedMapOf<String, String>().apply {
+                    putAll(NodeAndroidRuntimePolicy.nativeValues("embedded_script.android_service_start", diagnostics))
+                    putAll(NodeAndroidRuntimePolicy.nativeValues("embedded_script.android_service", serviceDiagnostics))
+                    put("embedded_script.service_start_failed", (component == null).toString())
+                }
+            }
+        }
+
+        private fun startEmbeddedScriptService(
+            appContext: Context,
+            intent: Intent,
+            serviceClass: Class<out NativeNodeEmbeddedScriptService> = NativeNodeEmbeddedScriptService::class.java,
+            foreground: Boolean = true,
+        ): ServiceStartOutcome {
+            intent.setClass(appContext, serviceClass)
+            val serviceDiagnostics = NodeAndroidRuntimePolicy.embeddedServiceDiagnostics(
+                appContext,
+                serviceClass,
+                embeddedForegroundServiceTypeForCurrentSdk(),
+            )
+            return try {
+                val component = if (foreground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    appContext.startForegroundService(intent)
+                } else {
+                    appContext.startService(intent)
+                }
+                val diagnostics = if (component == null) {
+                    NodeAndroidRuntimePolicy.serviceStartFailureDiagnosticsForClass(
+                        className = "android.content.ComponentName:null",
+                        message = "Context.startService returned null.",
+                        serviceClassName = serviceClass.name,
+                        sdkInt = Build.VERSION.SDK_INT,
+                    )
+                } else {
+                    JSONObject().apply {
+                        put("sdkInt", Build.VERSION.SDK_INT)
+                        put("serviceName", serviceClass.name)
+                        put("reason", "started")
+                        put("componentName", component.flattenToShortString())
+                    }
+                }
+                ServiceStartOutcome(component, diagnostics, serviceDiagnostics)
+            } catch (e: Throwable) {
+                ServiceStartOutcome(
+                    component = null,
+                    diagnostics = NodeAndroidRuntimePolicy.serviceStartFailureDiagnostics(
+                        throwable = e,
+                        serviceClassName = serviceClass.name,
+                    ),
+                    serviceDiagnostics = serviceDiagnostics,
+                    throwable = e,
+                )
+            }
+        }
+
+        private fun serviceStartFailureResult(
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            message: String,
+            startedAt: Long,
+            executionId: String,
+            startOutcome: ServiceStartOutcome,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            val diagnostics = startOutcome.diagnostics
+            val processName = currentProcessNameCompat()
+            val pid = Process.myPid()
+            val sourceName = request.sourceName.ifBlank { DEFAULT_SOURCE_NAME }
+            val elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L)
+            val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
+                .apply { transition(NodeEmbeddedRuntimeState.FAILED, "client.foreground_service_start_failed") }
+            val errorCode = diagnostics.optString("errorCode")
+                .ifBlank { NodeRuntimeErrorCodes.EMBEDDED_NODE_INVALID_STATE }
+            val errorName = diagnostics.optString("errorName")
+                .ifBlank { "EmbeddedNodeForegroundServiceStartError" }
+            val androidMessage = diagnostics.optString("androidExceptionMessage")
+                .takeIf { it.isNotBlank() }
+                ?.let { "\nAndroid: $it" }
+                .orEmpty()
+            val nativeValues = linkedMapOf<String, String>().apply {
+                putAll(startOutcome.nativeValues())
+                put("embedded_script.error_code", errorCode)
+                put("embedded_script.error_name", errorName)
+            }
+            return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+                succeeded = false,
+                exitCode = 1,
+                resultText = null,
+                stdout = "",
+                stderr = "",
+                errorName = errorName,
+                errorMessage = diagnostics.optString("message").ifBlank { message } + androidMessage,
+                errorStack = startOutcome.throwable?.stackTraceToString(),
+                errorCode = errorCode,
+                elapsedMs = elapsedMs,
+                processName = processName,
+                pid = pid,
+                sourceName = sourceName,
+                nativeValues = nativeValues,
+                workingDirectory = request.workingDirectory,
+            ).withLifecycle(lifecycle)
+        }
+
+        private fun embeddedForegroundServiceTypeForCurrentSdk(): Int {
+            return when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                else -> FOREGROUND_SERVICE_TYPE_UNKNOWN
+            }
+        }
+
+        private fun normalizedPrewarmTtlMs(ttlMs: Long): Long {
+            return when {
+                ttlMs <= 0L -> DEFAULT_PREWARM_TTL_MS
+                else -> ttlMs.coerceAtMost(MAX_PREWARM_TTL_MS)
+            }
+        }
+
+        private fun Bundle?.toPrewarmRuntimeResult(): PrewarmRuntimeResult {
+            val nativeValues = nativePayloadMap(this?.getStringArray(EXTRA_PREWARM_NATIVE_PAYLOAD))
+            return PrewarmRuntimeResult(
+                started = this?.getBoolean(EXTRA_PREWARM_STARTED) ?: false,
+                status = this?.getString(EXTRA_PREWARM_STATUS).orEmpty().ifBlank { "unknown" },
+                reason = this?.getString(EXTRA_PREWARM_REASON).orEmpty(),
+                ttlMs = this?.getLong(EXTRA_PREWARM_TTL_MS) ?: 0L,
+                processName = this?.getString(EXTRA_PREWARM_PROCESS_NAME).orEmpty(),
+                pid = this?.getInt(EXTRA_PREWARM_PID) ?: -1,
+                processOnly = this?.getBoolean(EXTRA_PREWARM_PROCESS_ONLY) ?: true,
+                runtimeLoaded = this?.getBoolean(EXTRA_PREWARM_RUNTIME_LOADED) ?: false,
+                nativeValues = nativeValues,
+            )
+        }
+
+        private fun nativePayloadMap(payload: Array<String>?): Map<String, String> {
+            return payload.orEmpty()
+                .mapNotNull { item ->
+                    val separator = item.indexOf('=')
+                    if (separator <= 0) {
+                        null
+                    } else {
+                        item.substring(0, separator) to item.substring(separator + 1)
+                    }
+                }
+                .toMap(linkedMapOf())
+        }
+
+        private fun acquireDefaultProcessPoolSlot(
+            context: Context,
+            executionId: String,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            launchSurface: String,
+        ): DefaultProcessPoolSlotDecision {
+            if (!request.processPoolSlot.isNullOrBlank()) {
+                return DefaultProcessPoolSlotDecision.NotEligible
+            }
+            if (!NodeEmbeddedProcessPoolPolicy.defaultSchedulerEligible(
+                    context = context,
+                    executionMode = request.executionMode,
+                    launchSurface = launchSurface,
+                )
+            ) {
+                return DefaultProcessPoolSlotDecision.NotEligible
+            }
+            val normalizedMode = NodeExecutionQueuePolicy.normalizeMode(request.queueMode)
+            val normalizedQueueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(
+                normalizedMode,
+                request.queueTimeoutMs,
+            )
+            val queuedAt = android.os.SystemClock.elapsedRealtime()
+            var queued = false
+            while (true) {
+                synchronized(DEFAULT_PROCESS_POOL_LOCK) {
+                    val now = android.os.SystemClock.elapsedRealtime()
+                    val queueWaitMs = (now - queuedAt).coerceAtLeast(0L)
+                    val deadline = queuedAt + normalizedQueueTimeoutMs
+                    val remainingMs = deadline - now
+                    pruneDefaultProcessPoolSlotCooldownsLocked(now)
+                    val coolingSlotIds = DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS.keys
+                        .map { "$it:cooling" }
+                    val activeSlotIds = DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.toList() + coolingSlotIds
+                    val slot = NodeEmbeddedProcessPoolPolicy.defaultSchedulerSelectableSlots(
+                        context = context,
+                        executionMode = request.executionMode,
+                        launchSurface = launchSurface,
+                    ).firstOrNull { candidate ->
+                        candidate.id !in DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS &&
+                                candidate.id !in DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS
+                    }
+                    if (slot != null) {
+                        DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.add(slot.id)
+                        return DefaultProcessPoolSlotDecision.Acquired(
+                            DefaultProcessPoolSlotLease(
+                                executionId = executionId,
+                                slot = slot,
+                                activeSlotIdsAtAcquire = activeSlotIds,
+                                acquiredAtElapsedMs = android.os.SystemClock.elapsedRealtime(),
+                                queueMode = normalizedMode,
+                                queued = queued,
+                                queueWaitMs = queueWaitMs,
+                            ),
+                        )
+                    }
+                    if (normalizedMode != NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY) {
+                        return DefaultProcessPoolSlotDecision.Rejected(
+                            failure = defaultProcessPoolBusyFailure(
+                                executionId = executionId,
+                                queueMode = normalizedMode,
+                                queuedAt = queuedAt,
+                                activeSlotIds = activeSlotIds,
+                            ),
+                            activeSlotIds = activeSlotIds,
+                        )
+                    }
+                    if (remainingMs <= 0L) {
+                        return DefaultProcessPoolSlotDecision.Rejected(
+                            failure = queueTimeoutFailure(
+                                executionId = executionId,
+                                queueMode = normalizedMode,
+                                queueWaitMs = queueWaitMs,
+                            ),
+                            activeSlotIds = activeSlotIds,
+                        )
+                    }
+                    queued = true
+                    try {
+                        DEFAULT_PROCESS_POOL_LOCK.wait(remainingMs.coerceAtMost(100L))
+                    } catch (e: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                        return DefaultProcessPoolSlotDecision.Rejected(
+                            failure = queueCancelledFailure(
+                                executionId = executionId,
+                                queueMode = normalizedMode,
+                                queueWaitMs = (android.os.SystemClock.elapsedRealtime() - queuedAt).coerceAtLeast(0L),
+                            ),
+                            activeSlotIds = activeSlotIds,
+                        )
+                    }
+                }
+            }
+        }
+
+        private fun defaultProcessPoolBusyFailure(
+            executionId: String,
+            queueMode: String,
+            queuedAt: Long,
+            activeSlotIds: List<String>,
+        ): ExecutionSlotFailure {
+            return ExecutionSlotFailure(
+                errorName = "EmbeddedNodeProcessPoolBusyError",
+                errorCode = NodeRuntimeErrorCodes.NODE_ENGINE_BUSY,
+                errorMessage = "Embedded Node.js default process pool is busy; active slots=${activeSlotIds.joinToString(",")}.",
+                queueMode = queueMode,
+                reason = "default_process_pool_busy",
+                activeExecutionId = null,
+                queueWaitMs = (android.os.SystemClock.elapsedRealtime() - queuedAt).coerceAtLeast(0L),
+                queuedCount = 0,
+                maxQueuedExecutions = NodeEmbeddedProcessPoolPolicy.DEFAULT_SCHEDULER_EFFECTIVE_MAX_ACTIVE_SLOTS,
+            )
+        }
+
+        private fun releaseDefaultProcessPoolSlot(lease: DefaultProcessPoolSlotLease?) {
+            if (lease == null) {
+                return
+            }
+            synchronized(DEFAULT_PROCESS_POOL_LOCK) {
+                DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.remove(lease.slot.id)
+                DEFAULT_PROCESS_POOL_LOCK.notifyAll()
+            }
+        }
+
+        private fun coolDownDefaultProcessPoolSlot(lease: DefaultProcessPoolSlotLease?, reason: String) {
+            if (lease == null) {
+                return
+            }
+            val until = android.os.SystemClock.elapsedRealtime() + DEFAULT_PROCESS_POOL_STOP_COOLDOWN_MS
+            synchronized(DEFAULT_PROCESS_POOL_LOCK) {
+                DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS[lease.slot.id] = until
+                DEFAULT_PROCESS_POOL_LOCK.notifyAll()
+            }
+            Log.i(
+                TAG,
+                "default_process_pool.slot_cooldown slot=${lease.slot.id} " +
+                        "executionId=${lease.executionId} reason=$reason " +
+                        "cooldownMs=$DEFAULT_PROCESS_POOL_STOP_COOLDOWN_MS",
+            )
+        }
+
+        private fun pruneDefaultProcessPoolSlotCooldownsLocked(now: Long) {
+            val iterator = DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS.iterator()
+            while (iterator.hasNext()) {
+                val entry = iterator.next()
+                if (entry.value <= now) {
+                    iterator.remove()
+                }
+            }
+        }
+
+        private fun defaultProcessPoolFailureResult(
+            context: Context,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            executionId: String,
+            startedAt: Long,
+            launchSurface: String,
+            failure: ExecutionSlotFailure,
+            activeSlotIds: List<String>,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            val processName = currentProcessNameCompat()
+            val pid = Process.myPid()
+            val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, request.sourceName)
+                .apply {
+                    transition(NodeEmbeddedRuntimeState.FAILED, "client.${failure.reason}")
+                }
+            val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
+                context = context,
+                executionMode = request.executionMode,
+                launchSurface = launchSurface,
+                slotSelectionSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+                defaultSchedulerEnabled = true,
+            )
+            val nativeValues = linkedMapOf<String, String>().apply {
+                putAll(processPoolPlan.nativeValues())
+                put("embedded_script.process_pool.scheduler_rejected", "true")
+                put("embedded_script.process_pool.active_slot_ids", activeSlotIds.joinToString(","))
+                put("embedded_script.concurrent_policy", "one-active-execution-per-process-slot")
+                put("embedded_script.rejected_execution_id", executionId)
+                put("embedded_script.queue_mode", failure.queueMode)
+                put("embedded_script.queue_status", failure.reason)
+                put("embedded_script.queue_wait_ms", failure.queueWaitMs.toString())
+                put("embedded_script.error_code", failure.errorCode)
+                when (failure.errorCode) {
+                    NodeRuntimeErrorCodes.NODE_ENGINE_BUSY -> {
+                        put("embedded_script.process_pool.busy", "true")
+                        put("embedded_script.engine_busy", "true")
+                    }
+                    NodeRuntimeErrorCodes.NODE_QUEUE_TIMEOUT -> put("embedded_script.queue_timeout", "true")
+                    NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED -> put("embedded_script.queue_cancelled", "true")
+                }
+            }
+            return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+                succeeded = false,
+                exitCode = 1,
+                resultText = null,
+                stdout = "",
+                stderr = "",
+                errorName = failure.errorName,
+                errorMessage = failure.errorMessage,
+                errorStack = null,
+                errorCode = failure.errorCode,
+                elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L),
+                processName = processName,
+                pid = pid,
+                sourceName = request.sourceName,
+                nativeValues = nativeValues,
+                workingDirectory = request.workingDirectory,
+            ).withLifecycle(lifecycle)
         }
 
         private fun acquireExecutionSlot(
@@ -1340,6 +3082,37 @@ class NativeNodeEmbeddedScriptService : Service() {
             )
         }
 
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withProcessPoolPlan(
+            plan: NodeEmbeddedProcessPoolPolicy.ProcessPoolPlan,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            return copy(
+                nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(nativeValues)
+                    putAll(plan.nativeValues())
+                },
+            )
+        }
+
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withDefaultProcessPoolLease(
+            lease: DefaultProcessPoolSlotLease?,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            if (lease == null) {
+                return this
+            }
+            return copy(
+                nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(nativeValues)
+                    put("embedded_script.process_pool.queue_mode", lease.queueMode)
+                    put("embedded_script.process_pool.queue_queued", lease.queued.toString())
+                    put(
+                        "embedded_script.process_pool.queue_status",
+                        if (lease.queued) "dequeued" else "not_queued",
+                    )
+                    put("embedded_script.process_pool.queue_wait_ms", lease.queueWaitMs.toString())
+                },
+            )
+        }
+
         private fun settleBetweenQueuedExecutions() {
             runCatching {
                 Thread.sleep(CLIENT_QUEUE_PROCESS_SETTLE_MS)
@@ -1391,9 +3164,15 @@ class NativeNodeEmbeddedScriptService : Service() {
                 pendingTimers = nativeValues["embedded_script.pending_timers"]?.equals("true", ignoreCase = true),
                 pendingTimerCount = nativeValues["embedded_script.pending_timer_count"]?.toIntOrNull(),
                 pendingScopedFsCallbacks = nativeValues["embedded_script.pending_scoped_fs_callbacks"]?.toIntOrNull(),
+                pendingScopedFsStreams = nativeValues["embedded_script.pending_scoped_fs_streams"]?.equals("true", ignoreCase = true),
+                pendingScopedFsStreamCount = nativeValues["embedded_script.pending_scoped_fs_stream_count"]?.toIntOrNull(),
+                pendingScopedFsWatchCount = nativeValues["embedded_script.pending_scoped_fs_watch_count"]?.toIntOrNull(),
+                pendingScopedFsWatchFileCount = nativeValues["embedded_script.pending_scoped_fs_watch_file_count"]?.toIntOrNull(),
                 pendingCryptoCallbacks = nativeValues["embedded_script.pending_crypto_callbacks"]?.toIntOrNull(),
                 pendingDnsCallbacks = nativeValues["embedded_script.pending_dns_callbacks"]?.toIntOrNull(),
                 pendingZlibCallbacks = nativeValues["embedded_script.pending_zlib_callbacks"]?.toIntOrNull(),
+                pendingZlibStreams = nativeValues["embedded_script.pending_zlib_streams"]?.equals("true", ignoreCase = true),
+                pendingZlibStreamCount = nativeValues["embedded_script.pending_zlib_stream_count"]?.toIntOrNull(),
                 pendingAsyncCallbacks = nativeValues["embedded_script.pending_async_callbacks"]?.toIntOrNull(),
                 pendingCallbacks = nativeValues["embedded_script.pending_callbacks"]?.equals("true", ignoreCase = true),
             )
@@ -1457,9 +3236,20 @@ class NativeNodeEmbeddedScriptService : Service() {
         private fun currentProcessNameCompat(): String = runCatching { App.getProcessNameCompat() }
             .getOrElse { "unknown" }
 
-        private fun clientAwaitTimeoutMs(requestTimeoutMs: Long): Long {
-            val scriptTimeoutMs = requestTimeoutMs.coerceAtLeast(1L)
-            return (scriptTimeoutMs + CLIENT_SERVICE_START_GRACE_MS).coerceAtLeast(scriptTimeoutMs)
+        private fun clientAwaitTimeoutMs(
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            includeQueueTimeout: Boolean,
+        ): Long {
+            val scriptTimeoutMs = request.timeoutMs.coerceAtLeast(1L)
+            val queueTimeoutMs = if (includeQueueTimeout) {
+                NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(
+                    NodeExecutionQueuePolicy.normalizeMode(request.queueMode),
+                    request.queueTimeoutMs,
+                )
+            } else {
+                0L
+            }
+            return (scriptTimeoutMs + queueTimeoutMs + CLIENT_SERVICE_START_GRACE_MS).coerceAtLeast(scriptTimeoutMs)
         }
 
         private fun timeoutNativeValues(
@@ -1469,9 +3259,11 @@ class NativeNodeEmbeddedScriptService : Service() {
             val timeoutMs = request.timeoutMs.coerceAtLeast(1L)
             val pendingTimers = hasLikelyPendingTimerSourceHint(request.source)
             val pendingScopedFsCallbacks = hasLikelyScopedFsCallbackSourceHint(request.source)
+            val pendingScopedFsStreams = hasLikelyScopedFsStreamSourceHint(request.source)
             val pendingCryptoCallbacks = hasLikelyCryptoCallbackSourceHint(request.source)
             val pendingDnsCallbacks = hasLikelyDnsCallbackSourceHint(request.source)
             val pendingZlibCallbacks = hasLikelyZlibCallbackSourceHint(request.source)
+            val pendingZlibStreams = hasLikelyZlibStreamSourceHint(request.source)
             return linkedMapOf(
                 "embedded_script.succeeded" to "false",
                 "embedded_script.exit_code" to TIMEOUT_EXIT_CODE.toString(),
@@ -1485,20 +3277,28 @@ class NativeNodeEmbeddedScriptService : Service() {
                 "embedded_script.pending_timers" to pendingTimers.toString(),
                 "embedded_script.pending_timer_count" to if (pendingTimers) "1" else "0",
                 "embedded_script.pending_scoped_fs_callbacks" to if (pendingScopedFsCallbacks) "1" else "0",
+                "embedded_script.pending_scoped_fs_streams" to pendingScopedFsStreams.toString(),
+                "embedded_script.pending_scoped_fs_stream_count" to if (pendingScopedFsStreams) "1" else "0",
                 "embedded_script.pending_crypto_callbacks" to if (pendingCryptoCallbacks) "1" else "0",
                 "embedded_script.pending_dns_callbacks" to if (pendingDnsCallbacks) "1" else "0",
                 "embedded_script.pending_zlib_callbacks" to if (pendingZlibCallbacks) "1" else "0",
+                "embedded_script.pending_zlib_streams" to pendingZlibStreams.toString(),
+                "embedded_script.pending_zlib_stream_count" to if (pendingZlibStreams) "1" else "0",
                 "embedded_script.pending_async_callbacks" to listOf(
                     pendingScopedFsCallbacks,
+                    pendingScopedFsStreams,
                     pendingCryptoCallbacks,
                     pendingDnsCallbacks,
                     pendingZlibCallbacks,
+                    pendingZlibStreams,
                 ).count { it }.toString(),
                 "embedded_script.pending_callbacks" to (
                     pendingScopedFsCallbacks ||
+                        pendingScopedFsStreams ||
                         pendingCryptoCallbacks ||
                         pendingDnsCallbacks ||
-                        pendingZlibCallbacks
+                        pendingZlibCallbacks ||
+                        pendingZlibStreams
                     ).toString(),
             )
         }
@@ -1532,6 +3332,9 @@ class NativeNodeEmbeddedScriptService : Service() {
                 append("pendingScopedFsCallbacks=")
                 append(nativeValues["embedded_script.pending_scoped_fs_callbacks"] ?: "unknown")
                 append('\n')
+                append("pendingScopedFsStreamCount=")
+                append(nativeValues["embedded_script.pending_scoped_fs_stream_count"] ?: "unknown")
+                append('\n')
                 append("pendingCryptoCallbacks=")
                 append(nativeValues["embedded_script.pending_crypto_callbacks"] ?: "unknown")
                 append('\n')
@@ -1540,6 +3343,9 @@ class NativeNodeEmbeddedScriptService : Service() {
                 append('\n')
                 append("pendingZlibCallbacks=")
                 append(nativeValues["embedded_script.pending_zlib_callbacks"] ?: "unknown")
+                append('\n')
+                append("pendingZlibStreamCount=")
+                append(nativeValues["embedded_script.pending_zlib_stream_count"] ?: "unknown")
             }
         }
 
@@ -1549,6 +3355,10 @@ class NativeNodeEmbeddedScriptService : Service() {
 
         private fun hasLikelyScopedFsCallbackSourceHint(source: String): Boolean {
             return FS_CALLBACK_SOURCE_HINT_PATTERN.containsMatchIn(source)
+        }
+
+        private fun hasLikelyScopedFsStreamSourceHint(source: String): Boolean {
+            return FS_STREAM_SOURCE_HINT_PATTERN.containsMatchIn(source)
         }
 
         private fun hasLikelyCryptoCallbackSourceHint(source: String): Boolean {
@@ -1561,6 +3371,10 @@ class NativeNodeEmbeddedScriptService : Service() {
 
         private fun hasLikelyZlibCallbackSourceHint(source: String): Boolean {
             return ZLIB_CALLBACK_SOURCE_HINT_PATTERN.containsMatchIn(source)
+        }
+
+        private fun hasLikelyZlibStreamSourceHint(source: String): Boolean {
+            return ZLIB_STREAM_SOURCE_HINT_PATTERN.containsMatchIn(source)
         }
 
         private fun writeEmbeddedScriptRequestSpool(
@@ -1600,7 +3414,9 @@ class NativeNodeEmbeddedScriptService : Service() {
                 source = getStringExtra(EXTRA_SOURCE).orEmpty(),
                 sourceName = getStringExtra(EXTRA_SOURCE_NAME).orEmpty().ifBlank { DEFAULT_SOURCE_NAME },
                 workingDirectory = getStringExtra(EXTRA_WORKING_DIRECTORY)?.takeIf { it.isNotBlank() },
+                sandboxRoot = getStringExtra(EXTRA_SANDBOX_ROOT)?.takeIf { it.isNotBlank() },
                 executionId = getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() },
+                executionMode = NodeExecutionModePolicy.normalize(getStringExtra(EXTRA_EXECUTION_MODE)),
                 timeoutMs = getLongExtra(EXTRA_TIMEOUT_MS, DEFAULT_TIMEOUT_MS).coerceAtLeast(1L),
                 env = envExtra(),
                 moduleSources = moduleSourcesExtra(),
@@ -1613,15 +3429,26 @@ class NativeNodeEmbeddedScriptService : Service() {
                     EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
                     BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
                 ),
+                rawNodeNetworkModulesExperimentalEnabled = getBooleanExtra(
+                    EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                    BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                ),
                 workerThreadsExperimentalEnabled = getBooleanExtra(
                     EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED,
                     BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+                ),
+                childProcessExperimentalEnabled = getBooleanExtra(
+                    EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
+                    BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
                 ),
                 javaInteropExperimentalEnabled = getBooleanExtra(
                     EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
                     BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
                 ),
                 spawnDepth = getIntExtra(EXTRA_SPAWN_DEPTH, 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
+                runtimeAdapter = getStringExtra(EXTRA_RUNTIME_ADAPTER)?.takeIf { it.isNotBlank() },
+                processPoolSlot = getStringExtra(EXTRA_PROCESS_POOL_SLOT)?.takeIf { it.isNotBlank() },
+                processPoolSlotSource = getStringExtra(EXTRA_PROCESS_POOL_SLOT_SOURCE)?.takeIf { it.isNotBlank() },
             )
         }
 
@@ -1647,7 +3474,9 @@ class NativeNodeEmbeddedScriptService : Service() {
                 put("source", request.source)
                 put("sourceName", request.sourceName)
                 put("workingDirectory", request.workingDirectory)
+                put("sandboxRoot", request.sandboxRoot)
                 put("executionId", request.executionId)
+                put("executionMode", NodeExecutionModePolicy.normalize(request.executionMode))
                 put("timeoutMs", request.timeoutMs.coerceAtLeast(1L))
                 put("queueMode", request.queueMode)
                 put("queueTimeoutMs", request.queueTimeoutMs)
@@ -1658,9 +3487,14 @@ class NativeNodeEmbeddedScriptService : Service() {
                 put("runtimeModuleSources", orderedStringMapJson(request.runtimeModuleSources))
                 put("esmExperimentalEnabled", request.esmExperimentalEnabled)
                 put("dynamicImportExperimentalEnabled", request.dynamicImportExperimentalEnabled)
+                put("rawNodeNetworkModulesExperimentalEnabled", request.rawNodeNetworkModulesExperimentalEnabled)
                 put("workerThreadsExperimentalEnabled", request.workerThreadsExperimentalEnabled)
+                put("childProcessExperimentalEnabled", request.childProcessExperimentalEnabled)
                 put("javaInteropExperimentalEnabled", request.javaInteropExperimentalEnabled)
                 put("spawnDepth", request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
+                request.runtimeAdapter?.takeIf { it.isNotBlank() }?.let { put("runtimeAdapter", it) }
+                request.processPoolSlot?.takeIf { it.isNotBlank() }?.let { put("processPoolSlot", it) }
+                request.processPoolSlotSource?.takeIf { it.isNotBlank() }?.let { put("processPoolSlotSource", it) }
             }
         }
 
@@ -1674,9 +3508,11 @@ class NativeNodeEmbeddedScriptService : Service() {
                 source = json.optString("source"),
                 sourceName = json.optString("sourceName").ifBlank { DEFAULT_SOURCE_NAME },
                 workingDirectory = json.optString("workingDirectory").takeIf { it.isNotBlank() },
+                sandboxRoot = json.optString("sandboxRoot").takeIf { it.isNotBlank() },
                 executionId = json.optString("executionId").takeIf { it.isNotBlank() },
+                executionMode = NodeExecutionModePolicy.normalize(json.optString("executionMode")),
                 timeoutMs = json.optLong("timeoutMs", DEFAULT_TIMEOUT_MS).coerceAtLeast(1L),
-                queueMode = json.optString("queueMode").ifBlank { NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY },
+                queueMode = json.optString("queueMode").ifBlank { NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY },
                 queueTimeoutMs = json.optLong("queueTimeoutMs", 0L),
                 captureStdout = json.optBoolean("captureStdout", true),
                 captureStderr = json.optBoolean("captureStderr", true),
@@ -1691,15 +3527,26 @@ class NativeNodeEmbeddedScriptService : Service() {
                     "dynamicImportExperimentalEnabled",
                     BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
                 ),
+                rawNodeNetworkModulesExperimentalEnabled = json.optBoolean(
+                    "rawNodeNetworkModulesExperimentalEnabled",
+                    BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                ),
                 workerThreadsExperimentalEnabled = json.optBoolean(
                     "workerThreadsExperimentalEnabled",
                     BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+                ),
+                childProcessExperimentalEnabled = json.optBoolean(
+                    "childProcessExperimentalEnabled",
+                    BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
                 ),
                 javaInteropExperimentalEnabled = json.optBoolean(
                     "javaInteropExperimentalEnabled",
                     BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
                 ),
                 spawnDepth = json.optInt("spawnDepth", 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
+                runtimeAdapter = json.optString("runtimeAdapter").takeIf { it.isNotBlank() },
+                processPoolSlot = json.optString("processPoolSlot").takeIf { it.isNotBlank() },
+                processPoolSlotSource = json.optString("processPoolSlotSource").takeIf { it.isNotBlank() },
             )
         }
 
@@ -1776,14 +3623,19 @@ class NativeNodeEmbeddedScriptService : Service() {
             pendingIntervalCount?.let { putInt(EXTRA_RESULT_PENDING_INTERVAL_COUNT, it) }
             pendingImmediateCount?.let { putInt(EXTRA_RESULT_PENDING_IMMEDIATE_COUNT, it) }
             pendingScopedFsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS, it) }
+            pendingScopedFsStreams?.let { putBoolean(EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS, it) }
+            pendingScopedFsStreamCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT, it) }
+            pendingScopedFsWatchCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_COUNT, it) }
+            pendingScopedFsWatchFileCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_FILE_COUNT, it) }
             pendingCryptoCallbacks?.let { putInt(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS, it) }
             pendingDnsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_DNS_CALLBACKS, it) }
             pendingZlibCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS, it) }
+            pendingNodeTestCallbacks?.let { putInt(EXTRA_RESULT_PENDING_NODE_TEST_CALLBACKS, it) }
+            pendingZlibStreams?.let { putBoolean(EXTRA_RESULT_PENDING_ZLIB_STREAMS, it) }
+            pendingZlibStreamCount?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT, it) }
             pendingAsyncCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS, it) }
             pendingCallbacks?.let { putBoolean(EXTRA_RESULT_PENDING_CALLBACKS, it) }
-            val transportNativeValues = nativeValues
-                .mapValues { (key, value) -> value.limitResultTransportString("native:$key", truncations) }
-                .toMutableMap()
+            val transportNativeValues = nativeValues.toTransportNativeValues(truncations)
             if (truncations.isNotEmpty()) {
                 transportNativeValues["embedded_script.result_transport.truncated"] = "true"
                 transportNativeValues["embedded_script.result_transport.truncated_fields"] = truncations.keys.joinToString(",")
@@ -1792,6 +3644,75 @@ class NativeNodeEmbeddedScriptService : Service() {
                 }
             }
             putStringArray(EXTRA_RESULT_NATIVE_PAYLOAD, transportNativeValues.map { (key, value) -> "$key=$value" }.toTypedArray())
+        }
+
+        private fun Map<String, String>.toTransportNativeValues(
+            truncations: MutableMap<String, Int>,
+        ): MutableMap<String, String> {
+            val transport = linkedMapOf<String, String>()
+            val omittedKeys = mutableListOf<String>()
+            var originalChars = entries.sumOf { (key, value) -> key.length + 1 + value.length }
+            var sentChars = 0
+            var omittedChars = 0
+            val priorityKeys = RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS.toSet()
+
+            fun appendTransportEntry(key: String, value: String, priority: Boolean) {
+                val originalEntryChars = key.length + 1 + value.length
+                if (key in RESULT_TRANSPORT_NATIVE_PAYLOAD_DEDICATED_KEYS) {
+                    omittedKeys += key
+                    omittedChars += originalEntryChars
+                    return
+                }
+                val limitedValue = value.limitResultTransportString("native:$key", truncations)
+                val transportEntryChars = key.length + 1 + limitedValue.length
+                if (
+                    !priority && (
+                        transport.size >= RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES ||
+                            sentChars + transportEntryChars > RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS
+                    )
+                ) {
+                    omittedKeys += key
+                    omittedChars += originalEntryChars
+                    return
+                }
+                transport[key] = limitedValue
+                sentChars += transportEntryChars
+            }
+
+            RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS.forEach { key ->
+                this[key]?.let { appendTransportEntry(key, it, priority = true) }
+            }
+            for ((key, value) in this) {
+                if (key in priorityKeys) {
+                    continue
+                }
+                appendTransportEntry(key, value, priority = false)
+            }
+            val omittedCount = omittedKeys.size
+            if (omittedCount > 0) {
+                transport["embedded_script.result_transport.native_payload_limited"] = "true"
+                transport["embedded_script.result_transport.native_payload_original_entries"] = size.toString()
+                transport["embedded_script.result_transport.native_payload_sent_entries"] = transport.size.toString()
+                transport["embedded_script.result_transport.native_payload_omitted_entries"] = omittedCount.toString()
+                transport["embedded_script.result_transport.native_payload_original_chars"] = originalChars.toString()
+                transport["embedded_script.result_transport.native_payload_sent_chars"] = sentChars.toString()
+                transport["embedded_script.result_transport.native_payload_omitted_chars"] = omittedChars.toString()
+                transport["embedded_script.result_transport.native_payload_max_entries"] =
+                    RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES.toString()
+                transport["embedded_script.result_transport.native_payload_max_chars"] =
+                    RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS.toString()
+                transport["embedded_script.result_transport.native_payload_omitted_keys"] =
+                    omittedKeys.joinToString(",").limitOmittedKeysList()
+            }
+            return transport
+        }
+
+        private fun String.limitOmittedKeysList(): String {
+            return if (length <= RESULT_TRANSPORT_OMITTED_KEYS_MAX_CHARS) {
+                this
+            } else {
+                take(RESULT_TRANSPORT_OMITTED_KEYS_MAX_CHARS) + "..."
+            }
         }
 
         private fun String.limitResultTransportString(
@@ -1845,12 +3766,26 @@ class NativeNodeEmbeddedScriptService : Service() {
                     ?.getInt(EXTRA_RESULT_PENDING_IMMEDIATE_COUNT),
                 pendingScopedFsCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS),
+                pendingScopedFsStreams = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS) }
+                    ?.getBoolean(EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS),
+                pendingScopedFsStreamCount = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT) }
+                    ?.getInt(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT),
+                pendingScopedFsWatchCount = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_COUNT) }
+                    ?.getInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_COUNT),
+                pendingScopedFsWatchFileCount = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_FILE_COUNT) }
+                    ?.getInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_FILE_COUNT),
                 pendingCryptoCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS),
                 pendingDnsCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_DNS_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_DNS_CALLBACKS),
                 pendingZlibCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS),
+                pendingNodeTestCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_NODE_TEST_CALLBACKS) }
+                    ?.getInt(EXTRA_RESULT_PENDING_NODE_TEST_CALLBACKS),
+                pendingZlibStreams = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ZLIB_STREAMS) }
+                    ?.getBoolean(EXTRA_RESULT_PENDING_ZLIB_STREAMS),
+                pendingZlibStreamCount = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT) }
+                    ?.getInt(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT),
                 pendingAsyncCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS),
                 pendingCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_CALLBACKS) }
@@ -1880,21 +3815,31 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_RESULT_PENDING_INTERVAL_COUNT = "result_pending_interval_count"
         private const val EXTRA_RESULT_PENDING_IMMEDIATE_COUNT = "result_pending_immediate_count"
         private const val EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS = "result_pending_scoped_fs_callbacks"
+        private const val EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS = "result_pending_scoped_fs_streams"
+        private const val EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT = "result_pending_scoped_fs_stream_count"
+        private const val EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_COUNT = "result_pending_scoped_fs_watch_count"
+        private const val EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_FILE_COUNT = "result_pending_scoped_fs_watch_file_count"
         private const val EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS = "result_pending_crypto_callbacks"
         private const val EXTRA_RESULT_PENDING_DNS_CALLBACKS = "result_pending_dns_callbacks"
         private const val EXTRA_RESULT_PENDING_ZLIB_CALLBACKS = "result_pending_zlib_callbacks"
+        private const val EXTRA_RESULT_PENDING_NODE_TEST_CALLBACKS = "result_pending_node_test_callbacks"
+        private const val EXTRA_RESULT_PENDING_ZLIB_STREAMS = "result_pending_zlib_streams"
+        private const val EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT = "result_pending_zlib_stream_count"
         private const val EXTRA_RESULT_PENDING_ASYNC_CALLBACKS = "result_pending_async_callbacks"
         private const val EXTRA_RESULT_PENDING_CALLBACKS = "result_pending_callbacks"
         private const val EXTRA_RESULT_NATIVE_PAYLOAD = "result_native_payload"
     }
 }
 
+class NativeNodeEmbeddedScriptServiceSlot1 : NativeNodeEmbeddedScriptService()
+
+class NativeNodeEmbeddedScriptServiceSlot2 : NativeNodeEmbeddedScriptService()
+
 private fun NodeBridgeRequest.dispatchExceptionResponse(error: Throwable): NodeBridgeResponse {
     return NodeBridgeResponse.failure(
         id,
-        NodeBridgeError(
+        NodeBridgeError.providerFailed(
             message = error.message ?: error.javaClass.name,
-            code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
             module = module,
             method = method,
             stack = error.stackTraceToString(),

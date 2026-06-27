@@ -1,0 +1,16 @@
+{
+  "name": "live-fetch",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 15000,
+    "permissions": ["network"]
+  },
+  "example": {
+    "capabilities": ["network"],
+    "expectedProvider": "Android controlled fetch provider",
+    "packagedSupport": "requires explicit packaged network capability and INTERNET permission mapping",
+    "securityLimitations": ["raw network modules remain denied", "timeouts and response-size limits apply"]
+  }
+}

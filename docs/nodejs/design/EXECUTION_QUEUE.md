@@ -1,6 +1,6 @@
 # Embedded Node Execution Queue
 
-Status: implemented as an explicit opt-in caller-side queue for `NativeNodeEmbeddedScriptService`.
+Status: implemented as the default bounded queue for ordinary script starts, with an explicit reject mode retained for diagnostics.
 
 ## Policy
 
@@ -10,13 +10,13 @@ The default embedded execution policy remains:
 one active embedded Node execution per :nodejs_embedded process
 ```
 
-Normal script starts use `reject_when_busy`. A concurrent start is rejected with:
+Normal script starts use `enqueue_when_busy`. A concurrent start that reaches an occupied `:nodejs_embedded` process waits in a bounded execution queue instead of immediately failing with:
 
 ```text
 ERR_AUTOJS6_NODE_ENGINE_BUSY
 ```
 
-Queueing is available only when the caller explicitly uses the enqueue API. This keeps existing script startup behavior deterministic and prevents silent queueing of user-triggered runs.
+Callers that need the old fail-fast behavior can explicitly request `reject_when_busy`. That mode still returns `ERR_AUTOJS6_NODE_ENGINE_BUSY` when another execution owns the target process slot.
 
 The queue does not reuse a completed embedded Node instance. Each dequeued item starts a normal one-shot `NativeNodeEmbeddedScriptService` run, then waits briefly for the `:nodejs_embedded` process to settle before releasing the next queued execution. This avoids a second `libnode`/V8/libuv startup inside the same service process.
 
@@ -24,11 +24,11 @@ The queue does not reuse a completed embedded Node instance. Each dequeued item 
 
 Current limits:
 
-- max queued executions: `1`
-- default queue wait timeout: `30000ms`
+- max queued executions: `16`
+- default queue wait timeout: `300000ms`
 - max queue wait timeout: `300000ms`
 
-The queue is local to the caller process that owns `enqueueScript(...)`. It serializes queue participants before they reach the embedded service. The embedded service itself still enforces one active execution per `:nodejs_embedded` process and receives queued executions as normal `reject_when_busy` service starts.
+The service queue serializes executions that target the same embedded service process. The default process-pool scheduler also waits for an available `primary` / `overflow_1` slot when both eligible default slots are busy. The embedded service itself still enforces one active execution per process slot.
 
 ## API Shape
 
@@ -46,13 +46,13 @@ NativeNodeEmbeddedScriptService.queueStatus(context)
 - `queueMode`
 - `queueTimeoutMs`
 
-Callers that need cancellation should provide a stable `executionId` before enqueuing. `queueMode` is diagnostic/request metadata; the public queue API is `enqueueScript(...)`, and direct `runScript(...)` continues to use the default reject-when-busy service path.
+Callers that need cancellation should provide a stable `executionId` before enqueuing. `queueMode` controls whether a direct `runScript(...)` start waits (`enqueue_when_busy`) or fails fast (`reject_when_busy`).
 
 ## Error Codes
 
 Queue-specific failures are stable:
 
-- `ERR_AUTOJS6_NODE_ENGINE_BUSY`: default reject path when another execution is active
+- `ERR_AUTOJS6_NODE_ENGINE_BUSY`: explicit fail-fast path when another execution is active
 - `ERR_AUTOJS6_NODE_QUEUE_FULL`: enqueue requested but max queued executions is reached
 - `ERR_AUTOJS6_NODE_QUEUE_TIMEOUT`: queued execution did not acquire the active slot before its queue timeout
 - `ERR_AUTOJS6_NODE_QUEUE_CANCELLED`: queued execution was cancelled before it started
@@ -70,7 +70,7 @@ Results include queue metadata in `nativeValues`:
 - `embedded_script.queue_position`
 - `embedded_script.queue_max_queued_executions`
 
-The default busy path also preserves:
+The explicit busy path also preserves:
 
 - `embedded_script.engine_busy=true`
 - `embedded_script.concurrent_policy=single-active-execution-per-process`
@@ -87,7 +87,9 @@ Queued cancellation, queue full, and queue timeout failures are returned before 
 
 Focused lifecycle stress coverage verifies:
 
-- default concurrent starts still reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`
+- default concurrent starts queue and run after the active execution releases the process slot
+- explicit `reject_when_busy` starts still reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`
 - an explicitly queued second script runs after the first finishes
 - a queued script can be cancelled by execution id
+- a queued script times out with `ERR_AUTOJS6_NODE_QUEUE_TIMEOUT` before user code runs
 - a third enqueue fails with `ERR_AUTOJS6_NODE_QUEUE_FULL` when the queue is full

@@ -1,6 +1,7 @@
 # AutoJs6 Node.js Error Catalog
 
-This catalog documents the current user-visible `ERR_AUTOJS6_*` error codes in the AutoJs6 Safe Node Profile.
+This catalog documents the current user-visible AutoJs6 Safe Node Profile error codes, including `ERR_AUTOJS6_*`
+codes and Node-compatible errors kept for developer familiarity.
 It is verified by `:app:verifyNodeErrorCatalog` against `NodeRuntimeErrorCodes.kt` and the runtime bootstrap sources.
 
 Prefer `error.autojs6Code` when it exists. Some compatibility paths preserve a legacy `error.code` and attach the
@@ -46,6 +47,14 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: handle rejection, clean resources in `finally`, and avoid assuming long bridge calls survive service stop.
 - Related docs: [TESTING.md](TESTING.md), [docs/nodejs/design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md).
 
+## ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED
+
+- Meaning: A bridge provider failed while handling a declared and permitted request.
+- Common cause: provider-side exception, unavailable Android subsystem, invalid provider state, or a failed fake-provider test path.
+- Example: `require("ocr").recognize(image)` rejects after the OCR provider reports an internal failure.
+- How to fix: handle the rejection, verify the provider is available, and inspect provider diagnostics for the specific module.
+- Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
+
 ## ERR_AUTOJS6_BRIDGE_RATE_LIMITED
 
 - Meaning: A bridge module rejected the call because its request rate limit was exceeded.
@@ -70,10 +79,42 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: pass an appropriate timeout where supported and handle the rejection path.
 - Related docs: [TESTING.md](TESTING.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
+## ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN
+
+- Meaning: A Rhino-style compatibility API was rejected because it would cross the Safe Node Profile boundary.
+- Common cause: a migrated script expects raw Java, Rhino `Scriptable`, Android UI/accessibility objects, `importClass`, `importPackage`, or `JavaAdapter`.
+- Example: asking the compat loader to expose `importClass`.
+- How to fix: use a JSON-safe Node bridge facade, or keep the script on the Rhino engine until a safe migration path exists.
+- Related docs: [design/RHINO_COMPAT_LOADER.md](design/RHINO_COMPAT_LOADER.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION
+
+- Meaning: A Rhino compatibility loader or facade option was malformed.
+- Common cause: passing a non-object options value to `require("autojs6:compat").install()`.
+- Example: `compat.install("globals")`.
+- How to fix: pass an options object and keep global installation explicit.
+- Related docs: [design/RHINO_COMPAT_LOADER.md](design/RHINO_COMPAT_LOADER.md).
+
+## ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED
+
+- Meaning: A Rhino-style compatibility API is not implemented in the current Node compat facade.
+- Common cause: using a Rhino API before its Phase 11 facade task has landed.
+- Example: `compat.assertSupported("files.read")` before the scoped files facade is implemented.
+- How to fix: use the current Node bridge module directly, or wait for the matching Phase 11 compat facade task.
+- Related docs: [design/RHINO_COMPAT_LOADER.md](design/RHINO_COMPAT_LOADER.md), [RHINO_AUGMENT_COMPATIBILITY_MATRIX.md](RHINO_AUGMENT_COMPATIBILITY_MATRIX.md).
+
+## ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED
+
+- Meaning: Rhino `JavaAdapter` is not available inside the Node runtime.
+- Common cause: a migrated script expects `new JavaAdapter(...)` to create Java listener or interface implementations from V8.
+- Example: `require("rhino").JavaAdapter(android.view.View.OnClickListener, handlers)`.
+- How to fix: keep the script on the Rhino engine for now, or wait for the P13-16 bounded `java.defineClass()` / proxy-interface provider.
+- Related docs: [design/RHINO_SHIM.md](design/RHINO_SHIM.md), [design/JAVA_INTEROP.md](design/JAVA_INTEROP.md).
+
 ## ERR_AUTOJS6_BUILTIN_DISABLED
 
 - Meaning: A Node builtin is disabled by the Safe Node Profile.
-- Common cause: requiring `child_process`, `vm`, `inspector`, `dgram`, or another denied builtin.
+- Common cause: requiring `child_process`, `inspector`, `dgram`, `wasi`, or another denied builtin.
 - Example: `require("child_process")`.
 - How to fix: use the AutoJs-controlled module for the task, or keep the dependency out of the stable profile.
 - Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
@@ -98,16 +139,16 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 
 - Meaning: Legacy code value for unsupported dynamic import.
 - Common cause: compatibility path preserving the old `error.code` while attaching `autojs6Code=ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`.
-- Example: `import("./x.mjs")` in the stable profile.
-- How to fix: use CommonJS or an experimental build with the dynamic-import gate enabled.
+- Example: `import("file:///tmp/x.mjs")`, `eval("import('./x.mjs')")`, or an explicit diagnostic request with dynamic import disabled.
+- How to fix: use local-only dynamic import from script source, avoid URL/protocol specifiers and dynamic-code constructors, or keep CommonJS.
 - Related docs: [design/ESM.md](design/ESM.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
 ## ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED
 
-- Meaning: ESM execution is not enabled in the stable profile.
-- Common cause: `.mjs`, `type: "module"`, static `import`, `export`, or `import.meta` is used without the experimental ESM flag.
-- Example: running a `.mjs` entry in a normal GA build.
-- How to fix: use `.cjs` or CommonJS syntax for stable scripts.
+- Meaning: ESM execution is not enabled for this path, or the requested ESM syntax is outside the partial profile.
+- Common cause: ESM was explicitly disabled for a diagnostic run, static `import`/`export` syntax was used in a CommonJS entry, JSON import attributes were missing/unknown, or an unsupported ESM form outside the scoped v1.1 subset was used.
+- Example: `import data from "./data.json"` without `with { type: "json" }`, legacy `assert { type: "json" }`, or an import attribute on a non-JSON module.
+- How to fix: use supported partial ESM syntax, add `with { type: "json" }` for JSON imports, move static imports into a `.mjs` or `type=module` entry, or keep CommonJS syntax in `.cjs`/CommonJS files.
 - Related docs: [design/ESM.md](design/ESM.md), [QUICK_START.md](QUICK_START.md).
 
 ## ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED
@@ -146,16 +187,17 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 
 - Meaning: An option was recognized but is unsupported by the Safe Node Profile.
 - Common cause: unsupported fs/glob options, unsupported execution options, or an internal compatibility option.
-- Example: using scoped glob options that follow symlinks outside the working directory.
+- Example: using scoped glob options that follow symlinks outside the working directory, or requesting `executionMode: "interactiveLongRunning"` from a normal script launch instead of the explicit interactive session surface.
 - How to fix: remove the unsupported option and stay within the documented profile.
 - Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
 ## ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED
 
-- Meaning: scoped fs denied an absolute path.
-- Common cause: a script passed `/sdcard/...`, `/proc/...`, `/sys/...`, `/dev/...`, or another absolute path to `fs`.
+- Meaning: scoped fs denied an absolute path outside the current sandbox root.
+- Common cause: a script passed `/sdcard/...`, `/proc/...`, `/sys/...`, `/dev/...`, or another outside-root absolute path to `fs`.
 - Example: `fs.readFileSync("/proc/version")`.
-- How to fix: use a relative path inside the working directory.
+- How to fix: keep the file inside the working directory and use either a
+  relative path or an absolute path that resolves under that scoped root.
 - Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [design/FS_PROMISES.md](design/FS_PROMISES.md).
 
 ## ERR_AUTOJS6_FS_NUL_BYTE
@@ -197,6 +239,22 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - Example: a dependency contains a link to a parent directory.
 - How to fix: replace the symlink with copied files or remove the dependency path.
 - Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_FS_WATCH_LIMIT
+
+- Meaning: the scoped fs watcher quota for the current embedded execution was exceeded.
+- Common cause: opening too many active `fs.watch`, `fs.promises.watch`, or `fs.watchFile` handles without closing them.
+- Example: creating a watcher per file in a large tree and leaving all handles active.
+- How to fix: close watchers promptly, multiplex directory watches where safe, or poll a bounded set of files.
+- Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_FS_WATCH_RATE_LIMITED
+
+- Meaning: a scoped fs watcher produced more events than the per-watcher rate limit allows.
+- Common cause: a tight file write loop, a noisy generated output directory, or manually emitted watcher events.
+- Example: rewriting the same watched file many times in one second.
+- How to fix: debounce file changes, close noisy watchers, and re-read scoped state after a quiet period.
+- Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).
 
 ## ERR_AUTOJS6_JAVA_CLASS_DENIED
 
@@ -241,7 +299,7 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 ## ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED
 
 - Meaning: injected moduleSources exceeded the Safe Node Profile budget before native Node startup.
-- Common cause: too many preloaded modules, a single module over `262144` UTF-8 bytes, or total moduleSources over `524288` UTF-8 bytes.
+- Common cause: too many preloaded modules, a single module over `16777216` UTF-8 bytes, or total moduleSources over `67108864` UTF-8 bytes.
 - Example: packaging a large CommonJS graph into encrypted moduleSources.
 - How to fix: reduce bundled dependencies, split unsupported packages out of the packaged graph, or keep the app on disk-backed scoped `fs` instead of injected moduleSources.
 - Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).
@@ -265,10 +323,18 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 ## ERR_AUTOJS6_NETWORK_DISABLED
 
 - Meaning: controlled network access is disabled in the current build or provider.
-- Common cause: normal builds keep live network providers disabled; raw network modules also reject before I/O.
+- Common cause: normal builds keep live network providers disabled; default raw network modules also reject before I/O unless the explicit raw Node network module opt-in is enabled.
 - Example: `await fetch("https://example.com")` in a normal build.
 - How to fix: use fake providers in tests or an explicitly approved experimental network build.
 - Related docs: [design/NETWORK.md](design/NETWORK.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## ERR_AUTOJS6_NETWORK_ERROR
+
+- Meaning: a controlled network operation failed with a provider or transport error that is not one of the more specific network codes.
+- Common cause: provider exception, transport failure, rejected axios-compatible request wrapper, or an unexpected fake-provider failure.
+- Example: a controlled axios request rejects without a timeout, abort, size, URL, permission, or policy-specific code.
+- How to fix: inspect the wrapped error details, retry only when the operation is idempotent, and keep live network behind the approved experimental gate.
+- Related docs: [design/NETWORK.md](design/NETWORK.md), [design/WEBSOCKET.md](design/WEBSOCKET.md).
 
 ## ERR_AUTOJS6_NETWORK_INVALID_URL
 
@@ -350,6 +416,54 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: shorten the active script, increase the queue timeout where supported, or avoid queueing.
 - Related docs: [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md), [TESTING.md](TESTING.md).
 
+## ERR_AUTOJS6_NODE_TEST_ASYNC_ACTIVITY
+
+- Meaning: the embedded `node:test` subset detected async activity after a test completed.
+- Common cause: a test leaves timers or other pending work active after its body resolves.
+- Example: a test schedules `setTimeout()` and returns before clearing or awaiting it.
+- How to fix: await asynchronous work, clear timers, and keep node:test samples bounded.
+- Related docs: [TESTING.md](TESTING.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
+
+## ERR_AUTOJS6_NODE_TEST_FAILURE
+
+- Meaning: one or more embedded `node:test` subset cases failed.
+- Common cause: assertion failure, rejected test body, failed subtest, or a test harness diagnostic path.
+- Example: `assert.equal(actual, expected)` fails inside a sample compatibility test.
+- How to fix: inspect the test diagnostics and fix the failing case before treating the profile gate as passed.
+- Related docs: [TESTING.md](TESTING.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
+
+## ERR_AUTOJS6_NODE_TEST_TIMEOUT
+
+- Meaning: an embedded `node:test` subset case exceeded its timeout.
+- Common cause: a hung promise, uncleared timer, blocked event loop, or a test body that never resolves.
+- Example: a test awaits a promise that is never settled.
+- How to fix: add bounded waits, settle pending promises, and close handles before the test exits.
+- Related docs: [TESTING.md](TESTING.md), [PERFORMANCE.md](PERFORMANCE.md).
+
+## ERR_AUTOJS6_FOREGROUND_SERVICE_START_NOT_ALLOWED
+
+- Meaning: Android denied starting the embedded Node foreground service from the current app state.
+- Common cause: background foreground-service start restrictions on Android 12+.
+- Example: launching an interactive Node runtime while the app is not allowed to start a foreground service.
+- How to fix: start from a user-visible app surface or retry when Android permits foreground service launch.
+- Related docs: [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## ERR_AUTOJS6_FOREGROUND_SERVICE_TYPE_INVALID
+
+- Meaning: the embedded Node foreground service type is missing or does not match the manifest.
+- Common cause: stale packaged template, missing `android:foregroundServiceType`, or missing foreground-service permission.
+- Example: requesting the `specialUse` foreground-service type from a service manifest that declares no compatible type.
+- How to fix: refresh the packaged template or manifest so the embedded Node service declares the expected type and permissions.
+- Related docs: [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md), [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
+
+## ERR_AUTOJS6_WORK_MANAGER_QUOTA_EXHAUSTED
+
+- Meaning: Android WorkManager/JobScheduler quota is exhausted for a scheduled Node task path.
+- Common cause: Android 16+ counts long-running WorkManager foreground workers against JobScheduler quota.
+- Example: repeated long-running WorkManager jobs consume the quota window before the next Node task can run.
+- How to fix: keep scheduled Node tasks bounded, defer work, or use the explicit user-visible foreground runtime for user-initiated long work.
+- Related docs: [design/WORK_MANAGER.md](design/WORK_MANAGER.md), [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md).
+
 ## ERR_AUTOJS6_PROCESS_API_DISABLED
 
 - Meaning: a dangerous `process` API is disabled.
@@ -360,11 +474,35 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 
 ## ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED
 
-- Meaning: CommonJS attempted to require an ESM module in a profile that does not support that boundary.
-- Common cause: `require()` resolves to `.mjs` or package `type: "module"` under the experimental ESM path.
+- Meaning: CommonJS attempted to require an ESM module while the partial ESM boundary was disabled or unavailable.
+- Common cause: an explicit ESM-off diagnostic request resolves `require()` to `.mjs` or a package target selected as ESM.
 - Example: `require("./module.mjs")`.
-- How to fix: use CommonJS modules for stable scripts or import from ESM only in an approved experimental flow.
+- How to fix: use the default v1.1 partial ESM profile for synchronous ESM graphs, or provide a CommonJS package branch for older/ESM-off profiles.
 - Related docs: [design/ESM.md](design/ESM.md), [EXPERIMENTAL_PROMOTION_POLICY.md](EXPERIMENTAL_PROMOTION_POLICY.md).
+
+## ERR_REQUIRE_ASYNC_MODULE
+
+- Meaning: CommonJS attempted to synchronously require a partial ESM graph that needs asynchronous evaluation.
+- Common cause: an ESM file reachable from `require()` contains `await` or dynamic `import()`.
+- Example: `require("./module-with-top-level-await.mjs")`.
+- How to fix: use an ESM entry or dynamic `import()` for asynchronous ESM graphs, or remove asynchronous ESM syntax from the required module.
+- Related docs: [design/ESM.md](design/ESM.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
+
+## ERR_AUTOJS6_TYPESCRIPT_UNSUPPORTED_EXTENSION
+
+- Meaning: A TypeScript source file uses an extension outside AutoJs6 lightweight type stripping.
+- Common cause: running or packaging `.tsx` directly.
+- Example: declaring `main.tsx` in `project.json`.
+- How to fix: compile TSX to JavaScript on the desktop/build stage, or use `.ts`, `.mts`, or `.cts` with erasable type syntax only.
+- Related docs: [PROJECT_WIZARD.md](PROJECT_WIZARD.md), [EXAMPLES.md](EXAMPLES.md), [TESTING.md](TESTING.md).
+
+## ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX
+
+- Meaning: AutoJs6 detected TypeScript syntax that requires code generation instead of simple type stripping.
+- Common cause: `enum`, `namespace`, decorators, constructor parameter properties, or import aliases.
+- Example: `enum Color { Red }`.
+- How to fix: replace with erasable JavaScript-compatible patterns, such as a frozen object for enum-like values, or compile the project before packaging.
+- Related docs: [PROJECT_WIZARD.md](PROJECT_WIZARD.md), [EXAMPLES.md](EXAMPLES.md), [TESTING.md](TESTING.md).
 
 ## ERR_AUTOJS6_SCRIPT_TIMEOUT
 
@@ -396,6 +534,46 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - Common cause: too many active experimental workers.
 - Example: creating more workers than the profile permits.
 - How to fix: terminate existing workers and keep worker concurrency below the limit.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [PERFORMANCE.md](PERFORMANCE.md).
+
+## ERR_AUTOJS6_WORKER_POOL_CLOSED
+
+- Meaning: an experimental `WorkerPool` rejected work because the pool is closed or closing.
+- Common cause: submitting a task after `close()` or service shutdown started.
+- Example: calling `pool.run()` after the pool has rejected pending tasks during close.
+- How to fix: stop submitting work after close begins and create a new pool only in an explicitly enabled worker profile.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_WORKER_POOL_QUEUE_FULL
+
+- Meaning: an experimental `WorkerPool` task queue reached its configured limit.
+- Common cause: submitting tasks faster than workers can complete them.
+- Example: enqueueing another task when the pool queue limit is already full.
+- How to fix: throttle submissions, await previous tasks, or lower concurrency in stable scripts by avoiding worker pools.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [PERFORMANCE.md](PERFORMANCE.md).
+
+## ERR_AUTOJS6_WORKER_POOL_TASK_CANCELLED
+
+- Meaning: an experimental `WorkerPool` task was cancelled before completion.
+- Common cause: caller cancellation, pool close, worker termination, or timeout cleanup.
+- Example: cancelling a pending task with an `AbortSignal`.
+- How to fix: handle cancellation as a normal control path and clean task-local resources.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_WORKER_POOL_TASK_FAILED
+
+- Meaning: an experimental `WorkerPool` task failed while executing or while receiving its result.
+- Common cause: worker exception, rejected task handler, worker exit, or unexpected worker error.
+- Example: a pool task throws before posting its result.
+- How to fix: catch task errors, keep worker code pure JavaScript, and inspect worker diagnostics.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_WORKER_POOL_TASK_TIMEOUT
+
+- Meaning: an experimental `WorkerPool` task exceeded its timeout.
+- Common cause: CPU-bound work, a hung promise, or a worker that does not respond before the task deadline.
+- Example: a pool task loops indefinitely and never posts a result.
+- How to fix: keep worker tasks bounded, add cooperative cancellation, and avoid workers in stable scripts.
 - Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [PERFORMANCE.md](PERFORMANCE.md).
 
 ## ERR_AUTOJS6_WORKER_TERMINATED

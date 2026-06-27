@@ -154,6 +154,10 @@ public abstract class JavaScriptSource extends ScriptSource {
         String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
         return lowerCaseName.endsWith(".mjs") ||
                 lowerCaseName.endsWith(".cjs") ||
+                lowerCaseName.endsWith(".mts") ||
+                lowerCaseName.endsWith(".cts") ||
+                lowerCaseName.endsWith(".ts") ||
+                lowerCaseName.endsWith(".tsx") ||
                 lowerCaseName.endsWith(".node.js");
     }
 
@@ -164,7 +168,11 @@ public abstract class JavaScriptSource extends ScriptSource {
         String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
         return lowerCaseName.endsWith(".js") ||
                 lowerCaseName.endsWith(".mjs") ||
-                lowerCaseName.endsWith(".cjs");
+                lowerCaseName.endsWith(".cjs") ||
+                lowerCaseName.endsWith(".mts") ||
+                lowerCaseName.endsWith(".cts") ||
+                lowerCaseName.endsWith(".ts") ||
+                lowerCaseName.endsWith(".tsx");
     }
 
     @Override

@@ -67,7 +67,6 @@ import org.autojs.autojs.ui.widget.FirstCharView
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.EnvironmentUtils.externalStoragePath
-import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils.setForceShowIconCompat
 import org.autojs.autojs.util.ViewUtils.showSnack
@@ -900,8 +899,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 .subscribe { icon ->
                     mFirstChar.setIcon(icon)
 
-                    val actions = when (item.type) {
-                        FileUtils.TYPE.JAVASCRIPT, FileUtils.TYPE.AUTO -> {
+                    val actions = when {
+                        item.type.isExecutable() -> {
                             Observable.fromCallable {
                                 ColorUtils.adjustColorForContrast(
                                     context.getColor(R.color.item_background_dark),

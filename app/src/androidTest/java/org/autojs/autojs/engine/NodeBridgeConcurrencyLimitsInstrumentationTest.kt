@@ -45,7 +45,7 @@ class NodeBridgeConcurrencyLimitsInstrumentationTest {
                   "autojs6": {
                     "node": {
                       "bridgeLimits": {
-                        "maxNetworkRequests": 6,
+                        "maxNetworkRequests": 24,
                         "maxWebSocketConnections": 9
                       }
                     }
@@ -57,9 +57,11 @@ class NodeBridgeConcurrencyLimitsInstrumentationTest {
         assertEquals(2, policy.maxPendingBridgeCalls)
         assertEquals(1, policy.maxImageHandles)
         assertEquals(2, policy.maxShellCommands)
-        assertEquals(6, policy.maxNetworkRequests)
+        assertEquals(24, policy.maxNetworkRequests)
         assertEquals(2, policy.maxWebSocketConnections)
         assertEquals(3, policy.accessibilityQueriesPerSecond)
+        assertEquals(16, NodeBridgeLimits.defaults.maxNetworkRequests)
+        assertEquals(32, NodeBridgeLimits.defaults.toJsonObject().getJSONObject("hardMax").getInt("maxNetworkRequests"))
         assertTrue(policy.sources.contains("project.json:node.bridgeLimits"))
         assertTrue(policy.sources.contains("package.json:autojs6.node.bridgeLimits"))
         assertTrue(policy.warnings.any { it.contains("maxShellCommands") && it.contains("outside") })

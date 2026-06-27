@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/https-request-client-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "https-request-wrapper": "1.0.0"
+  }
+}

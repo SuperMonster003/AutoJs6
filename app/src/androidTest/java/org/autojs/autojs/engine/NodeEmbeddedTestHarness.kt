@@ -25,7 +25,9 @@ internal object NodeEmbeddedTestHarness {
     }
 
     fun settleEmbeddedScriptServiceProcess() {
-        targetContext.stopService(Intent(targetContext, NativeNodeEmbeddedScriptService::class.java))
+        NodeEmbeddedProcessPoolPolicy.declaredSlots.forEach { slot ->
+            targetContext.stopService(Intent(targetContext, slot.serviceClass))
+        }
         SystemClock.sleep(600L)
     }
 
@@ -33,14 +35,21 @@ internal object NodeEmbeddedTestHarness {
         source: String,
         sourceName: String,
         workingDirectory: File = targetContext.cacheDir,
+        sandboxRoot: File? = null,
         timeoutMs: Long = 10_000L,
         env: Map<String, String> = emptyMap(),
         moduleSources: Map<String, String> = emptyMap(),
         runtimeModuleSources: Map<String, String> = emptyMap(),
         esmExperimentalEnabled: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
         dynamicImportExperimentalEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+        rawNodeNetworkModulesExperimentalEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
         workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        childProcessExperimentalEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
         javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
+        runtimeAdapter: String? = null,
+        queueMode: String = NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY,
+        queueTimeoutMs: Long = 0L,
+        processPoolSlot: String? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             targetContext,
@@ -48,14 +57,21 @@ internal object NodeEmbeddedTestHarness {
                 source = source,
                 sourceName = sourceName,
                 workingDirectory = workingDirectory.absolutePath,
+                sandboxRoot = sandboxRoot?.absolutePath,
                 timeoutMs = timeoutMs,
                 env = env,
                 moduleSources = moduleSources,
                 runtimeModuleSources = runtimeModuleSources,
                 esmExperimentalEnabled = esmExperimentalEnabled,
                 dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled,
+                rawNodeNetworkModulesExperimentalEnabled = rawNodeNetworkModulesExperimentalEnabled,
                 workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
+                childProcessExperimentalEnabled = childProcessExperimentalEnabled,
                 javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
+                runtimeAdapter = runtimeAdapter,
+                queueMode = queueMode,
+                queueTimeoutMs = queueTimeoutMs,
+                processPoolSlot = processPoolSlot,
             ),
         )
     }

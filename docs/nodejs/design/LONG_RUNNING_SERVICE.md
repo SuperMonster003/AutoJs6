@@ -1,6 +1,60 @@
 # Long-Running Node Service Mode
 
-Status: design gate only. No long-running Node service runtime is implemented by this document.
+Status: Phase 13 P13-07 partial foreground MVP. Normal script and generic
+project launches remain one-shot; the explicit interactive session launch
+surface and packaged long-running launch surface can run
+`interactive_long_running`.
+
+Task 179 adds the first runtime contract guard: embedded script requests now
+carry an `executionMode` field through the service request spool. `one_shot` is
+the only supported runtime mode. Explicit `long_running` or `service` requests
+are rejected before user JavaScript runs with
+`ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`, and pending timers still time
+out as normal one-shot scripts.
+
+Task S7-17 expands that guard into a versioned execution-mode state machine:
+
+- `one_shot`: implemented; requires a positive script timeout.
+- `interactive_long_running`: partial; supported only by the explicit
+  interactive session or packaged long-running launch surface with a persistent
+  foreground notification, Stop action, status file, duration/resource summary,
+  and restart policy `never`.
+- `scheduled`: reserved; WorkManager currently launches bounded one-shot runs
+  until the dedicated scheduled task runner gate exists.
+- `worker_computation`: reserved; blocked behind worker_threads capability
+  isolation and worker resource gates.
+- `node_sandboxed`: Phase 8 manifest/design-gated POC; blocked until the
+  Binder capability broker exists.
+
+Each mode definition records timeout policy, foreground requirement,
+notification requirement, allowed provider set, restart policy, quota profile,
+and stop semantics. Unsupported mode requests are rejected before user code and
+return the same policy metadata in native values.
+
+Task S7-18 adds the first runtime slice for user-visible long-running Node
+automation. `NativeNodeEmbeddedScriptService.startInteractiveLongRunning(...)`
+starts an explicitly requested `interactive_long_running` session in the
+embedded Node process, promotes the service to foreground with a persistent
+notification, writes JSON status snapshots under app-private storage, exposes
+duration and active resource summary fields, and supports a notification/client
+Stop path that schedules clean Node process teardown. It deliberately does not
+enable implicit service mode for ordinary script execution.
+
+Task S7-22 adds a cooperative checkpoint and explicit restore protocol for the
+same interactive runtime. `require("autojs6:lifecycle")` exposes
+`checkpoint()`, `readCheckpoint()`, `clearCheckpoint()`, `onCheckpoint()`,
+`onRestore()`, and `onStop()` only through the explicit interactive session
+surface. Checkpoints are JSON-serializable data only, size-limited to 64 KiB,
+stored atomically under app-private project-scoped storage, and never trigger an
+automatic restart.
+
+Task P13-07 adds the first packaged long-running dispatch path. A packaged Node
+project may opt in with `node.executionMode=interactive_long_running`; the inrt
+launcher then prepares the encrypted project entry through the same Node project
+preprocessor used by one-shot packaged projects and starts the foreground
+service with `launchSurface=packaged_long_running`. The final blocker remains
+open until install/run smoke, packaged lifecycle restore/cleanup, Android
+permission denial, and background-start policy evidence land.
 
 ## Goal
 
@@ -12,7 +66,9 @@ This design separates:
 - scheduled/background tasks: AutoJs6 task-owned launches
 - long-running services: explicit foreground, user-visible Node service sessions
 
-Normal scripts must remain timeout-controlled. A future long-running mode must be explicit and must not be enabled by a file suffix, `"nodejs";` directive, package metadata guess, or accidental pending timer.
+Normal scripts must remain timeout-controlled. Long-running mode must be
+explicit and must not be enabled by a file suffix, `"nodejs";` directive,
+package metadata guess, or accidental pending timer.
 
 ## Non-Goals
 
@@ -29,14 +85,17 @@ Long-running service mode is not:
 
 | Mode | Current status | Timeout | User visibility | Entry |
 | --- | --- | --- | --- | --- |
-| One-shot embedded script | Implemented | Required | Console/notification while running | directive, file route, project route, packaged route |
-| Execution queue | Implemented | Queue timeout plus per-script timeout | Caller-owned diagnostics | `enqueueScript(...)` |
-| Scheduled Node task | Metadata MVP only | Required per execution | Future task UI/notification | `work_manager` metadata |
-| Long-running Node service | Not implemented | Startup timeout plus watchdog policy | Persistent foreground notification | Future explicit service descriptor |
+| `one_shot` | Implemented | Required positive script timeout | Console/notification while running | directive, file route, project route, packaged route |
+| Execution queue | Implemented helper, not a mode | Queue timeout plus per-script timeout | Caller-owned diagnostics | `enqueueScript(...)` |
+| `scheduled` | Reserved; WorkManager still launches bounded one-shot executions | Required task timeout | Future task UI/notification | future scheduled runner |
+| `interactive_long_running` | Partial explicit foreground MVP | Startup timeout plus stop grace and watchdog policy | Persistent foreground notification with Stop | explicit interactive session API or packaged long-running opt-in |
+| `worker_computation` | Reserved behind worker_threads gates | Startup/task timeout | None | future worker runtime |
+| `node_sandboxed` | Manifest and policy POC; not executable | Broker startup and script timeout | Host-owned visibility required | future isolated-process runtime |
 
 ## Explicit Opt-In
 
-Future service mode must require a dedicated descriptor, for example:
+Broader project/package service mode must require a dedicated descriptor, for
+example:
 
 ```json
 {
@@ -67,9 +126,25 @@ The exact schema is deferred, but required properties should include:
 
 The default for all existing scripts remains one-shot mode.
 
+The current runtime accepts `executionMode: "one_shot"` for normal script
+launches. The aliases `"interactiveLongRunning"`, `"longRunning"`,
+`"long_running"`, and `"service"` normalize to `interactive_long_running`, but
+direct script launches still reject before user JavaScript runs and do not
+convert `timeoutMs: 0` into an unbounded run. `interactive_long_running` is
+accepted only when the service request is created through the explicit
+interactive session launch surface or packaged long-running launch surface.
+`scheduled` and `workerComputation` are also recognized as reserved modes and
+rejected before user code until their dedicated gates are implemented.
+
 ## Foreground Notification
 
 Long-running service mode must run with an explicit foreground notification while active.
+
+The S7-18 MVP notification uses the dedicated Embedded Node foreground service
+channel, a persistent service notification, and a Stop action bound to the
+current execution id. The notification content identifies the interactive Node
+runtime and source name. Rich diagnostics/open-console actions remain future
+work.
 
 Required notification properties:
 
@@ -83,7 +158,17 @@ Required notification properties:
 
 The notification must not be reused as a generic script notification. Service mode needs a distinct channel/category so users can identify persistent Node work.
 
-Android 14+ foreground service type requirements still apply. The current `specialUse` service type can cover only valid special-use cases and must keep its subtype property and Play review explanation accurate.
+Android 14+ foreground service type requirements still apply. The current
+`specialUse` service type can cover only valid special-use cases and must keep
+its subtype property and Play review explanation accurate. S7-19 adds an
+Android runtime policy diagnostic that verifies the embedded Node service
+manifest, foreground-service permissions, requested service type, and API-level
+policy flags before focused gates promote a long-running change.
+
+Foreground service start failures must be visible. Android background-start
+denials are reported as `ERR_AUTOJS6_FOREGROUND_SERVICE_START_NOT_ALLOWED`;
+missing or mismatched foreground-service types are reported as
+`ERR_AUTOJS6_FOREGROUND_SERVICE_TYPE_INVALID`.
 
 ## Timeout And Watchdog Policy
 
@@ -105,6 +190,31 @@ If startup does not complete before `startupTimeoutMs`, the service should fail 
 
 If stop grace expires, the service process should be force-stopped and diagnostics should record leaked resources.
 
+S7-20 adds the first runtime budget and heartbeat diagnostic layer. The policy
+is derived from the existing bridge limit policy and execution mode: one-shot
+runs keep `timeoutMs` as the maximum execution duration, while
+`interactive_long_running` reports the policy
+`foreground_user_visible_no_automatic_restart`. Interactive sessions now write
+periodic app-private heartbeat snapshots with event-loop responsiveness, last
+bridge request/response progress, active libuv handle diagnostics when native
+values are available, active `NodeBridgeResourceRegistry` entries, and current
+resource-budget usage. A pending bridge call with no timely bridge response is
+reported as `stale_pending_bridge` so stalled runtimes produce actionable
+diagnostics before broader service-mode promotion.
+
+Android 15+ can call `Service.onTimeout(int, int)` for timed-out foreground
+service types. The S7-19 runtime handles both service timeout overloads,
+records foreground timeout diagnostics in the interactive status snapshot,
+marks the runtime timed out, calls `stopSelf()` immediately, stops foreground
+notification ownership, and schedules the isolated Node process to exit. This
+path exists to avoid platform `RemoteServiceException` when Android grants only
+a short timeout grace window.
+
+Android 16+ WorkManager long-running workers can consume JobScheduler quota.
+The controlled `work_manager` provider remains bounded one-shot/periodic task
+execution, not arbitrary service mode, and now records quota diagnostics in task
+records and last-run metadata.
+
 ## User Stop Controls
 
 Long-running service mode must provide multiple stop paths:
@@ -115,7 +225,23 @@ Long-running service mode must provide multiple stop paths:
 - `engines.stopAll()` from AutoJs6-owned control surfaces
 - packaged app stop control when running in packaged APK
 
-Stop must route through the same lifecycle controller. JavaScript should receive a cooperative shutdown signal before force stop, but force stop must remain available if the service does not drain.
+The S7-18 MVP implements the foreground notification Stop action and the
+programmatic client stop path
+`NativeNodeEmbeddedScriptService.stopInteractiveLongRunning(context,
+executionId)`. Stop requests mark the interactive status as stopping/stopped and
+schedule the isolated embedded Node process to exit. Console UI and packaged app
+stop controls remain future gates.
+
+S7-22 adds the script-level cooperative stop callback for the interactive
+session surface. `lifecycle.onStop(handler)` receives a bounded stop reason, can
+call `lifecycle.checkpoint(data, { reason })`, and runs during a 1500 ms stop
+grace window before the isolated process is allowed to exit. The stop path
+preserves `stopRequested=true` in terminal status snapshots when the script
+drains voluntarily after a stop request.
+
+Stop must route through the same lifecycle controller. JavaScript should
+eventually receive a cooperative shutdown signal before force stop, but force
+stop must remain available if the service does not drain.
 
 Suggested future JavaScript shape:
 
@@ -130,6 +256,23 @@ onStopRequested(async () => {
   // close controlled resources here
 });
 ```
+
+Current S7-22 JavaScript shape:
+
+```js
+const lifecycle = require("autojs6:lifecycle");
+
+lifecycle.onStop(async (reason) => {
+  await lifecycle.checkpoint({ reason, cursor: 42 }, { reason: "user.stop" });
+});
+
+await lifecycle.onRestore((checkpoint, record) => {
+  console.log(record.restartPolicy, checkpoint.cursor);
+});
+```
+
+`onRestore()` is explicit and application-owned. AutoJs6 does not silently
+restart the previous script or replay arbitrary code from a checkpoint.
 
 This `service` module is a future design item. It must not appear in the Safe Node Profile until implementation and tests exist.
 
@@ -154,6 +297,16 @@ Required quota categories:
 Quota failures should use stable `ERR_AUTOJS6_*` or bridge error codes and should be visible in diagnostics.
 
 Quota policy must have hard maximums that project metadata cannot raise.
+
+The S7-20 runtime budget does not grant new resources and does not bypass
+provider enforcement. Safe project/package/runtime overrides may lower or raise
+reported budget values only up to the effective `NodeBridgeLimits` hard caps for
+pending bridge calls, image handles, controlled fetch requests, and controlled
+WebSocket sessions. Resource breaches are surfaced through
+`embedded_script.runtime_budget.*`, heartbeat JSON, and `activeResources`;
+provider-level quota denials such as shell, network, WebSocket, image, sensor,
+UI, and bridge pending-call limits continue to reject or clean up the offending
+resource through their existing fail-closed paths.
 
 ## Network And WebSocket Behavior
 
@@ -232,6 +385,11 @@ Suggested future descriptor:
 
 Long-running services should not reuse the current one-shot lifecycle assumptions blindly.
 
+The S7-18 MVP still runs in `:nodejs_embedded` and keeps the existing
+single-active Node environment invariant. It is an interactive runtime surface,
+not a generic service scheduler. No automatic restart is attempted after stop,
+timeout, process exit, or failure.
+
 Open design choices:
 
 - reuse `:nodejs_embedded` with a dedicated service component
@@ -270,24 +428,58 @@ Long-running service diagnostics should include:
 
 Diagnostics should be attachable through the existing Embedded Node doctor report once a runtime provider exists.
 
-## Tests Required Before Implementation
+The S7-18 MVP writes app-private JSON status snapshots containing schema
+version, execution id, execution mode, launch surface, source name, working
+directory, state, start/update timestamps, duration, stop-request flag, restart
+policy `never`, `automaticRestart=false`, stop action name, active resource
+summary, policy metadata, and native values.
 
-No runtime implementation should land without focused tests for:
+S7-20 extends those snapshots with runtime heartbeat status, heartbeat sequence,
+event-loop responsiveness, runtime budget status, budget breach count,
+`NodeBridgeResourceRegistry` active count/types, active image handles,
+controlled fetch requests, and controlled WebSocket sessions. Stopping, stopped,
+timed-out, and failed terminal status records preserve the latest runtime budget
+native values so a later diagnostic read does not lose the reason a runtime was
+stalled, over budget, or stopped by the user/system.
+
+S7-22 adds checkpoint metadata to the same status snapshots. The status file
+records whether a project-scoped checkpoint exists plus its reason, byte count,
+and timestamps; it does not duplicate the full checkpoint payload. Full payloads
+remain in the app-private checkpoint store and are returned only through the
+explicit lifecycle read/restore APIs.
+
+## Tests
+
+The current S7-18 gate covers:
 
 - normal scripts still time out
-- service startup timeout
-- ready signal success path
 - notification stop action
-- console stop action
-- cooperative stop drain
-- force stop after grace timeout
-- service destroy rejects pending bridge calls
-- controlled fetch/WebSocket cleanup
-- quota exceeded paths
-- packaged manifest verifier
-- packaged service smoke
-- crash without restart
-- bounded restart policy if implemented
+- explicit interactive session status: starting/running/stopping/stopped
+- runtime duration and active resource summary fields
+- app UI leaving foreground while the script remains alive
+- notification/client Stop path and recovery after process teardown
+- Android runtime policy diagnostics for foreground service manifest/type,
+  background-start denial classification, Android 15 timeout cleanup, and
+  Android 16 WorkManager quota reporting
+- runtime budget parsing, heartbeat stale classification, provider resource
+  quota rejection without leaks, and interactive status heartbeat/budget
+  summaries
+- cooperative `onStop()` checkpoint write, project-scoped metadata in stopped
+  status, service-settled explicit `onRestore()`, and restart policy `never`
+- repeated interactive stop/checkpoint/recovery cycles with periodic timer
+  cleanup and bounded memory pressure
+- provider destroy cleanup for owned notification, sensor, UI, shell, and
+  WebSocket counters, with zero active provider resources and close errors
+- direct script `interactiveLongRunning`/legacy `long_running` rejection before
+  user code
+- one-shot interval timeout regression
+
+Before broader service mode promotion, add focused tests for startup ready
+signals, console stop, cooperative stop drain, force stop after grace timeout,
+service destroy rejection for pending bridge calls, live controlled
+fetch/WebSocket cleanup, quota exceeded paths, packaged manifest verification,
+packaged service smoke, crash without restart, and bounded restart policy if
+implemented.
 
 ## Release Gate
 
@@ -295,9 +487,19 @@ Any release with long-running service mode enabled must verify:
 
 - normal one-shot timeout tests still pass
 - `NodeEmbeddedLifecycleStressInstrumentationTest` still passes
+- `NodeInteractiveLongRunningInstrumentationTest` passes on the target device
+- `NodeLongRunningStressInstrumentationTest` passes on the target device
+- `NodeAndroidRuntimePolicyInstrumentationTest` passes on the target device
+- `NodeRuntimeBudgetPolicyInstrumentationTest` passes on the target device
 - foreground service permissions and type are correct
-- packaged diagnostic report includes service-mode checks
+- status snapshots include duration, restart policy `never`, stop action, and
+  active resource summary plus runtime heartbeat/budget/checkpoint diagnostics
+- checkpoint payloads remain JSON-only, app-private, project-scoped,
+  size-limited, and explicit-restore only
 - raw network and dangerous process APIs remain denied
+- provider destroy leaves no active provider resources, shell commands,
+  WebSocket counters, or close errors
 - service mode is documented as explicit and user-visible
 
-Until those gates exist, long-running service mode remains a design-only future capability.
+Packaged service mode still remains disabled until packaged manifest, template,
+diagnostic, and stop-control gates exist.

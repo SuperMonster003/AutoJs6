@@ -1,0 +1,5 @@
+{
+  "name": "crash-evidence-bundle",
+  "type": "node",
+  "main": "main.cjs"
+}

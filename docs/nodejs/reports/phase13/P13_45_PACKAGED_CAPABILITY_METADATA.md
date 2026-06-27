@@ -1,0 +1,66 @@
+# P13-45 Packaged APK Capability Metadata
+
+P13-45 records packaged APK capability metadata as partial capability evidence.
+The P13-45 metadata gate is ready: the current landing adds
+`packagedCapabilityProfile` diagnostics, a structured
+`packagedMetadata` summary inside the bridge permission manifest, focused
+device instrumentation, a host verifier, and a Gradle gate.
+
+## Covered
+
+- `project.json node.profile`, `node.profiles`, `node.permissions`,
+  `node.builtins`, `node.nativeAssets`, `node.filesystem.roots`,
+  `node.executionMode`, and `node.network` are parsed into a read-only metadata
+  summary.
+- `package.json autojs6` / `autojs6.node` metadata can contribute the same
+  packaged profile, builtin, native asset, filesystem root, and network fields.
+- `node.permissions` remains the authority source for bridge dispatch and
+  Android manifest permission synthesis.
+- `network` capability metadata maps to `android.permission.INTERNET` through
+  the existing manifest permission path.
+- Invalid packaged metadata fields are reported through both top-level manifest
+  warnings and `packagedMetadata.warnings`, and JS receives the same frozen
+  diagnostics through `bridge.permissions()` and `autojs6:profile`.
+- Declared builtins, native assets, filesystem roots, and profiles are
+  diagnostic-only and do not grant runtime authority.
+- Missing bridge capabilities still reject before dispatch in JavaScript; this
+  denial evidence is covered by focused instrumentation and the host verifier.
+
+For P13-45 v1.1, packaged profile, builtin, native asset, and filesystem-root
+metadata stay diagnostic-only. They are accepted only as reviewable metadata
+and must not select runtime profiles, widen builtin allowlists, load native
+assets, expand filesystem roots, or grant bridge authority.
+
+## Future Promotion Work
+
+- Full packaged install/run synthesis, user disclosure, rollback, and
+  profile-specific device matrices remain future work.
+
+The generated gate treats full install/run plus disclosure/profile promotion as
+future packaged promotion work, not as a blocker for the P13-45 metadata
+closure.
+
+## Evidence
+
+- Runtime diagnostics: `packagedCapabilityProfile`
+- Manifest metadata: `NodeBridgePermissionManifest.PackagedMetadata`
+- Focused test:
+  `NodePackagedCapabilityMetadataPhase13DecisionInstrumentationTest`
+- Existing evidence:
+  `NodeBridgePermissionManifestInstrumentationTest`,
+  `EmbeddedNodePackagedApkSmokeTest`,
+  `NodeWorkManagerBridgeInstrumentationTest`,
+  `NodeProjectRuntimeCompatibilityDescriptor`,
+  `NodeProjectLaunchDescriptor`, and `ApkBuilder`
+- Host verifier:
+  `tools/nodejs/phase13/verify-packaged-capability-metadata-decision.js`
+- Gradle gate:
+  `:app:verifyNodePhase13PackagedCapabilityMetadataDecision`
+
+## Verification
+
+```powershell
+node tools\nodejs\phase13\verify-packaged-capability-metadata-decision.js --repo-root . --report-dir build\reports\nodejs
+.\gradlew.bat --console=plain :app:verifyNodePhase13PackagedCapabilityMetadataDecision
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePackagedCapabilityMetadataPhase13DecisionInstrumentationTest"
+```

@@ -20,9 +20,23 @@ The current runtime keeps inspector disabled:
 - `require("inspector")` and `require("node:inspector")` reject with the disabled-builtin error shape.
 - `require.resolve("inspector")` rejects before `node_modules/inspector` can shadow the disabled builtin.
 - `process._debugProcess` is disabled.
+- `process.execArgv` is empty, `process.allowedNodeEnvironmentFlags` is frozen and empty, and `process.features.inspector` / `process.features.debug` are false.
+- Request startup env strips Node debugger/cache keys before native Node initialization, and script-visible `process.env` filters the same startup/debugger keys.
 - `NodeRuntimeCapabilities.featureFlagsById["inspector"]` is `status=disabled`, `securityLevel=high`, and has no build, project, or packaged APK override.
 - No embedded Node service binds an inspector TCP or WebSocket port.
 - Packaged APK verification does not accept inspector metadata.
+
+## S8-37 Design Gate
+
+S8-37 adds `NodeInspectorDesignGateInstrumentationTest` as a focused negative gate for the disabled policy. It verifies the registry-disabled feature flag, build/project/package override denial, script-visible builtin denial, local `node_modules/inspector` shadowing denial, inert process debugging APIs, startup/debugger env filtering, and absence of inspector diagnostics while disabled.
+
+The gate does not enable inspector support. A future task that opens a debug endpoint must add positive attach tests and the lifecycle/security coverage listed under Future Acceptance Gate.
+
+## S8-40 Security Gate
+
+S8-40 adds `NodeInspectorSecurityGateInstrumentationTest` as a focused hardening gate for hostile startup input while the inspector remains disabled. It verifies release/project/package metadata denial, non-loopback and loopback `NODE_OPTIONS=--inspect` attempts, port cleanup after normal script stop and timeout, and absence of inspector profile artifacts or sensitive marker leaks.
+
+The runtime also strips `NODE_OPTIONS`, `NODE_INSPECT_RESUME_ON_START`, `NODE_COMPILE_CACHE`, and `NODE_DISABLE_COMPILE_CACHE` at the embedded request boundary before native startup. Native initialization disables `NODE_OPTIONS` parsing and global debug variable parsing. These changes preserve the disabled result: no inspector endpoint, no active session, no profiler channel, and no script-visible authority.
 
 ## Risk Model
 
@@ -55,6 +69,26 @@ If a future task implements inspector support, the minimum binding policy is:
 
 On Android, opening a socket may require `android.permission.INTERNET`. That permission is broad, so inspector support must not add it to normal main-app or packaged APK release manifests merely for debugging. Debug variants may opt in explicitly.
 
+## ADB Forward And DevTools Workflow
+
+S8-38 remains deferred while S8-37 keeps inspector disabled. There is currently
+no device endpoint, no port, no ADB forward target, and no Chrome DevTools URL.
+
+A future workflow must be host-assisted but runtime-owned:
+
+- AutoJs6 starts the session only from trusted debug UI or host/debug command.
+- The device listener binds loopback only and uses a random ephemeral port.
+- A structured session descriptor exposes execution id, loopback host, device
+  port, opaque WebSocket path/token, and expiry.
+- The host tool creates `adb forward tcp:<host-port> tcp:<device-port>`.
+- DevTools attaches through `127.0.0.1:<host-port>`, not a public interface.
+- Stop/revoke removes the active session and gives the host deterministic
+  cleanup instructions for the ADB forward.
+
+Breakpoints, pause/resume, console, async stacks, source maps, ESM source
+names, and lightweight TypeScript source names are acceptance criteria for a
+future positive gate, not current runtime behavior.
+
 ## WebSocket Transport
 
 The Node inspector protocol uses WebSocket transport, but it is not the same as AutoJs6's controlled `websocket` bridge module.
@@ -80,6 +114,23 @@ Future design must prove:
 - `node::Stop()` and service destroy close the inspector session deterministically
 - heap snapshot and CPU profile operations are bounded or explicitly user-controlled
 - crash diagnostics distinguish inspector crashes from script crashes
+
+## Profiling And Heap Snapshots
+
+S8-39 also remains deferred while inspector is disabled. The current runtime
+does not emit `.cpuprofile`, `.heapsnapshot`, allocation sampling, or
+inspector-owned event-loop reports.
+
+Future profiling support must:
+
+- require explicit user action for CPU profiles and heap snapshots
+- keep raw artifacts under app-private diagnostics until explicit export
+- correlate profiles with execution id, event-loop utilization, bridge resource
+  counters, memory/RSS samples, and cleanup state
+- redact project-sensitive metadata from summaries
+- close profiler sessions on script stop, timeout, crash, service destroy, or
+  user revoke
+- deny packaged release profiling
 
 ## Packaged APK Policy
 

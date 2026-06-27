@@ -1,0 +1,84 @@
+{
+  "schema": "autojs6-node-pro-parity-examples-v1",
+  "phase": "P13-53",
+  "status": "partial",
+  "smokeSubset": {
+    "entry": "smoke.cjs",
+    "expectedOutput": "smoke-output.txt",
+    "profile": "pro_compat_opt_in",
+    "examples": ["ui-layout", "tasks-work-manager"],
+    "description": "Runs already-covered Activity-owned UI layout and WorkManager one-shot scheduling/cancel paths without enabling Java, Rhino, overlay, screenshot, OCR, or accessibility authority."
+  },
+  "examples": [
+    {
+      "id": "java-interop",
+      "title": "$autojs.java allowlist call",
+      "file": "snippets/java-interop.cjs",
+      "targetProfile": "pro_compat_opt_in",
+      "requiredCapabilities": ["java_interop"],
+      "expectedOutput": "sample.pro-parity-suite.java-interop=PASS",
+      "packagedBehavior": "metadata-only until Pro profile promotion and Java allowlist review",
+      "skipReason": "java_interop requires explicit Pro/debug opt-in and allowlist provider readiness"
+    },
+    {
+      "id": "rhino-install",
+      "title": "rhino.install Java proxy globals",
+      "file": "snippets/rhino-install.cjs",
+      "targetProfile": "pro_compat_opt_in",
+      "requiredCapabilities": ["rhino", "java_interop"],
+      "expectedOutput": "sample.pro-parity-suite.rhino-install=PASS",
+      "packagedBehavior": "experimental metadata-only proxy install; no default global mutation",
+      "skipReason": "rhino.install({ experimental: true }) depends on the Java proxy provider"
+    },
+    {
+      "id": "ui-layout",
+      "title": "Activity-owned JSON UI layout",
+      "file": "snippets/ui-layout.cjs",
+      "targetProfile": "pro_compat_opt_in",
+      "requiredCapabilities": ["ui"],
+      "expectedOutput": "sample.pro-parity-suite.ui-layout=PASS",
+      "packagedBehavior": "packaged UI remains gated by lifecycle and disclosure evidence",
+      "skipReason": "live UI provider may be unavailable for the current execution mode"
+    },
+    {
+      "id": "overlay-floaty",
+      "title": "floaty-style overlay migration",
+      "file": "snippets/overlay-floaty.cjs",
+      "targetProfile": "pro_compat_opt_in",
+      "requiredCapabilities": ["ui.overlay", "ui.overlay.permission"],
+      "expectedOutput": "sample.pro-parity-suite.overlay-floaty=PASS",
+      "packagedBehavior": "requires reviewed disclosure, overlay permission, and foreground notification ownership",
+      "skipReason": "overlay permission or promoted overlay provider may be unavailable"
+    },
+    {
+      "id": "tasks-work-manager",
+      "title": "WorkManager one-shot task migration",
+      "file": "snippets/tasks-work-manager.cjs",
+      "targetProfile": "pro_compat_opt_in",
+      "requiredCapabilities": ["work_manager"],
+      "expectedOutput": "sample.pro-parity-suite.tasks-work-manager=PASS",
+      "packagedBehavior": "one-shot metadata is supported; daily/weekly/intent rows remain gated",
+      "skipReason": "WorkManager provider or persistent task database substrate may be unavailable"
+    },
+    {
+      "id": "screenshot-ocr",
+      "title": "screenshot plus OCR migration",
+      "file": "snippets/screenshot-ocr.cjs",
+      "targetProfile": "pro_compat_opt_in",
+      "requiredCapabilities": ["screen_capture", "image", "ocr"],
+      "expectedOutput": "sample.pro-parity-suite.screenshot-ocr=PASS",
+      "packagedBehavior": "packaged capture/OCR requires disclosure manifest and permission review",
+      "skipReason": "MediaProjection permission, image handle, or OCR provider may be unavailable"
+    },
+    {
+      "id": "accessibility-selector",
+      "title": "selector/accessibility migration",
+      "file": "snippets/accessibility-selector.cjs",
+      "targetProfile": "pro_compat_opt_in",
+      "requiredCapabilities": ["accessibility"],
+      "expectedOutput": "sample.pro-parity-suite.accessibility-selector=PASS",
+      "packagedBehavior": "packaged accessibility requires service/disclosure review",
+      "skipReason": "accessibility service may be disabled"
+    }
+  ]
+}

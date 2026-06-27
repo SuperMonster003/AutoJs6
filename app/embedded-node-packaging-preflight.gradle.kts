@@ -286,7 +286,6 @@ private val embeddedNodePackagingDiagnosticsMarkers = listOf(
     "packaged.diagnostics.esm.exports_context=true",
     "packaged.diagnostics.after_failure.ok=true",
     "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
-    "packaged.diagnostics.dynamic_import.code=ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED",
     "packaged.diagnostics.timeout.code=ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT",
     "packaged.diagnostics.timeout.timedOut=true",
     "packaged.diagnostics.timeout.pendingTimers=true",
@@ -300,7 +299,8 @@ private val embeddedNodePackagingDiagnosticsJavaScriptEntries = listOf(
     "assets/project/main.js",
     "assets/project/esm-entry.mjs",
     "assets/project/dynamic-import.js",
-    "assets/project/dynamic-target.js",
+    "assets/project/dynamic-target.mjs",
+    "assets/project/dynamic-legacy.cjs",
     "assets/project/timeout.js",
     "assets/project/node_modules/diagnostic-boom/index.js",
     "assets/project/node_modules/diagnostic-type-module/index.mjs",
@@ -323,6 +323,9 @@ private val embeddedNodePackagingKnownBridgeCapabilities = listOf(
     "accessibility",
     "screen_capture",
     "image",
+    "ocr",
+    "storage",
+    "ui",
     "clipboard",
     "device",
     "shell",
@@ -359,6 +362,7 @@ private val embeddedNodePackagingSmokeApkNames = listOf(
     "PackagedNodeEsmDiagnosticsSmoke_v1.0.0.apk",
     "PackagedNodeDynamicImportDiagnosticsSmoke_v1.0.0.apk",
     "PackagedNodeTimeoutDiagnosticsSmoke_v1.0.0.apk",
+    "PackagedNodeV11BridgeSmoke_v1.0.0.apk",
 )
 private val embeddedNodePackagingSmokeVerifierReadyApkNames = setOf(
     "PackagedNodeSmoke_v1.0.0.apk",
@@ -658,6 +662,7 @@ private fun embeddedNodePackagingNormalizeBridgeCapability(value: String): Strin
         when (normalized) {
             "media_projection", "media.projection", "screen.capture", "screencapture" -> "screen_capture"
             "engine.exec" -> "engines.exec"
+            "storages" -> "storage"
             "java" -> "java_interop"
             else -> normalized
         }
@@ -3527,6 +3532,351 @@ val generateDesktopNodeDifferentialReport = tasks.register(
     commandLine("node", rootProject.projectDir.resolve("tools/nodejs/differential/run-differential-tests.js").absolutePath)
 }
 
+val generateNodeModernCoreDifferentialReport = tasks.register(
+    "generateNodeModernCoreDifferentialReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Runs the desktop Node differential harness for modern core capability probes."
+
+    workingDir(rootProject.projectDir)
+    commandLine("node", rootProject.projectDir.resolve("tools/nodejs/differential/run-modern-core-differential.js").absolutePath)
+}
+
+val generateNode24PatchUpgradeFeasibilityReport = tasks.register(
+    "generateNode24PatchUpgradeFeasibilityReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Generates the Node 24.x patch upgrade feasibility report without changing the default runtime."
+
+    workingDir(rootProject.projectDir)
+
+    val command = mutableListOf(
+        "node",
+        rootProject.projectDir
+            .resolve("tools/nodejs/patch-upgrade/generate-node24-patch-feasibility.js")
+            .absolutePath,
+    )
+    providers.gradleProperty("autojs.nodejs.patchTargetVersion").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--target-version", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateJniLibs").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-jni-libs", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateHeaders").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-headers", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateCompatibilityProfile").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-compatibility-profile", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidatePerformanceReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-performance-report", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateDifferentialReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-differential-report", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidatePackagedReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-packaged-report", it)) }
+    providers.gradleProperty("autojs.nodejs.patchFailOnNoGo").orNull
+        ?.takeIf { it.equals("true", ignoreCase = true) }
+        ?.let { command.add("--fail-on-no-go") }
+
+    commandLine(command)
+    outputs.upToDateWhen { false }
+}
+
+val generateNodeDualRuntimeABReport = tasks.register(
+    "generateNodeDualRuntimeABReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Generates the build-only Node 24 dual-runtime A/B gate report."
+
+    workingDir(rootProject.projectDir)
+
+    val command = mutableListOf(
+        "node",
+        rootProject.projectDir
+            .resolve("tools/nodejs/patch-upgrade/generate-dual-runtime-ab-gate.js")
+            .absolutePath,
+    )
+    providers.gradleProperty("autojs.nodejs.runtimeSlot").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--runtime-slot", it)) }
+    providers.gradleProperty("autojs.nodejs.patchTargetVersion").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--target-version", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateJniLibs").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-jni-libs", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateHeaders").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-headers", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateCompatibilityProfile").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-compatibility", it)) }
+    providers.gradleProperty("autojs.nodejs.abCandidateSecurityReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-security", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidatePackagedReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-packaged", it)) }
+    providers.gradleProperty("autojs.nodejs.abCandidateMemoryReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-memory", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidatePerformanceReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-performance", it)) }
+    providers.gradleProperty("autojs.nodejs.abFailOnBlocked").orNull
+        ?.takeIf { it.equals("true", ignoreCase = true) }
+        ?.let { command.add("--fail-on-blocked") }
+
+    commandLine(command)
+    outputs.upToDateWhen { false }
+}
+
+val generateNode2417NativeDiffReport = tasks.register(
+    "generateNode2417NativeDiffReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Generates the Node 24.17 native ABI/export diff report without changing the default runtime."
+
+    workingDir(rootProject.projectDir)
+
+    val command = mutableListOf(
+        "node",
+        rootProject.projectDir
+            .resolve("tools/nodejs/patch-upgrade/generate-node2417-native-diff.js")
+            .absolutePath,
+    )
+    providers.gradleProperty("autojs.nodejs.patchTargetVersion").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--target-version", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateJniLibs").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-jni-libs", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateHeaders").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-headers", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateSourceCommit").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-source-commit", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateBuildNotes").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-build-notes", it)) }
+    providers.gradleProperty("autojs.nodejs.nativeDiffFailOnBlocked").orNull
+        ?.takeIf { it.equals("true", ignoreCase = true) }
+        ?.let { command.add("--fail-on-blocked") }
+
+    commandLine(command)
+    outputs.upToDateWhen { false }
+}
+
+val verifyNode2417NativeDiffGate = tasks.register("verifyNode2417NativeDiffGate") {
+    group = "verification"
+    description = "Fails unless the Node 24.17 native ABI/export diff report is ready."
+
+    dependsOn(generateNode2417NativeDiffReport)
+    doLast {
+        val reportFile = rootProject.layout.buildDirectory
+            .file("reports/nodejs/node-24.17-native-diff.json")
+            .get()
+            .asFile
+        if (!reportFile.isFile) {
+            throw GradleException("Node 24.17 native diff report is missing: ${reportFile.absolutePath}")
+        }
+        val reportJson = JsonSlurper().parse(reportFile) as Map<*, *>
+        val decision = reportJson["decision"] as? Map<*, *>
+        if (decision?.get("status") != "ready") {
+            throw GradleException(
+                "Node 24.17 native diff gate is not ready. See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
+val generateNode2417SecurityProbeReport = tasks.register(
+    "generateNode2417SecurityProbeReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Generates the Node 24.17 security probe coverage/evidence report."
+
+    workingDir(rootProject.projectDir)
+    mustRunAfter("connectedAppDebugAndroidTest")
+
+    val command = mutableListOf(
+        "node",
+        rootProject.projectDir
+            .resolve("tools/nodejs/patch-upgrade/generate-node2417-security-probes.js")
+            .absolutePath,
+    )
+    providers.gradleProperty("autojs.nodejs.patchTargetVersion").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--target-version", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateSecurityReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-security-report", it)) }
+    providers.gradleProperty("autojs.nodejs.securityProbeFailOnBlocked").orNull
+        ?.takeIf { it.equals("true", ignoreCase = true) }
+        ?.let { command.add("--fail-on-blocked") }
+
+    commandLine(command)
+    outputs.upToDateWhen { false }
+}
+
+val verifyNode2417SecurityProbeGate = tasks.register("verifyNode2417SecurityProbeGate") {
+    group = "verification"
+    description = "Runs and verifies the focused Node 24.17 security fix probes on a candidate runtime."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    val runtimeSlot = providers.gradleProperty("autojs.nodejs.runtimeSlot").orElse("node24_5").get()
+    if (deviceProfile in setOf("sony", "full") && runtimeSlot == "node24_current") {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    dependsOn(generateNode2417SecurityProbeReport)
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+        if (runtimeSlot != "node24_current") {
+            throw GradleException(
+                "$name must be run with -Pautojs.nodejs.runtimeSlot=node24_current and candidate 24.17 artifacts."
+            )
+        }
+    }
+    doLast {
+        val reportFile = rootProject.layout.buildDirectory
+            .file("reports/nodejs/node-24.17-security-probes.json")
+            .get()
+            .asFile
+        if (!reportFile.isFile) {
+            throw GradleException("Node 24.17 security probe report is missing: ${reportFile.absolutePath}")
+        }
+        val reportJson = JsonSlurper().parse(reportFile) as Map<*, *>
+        val decision = reportJson["decision"] as? Map<*, *>
+        if (decision?.get("status") != "ready") {
+            throw GradleException(
+                "Node 24.17 security probe gate is not ready. See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
+val generateNode2417UpgradeGateReport = tasks.register(
+    "generateNode2417UpgradeGateReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Generates the Node 24.17 runtime upgrade gate report from Batch A evidence."
+
+    dependsOn(
+        generateNode24PatchUpgradeFeasibilityReport,
+        generateNode2417NativeDiffReport,
+        generateNodeDualRuntimeABReport,
+        generateNode2417SecurityProbeReport,
+    )
+    workingDir(rootProject.projectDir)
+    mustRunAfter("connectedAppDebugAndroidTest", "verifyEmbeddedNodeDebug", "verifyEmbeddedNodePackagedDebug")
+
+    val command = mutableListOf(
+        "node",
+        rootProject.projectDir
+            .resolve("tools/nodejs/patch-upgrade/generate-node2417-upgrade-gate.js")
+            .absolutePath,
+    )
+    providers.gradleProperty("autojs.nodejs.patchTargetVersion").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--target-version", it)) }
+    providers.gradleProperty("autojs.nodejs.upgradeGateFailOnBlocked").orNull
+        ?.takeIf { it.equals("true", ignoreCase = true) }
+        ?.let { command.add("--fail-on-blocked") }
+
+    commandLine(command)
+    outputs.upToDateWhen { false }
+}
+
+val verifyNode2417UpgradeGate = tasks.register("verifyNode2417UpgradeGate") {
+    group = "verification"
+    description = "Fails unless Node 24.17 Batch A runtime-upgrade evidence is complete and ready for default promotion."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    val runtimeSlot = providers.gradleProperty("autojs.nodejs.runtimeSlot").orElse("node24_5").get()
+    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental")
+        .orElse("false")
+        .get()
+        .equals("true", ignoreCase = true)
+    if (deviceProfile in setOf("sony", "full") && runtimeSlot == "node24_current") {
+        dependsOn(
+            "verifyEmbeddedNodeDebug",
+            "verifyEmbeddedNodePackagedDebug",
+            "connectedAppDebugAndroidTest",
+            generateNode2417UpgradeGateReport,
+        )
+    } else {
+        dependsOn(generateNode2417UpgradeGateReport)
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+        if (runtimeSlot != "node24_current") {
+            throw GradleException(
+                "$name must be run with -Pautojs.nodejs.runtimeSlot=node24_current and candidate 24.17 artifacts."
+            )
+        }
+        if (!networkExperimental) {
+            throw GradleException(
+                "$name requires -Pautojs.nodejs.network.experimental=true so live fetch/WebSocket providers are covered."
+            )
+        }
+    }
+    doLast {
+        val reportFile = rootProject.layout.buildDirectory
+            .file("reports/nodejs/node-24.17-upgrade-gate.json")
+            .get()
+            .asFile
+        if (!reportFile.isFile) {
+            throw GradleException("Node 24.17 upgrade gate report is missing: ${reportFile.absolutePath}")
+        }
+        val reportJson = JsonSlurper().parse(reportFile) as Map<*, *>
+        val decision = reportJson["decision"] as? Map<*, *>
+        if (decision?.get("status") != "ready") {
+            throw GradleException(
+                "Node 24.17 upgrade gate is not ready. See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
+val verifyNodeDualRuntimeABGate = tasks.register("verifyNodeDualRuntimeABGate") {
+    group = "verification"
+    description = "Fails unless the Node 24 dual-runtime A/B gate report has complete evidence for both slots."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn(generateNodeDualRuntimeABReport)
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+    doLast {
+        val reportFile = rootProject.layout.buildDirectory
+            .file("reports/nodejs/patch-upgrade/node-dual-runtime-ab-gate.json")
+            .get()
+            .asFile
+        if (!reportFile.isFile) {
+            throw GradleException("Node dual-runtime A/B gate report is missing: ${reportFile.absolutePath}")
+        }
+        val reportJson = JsonSlurper().parse(reportFile) as Map<*, *>
+        val decision = reportJson["decision"] as? Map<*, *>
+        if (decision?.get("status") != "ready") {
+            throw GradleException(
+                "Node dual-runtime A/B gate is not ready. See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
 val verifyNodePrGate = tasks.register("verifyNodePrGate") {
     group = "verification"
     description = "Runs fast host-side Embedded Node PR checks without connected-device stress or packaged smoke launch."
@@ -3540,6 +3890,7 @@ val verifyNodePrGate = tasks.register("verifyNodePrGate") {
         "verifyNodeCompatibilityProfile",
         "verifyNodeResolverVisualizerFixtures",
         "verifyNodeDependencyBundlerFixtures",
+        generateNodeModernCoreDifferentialReport,
     )
 }
 
@@ -3552,9 +3903,311 @@ val verifyNodeNightlyGate = tasks.register("verifyNodeNightlyGate") {
         dependsOn(
             verifyNodePrGate,
             generateDesktopNodeDifferentialReport,
+            generateNodeModernCoreDifferentialReport,
             verifyEmbeddedNodeDebug,
             verifyEmbeddedNodePackagedDebug,
             "connectedAppDebugAndroidTest",
+        )
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodePackagedEsmGate = tasks.register("verifyNodePackagedEsmGate") {
+    group = "verification"
+    description = "Runs the focused Node Profile v1.1 packaged ESM/dynamic import APK gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeLiveProviderGate = tasks.register("verifyNodeLiveProviderGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 live-provider gate and writes build/reports/nodejs/live-provider-summary.json."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false")
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("generateNodeLiveProviderSummary")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+        if (!networkExperimental.get().equals("true", ignoreCase = true)) {
+            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so fetch/websocket live providers are covered.")
+        }
+    }
+}
+
+val verifyNodeLiveFetchGate = tasks.register("verifyNodeLiveFetchGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 controlled fetch/axios live-provider gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false")
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+        if (!networkExperimental.get().equals("true", ignoreCase = true)) {
+            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so the Android live network provider is enabled.")
+        }
+    }
+}
+
+val verifyNodeLiveWebSocketGate = tasks.register("verifyNodeLiveWebSocketGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 controlled WebSocket live-provider gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false")
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+        if (!networkExperimental.get().equals("true", ignoreCase = true)) {
+            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so the Android live network provider is enabled.")
+        }
+    }
+}
+
+val verifyNodeLiveOcrGate = tasks.register("verifyNodeLiveOcrGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 OCR live-provider gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeLiveStorageNotificationsGate = tasks.register("verifyNodeLiveStorageNotificationsGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 storage/notifications live-provider gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeLiveSensorsGate = tasks.register("verifyNodeLiveSensorsGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 sensors live-provider gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeLiveAccessibilityImageGate = tasks.register("verifyNodeLiveAccessibilityImageGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 accessibility/image live-provider gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeLiveUiGate = tasks.register("verifyNodeLiveUiGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 UI live-provider gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeLiveWorkManagerGate = tasks.register("verifyNodeLiveWorkManagerGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 WorkManager live-provider gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeLongRunningGate = tasks.register("verifyNodeLongRunningGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 long-running/resource-lifecycle readiness gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeWorkerGate = tasks.register("verifyNodeWorkerGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 worker_threads gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeModernCoreGate = tasks.register("verifyNodeModernCoreGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 modern-core compatibility gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeTypeScriptGate = tasks.register("verifyNodeTypeScriptGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 8 lightweight TypeScript routing and stripping gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeDeveloperExperienceGate = tasks.register("verifyNodeDeveloperExperienceGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 10 TypeScript/source-map/node:test/debug-reload developer experience gate."
+
+    dependsOn("verifyNodePhase10DeveloperExperience")
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodePhase8SecurityStressGate = tasks.register("verifyNodePhase8SecurityStressGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 8 security and stress expansion gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodePhase7ResourceStressGate = tasks.register("verifyNodePhase7ResourceStressGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 runtime/provider resource stress gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodePhase7Gate = tasks.register("verifyNodePhase7Gate") {
+    group = "verification"
+    description = "Runs the current focused Node Phase 7 gate set without expanding to the full release gate."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn(
+            verifyNodePackagedEsmGate,
+            verifyNodeLiveProviderGate,
+            verifyNodeLongRunningGate,
+            verifyNodeWorkerGate,
+            verifyNodeModernCoreGate,
+            verifyNodePhase7ResourceStressGate,
+            "generateNodePhase7Summary",
+        )
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodePhase8Gate = tasks.register("verifyNodePhase8Gate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 8 capability expansion gate and writes the Phase 8 summary report."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn(
+            verifyNodeTypeScriptGate,
+            verifyNodePhase8SecurityStressGate,
+            "generateNodePhase8Summary",
+        )
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeWasmWasiGate = tasks.register("verifyNodeWasmWasiGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 9 WebAssembly and raw WASI policy gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodePhase9Gate = tasks.register("verifyNodePhase9Gate") {
+    group = "verification"
+    description = "Runs the Phase 9 aggregate gate without promoting Node 24.17 or loosening Safe Node boundaries."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn(
+            "generateNodePhase9Summary",
+            verifyNodeWasmWasiGate,
         )
     }
     doFirst {
@@ -3571,6 +4224,7 @@ val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
         dependsOn(
             "generateNodeProfileReleaseManifest",
             generateDesktopNodeDifferentialReport,
+            generateNodeModernCoreDifferentialReport,
             "verifyEmbeddedNodeReleaseCandidate",
             "connectedAppDebugAndroidTest",
         )

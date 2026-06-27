@@ -884,6 +884,19 @@ private:
 class ScopedWorkingDirectory {
 public:
     bool enter(JNIEnv* env, const std::string& workingDirectory) {
+        std::string error;
+        if (enter(workingDirectory, &error)) {
+            return true;
+        }
+        throwJava(
+                env,
+                "java/lang/IllegalStateException",
+                error
+        );
+        return false;
+    }
+
+    bool enter(const std::string& workingDirectory, std::string* error) {
         if (workingDirectory.empty()) {
             return true;
         }
@@ -895,12 +908,10 @@ public:
         }
 
         if (chdir(workingDirectory.c_str()) != 0) {
-            throwJava(
-                    env,
-                    "java/lang/IllegalStateException",
-                    "Failed to change working directory to " + workingDirectory + ": " +
-                            std::strerror(errno)
-            );
+            if (error != nullptr) {
+                *error = "Failed to change working directory to " + workingDirectory + ": " +
+                        std::strerror(errno);
+            }
             return false;
         }
         changed_ = true;
@@ -925,6 +936,28 @@ private:
     bool changed_ = false;
     std::string previous_;
 };
+
+struct EmbeddedScriptExecutionRequest {
+    std::string source;
+    std::string sourceName;
+    std::string workingDirectory;
+    std::string sandboxRoot;
+    std::vector<std::pair<std::string, std::string>> moduleSources;
+    std::vector<std::pair<std::string, std::string>> runtimeModuleSources;
+    std::vector<std::pair<std::string, std::string>> env;
+    bool esmExperimentalEnabled = false;
+    bool dynamicImportExperimentalEnabled = false;
+    bool rawNodeNetworkModulesExperimentalEnabled = false;
+    bool workerThreadsExperimentalEnabled = false;
+    bool childProcessExperimentalEnabled = false;
+    bool javaInteropExperimentalEnabled = false;
+};
+
+std::vector<std::string> runEmbeddedScriptExecution(
+        const EmbeddedScriptExecutionRequest& request,
+        const char* runtimeAdapterPath = nullptr,
+        const char* runtimeAdapterMode = nullptr
+);
 
 bool isInlineSystemServiceDeniedProbe(EmbeddedLifecycleJsProbeKind kind);
 void putInlineSystemServiceDeniedSkippedPayload(
@@ -982,12 +1015,15 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::string& source,
         const std::string& sourceName,
         const std::string& workingDirectory,
+        const std::string& sandboxRoot,
         const std::vector<std::pair<std::string, std::string>>& moduleSources,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSources,
         const std::vector<std::pair<std::string, std::string>>& env,
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
+        bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
+        bool childProcessExperimentalEnabled,
         bool javaInteropExperimentalEnabled);
 void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const std::string& text);
 std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values, const char* label = "array");
@@ -1228,7 +1264,8 @@ bool appendUvRunCleanupPayload(
         UvWalk uvWalk,
         UvHandleGetType uvHandleGetType,
         UvIsActive uvIsActive,
-        UvIsClosing uvIsClosing
+        UvIsClosing uvIsClosing,
+        bool collectDiagnostics = true
 );
 int v8BuildConfiguration();
 std::string uvLoopResultDetail(const char* operation, int result);
@@ -1263,7 +1300,8 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         const std::string* sourceOverride = nullptr,
         const char* sourceLabelOverride = nullptr,
         const char* workingDirectoryOverride = nullptr,
-        bool scriptExecution = false
+        bool scriptExecution = false,
+        bool fullUvDiagnostics = true
 );
 void appendEmbeddedIsolateLifecycleProbePayload(
         std::vector<std::string>& payload,

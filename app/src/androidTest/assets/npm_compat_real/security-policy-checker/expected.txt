@@ -1,0 +1,1 @@
+realnpm.security-policy-checker=security:blocked=3/allowed=2

@@ -1,0 +1,16 @@
+{
+  "name": "cpu-profile",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["profiler", "inspector"],
+    "expectedProvider": "design-gated inspector profiling",
+    "packagedSupport": "not supported in release builds",
+    "securityLimitations": ["no release profile artifact export", "no DevTools endpoint"]
+  }
+}

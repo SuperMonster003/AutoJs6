@@ -1,0 +1,292 @@
+{
+  "schema": "autojs6-node-relaxed-capability-security-corpus-v1",
+  "task": "P13-50",
+  "status": "ready",
+  "updatedAt": "2026-06-27",
+  "policy": {
+    "defaultProfile": "safe_default",
+    "profilePromotion": false,
+    "rawCapabilitiesPromoted": false,
+    "minimumEvidence": [
+      "positiveTests",
+      "negativeTests",
+      "abuseCases",
+      "ciEvidence",
+      "runtimeGuards",
+      "promotionPreconditions",
+      "rollback"
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "raw_network",
+      "profile": "desktop_compat_opt_in",
+      "risk": "high",
+      "positiveTests": [
+        "profileSelection reports network as a Desktop-profile high-risk capability with android.permission.INTERNET",
+        "controlled fetch/http/net/tls/dns facades keep documented diagnostics under existing P13-29/P13-30 tests",
+        "raw Node dns/dns-promises/http/https/net/tls native builtins are available only when autojs.nodejs.rawNetworkModules.experimental=true"
+      ],
+      "negativeTests": [
+        "Safe profile keeps raw network disabled by default",
+        "server/listen, DNS resolution, raw socket connect, unsupported schemes, and credential-bearing URLs reject without leaking secrets"
+      ],
+      "abuseCases": [
+        "loopback server bind",
+        "raw socket outbound connect",
+        "DNS resolution without network opt-in",
+        "credential redaction in denied URL diagnostics"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeHttpDesktopParityInstrumentationTest",
+        "NodeNetTlsDnsStagedParityInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "runtimeGuards": [
+        "ERR_AUTOJS6_NETWORK_DISABLED for Safe-profile fetch/http/https/net/tls/dns attempts",
+        "NODEJS_NETWORK_EXPERIMENTAL_ENABLED remains false in release",
+        "NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED remains false in release",
+        "credential-bearing denied URLs must be redacted in diagnostics"
+      ],
+      "promotionPreconditions": [
+        "P13-51 rollback playbook has a raw-network kill switch",
+        "P13-52 privacy disclosure covers outbound network and DNS lookup behavior",
+        "packaged APK metadata and review UI record raw network authority",
+        "positive, negative, and abuse tests are green on connected Android CI before enabling"
+      ],
+      "rollback": "Keep NODEJS_NETWORK_EXPERIMENTAL_ENABLED false and NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED false."
+    },
+    {
+      "id": "filesystem_relaxation",
+      "profile": "desktop_compat_opt_in",
+      "risk": "high",
+      "positiveTests": [
+        "scoped working-directory reads/writes and advanced fs APIs work inside the project root",
+        "filesystemProfile reports additionalRoots as empty and rawFd as false"
+      ],
+      "negativeTests": [
+        "absolute paths, parent traversal, NUL paths, /proc, /sys, /dev, symlink, and realpath escapes reject",
+        "watchers and streams must close without pending scoped resources"
+      ],
+      "abuseCases": [
+        "symlink escape to app cache sibling",
+        "realpath escape",
+        "absolute device/proc/sys reads",
+        "stream escape cleanup"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#scopedFilesystemAndPackageEscapesStayDenied",
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeFilesystemAdvancedDecisionInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "runtimeGuards": [
+        "ERR_AUTOJS6_FS_REALPATH_ESCAPE for realpath and symlink escapes",
+        "EPERM for absolute paths, parent traversal, and process.chdir escapes",
+        "filesystemProfile.additionalRoots remains empty",
+        "raw fd numbers and broad host paths remain unavailable"
+      ],
+      "promotionPreconditions": [
+        "P13-51 rollback playbook has an expanded-filesystem kill switch",
+        "P13-52 privacy disclosure covers broad file access and retained file metadata",
+        "packaged APK metadata records authorized filesystem roots",
+        "escape, symlink, watcher, stream, and cleanup tests are green on connected Android CI before enabling"
+      ],
+      "rollback": "Keep filesystemProfile.additionalRoots empty and require explicit future root authorization."
+    },
+    {
+      "id": "java_interop",
+      "profile": "pro_compat_opt_in",
+      "risk": "critical",
+      "positiveTests": [
+        "debug experimental provider can call allowlisted java.lang.Math and manage JSON-safe Android handles",
+        "profileSelection and featureFlags report Java interop as high-risk disabled by default"
+      ],
+      "negativeTests": [
+        "default Java module require/resolve is denied and cannot be shadowed",
+        "Runtime.exec, ProcessBuilder, ClassLoader, reflection, System.loadLibrary, denied mutation, and released handles reject"
+      ],
+      "abuseCases": [
+        "process execution through java.lang.Runtime",
+        "classloader access",
+        "reflection access",
+        "native library loading",
+        "stale Java handle reuse"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13JavaInteropRelaxedCapabilityCorpusKeepsAllowlistAndDenials",
+        "NodeJavaInteropBridgeInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "runtimeGuards": [
+        "ERR_AUTOJS6_JAVA_INTEROP_DISABLED when Java interop is disabled",
+        "ERR_AUTOJS6_JAVA_CLASS_DENIED for Runtime, ProcessBuilder, ClassLoader, and System.loadLibrary",
+        "ERR_AUTOJS6_JAVA_REFLECTION_DENIED for reflection classes",
+        "released Java handles must reject stale use"
+      ],
+      "promotionPreconditions": [
+        "P13-51 rollback playbook has a Java interop kill switch",
+        "P13-52 privacy disclosure covers host object access and Android API reach",
+        "packaged APK metadata rejects Java interop authority unless reviewed allowlist and disclosure evidence exist",
+        "allowlist review explicitly rejects process execution, class loading, reflection, and native loading",
+        "allowlist and denylist tests are green on connected Android CI before enabling"
+      ],
+      "rollback": "Keep NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED false in release and reject project/package overrides."
+    },
+    {
+      "id": "child_process",
+      "profile": "desktop_compat_opt_in",
+      "risk": "high",
+      "positiveTests": [
+        "separate shell bridge remains available only with shell capability",
+        "childProcessProfile documents scoped-runner requirements"
+      ],
+      "negativeTests": [
+        "child_process and node:child_process require/resolve are denied and cannot be shadowed",
+        "raw process handles, spawn/fork, detached mode, signals, and fd streams remain unavailable"
+      ],
+      "abuseCases": [
+        "child_process shadow package",
+        "raw spawn/fork access",
+        "shell operator confusion",
+        "process handle leakage"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeChildProcessPhase13DecisionInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "runtimeGuards": [
+        "ERR_AUTOJS6_BUILTIN_DISABLED for child_process and node:child_process",
+        "ERR_AUTOJS6_PROCESS_API_DISABLED for raw process handles",
+        "shell bridge remains separate from child_process authority",
+        "detached mode, inherited fds, signals, and raw stdio streams remain unavailable"
+      ],
+      "promotionPreconditions": [
+        "P13-51 rollback playbook has a child_process scoped-runner kill switch",
+        "P13-52 privacy disclosure covers command execution and process output",
+        "packaged APK metadata records allowed binaries, cwd, env, timeout, and stdio policy",
+        "spawn/fork/shell-confusion abuse tests are green on connected Android CI before enabling"
+      ],
+      "rollback": "Keep child_process builtin disabled and route command execution through the scoped shell bridge only."
+    },
+    {
+      "id": "native_addon",
+      "profile": "desktop_compat_opt_in",
+      "risk": "critical",
+      "positiveTests": [
+        "nativeAddonProfile documents signed packaged-only artifact requirements",
+        "package integrity policy covers native addon artifacts before any promotion"
+      ],
+      "negativeTests": [
+        ".node require/resolve, process.dlopen, process.binding, _linkedBinding, node-gyp artifacts, and downloaded native payloads reject"
+      ],
+      "abuseCases": [
+        "relative .node load",
+        "package main .node load",
+        "process.dlopen",
+        "private binding access",
+        "unsigned native payload"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeNativeAddonPhase13DecisionInstrumentationTest",
+        "NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "runtimeGuards": [
+        "ERR_AUTOJS6_NATIVE_ADDON_DISABLED for .node package and relative loads",
+        "ERR_AUTOJS6_PROCESS_API_DISABLED for process.dlopen, process.binding, and _linkedBinding",
+        "package integrity policy rejects unsigned native artifacts",
+        "node-gyp artifacts and downloaded native payloads remain unsupported"
+      ],
+      "promotionPreconditions": [
+        "P13-51 rollback playbook has a native-addon kill switch",
+        "P13-52 privacy disclosure covers native code loading and crash risk",
+        "packaged APK metadata records signature, ABI, hash, and dependency scan evidence",
+        "unsigned, downloaded, process.dlopen, and private binding abuse tests are green on connected Android CI before enabling"
+      ],
+      "rollback": "Keep native addon loading denied until signed packaged artifacts, ABI/hash allowlists, dependency scan, and crash isolation land."
+    },
+    {
+      "id": "inspector",
+      "profile": "debug_unsafe_lab",
+      "risk": "critical",
+      "positiveTests": [
+        "inspectorProfile documents debug-only ADB forwarding, user action, and redaction requirements",
+        "process.features reports inspector/debug as false"
+      ],
+      "negativeTests": [
+        "inspector and node:inspector require/resolve are denied and cannot be shadowed",
+        "DevTools attach, protocol sessions, CPU/heap artifacts, remote sockets, and release builds remain unavailable"
+      ],
+      "abuseCases": [
+        "shadow inspector package",
+        "remote inspector port exposure",
+        "heap snapshot export",
+        "CPU profile export",
+        "release build debug attach"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeInspectorPhase13DecisionInstrumentationTest",
+        "NodeInspectorSecurityGateInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "runtimeGuards": [
+        "ERR_AUTOJS6_BUILTIN_DISABLED for inspector and node:inspector",
+        "process.features inspector/debug values remain false in release",
+        "DevTools attach and protocol sessions require explicit future debug-only user action",
+        "CPU profile and heap snapshot artifacts remain unavailable"
+      ],
+      "promotionPreconditions": [
+        "P13-51 rollback playbook has an inspector/debug kill switch",
+        "P13-52 privacy disclosure covers debugging, heap data, CPU profiles, and ADB forwarding",
+        "packaged APK metadata rejects inspector/debug authority in release builds",
+        "debug-only builds require explicit user action and local attach constraints",
+        "release attach, artifact export, and remote exposure abuse tests are green on connected Android CI before enabling"
+      ],
+      "rollback": "Keep inspector disabled outside future debug-only sessions with explicit user action."
+    },
+    {
+      "id": "wasi",
+      "profile": "desktop_compat_opt_in",
+      "risk": "high",
+      "positiveTests": [
+        "pure WebAssembly remains available without raw WASI authority",
+        "wasiProfile documents scoped/authorized preopen and fd/env/args requirements"
+      ],
+      "negativeTests": [
+        "wasi and node:wasi require/resolve are denied and cannot be shadowed",
+        "raw preopens, host path access, inherited fd numbers, unrestricted env/args, network, and process exit remain denied"
+      ],
+      "abuseCases": [
+        "preopen escape",
+        "raw fd number inheritance",
+        "env leakage",
+        "process exit from WASI",
+        "worker-integrated WASI escape"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeWasiPhase13DecisionInstrumentationTest",
+        "NodeWasmWasiInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "runtimeGuards": [
+        "ERR_AUTOJS6_BUILTIN_DISABLED for wasi and node:wasi",
+        "rawHostPaths, rawFdNumbers, rawProcessHandles, and rawNativeHandles remain false",
+        "processExit remains denied",
+        "pure WebAssembly stays separate from raw WASI authority"
+      ],
+      "promotionPreconditions": [
+        "P13-51 rollback playbook has a WASI facade kill switch",
+        "P13-52 privacy disclosure covers preopened roots, env, args, stdio, and process-exit behavior",
+        "packaged APK metadata records scoped preopens, virtual fd policy, env/args policy, and resource budgets",
+        "preopen escape, raw fd, env leakage, worker integration, and process-exit tests are green on connected Android CI before enabling"
+      ],
+      "rollback": "Keep raw WASI denied until a controlled facade proves scoped preopens, virtual fds, env/args, resources, worker, and packaged behavior."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/node-test-project",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

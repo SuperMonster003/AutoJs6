@@ -23,6 +23,9 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.stderr.bytes", jsonNumberField(text, "stderrBytes"));
     putPayload(payload, "embedded_script.stdout.truncated", jsonBooleanField(text, "stdoutTruncated"));
     putPayload(payload, "embedded_script.stderr.truncated", jsonBooleanField(text, "stderrTruncated"));
+    putPayload(payload, "embedded_script.console_events_json", jsonStringField(text, "consoleEventsJson"));
+    putPayload(payload, "embedded_script.console_event_count", jsonNumberField(text, "consoleEventCount"));
+    putPayload(payload, "embedded_script.console_events_truncated", jsonBooleanField(text, "consoleEventsTruncated"));
     putPayload(payload, "embedded_script.chdir_failure_reason", jsonStringField(text, "chdirFailureReason"));
     putPayload(payload, "embedded_script.create_require_failure_reason", jsonStringField(text, "createRequireFailureReason"));
     putPayload(payload, "embedded_script.node_version", jsonStringField(text, "nodeVersion"));
@@ -35,11 +38,18 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.pending_interval_count", jsonNumberField(text, "pendingIntervalCount"));
     putPayload(payload, "embedded_script.pending_immediate_count", jsonNumberField(text, "pendingImmediateCount"));
     putPayload(payload, "embedded_script.pending_scoped_fs_callbacks", jsonNumberField(text, "pendingScopedFsCallbacks"));
+    putPayload(payload, "embedded_script.pending_scoped_fs_streams", jsonBooleanField(text, "pendingScopedFsStreams"));
+    putPayload(payload, "embedded_script.pending_scoped_fs_stream_count", jsonNumberField(text, "pendingScopedFsStreamCount"));
+    putPayload(payload, "embedded_script.pending_scoped_fs_watch_count", jsonNumberField(text, "pendingScopedFsWatchCount"));
+    putPayload(payload, "embedded_script.pending_scoped_fs_watch_file_count", jsonNumberField(text, "pendingScopedFsWatchFileCount"));
     putPayload(payload, "embedded_script.pending_workers", jsonBooleanField(text, "pendingWorkers"));
     putPayload(payload, "embedded_script.pending_worker_count", jsonNumberField(text, "pendingWorkerCount"));
     putPayload(payload, "embedded_script.pending_crypto_callbacks", jsonNumberField(text, "pendingCryptoCallbacks"));
     putPayload(payload, "embedded_script.pending_dns_callbacks", jsonNumberField(text, "pendingDnsCallbacks"));
     putPayload(payload, "embedded_script.pending_zlib_callbacks", jsonNumberField(text, "pendingZlibCallbacks"));
+    putPayload(payload, "embedded_script.pending_node_test_callbacks", jsonNumberField(text, "pendingNodeTestCallbacks"));
+    putPayload(payload, "embedded_script.pending_zlib_streams", jsonBooleanField(text, "pendingZlibStreams"));
+    putPayload(payload, "embedded_script.pending_zlib_stream_count", jsonNumberField(text, "pendingZlibStreamCount"));
     putPayload(payload, "embedded_script.pending_async_callbacks", jsonNumberField(text, "pendingAsyncCallbacks"));
     putPayload(payload, "embedded_script.pending_callbacks", jsonBooleanField(text, "pendingCallbacks"));
     putPayload(payload, "embedded_script.bridge_requests_json", jsonStringField(text, "bridgeRequestsJson"));
@@ -84,6 +94,20 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.worker_cleanup_terminate_requested_count", jsonNumberField(text, "workerCleanupTerminateRequestedCount"));
     putPayload(payload, "embedded_script.worker_cleanup_error_count", jsonNumberField(text, "workerCleanupErrorCount"));
     putPayload(payload, "embedded_script.worker_cleanup_pending_message_rejected_count", jsonNumberField(text, "workerCleanupPendingMessageRejectedCount"));
+    putPayload(payload, "embedded_script.worker_message_port_active_count", jsonNumberField(text, "workerMessagePortActiveCount"));
+    putPayload(payload, "embedded_script.worker_message_port_max_active_count", jsonNumberField(text, "workerMessagePortMaxActiveCount"));
+    putPayload(payload, "embedded_script.worker_message_port_created_count", jsonNumberField(text, "workerMessagePortCreatedCount"));
+    putPayload(payload, "embedded_script.worker_message_port_closed_count", jsonNumberField(text, "workerMessagePortClosedCount"));
+    putPayload(payload, "embedded_script.worker_message_rejected_count", jsonNumberField(text, "workerMessageRejectedCount"));
+    putPayload(payload, "embedded_script.worker_last_message_rejection", jsonStringField(text, "workerLastMessageRejection"));
+    putPayload(payload, "embedded_script.worker_pool_active_count", jsonNumberField(text, "workerPoolActiveCount"));
+    putPayload(payload, "embedded_script.worker_pool_max_active_count", jsonNumberField(text, "workerPoolMaxActiveCount"));
+    putPayload(payload, "embedded_script.worker_pool_created_count", jsonNumberField(text, "workerPoolCreatedCount"));
+    putPayload(payload, "embedded_script.worker_pool_closed_count", jsonNumberField(text, "workerPoolClosedCount"));
+    putPayload(payload, "embedded_script.worker_pool_task_completed_count", jsonNumberField(text, "workerPoolTaskCompletedCount"));
+    putPayload(payload, "embedded_script.worker_pool_task_cancelled_count", jsonNumberField(text, "workerPoolTaskCancelledCount"));
+    putPayload(payload, "embedded_script.worker_pool_task_timeout_count", jsonNumberField(text, "workerPoolTaskTimeoutCount"));
+    putPayload(payload, "embedded_script.worker_pool_queue_rejected_count", jsonNumberField(text, "workerPoolQueueRejectedCount"));
     putPayload(payload, "embedded_script.worker_last_policy_rejection", jsonStringField(text, "workerLastPolicyRejection"));
     putPayload(payload, "embedded_script.source_map_enabled", jsonBooleanField(text, "sourceMapEnabled"));
     putPayload(payload, "embedded_script.source_map_loaded_count", jsonNumberField(text, "sourceMapLoadedCount"));
@@ -92,6 +116,25 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.source_map_last_source", jsonStringField(text, "sourceMapLastSource"));
     putPayload(payload, "embedded_script.source_map_last_map", jsonStringField(text, "sourceMapLastMap"));
     putPayload(payload, "embedded_script.source_map_last_error", jsonStringField(text, "sourceMapLastError"));
+    putPayload(payload, "embedded_script.compile_cache.requested", jsonBooleanField(text, "compileCacheRequested"));
+    putPayload(payload, "embedded_script.compile_cache.enabled", jsonBooleanField(text, "compileCacheEnabled"));
+    putPayload(payload, "embedded_script.compile_cache.status", jsonStringField(text, "compileCacheStatus"));
+    putPayload(payload, "embedded_script.compile_cache.status_code", jsonStringField(text, "compileCacheStatusCode"));
+    putPayload(payload, "embedded_script.compile_cache.directory", jsonStringField(text, "compileCacheDirectory"));
+    putPayload(payload, "embedded_script.compile_cache.key", jsonStringField(text, "compileCacheKey"));
+    putPayload(payload, "embedded_script.compile_cache.runtime_key", jsonStringField(text, "compileCacheRuntimeKey"));
+    putPayload(payload, "embedded_script.compile_cache.project_key", jsonStringField(text, "compileCacheProjectKey"));
+    putPayload(payload, "embedded_script.compile_cache.loader", jsonStringField(text, "compileCacheLoader"));
+    putPayload(payload, "embedded_script.compile_cache.schema", jsonStringField(text, "compileCacheSchema"));
+    putPayload(payload, "embedded_script.compile_cache.message", jsonStringField(text, "compileCacheMessage"));
+    putPayload(payload, "embedded_script.compile_cache.v8_version", jsonStringField(text, "compileCacheV8Version"));
+    putPayload(payload, "embedded_script.compile_cache.flush_supported", jsonBooleanField(text, "compileCacheFlushSupported"));
+    putPayload(payload, "embedded_script.compile_cache.flush_attempted", jsonBooleanField(text, "compileCacheFlushAttempted"));
+    putPayload(payload, "embedded_script.compile_cache.flushed", jsonBooleanField(text, "compileCacheFlushed"));
+    putPayload(payload, "embedded_script.compile_cache.custom_loader", jsonBooleanField(text, "compileCacheCustomLoader"));
+    putPayload(payload, "embedded_script.compile_cache.hit_count", jsonNumberField(text, "compileCacheHitCount"));
+    putPayload(payload, "embedded_script.compile_cache.miss_count", jsonNumberField(text, "compileCacheMissCount"));
+    putPayload(payload, "embedded_script.compile_cache.hit_miss_status", jsonStringField(text, "compileCacheHitMissStatus"));
 }
 
 void putLifecycleSkippedPayload(
@@ -5130,11 +5173,13 @@ bool appendUvRunCleanupPayload(
         UvWalk uvWalk,
         UvHandleGetType uvHandleGetType,
         UvIsActive uvIsActive,
-        UvIsClosing uvIsClosing
+        UvIsClosing uvIsClosing,
+        bool collectDiagnostics
 ) {
     __android_log_print(ANDROID_LOG_INFO, kLogTag, "uv.run.start mode=UV_RUN_NOWAIT max_iterations=%d", kUvRunCleanupMaxIterations);
     const auto startedAt = Clock::now();
     putPayload(payload, "uv.run.mode", "UV_RUN_NOWAIT");
+    putPayload(payload, "uv.run.diagnostics", collectDiagnostics ? "full" : "lightweight");
     putPayload(payload, "uv.run.max_iterations", static_cast<long long>(kUvRunCleanupMaxIterations));
     putPayload(payload, "uv.run.completed_iterations", static_cast<long long>(0));
     if (eventLoop == nullptr) {
@@ -5157,20 +5202,30 @@ bool appendUvRunCleanupPayload(
             const std::string iterationPrefix = "uv.run.iteration." + std::to_string(iteration);
             putPayload(payload, iterationPrefix + ".rc", static_cast<long long>(result));
             putPayload(payload, "timing.uv_run_iteration_" + std::to_string(iteration) + ".ms", elapsedMs(iterationStartedAt));
-            const UvDiagnosticsSummary summary = appendUvDiagnosticsPayload(
-                    payload,
-                    "after_run_" + std::to_string(iteration),
-                    eventLoop,
-                    uvWalk,
-                    uvHandleGetType,
-                    uvIsActive,
-                    uvIsClosing
-            );
-            if (summary.valid) {
-                putPayload(payload, iterationPrefix + ".handle.count", static_cast<long long>(summary.count));
-                putPayload(payload, iterationPrefix + ".handle.active", static_cast<long long>(summary.active));
-                putPayload(payload, iterationPrefix + ".handle.closing", static_cast<long long>(summary.closing));
-                handleCountZero = summary.count == 0;
+            int handleCount = -1;
+            int activeCount = -1;
+            int closingCount = -1;
+            if (collectDiagnostics) {
+                const UvDiagnosticsSummary summary = appendUvDiagnosticsPayload(
+                        payload,
+                        "after_run_" + std::to_string(iteration),
+                        eventLoop,
+                        uvWalk,
+                        uvHandleGetType,
+                        uvIsActive,
+                        uvIsClosing
+                );
+                if (summary.valid) {
+                    handleCount = summary.count;
+                    activeCount = summary.active;
+                    closingCount = summary.closing;
+                    putPayload(payload, iterationPrefix + ".handle.count", static_cast<long long>(summary.count));
+                    putPayload(payload, iterationPrefix + ".handle.active", static_cast<long long>(summary.active));
+                    putPayload(payload, iterationPrefix + ".handle.closing", static_cast<long long>(summary.closing));
+                    handleCountZero = summary.count == 0;
+                }
+            } else {
+                handleCountZero = result == 0;
             }
             putPayload(payload, "uv.run.completed_iterations", static_cast<long long>(completedIterations));
             __android_log_print(
@@ -5179,9 +5234,9 @@ bool appendUvRunCleanupPayload(
                     "uv.run.iteration.%d.done rc=%d handle_count=%d active=%d closing=%d elapsed=%lldms",
                     iteration,
                     result,
-                    summary.valid ? summary.count : -1,
-                    summary.valid ? summary.active : -1,
-                    summary.valid ? summary.closing : -1,
+                    handleCount,
+                    activeCount,
+                    closingCount,
                     elapsedMs(iterationStartedAt)
             );
             if (handleCountZero) {

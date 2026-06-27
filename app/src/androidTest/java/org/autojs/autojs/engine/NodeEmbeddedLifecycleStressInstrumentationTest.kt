@@ -81,6 +81,49 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     }
 
     @Test
+    fun explicitLongRunningModeIsRejectedBeforeUserScriptRuns() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val scriptDir = File(context.cacheDir, "embedded-long-running-policy-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create long-running policy dir: $absolutePath" }
+        }
+        val marker = File(scriptDir, "unexpected.txt")
+
+        try {
+            val result = runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    require("fs").writeFileSync("./unexpected.txt", "ran");
+                    setInterval(() => {}, 100);
+                """.trimIndent(),
+                sourceName = "<lifecycle-stress-long-running-policy.js>",
+                workingDirectory = scriptDir.absolutePath,
+                timeoutMs = 0L,
+                executionMode = "longRunning",
+            )
+
+            assertFalse("long-running policy gate unexpectedly succeeded", result.succeeded)
+            assertFalse("long-running policy gate must not be reported as a script timeout", result.timedOut)
+            assertEquals(NodeRuntimeErrorCodes.EMBEDDED_NODE_UNSUPPORTED_OPTION, result.errorCode)
+            assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, result.nativeValues["embedded_script.execution_mode"])
+            assertEquals("partial", result.nativeValues["embedded_script.execution_mode_status"])
+            assertEquals(NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT, result.nativeValues["embedded_script.execution_mode_launch_surface"])
+            assertEquals("false", result.nativeValues["embedded_script.execution_mode_supported"])
+            assertEquals("startup_timeout_stop_grace_and_watchdog", result.nativeValues["embedded_script.execution_mode_timeout_policy"])
+            assertEquals("true", result.nativeValues["embedded_script.long_running_requested"])
+            assertEquals("false", result.nativeValues["embedded_script.long_running_supported"])
+            assertEquals("true", result.nativeValues["embedded_script.execution_mode_rejected"])
+            assertTrue(result.errorMessage.orEmpty(), result.errorMessage.orEmpty().contains("Phase 7 runtime state machine"))
+            assertFalse("long-running rejected script should not have entered user code", marker.exists())
+
+            assertRecoveryRun("after.long_running.policy")
+        } finally {
+            scriptDir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun uncaughtExceptionDoesNotPoisonNextRun() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -168,6 +211,85 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     }
 
     @Test
+    fun activeScopedFsStreamTimesOutThenNextRunWorks() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val scriptDir = File(context.cacheDir, "embedded-lifecycle-fs-stream-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create lifecycle fs stream dir: $absolutePath" }
+        }
+        try {
+            val timeout = runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    const fs = require("fs");
+                    fs.mkdirSync("./stream-timeout", { recursive: true });
+                    fs.writeFileSync("./stream-timeout/input.bin", Buffer.alloc(2 * 1024 * 1024, 65));
+                    globalThis.__autojs6HeldReadable = fs.createReadStream("./stream-timeout/input.bin", {
+                      highWaterMark: 64 * 1024
+                    });
+                    globalThis.__autojs6HeldReadable.on("data", () => {
+                      console.log("stress.fs.stream.paused");
+                      globalThis.__autojs6HeldReadable.pause();
+                    });
+                    globalThis.__autojs6HeldReadable.on("end", () => console.log("stress.fs.stream.unexpected_end"));
+                    console.log("stress.fs.stream.pending");
+                """.trimIndent(),
+                sourceName = "<lifecycle-stress-fs-stream.js>",
+                workingDirectory = scriptDir.absolutePath,
+                timeoutMs = FAULT_TIMEOUT_MS,
+            )
+
+            assertTimedOut("active scoped fs stream", timeout)
+            assertEquals(false, timeout.pendingTimers)
+            assertEquals(true, timeout.pendingScopedFsStreams)
+            assertEquals(1, timeout.pendingScopedFsStreamCount)
+            assertEquals(true, timeout.pendingCallbacks)
+            assertTrue(
+                timeout.errorMessage.orEmpty(),
+                timeout.errorMessage.orEmpty().contains("pendingScopedFsStreamCount=1"),
+            )
+            settleEmbeddedScriptServiceProcess()
+
+            assertRecoveryRun("after.fs.stream")
+        } finally {
+            scriptDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun activeZlibStreamTimesOutThenNextRunWorks() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val timeout = runEmbeddedScript(
+            source = """
+                "nodejs";
+                const zlib = require("zlib");
+                globalThis.__autojs6HeldGzip = zlib.createGzip();
+                globalThis.__autojs6HeldGzip.on("data", () => {
+                  console.log("stress.zlib.stream.data");
+                });
+                globalThis.__autojs6HeldGzip.write(Buffer.from("pending-zlib-stream"));
+                console.log("stress.zlib.stream.pending");
+            """.trimIndent(),
+            sourceName = "<lifecycle-stress-zlib-stream.js>",
+            timeoutMs = FAULT_TIMEOUT_MS,
+        )
+
+        assertTimedOut("active zlib stream", timeout)
+        assertEquals(false, timeout.pendingTimers)
+        assertEquals(true, timeout.pendingZlibStreams)
+        assertEquals(1, timeout.pendingZlibStreamCount)
+        assertEquals(true, timeout.pendingCallbacks)
+        assertTrue(
+            timeout.errorMessage.orEmpty(),
+            timeout.errorMessage.orEmpty().contains("pendingZlibStreamCount=1"),
+        )
+        settleEmbeddedScriptServiceProcess()
+
+        assertRecoveryRun("after.zlib.stream")
+    }
+
+    @Test
     fun nestedFsCallbacksDrainBeforeSuccess() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -236,7 +358,7 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     }
 
     @Test
-    fun concurrentExecutionIsRejectedAndNextRunWorks() {
+    fun explicitRejectWhenBusyStillRejectsAndNextRunWorks() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val scriptDir = File(context.cacheDir, "embedded-concurrent-${System.nanoTime()}").apply {
@@ -261,6 +383,9 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
                     sourceName = "<lifecycle-stress-concurrent-first.js>",
                     workingDirectory = scriptDir.absolutePath,
                     timeoutMs = CONCURRENT_TIMEOUT_MS,
+                    queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                    processPoolSlot = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                    processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
                 )
             }.onSuccess { result ->
                 firstResult.set(result)
@@ -285,6 +410,9 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
                 """.trimIndent(),
                 sourceName = "<lifecycle-stress-concurrent-second.js>",
                 timeoutMs = SIMPLE_TIMEOUT_MS,
+                queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                processPoolSlot = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
             )
 
             firstThread.join(CONCURRENT_TIMEOUT_MS + 3000L)
@@ -306,6 +434,108 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
 
             settleEmbeddedScriptServiceProcess()
             assertRecoveryRun("after.concurrent.busy")
+        } finally {
+            scriptDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun defaultConcurrentExecutionQueuesInsteadOfEngineBusy() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val scriptDir = File(context.cacheDir, "embedded-default-queue-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create default queue dir: $absolutePath" }
+        }
+        val firstStarted = File(scriptDir, "first-started.txt")
+        val order = File(scriptDir, "order.txt")
+        val firstResult = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+        val secondResult = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+        val firstFailure = AtomicReference<Throwable?>()
+        val secondFailure = AtomicReference<Throwable?>()
+
+        val firstThread = Thread {
+            runCatching {
+                runEmbeddedScript(
+                    source = """
+                        "nodejs";
+                        const fs = require("fs");
+                        fs.writeFileSync("./first-started.txt", "started");
+                        fs.appendFileSync("./order.txt", "first-started\n");
+                        console.log("stress.default.queue.first.started");
+                        return new Promise((resolve) => setTimeout(() => {
+                          fs.appendFileSync("./order.txt", "first-done\n");
+                          console.log("stress.default.queue.first.done");
+                          resolve();
+                        }, 1500));
+                    """.trimIndent(),
+                    sourceName = "<lifecycle-stress-default-queue-first.js>",
+                    workingDirectory = scriptDir.absolutePath,
+                    timeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                    queueTimeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                    processPoolSlot = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                    processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
+                )
+            }.onSuccess(firstResult::set)
+                .onFailure(firstFailure::set)
+        }.apply {
+            name = "AutoJs6NodeDefaultQueueFirst"
+            start()
+        }
+
+        val secondThread = Thread {
+            runCatching {
+                runEmbeddedScript(
+                    source = """
+                        "nodejs";
+                        const fs = require("fs");
+                        fs.appendFileSync("./order.txt", "second-run\n");
+                        console.log("stress.default.queue.second.run");
+                    """.trimIndent(),
+                    sourceName = "<lifecycle-stress-default-queue-second.js>",
+                    workingDirectory = scriptDir.absolutePath,
+                    timeoutMs = SIMPLE_TIMEOUT_MS,
+                    queueTimeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                    processPoolSlot = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                    processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
+                )
+            }.onSuccess(secondResult::set)
+                .onFailure(secondFailure::set)
+        }.apply {
+            name = "AutoJs6NodeDefaultQueueSecond"
+        }
+
+        try {
+            assertTrue(
+                "First default queue run did not enter user script before timeout.",
+                waitUntil(5000L) { firstStarted.isFile },
+            )
+            secondThread.start()
+
+            firstThread.join(QUEUE_TEST_TIMEOUT_MS + 3000L)
+            secondThread.join(QUEUE_TEST_TIMEOUT_MS + SIMPLE_TIMEOUT_MS + 3000L)
+            firstFailure.get()?.let { throw AssertionError("First default queue run failed.", it) }
+            secondFailure.get()?.let { throw AssertionError("Second default queue run failed.", it) }
+            assertFalse("First default queue run did not finish.", firstThread.isAlive)
+            assertFalse("Second default queue run did not finish.", secondThread.isAlive)
+
+            val first = firstResult.get()
+            val second = secondResult.get()
+            assertTrue("First default queue run did not produce a result.", first != null)
+            assertTrue("Second default queue run did not produce a result.", second != null)
+            assertSucceeded("default queue first", first!!)
+            assertSucceeded("default queue second", second!!)
+            assertEquals("true", second.nativeValues["embedded_script.queue_queued"])
+            assertEquals("dequeued", second.nativeValues["embedded_script.queue_status"])
+            assertTrue(
+                second.nativeValues["embedded_script.queue_wait_ms"].orEmpty(),
+                second.nativeValues["embedded_script.queue_wait_ms"].orEmpty().toLongOrNull() ?: 0L > 0L,
+            )
+            assertFalse("Default queued run must not report engine busy.", second.errorCode == NodeRuntimeErrorCodes.NODE_ENGINE_BUSY)
+
+            val orderText = order.readText()
+            assertTrue(orderText, orderText.indexOf("first-started") >= 0)
+            assertTrue(orderText, orderText.indexOf("first-done") > orderText.indexOf("first-started"))
+            assertTrue(orderText, orderText.indexOf("second-run") > orderText.indexOf("first-done"))
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -508,6 +738,80 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     }
 
     @Test
+    fun queuedExecutionTimeoutReturnsStableError() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val scriptDir = File(context.cacheDir, "embedded-queue-timeout-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create queue timeout dir: $absolutePath" }
+        }
+        val firstStarted = File(scriptDir, "first-started.txt")
+        val secondMarker = File(scriptDir, "second-ran.txt")
+        val firstId = "queue-timeout-first-${System.nanoTime()}"
+        val secondId = "queue-timeout-second-${System.nanoTime()}"
+        val firstResult = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+
+        val firstThread = Thread {
+            firstResult.set(
+                enqueueEmbeddedScript(
+                    source = """
+                        "nodejs";
+                        const fs = require("fs");
+                        fs.writeFileSync("./first-started.txt", "started");
+                        return new Promise((resolve) => setTimeout(resolve, 2500));
+                    """.trimIndent(),
+                    sourceName = "<lifecycle-stress-queue-timeout-first.js>",
+                    workingDirectory = scriptDir.absolutePath,
+                    timeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                    executionId = firstId,
+                    queueTimeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                ),
+            )
+        }.apply {
+            name = "AutoJs6NodeQueueTimeoutFirst"
+            start()
+        }
+
+        try {
+            assertTrue(
+                "First queue-timeout run did not enter user script before timeout.",
+                waitUntil(5000L) { firstStarted.isFile },
+            )
+
+            val second = enqueueEmbeddedScript(
+                source = """
+                    "nodejs";
+                    const fs = require("fs");
+                    fs.writeFileSync("./second-ran.txt", "unexpected");
+                    console.log("stress.queue.timeout.second.unexpected");
+                """.trimIndent(),
+                sourceName = "<lifecycle-stress-queue-timeout-second.js>",
+                workingDirectory = scriptDir.absolutePath,
+                timeoutMs = SIMPLE_TIMEOUT_MS,
+                executionId = secondId,
+                queueTimeoutMs = QUEUE_SHORT_TIMEOUT_MS,
+            )
+
+            assertFalse("Queue-timeout run unexpectedly succeeded.", second.succeeded)
+            assertFalse("Queue-timeout failure should not be reported as a script timeout.", second.timedOut)
+            assertEquals(NodeRuntimeErrorCodes.NODE_QUEUE_TIMEOUT, second.errorCode)
+            assertEquals("true", second.nativeValues["embedded_script.queue_timeout"])
+            assertEquals("queue_timeout", second.nativeValues["embedded_script.queue_status"])
+            assertTrue(
+                second.nativeValues["embedded_script.queue_wait_ms"].orEmpty(),
+                second.nativeValues["embedded_script.queue_wait_ms"].orEmpty().toLongOrNull() ?: 0L > 0L,
+            )
+            assertFalse("Timed-out queued script must not run user code.", secondMarker.exists())
+
+            firstThread.join(QUEUE_TEST_TIMEOUT_MS + 3000L)
+            val first = firstResult.get()
+            assertTrue("First queue-timeout run did not produce a result.", first != null)
+            assertSucceeded("queue timeout first", first!!)
+        } finally {
+            scriptDir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun queueLimitReachedReturnsStableError() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -641,7 +945,10 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
     ) {
         assertFalse("$label unexpectedly succeeded", result.succeeded)
-        assertTrue("$label should time out", result.timedOut)
+        assertTrue(
+            "$label should time out\nstdout=${result.stdout}\nstderr=${result.stderr}\nerror=${result.errorName}: ${result.errorMessage}\nnativeValues=${result.nativeValues}",
+            result.timedOut,
+        )
         assertEquals("EmbeddedScriptTimeoutError", result.errorName)
         assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT", result.errorCode)
         assertTrue(
@@ -655,6 +962,11 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         sourceName: String,
         workingDirectory: String? = context.cacheDir.absolutePath,
         timeoutMs: Long = SIMPLE_TIMEOUT_MS,
+        executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        queueMode: String = NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY,
+        queueTimeoutMs: Long = 0L,
+        processPoolSlot: String? = null,
+        processPoolSlotSource: String? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             context,
@@ -662,7 +974,12 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
                 source = source,
                 sourceName = sourceName,
                 workingDirectory = workingDirectory,
+                executionMode = executionMode,
                 timeoutMs = timeoutMs,
+                queueMode = queueMode,
+                queueTimeoutMs = queueTimeoutMs,
+                processPoolSlot = processPoolSlot,
+                processPoolSlotSource = processPoolSlotSource,
             ),
         )
     }
@@ -717,5 +1034,6 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         private const val FAULT_TIMEOUT_MS = 900L
         private const val CONCURRENT_TIMEOUT_MS = 10000L
         private const val QUEUE_TEST_TIMEOUT_MS = 10000L
+        private const val QUEUE_SHORT_TIMEOUT_MS = 500L
     }
 }

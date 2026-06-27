@@ -1,0 +1,16 @@
+{
+  "name": "wasm-worker",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["wasm", "worker"],
+    "expectedProvider": "design-gated worker/process isolation",
+    "packagedSupport": "not supported for user code in this phase",
+    "securityLimitations": ["worker_threads remains default-disabled", "WASM worker resource limits are not promoted"]
+  }
+}

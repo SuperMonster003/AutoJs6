@@ -16,14 +16,20 @@ import java.util.concurrent.TimeUnit
 class NodeWorkManagerBridgeInstrumentationTest {
 
     private val context = NodeEmbeddedTestHarness.targetContext
+    private val ownerKeys = mutableSetOf<String>()
 
     @Before
     fun settleBefore() {
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        ownerKeys.clear()
     }
 
     @After
     fun settleAfter() {
+        ownerKeys.forEach { ownerKey ->
+            NodeWorkManagerBridgeScheduler.cancelAllForOwner(context, ownerKey)
+        }
+        ownerKeys.clear()
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
     }
 
@@ -44,13 +50,17 @@ class NodeWorkManagerBridgeInstrumentationTest {
                     val payload = JSONArray(request.argsJson).getJSONObject(0)
                     assertEquals("embedded", payload.getString("backend"))
                     assertEquals("main.cjs", payload.getString("scriptPath"))
+                    assertEquals("scriptPath", payload.getString("entryKind"))
                     assertEquals(1_000L, payload.getLong("delayMs"))
+                    assertEquals(4_321L, payload.getLong("timeoutMs"))
                     assertTrue(payload.getJSONObject("constraints").getBoolean("network"))
                     NodeBridgeResponse.success(request.id, NodeBridgeJsonValue.string("fake-once"))
                 }
                 "schedulePeriodic" -> {
                     val payload = JSONArray(request.argsJson).getJSONObject(0)
                     assertEquals("projectEntry", payload.getString("entryKind"))
+                    assertEquals("main.cjs", payload.getString("entry"))
+                    assertFalse(payload.has("scriptPath"))
                     assertEquals(900_000L, payload.getLong("intervalMs"))
                     assertTrue(payload.getBoolean("packaged"))
                     NodeBridgeResponse.success(request.id, NodeBridgeJsonValue.string("fake-periodic"))
@@ -67,7 +77,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
                 id = "work-manager-once-1",
                 module = "work_manager",
                 method = "scheduleOnce",
-                argsJson = """[{"scriptPath":"main.cjs","backend":"embedded","delayMs":1000,"constraints":{"network":true}}]""",
+                argsJson = """[{"scriptPath":"main.cjs","entryKind":"scriptPath","backend":"embedded","delayMs":1000,"timeoutMs":4321,"constraints":{"network":true}}]""",
                 timeoutMs = 2_000L,
                 permissions = listOf("work_manager"),
             ),
@@ -77,7 +87,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
                 id = "work-manager-periodic-1",
                 module = "work_manager",
                 method = "schedulePeriodic",
-                argsJson = """[{"entry":"main.cjs","backend":"embedded","packaged":true,"intervalMs":900000,"constraints":{"charging":true}}]""",
+                argsJson = """[{"entry":"main.cjs","entryKind":"projectEntry","backend":"embedded","packaged":true,"intervalMs":900000,"constraints":{"charging":true}}]""",
                 timeoutMs = 2_000L,
                 permissions = listOf("work_manager"),
             ),
@@ -164,10 +174,12 @@ class NodeWorkManagerBridgeInstrumentationTest {
               });
 
               const work = require("work_manager");
+              const compat = require("autojs6:compat");
               const resolved = require.resolve("work_manager");
               const onceId = await work.scheduleOnce({
                 scriptPath: "./main.cjs",
                 delayMs: 1234,
+                taskTimeoutMs: 4321,
                 timeoutMs: 777,
                 constraints: { network: true }
               });
@@ -180,6 +192,80 @@ class NodeWorkManagerBridgeInstrumentationTest {
               const beforeCancel = await work.list();
               await work.cancel(onceId);
               const afterCancel = await work.list();
+              const compatId = await compat.tasks.addDisposableTask({
+                path: "./main.cjs",
+                delayMs: 2345,
+                taskTimeoutMs: 5432,
+                timeoutMs: 778,
+                constraints: { idle: true }
+              });
+              const compatBefore = await compat.tasks.queryTasks({ timeoutMs: 779 });
+              const compatRemoved = await compat.tasks.removeTask(compatId, { timeoutMs: 780 });
+              const compatAfter = await compat.tasks.queryTasks();
+              const compatTimed = await compat.tasks.queryTimedTasks({ timeoutMs: 781 });
+              const compatTimedOne = await compat.tasks.getTimedTask(compatId, { timeoutMs: 782 });
+              const compatTimedRemoved = await compat.tasks.removeTimedTask("fake-work-missing", { timeoutMs: 783 });
+              let compatRawCode = "";
+              try {
+                await compat.tasks.removeTask({ id: compatId });
+              } catch (error) {
+                compatRawCode = codeOf(error);
+              }
+              let compatUnknownCode = "";
+              try {
+                await compat.tasks.addDisposableTask({ path: "main.cjs", delayMs: 10, repeat: true });
+              } catch (error) {
+                compatUnknownCode = codeOf(error);
+              }
+              let compatPastCode = "";
+              try {
+                await compat.tasks.addDisposableTask({ path: "main.cjs", date: new Date(Date.now() - 1000) });
+              } catch (error) {
+                compatPastCode = codeOf(error);
+              }
+              const beforeRejected = requests.length;
+              let compatDailyCode = "";
+              try {
+                await compat.tasks.addDailyTask({ path: "main.cjs", time: "08:30" });
+              } catch (error) {
+                compatDailyCode = codeOf(error);
+              }
+              let compatWeeklyCode = "";
+              try {
+                await compat.tasks.addWeeklyTask({ path: "main.cjs", time: "08:30", daysOfWeek: [1] });
+              } catch (error) {
+                compatWeeklyCode = codeOf(error);
+              }
+              let compatUpdateCode = "";
+              try {
+                await compat.tasks.updateTask({ id: compatId });
+              } catch (error) {
+                compatUpdateCode = codeOf(error);
+              }
+              let compatAddIntentCode = "";
+              try {
+                await compat.tasks.addIntentTask({ path: "main.cjs", action: "org.autojs6.TEST" });
+              } catch (error) {
+                compatAddIntentCode = codeOf(error);
+              }
+              let compatQueryIntentCode = "";
+              try {
+                await compat.tasks.queryIntentTasks({ action: "org.autojs6.TEST" });
+              } catch (error) {
+                compatQueryIntentCode = codeOf(error);
+              }
+              let compatGetIntentCode = "";
+              try {
+                await compat.tasks.getIntentTask("intent-1");
+              } catch (error) {
+                compatGetIntentCode = codeOf(error);
+              }
+              let compatRemoveIntentCode = "";
+              try {
+                await compat.tasks.removeIntentTask("intent-1");
+              } catch (error) {
+                compatRemoveIntentCode = codeOf(error);
+              }
 
               const beforeInvalid = requests.length;
               let pathEscapeCode = "";
@@ -213,8 +299,18 @@ class NodeWorkManagerBridgeInstrumentationTest {
               console.log("work.methods=" + [typeof work.scheduleOnce, typeof work.schedulePeriodic, typeof work.cancel, typeof work.list].join("|"));
               console.log("work.policy=" + [work.policy.maxTasksPerProvider, work.policy.minPeriodicIntervalMs, work.policy.maxPeriodicIntervalMs].join("|"));
               console.log("work.ids=" + onceId + "|" + periodicId);
-              console.log("work.before=" + beforeCancel.map((task) => [task.id, task.type, task.scriptPath, task.entryKind, task.packaged, task.constraints.network, task.constraints.charging].join(":")).join("|"));
+              console.log("work.before=" + beforeCancel.map((task) => [task.id, task.type, task.scriptPath || "", task.entry || "", task.entryKind, task.packaged, task.constraints.network, task.constraints.charging].join(":")).join("|"));
+              console.log("work.request_entry=" + [requests[0].args[0].scriptPath || "", requests[0].args[0].entry || "", requests[1].args[0].scriptPath || "", requests[1].args[0].entry || ""].join("|"));
               console.log("work.after=" + afterCancel.map((task) => task.id).join("|"));
+              console.log("compat.tasks.methods=" + [typeof compat.tasks.addDisposableTask, typeof compat.tasks.addDailyTask, typeof compat.tasks.addWeeklyTask, typeof compat.tasks.addIntentTask, typeof compat.tasks.removeTask, typeof compat.tasks.queryTasks, typeof compat.tasks.queryIntentTasks, typeof compat.tasks.queryTimedTasks, typeof compat.tasks.getIntentTask, typeof compat.tasks.getTimedTask, typeof compat.tasks.removeIntentTask, typeof compat.tasks.removeTimedTask, typeof compat.tasks.updateTask].join("|"));
+              console.log("compat.tasks.id=" + compatId);
+              console.log("compat.tasks.before=" + compatBefore.map((task) => [task.id, task.type, task.scriptPath || "", task.constraints.idle].join(":")).join("|"));
+              console.log("compat.tasks.removed=" + [compatRemoved, compatAfter.length].join("|"));
+              console.log("compat.tasks.rhino_aliases=" + [compatTimed.length, compatTimedOne === null, compatTimedRemoved].join("|"));
+              console.log("compat.tasks.codes=" + [compatRawCode, compatUnknownCode, compatPastCode].join("|"));
+              console.log("compat.tasks.rejected=" + [compatDailyCode, compatWeeklyCode, compatUpdateCode, compatAddIntentCode, compatQueryIntentCode, compatGetIntentCode, compatRemoveIntentCode, requests.length === beforeRejected].join("|"));
+              console.log("compat.tasks.global=" + ("tasks" in globalThis));
+              console.log("compat.tasks.status=" + [compat.status().implementedTasks.indexOf("P12-16") >= 0, compat.status().implementedTasks.indexOf("P12-17") >= 0, compat.status().implementedTasks.indexOf("P12-18") >= 0, compat.status().moduleNames.indexOf("tasks") >= 0, compat.status().availableGlobalNames.indexOf("tasks") >= 0].join("|"));
               console.log("work.requests=" + requests.map((request) => request.method).join("|"));
               console.log("work.permissions=" + requests.slice(0, 3).every((request) => request.permissions.indexOf("work_manager") >= 0));
               console.log("work.timeout=" + requests[0].timeoutMs);
@@ -236,9 +332,19 @@ class NodeWorkManagerBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("work.methods=function|function|function|function"))
         assertTrue(result.stdout.contains("work.policy=64|900000|2592000000"))
         assertTrue(result.stdout.contains("work.ids=fake-work-1|fake-work-2"))
-        assertTrue(result.stdout.contains("fake-work-1:once:main.cjs:scriptPath:false:true:false"))
-        assertTrue(result.stdout.contains("fake-work-2:periodic:main.cjs:projectEntry:true:false:true"))
+        assertTrue(result.stdout.contains("fake-work-1:once:main.cjs::scriptPath:false:true:false"))
+        assertTrue(result.stdout.contains("fake-work-2:periodic::main.cjs:projectEntry:true:false:true"))
+        assertTrue(result.stdout.contains("work.request_entry=main.cjs|||main.cjs"))
         assertTrue(result.stdout.contains("work.after=fake-work-2"))
+        assertTrue(result.stdout.contains("compat.tasks.methods=function|function|function|function|function|function|function|function|function|function|function|function|function"))
+        assertTrue(result.stdout.contains("compat.tasks.id=fake-work-3"))
+        assertTrue(result.stdout.contains("compat.tasks.before=fake-work-3:once:main.cjs:true"))
+        assertTrue(result.stdout.contains("compat.tasks.removed=true|0"))
+        assertTrue(result.stdout.contains("compat.tasks.rhino_aliases=0|true|true"))
+        assertTrue(result.stdout.contains("compat.tasks.codes=ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN|ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION|ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION"))
+        assertTrue(result.stdout.contains("compat.tasks.rejected=ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED|ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED|ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN|ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED|ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED|ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED|ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED|true"))
+        assertTrue(result.stdout.contains("compat.tasks.global=false"))
+        assertTrue(result.stdout.contains("compat.tasks.status=true|true|true|true|false"))
         assertTrue(result.stdout.contains("work.permissions=true"))
         assertTrue(result.stdout.contains("work.timeout=777"))
         assertTrue(result.stdout.contains("work.invalid_no_request=true"))
@@ -248,23 +354,15 @@ class NodeWorkManagerBridgeInstrumentationTest {
     }
 
     @Test
-    fun androidWorkManagerProviderStoresMetadataAndEnforcesPathPolicy() {
+    fun androidWorkManagerProviderSchedulesLiveMetadataAndEnforcesPathPolicy() {
         val workDir = File(context.cacheDir, "node-bridge-work-manager-provider").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create work_manager provider directory: $absolutePath" }
         }
         File(workDir, "main.cjs").writeText("""console.log("scheduled");""")
-        val provider = AndroidNodeBridgeCapabilityProvider(
-            context,
-            NodeBridgeEngineInfo.fromContext(
-                context,
-                id = "work-manager-provider-test",
-                sourceName = "main.cjs",
-                cwd = workDir.absolutePath,
-            ),
-        )
+        val provider = androidProvider("work-manager-provider-test", workDir)
 
-        val once = dispatch(provider, "scheduleOnce", """[{"scriptPath":"main.cjs","delayMs":1000,"constraints":{"network":true}}]""")
+        val once = dispatch(provider, "scheduleOnce", """[{"scriptPath":"main.cjs","delayMs":60000,"constraints":{"network":true}}]""")
         assertTrue(once.ok)
         val onceId = jsonString(once.resultJson.orEmpty())
         assertTrue(onceId.startsWith("node-work-"))
@@ -279,13 +377,46 @@ class NodeWorkManagerBridgeInstrumentationTest {
         val tasks = JSONArray(list.resultJson.orEmpty())
         assertEquals(2, tasks.length())
         assertEquals(setOf(onceId, periodicId), (0 until tasks.length()).map { tasks.getJSONObject(it).getString("id") }.toSet())
-        assertTrue((0 until tasks.length()).map { tasks.getJSONObject(it).getString("scheduler") }.all { it == "metadata" })
+        assertTrue((0 until tasks.length()).map { tasks.getJSONObject(it).getString("scheduler") }.all { it == NodeWorkManagerBridgeScheduler.SCHEDULER_NAME })
+        assertTrue((0 until tasks.length()).map { tasks.getJSONObject(it).getString("status") }.all { it == NodeWorkManagerBridgeScheduler.STATUS_ENQUEUED })
         assertTrue((0 until tasks.length()).map { tasks.getJSONObject(it).getString("backend") }.all { it == "embedded" })
+        val onceTask = taskById(tasks, onceId)
+        assertEquals("scriptPath", onceTask.getString("entryKind"))
+        assertEquals("main.cjs", onceTask.getString("scriptPath"))
+        assertFalse(onceTask.has("entry"))
+        assertEquals(
+            NodeWorkManagerBridgeScheduler.SCHEDULER_NAME,
+            onceTask.getJSONObject("androidPolicy").getString("scheduler"),
+        )
+        assertTrue(onceTask.getJSONObject("androidPolicy").has("quotaState"))
+        val periodicTask = taskById(tasks, periodicId)
+        assertEquals("projectEntry", periodicTask.getString("entryKind"))
+        assertEquals("main.cjs", periodicTask.getString("entry"))
+        assertFalse(periodicTask.has("scriptPath"))
+        assertTrue(periodicTask.getBoolean("packaged"))
 
         val deniedPath = dispatch(provider, "scheduleOnce", """[{"scriptPath":"../escape.cjs"}]""")
         assertFalse(deniedPath.ok)
         assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, deniedPath.error?.code)
         assertEquals("work_manager", deniedPath.error?.module)
+
+        val deniedAbsolute = dispatch(provider, "scheduleOnce", """[{"scriptPath":"/sdcard/escape.cjs"}]""")
+        assertFalse(deniedAbsolute.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, deniedAbsolute.error?.code)
+
+        val deniedMissing = dispatch(provider, "scheduleOnce", """[{"entry":"missing.cjs"}]""")
+        assertFalse(deniedMissing.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, deniedMissing.error?.code)
+
+        val packagedMissing = dispatch(provider, "scheduleOnce", """[{"entry":"packaged/main.cjs","packaged":true,"delayMs":60000}]""")
+        assertTrue(packagedMissing.ok)
+        val packagedMissingId = jsonString(packagedMissing.resultJson.orEmpty())
+        val withPackagedMissing = JSONArray(dispatch(provider, "list", "[]").resultJson.orEmpty())
+        val packagedMissingTask = taskById(withPackagedMissing, packagedMissingId)
+        assertEquals("projectEntry", packagedMissingTask.getString("entryKind"))
+        assertEquals("packaged/main.cjs", packagedMissingTask.getString("entry"))
+        assertTrue(packagedMissingTask.getBoolean("packaged"))
+        assertTrue(dispatch(provider, "cancel", JSONArray().put(packagedMissingId).toString()).ok)
 
         val deniedInterval = dispatch(provider, "schedulePeriodic", """[{"scriptPath":"main.cjs","intervalMs":1000}]""")
         assertFalse(deniedInterval.ok)
@@ -296,9 +427,210 @@ class NodeWorkManagerBridgeInstrumentationTest {
         val afterCancel = JSONArray(dispatch(provider, "list", "[]").resultJson.orEmpty())
         assertEquals(1, afterCancel.length())
         assertEquals(periodicId, afterCancel.getJSONObject(0).getString("id"))
+
+        assertTrue(dispatch(provider, "cancel", JSONArray().put(periodicId).toString()).ok)
     }
 
-    private fun dispatch(provider: NodeBridgeCapabilityProvider, method: String, argsJson: String): NodeBridgeResponse {
+    @Test
+    fun androidWorkManagerLiveProviderExecutesPackagedProjectEntryAndPersistsResult() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node work_manager live provider one-shot execution")
+
+        val workDir = File(context.cacheDir, "node-bridge-work-manager-live-packaged").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create work_manager live directory: $absolutePath" }
+        }
+        val resultFile = File(workDir, "wm-result.json")
+        File(workDir, "main.cjs").writeText(
+            """
+            const fs = require("node:fs");
+            fs.writeFileSync("./wm-result.json", JSON.stringify({
+              ok: true,
+              mode: "packaged-entry",
+              cwd: process.cwd()
+            }));
+            console.log("work-manager-live-packaged-ran");
+            """.trimIndent(),
+        )
+        val provider = androidProvider("work-manager-live-packaged-provider", workDir)
+
+        val scheduled = dispatch(
+            provider,
+            "scheduleOnce",
+            """[{"entry":"main.cjs","packaged":true,"delayMs":0,"timeoutMs":20000}]""",
+            timeoutMs = 10_000L,
+        )
+        assertTrue(scheduled.toString(), scheduled.ok)
+        val taskId = jsonString(scheduled.resultJson.orEmpty())
+
+        waitUntil("scheduled packaged Node task should execute and persist result", timeoutMs = 60_000L) {
+            val task = taskById(JSONArray(dispatch(provider, "list", "[]", timeoutMs = 10_000L).resultJson.orEmpty()), taskId)
+            if (
+                task.optString("status") == NodeWorkManagerBridgeScheduler.STATUS_FAILED ||
+                task.optString("lastRunStatus") == NodeWorkManagerBridgeScheduler.STATUS_FAILED
+            ) {
+                throw AssertionError("scheduled packaged Node task failed: $task")
+            }
+            resultFile.isFile && task.optString("status") == NodeWorkManagerBridgeScheduler.STATUS_SUCCEEDED
+        }
+
+        val result = JSONObject(resultFile.readText())
+        assertTrue(result.getBoolean("ok"))
+        assertEquals("packaged-entry", result.getString("mode"))
+        val task = taskById(JSONArray(dispatch(provider, "list", "[]").resultJson.orEmpty()), taskId)
+        assertEquals("projectEntry", task.getString("entryKind"))
+        assertTrue(task.getBoolean("packaged"))
+        assertEquals(NodeWorkManagerBridgeScheduler.STATUS_SUCCEEDED, task.getString("lastRunStatus"))
+        val lastRun = task.getJSONObject("lastRun")
+        assertEquals(NodeExecutionModePolicy.MODE_SCHEDULED, lastRun.getString("executionMode"))
+        assertEquals(NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER, lastRun.getString("launchSurface"))
+        assertEquals("work_manager", lastRun.getString("trigger"))
+        assertEquals(1, lastRun.getInt("attempt"))
+        assertTrue(lastRun.getString("executionId").startsWith("node-work-run-$taskId-"))
+        assertTrue(lastRun.getString("stdout").contains("work-manager-live-packaged-ran"))
+        assertEquals(
+            NodeExecutionModePolicy.MODE_SCHEDULED,
+            lastRun.getJSONObject("nativeValues").getString("embedded_script.execution_mode"),
+        )
+        assertEquals(
+            NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
+            lastRun.getJSONObject("nativeValues").getString("embedded_script.execution_mode_launch_surface"),
+        )
+        assertEquals("true", lastRun.getJSONObject("nativeValues").getString("embedded_script.execution_mode_supported"))
+        assertEquals(1, task.getJSONArray("runHistory").length())
+        assertEquals(lastRun.getString("executionId"), task.getJSONArray("runHistory").getJSONObject(0).getString("executionId"))
+
+        assertTrue(dispatch(provider, "cancel", JSONArray().put(taskId).toString()).ok)
+    }
+
+    @Test
+    fun androidWorkManagerScheduledRunnerExecutesEsmEntryAndPersistsHistory() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node work_manager scheduled runner ESM execution")
+
+        val workDir = File(context.cacheDir, "node-bridge-work-manager-scheduled-esm").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create work_manager scheduled ESM directory: $absolutePath" }
+        }
+        val resultFile = File(workDir, "wm-esm-result.json")
+        File(workDir, "main.mjs").writeText(
+            """
+            import { writeFileSync } from "node:fs";
+            await Promise.resolve();
+            writeFileSync("./wm-esm-result.json", JSON.stringify({
+              ok: true,
+              taskId: process.env.AUTOJS6_NODE_SCHEDULED_TASK_ID,
+              type: process.env.AUTOJS6_NODE_SCHEDULED_TASK_TYPE,
+              attempt: process.env.AUTOJS6_NODE_SCHEDULED_TASK_ATTEMPT,
+              cwd: process.cwd()
+            }));
+            console.log("work-manager-scheduled-esm-ran");
+            """.trimIndent(),
+        )
+        val provider = androidProvider("work-manager-scheduled-esm-provider", workDir)
+
+        val scheduled = dispatch(
+            provider,
+            "scheduleOnce",
+            """[{"scriptPath":"main.mjs","delayMs":0,"timeoutMs":20000}]""",
+            timeoutMs = 10_000L,
+        )
+        assertTrue(scheduled.toString(), scheduled.ok)
+        val taskId = jsonString(scheduled.resultJson.orEmpty())
+
+        waitUntil("scheduled ESM Node task should execute and persist history", timeoutMs = 60_000L) {
+            val task = taskById(JSONArray(dispatch(provider, "list", "[]", timeoutMs = 10_000L).resultJson.orEmpty()), taskId)
+            if (
+                task.optString("status") == NodeWorkManagerBridgeScheduler.STATUS_FAILED ||
+                task.optString("lastRunStatus") == NodeWorkManagerBridgeScheduler.STATUS_FAILED
+            ) {
+                throw AssertionError("scheduled ESM Node task failed: $task")
+            }
+            resultFile.isFile && task.optString("status") == NodeWorkManagerBridgeScheduler.STATUS_SUCCEEDED
+        }
+
+        val result = JSONObject(resultFile.readText())
+        assertTrue(result.getBoolean("ok"))
+        assertEquals(taskId, result.getString("taskId"))
+        assertEquals("once", result.getString("type"))
+        assertEquals("1", result.getString("attempt"))
+        val task = taskById(JSONArray(dispatch(provider, "list", "[]").resultJson.orEmpty()), taskId)
+        val lastRun = task.getJSONObject("lastRun")
+        assertEquals("main.mjs", lastRun.getString("sourceName"))
+        assertEquals(NodeExecutionModePolicy.MODE_SCHEDULED, lastRun.getString("executionMode"))
+        assertEquals(NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER, lastRun.getString("launchSurface"))
+        assertTrue(lastRun.getString("stdout").contains("work-manager-scheduled-esm-ran"))
+        assertEquals(1, task.getJSONArray("runHistory").length())
+        assertEquals(
+            NodeExecutionModePolicy.MODE_SCHEDULED,
+            task.getJSONArray("runHistory").getJSONObject(0).getString("executionMode"),
+        )
+
+        assertTrue(dispatch(provider, "cancel", JSONArray().put(taskId).toString()).ok)
+    }
+
+    @Test
+    fun androidWorkManagerLiveProviderCancelPreventsDelayedExecution() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node work_manager live provider cancellation")
+
+        val workDir = File(context.cacheDir, "node-bridge-work-manager-live-cancel").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create work_manager cancel directory: $absolutePath" }
+        }
+        val resultFile = File(workDir, "wm-cancel-result.txt")
+        File(workDir, "main.cjs").writeText(
+            """
+            const fs = require("node:fs");
+            fs.writeFileSync("./wm-cancel-result.txt", "should-not-run");
+            """.trimIndent(),
+        )
+        val provider = androidProvider("work-manager-live-cancel-provider", workDir)
+
+        val scheduled = dispatch(provider, "scheduleOnce", """[{"scriptPath":"main.cjs","delayMs":2000,"timeoutMs":20000}]""")
+        assertTrue(scheduled.toString(), scheduled.ok)
+        val taskId = jsonString(scheduled.resultJson.orEmpty())
+        assertTrue(dispatch(provider, "cancel", JSONArray().put(taskId).toString()).ok)
+        assertEquals(0, JSONArray(dispatch(provider, "list", "[]").resultJson.orEmpty()).length())
+
+        TimeUnit.MILLISECONDS.sleep(3500)
+        assertFalse("Cancelled WorkManager task should not write its output file.", resultFile.exists())
+    }
+
+    @Test
+    fun androidWorkManagerProviderRequiresExplicitCapability() {
+        val workDir = File(context.cacheDir, "node-bridge-work-manager-capability").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create work_manager capability directory: $absolutePath" }
+        }
+        File(workDir, "main.cjs").writeText("""console.log("scheduled");""")
+        val provider = androidProvider("work-manager-capability-provider", workDir)
+
+        val response = dispatch(
+            provider,
+            "scheduleOnce",
+            """[{"scriptPath":"main.cjs","delayMs":60000}]""",
+            permissions = emptyList(),
+        )
+        assertFalse(response.toString(), response.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED, response.error?.code)
+    }
+
+    private fun androidProvider(id: String, workDir: File): AndroidNodeBridgeCapabilityProvider {
+        val engineInfo = NodeBridgeEngineInfo.fromContext(
+            context,
+            id = id,
+            sourceName = "main.cjs",
+            cwd = workDir.absolutePath,
+        )
+        ownerKeys += NodeWorkManagerBridgeScheduler.ownerKey(engineInfo)
+        return AndroidNodeBridgeCapabilityProvider(context, engineInfo)
+    }
+
+    private fun dispatch(
+        provider: NodeBridgeCapabilityProvider,
+        method: String,
+        argsJson: String,
+        permissions: List<String> = listOf("work_manager"),
+        timeoutMs: Long = 5_000L,
+    ): NodeBridgeResponse {
         val latch = CountDownLatch(1)
         var response: NodeBridgeResponse? = null
         provider.dispatch(
@@ -307,19 +639,45 @@ class NodeWorkManagerBridgeInstrumentationTest {
                 module = "work_manager",
                 method = method,
                 argsJson = argsJson,
-                timeoutMs = 5_000L,
-                permissions = listOf("work_manager"),
+                timeoutMs = timeoutMs,
+                permissions = permissions,
             ),
         ) { bridgeResponse ->
             response = bridgeResponse
             latch.countDown()
         }
-        assertTrue("Timed out waiting for work_manager provider response", latch.await(5, TimeUnit.SECONDS))
+        assertTrue("Timed out waiting for work_manager provider response", latch.await(timeoutMs, TimeUnit.MILLISECONDS))
         return checkNotNull(response) { "Missing work_manager provider response" }
     }
 
     private fun jsonString(json: String): String {
         return JSONTokener(json).nextValue() as String
+    }
+
+    private fun taskById(tasks: JSONArray, id: String): JSONObject {
+        for (index in 0 until tasks.length()) {
+            val task = tasks.getJSONObject(index)
+            if (task.optString("id") == id) {
+                return task
+            }
+        }
+        throw AssertionError("Missing work_manager task id: $id")
+    }
+
+    private fun waitUntil(label: String, timeoutMs: Long, intervalMs: Long = 500L, condition: () -> Boolean) {
+        val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMs)
+        var lastError: Throwable? = null
+        while (System.nanoTime() < deadline) {
+            try {
+                if (condition()) {
+                    return
+                }
+            } catch (error: Throwable) {
+                lastError = error
+            }
+            TimeUnit.MILLISECONDS.sleep(intervalMs)
+        }
+        throw AssertionError(label, lastError)
     }
 }
 

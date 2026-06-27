@@ -4,6 +4,43 @@ namespace autojs6::node_bridge::internal {
 
 using namespace autojs6::node_bridge;
 
+node::ProcessInitializationFlags::Flags embeddedNodeInitializationFlags(bool enableStdioInitialization) {
+    uint32_t flags =
+            static_cast<uint32_t>(node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior) |
+            static_cast<uint32_t>(node::ProcessInitializationFlags::kDisableNodeOptionsEnv) |
+            static_cast<uint32_t>(node::ProcessInitializationFlags::kNoParseGlobalDebugVariables);
+    if (enableStdioInitialization) {
+        flags &= ~static_cast<uint32_t>(node::ProcessInitializationFlags::kNoStdioInitialization);
+    }
+    return static_cast<node::ProcessInitializationFlags::Flags>(flags);
+}
+
+const char* embeddedNodeInitializationFlagsName(bool enableStdioInitialization) {
+    return enableStdioInitialization
+           ? "kLegacyInitializeNodeWithArgsBehavior_without_kNoStdioInitialization|kDisableNodeOptionsEnv|kNoParseGlobalDebugVariables"
+           : "kLegacyInitializeNodeWithArgsBehavior|kDisableNodeOptionsEnv|kNoParseGlobalDebugVariables";
+}
+
+bool isTruthyEnvValue(const std::string& value) {
+    std::string normalized;
+    normalized.reserve(value.size());
+    for (char ch : value) {
+        if (!std::isspace(static_cast<unsigned char>(ch))) {
+            normalized.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(ch))));
+        }
+    }
+    return normalized == "1" || normalized == "true" || normalized == "yes" || normalized == "on";
+}
+
+bool embeddedScriptFullUvDiagnosticsRequested(const EmbeddedScriptExecutionRequest& request) {
+    for (const auto& entry : request.env) {
+        if (entry.first == "AUTOJS6_NODE_FULL_UV_DIAGNOSTICS") {
+            return isTruthyEnvValue(entry.second);
+        }
+    }
+    return false;
+}
+
 void appendEmbeddedLifecycleProbePayload(std::vector<std::string>& payload, void* handle) {
     __android_log_print(ANDROID_LOG_INFO, kLogTag, "lifecycle.start");
     const auto lifecycleStartedAt = Clock::now();
@@ -55,16 +92,18 @@ void appendEmbeddedLifecycleProbePayload(std::vector<std::string>& payload, void
             reinterpret_cast<NodeTearDownOncePerProcess>(teardownLookup.address);
 
     std::vector<std::string> args = {"autojs6-embedded-lifecycle-probe"};
-    const auto flags = node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
+    const auto flags = embeddedNodeInitializationFlags(false);
+    const char* flagsName = embeddedNodeInitializationFlagsName(false);
     putPayload(payload, "initialize.symbol", initializeLookup.symbol);
-    putPayload(payload, "initialize.flags", "kLegacyInitializeNodeWithArgsBehavior");
+    putPayload(payload, "initialize.flags", flagsName);
     putPayload(payload, "teardown.symbol", teardownLookup.symbol);
 
     __android_log_print(
             ANDROID_LOG_INFO,
             kLogTag,
-            "initialize.start symbol=%s flags=kLegacyInitializeNodeWithArgsBehavior",
-            initializeLookup.symbol.c_str()
+            "initialize.start symbol=%s flags=%s",
+            initializeLookup.symbol.c_str(),
+            flagsName
     );
     const auto initializeStartedAt = Clock::now();
     bool initialized = false;
@@ -239,9 +278,10 @@ void appendEmbeddedV8LifecycleProbePayload(std::vector<std::string>& payload, vo
 
     const int buildConfiguration = v8BuildConfiguration();
     std::vector<std::string> args = {"autojs6-embedded-v8-lifecycle-probe"};
-    const auto flags = node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
+    const auto flags = embeddedNodeInitializationFlags(false);
+    const char* flagsName = embeddedNodeInitializationFlagsName(false);
     putPayload(payload, "initialize.symbol", initializeLookup.symbol);
-    putPayload(payload, "initialize.flags", "kLegacyInitializeNodeWithArgsBehavior");
+    putPayload(payload, "initialize.flags", flagsName);
     putPayload(payload, "teardown.symbol", teardownLookup.symbol);
     putPayload(payload, "platform.create.symbol", platformCreateLookup.symbol);
     putPayload(payload, "v8.initialize_platform.symbol", v8InitializePlatformLookup.symbol);
@@ -259,8 +299,9 @@ void appendEmbeddedV8LifecycleProbePayload(std::vector<std::string>& payload, vo
     __android_log_print(
             ANDROID_LOG_INFO,
             kLogTag,
-            "initialize.start symbol=%s flags=kLegacyInitializeNodeWithArgsBehavior",
-            initializeLookup.symbol.c_str()
+            "initialize.start symbol=%s flags=%s",
+            initializeLookup.symbol.c_str(),
+            flagsName
     );
     const auto initializeStartedAt = Clock::now();
     try {
@@ -453,6 +494,130 @@ void appendEmbeddedV8LifecycleProbePayload(std::vector<std::string>& payload, vo
 #endif
 }
 
+std::vector<std::string> runEmbeddedScriptExecution(
+        const EmbeddedScriptExecutionRequest& request,
+        const char* runtimeAdapterPath,
+        const char* runtimeAdapterMode
+) {
+    const auto startedAt = Clock::now();
+    __android_log_print(ANDROID_LOG_INFO, kLogTag, "embedded_script.enter");
+    const std::string sourceNameText = request.sourceName.empty()
+            ? "<embedded-user-script.js>"
+            : request.sourceName;
+    std::vector<std::string> payload;
+    putPayload(payload, "embedded_script.request.source_name", sourceNameText);
+    putPayload(payload, "embedded_script.request.source.length", static_cast<long long>(request.source.size()));
+    putPayload(payload, "embedded_script.request.working_directory", request.workingDirectory);
+    putPayload(payload, "embedded_script.request.sandbox_root", request.sandboxRoot);
+    putPayload(payload, "embedded_script.request.env.count", static_cast<long long>(request.env.size()));
+    putPayload(payload, "embedded_script.request.module_sources.count", static_cast<long long>(request.moduleSources.size()));
+    putPayload(
+            payload,
+            "embedded_script.request.runtime_module_sources.count",
+            static_cast<long long>(request.runtimeModuleSources.size())
+    );
+    putPayload(payload, "embedded_script.request.source_kind", "kotlin_provided_source");
+    putPayload(payload, "embedded_script.request.user_file_read_by_native", false);
+    putPayload(payload, "embedded_script.request.require_allowed", true);
+    putPayload(
+            payload,
+            "embedded_script.request.require_mode",
+            request.esmExperimentalEnabled ? "restricted_commonjs_mvp_with_experimental_esm" : "restricted_commonjs_mvp"
+    );
+    putPayload(payload, "embedded_script.request.fs_allowed", "scoped_working_directory_sync_mvp");
+    putPayload(payload, "embedded_script.request.import_allowed", request.esmExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.esm_experimental_enabled", request.esmExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.dynamic_import_experimental_enabled", request.dynamicImportExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.raw_node_network_modules_experimental_enabled", request.rawNodeNetworkModulesExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.worker_threads_experimental_enabled", request.workerThreadsExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.child_process_experimental_enabled", request.childProcessExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.java_interop_experimental_enabled", request.javaInteropExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.node_modules_allowed", "working_directory_commonjs_mvp");
+    putPayload(payload, "embedded_script.request.autojs_api_allowed", false);
+    putPayload(payload, "embedded_script.request.android_bridge_allowed", false);
+    if (runtimeAdapterPath != nullptr && std::strlen(runtimeAdapterPath) > 0) {
+        putPayload(payload, "embedded_script.runtime_adapter.path", runtimeAdapterPath);
+    }
+    if (runtimeAdapterMode != nullptr && std::strlen(runtimeAdapterMode) > 0) {
+        putPayload(payload, "embedded_script.runtime_adapter.mode", runtimeAdapterMode);
+    }
+
+    ScopedWorkingDirectory scopedWorkingDirectory;
+    std::string workingDirectoryError;
+    if (!scopedWorkingDirectory.enter(request.workingDirectory, &workingDirectoryError)) {
+        putPayload(payload, "embedded_script.request.working_directory_entered", false);
+        putPayload(payload, "embedded_script.status", "failed");
+        putPayload(payload, "embedded_script.detail", workingDirectoryError);
+        putPayload(payload, "embedded_script.succeeded", false);
+        putPayload(payload, "embedded_script.exit_code", static_cast<long long>(1));
+        putPayload(payload, "embedded_script.error_code", "ERR_AUTOJS6_NODE_WORKING_DIRECTORY");
+        putCommonEmbeddedProbePayload(payload, 0, startedAt);
+        __android_log_print(
+                ANDROID_LOG_WARN,
+                kLogTag,
+                "embedded_script.exit status=failed reason=working_directory elapsed=%lldms",
+                elapsedMs(startedAt)
+        );
+        return payload;
+    }
+    putPayload(payload, "embedded_script.request.working_directory_entered", !request.workingDirectory.empty());
+    std::string wrappedSource = buildEmbeddedScriptExecutionSource(
+            request.source,
+            sourceNameText,
+            request.workingDirectory,
+            request.sandboxRoot,
+            request.moduleSources,
+            request.runtimeModuleSources,
+            request.env,
+            request.esmExperimentalEnabled,
+            request.dynamicImportExperimentalEnabled,
+            request.rawNodeNetworkModulesExperimentalEnabled,
+            request.workerThreadsExperimentalEnabled,
+            request.childProcessExperimentalEnabled,
+            request.javaInteropExperimentalEnabled
+    );
+    void* handle = probeLoadedLibnodeHandle(payload);
+    const char* workingDirectoryPtr = request.workingDirectory.empty() ? nullptr : request.workingDirectory.c_str();
+    const bool fullUvDiagnostics = embeddedScriptFullUvDiagnosticsRequested(request);
+    putPayload(payload, "embedded_script.uv_diagnostics.mode", fullUvDiagnostics ? "full" : "lightweight");
+    putPayload(payload, "embedded_script.uv_diagnostics.full_requested", fullUvDiagnostics);
+    appendEmbeddedV8UvIsolateLifecycleProbePayload(
+            payload,
+            handle,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            &wrappedSource,
+            "embedded_script",
+            workingDirectoryPtr,
+            true,
+            fullUvDiagnostics
+    );
+    putCommonEmbeddedProbePayload(payload, 0, startedAt);
+    __android_log_print(ANDROID_LOG_INFO, kLogTag, "embedded_script.exit elapsed=%lldms", elapsedMs(startedAt));
+    return payload;
+}
+
 void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         std::vector<std::string>& payload,
         void* handle,
@@ -482,7 +647,8 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         const std::string* sourceOverride,
         const char* sourceLabelOverride,
         const char* workingDirectoryOverride,
-        bool scriptExecution
+        bool scriptExecution,
+        bool fullUvDiagnostics
 ) {
     const auto jsProbeKind = resolveEmbeddedLifecycleJsProbeKind(
             jsResult,
@@ -2734,9 +2900,23 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
     );
     putUvLoopSkippedPayload(payload, lifecycleDetail);
     putV8SkippedPayload(payload, lifecycleDetail);
+    const bool collectUvDiagnostics = diagnoseUvHandles && (!scriptExecution || fullUvDiagnostics);
+    putPayload(
+            payload,
+            "uv.diagnostics.collection",
+            collectUvDiagnostics
+                    ? "full"
+                    : diagnoseUvHandles
+                    ? "lightweight_cleanup"
+                    : "not_requested"
+    );
     putUvDiagnosticsSkippedPayload(
             payload,
-            diagnoseUvHandles ? lifecycleDetail : "uv diagnostics not requested"
+            collectUvDiagnostics
+                    ? lifecycleDetail
+                    : diagnoseUvHandles
+                    ? "full UV diagnostics disabled for embedded script fast path"
+                    : "uv diagnostics not requested"
     );
     putUvCloseSkippedPayload(
             payload,
@@ -3448,20 +3628,10 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
                     ? "autojs6-embedded-v8-uv-diagnostics-probe"
                     : "autojs6-embedded-v8-uv-isolate-probe"
     };
-    const auto flags = stdoutCapture
-            ? static_cast<node::ProcessInitializationFlags::Flags>(
-                    static_cast<uint32_t>(node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior) &
-                    ~static_cast<uint32_t>(node::ProcessInitializationFlags::kNoStdioInitialization)
-            )
-            : node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
+    const auto flags = embeddedNodeInitializationFlags(stdoutCapture);
+    const char* flagsName = embeddedNodeInitializationFlagsName(stdoutCapture);
     putPayload(payload, "initialize.symbol", initializeLookup.symbol);
-    putPayload(
-            payload,
-            "initialize.flags",
-            stdoutCapture
-                    ? "kLegacyInitializeNodeWithArgsBehavior_without_kNoStdioInitialization"
-                    : "kLegacyInitializeNodeWithArgsBehavior"
-    );
+    putPayload(payload, "initialize.flags", flagsName);
     putPayload(payload, "teardown.symbol", teardownLookup.symbol);
     putPayload(payload, "platform.create.symbol", platformCreateLookup.symbol);
     putPayload(payload, "v8.initialize_platform.symbol", v8InitializePlatformLookup.symbol);
@@ -6956,9 +7126,7 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
             kLogTag,
             "initialize.start symbol=%s flags=%s",
             initializeLookup.symbol.c_str(),
-            stdoutCapture
-                    ? "kLegacyInitializeNodeWithArgsBehavior_without_kNoStdioInitialization"
-                    : "kLegacyInitializeNodeWithArgsBehavior"
+            flagsName
     );
     const auto initializeStartedAt = Clock::now();
     try {
@@ -19342,7 +19510,7 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         putPayload(payload, "timing.isolate_dispose.ms", elapsedMs(disposeStartedAt));
     }
 
-    if (diagnoseUvHandles && uvLoopInitialized) {
+    if (collectUvDiagnostics && uvLoopInitialized) {
         putPayload(payload, "uv.diagnostics.status", "running");
         putPayload(payload, "uv.diagnostics.detail", "uv_walk diagnostics started");
         appendUvDiagnosticsPayload(
@@ -19368,15 +19536,17 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
                 uvIsActive,
                 uvIsClosing
         );
-        appendUvDiagnosticsPayload(
-                payload,
-                "after_uv_close",
-                eventLoop.get(),
-                uvWalk,
-                uvHandleGetType,
-                uvIsActive,
-                uvIsClosing
-        );
+        if (collectUvDiagnostics) {
+            appendUvDiagnosticsPayload(
+                    payload,
+                    "after_uv_close",
+                    eventLoop.get(),
+                    uvWalk,
+                    uvHandleGetType,
+                    uvIsActive,
+                    uvIsClosing
+            );
+        }
     }
 
     if (runUvLoopCleanup && uvLoopInitialized) {
@@ -19389,7 +19559,8 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
                 uvWalk,
                 uvHandleGetType,
                 uvIsActive,
-                uvIsClosing
+                uvIsClosing,
+                collectUvDiagnostics
         );
         if (!uvRunCleanupCompleted) {
             lifecycleFailed = true;
@@ -19434,7 +19605,7 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         putPayload(payload, "timing.uv_loop_close.ms", elapsedMs(uvLoopCloseStartedAt));
     }
 
-    if (diagnoseUvHandles && uvLoopInitialized) {
+    if (collectUvDiagnostics && uvLoopInitialized) {
         if (closeUvHandles && uvLoopCloseAttempted && !uvLoopClosed) {
             appendUvDiagnosticsPayload(
                     payload,
@@ -19787,13 +19958,14 @@ void appendEmbeddedIsolateLifecycleProbePayload(
     std::vector<std::string> args = {
             useUvLoop ? "autojs6-embedded-uv-isolate-probe" : "autojs6-embedded-isolate-probe"
     };
-    const auto flags = node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
+    const auto flags = embeddedNodeInitializationFlags(false);
+    const char* flagsName = embeddedNodeInitializationFlagsName(false);
     if (useUvLoop) {
         putPayload(payload, "uv.loop.init.symbol", uvLoopInitLookup.symbol);
         putPayload(payload, "uv.loop.close.symbol", uvLoopCloseLookup.symbol);
     }
     putPayload(payload, "initialize.symbol", initializeLookup.symbol);
-    putPayload(payload, "initialize.flags", "kLegacyInitializeNodeWithArgsBehavior");
+    putPayload(payload, "initialize.flags", flagsName);
     putPayload(payload, "teardown.symbol", teardownLookup.symbol);
     putPayload(payload, "platform.create.symbol", platformCreateLookup.symbol);
     putPayload(payload, "allocator.create.symbol", allocatorCreateLookup.symbol);
@@ -19852,8 +20024,9 @@ void appendEmbeddedIsolateLifecycleProbePayload(
         __android_log_print(
                 ANDROID_LOG_INFO,
                 kLogTag,
-                "initialize.start symbol=%s flags=kLegacyInitializeNodeWithArgsBehavior",
-                initializeLookup.symbol.c_str()
+                "initialize.start symbol=%s flags=%s",
+                initializeLookup.symbol.c_str(),
+                flagsName
         );
         const auto initializeStartedAt = Clock::now();
         try {

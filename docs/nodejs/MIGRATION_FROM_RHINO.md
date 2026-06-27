@@ -3,6 +3,35 @@
 This guide explains how existing AutoJs6 Rhino scripts should move to the Embedded Node runtime. Node support is a second engine with a different compatibility profile; it is not a drop-in replacement for Rhino globals.
 
 If you are adapting scripts from Auto.js Pro 9 or AutoX.js v7, also read [COMPATIBILITY_NOTES_PRO_AUTOX.md](COMPATIBILITY_NOTES_PRO_AUTOX.md).
+For the current v1.1 Node feature status, read [NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md).
+
+## Phase 13 Profile Migration Status
+
+P13-56 records migration and Pro9 comparison docs as partial. These labels are
+documentation and migration guidance labels, not runtime grants:
+
+- Pro-compatible: a script-facing path exists in the Safe profile or has a
+  documented Pro-profile migration target with evidence and stable denial
+  behavior.
+- Desktop-compatible: a local desktop Node.js pattern has a documented Safe or
+  Desktop-profile path with scoped Android limits.
+- gated/diagnostic-only: a design, debug-only profile, provider POC, static
+  example, or TypeScript profile row exists, but the script-visible authority is
+  still unavailable by default.
+
+debug-only/provider POC is not formal availability. A fake provider, live
+provider proof, debug profile diagnostic, or `sample/nodejs/*-parity-suite`
+snippet must not be treated as a stable user-script API until the corresponding
+runtime promotion gate says so.
+
+| Area | P13-56 label | Migration guidance |
+| --- | --- | --- |
+| Node entry points, CommonJS, partial local ESM, JSON modules, timers, `console`, `process`, `Buffer`, and scoped project files | Desktop-compatible | Use `.cjs` or `"nodejs";` plus explicit imports. Keep filesystem paths project-scoped and avoid raw desktop assumptions. |
+| covered `autojs6:compat` Rhino `augment` migrations and explicit bridge modules such as toast/files/storage/app/device/shell/image/OCR/accessibility wrappers | Pro-compatible | Prefer explicit `require()` modules or `require("autojs6:compat")`; do not depend on automatic Rhino global injection. |
+| `sample/nodejs/pro-parity-suite` | Pro-compatible documentation catalog, gated runtime | Use the snippets as migration examples for `$autojs.java`, `rhino.install`, UI, overlay/floaty, tasks, screenshot/OCR, and accessibility. They document required capabilities and skip reasons but do not grant Pro authority. |
+| `sample/nodejs/desktop-parity-suite` | Desktop-compatible documentation catalog, gated runtime | Use the snippets as desktop Node migration examples for ESM, `worker_threads`, HTTP/HTTPS, raw network modules opt-in, advanced fs, WASI, inspector, and pure-JS npm dependency patterns. Safe-profile denial output remains part of the contract. |
+| `profile_capabilities.d.ts` | Desktop-compatible and Pro-compatible metadata, gated runtime | Use the TypeScript matrix to record profile requirements with `ProfileModuleModeFor`, `ProfileRequiredFor`, `SafeDefaultModeFor`, and `PackagedBehaviorFor`, including the `raw_network` desktop marker. The declarations are metadata-only and do not make denied modules callable. |
+| `$autojs.java`, raw `java` / `android`, `rhino.install`, `Packages`, `importClass`, `importPackage`, `JavaAdapter`, raw `floaty`, unrestricted UI-thread execution, daily/weekly task rows, raw network sockets, expanded filesystem roots, `vm`, `inspector`, raw WASI, native addons, `child_process`, Android npm CLI, registry install, lifecycle scripts, and native payloads | gated/diagnostic-only or unsupported | Keep these scripts on Rhino, rewrite them to explicit bridge modules, or wait for a future Pro/Desktop profile promotion gate. Do not infer availability from debug diagnostics or provider POC evidence. |
 
 ## Entry Points
 
@@ -22,7 +51,7 @@ main.cjs
 main.mjs
 ```
 
-`.mjs` currently routes to the Node backend, but ESM remains disabled by default in AutoJs6 Safe Node Profile. Use CommonJS (`require`) unless an explicit future ESM flag says otherwise.
+`.mjs` currently routes to the Node backend and runs through the Node Profile v1.1 partial ESM path. Use CommonJS (`require`) when you need the widest compatibility; partial ESM supports local static imports, selected builtin imports, and ESM-to-CJS interop, but not the full desktop Node loader.
 
 For projects, prefer:
 
@@ -38,6 +67,25 @@ For projects, prefer:
 ```
 
 Rhino projects should keep their Rhino project type and should not add the Node directive accidentally.
+
+For checked migration pairs, see `docs/nodejs/examples/rhino-compat`. S11-27
+covers toast/files/storage/selector/image/ocr/app/device/shell with old Rhino
+snippets and Node `autojs6:compat` rewrites. P12-19 adds tasks migration
+examples covering supported async disposable tasks, unsupported daily/weekly and
+IntentTask rejections, and blocked raw task-object mutation. The examples are
+statically verified by `verifyNodeRhinoCompatExamples`, and the tasks-specific
+bucket report is verified by `verifyNodeRhinoCompatTasksMigrationExamples`.
+
+S11-28 adds dual-engine compatibility fixtures in
+`docs/nodejs/dual-engine-compat`. These pair Rhino snippets with Node
+compat-mode snippets and separate `supported_async` cases from
+`blocked_by_design` cases. Run `verifyNodeRhinoDualEngineCompatTests` to
+produce the host report. P12-33 adds fake device instrumentation evidence for
+the high-value `events-keys`, `ui-compat-show-update-close`,
+`tasks-disposable`, `barcode-qrcode`, and `rhino-shim-disabled` cases. Run
+`verifyNodeRhinoCompatDualEngineDeviceEvidence` for the host-side fixture gate;
+the focused connected-device hook is
+`RhinoNodeDualEngineCompatInstrumentationTest`.
 
 ## Mental Model Changes
 
@@ -71,7 +119,7 @@ Do not assume Rhino globals are present:
 
 - no direct global `toast()`
 - no direct global `files`
-- no direct global selector DSL
+- no direct global selector DSL unless `require("autojs6:compat").install({ globals: true })` is called explicitly
 - no direct global `images`
 - no direct Java object access by default
 - no `importClass`, `importPackage`, or Rhino Java bridge globals
@@ -80,7 +128,7 @@ If a script needs Android or AutoJs functionality, use an AutoJs bridge module.
 
 ## Rhino Compatibility Shim
 
-There is no `require("rhino")` compatibility module in the default Safe Node Profile, and Node does not support `rhino.install()` or automatic installation of old AutoJs globals.
+P12-24 reserves `require("rhino")` in the default Safe Node Profile as a disabled JSON-only shim facade. P12-25 implements an explicit `experimental: true` JSON-only execution adapter POC for small Rhino snippets or scoped files. Calls without `experimental: true` still reject, default `rhino.install()` still rejects, and Node does not automatically install old AutoJs globals. P13-14 adds only an explicit experimental Java proxy install for `Packages` / `java` / `android`; P13-15 and P13-16 keep `importClass`, `importPackage`, and `JavaAdapter` as stable unsupported helpers. The explicit migration helper for implemented Rhino-style APIs remains `require("autojs6:compat")`; it does not install globals unless the script calls `compat.install({ globals: true })`.
 
 Do not migrate scripts by expecting these Rhino-era surfaces to appear inside Node:
 
@@ -92,9 +140,34 @@ Do not migrate scripts by expecting these Rhino-era surfaces to appear inside No
 - direct `android.*`
 - old global AutoJs APIs such as `toast`, `files`, `images`, selector globals, or `threads`
 
-The recommended migration path is to rewrite those calls to explicit Node bridge modules. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing Rhino globals into Node.
+The recommended migration path is to rewrite those calls to explicit Node bridge modules. For low-risk helpers, `autojs6:compat` currently covers toast/sleep/clipboard, scoped files, pure/text utilities, storage/sqlite, readable `console`/timer debugging migration, the first selector/accessibility compatibility facade, and common app/device/shell wrappers. `console.show()` and related floating-console controls are no-op output-capture shims in Node; logs still go to captured stdout/stderr, and uncaught errors keep source-map-aware `errorStack` output. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing unrestricted Rhino globals into Node.
 
-The design gate for a possible future shim is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). Its recommendation is that any future shim should be explicit, isolated, JSON-serialized, timeout-bounded, and used only for migration.
+The design gate for broader Rhino interop is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). S11-26 narrows the only acceptable shape to a JSON-only `rhino.run({ source, timeoutMs, args })` / scoped `path` API, documented in [RHINO_JSON_ONLY_SHIM.md](design/RHINO_JSON_ONLY_SHIM.md). P12-25 implements the following explicit POC shape:
+
+```js
+"nodejs";
+
+const rhino = require("rhino");
+
+const result = await rhino.run({
+  experimental: true,
+  source: "({ value: args[0].value + 1 })",
+  args: [{ value: 41 }],
+  timeoutMs: 5000
+});
+```
+
+In P12-25, `rhino.run()` without `experimental: true` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`, and `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`. The POC accepts and returns only JSON-safe values, is timeout-bounded, and does not install Rhino globals into V8. It must reject Java objects, Rhino `Scriptable`, Android objects, functions, image/UI/accessibility handles, native pointers, threads, locks, process handles, cycles, `undefined`, `bigint`, symbols, and prototype-bearing objects at the engine boundary.
+
+P12-23 establishes the default-disabled POC gate in
+[RHINO_JSON_ONLY_SHIM_POC_GATE.md](reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md).
+P12-25 implements the runtime adapter in
+[RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md](reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md).
+The POC uses the `args` Rhino global, not the implicit Rhino `arguments`
+object, and returns a `RunResult` record rather than throwing Rhino exceptions
+directly into Node. P12-26 records packaged metadata behavior as fail-closed:
+no packaged metadata shape is accepted in Phase 12, and packaged APK execution
+remains rejected. Do not ship packaged APK code that depends on the Rhino JSON-only POC; keep those snippets in live validation or rewrite them to explicit Node bridge modules before packaging.
 
 ## Modules Instead Of Globals
 
@@ -113,6 +186,133 @@ const shell = require("shell");
 ```
 
 Use Node builtins only within the supported profile. Raw `child_process`, native addons, unrestricted network modules, and unrestricted filesystem access remain disabled by default.
+
+## Phase 12 Promoted Compatibility Examples
+
+P12-34 keeps the promoted Phase 12 compatibility surfaces visible in this
+formal migration guide. These examples use explicit imports and keep completed
+surfaces out of the provider-gap bucket.
+
+### Events Keys Constants
+
+Rhino key-code constants are available as pure compatibility constants. This
+does not enable Android key observation or interception.
+
+```js
+"nodejs";
+
+const compat = require("autojs6:compat");
+
+console.log(compat.keys.HOME);
+console.log(compat.events.keys.BACK);
+```
+
+### Disposable Scheduled Tasks
+
+Rhino one-shot disposable task migration uses the `compat.tasks` facade over
+`work_manager`. The facade returns a Node-owned string id and JSON task
+snapshots only.
+
+```js
+"nodejs";
+
+(async function main() {
+  const compat = require("autojs6:compat");
+
+  const taskId = await compat.tasks.addDisposableTask({
+    path: "jobs/cleanup.cjs",
+    delayMs: 60 * 1000,
+    taskTimeoutMs: 30 * 1000,
+  });
+
+  await compat.tasks.removeTask(taskId);
+})();
+```
+
+### Barcode And QRCode
+
+P12-28 promotes the direct `barcode` provider and P12-29 promotes
+`compat.barcode` plus QR-only `compat.qrcode`. Inputs are project-relative
+paths, provider-owned image handles, or existing-permission capture descriptors;
+raw `Bitmap`, `ImageWrapper`, ML Kit `Barcode`, scanners, and Java objects do
+not cross into Node.
+
+```js
+"nodejs";
+
+(async function main() {
+  const barcode = require("barcode");
+  const compat = require("autojs6:compat");
+
+  const allCodes = await barcode.detectAll("fixtures/barcodes.png", {
+    formats: ["QR_CODE", "EAN_13"],
+    timeoutMs: 10_000,
+  });
+
+  const image = await compat.images.read("fixtures/qrcode.png", { timeoutMs: 10_000 });
+  try {
+    const qrTexts = await compat.qrcode.recognizeTexts(image, { timeoutMs: 10_000 });
+    console.log(JSON.stringify({ allCodes: allCodes.length, qrTexts }));
+  } finally {
+    await compat.images.recycle(image);
+  }
+})();
+```
+
+### Stable Rejections
+
+Rejected compatibility APIs should fail with stable error codes instead of
+silently falling back to unsafe behavior:
+
+- `rhino.run()` without `experimental: true` rejects with
+  `ERR_AUTOJS6_RHINO_SHIM_DISABLED`.
+- `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`.
+- `s13n.color`, `s13n.point`, `s13n.throwable`, and `s13n.time` reject with
+  `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`.
+- raw task objects, exact Rhino `threads`, `floaty.window()`, and
+  `floaty.rawWindow()` are blocked by design; compatibility docs and examples
+  use `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN` where a stable callable stub
+  exists.
+
+## Unsupported Utility Modules
+
+P12-31 triages the remaining utility-heavy Rhino gaps in
+[RHINO_UNSUPPORTED_UTILITY_TRIAGE.md](reports/phase12/RHINO_UNSUPPORTED_UTILITY_TRIAGE.md).
+P12-32 promotes the first low-risk pilot, `s13n.bytes`, as a pure JavaScript
+helper without Android provider authority:
+
+```js
+// Rhino
+const bytes = s13n.bytes("1 KB");
+
+// Node direct facade
+const s13n = require("s13n");
+const bytesFromNode = s13n.bytes("1 KB");
+
+// Node Rhino compatibility facade
+const compat = require("autojs6:compat");
+const bytesFromCompat = compat.s13n.bytes("1", "MB");
+```
+
+The Node facade returns bytes as a number and is equivalent to
+`converter.bytes(source, fromUnit, "B", { fractionDigits: 0 })`.
+`s13n.color`, `s13n.point`, `s13n.throwable`, and `s13n.time` are present only
+as stable unsupported calls until each helper has a separate JSON-safe contract.
+
+Do not migrate production scripts by assuming these modules are available in
+Node yet:
+
+- `zip`: deferred until a scoped archive provider covers zip-slip denial,
+  archive budgets, overwrite policy, cleanup, and packaged smoke.
+- `canvas`: deferred until a JSON-only drawing provider exists; raw
+  `Canvas`/`Paint`/`View` parity is a permanent non-goal.
+- `recorder`, `media` audio helpers, and `mediainfo`: deferred until separate
+  provider gates define permissions, foreground disclosure, lifecycle cleanup,
+  and JSON-safe snapshots.
+- `opencc` and `pinyin.fromPhrase`: deferred until dictionary resource
+  packaging and stable missing-resource diagnostics are available.
+- `util` and `jsox.mathx`: deferred as split pure utility batches instead of
+  whole-module promotion.
 
 ## TypeScript Declarations
 
@@ -150,8 +350,20 @@ const result = await shell.exec("echo ok", { timeoutMs: 1000 });
 console.log(result.code, result.stdout.trim());
 ```
 
+The S11-17 compatibility facade also supports common Rhino `shell()` migration:
+
+```js
+"nodejs";
+
+const compat = require("autojs6:compat");
+const result = await compat.shell("echo ok", { timeoutMs: 1000 });
+console.log(result.code, result.stdout.trim());
+```
+
 Projects that use a bridge permission manifest must declare `shell`; root execution also requires `shell.root`.
-`spawn()`, `fork()`, streaming stdio, and interactive shells are not supported.
+`compat.shell("id", true)` is accepted as shorthand for `{ root: true }`, but root is never enabled implicitly.
+Shizuku execution remains unsupported; `compat.shell.checkAccess({ shizuku: true })` reports the missing capability
+instead of escalating. `spawn()`, `fork()`, streaming stdio, and interactive shells are not supported.
 
 ## Threads And Async Work
 
@@ -159,10 +371,50 @@ Rhino scripts may use older thread APIs. Node scripts should prefer:
 
 - `Promise`
 - `async` / `await`
-- timers
+- timers and `timers/promises`
+- `AbortController`
 - bridge APIs with timeout options
+- explicit `engines.execScriptFile()` / `engines.execScript()` slots for
+  separate bounded executions
+- `work_manager` for scheduled bounded work
 
-The `threads` module is not available in Node scripts, and Node `worker_threads` remains disabled by default.
+The `threads` module is not available in Node scripts, and Node
+`worker_threads` remains disabled by default. Do not migrate Rhino code by
+expecting `require("threads")`, `compat.threads`, a global `threads`, a global
+`sync`, or default `worker_threads` to exist.
+
+P12-20 rechecked `worker_threads`, process slot, and execution-mode maturity and
+kept that boundary. The internal worker path is native-availability gated, not a
+release migration target; `worker_computation` remains reserved, and
+`second_execution_slot` remains open. See
+[RHINO_THREADS_MATURITY_REVIEW.md](reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md).
+
+P12-21 adds the Rhino threads migration cookbook:
+[RHINO_THREADS_MIGRATION_COOKBOOK.md](reports/phase12/RHINO_THREADS_MIGRATION_COOKBOOK.md).
+It expands the script-author replacements for `threads.start()`,
+`threads.interrupt()`, `threads.pool()`, `threads.disposable()`, and
+`sync(fn, lock)`, and adds the dual-engine `threads-disposable` and
+`threads-sync-queue` blocked cases. Run
+`verifyNodeRhinoCompatThreadsMigrationCookbook` to verify that the cookbook,
+fixtures, matrix, and status manifest still keep `threads.*`
+`blocked_by_design`.
+
+P12-22 explicitly defers the compute/process-worker replacement API for Phase
+12. No `compute_worker`, `process_worker`, `worker`, `threads`, or
+`worker_threads` compatibility runtime surface is promoted. Future worker-like
+APIs must be separately named, must not claim Rhino parity, and must pass
+worker/process permissions, scoped script path, message size, cleanup, nested
+worker denial, bridge module isolation, resource stress, packaged behavior, and
+`second_execution_slot` gates. See
+[RHINO_COMPUTE_PROCESS_WORKER_DECISION.md](reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md).
+
+`threads.start()`, `threads.pool()`, `threads.interrupt()`,
+`threads.disposable()`, and `sync(fn, lock)` are all `blocked_by_design` as
+exact Node compatibility targets. They depend on shared Rhino `ScriptRuntime`
+state, raw Java `Thread` / `ThreadPoolExecutor` handles, Rhino `Synchronizer`,
+Java locks, and blocking `VolatileDispose` waits. Node code must not block the
+event loop or share mutable Rhino/Java objects across execution slots. See
+[RHINO_THREADS_MIGRATION_POLICY.md](design/RHINO_THREADS_MIGRATION_POLICY.md).
 
 Before:
 
@@ -185,7 +437,7 @@ After:
 
 ## Filesystem Migration
 
-Rhino scripts often use AutoJs `files` helpers and absolute Android paths. Node scripts use scoped `fs` or `fs/promises`. Paths are relative to the working directory or project root. Absolute paths, `..` escapes, NUL bytes, `/proc`, `/sys`, `/dev`, symlink escapes, and realpath escapes are denied.
+Rhino scripts often use AutoJs `files` helpers and absolute Android paths. Node scripts use scoped `fs` or `fs/promises`. Paths are scoped to the working directory or project root. Absolute paths are accepted only when they still resolve inside that scoped root; `/sdcard`-style roots outside the working directory, `..` escapes, NUL bytes, `/proc`, `/sys`, `/dev`, symlink escapes, and realpath escapes are denied.
 
 Before:
 
@@ -266,6 +518,90 @@ Node:
 })();
 ```
 
+Rhino `threads.disposable()` code that waits with `blockedGet()` should become
+a Promise flow:
+
+```js
+"nodejs";
+
+(async function main() {
+  const fs = require("fs/promises");
+  const value = await Promise.race([
+    fs.readFile("value.txt", "utf8"),
+    new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000))
+  ]);
+  console.log(value);
+})();
+```
+
+Rhino `sync(fn, lock)` should become an async serialized owner rather than a
+shared lock:
+
+```js
+"nodejs";
+
+function createQueue() {
+  let tail = Promise.resolve();
+  return function enqueue(task) {
+    tail = tail.then(task, task);
+    return tail;
+  };
+}
+
+(async function main() {
+  let count = 0;
+  const enqueue = createQueue();
+  await Promise.all([
+    enqueue(() => { count += 1; }),
+    enqueue(() => { count += 1; })
+  ]);
+  console.log(count);
+})();
+```
+
+For work that really needs a separate execution slot, use a bounded script
+entry or scheduled work. This is not a same-runtime thread:
+
+```js
+"nodejs";
+
+(async function main() {
+  const engines = require("engines");
+  await engines.execScriptFile("jobs/cleanup.cjs", {
+    args: { source: "main" },
+    timeoutMs: 30000
+  });
+})();
+```
+
+Scheduled work should use `work_manager`:
+
+```js
+"nodejs";
+
+(async function main() {
+  const workManager = require("work_manager");
+  await workManager.scheduleOnce({
+    scriptPath: "jobs/cleanup.cjs",
+    backend: "embedded",
+    delayMs: 1000,
+    taskTimeoutMs: 30000
+  });
+})();
+```
+
+Node with the compatibility facade:
+
+```js
+"nodejs";
+
+(async function main() {
+  const compat = require("autojs6:compat");
+  const launched = await compat.app.launchPackage("org.example.app", { timeoutMs: 5000 });
+  console.log("launched=" + launched);
+})();
+```
+
 ### Click Text
 
 Rhino:
@@ -274,24 +610,32 @@ Rhino:
 text("OK").findOne(3000).click();
 ```
 
-Node:
+Node with the S11-16 compatibility facade:
+
+```js
+"nodejs";
+
+(async function main() {
+  const compat = require("autojs6:compat");
+  const node = await compat.text("OK").findOne(3000);
+  const clicked = node !== null && await compat.text("OK").click({ timeoutMs: 3000 });
+  console.log("clicked=" + clicked);
+})();
+```
+
+Node with the direct bridge module:
 
 ```js
 "nodejs";
 
 (async function main() {
   const accessibility = require("accessibility");
-  const enabled = await accessibility.isEnabled();
-  if (!enabled) {
-    console.log("accessibility disabled");
-    return;
-  }
   const clicked = await accessibility.clickText("OK", { timeoutMs: 3000 });
   console.log("clicked=" + clicked);
 })();
 ```
 
-Node accessibility selectors are JSON descriptors and returned nodes are snapshots. Raw `AccessibilityNodeInfo` objects do not cross the process boundary.
+Node accessibility selectors are JSON descriptors and returned nodes are snapshots. No raw `AccessibilityNodeInfo` objects cross the process boundary. The compatibility selector DSL is synchronous only while building a handle; `findOne(3000)`, `find()`, `click()`, `back()`, and `home()` return Promises and must be awaited.
 
 ### Screenshot And Find Image
 
@@ -324,7 +668,262 @@ Node:
 })();
 ```
 
-Image values are handles owned by the current execution. They are recycled explicitly or when the service is destroyed.
+Node with the S11-19 compatibility facade:
+
+```js
+"nodejs";
+
+(async function main() {
+  const compat = require("autojs6:compat");
+
+  await compat.requestScreenCapture(true);
+  const capture = await compat.images.captureScreen({ timeoutMs: 5000 });
+  const template = await compat.images.read("template.png", { timeoutMs: 1000 });
+  const point = await compat.images.findImage(capture, template, 0, 0, 1080, 2400, 0.9);
+
+  await compat.images.recycle(template);
+  await compat.images.recycle(capture);
+  console.log(JSON.stringify(point));
+})();
+```
+
+Image values are handles owned by the current execution. They are recycled explicitly or when the service is destroyed. The S11-18 facade keeps Rhino names such as `images.read()` and `images.save()`, but bridge work is still asynchronous and must be awaited. S11-19 adds `requestScreenCapture()`, `requestScreenCaptureAsync()`, and `captureScreen()` compatibility wrappers; permission requests still go through the controlled Activity-owned `media_projection` provider, so denial or packaged fallback rejection is reported as a stable bridge error.
+
+### OCR And Barcode
+
+Rhino:
+
+```js
+requestScreenCapture();
+let textRows = ocr.recognizeText(captureScreen(), [0, 0, 400, 200]);
+let codes = qrcode.recognizeTexts(images.read("./qr.png"));
+log(textRows.join("\n"));
+```
+
+Node with the S11-20 compatibility facade:
+
+```js
+"nodejs";
+
+(async function main() {
+  const compat = require("autojs6:compat");
+
+  await compat.requestScreenCapture();
+  const capture = await compat.captureScreen({ timeoutMs: 5000 });
+  const textRows = await compat.ocr.recognizeText(capture, { region: [0, 0, 400, 200] });
+  const pathRows = await compat.ocr("fixtures/ocr.png", { timeoutMs: 5000 });
+
+  await compat.images.recycle(capture);
+  console.log(textRows.concat(pathRows).join("\n"));
+})();
+```
+
+`compat.ocr` is ML Kit-only in S11-20. It accepts an opaque image handle, a project-relative image path that is read and recycled after OCR completes, or no image argument to capture through the existing-permission screenshot path. `compat.ocr.recognizeText()` returns a string array like Rhino, while `compat.ocr.detect()` and `detectTextBounds()` return JSON-safe result snapshots. `ocr.tap("mlkit")` is accepted; Paddle/Rapid mode modules are not exposed in Node. P12-27 locks the barcode provider v1 schema, P12-28 exposes the direct `require("barcode")` provider for path, opaque image handle, and existing-permission capture inputs with JSON-safe barcode snapshots, and P12-29 exposes Rhino-style `compat.barcode` plus QR-only `compat.qrcode` wrappers over the same provider. P12-30 adds `docs/nodejs/examples/rhino-compat/10-barcode.*` migration examples and the `verifyNodeRhinoCompatBarcodeExamples` gate for path, image-handle, QR-only, and temporary-handle recycle coverage.
+
+### Key And Touch Events
+
+Rhino:
+
+```js
+events.observeKey();
+events.onKeyDown("volume_up", function(event) {
+  toast("volume up");
+});
+events.setKeyInterceptionEnabled("volume_up", true);
+events.observeTouch();
+events.on("touch", function(point) {
+  log(point.x + "," + point.y);
+});
+```
+
+Node S11-21:
+
+```js
+"nodejs";
+
+const { EventEmitter } = require("node:events");
+const bus = new EventEmitter();
+bus.on("ready", () => console.log("ready"));
+bus.emit("ready");
+```
+
+`node:events` is only the pure JavaScript event-emitter replacement. It is not a Rhino `events` facade and does not observe Android keys or touch input. `events.__asEmitter__()` / `events.asEmitter()` is blocked by design because it depends on Rhino `ScriptableObject`, Java `EventEmitter`, `Thread`, and `MainThreadProxy` semantics.
+
+`events.observeKey()`, `events.onKeyDown()`, `events.onKeyUp()`, `events.setKeyInterceptionEnabled()`, and `events.observeTouch()` remain provider gated. P12-05 exposes `require("input_observer")` with `source: "fake"` so scripts and tests can validate opaque subscription handles, drained JSON event snapshots, close behavior, and capability denial. P12-06 adds `source: "accessibility"` for live key observation when the AutoJs6 accessibility service is operational in the current process; scripts must still handle the stable unavailable error when that service state is missing. P12-07 keeps scheduled/background live observation, key interception, touch observation, shell/root fallback, and overlay capture rejected, so migrated scripts should close subscriptions explicitly and treat unavailable provider state as normal. The `events.keys` constants are available through `require("autojs6:compat").keys` and `require("autojs6:compat").events.keys`.
+
+### Scheduled Tasks
+
+Rhino disposable task:
+
+```js
+tasks.addDisposableTask({
+  path: "./jobs/cleanup.js",
+  date: new Date(Date.now() + 60 * 1000),
+});
+```
+
+Node with the current WorkManager MVP:
+
+```js
+"nodejs";
+
+(async function main() {
+  const workManager = require("work_manager");
+  const taskId = await workManager.scheduleOnce({
+    scriptPath: "jobs/cleanup.cjs",
+    backend: "embedded",
+    delayMs: 60 * 1000,
+    taskTimeoutMs: 30 * 1000,
+  });
+  console.log(taskId);
+})();
+```
+
+`work_manager` is Promise-based and schedules scoped embedded Node entries only. It returns string task ids and JSON task snapshots; it does not return Rhino `TimedTask` or `IntentTask` objects.
+
+P12-15 locks the `compat.tasks` v1 scope to disposable one-shot migration only,
+and P12-16 exposes that facade:
+`compat.tasks.addDisposableTask({ path, date|time|delayMs, ... })` wraps
+`work_manager.scheduleOnce()`, `compat.tasks.removeTask(id)` wraps
+`work_manager.cancel()`, and `compat.tasks.queryTasks(options?)` wraps
+`work_manager.list()` for one-shot JSON snapshots. `require("tasks")` and global
+`tasks` remain absent.
+
+P12-17 adds Rhino-name compatibility aliases for the same Node-owned subset:
+`compat.tasks.queryTimedTasks()`, `compat.tasks.getTimedTask(id)`, and
+`compat.tasks.removeTimedTask(id)`. They operate only on JSON-safe
+WorkManager-owned ids and snapshots created by Node. They do not read Rhino
+`TimedTask` database rows.
+
+Do not migrate `tasks.addDailyTask()` or `tasks.addWeeklyTask()` by mechanically calling `workManager.schedulePeriodic()`. Rhino daily/weekly tasks are wall-clock user tasks with next-run calculation, task UI/database state, and scheduler fallback semantics. WorkManager periodic work is OS-managed cadence with minimum interval and quota behavior. P12-17 keeps daily/weekly task compatibility rejected until a user-visible task database provider exists; the compatibility stubs reject with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`.
+
+`tasks.addIntentTask()`, `queryIntentTasks()`, `getIntentTask()`, boot/startup/package/exact-alarm/custom broadcast triggers, and `removeIntentTask()` remain rejected in P12-18 with stable `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` stubs. Node does not register Android receivers, mutate packaged manifests, expose raw trigger payloads, or grant custom broadcast authority. Raw `tasks.addTask(task)`, `removeTask(task)`, and `updateTask(task)` are blocked by design in Node because they depend on raw `TimedTask` / `IntentTask` Java objects. P12-17 exposes `compat.tasks.updateTask()` only as a stable `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN` rejection stub. See [RHINO_TASKS_WORK_MANAGER_MIGRATION.md](design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md), [COMPAT_TASKS_V1.md](design/COMPAT_TASKS_V1.md), [TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md](design/TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md), and [TASKS_INTENT_BROADCAST_COMPATIBILITY_DECISION.md](design/TASKS_INTENT_BROADCAST_COMPATIBILITY_DECISION.md).
+
+### UI Scripts
+
+Rhino UI scripts mix XML layout declarations, direct view wrappers, and
+main-thread helpers:
+
+```js
+"ui";
+
+ui.layout(
+  <vertical>
+    <input id="name" hint="Name" />
+    <button id="ok" text="OK" />
+  </vertical>
+);
+
+ui.ok.click(() => {
+  ui.run(() => {
+    ui.ok.setText("Done");
+  });
+});
+```
+
+Node UI uses either the explicit `require("ui")` module or the constrained
+`require("autojs6:compat").ui` facade. Both route to the same JSON-only
+Activity-owned provider:
+
+```js
+"nodejs";
+
+(async function main() {
+  const ui = require("autojs6:compat").ui;
+
+  const handle = await ui.showLayout({
+    type: "Column",
+    children: [
+      { id: "name", type: "Input", hint: "Name" },
+      { id: "ok", type: "Button", text: "OK" }
+    ]
+  }, { timeoutMs: 10000 });
+
+  handle.on("click", async (event) => {
+    if (event.id === "ok") {
+      await handle.update({ id: "ok", text: "Done" });
+      await handle.close();
+    }
+  });
+})();
+```
+
+Do not migrate Rhino `ui.run()` or `ui.post()` by trying to execute Node
+JavaScript on Android's UI thread. Node callbacks run on the Node event loop
+after UI events are drained as JSON snapshots. Layout mutation goes through
+`handle.update()` or `handle.batchUpdate()`, not through `NativeView`,
+`View`, `ui.findView()`, `ui.root`, or dynamic view properties. P12-08 locks
+the accepted JSON descriptor subset and fixture set in
+[RHINO_UI_JSON_LAYOUT_SUBSET.md](design/RHINO_UI_JSON_LAYOUT_SUBSET.md); see
+also [RHINO_UI_COMPATIBILITY.md](design/RHINO_UI_COMPATIBILITY.md).
+`require("autojs6:compat")` still does not install a default global `ui`; a
+global `ui` appears only after an explicit `compat.install({ globals: true })`
+call and is the same constrained `compat.ui` JSON facade.
+
+### Floaty And Overlay
+
+Rhino floaty scripts create overlay windows and return live window/view
+wrappers:
+
+```js
+const window = floaty.window(
+  <vertical>
+    <text id="status" text="Running" />
+    <button id="stop" text="Stop" />
+  </vertical>
+);
+
+window.stop.click(() => {
+  window.close();
+});
+```
+
+There is no current Node equivalent for `floaty.window()` or
+`floaty.rawWindow()`. Do not migrate these APIs by expecting
+`require("floaty")`, `compat.floaty`, or a global `floaty` to exist. P12-13
+adds `require("ui.overlay")` as a fake-provider POC for JSON-only overlay
+shape, capability, and handle-lifecycle checks. P12-14 adds the live gate for
+permission snapshots, settings dry-run/launch evidence, packaged metadata, and
+cleanup summaries. Production/live overlay support remains gated until
+foreground disclosure, opaque window handles, event drain, and live
+show/update/close behavior are implemented.
+
+P12-11 selects the Provider path for a controlled JSON-only overlay provider,
+and P12-12A locks the contract in
+[OVERLAY_PROVIDER_V1.md](design/OVERLAY_PROVIDER_V1.md). Treat exact Rhino
+`floaty.window()` and `floaty.rawWindow()` raw-wrapper semantics as a permanent
+non-goal in Node; keep production scripts that need real overlay windows on
+Rhino after the P12-14 live gate, because live overlay creation remains
+fail-closed.
+
+The current Node profile has only the P12-13 `require("ui.overlay")`
+fake-provider POC. `require("floaty")`, `compat.floaty`, and global `floaty`
+remain unavailable until an explicit compatibility facade task promotes them.
+When a migration example needs a stable marker for the raw Rhino APIs, use
+`compat.blockedByDesign("floaty.window", reason)` or
+`compat.blockedByDesign("floaty.rawWindow", reason)` and check
+`compat.errorCodes.blockedByDesign`
+(`ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`).
+For clipboard migration, `compat.getClip()` remains the Rhino-name facade over
+the controlled clipboard bridge.
+
+For in-app UI, use `require("ui").showLayout(...)`. For clipboard reads that
+previously used `floaty.getClip()`, use the controlled clipboard bridge:
+
+```js
+"nodejs";
+
+(async function main() {
+  const clipboard = require("clipboard");
+  console.log(await clipboard.getText());
+})();
+```
+
+`floaty.window()` and `floaty.rawWindow()` are blocked as exact Node
+compatibility targets because they depend on XML inflation, `FloatyService`,
+`WindowManager.LayoutParams`, live `JsWindow` wrappers, and raw `View` /
+`NativeView` lookup. See
+[RHINO_FLOATY_COMPATIBILITY.md](design/RHINO_FLOATY_COMPATIBILITY.md).
 
 ### File Read And Write
 
@@ -378,7 +977,14 @@ For release flavors and ABI policy, see `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Replace `files` helpers with scoped `fs` or `fs/promises`.
 - Keep file paths relative to the project working directory.
 - Remove direct Java object access.
-- Do not rely on `require("rhino")`, `rhino.install()`, `importClass`, `importPackage`, `Packages`, or `JavaAdapter` inside Node.
+- Do not rely on default `require("rhino")` execution; P12-25 requires an explicit `experimental: true` JSON-only POC request. Default `rhino.install()` remains rejected, while P13-14 permits only explicit experimental Java proxy install through the allowlist. `importClass` / `importPackage` return stable unsupported errors; P13-16 also keeps `JavaAdapter` unsupported with `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED` and reserves `java.defineClass()` / `$autojs.java.defineClass()` as stable-denied replacement names.
 - Confirm unsupported builtins still fail with `ERR_AUTOJS6_*`.
+- Review `docs/nodejs/examples/rhino-compat` for checked
+  toast/files/storage/selector/image/ocr/app/device/shell/tasks/barcode
+  migration pairs.
+- Review `docs/nodejs/dual-engine-compat` for S11-28 dual-engine fixtures that
+  distinguish `supported_async` from `blocked_by_design`, and run the P12-33
+  `verifyNodeRhinoCompatDualEngineDeviceEvidence` gate when validating the fake
+  device evidence contract.
 - Run examples under `sample/nodejs/` for reference.
 - Re-run packaged APK verification when the script is packaged.

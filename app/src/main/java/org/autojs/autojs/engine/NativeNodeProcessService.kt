@@ -24,9 +24,18 @@ open class NativeNodeProcessService : Service() {
     @Volatile
     private var prewarmStarted = false
 
+    @Volatile
+    private var activeCrashMarker: NodeCrashEvidenceStore.Marker? = null
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        NodeCrashEvidenceStore.markServiceDestroy(
+            context = this,
+            marker = activeCrashMarker,
+            reason = "native_process_service.onDestroy",
+        )
+        activeCrashMarker = null
         scheduleProcessExit(0)
         super.onDestroy()
     }
@@ -38,7 +47,7 @@ open class NativeNodeProcessService : Service() {
                     START_NOT_STICKY
                 } else {
                     prewarmNode(startId)
-                    START_STICKY
+                    START_NOT_STICKY
                 }
             }
             ACTION_RUN -> {
@@ -97,19 +106,48 @@ open class NativeNodeProcessService : Service() {
         val argv = intent.getStringArrayExtra(EXTRA_ARGV) ?: emptyArray()
         val workingDirectory = intent.getStringExtra(EXTRA_WORKING_DIRECTORY)
         val startedAt = SystemClock.elapsedRealtime()
+        val crashMarker = NodeCrashEvidenceStore.begin(
+            context = this,
+            executionId = "native-process-$startId-${System.currentTimeMillis()}",
+            sourceName = argv.firstOrNull().orEmpty().ifBlank { "node" },
+            workingDirectory = workingDirectory,
+            executionMode = "native_process",
+            launchSurface = "native_process_service",
+            timeoutMs = null,
+            runtimeAdapter = "desktop_node_main",
+            runtimeSlotId = javaClass.simpleName,
+            scenario = "native_process_service",
+        )
+        activeCrashMarker = crashMarker
         var exitCode = -1
+        var terminalMarked = false
         try {
             exitCode = NativeNodeRuntimeBridge.runMain(
                 argv = argv,
                 workingDirectory = workingDirectory,
                 outputSink = receiver?.let(::ReceiverOutputSink),
             )
+            NodeCrashEvidenceStore.markNativeProcessExit(
+                context = this,
+                marker = crashMarker,
+                exitCode = exitCode,
+                elapsedMs = SystemClock.elapsedRealtime() - startedAt,
+            )
+            terminalMarked = true
             receiver?.send(
                 RESULT_EXIT,
                 Bundle().apply { putInt(EXTRA_EXIT_CODE, exitCode) },
             )
         } catch (e: Throwable) {
             Log.e(TAG, "Native Node.js process run failed.", e)
+            NodeCrashEvidenceStore.markThrowable(
+                context = this,
+                marker = crashMarker,
+                reason = "native_process_service.exception",
+                throwable = e,
+                elapsedMs = SystemClock.elapsedRealtime() - startedAt,
+            )
+            terminalMarked = true
             receiver?.send(
                 RESULT_ERROR,
                 Bundle().apply {
@@ -119,6 +157,15 @@ open class NativeNodeProcessService : Service() {
             )
         } finally {
             val elapsed = SystemClock.elapsedRealtime() - startedAt
+            if (!terminalMarked) {
+                NodeCrashEvidenceStore.markNativeProcessExit(
+                    context = this,
+                    marker = crashMarker,
+                    exitCode = exitCode,
+                    elapsedMs = elapsed,
+                )
+            }
+            activeCrashMarker = null
             Log.i(TAG, "${javaClass.simpleName} finished native Node.js run in ${elapsed}ms with exitCode=$exitCode.")
             stopSelf(startId)
             scheduleProcessExit(if (exitCode == 0) 0 else 1)

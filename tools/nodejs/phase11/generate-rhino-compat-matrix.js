@@ -1,0 +1,352 @@
+#!/usr/bin/env node
+"use strict";
+
+const fs = require("fs");
+const path = require("path");
+const { scan } = require("./scan-rhino-augment-inventory.js");
+const { buildInventory } = require("./generate-rhino-augment-inventory.js");
+const {
+  buildGapReport,
+  parseBridgeModules,
+  parseTypeDeclarations,
+  parseRuntimeEvidence,
+  parseDocsEvidence,
+} = require("./generate-rhino-node-compat-gap.js");
+const {
+  DEFAULT_STATUS_MANIFEST,
+  loadStatusManifest,
+  applyStatusManifest,
+} = require("./rhino-compat-status-manifest.js");
+
+const DEFAULT_OUTPUT = "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md";
+const BRIDGE_PROTOCOL = "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt";
+const TYPES_ROOT = "docs/nodejs/types/autojs6-node";
+const NODE_BRIDGE_SOURCES = "app/src/main/cpp/node_bridge_sources.cpp";
+const DOC_EVIDENCE_FILES = [
+  "docs/nodejs/COMPATIBILITY_PROFILE.md",
+  "docs/nodejs/NODE_PROFILE_V1_1_USER_DRAFT.md",
+  "docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md",
+  "docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md",
+];
+
+function main() {
+  const options = parseArgs(process.argv.slice(2));
+  const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
+  const output = path.resolve(repoRoot, options.output || DEFAULT_OUTPUT);
+  const scanReport = scan(repoRoot);
+  const manifestInfo = loadStatusManifest(repoRoot, options.statusManifest || DEFAULT_STATUS_MANIFEST);
+  const inventory = applyStatusManifest(
+    buildInventory(scanReport),
+    manifestInfo,
+    { requireManifest: true },
+  );
+  const bridge = parseBridgeModules(path.join(repoRoot, BRIDGE_PROTOCOL));
+  const types = parseTypeDeclarations(path.join(repoRoot, TYPES_ROOT));
+  const runtime = parseRuntimeEvidence(path.join(repoRoot, NODE_BRIDGE_SOURCES), bridge.modules, types.modules);
+  const docs = parseDocsEvidence(repoRoot, DOC_EVIDENCE_FILES, bridge.modules, types.modules);
+  const gap = buildGapReport(inventory, bridge, types, runtime, docs);
+  const markdown = renderMatrix(inventory, gap);
+  fs.mkdirSync(path.dirname(output), { recursive: true });
+  fs.writeFileSync(output, markdown);
+  console.log(`Rhino compatibility matrix modules: ${inventory.modules.length}`);
+  console.log(`Rhino compatibility matrix API entries: ${inventory.totals.apiEntryCount}`);
+  console.log(`Rhino compatibility matrix output: ${path.relative(repoRoot, output).replace(/\\/g, "/")}`);
+}
+
+function renderMatrix(inventory, gap) {
+  const gapByModule = new Map(gap.modules.map((entry) => [entry.id, entry]));
+  const moduleRows = inventory.modules.map((module) => moduleMatrixRow(module, gapByModule.get(module.id)));
+  const lines = [
+    "# Rhino Augment Compatibility Matrix",
+    "",
+    "This Phase 11A matrix is generated from the Rhino augment inventory, the checked-in status manifest, and the Node bridge/types/docs gap report. It is a module-level tracking document; API-level details remain in `build/reports/nodejs/rhino-augment-api-inventory.json` and `build/reports/nodejs/rhino-node-compat-gap.json`.",
+    "",
+    "P12-34 keeps promoted Phase 12 examples and stable rejection guidance synchronized with `MIGRATION_FROM_RHINO.md`, the Pro 9 comparison, `SECURITY_MODEL.md`, `TESTING.md`, and the type declaration README.",
+    "",
+    "## Summary",
+    "",
+    `- Rhino modules: ${inventory.totals.moduleCount}`,
+    `- Rhino API entries: ${inventory.totals.apiEntryCount}`,
+    `- Node bridge modules: ${gap.summary.bridgeModuleCount}`,
+    `- Node type modules: ${gap.summary.typeModuleCount}`,
+    `- Modules with bridge evidence: ${gap.summary.rhinoModulesWithBridgeEvidence}`,
+    `- Modules with type evidence: ${gap.summary.rhinoModulesWithTypeEvidence}`,
+    `- Modules without Node surface evidence: ${gap.summary.rhinoModulesWithoutNodeSurface}`,
+    "",
+    "## Status Totals",
+    "",
+  ];
+  Object.keys(inventory.totals.byStatus).sort().forEach((status) => {
+    lines.push(`- ${status}: ${inventory.totals.byStatus[status]}`);
+  });
+  lines.push(
+    "",
+    "## Module Matrix",
+    "",
+    "| Order | Rhino Module | Key | Status | Node Surface | API Status | Risks | Next Step |",
+    "| ---: | --- | --- | --- | --- | --- | --- | --- |",
+  );
+  moduleRows.forEach((row) => {
+    lines.push(`| ${row.order} | ${row.id} | ${row.key} | ${row.status} | ${row.nodeSurface} | ${row.apiStatus} | ${row.risks} | ${row.nextStep} |`);
+  });
+  lines.push("", "## Module Details", "");
+  moduleRows.forEach((row) => {
+    lines.push(
+      `### ${row.id}`,
+      "",
+      `- Key: \`${row.key}\``,
+      `- Status: \`${row.status}\``,
+      `- Node surface: ${row.nodeSurface || "-"}`,
+      `- Coverage: \`${row.coverageStatus}\``,
+      `- API status: ${row.apiStatus}`,
+      `- Risks: ${row.risks}`,
+      `- Next step: ${row.nextStep}`,
+      "",
+    );
+  });
+    while (lines.length > 0 && lines[lines.length - 1] === "") {
+        lines.pop();
+    }
+    return lines.join("\n") + "\n";
+}
+
+function moduleMatrixRow(module, gapModule) {
+  const statusCounts = countEntryStatuses(module);
+  const nodeSurface = nodeSurfaceFor(module, gapModule);
+  const risks = riskSummary(module);
+  return {
+    order: module.registration.order,
+    id: module.id,
+    key: module.key,
+    status: module.migration.status,
+    nodeSurface,
+    coverageStatus: gapModule ? gapModule.coverageStatus : "unknown",
+    apiStatus: statusSummary(statusCounts),
+    risks,
+    nextStep: nextStepFor(module, gapModule),
+  };
+}
+
+function nodeSurfaceFor(module, gapModule) {
+  const modules = new Set();
+  if (Array.isArray(module.migration.nodeModules)) {
+    module.migration.nodeModules.forEach((name) => modules.add(name));
+  }
+  if (Array.isArray(module.migration.bridgeModules)) {
+    module.migration.bridgeModules.forEach((name) => modules.add(name));
+  }
+  if (module.migration.nodeModule) {
+    modules.add(module.migration.nodeModule);
+  }
+  if (module.migration.bridgeModule) {
+    modules.add(module.migration.bridgeModule);
+  }
+  if (gapModule) {
+    [
+      ...gapModule.nodeEvidence.bridge.modules,
+      ...gapModule.nodeEvidence.types.modules,
+      ...gapModule.nodeEvidence.runtime.modules,
+    ].forEach((name) => modules.add(name));
+  }
+  return Array.from(modules).sort().join(", ") || "-";
+}
+
+function countEntryStatuses(module) {
+  const counts = {};
+  module.exports.entries.forEach((entry) => {
+    counts[entry.migration.status] = (counts[entry.migration.status] || 0) + 1;
+  });
+  return counts;
+}
+
+function statusSummary(counts) {
+  return Object.keys(counts).sort().map((status) => `${status}:${counts[status]}`).join(", ");
+}
+
+function riskSummary(module) {
+  const risks = new Set();
+  module.exports.entries.forEach((entry) => (entry.risks || []).forEach((risk) => risks.add(risk)));
+  risks.delete("none");
+  return Array.from(risks).sort().join(", ") || "none";
+}
+
+function nextStepFor(module, gapModule) {
+  if (
+    module.id === "s13n" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-32 promotes s13n.bytes"))
+  ) {
+    return "Proceed to P12-33 dual-engine device evidence; keep s13n sibling helpers stable unsupported until per-helper contracts exist.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: promote s13n.bytes"))) {
+    return "Implement P12-32 s13n.bytes pure utility pilot; keep the rest of s13n deferred until per-helper JSON-safe contracts exist.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer util"))) {
+    return "Defer whole-module util promotion; split Node util aliases, pure type helpers, and Android density helpers into smaller decisions.";
+  }
+  if (
+    module.id === "jsox.mathx" &&
+    ((module.migration.notes || []).some((note) => note.includes("P13-27 promotes the pure Mathx facade")) || module.migration.status === "partial")
+  ) {
+    return "P13-27 promotes the pure Mathx facade subset; raw Android/OpenCV point/rect parity and sibling JSOX modules remain deferred.";
+  }
+  if (
+    module.id === "jsox" &&
+    ((module.migration.notes || []).some((note) => note.includes("P13-27 exposes jsox as an explicit Node facade")) || module.migration.status === "partial")
+  ) {
+    return "P13-27 exposes explicit-target jsox.extend() / extendAll() for Mathx; default global Math/prototype mutation remains blocked.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer jsox.mathx"))) {
+    return "Defer jsox.mathx as a later pure utility batch after the smaller s13n pilot proves the promotion pattern.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer canvas"))) {
+    return "Defer until a JSON-only drawing provider is designed; keep raw Canvas/Paint/View parity as a permanent non-goal.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer recorder"))) {
+    return "Defer until recorder has privacy, permission, foreground disclosure, cleanup, and packaged behavior gates.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer media/audio helper"))) {
+    return "Defer media/audio helper parity beyond screenshot wrappers to dedicated playback/audio/MediaStore provider tasks.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer OpenCC"))) {
+    return "Defer OpenCC promotion until dictionary packaging, resource lookup, and missing-resource diagnostics are designed.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer zip"))) {
+    return "Defer zip until a scoped archive provider covers zip-slip denial, archive budgets, overwrite policy, cleanup, and packaged smoke.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer pinyin.fromPhrase"))) {
+    return "Keep the fixture-backed pinyin subset; defer full dictionary paths to a text-resource provider.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer mediainfo"))) {
+    return "Defer mediainfo until a scoped metadata provider returns JSON-safe snapshots without raw MediaMetadataRetriever leakage.";
+  }
+  if (
+    (module.id === "barcode" || module.id === "barcode.qr_code") &&
+    (module.migration.notes || []).some((note) => note.includes("P12-30 adds barcode/qrcode migration examples"))
+  ) {
+    return "Proceed to P12-31 unsupported utility-heavy module triage; keep packaged barcode model availability provider-dependent.";
+  }
+  if (
+    (module.id === "barcode" || module.id === "barcode.qr_code") &&
+    (module.migration.notes || []).some((note) => note.includes("P12-29 exposes compat."))
+  ) {
+    return "Add P12-30 barcode/qrcode examples and packaged provider-dependent smoke policy evidence.";
+  }
+  if (
+    module.id === "threads" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-22 compute/process-worker replacement decision deferred"))
+  ) {
+    return "Proceed to P12-23 Rhino JSON-only shim POC gate; keep threads.* blocked_by_design and compute/process-worker deferred.";
+  }
+  if (
+    module.id === "threads" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-21 threads migration cookbook landed"))
+  ) {
+    return "Proceed to P12-22 compute/process-worker replacement API decision; keep worker_threads default-off and no Rhino parity.";
+  }
+  if (
+    module.id === "threads" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-20 threads maturity review"))
+  ) {
+    return "Proceed to P12-21 threads migration cookbook; keep worker_threads default-off and no Rhino parity.";
+  }
+  if (
+    module.id === "tasks" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-19 tasks migration examples and smoke landed"))
+  ) {
+    return "Proceed to P12-20 threads replacement maturity review; keep raw task objects gated.";
+  }
+  if (
+    module.id === "tasks" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-18 IntentTask/broadcast provider rejected"))
+  ) {
+    return "Proceed to P12-19 tasks migration examples and smoke; keep raw task objects gated.";
+  }
+  if (
+    module.id === "tasks" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-17 daily/weekly user-task database provider rejected"))
+  ) {
+    return "Proceed to P12-18 intent/broadcast task compatibility decision; keep raw task objects gated.";
+  }
+  if (
+    module.id === "tasks" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-16 compat.tasks disposable facade landed"))
+  ) {
+    return "Proceed to P12-17 daily/weekly user-task database decision; keep intent/broadcast and raw task objects gated.";
+  }
+  if (
+    module.id === "tasks" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-15 compat.tasks v1 scope locked"))
+  ) {
+    return "Implement P12-16 compat.tasks disposable facade over work_manager.scheduleOnce/cancel/list; keep daily/weekly, intent/broadcast, and raw task objects gated.";
+  }
+  if (
+    module.id === "floaty" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-14 overlay live gate landed"))
+  ) {
+    return "Proceed to P12-15 tasks disposable migration; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.";
+  }
+  if (
+    module.id === "floaty" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-13 overlay fake provider POC landed"))
+  ) {
+    return "Complete P12-14 live overlay packaged and cleanup gate; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.";
+  }
+  if (
+    module.id === "floaty" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-12A overlay provider v1 contract locked"))
+  ) {
+    return "Implement P12-13 overlay fake provider POC over ui.overlay; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.";
+  }
+  if (
+    module.id === "floaty" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-11 provider path selected"))
+  ) {
+    return "Define P12-12A overlay provider v1 contract; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.";
+  }
+  if (module.migration.status === "blocked_by_design") {
+    return "Keep denial documented and covered by policy tests.";
+  }
+  if (module.migration.status === "unsupported") {
+    return gapModule && gapModule.coverageStatus !== "no_node_surface"
+      ? "Decide explicit mapping or mark blocked-by-design."
+      : "Design a Node facade or record a permanent non-goal.";
+  }
+  if (module.migration.status === "partial") {
+    return "Implement explicit compat facade and promote mapped APIs one by one.";
+  }
+  if (module.migration.status === "renamed") {
+    return "Document the replacement name and add migration examples.";
+  }
+  if (module.migration.status === "supported_async") {
+    return "Add compat examples and dual-engine tests.";
+  }
+  return "Review status manifest decision.";
+}
+
+function parseArgs(argv) {
+  const options = {};
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--help" || arg === "-h") {
+      console.log("Usage: node generate-rhino-compat-matrix.js [--repo-root dir] [--output file] [--status-manifest file]");
+      process.exit(0);
+    }
+    if (!arg.startsWith("--")) {
+      throw new Error("Unexpected positional argument: " + arg);
+    }
+    const eq = arg.indexOf("=");
+    const rawKey = eq >= 0 ? arg.slice(2, eq) : arg.slice(2);
+    const key = rawKey.replace(/-([a-z])/g, (_, ch) => ch.toUpperCase());
+    const value = eq >= 0 ? arg.slice(eq + 1) : argv[index + 1];
+    if (eq < 0) {
+      index += 1;
+    }
+    if (!value || value.startsWith("--")) {
+      throw new Error("Missing value for " + arg);
+    }
+    options[key] = value;
+  }
+  return options;
+}
+
+main();

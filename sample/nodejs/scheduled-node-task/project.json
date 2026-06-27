@@ -1,0 +1,16 @@
+{
+  "name": "scheduled-node-task",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 15000,
+    "permissions": ["work_manager"]
+  },
+  "example": {
+    "capabilities": ["work_manager"],
+    "expectedProvider": "AndroidX WorkManager scheduled runner",
+    "packagedSupport": "project entry metadata supported; full packaged scheduled-task flow remains future gated",
+    "securityLimitations": ["script paths are scoped", "backend must be embedded", "raw scheduler authority is not exposed"]
+  }
+}

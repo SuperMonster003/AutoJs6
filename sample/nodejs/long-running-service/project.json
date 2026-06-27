@@ -1,0 +1,17 @@
+{
+  "name": "long-running-service",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 15000,
+    "executionMode": "interactive_long_running",
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["interactive_long_running", "lifecycle_checkpoint"],
+    "expectedProvider": "explicit interactive or packaged long-running launch surface",
+    "packagedSupport": "partial opt-in via node.executionMode=interactive_long_running; final restore/permission/background evidence remains P13-07",
+    "securityLimitations": ["restart policy is never", "checkpoint data is JSON-only", "direct one-shot launch rejects service mode"]
+  }
+}

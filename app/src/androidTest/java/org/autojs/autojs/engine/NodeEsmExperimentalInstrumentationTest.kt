@@ -28,9 +28,9 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun mjsEntryStillRejectsWhenExperimentalFlagIsDisabled() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM experimental bootstrap default-off regression")
-        assertFalse(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
+    fun mjsEntryCanStillRejectWhenEsmIsExplicitlyDisabled() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM partial explicit-off regression")
+        assertTrue(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
 
         val workDir = freshWorkDir("esm-default-off")
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
@@ -42,13 +42,35 @@ class NodeEsmExperimentalInstrumentationTest {
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("mjs disabled", result), result.succeeded)
         assertEquals(NodeRuntimeErrorCodes.EMBEDDED_NODE_ESM_UNSUPPORTED, result.errorCode)
-        assertEquals("false", result.nativeValues["embedded_script.esm_enabled"])
-        assertEquals("false", result.nativeValues["embedded_script.esm_entry"])
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "false")
+        assertNativeValueIfPresent(result, "embedded_script.esm_entry", "false")
     }
 
     @Test
-    fun experimentalMjsEntrySupportsLocalStaticImportAndTopLevelAwait() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM experimental bootstrap")
+    fun mjsEntryRunsAsNodeEsmWithoutDirective() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("mjs no directive routing")
+
+        val workDir = freshWorkDir("esm-no-directive")
+        val entry = File(workDir, "main.mjs")
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const nodeVersion = await Promise.resolve(process.version);
+                console.log("esm.noDirective=" + nodeVersion.startsWith("v"));
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("mjs no directive", result)
+        assertTrue(result.stdout.contains("esm.noDirective=true"))
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.esm_entry", "true")
+        assertNativeValueIfPresent(result, "embedded_script.esm_module_graph_root", entry.absolutePath)
+    }
+
+    @Test
+    fun partialMjsEntrySupportsLocalStaticImportAndTopLevelAwaitByDefault() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM partial bootstrap")
         val workDir = freshWorkDir("esm-local-import")
         val entry = File(workDir, "main.mjs")
         val dependency = File(workDir, "dep.mjs").apply {
@@ -69,20 +91,184 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = entry.absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("experimental mjs import", result)
+        NodeEmbeddedTestHarness.assertSucceeded("partial mjs import", result)
         assertTrue(result.stdout.contains("esm.local=dep.ok"))
-        assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
-        assertEquals("true", result.nativeValues["embedded_script.esm_entry"])
-        assertEquals(entry.absolutePath, result.nativeValues["embedded_script.esm_module_graph_root"])
-        assertEquals("2", result.nativeValues["embedded_script.esm_module_graph_size"])
-        assertTrue(result.nativeValues["embedded_script.esm_module_graph_modules"].orEmpty().contains(dependency.absolutePath))
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.esm_entry", "true")
+        assertNativeValueIfPresent(result, "embedded_script.esm_module_graph_root", entry.absolutePath)
+        assertNativeValueIfPresent(result, "embedded_script.esm_module_graph_size", "2")
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_module_graph_modules", dependency.absolutePath)
     }
 
     @Test
-    fun experimentalPackageTypeModuleEntryRunsAsEsm() {
+    fun partialMjsEntrySupportsInjectedModuleSourcesGraph() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM moduleSources graph")
+        val workDir = freshWorkDir("esm-module-sources")
+        val entry = File(workDir, "main.mjs")
+        val dependency = File(workDir, "dep.mjs")
+        val legacy = File(workDir, "legacy.cjs")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                import dep, { named, explode } from "./dep.mjs";
+                import legacy from "./legacy.cjs";
+                let stackOk = false;
+                try {
+                  explode();
+                } catch (error) {
+                  stackOk = String(error && error.stack || "").includes("dep.mjs");
+                }
+                console.log("esm.moduleSources.ready=" + (dep.value === "esm" && named === "named" && legacy.value === "cjs"));
+                console.log("esm.moduleSources.stack=" + stackOk);
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+            moduleSources = mapOf(
+                dependency.absolutePath to """
+                    export default { value: "esm" };
+                    export const named = "named";
+                    export function explode() { throw new Error("moduleSources stack"); }
+                """.trimIndent(),
+                legacy.absolutePath to """module.exports = { value: "cjs" };""",
+            ),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("partial ESM moduleSources graph", result)
+        assertTrue(result.stdout.contains("esm.moduleSources.ready=true"))
+        assertTrue(result.stdout.contains("esm.moduleSources.stack=true"))
+        assertNativeValueIfPresent(result, "embedded_script.esm_module_graph_size", "2")
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_module_graph_modules", dependency.absolutePath)
+    }
+
+    @Test
+    fun partialEsmDefaultNamedClassKeepsLocalBinding() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM named default class local binding")
+        val workDir = freshWorkDir("esm-default-named-class")
+        val entry = File(workDir, "main.mjs")
+        val dependency = File(workDir, "body.mjs").apply {
+            writeText(
+                """
+                export default class Body {
+                  text() { return "body"; }
+                }
+                Body.kind = "node-fetch-shape";
+                export const bodyKind = Body.kind;
+                """.trimIndent(),
+            )
+        }
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import Body, { bodyKind } from "./body.mjs";
+                console.log("esm.defaultNamedClass=" + bodyKind + "/" + new Body().text());
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("partial ESM named default class binding", result)
+        assertTrue(result.stdout.contains("esm.defaultNamedClass=node-fetch-shape/body"))
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_module_graph_modules", dependency.absolutePath)
+    }
+
+    @Test
+    fun partialEsmBuiltinStreamDefaultImportKeepsNodeFetchInstanceofShape() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM stream default import shape")
+        val workDir = freshWorkDir("esm-stream-default")
+        val entry = File(workDir, "main.mjs")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import Stream, { PassThrough, pipeline } from "node:stream";
+                const pass = new PassThrough();
+                console.log("esm.stream.default=" + [
+                  typeof Stream,
+                  Stream === Stream.Stream,
+                  pass instanceof Stream,
+                  Stream.PassThrough === PassThrough,
+                  typeof pipeline
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("partial ESM stream default import", result)
+        assertTrue(result.stdout.contains("esm.stream.default=function|true|true|true|function"))
+    }
+
+    @Test
+    fun partialEsmUnicodeIdentifierRegexFallsBackWithoutIcu() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM unicode identifier regex fallback")
+        val workDir = freshWorkDir("esm-unicode-regex")
+        val entry = File(workDir, "main.mjs")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const parserLike = /^(async)*\s*(?:[_\p{ID_Start}])(?:[\u200C\u200D\p{ID_Continue}])*\s*=>/u;
+                const literalText = "\\p{ID_Start}";
+                const nonAscii = String.fromCharCode(0x00E9);
+                const selectorLike = /\[\s*(?:(?<namespace>\*|[-\w\P{ASCII}]*)\|)?(?<name>[-\w\P{ASCII}]+)\s*(?:(?<operator>\W?=)\s*(?<value>.+?)\s*(\s(?<caseSensitive>[iIsS]))?\s*)?\]/gu;
+                const selectorMatch = selectorLike.exec("[svg|caf" + nonAscii + "=value i]");
+                console.log("esm.unicode.regex=" + [
+                  parserLike.test("value=>"),
+                  parserLike.test("async value =>"),
+                  literalText,
+                  selectorMatch && selectorMatch.groups.namespace,
+                  selectorMatch && selectorMatch.groups.name,
+                  selectorMatch && selectorMatch.groups.caseSensitive
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("partial ESM unicode identifier regex fallback", result)
+        assertTrue(result.stdout.contains("""esm.unicode.regex=true|true|\p{ID_Start}|svg|caf"""))
+        assertTrue(result.stdout.contains("|i"))
+    }
+
+    @Test
+    fun partialEsmNamedGeneratorFunctionExportsWork() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM named generator function exports")
+        val workDir = freshWorkDir("esm-generator-exports")
+        val entry = File(workDir, "main.mjs")
+        File(workDir, "generators.mjs").writeText(
+            """
+                export function* syncValues() {
+                  yield "sync-a";
+                  yield "sync-b";
+                }
+                export async function* asyncValues() {
+                  yield "async-a";
+                  yield "async-b";
+                }
+            """.trimIndent(),
+        )
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import { asyncValues, syncValues } from "./generators.mjs";
+                const syncRows = Array.from(syncValues());
+                const asyncRows = [];
+                for await (const row of asyncValues()) {
+                  asyncRows.push(row);
+                }
+                console.log("esm.generator.exports=" + syncRows.join("/") + "|" + asyncRows.join("/"));
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("partial ESM generator function exports", result)
+        assertTrue(result.stdout.contains("esm.generator.exports=sync-a/sync-b|async-a/async-b"))
+    }
+
+    @Test
+    fun partialPackageTypeModuleEntryRunsAsEsmByDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package type=module bootstrap")
         val workDir = freshWorkDir("esm-type-module")
         File(workDir, "package.json").writeText("""{"type":"module"}""")
@@ -95,13 +281,12 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = entry.absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("experimental type=module entry", result)
+        NodeEmbeddedTestHarness.assertSucceeded("partial type=module entry", result)
         assertTrue(result.stdout.contains("esm.type=type-module"))
-        assertEquals("true", result.nativeValues["embedded_script.esm_entry"])
-        assertEquals("type=module accepted by Embedded Node experimental ESM", result.nativeValues["embedded_script.package_type_module_policy"])
+        assertNativeValueIfPresent(result, "embedded_script.esm_entry", "true")
+        assertNativeValueIfPresent(result, "embedded_script.package_type_module_policy", "type=module accepted by Embedded Node partial ESM")
     }
 
     @Test
@@ -120,9 +305,9 @@ class NodeEsmExperimentalInstrumentationTest {
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("experimental import escape", result), result.succeeded)
         assertEquals("ERR_AUTOJS6_FS_PATH_ESCAPE", result.errorCode)
-        assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
-        assertEquals("true", result.nativeValues["embedded_script.esm_entry"])
-        assertTrue(result.nativeValues["embedded_script.esm_last_denied_reason"].orEmpty().contains("escapes working directory"))
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.esm_entry", "true")
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_last_denied_reason", "escapes working directory")
     }
 
     @Test
@@ -150,16 +335,31 @@ class NodeEsmExperimentalInstrumentationTest {
     fun experimentalEsmImportsSupportedBuiltins() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM importing supported builtins")
         val workDir = freshWorkDir("esm-import-builtins")
+        File(workDir, "node_modules/buffer/index.js").apply {
+            parentFile?.mkdirs()
+            writeText("""module.exports = { shadow: true, Buffer: function ShadowBuffer() {} };""")
+        }
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             source = """
+                import bareBuffer, { Buffer as BareBuffer } from "buffer";
+                import nodeBuffer, { Buffer as NodeBuffer, Blob as NodeBlob, atob, btoa } from "node:buffer";
                 import path from "node:path";
                 import { EventEmitter } from "node:events";
                 const events = new EventEmitter();
                 let seen = false;
                 events.on("ready", () => { seen = true; });
                 events.emit("ready");
-                console.log("esm.builtin=" + path.basename("/tmp/entry.txt") + "/" + seen);
+                const blobText = await new NodeBlob([NodeBuffer.from("blob")]).text();
+                const bufferOk =
+                  BareBuffer === Buffer &&
+                  NodeBuffer === Buffer &&
+                  bareBuffer === nodeBuffer &&
+                  nodeBuffer.shadow !== true &&
+                  NodeBuffer.from("buffer").toString("base64") === "YnVmZmVy" &&
+                  atob(btoa("roundtrip")) === "roundtrip" &&
+                  blobText === "blob";
+                console.log("esm.builtin=" + path.basename("/tmp/entry.txt") + "/" + seen + "/" + bufferOk);
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
@@ -167,7 +367,7 @@ class NodeEsmExperimentalInstrumentationTest {
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("experimental esm imports builtins", result)
-        assertTrue(result.stdout.contains("esm.builtin=entry.txt/true"))
+        assertTrue(result.stdout.contains("esm.builtin=entry.txt/true/true"))
     }
 
     @Test
@@ -188,21 +388,331 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalCommonJsRequireMjsFailsWithRequireEsmCode() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("CJS require ESM boundary")
+    fun experimentalCommonJsRequireMjsSupportsSyncGraphAndRejectsAsyncGraph() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("CJS require ESM sync boundary")
         val workDir = freshWorkDir("cjs-require-esm")
         File(workDir, "dep.mjs").writeText("""export const value = "esm";""")
+        File(workDir, "async-dep.mjs").writeText("""export const value = await Promise.resolve("esm");""")
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
-            source = """require("./dep.mjs");""",
+            source = """
+                const dep = require("./dep.mjs");
+                console.log("cjs.require.esm=" + dep.value);
+            """.trimIndent(),
             sourceName = File(workDir, "main.cjs").absolutePath,
             workingDirectory = workDir,
             esmExperimentalEnabled = true,
         )
 
-        assertFalse(NodeEmbeddedTestHarness.describeResult("cjs require mjs", result), result.succeeded)
-        assertEquals(NodeRuntimeErrorCodes.REQUIRE_ESM_UNSUPPORTED, result.errorCode)
-        assertTrue(result.errorMessage.orEmpty().contains("CommonJS require() cannot load experimental ESM modules"))
+        NodeEmbeddedTestHarness.assertSucceeded("cjs require sync mjs", result)
+        assertTrue(result.stdout.contains("cjs.require.esm=esm"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val asyncResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """require("./async-dep.mjs");""",
+            sourceName = File(workDir, "main.cjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        assertFalse(NodeEmbeddedTestHarness.describeResult("cjs require async mjs", asyncResult), asyncResult.succeeded)
+        assertEquals("ERR_REQUIRE_ASYNC_MODULE", asyncResult.errorCode)
+        assertTrue(asyncResult.errorMessage.orEmpty().contains("cannot synchronously load"))
+    }
+
+    @Test
+    fun experimentalEsmMultilineStaticImportsWorkForRequireAndStaticImport() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM multiline static imports")
+        val workDir = freshWorkDir("esm-multiline-imports")
+        File(workDir, "side-effect.mjs").writeText("""globalThis.__autojs6MultilineImportSideEffect = "side";""")
+        File(workDir, "dep.mjs").writeText(
+            """
+            export default { label: "dep" };
+            export const first = "one";
+            export const second = "two";
+            """.trimIndent(),
+        )
+        File(workDir, "multi.mjs").writeText(
+            """
+            import"./side-effect.mjs"
+            import dep, {
+              first,
+              second as renamed,
+            } from "./dep.mjs"
+            export const summary = [globalThis.__autojs6MultilineImportSideEffect, dep.label, first, renamed].join("/");
+            """.trimIndent(),
+        )
+        File(workDir, "compact.mjs").writeText("""import{first as compactFirst}from"./dep.mjs";import{second as compactSecond}from"./dep.mjs"; export const compact = compactFirst + "/" + compactSecond;""")
+
+        val cjs = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const mod = require("./multi.mjs");
+                const compact = require("./compact.mjs");
+                console.log("cjs.require.esm.multiline=" + mod.summary + "/" + compact.compact);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.cjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("cjs require ESM multiline static import", cjs)
+        assertTrue(cjs.stdout.contains("cjs.require.esm.multiline=side/dep/one/two/one/two"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val esm = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import { summary } from "./multi.mjs";
+                import{compact}from"./compact.mjs";
+                console.log("esm.multiline=" + summary + "/" + compact);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("ESM multiline static import", esm)
+        assertTrue(esm.stdout.contains("esm.multiline=side/dep/one/two/one/two"))
+    }
+
+    @Test
+    fun experimentalEsmReExportsWorkForRequireAndStaticImport() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM re-export support")
+        val workDir = freshWorkDir("esm-reexports")
+        File(workDir, "dep.mjs").writeText(
+            """
+            export const alpha = "alpha";
+            export const hidden = "hidden";
+            export default { label: "default" };
+            const local = "local";
+            export { /* local public */ local as publicName };
+            """.trimIndent(),
+        )
+        File(workDir, "named.mjs").writeText(
+            """
+            export {
+              /** @internal */ alpha as alias,
+              // default export alias
+              default as defaultName
+            } from "./dep.mjs";
+            """.trimIndent(),
+        )
+        File(workDir, "star.mjs").writeText(
+            """
+            export const alpha = "local-alpha";
+            export*from"./dep.mjs";
+            """.trimIndent(),
+        )
+        File(workDir, "namespace.mjs").writeText("""export*as bundle from"./dep.mjs";""")
+
+        val cjs = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const named = require("./named.mjs");
+                const star = require("./star.mjs");
+                const namespace = require("./namespace.mjs");
+                const dep = require("./dep.mjs");
+                console.log("cjs.require.esm.reexport=" + [
+                  named.alias,
+                  named.defaultName.label,
+                  star.alpha,
+                  star.publicName,
+                  Object.prototype.hasOwnProperty.call(star, "default"),
+                  namespace.bundle.alpha,
+                  namespace.bundle.default.label,
+                  dep.publicName
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = File(workDir, "main.cjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("cjs require ESM re-exports", cjs)
+        assertTrue(cjs.stdout.contains("cjs.require.esm.reexport=alpha|default|local-alpha|local|false|alpha|default|local"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val esm = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import {
+                  /** parse5-style specifier comment */ alias,
+                  // line comments are also accepted in named lists
+                  defaultName
+                } from "./named.mjs";
+                import * as star from "./star.mjs";
+                import { bundle } from "./namespace.mjs";
+                console.log("esm.reexport.static=" + [
+                  alias,
+                  defaultName.label,
+                  star.alpha,
+                  star.publicName,
+                  Object.prototype.hasOwnProperty.call(star, "default"),
+                  bundle.alpha,
+                  bundle.default.label
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("ESM static re-exports", esm)
+        assertTrue(esm.stdout.contains("esm.reexport.static=alpha|default|local-alpha|local|false|alpha|default"))
+    }
+
+    @Test
+    fun experimentalEsmJsonImportAttributesUseCommonJsJsonCache() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM JSON import attributes")
+        val workDir = freshWorkDir("esm-json-attributes")
+        File(workDir, "config.json").writeText("""{"name":"local-json","count":2}""")
+        File(workDir, "dynamic.json").writeText("""{"name":"dynamic-json"}""")
+        val packageDir = File(workDir, "node_modules/json-config-pkg").apply { mkdirs() }
+        File(packageDir, "package.json").writeText(
+            """
+            {
+              "name": "json-config-pkg",
+              "exports": {
+                ".": {
+                  "import": "./config.json",
+                  "require": "./config.json"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(packageDir, "config.json").writeText("""{"name":"package-json"}""")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import { createRequire } from "node:module";
+                import localConfig from "./config.json" with { type: "json" };
+                import packageConfig from "json-config-pkg" with { type: "json" };
+                const req = createRequire(__filename);
+                const requiredConfig = req("./config.json");
+                localConfig.seenFromEsm = true;
+                const dynamicConfig = await import("./dynamic.json", { with: { type: "json" } });
+                console.log("esm.json.local=" + localConfig.name + "/" + localConfig.count);
+                console.log("esm.json.cache=" + (requiredConfig === localConfig && req("./config.json").seenFromEsm === true));
+                console.log("esm.json.package=" + packageConfig.name);
+                console.log("esm.json.dynamic=" + dynamicConfig.default.name);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("ESM JSON import attributes", result)
+        assertTrue(result.stdout.contains("esm.json.local=local-json/2"))
+        assertTrue(result.stdout.contains("esm.json.cache=true"))
+        assertTrue(result.stdout.contains("esm.json.package=package-json"))
+        assertTrue(result.stdout.contains("esm.json.dynamic=dynamic-json"))
+    }
+
+    @Test
+    fun experimentalEsmJsonImportAttributesRejectMissingAndUnknownAttributes() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM JSON import attribute denial")
+        val workDir = freshWorkDir("esm-json-attribute-denial")
+        File(workDir, "config.json").writeText("""{"name":"local-json"}""")
+
+        fun runDenied(label: String, source: String, messageToken: String) {
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = source,
+                sourceName = File(workDir, "$label.mjs").absolutePath,
+                workingDirectory = workDir,
+                esmExperimentalEnabled = true,
+            )
+            assertFalse(NodeEmbeddedTestHarness.describeResult(label, result), result.succeeded)
+            assertEquals(NodeRuntimeErrorCodes.EMBEDDED_NODE_ESM_UNSUPPORTED, result.errorCode)
+            assertTrue(result.errorMessage.orEmpty(), result.errorMessage.orEmpty().contains(messageToken))
+            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        }
+
+        runDenied(
+            label = "missing-json-attribute",
+            source = """import config from "./config.json"; console.log(config);""",
+            messageToken = """requires with { type: "json" }""",
+        )
+        runDenied(
+            label = "unknown-json-attribute",
+            source = """import config from "./config.json" with { type: "text" }; console.log(config);""",
+            messageToken = "Only with",
+        )
+        runDenied(
+            label = "legacy-json-assertion",
+            source = """import config from "./config.json" assert { type: "json" }; console.log(config);""",
+            messageToken = "import assertions are not supported",
+        )
+        runDenied(
+            label = "dynamic-missing-json-attribute",
+            source = """await import("./config.json");""",
+            messageToken = """requires with { type: "json" }""",
+        )
+        runDenied(
+            label = "dynamic-unknown-json-attribute",
+            source = """await import("./config.json", { with: { type: "text" } });""",
+            messageToken = """Only { with: { type: "json" } } is supported""",
+        )
+    }
+
+    @Test
+    fun experimentalImportMetaExposesScopedMetadataAndResolve() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM import.meta")
+        val workDir = freshWorkDir("esm-import-meta")
+        File(workDir, "dep.mjs").writeText(
+            """
+            export const depMain = import.meta.main;
+            export const depUrl = import.meta.url;
+            export const depFilename = import.meta.filename;
+            """.trimIndent(),
+        )
+        val packageDir = File(workDir, "node_modules/meta-pkg").apply { mkdirs() }
+        File(packageDir, "package.json").writeText(
+            """
+            {
+              "name": "meta-pkg",
+              "exports": {
+                ".": "./entry.mjs"
+              }
+            }
+            """.trimIndent(),
+        )
+        File(packageDir, "entry.mjs").writeText("""export default "meta-pkg";""")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import path from "node:path";
+                import { depMain, depUrl, depFilename } from "./dep.mjs";
+                const localResolved = import.meta.resolve("./dep.mjs");
+                const packageResolved = import.meta.resolve("meta-pkg");
+                const builtinResolved = import.meta.resolve("node:path");
+                let denied = false;
+                try {
+                  import.meta.resolve("node:child_process");
+                } catch (error) {
+                  denied = error && error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED";
+                }
+                console.log("esm.meta.url=" + (import.meta.url.startsWith("file://") && import.meta.url.endsWith("/main.mjs")));
+                console.log("esm.meta.filename=" + import.meta.filename.endsWith("/main.mjs"));
+                console.log("esm.meta.dirname=" + (import.meta.dirname === path.dirname(import.meta.filename)));
+                console.log("esm.meta.main=" + import.meta.main + "/" + depMain);
+                console.log("esm.meta.dep=" + (depUrl.startsWith("file://") && depFilename.endsWith("/dep.mjs")));
+                console.log("esm.meta.resolve=" + (localResolved.endsWith("/dep.mjs") && packageResolved.endsWith("/entry.mjs") && builtinResolved === "node:path"));
+                console.log("esm.meta.denied=" + denied);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("ESM import.meta", result)
+        assertTrue(result.stdout.contains("esm.meta.url=true"))
+        assertTrue(result.stdout.contains("esm.meta.filename=true"))
+        assertTrue(result.stdout.contains("esm.meta.dirname=true"))
+        assertTrue(result.stdout.contains("esm.meta.main=true/false"))
+        assertTrue(result.stdout.contains("esm.meta.dep=true"))
+        assertTrue(result.stdout.contains("esm.meta.resolve=true"))
+        assertTrue(result.stdout.contains("esm.meta.denied=true"))
     }
 
     @Test
@@ -241,7 +751,7 @@ class NodeEsmExperimentalInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("esm package import condition", esm)
         assertTrue(esm.stdout.contains("esm.package.condition=import"))
-        assertEquals("import", esm.nativeValues["embedded_script.package_resolution_selected_condition"])
+        assertNativeValueIfPresent(esm, "embedded_script.package_resolution_selected_condition", "import")
         assertTrue(esm.stderr, esm.stderr.contains("[resolve] exports matched request=\".\""))
         assertTrue(esm.stderr, esm.stderr.contains("selectedCondition=\"import\""))
 
@@ -260,7 +770,7 @@ class NodeEsmExperimentalInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("cjs package require condition", cjs)
         assertTrue(cjs.stdout.contains("cjs.package.condition=require"))
-        assertEquals("require", cjs.nativeValues["embedded_script.package_resolution_selected_condition"])
+        assertNativeValueIfPresent(cjs, "embedded_script.package_resolution_selected_condition", "require")
         assertTrue(cjs.stderr, cjs.stderr.contains("[resolve] exports matched request=\".\""))
         assertTrue(cjs.stderr, cjs.stderr.contains("selectedCondition=\"require\""))
     }
@@ -402,6 +912,158 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun experimentalPackageAutojs6ConditionPreservesPackageKeyOrderAndPolicy() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package autojs6 condition")
+        val workDir = freshWorkDir("esm-package-autojs6-condition")
+        File(workDir, "package.json").writeText(
+            """
+            {
+              "imports": {
+                "#auto-alias": {
+                  "autojs6": "./auto-alias.mjs",
+                  "import": "./import-alias.mjs",
+                  "default": "./default-alias.mjs"
+                },
+                "#env-alias": {
+                  "development": "./development-alias.mjs",
+                  "production": "./production-alias.mjs",
+                  "default": "./default-env-alias.mjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(workDir, "auto-alias.mjs").writeText("""export default { value: "alias-autojs6" };""")
+        File(workDir, "import-alias.mjs").writeText("""export default { value: "alias-import" };""")
+        File(workDir, "default-alias.mjs").writeText("""export default { value: "alias-default" };""")
+        File(workDir, "development-alias.mjs").writeText("""export default { value: "alias-development" };""")
+        File(workDir, "production-alias.mjs").writeText("""export default { value: "alias-production" };""")
+        File(workDir, "default-env-alias.mjs").writeText("""export default { value: "alias-env-default" };""")
+
+        val autoFirstPackage = File(workDir, "node_modules/auto-first-pkg").apply { mkdirs() }
+        File(autoFirstPackage, "package.json").writeText(
+            """
+            {
+              "name": "auto-first-pkg",
+              "exports": {
+                ".": {
+                  "autojs6": "./auto.mjs",
+                  "import": "./import.mjs",
+                  "default": "./default.mjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(autoFirstPackage, "auto.mjs").writeText("""export default { value: "pkg-autojs6" };""")
+        File(autoFirstPackage, "import.mjs").writeText("""export default { value: "pkg-import" };""")
+        File(autoFirstPackage, "default.mjs").writeText("""export default { value: "pkg-default" };""")
+
+        val importFirstPackage = File(workDir, "node_modules/import-first-pkg").apply { mkdirs() }
+        File(importFirstPackage, "package.json").writeText(
+            """
+            {
+              "name": "import-first-pkg",
+              "exports": {
+                ".": {
+                  "import": "./import.mjs",
+                  "autojs6": "./auto.mjs",
+                  "default": "./default.mjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(importFirstPackage, "auto.mjs").writeText("""export default { value: "pkg-autojs6-late" };""")
+        File(importFirstPackage, "import.mjs").writeText("""export default { value: "pkg-import-first" };""")
+        File(importFirstPackage, "default.mjs").writeText("""export default { value: "pkg-default" };""")
+
+        val cjsPackage = File(workDir, "node_modules/cjs-auto-first-pkg").apply { mkdirs() }
+        File(cjsPackage, "package.json").writeText(
+            """
+            {
+              "name": "cjs-auto-first-pkg",
+              "exports": {
+                ".": {
+                  "autojs6": "./auto.cjs",
+                  "require": "./require.cjs",
+                  "default": "./default.cjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(cjsPackage, "auto.cjs").writeText("""module.exports = { value: "cjs-autojs6" };""")
+        File(cjsPackage, "require.cjs").writeText("""module.exports = { value: "cjs-require" };""")
+        File(cjsPackage, "default.cjs").writeText("""module.exports = { value: "cjs-default" };""")
+
+        val nativeAddonPackage = File(workDir, "node_modules/native-addon-auto-pkg").apply { mkdirs() }
+        File(nativeAddonPackage, "package.json").writeText(
+            """
+            {
+              "name": "native-addon-auto-pkg",
+              "exports": {
+                ".": {
+                  "autojs6": "./addon.node",
+                  "default": "./safe.mjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(nativeAddonPackage, "addon.node").writeText("")
+        File(nativeAddonPackage, "safe.mjs").writeText("""export default { value: "safe" };""")
+
+        val esm = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import autoFirst from "auto-first-pkg";
+                import importFirst from "import-first-pkg";
+                import autoAlias from "#auto-alias";
+                import envAlias from "#env-alias";
+                let nativeAddonDenied = false;
+                try {
+                  await import("native-addon-auto-pkg");
+                } catch (error) {
+                  nativeAddonDenied = error && error.code === "ERR_AUTOJS6_NATIVE_ADDON_DISABLED";
+                }
+                console.log("esm.package.autojs6=" + autoFirst.value + "/" + importFirst.value + "/" + autoAlias.value + "/" + envAlias.value);
+                console.log("esm.package.autojs6.denied=" + nativeAddonDenied);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("esm package autojs6 condition", esm)
+        assertTrue(esm.stdout.contains("esm.package.autojs6=pkg-autojs6/pkg-import-first/alias-autojs6/alias-env-default"))
+        assertTrue(esm.stdout.contains("esm.package.autojs6.denied=true"))
+        assertTrue(esm.stderr, esm.stderr.contains("selectedCondition=\"autojs6\""))
+        assertTrue(esm.stderr, esm.stderr.contains("selectedCondition=\"import\""))
+        assertTrue(esm.stderr, esm.stderr.contains("selectedCondition=\"default\""))
+        assertTrue(esm.stderr, esm.stderr.contains("ignoredConditions=\"development|production\""))
+        assertNativeValueIfPresent(esm, "embedded_script.package_resolution_selected_condition", "autojs6")
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val cjs = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const pkg = require("cjs-auto-first-pkg");
+                console.log("cjs.package.autojs6=" + pkg.value);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.cjs").absolutePath,
+            workingDirectory = workDir,
+            env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("cjs package autojs6 condition", cjs)
+        assertTrue(cjs.stdout.contains("cjs.package.autojs6=cjs-autojs6"))
+        assertTrue(cjs.stderr, cjs.stderr.contains("selectedCondition=\"autojs6\""))
+        assertNativeValueIfPresent(cjs, "embedded_script.package_resolution_selected_condition", "autojs6")
+    }
+
+    @Test
     fun experimentalNestedPackageImportAndSelfReferenceUseEsmConditions() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM nested package import and self-reference")
         val workDir = freshWorkDir("esm-nested-self-reference")
@@ -508,9 +1170,10 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun dynamicImportStaysDisabledWhenOnlyEsmExperimentalFlagIsEnabled() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("dynamic import default-off regression")
-        assertFalse(BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED)
+    fun dynamicImportCanStillRejectWhenExplicitlyDisabled() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("dynamic import explicit-off regression")
+        assertTrue(BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED)
+        assertTrue(BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED)
         val workDir = freshWorkDir("esm-dynamic-default-off")
         File(workDir, "dep.mjs").writeText("""export const value = "unexpected";""")
 
@@ -525,13 +1188,13 @@ class NodeEsmExperimentalInstrumentationTest {
         assertFalse(NodeEmbeddedTestHarness.describeResult("dynamic import disabled", result), result.succeeded)
         assertEquals(NodeRuntimeErrorCodes.LEGACY_DYNAMIC_IMPORT_UNSUPPORTED, result.errorCode)
         assertTrue(result.errorMessage.orEmpty().contains("dynamic import is disabled"))
-        assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
-        assertEquals("false", result.nativeValues["embedded_script.dynamic_import_enabled"])
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.dynamic_import_enabled", "false")
     }
 
     @Test
-    fun experimentalDynamicImportSupportsLocalRelativeEsmModule() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("experimental local dynamic import")
+    fun localDynamicImportSupportsRelativeEsmAndCjsModulesByDefault() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import")
         val workDir = freshWorkDir("esm-dynamic-local")
         val dependency = File(workDir, "dep.mjs").apply {
             writeText(
@@ -541,28 +1204,152 @@ class NodeEsmExperimentalInstrumentationTest {
                 """.trimIndent(),
             )
         }
+        File(workDir, "legacy.cjs").writeText("""module.exports = { value: "legacy" };""")
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             source = """
                 const mod = await import("./dep.mjs");
-                console.log("esm.dynamic=" + mod.default.value + "/" + mod.named);
+                const legacy = await import("./legacy.cjs");
+                console.log("esm.dynamic=" + mod.default.value + "/" + mod.named + "/" + legacy.default.value);
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
-            dynamicImportExperimentalEnabled = true,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("experimental local dynamic import", result)
-        assertTrue(result.stdout.contains("esm.dynamic=default/named"))
-        assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
-        assertEquals("true", result.nativeValues["embedded_script.dynamic_import_enabled"])
-        assertTrue(result.nativeValues["embedded_script.esm_module_graph_modules"].orEmpty().contains(dependency.absolutePath))
+        NodeEmbeddedTestHarness.assertSucceeded("local dynamic import", result)
+        assertTrue(result.stdout.contains("esm.dynamic=default/named/legacy"))
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.dynamic_import_enabled", "true")
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_module_graph_modules", dependency.absolutePath)
     }
 
     @Test
-    fun experimentalDynamicImportCannotEscapeWorkingDirectory() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("experimental dynamic import scoped guard")
+    fun localDynamicImportSupportsAllowedBuiltinsAndDeniesDisabledBuiltins() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import builtins")
+        val workDir = freshWorkDir("esm-dynamic-builtins")
+
+        val allowed = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const path = await import("node:path");
+                console.log("esm.dynamic.builtin=" + (path.default.basename("/tmp/value.txt") === "value.txt"));
+            """.trimIndent(),
+            sourceName = File(workDir, "builtin-main.mjs").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("local dynamic import builtin", allowed)
+        assertTrue(allowed.stdout.contains("esm.dynamic.builtin=true"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val denied = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """await import("node:child_process");""",
+            sourceName = File(workDir, "denied-builtin-main.mjs").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import disabled builtin", denied), denied.succeeded)
+        assertEquals(NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED, denied.errorCode)
+        assertTrue(denied.errorMessage.orEmpty().contains("child_process"))
+    }
+
+    @Test
+    fun localDynamicImportSupportsSafePackageImportCondition() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import package")
+        val workDir = freshWorkDir("esm-dynamic-package")
+        val packageDir = File(workDir, "node_modules/safe-package").apply { mkdirs() }
+        File(packageDir, "package.json").writeText(
+            """
+            {
+              "name": "safe-package",
+              "exports": {
+                ".": {
+                  "import": "./esm.mjs",
+                  "require": "./cjs.cjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(packageDir, "esm.mjs").writeText("""export default { value: "esm-condition" };""")
+        File(packageDir, "cjs.cjs").writeText("""module.exports = { value: "require-condition" };""")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const pkg = await import("safe-package");
+                console.log("esm.dynamic.package=" + pkg.default.value);
+            """.trimIndent(),
+            sourceName = File(workDir, "package-main.mjs").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("local dynamic import package", result)
+        assertTrue(result.stdout.contains("esm.dynamic.package=esm-condition"))
+        assertNativeValueIfPresent(result, "embedded_script.dynamic_import_enabled", "true")
+    }
+
+    @Test
+    fun partialEsmSupportsControlledDataUrlImports() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM controlled data URL imports")
+        val workDir = freshWorkDir("esm-data-url")
+        File(workDir, "dep.mjs").writeText("""export default "local";""")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import inline, { named } from "data:text/javascript,export%20default%20%7B%20value%3A%20%22inline-js%22%20%7D%3B%20export%20const%20named%20%3D%20%22named%22%3B";
+                import base64Value from "data:text/javascript;base64,ZXhwb3J0IGRlZmF1bHQgImI2NCI7";
+                import config from "data:application/json,%7B%22value%22%3A%22inline-json%22%7D" with { type: "json" };
+                const dynamicJs = await import("data:application/javascript,export%20default%20%22dynamic-js%22%3B");
+                const dynamicJson = await import(
+                  "data:application/json,%7B%22value%22%3A%22dynamic-json%22%7D",
+                  { with: { type: "json" } }
+                );
+                let relativeDenied = false;
+                try {
+                  await import("data:text/javascript,import%20%22.%2Fdep.mjs%22%3B%20export%20default%20%22bad%22%3B");
+                } catch (error) {
+                  relativeDenied = error && error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
+                }
+                let mimeDenied = false;
+                try {
+                  await import("data:text/plain,export%20default%20%22bad%22%3B");
+                } catch (error) {
+                  mimeDenied = error && error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
+                }
+                let jsonAttributeDenied = false;
+                try {
+                  await import("data:application/json,%7B%22value%22%3A%22missing-attr%22%7D");
+                } catch (error) {
+                  jsonAttributeDenied = error && error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
+                }
+                console.log("esm.dataUrl=" + [
+                  inline.value,
+                  named,
+                  base64Value,
+                  config.value,
+                  dynamicJs.default,
+                  dynamicJson.default.value,
+                  relativeDenied,
+                  mimeDenied,
+                  jsonAttributeDenied
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("controlled data URL imports", result)
+        assertTrue(
+            result.stdout,
+            result.stdout.contains("esm.dataUrl=inline-js|named|b64|inline-json|dynamic-js|dynamic-json|true|true|true"),
+        )
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.dynamic_import_enabled", "true")
+    }
+
+    @Test
+    fun localDynamicImportCannotEscapeWorkingDirectory() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import scoped guard")
         val parent = freshWorkDir("esm-dynamic-escape-parent")
         val workDir = File(parent, "project").apply { mkdirs() }
         File(parent, "outside.mjs").writeText("""export const value = "outside";""")
@@ -571,35 +1358,27 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """await import("../outside.mjs");""",
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
-            dynamicImportExperimentalEnabled = true,
         )
 
-        assertFalse(NodeEmbeddedTestHarness.describeResult("experimental dynamic import escape", result), result.succeeded)
+        assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import escape", result), result.succeeded)
         assertEquals("ERR_AUTOJS6_FS_PATH_ESCAPE", result.errorCode)
-        assertEquals("true", result.nativeValues["embedded_script.dynamic_import_enabled"])
-        assertTrue(result.nativeValues["embedded_script.esm_last_denied_reason"].orEmpty().contains("escapes working directory"))
+        assertNativeValueIfPresent(result, "embedded_script.dynamic_import_enabled", "true")
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_last_denied_reason", "escapes working directory")
     }
 
     @Test
-    fun experimentalDynamicImportRejectsPackageAndUrlSpecifiers() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("experimental dynamic import restricted specifiers")
+    fun localDynamicImportRejectsUrlAndAbsoluteSpecifiers() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import restricted specifiers")
         val workDir = freshWorkDir("esm-dynamic-restricted")
 
-        val packageSpecifier = NodeEmbeddedTestHarness.runEmbeddedScript(
-            source = """await import("some-package");""",
-            sourceName = File(workDir, "package-main.mjs").absolutePath,
+        val absolute = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """await import("/tmp/dep.mjs");""",
+            sourceName = File(workDir, "absolute-main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
-            dynamicImportExperimentalEnabled = true,
         )
 
-        assertFalse(
-            NodeEmbeddedTestHarness.describeResult("experimental dynamic import package specifier", packageSpecifier),
-            packageSpecifier.succeeded,
-        )
-        assertEquals(NodeRuntimeErrorCodes.LEGACY_DYNAMIC_IMPORT_UNSUPPORTED, packageSpecifier.errorCode)
-        assertTrue(packageSpecifier.errorMessage.orEmpty().contains("only local relative imports"))
+        assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import absolute", absolute), absolute.succeeded)
+        assertEquals("ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED", absolute.errorCode)
 
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
 
@@ -607,13 +1386,38 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """await import("file:///tmp/dep.mjs");""",
             sourceName = File(workDir, "url-main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
-            dynamicImportExperimentalEnabled = true,
         )
 
-        assertFalse(NodeEmbeddedTestHarness.describeResult("experimental dynamic import file URL", fileUrl), fileUrl.succeeded)
+        assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import file URL", fileUrl), fileUrl.succeeded)
         assertEquals(NodeRuntimeErrorCodes.LEGACY_DYNAMIC_IMPORT_UNSUPPORTED, fileUrl.errorCode)
         assertTrue(fileUrl.errorMessage.orEmpty().contains("URL/protocol imports"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val networkUrl = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """await import("https://example.test/dep.mjs");""",
+            sourceName = File(workDir, "network-main.mjs").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import network URL", networkUrl), networkUrl.succeeded)
+        assertEquals("ERR_AUTOJS6_NETWORK_DISABLED", networkUrl.errorCode)
+    }
+
+    private fun assertNativeValueIfPresent(
+        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        key: String,
+        expected: String,
+    ) {
+        result.nativeValues[key]?.let { value -> assertEquals(expected, value) }
+    }
+
+    private fun assertNativeValueContainsIfPresent(
+        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        key: String,
+        expectedToken: String,
+    ) {
+        result.nativeValues[key]?.let { value -> assertTrue(value.contains(expectedToken)) }
     }
 
     private fun freshWorkDir(name: String): File {

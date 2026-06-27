@@ -1,10 +1,12 @@
 # AutoJs6 Embedded Node.js Integration Plan
 
-This document is the engineering map for the AutoJs6 Safe Node Profile. It records the current integration boundary and the order in which future work should land.
+This document is the engineering map for the AutoJs6 Node runtime. It records
+the current Safe Node Profile boundary and the staged expansion path toward
+Auto.js Pro compatibility plus broader desktop Node.js compatibility.
 
 ## Product Goal
 
-AutoJs6 embeds Node.js as a controlled Android script runtime:
+AutoJs6 currently embeds Node.js as a controlled Android script runtime:
 
 - real Node/V8/libuv runtime through `libnode.so`
 - AutoJs6-owned bootstrap and CommonJS loader
@@ -15,7 +17,11 @@ AutoJs6 embeds Node.js as a controlled Android script runtime:
 - diagnostics and release gates
 - native crash diagnostics through native dependency and symbol archive reports
 
-The target is not unrestricted desktop Node.js. The target is a stable AutoJs6 Safe Node Profile that can grow deliberately.
+The default product surface remains the Safe Node Profile, but the long-term
+target is broader: explicit profiles should gradually approach Auto.js Pro
+capabilities and desktop Node.js capabilities where Android can support them.
+High-risk capabilities must move through design, opt-in profile, verification,
+packaged evidence, and rollback gates before becoming user-facing.
 
 ## Current Runtime Chain
 
@@ -59,7 +65,8 @@ Related properties:
 - `autojs.nodejs.embedded.probe.level=0`
 - `autojs.nodejs.embedded.probe.timeout.ms=3000`
 - `autojs.nodejs.embedded.probe.lifecycle=false`
-- `autojs.nodejs.esm.experimental=false`
+- `autojs.nodejs.esm.experimental=true`
+- `autojs.nodejs.dynamicImport.local=true`
 - `autojs.nodejs.dynamicImport.experimental=false`
 - `autojs.nodejs.network.experimental=false`
 - `autojs.nodejs.worker_threads.experimental=false`
@@ -134,7 +141,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 - Reject pending bridge calls when the script service stops.
 - Track provider-owned bridge resources per execution and close leaked handles on stop/destroy.
 - Apply per-execution bridge concurrency and resource limits before provider calls can flood the service.
-- Current user-facing MVP modules: `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, `work_manager` metadata registration, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, and protocol-gated `media_projection`/`image`.
+- Current user-facing MVP modules: `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, controlled WorkManager-backed `work_manager` scheduling, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, protocol-gated `media_projection`/`image`, and Activity-owned live `ui`.
 
 ### P5 Release Gates
 
@@ -150,7 +157,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 ### P6-P8 Longer-Term Compatibility
 
 - Evaluate `fs.promises`, stream, zlib, ESM, network, workers, Java interop, and native addons one at a time.
-- Keep scheduled/background task execution design-gated; Task 65 permits only controlled `work_manager` metadata registration, and Node must not get raw Android scheduler or broadcast authority.
+- Keep scheduled/background task execution design-gated; S7-15 permits only controlled WorkManager-backed timed Node work through `work_manager`, and Node must not get raw Android scheduler or broadcast authority.
 - Treat controlled `fetch` as the only approved network MVP; live provider enablement remains behind `autojs.nodejs.network.experimental=false` by default.
 - Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; workers must not access AutoJs bridge modules or Android objects.
 - Keep Java/Android interop behind `docs/nodejs/design/JAVA_INTEROP.md` and `autojs.nodejs.javaInterop.experimental=false`; the default product path is explicit AutoJs bridge modules, not raw `java.*`, `android.*`, reflection, class loaders, or Rhino adapter APIs.
@@ -158,13 +165,25 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 - Each high-risk feature needs a design document, flag, tests, packaged smoke, and rollback path.
 - Keep current design gates in `docs/nodejs/design/` synchronized when broad compatibility surfaces change.
 
+### P13 Pro/Desktop Parity Expansion
+
+- Use `docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md`
+  as the next implementation checklist after Phase 12.
+- Split runtime behavior into Safe, Pro compatibility, Desktop compatibility,
+  and debug lab profiles.
+- Revisit selected Phase 12 disabled or blocked surfaces through explicit
+  capability, permission, testing, packaged smoke, and rollback gates.
+- Treat Auto.js Pro parity and desktop Node.js parity as long-term opt-in
+  targets, not silent changes to the default runtime.
+
 ## Global Invariants
 
 1. Preserve Rhino compatibility.
 2. Keep `embedded` as the default backend while retaining `rhino`, `native`, and `auto` switches.
 3. Keep the native one-shot backend until embedded lifecycle stress coverage is mature.
 4. Support both the main app and packaged APKs.
-5. Treat the exposed runtime as AutoJs6 Safe Node Profile, not desktop Node.js.
+5. Treat the default exposed runtime as AutoJs6 Safe Node Profile while Pro and
+   Desktop parity expand only through explicit opt-in profiles and gates.
 6. Do not open high-risk capabilities without an explicit task and gate.
 7. Android and AutoJs API calls from Node must be asynchronous from the JavaScript perspective.
 8. Callbacks into JavaScript must be marshalled onto the Node event loop thread.
@@ -174,13 +193,13 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 ## Immediate Next Tasks
 
 1. Harden the private live bridge transport and refresh packaged templates so packaged apps can use the same live path.
-2. Keep `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, and protocol-gated `media_projection`/`image` stable while designing real capability providers.
+2. Keep `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, protocol-gated `media_projection`/`image`, and Activity-owned live `ui` stable while designing the remaining real capability providers.
 3. Treat `project.json node.permissions` and `package.json autojs6.node.permissions` as the bridge capability manifest when present; missing declarations reject with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
 3. Treat `project.json node.bridgeLimits` and `package.json autojs6.node.bridgeLimits` as safe bridge limit overrides; above-hard-max values must be ignored with diagnostics.
 3. Design the real accessibility and MediaProjection/image providers before enabling Android-backed actions, screenshot capture, image decoding, or live node/image handles. Accessibility selector descriptors and node snapshots must remain JSON-only.
-4. Keep scheduled/background task execution behind `docs/nodejs/design/WORK_MANAGER.md`; `work_manager` currently registers controlled metadata only, and future timed execution should use a bridge provider, persistent user-visible descriptors, and packaged manifest gates.
-5. Keep ESM behind `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=false`; `.mjs` remains a Node route with default rejection. Keep dynamic import behind the separate `autojs.nodejs.dynamicImport.experimental=false` gate.
-6. Keep network behind `docs/nodejs/design/NETWORK.md` and `autojs.nodejs.network.experimental=false`; Task 41 provides a controlled fetch wrapper and fake-provider coverage, while live Android network I/O remains disabled in normal builds and raw Node network modules stay denied.
+4. Keep scheduled/background task execution behind `docs/nodejs/design/WORK_MANAGER.md`; `work_manager` now has a controlled WorkManager-backed timed MVP, while user-visible task database migration, boot/broadcast triggers, restart policy, and packaged manifest gates remain future work.
+5. Keep ESM constrained by `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=true`; `.mjs` is a Node Profile v1.1 partial ESM route, not a full desktop Node loader. Keep dynamic import local-only through `autojs.nodejs.dynamicImport.local=true`; the legacy `autojs.nodejs.dynamicImport.experimental=false` switch remains release-forbidden.
+6. Keep network behind `docs/nodejs/design/NETWORK.md` and `autojs.nodejs.network.experimental=false`; Task 41 provides a controlled fetch wrapper and fake-provider coverage, while live Android network I/O remains disabled in normal builds. Raw Node `dns`/`http`/`https`/`net`/`tls` modules remain denied in the Safe profile unless a debug/build-time run explicitly enables `autojs.nodejs.rawNetworkModules.experimental=true`.
 7. Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; Task 42 freezes the worker boundary without enabling worker execution.
 8. Keep Java/Android interop behind `docs/nodejs/design/JAVA_INTEROP.md`; `java_interop` is a default-off allowlist experiment and must not expose raw Java, Android, reflection, class-loader, native-library, process, or filesystem authority.
 9. Use `docs/nodejs/PERFORMANCE.md`, `NodeEmbeddedPerformanceInstrumentationTest`, and `NodeEmbeddedMemoryLeakStressInstrumentationTest` when changing embedded startup, native load, service lifecycle, bridge, fs, or image-handle behavior.

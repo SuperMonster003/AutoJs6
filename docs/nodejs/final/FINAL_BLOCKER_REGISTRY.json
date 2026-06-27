@@ -1,0 +1,118 @@
+{
+  "schema": "autojs6-node-final-blocker-registry-v1",
+  "phase": "Phase 11: Node Platform Completion & Graduation",
+  "defaultRuntime": "node24_5",
+  "node2417Lane": "external_runtime_maintenance",
+  "finalStatusVocabulary": [
+    "completed",
+    "blocked"
+  ],
+  "blockedCompletionStatusForbidden": "completed_with_recorded_blockers",
+  "blockers": [
+    {
+      "id": "adapter_v1_real_execution_path",
+      "classification": "required_internal",
+      "status": "closed",
+      "currentEvidence": "AutoJsNodeRuntimeApiV1 now creates opaque handles, executes through the shared Node 24.5 embedded lifecycle, reports state/diagnostics, and destroys idempotently. adapter_v1 is selectable with legacy_jni retained as the auto/default fallback.",
+      "requiredResolution": "adapter_v1 creates, executes, polls, stops, diagnoses, and destroys the Node 24.5 runtime for script, CommonJS, ESM, dynamic import, bridge, and packaged execution."
+    },
+    {
+      "id": "crash_evidence_automation",
+      "classification": "required_internal",
+      "status": "closed",
+      "currentEvidence": "Phase 13 adds a runtime JSON crash marker store, next-launch collector, embedded script service marker writes, native process service marker writes, a host crash evidence collector, simulated native fatal running-marker collection, real fatal native SIGKILL chaos collection, packaged launch-surface marker contract, a passing packaged APK crash smoke with fresh inrt template override, and native signal-safe fixed-size marker proof. The focused gate reports ready with zero blockers.",
+      "requiredResolution": "Crash marker, next-launch collection, resource snapshot, timeline tail, symbolization, and chaos injection pass focused gates."
+    },
+    {
+      "id": "android_side_package_installation",
+      "classification": "required_internal",
+      "status": "open",
+      "currentEvidence": "Host-managed/offline fixture remains available; Phase 13 adds a partial Android-side local package store with transactional install/update/remove/list/verify/prune, cancellation, store locking, SHA-512 integrity, lifecycle/bin/native/path-escape denial, focused instrumentation, connected device coverage, source-authority diagnostics, a guarded local mutation require(\"package_manager\") facade, and a guarded require(\"npm\") alias facade whose status/policy/sourcePolicy/planInstall/planUpdate/planRemove/planRegistryInstall/planTarballInstall/install/update/remove/list/verify/prune operations expose the app-private store boundary plus plan-only remote source policy while npm CLI, registry download/install, lifecycle, bin, native payload, and unrestricted install authority remain denied. Registry/download implementation, npm CLI decision, signed native-payload decision, broader distribution evidence, and plugin/package distribution integration remain open.",
+      "requiredResolution": "Android package install/update/remove/list/verify/prune is transactional, cancellable, locked, integrity checked, and lifecycle-script free."
+    },
+    {
+      "id": "packaged_long_running",
+      "classification": "required_internal",
+      "status": "open",
+      "currentEvidence": "Interactive long-running works; Phase 13 adds partial packaged dispatch through node.executionMode=interactive_long_running, a packaged_long_running launch surface, inrt foreground-service routing, host verification, and a focused packaged crash evidence smoke that installs and starts packaged long-running mode with fresh inrt template override. Full foreground Stop action, lifecycle restore/cleanup, Android permission/background-start matrix, and quota/stress evidence remain open.",
+      "requiredResolution": "Packaged APK long-running mode has foreground notification, stop action, lifecycle handling, checkpoint, quota, and cleanup evidence."
+    },
+    {
+      "id": "second_execution_slot",
+      "classification": "required_internal",
+      "status": "open",
+      "currentEvidence": "Explicit primary/overflow_1 one-shot slot selection routes to independent Android service processes; Phase 13 adds a client-side default one-shot scheduler that can lease primary/overflow_1 on eligible devices, preserves processPoolSlotSource diagnostics, reports full-pool queue/dequeue diagnostics, propagates descriptor/package processPoolSlot metadata, adds focused packaged overflow-slot smoke coverage, records explicit no-restart crash marker fallback evidence with primary survivor execution, and adds focused two-slot shared-resource stress across stdout/stderr, cwd/env/module/global isolation, timers, file handles, watchers, bridge pending/resource cleanup, and crash marker runtimeSlotId metadata. Automatic slot replacement/quarantine and long-duration P13-08 stress soak remain open.",
+      "requiredResolution": "At least two independent Node execution slots are available with isolated ResourceRegistry and crash evidence."
+    },
+    {
+      "id": "full_heavy_resource_stress",
+      "classification": "required_internal",
+      "status": "open",
+      "currentEvidence": "Core long-running/resource stress exists; Phase 13 adds a full heavy resource stress verifier, expected 8h/24h final-soak report paths, comparable metric checks, fixture-based contract validation, a validated archive helper, host reporting, and a focused two-slot resource stress anchor for primary/overflow shared-resource isolation. Actual 8-hour quick soak and 24-hour final soak evidence remain incomplete.",
+      "requiredResolution": "8-hour quick soak and 24-hour final soak show no monotonic leaks, orphan process, or unrecoverable runtime."
+    },
+    {
+      "id": "worker_threads",
+      "classification": "conditional",
+      "status": "decision_required",
+      "currentEvidence": "Default disabled and blocked by native availability.",
+      "requiredResolution": "Implement controlled worker_threads or declare intentionally unsupported with an AutoJs6 process-worker replacement."
+    },
+    {
+      "id": "controlled_wasi",
+      "classification": "conditional",
+      "status": "decision_required",
+      "currentEvidence": "Pure WebAssembly works; raw node:wasi remains disabled.",
+      "requiredResolution": "Either support only WebAssembly or implement a controlled autojs:wasi profile while keeping raw node:wasi disabled."
+    },
+    {
+      "id": "x86",
+      "classification": "conditional",
+      "status": "optional",
+      "currentEvidence": "x86 is not a required Phase 11 ABI.",
+      "requiredResolution": "Optional experiment only; does not block the three required ABIs."
+    },
+    {
+      "id": "native_addon",
+      "classification": "intentional_non_goal",
+      "status": "permanently_unsupported",
+      "currentEvidence": "Native addon .node loading is denied by policy and tests.",
+      "requiredResolution": "Stable denial remains documented and tested."
+    },
+    {
+      "id": "unrestricted_child_process",
+      "classification": "intentional_non_goal",
+      "status": "permanently_unsupported",
+      "currentEvidence": "child_process is disabled.",
+      "requiredResolution": "Stable denial remains documented and tested."
+    },
+    {
+      "id": "raw_network",
+      "classification": "intentional_non_goal",
+      "status": "permanently_unsupported",
+      "currentEvidence": "Raw net/tls/dns/dgram stay denied; controlled fetch/http/WebSocket providers remain bounded.",
+      "requiredResolution": "Stable denial remains documented and tested."
+    },
+    {
+      "id": "private_node_bindings",
+      "classification": "intentional_non_goal",
+      "status": "permanently_unsupported",
+      "currentEvidence": "process.binding, process._linkedBinding, and process.dlopen stay denied.",
+      "requiredResolution": "Stable denial remains documented and tested."
+    },
+    {
+      "id": "production_inspector",
+      "classification": "intentional_non_goal",
+      "status": "permanently_unsupported",
+      "currentEvidence": "Inspector remains disabled outside debug-only gates.",
+      "requiredResolution": "Stable release bypass denial remains documented and tested."
+    },
+    {
+      "id": "node_24_17_community_fork",
+      "classification": "external_runtime_maintenance",
+      "status": "waiting_for_android_artifacts",
+      "currentEvidence": "Node 24.17 upstream exists, but Android shared-libnode artifacts for the required ABIs are not production-ready.",
+      "requiredResolution": "Future runtime upgrade lane only; does not block Phase 11 completion on node24_5."
+    }
+  ]
+}

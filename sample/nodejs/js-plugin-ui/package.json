@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/js-plugin-ui",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

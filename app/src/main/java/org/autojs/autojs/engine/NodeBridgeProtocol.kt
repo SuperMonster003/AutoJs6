@@ -1,13 +1,30 @@
 package org.autojs.autojs.engine
 
+import android.Manifest
 import android.accessibilityservice.AccessibilityService as AndroidAccessibilityService
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
+import android.database.sqlite.SQLiteStatement
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Rect
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
@@ -18,8 +35,19 @@ import android.os.VibratorManager
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.barcode.common.Barcode as MLKitBarcode
+import com.google.mlkit.vision.text.Text
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.TextRecognizer
+import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -27,11 +55,16 @@ import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
+import org.autojs.autojs.core.accessibility.OnKeyListener
+import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
+import org.mediainfo.android.MediaInfo
 import okio.ByteString.Companion.decodeBase64
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -39,8 +72,13 @@ import java.io.File
 import java.io.InputStream
 import java.net.URI
 import java.net.URL
+import java.security.MessageDigest
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -208,6 +246,37 @@ data class NodeBridgeResponse(
     }
 }
 
+object NodeBridgeErrorCategory {
+    const val UNAVAILABLE = "unavailable"
+    const val PERMISSION_DENIED = "permission-denied"
+    const val CAPABILITY_DENIED = "capability-denied"
+    const val PROVIDER_FAILED = "provider-failed"
+    const val INVALID_REQUEST = "invalid-request"
+    const val RESOURCE_LIMIT = "resource-limit"
+    const val RATE_LIMITED = "rate-limited"
+    const val TIMEOUT = "timeout"
+    const val PROCESS_DEAD = "process-dead"
+    const val RUNTIME_ERROR = "runtime-error"
+
+    fun fromCode(code: String): String = when (code) {
+        NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED -> CAPABILITY_DENIED
+        NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED,
+        NodeRuntimeErrorCodes.NETWORK_PERMISSION_DENIED,
+        NodeRuntimeErrorCodes.NETWORK_POLICY_DENIED -> PERMISSION_DENIED
+        NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST,
+        NodeRuntimeErrorCodes.NETWORK_INVALID_URL -> INVALID_REQUEST
+        NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT,
+        NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE -> RESOURCE_LIMIT
+        NodeRuntimeErrorCodes.BRIDGE_RATE_LIMITED -> RATE_LIMITED
+        NodeRuntimeErrorCodes.BRIDGE_TIMEOUT,
+        NodeRuntimeErrorCodes.NETWORK_TIMEOUT -> TIMEOUT
+        NodeRuntimeErrorCodes.NETWORK_DISABLED -> UNAVAILABLE
+        NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED -> PROVIDER_FAILED
+        NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD -> PROCESS_DEAD
+        else -> RUNTIME_ERROR
+    }
+}
+
 data class NodeBridgeError(
     val name: String = "Error",
     val message: String,
@@ -216,11 +285,13 @@ data class NodeBridgeError(
     val method: String? = null,
     val stack: String? = null,
     val missingCapabilities: List<String> = emptyList(),
+    val category: String = NodeBridgeErrorCategory.fromCode(code),
 ) {
     fun toJsonObject(): JSONObject = JSONObject().apply {
         put("name", name)
         put("message", message)
         put("code", code)
+        put("category", category)
         module?.let { put("module", it) }
         method?.let { put("method", it) }
         stack?.let { put("stack", it) }
@@ -231,14 +302,16 @@ data class NodeBridgeError(
 
     companion object {
         fun fromJsonObject(value: JSONObject): NodeBridgeError {
+            val code = value.optString("code", NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD)
             return NodeBridgeError(
                 name = value.optString("name", "Error"),
                 message = value.optString("message"),
-                code = value.optString("code", NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD),
+                code = code,
                 module = value.optString("module").takeIf { it.isNotBlank() },
                 method = value.optString("method").takeIf { it.isNotBlank() },
                 stack = value.optString("stack").takeIf { it.isNotBlank() },
                 missingCapabilities = value.optionalStringArray("missingCapabilities"),
+                category = value.optNonBlankString("category") ?: NodeBridgeErrorCategory.fromCode(code),
             )
         }
 
@@ -267,12 +340,18 @@ data class NodeBridgeError(
             )
         }
 
-        fun permissionDenied(message: String, module: String? = null, method: String? = null): NodeBridgeError {
+        fun permissionDenied(
+            message: String,
+            module: String? = null,
+            method: String? = null,
+            category: String = NodeBridgeErrorCategory.PERMISSION_DENIED,
+        ): NodeBridgeError {
             return NodeBridgeError(
                 message = message,
                 code = NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED,
                 module = module,
                 method = method,
+                category = category,
             )
         }
 
@@ -291,6 +370,24 @@ data class NodeBridgeError(
                 code = NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT,
                 module = module,
                 method = method,
+                category = NodeBridgeErrorCategory.RESOURCE_LIMIT,
+            )
+        }
+
+        fun providerFailed(
+            message: String,
+            module: String? = null,
+            method: String? = null,
+            stack: String? = null,
+            code: String = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
+        ): NodeBridgeError {
+            return NodeBridgeError(
+                message = message,
+                code = code,
+                module = module,
+                method = method,
+                stack = stack,
+                category = NodeBridgeErrorCategory.PROVIDER_FAILED,
             )
         }
 
@@ -299,6 +396,7 @@ data class NodeBridgeError(
                 message = "AutoJs6 bridge module or method is not available: $module.$method",
                 module = module,
                 method = method,
+                category = NodeBridgeErrorCategory.UNAVAILABLE,
             )
         }
 
@@ -307,6 +405,7 @@ data class NodeBridgeError(
                 message = "AutoJs6 $module bridge requires $requirement.",
                 module = module,
                 method = method,
+                category = NodeBridgeErrorCategory.UNAVAILABLE,
             )
         }
 
@@ -318,15 +417,23 @@ data class NodeBridgeError(
                 module = module,
                 method = method,
                 missingCapabilities = missing,
+                category = NodeBridgeErrorCategory.CAPABILITY_DENIED,
             )
         }
 
-        fun network(message: String, code: String, module: String? = null, method: String? = null): NodeBridgeError {
+        fun network(
+            message: String,
+            code: String,
+            module: String? = null,
+            method: String? = null,
+            category: String = NodeBridgeErrorCategory.fromCode(code),
+        ): NodeBridgeError {
             return NodeBridgeError(
                 message = message,
                 code = code,
                 module = module,
                 method = method,
+                category = category,
             )
         }
 
@@ -365,6 +472,8 @@ data class NodeBridgeEngineInfo(
     val backend: String = "embedded",
     val sourceName: String = "",
     val cwd: String = "",
+    val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+    val launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
     val spawnDepth: Int = 0,
     val processName: String = "",
     val pid: Int = Process.myPid(),
@@ -379,6 +488,8 @@ data class NodeBridgeEngineInfo(
         put("backend", backend)
         put("sourceName", sourceName)
         put("cwd", cwd)
+        put("executionMode", executionMode)
+        put("launchSurface", launchSurface)
         put("spawnDepth", spawnDepth)
         put("processName", processName)
         put("pid", pid)
@@ -396,6 +507,8 @@ data class NodeBridgeEngineInfo(
             id: String = "",
             sourceName: String = "",
             cwd: String = "",
+            executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+            launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
             spawnDepth: Int = 0,
             processName: String = "",
             pid: Int = Process.myPid(),
@@ -423,6 +536,8 @@ data class NodeBridgeEngineInfo(
                 id = id,
                 sourceName = sourceName,
                 cwd = cwd,
+                executionMode = executionMode,
+                launchSurface = launchSurface,
                 spawnDepth = spawnDepth.coerceIn(0, MAX_SPAWN_DEPTH),
                 processName = processName,
                 pid = pid,
@@ -448,16 +563,42 @@ object NodeBridgeModules {
     const val MEDIA_PROJECTION = "media_projection"
     const val IMAGE = "image"
     const val IMAGES = "images"
+    const val OCR = "ocr"
+    const val BARCODE = "barcode"
+    const val MEDIA = "media"
+    const val MEDIAINFO = "mediainfo"
+    const val RECORDER = "recorder"
+    const val STORAGE = "storage"
+    const val STORAGES = "storages"
+    const val DATABASE = "database"
+    const val SQLITE = "sqlite"
+    const val NOTIFICATIONS = "notifications"
+    const val SENSORS = "sensors"
+    const val UI = "ui"
+    const val UI_OVERLAY = "ui.overlay"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
     const val FETCH = "fetch"
     const val WEBSOCKET = "websocket"
     const val WORK_MANAGER = "work_manager"
+    const val PACKAGE_MANAGER = "package_manager"
     const val JAVA = "java"
+    const val RHINO = "rhino"
+    const val INPUT_OBSERVER = "input_observer"
 
     val toastMethods = setOf("showToast", "toast")
-    val appMethods = setOf("launchPackage", "launchApp", "openAppSetting", "startActivity")
+    val appMethods = setOf(
+        "launchPackage",
+        "launchApp",
+        "openAppSetting",
+        "startActivity",
+        "getPackageName",
+        "getAppName",
+        "isInstalled",
+        "viewFile",
+        "editFile",
+    )
     val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile")
     val dialogsMethods = setOf("alert", "confirm", "input", "select")
     val accessibilityMethods = setOf(
@@ -471,17 +612,60 @@ object NodeBridgeModules {
         "clickText",
         "findOne",
         "findAll",
+        "longClick",
+        "setText",
+        "scrollForward",
+        "scrollBackward",
     )
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
-    val imageMethods = setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle")
+    val imageMethods = setOf(
+        "captureScreen",
+        "readImage",
+        "saveImage",
+        "clip",
+        "resize",
+        "grayscale",
+        "threshold",
+        "findImage",
+        "matchTemplate",
+        "findColor",
+        "findMultiColors",
+        "recycle",
+    )
+    val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
+    val barcodeMethods = setOf("detect", "detectAll", "recognizeText", "recognizeTexts")
+    val mediaMethods = setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo")
+    val mediainfoMethods = setOf("read", "get")
+    val recorderMethods = setOf("getStatus", "start", "stop")
+    val storageModules = setOf(STORAGE, STORAGES)
+    val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
+    val databaseModules = setOf(DATABASE, SQLITE)
+    val databaseMethods = setOf("open", "exec", "run", "get", "all", "transaction", "close")
+    val notificationsMethods = setOf("notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings")
+    val sensorsMethods = setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents")
+    val uiMethods = setOf("showLayout", "update", "batchUpdate", "close", "drainEvents")
+    val uiOverlayMethods = setOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings")
     val clipboardMethods = setOf("getText", "setText", "hasText")
-    val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
+    val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings")
     val shellMethods = setOf("exec")
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
     val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
-    val javaMethods = setOf("type", "callStatic", "new")
+    val packageManagerMethods = setOf(
+        "list",
+        "verify",
+        "prune",
+        "planInstall",
+        "planUpdate",
+        "planRemove",
+        "install",
+        "update",
+        "remove",
+    )
+    val javaMethods = setOf("type", "callStatic", "new", "call", "callInstance", "getField", "release", "dispose")
+    val rhinoMethods = setOf("run")
+    val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
 
     val supportedMethodsByModule: Map<String, Set<String>> = mapOf(
         TOAST to toastMethods,
@@ -492,13 +676,29 @@ object NodeBridgeModules {
         MEDIA_PROJECTION to mediaProjectionMethods,
         IMAGE to imageMethods,
         IMAGES to imageMethods,
+        OCR to ocrMethods,
+        BARCODE to barcodeMethods,
+        MEDIA to mediaMethods,
+        MEDIAINFO to mediainfoMethods,
+        RECORDER to recorderMethods,
+        STORAGE to storageMethods,
+        STORAGES to storageMethods,
+        DATABASE to databaseMethods,
+        SQLITE to databaseMethods,
+        NOTIFICATIONS to notificationsMethods,
+        SENSORS to sensorsMethods,
+        UI to uiMethods,
+        UI_OVERLAY to uiOverlayMethods,
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
         SHELL to shellMethods,
         FETCH to fetchMethods,
         WEBSOCKET to websocketMethods,
         WORK_MANAGER to workManagerMethods,
+        PACKAGE_MANAGER to packageManagerMethods,
         JAVA to javaMethods,
+        RHINO to rhinoMethods,
+        INPUT_OBSERVER to inputObserverMethods,
     )
 
     fun supports(module: String, method: String): Boolean {
@@ -510,6 +710,8 @@ interface NodeBridgeCapabilityProvider {
     fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit)
 
     fun nativeDiagnostics(): Map<String, String> = emptyMap()
+
+    fun healthCheck(): List<NodeBridgeProviderHealth> = NodeBridgeProviderRegistry.unavailableHealth()
 
     fun destroy(reason: NodeBridgeError = NodeBridgeError.processDead()) = Unit
 }
@@ -526,6 +728,8 @@ class FakeNodeBridgeCapabilityProvider(
         requests += request
         callback(handler(request))
     }
+
+    override fun healthCheck(): List<NodeBridgeProviderHealth> = NodeBridgeProviderRegistry.fakeHealth()
 }
 
 class AndroidNodeBridgeCapabilityProvider(
@@ -545,66 +749,180 @@ class AndroidNodeBridgeCapabilityProvider(
     private val networkDiagnostics = ControlledFetchDiagnostics()
     private val websocketSessions = ConcurrentHashMap<String, ControlledWebSocketSession>()
     private val websocketDiagnostics = ControlledWebSocketDiagnostics()
+    private val imageHandles = ConcurrentHashMap<String, ControlledImageHandle>()
+    private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
+    private val ocrDiagnostics = ControlledOcrDiagnostics()
+    private val barcodeOperations = ConcurrentHashMap<String, ControlledBarcodeOperation>()
+    private val barcodeDiagnostics = ControlledBarcodeDiagnostics()
+    private val ocrRecognizerDelegate = lazy {
+        TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build())
+    }
+    private val ocrRecognizer: TextRecognizer by ocrRecognizerDelegate
     private val bridgePermissionManifest by lazy {
         NodeBridgePermissionManifest.fromWorkingDirectory(engineInfo.cwd)
     }
+    private val databaseHandles = ConcurrentHashMap<String, ControlledDatabaseHandle>()
+    private val databaseHandleCounter = AtomicInteger(1)
+    private val databaseDestroyed = AtomicBoolean(false)
+    private val databaseExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "AutoJs6NodeDatabase").apply { isDaemon = true }
+    }
     private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
+    private val packageInstallManager by lazy {
+        NodeAndroidPackageInstallManager(File(appContext.filesDir, "nodejs/package-manager-store"))
+    }
     private val javaHandles = ConcurrentHashMap<String, Any>()
+    private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
+    private val notificationIdCounter = AtomicInteger(1_000_000)
+    private val sensorSubscriptions = ConcurrentHashMap<String, ControlledSensorSubscription>()
+    private val uiSessionIds = ConcurrentHashMap.newKeySet<String>()
+    private val overlaySessionIds = ConcurrentHashMap.newKeySet<String>()
+    private val overlayPermissionSettingsLaunches = AtomicInteger(0)
+    private val inputObserverSubscriptions = ConcurrentHashMap<String, ControlledInputObserverSubscription>()
+    private val sensorManager by lazy {
+        appContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+    }
     private val resourceRegistry = NodeBridgeResourceRegistry(engineInfo.id)
     private val activeShellCommands = AtomicInteger(0)
     private val maxActiveShellCommands = AtomicInteger(0)
     private val bridgeResourceLimitRejections = AtomicInteger(0)
     private val bridgeRateLimitedRejections = AtomicInteger(0)
     private val accessibilityRateLimiter = NodeBridgeRateLimiter()
+    private val capabilityBrokerAudit = NodeCapabilityBrokerAuditLog(engineInfo.id)
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val brokerAttempt = capabilityBrokerAudit.begin(request)
+        val auditedCallback: (NodeBridgeResponse) -> Unit = { response ->
+            capabilityBrokerAudit.complete(brokerAttempt, response)
+            callback(response)
+        }
+        brokerAttempt.preflightError?.let { error ->
+            auditedCallback(NodeBridgeResponse.failure(request.id, error))
+            return
+        }
         val auditFailure = capabilityAuditFailure(request)
         if (auditFailure != null) {
-            callback(NodeBridgeResponse.failure(request.id, auditFailure))
+            auditedCallback(NodeBridgeResponse.failure(request.id, auditFailure))
             return
         }
         when {
-            request.module == NodeBridgeModules.TOAST && request.method in NodeBridgeModules.toastMethods -> dispatchToast(request, callback)
-            request.module == NodeBridgeModules.APP && request.method in NodeBridgeModules.appMethods -> dispatchApp(request, callback)
-            request.module == NodeBridgeModules.ENGINES && request.method in NodeBridgeModules.enginesMethods -> dispatchEngines(request, callback)
-            request.module == NodeBridgeModules.DIALOGS && request.method in NodeBridgeModules.dialogsMethods -> dispatchDialogs(request, callback)
-            request.module == NodeBridgeModules.ACCESSIBILITY && request.method in NodeBridgeModules.accessibilityMethods -> dispatchAccessibility(request, callback)
-            request.module == NodeBridgeModules.MEDIA_PROJECTION && request.method in NodeBridgeModules.mediaProjectionMethods -> dispatchMediaProjection(request, callback)
-            request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, callback)
-            request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, callback)
-            request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, callback)
-            request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, callback)
-            request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, callback)
-            request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, callback)
-            request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, callback)
-            request.module == NodeBridgeModules.JAVA && request.method in NodeBridgeModules.javaMethods -> dispatchJava(request, callback)
-            else -> callback(unavailable(request))
+            request.module == NodeBridgeModules.TOAST && request.method in NodeBridgeModules.toastMethods -> dispatchToast(request, auditedCallback)
+            request.module == NodeBridgeModules.APP && request.method in NodeBridgeModules.appMethods -> dispatchApp(request, auditedCallback)
+            request.module == NodeBridgeModules.ENGINES && request.method in NodeBridgeModules.enginesMethods -> dispatchEngines(request, auditedCallback)
+            request.module == NodeBridgeModules.DIALOGS && request.method in NodeBridgeModules.dialogsMethods -> dispatchDialogs(request, auditedCallback)
+            request.module == NodeBridgeModules.ACCESSIBILITY && request.method in NodeBridgeModules.accessibilityMethods -> dispatchAccessibility(request, auditedCallback)
+            request.module == NodeBridgeModules.MEDIA_PROJECTION && request.method in NodeBridgeModules.mediaProjectionMethods -> dispatchMediaProjection(request, auditedCallback)
+            request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, auditedCallback)
+            request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, auditedCallback)
+            request.module == NodeBridgeModules.BARCODE && request.method in NodeBridgeModules.barcodeMethods -> dispatchBarcode(request, auditedCallback)
+            request.module == NodeBridgeModules.MEDIA && request.method in NodeBridgeModules.mediaMethods -> dispatchMedia(request, auditedCallback)
+            request.module == NodeBridgeModules.MEDIAINFO && request.method in NodeBridgeModules.mediainfoMethods -> dispatchMediainfo(request, auditedCallback)
+            request.module == NodeBridgeModules.RECORDER && request.method in NodeBridgeModules.recorderMethods -> dispatchRecorder(request, auditedCallback)
+            request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, auditedCallback)
+            request.module in NodeBridgeModules.databaseModules && request.method in NodeBridgeModules.databaseMethods -> dispatchDatabase(request, auditedCallback)
+            request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, auditedCallback)
+            request.module == NodeBridgeModules.SENSORS && request.method in NodeBridgeModules.sensorsMethods -> dispatchSensors(request, auditedCallback)
+            request.module == NodeBridgeModules.UI && request.method in NodeBridgeModules.uiMethods -> dispatchUi(request, auditedCallback)
+            request.module == NodeBridgeModules.UI_OVERLAY && request.method in NodeBridgeModules.uiOverlayMethods -> dispatchUiOverlay(request, auditedCallback)
+            request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, auditedCallback)
+            request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, auditedCallback)
+            request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, auditedCallback)
+            request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, auditedCallback)
+            request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, auditedCallback)
+            request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, auditedCallback)
+            request.module == NodeBridgeModules.PACKAGE_MANAGER && request.method in NodeBridgeModules.packageManagerMethods -> dispatchPackageManager(request, auditedCallback)
+            request.module == NodeLifecycleCheckpointStore.BRIDGE_MODULE_NAME -> dispatchLifecycle(request, auditedCallback)
+            request.module == NodeBridgeModules.JAVA && request.method in NodeBridgeModules.javaMethods -> dispatchJava(request, auditedCallback)
+            request.module == NodeBridgeModules.RHINO && request.method in NodeBridgeModules.rhinoMethods -> dispatchRhino(request, auditedCallback)
+            request.module == NodeBridgeModules.INPUT_OBSERVER && request.method in NodeBridgeModules.inputObserverMethods -> dispatchInputObserver(request, auditedCallback)
+            else -> auditedCallback(unavailable(request))
         }
     }
 
     override fun nativeDiagnostics(): Map<String, String> = linkedMapOf<String, String>().apply {
         putAll(networkDiagnostics.nativeValues())
         putAll(websocketDiagnostics.nativeValues())
+        putAll(ocrDiagnostics.nativeValues())
+        putAll(barcodeDiagnostics.nativeValues())
+        put("embedded_script.image_active_handle_count", imageHandles.size.toString())
+        put("embedded_script.ocr_active_operation_count", ocrOperations.size.toString())
+        put("embedded_script.barcode_active_operation_count", barcodeOperations.size.toString())
+        put("embedded_script.database_active_handle_count", databaseHandles.size.toString())
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
+        put("embedded_script.overlay_active_session_count", overlaySessionIds.size.toString())
+        put("embedded_script.overlay_permission_granted", overlayPermissionGranted().toString())
+        put("embedded_script.overlay_permission_settings_launch_count", overlayPermissionSettingsLaunches.get().toString())
+        put("embedded_script.overlay_live_provider_state", "p12_14_live_gate_only")
+        put("embedded_script.input_observer_active_subscription_count", inputObserverSubscriptions.size.toString())
+        put("embedded_script.input_observer_pending_event_count", inputObserverSubscriptions.values.sumOf { it.pendingEventCount() }.toString())
+        put("embedded_script.input_observer_dropped_event_count", inputObserverSubscriptions.values.sumOf { it.droppedEventCount() }.toString())
+        put("embedded_script.input_observer_live_listener_count", inputObserverSubscriptions.values.sumOf { it.liveListenerCount() }.toString())
+        putAll(NodeLifecycleCheckpointStore.nativeDiagnostics(appContext, engineInfo))
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
+        put("embedded_script.package_manager_record_count", runCatching { packageInstallManager.list().size }.getOrDefault(0).toString())
+        putAll(packageInstallManager.nativeValues())
+        putAll(capabilityBrokerAudit.nativeDiagnostics())
         putAll(resourceRegistry.nativeDiagnostics())
         putAll(bridgeLimits.nativeDiagnostics())
         put("embedded_script.bridge_resource_limit_rejection_count", bridgeResourceLimitRejections.get().toString())
         put("embedded_script.bridge_rate_limited_count", bridgeRateLimitedRejections.get().toString())
         put("embedded_script.shell_active_command_count", activeShellCommands.get().toString())
         put("embedded_script.shell_max_active_command_count", maxActiveShellCommands.get().toString())
+        put("embedded_script.bridge_provider_health_json", NodeBridgeProviderRegistry.toJsonArray(healthCheck()).toString())
+    }
+
+    override fun healthCheck(): List<NodeBridgeProviderHealth> {
+        return NodeBridgeProviderRegistry.androidHealth(
+            appContext,
+            activeResourceCounts = mapOf(
+                "fetch" to networkCalls.size,
+                "websocket" to websocketSessions.size,
+                "ocr" to ocrOperations.size,
+                "barcode" to barcodeOperations.size,
+                "image" to imageHandles.size,
+                "database" to databaseHandles.size,
+                "notifications" to notificationHandles.size,
+                "sensors" to sensorSubscriptions.size,
+                "ui" to uiSessionIds.size,
+                "ui.overlay" to overlaySessionIds.size,
+                "input_observer" to inputObserverSubscriptions.size,
+                "work_manager" to workManagerTasks.size,
+                "package_manager" to runCatching { packageInstallManager.list().size }.getOrDefault(0),
+                "shell" to activeShellCommands.get(),
+            ),
+        )
     }
 
     override fun destroy(reason: NodeBridgeError) {
         val destroyReason = reason.code.ifBlank { reason.message }
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
+        ocrDiagnostics.recordServiceDestroyCancellation(ocrOperations.size)
+        barcodeDiagnostics.recordServiceDestroyCancellation(barcodeOperations.size)
+        ocrOperations.values.forEach { operation -> operation.cancel("destroy:$destroyReason") }
+        ocrOperations.clear()
+        barcodeOperations.values.forEach { operation -> operation.cancel("destroy:$destroyReason") }
+        barcodeOperations.clear()
+        databaseDestroyed.set(true)
+        databaseExecutor.shutdownNow()
         resourceRegistry.closeAll(destroyReason)
         networkCalls.values.forEach { call -> runCatching { call.cancel() } }
         networkCalls.clear()
         websocketSessions.clear()
+        imageHandles.clear()
+        databaseHandles.clear()
+        runCatching {
+            if (ocrRecognizerDelegate.isInitialized()) {
+                ocrRecognizer.close()
+            }
+        }
         workManagerTasks.clear()
         javaHandles.clear()
+        notificationHandles.clear()
+        sensorSubscriptions.clear()
+        uiSessionIds.clear()
+        overlaySessionIds.clear()
+        inputObserverSubscriptions.clear()
     }
 
     private fun unavailable(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -700,6 +1018,230 @@ class AndroidNodeBridgeCapabilityProvider(
         )
     }
 
+    private fun dispatchUi(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        when (request.method) {
+            "showLayout" -> dispatchUiShowLayout(request, callback)
+            "close" -> dispatchOwnedUiRequest(request, releaseOnClose = true, callback = callback)
+            "update", "batchUpdate", "drainEvents" -> dispatchOwnedUiRequest(request, releaseOnClose = false, callback = callback)
+            else -> callback(unavailable(request))
+        }
+    }
+
+    private fun dispatchUiOverlay(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val response = when (request.method) {
+            "hasPermission" -> NodeBridgeResponse.success(request.id, overlayPermissionSnapshot().toString())
+            "openPermissionSettings" -> dispatchOverlayOpenPermissionSettings(request)
+            "closeAll" -> NodeBridgeResponse.success(request.id, overlayCloseAllSummary("p12_14_live_gate_no_active_provider").toString())
+            else -> NodeBridgeResponse.failure(request.id, overlayLiveProviderMissing(request))
+        }
+        callback(response)
+    }
+
+    private fun dispatchOverlayOpenPermissionSettings(request: NodeBridgeRequest): NodeBridgeResponse {
+        val options = request.args().optJSONObject(0) ?: JSONObject()
+        val dryRun = options.optBoolean("dryRun", false)
+        val intent = overlayPermissionSettingsIntent()
+        val canOpenSettings = overlayPermissionSettingsIntentAvailable(intent)
+        var opened = false
+        var reason = if (canOpenSettings) "settings-intent-ready" else "settings-intent-unavailable"
+        if (canOpenSettings && !dryRun) {
+            runCatching {
+                appContext.startActivity(intent)
+                overlayPermissionSettingsLaunches.incrementAndGet()
+                opened = true
+                reason = "settings-intent-opened"
+            }.onFailure { error ->
+                reason = "settings-intent-failed:${error.javaClass.simpleName}"
+            }
+        } else if (dryRun) {
+            reason = "settings-intent-dry-run"
+        }
+        return NodeBridgeResponse.success(
+            request.id,
+            JSONObject()
+                .put("opened", opened)
+                .put("canOpenSettings", canOpenSettings)
+                .put("dryRun", dryRun)
+                .put("reason", reason)
+                .put("providerState", "p12_14_live_gate_only")
+                .toString(),
+        )
+    }
+
+    private fun overlayPermissionSnapshot(): JSONObject {
+        val granted = overlayPermissionGranted()
+        return JSONObject()
+            .put("granted", granted)
+            .put("canOpenSettings", overlayPermissionSettingsIntentAvailable())
+            .put("reason", if (granted) "permission-granted" else "permission-required")
+            .put("providerState", "p12_14_live_gate_only")
+            .put("packagedManifestPermission", "android.permission.SYSTEM_ALERT_WINDOW")
+            .put("foregroundDisclosure", "required_before_live_overlay")
+            .put("activeOverlayCount", overlaySessionIds.size)
+    }
+
+    private fun overlayCloseAllSummary(reason: String): JSONObject {
+        val closedCount = overlaySessionIds.size
+        overlaySessionIds.clear()
+        return JSONObject()
+            .put("closedCount", closedCount)
+            .put("remainingCount", overlaySessionIds.size)
+            .put("reason", reason)
+            .put("providerState", "p12_14_live_gate_only")
+            .put("rawWindowLeaked", false)
+    }
+
+    private fun overlayLiveProviderMissing(request: NodeBridgeRequest): NodeBridgeError {
+        return NodeBridgeError.capabilityProviderMissing(
+            module = request.module,
+            method = request.method,
+            requirement = "a promoted overlay capability provider; P12-14 exposes only permission/settings/cleanup live-gate evidence and keeps live overlay creation fail-closed",
+        )
+    }
+
+    private fun overlayPermissionGranted(): Boolean {
+        return runCatching { Settings.canDrawOverlays(appContext) }.getOrDefault(false)
+    }
+
+    private fun overlayPermissionSettingsIntent(): Intent {
+        return Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+            .setData(Uri.parse("package:${appContext.packageName}"))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
+    private fun overlayPermissionSettingsIntentAvailable(intent: Intent = overlayPermissionSettingsIntent()): Boolean {
+        return appContext.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
+    }
+
+    private fun intentAvailable(intent: Intent): Boolean {
+        return appContext.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
+    }
+
+    private fun dispatchUiShowLayout(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (uiSessionIds.size >= MAX_ACTIVE_UI_SESSIONS) {
+            callback(NodeBridgeResponse.failure(request.id, uiSessionLimitError(request)))
+            return
+        }
+        NodeBridgeUiDispatchService.dispatch(appContext, request) { response ->
+            if (!response.ok) {
+                callback(response)
+                return@dispatch
+            }
+            val sessionId = runCatching {
+                JSONObject(response.resultJson.orEmpty()).optString("id")
+            }.getOrDefault("")
+            if (sessionId.isBlank()) {
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.providerFailed(
+                            message = "AutoJs6 UI provider returned an invalid UI handle.",
+                            module = request.module,
+                            method = request.method,
+                            code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                        ),
+                    ),
+                )
+                return@dispatch
+            }
+            if (uiSessionIds.size >= MAX_ACTIVE_UI_SESSIONS) {
+                NodeBridgeUiDispatchService.dispatch(appContext, uiCloseRequest(sessionId, "ui_session_limit")) {}
+                callback(NodeBridgeResponse.failure(request.id, uiSessionLimitError(request)))
+                return@dispatch
+            }
+            val handle = runCatching {
+                resourceRegistry.register(
+                    type = NodeBridgeResourceType.UI_SESSION,
+                    id = sessionId,
+                    metadata = mapOf("module" to request.module),
+                ) { reason ->
+                    uiSessionIds.remove(sessionId)
+                    NodeBridgeUiDispatchService.dispatch(
+                        appContext,
+                        uiCloseRequest(sessionId, reason),
+                    ) {
+                        // Best-effort cleanup during execution destroy.
+                    }
+                }
+            }.getOrElse { error ->
+                NodeBridgeUiDispatchService.dispatch(appContext, uiCloseRequest(sessionId, "resource_register_failed")) {}
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.providerFailed(
+                            message = error.message ?: error.javaClass.name,
+                            module = request.module,
+                            method = request.method,
+                            code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                        ),
+                    ),
+                )
+                return@dispatch
+            }
+            uiSessionIds += handle.id
+            callback(response)
+        }
+    }
+
+    private fun dispatchOwnedUiRequest(
+        request: NodeBridgeRequest,
+        releaseOnClose: Boolean,
+        callback: (NodeBridgeResponse) -> Unit,
+    ) {
+        val sessionId = uiSessionId(request.argsJson)
+        if (sessionId.isBlank() || sessionId !in uiSessionIds) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 ui.${request.method} requires an active UI handle owned by this execution.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        NodeBridgeUiDispatchService.dispatch(appContext, request) { response ->
+            if (releaseOnClose) {
+                uiSessionIds.remove(sessionId)
+                resourceRegistry.release(sessionId, "ui.close")
+            }
+            callback(response)
+        }
+    }
+
+    private fun uiSessionId(argsJson: String): String {
+        val args = runCatching { JSONArray(argsJson) }.getOrDefault(JSONArray())
+        return when (val raw = args.opt(0)) {
+            is String -> raw
+            is JSONObject -> raw.optString("id", raw.optString("handleId", raw.optString("__autojs6UiHandle")))
+            else -> ""
+        }.trim()
+    }
+
+    private fun uiCloseRequest(sessionId: String, reason: String): NodeBridgeRequest {
+        return NodeBridgeRequest(
+            id = "ui-close-${UUID.randomUUID()}",
+            module = NodeBridgeModules.UI,
+            method = "close",
+            argsJson = JSONArray()
+                .put(sessionId)
+                .put(JSONObject().put("reason", reason))
+                .toString(),
+            timeoutMs = 5_000L,
+            permissions = listOf(NodeBridgePermissionManifest.UI),
+        )
+    }
+
+    private fun uiSessionLimitError(request: NodeBridgeRequest): NodeBridgeError {
+        return NodeBridgeError.resourceLimit(
+            message = "AutoJs6 UI bridge reached the active UI session limit ($MAX_ACTIVE_UI_SESSIONS).",
+            module = request.module,
+            method = request.method,
+        )
+    }
+
     private fun dispatchAccessibility(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         if (!accessibilityRateLimiter.tryAcquire(bridgeLimits.accessibilityQueriesPerSecond)) {
             bridgeRateLimitedRejections.incrementAndGet()
@@ -758,6 +1300,22 @@ class AndroidNodeBridgeCapabilityProvider(
             "findOne" -> dispatchAccessibilityFindOne(request, service)
             "findAll" -> dispatchAccessibilityFindAll(request, service)
             "click" -> dispatchAccessibilityClick(request, service)
+            "longClick" -> dispatchAccessibilitySelectorAction(
+                request,
+                service,
+                AccessibilityNodeInfo.ACTION_LONG_CLICK,
+            )
+            "setText" -> dispatchAccessibilitySetText(request, service)
+            "scrollForward" -> dispatchAccessibilitySelectorAction(
+                request,
+                service,
+                AccessibilityNodeInfo.ACTION_SCROLL_FORWARD,
+            )
+            "scrollBackward" -> dispatchAccessibilitySelectorAction(
+                request,
+                service,
+                AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD,
+            )
             else -> unavailable(request)
         }
     }
@@ -818,6 +1376,41 @@ class AndroidNodeBridgeCapabilityProvider(
         return NodeBridgeResponse.success(request.id, node?.clickAccessibilityNode().toString())
     }
 
+    private fun dispatchAccessibilitySelectorAction(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+        action: Int,
+    ): NodeBridgeResponse {
+        val selector = request.args().optJSONObject(0) ?: return NodeBridgeResponse.failure(
+            request.id,
+            NodeBridgeError.permissionDenied(
+                message = "AutoJs6 accessibility bridge supports ${request.method} only through selector descriptors.",
+                module = request.module,
+                method = request.method,
+            ),
+        )
+        val node = service.findAccessibilityNodes(selector).firstOrNull()
+        return NodeBridgeResponse.success(request.id, node?.performAccessibilityNodeAction(action).toString())
+    }
+
+    private fun dispatchAccessibilitySetText(
+        request: NodeBridgeRequest,
+        service: AutoJsAccessibilityService,
+    ): NodeBridgeResponse {
+        val args = request.args()
+        val selector = args.optJSONObject(0) ?: return NodeBridgeResponse.failure(
+            request.id,
+            NodeBridgeError.permissionDenied(
+                message = "AutoJs6 accessibility bridge supports setText only through selector descriptors.",
+                module = request.module,
+                method = request.method,
+            ),
+        )
+        val text = args.optString(1)
+        val node = service.findAccessibilityNodes(selector).firstOrNull()
+        return NodeBridgeResponse.success(request.id, node?.setAccessibilityNodeText(text).toString())
+    }
+
     private fun NodeBridgeRequest.args(): JSONArray {
         return runCatching { JSONArray(argsJson) }.getOrDefault(JSONArray())
     }
@@ -828,16 +1421,8 @@ class AndroidNodeBridgeCapabilityProvider(
 
     private fun AutoJsAccessibilityService.findAccessibilityNodes(selector: JSONObject): List<AccessibilityNodeInfo> {
         val root = accessibilityRoot() ?: return emptyList()
-        val text = selector.optString("text").takeIf { it.isNotBlank() }
-        if (text != null) {
-            return root.findAccessibilityNodeInfosByText(text).orEmpty()
-        }
-        val textContains = selector.optString("textContains").takeIf { it.isNotBlank() }
-        if (textContains != null) {
-            return root.findAccessibilityNodeInfosByText(textContains).orEmpty()
-        }
         val nodes = mutableListOf<AccessibilityNodeInfo>()
-        collectAccessibilityNodes(root, selector, nodes)
+        collectAccessibilityNodes(root, selector, nodes, depth = 0)
         return nodes
     }
 
@@ -845,36 +1430,157 @@ class AndroidNodeBridgeCapabilityProvider(
         node: AccessibilityNodeInfo?,
         selector: JSONObject,
         output: MutableList<AccessibilityNodeInfo>,
+        depth: Int,
     ) {
         if (node == null) {
             return
         }
-        if (node.matchesAccessibilitySelector(selector)) {
+        if (node.matchesAccessibilitySelector(selector, depth)) {
             output += node
         }
         repeat(node.childCount) { index ->
-            collectAccessibilityNodes(runCatching { node.getChild(index) }.getOrNull(), selector, output)
+            collectAccessibilityNodes(
+                runCatching { node.getChild(index) }.getOrNull(),
+                selector,
+                output,
+                depth = depth + 1,
+            )
         }
     }
 
-    private fun AccessibilityNodeInfo.matchesAccessibilitySelector(selector: JSONObject): Boolean {
+    private fun AccessibilityNodeInfo.matchesAccessibilitySelector(selector: JSONObject, depth: Int): Boolean {
+        var hasMatcher = false
+        fun markMatcher(): Boolean {
+            hasMatcher = true
+            return true
+        }
+
+        val nodeText = text?.toString().orEmpty()
+        val text = selector.optString("text").takeIf { it.isNotBlank() }
+        if (text != null && (!markMatcher() || nodeText != text)) {
+            return false
+        }
+        val textContains = selector.optString("textContains").takeIf { it.isNotBlank() }
+        if (textContains != null && (!markMatcher() || !nodeText.contains(textContains))) {
+            return false
+        }
+        val textMatches = selector.optRegex("textMatches")
+        if (textMatches != null && (!markMatcher() || !textMatches.matches(nodeText))) {
+            return false
+        }
+
+        val nodeDesc = contentDescription?.toString().orEmpty()
         val desc = selector.optString("desc").takeIf { it.isNotBlank() }
-        if (desc != null && contentDescription?.toString() != desc) {
+        if (desc != null && (!markMatcher() || nodeDesc != desc)) {
             return false
         }
         val descContains = selector.optString("descContains").takeIf { it.isNotBlank() }
-        if (descContains != null && contentDescription?.toString()?.contains(descContains) != true) {
+        if (descContains != null && (!markMatcher() || !nodeDesc.contains(descContains))) {
             return false
         }
+        val descMatches = selector.optRegex("descMatches")
+        if (descMatches != null && (!markMatcher() || !descMatches.matches(nodeDesc))) {
+            return false
+        }
+
+        val nodeId = viewIdResourceName.orEmpty()
         val id = selector.optString("id").takeIf { it.isNotBlank() }
-        if (id != null && viewIdResourceName != id) {
+        if (id != null && (!markMatcher() || nodeId != id)) {
             return false
         }
+        val idMatches = selector.optRegex("idMatches")
+        if (idMatches != null && (!markMatcher() || !idMatches.matches(nodeId))) {
+            return false
+        }
+
+        val nodeClassName = className?.toString().orEmpty()
         val className = selector.optString("className").takeIf { it.isNotBlank() }
-        if (className != null && this.className?.toString() != className) {
+        if (className != null && (!markMatcher() || nodeClassName != className)) {
             return false
         }
-        return desc != null || descContains != null || id != null || className != null
+        val classNameMatches = selector.optRegex("classNameMatches")
+        if (classNameMatches != null && (!markMatcher() || !classNameMatches.matches(nodeClassName))) {
+            return false
+        }
+
+        if (selector.has("clickable") && (!markMatcher() || selector.optBoolean("clickable") != isClickable)) {
+            return false
+        }
+        if (selector.has("enabled") && (!markMatcher() || selector.optBoolean("enabled") != isEnabled)) {
+            return false
+        }
+        if (selector.has("depth") && (!markMatcher() || selector.optInt("depth", -1) != depth)) {
+            return false
+        }
+
+        val bounds = Rect()
+        getBoundsInScreen(bounds)
+        selector.optBounds("boundsInside")?.let { target ->
+            if (!markMatcher() || !bounds.insideAccessibilityBounds(target)) {
+                return false
+            }
+        }
+        selector.optBounds("boundsContains")?.let { target ->
+            if (!markMatcher() || !bounds.containsAccessibilityBounds(target)) {
+                return false
+            }
+        }
+        return hasMatcher
+    }
+
+    private fun JSONObject.optRegex(name: String): Regex? {
+        val value = opt(name) ?: return null
+        val pattern = when (value) {
+            is JSONObject -> value.optString("pattern")
+            is String -> value
+            else -> return null
+        }.takeIf { it.isNotBlank() } ?: return null
+        val flags = (value as? JSONObject)?.optString("flags").orEmpty()
+        val options = buildSet {
+            if ('i' in flags) add(RegexOption.IGNORE_CASE)
+            if ('m' in flags) add(RegexOption.MULTILINE)
+            if ('s' in flags) add(RegexOption.DOT_MATCHES_ALL)
+        }
+        return runCatching { Regex(pattern, options) }.getOrNull()
+    }
+
+    private fun JSONObject.optBounds(name: String): Rect? {
+        val value = optJSONObject(name) ?: return null
+        return Rect(
+            value.optInt("left"),
+            value.optInt("top"),
+            value.optInt("right"),
+            value.optInt("bottom"),
+        )
+    }
+
+    private fun Rect.insideAccessibilityBounds(bounds: Rect): Boolean {
+        return left >= bounds.left && top >= bounds.top && right <= bounds.right && bottom <= bounds.bottom
+    }
+
+    private fun Rect.containsAccessibilityBounds(bounds: Rect): Boolean {
+        return left <= bounds.left && top <= bounds.top && right >= bounds.right && bottom >= bounds.bottom
+    }
+
+    private fun AccessibilityNodeInfo.performAccessibilityNodeAction(action: Int): Boolean {
+        var current: AccessibilityNodeInfo? = this
+        while (current != null) {
+            if (current.isEnabled && runCatching { current.performAction(action) }.getOrDefault(false)) {
+                return true
+            }
+            current = runCatching { current.parent }.getOrNull()
+        }
+        return false
+    }
+
+    private fun AccessibilityNodeInfo.setAccessibilityNodeText(text: String): Boolean {
+        if (!isEnabled) {
+            return false
+        }
+        val arguments = Bundle().apply {
+            putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
+        }
+        return runCatching { performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments) }.getOrDefault(false)
     }
 
     private fun AccessibilityNodeInfo.toAccessibilityJson(): JSONObject {
@@ -922,16 +1628,1576 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchImage(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        callback(
-            NodeBridgeResponse.failure(
-                request.id,
-                NodeBridgeError.capabilityProviderMissing(
+        when (request.method) {
+            "readImage" -> dispatchImageRead(request, callback)
+            "recycle" -> dispatchImageRecycle(request, callback)
+            else -> callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.capabilityProviderMissing(
+                        module = request.module,
+                        method = request.method,
+                        requirement = "a screenshot/image processing capability provider for ${request.method}",
+                    ),
+                ),
+            )
+        }
+    }
+
+    private fun dispatchOcr(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val args = request.argsArray()
+        val imageArg = args.optJSONObject(0)
+        val options = args.optJSONObject(1) ?: JSONObject()
+        val imageId = imageArg?.optNonBlankString("__autojs6ImageHandle")
+            ?: imageArg?.optNonBlankString("id")
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 OCR requires an existing provider-owned image handle.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val handle = imageHandles[imageId]
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 OCR image handle is not active or has been recycled: $imageId",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val ocrInput = runCatching { handle.ocrBitmap(options) }.getOrElse { error ->
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 OCR region is invalid.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val operationResource = resourceRegistry.register(
+            type = NodeBridgeResourceType.OCR_OPERATION,
+            id = "ocr-${request.id}",
+            metadata = mapOf(
+                "method" to request.method,
+                "image" to imageId,
+            ),
+        ) {
+            ocrInput.recycleIfNeeded()
+        }
+        val operation = ControlledOcrOperation(resource = operationResource)
+        ocrOperations[request.id] = operation
+        ocrDiagnostics.recordDispatch()
+        val timeoutMs = request.timeoutMs.coerceIn(1L, MAX_TIMEOUT_MS)
+        val timeoutRunnable = Runnable {
+            if (operation.finish()) {
+                ocrOperations.remove(request.id)
+                operation.resource.close("timeout:$timeoutMs")
+                ocrDiagnostics.recordFailure()
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.timeout(request.module, request.method),
+                    ),
+                )
+            }
+        }
+        operation.timeoutRunnable = timeoutRunnable
+        mainHandler.postDelayed(timeoutRunnable, timeoutMs)
+
+        val task = runCatching { ocrRecognizer.process(InputImage.fromBitmap(ocrInput.bitmap, 0)) }
+            .getOrElse { error ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    ocrOperations.remove(request.id)
+                    operation.resource.close("failed")
+                    ocrDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = error.message ?: error.javaClass.name,
+                                module = request.module,
+                                method = request.method,
+                                stack = error.stackTraceToString(),
+                            ),
+                        ),
+                    )
+                }
+                return
+            }
+        task
+            .addOnSuccessListener { text ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    ocrOperations.remove(request.id)
+                    operation.resource.close("success")
+                    callback(NodeBridgeResponse.success(request.id, text.toOcrResultsJson(ocrInput.offsetX, ocrInput.offsetY)))
+                }
+            }
+            .addOnCanceledListener {
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    ocrOperations.remove(request.id)
+                    operation.resource.close("cancelled")
+                    ocrDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = "AutoJs6 OCR provider cancelled the recognition task.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        ),
+                    )
+                }
+            }
+            .addOnFailureListener { error ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    ocrOperations.remove(request.id)
+                    operation.resource.close("failed")
+                    ocrDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = error.message ?: error.javaClass.name,
+                                module = request.module,
+                                method = request.method,
+                                stack = error.stackTraceToString(),
+                            ),
+                        ),
+                    )
+                }
+            }
+    }
+
+    private fun dispatchBarcode(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val args = request.argsArray()
+        val imageArg = args.optJSONObject(0)
+        val options = args.optJSONObject(1) ?: JSONObject()
+        val imageId = imageArg?.optNonBlankString("__autojs6ImageHandle")
+            ?: imageArg?.optNonBlankString("id")
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 barcode requires an existing provider-owned image handle.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val handle = imageHandles[imageId]
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 barcode image handle is not active or has been recycled: $imageId",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val barcodeOptions = runCatching { ControlledBarcodeOptions.fromOptions(options) }.getOrElse { error ->
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 barcode options are invalid.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val barcodeInput = runCatching { handle.barcodeBitmap(options) }.getOrElse { error ->
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 barcode region is invalid.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val scanner = runCatching { BarcodeScanning.getClient(barcodeOptions.scannerOptions()) }.getOrElse { error ->
+            barcodeInput.recycleIfNeeded()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.providerFailed(
+                        message = error.message ?: error.javaClass.name,
+                        module = request.module,
+                        method = request.method,
+                        stack = error.stackTraceToString(),
+                        code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                    ),
+                ),
+            )
+            return
+        }
+        val operationResource = resourceRegistry.register(
+            type = NodeBridgeResourceType.BARCODE_OPERATION,
+            id = "barcode-${request.id}",
+            metadata = mapOf(
+                "method" to request.method,
+                "image" to imageId,
+            ),
+        ) {
+            barcodeInput.recycleIfNeeded()
+            runCatching { scanner.close() }
+        }
+        val operation = ControlledBarcodeOperation(resource = operationResource)
+        barcodeOperations[request.id] = operation
+        barcodeDiagnostics.recordDispatch()
+        val timeoutMs = request.timeoutMs.coerceIn(1L, MAX_TIMEOUT_MS)
+        val timeoutRunnable = Runnable {
+            if (operation.finish()) {
+                barcodeOperations.remove(request.id)
+                operation.resource.close("timeout:$timeoutMs")
+                barcodeDiagnostics.recordFailure()
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.timeout(request.module, request.method),
+                    ),
+                )
+            }
+        }
+        operation.timeoutRunnable = timeoutRunnable
+        mainHandler.postDelayed(timeoutRunnable, timeoutMs)
+
+        val task = runCatching { scanner.process(InputImage.fromBitmap(barcodeInput.bitmap, 0)) }
+            .getOrElse { error ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    barcodeOperations.remove(request.id)
+                    operation.resource.close("failed")
+                    barcodeDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = error.message ?: error.javaClass.name,
+                                module = request.module,
+                                method = request.method,
+                                stack = error.stackTraceToString(),
+                                code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                            ),
+                        ),
+                    )
+                }
+                return
+            }
+        task
+            .addOnSuccessListener { barcodes ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    barcodeOperations.remove(request.id)
+                    operation.resource.close("success")
+                    val resultJson = runCatching {
+                        barcodes.toBarcodeResponseJson(
+                            method = request.method,
+                            maxResults = barcodeOptions.maxResults,
+                            offsetX = barcodeInput.offsetX,
+                            offsetY = barcodeInput.offsetY,
+                        )
+                    }.getOrElse { error ->
+                        barcodeDiagnostics.recordFailure()
+                        callback(
+                            NodeBridgeResponse.failure(
+                                request.id,
+                                NodeBridgeError.providerFailed(
+                                    message = error.message ?: error.javaClass.name,
+                                    module = request.module,
+                                    method = request.method,
+                                    stack = error.stackTraceToString(),
+                                    code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                                ),
+                            ),
+                        )
+                        return@addOnSuccessListener
+                    }
+                    callback(NodeBridgeResponse.success(request.id, resultJson))
+                }
+            }
+            .addOnCanceledListener {
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    barcodeOperations.remove(request.id)
+                    operation.resource.close("cancelled")
+                    barcodeDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = "AutoJs6 barcode provider cancelled the scan task.",
+                                module = request.module,
+                                method = request.method,
+                                code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                            ),
+                        ),
+                    )
+                }
+            }
+            .addOnFailureListener { error ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    barcodeOperations.remove(request.id)
+                    operation.resource.close("failed")
+                    barcodeDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = error.message ?: error.javaClass.name,
+                                module = request.module,
+                                method = request.method,
+                                stack = error.stackTraceToString(),
+                                code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                            ),
+                        ),
+                    )
+                }
+            }
+    }
+
+    private fun dispatchMedia(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        dispatchOnMain(request, callback) {
+            runCatching {
+                val args = request.argsArray()
+                val stream = audioStreamFromArg(args.opt(0))
+                when (request.method) {
+                    "getAudioStreamVolume" -> NodeBridgeResponse.success(
+                        request.id,
+                        NodeBridgeJson.valueToJson(audioManager().getStreamVolume(stream.type)),
+                    )
+                    "getAudioStreamMaxVolume" -> NodeBridgeResponse.success(
+                        request.id,
+                        NodeBridgeJson.valueToJson(audioManager().getStreamMaxVolume(stream.type)),
+                    )
+                    "getAudioStreamInfo" -> NodeBridgeResponse.success(
+                        request.id,
+                        audioStreamInfo(stream).toString(),
+                    )
+                    else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
+                }
+            }.getOrElse { error ->
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 media request failed.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+        }
+    }
+
+    private fun dispatchMediainfo(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        runCatching {
+            val args = request.argsArray()
+            val rawPath = args.optString(0, "")
+            val file = resolveScopedProjectFile(rawPath)
+                ?: return callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.permissionDenied(
+                            message = "AutoJs6 mediainfo path must stay inside the scoped working directory.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    ),
+                )
+            if (!file.isFile) {
+                return callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.invalidRequest(
+                            message = "AutoJs6 mediainfo target does not exist: $rawPath",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    ),
+                )
+            }
+            when (request.method) {
+                "read" -> {
+                    val options = args.optJSONObject(1) ?: JSONObject()
+                    callback(NodeBridgeResponse.success(request.id, mediainfoSnapshot(rawPath, file, options).toString()))
+                }
+                "get" -> {
+                    val streamKind = mediaInfoStreamKind(args.optString(1, "general"))
+                    val parameter = args.optString(2, "")
+                    val value = MediaInfo().get(file.absolutePath, streamKind, 0, parameter)
+                    callback(NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(value)))
+                }
+                else -> callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method)))
+            }
+        }.getOrElse { error ->
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 mediainfo request failed.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        }
+    }
+
+    private fun dispatchRecorder(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        when (request.method) {
+            "getStatus" -> callback(NodeBridgeResponse.success(request.id, recorderStatus().toString()))
+            "start", "stop" -> callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.capabilityProviderMissing(
+                        module = request.module,
+                        method = request.method,
+                        requirement = "a privacy-reviewed audio recorder provider with foreground disclosure and cleanup evidence",
+                    ),
+                ),
+            )
+            else -> callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method)))
+        }
+    }
+
+    private fun audioManager(): AudioManager {
+        return appContext.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            ?: throw IllegalStateException("Android AudioManager is unavailable.")
+    }
+
+    private fun audioStreamFromArg(raw: Any?): ControlledAudioStream {
+        val text = when (raw) {
+            null, JSONObject.NULL -> "music"
+            is JSONObject -> raw.optString("stream", raw.optString("type", "music"))
+            else -> raw.toString()
+        }.trim().lowercase(Locale.US).replace('-', '_')
+        return when (text) {
+            "", "music", "media", "stream_music" -> ControlledAudioStream("music", AudioManager.STREAM_MUSIC)
+            "notification", "notifications", "stream_notification" -> ControlledAudioStream("notification", AudioManager.STREAM_NOTIFICATION)
+            "alarm", "stream_alarm" -> ControlledAudioStream("alarm", AudioManager.STREAM_ALARM)
+            "ring", "ringtone", "stream_ring" -> ControlledAudioStream("ring", AudioManager.STREAM_RING)
+            "system", "stream_system" -> ControlledAudioStream("system", AudioManager.STREAM_SYSTEM)
+            "voice_call", "call", "stream_voice_call" -> ControlledAudioStream("voice_call", AudioManager.STREAM_VOICE_CALL)
+            "dtmf", "stream_dtmf" -> ControlledAudioStream("dtmf", AudioManager.STREAM_DTMF)
+            else -> throw IllegalArgumentException("Unsupported audio stream: $text")
+        }
+    }
+
+    private fun audioStreamInfo(stream: ControlledAudioStream): JSONObject {
+        val manager = audioManager()
+        return JSONObject()
+            .put("schema", "autojs6-node-media-audio-stream-v1")
+            .put("stream", stream.name)
+            .put("streamType", stream.type)
+            .put("volume", manager.getStreamVolume(stream.type))
+            .put("maxVolume", manager.getStreamMaxVolume(stream.type))
+            .put("minVolume", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) manager.getStreamMinVolume(stream.type) else 0)
+            .put("volumeFixed", manager.isVolumeFixed)
+    }
+
+    private fun mediainfoSnapshot(requestedPath: String, file: File, options: JSONObject): JSONObject {
+        val includeInform = options.optBoolean("includeInform", true)
+        val includeSections = options.optBoolean("includeSections", true)
+        val inform = MediaInfo().getMI(file.absolutePath).orEmpty()
+        return JSONObject()
+            .put("schema", "autojs6-node-mediainfo-snapshot-v1")
+            .put("path", requestedPath)
+            .put("fileName", file.name)
+            .put("sizeBytes", file.length())
+            .put("inform", if (includeInform) inform else "")
+            .put("sections", if (includeSections) mediaInfoSections(inform) else JSONObject())
+    }
+
+    private fun mediaInfoSections(inform: String): JSONObject {
+        val sections = JSONObject()
+        var current: JSONObject? = null
+        inform.lineSequence().forEach { raw ->
+            val line = raw.trimEnd()
+            if (line.isBlank()) return@forEach
+            if (!line.contains(':')) {
+                val sectionName = line.trim().lowercase(Locale.US)
+                val array = sections.optJSONArray(sectionName) ?: JSONArray().also { sections.put(sectionName, it) }
+                current = JSONObject().also { array.put(it) }
+            } else {
+                val target = current ?: return@forEach
+                val idx = line.indexOf(':')
+                val key = line.substring(0, idx).trim().toMediainfoCamel()
+                val value = line.substring(idx + 1).trim()
+                if (key.isNotBlank()) {
+                    target.put(key, value)
+                }
+            }
+        }
+        return sections
+    }
+
+    private fun String.toMediainfoCamel(): String = this
+        .replace(Regex("\\((s|es|ies)\\)"), "$1")
+        .split(Regex("[^A-Za-z0-9]+"))
+        .filter { it.isNotEmpty() }
+        .joinToString("") { part ->
+            part.lowercase(Locale.US).replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }.replaceFirstChar { it.lowercase() }
+
+    private fun mediaInfoStreamKind(raw: String): MediaInfo.StreamKind {
+        val normalized = raw.trim().uppercase(Locale.US)
+        return MediaInfo.StreamKind.entries.firstOrNull { it.name == normalized }
+            ?: throw IllegalArgumentException("Unsupported mediainfo stream kind: $raw")
+    }
+
+    private fun recorderStatus(): JSONObject {
+        val microphoneGranted = appContext.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        return JSONObject()
+            .put("schema", "autojs6-node-recorder-status-v1")
+            .put("recording", false)
+            .put("providerAvailable", false)
+            .put("microphonePermissionRequired", true)
+            .put("microphonePermissionGranted", microphoneGranted)
+            .put("foregroundDisclosureRequired", true)
+            .put("reason", "blocked_until_privacy_reviewed_recorder_provider")
+    }
+
+    private fun dispatchImageRead(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val args = request.argsArray()
+        val path = args.optString(0, "")
+        val file = resolveScopedProjectFile(path)
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.permissionDenied(
+                        message = "AutoJs6 image.readImage path must stay inside the scoped working directory.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        if (!file.isFile) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 image.readImage target does not exist: $path",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        if (imageHandles.size >= bridgeLimits.maxImageHandles) {
+            bridgeResourceLimitRejections.incrementAndGet()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.resourceLimit(
+                        message = "AutoJs6 image bridge exceeded ${bridgeLimits.maxImageHandles} active image handles.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 image.readImage could not decode image: $path",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val id = "image-${UUID.randomUUID()}"
+        val resource = resourceRegistry.register(
+            type = NodeBridgeResourceType.IMAGE_HANDLE,
+            id = id,
+            metadata = mapOf(
+                "source" to file.name,
+                "width" to bitmap.width.toString(),
+                "height" to bitmap.height.toString(),
+            ),
+        ) {
+            if (!bitmap.isRecycled) {
+                bitmap.recycle()
+            }
+        }
+        val handle = ControlledImageHandle(
+            id = id,
+            bitmap = bitmap,
+            resource = resource,
+        )
+        imageHandles[id] = handle
+        callback(NodeBridgeResponse.success(request.id, handle.toJson().toString()))
+    }
+
+    private fun dispatchImageRecycle(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val args = request.argsArray()
+        val image = args.optJSONObject(0)
+        val id = image?.optNonBlankString("__autojs6ImageHandle")
+            ?: image?.optNonBlankString("id")
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 image.recycle requires an image handle.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val handle = imageHandles.remove(id)
+        if (handle != null) {
+            handle.resource.close("recycle")
+        }
+        callback(NodeBridgeResponse.success(request.id, "true"))
+    }
+
+    private fun resolveScopedProjectFile(rawPath: String): File? {
+        if (rawPath.isBlank() || rawPath.indexOf('\u0000') >= 0) {
+            return null
+        }
+        val input = rawPath.trim().replace('\\', '/')
+        if (input.startsWith("/") || input.contains(':')) {
+            return null
+        }
+        val segments = input.split('/').filter { it.isNotBlank() }
+        if (segments.isEmpty() || segments.any { it == ".." }) {
+            return null
+        }
+        val base = File(engineInfo.cwd.takeIf { it.isNotBlank() } ?: appContext.filesDir.absolutePath).canonicalFile
+        val candidate = File(base, segments.joinToString(File.separator)).canonicalFile
+        val basePath = base.path.trimEnd(File.separatorChar)
+        val candidatePath = candidate.path
+        return candidate.takeIf { candidatePath == basePath || candidatePath.startsWith(basePath + File.separator) }
+    }
+
+    private fun dispatchStorage(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val response = runCatching {
+            val args = JSONArray(request.argsJson.ifBlank { "[]" })
+            val storeName = storageStringArg(request, args, 0, "storage name", NodeStorageBridgePolicy.MAX_STORE_NAME_LENGTH)
+            val prefs = appContext.getSharedPreferences(storagePreferencesName(storeName), Context.MODE_PRIVATE)
+            when (request.method) {
+                "get" -> {
+                    val key = storageStringArg(request, args, 1, "key", NodeStorageBridgePolicy.MAX_KEY_LENGTH)
+                    val stored = prefs.getString(key, null)
+                    val result = JSONObject().put("found", stored != null)
+                    if (stored != null) {
+                        result.put("value", NodeBridgeJson.parseJsonValue(stored))
+                    }
+                    NodeBridgeResponse.success(request.id, result.toString())
+                }
+                "put" -> {
+                    val key = storageStringArg(request, args, 1, "key", NodeStorageBridgePolicy.MAX_KEY_LENGTH)
+                    if (args.length() < 3) {
+                        throw StorageBridgeException(
+                            NodeBridgeError.invalidRequest(
+                                message = "AutoJs6 storage.put requires a JSON value.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    }
+                    val valueJson = NodeBridgeJson.valueToJson(args.opt(2))
+                    if (valueJson.toByteArray(Charsets.UTF_8).size > NodeStorageBridgePolicy.MAX_VALUE_BYTES) {
+                        throw StorageBridgeException(
+                            NodeBridgeError.resourceLimit(
+                                message = "AutoJs6 storage value exceeded ${NodeStorageBridgePolicy.MAX_VALUE_BYTES} bytes.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    }
+                    val projectedBytes = storageProjectedBytes(prefs, key, valueJson)
+                    if (projectedBytes > NodeStorageBridgePolicy.MAX_STORE_BYTES) {
+                        throw StorageBridgeException(
+                            NodeBridgeError.resourceLimit(
+                                message = "AutoJs6 storage store exceeded ${NodeStorageBridgePolicy.MAX_STORE_BYTES} bytes.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    }
+                    if (!prefs.edit().putString(key, valueJson).commit()) {
+                        throw StorageBridgeException(
+                            NodeBridgeError.permissionDenied(
+                                message = "AutoJs6 storage write failed.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    }
+                    NodeBridgeResponse.success(request.id, "null")
+                }
+                "remove" -> {
+                    val key = storageStringArg(request, args, 1, "key", NodeStorageBridgePolicy.MAX_KEY_LENGTH)
+                    prefs.edit().remove(key).commit()
+                    NodeBridgeResponse.success(request.id, "null")
+                }
+                "clear" -> {
+                    prefs.edit().clear().commit()
+                    NodeBridgeResponse.success(request.id, "null")
+                }
+                "keys" -> {
+                    val keys = prefs.all.keys.sorted()
+                    NodeBridgeResponse.success(request.id, JSONArray(keys).toString())
+                }
+                "contains" -> {
+                    val key = storageStringArg(request, args, 1, "key", NodeStorageBridgePolicy.MAX_KEY_LENGTH)
+                    NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(prefs.contains(key)))
+                }
+                else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
+            }
+        }.getOrElse { error ->
+            val bridgeError = (error as? StorageBridgeException)?.bridgeError
+                ?: NodeBridgeError.invalidRequest(
+                    message = error.message ?: "AutoJs6 storage request failed.",
                     module = request.module,
                     method = request.method,
-                    requirement = "an image capability provider",
+                )
+            NodeBridgeResponse.failure(request.id, bridgeError)
+        }
+        callback(response)
+    }
+
+    private fun storageStringArg(
+        request: NodeBridgeRequest,
+        args: JSONArray,
+        index: Int,
+        label: String,
+        maxLength: Int,
+    ): String {
+        val value = args.opt(index)
+        if (value !is String || value.isBlank() || value.length > maxLength || '\u0000' in value) {
+            throw StorageBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 storage $label must be a non-empty string up to $maxLength characters.",
+                    module = request.module,
+                    method = request.method,
                 ),
+            )
+        }
+        return value.trim()
+    }
+
+    private fun storageProjectedBytes(prefs: android.content.SharedPreferences, key: String, valueJson: String): Int {
+        val existingBytes = prefs.all.entries.sumOf { (entryKey, entryValue) ->
+            if (entryKey == key) {
+                0
+            } else {
+                entryKey.toByteArray(Charsets.UTF_8).size + entryValue.toString().toByteArray(Charsets.UTF_8).size
+            }
+        }
+        return existingBytes + key.toByteArray(Charsets.UTF_8).size + valueJson.toByteArray(Charsets.UTF_8).size
+    }
+
+    private fun storagePreferencesName(storeName: String): String {
+        val packageName = engineInfo.packageName.ifBlank { appContext.packageName }
+        return NodeStorageBridgePolicy.preferencesName(packageName, engineInfo.cwd, storeName)
+    }
+
+    private fun dispatchDatabase(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (databaseDestroyed.get()) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.processDead("AutoJs6 database bridge provider is destroyed."),
+                ),
+            )
+            return
+        }
+        try {
+            databaseExecutor.execute {
+                val response = runCatching {
+                    if (databaseDestroyed.get()) {
+                        throw DatabaseBridgeException(
+                            NodeBridgeError.processDead("AutoJs6 database bridge provider is destroyed."),
+                        )
+                    }
+                    val args = JSONArray(request.argsJson.ifBlank { "[]" })
+                    when (request.method) {
+                        "open" -> databaseOpen(request, args)
+                        "exec" -> databaseExec(request, args)
+                        "run" -> databaseRun(request, args)
+                        "get" -> databaseGet(request, args)
+                        "all" -> databaseAll(request, args)
+                        "transaction" -> databaseTransaction(request, args)
+                        "close" -> databaseClose(request, args)
+                        else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
+                    }
+                }.getOrElse { error ->
+                    NodeBridgeResponse.failure(request.id, databaseError(request, error))
+                }
+                callback(response)
+            }
+        } catch (error: RejectedExecutionException) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.processDead("AutoJs6 database bridge executor is not available."),
+                ),
+            )
+        }
+    }
+
+    private fun databaseOpen(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        if (databaseHandles.size >= NodeDatabaseBridgePolicy.MAX_OPEN_HANDLES) {
+            bridgeResourceLimitRejections.incrementAndGet()
+            throw DatabaseBridgeException(
+                NodeBridgeError.resourceLimit(
+                    message = "AutoJs6 database bridge reached the open handle limit.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        val name = NodeDatabaseBridgePolicy.openName(request, args.opt(0))
+        val databaseFile = NodeDatabaseBridgePolicy.databaseFile(appContext, engineInfo, name)
+        val parent = databaseFile.parentFile
+        if (parent == null || (!parent.exists() && !parent.mkdirs())) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 database bridge could not create the scoped database directory.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        val database = SQLiteDatabase.openOrCreateDatabase(databaseFile, null)
+        database.setForeignKeyConstraintsEnabled(true)
+        if (databaseDestroyed.get()) {
+            runCatching { database.close() }
+            throw DatabaseBridgeException(
+                NodeBridgeError.processDead("AutoJs6 database bridge provider is destroyed."),
+            )
+        }
+        val handleId = "database-${databaseHandleCounter.getAndIncrement()}-${UUID.randomUUID()}"
+        val resource = resourceRegistry.register(
+            type = NodeBridgeResourceType.DATABASE_HANDLE,
+            id = handleId,
+            metadata = mapOf(
+                "name" to name,
+                "path" to databaseFile.absolutePath,
+            ),
+        ) {
+            databaseHandles.remove(handleId)
+            runCatching { database.close() }
+        }
+        databaseHandles[handleId] = ControlledDatabaseHandle(
+            id = handleId,
+            name = name,
+            file = databaseFile,
+            database = database,
+            resource = resource,
+        )
+        val result = JSONObject()
+            .put("id", handleId)
+            .put("name", name)
+        return NodeBridgeResponse.success(request.id, result.toString())
+    }
+
+    private fun databaseExec(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handle = databaseHandle(request, args)
+        val sql = NodeDatabaseBridgePolicy.sql(request, args.optString(1, ""))
+        val params = NodeDatabaseBridgePolicy.params(request, args.opt(2))
+        handle.exec(request, sql, params)
+        return NodeBridgeResponse.success(request.id, "null")
+    }
+
+    private fun databaseRun(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handle = databaseHandle(request, args)
+        val sql = NodeDatabaseBridgePolicy.sql(request, args.optString(1, ""))
+        val params = NodeDatabaseBridgePolicy.params(request, args.opt(2))
+        return NodeBridgeResponse.success(request.id, handle.run(request, sql, params).toString())
+    }
+
+    private fun databaseGet(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handle = databaseHandle(request, args)
+        val sql = NodeDatabaseBridgePolicy.sql(request, args.optString(1, ""))
+        val params = NodeDatabaseBridgePolicy.params(request, args.opt(2))
+        val row = handle.query(request, sql, params)
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(row))
+    }
+
+    private fun databaseAll(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handle = databaseHandle(request, args)
+        val sql = NodeDatabaseBridgePolicy.sql(request, args.optString(1, ""))
+        val params = NodeDatabaseBridgePolicy.params(request, args.opt(2))
+        return NodeBridgeResponse.success(request.id, handle.queryAll(request, sql, params).toString())
+    }
+
+    private fun databaseTransaction(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handle = databaseHandle(request, args)
+        val operations = args.optJSONArray(1)
+            ?: throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database.transaction requires an array of operations.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        if (operations.length() > NodeDatabaseBridgePolicy.MAX_TRANSACTION_OPERATIONS) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.resourceLimit(
+                    message = "AutoJs6 database.transaction exceeded ${NodeDatabaseBridgePolicy.MAX_TRANSACTION_OPERATIONS} operations.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        val results = JSONArray()
+        handle.database.beginTransaction()
+        try {
+            for (index in 0 until operations.length()) {
+                val operation = operations.optJSONObject(index)
+                    ?: throw DatabaseBridgeException(
+                        NodeBridgeError.invalidRequest(
+                            message = "AutoJs6 database.transaction operation must be an object.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                val type = operation.optString("type", operation.optString("method", "")).trim().lowercase(Locale.US)
+                val sql = NodeDatabaseBridgePolicy.sql(request, operation.optString("sql", ""))
+                val params = NodeDatabaseBridgePolicy.params(request, operation.opt("params"))
+                val result = when (type) {
+                    "exec" -> {
+                        handle.exec(request, sql, params)
+                        JSONObject.NULL
+                    }
+                    "run" -> handle.run(request, sql, params)
+                    "get" -> handle.query(request, sql, params) ?: JSONObject.NULL
+                    "all" -> handle.queryAll(request, sql, params)
+                    else -> throw DatabaseBridgeException(
+                        NodeBridgeError.invalidRequest(
+                            message = "AutoJs6 database.transaction supports only exec, run, get, and all operations.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                }
+                results.put(result)
+            }
+            handle.database.setTransactionSuccessful()
+        } finally {
+            handle.database.endTransaction()
+        }
+        return NodeBridgeResponse.success(request.id, results.toString())
+    }
+
+    private fun databaseClose(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handleId = NodeDatabaseBridgePolicy.handleId(request, args.opt(0))
+        val closed = resourceRegistry.close(handleId, "database.close")
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(closed))
+    }
+
+    private fun databaseHandle(request: NodeBridgeRequest, args: JSONArray): ControlledDatabaseHandle {
+        val handleId = NodeDatabaseBridgePolicy.handleId(request, args.opt(0))
+        return databaseHandles[handleId]
+            ?: throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database handle is not open.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+    }
+
+    private fun databaseError(request: NodeBridgeRequest, error: Throwable): NodeBridgeError {
+        return when (error) {
+            is DatabaseBridgeException -> error.bridgeError
+            is SQLiteException -> NodeBridgeError.invalidRequest(
+                message = "AutoJs6 database request failed: ${error.message ?: error.javaClass.name}",
+                module = request.module,
+                method = request.method,
+            )
+            else -> NodeBridgeError.invalidRequest(
+                message = error.message ?: "AutoJs6 database request failed.",
+                module = request.module,
+                method = request.method,
+            )
+        }
+    }
+
+    private fun dispatchNotifications(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        dispatchOnMain(request, callback) {
+            runCatching {
+                val args = JSONArray(request.argsJson.ifBlank { "[]" })
+                when (request.method) {
+                    "notify" -> {
+                        val payload = args.optJSONObject(0)
+                            ?: throw NotificationBridgeException(
+                                NodeBridgeError.invalidRequest(
+                                    message = "notifications.notify requires an options object.",
+                                    module = request.module,
+                                    method = request.method,
+                                ),
+                            )
+                        val descriptor = ControlledNotificationDescriptor.fromJson(
+                            request = request,
+                            payload = payload,
+                            fallbackId = notificationIdCounter.getAndIncrement(),
+                            defaultChannelName = appContext.getString(R.string.app_name),
+                        )
+                        ensureNotificationPostingAllowed(request)
+                        if (!notificationHandles.containsKey(descriptor.id) &&
+                            notificationHandles.size >= ControlledNotificationPolicy.MAX_ACTIVE_NOTIFICATIONS
+                        ) {
+                            bridgeResourceLimitRejections.incrementAndGet()
+                            throw NotificationBridgeException(
+                                NodeBridgeError.resourceLimit(
+                                    message = "AutoJs6 notifications bridge reached the active notification limit.",
+                                    module = request.module,
+                                    method = request.method,
+                                ),
+                            )
+                        }
+                        ensureNotificationChannel(descriptor)
+                        NotificationManagerCompat.from(appContext).notify(descriptor.id, descriptor.toNotification(appContext))
+                        notificationHandles.remove(descriptor.id)?.release("notification.update")
+                        val handle = resourceRegistry.register(
+                            type = NodeBridgeResourceType.NOTIFICATION,
+                            id = "notification-${descriptor.id}",
+                            metadata = mapOf(
+                                "channel" to descriptor.channel,
+                                "ongoing" to descriptor.ongoing.toString(),
+                            ),
+                        ) {
+                            notificationHandles.remove(descriptor.id)
+                            NotificationManagerCompat.from(appContext).cancel(descriptor.id)
+                        }
+                        notificationHandles[descriptor.id] = handle
+                        NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(descriptor.id))
+                    }
+                    "cancel" -> {
+                        val id = ControlledNotificationDescriptor.parseNotificationIdArg(request, args, 0)
+                        notificationHandles.remove(id)?.close("notification.cancel")
+                        NodeBridgeResponse.success(request.id, "null")
+                    }
+                    "cancelAll" -> {
+                        notificationHandles.values.toList().forEach { handle ->
+                            handle.close("notification.cancelAll")
+                        }
+                        NodeBridgeResponse.success(request.id, "null")
+                    }
+                    "getPermissionStatus" -> {
+                        NodeBridgeResponse.success(request.id, notificationPermissionStatus().toString())
+                    }
+                    "openSettings" -> {
+                        val options = args.optJSONObject(0) ?: JSONObject()
+                        NodeBridgeResponse.success(
+                            request.id,
+                            openNotificationSettings(dryRun = options.optBoolean("dryRun", false)).toString(),
+                        )
+                    }
+                    else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
+                }
+            }.getOrElse { error ->
+                val bridgeError = when (error) {
+                    is NotificationBridgeException -> error.bridgeError
+                    is SecurityException -> NodeBridgeError.permissionDenied(
+                        message = "AutoJs6 notifications bridge could not post notification: ${error.message ?: error.javaClass.name}",
+                        module = request.module,
+                        method = request.method,
+                    )
+                    else -> NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 notifications request failed.",
+                        module = request.module,
+                        method = request.method,
+                    )
+                }
+                NodeBridgeResponse.failure(request.id, bridgeError)
+            }
+        }
+    }
+
+    private fun ensureNotificationPostingAllowed(request: NodeBridgeRequest) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            appContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            throw NotificationBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 notifications bridge requires android.permission.POST_NOTIFICATIONS.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        if (!NotificationManagerCompat.from(appContext).areNotificationsEnabled()) {
+            throw NotificationBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 notifications are disabled for this app.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+    }
+
+    private fun ensureNotificationChannel(descriptor: ControlledNotificationDescriptor) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return
+        }
+        val manager = appContext.getSystemService(NotificationManager::class.java)
+        if (manager.getNotificationChannel(descriptor.channel) != null) {
+            return
+        }
+        val channel = NotificationChannel(
+            descriptor.channel,
+            descriptor.channelName,
+            ControlledNotificationPolicy.importanceForPriority(descriptor.priority),
+        ).apply {
+            description = "AutoJs6 Node notifications"
+            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        }
+        manager.createNotificationChannel(channel)
+    }
+
+    private fun notificationPermissionStatus(): JSONObject {
+        val notificationsEnabled = NotificationManagerCompat.from(appContext).areNotificationsEnabled()
+        val runtimePermissionRequired = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        val runtimePermissionGranted = !runtimePermissionRequired ||
+                appContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        val intent = notificationSettingsIntent()
+        return JSONObject()
+            .put("schema", "autojs6-node-notification-permission-status-v1")
+            .put("sdkInt", Build.VERSION.SDK_INT)
+            .put("notificationsEnabled", notificationsEnabled)
+            .put("postNotificationsPermissionRequired", runtimePermissionRequired)
+            .put("postNotificationsPermissionGranted", runtimePermissionGranted)
+            .put("canOpenSettings", intentAvailable(intent))
+    }
+
+    private fun openNotificationSettings(dryRun: Boolean): JSONObject {
+        val intent = notificationSettingsIntent()
+        val canOpenSettings = intentAvailable(intent)
+        var opened = false
+        var reason = if (canOpenSettings) "settings-intent-ready" else "settings-intent-unavailable"
+        if (canOpenSettings && dryRun) {
+            reason = "settings-intent-dry-run"
+        } else if (canOpenSettings) {
+            runCatching {
+                appContext.startActivity(intent)
+                opened = true
+                reason = "settings-intent-opened"
+            }.getOrElse { error ->
+                reason = "settings-intent-failed:${error.javaClass.simpleName}"
+            }
+        }
+        return notificationPermissionStatus()
+            .put("opened", opened)
+            .put("dryRun", dryRun)
+            .put("action", intent.action.orEmpty())
+            .put("reason", reason)
+    }
+
+    private fun notificationSettingsIntent(): Intent {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, appContext.packageName)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        } else {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:${appContext.packageName}")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        }
+    }
+
+    private fun dispatchSensors(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        when (request.method) {
+            "getAvailableSensors" -> dispatchSensorsAvailable(request, callback)
+            "once" -> dispatchSensorOnce(request, callback)
+            "subscribe" -> dispatchSensorSubscribe(request, callback)
+            "unsubscribe" -> dispatchSensorUnsubscribe(request, callback)
+            "drainEvents" -> dispatchSensorDrainEvents(request, callback)
+            else -> callback(unavailable(request))
+        }
+    }
+
+    private fun dispatchSensorsAvailable(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val manager = sensorManager
+        if (manager == null) {
+            callback(NodeBridgeResponse.success(request.id, JSONArray().toString()))
+            return
+        }
+        val sensors = JSONArray()
+        ControlledSensorPolicy.allowedSensorTypes.forEach { (wireName, sensorType) ->
+            manager.getDefaultSensor(sensorType)?.let { sensor ->
+                sensors.put(ControlledSensorPolicy.sensorInfoJson(wireName, sensor))
+            }
+        }
+        callback(NodeBridgeResponse.success(request.id, sensors.toString()))
+    }
+
+    private fun dispatchSensorOnce(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val descriptor = ControlledSensorRequestDescriptor.fromRequest(request)
+        if (descriptor.error != null || descriptor.value == null) {
+            callback(NodeBridgeResponse.failure(request.id, descriptor.error ?: NodeBridgeError.processDead()))
+            return
+        }
+        mainHandler.post {
+            val manager = sensorManager
+            val sensor = manager?.getDefaultSensor(descriptor.value.sensorType)
+            if (manager == null || sensor == null) {
+                callback(NodeBridgeResponse.failure(request.id, sensorUnavailableError(request, descriptor.value.type)))
+                return@post
+            }
+            val listenerRef = arrayOfNulls<SensorEventListener>(1)
+            val resourceId = "sensor-once-${UUID.randomUUID()}"
+            val responded = AtomicBoolean(false)
+            val timeoutRunnable = Runnable {
+                if (responded.compareAndSet(false, true)) {
+                    resourceRegistry.close(resourceId, "sensor.once.timeout")
+                    callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.timeout(request.module, request.method)))
+                }
+            }
+            val listener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent) {
+                    if (responded.compareAndSet(false, true)) {
+                        mainHandler.removeCallbacks(timeoutRunnable)
+                        resourceRegistry.close(resourceId, "sensor.once.event")
+                        callback(
+                            NodeBridgeResponse.success(
+                                request.id,
+                                ControlledSensorPolicy.sensorEventJson(descriptor.value.type, event).toString(),
+                            ),
+                        )
+                    }
+                }
+
+                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+            }
+            listenerRef[0] = listener
+            resourceRegistry.register(
+                type = NodeBridgeResourceType.SENSOR_SUBSCRIPTION,
+                id = resourceId,
+                metadata = mapOf("type" to descriptor.value.type, "mode" to "once"),
+            ) {
+                listenerRef[0]?.let { manager.unregisterListener(it) }
+                mainHandler.removeCallbacks(timeoutRunnable)
+            }
+            if (!manager.registerListener(listener, sensor, descriptor.value.samplingPeriodUs)) {
+                resourceRegistry.close(resourceId, "sensor.once.register_failed")
+                callback(NodeBridgeResponse.failure(request.id, sensorUnavailableError(request, descriptor.value.type)))
+                return@post
+            }
+            mainHandler.postDelayed(timeoutRunnable, descriptor.value.timeoutMs)
+        }
+    }
+
+    private fun dispatchSensorSubscribe(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val descriptor = ControlledSensorRequestDescriptor.fromRequest(request)
+        if (descriptor.error != null || descriptor.value == null) {
+            callback(NodeBridgeResponse.failure(request.id, descriptor.error ?: NodeBridgeError.processDead()))
+            return
+        }
+        mainHandler.post {
+            val manager = sensorManager
+            val sensor = manager?.getDefaultSensor(descriptor.value.sensorType)
+            if (manager == null || sensor == null) {
+                callback(NodeBridgeResponse.failure(request.id, sensorUnavailableError(request, descriptor.value.type)))
+                return@post
+            }
+            if (sensorSubscriptions.size >= ControlledSensorPolicy.MAX_SUBSCRIPTIONS) {
+                bridgeResourceLimitRejections.incrementAndGet()
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.resourceLimit(
+                            message = "AutoJs6 sensors bridge reached the active subscription limit.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    ),
+                )
+                return@post
+            }
+            val subscriptionId = "sensor-${UUID.randomUUID()}"
+            val subscription = ControlledSensorSubscription(
+                id = subscriptionId,
+                type = descriptor.value.type,
+                maxQueueSize = descriptor.value.maxQueueSize,
+            )
+            val listener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent) {
+                    subscription.queueEvent(ControlledSensorPolicy.sensorEventJson(descriptor.value.type, event))
+                }
+
+                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                    subscription.queueAccuracy(accuracy)
+                }
+            }
+            subscription.listener = listener
+            sensorSubscriptions[subscriptionId] = subscription
+            resourceRegistry.register(
+                type = NodeBridgeResourceType.SENSOR_SUBSCRIPTION,
+                id = subscriptionId,
+                metadata = mapOf(
+                    "type" to descriptor.value.type,
+                    "samplingIntervalMs" to descriptor.value.samplingIntervalMs.toString(),
+                ),
+            ) {
+                sensorSubscriptions.remove(subscriptionId)
+                subscription.listener?.let { manager.unregisterListener(it) }
+                subscription.queueClose()
+            }
+            if (!manager.registerListener(listener, sensor, descriptor.value.samplingPeriodUs)) {
+                resourceRegistry.close(subscriptionId, "sensor.subscribe.register_failed")
+                callback(NodeBridgeResponse.failure(request.id, sensorUnavailableError(request, descriptor.value.type)))
+                return@post
+            }
+            callback(NodeBridgeResponse.success(request.id, subscription.toJson(descriptor.value).toString()))
+        }
+    }
+
+    private fun dispatchSensorUnsubscribe(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val payload = request.firstObjectArg()
+        val subscriptionId = payload?.optString("id").orEmpty()
+        if (subscriptionId.isBlank()) {
+            callback(NodeBridgeResponse.failure(request.id, sensorInvalidRequest(request, "sensors.unsubscribe requires a subscription id.")))
+            return
+        }
+        resourceRegistry.close(subscriptionId, "sensor.unsubscribe")
+        callback(NodeBridgeResponse.success(request.id, "null"))
+    }
+
+    private fun dispatchSensorDrainEvents(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val payload = request.firstObjectArg()
+        val subscriptionId = payload?.optString("id").orEmpty()
+        val subscription = sensorSubscriptions[subscriptionId]
+        if (payload == null || subscription == null) {
+            callback(NodeBridgeResponse.success(request.id, JSONArray().toString()))
+            return
+        }
+        callback(NodeBridgeResponse.success(request.id, subscription.drainEvents().toString()))
+    }
+
+    private fun sensorUnavailableError(request: NodeBridgeRequest, type: String): NodeBridgeError {
+        return NodeBridgeError.permissionDenied(
+            message = "AutoJs6 sensors bridge cannot access sensor type: $type.",
+            module = request.module,
+            method = request.method,
+        )
+    }
+
+    private fun sensorInvalidRequest(request: NodeBridgeRequest, message: String): NodeBridgeError {
+        return NodeBridgeError.invalidRequest(
+            message = message,
+            module = request.module,
+            method = request.method,
+        )
+    }
+
+    private fun dispatchInputObserver(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        when (request.method) {
+            "getAvailableSources" -> dispatchInputObserverAvailableSources(request, callback)
+            "observeKeys" -> dispatchInputObserverObserveKeys(request, callback)
+            "drainEvents" -> dispatchInputObserverDrainEvents(request, callback)
+            "close" -> dispatchInputObserverClose(request, callback)
+            else -> callback(unavailable(request))
+        }
+    }
+
+    private fun dispatchInputObserverAvailableSources(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val livePolicyError = inputObserverLivePolicyError(request)
+        val accessibilityAvailable = livePolicyError == null && accessibilityBridgeOperational()
+        callback(
+            NodeBridgeResponse.success(
+                request.id,
+                JSONArray()
+                    .put(ControlledInputObserverPolicy.sourceJson("fake", available = true, live = false))
+                    .put(
+                        ControlledInputObserverPolicy.sourceJson(
+                            "accessibility",
+                            available = accessibilityAvailable,
+                            live = true,
+                            reason = when {
+                                accessibilityAvailable -> ""
+                                livePolicyError != null -> livePolicyError.message
+                                else -> "accessibility service is not operational"
+                            },
+                        ),
+                    )
+                    .toString(),
             ),
         )
+    }
+
+    private fun dispatchInputObserverObserveKeys(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val parsed = ControlledInputObserverDescriptor.fromRequest(request)
+        if (parsed.error != null || parsed.value == null) {
+            callback(NodeBridgeResponse.failure(request.id, parsed.error ?: NodeBridgeError.processDead()))
+            return
+        }
+        val descriptor = parsed.value
+        if (descriptor.source !in ControlledInputObserverPolicy.allowedSources) {
+            callback(NodeBridgeResponse.failure(request.id, inputObserverInvalidSourceError(request, descriptor.source)))
+            return
+        }
+        if (inputObserverSubscriptions.size >= ControlledInputObserverPolicy.MAX_ACTIVE_SUBSCRIPTIONS) {
+            bridgeResourceLimitRejections.incrementAndGet()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.resourceLimit(
+                        message = "AutoJs6 input_observer bridge reached the active subscription limit.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        if (descriptor.source == "accessibility") {
+            val livePolicyError = inputObserverLivePolicyError(request)
+            if (livePolicyError != null) {
+                callback(NodeBridgeResponse.failure(request.id, livePolicyError))
+                return
+            }
+        }
+        val subscriptionId = "input-observer-${UUID.randomUUID()}"
+        val subscription = ControlledInputObserverSubscription(
+            id = subscriptionId,
+            source = descriptor.source,
+            keys = descriptor.keys,
+            actions = descriptor.actions,
+            maxQueueSize = descriptor.maxQueueSize,
+        )
+        inputObserverSubscriptions[subscriptionId] = subscription
+        resourceRegistry.register(
+            type = NodeBridgeResourceType.INPUT_OBSERVER_SUBSCRIPTION,
+            id = subscriptionId,
+            metadata = mapOf(
+                "source" to descriptor.source,
+                "keys" to descriptor.keys.joinToString(","),
+                "actions" to descriptor.actions.joinToString(","),
+            ),
+        ) {
+            inputObserverSubscriptions.remove(subscriptionId)?.close()
+        }
+        if (descriptor.source == "fake") {
+            descriptor.keys.forEach { key ->
+                descriptor.actions.forEach { action ->
+                    subscription.queueEvent(
+                        key = key,
+                        keyCode = ControlledInputObserverPolicy.keyCodeFor(key),
+                        action = action,
+                    )
+                }
+            }
+        } else if (!attachAccessibilityInputObserver(subscriptionId, subscription)) {
+            resourceRegistry.close(subscriptionId, "input_observer.accessibility_unavailable")
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.capabilityProviderMissing(
+                        module = request.module,
+                        method = request.method,
+                        requirement = "an operational AutoJs6 accessibility service with key observation enabled",
+                    ),
+                ),
+            )
+            return
+        }
+        callback(NodeBridgeResponse.success(request.id, subscription.toJson().toString()))
+    }
+
+    private fun attachAccessibilityInputObserver(
+        subscriptionId: String,
+        subscription: ControlledInputObserverSubscription,
+    ): Boolean {
+        val service = AutoJsAccessibilityService.instance
+        if (service == null || !AutoJsAccessibilityService.hasOperationalState) {
+            return false
+        }
+        val listener = object : OnKeyListener {
+            override fun onKeyEvent(keyCode: Int, event: KeyEvent) {
+                subscription.queueKeyEvent(keyCode, event)
+            }
+        }
+        val disconnectCallback = object : AccessibilityServiceCallback {
+            override fun onConnected() = Unit
+
+            override fun onDisconnected() {
+                resourceRegistry.close(subscriptionId, "input_observer.accessibility_service_destroy")
+            }
+        }
+        subscription.addCloseAction {
+            runCatching { service.onKeyObserver.removeListener(listener) }
+            AutoJsAccessibilityService.removeDisconnectCallback(disconnectCallback)
+            subscription.markLiveListenerDetached()
+        }
+        service.onKeyObserver.addListener(listener)
+        subscription.markLiveListenerAttached()
+        AutoJsAccessibilityService.addDisconnectCallback(disconnectCallback)
+        return true
+    }
+
+    private fun inputObserverInvalidSourceError(request: NodeBridgeRequest, source: String): NodeBridgeError {
+        return NodeBridgeError.invalidRequest(
+            message = "input_observer.${request.method} source is not supported: $source.",
+            module = request.module,
+            method = request.method,
+        )
+    }
+
+    private fun inputObserverLivePolicyError(request: NodeBridgeRequest): NodeBridgeError? {
+        val mode = NodeExecutionModePolicy.normalize(engineInfo.executionMode)
+        val launchSurface = engineInfo.launchSurface
+        val allowed = when (mode) {
+            NodeExecutionModePolicy.MODE_ONE_SHOT -> launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT
+            NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING -> launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
+            else -> false
+        }
+        if (allowed) {
+            return null
+        }
+        return NodeBridgeError.permissionDenied(
+            message = "input_observer accessibility source requires an active one-shot script or an interactive visible session; current executionMode=$mode launchSurface=$launchSurface.",
+            module = request.module,
+            method = request.method,
+        )
+    }
+
+    private fun dispatchInputObserverDrainEvents(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val args = request.argsArray()
+        val subscriptionId = args.optString(0, "")
+        val maxEvents = (args.optJSONObject(1)?.optInt("maxEvents", ControlledInputObserverPolicy.DEFAULT_DRAIN_BATCH_SIZE)
+            ?: ControlledInputObserverPolicy.DEFAULT_DRAIN_BATCH_SIZE)
+            .coerceIn(1, ControlledInputObserverPolicy.MAX_DRAIN_BATCH_SIZE)
+        val subscription = inputObserverSubscriptions[subscriptionId]
+        callback(NodeBridgeResponse.success(request.id, (subscription?.drainEvents(maxEvents) ?: JSONArray()).toString()))
+    }
+
+    private fun dispatchInputObserverClose(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val subscriptionId = request.argsArray().optString(0, "")
+        val closed = subscriptionId.isNotBlank() && resourceRegistry.close(subscriptionId, "input_observer.close")
+        callback(NodeBridgeResponse.success(request.id, closed.toString()))
     }
 
     private fun dispatchClipboard(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -992,6 +3258,21 @@ class AndroidNodeBridgeCapabilityProvider(
                 }.getOrElse { error ->
                     deviceAccessFailure(request, error)
                 }
+                "isIgnoringBatteryOptimizations" -> runCatching {
+                    NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(isIgnoringBatteryOptimizations()))
+                }.getOrElse { error ->
+                    deviceAccessFailure(request, error)
+                }
+                "openBatteryOptimizationSettings" -> runCatching {
+                    val args = request.argsArray()
+                    val options = args.optJSONObject(0) ?: JSONObject()
+                    NodeBridgeResponse.success(
+                        request.id,
+                        openBatteryOptimizationSettings(dryRun = options.optBoolean("dryRun", false)).toString(),
+                    )
+                }.getOrElse { error ->
+                    deviceAccessFailure(request, error)
+                }
                 else -> unavailable(request)
             }
         }
@@ -1022,9 +3303,8 @@ class AndroidNodeBridgeCapabilityProvider(
                 }.getOrElse { error ->
                     NodeBridgeResponse.failure(
                         request.id,
-                        NodeBridgeError(
+                        NodeBridgeError.providerFailed(
                             message = error.message ?: error.javaClass.name,
-                            code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
                             module = request.module,
                             method = request.method,
                             stack = error.stackTraceToString(),
@@ -1077,7 +3357,9 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun scheduleWorkManagerTask(request: NodeBridgeRequest, kind: ControlledWorkTaskKind): NodeBridgeResponse {
         val payload = request.firstObjectArg()
             ?: return workManagerPolicyFailure(request, "work_manager.${request.method} requires a JSON task descriptor.")
-        if (workManagerTasks.size >= ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER) {
+        val ownerKey = NodeWorkManagerBridgeScheduler.ownerKey(engineInfo)
+        val activeTasks = NodeWorkManagerBridgeScheduler.list(appContext, ownerKey)
+        if (activeTasks.length() >= ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER) {
             return workManagerPolicyFailure(
                 request,
                 "AutoJs6 work_manager exceeded ${ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER} registered tasks for this provider.",
@@ -1088,7 +3370,11 @@ class AndroidNodeBridgeCapabilityProvider(
             return NodeBridgeResponse.failure(request.id, parsed.error ?: NodeBridgeError.processDead())
         }
         val id = "node-work-${UUID.randomUUID()}"
-        val task = parsed.value.toJson(id, engineInfo)
+        val scheduled = NodeWorkManagerBridgeScheduler.schedule(appContext, parsed.value.toJson(id, engineInfo))
+        if (scheduled.errorMessage != null || scheduled.taskJson == null) {
+            return workManagerPolicyFailure(request, scheduled.errorMessage ?: "work_manager provider failed to schedule task.")
+        }
+        val task = scheduled.taskJson
         workManagerTasks[id] = task
         resourceRegistry.register(
             type = NodeBridgeResourceType.WORK_MANAGER_TASK,
@@ -1096,6 +3382,8 @@ class AndroidNodeBridgeCapabilityProvider(
             metadata = mapOf(
                 "kind" to kind.name.lowercase(),
                 "scheduler" to task.optString("scheduler", "metadata"),
+                "backend" to task.optString("backend", "embedded"),
+                "entryKind" to task.optString("entryKind", "scriptPath"),
             ),
         ) {
             workManagerTasks.remove(id)
@@ -1108,6 +3396,14 @@ class AndroidNodeBridgeCapabilityProvider(
         if (id.isBlank()) {
             return workManagerPolicyFailure(request, "work_manager.cancel requires a non-empty task id.")
         }
+        val cancelled = NodeWorkManagerBridgeScheduler.cancel(
+            appContext,
+            id,
+            ownerKey = NodeWorkManagerBridgeScheduler.ownerKey(engineInfo),
+        )
+        if (cancelled.errorMessage != null) {
+            return workManagerPolicyFailure(request, cancelled.errorMessage)
+        }
         if (!resourceRegistry.close(id, "work_manager.cancel")) {
             workManagerTasks.remove(id)
         }
@@ -1115,12 +3411,13 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun listWorkManagerTasks(request: NodeBridgeRequest): NodeBridgeResponse {
-        val tasks = workManagerTasks.values
-            .map { value -> JSONObject(value.toString()) }
-            .sortedBy { value -> value.optLong("createdAtEpochMs", 0L) }
-        val result = JSONArray()
-        tasks.forEach { task -> result.put(task) }
-        return NodeBridgeResponse.success(request.id, result.toString())
+        return NodeBridgeResponse.success(
+            request.id,
+            NodeWorkManagerBridgeScheduler.list(
+                appContext,
+                ownerKey = NodeWorkManagerBridgeScheduler.ownerKey(engineInfo),
+            ).toString(),
+        )
     }
 
     private fun workManagerPolicyFailure(request: NodeBridgeRequest, message: String): NodeBridgeResponse {
@@ -1132,6 +3429,273 @@ class AndroidNodeBridgeCapabilityProvider(
                 method = request.method,
             ),
         )
+    }
+
+    private fun dispatchPackageManager(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val response = runCatching {
+            when (request.method) {
+                "list" -> NodeBridgeResponse.success(
+                    request.id,
+                    NodeAndroidPackageInstallManager.recordsToJson(packageInstallManager.list()).toString(),
+                )
+                "verify" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.verify requires a JSON request with name and version.",
+                        )
+                    val name = payload.optString("name").trim()
+                    val version = payload.optString("version").trim()
+                    if (name.isBlank() || version.isBlank()) {
+                        return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.verify requires non-empty name and version.",
+                        )
+                    }
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.verify(name, version).toJson().toString(),
+                    )
+                }
+                "prune" -> {
+                    val payload = request.firstObjectArg()
+                    val maxTransactionAgeMs = packageManagerMaxTransactionAgeMs(payload)
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.prune(maxTransactionAgeMs).toJson().toString(),
+                    )
+                }
+                "planInstall" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.planInstall requires a JSON request with name, version, and sourceDir.",
+                        )
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.planInstall(packageManagerPackageRequest(payload, "planInstall")).toJson().toString(),
+                    )
+                }
+                "planUpdate" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.planUpdate requires a JSON request with name, version, and sourceDir.",
+                        )
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.planUpdate(packageManagerPackageRequest(payload, "planUpdate")).toJson().toString(),
+                    )
+                }
+                "planRemove" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.planRemove requires a JSON request with name and version.",
+                        )
+                    val nameVersion = packageManagerNameVersion(payload, "planRemove")
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.planRemove(nameVersion.first, nameVersion.second).toJson().toString(),
+                    )
+                }
+                "install" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.install requires a JSON request with name, version, sourceDir, expectedIntegrity, and allowMutation.",
+                        )
+                    packageManagerRequireMutationConfirmation(payload, "install")
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.install(
+                            packageManagerPackageRequest(payload, "install", requireExpectedIntegrity = true),
+                        ).toJson().toString(),
+                    )
+                }
+                "update" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.update requires a JSON request with name, version, sourceDir, expectedIntegrity, and allowMutation.",
+                        )
+                    packageManagerRequireMutationConfirmation(payload, "update")
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.update(
+                            packageManagerPackageRequest(payload, "update", requireExpectedIntegrity = true),
+                        ).toJson().toString(),
+                    )
+                }
+                "remove" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.remove requires a JSON request with name, version, expectedIntegrity, and allowMutation.",
+                        )
+                    packageManagerRequireMutationConfirmation(payload, "remove")
+                    val nameVersion = packageManagerNameVersion(payload, "remove")
+                    val expectedIntegrity = packageManagerExpectedIntegrity(payload, "remove", requireExpectedIntegrity = true)
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.remove(
+                            nameVersion.first,
+                            nameVersion.second,
+                            expectedIntegrity = expectedIntegrity,
+                        ).toJson().toString(),
+                    )
+                }
+                else -> unavailable(request)
+            }
+        }.getOrElse { error ->
+            NodeBridgeResponse.failure(request.id, packageManagerError(request, error))
+        }
+        callback(response)
+    }
+
+    private fun packageManagerPackageRequest(
+        payload: JSONObject,
+        methodName: String,
+        requireExpectedIntegrity: Boolean = false,
+    ): NodeAndroidPackageInstallManager.PackageRequest {
+        val (name, version) = packageManagerNameVersion(payload, methodName)
+        val sourceDirText = payload.optString("sourceDir").trim()
+        if (sourceDirText.isBlank()) {
+            throw IllegalArgumentException("package_manager.$methodName requires a non-empty relative sourceDir.")
+        }
+        val sourceDir = resolveScopedProjectFile(sourceDirText)
+            ?: throw IllegalArgumentException("package_manager.$methodName sourceDir must be a relative path inside the current workingDirectory.")
+        val expectedIntegrity = packageManagerExpectedIntegrity(payload, methodName, requireExpectedIntegrity)
+        val kind = payload.optString("kind", NodeAndroidPackageInstallManager.KIND_DEPENDENCY)
+            .trim()
+            .takeIf { it.isNotBlank() }
+            ?: NodeAndroidPackageInstallManager.KIND_DEPENDENCY
+        return NodeAndroidPackageInstallManager.PackageRequest(
+            name = name,
+            version = version,
+            sourceDir = sourceDir,
+            expectedIntegrity = expectedIntegrity,
+            kind = kind,
+        )
+    }
+
+    private fun packageManagerRequireMutationConfirmation(payload: JSONObject, methodName: String) {
+        if (payload.opt("allowMutation") != true) {
+            throw NodeAndroidPackageInstallManager.PackageInstallException(
+                NodeAndroidPackageInstallManager.ERROR_MUTATION_NOT_CONFIRMED,
+                "package_manager.$methodName requires allowMutation: true.",
+            )
+        }
+    }
+
+    private fun packageManagerExpectedIntegrity(
+        payload: JSONObject,
+        methodName: String,
+        requireExpectedIntegrity: Boolean,
+    ): String? {
+        val expectedIntegrity = payload.optString("expectedIntegrity").trim().takeIf { it.isNotBlank() }
+        if (requireExpectedIntegrity && expectedIntegrity == null) {
+            throw IllegalArgumentException("package_manager.$methodName requires expectedIntegrity from a dry-run plan.")
+        }
+        return expectedIntegrity
+    }
+
+    private fun packageManagerNameVersion(payload: JSONObject, methodName: String): Pair<String, String> {
+        val name = payload.optString("name").trim()
+        val version = payload.optString("version").trim()
+        if (name.isBlank() || version.isBlank()) {
+            throw IllegalArgumentException("package_manager.$methodName requires non-empty name and version.")
+        }
+        return name to version
+    }
+
+    private fun packageManagerMaxTransactionAgeMs(payload: JSONObject?): Long {
+        if (payload == null || !payload.has("maxTransactionAgeMs") || payload.isNull("maxTransactionAgeMs")) {
+            return 0L
+        }
+        val value = payload.opt("maxTransactionAgeMs")
+        return when (value) {
+            is Int -> value.toLong()
+            is Long -> value
+            is Number -> value.toLong()
+            is String -> value.toLongOrNull()
+            else -> null
+        }?.coerceAtLeast(0L) ?: throw IllegalArgumentException("package_manager.prune maxTransactionAgeMs must be a finite non-negative integer.")
+    }
+
+    private fun packageManagerInvalidRequest(request: NodeBridgeRequest, message: String): NodeBridgeResponse {
+        return NodeBridgeResponse.failure(
+            request.id,
+            NodeBridgeError.invalidRequest(
+                message = message,
+                module = request.module,
+                method = request.method,
+            ),
+        )
+    }
+
+    private fun packageManagerError(request: NodeBridgeRequest, error: Throwable): NodeBridgeError {
+        return when (error) {
+            is NodeAndroidPackageInstallManager.PackageInstallException -> NodeBridgeError.providerFailed(
+                message = error.message,
+                module = request.module,
+                method = request.method,
+                code = error.code,
+            )
+            is IllegalArgumentException -> NodeBridgeError.invalidRequest(
+                message = error.message ?: "package_manager request is malformed.",
+                module = request.module,
+                method = request.method,
+            )
+            else -> NodeBridgeError.providerFailed(
+                message = error.message ?: "Android package manager operation failed.",
+                module = request.module,
+                method = request.method,
+            )
+        }
+    }
+
+    private fun dispatchLifecycle(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val response = runCatching {
+            when (request.method) {
+                NodeLifecycleCheckpointStore.METHOD_CHECKPOINT -> {
+                    val payload = request.firstObjectArg()
+                        ?: throw NodeLifecycleCheckpointException(
+                            NodeBridgeError.invalidRequest(
+                                message = "AutoJs6 lifecycle.checkpoint requires a JSON descriptor.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    val checkpoint = if (payload.has("checkpoint")) payload.opt("checkpoint") else JSONObject.NULL
+                    val record = NodeLifecycleCheckpointStore.writeCheckpoint(
+                        context = appContext,
+                        engineInfo = engineInfo,
+                        reason = payload.optString("reason", "manual"),
+                        checkpoint = checkpoint,
+                    )
+                    NodeBridgeResponse.success(request.id, record.toString())
+                }
+                NodeLifecycleCheckpointStore.METHOD_READ_CHECKPOINT -> {
+                    val record = NodeLifecycleCheckpointStore.readCheckpoint(appContext, engineInfo)
+                    NodeBridgeResponse.success(request.id, record?.toString() ?: "null")
+                }
+                NodeLifecycleCheckpointStore.METHOD_CLEAR_CHECKPOINT -> {
+                    val result = NodeLifecycleCheckpointStore.clearCheckpoint(appContext, engineInfo)
+                    NodeBridgeResponse.success(request.id, result.toString())
+                }
+                else -> unavailable(request)
+            }
+        }.getOrElse { error ->
+            val bridgeError = (error as? NodeLifecycleCheckpointException)?.bridgeError
+                ?: NodeBridgeError.invalidRequest(
+                    message = error.message ?: "AutoJs6 lifecycle request failed.",
+                    module = request.module,
+                    method = request.method,
+                )
+            NodeBridgeResponse.failure(request.id, bridgeError)
+        }
+        callback(response)
     }
 
     private fun dispatchJava(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -1151,6 +3715,9 @@ class AndroidNodeBridgeCapabilityProvider(
                 "type" -> describeJavaType(request)
                 "callStatic" -> callJavaStatic(request)
                 "new" -> newJavaObject(request)
+                "call", "callInstance" -> callJavaInstance(request)
+                "getField" -> getJavaField(request)
+                "release", "dispose" -> releaseJavaObject(request)
                 else -> unavailable(request)
             }
         }.getOrElse { error ->
@@ -1166,6 +3733,10 @@ class AndroidNodeBridgeCapabilityProvider(
             )
         }
         callback(response)
+    }
+
+    private fun dispatchRhino(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        NodeBridgeRhinoExecutionService.dispatch(appContext, request, callback)
     }
 
     private fun describeJavaType(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -1232,6 +3803,55 @@ class AndroidNodeBridgeCapabilityProvider(
             javaHandles.remove(handleId)
         }
         return NodeBridgeResponse.success(request.id, javaHandleJson(handleId, className, rect).toString())
+    }
+
+    private fun callJavaInstance(request: NodeBridgeRequest): NodeBridgeResponse {
+        val payload = request.firstObjectArg()
+            ?: return javaPolicyFailure(request, "java.call requires an object handle descriptor.")
+        val method = payload.optNonBlankString("method")
+            ?: return javaPolicyFailure(request, "java.call requires a non-empty method.")
+        val rect = javaRectHandle(request, payload) ?: return javaPolicyFailure(request, "AutoJs6 Java interop handle is not available.")
+        val args = payload.optJSONArray("args") ?: JSONArray()
+        val result = ControlledJavaInteropPolicy.callRect(rect, method, args)
+        if (result.error != null) {
+            return NodeBridgeResponse.failure(request.id, result.error.toBridgeError(request))
+        }
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(result.value))
+    }
+
+    private fun getJavaField(request: NodeBridgeRequest): NodeBridgeResponse {
+        val payload = request.firstObjectArg()
+            ?: return javaPolicyFailure(request, "java.getField requires an object handle descriptor.")
+        val field = payload.optNonBlankString("field")
+            ?: return javaPolicyFailure(request, "java.getField requires a non-empty field.")
+        val rect = javaRectHandle(request, payload) ?: return javaPolicyFailure(request, "AutoJs6 Java interop handle is not available.")
+        val result = ControlledJavaInteropPolicy.getRectField(rect, field)
+        if (result.error != null) {
+            return NodeBridgeResponse.failure(request.id, result.error.toBridgeError(request))
+        }
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(result.value))
+    }
+
+    private fun releaseJavaObject(request: NodeBridgeRequest): NodeBridgeResponse {
+        val payload = request.firstObjectArg()
+            ?: return javaPolicyFailure(request, "java.release requires an object handle descriptor.")
+        val handleId = javaHandleId(payload)
+            ?: return javaPolicyFailure(request, "java.release requires a non-empty Java handle.")
+        val closed = resourceRegistry.close(handleId, "java.${request.method}")
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(closed))
+    }
+
+    private fun javaRectHandle(request: NodeBridgeRequest, payload: JSONObject): Rect? {
+        val handleId = javaHandleId(payload) ?: return null
+        val target = javaHandles[handleId] ?: return null
+        return target as? Rect ?: throw IllegalStateException("Unsupported Java handle type for ${request.method}: ${target.javaClass.name}")
+    }
+
+    private fun javaHandleId(payload: JSONObject): String? {
+        return payload.optNonBlankString("handle")
+            ?: payload.optNonBlankString("__autojs6JavaHandle")
+            ?: payload.optJSONObject("target")?.optNonBlankString("__autojs6JavaHandle")
+            ?: payload.optJSONObject("target")?.optNonBlankString("handle")
     }
 
     private fun javaHandleJson(handleId: String, className: String, rect: Rect): JSONObject {
@@ -1525,12 +4145,14 @@ class AndroidNodeBridgeCapabilityProvider(
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) {
                 mainHandler.removeCallbacks(timeoutRunnable)
-                websocketSessions.remove(sessionId)
                 if (websocketResource.release("websocket.failure")) {
                     websocketDiagnostics.finishConnection()
                 }
                 session.queueError(NodeRuntimeErrorCodes.NETWORK_TIMEOUT, t.message ?: t.javaClass.name)
+                session.queueClose(1006, t.message ?: t.javaClass.name)
+                session.markTerminal()
                 if (responded.compareAndSet(false, true)) {
+                    websocketSessions.remove(sessionId)
                     websocketDiagnostics.recordTimeout()
                     callback(
                         NodeBridgeResponse.failure(
@@ -1548,7 +4170,7 @@ class AndroidNodeBridgeCapabilityProvider(
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 session.queueClose(code, reason)
-                websocketSessions.remove(sessionId)
+                session.markTerminal()
                 if (websocketResource.release("websocket.closed")) {
                     websocketDiagnostics.finishConnection()
                 }
@@ -1618,7 +4240,11 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(NodeBridgeResponse.success(request.id, JSONArray().toString()))
             return
         }
-        callback(NodeBridgeResponse.success(request.id, session.drainEvents().toString()))
+        val events = session.drainEvents()
+        if (session.removeAfterDrain()) {
+            websocketSessions.remove(sessionId, session)
+        }
+        callback(NodeBridgeResponse.success(request.id, events.toString()))
     }
 
     private fun websocketMissingSessionResponse(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -1644,6 +4270,24 @@ class AndroidNodeBridgeCapabilityProvider(
                     request.id,
                     launchAppByLabel(request.firstStringArg()).toString(),
                 )
+                "getPackageName" -> NodeBridgeResponse.success(
+                    request.id,
+                    NodeBridgeJson.valueToJson(packageNameForLabel(request.firstStringArg())),
+                )
+                "getAppName" -> NodeBridgeResponse.success(
+                    request.id,
+                    NodeBridgeJson.valueToJson(appLabelForPackage(request.firstStringArg())),
+                )
+                "isInstalled" -> NodeBridgeResponse.success(
+                    request.id,
+                    isPackageInstalled(request.firstStringArg()).toString(),
+                )
+                "viewFile" -> dispatchScopedAppFileAction(request, "viewFile") { file ->
+                    IntentUtils.viewFile(appContext, file.absolutePath)
+                }
+                "editFile" -> dispatchScopedAppFileAction(request, "editFile") { file ->
+                    IntentUtils.editFile(appContext, file.absolutePath)
+                }
                 "openAppSetting" -> {
                     openAppSetting(request.firstStringArg().ifBlank { appContext.packageName })
                     NodeBridgeResponse.success(request.id, "null")
@@ -1715,9 +4359,8 @@ class AndroidNodeBridgeCapabilityProvider(
                 callback(
                     NodeBridgeResponse.failure(
                         request.id,
-                        NodeBridgeError(
+                        NodeBridgeError.providerFailed(
                             message = error.message ?: error.javaClass.name,
-                            code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
                             module = request.module,
                             method = request.method,
                             stack = error.stackTraceToString(),
@@ -1927,6 +4570,52 @@ class AndroidNodeBridgeCapabilityProvider(
         return powerManager.isInteractive
     }
 
+    private fun isIgnoringBatteryOptimizations(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true
+        }
+        val powerManager = appContext.getSystemService(Context.POWER_SERVICE) as? PowerManager
+            ?: return false
+        return powerManager.isIgnoringBatteryOptimizations(appContext.packageName)
+    }
+
+    private fun openBatteryOptimizationSettings(dryRun: Boolean): JSONObject {
+        val intent = batteryOptimizationSettingsIntent()
+        val canOpenSettings = intentAvailable(intent)
+        var opened = false
+        var reason = if (canOpenSettings) "settings-intent-ready" else "settings-intent-unavailable"
+        if (canOpenSettings && dryRun) {
+            reason = "settings-intent-dry-run"
+        } else if (canOpenSettings) {
+            runCatching {
+                appContext.startActivity(intent)
+                opened = true
+                reason = "settings-intent-opened"
+            }.getOrElse { error ->
+                reason = "settings-intent-failed:${error.javaClass.simpleName}"
+            }
+        }
+        return JSONObject()
+            .put("schema", "autojs6-node-battery-optimization-settings-v1")
+            .put("sdkInt", Build.VERSION.SDK_INT)
+            .put("ignoringBatteryOptimizations", isIgnoringBatteryOptimizations())
+            .put("canOpenSettings", canOpenSettings)
+            .put("opened", opened)
+            .put("dryRun", dryRun)
+            .put("action", intent.action.orEmpty())
+            .put("reason", reason)
+    }
+
+    private fun batteryOptimizationSettingsIntent(): Intent {
+        return Intent(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+            } else {
+                Settings.ACTION_SETTINGS
+            },
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
     @Suppress("DEPRECATION")
     private fun wakeUpDevice() {
         val powerManager = appContext.getSystemService(Context.POWER_SERVICE) as? PowerManager
@@ -1989,6 +4678,96 @@ class AndroidNodeBridgeCapabilityProvider(
         return launchPackage(matched.packageName)
     }
 
+    @Suppress("DEPRECATION")
+    private fun packageNameForLabel(label: String): String? {
+        if (label.isBlank()) {
+            return null
+        }
+        val packageManager = appContext.packageManager
+        val applications = runCatching {
+            packageManager.getInstalledApplications(0)
+        }.getOrDefault(emptyList())
+        return applications.firstOrNull { applicationInfo ->
+            runCatching {
+                packageManager.getApplicationLabel(applicationInfo).toString() == label
+            }.getOrDefault(false)
+        }?.packageName
+    }
+
+    @Suppress("DEPRECATION")
+    private fun appLabelForPackage(packageName: String): String? {
+        if (packageName.isBlank()) {
+            return null
+        }
+        val packageManager = appContext.packageManager
+        return runCatching {
+            packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0)).toString()
+        }.getOrNull()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun isPackageInstalled(packageName: String): Boolean {
+        if (packageName.isBlank()) {
+            return false
+        }
+        return runCatching {
+            appContext.packageManager.getPackageInfo(packageName, 0)
+            true
+        }.getOrDefault(false)
+    }
+
+    private fun dispatchScopedAppFileAction(
+        request: NodeBridgeRequest,
+        methodName: String,
+        launcher: (File) -> Boolean,
+    ): NodeBridgeResponse {
+        val rawPath = request.firstStringArg()
+        val file = resolveScopedAppFile(rawPath)
+            ?: return NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.permissionDenied(
+                    message = "app.$methodName path must stay inside the scoped working directory.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        if (!file.isFile) {
+            return NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.invalidRequest(
+                    message = "app.$methodName target does not exist or is not a file: $rawPath",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return NodeBridgeResponse.success(request.id, launcher(file).toString())
+    }
+
+    private fun resolveScopedAppFile(rawPath: String): File? {
+        if (rawPath.isBlank() || rawPath.indexOf('\u0000') >= 0) {
+            return null
+        }
+        val base = File(engineInfo.cwd.takeIf { it.isNotBlank() } ?: appContext.filesDir.absolutePath).canonicalFile
+        val trimmed = rawPath.trim()
+        val candidate = runCatching {
+            val input = File(trimmed)
+            if (input.isAbsolute) {
+                input.canonicalFile
+            } else {
+                val normalized = trimmed.replace('\\', '/')
+                val segments = normalized.split('/').filter { it.isNotBlank() }
+                if (segments.isEmpty()) {
+                    return null
+                }
+                File(base, segments.joinToString(File.separator)).canonicalFile
+            }
+        }.getOrNull() ?: return null
+        val basePath = base.path.trimEnd(File.separatorChar)
+        val candidatePath = candidate.path
+        return candidate.takeIf { candidatePath == basePath || candidatePath.startsWith(basePath + File.separator) }
+    }
+
     private fun openAppSetting(packageName: String) {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.parse("package:$packageName")
@@ -2008,6 +4787,12 @@ class AndroidNodeBridgeCapabilityProvider(
         if (!hasTarget) {
             return null
         }
+        val categories = parseIntentCategories(options) ?: return null
+        val flags = parseIntentFlags(options) ?: return null
+        val extras = options.optJSONObject("extras")
+        if (options.has("extras") && !options.isNull("extras") && extras == null) {
+            return null
+        }
         return Intent().apply {
             action?.let { setAction(it) }
             when {
@@ -2020,18 +4805,65 @@ class AndroidNodeBridgeCapabilityProvider(
                 setClassName(packageName, className)
             }
             component?.let { setComponent(parseComponentName(it) ?: return null) }
-            options.optJSONArray("categories")?.let { categories ->
-                for (index in 0 until categories.length()) {
-                    categories.optString(index).takeIf { it.isNotBlank() }?.let(::addCategory)
-                }
-            }
-            if (options.has("flags")) {
-                addFlags(options.optInt("flags", 0))
-            }
+            categories.forEach(::addCategory)
+            addFlags(flags)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            options.optJSONObject("extras")?.let { extras ->
-                putJsonIntentExtras(this, extras)
+            extras?.let { putJsonIntentExtras(this, it) }
+        }
+    }
+
+    private fun parseIntentCategories(options: JSONObject): List<String>? {
+        val values = mutableListOf<String>()
+        fun append(value: Any?): Boolean {
+            return when (value) {
+                null, JSONObject.NULL -> true
+                is String -> {
+                    value.takeIf { it.isNotBlank() }?.let(values::add)
+                    true
+                }
+                is JSONArray -> {
+                    for (index in 0 until value.length()) {
+                        if (!append(value.opt(index))) {
+                            return false
+                        }
+                    }
+                    true
+                }
+                else -> false
             }
+        }
+        if (options.has("category") && !append(options.opt("category"))) {
+            return null
+        }
+        if (options.has("categories") && !append(options.opt("categories"))) {
+            return null
+        }
+        return values.distinct()
+    }
+
+    private fun parseIntentFlags(options: JSONObject): Int? {
+        if (!options.has("flags") || options.isNull("flags")) {
+            return 0
+        }
+        fun flagOf(value: Any?): Int? {
+            return when (value) {
+                is Int -> value
+                is Long -> value.toInt()
+                is Number -> value.toInt()
+                else -> null
+            }
+        }
+        val value = options.opt("flags")
+        return when (value) {
+            is JSONArray -> {
+                var flags = 0
+                for (index in 0 until value.length()) {
+                    val flag = flagOf(value.opt(index)) ?: return null
+                    flags = flags or flag
+                }
+                flags
+            }
+            else -> flagOf(value)
         }
     }
 
@@ -2057,9 +4889,25 @@ class AndroidNodeBridgeCapabilityProvider(
                 is Long -> intent.putExtra(key, value)
                 is Double -> intent.putExtra(key, value)
                 is String -> intent.putExtra(key, value)
+                is JSONArray -> putJsonIntentExtraArray(intent, key, value)
                 JSONObject.NULL, null -> Unit
                 else -> intent.putExtra(key, value.toString())
             }
+        }
+    }
+
+    private fun putJsonIntentExtraArray(intent: Intent, key: String, values: JSONArray) {
+        if (values.length() == 0) {
+            intent.putExtra(key, emptyArray<String>())
+            return
+        }
+        when (values.opt(0)) {
+            is Boolean -> intent.putExtra(key, BooleanArray(values.length()) { index -> values.optBoolean(index) })
+            is Int -> intent.putExtra(key, IntArray(values.length()) { index -> values.optInt(index) })
+            is Long -> intent.putExtra(key, LongArray(values.length()) { index -> values.optLong(index) })
+            is Number -> intent.putExtra(key, DoubleArray(values.length()) { index -> values.optDouble(index) })
+            is String -> intent.putExtra(key, Array(values.length()) { index -> values.optString(index) })
+            else -> intent.putExtra(key, values.toString())
         }
     }
 
@@ -2089,6 +4937,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private companion object {
         const val TAG = "AndroidNodeBridge"
         const val SHELL_STREAM_JOIN_MS = 500L
+        const val MAX_ACTIVE_UI_SESSIONS = 4
     }
 }
 
@@ -2106,26 +4955,34 @@ private data class ShellExecResult(
     }
 }
 
-private enum class ControlledWorkTaskKind(val wireName: String) {
+private data class ControlledAudioStream(
+    val name: String,
+    val type: Int,
+)
+
+enum class ControlledWorkTaskKind(val wireName: String) {
     ONCE("once"),
     PERIODIC("periodic"),
 }
 
-private object ControlledWorkManagerPolicy {
+object ControlledWorkManagerPolicy {
     const val MAX_TASKS_PER_PROVIDER = 64
     const val MAX_DELAY_MS = 2_592_000_000L
     const val MIN_PERIODIC_INTERVAL_MS = 900_000L
     const val MAX_PERIODIC_INTERVAL_MS = 2_592_000_000L
+    const val DEFAULT_TASK_TIMEOUT_MS = 30_000L
+    const val MAX_TASK_TIMEOUT_MS = 600_000L
 }
 
 private data class ControlledWorkTaskDescriptor(
     val kind: ControlledWorkTaskKind,
-    val scriptPath: String,
+    val entryPath: String,
     val entryKind: String,
     val backend: String,
     val packaged: Boolean,
     val delayMs: Long,
     val intervalMs: Long?,
+    val timeoutMs: Long,
     val constraints: JSONObject,
 ) {
     fun toJson(id: String, engineInfo: NodeBridgeEngineInfo): JSONObject {
@@ -2133,13 +4990,18 @@ private data class ControlledWorkTaskDescriptor(
             put("id", id)
             put("type", kind.wireName)
             put("status", "registered")
-            put("scheduler", "metadata")
+            put("scheduler", NodeWorkManagerBridgeScheduler.SCHEDULER_NAME)
             put("backend", backend)
-            put("scriptPath", scriptPath)
             put("entryKind", entryKind)
+            if (entryKind == "projectEntry") {
+                put("entry", entryPath)
+            } else {
+                put("scriptPath", entryPath)
+            }
             put("packaged", packaged)
             put("delayMs", delayMs)
             intervalMs?.let { put("intervalMs", it) }
+            put("timeoutMs", timeoutMs)
             put("constraints", JSONObject(constraints.toString()))
             put("engineId", engineInfo.id)
             put("sourceName", engineInfo.sourceName)
@@ -2178,12 +5040,12 @@ private data class ControlledWorkTaskDescriptor(
                 hasEntry -> "projectEntry"
                 else -> ""
             }
-            val scriptPath = normalizeRelativeScriptPath(rawScriptPath)
+            val entryPath = normalizeRelativeScriptPath(rawScriptPath)
                 ?: return ControlledWorkTaskParseResult(
                     error = workTaskError(request, "work_manager task path must be a non-empty relative path inside the scoped project."),
                 )
             val packaged = payload.optBoolean("packaged", false)
-            if (resolveScopedScriptPath(appContext, engineInfo, scriptPath, packaged) == null) {
+            if (resolveScopedScriptPath(appContext, engineInfo, entryPath, packaged) == null) {
                 return ControlledWorkTaskParseResult(
                     error = workTaskError(request, "work_manager task path must resolve inside the scoped working directory."),
                 )
@@ -2224,16 +5086,34 @@ private data class ControlledWorkTaskDescriptor(
                 ?: return ControlledWorkTaskParseResult(
                     error = workTaskError(request, "work_manager constraints may contain only boolean charging, network, and idle fields."),
                 )
+            val timeoutFieldName = if (payload.has("taskTimeoutMs") && !payload.isNull("taskTimeoutMs")) {
+                "taskTimeoutMs"
+            } else {
+                "timeoutMs"
+            }
+            val timeoutMs = parseDuration(
+                payload = payload,
+                name = timeoutFieldName,
+                fallback = ControlledWorkManagerPolicy.DEFAULT_TASK_TIMEOUT_MS,
+                min = 1L,
+                max = ControlledWorkManagerPolicy.MAX_TASK_TIMEOUT_MS,
+            ) ?: return ControlledWorkTaskParseResult(
+                error = workTaskError(
+                    request,
+                    "work_manager $timeoutFieldName must be between 1 and ${ControlledWorkManagerPolicy.MAX_TASK_TIMEOUT_MS}.",
+                ),
+            )
 
             return ControlledWorkTaskParseResult(
                 value = ControlledWorkTaskDescriptor(
                     kind = kind,
-                    scriptPath = scriptPath,
+                    entryPath = entryPath,
                     entryKind = entryKind,
                     backend = "embedded",
                     packaged = packaged,
                     delayMs = delayMs,
                     intervalMs = intervalMs,
+                    timeoutMs = timeoutMs,
                     constraints = constraints,
                 ),
             )
@@ -2420,6 +5300,24 @@ private object ControlledJavaInteropPolicy {
                     },
                 ),
             )
+            put(
+                "instanceMethods",
+                JSONArray(
+                    when (className) {
+                        "android.graphics.Rect" -> rectInstanceMethods
+                        else -> emptyList()
+                    },
+                ),
+            )
+            put(
+                "fields",
+                JSONArray(
+                    when (className) {
+                        "android.graphics.Rect" -> rectFields
+                        else -> emptyList()
+                    },
+                ),
+            )
         }
     }
 
@@ -2493,6 +5391,36 @@ private object ControlledJavaInteropPolicy {
         return Result.value(Rect(left, top, right, bottom))
     }
 
+    fun callRect(rect: Rect, method: String, args: JSONArray): Result {
+        return when (method) {
+            "width" -> noArgs(args, "android.graphics.Rect.width") { rect.width() }
+            "height" -> noArgs(args, "android.graphics.Rect.height") { rect.height() }
+            "centerX" -> noArgs(args, "android.graphics.Rect.centerX") { rect.centerX() }
+            "centerY" -> noArgs(args, "android.graphics.Rect.centerY") { rect.centerY() }
+            "exactCenterX" -> noArgs(args, "android.graphics.Rect.exactCenterX") { rect.exactCenterX().toDouble() }
+            "exactCenterY" -> noArgs(args, "android.graphics.Rect.exactCenterY") { rect.exactCenterY().toDouble() }
+            "isEmpty" -> noArgs(args, "android.graphics.Rect.isEmpty") { rect.isEmpty }
+            "contains" -> containsPoint(rect, args)
+            else -> Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "AutoJs6 Java interop does not allow android.graphics.Rect.$method.",
+            )
+        }
+    }
+
+    fun getRectField(rect: Rect, field: String): Result {
+        return when (field) {
+            "left" -> Result.value(rect.left)
+            "top" -> Result.value(rect.top)
+            "right" -> Result.value(rect.right)
+            "bottom" -> Result.value(rect.bottom)
+            else -> Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "AutoJs6 Java interop does not allow android.graphics.Rect.$field field access.",
+            )
+        }
+    }
+
     private fun invalidRectArg(): Result {
         return Result.denied(
             NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
@@ -2532,6 +5460,34 @@ private object ControlledJavaInteropPolicy {
         return Result.value(operation(first, second))
     }
 
+    private fun noArgs(args: JSONArray, method: String, operation: () -> Any): Result {
+        if (args.length() != 0) {
+            return Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "$method requires no arguments.",
+            )
+        }
+        return Result.value(operation())
+    }
+
+    private fun containsPoint(rect: Rect, args: JSONArray): Result {
+        if (args.length() != 2) {
+            return Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "android.graphics.Rect.contains requires two integer arguments.",
+            )
+        }
+        val x = args.optIntOrNull(0) ?: return Result.denied(
+            NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+            "android.graphics.Rect.contains arguments must be finite integers.",
+        )
+        val y = args.optIntOrNull(1) ?: return Result.denied(
+            NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+            "android.graphics.Rect.contains arguments must be finite integers.",
+        )
+        return Result.value(rect.contains(x, y))
+    }
+
     data class ErrorDescriptor(
         val code: String,
         val message: String,
@@ -2558,6 +5514,18 @@ private object ControlledJavaInteropPolicy {
             )
         }
     }
+
+    private val rectInstanceMethods = listOf(
+        "width",
+        "height",
+        "centerX",
+        "centerY",
+        "exactCenterX",
+        "exactCenterY",
+        "isEmpty",
+        "contains",
+    )
+    private val rectFields = listOf("left", "top", "right", "bottom")
 }
 
 private fun JSONArray.optDoubleOrNull(index: Int): Double? {
@@ -2579,11 +5547,11 @@ private fun JSONArray.optIntOrNull(index: Int): Int? {
 }
 
 private object ControlledFetchPolicy {
-    const val MAX_CONCURRENT_REQUESTS = 4
+    const val MAX_CONCURRENT_REQUESTS = 16
     const val DEFAULT_TIMEOUT_MS = 30_000L
     const val HARD_TIMEOUT_MS = 120_000L
-    const val DEFAULT_MAX_RESPONSE_BYTES = 1_048_576L
-    const val HARD_MAX_RESPONSE_BYTES = 16_777_216L
+    const val DEFAULT_MAX_RESPONSE_BYTES = 33_554_432L
+    const val HARD_MAX_RESPONSE_BYTES = 67_108_864L
     const val DEFAULT_MAX_REDIRECTS = 5
     const val HARD_MAX_REDIRECTS = 10
 }
@@ -2872,6 +5840,1526 @@ private data class ControlledFetchParseResult(
     val error: NodeBridgeError? = null,
 )
 
+private object NodeStorageBridgePolicy {
+    const val MAX_STORE_NAME_LENGTH = 128
+    const val MAX_KEY_LENGTH = 256
+    const val MAX_VALUE_BYTES = 64 * 1024
+    const val MAX_STORE_BYTES = 256 * 1024
+    private const val PREFS_PREFIX = "autojs.node.storage"
+
+    fun preferencesName(packageName: String, cwd: String, storeName: String): String {
+        val packagePart = sanitize(packageName.ifBlank { "unknown" })
+        val cwdPart = sha256(cwd.ifBlank { "default" }).take(16)
+        val storePart = sanitize(storeName).take(64).ifBlank { "store" }
+        return "$PREFS_PREFIX.$packagePart.$cwdPart.$storePart"
+    }
+
+    private fun sanitize(value: String): String {
+        return value.map { char ->
+            when {
+                char.isLetterOrDigit() -> char.lowercaseChar()
+                char == '.' || char == '_' || char == '-' -> char
+                else -> '_'
+            }
+        }.joinToString("")
+    }
+
+    private fun sha256(value: String): String {
+        val bytes = MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
+        return bytes.joinToString("") { byte -> String.format(Locale.US, "%02x", byte.toInt() and 0xff) }
+    }
+}
+
+private class StorageBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
+
+private data class ControlledDatabaseHandle(
+    val id: String,
+    val name: String,
+    val file: File,
+    val database: SQLiteDatabase,
+    val resource: NodeBridgeResourceHandle,
+) {
+    fun exec(request: NodeBridgeRequest, sql: String, params: List<Any?>) {
+        ensureOpen(request)
+        val statement = database.compileStatement(sql)
+        try {
+            NodeDatabaseBridgePolicy.bind(statement, params)
+            statement.execute()
+        } finally {
+            statement.close()
+        }
+    }
+
+    fun run(request: NodeBridgeRequest, sql: String, params: List<Any?>): JSONObject {
+        ensureOpen(request)
+        val command = NodeDatabaseBridgePolicy.command(sql)
+        val statement = database.compileStatement(sql)
+        try {
+            NodeDatabaseBridgePolicy.bind(statement, params)
+            return when (command) {
+                "INSERT", "REPLACE" -> {
+                    val insertId = statement.executeInsert()
+                    JSONObject()
+                        .put("rowsAffected", if (insertId >= 0L) 1 else 0)
+                        .put("insertId", if (insertId >= 0L) insertId else JSONObject.NULL)
+                }
+                "UPDATE", "DELETE" -> JSONObject()
+                    .put("rowsAffected", statement.executeUpdateDelete())
+                    .put("insertId", JSONObject.NULL)
+                else -> {
+                    statement.execute()
+                    JSONObject()
+                        .put("rowsAffected", JSONObject.NULL)
+                        .put("insertId", JSONObject.NULL)
+                }
+            }
+        } finally {
+            statement.close()
+        }
+    }
+
+    fun query(
+        request: NodeBridgeRequest,
+        sql: String,
+        params: List<Any?>,
+    ): JSONObject? {
+        ensureOpen(request)
+        val cursor = database.rawQuery(sql, NodeDatabaseBridgePolicy.queryArgs(params))
+        try {
+            if (!cursor.moveToFirst()) {
+                return null
+            }
+            val row = NodeDatabaseBridgePolicy.cursorRow(cursor)
+            val bytes = row.toString().toByteArray(Charsets.UTF_8).size
+            if (bytes > NodeDatabaseBridgePolicy.MAX_RESULT_BYTES) {
+                throw DatabaseBridgeException(
+                    NodeBridgeError.resourceLimit(
+                        message = "AutoJs6 database result exceeded ${NodeDatabaseBridgePolicy.MAX_RESULT_BYTES} bytes.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            return row
+        } finally {
+            cursor.close()
+        }
+    }
+
+    fun queryAll(request: NodeBridgeRequest, sql: String, params: List<Any?>): JSONArray {
+        val rows = queryRows(request, sql, params, maxRows = NodeDatabaseBridgePolicy.MAX_RESULT_ROWS)
+        return JSONArray().apply { rows.forEach(::put) }
+    }
+
+    private fun queryRows(
+        request: NodeBridgeRequest,
+        sql: String,
+        params: List<Any?>,
+        maxRows: Int,
+    ): List<JSONObject> {
+        ensureOpen(request)
+        val rows = mutableListOf<JSONObject>()
+        val cursor = database.rawQuery(sql, NodeDatabaseBridgePolicy.queryArgs(params))
+        try {
+            var projectedBytes = 2
+            while (cursor.moveToNext()) {
+                if (rows.size >= maxRows) {
+                    throw DatabaseBridgeException(
+                        NodeBridgeError.resourceLimit(
+                            message = "AutoJs6 database result exceeded $maxRows rows.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                }
+                val row = NodeDatabaseBridgePolicy.cursorRow(cursor)
+                projectedBytes += row.toString().toByteArray(Charsets.UTF_8).size + 1
+                if (projectedBytes > NodeDatabaseBridgePolicy.MAX_RESULT_BYTES) {
+                    throw DatabaseBridgeException(
+                        NodeBridgeError.resourceLimit(
+                            message = "AutoJs6 database result exceeded ${NodeDatabaseBridgePolicy.MAX_RESULT_BYTES} bytes.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                }
+                rows += row
+            }
+        } finally {
+            cursor.close()
+        }
+        return rows
+    }
+
+    private fun ensureOpen(request: NodeBridgeRequest) {
+        if (!database.isOpen) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database handle is closed.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+    }
+
+}
+
+private object NodeDatabaseBridgePolicy {
+    const val MAX_OPEN_HANDLES = 4
+    const val MAX_NAME_LENGTH = 64
+    const val MAX_SQL_BYTES = 16 * 1024
+    const val MAX_PARAMS = 128
+    const val MAX_TRANSACTION_OPERATIONS = 64
+    const val MAX_RESULT_ROWS = 200
+    const val MAX_RESULT_BYTES = 256 * 1024
+
+    private const val DATABASE_DIR = "node-databases"
+    private val namePattern = Regex("^[A-Za-z0-9_.-]+$")
+    private val forbiddenSqlPattern = Regex("(?i)(^|[^A-Za-z0-9_])(load_extension|attach|detach)($|[^A-Za-z0-9_])")
+
+    fun openName(request: NodeBridgeRequest, value: Any?): String {
+        val rawName = when (value) {
+            is String -> value
+            is JSONObject -> value.optString("name", value.optString("path", ""))
+            else -> ""
+        }.trim()
+        if (rawName.isBlank() || rawName.length > MAX_NAME_LENGTH || '\u0000' in rawName) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database.open requires a non-empty database name up to $MAX_NAME_LENGTH characters.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        val normalized = rawName.replace('\\', '/')
+        if (
+            normalized.startsWith("/") ||
+            normalized.contains("/") ||
+            normalized.contains(":") ||
+            normalized == "." ||
+            normalized == ".." ||
+            normalized.contains("..") ||
+            !namePattern.matches(normalized)
+        ) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 database.open only accepts scoped database names, not paths.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return normalized
+    }
+
+    fun databaseFile(context: Context, engineInfo: NodeBridgeEngineInfo, name: String): File {
+        val packagePart = sanitize(engineInfo.packageName.ifBlank { context.packageName }).ifBlank { "unknown" }
+        val cwdPart = sha256(engineInfo.cwd.ifBlank { "default" }).take(16)
+        val base = File(context.filesDir, "$DATABASE_DIR/$packagePart/$cwdPart").canonicalFile
+        val fileName = sanitize(name).ifBlank { "database" }.let { sanitized ->
+            if (sanitized.endsWith(".db", ignoreCase = true)) sanitized else "$sanitized.db"
+        }
+        val candidate = File(base, fileName).canonicalFile
+        val basePath = base.path.trimEnd(File.separatorChar)
+        val candidatePath = candidate.path
+        if (candidatePath != basePath && !candidatePath.startsWith(basePath + File.separator)) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 database path escaped the scoped database directory.",
+                    module = NodeBridgeModules.DATABASE,
+                    method = "open",
+                ),
+            )
+        }
+        return candidate
+    }
+
+    fun handleId(request: NodeBridgeRequest, value: Any?): String {
+        val text = (value as? String).orEmpty().trim()
+        if (text.isBlank() || '\u0000' in text || text.length > 128) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database handle id is invalid.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return text
+    }
+
+    fun sql(request: NodeBridgeRequest, value: String): String {
+        val text = value.trim()
+        val bytes = text.toByteArray(Charsets.UTF_8).size
+        if (text.isBlank() || '\u0000' in text || bytes > MAX_SQL_BYTES) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database SQL must be non-empty and at most $MAX_SQL_BYTES bytes.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        if (forbiddenSqlPattern.containsMatchIn(text)) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 database SQL denied by policy.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return text
+    }
+
+    fun params(request: NodeBridgeRequest, value: Any?): List<Any?> {
+        if (value == null || value == JSONObject.NULL) {
+            return emptyList()
+        }
+        val array = value as? JSONArray
+            ?: throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database SQL parameters must be an array.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        if (array.length() > MAX_PARAMS) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.resourceLimit(
+                    message = "AutoJs6 database SQL parameters exceeded $MAX_PARAMS entries.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return (0 until array.length()).map { index ->
+            when (val item = array.opt(index)) {
+                null, JSONObject.NULL -> null
+                is String -> item
+                is Boolean -> item
+                is Int -> item.toLong()
+                is Long -> item
+                is Number -> {
+                    val number = item.toDouble()
+                    if (!number.isFinite()) {
+                        throw DatabaseBridgeException(
+                            NodeBridgeError.invalidRequest(
+                                message = "AutoJs6 database SQL parameter must be finite.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    }
+                    number
+                }
+                else -> throw DatabaseBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 database SQL parameters must be JSON primitive values.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+        }
+    }
+
+    fun bind(statement: SQLiteStatement, params: List<Any?>) {
+        params.forEachIndexed { index, value ->
+            val position = index + 1
+            when (value) {
+                null -> statement.bindNull(position)
+                is Boolean -> statement.bindLong(position, if (value) 1L else 0L)
+                is Long -> statement.bindLong(position, value)
+                is Int -> statement.bindLong(position, value.toLong())
+                is Number -> statement.bindDouble(position, value.toDouble())
+                else -> statement.bindString(position, value.toString())
+            }
+        }
+    }
+
+    fun queryArgs(params: List<Any?>): Array<String> {
+        return params.map { value ->
+            when (value) {
+                null -> ""
+                is Boolean -> if (value) "1" else "0"
+                else -> value.toString()
+            }
+        }.toTypedArray()
+    }
+
+    fun cursorRow(cursor: Cursor): JSONObject {
+        val row = JSONObject()
+        for (index in 0 until cursor.columnCount) {
+            val name = cursor.getColumnName(index)
+            val value: Any = when (cursor.getType(index)) {
+                Cursor.FIELD_TYPE_NULL -> JSONObject.NULL
+                Cursor.FIELD_TYPE_INTEGER -> cursor.getLong(index)
+                Cursor.FIELD_TYPE_FLOAT -> cursor.getDouble(index)
+                Cursor.FIELD_TYPE_BLOB -> JSONObject()
+                    .put("base64", Base64.encodeToString(cursor.getBlob(index), Base64.NO_WRAP))
+                else -> cursor.getString(index) ?: JSONObject.NULL
+            }
+            row.put(name, value)
+        }
+        return row
+    }
+
+    fun command(sql: String): String {
+        return sql.trimStart()
+            .takeWhile { !it.isWhitespace() && it != '(' }
+            .uppercase(Locale.US)
+    }
+
+    private fun sanitize(value: String): String {
+        return value.map { char ->
+            when {
+                char.isLetterOrDigit() -> char.lowercaseChar()
+                char == '.' || char == '_' || char == '-' -> char
+                else -> '_'
+            }
+        }.joinToString("")
+    }
+
+    private fun sha256(value: String): String {
+        val bytes = MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
+        return bytes.joinToString("") { byte -> String.format(Locale.US, "%02x", byte.toInt() and 0xff) }
+    }
+}
+
+private class DatabaseBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
+
+private data class ControlledImageHandle(
+    val id: String,
+    val bitmap: Bitmap,
+    val resource: NodeBridgeResourceHandle,
+) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("id", id)
+        .put("__autojs6ImageHandle", id)
+        .put("width", bitmap.width)
+        .put("height", bitmap.height)
+
+    fun ocrBitmap(options: JSONObject): ControlledOcrInput = processingBitmap(options, "OCR")
+
+    fun barcodeBitmap(options: JSONObject): ControlledOcrInput = processingBitmap(options, "barcode")
+
+    private fun processingBitmap(options: JSONObject, apiName: String): ControlledOcrInput {
+        check(!bitmap.isRecycled) { "AutoJs6 image handle has been recycled: $id" }
+        val region = ControlledOcrRegion.fromOptions(options, apiName)
+            ?: return ControlledOcrInput(bitmap = bitmap)
+        require(region.x >= 0 && region.y >= 0 && region.width > 0 && region.height > 0) {
+            "AutoJs6 $apiName region must use non-negative x/y and positive width/height."
+        }
+        require(region.x + region.width <= bitmap.width && region.y + region.height <= bitmap.height) {
+            "AutoJs6 $apiName region must stay inside the image bounds."
+        }
+        return ControlledOcrInput(
+            bitmap = Bitmap.createBitmap(bitmap, region.x, region.y, region.width, region.height),
+            offsetX = region.x,
+            offsetY = region.y,
+            recycleAfterUse = true,
+        )
+    }
+}
+
+private data class ControlledOcrInput(
+    val bitmap: Bitmap,
+    val offsetX: Int = 0,
+    val offsetY: Int = 0,
+    val recycleAfterUse: Boolean = false,
+) {
+    fun recycleIfNeeded() {
+        if (recycleAfterUse && !bitmap.isRecycled) {
+            bitmap.recycle()
+        }
+    }
+}
+
+private data class ControlledOcrRegion(
+    val x: Int,
+    val y: Int,
+    val width: Int,
+    val height: Int,
+) {
+    companion object {
+        fun fromOptions(options: JSONObject, apiName: String = "OCR"): ControlledOcrRegion? {
+            if (!options.has("region") || options.isNull("region")) {
+                return null
+            }
+            val value = options.opt("region")
+            return when (value) {
+                is JSONObject -> ControlledOcrRegion(
+                    x = finiteInt(value.opt("x"), "region.x", apiName),
+                    y = finiteInt(value.opt("y"), "region.y", apiName),
+                    width = finiteInt(value.opt("width"), "region.width", apiName),
+                    height = finiteInt(value.opt("height"), "region.height", apiName),
+                )
+                is JSONArray -> {
+                    require(value.length() >= 4) { "AutoJs6 $apiName region array must contain x, y, width, and height." }
+                    ControlledOcrRegion(
+                        x = finiteInt(value.opt(0), "region[0]", apiName),
+                        y = finiteInt(value.opt(1), "region[1]", apiName),
+                        width = finiteInt(value.opt(2), "region[2]", apiName),
+                        height = finiteInt(value.opt(3), "region[3]", apiName),
+                    )
+                }
+                else -> throw IllegalArgumentException("AutoJs6 $apiName region must be an object or array.")
+            }
+        }
+
+        private fun finiteInt(value: Any?, label: String, apiName: String): Int {
+            val number = when (value) {
+                is Int -> value.toDouble()
+                is Long -> value.toDouble()
+                is Number -> value.toDouble()
+                is String -> value.toDoubleOrNull()
+                else -> null
+            }
+            require(number != null && number.isFinite()) { "AutoJs6 $apiName $label must be a finite number." }
+            return number.toInt()
+        }
+    }
+}
+
+private class ControlledOcrOperation(
+    val resource: NodeBridgeResourceHandle,
+) {
+    private val completed = AtomicBoolean(false)
+
+    @Volatile
+    var timeoutRunnable: Runnable? = null
+
+    fun finish(): Boolean = completed.compareAndSet(false, true)
+
+    fun cancel(reason: String) {
+        if (finish()) {
+            resource.close(reason)
+        }
+    }
+}
+
+private class ControlledOcrDiagnostics {
+    private val dispatchCount = AtomicInteger(0)
+    private val failedCount = AtomicInteger(0)
+    private val serviceDestroyCancellationCount = AtomicInteger(0)
+
+    fun recordDispatch() {
+        dispatchCount.incrementAndGet()
+    }
+
+    fun recordFailure() {
+        failedCount.incrementAndGet()
+    }
+
+    fun recordServiceDestroyCancellation(count: Int) {
+        if (count > 0) {
+            serviceDestroyCancellationCount.addAndGet(count)
+        }
+    }
+
+    fun nativeValues(): Map<String, String> = linkedMapOf(
+        "embedded_script.ocr_live_dispatch_count" to dispatchCount.get().toString(),
+        "embedded_script.ocr_live_dispatch_failed_count" to failedCount.get().toString(),
+        "embedded_script.ocr_service_destroy_cancel_count" to serviceDestroyCancellationCount.get().toString(),
+    )
+}
+
+private fun Text.toOcrResultsJson(offsetX: Int, offsetY: Int): String {
+    val results = JSONArray()
+    textBlocks.forEach { block ->
+        block.lines.forEach { line ->
+            val bounds = line.boundingBox
+            val item = JSONObject()
+                .put("text", line.text.orEmpty())
+                .put("confidence", line.confidence.takeIf { it.isFinite() }?.toDouble() ?: JSONObject.NULL)
+            if (bounds != null) {
+                item.put(
+                    "bounds",
+                    JSONObject()
+                        .put("left", bounds.left + offsetX)
+                        .put("top", bounds.top + offsetY)
+                        .put("right", bounds.right + offsetX)
+                        .put("bottom", bounds.bottom + offsetY),
+                )
+            }
+            results.put(item)
+        }
+    }
+    return results.toString()
+}
+
+private data class ControlledBarcodeOptions(
+    val formats: IntArray,
+    val maxResults: Int,
+    val enableAllPotentialBarcodes: Boolean,
+) {
+    fun scannerOptions(): BarcodeScannerOptions {
+        val builder = BarcodeScannerOptions.Builder()
+        val effectiveFormats = formats
+            .filter { it != MLKitBarcode.FORMAT_UNKNOWN }
+            .distinct()
+        if (effectiveFormats.isEmpty() || effectiveFormats.contains(MLKitBarcode.FORMAT_ALL_FORMATS)) {
+            builder.setBarcodeFormats(MLKitBarcode.FORMAT_ALL_FORMATS)
+        } else {
+            builder.setBarcodeFormats(effectiveFormats.first(), *effectiveFormats.drop(1).toIntArray())
+        }
+        if (enableAllPotentialBarcodes) {
+            builder.enableAllPotentialBarcodes()
+        }
+        return builder.build()
+    }
+
+    companion object {
+        private const val MAX_RESULTS = 128
+        private const val MAX_FORMATS = 16
+
+        fun fromOptions(options: JSONObject): ControlledBarcodeOptions {
+            val qrOnly = options.optBoolean("qrOnly", false)
+            val parsedFormats = parseFormats(options)
+            if (qrOnly && parsedFormats.any { it != MLKitBarcode.FORMAT_QR_CODE }) {
+                throw IllegalArgumentException("AutoJs6 barcode qrOnly mode accepts only QR_CODE format.")
+            }
+            val effectiveFormats = if (qrOnly) {
+                intArrayOf(MLKitBarcode.FORMAT_QR_CODE)
+            } else {
+                parsedFormats
+            }
+            return ControlledBarcodeOptions(
+                formats = effectiveFormats,
+                maxResults = parseMaxResults(options),
+                enableAllPotentialBarcodes = options.optBoolean("enableAllPotentialBarcodes", false),
+            )
+        }
+
+        private fun parseFormats(options: JSONObject): IntArray {
+            val rawFormats = when {
+                options.has("formats") && !options.isNull("formats") -> options.opt("formats")
+                options.has("format") && !options.isNull("format") -> options.opt("format")
+                else -> return intArrayOf()
+            }
+            val values = when (rawFormats) {
+                is JSONArray -> (0 until rawFormats.length()).map { index -> rawFormats.opt(index) }
+                else -> listOf(rawFormats)
+            }
+            require(values.size <= MAX_FORMATS) { "AutoJs6 barcode formats must contain at most $MAX_FORMATS entries." }
+            return values
+                .map(::parseFormat)
+                .distinct()
+                .toIntArray()
+        }
+
+        private fun parseFormat(value: Any?): Int {
+            val format = when (value) {
+                is Int -> value
+                is Long -> value.toInt()
+                is Number -> {
+                    val number = value.toDouble()
+                    require(number.isFinite()) { "AutoJs6 barcode format number must be finite." }
+                    number.toInt()
+                }
+                is String -> {
+                    val name = normalizeFormatName(value)
+                    BARCODE_FORMATS_BY_NAME[name]
+                        ?: throw IllegalArgumentException("AutoJs6 barcode format is not supported: $value")
+                }
+                else -> throw IllegalArgumentException("AutoJs6 barcode format must be a number or string.")
+            }
+            require(format == MLKitBarcode.FORMAT_ALL_FORMATS || BARCODE_FORMAT_NAMES_BY_VALUE.containsKey(format)) {
+                "AutoJs6 barcode format is not supported: $value"
+            }
+            return format
+        }
+
+        private fun parseMaxResults(options: JSONObject): Int {
+            if (!options.has("maxResults") || options.isNull("maxResults")) {
+                return MAX_RESULTS
+            }
+            val value = options.opt("maxResults")
+            val number = when (value) {
+                is Int -> value.toDouble()
+                is Long -> value.toDouble()
+                is Number -> value.toDouble()
+                is String -> value.toDoubleOrNull()
+                else -> null
+            }
+            require(number != null && number.isFinite()) { "AutoJs6 barcode maxResults must be a finite number." }
+            val maxResults = number.toInt()
+            require(maxResults in 1..MAX_RESULTS) { "AutoJs6 barcode maxResults must be between 1 and $MAX_RESULTS." }
+            return maxResults
+        }
+
+        private fun normalizeFormatName(value: String): String {
+            val normalized = value
+                .trim()
+                .uppercase(Locale.US)
+                .replace(Regex("[^A-Z0-9]+"), "_")
+                .trim('_')
+            return when {
+                normalized == "PDF417" -> "PDF_417"
+                normalized == "QRCODE" -> "QR_CODE"
+                normalized.startsWith("FORMAT_") -> normalizeFormatName(normalized.removePrefix("FORMAT_"))
+                else -> normalized
+            }
+        }
+    }
+}
+
+private class ControlledBarcodeOperation(
+    val resource: NodeBridgeResourceHandle,
+) {
+    private val completed = AtomicBoolean(false)
+
+    @Volatile
+    var timeoutRunnable: Runnable? = null
+
+    fun finish(): Boolean = completed.compareAndSet(false, true)
+
+    fun cancel(reason: String) {
+        if (finish()) {
+            resource.close(reason)
+        }
+    }
+}
+
+private class ControlledBarcodeDiagnostics {
+    private val dispatchCount = AtomicInteger(0)
+    private val failedCount = AtomicInteger(0)
+    private val serviceDestroyCancellationCount = AtomicInteger(0)
+
+    fun recordDispatch() {
+        dispatchCount.incrementAndGet()
+    }
+
+    fun recordFailure() {
+        failedCount.incrementAndGet()
+    }
+
+    fun recordServiceDestroyCancellation(count: Int) {
+        if (count > 0) {
+            serviceDestroyCancellationCount.addAndGet(count)
+        }
+    }
+
+    fun nativeValues(): Map<String, String> = linkedMapOf(
+        "embedded_script.barcode_live_dispatch_count" to dispatchCount.get().toString(),
+        "embedded_script.barcode_live_dispatch_failed_count" to failedCount.get().toString(),
+        "embedded_script.barcode_service_destroy_cancel_count" to serviceDestroyCancellationCount.get().toString(),
+    )
+}
+
+private fun List<MLKitBarcode>.toBarcodeResponseJson(method: String, maxResults: Int, offsetX: Int, offsetY: Int): String {
+    val snapshots = take(maxResults).map { barcode -> barcode.toBarcodeSnapshotJson(offsetX, offsetY) }
+    return when (method) {
+        "detect" -> snapshots.firstOrNull()?.toString() ?: "null"
+        "detectAll" -> JSONArray().apply { snapshots.forEach(::put) }.toString()
+        "recognizeText" -> barcodeJsonStringOrNull(snapshots.firstOrNull()?.optStringOrNull("rawValue"))
+        "recognizeTexts" -> JSONArray().apply {
+            snapshots.mapNotNull { snapshot -> snapshot.optStringOrNull("rawValue") }.forEach(::put)
+        }.toString()
+        else -> "null"
+    }
+}
+
+private fun MLKitBarcode.toBarcodeSnapshotJson(offsetX: Int, offsetY: Int): JSONObject {
+    val snapshot = JSONObject()
+        .put("schema", BARCODE_SNAPSHOT_SCHEMA)
+        .put("rawValue", barcodeJsonNullableString(rawValue))
+        .put("displayValue", barcodeJsonNullableString(displayValue))
+        .put("format", format)
+        .put("formatName", BARCODE_FORMAT_NAMES_BY_VALUE[format] ?: "ALL")
+        .put("valueType", valueType)
+        .put("valueTypeName", BARCODE_VALUE_TYPE_NAMES_BY_VALUE[valueType] ?: "UNKNOWN")
+    boundingBox?.let { bounds ->
+        snapshot.put(
+            "boundingBox",
+            JSONObject()
+                .put("left", bounds.left + offsetX)
+                .put("top", bounds.top + offsetY)
+                .put("right", bounds.right + offsetX)
+                .put("bottom", bounds.bottom + offsetY)
+                .put("width", bounds.width())
+                .put("height", bounds.height()),
+        )
+    }
+    cornerPoints?.takeIf { it.isNotEmpty() }?.let { points ->
+        snapshot.put(
+            "cornerPoints",
+            JSONArray().apply {
+                points.take(8).forEach { point ->
+                    put(
+                        JSONObject()
+                            .put("x", point.x + offsetX)
+                            .put("y", point.y + offsetY),
+                    )
+                }
+            },
+        )
+    }
+    structuredPayloadJson()?.let { structured -> snapshot.put("structured", structured) }
+    return snapshot
+}
+
+private fun MLKitBarcode.structuredPayloadJson(): JSONObject? = when (valueType) {
+    MLKitBarcode.TYPE_EMAIL -> email?.let { payload("email").put("email", it.toJsonObject()) }
+    MLKitBarcode.TYPE_PHONE -> phone?.let { payload("phone").put("phone", it.toJsonObject()) }
+    MLKitBarcode.TYPE_SMS -> sms?.let {
+        payload("sms").put(
+            "sms",
+            JSONObject()
+                .putNullableString("message", it.message)
+                .putNullableString("phoneNumber", it.phoneNumber),
+        )
+    }
+    MLKitBarcode.TYPE_URL -> url?.let {
+        payload("url").put(
+            "url",
+            JSONObject()
+                .putNullableString("title", it.title)
+                .putNullableString("url", it.url),
+        )
+    }
+    MLKitBarcode.TYPE_WIFI -> wifi?.let {
+        payload("wifi").put(
+            "wifi",
+            JSONObject()
+                .putNullableString("ssid", it.ssid)
+                .putNullableString("password", it.password)
+                .put("encryptionType", it.encryptionType),
+        )
+    }
+    MLKitBarcode.TYPE_GEO -> geoPoint?.let {
+        payload("geoPoint").put(
+            "geoPoint",
+            JSONObject()
+                .put("lat", it.lat)
+                .put("lng", it.lng),
+        )
+    }
+    MLKitBarcode.TYPE_CONTACT_INFO -> contactInfo?.let { payload("contactInfo").put("contactInfo", it.toJsonObject()) }
+    MLKitBarcode.TYPE_CALENDAR_EVENT -> calendarEvent?.let { payload("calendarEvent").put("calendarEvent", it.toJsonObject()) }
+    MLKitBarcode.TYPE_DRIVER_LICENSE -> driverLicense?.let { payload("driverLicense").put("driverLicense", it.toJsonObject()) }
+    else -> null
+}
+
+private fun MLKitBarcode.Email.toJsonObject(): JSONObject = JSONObject()
+    .putNullableString("address", address)
+    .putNullableString("subject", subject)
+    .putNullableString("body", body)
+    .put("type", type)
+
+private fun MLKitBarcode.Phone.toJsonObject(): JSONObject = JSONObject()
+    .putNullableString("number", number)
+    .put("type", type)
+
+private fun MLKitBarcode.ContactInfo.toJsonObject(): JSONObject = JSONObject()
+    .putNullableString("organization", organization)
+    .putNullableString("title", title)
+    .putNullableString("name", name?.formattedName)
+    .put("phones", JSONArray().apply { phones.orEmpty().take(16).forEach { put(it.toJsonObject()) } })
+    .put("emails", JSONArray().apply { emails.orEmpty().take(16).forEach { put(it.toJsonObject()) } })
+    .put("urls", JSONArray().apply { urls.orEmpty().take(16).forEach { put(it) } })
+    .put(
+        "addresses",
+        JSONArray().apply {
+            addresses.orEmpty().take(16).mapNotNull { address ->
+                address.addressLines.joinToString("\n").takeIf { it.isNotBlank() }
+            }.forEach { put(it) }
+        },
+    )
+
+private fun MLKitBarcode.CalendarEvent.toJsonObject(): JSONObject = JSONObject()
+    .putNullableString("summary", summary)
+    .putNullableString("description", description)
+    .putNullableString("location", location)
+    .putNullableString("organizer", organizer)
+    .putNullableString("status", status)
+    .putNullableString("start", start?.rawValue)
+    .putNullableString("end", end?.rawValue)
+
+private fun MLKitBarcode.DriverLicense.toJsonObject(): JSONObject = JSONObject()
+    .putNullableString("documentType", documentType)
+    .putNullableString("firstName", firstName)
+    .putNullableString("middleName", middleName)
+    .putNullableString("lastName", lastName)
+    .putNullableString("licenseNumber", licenseNumber)
+    .putNullableString("gender", gender)
+    .putNullableString("birthDate", birthDate)
+    .putNullableString("expiryDate", expiryDate)
+    .putNullableString("issuingDate", issueDate)
+    .putNullableString("issuingCountry", issuingCountry)
+    .putNullableString("addressStreet", addressStreet)
+    .putNullableString("addressCity", addressCity)
+    .putNullableString("addressState", addressState)
+    .putNullableString("addressZip", addressZip)
+
+private fun payload(payloadType: String): JSONObject = JSONObject().put("payloadType", payloadType)
+
+private fun JSONObject.putNullableString(name: String, value: String?): JSONObject {
+    if (value != null) {
+        put(name, value)
+    }
+    return this
+}
+
+private fun JSONObject.optStringOrNull(name: String): String? {
+    return if (has(name) && !isNull(name)) optString(name) else null
+}
+
+private fun barcodeJsonNullableString(value: String?): Any {
+    if (value == null) {
+        return JSONObject.NULL
+    }
+    require(value.toByteArray(Charsets.UTF_8).size <= BARCODE_MAX_RAW_VALUE_BYTES) {
+        "AutoJs6 barcode raw/display value exceeded $BARCODE_MAX_RAW_VALUE_BYTES bytes."
+    }
+    return value
+}
+
+private fun barcodeJsonStringOrNull(value: String?): String = value?.let { JSONObject.quote(it) } ?: "null"
+
+private const val BARCODE_SNAPSHOT_SCHEMA = "autojs6-node-barcode-snapshot-v1"
+private const val BARCODE_MAX_RAW_VALUE_BYTES = 8192
+
+private val BARCODE_FORMATS_BY_NAME: Map<String, Int> = linkedMapOf(
+    "ALL" to MLKitBarcode.FORMAT_ALL_FORMATS,
+    "AZTEC" to MLKitBarcode.FORMAT_AZTEC,
+    "CODABAR" to MLKitBarcode.FORMAT_CODABAR,
+    "CODE_39" to MLKitBarcode.FORMAT_CODE_39,
+    "CODE_93" to MLKitBarcode.FORMAT_CODE_93,
+    "CODE_128" to MLKitBarcode.FORMAT_CODE_128,
+    "DATA_MATRIX" to MLKitBarcode.FORMAT_DATA_MATRIX,
+    "EAN_8" to MLKitBarcode.FORMAT_EAN_8,
+    "EAN_13" to MLKitBarcode.FORMAT_EAN_13,
+    "ITF" to MLKitBarcode.FORMAT_ITF,
+    "PDF_417" to MLKitBarcode.FORMAT_PDF417,
+    "QR_CODE" to MLKitBarcode.FORMAT_QR_CODE,
+    "UPC_A" to MLKitBarcode.FORMAT_UPC_A,
+    "UPC_E" to MLKitBarcode.FORMAT_UPC_E,
+)
+
+private val BARCODE_FORMAT_NAMES_BY_VALUE: Map<Int, String> = BARCODE_FORMATS_BY_NAME
+    .filterKeys { it != "ALL" }
+    .entries
+    .associate { (name, value) -> value to name }
+
+private val BARCODE_VALUE_TYPE_NAMES_BY_VALUE: Map<Int, String> = mapOf(
+    MLKitBarcode.TYPE_UNKNOWN to "UNKNOWN",
+    MLKitBarcode.TYPE_CONTACT_INFO to "CONTACT_INFO",
+    MLKitBarcode.TYPE_EMAIL to "EMAIL",
+    MLKitBarcode.TYPE_ISBN to "ISBN",
+    MLKitBarcode.TYPE_PHONE to "PHONE",
+    MLKitBarcode.TYPE_PRODUCT to "PRODUCT",
+    MLKitBarcode.TYPE_SMS to "SMS",
+    MLKitBarcode.TYPE_TEXT to "TEXT",
+    MLKitBarcode.TYPE_URL to "URL",
+    MLKitBarcode.TYPE_WIFI to "WIFI",
+    MLKitBarcode.TYPE_GEO to "GEO",
+    MLKitBarcode.TYPE_CALENDAR_EVENT to "CALENDAR_EVENT",
+    MLKitBarcode.TYPE_DRIVER_LICENSE to "DRIVER_LICENSE",
+)
+
+private data class ControlledNotificationDescriptor(
+    val id: Int,
+    val title: String,
+    val text: String,
+    val channel: String,
+    val channelName: String,
+    val ongoing: Boolean,
+    val priority: Int,
+) {
+    fun toNotification(context: Context): Notification {
+        return NotificationCompat.Builder(context, channel)
+            .setSmallIcon(R.drawable.autojs6_status_bar_icon)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setOngoing(ongoing)
+            .setAutoCancel(!ongoing)
+            .setPriority(priority)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setLocalOnly(true)
+            .build()
+    }
+
+    companion object {
+        fun fromJson(
+            request: NodeBridgeRequest,
+            payload: JSONObject,
+            fallbackId: Int,
+            defaultChannelName: String,
+        ): ControlledNotificationDescriptor {
+            val title = optionalString(request, payload, "title", ControlledNotificationPolicy.MAX_TITLE_LENGTH)
+                ?: "AutoJs6 Node"
+            val text = optionalString(request, payload, "text", ControlledNotificationPolicy.MAX_TEXT_LENGTH).orEmpty()
+            if (title.isBlank() && text.isBlank()) {
+                throw NotificationBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "notifications.notify requires title or text.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            val id = parseOptionalNotificationId(request, payload.opt("id")) ?: fallbackId
+            val channel = optionalString(request, payload, "channel", ControlledNotificationPolicy.MAX_CHANNEL_LENGTH)
+                ?.takeIf { it.isNotBlank() }
+                ?: ControlledNotificationPolicy.DEFAULT_CHANNEL_ID
+            val channelName = optionalString(request, payload, "channelName", ControlledNotificationPolicy.MAX_TITLE_LENGTH)
+                ?.takeIf { it.isNotBlank() }
+                ?: defaultChannelName
+            val priority = parsePriority(request, payload.opt("priority"))
+            return ControlledNotificationDescriptor(
+                id = id,
+                title = title,
+                text = text,
+                channel = channel,
+                channelName = channelName,
+                ongoing = payload.optBoolean("ongoing", false),
+                priority = priority,
+            )
+        }
+
+        fun parseNotificationIdArg(request: NodeBridgeRequest, args: JSONArray, index: Int): Int {
+            return parseOptionalNotificationId(request, args.opt(index))
+                ?: throw NotificationBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "notifications.cancel requires a positive integer id.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+        }
+
+        private fun optionalString(
+            request: NodeBridgeRequest,
+            payload: JSONObject,
+            name: String,
+            maxLength: Int,
+        ): String? {
+            if (!payload.has(name) || payload.isNull(name)) {
+                return null
+            }
+            val value = payload.opt(name)
+            if (value !is String || value.length > maxLength || '\u0000' in value) {
+                throw NotificationBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "notifications.notify option $name must be a string up to $maxLength characters.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            return value.trim()
+        }
+
+        private fun parseOptionalNotificationId(request: NodeBridgeRequest, value: Any?): Int? {
+            if (value == null || value == JSONObject.NULL) {
+                return null
+            }
+            val id = when (value) {
+                is Int -> value
+                is Long -> value.takeIf { it <= Int.MAX_VALUE }?.toInt()
+                is Number -> value.toDouble().takeIf { it.isFinite() && it % 1.0 == 0.0 && it <= Int.MAX_VALUE }?.toInt()
+                is String -> value.toIntOrNull()
+                else -> null
+            }
+            if (id == null || id <= 0) {
+                throw NotificationBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "notifications notify/cancel id must be a positive integer.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            return id
+        }
+
+        private fun parsePriority(request: NodeBridgeRequest, value: Any?): Int {
+            if (value == null || value == JSONObject.NULL) {
+                return NotificationCompat.PRIORITY_DEFAULT
+            }
+            val priority = when (value) {
+                is Number -> value.toInt()
+                is String -> when (value.trim().lowercase(Locale.US)) {
+                    "min" -> NotificationCompat.PRIORITY_MIN
+                    "low" -> NotificationCompat.PRIORITY_LOW
+                    "default" -> NotificationCompat.PRIORITY_DEFAULT
+                    "high" -> NotificationCompat.PRIORITY_HIGH
+                    "max" -> NotificationCompat.PRIORITY_MAX
+                    else -> null
+                }
+                else -> null
+            }
+            if (priority == null || priority !in NotificationCompat.PRIORITY_MIN..NotificationCompat.PRIORITY_MAX) {
+                throw NotificationBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "notifications.notify priority must be min, low, default, high, max, or a supported NotificationCompat priority.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            return priority
+        }
+    }
+}
+
+private object ControlledNotificationPolicy {
+    const val DEFAULT_CHANNEL_ID = "autojs6-node"
+    const val MAX_ACTIVE_NOTIFICATIONS = 32
+    const val MAX_TITLE_LENGTH = 120
+    const val MAX_TEXT_LENGTH = 1024
+    const val MAX_CHANNEL_LENGTH = 80
+
+    fun importanceForPriority(priority: Int): Int {
+        return when (priority) {
+            NotificationCompat.PRIORITY_MIN -> NotificationManager.IMPORTANCE_MIN
+            NotificationCompat.PRIORITY_LOW -> NotificationManager.IMPORTANCE_LOW
+            NotificationCompat.PRIORITY_HIGH,
+            NotificationCompat.PRIORITY_MAX -> NotificationManager.IMPORTANCE_HIGH
+            else -> NotificationManager.IMPORTANCE_DEFAULT
+        }
+    }
+}
+
+private class NotificationBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
+
+private data class ControlledInputObserverRequest(
+    val source: String,
+    val keys: List<String>,
+    val actions: List<String>,
+    val maxQueueSize: Int,
+)
+
+private data class ControlledInputObserverDescriptor(
+    val value: ControlledInputObserverRequest? = null,
+    val error: NodeBridgeError? = null,
+) {
+    companion object {
+        fun fromRequest(request: NodeBridgeRequest): ControlledInputObserverDescriptor {
+            val args = runCatching { JSONArray(request.argsJson.ifBlank { "[]" }) }.getOrDefault(JSONArray())
+            val payload = args.optJSONObject(0)
+                ?: return ControlledInputObserverDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "input_observer.${request.method} requires a descriptor object.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            if (payload.optString("type", "key") != "key") {
+                return ControlledInputObserverDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "input_observer.${request.method} supports only type=key.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            if (payload.optBoolean("intercept", false)) {
+                return ControlledInputObserverDescriptor(
+                    error = NodeBridgeError.permissionDenied(
+                        message = "input_observer key interception requires the separate input_observer.intercept provider gate.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            val keys = payload.optJSONArray("keys")?.toStringList()
+                .orEmpty()
+                .map { ControlledInputObserverPolicy.normalizeKeyName(it) }
+                .filter { it.isNotEmpty() }
+                .distinct()
+            if (keys.isEmpty()) {
+                return ControlledInputObserverDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "input_observer.${request.method} requires at least one key name.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            val actions = payload.optJSONArray("actions")?.toStringList()
+                .orEmpty()
+                .map { it.trim().lowercase(Locale.US) }
+                .filter { it.isNotEmpty() }
+                .ifEmpty { listOf("down", "up") }
+                .distinct()
+            if (actions.any { it !in ControlledInputObserverPolicy.allowedActions }) {
+                return ControlledInputObserverDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "input_observer.${request.method} actions may contain only down and up.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            val options = args.optJSONObject(1) ?: JSONObject()
+            val maxQueueSize = parseInt(
+                options.opt("maxQueueSize"),
+                fallback = ControlledInputObserverPolicy.DEFAULT_QUEUE_SIZE,
+            ).coerceIn(1, ControlledInputObserverPolicy.MAX_QUEUE_SIZE)
+            return ControlledInputObserverDescriptor(
+                value = ControlledInputObserverRequest(
+                    source = payload.optString("source", "fake").trim().lowercase(Locale.US).ifBlank { "fake" },
+                    keys = keys,
+                    actions = actions,
+                    maxQueueSize = maxQueueSize,
+                ),
+            )
+        }
+
+        private fun JSONArray.toStringList(): List<String> {
+            return (0 until length()).mapNotNull { index -> optString(index).takeIf { it.isNotBlank() } }
+        }
+
+        private fun parseInt(value: Any?, fallback: Int): Int {
+            return when (value) {
+                is Int -> value
+                is Long -> value.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
+                is Number -> value.toDouble().takeIf { it.isFinite() }?.toInt()
+                is String -> value.toIntOrNull()
+                else -> null
+            } ?: fallback
+        }
+    }
+}
+
+private object ControlledInputObserverPolicy {
+    const val MAX_ACTIVE_SUBSCRIPTIONS = 8
+    const val DEFAULT_QUEUE_SIZE = 64
+    const val MAX_QUEUE_SIZE = 256
+    const val DEFAULT_DRAIN_BATCH_SIZE = 32
+    const val MAX_DRAIN_BATCH_SIZE = 128
+
+    val allowedActions: Set<String> = setOf("down", "up")
+    val allowedSources: Set<String> = setOf("fake", "accessibility")
+
+    fun sourceJson(id: String, available: Boolean, live: Boolean, reason: String = ""): JSONObject {
+        return JSONObject()
+            .put("id", id)
+            .put("type", "key")
+            .put("available", available)
+            .put("live", live)
+            .apply {
+                if (reason.isNotBlank()) {
+                    put("reason", reason)
+                }
+            }
+    }
+
+    fun normalizeKeyName(key: String): String {
+        val raw = key
+            .trim()
+            .lowercase(Locale.US)
+            .removePrefix("keycode_")
+            .replace('-', '_')
+            .replace(' ', '_')
+        return when (raw) {
+            "volumeup" -> "volume_up"
+            "volumedown" -> "volume_down"
+            else -> raw
+        }
+    }
+
+    fun keyNameForKeyCode(keyCode: Int): String {
+        return normalizeKeyName(KeyEvent.keyCodeToString(keyCode))
+    }
+
+    fun actionNameFor(action: Int): String {
+        return when (action) {
+            KeyEvent.ACTION_DOWN -> "down"
+            KeyEvent.ACTION_UP -> "up"
+            else -> "unknown"
+        }
+    }
+
+    fun keyCodeFor(key: String): Int {
+        return when (normalizeKeyName(key)) {
+            "home" -> 3
+            "back" -> 4
+            "menu" -> 82
+            "volume_up" -> 24
+            "volume_down" -> 25
+            else -> 0
+        }
+    }
+}
+
+private class ControlledInputObserverSubscription(
+    val id: String,
+    private val source: String,
+    private val keys: List<String>,
+    private val actions: List<String>,
+    private val maxQueueSize: Int,
+) {
+    private val events = ConcurrentLinkedQueue<JSONObject>()
+    private val closeActions = ConcurrentLinkedQueue<() -> Unit>()
+    private val droppedCount = AtomicInteger(0)
+    private val liveListenerAttached = AtomicBoolean(false)
+    private val closed = AtomicBoolean(false)
+    private val createdAt = System.currentTimeMillis()
+
+    fun queueEvent(key: String, keyCode: Int, action: String) {
+        if (closed.get()) {
+            return
+        }
+        queue(
+            JSONObject()
+                .put("type", "key")
+                .put("source", source)
+                .put("key", key)
+                .put("keyCode", keyCode)
+                .put("action", action)
+                .put("eventTime", System.currentTimeMillis())
+                .put("repeatCount", 0),
+        )
+    }
+
+    fun queueKeyEvent(keyCode: Int, event: KeyEvent) {
+        val keyName = ControlledInputObserverPolicy.keyNameForKeyCode(keyCode)
+        val actionName = ControlledInputObserverPolicy.actionNameFor(event.action)
+        if (keyName !in keys || actionName !in actions) {
+            return
+        }
+        queue(
+            JSONObject()
+                .put("type", "key")
+                .put("source", source)
+                .put("key", keyName)
+                .put("keyCode", keyCode)
+                .put("action", actionName)
+                .put("eventTime", event.eventTime)
+                .put("repeatCount", event.repeatCount),
+        )
+    }
+
+    fun drainEvents(maxEvents: Int): JSONArray {
+        val result = JSONArray()
+        repeat(maxEvents.coerceAtLeast(0)) {
+            val event = events.poll() ?: return@repeat
+            result.put(event)
+        }
+        return result
+    }
+
+    fun addCloseAction(action: () -> Unit) {
+        closeActions.add(action)
+    }
+
+    fun markLiveListenerAttached() {
+        liveListenerAttached.set(true)
+    }
+
+    fun markLiveListenerDetached() {
+        liveListenerAttached.set(false)
+    }
+
+    fun pendingEventCount(): Int = events.size
+
+    fun droppedEventCount(): Int = droppedCount.get()
+
+    fun liveListenerCount(): Int = if (!closed.get() && liveListenerAttached.get()) 1 else 0
+
+    fun close() {
+        if (closed.getAndSet(true)) {
+            return
+        }
+        events.clear()
+        while (true) {
+            val action = closeActions.poll() ?: return
+            runCatching { action() }
+        }
+    }
+
+    fun toJson(): JSONObject {
+        return JSONObject()
+            .put("id", id)
+            .put("type", "key")
+            .put("source", source)
+            .put("keys", JSONArray(keys))
+            .put("actions", JSONArray(actions))
+            .put("ready", true)
+            .put("closed", closed.get())
+            .put("createdAt", createdAt)
+            .put("pendingEventCount", pendingEventCount())
+            .put("droppedCount", droppedCount.get())
+            .put("liveListenerCount", liveListenerCount())
+    }
+
+    private fun queue(event: JSONObject) {
+        while (events.size >= maxQueueSize) {
+            if (events.poll() == null) {
+                break
+            }
+            droppedCount.incrementAndGet()
+        }
+        events.add(event)
+    }
+}
+
+private data class ControlledSensorRequest(
+    val type: String,
+    val sensorType: Int,
+    val samplingIntervalMs: Long,
+    val samplingPeriodUs: Int,
+    val timeoutMs: Long,
+    val maxQueueSize: Int,
+)
+
+private data class ControlledSensorRequestDescriptor(
+    val value: ControlledSensorRequest? = null,
+    val error: NodeBridgeError? = null,
+) {
+    companion object {
+        fun fromRequest(request: NodeBridgeRequest): ControlledSensorRequestDescriptor {
+            val args = runCatching { JSONArray(request.argsJson.ifBlank { "[]" }) }.getOrDefault(JSONArray())
+            val payload = args.optJSONObject(0)
+                ?: return ControlledSensorRequestDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "sensors.${request.method} requires a descriptor object.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            val type = payload.optString("type", "").trim().lowercase(Locale.US)
+            val sensorType = ControlledSensorPolicy.allowedSensorTypes[type]
+                ?: return ControlledSensorRequestDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "sensors.${request.method} supports only accelerometer, gyroscope, and light.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            val samplingIntervalMs = parseLong(
+                payload.opt("samplingIntervalMs"),
+                fallback = ControlledSensorPolicy.DEFAULT_SAMPLING_INTERVAL_MS,
+            ).coerceIn(ControlledSensorPolicy.MIN_SAMPLING_INTERVAL_MS, ControlledSensorPolicy.MAX_SAMPLING_INTERVAL_MS)
+            val timeoutMs = parseLong(
+                payload.opt("timeoutMs"),
+                fallback = ControlledSensorPolicy.DEFAULT_TIMEOUT_MS,
+            ).coerceIn(ControlledSensorPolicy.MIN_TIMEOUT_MS, ControlledSensorPolicy.MAX_TIMEOUT_MS)
+            val maxQueueSize = parseInt(
+                payload.opt("maxQueueSize"),
+                fallback = ControlledSensorPolicy.DEFAULT_MAX_QUEUE_SIZE,
+            ).coerceIn(1, ControlledSensorPolicy.HARD_MAX_QUEUE_SIZE)
+            return ControlledSensorRequestDescriptor(
+                value = ControlledSensorRequest(
+                    type = type,
+                    sensorType = sensorType,
+                    samplingIntervalMs = samplingIntervalMs,
+                    samplingPeriodUs = (samplingIntervalMs * 1000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+                    timeoutMs = timeoutMs,
+                    maxQueueSize = maxQueueSize,
+                ),
+            )
+        }
+
+        private fun parseLong(value: Any?, fallback: Long): Long {
+            return when (value) {
+                is Int -> value.toLong()
+                is Long -> value
+                is Number -> value.toDouble().takeIf { it.isFinite() }?.toLong()
+                is String -> value.toLongOrNull()
+                else -> null
+            } ?: fallback
+        }
+
+        private fun parseInt(value: Any?, fallback: Int): Int {
+            return parseLong(value, fallback.toLong()).coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
+        }
+    }
+}
+
+private object ControlledSensorPolicy {
+    const val MAX_SUBSCRIPTIONS = 4
+    const val MIN_SAMPLING_INTERVAL_MS = 100L
+    const val DEFAULT_SAMPLING_INTERVAL_MS = 250L
+    const val MAX_SAMPLING_INTERVAL_MS = 60_000L
+    const val MIN_TIMEOUT_MS = 100L
+    const val DEFAULT_TIMEOUT_MS = 5_000L
+    const val MAX_TIMEOUT_MS = 60_000L
+    const val DEFAULT_MAX_QUEUE_SIZE = 16
+    const val HARD_MAX_QUEUE_SIZE = 64
+
+    val allowedSensorTypes: Map<String, Int> = linkedMapOf(
+        "accelerometer" to Sensor.TYPE_ACCELEROMETER,
+        "gyroscope" to Sensor.TYPE_GYROSCOPE,
+        "light" to Sensor.TYPE_LIGHT,
+    )
+
+    fun sensorInfoJson(type: String, sensor: Sensor): JSONObject {
+        return JSONObject()
+            .put("type", type)
+            .put("name", sensor.name.orEmpty())
+            .put("vendor", sensor.vendor.orEmpty())
+            .put("version", sensor.version)
+            .put("resolution", sensor.resolution.toDouble())
+            .put("power", sensor.power.toDouble())
+            .put("minDelayUs", sensor.minDelay)
+            .put("maxDelayUs", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) sensor.maxDelay else 0)
+    }
+
+    fun sensorEventJson(type: String, event: SensorEvent): JSONObject {
+        return JSONObject()
+            .put("type", type)
+            .put("timestamp", event.timestamp)
+            .put("accuracy", event.accuracy)
+            .put("values", JSONArray().also { values ->
+                event.values.forEach { values.put(it.toDouble()) }
+            })
+    }
+}
+
+private class ControlledSensorSubscription(
+    val id: String,
+    val type: String,
+    private val maxQueueSize: Int,
+) {
+    private val events = ConcurrentLinkedQueue<JSONObject>()
+    @Volatile
+    var listener: SensorEventListener? = null
+
+    fun queueEvent(event: JSONObject) {
+        queue(JSONObject().put("type", "event").put("event", event))
+    }
+
+    fun queueAccuracy(accuracy: Int) {
+        queue(JSONObject().put("type", "accuracy").put("accuracy", accuracy))
+    }
+
+    fun queueClose() {
+        queue(JSONObject().put("type", "close"))
+    }
+
+    fun drainEvents(): JSONArray {
+        val result = JSONArray()
+        while (true) {
+            val event = events.poll() ?: break
+            result.put(event)
+        }
+        return result
+    }
+
+    fun toJson(request: ControlledSensorRequest): JSONObject {
+        return JSONObject()
+            .put("id", id)
+            .put("type", type)
+            .put("samplingIntervalMs", request.samplingIntervalMs)
+            .put("maxQueueSize", maxQueueSize)
+    }
+
+    private fun queue(event: JSONObject) {
+        while (events.size >= maxQueueSize) {
+            events.poll() ?: break
+        }
+        events.add(event)
+    }
+}
+
 private class ControlledFetchException(
     val code: String,
     message: String,
@@ -3028,6 +7516,8 @@ private class ControlledWebSocketSession(
     private val events = ConcurrentLinkedQueue<JSONObject>()
     @Volatile
     private var webSocket: WebSocket? = null
+    @Volatile
+    private var terminal = false
 
     fun attach(value: WebSocket) {
         webSocket = value
@@ -3065,6 +7555,10 @@ private class ControlledWebSocketSession(
         )
     }
 
+    fun markTerminal() {
+        terminal = true
+    }
+
     fun drainEvents(): JSONArray {
         val result = JSONArray()
         while (true) {
@@ -3073,6 +7567,8 @@ private class ControlledWebSocketSession(
         }
         return result
     }
+
+    fun removeAfterDrain(): Boolean = terminal && events.isEmpty()
 
     fun sendText(text: String): Boolean = webSocket?.send(text) == true
 

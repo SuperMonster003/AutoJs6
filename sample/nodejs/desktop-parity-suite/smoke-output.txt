@@ -1,0 +1,7 @@
+sample.desktop-parity-suite.smoke.catalog=2
+sample.desktop-parity-suite.esm-loader.label=managed-local-esm
+sample.desktop-parity-suite.esm-loader.answer=42
+sample.desktop-parity-suite.esm-loader=PASS
+sample.desktop-parity-suite.npm-dependency.sum=42
+sample.desktop-parity-suite.npm-dependency=PASS
+sample.desktop-parity-suite.smoke=PASS

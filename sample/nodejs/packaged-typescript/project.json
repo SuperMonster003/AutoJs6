@@ -1,0 +1,16 @@
+{
+  "name": "packaged-typescript",
+  "type": "node",
+  "main": "main.mts",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["typescript", "esm", "dynamic_import", "moduleSources"],
+    "expectedProvider": "packaged Embedded Node TypeScript loader",
+    "packagedSupport": "supported for local .mts/.ts project graph",
+    "securityLimitations": ["local project graph only", "no remote imports", "unsupported TS syntax fails before launch"]
+  }
+}

@@ -5453,16 +5453,20 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::string& source,
         const std::string& sourceName,
         const std::string& workingDirectory,
+        const std::string& sandboxRoot,
         const std::vector<std::pair<std::string, std::string>>& moduleSources,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSources,
         const std::vector<std::pair<std::string, std::string>>& env,
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
+        bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
+        bool childProcessExperimentalEnabled,
         bool javaInteropExperimentalEnabled) {
     const std::string sourceLiteral = jsonStringLiteral(source);
     const std::string sourceNameLiteral = jsonStringLiteral(sanitizeSourceUrl(sourceName));
     const std::string workingDirectoryLiteral = jsonStringLiteral(workingDirectory);
+    const std::string sandboxRootLiteral = jsonStringLiteral(sandboxRoot.empty() ? workingDirectory : sandboxRoot);
     const std::string moduleSourcesLiteral = buildEmbeddedModuleSourcesLiteral(moduleSources);
     const std::string runtimeModuleSourcesLiteral = buildEmbeddedModuleSourcesLiteral(runtimeModuleSources);
     const std::string envLiteral = buildEmbeddedModuleSourcesLiteral(env);
@@ -5471,6 +5475,7 @@ std::string buildEmbeddedScriptExecutionSource(
             source.size() +
             sourceName.size() +
             workingDirectory.size() +
+            sandboxRoot.size() +
             moduleSourcesLiteral.size() +
             runtimeModuleSourcesLiteral.size() +
             envLiteral.size() +
@@ -5488,8 +5493,10 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_module_root = ")JS";
     script += workingDirectoryLiteral;
     script += R"JS(";
-  const __autojs6_sandbox_root = __autojs6_module_root;
-  let __autojs6_current_working_directory = __autojs6_sandbox_root;
+  const __autojs6_sandbox_root = ")JS";
+    script += sandboxRootLiteral;
+    script += R"JS(";
+  let __autojs6_current_working_directory = __autojs6_module_root || __autojs6_sandbox_root;
   let __autojs6_chdir_last_failure_reason = "";
   let __autojs6_create_require_last_failure_reason = "";
   const __autojs6_module_sources = Object.freeze()JS";
@@ -5508,15 +5515,21 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_dynamic_import_experimental_enabled = )JS";
     script += dynamicImportExperimentalEnabled ? "true" : "false";
     script += R"JS(;
+  const __autojs6_raw_node_network_modules_experimental_enabled = )JS";
+    script += rawNodeNetworkModulesExperimentalEnabled ? "true" : "false";
+    script += R"JS(;
   const __autojs6_worker_threads_experimental_enabled = )JS";
     script += workerThreadsExperimentalEnabled ? "true" : "false";
+    script += R"JS(;
+  const __autojs6_child_process_experimental_enabled = )JS";
+    script += childProcessExperimentalEnabled ? "true" : "false";
     script += R"JS(;
   const __autojs6_java_interop_experimental_enabled = )JS";
     script += javaInteropExperimentalEnabled ? "true" : "false";
     script += R"JS(;
-  const __autojs6_runtime_module_count_limit = 64;
-  const __autojs6_runtime_module_single_source_bytes_limit = 262144;
-  const __autojs6_runtime_module_total_source_bytes_limit = 524288;
+  const __autojs6_runtime_module_count_limit = 8192;
+  const __autojs6_runtime_module_single_source_bytes_limit = 16777216;
+  const __autojs6_runtime_module_total_source_bytes_limit = 67108864;
   const __autojs6_runtime_module_diagnostics = {
     loadedCount: 0,
     sourceBytes: 0,
@@ -5560,6 +5573,27 @@ std::string buildEmbeddedScriptExecutionSource(
     lastSource: "",
     lastMap: "",
     lastError: ""
+  };
+  const __autojs6_compile_cache_diagnostics = {
+    requested: false,
+    enabled: false,
+    status: "not_requested",
+    statusCode: "",
+    directory: "",
+    key: "",
+    runtimeKey: "",
+    projectKey: "",
+    loader: "",
+    schema: "",
+    message: "",
+    v8Version: "",
+    flushSupported: false,
+    flushAttempted: false,
+    flushed: false,
+    customLoader: true,
+    hitCount: 0,
+    missCount: 0,
+    hitMissStatus: "unavailable"
   };
   const __autojs6_source_map_cache = Object.create(null);
   let __autojs6_runtime_module_accounting = null;
@@ -5624,10 +5658,121 @@ std::string buildEmbeddedScriptExecutionSource(
       return "";
     }
   }
-  function __autojs6_console_write(stream, values) {
-    if (!stream || typeof stream.write !== "function") return;
+  const __autojs6_console_level_verbose = "VERBOSE";
+  const __autojs6_console_level_debug = "DEBUG";
+  const __autojs6_console_level_info = "INFO";
+  const __autojs6_console_level_warn = "WARN";
+  const __autojs6_console_level_error = "ERROR";
+  const __autojs6_console_level_assert = "ASSERT";
+  const __autojs6_console_event_max_count = 512;
+  const __autojs6_console_event_text_max = 8192;
+  const __autojs6_console_events = [];
+  let __autojs6_console_events_truncated = false;
+  function __autojs6_console_record(level, text) {
+    if (__autojs6_console_events.length >= __autojs6_console_event_max_count) {
+      __autojs6_console_events_truncated = true;
+      return;
+    }
+    let eventText = "";
+    try {
+      eventText = String(text);
+    } catch (_) {
+      eventText = "";
+    }
+    if (eventText.length > __autojs6_console_event_text_max) {
+      eventText = eventText.slice(0, __autojs6_console_event_text_max);
+      __autojs6_console_events_truncated = true;
+    }
+    __autojs6_console_events.push({
+      level: level || __autojs6_console_level_debug,
+      text: eventText
+    });
+  }
+  function __autojs6_console_events_json() {
+    try {
+      return JSON.stringify(__autojs6_console_events);
+    } catch (_) {
+      return "[]";
+    }
+  }
+  function __autojs6_console_write(stream, values, level) {
     const text = Array.prototype.map.call(values, __autojs6_console_text).join(" ");
+    __autojs6_console_record(level || __autojs6_console_level_debug, text);
+    if (!stream || typeof stream.write !== "function") return;
     stream.write(text + "\n");
+  }
+  function __autojs6_console_assert_error(message) {
+    const error = new Error(message);
+    try {
+      error.name = "AssertionError";
+    } catch (_) {}
+    return error;
+  }
+  function __autojs6_console_cell_text(value) {
+    return __autojs6_console_text(value).replace(/\r/g, "\\r").replace(/\n/g, "\\n");
+  }
+  function __autojs6_console_pad_right(value, width) {
+    const text = String(value);
+    return text.length >= width ? text : text + " ".repeat(width - text.length);
+  }
+  function __autojs6_console_table_text(data, properties) {
+    const rows = [];
+    const columns = ["(index)"];
+    const requested = Array.isArray(properties)
+      ? properties.map(function (value) { return String(value); })
+      : null;
+    function addColumn(name) {
+      if (columns.indexOf(name) < 0) columns.push(name);
+    }
+    function addRow(index, value) {
+      const row = Object.create(null);
+      row["(index)"] = index;
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const keys = requested || Object.keys(value);
+        for (let i = 0; i < keys.length; i += 1) {
+          const key = String(keys[i]);
+          addColumn(key);
+          row[key] = value[key];
+        }
+      } else {
+        addColumn("Values");
+        row.Values = value;
+      }
+      rows.push(row);
+    }
+    if (Array.isArray(data)) {
+      for (let i = 0; i < data.length; i += 1) addRow(i, data[i]);
+    } else if (data && typeof data === "object") {
+      const keys = Object.keys(data);
+      for (let i = 0; i < keys.length; i += 1) addRow(keys[i], data[keys[i]]);
+    } else {
+      return __autojs6_console_text(data);
+    }
+    if (rows.length === 0) return "(empty)";
+    const widths = columns.map(function (column) { return column.length; });
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+      for (let columnIndex = 0; columnIndex < columns.length; columnIndex += 1) {
+        const column = columns[columnIndex];
+        const value = rows[rowIndex][column];
+        const text = value === undefined ? "" : __autojs6_console_cell_text(value);
+        widths[columnIndex] = Math.max(widths[columnIndex], text.length);
+      }
+    }
+    const separator = "+-" + widths.map(function (width) { return "-".repeat(width); }).join("-+-") + "-+";
+    const lines = [separator];
+    lines.push("| " + columns.map(function (column, index) {
+      return __autojs6_console_pad_right(column, widths[index]);
+    }).join(" | ") + " |");
+    lines.push(separator);
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+      lines.push("| " + columns.map(function (column, index) {
+        const value = rows[rowIndex][column];
+        const text = value === undefined ? "" : __autojs6_console_cell_text(value);
+        return __autojs6_console_pad_right(text, widths[index]);
+      }).join(" | ") + " |");
+    }
+    lines.push(separator);
+    return lines.join("\n");
   }
   const __autojs6_output_capture_text_max = 4096;
   const __autojs6_output_capture_state = {
@@ -5725,20 +5870,72 @@ std::string buildEmbeddedScriptExecutionSource(
       ? globalThis.console
       : {};
     const shim = Object.assign({}, existing);
-    shim.log = function () {
+    function write(level, stream, values) {
       __autojs6_console_write(
+        typeof process === "object" && process ? stream : null,
+        values,
+        level
+      );
+    }
+    shim.log = function () {
+      write(
+        __autojs6_console_level_debug,
         typeof process === "object" && process ? process.stdout : null,
         arguments
       );
     };
-    shim.info = shim.log;
+    shim.debug = shim.log;
+    shim.verbose = function () {
+      write(
+        __autojs6_console_level_verbose,
+        typeof process === "object" && process ? process.stdout : null,
+        arguments
+      );
+    };
+    shim.info = function () {
+      write(
+        __autojs6_console_level_info,
+        typeof process === "object" && process ? process.stdout : null,
+        arguments
+      );
+    };
     shim.error = function () {
-      __autojs6_console_write(
+      write(
+        __autojs6_console_level_error,
         typeof process === "object" && process ? process.stderr : null,
         arguments
       );
     };
-    shim.warn = shim.error;
+    shim.warn = function () {
+      write(
+        __autojs6_console_level_warn,
+        typeof process === "object" && process ? process.stderr : null,
+        arguments
+      );
+    };
+    shim.assert = function (value) {
+      if (value) return undefined;
+      const output = [];
+      for (let i = 1; i < arguments.length; i += 1) {
+        output.push(arguments[i]);
+      }
+      if (output.length === 0) output.push("");
+      write(
+        __autojs6_console_level_assert,
+        typeof process === "object" && process ? process.stderr : null,
+        output
+      );
+      throw __autojs6_console_assert_error(
+        output.map(__autojs6_console_text).join(" ")
+      );
+    };
+    shim.table = function (tabularData, properties) {
+      write(
+        __autojs6_console_level_debug,
+        typeof process === "object" && process ? process.stdout : null,
+        [__autojs6_console_table_text(tabularData, properties)]
+      );
+    };
     globalThis.console = shim;
   }
   function __autojs6_define_global(name, value) {
@@ -5755,6 +5952,236 @@ std::string buildEmbeddedScriptExecutionSource(
         globalThis[name] = value;
       } catch (_) {}
     }
+  }
+  function __autojs6_text_decoder_no_icu_fatal_error(error) {
+    return !!error && (
+      error.code === "ERR_NO_ICU" ||
+      String(error.message || "").indexOf("without ICU") >= 0
+    );
+  }
+  function __autojs6_text_decoder_encoding(label) {
+    const value = label === undefined || label === null ? "utf-8" : String(label).trim().toLowerCase();
+    if (value === "utf8" || value === "utf-8" || value === "unicode-1-1-utf-8") return "utf-8";
+    if (value === "utf-16le" || value === "utf-16") return "utf-16le";
+    if (value === "utf-16be") return "utf-16be";
+    return "";
+  }
+  function __autojs6_text_decoder_input(value) {
+    if (value === undefined) return new Uint8Array();
+    if (value instanceof Uint8Array) return value;
+    if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) {
+      return new Uint8Array(value);
+    }
+    if (typeof ArrayBuffer === "function" && ArrayBuffer.isView && ArrayBuffer.isView(value)) {
+      return new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+    }
+    throw new TypeError("TextDecoder.decode input must be an ArrayBuffer or ArrayBufferView.");
+  }
+  function __autojs6_text_decoder_type_error(message) {
+    const error = new TypeError(message);
+    try {
+      Object.defineProperty(error, "code", {
+        value: "ERR_ENCODING_INVALID_ENCODED_DATA",
+        configurable: true,
+        enumerable: false
+      });
+    } catch (_) {}
+    return error;
+  }
+  function __autojs6_text_decoder_from_code_units(units, fatal) {
+    const chars = [];
+    for (let index = 0; index < units.length; index += 1) {
+      const code = units[index];
+      if (code >= 0xD800 && code <= 0xDBFF) {
+        const next = units[index + 1];
+        if (next >= 0xDC00 && next <= 0xDFFF) {
+          chars.push(String.fromCharCode(code, next));
+          index += 1;
+        } else if (fatal) {
+          throw __autojs6_text_decoder_type_error("The encoded data was not valid for encoding utf-16.");
+        } else {
+          chars.push("\uFFFD");
+        }
+      } else if (code >= 0xDC00 && code <= 0xDFFF) {
+        if (fatal) {
+          throw __autojs6_text_decoder_type_error("The encoded data was not valid for encoding utf-16.");
+        }
+        chars.push("\uFFFD");
+      } else {
+        chars.push(String.fromCharCode(code));
+      }
+    }
+    return chars.join("");
+  }
+  function __autojs6_text_decoder_decode_utf16(bytes, littleEndian, fatal, ignoreBOM) {
+    const units = [];
+    let length = bytes.byteLength;
+    if (length % 2 !== 0) {
+      if (fatal) {
+        throw __autojs6_text_decoder_type_error("The encoded data was not valid for encoding utf-16.");
+      }
+      length -= 1;
+    }
+    for (let index = 0; index < length; index += 2) {
+      const code = littleEndian
+        ? bytes[index] | (bytes[index + 1] << 8)
+        : (bytes[index] << 8) | bytes[index + 1];
+      units.push(code);
+    }
+    let text = __autojs6_text_decoder_from_code_units(units, fatal);
+    if (bytes.byteLength % 2 !== 0 && !fatal) {
+      text += "\uFFFD";
+    }
+    return !ignoreBOM && text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+  }
+  function __autojs6_text_decoder_decode_utf8(bytes, fatal, ignoreBOM) {
+    const chars = [];
+    let index = 0;
+    function fail() {
+      if (fatal) {
+        throw __autojs6_text_decoder_type_error("The encoded data was not valid for encoding utf-8.");
+      }
+      chars.push("\uFFFD");
+      index += 1;
+      return true;
+    }
+    while (index < bytes.length) {
+      const first = bytes[index];
+      if (first < 0x80) {
+        chars.push(String.fromCharCode(first));
+        index += 1;
+      } else if (first >= 0xC2 && first <= 0xDF) {
+        if (index + 1 >= bytes.length) {
+          fail();
+          continue;
+        }
+        const second = bytes[index + 1];
+        if ((second & 0xC0) !== 0x80) {
+          fail();
+          continue;
+        }
+        chars.push(String.fromCharCode(((first & 0x1F) << 6) | (second & 0x3F)));
+        index += 2;
+      } else if (first >= 0xE0 && first <= 0xEF) {
+        if (index + 2 >= bytes.length) {
+          fail();
+          continue;
+        }
+        const second = bytes[index + 1];
+        const third = bytes[index + 2];
+        const validSecond = first === 0xE0
+          ? second >= 0xA0 && second <= 0xBF
+          : (first === 0xED ? second >= 0x80 && second <= 0x9F : (second & 0xC0) === 0x80);
+        if (!validSecond || (third & 0xC0) !== 0x80) {
+          fail();
+          continue;
+        }
+        chars.push(String.fromCharCode(((first & 0x0F) << 12) | ((second & 0x3F) << 6) | (third & 0x3F)));
+        index += 3;
+      } else if (first >= 0xF0 && first <= 0xF4) {
+        if (index + 3 >= bytes.length) {
+          fail();
+          continue;
+        }
+        const second = bytes[index + 1];
+        const third = bytes[index + 2];
+        const fourth = bytes[index + 3];
+        const validSecond = first === 0xF0
+          ? second >= 0x90 && second <= 0xBF
+          : (first === 0xF4 ? second >= 0x80 && second <= 0x8F : (second & 0xC0) === 0x80);
+        if (!validSecond || (third & 0xC0) !== 0x80 || (fourth & 0xC0) !== 0x80) {
+          fail();
+          continue;
+        }
+        let codePoint = ((first & 0x07) << 18) | ((second & 0x3F) << 12) | ((third & 0x3F) << 6) | (fourth & 0x3F);
+        codePoint -= 0x10000;
+        chars.push(String.fromCharCode(0xD800 + (codePoint >> 10), 0xDC00 + (codePoint & 0x3FF)));
+        index += 4;
+      } else {
+        fail();
+      }
+    }
+    let text = chars.join("");
+    return !ignoreBOM && text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+  }
+  function __autojs6_text_decoder_compat_constructor(BaseTextDecoder) {
+    if (typeof BaseTextDecoder !== "function") return BaseTextDecoder;
+    if (BaseTextDecoder.__autojs6NoIcuFatalCompat) return BaseTextDecoder;
+    if (BaseTextDecoder.__autojs6NoIcuFatalCompatCtor) return BaseTextDecoder.__autojs6NoIcuFatalCompatCtor;
+    let needsCompat = false;
+    try {
+      new BaseTextDecoder("utf-8", { fatal: true });
+      new BaseTextDecoder("utf-16le", { fatal: true });
+    } catch (error) {
+      if (__autojs6_text_decoder_no_icu_fatal_error(error)) {
+        needsCompat = true;
+      } else {
+        throw error;
+      }
+    }
+    if (!needsCompat) return BaseTextDecoder;
+    function AutoJs6TextDecoder(label, options) {
+      const opts = options === undefined || options === null ? {} : Object(options);
+      const fatal = !!opts.fatal;
+      const ignoreBOM = !!opts.ignoreBOM;
+      const encoding = __autojs6_text_decoder_encoding(label);
+      this.__autojs6Encoding = encoding;
+      this.__autojs6Fatal = fatal;
+      this.__autojs6IgnoreBOM = ignoreBOM;
+      this.__autojs6Native = null;
+      if (encoding && (fatal || encoding === "utf-16le" || encoding === "utf-16be")) {
+        return;
+      }
+      try {
+        this.__autojs6Native = new BaseTextDecoder(label, opts);
+        this.__autojs6Encoding = this.__autojs6Native.encoding || encoding || "utf-8";
+      } catch (error) {
+        if (!fatal || !__autojs6_text_decoder_no_icu_fatal_error(error)) {
+          throw error;
+        }
+        this.__autojs6Native = new BaseTextDecoder(label, { ignoreBOM });
+        this.__autojs6Encoding = this.__autojs6Native.encoding || encoding || "utf-8";
+      }
+    }
+    Object.defineProperties(AutoJs6TextDecoder.prototype, {
+      encoding: {
+        get: function() {
+          return this.__autojs6Native ? this.__autojs6Native.encoding : this.__autojs6Encoding;
+        }
+      },
+      fatal: {
+        get: function() {
+          return this.__autojs6Native ? this.__autojs6Native.fatal : this.__autojs6Fatal;
+        }
+      },
+      ignoreBOM: {
+        get: function() {
+          return this.__autojs6Native ? this.__autojs6Native.ignoreBOM : this.__autojs6IgnoreBOM;
+        }
+      }
+    });
+    AutoJs6TextDecoder.prototype.decode = function(input) {
+      if (this.__autojs6Native) {
+        return this.__autojs6Native.decode.apply(this.__autojs6Native, arguments);
+      }
+      const bytes = __autojs6_text_decoder_input(input);
+      if (this.__autojs6Encoding === "utf-16le") {
+        return __autojs6_text_decoder_decode_utf16(bytes, true, this.__autojs6Fatal, this.__autojs6IgnoreBOM);
+      }
+      if (this.__autojs6Encoding === "utf-16be") {
+        return __autojs6_text_decoder_decode_utf16(bytes, false, this.__autojs6Fatal, this.__autojs6IgnoreBOM);
+      }
+      if (this.__autojs6Encoding === "utf-8") {
+        return __autojs6_text_decoder_decode_utf8(bytes, this.__autojs6Fatal, this.__autojs6IgnoreBOM);
+      }
+      throw new RangeError("The encoding label provided is unsupported.");
+    };
+    try {
+      Object.defineProperty(AutoJs6TextDecoder, "name", { value: "TextDecoder" });
+      Object.defineProperty(AutoJs6TextDecoder, "__autojs6NoIcuFatalCompat", { value: true });
+      Object.defineProperty(BaseTextDecoder, "__autojs6NoIcuFatalCompatCtor", { value: AutoJs6TextDecoder });
+    } catch (_) {}
+    return AutoJs6TextDecoder;
   }
   function __autojs6_define_process_property(name, value, writable) {
     if (typeof process !== "object" || !process) return false;
@@ -5782,6 +6209,47 @@ std::string buildEmbeddedScriptExecutionSource(
         "ERR_AUTOJS6_PROCESS_API_DISABLED"
       );
     };
+  }
+  function __autojs6_process_exit_code(value) {
+    let candidate = value;
+    if (candidate === undefined || candidate === null) {
+      candidate = process && process.exitCode !== undefined && process.exitCode !== null
+        ? process.exitCode
+        : 0;
+    }
+    if (typeof candidate === "string" && candidate.trim() !== "") {
+      candidate = Number(candidate);
+    }
+    if (typeof candidate !== "number" || !Number.isFinite(candidate)) {
+      throw __autojs6_invalid_arg_type("process.exit code must be a finite number or integer string.");
+    }
+    return Math.trunc(candidate);
+  }
+  function __autojs6_process_exit_signal(exitCode) {
+    const error = __autojs6_error(
+      "process.exit(" + exitCode + ") requested embedded script termination.",
+      "ERR_AUTOJS6_PROCESS_EXIT"
+    );
+    try {
+      error.name = "AutoJs6ProcessExit";
+    } catch (_) {}
+    __autojs6_define_error_property(error, "autojs6ProcessExit", true);
+    __autojs6_define_error_property(error, "exitCode", exitCode);
+    return error;
+  }
+  function __autojs6_is_process_exit_signal(error) {
+    return !!(error && typeof error === "object" && error.autojs6ProcessExit === true);
+  }
+  function __autojs6_limited_process_exit(code) {
+    const exitCode = __autojs6_process_exit_code(code);
+    try {
+      process.exitCode = exitCode;
+    } catch (_) {}
+    const signal = __autojs6_process_exit_signal(exitCode);
+    if (typeof __autojs6_finish_process_exit === "function") {
+      __autojs6_finish_process_exit(exitCode);
+    }
+    throw signal;
   }
   function __autojs6_define_disabled_process_api(apiName, exposeWhenMissing) {
     if (typeof process !== "object" || !process) return;
@@ -6218,12 +6686,30 @@ std::string buildEmbeddedScriptExecutionSource(
       typeof nodeV8.serialize === "function" &&
       typeof nodeV8.deserialize === "function"
     ) {
-      return nodeV8.deserialize(nodeV8.serialize(value));
+      try {
+        return nodeV8.deserialize(nodeV8.serialize(value));
+      } catch (error) {
+        throw __autojs6_dom_exception(
+          error && error.message ? error.message : "The object could not be cloned.",
+          "DataCloneError"
+        );
+      }
     }
     if (value === undefined) {
       return undefined;
     }
-    return JSON.parse(JSON.stringify(value));
+    try {
+      const serialized = JSON.stringify(value);
+      if (serialized === undefined) {
+        throw new Error("The object could not be cloned.");
+      }
+      return JSON.parse(serialized);
+    } catch (error) {
+      throw __autojs6_dom_exception(
+        error && error.message ? error.message : "The object could not be cloned.",
+        "DataCloneError"
+      );
+    }
   }
   function __autojs6_create_limited_navigator() {
     if (typeof navigator === "object" && navigator) {
@@ -7177,7 +7663,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_install_process_safety_guards() {
     if (typeof process !== "object" || !process) return;
-    __autojs6_define_disabled_process_api("exit", true);
+    __autojs6_define_process_property("exit", __autojs6_limited_process_exit, false);
     __autojs6_define_disabled_process_api("abort", true);
     __autojs6_define_disabled_process_api("kill", true);
     __autojs6_define_disabled_process_api("reallyExit", false);
@@ -7445,6 +7931,99 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     return report;
   }
+  function __autojs6_process_env_key(property) {
+    if (typeof property === "symbol") {
+      throw new TypeError("Cannot convert a Symbol value to a string");
+    }
+    return String(property);
+  }
+  function __autojs6_define_process_env_value(target, property, value) {
+    const key = __autojs6_process_env_key(property);
+    Object.defineProperty(target, key, {
+      value: String(value),
+      configurable: true,
+      enumerable: true,
+      writable: true
+    });
+    return true;
+  }
+  function __autojs6_process_env_define_error(message) {
+    const error = new TypeError(message);
+    try {
+      Object.defineProperty(error, "code", {
+        value: "ERR_INVALID_OBJECT_DEFINE_PROPERTY",
+        configurable: true,
+        enumerable: false,
+        writable: true
+      });
+    } catch (_) {}
+    return error;
+  }
+  function __autojs6_create_process_env(initialEnv) {
+    const target = Object.create(null);
+    const source = initialEnv && typeof initialEnv === "object" ? initialEnv : {};
+    for (const key of Object.keys(source)) {
+      __autojs6_define_process_env_value(target, key, source[key]);
+    }
+    if (typeof Proxy !== "function") {
+      return target;
+    }
+    return new Proxy(target, {
+      get: function(envTarget, property) {
+        if (typeof property === "symbol") {
+          return envTarget[property];
+        }
+        return envTarget[String(property)];
+      },
+      set: function(envTarget, property, value) {
+        return __autojs6_define_process_env_value(envTarget, property, value);
+      },
+      defineProperty: function(envTarget, property, descriptor) {
+        __autojs6_process_env_key(property);
+        if (!descriptor || typeof descriptor !== "object") {
+          return false;
+        }
+        if ("get" in descriptor || "set" in descriptor) {
+          throw __autojs6_process_env_define_error(
+            "'process.env' does not accept an accessor(getter/setter) descriptor"
+          );
+        }
+        if (
+          !Object.prototype.hasOwnProperty.call(descriptor, "value") ||
+          descriptor.configurable !== true ||
+          descriptor.enumerable !== true ||
+          descriptor.writable !== true
+        ) {
+          throw __autojs6_process_env_define_error(
+            "'process.env' only accepts a configurable, writable, and enumerable data descriptor"
+          );
+        }
+        return __autojs6_define_process_env_value(envTarget, property, descriptor.value);
+      },
+      deleteProperty: function(envTarget, property) {
+        if (typeof property === "symbol") {
+          return true;
+        }
+        delete envTarget[String(property)];
+        return true;
+      },
+      has: function(envTarget, property) {
+        if (typeof property === "symbol") {
+          return false;
+        }
+        return Object.prototype.hasOwnProperty.call(envTarget, String(property));
+      },
+      ownKeys: function(envTarget) {
+        return Object.keys(envTarget);
+      },
+      getOwnPropertyDescriptor: function(envTarget, property) {
+        if (typeof property === "symbol") {
+          return undefined;
+        }
+        return Object.getOwnPropertyDescriptor(envTarget, String(property));
+      }
+    });
+  }
   function __autojs6_define_existing_global_function(name) {
     const value = globalThis[name];
     if (typeof value === "function") {
@@ -7486,7 +8065,7 @@ std::string buildEmbeddedScriptExecutionSource(
       }
     });
   }
-  function __autojs6_install_process_mvp() {
+  function __autojs6_install_process_mvp(entryFilename) {
     if (typeof process !== "object" || !process) return;
     const controlledEnv = Object.create(null);
     controlledEnv.NODE_ENV = "production";
@@ -7494,6 +8073,12 @@ std::string buildEmbeddedScriptExecutionSource(
     controlledEnv.AUTOJS6_NODE_RUNTIME = "embedded";
     for (const key of Object.keys(__autojs6_request_env_sources || {})) {
       if (!key || key.indexOf("\u0000") >= 0) {
+        continue;
+      }
+      if (__autojs6_internal_compile_cache_env_key(key)) {
+        continue;
+      }
+      if (__autojs6_node_startup_env_key(key)) {
         continue;
       }
       const record = __autojs6_request_env_sources[key];
@@ -7505,15 +8090,20 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       controlledEnv[key] = value;
     }
-    if (!__autojs6_define_process_property("env", controlledEnv, true)) {
+    const processEnv = __autojs6_create_process_env(controlledEnv);
+    if (!__autojs6_define_process_property("env", processEnv, true)) {
       try {
         for (const key of Object.keys(process.env || {})) {
           delete process.env[key];
         }
-        Object.assign(process.env, controlledEnv);
+        Object.assign(process.env, processEnv);
       } catch (_) {}
     }
-    __autojs6_define_process_property("argv", ["autojs6-node", __autojs6_source_name], true);
+    __autojs6_define_process_property(
+      "argv",
+      ["autojs6-node", entryFilename === undefined || entryFilename === null ? __autojs6_source_name : String(entryFilename)],
+      true
+    );
     __autojs6_define_process_property("execArgv", [], true);
     if (typeof process.argv0 !== "string" || process.argv0.length === 0) {
       __autojs6_define_process_property("argv0", "autojs6-node", true);
@@ -7559,6 +8149,7 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_define_process_property("dlopen", __autojs6_disabled_process_api("dlopen"), false);
     __autojs6_define_process_property("cwd", __autojs6_scoped_process_cwd, false);
     __autojs6_define_process_property("chdir", __autojs6_scoped_process_chdir, false);
+    __autojs6_define_process_property("permission", __autojs6_create_process_permission(), false);
     __autojs6_define_process_property("report", __autojs6_create_process_report(), false);
   }
   function __autojs6_limited_tty_color_depth() {
@@ -7589,6 +8180,179 @@ std::string buildEmbeddedScriptExecutionSource(
       }
     } catch (_) {}
     return null;
+  }
+  function __autojs6_raw_node_network_builtin(name) {
+    if (!__autojs6_raw_node_network_modules_experimental_enabled) {
+      return null;
+    }
+    const request = name === undefined ? "" : String(name);
+    const normalized = request.indexOf("node:") === 0 ? request.slice(5) : request;
+    if (
+      normalized !== "dns" &&
+      normalized !== "dns/promises" &&
+      normalized !== "http" &&
+      normalized !== "https" &&
+      normalized !== "net" &&
+      normalized !== "tls"
+    ) {
+      return null;
+    }
+    let moduleValue = null;
+    if (normalized === "dns/promises") {
+      const dnsValue = __autojs6_builtin_module("dns");
+      if (dnsValue && dnsValue.promises) {
+        moduleValue = dnsValue.promises;
+      }
+    }
+    if (!moduleValue) {
+      moduleValue = __autojs6_builtin_module(normalized);
+    }
+    if (!moduleValue) {
+      throw __autojs6_error(
+        "Embedded Node raw network module '" + normalized + "' is unavailable.",
+        "ERR_AUTOJS6_BUILTIN_DISABLED"
+      );
+    }
+    return moduleValue;
+  }
+  function __autojs6_child_process_builtin(name) {
+    if (!__autojs6_child_process_experimental_enabled) {
+      return null;
+    }
+    const request = name === undefined ? "" : String(name);
+    const normalized = request.indexOf("node:") === 0 ? request.slice(5) : request;
+    if (normalized !== "child_process") {
+      return null;
+    }
+    const moduleValue = __autojs6_builtin_module("child_process");
+    if (!moduleValue) {
+      throw __autojs6_error(
+        "Embedded Node child_process module is unavailable.",
+        "ERR_AUTOJS6_BUILTIN_DISABLED"
+      );
+    }
+    return moduleValue;
+  }
+  function __autojs6_internal_request_env_value(key) {
+    try {
+      const record = __autojs6_request_env_sources && __autojs6_request_env_sources[key];
+      if (record && record.source !== undefined && record.source !== null) {
+        return String(record.source);
+      }
+    } catch (_) {}
+    return "";
+  }
+  function __autojs6_internal_compile_cache_env_key(key) {
+    return typeof key === "string" && (
+      key.indexOf("AUTOJS6_NODE_COMPILE_CACHE_") === 0 ||
+      key === "NODE_COMPILE_CACHE" ||
+      key === "NODE_DISABLE_COMPILE_CACHE"
+    );
+  }
+  function __autojs6_node_startup_env_key(key) {
+    return typeof key === "string" && (
+      key === "NODE_OPTIONS" ||
+      key === "NODE_INSPECT_RESUME_ON_START"
+    );
+  }
+  function __autojs6_compile_cache_status_name(status, constants) {
+    if (constants && typeof constants === "object") {
+      for (const key of Object.keys(constants)) {
+        if (constants[key] === status) {
+          return key;
+        }
+      }
+    }
+    return status === undefined || status === null ? "" : String(status);
+  }
+  function __autojs6_install_compile_cache() {
+    const diagnostics = __autojs6_compile_cache_diagnostics;
+    diagnostics.schema = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_SCHEMA");
+    diagnostics.directory = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_DIR");
+    diagnostics.key = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_KEY");
+    diagnostics.runtimeKey = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_RUNTIME_KEY");
+    diagnostics.projectKey = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_PROJECT_KEY");
+    diagnostics.loader = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_LOADER");
+    diagnostics.message = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_PREPARE_ERROR");
+    diagnostics.v8Version = typeof process === "object" && process && process.versions
+      ? String(process.versions.v8 || "")
+      : "";
+    const enabled = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_ENABLED");
+    diagnostics.requested = enabled !== "0" && diagnostics.directory.length > 0;
+    if (!diagnostics.requested) {
+      diagnostics.status = diagnostics.message ? "PREPARE_FAILED" : "disabled";
+      return;
+    }
+    try {
+      const moduleBuiltin = __autojs6_builtin_module("module");
+      if (!moduleBuiltin || typeof moduleBuiltin.enableCompileCache !== "function") {
+        diagnostics.status = "unavailable";
+        diagnostics.message = "node:module.enableCompileCache is unavailable in this runtime.";
+        return;
+      }
+      const constants = moduleBuiltin.constants && moduleBuiltin.constants.compileCacheStatus;
+      const result = moduleBuiltin.enableCompileCache(diagnostics.directory);
+      const status = result && result.status !== undefined ? result.status : undefined;
+      diagnostics.statusCode = status === undefined || status === null ? "" : String(status);
+      diagnostics.status = __autojs6_compile_cache_status_name(status, constants) || "unknown";
+      if (result && result.directory) {
+        diagnostics.directory = String(result.directory);
+      }
+      if (result && result.message) {
+        diagnostics.message = String(result.message);
+      }
+      diagnostics.enabled = diagnostics.status === "ENABLED" || diagnostics.status === "ALREADY_ENABLED";
+      diagnostics.flushSupported = typeof moduleBuiltin.flushCompileCache === "function";
+      diagnostics.hitMissStatus = "unavailable_custom_loader";
+    } catch (error) {
+      diagnostics.enabled = false;
+      diagnostics.status = "FAILED";
+      diagnostics.message = error && error.message ? String(error.message) : String(error);
+    }
+  }
+  function __autojs6_flush_compile_cache(reason) {
+    const diagnostics = __autojs6_compile_cache_diagnostics;
+    if (!diagnostics.flushSupported) {
+      return;
+    }
+    diagnostics.flushAttempted = true;
+    try {
+      const moduleBuiltin = __autojs6_builtin_module("module");
+      if (moduleBuiltin && typeof moduleBuiltin.flushCompileCache === "function") {
+        moduleBuiltin.flushCompileCache();
+        diagnostics.flushed = true;
+        diagnostics.message = diagnostics.message || String(reason || "");
+      }
+    } catch (error) {
+      diagnostics.flushed = false;
+      diagnostics.message = error && error.message ? String(error.message) : String(error);
+    }
+  }
+  function __autojs6_compile_cache_profile_snapshot() {
+    const diagnostics = __autojs6_compile_cache_diagnostics;
+    return Object.freeze({
+      requested: diagnostics.requested,
+      enabled: diagnostics.enabled,
+      status: diagnostics.status,
+      statusCode: diagnostics.statusCode,
+      directory: diagnostics.directory,
+      key: diagnostics.key,
+      runtimeKey: diagnostics.runtimeKey,
+      projectKey: diagnostics.projectKey,
+      loader: diagnostics.loader,
+      schema: diagnostics.schema,
+      message: diagnostics.message,
+      v8Version: diagnostics.v8Version,
+      flushSupported: diagnostics.flushSupported,
+      flushAttempted: diagnostics.flushAttempted,
+      flushed: diagnostics.flushed,
+      customLoader: diagnostics.customLoader,
+      hitCount: diagnostics.hitCount,
+      missCount: diagnostics.missCount,
+      hitMissStatus: diagnostics.hitMissStatus,
+      userControlExposed: false,
+      appPrivateOnly: true
+    });
   }
   function __autojs6_install_safe_globals() {
     const bufferModule = typeof Buffer === "function" ? null : __autojs6_builtin_module("buffer");
@@ -7623,8 +8387,12 @@ std::string buildEmbeddedScriptExecutionSource(
     if (typeof TextEncoder !== "function" && utilModule && typeof utilModule.TextEncoder === "function") {
       __autojs6_define_global("TextEncoder", utilModule.TextEncoder);
     }
-    if (typeof TextDecoder !== "function" && utilModule && typeof utilModule.TextDecoder === "function") {
-      __autojs6_define_global("TextDecoder", utilModule.TextDecoder);
+    const TextDecoderBase = typeof globalThis.TextDecoder === "function"
+      ? globalThis.TextDecoder
+      : (utilModule && typeof utilModule.TextDecoder === "function" ? utilModule.TextDecoder : null);
+    const TextDecoderCompat = __autojs6_text_decoder_compat_constructor(TextDecoderBase);
+    if (typeof TextDecoderCompat === "function" && globalThis.TextDecoder !== TextDecoderCompat) {
+      __autojs6_define_global("TextDecoder", TextDecoderCompat);
     }
     const webBufferModule = __autojs6_builtin_module("buffer");
     if (
@@ -7870,7 +8638,6 @@ std::string buildEmbeddedScriptExecutionSource(
     "stream/promises": true,
     "stream/web": true,
     "timers": true,
-    "vm": true,
     "wasi": true,
     "worker_threads": true,
     "zlib": true,
@@ -7930,6 +8697,7 @@ std::string buildEmbeddedScriptExecutionSource(
     "util",
     "util/types",
     "v8",
+    "vm",
     "zlib"
   ]);
   const __autojs6_limited_builtin_module_map = Object.freeze((function() {
@@ -7953,6 +8721,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_util_cache = null;
   let __autojs6_limited_async_hooks_cache = null;
   let __autojs6_limited_diagnostics_channel_cache = null;
+  let __autojs6_limited_node_test_cache = null;
   let __autojs6_limited_dns_cache = null;
   let __autojs6_limited_dns_promises_cache = null;
   let __autojs6_limited_events_cache = null;
@@ -7984,6 +8753,8 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_v8_cache = null;
   let __autojs6_limited_tty_cache = null;
   let __autojs6_profile_cache = null;
+  let __autojs6_autojs_global_cache = null;
+  let __autojs6_process_permission_cache = null;
   let __autojs6_bridge_cache = null;
   let __autojs6_bridge_transport = null;
   let __autojs6_bridge_live_config_cache = undefined;
@@ -8004,20 +8775,66 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_media_projection_cache = null;
   let __autojs6_limited_image_cache = null;
   let __autojs6_limited_images_cache = null;
+  let __autojs6_limited_ocr_cache = null;
+  let __autojs6_limited_barcode_cache = null;
+  let __autojs6_limited_media_cache = null;
+  let __autojs6_limited_mediainfo_cache = null;
+  let __autojs6_limited_recorder_cache = null;
+  let __autojs6_limited_storage_cache = null;
+  let __autojs6_limited_storages_cache = null;
+  let __autojs6_limited_database_cache = null;
+  let __autojs6_limited_sqlite_cache = null;
+  let __autojs6_limited_notifications_cache = null;
+  let __autojs6_limited_sensors_cache = null;
+  let __autojs6_limited_ui_cache = null;
+  let __autojs6_limited_ui_overlay_cache = null;
+  let __autojs6_limited_input_observer_cache = null;
   let __autojs6_limited_clipboard_cache = null;
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
   let __autojs6_limited_fetch_cache = null;
+  let __autojs6_limited_undici_cache = null;
+  let __autojs6_limited_axios_cache = null;
   let __autojs6_limited_websocket_cache = null;
   let __autojs6_limited_work_manager_cache = null;
+  let __autojs6_limited_package_manager_cache = null;
+  let __autojs6_limited_npm_cache = null;
+  let __autojs6_limited_lifecycle_cache = null;
+  let __autojs6_limited_rhino_cache = null;
+  let __autojs6_rhino_install_state = null;
+  let __autojs6_limited_rhino_compat_cache = null;
+  let __autojs6_limited_files_cache = null;
+  let __autojs6_limited_base64_cache = null;
+  let __autojs6_limited_colors_cache = null;
+  let __autojs6_limited_formatter_cache = null;
+  let __autojs6_limited_converter_cache = null;
+  let __autojs6_limited_s13n_cache = null;
+  let __autojs6_limited_mime_cache = null;
+  let __autojs6_limited_nanoid_cache = null;
+  let __autojs6_limited_opencc_cache = null;
+  let __autojs6_limited_pinyin_cache = null;
+  let __autojs6_limited_pinyin4j_cache = null;
+  let __autojs6_limited_jsox_mathx_cache = null;
+  let __autojs6_limited_jsox_arrayx_cache = null;
+  let __autojs6_limited_jsox_numberx_cache = null;
+  let __autojs6_limited_jsox_cache = null;
+  let __autojs6_rhino_compat_facade_cache = null;
+  let __autojs6_lifecycle_config_cache = undefined;
+  const __autojs6_lifecycle_checkpoint_handlers = [];
+  const __autojs6_lifecycle_stop_handlers = [];
+  let __autojs6_lifecycle_stop_poll_timer = null;
+  let __autojs6_lifecycle_stop_seen_id = "";
+  let __autojs6_limited_plugins_cache = null;
+  const __autojs6_plugin_registry = new Map();
   let __autojs6_limited_java_cache = null;
   let __autojs6_limited_worker_threads_cache = null;
+  let __autojs6_worker_threads_shape_facade_cache = null;
   const __autojs6_fetch_policy = Object.freeze({
     maxConcurrentRequests: __autojs6_bridge_limits_policy().maxNetworkRequests,
     defaultTimeoutMs: 30000,
     hardTimeoutMs: 120000,
-    defaultMaxResponseBytes: 1048576,
-    hardMaxResponseBytes: 16777216,
+    defaultMaxResponseBytes: 33554432,
+    hardMaxResponseBytes: 67108864,
     defaultMaxRedirects: 5,
     hardMaxRedirects: 10,
     allowedSchemes: Object.freeze(["http:", "https:"])
@@ -8054,6 +8871,8 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_work_manager_policy = Object.freeze({
     maxTasksPerProvider: 64,
     maxDelayMs: 2592000000,
+    defaultTaskTimeoutMs: 30000,
+    maxTaskTimeoutMs: 600000,
     minPeriodicIntervalMs: 900000,
     maxPeriodicIntervalMs: 2592000000,
     allowedConstraints: Object.freeze(["charging", "network", "idle"])
@@ -8078,17 +8897,45 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_worker_threads_policy = Object.freeze({
     maxWorkers: 1,
     startupTimeoutMs: 5000,
+    maxMessageBytes: 65536,
+    maxQueuedMessages: 32,
     allowedBuiltins: Object.freeze([
       "assert",
       "buffer",
       "events",
+      "fs",
+      "fs/promises",
       "path",
       "querystring",
       "string_decoder",
       "timers",
       "url",
       "util"
-    ])
+    ]),
+    workerProfile: Object.freeze({
+      fs: Object.freeze({
+        read: "workingDirectory",
+        write: "workingDirectory"
+      }),
+      network: "denied",
+      autoJsBridge: "denied",
+      shell: "denied",
+      javaInterop: "denied",
+      inspector: "denied"
+    }),
+    workerPool: Object.freeze({
+      minWorkers: 0,
+      maxWorkers: 1,
+      idleTimeoutMs: 1000,
+      taskTimeoutMs: 5000,
+      queueLimit: 8
+    }),
+    resourceLimits: Object.freeze({
+      maxOldGenerationSizeMb: 64,
+      maxYoungGenerationSizeMb: 16,
+      codeRangeSizeMb: 32,
+      stackSizeMb: 8
+    })
   });
   const __autojs6_worker_threads_diagnostics = {
     activeWorkerCount: 0,
@@ -8101,9 +8948,25 @@ std::string buildEmbeddedScriptExecutionSource(
     cleanupTerminateRequestedCount: 0,
     cleanupErrorCount: 0,
     cleanupPendingMessageRejectedCount: 0,
-    lastPolicyRejection: ""
+    activeMessagePortCount: 0,
+    maxActiveMessagePortCount: 0,
+    messagePortCreatedCount: 0,
+    messagePortClosedCount: 0,
+    messageRejectedCount: 0,
+    activeWorkerPoolCount: 0,
+    maxActiveWorkerPoolCount: 0,
+    workerPoolCreatedCount: 0,
+    workerPoolClosedCount: 0,
+    workerPoolTaskCompletedCount: 0,
+    workerPoolTaskCancelledCount: 0,
+    workerPoolTaskTimeoutCount: 0,
+    workerPoolQueueRejectedCount: 0,
+    lastPolicyRejection: "",
+    lastMessageRejection: ""
   };
   const __autojs6_worker_threads_records = new Set();
+  const __autojs6_worker_message_port_records = new Set();
+  const __autojs6_worker_pool_records = new Set();
   let __autojs6_worker_threads_shutdown_reason = "";
   function __autojs6_has_own(object, key) {
     return Object.prototype.hasOwnProperty.call(object, key);
@@ -8174,6 +9037,9 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_require_esm_unsupported(message) {
     return __autojs6_error(message, "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED");
+  }
+  function __autojs6_require_async_module(message) {
+    return __autojs6_error(message, "ERR_REQUIRE_ASYNC_MODULE");
   }
   function __autojs6_dynamic_import_unsupported(message) {
     return __autojs6_error(message, "ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED");
@@ -8308,6 +9174,9 @@ std::string buildEmbeddedScriptExecutionSource(
       if (name === "worker_threads" && __autojs6_worker_threads_experimental_enabled) {
         continue;
       }
+      if (name === "child_process" && __autojs6_child_process_experimental_enabled) {
+        continue;
+      }
       if (
         !__autojs6_has_own(__autojs6_limited_builtin_module_map, name) &&
         !__autojs6_has_own(__autojs6_require_builtin_allowlist, name)
@@ -8320,20 +9189,24 @@ std::string buildEmbeddedScriptExecutionSource(
       directBuiltinAliases[name] = __autojs6_require_builtin_allowlist[name];
     }
     const highRiskCapabilities = Object.freeze({
-      childProcess: false,
+      childProcess: __autojs6_child_process_experimental_enabled,
       dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       esm: __autojs6_esm_experimental_enabled,
       nativeAddon: false,
       network: false,
+      rawNodeNetworkModules: __autojs6_raw_node_network_modules_experimental_enabled,
       npmInstall: false,
       webSocket: false,
       workerThreads: __autojs6_worker_threads_experimental_enabled,
+      vm: true,
       javaInterop: __autojs6_java_interop_experimental_enabled
     });
     const experimentalFlags = Object.freeze({
       esm: __autojs6_esm_experimental_enabled,
       dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       network: false,
+      rawNodeNetworkModules: __autojs6_raw_node_network_modules_experimental_enabled,
+      childProcess: __autojs6_child_process_experimental_enabled,
       workerThreads: __autojs6_worker_threads_experimental_enabled,
       javaInterop: __autojs6_java_interop_experimental_enabled
     });
@@ -8342,35 +9215,35 @@ std::string buildEmbeddedScriptExecutionSource(
         id: "esm",
         diagnosticName: "esm",
         gradleProperty: "autojs.nodejs.esm.experimental",
-        defaultEnabled: false,
+        defaultEnabled: true,
         enabled: __autojs6_esm_experimental_enabled,
         buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
         buildOnly: true,
-        debugOnly: true,
+        debugOnly: false,
         projectAllowed: false,
         packagedAllowed: false,
-        releaseForbidden: true,
+        releaseForbidden: false,
         securityLevel: "medium",
-        status: "experimental"
+        status: "partial"
       }),
       dynamic_import: Object.freeze({
         id: "dynamic_import",
         diagnosticName: "dynamicImport",
-        gradleProperty: "autojs.nodejs.dynamicImport.experimental",
-        defaultEnabled: false,
+        gradleProperty: "autojs.nodejs.dynamicImport.local",
+        defaultEnabled: true,
         enabled: __autojs6_dynamic_import_experimental_enabled,
         buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
         buildOnly: true,
-        debugOnly: true,
+        debugOnly: false,
         projectAllowed: false,
         packagedAllowed: false,
-        releaseForbidden: true,
+        releaseForbidden: false,
         securityLevel: "medium",
-        status: "experimental"
+        status: "partial"
       }),
       network: Object.freeze({
         id: "network",
@@ -8392,19 +9265,19 @@ std::string buildEmbeddedScriptExecutionSource(
       raw_node_network_modules: Object.freeze({
         id: "raw_node_network_modules",
         diagnosticName: "rawNodeNetworkModules",
-        gradleProperty: null,
+        gradleProperty: "autojs.nodejs.rawNetworkModules.experimental",
         defaultEnabled: false,
-        enabled: false,
-        buildTimeOverrideAllowed: false,
+        enabled: __autojs6_raw_node_network_modules_experimental_enabled,
+        buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
-        buildOnly: false,
-        debugOnly: false,
+        buildOnly: true,
+        debugOnly: true,
         projectAllowed: false,
         packagedAllowed: false,
         releaseForbidden: true,
         securityLevel: "high",
-        status: "disabled"
+        status: "experimental"
       }),
       websocket: Object.freeze({
         id: "websocket",
@@ -8478,8 +9351,8 @@ std::string buildEmbeddedScriptExecutionSource(
         id: "vm",
         diagnosticName: "vm",
         gradleProperty: null,
-        defaultEnabled: false,
-        enabled: false,
+        defaultEnabled: true,
+        enabled: true,
         buildTimeOverrideAllowed: false,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
@@ -8489,7 +9362,7 @@ std::string buildEmbeddedScriptExecutionSource(
         packagedAllowed: false,
         releaseForbidden: true,
         securityLevel: "high",
-        status: "disabled"
+        status: "partial"
       }),
       inspector: Object.freeze({
         id: "inspector",
@@ -8545,19 +9418,19 @@ std::string buildEmbeddedScriptExecutionSource(
       child_process: Object.freeze({
         id: "child_process",
         diagnosticName: "childProcess",
-        gradleProperty: null,
+        gradleProperty: "autojs.nodejs.child_process.experimental",
         defaultEnabled: false,
-        enabled: false,
-        buildTimeOverrideAllowed: false,
+        enabled: __autojs6_child_process_experimental_enabled,
+        buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
-        buildOnly: false,
-        debugOnly: false,
+        buildOnly: true,
+        debugOnly: true,
         projectAllowed: false,
         packagedAllowed: false,
         releaseForbidden: true,
         securityLevel: "high",
-        status: "disabled"
+        status: "experimental"
       })
     });
     const enabledExperimentalFlags = Object.freeze(Object.keys(featureFlags).filter(function(name) {
@@ -8568,13 +9441,17 @@ std::string buildEmbeddedScriptExecutionSource(
       const flag = featureFlags[name];
       return !flag || flag.enabled !== true;
     }));
+    const bridgePermissionsReport = __autojs6_bridge_permission_report();
+    const profileSelection = __autojs6_profile_selection_report(featureFlags, bridgePermissionsReport);
+    const profileRollbackPolicy = __autojs6_profile_rollback_policy_report(featureFlags);
+    const privacyDisclosurePolicy = __autojs6_privacy_disclosure_policy_report();
     const legacyAliases = Object.create(null);
     for (const name of Object.keys(__autojs6_error_code_aliases)) {
       legacyAliases[name] = __autojs6_error_code_aliases[name];
     }
     __autojs6_profile_cache = Object.freeze({
       name: "AutoJs6 Safe Node Profile",
-      engineVersion: "autojs6-node-profile-v1",
+      engineVersion: "autojs6-node-profile-v1.1",
       node: typeof process === "object" && process ? process.version : "",
       cjs: true,
       esm: __autojs6_esm_experimental_enabled,
@@ -8584,6 +9461,476 @@ std::string buildEmbeddedScriptExecutionSource(
       javaInterop: __autojs6_java_interop_experimental_enabled,
       nativeAddon: false,
       scopedFs: true,
+      esmLoaderProfile: Object.freeze({
+        status: __autojs6_esm_experimental_enabled ? "partial_default" : "disabled_by_request",
+        defaultEnabled: true,
+        requestEnabled: __autojs6_esm_experimental_enabled,
+        dynamicImportDefaultEnabled: true,
+        dynamicImportEnabled: __autojs6_dynamic_import_experimental_enabled,
+        implementation: "autojs6_managed_transform",
+        mjsEntry: "partial",
+        packageTypeModuleEntry: "partial",
+        topLevelAwait: "partial",
+        staticImport: "local_scoped_partial",
+        dynamicImport: "local_scoped_partial",
+        packageExports: "partial",
+        packageImports: "partial",
+        jsonImportAttributes: "partial",
+        importMeta: "scoped_partial",
+        cjsInterop: "sync_esm_only",
+        moduleSources: "partial",
+        packagedBehavior: "focused_smoke_partial",
+        sourceMaps: "sourceURL_stack_only",
+        loaderHooks: "denied",
+        rawNodeModuleLoader: "denied",
+        networkImports: "denied",
+        fileUrlImports: "denied",
+        dataUrlImports: "inline_js_json_partial",
+        absolutePathImports: "denied",
+        workingDirectoryEscape: "denied",
+        disabledBuiltinImports: "denied",
+        encryptedGraphParity: "not_promoted",
+        pendingEvaluationCleanup: "not_proven",
+        realEsmCorpus: "partial_required",
+        rawNodeLoader: false,
+        customConditions: false
+      }),
+      packageManagerProfile: Object.freeze({
+        status: "android_substrate_partial",
+        defaultEnabled: false,
+        targetProfiles: Object.freeze(["desktop_compat_opt_in"]),
+        hostPackageManager: "available",
+        androidStore: "local_app_private_partial",
+        androidRuntimeInstall: "local_unpacked_only",
+        npmCli: "denied",
+        npmFacade: "guarded_package_manager_alias",
+        requireNpm: "guarded_package_manager_alias",
+        npmInstallEquivalent: "host_managed_plus_android_store_substrate",
+        registryDownload: "deferred",
+        tarballInstall: "host_side_only",
+        lockfile: "autojs6_lock_host_managed",
+        integrity: "sha512_required",
+        lifecycleScripts: "denied",
+        debugLifecycleScripts: "not_promoted",
+        binLinks: "denied",
+        symlinks: "denied",
+        nativeBuild: "denied",
+        nativePayloads: "denied",
+        postinstallDownload: "denied",
+        nodeModulesMutation: "transactional_store_only",
+        transaction: "locked_cancellable_atomic",
+        sourcePolicy: "guarded_local_unpacked_mutation",
+        sourceAuthority: "local_unpacked_host_managed_only",
+        installAuthority: "package_manager_mutate_explicit_local_unpacked",
+        allowedSources: Object.freeze(["local_unpacked_host_managed"]),
+        deniedSources: Object.freeze(["raw_registry", "remote_tarball", "git", "http_url", "file_url", "workspace_symlink", "unverified_cache"]),
+        planOperations: Object.freeze(["planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall"]),
+        mutationOperations: Object.freeze(["install", "update", "remove"]),
+        npmFacadeOperations: Object.freeze(["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript"]),
+        mutationCapability: "package_manager.mutate",
+        mutationConfirmation: "allowMutation_required",
+        operations: Object.freeze(["install", "update", "remove", "list", "verify", "prune"]),
+        packageKinds: Object.freeze(["dependency", "plugin", "project"]),
+        jsBridge: "guarded_mutation_partial",
+        requirePackageManager: "guarded_mutation_partial",
+        diagnosticFacade: "available",
+        packagedBehavior: "not_promoted",
+        androidNetwork: "denied",
+        rawExecutables: false,
+        rawRegistryAccess: false
+      }),
+      stdlibProfile: Object.freeze({
+        status: "safe_subset_partial",
+        defaultEnabled: true,
+        targetProfiles: Object.freeze(["safe_default", "desktop_compat_opt_in"]),
+        conformanceSet: "node24_safe_stdlib_subset",
+        moduleStatus: Object.freeze({
+          crypto: "partial",
+          stream: "partial",
+          zlib: "partial",
+          buffer: "partial",
+          url: "partial",
+          os: "partial",
+          readline: "partial",
+          tty: "partial",
+          perf_hooks: "partial",
+          async_hooks: "partial",
+          "zlib/promises": "disabled"
+        }),
+        conformanceModules: Object.freeze([
+          "crypto",
+          "stream",
+          "stream/promises",
+          "stream/consumers",
+          "stream/web",
+          "zlib",
+          "buffer",
+          "url",
+          "os",
+          "readline",
+          "readline/promises",
+          "tty",
+          "perf_hooks",
+          "async_hooks"
+        ]),
+        cjsAliases: "bare_and_node_prefix",
+        esmImports: "partial",
+        shadowing: "builtin_precedence",
+        processGetBuiltinModule: "controlled_partial",
+        androidDifferences: "documented_stable",
+        androidUnsupported: Object.freeze([
+          "os.setPriority",
+          "real_network_interfaces",
+          "tty_raw_mode",
+          "zlib/promises",
+          "node:test/reporters"
+        ]),
+        resourceLimits: "bounded_callbacks_streams_crypto_zlib",
+        npmCorpus: "real_npm_phase13_53_fixture_corpus",
+        desktopDifferential: "modern_core_s7_36_partial",
+        packagedBehavior: "existing_v1_1_smokes_partial",
+        rawDesktopParity: false,
+        rawNativeHandles: false,
+        unrestrictedNetwork: false,
+        broadTerminal: false
+      }),
+      processParityProfile: Object.freeze({
+        status: "safe_process_subset_partial",
+        defaultEnabled: true,
+        targetProfiles: Object.freeze(["safe_default", "desktop_compat_opt_in"]),
+        argv: "entry_and_project_runner_partial",
+        env: "controlled_string_map",
+        envMutation: "script_local_string_coercing_mutable",
+        envSources: "request_map_plus_safe_defaults",
+        envDefaultKeys: Object.freeze(["NODE_ENV", "AUTOJS6_EMBEDDED_NODE", "AUTOJS6_NODE_RUNTIME"]),
+        envFilteredKeys: Object.freeze([
+          "NODE_OPTIONS",
+          "NODE_INSPECT_RESUME_ON_START",
+          "NODE_COMPILE_CACHE",
+          "NODE_DISABLE_COMPILE_CACHE",
+          "AUTOJS6_NODE_COMPILE_CACHE_DIR",
+          "AUTOJS6_NODE_COMPILE_CACHE_KEY",
+          "AUTOJS6_NODE_COMPILE_CACHE_RUNTIME_KEY",
+          "AUTOJS6_NODE_COMPILE_CACHE_PROJECT_KEY",
+          "AUTOJS6_NODE_COMPILE_CACHE_LOADER"
+        ]),
+        cwd: "scoped_working_directory",
+        chdir: "scoped_relative_directory_only",
+        exit: "lifecycle_mapped_process_exit",
+        signals: "denied_no_android_signal_delivery",
+        versions: "partial_node_v8_available",
+        resourceUsage: "partial_runtime_snapshot",
+        timing: "partial_uptime_hrtime_cpu_memory",
+        permission: "autojs6_readonly_capability_query",
+        report: "getReport_only_write_denied",
+        stdio: "bounded_non_tty",
+        moduleAliases: Object.freeze(["process", "node:process"]),
+        androidDifferences: "documented_stable",
+        androidUnsupported: Object.freeze([
+          "process.kill",
+          "process.abort",
+          "native_process_exit",
+          "signals",
+          "privilege_posix_apis",
+          "raw_process_binding",
+          "raw_dlopen",
+          "report.writeReport",
+          "unrestricted_chdir"
+        ]),
+        packagedBehavior: "existing_project_runner_smokes_partial",
+        rawDesktopParity: false,
+        rawEnvInheritance: false,
+        rawSignals: false,
+        rawProcessHandles: false,
+        nativeBindings: false
+      }),
+      packagedCapabilityProfile: Object.freeze({
+        status: "packaged_metadata_partial",
+        defaultEnabled: true,
+        targetProfiles: Object.freeze(["pro_compat_opt_in", "desktop_compat_opt_in"]),
+        metadataSchema: "autojs6-packaged-capability-metadata-v1",
+        metadataSources: Object.freeze([
+          "project.json:node",
+          "package.json:autojs6",
+          "package.json:autojs6.node",
+          ".autojs6-node-runtime.json",
+          ".autojs6-node-launch.json"
+        ]),
+        permissionManifest: "node_permissions_enforced",
+        androidManifestSynthesis: "bridge_android_permissions_only",
+        profileMetadata: "diagnostic_only",
+        nodeBuiltins: "declared_metadata_only_no_authority",
+        nativeAssets: "declared_metadata_only_denied",
+        filesystemRoots: "declared_metadata_only_scoped_default",
+        network: "network_capability_maps_android_internet",
+        longRunning: "execution_mode_metadata_partial",
+        undeclaredCapabilities: "rejected_before_dispatch",
+        manifestConsistency: "project_package_metadata_verified",
+        packagedRuntimeDescriptor: "version_vector_required",
+        packagedLaunchDescriptor: "scoped_internal_metadata",
+        rawProfilePromotion: false,
+        rawBuiltinPromotion: false,
+        nativeAssetLoading: false,
+        expandedFilesystemRoots: false,
+        unreviewedAndroidPermissions: false
+      }),
+      pluginSystemProfile: Object.freeze({
+        status: "js_only_local_manager_partial",
+        defaultEnabled: true,
+        targetProfiles: Object.freeze(["pro_compat_opt_in", "desktop_compat_opt_in"]),
+        manager: "js_only_local_manager_v1",
+        pluginRoot: "project_local_plugins_directory",
+        installMode: "already_present_current_execution",
+        operations: Object.freeze([
+          "install",
+          "enable",
+          "disable",
+          "configure",
+          "load",
+          "start",
+          "stop",
+          "unload",
+          "reload",
+          "status",
+          "manifest",
+          "resolve",
+          "list",
+          "capabilities"
+        ]),
+        permissionModel: "exact_plugin_id_plus_requested_permissions",
+        hostManifestEnforcement: "required_before_install_load_start",
+        overDeclaredPluginCapabilities: "rejected_before_code_execution",
+        pluginNamespacePermissions: "rejected_in_manifest",
+        androidProviderPlugins: "deferred",
+        nativePlugins: "denied",
+        remoteMarketplace: "deferred",
+        signedArchives: "deferred",
+        updateChannel: "deferred",
+        packagedDistribution: "local_checked_files_only",
+        resourceOwnership: "plugin_lifecycle_context_partial",
+        debugReload: "debug_only",
+        downloadInstaller: false,
+        nativeAddonLoading: false,
+        androidPluginApkBridge: false,
+        marketplaceInstall: false,
+        persistedGlobalState: false,
+        grantsHostCapabilities: false
+      }),
+      packageIntegrityProfile: Object.freeze({
+        status: "lock_integrity_policy_partial",
+        defaultEnabled: true,
+        targetProfiles: Object.freeze(["pro_compat_opt_in", "desktop_compat_opt_in"]),
+        policySchema: "autojs6-node-package-lock-integrity-policy-v1",
+        lockfile: "autojs6-lock.json",
+        androidRecordSchema: "autojs6-node-android-package-record-v1",
+        hashAlgorithm: "sha512",
+        hashFormat: "ssri_sha512_base64",
+        androidPackageManager: "transactional_local_store",
+        pluginPackages: "local_checked_files_signed_archives_deferred",
+        nativeAddons: "denied_until_signed_packaged_artifacts",
+        signatureScheme: "autojs6-package-signature-v1",
+        signaturePolicy: "required_before_plugin_native_promotion",
+        rollback: "staging_restore_previous_on_failure",
+        cacheCleanup: "staging_prune_and_reinstall_required",
+        corruptionRecovery: "verify_mismatch_reinstall_required",
+        lockfileAuthority: "host_managed_required",
+        recoveryActions: Object.freeze([
+          "verify_package_integrity",
+          "prune_stale_transactions",
+          "reinstall_from_verified_source",
+          "restore_previous_transaction_snapshot",
+          "disable_unsigned_plugin_or_native_subject"
+        ]),
+        subjects: Object.freeze([
+          "android_package_manager",
+          "plugin_packages",
+          "native_addons"
+        ]),
+        unsafePackageExecution: false,
+        rawRegistryInstall: false,
+        unsignedPluginInstall: false,
+        unsignedNativeAddonLoad: false,
+        lifecycleScripts: false,
+        postinstallDownloads: false,
+        unverifiedCacheReuse: false
+      }),
+      filesystemProfile: Object.freeze({
+        mode: "scoped_working_directory",
+        safeProfileScoped: true,
+        additionalRoots: Object.freeze([]),
+        userAuthorizedRoots: false,
+        safRoots: false,
+        appPrivateRoots: false,
+        androidSharedStorage: false,
+        advancedApis: Object.freeze({
+          streams: "partial",
+          fileHandle: "partial",
+          fd: "partial",
+          opendir: "partial",
+          watch: "partial",
+          realpath: "partial",
+          recursiveWatch: "unsupported",
+          closeOnDestroy: "execution_owned",
+          packagedBehavior: "partial",
+          rawFd: false
+        }),
+        limits: Object.freeze({
+          watcherLimit: __autojs6_scoped_fs_watcher_limit,
+          watchEventLimit: __autojs6_scoped_fs_watch_event_limit,
+          watchEventWindowMs: __autojs6_scoped_fs_watch_event_window_ms
+        })
+      }),
+      workerThreadsProfile: Object.freeze({
+        status: __autojs6_worker_threads_experimental_enabled ? "experimental_opt_in_preflight" : "disabled_by_default",
+        defaultEnabled: false,
+        requestLocalOptIn: __autojs6_worker_threads_experimental_enabled,
+        nativeAvailability: "preflight_required",
+        messageChannel: "partial",
+        transferList: "partial",
+        workerPool: "partial",
+        bridgeModules: "denied",
+        nestedWorkers: false,
+        rawNativeHandles: false,
+        packagedBehavior: "native_available_only",
+        policy: __autojs6_worker_threads_policy_snapshot()
+      }),
+      processWorkerReplacementProfile: Object.freeze({
+        status: "decision_partial",
+        api: "not_introduced",
+        facade: "not_introduced",
+        preferredPrimitive: "worker_threads.WorkerPool",
+        workerThreads: "request_local_experimental_preflight",
+        childProcess: "denied",
+        shellBridge: "separate_scoped_command_bridge",
+        executionMode: "worker_computation_reserved",
+        secondExecutionSlot: "not_closed",
+        scopedScriptPath: "workingDirectory",
+        messageSizeBytes: __autojs6_worker_threads_policy.maxMessageBytes,
+        maxQueuedMessages: __autojs6_worker_threads_policy.maxQueuedMessages,
+        cleanup: "worker_pool_close_or_execution_destroy",
+        packagedBehavior: "not_promoted",
+        bridgeModules: "denied",
+        nestedWorkers: false,
+        rawProcessHandles: false
+      }),
+      vmProfile: Object.freeze({
+        status: "native_available",
+        defaultEnabled: true,
+        targetProfiles: Object.freeze(["desktop_compat_opt_in", "debug_unsafe_lab"]),
+        module: "native_available",
+        script: "native_available",
+        context: "native_available",
+        timeout: "native_run_options",
+        compileFunction: "native_available",
+        syntheticModule: "native_available",
+        sourceTextModule: "native_available",
+        dynamicImportHooks: "native_available",
+        bridgeModules: "denied",
+        processAccess: "not_security_boundary",
+        scopedFs: "must_preserve",
+        privateBindings: "denied",
+        hostObjects: "not_injected_by_autojs6",
+        memoryLimits: "native_node_defaults",
+        packagedBehavior: "native_builtin",
+        rawGlobalAccess: true
+      }),
+      inspectorProfile: Object.freeze({
+        status: "disabled_by_default",
+        defaultEnabled: false,
+        targetProfiles: Object.freeze(["debug_unsafe_lab"]),
+        module: "denied",
+        devtools: "deferred",
+        inspectorProtocol: "deferred",
+        adbForwarding: "required_before_enablement",
+        explicitUserAction: "required_before_enablement",
+        releaseBuild: "denied",
+        packagedBehavior: "not_promoted",
+        portBinding: "denied",
+        remoteConnections: "denied",
+        bridgeModules: "denied",
+        processAccess: "denied",
+        heapSnapshot: "denied",
+        cpuProfiler: "denied",
+        sensitivePathRedaction: "not_proven",
+        rawSockets: false
+      }),
+      wasiProfile: Object.freeze({
+        status: "disabled_by_default",
+        defaultEnabled: false,
+        targetProfiles: Object.freeze(["desktop_compat_opt_in"]),
+        pureWebAssembly: "available",
+        rawNodeWasi: "denied",
+        controlledFacade: "deferred",
+        module: "denied",
+        preopens: "scoped_or_authorized_roots_required",
+        workingDirectoryPreopen: "deferred",
+        authorizedRoots: "required_before_enablement",
+        args: "explicit_only",
+        env: "empty_by_default",
+        fd: "virtualized_required",
+        stdio: "bounded_required",
+        clock: "limited_required",
+        random: "limited_required",
+        network: "denied",
+        processExit: "denied",
+        symlinkEscape: "must_deny",
+        workerIntegration: "deferred",
+        packagedBehavior: "not_promoted",
+        rawHostPaths: false,
+        rawFdNumbers: false
+      }),
+      nativeAddonProfile: Object.freeze({
+        status: "disabled_by_default",
+        defaultEnabled: false,
+        targetProfiles: Object.freeze(["desktop_compat_opt_in"]),
+        module: "denied",
+        requireExtension: "denied",
+        processDlopen: "denied",
+        processBinding: "denied",
+        nodeGyp: "denied",
+        downloadedArtifacts: "denied",
+        signedPackagedOnly: "required_before_enablement",
+        abiAllowlist: "required_before_enablement",
+        hashAllowlist: "required_before_enablement",
+        dependencyScan: "required_before_enablement",
+        crashIsolation: "required_before_enablement",
+        packagedBehavior: "not_promoted",
+        jniBridge: "denied",
+        rawDlopen: "denied",
+        nativeMemoryAccess: "denied",
+        rawNativeHandles: false,
+        downloadExec: false
+      }),
+      childProcessProfile: Object.freeze({
+        status: __autojs6_child_process_experimental_enabled ? "experimental_opt_in_native" : "disabled_by_default",
+        defaultEnabled: false,
+        targetProfiles: Object.freeze(["desktop_compat_opt_in"]),
+        module: __autojs6_child_process_experimental_enabled ? "native_available" : "denied",
+        nodePrefix: __autojs6_child_process_experimental_enabled ? "native_available" : "denied",
+        scopedRunner: __autojs6_child_process_experimental_enabled ? "native_node_builtin" : "deferred",
+        shellBridge: "separate_scoped_command_bridge",
+        androidShellProvider: "available_with_shell_capability",
+        appPrivateBinaries: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "required_before_enablement",
+        allowlistedBinaries: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "required_before_enablement",
+        arbitraryPaths: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "denied",
+        cwd: "scoped_working_directory",
+        env: "string_map_scoped",
+        stdin: __autojs6_child_process_experimental_enabled ? "native_node_streams" : "deferred",
+        stdout: __autojs6_child_process_experimental_enabled ? "native_node_streams" : "bounded_required",
+        stderr: __autojs6_child_process_experimental_enabled ? "native_node_streams" : "bounded_required",
+        timeout: __autojs6_child_process_experimental_enabled ? "caller_managed" : "required",
+        cancellation: __autojs6_child_process_experimental_enabled ? "native_node_kill" : "required_before_enablement",
+        kill: __autojs6_child_process_experimental_enabled ? "native_available" : "required_before_enablement",
+        cleanup: __autojs6_child_process_experimental_enabled ? "native_node_lifecycle" : "required_before_enablement",
+        processHandles: __autojs6_child_process_experimental_enabled ? "native_available" : "denied",
+        fdStreams: __autojs6_child_process_experimental_enabled ? "native_available" : "denied",
+        detached: "denied",
+        shellOperators: __autojs6_child_process_experimental_enabled ? "native_shell_option" : "denied",
+        packagedBehavior: __autojs6_child_process_experimental_enabled ? "experimental_build_only" : "not_promoted",
+        rawProcessHandles: __autojs6_child_process_experimental_enabled,
+        rawSignals: __autojs6_child_process_experimental_enabled
+      }),
+      processPermission: __autojs6_process_permission_query(),
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
       limitedBuiltins: __autojs6_freeze_sorted_copy(
         __autojs6_worker_threads_experimental_enabled
@@ -8610,6 +9957,14 @@ std::string buildEmbeddedScriptExecutionSource(
         dynamicImportUnsupported: "ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED",
         esmUnsupported: "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
         requireEsmUnsupported: "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
+        rhinoShimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
+        rhinoInstallUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
+        rhinoImportUnsupported: "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED",
+        rhinoJavaAdapterUnsupported: "ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED",
+        rhinoInvalidRequest: "ERR_AUTOJS6_RHINO_INVALID_REQUEST",
+        rhinoExecutionError: "ERR_AUTOJS6_RHINO_EXECUTION_ERROR",
+        rhinoExecutionTimeout: "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT",
+        rhinoJsonUnsafeResult: "ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT",
         fsScopedPath: "ERR_AUTOJS6_FS_SCOPED_PATH",
         fsAbsolutePathDenied: "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED",
         fsPathEscape: "ERR_AUTOJS6_FS_PATH_ESCAPE",
@@ -8636,10 +9991,561 @@ std::string buildEmbeddedScriptExecutionSource(
         nativeAddonDisabled: "ERR_AUTOJS6_NATIVE_ADDON_DISABLED",
         legacyAliases: Object.freeze(legacyAliases)
       }),
-      bridgePermissions: __autojs6_bridge_permission_report(),
+      compileCache: __autojs6_compile_cache_profile_snapshot(),
+      profileSelection,
+      profileRollbackPolicy,
+      privacyDisclosurePolicy,
+      bridgePermissions: bridgePermissionsReport,
       bridgeLimits: __autojs6_bridge_limits_report()
     });
     return __autojs6_profile_cache;
+  }
+  function __autojs6_profile_rollback_policy_report(featureFlags) {
+    const profileKillSwitches = Object.freeze({
+      pro_compat_opt_in: "autojs.nodejs.profile.pro.enabled",
+      desktop_compat_opt_in: "autojs.nodejs.profile.desktop.enabled",
+      debug_unsafe_lab: "autojs.nodejs.profile.debugUnsafeLab.enabled"
+    });
+    const capabilityKillSwitches = Object.freeze({
+      network: "autojs.nodejs.network.experimental",
+      raw_network: "autojs.nodejs.rawNetworkModules.experimental",
+      worker_threads: "autojs.nodejs.worker_threads.experimental",
+      java_interop: "autojs.nodejs.javaInterop.experimental",
+      all_relaxed_capabilities: "autojs.nodejs.relaxedCapabilities.enabled",
+      raw_node_network_modules: "autojs.nodejs.rawNetworkModules.experimental",
+      filesystem_relaxation: "safe_profile_scoped_fs",
+      child_process: "autojs.nodejs.child_process.experimental",
+      native_addon: "stable_denial_no_runtime_switch",
+      inspector: "debug_profile_only_no_runtime_switch",
+      wasi: "stable_denial_no_runtime_switch"
+    });
+    const flagEnabled = function(name) {
+      const flag = featureFlags && featureFlags[name];
+      return !!(flag && flag.enabled === true);
+    };
+    return Object.freeze({
+      schema: "autojs6-node-profile-rollback-policy-v1",
+      status: "playbook_partial",
+      defaultProfile: "safe_default",
+      effectiveProfile: "safe_default",
+      rollbackTargetProfile: "safe_default",
+      crashFallbackProfile: "safe_default",
+      stressFallbackProfile: "safe_default",
+      profilePromotion: false,
+      userSelectable: false,
+      metadataOnly: true,
+      grantsAuthority: false,
+      safeDefaultAlwaysAvailable: true,
+      independentProfileDisable: true,
+      profileKillSwitches,
+      capabilityKillSwitches,
+      profileStates: Object.freeze([
+        Object.freeze({
+          id: "safe_default",
+          property: "always_on",
+          enabled: true,
+          rollbackAction: "keep_default_safe_profile",
+          fallbackProfile: "safe_default",
+          packagedAction: "no_downgrade_required"
+        }),
+        Object.freeze({
+          id: "pro_compat_opt_in",
+          property: profileKillSwitches.pro_compat_opt_in,
+          enabled: false,
+          rollbackAction: "disable_pro_profile_and_rebuild",
+          fallbackProfile: "safe_default",
+          packagedAction: "publish_safe_profile_patch_or_remove_pro_metadata"
+        }),
+        Object.freeze({
+          id: "desktop_compat_opt_in",
+          property: profileKillSwitches.desktop_compat_opt_in,
+          enabled: false,
+          rollbackAction: "disable_desktop_profile_and_rebuild",
+          fallbackProfile: "safe_default",
+          packagedAction: "publish_safe_profile_patch_or_remove_desktop_metadata"
+        }),
+        Object.freeze({
+          id: "debug_unsafe_lab",
+          property: profileKillSwitches.debug_unsafe_lab,
+          enabled: false,
+          rollbackAction: "disable_debug_unsafe_lab_and_rebuild",
+          fallbackProfile: "safe_default",
+          packagedAction: "release_build_forbids_debug_unsafe_lab"
+        })
+      ]),
+      capabilityStates: Object.freeze([
+        Object.freeze({
+          id: "network",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.network,
+          enabled: flagEnabled("network"),
+          rollbackAction: "set_autojs_nodejs_network_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "raw_network",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.raw_network,
+          enabled: flagEnabled("raw_node_network_modules"),
+          rollbackAction: "set_autojs_nodejs_rawNetworkModules_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "raw_node_network_modules",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.raw_node_network_modules,
+          enabled: flagEnabled("raw_node_network_modules"),
+          rollbackAction: "set_autojs_nodejs_rawNetworkModules_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "worker_threads",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.worker_threads,
+          enabled: flagEnabled("worker_threads"),
+          rollbackAction: "set_autojs_nodejs_worker_threads_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "java_interop",
+          profile: "pro_compat_opt_in",
+          property: capabilityKillSwitches.java_interop,
+          enabled: flagEnabled("java_interop"),
+          rollbackAction: "set_autojs_nodejs_javaInterop_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "all_relaxed_capabilities",
+          profile: "pro_or_desktop",
+          property: capabilityKillSwitches.all_relaxed_capabilities,
+          enabled: false,
+          rollbackAction: "set_autojs_nodejs_relaxedCapabilities_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "filesystem_relaxation",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.filesystem_relaxation,
+          enabled: false,
+          rollbackAction: "keep_scoped_working_directory_only",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "child_process",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.child_process,
+          enabled: flagEnabled("child_process"),
+          rollbackAction: "set_autojs_nodejs_child_process_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "native_addon",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.native_addon,
+          enabled: false,
+          rollbackAction: "keep_node_extension_and_dlopen_denied",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "inspector",
+          profile: "debug_unsafe_lab",
+          property: capabilityKillSwitches.inspector,
+          enabled: false,
+          rollbackAction: "keep_inspector_builtin_denied",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "wasi",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.wasi,
+          enabled: false,
+          rollbackAction: "keep_raw_wasi_denied",
+          fallbackProfile: "safe_default"
+        })
+      ]),
+      rollbackTriggers: Object.freeze([
+        Object.freeze({
+          id: "native_crash",
+          evidence: "NodeCrashEvidenceStore",
+          fallbackProfile: "safe_default",
+          action: "disable_requested_profile_and_relaunch_safe_default"
+        }),
+        Object.freeze({
+          id: "bridge_provider_crash",
+          evidence: "NodeCrashEvidenceStore",
+          fallbackProfile: "safe_default",
+          action: "disable_provider_capability_then_relaunch_safe_default"
+        }),
+        Object.freeze({
+          id: "stress_regression",
+          evidence: "verifyNodePhase13FullHeavyResourceStress",
+          fallbackProfile: "safe_default",
+          action: "disable_profile_or_capability_until_stress_gate_recovers"
+        }),
+        Object.freeze({
+          id: "security_corpus_regression",
+          evidence: "RELAXED_CAPABILITY_SECURITY_CORPUS.json",
+          fallbackProfile: "safe_default",
+          action: "fail_closed_and_keep_relaxed_capability_unpromoted"
+        }),
+        Object.freeze({
+          id: "packaged_apk_regression",
+          evidence: "packaged capability metadata and crash bundle",
+          fallbackProfile: "safe_default",
+          action: "ship_safe_profile_patch_or_remove_promoted_metadata"
+        })
+      ]),
+      packagedDowngrade: Object.freeze({
+        strategy: "publish_safe_profile_patch_or_remove_promoted_metadata",
+        authority: "metadata_only_no_authority",
+        publishSafeProfilePatch: true,
+        remoteKillSwitchAvailable: false,
+        remoteKillSwitchPolicy: "rejected_v1_1_publish_safe_profile_patch",
+        requiresUserDisclosure: true,
+        actions: Object.freeze([
+          "remove pro_compat_opt_in or desktop_compat_opt_in metadata",
+          "remove relaxed node.permissions",
+          "rebuild packaged APK with Safe profile defaults",
+          "keep stable denial errors for undeclared capabilities",
+          "record crash/stress evidence before re-enabling"
+        ])
+      }),
+      releasePolicy: Object.freeze({
+        releaseBuildForbidsDebugUnsafeLab: true,
+        releaseBuildForbidsExperimentalProfiles: true,
+        safeProfileReleaseFallback: true,
+        rollbackPropertiesDefaultFalse: true
+      }),
+      pending: Object.freeze([
+        "runtime profile promotion",
+        "settings UI profile switch",
+        "packaged builder profile switch",
+        "automatic crash circuit breaker",
+        "remote packaged kill switch",
+        "privacy disclosure prompts"
+      ])
+    });
+  }
+  function __autojs6_privacy_disclosure_surface(
+    id,
+    capability,
+    profile,
+    androidPermissions,
+    requiresUserPrompt,
+    requiresForegroundDisclosure,
+    requiresNotification,
+    requiresSettingsIntent,
+    promptChannel,
+    disclosureChannel,
+    settingsIntent
+  ) {
+    return Object.freeze({
+      id,
+      capability,
+      profile,
+      androidPermissions: Object.freeze(androidPermissions.slice()),
+      requiresUserPrompt,
+      requiresForegroundDisclosure,
+      requiresNotification,
+      requiresSettingsIntent,
+      promptChannel,
+      disclosureChannel,
+      settingsIntent: settingsIntent || null,
+      packagedBehavior: "deny_without_reviewed_disclosure_manifest",
+      runtimeStatus: "fail_closed_until_disclosure",
+      promotionBlockedUntil: "user_prompt_and_foreground_disclosure_implemented",
+      implicitGrantAllowed: false,
+      authority: "metadata_only_no_authority"
+    });
+  }
+  function __autojs6_privacy_disclosure_channel(id, status, requiredFor) {
+    return Object.freeze({
+      id,
+      status,
+      requiredFor: Object.freeze(requiredFor.slice()),
+      grantsAuthority: false
+    });
+  }
+  function __autojs6_privacy_disclosure_policy_report() {
+    return Object.freeze({
+      schema: "autojs6-node-privacy-disclosure-policy-v1",
+      status: "policy_partial",
+      defaultProfile: "safe_default",
+      effectiveProfile: "safe_default",
+      metadataOnly: true,
+      grantsAuthority: false,
+      implicitHighPrivilegeDenied: true,
+      packagedImplicitHighPrivilegeDenied: true,
+      disclosureBlocksPromotion: true,
+      foregroundDisclosureRequiredForPromotedSensitiveSurfaces: true,
+      userPromptRequiredForPromotedSensitiveSurfaces: true,
+      surfaces: Object.freeze([
+        __autojs6_privacy_disclosure_surface(
+          "screen_capture",
+          "screen_capture",
+          "pro_compat_opt_in",
+          Object.freeze([
+            "android.permission.FOREGROUND_SERVICE",
+            "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
+            "android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
+          ]),
+          true,
+          true,
+          true,
+          false,
+          "media_projection_prompt",
+          "foreground_service_notification",
+          "android.media.projection.MediaProjectionManager#createScreenCaptureIntent"
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "media_recording",
+          "media.recording",
+          "pro_compat_opt_in",
+          Object.freeze([
+            "android.permission.RECORD_AUDIO",
+            "android.permission.FOREGROUND_SERVICE",
+            "android.permission.FOREGROUND_SERVICE_MICROPHONE"
+          ]),
+          true,
+          true,
+          true,
+          false,
+          "android_permission_dialog",
+          "foreground_service_notification",
+          "android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS"
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "ui_overlay",
+          "ui.overlay",
+          "pro_compat_opt_in",
+          Object.freeze([
+            "android.permission.SYSTEM_ALERT_WINDOW",
+            "android.permission.FOREGROUND_SERVICE",
+            "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+            "android.permission.POST_NOTIFICATIONS"
+          ]),
+          true,
+          true,
+          true,
+          true,
+          "in_app_disclosure",
+          "foreground_service_notification",
+          "android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION"
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "accessibility",
+          "accessibility",
+          "pro_compat_opt_in",
+          Object.freeze(["android.permission.BIND_ACCESSIBILITY_SERVICE"]),
+          true,
+          true,
+          false,
+          true,
+          "in_app_disclosure",
+          "accessibility_service_description",
+          "android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS"
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "network",
+          "network",
+          "desktop_compat_opt_in",
+          Object.freeze(["android.permission.INTERNET"]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "packaged_metadata_review",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "raw_network",
+          "raw_network",
+          "desktop_compat_opt_in",
+          Object.freeze(["android.permission.INTERNET"]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "packaged_metadata_review",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "filesystem_relaxation",
+          "filesystem_relaxation",
+          "desktop_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "in_app_disclosure",
+          "storage_access_framework",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "java_interop",
+          "java_interop",
+          "pro_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "doctor_report",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "shell_root",
+          "shell.root",
+          "pro_compat_opt_in",
+          Object.freeze([]),
+          true,
+          true,
+          false,
+          false,
+          "in_app_disclosure",
+          "foreground_service_notification",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "shell_shizuku",
+          "shell.shizuku",
+          "pro_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "in_app_disclosure",
+          "shizuku_permission_dialog",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "child_process",
+          "child_process",
+          "desktop_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "doctor_report",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "native_addon",
+          "native_addon",
+          "desktop_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "packaged_metadata_review",
+          "signed_native_artifact_review",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "inspector",
+          "inspector",
+          "debug_unsafe_lab",
+          Object.freeze([]),
+          true,
+          true,
+          true,
+          false,
+          "debug_session_confirmation",
+          "foreground_service_notification",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "wasi",
+          "wasi",
+          "desktop_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "packaged_metadata_review",
+          null
+        )
+      ]),
+      channels: Object.freeze([
+        __autojs6_privacy_disclosure_channel("android_permission_dialog", "platform_controlled", ["media_recording"]),
+        __autojs6_privacy_disclosure_channel("media_projection_prompt", "platform_controlled", ["screen_capture"]),
+        __autojs6_privacy_disclosure_channel("foreground_service_notification", "required_before_promotion", [
+          "screen_capture",
+          "media_recording",
+          "ui_overlay",
+          "shell_root",
+          "inspector"
+        ]),
+        __autojs6_privacy_disclosure_channel("in_app_disclosure", "required_before_promotion", [
+          "ui_overlay",
+          "accessibility",
+          "filesystem_relaxation",
+          "shell_root",
+          "shell_shizuku"
+        ]),
+        __autojs6_privacy_disclosure_channel("project_capability_review", "required_before_promotion", [
+          "network",
+          "raw_network",
+          "java_interop",
+          "child_process",
+          "wasi"
+        ]),
+        __autojs6_privacy_disclosure_channel("packaged_metadata_review", "required_before_packaged_promotion", [
+          "network",
+          "raw_network",
+          "native_addon",
+          "wasi"
+        ]),
+        __autojs6_privacy_disclosure_channel("doctor_report", "diagnostic_only", ["java_interop", "child_process"])
+      ]),
+      packagedPolicy: Object.freeze({
+        schema: "autojs6-node-packaged-disclosure-manifest-v1",
+        status: "policy_partial",
+        metadataOnly: true,
+        grantsAuthority: false,
+        implicitHighPrivilegeDenied: true,
+        requiresDisclosureManifest: true,
+        reviewedManifestRequiredForPromotion: true,
+        denyUndeclaredHighRiskSurfaces: true,
+        permissionSynthesisRequiresReviewedDisclosure: true,
+        defaultAction: "deny_without_reviewed_disclosure_manifest",
+        manifestKeys: Object.freeze([
+          "project.json:node.disclosures",
+          "package.json:autojs6.node.disclosures"
+        ])
+      }),
+      doctorPrivacy: Object.freeze({
+        scriptContentsIncluded: false,
+        environmentValuesIncluded: false,
+        pathsRedacted: true,
+        surfaceMetadataOnly: true
+      }),
+      automationImplications: Object.freeze({
+        automaticCrashCircuitBreaker: "future_metadata_only_safe_profile_fallback",
+        crashEvidencePrivacy: "metadata_only_no_script_contents",
+        remotePackagedKillSwitch: "rejected_v1_1_publish_safe_profile_patch",
+        requiresDisclosureBeforeReenable: true,
+        grantsAuthority: false
+      }),
+      pending: Object.freeze([
+        "settings UI disclosure review",
+        "localized prompt copy",
+        "foreground service notification ownership",
+        "packaged disclosure manifest review",
+        "device matrix for screenshot recording overlay accessibility",
+        "automatic runtime enforcement before profile promotion"
+      ])
+    });
   }
   function __autojs6_bridge_normalize_capability(value) {
     const text = String(value === undefined || value === null ? "" : value)
@@ -8649,11 +10555,45 @@ std::string buildEmbeddedScriptExecutionSource(
     if (text === "media_projection" || text === "media.projection" || text === "screen.capture" || text === "screencapture") {
       return "screen_capture";
     }
+    if (text === "audio" || text === "media:audio" || text === "media-audio") {
+      return "media.audio";
+    }
+    if (text === "mediainfo" || text === "media.info" || text === "media-info" || text === "media_info" || text === "media:metadata") {
+      return "media.metadata";
+    }
+    if (text === "recorder" || text === "media.record" || text === "media:recording" || text === "media-recording" || text === "audio.recording") {
+      return "media.recording";
+    }
     if (text === "engine.exec") {
       return "engines.exec";
     }
     if (text === "java") {
       return "java_interop";
+    }
+    if (text === "rhino.run") {
+      return "rhino";
+    }
+    if (text === "sqlite") {
+      return "database";
+    }
+    if (text === "app-query" || text === "app.query" || text === "package-query" || text === "package.query") {
+      return "app.query";
+    }
+    if (
+      text === "package-manager.mutate" ||
+      text === "package.manager.mutate" ||
+      text === "android_package_manager.mutate" ||
+      text === "android-package-manager.mutate"
+    ) {
+      return "package_manager.mutate";
+    }
+    if (
+      text === "package-manager" ||
+      text === "package.manager" ||
+      text === "android_package_manager" ||
+      text === "android-package-manager"
+    ) {
+      return "package_manager";
     }
     return text;
   }
@@ -8670,6 +10610,54 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return Object.freeze(output);
   }
+  function __autojs6_bridge_packaged_metadata_fallback() {
+    return Object.freeze({
+      schema: "autojs6-packaged-capability-metadata-v1",
+      status: "absent",
+      profile: "safe_default",
+      requestedProfiles: Object.freeze([]),
+      builtins: Object.freeze([]),
+      nativeAssets: Object.freeze([]),
+      filesystemRoots: Object.freeze([]),
+      executionMode: "",
+      longRunning: false,
+      network: Object.freeze({
+        requested: false,
+        declaredCapability: false,
+        androidPermissions: Object.freeze([])
+      }),
+      metadataOnly: true,
+      grantsAuthority: false,
+      sources: Object.freeze(["none"]),
+      warnings: Object.freeze([])
+    });
+  }
+  function __autojs6_bridge_freeze_packaged_metadata(value) {
+    if (!value || typeof value !== "object") {
+      return __autojs6_bridge_packaged_metadata_fallback();
+    }
+    const network = value.network && typeof value.network === "object" ? value.network : {};
+    return Object.freeze({
+      schema: typeof value.schema === "string" && value.schema ? value.schema : "autojs6-packaged-capability-metadata-v1",
+      status: typeof value.status === "string" && value.status ? value.status : "absent",
+      profile: typeof value.profile === "string" && value.profile ? value.profile : "safe_default",
+      requestedProfiles: __autojs6_bridge_freeze_string_array(value.requestedProfiles),
+      builtins: __autojs6_bridge_freeze_string_array(value.builtins),
+      nativeAssets: __autojs6_bridge_freeze_string_array(value.nativeAssets),
+      filesystemRoots: __autojs6_bridge_freeze_string_array(value.filesystemRoots),
+      executionMode: typeof value.executionMode === "string" ? value.executionMode : "",
+      longRunning: value.longRunning === true,
+      network: Object.freeze({
+        requested: network.requested === true,
+        declaredCapability: network.declaredCapability === true,
+        androidPermissions: __autojs6_bridge_freeze_string_array(network.androidPermissions)
+      }),
+      metadataOnly: value.metadataOnly !== false,
+      grantsAuthority: value.grantsAuthority === true,
+      sources: __autojs6_bridge_freeze_string_array(value.sources),
+      warnings: __autojs6_bridge_freeze_string_array(value.warnings)
+    });
+  }
   function __autojs6_bridge_permission_manifest() {
     if (__autojs6_bridge_permission_manifest_cache !== undefined) {
       return __autojs6_bridge_permission_manifest_cache;
@@ -8684,6 +10672,7 @@ std::string buildEmbeddedScriptExecutionSource(
       unknownPermissions: Object.freeze([]),
       androidPermissions: Object.freeze([]),
       serviceRequired: false,
+      packagedMetadata: __autojs6_bridge_packaged_metadata_fallback(),
       warnings: Object.freeze([])
     });
     try {
@@ -8711,6 +10700,7 @@ std::string buildEmbeddedScriptExecutionSource(
         unknownPermissions: __autojs6_bridge_freeze_string_array(parsed.unknownPermissions),
         androidPermissions: __autojs6_bridge_freeze_string_array(parsed.androidPermissions),
         serviceRequired: parsed.serviceRequired === true,
+        packagedMetadata: __autojs6_bridge_freeze_packaged_metadata(parsed.packagedMetadata),
         warnings: __autojs6_bridge_freeze_string_array(parsed.warnings)
       });
       return __autojs6_bridge_permission_manifest_cache;
@@ -8736,7 +10726,271 @@ std::string buildEmbeddedScriptExecutionSource(
       unknownPermissions: Object.freeze(manifest.unknownPermissions.slice()),
       androidPermissions: Object.freeze(manifest.androidPermissions.slice()),
       serviceRequired: manifest.serviceRequired,
+      packagedMetadata: manifest.packagedMetadata,
       warnings: Object.freeze(manifest.warnings.slice())
+    });
+  }
+  function __autojs6_profile_profile_order() {
+    return Object.freeze([
+      "safe_default",
+      "pro_compat_opt_in",
+      "desktop_compat_opt_in",
+      "debug_unsafe_lab"
+    ]);
+  }
+  function __autojs6_profile_sort_profiles(values) {
+    const order = __autojs6_profile_profile_order();
+    const seen = Object.create(null);
+    const output = [];
+    for (let i = 0; i < values.length; i++) {
+      const value = String(values[i] === undefined || values[i] === null ? "" : values[i]).trim();
+      if (!value || seen[value]) {
+        continue;
+      }
+      seen[value] = true;
+      output.push(value);
+    }
+    output.sort(function(left, right) {
+      const leftIndex = order.indexOf(left);
+      const rightIndex = order.indexOf(right);
+      const leftRank = leftIndex < 0 ? 999 : leftIndex;
+      const rightRank = rightIndex < 0 ? 999 : rightIndex;
+      if (leftRank !== rightRank) return leftRank - rightRank;
+      return left < right ? -1 : left > right ? 1 : 0;
+    });
+    return output;
+  }
+  function __autojs6_profile_required_profile_for_capability(capability) {
+    const normalized = __autojs6_bridge_normalize_capability(capability);
+    if (normalized === "network") return "desktop_compat_opt_in";
+    if (
+      normalized === "accessibility" ||
+      normalized === "screen_capture" ||
+      normalized === "image" ||
+      normalized === "ocr" ||
+      normalized === "barcode" ||
+      normalized === "media" ||
+      normalized === "media.audio" ||
+      normalized === "media.metadata" ||
+      normalized === "media.recording" ||
+      normalized === "notifications" ||
+      normalized === "notifications.settings" ||
+      normalized === "sensors" ||
+      normalized === "ui" ||
+      normalized === "ui.overlay" ||
+      normalized === "ui.overlay.permission" ||
+      normalized === "ui.overlay.foreground" ||
+      normalized === "ui.overlay.packaged" ||
+      normalized === "device.power" ||
+      normalized === "shell" ||
+      normalized === "shell.root" ||
+      normalized === "shell.shizuku" ||
+      normalized === "java_interop" ||
+      normalized === "rhino" ||
+      normalized === "input_observer" ||
+      normalized === "input_observer.keys" ||
+      normalized === "input_observer.touch" ||
+      normalized === "input_observer.intercept" ||
+      normalized === "floaty.raw" ||
+      normalized === "floaty.touch" ||
+      normalized.indexOf("plugin.") === 0
+    ) {
+      return "pro_compat_opt_in";
+    }
+    if (
+      normalized === "raw_node_network_modules" ||
+      normalized === "websocket" ||
+      normalized === "worker_threads" ||
+      normalized === "vm" ||
+      normalized === "native_addon" ||
+      normalized === "child_process"
+    ) {
+      return "desktop_compat_opt_in";
+    }
+    if (normalized === "inspector") return "debug_unsafe_lab";
+    return "safe_default";
+  }
+  function __autojs6_profile_required_profiles_for_capabilities(capabilities) {
+    const profiles = [];
+    for (let i = 0; i < capabilities.length; i++) {
+      profiles.push(__autojs6_profile_required_profile_for_capability(capabilities[i]));
+    }
+    return Object.freeze(__autojs6_profile_sort_profiles(profiles));
+  }
+  function __autojs6_profile_android_permissions_for_capabilities(capabilities) {
+    const order = [
+      "android.permission.POST_NOTIFICATIONS",
+      "android.permission.RECORD_AUDIO",
+      "android.permission.INTERNET",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
+      "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+      "android.permission.FOREGROUND_SERVICE_MICROPHONE"
+    ];
+    const output = [];
+    function add(permission) {
+      if (output.indexOf(permission) < 0) output.push(permission);
+    }
+    for (let i = 0; i < capabilities.length; i++) {
+      const capability = __autojs6_bridge_normalize_capability(capabilities[i]);
+      if (capability === "notifications") {
+        add("android.permission.POST_NOTIFICATIONS");
+      } else if (capability === "media.recording") {
+        add("android.permission.RECORD_AUDIO");
+        add("android.permission.FOREGROUND_SERVICE");
+        add("android.permission.FOREGROUND_SERVICE_MICROPHONE");
+      } else if (capability === "network" || capability === "raw_node_network_modules") {
+        add("android.permission.INTERNET");
+      } else if (capability === "screen_capture") {
+        add("android.permission.FOREGROUND_SERVICE");
+        add("android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION");
+        add("android.permission.FOREGROUND_SERVICE_SPECIAL_USE");
+      }
+    }
+    output.sort(function(left, right) {
+      const leftIndex = order.indexOf(left);
+      const rightIndex = order.indexOf(right);
+      const leftRank = leftIndex < 0 ? 999 : leftIndex;
+      const rightRank = rightIndex < 0 ? 999 : rightIndex;
+      if (leftRank !== rightRank) return leftRank - rightRank;
+      return left < right ? -1 : left > right ? 1 : 0;
+    });
+    return Object.freeze(output);
+  }
+  function __autojs6_profile_missing_capability_message(moduleName, methodName, missingCapabilities) {
+    const missing = Object.freeze(missingCapabilities.slice());
+    const requiredProfiles = __autojs6_profile_required_profiles_for_capabilities(missing);
+    const androidPermissions = __autojs6_profile_android_permissions_for_capabilities(missing);
+    let message = "AutoJs6 bridge capability is not declared for " +
+      moduleName + "." + methodName + ": " + missing.join(", ") +
+      "; required profile: " + (requiredProfiles.length > 0 ? requiredProfiles.join(", ") : "safe_default") +
+      "; declare node.permissions: " + missing.join(", ");
+    if (androidPermissions.length > 0) {
+      message += "; required Android permissions: " + androidPermissions.join(", ");
+    }
+    return message;
+  }
+  function __autojs6_profile_declaration_examples(missingCapabilities) {
+    const nodePermissions = Object.freeze(missingCapabilities.slice());
+    return Object.freeze({
+      nodePermissions,
+      projectJson: Object.freeze({
+        node: Object.freeze({
+          permissions: Object.freeze(missingCapabilities.slice())
+        })
+      }),
+      packageJson: Object.freeze({
+        autojs6: Object.freeze({
+          node: Object.freeze({
+            permissions: Object.freeze(missingCapabilities.slice())
+          })
+        })
+      })
+    });
+  }
+  function __autojs6_profile_failure_hint_for_missing_capabilities(moduleName, methodName, missingCapabilities) {
+    const missing = Object.freeze(missingCapabilities.slice());
+    const requiredProfiles = __autojs6_profile_required_profiles_for_capabilities(missing);
+    const androidPermissions = __autojs6_profile_android_permissions_for_capabilities(missing);
+    return Object.freeze({
+      schema: "autojs6-node-profile-selection-failure-hint-v1",
+      module: String(moduleName),
+      method: String(methodName),
+      effectiveProfile: "safe_default",
+      requiredProfiles,
+      requiredNodePermissions: missing,
+      requiredAndroidPermissions: androidPermissions,
+      profileSelectionRequired: requiredProfiles.some(function(profile) { return profile !== "safe_default"; }),
+      message: __autojs6_profile_missing_capability_message(moduleName, methodName, missing),
+      declarationHint: "Declare node.permissions/project autojs6.node.permissions for the missing capabilities; profile metadata is diagnostic-only until promotion is implemented.",
+      declarationExamples: __autojs6_profile_declaration_examples(missing)
+    });
+  }
+  function __autojs6_profile_catalog(requestedProfiles) {
+    const order = __autojs6_profile_profile_order();
+    return Object.freeze(order.map(function(profile) {
+      return Object.freeze({
+        id: profile,
+        requested: requestedProfiles.indexOf(profile) >= 0,
+        effective: profile === "safe_default",
+        available: profile === "safe_default",
+        status: profile === "safe_default" ? "effective" : "diagnostic_only",
+        description: profile === "safe_default"
+          ? "Safe default Node.js profile currently enforced at runtime."
+          : "Requested profile metadata is visible but not promoted yet."
+      });
+    }));
+  }
+  function __autojs6_profile_selection_report(featureFlags, bridgePermissionsReport) {
+    const manifest = bridgePermissionsReport || __autojs6_bridge_permission_report();
+    const metadata = manifest.packagedMetadata || __autojs6_bridge_packaged_metadata_fallback();
+    const requestedSeed = metadata.requestedProfiles && metadata.requestedProfiles.length > 0
+      ? metadata.requestedProfiles.slice()
+      : [metadata.profile || "safe_default"];
+    const requestedProfiles = Object.freeze(__autojs6_profile_sort_profiles(requestedSeed));
+    const declaredNodePermissions = Object.freeze((manifest.normalizedPermissions || []).slice().sort());
+    const highRisk = [];
+    for (let i = 0; i < declaredNodePermissions.length; i++) {
+      const capability = declaredNodePermissions[i];
+      const requiredProfile = __autojs6_profile_required_profile_for_capability(capability);
+      const androidPermissions = __autojs6_profile_android_permissions_for_capabilities([capability]);
+      if (requiredProfile !== "safe_default" || androidPermissions.length > 0) {
+        highRisk.push(Object.freeze({
+          id: capability,
+          source: "permission_manifest",
+          declared: true,
+          effectiveProfile: "safe_default",
+          requiredProfile,
+          profilePromoted: false,
+          requiredAndroidPermissions: androidPermissions
+        }));
+      }
+    }
+    for (const name of Object.keys(featureFlags || {})) {
+      const flag = featureFlags[name];
+      if (!flag || (flag.securityLevel !== "high" && flag.securityLevel !== "critical")) {
+        continue;
+      }
+      highRisk.push(Object.freeze({
+        id: flag.id,
+        source: "feature_flag",
+        declared: false,
+        effectiveProfile: "safe_default",
+        requiredProfile: __autojs6_profile_required_profile_for_capability(flag.id),
+        enabledByDefault: flag.defaultEnabled === true,
+        status: String(flag.status || ""),
+        securityLevel: String(flag.securityLevel || ""),
+        releaseForbidden: flag.releaseForbidden === true
+      }));
+    }
+    const warnings = Array.from(new Set((manifest.warnings || []).slice().concat((metadata.warnings || []).slice())));
+    return Object.freeze({
+      schema: "autojs6-node-profile-selection-diagnostics-v1",
+      status: "diagnostic_only",
+      source: "runtime",
+      defaultProfile: "safe_default",
+      selectedProfile: "safe_default",
+      effectiveProfile: "safe_default",
+      declaredProfile: metadata.profile || "safe_default",
+      requestedProfiles,
+      selectionMode: "safe_default_effective_metadata_only",
+      profilePromotion: false,
+      userSelectable: false,
+      projectSettingsSupported: true,
+      packagedSettingsSupported: true,
+      debugProfileReleaseDenied: true,
+      metadataOnly: metadata.metadataOnly !== false,
+      grantsAuthority: metadata.grantsAuthority === true,
+      declaredNodePermissions,
+      declaredAndroidPermissions: Object.freeze((manifest.androidPermissions || []).slice()),
+      profileCatalog: __autojs6_profile_catalog(requestedProfiles),
+      highRiskCapabilities: Object.freeze(highRisk),
+      blockedProfilePromotions: Object.freeze(requestedProfiles.filter(function(profile) { return profile !== "safe_default"; })),
+      failureHints: Object.freeze({
+        capabilityNotDeclared: __autojs6_profile_failure_hint_for_missing_capabilities("module", "method", ["capability"]),
+        profilePromotionBlocked: "Requested Pro/Desktop/Debug profile metadata is visible but does not grant authority in Phase 13."
+      }),
+      warnings: Object.freeze(warnings)
     });
   }
   function __autojs6_bridge_limit_defaults() {
@@ -8744,7 +10998,7 @@ std::string buildEmbeddedScriptExecutionSource(
       maxPendingBridgeCalls: 32,
       maxImageHandles: 32,
       maxShellCommands: 2,
-      maxNetworkRequests: 4,
+      maxNetworkRequests: 16,
       maxWebSocketConnections: 2,
       accessibilityQueriesPerSecond: 20
     });
@@ -8754,7 +11008,7 @@ std::string buildEmbeddedScriptExecutionSource(
       maxPendingBridgeCalls: 128,
       maxImageHandles: 128,
       maxShellCommands: 4,
-      maxNetworkRequests: 8,
+      maxNetworkRequests: 32,
       maxWebSocketConnections: 4,
       accessibilityQueriesPerSecond: 60
     });
@@ -8838,6 +11092,8 @@ std::string buildEmbeddedScriptExecutionSource(
       if (methodName === "launchPackage" || methodName === "launchApp") return ["app.launch"];
       if (methodName === "openAppSetting") return ["app.settings"];
       if (methodName === "startActivity") return ["app.activity"];
+      if (methodName === "viewFile" || methodName === "editFile") return ["app.activity"];
+      if (methodName === "getPackageName" || methodName === "getAppName" || methodName === "isInstalled") return ["app.query"];
       return ["app"];
     }
     if (moduleName === "dialogs") return ["dialogs"];
@@ -8851,12 +11107,43 @@ std::string buildEmbeddedScriptExecutionSource(
       if (methodName === "captureScreen") return ["image", "screen_capture"];
       return ["image"];
     }
+    if (moduleName === "ocr") return ["ocr", "image"];
+    if (moduleName === "barcode") return ["barcode", "image"];
+    if (moduleName === "media") return ["media", "media.audio"];
+    if (moduleName === "mediainfo") return ["media", "media.metadata"];
+    if (moduleName === "recorder") return ["media", "media.recording"];
+    if (moduleName === "storage" || moduleName === "storages") return ["storage"];
+    if (moduleName === "database" || moduleName === "sqlite") return ["database"];
+    if (moduleName === "notifications") {
+      if (methodName === "openSettings") return ["notifications", "notifications.settings"];
+      return ["notifications"];
+    }
+    if (moduleName === "sensors") return ["sensors"];
+    if (moduleName === "ui") return ["ui"];
+    if (moduleName === "ui.overlay") {
+      if (methodName === "hasPermission" || methodName === "openPermissionSettings") return ["ui.overlay.permission"];
+      return ["ui.overlay"];
+    }
+    if (moduleName === "input_observer") {
+      if (methodName === "getAvailableSources") return ["input_observer"];
+      return ["input_observer", "input_observer.keys"];
+    }
     if (moduleName === "clipboard") return ["clipboard"];
-    if (moduleName === "device") return ["device"];
+    if (moduleName === "device") {
+      if (methodName === "isIgnoringBatteryOptimizations" || methodName === "openBatteryOptimizationSettings") return ["device", "device.power"];
+      return ["device"];
+    }
     if (moduleName === "shell") return ["shell"];
     if (moduleName === "fetch" || moduleName === "websocket") return ["network"];
     if (moduleName === "work_manager") return ["work_manager"];
+    if (moduleName === "package_manager") {
+      if (methodName === "install" || methodName === "update" || methodName === "remove") {
+        return ["package_manager", "package_manager.mutate"];
+      }
+      return ["package_manager"];
+    }
     if (moduleName === "java") return ["java_interop"];
+    if (moduleName === "rhino") return ["rhino"];
     return [];
   }
   function __autojs6_bridge_effective_permissions(moduleName, methodName, optionPermissions) {
@@ -8864,8 +11151,18 @@ std::string buildEmbeddedScriptExecutionSource(
     return explicit.length > 0 ? explicit : __autojs6_bridge_default_permissions(moduleName, methodName);
   }
   function __autojs6_bridge_declares_capability(declared, required) {
-    if (required === "shell.root") {
-      return declared.indexOf("shell.root") >= 0;
+    if (
+      required === "shell.root" ||
+      required === "shell.shizuku" ||
+      required === "notifications.settings" ||
+      required === "device.power" ||
+      required === "media.audio" ||
+      required === "media.metadata" ||
+      required === "media.recording" ||
+      required === "app.query" ||
+      required === "package_manager.mutate"
+    ) {
+      return declared.indexOf(required) >= 0;
     }
     if (declared.indexOf(required) >= 0) {
       return true;
@@ -8875,6 +11172,182 @@ std::string buildEmbeddedScriptExecutionSource(
       return declared.indexOf(required.slice(0, dotIndex)) >= 0;
     }
     return false;
+  }
+  function __autojs6_process_permission_normalize_scope(scope) {
+    const text = String(scope === undefined || scope === null ? "" : scope)
+      .trim()
+      .toLowerCase()
+      .replace(/:/g, ".")
+      .replace(/-/g, "_");
+    if (!text) return "";
+    if (text === "fs" || text === "fs.read" || text === "filesystem.read" || text === "file.read") return "fs.read";
+    if (text === "fs.write" || text === "filesystem.write" || text === "file.write") return "fs.write";
+    if (text === "worker" || text === "workers" || text === "worker_threads" || text === "workerthreads") return "worker";
+    if (text === "network" || text === "net" || text === "http" || text === "https") return "network";
+    if (text === "app.query" || text === "app_query" || text === "app-query" || text === "package.query" || text === "package_query" || text === "package-query") return "app.query";
+    if (text === "shell") return "shell";
+    if (
+      text === "package_manager.mutate" ||
+      text === "package.manager.mutate" ||
+      text === "package-manager.mutate" ||
+      text === "android_package_manager.mutate" ||
+      text === "android.package.manager.mutate" ||
+      text === "android-package-manager.mutate"
+    ) return "package_manager.mutate";
+    if (
+      text === "package_manager" ||
+      text === "package.manager" ||
+      text === "package-manager" ||
+      text === "android_package_manager" ||
+      text === "android.package.manager" ||
+      text === "android-package-manager"
+    ) return "package_manager";
+    if (text === "accessibility") return "accessibility";
+    if (
+      text === "screen_capture" ||
+      text === "screen.capture" ||
+      text === "screencapture" ||
+      text === "media_projection" ||
+      text === "media.projection"
+    ) return "screen_capture";
+    if (text === "notification" || text === "notifications") return "notifications";
+    if (
+      text === "notification.settings" ||
+      text === "notifications.settings" ||
+      text === "notifications_settings"
+    ) return "notifications.settings";
+    if (text === "device.power" || text === "device_power" || text === "power_manager") return "device.power";
+    if (text === "media") return "media";
+    if (text === "audio" || text === "media.audio" || text === "media_audio") return "media.audio";
+    if (text === "mediainfo" || text === "media.info" || text === "media_info" || text === "media.metadata" || text === "media_metadata") return "media.metadata";
+    if (text === "recorder" || text === "media.record" || text === "media.recording" || text === "media_recording" || text === "audio.recording") return "media.recording";
+    if (text === "sensor" || text === "sensors") return "sensors";
+    if (text === "ocr") return "ocr";
+    if (text === "barcode" || text === "qrcode" || text === "qr_code") return "barcode";
+    return text;
+  }
+  function __autojs6_process_permission_manifest_allows(capability) {
+    const manifest = __autojs6_bridge_permission_manifest();
+    if (!manifest.enforced) {
+      return true;
+    }
+    return __autojs6_bridge_declares_capability(
+      manifest.normalizedPermissions,
+      __autojs6_bridge_normalize_capability(capability)
+    );
+  }
+  function __autojs6_process_permission_has_fs(scope, referenceProvided, reference) {
+    try {
+      const operation = "process.permission.has(" + scope + ")";
+      if (!referenceProvided) {
+        __autojs6_validate_fs_path(".", operation, { mustExist: true });
+        return true;
+      }
+      __autojs6_validate_fs_path(
+        reference,
+        operation,
+        scope === "fs.write" ? { checkParent: true } : {}
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+  function __autojs6_process_permission_has(scope, reference) {
+    if (typeof scope !== "string") {
+      throw __autojs6_invalid_arg_type("process.permission.has scope must be a string.");
+    }
+    const normalizedScope = __autojs6_process_permission_normalize_scope(scope);
+    if (normalizedScope === "fs.read" || normalizedScope === "fs.write") {
+      return __autojs6_process_permission_has_fs(
+        normalizedScope,
+        arguments.length > 1,
+        reference
+      );
+    }
+    if (normalizedScope === "worker") {
+      return __autojs6_worker_threads_experimental_enabled === true;
+    }
+    if (normalizedScope === "network") {
+      return false;
+    }
+    if (
+      normalizedScope === "shell" ||
+      normalizedScope === "accessibility" ||
+      normalizedScope === "screen_capture" ||
+      normalizedScope === "notifications" ||
+      normalizedScope === "notifications.settings" ||
+      normalizedScope === "device.power" ||
+      normalizedScope === "media" ||
+      normalizedScope === "media.audio" ||
+      normalizedScope === "media.metadata" ||
+      normalizedScope === "media.recording" ||
+      normalizedScope === "package_manager" ||
+      normalizedScope === "package_manager.mutate" ||
+      normalizedScope === "sensors" ||
+      normalizedScope === "ocr" ||
+      normalizedScope === "barcode"
+    ) {
+      return __autojs6_process_permission_manifest_allows(normalizedScope);
+    }
+    return false;
+  }
+  function __autojs6_process_permission_query() {
+    const scopeNames = [
+      "fs.read",
+      "fs.write",
+      "network",
+      "worker",
+      "shell",
+      "app.query",
+      "accessibility",
+      "screen_capture",
+      "notifications",
+      "notifications.settings",
+      "device.power",
+      "media",
+      "media.audio",
+      "media.metadata",
+      "media.recording",
+      "package_manager",
+      "package_manager.mutate",
+      "sensors",
+      "ocr",
+      "barcode"
+    ];
+    const scopes = Object.create(null);
+    scopeNames.forEach(function(scope) {
+      scopes[scope] = __autojs6_process_permission_has(scope);
+    });
+    return Object.freeze({
+      version: 1,
+      model: "autojs6-readonly-capability-query",
+      exactNodePermissionModel: false,
+      readOnly: true,
+      scopeNames: Object.freeze(scopeNames.slice()),
+      scopes: Object.freeze(scopes),
+      scopedFs: Object.freeze({
+        root: __autojs6_resolved_sandbox_root(__autojs6_path_module()),
+        cwd: __autojs6_scoped_process_cwd(),
+        read: scopes["fs.read"],
+        write: scopes["fs.write"]
+      }),
+      manifest: __autojs6_bridge_permission_report()
+    });
+  }
+  function __autojs6_create_process_permission() {
+    if (__autojs6_process_permission_cache) {
+      return __autojs6_process_permission_cache;
+    }
+    const permission = Object.create(null);
+    Object.defineProperties(permission, {
+      has: { value: __autojs6_process_permission_has, enumerable: true },
+      query: { value: __autojs6_process_permission_query, enumerable: true },
+      model: { value: "autojs6-readonly-capability-query", enumerable: true },
+      exactNodePermissionModel: { value: false, enumerable: true }
+    });
+    __autojs6_process_permission_cache = Object.freeze(permission);
+    return __autojs6_process_permission_cache;
   }
   function __autojs6_bridge_missing_capabilities(requiredPermissions) {
     const manifest = __autojs6_bridge_permission_manifest();
@@ -8897,14 +11370,19 @@ std::string buildEmbeddedScriptExecutionSource(
     return missing;
   }
   function __autojs6_bridge_capability_not_declared_error(moduleName, methodName, missingCapabilities) {
-    const missing = missingCapabilities.slice();
+    const missing = Object.freeze(missingCapabilities.slice());
+    const profileSelectionHint = __autojs6_profile_failure_hint_for_missing_capabilities(moduleName, methodName, missing);
     const error = __autojs6_bridge_error(
-      "AutoJs6 bridge capability is not declared for " + moduleName + "." + methodName + ": " + missing.join(", "),
+      profileSelectionHint.message,
       "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED",
       moduleName,
       methodName
     );
-    __autojs6_define_error_property(error, "missingCapabilities", Object.freeze(missing));
+    __autojs6_define_error_property(error, "missingCapabilities", missing);
+    __autojs6_define_error_property(error, "requiredProfiles", profileSelectionHint.requiredProfiles);
+    __autojs6_define_error_property(error, "requiredNodePermissions", profileSelectionHint.requiredNodePermissions);
+    __autojs6_define_error_property(error, "requiredAndroidPermissions", profileSelectionHint.requiredAndroidPermissions);
+    __autojs6_define_error_property(error, "profileSelectionHint", profileSelectionHint);
     return error;
   }
   function __autojs6_bridge_next_id() {
@@ -8941,10 +11419,40 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return [value];
   }
+  function __autojs6_bridge_error_category(code, sourceError) {
+    if (sourceError && sourceError.category) {
+      return String(sourceError.category);
+    }
+    const value = code === undefined || code === null ? "" : String(code);
+    if (value === "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED") return "capability-denied";
+    if (
+      value === "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED" ||
+      value === "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED" ||
+      value === "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+    ) return "permission-denied";
+    if (
+      value === "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST" ||
+      value === "ERR_AUTOJS6_NETWORK_INVALID_URL"
+    ) return "invalid-request";
+    if (
+      value === "ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT" ||
+      value === "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"
+    ) return "resource-limit";
+    if (value === "ERR_AUTOJS6_BRIDGE_RATE_LIMITED") return "rate-limited";
+    if (
+      value === "ERR_AUTOJS6_BRIDGE_TIMEOUT" ||
+      value === "ERR_AUTOJS6_NETWORK_TIMEOUT"
+    ) return "timeout";
+    if (value === "ERR_AUTOJS6_NETWORK_DISABLED") return "unavailable";
+    if (value === "ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED") return "provider-failed";
+    if (value === "ERR_AUTOJS6_BRIDGE_PROCESS_DEAD") return "process-dead";
+    return "runtime-error";
+  }
   function __autojs6_bridge_error(message, code, moduleName, methodName, sourceError) {
     const error = __autojs6_error(message, code);
     if (moduleName) __autojs6_define_error_property(error, "module", moduleName);
     if (methodName) __autojs6_define_error_property(error, "method", methodName);
+    __autojs6_define_error_property(error, "category", __autojs6_bridge_error_category(code, sourceError));
     if (sourceError && sourceError.id) __autojs6_define_error_property(error, "bridgeId", sourceError.id);
     if (sourceError && sourceError.stack) {
       try {
@@ -8972,6 +11480,34 @@ std::string buildEmbeddedScriptExecutionSource(
       source
     );
   }
+  function __autojs6_bridge_diagnostics_message(record, status, error) {
+    const request = record && record.request ? record.request : {};
+    const startedAtMs = record && Number.isFinite(record.startedAtMs) ? record.startedAtMs : Date.now();
+    const message = {
+      id: record && record.id ? String(record.id) : "",
+      module: request.module === undefined ? "" : String(request.module),
+      method: request.method === undefined ? "" : String(request.method),
+      status,
+      timeoutMs: Number(request.timeoutMs || 0),
+      durationMs: Math.max(0, Date.now() - startedAtMs),
+      pendingCount: __autojs6_bridge_pending.size
+    };
+    if (Array.isArray(request.permissions)) {
+      message.permissions = request.permissions.map(String);
+    }
+    if (error) {
+      message.code = String(error.autojs6Code || error.code || error.name || "Error");
+      message.category = String(error.category || __autojs6_bridge_error_category(message.code, error));
+    }
+    return message;
+  }
+  function __autojs6_bridge_publish_diagnostics(record, status, error) {
+    const suffix = status === "error" ? "error" : status === "start" ? "start" : "end";
+    __autojs6_diagnostics_publish(
+      "autojs6.bridge.rpc." + suffix,
+      __autojs6_bridge_diagnostics_message(record, status, error)
+    );
+  }
   function __autojs6_bridge_reject_pending(record, error) {
     if (!record) return;
     if (record.timeout !== null) {
@@ -8983,6 +11519,7 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (_) {}
     }
     __autojs6_bridge_pending.delete(record.id);
+    __autojs6_bridge_publish_diagnostics(record, "error", error);
     record.reject(error);
   }
   function __autojs6_bridge_resolve_pending(record, value) {
@@ -8996,6 +11533,7 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (_) {}
     }
     __autojs6_bridge_pending.delete(record.id);
+    __autojs6_bridge_publish_diagnostics(record, "end", null);
     record.resolve(value);
   }
   function __autojs6_bridge_receive_message(message) {
@@ -9022,6 +11560,8 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_bridge_destroy(reason) {
     __autojs6_bridge_destroyed = true;
+    __autojs6_destroy_all_zlib_streams("bridge destroy");
+    __autojs6_destroy_all_scoped_fs_streams("bridge destroy");
     const message = reason ? String(reason) : "AutoJs6 bridge process is not available.";
     const records = Array.from(__autojs6_bridge_pending.values());
     for (const record of records) {
@@ -9068,6 +11608,9 @@ std::string buildEmbeddedScriptExecutionSource(
         request.method === "stopAll" ||
         request.method === "stopSelf";
     }
+    if (request.module === "rhino") {
+      return request.method === "run";
+    }
     if (request.module === "accessibility") {
       return request.method === "isEnabled" || request.method === "ensureEnabled";
     }
@@ -9096,6 +11639,35 @@ std::string buildEmbeddedScriptExecutionSource(
       if (request.method === "stopSelf") {
         return true;
       }
+    }
+    if (request && request.module === "rhino" && request.method === "run") {
+      return {
+        schema: "autojs6-rhino-json-only-run-result-v1",
+        mode: "json-only-poc",
+        provider: "queued-host",
+        ok: false,
+        timedOut: false,
+        sourceName: "",
+        durationMs: 0,
+        error: {
+          name: "RhinoProviderUnavailableError",
+          message: "AutoJs6 queued host transport cannot execute Rhino; use the Android live provider.",
+          code: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
+          category: "provider-unavailable"
+        },
+        console: {
+          schema: "autojs6-rhino-json-only-console-v1",
+          lines: [],
+          truncated: false,
+          maxLines: 0,
+          maxBytes: 0
+        },
+        lifecycle: {
+          engineCreated: false,
+          forceStopRequested: false,
+          destroyed: true
+        }
+      };
     }
     if (request && request.module === "accessibility") {
       return false;
@@ -9673,6 +12245,40 @@ std::string buildEmbeddedScriptExecutionSource(
       redirectCount: request.redirectCount + 1
     });
   }
+  function __autojs6_fetch_url_scheme(value) {
+    const match = String(value || "").match(/^([a-z][a-z0-9+.-]*:)/i);
+    return match ? match[1].toLowerCase() : "";
+  }
+  function __autojs6_fetch_diagnostics_message(request, phase, response, error, startedAtMs) {
+    const descriptor = request && request.descriptor ? request.descriptor : {};
+    const httpStatus = response && typeof response === "object" ? Number(response.status || 0) : 0;
+    const message = {
+      phase,
+      method: descriptor.method === undefined ? "" : String(descriptor.method),
+      urlScheme: __autojs6_fetch_url_scheme(descriptor.url),
+      timeoutMs: Number(request && request.bridgeTimeoutMs || 0),
+      maxResponseBytes: Number(request && request.maxResponseBytes || 0),
+      redirectMode: request && request.redirectMode === undefined ? "" : String(request && request.redirectMode || ""),
+      redirectCount: Number(request && request.redirectCount || 0),
+      durationMs: Math.max(0, Date.now() - (Number.isFinite(startedAtMs) ? startedAtMs : Date.now())),
+      activeRequestCount: __autojs6_fetch_diagnostics.activeRequestCount
+    };
+    if (response && typeof response === "object") {
+      message.httpStatus = httpStatus;
+      message.ok = httpStatus >= 200 && httpStatus < 300;
+    }
+    if (error) {
+      message.code = String(error.autojs6Code || error.code || error.name || "Error");
+    }
+    return message;
+  }
+  function __autojs6_fetch_publish_diagnostics(request, phase, response, error, startedAtMs) {
+    const suffix = phase === "error" ? "error" : phase === "start" ? "start" : "end";
+    __autojs6_diagnostics_publish(
+      "autojs6.fetch.request." + suffix,
+      __autojs6_fetch_diagnostics_message(request, phase, response, error, startedAtMs)
+    );
+  }
   function __autojs6_fetch_normalize_error(error) {
     __autojs6_fetch_record_error(error);
     const code = error && (error.autojs6Code || error.code);
@@ -9736,15 +12342,19 @@ std::string buildEmbeddedScriptExecutionSource(
           "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
         );
       }
+      const fetchStartedAtMs = Date.now();
+      __autojs6_fetch_publish_diagnostics(request, "start", null, null, fetchStartedAtMs);
       return __autojs6_fetch_dispatch(request).then(function(result) {
         return __autojs6_fetch_to_response(result, request.maxResponseBytes);
       }).then(function(response) {
         __autojs6_fetch_diagnostics.completedCount += 1;
         __autojs6_fetch_finish_request();
+        __autojs6_fetch_publish_diagnostics(request, "end", response, null, fetchStartedAtMs);
         return response;
       }, function(error) {
         const normalized = __autojs6_fetch_normalize_error(error);
         __autojs6_fetch_finish_request();
+        __autojs6_fetch_publish_diagnostics(request, "error", null, normalized, fetchStartedAtMs);
         throw normalized;
       });
     }).catch(function(error) {
@@ -9767,6 +12377,681 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     __autojs6_limited_fetch_cache = Object.freeze(fetchModule);
     return __autojs6_limited_fetch_cache;
+  }
+  function __autojs6_undici_policy_error(optionName) {
+    return __autojs6_fetch_policy_error(
+      "AutoJs6 controlled undici facade rejects option '" + optionName + "'. Raw Undici connectors are unavailable.",
+      "undici_" + optionName,
+      "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+    );
+  }
+  function __autojs6_undici_validate_options(options) {
+    if (!options || typeof options !== "object") {
+      return;
+    }
+    const denied = [
+      "connect",
+      "factory",
+      "socketPath",
+      "proxy",
+      "proxyTunnel"
+    ];
+    for (const name of denied) {
+      if (__autojs6_has_own(options, name) && options[name] !== undefined && options[name] !== null) {
+        throw __autojs6_undici_policy_error(name);
+      }
+    }
+  }
+  function __autojs6_undici_validate_dispatcher(dispatcher, optionName) {
+    if (dispatcher === undefined || dispatcher === null) {
+      return;
+    }
+    if (!dispatcher || typeof dispatcher !== "object" || dispatcher.__autojs6LimitedUndiciDispatcher !== true) {
+      throw __autojs6_undici_policy_error(optionName || "dispatcher");
+    }
+  }
+  function __autojs6_limited_undici() {
+    if (__autojs6_limited_undici_cache) {
+      return __autojs6_limited_undici_cache;
+    }
+    class LimitedDispatcher {
+      constructor(options) {
+        const opts = options && typeof options === "object" ? options : Object.create(null);
+        __autojs6_undici_validate_options(opts);
+        Object.defineProperty(this, "__autojs6LimitedUndiciDispatcher", {
+          value: true,
+          enumerable: false
+        });
+        this.options = Object.freeze(Object.assign(Object.create(null), opts));
+        this.closed = false;
+        this.destroyed = false;
+      }
+      dispatch() {
+        throw __autojs6_undici_policy_error("dispatch");
+      }
+      close(callback) {
+        this.closed = true;
+        if (typeof callback === "function") {
+          __autojs6_schedule_task(function() {
+            callback(null);
+          });
+          return undefined;
+        }
+        return Promise.resolve();
+      }
+      destroy(error, callback) {
+        if (typeof error === "function") {
+          callback = error;
+          error = null;
+        }
+        this.destroyed = true;
+        this.closed = true;
+        if (typeof callback === "function") {
+          const callbackError = error || null;
+          __autojs6_schedule_task(function() {
+            callback(callbackError);
+          });
+        }
+        return this;
+      }
+    }
+    class LimitedAgent extends LimitedDispatcher {
+      constructor(options) {
+        super(options);
+        const opts = options && typeof options === "object" ? options : Object.create(null);
+        this.connections = opts.connections === undefined ? null : Number(opts.connections);
+        this.pipelining = opts.pipelining === undefined ? 1 : Number(opts.pipelining);
+        this.keepAliveTimeout = opts.keepAliveTimeout === undefined ? 4000 : Number(opts.keepAliveTimeout);
+      }
+    }
+    class LimitedMockInterceptor {
+      constructor(pool, options) {
+        this.pool = pool;
+        this.options = Object.freeze(Object.assign(Object.create(null), options && typeof options === "object" ? options : {}));
+        this.replyStatusCode = null;
+        this.replyData = undefined;
+        this.replyOptions = Object.freeze(Object.create(null));
+        this.persisted = false;
+        this.remaining = 1;
+      }
+      reply(statusCode, data, options) {
+        this.replyStatusCode = Number(statusCode);
+        this.replyData = data;
+        this.replyOptions = Object.freeze(Object.assign(Object.create(null), options && typeof options === "object" ? options : {}));
+        return this;
+      }
+      times(count) {
+        const value = Number(count);
+        this.remaining = Number.isFinite(value) && value > 0 ? Math.floor(value) : 1;
+        return this;
+      }
+      persist() {
+        this.persisted = true;
+        return this;
+      }
+      delay() {
+        return this;
+      }
+    }
+    class LimitedMockPool {
+      constructor(origin) {
+        this.origin = String(origin);
+        this.interceptors = [];
+      }
+      intercept(options) {
+        const interceptor = new LimitedMockInterceptor(this, options);
+        this.interceptors.push(interceptor);
+        return interceptor;
+      }
+    }
+    class LimitedMockAgent extends LimitedDispatcher {
+      constructor(options) {
+        super(options);
+        this.netConnectDisabled = false;
+        this.__autojs6Pools = new Map();
+      }
+      disableNetConnect() {
+        this.netConnectDisabled = true;
+        return this;
+      }
+      enableNetConnect() {
+        this.netConnectDisabled = false;
+        return this;
+      }
+      get(origin) {
+        const key = String(origin);
+        if (!this.__autojs6Pools.has(key)) {
+          this.__autojs6Pools.set(key, new LimitedMockPool(key));
+        }
+        return this.__autojs6Pools.get(key);
+      }
+    }
+    function toRawHeaderValue(value) {
+      if (Array.isArray(value)) {
+        return value.map(function(item) {
+          return Buffer.from(String(item), "latin1");
+        });
+      }
+      return Buffer.from(String(value), "latin1");
+    }
+    function toRawHeaders(headers) {
+      const rawHeaders = [];
+      if (!headers || typeof headers !== "object") {
+        return rawHeaders;
+      }
+      Object.keys(headers).forEach(function(key) {
+        const value = headers[key];
+        if (value === undefined || value === null) {
+          return;
+        }
+        rawHeaders.push(Buffer.from(String(key), "latin1"), toRawHeaderValue(value));
+      });
+      return rawHeaders;
+    }
+    class LimitedDecoratorHandler {
+      constructor(handler) {
+        if (!handler || typeof handler !== "object") {
+          throw new TypeError("handler must be an object");
+        }
+        Object.defineProperties(this, {
+          __autojs6LimitedUndiciHandler: {
+            value: handler,
+            enumerable: false
+          },
+          __autojs6OnCompleteCalled: {
+            value: false,
+            writable: true,
+            enumerable: false
+          },
+          __autojs6OnErrorCalled: {
+            value: false,
+            writable: true,
+            enumerable: false
+          },
+          __autojs6OnResponseStartCalled: {
+            value: false,
+            writable: true,
+            enumerable: false
+          }
+        });
+      }
+      __autojs6AssertActive() {
+        if (this.__autojs6OnCompleteCalled) {
+          throw new Error("DecoratorHandler response already completed");
+        }
+        if (this.__autojs6OnErrorCalled) {
+          throw new Error("DecoratorHandler response already failed");
+        }
+      }
+      onRequestStart(controller, context) {
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onRequestStart === "function") {
+          return handler.onRequestStart(controller, context);
+        }
+        if (typeof handler.onConnect === "function") {
+          const abort = controller && typeof controller.abort === "function"
+            ? function(reason) { return controller.abort(reason); }
+            : function() {};
+          return handler.onConnect(abort, context);
+        }
+        return undefined;
+      }
+      onRequestUpgrade(controller, statusCode, headers, socket) {
+        this.__autojs6AssertActive();
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onRequestUpgrade === "function") {
+          return handler.onRequestUpgrade(controller, statusCode, headers, socket);
+        }
+        if (typeof handler.onUpgrade === "function") {
+          return handler.onUpgrade(statusCode, toRawHeaders(headers), socket);
+        }
+        return undefined;
+      }
+      onResponseStart(controller, statusCode, headers, statusMessage) {
+        this.__autojs6AssertActive();
+        if (this.__autojs6OnResponseStartCalled) {
+          throw new Error("DecoratorHandler response already started");
+        }
+        this.__autojs6OnResponseStartCalled = true;
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onResponseStart === "function") {
+          return handler.onResponseStart(controller, statusCode, headers, statusMessage);
+        }
+        if (typeof handler.onHeaders === "function") {
+          const resume = controller && typeof controller.resume === "function"
+            ? function() { return controller.resume(); }
+            : function() {};
+          const result = handler.onHeaders(statusCode, toRawHeaders(headers), resume, statusMessage);
+          if (result === false && controller && typeof controller.pause === "function") {
+            controller.pause();
+          }
+        }
+        return undefined;
+      }
+      onResponseData(controller, chunk) {
+        this.__autojs6AssertActive();
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onResponseData === "function") {
+          return handler.onResponseData(controller, chunk);
+        }
+        if (typeof handler.onData === "function") {
+          const result = handler.onData(chunk);
+          if (result === false && controller && typeof controller.pause === "function") {
+            controller.pause();
+          }
+        }
+        return undefined;
+      }
+      onResponseEnd(controller, trailers) {
+        this.__autojs6AssertActive();
+        this.__autojs6OnCompleteCalled = true;
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onResponseEnd === "function") {
+          return handler.onResponseEnd(controller, trailers);
+        }
+        if (typeof handler.onComplete === "function") {
+          return handler.onComplete(toRawHeaders(trailers));
+        }
+        return undefined;
+      }
+      onResponseError(controller, error) {
+        this.__autojs6OnErrorCalled = true;
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onResponseError === "function") {
+          return handler.onResponseError(controller, error);
+        }
+        if (typeof handler.onError === "function") {
+          return handler.onError(error);
+        }
+        throw error;
+      }
+      onBodySent() {}
+    }
+    const defaultDispatcher = new LimitedAgent({});
+    let globalDispatcher = defaultDispatcher;
+    function validateFetchInit(init) {
+      const requestInit = init && typeof init === "object" ? init : Object.create(null);
+      __autojs6_undici_validate_dispatcher(requestInit.dispatcher, "dispatcher");
+      __autojs6_undici_validate_options(requestInit);
+    }
+    function undiciFetch(input, init) {
+      validateFetchInit(init);
+      return __autojs6_controlled_fetch(input, init);
+    }
+    function undiciRequest(input, init) {
+      return undiciFetch(input, init).then(function(response) {
+        const headers = Object.create(null);
+        if (response.headers && typeof response.headers.forEach === "function") {
+          response.headers.forEach(function(value, name) {
+            headers[String(name)] = String(value);
+          });
+        }
+        return Object.freeze({
+          statusCode: response.status,
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.freeze(headers),
+          body: response.body,
+          trailers: Object.freeze(Object.create(null)),
+          opaque: null,
+          context: null
+        });
+      });
+    }
+    function setGlobalDispatcher(dispatcher) {
+      __autojs6_undici_validate_dispatcher(dispatcher, "globalDispatcher");
+      globalDispatcher = dispatcher;
+      return undefined;
+    }
+    function getGlobalDispatcher() {
+      return globalDispatcher;
+    }
+    function deniedConnector(name) {
+      return function() {
+        throw __autojs6_undici_policy_error(name);
+      };
+    }
+    [
+      LimitedDispatcher,
+      LimitedAgent,
+      LimitedMockAgent,
+      LimitedMockPool,
+      LimitedMockInterceptor,
+      LimitedDecoratorHandler
+    ].forEach(function(ctor) {
+      Object.freeze(ctor.prototype);
+      Object.freeze(ctor);
+    });
+    const undiciModule = {};
+    Object.defineProperties(undiciModule, {
+      fetch: { value: undiciFetch, enumerable: true },
+      request: { value: undiciRequest, enumerable: true },
+      Headers: { value: globalThis.Headers, enumerable: true },
+      Request: { value: globalThis.Request, enumerable: true },
+      Response: { value: globalThis.Response, enumerable: true },
+      FormData: { value: globalThis.FormData, enumerable: true },
+      File: { value: globalThis.File, enumerable: true },
+      Dispatcher: { value: LimitedDispatcher, enumerable: true },
+      Agent: { value: LimitedAgent, enumerable: true },
+      MockAgent: { value: LimitedMockAgent, enumerable: true },
+      DecoratorHandler: { value: LimitedDecoratorHandler, enumerable: true },
+      setGlobalDispatcher: { value: setGlobalDispatcher, enumerable: true },
+      getGlobalDispatcher: { value: getGlobalDispatcher, enumerable: true },
+      connect: { value: deniedConnector("connect"), enumerable: true },
+      upgrade: { value: deniedConnector("upgrade"), enumerable: true },
+      stream: { value: deniedConnector("stream"), enumerable: true },
+      pipeline: { value: deniedConnector("pipeline"), enumerable: true }
+    });
+    Object.defineProperty(undiciModule, "default", { value: undiciModule, enumerable: true });
+    __autojs6_limited_undici_cache = Object.freeze(undiciModule);
+    return __autojs6_limited_undici_cache;
+  }
+  function __autojs6_axios_is_plain_object(value) {
+    if (!value || Object.prototype.toString.call(value) !== "[object Object]") {
+      return false;
+    }
+    const proto = Object.getPrototypeOf(value);
+    return proto === Object.prototype || proto === null;
+  }
+  function __autojs6_axios_is_absolute_url(value) {
+    return /^[a-z][a-z0-9+.-]*:/i.test(String(value || ""));
+  }
+  function __autojs6_axios_combine_url(baseURL, url) {
+    const rawUrl = url === undefined || url === null ? "" : String(url);
+    if (__autojs6_axios_is_absolute_url(rawUrl) || !baseURL) {
+      return rawUrl;
+    }
+    return String(baseURL).replace(/\/+$/, "") + "/" + rawUrl.replace(/^\/+/, "");
+  }
+  function __autojs6_axios_params_string(params) {
+    if (params === undefined || params === null) {
+      return "";
+    }
+    if (typeof URLSearchParams === "function" && params instanceof URLSearchParams) {
+      return params.toString();
+    }
+    if (typeof params === "string") {
+      return params.charAt(0) === "?" ? params.slice(1) : params;
+    }
+    const search = new URLSearchParams();
+    if (Array.isArray(params)) {
+      for (const entry of params) {
+        if (entry && entry.length >= 2 && entry[1] !== undefined && entry[1] !== null) {
+          search.append(String(entry[0]), String(entry[1]));
+        }
+      }
+      return search.toString();
+    }
+    if (typeof params === "object") {
+      Object.keys(params).forEach(function(key) {
+        const value = params[key];
+        if (value === undefined || value === null) {
+          return;
+        }
+        if (Array.isArray(value)) {
+          value.forEach(function(item) {
+            if (item !== undefined && item !== null) {
+              search.append(key, String(item));
+            }
+          });
+        } else {
+          search.append(key, String(value));
+        }
+      });
+      return search.toString();
+    }
+    return String(params);
+  }
+  function __autojs6_axios_append_params(url, params) {
+    const query = __autojs6_axios_params_string(params);
+    if (!query) {
+      return url;
+    }
+    const hashIndex = url.indexOf("#");
+    const base = hashIndex >= 0 ? url.slice(0, hashIndex) : url;
+    const hash = hashIndex >= 0 ? url.slice(hashIndex) : "";
+    return base + (base.indexOf("?") >= 0 ? "&" : "?") + query + hash;
+  }
+  function __autojs6_axios_headers_object(headers) {
+    const result = {};
+    const normalized = new Headers(headers || undefined);
+    normalized.forEach(function(value, name) {
+      result[String(name)] = String(value);
+    });
+    return Object.freeze(result);
+  }
+  function __autojs6_axios_error(message, code, config, request, response, cause) {
+    const error = __autojs6_with_error_code(new Error(message), code);
+    error.name = "AxiosError";
+    error.config = config || {};
+    if (request !== undefined) {
+      error.request = request;
+    }
+    if (response !== undefined) {
+      error.response = response;
+      error.status = response && response.status;
+    }
+    if (cause !== undefined) {
+      error.cause = cause;
+      const causeCode = cause && (cause.autojs6Code || cause.code);
+      if (causeCode && String(causeCode).indexOf("ERR_AUTOJS6_") === 0) {
+        __autojs6_define_error_property(error, "autojs6Code", String(causeCode));
+      }
+    }
+    __autojs6_define_error_property(error, "isAxiosError", true);
+    error.toJSON = function() {
+      return {
+        message: this.message,
+        name: this.name,
+        code: this.code,
+        autojs6Code: this.autojs6Code,
+        status: this.status
+      };
+    };
+    return error;
+  }
+  function __autojs6_axios_wrap_error(error, config, request, response) {
+    if (error && error.isAxiosError) {
+      return error;
+    }
+    const code = error && (error.autojs6Code || error.code) || "ERR_AUTOJS6_NETWORK_ERROR";
+    return __autojs6_axios_error(
+      error && error.message ? error.message : "AutoJs6 controlled axios request failed.",
+      code,
+      config,
+      request,
+      response,
+      error
+    );
+  }
+  function __autojs6_axios_policy_error(message, reason, config) {
+    return __autojs6_axios_wrap_error(
+      __autojs6_fetch_policy_error(message, reason, "ERR_AUTOJS6_NETWORK_POLICY_DENIED"),
+      config
+    );
+  }
+  function __autojs6_axios_assert_supported_config(config) {
+    const denied = [
+      "adapter",
+      "httpAgent",
+      "httpsAgent",
+      "agent",
+      "transport",
+      "socketPath",
+      "paramsSerializer"
+    ];
+    for (const name of denied) {
+      if (config[name] !== undefined && config[name] !== null) {
+        throw __autojs6_axios_policy_error(
+          "AutoJs6 controlled axios does not support config." + name + ".",
+          "axios_" + name,
+          config
+        );
+      }
+    }
+    if (config.proxy !== undefined && config.proxy !== null && config.proxy !== false) {
+      throw __autojs6_axios_policy_error(
+        "AutoJs6 controlled axios does not support proxy configuration.",
+        "axios_proxy",
+        config
+      );
+    }
+  }
+  function __autojs6_axios_merge_config(defaultConfig, configOrUrl, maybeConfig) {
+    const defaults = defaultConfig && typeof defaultConfig === "object" ? defaultConfig : {};
+    const config = Object.assign({}, defaults);
+    const defaultHeaders = defaults.headers;
+    let requestHeaders;
+    if (typeof configOrUrl === "string" || (typeof URL === "function" && configOrUrl instanceof URL)) {
+      Object.assign(config, maybeConfig && typeof maybeConfig === "object" ? maybeConfig : {});
+      config.url = String(configOrUrl);
+      requestHeaders = maybeConfig && typeof maybeConfig === "object" ? maybeConfig.headers : undefined;
+    } else if (configOrUrl && typeof configOrUrl === "object") {
+      Object.assign(config, configOrUrl);
+      requestHeaders = configOrUrl.headers;
+    }
+    if (defaultHeaders !== undefined || requestHeaders !== undefined) {
+      config.headers = __autojs6_fetch_merge_headers(defaultHeaders, requestHeaders);
+    }
+    return config;
+  }
+  function __autojs6_axios_prepare_body(config, headers) {
+    const hasData = __autojs6_has_own(config, "data");
+    const hasBody = __autojs6_has_own(config, "body");
+    if (!hasData && !hasBody) {
+      return undefined;
+    }
+    const body = hasData ? config.data : config.body;
+    if (__autojs6_axios_is_plain_object(body)) {
+      if (!headers.has("content-type")) {
+        headers.set("content-type", "application/json");
+      }
+      return JSON.stringify(body);
+    }
+    if (typeof URLSearchParams === "function" && body instanceof URLSearchParams) {
+      if (!headers.has("content-type")) {
+        headers.set("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+      }
+      return body.toString();
+    }
+    return body;
+  }
+  function __autojs6_axios_response_data(response, responseType) {
+    const normalizedType = responseType === undefined || responseType === null ? "" : String(responseType).toLowerCase();
+    if (normalizedType === "arraybuffer") {
+      return response.arrayBuffer();
+    }
+    if (normalizedType === "text") {
+      return response.text();
+    }
+    if (normalizedType && normalizedType !== "json") {
+      throw __autojs6_fetch_policy_error(
+        "AutoJs6 controlled axios supports only json, text, and arraybuffer responseType.",
+        "axios_response_type",
+        "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+      );
+    }
+    const contentType = response.headers && typeof response.headers.get === "function"
+      ? String(response.headers.get("content-type") || "").toLowerCase()
+      : "";
+    if (normalizedType === "json" || contentType.indexOf("application/json") >= 0 || contentType.indexOf("+json") >= 0) {
+      return response.text().then(function(text) {
+        return text ? JSON.parse(text) : null;
+      });
+    }
+    return response.text();
+  }
+  function __autojs6_axios_validate_status(config, status) {
+    if (config.validateStatus === null) {
+      return true;
+    }
+    if (typeof config.validateStatus === "function") {
+      return !!config.validateStatus(status);
+    }
+    return status >= 200 && status < 300;
+  }
+  function __autojs6_axios_dispatch(defaultConfig, configOrUrl, maybeConfig) {
+    let config = {};
+    let request = undefined;
+    return Promise.resolve().then(function() {
+      config = __autojs6_axios_merge_config(defaultConfig, configOrUrl, maybeConfig);
+      __autojs6_axios_assert_supported_config(config);
+      const method = String(config.method || "GET").toUpperCase();
+      const headers = new Headers(config.headers || undefined);
+      const url = __autojs6_axios_append_params(
+        __autojs6_axios_combine_url(config.baseURL, config.url),
+        config.params
+      );
+      const body = __autojs6_axios_prepare_body(config, headers);
+      const fetchInit = {
+        method,
+        headers,
+        timeoutMs: config.timeout,
+        maxResponseBytes: config.maxResponseBytes !== undefined ? config.maxResponseBytes : config.maxContentLength,
+        maxRedirects: config.maxRedirects,
+        redirect: config.redirect,
+        signal: config.signal
+      };
+      if (body !== undefined) {
+        fetchInit.body = body;
+      }
+      request = Object.freeze({ method, url });
+      return __autojs6_controlled_fetch(url, fetchInit).then(function(response) {
+        return __autojs6_axios_response_data(response, config.responseType).then(function(data) {
+          const axiosResponse = Object.freeze({
+            data,
+            status: response.status,
+            statusText: response.statusText,
+            headers: __autojs6_axios_headers_object(response.headers),
+            config,
+            request
+          });
+          if (!__autojs6_axios_validate_status(config, response.status)) {
+            throw __autojs6_axios_error(
+              "Request failed with status code " + response.status,
+              response.status >= 500 ? "ERR_BAD_RESPONSE" : "ERR_BAD_REQUEST",
+              config,
+              request,
+              axiosResponse
+            );
+          }
+          return axiosResponse;
+        });
+      });
+    }).catch(function(error) {
+      throw __autojs6_axios_wrap_error(error, config, request);
+    });
+  }
+  function __autojs6_axios_create(defaultConfig) {
+    const defaults = Object.freeze(Object.assign({}, defaultConfig && typeof defaultConfig === "object" ? defaultConfig : {}));
+    function axios(configOrUrl, maybeConfig) {
+      return __autojs6_axios_dispatch(defaults, configOrUrl, maybeConfig);
+    }
+    function AxiosError(message, code, config, request, response) {
+      return __autojs6_axios_error(message, code, config, request, response);
+    }
+    Object.defineProperties(axios, {
+      request: { value: function(config) { return axios(config); }, enumerable: true },
+      get: { value: function(url, config) { return axios(Object.assign({}, config || {}, { method: "GET", url: String(url) })); }, enumerable: true },
+      post: { value: function(url, data, config) { return axios(Object.assign({}, config || {}, { method: "POST", url: String(url), data })); }, enumerable: true },
+      create: { value: function(config) { return __autojs6_axios_create(Object.assign({}, defaults, config || {})); }, enumerable: true },
+      isAxiosError: { value: function(value) { return !!(value && value.isAxiosError === true); }, enumerable: true },
+      AxiosError: { value: AxiosError, enumerable: true },
+      defaults: { value: defaults, enumerable: true },
+      adapterName: { value: "autojs6-controlled-fetch", enumerable: true },
+      VERSION: { value: "autojs6-v1.1-fetch-adapter", enumerable: true },
+      policy: { value: __autojs6_fetch_policy_snapshot(), enumerable: true },
+      diagnostics: { value: __autojs6_fetch_diagnostics_snapshot, enumerable: true },
+      default: { value: axios, enumerable: true }
+    });
+    return Object.freeze(axios);
+  }
+  function __autojs6_limited_axios() {
+    if (__autojs6_limited_axios_cache) {
+      return __autojs6_limited_axios_cache;
+    }
+    __autojs6_limited_axios_cache = __autojs6_axios_create({});
+    return __autojs6_limited_axios_cache;
   }
   function __autojs6_websocket_error(message, code) {
     return __autojs6_error(message, code);
@@ -9964,11 +13249,21 @@ std::string buildEmbeddedScriptExecutionSource(
     return __autojs6_websocket_send_descriptor(String(data), maxMessageBytes);
   }
   function __autojs6_websocket_emit(connection, eventName) {
+    const args = Array.prototype.slice.call(arguments, 2);
+    const handler = connection["on" + String(eventName)];
+    if (typeof handler === "function") {
+      try {
+        handler.apply(connection, args);
+      } catch (error) {
+        setImmediate(function() {
+          throw error;
+        });
+      }
+    }
     const listeners = connection.__listeners[eventName];
     if (!listeners || listeners.length === 0) {
       return;
     }
-    const args = Array.prototype.slice.call(arguments, 2);
     listeners.slice().forEach(function(listener) {
       try {
         listener.apply(connection, args);
@@ -9990,7 +13285,11 @@ std::string buildEmbeddedScriptExecutionSource(
       connection.__drainTimer = null;
     }
     __autojs6_websocket_finish_connection();
-    __autojs6_websocket_emit(connection, "close", code === undefined ? 1000 : code, reason || "");
+    __autojs6_websocket_emit(connection, "close", Object.freeze({
+      type: "close",
+      code: code === undefined ? 1000 : code,
+      reason: reason || ""
+    }));
   }
   function __autojs6_websocket_process_events(connection, events) {
     const list = Array.isArray(events) ? events : [];
@@ -10046,6 +13345,10 @@ std::string buildEmbeddedScriptExecutionSource(
       url: String(record.url || ""),
       readyState: "open",
       maxMessageBytes: __autojs6_websocket_max_message_bytes(connectionOptions.maxMessageBytes),
+      onopen: null,
+      onmessage: null,
+      onclose: null,
+      onerror: null,
       __listeners: Object.create(null),
       __closed: false,
       __drainTimer: null,
@@ -10063,6 +13366,12 @@ std::string buildEmbeddedScriptExecutionSource(
         if (!list) return this;
         this.__listeners[key] = list.filter(function(item) { return item !== listener; });
         return this;
+      },
+      addEventListener(eventName, listener) {
+        return this.on(eventName, listener);
+      },
+      removeEventListener(eventName, listener) {
+        return this.off(eventName, listener);
       },
       send(data, sendOptions) {
         if (this.__closed) {
@@ -10166,6 +13475,219 @@ std::string buildEmbeddedScriptExecutionSource(
       "ERR_AUTOJS6_WORKER_DISABLED"
     );
   }
+  function __autojs6_worker_threads_shape_facade() {
+    if (__autojs6_worker_threads_shape_facade_cache) {
+      return __autojs6_worker_threads_shape_facade_cache;
+    }
+    const messageClasses = (typeof globalThis.MessageChannel === "function" && typeof globalThis.MessagePort === "function")
+      ? {
+          MessageChannel: globalThis.MessageChannel,
+          MessagePort: globalThis.MessagePort
+        }
+      : __autojs6_create_limited_message_channel_classes();
+    const environmentData = new Map();
+    const disabledWorkerStates = new WeakMap();
+    function disabledWorkerState(worker, operation) {
+      if (worker && (typeof worker === "object" || typeof worker === "function") && disabledWorkerStates.has(worker)) {
+        return disabledWorkerStates.get(worker);
+      }
+      throw new TypeError("Illegal invocation of Worker." + operation);
+    }
+    function disabledWorkerEmit(worker, eventName) {
+      const state = disabledWorkerState(worker, "emit");
+      const args = Array.prototype.slice.call(arguments, 2);
+      const listeners = (state.listeners[eventName] || []).slice();
+      if (listeners.length === 0) {
+        return false;
+      }
+      listeners.forEach(function(entry) {
+        if (entry.once) {
+          const bucket = state.listeners[eventName] || [];
+          const index = bucket.indexOf(entry);
+          if (index >= 0) {
+            bucket.splice(index, 1);
+          }
+        }
+        entry.listener.apply(worker, args);
+      });
+      return true;
+    }
+    function disabledWorkerAddListener(worker, eventName, listener, once) {
+      if (typeof listener !== "function") {
+        throw new TypeError("listener must be a function");
+      }
+      const state = disabledWorkerState(worker, "on");
+      const name = String(eventName);
+      if (!state.listeners[name]) {
+        state.listeners[name] = [];
+      }
+      state.listeners[name].push({ listener, once: once === true });
+      return worker;
+    }
+    function disabledWorkerRemoveListener(worker, eventName, listener) {
+      const state = disabledWorkerState(worker, "off");
+      const name = String(eventName);
+      const bucket = state.listeners[name];
+      if (!bucket || typeof listener !== "function") {
+        return worker;
+      }
+      state.listeners[name] = bucket.filter(function(entry) {
+        return entry.listener !== listener;
+      });
+      return worker;
+    }
+    function disabledWorkerClose(worker) {
+      const state = disabledWorkerState(worker, "close");
+      if (state.closed) {
+        return false;
+      }
+      state.closed = true;
+      __autojs6_schedule_task(function() {
+        disabledWorkerEmit(worker, "exit", 0);
+      });
+      return true;
+    }
+    function DisabledWorker(filename, options) {
+      if (!(this instanceof DisabledWorker)) {
+        return new DisabledWorker(filename, options);
+      }
+      const state = {
+        filename: filename === undefined || filename === null ? "" : String(filename),
+        options: options && typeof options === "object" ? Object.assign(Object.create(null), options) : Object.create(null),
+        listeners: Object.create(null),
+        closed: false
+      };
+      disabledWorkerStates.set(this, state);
+      Object.defineProperties(this, {
+        threadId: { value: 0, enumerable: true },
+        stdin: { value: null, enumerable: true },
+        stdout: { value: null, enumerable: true },
+        stderr: { value: null, enumerable: true },
+        resourceLimits: { value: Object.freeze(Object.create(null)), enumerable: true }
+      });
+      disabledWorkerClose(this);
+    }
+    function receiveMessageOnPort() {
+      return undefined;
+    }
+    function markAsUntransferable() {
+      return undefined;
+    }
+    function isMarkedAsUntransferable() {
+      return false;
+    }
+    function moveMessagePortToContext(port) {
+      return port;
+    }
+    function setEnvironmentData(key, value) {
+      environmentData.set(key, value);
+    }
+    function getEnvironmentData(key) {
+      return environmentData.get(key);
+    }
+    function getHeapSnapshot() {
+      return Promise.reject(__autojs6_worker_threads_disabled_error());
+    }
+    Object.defineProperties(DisabledWorker.prototype, {
+      constructor: { value: DisabledWorker, configurable: true },
+      postMessage: {
+        value: function() {
+          throw __autojs6_worker_threads_disabled_error();
+        },
+        enumerable: true
+      },
+      terminate: {
+        value: function() {
+          disabledWorkerClose(this);
+          return Promise.resolve(0);
+        },
+        enumerable: true
+      },
+      ref: {
+        value: function() {
+          disabledWorkerState(this, "ref");
+          return this;
+        },
+        enumerable: true
+      },
+      unref: {
+        value: function() {
+          disabledWorkerState(this, "unref");
+          return this;
+        },
+        enumerable: true
+      },
+      on: {
+        value: function(eventName, listener) {
+          return disabledWorkerAddListener(this, eventName, listener, false);
+        },
+        enumerable: true
+      },
+      once: {
+        value: function(eventName, listener) {
+          return disabledWorkerAddListener(this, eventName, listener, true);
+        },
+        enumerable: true
+      },
+      off: {
+        value: function(eventName, listener) {
+          return disabledWorkerRemoveListener(this, eventName, listener);
+        },
+        enumerable: true
+      },
+      addListener: {
+        value: function(eventName, listener) {
+          return this.on(eventName, listener);
+        },
+        enumerable: true
+      },
+      removeListener: {
+        value: function(eventName, listener) {
+          return this.off(eventName, listener);
+        },
+        enumerable: true
+      },
+      getHeapSnapshot: {
+        value: function() {
+          return Promise.reject(__autojs6_worker_threads_disabled_error());
+        },
+        enumerable: true
+      },
+      [Symbol.toStringTag]: { value: "Worker" }
+    });
+    Object.freeze(DisabledWorker.prototype);
+    Object.freeze(DisabledWorker);
+    const facade = {
+      Worker: DisabledWorker,
+      MessageChannel: messageClasses.MessageChannel,
+      MessagePort: messageClasses.MessagePort,
+      receiveMessageOnPort,
+      markAsUntransferable,
+      isMarkedAsUntransferable,
+      moveMessagePortToContext,
+      setEnvironmentData,
+      getEnvironmentData,
+      getHeapSnapshot,
+      isMainThread: true,
+      parentPort: null,
+      workerData: undefined,
+      threadId: 0,
+      SHARE_ENV: Symbol.for("autojs6.worker_threads.SHARE_ENV"),
+      policy: Object.freeze({
+        status: "shape_only",
+        workerCreationEnabled: false,
+        nativeAvailable: false,
+        reason: "worker_threads native capability is disabled or unavailable"
+      }),
+      nativeAvailable: false,
+      diagnostics: __autojs6_worker_threads_diagnostics_snapshot
+    };
+    if (typeof globalThis.BroadcastChannel === "function") {
+      facade.BroadcastChannel = globalThis.BroadcastChannel;
+    }
+    __autojs6_worker_threads_shape_facade_cache = Object.freeze(facade);
+    return __autojs6_worker_threads_shape_facade_cache;
+  }
   function __autojs6_worker_threads_record_policy_rejection(reason) {
     __autojs6_worker_threads_diagnostics.rejectedByPolicyCount += 1;
     __autojs6_worker_threads_diagnostics.lastPolicyRejection = String(reason || "");
@@ -10173,6 +13695,168 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_worker_threads_policy_error(message, reason, code) {
     __autojs6_worker_threads_record_policy_rejection(reason || code || "policy");
     return __autojs6_worker_threads_error(message, code || "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+  }
+  function __autojs6_worker_threads_record_message_rejection(reason) {
+    __autojs6_worker_threads_diagnostics.messageRejectedCount += 1;
+    __autojs6_worker_threads_diagnostics.lastMessageRejection = String(reason || "");
+  }
+  function __autojs6_worker_threads_data_clone_error(message, reason) {
+    __autojs6_worker_threads_record_message_rejection(reason || "data_clone");
+    let error;
+    if (typeof DOMException === "function") {
+      error = new DOMException(message, "DataCloneError");
+    } else {
+      error = new Error(message);
+      try {
+        error.name = "DataCloneError";
+      } catch (_) {}
+      try {
+        Object.defineProperty(error, "code", { value: 25, enumerable: true, configurable: true });
+      } catch (_) {}
+    }
+    __autojs6_define_error_property(error, "autojs6Code", "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+    return error;
+  }
+  function __autojs6_worker_threads_estimate_message_bytes(value) {
+    const seen = new Set();
+    function estimate(input, depth) {
+      if (input === undefined || input === null) return 4;
+      const valueType = typeof input;
+      if (valueType === "string") return input.length * 2;
+      if (valueType === "number" || valueType === "bigint") return 8;
+      if (valueType === "boolean") return 4;
+      if (valueType === "function" || valueType === "symbol") {
+        throw __autojs6_worker_threads_data_clone_error(
+          "AutoJs6 experimental worker_threads message cannot clone " + valueType + " values.",
+          "uncloneable_" + valueType
+        );
+      }
+      if (depth > 32) return 0;
+      if (seen.has(input)) return 0;
+      seen.add(input);
+      if (typeof ArrayBuffer === "function" && input instanceof ArrayBuffer) {
+        return input.byteLength;
+      }
+      if (typeof ArrayBuffer === "function" && typeof ArrayBuffer.isView === "function" && ArrayBuffer.isView(input)) {
+        return input.byteLength || 0;
+      }
+      if (input && typeof input === "object") {
+        const tag = Object.prototype.toString.call(input);
+        if (tag === "[object Date]") return 16;
+        if (tag === "[object MessagePort]") return 64;
+        if (typeof Map === "function" && input instanceof Map) {
+          let total = 0;
+          for (const entry of input) {
+            total += estimate(entry[0], depth + 1) + estimate(entry[1], depth + 1);
+          }
+          return total;
+        }
+        if (typeof Set === "function" && input instanceof Set) {
+          let total = 0;
+          for (const item of input) {
+            total += estimate(item, depth + 1);
+          }
+          return total;
+        }
+        let total = 0;
+        for (const key of Object.keys(input)) {
+          total += String(key).length * 2;
+          total += estimate(input[key], depth + 1);
+        }
+        return total;
+      }
+      return 0;
+    }
+    return estimate(value, 0);
+  }
+  function __autojs6_worker_threads_validate_message_budget(message, label) {
+    const size = __autojs6_worker_threads_estimate_message_bytes(message);
+    if (size > __autojs6_worker_threads_policy.maxMessageBytes) {
+      throw __autojs6_worker_threads_data_clone_error(
+        "AutoJs6 experimental worker_threads " + label + " exceeds " +
+          __autojs6_worker_threads_policy.maxMessageBytes + " bytes.",
+        "message_too_large"
+      );
+    }
+    return size;
+  }
+  function __autojs6_worker_threads_try_queue_message(queueState, label) {
+    const state = queueState || {};
+    const queued = Math.max(0, Number(state.__autojs6QueuedMessages) || 0);
+    if (queued >= __autojs6_worker_threads_policy.maxQueuedMessages) {
+      throw __autojs6_worker_threads_data_clone_error(
+        "AutoJs6 experimental worker_threads " + label + " exceeded " +
+          __autojs6_worker_threads_policy.maxQueuedMessages + " queued messages.",
+        "message_queue_limit"
+      );
+    }
+    state.__autojs6QueuedMessages = queued + 1;
+    const decrement = function() {
+      state.__autojs6QueuedMessages = Math.max(0, (Number(state.__autojs6QueuedMessages) || 0) - 1);
+    };
+    try {
+      if (typeof setImmediate === "function") {
+        setImmediate(decrement);
+      } else {
+        setTimeout(decrement, 0);
+      }
+    } catch (_) {
+      decrement();
+    }
+  }
+  function __autojs6_worker_threads_register_message_port_record(record) {
+    if (!record || record.__autojs6Closed) return;
+    if (__autojs6_worker_message_port_records.has(record)) return;
+    __autojs6_worker_message_port_records.add(record);
+    __autojs6_worker_threads_diagnostics.activeMessagePortCount += 1;
+    __autojs6_worker_threads_diagnostics.messagePortCreatedCount += 1;
+    if (__autojs6_worker_threads_diagnostics.activeMessagePortCount > __autojs6_worker_threads_diagnostics.maxActiveMessagePortCount) {
+      __autojs6_worker_threads_diagnostics.maxActiveMessagePortCount = __autojs6_worker_threads_diagnostics.activeMessagePortCount;
+    }
+  }
+  function __autojs6_worker_threads_unregister_message_port_record(record) {
+    if (!record || record.__autojs6Closed) return;
+    record.__autojs6Closed = true;
+    if (__autojs6_worker_message_port_records.delete(record)) {
+      __autojs6_worker_threads_diagnostics.activeMessagePortCount = Math.max(
+        0,
+        __autojs6_worker_threads_diagnostics.activeMessagePortCount - 1
+      );
+      __autojs6_worker_threads_diagnostics.messagePortClosedCount += 1;
+    }
+  }
+  function __autojs6_worker_threads_close_message_port_record(record) {
+    if (!record || record.__autojs6Closed) return;
+    try {
+      if (record.nativePort && typeof record.nativePort.close === "function") {
+        record.nativePort.close();
+      }
+    } catch (_) {
+      __autojs6_worker_threads_diagnostics.cleanupErrorCount += 1;
+    }
+    __autojs6_worker_threads_unregister_message_port_record(record);
+  }
+  function __autojs6_close_all_worker_message_ports(reason) {
+    const records = Array.from(__autojs6_worker_message_port_records);
+    if (records.length === 0) return;
+    __autojs6_worker_threads_diagnostics.cleanupRequestedCount += records.length;
+    for (const record of records) {
+      __autojs6_worker_threads_close_message_port_record(record);
+    }
+  }
+  function __autojs6_close_all_worker_pools(reason) {
+    const pools = Array.from(__autojs6_worker_pool_records);
+    if (pools.length === 0) return;
+    __autojs6_worker_threads_diagnostics.cleanupRequestedCount += pools.length;
+    for (const pool of pools) {
+      try {
+        if (pool && typeof pool.__autojs6ClosePool === "function") {
+          pool.__autojs6ClosePool(String(reason || "runtime shutdown"));
+        }
+      } catch (_) {
+        __autojs6_worker_threads_diagnostics.cleanupErrorCount += 1;
+      }
+    }
   }
   function __autojs6_worker_threads_try_start() {
     if (__autojs6_worker_threads_diagnostics.activeWorkerCount >= __autojs6_worker_threads_policy.maxWorkers) {
@@ -10236,6 +13920,8 @@ std::string buildEmbeddedScriptExecutionSource(
     const workers = Array.from(__autojs6_worker_threads_records).filter(function(worker) {
       return worker && !worker.__autojs6Finished;
     });
+    __autojs6_close_all_worker_pools(shutdownReason);
+    __autojs6_close_all_worker_message_ports(shutdownReason);
     if (workers.length === 0) {
       return;
     }
@@ -10263,10 +13949,39 @@ std::string buildEmbeddedScriptExecutionSource(
     }
   }
   function __autojs6_worker_threads_policy_snapshot() {
+    const workerProfile = __autojs6_worker_threads_policy.workerProfile;
+    const workerPool = __autojs6_worker_threads_policy.workerPool;
+    const resourceLimits = __autojs6_worker_threads_policy.resourceLimits;
     return Object.freeze({
       maxWorkers: __autojs6_worker_threads_policy.maxWorkers,
       startupTimeoutMs: __autojs6_worker_threads_policy.startupTimeoutMs,
-      allowedBuiltins: Object.freeze(__autojs6_worker_threads_policy.allowedBuiltins.slice())
+      maxMessageBytes: __autojs6_worker_threads_policy.maxMessageBytes,
+      maxQueuedMessages: __autojs6_worker_threads_policy.maxQueuedMessages,
+      allowedBuiltins: Object.freeze(__autojs6_worker_threads_policy.allowedBuiltins.slice()),
+      workerProfile: Object.freeze({
+        fs: Object.freeze({
+          read: workerProfile.fs.read,
+          write: workerProfile.fs.write
+        }),
+        network: workerProfile.network,
+        autoJsBridge: workerProfile.autoJsBridge,
+        shell: workerProfile.shell,
+        javaInterop: workerProfile.javaInterop,
+        inspector: workerProfile.inspector
+      }),
+      workerPool: Object.freeze({
+        minWorkers: workerPool.minWorkers,
+        maxWorkers: workerPool.maxWorkers,
+        idleTimeoutMs: workerPool.idleTimeoutMs,
+        taskTimeoutMs: workerPool.taskTimeoutMs,
+        queueLimit: workerPool.queueLimit
+      }),
+      resourceLimits: Object.freeze({
+        maxOldGenerationSizeMb: resourceLimits.maxOldGenerationSizeMb,
+        maxYoungGenerationSizeMb: resourceLimits.maxYoungGenerationSizeMb,
+        codeRangeSizeMb: resourceLimits.codeRangeSizeMb,
+        stackSizeMb: resourceLimits.stackSizeMb
+      })
     });
   }
   function __autojs6_worker_threads_diagnostics_snapshot() {
@@ -10281,18 +13996,49 @@ std::string buildEmbeddedScriptExecutionSource(
       cleanupTerminateRequestedCount: __autojs6_worker_threads_diagnostics.cleanupTerminateRequestedCount,
       cleanupErrorCount: __autojs6_worker_threads_diagnostics.cleanupErrorCount,
       cleanupPendingMessageRejectedCount: __autojs6_worker_threads_diagnostics.cleanupPendingMessageRejectedCount,
-      lastPolicyRejection: __autojs6_worker_threads_diagnostics.lastPolicyRejection
+      activeMessagePortCount: __autojs6_worker_threads_diagnostics.activeMessagePortCount,
+      maxActiveMessagePortCount: __autojs6_worker_threads_diagnostics.maxActiveMessagePortCount,
+      messagePortCreatedCount: __autojs6_worker_threads_diagnostics.messagePortCreatedCount,
+      messagePortClosedCount: __autojs6_worker_threads_diagnostics.messagePortClosedCount,
+      messageRejectedCount: __autojs6_worker_threads_diagnostics.messageRejectedCount,
+      activeWorkerPoolCount: __autojs6_worker_threads_diagnostics.activeWorkerPoolCount,
+      maxActiveWorkerPoolCount: __autojs6_worker_threads_diagnostics.maxActiveWorkerPoolCount,
+      workerPoolCreatedCount: __autojs6_worker_threads_diagnostics.workerPoolCreatedCount,
+      workerPoolClosedCount: __autojs6_worker_threads_diagnostics.workerPoolClosedCount,
+      workerPoolTaskCompletedCount: __autojs6_worker_threads_diagnostics.workerPoolTaskCompletedCount,
+      workerPoolTaskCancelledCount: __autojs6_worker_threads_diagnostics.workerPoolTaskCancelledCount,
+      workerPoolTaskTimeoutCount: __autojs6_worker_threads_diagnostics.workerPoolTaskTimeoutCount,
+      workerPoolQueueRejectedCount: __autojs6_worker_threads_diagnostics.workerPoolQueueRejectedCount,
+      lastPolicyRejection: __autojs6_worker_threads_diagnostics.lastPolicyRejection,
+      lastMessageRejection: __autojs6_worker_threads_diagnostics.lastMessageRejection
     };
   }
-  function __autojs6_assert_worker_source_supported(source, sourceName) {
-    const extension = __autojs6_source_extension(sourceName);
-    if (__autojs6_is_esm_extension(extension)) {
-      throw __autojs6_worker_threads_policy_error(
-        "AutoJs6 experimental worker_threads accepts CommonJS worker scripts only: " + sourceName,
-        "esm_worker",
-        "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
-      );
+  function __autojs6_worker_threads_entry_kind(resolved) {
+    const extension = __autojs6_source_extension(resolved);
+    if (__autojs6_is_esm_extension(extension)) return "esm";
+    if (extension === ".js" && __autojs6_package_type_module_for_file(resolved)) return "esm";
+    if (extension === ".js" || extension === ".cjs") return "cjs";
+    return "";
+  }
+  function __autojs6_worker_threads_module_sources_snapshot(entryFilename, entryRecord) {
+    const snapshot = Object.create(null);
+    for (const resolved of Object.keys(__autojs6_module_sources)) {
+      const record = __autojs6_module_sources[resolved];
+      if (!record || typeof record.source !== "string") continue;
+      snapshot[resolved] = {
+        source: record.source,
+        sourceURL: record.sourceURL || resolved
+      };
     }
+    if (entryFilename && entryRecord && typeof entryRecord.source === "string") {
+      snapshot[entryFilename] = {
+        source: entryRecord.source,
+        sourceURL: entryRecord.sourceURL || entryFilename
+      };
+    }
+    return snapshot;
+  }
+  function __autojs6_assert_worker_source_supported(source, sourceName, entryKind) {
     const sourceText = String(source || "");
     const masked = __autojs6_mask_non_code(sourceText);
     if (__autojs6_contains_dynamic_import(sourceText)) {
@@ -10301,6 +14047,9 @@ std::string buildEmbeddedScriptExecutionSource(
         "dynamic_import",
         "ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED"
       );
+    }
+    if (entryKind === "esm") {
+      return;
     }
     if (/(^|[\r\n;{}])\s*import\b\s*(["'{*]|[A-Za-z_$])/.test(masked) ||
         /(^|[\r\n;{}])\s*export\b\s*([{*]|default\b|class\b|function\b|const\b|let\b|var\b|[A-Za-z_$])/.test(masked)) {
@@ -10312,6 +14061,19 @@ std::string buildEmbeddedScriptExecutionSource(
     }
   }
   function __autojs6_worker_threads_resolve_script(filename, parentFilename) {
+    const path = __autojs6_path_module();
+    if (
+      !path ||
+      typeof path.resolve !== "function" ||
+      typeof path.extname !== "function" ||
+      typeof path.isAbsolute !== "function"
+    ) {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads needs the allowlisted path module.",
+        "path_module",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+      );
+    }
     const name = filename === undefined || filename === null ? "" : String(filename);
     if (!name || !__autojs6_is_relative_module_name(name)) {
       throw __autojs6_worker_threads_policy_error(
@@ -10320,25 +14082,62 @@ std::string buildEmbeddedScriptExecutionSource(
         "ERR_AUTOJS6_FS_SCOPED_PATH"
       );
     }
-    let resolved;
-    try {
-      resolved = __autojs6_resolve_local_module(name, parentFilename || __autojs6_source_name);
-    } catch (error) {
+    if (name.indexOf("\u0000") >= 0) {
       throw __autojs6_worker_threads_policy_error(
-        error && error.message ? error.message : "AutoJs6 experimental worker_threads script path is outside the working directory.",
-        "script_path",
-        error && (error.autojs6Code || error.code) ? (error.autojs6Code || error.code) : "ERR_AUTOJS6_FS_PATH_ESCAPE"
+        "AutoJs6 experimental worker_threads rejects NUL worker script paths.",
+        "nul_script",
+        "ERR_AUTOJS6_FS_NUL_BYTE"
       );
     }
-    const extension = __autojs6_source_extension(resolved);
-    if (extension !== ".js" && extension !== ".cjs") {
+    if (path.isAbsolute(name)) {
       throw __autojs6_worker_threads_policy_error(
-        "AutoJs6 experimental worker_threads accepts only .js and .cjs worker scripts: " + name,
+        "AutoJs6 experimental worker_threads rejects absolute worker scripts: " + name,
+        "absolute_script",
+        "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED"
+      );
+    }
+    const root = __autojs6_module_resolution_root(parentFilename || __autojs6_source_name);
+    const parentDir = __autojs6_module_dirname(parentFilename || __autojs6_source_name);
+    const base = path.resolve(parentDir || root, name);
+    if (!__autojs6_path_within_root(base, root) || __autojs6_sensitive_path(base)) {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads script path is outside the working directory: " + name,
+        "script_path",
+        "ERR_AUTOJS6_FS_PATH_ESCAPE"
+      );
+    }
+    const extension = __autojs6_normalized_extension(path.extname(base));
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      name,
+      "AutoJs6 experimental worker_threads script",
+      "Unsupported AutoJs6 experimental worker script extension: " + name
+    );
+    if (extension && extension !== ".js" && extension !== ".cjs" && extension !== ".mjs") {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads accepts only .js, .cjs, and .mjs worker scripts: " + name,
         "unsupported_extension",
         "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
       );
     }
-    const record = __autojs6_module_record(resolved, false);
+    const candidates = extension ? [base] : [base, base + ".js", base + ".cjs", base + ".mjs"];
+    let resolved;
+    let record;
+    for (const candidate of candidates) {
+      const candidateResolved = path.resolve(candidate);
+      if (!__autojs6_path_within_root(candidateResolved, root) || __autojs6_sensitive_path(candidateResolved)) {
+        throw __autojs6_worker_threads_policy_error(
+          "AutoJs6 experimental worker_threads script path is outside the working directory: " + name,
+          "script_path",
+          "ERR_AUTOJS6_FS_PATH_ESCAPE"
+        );
+      }
+      record = __autojs6_module_record(candidateResolved, true);
+      if (record && typeof record.source === "string") {
+        resolved = candidateResolved;
+        break;
+      }
+    }
     if (!record || typeof record.source !== "string") {
       throw __autojs6_worker_threads_policy_error(
         "Cannot find AutoJs6 experimental worker script: " + name,
@@ -10346,91 +14145,946 @@ std::string buildEmbeddedScriptExecutionSource(
         "ERR_AUTOJS6_MODULE_NOT_FOUND"
       );
     }
-    __autojs6_assert_worker_source_supported(record.source, resolved);
+    const entryKind = __autojs6_worker_threads_entry_kind(resolved);
+    if (!entryKind) {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads accepts only CommonJS or partial ESM worker scripts: " + name,
+        "unsupported_entry_kind",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+      );
+    }
+    __autojs6_assert_worker_source_supported(record.source, resolved, entryKind);
     return {
+      root,
       filename: resolved,
       dirname: __autojs6_module_dirname(resolved),
+      format: entryKind,
       source: record.source,
-      sourceURL: record.sourceURL || resolved
+      sourceURL: record.sourceURL || resolved,
+      moduleSources: __autojs6_worker_threads_module_sources_snapshot(
+        resolved,
+        {
+          source: record.source,
+          sourceURL: record.sourceURL || resolved
+        }
+      )
     };
   }
   function __autojs6_worker_threads_bootstrap_source(descriptor) {
-    const filename = descriptor.filename;
-    const dirname = descriptor.dirname;
-    const sourceURL = String(descriptor.sourceURL || filename).replace(/[\r\n]/g, " ");
-    return [
-      "\"use strict\";",
-      "(function() {",
-      "  const __nativeRequire = require;",
-      "  const __workerThreads = __nativeRequire(\"worker_threads\");",
-      "  const __parentPort = __workerThreads.parentPort;",
-      "  const __workerDataEnvelope = __workerThreads.workerData || {};",
-      "  const __workerData = __workerDataEnvelope.__autojs6UserWorkerData;",
-      "  function __error(message, code) {",
-      "    const error = new Error(message);",
-      "    Object.defineProperty(error, \"code\", { value: code, enumerable: true, configurable: true });",
-      "    Object.defineProperty(error, \"autojs6Code\", { value: code, enumerable: true, configurable: true });",
-      "    return error;",
-      "  }",
-      "  function __deny(moduleName) {",
-      "    throw __error(\"AutoJs6 experimental worker_threads denies module '\" + moduleName + \"' in workers.\", \"ERR_AUTOJS6_WORKER_BRIDGE_DENIED\");",
-      "  }",
-      "  function __disabledProcess(name) {",
-      "    return function() {",
-      "      throw __error(\"AutoJs6 experimental worker_threads disables process.\" + name + \" in workers.\", \"ERR_AUTOJS6_PROCESS_API_DISABLED\");",
-      "    };",
-      "  }",
-      "  if (typeof process === \"object\" && process) {",
-      "    [\"binding\", \"_linkedBinding\", \"dlopen\", \"getBuiltinModule\", \"chdir\", \"exit\", \"abort\", \"kill\"].forEach(function(name) {",
-      "      try { Object.defineProperty(process, name, { value: __disabledProcess(name), configurable: true, writable: false }); } catch (_) { try { process[name] = __disabledProcess(name); } catch (_) {} }",
-      "    });",
-      "  }",
-      "  const __allowed = Object.freeze({",
-      "    assert: \"assert\",",
-      "    \"assert/strict\": \"assert/strict\",",
-      "    buffer: \"buffer\",",
-      "    events: \"events\",",
-      "    path: \"path\",",
-      "    \"path/posix\": \"path/posix\",",
-      "    \"path/win32\": \"path/win32\",",
-      "    querystring: \"querystring\",",
-      "    string_decoder: \"string_decoder\",",
-      "    timers: \"timers\",",
-      "    url: \"url\",",
-      "    util: \"util\",",
-      "    \"util/types\": \"util/types\"",
-      "  });",
-      "  const __limitedWorkerThreads = Object.freeze({",
-      "    isMainThread: false,",
-      "    parentPort: __parentPort,",
-      "    workerData: __workerData,",
-      "    threadId: __workerThreads.threadId,",
-      "    Worker: function Worker() { throw __error(\"Nested AutoJs6 worker_threads workers are disabled.\", \"ERR_AUTOJS6_WORKER_DISABLED\"); }",
-      "  });",
-      "  function __restrictedRequire(request) {",
-      "    const raw = String(request || \"\");",
-      "    const name = raw.indexOf(\"node:\") === 0 ? raw.slice(5) : raw;",
-      "    if (name === \"worker_threads\") return __limitedWorkerThreads;",
-      "    if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __nativeRequire(__allowed[name]);",
-      "    return __deny(raw);",
-      "  }",
-      "  __restrictedRequire.resolve = function(request) {",
-      "    const raw = String(request || \"\");",
-      "    const name = raw.indexOf(\"node:\") === 0 ? raw.slice(5) : raw;",
-      "    if (name === \"worker_threads\") return \"worker_threads\";",
-      "    if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __allowed[name];",
-      "    return __deny(raw);",
-      "  };",
-      "  const module = { id: " + JSON.stringify(filename) + ", filename: " + JSON.stringify(filename) + ", dirname: " + JSON.stringify(dirname) + ", exports: {}, loaded: false };",
-      "  module.require = __restrictedRequire;",
-      "  const exports = module.exports;",
-      "  const Buffer = __nativeRequire(\"buffer\").Buffer;",
-      "  const __run = new Function(\"require\", \"exports\", \"module\", \"__filename\", \"__dirname\", \"parentPort\", \"workerData\", \"Buffer\", " +
-        JSON.stringify("\"use strict\";\n" + descriptor.source + "\n//# sourceURL=" + sourceURL) + ");",
-      "  __run(__restrictedRequire, exports, module, module.filename, module.dirname, __parentPort, __workerData, Buffer);",
-      "  module.loaded = true;",
-      "})();"
-    ].join("\n");
+    const descriptorLiteral = JSON.stringify({
+      root: descriptor.root,
+      filename: descriptor.filename,
+      dirname: descriptor.dirname,
+      format: descriptor.format,
+      policy: {
+        maxMessageBytes: __autojs6_worker_threads_policy.maxMessageBytes,
+        maxQueuedMessages: __autojs6_worker_threads_policy.maxQueuedMessages,
+        workerProfile: __autojs6_worker_threads_policy_snapshot().workerProfile
+      },
+      moduleSources: descriptor.moduleSources || Object.create(null)
+    });
+    return "\"use strict\";\n" +
+      "(function() {\n" +
+      "  const __descriptor = " + descriptorLiteral + ";\n" +
+      String.raw`
+  const __nativeRequire = require;
+  const __workerThreads = __nativeRequire("worker_threads");
+  const __fs = __nativeRequire("fs");
+  const __path = __nativeRequire("path");
+  const __parentPort = __workerThreads.parentPort;
+  const __workerDataEnvelope = __workerThreads.workerData || {};
+  const __workerData = __workerDataEnvelope.__autojs6UserWorkerData;
+  const __moduleSources = __descriptor.moduleSources || Object.create(null);
+  const __moduleCache = Object.create(null);
+  const __esmModuleCache = Object.create(null);
+  const __root = __path.resolve(__descriptor.root || ".");
+  const __entryFilename = __path.resolve(__descriptor.filename);
+  const __AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
+  function __defineErrorProperty(error, name, value) {
+    try {
+      Object.defineProperty(error, name, { value, enumerable: true, configurable: true });
+    } catch (_) {
+      try { error[name] = value; } catch (_) {}
+    }
+  }
+  function __error(message, code, legacyCode) {
+    const error = new Error(message);
+    __defineErrorProperty(error, "code", legacyCode || code);
+    __defineErrorProperty(error, "autojs6Code", code);
+    return error;
+  }
+  function __deny(moduleName) {
+    throw __error("AutoJs6 experimental worker_threads denies module '" + moduleName + "' in workers.", "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+  }
+  function __nativeAddonDisabled(moduleName) {
+    throw __error(
+      "Native addon loading is disabled in AutoJs6 experimental worker_threads: " + moduleName,
+      "ERR_AUTOJS6_NATIVE_ADDON_DISABLED"
+    );
+  }
+  function __requireEsmUnsupported(moduleName) {
+    throw __error(
+      "CommonJS require() cannot load AutoJs6 partial ESM worker module: " + moduleName,
+      "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED"
+    );
+  }
+  function __dynamicImportUnsupported(filename) {
+    throw __error(
+      "AutoJs6 experimental worker_threads disables dynamic import in workers: " + filename,
+      "ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED"
+    );
+  }
+  function __esmUnsupported(message) {
+    throw __error(message, "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED");
+  }
+  function __disabledProcess(name) {
+    return function() {
+      throw __error("AutoJs6 experimental worker_threads disables process." + name + " in workers.", "ERR_AUTOJS6_PROCESS_API_DISABLED");
+    };
+  }
+  if (typeof process === "object" && process) {
+    ["binding", "_linkedBinding", "dlopen", "getBuiltinModule", "chdir", "exit", "abort", "kill"].forEach(function(name) {
+      try { Object.defineProperty(process, name, { value: __disabledProcess(name), configurable: true, writable: false }); }
+      catch (_) { try { process[name] = __disabledProcess(name); } catch (_) {} }
+    });
+  }
+  const __allowed = Object.freeze({
+    assert: "assert",
+    "assert/strict": "assert/strict",
+    buffer: "buffer",
+    events: "events",
+    fs: "fs",
+    "fs/promises": "fs/promises",
+    path: "path",
+    "path/posix": "path/posix",
+    "path/win32": "path/win32",
+    querystring: "querystring",
+    string_decoder: "string_decoder",
+    timers: "timers",
+    url: "url",
+    util: "util",
+    "util/types": "util/types"
+  });
+  const __messagePolicy = Object.freeze({
+    maxMessageBytes: (__descriptor.policy && __descriptor.policy.maxMessageBytes) || 65536,
+    maxQueuedMessages: (__descriptor.policy && __descriptor.policy.maxQueuedMessages) || 32
+  });
+  const __profilePolicy = (__descriptor.policy && __descriptor.policy.workerProfile) || {};
+  const __workerProfile = Object.freeze({
+    fs: Object.freeze({
+      read: (__profilePolicy.fs && __profilePolicy.fs.read) || "workingDirectory",
+      write: (__profilePolicy.fs && __profilePolicy.fs.write) || "workingDirectory"
+    }),
+    network: __profilePolicy.network || "denied",
+    autoJsBridge: __profilePolicy.autoJsBridge || "denied",
+    shell: __profilePolicy.shell || "denied",
+    javaInterop: __profilePolicy.javaInterop || "denied",
+    inspector: __profilePolicy.inspector || "denied"
+  });
+  let __limitedFsCache = null;
+  let __limitedFsPromisesCache = null;
+  const __parentPortQueueState = Object.create(null);
+  function __dataCloneError(message) {
+    let error;
+    if (typeof DOMException === "function") {
+      error = new DOMException(message, "DataCloneError");
+    } else {
+      error = new Error(message);
+      try { error.name = "DataCloneError"; } catch (_) {}
+    }
+    __defineErrorProperty(error, "autojs6Code", "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+    return error;
+  }
+  function __estimateMessageBytes(value, seen, depth) {
+    if (value === undefined || value === null) return 4;
+    const valueType = typeof value;
+    if (valueType === "string") return value.length * 2;
+    if (valueType === "number" || valueType === "bigint") return 8;
+    if (valueType === "boolean") return 4;
+    if (valueType === "function" || valueType === "symbol") {
+      throw __dataCloneError("AutoJs6 experimental worker_threads cannot clone " + valueType + " values.");
+    }
+    const visited = seen || new Set();
+    const currentDepth = depth || 0;
+    if (currentDepth > 32 || visited.has(value)) return 0;
+    visited.add(value);
+    if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) return value.byteLength;
+    if (typeof ArrayBuffer === "function" && typeof ArrayBuffer.isView === "function" && ArrayBuffer.isView(value)) return value.byteLength || 0;
+    if (Object.prototype.toString.call(value) === "[object MessagePort]") return 64;
+    if (typeof Map === "function" && value instanceof Map) {
+      let total = 0;
+      for (const entry of value) total += __estimateMessageBytes(entry[0], visited, currentDepth + 1) + __estimateMessageBytes(entry[1], visited, currentDepth + 1);
+      return total;
+    }
+    if (typeof Set === "function" && value instanceof Set) {
+      let total = 0;
+      for (const item of value) total += __estimateMessageBytes(item, visited, currentDepth + 1);
+      return total;
+    }
+    let total = 0;
+    for (const key of Object.keys(value)) {
+      total += String(key).length * 2;
+      total += __estimateMessageBytes(value[key], visited, currentDepth + 1);
+    }
+    return total;
+  }
+  function __validateMessage(message, label) {
+    const size = __estimateMessageBytes(message);
+    if (size > __messagePolicy.maxMessageBytes) {
+      throw __dataCloneError("AutoJs6 experimental worker_threads " + label + " exceeds " + __messagePolicy.maxMessageBytes + " bytes.");
+    }
+  }
+  function __prepareTransferList(transferList, label) {
+    if (transferList === undefined || transferList === null) return [];
+    let list;
+    try {
+      list = Array.isArray(transferList) ? transferList : Array.from(transferList);
+    } catch (_) {
+      throw __dataCloneError("AutoJs6 experimental worker_threads " + label + " must be an iterable transfer list.");
+    }
+    const output = [];
+    const seen = new Set();
+    for (const value of list) {
+      if (seen.has(value)) {
+        throw __dataCloneError("AutoJs6 experimental worker_threads " + label + " contains duplicate transfer entries.");
+      }
+      seen.add(value);
+      if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) {
+        output.push(value);
+        continue;
+      }
+      if (__workerThreads.MessagePort && value instanceof __workerThreads.MessagePort) {
+        output.push(value);
+        continue;
+      }
+      throw __dataCloneError("AutoJs6 experimental worker_threads " + label + " accepts only ArrayBuffer and MessagePort transfer entries.");
+    }
+    return output;
+  }
+  function __tryQueueMessage(queueState, label) {
+    const queued = Math.max(0, Number(queueState.queued) || 0);
+    if (queued >= __messagePolicy.maxQueuedMessages) {
+      throw __dataCloneError("AutoJs6 experimental worker_threads " + label + " exceeded " + __messagePolicy.maxQueuedMessages + " queued messages.");
+    }
+    queueState.queued = queued + 1;
+    const decrement = function() {
+      queueState.queued = Math.max(0, (Number(queueState.queued) || 0) - 1);
+    };
+    if (typeof setImmediate === "function") setImmediate(decrement);
+    else setTimeout(decrement, 0);
+  }
+  const __limitedParentPort = Object.freeze({
+    postMessage: function(message, transferList) {
+      __validateMessage(message, "parentPort.postMessage");
+      __tryQueueMessage(__parentPortQueueState, "parentPort.postMessage");
+      return __parentPort.postMessage(message, __prepareTransferList(transferList, "parentPort.postMessage transferList"));
+    },
+    on: function(eventName, listener) { __parentPort.on(eventName, listener); return this; },
+    once: function(eventName, listener) { __parentPort.once(eventName, listener); return this; },
+    off: function(eventName, listener) {
+      if (typeof __parentPort.off === "function") __parentPort.off(eventName, listener);
+      else if (typeof __parentPort.removeListener === "function") __parentPort.removeListener(eventName, listener);
+      return this;
+    },
+    addListener: function(eventName, listener) { return this.on(eventName, listener); },
+    removeListener: function(eventName, listener) { return this.off(eventName, listener); },
+    start: function() { return typeof __parentPort.start === "function" ? __parentPort.start() : undefined; },
+    close: function() { return typeof __parentPort.close === "function" ? __parentPort.close() : undefined; },
+    ref: function() { if (typeof __parentPort.ref === "function") __parentPort.ref(); return this; },
+    unref: function() { if (typeof __parentPort.unref === "function") __parentPort.unref(); return this; }
+  });
+  const __limitedWorkerThreads = Object.freeze({
+    isMainThread: false,
+    parentPort: __limitedParentPort,
+    workerData: __workerData,
+    threadId: __workerThreads.threadId,
+    MessageChannel: __workerThreads.MessageChannel,
+    MessagePort: __workerThreads.MessagePort,
+    workerProfile: __workerProfile,
+    Worker: function Worker() { throw __error("Nested AutoJs6 worker_threads workers are disabled.", "ERR_AUTOJS6_WORKER_DISABLED"); }
+  });
+  function __normalBuiltinName(request) {
+    const raw = String(request || "");
+    return raw.indexOf("node:") === 0 ? raw.slice(5) : raw;
+  }
+  function __builtinAllowed(request) {
+    const name = __normalBuiltinName(request);
+    return name === "worker_threads" || Object.prototype.hasOwnProperty.call(__allowed, name);
+  }
+  function __loadBuiltin(request) {
+    const raw = String(request || "");
+    const name = __normalBuiltinName(raw);
+    if (name === "worker_threads") return __limitedWorkerThreads;
+    if (name === "fs") return __limitedFsModule();
+    if (name === "fs/promises") return __limitedFsPromisesModule();
+    if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __nativeRequire(__allowed[name]);
+    return __deny(raw);
+  }
+  function __resolveBuiltin(request) {
+    const raw = String(request || "");
+    const name = __normalBuiltinName(raw);
+    if (name === "worker_threads") return "worker_threads";
+    if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __allowed[name];
+    return __deny(raw);
+  }
+  function __isRelativeModuleName(name) {
+    return name === "." || name === ".." || name.indexOf("./") === 0 || name.indexOf("../") === 0;
+  }
+  function __normalizedExtension(filename) {
+    return String(__path.extname(filename || "") || "").toLowerCase();
+  }
+  function __sensitivePath(pathValue) {
+    const normalized = String(pathValue || "").replace(/\\/g, "/");
+    return normalized === "/proc" || normalized.indexOf("/proc/") === 0 ||
+      normalized === "/sys" || normalized.indexOf("/sys/") === 0 ||
+      normalized === "/dev" || normalized.indexOf("/dev/") === 0;
+  }
+  function __withinRoot(pathValue, root) {
+    const relative = __path.relative(root, pathValue);
+    return relative === "" || (!!relative && relative.indexOf("..") !== 0 && !__path.isAbsolute(relative));
+  }
+  function __validatePath(resolved, label) {
+    const absolute = __path.resolve(resolved);
+    if (!__withinRoot(absolute, __root) || __sensitivePath(absolute)) {
+      throw __error(
+        "AutoJs6 experimental worker_threads " + label + " escapes working directory: " + resolved,
+        "ERR_AUTOJS6_FS_PATH_ESCAPE"
+      );
+    }
+    return absolute;
+  }
+  function __workerFsPath(pathValue, label) {
+    if (typeof pathValue !== "string") {
+      throw __error(
+        "AutoJs6 experimental worker_threads " + label + " requires a string path.",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+      );
+    }
+    if (pathValue.indexOf("\u0000") >= 0) {
+      throw __error(
+        "AutoJs6 experimental worker_threads rejects NUL byte in " + label + ": " + pathValue,
+        "ERR_AUTOJS6_FS_NUL_BYTE"
+      );
+    }
+    const absolute = __path.isAbsolute(pathValue) ? __path.resolve(pathValue) : __path.resolve(__root, pathValue);
+    return __validatePath(absolute, label);
+  }
+  function __workerFsRealpath(pathValue) {
+    if (__fs.realpathSync && typeof __fs.realpathSync.native === "function") {
+      return __fs.realpathSync.native(pathValue);
+    }
+    return __fs.realpathSync(pathValue);
+  }
+  function __workerFsReadablePath(pathValue, label) {
+    const absolute = __workerFsPath(pathValue, label);
+    const real = __workerFsRealpath(absolute);
+    return __validatePath(real, label + " real path");
+  }
+  function __workerFsNearestExistingParent(absolute, label) {
+    let current = __path.dirname(absolute);
+    while (__withinRoot(current, __root) && !__sensitivePath(current)) {
+      try {
+        const stat = __fs.statSync(current);
+        if (stat && typeof stat.isDirectory === "function" && stat.isDirectory()) {
+          return current;
+        }
+        throw __error(
+          "AutoJs6 experimental worker_threads " + label + " parent is not a directory: " + current,
+          "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+        );
+      } catch (error) {
+        if (!error || error.code !== "ENOENT") throw error;
+      }
+      if (current === __root) break;
+      const parent = __path.dirname(current);
+      if (!parent || parent === current) break;
+      current = parent;
+    }
+    throw __error(
+      "AutoJs6 experimental worker_threads " + label + " escapes working directory: " + absolute,
+      "ERR_AUTOJS6_FS_PATH_ESCAPE"
+    );
+  }
+  function __workerFsWritablePath(pathValue, label) {
+    const absolute = __workerFsPath(pathValue, label);
+    try {
+      const real = __workerFsRealpath(absolute);
+      return __validatePath(real, label + " real path");
+    } catch (error) {
+      if (!error || error.code !== "ENOENT") throw error;
+    }
+    const parent = __workerFsNearestExistingParent(absolute, label);
+    const realParent = __workerFsRealpath(parent);
+    __validatePath(realParent, label + " parent real path");
+    return absolute;
+  }
+  function __limitedFsPromisesModule() {
+    if (__limitedFsPromisesCache) return __limitedFsPromisesCache;
+    const promises = Object.freeze({
+      readFile: function(pathValue, options) {
+        return __fs.promises.readFile(__workerFsReadablePath(pathValue, "fs.promises.readFile"), options);
+      },
+      writeFile: function(pathValue, data, options) {
+        return __fs.promises.writeFile(__workerFsWritablePath(pathValue, "fs.promises.writeFile"), data, options);
+      },
+      appendFile: function(pathValue, data, options) {
+        return __fs.promises.appendFile(__workerFsWritablePath(pathValue, "fs.promises.appendFile"), data, options);
+      },
+      mkdir: function(pathValue, options) {
+        return __fs.promises.mkdir(__workerFsWritablePath(pathValue, "fs.promises.mkdir"), options);
+      },
+      rm: function(pathValue, options) {
+        return __fs.promises.rm(__workerFsWritablePath(pathValue, "fs.promises.rm"), options);
+      },
+      unlink: function(pathValue) {
+        return __fs.promises.unlink(__workerFsWritablePath(pathValue, "fs.promises.unlink"));
+      },
+      stat: function(pathValue, options) {
+        return __fs.promises.stat(__workerFsReadablePath(pathValue, "fs.promises.stat"), options);
+      },
+      readdir: function(pathValue, options) {
+        return __fs.promises.readdir(__workerFsReadablePath(pathValue, "fs.promises.readdir"), options);
+      },
+      copyFile: function(source, destination, mode) {
+        return __fs.promises.copyFile(
+          __workerFsReadablePath(source, "fs.promises.copyFile source"),
+          __workerFsWritablePath(destination, "fs.promises.copyFile destination"),
+          mode
+        );
+      }
+    });
+    __limitedFsPromisesCache = promises;
+    return promises;
+  }
+  function __limitedFsModule() {
+    if (__limitedFsCache) return __limitedFsCache;
+    const limitedFs = {
+      constants: Object.freeze(Object.assign(Object.create(null), __fs.constants || {})),
+      readFileSync: function(pathValue, options) {
+        return __fs.readFileSync(__workerFsReadablePath(pathValue, "fs.readFileSync"), options);
+      },
+      writeFileSync: function(pathValue, data, options) {
+        return __fs.writeFileSync(__workerFsWritablePath(pathValue, "fs.writeFileSync"), data, options);
+      },
+      appendFileSync: function(pathValue, data, options) {
+        return __fs.appendFileSync(__workerFsWritablePath(pathValue, "fs.appendFileSync"), data, options);
+      },
+      existsSync: function(pathValue) {
+        const absolute = __workerFsPath(pathValue, "fs.existsSync");
+        if (!__fs.existsSync(absolute)) return false;
+        __workerFsReadablePath(absolute, "fs.existsSync");
+        return true;
+      },
+      statSync: function(pathValue, options) {
+        return __fs.statSync(__workerFsReadablePath(pathValue, "fs.statSync"), options);
+      },
+      readdirSync: function(pathValue, options) {
+        return __fs.readdirSync(__workerFsReadablePath(pathValue, "fs.readdirSync"), options);
+      },
+      mkdirSync: function(pathValue, options) {
+        return __fs.mkdirSync(__workerFsWritablePath(pathValue, "fs.mkdirSync"), options);
+      },
+      rmSync: function(pathValue, options) {
+        return __fs.rmSync(__workerFsWritablePath(pathValue, "fs.rmSync"), options);
+      },
+      unlinkSync: function(pathValue) {
+        return __fs.unlinkSync(__workerFsWritablePath(pathValue, "fs.unlinkSync"));
+      },
+      copyFileSync: function(source, destination, mode) {
+        return __fs.copyFileSync(
+          __workerFsReadablePath(source, "fs.copyFileSync source"),
+          __workerFsWritablePath(destination, "fs.copyFileSync destination"),
+          mode
+        );
+      }
+    };
+    Object.defineProperty(limitedFs, "promises", {
+      value: __limitedFsPromisesModule(),
+      enumerable: true,
+      configurable: false,
+      writable: false
+    });
+    __limitedFsCache = Object.freeze(limitedFs);
+    return __limitedFsCache;
+  }
+  function __supportedSourceExtension(extension, allowEsm) {
+    return extension === ".js" || extension === ".cjs" || extension === ".json" || (allowEsm && extension === ".mjs");
+  }
+  function __embeddedRecord(resolved) {
+    if (!Object.prototype.hasOwnProperty.call(__moduleSources, resolved)) return null;
+    const record = __moduleSources[resolved];
+    if (!record || typeof record.source !== "string") return null;
+    return {
+      source: String(record.source),
+      sourceURL: record.sourceURL ? String(record.sourceURL) : resolved
+    };
+  }
+  function __recordExists(resolved, allowEsm) {
+    const absolute = __validatePath(resolved, "module path");
+    const extension = __normalizedExtension(absolute);
+    if (extension === ".node") __nativeAddonDisabled(absolute);
+    if (!__supportedSourceExtension(extension, allowEsm)) return false;
+    if (__embeddedRecord(absolute)) return true;
+    try {
+      const stat = __fs.statSync(absolute);
+      return !!(stat && typeof stat.isFile === "function" && stat.isFile());
+    } catch (_) {
+      return false;
+    }
+  }
+  function __moduleRecord(resolved, allowEsm) {
+    const absolute = __validatePath(resolved, "module path");
+    const extension = __normalizedExtension(absolute);
+    if (extension === ".node") __nativeAddonDisabled(absolute);
+    if (!__supportedSourceExtension(extension, allowEsm)) {
+      throw __error(
+        "Unsupported AutoJs6 experimental worker module extension: " + absolute,
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+      );
+    }
+    const embedded = __embeddedRecord(absolute);
+    if (embedded) return embedded;
+    try {
+      return {
+        source: String(__fs.readFileSync(absolute, "utf8")),
+        sourceURL: absolute
+      };
+    } catch (error) {
+      throw __error(
+        "Cannot find AutoJs6 experimental worker module: " + absolute,
+        "ERR_AUTOJS6_MODULE_NOT_FOUND",
+        error && error.code ? error.code : undefined
+      );
+    }
+  }
+  function __packageJsonRecord(packageJsonPath) {
+    const absolute = __validatePath(packageJsonPath, "package.json path");
+    const embedded = __embeddedRecord(absolute);
+    if (embedded) return embedded;
+    try {
+      const stat = __fs.statSync(absolute);
+      if (!stat || typeof stat.isFile !== "function" || !stat.isFile()) return null;
+      return {
+        source: String(__fs.readFileSync(absolute, "utf8")),
+        sourceURL: absolute
+      };
+    } catch (_) {
+      return null;
+    }
+  }
+  function __packageTypeModuleForFile(filename) {
+    let current = __path.resolve(__path.dirname(filename));
+    while (__withinRoot(current, __root) && !__sensitivePath(current)) {
+      const record = __packageJsonRecord(__path.resolve(current, "package.json"));
+      if (record) {
+        let data;
+        try {
+          data = JSON.parse(record.source);
+        } catch (error) {
+          throw __error(
+            "Invalid AutoJs6 experimental worker package.json: " + record.sourceURL,
+            "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+          );
+        }
+        return !!(data && typeof data === "object" && data.type === "module");
+      }
+      if (current === __root) break;
+      const parent = __path.dirname(current);
+      if (!parent || parent === current) break;
+      current = parent;
+    }
+    return false;
+  }
+  function __moduleKind(resolved) {
+    const extension = __normalizedExtension(resolved);
+    if (extension === ".mjs") return "esm";
+    if (extension === ".js" && __packageTypeModuleForFile(resolved)) return "esm";
+    if (extension === ".js" || extension === ".cjs" || extension === ".json") return "cjs";
+    return "";
+  }
+  function __resolveLocal(request, parentFilename, mode) {
+    const raw = String(request || "");
+    if (!raw || raw.indexOf("\u0000") >= 0) {
+      throw __error("AutoJs6 experimental worker_threads rejects invalid local module path: " + raw, "ERR_AUTOJS6_FS_NUL_BYTE");
+    }
+    if (!__isRelativeModuleName(raw)) {
+      return __deny(raw);
+    }
+    if (__path.isAbsolute(raw)) {
+      throw __error("AutoJs6 experimental worker_threads rejects absolute local module path: " + raw, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
+    }
+    if (/^[A-Za-z][A-Za-z0-9+.-]*:/.test(raw)) {
+      throw __error("AutoJs6 experimental worker_threads rejects protocol module path: " + raw, "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+    }
+    const parentDir = __path.dirname(parentFilename || __entryFilename);
+    const base = __validatePath(__path.resolve(parentDir, raw), "local module path");
+    const extension = __normalizedExtension(base);
+    if (extension === ".node") __nativeAddonDisabled(raw);
+    if (extension && !__supportedSourceExtension(extension, true)) {
+      throw __error("Unsupported AutoJs6 experimental worker module extension: " + raw, "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+    }
+    const candidates = extension ? [base] : [base, base + ".js", base + ".cjs", base + ".mjs", base + ".json"];
+    for (const candidate of candidates) {
+      const resolved = __validatePath(candidate, "local module path");
+      const kind = __moduleKind(resolved);
+      if (!kind) continue;
+      if (!__recordExists(resolved, true)) continue;
+      if (mode === "cjs" && kind === "esm") __requireEsmUnsupported(raw);
+      return { resolved, kind };
+    }
+    throw __error(
+      "Cannot find AutoJs6 experimental worker module '" + raw + "' from '" + parentFilename + "'.",
+      "ERR_AUTOJS6_MODULE_NOT_FOUND"
+    );
+  }
+  function __isWhitespace(ch) {
+    return ch === " " || ch === "\t" || ch === "\n" || ch === "\r" || ch === "\f" || ch === "\v";
+  }
+  function __isIdentifierStart(ch) {
+    return !!ch && /[A-Za-z_$]/.test(ch);
+  }
+  function __isIdentifierPart(ch) {
+    return !!ch && /[A-Za-z0-9_$]/.test(ch);
+  }
+  function __skipWhitespace(text, index) {
+    let cursor = index;
+    while (cursor < text.length && __isWhitespace(text.charAt(cursor))) cursor += 1;
+    return cursor;
+  }
+  function __isIdentifierTokenAt(text, index, token) {
+    if (text.slice(index, index + token.length) !== token) return false;
+    const before = index > 0 ? text.charAt(index - 1) : "";
+    const after = text.charAt(index + token.length);
+    if (before === "." || __isIdentifierPart(before)) return false;
+    return !__isIdentifierPart(after);
+  }
+  function __regexLiteralAllowed(previous) {
+    return !previous || "([{=:;,!&|?+-*~^<>".indexOf(previous) >= 0;
+  }
+  function __maskNonCode(source) {
+    const text = String(source || "");
+    const templateQuote = String.fromCharCode(96);
+    let masked = "";
+    let state = "normal";
+    let previous = "";
+    let escaped = false;
+    for (let index = 0; index < text.length; index += 1) {
+      const ch = text.charAt(index);
+      const next = text.charAt(index + 1);
+      if (state === "line_comment") {
+        if (ch === "\n" || ch === "\r") { masked += ch; state = "normal"; } else { masked += " "; }
+        continue;
+      }
+      if (state === "block_comment") {
+        if (ch === "*" && next === "/") { masked += "  "; index += 1; state = "normal"; } else { masked += (ch === "\n" || ch === "\r") ? ch : " "; }
+        continue;
+      }
+      if (state === "string") {
+        masked += (ch === "\n" || ch === "\r") ? ch : " ";
+        if (escaped) { escaped = false; continue; }
+        if (ch === "\\") { escaped = true; continue; }
+        if (ch === previous) state = "normal";
+        continue;
+      }
+      if (state === "template") {
+        masked += (ch === "\n" || ch === "\r") ? ch : " ";
+        if (escaped) { escaped = false; continue; }
+        if (ch === "\\") { escaped = true; continue; }
+        if (ch === templateQuote) state = "normal";
+        continue;
+      }
+      if (state === "regex") {
+        masked += (ch === "\n" || ch === "\r") ? ch : " ";
+        if (escaped) { escaped = false; continue; }
+        if (ch === "\\") { escaped = true; continue; }
+        if (ch === "/") state = "normal";
+        continue;
+      }
+      if (ch === "/" && next === "/") { masked += "  "; index += 1; state = "line_comment"; continue; }
+      if (ch === "/" && next === "*") { masked += "  "; index += 1; state = "block_comment"; continue; }
+      if (ch === "\"" || ch === "'") { masked += " "; previous = ch; state = "string"; escaped = false; continue; }
+      if (ch === templateQuote) { masked += " "; state = "template"; escaped = false; continue; }
+      if (ch === "/" && __regexLiteralAllowed(previous)) { masked += " "; state = "regex"; escaped = false; continue; }
+      masked += ch;
+      if (!__isWhitespace(ch)) previous = ch;
+    }
+    return masked;
+  }
+  function __containsDynamicImport(source) {
+    const masked = __maskNonCode(source);
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__isIdentifierTokenAt(masked, index, "import")) continue;
+      const nextIndex = __skipWhitespace(masked, index + "import".length);
+      if (masked.charAt(nextIndex) === "(") return true;
+    }
+    return false;
+  }
+  function __assertCjsSourceSupported(source, filename) {
+    const sourceText = String(source || "");
+    if (__containsDynamicImport(sourceText)) __dynamicImportUnsupported(filename);
+    const masked = __maskNonCode(sourceText);
+    if (/(^|[\r\n;{}])\s*import\b\s*(["'{*]|[A-Za-z_$])/.test(masked) ||
+        /(^|[\r\n;{}])\s*export\b\s*([{*]|default\b|class\b|function\b|const\b|let\b|var\b|[A-Za-z_$])/.test(masked)) {
+      __esmUnsupported("AutoJs6 experimental worker_threads disables ESM syntax in CommonJS workers: " + filename);
+    }
+  }
+  function __createRequire(parentModule) {
+    const parentFilename = parentModule ? parentModule.filename : __entryFilename;
+    function workerRequire(request) {
+      const raw = String(request || "");
+      if (__builtinAllowed(raw)) return __loadBuiltin(raw);
+      if (__isRelativeModuleName(raw)) {
+        const resolved = __resolveLocal(raw, parentFilename, "cjs");
+        return __loadCjsModule(resolved.resolved, parentModule);
+      }
+      return __deny(raw);
+    }
+    workerRequire.resolve = function(request) {
+      const raw = String(request || "");
+      if (__builtinAllowed(raw)) return __resolveBuiltin(raw);
+      if (__isRelativeModuleName(raw)) return __resolveLocal(raw, parentFilename, "cjs").resolved;
+      return __deny(raw);
+    };
+    return workerRequire;
+  }
+  function __loadCjsModule(resolved, parentModule) {
+    const filename = __validatePath(resolved, "CommonJS module path");
+    if (Object.prototype.hasOwnProperty.call(__moduleCache, filename)) {
+      return __moduleCache[filename].exports;
+    }
+    const kind = __moduleKind(filename);
+    if (kind === "esm") __requireEsmUnsupported(filename);
+    const record = __moduleRecord(filename, false);
+    const module = {
+      id: filename,
+      filename,
+      dirname: __path.dirname(filename),
+      exports: {},
+      loaded: false,
+      parent: parentModule || null,
+      children: []
+    };
+    if (parentModule && parentModule.children) parentModule.children.push(module);
+    __moduleCache[filename] = module;
+    if (__normalizedExtension(filename) === ".json") {
+      try {
+        module.exports = JSON.parse(record.source);
+      } catch (error) {
+        throw new SyntaxError("Invalid AutoJs6 experimental worker JSON module '" + filename + "': " + (error && error.message ? error.message : String(error)));
+      }
+      module.loaded = true;
+      return module.exports;
+    }
+    __assertCjsSourceSupported(record.source, filename);
+    const workerRequire = __createRequire(module);
+    module.require = workerRequire;
+    const sourceURL = String(record.sourceURL || filename).replace(/[\r\n]/g, " ");
+    const run = new Function(
+      "require",
+      "exports",
+      "module",
+      "__filename",
+      "__dirname",
+      "parentPort",
+      "workerData",
+      "Buffer",
+      "\"use strict\";\n" + record.source + "\n//# sourceURL=" + sourceURL
+    );
+    run(workerRequire, module.exports, module, module.filename, module.dirname, __parentPort, __workerData, __nativeRequire("buffer").Buffer);
+    module.loaded = true;
+    return module.exports;
+  }
+  function __splitNamedList(sourceName, text) {
+    const parts = String(text || "").split(",");
+    const output = [];
+    for (const rawPart of parts) {
+      const part = rawPart.trim();
+      if (!part) continue;
+      const match = /^([A-Za-z_$][0-9A-Za-z_$]*)(?:\s+as\s+([A-Za-z_$][0-9A-Za-z_$]*))?$/.exec(part);
+      if (!match) __esmUnsupported("Unsupported AutoJs6 worker ESM named binding in " + sourceName + ": " + part);
+      output.push({ exported: match[1], local: match[2] || match[1] });
+    }
+    return output;
+  }
+  function __parseImportBindings(bindingText, importVar, sourceName) {
+    let text = String(bindingText || "").trim();
+    const lines = [];
+    function bindDefault(value) {
+      const name = value.trim();
+      if (!/^[A-Za-z_$][0-9A-Za-z_$]*$/.test(name)) __esmUnsupported("Unsupported AutoJs6 worker ESM default import binding in " + sourceName + ": " + value);
+      lines.push("const " + name + " = " + importVar + "[\"default\"];");
+    }
+    function bindNamespace(value) {
+      const match = /^\*\s+as\s+([A-Za-z_$][0-9A-Za-z_$]*)$/.exec(value.trim());
+      if (!match) __esmUnsupported("Unsupported AutoJs6 worker ESM namespace import binding in " + sourceName + ": " + value);
+      lines.push("const " + match[1] + " = " + importVar + ";");
+    }
+    function bindNamed(value) {
+      const body = value.trim();
+      if (body.charAt(0) !== "{" || body.charAt(body.length - 1) !== "}") {
+        __esmUnsupported("Unsupported AutoJs6 worker ESM import binding in " + sourceName + ": " + value);
+      }
+      for (const item of __splitNamedList(sourceName, body.slice(1, -1))) {
+        lines.push("const " + item.local + " = " + importVar + "[" + JSON.stringify(item.exported) + "];");
+      }
+    }
+    const comma = text.indexOf(",");
+    if (comma >= 0 && text.charAt(0) !== "{" && text.charAt(0) !== "*") {
+      bindDefault(text.slice(0, comma));
+      text = text.slice(comma + 1).trim();
+    }
+    if (!text) return lines;
+    if (text.charAt(0) === "{") bindNamed(text);
+    else if (text.charAt(0) === "*") bindNamespace(text);
+    else bindDefault(text);
+    return lines;
+  }
+  function __transformExports(source, sourceName) {
+    let body = String(source || "");
+    const namedExports = [];
+    let hasDefault = false;
+    const masked = __maskNonCode(body);
+    if (/(^|[\r\n;{}])\s*export\s+(?:\*|\{[^}]*\}\s+from\b)/.test(masked)) {
+      __esmUnsupported("AutoJs6 worker partial ESM does not support re-export syntax in " + sourceName + ".");
+    }
+    body = body.replace(/\bexport\s+default\s+/g, function() {
+      if (hasDefault) __esmUnsupported("AutoJs6 worker partial ESM module has more than one default export: " + sourceName);
+      hasDefault = true;
+      return "const __autojs6_esm_default = ";
+    });
+    body = body.replace(/\bexport\s+(const|let|var)\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, kind, name) {
+      namedExports.push({ exported: name, local: name });
+      return kind + " " + name;
+    });
+    body = body.replace(/\bexport\s+(async\s+)?function\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, name) {
+      namedExports.push({ exported: name, local: name });
+      return (asyncPrefix || "") + "function " + name + "(";
+    });
+    body = body.replace(/\bexport\s+class\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, name) {
+      namedExports.push({ exported: name, local: name });
+      return "class " + name;
+    });
+    body = body.replace(/(^|[\r\n;{}])\s*export\s*\{([^}]*)\}\s*;?/g, function(match, prefix, list) {
+      for (const item of __splitNamedList(sourceName, list)) namedExports.push(item);
+      return prefix || "";
+    });
+    const tail = [];
+    if (hasDefault) tail.push("__autojs6_esm_namespace[\"default\"] = __autojs6_esm_default;");
+    for (const item of namedExports) tail.push("__autojs6_esm_namespace[" + JSON.stringify(item.exported) + "] = " + item.local + ";");
+    return { body, tail: tail.join("\n") };
+  }
+  function __transformEsmSource(source, filename) {
+    const sourceText = String(source || "");
+    const masked = __maskNonCode(sourceText);
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__isIdentifierTokenAt(masked, index, "import")) continue;
+      const nextIndex = __skipWhitespace(masked, index + "import".length);
+      const next = masked.charAt(nextIndex);
+      if (next === "(") __dynamicImportUnsupported(filename);
+      if (next === "." && masked.slice(nextIndex, nextIndex + 5) === ".meta") {
+        __esmUnsupported("import.meta is disabled for AutoJs6 worker partial ESM module '" + filename + "'.");
+      }
+    }
+    const importPattern = /(^|[\r\n;])\s*import\b\s*(?![.(])(?:(["'])([^"'\r\n]+)\2|([\s\S]*?)\s*from\s*(["'])([^"'\r\n]+)\5)[ \t]*(?=;|[\r\n]|$|\/\/|\/\*)/g;
+    const bindingLines = [];
+    let body = "";
+    let cursor = 0;
+    let importIndex = 0;
+    let match;
+    while ((match = importPattern.exec(sourceText)) !== null) {
+      const statementStart = match.index + match[1].length;
+      const statementEnd = importPattern.lastIndex;
+      body += sourceText.slice(cursor, statementStart);
+      cursor = statementEnd;
+      const importVar = "__autojs6_esm_import_" + importIndex++;
+      const specifier = match[3] || match[6];
+      bindingLines.push(
+        "const " + importVar + " = await __autojs6_load_esm_module(" +
+          JSON.stringify(specifier) + ", " + JSON.stringify(filename) + ");"
+      );
+      const specifierText = match[4] === undefined ? "" : match[4];
+      Array.prototype.push.apply(bindingLines, __parseImportBindings(specifierText, importVar, filename));
+    }
+    body += sourceText.slice(cursor);
+    const exportTransform = __transformExports(body, filename);
+    const remaining = __maskNonCode(exportTransform.body);
+    if (/(^|[\r\n;{}])\s*import\b/.test(remaining) || /(^|[\r\n;{}])\s*export\b/.test(remaining)) {
+      __esmUnsupported("AutoJs6 worker partial ESM found unsupported import/export syntax in " + filename + ".");
+    }
+    return bindingLines.join("\n") + "\n" + exportTransform.body + "\n" + exportTransform.tail;
+  }
+  function __namespaceFromCommonJs(value) {
+    const namespace = Object.create(null);
+    namespace.default = value;
+    if (value !== null && (typeof value === "object" || typeof value === "function")) {
+      for (const key of Object.getOwnPropertyNames(value)) {
+        if (key === "default") continue;
+        try { namespace[key] = value[key]; } catch (_) {}
+      }
+    }
+    return Object.freeze(namespace);
+  }
+  function __loadEsmModule(specifier, parentFilename) {
+    const raw = String(specifier || "");
+    if (__builtinAllowed(raw)) return Promise.resolve(__namespaceFromCommonJs(__loadBuiltin(raw)));
+    if (!__isRelativeModuleName(raw)) return Promise.reject(__error(
+      "AutoJs6 experimental worker_threads ESM imports only local worker dependencies and allowed builtins: " + raw,
+      "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+    ));
+    const resolved = __resolveLocal(raw, parentFilename, "esm");
+    if (resolved.kind === "cjs") {
+      return Promise.resolve(__namespaceFromCommonJs(__loadCjsModule(resolved.resolved, null)));
+    }
+    return __executeEsmModule(resolved.resolved);
+  }
+  function __executeEsmModule(resolved) {
+    const filename = __validatePath(resolved, "ESM module path");
+    if (Object.prototype.hasOwnProperty.call(__esmModuleCache, filename)) {
+      return __esmModuleCache[filename].promise;
+    }
+    const record = __moduleRecord(filename, true);
+    const namespace = Object.create(null);
+    const cacheRecord = { namespace, promise: null };
+    __esmModuleCache[filename] = cacheRecord;
+    cacheRecord.promise = (async function() {
+      const transformed = __transformEsmSource(record.source, filename);
+      const sourceURL = String(record.sourceURL || filename).replace(/[\r\n]/g, " ");
+      const moduleFunction = __AsyncFunction(
+        "__autojs6_load_esm_module",
+        "__autojs6_esm_namespace",
+        "require",
+        "exports",
+        "module",
+        "__filename",
+        "__dirname",
+        "\"use strict\";\n" + transformed + "\n//# sourceURL=" + sourceURL
+      );
+      await moduleFunction.call(
+        undefined,
+        __loadEsmModule,
+        namespace,
+        undefined,
+        undefined,
+        undefined,
+        filename,
+        __path.dirname(filename)
+      );
+      return Object.freeze(namespace);
+    })();
+    return cacheRecord.promise;
+  }
+  if (__descriptor.format === "esm") {
+    __executeEsmModule(__entryFilename).then(
+      function() {},
+      function(error) {
+        setImmediate(function() { throw error; });
+      }
+    );
+  } else {
+    __loadCjsModule(__entryFilename, null);
+  }
+})();
+`;
   }
   function __autojs6_limited_worker_threads() {
     if (__autojs6_limited_worker_threads_cache) {
@@ -10441,12 +15095,402 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const nativeModule = __autojs6_builtin_module("worker_threads");
     const eventsModule = __autojs6_events_module();
-    if (!nativeModule || typeof nativeModule.Worker !== "function" || !eventsModule || typeof eventsModule.EventEmitter !== "function") {
+    if (
+      !nativeModule ||
+      typeof nativeModule.Worker !== "function" ||
+      typeof nativeModule.MessageChannel !== "function" ||
+      typeof nativeModule.MessagePort !== "function" ||
+      !eventsModule ||
+      typeof eventsModule.EventEmitter !== "function"
+    ) {
+      return __autojs6_worker_threads_shape_facade();
+    }
+    const nativeMessagePortCtor = nativeModule.MessagePort;
+    const workerPortStates = new WeakMap();
+    const nativeToWrappedPort = new WeakMap();
+    function AutoJs6MessagePort() {
       throw __autojs6_worker_threads_error(
-        "AutoJs6 experimental worker_threads is unavailable in this Embedded Node build.",
-        "ERR_AUTOJS6_WORKER_DISABLED"
+        "AutoJs6 experimental worker_threads MessagePort cannot be constructed directly.",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
       );
     }
+    function __autojs6_worker_threads_message_port_state(port, operation) {
+      if (port && (typeof port === "object" || typeof port === "function") && workerPortStates.has(port)) {
+        return workerPortStates.get(port);
+      }
+      throw new TypeError("Illegal invocation of MessagePort." + operation);
+    }
+    function __autojs6_worker_threads_is_native_message_port(value) {
+      return !!(
+        value &&
+        (typeof value === "object" || typeof value === "function") &&
+        nativeMessagePortCtor &&
+        value instanceof nativeMessagePortCtor
+      );
+    }
+    function __autojs6_worker_threads_wrap_message_port(nativePort) {
+      if (!__autojs6_worker_threads_is_native_message_port(nativePort)) {
+        throw __autojs6_worker_threads_data_clone_error(
+          "AutoJs6 experimental worker_threads expected a native MessagePort.",
+          "invalid_message_port"
+        );
+      }
+      if (nativeToWrappedPort.has(nativePort)) {
+        return nativeToWrappedPort.get(nativePort);
+      }
+      const wrapper = Object.create(AutoJs6MessagePort.prototype);
+      const record = {
+        nativePort,
+        __autojs6Closed: false
+      };
+      const state = {
+        nativePort,
+        record,
+        queued: Object.create(null),
+        onmessage: null,
+        onmessageWrapper: null,
+        onmessageerror: null,
+        onmessageerrorWrapper: null
+      };
+      workerPortStates.set(wrapper, state);
+      nativeToWrappedPort.set(nativePort, wrapper);
+      __autojs6_worker_threads_register_message_port_record(record);
+      return wrapper;
+    }
+    function __autojs6_worker_threads_native_port_from_transfer(value, label) {
+      if (workerPortStates.has(value)) {
+        const state = workerPortStates.get(value);
+        if (state.record.__autojs6Closed) {
+          throw __autojs6_worker_threads_data_clone_error(
+            "AutoJs6 experimental worker_threads cannot transfer a closed MessagePort.",
+            "closed_message_port"
+          );
+        }
+        return {
+          nativePort: state.nativePort,
+          record: state.record
+        };
+      }
+      if (__autojs6_worker_threads_is_native_message_port(value)) {
+        return {
+          nativePort: value,
+          record: null
+        };
+      }
+      return null;
+    }
+    function __autojs6_worker_threads_prepare_transfer_list(transferList, label) {
+      if (transferList === undefined || transferList === null) {
+        return {
+          nativeList: [],
+          portRecords: []
+        };
+      }
+      let rawList;
+      try {
+        rawList = Array.isArray(transferList) ? transferList : Array.from(transferList);
+      } catch (_) {
+        throw __autojs6_worker_threads_data_clone_error(
+          "AutoJs6 experimental worker_threads " + label + " must be an iterable transfer list.",
+          "invalid_transfer_list"
+        );
+      }
+      const nativeList = [];
+      const portRecords = [];
+      const seen = new Set();
+      for (const value of rawList) {
+        if (seen.has(value)) {
+          throw __autojs6_worker_threads_data_clone_error(
+            "AutoJs6 experimental worker_threads " + label + " contains duplicate transfer entries.",
+            "duplicate_transfer"
+          );
+        }
+        seen.add(value);
+        const portTransfer = __autojs6_worker_threads_native_port_from_transfer(value, label);
+        if (portTransfer) {
+          nativeList.push(portTransfer.nativePort);
+          if (portTransfer.record) {
+            portRecords.push(portTransfer.record);
+          }
+          continue;
+        }
+        if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) {
+          nativeList.push(value);
+          continue;
+        }
+        throw __autojs6_worker_threads_data_clone_error(
+          "AutoJs6 experimental worker_threads " + label + " accepts only ArrayBuffer and MessagePort transfer entries.",
+          "unsupported_transfer"
+        );
+      }
+      return {
+        nativeList,
+        portRecords
+      };
+    }
+    function __autojs6_worker_threads_to_native_message(value, seen) {
+      if (workerPortStates.has(value)) {
+        const state = workerPortStates.get(value);
+        if (state.record.__autojs6Closed) {
+          throw __autojs6_worker_threads_data_clone_error(
+            "AutoJs6 experimental worker_threads cannot clone a closed MessagePort.",
+            "closed_message_port"
+          );
+        }
+        return state.nativePort;
+      }
+      if (value === null || value === undefined) return value;
+      const valueType = typeof value;
+      if (valueType !== "object") return value;
+      if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) return value;
+      if (typeof ArrayBuffer === "function" && typeof ArrayBuffer.isView === "function" && ArrayBuffer.isView(value)) return value;
+      if (typeof Date === "function" && value instanceof Date) return new Date(value.getTime());
+      const seenMap = seen || new Map();
+      if (seenMap.has(value)) {
+        return seenMap.get(value);
+      }
+      if (typeof Map === "function" && value instanceof Map) {
+        const clonedMap = new Map();
+        seenMap.set(value, clonedMap);
+        for (const entry of value) {
+          clonedMap.set(
+            __autojs6_worker_threads_to_native_message(entry[0], seenMap),
+            __autojs6_worker_threads_to_native_message(entry[1], seenMap)
+          );
+        }
+        return clonedMap;
+      }
+      if (typeof Set === "function" && value instanceof Set) {
+        const clonedSet = new Set();
+        seenMap.set(value, clonedSet);
+        for (const item of value) {
+          clonedSet.add(__autojs6_worker_threads_to_native_message(item, seenMap));
+        }
+        return clonedSet;
+      }
+      if (Array.isArray(value)) {
+        const clonedArray = [];
+        seenMap.set(value, clonedArray);
+        for (let index = 0; index < value.length; index += 1) {
+          clonedArray[index] = __autojs6_worker_threads_to_native_message(value[index], seenMap);
+        }
+        return clonedArray;
+      }
+      const clonedObject = Object.create(null);
+      seenMap.set(value, clonedObject);
+      for (const key of Object.keys(value)) {
+        clonedObject[key] = __autojs6_worker_threads_to_native_message(value[key], seenMap);
+      }
+      return clonedObject;
+    }
+    function __autojs6_worker_threads_finalize_port_transfers(portRecords) {
+      for (const record of portRecords || []) {
+        __autojs6_worker_threads_unregister_message_port_record(record);
+      }
+    }
+    function __autojs6_worker_threads_post_native_message(nativeTarget, queueState, message, transferList, label) {
+      const prepared = __autojs6_worker_threads_prepare_transfer_list(transferList, label + " transferList");
+      __autojs6_worker_threads_validate_message_budget(message, label);
+      __autojs6_worker_threads_try_queue_message(queueState, label);
+      const nativeMessage = __autojs6_worker_threads_to_native_message(message);
+      try {
+        const result = nativeTarget.postMessage(nativeMessage, prepared.nativeList);
+        __autojs6_worker_threads_finalize_port_transfers(prepared.portRecords);
+        return result;
+      } catch (error) {
+        if (error && error.name === "DataCloneError") {
+          __autojs6_worker_threads_record_message_rejection("native_data_clone");
+        }
+        throw error;
+      }
+    }
+    function __autojs6_worker_threads_normalize_resource_limits(resourceLimits, label) {
+      if (resourceLimits === undefined || resourceLimits === null) return undefined;
+      if (typeof resourceLimits !== "object" || Array.isArray(resourceLimits)) {
+        throw __autojs6_worker_threads_policy_error(
+          "AutoJs6 experimental worker_threads " + label + " resourceLimits must be an object.",
+          "invalid_resource_limits"
+        );
+      }
+      const caps = __autojs6_worker_threads_policy.resourceLimits;
+      const allowed = Object.freeze({
+        maxOldGenerationSizeMb: caps.maxOldGenerationSizeMb,
+        maxYoungGenerationSizeMb: caps.maxYoungGenerationSizeMb,
+        codeRangeSizeMb: caps.codeRangeSizeMb,
+        stackSizeMb: caps.stackSizeMb
+      });
+      const output = {};
+      for (const key of Object.keys(resourceLimits)) {
+        if (!__autojs6_has_own(allowed, key)) {
+          throw __autojs6_worker_threads_policy_error(
+            "AutoJs6 experimental worker_threads " + label + " rejects resourceLimits." + key + ".",
+            "unknown_resource_limit"
+          );
+        }
+        const value = Number(resourceLimits[key]);
+        if (!Number.isFinite(value) || value <= 0) {
+          throw __autojs6_worker_threads_policy_error(
+            "AutoJs6 experimental worker_threads " + label + " resourceLimits." + key + " must be positive.",
+            "invalid_resource_limit"
+          );
+        }
+        if (value > allowed[key]) {
+          throw __autojs6_worker_threads_policy_error(
+            "AutoJs6 experimental worker_threads " + label + " resourceLimits." + key + " exceeds " + allowed[key] + ".",
+            "resource_limit_too_large"
+          );
+        }
+        output[key] = Math.floor(value);
+      }
+      return Object.keys(output).length > 0 ? output : undefined;
+    }
+    Object.defineProperties(AutoJs6MessagePort.prototype, {
+      constructor: { value: AutoJs6MessagePort, configurable: true },
+      onmessage: {
+        get: function() {
+          return __autojs6_worker_threads_message_port_state(this, "onmessage").onmessage;
+        },
+        set: function(listener) {
+          const state = __autojs6_worker_threads_message_port_state(this, "onmessage");
+          if (state.onmessageWrapper && typeof state.nativePort.off === "function") {
+            try {
+              state.nativePort.off("message", state.onmessageWrapper);
+            } catch (_) {}
+          }
+          state.onmessage = typeof listener === "function" ? listener : null;
+          state.onmessageWrapper = state.onmessage
+            ? function(value) {
+                state.onmessage.call(this, { type: "message", data: value, target: this, currentTarget: this });
+              }.bind(this)
+            : null;
+          if (state.onmessageWrapper && typeof state.nativePort.on === "function") {
+            state.nativePort.on("message", state.onmessageWrapper);
+          }
+        },
+        enumerable: true
+      },
+      onmessageerror: {
+        get: function() {
+          return __autojs6_worker_threads_message_port_state(this, "onmessageerror").onmessageerror;
+        },
+        set: function(listener) {
+          const state = __autojs6_worker_threads_message_port_state(this, "onmessageerror");
+          if (state.onmessageerrorWrapper && typeof state.nativePort.off === "function") {
+            try {
+              state.nativePort.off("messageerror", state.onmessageerrorWrapper);
+            } catch (_) {}
+          }
+          state.onmessageerror = typeof listener === "function" ? listener : null;
+          state.onmessageerrorWrapper = state.onmessageerror
+            ? function(value) {
+                state.onmessageerror.call(this, { type: "messageerror", data: value, target: this, currentTarget: this });
+              }.bind(this)
+            : null;
+          if (state.onmessageerrorWrapper && typeof state.nativePort.on === "function") {
+            state.nativePort.on("messageerror", state.onmessageerrorWrapper);
+          }
+        },
+        enumerable: true
+      },
+      postMessage: {
+        value: function(message, transferList) {
+          const state = __autojs6_worker_threads_message_port_state(this, "postMessage");
+          if (state.record.__autojs6Closed) return undefined;
+          return __autojs6_worker_threads_post_native_message(
+            state.nativePort,
+            state.queued,
+            message,
+            transferList,
+            "MessagePort.postMessage"
+          );
+        },
+        enumerable: true
+      },
+      start: {
+        value: function() {
+          const state = __autojs6_worker_threads_message_port_state(this, "start");
+          return typeof state.nativePort.start === "function" ? state.nativePort.start() : undefined;
+        },
+        enumerable: true
+      },
+      close: {
+        value: function() {
+          const state = __autojs6_worker_threads_message_port_state(this, "close");
+          __autojs6_worker_threads_close_message_port_record(state.record);
+          return undefined;
+        },
+        enumerable: true
+      },
+      ref: {
+        value: function() {
+          const state = __autojs6_worker_threads_message_port_state(this, "ref");
+          if (typeof state.nativePort.ref === "function") state.nativePort.ref();
+          return this;
+        },
+        enumerable: true
+      },
+      unref: {
+        value: function() {
+          const state = __autojs6_worker_threads_message_port_state(this, "unref");
+          if (typeof state.nativePort.unref === "function") state.nativePort.unref();
+          return this;
+        },
+        enumerable: true
+      },
+      on: {
+        value: function(eventName, listener) {
+          const state = __autojs6_worker_threads_message_port_state(this, "on");
+          state.nativePort.on(eventName, listener);
+          return this;
+        },
+        enumerable: true
+      },
+      once: {
+        value: function(eventName, listener) {
+          const state = __autojs6_worker_threads_message_port_state(this, "once");
+          state.nativePort.once(eventName, listener);
+          return this;
+        },
+        enumerable: true
+      },
+      off: {
+        value: function(eventName, listener) {
+          const state = __autojs6_worker_threads_message_port_state(this, "off");
+          if (typeof state.nativePort.off === "function") state.nativePort.off(eventName, listener);
+          else if (typeof state.nativePort.removeListener === "function") state.nativePort.removeListener(eventName, listener);
+          return this;
+        },
+        enumerable: true
+      },
+      addListener: {
+        value: function(eventName, listener) {
+          return this.on(eventName, listener);
+        },
+        enumerable: true
+      },
+      removeListener: {
+        value: function(eventName, listener) {
+          return this.off(eventName, listener);
+        },
+        enumerable: true
+      },
+      [Symbol.toStringTag]: { value: "MessagePort" }
+    });
+    Object.freeze(AutoJs6MessagePort.prototype);
+    Object.freeze(AutoJs6MessagePort);
+    function AutoJs6MessageChannel() {
+      if (!(this instanceof AutoJs6MessageChannel)) {
+        return new AutoJs6MessageChannel();
+      }
+      const nativeChannel = new nativeModule.MessageChannel();
+      Object.defineProperties(this, {
+        port1: { value: __autojs6_worker_threads_wrap_message_port(nativeChannel.port1), enumerable: true },
+        port2: { value: __autojs6_worker_threads_wrap_message_port(nativeChannel.port2), enumerable: true }
+      });
+      Object.freeze(this);
+    }
+    Object.freeze(AutoJs6MessageChannel.prototype);
+    Object.freeze(AutoJs6MessageChannel);
     function AutoJs6Worker(filename, options) {
       if (!(this instanceof AutoJs6Worker)) {
         return new AutoJs6Worker(filename, options);
@@ -10472,13 +15516,29 @@ std::string buildEmbeddedScriptExecutionSource(
       let nativeWorker = null;
       try {
         const descriptor = __autojs6_worker_threads_resolve_script(filename, __autojs6_source_name);
+        const workerDataTransfer = __autojs6_worker_threads_prepare_transfer_list(
+          opts.transferList,
+          "Worker options.transferList"
+        );
+        __autojs6_worker_threads_validate_message_budget(opts.workerData, "Worker workerData");
+        const nativeWorkerData = __autojs6_worker_threads_to_native_message(opts.workerData);
+        const nativeResourceLimits = __autojs6_worker_threads_normalize_resource_limits(
+          opts.resourceLimits,
+          "Worker options"
+        );
+        const nativeOptions = {
+          eval: true,
+          workerData: { __autojs6UserWorkerData: nativeWorkerData },
+          transferList: workerDataTransfer.nativeList
+        };
+        if (nativeResourceLimits) {
+          nativeOptions.resourceLimits = nativeResourceLimits;
+        }
         nativeWorker = new nativeModule.Worker(
           __autojs6_worker_threads_bootstrap_source(descriptor),
-          {
-            eval: true,
-            workerData: { __autojs6UserWorkerData: opts.workerData }
-          }
+          nativeOptions
         );
+        __autojs6_worker_threads_finalize_port_transfers(workerDataTransfer.portRecords);
         this.__autojs6NativeWorker = nativeWorker;
         __autojs6_worker_threads_records.add(this);
         try {
@@ -10542,14 +15602,20 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     AutoJs6Worker.prototype = Object.create(eventsModule.EventEmitter.prototype);
     AutoJs6Worker.prototype.constructor = AutoJs6Worker;
-    AutoJs6Worker.prototype.postMessage = function(message) {
+    AutoJs6Worker.prototype.postMessage = function(message, transferList) {
       if (!this.__autojs6NativeWorker || this.__autojs6Finished) {
         throw __autojs6_worker_threads_error(
           "AutoJs6 experimental worker_threads worker is already terminated.",
           "ERR_AUTOJS6_WORKER_TERMINATED"
         );
       }
-      return this.__autojs6NativeWorker.postMessage(message);
+      return __autojs6_worker_threads_post_native_message(
+        this.__autojs6NativeWorker,
+        this,
+        message,
+        transferList,
+        "Worker.postMessage"
+      );
     };
     AutoJs6Worker.prototype.terminate = function() {
       if (!this.__autojs6NativeWorker || this.__autojs6Finished) {
@@ -10562,12 +15628,466 @@ std::string buildEmbeddedScriptExecutionSource(
         return code;
       });
     };
+    function __autojs6_worker_pool_error(message, code) {
+      return __autojs6_worker_threads_error(message, code || "ERR_AUTOJS6_WORKER_POOL_TASK_FAILED");
+    }
+    function __autojs6_worker_pool_int(value, fallback, min, max, label) {
+      if (value === undefined || value === null) return fallback;
+      const number = Number(value);
+      if (!Number.isFinite(number) || Math.floor(number) !== number || number < min || number > max) {
+        throw __autojs6_worker_threads_policy_error(
+          "AutoJs6 experimental worker_threads WorkerPool " + label + " must be an integer between " + min + " and " + max + ".",
+          "invalid_worker_pool_option"
+        );
+      }
+      return number;
+    }
+    function __autojs6_worker_pool_normalize_options(options) {
+      const input = options && typeof options === "object" ? options : {};
+      const policy = __autojs6_worker_threads_policy.workerPool;
+      const maxWorkers = __autojs6_worker_pool_int(
+        input.maxWorkers,
+        policy.maxWorkers,
+        1,
+        policy.maxWorkers,
+        "maxWorkers"
+      );
+      const minWorkers = __autojs6_worker_pool_int(
+        input.minWorkers,
+        policy.minWorkers,
+        0,
+        maxWorkers,
+        "minWorkers"
+      );
+      return {
+        minWorkers,
+        maxWorkers,
+        idleTimeoutMs: __autojs6_worker_pool_int(input.idleTimeoutMs, policy.idleTimeoutMs, 0, 60000, "idleTimeoutMs"),
+        taskTimeoutMs: __autojs6_worker_pool_int(input.taskTimeoutMs, policy.taskTimeoutMs, 1, 60000, "taskTimeoutMs"),
+        queueLimit: __autojs6_worker_pool_int(input.queueLimit, policy.queueLimit, 0, 128, "queueLimit"),
+        workerData: input.workerData,
+        resourceLimits: __autojs6_worker_threads_normalize_resource_limits(input.resourceLimits, "WorkerPool options")
+      };
+    }
+    function __autojs6_worker_pool_mark_closed(pool) {
+      if (pool.__autojs6PoolClosedRecorded) return;
+      pool.__autojs6PoolClosedRecorded = true;
+      __autojs6_worker_pool_records.delete(pool);
+      __autojs6_worker_threads_diagnostics.activeWorkerPoolCount = Math.max(
+        0,
+        __autojs6_worker_threads_diagnostics.activeWorkerPoolCount - 1
+      );
+      __autojs6_worker_threads_diagnostics.workerPoolClosedCount += 1;
+    }
+    function __autojs6_worker_pool_remove_record(pool, record) {
+      if (!record || record.removed) return;
+      record.removed = true;
+      if (record.idleTimer !== null) {
+        try { clearTimeout(record.idleTimer); } catch (_) {}
+        record.idleTimer = null;
+      }
+      if (record.task && record.task.timeoutTimer !== null) {
+        try { clearTimeout(record.task.timeoutTimer); } catch (_) {}
+        record.task.timeoutTimer = null;
+      }
+      const index = pool.__autojs6PoolWorkers.indexOf(record);
+      if (index >= 0) pool.__autojs6PoolWorkers.splice(index, 1);
+    }
+    function __autojs6_worker_pool_reject_task(pool, task, error, reason) {
+      if (!task || task.settled) return;
+      task.settled = true;
+      if (task.timeoutTimer !== null) {
+        try { clearTimeout(task.timeoutTimer); } catch (_) {}
+        task.timeoutTimer = null;
+      }
+      if (reason === "cancelled") {
+        pool.__autojs6PoolCancelledTaskCount += 1;
+        __autojs6_worker_threads_diagnostics.workerPoolTaskCancelledCount += 1;
+      } else if (reason === "timeout") {
+        pool.__autojs6PoolTimedOutTaskCount += 1;
+        __autojs6_worker_threads_diagnostics.workerPoolTaskTimeoutCount += 1;
+      }
+      task.reject(error);
+    }
+    function __autojs6_worker_pool_finish_task(pool, record, task, value) {
+      if (!task || task.settled) return;
+      task.settled = true;
+      if (task.timeoutTimer !== null) {
+        try { clearTimeout(task.timeoutTimer); } catch (_) {}
+        task.timeoutTimer = null;
+      }
+      record.busy = false;
+      record.task = null;
+      task.record = null;
+      pool.__autojs6PoolCompletedTaskCount += 1;
+      __autojs6_worker_threads_diagnostics.workerPoolTaskCompletedCount += 1;
+      task.resolve(value);
+      __autojs6_worker_pool_schedule_idle(pool, record);
+      __autojs6_worker_pool_drain(pool);
+    }
+    function __autojs6_worker_pool_terminate_record(pool, record, reason) {
+      if (!record || record.removed) return Promise.resolve(0);
+      const task = record.task;
+      if (task && !task.settled) {
+        __autojs6_worker_pool_reject_task(
+          pool,
+          task,
+          __autojs6_worker_pool_error(
+            "AutoJs6 experimental worker_threads WorkerPool task ended during " + reason + ".",
+            "ERR_AUTOJS6_WORKER_POOL_TASK_CANCELLED"
+          ),
+          reason === "timeout" ? "timeout" : "cancelled"
+        );
+      }
+      record.task = null;
+      record.busy = false;
+      __autojs6_worker_pool_remove_record(pool, record);
+      let termination;
+      try {
+        termination = Promise.resolve(record.worker.terminate());
+      } catch (error) {
+        termination = Promise.reject(error);
+      }
+      const trackedTermination = termination.then(
+        function(value) {
+          const index = pool.__autojs6PoolTerminations.indexOf(trackedTermination);
+          if (index >= 0) pool.__autojs6PoolTerminations.splice(index, 1);
+          return value;
+        },
+        function(error) {
+          const index = pool.__autojs6PoolTerminations.indexOf(trackedTermination);
+          if (index >= 0) pool.__autojs6PoolTerminations.splice(index, 1);
+          throw error;
+        }
+      );
+      pool.__autojs6PoolTerminations.push(trackedTermination);
+      return trackedTermination;
+    }
+    function __autojs6_worker_pool_schedule_idle(pool, record) {
+      if (pool.__autojs6PoolClosed || !record || record.removed || record.busy) return;
+      if (record.idleTimer !== null) {
+        try { clearTimeout(record.idleTimer); } catch (_) {}
+        record.idleTimer = null;
+      }
+      if (pool.__autojs6PoolWorkers.length <= pool.__autojs6PoolMinWorkers) return;
+      if (pool.__autojs6PoolIdleTimeoutMs <= 0) return;
+      record.idleTimer = setTimeout(function() {
+        record.idleTimer = null;
+        if (pool.__autojs6PoolClosed || record.busy || pool.__autojs6PoolWorkers.length <= pool.__autojs6PoolMinWorkers) return;
+        __autojs6_worker_pool_terminate_record(pool, record, "idle timeout");
+      }, pool.__autojs6PoolIdleTimeoutMs);
+    }
+    function __autojs6_worker_pool_create_worker(pool) {
+      const workerOptions = {
+        workerData: pool.__autojs6PoolWorkerData,
+        resourceLimits: pool.__autojs6PoolResourceLimits
+      };
+      const worker = new AutoJs6Worker(pool.__autojs6PoolFilename, workerOptions);
+      const record = {
+        worker,
+        ready: false,
+        busy: false,
+        removed: false,
+        task: null,
+        idleTimer: null,
+        workerIndex: ++pool.__autojs6PoolNextWorkerIndex
+      };
+      pool.__autojs6PoolWorkers.push(record);
+      pool.__autojs6PoolCreatedWorkerCount += 1;
+      worker.on("online", function() {
+        if (pool.__autojs6PoolClosed || record.removed) return;
+        record.ready = true;
+        __autojs6_worker_pool_schedule_idle(pool, record);
+        __autojs6_worker_pool_drain(pool);
+      });
+      worker.on("message", function(message) {
+        if (!message || typeof message !== "object" || !__autojs6_has_own(message, "__autojs6PoolTaskId")) return;
+        const task = record.task;
+        if (!task || task.id !== message.__autojs6PoolTaskId) return;
+        if (__autojs6_has_own(message, "error") && message.error !== undefined && message.error !== null) {
+          const errorMessage = typeof message.error === "string"
+            ? message.error
+            : String(message.error && (message.error.message || message.error.code) || message.error);
+          __autojs6_worker_pool_reject_task(
+            pool,
+            task,
+            __autojs6_worker_pool_error(errorMessage, "ERR_AUTOJS6_WORKER_POOL_TASK_FAILED"),
+            "failed"
+          );
+          record.busy = false;
+          record.task = null;
+          task.record = null;
+          __autojs6_worker_pool_schedule_idle(pool, record);
+          __autojs6_worker_pool_drain(pool);
+          return;
+        }
+        __autojs6_worker_pool_finish_task(pool, record, task, message.value);
+      });
+      worker.on("error", function(error) {
+        if (record.task && !record.task.settled) {
+          __autojs6_worker_pool_reject_task(
+            pool,
+            record.task,
+            error || __autojs6_worker_pool_error("AutoJs6 experimental worker_threads WorkerPool worker failed.", "ERR_AUTOJS6_WORKER_POOL_TASK_FAILED"),
+            "failed"
+          );
+          record.task = null;
+        }
+        __autojs6_worker_pool_remove_record(pool, record);
+        if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool);
+      });
+      worker.on("exit", function() {
+        if (record.task && !record.task.settled) {
+          __autojs6_worker_pool_reject_task(
+            pool,
+            record.task,
+            __autojs6_worker_pool_error("AutoJs6 experimental worker_threads WorkerPool worker exited before task completion.", "ERR_AUTOJS6_WORKER_POOL_TASK_FAILED"),
+            "failed"
+          );
+          record.task = null;
+        }
+        __autojs6_worker_pool_remove_record(pool, record);
+        if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool);
+      });
+      return record;
+    }
+    function __autojs6_worker_pool_dispatch(pool, record, task) {
+      if (record.idleTimer !== null) {
+        try { clearTimeout(record.idleTimer); } catch (_) {}
+        record.idleTimer = null;
+      }
+      record.busy = true;
+      record.task = task;
+      task.record = record;
+      if (task.timeoutMs > 0) {
+        task.timeoutTimer = setTimeout(function() {
+          if (task.settled) return;
+          __autojs6_worker_pool_reject_task(
+            pool,
+            task,
+            __autojs6_worker_pool_error(
+              "AutoJs6 experimental worker_threads WorkerPool task timed out.",
+              "ERR_AUTOJS6_WORKER_POOL_TASK_TIMEOUT"
+            ),
+            "timeout"
+          );
+          __autojs6_worker_pool_terminate_record(pool, record, "timeout").then(
+            function() { if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool); },
+            function() { if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool); }
+          );
+        }, task.timeoutMs);
+      }
+      try {
+        record.worker.postMessage({
+          __autojs6PoolTaskId: task.id,
+          value: task.value
+        }, task.transferList);
+      } catch (error) {
+        record.busy = false;
+        record.task = null;
+        task.record = null;
+        __autojs6_worker_pool_reject_task(pool, task, error, "failed");
+        __autojs6_worker_pool_schedule_idle(pool, record);
+      }
+    }
+    function __autojs6_worker_pool_drain(pool) {
+      if (!pool || pool.__autojs6PoolClosed) return;
+      while (pool.__autojs6PoolQueue.length > 0) {
+        let record = pool.__autojs6PoolWorkers.find(function(candidate) {
+          return candidate.ready && !candidate.busy && !candidate.removed;
+        });
+        if (!record && pool.__autojs6PoolWorkers.length < pool.__autojs6PoolMaxWorkers) {
+          if (__autojs6_worker_threads_diagnostics.activeWorkerCount >= __autojs6_worker_threads_policy.maxWorkers) {
+            return;
+          }
+          record = __autojs6_worker_pool_create_worker(pool);
+        }
+        if (!record || !record.ready || record.busy) return;
+        const task = pool.__autojs6PoolQueue.shift();
+        if (!task || task.settled) continue;
+        __autojs6_worker_pool_dispatch(pool, record, task);
+      }
+    }
+    function AutoJs6WorkerPool(filename, options) {
+      if (!(this instanceof AutoJs6WorkerPool)) {
+        return new AutoJs6WorkerPool(filename, options);
+      }
+      if (__autojs6_worker_threads_shutdown_reason) {
+        throw __autojs6_worker_threads_error(
+          "AutoJs6 experimental worker_threads WorkerPool creation is disabled during " +
+            __autojs6_worker_threads_shutdown_reason + ".",
+          "ERR_AUTOJS6_WORKER_TERMINATED"
+        );
+      }
+      const normalized = __autojs6_worker_pool_normalize_options(options);
+      this.__autojs6PoolFilename = filename;
+      this.__autojs6PoolMinWorkers = normalized.minWorkers;
+      this.__autojs6PoolMaxWorkers = normalized.maxWorkers;
+      this.__autojs6PoolIdleTimeoutMs = normalized.idleTimeoutMs;
+      this.__autojs6PoolTaskTimeoutMs = normalized.taskTimeoutMs;
+      this.__autojs6PoolQueueLimit = normalized.queueLimit;
+      this.__autojs6PoolWorkerData = normalized.workerData;
+      this.__autojs6PoolResourceLimits = normalized.resourceLimits;
+      this.__autojs6PoolQueue = [];
+      this.__autojs6PoolWorkers = [];
+      this.__autojs6PoolTerminations = [];
+      this.__autojs6PoolNextTaskId = 0;
+      this.__autojs6PoolNextWorkerIndex = 0;
+      this.__autojs6PoolCreatedWorkerCount = 0;
+      this.__autojs6PoolCompletedTaskCount = 0;
+      this.__autojs6PoolCancelledTaskCount = 0;
+      this.__autojs6PoolTimedOutTaskCount = 0;
+      this.__autojs6PoolClosed = false;
+      this.__autojs6PoolClosedRecorded = false;
+      this.__autojs6PoolClosePromise = null;
+      __autojs6_worker_pool_records.add(this);
+      __autojs6_worker_threads_diagnostics.activeWorkerPoolCount += 1;
+      __autojs6_worker_threads_diagnostics.workerPoolCreatedCount += 1;
+      if (__autojs6_worker_threads_diagnostics.activeWorkerPoolCount > __autojs6_worker_threads_diagnostics.maxActiveWorkerPoolCount) {
+        __autojs6_worker_threads_diagnostics.maxActiveWorkerPoolCount = __autojs6_worker_threads_diagnostics.activeWorkerPoolCount;
+      }
+      try {
+        for (let index = 0; index < this.__autojs6PoolMinWorkers; index += 1) {
+          __autojs6_worker_pool_create_worker(this);
+        }
+      } catch (error) {
+        this.__autojs6ClosePool("constructor failure");
+        throw error;
+      }
+    }
+    AutoJs6WorkerPool.prototype.run = function(value, options) {
+      if (this.__autojs6PoolClosed) {
+        throw __autojs6_worker_pool_error(
+          "AutoJs6 experimental worker_threads WorkerPool is closed.",
+          "ERR_AUTOJS6_WORKER_POOL_CLOSED"
+        );
+      }
+      if (this.__autojs6PoolQueue.length >= this.__autojs6PoolQueueLimit) {
+        __autojs6_worker_threads_diagnostics.workerPoolQueueRejectedCount += 1;
+        throw __autojs6_worker_pool_error(
+          "AutoJs6 experimental worker_threads WorkerPool queue is full.",
+          "ERR_AUTOJS6_WORKER_POOL_QUEUE_FULL"
+        );
+      }
+      const input = options && typeof options === "object" ? options : {};
+      const task = {
+        id: ++this.__autojs6PoolNextTaskId,
+        value,
+        transferList: input.transferList,
+        timeoutMs: __autojs6_worker_pool_int(input.timeoutMs, this.__autojs6PoolTaskTimeoutMs, 1, 60000, "task timeoutMs"),
+        resolve: null,
+        reject: null,
+        settled: false,
+        record: null,
+        timeoutTimer: null
+      };
+      const pool = this;
+      const promise = new Promise(function(resolve, reject) {
+        task.resolve = resolve;
+        task.reject = reject;
+      });
+      Object.defineProperty(promise, "cancel", {
+        value: function() {
+          if (task.settled) return false;
+          const queuedIndex = pool.__autojs6PoolQueue.indexOf(task);
+          if (queuedIndex >= 0) {
+            pool.__autojs6PoolQueue.splice(queuedIndex, 1);
+            __autojs6_worker_pool_reject_task(
+              pool,
+              task,
+              __autojs6_worker_pool_error(
+                "AutoJs6 experimental worker_threads WorkerPool task was cancelled.",
+                "ERR_AUTOJS6_WORKER_POOL_TASK_CANCELLED"
+              ),
+              "cancelled"
+            );
+            return true;
+          }
+          if (task.record) {
+            __autojs6_worker_pool_reject_task(
+              pool,
+              task,
+              __autojs6_worker_pool_error(
+                "AutoJs6 experimental worker_threads WorkerPool running task was cancelled.",
+                "ERR_AUTOJS6_WORKER_POOL_TASK_CANCELLED"
+              ),
+              "cancelled"
+            );
+            __autojs6_worker_pool_terminate_record(pool, task.record, "cancellation").then(
+              function() { if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool); },
+              function() { if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool); }
+            );
+            return true;
+          }
+          return false;
+        },
+        enumerable: false
+      });
+      this.__autojs6PoolQueue.push(task);
+      __autojs6_worker_pool_drain(this);
+      return promise;
+    };
+    AutoJs6WorkerPool.prototype.diagnostics = function() {
+      const idle = this.__autojs6PoolWorkers.filter(function(record) {
+        return record.ready && !record.busy && !record.removed;
+      }).length;
+      const busy = this.__autojs6PoolWorkers.filter(function(record) {
+        return record.busy && !record.removed;
+      }).length;
+      return {
+        closed: this.__autojs6PoolClosed,
+        workerCount: this.__autojs6PoolWorkers.length,
+        idleWorkerCount: idle,
+        busyWorkerCount: busy,
+        queuedTaskCount: this.__autojs6PoolQueue.length,
+        createdWorkerCount: this.__autojs6PoolCreatedWorkerCount,
+        completedTaskCount: this.__autojs6PoolCompletedTaskCount,
+        cancelledTaskCount: this.__autojs6PoolCancelledTaskCount,
+        timedOutTaskCount: this.__autojs6PoolTimedOutTaskCount
+      };
+    };
+    AutoJs6WorkerPool.prototype.close = function() {
+      return this.__autojs6ClosePool("close");
+    };
+    AutoJs6WorkerPool.prototype.shutdown = AutoJs6WorkerPool.prototype.close;
+    AutoJs6WorkerPool.prototype.__autojs6ClosePool = function(reason) {
+      if (this.__autojs6PoolClosePromise) return this.__autojs6PoolClosePromise;
+      this.__autojs6PoolClosed = true;
+      __autojs6_worker_pool_mark_closed(this);
+      while (this.__autojs6PoolQueue.length > 0) {
+        const task = this.__autojs6PoolQueue.shift();
+        __autojs6_worker_pool_reject_task(
+          this,
+          task,
+          __autojs6_worker_pool_error(
+            "AutoJs6 experimental worker_threads WorkerPool task rejected during " + reason + ".",
+            "ERR_AUTOJS6_WORKER_POOL_CLOSED"
+          ),
+          "cancelled"
+        );
+      }
+      const pendingTerminations = this.__autojs6PoolTerminations.slice();
+      const terminations = this.__autojs6PoolWorkers.slice().map((record) => {
+        return __autojs6_worker_pool_terminate_record(this, record, reason);
+      });
+      this.__autojs6PoolClosePromise = Promise.allSettled(pendingTerminations.concat(terminations)).then(function() {
+        return undefined;
+      });
+      return this.__autojs6PoolClosePromise;
+    };
+    Object.freeze(AutoJs6WorkerPool.prototype);
+    Object.freeze(AutoJs6WorkerPool);
     __autojs6_limited_worker_threads_cache = Object.freeze({
       Worker: AutoJs6Worker,
+      WorkerPool: AutoJs6WorkerPool,
+      MessageChannel: AutoJs6MessageChannel,
+      MessagePort: AutoJs6MessagePort,
       isMainThread: true,
       parentPort: null,
       workerData: undefined,
+      threadId: nativeModule.threadId,
       policy: __autojs6_worker_threads_policy_snapshot(),
+      nativeAvailable: true,
       diagnostics: __autojs6_worker_threads_diagnostics_snapshot
     });
     return __autojs6_limited_worker_threads_cache;
@@ -10679,6 +16199,13 @@ std::string buildEmbeddedScriptExecutionSource(
       signal: __autojs6_bridge_signal_from_options(options)
     };
   }
+  function __autojs6_device_power_bridge_options(options, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_device_timeout_from_options(options, fallbackMs),
+      permissions: ["device", "device.power"],
+      signal: __autojs6_bridge_signal_from_options(options)
+    };
+  }
   function __autojs6_device_invalid_argument_error(methodName, message) {
     return __autojs6_bridge_error(
       message,
@@ -10771,6 +16298,28 @@ std::string buildEmbeddedScriptExecutionSource(
         return undefined;
       });
     }
+    function isIgnoringBatteryOptimizations(options) {
+      const bridgeOptions = __autojs6_device_options(options);
+      return __autojs6_call_autojs(
+        "device",
+        "isIgnoringBatteryOptimizations",
+        [],
+        __autojs6_device_power_bridge_options(bridgeOptions, 5000)
+      ).then(function(result) {
+        return result === true;
+      });
+    }
+    function openBatteryOptimizationSettings(options) {
+      const bridgeOptions = __autojs6_device_options(options);
+      return __autojs6_call_autojs(
+        "device",
+        "openBatteryOptimizationSettings",
+        [{ dryRun: bridgeOptions.dryRun === true }],
+        __autojs6_device_power_bridge_options(bridgeOptions, 5000)
+      ).then(function(result) {
+        return Object.freeze(Object.assign({}, result || {}));
+      });
+    }
     __autojs6_limited_device_cache = Object.freeze({
       sdkInt: info.sdkInt,
       width: info.width,
@@ -10778,23 +16327,37 @@ std::string buildEmbeddedScriptExecutionSource(
       density: info.density,
       isScreenOn,
       wakeUp,
-      vibrate
+      vibrate,
+      isIgnoringBatteryOptimizations,
+      openBatteryOptimizationSettings
     });
     return __autojs6_limited_device_cache;
   }
   function __autojs6_shell_options(value) {
     return value && typeof value === "object" && !Array.isArray(value) ? value : {};
   }
-  function __autojs6_shell_invalid_argument_error(message) {
+  function __autojs6_shell_invalid_argument_error(methodName, message) {
+    if (message === undefined) {
+      message = methodName;
+      methodName = "exec";
+    }
     return __autojs6_bridge_error(
       message,
       "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
       "shell",
-      "exec"
+      methodName
     );
   }
-  function __autojs6_shell_timeout_ms(value) {
-    return __autojs6_bridge_timeout_ms(value === undefined ? 30000 : value);
+  function __autojs6_shell_shizuku_unsupported_error(methodName) {
+    return __autojs6_bridge_error(
+      "shell." + methodName + " requires Shizuku shell support, which is not available in the Node.js engine yet; P13-24 keeps Shizuku execution blocked until explicit authorization, lifecycle, packaged disclosure, and cleanup evidence land.",
+      "ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED",
+      "shell",
+      methodName
+    );
+  }
+  function __autojs6_shell_timeout_ms(value, fallbackMs) {
+    return __autojs6_bridge_timeout_ms(value === undefined ? fallbackMs : value);
   }
   function __autojs6_shell_bridge_timeout_ms(commandTimeoutMs) {
     return Math.min(2147483647, Math.max(1, Number(commandTimeoutMs) + 1000));
@@ -10836,6 +16399,38 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return env;
   }
+  function __autojs6_shell_normalize_exec_file_path(value) {
+    const text = value === undefined || value === null ? "" : String(value);
+    if (!text || text.indexOf("\u0000") >= 0) {
+      throw __autojs6_shell_invalid_argument_error("execFile", "shell.execFile path must be non-empty without NUL bytes.");
+    }
+    if (text.charAt(0) === "/" || /^[A-Za-z]:[\\/]/.test(text)) {
+      throw __autojs6_shell_invalid_argument_error("execFile", "shell.execFile path must be relative to the scoped working directory.");
+    }
+    const normalized = text.replace(/\\/g, "/");
+    const parts = normalized.split("/").filter(Boolean);
+    if (parts.length === 0 || parts.indexOf("..") >= 0) {
+      throw __autojs6_shell_invalid_argument_error("execFile", "shell.execFile path must not escape the scoped working directory.");
+    }
+    return normalized.indexOf("/") >= 0 ? normalized : "./" + normalized;
+  }
+  function __autojs6_shell_exec_file_args(value) {
+    if (value === undefined || value === null) {
+      return [];
+    }
+    if (!Array.isArray(value)) {
+      throw __autojs6_shell_invalid_argument_error("execFile", "shell.execFile args must be an array of strings.");
+    }
+    return value.map(function(item, index) {
+      if (typeof item !== "string" || item.indexOf("\u0000") >= 0) {
+        throw __autojs6_shell_invalid_argument_error("execFile", "shell.execFile args[" + index + "] must be a string without NUL bytes.");
+      }
+      return item;
+    });
+  }
+  function __autojs6_shell_quote(value) {
+    return "'" + String(value).replace(/'/g, "'\"'\"'") + "'";
+  }
   function __autojs6_shell_result(value) {
     const source = value && typeof value === "object" ? value : {};
     const rawCode = Number(source.code);
@@ -10849,6 +16444,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_limited_shell_cache) {
       return __autojs6_limited_shell_cache;
     }
+    let defaultTimeoutMs = 30000;
     function exec(command, options) {
       const commandText = command === undefined || command === null ? "" : String(command);
       if (!commandText || commandText.indexOf("\u0000") >= 0) {
@@ -10860,7 +16456,10 @@ std::string buildEmbeddedScriptExecutionSource(
       let inputOptions;
       try {
         inputOptions = __autojs6_shell_options(options);
-        const timeoutMs = __autojs6_shell_timeout_ms(inputOptions.timeoutMs);
+        if (inputOptions.shizuku === true) {
+          throw __autojs6_shell_shizuku_unsupported_error("exec");
+        }
+        const timeoutMs = __autojs6_shell_timeout_ms(inputOptions.timeoutMs, defaultTimeoutMs);
         normalizedOptions = {
           root: inputOptions.root === true,
           timeoutMs,
@@ -10870,7 +16469,7 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (error) {
         return Promise.reject(error);
       }
-      const permissions = normalizedOptions.root ? ["shell", "shell:root"] : ["shell"];
+      const permissions = normalizedOptions.root ? ["shell", "shell.root"] : ["shell"];
       return __autojs6_call_autojs(
         "shell",
         "exec",
@@ -10882,8 +16481,57 @@ std::string buildEmbeddedScriptExecutionSource(
         }
       ).then(__autojs6_shell_result);
     }
+    function execRoot(command, options) {
+      const inputOptions = __autojs6_shell_options(options);
+      return exec(command, Object.freeze(Object.assign({}, inputOptions, { root: true })));
+    }
+    function execShizuku(command, options) {
+      return Promise.reject(__autojs6_shell_shizuku_unsupported_error("execShizuku"));
+    }
+    function execFile(path, args, options) {
+      let command;
+      try {
+        const target = __autojs6_shell_normalize_exec_file_path(path);
+        const argv = __autojs6_shell_exec_file_args(args);
+        command = [target].concat(argv).map(__autojs6_shell_quote).join(" ");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return exec(command, options);
+    }
+    function checkAccess(options) {
+      const opts = __autojs6_shell_options(options);
+      const requested = ["shell"];
+      if (opts.root === true) {
+        requested.push("shell.root");
+      }
+      if (opts.shizuku === true) {
+        requested.push("shell.shizuku");
+      }
+      const missing = __autojs6_bridge_missing_capabilities(requested);
+      const frozenMissing = Object.freeze(missing.slice());
+      return Object.freeze({
+        shell: missing.indexOf("shell") < 0,
+        root: opts.root === true && missing.indexOf("shell.root") < 0,
+        shizuku: false,
+        missingCapabilities: frozenMissing
+      });
+    }
+    function setDefaultTimeout(ms) {
+      const timeoutMs = __autojs6_shell_timeout_ms(ms, defaultTimeoutMs);
+      if (!Number.isFinite(Number(ms)) || Number(ms) <= 0) {
+        throw __autojs6_shell_invalid_argument_error("setDefaultTimeout", "shell.setDefaultTimeout requires a positive timeout in milliseconds.");
+      }
+      defaultTimeoutMs = timeoutMs;
+      return defaultTimeoutMs;
+    }
     __autojs6_limited_shell_cache = Object.freeze({
-      exec
+      exec,
+      execRoot,
+      execShizuku,
+      execFile,
+      checkAccess,
+      setDefaultTimeout
     });
     return __autojs6_limited_shell_cache;
   }
@@ -10960,7 +16608,7 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
     return {
-      scriptPath: parts.join("/"),
+      path: parts.join("/"),
       entryKind: hasEntry && !hasScriptPath ? "projectEntry" : "scriptPath"
     };
   }
@@ -11005,7 +16653,6 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
     const descriptor = {
-      scriptPath: path.scriptPath,
       entryKind: path.entryKind,
       backend: "embedded",
       packaged: input.packaged === true,
@@ -11018,8 +16665,22 @@ std::string buildEmbeddedScriptExecutionSource(
         "delayMs",
         false
       ),
+      timeoutMs: __autojs6_work_manager_duration_ms(
+        input.taskTimeoutMs,
+        __autojs6_work_manager_policy.defaultTaskTimeoutMs,
+        1,
+        __autojs6_work_manager_policy.maxTaskTimeoutMs,
+        methodName,
+        "taskTimeoutMs",
+        false
+      ),
       constraints: __autojs6_work_manager_constraints(input.constraints, methodName)
     };
+    if (path.entryKind === "projectEntry") {
+      descriptor.entry = path.path;
+    } else {
+      descriptor.scriptPath = path.path;
+    }
     if (kind === "periodic") {
       descriptor.intervalMs = __autojs6_work_manager_duration_ms(
         input.intervalMs,
@@ -11043,36 +16704,4555 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return id;
   }
+  function __autojs6_work_manager_native_values(value) {
+    if (!value || typeof value !== "object") {
+      return Object.freeze({});
+    }
+    const result = {};
+    Object.keys(value).forEach(function(key) {
+      const nativeValue = value[key];
+      if (nativeValue !== undefined && nativeValue !== null) {
+        result[String(key)] = String(nativeValue);
+      }
+    });
+    return Object.freeze(result);
+  }
+  function __autojs6_work_manager_run_info(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      startedAtEpochMs: Number(source.startedAtEpochMs) || 0,
+      finishedAtEpochMs: Number(source.finishedAtEpochMs) || 0,
+      elapsedMs: Number(source.elapsedMs) || 0,
+      succeeded: source.succeeded === true,
+      trigger: source.trigger === undefined || source.trigger === null ? "" : String(source.trigger),
+      runnerVersion: Number(source.runnerVersion) || 0,
+      attempt: Number(source.attempt) || 0,
+      executionId: source.executionId === undefined || source.executionId === null ? "" : String(source.executionId),
+      executionMode: source.executionMode === undefined || source.executionMode === null ? "" : String(source.executionMode),
+      launchSurface: source.launchSurface === undefined || source.launchSurface === null ? "" : String(source.launchSurface),
+      exitCode: source.exitCode === undefined || source.exitCode === null ? null : Number(source.exitCode),
+      sourceName: source.sourceName === undefined || source.sourceName === null ? "" : String(source.sourceName),
+      errorCode: source.errorCode === undefined || source.errorCode === null ? null : String(source.errorCode),
+      errorName: source.errorName === undefined || source.errorName === null ? null : String(source.errorName),
+      errorMessage: source.errorMessage === undefined || source.errorMessage === null ? null : String(source.errorMessage),
+      timedOut: source.timedOut === true,
+      stdout: source.stdout === undefined || source.stdout === null ? "" : String(source.stdout),
+      stderr: source.stderr === undefined || source.stderr === null ? "" : String(source.stderr),
+      nativeValues: __autojs6_work_manager_native_values(source.nativeValues)
+    });
+  }
   function __autojs6_work_manager_task_info(value) {
     const source = value && typeof value === "object" ? value : {};
+    const entryKind = source.entryKind === undefined || source.entryKind === null ? "" : String(source.entryKind);
+    const scriptPath = source.scriptPath === undefined || source.scriptPath === null ? "" : String(source.scriptPath);
+    const explicitEntry = source.entry === undefined || source.entry === null ? "" : String(source.entry);
     return Object.freeze({
       id: source.id === undefined || source.id === null ? "" : String(source.id),
       type: source.type === undefined || source.type === null ? "" : String(source.type),
       status: source.status === undefined || source.status === null ? "" : String(source.status),
       scheduler: source.scheduler === undefined || source.scheduler === null ? "" : String(source.scheduler),
       backend: source.backend === undefined || source.backend === null ? "" : String(source.backend),
-      scriptPath: source.scriptPath === undefined || source.scriptPath === null ? "" : String(source.scriptPath),
-      entryKind: source.entryKind === undefined || source.entryKind === null ? "" : String(source.entryKind),
+      scriptPath,
+      entry: explicitEntry || (entryKind === "projectEntry" ? scriptPath : ""),
+      entryKind,
       packaged: source.packaged === true,
       delayMs: Number(source.delayMs) || 0,
       intervalMs: source.intervalMs === undefined || source.intervalMs === null ? null : Number(source.intervalMs),
+      timeoutMs: Number(source.timeoutMs) || __autojs6_work_manager_policy.defaultTaskTimeoutMs,
       constraints: Object.freeze({
         charging: !!(source.constraints && source.constraints.charging === true),
         network: !!(source.constraints && source.constraints.network === true),
         idle: !!(source.constraints && source.constraints.idle === true)
       }),
       packageName: source.packageName === undefined || source.packageName === null ? "" : String(source.packageName),
-      createdAtEpochMs: Number(source.createdAtEpochMs) || 0
+      createdAtEpochMs: Number(source.createdAtEpochMs) || 0,
+      updatedAtEpochMs: Number(source.updatedAtEpochMs) || 0,
+      lastRunStatus: source.lastRunStatus === undefined || source.lastRunStatus === null ? "" : String(source.lastRunStatus),
+      lastFailure: source.lastFailure === undefined || source.lastFailure === null ? null : String(source.lastFailure),
+      lastRun: source.lastRun && typeof source.lastRun === "object" ? __autojs6_work_manager_run_info(source.lastRun) : undefined,
+      runHistory: Object.freeze(Array.isArray(source.runHistory) ? source.runHistory.map(__autojs6_work_manager_run_info) : [])
     });
   }
   function __autojs6_work_manager_policy_snapshot() {
     return Object.freeze({
       maxTasksPerProvider: __autojs6_work_manager_policy.maxTasksPerProvider,
       maxDelayMs: __autojs6_work_manager_policy.maxDelayMs,
+      defaultTaskTimeoutMs: __autojs6_work_manager_policy.defaultTaskTimeoutMs,
+      maxTaskTimeoutMs: __autojs6_work_manager_policy.maxTaskTimeoutMs,
       minPeriodicIntervalMs: __autojs6_work_manager_policy.minPeriodicIntervalMs,
       maxPeriodicIntervalMs: __autojs6_work_manager_policy.maxPeriodicIntervalMs,
       allowedConstraints: Object.freeze(__autojs6_work_manager_policy.allowedConstraints.slice())
     });
+  }
+  function __autojs6_lifecycle_config() {
+    if (__autojs6_lifecycle_config_cache !== undefined) {
+      return __autojs6_lifecycle_config_cache;
+    }
+    const fallback = Object.freeze({
+      schemaVersion: 1,
+      executionId: "",
+      sourceName: "",
+      packageName: "",
+      workingDirectory: "",
+      projectKey: "",
+      executionMode: "one_shot",
+      launchSurface: "script",
+      checkpoint: Object.freeze({
+        enabled: false,
+        maxBytes: 65536,
+        automaticRestart: false,
+        restartPolicy: "never"
+      }),
+      stop: Object.freeze({
+        enabled: false,
+        requestPath: "",
+        pollIntervalMs: 50,
+        graceMs: 1500
+      })
+    });
+    try {
+      const record = __autojs6_runtime_module_embedded_sources["autojs6:lifecycle-config"];
+      if (!record || typeof record.source !== "string") {
+        __autojs6_lifecycle_config_cache = fallback;
+        return fallback;
+      }
+      const parsed = JSON.parse(record.source);
+      if (!parsed || typeof parsed !== "object") {
+        __autojs6_lifecycle_config_cache = fallback;
+        return fallback;
+      }
+      const checkpoint = parsed.checkpoint && typeof parsed.checkpoint === "object" ? parsed.checkpoint : {};
+      const stop = parsed.stop && typeof parsed.stop === "object" ? parsed.stop : {};
+      __autojs6_lifecycle_config_cache = Object.freeze({
+        schemaVersion: Number(parsed.schemaVersion) || 1,
+        executionId: parsed.executionId === undefined || parsed.executionId === null ? "" : String(parsed.executionId),
+        sourceName: parsed.sourceName === undefined || parsed.sourceName === null ? "" : String(parsed.sourceName),
+        packageName: parsed.packageName === undefined || parsed.packageName === null ? "" : String(parsed.packageName),
+        workingDirectory: parsed.workingDirectory === undefined || parsed.workingDirectory === null ? "" : String(parsed.workingDirectory),
+        projectKey: parsed.projectKey === undefined || parsed.projectKey === null ? "" : String(parsed.projectKey),
+        executionMode: parsed.executionMode === undefined || parsed.executionMode === null ? "one_shot" : String(parsed.executionMode),
+        launchSurface: parsed.launchSurface === undefined || parsed.launchSurface === null ? "script" : String(parsed.launchSurface),
+        checkpoint: Object.freeze({
+          enabled: checkpoint.enabled === true,
+          maxBytes: Math.max(0, Number(checkpoint.maxBytes) || 65536),
+          automaticRestart: false,
+          restartPolicy: "never"
+        }),
+        stop: Object.freeze({
+          enabled: stop.enabled === true,
+          requestPath: stop.requestPath === undefined || stop.requestPath === null ? "" : String(stop.requestPath),
+          pollIntervalMs: Math.max(10, Math.min(Number(stop.pollIntervalMs) || 50, 1000)),
+          graceMs: Math.max(0, Number(stop.graceMs) || 0)
+        })
+      });
+      return __autojs6_lifecycle_config_cache;
+    } catch (_) {
+      __autojs6_lifecycle_config_cache = fallback;
+      return fallback;
+    }
+  }
+  function __autojs6_lifecycle_policy_snapshot() {
+    const config = __autojs6_lifecycle_config();
+    return Object.freeze({
+      schemaVersion: config.schemaVersion,
+      executionId: config.executionId,
+      sourceName: config.sourceName,
+      packageName: config.packageName,
+      workingDirectory: config.workingDirectory,
+      projectKey: config.projectKey,
+      executionMode: config.executionMode,
+      launchSurface: config.launchSurface,
+      checkpoint: Object.freeze(Object.assign({}, config.checkpoint)),
+      stop: Object.freeze(Object.assign({}, config.stop)),
+      automaticRestart: false,
+      restartPolicy: "never"
+    });
+  }
+  function __autojs6_lifecycle_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_lifecycle_reason(value, fallback) {
+    if (typeof value === "string") {
+      return value.trim() || fallback;
+    }
+    const options = __autojs6_lifecycle_options(value);
+    if (typeof options.reason === "string" && options.reason.trim()) {
+      return options.reason.trim();
+    }
+    return fallback;
+  }
+  function __autojs6_lifecycle_timeout_from_options(options, fallback) {
+    const value = Number(options && options.timeoutMs);
+    if (!Number.isFinite(value) || value <= 0) {
+      return fallback;
+    }
+    return Math.max(1, Math.min(Math.floor(value), 30000));
+  }
+  function __autojs6_lifecycle_json_clone(value, methodName) {
+    let json;
+    try {
+      json = JSON.stringify(value === undefined ? null : value);
+    } catch (error) {
+      throw __autojs6_bridge_error(
+        "autojs6:lifecycle." + methodName + " requires JSON-serializable checkpoint data.",
+        "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+        "lifecycle",
+        methodName
+      );
+    }
+    if (json === undefined) {
+      throw __autojs6_bridge_error(
+        "autojs6:lifecycle." + methodName + " requires JSON-serializable checkpoint data.",
+        "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+        "lifecycle",
+        methodName
+      );
+    }
+    const maxBytes = __autojs6_lifecycle_config().checkpoint.maxBytes || 65536;
+    if (json.length > maxBytes) {
+      throw __autojs6_bridge_error(
+        "autojs6:lifecycle." + methodName + " checkpoint exceeded " + maxBytes + " bytes.",
+        "ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT",
+        "lifecycle",
+        methodName
+      );
+    }
+    return JSON.parse(json);
+  }
+  function __autojs6_lifecycle_deep_freeze(value) {
+    if (!value || typeof value !== "object" || Object.isFrozen(value)) {
+      return value;
+    }
+    Object.keys(value).forEach(function(key) {
+      __autojs6_lifecycle_deep_freeze(value[key]);
+    });
+    return Object.freeze(value);
+  }
+  function __autojs6_lifecycle_record(value) {
+    if (!value || typeof value !== "object") {
+      return null;
+    }
+    const record = {
+      schemaVersion: Number(value.schemaVersion) || 1,
+      projectKey: value.projectKey === undefined || value.projectKey === null ? "" : String(value.projectKey),
+      packageName: value.packageName === undefined || value.packageName === null ? "" : String(value.packageName),
+      workingDirectory: value.workingDirectory === undefined || value.workingDirectory === null ? "" : String(value.workingDirectory),
+      executionId: value.executionId === undefined || value.executionId === null ? "" : String(value.executionId),
+      sourceName: value.sourceName === undefined || value.sourceName === null ? "" : String(value.sourceName),
+      executionMode: value.executionMode === undefined || value.executionMode === null ? "" : String(value.executionMode),
+      launchSurface: value.launchSurface === undefined || value.launchSurface === null ? "" : String(value.launchSurface),
+      reason: value.reason === undefined || value.reason === null ? "" : String(value.reason),
+      checkpointBytes: Number(value.checkpointBytes) || 0,
+      createdAtEpochMs: Number(value.createdAtEpochMs) || 0,
+      updatedAtEpochMs: Number(value.updatedAtEpochMs) || 0,
+      automaticRestart: value.automaticRestart === true,
+      restartPolicy: value.restartPolicy === undefined || value.restartPolicy === null ? "never" : String(value.restartPolicy),
+      checkpoint: __autojs6_lifecycle_deep_freeze(value.checkpoint === undefined ? null : value.checkpoint)
+    };
+    return Object.freeze(record);
+  }
+  function __autojs6_lifecycle_checkpoint(data, options) {
+    let checkpoint;
+    try {
+      checkpoint = __autojs6_lifecycle_json_clone(data, "checkpoint");
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    const input = typeof options === "string" ? { reason: options } : __autojs6_lifecycle_options(options);
+    const reason = __autojs6_lifecycle_reason(input, "manual");
+    return __autojs6_call_autojs(
+      "lifecycle",
+      "checkpoint",
+      [{ reason, checkpoint }],
+      {
+        timeoutMs: __autojs6_lifecycle_timeout_from_options(input, 5000),
+        permissions: [],
+        signal: __autojs6_bridge_signal_from_options(input)
+      }
+    ).then(function(result) {
+      const record = __autojs6_lifecycle_record(result);
+      __autojs6_lifecycle_checkpoint_handlers.slice().forEach(function(handler) {
+        try {
+          handler(reason, record);
+        } catch (error) {
+          setImmediate(function() {
+            throw error;
+          });
+        }
+      });
+      return record;
+    });
+  }
+  function __autojs6_lifecycle_read_checkpoint(options) {
+    const input = __autojs6_lifecycle_options(options);
+    return __autojs6_call_autojs(
+      "lifecycle",
+      "readCheckpoint",
+      [],
+      {
+        timeoutMs: __autojs6_lifecycle_timeout_from_options(input, 5000),
+        permissions: [],
+        signal: __autojs6_bridge_signal_from_options(input)
+      }
+    ).then(__autojs6_lifecycle_record);
+  }
+  function __autojs6_lifecycle_clear_checkpoint(options) {
+    const input = __autojs6_lifecycle_options(options);
+    return __autojs6_call_autojs(
+      "lifecycle",
+      "clearCheckpoint",
+      [],
+      {
+        timeoutMs: __autojs6_lifecycle_timeout_from_options(input, 5000),
+        permissions: [],
+        signal: __autojs6_bridge_signal_from_options(input)
+      }
+    ).then(function(result) {
+      return __autojs6_lifecycle_deep_freeze(result && typeof result === "object" ? result : {});
+    });
+  }
+  function __autojs6_lifecycle_on_checkpoint(handler) {
+    if (typeof handler !== "function") {
+      throw new TypeError("autojs6:lifecycle.onCheckpoint requires a function.");
+    }
+    __autojs6_lifecycle_checkpoint_handlers.push(handler);
+    return function unsubscribeLifecycleCheckpoint() {
+      const index = __autojs6_lifecycle_checkpoint_handlers.indexOf(handler);
+      if (index >= 0) {
+        __autojs6_lifecycle_checkpoint_handlers.splice(index, 1);
+      }
+    };
+  }
+  function __autojs6_lifecycle_on_restore(handler, options) {
+    if (typeof handler !== "function") {
+      return Promise.reject(new TypeError("autojs6:lifecycle.onRestore requires a function."));
+    }
+    return __autojs6_lifecycle_read_checkpoint(options).then(function(record) {
+      if (!record) {
+        return null;
+      }
+      try {
+        return Promise.resolve(handler(record.checkpoint, record)).then(function() {
+          return record;
+        });
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    });
+  }
+  function __autojs6_lifecycle_read_stop_request(config) {
+    const fs = __autojs6_fs_module();
+    if (!fs || typeof fs.readFileSync !== "function") {
+      return null;
+    }
+    try {
+      const text = fs.readFileSync(config.stop.requestPath, "utf8");
+      const parsed = JSON.parse(text);
+      if (!parsed || typeof parsed !== "object") {
+        return null;
+      }
+      const id = parsed.id === undefined || parsed.id === null ? "" : String(parsed.id);
+      if (!id || id === __autojs6_lifecycle_stop_seen_id) {
+        return null;
+      }
+      __autojs6_lifecycle_stop_seen_id = id;
+      return Object.freeze({
+        id,
+        executionId: parsed.executionId === undefined || parsed.executionId === null ? "" : String(parsed.executionId),
+        reason: parsed.reason === undefined || parsed.reason === null ? "stop.requested" : String(parsed.reason),
+        requestedAtEpochMs: Number(parsed.requestedAtEpochMs) || Date.now()
+      });
+    } catch (error) {
+      if (error && (error.code === "ENOENT" || error.code === "ENOTDIR")) {
+        return null;
+      }
+      return null;
+    }
+  }
+  function __autojs6_lifecycle_dispatch_stop(request) {
+    if (__autojs6_lifecycle_stop_poll_timer) {
+      clearInterval(__autojs6_lifecycle_stop_poll_timer);
+      __autojs6_lifecycle_stop_poll_timer = null;
+    }
+    const handlers = __autojs6_lifecycle_stop_handlers.slice();
+    let chain = Promise.resolve();
+    handlers.forEach(function(handler) {
+      chain = chain.then(function() {
+        return handler(request.reason, request);
+      });
+    });
+    chain.catch(function(error) {
+      setImmediate(function() {
+        throw error;
+      });
+    });
+  }
+  function __autojs6_lifecycle_poll_stop() {
+    const config = __autojs6_lifecycle_config();
+    if (!config.stop.enabled || !config.stop.requestPath) {
+      return;
+    }
+    const request = __autojs6_lifecycle_read_stop_request(config);
+    if (request) {
+      __autojs6_lifecycle_dispatch_stop(request);
+    }
+  }
+  function __autojs6_lifecycle_start_stop_poll() {
+    const config = __autojs6_lifecycle_config();
+    if (!config.stop.enabled || !config.stop.requestPath || __autojs6_lifecycle_stop_poll_timer) {
+      return;
+    }
+    __autojs6_lifecycle_stop_poll_timer = setInterval(__autojs6_lifecycle_poll_stop, config.stop.pollIntervalMs);
+    if (__autojs6_lifecycle_stop_poll_timer && typeof __autojs6_lifecycle_stop_poll_timer.unref === "function") {
+      __autojs6_lifecycle_stop_poll_timer.unref();
+    }
+  }
+  function __autojs6_lifecycle_on_stop(handler) {
+    if (typeof handler !== "function") {
+      throw new TypeError("autojs6:lifecycle.onStop requires a function.");
+    }
+    __autojs6_lifecycle_stop_handlers.push(handler);
+    __autojs6_lifecycle_start_stop_poll();
+    return function unsubscribeLifecycleStop() {
+      const index = __autojs6_lifecycle_stop_handlers.indexOf(handler);
+      if (index >= 0) {
+        __autojs6_lifecycle_stop_handlers.splice(index, 1);
+      }
+      if (__autojs6_lifecycle_stop_handlers.length === 0 && __autojs6_lifecycle_stop_poll_timer) {
+        clearInterval(__autojs6_lifecycle_stop_poll_timer);
+        __autojs6_lifecycle_stop_poll_timer = null;
+      }
+    };
+  }
+  function __autojs6_limited_lifecycle() {
+    if (__autojs6_limited_lifecycle_cache) {
+      return __autojs6_limited_lifecycle_cache;
+    }
+    __autojs6_limited_lifecycle_cache = Object.freeze({
+      checkpoint: __autojs6_lifecycle_checkpoint,
+      readCheckpoint: __autojs6_lifecycle_read_checkpoint,
+      clearCheckpoint: __autojs6_lifecycle_clear_checkpoint,
+      onCheckpoint: __autojs6_lifecycle_on_checkpoint,
+      onRestore: __autojs6_lifecycle_on_restore,
+      onStop: __autojs6_lifecycle_on_stop,
+      policy: __autojs6_lifecycle_policy_snapshot()
+    });
+    return __autojs6_limited_lifecycle_cache;
+  }
+  function __autojs6_files_is_nullish(value) {
+    return value === undefined || value === null;
+  }
+  function __autojs6_files_text(value) {
+    return __autojs6_files_is_nullish(value) ? "" : String(value);
+  }
+  function __autojs6_files_encoding(value) {
+    if (value === undefined || value === null || value === "") {
+      return "utf8";
+    }
+    return String(value);
+  }
+  function __autojs6_files_migration_hint(error, apiName) {
+    if (!error || typeof error !== "object") {
+      return error;
+    }
+    const hint = " Migration: AutoJs6 Node files compatibility is scoped to the script workingDirectory; use relative paths under that directory or switch to require('fs')/require('path') for explicit Node code.";
+    try {
+      const message = error && error.message ? String(error.message) : String(error);
+      if (message.indexOf("Migration: AutoJs6 Node files compatibility") < 0) {
+        error.message = message + hint;
+      }
+    } catch (_) {}
+    __autojs6_define_error_property(error, "module", "files");
+    __autojs6_define_error_property(error, "api", "files." + apiName);
+    return error;
+  }
+  function __autojs6_files_call(apiName, action) {
+    try {
+      return action();
+    } catch (error) {
+      throw __autojs6_files_migration_hint(error, apiName);
+    }
+  }
+  function __autojs6_files_required_path(pathValue, apiName, argumentName) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      throw __autojs6_invalid_arg_type(
+        "files." + apiName + " " + (argumentName || "path") + " must not be nullish."
+      );
+    }
+    return String(pathValue);
+  }
+  function __autojs6_files_resolve(pathValue, apiName, options) {
+    const mergedOptions = Object.assign({ allowAbsolute: true }, options || {});
+    return __autojs6_validate_fs_path(pathValue, "files." + apiName, mergedOptions);
+  }
+  function __autojs6_files_resolve_required(pathValue, apiName, argumentName, options) {
+    return __autojs6_files_resolve(
+      __autojs6_files_required_path(pathValue, apiName, argumentName),
+      apiName,
+      options
+    );
+  }
+  function __autojs6_files_parent_directory(resolvedPath, apiName) {
+    const path = __autojs6_path_module();
+    if (!path || typeof path.dirname !== "function") {
+      throw new Error("files." + apiName + " needs allowlisted path.dirname.");
+    }
+    return path.dirname(resolvedPath);
+  }
+  function __autojs6_files_ensure_parent_directory(resolvedPath, apiName) {
+    const nodeFs = __autojs6_fs_module();
+    if (!nodeFs || typeof nodeFs.mkdirSync !== "function") {
+      throw new Error("files." + apiName + " needs allowlisted fs.mkdirSync.");
+    }
+    const parent = __autojs6_files_parent_directory(resolvedPath, apiName);
+    __autojs6_files_resolve(parent, apiName + " parent", {
+      allowAbsolute: true,
+      checkParent: true
+    });
+    if (!nodeFs.existsSync(parent)) {
+      nodeFs.mkdirSync(parent, { recursive: true });
+    }
+  }
+  function __autojs6_files_path(pathValue) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return null;
+    }
+    return __autojs6_files_call("path", function() {
+      return __autojs6_files_resolve(String(pathValue), "path", {});
+    });
+  }
+  function __autojs6_files_join() {
+    const path = __autojs6_path_module();
+    if (!path || typeof path.join !== "function") {
+      throw new Error("files.join needs allowlisted path.join.");
+    }
+    const args = Array.prototype.slice.call(arguments).map(function(value) {
+      return __autojs6_files_is_nullish(value) ? "" : String(value);
+    });
+    return path.join.apply(path, args);
+  }
+  function __autojs6_files_read(pathValue, encoding) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return "";
+    }
+    return __autojs6_files_call("read", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve(String(pathValue), "read", { mustExist: true });
+      return String(nodeFs.readFileSync(resolved, __autojs6_files_encoding(encoding)));
+    });
+  }
+  function __autojs6_files_write(pathValue, text, encoding) {
+    return __autojs6_files_call("write", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve_required(pathValue, "write", "path", {
+        checkParent: true,
+        rejectRoot: true
+      });
+      nodeFs.writeFileSync(resolved, __autojs6_files_text(text), __autojs6_files_encoding(encoding));
+    });
+  }
+  function __autojs6_files_append(pathValue, text, encoding) {
+    return __autojs6_files_call("append", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve_required(pathValue, "append", "path", {
+        checkParent: true,
+        rejectRoot: true
+      });
+      nodeFs.appendFileSync(resolved, __autojs6_files_text(text), __autojs6_files_encoding(encoding));
+    });
+  }
+  function __autojs6_files_exists(pathValue) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return false;
+    }
+    return __autojs6_files_call("exists", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve(String(pathValue), "exists", {});
+      return nodeFs.existsSync(resolved);
+    });
+  }
+  function __autojs6_files_list_dir(pathValue, filter) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return [];
+    }
+    return __autojs6_files_call("listDir", function() {
+      if (filter !== undefined && filter !== null && typeof filter !== "function") {
+        throw __autojs6_invalid_arg_type("files.listDir filter must be a function when provided.");
+      }
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve(String(pathValue), "listDir", {});
+      if (!nodeFs.existsSync(resolved)) {
+        return [];
+      }
+      const entries = nodeFs.readdirSync(resolved).map(String);
+      return typeof filter === "function"
+        ? entries.filter(function(name) { return filter(name) === true; })
+        : entries;
+    });
+  }
+  function __autojs6_files_remove(pathValue) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return false;
+    }
+    return __autojs6_files_call("remove", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve(String(pathValue), "remove", { rejectRoot: true });
+      if (!nodeFs.existsSync(resolved)) {
+        return false;
+      }
+      const lstat = nodeFs.lstatSync(resolved);
+      if (lstat && typeof lstat.isDirectory === "function" && lstat.isDirectory()) {
+        nodeFs.rmdirSync(resolved);
+      } else {
+        nodeFs.unlinkSync(resolved);
+      }
+      return !nodeFs.existsSync(resolved);
+    });
+  }
+  function __autojs6_files_copy(sourcePath, destinationPath) {
+    return __autojs6_files_call("copy", function() {
+      const nodeFs = __autojs6_fs_module();
+      const source = __autojs6_files_resolve_required(sourcePath, "copy source", "pathFrom", {});
+      const destination = __autojs6_files_resolve_required(destinationPath, "copy destination", "pathTo", {
+        checkParent: true,
+        rejectRoot: true
+      });
+      if (!nodeFs.existsSync(source)) {
+        return false;
+      }
+      const sourceStat = nodeFs.statSync(source);
+      if (!sourceStat || typeof sourceStat.isFile !== "function" || !sourceStat.isFile()) {
+        return false;
+      }
+      __autojs6_files_ensure_parent_directory(destination, "copy");
+      nodeFs.copyFileSync(source, destination);
+      return true;
+    });
+  }
+  function __autojs6_files_move(sourcePath, destinationPath) {
+    return __autojs6_files_call("move", function() {
+      const nodeFs = __autojs6_fs_module();
+      const source = __autojs6_files_resolve_required(sourcePath, "move source", "path", {});
+      const destination = __autojs6_files_resolve_required(destinationPath, "move destination", "newPath", {
+        checkParent: true,
+        rejectRoot: true
+      });
+      if (!nodeFs.existsSync(source)) {
+        return false;
+      }
+      try {
+        nodeFs.renameSync(source, destination);
+        return true;
+      } catch (error) {
+        if (error && error.code === "ENOENT") {
+          return false;
+        }
+        throw error;
+      }
+    });
+  }
+  function __autojs6_files_ensure_dir(pathValue) {
+    return __autojs6_files_call("ensureDir", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve_required(pathValue, "ensureDir", "path", {
+        checkParent: true,
+        rejectRoot: true
+      });
+      const text = String(pathValue);
+      const target = /[\\\/]$/.test(text)
+        ? resolved
+        : __autojs6_files_parent_directory(resolved, "ensureDir");
+      __autojs6_files_resolve(target, "ensureDir target", {
+        allowAbsolute: true,
+        checkParent: true,
+        rejectRoot: true
+      });
+      if (!nodeFs.existsSync(target)) {
+        nodeFs.mkdirSync(target, { recursive: true });
+      }
+      return nodeFs.existsSync(target);
+    });
+  }
+  function __autojs6_files_stat_boolean(pathValue, apiName, predicateName) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return false;
+    }
+    return __autojs6_files_call(apiName, function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve(String(pathValue), apiName, {});
+      if (!nodeFs.existsSync(resolved)) {
+        return false;
+      }
+      const stat = nodeFs.statSync(resolved);
+      return !!(stat && typeof stat[predicateName] === "function" && stat[predicateName]());
+    });
+  }
+  function __autojs6_limited_files() {
+    if (__autojs6_limited_files_cache) {
+      return __autojs6_limited_files_cache;
+    }
+    const path = __autojs6_path_module();
+    if (!path || typeof path.basename !== "function" || typeof path.extname !== "function") {
+      throw new Error("require('files') needs the allowlisted path module.");
+    }
+    const filesModule = Object.freeze({
+      path: __autojs6_files_path,
+      join: __autojs6_files_join,
+      read: __autojs6_files_read,
+      write: __autojs6_files_write,
+      append: __autojs6_files_append,
+      exists: __autojs6_files_exists,
+      listDir: __autojs6_files_list_dir,
+      remove: __autojs6_files_remove,
+      copy: __autojs6_files_copy,
+      move: __autojs6_files_move,
+      ensureDir: __autojs6_files_ensure_dir,
+      isFile: function(pathValue) {
+        return __autojs6_files_stat_boolean(pathValue, "isFile", "isFile");
+      },
+      isDir: function(pathValue) {
+        return __autojs6_files_stat_boolean(pathValue, "isDir", "isDirectory");
+      },
+      getName: function(pathValue) {
+        return path.basename(__autojs6_files_required_path(pathValue, "getName", "filePath"));
+      },
+      getExtension: function(fileName) {
+        const ext = path.extname(__autojs6_files_required_path(fileName, "getExtension", "fileName"));
+        return ext.charAt(0) === "." ? ext.slice(1) : ext;
+      },
+      open: function() {
+        throw __autojs6_rhino_compat_unsupported(
+          "files.open",
+          "The Rhino PFileInterface is not exposed in Node; use require('fs') scoped file handles instead."
+        );
+      },
+      toFile: function() {
+        throw __autojs6_rhino_compat_blocked_by_design(
+          "files.toFile",
+          "Returning a raw java.io.File object would cross the Safe Node Profile boundary."
+        );
+      }
+    });
+    __autojs6_limited_files_cache = filesModule;
+    return __autojs6_limited_files_cache;
+  }
+  function __autojs6_buffer_constructor_required(apiName) {
+    const BufferCtor = __autojs6_buffer_constructor();
+    if (!BufferCtor || typeof BufferCtor.from !== "function") {
+      throw new Error("autojs6:compat " + apiName + " requires Buffer support.");
+    }
+    return BufferCtor;
+  }
+  function __autojs6_base64_encoding(encoding) {
+    if (encoding === undefined || encoding === null || encoding === "") {
+      return "utf8";
+    }
+    const raw = String(encoding).trim();
+    const normalized = raw.toLowerCase().replace(/\W+/g, "");
+    const aliases = Object.freeze({
+      utf8: "utf8",
+      utf: "utf8",
+      unicode: "utf8",
+      utf16: "utf16le",
+      utf16le: "utf16le",
+      ucs2: "ucs2",
+      latin1: "latin1",
+      binary: "latin1",
+      ascii: "ascii",
+      hex: "hex",
+      base64: "base64",
+      base64url: "base64url"
+    });
+    const candidate = aliases[normalized] || raw;
+    const BufferCtor = __autojs6_buffer_constructor_required("base64");
+    return typeof BufferCtor.isEncoding === "function" && BufferCtor.isEncoding(candidate)
+      ? candidate
+      : "utf8";
+  }
+  function __autojs6_base64_to_buffer(value, encoding, apiName) {
+    if (value === undefined || value === null) {
+      throw __autojs6_invalid_arg_type("autojs6:compat " + apiName + " value must not be nullish.");
+    }
+    const BufferCtor = __autojs6_buffer_constructor_required(apiName);
+    if (typeof BufferCtor.isBuffer === "function" && BufferCtor.isBuffer(value)) {
+      return BufferCtor.from(value);
+    }
+    if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) {
+      return BufferCtor.from(value);
+    }
+    if (typeof ArrayBuffer === "function" && ArrayBuffer.isView && ArrayBuffer.isView(value)) {
+      return BufferCtor.from(value.buffer, value.byteOffset, value.byteLength);
+    }
+    if (Array.isArray(value)) {
+      return BufferCtor.from(value);
+    }
+    return BufferCtor.from(String(value), encoding || "utf8");
+  }
+  function __autojs6_limited_base64() {
+    if (__autojs6_limited_base64_cache) {
+      return __autojs6_limited_base64_cache;
+    }
+    __autojs6_limited_base64_cache = Object.freeze({
+      encode: function(value, encoding) {
+        return __autojs6_base64_to_buffer(value, __autojs6_base64_encoding(encoding), "base64.encode").toString("base64");
+      },
+      decode: function(value, encoding) {
+        const textEncoding = __autojs6_base64_encoding(encoding);
+        return __autojs6_base64_to_buffer(value, "base64", "base64.decode").toString(textEncoding);
+      }
+    });
+    return __autojs6_limited_base64_cache;
+  }
+  const __autojs6_color_names = Object.freeze({
+    black: 0xff000000,
+    white: 0xffffffff,
+    red: 0xffff0000,
+    green: 0xff00ff00,
+    blue: 0xff0000ff,
+    yellow: 0xffffff00,
+    cyan: 0xff00ffff,
+    magenta: 0xffff00ff,
+    transparent: 0x00000000,
+    gray: 0xff808080,
+    grey: 0xff808080
+  });
+  function __autojs6_color_byte(value, name) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+      throw __autojs6_invalid_arg_type("colors." + name + " component must be a finite number.");
+    }
+    const scaled = number >= 0 && number <= 1 && !Number.isInteger(number)
+      ? number * 255
+      : number;
+    return Math.max(0, Math.min(255, Math.round(scaled)));
+  }
+  function __autojs6_color_component(value, shift) {
+    return (__autojs6_color_uint(value) >>> shift) & 0xff;
+  }
+  function __autojs6_color_int(value) {
+    return (__autojs6_color_uint(value) | 0);
+  }
+  function __autojs6_color_uint(value) {
+    if (typeof value === "number") {
+      return value >>> 0;
+    }
+    if (typeof value === "bigint") {
+      return Number(value & 0xffffffffn) >>> 0;
+    }
+    if (typeof value === "string") {
+      const text = value.trim();
+      const named = __autojs6_color_names[text.toLowerCase()];
+      if (named !== undefined) {
+        return named >>> 0;
+      }
+      const hex = text.charAt(0) === "#" ? text.slice(1) : text;
+      if (/^[0-9a-f]{3}$/i.test(hex)) {
+        const r = parseInt(hex.charAt(0) + hex.charAt(0), 16);
+        const g = parseInt(hex.charAt(1) + hex.charAt(1), 16);
+        const b = parseInt(hex.charAt(2) + hex.charAt(2), 16);
+        return __autojs6_color_argb_uint(255, r, g, b);
+      }
+      if (/^[0-9a-f]{4}$/i.test(hex)) {
+        const a = parseInt(hex.charAt(0) + hex.charAt(0), 16);
+        const r = parseInt(hex.charAt(1) + hex.charAt(1), 16);
+        const g = parseInt(hex.charAt(2) + hex.charAt(2), 16);
+        const b = parseInt(hex.charAt(3) + hex.charAt(3), 16);
+        return __autojs6_color_argb_uint(a, r, g, b);
+      }
+      if (/^[0-9a-f]{6}$/i.test(hex)) {
+        return (0xff000000 | parseInt(hex, 16)) >>> 0;
+      }
+      if (/^[0-9a-f]{8}$/i.test(hex)) {
+        return parseInt(hex, 16) >>> 0;
+      }
+    }
+    if (value && typeof value === "object") {
+      if (typeof value.color === "number") {
+        return value.color >>> 0;
+      }
+      if ("a" in value || "r" in value || "g" in value || "b" in value) {
+        return __autojs6_color_argb_uint(
+          value.a === undefined ? 255 : value.a,
+          value.r === undefined ? 0 : value.r,
+          value.g === undefined ? 0 : value.g,
+          value.b === undefined ? 0 : value.b
+        );
+      }
+    }
+    throw __autojs6_invalid_arg_type("colors value cannot be converted to an ARGB integer.");
+  }
+  function __autojs6_color_argb_uint(a, r, g, b) {
+    return (
+      (__autojs6_color_byte(a, "argb") << 24) |
+      (__autojs6_color_byte(r, "argb") << 16) |
+      (__autojs6_color_byte(g, "argb") << 8) |
+      __autojs6_color_byte(b, "argb")
+    ) >>> 0;
+  }
+  function __autojs6_color_hex_pair(value) {
+    return value.toString(16).padStart(2, "0");
+  }
+  function __autojs6_color_to_full_hex(value) {
+    const color = __autojs6_color_uint(value);
+    return "#" +
+      __autojs6_color_hex_pair((color >>> 24) & 0xff) +
+      __autojs6_color_hex_pair((color >>> 16) & 0xff) +
+      __autojs6_color_hex_pair((color >>> 8) & 0xff) +
+      __autojs6_color_hex_pair(color & 0xff);
+  }
+  function __autojs6_color_to_hex(value, alphaOrLength) {
+    const color = __autojs6_color_uint(value);
+    const includeAlpha = alphaOrLength === true || Number(alphaOrLength) === 8;
+    const body = __autojs6_color_hex_pair((color >>> 16) & 0xff) +
+      __autojs6_color_hex_pair((color >>> 8) & 0xff) +
+      __autojs6_color_hex_pair(color & 0xff);
+    return includeAlpha ? "#" + __autojs6_color_hex_pair((color >>> 24) & 0xff) + body : "#" + body;
+  }
+  function __autojs6_color_set_component(value, shift, component) {
+    const color = __autojs6_color_uint(value);
+    const mask = ~(0xff << shift);
+    return (((color & mask) | (__autojs6_color_byte(component, "setComponent") << shift)) >>> 0) | 0;
+  }
+  function __autojs6_color_remove_component(value, shift) {
+    return __autojs6_color_set_component(value, shift, 0);
+  }
+  function __autojs6_color_round_alpha(value, keepTrailingZero) {
+    const rounded = Math.round(value * 1000) / 1000;
+    if (rounded === 1 && keepTrailingZero !== false) {
+      return "1.0";
+    }
+    return String(rounded).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+  }
+  function __autojs6_color_rgb_array(value) {
+    return [
+      __autojs6_color_component(value, 16),
+      __autojs6_color_component(value, 8),
+      __autojs6_color_component(value, 0)
+    ];
+  }
+  function __autojs6_color_argb_array(value) {
+    return [
+      __autojs6_color_component(value, 24),
+      __autojs6_color_component(value, 16),
+      __autojs6_color_component(value, 8),
+      __autojs6_color_component(value, 0)
+    ];
+  }
+  function __autojs6_color_rgb_to_hsv(r, g, b) {
+    const rn = __autojs6_color_byte(r, "hsv") / 255;
+    const gn = __autojs6_color_byte(g, "hsv") / 255;
+    const bn = __autojs6_color_byte(b, "hsv") / 255;
+    const max = Math.max(rn, gn, bn);
+    const min = Math.min(rn, gn, bn);
+    const delta = max - min;
+    let hue = 0;
+    if (delta !== 0) {
+      if (max === rn) {
+        hue = 60 * (((gn - bn) / delta) % 6);
+      } else if (max === gn) {
+        hue = 60 * (((bn - rn) / delta) + 2);
+      } else {
+        hue = 60 * (((rn - gn) / delta) + 4);
+      }
+    }
+    if (hue < 0) hue += 360;
+    const saturation = max === 0 ? 0 : delta / max;
+    return [hue, saturation, max];
+  }
+  function __autojs6_color_hsv_to_rgb(h, s, v) {
+    const hue = ((((Number(h) || 0) % 360) + 360) % 360) / 60;
+    const saturation = Math.max(0, Math.min(1, Number(s) > 1 ? Number(s) / 100 : Number(s) || 0));
+    const value = Math.max(0, Math.min(1, Number(v) > 1 ? Number(v) / 100 : Number(v) || 0));
+    const c = value * saturation;
+    const x = c * (1 - Math.abs((hue % 2) - 1));
+    const m = value - c;
+    let rgb;
+    if (hue < 1) rgb = [c, x, 0];
+    else if (hue < 2) rgb = [x, c, 0];
+    else if (hue < 3) rgb = [0, c, x];
+    else if (hue < 4) rgb = [0, x, c];
+    else if (hue < 5) rgb = [x, 0, c];
+    else rgb = [c, 0, x];
+    return rgb.map(function(part) { return Math.round((part + m) * 255); });
+  }
+  function __autojs6_color_rgb_to_hsl(r, g, b) {
+    const rn = __autojs6_color_byte(r, "hsl") / 255;
+    const gn = __autojs6_color_byte(g, "hsl") / 255;
+    const bn = __autojs6_color_byte(b, "hsl") / 255;
+    const max = Math.max(rn, gn, bn);
+    const min = Math.min(rn, gn, bn);
+    const delta = max - min;
+    const lightness = (max + min) / 2;
+    let hue = 0;
+    let saturation = 0;
+    if (delta !== 0) {
+      saturation = delta / (1 - Math.abs(2 * lightness - 1));
+      if (max === rn) {
+        hue = 60 * (((gn - bn) / delta) % 6);
+      } else if (max === gn) {
+        hue = 60 * (((bn - rn) / delta) + 2);
+      } else {
+        hue = 60 * (((rn - gn) / delta) + 4);
+      }
+    }
+    if (hue < 0) hue += 360;
+    return [hue, saturation, lightness];
+  }
+  function __autojs6_color_hsl_to_rgb(h, s, l) {
+    const hue = ((((Number(h) || 0) % 360) + 360) % 360);
+    const saturation = Math.max(0, Math.min(1, Number(s) > 1 ? Number(s) / 100 : Number(s) || 0));
+    const lightness = Math.max(0, Math.min(1, Number(l) > 1 ? Number(l) / 100 : Number(l) || 0));
+    const c = (1 - Math.abs(2 * lightness - 1)) * saturation;
+    const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
+    const m = lightness - c / 2;
+    let rgb;
+    if (hue < 60) rgb = [c, x, 0];
+    else if (hue < 120) rgb = [x, c, 0];
+    else if (hue < 180) rgb = [0, c, x];
+    else if (hue < 240) rgb = [0, x, c];
+    else if (hue < 300) rgb = [x, 0, c];
+    else rgb = [c, 0, x];
+    return rgb.map(function(part) { return Math.round((part + m) * 255); });
+  }
+  function __autojs6_limited_colors() {
+    if (__autojs6_limited_colors_cache) {
+      return __autojs6_limited_colors_cache;
+    }
+    const colorsModule = {
+      toInt: __autojs6_color_int,
+      toHex: __autojs6_color_to_hex,
+      toFullHex: __autojs6_color_to_full_hex,
+      toString: __autojs6_color_to_hex,
+      alpha: function(value, options) {
+        const alpha = __autojs6_color_component(value, 24);
+        return options && Number(options.max) === 1 ? alpha / 255 : alpha;
+      },
+      getAlpha: function(value, options) { return colorsModule.alpha(value, options); },
+      alphaDouble: function(value) { return __autojs6_color_component(value, 24) / 255; },
+      getAlphaDouble: function(value) { return colorsModule.alphaDouble(value); },
+      setAlpha: function(value, alpha) { return __autojs6_color_set_component(value, 24, alpha); },
+      setAlphaRelative: function(value, percentage) { return colorsModule.setAlpha(value, colorsModule.alpha(value) * Number(percentage)); },
+      removeAlpha: function(value) { return __autojs6_color_remove_component(value, 24); },
+      red: function(value, options) {
+        const red = __autojs6_color_component(value, 16);
+        return options && Number(options.max) === 1 ? red / 255 : red;
+      },
+      getRed: function(value, options) { return colorsModule.red(value, options); },
+      redDouble: function(value) { return __autojs6_color_component(value, 16) / 255; },
+      getRedDouble: function(value) { return colorsModule.redDouble(value); },
+      setRed: function(value, red) { return __autojs6_color_set_component(value, 16, red); },
+      setRedRelative: function(value, percentage) { return colorsModule.setRed(value, colorsModule.red(value) * Number(percentage)); },
+      removeRed: function(value) { return __autojs6_color_remove_component(value, 16); },
+      green: function(value, options) {
+        const green = __autojs6_color_component(value, 8);
+        return options && Number(options.max) === 1 ? green / 255 : green;
+      },
+      getGreen: function(value, options) { return colorsModule.green(value, options); },
+      greenDouble: function(value) { return __autojs6_color_component(value, 8) / 255; },
+      getGreenDouble: function(value) { return colorsModule.greenDouble(value); },
+      setGreen: function(value, green) { return __autojs6_color_set_component(value, 8, green); },
+      setGreenRelative: function(value, percentage) { return colorsModule.setGreen(value, colorsModule.green(value) * Number(percentage)); },
+      removeGreen: function(value) { return __autojs6_color_remove_component(value, 8); },
+      blue: function(value, options) {
+        const blue = __autojs6_color_component(value, 0);
+        return options && Number(options.max) === 1 ? blue / 255 : blue;
+      },
+      getBlue: function(value, options) { return colorsModule.blue(value, options); },
+      blueDouble: function(value) { return __autojs6_color_component(value, 0) / 255; },
+      getBlueDouble: function(value) { return colorsModule.blueDouble(value); },
+      setBlue: function(value, blue) { return __autojs6_color_set_component(value, 0, blue); },
+      setBlueRelative: function(value, percentage) { return colorsModule.setBlue(value, colorsModule.blue(value) * Number(percentage)); },
+      removeBlue: function(value) { return __autojs6_color_remove_component(value, 0); },
+      argb: function(a, r, g, b) { return __autojs6_color_argb_uint(a, r, g, b) | 0; },
+      rgb: function(r, g, b) { return __autojs6_color_argb_uint(255, r, g, b) | 0; },
+      rgba: function(r, g, b, a) { return __autojs6_color_argb_uint(a === undefined ? 255 : a, r, g, b) | 0; },
+      hsv: function(h, s, v) {
+        const rgb = __autojs6_color_hsv_to_rgb(h, s, v);
+        return __autojs6_color_argb_uint(255, rgb[0], rgb[1], rgb[2]) | 0;
+      },
+      hsva: function(h, s, v, a) {
+        const rgb = __autojs6_color_hsv_to_rgb(h, s, v);
+        return __autojs6_color_argb_uint(a === undefined ? 255 : a, rgb[0], rgb[1], rgb[2]) | 0;
+      },
+      hsl: function(h, s, l) {
+        const rgb = __autojs6_color_hsl_to_rgb(h, s, l);
+        return __autojs6_color_argb_uint(255, rgb[0], rgb[1], rgb[2]) | 0;
+      },
+      hsla: function(h, s, l, a) {
+        const rgb = __autojs6_color_hsl_to_rgb(h, s, l);
+        return __autojs6_color_argb_uint(a === undefined ? 255 : a, rgb[0], rgb[1], rgb[2]) | 0;
+      },
+      toRgb: function(value) { return Object.freeze(__autojs6_color_rgb_array(value)); },
+      toRgba: function(value) { return Object.freeze(__autojs6_color_rgb_array(value).concat([colorsModule.alphaDouble(value)])); },
+      toArgb: function(value) { return Object.freeze(__autojs6_color_argb_array(value)); },
+      toHsv: function(value) {
+        const rgb = __autojs6_color_rgb_array(value);
+        return Object.freeze(__autojs6_color_rgb_to_hsv(rgb[0], rgb[1], rgb[2]));
+      },
+      toHsva: function(value) { return Object.freeze(colorsModule.toHsv(value).concat([colorsModule.alphaDouble(value)])); },
+      toHsl: function(value) {
+        const rgb = __autojs6_color_rgb_array(value);
+        return Object.freeze(__autojs6_color_rgb_to_hsl(rgb[0], rgb[1], rgb[2]));
+      },
+      toHsla: function(value) { return Object.freeze(colorsModule.toHsl(value).concat([colorsModule.alphaDouble(value)])); },
+      toRgbString: function(value) { return "rgb(" + __autojs6_color_rgb_array(value).join(", ") + ")"; },
+      toRgbaString: function(value, options) {
+        return "rgba(" + __autojs6_color_rgb_array(value).join(", ") + ", " + __autojs6_color_round_alpha(colorsModule.alphaDouble(value), options && options.keepTrailingZeroForFullAlpha) + ")";
+      },
+      toArgbString: function(value, options) {
+        const argb = __autojs6_color_argb_array(value);
+        return "argb(" + __autojs6_color_round_alpha(argb[0] / 255, options && options.keepTrailingZeroForFullAlpha) + ", " + argb.slice(1).join(", ") + ")";
+      },
+      toHsvString: function(value) {
+        const hsv = colorsModule.toHsv(value);
+        return "hsv(" + Math.round(hsv[0] * 1000) / 1000 + ", " + Math.round(hsv[1] * 1000) / 1000 + ", " + Math.round(hsv[2] * 1000) / 1000 + ")";
+      },
+      toHsvaString: function(value) {
+        const hsva = colorsModule.toHsva(value);
+        return "hsva(" + Math.round(hsva[0] * 1000) / 1000 + ", " + Math.round(hsva[1] * 1000) / 1000 + ", " + Math.round(hsva[2] * 1000) / 1000 + ", " + __autojs6_color_round_alpha(hsva[3], true) + ")";
+      },
+      toHslString: function(value) {
+        const hsl = colorsModule.toHsl(value);
+        return "hsl(" + Math.round(hsl[0] * 1000) / 1000 + ", " + Math.round(hsl[1] * 1000) / 1000 + ", " + Math.round(hsl[2] * 1000) / 1000 + ")";
+      },
+      toHslaString: function(value) {
+        const hsla = colorsModule.toHsla(value);
+        return "hsla(" + Math.round(hsla[0] * 1000) / 1000 + ", " + Math.round(hsla[1] * 1000) / 1000 + ", " + Math.round(hsla[2] * 1000) / 1000 + ", " + __autojs6_color_round_alpha(hsla[3], true) + ")";
+      },
+      isEqual: function(left, right) { return __autojs6_color_uint(left) === __autojs6_color_uint(right); },
+      isSimilar: function(left, right, threshold) {
+        const max = threshold === undefined || threshold === null ? 4 : Number(threshold);
+        return Math.abs(colorsModule.red(left) - colorsModule.red(right)) <= max &&
+          Math.abs(colorsModule.green(left) - colorsModule.green(right)) <= max &&
+          Math.abs(colorsModule.blue(left) - colorsModule.blue(right)) <= max &&
+          Math.abs(colorsModule.alpha(left) - colorsModule.alpha(right)) <= max;
+      },
+      luminance: function(value) {
+        const rgb = __autojs6_color_rgb_array(value).map(function(part) {
+          const normalized = part / 255;
+          return normalized <= 0.03928 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+      },
+      build: function() { return colorsModule.argb.apply(colorsModule, arguments); },
+      summary: function(value) {
+        const color = __autojs6_color_int(value);
+        return "Color { " + colorsModule.toHex(color) + " | " + colorsModule.toRgbaString(color) + " | int(" + color + ") }";
+      },
+      toColorStateList: function() {
+        throw __autojs6_rhino_compat_blocked_by_design("colors.toColorStateList", "ColorStateList is an Android object and is not exposed in the Safe Node Profile.");
+      },
+      setPaintColor: function() {
+        throw __autojs6_rhino_compat_blocked_by_design("colors.setPaintColor", "Paint is an Android object and is not exposed in the Safe Node Profile.");
+      }
+    };
+    Object.defineProperty(colorsModule, "all", { value: __autojs6_color_names, enumerable: true });
+    Object.defineProperty(colorsModule, "themeColor", {
+      enumerable: true,
+      get: function() {
+        throw __autojs6_rhino_compat_blocked_by_design("colors.themeColor", "ThemeColor is an Android theme object and is not exposed in the Safe Node Profile.");
+      }
+    });
+    __autojs6_limited_colors_cache = Object.freeze(colorsModule);
+    return __autojs6_limited_colors_cache;
+  }
+  const __autojs6_bytes_constants = Object.freeze({
+    UNITS: "KMGTPEZYRQ",
+    AUTO: "AUTO",
+    IEC_DIV: 1024,
+    SI_DIV: 1000
+  });
+  function __autojs6_bytes_unit(unit, strict) {
+    const text = unit === undefined || unit === null || unit === "" ? "B" : String(unit).trim().toUpperCase();
+    if (text === __autojs6_bytes_constants.AUTO) {
+      return { auto: true, base: __autojs6_bytes_constants.IEC_DIV, exp: -1, label: __autojs6_bytes_constants.AUTO };
+    }
+    const normalized = strict ? text : text.replace(/I(?=B$)/, "");
+    const coreRaw = normalized.endsWith("B") ? normalized.slice(0, -1) : normalized;
+    const isIec = strict && coreRaw.endsWith("I");
+    const core = isIec ? coreRaw.slice(0, -1) : coreRaw;
+    if (core === "") {
+      return { auto: false, base: strict && !isIec ? __autojs6_bytes_constants.SI_DIV : __autojs6_bytes_constants.IEC_DIV, exp: 0, label: "B", iec: isIec };
+    }
+    const index = __autojs6_bytes_constants.UNITS.indexOf(core);
+    if (index < 0) {
+      throw __autojs6_invalid_arg_type("bytes unit is invalid: " + unit);
+    }
+    return {
+      auto: false,
+      base: strict && !isIec ? __autojs6_bytes_constants.SI_DIV : __autojs6_bytes_constants.IEC_DIV,
+      exp: index + 1,
+      label: core + (strict && isIec ? "iB" : "B"),
+      iec: isIec
+    };
+  }
+  function __autojs6_bytes_options(args, mode, tough) {
+    const options = {
+      source: args[0],
+      fromUnit: undefined,
+      toUnit: __autojs6_bytes_constants.AUTO,
+      fractionDigits: 2,
+      useIecIdentifier: undefined,
+      useSpace: true,
+      trimTrailingZero: false,
+      autoCarryThreshold: __autojs6_bytes_constants.IEC_DIV,
+      strict: tough === "strict"
+    };
+    if (tough === "loose") {
+      options.strict = false;
+    }
+    function merge(object) {
+      if (!object || typeof object !== "object" || Array.isArray(object)) return;
+      Object.keys(object).forEach(function(key) {
+        if (Object.prototype.hasOwnProperty.call(options, key)) {
+          options[key] = object[key];
+        }
+      });
+    }
+    if (args.length >= 2) {
+      const second = args[1];
+      if (second && typeof second === "object" && !Array.isArray(second)) {
+        merge(second);
+      } else if (typeof second === "string") {
+        options.toUnit = second;
+      } else if (typeof second === "number") {
+        options.fractionDigits = second;
+      } else if (typeof second === "boolean" && mode === "format") {
+        options.useIecIdentifier = second;
+      }
+    }
+    if (args.length >= 3) {
+      const second = args[1];
+      const third = args[2];
+      if (typeof second === "string" && typeof third === "string") {
+        options.fromUnit = second;
+        options.toUnit = third;
+      } else if (third && typeof third === "object" && !Array.isArray(third)) {
+        if (typeof second === "string") {
+          options.toUnit = second;
+        }
+        merge(third);
+      } else if (typeof third === "number") {
+        if (typeof second === "string") options.toUnit = second;
+        options.fractionDigits = third;
+      } else if (typeof third === "boolean" && mode === "format") {
+        if (typeof second === "string") options.toUnit = second;
+        options.useIecIdentifier = third;
+      }
+    }
+    if (args.length >= 4) {
+      options.fromUnit = args[1];
+      options.toUnit = args[2];
+      const fourth = args[3];
+      if (fourth && typeof fourth === "object" && !Array.isArray(fourth)) {
+        merge(fourth);
+      } else if (typeof fourth === "number") {
+        options.fractionDigits = fourth;
+      } else if (typeof fourth === "boolean" && mode === "format") {
+        options.useIecIdentifier = fourth;
+      }
+    }
+    if (tough === "strict") options.strict = true;
+    if (tough === "loose") options.strict = false;
+    options.fractionDigits = Math.max(0, Math.floor(Number(options.fractionDigits) || 0));
+    options.autoCarryThreshold = Math.max(1, Number(options.autoCarryThreshold) || __autojs6_bytes_constants.IEC_DIV);
+    options.useSpace = options.useSpace !== false;
+    options.trimTrailingZero = options.trimTrailingZero === true;
+    return options;
+  }
+  function __autojs6_bytes_parse_source(source, fromUnit, strict) {
+    let value;
+    let parsedUnit = "";
+    if (typeof source === "number" || typeof source === "bigint") {
+      value = Number(source);
+    } else {
+      const match = /^(\d+(?:\.\d+)?)\s*([A-Za-z]*)$/.exec(String(source === undefined || source === null ? 0 : source).trim());
+      if (!match) {
+        throw __autojs6_invalid_arg_type("bytes source is invalid: " + source);
+      }
+      value = Number(match[1]);
+      parsedUnit = match[2] || "";
+    }
+    if (!Number.isFinite(value) || value < 0) {
+      throw __autojs6_invalid_arg_type("bytes source must be a non-negative finite number.");
+    }
+    const incoming = fromUnit === undefined || fromUnit === null || fromUnit === "" ? "" : String(fromUnit);
+    const normalizedIncoming = strict ? incoming.trim() : incoming.trim().toUpperCase().replace(/I(?=B$)/, "");
+    const normalizedParsed = strict ? parsedUnit.trim() : parsedUnit.trim().toUpperCase().replace(/I(?=B$)/, "");
+    let unit = normalizedIncoming || normalizedParsed || "B";
+    if (normalizedIncoming && normalizedParsed && normalizedIncoming.toUpperCase() !== normalizedParsed.toUpperCase()) {
+      throw __autojs6_invalid_arg_type("bytes source has ambiguous units.");
+    }
+    unit = unit.toUpperCase();
+    return { value: value, unit: unit };
+  }
+  function __autojs6_bytes_value(options) {
+    const parsed = __autojs6_bytes_parse_source(options.source, options.fromUnit, options.strict);
+    const from = __autojs6_bytes_unit(parsed.unit, options.strict);
+    return parsed.value * Math.pow(from.base, from.exp);
+  }
+  function __autojs6_bytes_pick_auto(bytes, strict, threshold) {
+    const base = __autojs6_bytes_constants.IEC_DIV;
+    let exp = 0;
+    for (let index = 1; index <= __autojs6_bytes_constants.UNITS.length; index += 1) {
+      if (bytes >= Math.pow(base, index)) {
+        exp = index;
+      } else {
+        break;
+      }
+    }
+    if (exp > 0 && bytes / Math.pow(base, exp) >= threshold && exp < __autojs6_bytes_constants.UNITS.length) {
+      exp += 1;
+    }
+    const core = exp === 0 ? "" : __autojs6_bytes_constants.UNITS.charAt(exp - 1);
+    return { exp: exp, base: base, label: core ? core + (strict ? "iB" : "B") : "B" };
+  }
+  function __autojs6_bytes_number(args, tough) {
+    const options = __autojs6_bytes_options(args, "number", tough);
+    const bytes = __autojs6_bytes_value(options);
+    const target = String(options.toUnit || __autojs6_bytes_constants.AUTO).toUpperCase() === __autojs6_bytes_constants.AUTO
+      ? __autojs6_bytes_pick_auto(bytes, options.strict, options.autoCarryThreshold)
+      : __autojs6_bytes_unit(options.toUnit, options.strict);
+    const divisor = Math.pow(target.base, target.exp);
+    const value = target.exp === 0 ? bytes : bytes / divisor;
+    const scale = Math.pow(10, options.fractionDigits);
+    return Math.round(value * scale) / scale;
+  }
+  function __autojs6_bytes_string(args, tough) {
+    const options = __autojs6_bytes_options(args, "format", tough);
+    const bytes = __autojs6_bytes_value(options);
+    const target = String(options.toUnit || __autojs6_bytes_constants.AUTO).toUpperCase() === __autojs6_bytes_constants.AUTO
+      ? __autojs6_bytes_pick_auto(bytes, options.strict, options.autoCarryThreshold)
+      : __autojs6_bytes_unit(options.toUnit, options.strict);
+    const value = target.exp === 0 ? bytes : bytes / Math.pow(target.base, target.exp);
+    let text = value.toFixed(options.fractionDigits);
+    if (options.trimTrailingZero) {
+      text = text.replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+    }
+    let label = target.label;
+    if (!options.strict && options.useIecIdentifier === true && label !== "B" && label.indexOf("iB") < 0) {
+      label = label.replace(/B$/, "iB");
+    }
+    if (!options.strict && options.useIecIdentifier === false && label.indexOf("iB") >= 0) {
+      label = label.replace(/iB$/, "B");
+    }
+    return text + (options.useSpace ? " " : "") + label;
+  }
+  function __autojs6_limited_formatter() {
+    if (__autojs6_limited_formatter_cache) {
+      return __autojs6_limited_formatter_cache;
+    }
+    const bytes = function() {
+      return __autojs6_bytes_string(Array.prototype.slice.call(arguments), "none");
+    };
+    Object.defineProperties(bytes, {
+      UNITS: { value: __autojs6_bytes_constants.UNITS, enumerable: true },
+      AUTO: { value: __autojs6_bytes_constants.AUTO, enumerable: true },
+      IEC_DIV: { value: __autojs6_bytes_constants.IEC_DIV, enumerable: true },
+      SI_DIV: { value: __autojs6_bytes_constants.SI_DIV, enumerable: true },
+      strict: { value: function() { return __autojs6_bytes_string(Array.prototype.slice.call(arguments), "strict"); }, enumerable: true },
+      loose: { value: function() { return __autojs6_bytes_string(Array.prototype.slice.call(arguments), "loose"); }, enumerable: true }
+    });
+    __autojs6_limited_formatter_cache = Object.freeze({ bytes: Object.freeze(bytes) });
+    return __autojs6_limited_formatter_cache;
+  }
+  function __autojs6_limited_converter() {
+    if (__autojs6_limited_converter_cache) {
+      return __autojs6_limited_converter_cache;
+    }
+    const bytes = function() {
+      return __autojs6_bytes_number(Array.prototype.slice.call(arguments), "none");
+    };
+    Object.defineProperties(bytes, {
+      UNITS: { value: __autojs6_bytes_constants.UNITS, enumerable: true },
+      AUTO: { value: __autojs6_bytes_constants.AUTO, enumerable: true },
+      IEC_DIV: { value: __autojs6_bytes_constants.IEC_DIV, enumerable: true },
+      SI_DIV: { value: __autojs6_bytes_constants.SI_DIV, enumerable: true },
+      strict: { value: function() { return __autojs6_bytes_number(Array.prototype.slice.call(arguments), "strict"); }, enumerable: true },
+      loose: { value: function() { return __autojs6_bytes_number(Array.prototype.slice.call(arguments), "loose"); }, enumerable: true }
+    });
+    __autojs6_limited_converter_cache = Object.freeze({ bytes: Object.freeze(bytes) });
+    return __autojs6_limited_converter_cache;
+  }
+  function __autojs6_s13n_unsupported(methodName) {
+    throw __autojs6_rhino_compat_unsupported(
+      "s13n." + methodName,
+      "P12-32 promotes only s13n.bytes in Node; this s13n helper is deferred until a JSON-safe contract exists."
+    );
+  }
+  function __autojs6_s13n_bytes() {
+    const args = Array.prototype.slice.call(arguments);
+    if (args.length < 1 || args.length > 2) {
+      throw __autojs6_invalid_arg_type("s13n.bytes expects source and optional fromUnit.");
+    }
+    if (args.length === 2 && typeof args[1] !== "string") {
+      throw __autojs6_invalid_arg_type("s13n.bytes fromUnit must be a string when provided.");
+    }
+    const normalized = args.length === 2
+      ? [args[0], args[1], "B", { fractionDigits: 0 }]
+      : [args[0], "B", { fractionDigits: 0 }];
+    return __autojs6_bytes_number(normalized, "none");
+  }
+  function __autojs6_limited_s13n() {
+    if (__autojs6_limited_s13n_cache) {
+      return __autojs6_limited_s13n_cache;
+    }
+    __autojs6_limited_s13n_cache = Object.freeze({
+      bytes: __autojs6_s13n_bytes,
+      color: function() { __autojs6_s13n_unsupported("color"); },
+      point: function() { __autojs6_s13n_unsupported("point"); },
+      throwable: function() { __autojs6_s13n_unsupported("throwable"); },
+      time: function() { __autojs6_s13n_unsupported("time"); }
+    });
+    return __autojs6_limited_s13n_cache;
+  }
+  function __autojs6_mime_parse(value) {
+    const raw = value === undefined || value === null ? "" : String(value);
+    const parts = raw.split(/\s*;\s*/).filter(function(part) { return part.length > 0; });
+    const typePart = parts.shift() || "application/octet-stream";
+    const typeMatch = /^([^\/\s]+)\/([^;\s]+)$/.exec(typePart);
+    const type = typeMatch ? typeMatch[1].toLowerCase() : "application";
+    const subtype = typeMatch ? typeMatch[2].toLowerCase() : "octet-stream";
+    const parameters = {};
+    parts.forEach(function(part) {
+      const index = part.indexOf("=");
+      if (index > 0) {
+        parameters[part.slice(0, index).trim()] = part.slice(index + 1).trim().replace(/^"|"$/g, "");
+      }
+    });
+    const mimeTypeRefined = type + "/" + subtype;
+    const parameterText = Object.keys(parameters).map(function(key) {
+      return key + "=" + parameters[key];
+    }).join("; ");
+    const mimeType = parameterText ? mimeTypeRefined + "; " + parameterText : mimeTypeRefined;
+    const result = {
+      raw: raw,
+      type: type,
+      subtype: subtype,
+      mimeType: mimeType,
+      mimeTypeRefined: mimeTypeRefined,
+      parameters: Object.freeze(parameters),
+      toStringReadable: function() { return this.toString(); },
+      toString: function() {
+        return [
+          "JsMime {",
+          "  type: '" + type + "',",
+          "  subtype: '" + subtype + "',",
+          "  mimeType: '" + mimeType + "',",
+          "  mimeTypeRefined: '" + mimeTypeRefined + "',",
+          "  parameters: '" + __autojs6_limited_util().format(parameters) + "',",
+          "  raw: '" + raw + "',",
+          "}"
+        ].join("\n");
+      }
+    };
+    return Object.freeze(result);
+  }
+  function __autojs6_limited_mime() {
+    if (__autojs6_limited_mime_cache) {
+      return __autojs6_limited_mime_cache;
+    }
+    const mime = function(value) {
+      return __autojs6_mime_parse(value);
+    };
+    Object.defineProperties(mime, {
+      WILDCARD: { value: "*/*", enumerable: true },
+      TEXT_PLAIN: { value: "text/plain", enumerable: true },
+      APPLICATION_JSON: { value: "application/json", enumerable: true },
+      APPLICATION_OCTET_STREAM: { value: "application/octet-stream", enumerable: true },
+      IMAGE_PNG: { value: "image/png", enumerable: true },
+      parse: { value: __autojs6_mime_parse, enumerable: true }
+    });
+    __autojs6_limited_mime_cache = Object.freeze(mime);
+    return __autojs6_limited_mime_cache;
+  }
+  const __autojs6_nanoid_alphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
+  function __autojs6_nanoid_random_bytes(size) {
+    const count = Math.max(0, Math.min(1024, Math.floor(Number(size) || 0)));
+    const nodeCrypto = __autojs6_crypto_module();
+    if (nodeCrypto && typeof nodeCrypto.randomBytes === "function") {
+      return nodeCrypto.randomBytes(count);
+    }
+    const bytes = new Uint8Array(count);
+    for (let index = 0; index < count; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256);
+    }
+    return bytes;
+  }
+  function __autojs6_nanoid_generate(size, alphabet) {
+    const length = size === undefined || size === null || size === "" ? 21 : Math.max(0, Math.floor(Number(size)));
+    const sourceAlphabet = alphabet || __autojs6_nanoid_alphabet;
+    const bytes = __autojs6_nanoid_random_bytes(length);
+    let id = "";
+    for (let index = 0; index < length; index += 1) {
+      id += sourceAlphabet[bytes[index] % sourceAlphabet.length];
+    }
+    return id;
+  }
+  function __autojs6_limited_nanoid() {
+    if (__autojs6_limited_nanoid_cache) {
+      return __autojs6_limited_nanoid_cache;
+    }
+    const nanoid = function(size) {
+      return __autojs6_nanoid_generate(size);
+    };
+    Object.defineProperties(nanoid, {
+      urlAlphabet: { value: __autojs6_nanoid_alphabet, enumerable: true },
+      customAlphabet: {
+        value: function(alphabet, defaultSize) {
+          const text = String(alphabet || "");
+          if (!text) {
+            throw __autojs6_invalid_arg_type("nanoid.customAlphabet alphabet must be non-empty.");
+          }
+          return function(size) {
+            return __autojs6_nanoid_generate(size === undefined ? defaultSize : size, text);
+          };
+        },
+        enumerable: true
+      }
+    });
+    __autojs6_limited_nanoid_cache = Object.freeze(nanoid);
+    return __autojs6_limited_nanoid_cache;
+  }
+  const __autojs6_opencc_methods = Object.freeze([
+    "convert",
+    "hk2s",
+    "hk2t",
+    "jp2t",
+    "s2hk",
+    "s2t",
+    "s2tw",
+    "s2twp",
+    "t2hk",
+    "t2s",
+    "t2tw",
+    "t2jp",
+    "tw2s",
+    "tw2t",
+    "tw2sp",
+    "s2twi",
+    "twi2s",
+    "s2jp",
+    "t2twi",
+    "hk2tw",
+    "hk2twi",
+    "hk2jp",
+    "tw2hk",
+    "tw2twi",
+    "tw2jp",
+    "twi2t",
+    "twi2hk",
+    "twi2tw",
+    "twi2jp",
+    "jp2s",
+    "jp2hk",
+    "jp2tw",
+    "jp2twi"
+  ]);
+  function __autojs6_text_resource_unsupported(apiName, dependency) {
+    throw __autojs6_rhino_compat_unsupported(
+      apiName,
+      dependency + " resources are not available in the host-testable Node text facade; use a supported pure subset or run the Rhino/Android provider."
+    );
+  }
+  function __autojs6_limited_opencc() {
+    if (__autojs6_limited_opencc_cache) {
+      return __autojs6_limited_opencc_cache;
+    }
+    const opencc = function(value, type) {
+      return opencc.convert(value, type);
+    };
+    __autojs6_opencc_methods.forEach(function(name) {
+      Object.defineProperty(opencc, name, {
+        value: function() {
+          __autojs6_text_resource_unsupported("opencc." + name, "OpenCC dictionary");
+        },
+        enumerable: true
+      });
+    });
+    __autojs6_limited_opencc_cache = Object.freeze(opencc);
+    return __autojs6_limited_opencc_cache;
+  }
+  const __autojs6_pinyin_styles = Object.freeze({
+    NORMAL: 0,
+    TONE: 1,
+    TONE2: 2,
+    INITIALS: 3,
+    FIRST_LETTER: 4,
+    TO3NE: 5
+  });
+  const __autojs6_pinyin_modes = Object.freeze({
+    NORMAL: 0,
+    SURNAME: 1,
+    PLACE_NAME: 2,
+    PLACENAME: 2
+  });
+  const __autojs6_pinyin_initials = Object.freeze(["zh", "ch", "sh", "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", "j", "q", "x", "r", "z", "c", "s"]);
+  const __autojs6_pinyin_dict = Object.freeze({
+    "\u4e2d": Object.freeze([Object.freeze({ tone: "zh\u014dng", normal: "zhong", tone2: "zhong1", to3ne: "zho1ng" })]),
+    "\u56fd": Object.freeze([Object.freeze({ tone: "gu\u00f3", normal: "guo", tone2: "guo2", to3ne: "guo2" })]),
+    "\u4eba": Object.freeze([Object.freeze({ tone: "r\u00e9n", normal: "ren", tone2: "ren2", to3ne: "re2n" })]),
+    "\u6c11": Object.freeze([Object.freeze({ tone: "m\u00edn", normal: "min", tone2: "min2", to3ne: "mi2n" })]),
+    "\u4f60": Object.freeze([Object.freeze({ tone: "n\u01d0", normal: "ni", tone2: "ni3", to3ne: "ni3" })]),
+    "\u597d": Object.freeze([Object.freeze({ tone: "h\u01ceo", normal: "hao", tone2: "hao3", to3ne: "ha3o" })]),
+    "\u6211": Object.freeze([Object.freeze({ tone: "w\u01d2", normal: "wo", tone2: "wo3", to3ne: "wo3" })]),
+    "\u662f": Object.freeze([Object.freeze({ tone: "sh\u00ec", normal: "shi", tone2: "shi4", to3ne: "shi4" })]),
+    "\u7684": Object.freeze([Object.freeze({ tone: "de", normal: "de", tone2: "de0", to3ne: "de0" })]),
+    "\u884c": Object.freeze([Object.freeze({ tone: "x\u00edng", normal: "xing", tone2: "xing2", to3ne: "xi2ng" }), Object.freeze({ tone: "h\u00e1ng", normal: "hang", tone2: "hang2", to3ne: "ha2ng" })]),
+    "\u91cd": Object.freeze([Object.freeze({ tone: "zh\u00f2ng", normal: "zhong", tone2: "zhong4", to3ne: "zho4ng" }), Object.freeze({ tone: "ch\u00f3ng", normal: "chong", tone2: "chong2", to3ne: "cho2ng" })]),
+    "\u957f": Object.freeze([Object.freeze({ tone: "ch\u00e1ng", normal: "chang", tone2: "chang2", to3ne: "cha2ng" }), Object.freeze({ tone: "zh\u01ceng", normal: "zhang", tone2: "zhang3", to3ne: "zha3ng" })]),
+    "\u674e": Object.freeze([Object.freeze({ tone: "l\u01d0", normal: "li", tone2: "li3", to3ne: "li3" })]),
+    "\u738b": Object.freeze([Object.freeze({ tone: "w\u00e1ng", normal: "wang", tone2: "wang2", to3ne: "wa2ng" })]),
+    "\u5f20": Object.freeze([Object.freeze({ tone: "zh\u0101ng", normal: "zhang", tone2: "zhang1", to3ne: "zha1ng" })])
+  });
+  const __autojs6_pinyin_phrase_dict = Object.freeze({
+    "\u4e2d\u56fd": Object.freeze([Object.freeze(["zh\u014dng"]), Object.freeze(["gu\u00f3"])]),
+    "\u4eba\u6c11": Object.freeze([Object.freeze(["r\u00e9n"]), Object.freeze(["m\u00edn"])]),
+    "\u4f60\u597d": Object.freeze([Object.freeze(["n\u01d0"]), Object.freeze(["h\u01ceo"])])
+  });
+  function __autojs6_pinyin_parse_style(value, fallback) {
+    if (value === undefined || value === null || value === "") {
+      return fallback;
+    }
+    if (typeof value === "number") {
+      const number = Math.floor(value);
+      if (number >= 0 && number <= 5) return number;
+    }
+    const key = String(value).trim().toUpperCase();
+    if (Object.prototype.hasOwnProperty.call(__autojs6_pinyin_styles, key)) {
+      return __autojs6_pinyin_styles[key];
+    }
+    throw __autojs6_rhino_compat_unsupported("pinyin.style", "Unsupported pinyin style: " + value);
+  }
+  function __autojs6_pinyin_parse_mode(value, fallback) {
+    if (value === undefined || value === null || value === "") {
+      return fallback;
+    }
+    if (typeof value === "number") {
+      const number = Math.floor(value);
+      if (number >= 0 && number <= 2) return number;
+    }
+    const key = String(value).trim().toUpperCase();
+    if (Object.prototype.hasOwnProperty.call(__autojs6_pinyin_modes, key)) {
+      return __autojs6_pinyin_modes[key];
+    }
+    throw __autojs6_rhino_compat_unsupported("pinyin.mode", "Unsupported pinyin mode: " + value);
+  }
+  function __autojs6_pinyin_options(options) {
+    const input = options && typeof options === "object" && !Array.isArray(options) ? options : {};
+    const mode = __autojs6_pinyin_parse_mode(input.mode, __autojs6_pinyin_modes.NORMAL);
+    if (input.segment === true) {
+      __autojs6_text_resource_unsupported("pinyin.convert", "Jieba segmentation");
+    }
+    if (mode === __autojs6_pinyin_modes.PLACE_NAME) {
+      __autojs6_text_resource_unsupported("pinyin.convert", "Pinyin place-name dictionary");
+    }
+    return {
+      style: __autojs6_pinyin_parse_style(input.style, __autojs6_pinyin_styles.TONE),
+      heteronym: input.heteronym === true,
+      group: input.group === true,
+      mode: mode
+    };
+  }
+  function __autojs6_pinyin_initial(value) {
+    for (let index = 0; index < __autojs6_pinyin_initials.length; index += 1) {
+      const initial = __autojs6_pinyin_initials[index];
+      if (value.indexOf(initial) === 0) return initial;
+    }
+    return "";
+  }
+  function __autojs6_pinyin_fixed(record, style) {
+    switch (style) {
+      case __autojs6_pinyin_styles.NORMAL:
+        return record.normal;
+      case __autojs6_pinyin_styles.TONE2:
+        return record.tone2;
+      case __autojs6_pinyin_styles.TO3NE:
+        return record.to3ne;
+      case __autojs6_pinyin_styles.INITIALS:
+        return __autojs6_pinyin_initial(record.normal);
+      case __autojs6_pinyin_styles.FIRST_LETTER:
+        return record.normal.charAt(0);
+      case __autojs6_pinyin_styles.TONE:
+      default:
+        return record.tone;
+    }
+  }
+  function __autojs6_pinyin_is_han_char(text) {
+    if (!text) return false;
+    const code = text.codePointAt(0);
+    return (code >= 0x3400 && code <= 0x9fff) || (code >= 0xf900 && code <= 0xfaff);
+  }
+  function __autojs6_pinyin_char_variants(charValue, options) {
+    const records = __autojs6_pinyin_dict[charValue];
+    if (!records) {
+      return [charValue];
+    }
+    const mapped = records.map(function(record) {
+      return __autojs6_pinyin_fixed(record, options.style);
+    });
+    return options.heteronym ? Array.from(new Set(mapped)) : [mapped[0]];
+  }
+  function __autojs6_pinyin_compact_rows(rows) {
+    if (!Array.isArray(rows)) return "";
+    return rows.map(function(row) {
+      return Array.isArray(row) ? String(row[0] === undefined ? "" : row[0]) : String(row);
+    }).join("");
+  }
+  function __autojs6_pinyin_combo(rows) {
+    let result = [""];
+    rows.forEach(function(row) {
+      const values = Array.isArray(row) && row.length > 0 ? row : [""];
+      const next = [];
+      result.forEach(function(prefix) {
+        values.forEach(function(value) {
+          next.push(prefix + value);
+        });
+      });
+      result = next;
+    });
+    return result;
+  }
+  function __autojs6_pinyin_convert(value, optionsInput) {
+    const options = __autojs6_pinyin_options(optionsInput);
+    const text = value === undefined || value === null ? "" : String(value);
+    const rows = [];
+    let nonHan = "";
+    for (const charValue of text) {
+      if (__autojs6_pinyin_is_han_char(charValue)) {
+        if (nonHan) {
+          rows.push([nonHan]);
+          nonHan = "";
+        }
+        rows.push(__autojs6_pinyin_char_variants(charValue, options));
+      } else {
+        nonHan += charValue;
+      }
+    }
+    if (nonHan) {
+      rows.push([nonHan]);
+    }
+    const result = options.group ? [__autojs6_pinyin_combo(rows)] : rows;
+    Object.defineProperty(result, "compact", {
+      value: function() {
+        return __autojs6_pinyin_compact_rows(result);
+      },
+      configurable: true
+    });
+    return result;
+  }
+  function __autojs6_limited_pinyin() {
+    if (__autojs6_limited_pinyin_cache) {
+      return __autojs6_limited_pinyin_cache;
+    }
+    const pinyin = function(value, options) {
+      return pinyin.convert(value, options);
+    };
+    Object.defineProperties(pinyin, {
+      STYLE_NORMAL: { value: __autojs6_pinyin_styles.NORMAL, enumerable: true },
+      STYLE_TONE: { value: __autojs6_pinyin_styles.TONE, enumerable: true },
+      STYLE_TONE2: { value: __autojs6_pinyin_styles.TONE2, enumerable: true },
+      STYLE_TO3NE: { value: __autojs6_pinyin_styles.TO3NE, enumerable: true },
+      STYLE_INITIALS: { value: __autojs6_pinyin_styles.INITIALS, enumerable: true },
+      STYLE_FIRST_LETTER: { value: __autojs6_pinyin_styles.FIRST_LETTER, enumerable: true },
+      MODE_NORMAL: { value: __autojs6_pinyin_modes.NORMAL, enumerable: true },
+      MODE_SURNAME: { value: __autojs6_pinyin_modes.SURNAME, enumerable: true },
+      MODE_PLACENAME: { value: __autojs6_pinyin_modes.PLACENAME, enumerable: true },
+      MODE_PLACE_NAME: { value: __autojs6_pinyin_modes.PLACE_NAME, enumerable: true },
+      convert: { value: __autojs6_pinyin_convert, enumerable: true },
+      simple: {
+        value: function(value, enableNumericTone, enableSegment) {
+          if (enableSegment === true) {
+            __autojs6_text_resource_unsupported("pinyin.simple", "Jieba segmentation");
+          }
+          const rows = __autojs6_pinyin_convert(value, {
+            style: enableNumericTone === true ? __autojs6_pinyin_styles.TONE2 : __autojs6_pinyin_styles.NORMAL
+          });
+          return __autojs6_pinyin_compact_rows(rows);
+        },
+        enumerable: true
+      },
+      compact: { value: __autojs6_pinyin_compact_rows, enumerable: true },
+      compare: {
+        value: function(left, right) {
+          return pinyin.simple(left).localeCompare(pinyin.simple(right));
+        },
+        enumerable: true
+      },
+      fromCodePoint: {
+        value: function(codePoint) {
+          const charValue = String.fromCodePoint(Number(codePoint));
+          const records = __autojs6_pinyin_dict[charValue];
+          return records && records[0] ? records[0].tone : null;
+        },
+        enumerable: true
+      },
+      fromPhrase: {
+        value: function(phrase) {
+          const text = phrase === undefined || phrase === null ? "" : String(phrase);
+          const rows = __autojs6_pinyin_phrase_dict[text];
+          if (rows) return rows.map(function(row) { return row.slice(); });
+          __autojs6_text_resource_unsupported("pinyin.fromPhrase", "Pinyin phrase dictionary");
+        },
+        enumerable: true
+      }
+    });
+    __autojs6_limited_pinyin_cache = Object.freeze(pinyin);
+    return __autojs6_limited_pinyin_cache;
+  }
+  const __autojs6_pinyin4j_tone_map = Object.freeze({
+    zhong1: "zh\u014dng",
+    zhong4: "zh\u00f2ng",
+    chong2: "ch\u00f3ng",
+    guo2: "gu\u00f3",
+    ren2: "r\u00e9n",
+    min2: "m\u00edn",
+    ni3: "n\u01d0",
+    hao3: "h\u01ceo",
+    wo3: "w\u01d2",
+    shi4: "sh\u00ec",
+    de0: "de",
+    xing2: "x\u00edng",
+    hang2: "h\u00e1ng",
+    chang2: "ch\u00e1ng",
+    zhang1: "zh\u0101ng",
+    zhang3: "zh\u01ceng",
+    li3: "l\u01d0",
+    wang2: "w\u00e1ng"
+  });
+  function __autojs6_pinyin4j_options(options) {
+    const input = options && typeof options === "object" && !Array.isArray(options) ? options : {};
+    let separator = "";
+    if (typeof options === "string") {
+      separator = options;
+    }
+    if (input.separator !== undefined) separator = String(input.separator);
+    if (input.sep !== undefined) separator = String(input.sep);
+    const caseText = String(input.case !== undefined ? input.case : input.caseType !== undefined ? input.caseType : "LOWERCASE").toUpperCase();
+    const toneText = String(input.tone !== undefined ? input.tone : input.toneType !== undefined ? input.toneType : "WITHOUT_TONE").toUpperCase();
+    return {
+      separator: separator,
+      upper: caseText === "UPPERCASE" || caseText === "UP" || caseText === "U" || caseText === "1",
+      tone: toneText === "WITH_TONE_NUMBER" || toneText === "WITH_NUMBER" || toneText === "NUMBER" || toneText === "NUM"
+        ? "number"
+        : toneText === "WITH_TONE_MARK" || toneText === "WITH_MARK" || toneText === "MARK" || toneText === "TRUE" || toneText === "1"
+          ? "mark"
+          : "none"
+    };
+  }
+  function __autojs6_pinyin4j_format_record(record, options) {
+    let text = record.normal;
+    if (options.tone === "number") text = record.tone2;
+    if (options.tone === "mark") text = record.tone;
+    return options.upper ? text.toUpperCase() : text;
+  }
+  function __autojs6_pinyin4j_of(value, optionsInput) {
+    const text = value === undefined || value === null ? "" : String(value);
+    if (!text) return "";
+    const options = __autojs6_pinyin4j_options(optionsInput);
+    const parts = [];
+    for (const charValue of text) {
+      const records = __autojs6_pinyin_dict[charValue];
+      if (records && records[0]) {
+        parts.push(__autojs6_pinyin4j_format_record(records[0], options));
+      } else {
+        parts.push(charValue);
+      }
+    }
+    return parts.join(options.separator);
+  }
+  function __autojs6_pinyin4j_as(value) {
+    return String(value === undefined || value === null ? "" : value).replace(/[a-z]+[0-4]/gi, function(match) {
+      const lower = match.toLowerCase();
+      const fixed = __autojs6_pinyin4j_tone_map[lower] || match;
+      return match === match.toUpperCase() ? fixed.toUpperCase() : fixed;
+    });
+  }
+  function __autojs6_limited_pinyin4j() {
+    if (__autojs6_limited_pinyin4j_cache) {
+      return __autojs6_limited_pinyin4j_cache;
+    }
+    const pinyin4j = function(value, options) {
+      return __autojs6_pinyin4j_of(value, options);
+    };
+    Object.defineProperties(pinyin4j, {
+      of: { value: __autojs6_pinyin4j_of, enumerable: true },
+      as: { value: __autojs6_pinyin4j_as, enumerable: true }
+    });
+    __autojs6_limited_pinyin4j_cache = Object.freeze(pinyin4j);
+    return __autojs6_limited_pinyin4j_cache;
+  }
+  function __autojs6_jsox_mathx_flatten(input, output) {
+    const target = output || [];
+    Array.prototype.slice.call(input).forEach(function(value) {
+      if (Array.isArray(value)) {
+        __autojs6_jsox_mathx_flatten(value, target);
+      } else {
+        target.push(value);
+      }
+    });
+    return target;
+  }
+  function __autojs6_jsox_mathx_number(value) {
+    return Number(value);
+  }
+  function __autojs6_jsox_mathx_to_fixed_num(value, fraction) {
+    const number = Number(value);
+    const places = Math.trunc(Number(fraction));
+    if (Number.isNaN(number) || Number.isNaN(places)) return NaN;
+    if (!Number.isFinite(number)) return number;
+    const factor = Math.pow(10, places);
+    const scaled = number * factor;
+    return (scaled >= 0 ? Math.floor(scaled + 0.5) : Math.ceil(scaled - 0.5)) / factor;
+  }
+  function __autojs6_jsox_mathx_calc(callback, argsLike) {
+    const args = Array.prototype.slice.call(argsLike);
+    if (args.length === 0) return NaN;
+    if (args.length >= 2) {
+      const last = args[args.length - 1];
+      const fraction = Array.isArray(last) ? NaN : Number(last);
+      const values = args.slice(0, args.length - 1);
+      if (!Number.isNaN(fraction) && values.every(Array.isArray)) {
+        return __autojs6_jsox_mathx_to_fixed_num(callback(values), fraction);
+      }
+    }
+    return callback(args);
+  }
+  function __autojs6_jsox_mathx_values(argsLike) {
+    return __autojs6_jsox_mathx_flatten(argsLike).map(__autojs6_jsox_mathx_number);
+  }
+  function __autojs6_jsox_mathx_random_int() {
+    const values = __autojs6_jsox_mathx_values(arguments);
+    if (values.length === 0) return __autojs6_jsox_mathx_random_int(0, 1);
+    if (values.length === 1) {
+      const value = values[0];
+      if (value === Math.trunc(value)) return Math.trunc(value);
+      return Math.random() < 0.5 ? Math.floor(value) : Math.ceil(value);
+    }
+    const low = Math.ceil(Math.min.apply(Math, values));
+    const high = Math.floor(Math.max.apply(Math, values));
+    if (low > high) {
+      throw __autojs6_rhino_compat_error(
+        "jsox.mathx.randomInt range does not contain an integer.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        "jsox.mathx.randomInt",
+        "invalid-option"
+      );
+    }
+    return Math.floor(Math.random() * (high - low + 1)) + low;
+  }
+  function __autojs6_jsox_mathx_random_float() {
+    const values = __autojs6_jsox_mathx_values(arguments);
+    if (values.length === 0) return Math.random();
+    if (values.length === 1) {
+      const value = values[0];
+      let high = Math.ceil(value);
+      if (Math.floor(value) === high) high += 1;
+      return __autojs6_jsox_mathx_random_float(value, high);
+    }
+    const low = Math.min.apply(Math, values);
+    const high = Math.max.apply(Math, values);
+    return Math.random() * (high - low) + low;
+  }
+  function __autojs6_jsox_mathx_sum_raw(argsLike) {
+    const values = __autojs6_jsox_mathx_values(argsLike);
+    return values.reduce(function(total, value) { return total + value; }, 0);
+  }
+  function __autojs6_jsox_mathx_sum() {
+    return __autojs6_jsox_mathx_calc(__autojs6_jsox_mathx_sum_raw, arguments);
+  }
+  function __autojs6_jsox_mathx_mean_raw(argsLike) {
+    const values = __autojs6_jsox_mathx_values(argsLike);
+    return values.reduce(function(total, value) { return total + value; }, 0) / values.length;
+  }
+  function __autojs6_jsox_mathx_mean() {
+    return __autojs6_jsox_mathx_calc(__autojs6_jsox_mathx_mean_raw, arguments);
+  }
+  function __autojs6_jsox_mathx_median_raw(argsLike) {
+    const values = __autojs6_jsox_mathx_values(argsLike);
+    if (values.some(Number.isNaN)) return NaN;
+    const sorted = values.slice().sort(function(left, right) { return left - right; });
+    if (sorted.length === 0) return NaN;
+    const middle = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+  }
+  function __autojs6_jsox_mathx_median() {
+    return __autojs6_jsox_mathx_calc(__autojs6_jsox_mathx_median_raw, arguments);
+  }
+  function __autojs6_jsox_mathx_variance_raw(argsLike) {
+    const values = __autojs6_jsox_mathx_values(argsLike);
+    if (values.length === 0 || values.some(Number.isNaN)) return NaN;
+    const mean = values.reduce(function(total, value) { return total + value; }, 0) / values.length;
+    return values.reduce(function(total, value) {
+      return total + Math.pow(value - mean, 2);
+    }, 0) / values.length;
+  }
+  function __autojs6_jsox_mathx_variance() {
+    return __autojs6_jsox_mathx_calc(__autojs6_jsox_mathx_variance_raw, arguments);
+  }
+  function __autojs6_jsox_mathx_std_raw(argsLike) {
+    return Math.sqrt(__autojs6_jsox_mathx_variance_raw(argsLike));
+  }
+  function __autojs6_jsox_mathx_std() {
+    return __autojs6_jsox_mathx_calc(__autojs6_jsox_mathx_std_raw, arguments);
+  }
+  function __autojs6_jsox_mathx_cv_raw(argsLike) {
+    return __autojs6_jsox_mathx_std_raw(argsLike) / __autojs6_jsox_mathx_mean_raw(argsLike);
+  }
+  function __autojs6_jsox_mathx_cv() {
+    return __autojs6_jsox_mathx_calc(__autojs6_jsox_mathx_cv_raw, arguments);
+  }
+  function __autojs6_jsox_mathx_mode_raw(argsLike) {
+    const values = __autojs6_jsox_mathx_values(argsLike);
+    if (values.length === 0 || values.some(Number.isNaN)) return NaN;
+    const counts = new Map();
+    values.forEach(function(value) {
+      counts.set(value, (counts.get(value) || 0) + 1);
+    });
+    let winner = values[0];
+    let winnerCount = -1;
+    counts.forEach(function(count, value) {
+      if (count > winnerCount) {
+        winner = value;
+        winnerCount = count;
+      }
+    });
+    return winner;
+  }
+  function __autojs6_jsox_mathx_mode() {
+    return __autojs6_jsox_mathx_calc(__autojs6_jsox_mathx_mode_raw, arguments);
+  }
+  function __autojs6_jsox_mathx_max_raw(argsLike) {
+    const values = __autojs6_jsox_mathx_values(argsLike);
+    return values.length === 0 ? NaN : Math.max.apply(Math, values);
+  }
+  function __autojs6_jsox_mathx_max() {
+    return __autojs6_jsox_mathx_calc(__autojs6_jsox_mathx_max_raw, arguments);
+  }
+  function __autojs6_jsox_mathx_min_raw(argsLike) {
+    const values = __autojs6_jsox_mathx_values(argsLike);
+    return values.length === 0 ? NaN : Math.min.apply(Math, values);
+  }
+  function __autojs6_jsox_mathx_min() {
+    return __autojs6_jsox_mathx_calc(__autojs6_jsox_mathx_min_raw, arguments);
+  }
+  function __autojs6_jsox_mathx_point(value, apiName) {
+    let x;
+    let y;
+    if (Array.isArray(value)) {
+      if (value.length !== 2) {
+        throw __autojs6_rhino_compat_error(
+          apiName + " point arrays must have exactly two entries.",
+          __autojs6_rhino_compat_error_codes.invalidOption,
+          apiName,
+          "invalid-option"
+        );
+      }
+      x = value[0];
+      y = value[1];
+    } else if (value && typeof value === "object") {
+      x = value.x;
+      y = value.y;
+    } else {
+      throw __autojs6_rhino_compat_error(
+        apiName + " requires JSON-safe point arrays or { x, y } objects.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    x = Number(x);
+    y = Number(y);
+    if (Number.isNaN(x) || Number.isNaN(y)) {
+      throw __autojs6_rhino_compat_error(
+        apiName + " requires numeric point coordinates.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    return { x: x, y: y };
+  }
+  function __autojs6_jsox_mathx_dist(a, b, fraction) {
+    const apiName = "jsox.mathx.dist";
+    if (arguments.length === 0) return NaN;
+    if (arguments.length < 2 || arguments.length > 3) {
+      throw __autojs6_rhino_compat_error(
+        apiName + " accepts two point inputs and an optional fraction.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    const pointA = __autojs6_jsox_mathx_point(a, apiName);
+    const pointB = __autojs6_jsox_mathx_point(b, apiName);
+    const distance = Math.sqrt(Math.pow(pointA.x - pointB.x, 2) + Math.pow(pointA.y - pointB.y, 2));
+    return arguments.length === 3 ? __autojs6_jsox_mathx_to_fixed_num(distance, fraction) : distance;
+  }
+  function __autojs6_jsox_mathx_log_mn(baseInput, antilogarithmInput, fractionInput) {
+    const base = Number(baseInput);
+    const antilogarithm = Number(antilogarithmInput);
+    if (Number.isNaN(base) || Number.isNaN(antilogarithm)) {
+      throw __autojs6_rhino_compat_error(
+        "jsox.mathx.logMn requires numeric base and antilogarithm.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        "jsox.mathx.logMn",
+        "invalid-option"
+      );
+    }
+    const fraction = fractionInput === undefined || fractionInput === null ? 13 : fractionInput;
+    return __autojs6_jsox_mathx_to_fixed_num(Math.log(antilogarithm) / Math.log(base), fraction);
+  }
+  function __autojs6_jsox_mathx_floor_log(base, antilogarithm) {
+    return Math.floor(__autojs6_jsox_mathx_log_mn(base, antilogarithm));
+  }
+  function __autojs6_jsox_mathx_ceil_log(base, antilogarithm) {
+    return Math.ceil(__autojs6_jsox_mathx_log_mn(base, antilogarithm));
+  }
+  function __autojs6_jsox_mathx_round_log(base, antilogarithm) {
+    return Math.round(__autojs6_jsox_mathx_log_mn(base, antilogarithm));
+  }
+  function __autojs6_jsox_mathx_floor_pow(base, antilogarithm) {
+    return Math.pow(Number(base), __autojs6_jsox_mathx_floor_log(base, antilogarithm));
+  }
+  function __autojs6_jsox_mathx_ceil_pow(base, antilogarithm) {
+    return Math.pow(Number(base), __autojs6_jsox_mathx_ceil_log(base, antilogarithm));
+  }
+  function __autojs6_jsox_mathx_round_pow(base, antilogarithm) {
+    return Math.pow(Number(base), __autojs6_jsox_mathx_round_log(base, antilogarithm));
+  }
+  function __autojs6_jsox_arrayx_require_array(value, apiName) {
+    if (!Array.isArray(value)) {
+      throw __autojs6_rhino_compat_error(
+        apiName + " requires a JavaScript Array.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    return value;
+  }
+  function __autojs6_jsox_arrayx_require_function(value, apiName) {
+    if (typeof value !== "function") {
+      throw __autojs6_rhino_compat_error(
+        apiName + " requires a JavaScript Function selector.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    return value;
+  }
+  function __autojs6_jsox_arrayx_ensure_array() {
+    Array.prototype.slice.call(arguments).forEach(function(value) {
+      __autojs6_jsox_arrayx_require_array(value, "jsox.arrayx.ensureArray");
+    });
+  }
+  function __autojs6_jsox_arrayx_distinct(arr) {
+    const input = __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.distinct");
+    return Array.from(new Set(input));
+  }
+  function __autojs6_jsox_arrayx_distinct_by(arr, selector) {
+    const input = __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.distinctBy");
+    const select = __autojs6_jsox_arrayx_require_function(selector, "jsox.arrayx.distinctBy");
+    const seen = new Set();
+    const result = [];
+    input.forEach(function(value) {
+      const key = select(value);
+      if (!seen.has(key)) {
+        seen.add(key);
+        result.push(value);
+      }
+    });
+    return result;
+  }
+  function __autojs6_jsox_arrayx_union() {
+    const args = Array.prototype.slice.call(arguments);
+    if (args.length === 0) {
+      throw __autojs6_rhino_compat_error(
+        "jsox.arrayx.union requires at least one array.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        "jsox.arrayx.union",
+        "invalid-option"
+      );
+    }
+    const result = [];
+    const seen = new Set();
+    args.forEach(function(value) {
+      __autojs6_jsox_arrayx_require_array(value, "jsox.arrayx.union").forEach(function(item) {
+        if (!seen.has(item)) {
+          seen.add(item);
+          result.push(item);
+        }
+      });
+    });
+    return result;
+  }
+  function __autojs6_jsox_arrayx_intersect() {
+    const args = Array.prototype.slice.call(arguments);
+    if (args.length === 0) {
+      throw __autojs6_rhino_compat_error(
+        "jsox.arrayx.intersect requires at least one array.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        "jsox.arrayx.intersect",
+        "invalid-option"
+      );
+    }
+    const first = __autojs6_jsox_arrayx_require_array(args[0], "jsox.arrayx.intersect");
+    const rest = args.slice(1).map(function(value) {
+      return new Set(__autojs6_jsox_arrayx_require_array(value, "jsox.arrayx.intersect"));
+    });
+    const seen = new Set();
+    const result = [];
+    first.forEach(function(item) {
+      if (!seen.has(item) && rest.every(function(set) { return set.has(item); })) {
+        seen.add(item);
+        result.push(item);
+      }
+    });
+    return result;
+  }
+  function __autojs6_jsox_arrayx_subtract(left, right) {
+    const source = __autojs6_jsox_arrayx_require_array(left, "jsox.arrayx.subtract");
+    const deny = new Set(__autojs6_jsox_arrayx_require_array(right, "jsox.arrayx.subtract"));
+    const seen = new Set();
+    const result = [];
+    source.forEach(function(item) {
+      if (!deny.has(item) && !seen.has(item)) {
+        seen.add(item);
+        result.push(item);
+      }
+    });
+    return result;
+  }
+  function __autojs6_jsox_arrayx_differ(left, right) {
+    return __autojs6_jsox_arrayx_union(
+      __autojs6_jsox_arrayx_subtract(left, right),
+      __autojs6_jsox_arrayx_subtract(right, left)
+    );
+  }
+  function __autojs6_jsox_arrayx_compare_asc(a, b) {
+    if (a > b) return 1;
+    if (a < b) return -1;
+    if (a === b) return 0;
+    const as = String(a);
+    const bs = String(b);
+    if (as > bs) return 1;
+    if (as < bs) return -1;
+    return 0;
+  }
+  function __autojs6_jsox_arrayx_compare_desc(a, b) {
+    return -__autojs6_jsox_arrayx_compare_asc(a, b);
+  }
+  function __autojs6_jsox_arrayx_compare_by(selector, descending) {
+    const select = __autojs6_jsox_arrayx_require_function(selector, descending ? "jsox.arrayx.sortByDescending" : "jsox.arrayx.sortBy");
+    return function(a, b) {
+      const left = select(a);
+      const right = select(b);
+      return descending
+        ? __autojs6_jsox_arrayx_compare_desc(left, right)
+        : __autojs6_jsox_arrayx_compare_asc(left, right);
+    };
+  }
+  function __autojs6_jsox_arrayx_sort_by(arr, selector) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortBy")
+      .sort(__autojs6_jsox_arrayx_compare_by(selector, false));
+  }
+  function __autojs6_jsox_arrayx_sort_by_descending(arr, selector) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortByDescending")
+      .sort(__autojs6_jsox_arrayx_compare_by(selector, true));
+  }
+  function __autojs6_jsox_arrayx_sort_descending(arr) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortDescending")
+      .sort(__autojs6_jsox_arrayx_compare_desc);
+  }
+  function __autojs6_jsox_arrayx_sorted(arr) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sorted")
+      .slice()
+      .sort(__autojs6_jsox_arrayx_compare_asc);
+  }
+  function __autojs6_jsox_arrayx_sorted_descending(arr) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortedDescending")
+      .slice()
+      .sort(__autojs6_jsox_arrayx_compare_desc);
+  }
+  function __autojs6_jsox_arrayx_sorted_by(arr, selector) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortedBy")
+      .slice()
+      .sort(__autojs6_jsox_arrayx_compare_by(selector, false));
+  }
+  function __autojs6_jsox_arrayx_sorted_by_descending(arr, selector) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortedByDescending")
+      .slice()
+      .sort(__autojs6_jsox_arrayx_compare_by(selector, true));
+  }
+  function __autojs6_jsox_arrayx_shuffle(arr) {
+    const target = __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.shuffle");
+    for (let index = target.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      const value = target[index];
+      target[index] = target[swapIndex];
+      target[swapIndex] = value;
+    }
+    return target;
+  }
+  function __autojs6_limited_jsox_arrayx() {
+    if (__autojs6_limited_jsox_arrayx_cache) {
+      return __autojs6_limited_jsox_arrayx_cache;
+    }
+    __autojs6_limited_jsox_arrayx_cache = Object.freeze({
+      ensureArray: __autojs6_jsox_arrayx_ensure_array,
+      distinct: __autojs6_jsox_arrayx_distinct,
+      distinctBy: __autojs6_jsox_arrayx_distinct_by,
+      union: __autojs6_jsox_arrayx_union,
+      intersect: __autojs6_jsox_arrayx_intersect,
+      subtract: __autojs6_jsox_arrayx_subtract,
+      differ: __autojs6_jsox_arrayx_differ,
+      sortBy: __autojs6_jsox_arrayx_sort_by,
+      sortByDescending: __autojs6_jsox_arrayx_sort_by_descending,
+      sortDescending: __autojs6_jsox_arrayx_sort_descending,
+      sorted: __autojs6_jsox_arrayx_sorted,
+      sortedBy: __autojs6_jsox_arrayx_sorted_by,
+      sortedByDescending: __autojs6_jsox_arrayx_sorted_by_descending,
+      sortedDescending: __autojs6_jsox_arrayx_sorted_descending,
+      shuffle: __autojs6_jsox_arrayx_shuffle
+    });
+    return __autojs6_limited_jsox_arrayx_cache;
+  }
+  function __autojs6_jsox_numberx_invalid(apiName, message) {
+    throw __autojs6_rhino_compat_error(
+      message,
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      apiName,
+      "invalid-option"
+    );
+  }
+  function __autojs6_jsox_numberx_parse_percent(percent) {
+    if (percent === undefined || percent === null) return NaN;
+    const match = String(percent).trim().match(/^([+-]?\d+(?:\.\d+)?)(%*)$/);
+    if (!match) return NaN;
+    return Number(match[1]) / Math.pow(100, match[2].length);
+  }
+  function __autojs6_jsox_numberx_parse_ratio(ratio) {
+    if (ratio === undefined || ratio === null) return NaN;
+    const parts = String(ratio).trim().split(":").map(function(value) { return value.trim(); });
+    if (parts.length < 2) return NaN;
+    return Number(parts[0]) / Number(parts[1]);
+  }
+  function __autojs6_jsox_numberx_parse_any(value) {
+    if (value === undefined || value === null) return NaN;
+    if (typeof value === "number") return value;
+    const string = String(value).trim();
+    if (string.indexOf(":") >= 0) return __autojs6_jsox_numberx_parse_ratio(string);
+    if (string.indexOf("%") >= 0) return __autojs6_jsox_numberx_parse_percent(string);
+    return Number(string);
+  }
+  function __autojs6_jsox_numberx_ensure_number() {
+    const values = Array.prototype.slice.call(arguments);
+    if (values.length === 0) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumber", "jsox.numberx.ensureNumber requires at least one argument.");
+    }
+    values.forEach(function(value) {
+      if (typeof value !== "number") {
+        __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumber", "Argument must be a number.");
+      }
+    });
+  }
+  function __autojs6_jsox_numberx_ensure_number_like(value, allowNaN) {
+    if (value === undefined || value === null) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumberLike", "Argument for jsox.numberx.ensureNumberLike must not be null or undefined.");
+    }
+    if (typeof value === "number" && Number.isNaN(value)) {
+      if (allowNaN) return NaN;
+      __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumberLike", "Argument is NaN, which is not allowed for jsox.numberx.ensureNumberLike.");
+    }
+    const number = __autojs6_jsox_numberx_parse_any(value);
+    if (Number.isNaN(number)) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumberLike", "Argument cannot be taken as a number for jsox.numberx.ensureNumberLike.");
+    }
+    return number;
+  }
+  function __autojs6_jsox_numberx_ensure_numbers_like(values, allowNaN, containsNaN) {
+    if (!Array.isArray(values)) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumbersLike", "Argument \"numbers\" must be an array for jsox.numberx.ensureNumbersLike.");
+    }
+    const result = [];
+    values.forEach(function(value, index) {
+      if (value === undefined || value === null) {
+        __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumbersLike", "Argument[" + index + "] for jsox.numberx.ensureNumbersLike must not be null or undefined.");
+      }
+      if (typeof value === "number" && Number.isNaN(value)) {
+        if (!allowNaN) {
+          __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumbersLike", "Argument[" + index + "] is NaN, which is not allowed for jsox.numberx.ensureNumbersLike.");
+        }
+        if (containsNaN) result.push(NaN);
+        return;
+      }
+      const number = __autojs6_jsox_numberx_parse_any(value);
+      if (Number.isNaN(number)) {
+        __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumbersLike", "Argument[" + index + "] cannot be taken as a number for jsox.numberx.ensureNumbersLike.");
+      }
+      result.push(number);
+    });
+    return result;
+  }
+  function __autojs6_jsox_numberx_check() {
+    const inputs = Array.prototype.slice.call(arguments);
+    if (inputs.length === 0) return false;
+    if (inputs.length === 1) return typeof inputs[0] === "number";
+    if (inputs.length === 2) return __autojs6_jsox_numberx_check(inputs[0], "==", inputs[1]);
+    const operators = {
+      "<": function(a, b) { return a < b; },
+      "<=": function(a, b) { return a <= b; },
+      ">": function(a, b) { return a > b; },
+      ">=": function(a, b) { return a >= b; },
+      "=": function(a, b) { return a === b; },
+      "==": function(a, b) { return a === b; },
+      "!=": function(a, b) { return a !== b; },
+      "<>": function(a, b) { return a !== b; }
+    };
+    for (let index = 1; index < inputs.length; index += 2) {
+      const operator = inputs[index];
+      if (typeof operator !== "string" || !Object.prototype.hasOwnProperty.call(operators, operator)) {
+        __autojs6_jsox_numberx_invalid("jsox.numberx.check", "Arguments[" + index + "] for jsox.numberx.check must be a supported operator.");
+      }
+      const left = __autojs6_jsox_numberx_ensure_number_like(inputs[index - 1]);
+      const right = __autojs6_jsox_numberx_ensure_number_like(inputs[index + 1]);
+      if (!operators[operator](left, right)) return false;
+    }
+    return true;
+  }
+  function __autojs6_jsox_numberx_clamp(num) {
+    const x = __autojs6_jsox_numberx_ensure_number_like(num);
+    const values = __autojs6_jsox_mathx_flatten(Array.prototype.slice.call(arguments, 1));
+    const clamps = __autojs6_jsox_numberx_ensure_numbers_like(values).sort(function(a, b) { return a - b; });
+    if (clamps.length === 0) return x;
+    const min = clamps[0];
+    const max = clamps[clamps.length - 1];
+    if (x < min) return min;
+    if (x > max) return max;
+    return x;
+  }
+  function __autojs6_jsox_numberx_clamp_to(num, range, cycle) {
+    const x = __autojs6_jsox_numberx_ensure_number_like(num);
+    const sortedRange = __autojs6_jsox_numberx_ensure_numbers_like(range).sort(function(a, b) { return a - b; });
+    if (sortedRange.length === 0) return x;
+    const min = sortedRange[0];
+    const max = sortedRange[sortedRange.length - 1];
+    const t = cycle === undefined || cycle === null ? max - min : __autojs6_jsox_numberx_ensure_number_like(cycle);
+    if (!(t > 0)) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.clampTo", "Cycle must be a positive number.");
+    }
+    if (x < min) return x + Math.ceil((min - x) / t) * t;
+    if (x > max) return x - Math.ceil((x - max) / t) * t;
+    return x;
+  }
+  function __autojs6_jsox_numberx_to_fixed_num(num, fraction) {
+    return __autojs6_jsox_mathx_to_fixed_num(
+      __autojs6_jsox_numberx_parse_any(num),
+      fraction === undefined || fraction === null ? 0 : __autojs6_jsox_numberx_parse_any(fraction)
+    );
+  }
+  function __autojs6_jsox_numberx_parse_float(value, radix) {
+    if (value === undefined || value === null) return NaN;
+    const string = String(value);
+    if (radix === undefined || radix === null) return parseFloat(string);
+    let base = __autojs6_jsox_numberx_ensure_number_like(radix, true);
+    if (Number.isNaN(base) || !Number.isFinite(base)) base = 10;
+    const parts = string.split(".");
+    const fractionLength = parts.length > 1 ? parts[1].length : 0;
+    const compact = parts.join("");
+    return parseInt(compact, Math.round(base)) / Math.pow(base, fractionLength);
+  }
+  function __autojs6_jsox_numberx_pad_start(num, targetLength, pad) {
+    const length = Number(targetLength);
+    if (Number.isNaN(length) || !Number.isFinite(length)) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.padStart", "Argument \"targetLength\" for jsox.numberx.padStart must be a number.");
+    }
+    const padding = pad === undefined || pad === null ? "0" : String(pad);
+    return String(__autojs6_jsox_numberx_parse_any(num)).padStart(Math.round(length), padding);
+  }
+  function __autojs6_jsox_numberx_pad_end(num, targetLength, pad) {
+    const length = Number(targetLength);
+    if (Number.isNaN(length) || !Number.isFinite(length)) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.padEnd", "Argument \"targetLength\" for jsox.numberx.padEnd must be a number.");
+    }
+    const padding = pad === undefined || pad === null ? "0" : String(pad);
+    return String(__autojs6_jsox_numberx_parse_any(num)).padEnd(Math.round(length), padding);
+  }
+  function __autojs6_limited_jsox_numberx() {
+    if (__autojs6_limited_jsox_numberx_cache) {
+      return __autojs6_limited_jsox_numberx_cache;
+    }
+    __autojs6_limited_jsox_numberx_cache = Object.freeze({
+      ICU: 996,
+      ensureNumber: __autojs6_jsox_numberx_ensure_number,
+      ensureNumberLike: __autojs6_jsox_numberx_ensure_number_like,
+      ensureNumbersLike: __autojs6_jsox_numberx_ensure_numbers_like,
+      check: __autojs6_jsox_numberx_check,
+      clamp: __autojs6_jsox_numberx_clamp,
+      clampTo: __autojs6_jsox_numberx_clamp_to,
+      toFixedNum: __autojs6_jsox_numberx_to_fixed_num,
+      padStart: __autojs6_jsox_numberx_pad_start,
+      padEnd: __autojs6_jsox_numberx_pad_end,
+      parseFloat: __autojs6_jsox_numberx_parse_float,
+      parsePercent: __autojs6_jsox_numberx_parse_percent,
+      parseRatio: __autojs6_jsox_numberx_parse_ratio,
+      parseAny: __autojs6_jsox_numberx_parse_any
+    });
+    return __autojs6_limited_jsox_numberx_cache;
+  }
+  function __autojs6_limited_jsox_mathx() {
+    if (__autojs6_limited_jsox_mathx_cache) {
+      return __autojs6_limited_jsox_mathx_cache;
+    }
+    __autojs6_limited_jsox_mathx_cache = Object.freeze({
+      randInt: __autojs6_jsox_mathx_random_int,
+      randomInt: __autojs6_jsox_mathx_random_int,
+      randFloat: __autojs6_jsox_mathx_random_float,
+      randomFloat: __autojs6_jsox_mathx_random_float,
+      random: __autojs6_jsox_mathx_random_float,
+      sum: __autojs6_jsox_mathx_sum,
+      mean: __autojs6_jsox_mathx_mean,
+      avg: __autojs6_jsox_mathx_mean,
+      median: __autojs6_jsox_mathx_median,
+      var: __autojs6_jsox_mathx_variance,
+      std: __autojs6_jsox_mathx_std,
+      cv: __autojs6_jsox_mathx_cv,
+      mode: __autojs6_jsox_mathx_mode,
+      dist: __autojs6_jsox_mathx_dist,
+      logMn: __autojs6_jsox_mathx_log_mn,
+      floorLog: __autojs6_jsox_mathx_floor_log,
+      ceilLog: __autojs6_jsox_mathx_ceil_log,
+      roundLog: __autojs6_jsox_mathx_round_log,
+      floorPow: __autojs6_jsox_mathx_floor_pow,
+      ceilPow: __autojs6_jsox_mathx_ceil_pow,
+      roundPow: __autojs6_jsox_mathx_round_pow,
+      max: __autojs6_jsox_mathx_max,
+      maxi: __autojs6_jsox_mathx_max,
+      min: __autojs6_jsox_mathx_min,
+      mini: __autojs6_jsox_mathx_min
+    });
+    return __autojs6_limited_jsox_mathx_cache;
+  }
+  function __autojs6_jsox_module_names(argsLike) {
+    const values = __autojs6_jsox_mathx_flatten(argsLike);
+    return values.length === 0 ? ["Mathx"] : values.map(function(value) {
+      return String(value === undefined || value === null ? "" : value).trim();
+    }).filter(Boolean);
+  }
+  function __autojs6_jsox_extend_target(target, moduleNames) {
+    const names = __autojs6_jsox_module_names(moduleNames);
+    names.forEach(function(name) {
+      const normalized = (name.replace(/x$/i, "") + "x").toLowerCase();
+      const moduleValue = normalized === "mathx"
+        ? __autojs6_limited_jsox_mathx()
+        : normalized === "arrayx"
+          ? __autojs6_limited_jsox_arrayx()
+          : normalized === "numberx"
+            ? __autojs6_limited_jsox_numberx()
+            : null;
+      if (!moduleValue) {
+        throw __autojs6_rhino_compat_error(
+          "jsox.extend currently supports the pure Mathx, Arrayx, and Numberx facades only.",
+          __autojs6_rhino_compat_error_codes.unsupported,
+          "jsox.extend",
+          "unsupported"
+        );
+      }
+      Object.keys(moduleValue).forEach(function(key) {
+        Object.defineProperty(target, key, {
+          value: moduleValue[key],
+          enumerable: true,
+          configurable: true,
+          writable: true
+        });
+      });
+    });
+    return target;
+  }
+  function __autojs6_jsox_extend() {
+    const args = Array.prototype.slice.call(arguments);
+    const target = args[0];
+    if (args.length === 0 || target === undefined || target === null || typeof target === "string" || typeof target === "number" || typeof target === "boolean" || Array.isArray(target)) {
+      throw __autojs6_rhino_compat_blocked_by_design(
+        "jsox.extend",
+        "default global Math/prototype mutation is disabled in the Node facade; pass an explicit target object."
+      );
+    }
+    if (typeof target !== "object" && typeof target !== "function") {
+      throw __autojs6_rhino_compat_error(
+        "jsox.extend target must be an object or function.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        "jsox.extend",
+        "invalid-option"
+      );
+    }
+    return __autojs6_jsox_extend_target(target, args.slice(1));
+  }
+  function __autojs6_jsox_extend_all(target) {
+    if (target === undefined || target === null) {
+      throw __autojs6_rhino_compat_blocked_by_design(
+        "jsox.extendAll",
+        "default global Math/prototype mutation is disabled in the Node facade; pass an explicit target object."
+      );
+    }
+    return __autojs6_jsox_extend_target(target, ["Mathx", "Numberx", "Arrayx"]);
+  }
+  function __autojs6_limited_jsox() {
+    if (__autojs6_limited_jsox_cache) {
+      return __autojs6_limited_jsox_cache;
+    }
+    const jsox = function() {
+      return __autojs6_jsox_extend.apply(null, arguments);
+    };
+    Object.defineProperties(jsox, {
+      mathx: { value: __autojs6_limited_jsox_mathx(), enumerable: true },
+      Mathx: { value: __autojs6_limited_jsox_mathx(), enumerable: true },
+      arrayx: { value: __autojs6_limited_jsox_arrayx(), enumerable: true },
+      Arrayx: { value: __autojs6_limited_jsox_arrayx(), enumerable: true },
+      numberx: { value: __autojs6_limited_jsox_numberx(), enumerable: true },
+      Numberx: { value: __autojs6_limited_jsox_numberx(), enumerable: true },
+      extend: { value: __autojs6_jsox_extend, enumerable: true },
+      extendAll: { value: __autojs6_jsox_extend_all, enumerable: true },
+      status: {
+        value: function() {
+          return Object.freeze({
+            schema: "autojs6-node-jsox-v1",
+            task: "P13-27",
+            modules: Object.freeze(["Mathx", "Numberx", "Arrayx"]),
+            nodeModules: Object.freeze(["jsox", "jsox.mathx", "jsox.arrayx", "jsox.numberx"]),
+            safeDefault: true,
+            defaultGlobalMutation: false,
+            rawAndroidObjects: false
+          });
+        },
+        enumerable: true
+      }
+    });
+    __autojs6_limited_jsox_cache = Object.freeze(jsox);
+    return __autojs6_limited_jsox_cache;
+  }
+  const __autojs6_rhino_shim_error_codes = Object.freeze({
+    shimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
+    installUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
+    importUnsupported: "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED",
+    javaAdapterUnsupported: "ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED",
+    invalidRequest: "ERR_AUTOJS6_RHINO_INVALID_REQUEST",
+    executionError: "ERR_AUTOJS6_RHINO_EXECUTION_ERROR",
+    executionTimeout: "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT",
+    jsonUnsafeResult: "ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT"
+  });
+  function __autojs6_rhino_shim_error(message, code, apiName, category) {
+    const error = __autojs6_error(message, code);
+    __autojs6_define_error_property(error, "module", "rhino");
+    if (apiName !== undefined && apiName !== null && String(apiName).length > 0) {
+      __autojs6_define_error_property(error, "api", String(apiName));
+    }
+    if (category !== undefined && category !== null && String(category).length > 0) {
+      __autojs6_define_error_property(error, "category", String(category));
+    }
+    return error;
+  }
+  function __autojs6_rhino_shim_disabled_error(apiName) {
+    const api = apiName === undefined || apiName === null || String(apiName).length === 0
+      ? "rhino"
+      : String(apiName);
+    return __autojs6_rhino_shim_error(
+      "AutoJs6 Rhino JSON-only shim is disabled in the current Safe Node Profile; " +
+        api + " cannot execute Rhino without an explicit experimental adapter gate.",
+      __autojs6_rhino_shim_error_codes.shimDisabled,
+      api,
+      "disabled"
+    );
+  }
+  function __autojs6_rhino_install_unsupported_error() {
+    return __autojs6_rhino_shim_error(
+      "AutoJs6 Rhino JSON-only shim does not support rhino.install() by default; explicit experimental Java proxy install requires the Java interop gate.",
+      __autojs6_rhino_shim_error_codes.installUnsupported,
+      "install",
+      "unsupported"
+    );
+  }
+  function __autojs6_rhino_import_unsupported_error(apiName) {
+    const api = apiName === "importPackage" ? "importPackage" : "importClass";
+    return __autojs6_rhino_shim_error(
+      "AutoJs6 Node does not support Rhino " + api + "; use explicit assignment from rhino.install({ experimental: true, target }) Java proxies instead.",
+      __autojs6_rhino_shim_error_codes.importUnsupported,
+      api,
+      "unsupported"
+    );
+  }
+  function __autojs6_rhino_java_adapter_unsupported_error() {
+    return __autojs6_rhino_shim_error(
+      "AutoJs6 Node does not support Rhino JavaAdapter; P13-16 reserves a future $java.defineClass or proxy-interface replacement with bounded lifecycle and callback cleanup.",
+      __autojs6_rhino_shim_error_codes.javaAdapterUnsupported,
+      "JavaAdapter",
+      "unsupported"
+    );
+  }
+  function __autojs6_rhino_invalid_request_error(message, apiName) {
+    return __autojs6_rhino_shim_error(
+      message,
+      __autojs6_rhino_shim_error_codes.invalidRequest,
+      apiName || "run",
+      "invalid-request"
+    );
+  }
+  function __autojs6_rhino_utf8ish_size(value) {
+    const text = String(value === undefined || value === null ? "" : value);
+    if (typeof Buffer === "function" && Buffer && typeof Buffer.byteLength === "function") {
+      return Buffer.byteLength(text, "utf8");
+    }
+    return unescape(encodeURIComponent(text)).length;
+  }
+  function __autojs6_rhino_relative_text(value, fieldName, allowEmpty) {
+    const text = value === undefined || value === null ? "" : String(value);
+    if (!allowEmpty && text.length === 0) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run " + fieldName + " must be non-empty.");
+    }
+    if (text.indexOf("\u0000") !== -1) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run " + fieldName + " must not contain NUL bytes.");
+    }
+    if (text.charAt(0) === "/" || /^[A-Za-z]:[\\/]/.test(text)) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run " + fieldName + " must be relative to the scoped working directory.");
+    }
+    const parts = text.split(/[\\/]+/);
+    if (parts.some(function(part) { return part === ".."; })) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run " + fieldName + " must not escape the scoped working directory.");
+    }
+    return allowEmpty && text.length === 0 ? "." : text;
+  }
+  function __autojs6_rhino_run_timeout_ms(value) {
+    if (value === undefined || value === null) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run requires timeoutMs.");
+    }
+    const timeoutMs = Number(value);
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run timeoutMs must be a positive number.");
+    }
+    return Math.min(Math.trunc(timeoutMs), 30000);
+  }
+  function __autojs6_rhino_run_args(value) {
+    if (value === undefined || value === null) {
+      return [];
+    }
+    if (!Array.isArray(value)) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run args must be a JSON array.");
+    }
+    let text;
+    try {
+      text = JSON.stringify(value);
+    } catch (error) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run args must be JSON-serializable.");
+    }
+    if (typeof text !== "string") {
+      throw __autojs6_rhino_invalid_request_error("rhino.run args must be JSON-serializable.");
+    }
+    if (__autojs6_rhino_utf8ish_size(text) > 16384) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run args exceed 16384 bytes.");
+    }
+    return JSON.parse(text);
+  }
+  function __autojs6_rhino_run_request(request) {
+    const input = request && typeof request === "object" && !Array.isArray(request) ? request : null;
+    if (!input) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run requires a request object.");
+    }
+    if (input.experimental !== true) {
+      throw __autojs6_rhino_shim_disabled_error("run");
+    }
+    const hasSource = Object.prototype.hasOwnProperty.call(input, "source") && input.source !== undefined && input.source !== null;
+    const hasPath = Object.prototype.hasOwnProperty.call(input, "path") && input.path !== undefined && input.path !== null;
+    if (hasSource === hasPath) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run requires exactly one of source or path.");
+    }
+    const timeoutMs = __autojs6_rhino_run_timeout_ms(input.timeoutMs);
+    const payload = {
+      experimental: true,
+      timeoutMs,
+      args: __autojs6_rhino_run_args(input.args),
+      cwd: __autojs6_rhino_relative_text(input.cwd, "cwd", true),
+      __autojs6BaseCwd: __autojs6_current_engine_info().cwd || __autojs6_engine_info_fallback_cwd()
+    };
+    if (hasSource) {
+      const source = String(input.source);
+      if (source.length === 0 || source.indexOf("\u0000") !== -1) {
+        throw __autojs6_rhino_invalid_request_error("rhino.run source must be non-empty and must not contain NUL bytes.");
+      }
+      if (__autojs6_rhino_utf8ish_size(source) > 65536) {
+        throw __autojs6_rhino_invalid_request_error("rhino.run source exceeds 65536 bytes.");
+      }
+      payload.source = source;
+      if (input.name !== undefined && input.name !== null && String(input.name).length > 0) {
+        const name = String(input.name);
+        if (name.indexOf("\u0000") !== -1) {
+          throw __autojs6_rhino_invalid_request_error("rhino.run name must not contain NUL bytes.");
+        }
+        payload.name = name;
+      }
+    } else {
+      payload.path = __autojs6_rhino_relative_text(input.path, "path", false);
+    }
+    return payload;
+  }
+  function __autojs6_rhino_deep_freeze_json(value) {
+    if (!value || typeof value !== "object") {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return Object.freeze(value.map(__autojs6_rhino_deep_freeze_json));
+    }
+    const output = {};
+    Object.keys(value).forEach(function(key) {
+      output[key] = __autojs6_rhino_deep_freeze_json(value[key]);
+    });
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_error_result(value) {
+    const input = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      name: input.name === undefined || input.name === null ? "Error" : String(input.name),
+      message: input.message === undefined || input.message === null ? "" : String(input.message),
+      code: input.code === undefined || input.code === null ? __autojs6_rhino_shim_error_codes.executionError : String(input.code),
+      category: input.category === undefined || input.category === null ? "rhino-exception" : String(input.category),
+      sourceName: input.sourceName === undefined || input.sourceName === null ? "" : String(input.sourceName),
+      lineNumber: Number.isFinite(Number(input.lineNumber)) ? Math.trunc(Number(input.lineNumber)) : 0,
+      columnNumber: Number.isFinite(Number(input.columnNumber)) ? Math.trunc(Number(input.columnNumber)) : 0,
+      stack: input.stack === undefined || input.stack === null ? "" : String(input.stack)
+    });
+  }
+  function __autojs6_rhino_console_result(value) {
+    const input = value && typeof value === "object" ? value : {};
+    const lines = Array.isArray(input.lines) ? input.lines : [];
+    return Object.freeze({
+      schema: input.schema === undefined || input.schema === null ? "autojs6-rhino-json-only-console-v1" : String(input.schema),
+      lines: Object.freeze(lines.map(function(line) {
+        const item = line && typeof line === "object" ? line : {};
+        return Object.freeze({
+          level: item.level === undefined || item.level === null ? "log" : String(item.level),
+          message: item.message === undefined || item.message === null ? "" : String(item.message)
+        });
+      })),
+      truncated: input.truncated === true,
+      maxLines: Number.isFinite(Number(input.maxLines)) ? Math.trunc(Number(input.maxLines)) : 0,
+      maxBytes: Number.isFinite(Number(input.maxBytes)) ? Math.trunc(Number(input.maxBytes)) : 0
+    });
+  }
+  function __autojs6_rhino_lifecycle_result(value) {
+    const input = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      engineCreated: input.engineCreated === true,
+      forceStopRequested: input.forceStopRequested === true,
+      destroyed: input.destroyed === true
+    });
+  }
+  function __autojs6_rhino_run_result(value) {
+    const input = value && typeof value === "object" ? value : {};
+    const ok = input.ok === true;
+    const output = {
+      schema: input.schema === undefined || input.schema === null ? "autojs6-rhino-json-only-run-result-v1" : String(input.schema),
+      mode: input.mode === undefined || input.mode === null ? "json-only-poc" : String(input.mode),
+      provider: input.provider === undefined || input.provider === null ? "" : String(input.provider),
+      ok,
+      timedOut: input.timedOut === true,
+      sourceName: input.sourceName === undefined || input.sourceName === null ? "" : String(input.sourceName),
+      durationMs: Number.isFinite(Number(input.durationMs)) ? Math.max(0, Math.trunc(Number(input.durationMs))) : 0,
+      console: __autojs6_rhino_console_result(input.console),
+      lifecycle: __autojs6_rhino_lifecycle_result(input.lifecycle)
+    };
+    if (ok) {
+      output.value = __autojs6_rhino_deep_freeze_json(input.value === undefined ? null : input.value);
+    } else {
+      output.error = __autojs6_rhino_error_result(input.error);
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_disabled_status() {
+    return Object.freeze({
+      schema: "autojs6-rhino-json-only-shim-disabled-v1",
+      module: "rhino",
+      mode: "disabled",
+      enabled: false,
+      run: "disabled",
+      install: "unsupported",
+      globalsInstalled: false,
+      nodeAlias: false,
+      shadowing: "reserved"
+    });
+  }
+  const __autojs6_rhino_java_global_names = Object.freeze(["Packages", "java", "android"]);
+  function __autojs6_rhino_java_proxy_path(pathValue) {
+    return pathValue === undefined || pathValue === null ? "" : String(pathValue);
+  }
+  function __autojs6_rhino_java_proxy(pathValue) {
+    const path = __autojs6_rhino_java_proxy_path(pathValue);
+    const proxyTarget = function AutoJs6RhinoJavaProxy() {};
+    return new Proxy(proxyTarget, {
+      get: function(_target, property) {
+        if (property === Symbol.toStringTag) {
+          return "AutoJs6RhinoJavaProxy";
+        }
+        if (property === Symbol.toPrimitive) {
+          return function() {
+            return path;
+          };
+        }
+        if (property === "then") {
+          return undefined;
+        }
+        if (property === "__autojs6RhinoJavaProxy") {
+          return true;
+        }
+        if (property === "className" || property === "name" || property === "path") {
+          return path;
+        }
+        if (property === "toString" || property === "valueOf") {
+          return function() {
+            return path;
+          };
+        }
+        if (typeof property === "symbol") {
+          return undefined;
+        }
+        const segment = String(property);
+        return __autojs6_rhino_java_proxy(path ? path + "." + segment : segment);
+      },
+      apply: function(_target, _thisArg, args) {
+        const segments = path.split(".").filter(function(segment) { return segment.length > 0; });
+        if (segments.length < 2) {
+          return Promise.reject(__autojs6_rhino_invalid_request_error(
+            "rhino.install Java proxy requires a class and method path.",
+            "install"
+          ));
+        }
+        const methodName = segments.pop();
+        const className = segments.join(".");
+        return __autojs6_java_call_static(className, methodName, Array.prototype.slice.call(args || []));
+      },
+      construct: function(_target, args) {
+        return __autojs6_java_new(path, Array.prototype.slice.call(args || []));
+      }
+    });
+  }
+  function __autojs6_rhino_install_options(options) {
+    const input = options && typeof options === "object" && !Array.isArray(options) ? options : null;
+    if (!input || input.experimental !== true) {
+      throw __autojs6_rhino_install_unsupported_error();
+    }
+    const target = input.target && typeof input.target === "object"
+      ? input.target
+      : input.globals === true
+        ? globalThis
+        : {};
+    return {
+      target,
+      globals: target === globalThis
+    };
+  }
+  function __autojs6_rhino_install(options) {
+    const parsed = __autojs6_rhino_install_options(options);
+    __autojs6_java_check_enabled();
+    const packagesProxy = __autojs6_rhino_java_proxy("");
+    const javaProxy = __autojs6_rhino_java_proxy("java");
+    const androidProxy = __autojs6_rhino_java_proxy("android");
+    const definitions = {
+      Packages: packagesProxy,
+      java: javaProxy,
+      android: androidProxy
+    };
+    const installed = [];
+    __autojs6_rhino_java_global_names.forEach(function(name) {
+      Object.defineProperty(parsed.target, name, {
+        value: definitions[name],
+        enumerable: false,
+        writable: false,
+        configurable: true
+      });
+      installed.push(name);
+    });
+    __autojs6_rhino_install_state = Object.freeze({
+      schema: "autojs6-rhino-install-java-proxy-v1",
+      module: "rhino",
+      mode: "java-allowlist-proxy",
+      experimental: true,
+      globalsInstalled: parsed.globals,
+      installed: Object.freeze(installed.slice()),
+      javaInterop: __autojs6_java_policy_snapshot(),
+      importClass: false,
+      importPackage: false,
+      JavaAdapter: false,
+      shadowing: "reserved"
+    });
+    return __autojs6_rhino_install_state;
+  }
+  function __autojs6_limited_rhino() {
+    if (__autojs6_limited_rhino_cache) {
+      return __autojs6_limited_rhino_cache;
+    }
+    function run(request) {
+      let payload;
+      try {
+        payload = __autojs6_rhino_run_request(request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "rhino",
+        "run",
+        [payload],
+        {
+          timeoutMs: Math.min(payload.timeoutMs + 1000, 2147483647),
+          permissions: ["rhino"],
+          signal: __autojs6_bridge_signal_from_options(request)
+        }
+      ).then(__autojs6_rhino_run_result);
+    }
+    function install(options) {
+      return __autojs6_rhino_install(options);
+    }
+    function importClass() {
+      throw __autojs6_rhino_import_unsupported_error("importClass");
+    }
+    function importPackage() {
+      throw __autojs6_rhino_import_unsupported_error("importPackage");
+    }
+    function JavaAdapter() {
+      throw __autojs6_rhino_java_adapter_unsupported_error();
+    }
+    __autojs6_limited_rhino_cache = Object.freeze({
+      name: "rhino",
+      version: 1,
+      schema: "autojs6-rhino-json-only-shim-disabled-v1",
+      mode: "disabled",
+      enabled: false,
+      errorCodes: __autojs6_rhino_shim_error_codes,
+      isEnabled: function() {
+        return false;
+      },
+      status: __autojs6_rhino_disabled_status,
+      run,
+      install,
+      importClass,
+      importPackage,
+      JavaAdapter
+    });
+    return __autojs6_limited_rhino_cache;
+  }
+  const __autojs6_rhino_compat_error_codes = Object.freeze({
+    invalidOption: "ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION",
+    unsupported: "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
+    blockedByDesign: "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
+  });
+  const __autojs6_rhino_selector_handle_type = "autojs6.rhino.selector.handle";
+  const __autojs6_rhino_selector_builder_names = Object.freeze(["text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains"]);
+  const __autojs6_rhino_selector_action_names = Object.freeze(["click", "back", "home", "recentApps", "recents"]);
+  const __autojs6_rhino_selector_global_names = Object.freeze(["selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents"]);
+  let __autojs6_rhino_selector_dsl_cache = null;
+  let __autojs6_rhino_compat_shell_cache = null;
+  let __autojs6_rhino_compat_images_cache = null;
+  let __autojs6_rhino_compat_screen_capturer_cache = null;
+  let __autojs6_rhino_compat_ocr_cache = null;
+  let __autojs6_rhino_compat_barcode_cache = null;
+  let __autojs6_rhino_compat_qrcode_cache = null;
+  let __autojs6_rhino_compat_tasks_cache = null;
+  const __autojs6_rhino_compat_key_constants = Object.freeze({
+    home: 3,
+    HOME: 3,
+    menu: 82,
+    MENU: 82,
+    back: 4,
+    BACK: 4,
+    volumeUp: 24,
+    volume_up: 24,
+    VOLUME_UP: 24,
+    volumeDown: 25,
+    volume_down: 25,
+    VOLUME_DOWN: 25
+  });
+  const __autojs6_rhino_compat_events = Object.freeze({
+    keys: __autojs6_rhino_compat_key_constants
+  });
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "jsox", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "barcode", "qrcode", "media", "mediainfo", "recorder", "keys", "ui"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "jsox", "jsox.mathx", "jsox.arrayx", "jsox.numberx", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "barcode", "qrcode", "media", "mediainfo", "recorder", "events.keys", "ui", "tasks"]);
+  const __autojs6_rhino_compat_installed_globals = [];
+  function __autojs6_rhino_compat_error(message, code, apiName, category) {
+    const error = __autojs6_error(message, code);
+    __autojs6_define_error_property(error, "module", "autojs6:compat");
+    if (apiName !== undefined && apiName !== null && String(apiName).length > 0) {
+      __autojs6_define_error_property(error, "api", String(apiName));
+    }
+    if (category !== undefined && category !== null && String(category).length > 0) {
+      __autojs6_define_error_property(error, "category", String(category));
+    }
+    return error;
+  }
+  function __autojs6_rhino_compat_option_object(options, operation) {
+    if (options === undefined || options === null) {
+      return {};
+    }
+    if (typeof options !== "object" || Array.isArray(options)) {
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat." + operation + " options must be an object when provided.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        operation,
+        "invalid-option"
+      );
+    }
+    return options;
+  }
+  function __autojs6_rhino_compat_message(value) {
+    return value === undefined || value === null ? "" : String(value);
+  }
+  function __autojs6_rhino_compat_toast(message, options) {
+    return __autojs6_limited_toast().showToast(
+      __autojs6_rhino_compat_message(message),
+      options
+    );
+  }
+  function __autojs6_rhino_compat_toast_log() {
+    const args = Array.prototype.slice.call(arguments);
+    const message = args.length === 0
+      ? ""
+      : args.map(__autojs6_rhino_compat_message).join(" ");
+    try {
+      if (typeof console === "object" && console && typeof console.log === "function") {
+        console.log.apply(console, args.length === 0 ? [message] : args);
+      }
+    } catch (_) {}
+    return __autojs6_limited_toast().showToast(message, { log: true });
+  }
+  function __autojs6_rhino_compat_number(value, operation, fallback) {
+    if (value === undefined || value === null || value === "") {
+      return fallback;
+    }
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat." + operation + " requires a finite millisecond value.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        operation,
+        "invalid-option"
+      );
+    }
+    return number;
+  }
+  function __autojs6_rhino_compat_sleep_duration(millisMin, millisMax, hasMax) {
+    let min = Math.max(0, __autojs6_rhino_compat_number(millisMin, "sleep", 0));
+    let max = min;
+    if (hasMax) {
+      if (typeof millisMax === "string") {
+        const match = /[+-]?(\d+(\.\d+)?(e[+-]?\d+)?)/i.exec(millisMax);
+        if (!match) {
+          throw __autojs6_rhino_compat_error(
+            "autojs6:compat.sleep string max must contain a number.",
+            __autojs6_rhino_compat_error_codes.invalidOption,
+            "sleep",
+            "invalid-option"
+          );
+        }
+        const delta = __autojs6_rhino_compat_number(match[0], "sleep", 0);
+        max = min + delta;
+        min -= delta;
+      } else {
+        max = __autojs6_rhino_compat_number(millisMax, "sleep", min);
+      }
+    }
+    const low = Math.max(0, Math.min(min, max));
+    const high = Math.max(low, Math.max(min, max));
+    const duration = low + Math.random() * (high - low);
+    return Math.max(0, Math.min(2147483647, Math.floor(duration)));
+  }
+  function __autojs6_rhino_compat_sleep(millisMin, millisMax) {
+    let duration;
+    try {
+      duration = __autojs6_rhino_compat_sleep_duration(millisMin, millisMax, arguments.length > 1);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return new Promise(function(resolve) {
+      setTimeout(resolve, duration);
+    });
+  }
+  function __autojs6_rhino_compat_set_clip(text, options) {
+    return __autojs6_limited_clipboard().setText(
+      __autojs6_rhino_compat_message(text),
+      options
+    );
+  }
+  function __autojs6_rhino_compat_get_clip(options) {
+    return __autojs6_limited_clipboard().getText(options);
+  }
+  function __autojs6_rhino_compat_shell_options(value) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (typeof value === "boolean") {
+      return Object.freeze({ root: value });
+    }
+    if (typeof value === "object" && !Array.isArray(value)) {
+      return value;
+    }
+    throw __autojs6_rhino_compat_error(
+      "autojs6:compat.shell options must be a boolean root flag or an object when provided.",
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      "shell",
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_compat_shell() {
+    if (__autojs6_rhino_compat_shell_cache) {
+      return __autojs6_rhino_compat_shell_cache;
+    }
+    const shellModule = __autojs6_limited_shell();
+    const shell = function(command, options) {
+      let shellOptions;
+      try {
+        shellOptions = __autojs6_rhino_compat_shell_options(options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return shellModule.exec(command, shellOptions);
+    };
+    Object.defineProperties(shell, {
+      exec: { value: shellModule.exec, enumerable: true },
+      execRoot: { value: shellModule.execRoot, enumerable: true },
+      execShizuku: { value: shellModule.execShizuku, enumerable: true },
+      execFile: { value: shellModule.execFile, enumerable: true },
+      checkAccess: { value: shellModule.checkAccess, enumerable: true },
+      setDefaultTimeout: { value: shellModule.setDefaultTimeout, enumerable: true }
+    });
+    __autojs6_rhino_compat_shell_cache = Object.freeze(shell);
+    return __autojs6_rhino_compat_shell_cache;
+  }
+  function __autojs6_rhino_compat_image_plain_options(value, apiName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (typeof value === "object" && !Array.isArray(value)) {
+      return value;
+    }
+    throw __autojs6_rhino_compat_error(
+      "autojs6:compat." + apiName + " options must be an object when provided.",
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      apiName,
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_compat_image_number(value, apiName, fieldName) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat." + apiName + " requires finite numeric " + fieldName + ".",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    return number;
+  }
+  function __autojs6_rhino_compat_image_region(value, y, width, height, apiName) {
+    let xValue = value;
+    let yValue = y;
+    let widthValue = width;
+    let heightValue = height;
+    if (Array.isArray(value)) {
+      xValue = value[0];
+      yValue = value[1];
+      widthValue = value[2];
+      heightValue = value[3];
+    } else if (value && typeof value === "object") {
+      xValue = value.x !== undefined ? value.x : value.left;
+      yValue = value.y !== undefined ? value.y : value.top;
+      if (value.width !== undefined || value.height !== undefined) {
+        widthValue = value.width;
+        heightValue = value.height;
+      } else {
+        widthValue = Number(value.right) - Number(xValue);
+        heightValue = Number(value.bottom) - Number(yValue);
+      }
+    }
+    return Object.freeze({
+      x: __autojs6_rhino_compat_image_number(xValue, apiName, "region.x"),
+      y: __autojs6_rhino_compat_image_number(yValue, apiName, "region.y"),
+      width: __autojs6_rhino_compat_image_number(widthValue, apiName, "region.width"),
+      height: __autojs6_rhino_compat_image_number(heightValue, apiName, "region.height")
+    });
+  }
+  function __autojs6_rhino_compat_image_size(value, height, apiName) {
+    let widthValue = value;
+    let heightValue = height;
+    if (Array.isArray(value)) {
+      widthValue = value[0];
+      heightValue = value[1];
+    } else if (value && typeof value === "object") {
+      widthValue = value.width;
+      heightValue = value.height;
+    }
+    return Object.freeze({
+      width: __autojs6_rhino_compat_image_number(widthValue, apiName, "width"),
+      height: __autojs6_rhino_compat_image_number(heightValue, apiName, "height")
+    });
+  }
+  function __autojs6_rhino_compat_image_save_options(formatOrOptions, qualityOrOptions, apiName) {
+    const output = {};
+    if (formatOrOptions !== undefined && formatOrOptions !== null) {
+      if (typeof formatOrOptions === "string") {
+        output.format = formatOrOptions;
+      } else if (typeof formatOrOptions === "object" && !Array.isArray(formatOrOptions)) {
+        Object.keys(formatOrOptions).forEach(function(key) {
+          output[key] = formatOrOptions[key];
+        });
+      } else {
+        throw __autojs6_rhino_compat_error(
+          "autojs6:compat." + apiName + " format must be a string or options object.",
+          __autojs6_rhino_compat_error_codes.invalidOption,
+          apiName,
+          "invalid-option"
+        );
+      }
+    }
+    if (qualityOrOptions !== undefined && qualityOrOptions !== null) {
+      if (typeof qualityOrOptions === "object" && !Array.isArray(qualityOrOptions)) {
+        Object.keys(qualityOrOptions).forEach(function(key) {
+          output[key] = qualityOrOptions[key];
+        });
+      } else {
+        output.quality = __autojs6_rhino_compat_image_number(qualityOrOptions, apiName, "quality");
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_image_threshold_type(value) {
+    if (value === undefined || value === null || value === "") {
+      return undefined;
+    }
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return ["binary", "binary_inv", "trunc", "tozero", "tozero_inv"][Math.trunc(value)];
+    }
+    const text = String(value).toLowerCase().replace(/^thresh[_-]?/, "").replace(/-/g, "_");
+    return text === "binary" || text === "binary_inv" || text === "trunc" || text === "tozero" || text === "tozero_inv"
+      ? text
+      : String(value);
+  }
+  function __autojs6_rhino_compat_image_threshold_options(thresholdOrOptions, maxValue, type, apiName) {
+    if (thresholdOrOptions && typeof thresholdOrOptions === "object" && !Array.isArray(thresholdOrOptions)) {
+      return thresholdOrOptions;
+    }
+    const output = {};
+    if (thresholdOrOptions !== undefined && thresholdOrOptions !== null) {
+      output.threshold = __autojs6_rhino_compat_image_number(thresholdOrOptions, apiName, "threshold");
+    }
+    if (maxValue !== undefined && maxValue !== null) {
+      output.maxValue = __autojs6_rhino_compat_image_number(maxValue, apiName, "maxValue");
+    }
+    const thresholdType = __autojs6_rhino_compat_image_threshold_type(type);
+    if (thresholdType !== undefined) {
+      output.type = thresholdType;
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_image_find_options(optionsOrX, y, width, height, threshold, apiName, hasRegionArgs) {
+    if (!hasRegionArgs) {
+      return __autojs6_rhino_compat_image_plain_options(optionsOrX, apiName);
+    }
+    const region = __autojs6_rhino_compat_image_region(optionsOrX, y, width, height, apiName);
+    const output = { region: Object.freeze([region.x, region.y, region.width, region.height]) };
+    if (threshold !== undefined && threshold !== null) {
+      output.threshold = __autojs6_rhino_compat_image_number(threshold, apiName, "threshold");
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_screen_capture_request_options(value, apiName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (typeof value === "boolean") {
+      return Object.freeze({ orientation: value ? "landscape" : "portrait" });
+    }
+    if (typeof value === "string") {
+      return Object.freeze({ orientation: value });
+    }
+    if (typeof value === "object" && !Array.isArray(value)) {
+      return value;
+    }
+    throw __autojs6_rhino_compat_error(
+      "autojs6:compat." + apiName + " options must be a boolean orientation flag, orientation string, or object when provided.",
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      apiName,
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_compat_capture_options(value, apiName) {
+    const input = __autojs6_rhino_compat_image_plain_options(value, apiName);
+    const output = {};
+    if (input) {
+      Object.keys(input).forEach(function(key) {
+        output[key] = input[key];
+      });
+    }
+    output.requireExistingPermission = true;
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_request_screen_capture(options) {
+    let requestOptions;
+    try {
+      requestOptions = __autojs6_rhino_compat_screen_capture_request_options(options, "requestScreenCapture");
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    const request = function() {
+      return __autojs6_limited_media_projection().requestScreenCapture(requestOptions).then(function(capturer) {
+        __autojs6_rhino_compat_screen_capturer_cache = capturer || null;
+        return true;
+      });
+    };
+    if (__autojs6_rhino_compat_screen_capturer_cache && typeof __autojs6_rhino_compat_screen_capturer_cache.stop === "function") {
+      const previous = __autojs6_rhino_compat_screen_capturer_cache;
+      __autojs6_rhino_compat_screen_capturer_cache = null;
+      return Promise.resolve().then(function() {
+        return previous.stop();
+      }).then(request, request);
+    }
+    return request();
+  }
+  function __autojs6_rhino_compat_stop_screen_capture(options) {
+    const capturer = __autojs6_rhino_compat_screen_capturer_cache;
+    __autojs6_rhino_compat_screen_capturer_cache = null;
+    if (!capturer || typeof capturer.stop !== "function") {
+      return Promise.resolve(false);
+    }
+    return Promise.resolve().then(function() {
+      return capturer.stop(options);
+    }).then(function() {
+      return true;
+    });
+  }
+  function __autojs6_rhino_compat_recycle_after_settle(imageModule, handle, continuation) {
+    return Promise.resolve().then(continuation).then(function(value) {
+      return imageModule.recycle(handle).then(function() {
+        return value;
+      }, function() {
+        return value;
+      });
+    }, function(error) {
+      return imageModule.recycle(handle).then(function() {
+        throw error;
+      }, function() {
+        throw error;
+      });
+    });
+  }
+  function __autojs6_rhino_compat_capture_screen(pathOrOptions, maybeOptions) {
+    const imageModule = __autojs6_limited_image("images");
+    const hasPath = typeof pathOrOptions === "string";
+    let captureOptions;
+    let saveOptions;
+    try {
+      captureOptions = __autojs6_rhino_compat_capture_options(hasPath ? maybeOptions : pathOrOptions, "captureScreen");
+      saveOptions = hasPath ? __autojs6_rhino_compat_image_save_options(maybeOptions, undefined, "captureScreen") : undefined;
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return imageModule.captureScreen(captureOptions).then(function(handle) {
+      if (!hasPath) {
+        return handle;
+      }
+      return __autojs6_rhino_compat_recycle_after_settle(imageModule, handle, function() {
+        return imageModule.saveImage(handle, pathOrOptions, saveOptions).then(function() {
+          return true;
+        });
+      });
+    });
+  }
+  function __autojs6_rhino_compat_ocr_region_like(value) {
+    if (Array.isArray(value)) {
+      return true;
+    }
+    if (!value || typeof value !== "object") {
+      return false;
+    }
+    if (value.region !== undefined) {
+      return false;
+    }
+    return value.x !== undefined || value.y !== undefined || value.width !== undefined || value.height !== undefined ||
+      value.left !== undefined || value.top !== undefined || value.right !== undefined || value.bottom !== undefined;
+  }
+  function __autojs6_rhino_compat_ocr_options(value, apiName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (__autojs6_rhino_compat_ocr_region_like(value)) {
+      return Object.freeze({
+        region: __autojs6_rhino_compat_image_region(value, undefined, undefined, undefined, apiName)
+      });
+    }
+    if (typeof value === "object" && !Array.isArray(value)) {
+      const output = {};
+      Object.keys(value).forEach(function(key) {
+        output[key] = value[key];
+      });
+      if (output.region !== undefined && output.region !== null) {
+        output.region = __autojs6_rhino_compat_image_region(output.region, undefined, undefined, undefined, apiName);
+      }
+      return Object.freeze(output);
+    }
+    throw __autojs6_rhino_compat_error(
+      "autojs6:compat." + apiName + " options must be an object or region tuple when provided.",
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      apiName,
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_compat_ocr_source_args(imageOrOptions, maybeOptions, apiName) {
+    const hasImageSource = typeof imageOrOptions === "string" || !!__autojs6_normalize_image_handle(imageOrOptions);
+    return Object.freeze({
+      image: hasImageSource ? imageOrOptions : undefined,
+      options: __autojs6_rhino_compat_ocr_options(hasImageSource ? maybeOptions : imageOrOptions, apiName)
+    });
+  }
+  function __autojs6_rhino_compat_ocr_with_image(apiName, imageOrOptions, maybeOptions, continuation) {
+    const imageModule = __autojs6_limited_image("images");
+    let args;
+    try {
+      args = __autojs6_rhino_compat_ocr_source_args(imageOrOptions, maybeOptions, apiName);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    if (typeof args.image === "string") {
+      return imageModule.readImage(args.image, args.options).then(function(handle) {
+        return __autojs6_rhino_compat_recycle_after_settle(imageModule, handle, function() {
+          return continuation(handle, args.options);
+        });
+      });
+    }
+    if (args.image !== undefined) {
+      return continuation(args.image, args.options);
+    }
+    const captureOptions = __autojs6_rhino_compat_capture_options(args.options, apiName);
+    return imageModule.captureScreen(captureOptions).then(function(handle) {
+      return __autojs6_rhino_compat_recycle_after_settle(imageModule, handle, function() {
+        return continuation(handle, args.options);
+      });
+    });
+  }
+  function __autojs6_rhino_compat_ocr_texts(results) {
+    const output = [];
+    const values = Array.isArray(results) ? results : [];
+    for (let i = 0; i < values.length; i++) {
+      const text = values[i] && typeof values[i].text === "string" ? values[i].text : "";
+      if (text.length > 0) {
+        output.push(text);
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_ocr() {
+    if (__autojs6_rhino_compat_ocr_cache) {
+      return __autojs6_rhino_compat_ocr_cache;
+    }
+    const ocrModule = __autojs6_limited_ocr();
+    function recognize(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_ocr_with_image("ocr.recognize", imageOrOptions, maybeOptions, function(image, options) {
+        return ocrModule.recognize(image, options);
+      });
+    }
+    function recognizeText(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_ocr_with_image("ocr.recognizeText", imageOrOptions, maybeOptions, function(image, options) {
+        return ocrModule.recognize(image, options).then(__autojs6_rhino_compat_ocr_texts);
+      });
+    }
+    function detectTextBounds(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_ocr_with_image("ocr.detectTextBounds", imageOrOptions, maybeOptions, function(image, options) {
+        return ocrModule.detectTextBounds(image, options);
+      });
+    }
+    function tap(mode) {
+      const requested = mode === undefined || mode === null || mode === "" ? "mlkit" : String(mode).toLowerCase();
+      if (requested === "mlkit") {
+        return "mlkit";
+      }
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat.ocr.tap supports only the Activity-owned ML Kit provider in Node; Rhino OCR mode \"" + requested + "\" is not exposed.",
+        __autojs6_rhino_compat_error_codes.blockedByDesign,
+        "ocr.tap",
+        "blocked-by-design"
+      );
+    }
+    function summary() {
+      return [
+        "[ OCR summary ]",
+        "Current mode: mlkit",
+        "Available modes: [ mlkit ]",
+        "Unavailable Rhino modes in Node: paddle, rapid"
+      ].join("\n");
+    }
+    const callable = function(imageOrOptions, maybeOptions) {
+      return recognizeText(imageOrOptions, maybeOptions);
+    };
+    Object.defineProperties(callable, {
+      recognize: { value: recognize, enumerable: true },
+      recognizeText: { value: recognizeText, enumerable: true },
+      detect: { value: detectTextBounds, enumerable: true },
+      detectTextBounds: { value: detectTextBounds, enumerable: true },
+      tap: { value: tap, enumerable: true },
+      summary: { value: summary, enumerable: true },
+      toString: { value: summary, enumerable: true },
+      mode: {
+        get: function() { return "mlkit"; },
+        set: function(value) { tap(value); },
+        enumerable: true
+      }
+    });
+    __autojs6_rhino_compat_ocr_cache = Object.freeze(callable);
+    return __autojs6_rhino_compat_ocr_cache;
+  }
+  function __autojs6_rhino_compat_barcode_image_source(value) {
+    if (typeof value === "string" || !!__autojs6_normalize_image_handle(value)) {
+      return true;
+    }
+    if (!value || typeof value !== "object") {
+      return false;
+    }
+    const type = String(value.type === undefined || value.type === null ? "" : value.type);
+    return type === "path" || type === "imageHandle" || type === "capture";
+  }
+  function __autojs6_rhino_compat_barcode_options(value, apiName, qrOnly) {
+    if (value === undefined || value === null) {
+      return qrOnly ? Object.freeze({ qrOnly: true, formats: Object.freeze(["QR_CODE"]) }) : undefined;
+    }
+    let output;
+    if (__autojs6_rhino_compat_ocr_region_like(value)) {
+      output = {
+        region: __autojs6_rhino_compat_image_region(value, undefined, undefined, undefined, apiName)
+      };
+    } else if (typeof value === "object" && !Array.isArray(value)) {
+      output = {};
+      Object.keys(value).forEach(function(key) {
+        output[key] = value[key];
+      });
+      if (output.region !== undefined && output.region !== null) {
+        output.region = __autojs6_rhino_compat_image_region(output.region, undefined, undefined, undefined, apiName);
+      }
+    } else {
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat." + apiName + " options must be an object or region tuple when provided.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    if (qrOnly) {
+      output.qrOnly = true;
+    }
+    const normalized = __autojs6_barcode_options(output, apiName);
+    Object.keys(normalized).forEach(function(key) {
+      output[key] = normalized[key];
+    });
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_barcode_source_args(imageOrOptions, maybeOptions, apiName, qrOnly) {
+    const hasImageSource = __autojs6_rhino_compat_barcode_image_source(imageOrOptions);
+    return Object.freeze({
+      image: hasImageSource ? imageOrOptions : undefined,
+      options: __autojs6_rhino_compat_barcode_options(hasImageSource ? maybeOptions : imageOrOptions, apiName, qrOnly)
+    });
+  }
+  function __autojs6_rhino_compat_barcode_with_image(apiName, qrOnly, imageOrOptions, maybeOptions, continuation) {
+    const imageModule = __autojs6_limited_image("images");
+    let args;
+    try {
+      args = __autojs6_rhino_compat_barcode_source_args(imageOrOptions, maybeOptions, apiName, qrOnly);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    if (args.image !== undefined) {
+      return continuation(args.image, args.options);
+    }
+    const captureOptions = __autojs6_rhino_compat_capture_options(args.options, apiName);
+    return imageModule.captureScreen(captureOptions).then(function(handle) {
+      return __autojs6_rhino_compat_recycle_after_settle(imageModule, handle, function() {
+        return continuation(handle, args.options);
+      });
+    });
+  }
+  function __autojs6_rhino_compat_barcode_facade(moduleName, qrOnly) {
+    const barcodeModule = __autojs6_limited_barcode();
+    function detect(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_barcode_with_image(moduleName + ".detect", qrOnly, imageOrOptions, maybeOptions, function(image, options) {
+        return barcodeModule.detect(image, options);
+      });
+    }
+    function detectAll(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_barcode_with_image(moduleName + ".detectAll", qrOnly, imageOrOptions, maybeOptions, function(image, options) {
+        return barcodeModule.detectAll(image, options);
+      });
+    }
+    function recognizeText(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_barcode_with_image(moduleName + ".recognizeText", qrOnly, imageOrOptions, maybeOptions, function(image, options) {
+        return barcodeModule.recognizeText(image, options);
+      });
+    }
+    function recognizeTexts(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_barcode_with_image(moduleName + ".recognizeTexts", qrOnly, imageOrOptions, maybeOptions, function(image, options) {
+        return barcodeModule.recognizeTexts(image, options);
+      });
+    }
+    const callable = function(imageOrOptions, maybeOptions) {
+      return recognizeTexts(imageOrOptions, maybeOptions);
+    };
+    Object.defineProperties(callable, {
+      detect: { value: detect, enumerable: true },
+      detectAll: { value: detectAll, enumerable: true },
+      recognizeText: { value: recognizeText, enumerable: true },
+      recognizeTexts: { value: recognizeTexts, enumerable: true }
+    });
+    return Object.freeze(callable);
+  }
+  function __autojs6_rhino_compat_barcode() {
+    if (__autojs6_rhino_compat_barcode_cache) {
+      return __autojs6_rhino_compat_barcode_cache;
+    }
+    __autojs6_rhino_compat_barcode_cache = __autojs6_rhino_compat_barcode_facade("barcode", false);
+    return __autojs6_rhino_compat_barcode_cache;
+  }
+  function __autojs6_rhino_compat_qrcode() {
+    if (__autojs6_rhino_compat_qrcode_cache) {
+      return __autojs6_rhino_compat_qrcode_cache;
+    }
+    __autojs6_rhino_compat_qrcode_cache = __autojs6_rhino_compat_barcode_facade("qrcode", true);
+    return __autojs6_rhino_compat_qrcode_cache;
+  }
+  function __autojs6_rhino_compat_images() {
+    if (__autojs6_rhino_compat_images_cache) {
+      return __autojs6_rhino_compat_images_cache;
+    }
+    const imageModule = __autojs6_limited_image("images");
+    function read(path, strictOrOptions, maybeOptions) {
+      let options;
+      try {
+        options = __autojs6_rhino_compat_image_plain_options(
+          maybeOptions !== undefined ? maybeOptions : (strictOrOptions && typeof strictOrOptions === "object" && !Array.isArray(strictOrOptions) ? strictOrOptions : undefined),
+          "images.read"
+        );
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.readImage(path, options);
+    }
+    function save(image, path, formatOrOptions, qualityOrOptions) {
+      let options;
+      try {
+        options = __autojs6_rhino_compat_image_save_options(formatOrOptions, qualityOrOptions, "images.save");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.saveImage(image, path, options).then(function() {
+        return true;
+      });
+    }
+    function clip(image, xOrRegion, y, width, height, options) {
+      let region;
+      let bridgeOptions;
+      try {
+        region = __autojs6_rhino_compat_image_region(xOrRegion, y, width, height, "images.clip");
+        bridgeOptions = __autojs6_rhino_compat_image_plain_options(
+          (Array.isArray(xOrRegion) || (xOrRegion && typeof xOrRegion === "object")) ? y : options,
+          "images.clip"
+        );
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.clip(image, region.x, region.y, region.width, region.height, bridgeOptions);
+    }
+    function resize(image, sizeOrWidth, heightOrOptions, maybeOptions) {
+      let size;
+      let bridgeOptions;
+      try {
+        size = __autojs6_rhino_compat_image_size(sizeOrWidth, heightOrOptions, "images.resize");
+        bridgeOptions = __autojs6_rhino_compat_image_plain_options(
+          (Array.isArray(sizeOrWidth) || (sizeOrWidth && typeof sizeOrWidth === "object")) ? heightOrOptions : maybeOptions,
+          "images.resize"
+        );
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.resize(image, size.width, size.height, bridgeOptions);
+    }
+    function grayscale(image, options) {
+      let bridgeOptions;
+      try {
+        bridgeOptions = __autojs6_rhino_compat_image_plain_options(options, "images.grayscale");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.grayscale(image, bridgeOptions);
+    }
+    function threshold(image, thresholdOrOptions, maxValue, type) {
+      let options;
+      try {
+        options = __autojs6_rhino_compat_image_threshold_options(thresholdOrOptions, maxValue, type, "images.threshold");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.threshold(image, options);
+    }
+    function findImage(source, template, optionsOrX, y, width, height, threshold) {
+      let options;
+      try {
+        options = __autojs6_rhino_compat_image_find_options(optionsOrX, y, width, height, threshold, "images.findImage", arguments.length > 3);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.findImage(source, template, options);
+    }
+    function matchTemplate(source, template, options) {
+      let bridgeOptions;
+      try {
+        bridgeOptions = __autojs6_rhino_compat_image_plain_options(options, "images.matchTemplate");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.matchTemplate(source, template, bridgeOptions);
+    }
+    function findColor(image, color, optionsOrX, y, width, height, threshold) {
+      let options;
+      try {
+        options = __autojs6_rhino_compat_image_find_options(optionsOrX, y, width, height, threshold, "images.findColor", arguments.length > 3);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.findColor(image, color, options);
+    }
+    function findMultiColors(image, color, points, options) {
+      let bridgeOptions;
+      try {
+        bridgeOptions = __autojs6_rhino_compat_image_plain_options(options, "images.findMultiColors");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.findMultiColors(image, color, points, bridgeOptions);
+    }
+    __autojs6_rhino_compat_images_cache = Object.freeze({
+      requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,
+      requestScreenCaptureAsync: __autojs6_rhino_compat_request_screen_capture,
+      captureScreen: __autojs6_rhino_compat_capture_screen,
+      stopScreenCapture: __autojs6_rhino_compat_stop_screen_capture,
+      read,
+      readImage: imageModule.readImage,
+      save,
+      saveImage: save,
+      clip,
+      resize,
+      grayscale,
+      threshold,
+      findImage,
+      matchTemplate,
+      findColor,
+      findMultiColors,
+      getSize: imageModule.getSize,
+      recycle: imageModule.recycle
+    });
+    return __autojs6_rhino_compat_images_cache;
+  }
+  function __autojs6_rhino_selector_copy_field(target, source, fieldName) {
+    if (Object.prototype.hasOwnProperty.call(source, fieldName) && source[fieldName] !== undefined) {
+      target[fieldName] = source[fieldName];
+    }
+  }
+  function __autojs6_rhino_selector_clone_descriptor(descriptor) {
+    const source = descriptor && typeof descriptor === "object" && !Array.isArray(descriptor) ? descriptor : {};
+    const target = {
+      type: source.type === undefined || source.type === null ? "autojs6.accessibility.selector" : source.type,
+      version: Number(source.version) === 1 ? 1 : 1
+    };
+    __autojs6_rhino_selector_builder_names.forEach(function(fieldName) {
+      __autojs6_rhino_selector_copy_field(target, source, fieldName);
+    });
+    return Object.freeze(target);
+  }
+  function __autojs6_rhino_selector_merge_descriptor(baseDescriptor, nextDescriptor) {
+    const target = {
+      type: baseDescriptor.type === undefined || baseDescriptor.type === null ? nextDescriptor.type : baseDescriptor.type,
+      version: 1
+    };
+    __autojs6_rhino_selector_builder_names.forEach(function(fieldName) {
+      __autojs6_rhino_selector_copy_field(target, baseDescriptor, fieldName);
+    });
+    __autojs6_rhino_selector_builder_names.forEach(function(fieldName) {
+      __autojs6_rhino_selector_copy_field(target, nextDescriptor, fieldName);
+    });
+    return Object.freeze(target);
+  }
+  function __autojs6_rhino_selector_build_descriptor(builderName, args) {
+    const accessibility = __autojs6_limited_accessibility();
+    return accessibility[builderName].apply(accessibility, args);
+  }
+  function __autojs6_rhino_selector_options(options, apiName) {
+    if (options === undefined || options === null) {
+      return undefined;
+    }
+    if (typeof options === "object" && !Array.isArray(options)) {
+      return options;
+    }
+    throw __autojs6_rhino_compat_error(
+      "autojs6:compat." + apiName + " options must be an object when provided.",
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      apiName,
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_selector_find_one_options(options, apiName) {
+    if (typeof options === "number") {
+      if (!Number.isFinite(options)) {
+        throw __autojs6_rhino_compat_error(
+          "autojs6:compat." + apiName + " timeout must be finite.",
+          __autojs6_rhino_compat_error_codes.invalidOption,
+          apiName,
+          "invalid-option"
+        );
+      }
+      return Object.freeze({ timeoutMs: options });
+    }
+    return __autojs6_rhino_selector_options(options, apiName);
+  }
+  function __autojs6_rhino_selector_rejected(error) {
+    return Promise.reject(error);
+  }
+  function __autojs6_rhino_selector_handle(descriptor) {
+    const frozenDescriptor = __autojs6_rhino_selector_clone_descriptor(descriptor);
+    const handle = {
+      type: __autojs6_rhino_selector_handle_type,
+      version: 1,
+      descriptor: frozenDescriptor,
+      findOne: function(options) {
+        let findOptions;
+        try {
+          findOptions = __autojs6_rhino_selector_find_one_options(options, "findOne");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().findOne(frozenDescriptor, findOptions);
+      },
+      find: function(options) {
+        let findOptions;
+        try {
+          findOptions = __autojs6_rhino_selector_options(options, "find");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().findAll(frozenDescriptor, findOptions);
+      },
+      findAll: function(options) {
+        let findOptions;
+        try {
+          findOptions = __autojs6_rhino_selector_options(options, "findAll");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().findAll(frozenDescriptor, findOptions);
+      },
+      click: function(options) {
+        let actionOptions;
+        try {
+          actionOptions = __autojs6_rhino_selector_options(options, "click");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().click(frozenDescriptor, actionOptions);
+      },
+      longClick: function(options) {
+        let actionOptions;
+        try {
+          actionOptions = __autojs6_rhino_selector_options(options, "longClick");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().longClick(frozenDescriptor, actionOptions);
+      },
+      setText: function(text, options) {
+        let actionOptions;
+        try {
+          actionOptions = __autojs6_rhino_selector_options(options, "setText");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().setText(frozenDescriptor, text, actionOptions);
+      },
+      scrollForward: function(options) {
+        let actionOptions;
+        try {
+          actionOptions = __autojs6_rhino_selector_options(options, "scrollForward");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().scrollForward(frozenDescriptor, actionOptions);
+      },
+      scrollBackward: function(options) {
+        let actionOptions;
+        try {
+          actionOptions = __autojs6_rhino_selector_options(options, "scrollBackward");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().scrollBackward(frozenDescriptor, actionOptions);
+      },
+      exists: function(options) {
+        let findOptions;
+        try {
+          findOptions = __autojs6_rhino_selector_find_one_options(options, "exists");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().findOne(frozenDescriptor, findOptions).then(function(node) {
+          return node !== null;
+        });
+      }
+    };
+    __autojs6_rhino_selector_builder_names.forEach(function(builderName) {
+      Object.defineProperty(handle, builderName, {
+        value: function() {
+          const nextDescriptor = __autojs6_rhino_selector_build_descriptor(builderName, arguments);
+          return __autojs6_rhino_selector_handle(__autojs6_rhino_selector_merge_descriptor(frozenDescriptor, nextDescriptor));
+        },
+        enumerable: true,
+        configurable: false,
+        writable: false
+      });
+    });
+    return Object.freeze(handle);
+  }
+  function __autojs6_rhino_selector_builder(builderName) {
+    return function() {
+      return __autojs6_rhino_selector_handle(__autojs6_rhino_selector_build_descriptor(builderName, arguments));
+    };
+  }
+  function __autojs6_rhino_selector_click(x, y, options) {
+    let actionOptions;
+    try {
+      actionOptions = __autojs6_rhino_selector_options(options, "click");
+    } catch (error) {
+      return __autojs6_rhino_selector_rejected(error);
+    }
+    return __autojs6_limited_accessibility().click(x, y, actionOptions);
+  }
+  function __autojs6_rhino_selector_simple_action(methodName) {
+    return function(options) {
+      let actionOptions;
+      try {
+        actionOptions = __autojs6_rhino_selector_options(options, methodName);
+      } catch (error) {
+        return __autojs6_rhino_selector_rejected(error);
+      }
+      return __autojs6_limited_accessibility()[methodName](actionOptions);
+    };
+  }
+  function __autojs6_rhino_selector_dsl() {
+    if (__autojs6_rhino_selector_dsl_cache) {
+      return __autojs6_rhino_selector_dsl_cache;
+    }
+    const selector = {};
+    __autojs6_rhino_selector_builder_names.forEach(function(builderName) {
+      selector[builderName] = __autojs6_rhino_selector_builder(builderName);
+    });
+    selector.click = __autojs6_rhino_selector_click;
+    selector.back = __autojs6_rhino_selector_simple_action("back");
+    selector.home = __autojs6_rhino_selector_simple_action("home");
+    selector.recentApps = __autojs6_rhino_selector_simple_action("recentApps");
+    selector.recents = selector.recentApps;
+    __autojs6_rhino_selector_dsl_cache = Object.freeze(selector);
+    return __autojs6_rhino_selector_dsl_cache;
+  }
+  function __autojs6_rhino_compat_tasks_invalid(operation, message) {
+    return __autojs6_rhino_compat_error(
+      "autojs6:compat.tasks." + operation + " " + message,
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      "tasks." + operation,
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_compat_tasks_option_object(value, operation) {
+    return __autojs6_rhino_compat_option_object(value, "tasks." + operation);
+  }
+  function __autojs6_rhino_compat_tasks_check_keys(input, operation, allowedKeys) {
+    Object.keys(input).forEach(function(key) {
+      if (allowedKeys.indexOf(key) < 0) {
+        throw __autojs6_rhino_compat_tasks_invalid(operation, "does not accept option " + key + ".");
+      }
+    });
+  }
+  function __autojs6_rhino_compat_tasks_has(input, key) {
+    return Object.prototype.hasOwnProperty.call(input, key) &&
+      input[key] !== undefined &&
+      input[key] !== null;
+  }
+  function __autojs6_rhino_compat_tasks_date_epoch(value, operation) {
+    if (value instanceof Date) {
+      return value.getTime();
+    }
+    if (typeof value === "number") {
+      return value;
+    }
+    if (typeof value === "string") {
+      return Date.parse(value);
+    }
+    if (value && typeof value.valueOf === "function") {
+      const epoch = Number(value.valueOf());
+      if (Number.isFinite(epoch)) {
+        return epoch;
+      }
+    }
+    throw __autojs6_rhino_compat_tasks_invalid(operation, "requires date/time to be a Date, epoch millisecond number, or parseable string.");
+  }
+  function __autojs6_rhino_compat_tasks_delay(input, operation) {
+    const hasDate = __autojs6_rhino_compat_tasks_has(input, "date");
+    const hasTime = __autojs6_rhino_compat_tasks_has(input, "time");
+    const hasDelay = __autojs6_rhino_compat_tasks_has(input, "delayMs");
+    const count = (hasDate ? 1 : 0) + (hasTime ? 1 : 0) + (hasDelay ? 1 : 0);
+    if (count !== 1) {
+      throw __autojs6_rhino_compat_tasks_invalid(operation, "requires exactly one of date, time, or delayMs.");
+    }
+    if (hasDelay) {
+      return input.delayMs;
+    }
+    const epoch = __autojs6_rhino_compat_tasks_date_epoch(hasDate ? input.date : input.time, operation);
+    const delayMs = Math.trunc(epoch - Date.now());
+    if (!Number.isFinite(delayMs) || delayMs < 0) {
+      throw __autojs6_rhino_compat_tasks_invalid(operation, "requires a future date/time.");
+    }
+    return delayMs;
+  }
+  function __autojs6_rhino_compat_tasks_descriptor(options) {
+    const operation = "addDisposableTask";
+    const input = __autojs6_rhino_compat_tasks_option_object(options, operation);
+    __autojs6_rhino_compat_tasks_check_keys(input, operation, ["path", "scriptPath", "entry", "date", "time", "delayMs", "taskTimeoutMs", "constraints", "packaged", "backend", "timeoutMs", "signal"]);
+    const pathCount = (__autojs6_rhino_compat_tasks_has(input, "path") ? 1 : 0) +
+      (__autojs6_rhino_compat_tasks_has(input, "scriptPath") ? 1 : 0) +
+      (__autojs6_rhino_compat_tasks_has(input, "entry") ? 1 : 0);
+    if (pathCount !== 1) {
+      throw __autojs6_rhino_compat_tasks_invalid(operation, "requires exactly one of path, scriptPath, or entry.");
+    }
+    const descriptor = {};
+    if (__autojs6_rhino_compat_tasks_has(input, "entry")) {
+      descriptor.entry = input.entry;
+    } else {
+      descriptor.scriptPath = __autojs6_rhino_compat_tasks_has(input, "path") ? input.path : input.scriptPath;
+    }
+    descriptor.delayMs = __autojs6_rhino_compat_tasks_delay(input, operation);
+    if (__autojs6_rhino_compat_tasks_has(input, "taskTimeoutMs")) descriptor.taskTimeoutMs = input.taskTimeoutMs;
+    if (__autojs6_rhino_compat_tasks_has(input, "constraints")) descriptor.constraints = input.constraints;
+    if (__autojs6_rhino_compat_tasks_has(input, "packaged")) descriptor.packaged = input.packaged === true;
+    if (__autojs6_rhino_compat_tasks_has(input, "backend")) descriptor.backend = input.backend;
+    if (__autojs6_rhino_compat_tasks_has(input, "timeoutMs")) descriptor.timeoutMs = input.timeoutMs;
+    if (__autojs6_rhino_compat_tasks_has(input, "signal")) descriptor.signal = input.signal;
+    return descriptor;
+  }
+  function __autojs6_rhino_compat_tasks_query_options(options, operationName) {
+    const operation = operationName || "queryTasks";
+    const input = __autojs6_rhino_compat_tasks_option_object(options, operation);
+    __autojs6_rhino_compat_tasks_check_keys(input, operation, ["timeoutMs", "signal"]);
+    return input;
+  }
+  function __autojs6_rhino_compat_tasks_remove_options(options, operationName) {
+    const operation = operationName || "removeTask";
+    const input = __autojs6_rhino_compat_tasks_option_object(options, operation);
+    __autojs6_rhino_compat_tasks_check_keys(input, operation, ["timeoutMs", "signal"]);
+    return input;
+  }
+  function __autojs6_rhino_compat_timed_task_id(value, operation) {
+    if (value && typeof value === "object") {
+      throw __autojs6_rhino_compat_tasks_invalid(operation, "requires a non-empty Node-owned task id string.");
+    }
+    const id = value === undefined || value === null ? "" : String(value).trim();
+    if (!id) {
+      throw __autojs6_rhino_compat_tasks_invalid(operation, "requires a non-empty Node-owned task id string.");
+    }
+    return id;
+  }
+  function __autojs6_rhino_compat_task_id(value) {
+    if (value && typeof value === "object") {
+      throw __autojs6_rhino_compat_blocked_by_design("tasks.removeTask", "Pass an explicit WorkManager-owned string id; raw TimedTask/IntentTask objects are not accepted.");
+    }
+    const id = value === undefined || value === null ? "" : String(value).trim();
+    if (!id) {
+      throw __autojs6_rhino_compat_tasks_invalid("removeTask", "requires a non-empty task id string.");
+    }
+    return id;
+  }
+  function __autojs6_rhino_compat_tasks_query_node_owned(options, operation) {
+    let input;
+    try {
+      input = __autojs6_rhino_compat_tasks_query_options(options, operation);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_limited_work_manager().list(input).then(function(tasks) {
+      return Object.freeze(tasks.filter(function(task) {
+        return task && task.type === "once";
+      }));
+    });
+  }
+  function __autojs6_rhino_compat_tasks_remove_node_owned(taskId, options, operation) {
+    let id;
+    let input;
+    try {
+      id = operation === "removeTask"
+        ? __autojs6_rhino_compat_task_id(taskId)
+        : __autojs6_rhino_compat_timed_task_id(taskId, operation);
+      input = __autojs6_rhino_compat_tasks_remove_options(options, operation);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_limited_work_manager().cancel(id, input).then(function() {
+      return true;
+    });
+  }
+  function __autojs6_rhino_compat_tasks_reject_wall_clock(apiName) {
+    return Promise.reject(__autojs6_rhino_compat_unsupported(
+      apiName,
+      "P12-17 keeps daily/weekly wall-clock user task database compatibility unpromoted; use compat.tasks.addDisposableTask for one-shot work, keep Rhino for AutoJs6 user-visible wall-clock tasks, or use work_manager.schedulePeriodic only when OS-managed cadence is intended."
+    ));
+  }
+  function __autojs6_rhino_compat_tasks_reject_update() {
+    return Promise.reject(__autojs6_rhino_compat_blocked_by_design(
+      "tasks.updateTask",
+      "P12-17 has no JSON patch/update provider for the AutoJs6 user task database; raw TimedTask/IntentTask objects cannot cross into Node."
+    ));
+  }
+  function __autojs6_rhino_compat_tasks_reject_intent(apiName) {
+    return Promise.reject(__autojs6_rhino_compat_unsupported(
+      apiName,
+      "P12-18 keeps IntentTask and broadcast-triggered task compatibility unpromoted; Node cannot register boot, package-event, exact-alarm, startup, or custom broadcast receivers until a user-visible broadcast task provider is designed."
+    ));
+  }
+  function __autojs6_rhino_compat_tasks() {
+    if (__autojs6_rhino_compat_tasks_cache) {
+      return __autojs6_rhino_compat_tasks_cache;
+    }
+    __autojs6_rhino_compat_tasks_cache = Object.freeze({
+      addDisposableTask: function(options) {
+        let descriptor;
+        try {
+          descriptor = __autojs6_rhino_compat_tasks_descriptor(options);
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        return __autojs6_limited_work_manager().scheduleOnce(descriptor);
+      },
+      addDailyTask: function(options) {
+        return __autojs6_rhino_compat_tasks_reject_wall_clock("tasks.addDailyTask");
+      },
+      addWeeklyTask: function(options) {
+        return __autojs6_rhino_compat_tasks_reject_wall_clock("tasks.addWeeklyTask");
+      },
+      addIntentTask: function(options) {
+        return __autojs6_rhino_compat_tasks_reject_intent("tasks.addIntentTask");
+      },
+      removeTask: function(taskId, options) {
+        return __autojs6_rhino_compat_tasks_remove_node_owned(taskId, options, "removeTask");
+      },
+      queryTasks: function(options) {
+        return __autojs6_rhino_compat_tasks_query_node_owned(options, "queryTasks");
+      },
+      queryIntentTasks: function(options) {
+        return __autojs6_rhino_compat_tasks_reject_intent("tasks.queryIntentTasks");
+      },
+      queryTimedTasks: function(options) {
+        return __autojs6_rhino_compat_tasks_query_node_owned(options, "queryTimedTasks");
+      },
+      getIntentTask: function(taskId, options) {
+        return __autojs6_rhino_compat_tasks_reject_intent("tasks.getIntentTask");
+      },
+      getTimedTask: function(taskId, options) {
+        let id;
+        try {
+          id = __autojs6_rhino_compat_timed_task_id(taskId, "getTimedTask");
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        return __autojs6_rhino_compat_tasks_query_node_owned(options, "getTimedTask").then(function(tasks) {
+          const matches = tasks.filter(function(task) {
+            return task && String(task.id) === id;
+          });
+          return matches.length > 0 ? matches[0] : null;
+        });
+      },
+      removeTimedTask: function(taskId, options) {
+        return __autojs6_rhino_compat_tasks_remove_node_owned(taskId, options, "removeTimedTask");
+      },
+      removeIntentTask: function(taskId, options) {
+        return __autojs6_rhino_compat_tasks_reject_intent("tasks.removeIntentTask");
+      },
+      updateTask: function(task) {
+        return __autojs6_rhino_compat_tasks_reject_update();
+      }
+    });
+    return __autojs6_rhino_compat_tasks_cache;
+  }
+  function __autojs6_rhino_compat_facade() {
+    if (__autojs6_rhino_compat_facade_cache) {
+      return __autojs6_rhino_compat_facade_cache;
+    }
+    const selector = __autojs6_rhino_selector_dsl();
+    const shell = __autojs6_rhino_compat_shell();
+    const images = __autojs6_rhino_compat_images();
+    const ocr = __autojs6_rhino_compat_ocr();
+    const barcode = __autojs6_rhino_compat_barcode();
+    const qrcode = __autojs6_rhino_compat_qrcode();
+    const media = __autojs6_limited_media();
+    const mediainfo = __autojs6_limited_mediainfo();
+    const recorder = __autojs6_limited_recorder();
+    const ui = __autojs6_limited_ui();
+    const tasks = __autojs6_rhino_compat_tasks();
+    __autojs6_rhino_compat_facade_cache = Object.freeze({
+      toast: __autojs6_rhino_compat_toast,
+      toastLog: __autojs6_rhino_compat_toast_log,
+      sleep: __autojs6_rhino_compat_sleep,
+      setClip: __autojs6_rhino_compat_set_clip,
+      getClip: __autojs6_rhino_compat_get_clip,
+      files: __autojs6_limited_files(),
+      base64: __autojs6_limited_base64(),
+      colors: __autojs6_limited_colors(),
+      fmt: __autojs6_limited_formatter(),
+      formatter: __autojs6_limited_formatter(),
+      cvt: __autojs6_limited_converter(),
+      converter: __autojs6_limited_converter(),
+      s13n: __autojs6_limited_s13n(),
+      mime: __autojs6_limited_mime(),
+      nanoid: __autojs6_limited_nanoid(),
+      util: __autojs6_limited_util(),
+      opencc: __autojs6_limited_opencc(),
+      pinyin: __autojs6_limited_pinyin(),
+      pinyin4j: __autojs6_limited_pinyin4j(),
+      jsox: __autojs6_limited_jsox(),
+      storage: __autojs6_limited_storage("storage"),
+      storages: __autojs6_limited_storage("storages"),
+      database: __autojs6_limited_database("database"),
+      sqlite: __autojs6_limited_database("sqlite"),
+      console: __autojs6_limited_console(),
+      timers: __autojs6_limited_timers(),
+      setTimeout: __autojs6_limited_timers().setTimeout,
+      clearTimeout: __autojs6_limited_timers().clearTimeout,
+      setInterval: __autojs6_limited_timers().setInterval,
+      clearInterval: __autojs6_limited_timers().clearInterval,
+      selector: selector,
+      text: selector.text,
+      desc: selector.desc,
+      id: selector.id,
+      className: selector.className,
+      textContains: selector.textContains,
+      descContains: selector.descContains,
+      textMatches: selector.textMatches,
+      descMatches: selector.descMatches,
+      idMatches: selector.idMatches,
+      classNameMatches: selector.classNameMatches,
+      clickable: selector.clickable,
+      enabled: selector.enabled,
+      depth: selector.depth,
+      boundsInside: selector.boundsInside,
+      boundsContains: selector.boundsContains,
+      click: selector.click,
+      back: selector.back,
+      home: selector.home,
+      recentApps: selector.recentApps,
+      recents: selector.recents,
+      app: __autojs6_limited_app(),
+      device: __autojs6_limited_device(),
+      shell: shell,
+      images: images,
+      ocr: ocr,
+      barcode: barcode,
+      qrcode: qrcode,
+      media: media,
+      mediainfo: mediainfo,
+      recorder: recorder,
+      ui: ui,
+      tasks: tasks,
+      requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,
+      requestScreenCaptureAsync: __autojs6_rhino_compat_request_screen_capture,
+      captureScreen: __autojs6_rhino_compat_capture_screen
+    });
+    return __autojs6_rhino_compat_facade_cache;
+  }
+  function __autojs6_rhino_compat_installed_global_names() {
+    return Object.freeze(__autojs6_rhino_compat_installed_globals.slice());
+  }
+  function __autojs6_rhino_compat_mark_global_installed(name) {
+    if (__autojs6_rhino_compat_installed_globals.indexOf(name) < 0) {
+      __autojs6_rhino_compat_installed_globals.push(name);
+    }
+  }
+  function __autojs6_rhino_compat_status_snapshot() {
+    return Object.freeze({
+      schema: "autojs6-node-rhino-compat-loader-v1",
+      entry: "autojs6:compat",
+      mode: "explicit-opt-in",
+      defaultGlobalInjection: false,
+      installed: __autojs6_rhino_compat_installed_globals.length > 0,
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16", "P12-17", "P12-18", "P12-29", "P12-32", "P13-26", "P13-27"]),
+      pendingTasks: Object.freeze([]),
+      globalNames: __autojs6_rhino_compat_installed_global_names(),
+      availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
+      moduleNames: __autojs6_rhino_compat_basic_module_names
+    });
+  }
+  function __autojs6_rhino_compat_install(options) {
+    const input = __autojs6_rhino_compat_option_object(options, "install");
+    const installGlobals = input.global === true || input.globals === true;
+    const warnings = [];
+    if (installGlobals) {
+      const facade = __autojs6_rhino_compat_facade();
+      const overwrite = input.overwrite === true;
+      __autojs6_rhino_compat_basic_global_names.forEach(function(name) {
+        if (!overwrite && Object.prototype.hasOwnProperty.call(globalThis, name) && globalThis[name] !== facade[name]) {
+          warnings.push("global " + name + " already exists; pass overwrite: true to replace it.");
+          return;
+        }
+        __autojs6_define_global(name, facade[name]);
+        if (globalThis[name] === facade[name]) {
+          __autojs6_rhino_compat_mark_global_installed(name);
+        } else {
+          warnings.push("global " + name + " could not be installed.");
+        }
+      });
+    }
+    return Object.freeze({
+      schema: "autojs6-node-rhino-compat-install-result-v1",
+      installed: __autojs6_rhino_compat_installed_globals.length > 0,
+      explicit: true,
+      globals: __autojs6_rhino_compat_installed_global_names(),
+      modules: __autojs6_rhino_compat_basic_module_names,
+      warnings: Object.freeze(warnings),
+      reason: installGlobals
+        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants, P12-09 constrained UI, P12-29 barcode/qrcode facades, P12-32 s13n.bytes, and P13-27 jsox pure helpers; P12-17 compat.tasks stays module-only."
+        : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
+    });
+  }
+  function __autojs6_rhino_compat_unsupported(apiName, reason) {
+    const api = apiName === undefined || apiName === null || String(apiName).length === 0
+      ? "unknown"
+      : String(apiName);
+    const detail = reason === undefined || reason === null || String(reason).length === 0
+      ? "This Rhino compatibility API is not implemented in the current Node compat facade."
+      : String(reason);
+    return __autojs6_rhino_compat_error(
+      "autojs6:compat " + api + " is unsupported: " + detail,
+      __autojs6_rhino_compat_error_codes.unsupported,
+      api,
+      "unsupported"
+    );
+  }
+  function __autojs6_rhino_compat_blocked_by_design(apiName, reason) {
+    const api = apiName === undefined || apiName === null || String(apiName).length === 0
+      ? "unknown"
+      : String(apiName);
+    const detail = reason === undefined || reason === null || String(reason).length === 0
+      ? "The API would expose raw Rhino, Java, or Android objects outside the Safe Node Profile."
+      : String(reason);
+    return __autojs6_rhino_compat_error(
+      "autojs6:compat " + api + " is blocked by design: " + detail,
+      __autojs6_rhino_compat_error_codes.blockedByDesign,
+      api,
+      "blocked-by-design"
+    );
+  }
+  function __autojs6_limited_rhino_compat() {
+    if (__autojs6_limited_rhino_compat_cache) {
+      return __autojs6_limited_rhino_compat_cache;
+    }
+    const selector = __autojs6_rhino_selector_dsl();
+    const shell = __autojs6_rhino_compat_shell();
+    const images = __autojs6_rhino_compat_images();
+    const ocr = __autojs6_rhino_compat_ocr();
+    const barcode = __autojs6_rhino_compat_barcode();
+    const qrcode = __autojs6_rhino_compat_qrcode();
+    const media = __autojs6_limited_media();
+    const mediainfo = __autojs6_limited_mediainfo();
+    const recorder = __autojs6_limited_recorder();
+    const ui = __autojs6_limited_ui();
+    const tasks = __autojs6_rhino_compat_tasks();
+    __autojs6_limited_rhino_compat_cache = Object.freeze({
+      name: "autojs6:compat",
+      version: 1,
+      mode: "explicit-opt-in",
+      errorCodes: __autojs6_rhino_compat_error_codes,
+      status: __autojs6_rhino_compat_status_snapshot,
+      install: __autojs6_rhino_compat_install,
+      toast: __autojs6_rhino_compat_toast,
+      toastLog: __autojs6_rhino_compat_toast_log,
+      sleep: __autojs6_rhino_compat_sleep,
+      setClip: __autojs6_rhino_compat_set_clip,
+      getClip: __autojs6_rhino_compat_get_clip,
+      files: __autojs6_limited_files(),
+      base64: __autojs6_limited_base64(),
+      colors: __autojs6_limited_colors(),
+      fmt: __autojs6_limited_formatter(),
+      formatter: __autojs6_limited_formatter(),
+      cvt: __autojs6_limited_converter(),
+      converter: __autojs6_limited_converter(),
+      s13n: __autojs6_limited_s13n(),
+      mime: __autojs6_limited_mime(),
+      nanoid: __autojs6_limited_nanoid(),
+      util: __autojs6_limited_util(),
+      opencc: __autojs6_limited_opencc(),
+      pinyin: __autojs6_limited_pinyin(),
+      pinyin4j: __autojs6_limited_pinyin4j(),
+      jsox: __autojs6_limited_jsox(),
+      keys: __autojs6_rhino_compat_key_constants,
+      events: __autojs6_rhino_compat_events,
+      storage: __autojs6_limited_storage("storage"),
+      storages: __autojs6_limited_storage("storages"),
+      database: __autojs6_limited_database("database"),
+      sqlite: __autojs6_limited_database("sqlite"),
+      console: __autojs6_limited_console(),
+      timers: __autojs6_limited_timers(),
+      setTimeout: __autojs6_limited_timers().setTimeout,
+      clearTimeout: __autojs6_limited_timers().clearTimeout,
+      setInterval: __autojs6_limited_timers().setInterval,
+      clearInterval: __autojs6_limited_timers().clearInterval,
+      selector: selector,
+      text: selector.text,
+      desc: selector.desc,
+      id: selector.id,
+      className: selector.className,
+      textContains: selector.textContains,
+      descContains: selector.descContains,
+      textMatches: selector.textMatches,
+      descMatches: selector.descMatches,
+      idMatches: selector.idMatches,
+      classNameMatches: selector.classNameMatches,
+      clickable: selector.clickable,
+      enabled: selector.enabled,
+      depth: selector.depth,
+      boundsInside: selector.boundsInside,
+      boundsContains: selector.boundsContains,
+      click: selector.click,
+      back: selector.back,
+      home: selector.home,
+      recentApps: selector.recentApps,
+      recents: selector.recents,
+      app: __autojs6_limited_app(),
+      device: __autojs6_limited_device(),
+      shell: shell,
+      images: images,
+      ocr: ocr,
+      barcode: barcode,
+      qrcode: qrcode,
+      media: media,
+      mediainfo: mediainfo,
+      recorder: recorder,
+      ui: ui,
+      tasks: tasks,
+      requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,
+      requestScreenCaptureAsync: __autojs6_rhino_compat_request_screen_capture,
+      captureScreen: __autojs6_rhino_compat_capture_screen,
+      unsupported: __autojs6_rhino_compat_unsupported,
+      blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
+      assertSupported: function(apiName) {
+        throw __autojs6_rhino_compat_unsupported(apiName);
+      }
+    });
+    return __autojs6_limited_rhino_compat_cache;
   }
   function __autojs6_limited_work_manager() {
     if (__autojs6_limited_work_manager_cache) {
@@ -11311,6 +21491,9 @@ std::string buildEmbeddedScriptExecutionSource(
       },
       new: function(args, options) {
         return __autojs6_java_new(checkedClassName, args, options);
+      },
+      create: function(args, options) {
+        return __autojs6_java_new(checkedClassName, args, options);
       }
     });
   }
@@ -11359,8 +21542,169 @@ std::string buildEmbeddedScriptExecutionSource(
         permissions: ["java_interop"]
       }
     ).then(function(result) {
-      return result && typeof result === "object" ? Object.freeze(result) : result;
+      return __autojs6_java_handle_descriptor(result);
     });
+  }
+  function __autojs6_java_handle_id(value) {
+    if (typeof value === "string") {
+      return value.trim();
+    }
+    if (value && typeof value === "object") {
+      if (typeof value.__autojs6JavaHandle === "string") {
+        return value.__autojs6JavaHandle.trim();
+      }
+      if (typeof value.handle === "string") {
+        return value.handle.trim();
+      }
+    }
+    return "";
+  }
+  function __autojs6_java_handle_class_name(value) {
+    return value && typeof value === "object" && typeof value.className === "string"
+      ? value.className
+      : "";
+  }
+  function __autojs6_java_handle_descriptor(result) {
+    if (!result || typeof result !== "object") {
+      return result;
+    }
+    const handleId = __autojs6_java_handle_id(result);
+    if (!handleId) {
+      return Object.freeze(result);
+    }
+    const handle = Object.assign({}, result);
+    Object.defineProperties(handle, {
+      call: {
+        value: function(methodName, args, options) {
+          return __autojs6_java_call_instance(handle, methodName, args, options);
+        }
+      },
+      callInstance: {
+        value: function(methodName, args, options) {
+          return __autojs6_java_call_instance(handle, methodName, args, options);
+        }
+      },
+      getField: {
+        value: function(fieldName, options) {
+          return __autojs6_java_get_field(handle, fieldName, options);
+        }
+      },
+      release: {
+        value: function(options) {
+          return __autojs6_java_release(handle, options);
+        }
+      },
+      dispose: {
+        value: function(options) {
+          return __autojs6_java_release(handle, options);
+        }
+      }
+    });
+    return Object.freeze(handle);
+  }
+  function __autojs6_java_call_instance(target, methodName, args, options) {
+    let descriptor;
+    try {
+      __autojs6_java_check_enabled();
+      const handle = __autojs6_java_handle_id(target);
+      const className = __autojs6_java_handle_class_name(target);
+      const checkedMethodName = __autojs6_java_method_name(methodName, className);
+      if (!handle) {
+        throw __autojs6_java_interop_error(
+          "AutoJs6 Java interop requires a Java object handle.",
+          "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+          className,
+          checkedMethodName
+        );
+      }
+      descriptor = {
+        handle,
+        method: checkedMethodName,
+        args: __autojs6_java_argument_array(args, className || "java.handle", checkedMethodName)
+      };
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_call_autojs(
+      "java",
+      "call",
+      [descriptor],
+      {
+        timeoutMs: __autojs6_java_timeout(options),
+        signal: __autojs6_bridge_signal_from_options(options),
+        permissions: ["java_interop"]
+      }
+    );
+  }
+  function __autojs6_java_get_field(target, fieldName, options) {
+    let descriptor;
+    try {
+      __autojs6_java_check_enabled();
+      const handle = __autojs6_java_handle_id(target);
+      const className = __autojs6_java_handle_class_name(target);
+      const checkedFieldName = __autojs6_java_method_name(fieldName, className);
+      if (!handle) {
+        throw __autojs6_java_interop_error(
+          "AutoJs6 Java interop requires a Java object handle.",
+          "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+          className,
+          checkedFieldName
+        );
+      }
+      descriptor = {
+        handle,
+        field: checkedFieldName
+      };
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_call_autojs(
+      "java",
+      "getField",
+      [descriptor],
+      {
+        timeoutMs: __autojs6_java_timeout(options),
+        signal: __autojs6_bridge_signal_from_options(options),
+        permissions: ["java_interop"]
+      }
+    );
+  }
+  function __autojs6_java_release(target, options) {
+    let descriptor;
+    try {
+      __autojs6_java_check_enabled();
+      const handle = __autojs6_java_handle_id(target);
+      if (!handle) {
+        throw __autojs6_java_interop_error(
+          "AutoJs6 Java interop requires a Java object handle.",
+          "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+          __autojs6_java_handle_class_name(target),
+          "release"
+        );
+      }
+      descriptor = { handle };
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_call_autojs(
+      "java",
+      "release",
+      [descriptor],
+      {
+        timeoutMs: __autojs6_java_timeout(options),
+        signal: __autojs6_bridge_signal_from_options(options),
+        permissions: ["java_interop"]
+      }
+    );
+  }
+  function __autojs6_java_define_class_unsupported() {
+    __autojs6_java_check_enabled();
+    throw __autojs6_java_interop_error(
+      "AutoJs6 Java defineClass/proxy-interface replacement is design-gated in P13-16; dynamic bytecode, class loaders, unbounded inheritance, and raw callback handles remain denied.",
+      "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+      "",
+      "defineClass"
+    );
   }
   function __autojs6_limited_java() {
     if (!__autojs6_java_interop_experimental_enabled) {
@@ -11370,12 +21714,170 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_limited_java_cache;
     }
     __autojs6_limited_java_cache = Object.freeze({
+      findClass: __autojs6_java_class_descriptor,
       type: __autojs6_java_class_descriptor,
       callStatic: __autojs6_java_call_static,
       new: __autojs6_java_new,
+      create: __autojs6_java_new,
+      call: __autojs6_java_call_instance,
+      callInstance: __autojs6_java_call_instance,
+      getField: __autojs6_java_get_field,
+      release: __autojs6_java_release,
+      dispose: __autojs6_java_release,
+      defineClass: __autojs6_java_define_class_unsupported,
       policy: __autojs6_java_policy_snapshot()
     });
     return __autojs6_limited_java_cache;
+  }
+  function __autojs6_autojs_java_class_name(value) {
+    if (typeof value === "string") {
+      return value;
+    }
+    if (value && typeof value === "object") {
+      if (typeof value.className === "string") {
+        return value.className;
+      }
+      if (typeof value.name === "string") {
+        return value.name;
+      }
+    }
+    return "";
+  }
+  function __autojs6_autojs_java_find_class(className) {
+    return __autojs6_limited_java().type(className);
+  }
+  function __autojs6_autojs_java_call_static(classOrName, methodName, args, options) {
+    return __autojs6_limited_java().callStatic(
+      __autojs6_autojs_java_class_name(classOrName),
+      methodName,
+      args,
+      options
+    );
+  }
+  function __autojs6_autojs_java_new(classOrName, args, options) {
+    return __autojs6_limited_java().new(__autojs6_autojs_java_class_name(classOrName), args, options);
+  }
+  function __autojs6_autojs_java_call_instance(target, methodName, args, options) {
+    return __autojs6_limited_java().call(target, methodName, args, options);
+  }
+  function __autojs6_autojs_java_get_field(target, fieldName, options) {
+    return __autojs6_limited_java().getField(target, fieldName, options);
+  }
+  function __autojs6_autojs_java_release(target, options) {
+    return __autojs6_limited_java().release(target, options);
+  }
+  function __autojs6_autojs_java_create(classOrName, args, threadModeOrOptions, maybeOptions) {
+    if (!__autojs6_java_interop_experimental_enabled) {
+      throw __autojs6_java_interop_disabled_error();
+    }
+    if (
+      typeof threadModeOrOptions === "string" &&
+      threadModeOrOptions.length > 0 &&
+      threadModeOrOptions !== "default"
+    ) {
+      throw __autojs6_java_interop_error(
+        "$autojs.java.create thread mode dispatch is not implemented in $autojs global v1.",
+        "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+        __autojs6_autojs_java_class_name(classOrName),
+        "create"
+      );
+    }
+    const options = typeof threadModeOrOptions === "object" && threadModeOrOptions !== null
+      ? threadModeOrOptions
+      : maybeOptions;
+    return __autojs6_autojs_java_new(classOrName, args, options);
+  }
+  function __autojs6_autojs_java_stable_rejection(methodName, reason) {
+    return function() {
+      if (!__autojs6_java_interop_experimental_enabled) {
+        throw __autojs6_java_interop_disabled_error();
+      }
+      throw __autojs6_java_interop_error(
+        "$autojs.java." + methodName + " is not implemented in $autojs global v1: " + reason,
+        "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+        "",
+        methodName
+      );
+    };
+  }
+  function __autojs6_autojs_java_facade() {
+    const enabled = __autojs6_java_interop_experimental_enabled;
+    return Object.freeze({
+      schema: "autojs6-node-autojs-java-v1",
+      enabled,
+      experimental: enabled,
+      mode: enabled ? "allowlist" : "disabled",
+      reason: enabled
+        ? "Experimental allowlist-only Java interop is enabled for this build."
+        : "AutoJs6 Java interop is disabled; enable autojs.nodejs.javaInterop.experimental for an allowlist-only experiment.",
+      policy: __autojs6_java_policy_snapshot(),
+      findClass: __autojs6_autojs_java_find_class,
+      type: __autojs6_autojs_java_find_class,
+      callStatic: __autojs6_autojs_java_call_static,
+      new: __autojs6_autojs_java_new,
+      create: __autojs6_autojs_java_create,
+      call: __autojs6_autojs_java_call_instance,
+      callInstance: __autojs6_autojs_java_call_instance,
+      getField: __autojs6_autojs_java_get_field,
+      release: __autojs6_autojs_java_release,
+      dispose: __autojs6_autojs_java_release,
+      defineClass: __autojs6_java_define_class_unsupported,
+      loadDex: __autojs6_autojs_java_stable_rejection("loadDex", "dynamic dex loading remains blocked."),
+      loadJar: __autojs6_autojs_java_stable_rejection("loadJar", "dynamic jar loading remains blocked."),
+      setThreadMode: __autojs6_autojs_java_stable_rejection("setThreadMode", "Java object thread dispatch remains blocked."),
+      setDefaultThreadMode: __autojs6_autojs_java_stable_rejection("setDefaultThreadMode", "Java class thread dispatch remains blocked."),
+      wrap: __autojs6_autojs_java_stable_rejection("wrap", "callback wrapping remains blocked.")
+    });
+  }
+  function __autojs6_autojs_android_context_descriptor(host) {
+    return Object.freeze({
+      schema: "autojs6-node-autojs-android-context-v1",
+      available: false,
+      proxy: true,
+      type: "android.content.Context",
+      packageName: host.packageName,
+      reason: "Raw Android Context is not exposed in the Safe Node Profile."
+    });
+  }
+  function __autojs6_autojs_global() {
+    if (__autojs6_autojs_global_cache) {
+      return __autojs6_autojs_global_cache;
+    }
+    const profile = __autojs6_profile();
+    const host = __autojs6_host_app_info();
+    const version = Object.freeze({
+      name: host.versionName,
+      code: host.versionCode,
+      engine: profile.engineVersion,
+      node: profile.node
+    });
+    __autojs6_autojs_global_cache = Object.freeze({
+      schema: "autojs6-node-autojs-global-v1",
+      version,
+      versionName: host.versionName,
+      versionCode: host.versionCode,
+      packageName: host.packageName,
+      profile,
+      androidContext: __autojs6_autojs_android_context_descriptor(host),
+      java: __autojs6_autojs_java_facade()
+    });
+    return __autojs6_autojs_global_cache;
+  }
+  function __autojs6_install_autojs_global() {
+    const value = __autojs6_autojs_global();
+    try {
+      Object.defineProperty(globalThis, "$autojs", {
+        value,
+        configurable: false,
+        enumerable: false,
+        writable: false
+      });
+    } catch (_) {
+      try {
+        if (globalThis.$autojs === value) return;
+        globalThis.$autojs = value;
+      } catch (_) {}
+    }
   }
   function __autojs6_host_app_info() {
     const fallback = {
@@ -11445,6 +21947,239 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_app_non_empty_string(value) {
     return value === undefined || value === null ? "" : String(value);
   }
+  function __autojs6_app_intent_plain_object(value) {
+    return value && typeof value === "object" && !Array.isArray(value);
+  }
+  function __autojs6_app_intent_error(methodName, message) {
+    throw __autojs6_app_invalid_argument_error(methodName, message);
+  }
+  function __autojs6_app_optional_intent_string(value, methodName, fieldName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    const text = String(value);
+    return text.length > 0 ? text : undefined;
+  }
+  function __autojs6_app_expand_android_constant(kind, value) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    const text = String(value).trim();
+    if (!text) {
+      return undefined;
+    }
+    if (text.indexOf(".") >= 0) {
+      return text;
+    }
+    return "android.intent." + kind + "." + text.toUpperCase();
+  }
+  function __autojs6_app_normalize_action(value) {
+    return __autojs6_app_expand_android_constant("action", value);
+  }
+  function __autojs6_app_normalize_category(value) {
+    return __autojs6_app_expand_android_constant("category", value);
+  }
+  function __autojs6_app_has_uri_scheme(value) {
+    return /^[a-z][a-z0-9+.-]*:/i.test(String(value || ""));
+  }
+  function __autojs6_app_parse_uri_descriptor(value, methodName) {
+    if (value === undefined || value === null) {
+      return null;
+    }
+    const text = String(value);
+    const descriptor = {
+      schema: "autojs6-node-app-uri-descriptor-v1",
+      value: text
+    };
+    const schemeMatch = /^([a-z][a-z0-9+.-]*):(.*)$/i.exec(text);
+    if (!schemeMatch) {
+      if (text.length > 0) {
+        descriptor.path = text;
+      }
+      return Object.freeze(descriptor);
+    }
+    descriptor.scheme = schemeMatch[1].toLowerCase();
+    try {
+      const parsed = new URL(text);
+      const userInfo = parsed.username || parsed.password
+        ? parsed.username + (parsed.password ? ":" + parsed.password : "")
+        : "";
+      const authority = (userInfo ? userInfo + "@" : "") + parsed.host;
+      if (authority) descriptor.authority = authority;
+      if (userInfo) descriptor.userInfo = userInfo;
+      if (parsed.hostname) descriptor.host = parsed.hostname;
+      if (parsed.port) descriptor.port = Number(parsed.port);
+      if (parsed.pathname) descriptor.path = parsed.pathname;
+      if (parsed.search) descriptor.query = parsed.search.slice(1);
+      if (parsed.hash) descriptor.fragment = parsed.hash.slice(1);
+    } catch (_) {
+      const rest = schemeMatch[2] || "";
+      if (rest) descriptor.path = rest;
+    }
+    return Object.freeze(descriptor);
+  }
+  function __autojs6_app_looks_like_web_url(value) {
+    const text = String(value || "").trim();
+    return /^(www\.)?[-a-z0-9]+(\.[a-z0-9-]+)+(\/|$|\?|#)/i.test(text);
+  }
+  function __autojs6_app_normalize_url(value, methodName, fieldName) {
+    const text = __autojs6_app_optional_intent_string(value, methodName, fieldName);
+    if (text === undefined) {
+      return undefined;
+    }
+    const trimmed = text.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+    if (__autojs6_app_has_uri_scheme(trimmed)) {
+      return trimmed;
+    }
+    if (__autojs6_app_looks_like_web_url(trimmed)) {
+      return "http://" + trimmed;
+    }
+    __autojs6_app_intent_error(methodName, "app." + methodName + " " + fieldName + " must include a URI scheme or a web host.");
+  }
+  function __autojs6_app_intent_categories(value, methodName, fieldName) {
+    if (value === undefined || value === null) {
+      return [];
+    }
+    const values = Array.isArray(value) ? value : [value];
+    return values.map(function(entry) {
+      if (entry === undefined || entry === null) {
+        return "";
+      }
+      return __autojs6_app_normalize_category(entry) || "";
+    }).filter(function(entry) {
+      return entry.length > 0;
+    });
+  }
+  function __autojs6_app_intent_flag(value, methodName, fieldName) {
+    if (typeof value !== "number" || !Number.isFinite(value) || Math.floor(value) !== value) {
+      __autojs6_app_intent_error(methodName, "app." + methodName + " intent " + fieldName + " must be an integer flag value.");
+    }
+    return value | 0;
+  }
+  function __autojs6_app_intent_flags(value, methodName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (Array.isArray(value)) {
+      return value.reduce(function(flags, entry, index) {
+        return flags | __autojs6_app_intent_flag(entry, methodName, "flags[" + index + "]");
+      }, 0);
+    }
+    return __autojs6_app_intent_flag(value, methodName, "flags");
+  }
+  function __autojs6_app_intent_extra_value(value, methodName, key) {
+    if (value === undefined) {
+      return undefined;
+    }
+    if (value === null || typeof value === "string" || typeof value === "boolean") {
+      return value;
+    }
+    if (typeof value === "number") {
+      if (!Number.isFinite(value)) {
+        __autojs6_app_intent_error(methodName, "app." + methodName + " extras." + key + " must be a finite number.");
+      }
+      return value;
+    }
+    if (Array.isArray(value)) {
+      let elementType = "";
+      return Object.freeze(value.map(function(entry, index) {
+        const parsed = __autojs6_app_intent_extra_value(entry, methodName, key + "[" + index + "]");
+        const parsedType = parsed === null ? "null" : typeof parsed;
+        if (parsed === undefined || parsed === null || (parsed && typeof parsed === "object")) {
+          __autojs6_app_intent_error(methodName, "app." + methodName + " extras." + key + " arrays may only contain string, number, or boolean primitives.");
+        }
+        if (!elementType) {
+          elementType = parsedType;
+        } else if (elementType !== parsedType) {
+          __autojs6_app_intent_error(methodName, "app." + methodName + " extras." + key + " arrays must not mix primitive types.");
+        }
+        return parsed;
+      }));
+    }
+    __autojs6_app_intent_error(methodName, "app." + methodName + " extras." + key + " must be a JSON primitive or primitive array.");
+  }
+  function __autojs6_app_intent_extras(value, methodName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (!__autojs6_app_intent_plain_object(value)) {
+      __autojs6_app_intent_error(methodName, "app." + methodName + " intent extras must be a JSON object.");
+    }
+    const extras = {};
+    Object.keys(value).forEach(function(key) {
+      const parsed = __autojs6_app_intent_extra_value(value[key], methodName, key);
+      if (parsed !== undefined) {
+        extras[key] = parsed;
+      }
+    });
+    return Object.freeze(extras);
+  }
+  function __autojs6_app_reject_privileged_intent_options(options, methodName) {
+    ["root", "shizuku", "dual", "user", "userId"].forEach(function(key) {
+      if (Object.prototype.hasOwnProperty.call(options, key)) {
+        __autojs6_app_intent_error(
+          methodName,
+          "app." + methodName + " does not accept privileged Rhino intent option: " + key + ". Use a dedicated shell/root/Shizuku capability instead."
+        );
+      }
+    });
+  }
+  function __autojs6_app_normalize_intent_descriptor(options, methodName) {
+    if (!__autojs6_app_intent_plain_object(options)) {
+      __autojs6_app_intent_error(methodName, "app." + methodName + " requires a JSON intent descriptor object.");
+    }
+    __autojs6_app_reject_privileged_intent_options(options, methodName);
+    const descriptor = {};
+    [
+      "action",
+      "data",
+      "url",
+      "type",
+      "packageName",
+      "package",
+      "className",
+      "component"
+    ].forEach(function(key) {
+      const value = key === "url"
+        ? __autojs6_app_normalize_url(options[key], methodName, key)
+        : __autojs6_app_optional_intent_string(options[key], methodName, key);
+      if (value !== undefined) {
+        if (key === "package") {
+          descriptor.packageName = value;
+        } else if (key === "url") {
+          descriptor.data = value;
+        } else if (key === "action") {
+          descriptor.action = __autojs6_app_normalize_action(value);
+        } else {
+          descriptor[key] = value;
+        }
+      }
+    });
+    const categories = []
+      .concat(__autojs6_app_intent_categories(options.category, methodName, "category"))
+      .concat(__autojs6_app_intent_categories(options.categories, methodName, "categories"));
+    if (categories.length > 0) {
+      descriptor.categories = Object.freeze(Array.from(new Set(categories)));
+    }
+    const flags = __autojs6_app_intent_flags(options.flags, methodName);
+    if (flags !== undefined) {
+      descriptor.flags = flags;
+    }
+    const extras = __autojs6_app_intent_extras(options.extras, methodName);
+    if (extras !== undefined) {
+      descriptor.extras = extras;
+    }
+    if (!__autojs6_app_has_start_activity_target(descriptor)) {
+      __autojs6_app_intent_error(
+        methodName,
+        "app." + methodName + " requires action, data, type, packageName, className, or component."
+      );
+    }
+    return Object.freeze(descriptor);
+  }
   function __autojs6_app_has_start_activity_target(options) {
     if (!options || typeof options !== "object" || Array.isArray(options)) {
       return false;
@@ -11452,6 +22187,7 @@ std::string buildEmbeddedScriptExecutionSource(
     return Boolean(
       options.action ||
       options.data ||
+      options.url ||
       options.type ||
       options.packageName ||
       options.package ||
@@ -11459,11 +22195,343 @@ std::string buildEmbeddedScriptExecutionSource(
       options.component
     );
   }
+  function __autojs6_app_open_url_descriptor(url, methodName) {
+    return __autojs6_app_normalize_intent_descriptor({
+      action: "VIEW",
+      url: url,
+      category: "BROWSABLE"
+    }, methodName);
+  }
+  function __autojs6_app_email_values(value, methodName, fieldName) {
+    if (value === undefined || value === null) {
+      return [];
+    }
+    const values = Array.isArray(value) ? value : [value];
+    return values.map(function(entry) {
+      return String(entry === undefined || entry === null ? "" : entry).trim();
+    }).filter(function(entry) {
+      return entry.length > 0;
+    }).map(function(entry) {
+      if (/[\r\n]/.test(entry)) {
+        __autojs6_app_intent_error(methodName, "app." + methodName + " " + fieldName + " must not contain line breaks.");
+      }
+      return entry;
+    });
+  }
+  function __autojs6_app_email_request(value, methodName) {
+    if (typeof value === "string" || Array.isArray(value)) {
+      return { to: value };
+    }
+    if (!__autojs6_app_intent_plain_object(value)) {
+      __autojs6_app_intent_error(methodName, "app." + methodName + " requires an email request object or recipient string.");
+    }
+    return value;
+  }
+  function __autojs6_app_email_descriptor(value, methodName) {
+    const request = __autojs6_app_email_request(value, methodName);
+    const to = __autojs6_app_email_values(request.to || request.email || request.address, methodName, "to");
+    const cc = __autojs6_app_email_values(request.cc, methodName, "cc");
+    const bcc = __autojs6_app_email_values(request.bcc, methodName, "bcc");
+    const subject = request.subject === undefined || request.subject === null ? "" : String(request.subject);
+    const body = request.text === undefined || request.text === null
+      ? request.body === undefined || request.body === null ? "" : String(request.body)
+      : String(request.text);
+    const query = [];
+    if (cc.length > 0) query.push("cc=" + encodeURIComponent(cc.join(",")));
+    if (bcc.length > 0) query.push("bcc=" + encodeURIComponent(bcc.join(",")));
+    if (subject) query.push("subject=" + encodeURIComponent(subject));
+    if (body) query.push("body=" + encodeURIComponent(body));
+    const data = "mailto:" + to.map(encodeURIComponent).join(",") + (query.length > 0 ? "?" + query.join("&") : "");
+    const extras = {};
+    if (to.length > 0) extras["android.intent.extra.EMAIL"] = Object.freeze(to.slice());
+    if (cc.length > 0) extras["android.intent.extra.CC"] = Object.freeze(cc.slice());
+    if (bcc.length > 0) extras["android.intent.extra.BCC"] = Object.freeze(bcc.slice());
+    if (subject) extras["android.intent.extra.SUBJECT"] = subject;
+    if (body) extras["android.intent.extra.TEXT"] = body;
+    return __autojs6_app_normalize_intent_descriptor({
+      action: "SENDTO",
+      data: data,
+      extras: extras
+    }, methodName);
+  }
+  function __autojs6_app_uninstall_descriptor(packageName, methodName) {
+    const target = __autojs6_app_non_empty_string(packageName).trim();
+    if (!target) {
+      __autojs6_app_intent_error(methodName, "app." + methodName + " requires a non-empty package name.");
+    }
+    return __autojs6_app_normalize_intent_descriptor({
+      action: "DELETE",
+      data: "package:" + target
+    }, methodName);
+  }
+  function __autojs6_app_shell_quote(value) {
+    return "'" + String(value).replace(/'/g, "'\\''") + "'";
+  }
+  function __autojs6_app_shell_array_value(value) {
+    return String(value).replace(/\\/g, "\\\\").replace(/,/g, "\\,");
+  }
+  function __autojs6_app_shell_join_array(values) {
+    return values.map(__autojs6_app_shell_array_value).join(",");
+  }
+  function __autojs6_app_shell_number_type(value) {
+    if (Number.isInteger(value)) {
+      return value >= -2147483648 && value <= 2147483647 ? "i" : "l";
+    }
+    return "f";
+  }
+  function __autojs6_app_shell_number_array_type(values) {
+    let allInt32 = true;
+    let allInteger = true;
+    values.forEach(function(value) {
+      if (!Number.isInteger(value)) {
+        allInt32 = false;
+        allInteger = false;
+      } else if (value < -2147483648 || value > 2147483647) {
+        allInt32 = false;
+      }
+    });
+    return allInt32 ? "ia" : allInteger ? "la" : "fa";
+  }
+  function __autojs6_app_shell_extra_option(value, methodName, key) {
+    if (value === null) {
+      return "esn";
+    }
+    if (typeof value === "string") {
+      return "es";
+    }
+    if (typeof value === "boolean") {
+      return "ez";
+    }
+    if (typeof value === "number") {
+      return "e" + __autojs6_app_shell_number_type(value);
+    }
+    if (Array.isArray(value)) {
+      if (value.length === 0 || typeof value[0] === "string") {
+        return "esa";
+      }
+      if (typeof value[0] === "boolean") {
+        return "eza";
+      }
+      if (typeof value[0] === "number") {
+        return "e" + __autojs6_app_shell_number_array_type(value);
+      }
+    }
+    __autojs6_app_intent_error(methodName, "app." + methodName + " extras." + key + " cannot be converted to shell intent arguments.");
+  }
+  function __autojs6_app_intent_to_shell(descriptor, methodName) {
+    const parts = [];
+    const component = descriptor.component ||
+      (descriptor.packageName && descriptor.className ? descriptor.packageName + "/" + descriptor.className : "") ||
+      (descriptor.className || "");
+    if (component) {
+      parts.push("-n", __autojs6_app_shell_quote(component));
+    } else if (descriptor.packageName) {
+      parts.push("-p", __autojs6_app_shell_quote(descriptor.packageName));
+    }
+    if (descriptor.extras) {
+      Object.keys(descriptor.extras).forEach(function(key) {
+        const value = descriptor.extras[key];
+        const option = __autojs6_app_shell_extra_option(value, methodName, key);
+        if (option === "esn") {
+          parts.push("--" + option, __autojs6_app_shell_quote(key));
+        } else if (Array.isArray(value)) {
+          parts.push("--" + option, __autojs6_app_shell_quote(key), __autojs6_app_shell_quote(__autojs6_app_shell_join_array(value)));
+        } else {
+          const shellValue = typeof value === "string" ? __autojs6_app_shell_quote(value) : String(value);
+          parts.push("--" + option, __autojs6_app_shell_quote(key), shellValue);
+        }
+      });
+    }
+    (descriptor.categories || []).forEach(function(category) {
+      parts.push("-c", __autojs6_app_shell_quote(category));
+    });
+    if (descriptor.action) {
+      parts.push("-a", __autojs6_app_shell_quote(descriptor.action));
+    }
+    if (descriptor.flags !== undefined) {
+      parts.push("-f", String(descriptor.flags));
+    }
+    if (descriptor.type) {
+      parts.push("-t", __autojs6_app_shell_quote(descriptor.type));
+    }
+    if (descriptor.data) {
+      parts.push("-d", __autojs6_app_shell_quote(descriptor.data));
+    }
+    return parts.join(" ");
+  }
+  function __autojs6_app_send_broadcast_unavailable_error() {
+    return __autojs6_bridge_error(
+      "app.sendBroadcast is not available in the Node.js engine yet; P13-23 keeps broadcast send APIs blocked until receiver authority, manifest policy, and root/Shizuku separation are complete.",
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "app",
+      "sendBroadcast"
+    );
+  }
+  function __autojs6_app_raw_uri_unavailable_error(methodName) {
+    return __autojs6_bridge_error(
+      "app." + methodName + " is not available in the Node.js engine yet; P13-23 keeps raw Android Uri and FileProvider handles out of Node. Use app.parseUri() for JSON-safe URI inspection or app.viewFile()/app.editFile() for scoped file activity routing.",
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "app",
+      methodName
+    );
+  }
+  function __autojs6_app_privileged_unavailable_error(methodName) {
+    return __autojs6_bridge_error(
+      "app." + methodName + " is not available in the Node.js engine yet; P13-23 keeps root, Shizuku, and dual-user app helpers blocked until they are routed through explicit P13-24 shell/root/Shizuku capabilities.",
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "app",
+      methodName
+    );
+  }
   function __autojs6_limited_app() {
     if (__autojs6_limited_app_cache) {
       return __autojs6_limited_app_cache;
     }
     const info = __autojs6_host_app_info();
+    function intent(options) {
+      return __autojs6_app_normalize_intent_descriptor(options, "intent");
+    }
+    function parseUri(uri) {
+      return __autojs6_app_parse_uri_descriptor(uri, "parseUri");
+    }
+    function getUriForFile(path) {
+      throw __autojs6_app_raw_uri_unavailable_error("getUriForFile");
+    }
+    function intentToShell(options) {
+      return __autojs6_app_intent_to_shell(
+        __autojs6_app_normalize_intent_descriptor(options, "intentToShell"),
+        "intentToShell"
+      );
+    }
+    function openUrl(url, options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_app_open_url_descriptor(url, "openUrl");
+      } catch (error) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "openUrl",
+          error && error.message ? error.message : "app.openUrl requires a URI string."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "startActivity",
+        [descriptor],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function sendEmail(request, options) {
+      let descriptor;
+      try {
+        const emailRequest = (typeof request === "string" || Array.isArray(request)) && options && typeof options === "object"
+          ? Object.assign({}, options, { to: request })
+          : request;
+        descriptor = __autojs6_app_email_descriptor(emailRequest, "sendEmail");
+      } catch (error) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "sendEmail",
+          error && error.message ? error.message : "app.sendEmail requires a JSON-safe email request."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "startActivity",
+        [descriptor],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function uninstall(packageName, options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_app_uninstall_descriptor(packageName, "uninstall");
+      } catch (error) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "uninstall",
+          error && error.message ? error.message : "app.uninstall requires a non-empty package name."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "startActivity",
+        [descriptor],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function getPackageName(appName, options) {
+      const target = __autojs6_app_non_empty_string(appName).trim();
+      if (!target) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "getPackageName",
+          "app.getPackageName requires a non-empty app name."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "getPackageName",
+        [target],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function getAppName(packageName, options) {
+      const target = __autojs6_app_non_empty_string(packageName).trim();
+      if (!target) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "getAppName",
+          "app.getAppName requires a non-empty package name."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "getAppName",
+        [target],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function isInstalled(packageName, options) {
+      const target = __autojs6_app_non_empty_string(packageName).trim();
+      if (!target) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "isInstalled",
+          "app.isInstalled requires a non-empty package name."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "isInstalled",
+        [target],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function viewFile(path, options) {
+      const target = __autojs6_app_non_empty_string(path).trim();
+      if (!target) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "viewFile",
+          "app.viewFile requires a non-empty scoped file path."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "viewFile",
+        [target],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function editFile(path, options) {
+      const target = __autojs6_app_non_empty_string(path).trim();
+      if (!target) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "editFile",
+          "app.editFile requires a non-empty scoped file path."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "editFile",
+        [target],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
     function launchPackage(packageName, options) {
       const target = __autojs6_app_non_empty_string(packageName);
       if (!target) {
@@ -11516,11 +22584,15 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
     function startActivity(options, callOptions) {
-      const descriptor = options && typeof options === "object" && !Array.isArray(options) ? options : null;
-      if (!__autojs6_app_has_start_activity_target(descriptor)) {
+      let descriptor;
+      try {
+        descriptor = typeof options === "string"
+          ? __autojs6_app_open_url_descriptor(options, "startActivity")
+          : __autojs6_app_normalize_intent_descriptor(options, "startActivity");
+      } catch (error) {
         return Promise.reject(__autojs6_app_invalid_argument_error(
           "startActivity",
-          "app.startActivity requires a JSON intent descriptor with action, data, type, packageName, className, or component."
+          error && error.message ? error.message : "app.startActivity requires a JSON intent descriptor."
         ));
       }
       return __autojs6_call_autojs(
@@ -11530,14 +22602,74 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_app_bridge_options(callOptions, 10000)
       );
     }
+    function startDualActivity(options, callOptions) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("startDualActivity"));
+    }
+    function sendBroadcast(options, callOptions) {
+      return Promise.reject(__autojs6_app_send_broadcast_unavailable_error());
+    }
+    function openDualUrl(url, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("openDualUrl"));
+    }
+    function launchDualPackage(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("launchDualPackage"));
+    }
+    function launchDualApp(appName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("launchDualApp"));
+    }
+    function launchDualAppDetailsSettings(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("launchDualAppDetailsSettings"));
+    }
+    function isDualInstalled(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("isDualInstalled"));
+    }
+    function uninstallDual(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("uninstallDual"));
+    }
+    function kill(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("kill"));
+    }
+    function killDual(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("killDual"));
+    }
     __autojs6_limited_app_cache = Object.freeze({
       packageName: info.packageName,
       versionName: info.versionName,
       versionCode: info.versionCode,
+      intent,
+      parseUri,
+      getUriForFile,
+      intentToShell,
+      openUrl,
+      openDualUrl,
+      sendEmail,
+      uninstall,
+      uninstallDual,
+      getPackageName,
+      getAppName,
+      isInstalled,
+      isDualInstalled,
+      viewFile,
+      editFile,
+      launch: launchPackage,
+      launchDual: launchDualPackage,
       launchPackage,
+      launchDualPackage,
       launchApp,
+      launchDualApp,
       openAppSetting,
-      startActivity
+      openAppSettings: openAppSetting,
+      launchSettings: openAppSetting,
+      launchAppDetailsSettings: openAppSetting,
+      openDualAppSetting: launchDualAppDetailsSettings,
+      openDualAppSettings: launchDualAppDetailsSettings,
+      launchDualSettings: launchDualAppDetailsSettings,
+      launchDualAppDetailsSettings,
+      startActivity,
+      startDualActivity,
+      sendBroadcast,
+      kill,
+      killDual
     });
     return __autojs6_limited_app_cache;
   }
@@ -11906,6 +23038,786 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     return __autojs6_limited_dialogs_cache;
   }
+  function __autojs6_ui_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_ui_timeout_from_options(options, fallbackMs) {
+    return options && typeof options === "object" && options.timeoutMs !== undefined
+      ? options.timeoutMs
+      : fallbackMs;
+  }
+  function __autojs6_ui_bridge_options(options, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_ui_timeout_from_options(options, fallbackMs),
+      permissions: ["ui"],
+      signal: __autojs6_bridge_signal_from_options(options)
+    };
+  }
+  function __autojs6_ui_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "ui",
+      methodName
+    );
+  }
+  function __autojs6_ui_validate_json(value, methodName, path, depth, seen) {
+    if (depth > 16) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor is too deep at " + path + ".");
+    }
+    if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      if (typeof value === "number" && !Number.isFinite(value)) {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor contains a non-finite number at " + path + ".");
+      }
+      return value;
+    }
+    if (!value || typeof value !== "object") {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must be JSON-only at " + path + ".");
+    }
+    if (seen.indexOf(value) >= 0) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must not contain cycles.");
+    }
+    seen.push(value);
+    if (Array.isArray(value)) {
+      if (value.length > 128) {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor array is too large at " + path + ".");
+      }
+      const arrayResult = value.map(function(entry, index) {
+        return __autojs6_ui_validate_json(entry, methodName, path + "[" + index + "]", depth + 1, seen);
+      });
+      seen.pop();
+      return arrayResult;
+    }
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must use plain JSON objects at " + path + ".");
+    }
+    const keys = Object.keys(value);
+    if (keys.length > 64) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor object is too large at " + path + ".");
+    }
+    const objectResult = Object.create(null);
+    keys.forEach(function(key) {
+      const entry = value[key];
+      if (entry === undefined || typeof entry === "function" || typeof entry === "symbol" || typeof entry === "bigint") {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must be JSON-only at " + path + "." + key + ".");
+      }
+      objectResult[key] = __autojs6_ui_validate_json(entry, methodName, path + "." + key, depth + 1, seen);
+    });
+    seen.pop();
+    return objectResult;
+  }
+  function __autojs6_ui_descriptor(value, methodName) {
+    const descriptor = __autojs6_ui_validate_json(value, methodName, "layout", 0, []);
+    const text = JSON.stringify(descriptor);
+    if (!text || text.length > 32768) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor exceeds 32768 characters.");
+    }
+    if (!descriptor || typeof descriptor !== "object" || Array.isArray(descriptor)) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " requires a JSON object descriptor.");
+    }
+    return descriptor;
+  }
+  const __autojs6_ui_state_type = "autojs6.ui.state";
+  const __autojs6_ui_binding_type = "autojs6.ui.binding";
+  const __autojs6_ui_bindable_properties = Object.freeze({
+    text: true,
+    value: true,
+    checked: true,
+    enabled: true,
+    progress: true,
+    max: true,
+    hint: true,
+    contentDescription: true,
+    selectedIndex: true
+  });
+  function __autojs6_ui_json_clone(value, methodName, path) {
+    return __autojs6_ui_validate_json(value, methodName, path || "value", 0, []);
+  }
+  function __autojs6_ui_is_state(value) {
+    return !!(value && typeof value === "object" && value.__autojs6UiState === __autojs6_ui_state_type);
+  }
+  function __autojs6_ui_is_binding(value) {
+    return !!(value && typeof value === "object" && value.__autojs6UiBinding === __autojs6_ui_binding_type);
+  }
+  function __autojs6_ui_state(initialValue) {
+    const initial = initialValue === undefined ? {} : __autojs6_ui_json_clone(initialValue, "state", "state");
+    if (!initial || typeof initial !== "object" || Array.isArray(initial)) {
+      throw __autojs6_ui_invalid_argument_error("state", "ui.state requires a JSON object initial value.");
+    }
+    const values = JSON.parse(JSON.stringify(initial));
+    const listeners = [];
+    let api = null;
+    function cloneSnapshot() {
+      return Object.freeze(JSON.parse(JSON.stringify(values)));
+    }
+    function notify(keys) {
+      const event = Object.freeze({
+        keys: Object.freeze(keys.slice()),
+        snapshot: cloneSnapshot()
+      });
+      listeners.slice().forEach(function(listener) {
+        listener(event);
+      });
+    }
+    api = {
+      get(key) {
+        const name = key === undefined || key === null ? "" : String(key);
+        if (!Object.prototype.hasOwnProperty.call(values, name)) {
+          return undefined;
+        }
+        return __autojs6_ui_json_clone(values[name], "state", "state." + name);
+      },
+      set(key, value) {
+        const name = key === undefined || key === null ? "" : String(key).trim();
+        if (!name) {
+          throw __autojs6_ui_invalid_argument_error("state", "ui.state.set requires a non-empty key.");
+        }
+        values[name] = __autojs6_ui_json_clone(value, "state", "state." + name);
+        notify([name]);
+        return api;
+      },
+      update(nextValues) {
+        const descriptor = __autojs6_ui_json_clone(nextValues, "state", "state");
+        if (!descriptor || typeof descriptor !== "object" || Array.isArray(descriptor)) {
+          throw __autojs6_ui_invalid_argument_error("state", "ui.state.update requires a JSON object.");
+        }
+        const keys = Object.keys(descriptor);
+        keys.forEach(function(key) {
+          values[key] = descriptor[key];
+        });
+        if (keys.length > 0) {
+          notify(keys);
+        }
+        return api;
+      },
+      snapshot: cloneSnapshot,
+      subscribe(callback) {
+        if (typeof callback !== "function") {
+          throw __autojs6_ui_invalid_argument_error("state", "ui.state.subscribe requires a callback.");
+        }
+        listeners.push(callback);
+        return function unsubscribe() {
+          const index = listeners.indexOf(callback);
+          if (index >= 0) {
+            listeners.splice(index, 1);
+          }
+        };
+      }
+    };
+    Object.defineProperty(api, "__autojs6UiState", {
+      value: __autojs6_ui_state_type
+    });
+    return Object.freeze(api);
+  }
+  function __autojs6_ui_bind(state, key) {
+    if (!__autojs6_ui_is_state(state)) {
+      throw __autojs6_ui_invalid_argument_error("bind", "ui.bind requires a ui.state object.");
+    }
+    const name = key === undefined || key === null ? "" : String(key).trim();
+    if (!name) {
+      throw __autojs6_ui_invalid_argument_error("bind", "ui.bind requires a non-empty state key.");
+    }
+    return Object.freeze({
+      __autojs6UiBinding: __autojs6_ui_binding_type,
+      state,
+      key: name
+    });
+  }
+  function __autojs6_ui_prepare_descriptor(value, methodName) {
+    const bindings = [];
+    function walk(entry, path, componentId, propertyName, depth, seen) {
+      if (__autojs6_ui_is_binding(entry)) {
+        if (!componentId || !propertyName || !__autojs6_ui_bindable_properties[propertyName]) {
+          throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " binding at " + path + " requires a component id and bindable property.");
+        }
+        bindings.push({
+          state: entry.state,
+          key: entry.key,
+          id: componentId,
+          property: propertyName
+        });
+        return entry.state.get(entry.key);
+      }
+      if (entry === null || typeof entry === "string" || typeof entry === "number" || typeof entry === "boolean") {
+        return entry;
+      }
+      if (!entry || typeof entry !== "object") {
+        return entry;
+      }
+      if (seen.indexOf(entry) >= 0) {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must not contain cycles.");
+      }
+      if (depth > 16) {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor is too deep at " + path + ".");
+      }
+      seen.push(entry);
+      if (Array.isArray(entry)) {
+        const arrayResult = entry.map(function(child, index) {
+          return walk(child, path + "[" + index + "]", componentId, propertyName, depth + 1, seen);
+        });
+        seen.pop();
+        return arrayResult;
+      }
+      const prototype = Object.getPrototypeOf(entry);
+      if (prototype !== Object.prototype && prototype !== null) {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must use plain JSON objects at " + path + ".");
+      }
+      const currentId = entry.id === undefined || entry.id === null ? componentId : String(entry.id);
+      const objectResult = Object.create(null);
+      Object.keys(entry).forEach(function(key) {
+        objectResult[key] = walk(entry[key], path + "." + key, currentId, key, depth + 1, seen);
+      });
+      seen.pop();
+      return objectResult;
+    }
+    return {
+      descriptor: walk(value, "layout", "", "", 0, []),
+      bindings
+    };
+  }
+  function __autojs6_ui_handle_id(value) {
+    if (typeof value === "string") {
+      return value.trim();
+    }
+    if (value && typeof value === "object") {
+      return String(value.id || value.handleId || value.__autojs6UiHandle || "").trim();
+    }
+    return "";
+  }
+  function __autojs6_ui_handle(result, moduleOptions, bindings) {
+    const id = __autojs6_ui_handle_id(result);
+    if (!id) {
+      throw __autojs6_ui_invalid_argument_error("showLayout", "ui.showLayout provider returned an invalid UI handle.");
+    }
+    const listeners = Object.create(null);
+    let closed = false;
+    let drainTimer = null;
+    let draining = false;
+    let pendingBindingPatches = [];
+    let bindingFlushScheduled = false;
+    const bindingUnsubscribers = [];
+    const defaultDrainIntervalMs = Math.max(10, Math.min(1000, Number(moduleOptions.drainIntervalMs) || 50));
+    function listenerCount() {
+      return Object.keys(listeners).reduce(function(total, key) {
+        return total + listeners[key].length;
+      }, 0);
+    }
+    function stopDrainIfIdle() {
+      if (listenerCount() === 0 && drainTimer !== null) {
+        clearInterval(drainTimer);
+        drainTimer = null;
+      }
+    }
+    function dispatchEvent(event) {
+      if (!event || typeof event !== "object") {
+        return;
+      }
+      const type = event.type === undefined || event.type === null ? "" : String(event.type);
+      const targets = []
+        .concat(listeners[type] || [])
+        .concat(listeners["*"] || []);
+      targets.forEach(function(callback) {
+        try {
+          callback(Object.freeze(Object.assign({}, event, { handleId: id })));
+        } catch (error) {
+          setTimeout(function() { throw error; }, 0);
+        }
+      });
+    }
+    function drain(options) {
+      if (closed || draining || listenerCount() === 0) {
+        return;
+      }
+      draining = true;
+      const bridgeOptions = __autojs6_ui_options(options || moduleOptions);
+      __autojs6_call_autojs(
+        "ui",
+        "drainEvents",
+        [id, { maxEvents: 16 }],
+        __autojs6_ui_bridge_options(bridgeOptions, 5000)
+      ).then(function(events) {
+        if (Array.isArray(events)) {
+          events.forEach(dispatchEvent);
+        }
+      }, function() {
+        return undefined;
+      }).finally(function() {
+        draining = false;
+      });
+    }
+    function on(eventName, callback, options) {
+      const event = eventName === undefined || eventName === null ? "" : String(eventName).trim();
+      if (!event || typeof callback !== "function") {
+        throw __autojs6_ui_invalid_argument_error("on", "ui.handle.on requires an event name and callback.");
+      }
+      if (!listeners[event]) {
+        listeners[event] = [];
+      }
+      listeners[event].push(callback);
+      if (drainTimer === null) {
+        const intervalMs = Math.max(10, Math.min(1000, Number((options && options.drainIntervalMs) || moduleOptions.drainIntervalMs) || defaultDrainIntervalMs));
+        drainTimer = setInterval(function() { drain(options); }, intervalMs);
+        drain(options);
+      }
+      return function unsubscribe() {
+        const bucket = listeners[event] || [];
+        const index = bucket.indexOf(callback);
+        if (index >= 0) {
+          bucket.splice(index, 1);
+        }
+        stopDrainIfIdle();
+      };
+    }
+    function update(patch, options) {
+      if (closed) {
+        return Promise.resolve(undefined);
+      }
+      let descriptor;
+      try {
+        descriptor = __autojs6_ui_descriptor(patch, "update");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const bridgeOptions = __autojs6_ui_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui",
+        "update",
+        [id, descriptor],
+        __autojs6_ui_bridge_options(bridgeOptions, 10000)
+      ).then(function() {
+        return undefined;
+      });
+    }
+    function batchUpdate(patches, options) {
+      if (closed) {
+        return Promise.resolve(undefined);
+      }
+      if (!Array.isArray(patches)) {
+        return Promise.reject(__autojs6_ui_invalid_argument_error("batchUpdate", "ui.handle.batchUpdate requires an array of patches."));
+      }
+      if (patches.length === 0) {
+        return Promise.resolve(undefined);
+      }
+      if (patches.length > 64) {
+        return Promise.reject(__autojs6_ui_invalid_argument_error("batchUpdate", "ui.handle.batchUpdate patch array exceeds 64 entries."));
+      }
+      let descriptors;
+      try {
+        descriptors = patches.map(function(patch) {
+          return __autojs6_ui_descriptor(patch, "batchUpdate");
+        });
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const bridgeOptions = __autojs6_ui_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui",
+        "batchUpdate",
+        [id, descriptors],
+        __autojs6_ui_bridge_options(bridgeOptions, 10000)
+      ).then(function() {
+        return undefined;
+      });
+    }
+    function flushBindingPatches() {
+      bindingFlushScheduled = false;
+      if (closed || pendingBindingPatches.length === 0) {
+        pendingBindingPatches = [];
+        return;
+      }
+      const patches = pendingBindingPatches.slice();
+      pendingBindingPatches = [];
+      batchUpdate(patches, moduleOptions).catch(function() {
+        return undefined;
+      });
+    }
+    function enqueueBindingPatch(patch) {
+      if (closed) {
+        return;
+      }
+      pendingBindingPatches.push(patch);
+      if (!bindingFlushScheduled) {
+        bindingFlushScheduled = true;
+        Promise.resolve().then(flushBindingPatches);
+      }
+    }
+    (Array.isArray(bindings) ? bindings : []).forEach(function(binding) {
+      const off = binding.state.subscribe(function(event) {
+        if (!event || !Array.isArray(event.keys) || event.keys.indexOf(binding.key) < 0) {
+          return;
+        }
+        const patch = Object.create(null);
+        patch.id = binding.id;
+        patch[binding.property] = binding.state.get(binding.key);
+        enqueueBindingPatch(patch);
+      });
+      bindingUnsubscribers.push(off);
+    });
+    function close(options) {
+      if (closed) {
+        return Promise.resolve(undefined);
+      }
+      closed = true;
+      if (drainTimer !== null) {
+        clearInterval(drainTimer);
+        drainTimer = null;
+      }
+      bindingUnsubscribers.splice(0).forEach(function(unsubscribe) {
+        unsubscribe();
+      });
+      pendingBindingPatches = [];
+      const bridgeOptions = __autojs6_ui_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui",
+        "close",
+        [id],
+        __autojs6_ui_bridge_options(bridgeOptions, 10000)
+      ).then(function() {
+        return undefined;
+      });
+    }
+    return Object.freeze({
+      id,
+      on,
+      update,
+      batchUpdate,
+      close
+    });
+  }
+  function __autojs6_limited_ui() {
+    if (__autojs6_limited_ui_cache) {
+      return __autojs6_limited_ui_cache;
+    }
+    function showLayout(layoutJson, options) {
+      let prepared;
+      let descriptor;
+      try {
+        prepared = __autojs6_ui_prepare_descriptor(layoutJson, "showLayout");
+        descriptor = __autojs6_ui_descriptor(prepared.descriptor, "showLayout");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const bridgeOptions = __autojs6_ui_options(options);
+      return __autojs6_call_autojs(
+        "ui",
+        "showLayout",
+        [descriptor],
+        __autojs6_ui_bridge_options(bridgeOptions, 10000)
+      ).then(function(result) {
+        return __autojs6_ui_handle(result, bridgeOptions, prepared.bindings);
+      });
+    }
+    __autojs6_limited_ui_cache = Object.freeze({
+      showLayout,
+      state: __autojs6_ui_state,
+      bind: __autojs6_ui_bind
+    });
+    return __autojs6_limited_ui_cache;
+  }
+  const __autojs6_ui_overlay_policy = Object.freeze({
+    maxActiveOverlays: 4,
+    maxDescriptorBytes: 65536,
+    maxDescriptorDepth: 16,
+    defaultEventQueueSize: 64,
+    maxEventQueueSize: 128,
+    defaultDrainBatchSize: 32,
+    maxDrainBatchSize: 64,
+    defaultTimeoutMs: 10000,
+    maxTimeoutMs: 60000,
+    minAlpha: 0.2
+  });
+  function __autojs6_ui_overlay_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "ui.overlay",
+      methodName
+    );
+  }
+  function __autojs6_ui_overlay_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_ui_overlay_number(value, fallback, min, max) {
+    const numberValue = value === undefined || value === null ? fallback : Number(value);
+    if (!Number.isFinite(numberValue)) return fallback;
+    return Math.min(max, Math.max(min, Math.trunc(numberValue)));
+  }
+  function __autojs6_ui_overlay_timeout_from_options(options, fallbackMs) {
+    return __autojs6_bridge_timeout_ms(
+      __autojs6_ui_overlay_number(
+        options && options.timeoutMs,
+        fallbackMs,
+        1,
+        __autojs6_ui_overlay_policy.maxTimeoutMs
+      )
+    );
+  }
+  function __autojs6_ui_overlay_bridge_options(options, methodName, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_ui_overlay_timeout_from_options(options, fallbackMs),
+      permissions: methodName === "hasPermission" || methodName === "openPermissionSettings"
+        ? ["ui.overlay.permission"]
+        : ["ui.overlay"],
+      signal: __autojs6_bridge_signal_from_options(options)
+    };
+  }
+  function __autojs6_ui_overlay_request_options(options) {
+    const opts = __autojs6_ui_overlay_options(options);
+    const request = {};
+    if (opts.timeoutMs !== undefined) {
+      request.timeoutMs = __autojs6_ui_overlay_number(opts.timeoutMs, __autojs6_ui_overlay_policy.defaultTimeoutMs, 1, __autojs6_ui_overlay_policy.maxTimeoutMs);
+    }
+      if (opts.maxEvents !== undefined) {
+        request.maxEvents = __autojs6_ui_overlay_number(opts.maxEvents, __autojs6_ui_overlay_policy.defaultDrainBatchSize, 1, __autojs6_ui_overlay_policy.maxDrainBatchSize);
+      }
+      if (opts.dryRun !== undefined) {
+        request.dryRun = Boolean(opts.dryRun);
+      }
+      return Object.freeze(request);
+  }
+  function __autojs6_ui_overlay_dimension(value, propertyName, methodName) {
+    if (value === undefined || value === null) return undefined;
+    if (value === "wrap_content" || value === "match_parent") return value;
+    const numberValue = Number(value);
+    if (!Number.isFinite(numberValue) || numberValue < 1 || numberValue > 4096) {
+      throw __autojs6_ui_overlay_invalid_argument_error(
+        methodName,
+        "ui.overlay." + methodName + " window." + propertyName + " must be a positive bounded number, wrap_content, or match_parent."
+      );
+    }
+    return Math.trunc(numberValue);
+  }
+  function __autojs6_ui_overlay_disclosure(value, methodName) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw __autojs6_ui_overlay_invalid_argument_error(
+        methodName,
+        "ui.overlay." + methodName + " requires disclosure title and text."
+      );
+    }
+    const title = String(value.title === undefined || value.title === null ? "" : value.title).trim();
+    const text = String(value.text === undefined || value.text === null ? "" : value.text).trim();
+    if (!title || !text) {
+      throw __autojs6_ui_overlay_invalid_argument_error(
+        methodName,
+        "ui.overlay." + methodName + " requires non-empty disclosure title and text."
+      );
+    }
+    return Object.freeze({ title, text });
+  }
+  function __autojs6_ui_overlay_window(value, methodName) {
+    const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    if (source.layoutParams !== undefined || source.flags !== undefined || String(source.type || "").indexOf("WindowManager") >= 0) {
+      throw __autojs6_ui_overlay_invalid_argument_error(
+        methodName,
+        "ui.overlay." + methodName + " rejects raw WindowManager.LayoutParams, flags, and platform window types."
+      );
+    }
+    if (source.visible === false) {
+      throw __autojs6_ui_overlay_invalid_argument_error(methodName, "ui.overlay." + methodName + " does not allow hidden overlays.");
+    }
+    if (source.alpha !== undefined && Number(source.alpha) < __autojs6_ui_overlay_policy.minAlpha) {
+      throw __autojs6_ui_overlay_invalid_argument_error(methodName, "ui.overlay." + methodName + " does not allow fully transparent overlays.");
+    }
+    const output = {};
+    const width = __autojs6_ui_overlay_dimension(source.width, "width", methodName);
+    const height = __autojs6_ui_overlay_dimension(source.height, "height", methodName);
+    if (width !== undefined) output.width = width;
+    if (height !== undefined) output.height = height;
+    if (source.x !== undefined) output.x = __autojs6_ui_overlay_number(source.x, 0, -4096, 4096);
+    if (source.y !== undefined) output.y = __autojs6_ui_overlay_number(source.y, 0, -4096, 4096);
+    if (source.touchable !== undefined) output.touchable = Boolean(source.touchable);
+    if (source.focusable !== undefined) output.focusable = Boolean(source.focusable);
+    if (source.draggable !== undefined) output.draggable = Boolean(source.draggable);
+    output.visible = true;
+    if (source.alpha !== undefined) output.alpha = Math.min(1, Math.max(__autojs6_ui_overlay_policy.minAlpha, Number(source.alpha)));
+    return Object.freeze(output);
+  }
+  function __autojs6_ui_overlay_descriptor(value, methodName) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw __autojs6_ui_overlay_invalid_argument_error(methodName, "ui.overlay." + methodName + " requires a descriptor object.");
+    }
+    const contentValue = value.content;
+    if (!contentValue || typeof contentValue !== "object" || Array.isArray(contentValue)) {
+      throw __autojs6_ui_overlay_invalid_argument_error(methodName, "ui.overlay." + methodName + " requires a JSON content descriptor.");
+    }
+    const prepared = __autojs6_ui_prepare_descriptor(contentValue, "ui.overlay." + methodName);
+    const content = __autojs6_ui_descriptor(prepared.descriptor, "ui.overlay." + methodName);
+    return Object.freeze({
+      content,
+      window: __autojs6_ui_overlay_window(value.window, methodName),
+      disclosure: __autojs6_ui_overlay_disclosure(value.disclosure, methodName)
+    });
+  }
+  function __autojs6_ui_overlay_snapshot(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const bounds = source.bounds && typeof source.bounds === "object" ? source.bounds : null;
+    const disclosure = source.disclosure && typeof source.disclosure === "object" ? source.disclosure : null;
+    const output = {
+      id: String(source.id || ""),
+      type: "overlay",
+      closed: Boolean(source.closed),
+      visible: source.visible !== false,
+      createdAt: Number(source.createdAt || 0)
+    };
+    if (bounds) {
+      output.bounds = Object.freeze({
+        x: Number(bounds.x || 0),
+        y: Number(bounds.y || 0),
+        width: Number(bounds.width || 0),
+        height: Number(bounds.height || 0)
+      });
+    }
+    if (disclosure) {
+      output.disclosure = Object.freeze({ title: String(disclosure.title || "") });
+    }
+    if (source.droppedCount !== undefined) {
+      output.droppedCount = Number(source.droppedCount || 0);
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_ui_overlay_event(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const output = {
+      type: String(source.type || ""),
+      overlayId: String(source.overlayId || ""),
+      eventTime: Number(source.eventTime || 0)
+    };
+    if (source.targetId !== undefined && source.targetId !== null) output.targetId = String(source.targetId);
+    if (source.reason !== undefined && source.reason !== null) output.reason = String(source.reason);
+    if (source.state && typeof source.state === "object" && !Array.isArray(source.state)) output.state = Object.freeze(Object.assign({}, source.state));
+    return Object.freeze(output);
+  }
+  function __autojs6_ui_overlay_handle(record, moduleOptions) {
+    const snapshot = __autojs6_ui_overlay_snapshot(record);
+    const state = { id: snapshot.id, closed: snapshot.closed };
+    function update(patch, options) {
+      if (state.closed) {
+        return Promise.reject(__autojs6_ui_overlay_invalid_argument_error("update", "ui.overlay.update requires an active overlay handle."));
+      }
+      const opts = __autojs6_ui_overlay_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "update",
+        [state.id, patch || {}, __autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "update", 5000)
+      ).then(__autojs6_ui_overlay_snapshot);
+    }
+    function drainEvents(options) {
+      if (state.closed) return Promise.resolve(Object.freeze([]));
+      const opts = __autojs6_ui_overlay_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "drainEvents",
+        [state.id, __autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "drainEvents", 5000)
+      ).then(function(result) {
+        return Object.freeze((Array.isArray(result) ? result : []).map(__autojs6_ui_overlay_event));
+      });
+    }
+    function close(options) {
+      if (state.closed) return Promise.resolve(false);
+      const opts = __autojs6_ui_overlay_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "close",
+        [state.id, __autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "close", 5000)
+      ).then(function(result) {
+        state.closed = true;
+        return Boolean(result);
+      }, function(error) {
+        state.closed = true;
+        throw error;
+      });
+    }
+    return Object.freeze({
+      get id() { return state.id; },
+      get type() { return "overlay"; },
+      get closed() { return state.closed; },
+      update,
+      drainEvents,
+      close
+    });
+  }
+  function __autojs6_limited_ui_overlay() {
+    if (__autojs6_limited_ui_overlay_cache) {
+      return __autojs6_limited_ui_overlay_cache;
+    }
+    function show(descriptor, options) {
+      let prepared;
+      try {
+        prepared = __autojs6_ui_overlay_descriptor(descriptor, "show");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const opts = __autojs6_ui_overlay_options(options);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "show",
+        [prepared, __autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "show", 10000)
+      ).then(function(result) {
+        return __autojs6_ui_overlay_handle(result, opts);
+      });
+    }
+    function closeAll(options) {
+      const opts = __autojs6_ui_overlay_options(options);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "closeAll",
+        [__autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "closeAll", 5000)
+      ).then(function(result) {
+        const source = result && typeof result === "object" ? result : {};
+        return Object.freeze({
+          closedCount: Number(source.closedCount || 0),
+          remainingCount: Number(source.remainingCount || 0)
+        });
+      });
+    }
+    function hasPermission(options) {
+      const opts = __autojs6_ui_overlay_options(options);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "hasPermission",
+        [__autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "hasPermission", 5000)
+      ).then(function(result) {
+        const source = result && typeof result === "object" ? result : {};
+        return Object.freeze({
+          granted: Boolean(source.granted),
+          canOpenSettings: Boolean(source.canOpenSettings),
+          reason: source.reason === undefined || source.reason === null ? undefined : String(source.reason)
+        });
+      });
+    }
+    function openPermissionSettings(options) {
+      const opts = __autojs6_ui_overlay_options(options);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "openPermissionSettings",
+        [__autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "openPermissionSettings", 5000)
+      ).then(function(result) {
+          const source = result && typeof result === "object" ? result : {};
+          return Object.freeze({
+            opened: Boolean(source.opened),
+            canOpenSettings: Boolean(source.canOpenSettings),
+            dryRun: Boolean(source.dryRun),
+            reason: source.reason === undefined || source.reason === null ? undefined : String(source.reason)
+          });
+        });
+    }
+    __autojs6_limited_ui_overlay_cache = Object.freeze({
+      policy: __autojs6_ui_overlay_policy,
+      show,
+      closeAll,
+      hasPermission,
+      openPermissionSettings
+    });
+    return __autojs6_limited_ui_overlay_cache;
+  }
   function __autojs6_accessibility_timeout_from_options(options, fallbackMs) {
     return options && typeof options === "object" && options.timeoutMs !== undefined
       ? options.timeoutMs
@@ -11937,6 +23849,16 @@ std::string buildEmbeddedScriptExecutionSource(
     const text = value === undefined || value === null ? "" : String(value);
     return text;
   }
+  function __autojs6_accessibility_text_input(value, methodName) {
+    const text = value === undefined || value === null ? "" : String(value);
+    if (text.indexOf("\u0000") !== -1) {
+      throw __autojs6_accessibility_invalid_argument_error(
+        methodName,
+        "accessibility." + methodName + " text must not contain NUL bytes."
+      );
+    }
+    return text;
+  }
   const __autojs6_accessibility_selector_type = "autojs6.accessibility.selector";
   const __autojs6_accessibility_selector_fields = Object.freeze([
     "text",
@@ -11944,7 +23866,16 @@ std::string buildEmbeddedScriptExecutionSource(
     "id",
     "className",
     "textContains",
-    "descContains"
+    "descContains",
+    "textMatches",
+    "descMatches",
+    "idMatches",
+    "classNameMatches",
+    "clickable",
+    "enabled",
+    "depth",
+    "boundsInside",
+    "boundsContains"
   ]);
   function __autojs6_accessibility_selector_text(value, methodName, fieldName) {
     const text = value === undefined || value === null ? "" : String(value);
@@ -11956,13 +23887,92 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return text;
   }
+  function __autojs6_accessibility_selector_regex(value, methodName, fieldName) {
+    let pattern = "";
+    let flags = "";
+    if (value instanceof RegExp) {
+      pattern = value.source;
+      flags = (value.ignoreCase ? "i" : "") + (value.multiline ? "m" : "") + (value.dotAll ? "s" : "");
+    } else if (value && typeof value === "object" && !Array.isArray(value)) {
+      pattern = value.pattern === undefined || value.pattern === null ? "" : String(value.pattern);
+      const rawFlags = value.flags === undefined || value.flags === null ? "" : String(value.flags);
+      for (let i = 0; i < rawFlags.length; i++) {
+        const flag = rawFlags.charAt(i);
+        if ((flag === "i" || flag === "m" || flag === "s") && flags.indexOf(flag) < 0) {
+          flags += flag;
+        }
+      }
+    } else {
+      pattern = value === undefined || value === null ? "" : String(value);
+    }
+    if (pattern.length === 0 || pattern.indexOf("\u0000") !== -1) {
+      throw __autojs6_accessibility_invalid_argument_error(
+        methodName,
+        "accessibility." + methodName + " requires non-empty selector " + fieldName + " pattern without NUL bytes."
+      );
+    }
+    return Object.freeze({ pattern, flags });
+  }
+  function __autojs6_accessibility_selector_boolean(value) {
+    return value !== false;
+  }
+  function __autojs6_accessibility_selector_depth(value, methodName, fieldName) {
+    const number = Number(value);
+    if (!Number.isFinite(number) || Math.trunc(number) < 0) {
+      throw __autojs6_accessibility_invalid_argument_error(
+        methodName,
+        "accessibility." + methodName + " requires non-negative integer selector " + fieldName + "."
+      );
+    }
+    return Math.trunc(number);
+  }
+  function __autojs6_accessibility_selector_bounds(value, methodName, fieldName) {
+    const input = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    const bounds = Object.freeze({
+      left: __autojs6_accessibility_finite_number(input.left),
+      top: __autojs6_accessibility_finite_number(input.top),
+      right: __autojs6_accessibility_finite_number(input.right),
+      bottom: __autojs6_accessibility_finite_number(input.bottom)
+    });
+    if (!Number.isFinite(bounds.left) || !Number.isFinite(bounds.top) ||
+        !Number.isFinite(bounds.right) || !Number.isFinite(bounds.bottom) ||
+        bounds.right < bounds.left || bounds.bottom < bounds.top) {
+      throw __autojs6_accessibility_invalid_argument_error(
+        methodName,
+        "accessibility." + methodName + " requires finite selector " + fieldName + " bounds."
+      );
+    }
+    return bounds;
+  }
+  function __autojs6_accessibility_selector_value(fieldName, value, methodName) {
+    if (fieldName === "textMatches" || fieldName === "descMatches" ||
+        fieldName === "idMatches" || fieldName === "classNameMatches") {
+      return __autojs6_accessibility_selector_regex(value, methodName, fieldName);
+    }
+    if (fieldName === "clickable" || fieldName === "enabled") {
+      return __autojs6_accessibility_selector_boolean(value);
+    }
+    if (fieldName === "depth") {
+      return __autojs6_accessibility_selector_depth(value, methodName, fieldName);
+    }
+    if (fieldName === "boundsInside" || fieldName === "boundsContains") {
+      return __autojs6_accessibility_selector_bounds(value, methodName, fieldName);
+    }
+    return __autojs6_accessibility_selector_text(value, methodName, fieldName);
+  }
   function __autojs6_accessibility_selector(fieldName, value, methodName) {
     const selector = {
       type: __autojs6_accessibility_selector_type,
       version: 1
     };
-    selector[fieldName] = __autojs6_accessibility_selector_text(value, methodName, fieldName);
+    selector[fieldName] = __autojs6_accessibility_selector_value(fieldName, value, methodName);
     return Object.freeze(selector);
+  }
+  function __autojs6_accessibility_bounds_input(args) {
+    if (args.length === 1 && args[0] && typeof args[0] === "object" && !Array.isArray(args[0])) {
+      return args[0];
+    }
+    return { left: args[0], top: args[1], right: args[2], bottom: args[3] };
   }
   function __autojs6_accessibility_is_selector_input(value) {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -11984,7 +23994,7 @@ std::string buildEmbeddedScriptExecutionSource(
         Number(value.version) !== 1) {
       throw __autojs6_accessibility_invalid_argument_error(
         methodName,
-        "accessibility." + methodName + " requires a selector descriptor created by accessibility.text/desc/id/className/textContains/descContains."
+        "accessibility." + methodName + " requires a selector descriptor created by an accessibility selector builder."
       );
     }
     const descriptor = {
@@ -11995,7 +24005,7 @@ std::string buildEmbeddedScriptExecutionSource(
     for (let i = 0; i < __autojs6_accessibility_selector_fields.length; i++) {
       const fieldName = __autojs6_accessibility_selector_fields[i];
       if (value[fieldName] !== undefined) {
-        descriptor[fieldName] = __autojs6_accessibility_selector_text(value[fieldName], methodName, fieldName);
+        descriptor[fieldName] = __autojs6_accessibility_selector_value(fieldName, value[fieldName], methodName);
         fieldCount += 1;
       }
     }
@@ -12167,6 +24177,42 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_accessibility_bridge_options(findOptions, 10000)
       ).then(__autojs6_accessibility_normalize_nodes);
     }
+    function selectorAction(methodName, selector, options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_accessibility_selector_descriptor(selector, methodName);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const actionOptions = __autojs6_accessibility_options(options);
+      return __autojs6_call_autojs(
+        "accessibility",
+        methodName,
+        [descriptor, actionOptions],
+        __autojs6_accessibility_bridge_options(actionOptions, 10000)
+      ).then(function(result) {
+        return result === true;
+      });
+    }
+    function setText(selector, text, options) {
+      let descriptor;
+      let targetText;
+      try {
+        descriptor = __autojs6_accessibility_selector_descriptor(selector, "setText");
+        targetText = __autojs6_accessibility_text_input(text, "setText");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const actionOptions = __autojs6_accessibility_options(options);
+      return __autojs6_call_autojs(
+        "accessibility",
+        "setText",
+        [descriptor, targetText, actionOptions],
+        __autojs6_accessibility_bridge_options(actionOptions, 10000)
+      ).then(function(result) {
+        return result === true;
+      });
+    }
     function clickText(text, options) {
       const target = __autojs6_accessibility_non_empty_string(text);
       if (!target) {
@@ -12204,6 +24250,33 @@ std::string buildEmbeddedScriptExecutionSource(
       descContains: function(value) {
         return __autojs6_accessibility_selector("descContains", value, "descContains");
       },
+      textMatches: function(value) {
+        return __autojs6_accessibility_selector("textMatches", value, "textMatches");
+      },
+      descMatches: function(value) {
+        return __autojs6_accessibility_selector("descMatches", value, "descMatches");
+      },
+      idMatches: function(value) {
+        return __autojs6_accessibility_selector("idMatches", value, "idMatches");
+      },
+      classNameMatches: function(value) {
+        return __autojs6_accessibility_selector("classNameMatches", value, "classNameMatches");
+      },
+      clickable: function(value) {
+        return __autojs6_accessibility_selector("clickable", value, "clickable");
+      },
+      enabled: function(value) {
+        return __autojs6_accessibility_selector("enabled", value, "enabled");
+      },
+      depth: function(value) {
+        return __autojs6_accessibility_selector("depth", value, "depth");
+      },
+      boundsInside: function(left, top, right, bottom) {
+        return __autojs6_accessibility_selector("boundsInside", __autojs6_accessibility_bounds_input(arguments), "boundsInside");
+      },
+      boundsContains: function(left, top, right, bottom) {
+        return __autojs6_accessibility_selector("boundsContains", __autojs6_accessibility_bounds_input(arguments), "boundsContains");
+      },
       isEnabled,
       ensureEnabled,
       click,
@@ -12219,7 +24292,17 @@ std::string buildEmbeddedScriptExecutionSource(
       findByText,
       findOne,
       findAll,
-      clickText
+      clickText,
+      longClick: function(selector, options) {
+        return selectorAction("longClick", selector, options);
+      },
+      setText,
+      scrollForward: function(selector, options) {
+        return selectorAction("scrollForward", selector, options);
+      },
+      scrollBackward: function(selector, options) {
+        return selectorAction("scrollBackward", selector, options);
+      }
     });
     return __autojs6_limited_accessibility_cache;
   }
@@ -12373,6 +24456,120 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return Object.freeze({ x, y });
   }
+  function __autojs6_image_integer(moduleName, methodName, fieldName, value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+      throw __autojs6_image_invalid_argument_error(
+        moduleName,
+        methodName,
+        moduleName + "." + methodName + " requires finite numeric " + fieldName + "."
+      );
+    }
+    return Math.trunc(number);
+  }
+  function __autojs6_image_color(moduleName, methodName, fieldName, value) {
+    if (typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 4294967295) {
+      return Math.trunc(value);
+    }
+    const text = value === undefined || value === null ? "" : String(value).trim();
+    if (text.length > 0 && text.length <= 64 && text.indexOf("\u0000") === -1) {
+      return text;
+    }
+    throw __autojs6_image_invalid_argument_error(
+      moduleName,
+      methodName,
+      moduleName + "." + methodName + " requires " + fieldName + " to be a color number or string."
+    );
+  }
+  function __autojs6_image_multi_color_points(moduleName, methodName, points) {
+    if (!Array.isArray(points) || points.length === 0) {
+      throw __autojs6_image_invalid_argument_error(
+        moduleName,
+        methodName,
+        moduleName + "." + methodName + " requires a non-empty multi-color points array."
+      );
+    }
+    const normalized = [];
+    for (let i = 0; i < points.length; i++) {
+      const point = points[i];
+      const xValue = Array.isArray(point) ? point[0] : point && point.x;
+      const yValue = Array.isArray(point) ? point[1] : point && point.y;
+      const colorValue = Array.isArray(point) ? point[2] : point && point.color;
+      normalized.push(Object.freeze({
+        x: __autojs6_image_integer(moduleName, methodName, "points[" + i + "].x", xValue),
+        y: __autojs6_image_integer(moduleName, methodName, "points[" + i + "].y", yValue),
+        color: __autojs6_image_color(moduleName, methodName, "points[" + i + "].color", colorValue)
+      }));
+    }
+    return Object.freeze(normalized);
+  }
+  function __autojs6_image_threshold_options(moduleName, methodName, options) {
+    const input = __autojs6_image_options(options);
+    const output = {};
+    Object.keys(input).forEach(function(key) {
+      output[key] = input[key];
+    });
+    if (input.threshold !== undefined) {
+      const threshold = Number(input.threshold);
+      if (!Number.isFinite(threshold) || threshold < 0 || threshold > 255) {
+        throw __autojs6_image_invalid_argument_error(
+          moduleName,
+          methodName,
+          moduleName + "." + methodName + " options.threshold must be between 0 and 255."
+        );
+      }
+      output.threshold = Math.trunc(threshold);
+    }
+    if (input.maxValue !== undefined) {
+      const maxValue = Number(input.maxValue);
+      if (!Number.isFinite(maxValue) || maxValue < 0 || maxValue > 255) {
+        throw __autojs6_image_invalid_argument_error(
+          moduleName,
+          methodName,
+          moduleName + "." + methodName + " options.maxValue must be between 0 and 255."
+        );
+      }
+      output.maxValue = Math.trunc(maxValue);
+    }
+    if (input.type !== undefined) {
+      const type = String(input.type);
+      if (["binary", "binary_inv", "trunc", "tozero", "tozero_inv"].indexOf(type) < 0) {
+        throw __autojs6_image_invalid_argument_error(
+          moduleName,
+          methodName,
+          moduleName + "." + methodName + " options.type is not supported."
+        );
+      }
+      output.type = type;
+    }
+    return output;
+  }
+  function __autojs6_normalize_image_match(value) {
+    const point = __autojs6_normalize_point(value);
+    if (!point) {
+      return null;
+    }
+    const scoreValue = value && value.score !== undefined ? value.score : value && (value.similarity !== undefined ? value.similarity : value.confidence);
+    const score = Number(scoreValue);
+    return Object.freeze({
+      x: point.x,
+      y: point.y,
+      score: Number.isFinite(score) ? score : null
+    });
+  }
+  function __autojs6_normalize_image_matches(value) {
+    const values = Array.isArray(value)
+      ? value
+      : (value && typeof value === "object" && Array.isArray(value.matches) ? value.matches : []);
+    const matches = [];
+    for (let i = 0; i < values.length; i++) {
+      const match = __autojs6_normalize_image_match(values[i]);
+      if (match) {
+        matches.push(match);
+      }
+    }
+    return Object.freeze(matches);
+  }
   function __autojs6_media_projection_handle_id(value) {
     if (!value || typeof value !== "object") {
       return "";
@@ -12485,7 +24682,7 @@ std::string buildEmbeddedScriptExecutionSource(
         );
       });
     }
-    function saveImage(image, path, options) {
+    function saveImage(image, path, formatOrOptions, maybeOptions) {
       const imageHandle = __autojs6_normalize_image_handle(image);
       if (!imageHandle) {
         return Promise.reject(__autojs6_image_invalid_argument_error(
@@ -12500,7 +24697,9 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (error) {
         return Promise.reject(error);
       }
-      const saveOptions = __autojs6_image_options(options);
+      const saveOptions = typeof formatOrOptions === "string"
+        ? Object.assign({}, __autojs6_image_options(maybeOptions), { format: formatOrOptions })
+        : __autojs6_image_options(formatOrOptions);
       return __autojs6_call_autojs(
         bridgeModuleName,
         "saveImage",
@@ -12566,6 +24765,38 @@ std::string buildEmbeddedScriptExecutionSource(
         );
       });
     }
+    function imageTransform(methodName, image, options, normalizeOptions) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          bridgeModuleName,
+          methodName,
+          bridgeModuleName + "." + methodName + " requires an image handle."
+        ));
+      }
+      let transformOptions;
+      try {
+        transformOptions = typeof normalizeOptions === "function"
+          ? normalizeOptions(bridgeModuleName, methodName, options)
+          : __autojs6_image_options(options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_track_image_creation(bridgeModuleName, methodName, function() {
+        return __autojs6_call_autojs(
+          bridgeModuleName,
+          methodName,
+          [imageHandle, transformOptions],
+          __autojs6_image_bridge_options(transformOptions, 10000)
+        );
+      });
+    }
+    function grayscale(image, options) {
+      return imageTransform("grayscale", image, options);
+    }
+    function threshold(image, options) {
+      return imageTransform("threshold", image, options, __autojs6_image_threshold_options);
+    }
     function findImage(source, template, options) {
       const sourceId = __autojs6_image_handle_id(source);
       const templateId = __autojs6_image_handle_id(template);
@@ -12587,6 +24818,87 @@ std::string buildEmbeddedScriptExecutionSource(
         ],
         __autojs6_image_bridge_options(findOptions, 10000)
       ).then(__autojs6_normalize_point);
+    }
+    function matchTemplate(source, template, options) {
+      const sourceId = __autojs6_image_handle_id(source);
+      const templateId = __autojs6_image_handle_id(template);
+      if (!sourceId || !templateId) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          bridgeModuleName,
+          "matchTemplate",
+          bridgeModuleName + ".matchTemplate requires source and template image handles."
+        ));
+      }
+      const matchOptions = __autojs6_image_options(options);
+      return __autojs6_call_autojs(
+        bridgeModuleName,
+        "matchTemplate",
+        [
+          __autojs6_normalize_image_handle(source),
+          __autojs6_normalize_image_handle(template),
+          matchOptions
+        ],
+        __autojs6_image_bridge_options(matchOptions, 10000)
+      ).then(__autojs6_normalize_image_matches);
+    }
+    function findColor(image, color, options) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          bridgeModuleName,
+          "findColor",
+          bridgeModuleName + ".findColor requires an image handle."
+        ));
+      }
+      let targetColor;
+      try {
+        targetColor = __autojs6_image_color(bridgeModuleName, "findColor", "color", color);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const findOptions = __autojs6_image_options(options);
+      return __autojs6_call_autojs(
+        bridgeModuleName,
+        "findColor",
+        [imageHandle, targetColor, findOptions],
+        __autojs6_image_bridge_options(findOptions, 10000)
+      ).then(__autojs6_normalize_point);
+    }
+    function findMultiColors(image, color, points, options) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          bridgeModuleName,
+          "findMultiColors",
+          bridgeModuleName + ".findMultiColors requires an image handle."
+        ));
+      }
+      let targetColor;
+      let colorPoints;
+      try {
+        targetColor = __autojs6_image_color(bridgeModuleName, "findMultiColors", "color", color);
+        colorPoints = __autojs6_image_multi_color_points(bridgeModuleName, "findMultiColors", points);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const findOptions = __autojs6_image_options(options);
+      return __autojs6_call_autojs(
+        bridgeModuleName,
+        "findMultiColors",
+        [imageHandle, targetColor, colorPoints, findOptions],
+        __autojs6_image_bridge_options(findOptions, 10000)
+      ).then(__autojs6_normalize_point);
+    }
+    function getSize(image) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        throw __autojs6_image_invalid_argument_error(
+          bridgeModuleName,
+          "getSize",
+          bridgeModuleName + ".getSize requires an image handle."
+        );
+      }
+      return Object.freeze({ width: imageHandle.width, height: imageHandle.height });
     }
     function recycle(image, options) {
       const imageHandle = __autojs6_normalize_image_handle(image);
@@ -12617,7 +24929,13 @@ std::string buildEmbeddedScriptExecutionSource(
       saveImage,
       clip,
       resize,
+      grayscale,
+      threshold,
       findImage,
+      matchTemplate,
+      findColor,
+      findMultiColors,
+      getSize,
       recycle
     });
     if (bridgeModuleName === "images") {
@@ -12626,6 +24944,1573 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_limited_image_cache = moduleValue;
     }
     return moduleValue;
+  }
+  function __autojs6_ocr_bridge_options(options, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_image_timeout_from_options(options, fallbackMs),
+      signal: __autojs6_bridge_signal_from_options(options),
+      permissions: ["ocr", "image"]
+    };
+  }
+  function __autojs6_ocr_normalize_bounds(value) {
+    if (!value || typeof value !== "object") {
+      return null;
+    }
+    const left = Number(value.left);
+    const top = Number(value.top);
+    const right = Number(value.right);
+    const bottom = Number(value.bottom);
+    if (Number.isFinite(left) && Number.isFinite(top) && Number.isFinite(right) && Number.isFinite(bottom)) {
+      return Object.freeze({ left, top, right, bottom });
+    }
+    const x = Number(value.x);
+    const y = Number(value.y);
+    const width = Number(value.width);
+    const height = Number(value.height);
+    if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(width) && Number.isFinite(height)) {
+      return Object.freeze({ left: x, top: y, right: x + width, bottom: y + height });
+    }
+    return null;
+  }
+  function __autojs6_ocr_normalize_result(value) {
+    if (typeof value === "string") {
+      return Object.freeze({ text: value, confidence: null });
+    }
+    const source = value && typeof value === "object" ? value : {};
+    const textValue = typeof source.text === "string"
+      ? source.text
+      : (typeof source.label === "string" ? source.label : "");
+    const confidenceValue = Number(source.confidence);
+    const normalized = {
+      text: textValue,
+      confidence: Number.isFinite(confidenceValue) ? confidenceValue : null
+    };
+    const bounds = __autojs6_ocr_normalize_bounds(source.bounds || source.boundingBox || source.region);
+    if (bounds) {
+      normalized.bounds = bounds;
+    }
+    return Object.freeze(normalized);
+  }
+  function __autojs6_ocr_normalize_results(value) {
+    const values = Array.isArray(value)
+      ? value
+      : (value && typeof value === "object" && Array.isArray(value.results) ? value.results : []);
+    const results = [];
+    for (let i = 0; i < values.length; i++) {
+      results.push(__autojs6_ocr_normalize_result(values[i]));
+    }
+    return Object.freeze(results);
+  }
+  function __autojs6_limited_ocr() {
+    if (__autojs6_limited_ocr_cache) {
+      return __autojs6_limited_ocr_cache;
+    }
+    function callOcr(methodName, image, options) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          "ocr",
+          methodName,
+          "ocr." + methodName + " requires an image handle."
+        ));
+      }
+      const recognizeOptions = __autojs6_image_options(options);
+      return __autojs6_call_autojs(
+        "ocr",
+        methodName,
+        [imageHandle, recognizeOptions],
+        __autojs6_ocr_bridge_options(recognizeOptions, 30000)
+      ).then(__autojs6_ocr_normalize_results);
+    }
+    function recognize(image, options) {
+      return callOcr("recognize", image, options);
+    }
+    function recognizeText(image, options) {
+      return callOcr("recognizeText", image, options).then(function(results) {
+        const textValues = [];
+        for (let i = 0; i < results.length; i++) {
+          if (typeof results[i].text === "string" && results[i].text.length > 0) {
+            textValues.push(results[i].text);
+          }
+        }
+        return textValues.join("\n");
+      });
+    }
+    function detectTextBounds(image, options) {
+      return callOcr("detectTextBounds", image, options);
+    }
+    __autojs6_limited_ocr_cache = Object.freeze({
+      recognize,
+      recognizeText,
+      detectTextBounds
+    });
+    return __autojs6_limited_ocr_cache;
+  }
+  function __autojs6_barcode_bridge_options(options, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_image_timeout_from_options(options, fallbackMs),
+      signal: __autojs6_bridge_signal_from_options(options),
+      permissions: ["barcode", "image"]
+    };
+  }
+  function __autojs6_barcode_format_name(value, apiName) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return Math.trunc(value);
+    }
+    const text = String(value === undefined || value === null ? "" : value)
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+    let normalized = text;
+    if (normalized.indexOf("FORMAT_") === 0) {
+      normalized = normalized.slice("FORMAT_".length);
+    }
+    if (normalized === "PDF417") {
+      normalized = "PDF_417";
+    } else if (normalized === "QRCODE") {
+      normalized = "QR_CODE";
+    }
+    const allowed = [
+      "ALL",
+      "AZTEC",
+      "CODABAR",
+      "CODE_39",
+      "CODE_93",
+      "CODE_128",
+      "DATA_MATRIX",
+      "EAN_8",
+      "EAN_13",
+      "ITF",
+      "PDF_417",
+      "QR_CODE",
+      "UPC_A",
+      "UPC_E"
+    ];
+    if (allowed.indexOf(normalized) < 0) {
+      throw __autojs6_image_invalid_argument_error(
+        "barcode",
+        apiName,
+        "barcode." + apiName + " received an unsupported barcode format."
+      );
+    }
+    return normalized;
+  }
+  function __autojs6_barcode_options(value, apiName) {
+    const input = __autojs6_image_options(value);
+    const output = {};
+    if (input.region !== undefined) {
+      output.region = input.region;
+    }
+    if (input.timeoutMs !== undefined) {
+      output.timeoutMs = input.timeoutMs;
+    }
+    if (input.qrOnly !== undefined) {
+      output.qrOnly = input.qrOnly === true;
+    }
+    const formatInput = input.formats !== undefined ? input.formats : input.format;
+    if (formatInput !== undefined && formatInput !== null) {
+      const formatValues = Array.isArray(formatInput) ? formatInput : [formatInput];
+      if (formatValues.length > 16) {
+        throw __autojs6_image_invalid_argument_error(
+          "barcode",
+          apiName,
+          "barcode." + apiName + " options.formats must contain at most 16 entries."
+        );
+      }
+      output.formats = Object.freeze(formatValues.map(function(formatValue) {
+        return __autojs6_barcode_format_name(formatValue, apiName);
+      }));
+    }
+    if (output.qrOnly && output.formats && output.formats.some(function(format) { return format !== "QR_CODE"; })) {
+      throw __autojs6_image_invalid_argument_error(
+        "barcode",
+        apiName,
+        "barcode." + apiName + " qrOnly mode accepts only QR_CODE format."
+      );
+    }
+    if (output.qrOnly) {
+      output.formats = Object.freeze(["QR_CODE"]);
+    }
+    if (input.maxResults !== undefined) {
+      const maxResults = Number(input.maxResults);
+      if (!Number.isFinite(maxResults) || maxResults < 1 || maxResults > 128) {
+        throw __autojs6_image_invalid_argument_error(
+          "barcode",
+          apiName,
+          "barcode." + apiName + " options.maxResults must be between 1 and 128."
+        );
+      }
+      output.maxResults = Math.trunc(maxResults);
+    }
+    if (input.enableAllPotentialBarcodes !== undefined || input.enableAllPotentialQrCodes !== undefined) {
+      output.enableAllPotentialBarcodes = input.enableAllPotentialBarcodes === true || input.enableAllPotentialQrCodes === true;
+    }
+    return output;
+  }
+  function __autojs6_barcode_deep_freeze_json(value) {
+    if (!value || typeof value !== "object") {
+      return value === undefined ? null : value;
+    }
+    if (Array.isArray(value)) {
+      return Object.freeze(value.map(__autojs6_barcode_deep_freeze_json));
+    }
+    const output = {};
+    Object.keys(value).forEach(function(key) {
+      output[key] = __autojs6_barcode_deep_freeze_json(value[key]);
+    });
+    return Object.freeze(output);
+  }
+  function __autojs6_barcode_normalize_snapshot(value) {
+    if (!value || typeof value !== "object") {
+      return null;
+    }
+    return __autojs6_barcode_deep_freeze_json(value);
+  }
+  function __autojs6_barcode_normalize_snapshots(value) {
+    const values = Array.isArray(value)
+      ? value
+      : (value && typeof value === "object" && Array.isArray(value.results) ? value.results : []);
+    const results = [];
+    for (let i = 0; i < values.length; i++) {
+      const snapshot = __autojs6_barcode_normalize_snapshot(values[i]);
+      if (snapshot) {
+        results.push(snapshot);
+      }
+    }
+    return Object.freeze(results);
+  }
+  function __autojs6_barcode_recycle_after(handle, promise, options) {
+    const imageModule = __autojs6_limited_image("images");
+    function recycle() {
+      return imageModule.recycle(handle, options).catch(function() {
+        return undefined;
+      });
+    }
+    return Promise.resolve(promise).then(function(result) {
+      return recycle().then(function() { return result; });
+    }, function(error) {
+      return recycle().then(function() { throw error; });
+    });
+  }
+  function __autojs6_limited_barcode() {
+    if (__autojs6_limited_barcode_cache) {
+      return __autojs6_limited_barcode_cache;
+    }
+    function callProvider(methodName, image, options) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          "barcode",
+          methodName,
+          "barcode." + methodName + " requires an image handle."
+        ));
+      }
+      let detectOptions;
+      const bridgeOptionsSource = __autojs6_image_options(options);
+      try {
+        detectOptions = __autojs6_barcode_options(options, methodName);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "barcode",
+        methodName,
+        [imageHandle, detectOptions],
+        __autojs6_barcode_bridge_options(bridgeOptionsSource, 30000)
+      );
+    }
+    function callBarcode(methodName, image, options) {
+      const imageModule = __autojs6_limited_image("images");
+      const directHandle = __autojs6_normalize_image_handle(image);
+      if (directHandle) {
+        return callProvider(methodName, directHandle, options);
+      }
+      if (typeof image === "string") {
+        let target;
+        try {
+          target = __autojs6_image_relative_text("barcode", methodName, "path", image, false);
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        return imageModule.readImage(target, options).then(function(handle) {
+          return __autojs6_barcode_recycle_after(handle, callProvider(methodName, handle, options), options);
+        });
+      }
+      if (image && typeof image === "object") {
+        const type = String(image.type === undefined || image.type === null ? "" : image.type);
+        if (type === "imageHandle") {
+          const imageHandle = __autojs6_normalize_image_handle(image);
+          if (imageHandle) {
+            return callProvider(methodName, imageHandle, options);
+          }
+        }
+        if (type === "path") {
+          let target;
+          try {
+            target = __autojs6_image_relative_text("barcode", methodName, "path", image.path, false);
+          } catch (error) {
+            return Promise.reject(error);
+          }
+          return imageModule.readImage(target, options).then(function(handle) {
+            return __autojs6_barcode_recycle_after(handle, callProvider(methodName, handle, options), options);
+          });
+        }
+        if (type === "capture") {
+          if (image.requireExistingPermission !== true) {
+            return Promise.reject(__autojs6_image_invalid_argument_error(
+              "barcode",
+              methodName,
+              "barcode." + methodName + " capture input requires requireExistingPermission: true."
+            ));
+          }
+          const captureOptions = Object.assign({}, __autojs6_image_options(options), {
+            orientation: image.orientation,
+            requireExistingPermission: true
+          });
+          return imageModule.captureScreen(captureOptions).then(function(handle) {
+            return __autojs6_barcode_recycle_after(handle, callProvider(methodName, handle, options), options);
+          });
+        }
+      }
+      return Promise.reject(__autojs6_image_invalid_argument_error(
+        "barcode",
+        methodName,
+        "barcode." + methodName + " requires a path, capture input, or provider-owned image handle."
+      ));
+    }
+    function detect(image, options) {
+      return callBarcode("detect", image, options).then(__autojs6_barcode_normalize_snapshot);
+    }
+    function detectAll(image, options) {
+      return callBarcode("detectAll", image, options).then(__autojs6_barcode_normalize_snapshots);
+    }
+    function recognizeText(image, options) {
+      return callBarcode("recognizeText", image, options).then(function(value) {
+        return typeof value === "string" ? value : null;
+      });
+    }
+    function recognizeTexts(image, options) {
+      return callBarcode("recognizeTexts", image, options).then(function(value) {
+        if (!Array.isArray(value)) {
+          return Object.freeze([]);
+        }
+        return Object.freeze(value.filter(function(item) { return typeof item === "string"; }));
+      });
+    }
+    __autojs6_limited_barcode_cache = Object.freeze({
+      detect,
+      detectAll,
+      recognizeText,
+      recognizeTexts
+    });
+    return __autojs6_limited_barcode_cache;
+  }
+  function __autojs6_media_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_media_invalid_argument_error(moduleName, methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      moduleName,
+      methodName
+    );
+  }
+  function __autojs6_media_bridge_options(moduleName, methodName, options, fallbackMs) {
+    const input = __autojs6_media_options(options);
+    let permissions = ["media"];
+    if (moduleName === "media") {
+      permissions = ["media", "media.audio"];
+    } else if (moduleName === "mediainfo") {
+      permissions = ["media", "media.metadata"];
+    } else if (moduleName === "recorder") {
+      permissions = ["media", "media.recording"];
+    }
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(input.timeoutMs === undefined ? fallbackMs : input.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(input),
+      permissions
+    };
+  }
+  function __autojs6_media_stream_name(value, methodName) {
+    if (value === undefined || value === null || value === "") {
+      return "music";
+    }
+    if (typeof value === "object" && !Array.isArray(value)) {
+      return __autojs6_media_stream_name(value.stream !== undefined ? value.stream : value.type, methodName);
+    }
+    const text = String(value).trim();
+    if (!text) {
+      return "music";
+    }
+    if (!/^[A-Za-z0-9_.:-]+$/.test(text)) {
+      throw __autojs6_media_invalid_argument_error(
+        "media",
+        methodName,
+        "media." + methodName + " stream must be a known Android audio stream name."
+      );
+    }
+    return text;
+  }
+  function __autojs6_media_freeze_record(value) {
+    if (!value || typeof value !== "object") {
+      return value === undefined ? null : value;
+    }
+    if (Array.isArray(value)) {
+      return Object.freeze(value.map(__autojs6_media_freeze_record));
+    }
+    const output = {};
+    Object.keys(value).forEach(function(key) {
+      output[key] = __autojs6_media_freeze_record(value[key]);
+    });
+    return Object.freeze(output);
+  }
+  function __autojs6_limited_media() {
+    if (__autojs6_limited_media_cache) {
+      return __autojs6_limited_media_cache;
+    }
+    function call(methodName, stream, options) {
+      let streamName;
+      try {
+        streamName = __autojs6_media_stream_name(stream, methodName);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "media",
+        methodName,
+        [streamName],
+        __autojs6_media_bridge_options("media", methodName, options, 5000)
+      );
+    }
+    function getAudioStreamVolume(stream, options) {
+      return call("getAudioStreamVolume", stream, options).then(function(value) {
+        return Math.trunc(Number(value));
+      });
+    }
+    function getAudioStreamMaxVolume(stream, options) {
+      return call("getAudioStreamMaxVolume", stream, options).then(function(value) {
+        return Math.trunc(Number(value));
+      });
+    }
+    function getAudioStreamInfo(stream, options) {
+      return call("getAudioStreamInfo", stream, options).then(__autojs6_media_freeze_record);
+    }
+    __autojs6_limited_media_cache = Object.freeze({
+      getAudioStreamVolume,
+      getAudioStreamMaxVolume,
+      getAudioStreamInfo
+    });
+    return __autojs6_limited_media_cache;
+  }
+  function __autojs6_mediainfo_path(value, methodName) {
+    const text = value === undefined || value === null ? "" : String(value).trim();
+    if (!text || text.indexOf("\u0000") !== -1 || text.indexOf(":") !== -1 || text.charAt(0) === "/" || text.indexOf("..") !== -1) {
+      throw __autojs6_media_invalid_argument_error(
+        "mediainfo",
+        methodName,
+        "mediainfo." + methodName + " path must be a relative file path inside the scoped working directory."
+      );
+    }
+    return text;
+  }
+  function __autojs6_mediainfo_stream_kind(value, methodName) {
+    const text = value === undefined || value === null || value === "" ? "general" : String(value).trim();
+    if (!/^[A-Za-z]+$/.test(text)) {
+      throw __autojs6_media_invalid_argument_error(
+        "mediainfo",
+        methodName,
+        "mediainfo." + methodName + " stream kind must be a MediaInfo stream name."
+      );
+    }
+    return text.toLowerCase();
+  }
+  function __autojs6_limited_mediainfo() {
+    if (__autojs6_limited_mediainfo_cache) {
+      return __autojs6_limited_mediainfo_cache;
+    }
+    function read(path, options) {
+      let target;
+      try {
+        target = __autojs6_mediainfo_path(path, "read");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "mediainfo",
+        "read",
+        [target, __autojs6_media_options(options)],
+        __autojs6_media_bridge_options("mediainfo", "read", options, 10000)
+      ).then(__autojs6_media_freeze_record);
+    }
+    function get(path, streamKind, parameter, options) {
+      let target;
+      let kind;
+      try {
+        target = __autojs6_mediainfo_path(path, "get");
+        kind = __autojs6_mediainfo_stream_kind(streamKind, "get");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "mediainfo",
+        "get",
+        [target, kind, parameter === undefined || parameter === null ? "" : String(parameter)],
+        __autojs6_media_bridge_options("mediainfo", "get", options, 10000)
+      ).then(function(value) {
+        return value === undefined || value === null ? "" : String(value);
+      });
+    }
+    const facade = function(path, options) {
+      return read(path, options);
+    };
+    Object.defineProperties(facade, {
+      read: { value: read, enumerable: true },
+      get: { value: get, enumerable: true }
+    });
+    __autojs6_limited_mediainfo_cache = Object.freeze(facade);
+    return __autojs6_limited_mediainfo_cache;
+  }
+  function __autojs6_limited_recorder() {
+    if (__autojs6_limited_recorder_cache) {
+      return __autojs6_limited_recorder_cache;
+    }
+    function getStatus(options) {
+      return __autojs6_call_autojs(
+        "recorder",
+        "getStatus",
+        [],
+        __autojs6_media_bridge_options("recorder", "getStatus", options, 5000)
+      ).then(__autojs6_media_freeze_record);
+    }
+    function start(options) {
+      return __autojs6_call_autojs(
+        "recorder",
+        "start",
+        [__autojs6_media_options(options)],
+        __autojs6_media_bridge_options("recorder", "start", options, 5000)
+      );
+    }
+    function stop(options) {
+      return __autojs6_call_autojs(
+        "recorder",
+        "stop",
+        [__autojs6_media_options(options)],
+        __autojs6_media_bridge_options("recorder", "stop", options, 5000)
+      );
+    }
+    __autojs6_limited_recorder_cache = Object.freeze({
+      getStatus,
+      start,
+      stop
+    });
+    return __autojs6_limited_recorder_cache;
+  }
+  function __autojs6_storage_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_storage_invalid_argument_error(moduleName, methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      moduleName,
+      methodName
+    );
+  }
+  function __autojs6_storage_name(moduleName, methodName, value, label) {
+    const text = value === undefined || value === null ? "" : String(value).trim();
+    if (!text) {
+      throw __autojs6_storage_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " requires a non-empty " + label + ".");
+    }
+    if (text.indexOf("\u0000") !== -1 || text.length > 128) {
+      throw __autojs6_storage_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " received an invalid " + label + ".");
+    }
+    return text;
+  }
+  function __autojs6_storage_json_value(moduleName, methodName, value) {
+    if (value === undefined || typeof value === "function" || typeof value === "symbol") {
+      throw __autojs6_storage_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " value must be JSON-serializable.");
+    }
+    let json = "";
+    try {
+      json = JSON.stringify(value);
+    } catch (error) {
+      throw __autojs6_storage_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " value must be JSON-serializable.");
+    }
+    if (json === undefined) {
+      throw __autojs6_storage_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " value must be JSON-serializable.");
+    }
+    return value;
+  }
+  function __autojs6_storage_bridge_options(options, fallbackMs) {
+    const input = __autojs6_storage_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(input.timeoutMs === undefined ? fallbackMs : input.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(input),
+      permissions: ["storage"]
+    };
+  }
+  function __autojs6_limited_storage(moduleName) {
+    if (moduleName === "storages" && __autojs6_limited_storages_cache) {
+      return __autojs6_limited_storages_cache;
+    }
+    if (moduleName === "storage" && __autojs6_limited_storage_cache) {
+      return __autojs6_limited_storage_cache;
+    }
+    function createStore(name) {
+      const storeName = __autojs6_storage_name(moduleName, "create", name, "storage name");
+      function call(methodName, args, options, fallbackMs) {
+        return __autojs6_call_autojs(
+          moduleName,
+          methodName,
+          [storeName].concat(args || []),
+          __autojs6_storage_bridge_options(options, fallbackMs || 5000)
+        );
+      }
+      function get(key, defaultValue, options) {
+        const checkedKey = __autojs6_storage_name(moduleName, "get", key, "key");
+        return call("get", [checkedKey], options, 5000).then(function(result) {
+          if (result && typeof result === "object" && result.found === true) {
+            return result.value;
+          }
+          return defaultValue;
+        });
+      }
+      function put(key, value, options) {
+        const checkedKey = __autojs6_storage_name(moduleName, "put", key, "key");
+        const checkedValue = __autojs6_storage_json_value(moduleName, "put", value);
+        return call("put", [checkedKey, checkedValue], options, 5000).then(function() {
+          return undefined;
+        });
+      }
+      function remove(key, options) {
+        const checkedKey = __autojs6_storage_name(moduleName, "remove", key, "key");
+        return call("remove", [checkedKey], options, 5000).then(function() {
+          return undefined;
+        });
+      }
+      function clear(options) {
+        return call("clear", [], options, 5000).then(function() {
+          return undefined;
+        });
+      }
+      function keys(options) {
+        return call("keys", [], options, 5000).then(function(result) {
+          return Object.freeze(Array.isArray(result) ? result.map(String) : []);
+        });
+      }
+      function contains(key, options) {
+        const checkedKey = __autojs6_storage_name(moduleName, "contains", key, "key");
+        return call("contains", [checkedKey], options, 5000).then(function(result) {
+          return result === true;
+        });
+      }
+      function selfRemove(options) {
+        return removeStorage(storeName, options);
+      }
+      return Object.freeze({
+        name: storeName,
+        get,
+        put,
+        putSync: put,
+        remove,
+        removeSync: remove,
+        clear,
+        clearSync: clear,
+        keys,
+        contains,
+        selfRemove,
+        selfRemoveSync: selfRemove
+      });
+    }
+    function create(name) {
+      return createStore(name);
+    }
+    function open(name) {
+      return createStore(name);
+    }
+    function removeStorage(name, options) {
+      const storeName = __autojs6_storage_name(moduleName, "remove", name, "storage name");
+      return createStore(storeName).clear(options);
+    }
+    function names() {
+      throw __autojs6_rhino_compat_unsupported(
+        "storages.names",
+        "The controlled Node storage bridge is scoped by package and working directory and does not expose storage namespace enumeration."
+      );
+    }
+    function all() {
+      throw __autojs6_rhino_compat_unsupported(
+        "storages.all",
+        "The controlled Node storage bridge is scoped by package and working directory and does not expose storage namespace enumeration."
+      );
+    }
+    const moduleValue = Object.freeze({
+      create,
+      open,
+      remove: removeStorage,
+      removeSync: removeStorage,
+      names,
+      all
+    });
+    if (moduleName === "storages") {
+      __autojs6_limited_storages_cache = moduleValue;
+    } else {
+      __autojs6_limited_storage_cache = moduleValue;
+    }
+    return moduleValue;
+  }
+  function __autojs6_database_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_database_invalid_argument_error(moduleName, methodName, message, code) {
+    return __autojs6_bridge_error(
+      message,
+      code || "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      moduleName,
+      methodName
+    );
+  }
+  function __autojs6_database_open_payload(moduleName, value) {
+    let name = "";
+    if (typeof value === "string" || typeof value === "number") {
+      name = String(value).trim();
+    } else if (value && typeof value === "object" && !Array.isArray(value)) {
+      name = String(value.name === undefined || value.name === null ? value.path : value.name).trim();
+    }
+    if (!name || name.length > 64 || name.indexOf("\u0000") !== -1) {
+      throw __autojs6_database_invalid_argument_error(moduleName, "open", moduleName + ".open requires a non-empty database name up to 64 characters.");
+    }
+    const normalized = name.replace(/\\/g, "/");
+    if (
+      normalized.charAt(0) === "/" ||
+      normalized.indexOf("/") >= 0 ||
+      normalized.indexOf(":") >= 0 ||
+      normalized === "." ||
+      normalized === ".." ||
+      normalized.indexOf("..") >= 0 ||
+      !/^[A-Za-z0-9_.-]+$/.test(normalized)
+    ) {
+      throw __autojs6_database_invalid_argument_error(
+        moduleName,
+        "open",
+        moduleName + ".open only accepts scoped database names, not paths.",
+        "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"
+      );
+    }
+    return { name: normalized };
+  }
+  function __autojs6_database_sql(moduleName, methodName, value) {
+    const sql = String(value === undefined || value === null ? "" : value).trim();
+    if (!sql || sql.length > 16384 || sql.indexOf("\u0000") !== -1) {
+      throw __autojs6_database_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " requires non-empty SQL up to 16384 characters.");
+    }
+    if (/(^|[^A-Za-z0-9_])(load_extension|attach|detach)($|[^A-Za-z0-9_])/i.test(sql)) {
+      throw __autojs6_database_invalid_argument_error(
+        moduleName,
+        methodName,
+        moduleName + "." + methodName + " SQL is denied by policy.",
+        "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"
+      );
+    }
+    return sql;
+  }
+  function __autojs6_database_params(moduleName, methodName, value) {
+    if (value === undefined || value === null) {
+      return [];
+    }
+    if (!Array.isArray(value)) {
+      throw __autojs6_database_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " parameters must be an array.");
+    }
+    if (value.length > 128) {
+      throw __autojs6_database_invalid_argument_error(
+        moduleName,
+        methodName,
+        moduleName + "." + methodName + " parameters exceeded 128 entries.",
+        "ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT"
+      );
+    }
+    return value.map(function(item) {
+      if (
+        item === null ||
+        typeof item === "string" ||
+        typeof item === "number" ||
+        typeof item === "boolean"
+      ) {
+        if (typeof item === "number" && !Number.isFinite(item)) {
+          throw __autojs6_database_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " numeric parameters must be finite.");
+        }
+        return item;
+      }
+      throw __autojs6_database_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " parameters must be JSON primitive values.");
+    });
+  }
+  function __autojs6_database_bridge_options(options, fallbackMs) {
+    const input = __autojs6_database_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(input.timeoutMs === undefined ? fallbackMs : input.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(input),
+      permissions: ["database"]
+    };
+  }
+  function __autojs6_database_transaction_operations(moduleName, operations) {
+    if (typeof operations === "function") {
+      throw __autojs6_database_invalid_argument_error(moduleName, "transaction", moduleName + ".transaction callback form is not supported by the controlled bridge.");
+    }
+    if (!Array.isArray(operations)) {
+      throw __autojs6_database_invalid_argument_error(moduleName, "transaction", moduleName + ".transaction requires an array of operations.");
+    }
+    if (operations.length > 64) {
+      throw __autojs6_database_invalid_argument_error(
+        moduleName,
+        "transaction",
+        moduleName + ".transaction exceeded 64 operations.",
+        "ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT"
+      );
+    }
+    return operations.map(function(operation) {
+      if (!operation || typeof operation !== "object" || Array.isArray(operation)) {
+        throw __autojs6_database_invalid_argument_error(moduleName, "transaction", moduleName + ".transaction operations must be objects.");
+      }
+      const type = String(operation.type || operation.method || "").trim().toLowerCase();
+      if (["exec", "run", "get", "all"].indexOf(type) < 0) {
+        throw __autojs6_database_invalid_argument_error(moduleName, "transaction", moduleName + ".transaction supports only exec, run, get, and all operations.");
+      }
+      return {
+        type,
+        sql: __autojs6_database_sql(moduleName, "transaction", operation.sql),
+        params: __autojs6_database_params(moduleName, "transaction", operation.params)
+      };
+    });
+  }
+  function __autojs6_limited_database(moduleName) {
+    if (moduleName === "sqlite" && __autojs6_limited_sqlite_cache) {
+      return __autojs6_limited_sqlite_cache;
+    }
+    if (moduleName === "database" && __autojs6_limited_database_cache) {
+      return __autojs6_limited_database_cache;
+    }
+    function createDatabaseHandle(openResult) {
+      const handleId = openResult && typeof openResult.id === "string" ? openResult.id : "";
+      const databaseName = openResult && typeof openResult.name === "string" ? openResult.name : "";
+      if (!handleId) {
+        throw __autojs6_database_invalid_argument_error(moduleName, "open", moduleName + ".open did not receive a database handle from the bridge.");
+      }
+      let closed = false;
+      function ensureOpen(methodName) {
+        if (closed) {
+          throw __autojs6_database_invalid_argument_error(moduleName, methodName, moduleName + " database handle is closed.");
+        }
+      }
+      function call(methodName, args, options, fallbackMs) {
+        ensureOpen(methodName);
+        return __autojs6_call_autojs(
+          moduleName,
+          methodName,
+          [handleId].concat(args || []),
+          __autojs6_database_bridge_options(options, fallbackMs || 10000)
+        );
+      }
+      function exec(sql, params, options) {
+        return call("exec", [__autojs6_database_sql(moduleName, "exec", sql), __autojs6_database_params(moduleName, "exec", params)], options, 10000).then(function() {
+          return undefined;
+        });
+      }
+      function run(sql, params, options) {
+        return call("run", [__autojs6_database_sql(moduleName, "run", sql), __autojs6_database_params(moduleName, "run", params)], options, 10000);
+      }
+      function get(sql, params, options) {
+        return call("get", [__autojs6_database_sql(moduleName, "get", sql), __autojs6_database_params(moduleName, "get", params)], options, 10000);
+      }
+      function all(sql, params, options) {
+        return call("all", [__autojs6_database_sql(moduleName, "all", sql), __autojs6_database_params(moduleName, "all", params)], options, 10000).then(function(result) {
+          return Object.freeze(Array.isArray(result) ? result.slice() : []);
+        });
+      }
+      function transaction(operations, options) {
+        return call("transaction", [__autojs6_database_transaction_operations(moduleName, operations)], options, 15000);
+      }
+      function close(options) {
+        if (closed) {
+          return Promise.resolve(false);
+        }
+        return __autojs6_call_autojs(
+          moduleName,
+          "close",
+          [handleId],
+          __autojs6_database_bridge_options(options, 5000)
+        ).then(function(result) {
+          closed = true;
+          return result === true;
+        });
+      }
+      return Object.freeze({
+        id: handleId,
+        name: databaseName,
+        exec,
+        run,
+        get,
+        all,
+        transaction,
+        close
+      });
+    }
+    function open(nameOrOptions, options) {
+      const payload = __autojs6_database_open_payload(moduleName, nameOrOptions);
+      return __autojs6_call_autojs(
+        moduleName,
+        "open",
+        [payload],
+        __autojs6_database_bridge_options(options, 10000)
+      ).then(createDatabaseHandle);
+    }
+    const moduleValue = moduleName === "sqlite"
+      ? (function() {
+          const sqlite = function(nameOrOptions, options) {
+            return open(nameOrOptions, options);
+          };
+          Object.defineProperty(sqlite, "open", {
+            value: open,
+            enumerable: true
+          });
+          return Object.freeze(sqlite);
+        })()
+      : Object.freeze({ open });
+    if (moduleName === "sqlite") {
+      __autojs6_limited_sqlite_cache = moduleValue;
+    } else {
+      __autojs6_limited_database_cache = moduleValue;
+    }
+    return moduleValue;
+  }
+  function __autojs6_notifications_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_notifications_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "notifications",
+      methodName
+    );
+  }
+  function __autojs6_notifications_call_options(options, fallbackMs) {
+    const input = __autojs6_notifications_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(input.timeoutMs === undefined ? fallbackMs : input.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(input),
+      permissions: ["notifications"]
+    };
+  }
+  function __autojs6_notifications_settings_call_options(options, fallbackMs) {
+    const input = __autojs6_notifications_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(input.timeoutMs === undefined ? fallbackMs : input.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(input),
+      permissions: ["notifications", "notifications.settings"]
+    };
+  }
+  function __autojs6_notifications_settings_payload(options) {
+    const input = __autojs6_notifications_options(options);
+    return {
+      dryRun: input.dryRun === true
+    };
+  }
+  function __autojs6_notifications_payload(options) {
+    if (!options || typeof options !== "object" || Array.isArray(options)) {
+      throw __autojs6_notifications_invalid_argument_error(
+        "notify",
+        "notifications.notify requires an options object."
+      );
+    }
+    const payload = {};
+    ["id", "title", "text", "channel", "channelName", "ongoing", "priority"].forEach(function(key) {
+      if (options[key] !== undefined) {
+        payload[key] = options[key];
+      }
+    });
+    return payload;
+  }
+  function __autojs6_notifications_id(methodName, value) {
+    const numberValue = Number(value);
+    if (!Number.isFinite(numberValue) || Math.trunc(numberValue) !== numberValue || numberValue <= 0) {
+      throw __autojs6_notifications_invalid_argument_error(
+        methodName,
+        "notifications." + methodName + " requires a positive integer id."
+      );
+    }
+    return numberValue;
+  }
+  function __autojs6_limited_notifications() {
+    if (__autojs6_limited_notifications_cache) {
+      return __autojs6_limited_notifications_cache;
+    }
+    function notify(options, callOptions) {
+      let payload;
+      try {
+        payload = __autojs6_notifications_payload(options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "notifications",
+        "notify",
+        [payload],
+        __autojs6_notifications_call_options(callOptions, 5000)
+      ).then(function(result) {
+        return Number(result);
+      });
+    }
+    function cancel(id, options) {
+      let notificationId;
+      try {
+        notificationId = __autojs6_notifications_id("cancel", id);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "notifications",
+        "cancel",
+        [notificationId],
+        __autojs6_notifications_call_options(options, 5000)
+      ).then(function() {
+        return undefined;
+      });
+    }
+    function cancelAll(options) {
+      return __autojs6_call_autojs(
+        "notifications",
+        "cancelAll",
+        [],
+        __autojs6_notifications_call_options(options, 5000)
+      ).then(function() {
+        return undefined;
+      });
+    }
+    function getPermissionStatus(options) {
+      return __autojs6_call_autojs(
+        "notifications",
+        "getPermissionStatus",
+        [],
+        __autojs6_notifications_call_options(options, 5000)
+      ).then(function(result) {
+        return Object.freeze(Object.assign({}, result || {}));
+      });
+    }
+    function openSettings(options) {
+      return __autojs6_call_autojs(
+        "notifications",
+        "openSettings",
+        [__autojs6_notifications_settings_payload(options)],
+        __autojs6_notifications_settings_call_options(options, 5000)
+      ).then(function(result) {
+        return Object.freeze(Object.assign({}, result || {}));
+      });
+    }
+    __autojs6_limited_notifications_cache = Object.freeze({
+      notify,
+      cancel,
+      cancelAll,
+      getPermissionStatus,
+      openSettings,
+      openNotificationSettings: openSettings
+    });
+    return __autojs6_limited_notifications_cache;
+  }
+  const __autojs6_sensors_allowed_types = Object.freeze(["accelerometer", "gyroscope", "light"]);
+  const __autojs6_sensors_policy = Object.freeze({
+    maxSubscriptions: 4,
+    minSamplingIntervalMs: 100,
+    defaultSamplingIntervalMs: 250,
+    maxSamplingIntervalMs: 60000,
+    defaultTimeoutMs: 5000,
+    drainIntervalMs: 100,
+    defaultMaxQueueSize: 16,
+    hardMaxQueueSize: 64
+  });
+  function __autojs6_sensors_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_sensors_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "sensors",
+      methodName
+    );
+  }
+  function __autojs6_sensors_number(value, fallback, min, max) {
+    const numberValue = value === undefined || value === null ? fallback : Number(value);
+    if (!Number.isFinite(numberValue)) {
+      return fallback;
+    }
+    return Math.min(max, Math.max(min, Math.trunc(numberValue)));
+  }
+  function __autojs6_sensors_type(methodName, value) {
+    const text = String(value === undefined || value === null ? "" : value).trim().toLowerCase();
+    if (__autojs6_sensors_allowed_types.indexOf(text) < 0) {
+      throw __autojs6_sensors_invalid_argument_error(
+        methodName,
+        "sensors." + methodName + " supports only accelerometer, gyroscope, and light."
+      );
+    }
+    return text;
+  }
+  function __autojs6_sensors_descriptor(methodName, type, options) {
+    const opts = __autojs6_sensors_options(options);
+    const samplingSource = opts.samplingIntervalMs === undefined ? opts.intervalMs : opts.samplingIntervalMs;
+    const timeoutMs = __autojs6_sensors_number(
+      opts.timeoutMs,
+      __autojs6_sensors_policy.defaultTimeoutMs,
+      100,
+      60000
+    );
+    return {
+      type: __autojs6_sensors_type(methodName, type),
+      samplingIntervalMs: __autojs6_sensors_number(
+        samplingSource,
+        __autojs6_sensors_policy.defaultSamplingIntervalMs,
+        __autojs6_sensors_policy.minSamplingIntervalMs,
+        __autojs6_sensors_policy.maxSamplingIntervalMs
+      ),
+      timeoutMs,
+      maxQueueSize: __autojs6_sensors_number(
+        opts.maxQueueSize,
+        __autojs6_sensors_policy.defaultMaxQueueSize,
+        1,
+        __autojs6_sensors_policy.hardMaxQueueSize
+      )
+    };
+  }
+  function __autojs6_sensors_call_options(options, fallbackMs) {
+    const opts = __autojs6_sensors_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(opts.timeoutMs === undefined ? fallbackMs : opts.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(opts),
+      permissions: ["sensors"]
+    };
+  }
+  function __autojs6_sensors_freeze_event(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const values = Array.isArray(source.values) ? source.values.map(Number) : [];
+    return Object.freeze({
+      type: String(source.type || ""),
+      timestamp: Number(source.timestamp || 0),
+      accuracy: Number(source.accuracy || 0),
+      values: Object.freeze(values)
+    });
+  }
+  function __autojs6_sensors_emit_error(state, error) {
+    if (typeof state.onerror === "function") {
+      try {
+        state.onerror(error);
+      } catch (thrown) {
+        setImmediate(function() { throw thrown; });
+      }
+    }
+  }
+  function __autojs6_sensors_schedule_drain(state) {
+    if (state.closed || state.timer !== null || state.drainPromise !== null || !state.id) {
+      return;
+    }
+    state.timer = setTimeout(function() {
+      state.timer = null;
+      if (state.closed || !state.id) {
+        return;
+      }
+      state.drainPromise = __autojs6_call_autojs(
+        "sensors",
+        "drainEvents",
+        [{ id: state.id }],
+        { timeoutMs: 5000, permissions: ["sensors"] }
+      ).then(function(events) {
+        if (state.closed) {
+          return;
+        }
+        const list = Array.isArray(events) ? events : [];
+        for (const event of list) {
+          if (!event || typeof event !== "object") continue;
+          if (event.type === "event") {
+            try {
+              state.callback(__autojs6_sensors_freeze_event(event.event));
+            } catch (error) {
+              setImmediate(function() { throw error; });
+            }
+          } else if (event.type === "error") {
+            __autojs6_sensors_emit_error(state, event.error || event);
+          } else if (event.type === "close") {
+            state.closed = true;
+          }
+        }
+      }, function(error) {
+        if (!state.closed) {
+          state.closed = true;
+          __autojs6_sensors_emit_error(state, error);
+        }
+      }).then(function() {
+        state.drainPromise = null;
+        if (!state.closed) {
+          __autojs6_sensors_schedule_drain(state);
+        }
+      });
+    }, state.drainIntervalMs);
+  }
+  function __autojs6_limited_sensors() {
+    if (__autojs6_limited_sensors_cache) {
+      return __autojs6_limited_sensors_cache;
+    }
+    function getAvailableSensors(options) {
+      const opts = __autojs6_sensors_options(options);
+      return __autojs6_call_autojs(
+        "sensors",
+        "getAvailableSensors",
+        [],
+        __autojs6_sensors_call_options(opts, 5000)
+      ).then(function(result) {
+        return Object.freeze((Array.isArray(result) ? result : []).map(function(item) {
+          return Object.freeze(Object.assign({}, item));
+        }));
+      });
+    }
+    function once(type, options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_sensors_descriptor("once", type, options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "sensors",
+        "once",
+        [descriptor],
+        __autojs6_sensors_call_options(options, descriptor.timeoutMs + 1000)
+      ).then(__autojs6_sensors_freeze_event);
+    }
+    function subscribe(type, callback, options) {
+      if (typeof callback !== "function") {
+        throw __autojs6_sensors_invalid_argument_error(
+          "subscribe",
+          "sensors.subscribe requires a callback function."
+        );
+      }
+      const opts = __autojs6_sensors_options(options);
+      const descriptor = __autojs6_sensors_descriptor("subscribe", type, opts);
+      const state = {
+        id: "",
+        type: descriptor.type,
+        closed: false,
+        timer: null,
+        drainPromise: null,
+        callback,
+        onerror: null,
+        drainIntervalMs: __autojs6_sensors_number(
+          opts.drainIntervalMs,
+          __autojs6_sensors_policy.drainIntervalMs,
+          25,
+          5000
+        )
+      };
+      const subscription = Object.freeze({
+        get id() { return state.id; },
+        get type() { return state.type; },
+        get closed() { return state.closed; },
+        get ready() { return ready; },
+        close(closeOptions) {
+          if (state.closed) {
+            return Promise.resolve(undefined);
+          }
+          state.closed = true;
+          if (state.timer !== null) {
+            clearTimeout(state.timer);
+            state.timer = null;
+          }
+          return ready.then(function() {
+            if (!state.id) {
+              return undefined;
+            }
+            return (state.drainPromise || Promise.resolve()).then(function() {
+              return __autojs6_call_autojs(
+                "sensors",
+                "unsubscribe",
+                [{ id: state.id }],
+                __autojs6_sensors_call_options(closeOptions, 5000)
+              ).then(function() {
+                return undefined;
+              });
+            });
+          });
+        }
+      });
+      const ready = __autojs6_call_autojs(
+        "sensors",
+        "subscribe",
+        [descriptor],
+        __autojs6_sensors_call_options(opts, 5000)
+      ).then(function(record) {
+        state.id = String(record && record.id || "");
+        state.type = String(record && record.type || descriptor.type);
+        __autojs6_sensors_schedule_drain(state);
+        return undefined;
+      }, function(error) {
+        state.closed = true;
+        throw error;
+      });
+      return subscription;
+    }
+    __autojs6_limited_sensors_cache = Object.freeze({
+      policy: __autojs6_sensors_policy,
+      getAvailableSensors,
+      once,
+      subscribe
+    });
+    return __autojs6_limited_sensors_cache;
+  }
+  const __autojs6_input_observer_policy = Object.freeze({
+    maxActiveSubscriptions: 8,
+    defaultQueueSize: 64,
+    maxQueueSize: 256,
+    defaultDrainBatchSize: 32,
+    maxDrainBatchSize: 128,
+    defaultTimeoutMs: 10000,
+    maxTimeoutMs: 60000,
+    allowedActions: Object.freeze(["down", "up"]),
+    allowedSources: Object.freeze(["fake", "accessibility"])
+  });
+  function __autojs6_input_observer_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_input_observer_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "input_observer",
+      methodName
+    );
+  }
+  function __autojs6_input_observer_number(value, fallback, min, max) {
+    const numberValue = value === undefined || value === null ? fallback : Number(value);
+    if (!Number.isFinite(numberValue)) {
+      return fallback;
+    }
+    return Math.min(max, Math.max(min, Math.trunc(numberValue)));
+  }
+  function __autojs6_input_observer_string_list(value, methodName, propertyName) {
+    const values = Array.isArray(value) ? value : [];
+    const output = [];
+    for (const item of values) {
+      const text = String(item === undefined || item === null ? "" : item).trim().toLowerCase();
+      if (!text) continue;
+      if (output.indexOf(text) < 0) {
+        output.push(text);
+      }
+    }
+    if (output.length === 0) {
+      throw __autojs6_input_observer_invalid_argument_error(
+        methodName,
+        "input_observer." + methodName + " requires at least one " + propertyName + "."
+      );
+    }
+    return output;
+  }
+  function __autojs6_input_observer_descriptor(value, methodName) {
+    const source = Array.isArray(value) ? { keys: value } : value;
+    if (!source || typeof source !== "object" || Array.isArray(source)) {
+      throw __autojs6_input_observer_invalid_argument_error(
+        methodName,
+        "input_observer." + methodName + " requires a descriptor object or key-name array."
+      );
+    }
+    const keys = __autojs6_input_observer_string_list(source.keys, methodName, "key name");
+    const actionValues = source.actions === undefined || source.actions === null
+      ? ["down", "up"]
+      : __autojs6_input_observer_string_list(source.actions, methodName, "action");
+    for (const action of actionValues) {
+      if (__autojs6_input_observer_policy.allowedActions.indexOf(action) < 0) {
+        throw __autojs6_input_observer_invalid_argument_error(
+          methodName,
+          "input_observer." + methodName + " actions may contain only down and up."
+        );
+      }
+    }
+    if (source.intercept === true) {
+      throw __autojs6_input_observer_invalid_argument_error(
+        methodName,
+        "input_observer." + methodName + " requires the separate input_observer.intercept provider gate for key interception."
+      );
+    }
+    const sourceName = String(source.source === undefined || source.source === null ? "fake" : source.source)
+      .trim()
+      .toLowerCase() || "fake";
+    if (__autojs6_input_observer_policy.allowedSources.indexOf(sourceName) < 0) {
+      throw __autojs6_input_observer_invalid_argument_error(
+        methodName,
+        "input_observer." + methodName + " source must be fake or accessibility."
+      );
+    }
+    return Object.freeze({
+      type: "key",
+      keys: Object.freeze(keys),
+      actions: Object.freeze(actionValues),
+      source: sourceName,
+      intercept: false
+    });
+  }
+  function __autojs6_input_observer_bridge_options(options, methodName, fallbackMs) {
+    const opts = __autojs6_input_observer_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(
+        __autojs6_input_observer_number(
+          opts.timeoutMs,
+          fallbackMs,
+          1,
+          __autojs6_input_observer_policy.maxTimeoutMs
+        )
+      ),
+      permissions: methodName === "getAvailableSources"
+        ? ["input_observer"]
+        : ["input_observer", "input_observer.keys"],
+      signal: __autojs6_bridge_signal_from_options(opts)
+    };
+  }
+  function __autojs6_input_observer_request_options(options) {
+    const opts = __autojs6_input_observer_options(options);
+    const request = {};
+    if (opts.maxQueueSize !== undefined) {
+      request.maxQueueSize = __autojs6_input_observer_number(
+        opts.maxQueueSize,
+        __autojs6_input_observer_policy.defaultQueueSize,
+        1,
+        __autojs6_input_observer_policy.maxQueueSize
+      );
+    }
+    if (opts.maxEvents !== undefined) {
+      request.maxEvents = __autojs6_input_observer_number(
+        opts.maxEvents,
+        __autojs6_input_observer_policy.defaultDrainBatchSize,
+        1,
+        __autojs6_input_observer_policy.maxDrainBatchSize
+      );
+    }
+    if (opts.timeoutMs !== undefined) {
+      request.timeoutMs = __autojs6_input_observer_number(
+        opts.timeoutMs,
+        __autojs6_input_observer_policy.defaultTimeoutMs,
+        1,
+        __autojs6_input_observer_policy.maxTimeoutMs
+      );
+    }
+    return request;
+  }
+  function __autojs6_input_observer_freeze_event(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      type: "key",
+      source: String(source.source || ""),
+      key: String(source.key || ""),
+      keyCode: Number(source.keyCode || 0),
+      action: String(source.action || ""),
+      eventTime: Number(source.eventTime || 0),
+      repeatCount: Number(source.repeatCount || 0)
+    });
+  }
+  function __autojs6_input_observer_source(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const output = {
+      id: String(source.id || ""),
+      type: String(source.type || "key"),
+      available: Boolean(source.available),
+      live: Boolean(source.live)
+    };
+    if (source.reason !== undefined && source.reason !== null) {
+      output.reason = String(source.reason);
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_input_observer_subscription(record) {
+    const source = record && typeof record === "object" ? record : {};
+    const state = {
+      id: String(source.id || ""),
+      type: String(source.type || "key"),
+      source: String(source.source || "fake"),
+      ready: Boolean(source.ready !== false),
+      closed: Boolean(source.closed)
+    };
+    function drainEvents(options) {
+      if (state.closed) {
+        return Promise.resolve(Object.freeze([]));
+      }
+      const requestOptions = __autojs6_input_observer_request_options(options);
+      return __autojs6_call_autojs(
+        "input_observer",
+        "drainEvents",
+        [state.id, requestOptions],
+        __autojs6_input_observer_bridge_options(options, "drainEvents", 5000)
+      ).then(function(result) {
+        return Object.freeze((Array.isArray(result) ? result : []).map(__autojs6_input_observer_freeze_event));
+      });
+    }
+    function close(options) {
+      if (state.closed) {
+        return Promise.resolve(false);
+      }
+      return __autojs6_call_autojs(
+        "input_observer",
+        "close",
+        [state.id, __autojs6_input_observer_request_options(options)],
+        __autojs6_input_observer_bridge_options(options, "close", 5000)
+      ).then(function(result) {
+        state.closed = true;
+        return Boolean(result);
+      }, function(error) {
+        state.closed = true;
+        throw error;
+      });
+    }
+    return Object.freeze({
+      get id() { return state.id; },
+      get type() { return state.type; },
+      get source() { return state.source; },
+      get ready() { return state.ready; },
+      get closed() { return state.closed; },
+      drainEvents,
+      close
+    });
+  }
+  function __autojs6_limited_input_observer() {
+    if (__autojs6_limited_input_observer_cache) {
+      return __autojs6_limited_input_observer_cache;
+    }
+    function observeKeys(descriptor, options) {
+      let prepared;
+      try {
+        prepared = __autojs6_input_observer_descriptor(descriptor, "observeKeys");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "input_observer",
+        "observeKeys",
+        [prepared, __autojs6_input_observer_request_options(options)],
+        __autojs6_input_observer_bridge_options(options, "observeKeys", 10000)
+      ).then(__autojs6_input_observer_subscription);
+    }
+    function getAvailableSources(options) {
+      return __autojs6_call_autojs(
+        "input_observer",
+        "getAvailableSources",
+        [__autojs6_input_observer_request_options(options)],
+        __autojs6_input_observer_bridge_options(options, "getAvailableSources", 5000)
+      ).then(function(result) {
+        return Object.freeze((Array.isArray(result) ? result : []).map(__autojs6_input_observer_source));
+      });
+    }
+    __autojs6_limited_input_observer_cache = Object.freeze({
+      policy: __autojs6_input_observer_policy,
+      observeKeys,
+      getAvailableSources
+    });
+    return __autojs6_limited_input_observer_cache;
   }
   function __autojs6_call_autojs(moduleName, methodName, args, options) {
     const moduleValue = moduleName === undefined || moduleName === null ? "" : String(moduleName);
@@ -12688,7 +26573,8 @@ std::string buildEmbeddedScriptExecutionSource(
         resolve,
         reject,
         timeout: null,
-        cleanup: null
+        cleanup: null,
+        startedAtMs: Date.now()
       };
       if (signal && typeof signal.addEventListener === "function") {
         const abortListener = function() {
@@ -12727,6 +26613,7 @@ std::string buildEmbeddedScriptExecutionSource(
         );
       }, timeoutMs);
       __autojs6_bridge_pending.set(request.id, record);
+      __autojs6_bridge_publish_diagnostics(record, "start", null);
       try {
         const requestMessage = JSON.stringify(request);
         if (!__autojs6_bridge_transport || typeof __autojs6_bridge_transport.postMessage !== "function") {
@@ -12769,6 +26656,2262 @@ std::string buildEmbeddedScriptExecutionSource(
       __test: testApi
     });
     return __autojs6_bridge_cache;
+  }
+  function __autojs6_plugins_invalid_request(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "plugins",
+      methodName
+    );
+  }
+  function __autojs6_plugins_permission_denied(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "plugins",
+      methodName
+    );
+  }
+  function __autojs6_plugins_path_escape(methodName, message, pathValue) {
+    const error = __autojs6_error(message, "EPERM", "ERR_AUTOJS6_FS_PATH_ESCAPE");
+    __autojs6_define_error_property(error, "module", "plugins");
+    __autojs6_define_error_property(error, "method", methodName);
+    if (pathValue !== undefined) {
+      __autojs6_define_error_property(error, "path", __autojs6_path_value_display(pathValue));
+    }
+    return error;
+  }
+  function __autojs6_plugin_id(value, methodName) {
+    if (typeof value !== "string") {
+      throw __autojs6_plugins_invalid_request(methodName, "plugins." + methodName + " requires a plugin id string.");
+    }
+    const id = value.trim();
+    if (
+      !/^[a-z0-9][a-z0-9_.-]{0,127}$/.test(id) ||
+      id === "." ||
+      id === ".." ||
+      id.indexOf("..") >= 0 ||
+      id.indexOf("/") >= 0 ||
+      id.indexOf("\\") >= 0
+    ) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " rejects unsafe plugin id: " + String(value)
+      );
+    }
+    return id;
+  }
+  function __autojs6_plugins_scope(methodName) {
+    const path = __autojs6_path_module();
+    const fs = __autojs6_fs_module();
+    if (
+      !path ||
+      !fs ||
+      typeof path.resolve !== "function" ||
+      typeof path.extname !== "function" ||
+      typeof path.isAbsolute !== "function" ||
+      typeof fs.existsSync !== "function" ||
+      typeof fs.lstatSync !== "function" ||
+      typeof fs.realpathSync !== "function" ||
+      typeof fs.readdirSync !== "function"
+    ) {
+      throw __autojs6_plugins_permission_denied(
+        methodName,
+        "AutoJs6 JS plugins require the allowlisted path and fs modules."
+      );
+    }
+    const scope = __autojs6_fs_root(path, fs);
+    const pluginsDir = path.resolve(scope.root, "plugins");
+    if (!__autojs6_path_within_root(pluginsDir, scope.root) || __autojs6_sensitive_path(pluginsDir)) {
+      throw __autojs6_plugins_path_escape(methodName, "AutoJs6 JS plugin root escapes working directory.", pluginsDir);
+    }
+    return {
+      path,
+      fs,
+      root: scope.root,
+      realRoot: scope.realRoot,
+      pluginsDir
+    };
+  }
+  function __autojs6_plugin_manifest_field(packageData, id, methodName) {
+    let plugin = null;
+    if (
+      packageData &&
+      typeof packageData === "object" &&
+      packageData.autojs6 &&
+      typeof packageData.autojs6 === "object" &&
+      !Array.isArray(packageData.autojs6) &&
+      packageData.autojs6.plugin !== undefined
+    ) {
+      plugin = packageData.autojs6.plugin;
+    } else if (
+      packageData &&
+      typeof packageData === "object" &&
+      __autojs6_has_own(packageData, "autojs6.plugin")
+    ) {
+      plugin = packageData["autojs6.plugin"];
+    }
+    if (!plugin || typeof plugin !== "object" || Array.isArray(plugin)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' requires package.json autojs6.plugin metadata."
+      );
+    }
+    return plugin;
+  }
+  function __autojs6_plugin_assert_bridge_permission(normalized, id, methodName) {
+    if (normalized === "plugin" || normalized.indexOf("plugin.") === 0) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' cannot declare plugin namespace capability '" +
+          normalized + "' in autojs6.plugin.permissions; project metadata grants the exact plugin.<id> capability separately."
+      );
+    }
+  }
+  function __autojs6_plugin_permissions(plugin, id, methodName) {
+    let permissions = plugin.permissions;
+    if (
+      permissions &&
+      typeof permissions === "object" &&
+      !Array.isArray(permissions) &&
+      Array.isArray(permissions.requires)
+    ) {
+      permissions = permissions.requires;
+    }
+    if (!Array.isArray(permissions)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' requires autojs6.plugin.permissions as a string array."
+      );
+    }
+    const output = [];
+    const seen = Object.create(null);
+    for (let i = 0; i < permissions.length; i += 1) {
+      const value = permissions[i];
+      if (typeof value !== "string" || value.trim().length === 0) {
+        throw __autojs6_plugins_invalid_request(
+          methodName,
+          "AutoJs6 JS plugin '" + id + "' has a non-string permission at index " + i + "."
+        );
+      }
+      const normalized = __autojs6_bridge_normalize_capability(value);
+      __autojs6_plugin_assert_bridge_permission(normalized, id, methodName);
+      if (normalized && !seen[normalized]) {
+        seen[normalized] = true;
+        output.push(normalized);
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_plugin_string_list(value, id, fieldName, methodName) {
+    if (value === undefined) {
+      return Object.freeze([]);
+    }
+    if (!Array.isArray(value)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' requires autojs6.plugin." + fieldName + " as a string array when present."
+      );
+    }
+    const output = [];
+    const seen = Object.create(null);
+    for (let i = 0; i < value.length; i += 1) {
+      const item = value[i];
+      if (typeof item !== "string" || item.trim().length === 0) {
+        throw __autojs6_plugins_invalid_request(
+          methodName,
+          "AutoJs6 JS plugin '" + id + "' has a non-string " + fieldName + " entry at index " + i + "."
+        );
+      }
+      const normalized = item.trim();
+      if (!seen[normalized]) {
+        seen[normalized] = true;
+        output.push(normalized);
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_plugin_exports(plugin, entry, id, methodName) {
+    const output = Object.create(null);
+    const source = plugin.exports === undefined ? { ".": entry } : plugin.exports;
+    if (typeof source === "string") {
+      output["."] = source;
+      return Object.freeze(output);
+    }
+    if (!source || typeof source !== "object" || Array.isArray(source)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' requires autojs6.plugin.exports as an object map when present."
+      );
+    }
+    const names = Object.keys(source);
+    if (names.length === 0) {
+      output["."] = entry;
+      return Object.freeze(output);
+    }
+    for (const name of names) {
+      if (typeof name !== "string" || !/^(?:\.|[A-Za-z0-9][A-Za-z0-9_.-]{0,127})$/.test(name)) {
+        throw __autojs6_plugins_invalid_request(
+          methodName,
+          "AutoJs6 JS plugin '" + id + "' rejects unsafe export name: " + String(name)
+        );
+      }
+      const target = source[name];
+      if (typeof target !== "string" || target.trim().length === 0) {
+        throw __autojs6_plugins_invalid_request(
+          methodName,
+          "AutoJs6 JS plugin '" + id + "' export '" + name + "' must target a relative module path."
+        );
+      }
+      output[name] = target.trim();
+    }
+    if (output["."] === undefined) {
+      output["."] = entry;
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_plugin_config_value(value, methodName) {
+    if (value === undefined) {
+      return Object.freeze({});
+    }
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " requires plugin configuration as a JSON object."
+      );
+    }
+    let cloned;
+    try {
+      cloned = JSON.parse(JSON.stringify(value));
+    } catch (error) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " requires JSON-serializable plugin configuration."
+      );
+    }
+    return Object.freeze(cloned && typeof cloned === "object" && !Array.isArray(cloned) ? cloned : {});
+  }
+  function __autojs6_plugin_options(value, methodName) {
+    if (value === undefined || value === null) {
+      return Object.freeze({});
+    }
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " requires an options object when options are provided."
+      );
+    }
+    return value;
+  }
+  function __autojs6_plugin_package_descriptor(id, methodName) {
+    const scope = __autojs6_plugins_scope(methodName);
+    const path = scope.path;
+    const fs = scope.fs;
+    const pluginDir = path.resolve(scope.pluginsDir, id);
+    if (!__autojs6_path_within_root(pluginDir, scope.pluginsDir) || __autojs6_sensitive_path(pluginDir)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "AutoJs6 JS plugin path escapes the project plugins directory: " + id,
+        pluginDir
+      );
+    }
+    let lstat;
+    try {
+      lstat = fs.lstatSync(pluginDir);
+    } catch (error) {
+      if (error && (error.code === "ENOENT" || error.code === "ENOTDIR")) {
+        throw __autojs6_module_not_found("Cannot find AutoJs6 JS plugin '" + id + "' under ./plugins.");
+      }
+      throw error;
+    }
+    if (!lstat || typeof lstat.isDirectory !== "function" || !lstat.isDirectory()) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' must be installed as a directory under ./plugins."
+      );
+    }
+    const realPluginDir = fs.realpathSync(pluginDir);
+    if (!__autojs6_path_within_root(realPluginDir, scope.realRoot) || __autojs6_sensitive_path(realPluginDir)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "AutoJs6 JS plugin real path escapes the project working directory: " + id,
+        pluginDir
+      );
+    }
+    const packageJsonResolved = path.resolve(pluginDir, "package.json");
+    const packageData = __autojs6_package_data(packageJsonResolved, "plugins:" + id);
+    if (!packageData) {
+      throw __autojs6_module_not_found("Cannot find AutoJs6 JS plugin package.json for '" + id + "'.");
+    }
+    const plugin = __autojs6_plugin_manifest_field(packageData, id, methodName);
+    const manifestId = typeof plugin.id === "string" && plugin.id.trim().length > 0
+      ? plugin.id.trim()
+      : __autojs6_package_name(packageData);
+    if (manifestId !== id) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin id mismatch: requested '" + id + "' but package declares '" + String(manifestId || "") + "'."
+      );
+    }
+    const permissions = __autojs6_plugin_permissions(plugin, id, methodName);
+    const entry = plugin.entry !== undefined ? plugin.entry : (packageData.main !== undefined ? packageData.main : "index.cjs");
+    const dependencies = __autojs6_plugin_string_list(plugin.dependencies, id, "dependencies", methodName);
+    const exportsMap = __autojs6_plugin_exports(plugin, entry, id, methodName);
+    return {
+      scope,
+      id,
+      packageName: __autojs6_package_name(packageData) || id,
+      version: typeof packageData.version === "string" ? packageData.version : "",
+      plugin,
+      permissions,
+      dependencies,
+      exports: exportsMap,
+      entry,
+      pluginDir,
+      realPluginDir
+    };
+  }
+  function __autojs6_plugin_native_file_extension(extension) {
+    const normalized = __autojs6_normalized_extension(extension);
+    return normalized === ".so" ||
+      normalized === ".dll" ||
+      normalized === ".dylib" ||
+      normalized === ".a" ||
+      normalized === ".o";
+  }
+  function __autojs6_plugin_scan_native_files(descriptor, methodName) {
+    const path = descriptor.scope.path;
+    const fs = descriptor.scope.fs;
+    const stack = [{ dir: descriptor.pluginDir, depth: 0 }];
+    let visited = 0;
+    while (stack.length > 0) {
+      const current = stack.pop();
+      visited += 1;
+      if (visited > 512) {
+        throw __autojs6_plugins_permission_denied(
+          methodName,
+          "AutoJs6 JS plugin '" + descriptor.id + "' exceeds the prototype scan file budget."
+        );
+      }
+      if (current.depth > 16) {
+        throw __autojs6_plugins_permission_denied(
+          methodName,
+          "AutoJs6 JS plugin '" + descriptor.id + "' exceeds the prototype scan directory depth."
+        );
+      }
+      const entries = fs.readdirSync(current.dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const name = String(entry && entry.name || "");
+        if (!name || name === "." || name === "..") continue;
+        const absolute = path.resolve(current.dir, name);
+        if (!__autojs6_path_within_root(absolute, descriptor.pluginDir) || __autojs6_sensitive_path(absolute)) {
+          throw __autojs6_plugins_path_escape(
+            methodName,
+            "AutoJs6 JS plugin file escapes the plugin directory: " + name,
+            absolute
+          );
+        }
+        const extension = __autojs6_normalized_extension(path.extname(absolute));
+        __autojs6_throw_if_native_addon_extension(
+          extension,
+          absolute,
+          "AutoJs6 JS plugin scan",
+          "AutoJs6 JS plugin '" + descriptor.id + "' contains a .node native addon: " + absolute
+        );
+        if (__autojs6_plugin_native_file_extension(extension)) {
+          throw __autojs6_plugins_permission_denied(
+            methodName,
+            "AutoJs6 JS plugin '" + descriptor.id + "' contains a native file unsupported by the JS-only prototype: " + absolute
+          );
+        }
+        const lstat = fs.lstatSync(absolute);
+        if (lstat && typeof lstat.isSymbolicLink === "function" && lstat.isSymbolicLink()) {
+          const real = fs.realpathSync(absolute);
+          if (!__autojs6_path_within_root(real, descriptor.realPluginDir) || __autojs6_sensitive_path(real)) {
+            throw __autojs6_plugins_path_escape(
+              methodName,
+              "AutoJs6 JS plugin symlink escapes the plugin directory: " + name,
+              absolute
+            );
+          }
+          throw __autojs6_plugins_permission_denied(
+            methodName,
+            "AutoJs6 JS plugin '" + descriptor.id + "' cannot contain symlinks in the JS-only prototype."
+          );
+        }
+        if (lstat && typeof lstat.isDirectory === "function" && lstat.isDirectory()) {
+          stack.push({ dir: absolute, depth: current.depth + 1 });
+        }
+      }
+    }
+  }
+  function __autojs6_plugin_entry_path(descriptor, methodName) {
+    const path = descriptor.scope.path;
+    const fs = descriptor.scope.fs;
+    if (typeof descriptor.entry !== "string" || descriptor.entry.trim().length === 0) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry must be a non-empty string."
+      );
+    }
+    const entry = descriptor.entry.trim();
+    if (entry.indexOf("\u0000") >= 0) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry rejects NUL paths."
+      );
+    }
+    if (path.isAbsolute(entry) || __autojs6_protocol_specifier(entry)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry must be relative to the plugin directory: " + entry,
+        entry
+      );
+    }
+    const base = path.resolve(descriptor.pluginDir, entry);
+    if (!__autojs6_path_within_root(base, descriptor.pluginDir) || __autojs6_sensitive_path(base)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry escapes the plugin directory: " + entry,
+        entry
+      );
+    }
+    const extension = __autojs6_normalized_extension(path.extname(base));
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      descriptor.id,
+      "AutoJs6 JS plugin entry",
+      "AutoJs6 JS plugin '" + descriptor.id + "' entry resolves to a .node native addon: " + entry
+    );
+    if (extension !== ".js" && extension !== ".cjs") {
+      throw __autojs6_plugins_permission_denied(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry must be a .js or .cjs file in the JS-only prototype."
+      );
+    }
+    const record = __autojs6_module_record(base, false);
+    if (!record) {
+      throw __autojs6_module_not_found("Cannot find AutoJs6 JS plugin entry '" + entry + "' for '" + descriptor.id + "'.");
+    }
+    const realEntry = fs.realpathSync(base);
+    if (!__autojs6_path_within_root(realEntry, descriptor.realPluginDir) || __autojs6_sensitive_path(realEntry)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' entry real path escapes the plugin directory: " + entry,
+        entry
+      );
+    }
+    return base;
+  }
+  function __autojs6_plugin_export_name(value, methodName) {
+    if (value === undefined || value === null) {
+      return ".";
+    }
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " requires the plugin export name as a string when provided."
+      );
+    }
+    const name = value.trim();
+    if (!/^(?:\.|[A-Za-z0-9][A-Za-z0-9_.-]{0,127})$/.test(name)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " rejects unsafe plugin export name: " + String(value)
+      );
+    }
+    return name;
+  }
+  function __autojs6_plugin_export_entry_path(descriptor, methodName, exportNameValue) {
+    const exportName = __autojs6_plugin_export_name(exportNameValue, methodName);
+    const target = descriptor.exports[exportName];
+    if (target === undefined) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' does not export module '" + exportName + "'."
+      );
+    }
+    const exportDescriptor = Object.assign({}, descriptor, { entry: target });
+    return __autojs6_plugin_entry_path(exportDescriptor, methodName);
+  }
+  function __autojs6_plugin_required_capabilities(descriptor) {
+    return Object.freeze(["plugin." + descriptor.id].concat(descriptor.permissions));
+  }
+  function __autojs6_plugins_missing_capabilities(descriptor) {
+    const manifest = __autojs6_bridge_permission_manifest();
+    const required = __autojs6_plugin_required_capabilities(descriptor);
+    if (!manifest.enforced) {
+      return required.slice();
+    }
+    const declared = manifest.normalizedPermissions;
+    const missing = [];
+    const pluginCapability = __autojs6_bridge_normalize_capability("plugin." + descriptor.id);
+    if (declared.indexOf(pluginCapability) < 0) {
+      missing.push(pluginCapability);
+    }
+    for (const permission of descriptor.permissions) {
+      const normalized = __autojs6_bridge_normalize_capability(permission);
+      if (normalized && !__autojs6_bridge_declares_capability(declared, normalized) && missing.indexOf(normalized) < 0) {
+        missing.push(normalized);
+      }
+    }
+    return missing;
+  }
+  function __autojs6_plugin_descriptor(idValue, methodName) {
+    const id = __autojs6_plugin_id(idValue, methodName);
+    const descriptor = __autojs6_plugin_package_descriptor(id, methodName);
+    __autojs6_plugin_scan_native_files(descriptor, methodName);
+    descriptor.entryPath = __autojs6_plugin_entry_path(descriptor, methodName);
+    descriptor.capability = __autojs6_bridge_normalize_capability("plugin." + descriptor.id);
+    return descriptor;
+  }
+  function __autojs6_plugins_assert_capabilities(descriptor, methodName) {
+    const missing = __autojs6_plugins_missing_capabilities(descriptor);
+    if (missing.length > 0) {
+      throw __autojs6_bridge_capability_not_declared_error("plugins", methodName, missing);
+    }
+  }
+  function __autojs6_plugin_public_manifest(descriptor) {
+    return Object.freeze({
+      id: descriptor.id,
+      packageName: descriptor.packageName,
+      version: descriptor.version,
+      capability: descriptor.capability,
+      entry: descriptor.entry,
+      entryPath: descriptor.entryPath,
+      permissions: Object.freeze(descriptor.permissions.slice()),
+      dependencies: Object.freeze(descriptor.dependencies.slice()),
+      exports: Object.freeze(Object.assign({}, descriptor.exports)),
+      jsOnly: true,
+      nativeAddons: false
+    });
+  }
+  function __autojs6_plugin_capability_subset(descriptor) {
+    const output = [];
+    const seen = Object.create(null);
+    const required = [descriptor.capability].concat(descriptor.permissions || []);
+    for (const value of required) {
+      const normalized = __autojs6_bridge_normalize_capability(value);
+      if (normalized && !seen[normalized]) {
+        seen[normalized] = true;
+        output.push(normalized);
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_plugin_resource_registry() {
+    return {
+      sequence: 0,
+      entries: new Map(),
+      cleanupErrors: 0
+    };
+  }
+  function __autojs6_plugin_resource_kind(value, methodName) {
+    const kind = String(value === undefined || value === null ? "generic" : value).trim().toLowerCase();
+    if (
+      kind !== "timer" &&
+      kind !== "provider" &&
+      kind !== "ui" &&
+      kind !== "socket" &&
+      kind !== "image" &&
+      kind !== "generic"
+    ) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " rejects unsupported plugin resource kind: " + String(value)
+      );
+    }
+    return kind;
+  }
+  function __autojs6_plugin_default_cleanup(kind, handle) {
+    if (!handle || (typeof handle !== "object" && typeof handle !== "function")) {
+      return null;
+    }
+    const names = kind === "image"
+      ? ["recycle", "close", "dispose"]
+      : kind === "socket"
+        ? ["close", "destroy", "dispose"]
+        : kind === "ui"
+          ? ["close", "destroy", "dispose"]
+          : kind === "provider"
+            ? ["close", "stop", "destroy", "dispose"]
+            : ["close", "dispose", "destroy", "unsubscribe", "cancel"];
+    for (const name of names) {
+      if (typeof handle[name] === "function") {
+        return function() {
+          return handle[name]();
+        };
+      }
+    }
+    return null;
+  }
+  function __autojs6_plugin_resource_token(record, entry) {
+    return Object.freeze({
+      id: entry.id,
+      kind: entry.kind,
+      owner: record.namespace
+    });
+  }
+  function __autojs6_plugin_resource_id(token, methodName) {
+    if (typeof token === "number" && Number.isFinite(token)) {
+      return Math.floor(token);
+    }
+    if (token && typeof token === "object" && typeof token.id === "number" && Number.isFinite(token.id)) {
+      return Math.floor(token.id);
+    }
+    throw __autojs6_plugins_invalid_request(
+      methodName,
+      "plugins." + methodName + " requires a plugin resource token returned by context.resources."
+    );
+  }
+  function __autojs6_plugin_resource_snapshot(record) {
+    const counts = {
+      timer: 0,
+      provider: 0,
+      ui: 0,
+      socket: 0,
+      image: 0,
+      generic: 0
+    };
+    record.resources.entries.forEach(function(entry) {
+      counts[entry.kind] = (counts[entry.kind] || 0) + 1;
+    });
+    const total = counts.timer + counts.provider + counts.ui + counts.socket + counts.image + counts.generic;
+    return Object.freeze({
+      owner: record.namespace,
+      total,
+      timers: counts.timer,
+      providers: counts.provider,
+      ui: counts.ui,
+      sockets: counts.socket,
+      images: counts.image,
+      generic: counts.generic,
+      cleanupErrors: record.resources.cleanupErrors
+    });
+  }
+  function __autojs6_plugin_track_resource(record, kindValue, handle, cleanup, methodName) {
+    const kind = __autojs6_plugin_resource_kind(kindValue, methodName || "track");
+    if (cleanup !== undefined && cleanup !== null && typeof cleanup !== "function") {
+      throw __autojs6_plugins_invalid_request(
+        methodName || "track",
+        "plugins." + (methodName || "track") + " requires resource cleanup as a function when provided."
+      );
+    }
+    const cleanupFn = typeof cleanup === "function" ? cleanup : __autojs6_plugin_default_cleanup(kind, handle);
+    record.resources.sequence += 1;
+    const entry = {
+      id: record.resources.sequence,
+      kind,
+      handle,
+      cleanup: cleanupFn,
+      createdAt: Date.now()
+    };
+    record.resources.entries.set(entry.id, entry);
+    return __autojs6_plugin_resource_token(record, entry);
+  }
+  function __autojs6_plugin_release_resource_entry(record, entry) {
+    if (!entry || !record.resources.entries.has(entry.id)) {
+      return false;
+    }
+    record.resources.entries.delete(entry.id);
+    if (typeof entry.cleanup !== "function") {
+      return true;
+    }
+    try {
+      return entry.cleanup(entry.handle);
+    } catch (error) {
+      record.resources.cleanupErrors += 1;
+      throw error;
+    }
+  }
+  function __autojs6_plugin_release_resource_token(record, token, methodName) {
+    const id = __autojs6_plugin_resource_id(token, methodName || "release");
+    const entry = record.resources.entries.get(id);
+    if (!entry) {
+      return false;
+    }
+    return __autojs6_plugin_release_resource_entry(record, entry);
+  }
+  function __autojs6_plugin_release_all_resources(record) {
+    const entries = Array.from(record.resources.entries.values()).reverse();
+    let chain = null;
+    const releaseOne = function(entry) {
+      return __autojs6_plugin_release_resource_entry(record, entry);
+    };
+    for (const entry of entries) {
+      if (chain) {
+        chain = chain.then(function() {
+          return releaseOne(entry);
+        });
+        continue;
+      }
+      const result = releaseOne(entry);
+      if (result && typeof result.then === "function") {
+        chain = Promise.resolve(result);
+      }
+    }
+    return chain || true;
+  }
+  function __autojs6_plugin_resource_api(record) {
+    function track(kind, handle, cleanup) {
+      return __autojs6_plugin_track_resource(record, kind, handle, cleanup, "track");
+    }
+    function release(token) {
+      return __autojs6_plugin_release_resource_token(record, token, "release");
+    }
+    function addCleanup(cleanup) {
+      return __autojs6_plugin_track_resource(record, "generic", null, cleanup, "addCleanup");
+    }
+    function snapshot() {
+      return __autojs6_plugin_resource_snapshot(record);
+    }
+    function setTimeoutOwned(callback, delay) {
+      const args = Array.prototype.slice.call(arguments, 2);
+      let token = null;
+      const handle = setTimeout(function() {
+        if (token) {
+          try {
+            __autojs6_plugin_release_resource_token(record, token, "setTimeout");
+          } catch (_) {}
+        }
+        if (typeof callback === "function") {
+          return callback.apply(this, args);
+        }
+        return undefined;
+      }, delay);
+      token = __autojs6_plugin_track_resource(record, "timer", handle, function() {
+        clearTimeout(handle);
+      }, "setTimeout");
+      return token;
+    }
+    function clearTimeoutOwned(token) {
+      return __autojs6_plugin_release_resource_token(record, token, "clearTimeout");
+    }
+    function setIntervalOwned(callback, delay) {
+      const args = Array.prototype.slice.call(arguments, 2);
+      const handle = setInterval(function() {
+        if (typeof callback === "function") {
+          return callback.apply(this, args);
+        }
+        return undefined;
+      }, delay);
+      return __autojs6_plugin_track_resource(record, "timer", handle, function() {
+        clearInterval(handle);
+      }, "setInterval");
+    }
+    function clearIntervalOwned(token) {
+      return __autojs6_plugin_release_resource_token(record, token, "clearInterval");
+    }
+    return Object.freeze({
+      track,
+      release,
+      addCleanup,
+      snapshot,
+      setTimeout: setTimeoutOwned,
+      clearTimeout: clearTimeoutOwned,
+      setInterval: setIntervalOwned,
+      clearInterval: clearIntervalOwned
+    });
+  }
+  function __autojs6_plugin_create_record(descriptor, options) {
+    const opts = options || {};
+    const namespace = "plugin:" + descriptor.id;
+    return {
+      id: descriptor.id,
+      descriptor,
+      namespace,
+      capabilities: __autojs6_plugin_capability_subset(descriptor),
+      enabled: opts.enabled === false ? false : true,
+      loaded: false,
+      started: false,
+      state: "installed",
+      startCount: 0,
+      stopCount: 0,
+      reloadCount: Math.max(0, Number(opts.reloadCount) || 0),
+      config: __autojs6_plugin_config_value(opts.config, opts.methodName || "install"),
+      loadedPaths: new Set(),
+      resources: __autojs6_plugin_resource_registry()
+    };
+  }
+  function __autojs6_plugin_record(idValue, methodName, autoInstall) {
+    const id = __autojs6_plugin_id(idValue, methodName);
+    if (__autojs6_plugin_registry.has(id)) {
+      return __autojs6_plugin_registry.get(id);
+    }
+    if (!autoInstall) {
+      throw __autojs6_module_not_found("AutoJs6 JS plugin '" + id + "' has not been installed in this execution.");
+    }
+    const descriptor = __autojs6_plugin_descriptor(id, methodName);
+    const record = __autojs6_plugin_create_record(descriptor, { methodName, config: Object.freeze({}) });
+    __autojs6_plugin_registry.set(id, record);
+    return record;
+  }
+  function __autojs6_plugin_status(record) {
+    const manifest = __autojs6_plugin_public_manifest(record.descriptor);
+    return Object.freeze(Object.assign({}, manifest, {
+      namespace: record.namespace,
+      capabilities: record.capabilities,
+      enabled: record.enabled === true,
+      loaded: record.loaded === true,
+      started: record.started === true,
+      state: record.state,
+      startCount: record.startCount,
+      stopCount: record.stopCount,
+      reloadCount: record.reloadCount,
+      resources: __autojs6_plugin_resource_snapshot(record),
+      config: record.config
+    }));
+  }
+  function __autojs6_plugin_assert_enabled(record, methodName) {
+    if (record.enabled !== true) {
+      throw __autojs6_plugins_permission_denied(
+        methodName,
+        "AutoJs6 JS plugin '" + record.id + "' is disabled."
+      );
+    }
+  }
+  function __autojs6_plugin_lifecycle_context(record, phase, options) {
+    return Object.freeze({
+      id: record.id,
+      namespace: record.namespace,
+      owner: record.namespace,
+      phase,
+      capabilities: record.capabilities,
+      permissions: Object.freeze(record.descriptor.permissions.slice()),
+      config: record.config,
+      options: options && typeof options === "object" ? Object.freeze(Object.assign({}, options)) : Object.freeze({}),
+      resources: __autojs6_plugin_resource_api(record)
+    });
+  }
+  function __autojs6_plugin_main_exports(record) {
+    const moduleRecord = __autojs6_module_cache[record.descriptor.entryPath];
+    return moduleRecord && moduleRecord.exports !== undefined ? moduleRecord.exports : null;
+  }
+  function __autojs6_plugin_call_lifecycle_hook(record, exported, hookName, options) {
+    if (!exported || typeof exported !== "object" && typeof exported !== "function") {
+      return undefined;
+    }
+    const hook = exported[hookName];
+    if (typeof hook !== "function") {
+      return undefined;
+    }
+    return hook(__autojs6_plugin_lifecycle_context(record, hookName, options));
+  }
+  function __autojs6_plugin_finish_start(record) {
+    record.started = true;
+    record.state = "started";
+    record.startCount += 1;
+    return __autojs6_plugin_status(record);
+  }
+  function __autojs6_plugin_fail_start(record, error) {
+    const cleanup = __autojs6_plugin_release_all_resources(record);
+    record.started = false;
+    record.state = record.loaded ? "loaded" : "stopped";
+    if (cleanup && typeof cleanup.then === "function") {
+      return Promise.resolve(cleanup).then(function() {
+        throw error;
+      });
+    }
+    throw error;
+  }
+  function __autojs6_plugin_start_record(record, options, loadMain) {
+    if (record.started) {
+      return __autojs6_plugin_status(record);
+    }
+    record.state = "starting";
+    const exported = loadMain();
+    let result;
+    try {
+      result = __autojs6_plugin_call_lifecycle_hook(record, exported, "start", options);
+    } catch (error) {
+      return __autojs6_plugin_fail_start(record, error);
+    }
+    if (result && typeof result.then === "function") {
+      return Promise.resolve(result).then(function() {
+        return __autojs6_plugin_finish_start(record);
+      }, function(error) {
+        return __autojs6_plugin_fail_start(record, error);
+      });
+    }
+    return __autojs6_plugin_finish_start(record);
+  }
+  function __autojs6_plugin_finish_stop(record, wasStarted) {
+    const cleanup = __autojs6_plugin_release_all_resources(record);
+    const finish = function() {
+      record.started = false;
+      record.state = "stopped";
+      if (wasStarted) {
+        record.stopCount += 1;
+      }
+      return __autojs6_plugin_status(record);
+    };
+    if (cleanup && typeof cleanup.then === "function") {
+      return Promise.resolve(cleanup).then(finish);
+    }
+    return finish();
+  }
+  function __autojs6_plugin_stop_record(record, options) {
+    const wasStarted = record.started === true;
+    if (!wasStarted && record.resources.entries.size === 0) {
+      record.state = record.loaded ? "loaded" : "stopped";
+      return __autojs6_plugin_status(record);
+    }
+    record.state = "stopping";
+    const exported = __autojs6_plugin_main_exports(record);
+    let result;
+    try {
+      result = wasStarted
+        ? __autojs6_plugin_call_lifecycle_hook(record, exported, "stop", options)
+        : undefined;
+    } catch (error) {
+      const cleanup = __autojs6_plugin_release_all_resources(record);
+      record.started = false;
+      record.state = "stopped";
+      if (cleanup && typeof cleanup.then === "function") {
+        return Promise.resolve(cleanup).then(function() {
+          throw error;
+        });
+      }
+      throw error;
+    }
+    if (result && typeof result.then === "function") {
+      return Promise.resolve(result).then(function() {
+        return __autojs6_plugin_finish_stop(record, wasStarted);
+      }, function(error) {
+        const cleanup = __autojs6_plugin_release_all_resources(record);
+        record.started = false;
+        record.state = "stopped";
+        if (cleanup && typeof cleanup.then === "function") {
+          return Promise.resolve(cleanup).then(function() {
+            throw error;
+          });
+        }
+        throw error;
+      });
+    }
+    return __autojs6_plugin_finish_stop(record, wasStarted);
+  }
+  function __autojs6_plugin_validate_source_option(descriptor, sourceValue, methodName) {
+    if (sourceValue === undefined || sourceValue === null) {
+      return;
+    }
+    if (typeof sourceValue !== "string" || sourceValue.trim().length === 0) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins.install source must be a non-empty local path when provided."
+      );
+    }
+    const path = descriptor.scope.path;
+    const fs = descriptor.scope.fs;
+    const sourcePath = path.resolve(descriptor.scope.root, sourceValue.trim());
+    if (!__autojs6_path_within_root(sourcePath, descriptor.scope.root) || __autojs6_sensitive_path(sourcePath)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "plugins.install source path escapes the project working directory.",
+        sourceValue
+      );
+    }
+    const realSource = fs.realpathSync(sourcePath);
+    if (realSource !== descriptor.realPluginDir) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins.install source must point at ./plugins/" + descriptor.id + " for the JS-only local manager."
+      );
+    }
+  }
+  function __autojs6_plugin_clear_module_cache(record) {
+    const descriptor = record.descriptor;
+    const keys = Object.keys(__autojs6_module_cache);
+    for (const key of keys) {
+      if (__autojs6_path_within_root(key, descriptor.pluginDir)) {
+        delete __autojs6_module_cache[key];
+      }
+    }
+    record.loaded = false;
+    record.loadedPaths.clear();
+    record.state = record.started ? record.state : "stopped";
+    return true;
+  }
+  function __autojs6_plugin_unload_record(record) {
+    const stopped = __autojs6_plugin_stop_record(record, { reason: "unload" });
+    if (stopped && typeof stopped.then === "function") {
+      return Promise.resolve(stopped).then(function() {
+        return __autojs6_plugin_clear_module_cache(record);
+      });
+    }
+    return __autojs6_plugin_clear_module_cache(record);
+  }
+  function __autojs6_limited_plugins() {
+    if (__autojs6_limited_plugins_cache) {
+      return __autojs6_limited_plugins_cache;
+    }
+    function manifest(id) {
+      const record = __autojs6_plugin_registry.has(__autojs6_plugin_id(id, "manifest"))
+        ? __autojs6_plugin_record(id, "manifest", false)
+        : { descriptor: __autojs6_plugin_descriptor(id, "manifest"), enabled: true, loaded: false, config: Object.freeze({}) };
+      return __autojs6_plugin_public_manifest(record.descriptor);
+    }
+    function install(id, options) {
+      const opts = __autojs6_plugin_options(options, "install");
+      const descriptor = __autojs6_plugin_descriptor(id, "install");
+      __autojs6_plugin_validate_source_option(descriptor, opts.source, "install");
+      __autojs6_plugins_assert_capabilities(descriptor, "install");
+      const finishInstall = function() {
+        const record = __autojs6_plugin_create_record(descriptor, {
+          methodName: "install",
+          enabled: opts.enabled,
+          config: opts.config
+        });
+        __autojs6_plugin_registry.set(descriptor.id, record);
+        return __autojs6_plugin_status(record);
+      };
+      const existing = __autojs6_plugin_registry.get(descriptor.id);
+      if (existing) {
+        const unloaded = __autojs6_plugin_unload_record(existing);
+        if (unloaded && typeof unloaded.then === "function") {
+          return Promise.resolve(unloaded).then(finishInstall);
+        }
+      }
+      return finishInstall();
+    }
+    function resolve(id, exportName) {
+      const record = __autojs6_plugin_record(id, "resolve", true);
+      __autojs6_plugin_assert_enabled(record, "resolve");
+      __autojs6_plugins_assert_capabilities(record.descriptor, "resolve");
+      return __autojs6_plugin_export_entry_path(record.descriptor, "resolve", exportName);
+    }
+    function load(id, exportName) {
+      const record = __autojs6_plugin_record(id, "load", true);
+      __autojs6_plugin_assert_enabled(record, "load");
+      const descriptor = record.descriptor;
+      __autojs6_plugins_assert_capabilities(descriptor, "load");
+      const entryPath = __autojs6_plugin_export_entry_path(descriptor, "load", exportName);
+      __autojs6_plugin_module_roots[descriptor.pluginDir] = true;
+      const exported = __autojs6_load_local_module(entryPath, null);
+      record.loaded = true;
+      record.loadedPaths.add(entryPath);
+      return exported;
+    }
+    function start(id, options) {
+      const record = __autojs6_plugin_record(id, "start", true);
+      __autojs6_plugin_assert_enabled(record, "start");
+      __autojs6_plugins_assert_capabilities(record.descriptor, "start");
+      return __autojs6_plugin_start_record(record, __autojs6_plugin_options(options, "start"), function() {
+        return load(id);
+      });
+    }
+    function stop(id, options) {
+      const record = __autojs6_plugin_record(id, "stop", true);
+      __autojs6_plugins_assert_capabilities(record.descriptor, "stop");
+      return __autojs6_plugin_stop_record(record, __autojs6_plugin_options(options, "stop"));
+    }
+    function enable(id) {
+      const record = __autojs6_plugin_record(id, "enable", true);
+      __autojs6_plugins_assert_capabilities(record.descriptor, "enable");
+      record.enabled = true;
+      return __autojs6_plugin_status(record);
+    }
+    function disable(id) {
+      const record = __autojs6_plugin_record(id, "disable", true);
+      __autojs6_plugins_assert_capabilities(record.descriptor, "disable");
+      record.enabled = false;
+      const unloaded = __autojs6_plugin_unload_record(record);
+      if (unloaded && typeof unloaded.then === "function") {
+        return Promise.resolve(unloaded).then(function() {
+          return __autojs6_plugin_status(record);
+        });
+      }
+      return __autojs6_plugin_status(record);
+    }
+    function isEnabled(id) {
+      return __autojs6_plugin_record(id, "isEnabled", true).enabled === true;
+    }
+    function configure(id, config) {
+      const record = __autojs6_plugin_record(id, "configure", true);
+      __autojs6_plugins_assert_capabilities(record.descriptor, "configure");
+      record.config = __autojs6_plugin_config_value(config, "configure");
+      return record.config;
+    }
+    function config(id) {
+      return __autojs6_plugin_record(id, "config", true).config;
+    }
+    function version(id) {
+      return __autojs6_plugin_record(id, "version", true).descriptor.version;
+    }
+    function dependencies(id) {
+      return Object.freeze(__autojs6_plugin_record(id, "dependencies", true).descriptor.dependencies.slice());
+    }
+    function exportsOf(id) {
+      return Object.freeze(Object.assign({}, __autojs6_plugin_record(id, "exports", true).descriptor.exports));
+    }
+    function unload(id) {
+      const record = __autojs6_plugin_record(id, "unload", true);
+      __autojs6_plugins_assert_capabilities(record.descriptor, "unload");
+      return __autojs6_plugin_unload_record(record);
+    }
+    function reload(id, options) {
+      const opts = __autojs6_plugin_options(options, "reload");
+      if (opts.debug !== true) {
+        throw __autojs6_plugins_permission_denied(
+          "reload",
+          "plugins.reload is debug-only and requires options.debug === true."
+        );
+      }
+      const pluginId = __autojs6_plugin_id(id, "reload");
+      const previous = __autojs6_plugin_registry.get(pluginId) || null;
+      const wasStarted = previous && previous.started === true;
+      const previousReloadCount = previous ? previous.reloadCount : 0;
+      const previousEnabled = previous ? previous.enabled : true;
+      const previousConfig = previous ? previous.config : Object.freeze({});
+      const finishReload = function() {
+        const descriptor = __autojs6_plugin_descriptor(pluginId, "reload");
+        __autojs6_plugins_assert_capabilities(descriptor, "reload");
+        const record = __autojs6_plugin_create_record(descriptor, {
+          methodName: "reload",
+          enabled: opts.enabled === undefined ? previousEnabled : opts.enabled,
+          config: opts.config === undefined ? previousConfig : opts.config,
+          reloadCount: previousReloadCount + 1
+        });
+        __autojs6_plugin_registry.set(pluginId, record);
+        if (wasStarted && record.enabled) {
+          return start(pluginId, opts);
+        }
+        return __autojs6_plugin_status(record);
+      };
+      if (previous) {
+        const unloaded = __autojs6_plugin_unload_record(previous);
+        if (unloaded && typeof unloaded.then === "function") {
+          return Promise.resolve(unloaded).then(finishReload);
+        }
+      }
+      return finishReload();
+    }
+    function status(id) {
+      return __autojs6_plugin_status(__autojs6_plugin_record(id, "status", true));
+    }
+    function capabilities(id) {
+      return __autojs6_plugin_record(id, "capabilities", true).capabilities;
+    }
+    function list() {
+      const output = [];
+      __autojs6_plugin_registry.forEach(function(record) {
+        output.push(__autojs6_plugin_status(record));
+      });
+      return Object.freeze(output);
+    }
+    __autojs6_limited_plugins_cache = Object.freeze({
+      install,
+      enable,
+      disable,
+      isEnabled,
+      configure,
+      config,
+      version,
+      dependencies,
+      exports: exportsOf,
+      capabilities,
+      status,
+      start,
+      stop,
+      reload,
+      unload,
+      list,
+      load,
+      resolve,
+      manifest
+    });
+    return __autojs6_limited_plugins_cache;
+  }
+  const __autojs6_package_manager_allowed_sources = Object.freeze(["local_unpacked_host_managed"]);
+  const __autojs6_package_manager_denied_sources = Object.freeze([
+    "raw_registry",
+    "remote_tarball",
+    "git",
+    "http_url",
+    "file_url",
+    "workspace_symlink",
+    "unverified_cache"
+  ]);
+  const __autojs6_package_manager_future_promotion_requirements = Object.freeze([
+    "signed_or_host_managed_source_manifest",
+    "sha512_integrity_lock",
+    "transaction_rollback_evidence",
+    "cache_corruption_recovery",
+    "packaged_distribution_evidence",
+    "user_visible_install_authority"
+  ]);
+  const __autojs6_package_manager_plan_operations = Object.freeze(["planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall"]);
+  const __autojs6_package_manager_mutation_operations = Object.freeze(["install", "update", "remove"]);
+  const __autojs6_npm_facade_operations = Object.freeze([
+    "status",
+    "policy",
+    "sourcePolicy",
+    "packageManager",
+    "planInstall",
+    "planUpdate",
+    "planRemove",
+    "planRegistryInstall",
+    "planTarballInstall",
+    "install",
+    "update",
+    "remove",
+    "list",
+    "verify",
+    "prune",
+    "cli",
+    "exec",
+    "runScript"
+  ]);
+  const __autojs6_package_manager_install_authority = "package_manager_mutate_explicit_local_unpacked";
+  const __autojs6_package_manager_source_policy = Object.freeze({
+    schema: "autojs6-node-package-manager-source-policy-v1",
+    status: "guarded_local_unpacked_mutation",
+    sourceAuthority: "local_unpacked_host_managed_only",
+    installAuthority: __autojs6_package_manager_install_authority,
+    grantsInstallAuthority: true,
+    allowedSources: __autojs6_package_manager_allowed_sources,
+    deniedSources: __autojs6_package_manager_denied_sources,
+    planOperations: __autojs6_package_manager_plan_operations,
+    mutationOperations: __autojs6_package_manager_mutation_operations,
+    mutationCapability: "package_manager.mutate",
+    mutationConfirmation: "allowMutation_required",
+    requiresExpectedIntegrity: true,
+    localUnpacked: Object.freeze({
+      status: "allowed_substrate",
+      source: "host_managed_unpacked_directory",
+      requiresPackageJson: true,
+      requiresNameVersionMatch: true,
+      requiresSha512: true,
+      requiresHostManagedLockfile: true,
+      lifecycleScripts: "denied",
+      binLinks: "denied",
+      symlinks: "denied",
+      nativePayloads: "denied",
+      pathEscapes: "denied"
+    }),
+    registry: Object.freeze({
+      status: "deferred",
+      rawRegistryAccess: false,
+      networkInstall: "denied",
+      metadataDownload: "deferred",
+      cacheReuse: "unverified_cache_denied"
+    }),
+    tarball: Object.freeze({
+      status: "host_side_only",
+      androidDownload: "denied",
+      androidExtraction: "deferred",
+      integrity: "sha512_required"
+    }),
+    npmCli: Object.freeze({
+      status: "denied",
+      lifecycleScripts: "denied",
+      nativeBuild: "denied"
+    }),
+    futurePromotionRequires: __autojs6_package_manager_future_promotion_requirements
+  });
+  const __autojs6_package_manager_policy = Object.freeze({
+    schema: "autojs6-node-package-manager-policy-v1",
+    status: "guarded_mutation_partial",
+    androidStore: "local_app_private_partial",
+    androidRuntimeInstall: "local_unpacked_only",
+    npmCli: "denied",
+    npmFacade: "guarded_package_manager_alias",
+    requireNpm: "guarded_package_manager_alias",
+    npmInstallEquivalent: "host_managed_plus_android_store_substrate",
+    registryDownload: "deferred",
+    tarballInstall: "host_side_only",
+    lockfile: "autojs6_lock_host_managed",
+    integrity: "sha512_required",
+    lifecycleScripts: "denied",
+    debugLifecycleScripts: "not_promoted",
+    binLinks: "denied",
+    symlinks: "denied",
+    nativeBuild: "denied",
+    nativePayloads: "denied",
+    postinstallDownload: "denied",
+    nodeModulesMutation: "transactional_store_only",
+    transaction: "locked_cancellable_atomic",
+    sourcePolicy: "guarded_local_unpacked_mutation",
+    sourceAuthority: "local_unpacked_host_managed_only",
+    installAuthority: __autojs6_package_manager_install_authority,
+    allowedSources: __autojs6_package_manager_allowed_sources,
+    deniedSources: __autojs6_package_manager_denied_sources,
+    planOperations: __autojs6_package_manager_plan_operations,
+    mutationOperations: __autojs6_package_manager_mutation_operations,
+    npmFacadeOperations: __autojs6_npm_facade_operations,
+    mutationCapability: "package_manager.mutate",
+    mutationConfirmation: "allowMutation_required",
+    requiresExpectedIntegrity: true,
+    operations: Object.freeze(["install", "update", "remove", "list", "verify", "prune"]),
+    packageKinds: Object.freeze(["dependency", "plugin", "project"]),
+    androidNetwork: "denied",
+    rawExecutables: false,
+    rawRegistryAccess: false,
+    grantsInstallAuthority: true
+  });
+  function __autojs6_package_manager_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_package_manager_timeout_from_options(options, fallbackMs) {
+    return options && typeof options === "object" && options.timeoutMs !== undefined
+      ? options.timeoutMs
+      : fallbackMs;
+  }
+  function __autojs6_package_manager_invalid_request(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "package_manager",
+      methodName
+    );
+  }
+  function __autojs6_package_manager_string(value) {
+    return value === undefined || value === null ? "" : String(value);
+  }
+  function __autojs6_package_manager_plain_object(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : null;
+  }
+  function __autojs6_package_manager_registry_packument(input) {
+    const metadata = __autojs6_package_manager_plain_object(input && input.metadata);
+    if (metadata) {
+      return metadata;
+    }
+    return __autojs6_package_manager_plain_object(input && input.packument);
+  }
+  function __autojs6_package_manager_semver_parse(value) {
+    const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(__autojs6_package_manager_string(value).trim());
+    return match ? {
+      major: Number(match[1]),
+      minor: Number(match[2]),
+      patch: Number(match[3])
+    } : null;
+  }
+  function __autojs6_package_manager_semver_compare_parsed(left, right) {
+    if (left.major !== right.major) return left.major - right.major;
+    if (left.minor !== right.minor) return left.minor - right.minor;
+    return left.patch - right.patch;
+  }
+  function __autojs6_package_manager_semver_compare(left, right) {
+    const parsedLeft = __autojs6_package_manager_semver_parse(left);
+    const parsedRight = __autojs6_package_manager_semver_parse(right);
+    if (!parsedLeft && !parsedRight) return left < right ? -1 : left > right ? 1 : 0;
+    if (!parsedLeft) return -1;
+    if (!parsedRight) return 1;
+    return __autojs6_package_manager_semver_compare_parsed(parsedLeft, parsedRight);
+  }
+  function __autojs6_package_manager_semver_compare_with_comparator(version, comparator) {
+    const match = /^(>=|>|<=|<|=)?(\d+\.\d+\.\d+)$/.exec(__autojs6_package_manager_string(comparator).trim());
+    if (!match) {
+      return null;
+    }
+    const comparison = __autojs6_package_manager_semver_compare(version, match[2]);
+    const op = match[1] || "=";
+    if (op === "=") return comparison === 0;
+    if (op === ">=") return comparison >= 0;
+    if (op === ">") return comparison > 0;
+    if (op === "<=") return comparison <= 0;
+    if (op === "<") return comparison < 0;
+    return null;
+  }
+  function __autojs6_package_manager_semver_satisfies(version, range) {
+    const trimmed = __autojs6_package_manager_string(range).trim();
+    if (trimmed === "" || trimmed === "*") {
+      return true;
+    }
+    if (/^\d+\.\d+\.\d+$/.test(trimmed)) {
+      return version === trimmed;
+    }
+    if (trimmed.charAt(0) === "^") {
+      const min = __autojs6_package_manager_semver_parse(trimmed.slice(1));
+      const current = __autojs6_package_manager_semver_parse(version);
+      if (!min || !current) {
+        return null;
+      }
+      const upper = min.major === 0
+        ? { major: 0, minor: min.minor + 1, patch: 0 }
+        : { major: min.major + 1, minor: 0, patch: 0 };
+      return __autojs6_package_manager_semver_compare_parsed(current, min) >= 0 &&
+        __autojs6_package_manager_semver_compare_parsed(current, upper) < 0;
+    }
+    if (trimmed.charAt(0) === "~") {
+      const min = __autojs6_package_manager_semver_parse(trimmed.slice(1));
+      const current = __autojs6_package_manager_semver_parse(version);
+      if (!min || !current) {
+        return null;
+      }
+      const upper = { major: min.major, minor: min.minor + 1, patch: 0 };
+      return __autojs6_package_manager_semver_compare_parsed(current, min) >= 0 &&
+        __autojs6_package_manager_semver_compare_parsed(current, upper) < 0;
+    }
+    const comparators = trimmed.split(/\s+/).filter(Boolean);
+    if (comparators.length > 1 || /^[<>]=?/.test(comparators[0] || "")) {
+      for (let i = 0; i < comparators.length; i += 1) {
+        const result = __autojs6_package_manager_semver_compare_with_comparator(version, comparators[i]);
+        if (result === null) {
+          return null;
+        }
+        if (!result) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return null;
+  }
+  function __autojs6_package_manager_registry_versions_desc(versions) {
+    return Object.keys(versions || {})
+      .filter((version) => !!__autojs6_package_manager_semver_parse(version))
+      .sort(__autojs6_package_manager_semver_compare)
+      .reverse();
+  }
+  function __autojs6_package_manager_registry_resolve_range(versions, range) {
+    const sortedVersions = __autojs6_package_manager_registry_versions_desc(versions);
+    let supported = true;
+    for (let i = 0; i < sortedVersions.length; i += 1) {
+      const version = sortedVersions[i];
+      const satisfied = __autojs6_package_manager_semver_satisfies(version, range);
+      if (satisfied === null) {
+        supported = false;
+        continue;
+      }
+      if (satisfied) {
+        return Object.freeze({ version, supported: true });
+      }
+    }
+    return Object.freeze({ version: "", supported });
+  }
+  function __autojs6_package_manager_integrity_status(expectedIntegrity, resolvedIntegrity, metadataPresent) {
+    if (!metadataPresent) {
+      return "metadata_not_provided";
+    }
+    if (!expectedIntegrity) {
+      return "expected_integrity_missing";
+    }
+    if (!resolvedIntegrity) {
+      return "metadata_integrity_missing";
+    }
+    return expectedIntegrity === resolvedIntegrity
+      ? "expected_integrity_matched"
+      : "expected_integrity_mismatch";
+  }
+  function __autojs6_package_manager_integrity_algorithm(value) {
+    const match = /^([A-Za-z0-9][A-Za-z0-9-]*)-/.exec(__autojs6_package_manager_string(value).trim());
+    return match ? match[1].toLowerCase() : "";
+  }
+  function __autojs6_package_manager_tarball_integrity_status(expectedIntegrity) {
+    if (!expectedIntegrity) {
+      return "expected_integrity_missing";
+    }
+    const algorithm = __autojs6_package_manager_integrity_algorithm(expectedIntegrity);
+    if (!algorithm) {
+      return "expected_integrity_malformed";
+    }
+    return algorithm === "sha512"
+      ? "expected_integrity_sha512"
+      : "expected_integrity_unsupported_algorithm";
+  }
+  function __autojs6_package_manager_decode_url_segment(value) {
+    const text = __autojs6_package_manager_string(value);
+    try {
+      return decodeURIComponent(text);
+    } catch (error) {
+      return text;
+    }
+  }
+  function __autojs6_package_manager_tarball_package_from_parts(parts) {
+    const markerIndex = parts.indexOf("-");
+    if (markerIndex <= 0) {
+      return "";
+    }
+    const first = parts[0] || "";
+    if (first.charAt(0) === "@") {
+      return first.indexOf("/") >= 0
+        ? first
+        : parts.length > 1
+          ? first + "/" + (parts[1] || "")
+          : first;
+    }
+    return first;
+  }
+  function __autojs6_package_manager_tarball_url_fields(tarballUrl) {
+    const source = __autojs6_package_manager_string(tarballUrl).trim();
+    const fields = {
+      urlProtocol: "",
+      urlHost: "",
+      urlPath: "",
+      urlStatus: source ? "invalid_url" : "empty_url",
+      archiveExtension: "",
+      tarballBasename: "",
+      inferredName: "",
+      inferredVersion: ""
+    };
+    const match = /^([A-Za-z][A-Za-z0-9+.-]*):\/\/([^/?#]+)([^?#]*)/.exec(source);
+    if (!match) {
+      return Object.freeze(fields);
+    }
+    fields.urlProtocol = match[1].toLowerCase();
+    fields.urlHost = match[2];
+    fields.urlPath = match[3] || "/";
+    const parts = fields.urlPath.split("/").filter(Boolean).map(__autojs6_package_manager_decode_url_segment);
+    fields.tarballBasename = parts.length ? parts[parts.length - 1] : "";
+    fields.archiveExtension = /\.tgz$/i.test(fields.tarballBasename) ? ".tgz" : "";
+    fields.inferredName = __autojs6_package_manager_tarball_package_from_parts(parts);
+    const basename = fields.archiveExtension
+      ? fields.tarballBasename.slice(0, -fields.archiveExtension.length)
+      : fields.tarballBasename;
+    const versionMatch = /-(\d+\.\d+\.\d+)$/.exec(basename);
+    fields.inferredVersion = versionMatch ? versionMatch[1] : "";
+    fields.urlStatus = fields.urlProtocol === "http" || fields.urlProtocol === "https"
+      ? fields.archiveExtension
+        ? "remote_url"
+        : "unsupported_archive"
+      : "unsupported_protocol";
+    return Object.freeze(fields);
+  }
+  function __autojs6_package_manager_registry_resolution(request, input) {
+    const metadata = __autojs6_package_manager_registry_packument(input);
+    const requestedVersion = __autojs6_package_manager_string(request.version).trim();
+    const requestedRange = __autojs6_package_manager_string(request.range).trim();
+    const requestedTag = __autojs6_package_manager_string(request.tag).trim();
+    const expectedIntegrity = __autojs6_package_manager_string(request.expectedIntegrity).trim();
+    const base = {
+      schema: "autojs6-node-package-manager-registry-resolution-v1",
+      status: "",
+      name: request.name,
+      metadataName: "",
+      nameMatches: true,
+      requestedVersion,
+      requestedRange,
+      requestedTag,
+      selector: requestedVersion || requestedRange || requestedTag,
+      selectorKind: requestedVersion ? "version" : requestedRange ? "range" : "tag",
+      resolvedVersion: requestedVersion,
+      inferredName: "",
+      resolvedName: request.name,
+      inferredVersion: "",
+      versionMatches: true,
+      registry: request.registry,
+      tarballUrl: "",
+      integrity: expectedIntegrity,
+      expectedIntegrity,
+      integrityStatus: __autojs6_package_manager_integrity_status(expectedIntegrity, "", !!metadata),
+      integrityAlgorithm: __autojs6_package_manager_integrity_algorithm(expectedIntegrity),
+      integrityAlgorithmAllowed: __autojs6_package_manager_integrity_algorithm(expectedIntegrity) === "sha512",
+      shasum: "",
+      hasMetadata: !!metadata,
+      rangeSupported: true,
+      urlProtocol: "",
+      urlHost: "",
+      urlPath: "",
+      urlStatus: "not_applicable",
+      archiveExtension: "",
+      tarballBasename: ""
+    };
+    if (!metadata) {
+      base.status = requestedVersion
+        ? "version_requested_no_metadata"
+        : requestedRange
+          ? "range_requested_no_metadata"
+          : "metadata_not_provided";
+      return Object.freeze(base);
+    }
+    const metadataName = __autojs6_package_manager_string(metadata.name).trim();
+    const distTags = __autojs6_package_manager_plain_object(metadata["dist-tags"]);
+    const versions = __autojs6_package_manager_plain_object(metadata.versions);
+    base.metadataName = metadataName;
+    base.nameMatches = !metadataName || metadataName === request.name;
+    let resolvedVersion = requestedVersion;
+    let status = requestedVersion ? "resolved_from_version" : requestedRange ? "resolved_from_range" : "resolved_from_dist_tag";
+    if (!resolvedVersion && requestedRange) {
+      if (distTags && Object.prototype.hasOwnProperty.call(distTags, requestedRange)) {
+        resolvedVersion = __autojs6_package_manager_string(distTags[requestedRange]).trim();
+        status = "resolved_from_dist_tag";
+      } else {
+        const rangeResolution = versions
+          ? __autojs6_package_manager_registry_resolve_range(versions, requestedRange)
+          : Object.freeze({ version: "", supported: true });
+        resolvedVersion = rangeResolution.version;
+        base.rangeSupported = rangeResolution.supported;
+        if (!resolvedVersion) {
+          status = rangeResolution.supported ? "range_not_satisfied" : "unsupported_range";
+        }
+      }
+    } else if (!resolvedVersion) {
+      resolvedVersion = distTags && Object.prototype.hasOwnProperty.call(distTags, requestedTag)
+        ? __autojs6_package_manager_string(distTags[requestedTag]).trim()
+        : "";
+      if (!resolvedVersion) {
+        status = "tag_not_found";
+      }
+    }
+    base.resolvedVersion = resolvedVersion;
+    const versionEntry = resolvedVersion && versions
+      ? __autojs6_package_manager_plain_object(versions[resolvedVersion])
+      : null;
+    if (!base.nameMatches) {
+      status = "name_mismatch";
+    } else if (resolvedVersion && !versionEntry) {
+      status = "version_not_found";
+    }
+    const dist = versionEntry ? __autojs6_package_manager_plain_object(versionEntry.dist) : null;
+    if (dist) {
+      base.tarballUrl = __autojs6_package_manager_string(dist.tarball).trim();
+      base.integrity = __autojs6_package_manager_string(dist.integrity).trim() || expectedIntegrity;
+      base.shasum = __autojs6_package_manager_string(dist.shasum).trim();
+    }
+    base.integrityStatus = __autojs6_package_manager_integrity_status(expectedIntegrity, base.integrity, true);
+    base.status = status;
+    return Object.freeze(base);
+  }
+  function __autojs6_package_manager_tarball_resolution(request) {
+    const expectedIntegrity = __autojs6_package_manager_string(request.expectedIntegrity).trim();
+    const urlFields = __autojs6_package_manager_tarball_url_fields(request.tarballUrl);
+    const requestedName = __autojs6_package_manager_string(request.name).trim();
+    const requestedVersion = __autojs6_package_manager_string(request.version).trim();
+    const inferredName = urlFields.inferredName;
+    const inferredVersion = urlFields.inferredVersion;
+    const resolvedName = requestedName || inferredName;
+    const resolvedVersion = requestedVersion || inferredVersion;
+    const integrityAlgorithm = __autojs6_package_manager_integrity_algorithm(expectedIntegrity);
+    return Object.freeze({
+      schema: "autojs6-node-package-manager-tarball-resolution-v1",
+      status: expectedIntegrity ? "integrity_supplied" : "integrity_required",
+      name: requestedName,
+      metadataName: "",
+      nameMatches: !requestedName || !inferredName || requestedName === inferredName,
+      requestedVersion,
+      requestedRange: "",
+      requestedTag: "",
+      selector: request.tarballUrl,
+      selectorKind: "tarball_url",
+      resolvedVersion,
+      inferredName,
+      resolvedName,
+      inferredVersion,
+      versionMatches: !requestedVersion || !inferredVersion || requestedVersion === inferredVersion,
+      registry: "",
+      tarballUrl: request.tarballUrl,
+      integrity: expectedIntegrity,
+      expectedIntegrity,
+      integrityStatus: __autojs6_package_manager_tarball_integrity_status(expectedIntegrity),
+      integrityAlgorithm,
+      integrityAlgorithmAllowed: integrityAlgorithm === "sha512",
+      shasum: "",
+      hasMetadata: false,
+      rangeSupported: true,
+      urlProtocol: urlFields.urlProtocol,
+      urlHost: urlFields.urlHost,
+      urlPath: urlFields.urlPath,
+      urlStatus: urlFields.urlStatus,
+      archiveExtension: urlFields.archiveExtension,
+      tarballBasename: urlFields.tarballBasename
+    });
+  }
+  function __autojs6_package_manager_record(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      schema: __autojs6_package_manager_string(source.schema || "autojs6-node-android-package-record-v1"),
+      name: __autojs6_package_manager_string(source.name),
+      version: __autojs6_package_manager_string(source.version),
+      kind: __autojs6_package_manager_string(source.kind || "dependency"),
+      integrity: __autojs6_package_manager_string(source.integrity),
+      installedAtEpochMs: Number(source.installedAtEpochMs) || 0,
+      fileCount: Number(source.fileCount) || 0,
+      totalBytes: Number(source.totalBytes) || 0,
+      packageDir: __autojs6_package_manager_string(source.packageDir)
+    });
+  }
+  function __autojs6_package_manager_operation_result(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      operation: __autojs6_package_manager_string(source.operation),
+      status: __autojs6_package_manager_string(source.status),
+      transactionId: __autojs6_package_manager_string(source.transactionId),
+      message: __autojs6_package_manager_string(source.message),
+      record: source.record && typeof source.record === "object"
+        ? __autojs6_package_manager_record(source.record)
+        : null
+    });
+  }
+  function __autojs6_package_manager_plan_result(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      schema: __autojs6_package_manager_string(source.schema || "autojs6-node-android-package-plan-v1"),
+      operation: __autojs6_package_manager_string(source.operation),
+      status: __autojs6_package_manager_string(source.status),
+      dryRun: source.dryRun !== false,
+      sourceAuthority: __autojs6_package_manager_string(source.sourceAuthority || "local_unpacked_host_managed_only"),
+      installAuthority: __autojs6_package_manager_string(source.installAuthority || __autojs6_package_manager_install_authority),
+      grantsInstallAuthority: false,
+      message: __autojs6_package_manager_string(source.message),
+      record: source.record && typeof source.record === "object"
+        ? __autojs6_package_manager_record(source.record)
+        : null,
+      existingRecord: source.existingRecord && typeof source.existingRecord === "object"
+        ? __autojs6_package_manager_record(source.existingRecord)
+        : null
+    });
+  }
+  function __autojs6_package_manager_remote_plan_result(operation, sourceKind, normalizedRequest, sourcePolicy, resolution, message) {
+    return Object.freeze({
+      schema: "autojs6-node-package-manager-remote-plan-v1",
+      operation,
+      status: "blocked_by_policy",
+      dryRun: true,
+      source: sourceKind,
+      sourceAuthority: sourceKind === "raw_registry" ? "raw_registry_denied" : "remote_tarball_denied",
+      installAuthority: "none",
+      grantsInstallAuthority: false,
+      networkAccess: false,
+      cacheAccess: false,
+      lifecycleScripts: "denied",
+      binLinks: "denied",
+      nativePayloads: "denied",
+      requiresExpectedIntegrity: true,
+      message,
+      request: Object.freeze(normalizedRequest),
+      resolution: Object.freeze(resolution || {}),
+      policy: sourcePolicy,
+      futurePromotionRequires: __autojs6_package_manager_future_promotion_requirements
+    });
+  }
+  function __autojs6_package_manager_bridge_options(input, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_package_manager_timeout_from_options(input, fallbackMs),
+      permissions: ["package_manager"],
+      signal: __autojs6_bridge_signal_from_options(input)
+    };
+  }
+  function __autojs6_package_manager_mutation_bridge_options(input, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_package_manager_timeout_from_options(input, fallbackMs),
+      permissions: ["package_manager", "package_manager.mutate"],
+      signal: __autojs6_bridge_signal_from_options(input)
+    };
+  }
+  function __autojs6_package_manager_mutation_not_confirmed(methodName, message) {
+    return __autojs6_bridge_error(
+      message || ("package_manager." + methodName + " requires allowMutation: true."),
+      "ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED",
+      "package_manager",
+      methodName
+    );
+  }
+  function __autojs6_package_manager_assert_mutation_allowed(methodName, input) {
+    if (!input || input.allowMutation !== true) {
+      throw __autojs6_package_manager_mutation_not_confirmed(
+        methodName,
+        "package_manager." + methodName + " requires allowMutation: true."
+      );
+    }
+  }
+  function __autojs6_package_manager_verify_request(value) {
+    const input = __autojs6_package_manager_options(value);
+    const name = __autojs6_package_manager_string(input.name).trim();
+    const version = __autojs6_package_manager_string(input.version).trim();
+    if (!name || !version) {
+      throw __autojs6_package_manager_invalid_request(
+        "verify",
+        "package_manager.verify requires non-empty name and version."
+      );
+    }
+    return { name, version };
+  }
+  function __autojs6_package_manager_source_request(methodName, value) {
+    const input = __autojs6_package_manager_options(value);
+    const name = __autojs6_package_manager_string(input.name).trim();
+    const version = __autojs6_package_manager_string(input.version).trim();
+    const sourceDir = __autojs6_package_manager_string(input.sourceDir).trim();
+    if (!name || !version || !sourceDir) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires non-empty name, version, and sourceDir."
+      );
+    }
+    const payload = {
+      name,
+      version,
+      sourceDir,
+      kind: __autojs6_package_manager_string(input.kind || "dependency").trim() || "dependency"
+    };
+    const expectedIntegrity = __autojs6_package_manager_string(input.expectedIntegrity).trim();
+    if (expectedIntegrity) {
+      payload.expectedIntegrity = expectedIntegrity;
+    }
+    return payload;
+  }
+  function __autojs6_package_manager_registry_plan_request(methodName, value) {
+    const input = __autojs6_package_manager_options(value);
+    const name = __autojs6_package_manager_string(input.name).trim();
+    const version = __autojs6_package_manager_string(input.version).trim();
+    const range = __autojs6_package_manager_string(input.range || input.versionRange).trim();
+    const tag = __autojs6_package_manager_string(input.tag || (version || range ? "" : "latest")).trim();
+    const registry = __autojs6_package_manager_string(input.registry || "default").trim() || "default";
+    const expectedIntegrity = __autojs6_package_manager_string(input.expectedIntegrity).trim();
+    if (!name) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires a non-empty package name."
+      );
+    }
+    if (!version && !range && !tag) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires a version, range, or tag."
+      );
+    }
+    const payload = {
+      name,
+      version,
+      range,
+      tag,
+      registry
+    };
+    if (expectedIntegrity) {
+      payload.expectedIntegrity = expectedIntegrity;
+    }
+    return payload;
+  }
+  function __autojs6_package_manager_tarball_plan_request(methodName, value) {
+    const input = __autojs6_package_manager_options(value);
+    const tarballUrl = __autojs6_package_manager_string(input.tarballUrl || input.url).trim();
+    const name = __autojs6_package_manager_string(input.name).trim();
+    const version = __autojs6_package_manager_string(input.version).trim();
+    const expectedIntegrity = __autojs6_package_manager_string(input.expectedIntegrity || input.integrity).trim();
+    if (!tarballUrl) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires a non-empty tarballUrl."
+      );
+    }
+    const payload = {
+      tarballUrl,
+      name,
+      version
+    };
+    if (expectedIntegrity) {
+      payload.expectedIntegrity = expectedIntegrity;
+    }
+    return payload;
+  }
+  function __autojs6_package_manager_mutation_source_request(methodName, value) {
+    const input = __autojs6_package_manager_options(value);
+    __autojs6_package_manager_assert_mutation_allowed(methodName, input);
+    const payload = __autojs6_package_manager_source_request(methodName, input);
+    const expectedIntegrity = __autojs6_package_manager_string(input.expectedIntegrity).trim();
+    if (!expectedIntegrity) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires expectedIntegrity from planInstall/planUpdate."
+      );
+    }
+    payload.expectedIntegrity = expectedIntegrity;
+    payload.allowMutation = true;
+    return payload;
+  }
+  function __autojs6_package_manager_name_version_request(methodName, value) {
+    const input = __autojs6_package_manager_options(value);
+    const name = __autojs6_package_manager_string(input.name).trim();
+    const version = __autojs6_package_manager_string(input.version).trim();
+    if (!name || !version) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires non-empty name and version."
+      );
+    }
+    return { name, version };
+  }
+  function __autojs6_package_manager_mutation_remove_request(methodName, value) {
+    const input = __autojs6_package_manager_options(value);
+    __autojs6_package_manager_assert_mutation_allowed(methodName, input);
+    const payload = __autojs6_package_manager_name_version_request(methodName, input);
+    const expectedIntegrity = __autojs6_package_manager_string(input.expectedIntegrity).trim();
+    if (!expectedIntegrity) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires expectedIntegrity from planRemove."
+      );
+    }
+    payload.expectedIntegrity = expectedIntegrity;
+    payload.allowMutation = true;
+    return payload;
+  }
+  function __autojs6_package_manager_prune_request(value) {
+    const input = __autojs6_package_manager_options(value);
+    if (input.maxTransactionAgeMs === undefined || input.maxTransactionAgeMs === null || input.maxTransactionAgeMs === "") {
+      return {};
+    }
+    const ageMs = Number(input.maxTransactionAgeMs);
+    if (!Number.isFinite(ageMs) || ageMs < 0) {
+      throw __autojs6_package_manager_invalid_request(
+        "prune",
+        "package_manager.prune maxTransactionAgeMs must be a finite non-negative number."
+      );
+    }
+    return { maxTransactionAgeMs: Math.trunc(ageMs) };
+  }
+  function __autojs6_limited_package_manager() {
+    if (__autojs6_limited_package_manager_cache) {
+      return __autojs6_limited_package_manager_cache;
+    }
+    function status() {
+      const profile = __autojs6_profile().packageManagerProfile;
+      return Object.freeze({
+        schema: "autojs6-node-package-manager-status-v1",
+        status: "guarded_mutation_partial",
+        profileStatus: profile.status,
+        hostPackageManager: profile.hostPackageManager,
+        androidStore: profile.androidStore,
+        androidRuntimeInstall: profile.androidRuntimeInstall,
+        jsBridge: profile.jsBridge,
+        requirePackageManager: profile.requirePackageManager,
+        diagnosticFacade: profile.diagnosticFacade,
+        sourcePolicy: profile.sourcePolicy,
+        sourceAuthority: profile.sourceAuthority,
+        installAuthority: profile.installAuthority,
+        allowedSources: __autojs6_package_manager_allowed_sources,
+        deniedSources: __autojs6_package_manager_denied_sources,
+        planOperations: __autojs6_package_manager_plan_operations,
+        mutationOperations: __autojs6_package_manager_mutation_operations,
+        mutationCapability: __autojs6_package_manager_policy.mutationCapability,
+        mutationConfirmation: __autojs6_package_manager_policy.mutationConfirmation,
+        requiresExpectedIntegrity: true,
+        operations: __autojs6_package_manager_policy.operations,
+        packageKinds: __autojs6_package_manager_policy.packageKinds,
+        npmCli: profile.npmCli,
+        npmFacade: profile.npmFacade,
+        requireNpm: profile.requireNpm,
+        npmFacadeOperations: __autojs6_npm_facade_operations,
+        registryDownload: profile.registryDownload,
+        lifecycleScripts: profile.lifecycleScripts,
+        binLinks: profile.binLinks,
+        nativePayloads: profile.nativePayloads,
+        androidNetwork: profile.androidNetwork,
+        rawExecutables: profile.rawExecutables,
+        rawRegistryAccess: profile.rawRegistryAccess,
+        grantsInstallAuthority: true
+      });
+    }
+    function policy() {
+      return __autojs6_package_manager_policy;
+    }
+    function sourcePolicy() {
+      return __autojs6_package_manager_source_policy;
+    }
+    function planInstall(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_source_request("planInstall", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "planInstall",
+        [payload],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(__autojs6_package_manager_plan_result);
+    }
+    function planUpdate(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_source_request("planUpdate", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "planUpdate",
+        [payload],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(__autojs6_package_manager_plan_result);
+    }
+    function planRemove(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_name_version_request("planRemove", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "planRemove",
+        [payload],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(__autojs6_package_manager_plan_result);
+    }
+    function planRegistryInstall(request) {
+      let payload;
+      const input = __autojs6_package_manager_options(request);
+      try {
+        payload = __autojs6_package_manager_registry_plan_request("planRegistryInstall", input);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const resolution = __autojs6_package_manager_registry_resolution(payload, input);
+      return Promise.resolve(__autojs6_package_manager_remote_plan_result(
+        "planRegistryInstall",
+        "raw_registry",
+        payload,
+        __autojs6_package_manager_source_policy.registry,
+        resolution,
+        "Android registry metadata download and install remain blocked by package_manager source policy."
+      ));
+    }
+    function planTarballInstall(request) {
+      let payload;
+      const input = __autojs6_package_manager_options(request);
+      try {
+        payload = __autojs6_package_manager_tarball_plan_request("planTarballInstall", input);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const resolution = __autojs6_package_manager_tarball_resolution(payload);
+      return Promise.resolve(__autojs6_package_manager_remote_plan_result(
+        "planTarballInstall",
+        "remote_tarball",
+        payload,
+        __autojs6_package_manager_source_policy.tarball,
+        resolution,
+        "Android remote tarball download and extraction remain blocked by package_manager source policy."
+      ));
+    }
+    function install(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_mutation_source_request("install", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "install",
+        [payload],
+        __autojs6_package_manager_mutation_bridge_options(input, 15000)
+      ).then(__autojs6_package_manager_operation_result);
+    }
+    function update(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_mutation_source_request("update", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "update",
+        [payload],
+        __autojs6_package_manager_mutation_bridge_options(input, 15000)
+      ).then(__autojs6_package_manager_operation_result);
+    }
+    function remove(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_mutation_remove_request("remove", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "remove",
+        [payload],
+        __autojs6_package_manager_mutation_bridge_options(input, 15000)
+      ).then(__autojs6_package_manager_operation_result);
+    }
+    function list(options) {
+      const input = __autojs6_package_manager_options(options);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "list",
+        [],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(function(result) {
+        return Object.freeze((Array.isArray(result) ? result : []).map(__autojs6_package_manager_record));
+      });
+    }
+    function verify(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_verify_request(request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "verify",
+        [payload],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(__autojs6_package_manager_operation_result);
+    }
+    function prune(options) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_prune_request(options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(options);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "prune",
+        [payload],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(__autojs6_package_manager_operation_result);
+    }
+    __autojs6_limited_package_manager_cache = Object.freeze({
+      status,
+      policy,
+      sourcePolicy,
+      planInstall,
+      planUpdate,
+      planRemove,
+      planRegistryInstall,
+      planTarballInstall,
+      install,
+      update,
+      remove,
+      list,
+      verify,
+      prune
+    });
+    return __autojs6_limited_package_manager_cache;
+  }
+  function __autojs6_npm_facade_denied(methodName, message, code) {
+    return function() {
+      throw __autojs6_bridge_error(
+        message,
+        code || "ERR_AUTOJS6_NPM_CLI_DENIED",
+        "npm",
+        methodName
+      );
+    };
+  }
+  function __autojs6_limited_npm() {
+    if (__autojs6_limited_npm_cache) {
+      return __autojs6_limited_npm_cache;
+    }
+    const packageManager = __autojs6_limited_package_manager();
+    function status() {
+      const packageManagerStatus = packageManager.status();
+      return Object.freeze({
+        schema: "autojs6-node-npm-facade-status-v1",
+        status: "guarded_package_manager_alias",
+        aliasFor: "package_manager",
+        packageManagerStatus: packageManagerStatus.status,
+        packageManagerBridge: packageManagerStatus.jsBridge,
+        npmCli: "denied",
+        registryDownload: packageManagerStatus.registryDownload,
+        lifecycleScripts: packageManagerStatus.lifecycleScripts,
+        binLinks: packageManagerStatus.binLinks,
+        nativePayloads: packageManagerStatus.nativePayloads,
+        sourcePolicy: packageManagerStatus.sourcePolicy,
+        sourceAuthority: packageManagerStatus.sourceAuthority,
+        installAuthority: packageManagerStatus.installAuthority,
+        operations: __autojs6_npm_facade_operations,
+        delegatedOperations: __autojs6_package_manager_policy.operations,
+        planOperations: __autojs6_package_manager_plan_operations,
+        mutationOperations: __autojs6_package_manager_mutation_operations,
+        mutationCapability: __autojs6_package_manager_policy.mutationCapability,
+        mutationConfirmation: __autojs6_package_manager_policy.mutationConfirmation,
+        requiresExpectedIntegrity: true,
+        rawRegistryAccess: false,
+        rawExecutables: false,
+        packageManager: packageManagerStatus
+      });
+    }
+    function policy() {
+      const packageManagerPolicy = packageManager.policy();
+      return Object.freeze({
+        schema: "autojs6-node-npm-facade-policy-v1",
+        status: "guarded_package_manager_alias",
+        aliasFor: "package_manager",
+        cli: "denied",
+        npmCli: packageManagerPolicy.npmCli,
+        registryDownload: packageManagerPolicy.registryDownload,
+        tarballInstall: packageManagerPolicy.tarballInstall,
+        lifecycleScripts: packageManagerPolicy.lifecycleScripts,
+        debugLifecycleScripts: packageManagerPolicy.debugLifecycleScripts,
+        binLinks: packageManagerPolicy.binLinks,
+        symlinks: packageManagerPolicy.symlinks,
+        nativeBuild: packageManagerPolicy.nativeBuild,
+        nativePayloads: packageManagerPolicy.nativePayloads,
+        postinstallDownload: packageManagerPolicy.postinstallDownload,
+        sourcePolicy: packageManagerPolicy.sourcePolicy,
+        sourceAuthority: packageManagerPolicy.sourceAuthority,
+        installAuthority: packageManagerPolicy.installAuthority,
+        allowedSources: __autojs6_package_manager_allowed_sources,
+        deniedSources: __autojs6_package_manager_denied_sources,
+        operations: __autojs6_npm_facade_operations,
+        delegatedOperations: packageManagerPolicy.operations,
+        planOperations: __autojs6_package_manager_plan_operations,
+        mutationOperations: __autojs6_package_manager_mutation_operations,
+        mutationCapability: packageManagerPolicy.mutationCapability,
+        mutationConfirmation: packageManagerPolicy.mutationConfirmation,
+        requiresExpectedIntegrity: true,
+        rawRegistryAccess: false,
+        rawExecutables: false,
+        packageManager: packageManagerPolicy
+      });
+    }
+    function sourcePolicy() {
+      return packageManager.sourcePolicy();
+    }
+    function packageManagerModule() {
+      return packageManager;
+    }
+    __autojs6_limited_npm_cache = Object.freeze({
+      status,
+      policy,
+      sourcePolicy,
+      packageManager: packageManagerModule,
+      planInstall: packageManager.planInstall,
+      planUpdate: packageManager.planUpdate,
+      planRemove: packageManager.planRemove,
+      planRegistryInstall: packageManager.planRegistryInstall,
+      planTarballInstall: packageManager.planTarballInstall,
+      install: packageManager.install,
+      update: packageManager.update,
+      remove: packageManager.remove,
+      list: packageManager.list,
+      verify: packageManager.verify,
+      prune: packageManager.prune,
+      cli: __autojs6_npm_facade_denied(
+        "cli",
+        "npm.cli is not promoted in the current AutoJs6 Node profile; Android npm CLI execution remains denied."
+      ),
+      exec: __autojs6_npm_facade_denied(
+        "exec",
+        "npm.exec is not promoted in the current AutoJs6 Node profile; use guarded local package_manager operations instead."
+      ),
+      runScript: __autojs6_npm_facade_denied(
+        "runScript",
+        "npm.runScript is not promoted in the current AutoJs6 Node profile; package lifecycle scripts remain denied."
+      ),
+      installFromRegistry: __autojs6_npm_facade_denied(
+        "installFromRegistry",
+        "npm.installFromRegistry is not promoted in the current AutoJs6 Node profile; Android registry installation remains denied.",
+        "ERR_AUTOJS6_NPM_REGISTRY_DENIED"
+      ),
+      publish: __autojs6_npm_facade_denied(
+        "publish",
+        "npm.publish is not promoted in the current AutoJs6 Node profile; registry publishing remains denied.",
+        "ERR_AUTOJS6_NPM_REGISTRY_DENIED"
+      ),
+      pack: __autojs6_npm_facade_denied(
+        "pack",
+        "npm.pack is not promoted in the current AutoJs6 Node profile; package tarball creation remains host-managed.",
+        "ERR_AUTOJS6_NPM_CLI_DENIED"
+      )
+    });
+    return __autojs6_limited_npm_cache;
   }
   function __autojs6_invalid_package_target(message) {
     return __autojs6_error(message, "ERR_INVALID_PACKAGE_TARGET");
@@ -13097,6 +29240,17 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return null;
   }
+  function __autojs6_vm_module() {
+    if (__autojs6_has_own(__autojs6_require_builtin_cache, "vm")) {
+      return __autojs6_require_builtin_cache.vm;
+    }
+    const moduleValue = __autojs6_builtin_module("vm");
+    if (moduleValue) {
+      __autojs6_require_builtin_cache.vm = moduleValue;
+      return moduleValue;
+    }
+    return null;
+  }
   function __autojs6_is_relative_module_name(name) {
     return name === "." ||
       name === ".." ||
@@ -13104,6 +29258,9 @@ std::string buildEmbeddedScriptExecutionSource(
       name.indexOf("../") === 0;
   }
   function __autojs6_module_dirname(filename) {
+    if (__autojs6_is_data_url_module_id(filename)) {
+      return "";
+    }
     const path = __autojs6_path_module();
     if (!path || typeof path.dirname !== "function") {
       return __autojs6_current_working_directory || __autojs6_sandbox_root || "";
@@ -13111,6 +29268,36 @@ std::string buildEmbeddedScriptExecutionSource(
     return filename && filename.charAt(0) === "/"
       ? path.dirname(filename)
       : __autojs6_resolved_current_working_directory(path);
+  }
+  function __autojs6_virtual_entry_basename(path, sourceName) {
+    const normalized = String(sourceName || "").replace(/\\/g, "/");
+    const base = path && typeof path.basename === "function"
+      ? path.basename(normalized)
+      : normalized.slice(normalized.lastIndexOf("/") + 1);
+    return base && base !== "." && base !== ".." && base.indexOf("\u0000") < 0
+      ? base
+      : "embedded-node-entry.js";
+  }
+  function __autojs6_is_virtual_entry_source_name(sourceName) {
+    const name = String(sourceName || "");
+    return name.indexOf("$remote/") === 0 ||
+      name.indexOf("$remote\\") === 0 ||
+      (/^<[^<>]+>$/.test(name));
+  }
+  function __autojs6_entry_filename() {
+    const path = __autojs6_path_module();
+    const name = String(__autojs6_source_name || "");
+    if (!path || typeof path.resolve !== "function" || typeof path.isAbsolute !== "function") {
+      return name || "embedded-node-entry.js";
+    }
+    const root = __autojs6_resolved_sandbox_root(path);
+    if (name && path.isAbsolute(name)) {
+      return path.resolve(name);
+    }
+    const relativeName = __autojs6_is_virtual_entry_source_name(name)
+      ? __autojs6_virtual_entry_basename(path, name)
+      : (name || "embedded-node-entry.js");
+    return path.resolve(root, relativeName);
   }
   function __autojs6_diagnostic_path(value) {
     return value === undefined || value === null ? "" : String(value);
@@ -13219,7 +29406,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const absolute = path.resolve(resolved);
     __autojs6_record_runtime_module_candidate(absolute);
-    const root = path.resolve(__autojs6_module_root || ".");
+    const root = __autojs6_resolved_sandbox_root(path);
     let realRoot;
     try {
       realRoot = fs.realpathSync(root);
@@ -13327,6 +29514,7 @@ std::string buildEmbeddedScriptExecutionSource(
     return null;
   }
   function __autojs6_module_metadata_record(resolved, allowEsm) {
+    __autojs6_throw_if_disallowed_module_source_extension(resolved, allowEsm, "Embedded Node module metadata source");
     if (__autojs6_has_own(__autojs6_module_sources, resolved)) {
       return __autojs6_module_sources[resolved];
     }
@@ -13416,6 +29604,7 @@ std::string buildEmbeddedScriptExecutionSource(
     return record;
   }
   function __autojs6_module_record(resolved, allowEsm) {
+    __autojs6_throw_if_disallowed_module_source_extension(resolved, allowEsm, "Embedded Node module source");
     if (__autojs6_has_own(__autojs6_module_sources, resolved)) {
       return __autojs6_module_sources[resolved];
     }
@@ -13428,20 +29617,38 @@ std::string buildEmbeddedScriptExecutionSource(
     return "ESM/import is not supported in Embedded Node.js MVP" + (detail ? ": " + detail : ".");
   }
   function __autojs6_mjs_unsupported_detail(detail) {
-    return ".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile." + (detail ? " " + detail : "");
+    return ".mjs/.mts routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile." + (detail ? " " + detail : "");
   }
   function __autojs6_is_esm_extension(extension) {
-    return __autojs6_normalized_extension(extension) === ".mjs";
+    const normalized = __autojs6_normalized_extension(extension);
+    return normalized === ".mjs" || normalized === ".mts";
   }
   function __autojs6_is_native_addon_extension(extension) {
     return __autojs6_normalized_extension(extension) === ".node";
   }
+  function __autojs6_throw_if_disallowed_module_source_extension(resolved, allowEsm, context) {
+    const path = __autojs6_path_module();
+    const absolute = path && typeof path.resolve === "function" ? path.resolve(resolved) : String(resolved || "");
+    const extension = path && typeof path.extname === "function" ? path.extname(absolute) : "";
+    if (!allowEsm) {
+      __autojs6_throw_if_esm_extension(extension, absolute, context);
+    }
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      absolute,
+      context,
+      "Unsupported Embedded Node module source extension in MVP: " + absolute
+    );
+    if (extension && !__autojs6_supported_local_module_extension(extension) && !(allowEsm && __autojs6_is_esm_extension(extension))) {
+      throw __autojs6_runtime_module_error("Unsupported Embedded Node module source extension in MVP: " + absolute);
+    }
+  }
   function __autojs6_throw_if_esm_extension(extension, moduleName, context) {
     if (__autojs6_is_esm_extension(extension)) {
-      const detail = context + " resolves to an .mjs module for '" + moduleName + "'.";
+      const detail = context + " resolves to an ESM module for '" + moduleName + "'.";
       if (__autojs6_esm_experimental_enabled) {
         throw __autojs6_require_esm_unsupported(
-          "CommonJS require() cannot load experimental ESM modules in AutoJs6 Safe Node Profile: " + detail
+          "CommonJS require() cannot load AutoJs6 partial ESM modules in AutoJs6 Safe Node Profile: " + detail
         );
       }
       throw __autojs6_esm_unsupported(__autojs6_esm_unsupported_message(__autojs6_mjs_unsupported_detail(detail)));
@@ -13467,9 +29674,16 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_supported_local_module_extension(extension) {
     const normalized = __autojs6_normalized_extension(extension);
-    return normalized === ".js" || normalized === ".cjs" || normalized === ".json";
+    return normalized === ".js" ||
+      normalized === ".cjs" ||
+      normalized === ".cts" ||
+      normalized === ".ts" ||
+      normalized === ".json";
   }
   function __autojs6_denied_builtin_module_name(name) {
+    if ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled) {
+      return false;
+    }
     return name.indexOf("node:") === 0 || __autojs6_has_own(__autojs6_require_builtin_denylist, name);
   }
   function __autojs6_protocol_specifier(name) {
@@ -13490,7 +29704,10 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_protocol_specifier(name)) {
       throw new Error("Embedded Node node_modules require rejects protocol specifier: " + name);
     }
-    const parts = name.split("/");
+    const normalizedName = name.charAt(name.length - 1) === "/"
+      ? name.slice(0, -1)
+      : name;
+    const parts = normalizedName.split("/");
     if (!parts.length) return null;
     for (const part of parts) {
       if (part === "") {
@@ -13589,10 +29806,16 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_package_condition_mode(mode) {
     return mode === "esm" ? "esm" : "cjs";
   }
+  function __autojs6_package_target_allows_esm(mode) {
+    return mode === "esm" || mode === "cjs_require_esm";
+  }
+  function __autojs6_commonjs_require_resolution_mode() {
+    return __autojs6_esm_experimental_enabled ? "cjs_require_esm" : "cjs";
+  }
   function __autojs6_package_active_conditions(mode) {
     return __autojs6_package_condition_mode(mode) === "esm"
-      ? ["import", "node", "default"]
-      : ["require", "node", "default"];
+      ? ["autojs6", "import", "node", "default"]
+      : ["autojs6", "require", "node", "default"];
   }
   function __autojs6_package_mode_label(mode) {
     return __autojs6_package_condition_mode(mode) === "esm" ? "ESM" : "CommonJS";
@@ -13613,6 +29836,7 @@ std::string buildEmbeddedScriptExecutionSource(
       key === "node" ||
       key === "default" ||
       key === "import" ||
+      key === "autojs6" ||
       key === "browser" ||
       key === "development" ||
       key === "production" ||
@@ -13752,7 +29976,7 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
     const extension = path.extname(base);
-    const allowEsm = __autojs6_package_condition_mode(mode) === "esm";
+    const allowEsm = __autojs6_package_target_allows_esm(mode);
     if (!allowEsm) {
       __autojs6_throw_if_esm_extension(extension, moduleName, "Embedded Node package " + fieldName + " target");
     }
@@ -13767,18 +29991,18 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const candidates = extension
       ? [base]
-      : allowEsm
-        ? [base, base + ".mjs", base + ".js", base + ".cjs", base + ".json"]
-        : [base, base + ".js", base + ".cjs", base + ".json"];
+      : __autojs6_package_condition_mode(mode) === "esm"
+        ? [base, base + ".mts", base + ".ts", base + ".mjs", base + ".js", base + ".cts", base + ".cjs", base + ".json"]
+        : [base, base + ".js", base + ".cjs", base + ".cts", base + ".ts", base + ".json"];
     const resolved = __autojs6_first_local_module_candidate(candidates, root, moduleName, allowEsm);
     if (resolved && __autojs6_path_within_root(resolved, packageDir)) {
       return resolved;
     }
     throw __autojs6_module_not_found("Cannot find Embedded Node package " + fieldName + " target '" + target + "' for '" + moduleName + "'.");
   }
-  function __autojs6_resolve_package_main(packageDir, packageMain, root, moduleName, ignoredFields) {
+  function __autojs6_resolve_package_main(packageDir, packageMain, root, moduleName, ignoredFields, mode) {
     try {
-      return __autojs6_resolve_package_path_target(packageDir, packageMain, root, moduleName, "main", "cjs");
+      return __autojs6_resolve_package_path_target(packageDir, packageMain, root, moduleName, "main", mode || "cjs");
     } catch (error) {
       throw __autojs6_enrich_package_error(error, packageDir, moduleName, "main", moduleName, packageMain, "", "", ignoredFields);
     }
@@ -13842,7 +30066,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (entry && typeof entry === "object" && !Array.isArray(entry)) {
       const conditionKeys = __autojs6_package_condition_keys(entry);
       const ignoredConditions = __autojs6_unsupported_package_conditions(entry, mode);
-      for (const condition of __autojs6_package_active_conditions(mode)) {
+      const activeConditions = __autojs6_package_active_conditions(mode);
+      for (const condition of Object.keys(entry)) {
+        if (activeConditions.indexOf(condition) < 0) continue;
         if (__autojs6_has_own(entry, condition)) {
           const target = __autojs6_package_condition_target(entry[condition], moduleName, fieldName, mode);
           if (target !== null) {
@@ -14152,7 +30378,7 @@ std::string buildEmbeddedScriptExecutionSource(
       const packageMain = __autojs6_package_main(packageData, moduleName);
       if (packageMain !== null) {
         try {
-          const resolved = __autojs6_resolve_package_main(packageDir, packageMain, root, moduleName, ignoredFields);
+          const resolved = __autojs6_resolve_package_main(packageDir, packageMain, root, moduleName, ignoredFields, mode);
           __autojs6_resolve_trace("main matched", {
             request: moduleName,
             packageDir,
@@ -14167,10 +30393,28 @@ std::string buildEmbeddedScriptExecutionSource(
         }
       }
     }
+    const indexCandidates = __autojs6_package_condition_mode(mode) === "esm"
+      ? [
+          path.resolve(packageDir, "index.mts"),
+          path.resolve(packageDir, "index.ts"),
+          path.resolve(packageDir, "index.mjs"),
+          path.resolve(packageDir, "index.js"),
+          path.resolve(packageDir, "index.cts"),
+          path.resolve(packageDir, "index.cjs"),
+          path.resolve(packageDir, "index.json")
+        ]
+      : [
+          path.resolve(packageDir, "index.js"),
+          path.resolve(packageDir, "index.cjs"),
+          path.resolve(packageDir, "index.cts"),
+          path.resolve(packageDir, "index.ts"),
+          path.resolve(packageDir, "index.json")
+        ];
     const indexResolved = __autojs6_first_local_module_candidate(
-      [path.resolve(packageDir, "index.js"), path.resolve(packageDir, "index.cjs"), path.resolve(packageDir, "index.json")],
+      indexCandidates,
       root,
-      moduleName
+      moduleName,
+      __autojs6_package_condition_mode(mode) === "esm"
     );
     if (indexResolved && packageData) {
       __autojs6_resolve_trace("index matched", {
@@ -14194,7 +30438,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return indexResolved;
   }
-  function __autojs6_resolve_local_module(moduleName, parentFilename) {
+  function __autojs6_resolve_local_module(moduleName, parentFilename, mode) {
     const path = __autojs6_path_module();
     if (
       !path ||
@@ -14210,27 +30454,32 @@ std::string buildEmbeddedScriptExecutionSource(
     if (path.isAbsolute(moduleName)) {
       throw new Error("Embedded Node local require rejects absolute path: " + moduleName);
     }
-    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    const root = __autojs6_module_resolution_root(parentFilename);
     const parentDir = __autojs6_module_dirname(parentFilename);
     const base = path.resolve(parentDir || root, moduleName);
     if (!__autojs6_path_within_root(base, root)) {
       throw new Error("Relative require escapes Embedded Node working directory: " + moduleName);
     }
+    const resolutionMode = mode || "cjs";
+    const allowEsm = __autojs6_package_target_allows_esm(resolutionMode);
     const extension = path.extname(base);
-    __autojs6_throw_if_esm_extension(extension, moduleName, "Embedded Node local module");
+    if (!allowEsm) {
+      __autojs6_throw_if_esm_extension(extension, moduleName, "Embedded Node local module");
+    }
     __autojs6_throw_if_native_addon_extension(
       extension,
       moduleName,
       "Embedded Node local module",
       "Unsupported Embedded Node local module extension in MVP: " + moduleName
     );
-    if (extension && !__autojs6_supported_local_module_extension(extension)) {
+    if (extension && !__autojs6_supported_local_module_extension(extension) && !(allowEsm && __autojs6_is_esm_extension(extension))) {
       throw new Error("Unsupported Embedded Node local module extension in MVP: " + moduleName);
     }
     const fileResolved = __autojs6_first_local_module_candidate(
-      extension ? [base] : [base, base + ".js", base + ".cjs", base + ".json"],
+      extension ? [base] : [base, base + ".js", base + ".cjs", base + ".cts", base + ".ts", base + ".json"],
       root,
-      moduleName
+      moduleName,
+      allowEsm
     );
     if (fileResolved) {
       __autojs6_resolve_trace("final", {
@@ -14242,7 +30491,7 @@ std::string buildEmbeddedScriptExecutionSource(
       return fileResolved;
     }
     if (!extension) {
-      const directoryResolved = __autojs6_resolve_package_directory(base, root, moduleName);
+      const directoryResolved = __autojs6_resolve_package_directory(base, root, moduleName, resolutionMode);
       if (directoryResolved) {
         __autojs6_resolve_trace("final", {
           kind: "local-directory",
@@ -14305,7 +30554,7 @@ std::string buildEmbeddedScriptExecutionSource(
     ) {
       throw new Error("Embedded Node.js package imports require needs the allowlisted path module.");
     }
-    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    const root = __autojs6_module_resolution_root(parentFilename);
     const scope = __autojs6_find_package_scope(parentFilename, root);
     if (!scope) {
       throw __autojs6_package_import_not_defined("Cannot find Embedded Node package imports scope for '" + moduleName + "' from '" + parentFilename + "'.");
@@ -14413,21 +30662,25 @@ std::string buildEmbeddedScriptExecutionSource(
     if (!__autojs6_path_within_root(base, packageDir)) {
       throw new Error("Embedded Node node_modules package subpath escapes package directory: " + moduleName);
     }
+    const allowEsm = __autojs6_package_target_allows_esm(mode);
     const extension = path.extname(base);
-    __autojs6_throw_if_esm_extension(extension, moduleName, "Embedded Node node_modules module");
+    if (!allowEsm) {
+      __autojs6_throw_if_esm_extension(extension, moduleName, "Embedded Node node_modules module");
+    }
     __autojs6_throw_if_native_addon_extension(
       extension,
       moduleName,
       "Embedded Node node_modules module",
       "Unsupported Embedded Node node_modules module extension in MVP: " + moduleName
     );
-    if (extension && !__autojs6_supported_local_module_extension(extension)) {
+    if (extension && !__autojs6_supported_local_module_extension(extension) && !(allowEsm && __autojs6_is_esm_extension(extension))) {
       throw new Error("Unsupported Embedded Node node_modules module extension in MVP: " + moduleName);
     }
     const fileResolved = __autojs6_first_local_module_candidate(
-      extension ? [base] : [base, base + ".js", base + ".cjs", base + ".json"],
+      extension ? [base] : [base, base + ".js", base + ".cjs", base + ".cts", base + ".ts", base + ".json"],
       root,
-      moduleName
+      moduleName,
+      allowEsm
     );
     if (fileResolved && __autojs6_path_within_root(fileResolved, packageDir)) {
       return fileResolved;
@@ -14455,7 +30708,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (!specifier) {
       throw new Error("Invalid Embedded Node package specifier: " + moduleName);
     }
-    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    const root = __autojs6_module_resolution_root(parentFilename);
     const selfReference = __autojs6_resolve_package_self_reference(specifier, parentFilename, root, moduleName, mode);
     if (selfReference !== null) {
       return selfReference;
@@ -14502,7 +30755,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const path = __autojs6_path_module();
     if (!path || typeof path.resolve !== "function") return;
     try {
-      const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(filename));
+      const root = __autojs6_module_resolution_root(filename);
       const scope = __autojs6_find_package_scope(filename, root);
       if (!scope) return;
       const packageData = __autojs6_package_data(scope.packageJsonResolved, filename);
@@ -14813,7 +31066,14 @@ std::string buildEmbeddedScriptExecutionSource(
         "NUL path"
       );
     }
-    if (path.isAbsolute(pathText) && !input.allowAbsolute) {
+    const scope = __autojs6_fs_root(path, fs);
+    const absoluteInput = path.isAbsolute(pathText);
+    const resolved = path.resolve(scope.cwd, pathText || ".");
+    if (
+      absoluteInput &&
+      !input.allowAbsolute &&
+      (!__autojs6_path_within_root(resolved, scope.root) || __autojs6_sensitive_path(resolved))
+    ) {
       throw __autojs6_scoped_fs_policy_error(
         "Embedded Node scoped fs rejects absolute path for " + operation + ": " + display,
         pathValue,
@@ -14822,8 +31082,6 @@ std::string buildEmbeddedScriptExecutionSource(
         "absolute path"
       );
     }
-    const scope = __autojs6_fs_root(path, fs);
-    const resolved = path.resolve(scope.cwd, pathText || ".");
     if (!__autojs6_path_within_root(resolved, scope.root) || __autojs6_sensitive_path(resolved)) {
       throw __autojs6_scoped_fs_policy_error(
         "Embedded Node scoped fs " + inputKind + "path escapes working directory for " + operation + ": " + display + " (sandboxRoot=" + scope.root + ")",
@@ -15084,7 +31342,9 @@ std::string buildEmbeddedScriptExecutionSource(
       return {
         source: String(__autojs6_source || ""),
         sourceURL: name,
-        lineOffset: 1
+        // Function constructor frames include wrapper prologue lines before the
+        // user source that already contains one injected "use strict" line.
+        lineOffset: 3
       };
     }
     if (__autojs6_has_own(__autojs6_module_sources, name)) {
@@ -15214,18 +31474,26 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_pending_crypto_callbacks = 0;
   let __autojs6_pending_dns_callbacks = 0;
   let __autojs6_pending_zlib_callbacks = 0;
+  let __autojs6_pending_node_test_callbacks = 0;
   let __autojs6_pending_scoped_fs_streams = [];
+  let __autojs6_pending_zlib_streams = [];
   let __autojs6_scoped_watch_file_records = [];
   let __autojs6_scoped_fs_watch_records = [];
   let __autojs6_scoped_fd_records = Object.create(null);
   let __autojs6_scoped_fd_next_id = 1;
+  const __autojs6_scoped_fs_recursive_entry_limit = 4096;
+  const __autojs6_scoped_fs_watcher_limit = 16;
+  const __autojs6_scoped_fs_watch_event_limit = 64;
+  const __autojs6_scoped_fs_watch_event_window_ms = 1000;
   let __autojs6_deferred_success_waiting = false;
   let __autojs6_deferred_success_value = undefined;
   function __autojs6_pending_callback_count() {
     return __autojs6_pending_scoped_fs_callbacks +
       __autojs6_pending_crypto_callbacks +
       __autojs6_pending_dns_callbacks +
-      __autojs6_pending_zlib_callbacks;
+      __autojs6_pending_zlib_callbacks +
+      __autojs6_pending_zlib_streams.length +
+      __autojs6_pending_node_test_callbacks;
   }
   function __autojs6_schedule_task(callback) {
     if (typeof setImmediate === "function") {
@@ -15286,6 +31554,74 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_schedule_zlib_callback(callback, action) {
     __autojs6_schedule_pending_callback("zlib", action);
+  }
+  function __autojs6_adjust_pending_node_test(delta) {
+    __autojs6_pending_node_test_callbacks = Math.max(0, __autojs6_pending_node_test_callbacks + delta);
+  }
+  function __autojs6_track_zlib_stream(stream) {
+    if (!stream || typeof stream.once !== "function") {
+      return stream;
+    }
+    let settled = false;
+    let keepAliveHandle = null;
+    const record = {
+      stream,
+      settle
+    };
+    __autojs6_pending_zlib_streams.push(record);
+    if (typeof setInterval === "function" && typeof clearInterval === "function") {
+      try {
+        keepAliveHandle = setInterval(function() {}, 2147483647);
+        __autojs6_untrack_timer("interval", keepAliveHandle);
+      } catch (_) {
+        keepAliveHandle = null;
+      }
+    }
+    function clearKeepAlive() {
+      if (keepAliveHandle === null) {
+        return;
+      }
+      try {
+        clearInterval(keepAliveHandle);
+      } catch (_) {}
+      keepAliveHandle = null;
+    }
+    function settle() {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearKeepAlive();
+      const index = __autojs6_pending_zlib_streams.indexOf(record);
+      if (index >= 0) {
+        __autojs6_pending_zlib_streams.splice(index, 1);
+      }
+      __autojs6_try_finish_deferred_success();
+    }
+    stream.once("close", settle);
+    stream.once("end", settle);
+    stream.once("finish", settle);
+    stream.once("error", settle);
+    return stream;
+  }
+  function __autojs6_destroy_all_zlib_streams(reason) {
+    const records = __autojs6_pending_zlib_streams.slice();
+    if (records.length <= 0) {
+      return;
+    }
+    for (const record of records) {
+      const stream = record && record.stream;
+      try {
+        if (stream && typeof stream.destroy === "function") {
+          stream.destroy();
+        }
+      } catch (_) {
+      } finally {
+        if (record && typeof record.settle === "function") {
+          record.settle();
+        }
+      }
+    }
   }
   function __autojs6_require_callback(callback, operation) {
     if (typeof callback !== "function") {
@@ -15662,12 +31998,26 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_track_watch_file(resolvedPath, listener, wrappedListener, handle, options) {
     const record = {
+      kind: "watchFile",
       path: resolvedPath,
       listener,
       wrappedListener,
       pending: __autojs6_watch_file_keeps_pending(options),
-      active: true
+      active: true,
+      rateState: __autojs6_create_scoped_fs_watch_rate_state()
     };
+    try {
+      Object.defineProperty(wrappedListener, "__autojs6ScopedWatchFileRecord", {
+        value: record,
+        configurable: true,
+        enumerable: false,
+        writable: true
+      });
+    } catch (_) {
+      try {
+        wrappedListener.__autojs6ScopedWatchFileRecord = record;
+      } catch (_) {}
+    }
     __autojs6_scoped_watch_file_records.push(record);
     if (record.pending) {
       __autojs6_adjust_pending_callback("fs", 1);
@@ -15722,6 +32072,76 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_fs_watch_keeps_pending(options) {
     return !(options && typeof options === "object" && options.persistent === false);
   }
+  function __autojs6_active_scoped_fs_watcher_count() {
+    return __autojs6_scoped_fs_watch_records.length +
+      __autojs6_scoped_watch_file_records.length;
+  }
+  function __autojs6_assert_scoped_fs_watcher_available(operation) {
+    if (__autojs6_active_scoped_fs_watcher_count() >= __autojs6_scoped_fs_watcher_limit) {
+      throw __autojs6_error(
+        "Embedded Node scoped fs " + operation + " watcher limit exceeded: " +
+          __autojs6_scoped_fs_watcher_limit,
+        "ERR_AUTOJS6_FS_WATCH_LIMIT"
+      );
+    }
+  }
+  function __autojs6_create_scoped_fs_watch_rate_state() {
+    return {
+      windowStartMs: 0,
+      eventCount: 0
+    };
+  }
+  function __autojs6_scoped_fs_watch_rate_limit_error(operation) {
+    return __autojs6_error(
+      "Embedded Node scoped fs " + operation + " event rate limit exceeded: " +
+        __autojs6_scoped_fs_watch_event_limit + " events per " +
+        __autojs6_scoped_fs_watch_event_window_ms + "ms",
+      "ERR_AUTOJS6_FS_WATCH_RATE_LIMITED"
+    );
+  }
+  function __autojs6_close_rate_limited_watch_record(record) {
+    if (!record) {
+      return;
+    }
+    if (record.kind === "watchFile") {
+      try {
+        __autojs6_untrack_watch_file_records(record.path, record.listener, true);
+      } catch (_) {
+        __autojs6_settle_watch_file_record(record);
+      }
+      return;
+    }
+    try {
+      if (record.close && typeof record.close === "function") {
+        record.close();
+      } else if (record.watcher && typeof record.watcher.close === "function") {
+        record.watcher.close();
+      }
+    } catch (_) {
+    } finally {
+      __autojs6_settle_fs_watch_record(record);
+    }
+  }
+  function __autojs6_note_scoped_fs_watch_event(record, operation) {
+    if (!record || !record.active) {
+      return;
+    }
+    const state = record.rateState || (record.rateState = __autojs6_create_scoped_fs_watch_rate_state());
+    const now = Date.now();
+    if (
+      !state.windowStartMs ||
+      now - state.windowStartMs >= __autojs6_scoped_fs_watch_event_window_ms
+    ) {
+      state.windowStartMs = now;
+      state.eventCount = 0;
+    }
+    state.eventCount += 1;
+    if (state.eventCount > __autojs6_scoped_fs_watch_event_limit) {
+      const error = __autojs6_scoped_fs_watch_rate_limit_error(operation);
+      __autojs6_close_rate_limited_watch_record(record);
+      throw error;
+    }
+  }
   function __autojs6_patch_fs_watcher_handle(watcher, record) {
     if (!watcher || typeof watcher.close !== "function" || watcher.__autojs6ScopedFsWatchPatched) {
       return watcher;
@@ -15729,6 +32149,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const nativeClose = watcher.close;
     const nativeRef = typeof watcher.ref === "function" ? watcher.ref : null;
     const nativeUnref = typeof watcher.unref === "function" ? watcher.unref : null;
+    const nativeEmit = typeof watcher.emit === "function" ? watcher.emit : null;
     try {
       Object.defineProperty(watcher, "close", {
         value: function() {
@@ -15755,6 +32176,19 @@ std::string buildEmbeddedScriptExecutionSource(
           value: function() {
             __autojs6_set_watch_record_pending(record, false);
             return nativeUnref.apply(this, arguments);
+          },
+          configurable: true,
+          enumerable: false,
+          writable: true
+        });
+      }
+      if (nativeEmit) {
+        Object.defineProperty(watcher, "emit", {
+          value: function(eventName) {
+            if (eventName === "change") {
+              __autojs6_note_scoped_fs_watch_event(record, "watch");
+            }
+            return nativeEmit.apply(this, arguments);
           },
           configurable: true,
           enumerable: false,
@@ -15792,10 +32226,12 @@ std::string buildEmbeddedScriptExecutionSource(
     const signal = __autojs6_fs_watch_option_signal(options);
     let done = false;
     const record = {
+      kind: "watch",
       path: resolvedPath,
       watcher,
       pending: __autojs6_fs_watch_keeps_pending(options),
-      active: true
+      active: true,
+      rateState: __autojs6_create_scoped_fs_watch_rate_state()
     };
     const cleanup = function() {
       __autojs6_timers_promises_remove_abort_listener(signal, onAbort);
@@ -15850,11 +32286,13 @@ std::string buildEmbeddedScriptExecutionSource(
     let finalError = null;
     let closeStarted = false;
     const record = {
+      kind: "watch",
       path: resolvedPath,
       iterator: nativeIterator,
       pending: __autojs6_fs_watch_keeps_pending(options),
       active: true,
-      close: null
+      close: null,
+      rateState: __autojs6_create_scoped_fs_watch_rate_state()
     };
     const cleanup = function() {
       __autojs6_timers_promises_remove_abort_listener(signal, onAbort);
@@ -15910,6 +32348,7 @@ std::string buildEmbeddedScriptExecutionSource(
               finish(null);
             }
             if (result && !result.done && result.value) {
+              __autojs6_note_scoped_fs_watch_event(record, "watch");
               return {
                 value: __autojs6_watch_event_value(result.value, filenameEncoding),
                 done: false
@@ -16021,6 +32460,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const normalized = __autojs6_normalize_fs_watch_options(parsed.options);
     const watchOptions = normalized.options;
     const resolved = __autojs6_validate_fs_path(pathValue, "watch", { mustExist: true });
+    __autojs6_assert_scoped_fs_watcher_available("watch");
     const wrapped = typeof parsed.listener === "function"
       ? function(eventType, filename) {
           if (__autojs6_finished) {
@@ -16057,6 +32497,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const normalized = __autojs6_normalize_fs_watch_options(options);
     const watchOptions = normalized.options;
     const resolved = __autojs6_validate_fs_path(pathValue, "watch", { mustExist: true });
+    __autojs6_assert_scoped_fs_watcher_available("watch");
     const nativeIterator = watchOptions === undefined
       ? nodeFsPromises.watch(resolved)
       : nodeFsPromises.watch(resolved, watchOptions);
@@ -16076,11 +32517,16 @@ std::string buildEmbeddedScriptExecutionSource(
         return;
       }
       try {
+        __autojs6_note_scoped_fs_watch_event(
+          wrapped.__autojs6ScopedWatchFileRecord,
+          "watchFile"
+        );
         return parsed.listener.call(this, curr, prev);
       } catch (error) {
         __autojs6_finish_error(error);
       }
     };
+    __autojs6_assert_scoped_fs_watcher_available("watchFile");
     const handle = parsed.options === undefined
       ? nodeFs.watchFile(resolved, wrapped)
       : nodeFs.watchFile(resolved, parsed.options, wrapped);
@@ -16906,9 +33352,18 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     let settled = false;
     let fdUnregistered = false;
+    let keepAliveHandle = null;
     const unregisterFd = fdRecord && __autojs6_stream_auto_closes_fd(options);
     __autojs6_pending_scoped_fs_streams.push(stream);
     __autojs6_adjust_pending_callback("fs", 1);
+    if (typeof setInterval === "function" && typeof clearInterval === "function") {
+      try {
+        keepAliveHandle = setInterval(function() {}, 2147483647);
+        __autojs6_untrack_timer("interval", keepAliveHandle);
+      } catch (_) {
+        keepAliveHandle = null;
+      }
+    }
     function unregisterStreamFd() {
       if (!unregisterFd || fdUnregistered) {
         return;
@@ -16916,11 +33371,21 @@ std::string buildEmbeddedScriptExecutionSource(
       fdUnregistered = true;
       __autojs6_unregister_scoped_fd(fdRecord.fd);
     }
+    function clearKeepAlive() {
+      if (keepAliveHandle === null) {
+        return;
+      }
+      try {
+        clearInterval(keepAliveHandle);
+      } catch (_) {}
+      keepAliveHandle = null;
+    }
     function settle() {
       if (settled) {
         return;
       }
       settled = true;
+      clearKeepAlive();
       unregisterStreamFd();
       const index = __autojs6_pending_scoped_fs_streams.indexOf(stream);
       if (index >= 0) {
@@ -16945,6 +33410,21 @@ std::string buildEmbeddedScriptExecutionSource(
     stream.once("finish", settle);
     stream.once("error", settleError);
     return stream;
+  }
+  function __autojs6_destroy_all_scoped_fs_streams(reason) {
+    const streams = __autojs6_pending_scoped_fs_streams.slice();
+    if (streams.length <= 0) {
+      return;
+    }
+    for (const stream of streams) {
+      try {
+        if (stream && typeof stream.destroy === "function") {
+          stream.destroy();
+        } else if (stream && typeof stream.close === "function") {
+          stream.close();
+        }
+      } catch (_) {}
+    }
   }
   function __autojs6_readdir_options_with_file_types(options) {
     return Boolean(options && typeof options === "object" && options.withFileTypes === true);
@@ -17069,6 +33549,15 @@ std::string buildEmbeddedScriptExecutionSource(
     if (encoding !== undefined) {
       direntReadOptions.encoding = encoding;
     }
+    function pushResult(value) {
+      if (results.length >= __autojs6_scoped_fs_recursive_entry_limit) {
+        throw __autojs6_out_of_range(
+          "Embedded Node scoped fs " + op + " recursive entry limit exceeded: " +
+            __autojs6_scoped_fs_recursive_entry_limit
+        );
+      }
+      results.push(value);
+    }
     function encodedName(relativePath) {
       if (encoding !== "buffer") {
         return relativePath;
@@ -17091,9 +33580,9 @@ std::string buildEmbeddedScriptExecutionSource(
           ? path.join(relativeDir, nameText)
           : nameText;
         if (withFileTypes) {
-          results.push(__autojs6_limited_dirent(nativeEntry, parentPath));
+          pushResult(__autojs6_limited_dirent(nativeEntry, parentPath));
         } else {
-          results.push(encodedName(childRelative));
+          pushResult(encodedName(childRelative));
         }
         if (
           nativeEntry &&
@@ -19382,6 +35871,8 @@ std::string buildEmbeddedScriptExecutionSource(
         return "sha1";
       case "SHA-256":
         return "sha256";
+      case "SHA-384":
+        return "sha384";
       case "SHA-512":
         return "sha512";
       default:
@@ -19393,8 +35884,12 @@ std::string buildEmbeddedScriptExecutionSource(
       ? hash
       : (hash && typeof hash === "object" && hash.name !== undefined ? hash.name : "");
     switch (String(name).toUpperCase()) {
+      case "SHA-1":
+        return { node: "sha1", web: "SHA-1" };
       case "SHA-256":
         return { node: "sha256", web: "SHA-256" };
+      case "SHA-384":
+        return { node: "sha384", web: "SHA-384" };
       case "SHA-512":
         return { node: "sha512", web: "SHA-512" };
       default:
@@ -19470,6 +35965,20 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     throw __autojs6_dom_exception("Only raw and jwk HMAC keys are supported", "NotSupportedError");
   }
+  function __autojs6_web_crypto_hmac_jwk_alg(hashName) {
+    switch (hashName) {
+      case "SHA-1":
+        return "HS1";
+      case "SHA-256":
+        return "HS256";
+      case "SHA-384":
+        return "HS384";
+      case "SHA-512":
+        return "HS512";
+      default:
+        return "HS256";
+    }
+  }
   function __autojs6_digest_buffer_to_array_buffer(buffer) {
     return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
   }
@@ -19507,6 +36016,7 @@ std::string buildEmbeddedScriptExecutionSource(
         type: "secret",
         extractable: !!record.extractable,
         hashNode: record.hashNode,
+        hashWeb: record.hashWeb,
         algorithm: Object.freeze({
           name: "HMAC",
           hash: Object.freeze({ name: record.hashWeb }),
@@ -19621,7 +36131,7 @@ std::string buildEmbeddedScriptExecutionSource(
                 resolve(Object.freeze({
                   kty: "oct",
                   k: __autojs6_crypto_base64_url(Buffer.from(record.material)),
-                  alg: record.hashWeb === "SHA-512" ? "HS512" : "HS256",
+                  alg: __autojs6_web_crypto_hmac_jwk_alg(record.hashWeb),
                   ext: true,
                   key_ops: record.usages.slice()
                 }));
@@ -21148,7 +37658,7 @@ std::string buildEmbeddedScriptExecutionSource(
       ? nodeUtil.TextEncoder
       : (typeof TextEncoder === "function" ? TextEncoder : null);
     const TextDecoderCtor = nodeUtil && typeof nodeUtil.TextDecoder === "function"
-      ? nodeUtil.TextDecoder
+      ? __autojs6_text_decoder_compat_constructor(nodeUtil.TextDecoder)
       : (typeof TextDecoder === "function" ? TextDecoder : null);
     const getSystemErrorName = nodeUtil && typeof nodeUtil.getSystemErrorName === "function"
       ? nodeUtil.getSystemErrorName.bind(nodeUtil)
@@ -21551,6 +38061,56 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_limited_diagnostics_channel_cache = Object.freeze(limitedDiagnosticsChannel);
     return __autojs6_limited_diagnostics_channel_cache;
   }
+  function __autojs6_diagnostics_safe_value(value) {
+    const type = typeof value;
+    if (
+      value === null ||
+      type === "string" ||
+      type === "number" ||
+      type === "boolean"
+    ) {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return Object.freeze(value.map(__autojs6_diagnostics_safe_value).filter(function(item) {
+        return item !== undefined;
+      }));
+    }
+    return undefined;
+  }
+  function __autojs6_diagnostics_safe_message(message) {
+    const result = Object.create(null);
+    const source = message && typeof message === "object" ? message : {};
+    Object.keys(source).forEach(function(key) {
+      const safe = __autojs6_diagnostics_safe_value(source[key]);
+      if (safe !== undefined) {
+        result[key] = safe;
+      }
+    });
+    return Object.freeze(result);
+  }
+  function __autojs6_diagnostics_publish(name, message) {
+    const diagnostics = __autojs6_limited_diagnostics_channel_cache;
+    if (!diagnostics || typeof diagnostics.channel !== "function") {
+      return;
+    }
+    let channel;
+    try {
+      channel = diagnostics.channel(name);
+    } catch (_) {
+      return;
+    }
+    if (!channel || channel.hasSubscribers !== true || typeof channel.publish !== "function") {
+      return;
+    }
+    try {
+      channel.publish(__autojs6_diagnostics_safe_message(message));
+    } catch (error) {
+      if (typeof setImmediate === "function") {
+        setImmediate(function() { throw error; });
+      }
+    }
+  }
   function __autojs6_limited_perf_hooks() {
     if (__autojs6_limited_perf_hooks_cache) {
       return __autojs6_limited_perf_hooks_cache;
@@ -21573,6 +38133,17 @@ std::string buildEmbeddedScriptExecutionSource(
       throw new Error("require is restricted in Embedded Node.js MVP; allowlisted module 'perf_hooks' is unavailable.");
     }
     const allowedEntryTypes = Object.freeze(["mark", "measure"]);
+    const nativeEventLoopUtilization = typeof nativePerformance.eventLoopUtilization === "function"
+      ? nativePerformance.eventLoopUtilization.bind(nativePerformance)
+      : null;
+    function freezeEventLoopUtilization(value) {
+      const source = value && typeof value === "object" ? value : {};
+      return Object.freeze({
+        idle: Number(source.idle || 0),
+        active: Number(source.active || 0),
+        utilization: Number(source.utilization || 0)
+      });
+    }
     function validateEntryType(value) {
       if (typeof value !== "string" || allowedEntryTypes.indexOf(value) < 0) {
         throw __autojs6_invalid_arg_value("perf_hooks PerformanceObserver entry type is not supported: " + value);
@@ -21658,6 +38229,14 @@ std::string buildEmbeddedScriptExecutionSource(
         enumerable: true
       }
     });
+    if (nativeEventLoopUtilization) {
+      Object.defineProperty(limitedPerformance, "eventLoopUtilization", {
+        value: function(utilization1, utilization2) {
+          return freezeEventLoopUtilization(nativeEventLoopUtilization(utilization1, utilization2));
+        },
+        enumerable: true
+      });
+    }
     const limitedPerfHooks = Object.create(null);
     const descriptors = {
       performance: { value: Object.freeze(limitedPerformance), enumerable: true },
@@ -21873,74 +38452,102 @@ std::string buildEmbeddedScriptExecutionSource(
     ) {
       throw new Error("require is restricted in Embedded Node.js MVP; allowlisted module 'stream' is unavailable.");
     }
-    const limitedStream = Object.create(null);
+    const nativeStream = nodeStream.Stream;
+    const nativeReadable = nodeStream.Readable;
+    const nativeWritable = nodeStream.Writable;
+    const nativeDuplex = nodeStream.Duplex;
+    const nativeTransform = nodeStream.Transform;
+    const nativePassThrough = nodeStream.PassThrough;
+    const nativePipeline = nodeStream.pipeline;
+    const nativeFinished = nodeStream.finished;
+    const nativeAddAbortSignal = nodeStream.addAbortSignal;
+    const nativeCompose = nodeStream.compose;
+    const nativeDuplexPair = nodeStream.duplexPair;
+    const nativeIsReadable = nodeStream.isReadable;
+    const nativeIsWritable = nodeStream.isWritable;
+    const nativeIsErrored = nodeStream.isErrored;
+    const nativeIsDestroyed = nodeStream.isDestroyed;
+    const nativeIsDisturbed = nodeStream.isDisturbed;
+    function limitedStream() {
+      return Reflect.construct(nativeStream, arguments, new.target || nativeStream);
+    }
+    try {
+      Object.setPrototypeOf(limitedStream, nativeStream);
+    } catch (_) {
+      // Best effort only; instanceof compatibility comes from the prototype below.
+    }
+    Object.defineProperty(limitedStream, "prototype", {
+      value: nativeStream.prototype,
+      enumerable: false
+    });
     Object.defineProperties(limitedStream, {
-      Stream: { value: nodeStream.Stream, enumerable: true },
-      Readable: { value: nodeStream.Readable, enumerable: true },
-      Writable: { value: nodeStream.Writable, enumerable: true },
-      Duplex: { value: nodeStream.Duplex, enumerable: true },
-      Transform: { value: nodeStream.Transform, enumerable: true },
-      PassThrough: { value: nodeStream.PassThrough, enumerable: true },
+      Stream: { value: limitedStream, enumerable: true },
+      Readable: { value: nativeReadable, enumerable: true },
+      Writable: { value: nativeWritable, enumerable: true },
+      Duplex: { value: nativeDuplex, enumerable: true },
+      Transform: { value: nativeTransform, enumerable: true },
+      PassThrough: { value: nativePassThrough, enumerable: true },
       pipeline: {
         value: function() {
-          return nodeStream.pipeline.apply(nodeStream, arguments);
+          return nativePipeline.apply(nodeStream, arguments);
         },
         enumerable: true
       },
       finished: {
         value: function() {
-          return nodeStream.finished.apply(nodeStream, arguments);
+          return nativeFinished.apply(nodeStream, arguments);
         },
         enumerable: true
       },
       addAbortSignal: {
         value: function() {
-          return nodeStream.addAbortSignal.apply(nodeStream, arguments);
+          return nativeAddAbortSignal.apply(nodeStream, arguments);
         },
         enumerable: true
       },
       compose: {
         value: function() {
-          return nodeStream.compose.apply(nodeStream, arguments);
+          return nativeCompose.apply(nodeStream, arguments);
         },
         enumerable: true
       },
       duplexPair: {
         value: function() {
-          return nodeStream.duplexPair.apply(nodeStream, arguments);
+          return nativeDuplexPair.apply(nodeStream, arguments);
         },
         enumerable: true
       },
       isReadable: {
         value: function(value) {
-          return nodeStream.isReadable(value);
+          return nativeIsReadable(value);
         },
         enumerable: true
       },
       isWritable: {
         value: function(value) {
-          return nodeStream.isWritable(value);
+          return nativeIsWritable(value);
         },
         enumerable: true
       },
       isErrored: {
         value: function(value) {
-          return nodeStream.isErrored(value);
+          return nativeIsErrored(value);
         },
         enumerable: true
       },
       isDestroyed: {
         value: function(value) {
-          return nodeStream.isDestroyed(value);
+          return nativeIsDestroyed(value);
         },
         enumerable: true
       },
       isDisturbed: {
         value: function(value) {
-          return nodeStream.isDisturbed(value);
+          return nativeIsDisturbed(value);
         },
         enumerable: true
-      }
+      },
+      promises: { value: undefined, enumerable: true }
     });
     __autojs6_limited_stream_cache = Object.freeze(limitedStream);
     return __autojs6_limited_stream_cache;
@@ -22077,8 +38684,8 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_limited_stream_consumers_cache = Object.freeze(limitedConsumers);
     return __autojs6_limited_stream_consumers_cache;
   }
-  const __autojs6_zlib_input_limit = 512 * 1024;
-  const __autojs6_zlib_output_limit = 2 * 1024 * 1024;
+  const __autojs6_zlib_input_limit = 8 * 1024 * 1024;
+  const __autojs6_zlib_output_limit = 32 * 1024 * 1024;
   function __autojs6_binary_like_size(value) {
     if (typeof value === "string") {
       return Buffer.byteLength(value);
@@ -22196,11 +38803,20 @@ std::string buildEmbeddedScriptExecutionSource(
     return function(options) {
       const chunks = [];
       let inputSize = 0;
+      let tracked = false;
       const originalOptions = options;
       const transformOptions = __autojs6_zlib_stream_transform_options(options);
       const stream = new nodeStream.Transform(transformOptions);
+      function activateStream() {
+        if (tracked) {
+          return;
+        }
+        tracked = true;
+        __autojs6_track_zlib_stream(stream);
+      }
       stream._transform = function(chunk, encoding, callback) {
         try {
+          activateStream();
           const chunkSize = __autojs6_binary_like_size(chunk);
           inputSize += chunkSize;
           if (inputSize > __autojs6_zlib_input_limit) {
@@ -22216,6 +38832,7 @@ std::string buildEmbeddedScriptExecutionSource(
       };
       stream._flush = function(callback) {
         try {
+          activateStream();
           const input = chunks.length === 1 ? chunks[0] : Buffer.concat(chunks, inputSize);
           const output = originalOptions === undefined
             ? syncFn(input)
@@ -22562,6 +39179,536 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_limited_assert_strict() {
     return __autojs6_limited_assert().strict;
   }
+  function __autojs6_limited_node_test() {
+    if (__autojs6_limited_node_test_cache) {
+      return __autojs6_limited_node_test_cache;
+    }
+    const assertStrict = __autojs6_limited_assert_strict();
+    const rootSuite = {
+      kind: "suite",
+      name: "",
+      mode: "run",
+      reason: "",
+      parent: null,
+      children: [],
+      before: [],
+      after: [],
+      beforeEach: [],
+      afterEach: [],
+      setupPromise: null,
+      setupError: null
+    };
+    const state = {
+      scheduled: false,
+      running: false,
+      completed: false,
+      pendingCounted: false,
+      nextId: 1,
+      tests: 0,
+      suites: 0,
+      pass: 0,
+      fail: 0,
+      skipped: 0,
+      todo: 0,
+      startMs: 0,
+      endMs: 0
+    };
+    let currentSuite = rootSuite;
+    function tapText(value) {
+      return String(value === undefined || value === null ? "" : value).replace(/[\r\n]+/g, " ").trim();
+    }
+    function optionReason(value) {
+      return typeof value === "string" ? value : "";
+    }
+    function isPlainOptions(value) {
+      return !!value && typeof value === "object" && !Array.isArray(value);
+    }
+    function timeoutFromOptions(options, label) {
+      if (!options || !__autojs6_has_own(options, "timeout") || options.timeout === undefined) {
+        return 0;
+      }
+      const timeout = Number(options.timeout);
+      if (!Number.isFinite(timeout) || timeout < 0) {
+        throw __autojs6_invalid_arg_value("node:test " + label + " timeout must be a non-negative finite number.");
+      }
+      return Math.min(Math.floor(timeout), 2147483647);
+    }
+    function normalizeRegistration(args, fallbackName, forcedMode) {
+      const values = Array.prototype.slice.call(args);
+      let name = "";
+      let options = Object.create(null);
+      let fn = null;
+      if (typeof values[0] === "string") {
+        name = String(values.shift());
+      } else if (typeof values[0] === "function") {
+        fn = values.shift();
+        name = fn.name || fallbackName;
+      } else if (isPlainOptions(values[0])) {
+        options = values.shift();
+        if (options.name !== undefined) {
+          name = String(options.name);
+        }
+      } else if (values[0] !== undefined) {
+        name = String(values.shift());
+      }
+      if (!fn && isPlainOptions(values[0])) {
+        options = values.shift();
+        if (!name && options.name !== undefined) {
+          name = String(options.name);
+        }
+      }
+      if (!fn && typeof values[0] === "function") {
+        fn = values.shift();
+        if (!name) {
+          name = fn.name || fallbackName;
+        }
+      }
+      if (!name) {
+        name = fallbackName;
+      }
+      const skip = forcedMode === "skip" || options.skip === true || typeof options.skip === "string";
+      const todo = !skip && (forcedMode === "todo" || options.todo === true || typeof options.todo === "string");
+      return {
+        name: tapText(name || fallbackName),
+        fn,
+        mode: skip ? "skip" : todo ? "todo" : "run",
+        reason: forcedMode === "skip" ? optionReason(options.skip) :
+          forcedMode === "todo" ? optionReason(options.todo) :
+          skip ? optionReason(options.skip) :
+          todo ? optionReason(options.todo) : "",
+        timeoutMs: timeoutFromOptions(options, fallbackName),
+        options
+      };
+    }
+    function normalizeHook(args, label) {
+      const values = Array.prototype.slice.call(args);
+      let options = Object.create(null);
+      let fn = null;
+      if (typeof values[0] === "function") {
+        fn = values.shift();
+      } else if (isPlainOptions(values[0])) {
+        options = values.shift();
+        if (typeof values[0] === "function") {
+          fn = values.shift();
+        }
+      }
+      if (!fn && typeof values[0] === "function") {
+        fn = values.shift();
+      }
+      if (typeof fn !== "function") {
+        throw __autojs6_invalid_arg_type("node:test " + label + " hook must be a function.");
+      }
+      return {
+        name: label,
+        fn,
+        timeoutMs: timeoutFromOptions(options, label)
+      };
+    }
+    function scheduleRun() {
+      if (state.scheduled || state.running || state.completed) {
+        return;
+      }
+      state.scheduled = true;
+      state.pendingCounted = true;
+      __autojs6_adjust_pending_node_test(1);
+      __autojs6_schedule_task(function() {
+        Promise.resolve().then(runAll).then(function() {
+          finishRun(null);
+        }, function(error) {
+          finishRun(error);
+        });
+      });
+    }
+    function registerTest(args, forcedMode, fallbackName) {
+      const registration = normalizeRegistration(args, fallbackName, forcedMode);
+      const record = {
+        kind: "test",
+        name: registration.name,
+        fn: registration.fn,
+        mode: registration.mode,
+        reason: registration.reason,
+        timeoutMs: registration.timeoutMs,
+        parent: currentSuite
+      };
+      currentSuite.children.push(record);
+      scheduleRun();
+      return record;
+    }
+    function registerSuite(args, forcedMode, fallbackName) {
+      const registration = normalizeRegistration(args, fallbackName, forcedMode);
+      const suite = {
+        kind: "suite",
+        name: registration.name,
+        fn: registration.fn,
+        mode: registration.mode,
+        reason: registration.reason,
+        timeoutMs: registration.timeoutMs,
+        parent: currentSuite,
+        children: [],
+        before: [],
+        after: [],
+        beforeEach: [],
+        afterEach: [],
+        setupPromise: null,
+        setupError: null
+      };
+      currentSuite.children.push(suite);
+      state.suites += 1;
+      if (suite.mode === "run" && typeof suite.fn === "function") {
+        const previous = currentSuite;
+        currentSuite = suite;
+        try {
+          const result = suite.fn.call(undefined);
+          if (result && typeof result.then === "function") {
+            suite.setupPromise = Promise.resolve(result).catch(function(error) {
+              suite.setupError = error;
+            });
+          }
+        } catch (error) {
+          suite.setupError = error;
+        } finally {
+          currentSuite = previous;
+        }
+      }
+      scheduleRun();
+      return suite;
+    }
+    function registerHook(target, args) {
+      currentSuite[target].push(normalizeHook(args, target));
+      scheduleRun();
+    }
+    function nodeTest() {
+      return registerTest(arguments, "", "test");
+    }
+    nodeTest.skip = function() {
+      return registerTest(arguments, "skip", "test");
+    };
+    nodeTest.todo = function() {
+      return registerTest(arguments, "todo", "test");
+    };
+    function describe() {
+      return registerSuite(arguments, "", "suite");
+    }
+    describe.skip = function() {
+      return registerSuite(arguments, "skip", "suite");
+    };
+    describe.todo = function() {
+      return registerSuite(arguments, "todo", "suite");
+    };
+    function it() {
+      return registerTest(arguments, "", "test");
+    }
+    it.skip = function() {
+      return registerTest(arguments, "skip", "test");
+    };
+    it.todo = function() {
+      return registerTest(arguments, "todo", "test");
+    };
+    function before() {
+      registerHook("before", arguments);
+    }
+    function after() {
+      registerHook("after", arguments);
+    }
+    function beforeEach() {
+      registerHook("beforeEach", arguments);
+    }
+    function afterEach() {
+      registerHook("afterEach", arguments);
+    }
+    function control(kind, reason) {
+      const error = new Error(kind === "skip" ? "test skipped" : "test todo");
+      error.__autojs6NodeTestControl = kind;
+      error.reason = tapText(reason || "");
+      return error;
+    }
+    function controlKind(error) {
+      return error && error.__autojs6NodeTestControl ? String(error.__autojs6NodeTestControl) : "";
+    }
+    function testContext(record) {
+      const context = Object.create(null);
+      Object.defineProperties(context, {
+        name: { value: record.name, enumerable: true },
+        skip: {
+          value: function(reason) {
+            throw control("skip", reason);
+          },
+          enumerable: true
+        },
+        todo: {
+          value: function(reason) {
+            throw control("todo", reason);
+          },
+          enumerable: true
+        },
+        diagnostic: {
+          value: function(message) {
+            console.log("# " + tapText(message));
+          },
+          enumerable: true
+        },
+        timeout: {
+          value: function(timeoutMs) {
+            record.timeoutMs = timeoutFromOptions({ timeout: timeoutMs }, "test context");
+          },
+          enumerable: true
+        }
+      });
+      return Object.freeze(context);
+    }
+    function timeoutError(label, timeoutMs) {
+      return __autojs6_with_error_code(
+        new Error("node:test embedded test timed out after " + timeoutMs + "ms: " + label),
+        "ERR_AUTOJS6_NODE_TEST_TIMEOUT"
+      );
+    }
+    function runFunction(fn, context, timeoutMs, label) {
+      const work = Promise.resolve().then(function() {
+        return fn.call(undefined, context);
+      });
+      if (!timeoutMs) {
+        return work;
+      }
+      let timer = null;
+      let settled = false;
+      return new Promise(function(resolve, reject) {
+        timer = setTimeout(function() {
+          if (settled) return;
+          settled = true;
+          reject(timeoutError(label, timeoutMs));
+        }, timeoutMs);
+        work.then(function(value) {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          resolve(value);
+        }, function(error) {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          reject(error);
+        });
+      });
+    }
+    function settleOneTick() {
+      return new Promise(function(resolve) {
+        __autojs6_schedule_task(resolve);
+      });
+    }
+    function inheritedBeforeEach(suite) {
+      const hooks = [];
+      let current = suite;
+      while (current && current !== rootSuite) {
+        hooks.unshift.apply(hooks, current.beforeEach);
+        current = current.parent;
+      }
+      hooks.unshift.apply(hooks, rootSuite.beforeEach);
+      return hooks;
+    }
+    function inheritedAfterEach(suite) {
+      const hooks = [];
+      let current = suite;
+      while (current && current !== rootSuite) {
+        hooks.push.apply(hooks, current.afterEach);
+        current = current.parent;
+      }
+      hooks.push.apply(hooks, rootSuite.afterEach);
+      return hooks;
+    }
+    async function runHooks(hooks, context) {
+      for (const hook of hooks) {
+        await runFunction(hook.fn, context, hook.timeoutMs, hook.name);
+      }
+    }
+    function emitOk(record, suffix) {
+      const id = state.nextId++;
+      console.log("ok " + id + " - " + tapText(record.name) + (suffix ? " " + suffix : ""));
+    }
+    function emitFailure(record, error, durationMs) {
+      const id = state.nextId++;
+      const message = error && error.message ? String(error.message) : String(error);
+      const name = error && error.name ? String(error.name) : "Error";
+      const code = error && (error.code || error.autojs6Code) ? String(error.code || error.autojs6Code) : "";
+      console.log("not ok " + id + " - " + tapText(record.name));
+      console.log("  ---");
+      console.log("  duration_ms: " + Math.max(0, Number(durationMs || 0)));
+      console.log("  error:");
+      console.log("    name: " + JSON.stringify(name));
+      console.log("    message: " + JSON.stringify(message));
+      if (code) {
+        console.log("    code: " + JSON.stringify(code));
+      }
+      console.log("  ...");
+      state.fail += 1;
+    }
+    function asyncActivityError(beforeCount, afterCount) {
+      return __autojs6_with_error_code(
+        new Error("node:test embedded subset detected async activity after test completion: pending timers changed from " + beforeCount + " to " + afterCount + "."),
+        "ERR_AUTOJS6_NODE_TEST_ASYNC_ACTIVITY"
+      );
+    }
+    async function runTest(record) {
+      state.tests += 1;
+      if (record.mode === "skip") {
+        state.skipped += 1;
+        emitOk(record, "# SKIP" + (record.reason ? " " + tapText(record.reason) : ""));
+        return;
+      }
+      if (record.mode === "todo") {
+        state.todo += 1;
+        emitOk(record, "# TODO" + (record.reason ? " " + tapText(record.reason) : ""));
+        return;
+      }
+      if (typeof record.fn !== "function") {
+        state.todo += 1;
+        emitOk(record, "# TODO no callback");
+        return;
+      }
+      const startedAt = Date.now();
+      const beforeTimerCount = __autojs6_pending_timer_total();
+      const context = testContext(record);
+      let failure = null;
+      let controlled = "";
+      try {
+        await runHooks(inheritedBeforeEach(record.parent), context);
+        await runFunction(record.fn, context, record.timeoutMs, record.name);
+      } catch (error) {
+        controlled = controlKind(error);
+        failure = error;
+      }
+      try {
+        await runHooks(inheritedAfterEach(record.parent), context);
+      } catch (error) {
+        if (!failure) {
+          failure = error;
+        }
+      }
+      await settleOneTick();
+      const durationMs = Date.now() - startedAt;
+      if (controlled === "skip") {
+        state.skipped += 1;
+        emitOk(record, "# SKIP" + (failure.reason ? " " + tapText(failure.reason) : ""));
+        return;
+      }
+      if (controlled === "todo") {
+        state.todo += 1;
+        emitOk(record, "# TODO" + (failure.reason ? " " + tapText(failure.reason) : ""));
+        return;
+      }
+      if (failure) {
+        emitFailure(record, failure, durationMs);
+        return;
+      }
+      const afterTimerCount = __autojs6_pending_timer_total();
+      if (afterTimerCount > beforeTimerCount) {
+        emitFailure(record, asyncActivityError(beforeTimerCount, afterTimerCount), durationMs);
+        return;
+      }
+      state.pass += 1;
+      emitOk(record, "(" + durationMs + "ms)");
+    }
+    async function runSuite(suite) {
+      if (suite.mode === "skip") {
+        state.skipped += 1;
+        emitOk(suite, "# SKIP" + (suite.reason ? " " + tapText(suite.reason) : ""));
+        return;
+      }
+      if (suite.mode === "todo") {
+        state.todo += 1;
+        emitOk(suite, "# TODO" + (suite.reason ? " " + tapText(suite.reason) : ""));
+        return;
+      }
+      if (suite.setupPromise) {
+        await suite.setupPromise;
+      }
+      if (suite.setupError) {
+        emitFailure({ name: suite.name + " setup" }, suite.setupError, 0);
+        return;
+      }
+      try {
+        await runHooks(suite.before, testContext(suite));
+      } catch (error) {
+        emitFailure({ name: suite.name ? suite.name + " before" : "before" }, error, 0);
+        return;
+      }
+      let index = 0;
+      while (index < suite.children.length) {
+        const child = suite.children[index++];
+        if (child.kind === "suite") {
+          await runSuite(child);
+        } else {
+          await runTest(child);
+        }
+      }
+      try {
+        await runHooks(suite.after, testContext(suite));
+      } catch (error) {
+        emitFailure({ name: suite.name ? suite.name + " after" : "after" }, error, 0);
+      }
+    }
+    async function runAll() {
+      if (state.running || state.completed) {
+        return;
+      }
+      state.running = true;
+      state.startMs = Date.now();
+      console.log("TAP version 13");
+      await runSuite(rootSuite);
+      state.endMs = Date.now();
+      state.completed = true;
+    }
+    function emitSummary() {
+      const total = state.pass + state.fail + state.skipped + state.todo;
+      console.log("1.." + total);
+      console.log("# tests " + state.tests);
+      console.log("# suites " + state.suites);
+      console.log("# pass " + state.pass);
+      console.log("# fail " + state.fail);
+      console.log("# skipped " + state.skipped);
+      console.log("# todo " + state.todo);
+      console.log("# duration_ms " + Math.max(0, state.endMs - state.startMs));
+    }
+    function nodeTestFailureError() {
+      return __autojs6_with_error_code(
+        new Error("AutoJs6 node:test embedded subset failed: " + state.fail + " failed, " + state.pass + " passed."),
+        "ERR_AUTOJS6_NODE_TEST_FAILURE"
+      );
+    }
+    function finishRun(error) {
+      if (state.pendingCounted) {
+        state.pendingCounted = false;
+        __autojs6_adjust_pending_node_test(-1);
+      }
+      try {
+        emitSummary();
+      } catch (_) {}
+      if (error) {
+        __autojs6_finish_error(error);
+      } else if (state.fail > 0) {
+        __autojs6_finish_error(nodeTestFailureError());
+      } else {
+        __autojs6_try_finish_deferred_success();
+      }
+    }
+    Object.defineProperties(nodeTest, {
+      test: { value: nodeTest, enumerable: true },
+      describe: { value: describe, enumerable: true },
+      suite: { value: describe, enumerable: true },
+      it: { value: it, enumerable: true },
+      before: { value: before, enumerable: true },
+      after: { value: after, enumerable: true },
+      beforeEach: { value: beforeEach, enumerable: true },
+      afterEach: { value: afterEach, enumerable: true },
+      skip: { value: nodeTest.skip, enumerable: true },
+      todo: { value: nodeTest.todo, enumerable: true },
+      assert: { value: assertStrict, enumerable: true },
+      reporter: { value: "tap", enumerable: true }
+    });
+    Object.freeze(describe);
+    Object.freeze(it);
+    __autojs6_limited_node_test_cache = Object.freeze(nodeTest);
+    return __autojs6_limited_node_test_cache;
+  }
   function __autojs6_limited_punycode() {
     if (__autojs6_limited_punycode_cache) {
       return __autojs6_limited_punycode_cache;
@@ -22617,23 +39764,48 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       return consoleStates.get(receiver);
     }
-    function consoleWrite(state, streamName, values) {
-      __autojs6_console_write(streamName === "stderr" ? state.stderr : state.stdout, values);
+    function consoleWrite(state, streamName, values, level) {
+      __autojs6_console_write(
+        streamName === "stderr" ? state.stderr : state.stdout,
+        values,
+        level || (streamName === "stderr" ? __autojs6_console_level_error : __autojs6_console_level_debug)
+      );
       return undefined;
     }
     function consoleLog() {
-      return consoleWrite(consoleState(this), "stdout", arguments);
+      return consoleWrite(consoleState(this), "stdout", arguments, __autojs6_console_level_debug);
+    }
+    function consoleInfo() {
+      return consoleWrite(consoleState(this), "stdout", arguments, __autojs6_console_level_info);
+    }
+    function consoleVerbose() {
+      return consoleWrite(consoleState(this), "stdout", arguments, __autojs6_console_level_verbose);
     }
     function consoleError() {
-      return consoleWrite(consoleState(this), "stderr", arguments);
+      return consoleWrite(consoleState(this), "stderr", arguments, __autojs6_console_level_error);
+    }
+    function consoleWarn() {
+      return consoleWrite(consoleState(this), "stderr", arguments, __autojs6_console_level_warn);
     }
     function consoleAssert(value) {
       if (value) return undefined;
-      const output = arguments.length > 1 ? ["Assertion failed:"] : ["Assertion failed"];
+      const output = [];
       for (let i = 1; i < arguments.length; i += 1) {
         output.push(arguments[i]);
       }
-      return consoleWrite(consoleState(this), "stderr", output);
+      if (output.length === 0) output.push("");
+      consoleWrite(consoleState(this), "stderr", output, __autojs6_console_level_assert);
+      throw __autojs6_console_assert_error(
+        output.map(__autojs6_console_text).join(" ")
+      );
+    }
+    function consoleTable(tabularData, properties) {
+      return consoleWrite(
+        consoleState(this),
+        "stdout",
+        [__autojs6_console_table_text(tabularData, properties)],
+        __autojs6_console_level_debug
+      );
     }
     function consoleCount(label) {
       const state = consoleState(this);
@@ -22698,6 +39870,29 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       return undefined;
     }
+    function consoleNoopReturnSelf() {
+      return limitedConsole;
+    }
+    function consoleUnsupported(apiName, reason) {
+      return function() {
+        throw __autojs6_rhino_compat_unsupported(apiName, reason);
+      };
+    }
+    function consolePrintAllStackTrace(value) {
+      let output = "";
+      if (value && value.stack !== undefined && value.stack !== null) {
+        output = String(value.stack);
+      } else if (arguments.length > 0) {
+        output = __autojs6_console_text(value);
+      } else {
+        try {
+          output = (new Error("Stack trace")).stack || "Stack trace";
+        } catch (_) {
+          output = "Stack trace";
+        }
+      }
+      return consoleWrite(consoleState(this), "stderr", [output]);
+    }
     function Console(stdoutOrOptions, stderr) {
       if (!(this instanceof Console)) {
         return new Console(stdoutOrOptions, stderr);
@@ -22721,13 +39916,14 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     Object.defineProperties(Console.prototype, {
       log: { value: consoleLog, enumerable: true },
-      info: { value: consoleLog, enumerable: true },
+      info: { value: consoleInfo, enumerable: true },
       debug: { value: consoleLog, enumerable: true },
       dir: { value: consoleLog, enumerable: true },
       dirxml: { value: consoleLog, enumerable: true },
-      table: { value: consoleLog, enumerable: true },
+      table: { value: consoleTable, enumerable: true },
       error: { value: consoleError, enumerable: true },
-      warn: { value: consoleError, enumerable: true },
+      warn: { value: consoleWarn, enumerable: true },
+      verbose: { value: consoleVerbose, enumerable: true },
       assert: { value: consoleAssert, enumerable: true },
       count: { value: consoleCount, enumerable: true },
       countReset: { value: consoleCountReset, enumerable: true },
@@ -22735,6 +39931,7 @@ std::string buildEmbeddedScriptExecutionSource(
       timeLog: { value: consoleTimeLog, enumerable: true },
       timeEnd: { value: consoleTimeEnd, enumerable: true },
       trace: { value: consoleTrace, enumerable: true },
+      printAllStackTrace: { value: consolePrintAllStackTrace, enumerable: true },
       clear: { value: consoleClear, enumerable: true },
       group: { value: consoleGroup, enumerable: true },
       groupCollapsed: { value: consoleGroup, enumerable: true },
@@ -22768,7 +39965,16 @@ std::string buildEmbeddedScriptExecutionSource(
     Object.defineProperties(limitedConsole, {
       Console: { value: Console, enumerable: true },
       assert: { value: defaultMethod("assert"), enumerable: true },
+      build: {
+        value: consoleUnsupported(
+          "console.build",
+          "Rhino Console.Builder is not exposed in the Safe Node Profile."
+        ),
+        enumerable: true
+      },
       clear: { value: defaultMethod("clear"), enumerable: true },
+      clearConsole: { value: defaultMethod("clear"), enumerable: true },
+      collapse: { value: consoleNoopReturnSelf, enumerable: true },
       context: { value: consoleContext, enumerable: true },
       count: { value: defaultMethod("count"), enumerable: true },
       countReset: { value: defaultMethod("countReset"), enumerable: true },
@@ -22776,20 +39982,70 @@ std::string buildEmbeddedScriptExecutionSource(
       debug: { value: defaultMethod("debug"), enumerable: true },
       dir: { value: defaultMethod("dir"), enumerable: true },
       dirxml: { value: defaultMethod("dirxml"), enumerable: true },
+      err: { value: defaultMethod("error"), enumerable: true },
       error: { value: defaultMethod("error"), enumerable: true },
+      expand: { value: consoleNoopReturnSelf, enumerable: true },
       group: { value: defaultMethod("group"), enumerable: true },
       groupCollapsed: { value: defaultMethod("groupCollapsed"), enumerable: true },
       groupEnd: { value: defaultMethod("groupEnd"), enumerable: true },
+      hide: { value: consoleNoopReturnSelf, enumerable: true },
       info: { value: defaultMethod("info"), enumerable: true },
+      input: {
+        value: consoleUnsupported(
+          "console.input",
+          "Interactive Rhino console input is not exposed in the Safe Node Profile."
+        ),
+        enumerable: true
+      },
+      launch: { value: consoleNoopReturnSelf, enumerable: true },
+      launchConsole: { value: consoleNoopReturnSelf, enumerable: true },
       log: { value: defaultMethod("log"), enumerable: true },
+      openConsole: { value: consoleNoopReturnSelf, enumerable: true },
+      print: { value: defaultMethod("log"), enumerable: true },
+      printAllStackTrace: { value: defaultMethod("printAllStackTrace"), enumerable: true },
       profile: { value: defaultMethod("clear"), enumerable: true },
       profileEnd: { value: defaultMethod("clear"), enumerable: true },
+      rawInput: {
+        value: consoleUnsupported(
+          "console.rawInput",
+          "Interactive Rhino console input is not exposed in the Safe Node Profile."
+        ),
+        enumerable: true
+      },
+      reset: { value: consoleNoopReturnSelf, enumerable: true },
+      resetGlobalLogConfig: { value: consoleNoopReturnSelf, enumerable: true },
+      setBackgroundAlpha: { value: consoleNoopReturnSelf, enumerable: true },
+      setBackgroundColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setBackgroundTint: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentBackgroundAlpha: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentBackgroundColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentBackgroundTint: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentTextColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentTextColors: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentTextSize: { value: consoleNoopReturnSelf, enumerable: true },
+      setExitOnClose: { value: consoleNoopReturnSelf, enumerable: true },
+      setGlobalLogConfig: { value: consoleNoopReturnSelf, enumerable: true },
+      setPosition: { value: consoleNoopReturnSelf, enumerable: true },
+      setSize: { value: consoleNoopReturnSelf, enumerable: true },
+      setTextColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setTextSize: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitle: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleBackgroundAlpha: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleBackgroundColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleBackgroundTint: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleIconsTint: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleTextColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleTextSize: { value: consoleNoopReturnSelf, enumerable: true },
+      setTouchable: { value: consoleNoopReturnSelf, enumerable: true },
+      show: { value: consoleNoopReturnSelf, enumerable: true },
+      showConsole: { value: consoleNoopReturnSelf, enumerable: true },
       table: { value: defaultMethod("table"), enumerable: true },
       time: { value: defaultMethod("time"), enumerable: true },
       timeEnd: { value: defaultMethod("timeEnd"), enumerable: true },
       timeLog: { value: defaultMethod("timeLog"), enumerable: true },
       timeStamp: { value: defaultMethod("clear"), enumerable: true },
       trace: { value: defaultMethod("trace"), enumerable: true },
+      verbose: { value: defaultMethod("verbose"), enumerable: true },
       warn: { value: defaultMethod("warn"), enumerable: true }
     });
     __autojs6_limited_console_cache = Object.freeze(limitedConsole);
@@ -23249,6 +40505,7 @@ std::string buildEmbeddedScriptExecutionSource(
       resolvePtr: __autojs6_limited_dns_disabled_callback("resolvePtr"),
       resolveSoa: __autojs6_limited_dns_disabled_callback("resolveSoa"),
       resolveSrv: __autojs6_limited_dns_disabled_callback("resolveSrv"),
+      resolveTlsa: __autojs6_limited_dns_disabled_callback("resolveTlsa"),
       resolveTxt: __autojs6_limited_dns_disabled_callback("resolveTxt"),
       reverse: __autojs6_limited_dns_disabled_callback("reverse")
     };
@@ -23265,6 +40522,7 @@ std::string buildEmbeddedScriptExecutionSource(
       resolvePtr: __autojs6_limited_dns_disabled_promise("resolvePtr"),
       resolveSoa: __autojs6_limited_dns_disabled_promise("resolveSoa"),
       resolveSrv: __autojs6_limited_dns_disabled_promise("resolveSrv"),
+      resolveTlsa: __autojs6_limited_dns_disabled_promise("resolveTlsa"),
       resolveTxt: __autojs6_limited_dns_disabled_promise("resolveTxt"),
       reverse: __autojs6_limited_dns_disabled_promise("reverse")
     };
@@ -23863,6 +41121,221 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_schedule_task(callback);
     }
   }
+  function __autojs6_limited_http_network_capability_declared() {
+    const manifest = __autojs6_bridge_permission_manifest();
+    return manifest.enforced === true &&
+      __autojs6_bridge_declares_capability(manifest.normalizedPermissions, "network");
+  }
+  function __autojs6_limited_http_controlled_client_enabled() {
+    if (!__autojs6_limited_http_network_capability_declared()) {
+      return false;
+    }
+    if (__autojs6_bridge_transport && typeof __autojs6_bridge_transport.postMessage === "function") {
+      return true;
+    }
+    return !!__autojs6_bridge_live_config();
+  }
+  function __autojs6_limited_http_buffer(chunk, encoding) {
+    const BufferCtor = __autojs6_fetch_buffer_constructor();
+    if (!BufferCtor || typeof BufferCtor.from !== "function") {
+      throw __autojs6_fetch_error(
+        "AutoJs6 controlled HTTP client requires Buffer support.",
+        "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED"
+      );
+    }
+    if (chunk === undefined || chunk === null) {
+      return BufferCtor.from([]);
+    }
+    if (BufferCtor.isBuffer && BufferCtor.isBuffer(chunk)) {
+      return chunk;
+    }
+    if (typeof ArrayBuffer === "function" && chunk instanceof ArrayBuffer) {
+      return BufferCtor.from(new Uint8Array(chunk));
+    }
+    if (typeof ArrayBuffer === "function" && ArrayBuffer.isView && ArrayBuffer.isView(chunk)) {
+      return BufferCtor.from(chunk.buffer, chunk.byteOffset, chunk.byteLength);
+    }
+    return BufferCtor.from(String(chunk), typeof encoding === "string" ? encoding : undefined);
+  }
+  function __autojs6_limited_http_concat(buffers) {
+    const BufferCtor = __autojs6_fetch_buffer_constructor();
+    if (!BufferCtor || typeof BufferCtor.concat !== "function") {
+      throw __autojs6_fetch_error(
+        "AutoJs6 controlled HTTP client requires Buffer support.",
+        "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED"
+      );
+    }
+    return BufferCtor.concat(buffers);
+  }
+  function __autojs6_limited_http_apply_headers(message, headers) {
+    if (!headers || typeof headers !== "object") {
+      return;
+    }
+    if (Array.isArray(headers)) {
+      for (const entry of headers) {
+        if (entry && entry.length >= 2) {
+          message.setHeader(entry[0], entry[1]);
+        }
+      }
+      return;
+    }
+    Object.keys(headers).forEach(function(name) {
+      message.setHeader(name, headers[name]);
+    });
+  }
+  function __autojs6_limited_http_response_headers(headers) {
+    const normalized = new Headers(headers || undefined);
+    const object = Object.create(null);
+    const raw = [];
+    normalized.forEach(function(value, name) {
+      const key = String(name).toLowerCase();
+      object[key] = String(value);
+      raw.push(key, String(value));
+    });
+    return { headers: object, rawHeaders: raw };
+  }
+  function __autojs6_limited_http_protocol_error(expected, actual) {
+    const error = __autojs6_with_error_code(
+      new TypeError("Protocol \"" + String(actual) + "\" not supported. Expected \"" + String(expected) + "\"."),
+      "ERR_INVALID_PROTOCOL"
+    );
+    error.expected = String(expected);
+    error.actual = String(actual);
+    return error;
+  }
+  function __autojs6_limited_http_request_url(protocol, options) {
+    const protocolValue = String(options.protocol || (protocol + ":")).toLowerCase();
+    if (protocolValue !== protocol + ":") {
+      throw __autojs6_limited_http_protocol_error(protocol + ":", protocolValue);
+    }
+    let authority = String(options.host || options.hostname || "localhost");
+    const portText = options.port === undefined || options.port === null || options.port === ""
+      ? ""
+      : String(options.port);
+    if (portText && authority.indexOf(":") < 0) {
+      authority += ":" + portText;
+    }
+    const path = options.path === undefined || options.path === null || options.path === ""
+      ? "/"
+      : String(options.path);
+    return new URL(path, protocolValue + "//" + authority).toString();
+  }
+  function __autojs6_limited_http_request_arguments(protocol, values) {
+    const args = Array.prototype.slice.call(values || []);
+    let callback = null;
+    if (args.length > 0 && typeof args[args.length - 1] === "function") {
+      callback = args.pop();
+    }
+    let options;
+    if (args.length === 0) {
+      options = __autojs6_limited_http_request_options(protocol, undefined);
+    } else if (args.length === 1) {
+      options = __autojs6_limited_http_request_options(protocol, args[0]);
+    } else {
+      const base = __autojs6_limited_http_request_options(protocol, args[0]);
+      const extra = args[1] && typeof args[1] === "object" ? args[1] : Object.create(null);
+      options = __autojs6_limited_http_request_options(protocol, Object.assign({}, base, extra, {
+        headers: extra.headers !== undefined ? extra.headers : base.headers
+      }));
+    }
+    return { options, callback };
+  }
+  function __autojs6_limited_https_policy_error(optionName) {
+    return __autojs6_fetch_policy_error(
+      "AutoJs6 controlled HTTPS client rejects TLS option '" + optionName + "'. Certificate customization requires a separate design gate.",
+      "https_" + optionName,
+      "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+    );
+  }
+  function __autojs6_limited_http_raw_option_error(protocol, optionName) {
+    return __autojs6_fetch_policy_error(
+      "AutoJs6 controlled " + protocol + " client rejects raw socket option '" + optionName + "'. Raw socket customization is unavailable.",
+      protocol + "_" + optionName,
+      "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+    );
+  }
+  function __autojs6_limited_http_validate_raw_options(protocol, options) {
+    if (!options || typeof options !== "object") {
+      return;
+    }
+    const denied = [
+      "createConnection",
+      "socketPath",
+      "proxy",
+      "proxyUrl",
+      "proxyTunnel",
+      "httpProxy",
+      "httpsProxy",
+      "socksProxy",
+      "tunnel",
+      "upgrade"
+    ];
+    for (const name of denied) {
+      if (__autojs6_has_own(options, name) && options[name] !== undefined && options[name] !== null) {
+        throw __autojs6_limited_http_raw_option_error(protocol, name);
+      }
+    }
+    const method = String(options.method || "").toUpperCase();
+    if (method === "CONNECT") {
+      throw __autojs6_limited_http_raw_option_error(protocol, "method.CONNECT");
+    }
+    const agent = options.agent;
+    if (agent && typeof agent === "object") {
+      if (typeof agent.createConnection === "function" && !agent.__autojs6LimitedAgent) {
+        throw __autojs6_limited_http_raw_option_error(protocol, "agent.createConnection");
+      }
+      if (typeof agent.addRequest === "function" && !agent.__autojs6LimitedAgent) {
+        throw __autojs6_limited_http_raw_option_error(protocol, "agent.addRequest");
+      }
+    }
+  }
+  function __autojs6_limited_https_validate_options(options) {
+    if (!options || typeof options !== "object") {
+      return;
+    }
+    if (options.rejectUnauthorized === false) {
+      throw __autojs6_limited_https_policy_error("rejectUnauthorized");
+    }
+    const denied = [
+      "ca",
+      "cert",
+      "key",
+      "pfx",
+      "passphrase",
+      "secureContext",
+      "secureOptions",
+      "secureProtocol",
+      "ciphers",
+      "minVersion",
+      "maxVersion",
+      "checkServerIdentity",
+      "session",
+      "requestCert",
+      "clientCertEngine",
+      "crl",
+      "ecdhCurve",
+      "honorCipherOrder",
+      "sigalgs",
+      "createConnection"
+    ];
+    for (const name of denied) {
+      if (__autojs6_has_own(options, name) && options[name] !== undefined && options[name] !== null) {
+        throw __autojs6_limited_https_policy_error(name);
+      }
+    }
+    const agent = options.agent;
+    if (agent && typeof agent === "object") {
+      const agentOptions = agent.options && typeof agent.options === "object" ? agent.options : agent;
+      __autojs6_limited_https_validate_options(agentOptions);
+      if (
+        __autojs6_has_own(agent, "createConnection") &&
+        typeof agent.createConnection === "function" &&
+        !agent.__autojs6LimitedAgent
+      ) {
+        throw __autojs6_limited_https_policy_error("agent.createConnection");
+      }
+    }
+  }
   function __autojs6_limited_http_request_options(protocol, options) {
     const defaults = {
       protocol: protocol + ":",
@@ -24006,23 +41479,240 @@ std::string buildEmbeddedScriptExecutionSource(
       }
     }
     class LimitedClientRequest extends LimitedOutgoingMessage {
-      constructor(options, callback) {
+      constructor(options, callback, autoDispatch) {
         super();
         const normalized = __autojs6_limited_http_request_options(protocol, options);
+        __autojs6_limited_http_validate_raw_options(protocol, normalized);
+        if (isHttps) {
+          __autojs6_limited_https_validate_options(normalized);
+        }
         this.aborted = false;
         this.agent = normalized.agent || limitedModule.globalAgent;
         this.method = normalized.method;
         this.path = normalized.path;
         this.host = normalized.host;
         this.protocol = normalized.protocol || protocol + ":";
+        this.__autojs6Options = normalized;
+        this.__autojs6Chunks = [];
+        this.__autojs6Started = false;
+        this.__autojs6AutoDispatch = autoDispatch === true;
+        this.__autojs6TimeoutMs = __autojs6_fetch_timeout_ms(
+          normalized.timeoutMs === undefined ? normalized.timeout : normalized.timeoutMs
+        );
+        this.__autojs6AbortController = typeof AbortController === "function" ? new AbortController() : null;
+        this.__autojs6ExternalSignal = normalized.signal || null;
+        this.__autojs6ExternalAbortListener = null;
+        __autojs6_limited_http_apply_headers(this, normalized.headers);
         if (typeof callback === "function") {
           this.once("response", callback);
         }
+        this.__autojs6AttachSignal();
+      }
+      write(chunk, encoding, callback) {
+        if (typeof encoding === "function") {
+          callback = encoding;
+          encoding = undefined;
+        }
+        if (this.destroyed || this.aborted) {
+          const error = __autojs6_fetch_error(
+            "AutoJs6 controlled HTTP request has been destroyed.",
+            "ERR_AUTOJS6_NETWORK_ABORTED"
+          );
+          __autojs6_limited_http_schedule_callback(function() {
+            if (typeof callback === "function") callback(error);
+          });
+          return false;
+        }
+        try {
+          this.__autojs6Chunks.push(__autojs6_limited_http_buffer(chunk, encoding));
+          __autojs6_limited_http_schedule_callback(callback);
+          return true;
+        } catch (error) {
+          __autojs6_limited_http_schedule_callback(function() {
+            if (typeof callback === "function") callback(error);
+          });
+          throw error;
+        }
+      }
+      end(chunk, encoding, callback) {
+        if (typeof chunk === "function") {
+          callback = chunk;
+          chunk = undefined;
+        } else if (typeof encoding === "function") {
+          callback = encoding;
+          encoding = undefined;
+        }
+        if (chunk !== undefined && chunk !== null) {
+          this.write(chunk, encoding);
+        }
+        this.finished = true;
+        this.writableEnded = true;
+        this.writableFinished = true;
+        __autojs6_limited_http_schedule_callback(callback);
+        if (this.__autojs6AutoDispatch) {
+          this.__autojs6Dispatch();
+        }
+        return this;
       }
       abort() {
         this.aborted = true;
         this.destroyed = true;
+        if (this.__autojs6AbortController) {
+          try {
+            this.__autojs6AbortController.abort();
+          } catch (_) {}
+        }
+        this.__autojs6DetachSignal();
+        this.emit("abort");
+        this.emit("close");
         return this;
+      }
+      destroy(error) {
+        if (error && typeof this.listenerCount === "function" && this.listenerCount("error") > 0) {
+          this.emit("error", error);
+        }
+        return this.abort();
+      }
+      setTimeout(timeout, callback) {
+        this.__autojs6TimeoutMs = __autojs6_fetch_timeout_ms(timeout);
+        if (typeof callback === "function") {
+          this.once("timeout", callback);
+        }
+        return this;
+      }
+      __autojs6Dispatch() {
+        if (this.__autojs6Started || this.destroyed || this.aborted) {
+          return;
+        }
+        this.__autojs6Started = true;
+        this.headersSent = true;
+        let url;
+        let body;
+        try {
+          url = __autojs6_limited_http_request_url(protocol, this.__autojs6Options);
+          body = __autojs6_limited_http_concat(this.__autojs6Chunks);
+        } catch (error) {
+          this.emit("error", error);
+          this.emit("close");
+          return;
+        }
+        const fetchInit = {
+          method: this.method,
+          headers: this.getHeaders(),
+          timeoutMs: this.__autojs6TimeoutMs,
+          signal: this.__autojs6AbortController && this.__autojs6AbortController.signal
+        };
+        fetchInit.maxResponseBytes = this.__autojs6Options.maxResponseBytes;
+        if (__autojs6_has_own(this.__autojs6Options, "redirect")) {
+          fetchInit.redirect = this.__autojs6Options.redirect;
+          fetchInit.maxRedirects = this.__autojs6Options.maxRedirects;
+        } else if (__autojs6_has_own(this.__autojs6Options, "maxRedirects")) {
+          fetchInit.redirect = "follow";
+          fetchInit.maxRedirects = this.__autojs6Options.maxRedirects;
+        } else {
+          fetchInit.redirect = "manual";
+          fetchInit.maxRedirects = 0;
+        }
+        if (body.length > 0 || this.method === "POST") {
+          fetchInit.body = body;
+        }
+        const self = this;
+        __autojs6_controlled_fetch(url, fetchInit)
+          .then(function(response) {
+            return response.arrayBuffer().then(function(arrayBuffer) {
+              return { response, body: __autojs6_limited_http_buffer(arrayBuffer) };
+            });
+          })
+          .then(function(result) {
+            if (self.destroyed || self.aborted) {
+              return;
+            }
+            const incoming = new LimitedIncomingMessage();
+            const headerRecord = __autojs6_limited_http_response_headers(result.response.headers);
+            incoming.statusCode = Number(result.response.status);
+            incoming.statusMessage = String(result.response.statusText || STATUS_CODES[incoming.statusCode] || "");
+            incoming.headers = headerRecord.headers;
+            incoming.rawHeaders = headerRecord.rawHeaders;
+            incoming.url = url;
+            __autojs6_schedule_task(function() {
+              self.emit("response", incoming);
+              incoming.__autojs6EmitBody(result.body);
+              self.__autojs6DetachSignal();
+              self.emit("close");
+            });
+          })
+          .catch(function(error) {
+            if (self.destroyed && !(error && (error.autojs6Code || error.code) === "ERR_AUTOJS6_NETWORK_ABORTED")) {
+              return;
+            }
+            const code = error && (error.autojs6Code || error.code);
+            if (code === "ERR_AUTOJS6_NETWORK_TIMEOUT" || code === "ERR_AUTOJS6_BRIDGE_TIMEOUT") {
+              self.emit("timeout");
+            }
+            self.__autojs6DetachSignal();
+            self.emit("error", error);
+            self.emit("close");
+          });
+      }
+      __autojs6AttachSignal() {
+        const signal = this.__autojs6ExternalSignal;
+        if (!signal) {
+          return;
+        }
+        if (!__autojs6_is_abort_signal(signal)) {
+          throw __autojs6_invalid_arg_type("Embedded Node limited " + protocol + ".request signal must be an AbortSignal.");
+        }
+        const self = this;
+        const listener = function() {
+          self.__autojs6AbortFromSignal();
+        };
+        this.__autojs6ExternalAbortListener = listener;
+        if (signal.aborted === true) {
+          const error = this.__autojs6AbortError();
+          this.aborted = true;
+          this.destroyed = true;
+          __autojs6_limited_http_schedule_callback(function() {
+            self.__autojs6DetachSignal();
+            self.emit("error", error);
+            self.emit("close");
+          });
+        } else {
+          signal.addEventListener("abort", listener, { once: true });
+        }
+      }
+      __autojs6DetachSignal() {
+        const signal = this.__autojs6ExternalSignal;
+        const listener = this.__autojs6ExternalAbortListener;
+        if (signal && listener && typeof signal.removeEventListener === "function") {
+          try {
+            signal.removeEventListener("abort", listener);
+          } catch (_) {}
+        }
+        this.__autojs6ExternalAbortListener = null;
+      }
+      __autojs6AbortFromSignal() {
+        if (this.aborted || this.destroyed) {
+          return;
+        }
+        const error = this.__autojs6AbortError();
+        this.aborted = true;
+        this.destroyed = true;
+        if (this.__autojs6AbortController) {
+          try {
+            this.__autojs6AbortController.abort();
+          } catch (_) {}
+        }
+        if (!this.__autojs6Started) {
+          this.__autojs6DetachSignal();
+          this.emit("error", error);
+          this.emit("close");
+        }
+      }
+      __autojs6AbortError() {
+        return __autojs6_fetch_error(
+          "AutoJs6 controlled HTTP request was aborted.",
+          "ERR_AUTOJS6_NETWORK_ABORTED"
+        );
       }
     }
     class LimitedIncomingMessage extends nodeEvents.EventEmitter {
@@ -24044,6 +41734,9 @@ std::string buildEmbeddedScriptExecutionSource(
         this.statusMessage = null;
         this.aborted = false;
         this.destroyed = false;
+        this.readable = true;
+        this.readableEnded = false;
+        this.__autojs6Encoding = null;
       }
       setTimeout(timeout, callback) {
         if (typeof callback === "function") {
@@ -24051,12 +41744,46 @@ std::string buildEmbeddedScriptExecutionSource(
         }
         return this;
       }
+      setEncoding(encoding) {
+        this.__autojs6Encoding = encoding === undefined || encoding === null ? "utf8" : String(encoding);
+        return this;
+      }
+      pause() {
+        return this;
+      }
+      resume() {
+        return this;
+      }
+      pipe(destination) {
+        const target = destination;
+        this.on("data", function(chunk) {
+          if (target && typeof target.write === "function") {
+            target.write(chunk);
+          }
+        });
+        this.on("end", function() {
+          if (target && typeof target.end === "function") {
+            target.end();
+          }
+        });
+        return target;
+      }
       destroy(error) {
         this.destroyed = true;
         if (error && typeof this.listenerCount === "function" && this.listenerCount("error") > 0) {
           this.emit("error", error);
         }
         return this;
+      }
+      __autojs6EmitBody(buffer) {
+        const body = buffer || __autojs6_limited_http_buffer("");
+        if (body.length > 0) {
+          this.emit("data", this.__autojs6Encoding ? body.toString(this.__autojs6Encoding) : body);
+        }
+        this.complete = true;
+        this.readableEnded = true;
+        this.emit("end");
+        this.emit("close");
       }
     }
     class LimitedServerResponse extends LimitedOutgoingMessage {
@@ -24093,6 +41820,14 @@ std::string buildEmbeddedScriptExecutionSource(
       constructor(options) {
         super();
         const opts = options && typeof options === "object" ? options : Object.create(null);
+        __autojs6_limited_http_validate_raw_options(protocol, opts);
+        if (isHttps) {
+          __autojs6_limited_https_validate_options(opts);
+        }
+        Object.defineProperty(this, "__autojs6LimitedAgent", {
+          value: true,
+          enumerable: false
+        });
         this.options = Object.freeze(Object.assign(Object.create(null), opts));
         this.requests = Object.create(null);
         this.sockets = Object.create(null);
@@ -24174,10 +41909,20 @@ std::string buildEmbeddedScriptExecutionSource(
       }
     }
     function request() {
-      throw __autojs6_limited_http_disabled_error(protocol, "request");
+      if (!__autojs6_limited_http_controlled_client_enabled()) {
+        throw __autojs6_limited_http_disabled_error(protocol, "request");
+      }
+      const parsed = __autojs6_limited_http_request_arguments(protocol, arguments);
+      return new LimitedClientRequest(parsed.options, parsed.callback, true);
     }
     function get() {
-      throw __autojs6_limited_http_disabled_error(protocol, "get");
+      if (!__autojs6_limited_http_controlled_client_enabled()) {
+        throw __autojs6_limited_http_disabled_error(protocol, "get");
+      }
+      const parsed = __autojs6_limited_http_request_arguments(protocol, arguments);
+      const req = new LimitedClientRequest(parsed.options, parsed.callback, true);
+      req.end();
+      return req;
     }
     function createServer(options, requestListener) {
       return new LimitedServer(options, requestListener);
@@ -24810,7 +42555,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (typeof BufferCtor !== "function") {
       throw new Error("require is restricted in Embedded Node.js MVP; allowlisted module 'buffer' is unavailable.");
     }
-    const limitedBuffer = Object.create(null);
+    const limitedBuffer = {};
     const descriptors = {
       Buffer: { value: BufferCtor, enumerable: true }
     };
@@ -24872,12 +42617,17 @@ std::string buildEmbeddedScriptExecutionSource(
     if (baseValue.indexOf("\u0000") >= 0) {
       throw __autojs6_create_require_error(baseValue, "NUL paths are not allowed.", "ERR_INVALID_ARG_TYPE");
     }
+    let basePathValue = baseValue;
     if (__autojs6_protocol_specifier(baseValue)) {
-      throw __autojs6_create_require_error(
-        baseValue,
-        "file URL and protocol bases are not supported in Embedded Node.js MVP.",
-        "ERR_INVALID_ARG_TYPE"
-      );
+      if (/^file:/i.test(baseValue)) {
+        basePathValue = __autojs6_file_url_to_absolute_path(baseValue, "module.createRequire");
+      } else {
+        throw __autojs6_create_require_error(
+          baseValue,
+          "protocol bases other than file URLs are not supported in Embedded Node.js MVP.",
+          "ERR_INVALID_ARG_TYPE"
+        );
+      }
     }
     const path = __autojs6_path_module();
     const fs = __autojs6_fs_module();
@@ -24894,7 +42644,7 @@ std::string buildEmbeddedScriptExecutionSource(
       throw __autojs6_create_require_error(baseValue, "allowlisted path and fs modules are required.", "EPERM");
     }
     const scope = __autojs6_fs_root(path, fs);
-    const target = path.resolve(path.isAbsolute(baseValue) ? baseValue : path.resolve(scope.cwd, baseValue));
+    const target = path.resolve(path.isAbsolute(basePathValue) ? basePathValue : path.resolve(scope.cwd, basePathValue));
     if (!__autojs6_path_within_root(target, scope.root) || __autojs6_sensitive_path(target)) {
       throw __autojs6_create_require_error(baseValue, "base escapes sandboxRoot.", "EPERM");
     }
@@ -24972,7 +42722,16 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_limited_module_is_builtin(name) {
     const key = name === undefined ? "" : String(name);
-    if (__autojs6_worker_threads_experimental_enabled && (key === "worker_threads" || key === "node:worker_threads")) {
+    if (key === "node:test") {
+      return true;
+    }
+    if (key === "node:worker_threads") {
+      return true;
+    }
+    if (__autojs6_worker_threads_experimental_enabled && key === "worker_threads") {
+      return true;
+    }
+    if ((key === "child_process" || key === "node:child_process") && __autojs6_child_process_experimental_enabled) {
       return true;
     }
     return __autojs6_has_own(__autojs6_limited_builtin_module_map, key);
@@ -24995,11 +42754,17 @@ std::string buildEmbeddedScriptExecutionSource(
         enumerable: true
       },
       builtinModules: {
-        value: Object.freeze(
-          __autojs6_worker_threads_experimental_enabled
-            ? __autojs6_limited_builtin_module_names.concat(["worker_threads"])
-            : __autojs6_limited_builtin_module_names.slice()
-        ),
+        value: Object.freeze((function() {
+          const names = __autojs6_limited_builtin_module_names.slice();
+          names.push("node:test");
+          if (__autojs6_worker_threads_experimental_enabled) {
+            names.push("worker_threads");
+          }
+          if (__autojs6_child_process_experimental_enabled) {
+            names.push("child_process");
+          }
+          return names;
+        })()),
         enumerable: true
       },
       syncBuiltinESMExports: {
@@ -26305,14 +44070,30 @@ std::string buildEmbeddedScriptExecutionSource(
     return __autojs6_scoped_fs_cache;
   }
   const __autojs6_module_cache = Object.create(null);
+  const __autojs6_plugin_module_roots = Object.create(null);
   const __autojs6_esm_module_cache = Object.create(null);
+  const __autojs6_esm_data_url_records = Object.create(null);
   let __autojs6_main_module_ref = null;
+  function __autojs6_module_resolution_root(filename) {
+    const path = __autojs6_path_module();
+    if (!path || typeof path.resolve !== "function") {
+      return __autojs6_module_root || __autojs6_module_dirname(filename);
+    }
+    const fallbackRoot = __autojs6_resolved_sandbox_root(path);
+    const resolvedFilename = path.resolve(filename || fallbackRoot);
+    for (const root of Object.keys(__autojs6_plugin_module_roots)) {
+      if (__autojs6_path_within_root(resolvedFilename, root)) {
+        return root;
+      }
+    }
+    return fallbackRoot;
+  }
   function __autojs6_module_paths(filename) {
     const path = __autojs6_path_module();
     if (!path || typeof path.resolve !== "function") {
       return [];
     }
-    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(filename));
+    const root = __autojs6_module_resolution_root(filename);
     return __autojs6_node_modules_search_dirs(filename, root).slice();
   }
   function __autojs6_create_module(filename, parentModule) {
@@ -26354,6 +44135,14 @@ std::string buildEmbeddedScriptExecutionSource(
         value: __autojs6_disabled_require_extension,
         enumerable: true
       },
+      ".cts": {
+        value: __autojs6_disabled_require_extension,
+        enumerable: true
+      },
+      ".ts": {
+        value: __autojs6_disabled_require_extension,
+        enumerable: true
+      },
       ".json": {
         value: __autojs6_disabled_require_extension,
         enumerable: true
@@ -26391,25 +44180,19 @@ std::string buildEmbeddedScriptExecutionSource(
     return __autojs6_error(message, code || "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED");
   }
   function __autojs6_esm_entry_filename() {
-    const path = __autojs6_path_module();
-    const root = __autojs6_resolved_sandbox_root(path);
-    const name = String(__autojs6_source_name || "");
-    if (!path || typeof path.resolve !== "function" || typeof path.isAbsolute !== "function") {
-      return name || "<embedded-esm-entry.mjs>";
-    }
-    return path.isAbsolute(name) ? path.resolve(name) : path.resolve(root, name || "embedded-esm-entry.mjs");
+    return __autojs6_entry_filename();
   }
   function __autojs6_package_type_module_for_file(filename) {
     const path = __autojs6_path_module();
     if (!path || typeof path.resolve !== "function") return false;
     try {
-      const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(filename));
+      const root = __autojs6_module_resolution_root(filename);
       const scope = __autojs6_find_package_scope(filename, root);
       if (!scope) return false;
       const packageData = __autojs6_package_data(scope.packageJsonResolved, filename);
       if (!__autojs6_package_type_is_module(packageData)) return false;
       __autojs6_package_diagnostics.lastTypeModulePolicy =
-        "type=module accepted by Embedded Node experimental ESM";
+        "type=module accepted by Embedded Node partial ESM";
       __autojs6_package_diagnostics.lastTypeModulePackage =
         __autojs6_package_name(packageData) || __autojs6_diagnostic_path(scope.packageDir);
       __autojs6_package_diagnostics.lastTypeModulePackageJson =
@@ -26421,23 +44204,43 @@ std::string buildEmbeddedScriptExecutionSource(
       return false;
     }
   }
+  function __autojs6_entry_source_has_esm_syntax(source) {
+    const code = __autojs6_mask_non_code(source);
+    for (let index = 0; index < code.length; index += 1) {
+      if (!__autojs6_is_identifier_token_at(code, index, "import")) continue;
+      const nextIndex = __autojs6_skip_whitespace(code, index + "import".length);
+      const next = code.charAt(nextIndex);
+      if (next === "(") continue;
+      if (next === "." && code.slice(nextIndex, nextIndex + 5) === ".meta") return true;
+      if (next === "\"" || next === "'" || next === "{" || next === "*" || __autojs6_is_identifier_start(next)) {
+        return true;
+      }
+    }
+    return /(^|[\r\n;{}])\s*export\b\s*([{*]|default\b|class\b|function\b|const\b|let\b|var\b|[A-Za-z_$])/.test(code);
+  }
   function __autojs6_should_run_entry_as_esm() {
     if (!__autojs6_esm_experimental_enabled) return false;
     const entry = __autojs6_esm_entry_filename();
     const extension = __autojs6_source_extension(entry);
     return __autojs6_is_esm_extension(extension) ||
-      (extension === ".js" && __autojs6_package_type_module_for_file(entry));
+      ((extension === ".js" || extension === ".ts") && __autojs6_package_type_module_for_file(entry)) ||
+      __autojs6_entry_source_has_esm_syntax(__autojs6_source);
   }
   function __autojs6_esm_validate_identifier(name, context) {
     const value = String(name || "").trim();
     if (!/^[A-Za-z_$][0-9A-Za-z_$]*$/.test(value)) {
-      throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM identifier in " + context + ": " + value);
+      throw __autojs6_esm_error("Unsupported Embedded Node partial ESM identifier in " + context + ": " + value);
     }
     return value;
   }
+  function __autojs6_esm_strip_named_list_comments(text) {
+    return String(text || "")
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/\/\/[^\r\n]*/g, " ");
+  }
   function __autojs6_esm_split_named_list(sourceName, text) {
     const values = [];
-    const entries = String(text || "").split(",");
+    const entries = __autojs6_esm_strip_named_list_comments(text).split(",");
     for (const entry of entries) {
       const trimmed = entry.trim();
       if (!trimmed) continue;
@@ -26447,6 +44250,169 @@ std::string buildEmbeddedScriptExecutionSource(
       values.push({ exported, local });
     }
     return values;
+  }
+  function __autojs6_esm_split_export_named_list(sourceName, text) {
+    const values = [];
+    const entries = __autojs6_esm_strip_named_list_comments(text).split(",");
+    for (const entry of entries) {
+      const trimmed = entry.trim();
+      if (!trimmed) continue;
+      const parts = trimmed.split(/\s+as\s+/);
+      const local = __autojs6_esm_validate_identifier(parts[0], sourceName);
+      const exported = __autojs6_esm_validate_identifier(parts.length > 1 ? parts[1] : parts[0], sourceName);
+      values.push({ exported, local });
+    }
+    return values;
+  }
+  function __autojs6_esm_split_top_level(text, separator) {
+    const source = String(text || "");
+    const masked = __autojs6_mask_non_code(source);
+    const values = [];
+    let cursor = 0;
+    let braceDepth = 0;
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    for (let index = 0; index < masked.length; index += 1) {
+      const ch = masked.charAt(index);
+      if (ch === "{") braceDepth += 1;
+      else if (ch === "}") braceDepth = Math.max(0, braceDepth - 1);
+      else if (ch === "[") bracketDepth += 1;
+      else if (ch === "]") bracketDepth = Math.max(0, bracketDepth - 1);
+      else if (ch === "(") parenDepth += 1;
+      else if (ch === ")") parenDepth = Math.max(0, parenDepth - 1);
+      else if (ch === separator && braceDepth === 0 && bracketDepth === 0 && parenDepth === 0) {
+        values.push(source.slice(cursor, index));
+        cursor = index + 1;
+      }
+    }
+    values.push(source.slice(cursor));
+    return values;
+  }
+  function __autojs6_esm_find_top_level_char(text, target) {
+    const source = String(text || "");
+    const masked = __autojs6_mask_non_code(source);
+    let braceDepth = 0;
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    for (let index = 0; index < masked.length; index += 1) {
+      const ch = masked.charAt(index);
+      if (ch === "{") braceDepth += 1;
+      else if (ch === "}") braceDepth = Math.max(0, braceDepth - 1);
+      else if (ch === "[") bracketDepth += 1;
+      else if (ch === "]") bracketDepth = Math.max(0, bracketDepth - 1);
+      else if (ch === "(") parenDepth += 1;
+      else if (ch === ")") parenDepth = Math.max(0, parenDepth - 1);
+      else if (ch === target && braceDepth === 0 && bracketDepth === 0 && parenDepth === 0) {
+        return index;
+      }
+    }
+    return -1;
+  }
+  function __autojs6_esm_collect_binding_identifiers(pattern, sourceName) {
+    const names = [];
+    function add(name) {
+      const value = String(name || "").trim();
+      if (!value) return;
+      names.push(__autojs6_esm_validate_identifier(value, sourceName));
+    }
+    function collect(value) {
+      let text = String(value || "").trim();
+      if (!text) return;
+      if (text.slice(0, 3) === "...") {
+        text = text.slice(3).trim();
+      }
+      const equalIndex = __autojs6_esm_find_top_level_char(text, "=");
+      if (equalIndex >= 0) {
+        text = text.slice(0, equalIndex).trim();
+      }
+      if (!text) return;
+      const first = text.charAt(0);
+      if (first === "{" && text.charAt(text.length - 1) === "}") {
+        collectObject(text.slice(1, -1));
+        return;
+      }
+      if (first === "[" && text.charAt(text.length - 1) === "]") {
+        collectArray(text.slice(1, -1));
+        return;
+      }
+      const match = /^([A-Za-z_$][0-9A-Za-z_$]*)$/.exec(text);
+      if (match) {
+        add(match[1]);
+      }
+    }
+    function collectObject(body) {
+      const entries = __autojs6_esm_split_top_level(body, ",");
+      for (const entry of entries) {
+        let text = String(entry || "").trim();
+        if (!text) continue;
+        if (text.slice(0, 3) === "...") {
+          collect(text);
+          continue;
+        }
+        const colonIndex = __autojs6_esm_find_top_level_char(text, ":");
+        if (colonIndex >= 0) {
+          collect(text.slice(colonIndex + 1));
+        } else {
+          collect(text);
+        }
+      }
+    }
+    function collectArray(body) {
+      const entries = __autojs6_esm_split_top_level(body, ",");
+      for (const entry of entries) {
+        collect(entry);
+      }
+    }
+    collect(pattern);
+    return names;
+  }
+  function __autojs6_esm_find_matching_delimiter(text, openIndex) {
+    const source = String(text || "");
+    const open = source.charAt(openIndex);
+    const close = open === "{" ? "}" : open === "[" ? "]" : open === "(" ? ")" : "";
+    if (!close) return -1;
+    let depth = 0;
+    for (let index = openIndex; index < source.length; index += 1) {
+      const ch = source.charAt(index);
+      if (ch === open) depth += 1;
+      else if (ch === close) {
+        depth -= 1;
+        if (depth === 0) return index;
+      }
+    }
+    return -1;
+  }
+  function __autojs6_esm_transform_destructured_declaration_exports(body, sourceName, namedExports) {
+    const source = String(body || "");
+    const masked = __autojs6_mask_non_code(source);
+    let output = "";
+    let cursor = 0;
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__autojs6_is_identifier_token_at(masked, index, "export")) continue;
+      const exportEnd = index + "export".length;
+      const kindStart = __autojs6_skip_whitespace(masked, exportEnd);
+      const kindMatch = /^(const|let|var)\b/.exec(masked.slice(kindStart));
+      if (!kindMatch) continue;
+      const afterKind = kindStart + kindMatch[1].length;
+      const patternStart = __autojs6_skip_whitespace(masked, afterKind);
+      const opener = masked.charAt(patternStart);
+      if (opener !== "{" && opener !== "[") continue;
+      const patternEnd = __autojs6_esm_find_matching_delimiter(masked, patternStart);
+      if (patternEnd < 0) continue;
+      const afterPattern = __autojs6_skip_whitespace(masked, patternEnd + 1);
+      if (masked.charAt(afterPattern) !== "=") continue;
+      const names = __autojs6_esm_collect_binding_identifiers(
+        source.slice(patternStart, patternEnd + 1),
+        sourceName
+      );
+      for (const name of names) {
+        namedExports.push({ exported: name, local: name });
+      }
+      output += source.slice(cursor, index);
+      cursor = kindStart;
+      index = kindStart;
+    }
+    return output + source.slice(cursor);
   }
   function __autojs6_esm_parse_import_bindings(specifierText, importVar, sourceName) {
     const lines = [];
@@ -26459,14 +44425,14 @@ std::string buildEmbeddedScriptExecutionSource(
     function bindNamespace(value) {
       const match = /^\*\s+as\s+([A-Za-z_$][0-9A-Za-z_$]*)$/.exec(value.trim());
       if (!match) {
-        throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM namespace import in " + sourceName + ": " + value);
+        throw __autojs6_esm_error("Unsupported Embedded Node partial ESM namespace import in " + sourceName + ": " + value);
       }
       lines.push("const " + match[1] + " = " + importVar + ";");
     }
     function bindNamed(value) {
       const body = value.trim();
       if (body.charAt(0) !== "{" || body.charAt(body.length - 1) !== "}") {
-        throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import binding in " + sourceName + ": " + value);
+        throw __autojs6_esm_error("Unsupported Embedded Node partial ESM import binding in " + sourceName + ": " + value);
       }
       for (const item of __autojs6_esm_split_named_list(sourceName, body.slice(1, -1))) {
         lines.push("const " + item.local + " = " + importVar + "[" + JSON.stringify(item.exported) + "];");
@@ -26488,7 +44454,10 @@ std::string buildEmbeddedScriptExecutionSource(
     return lines;
   }
   function __autojs6_esm_builtin_specifier(name) {
-    return __autojs6_has_own(__autojs6_require_builtin_allowlist, name) ||
+    return name === "node:test" ||
+      ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled) ||
+      name === "rhino" ||
+      __autojs6_has_own(__autojs6_require_builtin_allowlist, name) ||
       __autojs6_has_own(__autojs6_limited_builtin_module_map, name) ||
       __autojs6_denied_builtin_module_name(name);
   }
@@ -26508,18 +44477,108 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_esm_module_kind(resolved) {
     const extension = __autojs6_source_extension(resolved);
     if (__autojs6_is_esm_extension(extension)) return "esm";
+    if ((extension === ".js" || extension === ".ts") && __autojs6_package_type_module_for_file(resolved)) return "esm";
     if (__autojs6_supported_local_module_extension(extension)) return "cjs";
     return "";
+  }
+  function __autojs6_is_data_url_module_id(value) {
+    return /^data:/i.test(String(value || ""));
+  }
+  function __autojs6_esm_data_url_media_type(header) {
+    const first = String(header || "").split(";")[0].trim().toLowerCase();
+    return first;
+  }
+  function __autojs6_esm_data_url_is_base64(header) {
+    const parts = String(header || "").split(";");
+    for (let index = 1; index < parts.length; index += 1) {
+      if (parts[index].trim().toLowerCase() === "base64") return true;
+    }
+    return false;
+  }
+  function __autojs6_esm_data_url_format(mediaType, specifier) {
+    const type = String(mediaType || "").toLowerCase();
+    if (
+      type === "text/javascript" ||
+      type === "application/javascript" ||
+      type === "text/ecmascript" ||
+      type === "application/ecmascript"
+    ) {
+      return "module";
+    }
+    if (type === "application/json" || /\+json$/.test(type)) {
+      return "json";
+    }
+    throw __autojs6_esm_error(
+      "Embedded Node partial ESM supports only JavaScript or JSON data URL imports: " + specifier,
+      "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
+    );
+  }
+  function __autojs6_esm_decode_data_url_body(body, isBase64, specifier) {
+    if (isBase64) {
+      const BufferCtor = __autojs6_buffer_constructor();
+      if (!BufferCtor || typeof BufferCtor.from !== "function") {
+        throw __autojs6_esm_error("Embedded Node partial ESM data URL import needs Buffer support.");
+      }
+      try {
+        return BufferCtor.from(String(body || ""), "base64").toString("utf8");
+      } catch (error) {
+        throw __autojs6_esm_error(
+          "Embedded Node partial ESM rejects malformed base64 data URL import: " + specifier,
+          "ERR_INVALID_ARG_TYPE"
+        );
+      }
+    }
+    try {
+      return decodeURIComponent(String(body || ""));
+    } catch (error) {
+      throw __autojs6_esm_error(
+        "Embedded Node partial ESM rejects malformed percent-encoded data URL import: " + specifier,
+        "ERR_INVALID_ARG_TYPE"
+      );
+    }
+  }
+  function __autojs6_resolve_esm_data_url(specifier) {
+    const id = String(specifier || "");
+    if (__autojs6_has_own(__autojs6_esm_data_url_records, id)) {
+      return __autojs6_esm_data_url_records[id];
+    }
+    const comma = id.indexOf(",");
+    if (comma < 0) {
+      throw __autojs6_esm_error(
+        "Embedded Node partial ESM rejects malformed data URL import: " + id,
+        "ERR_INVALID_ARG_TYPE"
+      );
+    }
+    const header = id.slice("data:".length, comma);
+    const mediaType = __autojs6_esm_data_url_media_type(header);
+    const format = __autojs6_esm_data_url_format(mediaType, id);
+    const source = __autojs6_esm_decode_data_url_body(
+      id.slice(comma + 1),
+      __autojs6_esm_data_url_is_base64(header),
+      id
+    );
+    __autojs6_enforce_runtime_module_budget(id, source);
+    const resolved = Object.freeze({
+      kind: format === "json" ? "data-json" : "data",
+      resolved: id,
+      mediaType,
+      record: Object.freeze({
+        source,
+        sourceURL: id.replace(/[\r\n]/g, " ")
+      })
+    });
+    __autojs6_esm_data_url_records[id] = resolved;
+    return resolved;
   }
   function __autojs6_resolve_esm_file_candidate(candidates, root, specifier, parentFilename, packageDir) {
     const path = __autojs6_path_module();
     for (const candidate of candidates) {
       const resolved = path.resolve(candidate);
       if (!__autojs6_path_within_root(resolved, root) || __autojs6_sensitive_path(resolved)) {
-        throw __autojs6_esm_error("Embedded Node experimental ESM import escapes working directory: " + specifier, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+        throw __autojs6_esm_error("Embedded Node partial ESM import escapes working directory: " + specifier, "ERR_AUTOJS6_FS_PATH_ESCAPE");
       }
       if (packageDir && !__autojs6_path_within_root(resolved, packageDir)) {
-        throw __autojs6_esm_error("Embedded Node experimental ESM package import escapes package directory: " + specifier, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+        throw __autojs6_esm_error("Embedded Node partial ESM package import escapes package directory: " + specifier, "ERR_AUTOJS6_FS_PATH_ESCAPE");
       }
       const record = __autojs6_module_record(resolved, true);
       if (!record) continue;
@@ -26529,10 +44588,10 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_throw_if_native_addon_extension(
           extension,
           specifier,
-          "Embedded Node experimental ESM import",
-          "Unsupported Embedded Node experimental ESM import extension: " + specifier
+          "Embedded Node partial ESM import",
+          "Unsupported Embedded Node partial ESM import extension: " + specifier
         );
-        throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import extension: " + specifier);
+        throw __autojs6_esm_error("Unsupported Embedded Node partial ESM import extension: " + specifier);
       }
       __autojs6_resolve_trace("esm import matched", {
         request: specifier,
@@ -26547,14 +44606,14 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_resolve_esm_module(specifier, parentFilename) {
     const path = __autojs6_path_module();
     if (!path || typeof path.resolve !== "function" || typeof path.extname !== "function" || typeof path.isAbsolute !== "function") {
-      throw __autojs6_esm_error("Embedded Node experimental ESM needs the allowlisted path module.");
+      throw __autojs6_esm_error("Embedded Node partial ESM needs the allowlisted path module.");
     }
     const name = String(specifier || "");
     if (name.indexOf("\u0000") >= 0) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM rejects NUL import specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
+      throw __autojs6_esm_error("Embedded Node partial ESM rejects NUL import specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
     }
     if (path.isAbsolute(name)) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM rejects absolute import: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
+      throw __autojs6_esm_error("Embedded Node partial ESM rejects absolute import: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
     }
     if (__autojs6_esm_builtin_specifier(name)) {
       __autojs6_resolve_trace("esm builtin matched", {
@@ -26564,11 +44623,26 @@ std::string buildEmbeddedScriptExecutionSource(
       });
       return { kind: "builtin", name };
     }
+    if (__autojs6_is_data_url_module_id(name)) {
+      const resolvedData = __autojs6_resolve_esm_data_url(name);
+      __autojs6_resolve_trace("esm data url matched", {
+        request: "data:",
+        from: parentFilename,
+        format: resolvedData.kind
+      });
+      return resolvedData;
+    }
     if (__autojs6_protocol_specifier(name)) {
       const code = /^https?:/i.test(name) ? "ERR_AUTOJS6_NETWORK_DISABLED" : "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
-      throw __autojs6_esm_error("Embedded Node experimental ESM rejects protocol import: " + name, code);
+      throw __autojs6_esm_error("Embedded Node partial ESM rejects protocol import: " + name, code);
     }
-    const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
+    if (__autojs6_is_data_url_module_id(parentFilename)) {
+      throw __autojs6_esm_error(
+        "Embedded Node partial ESM data URL modules cannot resolve scoped package or relative imports: " + name,
+        "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
+      );
+    }
+    const root = __autojs6_module_resolution_root(parentFilename);
     if (name.indexOf("#") === 0) {
       const resolved = __autojs6_resolve_package_import(name, parentFilename, "esm");
       return {
@@ -26586,65 +44660,120 @@ std::string buildEmbeddedScriptExecutionSource(
     const parentDir = __autojs6_module_dirname(parentFilename);
     const base = path.resolve(parentDir || root, name);
     if (!__autojs6_path_within_root(base, root) || __autojs6_sensitive_path(base)) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM import escapes working directory: " + name, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+      throw __autojs6_esm_error("Embedded Node partial ESM import escapes working directory: " + name, "ERR_AUTOJS6_FS_PATH_ESCAPE");
     }
     const extension = __autojs6_normalized_extension(path.extname(base));
     __autojs6_throw_if_native_addon_extension(
       extension,
       name,
-      "Embedded Node experimental ESM import",
-      "Unsupported Embedded Node experimental ESM import extension: " + name
+      "Embedded Node partial ESM import",
+      "Unsupported Embedded Node partial ESM import extension: " + name
     );
     if (extension && !__autojs6_is_esm_extension(extension) && !__autojs6_supported_local_module_extension(extension)) {
-      throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import extension: " + name);
+      throw __autojs6_esm_error("Unsupported Embedded Node partial ESM import extension: " + name);
     }
-    const candidates = extension ? [base] : [base + ".mjs", base + ".cjs", base + ".json"];
+    const candidates = extension ? [base] : [base + ".mts", base + ".ts", base + ".mjs", base + ".js", base + ".cts", base + ".cjs", base + ".json"];
     const resolved = __autojs6_resolve_esm_file_candidate(candidates, root, name, parentFilename);
     if (resolved) {
       return resolved;
     }
-    throw __autojs6_module_not_found("Cannot find Embedded Node experimental ESM module '" + name + "' from '" + parentFilename + "'.");
+    throw __autojs6_module_not_found("Cannot find Embedded Node partial ESM module '" + name + "' from '" + parentFilename + "'.");
   }
-  function __autojs6_esm_transform_exports(source, sourceName) {
+  function __autojs6_esm_copy_star_exports(source, target) {
+    if (source === null || source === undefined) return;
+    const type = typeof source;
+    if (type !== "object" && type !== "function") return;
+    for (const key of Object.keys(source)) {
+      if (key === "default") continue;
+      if (!__autojs6_has_own(target, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+  function __autojs6_esm_transform_exports(source, sourceName, syncMode, importState) {
     let body = String(source || "");
     const namedExports = [];
+    const reExportTail = [];
     let hasDefault = false;
-    const masked = __autojs6_mask_non_code(body);
-    if (/(^|[\r\n;{}])\s*export\s+(?:\*|\{[^}]*\}\s+from\b)/.test(masked)) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM v1 does not support re-export syntax in " + sourceName + ".");
-    }
+    let defaultLocal = "";
+    const state = importState || { nextIndex: 0, bindingLines: [] };
+    if (!Array.isArray(state.bindingLines)) state.bindingLines = [];
+    if (typeof state.nextIndex !== "number") state.nextIndex = 0;
+    const reExportPattern = /(^|[\r\n;{}])\s*export\s*(?:(\*)\s*(?:as\s+([A-Za-z_$][0-9A-Za-z_$]*))?|(\{[^}]*\}))\s*from\s*(["'])([^"'\r\n]+)\5(?:\s+(with|assert)\s*\{([^}]*)\})?\s*;?/g;
+    body = body.replace(reExportPattern, function(match, prefix, star, namespaceName, namedList, quote, specifier, attributeKind, attributeBody) {
+      const importVar = "__autojs6_esm_import_" + state.nextIndex++;
+      const attributes = __autojs6_esm_parse_static_import_attributes(attributeKind, attributeBody, sourceName, specifier);
+      state.bindingLines.push(
+        "const " + importVar + " = " + (syncMode ? "__autojs6_load_esm_module_sync" : "await __autojs6_load_esm_module") + "(" +
+          JSON.stringify(specifier) + ", " + JSON.stringify(sourceName) + ", " + JSON.stringify(attributes) + ");"
+      );
+      if (star) {
+        if (namespaceName) {
+          const exportedName = __autojs6_esm_validate_identifier(namespaceName, sourceName);
+          reExportTail.push("__autojs6_esm_namespace[" + JSON.stringify(exportedName) + "] = " + importVar + ";");
+        } else {
+          reExportTail.push("__autojs6_esm_copy_star_exports(" + importVar + ", __autojs6_esm_namespace);");
+        }
+      } else {
+        for (const item of __autojs6_esm_split_export_named_list(sourceName, String(namedList || "").slice(1, -1))) {
+          reExportTail.push(
+            "__autojs6_esm_namespace[" + JSON.stringify(item.exported) + "] = " +
+              importVar + "[" + JSON.stringify(item.local) + "];"
+          );
+        }
+      }
+      return prefix || "";
+    });
+    body = body.replace(/\bexport\s+default\s+(async\s+)?function(\s*\*)?\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, starPrefix, name) {
+      if (hasDefault) {
+        throw __autojs6_esm_error("Embedded Node partial ESM module has more than one default export: " + sourceName);
+      }
+      hasDefault = true;
+      defaultLocal = name;
+      return (asyncPrefix || "") + "function" + (starPrefix || " ") + name + "(";
+    });
+    body = body.replace(/\bexport\s+default\s+class\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, name) {
+      if (hasDefault) {
+        throw __autojs6_esm_error("Embedded Node partial ESM module has more than one default export: " + sourceName);
+      }
+      hasDefault = true;
+      defaultLocal = name;
+      return "class " + name;
+    });
     body = body.replace(/\bexport\s+default\s+/g, function() {
       if (hasDefault) {
-        throw __autojs6_esm_error("Embedded Node experimental ESM module has more than one default export: " + sourceName);
+        throw __autojs6_esm_error("Embedded Node partial ESM module has more than one default export: " + sourceName);
       }
       hasDefault = true;
       return "const __autojs6_esm_default = ";
     });
+    body = __autojs6_esm_transform_destructured_declaration_exports(body, sourceName, namedExports);
     body = body.replace(/\bexport\s+(const|let|var)\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, kind, name) {
       namedExports.push({ exported: name, local: name });
       return kind + " " + name;
     });
-    body = body.replace(/\bexport\s+(async\s+)?function\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, name) {
+    body = body.replace(/\bexport\s+(async\s+)?function(\s*\*)?\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, starPrefix, name) {
       namedExports.push({ exported: name, local: name });
-      return (asyncPrefix || "") + "function " + name + "(";
+      return (asyncPrefix || "") + "function" + (starPrefix || " ") + name + "(";
     });
     body = body.replace(/\bexport\s+class\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, name) {
       namedExports.push({ exported: name, local: name });
       return "class " + name;
     });
     body = body.replace(/(^|[\r\n;{}])\s*export\s*\{([^}]*)\}\s*;?/g, function(match, prefix, list) {
-      for (const item of __autojs6_esm_split_named_list(sourceName, list)) {
+      for (const item of __autojs6_esm_split_export_named_list(sourceName, list)) {
         namedExports.push(item);
       }
       return prefix || "";
     });
     const tail = [];
     if (hasDefault) {
-      tail.push("__autojs6_esm_namespace[\"default\"] = __autojs6_esm_default;");
+      tail.push("__autojs6_esm_namespace[\"default\"] = " + (defaultLocal || "__autojs6_esm_default") + ";");
     }
     for (const item of namedExports) {
       tail.push("__autojs6_esm_namespace[" + JSON.stringify(item.exported) + "] = " + item.local + ";");
     }
+    Array.prototype.push.apply(tail, reExportTail);
     return {
       body,
       tail: tail.join("\n")
@@ -26662,6 +44791,50 @@ std::string buildEmbeddedScriptExecutionSource(
       if (masked.charAt(nextIndex) === "(") {
         return true;
       }
+    }
+    return false;
+  }
+  function __autojs6_contains_await_token(source) {
+    const sourceText = String(source || "");
+    if (sourceText.indexOf("await") < 0) {
+      return false;
+    }
+    const masked = __autojs6_mask_non_code(sourceText);
+    for (let index = 0; index < masked.length; index += 1) {
+      if (__autojs6_is_identifier_token_at(masked, index, "await")) {
+        return true;
+      }
+    }
+    return false;
+  }
+  function __autojs6_esm_has_residual_import_export(source) {
+    const sourceText = String(source || "");
+    if (sourceText.indexOf("import") < 0 && sourceText.indexOf("export") < 0) {
+      return false;
+    }
+    const masked = __autojs6_mask_non_code(sourceText);
+    let braceDepth = 0;
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    for (let index = 0; index < masked.length; index += 1) {
+      if (
+        braceDepth === 0 &&
+        bracketDepth === 0 &&
+        parenDepth === 0 &&
+        (
+          __autojs6_is_identifier_token_at(masked, index, "import") ||
+          __autojs6_is_identifier_token_at(masked, index, "export")
+        )
+      ) {
+        return true;
+      }
+      const ch = masked.charAt(index);
+      if (ch === "{") braceDepth += 1;
+      else if (ch === "}") braceDepth = Math.max(0, braceDepth - 1);
+      else if (ch === "[") bracketDepth += 1;
+      else if (ch === "]") bracketDepth = Math.max(0, bracketDepth - 1);
+      else if (ch === "(") parenDepth += 1;
+      else if (ch === ")") parenDepth = Math.max(0, parenDepth - 1);
     }
     return false;
   }
@@ -26689,26 +44862,229 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return output + sourceText.slice(cursor);
   }
-  function __autojs6_esm_transform_module_source(source, filename) {
+  function __autojs6_esm_empty_import_attributes() {
+    return { type: "" };
+  }
+  function __autojs6_esm_parse_static_import_attributes(kind, body, sourceName, specifier) {
+    if (!kind) {
+      return __autojs6_esm_empty_import_attributes();
+    }
+    if (kind !== "with") {
+      throw __autojs6_esm_error(
+        "Embedded Node partial ESM import assertions are not supported in " +
+          sourceName + " for '" + specifier + "'. Use import attributes with { type: \"json\" } for JSON."
+      );
+    }
+    const text = String(body || "").trim();
+    const match = /^type\s*:\s*(["'])json\1\s*,?$/.exec(text);
+    if (!match) {
+      throw __autojs6_esm_error(
+        "Unsupported Embedded Node partial ESM import attributes in " +
+          sourceName + " for '" + specifier + "'. Only with { type: \"json\" } is supported."
+      );
+    }
+    return { type: "json" };
+  }
+  function __autojs6_esm_parse_dynamic_import_attributes(options, parentFilename, specifier) {
+    if (options === undefined || options === null) {
+      return __autojs6_esm_empty_import_attributes();
+    }
+    if (typeof options !== "object") {
+      throw __autojs6_esm_error(
+        "Embedded Node local dynamic import attributes must be an object for '" + specifier + "' from '" + parentFilename + "'."
+      );
+    }
+    const optionKeys = Object.keys(options);
+    if (optionKeys.length !== 1 || optionKeys[0] !== "with") {
+      throw __autojs6_esm_error(
+        "Unsupported Embedded Node local dynamic import options for '" + specifier + "' from '" + parentFilename +
+          "'. Only { with: { type: \"json\" } } is supported."
+      );
+    }
+    const withAttributes = options.with;
+    if (!withAttributes || typeof withAttributes !== "object" || Array.isArray(withAttributes)) {
+      throw __autojs6_esm_error(
+        "Embedded Node local dynamic import attributes must use { with: { type: \"json\" } } for '" +
+          specifier + "' from '" + parentFilename + "'."
+      );
+    }
+    const attributeKeys = Object.keys(withAttributes);
+    if (attributeKeys.length !== 1 || attributeKeys[0] !== "type" || withAttributes.type !== "json") {
+      throw __autojs6_esm_error(
+        "Unsupported Embedded Node local dynamic import attributes for '" + specifier + "' from '" + parentFilename +
+          "'. Only { with: { type: \"json\" } } is supported."
+      );
+    }
+    return { type: "json" };
+  }
+  function __autojs6_esm_validate_import_attributes(resolved, attributes, specifier, parentFilename) {
+    const attributeType = attributes && attributes.type ? String(attributes.type) : "";
+    if (resolved.kind === "builtin") {
+      if (attributeType) {
+        throw __autojs6_esm_error(
+          "Embedded Node partial ESM import attributes are only supported for JSON modules: " + specifier
+        );
+      }
+      return;
+    }
+    if (resolved.kind === "data-json") {
+      if (attributeType !== "json") {
+        throw __autojs6_esm_error(
+          "Embedded Node partial ESM JSON data URL import requires with { type: \"json\" } for '" +
+            specifier + "' from '" + parentFilename + "'."
+        );
+      }
+      return;
+    }
+    if (resolved.kind === "data") {
+      if (attributeType) {
+        throw __autojs6_esm_error(
+          "Embedded Node partial ESM import attributes are only supported for JSON modules: " + specifier
+        );
+      }
+      return;
+    }
+    const extension = __autojs6_source_extension(resolved.resolved);
+    const isJson = extension === ".json";
+    if (isJson) {
+      if (attributeType !== "json") {
+        throw __autojs6_esm_error(
+          "Embedded Node partial ESM JSON import requires with { type: \"json\" } for '" +
+            specifier + "' from '" + parentFilename + "'."
+        );
+      }
+      return;
+    }
+    if (attributeType) {
+      throw __autojs6_esm_error(
+        "Embedded Node partial ESM import attributes are only supported for JSON modules: " + specifier
+      );
+    }
+  }
+  function __autojs6_import_meta_file_url(filename) {
+    const url = __autojs6_limited_path_to_file_url(filename);
+    return url && typeof url.href === "string" ? url.href : String(url);
+  }
+  function __autojs6_import_meta_builtin_url(name) {
+    if (name === "node:test") {
+      return "node:test";
+    }
+    if (name === "node:worker_threads") {
+      return "node:worker_threads";
+    }
+    if ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled) {
+      return "node:child_process";
+    }
+    if (name === "rhino") {
+      return "rhino";
+    }
+    if (__autojs6_has_own(__autojs6_limited_builtin_module_map, name)) {
+      return name.indexOf("node:") === 0 ? name : "node:" + name;
+    }
+    if (__autojs6_has_own(__autojs6_require_builtin_allowlist, name)) {
+      const normalized = __autojs6_require_builtin_allowlist[name];
+      return normalized.indexOf("node:") === 0 ? normalized : "node:" + normalized;
+    }
+    return null;
+  }
+  function __autojs6_import_meta_resolve(specifier, parentFilename) {
+    const name = specifier === undefined || specifier === null ? "" : String(specifier);
+    const resolved = __autojs6_resolve_esm_module(name, parentFilename);
+    if (resolved.kind === "builtin") {
+      const builtinUrl = __autojs6_import_meta_builtin_url(resolved.name);
+      if (builtinUrl) {
+        return builtinUrl;
+      }
+      throw __autojs6_builtin_disabled(
+        "import.meta.resolve is restricted in Embedded Node partial ESM; builtin module '" + name + "' is not allowed."
+      );
+    }
+    return __autojs6_import_meta_file_url(resolved.resolved);
+  }
+  function __autojs6_import_meta_for_module(filename) {
+    const path = __autojs6_path_module();
+    const resolvedFilename = path && typeof path.resolve === "function"
+      ? (__autojs6_is_data_url_module_id(filename) ? String(filename || "") : path.resolve(filename))
+      : String(filename || "");
+    const entryFilename = path && typeof path.resolve === "function"
+      ? path.resolve(__autojs6_esm_entry_filename())
+      : String(__autojs6_esm_entry_filename() || "");
+    const dataUrlModule = __autojs6_is_data_url_module_id(resolvedFilename);
+    const meta = Object.create(null);
+    Object.defineProperties(meta, {
+      url: {
+        value: dataUrlModule ? resolvedFilename : __autojs6_import_meta_file_url(resolvedFilename),
+        enumerable: true
+      },
+      filename: {
+        value: dataUrlModule ? "" : resolvedFilename,
+        enumerable: true
+      },
+      dirname: {
+        value: dataUrlModule ? "" : __autojs6_module_dirname(resolvedFilename),
+        enumerable: true
+      },
+      main: {
+        value: !dataUrlModule && resolvedFilename === entryFilename,
+        enumerable: true
+      },
+      resolve: {
+        value: function(specifier) {
+          return __autojs6_import_meta_resolve(specifier, resolvedFilename);
+        },
+        enumerable: true
+      }
+    });
+    return Object.freeze(meta);
+  }
+  function __autojs6_transform_import_meta(source, sourceName) {
     const sourceText = String(source || "");
+    if (sourceText.indexOf("import.meta") < 0) {
+      return sourceText;
+    }
+    const masked = __autojs6_mask_non_code(sourceText);
+    let output = "";
+    let cursor = 0;
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__autojs6_is_identifier_token_at(masked, index, "import")) continue;
+      const nextIndex = index + "import".length;
+      if (masked.slice(nextIndex, nextIndex + 5) !== ".meta") continue;
+      if (__autojs6_is_identifier_part(masked.charAt(nextIndex + 5))) continue;
+      output += sourceText.slice(cursor, index);
+      output += "__autojs6_import_meta";
+      cursor = nextIndex + 5;
+    }
+    return output + sourceText.slice(cursor);
+  }
+  function __autojs6_esm_transform_module_source(source, filename, syncMode) {
+    const sourceText = String(source || "");
+    if (syncMode && __autojs6_contains_await_token(sourceText)) {
+      throw __autojs6_require_async_module(
+        "CommonJS require() cannot synchronously load AutoJs6 partial ESM module '" +
+          filename + "' because it contains await syntax."
+      );
+    }
     const masked = __autojs6_mask_non_code(sourceText);
     for (let index = 0; index < masked.length; index += 1) {
       if (!__autojs6_is_identifier_token_at(masked, index, "import")) continue;
       const nextIndex = __autojs6_skip_whitespace(masked, index + "import".length);
       const next = masked.charAt(nextIndex);
       if (next === "(") {
+        if (syncMode) {
+          throw __autojs6_require_async_module(
+            "CommonJS require() cannot synchronously load AutoJs6 partial ESM module '" +
+              filename + "' because it contains dynamic import()."
+          );
+        }
         if (!__autojs6_dynamic_import_experimental_enabled) {
           throw __autojs6_dynamic_import_unsupported(
-            __autojs6_esm_unsupported_message("dynamic import is disabled for experimental ESM module '" + filename + "'.")
+            __autojs6_esm_unsupported_message("dynamic import is disabled for partial ESM module '" + filename + "'.")
           );
         }
         continue;
       }
-      if (next === "." && masked.slice(nextIndex, nextIndex + 5) === ".meta") {
-        throw __autojs6_esm_error("import.meta is disabled for experimental ESM module '" + filename + "'.");
-      }
     }
-    const importPattern = /(^|[\r\n;])\s*import\s+(?:(.*?)\s+from\s+)?(["'])([^"'\r\n]+)\3\s*;?/g;
+    const importPattern = /(^|[\r\n;])\s*import\b\s*(?![.(])(?:(["'])([^"'\r\n]+)\2|([\s\S]*?)\s*from\s*(["'])([^"'\r\n]+)\5)(?:\s+(with|assert)\s*\{([^}]*)\})?[ \t]*(?=;|[\r\n]|$|\/\/|\/\*)/g;
     const bindingLines = [];
     let body = "";
     let cursor = 0;
@@ -26720,37 +45096,95 @@ std::string buildEmbeddedScriptExecutionSource(
       body += sourceText.slice(cursor, statementStart);
       cursor = statementEnd;
       const importVar = "__autojs6_esm_import_" + importIndex++;
-      const specifier = match[4];
+      const specifier = match[3] || match[6];
+      const attributes = __autojs6_esm_parse_static_import_attributes(match[7], match[8], filename, specifier);
       bindingLines.push(
-        "const " + importVar + " = await __autojs6_load_esm_module(" +
-          JSON.stringify(specifier) + ", " + JSON.stringify(filename) + ");"
+        "const " + importVar + " = " + (syncMode ? "__autojs6_load_esm_module_sync" : "await __autojs6_load_esm_module") + "(" +
+          JSON.stringify(specifier) + ", " + JSON.stringify(filename) + ", " + JSON.stringify(attributes) + ");"
       );
-      const specifierText = match[2] === undefined ? "" : match[2];
+      const specifierText = match[4] === undefined ? "" : match[4];
       Array.prototype.push.apply(
         bindingLines,
         __autojs6_esm_parse_import_bindings(specifierText, importVar, filename)
       );
     }
     body += sourceText.slice(cursor);
-    const exportTransform = __autojs6_esm_transform_exports(body, filename);
-    const transformedBody = __autojs6_transform_dynamic_import_calls(exportTransform.body, filename, "__filename");
-    const remaining = __autojs6_mask_non_code(transformedBody);
-    if (/(^|[\r\n;{}])\s*import\b/.test(remaining) || /(^|[\r\n;{}])\s*export\b/.test(remaining)) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM v1 found unsupported import/export syntax in " + filename + ".");
+    const exportTransform = __autojs6_esm_transform_exports(body, filename, syncMode, {
+      bindingLines,
+      nextIndex: importIndex
+    });
+    const importMetaBody = __autojs6_transform_import_meta(exportTransform.body, filename);
+    const transformedBody = __autojs6_transform_unsupported_unicode_identifier_regex_literals(
+      __autojs6_transform_dynamic_import_calls(importMetaBody, filename, "__filename")
+    );
+    if (__autojs6_esm_has_residual_import_export(transformedBody)) {
+      throw __autojs6_esm_error("Embedded Node partial ESM v1 found unsupported import/export syntax in " + filename + ".");
     }
     return bindingLines.join("\n") + "\n" + transformedBody + "\n" + exportTransform.tail;
   }
-  function __autojs6_load_esm_module(specifier, parentFilename) {
+  function __autojs6_load_esm_module_sync(specifier, parentFilename, importAttributes) {
     const resolved = __autojs6_resolve_esm_module(specifier, parentFilename);
+    __autojs6_esm_validate_import_attributes(resolved, importAttributes, specifier, parentFilename);
+    if (resolved.kind === "builtin") {
+      return __autojs6_esm_namespace_from_commonjs(__autojs6_restricted_require(resolved.name, null));
+    }
+    if (resolved.kind === "data-json") {
+      return __autojs6_load_esm_data_json_module(resolved);
+    }
+    if (resolved.kind === "data") {
+      return __autojs6_execute_esm_module_sync(resolved.resolved, resolved.record);
+    }
+    if (resolved.kind === "cjs") {
+      return __autojs6_esm_namespace_from_commonjs(__autojs6_load_local_module(resolved.resolved, null));
+    }
+    return __autojs6_execute_esm_module_sync(resolved.resolved, null);
+  }
+  function __autojs6_load_esm_module(specifier, parentFilename, importAttributes) {
+    const resolved = __autojs6_resolve_esm_module(specifier, parentFilename);
+    __autojs6_esm_validate_import_attributes(resolved, importAttributes, specifier, parentFilename);
     if (resolved.kind === "builtin") {
       return Promise.resolve(__autojs6_esm_namespace_from_commonjs(__autojs6_restricted_require(resolved.name, null)));
+    }
+    if (resolved.kind === "data-json") {
+      return Promise.resolve(__autojs6_load_esm_data_json_module(resolved));
+    }
+    if (resolved.kind === "data") {
+      return __autojs6_execute_esm_module(resolved.resolved, resolved.record);
     }
     if (resolved.kind === "cjs") {
       return Promise.resolve(__autojs6_esm_namespace_from_commonjs(__autojs6_load_local_module(resolved.resolved, null)));
     }
     return __autojs6_execute_esm_module(resolved.resolved, null);
   }
-  function __autojs6_dynamic_import(parentFilename, specifier) {
+  function __autojs6_load_esm_data_json_module(resolved) {
+    const id = resolved && resolved.resolved ? String(resolved.resolved) : "";
+    if (__autojs6_has_own(__autojs6_esm_module_cache, id)) {
+      const cached = __autojs6_esm_module_cache[id];
+      if (cached.evaluated) return cached.namespace;
+    }
+    let value;
+    try {
+      value = JSON.parse(String(resolved.record && resolved.record.source || ""));
+    } catch (error) {
+      throw __autojs6_esm_error(
+        "Invalid Embedded Node partial ESM JSON data URL module '" + id + "': " +
+          (error && error.message ? error.message : String(error)),
+        "ERR_INVALID_ARG_TYPE"
+      );
+    }
+    const namespace = __autojs6_esm_namespace_from_commonjs(value);
+    __autojs6_esm_module_cache[id] = {
+      namespace,
+      promise: null,
+      evaluated: true,
+      evaluating: false,
+      sync: true
+    };
+    __autojs6_esm_diagnostics.graphSize += 1;
+    __autojs6_esm_diagnostics.graphModules.push(id);
+    return namespace;
+  }
+  function __autojs6_dynamic_import(parentFilename, specifier, options) {
     return Promise.resolve().then(function() {
       if (!__autojs6_dynamic_import_experimental_enabled) {
         throw __autojs6_dynamic_import_unsupported(
@@ -26759,45 +45193,47 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       if (!__autojs6_esm_experimental_enabled) {
         throw __autojs6_esm_unsupported(
-          __autojs6_esm_unsupported_message("dynamic import requires experimental ESM to be enabled.")
+          __autojs6_esm_unsupported_message("dynamic import requires partial ESM to be enabled.")
         );
       }
       const name = specifier === undefined || specifier === null ? "" : String(specifier);
+      const importAttributes = __autojs6_esm_parse_dynamic_import_attributes(options, parentFilename || __autojs6_source_name, name);
       if (name.indexOf("\0") >= 0) {
-        throw __autojs6_esm_error("Embedded Node experimental dynamic import rejects NUL byte in specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
+        throw __autojs6_esm_error("Embedded Node local dynamic import rejects NUL byte in specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
       }
       const path = __autojs6_path_module();
       if (path.isAbsolute(name)) {
-        throw __autojs6_esm_error("Embedded Node experimental dynamic import rejects absolute path: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
+        throw __autojs6_esm_error("Embedded Node local dynamic import rejects absolute path: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
       }
       const protocolMatch = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(name);
-      if (protocolMatch) {
+      if (protocolMatch && !__autojs6_esm_builtin_specifier(name) && !__autojs6_is_data_url_module_id(name)) {
         const protocol = protocolMatch[1].toLowerCase();
         if (protocol === "http" || protocol === "https") {
-          throw __autojs6_error("Embedded Node experimental dynamic import rejects network URL imports: " + name, "ERR_AUTOJS6_NETWORK_DISABLED");
+          throw __autojs6_error("Embedded Node local dynamic import rejects network URL imports: " + name, "ERR_AUTOJS6_NETWORK_DISABLED");
         }
-        throw __autojs6_dynamic_import_unsupported("Embedded Node experimental dynamic import rejects URL/protocol imports: " + name);
+        throw __autojs6_dynamic_import_unsupported("Embedded Node local dynamic import rejects URL/protocol imports: " + name);
       }
-      if (!__autojs6_is_relative_module_name(name)) {
-        throw __autojs6_dynamic_import_unsupported(
-          "Embedded Node experimental dynamic import currently allows only local relative imports; package and builtin dynamic import is disabled: " + name
-        );
-      }
-      return __autojs6_load_esm_module(name, parentFilename || __autojs6_source_name);
+      return __autojs6_load_esm_module(name, parentFilename || __autojs6_source_name, importAttributes);
     });
   }
   function __autojs6_execute_esm_module(resolved, entryRecord) {
     if (__autojs6_has_own(__autojs6_esm_module_cache, resolved)) {
-      return __autojs6_esm_module_cache[resolved].promise;
+      const cached = __autojs6_esm_module_cache[resolved];
+      if (cached.promise) return cached.promise;
+      if (cached.evaluated) return Promise.resolve(cached.namespace);
+      return Promise.resolve(cached.namespace);
     }
     const record = entryRecord || __autojs6_module_record(resolved, true);
     if (!record) {
-      throw __autojs6_module_not_found("Cannot find Embedded Node experimental ESM module '" + resolved + "'.");
+      throw __autojs6_module_not_found("Cannot find Embedded Node partial ESM module '" + resolved + "'.");
     }
     const namespace = Object.create(null);
     const cacheRecord = {
       namespace,
-      promise: null
+      promise: null,
+      evaluated: false,
+      evaluating: true,
+      sync: false
     };
     __autojs6_esm_module_cache[resolved] = cacheRecord;
     __autojs6_esm_diagnostics.graphSize += 1;
@@ -26807,18 +45243,22 @@ std::string buildEmbeddedScriptExecutionSource(
       const moduleFunction = __autojs6_native_async_function(
         "__autojs6_load_esm_module",
         "__autojs6_dynamic_import",
+        "__autojs6_import_meta",
+        "__autojs6_esm_copy_star_exports",
         "__autojs6_esm_namespace",
         "require",
         "exports",
         "module",
         "__filename",
         "__dirname",
-        "\"use strict\";\n" + transformed + "\n//# sourceURL=" + (record.sourceURL || resolved)
+        "\"use strict\";\n{\n" + transformed + "\n}\n//# sourceURL=" + (record.sourceURL || resolved)
       );
       await moduleFunction.call(
         undefined,
         __autojs6_load_esm_module,
         __autojs6_dynamic_import,
+        __autojs6_import_meta_for_module(resolved),
+        __autojs6_esm_copy_star_exports,
         namespace,
         undefined,
         undefined,
@@ -26826,9 +45266,71 @@ std::string buildEmbeddedScriptExecutionSource(
         resolved,
         __autojs6_module_dirname(resolved)
       );
+      cacheRecord.evaluating = false;
+      cacheRecord.evaluated = true;
       return Object.freeze(namespace);
     })();
     return cacheRecord.promise;
+  }
+  function __autojs6_execute_esm_module_sync(resolved, entryRecord) {
+    if (__autojs6_has_own(__autojs6_esm_module_cache, resolved)) {
+      const cached = __autojs6_esm_module_cache[resolved];
+      if (cached.evaluated || cached.evaluating && cached.sync) {
+        return cached.namespace;
+      }
+      throw __autojs6_require_async_module(
+        "CommonJS require() cannot synchronously load AutoJs6 partial ESM module '" +
+          resolved + "' while it is already evaluating asynchronously."
+      );
+    }
+    const record = entryRecord || __autojs6_module_record(resolved, true);
+    if (!record) {
+      throw __autojs6_module_not_found("Cannot find Embedded Node partial ESM module '" + resolved + "'.");
+    }
+    const namespace = Object.create(null);
+    const cacheRecord = {
+      namespace,
+      promise: null,
+      evaluated: false,
+      evaluating: true,
+      sync: true
+    };
+    __autojs6_esm_module_cache[resolved] = cacheRecord;
+    __autojs6_esm_diagnostics.graphSize += 1;
+    __autojs6_esm_diagnostics.graphModules.push(resolved);
+    try {
+      const transformed = __autojs6_esm_transform_module_source(record.source, resolved, true);
+      const moduleFunction = __autojs6_native_function(
+        "__autojs6_load_esm_module_sync",
+        "__autojs6_import_meta",
+        "__autojs6_esm_copy_star_exports",
+        "__autojs6_esm_namespace",
+        "require",
+        "exports",
+        "module",
+        "__filename",
+        "__dirname",
+        "\"use strict\";\n{\n" + transformed + "\n}\n//# sourceURL=" + (record.sourceURL || resolved)
+      );
+      moduleFunction.call(
+        undefined,
+        __autojs6_load_esm_module_sync,
+        __autojs6_import_meta_for_module(resolved),
+        __autojs6_esm_copy_star_exports,
+        namespace,
+        undefined,
+        undefined,
+        undefined,
+        resolved,
+        __autojs6_module_dirname(resolved)
+      );
+      cacheRecord.evaluating = false;
+      cacheRecord.evaluated = true;
+      return Object.freeze(namespace);
+    } catch (error) {
+      delete __autojs6_esm_module_cache[resolved];
+      throw error;
+    }
   }
   function __autojs6_run_esm_entry() {
     const entry = __autojs6_esm_entry_filename();
@@ -26865,6 +45367,203 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_regex_literal_allowed(previous) {
     return !previous || "([{=:;,!&|?+-*~^<>".indexOf(previous) >= 0;
+  }
+  let __autojs6_unicode_property_regex_supported_cache = undefined;
+  function __autojs6_unicode_property_regex_supported() {
+    if (__autojs6_unicode_property_regex_supported_cache !== undefined) {
+      return __autojs6_unicode_property_regex_supported_cache;
+    }
+    try {
+      new RegExp("\\p{ID_Start}", "u");
+      new RegExp("\\p{ID_Continue}", "u");
+      new RegExp("\\p{ASCII}", "u");
+      new RegExp("\\P{ASCII}", "u");
+      __autojs6_unicode_property_regex_supported_cache = true;
+    } catch (_) {
+      __autojs6_unicode_property_regex_supported_cache = false;
+    }
+    return __autojs6_unicode_property_regex_supported_cache;
+  }
+  function __autojs6_regex_literal_close_index(text, start) {
+    let escaped = false;
+    let inClass = false;
+    for (let index = start + 1; index < text.length; index += 1) {
+      const ch = text.charAt(index);
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (ch === "[") {
+        inClass = true;
+        continue;
+      }
+      if (ch === "]") {
+        inClass = false;
+        continue;
+      }
+      if ((ch === "\n" || ch === "\r") && !inClass) {
+        return -1;
+      }
+      if (ch === "/" && !inClass) {
+        return index;
+      }
+    }
+    return -1;
+  }
+  function __autojs6_regex_literal_end_index(text, start) {
+    const close = __autojs6_regex_literal_close_index(text, start);
+    if (close < 0) return -1;
+    let end = close + 1;
+    while (end < text.length && /[A-Za-z]/.test(text.charAt(end))) {
+      end += 1;
+    }
+    return end;
+  }
+  function __autojs6_unicode_property_regex_replacement(token, inClass) {
+    if (token === "\\p{ID_Start}") {
+      return inClass ? "A-Za-z" : "[A-Za-z]";
+    }
+    if (token === "\\p{ID_Continue}") {
+      return inClass ? "0-9A-Za-z" : "[0-9A-Za-z]";
+    }
+    if (token === "\\p{ASCII}") {
+      return inClass ? "\\x00-\\x7F" : "[\\x00-\\x7F]";
+    }
+    if (token === "\\P{ASCII}") {
+      return inClass ? "\\x80-\\uFFFF" : "[\\x80-\\uFFFF]";
+    }
+    return null;
+  }
+  function __autojs6_source_needs_unicode_property_regex_rewrite(text) {
+    return text.indexOf("\\p{ID_") >= 0 ||
+      text.indexOf("\\p{ASCII}") >= 0 ||
+      text.indexOf("\\P{ASCII}") >= 0;
+  }
+  function __autojs6_rewrite_unicode_property_regex_literal(literal) {
+    const close = __autojs6_regex_literal_close_index(literal, 0);
+    if (close < 0) return literal;
+    const body = literal.slice(1, close);
+    let rewritten = "";
+    let inClass = false;
+    for (let index = 0; index < body.length; index += 1) {
+      const replacementTokens = ["\\p{ID_Start}", "\\p{ID_Continue}", "\\p{ASCII}", "\\P{ASCII}"];
+      let replaced = false;
+      for (const token of replacementTokens) {
+        if (body.slice(index, index + token.length) === token) {
+          rewritten += __autojs6_unicode_property_regex_replacement(token, inClass);
+          index += token.length - 1;
+          replaced = true;
+          break;
+        }
+      }
+      if (replaced) {
+        continue;
+      }
+      const ch = body.charAt(index);
+      if (ch === "\\") {
+        rewritten += body.slice(index, index + 2);
+        index += 1;
+        continue;
+      }
+      if (ch === "[") {
+        inClass = true;
+      } else if (ch === "]") {
+        inClass = false;
+      }
+      rewritten += ch;
+    }
+    return "/" + rewritten + literal.slice(close);
+  }
+  function __autojs6_transform_unsupported_unicode_identifier_regex_literals(source) {
+    const text = String(source || "");
+    if (!__autojs6_source_needs_unicode_property_regex_rewrite(text) || __autojs6_unicode_property_regex_supported()) {
+      return text;
+    }
+    let output = "";
+    let cursor = 0;
+    let state = "normal";
+    let previous = "";
+    let escaped = false;
+    for (let index = 0; index < text.length; index += 1) {
+      const ch = text.charAt(index);
+      const next = text.charAt(index + 1);
+      if (state === "line_comment") {
+        if (ch === "\n" || ch === "\r") state = "normal";
+        continue;
+      }
+      if (state === "block_comment") {
+        if (ch === "*" && next === "/") {
+          index += 1;
+          state = "normal";
+        }
+        continue;
+      }
+      if (state === "single" || state === "double" || state === "template") {
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+        if (ch === "\\") {
+          escaped = true;
+          continue;
+        }
+        if (
+          (state === "single" && ch === "'") ||
+          (state === "double" && ch === "\"") ||
+          (state === "template" && ch === "`")
+        ) {
+          state = "normal";
+        }
+        continue;
+      }
+      if (ch === "/" && next === "/") {
+        index += 1;
+        state = "line_comment";
+        continue;
+      }
+      if (ch === "/" && next === "*") {
+        index += 1;
+        state = "block_comment";
+        continue;
+      }
+      if (ch === "'") {
+        state = "single";
+        escaped = false;
+        continue;
+      }
+      if (ch === "\"") {
+        state = "double";
+        escaped = false;
+        continue;
+      }
+      if (ch === "`") {
+        state = "template";
+        escaped = false;
+        continue;
+      }
+      if (ch === "/" && __autojs6_regex_literal_allowed(previous)) {
+        const end = __autojs6_regex_literal_end_index(text, index);
+        if (end > index) {
+          const literal = text.slice(index, end);
+          if (__autojs6_source_needs_unicode_property_regex_rewrite(literal)) {
+            output += text.slice(cursor, index);
+            output += __autojs6_rewrite_unicode_property_regex_literal(literal);
+            cursor = end;
+          }
+          index = end - 1;
+          previous = "/";
+          continue;
+        }
+      }
+      if (!__autojs6_is_whitespace(ch)) {
+        previous = ch;
+      }
+    }
+    return output + text.slice(cursor);
   }
   function __autojs6_mask_non_code(source) {
     const text = String(source || "");
@@ -27075,15 +45774,25 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_attach_child_module(parentModule, cachedModule);
       return cachedModule.exports;
     }
-    const record = __autojs6_module_record(resolved);
+    const kind = __autojs6_esm_experimental_enabled ? __autojs6_esm_module_kind(resolved) : "";
+    const isEsmModule = kind === "esm";
+    const record = __autojs6_module_record(resolved, isEsmModule);
     if (!record) {
       throw __autojs6_module_not_found("Cannot find module '" + resolved + "'. Cannot find Embedded Node local module '" + resolved + "'.");
+    }
+    if (isEsmModule) {
+      return __autojs6_execute_esm_module_sync(resolved, record);
     }
     const module = __autojs6_create_module(resolved, parentModule);
     __autojs6_module_cache[resolved] = module;
     __autojs6_attach_child_module(parentModule, module);
     const extension = __autojs6_source_extension(resolved);
     __autojs6_throw_if_esm_extension(extension, resolved, "Embedded Node local module");
+    if (extension === ".ts" && __autojs6_package_type_module_for_file(resolved)) {
+      throw __autojs6_require_esm_unsupported(
+        "CommonJS require() cannot load AutoJs6 partial ESM TypeScript modules in AutoJs6 Safe Node Profile: " + resolved
+      );
+    }
     if (extension === ".json") {
       try {
         module.exports = JSON.parse(record.source);
@@ -27100,11 +45809,13 @@ std::string buildEmbeddedScriptExecutionSource(
       module.loaded = true;
       return module.exports;
     }
-    if (extension === ".js") {
+    if (extension === ".js" || extension === ".ts") {
       __autojs6_record_type_module_commonjs_policy(resolved);
     }
     __autojs6_assert_common_js_source_supported(record.source, resolved);
-    const transformedSource = __autojs6_transform_dynamic_import_calls(record.source, resolved, "__filename");
+    const transformedSource = __autojs6_transform_unsupported_unicode_identifier_regex_literals(
+      __autojs6_transform_dynamic_import_calls(record.source, resolved, "__filename")
+    );
     const moduleFunction = __autojs6_native_function(
       "exports",
       "require",
@@ -27140,6 +45851,60 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "autojs6:bridge") {
       return "autojs6:bridge";
     }
+    if (name === "autojs6:compat") {
+      return "autojs6:compat";
+    }
+    if (name === "rhino") {
+      return "rhino";
+    }
+    if (name === "files") {
+      return "files";
+    }
+    if (name === "base64") {
+      return "base64";
+    }
+    if (name === "colors") {
+      return "colors";
+    }
+    if (name === "formatter" || name === "fmt") {
+      return "formatter";
+    }
+    if (name === "converter" || name === "cvt") {
+      return "converter";
+    }
+    if (name === "s13n") {
+      return "s13n";
+    }
+    if (name === "mime") {
+      return "mime";
+    }
+    if (name === "nanoid") {
+      return "nanoid";
+    }
+    if (name === "opencc") {
+      return "opencc";
+    }
+    if (name === "pinyin") {
+      return "pinyin";
+    }
+    if (name === "pinyin4j") {
+      return "pinyin4j";
+    }
+    if (name === "jsox") {
+      return "jsox";
+    }
+    if (name === "jsox.mathx") {
+      return "jsox.mathx";
+    }
+    if (name === "jsox.arrayx") {
+      return "jsox.arrayx";
+    }
+    if (name === "jsox.numberx") {
+      return "jsox.numberx";
+    }
+    if (name === "autojs6:lifecycle") {
+      return "autojs6:lifecycle";
+    }
     if (name === "toast") {
       return "toast";
     }
@@ -27164,6 +45929,48 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "images") {
       return "images";
     }
+    if (name === "ocr") {
+      return "ocr";
+    }
+    if (name === "barcode") {
+      return "barcode";
+    }
+    if (name === "media") {
+      return "media";
+    }
+    if (name === "mediainfo") {
+      return "mediainfo";
+    }
+    if (name === "recorder") {
+      return "recorder";
+    }
+    if (name === "storage") {
+      return "storage";
+    }
+    if (name === "storages") {
+      return "storages";
+    }
+    if (name === "database") {
+      return "database";
+    }
+    if (name === "sqlite") {
+      return "sqlite";
+    }
+    if (name === "notifications") {
+      return "notifications";
+    }
+    if (name === "sensors") {
+      return "sensors";
+    }
+    if (name === "ui") {
+      return "ui";
+    }
+    if (name === "ui.overlay") {
+      return "ui.overlay";
+    }
+    if (name === "input_observer") {
+      return "input_observer";
+    }
     if (name === "clipboard") {
       return "clipboard";
     }
@@ -27176,11 +45983,23 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "fetch") {
       return "fetch";
     }
+    if (name === "axios") {
+      return "axios";
+    }
     if (name === "websocket") {
       return "websocket";
     }
     if (name === "work_manager") {
       return "work_manager";
+    }
+    if (name === "package_manager") {
+      return "package_manager";
+    }
+    if (name === "npm") {
+      return "npm";
+    }
+    if (name === "plugins") {
+      return "plugins";
     }
     if (name === "java") {
       if (!__autojs6_java_interop_experimental_enabled) {
@@ -27188,8 +46007,17 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       return "java";
     }
-    if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
+    if (name === "node:worker_threads") {
       return "worker_threads";
+    }
+    if (name === "worker_threads" && __autojs6_worker_threads_experimental_enabled) {
+      return "worker_threads";
+    }
+    if ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled) {
+      return "child_process";
+    }
+    if (name === "node:test") {
+      return "node:test";
     }
     if (name === "fs" || name === "node:fs") {
       return "fs";
@@ -27205,6 +46033,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "v8" || name === "node:v8") {
       return "v8";
+    }
+    if (name === "vm" || name === "node:vm") {
+      return "vm";
     }
     if (name === "tty" || name === "node:tty") {
       return "tty";
@@ -27317,17 +46148,18 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_has_own(__autojs6_require_builtin_allowlist, name)) {
       return __autojs6_require_builtin_allowlist[name];
     }
+    const __autojs6_require_resolution_mode = __autojs6_commonjs_require_resolution_mode();
     if (__autojs6_is_relative_module_name(name)) {
-      return __autojs6_resolve_local_module(name, parentFilename);
+      return __autojs6_resolve_local_module(name, parentFilename, __autojs6_require_resolution_mode);
     }
     if (name.indexOf("#") === 0) {
-      return __autojs6_resolve_package_import(name, parentFilename);
+      return __autojs6_resolve_package_import(name, parentFilename, __autojs6_require_resolution_mode);
     }
     if (__autojs6_denied_builtin_module_name(name)) {
       throw __autojs6_builtin_disabled("require.resolve is restricted in Embedded Node.js MVP; builtin module '" + name + "' is not allowed.");
     }
     if (name) {
-      return __autojs6_resolve_node_modules_module(name, parentFilename);
+      return __autojs6_resolve_node_modules_module(name, parentFilename, __autojs6_require_resolution_mode);
     }
     throw new Error("require.resolve is restricted in Embedded Node.js MVP; module name must be non-empty.");
     } catch (error) {
@@ -27361,6 +46193,60 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "autojs6:bridge") {
       return __autojs6_bridge_module();
     }
+    if (name === "autojs6:compat") {
+      return __autojs6_limited_rhino_compat();
+    }
+    if (name === "rhino") {
+      return __autojs6_limited_rhino();
+    }
+    if (name === "files") {
+      return __autojs6_limited_files();
+    }
+    if (name === "base64") {
+      return __autojs6_limited_base64();
+    }
+    if (name === "colors") {
+      return __autojs6_limited_colors();
+    }
+    if (name === "formatter" || name === "fmt") {
+      return __autojs6_limited_formatter();
+    }
+    if (name === "converter" || name === "cvt") {
+      return __autojs6_limited_converter();
+    }
+    if (name === "s13n") {
+      return __autojs6_limited_s13n();
+    }
+    if (name === "mime") {
+      return __autojs6_limited_mime();
+    }
+    if (name === "nanoid") {
+      return __autojs6_limited_nanoid();
+    }
+    if (name === "opencc") {
+      return __autojs6_limited_opencc();
+    }
+    if (name === "pinyin") {
+      return __autojs6_limited_pinyin();
+    }
+    if (name === "pinyin4j") {
+      return __autojs6_limited_pinyin4j();
+    }
+    if (name === "jsox") {
+      return __autojs6_limited_jsox();
+    }
+    if (name === "jsox.mathx") {
+      return __autojs6_limited_jsox_mathx();
+    }
+    if (name === "jsox.arrayx") {
+      return __autojs6_limited_jsox_arrayx();
+    }
+    if (name === "jsox.numberx") {
+      return __autojs6_limited_jsox_numberx();
+    }
+    if (name === "autojs6:lifecycle") {
+      return __autojs6_limited_lifecycle();
+    }
     if (name === "toast") {
       return __autojs6_limited_toast();
     }
@@ -27385,6 +46271,48 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "images") {
       return __autojs6_limited_image("images");
     }
+    if (name === "ocr") {
+      return __autojs6_limited_ocr();
+    }
+    if (name === "barcode") {
+      return __autojs6_limited_barcode();
+    }
+    if (name === "media") {
+      return __autojs6_limited_media();
+    }
+    if (name === "mediainfo") {
+      return __autojs6_limited_mediainfo();
+    }
+    if (name === "recorder") {
+      return __autojs6_limited_recorder();
+    }
+    if (name === "storage") {
+      return __autojs6_limited_storage("storage");
+    }
+    if (name === "storages") {
+      return __autojs6_limited_storage("storages");
+    }
+    if (name === "database") {
+      return __autojs6_limited_database("database");
+    }
+    if (name === "sqlite") {
+      return __autojs6_limited_database("sqlite");
+    }
+    if (name === "notifications") {
+      return __autojs6_limited_notifications();
+    }
+    if (name === "sensors") {
+      return __autojs6_limited_sensors();
+    }
+    if (name === "ui") {
+      return __autojs6_limited_ui();
+    }
+    if (name === "ui.overlay") {
+      return __autojs6_limited_ui_overlay();
+    }
+    if (name === "input_observer") {
+      return __autojs6_limited_input_observer();
+    }
     if (name === "clipboard") {
       return __autojs6_limited_clipboard();
     }
@@ -27397,17 +46325,41 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "fetch") {
       return __autojs6_limited_fetch();
     }
+    if (name === "undici") {
+      return __autojs6_limited_undici();
+    }
+    if (name === "axios") {
+      return __autojs6_limited_axios();
+    }
     if (name === "websocket") {
       return __autojs6_limited_websocket();
     }
     if (name === "work_manager") {
       return __autojs6_limited_work_manager();
     }
+    if (name === "package_manager") {
+      return __autojs6_limited_package_manager();
+    }
+    if (name === "npm") {
+      return __autojs6_limited_npm();
+    }
+    if (name === "plugins") {
+      return __autojs6_limited_plugins();
+    }
     if (name === "java") {
       return __autojs6_limited_java();
     }
+    if (name === "node:worker_threads" && !__autojs6_worker_threads_experimental_enabled) {
+      return __autojs6_worker_threads_shape_facade();
+    }
     if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
       return __autojs6_limited_worker_threads();
+    }
+    if ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled) {
+      return __autojs6_child_process_builtin(name);
+    }
+    if (name === "node:test") {
+      return __autojs6_limited_node_test();
     }
     if (name === "fs" || name === "node:fs") {
       return __autojs6_scoped_fs();
@@ -27423,6 +46375,11 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "v8" || name === "node:v8") {
       return __autojs6_limited_v8();
+    }
+    if (name === "vm" || name === "node:vm") {
+      const moduleValue = __autojs6_vm_module();
+      if (moduleValue) return moduleValue;
+      throw __autojs6_builtin_disabled("require is restricted in Embedded Node.js MVP; builtin module '" + name + "' is unavailable.");
     }
     if (name === "tty" || name === "node:tty") {
       return __autojs6_limited_tty();
@@ -27449,18 +46406,28 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_limited_crypto();
     }
     if (name === "dns" || name === "node:dns") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_dns();
     }
     if (name === "dns/promises" || name === "node:dns/promises") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_dns_promises();
     }
     if (name === "http" || name === "node:http") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_http("http");
     }
     if (name === "https" || name === "node:https") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_http("https");
     }
     if (name === "net" || name === "node:net") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_net();
     }
     if (name === "os" || name === "node:os") {
@@ -27500,6 +46467,8 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_limited_timers_promises();
     }
     if (name === "tls" || name === "node:tls") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_tls();
     }
     if (name === "stream" || name === "node:stream") {
@@ -27541,17 +46510,18 @@ std::string buildEmbeddedScriptExecutionSource(
         "require is restricted in Embedded Node.js MVP; allowlisted module '" + name + "' is unavailable."
       );
     }
+    const __autojs6_require_resolution_mode = __autojs6_commonjs_require_resolution_mode();
     if (__autojs6_is_relative_module_name(name)) {
-      return __autojs6_load_local_module(__autojs6_resolve_local_module(name, parentFilename), parentModule);
+      return __autojs6_load_local_module(__autojs6_resolve_local_module(name, parentFilename, __autojs6_require_resolution_mode), parentModule);
     }
     if (name.indexOf("#") === 0) {
-      return __autojs6_load_local_module(__autojs6_resolve_package_import(name, parentFilename), parentModule);
+      return __autojs6_load_local_module(__autojs6_resolve_package_import(name, parentFilename, __autojs6_require_resolution_mode), parentModule);
     }
     if (__autojs6_denied_builtin_module_name(name)) {
       throw __autojs6_builtin_disabled("require is restricted in Embedded Node.js MVP; builtin module '" + name + "' is not allowed.");
     }
     if (name) {
-      return __autojs6_load_local_module(__autojs6_resolve_node_modules_module(name, parentFilename), parentModule);
+      return __autojs6_load_local_module(__autojs6_resolve_node_modules_module(name, parentFilename, __autojs6_require_resolution_mode), parentModule);
     }
     throw new Error(
       name
@@ -27574,15 +46544,27 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_resolve_trace_end(traceRecord);
     }
   }
-  function __autojs6_disabled_builtin_module(moduleName) {
-    const name = moduleName === undefined ? "" : String(moduleName);
-    throw __autojs6_error(
-      name
-        ? "process.getBuiltinModule is disabled in Embedded Node.js MVP; module '" + name + "' is not available."
-        : "process.getBuiltinModule is disabled in Embedded Node.js MVP.",
-      "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED",
-      "ERR_AUTOJS6_PROCESS_API_DISABLED"
-    );
+  function __autojs6_process_get_builtin_module(moduleName) {
+    if (typeof moduleName !== "string") {
+      throw __autojs6_invalid_arg_type("The \"id\" argument must be of type string.");
+    }
+    const name = moduleName;
+    if (!name) return undefined;
+    const bareName = name.indexOf("node:") === 0 ? name.slice("node:".length) : name;
+    const knownControlledBuiltin = __autojs6_limited_module_is_builtin(name);
+    const knownDeniedBuiltin = __autojs6_has_own(__autojs6_require_builtin_denylist, bareName) ||
+      name === "node:test/reporters";
+    if (!knownControlledBuiltin && !knownDeniedBuiltin) {
+      return undefined;
+    }
+    if (!knownControlledBuiltin && knownDeniedBuiltin) {
+      throw __autojs6_error(
+        "process.getBuiltinModule is restricted in Embedded Node.js MVP; builtin module '" + name + "' is disabled or not allowed.",
+        "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED",
+        "ERR_AUTOJS6_BUILTIN_DISABLED"
+      );
+    }
+    return __autojs6_restricted_require(name, null);
   }
   function __autojs6_install_require_guard(mainModule) {
     __autojs6_prime_restricted_require();
@@ -27601,17 +46583,17 @@ std::string buildEmbeddedScriptExecutionSource(
     }
   }
   function __autojs6_install_builtin_module_guard() {
-    if (typeof process !== "object" || !process || typeof process.getBuiltinModule !== "function") return;
+    if (typeof process !== "object" || !process) return;
     try {
       Object.defineProperty(process, "getBuiltinModule", {
-        value: __autojs6_disabled_builtin_module,
+        value: __autojs6_process_get_builtin_module,
         configurable: true,
         enumerable: false,
         writable: false
       });
     } catch (_) {
       try {
-        process.getBuiltinModule = __autojs6_disabled_builtin_module;
+        process.getBuiltinModule = __autojs6_process_get_builtin_module;
       } catch (_) {}
     }
   }
@@ -27629,12 +46611,17 @@ std::string buildEmbeddedScriptExecutionSource(
       pendingIntervalCount,
       pendingImmediateCount,
       pendingScopedFsCallbacks: __autojs6_pending_scoped_fs_callbacks,
+      pendingScopedFsStreams: __autojs6_pending_scoped_fs_streams.length > 0,
+      pendingScopedFsStreamCount: __autojs6_pending_scoped_fs_streams.length,
       pendingScopedFsWatchCount: __autojs6_scoped_fs_watch_records.length,
       pendingScopedFsWatchFileCount: __autojs6_scoped_watch_file_records.length,
       pendingWorkerCount: __autojs6_worker_threads_diagnostics.activeWorkerCount,
       pendingCryptoCallbacks: __autojs6_pending_crypto_callbacks,
       pendingDnsCallbacks: __autojs6_pending_dns_callbacks,
       pendingZlibCallbacks: __autojs6_pending_zlib_callbacks,
+      pendingNodeTestCallbacks: __autojs6_pending_node_test_callbacks,
+      pendingZlibStreams: __autojs6_pending_zlib_streams.length > 0,
+      pendingZlibStreamCount: __autojs6_pending_zlib_streams.length,
       pendingAsyncCallbacks,
       pendingWorkers: __autojs6_worker_threads_diagnostics.activeWorkerCount > 0,
       pendingCallbacks: pendingAsyncCallbacks > 0
@@ -27652,6 +46639,9 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.stderrBytes = __autojs6_output_capture_state.stderrBytes;
     fields.stdoutTruncated = __autojs6_output_capture_state.stdoutTruncated;
     fields.stderrTruncated = __autojs6_output_capture_state.stderrTruncated;
+    fields.consoleEventsJson = __autojs6_console_events_json();
+    fields.consoleEventCount = __autojs6_console_events.length;
+    fields.consoleEventsTruncated = __autojs6_console_events_truncated;
     fields.chdirFailureReason = __autojs6_chdir_last_failure_reason;
     fields.createRequireFailureReason = __autojs6_create_require_last_failure_reason;
     fields.nodeVersion = __autojs6_node_version();
@@ -27664,6 +46654,8 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.pendingIntervalCount = summary.pendingIntervalCount;
     fields.pendingImmediateCount = summary.pendingImmediateCount;
     fields.pendingScopedFsCallbacks = summary.pendingScopedFsCallbacks;
+    fields.pendingScopedFsStreams = summary.pendingScopedFsStreams;
+    fields.pendingScopedFsStreamCount = summary.pendingScopedFsStreamCount;
     fields.pendingScopedFsWatchCount = summary.pendingScopedFsWatchCount;
     fields.pendingScopedFsWatchFileCount = summary.pendingScopedFsWatchFileCount;
     fields.pendingWorkers = summary.pendingWorkers;
@@ -27671,6 +46663,9 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.pendingCryptoCallbacks = summary.pendingCryptoCallbacks;
     fields.pendingDnsCallbacks = summary.pendingDnsCallbacks;
     fields.pendingZlibCallbacks = summary.pendingZlibCallbacks;
+    fields.pendingNodeTestCallbacks = summary.pendingNodeTestCallbacks;
+    fields.pendingZlibStreams = summary.pendingZlibStreams;
+    fields.pendingZlibStreamCount = summary.pendingZlibStreamCount;
     fields.pendingAsyncCallbacks = summary.pendingAsyncCallbacks;
     fields.pendingCallbacks = summary.pendingCallbacks;
     fields.pendingSummary = summary;
@@ -27716,7 +46711,21 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.workerCleanupTerminateRequestedCount = __autojs6_worker_threads_diagnostics.cleanupTerminateRequestedCount;
     fields.workerCleanupErrorCount = __autojs6_worker_threads_diagnostics.cleanupErrorCount;
     fields.workerCleanupPendingMessageRejectedCount = __autojs6_worker_threads_diagnostics.cleanupPendingMessageRejectedCount;
+    fields.workerMessagePortActiveCount = __autojs6_worker_threads_diagnostics.activeMessagePortCount;
+    fields.workerMessagePortMaxActiveCount = __autojs6_worker_threads_diagnostics.maxActiveMessagePortCount;
+    fields.workerMessagePortCreatedCount = __autojs6_worker_threads_diagnostics.messagePortCreatedCount;
+    fields.workerMessagePortClosedCount = __autojs6_worker_threads_diagnostics.messagePortClosedCount;
+    fields.workerMessageRejectedCount = __autojs6_worker_threads_diagnostics.messageRejectedCount;
+    fields.workerPoolActiveCount = __autojs6_worker_threads_diagnostics.activeWorkerPoolCount;
+    fields.workerPoolMaxActiveCount = __autojs6_worker_threads_diagnostics.maxActiveWorkerPoolCount;
+    fields.workerPoolCreatedCount = __autojs6_worker_threads_diagnostics.workerPoolCreatedCount;
+    fields.workerPoolClosedCount = __autojs6_worker_threads_diagnostics.workerPoolClosedCount;
+    fields.workerPoolTaskCompletedCount = __autojs6_worker_threads_diagnostics.workerPoolTaskCompletedCount;
+    fields.workerPoolTaskCancelledCount = __autojs6_worker_threads_diagnostics.workerPoolTaskCancelledCount;
+    fields.workerPoolTaskTimeoutCount = __autojs6_worker_threads_diagnostics.workerPoolTaskTimeoutCount;
+    fields.workerPoolQueueRejectedCount = __autojs6_worker_threads_diagnostics.workerPoolQueueRejectedCount;
     fields.workerLastPolicyRejection = __autojs6_worker_threads_diagnostics.lastPolicyRejection;
+    fields.workerLastMessageRejection = __autojs6_worker_threads_diagnostics.lastMessageRejection;
     fields.sourceMapEnabled = __autojs6_source_map_diagnostics.enabled;
     fields.sourceMapLoadedCount = __autojs6_source_map_diagnostics.loadedCount;
     fields.sourceMapMappedFrameCount = __autojs6_source_map_diagnostics.mappedFrameCount;
@@ -27724,14 +46733,36 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.sourceMapLastSource = __autojs6_source_map_diagnostics.lastSource;
     fields.sourceMapLastMap = __autojs6_source_map_diagnostics.lastMap;
     fields.sourceMapLastError = __autojs6_source_map_diagnostics.lastError;
+    fields.compileCacheRequested = __autojs6_compile_cache_diagnostics.requested;
+    fields.compileCacheEnabled = __autojs6_compile_cache_diagnostics.enabled;
+    fields.compileCacheStatus = __autojs6_compile_cache_diagnostics.status;
+    fields.compileCacheStatusCode = __autojs6_compile_cache_diagnostics.statusCode;
+    fields.compileCacheDirectory = __autojs6_compile_cache_diagnostics.directory;
+    fields.compileCacheKey = __autojs6_compile_cache_diagnostics.key;
+    fields.compileCacheRuntimeKey = __autojs6_compile_cache_diagnostics.runtimeKey;
+    fields.compileCacheProjectKey = __autojs6_compile_cache_diagnostics.projectKey;
+    fields.compileCacheLoader = __autojs6_compile_cache_diagnostics.loader;
+    fields.compileCacheSchema = __autojs6_compile_cache_diagnostics.schema;
+    fields.compileCacheMessage = __autojs6_compile_cache_diagnostics.message;
+    fields.compileCacheV8Version = __autojs6_compile_cache_diagnostics.v8Version;
+    fields.compileCacheFlushSupported = __autojs6_compile_cache_diagnostics.flushSupported;
+    fields.compileCacheFlushAttempted = __autojs6_compile_cache_diagnostics.flushAttempted;
+    fields.compileCacheFlushed = __autojs6_compile_cache_diagnostics.flushed;
+    fields.compileCacheCustomLoader = __autojs6_compile_cache_diagnostics.customLoader;
+    fields.compileCacheHitCount = __autojs6_compile_cache_diagnostics.hitCount;
+    fields.compileCacheMissCount = __autojs6_compile_cache_diagnostics.missCount;
+    fields.compileCacheHitMissStatus = __autojs6_compile_cache_diagnostics.hitMissStatus;
     return fields;
   }
   function __autojs6_finish_success(value) {
     if (__autojs6_finished) return;
     __autojs6_terminate_all_worker_threads("script success");
+    __autojs6_destroy_all_zlib_streams("script success");
+    __autojs6_destroy_all_scoped_fs_streams("script success");
     __autojs6_close_all_scoped_fs_watches();
     __autojs6_close_all_scoped_watch_files();
     __autojs6_close_all_scoped_fds();
+    __autojs6_flush_compile_cache("script success");
     __autojs6_finished = true;
     globalThis.__autojs6_probe_result = JSON.stringify(__autojs6_result_envelope({
       succeeded: true,
@@ -27743,12 +46774,41 @@ std::string buildEmbeddedScriptExecutionSource(
       errorCode: ""
     }));
   }
-  function __autojs6_finish_error(error) {
+  function __autojs6_finish_process_exit(exitCode) {
     if (__autojs6_finished) return;
-    __autojs6_terminate_all_worker_threads("script failure");
+    const normalizedExitCode = Number.isFinite(Number(exitCode)) ? Math.trunc(Number(exitCode)) : 0;
+    const succeeded = normalizedExitCode === 0;
+    __autojs6_terminate_all_worker_threads("process.exit");
+    __autojs6_destroy_all_zlib_streams("process.exit");
+    __autojs6_destroy_all_scoped_fs_streams("process.exit");
     __autojs6_close_all_scoped_fs_watches();
     __autojs6_close_all_scoped_watch_files();
     __autojs6_close_all_scoped_fds();
+    __autojs6_flush_compile_cache("process.exit");
+    __autojs6_finished = true;
+    globalThis.__autojs6_probe_result = JSON.stringify(__autojs6_result_envelope({
+      succeeded,
+      exitCode: normalizedExitCode,
+      resultText: "",
+      errorName: succeeded ? "" : "AutoJs6ProcessExit",
+      errorMessage: succeeded ? "" : "process.exit(" + normalizedExitCode + ")",
+      errorStack: "",
+      errorCode: succeeded ? "" : "ERR_AUTOJS6_PROCESS_EXIT"
+    }));
+  }
+  function __autojs6_finish_error(error) {
+    if (__autojs6_finished) return;
+    if (__autojs6_is_process_exit_signal(error)) {
+      __autojs6_finish_process_exit(error.exitCode);
+      return;
+    }
+    __autojs6_terminate_all_worker_threads("script failure");
+    __autojs6_destroy_all_zlib_streams("script failure");
+    __autojs6_destroy_all_scoped_fs_streams("script failure");
+    __autojs6_close_all_scoped_fs_watches();
+    __autojs6_close_all_scoped_watch_files();
+    __autojs6_close_all_scoped_fds();
+    __autojs6_flush_compile_cache("script failure");
     __autojs6_finished = true;
     globalThis.__autojs6_probe_result = JSON.stringify(__autojs6_result_envelope({
       succeeded: false,
@@ -27780,26 +46840,33 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_install_console_shim();
     __autojs6_install_safe_globals();
     __autojs6_install_timer_diagnostics();
-    __autojs6_install_process_mvp();
+    const __autojs6_run_entry_as_esm = __autojs6_should_run_entry_as_esm();
+    const __autojs6_main_filename = __autojs6_run_entry_as_esm
+      ? __autojs6_entry_filename()
+      : __autojs6_source_name;
+    __autojs6_install_process_mvp(__autojs6_main_filename);
+    __autojs6_install_compile_cache();
     __autojs6_install_output_capture();
     __autojs6_install_tty_stdio_helpers();
-    const __autojs6_main_module = __autojs6_create_module(__autojs6_source_name, null);
+    const __autojs6_main_module = __autojs6_create_module(__autojs6_main_filename, null);
     __autojs6_main_module_ref = __autojs6_main_module;
     __autojs6_module_cache[__autojs6_main_module.filename] = __autojs6_main_module;
     __autojs6_install_require_guard(__autojs6_main_module);
     __autojs6_install_builtin_module_guard();
+    __autojs6_install_autojs_global();
     __autojs6_install_error_handlers();
-    const __autojs6_run_entry_as_esm = __autojs6_should_run_entry_as_esm();
     __autojs6_install_dynamic_code_guard();
     let __autojs6_user_result;
     if (__autojs6_run_entry_as_esm) {
       __autojs6_user_result = __autojs6_run_esm_entry();
     } else {
       __autojs6_assert_common_js_source_supported(__autojs6_source, __autojs6_source_name);
-      const __autojs6_transformed_source = __autojs6_transform_dynamic_import_calls(
-        __autojs6_source,
-        __autojs6_source_name,
-        "__filename"
+      const __autojs6_transformed_source = __autojs6_transform_unsupported_unicode_identifier_regex_literals(
+        __autojs6_transform_dynamic_import_calls(
+          __autojs6_source,
+          __autojs6_source_name,
+          "__filename"
+        )
       );
       const __autojs6_user_function = __autojs6_native_function(
         "exports",

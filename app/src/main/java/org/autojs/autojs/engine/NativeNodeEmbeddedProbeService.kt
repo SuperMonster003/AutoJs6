@@ -12,6 +12,8 @@ import android.os.Looper
 import android.os.Process
 import android.os.ResultReceiver
 import android.os.SystemClock
+import android.system.Os
+import android.system.OsConstants
 import android.util.Log
 import org.autojs.autojs.App
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -76,6 +78,9 @@ class NativeNodeEmbeddedProbeService : Service() {
         val pid = Process.myPid()
         Log.i(TAG, "probe.enter processName=$processName pid=$pid level=$probeLevel")
         try {
+            if (runFatalCrashEvidenceProbeIfRequested(intent, receiver, processName, pid)) {
+                return
+            }
             val probeResult = if (probeLevel == NativeNodeEmbeddedRuntimeBridge.PROBE_LEVEL_KOTLIN_ROUND_TRIP) {
                 runKotlinRoundTripProbe(probeLevel, processName, pid, startedAt)
             } else {
@@ -109,6 +114,54 @@ class NativeNodeEmbeddedProbeService : Service() {
             stopSelf(startId)
             scheduleProcessExit(0)
         }
+    }
+
+    private fun runFatalCrashEvidenceProbeIfRequested(
+        intent: Intent,
+        receiver: ResultReceiver?,
+        processName: String,
+        pid: Int,
+    ): Boolean {
+        if (!intent.getBooleanExtra(EXTRA_FATAL_CRASH_EVIDENCE_PROBE, false)) {
+            return false
+        }
+        val executionId = intent.getStringExtra(EXTRA_FATAL_CRASH_EVIDENCE_EXECUTION_ID)
+            ?.takeIf { it.isNotBlank() }
+            ?: "p13-native-fatal-chaos-${System.currentTimeMillis()}"
+        val marker = NodeCrashEvidenceStore.begin(
+            context = this,
+            executionId = executionId,
+            sourceName = "p13-native-fatal-chaos-sigkill.js",
+            workingDirectory = filesDir.absolutePath,
+            executionMode = "native_process",
+            launchSurface = "embedded_probe_service",
+            timeoutMs = intent.getLongExtra(EXTRA_FATAL_CRASH_EVIDENCE_TIMEOUT_MS, FATAL_CRASH_EVIDENCE_TIMEOUT_MS),
+            runtimeAdapter = "embedded_node_probe",
+            runtimeSlotId = EMBEDDED_PROBE_PROCESS_SUFFIX,
+            scenario = "native_fatal_chaos_injection",
+        )
+        if (marker == null) {
+            receiver?.send(
+                RESULT_PROBE,
+                Bundle().apply {
+                    putBoolean(EXTRA_SUCCEEDED, false)
+                    putString(EXTRA_FORMATTED_LOG, "Fatal crash evidence marker creation failed.")
+                    putString(EXTRA_ERROR_MESSAGE, "Fatal crash evidence marker creation failed.")
+                },
+            )
+            return true
+        }
+        Log.w(
+            TAG,
+            "fatal_crash_evidence.kill processName=$processName pid=$pid marker=${marker.id} signal=SIGKILL",
+        )
+        killFatalCrashEvidenceProcess(pid)
+    }
+
+    private fun killFatalCrashEvidenceProcess(pid: Int): Nothing {
+        runCatching { Os.kill(pid, OsConstants.SIGKILL) }
+        Process.killProcess(pid)
+        exitProcess(137)
     }
 
     private fun runKotlinRoundTripProbe(
@@ -195,6 +248,9 @@ class NativeNodeEmbeddedProbeService : Service() {
         private const val ACTION_PROBE = "org.autojs.autojs.engine.action.PROBE_NATIVE_NODE_EMBEDDED"
         private const val EXTRA_RESULT_RECEIVER = "result_receiver"
         private const val EXTRA_PROBE_LEVEL = "probe_level"
+        private const val EXTRA_FATAL_CRASH_EVIDENCE_PROBE = "fatal_crash_evidence_probe"
+        private const val EXTRA_FATAL_CRASH_EVIDENCE_EXECUTION_ID = "fatal_crash_evidence_execution_id"
+        private const val EXTRA_FATAL_CRASH_EVIDENCE_TIMEOUT_MS = "fatal_crash_evidence_timeout_ms"
         private const val EXTRA_INITIALIZE_PROBE = "initialize_probe"
         private const val EXTRA_ISOLATE_PROBE = "isolate_probe"
         private const val EXTRA_UVLOOP_PROBE = "uvloop_probe"
@@ -611,6 +667,8 @@ class NativeNodeEmbeddedProbeService : Service() {
         private const val RESULT_PROBE = 1
         private const val NOTIFICATION_ID = 0xA6E3
         private const val EMBEDDED_PROBE_PROCESS_SUFFIX = ":nodejs_embedded"
+        private const val PROBE_LEVEL_FATAL_CRASH_EVIDENCE = 54
+        private const val FATAL_CRASH_EVIDENCE_TIMEOUT_MS = 3000L
         private const val PROCESS_EXIT_DELAY_MS = 250L
 
         private data class InlineProbeRequest(
@@ -1052,6 +1110,65 @@ class NativeNodeEmbeddedProbeService : Service() {
             }
             return result.get()
                 ?: processCrashedOrTimedOut(probeLevel, "Embedded probe process crashed or timed out at level $probeLevel.")
+        }
+
+        fun runFatalCrashEvidenceProbe(
+            context: Context,
+            executionId: String,
+            timeoutMs: Long = FATAL_CRASH_EVIDENCE_TIMEOUT_MS,
+        ): ProbeIpcResult {
+            val appContext = context.applicationContext
+            val completion = CountDownLatch(1)
+            val result = AtomicReference<ProbeIpcResult>()
+            val receiver = object : ResultReceiver(null) {
+                override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                    if (resultCode != RESULT_PROBE) {
+                        return
+                    }
+                    result.set(
+                        ProbeIpcResult(
+                            succeeded = resultData?.getBoolean(EXTRA_SUCCEEDED) ?: false,
+                            formattedLog = resultData?.getString(EXTRA_FORMATTED_LOG).orEmpty(),
+                            errorMessage = resultData?.getString(EXTRA_ERROR_MESSAGE),
+                        )
+                    )
+                    completion.countDown()
+                }
+            }
+            val intent = Intent(appContext, NativeNodeEmbeddedProbeService::class.java).apply {
+                action = ACTION_PROBE
+                putExtra(EXTRA_RESULT_RECEIVER, receiver)
+                putExtra(EXTRA_PROBE_LEVEL, PROBE_LEVEL_FATAL_CRASH_EVIDENCE)
+                putExtra(EXTRA_FATAL_CRASH_EVIDENCE_PROBE, true)
+                putExtra(EXTRA_FATAL_CRASH_EVIDENCE_EXECUTION_ID, executionId)
+                putExtra(EXTRA_FATAL_CRASH_EVIDENCE_TIMEOUT_MS, timeoutMs)
+            }
+            var component: android.content.ComponentName? = null
+            try {
+                component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    appContext.startForegroundService(intent)
+                } else {
+                    appContext.startService(intent)
+                }
+                    ?: return processCrashedOrTimedOut(PROBE_LEVEL_FATAL_CRASH_EVIDENCE, "Failed to start embedded fatal crash evidence probe.")
+                val completed = completion.await(timeoutMs.coerceAtLeast(1L), TimeUnit.MILLISECONDS)
+                if (!completed) {
+                    appContext.stopService(Intent().setComponent(component))
+                    return processCrashedOrTimedOut(PROBE_LEVEL_FATAL_CRASH_EVIDENCE, "Embedded fatal crash evidence probe process crashed or timed out.")
+                }
+            } catch (e: InterruptedException) {
+                component?.let { appContext.stopService(Intent().setComponent(it)) }
+                Thread.currentThread().interrupt()
+                throw ScriptInterruptedException(e)
+            } catch (e: Throwable) {
+                component?.let { appContext.stopService(Intent().setComponent(it)) }
+                return processCrashedOrTimedOut(
+                    PROBE_LEVEL_FATAL_CRASH_EVIDENCE,
+                    "Embedded fatal crash evidence probe process crashed or timed out.\n${e.message ?: e.javaClass.name}"
+                )
+            }
+            return result.get()
+                ?: processCrashedOrTimedOut(PROBE_LEVEL_FATAL_CRASH_EVIDENCE, "Embedded fatal crash evidence probe process crashed or timed out.")
         }
 
         private fun processCrashedOrTimedOut(probeLevel: Int, message: String): ProbeIpcResult {

@@ -1,0 +1,1 @@
+realnpm.diagnostics-report-package=diagnostics:inspector-free/true

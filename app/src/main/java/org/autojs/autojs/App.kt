@@ -22,6 +22,7 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.engine.NativeNodeProcessService
+import org.autojs.autojs.engine.NodeCrashEvidenceStore
 import org.autojs.autojs.engine.NodeRuntimeBackend
 import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
@@ -76,6 +77,7 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
                 }
                 setUpDebugEnvironment()
                 setUpLeakCanary()
+                collectPendingNodeCrashEvidence()
                 prewarmNativeNodeIfNeeded()
 
                 AutoJs.initInstance(this)
@@ -256,6 +258,18 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
             }
             NodeRuntimeBackend.RHINO,
             NodeRuntimeBackend.EMBEDDED -> Unit
+        }
+    }
+
+    private fun collectPendingNodeCrashEvidence() {
+        runCatching {
+            NodeCrashEvidenceStore.collectPending(this, "app.onCreate")
+        }.onSuccess { collected ->
+            if (collected.length() > 0) {
+                Log.w(TAG, "Collected pending Node crash evidence bundles: ${collected.length()}")
+            }
+        }.onFailure {
+            Log.w(TAG, "Failed to collect pending Node crash evidence bundles.", it)
         }
     }
 

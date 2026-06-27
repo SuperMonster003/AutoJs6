@@ -218,7 +218,11 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
             ),
             "autojs.nodejs.esm.experimental" to nodeProfileReleaseManifestBooleanProperty(
                 "autojs.nodejs.esm.experimental",
-                false,
+                true,
+            ),
+            "autojs.nodejs.dynamicImport.local" to nodeProfileReleaseManifestBooleanProperty(
+                "autojs.nodejs.dynamicImport.local",
+                true,
             ),
             "autojs.nodejs.dynamicImport.experimental" to nodeProfileReleaseManifestBooleanProperty(
                 "autojs.nodejs.dynamicImport.experimental",
@@ -275,7 +279,7 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
             ),
             "nodeProfile" to linkedMapOf(
                 "name" to "AutoJs6 Safe Node Profile",
-                "engine" to "autojs6-node-profile-v1",
+                "engine" to "autojs6-node-profile-v1.1",
                 "expectedNode" to "v24.5.0",
                 "releaseFlavor" to releaseFlavor,
                 "backend" to effectiveBackend,

@@ -285,6 +285,49 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
         val enabledBridgeModules = bridgeModules
             .map { "${it.nodeDoctorString("name")}=${it.nodeDoctorString("status")}" }
             .sorted()
+        val networkFeatureEnabled = featureFlags
+            .firstOrNull { it.nodeDoctorString("id") == "network" }
+            ?.nodeDoctorBoolean("effectiveEnabled")
+        val bridgeCapabilityManifest = linkedMapOf(
+            "manifestVersion" to 1,
+            "projectManifestSupported" to true,
+            "enforcedWhenDeclared" to true,
+            "declarationKeys" to listOf(
+                "project.json:node.permissions",
+                "package.json:autojs6.node.permissions",
+            ),
+            "knownCapabilities" to listOf(
+                "toast",
+                "app",
+                "app.launch",
+                "app.settings",
+                "app.activity",
+                "dialogs",
+                "engines",
+                "engines.exec",
+                "accessibility",
+                "screen_capture",
+                "image",
+                "ocr",
+                "clipboard",
+                "device",
+                "shell",
+                "shell.root",
+                "network",
+                "work_manager",
+                "java_interop",
+            ),
+            "network" to linkedMapOf(
+                "capability" to "network",
+                "requiresDeclaration" to true,
+                "providerFeatureFlag" to "autojs.nodejs.network.experimental",
+                "providerEnabled" to networkFeatureEnabled,
+                "requiredAndroidPermissions" to listOf("android.permission.INTERNET"),
+                "requiresAndroidInternet" to true,
+                "controlledModules" to listOf("fetch", "axios", "websocket"),
+                "rawNodeNetworkModulesEnabled" to false,
+            ),
+        )
 
         val dependencyManifest = nodeDoctorReadJsonObject(dependencyManifestFile)
         val dependencySbom = nodeDoctorReadJsonObject(dependencySbomFile)
@@ -367,6 +410,7 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
                     "${it.nodeDoctorString("name")}=${it.nodeDoctorString("status")}"
                 },
             ),
+            "bridgeCapabilities" to bridgeCapabilityManifest,
             "packagedApk" to linkedMapOf(
                 "releaseFlavor" to releaseFlavor,
                 "profile" to packagedProfile,
@@ -444,6 +488,14 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
             appendLine("  partial builtins: ${nodeDoctorTextList(partialBuiltins)}")
             appendLine("  disabled builtins: ${nodeDoctorTextList(disabledBuiltins)}")
             appendLine("  bridge modules: ${nodeDoctorTextList(enabledBridgeModules)}")
+            appendLine()
+            appendLine("Bridge Capabilities:")
+            appendLine("  manifest supported: ${bridgeCapabilityManifest["projectManifestSupported"]}")
+            appendLine("  enforced when declared: ${bridgeCapabilityManifest["enforcedWhenDeclared"]}")
+            appendLine("  network capability: requires declaration=true provider enabled=${networkFeatureEnabled ?: "unavailable"}")
+            appendLine("  network Android permissions: android.permission.INTERNET")
+            appendLine("  controlled network modules: fetch, axios, websocket")
+            appendLine("  raw Node network modules enabled: false")
             appendLine()
             appendLine("Native Libraries:")
             appendLine("  dependency report: ${nativeDepsFile.nodeDoctorPathRelativeTo(rootProject.projectDir)} available=${nativeDepsFile.isFile}")

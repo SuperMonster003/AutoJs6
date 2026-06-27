@@ -13,6 +13,7 @@ import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.NodeEntryDirective
 import org.autojs.autojs.script.NodeProjectJavaScriptFileSource
 import org.autojs.autojs.script.NodeProjectLaunchDescriptor
 import org.autojs.autojs.script.NodeProjectLaunchKind
@@ -23,6 +24,7 @@ import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.timing.IntentTask
 import org.autojs.autojs.timing.TimedTask
 import org.autojs.autojs.ui.main.task.Task
+import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs.runtime.api.Engines as RuntimeEngines
 import org.junit.After
@@ -49,6 +51,11 @@ import java.util.zip.GZIPOutputStream
 class EmbeddedScriptMvpInstrumentationTest {
 
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
+    private val moduleSourceMaxCount = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT
+    private val moduleSourceOverLimitCount = moduleSourceMaxCount + 1
+    private val moduleSourceMaxBytes = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
+    private val moduleSourceOverLimitBytes = moduleSourceMaxBytes + 1
+    private val moduleSourcesMaxBytes = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
 
     @Before
     fun settleBefore() {
@@ -82,6 +89,8 @@ class EmbeddedScriptMvpInstrumentationTest {
         try {
             val mjs = File(scriptDir, "module.mjs").apply { writeText("console.log('mjs');") }
             val cjs = File(scriptDir, "common.cjs").apply { writeText("console.log('cjs');") }
+            val mts = File(scriptDir, "module-ts.mts").apply { writeText("console.log('mts');") }
+            val cts = File(scriptDir, "common-ts.cts").apply { writeText("console.log('cts');") }
             val nodeJs = File(scriptDir, "explicit.node.js").apply { writeText("console.log('node.js');") }
             val directiveJs = File(scriptDir, "directive.js").apply { writeText(""""nodejs"; console.log('directive');""") }
             val rhinoJs = File(scriptDir, "rhino.js").apply { writeText("console.log('rhino');") }
@@ -95,12 +104,29 @@ class EmbeddedScriptMvpInstrumentationTest {
 
             assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(mjs).engineName)
             assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(cjs).engineName)
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(mts).engineName)
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(cts).engineName)
             assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(nodeJs).engineName)
             assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(directiveJs).engineName)
             assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(projectMain).engineName)
             assertEquals(JavaScriptSource.ENGINE, JavaScriptFileSource(rhinoJs).engineName)
             assertEquals(projectDir.canonicalFile, JavaScriptFileSource(projectMain).nodeProjectRoot)
             assertEquals(null, JavaScriptFileSource(rhinoJs).nodeProjectRoot)
+            val editorTmpJs = File(scriptDir, "tmp-editor.js").apply { writeText("console.log('editor tmp');") }
+            val editorTmpMjsSource = JavaScriptFileSource(editorTmpJs).apply {
+                overriddenFullPath = mjs.absolutePath
+            }
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, editorTmpMjsSource.engineName)
+            val editorTmpProjectSource = JavaScriptFileSource(editorTmpJs).apply {
+                overriddenFullPath = projectMain.absolutePath
+            }
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, editorTmpProjectSource.engineName)
+            assertEquals(projectDir.canonicalFile, editorTmpProjectSource.nodeProjectRoot)
+            assertNodeScriptFileType(mjs, FileUtils.TYPE.MODULE_JAVASCRIPT)
+            assertNodeScriptFileType(cjs, FileUtils.TYPE.COMMONJS_JAVASCRIPT)
+            assertNodeScriptFileType(mts, FileUtils.TYPE.MODULE_TYPESCRIPT)
+            assertNodeScriptFileType(cts, FileUtils.TYPE.COMMONJS_TYPESCRIPT)
+            assertNodeScriptFileType(nodeJs, FileUtils.TYPE.NODE_JAVASCRIPT)
             assertEquals(ScriptFile.TYPE_JAVASCRIPT, ScriptFile(cjs).type)
             assertEquals(JavaScriptSource.ENGINE_NODEJS, ScriptFile(cjs).toSource().engineName)
             val projectMainSource = ScriptFile(projectMain).toSource()
@@ -128,6 +154,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(JavaScriptSource.ENGINE, ScriptFile(rhinoJs).toSource().engineName)
             assertPendingTaskEngineName(cjs, JavaScriptSource.ENGINE_NODEJS)
             assertPendingTaskEngineName(mjs, JavaScriptSource.ENGINE_NODEJS)
+            assertPendingTaskEngineName(mts, JavaScriptSource.ENGINE_NODEJS)
+            assertPendingTaskEngineName(cts, JavaScriptSource.ENGINE_NODEJS)
             assertPendingTaskEngineName(nodeJs, JavaScriptSource.ENGINE_NODEJS)
             assertPendingTaskEngineName(directiveJs, JavaScriptSource.ENGINE_NODEJS)
             assertPendingTaskEngineName(projectMain, JavaScriptSource.ENGINE_NODEJS)
@@ -138,6 +166,120 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertPendingTaskNodeProjectLaunchKind(autoFile, null)
         } finally {
             scriptDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun consoleMethodsAlignWithRhinoLevelsAndSupportTable() {
+        assumeTrue(BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED)
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            console.verbose("verbose-line", 1);
+            console.log("debug-line", 2);
+            console.info("info-line", 3);
+            console.warn("warn-line", 4);
+            console.error("error-line", 5);
+            try {
+              console.assert(false, "assert-line", 6);
+            } catch (error) {
+              console.log("assert.error=" + error.name + ":" + error.message);
+            }
+            console.assert(true, "hidden-line");
+            console.table([{ name: "gradle", version: "8" }]);
+            """.trimIndent(),
+            sourceName = "<embedded-console-rhino-parity.js>",
+        )
+
+        assertTrue(result.errorMessage.orEmpty(), result.succeeded)
+        assertTrue(result.stdout.contains("verbose-line 1"))
+        assertTrue(result.stdout.contains("debug-line 2"))
+        assertTrue(result.stdout.contains("info-line 3"))
+        assertTrue(result.stdout.contains("assert.error=AssertionError:assert-line 6"))
+        assertTrue(result.stdout.contains("gradle"))
+        assertTrue(result.stderr.contains("warn-line 4"))
+        assertTrue(result.stderr.contains("error-line 5"))
+        assertTrue(result.stderr.contains("assert-line 6"))
+
+        val eventsJson = embeddedConsoleEventsJson(result.nativeValues)
+        assertTrue(
+            "missing console events; keys=${result.nativeValues.keys.sorted()} stdout=${result.stdout} stderr=${result.stderr}",
+            eventsJson.isNotBlank(),
+        )
+        val events = JSONArray(eventsJson)
+        assertConsoleEvent(events, "VERBOSE", "verbose-line 1")
+        assertConsoleEvent(events, "DEBUG", "debug-line 2")
+        assertConsoleEvent(events, "INFO", "info-line 3")
+        assertConsoleEvent(events, "WARN", "warn-line 4")
+        assertConsoleEvent(events, "ERROR", "error-line 5")
+        assertConsoleEvent(events, "ASSERT", "assert-line 6")
+        assertConsoleEvent(events, "DEBUG", "gradle")
+        assertFalse(embeddedConsoleEventsTruncated(result.nativeValues))
+    }
+
+    private fun embeddedConsoleEventsJson(nativeValues: Map<String, String>): String {
+        nativeValues["embedded_script.console_events_json"].takeUnless { it.isNullOrBlank() }?.let { return it }
+        val resultJson = nativeValues["embedded_script.result_json"].takeUnless { it.isNullOrBlank() }
+            ?: return ""
+        return JSONObject(resultJson).optString("consoleEventsJson")
+    }
+
+    private fun embeddedConsoleEventsTruncated(nativeValues: Map<String, String>): Boolean {
+        nativeValues["embedded_script.console_events_truncated"]?.toBooleanStrictOrNull()?.let { return it }
+        return JSONObject(nativeValues["embedded_script.result_json"].orEmpty()).optBoolean("consoleEventsTruncated")
+    }
+
+    private fun assertConsoleEvent(events: JSONArray, expectedLevel: String, expectedTextPart: String) {
+        for (index in 0 until events.length()) {
+            val event = events.optJSONObject(index) ?: continue
+            if (event.optString("level") == expectedLevel && event.optString("text").contains(expectedTextPart)) {
+                return
+            }
+        }
+        throw AssertionError("Missing console event level=$expectedLevel text=$expectedTextPart in $events")
+    }
+
+    @Test
+    fun editorTemporaryMjsSourceUsesOriginalPathAndWorkingDirectory() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val workDir = File(context.cacheDir, "embedded-node-editor-mjs-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create editor mjs work dir: $absolutePath" }
+        }
+        val tempDir = File(context.cacheDir, "embedded-node-editor-tmp-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create editor temp dir: $absolutePath" }
+        }
+        try {
+            val original = File(workDir, "editor-main.mjs").apply {
+                writeText("// original editor path placeholder\n")
+            }
+            File(workDir, "dep.mjs").writeText("""export const label = "from-workdir";""")
+            val temp = File(tempDir, "tmp-editor.mjs").apply {
+                writeText(
+                    """
+                    import { label } from "./dep.mjs";
+                    console.log("editor.temp.mjs=" + label);
+                    """.trimIndent(),
+                )
+            }
+            val source = JavaScriptFileSource(temp).apply {
+                overriddenFullPath = original.absolutePath
+            }
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, source.engineName)
+
+            val engine = NativeNodeEmbeddedJavaScriptEngine(context).apply {
+                setTag(ScriptEngine.TAG_WORKING_DIRECTORY, workDir.canonicalPath)
+            }
+            assertEquals(0, engine.doExecution(source))
+            val nativeValues = engine.lastEmbeddedScriptResultNativeValues
+            assertEquals(original.canonicalPath, nativeValues["embedded_script.source_name"])
+            assertEquals(workDir.canonicalPath, nativeValues["embedded_script.current_working_directory"])
+            assertEquals("true", nativeValues["embedded_script.esm_entry"])
+            assertEquals(original.canonicalPath, nativeValues["embedded_script.esm_module_graph_root"])
+        } finally {
+            tempDir.deleteRecursively()
+            workDir.deleteRecursively()
         }
     }
 
@@ -958,6 +1100,25 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
+    fun embeddedConsoleReplayLinesDropOnlyTransportTrailingLineTerminator() {
+        assertEquals(emptyList<String>(), nodeEmbeddedConsoleOutputLines("").toList())
+        assertEquals(
+            listOf("Node.js version: v24.5.0"),
+            nodeEmbeddedConsoleOutputLines("Node.js version: v24.5.0\n").toList(),
+        )
+        assertEquals(
+            listOf("first", "second"),
+            nodeEmbeddedConsoleOutputLines("first\nsecond\n").toList(),
+        )
+        assertEquals(
+            listOf("first", ""),
+            nodeEmbeddedConsoleOutputLines("first\n\n").toList(),
+        )
+        assertEquals(listOf(""), nodeEmbeddedConsoleOutputLines("\n").toList())
+        assertEquals(listOf("first", "second"), nodeEmbeddedConsoleOutputLines("first\r\nsecond\r\n").toList())
+    }
+
+    @Test
     fun emptyAndDirectiveOnlyScriptsSucceedWithZeroExitCode() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -974,6 +1135,60 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertEquals(0, directiveOnly.exitCode ?: -1)
         assertTrue(directiveOnly.stdout.isEmpty())
         assertTrue(directiveOnly.stderr.isEmpty())
+    }
+
+    @Test
+    fun largeFailureEnvelopeIsBoundedForResultTransport() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            const filler = "x".repeat(160 * 1024);
+            throw new Error("large-transport-error:" + filler);
+            """.trimIndent(),
+            "<embedded-large-result-transport-source.js>",
+            timeoutMs = 30_000L,
+        )
+
+        assertFalse(result.succeeded)
+        assertEquals("Error", result.errorName)
+        assertTrue(result.errorMessage.orEmpty().startsWith("large-transport-error:"))
+        assertTrue(result.errorMessage.orEmpty().contains("truncated by AutoJs6 Embedded Node result transport"))
+        assertTrue(result.errorStack.orEmpty().contains("truncated by AutoJs6 Embedded Node result transport"))
+        assertEquals("true", result.nativeValues["embedded_script.result_transport.truncated"])
+        assertTrue(
+            result.nativeValues["embedded_script.result_transport.truncated_fields"].orEmpty()
+                .contains("result_error_message"),
+        )
+        assertEquals("true", result.nativeValues["embedded_script.result_transport.native_payload_limited"])
+        assertTrue(
+            result.nativeValues["embedded_script.result_transport.native_payload_omitted_entries"].orEmpty()
+                .toIntOrNull()
+                ?.let { it > 0 } == true,
+        )
+        assertFalse(result.nativeValues.containsKey("embedded_script.result_json"))
+    }
+
+    @Test
+    fun embeddedScriptUsesLightweightUvDiagnosticsByDefaultWithFullOptIn() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val lightweight = runEmbeddedScript(""""nodejs";""", "<embedded-lightweight-uv-diagnostics.js>")
+        assertTrue(lightweight.errorMessage.orEmpty(), lightweight.succeeded)
+        assertEquals("lightweight", lightweight.nativeValues["embedded_script.uv_diagnostics.mode"])
+        assertEquals("lightweight_cleanup", lightweight.nativeValues["uv.diagnostics.collection"])
+
+        settleEmbeddedScriptServiceProcess()
+
+        val full = runEmbeddedScript(
+            """"nodejs";""",
+            "<embedded-full-uv-diagnostics.js>",
+            env = mapOf("AUTOJS6_NODE_FULL_UV_DIAGNOSTICS" to "1"),
+        )
+        assertTrue(full.errorMessage.orEmpty(), full.succeeded)
+        assertEquals("full", full.nativeValues["embedded_script.uv_diagnostics.mode"])
+        assertEquals("full", full.nativeValues["uv.diagnostics.collection"])
     }
 
     @Test
@@ -1154,6 +1369,28 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertTrue(result.errorMessage.orEmpty(), result.succeeded)
         assertTrue(result.stdout.contains("cleared"))
         assertFalse(result.stdout.contains("should-not-run"))
+    }
+
+    @Test
+    fun embeddedScriptRequestDefaultTimeoutAllowsLargeNodeModuleStartup() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val request = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+            source = """
+                "nodejs";
+                console.log("default.timeout.probe");
+            """.trimIndent(),
+            sourceName = "<embedded-default-timeout-source.js>",
+            workingDirectory = context.cacheDir.absolutePath,
+        )
+        val result = NativeNodeEmbeddedScriptService.runScript(
+            context,
+            request,
+        )
+
+        assertEquals(NativeNodeEmbeddedRuntimeBridge.DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS, request.timeoutMs)
+        assertTrue(result.errorMessage.orEmpty(), result.succeeded)
+        assertTrue(result.stdout.contains("default.timeout.probe"))
     }
 
     @Test
@@ -1644,11 +1881,106 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertTrue(result.stdout.contains("profile.readonly=true"))
         assertTrue(result.stdout.contains("profile.identity=true"))
         assertTrue(result.stdout.contains("profile.resolve=autojs6:profile"))
-        assertTrue(result.stdout.contains("profile.flags=true/false/false/false/false/false/true"))
-        assertTrue(result.stdout.contains("profile.experimental=false/false/false"))
+        assertTrue(result.stdout.contains("profile.flags=true/true/true/false/false/false/true"))
+        assertTrue(result.stdout.contains("profile.experimental=true/false/false"))
         assertTrue(result.stdout.contains("profile.frozen=true/true/true/true/true/true/true/true"))
         assertTrue(result.stdout.contains("profile.builtins=true/true/true/true/true/false"))
         assertTrue(result.stdout.contains("profile.errors=ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_PROCESS_API_DISABLED/ERR_AUTOJS6_NETWORK_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_NETWORK_DISABLED"))
+    }
+
+    @Test
+    fun autojsGlobalV1ExposesFrozenDiagnosticsAndGatedJavaFacade() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            const profile = require("autojs6:profile");
+            const autojs = globalThis.${'$'}autojs;
+            const descriptor = Object.getOwnPropertyDescriptor(globalThis, "${'$'}autojs");
+            const beforeVersion = autojs.version;
+            function codeOf(error) {
+              return String(error && (error.autojs6Code || error.code || error.name || ""));
+            }
+            try {
+              globalThis.${'$'}autojs = { mutated: true };
+            } catch (_) {}
+            try {
+              autojs.version = { name: "mutated" };
+            } catch (_) {}
+            let findClassCode = "";
+            let createUiCode = "";
+            let loadDexCode = "";
+            try {
+              autojs.java.findClass("java.lang.Math");
+            } catch (error) {
+              findClassCode = codeOf(error);
+            }
+            try {
+              autojs.java.create("android.view.View", [], "ui");
+            } catch (error) {
+              createUiCode = codeOf(error);
+            }
+            try {
+              autojs.java.loadDex("plugin.dex");
+            } catch (error) {
+              loadDexCode = codeOf(error);
+            }
+            console.log("autojs.global=" + [
+              typeof autojs,
+              descriptor.writable,
+              descriptor.configurable,
+              descriptor.enumerable,
+              globalThis.${'$'}autojs === autojs
+            ].join("/"));
+            console.log("autojs.identity=" + [
+              autojs.profile === profile,
+              autojs.version === beforeVersion,
+              typeof autojs.version.name,
+              typeof autojs.version.code,
+              autojs.version.engine,
+              autojs.version.node === profile.node
+            ].join("/"));
+            console.log("autojs.frozen=" + [
+              Object.isFrozen(autojs),
+              Object.isFrozen(autojs.version),
+              Object.isFrozen(autojs.profile),
+              Object.isFrozen(autojs.androidContext),
+              Object.isFrozen(autojs.java),
+              Object.isFrozen(autojs.java.policy),
+              Object.isFrozen(autojs.java.policy.allowedClasses),
+              Object.isFrozen(autojs.java.policy.deniedClassPrefixes)
+            ].join("/"));
+            console.log("autojs.context=" + [
+              autojs.androidContext.available,
+              autojs.androidContext.proxy,
+              autojs.androidContext.type,
+              typeof autojs.androidContext.packageName,
+              autojs.androidContext.reason.indexOf("Raw Android Context") >= 0
+            ].join("/"));
+            console.log("autojs.java=" + [
+              autojs.java.enabled,
+              autojs.java.experimental,
+              autojs.java.mode,
+              typeof autojs.java.findClass,
+              typeof autojs.java.type,
+              typeof autojs.java.callStatic,
+              typeof autojs.java.new,
+              typeof autojs.java.create,
+              autojs.java.policy.allowedClasses.includes("java.lang.Math")
+            ].join("/"));
+            console.log("autojs.java.codes=" + [findClassCode, createUiCode, loadDexCode].join("/"));
+            """.trimIndent(),
+            "<embedded-autojs-global-v1-source.js>",
+        )
+
+        assertTrue(result.errorMessage.orEmpty(), result.succeeded)
+        assertTrue(result.stdout.contains("autojs.global=object/false/false/false/true"))
+        assertTrue(result.stdout.contains("autojs.identity=true/true/string/number/autojs6-node-profile-v1.1/true"))
+        assertTrue(result.stdout.contains("autojs.frozen=true/true/true/true/true/true/true/true"))
+        assertTrue(result.stdout.contains("autojs.context=false/true/android.content.Context/string/true"))
+        assertTrue(result.stdout.contains("autojs.java=false/false/disabled/function/function/function/function/function/true"))
+        assertTrue(result.stdout.contains("autojs.java.codes=ERR_AUTOJS6_JAVA_INTEROP_DISABLED/ERR_AUTOJS6_JAVA_INTEROP_DISABLED/ERR_AUTOJS6_JAVA_INTEROP_DISABLED"))
     }
 
     @Test
@@ -1672,10 +2004,10 @@ class EmbeddedScriptMvpInstrumentationTest {
               }
             }
             (async () => {
-              await capture("err.builtin", () => require("child_process"));
-              await capture("err.getBuiltin", () => process.getBuiltinModule("fs"));
-              await capture("err.process", () => process.exit(1));
-              await capture("err.fetch", () => fetch("https://example.com"));
+              await capture("err.builtin", () => require("dgram"));
+              await capture("err.getBuiltin", () => process.getBuiltinModule("dgram"));
+              await capture("err.process", () => process.abort());
+              await capture("err.fetch", () => fetch("http://127.0.0.1/"));
               await capture("err.fs.escape", () => fs.readFileSync("../outside.txt", "utf8"));
               await capture("err.fs.absolute", () => fs.readFileSync("/tmp/outside.txt", "utf8"));
             })();
@@ -1685,9 +2017,16 @@ class EmbeddedScriptMvpInstrumentationTest {
 
         assertTrue(result.errorMessage.orEmpty(), result.succeeded)
         assertTrue(result.stdout, result.stdout.contains("err.builtin=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
-        assertTrue(result.stdout, result.stdout.contains("err.getBuiltin=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_PROCESS_API_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
+        assertTrue(result.stdout, result.stdout.contains("err.getBuiltin=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
         assertTrue(result.stdout, result.stdout.contains("err.process=ERR_AUTOJS6_PROCESS_API_DISABLED/ERR_AUTOJS6_PROCESS_API_DISABLED/"))
-        assertTrue(result.stdout, result.stdout.contains("err.fetch=ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED/ERR_AUTOJS6_NETWORK_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED"))
+        if (BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {
+            assertTrue(result.stdout, result.stdout.contains("err.fetch=ERR_AUTOJS6_NETWORK_"))
+        } else {
+            assertTrue(
+                result.stdout,
+                result.stdout.contains("err.fetch=ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED/ERR_AUTOJS6_NETWORK_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED"),
+            )
+        }
         assertTrue(result.stdout, result.stdout.contains("err.fs.escape=EPERM/ERR_AUTOJS6_FS_PATH_ESCAPE/"))
         assertTrue(result.stdout, result.stdout.contains("err.fs.absolute=EPERM/ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED/"))
     }
@@ -2203,12 +2542,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log("events.timers.denied." + name + "=" + error.message.includes(name));
                   }
                 }
-                try {
-                  process.getBuiltinModule("timers");
-                  console.log("events.timers.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("events.timers.getBuiltinModule=" + error.message.includes("disabled"));
-                }
+                console.log("events.timers.getBuiltinModule=" + (
+                  process.getBuiltinModule("timers") === require("timers") &&
+                  process.getBuiltinModule("node:timers") === require("timers")
+                ));
                 Promise.all([
                   oncePromise,
                   iteratorPromise,
@@ -2503,6 +2840,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 return observed.then((observedSummary) => {
                   const nowB = performance.now();
                   const json = performance.toJSON();
+                  const eluBefore = performance.eventLoopUtilization();
+                  const eluDelta = performance.eventLoopUtilization(eluBefore);
                   console.log("perf_hooks.same=" + (perfHooks === nodePerfHooks));
                   console.log("perf_hooks.shadow=" + (perfHooks.shadow === true));
                   console.log("perf_hooks.frozen=" + Object.isFrozen(perfHooks));
@@ -2521,6 +2860,14 @@ class EmbeddedScriptMvpInstrumentationTest {
                     Object.isFrozen(perfHooks.PerformanceObserver.supportedEntryTypes) &&
                     perfHooks.PerformanceObserver.supportedEntryTypes.join(",")
                   ));
+                  console.log("perf_hooks.elu=" + [
+                    typeof performance.eventLoopUtilization,
+                    Object.isFrozen(eluBefore),
+                    Object.isFrozen(eluDelta),
+                    typeof eluBefore.idle,
+                    typeof eluDelta.active,
+                    typeof eluDelta.utilization
+                  ].join(","));
                   console.log("perf_hooks.helpers=" + [
                     typeof perfHooks.performance,
                     typeof performance.now,
@@ -2543,7 +2890,6 @@ class EmbeddedScriptMvpInstrumentationTest {
                     typeof perfHooks.timerify,
                     typeof perfHooks.eventLoopUtilization,
                     typeof performance.timerify,
-                    typeof performance.eventLoopUtilization,
                     typeof performance.nodeTiming,
                     typeof performance.markResourceTiming
                   ].join(","));
@@ -2574,8 +2920,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("perf_hooks.entries=true"))
             assertTrue(result.stdout.contains("perf_hooks.observer=true"))
             assertTrue(result.stdout.contains("perf_hooks.supported=mark,measure"))
+            assertTrue(result.stdout.contains("perf_hooks.elu=function,true,true,number,number,number"))
             assertTrue(result.stdout.contains("perf_hooks.helpers=object,function,function,function,function,function,function,function,function,number,function,function,function,function"))
-            assertTrue(result.stdout.contains("perf_hooks.hidden=undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined"))
+            assertTrue(result.stdout.contains("perf_hooks.hidden=undefined,undefined,undefined,undefined,undefined,undefined,undefined"))
             assertTrue(result.stdout.contains("perf_hooks.toJSON=true"))
             assertTrue(result.stdout.contains("perf_hooks.resolve=perf_hooks|perf_hooks"))
         } finally {
@@ -3102,12 +3449,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                   readable.pipe(writable);
                 });
 
-                try {
-                  process.getBuiltinModule("stream");
-                  console.log("stream.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("stream.getBuiltinModule=" + error.message.includes("disabled"));
-                }
+                console.log("stream.getBuiltinModule=" + (
+                  process.getBuiltinModule("stream") === stream &&
+                  process.getBuiltinModule("node:stream") === stream
+                ));
 
                 Promise.all([
                   readablePromise,
@@ -3533,7 +3878,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                   }
                 }
 
-                run().catch((error) => {
+                return run().catch((error) => {
                   console.log("readline.error=" + (error && error.message || error));
                   throw error;
                 });
@@ -3834,7 +4179,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 parentFile?.mkdirs()
                 writeText("""module.exports = { shadow: true };""", StandardCharsets.UTF_8)
             }
-            val outputBombBase64 = gzipBase64(ByteArray(2 * 1024 * 1024 + 1) { 'A'.code.toByte() })
+            val outputBombBase64 = gzipBase64(ByteArray(32 * 1024 * 1024 + 1) { 'A'.code.toByte() })
 
             val result = runEmbeddedScript(
                 """
@@ -3923,7 +4268,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     ]
                   );
                   const streamInputLimit = await zlibPipelineError(
-                    [Buffer.alloc(512 * 1024 + 1)],
+                    [Buffer.alloc(8 * 1024 * 1024 + 1)],
                     [zlib.createGzip()]
                   );
                   const streamOutputLimit = await zlibPipelineError(
@@ -3968,11 +4313,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                   }
                 }
                 expectCode("zlib.invalidArg", () => zlib.gzipSync(42), "ERR_INVALID_ARG_TYPE");
-                expectCode("zlib.inputLimit", () => zlib.gzipSync(Buffer.alloc(512 * 1024 + 1)), "ERR_OUT_OF_RANGE");
-                expectCode("zlib.brotliInputLimit", () => zlib.brotliCompressSync(Buffer.alloc(512 * 1024 + 1)), "ERR_OUT_OF_RANGE");
+                expectCode("zlib.inputLimit", () => zlib.gzipSync(Buffer.alloc(8 * 1024 * 1024 + 1)), "ERR_OUT_OF_RANGE");
+                expectCode("zlib.brotliInputLimit", () => zlib.brotliCompressSync(Buffer.alloc(8 * 1024 * 1024 + 1)), "ERR_OUT_OF_RANGE");
                 expectCode("zlib.callback.missing", () => zlib.gzip(Buffer.from("x")), "ERR_INVALID_ARG_TYPE");
                 expectCode("zlib.callback.type", () => zlib.gzip(Buffer.from("x"), "bad"), "ERR_INVALID_ARG_TYPE");
-                expectCode("zlib.callback.inputLimit", () => zlib.gzip(Buffer.alloc(512 * 1024 + 1), () => {}), "ERR_OUT_OF_RANGE");
+                expectCode("zlib.callback.inputLimit", () => zlib.gzip(Buffer.alloc(8 * 1024 * 1024 + 1), () => {}), "ERR_OUT_OF_RANGE");
                 expectCode(
                   "zlib.outputLimit",
                   () => zlib.gunzipSync(Buffer.from("$outputBombBase64", "base64")),
@@ -4026,8 +4371,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 for (const name of [
                   "zlib/promises",
                   "node:zlib/promises",
-                  "child_process",
-                  "worker_threads"
+                  "child_process"
                 ]) {
                   try {
                     require(name);
@@ -4036,12 +4380,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log("zlib.denied." + name + "=" + error.message.includes(name));
                   }
                 }
-                try {
-                  process.getBuiltinModule("zlib");
-                  console.log("zlib.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("zlib.getBuiltinModule=" + error.message.includes("disabled"));
-                }
+                console.log("zlib.getBuiltinModule=" + (
+                  process.getBuiltinModule("zlib") === zlib &&
+                  process.getBuiltinModule("node:zlib") === zlib
+                ));
                 console.log("zlib.scheduled=true");
                 return zlibStreamChecks;
                 """.trimIndent(),
@@ -4084,7 +4426,6 @@ class EmbeddedScriptMvpInstrumentationTest {
                 "zlib/promises",
                 "node:zlib/promises",
                 "child_process",
-                "worker_threads",
             ).forEach { name ->
                 assertTrue(result.stdout.contains("zlib.denied.$name=true"))
             }
@@ -5476,11 +5817,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log("crypto.os.tmpdir.same=" + result.tmpdirSame);
                     console.log("crypto.os.extended=" + result.osExtended);
                     console.log("crypto.os.alias=" + result.alias);
-                    try {
-                      process.getBuiltinModule("crypto");
-                    } catch (error) {
-                      console.log("crypto.os.getBuiltinModule=" + error.message.includes("disabled"));
-                    }
+                    console.log("crypto.os.getBuiltinModule=" + (
+                      process.getBuiltinModule("crypto") === require("crypto") &&
+                      process.getBuiltinModule("node:crypto") === require("crypto")
+                    ));
                     try {
                       require("worker_threads");
                     } catch (error) {
@@ -5937,6 +6277,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                   transcodeTypedArrayHex === "610062006300" &&
                   transcodeLimit === "ERR_OUT_OF_RANGE" &&
                   transcodeInvalid === "U_ILLEGAL_ARGUMENT_ERROR";
+                const hasOwnOk =
+                  buffer.hasOwnProperty("Buffer") === true &&
+                  buffer.Buffer.hasOwnProperty("from") === true;
                 const objectUrlOk =
                   typeof buffer.resolveObjectURL === "function" &&
                   typeof URL.createObjectURL === "function" &&
@@ -5980,6 +6323,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("buffer.builtin.roundtrip=" + decoded);
                 console.log("buffer.builtin.slow=" + slowOk);
                 console.log("buffer.builtin.surface=" + surfaceOk);
+                console.log("buffer.builtin.has_own=" + hasOwnOk);
                 console.log("buffer.builtin.object_url=" + objectUrlOk);
                 console.log("buffer.builtin.transcode=" + [
                   transcodeRoundtrip,
@@ -5996,16 +6340,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("buffer.builtin.resolve=" + require.resolve("buffer") + "/" + require.resolve("node:buffer"));
                 console.log("buffer.builtin.shadow=" + (buffer.shadow !== true && nodeBuffer.shadow !== true && !shadowLoaded));
 
-                try {
-                  process.getBuiltinModule("buffer");
-                  console.log("buffer.builtin.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("buffer.builtin.getBuiltinModule=" + (
-                    error &&
-                    error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" &&
-                    String(error.message).includes("process.getBuiltinModule")
-                  ));
-                }
+                console.log("buffer.builtin.getBuiltinModule=" + (
+                  process.getBuiltinModule("buffer") === buffer &&
+                  process.getBuiltinModule("node:buffer") === buffer &&
+                  process.getBuiltinModule("node:missing-buffer") === undefined
+                ));
                 })();
                 """.trimIndent(),
                 "<embedded-buffer-builtin-source.js>",
@@ -6019,6 +6358,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("buffer.builtin.roundtrip=builtin"))
             assertTrue(result.stdout.contains("buffer.builtin.slow=true"))
             assertTrue(result.stdout.contains("buffer.builtin.surface=true"))
+            assertTrue(result.stdout.contains("buffer.builtin.has_own=true"))
             assertTrue(result.stdout.contains("buffer.builtin.object_url=true"))
             assertTrue(result.stdout.contains("buffer.builtin.transcode=builtin|636166c3a9|610062006300|ERR_OUT_OF_RANGE|U_ILLEGAL_ARGUMENT_ERROR"))
             assertTrue(result.stdout.contains("buffer.builtin.constants=true"))
@@ -6485,7 +6825,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             check(mkdirs()) { "Failed to create web compression global test dir: $absolutePath" }
         }
         try {
-            val outputBombBase64 = gzipBase64(ByteArray(2 * 1024 * 1024 + 1) { 'A'.code.toByte() })
+            val outputBombBase64 = gzipBase64(ByteArray(32 * 1024 * 1024 + 1) { 'A'.code.toByte() })
             val result = runEmbeddedScript(
                 """
                 "nodejs";
@@ -6590,7 +6930,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                   collectBytes(new CompressionStream("gzip"), [new ArrayBuffer(1)])
                 );
                 const tooLargeInput = await captureAsync(() =>
-                  collectBytes(new CompressionStream("gzip"), [Buffer.alloc(512 * 1024 + 1)])
+                  collectBytes(new CompressionStream("gzip"), [Buffer.alloc(8 * 1024 * 1024 + 1)])
                 );
                 const outputBomb = await captureAsync(() =>
                   collectBytes(new DecompressionStream("gzip"), [Buffer.from("$outputBombBase64", "base64")])
@@ -6977,11 +7317,12 @@ class EmbeddedScriptMvpInstrumentationTest {
                 ));
                 console.log("path.hidden=" + pathHidden);
                 console.log("path.toNamespacedPath=" + path.toNamespacedPath("a/b"));
+                console.log("path.absolute.fs.read=" + fs.readFileSync(absolute, "utf8"));
                 try {
-                  fs.readFileSync(absolute, "utf8");
-                  console.log("path.absolute.fs.denied=false");
+                  fs.readFileSync("/tmp/autojs6-outside.txt", "utf8");
+                  console.log("path.absolute.fs.outside.denied=false");
                 } catch (error) {
-                  console.log("path.absolute.fs.denied=" + String(error.message).includes("rejects absolute path"));
+                  console.log("path.absolute.fs.outside.denied=" + String(error.message).includes("rejects absolute path"));
                 }
                 console.log("url.global=" + target.protocol + "/" + target.pathname + "/" + target.searchParams.get("y"));
                 console.log("url.params=" + params.toString());
@@ -7071,7 +7412,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("path.matchesGlob=true"))
             assertTrue(result.stdout.contains("path.hidden=undefined,function"))
             assertTrue(result.stdout.contains("path.toNamespacedPath=a/b"))
-            assertTrue(result.stdout.contains("path.absolute.fs.denied=true"))
+            assertTrue(result.stdout.contains("path.absolute.fs.read=x"))
+            assertTrue(result.stdout.contains("path.absolute.fs.outside.denied=true"))
             assertTrue(result.stdout.contains("url.global=https:/"))
             assertTrue(result.stdout.contains("url.params=a=1&b=2"))
             assertTrue(result.stdout.contains("url.wrapper.same=true"))
@@ -7327,7 +7669,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                 captureSync("url.reject.nul.path", () => url.pathToFileURL(nulPath));
                 captureSync("url.reject.nul.file", () => url.fileURLToPath(new URL("bad%00path", sandboxRootUrl)));
                 captureSync("url.reject.fs.sync", () => fs.readFileSync(new URL(outsideUrl), "utf8"));
-                captureSync("url.reject.getBuiltinModule", () => process.getBuiltinModule("url"));
+                console.log("url.getBuiltinModule=" + (
+                  process.getBuiltinModule("url") === url &&
+                  process.getBuiltinModule("node:url") === url
+                ));
                 console.log("url.reject.shadow=" + (url.shadow === true));
 
                 return Promise.all([
@@ -7368,7 +7713,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("url.reject.fs.promise.fileToken=true"))
             assertTrue(result.stdout.contains("url.reject.opendir.isError=true"))
             assertTrue(result.stdout.contains("url.reject.opendir.code=EPERM"))
-            assertTrue(result.stdout.contains("url.reject.getBuiltinModule.isError=true"))
+            assertTrue(result.stdout.contains("url.getBuiltinModule=true"))
             assertTrue(result.stdout.contains("url.reject.shadow=false"))
             assertFalse(result.stdout.contains(".unexpected=true"))
             assertTrue(result.stdout.contains("url.reject.done=true"))
@@ -8946,7 +9291,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                       )).toString("utf8");
                       const invalid = captureSync(() => new CompressionStream("br"));
                       const tooLarge = await captureAsync(() =>
-                        collectBytes(new CompressionStream("gzip"), [Buffer.alloc(512 * 1024 + 1)])
+                        collectBytes(new CompressionStream("gzip"), [Buffer.alloc(8 * 1024 * 1024 + 1)])
                       );
                       const hidden = [
                         typeof streamWeb.CompressionStream,
@@ -9579,11 +9924,15 @@ class EmbeddedScriptMvpInstrumentationTest {
                         Object.isFrozen(os) &&
                         Object.isFrozen(util) &&
                         Object.isFrozen(utilTypes);
+                      const getBuiltinOk =
+                        process.getBuiltinModule("util/types") === utilTypes &&
+                        process.getBuiltinModule("node:util/types") === utilTypes &&
+                        process.getBuiltinModule("missing-util-types") === undefined;
                       const deniedOk = limitedHttpGuard() &&
-                        captureDenied(() => require("node:vm"), "node:vm") &&
+                        typeof require("node:vm").Script === "function" &&
                         require.resolve("timers/promises") === "timers/promises" &&
                         require.resolve("node:timers/promises") === "timers/promises" &&
-                        captureDenied(() => process.getBuiltinModule("util/types"), "process.getBuiltinModule");
+                        getBuiltinOk;
                       return {
                         ok: aliasOk && resolveOk && shadowOk && pathUrlOk && osOk && utilOk && mimeOk && utilTypesOk && frozenOk && deniedOk,
                         alias: aliasOk,
@@ -9704,6 +10053,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                 const nodeAssert = require("node:assert");
                 const punycode = require("punycode");
                 const nodePunycode = require("node:punycode");
+                const packagePunycode = require("punycode/");
+                const packagePunycodeAgain = require("punycode/");
+                const packagePunycodeResolved = require.resolve("punycode/");
 
                 const encoded = querystring.stringify({ a: "1", b: "你好" });
                 const parsed = querystring.parse("a=1&b=%E4%BD%A0%E5%A5%BD");
@@ -9737,6 +10089,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("legacy.assert.error=" + (assertion instanceof Error));
                 console.log("legacy.punycode.same=" + (punycode === nodePunycode));
                 console.log("legacy.punycode.shadow=" + (punycode.shadow === true));
+                console.log("legacy.punycode.package_root=" + (packagePunycode.shadow === true));
+                console.log("legacy.punycode.package_cache=" + (packagePunycode === packagePunycodeAgain));
+                console.log("legacy.punycode.package_resolve=" + packagePunycodeResolved.endsWith("/node_modules/punycode/index.js"));
                 console.log("legacy.punycode.ascii=" + ascii.includes("xn--"));
                 console.log("legacy.punycode.unicode=" + (unicode === "mañana.com"));
                 console.log("legacy.punycode.ucs2=" + (typeof punycode.ucs2.decode));
@@ -9750,12 +10105,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log("legacy.denied." + name + "=" + error.message.includes(name));
                   }
                 }
-                try {
-                  process.getBuiltinModule("querystring");
-                  console.log("legacy.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("legacy.getBuiltinModule=" + error.message.includes("disabled"));
-                }
+                console.log("legacy.getBuiltinModule=" + (
+                  process.getBuiltinModule("querystring") === querystring &&
+                  process.getBuiltinModule("node:querystring") === querystring
+                ));
                 """.trimIndent(),
                 "<embedded-legacy-core-source.js>",
                 workingDirectory = scriptDir.canonicalPath,
@@ -9779,6 +10132,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("legacy.assert.error=true"))
             assertTrue(result.stdout.contains("legacy.punycode.same=true"))
             assertTrue(result.stdout.contains("legacy.punycode.shadow=false"))
+            assertTrue(result.stdout.contains("legacy.punycode.package_root=true"))
+            assertTrue(result.stdout.contains("legacy.punycode.package_cache=true"))
+            assertTrue(result.stdout.contains("legacy.punycode.package_resolve=true"))
             assertTrue(result.stdout.contains("legacy.punycode.ascii=true"))
             assertTrue(result.stdout.contains("legacy.punycode.unicode=true"))
             assertTrue(result.stdout.contains("legacy.punycode.ucs2=function"))
@@ -10735,7 +11091,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     """
                     "nodejs";
                     const compose = require("pkg-readline-compose-like");
-                    compose.run().then((result) => {
+                    return compose.run().then((result) => {
                       console.log("readline.npm.ok=" + result.ok);
                       console.log("readline.npm.callback=" + result.callback);
                       console.log("readline.npm.promise=" + result.promise);
@@ -11227,7 +11583,6 @@ class EmbeddedScriptMvpInstrumentationTest {
                 "child_process",
                 "worker_threads",
                 "cluster",
-                "vm",
                 "inspector",
                 "repl",
                 "zlib/promises",
@@ -11268,6 +11623,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 "stream/promises",
                 "stream/web",
                 "zlib",
+                "vm",
             )
             val result = runEmbeddedScript(
                 """
@@ -11303,7 +11659,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 }
 
                 try {
-                  process.getBuiltinModule("http");
+                  process.getBuiltinModule("dgram");
                   console.log("deny.getBuiltinModule=false");
                 } catch (error) {
                   console.log("deny.getBuiltinModule=" + (
@@ -11330,6 +11686,101 @@ class EmbeddedScriptMvpInstrumentationTest {
         } finally {
             scriptDir.deleteRecursively()
         }
+    }
+
+    private fun assertNodeScriptFileType(file: File, expectedType: FileUtils.TYPE) {
+        val actualType = FileUtils.TYPE.determineBy(file)
+        assertEquals(expectedType, actualType)
+        assertTrue(actualType.isExecutable())
+        assertTrue(actualType.isTextEditable())
+        assertEquals(ScriptFile.TYPE_JAVASCRIPT, ScriptFile(file).type)
+        assertEquals(JavaScriptSource.ENGINE_NODEJS, ScriptFile(file).toSource().engineName)
+    }
+
+    @Test
+    fun nodeWorkerThreadsDefaultFacadeSupportsNpmFeatureDetection() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            return (async () => {
+              const moduleBuiltin = require("module");
+              const {
+                Worker,
+                MessageChannel,
+                MessagePort,
+                receiveMessageOnPort,
+                isMainThread,
+                parentPort,
+                workerData
+              } = require("node:worker_threads");
+              const channel = new MessageChannel();
+              console.log("worker.facade.shape=" + [
+                typeof Worker,
+                typeof MessageChannel,
+                typeof MessagePort,
+                typeof receiveMessageOnPort,
+                isMainThread,
+                parentPort === null,
+                workerData === undefined
+              ].join("/"));
+              console.log("worker.facade.resolve=" + require.resolve("node:worker_threads"));
+              console.log("worker.facade.isBuiltin=" + moduleBuiltin.isBuiltin("node:worker_threads"));
+              console.log("worker.facade.receive=" + (receiveMessageOnPort(channel.port1) === undefined));
+              channel.port1.close();
+              channel.port2.close();
+
+              const worker = new Worker(__filename);
+              const exitCode = await new Promise((resolve) => {
+                worker.once("exit", resolve);
+                worker.unref();
+              });
+              console.log("worker.facade.worker=" + [
+                worker instanceof Worker,
+                typeof worker.postMessage,
+                typeof worker.terminate,
+                typeof worker.unref,
+                worker.threadId,
+                exitCode
+              ].join("/"));
+              try {
+                worker.postMessage({ ok: true });
+                console.log("worker.facade.post=allowed");
+              } catch (error) {
+                console.log("worker.facade.post=" + (
+                  error &&
+                  error.code === "ERR_AUTOJS6_WORKER_DISABLED" &&
+                  String(error.message || "").includes("worker_threads")
+                ));
+              }
+              console.log("worker.facade.terminate=" + await worker.terminate());
+
+              try {
+                require("worker_threads");
+                console.log("worker.facade.bare=allowed");
+              } catch (error) {
+                console.log("worker.facade.bare=" + (
+                  error &&
+                  error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" &&
+                  String(error.message || "").includes("worker_threads")
+                ));
+              }
+            })();
+            """.trimIndent(),
+            "<embedded-node-worker-threads-facade-source.js>",
+            workerThreadsExperimentalEnabled = false,
+        )
+
+        assertTrue(result.errorMessage.orEmpty(), result.succeeded)
+        assertTrue(result.stdout.contains("worker.facade.shape=function/function/function/function/true/true/true"))
+        assertTrue(result.stdout.contains("worker.facade.resolve=worker_threads"))
+        assertTrue(result.stdout.contains("worker.facade.isBuiltin=true"))
+        assertTrue(result.stdout.contains("worker.facade.receive=true"))
+        assertTrue(result.stdout.contains("worker.facade.worker=true/function/function/function/0/0"))
+        assertTrue(result.stdout.contains("worker.facade.post=true"))
+        assertTrue(result.stdout.contains("worker.facade.terminate=0"))
+        assertTrue(result.stdout.contains("worker.facade.bare=true"))
     }
 
     @Test
@@ -13375,6 +13826,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                   const denied = [
                     captureSync(() => fs.createReadStream("../outside.txt"), "escapes working directory"),
                     captureSync(() => fs.createWriteStream("/sdcard/autojs6-stream.txt"), "rejects absolute path"),
+                    captureSync(() => fs.createReadStream("/proc/self/cmdline"), "rejects absolute path"),
+                    captureSync(() => fs.createReadStream("/sys/kernel"), "rejects absolute path"),
+                    captureSync(() => fs.createWriteStream("/dev/null"), "rejects absolute path"),
                     captureSync(() => fs.createReadStream("./streams/out.txt", { fd: 0 }), "not open or not owned"),
                     captureSync(() => fs.createWriteStream("./streams/out.txt", { fd: 1 }), "not open or not owned"),
                     captureSync(() => fs.createReadStream("./streams/out.txt", { flags: "w" }), "read stream flags"),
@@ -13436,7 +13890,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("fs.stream.fd=file-stream|true|file-stream|true|fd-write|true"))
             assertTrue(result.stdout.contains("fs.stream.filehandle_fd=2345|true|012XYZ6789|true"))
             assertTrue(result.stdout.contains("fs.stream.missing=error:ENOENT"))
-            assertTrue(result.stdout.contains("fs.stream.denied=11/11"))
+            assertTrue(result.stdout.contains("fs.stream.denied=14/14"))
+            assertEquals(false, result.pendingScopedFsStreams)
+            assertEquals(0, result.pendingScopedFsStreamCount)
             assertEquals("file-stream", File(scriptDir, "streams/out.txt").readText(StandardCharsets.UTF_8))
             assertEquals("url-stream", File(scriptDir, "streams/url.txt").readText(StandardCharsets.UTF_8))
             assertEquals("fd-write", File(scriptDir, "streams/fd-write.txt").readText(StandardCharsets.UTF_8))
@@ -18429,7 +18885,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                         limitedNetGuard &&
                         limitedTlsGuard &&
                         deniedRequire("worker_threads") &&
-                        deniedGetBuiltin("fs");
+                        deniedGetBuiltin("dgram");
                       const treeOk = fs.existsSync("./npm-fs-failure/safe.txt") &&
                         fs.existsSync("./npm-fs-failure/dir/sub");
                       assert.equal(syncChecks.filter(Boolean).length, syncChecks.length);
@@ -19448,7 +19904,6 @@ class EmbeddedScriptMvpInstrumentationTest {
             "binding" to """process.binding("fs");""",
             "dlopen" to """process.dlopen({}, "native.node");""",
             "_linkedBinding" to """process._linkedBinding("fs");""",
-            "exit" to """process.exit(1);""",
             "abort" to """process.abort();""",
             "kill" to """process.kill(process.pid, 0);""",
             "umask" to """process.umask(0);""",
@@ -19554,12 +20009,16 @@ class EmbeddedScriptMvpInstrumentationTest {
                   process.argv.includes("--process-builtin") &&
                   processBuiltin.argv === process.argv &&
                   processBuiltin.cwd() === process.cwd();
+                const processGetBuiltinModule =
+                  processBuiltin.getBuiltinModule("fs") === fs &&
+                  processBuiltin.getBuiltinModule("node:fs") === fs &&
+                  processBuiltin.getBuiltinModule("left-pad") === undefined &&
+                  disabled(() => processBuiltin.getBuiltinModule("dgram"));
                 const processDangerous =
-                  disabled(() => processBuiltin.getBuiltinModule("fs")) &&
                   disabled(() => processBuiltin.binding("fs")) &&
                   disabled(() => processBuiltin.dlopen({}, "native.node")) &&
                   disabled(() => processBuiltin._linkedBinding("fs")) &&
-                  disabled(() => processBuiltin.exit(1)) &&
+                  typeof processBuiltin.exit === "function" &&
                   disabled(() => processBuiltin.abort()) &&
                   disabled(() => processBuiltin.kill(process.pid, 0)) &&
                   typeof processBuiltin.umask() === "number" &&
@@ -19598,6 +20057,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("process.builtin.alias=" + (processBuiltin === nodeProcessBuiltin));
                 console.log("process.builtin.global=" + processState);
                 console.log("process.builtin.surface=" + processSurface);
+                console.log("process.builtin.getBuiltinModule=" + processGetBuiltinModule);
                 console.log("process.builtin.dangerous=" + processDangerous);
                 console.log("process.builtin.resolve=" + (
                   require.resolve("process") === "process" &&
@@ -19628,6 +20088,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("process.builtin.alias=true"))
             assertTrue(result.stdout.contains("process.builtin.global=true"))
             assertTrue(result.stdout.contains("process.builtin.surface=true"))
+            assertTrue(result.stdout.contains("process.builtin.getBuiltinModule=true"))
             assertTrue(result.stdout.contains("process.builtin.dangerous=true"))
             assertTrue(result.stdout.contains("process.builtin.resolve=true"))
             assertTrue(result.stdout.contains("process.builtin.shadow=true"))
@@ -20033,7 +20494,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                   moduleBuiltin.builtinModules.includes("timers/promises") &&
                   moduleBuiltin.builtinModules.includes("http") &&
                   moduleBuiltin.builtinModules.includes("https") &&
-                  moduleBuiltin.builtinModules.includes("tls")
+                  moduleBuiltin.builtinModules.includes("tls") &&
+                  moduleBuiltin.builtinModules.includes("vm")
                 ));
                 console.log("module.builtin.sync=" + (
                   typeof moduleBuiltin.syncBuiltinESMExports === "function" &&
@@ -20042,16 +20504,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("module.builtin.dangerous_missing=" + dangerousMissing);
                 console.log("module.builtin.resolve=" + require.resolve("module") + "/" + require.resolve("node:module"));
                 console.log("module.builtin.shadow=" + (moduleBuiltin.shadow !== true && nodeModuleBuiltin.shadow !== true && !shadowLoaded));
-                try {
-                  process.getBuiltinModule("module");
-                  console.log("module.builtin.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("module.builtin.getBuiltinModule=" + (
-                    error &&
-                    error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" &&
-                    /disabled/.test(error.message)
-                  ));
-                }
+                console.log("module.builtin.getBuiltinModule=" + (
+                  process.getBuiltinModule("module") === moduleBuiltin &&
+                  process.getBuiltinModule("node:module") === moduleBuiltin
+                ));
                 """.trimIndent(),
                 "<embedded-module-builtin-source.js>",
                 workingDirectory = scriptDir.canonicalPath,
@@ -20063,7 +20519,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("module.builtin.frozen=true"))
             assertTrue(result.stdout.contains("module.builtin.keys=createRequire,isBuiltin,builtinModules,syncBuiltinESMExports"))
             assertTrue(result.stdout.contains("module.builtin.createRequire=function"))
-            assertTrue(result.stdout.contains("module.builtin.isBuiltin=true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/false"))
+            assertTrue(result.stdout.contains("module.builtin.isBuiltin=true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true"))
             assertTrue(result.stdout.contains("module.builtin.modules=true"))
             assertTrue(result.stdout.contains("module.builtin.sync=true"))
             assertTrue(result.stdout.contains("module.builtin.dangerous_missing=true"))
@@ -20252,11 +20708,14 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("module.createRequire.escape.code=EPERM"))
             assertTrue(result.stdout.contains("module.createRequire.absolute.code=EPERM"))
             assertTrue(result.stdout.contains("module.createRequire.nul.code=ERR_INVALID_ARG_TYPE"))
-            assertTrue(result.stdout.contains("module.createRequire.url.code=ERR_INVALID_ARG_TYPE"))
+            assertTrue(result.stdout.contains("module.createRequire.url.code=EPERM"))
             assertTrue(result.stdout.contains("module.createRequire.directory.code=ENOTDIR"))
             assertTrue(result.stdout.contains("module.createRequire.escape.message=true"))
+            assertTrue(result.stdout.contains("module.createRequire.url.message=true"))
             assertTrue(result.stdout.contains("module.createRequire.directory.message=true"))
-            assertTrue(result.nativeValues["embedded_script.create_require_failure_reason"].orEmpty().contains("module.createRequire"))
+            result.nativeValues["embedded_script.create_require_failure_reason"]?.let { failureReason ->
+                assertTrue(failureReason.contains("module.createRequire"))
+            }
         } finally {
             outsideFile.delete()
             scriptDir.deleteRecursively()
@@ -20336,7 +20795,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log(label + ".message=" + String(error.message).includes(label === "module.createRequire.target.esm" ? "ESM/import" : "Unsupported Embedded Node local module extension"));
                   }
                 }
-                check("module.createRequire.target.esm", () => req("./esm.mjs"));
+                console.log("module.createRequire.target.esm.default=" + req("./esm.mjs").default);
                 check("module.createRequire.target.native", () => req("./native.node"));
                 const target = "./preferred";
                 console.log("module.createRequire.precedence=" + req(target));
@@ -20346,15 +20805,15 @@ class EmbeddedScriptMvpInstrumentationTest {
                 moduleSources = mapOf(preferred.canonicalPath to """module.exports = "preloaded";"""),
             )
             assertTrue(precedence.errorMessage.orEmpty(), precedence.succeeded)
-            assertTrue(precedence.stdout.contains("module.createRequire.target.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"))
+            assertTrue(precedence.stdout.contains("module.createRequire.target.esm.default=1"))
             assertTrue(precedence.stdout.contains("module.createRequire.target.native.message=true"))
             assertTrue(precedence.stdout.contains("module.createRequire.precedence=preloaded"))
-            assertEquals("0", precedence.nativeValues["embedded_script.dynamic_require_fallback_loaded_count"])
+            assertEquals("1", precedence.nativeValues["embedded_script.dynamic_require_fallback_loaded_count"])
 
             settleEmbeddedScriptServiceProcess()
 
             File(scriptDir, "extra.js").writeText("""module.exports = true;""" + "\n", StandardCharsets.UTF_8)
-            val sixtyFourSources = (0 until 64).associate { index ->
+            val maxCountSources = (0 until moduleSourceMaxCount).associate { index ->
                 "${scriptDir.canonicalPath}/preloaded-create-require-$index.js" to "module.exports = $index;"
             }
             val tooMany = runEmbeddedScript(
@@ -20366,16 +20825,16 @@ class EmbeddedScriptMvpInstrumentationTest {
                 """.trimIndent(),
                 sourceName = main.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
-                moduleSources = sixtyFourSources,
+                moduleSources = maxCountSources,
             )
             assertFalse(tooMany.succeeded)
             assertTrue(tooMany.errorMessage.orEmpty().contains("dynamic require fallback"))
             assertTrue(tooMany.errorMessage.orEmpty().contains("module source count is too large"))
-            assertTrue(tooMany.errorMessage.orEmpty().contains("65 > 64"))
+            assertTrue(tooMany.errorMessage.orEmpty().contains("$moduleSourceOverLimitCount > $moduleSourceMaxCount"))
 
             settleEmbeddedScriptServiceProcess()
 
-            File(scriptDir, "big.js").writeText("x".repeat(262_145), StandardCharsets.UTF_8)
+            File(scriptDir, "big.js").writeText("x".repeat(moduleSourceOverLimitBytes), StandardCharsets.UTF_8)
             val singleTooLarge = runEmbeddedScript(
                 source = """
                     "nodejs";
@@ -20388,7 +20847,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             )
             assertFalse(singleTooLarge.succeeded)
             assertTrue(singleTooLarge.errorMessage.orEmpty().contains("dynamic require fallback module source is too large"))
-            assertTrue(singleTooLarge.errorMessage.orEmpty().contains("262145 bytes > 262144 bytes"))
+            assertTrue(
+                singleTooLarge.errorMessage.orEmpty()
+                    .contains("$moduleSourceOverLimitBytes bytes > $moduleSourceMaxBytes bytes"),
+            )
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -21292,7 +21754,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun nodeProjectRunnerProjectMainKeepsMjsUnsupportedGate() {
+    fun nodeProjectRunnerProjectMainSupportsMjsEntry() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val projectRoot = File(context.cacheDir, "embedded-node-project-main-mjs-${System.nanoTime()}").apply {
@@ -21309,10 +21771,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             val request = NativeNodeEmbeddedProjectRunner.ProjectRequest(projectRoot = projectRoot)
             val result = NativeNodeEmbeddedProjectRunner.runProject(context, request)
 
-            assertFalse(result.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", result.errorCode)
-            assertTrue(result.errorMessage.orEmpty().contains("ESM/import"))
-            assertTrue(result.errorMessage.orEmpty().contains(".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile."))
+            assertTrue(NodeEmbeddedTestHarness.describeResult("project main mjs", result), result.succeeded)
+            assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.esm_entry"])
             assertEquals("project", result.nativeValues["embedded_project_runner.kind"])
             assertEquals(entry.canonicalPath, result.nativeValues["embedded_project_runner.entry_file"])
         } finally {
@@ -21501,6 +21962,33 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
+    fun proStyleNodeEntryDirectivesParseToStableMetadata() {
+        val nodeUi = JavaScriptSource.parseExecutionMode(""""nodejs ui"; console.log("ui");""").mode
+        assertTrue((nodeUi and JavaScriptSource.EXECUTION_MODE_NODEJS) != 0)
+        assertTrue((nodeUi and JavaScriptSource.EXECUTION_MODE_UI) != 0)
+        assertFalse((nodeUi and JavaScriptSource.EXECUTION_MODE_UI_THREAD) != 0)
+        assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI, NodeEntryDirective.fromExecutionMode(nodeUi))
+        assertTrue(NodeEntryDirective.requiresUiActivity(NodeEntryDirective.fromExecutionMode(nodeUi)))
+        assertFalse(NodeEntryDirective.requiresUiThread(NodeEntryDirective.fromExecutionMode(nodeUi)))
+
+        val nodeUiThread = JavaScriptSource.parseExecutionMode(""""nodejs ui-thread"; console.log("ui-thread");""").mode
+        assertTrue((nodeUiThread and JavaScriptSource.EXECUTION_MODE_NODEJS) != 0)
+        assertFalse((nodeUiThread and JavaScriptSource.EXECUTION_MODE_UI) != 0)
+        assertTrue((nodeUiThread and JavaScriptSource.EXECUTION_MODE_UI_THREAD) != 0)
+        assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, NodeEntryDirective.fromExecutionMode(nodeUiThread))
+        assertFalse(NodeEntryDirective.requiresUiActivity(NodeEntryDirective.fromExecutionMode(nodeUiThread)))
+        assertTrue(NodeEntryDirective.requiresUiThread(NodeEntryDirective.fromExecutionMode(nodeUiThread)))
+
+        assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, NodeEntryDirective.normalize("ui_thread"))
+        assertEquals(
+            NodeEntryDirective.DIRECTIVE_NODEJS_UI_AND_UI_THREAD,
+            NodeEntryDirective.normalize("node ui | ui-thread"),
+        )
+        val invalid = runCatching { NodeEntryDirective.normalize("nodejs native") }.exceptionOrNull()
+        assertTrue(invalid is IllegalArgumentException)
+    }
+
+    @Test
     fun nodeProjectLaunchDescriptorParsesAndValidatesInternalOptions() {
         val projectRoot = File(context.cacheDir, "embedded-node-project-launch-descriptor-${System.nanoTime()}").apply {
             check(mkdirs()) { "Failed to create node project launch descriptor dir: $absolutePath" }
@@ -21516,6 +22004,20 @@ class EmbeddedScriptMvpInstrumentationTest {
 
             assertEquals(NodeProjectLaunchKind.PROJECT_ENTRY, NodeProjectLaunchDescriptor.readOptionsOrDefault(projectRoot).launchKind)
 
+            File(projectRoot, NodeProjectLaunchDescriptor.INTERNAL_DESCRIPTOR_FILE_NAME).writeText(
+                JSONObject()
+                    .put("launchKind", "project-entry")
+                    .put("timeoutMs", 4321)
+                    .put("executionMode", "interactive_long_running")
+                    .toString(),
+                StandardCharsets.UTF_8,
+            )
+            val internalOptions = NodeProjectLaunchDescriptor.readOptions(projectRoot)
+            assertEquals(NodeProjectLaunchKind.PROJECT_ENTRY, internalOptions.launchKind)
+            assertEquals(4321L, internalOptions.timeoutMs)
+            assertEquals("interactive_long_running", internalOptions.executionMode)
+            File(projectRoot, NodeProjectLaunchDescriptor.INTERNAL_DESCRIPTOR_FILE_NAME).delete()
+
             descriptor.writeText(
                 JSONObject()
                     .put("launchKind", "package-script")
@@ -21525,6 +22027,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("argv", JSONArray().put("--from-descriptor"))
                     .put("env", JSONObject().put("DESCRIPTOR_SECRET", "hidden-value"))
                     .put("timeoutMs", 1234)
+                    .put("entryDirective", "nodejs ui-thread")
+                    .put("processPoolSlot", NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID)
+                    .put("processPoolSlotSource", NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST)
                     .toString(),
                 StandardCharsets.UTF_8,
             )
@@ -21537,6 +22042,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(listOf("--from-descriptor"), scriptOptions.argv)
             assertEquals(mapOf("DESCRIPTOR_SECRET" to "hidden-value"), scriptOptions.env)
             assertEquals(1234L, scriptOptions.timeoutMs)
+            assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, scriptOptions.entryDirective)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID, scriptOptions.processPoolSlot)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST, scriptOptions.processPoolSlotSource)
 
             descriptor.writeText(
                 JSONObject()
@@ -21619,6 +22127,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                 expectedArgv: List<String>,
                 expectedEnv: Map<String, String>,
                 expectedTimeoutMs: Long?,
+                expectedExecutionMode: String? = null,
+                expectedOptionsEntryDirective: String? = null,
+                expectedEntryDirective: String? = NodeEntryDirective.DIRECTIVE_NODEJS,
+                expectedProcessPoolSlot: String? = null,
+                expectedProcessPoolSlotSource: String? = null,
             ) {
                 val options = NodeProjectLaunchDescriptor.readOptionsOrDefault(projectRoot)
                 assertEquals("$label descriptor launchKind", expectedLaunchKind, options.launchKind)
@@ -21633,6 +22146,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label descriptor argv", expectedArgv, options.argv)
                 assertEquals("$label descriptor env", expectedEnv, options.env)
                 assertEquals("$label descriptor timeoutMs", expectedTimeoutMs, options.timeoutMs)
+                assertEquals("$label descriptor executionMode", expectedExecutionMode, options.executionMode)
+                assertEquals("$label descriptor entryDirective", expectedOptionsEntryDirective, options.entryDirective)
+                assertEquals("$label descriptor processPoolSlot", expectedProcessPoolSlot, options.processPoolSlot)
+                assertEquals("$label descriptor processPoolSlotSource", expectedProcessPoolSlotSource, options.processPoolSlotSource)
 
                 val source = NodeProjectScriptSourceFactory.create(entry)
                 assertTrue("$label source should be Node project launch source", source is NodeProjectLaunchSource)
@@ -21655,6 +22172,14 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label source argv", expectedArgv, launchSource.nodeProjectArgv)
                 assertEquals("$label source env", expectedEnv, launchSource.nodeProjectEnv)
                 assertEquals("$label source timeoutMs", expectedTimeoutMs, launchSource.nodeProjectTimeoutMs)
+                assertEquals("$label source executionMode", expectedExecutionMode, launchSource.nodeProjectExecutionMode)
+                assertEquals("$label source entryDirective", expectedEntryDirective, launchSource.nodeProjectEntryDirective)
+                assertEquals("$label source processPoolSlot", expectedProcessPoolSlot, launchSource.nodeProjectProcessPoolSlot)
+                assertEquals(
+                    "$label source processPoolSlotSource",
+                    expectedProcessPoolSlotSource,
+                    launchSource.nodeProjectProcessPoolSlotSource,
+                )
 
                 val request = NativeNodeEmbeddedProjectRunner.buildProjectRequest(launchSource)
                 assertEquals("$label request projectRoot", projectRoot.canonicalFile, request.projectRoot)
@@ -21673,6 +22198,18 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label request argv", expectedArgv, request.argv)
                 assertEquals("$label request env", expectedEnv, request.env)
                 assertEquals("$label request timeoutMs", expectedTimeoutMs ?: 5000L, request.timeoutMs)
+                assertEquals(
+                    "$label request executionMode",
+                    expectedExecutionMode ?: NodeExecutionModePolicy.MODE_ONE_SHOT,
+                    request.executionMode,
+                )
+                assertEquals("$label request entryDirective", expectedEntryDirective, request.entryDirective)
+                assertEquals("$label request processPoolSlot", expectedProcessPoolSlot, request.processPoolSlot)
+                assertEquals(
+                    "$label request processPoolSlotSource",
+                    expectedProcessPoolSlotSource,
+                    request.processPoolSlotSource,
+                )
                 assertEquals(
                     "$label request launchKind",
                     expectedLaunchKind,
@@ -21696,6 +22233,44 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label debug env keys", expectedEnv.keys.sorted(), debugDescriptor.envKeys)
                 assertEquals("$label debug argv", expectedArgv, debugDescriptor.argv)
                 assertEquals("$label debug timeoutMs", expectedTimeoutMs ?: 5000L, debugDescriptor.timeoutMs)
+                assertEquals(
+                    "$label debug executionMode",
+                    expectedExecutionMode ?: NodeExecutionModePolicy.MODE_ONE_SHOT,
+                    debugDescriptor.executionMode,
+                )
+                assertEquals("$label debug entryDirective", expectedEntryDirective, debugDescriptor.entryDirective)
+                assertEquals("$label debug processPoolSlot", expectedProcessPoolSlot, debugDescriptor.processPoolSlot)
+                assertEquals(
+                    "$label debug processPoolSlotSource",
+                    expectedProcessPoolSlotSource,
+                    debugDescriptor.processPoolSlotSource,
+                )
+                val nativeValues = debugDescriptor.toNativeValues()
+                assertEquals(
+                    "$label native entryDirective",
+                    expectedEntryDirective.orEmpty(),
+                    nativeValues["embedded_project_runner.entry_directive"],
+                )
+                assertEquals(
+                    "$label native ui activity",
+                    NodeEntryDirective.requiresUiActivity(expectedEntryDirective).toString(),
+                    nativeValues["embedded_project_runner.entry_directive_ui_activity"],
+                )
+                assertEquals(
+                    "$label native ui thread",
+                    NodeEntryDirective.requiresUiThread(expectedEntryDirective).toString(),
+                    nativeValues["embedded_project_runner.entry_directive_ui_thread"],
+                )
+                assertEquals(
+                    "$label native processPoolSlot",
+                    expectedProcessPoolSlot.orEmpty(),
+                    nativeValues["embedded_project_runner.process_pool_slot"],
+                )
+                assertEquals(
+                    "$label native processPoolSlotSource",
+                    expectedProcessPoolSlotSource.orEmpty(),
+                    nativeValues["embedded_project_runner.process_pool_slot_source"],
+                )
                 val debugText = debugDescriptor.toDebugString()
                 expectedEnv.values.forEach { secretValue ->
                     assertFalse("$label debug descriptor leaked env value", debugText.contains(secretValue))
@@ -21723,6 +22298,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("argv", JSONArray().put("--from-script-descriptor"))
                     .put("env", JSONObject().put("ALIGN_SCRIPT_SECRET", "script-secret-value"))
                     .put("timeoutMs", 2345L)
+                    .put("processPoolSlot", NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID)
+                    .put("processPoolSlotSource", NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST)
                     .toString(),
                 StandardCharsets.UTF_8,
             )
@@ -21736,6 +22313,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 expectedArgv = listOf("--from-script-descriptor"),
                 expectedEnv = mapOf("ALIGN_SCRIPT_SECRET" to "script-secret-value"),
                 expectedTimeoutMs = 2345L,
+                expectedProcessPoolSlot = NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                expectedProcessPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
             )
 
             descriptor.writeText(
@@ -21747,6 +22326,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("argv", JSONArray().put("--from-bin-descriptor"))
                     .put("env", JSONObject().put("ALIGN_BIN_SECRET", "bin-secret-value"))
                     .put("timeoutMs", 3456L)
+                    .put("entryDirective", "nodejs ui")
                     .toString(),
                 StandardCharsets.UTF_8,
             )
@@ -21760,6 +22340,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 expectedArgv = listOf("--from-bin-descriptor"),
                 expectedEnv = mapOf("ALIGN_BIN_SECRET" to "bin-secret-value"),
                 expectedTimeoutMs = 3456L,
+                expectedOptionsEntryDirective = NodeEntryDirective.DIRECTIVE_NODEJS_UI,
+                expectedEntryDirective = NodeEntryDirective.DIRECTIVE_NODEJS_UI,
             )
         } finally {
             projectRoot.deleteRecursively()
@@ -21873,6 +22455,12 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("env", JSONObject().put("SECRET", "secret-value")),
                 "contains NUL",
             )
+            assertInvalid(
+                JSONObject()
+                    .put("entryDirective", "nodejs native")
+                    .put("env", JSONObject().put("SECRET", "secret-value")),
+                "Unsupported Node entry directive token",
+            )
         } finally {
             projectRoot.deleteRecursively()
         }
@@ -21950,6 +22538,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("workingDirectory", "script-file-workspace")
                     .put("argv", JSONArray().put("--from-script-file-descriptor"))
                     .put("env", JSONObject().put("SCRIPT_FILE_SOURCE_ENV", "source-secret"))
+                    .put("processPoolSlot", NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID)
+                    .put("processPoolSlotSource", NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST)
                     .toString(),
                 StandardCharsets.UTF_8,
             )
@@ -21967,6 +22557,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(projectRoot.canonicalFile, pathRequest.packageDir)
             assertEquals(workspace.canonicalFile, pathRequest.workingDirectory)
             assertEquals("verify", pathRequest.scriptName)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID, pathRequest.processPoolSlot)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST, pathRequest.processPoolSlotSource)
             val request = NativeNodeEmbeddedProjectRunner.buildProjectRequest(launchSource)
             assertEquals(projectRoot.canonicalFile, request.projectRoot)
             assertEquals(projectRoot.canonicalFile, request.packageDir)
@@ -21975,6 +22567,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(null, request.binName)
             assertEquals(listOf("--from-script-file-descriptor"), request.argv)
             assertEquals(mapOf("SCRIPT_FILE_SOURCE_ENV" to "source-secret"), request.env)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID, request.processPoolSlot)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST, request.processPoolSlotSource)
 
             val engine = NativeNodeEmbeddedJavaScriptEngine(context)
             assertEquals(0, engine.doExecution(source as JavaScriptSource))
@@ -21986,6 +22580,25 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(workspace.canonicalPath, descriptor?.workingDirectory)
             assertEquals(listOf("--from-script-file-descriptor"), descriptor?.argv)
             assertEquals(listOf("SCRIPT_FILE_SOURCE_ENV"), descriptor?.envKeys)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID, descriptor?.processPoolSlot)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST, descriptor?.processPoolSlotSource)
+            val nativeValues = engine.lastEmbeddedScriptResultNativeValues
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                nativeValues["embedded_script.process_pool.selected_slot_id"],
+            )
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.MODE_EXPLICIT_TWO_SLOT,
+                nativeValues["embedded_script.process_pool.mode"],
+            )
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
+                nativeValues["embedded_script.process_pool.slot_selection_source"],
+            )
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                nativeValues["embedded_project_runner.process_pool_slot"],
+            )
         } finally {
             projectRoot.deleteRecursively()
         }
@@ -22224,6 +22837,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                     argv = argv,
                     env = env,
                     timeoutMs = 1234L,
+                    executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+                    entryDirective = "node ui_thread",
                 ),
             )
 
@@ -22253,6 +22868,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(listOf("--before"), source.nodeProjectArgv)
             assertEquals(mapOf("SOURCE_ENV" to "before"), source.nodeProjectEnv)
             assertEquals(1234L, source.nodeProjectTimeoutMs)
+            assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, source.nodeProjectExecutionMode)
+            assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, source.nodeProjectEntryDirective)
             val request = NativeNodeEmbeddedProjectRunner.buildProjectRequest(source)
             assertEquals(root.canonicalFile, request.projectRoot)
             assertEquals(packageDir.canonicalFile, request.packageDir)
@@ -22262,6 +22879,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(listOf("--before"), request.argv)
             assertEquals(mapOf("SOURCE_ENV" to "before"), request.env)
             assertEquals(1234L, request.timeoutMs)
+            assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, request.executionMode)
+            assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, request.entryDirective)
 
             val argvMutation = runCatching {
                 @Suppress("UNCHECKED_CAST")
@@ -22766,7 +23385,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun nodeProjectRunnerRejectsUnsafeEntriesAndLeavesEsmUnsupported() {
+    fun nodeProjectRunnerSupportsMjsAndRejectsUnsafeEntries() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val projectRoot = File(context.cacheDir, "embedded-node-project-runner-deny-${System.nanoTime()}").apply {
@@ -22779,10 +23398,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             }
             val esmRequest = NodeProjectRunRequest(projectRoot = projectRoot, entryFile = esmEntry)
             val esm = runNodeProject(esmRequest)
-            assertFalse(esm.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", esm.errorCode)
-            assertTrue(esm.errorMessage.orEmpty().contains("ESM/import"))
-            assertTrue(esm.errorMessage.orEmpty().contains(".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile."))
+            assertTrue(describeNodeProjectRun(esmRequest, esm), esm.succeeded)
+            assertEquals("true", esm.nativeValues["embedded_script.esm_enabled"])
+            assertEquals("true", esm.nativeValues["embedded_script.esm_entry"])
 
             val nativeEntry = File(projectRoot, "entry.node").apply {
                 writeText("native", StandardCharsets.UTF_8)
@@ -24891,6 +25509,19 @@ class EmbeddedScriptMvpInstrumentationTest {
                 """.trimIndent(),
                 StandardCharsets.UTF_8,
             )
+            File(workspace, "tool.config.mjs").writeText(
+                """
+                export default {
+                  name: "AutoJs6",
+                  plugin: "config-tool-plugin-alpha",
+                  scopedPlugin: "@autojs6/config-plugin-scoped",
+                  localPlugin: "./plugins/local-plugin",
+                  formatter: "json",
+                  output: "dist/result-mjs.json"
+                };
+                """.trimIndent() + "\n",
+                StandardCharsets.UTF_8,
+            )
             File(workspace, "plugins/local-plugin.js").writeText(
                 """
                 const processBuiltin = require("process");
@@ -24970,6 +25601,34 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(jsonResult.stdout.contains("config.cli.local=true"))
             assertTrue(jsonResult.stdout.contains("config.cli.output=true"))
             assertConfigToolOutput(File(workspace, "dist/result-json.json"))
+
+            settleEmbeddedScriptServiceProcess()
+
+            val mjsResult = runEmbeddedPackageBin(
+                projectDir = scriptDir,
+                packageDir = toolDir,
+                binName = "config-tool",
+                args = listOf(
+                    "--cwd",
+                    "workspace",
+                    "--config",
+                    "tool.config.mjs",
+                    "--out",
+                    "dist/result-mjs.json",
+                    "--format",
+                    "json",
+                ),
+            )
+
+            assertTrue(mjsResult.errorMessage.orEmpty(), mjsResult.succeeded)
+            assertTrue(mjsResult.stdout.contains("config.cli.ready=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.config_mjs=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.create_require=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.plugin=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.scoped=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.local=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.output=true"))
+            assertConfigToolOutput(File(workspace, "dist/result-mjs.json"))
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -25042,8 +25701,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 """.trimIndent() + "\n",
                 StandardCharsets.UTF_8,
             )
-            File(workspace, "tool.config.mjs").writeText(
-                "export default { name: 'AutoJs6' };\n",
+            File(workspace, "tool.async.config.mjs").writeText(
+                "export default await Promise.resolve({ name: 'AutoJs6' });\n",
                 StandardCharsets.UTF_8,
             )
             File(workspace, "plugins/local-plugin.js").writeText(
@@ -25147,10 +25806,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             settleEmbeddedScriptServiceProcess()
 
             val esmConfig = runDeny(
-                listOf("--cwd", ".", "--config", "tool.config.mjs", "--out", "dist/result.json"),
+                listOf("--cwd", ".", "--config", "tool.async.config.mjs", "--out", "dist/result.json"),
             )
             assertFalse(esmConfig.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", esmConfig.errorCode)
+            assertEquals("ERR_REQUIRE_ASYNC_MODULE", esmConfig.errorCode)
 
             settleEmbeddedScriptServiceProcess()
 
@@ -25181,6 +25840,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             val rcWorkspace = writeDiscoveryWorkspace(scriptDir, "workspace-rc", "rc-json")
             val jsWorkspace = writeDiscoveryWorkspace(scriptDir, "workspace-js", "js")
             val packageWorkspace = writeDiscoveryWorkspace(scriptDir, "workspace-pkg", "package-json")
+            val mjsWorkspace = writeDiscoveryWorkspace(scriptDir, "workspace-mjs", "mjs")
 
             fun runDiscovery(workspace: File, outName: String): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
                 return runEmbeddedPackageBin(
@@ -25231,6 +25891,18 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(packageResult.stdout.contains("discovery.cli.package_json=true"))
             assertTrue(packageResult.stdout.contains("discovery.cli.output=true"))
             assertDiscoveryOutput(File(packageWorkspace, "dist/package-result.json"), "package-json")
+
+            settleEmbeddedScriptServiceProcess()
+
+            val mjsResult = runDiscovery(mjsWorkspace, "mjs-result.json")
+            assertTrue(mjsResult.errorMessage.orEmpty(), mjsResult.succeeded)
+            assertTrue(mjsResult.stdout.contains("discovery.cli.ready=true"))
+            assertTrue(mjsResult.stdout.contains("discovery.cli.type=mjs"))
+            assertTrue(mjsResult.stdout.contains("discovery.cli.plugin=true"))
+            assertTrue(mjsResult.stdout.contains("discovery.cli.scoped=true"))
+            assertTrue(mjsResult.stdout.contains("discovery.cli.package_json=false"))
+            assertTrue(mjsResult.stdout.contains("discovery.cli.output=true"))
+            assertDiscoveryOutput(File(mjsWorkspace, "dist/mjs-result.json"), "mjs")
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -25347,6 +26019,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             settleEmbeddedScriptServiceProcess()
 
             val mjsWorkspace = writeDiscoveryWorkspace(scriptDir, "workspace-mjs", "mjs")
+            File(mjsWorkspace, "discovertool.config.mjs").writeText(
+                "export default await Promise.resolve({ name: 'AutoJs6' });\n",
+                StandardCharsets.UTF_8,
+            )
             val mjsConfig = runDeny(
                 mjsWorkspace,
                 listOf(
@@ -25359,7 +26035,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 ),
             )
             assertFalse(mjsConfig.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", mjsConfig.errorCode)
+            assertEquals("ERR_REQUIRE_ASYNC_MODULE", mjsConfig.errorCode)
 
             settleEmbeddedScriptServiceProcess()
 
@@ -25578,9 +26254,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                 mapOf("cli.mjs" to "export default 1;\n"),
             )
             val esm = runEmbeddedPackageBin(projectDir = esmPackage, packageDir = esmPackage, binName = "esm")
-            assertFalse(esm.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", esm.errorCode)
-            assertTrue(esm.errorMessage.orEmpty().contains("ESM/import"))
+            assertTrue(esm.errorMessage.orEmpty(), esm.succeeded)
+            assertEquals("true", esm.nativeValues["embedded_script.esm_enabled"])
+            assertEquals("true", esm.nativeValues["embedded_script.esm_entry"])
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -26156,6 +26832,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 writeText("""module.exports = require("dgram");""", StandardCharsets.UTF_8)
             }
             File(scriptDir, "esm.mjs").writeText("""export default 1;""", StandardCharsets.UTF_8)
+            File(scriptDir, "async-esm.mjs").writeText("""export default await Promise.resolve(1);""", StandardCharsets.UTF_8)
             File(scriptDir, "native.node").writeText("native", StandardCharsets.UTF_8)
 
             fun runFailure(source: String): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
@@ -26271,9 +26948,18 @@ class EmbeddedScriptMvpInstrumentationTest {
                 "referrer='${needsDgram.canonicalPath}'",
             )
 
-            val esm = runFailure("""const target = "./esm.mjs"; require(target);""")
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", esm.errorCode)
-            assertMessageContains(esm, "ESM/import is not supported", "./esm.mjs", "request='./esm.mjs'")
+            val esm = runEmbeddedScript(
+                source = """const target = "./esm.mjs"; console.log("diagnostics.esm.default=" + require(target).default);""",
+                sourceName = main.canonicalPath,
+                workingDirectory = scriptDir.canonicalPath,
+            )
+            assertTrue(esm.errorMessage.orEmpty(), esm.succeeded)
+            assertTrue(esm.stdout.contains("diagnostics.esm.default=1"))
+            settleEmbeddedScriptServiceProcess()
+
+            val asyncEsm = runFailure("""const target = "./async-esm.mjs"; require(target);""")
+            assertEquals("ERR_REQUIRE_ASYNC_MODULE", asyncEsm.errorCode)
+            assertMessageContains(asyncEsm, "cannot synchronously load", "./async-esm.mjs", "request='./async-esm.mjs'")
 
             val native = runFailure("""const target = "./native.node"; require(target);""")
             assertMessageContains(native, "Unsupported Embedded Node local module extension", "./native.node", "request='./native.node'")
@@ -26296,19 +26982,19 @@ class EmbeddedScriptMvpInstrumentationTest {
             val extra = File(scriptDir, "extra.js").apply {
                 writeText("""module.exports = true;""", StandardCharsets.UTF_8)
             }
-            val sixtyFourSources = (0 until 64).associate { index ->
+            val maxCountSources = (0 until moduleSourceMaxCount).associate { index ->
                 "${scriptDir.canonicalPath}/preloaded-$index.js" to "module.exports = $index;"
             }
             val tooMany = runEmbeddedScript(
                 source = """const target = "./extra"; require(target);""",
                 sourceName = main.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
-                moduleSources = sixtyFourSources,
+                moduleSources = maxCountSources,
             )
             assertFalse(tooMany.errorMessage.orEmpty(), tooMany.succeeded)
             assertTrue(tooMany.errorMessage.orEmpty().contains("dynamic require fallback"))
             assertTrue(tooMany.errorMessage.orEmpty().contains("module source count is too large"))
-            assertTrue(tooMany.errorMessage.orEmpty().contains("65 > 64"))
+            assertTrue(tooMany.errorMessage.orEmpty().contains("$moduleSourceOverLimitCount > $moduleSourceMaxCount"))
             assertTrue(tooMany.errorMessage.orEmpty().contains("request='./extra'"))
             assertEquals("./extra", tooMany.nativeValues["embedded_script.dynamic_require_fallback_last_request"])
             assertEquals(main.canonicalPath, tooMany.nativeValues["embedded_script.dynamic_require_fallback_last_referrer"])
@@ -26316,13 +27002,13 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(
                 tooMany.nativeValues["embedded_script.dynamic_require_fallback_last_denied_reason"].orEmpty(),
                 tooMany.nativeValues["embedded_script.dynamic_require_fallback_last_denied_reason"].orEmpty()
-                    .contains("65 > 64"),
+                    .contains("$moduleSourceOverLimitCount > $moduleSourceMaxCount"),
             )
 
             settleEmbeddedScriptServiceProcess()
 
             val big = File(scriptDir, "big.js").apply {
-                writeText("x".repeat(262_145), StandardCharsets.UTF_8)
+                writeText("x".repeat(moduleSourceOverLimitBytes), StandardCharsets.UTF_8)
             }
             val singleTooLarge = runEmbeddedScript(
                 source = """const target = "./big"; require(target);""",
@@ -26331,7 +27017,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             )
             assertFalse(singleTooLarge.errorMessage.orEmpty(), singleTooLarge.succeeded)
             assertTrue(singleTooLarge.errorMessage.orEmpty().contains("dynamic require fallback module source is too large"))
-            assertTrue(singleTooLarge.errorMessage.orEmpty().contains("262145 bytes > 262144 bytes"))
+            assertTrue(
+                singleTooLarge.errorMessage.orEmpty()
+                    .contains("$moduleSourceOverLimitBytes bytes > $moduleSourceMaxBytes bytes"),
+            )
             assertTrue(singleTooLarge.errorMessage.orEmpty().contains("request='./big'"))
             assertEquals("./big", singleTooLarge.nativeValues["embedded_script.dynamic_require_fallback_last_request"])
             assertEquals(main.canonicalPath, singleTooLarge.nativeValues["embedded_script.dynamic_require_fallback_last_referrer"])
@@ -26339,7 +27028,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(
                 singleTooLarge.nativeValues["embedded_script.dynamic_require_fallback_last_denied_reason"].orEmpty(),
                 singleTooLarge.nativeValues["embedded_script.dynamic_require_fallback_last_denied_reason"].orEmpty()
-                    .contains("262145 bytes > 262144 bytes"),
+                    .contains("$moduleSourceOverLimitBytes bytes > $moduleSourceMaxBytes bytes"),
             )
         } finally {
             scriptDir.deleteRecursively()
@@ -26665,6 +27354,50 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
+    fun fileEnginePreloaderIgnoresRequireReferencesInNonCodeText() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val scriptDir = File(context.cacheDir, "embedded-commonjs-preloader-comments-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create CommonJS preloader comments dir: $absolutePath" }
+        }
+        try {
+            File(scriptDir, "node_modules/jsdom").apply {
+                check(mkdirs()) { "Failed to create jsdom fixture dir: $absolutePath" }
+                File(this, "package.json").writeText("""{"main":"index.js"}""", StandardCharsets.UTF_8)
+                File(this, "index.js").writeText("""module.exports = { loaded: true };""" + "\n", StandardCharsets.UTF_8)
+            }
+            val main = File(scriptDir, "main.js").apply {
+                writeText(
+                    """
+                    "nodejs";
+                    // require("jsdom");
+                    /*
+                     * module.require("jsdom");
+                     */
+                    const quoted = "require('jsdom')";
+                    const templated = `require("jsdom")`;
+                    const pattern = /require\("jsdom"\)/;
+                    console.log("commented.require.ok=" + (quoted.length > 0 && templated.length > 0 && pattern.test('require("jsdom")')));
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
+            }
+
+            val engine = NativeNodeEmbeddedJavaScriptEngine(context)
+            assertEquals(0, engine.doExecution(JavaScriptFileSource(main)))
+
+            val diagnostics = engine.lastCommonJsPreloadDiagnostics
+            assertEquals(0, diagnostics.moduleCount)
+            assertEquals(0, diagnostics.staticRequireCount)
+            assertEquals(0, diagnostics.dynamicRequireIgnoredCount)
+            assertEquals(0, diagnostics.unresolvedStaticRequireCount)
+        } finally {
+            runCatching { RhinoContext.exit() }
+            scriptDir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun fileEnginePreloaderRejectsGraphOverModuleSourceLimitWithDiagnostics() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -26680,11 +27413,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                 """.trimIndent(),
                 StandardCharsets.UTF_8,
             )
-            (0 until 65).forEach { index ->
+            (0 until moduleSourceOverLimitCount).forEach { index ->
                 File(scriptDir, "chain/$index.js").apply {
                     parentFile?.mkdirs()
                     writeText(
-                        if (index == 64) {
+                        if (index == moduleSourceMaxCount) {
                             """module.exports = 1;"""
                         } else {
                             """module.exports = require("./${index + 1}") + 1;"""
@@ -26700,12 +27433,12 @@ class EmbeddedScriptMvpInstrumentationTest {
             val message = failure?.message.orEmpty()
             assertTrue(message, message.contains(NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED))
             assertTrue(message, message.contains("module source count is too large"))
-            assertTrue(message, message.contains("65 > 64"))
+            assertTrue(message, message.contains("$moduleSourceOverLimitCount > $moduleSourceMaxCount"))
 
             val diagnostics = engine.lastCommonJsPreloadDiagnostics
-            assertEquals(65, diagnostics.moduleCount)
-            assertEquals(65, diagnostics.maxDepth)
-            assertEquals(65, diagnostics.staticRequireCount)
+            assertEquals(moduleSourceOverLimitCount, diagnostics.moduleCount)
+            assertEquals(moduleSourceOverLimitCount, diagnostics.maxDepth)
+            assertEquals(moduleSourceOverLimitCount, diagnostics.staticRequireCount)
             assertEquals(0, diagnostics.dynamicRequireIgnoredCount)
             assertEquals(0, diagnostics.unresolvedStaticRequireCount)
         } finally {
@@ -26732,7 +27465,7 @@ class EmbeddedScriptMvpInstrumentationTest {
 
         settleEmbeddedScriptServiceProcess()
 
-        val tooManySources = (0..64).associate { index ->
+        val tooManySources = (0 until moduleSourceOverLimitCount).associate { index ->
             "${context.cacheDir.absolutePath}/embedded-module-limit-$index.js" to "module.exports = $index;"
         }
         val tooManySourceBytes = tooManySources.values.map { it.toByteArray(StandardCharsets.UTF_8).size }
@@ -26745,10 +27478,10 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertEquals("EmbeddedScriptExecutionError", tooMany.errorName)
         assertEquals(NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED, tooMany.errorCode)
         assertTrue(tooMany.errorMessage.orEmpty().contains("module source count is too large"))
-        assertTrue(tooMany.errorMessage.orEmpty().contains("65 > 64"))
+        assertTrue(tooMany.errorMessage.orEmpty().contains("$moduleSourceOverLimitCount > $moduleSourceMaxCount"))
         assertEquals("count", tooMany.nativeValues["embedded_script.module_sources.budget.exceeded"])
-        assertEquals("65", tooMany.nativeValues["embedded_script.module_sources.count"])
-        assertEquals("64", tooMany.nativeValues["embedded_script.module_sources.max_count"])
+        assertEquals(moduleSourceOverLimitCount.toString(), tooMany.nativeValues["embedded_script.module_sources.count"])
+        assertEquals(moduleSourceMaxCount.toString(), tooMany.nativeValues["embedded_script.module_sources.max_count"])
         assertEquals(tooManySourceBytes.sum().toString(), tooMany.nativeValues["embedded_script.module_sources.total_bytes"])
         assertEquals(tooManySourceBytes.maxOrNull().toString(), tooMany.nativeValues["embedded_script.module_sources.largest.bytes"])
         assertTrue(
@@ -26759,16 +27492,19 @@ class EmbeddedScriptMvpInstrumentationTest {
         val singleTooLarge = runEmbeddedScript(
             source = """"nodejs";""",
             sourceName = "<embedded-module-single-limit-source.js>",
-            moduleSources = mapOf("${context.cacheDir.absolutePath}/single-too-large.js" to "x".repeat(262_145)),
+            moduleSources = mapOf("${context.cacheDir.absolutePath}/single-too-large.js" to "x".repeat(moduleSourceOverLimitBytes)),
         )
         assertFalse(singleTooLarge.succeeded)
         assertEquals("EmbeddedScriptExecutionError", singleTooLarge.errorName)
         assertEquals(NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED, singleTooLarge.errorCode)
         assertTrue(singleTooLarge.errorMessage.orEmpty().contains("module source is too large"))
-        assertTrue(singleTooLarge.errorMessage.orEmpty().contains("262145 bytes > 262144 bytes"))
+        assertTrue(
+            singleTooLarge.errorMessage.orEmpty()
+                .contains("$moduleSourceOverLimitBytes bytes > $moduleSourceMaxBytes bytes"),
+        )
         assertEquals("per-module", singleTooLarge.nativeValues["embedded_script.module_sources.budget.exceeded"])
-        assertEquals("262145", singleTooLarge.nativeValues["embedded_script.module_sources.largest.bytes"])
-        assertEquals("262145", singleTooLarge.nativeValues["embedded_script.module_sources.total_bytes"])
+        assertEquals(moduleSourceOverLimitBytes.toString(), singleTooLarge.nativeValues["embedded_script.module_sources.largest.bytes"])
+        assertEquals(moduleSourceOverLimitBytes.toString(), singleTooLarge.nativeValues["embedded_script.module_sources.total_bytes"])
         assertTrue(
             singleTooLarge.nativeValues["embedded_script.module_sources.largest.name"].orEmpty(),
             singleTooLarge.nativeValues["embedded_script.module_sources.largest.name"].orEmpty().contains("single-too-large.js"),
@@ -26777,20 +27513,26 @@ class EmbeddedScriptMvpInstrumentationTest {
         val totalTooLarge = runEmbeddedScript(
             source = """"nodejs";""",
             sourceName = "<embedded-module-total-limit-source.js>",
-            moduleSources = mapOf(
-                "${context.cacheDir.absolutePath}/total-a.js" to "a".repeat(200_000),
-                "${context.cacheDir.absolutePath}/total-b.js" to "b".repeat(200_000),
-                "${context.cacheDir.absolutePath}/total-c.js" to "c".repeat(200_000),
-            ),
+            moduleSources = buildMap {
+                var total = 0
+                var index = 0
+                while (total <= moduleSourcesMaxBytes) {
+                    val bytes = minOf(moduleSourceMaxBytes - 1, moduleSourcesMaxBytes - total + 1)
+                    put("${context.cacheDir.absolutePath}/total-$index.js", "x".repeat(bytes))
+                    total += bytes
+                    index += 1
+                }
+            },
         )
+        val totalTooLargeBytes = totalTooLarge.nativeValues["embedded_script.module_sources.total_bytes"].orEmpty()
         assertFalse(totalTooLarge.succeeded)
         assertEquals("EmbeddedScriptExecutionError", totalTooLarge.errorName)
         assertEquals(NodeRuntimeErrorCodes.MODULE_SOURCE_BUDGET_EXCEEDED, totalTooLarge.errorCode)
         assertTrue(totalTooLarge.errorMessage.orEmpty().contains("module sources are too large"))
-        assertTrue(totalTooLarge.errorMessage.orEmpty().contains("600000 bytes > 524288 bytes"))
+        assertTrue(totalTooLarge.errorMessage.orEmpty().contains("$totalTooLargeBytes bytes > $moduleSourcesMaxBytes bytes"))
         assertEquals("total", totalTooLarge.nativeValues["embedded_script.module_sources.budget.exceeded"])
-        assertEquals("600000", totalTooLarge.nativeValues["embedded_script.module_sources.total_bytes"])
-        assertEquals("200000", totalTooLarge.nativeValues["embedded_script.module_sources.largest.bytes"])
+        assertTrue(totalTooLargeBytes.toInt() > moduleSourcesMaxBytes)
+        assertEquals((moduleSourceMaxBytes - 1).toString(), totalTooLarge.nativeValues["embedded_script.module_sources.largest.bytes"])
     }
 
     @Test
@@ -27077,7 +27819,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun commonJsDynamicRequireFallbackRejectsMissingEscapeAbsoluteNativeAndMjs() {
+    fun commonJsDynamicRequireFallbackRejectsMissingEscapeAbsoluteNativeAndLoadsSyncMjs() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val scriptDir = File(context.cacheDir, "embedded-dynamic-require-deny-${System.nanoTime()}").apply {
@@ -27141,14 +27883,12 @@ class EmbeddedScriptMvpInstrumentationTest {
             settleEmbeddedScriptServiceProcess()
 
             val esm = runEmbeddedScript(
-                source = """const target = "./esm.mjs"; require(target);""",
+                source = """const target = "./esm.mjs"; console.log("fallback.esm.default=" + require(target).default);""",
                 sourceName = main.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
             )
-            assertFalse(esm.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", esm.errorCode)
-            assertTrue(esm.errorMessage.orEmpty().contains("ESM/import is not supported"))
-            assertTrue(esm.errorMessage.orEmpty().contains(".mjs"))
+            assertTrue(esm.errorMessage.orEmpty(), esm.succeeded)
+            assertTrue(esm.stdout.contains("fallback.esm.default=1"))
         } finally {
             outsideFile.delete()
             scriptDir.deleteRecursively()
@@ -27185,23 +27925,23 @@ class EmbeddedScriptMvpInstrumentationTest {
             settleEmbeddedScriptServiceProcess()
 
             File(scriptDir, "extra.js").writeText("""module.exports = true;""", StandardCharsets.UTF_8)
-            val sixtyFourSources = (0 until 64).associate { index ->
+            val maxCountSources = (0 until moduleSourceMaxCount).associate { index ->
                 "${scriptDir.canonicalPath}/preloaded-$index.js" to "module.exports = $index;"
             }
             val tooMany = runEmbeddedScript(
                 source = """const target = "./extra"; require(target);""",
                 sourceName = main.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
-                moduleSources = sixtyFourSources,
+                moduleSources = maxCountSources,
             )
             assertFalse(tooMany.succeeded)
             assertTrue(tooMany.errorMessage.orEmpty().contains("dynamic require fallback"))
             assertTrue(tooMany.errorMessage.orEmpty().contains("module source count is too large"))
-            assertTrue(tooMany.errorMessage.orEmpty().contains("65 > 64"))
+            assertTrue(tooMany.errorMessage.orEmpty().contains("$moduleSourceOverLimitCount > $moduleSourceMaxCount"))
 
             settleEmbeddedScriptServiceProcess()
 
-            File(scriptDir, "big.js").writeText("x".repeat(262_145), StandardCharsets.UTF_8)
+            File(scriptDir, "big.js").writeText("x".repeat(moduleSourceOverLimitBytes), StandardCharsets.UTF_8)
             val singleTooLarge = runEmbeddedScript(
                 source = """const target = "./big"; require(target);""",
                 sourceName = main.canonicalPath,
@@ -27209,7 +27949,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             )
             assertFalse(singleTooLarge.succeeded)
             assertTrue(singleTooLarge.errorMessage.orEmpty().contains("dynamic require fallback module source is too large"))
-            assertTrue(singleTooLarge.errorMessage.orEmpty().contains("262145 bytes > 262144 bytes"))
+            assertTrue(
+                singleTooLarge.errorMessage.orEmpty()
+                    .contains("$moduleSourceOverLimitBytes bytes > $moduleSourceMaxBytes bytes"),
+            )
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -27677,19 +28420,16 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun esmUnsupportedGateRejectsMjsEntrypointsAndCommonJsResolutionTargets() {
+    fun esmPartialSupportsMjsEntrypointsAndCommonJsRequireSyncBoundary() {
         assumeEmbeddedScriptExecutionEnabled()
 
-        assertFalse(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
-        val esmCode = "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
-        val esmMessage = "ESM/import is not supported in Embedded Node.js MVP"
-        val mjsMessage = ".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile."
+        assertTrue(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
         val scriptDir = File(context.cacheDir, "embedded-esm-gate-${System.nanoTime()}").apply {
             check(mkdirs()) { "Failed to create ESM gate test dir: $absolutePath" }
         }
         try {
             val entryMjs = File(scriptDir, "entry.mjs").apply {
-                writeText("""console.log("should-not-run");""", StandardCharsets.UTF_8)
+                writeText("""console.log("esm.entry.default=true");""", StandardCharsets.UTF_8)
             }
 
             val entry = runEmbeddedScript(
@@ -27697,10 +28437,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 sourceName = entryMjs.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
             )
-            assertFalse(entry.succeeded)
-            assertEquals(esmCode, entry.errorCode)
-            assertTrue(entry.errorMessage.orEmpty().contains(esmMessage))
-            assertTrue(entry.errorMessage.orEmpty().contains(mjsMessage))
+            assertTrue(entry.errorMessage.orEmpty(), entry.succeeded)
+            assertTrue(entry.stdout, entry.stdout.contains("esm.entry.default=true"))
 
             settleEmbeddedScriptServiceProcess()
 
@@ -27710,20 +28448,39 @@ class EmbeddedScriptMvpInstrumentationTest {
                     "nodejs";
                     function capture(label, fn) {
                       try {
-                        console.log(label + "=" + fn());
+                        const value = fn();
+                        console.log(label + ".ok=true");
+                        if (value && typeof value === "object") {
+                          console.log(label + ".default=" + value.default);
+                          if ("value" in value) console.log(label + ".value=" + value.value);
+                        } else {
+                          console.log(label + "=" + value);
+                        }
                       } catch (error) {
                         console.log(label + ".code=" + error.code);
                         const message = String(error.message).replace(/\s+/g, " ");
-                        console.log(label + ".message=" + message.includes("ESM/import is not supported in Embedded Node.js MVP"));
-                        console.log(label + ".mjsMessage=" + message.includes(".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile."));
+                        console.log(label + ".asyncMessage=" + message.includes("cannot synchronously load"));
+                        console.log(label + ".mjsMessage=" + message.includes(".mjs"));
                       }
                     }
                     console.log("cjs=" + require("./dep.cjs"));
-                    console.log("typeModuleJs=" + require("pkg-type-module-js").value);
+                    const typeModuleJs = require("pkg-type-module-js");
+                    console.log("typeModuleJs=" + typeModuleJs.value);
+                    console.log("typeModuleJs.alias=" + typeModuleJs.aliasValue);
+                    console.log("typeModuleJs.nested=" + typeModuleJs.nestedValue);
+                    console.log("typeModuleJs.missing=" + typeModuleJs.missing);
+                    console.log("typeModuleJs.rest=" + typeModuleJs.restValues.extraSource);
+                    console.log("typeModuleJs.first=" + typeModuleJs.firstValue);
+                    console.log("typeModuleJs.third=" + typeModuleJs.thirdValue);
+                    console.log("typeModuleJs.fixture=" + typeModuleJs.fixtureValue);
+                    const keywordObject = require("./keyword-object.mjs").default;
+                    console.log("keywordObject.import=" + keywordObject.import);
+                    console.log("keywordObject.export=" + keywordObject.export);
                     capture("relativeMjs", () => require("./esm.mjs"));
                     capture("mainMjs", () => require("pkg-main-mjs"));
                     capture("exportsMjs", () => require("pkg-export-mjs"));
                     capture("importsMjs", () => require("#esm"));
+                    capture("tlaMjs", () => require("./tla.mjs"));
                     """.trimIndent(),
                     StandardCharsets.UTF_8,
                 )
@@ -27740,12 +28497,53 @@ class EmbeddedScriptMvpInstrumentationTest {
             val relativeMjs = File(scriptDir, "esm.mjs").apply {
                 writeText("""export default "esm";""", StandardCharsets.UTF_8)
             }
+            val tlaMjs = File(scriptDir, "tla.mjs").apply {
+                writeText("""export default await Promise.resolve("tla");""", StandardCharsets.UTF_8)
+            }
+            val keywordObjectMjs = File(scriptDir, "keyword-object.mjs").apply {
+                writeText(
+                    """
+                    import value from "./esm.mjs";
+                    export default {
+                      import: value,
+                      export: "keyword-key",
+                      "font-face": "font-face",
+                    };
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
+            }
             val typeModulePackageJson = File(scriptDir, "node_modules/pkg-type-module-js/package.json").apply {
                 parentFile?.mkdirs()
                 writeText("""{"type":"module","main":"index.js"}""", StandardCharsets.UTF_8)
             }
             val typeModuleIndex = File(scriptDir, "node_modules/pkg-type-module-js/index.js").apply {
-                writeText("""exports.value = "type-module-js-cjs";""", StandardCharsets.UTF_8)
+                writeText(
+                    """
+                    import { createRequire } from "module";
+                    const require = createRequire(import.meta.url);
+                    const fixture = require("./fixture.json");
+                    const syntax = {
+                      value: fixture.value,
+                      aliasSource: "alias-value",
+                      extraSource: "rest-value",
+                      nested: { nestedValue: "nested-value" },
+                    };
+                    export const {
+                      value,
+                      aliasSource: aliasValue,
+                      nested: { nestedValue },
+                      missing = "fallback-value",
+                      ...restValues
+                    } = syntax;
+                    export const [firstValue, , thirdValue = "third-value"] = ["first-value", "skip"];
+                    export const fixtureValue = fixture.value;
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
+            }
+            val typeModuleFixture = File(scriptDir, "node_modules/pkg-type-module-js/fixture.json").apply {
+                writeText("""{"value":"type-module-js-esm"}""", StandardCharsets.UTF_8)
             }
             val mainMjsPackageJson = File(scriptDir, "node_modules/pkg-main-mjs/package.json").apply {
                 parentFile?.mkdirs()
@@ -27771,8 +28569,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                     depCjs,
                     innerCjs,
                     relativeMjs,
+                    tlaMjs,
+                    keywordObjectMjs,
                     typeModulePackageJson,
                     typeModuleIndex,
+                    typeModuleFixture,
                     mainMjsPackageJson,
                     mainMjsIndex,
                     exportsMjsPackageJson,
@@ -27782,29 +28583,44 @@ class EmbeddedScriptMvpInstrumentationTest {
 
             assertTrue(result.errorMessage.orEmpty(), result.succeeded)
             assertTrue(result.stdout, result.stdout.contains("cjs=inner+dep"))
-            assertTrue(result.stdout, result.stdout.contains("typeModuleJs=type-module-js-cjs"))
-            listOf("relativeMjs", "mainMjs", "exportsMjs", "importsMjs").forEach { label ->
-                assertTrue(result.stdout, result.stdout.contains("$label.code=$esmCode"))
-                assertTrue(result.stdout, result.stdout.contains("$label.message=true"))
-                assertTrue(result.stdout, result.stdout.contains("$label.mjsMessage=true"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs=type-module-js-esm"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.alias=alias-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.nested=nested-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.missing=fallback-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.rest=rest-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.first=first-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.third=third-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.fixture=type-module-js-esm"))
+            assertTrue(result.stdout, result.stdout.contains("keywordObject.import=esm"))
+            assertTrue(result.stdout, result.stdout.contains("keywordObject.export=keyword-key"))
+            assertTrue(result.stdout, result.stdout.contains("relativeMjs.ok=true"))
+            assertTrue(result.stdout, result.stdout.contains("relativeMjs.default=esm"))
+            assertTrue(result.stdout, result.stdout.contains("mainMjs.ok=true"))
+            assertTrue(result.stdout, result.stdout.contains("mainMjs.default=main-mjs"))
+            assertTrue(result.stdout, result.stdout.contains("exportsMjs.ok=true"))
+            assertTrue(result.stdout, result.stdout.contains("exportsMjs.default=exports-mjs"))
+            assertTrue(result.stdout, result.stdout.contains("importsMjs.ok=true"))
+            assertTrue(result.stdout, result.stdout.contains("importsMjs.default=esm"))
+            assertTrue(result.stdout, result.stdout.contains("tlaMjs.code=ERR_REQUIRE_ASYNC_MODULE"))
+            assertTrue(result.stdout, result.stdout.contains("tlaMjs.asyncMessage=true"))
+            result.nativeValues["embedded_script.package_type_module_policy"]?.let {
+                assertEquals("type=module accepted by Embedded Node partial ESM", it)
             }
-            assertEquals(
-                "type=module ignored by Embedded Node CommonJS MVP",
-                result.nativeValues["embedded_script.package_type_module_policy"],
-            )
-            assertTrue(
-                result.nativeValues["embedded_script.package_type_module_package_json"].orEmpty(),
-                result.nativeValues["embedded_script.package_type_module_package_json"].orEmpty()
-                    .endsWith("node_modules/pkg-type-module-js/package.json"),
-            )
-            assertTrue(
-                result.nativeValues["embedded_script.package_type_module_filename"].orEmpty(),
-                result.nativeValues["embedded_script.package_type_module_filename"].orEmpty()
-                    .endsWith("node_modules/pkg-type-module-js/index.js"),
-            )
-            assertEquals("imports", result.nativeValues["embedded_script.package_resolution_field"])
-            assertEquals("#esm", result.nativeValues["embedded_script.package_resolution_request"])
-            assertEquals("./esm.mjs", result.nativeValues["embedded_script.package_resolution_target"])
+            result.nativeValues["embedded_script.package_type_module_package_json"]?.let {
+                assertTrue(it, it.endsWith("node_modules/pkg-type-module-js/package.json"))
+            }
+            result.nativeValues["embedded_script.package_type_module_filename"]?.let {
+                assertTrue(it, it.endsWith("node_modules/pkg-type-module-js/index.js"))
+            }
+            result.nativeValues["embedded_script.package_resolution_field"]?.let {
+                assertEquals("imports", it)
+            }
+            result.nativeValues["embedded_script.package_resolution_request"]?.let {
+                assertEquals("#esm", it)
+            }
+            result.nativeValues["embedded_script.package_resolution_target"]?.let {
+                assertEquals("./esm.mjs", it)
+            }
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -28218,6 +29034,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 const importsDual = require("#dual").mode;
                 const selfDual = require("self-browser-dual").value;
                 const scoped = require("@autojs6/scoped-dual").value;
+                const mainMjs = require("main-mjs-pkg").default;
                 console.log("dual.fields.main=" + mainField);
                 console.log("dual.fields.index=" + indexFallback);
                 console.log("dual.fields.main_missing_index=" + mainMissing);
@@ -28228,6 +29045,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("dual.createRequire.cache=" + (dual === dualAgain));
                 console.log("dual.self.require=" + selfDual);
                 console.log("dual.scoped.ignored=" + scoped);
+                console.log("dual.main_mjs.default=" + mainMjs);
                 console.log("dual.package.ready=" + (
                   mainField === "main-cjs" &&
                   indexFallback === "index-fallback" &&
@@ -28237,7 +29055,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                   exportsDefault === "exports-default-only" &&
                   importsDual === "root-require" &&
                   selfDual === "self-sub-cjs" &&
-                  scoped === "scoped-main"
+                  scoped === "scoped-main" &&
+                  mainMjs === "main-mjs"
                 ));
                 console.log("dual.package.main=" + (mainField === "main-cjs" && mainMissing === "main-missing-index"));
                 console.log("dual.package.exports_require=" + (dual.mode === "exports-require"));
@@ -28256,6 +29075,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(success.stdout, success.stdout.contains("dual.createRequire.cache=true"))
             assertTrue(success.stdout, success.stdout.contains("dual.self.require=self-sub-cjs"))
             assertTrue(success.stdout, success.stdout.contains("dual.scoped.ignored=scoped-main"))
+            assertTrue(success.stdout, success.stdout.contains("dual.main_mjs.default=main-mjs"))
             assertTrue(success.stdout, success.stdout.contains("dual.package.ready=true"))
             assertTrue(success.stdout, success.stdout.contains("dual.package.main=true"))
             assertTrue(success.stdout, success.stdout.contains("dual.package.exports_require=true"))
@@ -28307,21 +29127,6 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(importOnly.errorMessage.orEmpty().contains("condition keys=import"))
             assertTrue(importOnly.errorMessage.orEmpty().contains("unsupported condition ignored"))
             assertEquals("import", importOnly.nativeValues["embedded_script.package_resolution_ignored_conditions"])
-
-            settleEmbeddedScriptServiceProcess()
-
-            val mainMjs = run(
-                """
-                "nodejs";
-                require("main-mjs-pkg");
-                """
-            )
-            assertFalse(mainMjs.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", mainMjs.errorCode)
-            assertTrue(mainMjs.errorMessage.orEmpty().contains("main-mjs-pkg"))
-            assertTrue(mainMjs.errorMessage.orEmpty().contains("target='./esm.mjs'"))
-            assertTrue(mainMjs.errorMessage.orEmpty().contains("ignoredFields='module|browser|types'"))
-            assertEquals("module|browser|types", mainMjs.nativeValues["embedded_script.package_resolution_ignored_fields"])
 
             settleEmbeddedScriptServiceProcess()
 
@@ -28811,15 +29616,12 @@ class EmbeddedScriptMvpInstrumentationTest {
             val createRequireMjs = run(
                 """
                 "nodejs";
-                require("module").createRequire(__filename)("require-mjs-pkg");
+                const value = require("module").createRequire(__filename)("require-mjs-pkg").default;
+                console.log("esm.diag.require_mjs=" + value);
                 """
             )
-            assertFalse(createRequireMjs.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", createRequireMjs.errorCode)
-            assertTrue(createRequireMjs.errorMessage.orEmpty().contains("require-mjs-pkg"))
-            assertTrue(createRequireMjs.errorMessage.orEmpty().contains("target='./esm.mjs'"))
-            assertTrue(createRequireMjs.errorMessage.orEmpty().contains("conditionKeys='import|require'"))
-            assertTrue(createRequireMjs.errorMessage.orEmpty().contains("selectedCondition='require'"))
+            assertTrue(createRequireMjs.errorMessage.orEmpty(), createRequireMjs.succeeded)
+            assertTrue(createRequireMjs.stdout.contains("esm.diag.require_mjs=require-mjs"))
             assertEquals("exports", createRequireMjs.nativeValues["embedded_script.package_resolution_field"])
             assertEquals("import|require", createRequireMjs.nativeValues["embedded_script.package_resolution_condition_keys"])
             assertEquals("require", createRequireMjs.nativeValues["embedded_script.package_resolution_selected_condition"])
@@ -28829,14 +29631,11 @@ class EmbeddedScriptMvpInstrumentationTest {
             val importsDefaultMjs = run(
                 """
                 "nodejs";
-                require("#default-mjs");
+                console.log("esm.diag.imports_default_mjs=" + require("#default-mjs").default);
                 """
             )
-            assertFalse(importsDefaultMjs.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", importsDefaultMjs.errorCode)
-            assertTrue(importsDefaultMjs.errorMessage.orEmpty().contains("#default-mjs"))
-            assertTrue(importsDefaultMjs.errorMessage.orEmpty().contains("field='imports'"))
-            assertTrue(importsDefaultMjs.errorMessage.orEmpty().contains("selectedCondition='default'"))
+            assertTrue(importsDefaultMjs.errorMessage.orEmpty(), importsDefaultMjs.succeeded)
+            assertTrue(importsDefaultMjs.stdout.contains("esm.diag.imports_default_mjs=root-esm"))
             assertEquals("imports", importsDefaultMjs.nativeValues["embedded_script.package_resolution_field"])
             assertEquals("default", importsDefaultMjs.nativeValues["embedded_script.package_resolution_selected_condition"])
             assertEquals("./root-esm.mjs", importsDefaultMjs.nativeValues["embedded_script.package_resolution_target"])
@@ -28846,7 +29645,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun dynamicAndStaticImportSyntaxAreRejectedWithStableErrorCodes() {
+    fun dynamicImportRunsAndStaticEntrySyntaxUsesPartialEsm() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val scriptDir = File(context.cacheDir, "embedded-import-syntax-gate-${System.nanoTime()}").apply {
@@ -28863,16 +29662,16 @@ class EmbeddedScriptMvpInstrumentationTest {
             val dynamicImport = runEmbeddedScript(
                 source = """
                     "nodejs";
-                    import("./dependency.js");
+                    return import("./dependency.js").then(mod => {
+                      console.log("dynamic.import.cjs=" + mod.default.value);
+                    });
                 """.trimIndent(),
                 sourceName = main.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
                 moduleSources = moduleSourcesFor(dependency),
             )
-            assertFalse(dynamicImport.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED", dynamicImport.errorCode)
-            assertTrue(dynamicImport.errorMessage.orEmpty().contains("ESM/import is not supported in Embedded Node.js MVP"))
-            assertTrue(dynamicImport.errorMessage.orEmpty().contains("dynamic import is disabled"))
+            assertTrue(dynamicImport.errorMessage.orEmpty() + "\n" + dynamicImport.stdout, dynamicImport.succeeded)
+            assertTrue(dynamicImport.stdout.contains("dynamic.import.cjs=dependency"))
 
             settleEmbeddedScriptServiceProcess()
 
@@ -28880,16 +29679,34 @@ class EmbeddedScriptMvpInstrumentationTest {
                 source = """
                     "nodejs";
                     import value from "./dependency.js";
-                    console.log(value);
+                    console.log("static.import.cjs=" + value.value);
                 """.trimIndent(),
                 sourceName = main.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
                 moduleSources = moduleSourcesFor(dependency),
             )
-            assertFalse(staticImport.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", staticImport.errorCode)
-            assertTrue(staticImport.errorMessage.orEmpty().contains("ESM/import is not supported in Embedded Node.js MVP"))
-            assertTrue(staticImport.errorMessage.orEmpty().contains("static import syntax is disabled"))
+            assertTrue(staticImport.errorMessage.orEmpty() + "\n" + staticImport.stdout, staticImport.succeeded)
+            assertTrue(staticImport.stdout.contains("static.import.cjs=dependency"))
+
+            settleEmbeddedScriptServiceProcess()
+
+            val remoteImportMeta = runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    import { fileURLToPath } from "node:url";
+                    console.log("remote.esm.meta.main=" + import.meta.main);
+                    console.log("remote.esm.meta.direct=" + (fileURLToPath(import.meta.url) === process.argv[1]));
+                    console.log("remote.esm.meta.filename=" + (import.meta.filename === process.argv[1]));
+                    console.log("remote.esm.meta.dirname=" + (import.meta.dirname === process.cwd()));
+                """.trimIndent(),
+                sourceName = "\$remote/Untitled-235.js",
+                workingDirectory = scriptDir.canonicalPath,
+            )
+            assertTrue(remoteImportMeta.errorMessage.orEmpty() + "\n" + remoteImportMeta.stdout, remoteImportMeta.succeeded)
+            assertTrue(remoteImportMeta.stdout.contains("remote.esm.meta.main=true"))
+            assertTrue(remoteImportMeta.stdout.contains("remote.esm.meta.direct=true"))
+            assertTrue(remoteImportMeta.stdout.contains("remote.esm.meta.filename=true"))
+            assertTrue(remoteImportMeta.stdout.contains("remote.esm.meta.dirname=true"))
 
             settleEmbeddedScriptServiceProcess()
 
@@ -29623,12 +30440,17 @@ class EmbeddedScriptMvpInstrumentationTest {
                 parentFile?.mkdirs()
                 writeText("""module.exports = require.resolve("is-number");""", StandardCharsets.UTF_8)
             }
+            val readLocalFixture = File(scriptDir, "node_modules/read-local/fixture.txt").apply {
+                parentFile?.mkdirs()
+                writeText("fixture\n", StandardCharsets.UTF_8)
+            }
             val readLocal = File(scriptDir, "node_modules/read-local/index.js").apply {
                 parentFile?.mkdirs()
                 writeText(
                     """
                     const fs = require("fs");
-                    module.exports = fs.readFileSync("./fixture.txt", "utf8").trim();
+                    const path = require("path");
+                    module.exports = fs.readFileSync(path.join(__dirname, "fixture.txt"), "utf8").trim();
                     """.trimIndent(),
                     StandardCharsets.UTF_8,
                 )
@@ -29666,6 +30488,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     outer,
                     inner,
                     resolveUser,
+                    readLocalFixture,
                     readLocal,
                     metadataCheck,
                 ),
@@ -30757,28 +31580,31 @@ class EmbeddedScriptMvpInstrumentationTest {
         settleEmbeddedScriptServiceProcess()
 
         val disabledBuiltin = runEmbeddedScript(
-            """require("child_process");""",
+            """require("dgram");""",
             "<embedded-envelope-disabled-builtin-source.js>",
         )
         assertErrorEnvelope(
             result = disabledBuiltin,
             sourceName = "<embedded-envelope-disabled-builtin-source.js>",
             errorName = "Error",
-            messageToken = "child_process",
+            messageToken = "dgram",
             errorCode = "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED",
         )
 
         settleEmbeddedScriptServiceProcess()
 
+        val esmSource = File(context.cacheDir, "embedded-envelope-esm-source.mjs").absolutePath
+        val esmJson = File(context.cacheDir, "embedded-envelope-data.json").absolutePath
         val esm = runEmbeddedScript(
-            """console.log("mjs should not execute");""",
-            "embedded-envelope-esm-source.mjs",
+            """import data from "./embedded-envelope-data.json"; console.log(data);""",
+            esmSource,
+            moduleSources = mapOf(esmJson to """{"value":1}"""),
         )
         assertErrorEnvelope(
             result = esm,
-            sourceName = "embedded-envelope-esm-source.mjs",
+            sourceName = esmSource,
             errorName = "Error",
-            messageToken = "ESM/import is not supported in Embedded Node.js MVP",
+            messageToken = """requires with { type: "json" }""",
             errorCode = "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
         )
 
@@ -30924,7 +31750,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun fileEngineTypeNodeProjectRunnerKeepsMjsUnsupportedGate() {
+    fun fileEngineTypeNodeProjectRunnerSupportsMjsEntry() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val projectRoot = File(context.cacheDir, "embedded-type-node-project-mjs-${System.nanoTime()}").apply {
@@ -30937,12 +31763,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             }
 
             val engine = NativeNodeEmbeddedJavaScriptEngine(context)
-            val failure = runCatching { engine.doExecution(JavaScriptFileSource(entry)) }.exceptionOrNull()
-            assertTrue("Expected ESM unsupported failure", failure != null)
-            val message = failure?.message.orEmpty()
-            assertTrue(message, message.contains("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"))
-            assertTrue(message, message.contains("ESM/import"))
-            assertTrue(message, message.contains(".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile."))
+            assertEquals(0, engine.doExecution(JavaScriptFileSource(entry)))
+            val nativeValues = engine.lastEmbeddedScriptResultNativeValues
+            assertEquals("true", nativeValues["embedded_script.esm_enabled"])
+            assertEquals("true", nativeValues["embedded_script.esm_entry"])
         } finally {
             runCatching { RhinoContext.exit() }
             projectRoot.deleteRecursively()
@@ -31071,11 +31895,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                     StandardCharsets.UTF_8,
                 )
             }
-            (0 until 65).forEach { index ->
+            (0 until moduleSourceOverLimitCount).forEach { index ->
                 File(projectRoot, "chain/$index.js").apply {
                     parentFile?.let { parent -> check(parent.mkdirs() || parent.isDirectory) }
                     writeText(
-                        if (index == 64) {
+                        if (index == moduleSourceMaxCount) {
                             """module.exports = 1;"""
                         } else {
                             """module.exports = require("./${index + 1}") + 1;"""
@@ -31090,20 +31914,20 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue("Expected type=node project preload limit failure", failure != null)
             val message = failure?.message.orEmpty()
             assertTrue(message, message.contains("module source count is too large"))
-            assertTrue(message, message.contains("65 > 64"))
+            assertTrue(message, message.contains("$moduleSourceOverLimitCount > $moduleSourceMaxCount"))
 
             val diagnostics = engine.lastCommonJsPreloadDiagnostics
-            assertEquals(65, diagnostics.moduleCount)
-            assertEquals(65, diagnostics.maxDepth)
-            assertTrue(diagnostics.staticRequireCount >= 65)
+            assertEquals(moduleSourceOverLimitCount, diagnostics.moduleCount)
+            assertEquals(moduleSourceOverLimitCount, diagnostics.maxDepth)
+            assertTrue(diagnostics.staticRequireCount >= moduleSourceOverLimitCount)
             val descriptor = engine.lastNodeProjectRunnerDescriptor
             assertEquals("entry", descriptor?.kind)
             assertEquals(projectRoot.canonicalPath, descriptor?.projectRoot)
             assertEquals(entry.canonicalPath, descriptor?.entryFile)
-            assertEquals(65, descriptor?.moduleSourceCount)
+            assertEquals(moduleSourceOverLimitCount, descriptor?.moduleSourceCount)
             val nativeValues = engine.lastEmbeddedScriptResultNativeValues
             assertEquals("entry", nativeValues["embedded_project_runner.kind"])
-            assertEquals("65", nativeValues["embedded_project_runner.module_source_count"])
+            assertEquals(moduleSourceOverLimitCount.toString(), nativeValues["embedded_project_runner.module_source_count"])
             assertEquals(projectRoot.canonicalPath, nativeValues["embedded_project_runner.project_root"])
             assertEquals(entry.canonicalPath, nativeValues["embedded_project_runner.entry_file"])
         } finally {
@@ -31161,12 +31985,12 @@ class EmbeddedScriptMvpInstrumentationTest {
     fun requireRejectsUnsafeModulesAndBuiltinBypass() {
         assumeEmbeddedScriptExecutionEnabled()
 
-        val result = runEmbeddedScript("""require("child_process");""")
+        val result = runEmbeddedScript("""require("dgram");""")
 
         assertFalse(result.succeeded)
         assertEquals("Error", result.errorName)
         assertTrue(result.errorMessage.orEmpty().contains("require is restricted in Embedded Node.js MVP"))
-        assertTrue(result.errorMessage.orEmpty().contains("child_process"))
+        assertTrue(result.errorMessage.orEmpty().contains("dgram"))
         assertTrue(result.errorMessage.orEmpty().contains("not allowed"))
 
         settleEmbeddedScriptServiceProcess()
@@ -31185,14 +32009,20 @@ class EmbeddedScriptMvpInstrumentationTest {
         val builtinAccess = runEmbeddedScript(
             """
             "nodejs";
-            process.getBuiltinModule("fs");
+            const fs = require("fs");
+            if (process.getBuiltinModule("fs") !== fs) {
+              throw new Error("process.getBuiltinModule did not return scoped fs wrapper");
+            }
+            try {
+              process.getBuiltinModule("dgram");
+            } catch (error) {
+              console.log("builtin.getBuiltin.dgram=" + (error.autojs6Code || error.code));
+            }
             """.trimIndent(),
             "<embedded-builtin-module-guard-source.js>",
         )
-        assertFalse(builtinAccess.succeeded)
-        assertEquals("Error", builtinAccess.errorName)
-        assertTrue(builtinAccess.errorMessage.orEmpty().contains("process.getBuiltinModule is disabled"))
-        assertTrue(builtinAccess.errorMessage.orEmpty().contains("fs"))
+        assertTrue(builtinAccess.errorMessage.orEmpty(), builtinAccess.succeeded)
+        assertTrue(builtinAccess.stdout, builtinAccess.stdout.contains("builtin.getBuiltin.dgram=ERR_AUTOJS6_BUILTIN_DISABLED"))
     }
 
     @Test
@@ -31264,6 +32094,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         moduleSources: Map<String, String> = emptyMap(),
         runtimeModuleSources: Map<String, String> = emptyMap(),
         env: Map<String, String> = emptyMap(),
+        workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             context,
@@ -31275,6 +32106,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 env = env,
                 moduleSources = moduleSources,
                 runtimeModuleSources = runtimeModuleSources,
+                workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
             ),
         )
     }
@@ -31728,7 +32560,13 @@ class EmbeddedScriptMvpInstrumentationTest {
 
             function configRequire(configFile) {
               const req = createRequire(configFile);
-              return { req, config: req("./" + path.basename(configFile)) };
+              const loaded = req("./" + path.basename(configFile));
+              return {
+                req,
+                config: loaded && typeof loaded === "object" && Object.prototype.hasOwnProperty.call(loaded, "default")
+                  ? loaded.default
+                  : loaded
+              };
             }
 
             async function parseJsonFile(file, label) {
@@ -32146,6 +32984,7 @@ class EmbeddedScriptMvpInstrumentationTest {
               console.log("config.cli.ready=" + ready);
               console.log("config.cli.config_js=" + (loaded.type === "js"));
               console.log("config.cli.config_json=" + (loaded.type === "json"));
+              console.log("config.cli.config_mjs=" + (loaded.type === "mjs"));
               console.log("config.cli.argv=" + argvOk);
               console.log("config.cli.chdir=" + cwdOk);
               console.log("config.cli.require_main=" + requireMainOk);
@@ -32183,7 +33022,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             const { createRequire } = require("module");
 
             function requireConfig(configRequire, configFile) {
-              return configRequire("./" + path.basename(configFile));
+              const loaded = configRequire("./" + path.basename(configFile));
+              return loaded && typeof loaded === "object" && Object.prototype.hasOwnProperty.call(loaded, "default")
+                ? loaded.default
+                : loaded;
             }
 
             exports.value = "loader";
@@ -32200,13 +33042,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                   config: JSON.parse(await fsp.readFile(configArg, "utf8"))
                 };
               }
-              if (lower.endsWith(".mjs")) {
-                const configRequire = createRequire(path.resolve("package.json"));
-                requireConfig(configRequire, configFile);
-              }
               const configRequire = createRequire(configFile);
               return {
-                type: "js",
+                type: lower.endsWith(".mjs") ? "mjs" : "js",
                 configFile,
                 require: configRequire,
                 createRequire: true,
@@ -32898,6 +33736,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         val argv: List<String> = emptyList(),
         val env: Map<String, String> = emptyMap(),
         val timeoutMs: Long = 5000L,
+        val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
     )
 
     private fun assertNodeProjectLaunchRequest(
@@ -32927,6 +33766,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertEquals("$label request argv", expected.argv, request.argv)
         assertEquals("$label request env", expected.env, request.env)
         assertEquals("$label request timeoutMs", expected.timeoutMs, request.timeoutMs)
+        assertEquals("$label request executionMode", expected.executionMode, request.executionMode)
         assertEquals("$label request launchKind", expected.launchKind, NodeProjectLaunchKind.from(request.scriptName, request.binName))
     }
 

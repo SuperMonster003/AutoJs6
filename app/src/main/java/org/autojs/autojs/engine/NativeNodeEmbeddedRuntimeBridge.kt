@@ -6,15 +6,23 @@ import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import org.autojs.autojs.App
+import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
+import org.json.JSONObject
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.util.Locale
 
 object NativeNodeEmbeddedRuntimeBridge {
 
     private const val TAG = "NativeNodeEmbeddedRuntime"
+    const val DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS = 300_000L
     private val NODE_HEADER_VERSION = NodeRuntimeCapabilities.NODE_HEADER_VERSION
+    private const val RUNTIME_ADAPTER_PROPERTY = "autojs.nodejs.runtime.adapter"
+    private const val RUNTIME_ADAPTER_AUTO = "auto"
+    private const val RUNTIME_ADAPTER_LEGACY_JNI = "legacy_jni"
+    private const val RUNTIME_ADAPTER_V1 = "adapter_v1"
     private const val INITIALIZE_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.initialize"
     private const val ISOLATE_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.isolate"
     private const val UVLOOP_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.uvloop"
@@ -230,6 +238,24 @@ object NativeNodeEmbeddedRuntimeBridge {
     private const val EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
     private const val EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
     private const val EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT
+    const val COMPILE_CACHE_SCHEMA_VERSION = "autojs6-node-compile-cache-v1"
+    const val COMPILE_CACHE_DIR_NAME = "node-compile-cache"
+    const val COMPILE_CACHE_MAX_BYTES = 16L * 1024L * 1024L
+    const val COMPILE_CACHE_MAX_PROJECT_DIRS = 32
+    const val COMPILE_CACHE_ENV_ENABLED = "AUTOJS6_NODE_COMPILE_CACHE_ENABLED"
+    const val COMPILE_CACHE_ENV_DIR = "AUTOJS6_NODE_COMPILE_CACHE_DIR"
+    const val COMPILE_CACHE_ENV_KEY = "AUTOJS6_NODE_COMPILE_CACHE_KEY"
+    const val COMPILE_CACHE_ENV_RUNTIME_KEY = "AUTOJS6_NODE_COMPILE_CACHE_RUNTIME_KEY"
+    const val COMPILE_CACHE_ENV_PROJECT_KEY = "AUTOJS6_NODE_COMPILE_CACHE_PROJECT_KEY"
+    const val COMPILE_CACHE_ENV_LOADER = "AUTOJS6_NODE_COMPILE_CACHE_LOADER"
+    const val COMPILE_CACHE_ENV_SCHEMA = "AUTOJS6_NODE_COMPILE_CACHE_SCHEMA"
+    const val COMPILE_CACHE_ENV_PREPARE_ERROR = "AUTOJS6_NODE_COMPILE_CACHE_PREPARE_ERROR"
+    private val NODE_STARTUP_ENV_NAMES = setOf(
+        "NODE_OPTIONS",
+        "NODE_INSPECT_RESUME_ON_START",
+        "NODE_COMPILE_CACHE",
+        "NODE_DISABLE_COMPILE_CACHE",
+    )
     const val PROBE_LEVEL_KOTLIN_ROUND_TRIP = 0
     private const val PROBE_LEVEL_BRIDGE_PING = 1
     private const val PROBE_LEVEL_LOAD_LIBNODE = 2
@@ -451,6 +477,91 @@ object NativeNodeEmbeddedRuntimeBridge {
 
     private fun nativeLibrarySoFileName(libraryName: String): String = "lib$libraryName.so"
 
+    fun writeSignalSafeCrashMarker(
+        markerPath: String,
+        markerId: String,
+        executionId: String,
+        scenario: String,
+        reason: String,
+        pid: Int = Process.myPid(),
+        epochMs: Long = System.currentTimeMillis(),
+    ): SignalSafeCrashMarkerWriteResult {
+        val loadStartedAt = SystemClock.elapsedRealtime()
+        val libcxxLoad = loadLibrary("c++_shared")
+        val bridgeLoad = if (libcxxLoad.loaded) {
+            loadLibrary(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)
+        } else {
+            LibraryLoad.skipped(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)
+        }
+        val loadDurationMs = SystemClock.elapsedRealtime() - loadStartedAt
+        val loadError = when {
+            libcxxLoad.attempted && !libcxxLoad.loaded -> "libc++_shared.so failed to load: ${libcxxLoad.error.toLoadErrorMessage().orEmpty()}"
+            bridgeLoad.attempted && !bridgeLoad.loaded -> "libautojs6-node.so failed to load: ${bridgeLoad.error.toLoadErrorMessage().orEmpty()}"
+            else -> null
+        }
+        if (loadError != null) {
+            return SignalSafeCrashMarkerWriteResult(
+                succeeded = false,
+                markerPath = markerPath,
+                markerId = markerId,
+                schema = NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_SCHEMA,
+                writer = "native_fixed_size_signal_safe_writer",
+                recordBytes = NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES,
+                bytesWritten = 0,
+                status = "failed",
+                errorMessage = loadError,
+                nativeValues = mapOf(
+                    "signal_safe_marker.status" to "failed",
+                    "signal_safe_marker.error" to loadError,
+                    "signal_safe_marker.path" to markerPath,
+                    "signal_safe_marker.marker_id" to markerId,
+                    "signal_safe_marker.record_bytes" to NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES.toString(),
+                    "load.duration.ms" to loadDurationMs.toString(),
+                ),
+            )
+        }
+
+        val nativeCall = runCatching {
+            nativeWriteSignalSafeCrashMarker(
+                markerPath,
+                markerId,
+                executionId,
+                scenario,
+                reason,
+                pid,
+                epochMs,
+            ) ?: emptyArray()
+        }
+        val nativeValues = nativeCall
+            .map(::parseNativePayload)
+            .getOrElse { throwable ->
+                mapOf(
+                    "signal_safe_marker.status" to "failed",
+                    "signal_safe_marker.error" to (throwable.message ?: throwable.javaClass.name),
+                    "signal_safe_marker.path" to markerPath,
+                    "signal_safe_marker.marker_id" to markerId,
+                    "signal_safe_marker.record_bytes" to NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES.toString(),
+                )
+            }
+            .toMutableMap()
+        nativeValues["load.duration.ms"] = loadDurationMs.toString()
+        val status = nativeValues["signal_safe_marker.status"].orEmpty()
+        return SignalSafeCrashMarkerWriteResult(
+            succeeded = status == "written" &&
+                    nativeValues["signal_safe_marker.bytes_written"]?.toIntOrNull() == NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES,
+            markerPath = nativeValues["signal_safe_marker.path"].orEmpty().ifBlank { markerPath },
+            markerId = nativeValues["signal_safe_marker.marker_id"].orEmpty().ifBlank { markerId },
+            schema = nativeValues["signal_safe_marker.schema"].orEmpty().ifBlank { NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_SCHEMA },
+            writer = nativeValues["signal_safe_marker.writer"].orEmpty().ifBlank { "native_fixed_size_signal_safe_writer" },
+            recordBytes = nativeValues["signal_safe_marker.record_bytes"]?.toIntOrNull()
+                ?: NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES,
+            bytesWritten = nativeValues["signal_safe_marker.bytes_written"]?.toIntOrNull() ?: 0,
+            status = status.ifBlank { "failed" },
+            errorMessage = nativeValues["signal_safe_marker.error"].takeUnless { it.isNullOrBlank() },
+            nativeValues = nativeValues,
+        )
+    }
+
     private fun File.sha256Hex(): String {
         val digest = MessageDigest.getInstance("SHA-256")
         inputStream().use { input ->
@@ -473,13 +584,15 @@ object NativeNodeEmbeddedRuntimeBridge {
         val startedAt = SystemClock.elapsedRealtime()
         val processName = currentProcessName()
         val pid = Process.myPid()
-        if (!isEmbeddedProbeProcess(processName)) {
+        if (!isEmbeddedScriptProcess(processName)) {
             return failureEmbeddedScriptResult(
                 request = request,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
-                message = "Embedded script execution must run in isolated process $EMBEDDED_PROBE_PROCESS_SUFFIX; currentProcess=$processName, pid=$pid.",
+                message = "Embedded script execution must run in isolated process " +
+                        embeddedScriptProcessSuffixes().joinToString(prefix = "[", postfix = "]") +
+                        "; currentProcess=$processName, pid=$pid.",
             )
         }
         if (!BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED) {
@@ -493,17 +606,30 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
         }
 
-        val sourceBytes = request.source.toByteArray(StandardCharsets.UTF_8).size
+        var preparedRequest = try {
+            prepareEmbeddedScriptRequest(request)
+        } catch (error: Throwable) {
+            return embeddedScriptRequestPreparationFailure(
+                request = request,
+                throwable = error,
+                startedAt = startedAt,
+                processName = processName,
+                pid = pid,
+            )
+        }
+
+        val sourceBytes = preparedRequest.source.toByteArray(StandardCharsets.UTF_8).size
         if (sourceBytes > EMBEDDED_SCRIPT_SOURCE_MAX_BYTES) {
             return failureEmbeddedScriptResult(
-                request = request,
+                request = preparedRequest,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
-                message = embeddedScriptSourceTooLargeMessage(request.sourceName, sourceBytes),
+                message = embeddedScriptSourceTooLargeMessage(preparedRequest.sourceName, sourceBytes),
             )
         }
-        validateEmbeddedScriptModuleSources(request, processName, pid, startedAt)?.let { return it }
+        validateEmbeddedScriptModuleSources(preparedRequest, processName, pid, startedAt)?.let { return it }
+        preparedRequest = withCompileCacheEnv(context, preparedRequest)
 
         val loadStartedAt = SystemClock.elapsedRealtime()
         val libcxxLoad = loadLibrary("c++_shared")
@@ -526,7 +652,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         }
         if (loadError != null) {
             return failureEmbeddedScriptResult(
-                request = request,
+                request = preparedRequest,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
@@ -535,55 +661,82 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
         }
 
+        val runtimeAdapterSelection = resolveRuntimeAdapterSelection(preparedRequest.runtimeAdapter)
         val nativeCall = runCatching {
-            val payload = if (request.runtimeModuleSources.isEmpty()) {
+            val payload = if (runtimeAdapterSelection.effective == RUNTIME_ADAPTER_V1) {
+                nativeRunEmbeddedScriptAdapterV1Execute(
+                    preparedRequest.source,
+                    preparedRequest.sourceName,
+                    preparedRequest.workingDirectory,
+                    preparedRequest.sandboxRoot,
+                    preparedRequest.moduleSources.keys.toTypedArray(),
+                    preparedRequest.moduleSources.values.toTypedArray(),
+                    preparedRequest.runtimeModuleSources.keys.toTypedArray(),
+                    preparedRequest.runtimeModuleSources.values.toTypedArray(),
+                    preparedRequest.env.keys.toTypedArray(),
+                    preparedRequest.env.values.toTypedArray(),
+                    preparedRequest.esmExperimentalEnabled,
+                    preparedRequest.dynamicImportExperimentalEnabled,
+                    preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
+                    preparedRequest.workerThreadsExperimentalEnabled,
+                    preparedRequest.childProcessExperimentalEnabled,
+                    preparedRequest.javaInteropExperimentalEnabled,
+                )
+            } else if (preparedRequest.runtimeModuleSources.isEmpty()) {
                 nativeRunEmbeddedScriptLifecycleWithModulesV2(
-                    request.source,
-                    request.sourceName,
-                    request.workingDirectory,
-                    request.moduleSources.keys.toTypedArray(),
-                    request.moduleSources.values.toTypedArray(),
-                    request.env.keys.toTypedArray(),
-                    request.env.values.toTypedArray(),
-                    request.esmExperimentalEnabled,
-                    request.dynamicImportExperimentalEnabled,
-                    request.workerThreadsExperimentalEnabled,
-                    request.javaInteropExperimentalEnabled,
+                    preparedRequest.source,
+                    preparedRequest.sourceName,
+                    preparedRequest.workingDirectory,
+                    preparedRequest.sandboxRoot,
+                    preparedRequest.moduleSources.keys.toTypedArray(),
+                    preparedRequest.moduleSources.values.toTypedArray(),
+                    preparedRequest.env.keys.toTypedArray(),
+                    preparedRequest.env.values.toTypedArray(),
+                    preparedRequest.esmExperimentalEnabled,
+                    preparedRequest.dynamicImportExperimentalEnabled,
+                    preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
+                    preparedRequest.workerThreadsExperimentalEnabled,
+                    preparedRequest.childProcessExperimentalEnabled,
+                    preparedRequest.javaInteropExperimentalEnabled,
                 )
             } else {
                 nativeRunEmbeddedScriptLifecycleWithRuntimeModulesV2(
-                    request.source,
-                    request.sourceName,
-                    request.workingDirectory,
-                    request.moduleSources.keys.toTypedArray(),
-                    request.moduleSources.values.toTypedArray(),
-                    request.runtimeModuleSources.keys.toTypedArray(),
-                    request.runtimeModuleSources.values.toTypedArray(),
-                    request.env.keys.toTypedArray(),
-                    request.env.values.toTypedArray(),
-                    request.esmExperimentalEnabled,
-                    request.dynamicImportExperimentalEnabled,
-                    request.workerThreadsExperimentalEnabled,
-                    request.javaInteropExperimentalEnabled,
+                    preparedRequest.source,
+                    preparedRequest.sourceName,
+                    preparedRequest.workingDirectory,
+                    preparedRequest.sandboxRoot,
+                    preparedRequest.moduleSources.keys.toTypedArray(),
+                    preparedRequest.moduleSources.values.toTypedArray(),
+                    preparedRequest.runtimeModuleSources.keys.toTypedArray(),
+                    preparedRequest.runtimeModuleSources.values.toTypedArray(),
+                    preparedRequest.env.keys.toTypedArray(),
+                    preparedRequest.env.values.toTypedArray(),
+                    preparedRequest.esmExperimentalEnabled,
+                    preparedRequest.dynamicImportExperimentalEnabled,
+                    preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
+                    preparedRequest.workerThreadsExperimentalEnabled,
+                    preparedRequest.childProcessExperimentalEnabled,
+                    preparedRequest.javaInteropExperimentalEnabled,
                 )
             }
             payload ?: emptyArray()
         }
         val nativePayload = nativeCall.getOrElse { throwable ->
             return failureEmbeddedScriptResult(
-                request = request,
+                request = preparedRequest,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
                 message = "Embedded script native runner failed: ${throwable.message ?: throwable.javaClass.name}",
                 nativeError = throwable,
-                nativeValues = mapOf("load.duration.ms" to loadDurationMs.toString()),
+                nativeValues = runtimeAdapterSelection.toNativeValues() + ("load.duration.ms" to loadDurationMs.toString()),
             )
         }
         val nativeValues = parseNativePayload(nativePayload).toMutableMap()
+        nativeValues.putAll(runtimeAdapterSelection.toNativeValues())
         nativeValues["load.duration.ms"] = loadDurationMs.toString()
         return parseEmbeddedScriptResult(
-            request = request,
+            request = preparedRequest,
             processName = processName,
             pid = pid,
             startedAt = startedAt,
@@ -598,58 +751,82 @@ object NativeNodeEmbeddedRuntimeBridge {
         startedAt: Long,
         nativeValues: Map<String, String>,
     ): EmbeddedScriptResult {
-        val envelopePresent = !nativeValues["embedded_script.result_json"].isNullOrBlank()
-        val status = nativeValues["embedded_script.status"].orEmpty()
+        val resultNativeValues = nativeValues.toMutableMap()
+        val resultEnvelope = resultNativeValues["embedded_script.result_json"]
+            ?.takeUnless { it.isBlank() }
+            ?.let { runCatching { JSONObject(it) }.getOrNull() }
+        fun fillResultEnvelopeInt(nativeKey: String, envelopeKey: String) {
+            if (!resultNativeValues[nativeKey].isNullOrBlank()) {
+                return
+            }
+            val value = resultEnvelope
+                ?.takeIf { it.has(envelopeKey) && !it.isNull(envelopeKey) }
+                ?.optInt(envelopeKey)
+                ?: return
+            resultNativeValues[nativeKey] = value.toString()
+        }
+        fillResultEnvelopeInt("embedded_script.pending_scoped_fs_watch_count", "pendingScopedFsWatchCount")
+        fillResultEnvelopeInt("embedded_script.pending_scoped_fs_watch_file_count", "pendingScopedFsWatchFileCount")
+
+        val envelopePresent = !resultNativeValues["embedded_script.result_json"].isNullOrBlank()
+        val status = resultNativeValues["embedded_script.status"].orEmpty()
         val nativeFailure = when {
-            status == "failed" -> nativeValues["embedded_script.detail"].takeUnless { it.isNullOrBlank() }
+            status == "failed" -> resultNativeValues["embedded_script.detail"].takeUnless { it.isNullOrBlank() }
                 ?: "Embedded script native lifecycle failed."
-            status == "skipped" -> nativeValues["embedded_script.detail"].takeUnless { it.isNullOrBlank() }
+            status == "skipped" -> resultNativeValues["embedded_script.detail"].takeUnless { it.isNullOrBlank() }
                 ?: "Embedded script native lifecycle was skipped."
             !envelopePresent -> "Embedded script did not return a result envelope."
             else -> null
         }
-        val scriptSucceeded = nativeValues["embedded_script.succeeded"].toBooleanValue()
+        val scriptSucceeded = resultNativeValues["embedded_script.succeeded"].toBooleanValue()
         val succeeded = nativeFailure == null && scriptSucceeded
-        val elapsedMs = nativeValues["timing.total.ms"].toLongValue()
+        val elapsedMs = resultNativeValues["timing.total.ms"].toLongValue()
             .takeIf { it > 0L }
             ?: (SystemClock.elapsedRealtime() - startedAt)
-        val embeddedStdout = nativeValues["embedded_script.stdout"].orEmpty()
-        val embeddedStderr = nativeValues["embedded_script.stderr"].orEmpty()
-        val stdoutCaptureText = nativeValues.captureText("stdout_capture")
-        val stderrCaptureText = nativeValues.captureText("stderr_capture")
+        val embeddedStdout = resultNativeValues["embedded_script.stdout"].orEmpty()
+        val embeddedStderr = resultNativeValues["embedded_script.stderr"].orEmpty()
+        val stdoutCaptureText = resultNativeValues.captureText("stdout_capture")
+        val stderrCaptureText = resultNativeValues.captureText("stderr_capture")
         return EmbeddedScriptResult(
             succeeded = succeeded,
-            exitCode = nativeValues["embedded_script.exit_code"]?.toIntOrNull()
+            exitCode = resultNativeValues["embedded_script.exit_code"]?.toIntOrNull()
                 ?: if (succeeded) 0 else 1,
-            resultText = nativeValues["embedded_script.result_text"].takeUnless { it.isNullOrBlank() },
+            resultText = resultNativeValues["embedded_script.result_text"].takeUnless { it.isNullOrBlank() },
             stdout = preferMoreCompleteCapture(embeddedStdout, stdoutCaptureText),
             stderr = preferMoreCompleteCapture(embeddedStderr, stderrCaptureText),
-            errorName = nativeValues["embedded_script.error_name"].takeUnless { it.isNullOrBlank() },
-            errorMessage = nativeFailure ?: nativeValues["embedded_script.error_message"].takeUnless { it.isNullOrBlank() },
-            errorStack = nativeValues["embedded_script.error_stack"].takeUnless { it.isNullOrBlank() },
-            errorCode = nativeValues["embedded_script.error_code"].takeUnless { it.isNullOrBlank() },
+            errorName = resultNativeValues["embedded_script.error_name"].takeUnless { it.isNullOrBlank() },
+            errorMessage = nativeFailure ?: resultNativeValues["embedded_script.error_message"].takeUnless { it.isNullOrBlank() },
+            errorStack = resultNativeValues["embedded_script.error_stack"].takeUnless { it.isNullOrBlank() },
+            errorCode = resultNativeValues["embedded_script.error_code"].takeUnless { it.isNullOrBlank() },
             elapsedMs = elapsedMs,
             processName = processName,
             pid = pid,
             sourceName = request.sourceName,
-            nativeValues = nativeValues,
-            timedOut = nativeValues["embedded_script.timed_out"].toBooleanValue(),
-            timeoutMs = nativeValues["embedded_script.timeout_ms"].toOptionalLong()?.takeIf { it > 0L },
-            workingDirectory = nativeValues["embedded_script.working_directory"].takeUnless { it.isNullOrBlank() }
+            nativeValues = resultNativeValues,
+            timedOut = resultNativeValues["embedded_script.timed_out"].toBooleanValue(),
+            timeoutMs = resultNativeValues["embedded_script.timeout_ms"].toOptionalLong()?.takeIf { it > 0L },
+            workingDirectory = resultNativeValues["embedded_script.working_directory"].takeUnless { it.isNullOrBlank() }
                 ?: request.workingDirectory,
-            pendingTimers = nativeValues["embedded_script.pending_timers"].toOptionalBoolean(),
-            pendingTimerCount = nativeValues["embedded_script.pending_timer_count"].toOptionalInt(),
-            pendingTimeoutCount = nativeValues["embedded_script.pending_timeout_count"].toOptionalInt(),
-            pendingIntervalCount = nativeValues["embedded_script.pending_interval_count"].toOptionalInt(),
-            pendingImmediateCount = nativeValues["embedded_script.pending_immediate_count"].toOptionalInt(),
-            pendingScopedFsCallbacks = nativeValues["embedded_script.pending_scoped_fs_callbacks"].toOptionalInt(),
-            pendingWorkers = nativeValues["embedded_script.pending_workers"].toOptionalBoolean(),
-            pendingWorkerCount = nativeValues["embedded_script.pending_worker_count"].toOptionalInt(),
-            pendingCryptoCallbacks = nativeValues["embedded_script.pending_crypto_callbacks"].toOptionalInt(),
-            pendingDnsCallbacks = nativeValues["embedded_script.pending_dns_callbacks"].toOptionalInt(),
-            pendingZlibCallbacks = nativeValues["embedded_script.pending_zlib_callbacks"].toOptionalInt(),
-            pendingAsyncCallbacks = nativeValues["embedded_script.pending_async_callbacks"].toOptionalInt(),
-            pendingCallbacks = nativeValues["embedded_script.pending_callbacks"].toOptionalBoolean(),
+            pendingTimers = resultNativeValues["embedded_script.pending_timers"].toOptionalBoolean(),
+            pendingTimerCount = resultNativeValues["embedded_script.pending_timer_count"].toOptionalInt(),
+            pendingTimeoutCount = resultNativeValues["embedded_script.pending_timeout_count"].toOptionalInt(),
+            pendingIntervalCount = resultNativeValues["embedded_script.pending_interval_count"].toOptionalInt(),
+            pendingImmediateCount = resultNativeValues["embedded_script.pending_immediate_count"].toOptionalInt(),
+            pendingScopedFsCallbacks = resultNativeValues["embedded_script.pending_scoped_fs_callbacks"].toOptionalInt(),
+            pendingScopedFsStreams = resultNativeValues["embedded_script.pending_scoped_fs_streams"].toOptionalBoolean(),
+            pendingScopedFsStreamCount = resultNativeValues["embedded_script.pending_scoped_fs_stream_count"].toOptionalInt(),
+            pendingScopedFsWatchCount = resultNativeValues["embedded_script.pending_scoped_fs_watch_count"].toOptionalInt(),
+            pendingScopedFsWatchFileCount = resultNativeValues["embedded_script.pending_scoped_fs_watch_file_count"].toOptionalInt(),
+            pendingWorkers = resultNativeValues["embedded_script.pending_workers"].toOptionalBoolean(),
+            pendingWorkerCount = resultNativeValues["embedded_script.pending_worker_count"].toOptionalInt(),
+            pendingCryptoCallbacks = resultNativeValues["embedded_script.pending_crypto_callbacks"].toOptionalInt(),
+            pendingDnsCallbacks = resultNativeValues["embedded_script.pending_dns_callbacks"].toOptionalInt(),
+            pendingZlibCallbacks = resultNativeValues["embedded_script.pending_zlib_callbacks"].toOptionalInt(),
+            pendingNodeTestCallbacks = resultNativeValues["embedded_script.pending_node_test_callbacks"].toOptionalInt(),
+            pendingZlibStreams = resultNativeValues["embedded_script.pending_zlib_streams"].toOptionalBoolean(),
+            pendingZlibStreamCount = resultNativeValues["embedded_script.pending_zlib_stream_count"].toOptionalInt(),
+            pendingAsyncCallbacks = resultNativeValues["embedded_script.pending_async_callbacks"].toOptionalInt(),
+            pendingCallbacks = resultNativeValues["embedded_script.pending_callbacks"].toOptionalBoolean(),
         )
     }
 
@@ -661,6 +838,59 @@ object NativeNodeEmbeddedRuntimeBridge {
             return captureText
         }
         return embeddedText
+    }
+
+    private data class RuntimeAdapterSelection(
+        val requested: String,
+        val effective: String,
+        val status: String,
+        val source: String,
+    ) {
+        fun toNativeValues(): Map<String, String> = mapOf(
+            "embedded_script.runtime_adapter.selector_property" to RUNTIME_ADAPTER_PROPERTY,
+            "embedded_script.runtime_adapter.requested" to requested,
+            "embedded_script.runtime_adapter.effective" to effective,
+            "embedded_script.runtime_adapter.status" to status,
+            "embedded_script.runtime_adapter.source" to source,
+        )
+    }
+
+    private fun resolveRuntimeAdapterSelection(requestOverride: String? = null): RuntimeAdapterSelection {
+        val normalizedOverride = requestOverride?.trim().orEmpty()
+        val fromRequest = normalizedOverride.isNotBlank()
+        val rawRequested = if (fromRequest) {
+            normalizedOverride
+        } else {
+            System.getProperty(RUNTIME_ADAPTER_PROPERTY)?.trim().orEmpty()
+        }
+        val requested = rawRequested.lowercase(Locale.US).ifBlank { RUNTIME_ADAPTER_AUTO }
+        val source = if (fromRequest) "request" else "system_property"
+        return when (requested) {
+            RUNTIME_ADAPTER_V1 -> RuntimeAdapterSelection(
+                requested = requested,
+                effective = RUNTIME_ADAPTER_V1,
+                status = "adapter_v1_selected",
+                source = source,
+            )
+            RUNTIME_ADAPTER_LEGACY_JNI -> RuntimeAdapterSelection(
+                requested = requested,
+                effective = RUNTIME_ADAPTER_LEGACY_JNI,
+                status = "legacy_jni_selected",
+                source = source,
+            )
+            RUNTIME_ADAPTER_AUTO -> RuntimeAdapterSelection(
+                requested = requested,
+                effective = RUNTIME_ADAPTER_LEGACY_JNI,
+                status = "auto_fallback_legacy_jni",
+                source = source,
+            )
+            else -> RuntimeAdapterSelection(
+                requested = requested,
+                effective = RUNTIME_ADAPTER_LEGACY_JNI,
+                status = "invalid_fallback_legacy_jni",
+                source = source,
+            )
+        }
     }
 
     private fun failureEmbeddedScriptResult(
@@ -700,7 +930,10 @@ object NativeNodeEmbeddedRuntimeBridge {
         )
     }
 
-    fun validateEmbeddedScriptRequestBeforeServiceStart(request: EmbeddedScriptRequest): EmbeddedScriptResult? {
+    fun validateEmbeddedScriptRequestBeforeServiceStart(
+        request: EmbeddedScriptRequest,
+        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+    ): EmbeddedScriptResult? {
         val startedAt = SystemClock.elapsedRealtime()
         val processName = currentProcessName()
         val pid = Process.myPid()
@@ -714,18 +947,285 @@ object NativeNodeEmbeddedRuntimeBridge {
                 errorCode = NodeRuntimeErrorCodes.NODE_DISABLED,
             )
         }
-        val sourceBytes = request.source.toByteArray(StandardCharsets.UTF_8).size
-        if (sourceBytes > EMBEDDED_SCRIPT_SOURCE_MAX_BYTES) {
-            return failureEmbeddedScriptResult(
+        val preparedRequest = try {
+            prepareEmbeddedScriptRequest(request)
+        } catch (error: Throwable) {
+            return embeddedScriptRequestPreparationFailure(
                 request = request,
+                throwable = error,
+                startedAt = startedAt,
+                processName = processName,
+                pid = pid,
+            )
+        }
+        val executionMode = NodeExecutionModePolicy.normalize(request.executionMode)
+        if (!NodeExecutionModePolicy.isSupported(executionMode, launchSurface)) {
+            return failureEmbeddedScriptResult(
+                request = preparedRequest,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
-                message = embeddedScriptSourceTooLargeMessage(request.sourceName, sourceBytes),
+                message = NodeExecutionModePolicy.unsupportedMessage(executionMode, launchSurface),
+                nativeValues = NodeExecutionModePolicy.nativeValues(executionMode, launchSurface) + mapOf(
+                    "embedded_script.execution_mode_rejected" to "true",
+                    "embedded_script.error_code" to NodeRuntimeErrorCodes.EMBEDDED_NODE_UNSUPPORTED_OPTION,
+                ),
+                errorCode = NodeRuntimeErrorCodes.EMBEDDED_NODE_UNSUPPORTED_OPTION,
             )
         }
-        validateEmbeddedScriptModuleSources(request, processName, pid, startedAt)?.let { return it }
+        val sourceBytes = preparedRequest.source.toByteArray(StandardCharsets.UTF_8).size
+        if (sourceBytes > EMBEDDED_SCRIPT_SOURCE_MAX_BYTES) {
+            return failureEmbeddedScriptResult(
+                request = preparedRequest,
+                processName = processName,
+                pid = pid,
+                startedAt = startedAt,
+                message = embeddedScriptSourceTooLargeMessage(preparedRequest.sourceName, sourceBytes),
+            )
+        }
+        validateEmbeddedScriptModuleSources(preparedRequest, processName, pid, startedAt)?.let { return it }
         return null
+    }
+
+    fun prepareEmbeddedScriptRequest(request: EmbeddedScriptRequest): EmbeddedScriptRequest {
+        val entry = NodeTypeScriptStripper.stripIfTypeScript(request.sourceName, request.source)
+        val moduleSources = stripTypeScriptSourceMap(request.moduleSources)
+        val runtimeModuleSources = stripTypeScriptSourceMap(request.runtimeModuleSources)
+        val env = stripNodeStartupEnv(request.env)
+        return if (
+            !entry.stripped &&
+            moduleSources === request.moduleSources &&
+            runtimeModuleSources === request.runtimeModuleSources &&
+            env === request.env
+        ) {
+            request
+        } else {
+            request.copy(
+                source = entry.source,
+                env = env,
+                moduleSources = moduleSources,
+                runtimeModuleSources = runtimeModuleSources,
+            )
+        }
+    }
+
+    private fun stripNodeStartupEnv(env: Map<String, String>): Map<String, String> {
+        if (env.isEmpty()) {
+            return env
+        }
+        var stripped = false
+        val sanitized = LinkedHashMap<String, String>(env.size)
+        env.forEach { (name, value) ->
+            if (NODE_STARTUP_ENV_NAMES.contains(name.uppercase(Locale.ROOT))) {
+                stripped = true
+            } else {
+                sanitized[name] = value
+            }
+        }
+        return if (stripped) sanitized else env
+    }
+
+    fun compileCacheBaseDir(context: Context): File {
+        val appContext = context.applicationContext
+        val codeCacheDir = runCatching { appContext.codeCacheDir }.getOrNull()
+            ?: File(appContext.cacheDir, "code_cache")
+        return File(codeCacheDir, COMPILE_CACHE_DIR_NAME)
+    }
+
+    private fun withCompileCacheEnv(
+        context: Context,
+        request: EmbeddedScriptRequest,
+    ): EmbeddedScriptRequest {
+        val env = LinkedHashMap<String, String>(request.env)
+        val runtimeKey = compileCacheRuntimeKey(request)
+        val projectKey = compileCacheProjectKey(request)
+        env[COMPILE_CACHE_ENV_ENABLED] = "1"
+        env[COMPILE_CACHE_ENV_SCHEMA] = COMPILE_CACHE_SCHEMA_VERSION
+        env[COMPILE_CACHE_ENV_RUNTIME_KEY] = runtimeKey
+        env[COMPILE_CACHE_ENV_PROJECT_KEY] = projectKey
+        env[COMPILE_CACHE_ENV_KEY] = compileCacheContentKey(request, runtimeKey, projectKey)
+        env[COMPILE_CACHE_ENV_LOADER] = compileCacheLoaderVersion()
+        val directory = runCatching {
+            val root = compileCacheBaseDir(context)
+            val cacheDir = File(File(root, runtimeKey), projectKey)
+            if (!cacheDir.isDirectory && !cacheDir.mkdirs() && !cacheDir.isDirectory) {
+                error("Failed to create compile cache directory: ${cacheDir.absolutePath}")
+            }
+            pruneCompileCacheDirectory(root)
+            cacheDir
+        }.getOrElse { error ->
+            env[COMPILE_CACHE_ENV_ENABLED] = "0"
+            env[COMPILE_CACHE_ENV_PREPARE_ERROR] = error.message ?: error.javaClass.name
+            null
+        }
+        env[COMPILE_CACHE_ENV_DIR] = directory?.absolutePath.orEmpty()
+        return request.copy(env = env)
+    }
+
+    private fun compileCacheRuntimeKey(request: EmbeddedScriptRequest): String = sha256Hex {
+        updatePart(COMPILE_CACHE_SCHEMA_VERSION)
+        updatePart(NodeRuntimeCapabilities.ENGINE_VERSION)
+        updatePart(NodeRuntimeCapabilities.NODE_HEADER_VERSION)
+        updatePart(NodeRuntimeCapabilities.NODE_VERSION_EXPECTED_PREFIX)
+        updatePart(BuildConfig.NODEJS_RUNTIME_BACKEND)
+        updatePart(BuildConfig.NODEJS_RUNTIME_SLOT)
+        updatePart(BuildConfig.NODEJS_RUNTIME_SLOT_TARGET_VERSION)
+        updatePart(request.runtimeAdapter.orEmpty())
+        updatePart(request.processPoolSlot.orEmpty())
+        updatePart(Build.SUPPORTED_ABIS.joinToString(","))
+        updatePart(Build.VERSION.SDK_INT.toString())
+        updatePart(compileCacheLoaderVersion())
+        updatePart(request.esmExperimentalEnabled.toString())
+        updatePart(request.dynamicImportExperimentalEnabled.toString())
+        updatePart(request.rawNodeNetworkModulesExperimentalEnabled.toString())
+        updatePart(request.workerThreadsExperimentalEnabled.toString())
+        updatePart(request.childProcessExperimentalEnabled.toString())
+        updatePart(request.javaInteropExperimentalEnabled.toString())
+    }.take(32)
+
+    private fun compileCacheProjectKey(request: EmbeddedScriptRequest): String = sha256Hex {
+        updatePart(COMPILE_CACHE_SCHEMA_VERSION)
+        updatePart(request.workingDirectory?.takeIf { it.isNotBlank() } ?: File(request.sourceName).parent.orEmpty())
+        updatePart(request.sandboxRoot.orEmpty())
+    }.take(24)
+
+    private fun compileCacheContentKey(
+        request: EmbeddedScriptRequest,
+        runtimeKey: String,
+        projectKey: String,
+    ): String = sha256Hex {
+        updatePart(runtimeKey)
+        updatePart(projectKey)
+        updatePart(request.sourceName)
+        updatePart(sha256Utf8(request.source))
+        updatePart("moduleSources")
+        request.moduleSources.keys.sorted().forEach { sourceName ->
+            updatePart(sourceName)
+            updatePart(sha256Utf8(request.moduleSources.getValue(sourceName)))
+        }
+        updatePart("runtimeModuleSources")
+        request.runtimeModuleSources.keys.sorted().forEach { sourceName ->
+            updatePart(sourceName)
+            updatePart(sha256Utf8(request.runtimeModuleSources.getValue(sourceName)))
+        }
+    }.take(48)
+
+    private fun compileCacheLoaderVersion(): String = listOf(
+        NodeProjectRuntimeCompatibilityDescriptor.BOOTSTRAP_VERSION,
+        NodeProjectRuntimeCompatibilityDescriptor.COMMONJS_LOADER_VERSION,
+        NodeProjectRuntimeCompatibilityDescriptor.ESM_LOADER_VERSION,
+        NodeProjectRuntimeCompatibilityDescriptor.DYNAMIC_IMPORT_VERSION,
+        NodeProjectRuntimeCompatibilityDescriptor.MODULE_SOURCES_SCHEMA_VERSION,
+    ).joinToString("|")
+
+    private fun pruneCompileCacheDirectory(root: File) {
+        if (!root.isDirectory || root.name != COMPILE_CACHE_DIR_NAME) {
+            return
+        }
+        val projectDirs = root.listFiles().orEmpty()
+            .filter { it.isDirectory }
+            .flatMap { runtimeDir -> runtimeDir.listFiles().orEmpty().filter { it.isDirectory } }
+        projectDirs
+            .sortedByDescending { it.lastModified() }
+            .drop(COMPILE_CACHE_MAX_PROJECT_DIRS)
+            .forEach { it.safeDeleteRecursivelyUnder(root) }
+        var totalBytes = root.recursiveSizeBytes()
+        if (totalBytes <= COMPILE_CACHE_MAX_BYTES) {
+            return
+        }
+        projectDirs.sortedBy { it.lastModified() }.forEach { projectDir ->
+            if (totalBytes <= COMPILE_CACHE_MAX_BYTES) {
+                return
+            }
+            val bytes = projectDir.recursiveSizeBytes()
+            if (projectDir.safeDeleteRecursivelyUnder(root)) {
+                totalBytes -= bytes
+            }
+        }
+    }
+
+    private fun File.recursiveSizeBytes(): Long {
+        if (!exists()) {
+            return 0L
+        }
+        if (isFile) {
+            return length()
+        }
+        return listFiles().orEmpty().sumOf { it.recursiveSizeBytes() }
+    }
+
+    private fun File.safeDeleteRecursivelyUnder(root: File): Boolean {
+        return runCatching {
+            val canonicalRoot = root.canonicalFile
+            val canonicalTarget = canonicalFile
+            val rootPath = canonicalRoot.path
+            val targetPath = canonicalTarget.path
+            if (targetPath == rootPath || !targetPath.startsWith(rootPath + File.separator)) {
+                return false
+            }
+            deleteRecursively()
+        }.getOrDefault(false)
+    }
+
+    private fun sha256Utf8(value: String): String = sha256Hex {
+        updatePart(value)
+    }
+
+    private fun sha256Hex(block: MessageDigest.() -> Unit): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.block()
+        return digest.digest().joinToString("") { "%02x".format(it) }
+    }
+
+    private fun MessageDigest.updatePart(value: String?) {
+        val bytes = (value ?: "<null>").toByteArray(StandardCharsets.UTF_8)
+        update(bytes)
+        update(0.toByte())
+    }
+
+    fun embeddedScriptRequestPreparationFailure(
+        request: EmbeddedScriptRequest,
+        throwable: Throwable,
+        startedAt: Long = SystemClock.elapsedRealtime(),
+        processName: String = currentProcessName(),
+        pid: Int = Process.myPid(),
+    ): EmbeddedScriptResult {
+        val typeScriptError = throwable as? NodeTypeScriptStripper.UnsupportedTypeScriptException
+        val message = throwable.message ?: throwable.javaClass.name
+        return failureEmbeddedScriptResult(
+            request = request,
+            processName = processName,
+            pid = pid,
+            startedAt = startedAt,
+            message = message,
+            nativeError = throwable,
+            nativeValues = typeScriptError?.let(::typeScriptFailureNativeValues).orEmpty(),
+            errorCode = typeScriptError?.errorCode,
+        )
+    }
+
+    private fun stripTypeScriptSourceMap(sources: Map<String, String>): Map<String, String> {
+        var changed = false
+        val stripped = linkedMapOf<String, String>()
+        sources.forEach { (sourceName, source) ->
+            val result = NodeTypeScriptStripper.stripIfTypeScript(sourceName, source)
+            changed = changed || result.stripped
+            stripped[sourceName] = result.source
+        }
+        return if (changed) stripped else sources
+    }
+
+    private fun typeScriptFailureNativeValues(
+        error: NodeTypeScriptStripper.UnsupportedTypeScriptException,
+    ): Map<String, String> {
+        return mapOf(
+            "embedded_script.error_code" to error.errorCode,
+            "embedded_script.typescript.error" to "true",
+            "embedded_script.typescript.source" to error.sourceName,
+            "embedded_script.typescript.syntax_kind" to error.syntaxKind,
+            "embedded_script.typescript.line" to error.line.toString(),
+            "embedded_script.typescript.column" to error.column.toString(),
+        )
     }
 
     private fun validateEmbeddedScriptModuleSources(
@@ -14835,15 +15335,28 @@ object NativeNodeEmbeddedRuntimeBridge {
     private external fun nativeEmbeddedProbeV8UvEmbeddedMvpTimeoutIsolationReadinessLifecycle(): Array<String>?
     private external fun nativeEmbeddedProbeV8UvEmbeddedMvpSecurityPolicyReadinessLifecycle(): Array<String>?
     private external fun nativeEmbeddedProbeV8UvEmbeddedMvpGoNoGoReadinessLifecycle(): Array<String>?
+    private external fun nativeWriteSignalSafeCrashMarker(
+        markerPath: String,
+        markerId: String,
+        executionId: String,
+        scenario: String,
+        reason: String,
+        pid: Int,
+        epochMs: Long,
+    ): Array<String>?
+
     private external fun nativeRunEmbeddedScriptLifecycleV2(
         source: String,
         sourceName: String,
         workingDirectory: String?,
+        sandboxRoot: String?,
         envNames: Array<String>,
         envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
         dynamicImportExperimentalEnabled: Boolean,
+        rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
+        childProcessExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
@@ -14851,13 +15364,16 @@ object NativeNodeEmbeddedRuntimeBridge {
         source: String,
         sourceName: String,
         workingDirectory: String?,
+        sandboxRoot: String?,
         moduleSourceNames: Array<String>,
         moduleSources: Array<String>,
         envNames: Array<String>,
         envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
         dynamicImportExperimentalEnabled: Boolean,
+        rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
+        childProcessExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
@@ -14865,6 +15381,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         source: String,
         sourceName: String,
         workingDirectory: String?,
+        sandboxRoot: String?,
         moduleSourceNames: Array<String>,
         moduleSources: Array<String>,
         runtimeModuleSourceNames: Array<String>,
@@ -14873,7 +15390,37 @@ object NativeNodeEmbeddedRuntimeBridge {
         envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
         dynamicImportExperimentalEnabled: Boolean,
+        rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
+        childProcessExperimentalEnabled: Boolean,
+        javaInteropExperimentalEnabled: Boolean,
+    ): Array<String>?
+
+    private external fun nativeRunEmbeddedScriptAdapterV1Diagnostics(
+        source: String,
+        sourceName: String,
+        workingDirectory: String?,
+        moduleSourceCount: Int,
+        runtimeModuleSourceCount: Int,
+        envCount: Int,
+    ): Array<String>?
+
+    private external fun nativeRunEmbeddedScriptAdapterV1Execute(
+        source: String,
+        sourceName: String,
+        workingDirectory: String?,
+        sandboxRoot: String?,
+        moduleSourceNames: Array<String>,
+        moduleSources: Array<String>,
+        runtimeModuleSourceNames: Array<String>,
+        runtimeModuleSources: Array<String>,
+        envNames: Array<String>,
+        envValues: Array<String>,
+        esmExperimentalEnabled: Boolean,
+        dynamicImportExperimentalEnabled: Boolean,
+        rawNodeNetworkModulesExperimentalEnabled: Boolean,
+        workerThreadsExperimentalEnabled: Boolean,
+        childProcessExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
@@ -15291,6 +15838,12 @@ object NativeNodeEmbeddedRuntimeBridge {
 
     fun isEmbeddedProbeProcess(processName: String): Boolean =
         processName.endsWith(EMBEDDED_PROBE_PROCESS_SUFFIX)
+
+    fun isEmbeddedScriptProcess(processName: String): Boolean =
+        embeddedScriptProcessSuffixes().any { suffix -> processName.endsWith(suffix) }
+
+    private fun embeddedScriptProcessSuffixes(): List<String> =
+        NodeEmbeddedProcessPoolPolicy.declaredSlots.map { slot -> slot.processSuffix }
 
     private fun logStage(
         stageEvents: MutableList<String>,
@@ -17115,13 +17668,28 @@ object NativeNodeEmbeddedRuntimeBridge {
         val error: Throwable?,
     )
 
+    data class SignalSafeCrashMarkerWriteResult(
+        val succeeded: Boolean,
+        val markerPath: String,
+        val markerId: String,
+        val schema: String,
+        val writer: String,
+        val recordBytes: Int,
+        val bytesWritten: Int,
+        val status: String,
+        val errorMessage: String?,
+        val nativeValues: Map<String, String>,
+    )
+
     data class EmbeddedScriptRequest(
         val source: String,
         val sourceName: String,
         val workingDirectory: String? = null,
+        val sandboxRoot: String? = null,
         val executionId: String? = null,
-        val timeoutMs: Long = BuildConfig.NODEJS_EMBEDDED_PROBE_TIMEOUT_MS.coerceAtLeast(1L),
-        val queueMode: String = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+        val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        val timeoutMs: Long = DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS,
+        val queueMode: String = NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY,
         val queueTimeoutMs: Long = 0L,
         val captureStdout: Boolean = true,
         val captureStderr: Boolean = true,
@@ -17130,9 +17698,14 @@ object NativeNodeEmbeddedRuntimeBridge {
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val esmExperimentalEnabled: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
         val dynamicImportExperimentalEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+        val rawNodeNetworkModulesExperimentalEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
         val workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        val childProcessExperimentalEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
         val javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
         val spawnDepth: Int = 0,
+        val runtimeAdapter: String? = null,
+        val processPoolSlot: String? = null,
+        val processPoolSlotSource: String? = null,
     )
 
     data class EmbeddedScriptResult(
@@ -17159,11 +17732,18 @@ object NativeNodeEmbeddedRuntimeBridge {
         val pendingIntervalCount: Int? = null,
         val pendingImmediateCount: Int? = null,
         val pendingScopedFsCallbacks: Int? = null,
+        val pendingScopedFsStreams: Boolean? = null,
+        val pendingScopedFsStreamCount: Int? = null,
+        val pendingScopedFsWatchCount: Int? = null,
+        val pendingScopedFsWatchFileCount: Int? = null,
         val pendingWorkers: Boolean? = null,
         val pendingWorkerCount: Int? = null,
         val pendingCryptoCallbacks: Int? = null,
         val pendingDnsCallbacks: Int? = null,
         val pendingZlibCallbacks: Int? = null,
+        val pendingNodeTestCallbacks: Int? = null,
+        val pendingZlibStreams: Boolean? = null,
+        val pendingZlibStreamCount: Int? = null,
         val pendingAsyncCallbacks: Int? = null,
         val pendingCallbacks: Boolean? = null,
     )

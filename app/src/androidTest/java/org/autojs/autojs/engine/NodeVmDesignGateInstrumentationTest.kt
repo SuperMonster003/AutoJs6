@@ -24,20 +24,21 @@ class NodeVmDesignGateInstrumentationTest {
     }
 
     @Test
-    fun vmRemainsDesignGatedAndDisabledByDefault() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("vm design gate")
+    fun vmNativeBuiltinIsAvailableAndCannotBeShadowed() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("vm native builtin")
         val vmFlag = NodeRuntimeCapabilities.featureFlagsById["vm"]
-        assertEquals("disabled", vmFlag?.status)
+        assertEquals("partial", vmFlag?.status)
         assertEquals("high", vmFlag?.securityLevel)
-        assertFalse(vmFlag?.defaultEnabled ?: true)
+        assertTrue(vmFlag?.defaultEnabled ?: false)
         assertFalse(vmFlag?.buildTimeOverrideAllowed ?: true)
         assertFalse(vmFlag?.projectJsonOverrideAllowed ?: true)
         assertFalse(vmFlag?.packagedApkOverrideAllowed ?: true)
-        assertTrue(NodeRuntimeCapabilities.disabledBuiltinModuleNames.contains("vm"))
+        assertTrue(NodeRuntimeCapabilities.limitedBuiltinModuleNames.contains("vm"))
+        assertFalse(NodeRuntimeCapabilities.disabledBuiltinModuleNames.contains("vm"))
 
-        val workDir = File(context.cacheDir, "node-vm-design-gate-${System.nanoTime()}").apply {
+        val workDir = File(context.cacheDir, "node-vm-native-${System.nanoTime()}").apply {
             deleteRecursively()
-            check(mkdirs()) { "Failed to create vm design gate work dir: $absolutePath" }
+            check(mkdirs()) { "Failed to create vm native work dir: $absolutePath" }
         }
         try {
             File(workDir, "node_modules/vm").apply {
@@ -52,29 +53,12 @@ class NodeVmDesignGateInstrumentationTest {
                 source = """
                     "nodejs";
                     const profile = require("autojs6:profile");
-                    function detailOf(error) {
-                      return [
-                        error && error.code,
-                        error && error.autojs6Code,
-                        error && error.legacyCode
-                      ].filter(Boolean).join("/");
-                    }
-                    function expectDenied(label, action) {
-                      try {
-                        action();
-                      } catch (error) {
-                        const detail = detailOf(error);
-                        if (
-                          error.code !== "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" ||
-                          error.autojs6Code !== "ERR_AUTOJS6_BUILTIN_DISABLED"
-                        ) {
-                          throw new Error(label + " expected builtin disabled but got " + detail);
-                        }
-                        console.log("vm." + label + "=" + detail);
-                        return;
-                      }
-                      throw new Error(label + " was unexpectedly allowed");
-                    }
+                    const vm = require("vm");
+                    const nodeVm = require("node:vm");
+                    const script = new vm.Script("answer + 1");
+                    const context = vm.createContext({ answer: 41 });
+                    const inContext = script.runInContext(context, { timeout: 1000 });
+                    const inNewContext = vm.runInNewContext("value * 2", { value: 21 }, { timeout: 1000 });
 
                     console.log("vm.profile=" + [
                       profile.featureFlags.vm.enabled,
@@ -82,35 +66,38 @@ class NodeVmDesignGateInstrumentationTest {
                       profile.featureFlags.vm.buildTimeOverrideAllowed,
                       profile.featureFlags.vm.projectJsonOverrideAllowed,
                       profile.featureFlags.vm.packagedApkOverrideAllowed,
-                      profile.disabledBuiltins.includes("vm")
+                      profile.disabledBuiltins.includes("vm"),
+                      profile.limitedBuiltins.includes("vm")
                     ].join("/"));
                     console.log("vm.profileFrozen=" + (
                       Object.isFrozen(profile.featureFlags.vm) &&
-                      Object.isFrozen(profile.disabledBuiltins)
+                      Object.isFrozen(profile.disabledBuiltins) &&
+                      Object.isFrozen(profile.limitedBuiltins)
                     ));
-
-                    expectDenied("requireBare", () => require("vm"));
-                    expectDenied("requireNodePrefix", () => require("node:vm"));
-                    expectDenied("resolveBare", () => require.resolve("vm"));
-                    expectDenied("resolveNodePrefix", () => require.resolve("node:vm"));
-
+                    console.log("vm.module=" + [
+                      vm === nodeVm,
+                      require.resolve("vm"),
+                      require.resolve("node:vm"),
+                      typeof vm.Script,
+                      typeof vm.createContext,
+                      inContext,
+                      inNewContext,
+                      vm.shadow !== true
+                    ].join("|"));
                     console.log("vm.shadowLoaded=" + Object.keys(require.cache).some((filename) => {
                       return filename.replace(/\\/g, "/").includes("/node_modules/vm/");
                     }));
                     console.log("vm.ready=true");
                 """.trimIndent(),
-                sourceName = "<node-vm-design-gate.js>",
+                sourceName = "<node-vm-native.js>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
             )
 
-            NodeEmbeddedTestHarness.assertSucceeded("vm design gate", result)
-            assertTrue(result.stdout, result.stdout.contains("vm.profile=false/false/false/false/false/true"))
+            NodeEmbeddedTestHarness.assertSucceeded("vm native builtin", result)
+            assertTrue(result.stdout, result.stdout.contains("vm.profile=true/true/false/false/false/false/true"))
             assertTrue(result.stdout, result.stdout.contains("vm.profileFrozen=true"))
-            assertTrue(result.stdout, result.stdout.contains("vm.requireBare=${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}"))
-            assertTrue(result.stdout, result.stdout.contains("vm.requireNodePrefix=${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}"))
-            assertTrue(result.stdout, result.stdout.contains("vm.resolveBare=${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}"))
-            assertTrue(result.stdout, result.stdout.contains("vm.resolveNodePrefix=${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}"))
+            assertTrue(result.stdout, result.stdout.contains("vm.module=true|vm|vm|function|function|42|42|true"))
             assertTrue(result.stdout, result.stdout.contains("vm.shadowLoaded=false"))
             assertTrue(result.stdout, result.stdout.contains("vm.ready=true"))
         } finally {

@@ -50,7 +50,7 @@ Promotion requires:
 - ESM import of CJS tests
 - CJS require of ESM decision tests
 - top-level await tests
-- `import.meta` decision tests
+- `import.meta` scoped metadata, resolver, and denial tests
 - scoped file URL and path escape tests
 - package `exports` condition-order tests
 - encrypted moduleSources graph tests

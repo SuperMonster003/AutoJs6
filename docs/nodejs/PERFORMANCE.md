@@ -142,6 +142,56 @@ Recommended comparison method:
 3. Keep screen, power, and background load consistent.
 4. Record the report JSON with any lifecycle or native-load change.
 
+## Compile Cache And Startup Snapshot Modes
+
+S8-33 enables the module compile cache as an internal fail-soft optimization.
+It may improve repeated module compilation without changing isolate, context,
+or environment creation.
+
+S8-34 keeps bootstrap startup snapshots disabled behind a design gate. The
+current runtime does not generate, package, load, or request a snapshot blob;
+normal bootstrap remains the active path and the required fallback path.
+
+S8-35 adds an explicit process-only prewarm. It may reduce Android service
+process cold-start cost, but it does not preload Node/V8 or user modules and
+does not replace the snapshot modes below.
+
+S8-36 records the current available performance matrix with:
+
+```powershell
+$env:ANDROID_SERIAL = "QV710AF65F"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePerformanceMatrixInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:pullNodeEmbeddedPerformanceReports
+```
+
+Reports use schema `autojs6-node-phase8-performance-matrix-v1` and compare
+only modes that the current runtime can truthfully execute. Unavailable modes
+are included in the JSON with an explicit reason.
+
+The current mode matrix is:
+
+| Mode | Current v1.1 status | Notes |
+| --- | --- | --- |
+| no cache / no snapshot | unavailable | Compile cache is an internal default after S8-33; no user or instrumentation switch disables it. |
+| compile cache only | supported | Internal app-private module compile cache |
+| snapshot only | unavailable | Requires S8-34 runtime implementation |
+| compile cache plus snapshot | unavailable | Requires S8-34 runtime implementation |
+| compile cache plus process prewarm | supported separate axis | S8-35 explicit process-only prewarm; not a snapshot substitute |
+
+Measured rows record native load, environment creation, bootstrap, first local
+module, first fake-transport bridge call, RSS snapshots, compile-cache size,
+and runtime timeline event count. `packagedStartupMs` is recorded as
+`not_measured_in_embedded_instrumentation` until packaged smoke exports a
+launch-to-marker metric.
+
+Measure process-only prewarm as a separate axis: prewarm off versus explicit
+prewarm consumed. Report `embedded_script.prewarm_pool.status`, process id
+reuse, wall time, native load timing, and RSS so service-process wins are not
+confused with V8 or module-cache wins.
+
+Detailed S8-36 coverage is recorded in
+`docs/nodejs/reports/phase8/PERFORMANCE_MATRIX.md`.
+
 ## Memory Leak Stress
 
 Run the extended leak stress gate on a connected device:
@@ -195,3 +245,26 @@ Useful local overrides:
 ```
 
 Set `autojs.nodejs.leak.failOnRunaway=false` to collect a report without failing the test. Use that only for exploratory local profiling.
+
+Phase 13 full heavy resource stress consumes long-duration reports at:
+
+- `build/reports/nodejs/final-soak/quick-soak-8h.json`
+- `build/reports/nodejs/final-soak/final-soak-24h.json`
+
+Each report must provide a duration (`durationHours`, `durationMs`, or
+parseable start/end timestamps), RSS, Java heap, native heap, thread count, fd
+count, and bridge diagnostics. `verifyNodePhase13FullHeavyResourceStress`
+keeps the final blocker open when either report is missing, below duration,
+missing comparable metrics, or reporting failures, monotonic leaks, orphan
+processes, or unrecoverable runtime state.
+
+The verifier also contains contract fixtures under
+`tools/nodejs/phase13/fixtures/full-heavy-resource-stress/`. They prove that the
+parser accepts the intended 8h/24h report shapes and rejects under-duration,
+missing-metric, leak/orphan, or unrecoverable runtime samples. These fixtures
+are not performance evidence and must not be copied into
+`build/reports/nodejs/final-soak/`.
+
+Use `tools/nodejs/phase13/archive-full-heavy-resource-soak.js` to copy only
+validated real soak outputs into `build/reports/nodejs/final-soak/`. Run it with
+`--dry-run` first when checking a candidate report.

@@ -38,6 +38,7 @@ class NodeZlibBufferInstrumentationTest {
             val source = """
                 "nodejs";
                 const assert = require("assert/strict");
+                const fs = require("fs");
                 const zlib = require("zlib");
                 const nodeZlib = require("node:zlib");
                 const stream = require("stream");
@@ -54,6 +55,15 @@ class NodeZlibBufferInstrumentationTest {
                   });
                   await pipeline(stream.Readable.from(chunks), ...transforms, writable);
                   return Buffer.concat(values).toString("utf8");
+                }
+
+                async function collectError(chunks, transforms) {
+                  try {
+                    await collect(chunks, transforms);
+                    return "ok";
+                  } catch (error) {
+                    return error instanceof Error ? "error" : "other";
+                  }
                 }
 
                 function rejectsBuiltin(name) {
@@ -74,6 +84,8 @@ class NodeZlibBufferInstrumentationTest {
 
                   const gzip = zlib.gzipSync(Buffer.from("gzip-value"));
                   assert.strictEqual(zlib.gunzipSync(gzip).toString("utf8"), "gzip-value");
+                  const largePayload = Buffer.alloc(3 * 1024 * 1024, 65);
+                  assert.strictEqual(zlib.gunzipSync(zlib.gzipSync(largePayload)).length, largePayload.length);
 
                   const deflated = zlib.deflateSync(Buffer.from("deflate-value"));
                   assert.strictEqual(zlib.inflateSync(deflated).toString("utf8"), "deflate-value");
@@ -92,6 +104,20 @@ class NodeZlibBufferInstrumentationTest {
                   assert.strictEqual(
                     await collect([Buffer.from("stream-value")], [zlib.createGzip(), zlib.createGunzip()]),
                     "stream-value"
+                  );
+                  fs.writeFileSync("./stream-source.txt", "fs-pipeline-value", "utf8");
+                  await pipeline(
+                    fs.createReadStream("./stream-source.txt"),
+                    zlib.createGzip(),
+                    fs.createWriteStream("./stream-source.txt.gz")
+                  );
+                  assert.strictEqual(
+                    zlib.gunzipSync(fs.readFileSync("./stream-source.txt.gz")).toString("utf8"),
+                    "fs-pipeline-value"
+                  );
+                  assert.strictEqual(
+                    await collectError([Buffer.from("not gzip")], [zlib.createGunzip()]),
+                    "error"
                   );
                   assert.throws(() => zlib.gunzipSync(Buffer.from("not gzip")), /incorrect header|invalid/i);
                   assert.strictEqual(Object.isFrozen(zlib.constants), true);
@@ -113,6 +139,8 @@ class NodeZlibBufferInstrumentationTest {
                 result.stdout.contains("zlib.buffer.focused.ready=true"),
             )
             assertEquals(0, result.pendingZlibCallbacks ?: -1)
+            assertEquals(false, result.pendingZlibStreams)
+            assertEquals(0, result.pendingZlibStreamCount ?: -1)
         } finally {
             workDir.deleteRecursively()
         }

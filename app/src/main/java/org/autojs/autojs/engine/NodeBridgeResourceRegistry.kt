@@ -11,6 +11,9 @@ import java.util.concurrent.atomic.AtomicInteger
 
 enum class NodeBridgeResourceType(val idPrefix: String) {
     IMAGE_HANDLE("image"),
+    OCR_OPERATION("ocr"),
+    BARCODE_OPERATION("barcode"),
+    DATABASE_HANDLE("database"),
     SCREEN_CAPTURER("screen-capturer"),
     WEBSOCKET_CONNECTION("websocket"),
     SHELL_EXECUTION("shell"),
@@ -19,6 +22,11 @@ enum class NodeBridgeResourceType(val idPrefix: String) {
     JAVA_OBJECT("java"),
     WORKER("worker"),
     NETWORK_CALL("network"),
+    NOTIFICATION("notification"),
+    SENSOR_SUBSCRIPTION("sensor"),
+    UI_SESSION("ui"),
+    OVERLAY_SESSION("overlay"),
+    INPUT_OBSERVER_SUBSCRIPTION("input-observer"),
 }
 
 class NodeBridgeResourceHandle internal constructor(

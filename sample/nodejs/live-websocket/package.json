@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/live-websocket",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

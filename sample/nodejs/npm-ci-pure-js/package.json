@@ -1,0 +1,11 @@
+{
+  "name": "@autojs6-fixture/npm-ci-pure-js",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "main.cjs",
+  "dependencies": {
+    "left-pad-lite": "file:vendor/left-pad-lite",
+    "slugify-lite": "file:vendor/slugify-lite"
+  }
+}

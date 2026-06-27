@@ -1,0 +1,6 @@
+AUTOJS6_NODE_RUNTIME_1.0 {
+  global:
+    autojs_node_get_runtime_api_v1;
+  local:
+    *;
+};

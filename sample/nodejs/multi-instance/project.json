@@ -1,0 +1,16 @@
+{
+  "name": "multi-instance",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["multi-instance", "process-pool"],
+    "expectedProvider": "design-gated embedded process pool",
+    "packagedSupport": "not supported for user code in this phase",
+    "securityLimitations": ["one active Node environment per process", "resource registries remain per execution"]
+  }
+}

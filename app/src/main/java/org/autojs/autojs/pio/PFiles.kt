@@ -131,6 +131,8 @@ object PFiles {
             ByteArray(stream.available()).also { stream.read(it) }
         } catch (e: IOException) {
             throw UncheckedIOException(e)
+        } finally {
+            closeSilently(stream)
         }
     }
 

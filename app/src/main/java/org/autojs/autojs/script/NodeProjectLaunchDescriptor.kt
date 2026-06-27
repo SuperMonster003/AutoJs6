@@ -7,16 +7,22 @@ import java.io.File
 object NodeProjectLaunchDescriptor {
 
     const val DESCRIPTOR_FILE_NAME = ".autojs6-node-launch.json"
+    const val INTERNAL_DESCRIPTOR_FILE_NAME = "autojs6-node-launch.json"
     const val INVALID_JSON_SANITIZED_MARKER =
         "autojs6.node_project_launch_descriptor.invalid_json_sanitized.v1"
+
+    val DESCRIPTOR_FILE_NAMES = listOf(DESCRIPTOR_FILE_NAME, INTERNAL_DESCRIPTOR_FILE_NAME)
 
     @JvmStatic
     fun descriptorFile(projectRoot: File): File = File(projectRoot, DESCRIPTOR_FILE_NAME)
 
     @JvmStatic
+    fun descriptorFiles(projectRoot: File): List<File> = DESCRIPTOR_FILE_NAMES.map { name -> File(projectRoot, name) }
+
+    @JvmStatic
     fun readOptionsOrDefault(projectRoot: File): NodeProjectLaunchOptions {
-        val descriptor = descriptorFile(projectRoot)
-        return if (descriptor.isFile) {
+        NodeProjectRuntimeCompatibilityDescriptor.requireCompatibleOrDefault(projectRoot)
+        return if (descriptorFiles(projectRoot).any { descriptor -> descriptor.isFile }) {
             readOptions(projectRoot)
         } else {
             NodeProjectLaunchOptions()
@@ -25,9 +31,10 @@ object NodeProjectLaunchDescriptor {
 
     @JvmStatic
     fun readOptions(projectRoot: File): NodeProjectLaunchOptions {
-        val descriptor = descriptorFile(projectRoot)
-        require(descriptor.isFile) {
-            "Missing internal Node project launch descriptor: ${descriptor.absolutePath}"
+        NodeProjectRuntimeCompatibilityDescriptor.requireCompatibleOrDefault(projectRoot)
+        val descriptor = descriptorFiles(projectRoot).firstOrNull { descriptor -> descriptor.isFile }
+        require(descriptor != null) {
+            "Missing internal Node project launch descriptor: ${descriptorFile(projectRoot).absolutePath}"
         }
         val json = runCatching {
             JSONObject(descriptor.readText(Charsets.UTF_8))
@@ -46,6 +53,10 @@ object NodeProjectLaunchDescriptor {
             argv = json.optStringArray("argv"),
             env = json.optStringMap("env"),
             timeoutMs = json.optPositiveLongOrNull("timeoutMs"),
+            executionMode = json.optStringOrNull("executionMode"),
+            entryDirective = json.optNodeEntryDirectiveOrNull(),
+            processPoolSlot = json.optStringOrNull("processPoolSlot"),
+            processPoolSlotSource = json.optStringOrNull("processPoolSlotSource"),
         )
         return launchOptions.validateDescriptorLaunchKind(descriptorLaunchKind)
     }
@@ -108,6 +119,14 @@ object NodeProjectLaunchDescriptor {
     private fun JSONObject.optNodeProjectLaunchKindOrNull(key: String): NodeProjectLaunchKind? {
         val value = optStringOrNull(key) ?: return null
         return NodeProjectLaunchKind.fromDescriptorValue(value)
+    }
+
+    private fun JSONObject.optNodeEntryDirectiveOrNull(): String? {
+        val value = optStringOrNull("entryDirective")
+            ?: optStringOrNull("nodeEntryDirective")
+            ?: optStringOrNull("directive")
+            ?: return null
+        return NodeEntryDirective.normalize(value)
     }
 
     private fun JSONObject.optStringArray(key: String): List<String> {

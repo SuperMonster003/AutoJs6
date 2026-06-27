@@ -6,6 +6,11 @@ Device: Sony XQ-AT72 (`QV710AF65F`), Android 12
 
 Branch/package identity: `feature/nodejs-runtime`, `org.autojs.autojs6.nodejs`
 
+Supersession note: Task 167 on `feature/nodejs-runtime-v1.1` later added an
+AutoJs6-owned `require("axios")` adapter backed by controlled fetch. The v1 GA
+live-network recommendation in this report still stands; only the old "no
+adapter exists" axios statement has been superseded for v1.1 experiments.
+
 ## Recommendation
 
 Keep controlled network experimental and off by default for Node Profile v1 GA.
@@ -128,10 +133,12 @@ handling, service destroy cancellation, packaged `INTERNET` opt-in, and raw-modu
 
 Axios is not a supported Node Profile v1 compatibility guarantee.
 
-There is no AutoJs6 `require("axios")` builtin adapter, and desktop Node axios adapters normally depend on `http`,
-`https`, streams, agents, and socket behavior outside the Safe Node Profile. Axios can only be considered in a future
-task if it is pinned to a fetch-compatible adapter or an AutoJs6-owned bridge adapter and passes the same timeout, abort,
-budget, permission, packaged, and raw-module denial gates.
+At the time of this GA evaluation there was no AutoJs6 `require("axios")`
+builtin adapter, and desktop Node axios adapters normally depended on `http`,
+`https`, streams, agents, and socket behavior outside the Safe Node Profile.
+Task 167 later added a v1.1 experimental adapter owned by AutoJs6 and backed by
+controlled fetch. That adapter still does not change the GA live-network
+decision or allow desktop axios raw transport behavior.
 
 ## Release Decision
 
@@ -143,7 +150,7 @@ Node Profile v1 GA should document controlled network as:
 - fake-provider covered
 - packaged-permission reporting covered
 - not raw Node networking
-- not axios support by default
+- not desktop axios transport support by default
 
 The next promotion gate should add live-provider device smoke under an explicit build flag, a packaged network opt-in
 fixture, and an axios/fetch-adapter corpus only if axios is meant to be user-visible.

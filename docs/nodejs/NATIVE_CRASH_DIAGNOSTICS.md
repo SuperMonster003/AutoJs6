@@ -121,6 +121,51 @@ $ndk = "$env:ANDROID_HOME\ndk\26.1.10909125"
 
 If `ndk-stack` does not resolve frames, use the exact `symbol_file` path listed by the report with `llvm-symbolizer` from the same NDK.
 
+## Phase 11 Crash Bundle Tools
+
+The final integration lane also provides schema-stable crash bundle tools:
+
+```powershell
+.\gradlew.bat --console=plain :app:collectNodeCrashBundle
+.\gradlew.bat --console=plain :app:symbolizeNodeCrash
+.\gradlew.bat --console=plain :app:verifyNodeCrashBundle
+```
+
+The default bundle is written to:
+
+```text
+build/reports/nodejs/final-crash-evidence-bundle/
+```
+
+For manual evidence, call the scripts directly with a tombstone or logcat file:
+
+```powershell
+node tools\nodejs\phase11\collect-node-crash-bundle.js `
+  --repo-root . `
+  --report-dir build\reports\nodejs `
+  --logcat app\build\reports\native-node\logcat-native-crash.txt `
+  --resource-snapshot app\build\reports\native-node\resource-snapshot.json `
+  --timeline-tail app\build\reports\native-node\timeline-tail.json
+
+node tools\nodejs\phase11\symbolize-node-crash.js `
+  --repo-root . `
+  --report-dir build\reports\nodejs `
+  --logcat app\build\reports\native-node\logcat-native-crash.txt `
+  --symbol-dir app\build\intermediates\cxx
+
+node tools\nodejs\phase11\verify-node-crash-bundle.js `
+  --repo-root . `
+  --report-dir build\reports\nodejs
+```
+
+These tools make collection, schema validation, evidence import, and best-effort
+symbolization callable. `--resource-snapshot` accepts either the Phase 11
+resource snapshot schema or exported `EmbeddedScriptResult.nativeValues` JSON.
+`--timeline-tail` accepts either the Phase 11 timeline schema or exported
+`embedded_script.timeline_json` data. The final crash gate still remains blocked
+until safe native crash markers, automatic next-launch collection, and chaos
+injection exist.
+
 ## Triage Bundle
 
 Attach these files to any native crash issue:

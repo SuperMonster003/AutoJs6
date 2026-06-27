@@ -1,7 +1,18 @@
 #include "node_bridge_internal.h"
+#include "node_runtime_api_v1.h"
+
+#include <cerrno>
+#include <cstring>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 using namespace autojs6::node_bridge;
 using namespace autojs6::node_bridge::internal;
+
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
 
 extern "C" JNIEXPORT jint JNICALL
 Java_org_autojs_autojs_engine_NativeNodeRuntimeBridge_nativeRunMain(
@@ -91,98 +102,527 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jstring sandboxRoot,
         const std::vector<std::pair<std::string, std::string>>& moduleSourcePairs,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs,
         const std::vector<std::pair<std::string, std::string>>& envPairs,
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
+        bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
+        bool childProcessExperimentalEnabled,
         bool javaInteropExperimentalEnabled
 ) {
+    EmbeddedScriptExecutionRequest request;
+    request.source = toStdString(env, source);
+    request.sourceName = toStdString(env, sourceName);
+    request.workingDirectory = toStdString(env, workingDirectory);
+    request.sandboxRoot = toStdString(env, sandboxRoot);
+    request.moduleSources = moduleSourcePairs;
+    request.runtimeModuleSources = runtimeModuleSourcePairs;
+    request.env = envPairs;
+    request.esmExperimentalEnabled = esmExperimentalEnabled;
+    request.dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled;
+    request.rawNodeNetworkModulesExperimentalEnabled = rawNodeNetworkModulesExperimentalEnabled;
+    request.workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled;
+    request.childProcessExperimentalEnabled = childProcessExperimentalEnabled;
+    request.javaInteropExperimentalEnabled = javaInteropExperimentalEnabled;
+    std::vector<std::string> payload = runEmbeddedScriptExecution(request);
+    return toJavaStringArray(env, payload);
+}
+
+static const char* adapterResultCodeName(int32_t code) {
+    switch (code) {
+        case AUTOJS_NODE_RESULT_OK:
+            return "ok";
+        case AUTOJS_NODE_RESULT_INVALID_ARGUMENT:
+            return "invalid_argument";
+        case AUTOJS_NODE_RESULT_UNAVAILABLE:
+            return "unavailable";
+        case AUTOJS_NODE_RESULT_INTERRUPTED:
+            return "interrupted";
+        case AUTOJS_NODE_RESULT_FAILED:
+            return "failed";
+        default:
+            return "unknown";
+    }
+}
+
+namespace {
+
+constexpr size_t kSignalSafeMarkerRecordBytes = 256;
+constexpr const char* kSignalSafeMarkerSchema = "autojs6-node-phase13-signal-safe-crash-marker-v1";
+constexpr const char* kSignalSafeMarkerWriter = "native_fixed_size_signal_safe_writer";
+
+struct SignalSafeMarkerWriteResult {
+    bool succeeded = false;
+    ssize_t bytesWritten = 0;
+    int errorNumber = 0;
+};
+
+void appendSignalSafeLiteral(char* buffer, size_t* offset, const char* value) {
+    if (value == nullptr) {
+        return;
+    }
+    while (*value != '\0' && *offset < kSignalSafeMarkerRecordBytes - 1) {
+        buffer[*offset] = *value;
+        ++(*offset);
+        ++value;
+    }
+}
+
+void appendSignalSafeTruncated(char* buffer, size_t* offset, const char* value, size_t maxBytes) {
+    if (value == nullptr) {
+        return;
+    }
+    size_t copied = 0;
+    while (*value != '\0' && copied < maxBytes && *offset < kSignalSafeMarkerRecordBytes - 1) {
+        const char next = *value;
+        buffer[*offset] = next == '\n' || next == '\r' ? '_' : next;
+        ++(*offset);
+        ++value;
+        ++copied;
+    }
+}
+
+void appendSignalSafeUnsigned(char* buffer, size_t* offset, unsigned long long value) {
+    char digits[32];
+    size_t count = 0;
+    do {
+        digits[count++] = static_cast<char>('0' + (value % 10));
+        value /= 10;
+    } while (value > 0 && count < sizeof(digits));
+    while (count > 0 && *offset < kSignalSafeMarkerRecordBytes - 1) {
+        buffer[*offset] = digits[--count];
+        ++(*offset);
+    }
+}
+
+void appendSignalSafeSigned(char* buffer, size_t* offset, long long value) {
+    if (value < 0) {
+        appendSignalSafeLiteral(buffer, offset, "-");
+        appendSignalSafeUnsigned(buffer, offset, static_cast<unsigned long long>(-(value + 1)) + 1ULL);
+    } else {
+        appendSignalSafeUnsigned(buffer, offset, static_cast<unsigned long long>(value));
+    }
+}
+
+SignalSafeMarkerWriteResult writeSignalSafeCrashMarkerRecord(
+        const char* path,
+        const char* markerId,
+        const char* executionId,
+        const char* scenario,
+        const char* reason,
+        int pid,
+        long long epochMs
+) {
+    char record[kSignalSafeMarkerRecordBytes];
+    for (size_t index = 0; index < sizeof(record); ++index) {
+        record[index] = ' ';
+    }
+    size_t offset = 0;
+    appendSignalSafeLiteral(record, &offset, "AJ6SIG13 ");
+    appendSignalSafeLiteral(record, &offset, "schema=");
+    appendSignalSafeLiteral(record, &offset, kSignalSafeMarkerSchema);
+    appendSignalSafeLiteral(record, &offset, " writer=");
+    appendSignalSafeLiteral(record, &offset, kSignalSafeMarkerWriter);
+    appendSignalSafeLiteral(record, &offset, " marker=");
+    appendSignalSafeTruncated(record, &offset, markerId, 40);
+    appendSignalSafeLiteral(record, &offset, " exec=");
+    appendSignalSafeTruncated(record, &offset, executionId, 40);
+    appendSignalSafeLiteral(record, &offset, " scenario=");
+    appendSignalSafeTruncated(record, &offset, scenario, 36);
+    appendSignalSafeLiteral(record, &offset, " reason=");
+    appendSignalSafeTruncated(record, &offset, reason, 28);
+    appendSignalSafeLiteral(record, &offset, " pid=");
+    appendSignalSafeSigned(record, &offset, static_cast<long long>(pid));
+    appendSignalSafeLiteral(record, &offset, " epochMs=");
+    appendSignalSafeSigned(record, &offset, epochMs);
+    record[kSignalSafeMarkerRecordBytes - 1] = '\n';
+
+    const int fd = open(path, O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC, S_IRUSR | S_IWUSR);
+    if (fd < 0) {
+        return {false, 0, errno};
+    }
+
+    size_t total = 0;
+    while (total < sizeof(record)) {
+        const ssize_t written = write(fd, record + total, sizeof(record) - total);
+        if (written < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            const int errorNumber = errno;
+            close(fd);
+            return {false, static_cast<ssize_t>(total), errorNumber};
+        }
+        if (written == 0) {
+            close(fd);
+            return {false, static_cast<ssize_t>(total), EIO};
+        }
+        total += static_cast<size_t>(written);
+    }
+
+    if (close(fd) != 0) {
+        return {false, static_cast<ssize_t>(total), errno};
+    }
+    return {true, static_cast<ssize_t>(total), 0};
+}
+
+} // namespace
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeWriteSignalSafeCrashMarker(
+        JNIEnv* env,
+        jobject /* thiz */,
+        jstring markerPath,
+        jstring markerId,
+        jstring executionId,
+        jstring scenario,
+        jstring reason,
+        jint pid,
+        jlong epochMs
+) {
     const auto startedAt = Clock::now();
-    __android_log_print(ANDROID_LOG_INFO, kLogTag, "embedded_script.enter");
+    const std::string path = toStdString(env, markerPath);
+    const std::string markerIdText = toStdString(env, markerId);
+    const std::string executionIdText = toStdString(env, executionId);
+    const std::string scenarioText = toStdString(env, scenario);
+    const std::string reasonText = toStdString(env, reason);
+    std::vector<std::string> payload;
+    putPayload(payload, "signal_safe_marker.schema", kSignalSafeMarkerSchema);
+    putPayload(payload, "signal_safe_marker.writer", kSignalSafeMarkerWriter);
+    putPayload(payload, "signal_safe_marker.record_bytes", static_cast<long long>(kSignalSafeMarkerRecordBytes));
+    putPayload(payload, "signal_safe_marker.path", path);
+    putPayload(payload, "signal_safe_marker.marker_id", markerIdText);
+    putPayload(payload, "signal_safe_marker.execution_id", executionIdText);
+    putPayload(payload, "signal_safe_marker.scenario", scenarioText);
+    putPayload(payload, "signal_safe_marker.reason", reasonText);
+    putPayload(payload, "signal_safe_marker.pid", static_cast<long long>(pid));
+    putPayload(payload, "signal_safe_marker.epoch_ms", static_cast<long long>(epochMs));
+    putPayload(payload, "signal_safe_marker.append_only", true);
+    putPayload(payload, "signal_safe_marker.native_core", "open_write_close_fixed_buffer");
+    putPayload(payload, "signal_safe_marker.signal_safe_syscalls", "open|write|close");
+
+    if (path.empty()) {
+        putPayload(payload, "signal_safe_marker.status", "failed");
+        putPayload(payload, "signal_safe_marker.error", "marker path is empty");
+        putPayload(payload, "signal_safe_marker.bytes_written", static_cast<long long>(0));
+        putCommonEmbeddedProbePayload(payload, 0, startedAt);
+        return toJavaStringArray(env, payload);
+    }
+
+    const SignalSafeMarkerWriteResult result = writeSignalSafeCrashMarkerRecord(
+            path.c_str(),
+            markerIdText.c_str(),
+            executionIdText.c_str(),
+            scenarioText.c_str(),
+            reasonText.c_str(),
+            static_cast<int>(pid),
+            static_cast<long long>(epochMs)
+    );
+    putPayload(payload, "signal_safe_marker.status", result.succeeded ? "written" : "failed");
+    putPayload(payload, "signal_safe_marker.bytes_written", static_cast<long long>(result.bytesWritten));
+    putPayload(payload, "signal_safe_marker.errno", static_cast<long long>(result.errorNumber));
+    if (!result.succeeded) {
+        putPayload(payload, "signal_safe_marker.error", std::strerror(result.errorNumber));
+    }
+    putCommonEmbeddedProbePayload(payload, 0, startedAt);
+    return toJavaStringArray(env, payload);
+}
+
+static std::string orderedStringPairsJson(const std::vector<std::pair<std::string, std::string>>& pairs) {
+    std::string json = "[";
+    for (size_t index = 0; index < pairs.size(); ++index) {
+        if (index > 0) {
+            json += ",";
+        }
+        json += "[";
+        json += jsonStringLiteral(pairs[index].first);
+        json += ",";
+        json += jsonStringLiteral(pairs[index].second);
+        json += "]";
+    }
+    json += "]";
+    return json;
+}
+
+static std::string adapterModuleSourcesJson(
+        const std::vector<std::pair<std::string, std::string>>& moduleSourcePairs,
+        const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs,
+        const std::string& sandboxRoot
+) {
+    return std::string("{\"sandboxRoot\":") + jsonStringLiteral(sandboxRoot) +
+            ",\"moduleSources\":" + orderedStringPairsJson(moduleSourcePairs) +
+            ",\"runtimeModuleSources\":" + orderedStringPairsJson(runtimeModuleSourcePairs) + "}";
+}
+
+static uint32_t adapterExecutionFlags(
+        bool esmExperimentalEnabled,
+        bool dynamicImportExperimentalEnabled,
+        bool rawNodeNetworkModulesExperimentalEnabled,
+        bool workerThreadsExperimentalEnabled,
+        bool childProcessExperimentalEnabled,
+        bool javaInteropExperimentalEnabled
+) {
+    uint32_t flags = 0;
+    if (esmExperimentalEnabled) {
+        flags |= AUTOJS_NODE_EXECUTION_FLAG_ESM_EXPERIMENTAL;
+    }
+    if (dynamicImportExperimentalEnabled) {
+        flags |= AUTOJS_NODE_EXECUTION_FLAG_DYNAMIC_IMPORT_EXPERIMENTAL;
+    }
+    if (rawNodeNetworkModulesExperimentalEnabled) {
+        flags |= AUTOJS_NODE_EXECUTION_FLAG_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL;
+    }
+    if (workerThreadsExperimentalEnabled) {
+        flags |= AUTOJS_NODE_EXECUTION_FLAG_WORKER_THREADS_EXPERIMENTAL;
+    }
+    if (childProcessExperimentalEnabled) {
+        flags |= AUTOJS_NODE_EXECUTION_FLAG_CHILD_PROCESS_EXPERIMENTAL;
+    }
+    if (javaInteropExperimentalEnabled) {
+        flags |= AUTOJS_NODE_EXECUTION_FLAG_JAVA_INTEROP_EXPERIMENTAL;
+    }
+    return flags;
+}
+
+static jobjectArray runEmbeddedScriptAdapterV1DiagnosticsNative(
+        JNIEnv* env,
+        jstring source,
+        jstring sourceName,
+        jstring workingDirectory,
+        jint moduleSourceCount,
+        jint runtimeModuleSourceCount,
+        jint envCount
+) {
+    const auto startedAt = Clock::now();
     const std::string sourceText = toStdString(env, source);
     const std::string sourceNameInput = toStdString(env, sourceName);
     const std::string sourceNameText = sourceNameInput.empty()
             ? "<embedded-user-script.js>"
             : sourceNameInput;
     const std::string workingDirectoryText = toStdString(env, workingDirectory);
+    const char* workingDirectoryPtr = workingDirectoryText.empty() ? nullptr : workingDirectoryText.c_str();
     std::vector<std::string> payload;
     putPayload(payload, "embedded_script.request.source_name", sourceNameText);
     putPayload(payload, "embedded_script.request.source.length", static_cast<long long>(sourceText.size()));
     putPayload(payload, "embedded_script.request.working_directory", workingDirectoryText);
-    putPayload(payload, "embedded_script.request.env.count", static_cast<long long>(envPairs.size()));
-    putPayload(payload, "embedded_script.request.module_sources.count", static_cast<long long>(moduleSourcePairs.size()));
-    putPayload(payload, "embedded_script.request.runtime_module_sources.count", static_cast<long long>(runtimeModuleSourcePairs.size()));
-    putPayload(payload, "embedded_script.request.source_kind", "kotlin_provided_source");
-    putPayload(payload, "embedded_script.request.user_file_read_by_native", false);
-    putPayload(payload, "embedded_script.request.require_allowed", true);
+    putPayload(payload, "embedded_script.request.env.count", static_cast<long long>(envCount));
+    putPayload(payload, "embedded_script.request.module_sources.count", static_cast<long long>(moduleSourceCount));
     putPayload(
             payload,
-            "embedded_script.request.require_mode",
-            esmExperimentalEnabled ? "restricted_commonjs_mvp_with_experimental_esm" : "restricted_commonjs_mvp"
+            "embedded_script.request.runtime_module_sources.count",
+            static_cast<long long>(runtimeModuleSourceCount)
     );
-    putPayload(payload, "embedded_script.request.fs_allowed", "scoped_working_directory_sync_mvp");
-    putPayload(payload, "embedded_script.request.import_allowed", esmExperimentalEnabled);
-    putPayload(payload, "embedded_script.request.esm_experimental_enabled", esmExperimentalEnabled);
-    putPayload(payload, "embedded_script.request.dynamic_import_experimental_enabled", dynamicImportExperimentalEnabled);
-    putPayload(payload, "embedded_script.request.worker_threads_experimental_enabled", workerThreadsExperimentalEnabled);
-    putPayload(payload, "embedded_script.request.java_interop_experimental_enabled", javaInteropExperimentalEnabled);
-    putPayload(payload, "embedded_script.request.node_modules_allowed", "working_directory_commonjs_mvp");
-    putPayload(payload, "embedded_script.request.autojs_api_allowed", false);
-    putPayload(payload, "embedded_script.request.android_bridge_allowed", false);
-    ScopedWorkingDirectory scopedWorkingDirectory;
-    if (!scopedWorkingDirectory.enter(env, workingDirectoryText)) {
-        return nullptr;
+    putPayload(payload, "embedded_script.request.source_kind", "kotlin_provided_source");
+    putPayload(payload, "embedded_script.request.user_file_read_by_native", false);
+    putPayload(payload, "embedded_script.runtime_adapter.path", "adapter_v1");
+    putPayload(payload, "embedded_script.runtime_adapter.fallback_path", "legacy_jni");
+    putPayload(payload, "embedded_script.runtime_adapter.mode", "diagnostics");
+
+    const AutoJsNodeRuntimeApiV1* api = autojs_node_get_runtime_api_v1();
+    if (api == nullptr) {
+        putPayload(payload, "embedded_script.runtime_adapter.status", "api_unavailable");
+        putPayload(payload, "embedded_script.status", "failed");
+        putPayload(payload, "embedded_script.detail", "autojs_node_get_runtime_api_v1 returned null");
+        putPayload(payload, "embedded_script.succeeded", false);
+        putPayload(payload, "embedded_script.exit_code", static_cast<long long>(1));
+        putPayload(payload, "embedded_script.error_code", "ERR_AUTOJS6_NODE_ADAPTER_API_UNAVAILABLE");
+        putCommonEmbeddedProbePayload(payload, 0, startedAt);
+        return toJavaStringArray(env, payload);
     }
-    putPayload(payload, "embedded_script.request.working_directory_entered", !workingDirectoryText.empty());
-    std::string wrappedSource = buildEmbeddedScriptExecutionSource(
-            sourceText,
-            sourceNameText,
-            workingDirectoryText,
-            moduleSourcePairs,
-            runtimeModuleSourcePairs,
-            envPairs,
+
+    putPayload(payload, "embedded_script.runtime_adapter.abi_version", static_cast<long long>(api->abi_version));
+    putPayload(payload, "embedded_script.runtime_adapter.struct_size", static_cast<long long>(api->struct_size));
+    putPayload(payload, "embedded_script.runtime_adapter.feature_bits", static_cast<long long>(api->feature_bits));
+    putPayload(payload, "embedded_script.runtime_adapter.node_version", api->get_node_version == nullptr ? "" : api->get_node_version());
+    putPayload(
+            payload,
+            "embedded_script.runtime_adapter.runtime_descriptor_json",
+            api->get_runtime_descriptor == nullptr ? "" : api->get_runtime_descriptor()
+    );
+
+    AutoJsNodeCreateOptions createOptions{};
+    createOptions.struct_size = sizeof(AutoJsNodeCreateOptions);
+    createOptions.runtime_descriptor_json = "{\"requestedPath\":\"adapter_v1\",\"host\":\"autojs6\"}";
+    createOptions.working_directory = workingDirectoryPtr;
+    createOptions.initial_environment_json = "{}";
+    createOptions.timeout_ms = 0;
+    AutoJsNodeHandle* handle = nullptr;
+    const int32_t createCode = api->create_runtime == nullptr
+            ? AUTOJS_NODE_RESULT_UNAVAILABLE
+            : api->create_runtime(&createOptions, &handle);
+    putPayload(payload, "embedded_script.runtime_adapter.create_result_code", static_cast<long long>(createCode));
+    putPayload(payload, "embedded_script.runtime_adapter.create_result", adapterResultCodeName(createCode));
+    putPayload(payload, "embedded_script.runtime_adapter.handle_created", handle != nullptr);
+
+    AutoJsNodeDiagnostics diagnostics{};
+    diagnostics.struct_size = sizeof(AutoJsNodeDiagnostics);
+    const int32_t diagnosticsCode = api->get_diagnostics == nullptr
+            ? AUTOJS_NODE_RESULT_UNAVAILABLE
+            : api->get_diagnostics(handle, &diagnostics);
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_result_code", static_cast<long long>(diagnosticsCode));
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_result", adapterResultCodeName(diagnosticsCode));
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_descriptor_json", diagnostics.runtime_descriptor_json);
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_state_json", diagnostics.state_json);
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_resource_json", diagnostics.resource_json);
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_last_error_json", diagnostics.last_error_json);
+
+    if (handle != nullptr && api->destroy_runtime != nullptr) {
+        const int32_t destroyCode = api->destroy_runtime(handle);
+        putPayload(payload, "embedded_script.runtime_adapter.destroy_result_code", static_cast<long long>(destroyCode));
+        putPayload(payload, "embedded_script.runtime_adapter.destroy_result", adapterResultCodeName(destroyCode));
+    }
+
+    putPayload(payload, "embedded_script.runtime_adapter.status", "diagnostics_ready");
+    putPayload(payload, "embedded_script.status", "done");
+    putPayload(payload, "embedded_script.detail", "adapter_v1 diagnostics completed");
+    putPayload(payload, "embedded_script.succeeded", true);
+    putPayload(payload, "embedded_script.exit_code", static_cast<long long>(0));
+    putCommonEmbeddedProbePayload(payload, 0, startedAt);
+    return toJavaStringArray(env, payload);
+}
+
+static jobjectArray runEmbeddedScriptAdapterV1ExecuteNative(
+        JNIEnv* env,
+        jstring source,
+        jstring sourceName,
+        jstring workingDirectory,
+        jstring sandboxRoot,
+        const std::vector<std::pair<std::string, std::string>>& moduleSourcePairs,
+        const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs,
+        const std::vector<std::pair<std::string, std::string>>& envPairs,
+        bool esmExperimentalEnabled,
+        bool dynamicImportExperimentalEnabled,
+        bool rawNodeNetworkModulesExperimentalEnabled,
+        bool workerThreadsExperimentalEnabled,
+        bool childProcessExperimentalEnabled,
+        bool javaInteropExperimentalEnabled
+) {
+    const auto startedAt = Clock::now();
+    const std::string sourceText = toStdString(env, source);
+    const std::string sourceNameInput = toStdString(env, sourceName);
+    const std::string sourceNameText = sourceNameInput.empty()
+            ? "<embedded-user-script.js>"
+            : sourceNameInput;
+    const std::string workingDirectoryText = toStdString(env, workingDirectory);
+    const std::string sandboxRootText = toStdString(env, sandboxRoot);
+    const std::string moduleSourcesJson = adapterModuleSourcesJson(moduleSourcePairs, runtimeModuleSourcePairs, sandboxRootText);
+    const std::string environmentJson = orderedStringPairsJson(envPairs);
+    std::vector<std::string> payload;
+    putPayload(payload, "embedded_script.request.source_name", sourceNameText);
+    putPayload(payload, "embedded_script.request.source.length", static_cast<long long>(sourceText.size()));
+    putPayload(payload, "embedded_script.request.working_directory", workingDirectoryText);
+    putPayload(payload, "embedded_script.request.sandbox_root", sandboxRootText);
+    putPayload(payload, "embedded_script.request.env.count", static_cast<long long>(envPairs.size()));
+    putPayload(payload, "embedded_script.request.module_sources.count", static_cast<long long>(moduleSourcePairs.size()));
+    putPayload(
+            payload,
+            "embedded_script.request.runtime_module_sources.count",
+            static_cast<long long>(runtimeModuleSourcePairs.size())
+    );
+    putPayload(payload, "embedded_script.request.source_kind", "kotlin_provided_source");
+    putPayload(payload, "embedded_script.request.user_file_read_by_native", false);
+    putPayload(payload, "embedded_script.runtime_adapter.path", "adapter_v1");
+    putPayload(payload, "embedded_script.runtime_adapter.fallback_path", "legacy_jni");
+    putPayload(payload, "embedded_script.runtime_adapter.mode", "execution_path");
+
+    const AutoJsNodeRuntimeApiV1* api = autojs_node_get_runtime_api_v1();
+    if (api == nullptr) {
+        putPayload(payload, "embedded_script.runtime_adapter.status", "api_unavailable");
+        putPayload(payload, "embedded_script.status", "failed");
+        putPayload(payload, "embedded_script.detail", "autojs_node_get_runtime_api_v1 returned null");
+        putPayload(payload, "embedded_script.succeeded", false);
+        putPayload(payload, "embedded_script.exit_code", static_cast<long long>(1));
+        putPayload(payload, "embedded_script.error_code", "ERR_AUTOJS6_NODE_ADAPTER_API_UNAVAILABLE");
+        putCommonEmbeddedProbePayload(payload, 0, startedAt);
+        return toJavaStringArray(env, payload);
+    }
+
+    putPayload(payload, "embedded_script.runtime_adapter.abi_version", static_cast<long long>(api->abi_version));
+    putPayload(payload, "embedded_script.runtime_adapter.struct_size", static_cast<long long>(api->struct_size));
+    putPayload(payload, "embedded_script.runtime_adapter.feature_bits", static_cast<long long>(api->feature_bits));
+    putPayload(payload, "embedded_script.runtime_adapter.node_version", api->get_node_version == nullptr ? "" : api->get_node_version());
+    putPayload(
+            payload,
+            "embedded_script.runtime_adapter.runtime_descriptor_json",
+            api->get_runtime_descriptor == nullptr ? "" : api->get_runtime_descriptor()
+    );
+
+    AutoJsNodeCreateOptions createOptions{};
+    createOptions.struct_size = sizeof(AutoJsNodeCreateOptions);
+    createOptions.runtime_descriptor_json = "{\"requestedPath\":\"adapter_v1\",\"host\":\"autojs6\"}";
+    createOptions.working_directory = workingDirectoryText.empty() ? nullptr : workingDirectoryText.c_str();
+    createOptions.initial_environment_json = environmentJson.c_str();
+    createOptions.timeout_ms = 0;
+    AutoJsNodeHandle* handle = nullptr;
+    const int32_t createCode = api->create_runtime == nullptr
+            ? AUTOJS_NODE_RESULT_FAILED
+            : api->create_runtime(&createOptions, &handle);
+    putPayload(payload, "embedded_script.runtime_adapter.create_result_code", static_cast<long long>(createCode));
+    putPayload(payload, "embedded_script.runtime_adapter.create_result", adapterResultCodeName(createCode));
+    putPayload(payload, "embedded_script.runtime_adapter.handle_created", handle != nullptr);
+    if (createCode != AUTOJS_NODE_RESULT_OK || handle == nullptr) {
+        putPayload(payload, "embedded_script.runtime_adapter.status", "create_failed");
+        putPayload(payload, "embedded_script.status", "failed");
+        putPayload(payload, "embedded_script.detail", "adapter_v1 create_runtime failed");
+        putPayload(payload, "embedded_script.succeeded", false);
+        putPayload(payload, "embedded_script.exit_code", static_cast<long long>(1));
+        putPayload(payload, "embedded_script.error_code", "ERR_AUTOJS6_NODE_ADAPTER_CREATE_FAILED");
+        putCommonEmbeddedProbePayload(payload, 0, startedAt);
+        return toJavaStringArray(env, payload);
+    }
+
+    AutoJsNodeExecutionRequest executionRequest{};
+    executionRequest.struct_size = sizeof(AutoJsNodeExecutionRequest);
+    executionRequest.flags = adapterExecutionFlags(
             esmExperimentalEnabled,
             dynamicImportExperimentalEnabled,
+            rawNodeNetworkModulesExperimentalEnabled,
             workerThreadsExperimentalEnabled,
+            childProcessExperimentalEnabled,
             javaInteropExperimentalEnabled
     );
-    void* handle = probeLoadedLibnodeHandle(payload);
-    const char* workingDirectoryPtr = workingDirectoryText.empty() ? nullptr : workingDirectoryText.c_str();
-    appendEmbeddedV8UvIsolateLifecycleProbePayload(
-            payload,
-            handle,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            true,
-            false,
-            false,
-            false,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            &wrappedSource,
-            "embedded_script",
-            workingDirectoryPtr,
-            true
-    );
+    executionRequest.source_name = sourceNameText.c_str();
+    executionRequest.source = {
+            sourceText.data(),
+            static_cast<uint64_t>(sourceText.size())
+    };
+    executionRequest.working_directory = workingDirectoryText.empty() ? nullptr : workingDirectoryText.c_str();
+    executionRequest.module_sources_json = moduleSourcesJson.c_str();
+    executionRequest.environment_json = environmentJson.c_str();
+    executionRequest.timeout_ms = 0;
+    executionRequest.execution_id = 0;
+    AutoJsNodeExecutionResult executionResult{};
+    executionResult.struct_size = sizeof(AutoJsNodeExecutionResult);
+    const int32_t executeCode = api->execute_script == nullptr
+            ? AUTOJS_NODE_RESULT_FAILED
+            : api->execute_script(handle, &executionRequest, &executionResult);
+    putPayload(payload, "embedded_script.runtime_adapter.execute_result_code", static_cast<long long>(executeCode));
+    putPayload(payload, "embedded_script.runtime_adapter.execute_result", adapterResultCodeName(executeCode));
+    putPayload(payload, "embedded_script.runtime_adapter.execution_result_code", static_cast<long long>(executionResult.result_code));
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_json", executionResult.diagnostics_json);
+    putPayload(payload, "embedded_script.runtime_adapter.status", executeCode == AUTOJS_NODE_RESULT_OK ? "executed" : "execute_failed");
+    if (executionResult.result_json != nullptr && std::strlen(executionResult.result_json) > 0) {
+        putPayload(payload, "embedded_script.status", executeCode == AUTOJS_NODE_RESULT_OK ? "done" : "failed");
+        putEmbeddedScriptExecutionFields(payload, executionResult.result_json);
+        putPayloadRaw(payload, "embedded_script.stdout", executionResult.stdout_text == nullptr ? "" : executionResult.stdout_text);
+        putPayloadRaw(payload, "embedded_script.stderr", executionResult.stderr_text == nullptr ? "" : executionResult.stderr_text);
+    } else {
+        putPayload(payload, "embedded_script.status", "failed");
+        putPayload(payload, "embedded_script.detail", "adapter_v1 did not return a result envelope");
+        putPayload(payload, "embedded_script.succeeded", false);
+        putPayload(payload, "embedded_script.exit_code", static_cast<long long>(1));
+        putPayload(payload, "embedded_script.error_code", "ERR_AUTOJS6_NODE_ADAPTER_RESULT_MISSING");
+    }
+
+    if (api->destroy_runtime != nullptr) {
+        const int32_t destroyCode = api->destroy_runtime(handle);
+        putPayload(payload, "embedded_script.runtime_adapter.destroy_result_code", static_cast<long long>(destroyCode));
+        putPayload(payload, "embedded_script.runtime_adapter.destroy_result", adapterResultCodeName(destroyCode));
+    }
     putCommonEmbeddedProbePayload(payload, 0, startedAt);
-    __android_log_print(ANDROID_LOG_INFO, kLogTag, "embedded_script.exit elapsed=%lldms", elapsedMs(startedAt));
     return toJavaStringArray(env, payload);
 }
 
@@ -202,13 +642,128 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            workingDirectory,
             {},
             {},
             {},
+            false,
+            false,
             false,
             false,
             false,
             false
+    );
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptAdapterV1Diagnostics(
+        JNIEnv* env,
+        jobject /* thiz */,
+        jstring source,
+        jstring sourceName,
+        jstring workingDirectory,
+        jint moduleSourceCount,
+        jint runtimeModuleSourceCount,
+        jint envCount
+) {
+    return runEmbeddedScriptAdapterV1DiagnosticsNative(
+            env,
+            source,
+            sourceName,
+            workingDirectory,
+            moduleSourceCount,
+            runtimeModuleSourceCount,
+            envCount
+    );
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptAdapterV1Execute(
+        JNIEnv* env,
+        jobject /* thiz */,
+        jstring source,
+        jstring sourceName,
+        jstring workingDirectory,
+        jstring sandboxRoot,
+        jobjectArray moduleSourceNames,
+        jobjectArray moduleSources,
+        jobjectArray runtimeModuleSourceNames,
+        jobjectArray runtimeModuleSources,
+        jobjectArray envNames,
+        jobjectArray envValues,
+        jboolean esmExperimentalEnabled,
+        jboolean dynamicImportExperimentalEnabled,
+        jboolean rawNodeNetworkModulesExperimentalEnabled,
+        jboolean workerThreadsExperimentalEnabled,
+        jboolean childProcessExperimentalEnabled,
+        jboolean javaInteropExperimentalEnabled
+) {
+    const std::vector<std::string> moduleSourceNameValues = toStringVectorOrEmpty(env, moduleSourceNames, "moduleSourceNames");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> moduleSourceValues = toStringVectorOrEmpty(env, moduleSources, "moduleSources");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> runtimeModuleSourceNameValues = toStringVectorOrEmpty(env, runtimeModuleSourceNames, "runtimeModuleSourceNames");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> runtimeModuleSourceValues = toStringVectorOrEmpty(env, runtimeModuleSources, "runtimeModuleSources");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> envNameValues = toStringVectorOrEmpty(env, envNames, "envNames");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    const std::vector<std::string> envValueValues = toStringVectorOrEmpty(env, envValues, "envValues");
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
+    if (moduleSourceNameValues.size() != moduleSourceValues.size()) {
+        throwJava(env, "java/lang/IllegalArgumentException", "moduleSourceNames.size != moduleSources.size");
+        return nullptr;
+    }
+    if (runtimeModuleSourceNameValues.size() != runtimeModuleSourceValues.size()) {
+        throwJava(env, "java/lang/IllegalArgumentException", "runtimeModuleSourceNames.size != runtimeModuleSources.size");
+        return nullptr;
+    }
+    if (envNameValues.size() != envValueValues.size()) {
+        throwJava(env, "java/lang/IllegalArgumentException", "envNames.size != envValues.size");
+        return nullptr;
+    }
+    std::vector<std::pair<std::string, std::string>> moduleSourcePairs;
+    moduleSourcePairs.reserve(moduleSourceNameValues.size());
+    for (size_t index = 0; index < moduleSourceNameValues.size(); ++index) {
+        moduleSourcePairs.emplace_back(moduleSourceNameValues[index], moduleSourceValues[index]);
+    }
+    std::vector<std::pair<std::string, std::string>> runtimeModuleSourcePairs;
+    runtimeModuleSourcePairs.reserve(runtimeModuleSourceNameValues.size());
+    for (size_t index = 0; index < runtimeModuleSourceNameValues.size(); ++index) {
+        runtimeModuleSourcePairs.emplace_back(runtimeModuleSourceNameValues[index], runtimeModuleSourceValues[index]);
+    }
+    std::vector<std::pair<std::string, std::string>> envPairs;
+    envPairs.reserve(envNameValues.size());
+    for (size_t index = 0; index < envNameValues.size(); ++index) {
+        envPairs.emplace_back(envNameValues[index], envValueValues[index]);
+    }
+    return runEmbeddedScriptAdapterV1ExecuteNative(
+            env,
+            source,
+            sourceName,
+            workingDirectory,
+            sandboxRoot,
+            moduleSourcePairs,
+            runtimeModuleSourcePairs,
+            envPairs,
+            esmExperimentalEnabled == JNI_TRUE,
+            dynamicImportExperimentalEnabled == JNI_TRUE,
+            rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
+            workerThreadsExperimentalEnabled == JNI_TRUE,
+            childProcessExperimentalEnabled == JNI_TRUE,
+            javaInteropExperimentalEnabled == JNI_TRUE
     );
 }
 
@@ -219,11 +774,14 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jstring sandboxRoot,
         jobjectArray envNames,
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
         jboolean dynamicImportExperimentalEnabled,
+        jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
+        jboolean childProcessExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
     const std::vector<std::string> envNameValues = toStringVectorOrEmpty(env, envNames, "envNames");
@@ -248,12 +806,15 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            sandboxRoot,
             {},
             {},
             envPairs,
             esmExperimentalEnabled == JNI_TRUE,
             dynamicImportExperimentalEnabled == JNI_TRUE,
+            rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
+            childProcessExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );
 }
@@ -292,9 +853,12 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            workingDirectory,
             moduleSourcePairs,
             {},
             {},
+            false,
+            false,
             false,
             false,
             false,
@@ -309,13 +873,16 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jstring sandboxRoot,
         jobjectArray moduleSourceNames,
         jobjectArray moduleSources,
         jobjectArray envNames,
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
         jboolean dynamicImportExperimentalEnabled,
+        jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
+        jboolean childProcessExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVectorOrEmpty(env, moduleSourceNames, "moduleSourceNames");
@@ -357,12 +924,15 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            sandboxRoot,
             moduleSourcePairs,
             {},
             envPairs,
             esmExperimentalEnabled == JNI_TRUE,
             dynamicImportExperimentalEnabled == JNI_TRUE,
+            rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
+            childProcessExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );
 }
@@ -420,9 +990,12 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            workingDirectory,
             moduleSourcePairs,
             runtimeModuleSourcePairs,
             {},
+            false,
+            false,
             false,
             false,
             false,
@@ -437,6 +1010,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jstring sandboxRoot,
         jobjectArray moduleSourceNames,
         jobjectArray moduleSources,
         jobjectArray runtimeModuleSourceNames,
@@ -445,7 +1019,9 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
         jboolean dynamicImportExperimentalEnabled,
+        jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
+        jboolean childProcessExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVectorOrEmpty(env, moduleSourceNames, "moduleSourceNames");
@@ -504,12 +1080,15 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            sandboxRoot,
             moduleSourcePairs,
             runtimeModuleSourcePairs,
             envPairs,
             esmExperimentalEnabled == JNI_TRUE,
             dynamicImportExperimentalEnabled == JNI_TRUE,
+            rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
+            childProcessExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );
 }

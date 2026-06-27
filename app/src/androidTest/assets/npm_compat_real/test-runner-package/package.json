@@ -1,0 +1,8 @@
+{
+  "name": "autojs6-fixture-test-runner-package",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fixed offline test runner package fixture for AutoJs6 Node real npm compatibility.",
+  "main": "test.cjs",
+  "license": "SEE LICENSE_NOTE.md"
+}

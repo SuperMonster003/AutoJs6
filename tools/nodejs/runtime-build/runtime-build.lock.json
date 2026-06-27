@@ -1,0 +1,146 @@
+{
+  "schema": "autojs6-node-runtime-build-lock-v1",
+  "node": {
+    "currentVersion": "24.5.0",
+    "targetVersion": "24.17.0",
+    "upstreamRepository": "https://github.com/nodejs/node",
+    "upstreamTag": "v24.17.0",
+    "upstreamTagUrl": "https://github.com/nodejs/node/tree/v24.17.0",
+    "upstreamReleaseUrl": "https://github.com/nodejs/node/releases/tag/v24.17.0",
+    "upstreamCommitUrl": "https://github.com/nodejs/node/commit/413e874773eef1e27a8397ddc949dbbe19cadb31",
+    "upstreamTagObject": "9c9a7894a60efe6ef9084ec9796a36f0b8091408",
+    "ltsCodename": "Krypton",
+    "releaseKind": "lts-security",
+    "publishedAt": "2026-06-18T04:37:35Z",
+    "sourceUrl": "https://nodejs.org/dist/v24.17.0/node-v24.17.0.tar.xz",
+    "headersUrl": "https://nodejs.org/dist/v24.17.0/node-v24.17.0-headers.tar.xz",
+    "sourceCommit": "413e874773eef1e27a8397ddc949dbbe19cadb31",
+    "sourceSha256": "a7ab562ed2369a29c68b72fa00e3103bcdfe37063dff799c6acc8e404e275fcd",
+    "headersSha256": "aab64d32cd1690e4027326e746877bdac62f0a8458215241638477cbfe0a4192",
+    "nodejsMobileForkCommit": "116bad1dc919702d4a701d49df26d960403ee4a4",
+    "patchSeries": "pending-node24.17-android-port-from-degaso-nodejs-mobile-v24.5.0-r1",
+    "patchSet": "pending-node24.17-android-port"
+  },
+  "androidFork": {
+    "repository": "https://github.com/degaso/nodejs-mobile",
+    "originalRepository": "https://github.com/nodejs-mobile/nodejs-mobile",
+    "localPath": "D:/idea-projects/nodejs-mobile",
+    "currentBranch": "update-v24.5.0",
+    "currentTag": "v24.5.0-r1",
+    "currentCommit": "116bad1dc919702d4a701d49df26d960403ee4a4",
+    "currentCommitDate": "2026-03-22T20:53:16+01:00",
+    "releaseUrl": "https://github.com/degaso/nodejs-mobile/releases/tag/v24.5.0-r1",
+    "androidArtifact": {
+      "name": "nodejs-mobile-24.05-android.zip",
+      "url": "https://github.com/degaso/nodejs-mobile/releases/download/v24.5.0-r1/nodejs-mobile-24.05-android.zip",
+      "size": 90705528,
+      "sha256": "02e541cc42e7b61bc4d514e4ef2354abb1d46bcf024dd58ce4fbf6b4cdc3a128",
+      "abiCount": 3,
+      "status": "current-node24.5-artifact"
+    },
+    "targetPortStatus": "pending-node24.17-android-artifacts"
+  },
+  "promotionDecision": {
+    "defaultRuntimeSlot": "node24_5",
+    "defaultRuntimeVersion": "24.5.0",
+    "node2417Promotion": "deferred",
+    "reason": "Node 24.17 Android libnode.so artifacts are not currently producible.",
+    "requiredBeforePromotion": [
+      "produce Node 24.17 Android libnode.so for arm64-v8a, armeabi-v7a, and x86_64",
+      "record per-ABI SHA-256 values",
+      "record per-ABI Build IDs",
+      "run adapter export and Phase 9 native modernization gates",
+      "run Sony device validation before changing the default runtime"
+    ]
+  },
+  "toolchain": {
+    "host": "linux-x86_64",
+    "ndkVersion": "26.1.10909125",
+    "clangVersion": "17.0.2",
+    "pythonVersion": "3.11.9",
+    "cmakeVersion": "3.22.1",
+    "minSdk": 24,
+    "pageSizeBytes": [
+      4096,
+      16384
+    ],
+    "containerImage": "autojs6-node-runtime-builder:TBD",
+    "dockerfile": "tools/nodejs/runtime-build/container/Dockerfile"
+  },
+  "runtimeConfig": {
+    "icu": "small-icu",
+    "openssl": "bundled-node-openssl",
+    "libuv": "bundled-node-libuv",
+    "snapshot": "disabled-until-snapshot-batch",
+    "npm": "disabled",
+    "corepack": "disabled"
+  },
+  "configureArgs": [
+    "--dest-cpu=$AUTOJS6_NODE_TARGET_CPU",
+    "--dest-os=android",
+    "--cross-compiling",
+    "--shared",
+    "--without-npm",
+    "--without-corepack",
+    "--openssl-no-asm"
+  ],
+  "abis": {
+    "arm64-v8a": {
+      "targetCpu": "arm64",
+      "clangTarget": "aarch64-linux-android24",
+      "cflags": [
+        "-fPIC",
+        "-ffunction-sections",
+        "-fdata-sections"
+      ],
+      "ldflags": [
+        "-Wl,--gc-sections",
+        "-Wl,--build-id=sha1",
+        "-Wl,-z,max-page-size=16384"
+      ],
+      "expectedLibnodeSha256": "EXTERNAL",
+      "expectedBuildId": "EXTERNAL"
+    },
+    "armeabi-v7a": {
+      "targetCpu": "arm",
+      "clangTarget": "armv7a-linux-androideabi24",
+      "cflags": [
+        "-fPIC",
+        "-ffunction-sections",
+        "-fdata-sections"
+      ],
+      "ldflags": [
+        "-Wl,--gc-sections",
+        "-Wl,--build-id=sha1"
+      ],
+      "expectedLibnodeSha256": "EXTERNAL",
+      "expectedBuildId": "EXTERNAL"
+    },
+    "x86_64": {
+      "targetCpu": "x64",
+      "clangTarget": "x86_64-linux-android24",
+      "cflags": [
+        "-fPIC",
+        "-ffunction-sections",
+        "-fdata-sections"
+      ],
+      "ldflags": [
+        "-Wl,--gc-sections",
+        "-Wl,--build-id=sha1",
+        "-Wl,-z,max-page-size=16384"
+      ],
+      "expectedLibnodeSha256": "EXTERNAL",
+      "expectedBuildId": "EXTERNAL"
+    }
+  },
+  "linker": {
+    "visibility": "hidden-by-default",
+    "versionScript": "tools/nodejs/runtime-build/libnode.exports.map",
+    "buildId": "sha1"
+  },
+  "outputs": {
+    "manifest": "build/reports/nodejs/runtime-build-manifest.json",
+    "libraryName": "libnode.so",
+    "headerArchive": "node-v24.17.0-headers.tar.zst"
+  }
+}

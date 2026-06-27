@@ -360,8 +360,8 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
             add(mapOf("name" to "process.dlopen", "status" to "disabled", "securityLevel" to "critical"))
             add(mapOf("name" to "worker_threads", "status" to "experimental-disabled", "securityLevel" to "high"))
             add(mapOf("name" to "raw_node_network", "status" to "disabled", "securityLevel" to "high"))
-            add(mapOf("name" to "dynamic_import", "status" to "experimental-disabled", "securityLevel" to "medium"))
-            add(mapOf("name" to "esm", "status" to "experimental-disabled", "securityLevel" to "medium"))
+            add(mapOf("name" to "dynamic_import", "status" to "partial", "securityLevel" to "medium"))
+            add(mapOf("name" to "esm", "status" to "partial", "securityLevel" to "medium"))
             add(mapOf("name" to "vm", "status" to "disabled", "securityLevel" to "high"))
             add(mapOf("name" to "inspector", "status" to "disabled", "securityLevel" to "high"))
             add(mapOf("name" to "java_interop", "status" to "unsupported", "securityLevel" to "critical"))
@@ -427,7 +427,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
                     "name" to module,
                     "status" to when (module) {
                         "fetch" -> "experimental"
-                        "accessibility", "media_projection", "image", "images", "dialogs" -> "partial"
+                        "accessibility", "media_projection", "image", "images", "dialogs", "ui" -> "partial"
                         else -> "stable"
                     },
                     "methods" to methods.sorted(),
@@ -506,7 +506,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
             bridgeModules.forEach { (module, methods) ->
                 val status = when (module) {
                     "fetch" -> "experimental"
-                    "accessibility", "media_projection", "image", "images", "dialogs" -> "partial"
+                    "accessibility", "media_projection", "image", "images", "dialogs", "ui" -> "partial"
                     else -> "stable"
                 }
                 appendLine(tableRow(module, status, methods.sorted().joinToString(", ")))

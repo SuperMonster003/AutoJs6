@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/live-fetch",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

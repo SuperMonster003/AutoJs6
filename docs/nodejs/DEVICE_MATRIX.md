@@ -96,6 +96,9 @@ Use `accessibility` only for manual physical-device validation after enabling th
 - primary device: Sony XQ-AT72 `QV710AF65F`
 - use: controlled real-device `accessibility` provider smoke for `isEnabled`, `ensureEnabled`, `findByText`, and `clickText`
 - optional extra: pass `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke.globalActions=true` only when it is safe for the test to trigger Back/Home
+- P13-19 keeps optional accessibility smoke manual: the promotion gate records
+  selector/provider evidence, but it still requires explicit user-side service
+  enablement and does not modify Android accessibility settings.
 
 Recommended command:
 
@@ -112,6 +115,10 @@ Use `screen_capture` only for manual physical-device validation after preparing 
 - primary device: Sony XQ-AT72 `QV710AF65F`
 - use: real-device MediaProjection and image-frame smoke for permission request, one captured frame, dimension checks, bitmap decode/recycle, and capturer shutdown
 - expected denial behavior: if the system prompt is denied or canceled, the optional test fails with a clear permission-denied message
+- P13-20 keeps screen_capture smoke manual: the promotion gate records the
+  optional Android capture lifecycle evidence, but the Node bridge
+  MediaProjection provider remains unavailable until permission prompt,
+  foreground disclosure, stop cleanup, and packaged behavior are promoted.
 
 Recommended command:
 

@@ -3,14 +3,25 @@
 This plan starts after Node Profile v1 GA. It keeps the Safe Node Profile publishable without expanding the default
 authority surface by accident.
 
+## Operational Runbooks
+
+- [POST_GA_SMOKE.md](POST_GA_SMOKE.md) defines daily, weekly, nightly, and monthly smoke cadence.
+- [CRASH_INTAKE.md](CRASH_INTAKE.md) defines required crash attachments, labels, severity, and closure criteria.
+- [releases/V1_0_X_HOTFIX_POLICY.md](releases/V1_0_X_HOTFIX_POLICY.md) defines patch-release scope and minimum gates.
+- [tools/nodejs/bisect-node-smoke.ps1](../../tools/nodejs/bisect-node-smoke.ps1) provides a small git-bisect-compatible
+  Node smoke helper.
+- [.github/ISSUE_TEMPLATE/nodejs_bug_report.yml](../../.github/ISSUE_TEMPLATE/nodejs_bug_report.yml) is the user-facing
+  Node bug report template.
+
 ## Maintenance Invariants
 
 - Rhino fallback remains available.
 - `rhino`, `native`, `embedded`, and `auto` backend switches remain available.
 - Native one-shot remains a regression oracle.
 - Scoped fs policy is not loosened in patch releases.
-- Native addons, unrestricted `child_process`, raw network, inspector, unrestricted Java/Android interop, unrestricted
-  `worker_threads`, and unrestricted `vm` remain default-off or disabled unless a documented promotion gate passes.
+- Native addons, unrestricted `child_process`, raw network, inspector, unrestricted Java/Android interop, and unrestricted
+  `worker_threads` remain default-off or disabled unless a documented promotion gate passes. Native `vm` is available after
+  P13-36 but remains documented as a non-sandbox compatibility surface.
 - Packaged APK support remains a first-class release target.
 
 ## Weekly Smoke
@@ -26,6 +37,8 @@ $env:ANDROID_SERIAL="QV710AF65F"
 Record failures with the failing task, class, method, device serial, package identity, and whether the failure is
 reproducible. Do not retry security, scoped fs, packaged script, bridge capability, or leak assertions to make a smoke
 pass.
+
+See [POST_GA_SMOKE.md](POST_GA_SMOKE.md) for the full post-GA cadence.
 
 ## Nightly Extended Gate
 
@@ -46,7 +59,7 @@ to the nightly record. If the final tag commit differs from the latest green nig
 Run monthly when Node bundling or compatibility corpus work is active:
 
 ```powershell
-.\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures :app:generateDesktopNodeDifferentialReport
+.\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures :app:generateDesktopNodeDifferentialReport :app:generateNodeModernCoreDifferentialReport
 ```
 
 Review:
@@ -56,6 +69,7 @@ Review:
 - lifecycle script, postinstall, `.bin`, executable, and npm cache rejection coverage;
 - dependency size limits and SBOM-lite output;
 - fixed real npm corpus drift against desktop Node.
+- modern core exact/partial/restriction classification drift against desktop Node.
 
 No runtime `npm install`, lifecycle script execution, unchecked `.bin`, or native build step is allowed in v1.x.
 
@@ -82,7 +96,10 @@ ESM review:
 
 - revisit `.mjs`, package `type`, CJS/ESM interop, top-level await, `import.meta`, source maps, dynamic import, packaged
   APK smoke, and scoped file URL denial;
-- keep ESM and dynamic import default-off until those gates are green.
+- keep dynamic import local-only after the v1.1 gate, and keep ESM partial
+  support under focused regression and packaged smoke coverage. Broader URL,
+  loader-hook, and package-graph dynamic import support still needs a future
+  gate.
 
 Worker review:
 
@@ -123,6 +140,8 @@ Classify the issue:
 P0/P1 fixes require a focused regression test, release note, and backport decision. Native crashes require symbolication
 against the matching `nativeNodeSymbolArchiveReport` output before closure.
 
+See [CRASH_INTAKE.md](CRASH_INTAKE.md) for the full intake workflow and issue-template fields.
+
 ## Versioning Policy
 
 Node Profile v1.x patch releases may include:
@@ -132,6 +151,8 @@ Node Profile v1.x patch releases may include:
 - scoped fs, resolver, packaged APK, bridge, and lifecycle hardening that does not remove documented stable behavior;
 - new optional bridge fields or docs when older scripts continue to work;
 - experimental feature fixes that remain behind their existing flags.
+
+See [releases/V1_0_X_HOTFIX_POLICY.md](releases/V1_0_X_HOTFIX_POLICY.md) for the v1.0.x hotfix boundary and minimum gate.
 
 Node Profile v2 is required for:
 

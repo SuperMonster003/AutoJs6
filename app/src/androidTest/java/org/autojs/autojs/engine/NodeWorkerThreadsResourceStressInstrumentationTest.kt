@@ -28,6 +28,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
     @Test
     fun createAndTerminateWorkersSequentiallyDoesNotGrowResourceCounters() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads resource stress")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads sequential resource stress")
 
         val before = resourceSnapshot("before")
         val workDir = createWorkDir("node-worker-resource-sequence")
@@ -53,7 +54,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
                           worker.once(eventName, resolve);
                         });
                       }
-                      for (let index = 0; index < 50; index += 1) {
+                      for (let index = 0; index < $SEQUENTIAL_WORKER_JOB_COUNT; index += 1) {
                         const worker = new Worker("./ready.js", { workerData: { index } });
                         const message = await once(worker, "message");
                         if (!message || message.ready !== index) {
@@ -74,15 +75,15 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
                 """.trimIndent(),
                 sourceName = "<node-worker-resource-sequence.js>",
                 workingDirectory = workDir,
-                timeoutMs = 45_000L,
+                timeoutMs = 90_000L,
                 workerThreadsExperimentalEnabled = true,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("worker sequence terminate", result)
-            assertTrue(result.stdout, result.stdout.contains("worker.resource.sequence=0|1|50|50|0|0"))
+            assertTrue(result.stdout, result.stdout.contains("worker.resource.sequence=0|1|100|100|0|0"))
             assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
-            assertEquals("50", result.nativeValues["embedded_script.worker_created_count"])
-            assertEquals("50", result.nativeValues["embedded_script.worker_terminated_count"])
+            assertEquals("100", result.nativeValues["embedded_script.worker_created_count"])
+            assertEquals("100", result.nativeValues["embedded_script.worker_terminated_count"])
             assertEquals("0", result.nativeValues["embedded_script.worker_cleanup_requested_count"])
 
             NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
@@ -97,8 +98,256 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
     }
 
     @Test
+    fun workerPoolStressDoesNotLeakAfterFailuresTimeoutsAndTransfers() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads pool stress")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads pool stress")
+
+        val before = resourceSnapshot("pool-before")
+        val workDir = createWorkDir("node-worker-pool-stress")
+        try {
+            File(workDir, "pool-stress.cjs").writeText(
+                """
+                    const { parentPort, threadId } = require("worker_threads");
+
+                    parentPort.on("message", (task) => {
+                      const id = task && task.__autojs6PoolTaskId;
+                      const value = task && task.value || {};
+                      if (value.kind === "throw") {
+                        parentPort.postMessage({
+                          __autojs6PoolTaskId: id,
+                          error: "worker pool stress boom"
+                        });
+                        return;
+                      }
+                      if (value.kind === "never") {
+                        return;
+                      }
+                      if (value.kind === "delay") {
+                        setTimeout(() => {
+                          parentPort.postMessage({
+                            __autojs6PoolTaskId: id,
+                            value: {
+                              kind: "delay",
+                              threadId
+                            }
+                          });
+                        }, value.ms);
+                        return;
+                      }
+                      if (value.kind === "buffer") {
+                        const bytes = new Uint8Array(value.buffer);
+                        parentPort.postMessage({
+                          __autojs6PoolTaskId: id,
+                          value: {
+                            kind: "buffer",
+                            length: value.buffer.byteLength,
+                            first: bytes[0],
+                            last: bytes[bytes.length - 1],
+                            threadId
+                          }
+                        });
+                        return;
+                      }
+                      parentPort.postMessage({
+                        __autojs6PoolTaskId: id,
+                        value: {
+                          index: value.index,
+                          value: value.index * 3,
+                          threadId
+                        }
+                      });
+                    });
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    (async function main() {
+                      const workerThreads = require("worker_threads");
+                      const { WorkerPool } = workerThreads;
+                      function codeOf(error) {
+                        return String(error && (error.autojs6Code || error.code || error.name || ""));
+                      }
+
+                      const pool = new WorkerPool("./pool-stress.cjs", {
+                        minWorkers: 1,
+                        maxWorkers: 1,
+                        idleTimeoutMs: 5000,
+                        taskTimeoutMs: 1000,
+                        queueLimit: 4,
+                        resourceLimits: {
+                          maxOldGenerationSizeMb: 16
+                        }
+                      });
+
+                      let firstThreadId = 0;
+                      let reused = true;
+                      let sum = 0;
+                      for (let index = 0; index < $SEQUENTIAL_WORKER_JOB_COUNT; index += 1) {
+                        const message = await pool.run({ index });
+                        if (index === 0) firstThreadId = message.threadId;
+                        else if (message.threadId !== firstThreadId) reused = false;
+                        sum += message.value;
+                      }
+
+                      const buffer = new ArrayBuffer(16);
+                      const bytes = new Uint8Array(buffer);
+                      bytes[0] = 7;
+                      bytes[15] = 11;
+                      const transferred = await pool.run({ kind: "buffer", buffer }, { transferList: [buffer] });
+                      const detached = buffer.byteLength === 0;
+
+                      let failureCode = "";
+                      try {
+                        await pool.run({ kind: "throw" });
+                      } catch (error) {
+                        failureCode = codeOf(error);
+                      }
+                      const recoveredAfterFailure = await pool.run({ index: 7 });
+
+                      const running = pool.run({ kind: "delay", ms: 150 });
+                      const queued = pool.run({ index: 9 });
+                      const queuedHandled = queued.catch((error) => codeOf(error));
+                      const cancelResult = queued.cancel();
+                      const cancelCode = await queuedHandled;
+                      const runningResult = await running;
+
+                      let timeoutCode = "";
+                      try {
+                        await pool.run({ kind: "never" }, { timeoutMs: 50 });
+                      } catch (error) {
+                        timeoutCode = codeOf(error);
+                      }
+                      const recoveredAfterTimeout = await pool.run({ index: 11 });
+
+                      await pool.close();
+                      const diagnostics = workerThreads.diagnostics();
+                      console.log("worker.resource.pool.stress=" + [
+                        sum,
+                        reused,
+                        recoveredAfterFailure.value,
+                        recoveredAfterTimeout.value
+                      ].join("|"));
+                      console.log("worker.resource.pool.transfer=" + [
+                        detached,
+                        transferred.length,
+                        transferred.first,
+                        transferred.last
+                      ].join("|"));
+                      console.log("worker.resource.pool.failures=" + [
+                        failureCode,
+                        cancelResult,
+                        cancelCode,
+                        runningResult.kind,
+                        timeoutCode
+                      ].join("|"));
+                      console.log("worker.resource.pool.shutdown=" + [
+                        diagnostics.activeWorkerCount,
+                        diagnostics.activeWorkerPoolCount,
+                        diagnostics.workerPoolTaskCompletedCount,
+                        diagnostics.workerPoolTaskCancelledCount,
+                        diagnostics.workerPoolTaskTimeoutCount,
+                        diagnostics.workerPoolQueueRejectedCount
+                      ].join("|"));
+                    })();
+                """.trimIndent(),
+                sourceName = "<node-worker-pool-stress.js>",
+                workingDirectory = workDir,
+                timeoutMs = 60_000L,
+                workerThreadsExperimentalEnabled = true,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("worker pool stress", result)
+            assertTrue(result.stdout, result.stdout.contains("worker.resource.pool.stress=14850|true|21|33"))
+            assertTrue(result.stdout, result.stdout.contains("worker.resource.pool.transfer=true|16|7|11"))
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "worker.resource.pool.failures=${NodeRuntimeErrorCodes.WORKER_POOL_TASK_FAILED}|true|${NodeRuntimeErrorCodes.WORKER_POOL_TASK_CANCELLED}|delay|${NodeRuntimeErrorCodes.WORKER_POOL_TASK_TIMEOUT}",
+                ),
+            )
+            assertTrue(result.stdout, result.stdout.contains("worker.resource.pool.shutdown=0|0|104|1|1|0"))
+            assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
+            assertEquals("0", result.nativeValues["embedded_script.worker_pool_active_count"])
+            assertEquals("104", result.nativeValues["embedded_script.worker_pool_task_completed_count"])
+            assertEquals("1", result.nativeValues["embedded_script.worker_pool_task_cancelled_count"])
+            assertEquals("1", result.nativeValues["embedded_script.worker_pool_task_timeout_count"])
+
+            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+            SystemClock.sleep(500L)
+            val after = resourceSnapshot("pool-after")
+            println("node.worker.pool.resource.before=$before")
+            println("node.worker.pool.resource.after=$after")
+            assertResourceGrowthBounded(before, after)
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun workerPoolIsClosedDuringParentCompletionCleanup() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads pool parent cleanup")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads pool parent cleanup")
+
+        val workDir = createWorkDir("node-worker-pool-parent-cleanup")
+        try {
+            File(workDir, "pool-cleanup.cjs").writeText(
+                """
+                    const { parentPort } = require("worker_threads");
+                    parentPort.on("message", (task) => {
+                      setTimeout(() => {
+                        parentPort.postMessage({
+                          __autojs6PoolTaskId: task.__autojs6PoolTaskId,
+                          value: "late"
+                        });
+                      }, 1000);
+                    });
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    const workerThreads = require("worker_threads");
+                    const { WorkerPool } = workerThreads;
+                    const pool = new WorkerPool("./pool-cleanup.cjs", {
+                      minWorkers: 1,
+                      maxWorkers: 1,
+                      idleTimeoutMs: 5000,
+                      taskTimeoutMs: 5000,
+                      queueLimit: 1
+                    });
+                    pool.run({ kind: "late" }).catch(() => {});
+                    const diagnostics = workerThreads.diagnostics();
+                    console.log("worker.resource.pool.cleanup.before=" + [
+                      diagnostics.activeWorkerCount,
+                      diagnostics.activeWorkerPoolCount
+                    ].join("|"));
+                """.trimIndent(),
+                sourceName = "<node-worker-pool-parent-cleanup.js>",
+                workingDirectory = workDir,
+                timeoutMs = 10_000L,
+                workerThreadsExperimentalEnabled = true,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("worker pool parent cleanup", result)
+            assertTrue(result.stdout, result.stdout.contains("worker.resource.pool.cleanup.before=1|1"))
+            assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
+            assertEquals("0", result.nativeValues["embedded_script.worker_pool_active_count"])
+            assertEquals("1", result.nativeValues["embedded_script.worker_pool_task_cancelled_count"])
+            assertEquals("2", result.nativeValues["embedded_script.worker_cleanup_requested_count"])
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun workerExceptionDoesNotPoisonNextRun() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads exception lifecycle")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads exception lifecycle")
 
         val workDir = createWorkDir("node-worker-resource-exception")
         try {
@@ -156,6 +405,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
     @Test
     fun infiniteLoopWorkerTimeoutDoesNotPoisonNextRun() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads timeout lifecycle")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads timeout lifecycle")
 
         val workDir = createWorkDir("node-worker-resource-timeout")
         try {
@@ -204,6 +454,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
     @Test
     fun pendingWorkerMessageIsRejectedDuringParentCompletionCleanup() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads completion cleanup")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads completion cleanup")
 
         val workDir = createWorkDir("node-worker-resource-cleanup")
         try {
@@ -300,6 +551,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
     )
 
     private companion object {
+        private const val SEQUENTIAL_WORKER_JOB_COUNT = 100
         private const val MAX_THREAD_DELTA = 16
         private const val MAX_RSS_DELTA_KB = 262_144L
     }

@@ -1,0 +1,214 @@
+{
+  "schema": "autojs6-rhino-dual-engine-compat-tests-v1",
+  "task": "S11-28",
+  "description": "Static host fixtures for validating the same Rhino use cases against Node compat-mode migration outcomes.",
+  "statusVocabulary": [
+    "supported_async",
+    "blocked_by_design"
+  ],
+  "hostGate": {
+    "gradleTask": "verifyNodeRhinoDualEngineCompatTests",
+    "reportBasename": "rhino-dual-engine-compat-tests-verification"
+  },
+  "deviceInstrumentation": {
+    "status": "fake_device_evidence",
+    "task": "P12-33",
+    "testClass": "org.autojs.autojs.engine.RhinoNodeDualEngineCompatInstrumentationTest",
+    "runnerMode": "fake_device_transport",
+    "evidenceReport": "docs/nodejs/reports/phase12/RHINO_DUAL_ENGINE_DEVICE_EVIDENCE.md",
+    "resultFixture": "device-evidence/p12-33-fake-device-results.json",
+    "selectedDeviceCaseIds": [
+      "events-keys",
+      "ui-compat-show-update-close",
+      "tasks-disposable",
+      "barcode-qrcode",
+      "rhino-shim-disabled"
+    ],
+    "resultStatusField": "compatStatus",
+    "requiredResultFields": [
+      "engine",
+      "compatStatus",
+      "providerMode",
+      "resourceCleanupStatus",
+      "skipReason"
+    ],
+    "requiredStatuses": [
+      "supported",
+      "supported_async",
+      "partial",
+      "blocked_by_design"
+    ]
+  },
+  "cases": [
+    {
+      "id": "toast-log",
+      "title": "Toast log",
+      "status": "supported_async",
+      "rhino": "cases/toast-log.rhino.js",
+      "node": "cases/toast-log.node.cjs",
+      "statusManifestIds": [
+        "global.toastLog"
+      ],
+      "expected": {
+        "rhino": "legacy_global_call",
+        "node": "promise_resolves"
+      },
+      "devicePlan": {
+        "mode": "fake_or_live_provider",
+        "assertions": [
+          "Rhino executes toastLog synchronously through the legacy global.",
+          "Node compat mode resolves compat.toastLog and records compatStatus=supported_async."
+        ]
+      }
+    },
+    {
+      "id": "clipboard-roundtrip",
+      "title": "Clipboard roundtrip",
+      "status": "supported_async",
+      "rhino": "cases/clipboard-roundtrip.rhino.js",
+      "node": "cases/clipboard-roundtrip.node.cjs",
+      "statusManifestIds": [
+        "global.setClip",
+        "global.getClip"
+      ],
+      "expected": {
+        "rhino": "legacy_roundtrip",
+        "node": "promise_resolves"
+      },
+      "devicePlan": {
+        "mode": "fake_or_live_provider",
+        "assertions": [
+          "Rhino setClip/getClip roundtrip keeps the test value.",
+          "Node compat mode awaits setClip/getClip and records compatStatus=supported_async."
+        ]
+      }
+    },
+    {
+      "id": "sleep-yield",
+      "title": "Sleep yields",
+      "status": "supported_async",
+      "rhino": "cases/sleep-yield.rhino.js",
+      "node": "cases/sleep-yield.node.cjs",
+      "statusManifestIds": [
+        "global.sleep"
+      ],
+      "expected": {
+        "rhino": "blocking_delay",
+        "node": "promise_resolves"
+      },
+      "devicePlan": {
+        "mode": "host_clock_or_fake_timer",
+        "assertions": [
+          "Rhino sleep blocks the current script for the requested interval.",
+          "Node compat mode awaits compat.sleep and records compatStatus=supported_async."
+        ]
+      }
+    },
+    {
+      "id": "threads-start",
+      "title": "Threads start is blocked",
+      "status": "blocked_by_design",
+      "rhino": "cases/threads-start.rhino.js",
+      "node": "cases/threads-start.node.cjs",
+      "statusManifestIds": [
+        "threads.start"
+      ],
+      "expected": {
+        "rhino": "legacy_thread_starts",
+        "node": "blocked_by_design_marker"
+      },
+      "devicePlan": {
+        "mode": "policy_only",
+        "assertions": [
+          "Rhino remains the owner of legacy threads.start behavior.",
+          "Node compat mode reports blocked_by_design and does not expose compat.threads."
+        ]
+      }
+    },
+    {
+      "id": "threads-disposable",
+      "title": "Threads disposable is blocked",
+      "status": "blocked_by_design",
+      "rhino": "cases/threads-disposable.rhino.js",
+      "node": "cases/threads-disposable.node.cjs",
+      "statusManifestIds": [
+        "threads.disposable"
+      ],
+      "expected": {
+        "rhino": "legacy_blocking_disposable",
+        "node": "blocked_by_design_marker"
+      },
+      "devicePlan": {
+        "mode": "policy_only",
+        "assertions": [
+          "Rhino remains the owner of legacy threads.disposable blockedGet/setAndNotify behavior.",
+          "Node compat mode reports blocked_by_design and does not expose compat.threads."
+        ]
+      }
+    },
+    {
+      "id": "threads-sync-queue",
+      "title": "Threads sync is blocked",
+      "status": "blocked_by_design",
+      "rhino": "cases/threads-sync-queue.rhino.js",
+      "node": "cases/threads-sync-queue.node.cjs",
+      "statusManifestIds": [
+        "threads.sync"
+      ],
+      "expected": {
+        "rhino": "legacy_synchronized_callback",
+        "node": "blocked_by_design_marker"
+      },
+      "devicePlan": {
+        "mode": "policy_only",
+        "assertions": [
+          "Rhino remains the owner of legacy sync(fn, lock) Synchronizer and Java lock behavior.",
+          "Node compat mode reports blocked_by_design and does not expose compat.threads."
+        ]
+      }
+    },
+    {
+      "id": "ui-run",
+      "title": "UI run is blocked",
+      "status": "blocked_by_design",
+      "rhino": "cases/ui-run.rhino.js",
+      "node": "cases/ui-run.node.cjs",
+      "statusManifestIds": [
+        "ui.run"
+      ],
+      "expected": {
+        "rhino": "legacy_ui_callback",
+        "node": "blocked_by_design_marker"
+      },
+      "devicePlan": {
+        "mode": "policy_only",
+        "assertions": [
+          "Rhino keeps ui.run for legacy UI scripts.",
+          "Node compat mode reports blocked_by_design and does not expose compat.ui."
+        ]
+      }
+    },
+    {
+      "id": "floaty-window",
+      "title": "Floaty window is blocked",
+      "status": "blocked_by_design",
+      "rhino": "cases/floaty-window.rhino.js",
+      "node": "cases/floaty-window.node.cjs",
+      "statusManifestIds": [
+        "floaty.window",
+        "floaty.rawWindow"
+      ],
+      "expected": {
+        "rhino": "legacy_overlay_window",
+        "node": "blocked_by_design_marker"
+      },
+      "devicePlan": {
+        "mode": "policy_only",
+        "assertions": [
+          "Rhino remains the owner of legacy floaty.window/rawWindow overlay semantics.",
+          "Node compat mode reports blocked_by_design and does not expose compat.floaty."
+        ]
+      }
+    }
+  ]
+}

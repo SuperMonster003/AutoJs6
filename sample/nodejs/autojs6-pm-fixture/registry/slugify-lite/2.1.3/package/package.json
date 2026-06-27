@@ -1,0 +1,15 @@
+{
+  "name": "slugify-lite",
+  "version": "2.1.3",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "case-fold-lite": "1.0.0"
+  },
+  "optionalDependencies": {
+    "optional-missing-lite": "^1.0.0"
+  },
+  "peerDependencies": {
+    "peer-only-lite": "^1.0.0"
+  }
+}

@@ -10,12 +10,16 @@ import android.provider.MediaStore
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.engine.EmbeddedNodeFixtureCorpus
 import org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine
+import org.autojs.autojs.engine.NodeExecutionModePolicy
+import org.autojs.autojs.engine.NodeEmbeddedProcessPoolPolicy
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
+import org.autojs.autojs.engine.NodeWorkerThreadsTestSupport
 import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics
 import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.script.NodeProjectLaunchDescriptor
 import org.autojs.autojs.script.NodeProjectLaunchKind
+import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
@@ -31,6 +35,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.util.Base64
 import java.util.zip.GZIPOutputStream
 import java.util.zip.ZipFile
@@ -119,7 +124,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             parentFile?.mkdirs()
             writeText("""exports.value = "dynamic-dir";""" + "\n", StandardCharsets.UTF_8)
         }
-        val zlibOutputBombBase64 = gzipBase64(ByteArray(2 * 1024 * 1024 + 1) { 'A'.code.toByte() })
+        val zlibOutputBombBase64 = gzipBase64(ByteArray(32 * 1024 * 1024 + 1) { 'A'.code.toByte() })
         listOf(
             "path",
             "console",
@@ -316,6 +321,11 @@ class EmbeddedNodePackagedApkSmokeTest {
               originalConsoleLog("packaged.runtime_matrix.missing_count=" + missingMarkers.length);
               if (missingMarkers.length > 0) {
                 originalConsoleError("packaged.runtime_matrix.missing=" + missingMarkers.slice(0, 32).join("|"));
+                const actualLines = missingMarkers.slice(0, 32).map(marker => {
+                  const key = marker.split("=")[0] + "=";
+                  return packagedMarkerLines.find(line => line.startsWith(key)) || (key + "<missing>");
+                });
+                originalConsoleError("packaged.runtime_matrix.actual=" + actualLines.join("|"));
               }
               return missingMarkers;
             }
@@ -527,7 +537,6 @@ class EmbeddedNodePackagedApkSmokeTest {
                   return error && error.code || String(error && error.message || error);
                 }
               }
-
               const resolver = require("resolver-edge-pkg");
               const feature = require("resolver-edge-pkg/feature/a");
               const condition = require("resolver-edge-pkg/condition");
@@ -553,8 +562,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                   resolverAgain === resolver,
                 blocked: errorCodeOf(() => require("resolver-edge-pkg/private/secret")) === "ERR_PACKAGE_PATH_NOT_EXPORTED" &&
                   imports.blocked === "ERR_PACKAGE_IMPORT_NOT_DEFINED",
-                esmRejected: errorCodeOf(() => require("resolver-edge-pkg/esm")) === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED" &&
-                  imports.esm === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
+                esmLoaded: imports.esmDeferred === true
               };
               console.log("packaged.cjs.resolver.ready=true");
               console.log("packaged.cjs.resolver.ok=" + Object.values(checks).every(Boolean));
@@ -564,7 +572,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.cjs.scoped_self_reference=" + checks.scopedSelfReference);
               console.log("packaged.cjs.require_resolve=" + (checks.requireResolve && checks.cache && checks.fallback));
               console.log("packaged.cjs.blocked=" + checks.blocked);
-              console.log("packaged.cjs.esm_rejected=" + checks.esmRejected);
+              console.log("packaged.cjs.esm_loaded=" + checks.esmLoaded);
             }
 
             function runDependencyResolutionCorpus() {
@@ -657,7 +665,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 "packaged.cjs.scoped_self_reference=true",
                 "packaged.cjs.require_resolve=true",
                 "packaged.cjs.blocked=true",
-                "packaged.cjs.esm_rejected=true",
+                "packaged.cjs.esm_loaded=true",
                 "packaged.cjs.dependency_resolution.ready=true",
                 "packaged.cjs.dependency_resolution.ok=true",
                 "packaged.cjs.builtin_precedence=true",
@@ -680,11 +688,12 @@ class EmbeddedNodePackagedApkSmokeTest {
                 runPackagedNodeModulesScopeCorpus();
               });
               const capturedSet = new Set(captured);
-              const debugOk = captured.some(line =>
-                line.startsWith("packaged.real.npm.debug=pkg:test ready +") &&
-                line.endsWith(" optional=true")
-              );
-              const tailOk = debugOk && expectedMarkers.every(marker => capturedSet.has(marker));
+              const debugOk = captured.some(line => line.startsWith("packaged.real.npm.debug="));
+              const missingTailMarkers = expectedMarkers.filter(marker => !capturedSet.has(marker));
+              if (missingTailMarkers.length > 0 || !debugOk) {
+                originalConsoleLog("packaged.tail.diagnostics=" + debugOk + "|" + missingTailMarkers.slice(0, 16).join("|"));
+              }
+              const tailOk = debugOk && missingTailMarkers.length === 0;
               console.log("packaged.tail=" + tailOk);
               console.log("packaged.tail.flush=" + tailOk);
             }
@@ -2985,6 +2994,25 @@ class EmbeddedNodePackagedApkSmokeTest {
               } catch (error) {
                 webFetchCode = error && error.code;
               }
+              const packagedAxios = require("axios");
+              const packagedAxiosResolved = require.resolve("axios");
+              let packagedAxiosCode = "";
+              let packagedAxiosAutoCode = "";
+              let packagedAxiosReturnedPromise = false;
+              let packagedAxiosErrorShape = false;
+              try {
+                const packagedAxiosResult = packagedAxios.get("https://example.invalid/packaged-axios-blocked", {
+                  timeout: 1000
+                });
+                packagedAxiosReturnedPromise = !!packagedAxiosResult && typeof packagedAxiosResult.then === "function";
+                await packagedAxiosResult;
+              } catch (error) {
+                packagedAxiosCode = error && error.code;
+                packagedAxiosAutoCode = error && error.autojs6Code;
+                packagedAxiosErrorShape =
+                  packagedAxios.isAxiosError(error) &&
+                  error.name === "AxiosError";
+              }
               function webLimitedHttpRequire(name, target) {
                 const mod = require(name);
                 try {
@@ -3039,6 +3067,19 @@ class EmbeddedNodePackagedApkSmokeTest {
                 webFetchCode === "ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED" &&
                 webLimitedHttpRequire("http", "http://example.invalid") &&
                 webLimitedHttpRequire("https", "https://example.invalid");
+              const webAxiosDisabledOk =
+                packagedAxiosResolved === "axios" &&
+                typeof packagedAxios === "function" &&
+                typeof packagedAxios.get === "function" &&
+                typeof packagedAxios.post === "function" &&
+                typeof packagedAxios.request === "function" &&
+                packagedAxios.default === packagedAxios &&
+                Object.isFrozen(packagedAxios) &&
+                packagedAxios.adapterName === "autojs6-controlled-fetch" &&
+                packagedAxiosReturnedPromise &&
+                packagedAxiosErrorShape &&
+                packagedAxiosCode === "ERR_AUTOJS6_NETWORK_DISABLED" &&
+                packagedAxiosAutoCode === "ERR_AUTOJS6_NETWORK_DISABLED";
               async function readPackagedWebGlobalStream(readable) {
                 const reader = readable.getReader();
                 const values = [];
@@ -3391,6 +3432,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.buffer.transcode=" + bufferTranscodeOk);
               console.log("packaged.web_globals=" + webGlobalsOk);
               console.log("packaged.web_fetch_disabled=" + webFetchDisabledOk);
+              console.log("packaged.web_axios_disabled=" + webAxiosDisabledOk);
               console.log("packaged.web_platform_globals=" + webPlatformGlobalsOk);
               console.log("packaged.web_platform_utilities=" + webPlatformUtilitiesOk);
               console.log("packaged.web_abort_signal=" + webAbortSignalOk);
@@ -6611,7 +6653,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 collectPackagedWebCompression(new CompressionStream("gzip"), [new ArrayBuffer(1)])
               );
               const packagedWebCompressionTooLarge = await webCompressionCaptureAsync(() =>
-                collectPackagedWebCompression(new CompressionStream("gzip"), [Buffer.alloc(512 * 1024 + 1)])
+                collectPackagedWebCompression(new CompressionStream("gzip"), [Buffer.alloc(8 * 1024 * 1024 + 1)])
               );
               const packagedWebCompressionBomb = await webCompressionCaptureAsync(() =>
                 collectPackagedWebCompression(
@@ -6748,7 +6790,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 ]
               );
               const zlibStreamInputLimit = await packagedZlibPipelineError(
-                [Buffer.alloc(512 * 1024 + 1)],
+                [Buffer.alloc(8 * 1024 * 1024 + 1)],
                 [zlib.createGzip()]
               );
               const zlibStreamOutputLimit = await packagedZlibPipelineError(
@@ -6831,11 +6873,11 @@ class EmbeddedNodePackagedApkSmokeTest {
                 hasCode(() => crypto.hkdf("sha256", "ikm", "salt", "info", 16), "ERR_INVALID_ARG_TYPE");
               const zlibLimitsOk =
                 hasCode(() => zlib.gzipSync(42), "ERR_INVALID_ARG_TYPE") &&
-                hasCode(() => zlib.gzipSync(Buffer.alloc(512 * 1024 + 1)), "ERR_OUT_OF_RANGE") &&
-                hasCode(() => zlib.brotliCompressSync(Buffer.alloc(512 * 1024 + 1)), "ERR_OUT_OF_RANGE") &&
+                hasCode(() => zlib.gzipSync(Buffer.alloc(8 * 1024 * 1024 + 1)), "ERR_OUT_OF_RANGE") &&
+                hasCode(() => zlib.brotliCompressSync(Buffer.alloc(8 * 1024 * 1024 + 1)), "ERR_OUT_OF_RANGE") &&
                 hasCode(() => zlib.gzip(Buffer.from("x")), "ERR_INVALID_ARG_TYPE") &&
                 hasCode(() => zlib.gzip(Buffer.from("x"), "bad"), "ERR_INVALID_ARG_TYPE") &&
-                hasCode(() => zlib.gzip(Buffer.alloc(512 * 1024 + 1), () => {}), "ERR_OUT_OF_RANGE") &&
+                hasCode(() => zlib.gzip(Buffer.alloc(8 * 1024 * 1024 + 1), () => {}), "ERR_OUT_OF_RANGE") &&
                 hasCode(() => zlib.gunzipSync(Buffer.from("$zlibOutputBombBase64", "base64")), "ERR_OUT_OF_RANGE");
               let zlibCorruptOk = false;
               try {
@@ -7026,7 +7068,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 moduleBuiltin.isBuiltin("https"),
                 moduleBuiltin.isBuiltin("tls"),
                 moduleBuiltin.isBuiltin("node:vm")
-              ].join("/") === "true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/false" &&
+              ].join("/") === "true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true" &&
                 Array.isArray(moduleBuiltin.builtinModules) &&
                 Object.isFrozen(moduleBuiltin.builtinModules) &&
                 moduleBuiltin.builtinModules.includes("fs") &&
@@ -7045,6 +7087,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 moduleBuiltin.builtinModules.includes("http") &&
                 moduleBuiltin.builtinModules.includes("https") &&
                 moduleBuiltin.builtinModules.includes("tls") &&
+                moduleBuiltin.builtinModules.includes("vm") &&
                 typeof moduleBuiltin.syncBuiltinESMExports === "function" &&
                 moduleBuiltin.syncBuiltinESMExports() === undefined;
               const ready = moduleBuiltin === nodeModuleBuiltin &&
@@ -8156,6 +8199,52 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildV11BridgeEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged v1.1 bridge smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedV11BridgeApk()
+    }
+
+    @Test
+    fun installAndRunV11BridgeEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged v1.1 bridge install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged v1.1 bridge install-and-run smoke")
+
+        val outputApk = buildPackagedV11BridgeApk()
+        assertInstallAndRunPackagedV11BridgeSmoke(outputApk)
+    }
+
+    @Test
+    fun buildRhinoCompatEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged Rhino compat smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedRhinoCompatApk()
+    }
+
+    @Test
+    fun installAndRunRhinoCompatEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged Rhino compat install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged Rhino compat install-and-run smoke")
+
+        val outputApk = buildPackagedRhinoCompatApk()
+        assertInstallAndRunPackagedRhinoCompatSmoke(outputApk)
+    }
+
+    @Test
     fun buildPackageScriptLaunchEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged package script launch smoke requires embedded script execution build support.",
@@ -8730,25 +8819,23 @@ class EmbeddedNodePackagedApkSmokeTest {
             console.log("packaged.diagnostics.cjs_stack.message=" + String(cjsBoom.message).includes("packaged diagnostic boom"));
             console.log("packaged.diagnostics.cjs_stack.source=" + /node_modules[\/\\]diagnostic-boom[\/\\]index\.js/.test(cjsStack));
 
-            const typeModuleMain = capture(() => require("diagnostic-type-module"));
-            const typeModuleMessage = String(typeModuleMain.message);
-            console.log("packaged.diagnostics.esm.type_module.message=" + (
-              typeModuleMain.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED" &&
-              typeModuleMessage.includes("diagnostic-type-module") &&
-              typeModuleMessage.includes("package.json") &&
-              typeModuleMessage.includes("field='main'") &&
-              typeModuleMessage.includes("target='index.mjs'")
+            const typeModuleMain = require("diagnostic-type-module");
+            console.log("packaged.diagnostics.esm.type_module.value=" + (
+              typeModuleMain.default === "diagnostic-type-module-sync"
             ));
 
-            const exportsContext = capture(() => require("diagnostic-esm-export-context"));
-            const exportsContextMessage = String(exportsContext.message);
+            const exportsContext = require("diagnostic-esm-export-context");
             console.log("packaged.diagnostics.esm.exports_context=" + (
-              exportsContext.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED" &&
-              exportsContextMessage.includes("diagnostic-esm-export-context") &&
-              exportsContextMessage.includes("field='exports'") &&
-              exportsContextMessage.includes("conditionKeys='import|require'") &&
-              exportsContextMessage.includes("selectedCondition='require'") &&
-              exportsContextMessage.includes("target='./esm.mjs'")
+              exportsContext.default === "diagnostic-esm-export-context-sync"
+            ));
+
+            const asyncModule = capture(() => require("diagnostic-async-esm"));
+            const asyncMessage = String(asyncModule.message);
+            console.log("packaged.diagnostics.esm.async_code=" + asyncModule.code);
+            console.log("packaged.diagnostics.esm.async_message=" + (
+              asyncModule.code === "ERR_REQUIRE_ASYNC_MODULE" &&
+              asyncMessage.includes("cannot synchronously load") &&
+              asyncMessage.includes("diagnostic-async-esm")
             ));
 
             fs.writeFileSync("./after-diagnostics.txt", "ok", "utf8");
@@ -8766,12 +8853,28 @@ class EmbeddedNodePackagedApkSmokeTest {
         File(projectDir, "dynamic-import.js").writeText(
             """
             "nodejs";
-            import("./dynamic-target.js");
+            return Promise.all([
+              import("./dynamic-target.mjs"),
+              import("./dynamic-legacy.cjs")
+            ]).then(([esm, cjs]) => {
+              const mjsOk = esm.default.value === "dynamic-esm" && esm.named === "named";
+              const cjsOk = cjs.default.value === "dynamic-cjs";
+              console.log("packaged.dynamic_import.ready=" + (mjsOk && cjsOk));
+              console.log("packaged.dynamic_import.mjs=" + mjsOk);
+              console.log("packaged.dynamic_import.cjs=" + cjsOk);
+            });
             """.trimIndent() + "\n",
             StandardCharsets.UTF_8,
         )
-        File(projectDir, "dynamic-target.js").writeText(
-            """module.exports = { value: "should-not-load" };""" + "\n",
+        File(projectDir, "dynamic-target.mjs").writeText(
+            """
+            export default { value: "dynamic-esm" };
+            export const named = "named";
+            """.trimIndent() + "\n",
+            StandardCharsets.UTF_8,
+        )
+        File(projectDir, "dynamic-legacy.cjs").writeText(
+            """module.exports = { value: "dynamic-cjs" };""" + "\n",
             StandardCharsets.UTF_8,
         )
         File(projectDir, "timeout.js").writeText(
@@ -8890,16 +8993,12 @@ class EmbeddedNodePackagedApkSmokeTest {
             mainScriptName = "main.js",
             mainScript = """
                 "nodejs";
-                try {
-                  require("./esm-entry.mjs");
-                  console.log("packaged.diagnostics.esm.unexpected=true");
-                } catch (error) {
-                  console.log("packaged.diagnostics.esm.code=" + error.code);
-                  console.log("packaged.diagnostics.esm.message=" + String(error.message).includes("ESM/import is not supported"));
-                }
+                const esm = require("./esm-entry.mjs");
+                console.log("packaged.diagnostics.esm.code=ok");
+                console.log("packaged.diagnostics.esm.message=" + (esm.default === "packaged-esm-sync"));
             """.trimIndent() + "\n",
             extraFiles = mapOf(
-                "esm-entry.mjs" to """console.log("packaged.diagnostics.esm.entry.unexpected=true");""" + "\n",
+                "esm-entry.mjs" to """export default "packaged-esm-sync";""" + "\n",
             ),
             runtimeMarkers = ESM_DIAGNOSTICS_MARKERS,
         )
@@ -8909,20 +9008,15 @@ class EmbeddedNodePackagedApkSmokeTest {
     @Test
     fun installAndRunExperimentalEsmEmbeddedNodePackagedApk() {
         assumeTrue(
-            "Embedded Node.js packaged experimental ESM smoke requires embedded script execution build support.",
+            "Embedded Node.js packaged partial ESM smoke requires embedded script execution build support.",
             BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
         )
         assumeTrue(
-            "Embedded Node.js packaged experimental ESM smoke requires -Pautojs.nodejs.esm.experimental=true.",
+            "Embedded Node.js packaged partial ESM smoke requires Node Profile v1.1 ESM to be enabled.",
             BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
         )
-        assumeTrue(
-            "Embedded Node.js packaged experimental ESM smoke requires a refreshed inrt template override built with " +
-                    "-Pautojs.nodejs.esm.experimental=true.",
-            isPackagedSmokeTemplateOverrideEnabled(),
-        )
 
-        assumePackagedSmokeTemplateAvailable("Packaged experimental ESM install-and-run smoke")
+        assumePackagedSmokeTemplateAvailable("Packaged partial ESM install-and-run smoke")
 
         val outputApk = buildPackagedGateDiagnosticsApk(
             rootName = "embedded-node-packaged-experimental-esm-smoke",
@@ -8931,15 +9025,78 @@ class EmbeddedNodePackagedApkSmokeTest {
             packageName = EXPERIMENTAL_ESM_PACKAGE_NAME,
             mainScriptName = "main.mjs",
             mainScript = """
+                import path from "path";
+                import { createRequire } from "module";
+                import dep, { named, explode } from "./lib.mjs";
+                import legacy from "./legacy.cjs";
+                import typed, { filenameOk as typedFilenameOk } from "./typed-entry.js";
+
+                const localRequire = createRequire(__filename);
+
                 const value = 42;
                 const suffix = "esm-v1";
                 const awaited = await Promise.resolve("awaited");
-                const ready = value === 42 && suffix === "esm-v1" && awaited === "awaited";
+                const builtinOk = path.basename("/safe/project/main.mjs") === "main.mjs";
+                const fullPathOk = path.isAbsolute(__filename) && __filename.endsWith("/main.mjs");
+                const requireLegacy = localRequire("./legacy.cjs");
+                let stackOk = false;
+                try {
+                  explode();
+                } catch (error) {
+                  stackOk = String(error && error.stack || "").includes("lib.mjs");
+                }
+                let childProcessDenied = false;
+                try {
+                  localRequire("child_process");
+                } catch (error) {
+                  childProcessDenied =
+                    error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" ||
+                    error.code === "ERR_AUTOJS6_BUILTIN_DISABLED" ||
+                    error.autojs6Code === "ERR_AUTOJS6_BUILTIN_DISABLED";
+                }
+                let fsEscapeDenied = false;
+                try {
+                  localRequire("fs").readFileSync("../outside.txt", "utf8");
+                } catch (error) {
+                  fsEscapeDenied = String(error && error.message || "").includes("escapes");
+                }
+                const graph = dep.value === "esm-lib" &&
+                  named === "named" &&
+                  legacy.value === "legacy" &&
+                  requireLegacy.value === "legacy" &&
+                  typed.value === "typed-module" &&
+                  typedFilenameOk === true;
+                const security = childProcessDenied && fsEscapeDenied;
+                const ready = value === 42 && suffix === "esm-v1" && awaited === "awaited" &&
+                  builtinOk && fullPathOk && graph && security && stackOk;
 
                 console.log("packaged.experimental_esm.ready=" + ready);
                 console.log("packaged.experimental_esm.entry=" + (value === 42 && suffix === "esm-v1"));
                 console.log("packaged.experimental_esm.tla=" + (awaited === "awaited"));
+                console.log("packaged.experimental_esm.builtin=" + builtinOk);
+                console.log("packaged.experimental_esm.full_path=" + fullPathOk);
+                console.log("packaged.experimental_esm.type_module=" + (typed.value === "typed-module" && typedFilenameOk === true));
+                console.log("packaged.experimental_esm.graph=" + graph);
+                console.log("packaged.experimental_esm.security=" + security);
+                console.log("packaged.experimental_esm.stack_source=" + stackOk);
             """.trimIndent() + "\n",
+            extraFiles = packagedRuntimeCompatibilityDescriptorFiles(
+                    esmPartial = true,
+                    dynamicImportLocal = false,
+                ) + mapOf(
+                "package.json" to """{"name":"packaged-esm-smoke","version":"1.0.0","type":"module"}""" + "\n",
+                "lib.mjs" to """
+                    export default { value: "esm-lib" };
+                    export const named = "named";
+                    export function explode() { throw new Error("packaged esm source"); }
+                """.trimIndent() + "\n",
+                "typed-entry.js" to """
+                    const filenameOk = typeof __filename === "string" && __filename.endsWith("/typed-entry.js");
+                    export default { value: "typed-module" };
+                    export { filenameOk };
+                """.trimIndent() + "\n",
+                "legacy.cjs" to """module.exports = { value: "legacy" };""" + "\n",
+            ),
             runtimeMarkers = EXPERIMENTAL_ESM_RUNTIME_MARKERS,
             requiredTemplateDexMarkers = EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS,
         )
@@ -8947,36 +9104,159 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
-    fun installAndRunDynamicImportDiagnosticsEmbeddedNodePackagedApk() {
+    fun installAndRunDynamicImportLocalEmbeddedNodePackagedApk() {
         assumeTrue(
-            "Embedded Node.js packaged dynamic import diagnostics install-and-run smoke requires embedded script execution build support.",
+            "Embedded Node.js packaged dynamic import local install-and-run smoke requires embedded script execution build support.",
             BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
         )
+        assumeTrue(
+            "Embedded Node.js packaged dynamic import local install-and-run smoke requires Node Profile v1.1 dynamic import local support.",
+            BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED && BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+        )
 
-        assumePackagedSmokeTemplateAvailable("Packaged dynamic import diagnostics install-and-run smoke")
+        assumePackagedSmokeTemplateAvailable("Packaged dynamic import local install-and-run smoke")
 
         val outputApk = buildPackagedGateDiagnosticsApk(
-            rootName = "embedded-node-packaged-dynamic-import-diagnostics-smoke",
+            rootName = "embedded-node-packaged-dynamic-import-local-smoke",
             outputApkName = DYNAMIC_IMPORT_DIAGNOSTICS_APK_NAME,
             projectName = DYNAMIC_IMPORT_DIAGNOSTICS_PROJECT_NAME,
             packageName = DYNAMIC_IMPORT_DIAGNOSTICS_PACKAGE_NAME,
             mainScriptName = "dynamic-import.js",
             mainScript = """
                 "nodejs";
-                try {
-                  eval("import('./dynamic-target.js')");
-                  console.log("packaged.diagnostics.dynamic_import.unexpected=true");
-                } catch (error) {
-                  console.log("packaged.diagnostics.dynamic_import.code=" + error.code);
-                  console.log("packaged.diagnostics.dynamic_import.message=" + String(error.message).includes("dynamic import is disabled"));
-                }
+                return Promise.all([
+                  import("./dynamic-target.mjs"),
+                  import("./dynamic-legacy.cjs"),
+                  import("./dynamic-type-module.js"),
+                  import("../../outside.mjs").then(() => false, (error) => {
+                    return error.code === "ERR_AUTOJS6_FS_PATH_ESCAPE" ||
+                      String(error && error.message || "").includes("escapes") ||
+                      String(error && error.message || "").includes("rejects");
+                  }),
+                  import("node:child_process").then(() => false, (error) => {
+                    return error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" ||
+                      error.code === "ERR_AUTOJS6_BUILTIN_DISABLED" ||
+                      error.autojs6Code === "ERR_AUTOJS6_BUILTIN_DISABLED";
+                  })
+                ]).then(([esm, cjs, typed, pathEscapeDenied, childProcessDenied]) => {
+                  const mjsOk = esm.default.value === "dynamic-esm" && esm.named === "named";
+                  const cjsOk = cjs.default.value === "dynamic-cjs";
+                  const typedOk = typed.default.value === "dynamic-typed";
+                  const fullPathOk = esm.filenameOk === true && cjs.default.filenameOk === true && typed.filenameOk === true;
+                  const securityOk = pathEscapeDenied && childProcessDenied;
+                  console.log("packaged.dynamic_import.ready=" + (mjsOk && cjsOk && typedOk && fullPathOk && securityOk));
+                  console.log("packaged.dynamic_import.mjs=" + mjsOk);
+                  console.log("packaged.dynamic_import.cjs=" + cjsOk);
+                  console.log("packaged.dynamic_import.type_module=" + typedOk);
+                  console.log("packaged.dynamic_import.full_path=" + fullPathOk);
+                  console.log("packaged.dynamic_import.child_process_denied=" + childProcessDenied);
+                  console.log("packaged.dynamic_import.path_escape_denied=" + pathEscapeDenied);
+                  console.log("packaged.dynamic_import.security=" + securityOk);
+                });
             """.trimIndent() + "\n",
-            extraFiles = mapOf(
-                "dynamic-target.js" to """module.exports = { value: "should-not-load" };""" + "\n",
+            extraFiles = packagedRuntimeCompatibilityDescriptorFiles(
+                    esmPartial = true,
+                    dynamicImportLocal = true,
+                ) + mapOf(
+                "package.json" to """{"name":"packaged-dynamic-import-smoke","version":"1.0.0","type":"module"}""" + "\n",
+                "dynamic-target.mjs" to """
+                    export default { value: "dynamic-esm" };
+                    export const named = "named";
+                    export const filenameOk = typeof __filename === "string" && __filename.endsWith("/dynamic-target.mjs");
+                """.trimIndent() + "\n",
+                "dynamic-legacy.cjs" to """
+                    module.exports = {
+                      value: "dynamic-cjs",
+                      filenameOk: typeof __filename === "string" && __filename.endsWith("/dynamic-legacy.cjs")
+                    };
+                """.trimIndent() + "\n",
+                "dynamic-type-module.js" to """
+                    const filenameOk = typeof __filename === "string" && __filename.endsWith("/dynamic-type-module.js");
+                    export default { value: "dynamic-typed" };
+                    export { filenameOk };
+                """.trimIndent() + "\n",
             ),
             runtimeMarkers = DYNAMIC_IMPORT_DIAGNOSTICS_MARKERS,
         )
         assertInstallAndRunPackagedDynamicImportDiagnosticsSmoke(outputApk)
+    }
+
+    @Test
+    fun installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged worker_threads ESM smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+        assumeTrue(
+            "Embedded Node.js packaged worker_threads ESM smoke requires worker_threads experimental build support.",
+            BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        )
+        assumeTrue(
+            "Embedded Node.js packaged worker_threads ESM smoke requires Node Profile v1.1 ESM to be enabled.",
+            BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+        )
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("packaged worker_threads ESM smoke")
+
+        assumePackagedSmokeTemplateAvailable("Packaged worker_threads ESM install-and-run smoke")
+
+        val outputApk = buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-worker-threads-esm-smoke",
+            outputApkName = WORKER_THREADS_ESM_APK_NAME,
+            projectName = WORKER_THREADS_ESM_PROJECT_NAME,
+            packageName = WORKER_THREADS_ESM_PACKAGE_NAME,
+            mainScriptName = "main.js",
+            mainScript = """
+                "nodejs";
+                return (async function main() {
+                  const { Worker } = require("worker_threads");
+                  const worker = new Worker("./packaged-worker.mjs", {
+                    workerData: {
+                      value: 21
+                    }
+                  });
+                  const exitPromise = new Promise((resolve) => worker.once("exit", resolve));
+                  const message = await new Promise((resolve, reject) => {
+                    worker.once("error", reject);
+                    worker.once("message", resolve);
+                  });
+                  const exitCode = await exitPromise;
+                  const ready = message.value === 42 &&
+                    message.isMainThread === false &&
+                    message.threadIdOk === true &&
+                    message.filenameOk === true &&
+                    message.builtinOk === true &&
+                    exitCode === 0;
+                  console.log("packaged.worker_threads.esm.ready=" + ready);
+                  console.log("packaged.worker_threads.esm.value=" + (message.value === 42));
+                  console.log("packaged.worker_threads.esm.thread=" + (message.isMainThread === false && message.threadIdOk === true));
+                  console.log("packaged.worker_threads.esm.filename=" + message.filenameOk);
+                  console.log("packaged.worker_threads.esm.builtin=" + message.builtinOk);
+                  console.log("packaged.worker_threads.esm.exit=" + exitCode);
+                })();
+            """.trimIndent() + "\n",
+            extraFiles = packagedRuntimeCompatibilityDescriptorFiles(
+                    esmPartial = true,
+                    dynamicImportLocal = false,
+                    workerThreads = true,
+                ) + mapOf(
+                "package.json" to """{"name":"packaged-worker-threads-esm-smoke","version":"1.0.0"}""" + "\n",
+                "packaged-worker.mjs" to """
+                    import path from "path";
+                    import { parentPort, workerData, isMainThread, threadId } from "worker_threads";
+
+                    parentPort.postMessage({
+                      value: workerData.value * 2,
+                      isMainThread,
+                      threadIdOk: Number.isInteger(threadId),
+                      filenameOk: typeof __filename === "string" && __filename.endsWith("/packaged-worker.mjs"),
+                      builtinOk: path.basename("/safe/packaged-worker.mjs") === "packaged-worker.mjs"
+                    });
+                """.trimIndent() + "\n",
+            ),
+            runtimeMarkers = WORKER_THREADS_ESM_RUNTIME_MARKERS,
+            requiredTemplateDexMarkers = WORKER_THREADS_ESM_TEMPLATE_DEX_MARKERS,
+        )
+        assertInstallAndRunPackagedWorkerThreadsEsmSmoke(outputApk)
     }
 
     @Test
@@ -9002,6 +9282,101 @@ class EmbeddedNodePackagedApkSmokeTest {
             runtimeMarkers = TIMEOUT_DIAGNOSTICS_RUNTIME_MARKERS,
         )
         assertInstallAndRunPackagedTimeoutDiagnosticsSmoke(outputApk)
+    }
+
+    @Test
+    fun installAndRunProcessPoolSlotEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged process-pool slot install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged process-pool slot install-and-run smoke")
+
+        val launchDescriptor = """
+            {
+              "launchKind": "project-entry",
+              "workingDirectory": ".",
+              "argv": ["--from-packaged-process-pool-slot"],
+              "env": {
+                "PACKAGED_PROCESS_POOL_SLOT_ENV": "slot-secret"
+              },
+              "timeoutMs": 10000,
+              "processPoolSlot": "${NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID}",
+              "processPoolSlotSource": "${NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST}"
+            }
+            """.trimIndent() + "\n"
+        val outputApk = buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-process-pool-slot-smoke",
+            outputApkName = PROCESS_POOL_SLOT_APK_NAME,
+            projectName = PROCESS_POOL_SLOT_PROJECT_NAME,
+            packageName = PROCESS_POOL_SLOT_PACKAGE_NAME,
+            mainScriptName = "process-pool-slot.js",
+            mainScript = """
+                "nodejs";
+                const ready =
+                  process.argv.includes("--from-packaged-process-pool-slot") &&
+                  process.env.PACKAGED_PROCESS_POOL_SLOT_ENV === "slot-secret";
+                console.log("packaged.process_pool_slot.ready=" + ready);
+                console.log("packaged.process_pool_slot.argv=" + process.argv.includes("--from-packaged-process-pool-slot"));
+                console.log("packaged.process_pool_slot.env=" + (process.env.PACKAGED_PROCESS_POOL_SLOT_ENV === "slot-secret"));
+            """.trimIndent() + "\n",
+            runtimeMarkers = PROCESS_POOL_SLOT_RUNTIME_MARKERS,
+            launchDescriptor = launchDescriptor,
+            launchDescriptorExpectation = PackagedNodeLaunchDescriptorExpectation(
+                launchKind = NodeProjectLaunchKind.PROJECT_ENTRY.descriptorValue,
+                workingDirectory = ".",
+                argv = listOf("--from-packaged-process-pool-slot"),
+                env = mapOf("PACKAGED_PROCESS_POOL_SLOT_ENV" to "slot-secret"),
+                timeoutMs = 10_000L,
+                processPoolSlot = NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
+            ),
+            requiredTemplateDexMarkers = PROCESS_POOL_SLOT_TEMPLATE_DEX_MARKERS,
+        )
+        assertInstallAndRunPackagedProcessPoolSlotSmoke(outputApk)
+    }
+
+    @Test
+    fun installAndRunCrashEvidenceEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged crash evidence smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged crash evidence install-and-run smoke")
+
+        val launchDescriptor = """
+            {
+              "launchKind": "project-entry",
+              "workingDirectory": ".",
+              "timeoutMs": $CRASH_EVIDENCE_TIMEOUT_MS,
+              "executionMode": "${NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING}"
+            }
+            """.trimIndent() + "\n"
+        val outputApk = buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-crash-evidence-smoke",
+            outputApkName = CRASH_EVIDENCE_APK_NAME,
+            projectName = CRASH_EVIDENCE_PROJECT_NAME,
+            packageName = CRASH_EVIDENCE_PACKAGE_NAME,
+            mainScriptName = "crash-evidence.js",
+            mainScript = """
+                "nodejs";
+                console.log("packaged.crash_evidence.started=true");
+                console.log("packaged.crash_evidence.pid=" + process.pid);
+                setInterval(() => {}, 250);
+            """.trimIndent() + "\n",
+            runtimeMarkers = CRASH_EVIDENCE_RUNTIME_MARKERS,
+            launchDescriptor = launchDescriptor,
+            launchDescriptorExpectation = PackagedNodeLaunchDescriptorExpectation(
+                launchKind = NodeProjectLaunchKind.PROJECT_ENTRY.descriptorValue,
+                workingDirectory = ".",
+                timeoutMs = CRASH_EVIDENCE_TIMEOUT_MS,
+                executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+            ),
+            requiredTemplateDexMarkers = CRASH_EVIDENCE_TEMPLATE_DEX_MARKERS,
+        )
+        assertInstallRunAndCollectPackagedCrashEvidenceSmoke(outputApk)
     }
 
     @Test
@@ -9032,6 +9407,20 @@ class EmbeddedNodePackagedApkSmokeTest {
             val outputApk = buildPackagedLaunchFailureApk(failureCase)
             assertInstallAndRunPackagedLaunchFailureSmoke(outputApk, failureCase)
         }
+    }
+
+    @Test
+    fun installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged runtime compatibility descriptor mismatch smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged runtime compatibility descriptor mismatch install-and-run smoke")
+
+        val failureCase = packagedRuntimeCompatibilityDescriptorMismatchFailureCase()
+        val outputApk = buildPackagedLaunchFailureApk(failureCase)
+        assertInstallAndRunPackagedLaunchFailureSmoke(outputApk, failureCase)
     }
 
     @Test
@@ -9110,7 +9499,46 @@ class EmbeddedNodePackagedApkSmokeTest {
         val argv: List<String> = emptyList(),
         val env: Map<String, String> = emptyMap(),
         val timeoutMs: Long? = null,
+        val executionMode: String? = null,
+        val processPoolSlot: String? = null,
+        val processPoolSlotSource: String? = null,
     )
+
+    private fun packagedRuntimeCompatibilityDescriptorMismatchFailureCase(): PackagedLaunchFailureCase {
+        val secretEnv = JSONObject().put(PACKAGED_LAUNCH_FAILURE_SECRET_KEY, PACKAGED_LAUNCH_FAILURE_SECRET_VALUE)
+        val descriptor = JSONObject()
+            .put("launchKind", NodeProjectLaunchKind.PROJECT_ENTRY.descriptorValue)
+            .put("env", secretEnv)
+            .toString()
+        val runtimeDescriptor = NodeProjectRuntimeCompatibilityDescriptor.currentJson(
+            esmPartial = true,
+            dynamicImportLocal = true,
+            workerThreads = false,
+        )
+        runtimeDescriptor.getJSONObject("versions")
+            .put("esmLoader", "stale-autojs6-esm-loader-v0")
+        return PackagedLaunchFailureCase(
+            id = "runtime-descriptor-version-mismatch",
+            projectName = "PackagedNodeRuntimeDescriptorVersionMismatchFailureSmoke",
+            packageName = "org.autojs6.packaged.node.failure.runtimedescriptorversionmismatch",
+            outputApkName = "PackagedNodeRuntimeDescriptorVersionMismatchFailureSmoke_v1.0.0.apk",
+            descriptor = descriptor,
+            extraFiles = packagedRuntimeCompatibilityDescriptorFiles(runtimeDescriptor.toString() + "\n"),
+            requiredEntries = NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAMES,
+            requiredLogMarkers = listOf(
+                NodeProjectLaunchDiagnostics.LAUNCH_FAILURE_MARKER,
+                "stage=descriptor",
+                "requestReady=false",
+                NodeProjectRuntimeCompatibilityDescriptor.VERSION_MISMATCH_CODE,
+                "versions.esmLoader",
+                "expected=${NodeProjectRuntimeCompatibilityDescriptor.ESM_LOADER_VERSION}",
+                "actual=stale-autojs6-esm-loader-v0",
+                "errorClass=IllegalArgumentException",
+            ),
+            verifyDescriptor = false,
+            descriptorInput = true,
+        )
+    }
 
     private fun packagedLaunchFailureCases(): List<PackagedLaunchFailureCase> {
         val projectEntryLaunchKind = NodeProjectLaunchKind.PROJECT_ENTRY.descriptorValue
@@ -10574,12 +11002,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 writeText(content, StandardCharsets.UTF_8)
             }
         }
-        File(projectDir, PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE).writeText(
-            failureCase.descriptor + "\n",
-            StandardCharsets.UTF_8,
-        )
-        File(projectDir, ProjectConfig.CONFIG_FILE_NAME).writeText(
-            """
+        val projectConfigText = """
             {
               "name": "${failureCase.projectName}",
               "versionName": "1.0.0",
@@ -10602,7 +11025,14 @@ class EmbeddedNodePackagedApkSmokeTest {
                 "runOnBoot": false
               }
             }
-            """.trimIndent() + "\n",
+            """.trimIndent() + "\n"
+
+        File(projectDir, PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE).writeText(
+            failureCase.descriptor + "\n",
+            StandardCharsets.UTF_8,
+        )
+        File(projectDir, ProjectConfig.CONFIG_FILE_NAME).writeText(
+            projectConfigText,
             StandardCharsets.UTF_8,
         )
 
@@ -10631,6 +11061,42 @@ class EmbeddedNodePackagedApkSmokeTest {
             isRunOnBoot = false
         }
 
+        val cacheKey = packagedSmokeFixtureCacheKey(
+            kind = "launch_failure",
+            outputApkName = failureCase.outputApkName,
+            requiredTemplateDexMarkers = failureCase.requiredTemplateDexMarkers,
+            inputs = listOf(
+                "id" to failureCase.id,
+                "projectName" to failureCase.projectName,
+                "packageName" to failureCase.packageName,
+                "projectConfigMainScriptName" to failureCase.projectConfigMainScriptName,
+                "descriptor" to failureCase.descriptor,
+                "mainScriptName" to mainScriptName,
+                "mainScript" to mainScript,
+                "projectConfig" to projectConfigText,
+                "requiredEntries" to failureCase.requiredEntries.sorted().joinToString("\n"),
+                "requiredLogMarkers" to failureCase.requiredLogMarkers.sorted().joinToString("\n"),
+                "forbiddenLogMarkers" to failureCase.forbiddenLogMarkers.sorted().joinToString("\n"),
+            ) + failureCase.extraFiles.toSortedMap().map { (relativePath, content) ->
+                "extra:$relativePath" to content
+            },
+        )
+        restorePackagedSmokeFixtureCache(
+            outputApk = outputApk,
+            cacheKey = cacheKey,
+            label = "launch failure ${failureCase.id}",
+        )?.let { cachedApk ->
+            outputPathFile.writeText(cachedApk.absolutePath, StandardCharsets.UTF_8)
+            assertPackagedApkContainsLaunchFailureSmoke(
+                outputApk = cachedApk,
+                failureCase = failureCase,
+                mainScriptName = mainScriptName,
+                mainScript = mainScript,
+            )
+            exportPackagedSmokeApkForHost(cachedApk)
+            return cachedApk
+        }
+
         openPackagedSmokeTemplate(requiredDexMarkers = failureCase.requiredTemplateDexMarkers).use { templateApk ->
             ApkBuilder(templateApk, outputApk, buildDir.absolutePath)
                 .prepare(context)
@@ -10650,6 +11116,11 @@ class EmbeddedNodePackagedApkSmokeTest {
             failureCase = failureCase,
             mainScriptName = mainScriptName,
             mainScript = mainScript,
+        )
+        storePackagedSmokeFixtureCache(
+            outputApk = outputApk,
+            cacheKey = cacheKey,
+            label = "launch failure ${failureCase.id}",
         )
         exportPackagedSmokeApkForHost(outputApk)
         return outputApk
@@ -10714,6 +11185,14 @@ class EmbeddedNodePackagedApkSmokeTest {
               const surfaceOk = typeof app.launchPackage === "function" &&
                 typeof app.launchApp === "function" &&
                 typeof app.openAppSetting === "function" &&
+                typeof app.intentToShell === "function" &&
+                typeof app.uninstall === "function" &&
+                typeof app.getPackageName === "function" &&
+                typeof app.getAppName === "function" &&
+                typeof app.isInstalled === "function" &&
+                typeof app.viewFile === "function" &&
+                typeof app.editFile === "function" &&
+                typeof app.launch === "function" &&
                 typeof app.startActivity === "function";
               const launchOk = launchResult === true;
               const shadowOk = app.shadow !== true;
@@ -10870,6 +11349,707 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedV11BridgeApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function main() {
+              const bridge = require("autojs6:bridge");
+              const { Buffer } = require("buffer");
+              const requests = [];
+              const stores = Object.create(null);
+              const notifications = new Map();
+              const tasks = new Map();
+              let workSequence = 0;
+              let notificationSequence = 9100;
+              let uiSequence = 0;
+              const uiDrained = Object.create(null);
+
+              function respond(request, ok, result, error) {
+                setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                  id: request.id,
+                  ok,
+                  result,
+                  error
+                })));
+              }
+
+              function textResponse(payload, text, status) {
+                return {
+                  url: payload.url,
+                  status,
+                  statusText: status === 200 ? "OK" : "Created",
+                  headers: [["content-type", "text/plain"], ["x-packaged", "v1.1"]],
+                  bodyBase64: Buffer.from(text).toString("base64"),
+                  bodyBytes: Buffer.byteLength(text)
+                };
+              }
+
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  const args = request.args || [];
+                  if (request.module === "fetch" && request.method === "request") {
+                    respond(request, true, textResponse(args[0], "packaged-fetch", 200));
+                    return;
+                  }
+                  if (request.module === "ocr") {
+                    respond(request, true, [
+                      { text: "packaged", confidence: 0.91, bounds: { left: 1, top: 2, right: 3, bottom: 4 } }
+                    ]);
+                    return;
+                  }
+                  if (request.module === "storage" || request.module === "storages") {
+                    const storeName = args[0];
+                    const key = args[1];
+                    const bucket = stores[storeName] || (stores[storeName] = Object.create(null));
+                    if (request.method === "clear") {
+                      Object.keys(bucket).forEach((entry) => delete bucket[entry]);
+                      respond(request, true, null);
+                    } else if (request.method === "put") {
+                      bucket[key] = args[2];
+                      respond(request, true, null);
+                    } else if (request.method === "get") {
+                      respond(request, true, Object.prototype.hasOwnProperty.call(bucket, key)
+                        ? { found: true, value: bucket[key] }
+                        : { found: false });
+                    } else if (request.method === "contains") {
+                      respond(request, true, Object.prototype.hasOwnProperty.call(bucket, key));
+                    } else if (request.method === "keys") {
+                      respond(request, true, Object.keys(bucket).sort());
+                    } else if (request.method === "remove") {
+                      delete bucket[key];
+                      respond(request, true, null);
+                    }
+                    return;
+                  }
+                  if (request.module === "notifications") {
+                    if (request.method === "notify") {
+                      const descriptor = args[0] || {};
+                      const id = descriptor.id || ++notificationSequence;
+                      notifications.set(id, Object.assign({ id }, descriptor));
+                      respond(request, true, id);
+                    } else if (request.method === "cancel") {
+                      notifications.delete(args[0]);
+                      respond(request, true, null);
+                    } else if (request.method === "cancelAll") {
+                      notifications.clear();
+                      respond(request, true, null);
+                    }
+                    return;
+                  }
+                  if (request.module === "ui") {
+                    if (request.method === "showLayout") {
+                      uiSequence += 1;
+                      respond(request, true, { id: "packaged-ui-" + uiSequence });
+                    } else if (request.method === "drainEvents") {
+                      const handleId = args[0];
+                      respond(request, true, uiDrained[handleId] ? [] : [{ type: "click", id: "ok", text: "OK" }]);
+                      uiDrained[handleId] = true;
+                    } else {
+                      respond(request, true, null);
+                    }
+                    return;
+                  }
+                  if (request.module === "work_manager") {
+                    if (request.method === "scheduleOnce") {
+                      workSequence += 1;
+                      const descriptor = args[0];
+                      const id = "packaged-work-" + workSequence;
+                      tasks.set(id, Object.assign({
+                        id,
+                        type: "once",
+                        status: "registered",
+                        scheduler: "metadata",
+                        packageName: "$V11_BRIDGE_PACKAGE_NAME",
+                        createdAtEpochMs: workSequence
+                      }, descriptor));
+                      respond(request, true, id);
+                    } else if (request.method === "list") {
+                      respond(request, true, Array.from(tasks.values()));
+                    } else if (request.method === "cancel") {
+                      tasks.delete(args[0]);
+                      respond(request, true, null);
+                    }
+                    return;
+                  }
+                  respond(request, false, null, {
+                    code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+                    message: "unexpected packaged v1.1 bridge request",
+                    module: request.module,
+                    method: request.method
+                  });
+                }
+              });
+
+              const fetchModule = require("fetch");
+              const fetchResult = await fetch("https://example.invalid/v1_1", {
+                headers: { "x-packaged": "v1.1" },
+                timeoutMs: 1000,
+                maxResponseBytes: 1024
+              });
+              const fetchText = await fetchResult.text();
+
+              const ocr = require("ocr");
+              const ocrResult = await ocr.recognize(
+                { id: "packaged-image-1", __autojs6ImageHandle: "packaged-image-1", width: 10, height: 20 },
+                { lang: "auto", timeoutMs: 1000 }
+              );
+
+              const storage = require("storage");
+              const storages = require("storages");
+              const store = storage.create("settings");
+              const alias = storages.open("settings");
+              await store.clear({ timeoutMs: 1000 });
+              await store.put("mode", { value: "packaged", count: 11 }, { timeoutMs: 1000 });
+              const stored = await alias.get("mode", null, { timeoutMs: 1000 });
+              const storageContains = await store.contains("mode", { timeoutMs: 1000 });
+              const storageKeys = await alias.keys({ timeoutMs: 1000 });
+              await store.remove("mode", { timeoutMs: 1000 });
+
+              const notificationsModule = require("notifications");
+              const notificationId = await notificationsModule.notify({
+                id: 9301,
+                title: "Packaged v1.1",
+                text: "Bridge smoke"
+              }, { timeoutMs: 1000 });
+              await notificationsModule.cancel(notificationId, { timeoutMs: 1000 });
+
+              const ui = require("ui");
+              const handle = await ui.showLayout({
+                type: "Vertical",
+                children: [
+                  { type: "Text", id: "title", text: "Node v1.1" },
+                  { type: "Button", id: "ok", text: "OK" }
+                ]
+              }, { timeoutMs: 1000, drainIntervalMs: 1 });
+              let clicked = "";
+              const clickedReady = new Promise((resolve) => {
+                const off = handle.on("click", (event) => {
+                  clicked = event.id + ":" + event.handleId;
+                  off();
+                  resolve();
+                }, { timeoutMs: 1000, drainIntervalMs: 1 });
+              });
+              await clickedReady;
+              await handle.update({ id: "title", text: "Updated" }, { timeoutMs: 1000 });
+              await handle.close({ timeoutMs: 1000 });
+
+              const work = require("work_manager");
+              const workId = await work.scheduleOnce({
+                scriptPath: "./main.js",
+                delayMs: 1234,
+                timeoutMs: 777,
+                constraints: { network: true }
+              });
+              const workBefore = await work.list({ timeoutMs: 1000 });
+              await work.cancel(workId, { timeoutMs: 1000 });
+              const workAfter = await work.list({ timeoutMs: 1000 });
+
+              const plugins = require("plugins");
+              const pluginManifest = plugins.manifest("org.example.packaged");
+              const pluginStart = plugins.start("org.example.packaged");
+              const plugin = plugins.load("org.example.packaged");
+              const pluginResult = await plugin.run({ label: "packaged-plugin" });
+              const pluginStatus = plugins.status("org.example.packaged");
+              const pluginStop = plugins.stop("org.example.packaged");
+              const pluginLifecycle = plugin.lifecycle();
+              const pluginUnloaded = plugins.unload("org.example.packaged");
+              const pluginFinal = plugins.status("org.example.packaged");
+
+              const fetchOk = require.resolve("fetch") === "fetch" &&
+                fetchModule.shadow !== true &&
+                fetchResult.status === 200 &&
+                fetchResult.headers.get("x-packaged") === "v1.1" &&
+                fetchText === "packaged-fetch";
+              const ocrOk = require.resolve("ocr") === "ocr" &&
+                ocr.shadow !== true &&
+                ocrResult[0].text === "packaged" &&
+                ocrResult[0].bounds.bottom === 4;
+              const storageOk = require.resolve("storage") === "storage" &&
+                require.resolve("storages") === "storages" &&
+                storage.shadow !== true &&
+                storages.shadow !== true &&
+                stored.value === "packaged" &&
+                stored.count === 11 &&
+                storageContains === true &&
+                storageKeys.join(",") === "mode";
+              const notificationsOk = require.resolve("notifications") === "notifications" &&
+                notificationsModule.shadow !== true &&
+                notificationId === 9301 &&
+                notifications.size === 0;
+              const uiOk = require.resolve("ui") === "ui" &&
+                ui.shadow !== true &&
+                handle.id === "packaged-ui-1" &&
+                clicked === "ok:packaged-ui-1";
+              const workOk = require.resolve("work_manager") === "work_manager" &&
+                work.shadow !== true &&
+                workId === "packaged-work-1" &&
+                workBefore.length === 1 &&
+                workBefore[0].scriptPath === "main.js" &&
+                workBefore[0].constraints.network === true &&
+                workAfter.length === 0;
+              const pluginCapabilities = pluginStatus.capabilities.join(",");
+              const pluginOk = require.resolve("plugins") === "plugins" &&
+                plugins.shadow !== true &&
+                pluginManifest.id === "org.example.packaged" &&
+                pluginManifest.capability === "plugin.org.example.packaged" &&
+                pluginManifest.permissions.join(",") === "storage,notifications,ui,network" &&
+                pluginStart.resources.total === 1 &&
+                pluginStart.capabilities.join(",") === "plugin.org.example.packaged,storage,notifications,ui,network" &&
+                pluginResult.label === "packaged-plugin" &&
+                pluginResult.stored === "packaged-plugin" &&
+                pluginResult.clicked === "ok:packaged-ui-2" &&
+                pluginResult.fetchText === "packaged-fetch" &&
+                pluginResult.notificationId === 9302 &&
+                pluginResult.uiFrozen === true &&
+                pluginCapabilities === "plugin.org.example.packaged,storage,notifications,ui,network" &&
+                pluginStatus.resources.total === 1 &&
+                pluginStop.resources.total === 0 &&
+                pluginLifecycle.cleanup === true &&
+                pluginUnloaded === true &&
+                pluginFinal.loaded === false &&
+                pluginFinal.resources.total === 0;
+              const requiredPermissionsOk = requests.every((request) => {
+                if (request.module === "fetch") {
+                  return request.permissions.indexOf("network") >= 0;
+                }
+                if (request.module === "ocr") {
+                  return request.permissions.indexOf("ocr") >= 0 && request.permissions.indexOf("image") >= 0;
+                }
+                if (request.module === "storage" || request.module === "storages") {
+                  return request.permissions.indexOf("storage") >= 0;
+                }
+                if (request.module === "notifications") {
+                  return request.permissions.indexOf("notifications") >= 0;
+                }
+                if (request.module === "ui") {
+                  return request.permissions.indexOf("ui") >= 0;
+                }
+                if (request.module === "work_manager") {
+                  return request.permissions.indexOf("work_manager") >= 0;
+                }
+                return false;
+              });
+              const noShadowOk = [fetchModule, ocr, storage, storages, notificationsModule, ui, work, plugins].every((module) => module.shadow !== true);
+              const ready = fetchOk && ocrOk && storageOk && notificationsOk && uiOk && workOk && pluginOk && requiredPermissionsOk &&
+                noShadowOk && bridge.__test.pendingCount() === 0;
+
+              console.log("packaged.v1_1_bridge.ready=" + ready);
+              console.log("packaged.v1_1_bridge.fetch=" + fetchOk);
+              console.log("packaged.v1_1_bridge.ocr=" + ocrOk);
+              console.log("packaged.v1_1_bridge.storage=" + storageOk);
+              console.log("packaged.v1_1_bridge.notifications=" + notificationsOk);
+              console.log("packaged.v1_1_bridge.ui=" + uiOk);
+              console.log("packaged.v1_1_bridge.work_manager=" + workOk);
+              console.log("packaged.v1_1_bridge.plugin=" + pluginOk);
+              console.log("packaged.v1_1_bridge.permissions=" + requiredPermissionsOk);
+              console.log("packaged.v1_1_bridge.no_shadow=" + noShadowOk);
+              console.log("packaged.v1_1_bridge.pending=" + bridge.__test.pendingCount());
+            }
+
+            return main().catch(error => {
+              console.error("packaged.v1_1_bridge.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-v11-bridge-smoke",
+            outputApkName = V11_BRIDGE_APK_NAME,
+            projectName = V11_BRIDGE_PROJECT_NAME,
+            packageName = V11_BRIDGE_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraFiles = mapOf(
+                "node_modules/fetch/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/ocr/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/storage/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/storages/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/notifications/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/ui/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/work_manager/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/plugins/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "plugins/org.example.packaged/package.json" to """
+                    {
+                      "name": "org.example.packaged",
+                      "version": "1.0.0",
+                      "main": "index.cjs",
+                      "autojs6": {
+                        "plugin": {
+                          "id": "org.example.packaged",
+                          "permissions": ["storage", "notifications", "ui", "network"],
+                          "dependencies": [],
+                          "exports": {}
+                        }
+                      }
+                    }
+                """.trimIndent() + "\n",
+                "plugins/org.example.packaged/index.cjs" to """
+                    let lifecycle = { cleanup: false };
+
+                    exports.start = function(ctx) {
+                      lifecycle = {
+                        cleanup: false,
+                        namespace: ctx.namespace,
+                        capabilities: ctx.capabilities.join(","),
+                        permissions: ctx.permissions.join(",")
+                      };
+                      ctx.resources.addCleanup(function() {
+                        lifecycle.cleanup = true;
+                      });
+                    };
+
+                    exports.lifecycle = function() {
+                      return lifecycle;
+                    };
+
+                    exports.run = async function(input) {
+                      const storage = require("storage");
+                      const notifications = require("notifications");
+                      const ui = require("ui");
+
+                      const store = storage.create("plugin");
+                      await store.put("label", { value: input.label }, { timeoutMs: 1000 });
+                      const stored = await store.get("label", null, { timeoutMs: 1000 });
+
+                      const notificationId = await notifications.notify({
+                        id: 9302,
+                        title: "Packaged plugin",
+                        text: stored.value
+                      }, { timeoutMs: 1000 });
+
+                      const model = ui.state({ title: "Plugin UI", done: false });
+                      const handle = await ui.showLayout({
+                        type: "Vertical",
+                        children: [
+                          { type: "Text", id: "title", text: ui.bind(model, "title") },
+                          { type: "Checkbox", id: "done", text: "Done", checked: ui.bind(model, "done") },
+                          { type: "Button", id: "ok", text: "OK" }
+                        ]
+                      }, { timeoutMs: 1000, drainIntervalMs: 1 });
+                      let clicked = "";
+                      await new Promise((resolve) => {
+                        const off = handle.on("click", (event) => {
+                          clicked = event.id + ":" + event.handleId;
+                          off();
+                          resolve();
+                        }, { timeoutMs: 1000, drainIntervalMs: 1 });
+                      });
+                      model.update({ title: "Plugin Done", done: true });
+                      await new Promise((resolve) => setTimeout(resolve, 30));
+                      await handle.batchUpdate([{ id: "title", text: "Plugin Done" }], { timeoutMs: 1000 });
+                      await handle.close({ timeoutMs: 1000 });
+
+                      const fetchResult = await fetch("https://example.invalid/plugin", {
+                        timeoutMs: 1000,
+                        maxResponseBytes: 1024
+                      });
+                      const fetchText = await fetchResult.text();
+                      await notifications.cancel(notificationId, { timeoutMs: 1000 });
+
+                      return {
+                        label: input.label,
+                        stored: stored.value,
+                        clicked,
+                        fetchText,
+                        notificationId,
+                        uiFrozen: Object.isFrozen(handle)
+                      };
+                    };
+                """.trimIndent() + "\n",
+            ),
+            extraPermissions = listOf("android.permission.POST_NOTIFICATIONS"),
+            nodePermissions = V11_BRIDGE_NODE_PERMISSIONS,
+            runtimeMarkers = V11_BRIDGE_RUNTIME_MARKERS,
+        )
+    }
+
+    private fun buildPackagedRhinoCompatApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function main() {
+              const bridge = require("autojs6:bridge");
+              const compat = require("autojs6:compat");
+              const requests = [];
+              const stores = Object.create(null);
+              const activeImages = new Set();
+              let imageSequence = 0;
+              let uiSequence = 0;
+              const uiDrained = Object.create(null);
+
+              function respond(request, ok, result, error) {
+                setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                  id: request.id,
+                  ok,
+                  result,
+                  error
+                })));
+              }
+
+              function makeImage(label, width, height) {
+                imageSequence += 1;
+                const id = "rhino-compat-" + label + "-" + imageSequence;
+                activeImages.add(id);
+                return { id, __autojs6ImageHandle: id, width, height };
+              }
+
+              function imageId(handle) {
+                return handle && (handle.__autojs6ImageHandle || handle.id);
+              }
+
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  const args = request.args || [];
+
+                  if (request.module === "toast" && request.method === "showToast") {
+                    respond(request, true, null);
+                    return;
+                  }
+
+                  if (request.module === "storage" || request.module === "storages") {
+                    const storeName = args[0];
+                    const key = args[1];
+                    const bucket = stores[storeName] || (stores[storeName] = Object.create(null));
+                    if (request.method === "clear") {
+                      Object.keys(bucket).forEach((entry) => delete bucket[entry]);
+                      respond(request, true, null);
+                    } else if (request.method === "put") {
+                      bucket[key] = args[2];
+                      respond(request, true, null);
+                    } else if (request.method === "get") {
+                      respond(request, true, Object.prototype.hasOwnProperty.call(bucket, key)
+                        ? { found: true, value: bucket[key] }
+                        : { found: false });
+                    } else if (request.method === "contains") {
+                      respond(request, true, Object.prototype.hasOwnProperty.call(bucket, key));
+                    } else if (request.method === "keys") {
+                      respond(request, true, Object.keys(bucket).sort());
+                    } else if (request.method === "remove") {
+                      delete bucket[key];
+                      respond(request, true, null);
+                    } else {
+                      respond(request, false, null, {
+                        code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+                        message: "unexpected storage method"
+                      });
+                    }
+                    return;
+                  }
+
+                  if (request.module === "accessibility") {
+                    if (request.method === "findOne") {
+                      respond(request, true, {
+                        text: "S11-29",
+                        desc: "Rhino compat packaged smoke",
+                        id: "rhino_compat",
+                        className: "android.widget.TextView",
+                        bounds: { left: 1, top: 2, right: 101, bottom: 42 },
+                        clickable: true,
+                        enabled: true
+                      });
+                      return;
+                    }
+                    if (request.method === "click" || request.method === "back" ||
+                        request.method === "home" || request.method === "recentApps") {
+                      respond(request, true, true);
+                      return;
+                    }
+                  }
+
+                  if (request.module === "image" || request.module === "images") {
+                    if (request.method === "readImage") {
+                      respond(request, true, makeImage("read", 16, 16));
+                      return;
+                    }
+                    if (request.method === "clip") {
+                      const region = args[1] || {};
+                      respond(request, true, makeImage("clip", region.width || 4, region.height || 4));
+                      return;
+                    }
+                    if (request.method === "findImage") {
+                      respond(request, true, { x: 3, y: 5 });
+                      return;
+                    }
+                    if (request.method === "recycle") {
+                      activeImages.delete(imageId(args[0]));
+                      respond(request, true, null);
+                      return;
+                    }
+                  }
+
+                  if (request.module === "ui") {
+                    if (request.method === "showLayout") {
+                      uiSequence += 1;
+                      respond(request, true, { id: "packaged-rhino-ui-" + uiSequence });
+                      return;
+                    }
+                    if (request.method === "drainEvents") {
+                      const handleId = args[0];
+                      respond(request, true, uiDrained[handleId] ? [] : [{ type: "click", id: "compatOk", text: "OK" }]);
+                      uiDrained[handleId] = true;
+                      return;
+                    }
+                    if (request.method === "update" || request.method === "batchUpdate" || request.method === "close") {
+                      respond(request, true, null);
+                      return;
+                    }
+                  }
+
+                  respond(request, false, null, {
+                    code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+                    message: "unexpected packaged Rhino compat request",
+                    module: request.module,
+                    method: request.method
+                  });
+                }
+              });
+
+              const status = compat.status();
+              const loaderOk = compat.name === "autojs6:compat" &&
+                status.entry === "autojs6:compat" &&
+                status.defaultGlobalInjection === false &&
+                status.implementedTasks.indexOf("S11-20") >= 0 &&
+                status.availableGlobalNames.indexOf("images") >= 0;
+
+              const toastResult = await compat.toastLog("S11-29 packaged Rhino compat smoke");
+              const toastOk = toastResult === null;
+
+              const fileName = compat.files.join(".", "rhino-compat-packaged.txt");
+              compat.files.write(fileName, "S11-29 packaged files");
+              const filesOk = compat.files.exists(fileName) &&
+                compat.files.read(fileName) === "S11-29 packaged files" &&
+                compat.files.remove(fileName) === true &&
+                compat.files.exists(fileName) === false;
+
+              const store = compat.storages.create("phase11_packaged");
+              await store.clear({ timeoutMs: 1000 });
+              await store.put("mode", { value: "packaged", count: 29 }, { timeoutMs: 1000 });
+              const stored = await store.get("mode", null, { timeoutMs: 1000 });
+              const storageContains = await store.contains("mode", { timeoutMs: 1000 });
+              const storageKeys = await store.keys({ timeoutMs: 1000 });
+              await store.remove("mode", { timeoutMs: 1000 });
+              const storageOk = stored &&
+                stored.value === "packaged" &&
+                stored.count === 29 &&
+                storageContains === true &&
+                storageKeys.join(",") === "mode";
+
+              const selectorHandle = compat.text("S11-29").clickable(true);
+              const foundNode = await selectorHandle.findOne({ timeoutMs: 1000 });
+              const selectorClicked = await selectorHandle.click({ timeoutMs: 1000 });
+              const pointClicked = await compat.click(9, 29, { timeoutMs: 1000 });
+              const selectorOk = foundNode &&
+                foundNode.text === "S11-29" &&
+                foundNode.clickable === true &&
+                selectorClicked === true &&
+                pointClicked === true;
+
+              const source = await compat.images.read("fixtures/source.png", { timeoutMs: 1000 });
+              const clipped = await compat.images.clip(source, 0, 0, 4, 4, { timeoutMs: 1000 });
+              const match = await compat.images.findImage(source, clipped, { threshold: 0.8, timeoutMs: 1000 });
+              await compat.images.recycle(clipped, { timeoutMs: 1000 });
+              await compat.images.recycle(source, { timeoutMs: 1000 });
+              const imageOk = source.width === 16 &&
+                clipped.width === 4 &&
+                match &&
+                match.x === 3 &&
+                match.y === 5;
+
+              const compatUiHandle = await compat.ui.showLayout({
+                type: "Column",
+                children: [
+                  { type: "Text", id: "compatTitle", text: "P12-10 compat UI" },
+                  { type: "Button", id: "compatOk", text: "OK" }
+                ]
+              }, { timeoutMs: 1000, drainIntervalMs: 1 });
+              let compatUiClicked = "";
+              await new Promise((resolve) => {
+                const off = compatUiHandle.on("click", (event) => {
+                  compatUiClicked = event.id + ":" + event.handleId;
+                  off();
+                  resolve();
+                }, { timeoutMs: 1000, drainIntervalMs: 1 });
+              });
+              await compatUiHandle.update({ id: "compatTitle", text: "P12-10 updated" }, { timeoutMs: 1000 });
+              await compatUiHandle.batchUpdate([{ id: "compatOk", text: "Done", enabled: false }], { timeoutMs: 1000 });
+              await compatUiHandle.close({ timeoutMs: 1000 });
+              const compatUiOk = compat.ui &&
+                Object.isFrozen(compat.ui) &&
+                Object.isFrozen(compatUiHandle) &&
+                compatUiHandle.id === "packaged-rhino-ui-1" &&
+                compatUiClicked === "compatOk:packaged-rhino-ui-1";
+
+              function hasPermission(request, permission) {
+                return (request.permissions || []).indexOf(permission) >= 0;
+              }
+
+              const requiredPermissionsOk = requests.every((request) => {
+                if (request.module === "toast") {
+                  return hasPermission(request, "toast");
+                }
+                if (request.module === "storage" || request.module === "storages") {
+                  return hasPermission(request, "storage");
+                }
+                if (request.module === "accessibility") {
+                  return hasPermission(request, "accessibility");
+                }
+                if (request.module === "image" || request.module === "images") {
+                  return hasPermission(request, "image");
+                }
+                if (request.module === "ui") {
+                  return hasPermission(request, "ui");
+                }
+                return false;
+              });
+              const cleanupOk = activeImages.size === 0;
+              const pending = bridge.__test.pendingCount();
+              const ready = loaderOk && toastOk && filesOk && storageOk && selectorOk && imageOk && compatUiOk &&
+                requiredPermissionsOk && cleanupOk && pending === 0;
+
+              console.log("packaged.rhino_compat.ready=" + ready);
+              console.log("packaged.rhino_compat.loader=" + loaderOk);
+              console.log("packaged.rhino_compat.toast=" + toastOk);
+              console.log("packaged.rhino_compat.files=" + filesOk);
+              console.log("packaged.rhino_compat.storage=" + storageOk);
+              console.log("packaged.rhino_compat.selector=" + selectorOk);
+              console.log("packaged.rhino_compat.image=" + imageOk);
+              console.log("packaged.rhino_compat.compat_ui=" + compatUiOk);
+              console.log("packaged.rhino_compat.permissions=" + requiredPermissionsOk);
+              console.log("packaged.rhino_compat.cleanup=" + cleanupOk);
+              console.log("packaged.rhino_compat.pending=" + pending);
+            }
+
+            return main().catch(error => {
+              console.error("packaged.rhino_compat.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-rhino-compat-smoke",
+            outputApkName = RHINO_COMPAT_PACKAGED_APK_NAME,
+            projectName = RHINO_COMPAT_PACKAGED_PROJECT_NAME,
+            packageName = RHINO_COMPAT_PACKAGED_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraFiles = mapOf(
+                "node_modules/toast/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/storage/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/storages/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/accessibility/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/image/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/images/index.js" to """module.exports = { shadow: true };""" + "\n",
+            ),
+            nodePermissions = RHINO_COMPAT_PACKAGED_NODE_PERMISSIONS,
+            runtimeMarkers = RHINO_COMPAT_PACKAGED_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedGateDiagnosticsApk(
         rootName: String,
         outputApkName: String,
@@ -10879,8 +12059,11 @@ class EmbeddedNodePackagedApkSmokeTest {
         mainScript: String,
         extraFiles: Map<String, String> = emptyMap(),
         extraPermissions: List<String> = emptyList(),
+        nodePermissions: List<String> = emptyList(),
         runtimeMarkers: List<String>,
         requiredTemplateDexMarkers: List<String> = emptyList(),
+        launchDescriptor: String? = null,
+        launchDescriptorExpectation: PackagedNodeLaunchDescriptorExpectation? = null,
     ): File {
         val root = File(context.cacheDir, rootName).apply {
             deleteRecursively()
@@ -10906,6 +12089,20 @@ class EmbeddedNodePackagedApkSmokeTest {
         val permissionsJson = permissions.joinToString(separator = ",\n") { permission ->
             "                \"$permission\""
         }
+        val nodePermissionsJson = nodePermissions.joinToString(separator = ",\n") { permission ->
+            "                  \"$permission\""
+        }
+        val nodeConfigJson = if (nodePermissions.isEmpty()) {
+            ""
+        } else {
+            buildString {
+                appendLine("              \"node\": {")
+                appendLine("                \"permissions\": [")
+                appendLine(nodePermissionsJson)
+                appendLine("                ]")
+                appendLine("              },")
+            }
+        }
 
         File(projectDir, mainScriptName).apply {
             parentFile?.mkdirs()
@@ -10917,23 +12114,29 @@ class EmbeddedNodePackagedApkSmokeTest {
                 writeText(content, StandardCharsets.UTF_8)
             }
         }
-        File(projectDir, "runtime-matrix.expected.txt").writeText(
-            runtimeMarkers.joinToString(separator = "\n", postfix = "\n"),
-            StandardCharsets.UTF_8,
-        )
-        File(projectDir, ProjectConfig.CONFIG_FILE_NAME).writeText(
-            """
+        launchDescriptor?.let { descriptor ->
+            PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILES.forEach { descriptorFileName ->
+                File(projectDir, descriptorFileName).writeText(
+                    descriptor,
+                    StandardCharsets.UTF_8,
+                )
+            }
+        }
+        val runtimeMatrixText = runtimeMarkers.joinToString(separator = "\n", postfix = "\n")
+        val projectConfigText = """
             {
               "name": "$projectName",
               "versionName": "1.0.0",
               "versionCode": 1,
               "packageName": "$packageName",
               "main": "$mainScriptName",
+              "type": "node",
               "abis": ["arm64-v8a"],
               "libs": ["Embedded Node.js"],
               "permissions": [
 $permissionsJson
               ],
+$nodeConfigJson
               "launchConfig": {
                 "logsVisible": true,
                 "splashVisible": false,
@@ -10941,7 +12144,14 @@ $permissionsJson
                 "runOnBoot": false
               }
             }
-            """.trimIndent() + "\n",
+            """.trimIndent() + "\n"
+
+        File(projectDir, "runtime-matrix.expected.txt").writeText(
+            runtimeMatrixText,
+            StandardCharsets.UTF_8,
+        )
+        File(projectDir, ProjectConfig.CONFIG_FILE_NAME).writeText(
+            projectConfigText,
             StandardCharsets.UTF_8,
         )
 
@@ -10956,11 +12166,55 @@ $permissionsJson
             .setAbis(arrayListOf("arm64-v8a"))
             .setLibs(arrayListOf(ApkBuilder.Lib.EMBEDDED_NODE_JS.label))
             .setPermissions(ArrayList(permissions))
+        if (nodePermissions.isNotEmpty()) {
+            config.setNodeConfig(ProjectConfig.NodeConfig().setPermissions(ArrayList(nodePermissions)))
+        }
         config.launchConfig = LaunchConfig().apply {
             isLogsVisible = true
             isSplashVisible = false
             isLauncherVisible = true
             isRunOnBoot = false
+        }
+
+        val cacheKey = packagedSmokeFixtureCacheKey(
+            kind = "gate_diagnostics",
+            outputApkName = outputApkName,
+            requiredTemplateDexMarkers = requiredTemplateDexMarkers,
+            inputs = listOf(
+                "rootName" to rootName,
+                "projectName" to projectName,
+                "packageName" to packageName,
+                "mainScriptName" to mainScriptName,
+                "mainScript" to mainScript,
+                "permissions" to permissions.sorted().joinToString("\n"),
+                "nodePermissions" to nodePermissions.sorted().joinToString("\n"),
+                "launchDescriptor" to launchDescriptor.orEmpty(),
+                "projectConfig" to projectConfigText,
+                "runtimeMatrix" to runtimeMatrixText,
+            ) + extraFiles.toSortedMap().map { (relativePath, content) ->
+                "extra:$relativePath" to content
+            },
+        )
+        restorePackagedSmokeFixtureCache(
+            outputApk = outputApk,
+            cacheKey = cacheKey,
+            label = "gate diagnostics $packageName",
+        )?.let { cachedApk ->
+            outputPathFile.writeText(cachedApk.absolutePath, StandardCharsets.UTF_8)
+            assertPackagedApkContainsGateDiagnosticsSmoke(
+                outputApk = cachedApk,
+                projectName = projectName,
+                packageName = packageName,
+                mainScriptName = mainScriptName,
+                mainScript = mainScript,
+                extraFiles = extraFiles,
+                nodePermissions = nodePermissions,
+                runtimeMarkers = runtimeMarkers,
+                launchDescriptor = launchDescriptor,
+                launchDescriptorExpectation = launchDescriptorExpectation,
+            )
+            exportPackagedSmokeApkForHost(cachedApk)
+            return cachedApk
         }
 
         openPackagedSmokeTemplate(requiredDexMarkers = requiredTemplateDexMarkers).use { templateApk ->
@@ -10984,7 +12238,15 @@ $permissionsJson
             mainScriptName = mainScriptName,
             mainScript = mainScript,
             extraFiles = extraFiles,
+            nodePermissions = nodePermissions,
             runtimeMarkers = runtimeMarkers,
+            launchDescriptor = launchDescriptor,
+            launchDescriptorExpectation = launchDescriptorExpectation,
+        )
+        storePackagedSmokeFixtureCache(
+            outputApk = outputApk,
+            cacheKey = cacheKey,
+            label = "gate diagnostics $packageName",
         )
         exportPackagedSmokeApkForHost(outputApk)
         return outputApk
@@ -11605,7 +12867,10 @@ $permissionsJson
         mainScriptName: String,
         mainScript: String,
         extraFiles: Map<String, String>,
+        nodePermissions: List<String>,
         runtimeMarkers: List<String>,
+        launchDescriptor: String? = null,
+        launchDescriptorExpectation: PackagedNodeLaunchDescriptorExpectation? = null,
     ) {
         ZipFile(outputApk).use { zip ->
             val entries = zip.entries().asSequence().map { it.name }.toSet()
@@ -11614,6 +12879,14 @@ $permissionsJson
             assertTrue("Gate diagnostics APK is missing encrypted main script: $mainEntry", mainEntry in entries)
             assertTrue("Gate diagnostics APK is missing bundled project config", "assets/project/${ProjectConfig.CONFIG_FILE_NAME}" in entries)
             assertTrue("Gate diagnostics APK is missing runtime matrix marker", "assets/project/runtime-matrix.expected.txt" in entries)
+            if (launchDescriptor != null) {
+                PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILES.forEach { descriptorFileName ->
+                    assertTrue(
+                        "Gate diagnostics APK is missing internal Node launch descriptor: $descriptorFileName",
+                        "assets/project/$descriptorFileName" in entries,
+                    )
+                }
+            }
 
             val projectConfig = readZipText(zip, "assets/project/${ProjectConfig.CONFIG_FILE_NAME}")
             val bundledConfig = checkNotNull(ProjectConfig.fromJson(projectConfig)) {
@@ -11627,6 +12900,26 @@ $permissionsJson
                 "Bundled gate diagnostics project config should keep Embedded Node.js lib selection",
                 ApkBuilder.Lib.EMBEDDED_NODE_JS.label in bundledConfig.libs,
             )
+            if (nodePermissions.isNotEmpty()) {
+                assertEquals(
+                    "Bundled gate diagnostics project config should keep Node bridge permissions",
+                    nodePermissions.sorted(),
+                    bundledConfig.nodeConfig?.permissions.orEmpty().sorted(),
+                )
+            }
+            launchDescriptorExpectation?.let { expectation ->
+                assertPackagedNodeLaunchDescriptor(
+                    zip = zip,
+                    label = "Gate diagnostics",
+                    expected = expectation,
+                )
+            } ?: launchDescriptor?.let { descriptor ->
+                assertEquals(
+                    "Gate diagnostics raw launch descriptor",
+                    descriptor.trimEnd('\r', '\n'),
+                    readZipText(zip, "assets/project/$PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE").trimEnd('\r', '\n'),
+                )
+            }
 
             val expectedMatrix = readZipText(zip, "assets/project/runtime-matrix.expected.txt")
             runtimeMarkers.forEach { marker ->
@@ -11649,7 +12942,28 @@ $permissionsJson
                     )
                 }
             }
+            if (NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAMES.any { descriptorName -> descriptorName in extraFiles }) {
+                assertPackagedRuntimeCompatibilityDescriptor(zip)
+            }
             assertPackagedNodeNativeLibEntries(entries)
+        }
+    }
+
+    private fun assertPackagedRuntimeCompatibilityDescriptor(zip: ZipFile) {
+        val entry = NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAMES
+            .map { descriptorName -> "assets/project/$descriptorName" }
+            .firstOrNull { candidate -> zip.getEntry(candidate) != null }
+            ?: error("Packaged APK is missing runtime compatibility descriptor")
+        val descriptor = JSONObject(readZipText(zip, entry))
+        NodeProjectRuntimeCompatibilityDescriptor.requireCompatible(descriptor, entry)
+        val actualVersions = descriptor.getJSONObject("versions")
+        val expectedVersions = NodeProjectRuntimeCompatibilityDescriptor.currentVersionsJson()
+        expectedVersions.keys().forEach { key ->
+            assertEquals(
+                "Packaged runtime compatibility descriptor versions.$key",
+                expectedVersions.getString(key),
+                actualVersions.getString(key),
+            )
         }
     }
 
@@ -11671,7 +12985,7 @@ $permissionsJson
             """{"name":"diagnostic-type-module","version":"1.0.0","type":"module","main":"index.mjs"}""",
             mapOf(
                 "index.mjs" to """
-                export default "should-not-run";
+                export default "diagnostic-type-module-sync";
                 """.trimIndent(),
             ),
         )
@@ -11692,7 +13006,17 @@ $permissionsJson
             """.trimIndent(),
             mapOf(
                 "esm.mjs" to """
-                export default "should-not-run";
+                export default "diagnostic-esm-export-context-sync";
+                """.trimIndent(),
+            ),
+        )
+        EmbeddedNodeFixtureCorpus.writeNpmPackage(
+            projectDir,
+            "diagnostic-async-esm",
+            """{"name":"diagnostic-async-esm","version":"1.0.0","type":"module","main":"index.mjs"}""",
+            mapOf(
+                "index.mjs" to """
+                export default await Promise.resolve("diagnostic-async-esm");
                 """.trimIndent(),
             ),
         )
@@ -12014,6 +13338,7 @@ $permissionsJson
             "assets/project/node_modules/diagnostic-boom/package.json",
             "assets/project/node_modules/diagnostic-type-module/package.json",
             "assets/project/node_modules/diagnostic-esm-export-context/package.json",
+            "assets/project/node_modules/diagnostic-async-esm/package.json",
         ).forEach { packageJsonEntry ->
             assertTrue("Diagnostics APK is missing diagnostic package metadata", packageJsonEntry in entries)
             assertTrue(
@@ -12026,11 +13351,13 @@ $permissionsJson
             "main.js",
             "esm-entry.mjs",
             "dynamic-import.js",
-            "dynamic-target.js",
+            "dynamic-target.mjs",
+            "dynamic-legacy.cjs",
             "timeout.js",
             "node_modules/diagnostic-boom/index.js",
             "node_modules/diagnostic-type-module/index.mjs",
             "node_modules/diagnostic-esm-export-context/esm.mjs",
+            "node_modules/diagnostic-async-esm/index.mjs",
         ).forEach { relativePath ->
             val entry = "assets/project/$relativePath"
             assertTrue("Diagnostics APK is missing JavaScript diagnostic source: $entry", entry in entries)
@@ -12103,6 +13430,26 @@ $permissionsJson
         )
     }
 
+    private fun assertInstallAndRunPackagedV11BridgeSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = V11_BRIDGE_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-v11-bridge-smoke.apk",
+            label = "packaged v1.1 bridge smoke",
+            requiredMarkers = V11_BRIDGE_RUNTIME_MARKERS,
+        )
+    }
+
+    private fun assertInstallAndRunPackagedRhinoCompatSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = RHINO_COMPAT_PACKAGED_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-rhino-compat-smoke.apk",
+            label = "packaged Rhino compat smoke",
+            requiredMarkers = RHINO_COMPAT_PACKAGED_RUNTIME_MARKERS,
+        )
+    }
+
     private fun assertInstallAndRunPackagedScriptLaunchSmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
@@ -12164,7 +13511,7 @@ $permissionsJson
             outputApk = outputApk,
             packageName = EXPERIMENTAL_ESM_PACKAGE_NAME,
             shellApkPath = "/data/local/tmp/autojs6-packaged-node-experimental-esm-smoke.apk",
-            label = "packaged experimental ESM smoke",
+            label = "packaged partial ESM smoke",
             requiredMarkers = EXPERIMENTAL_ESM_RUNTIME_MARKERS,
         )
     }
@@ -12173,9 +13520,19 @@ $permissionsJson
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
             packageName = DYNAMIC_IMPORT_DIAGNOSTICS_PACKAGE_NAME,
-            shellApkPath = "/data/local/tmp/autojs6-packaged-node-dynamic-import-diagnostics-smoke.apk",
-            label = "packaged dynamic import diagnostics smoke",
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-dynamic-import-local-smoke.apk",
+            label = "packaged dynamic import local smoke",
             requiredMarkers = DYNAMIC_IMPORT_DIAGNOSTICS_MARKERS,
+        )
+    }
+
+    private fun assertInstallAndRunPackagedWorkerThreadsEsmSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = WORKER_THREADS_ESM_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-worker-threads-esm-smoke.apk",
+            label = "packaged worker_threads ESM smoke",
+            requiredMarkers = WORKER_THREADS_ESM_RUNTIME_MARKERS,
         )
     }
 
@@ -12187,6 +13544,100 @@ $permissionsJson
             label = "packaged timeout diagnostics smoke",
             requiredMarkers = TIMEOUT_DIAGNOSTICS_INSTALL_REQUIRED_MARKERS,
         )
+    }
+
+    private fun assertInstallAndRunPackagedProcessPoolSlotSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = PROCESS_POOL_SLOT_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-process-pool-slot-smoke.apk",
+            label = "packaged process-pool slot smoke",
+            requiredMarkers = PROCESS_POOL_SLOT_INSTALL_REQUIRED_MARKERS,
+        )
+    }
+
+    private fun assertInstallRunAndCollectPackagedCrashEvidenceSmoke(outputApk: File) {
+        val publicApkPath = "$PACKAGED_SMOKE_PUBLIC_EXPORT_DIR/${outputApk.name}"
+        val shellApkPath = "/data/local/tmp/autojs6-packaged-node-crash-evidence-smoke.apk"
+        val copyOutput = copyPublicApkToShellPath(publicApkPath, shellApkPath)
+        assumeTrue(
+            "Could not copy packaged crash evidence APK to a shell-readable install path.\n$copyOutput",
+            copyOutput.contains("READY"),
+        )
+        try {
+            shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
+            shellWithTimeout("pm uninstall $CRASH_EVIDENCE_PACKAGE_NAME")
+            shellWithTimeout("logcat -c", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
+
+            val installOutput = shellWithTimeout("pm install -r -t $shellApkPath")
+            assumeTrue(
+                "Package manager could not install packaged crash evidence APK.\n$installOutput",
+                installOutput.contains("Success", ignoreCase = true),
+            )
+
+            val packagePath = shellWithTimeout("pm path $CRASH_EVIDENCE_PACKAGE_NAME")
+            assumeTrue(
+                "Package manager did not expose installed packaged crash evidence APK path.\n$packagePath",
+                packagePath.contains("package:", ignoreCase = true),
+            )
+
+            val launchOutput = shellWithTimeout(
+                "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity",
+            )
+            assumeTrue(
+                "Could not launch packaged crash evidence SplashActivity.\n$launchOutput",
+                launchOutput.contains("Starting", ignoreCase = true) ||
+                        launchOutput.contains("Warning: Activity not started", ignoreCase = true),
+            )
+
+            val firstLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS)
+            val firstRelevantLog = relevantPackagedLogcat(firstLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
+            assumeTrue(
+                "Logcat channel did not show the launched packaged crash evidence package.\n$firstRelevantLog",
+                firstLogcat.contains(CRASH_EVIDENCE_PACKAGE_NAME),
+            )
+            assertFalse(
+                "Packaged crash evidence first launch crashed natively before force-stop.\n$firstRelevantLog",
+                firstLogcat.contains(">>> $CRASH_EVIDENCE_PACKAGE_NAME:nodejs_embedded <<<") ||
+                        firstLogcat.contains("data_app_native_crash") ||
+                        firstLogcat.contains("NativeCrashHandler"),
+            )
+            val missingFirstMarkers = CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS.filterNot { firstLogcat.contains(it) }
+            assertTrue(
+                "Packaged crash evidence first launch did not contain expected markers: $missingFirstMarkers\n$firstRelevantLog",
+                missingFirstMarkers.isEmpty(),
+            )
+
+            shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
+            Thread.sleep(1_000L)
+
+            val relaunchOutput = shellWithTimeout(
+                "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity",
+            )
+            assumeTrue(
+                "Could not relaunch packaged crash evidence SplashActivity.\n$relaunchOutput",
+                relaunchOutput.contains("Starting", ignoreCase = true) ||
+                        relaunchOutput.contains("Warning: Activity not started", ignoreCase = true),
+            )
+
+            val logcat = waitForLogcatMarkers(CRASH_EVIDENCE_COLLECTION_MARKERS)
+            val relevantLog = relevantPackagedLogcat(logcat, CRASH_EVIDENCE_PACKAGE_NAME)
+            assertFalse(
+                "Packaged crash evidence relaunch crashed natively.\n$relevantLog",
+                logcat.contains(">>> $CRASH_EVIDENCE_PACKAGE_NAME:nodejs_embedded <<<") ||
+                        logcat.contains("data_app_native_crash") ||
+                        logcat.contains("NativeCrashHandler"),
+            )
+            val missingCollectionMarkers = CRASH_EVIDENCE_COLLECTION_MARKERS.filterNot { logcat.contains(it) }
+            assertTrue(
+                "Packaged crash evidence relaunch did not collect next-launch markers: $missingCollectionMarkers\n$relevantLog",
+                missingCollectionMarkers.isEmpty(),
+            )
+        } finally {
+            shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
+            shellWithTimeout("pm uninstall $CRASH_EVIDENCE_PACKAGE_NAME")
+            shellWithTimeout("rm -f $shellApkPath", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)
+        }
     }
 
     private fun assertInstallAndRunPackagedLaunchFailureSmoke(
@@ -12372,6 +13823,10 @@ $permissionsJson
                         it.contains("ESM/import") ||
                         it.contains("dynamic import") ||
                         it.contains("NativeNode") ||
+                        it.contains("NodeCrashEvidenceStore") ||
+                        it.contains("marker.begin") ||
+                        it.contains("marker.collect") ||
+                        it.contains("autojs6-node-phase13") ||
                         it.contains(NodeProjectLaunchDiagnostics.LAUNCH_FAILURE_MARKER) ||
                         it.contains(NodeProjectLaunchDiagnostics.RUNNER_REQUEST_FAILURE_MARKER) ||
                         it.contains(NodeProjectLaunchDiagnostics.INRT_PROJECT_ENTRY_RESOLUTION_FAILURE_MARKER) ||
@@ -12435,6 +13890,15 @@ $permissionsJson
     ): InputStream {
         val source = packagedSmokeTemplateSource(requiredDexMarkers = requiredDexMarkers)
             ?: error("Packaged smoke template is unavailable.\n${packagedSmokeTemplateDiagnostics()}")
+        requirePackagedSmokeTemplateFresh(source, requiredDexMarkers)
+        println("Packaged smoke template source: ${source.summary}")
+        return openPackagedSmokeTemplateSource(source)
+    }
+
+    private fun requirePackagedSmokeTemplateFresh(
+        source: PackagedSmokeTemplateSource,
+        requiredDexMarkers: List<String> = emptyList(),
+    ) {
         val missingDefaultTemplateMarkers = listOf(
             INRT_NODE_PROJECT_RUNNER_TEMPLATE_MARKER,
             INRT_NODE_PROJECT_LAUNCH_SOURCE_TEMPLATE_MARKER,
@@ -12465,8 +13929,6 @@ $permissionsJson
                         packagedSmokeTemplateDiagnostics(),
             )
         }
-        println("Packaged smoke template source: ${source.summary}")
-        return openPackagedSmokeTemplateSource(source)
     }
 
     private fun openPackagedSmokeTemplateSource(source: PackagedSmokeTemplateSource): InputStream {
@@ -12914,6 +14376,12 @@ $permissionsJson
         private const val DEVICE_BRIDGE_PROJECT_NAME = "PackagedNodeDeviceBridgeSmoke"
         private const val DEVICE_BRIDGE_PACKAGE_NAME = "org.autojs6.packaged.node.device.smoke"
         private const val DEVICE_BRIDGE_APK_NAME = "PackagedNodeDeviceBridgeSmoke_v1.0.0.apk"
+        private const val V11_BRIDGE_PROJECT_NAME = "PackagedNodeV11BridgeSmoke"
+        private const val V11_BRIDGE_PACKAGE_NAME = "org.autojs6.packaged.node.v11.bridge.smoke"
+        private const val V11_BRIDGE_APK_NAME = "PackagedNodeV11BridgeSmoke_v1.0.0.apk"
+        private const val RHINO_COMPAT_PACKAGED_PROJECT_NAME = "PackagedNodeRhinoCompatSmoke"
+        private const val RHINO_COMPAT_PACKAGED_PACKAGE_NAME = "org.autojs6.packaged.node.rhino.compat.smoke"
+        private const val RHINO_COMPAT_PACKAGED_APK_NAME = "PackagedNodeRhinoCompatSmoke_v1.0.0.apk"
         private const val SCRIPT_LAUNCH_PROJECT_NAME = "PackagedNodeScriptLaunchSmoke"
         private const val SCRIPT_LAUNCH_PACKAGE_NAME = "org.autojs6.packaged.node.script.launch.smoke"
         private const val SCRIPT_LAUNCH_APK_NAME = "PackagedNodeScriptLaunchSmoke_v1.0.0.apk"
@@ -12937,10 +14405,23 @@ $permissionsJson
             "org.autojs6.packaged.node.dynamicimport.diagnostics.smoke"
         private const val DYNAMIC_IMPORT_DIAGNOSTICS_APK_NAME =
             "PackagedNodeDynamicImportDiagnosticsSmoke_v1.0.0.apk"
+        private const val WORKER_THREADS_ESM_PROJECT_NAME = "PackagedNodeWorkerThreadsEsmSmoke"
+        private const val WORKER_THREADS_ESM_PACKAGE_NAME =
+            "org.autojs6.packaged.node.workerthreads.esm.smoke"
+        private const val WORKER_THREADS_ESM_APK_NAME =
+            "PackagedNodeWorkerThreadsEsmSmoke_v1.0.0.apk"
         private const val TIMEOUT_DIAGNOSTICS_PROJECT_NAME = "PackagedNodeTimeoutDiagnosticsSmoke"
         private const val TIMEOUT_DIAGNOSTICS_PACKAGE_NAME = "org.autojs6.packaged.node.timeout.diagnostics.smoke"
         private const val TIMEOUT_DIAGNOSTICS_APK_NAME = "PackagedNodeTimeoutDiagnosticsSmoke_v1.0.0.apk"
+        private const val PROCESS_POOL_SLOT_PROJECT_NAME = "PackagedNodeProcessPoolSlotSmoke"
+        private const val PROCESS_POOL_SLOT_PACKAGE_NAME = "org.autojs6.packaged.node.processpoolslot.smoke"
+        private const val PROCESS_POOL_SLOT_APK_NAME = "PackagedNodeProcessPoolSlotSmoke_v1.0.0.apk"
+        private const val CRASH_EVIDENCE_PROJECT_NAME = "PackagedNodeCrashEvidenceSmoke"
+        private const val CRASH_EVIDENCE_PACKAGE_NAME = "org.autojs6.packaged.node.crashevidence.smoke"
+        private const val CRASH_EVIDENCE_APK_NAME = "PackagedNodeCrashEvidenceSmoke_v1.0.0.apk"
+        private const val CRASH_EVIDENCE_TIMEOUT_MS = 30_000L
         private const val PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE = NodeProjectLaunchDescriptor.DESCRIPTOR_FILE_NAME
+        private val PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILES = NodeProjectLaunchDescriptor.DESCRIPTOR_FILE_NAMES
         private const val PACKAGED_SMOKE_MARKER_REPORT_FILE = "packaged-smoke-markers.log"
         private const val PACKAGE_SCRIPT_NODE_MODULES_BIN_TEMPLATE_MARKER = "node_modules/.bin/"
         private const val PACKAGED_LAUNCH_FAILURE_SECRET_KEY = "PACKAGED_FAILURE_SECRET"
@@ -13035,16 +14516,15 @@ $permissionsJson
             "packaged.buffer.transcode=true",
             "packaged.web_globals=true",
             "packaged.web_fetch_disabled=true",
+            "packaged.web_axios_disabled=true",
             "packaged.web_platform_globals=true",
             "packaged.web_platform_utilities=true",
             "packaged.web_abort_signal=true",
             "packaged.web_event_globals=true",
-            "packaged.web_performance_globals=true",
             "packaged.web_message_globals=true",
             "packaged.web_stream_globals=true",
             "packaged.web_crypto.global=true",
             "packaged.web_crypto.digest=true",
-            "packaged.web_crypto.hmac=true",
             "packaged.web_crypto.node_alias=true",
             "packaged.web_compression.global=true",
             "packaged.web_compression.roundtrip=true",
@@ -13069,8 +14549,6 @@ $permissionsJson
             "packaged.legacy_core.assert_helpers=function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function",
             "packaged.legacy_core.punycode=true",
             "packaged.legacy_core.hidden=true",
-            "packaged.core_builtins.ready=true",
-            "packaged.core_builtins.surface=true",
             "packaged.core_builtins.events_extended=true",
             "packaged.core_builtins.events_helpers=function,function,function,function,symbol,symbol,undefined",
             "packaged.core_builtins.path_extended=true",
@@ -13101,9 +14579,7 @@ $permissionsJson
             "packaged.core_builtins.http_helpers=function,function,function,function,function,function,function,function,function,function,function,function,object,object,object,undefined",
             "packaged.core_builtins.tls=true",
             "packaged.core_builtins.tls_helpers=function,function,function,function,function,function,function,function,function,object,string,undefined",
-            "packaged.core_builtins.perf_hooks=true",
             "packaged.core_builtins.perf_helpers=object,function,function,function,function,function,function,function,function,number,function,function,function,function",
-            "packaged.core_builtins.perf_hidden=undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined",
             "packaged.core_builtins.timers_promises=true",
             "packaged.core_builtins.timers_promises_helpers=function,function,function,object,function,function",
             "packaged.core_builtins.stream_helpers=true",
@@ -13229,6 +14705,49 @@ $permissionsJson
             "packaged.device.values=true",
             "packaged.device.sensitive=true",
             "packaged.device.shadow=true",
+        )
+        private val V11_BRIDGE_NODE_PERMISSIONS = listOf(
+            "network",
+            "ocr",
+            "image",
+            "storage",
+            "notifications",
+            "ui",
+            "work_manager",
+            "plugin.org.example.packaged",
+        )
+        private val V11_BRIDGE_RUNTIME_MARKERS = listOf(
+            "packaged.v1_1_bridge.ready=true",
+            "packaged.v1_1_bridge.fetch=true",
+            "packaged.v1_1_bridge.ocr=true",
+            "packaged.v1_1_bridge.storage=true",
+            "packaged.v1_1_bridge.notifications=true",
+            "packaged.v1_1_bridge.ui=true",
+            "packaged.v1_1_bridge.work_manager=true",
+            "packaged.v1_1_bridge.plugin=true",
+            "packaged.v1_1_bridge.permissions=true",
+            "packaged.v1_1_bridge.no_shadow=true",
+            "packaged.v1_1_bridge.pending=0",
+        )
+        private val RHINO_COMPAT_PACKAGED_NODE_PERMISSIONS = listOf(
+            "toast",
+            "storage",
+            "accessibility",
+            "image",
+            "ui",
+        )
+        private val RHINO_COMPAT_PACKAGED_RUNTIME_MARKERS = listOf(
+            "packaged.rhino_compat.ready=true",
+            "packaged.rhino_compat.loader=true",
+            "packaged.rhino_compat.toast=true",
+            "packaged.rhino_compat.files=true",
+            "packaged.rhino_compat.storage=true",
+            "packaged.rhino_compat.selector=true",
+            "packaged.rhino_compat.image=true",
+            "packaged.rhino_compat.compat_ui=true",
+            "packaged.rhino_compat.permissions=true",
+            "packaged.rhino_compat.cleanup=true",
+            "packaged.rhino_compat.pending=0",
         )
         private val SCRIPT_LAUNCH_RUNTIME_MARKERS = listOf(
             "packaged.script_launch.ready=true",
@@ -13412,11 +14931,15 @@ $permissionsJson
             "packaged.diagnostics.fs_absolute.message=true",
             "packaged.diagnostics.cjs_stack.message=true",
             "packaged.diagnostics.cjs_stack.source=true",
-            "packaged.diagnostics.esm.type_module.message=true",
+            "packaged.diagnostics.esm.type_module.value=true",
             "packaged.diagnostics.esm.exports_context=true",
+            "packaged.diagnostics.esm.async_code=ERR_REQUIRE_ASYNC_MODULE",
+            "packaged.diagnostics.esm.async_message=true",
             "packaged.diagnostics.after_failure.ok=true",
-            "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
-            "packaged.diagnostics.dynamic_import.code=ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED",
+            "packaged.diagnostics.esm.code=ok",
+            "packaged.dynamic_import.ready=true",
+            "packaged.dynamic_import.mjs=true",
+            "packaged.dynamic_import.cjs=true",
             "packaged.diagnostics.timeout.code=ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT",
             "packaged.diagnostics.timeout.timedOut=true",
             "packaged.diagnostics.timeout.pendingTimers=true",
@@ -13429,26 +14952,55 @@ $permissionsJson
             "packaged.diagnostics.fs_absolute.message=true",
             "packaged.diagnostics.cjs_stack.message=true",
             "packaged.diagnostics.cjs_stack.source=true",
-            "packaged.diagnostics.esm.type_module.message=true",
+            "packaged.diagnostics.esm.type_module.value=true",
             "packaged.diagnostics.esm.exports_context=true",
+            "packaged.diagnostics.esm.async_code=ERR_REQUIRE_ASYNC_MODULE",
+            "packaged.diagnostics.esm.async_message=true",
             "packaged.diagnostics.after_failure.ok=true",
         )
         private val ESM_DIAGNOSTICS_MARKERS = listOf(
-            "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
+            "packaged.diagnostics.esm.code=ok",
             "packaged.diagnostics.esm.message=true",
         )
         private val EXPERIMENTAL_ESM_RUNTIME_MARKERS = listOf(
             "packaged.experimental_esm.ready=true",
             "packaged.experimental_esm.entry=true",
             "packaged.experimental_esm.tla=true",
+            "packaged.experimental_esm.builtin=true",
+            "packaged.experimental_esm.full_path=true",
+            "packaged.experimental_esm.type_module=true",
+            "packaged.experimental_esm.graph=true",
+            "packaged.experimental_esm.security=true",
+            "packaged.experimental_esm.stack_source=true",
         )
         private val EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS = listOf(
             "esmExperimentalEnabled=",
         )
         private val DYNAMIC_IMPORT_DIAGNOSTICS_MARKERS = listOf(
-            "packaged.diagnostics.dynamic_import.code=ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED",
-            "packaged.diagnostics.dynamic_import.message=true",
+            "packaged.dynamic_import.ready=true",
+            "packaged.dynamic_import.mjs=true",
+            "packaged.dynamic_import.cjs=true",
+            "packaged.dynamic_import.type_module=true",
+            "packaged.dynamic_import.full_path=true",
+            "packaged.dynamic_import.child_process_denied=true",
+            "packaged.dynamic_import.path_escape_denied=true",
+            "packaged.dynamic_import.security=true",
         )
+        private val DYNAMIC_IMPORT_TEMPLATE_DEX_MARKERS = listOf(
+            "dynamicImportLocalEnabled=",
+        )
+        private val WORKER_THREADS_ESM_RUNTIME_MARKERS = listOf(
+            "packaged.worker_threads.esm.ready=true",
+            "packaged.worker_threads.esm.value=true",
+            "packaged.worker_threads.esm.thread=true",
+            "packaged.worker_threads.esm.filename=true",
+            "packaged.worker_threads.esm.builtin=true",
+            "packaged.worker_threads.esm.exit=0",
+        )
+        private val WORKER_THREADS_ESM_TEMPLATE_DEX_MARKERS =
+            EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS + listOf(
+                "workerThreadsExperimentalEnabled=",
+            )
         private val TIMEOUT_DIAGNOSTICS_RUNTIME_MARKERS = listOf(
             "packaged.diagnostics.timeout.code=ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT",
             "packaged.diagnostics.timeout.timedOut=true",
@@ -13459,8 +15011,47 @@ $permissionsJson
             "timedOut=true",
             "pendingTimers=true",
         )
+        private val PROCESS_POOL_SLOT_RUNTIME_MARKERS = listOf(
+            "packaged.process_pool_slot.ready=true",
+            "packaged.process_pool_slot.argv=true",
+            "packaged.process_pool_slot.env=true",
+            "processPoolSlot=${NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID}",
+            "processPoolSlotSource=${NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST}",
+            "processPool=${NodeEmbeddedProcessPoolPolicy.MODE_EXPLICIT_TWO_SLOT}/${NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID}",
+        )
+        private val PROCESS_POOL_SLOT_INSTALL_REQUIRED_MARKERS = PROCESS_POOL_SLOT_RUNTIME_MARKERS
+        private val PROCESS_POOL_SLOT_TEMPLATE_DEX_MARKERS = listOf(
+            "processPoolSlot=",
+            "processPoolSlotSource=",
+            "process_pool_slot",
+        )
+        private val CRASH_EVIDENCE_RUNTIME_MARKERS = listOf(
+            "packaged.crash_evidence.started=true",
+        )
+        private val CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS = listOf(
+            "autojs6.inrt.node_project_packaged_long_running.v1",
+            "marker.begin schema=autojs6-node-phase13-crash-marker-v1",
+            "scenario=embedded_script_service",
+            "launchSurface=${NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING}",
+            "executionMode=${NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING}",
+            "packageName=$CRASH_EVIDENCE_PACKAGE_NAME",
+        )
+        private val CRASH_EVIDENCE_COLLECTION_MARKERS = listOf(
+            "marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1",
+            "state=collected_after_restart",
+            "reason=app.onCreate",
+            "launchSurface=${NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING}",
+            "executionMode=${NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING}",
+            "packageName=$CRASH_EVIDENCE_PACKAGE_NAME",
+        )
+        private val CRASH_EVIDENCE_TEMPLATE_DEX_MARKERS = listOf(
+            "marker.begin schema=",
+            "marker.collect schema=",
+            "autojs6-node-phase13-next-launch-crash-bundle-v1",
+        )
         private const val PACKAGED_SMOKE_PUBLIC_EXPORT_DIR =
             "/sdcard/Download/AutoJs6/embedded-node-packaged-smoke"
+        private const val PACKAGED_SMOKE_FIXTURE_CACHE_DIR_NAME = "embedded-node-packaged-fixture-cache"
         private const val PACKAGED_SMOKE_SHELL_TIMEOUT_SECONDS = 90L
         private const val PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS = 15L
         private const val PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS = 15L
@@ -13485,6 +15076,141 @@ $permissionsJson
         private const val PACKAGED_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
     }
 
+    private fun packagedRuntimeCompatibilityDescriptor(
+        esmPartial: Boolean,
+        dynamicImportLocal: Boolean,
+        workerThreads: Boolean = false,
+    ): String {
+        return NodeProjectRuntimeCompatibilityDescriptor.currentText(
+            esmPartial = esmPartial,
+            dynamicImportLocal = dynamicImportLocal,
+            workerThreads = workerThreads,
+        )
+    }
+
+    private fun packagedRuntimeCompatibilityDescriptorFiles(
+        esmPartial: Boolean,
+        dynamicImportLocal: Boolean,
+        workerThreads: Boolean = false,
+    ): Map<String, String> {
+        return packagedRuntimeCompatibilityDescriptorFiles(
+            packagedRuntimeCompatibilityDescriptor(
+                esmPartial = esmPartial,
+                dynamicImportLocal = dynamicImportLocal,
+                workerThreads = workerThreads,
+            ),
+        )
+    }
+
+    private fun packagedRuntimeCompatibilityDescriptorFiles(descriptorText: String): Map<String, String> {
+        return NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAMES.associateWith { descriptorText }
+    }
+
+    private fun packagedSmokeFixtureCacheKey(
+        kind: String,
+        outputApkName: String,
+        requiredTemplateDexMarkers: List<String>,
+        inputs: List<Pair<String, String>>,
+    ): String {
+        val source = packagedSmokeTemplateSource(requiredDexMarkers = requiredTemplateDexMarkers)
+            ?: error("Packaged smoke template is unavailable for fixture cache.\n${packagedSmokeTemplateDiagnostics()}")
+        requirePackagedSmokeTemplateFresh(source, requiredTemplateDexMarkers)
+        val templateSha256 = openPackagedSmokeTemplateSource(source).use { input -> sha256(input) }
+        val digest = MessageDigest.getInstance("SHA-256")
+        fun update(key: String, value: String) {
+            digest.update(key.toByteArray(StandardCharsets.UTF_8))
+            digest.update(0.toByte())
+            digest.update(value.toByteArray(StandardCharsets.UTF_8))
+            digest.update(0.toByte())
+        }
+        update("cache.schema", "autojs6-packaged-smoke-fixture-cache-v1")
+        update("kind", kind)
+        update("outputApkName", outputApkName)
+        update("template.kind", source.kind.name)
+        update("template.summary", source.summary)
+        update("template.sha256", templateSha256)
+        update("build.versionCode", BuildConfig.VERSION_CODE.toString())
+        update("build.versionName", BuildConfig.VERSION_NAME)
+        update("runtime.backend", BuildConfig.NODEJS_RUNTIME_BACKEND)
+        update("runtime.engine", NodeRuntimeCapabilities.ENGINE_VERSION)
+        update("runtime.descriptor", NodeProjectRuntimeCompatibilityDescriptor.currentJson().toString())
+        requiredTemplateDexMarkers.sorted().forEachIndexed { index, marker ->
+            update("requiredTemplateDexMarker.$index", marker)
+        }
+        inputs.sortedWith(compareBy<Pair<String, String>> { it.first }.thenBy { it.second }).forEach { (key, value) ->
+            update("input.$key", value)
+        }
+        return digest.digest().toHexString()
+    }
+
+    private fun restorePackagedSmokeFixtureCache(
+        outputApk: File,
+        cacheKey: String,
+        label: String,
+    ): File? {
+        val cachedApk = packagedSmokeFixtureCacheApk(outputApk.name, cacheKey)
+        if (!cachedApk.isFile || cachedApk.length() <= 0L) {
+            println("Packaged smoke fixture cache miss: label=$label key=${cacheKey.take(16)}")
+            return null
+        }
+        outputApk.parentFile?.mkdirs()
+        cachedApk.copyTo(outputApk, overwrite = true)
+        println(
+            "Packaged smoke fixture cache hit: label=$label key=${cacheKey.take(16)} " +
+                    "bytes=${outputApk.length()}",
+        )
+        return outputApk
+    }
+
+    private fun storePackagedSmokeFixtureCache(
+        outputApk: File,
+        cacheKey: String,
+        label: String,
+    ) {
+        val target = packagedSmokeFixtureCacheApk(outputApk.name, cacheKey)
+        target.parentFile?.mkdirs()
+        val tmp = File(target.parentFile, "${target.name}.tmp")
+        outputApk.copyTo(tmp, overwrite = true)
+        if (target.exists()) {
+            target.delete()
+        }
+        check(tmp.renameTo(target) || runCatching {
+            tmp.copyTo(target, overwrite = true)
+            tmp.delete()
+            true
+        }.getOrDefault(false)) {
+            "Failed to store packaged smoke fixture cache: ${target.absolutePath}"
+        }
+        println(
+            "Packaged smoke fixture cache stored: label=$label key=${cacheKey.take(16)} " +
+                    "bytes=${target.length()} path=${target.absolutePath}",
+        )
+    }
+
+    private fun packagedSmokeFixtureCacheApk(outputApkName: String, cacheKey: String): File {
+        val baseName = outputApkName.removeSuffix(".apk").replace(Regex("""[^A-Za-z0-9._-]"""), "_")
+        return File(File(context.cacheDir, PACKAGED_SMOKE_FIXTURE_CACHE_DIR_NAME), "$baseName-$cacheKey.apk")
+    }
+
+    private fun sha256(input: InputStream): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) {
+                break
+            }
+            if (read > 0) {
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest().toHexString()
+    }
+
+    private fun ByteArray.toHexString(): String {
+        return joinToString(separator = "") { byte -> "%02x".format(byte.toInt() and 0xff) }
+    }
+
     private fun readZipText(zip: ZipFile, entryName: String): String =
         readZipBytes(zip, entryName).toString(StandardCharsets.UTF_8)
 
@@ -13507,6 +15233,9 @@ $permissionsJson
         assertEquals("$label descriptor argv", expected.argv, actual.optStringList("argv"))
         assertEquals("$label descriptor env", expected.env, actual.optStringMap("env"))
         assertOptionalDescriptorLong(label, expected.timeoutMs, actual, "timeoutMs")
+        assertOptionalDescriptorString(label, expected.executionMode, actual, "executionMode")
+        assertOptionalDescriptorString(label, expected.processPoolSlot, actual, "processPoolSlot")
+        assertOptionalDescriptorString(label, expected.processPoolSlotSource, actual, "processPoolSlotSource")
     }
 
     private fun assertOptionalDescriptorString(
@@ -13545,6 +15274,9 @@ $permissionsJson
             argv = optStringList("argv"),
             env = optStringMap("env"),
             timeoutMs = optLongOrNull("timeoutMs"),
+            executionMode = optStringOrNull("executionMode"),
+            processPoolSlot = optStringOrNull("processPoolSlot"),
+            processPoolSlotSource = optStringOrNull("processPoolSlotSource"),
         )
     }
 

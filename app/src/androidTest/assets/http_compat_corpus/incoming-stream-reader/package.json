@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/incoming-stream-reader-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "incoming-stream-reader": "1.0.0"
+  }
+}

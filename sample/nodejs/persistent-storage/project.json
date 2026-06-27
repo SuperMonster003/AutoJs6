@@ -1,0 +1,5 @@
+{
+  "name": "persistent-storage",
+  "type": "node",
+  "main": "main.cjs"
+}

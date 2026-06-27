@@ -13,6 +13,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:verifyNodeResolverVisualizerFixtures`
 - [ ] `:app:generateNodeProfileReleaseManifest`
 - [ ] `:app:verifyNodePrGate`
+- [ ] v1.1 release candidates use `:app:verifyNodeV11RcReadiness` with `autojs.nodejs.test.deviceProfile=v1_1_beta`
 - [ ] release candidates use `:app:verifyNodeReleaseGate` with `autojs.nodejs.test.deviceProfile=sony` or `full`
 - [ ] `:app:generateNodeNightlyReport` output attached when publishing nightly or release-candidate results
 - [ ] fuzzer failures, if any, have seed JSON files under `build/reports/nodejs/fuzz-seeds/` and replay with `:app:replayNodeFuzzerSeed`
@@ -45,12 +46,14 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeDeviceBridgeInstrumentationTest`
 - [ ] `NodeShellBridgeInstrumentationTest`
 - [ ] `NodeFetchBridgeInstrumentationTest`
+- [ ] `NodeWorkerThreadsBootstrapInstrumentationTest`
 - [ ] `NodeWorkerThreadsDesignGateInstrumentationTest`
 - [ ] `NodeRawNetworkPolicyInstrumentationTest`
 - [ ] `NodeWorkerThreadsExperimentalInstrumentationTest`
 - [ ] `NodeJavaInteropBridgeInstrumentationTest`
 - [ ] `NodeBridgeResourceRegistryInstrumentationTest`
 - [ ] `NodeBridgeConcurrencyLimitsInstrumentationTest`
+- [ ] `NodeRuntimeBudgetPolicyInstrumentationTest`
 - [ ] `NodeBridgeRpcFuzzerInstrumentationTest`
 - [ ] `NodeExampleProjectInstrumentationTest`
 - [ ] timeline trace smoke verifies default-off behavior and required `embedded_script.timeline_json` events when opted in
@@ -69,14 +72,15 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies `shell` fake provider results, shadowing protection, timeout/cwd/env policy, declared `shell`/`shell.root` capability behavior, explicit root permission tagging, and that `child_process` remains disabled
 - [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, unsupported scheme, redirect limit, max concurrency, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
 - [ ] bridge smoke verifies controlled `websocket` fake-provider connect/send/receive/close, timeout, message budget, max connection, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `net`/`tls` remain disabled
-- [ ] bridge smoke verifies controlled `work_manager` schedule-once, schedule-periodic, cancel, list, scoped descriptor policy, packaged entry metadata serialization, queued-fallback rejection, shadowing protection, and that `tasks` remains unavailable
+- [ ] bridge smoke verifies controlled `work_manager` schedule-once, schedule-periodic, cancel, list, scoped descriptor policy, packaged entry metadata serialization, Android quota diagnostics, WorkManager live scheduled-runner CJS/ESM execution, `lastRun`/`runHistory`, cancel paths, queued-fallback rejection, shadowing protection, and that `tasks` remains unavailable
 - [ ] bridge conformance verifies stable module exports, Promise-returning bridge calls, provider error shape, capability rejection, handle methods, and zero pending calls after destroy
-- [ ] bridge resource registry verifies leaked image/screen/websocket resource cleanup semantics, Java handle cleanup, `work_manager` metadata cleanup, shell timeout cleanup, and `embedded_script.bridge_resource.*` diagnostics
+- [ ] bridge resource registry verifies leaked image/screen/websocket resource cleanup semantics, Java handle cleanup, `work_manager` registration cleanup, shell timeout cleanup, and `embedded_script.bridge_resource.*` diagnostics
 - [ ] bridge concurrency limits verify pending-call flood rejection, image-handle quota, shell/network/WebSocket resource limits, accessibility request-rate limiting, safe project overrides, and ignored above-hard-max overrides
+- [ ] runtime heartbeat/budget verifies stale bridge-call diagnostics, active registry/resource counts, safe runtime budget overrides, ignored above-hard-max overrides, provider quota rejection without leaks, and terminal status preservation
 - [ ] bridge RPC fuzzer verifies malformed request parsing, unknown dispatch paths, fake-provider mode, malformed responses, service-destroy rejection, and zero pending calls after cleanup
 - [ ] native addon policy verifies `.node` denial through relative require, `module.createRequire`, package `main`, package `exports`, package `imports`, and package subpath imports with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`
-- [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
-- [ ] experimental worker smoke verifies pure-JS worker computation, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path denial, and denied AutoJs bridge/raw network/fs/nested-worker access
+- [ ] worker gate verifies `worker_threads` stays disabled by default, cannot be shadowed, reports `experimentalFlags.workerThreads=false`, and records experimental native-availability preflight as either usable native Worker bootstrap or stable `ERR_AUTOJS6_WORKER_DISABLED`
+- [ ] experimental worker smoke verifies pure-JS worker computation, `workerData`, `parentPort.postMessage`, `threadId`, `terminate()`, max-worker rejection, scoped path denial, and denied AutoJs bridge/raw network/fs/nested-worker access when native workers are available; otherwise the promotion gate is explicitly skipped, not passed as runnable support
 - [ ] `:app:verifyNodeExamples` passes and generated example report matches `sample/nodejs/examples.json`
 - [ ] `:app:verifyAutoJs6NodeTypeDeclarations` passes and `sample/nodejs/typescript-smoke` type-checks when `tsc` is available
 - [ ] checked-in main-app examples `hello-node`, `cjs-package`, `fs-scoped`, `fs-promises`, `npm-pure-js-cjs`, `toast-app`, `accessibility-click-text`, `screenshot-find-image`, and `disabled-features-demo` still run from `sample/nodejs`
@@ -95,6 +99,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] packaged `app` bridge smoke passes, reports the packaged app id, and cannot be shadowed by `node_modules/app`
 - [ ] packaged `clipboard` bridge smoke passes and cannot be shadowed by `node_modules/clipboard`
 - [ ] packaged `device` bridge smoke passes, keeps sensitive identifiers absent, declares `android.permission.VIBRATE`, and cannot be shadowed by `node_modules/device`
+- [ ] packaged v1.1 bridge smoke passes for controlled `fetch`, OCR, `storage`/`storages`, UI, and `work_manager` fake transport with declared `node.permissions`, bridge-module shadowing protection, and zero pending bridge calls
 - [ ] packaged `engines` bridge smoke passes after the inrt template carries live bridge metadata
 - [ ] template APK refreshed when inrt bytecode or manifest changes
 - [ ] template reproducibility report records `template.refresh.ready=true`, template APK SHA-256, normalized manifest SHA-256, and native lib injection policy
@@ -106,7 +111,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `FOREGROUND_SERVICE` permission exists
 - [ ] `FOREGROUND_SERVICE_SPECIAL_USE` permission exists
 - [ ] packaged scheduled/background task receivers and permissions are absent unless the project explicitly opts in
-- [ ] packaged `work_manager` metadata registration requires live bridge metadata and is not accepted by queued fallback
+- [ ] packaged `work_manager` registration requires live bridge metadata and is not accepted by queued fallback
 - [ ] if packaged timed/boot/package tasks are enabled, manifest verifier reports the exact receivers, permissions, and foreground-service requirements
 - [ ] if packaged controlled network or WebSocket is enabled, manifest verifier reports `android.permission.INTERNET`; if it is not enabled, normal builds keep `autojs.nodejs.network.experimental=false`
 - [ ] if `node.permissions` / `autojs6.node.permissions` is present, missing bridge capabilities reject with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
@@ -165,7 +170,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] experimental workers, when explicitly tested, expose a smaller capability set than parent Node scripts and cannot access AutoJs bridge modules
 - [ ] experimental worker resource stress, when explicitly tested, shows no active worker after completion cleanup and no unbounded RSS/thread growth
 - [ ] direct WorkManager, AlarmManager, JobScheduler, and BroadcastReceiver authority remains denied to Node scripts
-- [ ] `work_manager` registration accepts only embedded backend, scoped relative paths, bounded intervals, and boolean constraint descriptors
+- [ ] `work_manager` registration accepts only embedded backend, scoped relative paths, bounded intervals, and boolean constraint descriptors; fired runs use only the WorkManager-owned `scheduled_runner` surface and cannot expose interactive UI or unrestricted background process authority
 - [ ] direct Java/Android interop remains disabled unless `autojs.nodejs.javaInterop.experimental=true` is explicitly tested
 - [ ] experimental Java interop, when explicitly tested, exposes only the documented allowlist and provider-owned opaque handles
 - [ ] reflection, class loaders, raw `Context`, native library loading, and Java process execution remain unavailable to Node scripts
@@ -185,7 +190,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] pure-JS npm corpus smoke
 - [ ] fixed real npm package corpus smoke
 - [ ] real npm corpus has license notes, no install scripts, no native addons, and no ESM-only packages
-- [ ] desktop Node differential report generated for fixed real npm corpus
+- [ ] desktop Node differential report generated for fixed real npm corpus, including `build/reports/nodejs/v1.1-differential.md`
+- [ ] modern core differential report generated at `build/reports/nodejs/differential/modern-core-differential.md`
 - [ ] package manager policy remains vendored/build-time only; no runtime install, lifecycle scripts, native addons, or unchecked `.bin` execution
 - [ ] `:app:bundleNodeDependencies` generated sanitized bundle manifest, SBOM-lite, size report, and rejection report
 - [ ] `:app:verifyNodeDependencyBundlerFixtures` rejects unsafe native addon, node-gyp artifact, lifecycle script, `.bin`, npm artifact, executable, path-reference, and oversized fixtures
@@ -201,9 +207,15 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] stdout/stderr are captured and closed
 - [ ] native handle diagnostics are available when debugging
 - [ ] runtime timeline trace remains off by default and records service/native/bootstrap/stdout/pending/bridge/stop/drain/destroy events when opted in
-- [ ] concurrent embedded Node starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`, and a later run succeeds after the active execution finishes
-- [ ] explicit embedded execution queue runs a second script after the first, supports queued cancellation, and returns `ERR_AUTOJS6_NODE_QUEUE_FULL` when the queue is full
-- [ ] long-running service mode remains disabled/design-only unless foreground notification, user stop, quotas, packaged checks, and restart policy tests are implemented
+- [ ] normal concurrent embedded Node starts queue and run after the active execution releases its process slot
+- [ ] explicit `reject_when_busy` concurrent starts return `ERR_AUTOJS6_NODE_ENGINE_BUSY`, and a later run succeeds after the active execution finishes
+- [ ] embedded execution queue supports queued cancellation and returns `ERR_AUTOJS6_NODE_QUEUE_FULL` when the queue is full
+- [ ] interactive long-running mode remains explicit, foreground, user-stoppable, restart policy `never`, and unavailable to normal script/package launches unless their dedicated gates are implemented
+- [ ] scheduled execution mode remains unavailable to direct script/package launches and is accepted only for WorkManager-owned scheduled runner executions
+- [ ] embedded Node foreground-service start/type/timeout diagnostics are present, and Android timeout cleanup calls the immediate stop path
+- [ ] interactive status snapshots preserve runtime heartbeat/budget diagnostics, including stopped/timed-out terminal records
+- [ ] interactive lifecycle checkpoints are JSON-only, size-limited, project-scoped, atomically persisted, explicitly restored, and never enable automatic restart
+- [ ] long-running stress gate repeats interactive stop/checkpoint/recovery and provider destroy leaves no active resources, shell commands, WebSocket counters, or close errors
 
 ## Diagnostics
 
@@ -214,7 +226,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] release manifest Markdown generated at `app/build/reports/nodejs/release-manifest.md`
 - [ ] release manifest records app version, git commit, release flavor, ABI list, native library hashes, template hash, compatibility profile hash, stable surface hash, and feature flag defaults
 - [ ] Embedded Node doctor text and JSON reports generated under `app/build/reports/nodejs/doctor/`
-- [ ] doctor report lists backend, expected Node version, feature flags, enabled/disabled modules, native hashes, packaged status, last-error/lifecycle/resource-count availability, and dependency bundle status
+- [ ] doctor report lists backend, expected Node version, feature flags, enabled/disabled modules, bridge/network capability status, native hashes, packaged status, last-error/lifecycle/resource-count availability, and dependency bundle status
 - [ ] app UI exposes Developer options > Node.js > Node.js Doctor and can export text and JSON reports
 - [ ] device Node Doctor report omits user script contents and environment values and redacts app-private paths
 - [ ] runtime probe logs `libnode.so.sha256` and `libautojs6-node.so.sha256`
@@ -264,5 +276,5 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/design/JAVA_INTEROP.md` when Java/Android interop, Rhino compatibility shims, or Java allowlist policy changes
 - [ ] `docs/nodejs/design/RHINO_SHIM.md` when `require("rhino")`, old global API installation, or mixed Rhino/Node migration behavior changes
 - [ ] `docs/nodejs/design/EXECUTION_QUEUE.md` when embedded execution queue behavior changes
-- [ ] `docs/nodejs/design/LONG_RUNNING_SERVICE.md` when long-running service behavior, foreground service policy, or restart policy changes
+- [ ] `docs/nodejs/design/LONG_RUNNING_SERVICE.md` when long-running service behavior, foreground service policy, checkpoint/restore behavior, or restart policy changes
 - [ ] packaged APK user docs or examples if packaging behavior changed

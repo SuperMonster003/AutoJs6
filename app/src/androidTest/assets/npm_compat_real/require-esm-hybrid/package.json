@@ -1,0 +1,13 @@
+{
+  "name": "@autojs6-fixtures/require-esm-hybrid-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "require-esm-bridge": "1.0.0",
+    "sync-esm-namespace": "1.0.0"
+  }
+}

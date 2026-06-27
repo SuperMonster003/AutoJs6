@@ -131,14 +131,16 @@ class NodeBridgeResourceRegistryInstrumentationTest {
             check(mkdirs()) { "Failed to create bridge resource work_manager directory: $absolutePath" }
         }
         File(workDir, "main.cjs").writeText("""console.log("scheduled");""")
+        val engineInfo = NodeBridgeEngineInfo.fromContext(
+            context,
+            id = "resource-work-manager-provider",
+            sourceName = "main.cjs",
+            cwd = workDir.absolutePath,
+        )
+        val ownerKey = NodeWorkManagerBridgeScheduler.ownerKey(engineInfo)
         val provider = AndroidNodeBridgeCapabilityProvider(
             context,
-            NodeBridgeEngineInfo.fromContext(
-                context,
-                id = "resource-work-manager-provider",
-                sourceName = "main.cjs",
-                cwd = workDir.absolutePath,
-            ),
+            engineInfo,
         )
 
         val once = dispatch(
@@ -173,7 +175,9 @@ class NodeBridgeResourceRegistryInstrumentationTest {
             permissions = listOf("work_manager"),
         )
         assertTrue(periodic.toString(), periodic.ok)
+        val periodicId = jsonString(periodic.resultJson.orEmpty())
         provider.destroy()
+        NodeWorkManagerBridgeScheduler.cancel(context, periodicId, ownerKey)
         assertEquals("0", provider.nativeDiagnostics()["embedded_script.work_manager_registered_task_count"])
         assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
         assertEquals("1", provider.nativeDiagnostics()["embedded_script.bridge_resource.leak_count"])

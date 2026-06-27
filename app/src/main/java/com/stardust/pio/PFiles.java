@@ -152,6 +152,8 @@ public class PFiles {
             return bytes;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } finally {
+            closeSilently(is);
         }
     }
 

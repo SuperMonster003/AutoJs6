@@ -4,6 +4,7 @@ import org.gradle.api.tasks.Exec
 import java.io.File
 
 private val nodeExampleKnownStatuses = setOf("stable", "partial", "experimental")
+private val nodeExampleIgnoredDirectories = setOf("npm-ci-pure-js", "autojs6-pm-fixture")
 private val nodeExampleKnownTags = setOf(
     "main-app",
     "packaged",
@@ -23,7 +24,58 @@ private val nodeExampleKnownTags = setOf(
     "security",
     "disabled-features",
     "typescript",
+    "phase7",
+    "esm",
+    "dynamic-import",
+    "network",
+    "raw-network",
+    "websocket",
+    "ocr",
+    "long-running",
+    "scheduled-task",
+    "worker",
+    "node-test",
+    "database",
+    "plugin",
+    "ui",
+    "phase8",
+    "tsx",
+    "require-esm",
+    "http",
+    "filehandle",
+    "fs-watch",
+    "compile-cache",
+    "inspector",
+    "profiler",
+    "hardened-sandbox",
+    "design-gated",
+    "phase9",
+    "runtime-info",
+    "snapshot",
+    "heap-snapshot",
+    "multi-instance",
+    "sandbox",
+    "wasm",
+    "wasi",
+    "wasm-worker",
+    "wasm-plugin",
+    "phase10",
+    "storage",
+    "notifications",
+    "sensors",
+    "package-install",
+    "provider",
+    "capability-truth",
+    "crash",
+    "adapter",
+    "debug",
+    "queue",
+    "phase13",
+    "pro-parity",
+    "desktop-parity",
 )
+
+private val nodeExampleSupportedEntryExtensions = setOf("js", "cjs", "mjs", "ts", "cts", "mts")
 
 private val nodeTypeDeclarationModules = listOf(
     "toast",
@@ -37,9 +89,33 @@ private val nodeTypeDeclarationModules = listOf(
     "media_projection",
     "image",
     "images",
+    "ocr",
+    "storage",
+    "storages",
+    "database",
+    "sqlite",
+    "console",
+    "timers",
+    "files",
+    "base64",
+    "colors",
+    "formatter",
+    "converter",
+    "s13n",
+    "mime",
+    "nanoid",
+    "util",
+    "opencc",
+    "pinyin",
+    "pinyin4j",
+    "rhino",
+    "notifications",
+    "sensors",
     "fetch",
+    "axios",
     "websocket",
     "work_manager",
+    "plugins",
 )
 
 private fun nodeExampleReadJsonObject(file: File): Map<*, *> =
@@ -58,6 +134,26 @@ private fun nodeExampleMainHasNodeDirective(file: File): Boolean {
             firstMeaningful == "'nodejs';" ||
             firstMeaningful == "\"node\";" ||
             firstMeaningful == "'node';"
+}
+
+private fun nodeExampleEntryFile(dir: File, name: String, projectJson: Map<*, *>): File {
+    val entry = projectJson["main"]?.toString().orEmpty()
+    if (entry.isBlank()) {
+        throw GradleException("Node example '$name' project.json must declare a main entry.")
+    }
+    if (entry.contains('\u0000') || entry.startsWith("/") || entry.startsWith("\\") || Regex("""^[A-Za-z]:""").containsMatchIn(entry)) {
+        throw GradleException("Node example '$name' project.json main must be a safe relative path: $entry")
+    }
+    val file = dir.resolve(entry).canonicalFile
+    val root = dir.canonicalFile
+    if (file != root && !file.toPath().startsWith(root.toPath())) {
+        throw GradleException("Node example '$name' project.json main escapes the example directory: $entry")
+    }
+    val extension = file.extension.lowercase()
+    if (extension !in nodeExampleSupportedEntryExtensions) {
+        throw GradleException("Node example '$name' project.json main uses unsupported extension '.$extension'.")
+    }
+    return file
 }
 
 val verifyNodeExamples = tasks.register("verifyNodeExamples") {
@@ -88,7 +184,10 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
         if (duplicateNames.isNotEmpty()) {
             throw GradleException("Duplicate Node example manifest entries: ${duplicateNames.joinToString()}")
         }
-        val directoryNames = examplesRoot.listFiles(File::isDirectory).orEmpty().map(File::getName).sorted()
+        val directoryNames = examplesRoot.listFiles(File::isDirectory).orEmpty()
+            .map(File::getName)
+            .filterNot(nodeExampleIgnoredDirectories::contains)
+            .sorted()
         val missingManifest = directoryNames - manifestNames.toSet()
         val missingDirectory = manifestNames.toSet() - directoryNames.toSet()
         if (missingManifest.isNotEmpty() || missingDirectory.isNotEmpty()) {
@@ -113,7 +212,7 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
                 throw GradleException("Node example '$name' has unknown tags: ${unknownTags.joinToString()}")
             }
             val dir = examplesRoot.resolve(name)
-            val requiredFiles = listOf("README.md", "project.json", "package.json", "main.cjs", "expected-output.txt")
+            val requiredFiles = listOf("README.md", "project.json", "package.json", "expected-output.txt")
             val missingFiles = requiredFiles.filterNot { dir.resolve(it).isFile }
             if (missingFiles.isNotEmpty()) {
                 throw GradleException("Node example '$name' is missing files: ${missingFiles.joinToString()}")
@@ -126,17 +225,37 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
             if (projectJson["name"] != name || projectJson["type"] != "node") {
                 throw GradleException("Node example '$name' project.json must declare name='$name' and type='node'.")
             }
-            if (projectJson["main"] != "main.cjs") {
-                throw GradleException("Node example '$name' project.json must use main.cjs as main.")
+            val mainFile = nodeExampleEntryFile(dir, name, projectJson)
+            if (!mainFile.isFile) {
+                throw GradleException("Node example '$name' is missing declared main entry: ${mainFile.relativeTo(dir)}")
+            }
+            if ("phase7" in tags) {
+                val exampleMetadata = projectJson["example"] as? Map<*, *>
+                    ?: throw GradleException("Phase 7 Node example '$name' must declare project.json example metadata.")
+                val capabilities = nodeExampleList(exampleMetadata["capabilities"])
+                val limitations = nodeExampleList(exampleMetadata["securityLimitations"])
+                val expectedProvider = exampleMetadata["expectedProvider"]?.toString().orEmpty()
+                val packagedSupport = exampleMetadata["packagedSupport"]?.toString().orEmpty()
+                if (capabilities.isEmpty()) {
+                    throw GradleException("Phase 7 Node example '$name' must declare example.capabilities.")
+                }
+                if (expectedProvider.isBlank()) {
+                    throw GradleException("Phase 7 Node example '$name' must declare example.expectedProvider.")
+                }
+                if (packagedSupport.isBlank()) {
+                    throw GradleException("Phase 7 Node example '$name' must declare example.packagedSupport.")
+                }
+                if (limitations.isEmpty()) {
+                    throw GradleException("Phase 7 Node example '$name' must declare example.securityLimitations.")
+                }
             }
             val packageJson = nodeExampleReadJsonObject(dir.resolve("package.json"))
             val packageName = packageJson["name"]?.toString().orEmpty()
             if (!packageName.startsWith("@autojs6-sample/")) {
                 throw GradleException("Node example '$name' package.json name must use @autojs6-sample/ scope.")
             }
-            val mainFile = dir.resolve("main.cjs")
-            if (!nodeExampleMainHasNodeDirective(mainFile)) {
-                throw GradleException("Node example '$name' main.cjs must start with a node directive.")
+            if (mainFile.extension.lowercase() !in setOf("mjs", "mts") && !nodeExampleMainHasNodeDirective(mainFile)) {
+                throw GradleException("Node example '$name' ${mainFile.name} must start with a node directive.")
             }
             val expectedOutput = dir.resolve("expected-output.txt").readText()
             val passMarker = "sample.$name=PASS"
@@ -144,7 +263,7 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
                 throw GradleException("Node example '$name' expected-output.txt must contain '$passMarker'.")
             }
             if (!mainFile.readText().contains(passMarker)) {
-                throw GradleException("Node example '$name' main.cjs must print '$passMarker'.")
+                throw GradleException("Node example '$name' ${mainFile.name} must print '$passMarker'.")
             }
             if (packagedCompatible && "packaged" !in tags) {
                 throw GradleException("Node example '$name' is packagedCompatible but is missing the packaged tag.")
@@ -211,10 +330,11 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
         val sampleRoot = rootProject.projectDir.resolve("sample/nodejs/typescript-smoke")
         val indexFile = typesRoot.resolve("index.d.ts")
         val commonFile = typesRoot.resolve("common.d.ts")
+        val profileCapabilitiesFile = typesRoot.resolve("profile_capabilities.d.ts")
         val sampleTsConfig = sampleRoot.resolve("tsconfig.json")
         val sampleSource = sampleRoot.resolve("src/main.ts")
 
-        val missingRequired = listOf(indexFile, commonFile, sampleTsConfig, sampleSource)
+        val missingRequired = listOf(indexFile, commonFile, profileCapabilitiesFile, sampleTsConfig, sampleSource)
             .filterNot(File::isFile)
             .map { it.relativeTo(rootProject.projectDir).invariantSeparatorsPath }
         if (missingRequired.isNotEmpty()) {
@@ -222,6 +342,7 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
         }
 
         val indexText = indexFile.readText()
+        val profileCapabilitiesText = profileCapabilitiesFile.readText()
         val sampleText = sampleSource.readText()
         val tsConfigText = sampleTsConfig.readText()
         val rows = nodeTypeDeclarationModules.map { moduleName ->
@@ -248,6 +369,21 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
 
         if (!tsConfigText.contains("../../../docs/nodejs/types/autojs6-node/**/*.d.ts")) {
             throw GradleException("typescript-smoke tsconfig.json must include the checked-in AutoJs6 Node declarations.")
+        }
+        if (!indexText.contains("profile_capabilities.d.ts")) {
+            throw GradleException("index.d.ts must reference profile_capabilities.d.ts.")
+        }
+        if (!profileCapabilitiesText.contains("ProfileModuleCatalog") ||
+            !profileCapabilitiesText.contains("ProfileModuleModeFor") ||
+            !profileCapabilitiesText.contains("desktop_compat_opt_in")
+        ) {
+            throw GradleException("profile_capabilities.d.ts must declare the profile-aware module catalog and conditional helpers.")
+        }
+        if (!sampleText.contains("""ProfileModuleModeFor<"java", "safe_default">""") ||
+            !sampleText.contains("""ProfileModuleModeFor<"worker_threads", "desktop_compat_opt_in">""") ||
+            !sampleText.contains("ProfileDeclarationMatrix")
+        ) {
+            throw GradleException("typescript-smoke sample must cover Safe/Pro/Desktop profile declaration differences.")
         }
 
         val examplesManifest = nodeExampleReadJsonObject(rootProject.projectDir.resolve("sample/nodejs/examples.json"))

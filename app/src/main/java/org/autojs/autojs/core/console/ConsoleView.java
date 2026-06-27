@@ -394,7 +394,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
                     mLogEntries.add(logEntries.get(i));
                 }
             }
-            Objects.requireNonNull(mLogListRecyclerView.getAdapter()).notifyItemRangeInserted(oldSize, size - 1);
+            Objects.requireNonNull(mLogListRecyclerView.getAdapter()).notifyItemRangeInserted(oldSize, size - oldSize);
             mLogListRecyclerView.scrollToPosition(size - 1);
         }
     }

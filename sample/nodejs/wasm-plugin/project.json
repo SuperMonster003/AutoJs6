@@ -1,0 +1,16 @@
+{
+  "name": "wasm-plugin",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": ["plugins", "plugin.org.example.wasm_math"]
+  },
+  "example": {
+    "capabilities": ["plugins", "plugin.org.example.wasm_math", "wasm"],
+    "expectedProvider": "JS-only plugin manager with design-gated WASM plugin metadata",
+    "packagedSupport": "local checked plugin files only",
+    "securityLimitations": ["native service plugins remain deferred", "native addons remain denied", "WASM resource limits are required before promotion"]
+  }
+}

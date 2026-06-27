@@ -102,6 +102,7 @@ internal class NodeEmbeddedRuntimeTimeline private constructor(
                 "cryptoCount" to result.pendingCryptoCallbacks,
                 "dnsCount" to result.pendingDnsCallbacks,
                 "zlibCount" to result.pendingZlibCallbacks,
+                "zlibStreamCount" to result.pendingZlibStreamCount,
             ),
         )
         mark(

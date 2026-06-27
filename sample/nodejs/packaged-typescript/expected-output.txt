@@ -1,0 +1,2 @@
+sample.packaged-typescript.value=packaged:dynamic
+sample.packaged-typescript=PASS

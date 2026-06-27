@@ -9,7 +9,10 @@ import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
 import org.autojs.autojs.engine.NativeNodeEmbeddedProjectRunner
+import org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine
+import org.autojs.autojs.engine.NativeNodeEmbeddedScriptService
 import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics
+import org.autojs.autojs.engine.NodeExecutionModePolicy
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.inrt.LogActivity
@@ -20,12 +23,16 @@ import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.NodeEntryDirective
 import org.autojs.autojs.script.NodeProjectLaunchDescriptor
 import org.autojs.autojs.script.NodeProjectLaunchKind
+import org.autojs.autojs.script.NodeProjectLaunchOptions
 import org.autojs.autojs.script.NodeProjectLaunchSource
+import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.util.IntentUtils.startSafely
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 
 /**
@@ -83,6 +90,9 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         }
         try {
             val launch = createMainScriptLaunch()
+            if (startPackagedLongRunningIfRequested(launch, activity)) {
+                return
+            }
             val source = launch.source as JavaScriptSource
             val config = launch.createExecutionConfig()
             if (source.executionMode and JavaScriptSource.EXECUTION_MODE_UI != 0) {
@@ -131,8 +141,29 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         PFiles.deleteRecursively(File(mProjectDir))
         try {
             PFiles.copyAssetDir(mActivity.assets, mAssetsProjectDir, mProjectDir, null)
+            copyKnownNodeDescriptorAssets()
         } catch (e: IOException) {
             throw UncheckedIOException(e)
+        }
+    }
+
+    private fun copyKnownNodeDescriptorAssets() {
+        val descriptorNames = (
+                NodeProjectLaunchDescriptor.DESCRIPTOR_FILE_NAMES +
+                        NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAMES
+        ).distinct()
+        descriptorNames.forEach { descriptorName ->
+            val assetPath = PFiles.join(mAssetsProjectDir, descriptorName)
+            try {
+                mActivity.assets.open(assetPath).use { input ->
+                    File(mProjectDir, descriptorName).outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                Log.d(TAG, "Copied packaged Node descriptor asset: $descriptorName")
+            } catch (_: FileNotFoundException) {
+                // Optional descriptor assets are only copied when bundled.
+            }
         }
     }
 
@@ -171,7 +202,13 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             )
         }
         val launchOptions = try {
-            NodeProjectLaunchDescriptor.readOptionsOrDefault(projectRoot)
+            NodeProjectRuntimeCompatibilityDescriptor.requireCompatibleAssetOrDefault(
+                assets = mActivity.assets,
+                assetsProjectDir = mAssetsProjectDir,
+            )
+            NodeProjectLaunchDescriptor
+                .readOptionsOrDefault(projectRoot)
+                .withNodeConfigDefaults(mProjectConfig.nodeConfig)
         } catch (e: Exception) {
             logNodeProjectLaunchFailure("descriptor", projectRoot, mMainScriptFile, null, null, e)
             throw e
@@ -212,6 +249,11 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
                     "requestReady=${request != null} " +
                     "launchKind=${launchSource?.nodeProjectLaunchKind?.descriptorValue.orEmpty()} " +
                     "requestLaunchKind=$requestLaunchKind " +
+                    "executionMode=${launchSource?.nodeProjectExecutionMode.orEmpty()} " +
+                    "entryDirective=${launchSource?.nodeProjectEntryDirective.orEmpty()} " +
+                    "longRunning=${NodeExecutionModePolicy.isLongRunningRequest(launchSource?.nodeProjectExecutionMode)} " +
+                    "processPoolSlot=${launchSource?.nodeProjectProcessPoolSlot.orEmpty()} " +
+                    "processPoolSlotSource=${launchSource?.nodeProjectProcessPoolSlotSource.orEmpty()} " +
                     "packageDir=${request?.packageDir?.path.orEmpty()} " +
                     "packageDirProjectRoot=$packageDirProjectRoot " +
                     "workingDirectory=${request?.workingDirectory?.path.orEmpty()} " +
@@ -222,6 +264,78 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
                     "envKeys=${launchSource?.nodeProjectEnv?.keys?.sorted()?.joinToString(prefix = "[", postfix = "]").orEmpty()}",
         )
         return launch
+    }
+
+    private fun startPackagedLongRunningIfRequested(
+        launch: ScriptLaunchSourceFactory.Launch,
+        activity: Activity?,
+    ): Boolean {
+        val launchSource = launch.nodeProjectLaunchSource ?: return false
+        val executionMode = NodeExecutionModePolicy.normalize(launchSource.nodeProjectExecutionMode)
+        if (executionMode != NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING) {
+            return false
+        }
+        val source = launch.source as? JavaScriptSource
+            ?: throw IllegalStateException("Packaged Node long-running launch requires a JavaScript source.")
+        if (NodeEntryDirective.requiresUiActivity(launchSource.nodeProjectEntryDirective)) {
+            throw IllegalStateException("Packaged Node long-running launch does not support UI entry directives yet.")
+        }
+        val engine = NativeNodeEmbeddedJavaScriptEngine(mActivity.applicationContext)
+        val request = engine.prepareNodeProjectLaunchRequest(source)
+            ?: throw IllegalStateException("Packaged Node long-running launch requires a Node project source.")
+        val session = NativeNodeEmbeddedScriptService.startPackagedLongRunning(
+            context = mActivity,
+            request = request,
+        )
+        val statusState = session.status?.optString("state").orEmpty()
+        Log.i(
+            TAG,
+            "$INRT_NODE_PROJECT_PACKAGED_LONG_RUNNING_MARKER " +
+                    "executionId=${session.executionId} " +
+                    "started=${session.started} " +
+                    "state=$statusState " +
+                    "sourceName=${request.sourceName} " +
+                    "timeoutMs=${request.timeoutMs} " +
+                    "moduleSources=${request.moduleSources.size} " +
+                    "runtimeModuleSources=${request.runtimeModuleSources.size}",
+        )
+        if (!session.started) {
+            val message = session.error?.errorMessage
+                ?: session.status?.optString("message")?.takeIf { it.isNotBlank() }
+                ?: "Failed to start packaged Node long-running service."
+            throw IllegalStateException(message)
+        }
+        finishHostActivity(activity)
+        return true
+    }
+
+    private fun NodeProjectLaunchOptions.withNodeConfigDefaults(
+        nodeConfig: ProjectConfig.NodeConfig?,
+    ): NodeProjectLaunchOptions {
+        nodeConfig ?: return this
+        val descriptorMode = executionMode?.takeIf { it.isNotBlank() }
+        val projectMode = nodeConfig.executionMode?.takeIf { it.isNotBlank() }
+        val descriptorDirective = NodeEntryDirective.normalize(entryDirective)
+        val projectDirective = NodeEntryDirective.normalize(nodeConfig.entryDirective)
+        if (
+            descriptorMode != null &&
+            projectMode != null &&
+            NodeExecutionModePolicy.normalize(descriptorMode) != NodeExecutionModePolicy.normalize(projectMode)
+        ) {
+            throw IllegalArgumentException(
+                "Packaged Node executionMode mismatch: descriptor=$descriptorMode project=${nodeConfig.executionMode}",
+            )
+        }
+        if (descriptorDirective != null && projectDirective != null && descriptorDirective != projectDirective) {
+            throw IllegalArgumentException(
+                "Packaged Node entryDirective mismatch: descriptor=$descriptorDirective project=${nodeConfig.entryDirective}",
+            )
+        }
+        return copy(
+            timeoutMs = timeoutMs ?: nodeConfig.timeoutMs?.takeIf { it > 0L },
+            executionMode = descriptorMode ?: projectMode,
+            entryDirective = descriptorDirective ?: projectDirective,
+        )
     }
 
     private fun logNodeProjectLaunchFailure(
@@ -272,5 +386,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         private const val INRT_NODE_PROJECT_RUNNER_TEMPLATE_MARKER = "autojs6.inrt.node_project_runner.v1"
         private const val INRT_NODE_PROJECT_LAUNCH_SOURCE_TEMPLATE_MARKER =
             "autojs6.inrt.node_project_launch_source.v2"
+        private const val INRT_NODE_PROJECT_PACKAGED_LONG_RUNNING_MARKER =
+            "autojs6.inrt.node_project_packaged_long_running.v1"
     }
 }

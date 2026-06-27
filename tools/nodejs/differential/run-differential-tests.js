@@ -21,7 +21,8 @@ function main() {
     throw new Error("No differential fixtures found in " + path.join(fixtureRoot, "manifest.json"));
   }
 
-  const autoJsResults = readAutoJsResults(options);
+  const autoJsImport = readAutoJsResults(options);
+  const autoJsResults = autoJsImport.results;
   const rows = fixtures.map((fixture) => {
     const fixtureDir = path.join(fixtureRoot, fixture.name);
     const expectedOutput = readText(path.join(fixtureDir, "expected.txt")).trim();
@@ -44,19 +45,32 @@ function main() {
       binary: nodeBinary,
       version: runNodeVersion(nodeBinary),
     },
-    autoJsSource: options.autojsJson || options.autojsLog || null,
+    autoJsSource: autoJsImport.sources.length > 0 ? autoJsImport.sources.join("; ") : null,
+    autoJsSources: autoJsImport.sources,
+    autoJsImportedRecords: autoJsImport.recordCount,
     rows,
     summary: summarize(rows),
+    phase13Compatibility: summarizePhase13CompatibilityCategories(rows, manifest.phase13Compatibility),
   };
 
   fs.mkdirSync(reportDir, { recursive: true });
   const jsonPath = path.join(reportDir, "desktop-node-differential.json");
   const markdownPath = path.join(reportDir, "desktop-node-differential.md");
+  const v11ReportPath = path.resolve(options.compatReport || path.join(path.dirname(reportDir), "npm-compat-v1.1.md"));
+  const v11DifferentialPath = path.resolve(
+    options.v11DifferentialReport || path.join(path.dirname(reportDir), "v1.1-differential.md"),
+  );
   fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2) + "\n");
   fs.writeFileSync(markdownPath, renderMarkdown(report));
+  fs.mkdirSync(path.dirname(v11ReportPath), { recursive: true });
+  fs.writeFileSync(v11ReportPath, renderV11CompatMarkdown(report));
+  fs.mkdirSync(path.dirname(v11DifferentialPath), { recursive: true });
+  fs.writeFileSync(v11DifferentialPath, renderV11DifferentialMarkdown(report));
 
   console.log("Differential JSON: " + jsonPath);
   console.log("Differential Markdown: " + markdownPath);
+  console.log("NPM compatibility v1.1 Markdown: " + v11ReportPath);
+  console.log("Node Profile v1.1 differential Markdown: " + v11DifferentialPath);
   console.log("Differential summary: " + JSON.stringify(report.summary));
 
   if (report.summary.desktopFailures > 0 || report.summary.bugs > 0) {
@@ -99,6 +113,9 @@ function printHelp() {
     "  --node <path>         Desktop Node binary. Defaults to process.execPath.",
     "  --autojs-log <file>   Gradle/logcat text containing realnpm.differential.result= JSON lines.",
     "  --autojs-json <file>  JSON file containing an array, {results:[]}, or {rows:[{autojs}]} shape.",
+    "  --autojs-connected-results <dir|file>  Scan Gradle connected test results/logcat output for realnpm.differential.result= JSON lines.",
+    "  --compat-report <file>  Output v1.1 npm compatibility Markdown report.",
+    "  --v11-differential-report <file>  Output v1.1 differential Markdown report.",
   ].join("\n"));
 }
 
@@ -159,17 +176,36 @@ function runDesktopFixture(nodeBinary, fixtureDir, fixtureName, expectedOutput) 
 
 function readAutoJsResults(options) {
   const results = new Map();
-  [options.autojsJson, options.autojsLog].filter(Boolean).forEach((file) => {
-    const resolved = path.resolve(file);
-    const text = fs.readFileSync(resolved, "utf8");
-    const records = file === options.autojsJson ? parseAutoJsJson(text) : parseAutoJsLog(text);
+  const sources = [];
+  let recordCount = 0;
+  function addRecords(source, records) {
+    if (records.length > 0) {
+      sources.push(source);
+      recordCount += records.length;
+    }
     records.forEach((record) => {
       if (record && record.fixture) {
         results.set(record.fixture, normalizeRuntimeRecord(record));
       }
     });
+  }
+  [options.autojsJson, options.autojsLog].filter(Boolean).forEach((file) => {
+    const resolved = path.resolve(file);
+    const text = fs.readFileSync(resolved, "utf8");
+    const records = file === options.autojsJson ? parseAutoJsJson(text) : parseAutoJsLog(text);
+    addRecords(resolved, records);
   });
-  return results;
+  if (options.autojsConnectedResults) {
+    const connected = readAutoJsConnectedResults(path.resolve(options.autojsConnectedResults));
+    connected.files.forEach((file) => {
+      addRecords(file, connected.recordsByFile.get(file) || []);
+    });
+  }
+  return {
+    results,
+    sources,
+    recordCount,
+  };
 }
 
 function parseAutoJsJson(text) {
@@ -190,14 +226,129 @@ function parseAutoJsJson(text) {
 }
 
 function parseAutoJsLog(text) {
-  return String(text).split(/\r?\n/).map((line) => {
-    const index = line.indexOf(AUTOJS_RESULT_PREFIX);
-    if (index < 0) {
-      return null;
+  const output = [];
+  String(text).split(/\r?\n/).forEach((line) => {
+    let searchFrom = 0;
+    while (searchFrom < line.length) {
+      const index = line.indexOf(AUTOJS_RESULT_PREFIX, searchFrom);
+      if (index < 0) {
+        break;
+      }
+      const payload = line.slice(index + AUTOJS_RESULT_PREFIX.length).trim();
+      const jsonText = extractJsonObject(payload);
+      if (!jsonText) {
+        break;
+      }
+      output.push(parseJsonPayload(jsonText));
+      searchFrom = index + AUTOJS_RESULT_PREFIX.length + jsonText.length;
     }
-    const payload = line.slice(index + AUTOJS_RESULT_PREFIX.length).trim();
+  });
+  return output;
+}
+
+function readAutoJsConnectedResults(root) {
+  const files = collectAutoJsResultFiles(root);
+  const recordsByFile = new Map();
+  files.forEach((file) => {
+    const text = fs.readFileSync(file, "utf8");
+    if (!text.includes(AUTOJS_RESULT_PREFIX)) {
+      return;
+    }
+    const records = parseAutoJsLog(text);
+    if (records.length > 0) {
+      recordsByFile.set(file, records);
+    }
+  });
+  return {
+    files: Array.from(recordsByFile.keys()),
+    recordsByFile,
+  };
+}
+
+function collectAutoJsResultFiles(root) {
+  const stat = fs.statSync(root);
+  if (stat.isFile()) {
+    return [root];
+  }
+  if (!stat.isDirectory()) {
+    return [];
+  }
+  const output = [];
+  const stack = [root];
+  while (stack.length > 0) {
+    const dir = stack.pop();
+    fs.readdirSync(dir, { withFileTypes: true }).forEach((entry) => {
+      const file = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(file);
+      } else if (entry.isFile() && isAutoJsResultTextFile(file)) {
+        output.push(file);
+      }
+    });
+  }
+  output.sort();
+  return output;
+}
+
+function isAutoJsResultTextFile(file) {
+  const extension = path.extname(file).toLowerCase();
+  return extension === ".txt" ||
+    extension === ".log" ||
+    extension === ".xml" ||
+    extension === ".textproto";
+}
+
+function extractJsonObject(value) {
+  const text = String(value || "");
+  const start = text.indexOf("{");
+  if (start < 0) {
+    const trimmed = text.trim();
+    return trimmed.length > 0 ? trimmed : "";
+  }
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let index = start; index < text.length; index += 1) {
+    const ch = text[index];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === "\"") {
+        inString = false;
+      }
+      continue;
+    }
+    if (ch === "\"") {
+      inString = true;
+    } else if (ch === "{") {
+      depth += 1;
+    } else if (ch === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        return text.slice(start, index + 1);
+      }
+    }
+  }
+  return text.slice(start).trim();
+}
+
+function parseJsonPayload(payload) {
+  try {
     return JSON.parse(payload);
-  }).filter(Boolean);
+  } catch (error) {
+    return JSON.parse(unescapeXml(payload));
+  }
+}
+
+function unescapeXml(value) {
+  return String(value)
+    .replace(/&quot;/g, "\"")
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
 }
 
 function normalizeRuntimeRecord(record) {
@@ -326,6 +477,241 @@ function renderMarkdown(report) {
   lines.push(JSON.stringify(report.summary, null, 2));
   lines.push("```");
   return lines.join("\n") + "\n";
+}
+
+function renderV11CompatMarkdown(report) {
+  const categories = new Map();
+  report.rows.forEach((row) => {
+    (row.patterns || []).forEach((pattern) => {
+      const list = categories.get(pattern) || [];
+      list.push(row.fixture);
+      categories.set(pattern, list);
+    });
+  });
+
+  const lines = [];
+  lines.push("# Node Profile v1.1 NPM Compatibility Report");
+  lines.push("");
+  lines.push("- Generated: `" + report.generatedAt + "`");
+  lines.push("- Desktop Node: `" + report.desktopNode.version + "`");
+  lines.push("- Fixture root: `" + report.fixtureRoot + "`");
+  lines.push("- Fixed fixture count: `" + report.summary.fixtures + "`");
+  lines.push("- Desktop failures: `" + report.summary.desktopFailures + "`");
+  lines.push("- AutoJs source: `" + (report.autoJsSource || "not supplied") + "`");
+  lines.push("");
+  lines.push("## Fixture Coverage");
+  lines.push("");
+  lines.push("| Fixture | Patterns | Desktop baseline | AutoJs6 result |");
+  lines.push("| --- | --- | --- | --- |");
+  report.rows.forEach((row) => {
+    lines.push([
+      row.fixture,
+      (row.patterns || []).join(", "),
+      row.desktop.expectedOutputFound && row.desktop.exitCode === 0 ? "pass" : "fail",
+      row.autojs ? (row.autojs.exitCode === 0 ? "pass" : "fail") : "not supplied",
+    ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  });
+  lines.push("");
+  lines.push("## Pattern Index");
+  lines.push("");
+  Array.from(categories.keys()).sort().forEach((pattern) => {
+    lines.push("- `" + pattern + "`: " + categories.get(pattern).join(", "));
+  });
+  lines.push("");
+  lines.push("## Summary");
+  lines.push("");
+  lines.push("```json");
+  lines.push(JSON.stringify(report.summary, null, 2));
+  lines.push("```");
+  return lines.join("\n") + "\n";
+}
+
+function renderV11DifferentialMarkdown(report) {
+  const categories = summarizeV11CapabilityCategories(report.rows);
+  const phase13Categories = report.phase13Compatibility && report.phase13Compatibility.categories || [];
+  const lines = [];
+  lines.push("# Node Profile v1.1 Differential Report");
+  lines.push("");
+  lines.push("- Generated: `" + report.generatedAt + "`");
+  lines.push("- Desktop Node: `" + report.desktopNode.version + "`");
+  lines.push("- Fixture root: `" + report.fixtureRoot + "`");
+  lines.push("- AutoJs source: `" + (report.autoJsSource || "not supplied") + "`");
+  lines.push("- Measurement mode: `" + (report.autoJsSource ? "desktop-vs-autojs6" : "desktop-baseline-only") + "`");
+  lines.push("");
+  lines.push("## Classification Summary");
+  lines.push("");
+  lines.push("| Classification | Count |");
+  lines.push("| --- | ---: |");
+  lines.push("| matched | `" + report.summary.matched + "` |");
+  lines.push("| expected AutoJs6 restriction | `" + report.summary.expectedRestrictions + "` |");
+  lines.push("| unsupported | `" + report.summary.unsupported + "` |");
+  lines.push("| flaky | `" + report.summary.flaky + "` |");
+  lines.push("| bug | `" + report.summary.bugs + "` |");
+  lines.push("| desktop failures | `" + report.summary.desktopFailures + "` |");
+  lines.push("");
+  if (phase13Categories.length > 0) {
+    lines.push("## Phase 13 Dependency Compatibility Categories");
+    lines.push("");
+    lines.push("| Category | Reason kind | Fixtures | Desktop pass-rate | AutoJs6 pass-rate | Package reasons |");
+    lines.push("| --- | --- | --- | ---: | ---: | --- |");
+    phase13Categories.forEach((category) => {
+      lines.push([
+        category.title || category.id,
+        category.reasonKind,
+        category.fixtures.join(", ") || "none",
+        renderPassRate(category.passRate.desktop),
+        renderPassRate(category.passRate.autojs),
+        category.packages.map((row) => row.name + ": " + row.reason).join("; "),
+      ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+    });
+    lines.push("");
+  }
+  lines.push("## Required v1.1 Coverage");
+  lines.push("");
+  lines.push("| Capability area | Fixtures | Classification counts |");
+  lines.push("| --- | --- | --- |");
+  categories.forEach((category) => {
+    lines.push([
+      category.name,
+      category.fixtures.join(", ") || "none",
+      renderClassificationCounts(category.counts),
+    ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  });
+  lines.push("");
+  lines.push("## Fixture Results");
+  lines.push("");
+  lines.push("| Fixture | Patterns | Desktop | AutoJs6 | Classification | Reason |");
+  lines.push("| --- | --- | --- | --- | --- | --- |");
+  report.rows.forEach((row) => {
+    lines.push([
+      row.fixture,
+      (row.patterns || []).join(", "),
+      row.desktop.expectedOutputFound && row.desktop.exitCode === 0 ? "pass" : "fail",
+      row.autojs ? (row.autojs.exitCode === 0 ? "pass" : "fail") : "not supplied",
+      row.comparison.classification,
+      row.comparison.reason,
+    ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  });
+  return lines.join("\n") + "\n";
+}
+
+function summarizePhase13CompatibilityCategories(rows, metadata) {
+  if (!metadata || !Array.isArray(metadata.categories)) {
+    return {
+      schema: "",
+      fixtureCount: rows.length,
+      requiredReasonKinds: [],
+      categories: [],
+    };
+  }
+  const rowByFixture = new Map(rows.map((row) => [row.fixture, row]));
+  return {
+    schema: String(metadata.schema || ""),
+    fixtureCount: Number(metadata.fixtureCount || rows.length),
+    requiredReasonKinds: Array.isArray(metadata.requiredReasonKinds) ? metadata.requiredReasonKinds.map(String) : [],
+    categories: metadata.categories.map((category) => {
+      const fixtures = Array.isArray(category.fixtures) ? category.fixtures.map(String) : [];
+      const matchedRows = fixtures.map((fixture) => rowByFixture.get(fixture)).filter(Boolean);
+      return {
+        id: String(category.id || ""),
+        title: String(category.title || category.id || ""),
+        reasonKind: String(category.reasonKind || ""),
+        fixtures,
+        packages: Array.isArray(category.packages)
+          ? category.packages.map((row) => ({
+            name: String(row && row.name || ""),
+            reason: String(row && row.reason || ""),
+          }))
+          : [],
+        counts: countClassifications(matchedRows),
+        passRate: {
+          desktop: passRate(matchedRows, (row) => row.desktop && row.desktop.expectedOutputFound && row.desktop.exitCode === 0),
+          autojs: passRate(
+            matchedRows.filter((row) => row.autojs),
+            (row) => row.autojs && row.autojs.exitCode === 0,
+          ),
+        },
+      };
+    }),
+  };
+}
+
+function passRate(rows, predicate) {
+  if (!rows.length) {
+    return {
+      passed: 0,
+      total: 0,
+      ratio: null,
+    };
+  }
+  const passed = rows.filter(predicate).length;
+  return {
+    passed,
+    total: rows.length,
+    ratio: passed / rows.length,
+  };
+}
+
+function summarizeV11CapabilityCategories(rows) {
+  return [
+    {
+      name: "ESM packages",
+      matches: ["esm", "hybrid", "exports import", "exports"],
+    },
+    {
+      name: "stream packages",
+      matches: ["stream utility"],
+    },
+    {
+      name: "zlib packages",
+      matches: ["zlib"],
+    },
+    {
+      name: "fetch packages",
+      matches: ["fetch"],
+    },
+    {
+      name: "buffer packages",
+      matches: ["buffer"],
+    },
+  ].map((category) => {
+    const matchedRows = rows.filter((row) => {
+      const haystack = (row.patterns || []).join(" ").toLowerCase();
+      return category.matches.some((needle) => haystack.includes(needle));
+    });
+    return {
+      name: category.name,
+      fixtures: matchedRows.map((row) => row.fixture),
+      counts: countClassifications(matchedRows),
+    };
+  });
+}
+
+function countClassifications(rows) {
+  return rows.reduce((counts, row) => {
+    const classification = row.comparison.classification;
+    counts[classification] = (counts[classification] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+function renderClassificationCounts(counts) {
+  return [
+    "matched",
+    "expected AutoJs6 restriction",
+    "unsupported",
+    "flaky",
+    "bug",
+  ].filter((classification) => counts[classification] > 0)
+    .map((classification) => classification + "=" + counts[classification])
+    .join(", ") || "none";
+}
+
+function renderPassRate(value) {
+  if (!value || !value.total) {
+    return "n/a";
+  }
+  return value.passed + "/" + value.total;
 }
 
 function markdownCell(value) {

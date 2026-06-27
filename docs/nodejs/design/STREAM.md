@@ -33,10 +33,13 @@ The current test corpus covers:
 - callback `finished`
 - promise `pipeline`
 - promise `finished`
+- `Readable.toWeb()` / `Readable.fromWeb()`
+- `Writable.toWeb()` / `Writable.fromWeb()`
 - common stream state helpers
 - stream interaction with readline
 - scoped `fs.createReadStream`
 - scoped `fs.createWriteStream`
+- scoped fs stream active-resource diagnostics
 - zlib transform streams
 
 ## Safety Boundaries
@@ -48,7 +51,8 @@ Required boundaries:
 - no network sockets through streams unless a future network design gate opens them
 - fs streams must use scoped fs path validation
 - FileHandle streams must use owned fd tracking
-- zlib streams must enforce zlib input/output budgets
+- active scoped fs streams must be tracked until `close`, `end`, `finish`, or `error`
+- zlib streams must enforce zlib input/output budgets and active stream cleanup
 - stream constructors must not expose raw native handles
 - destroyed streams must release callbacks and pending counters
 - timeout must destroy active AutoJs6-owned streams
@@ -75,8 +79,11 @@ Lifecycle tests should cover:
 - finished callback and promise resolution
 - readable async iteration
 - writable drain and finish
+- backpressure smoke
+- destroy propagation
 - timeout with active stream
 - service destroy with active stream
+- active scoped fs stream timeout recovery
 
 ## Deferred Work
 
@@ -96,8 +103,14 @@ Required coverage:
 - callback and promise pipeline success
 - callback and promise pipeline error propagation
 - `finished` callback and promise paths
+- Node/Web stream adapter smoke through `toWeb()` and `fromWeb()`
+- backpressure smoke on a slow writable
+- destroy propagation through failed pipeline
 - scoped fs read/write streams reject escaping paths
+- scoped fs read/write streams reject absolute Android/device paths, including `/proc`, `/sys`, and `/dev`
+- active scoped fs streams are visible in pending diagnostics and do not poison the next execution after timeout/service cleanup
 - zlib stream roundtrip remains bounded
+- active zlib transforms are visible in pending diagnostics after first data write and do not poison the next execution after timeout/service cleanup
 - `node:stream` cannot be shadowed
 
 Current coverage lives in the embedded stream, fs, readline, zlib, compatibility corpus, security regression tests, and `NodeStreamMvpInstrumentationTest`.

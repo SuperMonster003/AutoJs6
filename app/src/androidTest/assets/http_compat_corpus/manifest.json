@@ -1,0 +1,76 @@
+{
+  "fixtures": [
+    {
+      "name": "http-get-client",
+      "patterns": [
+        "package using http.get",
+        "controlled node:http client",
+        "response header and body consumption"
+      ]
+    },
+    {
+      "name": "https-request-client",
+      "patterns": [
+        "package using https.request",
+        "request body serialization",
+        "Agent option compatibility"
+      ]
+    },
+    {
+      "name": "incoming-stream-reader",
+      "patterns": [
+        "IncomingMessage stream consumer",
+        "data/end event package",
+        "controlled response stream semantics"
+      ]
+    },
+    {
+      "name": "form-post-client",
+      "patterns": [
+        "package posting form data",
+        "application/x-www-form-urlencoded",
+        "controlled request headers"
+      ]
+    },
+    {
+      "name": "abort-signal-client",
+      "patterns": [
+        "package expecting AbortSignal",
+        "pre-aborted request no-dispatch",
+        "in-flight abort cancellation"
+      ]
+    },
+    {
+      "name": "agent-options-client",
+      "patterns": [
+        "package expecting Agent options",
+        "http.Agent safe shape",
+        "https.Agent safe shape"
+      ]
+    },
+    {
+      "name": "redirect-follow-client",
+      "patterns": [
+        "package following redirects",
+        "follow-redirects style wrapper",
+        "controlled redirect response handling"
+      ]
+    },
+    {
+      "name": "tls-failure-client",
+      "patterns": [
+        "package handling TLS provider failure",
+        "https request error propagation",
+        "controlled TLS failure code"
+      ]
+    },
+    {
+      "name": "proxy-denial-client",
+      "patterns": [
+        "package expecting proxy configuration denial",
+        "per-request proxy remains denied",
+        "controlled proxy policy error"
+      ]
+    }
+  ]
+}

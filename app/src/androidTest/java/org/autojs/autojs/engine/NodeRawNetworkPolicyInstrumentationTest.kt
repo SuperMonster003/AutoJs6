@@ -27,6 +27,7 @@ class NodeRawNetworkPolicyInstrumentationTest {
     fun rawNetworkModulesStayDeniedAndCannotBeShadowed() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("raw network policy regression")
         assertFalse(BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
+        assertFalse(BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED)
 
         val workDir = File(context.cacheDir, "node-raw-network-policy-${System.nanoTime()}").apply {
             deleteRecursively()

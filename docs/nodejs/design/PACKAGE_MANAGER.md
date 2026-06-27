@@ -2,7 +2,10 @@
 
 ## Status
 
-Decision gate. No runtime implementation is enabled by this document.
+Decision gate. Android runtime npm/registry installation is not enabled by this
+document. Phase 13 adds a partial Android local package store plus guarded
+script-visible `package_manager` and `npm` facades for policy diagnostics,
+local-store operations, and plan-only source-boundary checks.
 
 AutoJs6 Safe Node Profile supports checked-in pure JavaScript CommonJS dependencies under `node_modules`, but it does not run `npm install`, package lifecycle scripts, native addon builds, or package managers inside the Android runtime.
 
@@ -178,6 +181,29 @@ Supported:
 - package `main`, `exports`, `imports`, and self-reference under the current resolver
 - fixed offline compatibility fixtures
 - packaged APK inclusion of vetted JavaScript dependency files
+- partial Android local package store through `NodeAndroidPackageInstallManager`
+  for already-unpacked app-private packages with transaction staging, store
+  locking, cancellation checks, SHA-512 integrity, and
+  install/update/remove/list/verify/prune operations plus dry-run
+  planInstall/planUpdate/planRemove diagnostics through the script-visible
+  facade
+- plan-only registry/tarball boundary diagnostics through
+  `planRegistryInstall()` and `planTarballInstall()`, returning frozen
+  `autojs6-node-package-manager-remote-plan-v1` results with
+  `blocked_by_policy`, no Android bridge dispatch, no network/cache access,
+  and no install authority; registry plans can parse caller-provided npm
+  `metadata`/`packument` into a frozen dist-tag/semver/integrity resolution
+  diagnostic, and tarball plans can parse URL/name/version/sha512 integrity
+  shape locally, but Android registry/tarball download remains deferred
+
+P13-48 unifies the lock and integrity policy across the Android-side package
+manager, plugin packages, and native addon artifacts. The shared policy is
+recorded by `NodePackageIntegrityPolicy` and surfaced as
+`autojs6:profile.packageIntegrityProfile`: `autojs6-lock.json`, SHA-512
+integrity, signature requirements, rollback, stale transaction prune, mismatch
+recovery, and unverified-cache denial are explicit. Plugin archive signatures
+and signed native artifacts are policy requirements before promotion; they are
+not executable install/load paths yet.
 
 Unsupported:
 
@@ -187,6 +213,8 @@ Unsupported:
 - postinstall-generated sources
 - arbitrary `.bin` execution
 - mobile registry downloads
+- unrestricted JavaScript/runtime package-manager API exposure for the Android
+  local store
 
 ## Follow-Up Implementation
 
@@ -194,6 +222,9 @@ Task 76 adds the first build-time dependency bundler:
 
 ```powershell
 .\gradlew.bat --console=plain :app:bundleNodeDependencies
+.\gradlew.bat --console=plain :app:prepareNodeNpmCiDependencies
+.\gradlew.bat --console=plain :app:manageNodeDependencies
+.\gradlew.bat --console=plain :app:verifyNodeDependencyManagerFixture
 .\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
 ```
 
@@ -201,13 +232,146 @@ Default input is `sample/nodejs/npm-pure-js-cjs`. Override with:
 
 ```powershell
 .\gradlew.bat --console=plain :app:bundleNodeDependencies "-Pautojs.nodejs.bundle.projectRoot=D:\path\to\project"
+.\gradlew.bat --console=plain :app:prepareNodeNpmCiDependencies "-Pautojs.nodejs.npmCi.projectRoot=D:\path\to\project"
+.\gradlew.bat --console=plain :app:manageNodeDependencies "-Pautojs.nodejs.dependencyManager.projectRoot=D:\path\to\project"
 ```
 
 Outputs:
 
 - `app/build/nodejs/dependency-bundle/project/`
+- `app/build/nodejs/npm-ci-bundle/project/`
+- `app/build/nodejs/dependency-manager/project/`
+- `app/build/nodejs/dependency-cache/<bundle-hash>/project/`
 - `app/build/reports/nodejs/dependencies/dependency-manifest.json`
+- `app/build/reports/nodejs/dependencies/dependency-compatibility.json`
+- `app/build/reports/nodejs/npm-ci/dependency-manifest.json`
+- `app/build/reports/nodejs/dependency-manager/dependency-manager-report.json`
 - `app/build/reports/nodejs/dependencies/dependency-size-report.txt`
 - `app/build/reports/nodejs/dependencies/dependency-rejections.txt`
 
-The task does not execute package code. It rejects native addon files, lifecycle scripts, unsupported `.bin` entries, symlinks, path escapes, oversized files/packages/trees, excessive package counts, and default-profile ESM-only package metadata.
+The direct bundler task does not execute package code. The desktop-assisted npm route requires `package-lock.json`, copies
+the project to a temporary host work directory, runs `npm ci --ignore-scripts --no-bin-links --install-links --no-audit
+--fund=false`, verifies `package.json` and `package-lock.json` were not mutated, rejects generated `.bin` entries, and
+then runs the same sanitizer. Both routes reject native addon files, lifecycle scripts, unsupported `.bin` entries,
+symlinks, path escapes, unsupported package-manager layouts, oversized files/packages/trees, excessive package counts, and
+default-profile ESM-only package metadata.
+
+The dependency manifest records a normalized sanitized-project bundle hash and uses that hash as the content-addressed
+cache key. The hash covers `package.json`, optional `package-lock.json`, and `node_modules` file paths/content only; host
+working directories and cache paths are not part of the hash. Identical lockfiles and install options should therefore
+produce the same bundle hash. Package entries include package/version, integrity or content hash fallback, license,
+file count, total bytes, unsupported capability usage, and an AutoJs6 compatibility score. The SBOM-lite report mirrors
+the package identity, integrity, license, size, capability, and score fields for packaged APK review.
+
+`dependency-compatibility.json` is the v1.1 dependency compatibility analyzer output. It classifies the installed project
+as `compatible`, `compatible with capability`, `experimental`, `unsupported`, or `unsafe`; records ESM/CJS entry format,
+required builtins, declared and required capabilities, native/lifecycle/raw-network/process/fs-scope signals,
+package exports/imports conditions, and expected packaged graph size; and is summarized from
+`dependency-manifest.json` so APK-builder preflight gates can reject `unsafe` and `unsupported` bundles before copying
+`assets/project`.
+
+Task S8-45 adds `:app:manageNodeDependencies` as the integrated host-side dependency manager action. The action requires
+`package.json` plus `package-lock.json`, copies the source project to a clean work directory, runs
+`npm ci --ignore-scripts --no-bin-links --install-links --no-audit --fund=false`, verifies the package and lockfile were
+not mutated, validates the installed tree, writes the sanitized bundle, updates the content-addressed cache, emits
+SBOM-lite and compatibility reports, and verifies the output is ready for packaged APK `assets/project`. The default
+fixture stays offline through local `file:` dependencies. The manager report uses schema
+`autojs6-node-dependency-manager-v1` and records each step, the report index, the bundle hash, the cache key, and safety
+controls including `packageLifecycleScriptsExecuted=false`.
+
+## Phase 10 AutoJs6 Package Manager MVP
+
+Phase 10 adds a smaller host-managed installer prototype named `autojs6-pm`.
+It is intentionally not a full npm CLI and does not install packages inside the
+Android runtime.
+
+Focused gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
+.\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
+```
+
+The fixture uses a local registry under
+`sample/nodejs/autojs6-pm-fixture` and verifies:
+
+- registry metadata parsing
+- exact, caret, tilde, comparator range, and dist-tag semver resolution
+- nested `node_modules` layout
+- `sha512` tarball integrity checks
+- safe `.tgz` extraction with Tar Slip, symlink, and hardlink denial
+- `autojs6-lock.json`
+- `install`, `installFromTarball`, `update`, `remove`, `list`, `verify`, and
+  `prune`
+- compatibility analysis for lifecycle scripts, native addons, raw process and
+  raw network modules, `worker_threads`, raw `node:wasi`, and private bindings
+
+This is the S10-21 through S10-27 evidence path. S10-28 remains deferred:
+project UI, live online registry integration, and APK builder dependency UI
+must be added separately before this becomes a user-facing mobile installer.
+
+## Phase 13 Android Local Store
+
+Phase 13 adds `NodeAndroidPackageInstallManager` as the first Android-side
+package installation substrate. It is app-private and local-only: callers pass
+an already-unpacked package directory, and the manager validates and stages it
+before moving it into the store.
+
+Focused gates:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13AndroidPackageInstallManager
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeAndroidPackageInstallManagerInstrumentationTest"
+```
+
+Current operations:
+
+- `install`
+- `update`
+- `remove`
+- `planInstall` (dry-run)
+- `planUpdate` (dry-run)
+- `planRemove` (dry-run)
+- `list`
+- `verify`
+- `prune`
+
+Current safety properties:
+
+- store-wide file lock
+- transaction staging directory
+- atomic move with update restore path
+- cancellation checks
+- SHA-512 expected integrity and installed-record verification
+- lifecycle script denial for `preinstall`, `install`, `postinstall`, and
+  `prepare`
+- package `bin` denial
+- `.node`, `binding.gyp`, `build/Release`, and `build/Debug` native payload
+  denial
+- symlink and path-escape denial
+
+This is not a full Android npm installer. Registry download, npm CLI install,
+unrestricted JS install/update/remove authority, signed native payload support,
+and plugin/package distribution integration remain deferred.
+
+P13-42 adds `packageManagerProfile` and
+`verifyNodePhase13PackageManagerAndroidDecision` to record this boundary as an
+Android package-manager partial. The current equivalent to
+`npm i --no-bin-links` is host-managed validation plus the Android local store
+substrate for already-unpacked packages. Android-side npm CLI execution,
+registry/tarball download, lifecycle execution, bin shims, native builds,
+postinstall downloads, and unrestricted package-manager operations remain
+deferred. The script-visible `package_manager` facade is limited to guarded
+local mutation plus read-maintenance and policy-only source planning:
+status/policy/sourcePolicy/planInstall/planUpdate/planRemove/
+planRegistryInstall/planTarballInstall/install/update/remove/list/verify/prune.
+Its source policy records `local_unpacked_host_managed` as the only allowed
+source substrate and keeps raw registry, remote tarball, URL/git, workspace
+symlink, and unverified-cache sources denied. Remote source plan calls return
+`blocked_by_policy` without bridge dispatch, network/cache access, extraction,
+store mutation, or install authority. Mutating calls require
+`package_manager.mutate`, `allowMutation: true`, and SHA-512 integrity from a
+dry-run plan. The script-visible `npm` facade is a guarded alias over
+`package_manager`; it reports the same local-store policy and delegates local
+plan/mutation/maintenance plus remote source-boundary plan calls while keeping
+CLI, registry install, lifecycle, publish, and pack entry points denied.

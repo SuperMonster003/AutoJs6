@@ -7,15 +7,28 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(AUTOJS6_NODE_ENABLE_EMBEDDED_LIFECYCLE_PROBE OFF CACHE BOOL "Enable direct Node embedded lifecycle calls in the experimental probe")
 set(AUTOJS6_NODE_ENABLE_EMBEDDED_SCRIPT_EXECUTION OFF CACHE BOOL "Enable experimental embedded Node script execution")
-set(NODE_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/node-v24.5.0/include/node")
-set(NODE_LIBRARY_PATH "${CMAKE_CURRENT_LIST_DIR}/../jniLibs/${ANDROID_ABI}/libnode.so")
+set(AUTOJS6_NODE_RUNTIME_SLOT "node24_5" CACHE STRING "Build-only Embedded Node runtime slot")
+set(AUTOJS6_NODE_INCLUDE_DIR "" CACHE PATH "Build-selected Node include/node directory")
+set(AUTOJS6_NODE_LIBRARY_ROOT "" CACHE PATH "Build-selected Node jniLibs root")
+
+if ("${AUTOJS6_NODE_INCLUDE_DIR}" STREQUAL "")
+    set(NODE_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/node-v24.5.0/include/node")
+else ()
+    set(NODE_INCLUDE_DIR "${AUTOJS6_NODE_INCLUDE_DIR}")
+endif ()
+
+if ("${AUTOJS6_NODE_LIBRARY_ROOT}" STREQUAL "")
+    set(NODE_LIBRARY_PATH "${CMAKE_CURRENT_LIST_DIR}/../jniLibs/${ANDROID_ABI}/libnode.so")
+else ()
+    set(NODE_LIBRARY_PATH "${AUTOJS6_NODE_LIBRARY_ROOT}/${ANDROID_ABI}/libnode.so")
+endif ()
 
 if (NOT EXISTS "${NODE_INCLUDE_DIR}/node.h")
-    message(FATAL_ERROR "Node.js headers are missing: ${NODE_INCLUDE_DIR}")
+    message(FATAL_ERROR "Node.js headers are missing for runtime slot ${AUTOJS6_NODE_RUNTIME_SLOT}: ${NODE_INCLUDE_DIR}")
 endif ()
 
 if (NOT EXISTS "${NODE_LIBRARY_PATH}")
-    message(FATAL_ERROR "libnode.so is missing for ABI ${ANDROID_ABI}: ${NODE_LIBRARY_PATH}")
+    message(FATAL_ERROR "libnode.so is missing for runtime slot ${AUTOJS6_NODE_RUNTIME_SLOT}, ABI ${ANDROID_ABI}: ${NODE_LIBRARY_PATH}")
 endif ()
 
 add_library(node SHARED IMPORTED GLOBAL)
@@ -31,6 +44,7 @@ add_library(
         node_bridge_payload.cpp
         node_bridge_lifecycle.cpp
         node_bridge_jni.cpp
+        node_runtime_adapter_24_5.cpp
         node_bridge/embedded_inline_probe_payload.cpp
         node_bridge/embedded_probe_metadata.cpp
         node_bridge/embedded_probe_payload_utils.cpp

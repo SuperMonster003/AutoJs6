@@ -1,0 +1,8 @@
+sample.pro-parity-suite.smoke.catalog=2
+sample.pro-parity-suite.ui-layout.handle=true
+sample.pro-parity-suite.ui-layout.closed=true
+sample.pro-parity-suite.ui-layout=PASS
+sample.pro-parity-suite.tasks-work-manager.scheduled=true
+sample.pro-parity-suite.tasks-work-manager.cancelled=true
+sample.pro-parity-suite.tasks-work-manager=PASS
+sample.pro-parity-suite.smoke=PASS

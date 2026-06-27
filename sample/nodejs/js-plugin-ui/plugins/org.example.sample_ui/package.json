@@ -1,0 +1,13 @@
+{
+  "name": "org.example.sample_ui",
+  "version": "1.0.0",
+  "main": "index.cjs",
+  "autojs6": {
+    "plugin": {
+      "id": "org.example.sample_ui",
+      "permissions": ["ui"],
+      "dependencies": [],
+      "exports": {}
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "ocr-automation",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 15000,
+    "permissions": ["ocr", "image"]
+  },
+  "example": {
+    "capabilities": ["ocr", "image"],
+    "expectedProvider": "Android OCR provider over opaque image handles",
+    "packagedSupport": "future gated until packaged OCR model policy is accepted",
+    "securityLimitations": ["opaque image handles only", "no raw Bitmap or OCR engine objects", "provider timeout applies"]
+  }
+}

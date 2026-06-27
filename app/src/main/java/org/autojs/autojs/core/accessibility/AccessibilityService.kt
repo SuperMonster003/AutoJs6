@@ -17,6 +17,7 @@ import org.greenrobot.eventbus.EventBus
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 
@@ -283,6 +284,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         } catch (e: Throwable) {
             Log.e(TAG, "Unhandled exception in accessibility disconnected callback", e)
         }
+        notifyDisconnectCallbacks()
         postServiceStateChanged()
     }
 
@@ -309,6 +311,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
         @Volatile
         private var callback: AccessibilityServiceCallback? = null
+        private val disconnectCallbacks = CopyOnWriteArrayList<AccessibilityServiceCallback>()
 
         @Volatile
         var hasOperationalState = false
@@ -439,6 +442,24 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
         fun setCallback(listener: AccessibilityServiceCallback?) {
             callback = listener
+        }
+
+        fun addDisconnectCallback(listener: AccessibilityServiceCallback) {
+            disconnectCallbacks.addIfAbsent(listener)
+        }
+
+        fun removeDisconnectCallback(listener: AccessibilityServiceCallback): Boolean {
+            return disconnectCallbacks.remove(listener)
+        }
+
+        private fun notifyDisconnectCallbacks() {
+            disconnectCallbacks.forEach { listener ->
+                runCatching {
+                    listener.onDisconnected()
+                }.onFailure { error ->
+                    Log.w(TAG, "Error notifying accessibility disconnect callback", error)
+                }
+            }
         }
 
         interface GestureListener {

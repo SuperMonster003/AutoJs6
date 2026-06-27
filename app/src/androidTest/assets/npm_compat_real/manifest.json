@@ -29,6 +29,529 @@
         "stream utility",
         "zlib buffer utility"
       ]
+    },
+    {
+      "name": "core-feature-detect",
+      "patterns": [
+        "core builtin feature detection",
+        "constants/util.types/events",
+        "diagnostics_channel graceful support"
+      ]
+    },
+    {
+      "name": "esm-hybrid-packages",
+      "patterns": [
+        "ESM-only small package",
+        "hybrid CJS/ESM package",
+        "package exports import/require conditions"
+      ]
+    },
+    {
+      "name": "buffer-fetch-assert",
+      "patterns": [
+        "buffer utility",
+        "fetch wrapper fallback",
+        "assertion/test helper"
+      ]
+    },
+    {
+      "name": "async-context",
+      "patterns": [
+        "AsyncLocalStorage",
+        "async context propagation",
+        "promise and timer boundaries"
+      ]
+    },
+    {
+      "name": "stream-promises",
+      "patterns": [
+        "streams/promises",
+        "pipeline promise",
+        "transform stream package"
+      ]
+    },
+    {
+      "name": "webcrypto-digest",
+      "patterns": [
+        "WebCrypto",
+        "crypto.webcrypto.subtle",
+        "digest helper package"
+      ]
+    },
+    {
+      "name": "worker-cpu-package",
+      "patterns": [
+        "worker CPU package",
+        "worker_threads graceful fallback",
+        "pure JavaScript CPU task"
+      ]
+    },
+    {
+      "name": "test-runner-package",
+      "patterns": [
+        "test-runner package",
+        "assertion aggregation",
+        "async test case"
+      ]
+    },
+    {
+      "name": "database-abstraction",
+      "patterns": [
+        "database abstraction package",
+        "in-memory adapter",
+        "SQL-like query helper"
+      ]
+    },
+    {
+      "name": "typescript-source-package",
+      "patterns": [
+        "native TypeScript source project",
+        "checked TypeScript source package",
+        "lightweight type stripping"
+      ]
+    },
+    {
+      "name": "require-esm-hybrid",
+      "patterns": [
+        "hybrid require(esm)",
+        "synchronous ESM namespace",
+        "CommonJS bridge to ESM package"
+      ]
+    },
+    {
+      "name": "http-client-package",
+      "patterns": [
+        "package using node:http client",
+        "default raw network denial",
+        "HTTP Agent compatibility shape"
+      ]
+    },
+    {
+      "name": "formdata-fetch-package",
+      "patterns": [
+        "package using FormData/fetch",
+        "Web Platform FormData",
+        "default fetch denial"
+      ]
+    },
+    {
+      "name": "filehandle-package",
+      "patterns": [
+        "package using FileHandle",
+        "fs.promises.open",
+        "managed scoped file descriptor"
+      ]
+    },
+    {
+      "name": "fs-watch-package",
+      "patterns": [
+        "package using fs.watch",
+        "scoped watcher lifecycle",
+        "watcher cleanup"
+      ]
+    },
+    {
+      "name": "compile-cache-package",
+      "patterns": [
+        "package benefiting from compile cache",
+        "large reusable module graph",
+        "module cache repeat load"
+      ]
+    },
+    {
+      "name": "wasm-basic-package",
+      "patterns": [
+        "WebAssembly package",
+        "WebAssembly.compile",
+        "pure bytecode compute"
+      ]
+    },
+    {
+      "name": "wasm-buffer-package",
+      "patterns": [
+        "WebAssembly binary utility",
+        "Buffer-backed wasm bytes",
+        "compile cache friendly wasm module"
+      ]
+    },
+    {
+      "name": "wasi-policy-package",
+      "patterns": [
+        "controlled WASI facade detection",
+        "raw WASI tolerant package",
+        "safe WASI feature probe"
+      ]
+    },
+    {
+      "name": "diagnostics-report-package",
+      "patterns": [
+        "Inspector-free diagnostics",
+        "process.report graceful support",
+        "diagnostics without DevTools"
+      ]
+    },
+    {
+      "name": "concurrency-pool-package",
+      "patterns": [
+        "multiple concurrent scripts",
+        "Promise pool",
+        "timer and microtask scheduling"
+      ]
+    },
+    {
+      "name": "compile-cache-graph-package",
+      "patterns": [
+        "compile-cache-sensitive package",
+        "wide reusable module graph",
+        "repeat require identity"
+      ]
+    },
+    {
+      "name": "typescript-wasm-package",
+      "patterns": [
+        "TypeScript + WASM",
+        "typed package metadata",
+        "wasm compute"
+      ]
+    },
+    {
+      "name": "worker-wasm-fallback-package",
+      "patterns": [
+        "worker + WASM",
+        "worker_threads graceful fallback",
+        "wasm compute fallback"
+      ]
+    },
+    {
+      "name": "large-esm-graph-package",
+      "patterns": [
+        "large ESM graph",
+        "require(esm) package graph",
+        "ESM dependency fanout"
+      ]
+    },
+    {
+      "name": "package-integrity-package",
+      "patterns": [
+        "package integrity",
+        "crypto hash utility",
+        "asset integrity manifest"
+      ]
+    },
+    {
+      "name": "esm-only-utility-v2",
+      "patterns": [
+        "ESM-only Phase 10 utility",
+        "local dynamic import",
+        "package exports import condition"
+      ]
+    },
+    {
+      "name": "hybrid-exports-v2",
+      "patterns": [
+        "hybrid CJS/ESM Phase 10 package",
+        "package exports import/require conditions",
+        "require plus dynamic import"
+      ]
+    },
+    {
+      "name": "web-streams-transform",
+      "patterns": [
+        "Web Streams transform",
+        "ReadableStream pipeline",
+        "pure JavaScript stream adapter"
+      ]
+    },
+    {
+      "name": "fetch-adapter-v2",
+      "patterns": [
+        "fetch adapter package",
+        "controlled provider shape",
+        "no implicit network call"
+      ]
+    },
+    {
+      "name": "websocket-protocol-util",
+      "patterns": [
+        "WebSocket protocol utility",
+        "binary frame helper",
+        "no raw socket dependency"
+      ]
+    },
+    {
+      "name": "wasm-utility-v2",
+      "patterns": [
+        "WASM utility package",
+        "WebAssembly validate and compile",
+        "pure bytecode helper"
+      ]
+    },
+    {
+      "name": "typescript-output-package",
+      "patterns": [
+        "TypeScript output package",
+        "declaration metadata",
+        "compiled CommonJS artifact"
+      ]
+    },
+    {
+      "name": "test-helper-v2",
+      "patterns": [
+        "test helper package",
+        "assertion aggregation",
+        "async test summary"
+      ]
+    },
+    {
+      "name": "package-manager-installed",
+      "patterns": [
+        "package-manager-installed fixture",
+        "lockfile metadata reader",
+        "nested dependency install shape"
+      ]
+    },
+    {
+      "name": "lockfile-reader",
+      "patterns": [
+        "AutoJs6 lockfile reader",
+        "dependency graph traversal",
+        "integrity metadata"
+      ]
+    },
+    {
+      "name": "storage-json-helper",
+      "patterns": [
+        "storage JSON helper",
+        "namespace key encoder",
+        "quota-friendly serialization"
+      ]
+    },
+    {
+      "name": "notification-payload-helper",
+      "patterns": [
+        "notification payload helper",
+        "channel descriptor builder",
+        "permission-aware shape"
+      ]
+    },
+    {
+      "name": "sensor-data-normalizer",
+      "patterns": [
+        "sensor data normalizer",
+        "timestamp ordering",
+        "sampling interval helper"
+      ]
+    },
+    {
+      "name": "long-running-scheduler-helper",
+      "patterns": [
+        "long-running scheduler helper",
+        "heartbeat window calculation",
+        "stop policy metadata"
+      ]
+    },
+    {
+      "name": "checkpoint-serializer",
+      "patterns": [
+        "checkpoint serializer",
+        "JSON-only restore payload",
+        "atomic state envelope"
+      ]
+    },
+    {
+      "name": "module-graph-resolver",
+      "patterns": [
+        "module graph resolver",
+        "exports condition selection",
+        "local target normalization"
+      ]
+    },
+    {
+      "name": "source-map-parser-lite",
+      "patterns": [
+        "source map parser",
+        "line column mapping",
+        "inline source content"
+      ]
+    },
+    {
+      "name": "capability-manifest-reader",
+      "patterns": [
+        "capability manifest reader",
+        "provider requirement extraction",
+        "safe profile classification"
+      ]
+    },
+    {
+      "name": "security-policy-checker",
+      "patterns": [
+        "security policy checker",
+        "disabled builtin detection",
+        "native addon denial metadata"
+      ]
+    },
+    {
+      "name": "adapter-diagnostics-helper",
+      "patterns": [
+        "adapter diagnostics helper",
+        "C ABI status parser",
+        "legacy path blocker metadata"
+      ]
+    },
+    {
+      "name": "stdlib-digest-stream-package",
+      "patterns": [
+        "Phase 13 stdlib corpus delta",
+        "crypto hash plus stream/consumers",
+        "pure JavaScript dependency snapshot"
+      ]
+    },
+    {
+      "name": "perf-async-hooks-package",
+      "patterns": [
+        "Phase 13 stdlib corpus delta",
+        "perf_hooks and async_hooks package",
+        "async context timing helper"
+      ]
+    },
+    {
+      "name": "url-buffer-codec-package",
+      "patterns": [
+        "Phase 13 stdlib corpus delta",
+        "URL and Buffer package",
+        "query codec helper"
+      ]
     }
-  ]
+  ],
+  "phase13Compatibility": {
+    "schema": "autojs6-phase13-dependency-compatibility-corpus-v1",
+    "fixtureCount": 53,
+    "requiredReasonKinds": [
+      "missing_builtin",
+      "native_addon",
+      "postinstall",
+      "network",
+      "fs"
+    ],
+    "targetedFixtureDeltas": [
+      {
+        "area": "stdlib",
+        "fixtures": [
+          "stdlib-digest-stream-package",
+          "perf-async-hooks-package",
+          "url-buffer-codec-package"
+        ],
+        "passDelta": 3,
+        "notes": "P13-43/P13-47 adds fixed pure-JS stdlib package snapshots for crypto+stream, perf_hooks+async_hooks, and URL+Buffer coverage."
+      }
+    ],
+    "categories": [
+      {
+        "id": "missing_builtin",
+        "title": "Packages that probe desktop builtins unavailable in the Safe profile",
+        "reasonKind": "missing_builtin",
+        "fixtures": [
+          "wasi-policy-package",
+          "test-runner-package",
+          "diagnostics-report-package",
+          "security-policy-checker"
+        ],
+        "packages": [
+          {
+            "name": "wasi-policy-package",
+            "reason": "Raw node:wasi remains disabled; package must use controlled WASI detection or graceful fallback."
+          },
+          {
+            "name": "test-runner-package",
+            "reason": "node:test/reporters and broad test-runner surfaces are not promoted in the Safe profile."
+          },
+          {
+            "name": "diagnostics-report-package",
+            "reason": "inspector/devtools diagnostics remain disabled; package must avoid debugger-only builtin paths."
+          }
+        ]
+      },
+      {
+        "id": "native_addon",
+        "title": "Packages that depend on native addons or native build artifacts",
+        "reasonKind": "native_addon",
+        "fixtures": [
+          "security-policy-checker",
+          "adapter-diagnostics-helper"
+        ],
+        "packages": [
+          {
+            "name": "native-sqlite-addon",
+            "reason": ".node native addon loading remains denied until signed packaged artifacts, ABI/hash allowlists, and crash isolation land."
+          },
+          {
+            "name": "image-native-addon",
+            "reason": "Native payloads and node-gyp output are blocked by dependency scanning and runtime native-addon policy."
+          }
+        ]
+      },
+      {
+        "id": "postinstall",
+        "title": "Packages that require lifecycle scripts or postinstall downloads",
+        "reasonKind": "postinstall",
+        "fixtures": [
+          "package-manager-installed",
+          "lockfile-reader",
+          "package-integrity-package"
+        ],
+        "packages": [
+          {
+            "name": "unsafe-postinstall-lite",
+            "reason": "preinstall/install/postinstall/prepare scripts stay denied for Android runtime and packaged dependency bundles."
+          },
+          {
+            "name": "binary-downloader-package",
+            "reason": "Postinstall download and executable extraction remain blocked until integrity, rollback, and disclosure policy land."
+          }
+        ]
+      },
+      {
+        "id": "network",
+        "title": "Packages that require raw network, sockets, or live outbound access",
+        "reasonKind": "network",
+        "fixtures": [
+          "http-client-package",
+          "formdata-fetch-package",
+          "fetch-adapter-v2",
+          "websocket-protocol-util"
+        ],
+        "packages": [
+          {
+            "name": "http-client-package",
+            "reason": "node:http client shape is partial and raw network remains capability-gated."
+          },
+          {
+            "name": "websocket-protocol-util",
+            "reason": "Protocol helpers pass offline, but live sockets remain behind controlled websocket/network capability evidence."
+          }
+        ]
+      },
+      {
+        "id": "fs",
+        "title": "Packages that require broader filesystem roots or advanced fs behavior",
+        "reasonKind": "fs",
+        "fixtures": [
+          "filehandle-package",
+          "fs-watch-package",
+          "lockfile-reader",
+          "module-graph-resolver"
+        ],
+        "packages": [
+          {
+            "name": "filehandle-package",
+            "reason": "FileHandle coverage is scoped to the working directory and does not grant arbitrary host paths."
+          },
+          {
+            "name": "fs-watch-package",
+            "reason": "fs.watch coverage is scoped and bounded; recursive watchers and broader packaged watcher parity remain blocked."
+          }
+        ]
+      }
+    ]
+  }
 }

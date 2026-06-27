@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/long-running-service",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}
