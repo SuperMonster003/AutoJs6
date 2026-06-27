@@ -30,6 +30,11 @@ idea {
 }
 
 val globalApplicationId = "org.autojs.autojs6"
+val appApplicationId = "org.autojs.autojs6.ace"
+val autojsPluginPermission = "org.autojs.permission.PLUGIN"
+
+fun autojsPluginPermissionDeclarationFor(applicationId: String) =
+    if (applicationId == globalApplicationId) autojsPluginPermission else "$applicationId.permission.PLUGIN"
 
 val flavorDimension = "channel"
 val flavorNameApp = "app"
@@ -2074,7 +2079,8 @@ android {
     compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
-        applicationId = applicationId
+        // Temporary ACE integration branch package id for side-by-side device testing.
+        applicationId = appApplicationId
 
         minSdk = versions.sdkVersionMin
         targetSdk = versions.sdkVersionTarget
@@ -2167,7 +2173,7 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 mapOf(
-                    "resourcePackageName" to (this@defaultConfig.applicationId ?: globalApplicationId),
+                    "resourcePackageName" to globalApplicationId,
                     "androidManifestFile" to ("$projectDir/src/main/AndroidManifest.xml")
                 ).let { arguments(it) }
             }
@@ -2193,7 +2199,8 @@ android {
                     "appName" to "@string/node_identity_app_label",
                     "intentCategory" to "android.intent.category.LAUNCHER",
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
-                    "authorities" to "org.autojs.autojs6.fileprovider",
+                    "authorities" to "$appApplicationId.fileprovider",
+                    "autojsPluginPermissionDeclaration" to autojsPluginPermissionDeclarationFor(appApplicationId),
                     "icon" to "@mipmap/ic_app_launcher_adaptive",
                 )
             )
@@ -2214,10 +2221,11 @@ android {
             manifestPlaceholders.putAll(
                 mapOf(
                     "CHANNEL" to flavorNameInrt,
-                    "appName" to "AutoJs6.$flavorNameInrt",
+                    "appName" to "AutoJs6 ACE.$flavorNameInrt",
                     "intentCategory" to "android.intent.category.DEFAULT",
                     "intentCategoryInrt" to "android.intent.category.LAUNCHER",
-                    "authorities" to "org.autojs.autojs6.$flavorNameInrt.fileprovider",
+                    "authorities" to "$appApplicationId.$flavorNameInrt.fileprovider",
+                    "autojsPluginPermissionDeclaration" to autojsPluginPermissionDeclarationFor("$appApplicationId.$flavorNameInrt"),
                     "icon" to "@mipmap/ic_launcher",
                 )
             )

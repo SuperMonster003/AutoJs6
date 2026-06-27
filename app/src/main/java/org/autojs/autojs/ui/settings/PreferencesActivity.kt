@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.settings
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.BaseActivity
@@ -17,13 +18,15 @@ import org.autojs.autojs6.databinding.ActivityPreferencesBinding
 open class PreferencesActivity : BaseActivity() {
 
     private lateinit var binding: ActivityPreferencesBinding
+    protected open val titleRes: Int = R.string.text_settings
+    protected open fun createPreferencesFragment(): Fragment = PreferencesFragment()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPreferencesBinding.inflate(layoutInflater).also {
             setContentView(it.root)
             it.toolbar.apply {
-                setTitle(R.string.text_settings)
+                setTitle(titleRes)
                 setSupportActionBar(this)
                 setNavigationOnClickListener { finish() }
             }
@@ -31,7 +34,7 @@ open class PreferencesActivity : BaseActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.fragment_preferences, PreferencesFragment())
+            .replace(R.id.fragment_preferences, createPreferencesFragment())
             .disallowAddToBackStack()
             .commit()
     }

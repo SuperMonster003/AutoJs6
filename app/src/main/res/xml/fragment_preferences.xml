@@ -121,6 +121,15 @@
         app:layout="@layout/preference_category_custom"
         app:title="@string/text_code_editor">
 
+        <org.autojs.autojs.theme.preference.MaterialListPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_editor_engine"
+            app:title="@string/text_editor_engine"
+            app:itemKeys="@array/keys_editor_engine"
+            app:itemValues="@array/values_editor_engine"
+            app:itemDefaultKey="@string/default_key_editor_engine"
+            app:longClickPrompt="@string/description_editor_engine_preference" />
+
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_editor_auto_show_log_bottom_sheet_on_run"
@@ -148,6 +157,11 @@
             app:key="@string/key_editor_large_file_mode_threshold_bytes"
             app:title="@string/text_editor_large_file_mode_threshold"
             app:longClickPrompt="@string/description_editor_large_file_mode_threshold" />
+
+        <org.autojs.autojs.ui.settings.CodeEditorSettingsPreference
+            app:layout="@layout/preference_custom"
+            app:title="@string/text_all_settings"
+            app:summary="@string/summary_code_editor_settings" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 

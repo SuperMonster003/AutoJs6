@@ -7,8 +7,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
-import android.database.Cursor
-import android.graphics.Color
+import android.content.SharedPreferences
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
@@ -17,39 +16,39 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
 import android.os.SystemClock
-import android.provider.OpenableColumns
-import android.text.TextUtils
+import android.text.InputType
 import android.util.AttributeSet
 import android.util.SparseBooleanArray
 import android.view.Choreographer
 import android.view.View
 import android.widget.ImageView
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.StringRes
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentActivity
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.core.pref.Pref.getEditorTextSize
-import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.model.autocomplete.AutoCompletion
+import org.autojs.autojs.model.autocomplete.CodeCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletions
+import org.autojs.autojs.model.indices.AndroidClass
+import org.autojs.autojs.model.indices.ClassSearchingItem
 import org.autojs.autojs.model.indices.Module
 import org.autojs.autojs.model.indices.Property
 import org.autojs.autojs.model.script.Scripts.ACTION_ON_EXECUTION_FINISHED
@@ -59,23 +58,48 @@ import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE
 import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
-import org.autojs.autojs.pio.PFiles.write
 import org.autojs.autojs.script.JavaScriptSource
-import org.autojs.autojs.storage.file.StableDraftFileHelper
-import org.autojs.autojs.storage.file.TmpScriptFiles
-import org.autojs.autojs.storage.history.HistoryPrefs
-import org.autojs.autojs.storage.history.HistoryRepository
-import org.autojs.autojs.storage.history.HistoryUriUtils
-import org.autojs.autojs.storage.history.VersionHistoryController
-import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListener
 import org.autojs.autojs.ui.edit.debug.DebugBar
-import org.autojs.autojs.ui.edit.editor.CodeEditor
-import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
-import org.autojs.autojs.ui.edit.editor.LayoutHelper
+import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
+import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorAssets
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorTestHooks
+import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
+import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
+import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
+import org.autojs.autojs.ui.edit.editor.ace.health.AceFailureType
+import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
+import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher
+import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
+import org.autojs.autojs.ui.edit.editor.engine.EditorEngineFactory
+import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
+import org.autojs.autojs.ui.edit.editor.engine.EditorCursorChangeListener
+import org.autojs.autojs.ui.edit.editor.engine.EditorSearchOptions
+import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
+import org.autojs.autojs.ui.edit.editor.engine.EditorSelection
+import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
+import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
+import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadMetadata
+import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
+import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadTarget
+import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
+import org.autojs.autojs.ui.edit.editor.service.EditorBreakpointModelStore
+import org.autojs.autojs.ui.edit.editor.service.EditorFileSaveEncoding
+import org.autojs.autojs.ui.edit.editor.service.EditorFileService
+import org.autojs.autojs.ui.edit.editor.service.EditorTextProvider
+import org.autojs.autojs.ui.edit.editor.service.EditorThemeFontService
+import org.autojs.autojs.ui.edit.editor.service.EditorVersionHistoryService
+import org.autojs.autojs.ui.edit.editor.service.RunScriptTextProvider
+import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicy
+import org.autojs.autojs.ui.edit.editor.viewport.EditorViewportPolicyFactory
+import org.autojs.autojs.ui.edit.keyboard.AceActionFavoritesDialog
+import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
+import org.autojs.autojs.ui.edit.keyboard.AceShortcutPanel
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
@@ -86,19 +110,21 @@ import org.autojs.autojs.ui.edit.toolbar.DebugToolbarFragment
 import org.autojs.autojs.ui.edit.toolbar.NormalToolbarFragment
 import org.autojs.autojs.ui.edit.toolbar.SearchToolbarFragment
 import org.autojs.autojs.ui.edit.toolbar.ToolbarFragment
-import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.log.LogActivity
+import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
+import org.autojs.autojs.ui.project.BuildActivity
+import org.autojs.autojs.ui.settings.EditorSettingActionRegistry
 import org.autojs.autojs.ui.widget.EWebView
-import org.autojs.autojs.ui.widget.SimpleTextWatcher
 import org.autojs.autojs.util.ClipboardUtils
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
-import org.autojs.autojs.util.DisplayUtils.pxToSp
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.DocsUtils.getUrl
+import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ScriptOriginResolver
-import org.autojs.autojs.util.StringUtils
+import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.ViewUtils.showToast
@@ -106,18 +132,13 @@ import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.R.string.text_unknown
 import org.autojs.autojs6.databinding.EditorViewBinding
-import java.io.BufferedInputStream
+import org.json.JSONObject
 import java.io.File
-import java.io.IOException
 import java.io.InputStream
-import java.io.InputStreamReader
 import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
 import java.util.Locale
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import java.util.regex.Pattern
 
@@ -152,6 +173,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mLogPanelCallback?.onShowLogPanel()
     }
 
+    fun openEditorLogByPreference() {
+        val mode = Pref.getString(
+            R.string.key_editor_log_button_behavior,
+            key(R.string.default_key_editor_log_button_behavior),
+        )
+        if (mode == key(R.string.key_editor_log_button_behavior_fullscreen_page)) {
+            LogActivity.launch(context)
+            return
+        }
+        showLogPanel()
+    }
+
     fun setScriptRunningStateListener(listener: ScriptRunningStateListener?) {
         mScriptRunningStateListener = listener
         listener?.onScriptRunningStateChanged(isScriptRunning())
@@ -160,7 +193,28 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var binding: EditorViewBinding = EditorViewBinding.bind(inflate(context, R.layout.editor_view, this))
 
     @JvmField
-    val editor: CodeEditor = binding.editor
+    var editor: ScriptEditorEngine = EditorEngineFactory.create(context, EditorEnginePreferences.get())
+
+    private var mViewportPolicy: EditorViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
+    val breakpointModelStore = EditorBreakpointModelStore { editor }
+    private val mCommandDispatcher = EditorCommandDispatcher(
+        currentEditor = { editor },
+        breakpointModelStore = breakpointModelStore,
+        showManual = { urlSuffix, title -> showManual(urlSuffix, title) },
+        hideFunctionsKeyboard = { showSoftInput -> mFunctionsKeyboardHelper?.hideFunctionsLayout(showSoftInput) },
+    )
+    val commandDispatcher: EditorCommandDispatcher
+        get() = mCommandDispatcher
+
+    private val textLoadTarget: EditorTextLoadTarget
+        get() = EngineTextLoadTarget(editor)
+    private val editorTextProvider = EditorTextProvider(this) { editor }
+    private val runScriptTextProvider = RunScriptTextProvider(
+        context = context,
+        editorTextProvider = editorTextProvider,
+        onTmpFileCreated = { mTmpSavedFileForRunning = it },
+        extensionWithDotProvider = ::temporaryScriptExtensionWithDot,
+    )
 
     @JvmField
     val debugBar: DebugBar = binding.debugBar
@@ -180,6 +234,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @Volatile
     var saveStickyDirty: Boolean = false
 
+    private val versionHistoryService = EditorVersionHistoryService(
+        context = context,
+        currentEditor = { editor },
+        onRestoredToEditor = {
+            saveStickyDirty = true
+        },
+        onRestoredUi = {
+            syncPrimaryMenuState()
+            showSnack(this@EditorView, R.string.text_done)
+        },
+    )
+
     // Whether we have had any direct edits since last save/baseline.
     // Direct edits mean changes NOT caused by undo/redo buttons.
     //
@@ -188,6 +254,20 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // 直接编辑指不是由撤销/重做按钮触发的文本变化.
     @Volatile
     private var mHadDirectEditSinceSave: Boolean = false
+
+    private val fileService = EditorFileService(
+        context = context,
+        hostView = this,
+        versionHistoryService = versionHistoryService,
+        onSaveAsSucceeded = { dest ->
+            uri = Uri.fromFile(dest)
+            name = getNameWithoutExtension(dest.path)
+            editor.markTextAsSaved()
+            saveStickyDirty = false
+            mHadDirectEditSinceSave = false
+            setMenuItemStatus(R.id.save, false)
+        },
+    )
 
     // Whether a draft has been restored in this session.
     // If true, subsequent async file-load setInitialText() must NOT overwrite the restored draft.
@@ -254,6 +334,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @Volatile
     private var mLargeFileMode: Boolean = false
 
+    @Volatile
+    private var mSwitchingEditorEngine: Boolean = false
+
+    private val mAceFallbackInProgress = AtomicBoolean(false)
+
+    @Volatile
+    private var mLastAceDiagnosticsSnapshot: AceDiagnosticsSnapshot? = null
+
     // Active large-file loading cancel flag.
     // zh-CN: 大文件加载的取消标记 (当前会话).
     private val mLargeFileCancel = AtomicBoolean(false)
@@ -274,18 +362,23 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private val mCodeCompletionBar: CodeCompletionBar = binding.codeCompletionBar
     private val mInputMethodEnhanceBar: View = binding.inputMethodEnhanceBar
+    private val mNativeInputMethodEnhanceContent: View = binding.nativeInputMethodEnhanceContent
+    private val mAceInputMethodEnhanceContent: View = binding.aceInputMethodEnhanceContent
     private val mSymbolBar: CodeCompletionBar = binding.symbolBar
     private val mShowFunctionsButton: ImageView = binding.functions
+    private val mAceShowFunctionsButton: ImageView = binding.aceFunctions
+    private val mAceShortcutTopBar: CodeCompletionBar = binding.aceShortcutTopBar
+    private val mAceShortcutBottomBar: CodeCompletionBar = binding.aceShortcutBottomBar
+    private val mAceSymbolsBar: CodeCompletionBar = binding.aceSymbolsBar
     private val mFunctionsKeyboard: FunctionsKeyboardView = binding.functionsKeyboard
     private val mDocsWebView: EWebView = binding.docs
     private val mDrawerLayout: DrawerLayout = binding.drawerLayout
 
     private var mCurrentCharsetConfidence: Int = 0
-    private var mCurrentCharset: Charset = DEFAULT_CHARSET_TO_WRITE_FILE
+    private var mCurrentCharset: Charset = EditorFileService.DEFAULT_CHARSET_TO_WRITE_FILE
     private var mHadBom = false
     private var mReadOnly = false
     private var mAutoCompletion: AutoCompletion? = null
-    private var mEditorTheme: Theme? = null
     private var mFunctionsKeyboardHelper: FunctionsKeyboardHelper? = null
     private val mOnRunFinishedReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -311,8 +404,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mNormalToolbar = NormalToolbarFragment()
     private var mDebugging = false
     private var mTmpSavedFileForRunning: File? = null
+    private var mReadOnlyLockedByIntent = false
+    private var mAceShortcutReturnSelection: EditorSelection? = null
+    private var mAceShortcutLastObservedSelection: EditorSelection? = null
+    private var mAceShortcutReturnJumpInProgress = false
 
     private val mUiHandler = Handler(Looper.getMainLooper())
+
+    private val mPrimaryMenuStateSyncDebounceMs = 80L
+    private val mPrimaryMenuStateSyncRunnable = Runnable {
+        syncPrimaryMenuState()
+    }
 
     // Delay showing loading bar to avoid flicker.
     // zh-CN: 延迟显示加载提示条, 避免闪烁.
@@ -324,6 +426,26 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private val mLoadingBarContainer: View = binding.loadingBarContainer
     private val mLoadingBarText: TextView = binding.loadingBarText
+    private val themeFontService = EditorThemeFontService(
+        context = context,
+        activity = activity,
+        currentEditor = { editor },
+        inputMethodEnhanceBar = mInputMethodEnhanceBar,
+        loadingBarContainer = mLoadingBarContainer,
+        loadingBarText = mLoadingBarText,
+        completionBars = listOf(
+            mCodeCompletionBar,
+            mSymbolBar,
+            mAceShortcutTopBar,
+            mAceShortcutBottomBar,
+            mAceSymbolsBar,
+        ),
+        showFunctionsButtons = listOf(
+            mShowFunctionsButton,
+            mAceShowFunctionsButton,
+        ),
+        invalidateHost = { invalidate() },
+    )
 
     private var mLoadingBarRequested = false
     private var mLoadingBarShownAtMs = 0L
@@ -341,10 +463,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // IME bottom inset last applied to editor padding.
     // zh-CN: 最近一次应用到编辑器 padding 的 IME 底部值.
     private var mLastImeBottomInset = 0
-
-    // Reusable rect for cursor visibility requests.
-    // zh-CN: 光标可见性请求复用 Rect.
-    private val mTmpCursorRect = Rect()
+    private var mLastImeVisible = false
+    private var mLastImeEventAtUptimeMillis = 0L
 
     // Reusable rect for window visible area.
     // zh-CN: 复用的窗口可见区域 Rect.
@@ -380,6 +500,26 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         restartSearchStatsAsync(reason = "debounce")
     }
 
+    private val mEditorDisplayPreferenceKeys = setOf(
+        EditorDisplayPreferences.KEY_WORD_WRAP_ENABLED,
+        EditorDisplayPreferences.KEY_WORD_WRAP_INDENT_STYLE,
+        EditorDisplayPreferences.KEY_LINE_NUMBERS_ENABLED,
+        EditorDisplayPreferences.KEY_BREAKPOINT_MARKERS_ENABLED,
+        EditorDisplayPreferences.KEY_FOLD_MARKERS_ENABLED,
+        EditorDisplayPreferences.KEY_GUTTER_WIDTH_MODE,
+    )
+
+    private val mEditorPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+        when (changedKey) {
+            in mEditorDisplayPreferenceKeys -> post { editor.notifyDisplayPreferencesChanged() }
+            key(R.string.key_editor_text_size),
+            key(R.string.key_ace_editor_font),
+                -> post { themeFontService.applyEditorPreferences() }
+            key(R.string.key_editor_theme) -> post { applyCurrentEditorThemePreference() }
+            key(R.string.key_editor_engine) -> post { applyCurrentEditorEnginePreference() }
+        }
+    }
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -387,6 +527,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
+        recordAceAssetMissingFallbackIfNeeded()
+        attachEditorEngineView()
         setUpEditor()
         setUpInputMethodEnhancedBar()
         setUpFunctionsKeyboard()
@@ -396,10 +538,30 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             webView.settings.displayZoomControls = true
             webView.loadUrl(getUrl("index.html"))
         }
-        Themes.getCurrent(context)
+        themeFontService.loadCurrentTheme()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { theme: Theme? -> setTheme(theme) }
         initNormalToolbar()
+    }
+
+    private fun attachEditorEngineView() {
+        if (editor.view.parent == null) {
+            binding.editorContainer.addView(
+                editor.view,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                ),
+            )
+        }
+    }
+
+    private fun registerFunctionsKeyboardBackHandler() {
+        (context as? HostActivity)?.backPressedObserver?.registerHandler(mFunctionsKeyboardHelper)
+    }
+
+    private fun unregisterFunctionsKeyboardBackHandler() {
+        (context as? HostActivity)?.backPressedObserver?.unregisterHandler(mFunctionsKeyboardHelper)
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
@@ -410,7 +572,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         } else {
             context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED))
         }
-        (context as? HostActivity)?.backPressedObserver?.registerHandler(mFunctionsKeyboardHelper)
+        registerFunctionsKeyboardBackHandler()
+        Pref.get().registerOnSharedPreferenceChangeListener(mEditorPreferenceChangeListener)
     }
 
     fun handleIntent(intent: Intent): Observable<String> {
@@ -439,6 +602,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
         val readOnly = intent.getBooleanExtra(EXTRA_READ_ONLY, false).also {
             mReadOnly = it
+            mReadOnlyLockedByIntent = it
         }
         if (readOnly) {
             mInputMethodEnhanceBar.visibility = GONE
@@ -520,7 +684,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         syncPrimaryMenuState()
     }
 
-    fun getEditorTheme() = mEditorTheme
+    fun getEditorTheme() = themeFontService.currentTheme
 
     private fun handleText(intent: Intent): Observable<String> {
         val content = intent.getStringExtra(EXTRA_CONTENT)
@@ -568,27 +732,23 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 activity.window.decorView.getWindowVisibleDisplayFrame(mTmpWindowVisibleRect)
 
                 val loc = IntArray(2)
-                editor.getLocationOnScreen(loc)
-                val editorBottomOnScreen = loc[1] + editor.height
+                editor.view.getLocationOnScreen(loc)
+                val editorBottomOnScreen = loc[1] + editor.view.height
 
                 (editorBottomOnScreen - mTmpWindowVisibleRect.bottom).coerceAtLeast(0)
             } else {
                 0
             }
 
-            if (targetBottom != mLastImeBottomInset) {
+            val imeStateChanged = targetBottom != mLastImeBottomInset ||
+                imeVisible != mLastImeVisible
+
+            if (imeStateChanged) {
                 mLastImeBottomInset = targetBottom
+                mLastImeVisible = imeVisible
+                mLastImeEventAtUptimeMillis = SystemClock.uptimeMillis()
 
-                // Apply bottom padding only when the editor is actually overlapped by IME.
-                // zh-CN: 仅当 editor 实际被 IME 遮挡时才应用底部 padding.
-                val v = editor
-                v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, targetBottom)
-
-                // Only ensure cursor visible when IME becomes visible.
-                // zh-CN: 仅在 IME 变为可见时确保光标可见.
-                if (imeVisible) {
-                    post { ensureCursorVisibleIfPossible() }
-                }
+                mViewportPolicy.onImeInsetsChanged(imeVisible, targetBottom)
             }
 
             // Do not consume insets.
@@ -606,51 +766,19 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun ensureCursorVisibleIfPossible() {
         // Bring the caret into visible area when keyboard shows, without "scrolling back" on hide.
         // zh-CN: 键盘弹起时将光标区域滚动到可见范围内, 键盘收起时不回滚.
-        val editText = editor.codeEditText
-        val textLen = editText.text?.length ?: 0
-        if (textLen <= 0) return
-
-        val layout = editText.layout ?: return
-        val sel = editText.selectionStart.coerceIn(0, textLen)
-
-        val line = LayoutHelper.getLineOfChar(layout, sel).coerceAtLeast(0)
-        val lineTop = layout.getLineTop(line)
-        val lineBottom = layout.getLineBottom(line)
-
-        // Compute a small rect around the current line/caret.
-        // zh-CN: 计算一个围绕当前行/光标的小矩形区域.
-        val x = runCatching { layout.getPrimaryHorizontal(sel).toInt() }.getOrElse { 0 }
-        val left = (x - editText.paddingLeft - 16).coerceAtLeast(0)
-        val right = left + 32
-
-        mTmpCursorRect.set(
-            /* left = */ left,
-            /* top = */ lineTop,
-            /* right = */ right,
-            /* bottom = */ lineBottom,
-        )
-
-        // Request rectangle visible inside scroll container.
-        // zh-CN: 请求在滚动容器内显示该矩形区域.
-        editText.requestRectangleOnScreen(mTmpCursorRect, true)
+        editor.ensureCursorVisibleIfPossible()
     }
 
     private fun ensureEditorHasCursorAfterLoadIfNeeded() {
         // Ensure there is a visible caret after loading, so jump operations can work.
         // zh-CN: 加载完成后确保存在可见光标, 以使跳转操作可用.
-        val editText = editor.codeEditText
-        val len = editText.text?.length ?: 0
-        if (len <= 0) return
-
-        // If selection is invalid or collapsed at -1-like state, normalize.
-        // zh-CN: 若 selection 异常, 则归一化.
-        val safeSel = editText.selectionStart.coerceIn(0, len)
+        if (editor.textSnapshot.isEmpty()) return
 
         // Request focus without forcing soft keyboard.
         // zh-CN: 请求焦点但不强制弹出软键盘.
-        editText.requestFocus()
-        editText.isCursorVisible = true
-        editText.setSelection(safeSel)
+        if (editor.engineType != EditorEngineType.ACE) {
+            editor.requestEditorFocus()
+        }
 
         // Optionally ensure visible once.
         // zh-CN: 可选地确保一次可见.
@@ -691,26 +819,25 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun setEnhanceBarInteractive(interactive: Boolean) {
         // When not interactive, hide function/completion bars and show loading bar.
         // zh-CN: 非可操作状态时隐藏功能/补全栏, 显示加载提示条.
-        when (interactive) {
-            true -> {
-                mShowFunctionsButton.visibility = VISIBLE
-                mCodeCompletionBar.visibility = VISIBLE
-            }
-            else -> {
-                mShowFunctionsButton.visibility = INVISIBLE
-                mCodeCompletionBar.visibility = INVISIBLE
-            }
+        val activeContent = if (editor.engineType == EditorEngineType.ACE) {
+            mAceInputMethodEnhanceContent
+        } else {
+            mNativeInputMethodEnhanceContent
         }
-        if (!mSymbolBar.isGone) {
-            when (interactive) {
-                true -> {
-                    mSymbolBar.visibility = VISIBLE
-                }
-                else -> {
-                    mSymbolBar.visibility = INVISIBLE
-                }
-            }
+        val inactiveContent = if (editor.engineType == EditorEngineType.ACE) {
+            mNativeInputMethodEnhanceContent
+        } else {
+            mAceInputMethodEnhanceContent
         }
+
+        inactiveContent.visibility = GONE
+        if (!interactive && mReadOnly && !mEditorLoading && !mLoadingBarRequested) {
+            activeContent.visibility = GONE
+            mInputMethodEnhanceBar.visibility = GONE
+            return
+        }
+        mInputMethodEnhanceBar.visibility = VISIBLE
+        activeContent.visibility = if (interactive) VISIBLE else INVISIBLE
     }
 
     private fun beginEditorLoadingUi(initialMessage: String) {
@@ -738,13 +865,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun loadUri(uri: Uri): Observable<String> {
-        if (Pref.largeFileModeThresholdBytes == 0) {
-            beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
-            return loadUriStreamed(uri)
+        val sizeOrNull = runCatching { fileService.queryContentLengthOrNull(uri) }.getOrNull()
+        val shouldStreamAsLargeFile = EditorTextLoadPolicy.shouldStreamAsLargeFile(sizeOrNull)
+        if (EditorTextLoadPolicy.shouldRouteAceToNative(editor.engineType, shouldStreamAsLargeFile, shouldForceLargeFileNativeRoute())) {
+            if (!ensureNativeEditorForLargeFile()) {
+                return Observable.error(IllegalStateException(context.getString(R.string.error_ace_editor_unavailable)))
+            }
         }
 
-        val sizeOrNull = runCatching { queryContentLengthOrNull(uri) }.getOrNull()
-        if (sizeOrNull != null && Pref.shouldEnableLargeFileModeForSize(sizeOrNull)) {
+        if (shouldStreamAsLargeFile && editor.engineType == EditorEngineType.NATIVE) {
             // Large file: show loading in enhance bar, allow viewing/scrolling (read-only).
             // zh-CN: 大文件: 在增强栏显示加载提示, 允许查看/滚动 (只读).
             beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
@@ -753,20 +882,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         return Observable
             .fromCallable {
-                val resolver = context.contentResolver
-                val rawBytes = resolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
-
-                val detectedCharsetWrapper = StringUtils.detectCharset(rawBytes)
-                mCurrentCharsetConfidence = detectedCharsetWrapper.confidence ?: 0
-                mCurrentCharset = detectedCharsetWrapper.charsetOrDefault()
-                mHadBom = StringUtils.hasBom(rawBytes, mCurrentCharset)
-
-                val offset = if (mHadBom) {
-                    StringUtils.bomBytes(mCurrentCharset).size.coerceAtMost(rawBytes.size)
-                } else 0
-                val len = (rawBytes.size - offset).coerceAtLeast(0)
-
-                String(rawBytes, offset, len, mCurrentCharset)
+                fileService.readText(uri)
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -775,10 +891,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 mEditorLoading = true
                 syncPrimaryMenuState()
             }
-            .doOnNext { text: String ->
+            .doOnNext { result ->
                 post {
                     runCatching {
-                        setInitialText(text)
+                        applyReadMetadata(result.metadata)
+                        setInitialText(result.text)
 
                         // IMPORTANT: end loading UI on success.
                         // zh-CN: 重要: 成功时必须结束加载 UI.
@@ -793,6 +910,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     }
                 }
             }
+            .map { it.text }
             .doOnError {
                 endEditorLoadingUi()
                 mEditorLoading = false
@@ -800,26 +918,26 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
     }
 
-    private fun queryContentLengthOrNull(uri: Uri): Long? {
-        return when (uri.scheme?.lowercase()) {
-            "file" -> uri.path?.let { File(it).length().coerceAtLeast(0L) }
-            "content" -> {
-                val resolver = context.contentResolver
-                var cursor: Cursor? = null
-                try {
-                    cursor = resolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)
-                    if (cursor != null && cursor.moveToFirst()) {
-                        val idx = cursor.getColumnIndex(OpenableColumns.SIZE)
-                        if (idx >= 0 && !cursor.isNull(idx)) {
-                            cursor.getLong(idx).coerceAtLeast(0L)
-                        } else null
-                    } else null
-                } finally {
-                    runCatching { cursor?.close() }
-                }
-            }
-            else -> null
+    private fun ensureNativeEditorForLargeFile(): Boolean {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return true
         }
+
+        val switched = switchEditorEngine(
+            targetType = EditorEngineType.NATIVE,
+            oldEditor = editor,
+            latestText = editor.textSnapshot,
+            persistPreference = false,
+            showSwitchToast = false,
+        )
+        if (switched) {
+            showAceLargeFileNativeToastOnce()
+        }
+        return switched
+    }
+
+    private fun shouldForceLargeFileNativeRoute(): Boolean {
+        return editor.engineType == EditorEngineType.ACE && AceEditorTestHooks.shouldForceLargeFileNativeRoute()
     }
 
     override fun onDetachedFromWindow() {
@@ -829,7 +947,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         super.onDetachedFromWindow()
         context.unregisterReceiver(mOnRunFinishedReceiver)
-        (context as? HostActivity)?.backPressedObserver?.unregisterHandler(mFunctionsKeyboardHelper)
+        unregisterFunctionsKeyboardBackHandler()
+        Pref.get().unregisterOnSharedPreferenceChangeListener(mEditorPreferenceChangeListener)
     }
 
     fun getPreferredSearchQueryForDialogOrNull(): String? =
@@ -877,67 +996,17 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun loadUriStreamed(uri: Uri): Observable<String> {
-        val readBytes = AtomicLong(0L)
-
         // Reset cancel state for a new session.
         // zh-CN: 新的加载会话开始前重置取消标记.
         mLargeFileCancel.set(false)
 
-        return Observable
-            .create { emitter ->
-                val resolver = context.contentResolver
-
-                // Emit an early placeholder so handleIntent() can proceed.
-                // zh-CN: 提前发出占位字符串, 使 handleIntent() 能继续运行.
-                emitter.onNext("")
-
-                val raw = resolver.openInputStream(uri) ?: run {
-                    emitter.onError(IllegalStateException("Cannot open input stream for $uri"))
-                    return@create
-                }
-
-                // Keep a reference for cancellation.
-                // zh-CN: 保存引用以便取消时强制 close.
-                mLargeFileStreamRef.set(raw)
-
-                val counted = CountingInputStream(raw, readBytes)
-                val bis = BufferedInputStream(counted)
-
-                try {
-                    bis.use { input ->
-                        if (mLargeFileCancel.get() || emitter.isDisposed) {
-                            // Cancel early.
-                            // zh-CN: 提前取消.
-                            return@use
-                        }
-
-                        val sampleLimitBytes = 64 * 1024
-                        input.mark(sampleLimitBytes + 8)
-
-                        val sample = ByteArray(sampleLimitBytes)
-                        val sampleRead = input.read(sample).coerceAtLeast(0)
-                        val sampleBytes = if (sampleRead == sample.size) sample else sample.copyOf(sampleRead)
-
-                        val detected = StringUtils.detectCharset(sampleBytes)
-                        mCurrentCharsetConfidence = detected.confidence ?: 0
-                        mCurrentCharset = detected.charsetOrDefault()
-                        mHadBom = StringUtils.hasBom(sampleBytes, mCurrentCharset)
-
-                        runCatching { input.reset() }.getOrElse {
-                            if (!emitter.isDisposed && !mLargeFileCancel.get()) {
-                                emitter.onError(IllegalStateException("Stream reset failed for $uri"))
-                            }
-                            return@use
-                        }
-
-                        streamDecodeAndEmit(input, emitter)
-                    }
-                } finally {
-                    // Clear reference when finished/failed.
-                    // zh-CN: 结束/失败后清理引用.
-                    mLargeFileStreamRef.set(null)
-                }
-            }
+        return fileService
+            .streamTextChunks(
+                uri = uri,
+                cancel = mLargeFileCancel,
+                streamRef = mLargeFileStreamRef,
+                onMetadata = ::applyReadMetadata,
+            )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .let { upstream ->
@@ -945,6 +1014,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     upstream = upstream,
                 )
             }
+    }
+
+    private fun applyReadMetadata(metadata: EditorFileReadMetadata) {
+        mCurrentCharsetConfidence = metadata.charsetConfidence
+        mCurrentCharset = metadata.charset
+        mHadBom = metadata.hadBom
     }
 
     private fun bridgeStreamToUiWithProgress(
@@ -997,18 +1072,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         queue: ConcurrentLinkedQueue<String>,
         done: AtomicBoolean,
     ) {
-        val editText = editor.codeEditText
-
         mLargeFileMode = true
         mEditorLoading = true
         mUserMovedCursorDuringLoading = false
         syncPrimaryMenuState()
 
-        editText.setLoadingText(true)
-        editor.setRedoUndoEnabled(false)
-        editText.setLoadingGutterDigits(3)
-        editText.setText("")
-        editText.setSelection(0)
+        val loadTarget = textLoadTarget
+        loadTarget.beginStreamedLargeTextLoad()
 
         val choreographer = Choreographer.getInstance()
 
@@ -1031,7 +1101,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 if (mLargeFileCancel.get()) {
                     // Cancel: stop immediately and do not schedule next frame.
                     // zh-CN: 取消: 立即停止且不再调度下一帧.
-                    editText.setLoadingText(false)
+                    loadTarget.cancelStreamedLargeTextLoad()
                     mEditorLoading = false
                     syncPrimaryMenuState()
                     endEditorLoadingUi()
@@ -1041,9 +1111,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
                 val finished = done.get() && queue.isEmpty()
                 if (finished) {
-                    editText.setLoadingText(false)
-                    editor.setRedoUndoEnabled(false)
-                    editor.markUndoRedoBaselineAsUnchanged()
+                    loadTarget.finishStreamedLargeTextLoad(markClean = true)
 
                     mEditorLoading = false
                     syncPrimaryMenuState()
@@ -1060,10 +1128,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     // 加载结束后确保光标/焦点.
                     // - 默认: 光标置于 0, 方便从头阅读.
                     // - 若用户在加载期间触摸过: 保持当前光标, 不强制跳回 0.
-                    val textLength = editText.text?.length ?: 0
+                    val textLength = editor.textSnapshot.length
                     post {
                         if (!mUserMovedCursorDuringLoading) {
-                            runCatching { editText.setSelection(0) }
+                            runCatching { editor.jumpToStart() }
                         }
                         ensureEditorHasCursorAfterLoadIfNeeded()
                         if (Pref.isCodeHighlightEnabledForLength(textLength)) {
@@ -1079,7 +1147,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
                 mLoadingBarText.text = context.getString(R.string.text_loading_with_dots)
 
-                val userTouching = editor.isUserTouching()
+                val userTouching = loadTarget.isUserTouching
 
                 val budgetMs = if (userTouching) appendBudgetMsTouching else appendBudgetMsIdle
                 val maxCharsThisFrame = if (userTouching) maxCharsPerFrameTouching else maxCharsPerFrameIdle
@@ -1101,12 +1169,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 }
 
                 if (sb.isNotEmpty()) {
-                    editText.beginBatchEdit()
-                    try {
-                        editText.text?.append(sb)
-                    } finally {
-                        editText.endBatchEdit()
-                    }
+                    loadTarget.appendTextChunk(sb)
                 }
 
                 choreographer.postFrameCallback(this)
@@ -1117,37 +1180,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 保存引用以便取消.
         mLargeFileFrameCallback = callback
         choreographer.postFrameCallback(callback)
-    }
-
-    private fun streamDecodeAndEmit(input: BufferedInputStream, emitter: ObservableEmitter<String>) {
-        // Skip BOM bytes by consuming from raw stream before decoding.
-        // zh-CN: 在解码前先从原始字节流中消费 BOM 字节.
-        val bomBytes = StringUtils.bomBytes(mCurrentCharset)
-        if (mHadBom && bomBytes.isNotEmpty()) {
-            var skipped = 0
-            while (skipped < bomBytes.size) {
-                if (mLargeFileCancel.get() || emitter.isDisposed) {
-                    // Cancel early.
-                    // zh-CN: 提前取消.
-                    return
-                }
-                val r = input.read()
-                if (r == -1) break
-                skipped++
-            }
-        }
-
-        val reader = InputStreamReader(input, mCurrentCharset)
-        val buf = CharArray(32 * 1024)
-        while (!emitter.isDisposed && !mLargeFileCancel.get()) {
-            val n = reader.read(buf)
-            if (n <= 0) break
-            emitter.onNext(String(buf, 0, n))
-        }
-
-        if (!emitter.isDisposed && !mLargeFileCancel.get()) {
-            emitter.onComplete()
-        }
     }
 
     private fun setInitialText(text: String) {
@@ -1169,11 +1201,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
         if (mRestoredText != null) {
-            editor.text = mRestoredText!!
+            textLoadTarget.loadRestoredText(mRestoredText!!, undoRedoEnabled = !mLargeFileMode)
             mRestoredText = null
-
-            editor.markUndoRedoBaselineAsUnchanged()
-            editor.setRedoUndoEnabled(!mLargeFileMode)
 
             // Reset sticky dirty because we just established a new baseline.
             // zh-CN: 因刚刚建立了新的基线, 重置 sticky 脏标记.
@@ -1190,27 +1219,27 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return
         }
 
-        if (Pref.shouldEnableLargeFileModeForSize(text.length.toLong())) {
+        val shouldLoadProgressively = EditorTextLoadPolicy.shouldLoadProgressively(text.length)
+        if (EditorTextLoadPolicy.shouldRouteAceToNative(editor.engineType, shouldLoadProgressively, shouldForceLargeFileNativeRoute())) {
+            if (!ensureNativeEditorForLargeFile()) {
+                mEditorLoading = false
+                syncPrimaryMenuState()
+                return
+            }
+        }
+
+        if (shouldLoadProgressively && editor.engineType == EditorEngineType.NATIVE) {
             mLargeFileMode = true
             setInitialTextProgressively(text)
             return
         }
 
-        val editText = editor.codeEditText
-        editText.setLoadingText(true)
-        editor.setRedoUndoEnabled(false)
-        try {
-            editText.setText(text)
-            editor.markUndoRedoBaselineAsUnchanged()
+        textLoadTarget.loadSmallText(text)
 
-            // Reset sticky dirty because we just established a new baseline.
-            // zh-CN: 因刚刚建立了新的基线, 重置 sticky 脏标记.
-            saveStickyDirty = false
-            mHadDirectEditSinceSave = false
-        } finally {
-            editor.setRedoUndoEnabled(true)
-            editText.setLoadingText(false)
-        }
+        // Reset sticky dirty because we just established a new baseline.
+        // zh-CN: 因刚刚建立了新的基线, 重置 sticky 脏标记.
+        saveStickyDirty = false
+        mHadDirectEditSinceSave = false
 
         mEditorLoading = false
         syncPrimaryMenuState()
@@ -1248,8 +1277,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 // Normal mode.
                 // zh-CN: 普通模式.
                 setMenuItemStatus(R.id.run, true)
-                setMenuItemStatus(R.id.undo, editor.canUndo())
-                setMenuItemStatus(R.id.redo, editor.canRedo())
+                setMenuItemStatus(R.id.undo, !mReadOnly && editor.canUndo)
+                setMenuItemStatus(R.id.redo, !mReadOnly && editor.canRedo)
                 setMenuItemStatus(R.id.save, saveStickyDirty)
             }
         }
@@ -1257,19 +1286,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun setInitialTextProgressively(text: String) {
-        val editText = editor.codeEditText
-
-        // Mark loading state to suppress heavy callbacks during bulk insertion.
-        // zh-CN: 标记加载状态, 在批量插入期间抑制高开销回调.
-        editText.setLoadingText(true)
-
-        // Disable undo/redo recording during progressive load to avoid huge history and allocations.
-        // zh-CN: 渐进式加载期间禁用 undo/redo 记录, 避免巨大历史与大量分配.
-        editor.setRedoUndoEnabled(false)
-
-        // Clear existing content quickly.
-        // zh-CN: 快速清空现有内容.
-        editText.setText("")
+        val loadTarget = textLoadTarget
+        loadTarget.beginProgressiveTextLoad()
 
         // Do NOT call editor.setProgress(true) here.
         // zh-CN: 不要在这里再次 setProgress(true), 进度对话框已由 loadUri() 负责显示.
@@ -1294,10 +1312,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 if (index >= text.length) {
                     // Finish: mark current content as baseline without re-setting text.
                     // zh-CN: 完成: 将当前内容设为基线, 避免再次 setText.
-                    editText.setLoadingText(false)
-                    editor.setRedoUndoEnabled(true)
-                    editor.markUndoRedoBaselineAsUnchanged()
-                    editor.setProgress(false)
+                    loadTarget.finishProgressiveTextLoad(markClean = true)
                     if (Pref.isCodeHighlightEnabledForLength(text.length)) {
                         post { editor.refreshHighlightTokensIfAllowed() }
                     }
@@ -1312,7 +1327,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 // zh-CN: 在单帧预算内尽可能推进加载.
                 while (index < text.length) {
                     val end = (index + chunkSize).coerceAtMost(text.length)
-                    editText.text?.append(text, index, end)
+                    loadTarget.appendTextChunk(text.subSequence(index, end))
                     index = end
                     appendedChunks++
 
@@ -1362,6 +1377,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (fragment is NormalToolbarFragment) {
             fragment.setRunButtonAsStop(isRunning)
         }
+    }
+
+    private fun schedulePrimaryMenuStateSync() {
+        mUiHandler.removeCallbacks(mPrimaryMenuStateSyncRunnable)
+        mUiHandler.postDelayed(mPrimaryMenuStateSyncRunnable, mPrimaryMenuStateSyncDebounceMs)
     }
 
     private fun notifyScriptRunningStateChanged() {
@@ -1418,10 +1438,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun setUpFunctionsKeyboard() {
         mFunctionsKeyboardHelper = FunctionsKeyboardHelper.with(context as Activity)
-            .setContent(editor)
-            .setFunctionsTrigger(mShowFunctionsButton)
+            .setContent(binding.editorContainer)
             .setFunctionsView(mFunctionsKeyboard)
-            .setEditView(editor.codeEditText)
+            .setEditView(editor.inputView)
+            .apply {
+                setFunctionsTrigger(mShowFunctionsButton)
+                setFunctionsTrigger(mAceShowFunctionsButton)
+            }
             .build()
 
         // @TodoDiary by 抠脚本人 on Jul 10, 2023.
@@ -1440,149 +1463,510 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         //  ! 长按: 以浮动窗口形式展示 [方法/属性/模块] 对应的文档内容 (如果存在的话).
         mFunctionsKeyboard.setClickCallback(this)
 
-        mShowFunctionsButton.setOnLongClickListener {
-            true.also { editor.beautifyCode() }
+        val beautifyOnLongClick = View.OnLongClickListener {
+            true.also { mCommandDispatcher.beautifyCode() }
         }
+        mShowFunctionsButton.setOnLongClickListener(beautifyOnLongClick)
+        mAceShowFunctionsButton.setOnLongClickListener(beautifyOnLongClick)
     }
 
     private fun setUpInputMethodEnhancedBar() {
-        mSymbolBar.let { bar ->
+        mAutoCompletion?.shutdown()
+        mAutoCompletion = null
+        configureInputMethodEnhancedBars()
+        listOf(
+            mSymbolBar,
+            mCodeCompletionBar,
+            mAceShortcutTopBar,
+            mAceShortcutBottomBar,
+            mAceSymbolsBar,
+        ).forEach { bar ->
             bar.setOnHintClickListener(this)
+        }
+
+        if (editor.engineType == EditorEngineType.ACE) {
+            mCodeCompletionBar.codeCompletions = CodeCompletions.just(emptyList())
+            mSymbolBar.codeCompletions = CodeCompletions.just(emptyList())
+            mAceShortcutTopBar.codeCompletions = AceShortcutPanel.topRowCompletions
+            mAceShortcutBottomBar.codeCompletions = AceShortcutPanel.bottomRowCompletions
             refreshSymbolsBar()
+            setEnhanceBarInteractive(!mReadOnly && !mEditorLoading)
+            return
         }
-        mCodeCompletionBar.let { bar ->
-            bar.setOnHintClickListener(this)
-            AutoCompletion(context, editor.codeEditText).apply {
-                setAutoCompleteCallback { bar.codeCompletions = it }
-                mAutoCompletion = this
-            }
+
+        mAceShortcutReturnSelection = null
+        mAceShortcutLastObservedSelection = null
+        mAceShortcutReturnJumpInProgress = false
+        mAceShortcutTopBar.codeCompletions = CodeCompletions.just(emptyList())
+        mAceShortcutBottomBar.codeCompletions = CodeCompletions.just(emptyList())
+        mAceSymbolsBar.codeCompletions = CodeCompletions.just(emptyList())
+        mCodeCompletionBar.codeCompletions = CodeCompletions.just(emptyList())
+        refreshSymbolsBar()
+        editor.createAutoCompletion(context)?.apply {
+            setAutoCompleteCallback { mCodeCompletionBar.codeCompletions = it }
+            mAutoCompletion = this
         }
+        setEnhanceBarInteractive(!mReadOnly && !mEditorLoading)
+    }
+
+    private fun configureInputMethodEnhancedBars() {
+        mCodeCompletionBar.useHorizontalLayout()
+        mCodeCompletionBar.resetItemSize()
+        mSymbolBar.useHorizontalLayout()
+        mSymbolBar.resetItemSize()
+        mAceShortcutTopBar.useHorizontalLayout()
+        mAceShortcutTopBar.setFixedItemSizeDp(40, 35)
+        mAceShortcutBottomBar.useHorizontalLayout()
+        mAceShortcutBottomBar.setFixedItemSizeDp(40, 35)
+        mAceSymbolsBar.useFlowLayout()
+        mAceSymbolsBar.setItemHeightDp(35)
     }
 
     fun refreshSymbolsBar() {
+        if (editor.engineType == EditorEngineType.ACE) {
+            SymbolsConfigStore.ensureDefaultProfileExists(context)
+            val symbols = SymbolsConfigStore.getEnabledSymbolsForActiveProfile(
+                context,
+                SymbolsConfigStore.DefaultSymbolSet.ACE,
+            )
+            mAceSymbolsBar.isVisible = symbols.isNotEmpty()
+            mAceSymbolsBar.codeCompletions = CodeCompletions.just(symbols)
+            return
+        }
         SymbolsConfigStore.ensureDefaultProfileExists(context)
         val symbols = SymbolsConfigStore.getEnabledSymbolsForActiveProfile(context)
         mSymbolBar.isVisible = symbols.isNotEmpty()
         mSymbolBar.codeCompletions = CodeCompletions.just(symbols)
     }
 
-    private fun setUpEditor() {
-        editor.let { editor ->
-            editor.codeEditText.let { editText ->
-                // Observe user touch in text area to preserve caret position after large-file load.
-                // zh-CN: 监听用户在文本区域的触摸, 以便大文件加载完成后保留光标位置.
-                editText.onUserTouchInTextArea = {
-                    if (mEditorLoading && mLargeFileMode) {
-                        mUserMovedCursorDuringLoading = true
+    fun copyAceDiagnosticsToClipboard() {
+        val snapshot = createAceDiagnosticsSnapshot()
+        ClipboardUtils.setClip(context, AceDiagnostics.format(snapshot))
+        showToast(context, R.string.text_ace_diagnostics_copied)
+    }
+
+    fun isReadOnly(): Boolean = mReadOnly
+
+    fun isReadOnlyLockedByIntent(): Boolean = mReadOnlyLockedByIntent
+
+    fun canToggleReadOnlyMode(): Boolean {
+        return !mReadOnlyLockedByIntent && !mEditorLoading
+    }
+
+    fun toggleReadOnlyMode() {
+        if (!canToggleReadOnlyMode()) {
+            return
+        }
+        setSessionReadOnlyMode(!mReadOnly, toast = true)
+    }
+
+    private fun setSessionReadOnlyMode(readOnly: Boolean, toast: Boolean = false) {
+        if (mReadOnlyLockedByIntent) {
+            return
+        }
+        applySessionReadOnly(readOnly)
+        if (toast) {
+            showToast(
+                context,
+                if (readOnly) R.string.text_ace_read_only_mode_enabled else R.string.text_ace_read_only_mode_disabled,
+            )
+        }
+    }
+
+    private fun applySessionReadOnly(readOnly: Boolean) {
+        if (mReadOnly == readOnly) {
+            return
+        }
+        mReadOnly = readOnly
+        editor.setReadOnly(readOnly)
+        setEnhanceBarInteractive(!readOnly && !mEditorLoading)
+        if (readOnly) {
+            mFunctionsKeyboardHelper?.hideFunctionsLayout(false)
+        }
+        syncPrimaryMenuState()
+        activity.invalidateOptionsMenu()
+    }
+
+    fun switchEditorEngine(targetType: EditorEngineType) {
+        if (editor.engineType == targetType || mSwitchingEditorEngine) {
+            return
+        }
+        if (targetType == EditorEngineType.ACE && AceEditorTestHooks.shouldForceLargeFileNativeRoute()) {
+            showAceLargeFileNativeToastOnce()
+            return
+        }
+        if (mEditorLoading) {
+            showToast(context, R.string.text_loading_with_dots)
+            return
+        }
+        if (!mReadOnlyLockedByIntent && targetType != EditorEngineType.ACE && mReadOnly) {
+            applySessionReadOnly(false)
+        }
+
+        val oldEditor = editor
+        mSwitchingEditorEngine = true
+        runCatching {
+            oldEditor.getTextForSaving { latestText ->
+                post {
+                    try {
+                        switchEditorEngine(targetType, oldEditor, latestText)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        showToast(context, e.message, true)
+                    } finally {
+                        mSwitchingEditorEngine = false
                     }
                 }
+            }
+        }.onFailure { error ->
+            mSwitchingEditorEngine = false
+            error.printStackTrace()
+            showToast(context, error.message, true)
+        }
+    }
 
-                editText.addTextChangedListener(SimpleTextWatcher { _ ->
-                    // Skip menu state updates during progressive loading.
-                    // zh-CN: 渐进式加载期间跳过菜单状态更新.
-                    if (editText.isLoadingText() || mEditorLoading) {
-                        return@SimpleTextWatcher
-                    }
+    private fun switchEditorEngine(
+        targetType: EditorEngineType,
+        oldEditor: ScriptEditorEngine,
+        latestText: String,
+        persistPreference: Boolean = true,
+        showSwitchToast: Boolean = true,
+    ): Boolean {
+        if (oldEditor !== editor) {
+            return false
+        }
 
-                    // If this change is not caused by undo/redo buttons, treat it as a direct edit.
-                    // Direct edits keep Save sticky until next successful save.
-                    //
-                    // zh-CN:
-                    // 若本次变化并非由撤销/重做按钮触发, 则视为直接编辑.
-                    // 直接编辑会使保存按钮保持 sticky, 直到下一次保存成功.
-                    if (!mUndoRedoButtonInProgress) {
-                        mHadDirectEditSinceSave = true
-                        saveStickyDirty = true
-                    } else {
-                        // Undo/redo navigation:
-                        // Save should reflect (baseline changed) OR (there has been any direct edit since save).
-                        //
-                        // zh-CN:
-                        // undo/redo 历史导航:
-                        // 保存按钮应反映 (相对基线有变化) 或 (自保存以来发生过直接编辑).
-                        saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
-                    }
+        val newEditor = EditorEngineFactory.create(context, targetType)
+        if (newEditor.engineType != targetType) {
+            newEditor.destroy()
+            showToast(context, R.string.error_ace_editor_unavailable, true)
+            return false
+        }
 
-                    syncPrimaryMenuState()
-                })
+        val wasAttached = isAttachedToWindow
+        val oldSaveStickyDirty = saveStickyDirty
+        val oldHadDirectEditSinceSave = mHadDirectEditSinceSave
+        val oldEditorLoading = mEditorLoading
+        val oldLargeFileMode = mLargeFileMode
+        val snapshot = oldEditor.createStateSnapshot().copy(
+            text = latestText,
+            dirty = oldSaveStickyDirty || oldEditor.isTextChanged,
+            readOnly = mReadOnly,
+            themeKey = themeFontService.currentTheme?.name,
+        )
 
-                editText.addTextChangedListener(SimpleTextWatcher { _ ->
-                    // Live refresh search stats in search mode (debounced).
-                    // Behavior:
-                    // - Immediately show ".../..." to indicate recounting.
-                    // - Debounce the actual background scan.
-                    //
-                    // zh-CN: 搜索模式下实时刷新统计 (带防抖).
-                    // - 立刻把 subtitle 变成 ".../..." 表示重新统计中.
-                    // - 后台扫描做 debounce, 避免频繁扫全文.
-                    if (!mInSearchMode) return@SimpleTextWatcher
-                    if (editText.isLoadingText() || mEditorLoading) return@SimpleTextWatcher
+        mEditorLoading = true
+        syncPrimaryMenuState()
 
-                    mSearchStatsCounting = true
-                    mSearchStatsCurrentOrdinal = null
-                    mSearchStatsTotal = null
-                    mSearchStatsTotalCapped = false
-                    updateSearchSubtitleBestEffort()
+        if (wasAttached) {
+            unregisterFunctionsKeyboardBackHandler()
+        }
+        mFunctionsKeyboardHelper?.hideFunctionsLayout(false)
+        mFunctionsKeyboardHelper = null
+        mAutoCompletion?.shutdown()
+        mAutoCompletion = null
+        recordLastAceDiagnostics(oldEditor)
+        (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
+        (oldEditor as? AceScriptEditorEngine)?.onAceStateChanged = null
+        (oldEditor as? AceScriptEditorEngine)?.onSelectionAction = null
+        oldEditor.onUserTouchInTextArea = null
+        binding.editorContainer.removeView(oldEditor.view)
 
-                    scheduleSearchStatsRefreshDebounced()
-                })
+        editor = newEditor
+        breakpointModelStore.onEditorChanged()
+        mViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
+        attachEditorEngineView()
+        setUpEditor(resetInitialState = false)
+        setUpInputMethodEnhancedBar()
+        setUpFunctionsKeyboard()
+        mLastImeBottomInset = -1
+        requestApplyInsetsSoon()
+        if (wasAttached) {
+            registerFunctionsKeyboardBackHandler()
+        }
 
-                editText.textSize = getEditorTextSize(pxToSp(editText.textSize).toInt()).toFloat()
+        themeFontService.currentTheme?.let { themeFontService.applyTheme(it) }
+        editor.restoreStateSnapshot(snapshot)
+        editor.setReadOnly(mReadOnly)
+
+        oldEditor.destroy()
+        if (persistPreference) {
+            EditorEnginePreferences.set(targetType)
+        }
+
+        mEditorLoading = oldEditorLoading
+        mLargeFileMode = oldLargeFileMode && editor.engineType == EditorEngineType.NATIVE
+        saveStickyDirty = oldSaveStickyDirty || snapshot.dirty
+        mHadDirectEditSinceSave = oldHadDirectEditSinceSave || snapshot.dirty
+
+        syncPrimaryMenuState()
+        activity.invalidateOptionsMenu()
+        if (editor.engineType == EditorEngineType.NATIVE) {
+            editor.requestEditorFocus()
+        }
+
+        val engineName = when (targetType) {
+            EditorEngineType.NATIVE -> context.getString(R.string.entry_editor_engine_native)
+            EditorEngineType.ACE -> context.getString(R.string.entry_editor_engine_ace)
+        }
+        if (showSwitchToast) {
+            showEditorEngineSwitchedToast(engineName)
+        }
+        return true
+    }
+
+    private fun configureAceFallback(editor: ScriptEditorEngine) {
+        (editor as? AceScriptEditorEngine)?.onFatalFailure = { failure ->
+            post { fallbackToNativeFromAceFailure(failure) }
+        }
+    }
+
+    private fun configureAceActionHistory(editor: ScriptEditorEngine) {
+        (editor as? AceScriptEditorEngine)?.let { aceEditor ->
+            aceEditor.onAceStateChanged = {
+                schedulePrimaryMenuStateSync()
+            }
+            aceEditor.onSelectionAction = { action ->
+                actionForAceSelectionAction(action)?.let(::recordAceHistoryAction)
+            }
+        }
+    }
+
+    private fun fallbackToNativeFromAceFailure(failure: AceFailure) {
+        if (!mAceFallbackInProgress.compareAndSet(false, true)) {
+            return
+        }
+
+        val oldEditor = editor
+        if (oldEditor.engineType != EditorEngineType.ACE) {
+            mAceFallbackInProgress.set(false)
+            return
+        }
+
+        mSwitchingEditorEngine = true
+        runCatching {
+            (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
+            val switched = switchEditorEngine(
+                targetType = EditorEngineType.NATIVE,
+                oldEditor = oldEditor,
+                latestText = oldEditor.textSnapshot,
+                persistPreference = false,
+                showSwitchToast = false,
+            )
+            if (switched) {
+                showAceFallbackToastOnce(failure)
+            }
+        }.onFailure { error ->
+            error.printStackTrace()
+            showToast(context, error.message ?: failure.message, true)
+        }
+        mSwitchingEditorEngine = false
+        mAceFallbackInProgress.set(false)
+    }
+
+    private fun failureReasonForToast(failure: AceFailure): String {
+        return failure.type.name
+            .lowercase(Locale.getDefault())
+            .replace('_', ' ')
+    }
+
+    private fun showEditorEngineSwitchedToast(engineName: String) {
+        val message = if (EditorEnginePreferences.consumeEditorSwitchUndoNotice()) {
+            context.getString(R.string.text_editor_engine_switched_with_undo_notice, engineName)
+        } else {
+            context.getString(R.string.text_editor_engine_switched, engineName)
+        }
+        showToast(context, message)
+    }
+
+    private fun showAceFallbackToastOnce(failure: AceFailure) {
+        if (!EditorEnginePreferences.consumeAceFallbackNotice()) {
+            return
+        }
+        showToast(
+            context,
+            context.getString(R.string.text_ace_editor_fallback_native, failureReasonForToast(failure)),
+            true,
+        )
+    }
+
+    private fun showAceLargeFileNativeToastOnce() {
+        if (EditorEnginePreferences.consumeAceLargeFileNotice()) {
+            showToast(context, R.string.text_ace_large_file_uses_native_editor)
+        }
+    }
+
+    private fun recordAceAssetMissingFallbackIfNeeded() {
+        if (EditorEnginePreferences.get() != EditorEngineType.ACE) {
+            return
+        }
+        if (editor.engineType == EditorEngineType.ACE || AceEditorAssets.hasRequired(context)) {
+            return
+        }
+        val now = SystemClock.uptimeMillis()
+        val message = "ACE editor assets are unavailable"
+        mLastAceDiagnosticsSnapshot = AceDiagnostics
+            .createNativeSnapshot(EditorEngineType.ACE, fileSizeBytes = null, largeFilePolicy = "auto")
+            .copy(
+                aceHealthState = AceHealthState.FAILED.name,
+                lastFailureType = AceFailureType.ASSET_MISSING.name,
+                lastFailureMessage = message,
+                lastFailureFatal = true,
+                runtimeEventHistory = listOf(
+                    "$now:failure:type=${AceFailureType.ASSET_MISSING.name},fatal=true,message=$message",
+                ),
+            )
+    }
+
+    private fun createAceDiagnosticsSnapshot(): AceDiagnosticsSnapshot {
+        val fileSizeBytes = currentFileSizeOrNull()
+        val largeFilePolicy = currentLargeFilePolicyLabel()
+        return (editor as? AceScriptEditorEngine)?.createHostAceDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy)
+            ?: mLastAceDiagnosticsSnapshot
+            ?: AceDiagnostics.createNativeSnapshot(editor.engineType, fileSizeBytes, largeFilePolicy)
+    }
+
+    private fun recordLastAceDiagnostics(editor: ScriptEditorEngine) {
+        mLastAceDiagnosticsSnapshot = (editor as? AceScriptEditorEngine)
+            ?.createHostAceDiagnosticsSnapshot(currentFileSizeOrNull(), currentLargeFilePolicyLabel())
+            ?: mLastAceDiagnosticsSnapshot
+    }
+
+    private fun AceScriptEditorEngine.createHostAceDiagnosticsSnapshot(
+        fileSizeBytes: Long?,
+        largeFilePolicy: String,
+    ): AceDiagnosticsSnapshot {
+        val viewportPolicyEventAt = mLastImeEventAtUptimeMillis.takeIf { it > 0L }
+        val viewportPolicyName = mViewportPolicy.javaClass.simpleName
+        return createAceDiagnosticsSnapshot(fileSizeBytes, largeFilePolicy).copy(
+            viewportPolicy = viewportPolicyName,
+            lastViewportPolicyEvent = viewportPolicyEventAt?.let { "$viewportPolicyName.onImeInsetsChanged" },
+            lastViewportPolicyEventAtUptimeMillis = viewportPolicyEventAt,
+            lastViewportPolicyImeVisible = viewportPolicyEventAt?.let { mLastImeVisible },
+            lastViewportPolicyBottomInset = viewportPolicyEventAt?.let { mLastImeBottomInset },
+            lastHostImeVisible = mLastImeVisible,
+            lastHostImeBottomInset = mLastImeBottomInset.takeIf { it >= 0 },
+            lastHostImeEventAtUptimeMillis = mLastImeEventAtUptimeMillis.takeIf { it > 0L },
+        )
+    }
+
+    private fun currentFileSizeOrNull(): Long? {
+        val currentUri = uri ?: return null
+        return runCatching { fileService.queryContentLengthOrNull(currentUri) }.getOrNull()
+    }
+
+    private fun currentLargeFilePolicyLabel(): String {
+        return EditorTextLoadPolicy.largeFilePolicyLabel(
+            largeFileMode = mLargeFileMode,
+            forceNativeRoute = AceEditorTestHooks.shouldForceLargeFileNativeRoute(),
+        )
+    }
+
+    private fun setUpEditor(resetInitialState: Boolean = true) {
+        configureAceFallback(editor)
+        configureAceActionHistory(editor)
+        editor.let { editor ->
+            // Observe user touch in text area to preserve caret position after large-file load.
+            // zh-CN: 监听用户在文本区域的触摸, 以便大文件加载完成后保留光标位置.
+            editor.onUserTouchInTextArea = {
+                if (mEditorLoading && mLargeFileMode) {
+                    mUserMovedCursorDuringLoading = true
+                }
             }
 
-            editor.addCursorChangeCallback(object : CodeEditor.CursorChangeCallback {
-                override fun onCursorChange(line: String, cursor: Int) {
-                    autoComplete(line, cursor)
+            editor.addTextChangeListener {
+                // Skip menu state updates during progressive loading.
+                // zh-CN: 渐进式加载期间跳过菜单状态更新.
+                if (editor.isLoadingText || mEditorLoading) {
+                    return@addTextChangeListener
                 }
+
+                // If this change is not caused by undo/redo buttons, treat it as a direct edit.
+                // Direct edits keep Save sticky until next successful save.
+                //
+                // zh-CN:
+                // 若本次变化并非由撤销/重做按钮触发, 则视为直接编辑.
+                // 直接编辑会使保存按钮保持 sticky, 直到下一次保存成功.
+                if (!mUndoRedoButtonInProgress) {
+                    mHadDirectEditSinceSave = true
+                    saveStickyDirty = true
+                } else {
+                    // Undo/redo navigation:
+                    // Save should reflect (baseline changed) OR (there has been any direct edit since save).
+                    //
+                    // zh-CN:
+                    // undo/redo 历史导航:
+                    // 保存按钮应反映 (相对基线有变化) 或 (自保存以来发生过直接编辑).
+                    saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
+                }
+
+                schedulePrimaryMenuStateSync()
+            }
+
+            editor.addTextChangeListener {
+                // Live refresh search stats in search mode (debounced).
+                // Behavior:
+                // - Immediately show ".../..." to indicate recounting.
+                // - Debounce the actual background scan.
+                //
+                // zh-CN: 搜索模式下实时刷新统计 (带防抖).
+                // - 立刻把 subtitle 变成 ".../..." 表示重新统计中.
+                // - 后台扫描做 debounce, 避免频繁扫全文.
+                if (!mInSearchMode) return@addTextChangeListener
+                if (editor.isLoadingText || mEditorLoading) return@addTextChangeListener
+
+                mSearchStatsCounting = true
+                mSearchStatsCurrentOrdinal = null
+                mSearchStatsTotal = null
+                mSearchStatsTotalCapped = false
+                updateSearchSubtitleBestEffort()
+
+                scheduleSearchStatsRefreshDebounced()
+            }
+
+            themeFontService.applyEditorPreferences()
+
+            editor.addCursorChangeCallback(EditorCursorChangeListener { line, cursor ->
+                autoComplete(line, cursor)
+                recordAceShortcutCursorHistory()
             })
-            editor.layoutDirection = LAYOUT_DIRECTION_LTR
+            editor.view.layoutDirection = LAYOUT_DIRECTION_LTR
 
             // Initialize to "new file" expected state: only Run enabled.
             // zh-CN: 初始化为 "新建文件" 预期状态: 仅运行可用.
-            mEditorLoading = false
-            mLargeFileMode = false
-            saveStickyDirty = false
-            mHadDirectEditSinceSave = false
-            setMenuItemStatus(R.id.run, true)
-            setMenuItemStatus(R.id.undo, false)
-            setMenuItemStatus(R.id.redo, false)
-            setMenuItemStatus(R.id.save, false)
+            if (resetInitialState) {
+                mEditorLoading = false
+                mLargeFileMode = false
+                saveStickyDirty = false
+                mHadDirectEditSinceSave = false
+                setMenuItemStatus(R.id.run, true)
+                setMenuItemStatus(R.id.undo, false)
+                setMenuItemStatus(R.id.redo, false)
+                setMenuItemStatus(R.id.save, false)
+            }
         }
     }
 
     private fun autoComplete(line: String, cursor: Int) {
-        mAutoCompletion!!.onCursorChange(line, cursor)
+        mAutoCompletion?.onCursorChange(line, cursor)
     }
 
     private fun setTheme(theme: Theme?) {
-        theme?.let {
-            mEditorTheme = it
+        themeFontService.applyTheme(theme)
+    }
 
-            val appThemeColor = ThemeColorManager.colorPrimary
-            val imeBarBackgroundColor = it.imeBarBackgroundColor
-
-            editor.setTheme(it)
-
-            mInputMethodEnhanceBar.setBackgroundColor(imeBarBackgroundColor)
-            mLoadingBarContainer.setBackgroundColor(imeBarBackgroundColor)
-
-            run {
-                val adjustedImageContrastColor = ColorUtils.adjustColorForContrast(imeBarBackgroundColor, appThemeColor, 3.6)
-                mLoadingBarText.setTextColor(adjustedImageContrastColor)
+    @SuppressLint("CheckResult")
+    private fun applyCurrentEditorThemePreference() {
+        themeFontService.loadCurrentTheme()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ theme -> setTheme(theme) }) { error ->
+                showToast(context, error.message ?: error.toString(), true)
             }
+    }
 
-            val textColor = it.imeBarForegroundColor
-            mCodeCompletionBar.setTextColor(textColor)
-            mSymbolBar.setTextColor(textColor)
-            mShowFunctionsButton.setColorFilter(textColor)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ViewUtils.setNavigationBarBackgroundColor(activity, imeBarBackgroundColor)
-            } else {
-                val adjustedImageContrastColor = ColorUtils.adjustColorForContrast(Color.WHITE, ColorUtils.applyAlpha(imeBarBackgroundColor, 1.0), 2.3)
-                ViewUtils.setNavigationBarBackgroundColor(activity, adjustedImageContrastColor)
-            }
-            invalidate()
-        }
+    private fun applyCurrentEditorEnginePreference() {
+        switchEditorEngine(EditorEnginePreferences.get())
     }
 
     fun onBackPressed(): Boolean {
@@ -1598,6 +1982,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     override fun onToolbarMenuItemClick(id: Int) {
+        val action = actionForToolbarItem(id)
         when (id) {
             R.id.run -> when {
                 isScriptRunning() -> forceStop()
@@ -1632,6 +2017,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 onSearchStateMaybeChanged()
             }
         }
+        action?.let(::recordAceHistoryAction)
     }
 
     private fun onSearchStateMaybeChanged() {
@@ -1649,7 +2035,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     @SuppressLint("CheckResult")
     fun runAndSaveFileIfNeeded(showLogPanelAfterRun: Boolean = true) {
-        saveToTmpFile()
+        runScriptTextProvider.saveToTmpFile()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ file: File ->
                 val execution = runTmpFile(file)
@@ -1689,8 +2075,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return execution
     }
 
-    private fun runTmpFile(file: File): ScriptExecution? {
-        return run(!shouldAutoShowLogBottomSheetOnRun(), file)
+    private fun runTmpFile(file: File? = uri?.path?.let { File(it) }): ScriptExecution? {
+        return run(!shouldAutoShowLogBottomSheetOnRun(), file, uri?.path)
     }
 
     private fun undo() {
@@ -1698,7 +2084,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 标记撤销/重做按钮动作, 以便 TextWatcher 区分来源.
         mUndoRedoButtonInProgress = true
         try {
-            editor.undo()
+            mCommandDispatcher.undo()
         } finally {
             mUndoRedoButtonInProgress = false
         }
@@ -1707,6 +2093,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 历史导航后重新计算保存按钮状态.
         saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
         syncPrimaryMenuState()
+        schedulePrimaryMenuStateSync()
     }
 
     private fun redo() {
@@ -1714,7 +2101,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 标记撤销/重做按钮动作, 以便 TextWatcher 区分来源.
         mUndoRedoButtonInProgress = true
         try {
-            editor.redo()
+            mCommandDispatcher.redo()
         } finally {
             mUndoRedoButtonInProgress = false
         }
@@ -1729,25 +2116,35 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // 因为已回到基线, 且保存后没有发生直接编辑.
         saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
         syncPrimaryMenuState()
+        schedulePrimaryMenuStateSync()
     }
 
     fun save(): Observable<String> =
-        Observable
-            .fromCallable {
-                when (val uri = uri) {
-                    null -> {
-                        throw IllegalStateException(context.getString(R.string.error_unable_to_save_file_as_current_file_path_is_unknown))
-                    }
-                    else -> {
-                        // Use a transactional save flow for both file:// and content://.
-                        // zh-CN: 对 file:// 与 content:// 统一使用事务式保存流程.
-                        editor.text.apply {
-                            writeTextWithCharsetTransactional(uri, this)
+        editorTextProvider.getTextForSaving()
+            .flatMap { latestText ->
+                Observable.fromCallable {
+                    when (val uri = uri) {
+                        null -> {
+                            throw IllegalStateException(context.getString(R.string.error_unable_to_save_file_as_current_file_path_is_unknown))
+                        }
+                        else -> {
+                            // Use a transactional save flow for both file:// and content://.
+                            // zh-CN: 对 file:// 与 content:// 统一使用事务式保存流程.
+                            fileService.saveTextTransactional(
+                                uri = uri,
+                                text = latestText,
+                                encoding = EditorFileSaveEncoding(
+                                    charsetConfidence = mCurrentCharsetConfidence,
+                                    charset = mCurrentCharset,
+                                    hadBom = mHadBom,
+                                ),
+                                displayName = name,
+                            )
+                            latestText
                         }
                     }
-                }
+                }.subscribeOn(Schedulers.io())
             }
-            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 editor.markTextAsSaved()
@@ -1758,364 +2155,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 mHadDirectEditSinceSave = false
 
                 setMenuItemStatus(R.id.save, false)
-
-                val keyPath = uri?.path
-                val draftFileHelper = StableDraftFileHelper(context, keyPath)
-                draftFileHelper.deleteDraft()
             }
-
-    /**
-     * Transactional save for text files.
-     *
-     * Behavior:
-     * 1) SAVE_PRE: read old bytes (best-effort).
-     * 2) Build new bytes with charset/BOM strategy.
-     * 3) Write with openOutputStream(uri, "rwt").
-     * 4) Verify by reading back and comparing hash.
-     * 5) On failure:
-     *    - Try rollback to SAVE_PRE when possible.
-     *    - Always save an emergency draft, then prompt user to "Save as".
-     *
-     * zh-CN:
-     *
-     * 面向文本文件的事务式保存.
-     *
-     * 行为:
-     * 1) SAVE_PRE: 尽力读取旧 bytes.
-     * 2) 按 charset/BOM 策略生成新 bytes.
-     * 3) 通过 openOutputStream(uri, "rwt") 写入.
-     * 4) 写后读回并比对 hash 校验.
-     * 5) 失败时:
-     *    - 在可能时回滚到 SAVE_PRE.
-     *    - 无论能否回滚, 均保存草稿, 并提示用户 "另存为".
-     */
-    private fun writeTextWithCharsetTransactional(uri: Uri, text: String) {
-        val resolver = context.contentResolver
-
-        val (targetCharset, needBom) = when {
-            mHadBom -> {
-                mCurrentCharset to true
-            }
-            mCurrentCharsetConfidence >= MIN_CONFIDENCE_TO_WRITE_FILE -> {
-                mCurrentCharset to false
-            }
-            else -> {
-                DEFAULT_CHARSET_TO_WRITE_FILE to false
-            }
-        }
-
-        val newBytes = buildBytesToWrite(text, targetCharset, needBom)
-
-        // SAVE_PRE snapshot (best-effort).
-        // zh-CN: SAVE_PRE 快照 (尽力而为).
-        val oldBytes = runCatching {
-            resolver.openInputStream(uri)?.use { it.readBytes() }
-        }.getOrNull()
-
-        // Track history only when within size guardrails and inside internal storage.
-        // zh-CN: 仅在满足大小护栏且位于内部存储时纳管历史.
-        val logicalPath = HistoryUriUtils.toLogicalPathOrNull(uri)
-        if (logicalPath != null && shouldTrackHistory(oldBytes, newBytes) && oldBytes != null) {
-            runCatching {
-                HistoryRepository(context.applicationContext).recordSavePre(
-                    logicalPath = logicalPath,
-                    oldBytes = oldBytes,
-                    encodingName = targetCharset.name(),
-                    hadBom = needBom,
-                )
-            }
-        }
-
-        val newHash = sha256(newBytes)
-
-        try {
-            resolver.openOutputStream(uri, "rwt")?.use { out ->
-                out.write(newBytes)
-                out.flush()
-            } ?: throw IOException("Cannot open output stream for $uri")
-
-            val readBack = runCatching {
-                resolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
-            }.getOrElse { e ->
-                throw IOException("Read-back failed after write: $uri", e)
-            }
-
-            val readBackHash = sha256(readBack)
-            if (!readBackHash.contentEquals(newHash)) {
-                throw IOException("Write verification failed (hash mismatch) for uri: $uri")
-            }
-        } catch (e: SecurityException) {
-            // Permission denied by provider or missing URI grants.
-            // zh-CN: provider 拒绝访问或缺少 URI 授权导致权限被拒绝.
-            handleSaveFailure(uri, oldBytes, newBytes, IOException("Permission denied for uri: $uri", e))
-        } catch (e: Throwable) {
-            handleSaveFailure(uri, oldBytes, newBytes, e)
-        }
-    }
-
-    /**
-     * Handle transactional save failure.
-     *
-     * Steps:
-     * - Try rollback (best-effort).
-     * - Save emergency draft (always).
-     * - Prompt user actions on main thread.
-     *
-     * zh-CN:
-     *
-     * 处理事务保存失败.
-     *
-     * 步骤:
-     * - 尝试回滚 (尽力而为).
-     * - 保存草稿 (始终执行).
-     * - 在主线程弹窗提示用户后续操作.
-     */
-    private fun handleSaveFailure(uri: Uri, oldBytes: ByteArray?, newBytes: ByteArray, error: Throwable): Nothing {
-        val resolver = context.contentResolver
-
-        // Try rollback to SAVE_PRE if possible.
-        // zh-CN: 若可能则回滚到 SAVE_PRE.
-        if (oldBytes != null) {
-            runCatching {
-                resolver.openOutputStream(uri, "rwt")?.use { out ->
-                    out.write(oldBytes)
-                    out.flush()
-                }
-            }
-        }
-
-        val draftFile = runCatching {
-            EmergencyDraftStore(context).saveDraft(
-                displayName = name.ifBlank { "untitled" },
-                bytes = newBytes,
-            )
-        }.getOrNull()
-
-        // Prompt user on main thread.
-        // zh-CN: 在主线程提示用户.
-        DialogUtils.buildAndShowAdaptive {
-            MaterialDialog.Builder(context)
-                .title(R.string.error_save_failed)
-                .content(
-                    buildString {
-                        append(error.message ?: error.toString())
-                        if (draftFile != null) {
-                            append("\n\n")
-                            append(context.getString(R.string.text_draft_file_path))
-                            append(":\n")
-                            append(draftFile.absolutePath)
-                        }
-                    }
-                )
-                .also { builder ->
-                    if (draftFile != null) {
-                        builder.neutralText(R.string.dialog_button_copy_path)
-                        builder.neutralColorRes(R.color.dialog_button_hint)
-                        builder.onNeutral { d, _ ->
-                            ClipboardUtils.setClip(context, draftFile.absolutePath)
-                            showSnack(d.view, R.string.text_already_copied_to_clip, false)
-                        }
-                    }
-                }
-                .negativeText(R.string.dialog_button_dismiss)
-                .negativeColorRes(R.color.dialog_button_default)
-                .onNegative { d, _ -> d.dismiss() }
-                .positiveText(R.string.dialog_button_save_as)
-                .positiveColorRes(R.color.dialog_button_attraction)
-                .onPositive { d, _ ->
-                    // Guide user to save as a normal file path (file://).
-                    // zh-CN: 引导用户另存为普通文件路径 (file://).
-                    runCatching {
-                        FileChooserDialogBuilder(context)
-                            .title(R.string.text_save_to)
-                            .dir(INTERNAL_STORAGE_ROOT)
-                            .chooseDir()
-                            .singleChoice()
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe({ dir ->
-                                // Determine extension from current uri path if possible.
-                                // zh-CN: 尽可能从当前 uri.path 推导扩展名.
-                                val ext = uri.path?.let { targetExtFromPath(it) } ?: ""
-
-                                val dest = File(
-                                    dir.path,
-                                    buildSafeFileNameForSaveAs(
-                                        baseName = name,
-                                        ext = ext,
-                                    )
-                                )
-
-                                Schedulers.io().scheduleDirect {
-                                    runCatching {
-                                        dest.parentFile?.mkdirs()
-                                        File(dest.path).outputStream().use { it.write(newBytes) }
-
-                                        // If "Save as" succeeded, update current uri to the new file.
-                                        // zh-CN: 若另存为成功, 则将当前 uri 更新为新文件.
-                                        this@EditorView.uri = Uri.fromFile(dest)
-                                        this@EditorView.name = getNameWithoutExtension(dest.path)
-
-                                        // Mark as saved on UI thread.
-                                        // zh-CN: 在 UI 线程标记为已保存.
-                                        post {
-                                            d.dismiss()
-                                            editor.markTextAsSaved()
-                                            setMenuItemStatus(R.id.save, false)
-                                        }
-                                    }.onFailure {
-                                        post {
-                                            showSnack(d.view, R.string.error_save_failed, false)
-                                            showToast(context, it.message, true)
-                                        }
-                                    }
-                                }
-                            }, { e ->
-                                e.printStackTrace()
-                            })
-                    }
-                }
-                .autoDismiss(false)
-                .cancelable(false)
-                .build()
-        }
-
-        if (error is IOException) {
-            throw error
-        }
-        throw IOException(error)
-    }
-
-    private fun buildBytesToWrite(text: String, charset: Charset, needBom: Boolean): ByteArray {
-        val body = text.toByteArray(charset)
-        if (!needBom) return body
-
-        val bom = StringUtils.bomBytes(charset)
-        return ByteArray(bom.size + body.size).also {
-            System.arraycopy(bom, 0, it, 0, bom.size)
-            System.arraycopy(body, 0, it, bom.size, body.size)
-        }
-    }
-
-    private fun shouldTrackHistory(oldBytes: ByteArray?, newBytes: ByteArray): Boolean {
-        val oldSize = oldBytes?.size ?: 0
-        val newSize = newBytes.size
-        val limit = HistoryPrefs.maxFileSizeToTrackBytes().coerceAtLeast(0L)
-
-        return oldSize.toLong() <= limit && newSize.toLong() <= limit
-    }
-
-    private fun sha256(bytes: ByteArray): ByteArray {
-        return MessageDigest.getInstance("SHA-256").digest(bytes)
-    }
-
-    private fun targetExtFromPath(path: String): String {
-        val name = File(path).name
-        val dot = name.lastIndexOf('.')
-        if (dot <= 0 || dot >= name.length - 1) return ""
-        return name.substring(dot + 1)
-    }
-
-    private fun buildSafeFileNameForSaveAs(baseName: String, ext: String): String {
-        val raw = baseName.ifBlank { "untitled" }
-        val sanitized = raw.replace(Regex("""[\\/:*?"<>|]"""), "_")
-        val niceExt = ext.trim().trimStart('.')
-        return if (niceExt.isBlank()) sanitized else "$sanitized.$niceExt"
-    }
 
     fun showVersionHistoryDialog() {
-        when (val uri = uri) {
-            null -> {
-                DialogUtils.buildAndShowAdaptive {
-                    MaterialDialog.Builder(context)
-                        .title(R.string.text_prompt)
-                        .content(R.string.error_unable_to_display_version_history_as_current_file_path_is_unknown)
-                        .positiveText(R.string.dialog_button_dismiss)
-                        .positiveColorRes(R.color.dialog_button_default)
-                        .build()
-                }
-            }
-            else -> {
-                // Delegate to controller to unify editor/explorer/history page behavior.
-                // zh-CN: 委托给 Controller, 统一 editor/explorer/history page 的行为.
-                VersionHistoryController(context).showForEditor(
-                    uri = uri,
-                    onRestoreToEditor = { restoredText ->
-                        editor.text = restoredText
-
-                        // Restoring changes content => mark sticky dirty.
-                        // zh-CN: 恢复版本会改变内容, 因此置 sticky 脏标记.
-                        saveStickyDirty = true
-                    },
-                    onRestoredUi = {
-                        syncPrimaryMenuState()
-                        showSnack(this@EditorView, R.string.text_done)
-                    },
-                )
-            }
-        }
-    }
-
-    // A minimal emergency draft store.
-    // zh-CN: 一个最小实现的草稿存储器.
-    private class EmergencyDraftStore(private val context: Context) {
-
-        private val draftsDir: File by lazy { File(context.filesDir, "drafts") }
-
-        fun saveDraft(displayName: String, bytes: ByteArray): File {
-            draftsDir.mkdirs()
-
-            val safeName = displayName
-                .ifBlank { "untitled" }
-                .replace(Regex("""[\\/:*?"<>|]"""), "_")
-                .lowercase(Locale.getDefault())
-
-            val now = System.currentTimeMillis()
-            val f = File(draftsDir, "${now}_${safeName}.bin")
-
-            f.outputStream().use { it.write(bytes) }
-
-            // Cleanup drafts after save (best-effort).
-            // zh-CN: 保存后顺便清理草稿 (尽力而为).
-            runCatching { cleanupLocked() }
-
-            return f
-        }
-
-        private fun cleanupLocked() {
-            val files = draftsDir.listFiles()?.toList() ?: return
-            if (files.isEmpty()) return
-
-            val now = System.currentTimeMillis()
-
-            // 1) Remove expired.
-            // zh-CN: 1) 删除过期草稿.
-            val maxDraftLifetime = HistoryPrefs.draftsMaxDays().coerceAtLeast(0).toLong() * 24L * 60L * 60L * 1000L
-            val expiredBefore = now - maxDraftLifetime
-            files.forEach { f ->
-                if (f.lastModified() < expiredBefore) {
-                    // noinspection ResultOfMethodCallIgnored
-                    f.delete()
-                }
-            }
-
-            // 2) Enforce total bytes limit (keep newest first).
-            // zh-CN: 2) 约束总容量上限 (优先保留最新).
-            val remained = draftsDir.listFiles()?.toList()?.sortedByDescending { it.lastModified() } ?: return
-            var total = remained.sumOf { it.length().coerceAtLeast(0L) }
-
-            val draftLimit = HistoryPrefs.draftsMaxTotalBytes().coerceAtLeast(0L)
-
-            if (total <= draftLimit) return
-
-            for (f in remained.asReversed()) {
-                if (total <= draftLimit) break
-                val len = f.length().coerceAtLeast(0L)
-                if (f.delete()) {
-                    total -= len
-                }
-            }
-        }
+        versionHistoryService.showDialog(uri)
     }
 
     fun forceStop() {
@@ -2152,7 +2195,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun replace() {
-        editor.replaceSelection()
+        mCommandDispatcher.replaceSelection()
     }
 
     fun showConsole() {
@@ -2172,8 +2215,149 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
+    fun showFindOrReplaceDialog() {
+        showFindOrReplaceDialog(null)
+    }
+
+    private fun showFindOrReplaceDialog(payload: JSONObject?) {
+        val payloadQuery = payload?.optNonBlankString(PAYLOAD_QUERY)
+        val preferredQuery = payloadQuery ?: getPreferredSearchQueryForDialogOrNull()
+        val builder = FindOrReplaceDialogBuilder(context, this)
+        if (payload?.has(PAYLOAD_USING_REGEX) == true) {
+            builder.setUsingRegex(payload.optBoolean(PAYLOAD_USING_REGEX))
+        } else if (preferredQuery != null) {
+            builder.setUsingRegex(getPreferredSearchUsingRegexForDialog())
+        }
+        builder.setQueryIfNotEmpty(preferredQuery ?: editor.selectedTextSnapshot)
+        builder.setReplacement(payload?.optString(PAYLOAD_REPLACEMENT))
+        builder.setReplaceMode(
+            replace = payload?.optBoolean(PAYLOAD_REPLACE, false) == true,
+            replaceAll = payload?.optBoolean(PAYLOAD_REPLACE_ALL, false) == true,
+        )
+        builder.positiveColorRes(R.color.dialog_button_attraction)
+        builder.show()
+    }
+
+    fun showJumpToLineDialog() {
+        showJumpToLineDialog(null)
+    }
+
+    private fun showJumpToLineDialog(initialLine: Int?) {
+        val lineCount = editor.lineCountSnapshot.coerceAtLeast(1)
+        val initialInput = initialLine
+            ?.coerceIn(1, lineCount)
+            ?.toString()
+            .orEmpty()
+        val builder = MaterialDialog.Builder(context)
+            .title(R.string.text_jump_to_line)
+            .input("1 - $lineCount", initialInput) { _, input ->
+                if (input.isNullOrEmpty()) {
+                    return@input
+                }
+                val line = input.toString().toIntOrNull() ?: return@input
+                val targetLine = line.coerceIn(1, lineCount)
+                mCommandDispatcher.jumpTo(targetLine - 1, 0)
+                recordAceJumpToLineHistory(targetLine)
+            }
+            .inputType(InputType.TYPE_CLASS_NUMBER)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .widgetThemeColor()
+        builder.show()
+    }
+
+    fun showFileDetailsDialog() {
+        val path = uri?.path
+        if (path.isNullOrEmpty()) {
+            DialogUtils.buildAndShowAdaptive {
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.error_unable_to_display_file_details_as_current_file_path_is_unknown)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
+                    .build()
+            }
+            return
+        }
+        EditableFileInfoDialogManager.showEditableFileInfoDialog(context, File(path)) {
+            editor.text
+        }
+    }
+
+    fun startBuildApkActivity() {
+        startBuildApkActivity(null)
+    }
+
+    private fun startBuildApkActivity(fallbackPath: String?) {
+        val path = uri?.path?.takeIf { it.isNotEmpty() }
+            ?: fallbackPath?.takeIf { it.isNotEmpty() }
+        if (path.isNullOrEmpty()) {
+            DialogUtils.buildAndShowAdaptive {
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.error_unable_to_package_application_as_current_file_path_is_unknown)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
+                    .build()
+            }
+            return
+        }
+        BuildActivity.launch(context, path)
+    }
+
+    fun showJavaClassSearchDialog() {
+        showJavaClassSearchDialog(null)
+    }
+
+    private fun showJavaClassSearchDialog(initialQuery: String?) {
+        val query = initialQuery?.takeIf { it.isNotBlank() } ?: editor.selectedTextSnapshot
+        ClassSearchDialogBuilder(context)
+            .setQuery(query)
+            .itemClick { dialog, item, _ -> showClassSearchingItem(dialog, item) }
+            .title(R.string.text_find_java_classes)
+            .show()
+    }
+
+    private fun showClassSearchingItem(dialog: MaterialDialog, item: ClassSearchingItem) {
+        val title: String
+        val description: String
+        if (item is ClassSearchingItem.ClassItem) {
+            val androidClass: AndroidClass = item.androidClass
+            title = androidClass.className
+            description = androidClass.fullName
+        } else {
+            title = (item as ClassSearchingItem.PackageItem).packageName
+            description = title
+        }
+        MaterialDialog.Builder(context)
+            .title(title)
+            .content(description)
+            .neutralText(R.string.text_view_docs)
+            .neutralColorRes(R.color.dialog_button_hint)
+            .negativeText(R.string.text_en_import)
+            .negativeColorRes(R.color.dialog_button_hint)
+            .positiveText(R.string.text_copy)
+            .positiveColorRes(R.color.dialog_button_hint)
+            .onPositive { _, _ ->
+                ClipboardUtils.setClip(context, description)
+                showToast(context, R.string.text_already_copied_to_clip)
+                dialog.dismiss()
+            }
+            .onNegative { _, _ ->
+                val executionInfo = JavaScriptFileSource.parseExecutionMode(editor.text)
+                recordAceJavaClassImportHistory(item, description)
+                mCommandDispatcher.insert(executionInfo.lineno, item.importText + ";\n")
+            }
+            .onNeutral { _, _ ->
+                IntentUtils.browse(context, item.url, ToastExceptionHolder(context))
+            }
+            .onAny { _, _ -> dialog.dismiss() }
+            .show()
+    }
+
     fun beautifyCode() {
-        editor.beautifyCode()
+        mCommandDispatcher.beautifyCode()
     }
 
     @SuppressLint("CheckResult")
@@ -2191,20 +2375,46 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun selectTextSize() {
         DialogUtils.buildAndShowAdaptive {
             TextSizeSettingDialogBuilder(context)
-                .initialValue(pxToSp(editor.codeEditText.textSize).toInt())
+                .initialValue(themeFontService.currentTextSize())
                 .callback { value: Int -> setTextSize(value) }
                 .build()
         }
     }
 
+    fun selectAceEditorFont() {
+        val fonts = themeFontService.availableAceFonts()
+        val current = themeFontService.currentAceFont()
+        val currentIndex = fonts.indexOf(current).coerceAtLeast(0)
+        val labels = fonts.map { themeFontService.aceEditorFontLabel(it) }
+
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_ace_editor_font)
+                .items(labels)
+                .choiceWidgetThemeColor()
+                .itemsCallbackSingleChoice(currentIndex) { _, _, which, _ ->
+                    val font = fonts[which]
+                    themeFontService.persistAndApplyAceFont(font)
+                    showToast(
+                        context,
+                        context.getString(R.string.text_ace_editor_font_changed, themeFontService.aceEditorFontLabel(font)),
+                    )
+                    true
+                }
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .build()
+        }
+    }
+
     fun setTextSize(value: Int) {
-        setEditorTextSize(value)
-        editor.codeEditText.textSize = value.toFloat()
-        editor.lastTextSize = value
+        themeFontService.setTextSize(value)
     }
 
     private fun selectEditorTheme(themes: List<Theme>) {
-        val i = themes.indexOf(mEditorTheme).coerceAtLeast(0)
+        val i = themes.indexOf(themeFontService.currentTheme).coerceAtLeast(0)
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
                 .title(R.string.text_editor_theme)
@@ -2212,8 +2422,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 .choiceWidgetThemeColor()
                 .itemsCallbackSingleChoice(i) { _, _, which, _ ->
                     themes[which].let {
-                        setTheme(it)
-                        Themes.setCurrent(it.name)
+                        themeFontService.persistAndApplyTheme(it)
                     }
                     true
                 }
@@ -2360,9 +2569,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val gen = ++mSearchStatsGeneration
 
         val usingRegex = mCurrentSearchUsingRegex
-        val selStart = editor.codeEditText.selectionStart
-        val selEnd = editor.codeEditText.selectionEnd
-        val textSnapshot = editor.text
+        val currentSelection = editor.selection
+        val textSnapshot = editor.textSnapshot
 
         mSearchStatsDisposable = Observable
             .fromCallable {
@@ -2370,8 +2578,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     text = textSnapshot,
                     query = query,
                     usingRegex = usingRegex,
-                    selectionStart = minOf(selStart, selEnd),
-                    selectionEnd = maxOf(selStart, selEnd),
+                    selectionStart = currentSelection.startOffset,
+                    selectionEnd = currentSelection.endOffset,
                     maxTotal = mSearchStatsMaxTotal,
                     generation = gen,
                 )
@@ -2482,9 +2690,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // Try to start "Find" and enter search mode. Returns true if any result is found.
     // zh-CN: 尝试开始 "查找" 并进入搜索模式. 若找到任意结果则返回 true.
     fun tryFind(keywords: String, usingRegex: Boolean): Boolean {
-        editor.find(keywords, usingRegex)
+        val result = editor.find(keywords, EditorSearchOptions(usingRegex = usingRegex))
 
-        val hasResult = editor.getFoundIndex() >= 0
+        val hasResult = result.found
         if (!hasResult) {
             showNoSearchResultDialog(keywords)
             return false
@@ -2503,9 +2711,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // Try to start "Replace (single)" and enter search mode. Returns true if any result is found.
     // zh-CN: 尝试开始 "替换 (单次)" 并进入搜索模式. 若找到任意结果则返回 true.
     fun tryReplace(keywords: String, replacement: String, usingRegex: Boolean): Boolean {
-        editor.replace(keywords, replacement, usingRegex)
+        val result = editor.replace(keywords, replacement, EditorSearchOptions(usingRegex = usingRegex))
 
-        val hasResult = editor.getFoundIndex() >= 0
+        val hasResult = result.found
         if (!hasResult) {
             showNoSearchResultDialog(keywords)
             return false
@@ -2526,14 +2734,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         showNormalToolbar()
     }
 
-    @Throws(CheckedPatternSyntaxException::class)
+    @Throws(EditorSearchSyntaxException::class)
     fun find(keywords: String, usingRegex: Boolean) {
         // Keep old API for callers that don't care about result.
         // zh-CN: 保留旧 API, 兼容不关心结果的调用方.
         tryFind(keywords, usingRegex)
     }
 
-    @Throws(CheckedPatternSyntaxException::class)
+    @Throws(EditorSearchSyntaxException::class)
     fun replace(keywords: String, replacement: String, usingRegex: Boolean) {
         // Keep old API for callers that don't care about result.
         // zh-CN: 保留旧 API, 兼容不关心结果的调用方.
@@ -2554,9 +2762,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         post { syncPrimaryMenuState() }
     }
 
-    @Throws(CheckedPatternSyntaxException::class)
+    @Throws(EditorSearchSyntaxException::class)
     fun replaceAll(keywords: String, replacement: String, usingRegex: Boolean) {
-        editor.replaceAll(keywords, replacement, usingRegex)
+        editor.replaceAll(keywords, replacement, EditorSearchOptions(usingRegex = usingRegex))
     }
 
     fun debug() {
@@ -2600,8 +2808,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     override fun onHintClick(completions: CodeCompletions, pos: Int) {
-        val completion = completions[pos]
-
         // @Overruled by SuperMonster003 on Jul 12, 2023.
         //  ! Author: 抠脚本人
         //  ! Related PR: http://pr.autojs6.com/98
@@ -2619,7 +2825,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         //  #     editor!!.commentLine()
         //  # } else editor!!.insert(completion.insertText)
 
-        editor.insert(completion.insertText)
+        if (handleAceShortcutClick(completions[pos])) {
+            return
+        }
+        mCommandDispatcher.onCompletionClick(completions, pos)
     }
 
     override fun onHintLongClick(completions: CodeCompletions, pos: Int) {
@@ -2645,22 +2854,555 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         //  #     return
         //  # }
 
-        completions[pos].let {
-            when {
-                // @Inspired by 抠脚本人 (https://github.com/little-alei) on Jul 13, 2023.
-                it.insertText == "/" -> editor.commentHelper.toggle()
-                it.insertText == "=" -> editor.clear()
-                it.insertText == "-" -> editor.deleteLine()
-                it.insertText == "(" -> editor.moveCursor(-1)
-                it.insertText == ")" -> editor.moveCursor(1)
-                it.insertText == "[" -> editor.jumpToLineStart()
-                it.insertText == "]" -> editor.jumpToLineEnd()
-                it.insertText == "{" -> editor.jumpToStart()
-                it.insertText == "}" -> editor.jumpToEnd()
-                it.insertText == "<" -> editor.jumpToPrevLine()
-                it.insertText == ">" -> editor.jumpToNextLine()
-                it.url != null -> showManual(it.url, it.hint)
+        if (handleAceShortcutLongClick(completions[pos])) {
+            return
+        }
+        mCommandDispatcher.onCompletionLongClick(completions, pos)
+    }
+
+    override fun shouldRepeatHintLongClick(completions: CodeCompletions, pos: Int): Boolean {
+        if (pos < 0 || pos >= completions.size()) {
+            return false
+        }
+        return shouldRepeatAceShortcutLongClick(completions[pos])
+    }
+
+    override fun onHintLongClickRepeat(completions: CodeCompletions, pos: Int): Boolean {
+        if (pos < 0 || pos >= completions.size()) {
+            return false
+        }
+        return handleAceShortcutLongClickRepeat(completions[pos])
+    }
+
+    private fun handleAceShortcutClick(completion: CodeCompletion): Boolean {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return false
+        }
+        if (AceShortcutPanel.commandOf(completion) == AceShortcutPanel.Command.ActionFavorites) {
+            showAceActionHistoryDialog()
+            return true
+        }
+        return AceShortcutPanel.actionOf(completion)
+            ?.let { executeAceShortcutAction(it, record = false) }
+            ?: false
+    }
+
+    private fun handleAceShortcutLongClick(completion: CodeCompletion): Boolean {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return false
+        }
+        return when (AceShortcutPanel.commandOf(completion)) {
+            AceShortcutPanel.Command.ActionFavorites -> true.also {
+                repeatLastAceAction()
             }
+            AceShortcutPanel.Command.Escape -> true.also {
+                recordAceHistoryAction(historyAction(ACTION_EXIT_EDITOR, R.string.text_exit, mutatesText = false))
+                triggerHostBackPress()
+            }
+            AceShortcutPanel.Command.MoveUp -> true.also {
+                if (!handleAceShortcutVerticalLongClick(-1)) {
+                    recordAceHistoryAction(historyAction(ACTION_JUMP_TO_START, R.string.text_jump_to_start, mutatesText = false))
+                    jumpWithAceShortcutReturnPoint { editor.jumpToStart() }
+                }
+            }
+            AceShortcutPanel.Command.MoveDown -> true.also {
+                if (!handleAceShortcutVerticalLongClick(1)) {
+                    recordAceHistoryAction(historyAction(ACTION_JUMP_TO_END, R.string.text_jump_to_end, mutatesText = false))
+                    jumpWithAceShortcutReturnPoint { editor.jumpToEnd() }
+                }
+            }
+            AceShortcutPanel.Command.MoveLeft -> true.also {
+                recordAceHistoryAction(historyAction(ACTION_JUMP_TO_LINE_START, R.string.text_jump_to_line_start, mutatesText = false))
+                jumpWithAceShortcutReturnPoint { editor.jumpToLineStart() }
+            }
+            AceShortcutPanel.Command.MoveRight -> true.also {
+                recordAceHistoryAction(historyAction(ACTION_JUMP_TO_LINE_END, R.string.text_jump_to_line_end, mutatesText = false))
+                jumpWithAceShortcutReturnPoint { editor.jumpToLineEnd() }
+            }
+            AceShortcutPanel.Command.Tab -> true.also {
+                if (toggleAceShortcutReturnPoint()) {
+                    recordAceHistoryAction(historyAction(ACTION_JUMP_TO_PREVIOUS_CURSOR, R.string.text_jump_to_previous_cursor, mutatesText = false))
+                }
+            }
+            null -> false
+        }
+    }
+
+    private fun showAceActionHistoryDialog() {
+        AceActionFavoritesDialog.show(context) { action ->
+            executeAceHistoryAction(action, record = true)
+        }
+    }
+
+    private fun repeatLastAceAction() {
+        val action = AceActionHistoryStore.getLastAction(context)
+        if (action == null) {
+            showToast(context, R.string.text_ace_no_last_action)
+            return
+        }
+        executeAceHistoryAction(action, record = true)
+    }
+
+    fun recordAceActionForMenuItem(itemId: Int) {
+        actionForMenuItem(itemId)?.let(::recordAceHistoryAction)
+    }
+
+    @JvmOverloads
+    fun showEditorSettingsDialog(
+        initialPreferenceKey: String? = null,
+        suppressInitialSettingActionRecord: Boolean = false,
+    ) {
+        EditorSettingsDialogLauncher.show(
+            context = context,
+            initialPreferenceKey = initialPreferenceKey,
+            recordAceActionFavorites = editor.engineType == EditorEngineType.ACE,
+            suppressInitialActionRecord = suppressInitialSettingActionRecord,
+        )
+    }
+
+    private fun executeAceHistoryAction(
+        action: AceActionHistoryStore.Action,
+        record: Boolean,
+    ): Boolean {
+        if (action.mutatesText && editor.isReadOnly) {
+            return true
+        }
+        val handled = when (action.id) {
+            ACTION_RUN -> true.also { runAndSaveFileIfNeeded() }
+            ACTION_FORCE_STOP -> true.also { forceStop() }
+            ACTION_SAVE -> true.also { saveFile() }
+            ACTION_UNDO -> true.also { undo() }
+            ACTION_REDO -> true.also { redo() }
+            ACTION_FIND_NEXT -> true.also {
+                editor.resetFoundIndexForFindNextFromCursor()
+                findNext()
+                onSearchStateMaybeChanged()
+            }
+            ACTION_FIND_PREV -> true.also {
+                editor.resetFoundIndexForFindPrevFromCursor()
+                findPrev()
+                onSearchStateMaybeChanged()
+            }
+            ACTION_CANCEL_SEARCH -> true.also { cancelSearch() }
+            ACTION_FIND_OR_REPLACE -> true.also { showFindOrReplaceDialog(action.payloadObject()) }
+            ACTION_REPLACE_SELECTION -> true.also {
+                replace()
+                onSearchStateMaybeChanged()
+            }
+            ACTION_COPY_SELECTION -> true.also { copySelectedTextToClipboard() }
+            ACTION_COPY_ALL -> true.also { copyAllToClipboard() }
+            ACTION_COPY_LINE -> true.also { mCommandDispatcher.copyLine() }
+            ACTION_PASTE -> true.also { pasteFromClipboard() }
+            ACTION_SELECT_ALL -> (editor as? AceScriptEditorEngine)?.let { aceEditor ->
+                true.also { aceEditor.selectAll() }
+            } ?: false
+            ACTION_DELETE_LINE -> true.also { mCommandDispatcher.deleteLine() }
+            ACTION_CLEAR -> true.also { mCommandDispatcher.clear() }
+            ACTION_TOGGLE_COMMENT -> true.also { mCommandDispatcher.toggleComment() }
+            ACTION_BEAUTIFY -> true.also { mCommandDispatcher.beautifyCode() }
+            ACTION_JUMP_TO_LINE -> true.also { showJumpToLineDialog(action.payloadInt(PAYLOAD_LINE)) }
+            ACTION_JUMP_TO_START -> true.also { mCommandDispatcher.jumpToStart() }
+            ACTION_JUMP_TO_END -> true.also { mCommandDispatcher.jumpToEnd() }
+            ACTION_JUMP_TO_LINE_START -> true.also { mCommandDispatcher.jumpToLineStart() }
+            ACTION_JUMP_TO_LINE_END -> true.also { mCommandDispatcher.jumpToLineEnd() }
+            ACTION_TOGGLE_BREAKPOINT -> true.also { mCommandDispatcher.addOrRemoveBreakpointAtCurrentLine() }
+            ACTION_DEBUG -> true.also { debug() }
+            ACTION_REMOVE_ALL_BREAKPOINTS -> true.also { mCommandDispatcher.removeAllBreakpoints() }
+            ACTION_BUILD_APK -> true.also { startBuildApkActivity(action.payloadString(PAYLOAD_PATH)) }
+            ACTION_LOG -> true.also { openEditorLogByPreference() }
+            ACTION_SETTINGS -> true.also { showEditorSettingsDialog() }
+            ACTION_CONSOLE -> true.also { showConsole() }
+            ACTION_IMPORT_JAVA_CLASS -> true.also {
+                showJavaClassSearchDialog(
+                    action.payloadString(PAYLOAD_QUERY)
+                        ?: action.payloadString(PAYLOAD_IMPORT_TEXT),
+                )
+            }
+            ACTION_FILE_DETAILS -> true.also { showFileDetailsDialog() }
+            ACTION_READ_ONLY -> true.also { toggleReadOnlyMode() }
+            ACTION_COPY_ACE_DIAGNOSTICS -> true.also { copyAceDiagnosticsToClipboard() }
+            ACTION_OPEN_BY_OTHER_APPS -> true.also { openByOtherApps() }
+            ACTION_VERSION_HISTORY -> true.also { showVersionHistoryDialog() }
+            ACTION_EXIT_EDITOR -> true.also { triggerHostBackPress() }
+            ACTION_JUMP_TO_PREVIOUS_CURSOR -> toggleAceShortcutReturnPoint()
+            else -> executeEditorSettingHistoryAction(action)
+        }
+        if (handled && record && !isDeferredParameterizedHistoryAction(action.id)) {
+            AceActionHistoryStore.record(context, actionForHistoryRecord(action))
+        }
+        return handled
+    }
+
+    private fun executeEditorSettingHistoryAction(action: AceActionHistoryStore.Action): Boolean {
+        val preferenceKey = EditorSettingActionRegistry.preferenceKeyFromActionId(action.id)
+            ?: return false
+        if (!EditorSettingActionRegistry.isKnownPreferenceKey(context, preferenceKey)) {
+            return false
+        }
+        showEditorSettingsDialog(
+            initialPreferenceKey = preferenceKey,
+            suppressInitialSettingActionRecord = true,
+        )
+        return true
+    }
+
+    private fun recordAceHistoryAction(action: AceActionHistoryStore.Action) {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return
+        }
+        if (isDeferredParameterizedHistoryAction(action.id) && action.payloadJson.isNullOrBlank()) {
+            return
+        }
+        AceActionHistoryStore.record(context, action)
+    }
+
+    fun recordAceFindOrReplaceHistory(
+        keywords: String,
+        replacement: String,
+        usingRegex: Boolean,
+        replace: Boolean,
+        replaceAll: Boolean,
+    ) {
+        val query = keywords.takeIf { it.isNotEmpty() } ?: return
+        val payloadJson = historyPayload(
+            PAYLOAD_QUERY to query,
+            PAYLOAD_REPLACEMENT to replacement,
+            PAYLOAD_USING_REGEX to usingRegex,
+            PAYLOAD_REPLACE to replace,
+            PAYLOAD_REPLACE_ALL to replaceAll,
+        )
+        val payloadSummary = buildSearchPayloadSummary(
+            query = query,
+            replacement = replacement,
+            usingRegex = usingRegex,
+            replace = replace,
+        )
+        recordAceHistoryAction(
+            historyAction(
+                ACTION_FIND_OR_REPLACE,
+                R.string.text_find_or_replace,
+                mutatesText = true,
+                payloadJson = payloadJson,
+                payloadSummary = payloadSummary,
+            ),
+        )
+    }
+
+    private fun recordAceJumpToLineHistory(line: Int) {
+        recordAceHistoryAction(
+            historyAction(
+                ACTION_JUMP_TO_LINE,
+                R.string.text_jump_to_line,
+                mutatesText = false,
+                payloadJson = historyPayload(PAYLOAD_LINE to line),
+                payloadSummary = "#$line",
+            ),
+        )
+    }
+
+    private fun recordAceJavaClassImportHistory(item: ClassSearchingItem, query: String) {
+        val importText = item.importText.takeIf { it.isNotBlank() } ?: return
+        recordAceHistoryAction(
+            historyAction(
+                ACTION_IMPORT_JAVA_CLASS,
+                R.string.text_find_java_classes,
+                mutatesText = true,
+                payloadJson = historyPayload(
+                    PAYLOAD_QUERY to query,
+                    PAYLOAD_IMPORT_TEXT to importText,
+                ),
+                payloadSummary = compactHistorySummary(importText),
+            ),
+        )
+    }
+
+    private fun actionForToolbarItem(id: Int): AceActionHistoryStore.Action? = when (id) {
+        R.id.run -> historyAction(
+            if (isScriptRunning()) ACTION_FORCE_STOP else ACTION_RUN,
+            if (isScriptRunning()) R.string.text_force_stop else R.string.text_run,
+            mutatesText = false,
+        )
+        R.id.save -> historyAction(ACTION_SAVE, R.string.text_save, mutatesText = false)
+        R.id.undo -> historyAction(ACTION_UNDO, R.string.text_undo, mutatesText = true)
+        R.id.redo -> historyAction(ACTION_REDO, R.string.text_redo, mutatesText = true)
+        R.id.find_next -> historyAction(ACTION_FIND_NEXT, R.string.text_find_next_simplified, mutatesText = false)
+        R.id.find_prev -> historyAction(ACTION_FIND_PREV, R.string.text_find_prev_simplified, mutatesText = false)
+        R.id.replace -> historyAction(ACTION_REPLACE_SELECTION, R.string.text_replace, mutatesText = true)
+        else -> null
+    }
+
+    private fun actionForAceSelectionAction(action: AceScriptEditorEngine.SelectionAction): AceActionHistoryStore.Action? = when (action) {
+        AceScriptEditorEngine.SelectionAction.Copy -> historyAction(ACTION_COPY_SELECTION, R.string.text_copy, mutatesText = false)
+        AceScriptEditorEngine.SelectionAction.Paste -> historyAction(ACTION_PASTE, R.string.text_paste, mutatesText = true)
+        AceScriptEditorEngine.SelectionAction.SelectAll -> historyAction(ACTION_SELECT_ALL, R.string.text_select_all, mutatesText = false)
+        AceScriptEditorEngine.SelectionAction.DeleteLine -> historyAction(ACTION_DELETE_LINE, R.string.text_delete_line, mutatesText = true)
+        AceScriptEditorEngine.SelectionAction.CopyLine -> historyAction(ACTION_COPY_LINE, R.string.text_copy_line, mutatesText = false)
+    }
+
+    private fun actionForMenuItem(itemId: Int): AceActionHistoryStore.Action? = when (itemId) {
+        R.id.action_force_stop -> historyAction(ACTION_FORCE_STOP, R.string.text_force_stop, mutatesText = false)
+        R.id.action_find_or_replace -> historyAction(ACTION_FIND_OR_REPLACE, R.string.text_find_or_replace, mutatesText = true)
+        R.id.action_copy_all -> historyAction(ACTION_COPY_ALL, R.string.text_copy_all, mutatesText = false)
+        R.id.action_copy_line -> historyAction(ACTION_COPY_LINE, R.string.text_copy_line, mutatesText = false)
+        R.id.action_paste -> historyAction(ACTION_PASTE, R.string.text_paste, mutatesText = true)
+        R.id.action_delete_line -> historyAction(ACTION_DELETE_LINE, R.string.text_delete_line, mutatesText = true)
+        R.id.action_clear -> historyAction(ACTION_CLEAR, R.string.text_clear, mutatesText = true)
+        R.id.action_comment -> historyAction(ACTION_TOGGLE_COMMENT, R.string.text_comment, mutatesText = true)
+        R.id.action_beautify -> historyAction(ACTION_BEAUTIFY, R.string.text_code_beautify, mutatesText = true)
+        R.id.action_jump_to_line -> historyAction(ACTION_JUMP_TO_LINE, R.string.text_jump_to_line, mutatesText = false)
+        R.id.action_jump_to_start -> historyAction(ACTION_JUMP_TO_START, R.string.text_jump_to_start, mutatesText = false)
+        R.id.action_jump_to_end -> historyAction(ACTION_JUMP_TO_END, R.string.text_jump_to_end, mutatesText = false)
+        R.id.action_jump_to_line_start -> historyAction(ACTION_JUMP_TO_LINE_START, R.string.text_jump_to_line_start, mutatesText = false)
+        R.id.action_jump_to_line_end -> historyAction(ACTION_JUMP_TO_LINE_END, R.string.text_jump_to_line_end, mutatesText = false)
+        R.id.action_breakpoint -> historyAction(ACTION_TOGGLE_BREAKPOINT, R.string.text_set_breakpoint, mutatesText = false)
+        R.id.action_launch_debugger -> historyAction(ACTION_DEBUG, R.string.text_launch_debugger, mutatesText = false)
+        R.id.action_remove_all_breakpoints -> historyAction(ACTION_REMOVE_ALL_BREAKPOINTS, R.string.text_remove_all_breakpoints, mutatesText = false)
+        R.id.action_build_apk -> buildApkHistoryAction()
+        R.id.action_log -> historyAction(ACTION_LOG, R.string.text_log, mutatesText = false)
+        R.id.action_editor_settings -> historyAction(ACTION_SETTINGS, R.string.text_settings, mutatesText = false)
+        R.id.action_console -> historyAction(ACTION_CONSOLE, R.string.text_console, mutatesText = false)
+        R.id.action_import_java_class -> historyAction(ACTION_IMPORT_JAVA_CLASS, R.string.text_find_java_classes, mutatesText = true)
+        R.id.action_file_details -> historyAction(ACTION_FILE_DETAILS, R.string.text_file_details, mutatesText = false)
+        R.id.action_ace_read_only_mode -> historyAction(ACTION_READ_ONLY, R.string.text_ace_read_only_mode, mutatesText = false)
+        R.id.action_copy_ace_diagnostics -> historyAction(ACTION_COPY_ACE_DIAGNOSTICS, R.string.text_copy_ace_diagnostics, mutatesText = false)
+        R.id.action_open_by_other_apps -> historyAction(ACTION_OPEN_BY_OTHER_APPS, R.string.text_open_by_other_apps, mutatesText = false)
+        R.id.action_version_history -> historyAction(ACTION_VERSION_HISTORY, R.string.text_version_history, mutatesText = false)
+        else -> null
+    }
+
+    private fun historyAction(
+        id: String,
+        @StringRes labelResId: Int,
+        mutatesText: Boolean,
+        payloadJson: String? = null,
+        payloadSummary: String? = null,
+    ) = AceActionHistoryStore.Action(
+        id = id,
+        label = context.getString(labelResId),
+        mutatesText = mutatesText,
+        payloadJson = payloadJson,
+        payloadSummary = payloadSummary,
+    )
+
+    private fun buildApkHistoryAction(fallbackPath: String? = null): AceActionHistoryStore.Action {
+        val path = uri?.path?.takeIf { it.isNotEmpty() }
+            ?: fallbackPath?.takeIf { it.isNotEmpty() }
+        return historyAction(
+            ACTION_BUILD_APK,
+            R.string.text_build_apk,
+            mutatesText = false,
+            payloadJson = path?.let { historyPayload(PAYLOAD_PATH to it) },
+            payloadSummary = path?.let { compactHistorySummary(File(it).name.ifBlank { it }) },
+        )
+    }
+
+    private fun actionForHistoryRecord(action: AceActionHistoryStore.Action): AceActionHistoryStore.Action {
+        return when (action.id) {
+            ACTION_BUILD_APK -> buildApkHistoryAction(action.payloadString(PAYLOAD_PATH))
+            else -> action
+        }
+    }
+
+    private fun isDeferredParameterizedHistoryAction(id: String): Boolean {
+        return id == ACTION_FIND_OR_REPLACE ||
+            id == ACTION_JUMP_TO_LINE ||
+            id == ACTION_IMPORT_JAVA_CLASS
+    }
+
+    private fun historyPayload(vararg values: Pair<String, Any?>): String {
+        return JSONObject().apply {
+            values.forEach { (key, value) ->
+                when (value) {
+                    null -> Unit
+                    is Boolean -> put(key, value)
+                    is Number -> put(key, value)
+                    else -> put(key, value.toString())
+                }
+            }
+        }.toString()
+    }
+
+    private fun AceActionHistoryStore.Action.payloadObject(): JSONObject? {
+        val raw = payloadJson?.takeIf { it.isNotBlank() } ?: return null
+        return runCatching { JSONObject(raw) }.getOrNull()
+    }
+
+    private fun AceActionHistoryStore.Action.payloadString(key: String): String? {
+        return payloadObject()?.optNonBlankString(key)
+    }
+
+    private fun AceActionHistoryStore.Action.payloadInt(key: String): Int? {
+        val payload = payloadObject() ?: return null
+        if (!payload.has(key)) {
+            return null
+        }
+        return payload.optInt(key)
+    }
+
+    private fun JSONObject.optNonBlankString(key: String): String? {
+        return optString(key).takeIf { it.isNotBlank() }
+    }
+
+    private fun buildSearchPayloadSummary(
+        query: String,
+        replacement: String,
+        usingRegex: Boolean,
+        replace: Boolean,
+    ): String {
+        val querySummary = compactHistorySummary(
+            if (usingRegex) {
+                "/$query/"
+            } else {
+                "\"$query\""
+            },
+            maxLength = 48,
+        )
+        if (!replace) {
+            return querySummary
+        }
+        return "$querySummary -> ${compactHistorySummary("\"$replacement\"", maxLength = 32)}"
+    }
+
+    private fun compactHistorySummary(value: String, maxLength: Int = 72): String {
+        val compact = value.replace(Regex("\\s+"), " ").trim()
+        if (compact.length <= maxLength) {
+            return compact
+        }
+        return compact.take((maxLength - 3).coerceAtLeast(0)) + "..."
+    }
+
+    private fun copyAllToClipboard() {
+        ClipboardUtils.setClip(context, editor.text)
+        showSnack(this, R.string.text_already_copied_to_clip)
+    }
+
+    private fun copySelectedTextToClipboard() {
+        val selectedText = editor.selectedTextSnapshot
+        if (selectedText.isEmpty()) {
+            return
+        }
+        ClipboardUtils.setClip(context, selectedText)
+        showSnack(this, R.string.text_already_copied_to_clip)
+    }
+
+    private fun pasteFromClipboard() {
+        ClipboardUtils.getClip(context)?.let { mCommandDispatcher.insert(it) }
+    }
+
+    private fun executeAceShortcutAction(
+        action: AceShortcutPanel.Action,
+        record: Boolean,
+    ): Boolean {
+        if (action.mutatesText && editor.isReadOnly) {
+            return true
+        }
+        when (action.command) {
+            AceShortcutPanel.Command.Escape -> (editor as? AceScriptEditorEngine)?.handleEscapeKey()
+            AceShortcutPanel.Command.MoveUp -> (editor as? AceScriptEditorEngine)?.moveCompletionSelectionOrCursor(-1)
+                ?: editor.jumpToPrevLine()
+            AceShortcutPanel.Command.MoveDown -> (editor as? AceScriptEditorEngine)?.moveCompletionSelectionOrCursor(1)
+                ?: editor.jumpToNextLine()
+            AceShortcutPanel.Command.MoveLeft -> editor.moveCursor(-1)
+            AceShortcutPanel.Command.MoveRight -> editor.moveCursor(1)
+            AceShortcutPanel.Command.Tab -> (editor as? AceScriptEditorEngine)?.acceptCompletionOrInsertTab()
+            AceShortcutPanel.Command.ActionFavorites -> return true
+            null -> mCommandDispatcher.insert(action.insertText)
+        }
+        if (record) {
+            AceActionHistoryStore.record(context, action)
+        }
+        return true
+    }
+
+    private fun shouldRepeatAceShortcutLongClick(completion: CodeCompletion): Boolean {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return false
+        }
+        return when (AceShortcutPanel.commandOf(completion)) {
+            AceShortcutPanel.Command.MoveUp,
+            AceShortcutPanel.Command.MoveDown -> (editor as? AceScriptEditorEngine)?.isCompletionPopupOpen() == true
+            else -> false
+        }
+    }
+
+    private fun handleAceShortcutLongClickRepeat(completion: CodeCompletion): Boolean {
+        val aceEditor = editor as? AceScriptEditorEngine ?: return false
+        if (!aceEditor.isCompletionPopupOpen()) {
+            return false
+        }
+        val delta = when (AceShortcutPanel.commandOf(completion)) {
+            AceShortcutPanel.Command.MoveUp -> -1
+            AceShortcutPanel.Command.MoveDown -> 1
+            else -> return false
+        }
+        aceEditor.moveCompletionSelectionOrCursor(delta)
+        return true
+    }
+
+    private fun handleAceShortcutVerticalLongClick(delta: Int): Boolean {
+        val aceEditor = editor as? AceScriptEditorEngine
+        if (aceEditor?.isCompletionPopupOpen() == true) {
+            aceEditor.moveCompletionSelectionOrCursor(delta)
+            return true
+        }
+        return false
+    }
+
+    private fun jumpWithAceShortcutReturnPoint(jump: () -> Unit) {
+        rememberAceShortcutReturnPoint()
+        jump()
+    }
+
+    private fun toggleAceShortcutReturnPoint(): Boolean {
+        val target = mAceShortcutReturnSelection ?: return false
+        val current = editor.selection
+        mAceShortcutReturnSelection = current
+        mAceShortcutLastObservedSelection = current
+        mAceShortcutReturnJumpInProgress = true
+        editor.jumpTo(target.startLine, target.startColumn)
+        return true
+    }
+
+    private fun rememberAceShortcutReturnPoint() {
+        val current = editor.selection
+        if (!current.isCollapsed) {
+            return
+        }
+        mAceShortcutReturnSelection = current
+        mAceShortcutLastObservedSelection = current
+    }
+
+    private fun recordAceShortcutCursorHistory() {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return
+        }
+        val current = editor.selection
+        if (!current.isCollapsed) {
+            mAceShortcutLastObservedSelection = current
+            return
+        }
+        if (mAceShortcutReturnJumpInProgress) {
+            mAceShortcutReturnJumpInProgress = false
+            mAceShortcutLastObservedSelection = current
+            return
+        }
+        val previous = mAceShortcutLastObservedSelection
+        if (previous != null && previous.isCollapsed && !previous.isSameCollapsedCursor(current)) {
+            mAceShortcutReturnSelection = previous
+        }
+        mAceShortcutLastObservedSelection = current
+    }
+
+    private fun EditorSelection.isSameCollapsedCursor(other: EditorSelection): Boolean {
+        return startLine == other.startLine &&
+            startColumn == other.startColumn &&
+            endLine == other.endLine &&
+            endColumn == other.endColumn
+    }
+
+    private fun triggerHostBackPress() {
+        post {
+            activity.onBackPressedDispatcher.onBackPressed()
         }
     }
 
@@ -2677,31 +3419,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     override fun onModuleLongClick(module: Module) {
-        showManual(module.url, module.name)
+        mCommandDispatcher.onModuleLongClick(module)
     }
 
     override fun onPropertyClick(m: Module, property: Property) {
-        var p = property.key
-        if (!property.isVariable) {
-            p = "$p()"
-        }
-        if (property.isGlobal) {
-            editor.insert(p)
-        } else {
-            editor.insert(m.name + "." + p)
-        }
-        if (!property.isVariable) {
-            editor.moveCursor(-1)
-        }
-        mFunctionsKeyboardHelper!!.hideFunctionsLayout(true)
+        mCommandDispatcher.onPropertyClick(m, property)
     }
 
     override fun onPropertyLongClick(m: Module, property: Property) {
-        if (TextUtils.isEmpty(property.url)) {
-            showManual(m.url, property.key)
-        } else {
-            showManual(property.url, property.key)
-        }
+        mCommandDispatcher.onPropertyLongClick(m, property)
     }
 
     override fun onSaveInstanceState() = Bundle().apply {
@@ -2737,16 +3463,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
-    @SuppressLint("CheckResult")
-    private fun saveToTmpFile(): Observable<File> {
-        return Observable.fromCallable {
-            TmpScriptFiles.create(context, temporaryScriptExtensionWithDot()).also {
-                write(it, editor.text)
-                mTmpSavedFileForRunning = it
-            }
-        }.observeOn(Schedulers.io())
-    }
-
     private fun temporaryScriptExtensionWithDot(): String {
         val fileName = uri?.path
             ?.let { File(it).name }
@@ -2765,40 +3481,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mTmpSavedFileForRunning?.deleteOnExit()
     }
 
-    private class CountingInputStream(private val delegate: InputStream, private val counter: AtomicLong) : InputStream() {
-        override fun read(): Int {
-            val r = delegate.read()
-            if (r >= 0) counter.incrementAndGet()
-            return r
-        }
-
-        override fun read(b: ByteArray, off: Int, len: Int): Int {
-            val n = delegate.read(b, off, len)
-            if (n > 0) counter.addAndGet(n.toLong())
-            return n
-        }
-
-        override fun skip(n: Long): Long {
-            val s = delegate.skip(n)
-            if (s > 0) counter.addAndGet(s)
-            return s
-        }
-
-        override fun available(): Int = delegate.available()
-        override fun close() = delegate.close()
-        override fun mark(readlimit: Int) = delegate.mark(readlimit)
-        override fun reset() = delegate.reset()
-        override fun markSupported(): Boolean = delegate.markSupported()
-    }
-
     companion object {
 
-        private const val MIN_CONFIDENCE_TO_WRITE_FILE = 90
-        private val DEFAULT_CHARSET_TO_WRITE_FILE = StandardCharsets.UTF_8
 
-        // Internal storage root (no external SD).
         // zh-CN: 内部存储根目录 (不访问外置 SD).
-        private const val INTERNAL_STORAGE_ROOT = "/storage/emulated/0"
 
         const val EXTRA_PATH = "path"
         const val EXTRA_NAME = "name"
@@ -2806,5 +3492,54 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         const val EXTRA_READ_ONLY = "readOnly"
         const val EXTRA_SAVE_ENABLED = "saveEnabled"
         const val EXTRA_RUN_ENABLED = "runEnabled"
+
+        private const val ACTION_RUN = "editor:run"
+        private const val ACTION_FORCE_STOP = "editor:force_stop"
+        private const val ACTION_SAVE = "editor:save"
+        private const val ACTION_UNDO = "editor:undo"
+        private const val ACTION_REDO = "editor:redo"
+        private const val ACTION_FIND_NEXT = "editor:find_next"
+        private const val ACTION_FIND_PREV = "editor:find_prev"
+        private const val ACTION_CANCEL_SEARCH = "editor:cancel_search"
+        private const val ACTION_FIND_OR_REPLACE = "editor:find_or_replace"
+        private const val ACTION_REPLACE_SELECTION = "editor:replace_selection"
+        private const val ACTION_COPY_SELECTION = "editor:copy_selection"
+        private const val ACTION_COPY_ALL = "editor:copy_all"
+        private const val ACTION_COPY_LINE = "editor:copy_line"
+        private const val ACTION_PASTE = "editor:paste"
+        private const val ACTION_SELECT_ALL = "editor:select_all"
+        private const val ACTION_DELETE_LINE = "editor:delete_line"
+        private const val ACTION_CLEAR = "editor:clear"
+        private const val ACTION_TOGGLE_COMMENT = "editor:toggle_comment"
+        private const val ACTION_BEAUTIFY = "editor:beautify"
+        private const val ACTION_JUMP_TO_LINE = "editor:jump_to_line"
+        private const val ACTION_JUMP_TO_START = "editor:jump_to_start"
+        private const val ACTION_JUMP_TO_END = "editor:jump_to_end"
+        private const val ACTION_JUMP_TO_LINE_START = "editor:jump_to_line_start"
+        private const val ACTION_JUMP_TO_LINE_END = "editor:jump_to_line_end"
+        private const val ACTION_TOGGLE_BREAKPOINT = "editor:toggle_breakpoint"
+        private const val ACTION_DEBUG = "editor:debug"
+        private const val ACTION_REMOVE_ALL_BREAKPOINTS = "editor:remove_all_breakpoints"
+        private const val ACTION_BUILD_APK = "editor:build_apk"
+        private const val ACTION_LOG = "editor:log"
+        private const val ACTION_SETTINGS = "editor:settings"
+        private const val ACTION_CONSOLE = "editor:console"
+        private const val ACTION_IMPORT_JAVA_CLASS = "editor:import_java_class"
+        private const val ACTION_FILE_DETAILS = "editor:file_details"
+        private const val ACTION_READ_ONLY = "editor:read_only"
+        private const val ACTION_COPY_ACE_DIAGNOSTICS = "editor:copy_ace_diagnostics"
+        private const val ACTION_OPEN_BY_OTHER_APPS = "editor:open_by_other_apps"
+        private const val ACTION_VERSION_HISTORY = "editor:version_history"
+        private const val ACTION_EXIT_EDITOR = "editor:exit"
+        private const val ACTION_JUMP_TO_PREVIOUS_CURSOR = "editor:jump_to_previous_cursor"
+
+        private const val PAYLOAD_QUERY = "query"
+        private const val PAYLOAD_REPLACEMENT = "replacement"
+        private const val PAYLOAD_USING_REGEX = "usingRegex"
+        private const val PAYLOAD_REPLACE = "replace"
+        private const val PAYLOAD_REPLACE_ALL = "replaceAll"
+        private const val PAYLOAD_LINE = "line"
+        private const val PAYLOAD_IMPORT_TEXT = "importText"
+        private const val PAYLOAD_PATH = "path"
     }
 }

@@ -80,12 +80,22 @@ open class MaterialListPreference : MaterialDialogPreference {
             mItemKeys.forEachIndexed { index, it -> if (it in disables) mItemDisables += index }
         }
 
+        useEntrySummaryProvider()
+    }
+
+    constructor(context: Context) : this(context, null)
+
+    fun useEntrySummaryProvider() {
         summaryProvider = SummaryProvider<MaterialListPreference> { preference ->
             preference.entry?.takeUnless { TextUtils.isEmpty(it) }
         }
     }
 
-    constructor(context: Context) : this(context, null)
+    fun useStaticSummaryProvider(summaryText: CharSequence?) {
+        summaryProvider = SummaryProvider<MaterialListPreference> {
+            summaryText
+        }
+    }
 
     override fun getBuilder(): MaterialDialog.Builder = super.getBuilder().also { builder ->
         mItemValues.takeIf { it.isNotEmpty() }?.let {

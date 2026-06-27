@@ -10,7 +10,7 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.ui.edit.editor.CodeEditor.CheckedPatternSyntaxException
+import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.DialogFindOrReplaceBinding
 
@@ -114,21 +114,42 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
             if (!mReplaceCheckBox.isChecked) {
                 val ok = mEditorView.tryFind(keywords, usingRegex)
                 if (ok) {
+                    mEditorView.recordAceFindOrReplaceHistory(
+                        keywords = keywords,
+                        replacement = "",
+                        usingRegex = usingRegex,
+                        replace = false,
+                        replaceAll = false,
+                    )
                     dialog.dismiss()
                 }
             } else {
                 val replacement = mReplacementEditText.text.toString()
                 if (mReplaceAllCheckBox.isChecked) {
                     mEditorView.replaceAll(keywords, replacement, usingRegex)
+                    mEditorView.recordAceFindOrReplaceHistory(
+                        keywords = keywords,
+                        replacement = replacement,
+                        usingRegex = usingRegex,
+                        replace = true,
+                        replaceAll = true,
+                    )
                     dialog.dismiss()
                 } else {
                     val ok = mEditorView.tryReplace(keywords, replacement, usingRegex)
                     if (ok) {
+                        mEditorView.recordAceFindOrReplaceHistory(
+                            keywords = keywords,
+                            replacement = replacement,
+                            usingRegex = usingRegex,
+                            replace = true,
+                            replaceAll = false,
+                        )
                         dialog.dismiss()
                     }
                 }
             }
-        } catch (e: CheckedPatternSyntaxException) {
+        } catch (e: EditorSearchSyntaxException) {
             e.printStackTrace()
             mKeywordsEditText.error = getContext().getString(R.string.error_pattern_syntax)
         }
@@ -136,6 +157,17 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
 
     fun setQueryIfNotEmpty(s: String?): FindOrReplaceDialogBuilder {
         if (!TextUtils.isEmpty(s)) mKeywordsEditText.setText(s)
+        return this
+    }
+
+    fun setReplacement(s: String?): FindOrReplaceDialogBuilder {
+        mReplacementEditText.setText(s.orEmpty())
+        return this
+    }
+
+    fun setReplaceMode(replace: Boolean, replaceAll: Boolean): FindOrReplaceDialogBuilder {
+        mReplaceCheckBox.isChecked = replace || replaceAll
+        mReplaceAllCheckBox.isChecked = replaceAll
         return this
     }
 

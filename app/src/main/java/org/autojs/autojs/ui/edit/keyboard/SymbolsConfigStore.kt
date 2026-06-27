@@ -36,6 +36,11 @@ object SymbolsConfigStore {
         val enabled: Boolean = true,
     )
 
+    enum class DefaultSymbolSet {
+        NATIVE,
+        ACE,
+    }
+
     private fun prefs(context: Context): SharedPreferences =
         context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
@@ -66,7 +71,15 @@ object SymbolsConfigStore {
         return profiles.keys().asSequence().toList().sorted()
     }
 
-    fun loadProfile(context: Context, name: String): List<SymbolItem> {
+    fun loadProfile(
+        context: Context,
+        name: String,
+        defaultSymbolSet: DefaultSymbolSet = DefaultSymbolSet.NATIVE,
+    ): List<SymbolItem> {
+        if (name == PROFILE_DEFAULT_ID && defaultSymbolSet == DefaultSymbolSet.ACE) {
+            return defaultAceSymbols()
+        }
+
         val root = readRootOrCreate(context)
         val profiles = root.optJSONObject("profiles") ?: JSONObject()
         val arr = profiles.optJSONArray(name) ?: return emptyList()
@@ -111,11 +124,14 @@ object SymbolsConfigStore {
         }
     }
 
-    fun getEnabledSymbolsForActiveProfile(context: Context): List<String> {
+    fun getEnabledSymbolsForActiveProfile(
+        context: Context,
+        defaultSymbolSet: DefaultSymbolSet = DefaultSymbolSet.NATIVE,
+    ): List<String> {
         ensureDefaultProfileExists(context)
 
         val active = getActiveProfileName(context)
-        val items = loadProfile(context, active)
+        val items = loadProfile(context, active, defaultSymbolSet)
         val enabled = items.filter { it.enabled }.map { it.text }
 
         return enabled
@@ -153,8 +169,12 @@ object SymbolsConfigStore {
      *   "items": [ {"t":"...", "e":true}, ... ]
      * }
      */
-    fun exportProfileToJson(context: Context, name: String): JSONObject {
-        val items = loadProfile(context, name)
+    fun exportProfileToJson(
+        context: Context,
+        name: String,
+        defaultSymbolSet: DefaultSymbolSet = DefaultSymbolSet.NATIVE,
+    ): JSONObject {
+        val items = loadProfile(context, name, defaultSymbolSet)
         val arr = JSONArray()
         items.forEach { item ->
             if (!isValidSymbolText(item.text)) return@forEach
@@ -267,6 +287,16 @@ object SymbolsConfigStore {
     private fun persistRoot(context: Context, root: JSONObject) {
         prefs(context).edit { putString(KEY_PROFILES_JSON, root.toString()) }
     }
+
+    private fun defaultAceSymbols(): List<SymbolItem> = listOf(
+        "(", ")", "/", "=", ",", ";", "\"", "'", "{", "}", "[", "]", "`",
+        "<", ">", "-", "+", "|", ":", ".", "_", "*", "%", "\\", "#", "$", "&", "!", "?", "^", "@",
+        "×", "÷", "∈", "∩", "∪", "∉", "⊙", "∅", "¥", "€",
+        "°", "℃", "∵", "∴", "±", "≠", "≈",
+        "α", "β", "γ", "λ", "μ", "π", "σ", "ω",
+        "®", "©", "♂", "♀", "√", "×", "✔", "✘",
+        "♥", "♠", "♦", "♣", "★", "◀", "▶", "●", "■", "▲", "◆",
+    ).map { SymbolItem(it, true) }
 
     private fun defaultSymbols(): List<SymbolItem> = listOf(
         ",", ".", "=", ";", "\"", "'", "/", "-", "_",

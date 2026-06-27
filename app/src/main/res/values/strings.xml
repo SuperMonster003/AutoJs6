@@ -13,18 +13,34 @@
     <!-- Forcibly use LeakCanary to detect memory leaks. -->
     <string name="leak_canary_test_class_name" translatable="false">assertk.Assert</string>
 
-    <string name="app_name" translatable="false">AutoJs6</string>
+    <string name="app_name" translatable="false">AutoJs6 ACE</string>
     <string name="app_name_qq" translatable="false">QQ</string>
+    <string name="text_ace_editor_debug">Ace editor debug</string>
+    <string name="text_ace_editor_debug_description">Open an isolated Ace WebView editor test page</string>
+    <string name="text_ace_editor_debug_status">%1$s | lines %2$d | cursor %3$d:%4$d | breakpoints %5$d | dirty %6$s</string>
+    <string name="text_ace_editor_debug_status_loading">Loading Ace editor...</string>
+    <string name="text_ace_editor_debug_text_length">Ace text length: %1$d</string>
+    <string name="text_ace_diagnostics_copied">Ace diagnostics copied to clipboard</string>
+    <string name="text_ace_get_text">Get text</string>
+    <string name="text_ace_ime_stress">IME stress</string>
+    <string name="text_ace_ime_stress_done">IME stress finished: %1$d cycles</string>
+    <string name="text_ace_ime_stress_running">IME stress: %1$d/%2$d</string>
+    <string name="text_ace_insert">Insert</string>
+    <string name="text_ace_set_sample">Set sample</string>
     <string name="color_library_identifier_android_colors" translatable="false">Android</string>
     <string name="color_library_identifier_css_colors" translatable="false">CSS</string>
     <string name="color_library_identifier_web_colors" translatable="false">WEB</string>
     <string name="com_twofortyfouram_log_tag" tools:ignore="ResourceName" translatable="false" />
     <string name="default_build_apk_version_code" translatable="false">1</string>
     <string name="default_build_apk_version_name" translatable="false">1.0.0</string>
+    <string name="default_key_ace_editor_font" translatable="false">@string/key_ace_editor_font_jetbrains_mono</string>
     <string name="default_key_app_language" translatable="false">@string/key_app_language_auto</string>
     <string name="default_key_documentation_source" translatable="false">@string/key_documentation_source_local</string>
+    <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_ace</string>
+    <string name="default_key_editor_gutter_width_mode" translatable="false">@string/key_editor_gutter_width_mode_dynamic</string>
     <string name="default_key_editor_log_button_behavior" translatable="false">@string/key_editor_log_button_behavior_bottom_sheet</string>
     <string name="default_key_editor_pinch_to_zoom_strategy" translatable="false">@string/key_editor_pinch_to_zoom_change_text_size</string>
+    <string name="default_key_editor_word_wrap_indent_style" translatable="false">@string/key_editor_word_wrap_indent_style_continuation</string>
     <string name="default_key_file_extensions" translatable="false">@string/key_file_extensions_show_all_but_executable</string>
     <string name="default_key_hidden_files" translatable="false">@string/key_hidden_files_not_show</string>
     <string name="default_key_keep_screen_on_when_in_foreground" translatable="false">@string/key_keep_screen_on_when_in_foreground_disabled</string>
@@ -59,6 +75,18 @@
     <string name="id_launcher_shortcut_plugin_center" translatable="false">shortcut_$_plugin_center</string>
     <string name="id_launcher_shortcut_settings" translatable="false">shortcut_$_settings</string>
     <string name="key_a11y_service" translatable="false">key_$_a11y_service</string>
+    <string name="key_ace_editor_font" translatable="false">key_$_ace_editor_font</string>
+    <string name="key_ace_editor_font_jetbrains_mono" translatable="false">jetbrains_mono</string>
+    <string name="key_ace_editor_font_source_code_pro" translatable="false">source_code_pro</string>
+    <string name="key_ace_editor_font_system_monospace" translatable="false">system_monospace</string>
+    <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
+    <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
+    <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
+    <string name="key_editor_breakpoint_markers_enabled" translatable="false">key_$_editor_breakpoint_markers_enabled</string>
+    <string name="key_editor_fold_markers_enabled" translatable="false">key_$_editor_fold_markers_enabled</string>
+    <string name="key_editor_word_wrap_indent_style" translatable="false">key_$_editor_word_wrap_indent_style</string>
+    <string name="key_editor_word_wrap_indent_style_classic" translatable="false">classic</string>
+    <string name="key_editor_word_wrap_indent_style_continuation" translatable="false">continuation</string>
     <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
     <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
@@ -105,6 +133,13 @@
     <string name="key_editor_pinch_to_zoom_disable" translatable="false">key_$_editor_pinch_to_zoom_disable</string>
     <string name="key_editor_pinch_to_zoom_scale_view" translatable="false">key_$_editor_pinch_to_zoom_scale_view</string>
     <string name="key_editor_pinch_to_zoom_strategy" translatable="false">key_$_editor_pinch_to_zoom_strategy</string>
+    <string name="key_editor_engine" translatable="false">key_$_editor_engine</string>
+    <string name="key_editor_engine_ace" translatable="false">ace</string>
+    <string name="key_editor_engine_native" translatable="false">native</string>
+    <string name="key_editor_gutter_width_mode" translatable="false">key_$_editor_gutter_width_mode</string>
+    <string name="key_editor_gutter_width_mode_dynamic" translatable="false">dynamic</string>
+    <string name="key_editor_gutter_width_mode_fixed" translatable="false">fixed</string>
+    <string name="key_editor_shortcut_input_bar" translatable="false">key_$_editor_shortcut_input_bar</string>
     <string name="key_editor_text_size" translatable="false">key_$_editor_text_size</string>
     <string name="key_editor_theme" translatable="false">key_$_editor_theme</string>
     <string name="key_enable_a11y_service_with_root_access" translatable="false">key_$_enable_a11y_service_with_root_access</string>
@@ -476,6 +511,15 @@
     <string name="entry_editor_pinch_to_zoom_change_text_size">Change text size</string>
     <string name="entry_editor_pinch_to_zoom_disable">Disable</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">Scale view</string>
+    <string name="entry_editor_engine_ace">Ace</string>
+    <string name="entry_editor_engine_native">JsDroidEditor</string>
+    <string name="entry_editor_gutter_width_mode_dynamic">Dynamic</string>
+    <string name="entry_editor_gutter_width_mode_fixed">Fixed</string>
+    <string name="entry_editor_word_wrap_indent_style_classic">Flush continuation</string>
+    <string name="entry_editor_word_wrap_indent_style_continuation">Continuation indent</string>
+    <string name="entry_ace_editor_font_jetbrains_mono">JetBrains Mono</string>
+    <string name="entry_ace_editor_font_source_code_pro">Source Code Pro</string>
+    <string name="entry_ace_editor_font_system_monospace">System monospace</string>
     <string name="entry_file_extensions_not_show">Hide all file extensions</string>
     <string name="entry_file_extensions_show_all">Show all file extensions</string>
     <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
@@ -657,6 +701,7 @@
     <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Current file path is unknown, unable to display file details</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Current file path is unknown, unable to display version history</string>
+    <string name="error_ace_editor_unavailable">Ace editor is unavailable; JsDroidEditor is still active</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Current file path is unknown, unable to open with other apps</string>
     <string name="error_unable_to_package_application_as_current_file_path_is_unknown">Current file path is unknown, unable to package application</string>
     <string name="error_unable_to_save_file_as_current_file_path_is_unknown">Current file path is unknown, unable to save file</string>
@@ -877,6 +922,8 @@
     <string name="text_app_version_code">App version code</string>
     <string name="text_app_version_name">App version name</string>
     <string name="text_appearance">Appearance</string>
+    <string name="text_general">General</string>
+    <string name="text_all_settings">All settings</string>
     <string name="text_applying_binary_resources">Applying binary resources</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">At least one field from [Full Name, Organization Name, Organizational Unit, Country Code, State or Province, City or Locality, Street] must be filled</string>
     <string name="text_attribute">Attribute</string>
@@ -994,6 +1041,7 @@
     <string name="text_content">Content</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copy</string>
+    <string name="text_copy_ace_diagnostics">Copy Ace diagnostics</string>
     <string name="text_copy_all">Copy all</string>
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
     <string name="text_copy_command">Copy cmd</string>
@@ -1105,6 +1153,36 @@
     <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">Enable large file mode only for files larger than %1$s</string>
     <string name="text_editor_log_button_behavior">Editor log button behavior</string>
     <string name="text_editor_theme">Editor theme</string>
+    <string name="text_ace_editor_font">Editor font</string>
+    <string name="text_ace_editor_font_changed" formatted="true">Editor font switched to %s</string>
+    <string name="text_ace_read_only_mode">Read-only mode</string>
+    <string name="text_ace_read_only_mode_enabled">Read-only mode enabled</string>
+    <string name="text_ace_read_only_mode_disabled">Read-only mode disabled</string>
+    <string name="text_ace_line_numbers_enabled">Line numbers</string>
+    <string name="text_editor_breakpoint_markers_enabled">Breakpoint markers</string>
+    <string name="text_editor_fold_markers_enabled">Code folding markers</string>
+    <string name="text_ace_action_favorites">Action favorites</string>
+    <string name="text_ace_action_history_empty">No editor action history</string>
+    <string name="text_ace_action_pin">Pin</string>
+    <string name="text_ace_action_pinned">Pinned</string>
+    <string name="text_ace_action_unpin">Unpin</string>
+    <string name="text_ace_action_clear_confirm">Clear all editor action history?</string>
+    <string name="text_ace_action_delete_confirm" formatted="true">Delete \"%1$s\" from editor action history?</string>
+    <string name="text_ace_no_last_action">No last editor action</string>
+    <string name="text_set_editor_setting_action" formatted="true">Set %1$s</string>
+    <string name="text_editor_engine">Editor engine</string>
+    <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
+    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">Ace editor failed (%1$s); switched to JsDroidEditor. Copy Ace diagnostics from the More menu for details</string>
+    <string name="text_ace_large_file_uses_native_editor">Ace editor is routed to JsDroidEditor by the active fallback policy</string>
+    <string name="text_ace_word_wrap_enabled">Word wrap</string>
+    <string name="text_editor_gutter_width_mode">Gutter width</string>
+    <string name="text_editor_word_wrap_indent_style">Wrap indentation</string>
+
+    <plurals name="text_ace_action_used_times">
+        <item quantity="one">Used %1$d time</item>
+        <item quantity="other">Used %1$d times</item>
+    </plurals>
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>
     <string name="text_email_format_error">Invalid e-mail format</string>
@@ -1262,6 +1340,7 @@
     <string name="text_jump_to_line">Jump to line</string>
     <string name="text_jump_to_line_end">Jump to line end</string>
     <string name="text_jump_to_line_start">Jump to line start</string>
+    <string name="text_jump_to_previous_cursor">Jump to previous cursor</string>
     <string name="text_jump_to_start">Jump to start</string>
     <string name="text_keep_screen_on_when_in_foreground">Keep screen on when in foreground</string>
     <string name="text_key_alias">Alias</string>
@@ -1848,4 +1927,29 @@
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
+    <string name="text_code_editor_settings">Code editor settings</string>
+    <string name="text_editor_assistance">Assistance</string>
+    <string name="text_editor_gestures">Gestures</string>
+    <string name="text_editor_gutter_markers">Gutter markers</string>
+    <string name="text_editor_shortcut_input_bar">Shortcut input bar</string>
+    <string name="summary_code_editor_settings">Open the full code editor settings page.</string>
+    <string name="summary_editor_shortcut_input_bar">Configure shortcut input symbols shared by editor engines.</string>
+    <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter.</string>
+    <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter.</string>
+    <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter.</string>
+    <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine.</string>
+    <string name="summary_ace_lsp_enabled">Enable experimental LSP configuration; static completion remains the fallback.</string>
+    <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport.</string>
+    <string name="summary_editor_gutter_width_mode">Choose whether the gutter follows visible line digits or keeps a stable session width.</string>
+    <string name="summary_editor_word_wrap_indent_style">Choose how wrapped visual continuation lines are indented.</string>
+    <string name="text_ace_lsp_enabled">LSP smart completion (experimental)</string>
+    <string name="description_editor_engine_preference">Ace is the default editor engine. JsDroidEditor remains available as a fallback and can be selected explicitly.</string>
+    <string name="description_ace_editor_font_preference">Choose the editor font. JetBrains Mono is the default; Source Code Pro and system monospace are available fallbacks.</string>
+    <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
+    <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
+    <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>
+    <string name="description_ace_lsp_enabled_preference">Experimental LSP support is off by default. The current build only exposes bridge options; if no LSP server is available, the editor keeps using static completion.</string>
+    <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
+    <string name="description_editor_gutter_width_mode_preference">Dynamic width follows currently visible line-number digits. Fixed width preallocates a stable minimum and grows only when larger visible line numbers require it.</string>
+    <string name="description_editor_word_wrap_indent_style_preference">Continuation indent keeps wrapped visual lines aligned with the original indentation. Flush continuation starts wrapped visual lines at the viewport edge.</string>
 </resources>

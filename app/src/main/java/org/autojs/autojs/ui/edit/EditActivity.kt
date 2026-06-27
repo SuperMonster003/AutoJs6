@@ -22,18 +22,15 @@ import androidx.core.view.get
 import androidx.core.view.size
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.app.OnActivityResultDelegate
 import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
 import org.autojs.autojs.core.permission.OnRequestPermissionsResultCallback
 import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
-import org.autojs.autojs.pio.PFiles
-import org.autojs.autojs.storage.file.StableDraftFileHelper
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.ui.edit.editor.service.EditorDraftService
 import org.autojs.autojs.ui.error.ErrorDialogActivity
 import org.autojs.autojs.ui.log.LogBottomSheet
 import org.autojs.autojs.ui.main.MainActivity
@@ -90,7 +87,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     private val mRequestPermissionCallbacks = RequestPermissionCallbacks()
     private var mNewTask = false
 
-    private lateinit var draftFileHelper: StableDraftFileHelper
+    private lateinit var draftService: EditorDraftService
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,6 +110,19 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
             mEditorMenu = it
         }
 
+        // Use a stable key from intent instead of editorView.uri (which is not set yet here).
+        // zh-CN: 使用 intent 中的稳定 key, 避免此处 editorView.uri 尚未赋值导致 key 为 null.
+        val draftKeyPath = intent.getStringExtra(EditorView.EXTRA_PATH) ?: intent.data?.path
+
+        draftService = EditorDraftService(
+            context = this,
+            draftKeyPath = draftKeyPath,
+            currentEditor = { mEditorView.editor },
+            shouldSaveDraft = { mEditorView.isTextChanged || mEditorView.saveStickyDirty },
+            restoreDraftText = { draftText -> mEditorView.restoreDraftTextForThisSession(draftText) },
+            log = { message -> Log.d(LOG_TAG, message) },
+        )
+
         // Restore draft as early as possible to avoid being overwritten by async file loading.
         // We intentionally do this in onCreate(), not in onRestoreInstanceState(),
         // because handleIntent() may start async loading and call setInitialText() later.
@@ -121,25 +131,8 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         // 尽可能早地恢复草稿, 避免被异步文件加载覆盖.
         // 我们刻意在 onCreate() 中恢复, 而不是在 onRestoreInstanceState() 中恢复,
         // 因为 handleIntent() 可能启动异步加载并在稍后调用 setInitialText().
-        savedInstanceState?.getString("text")?.let { draftText ->
-            mEditorView.restoreDraftTextForThisSession(draftText)
-        } ?: savedInstanceState?.getString("path")?.let { path ->
-            Observable.just(path)
-                .observeOn(Schedulers.io())
-                .map { PFiles.read(it) }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ draftText ->
-                    mEditorView.restoreDraftTextForThisSession(draftText)
-                }, Throwable::printStackTrace)
-        }
+        draftService.restoreDraftForThisSession(savedInstanceState)
 
-        // Use a stable key from intent instead of editorView.uri (which is not set yet here).
-        // zh-CN: 使用 intent 中的稳定 key, 避免此处 editorView.uri 尚未赋值导致 key 为 null.
-        val draftKeyPath = intent.getStringExtra(EditorView.EXTRA_PATH) ?: intent.data?.path
-
-        StableDraftFileHelper(this, draftKeyPath).also {
-            draftFileHelper = it
-        }
         (intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0).also {
             mNewTask = it
         }
@@ -196,13 +189,10 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                         // Jump to the line in editor
                         try {
                             val editor = mEditorView.editor
-                            val layout = editor.codeEditText.layout
-                            if (lineNumber >= 0 && lineNumber < layout.lineCount) {
-                                val lineStart = layout.getLineStart(lineNumber)
+                            if (lineNumber >= 0 && lineNumber < editor.lineCountSnapshot) {
                                 val column = if (columnNumber > 0) columnNumber else 0
-                                val offset = minOf(lineStart + column, layout.getLineEnd(lineNumber) - 1)
-                                editor.codeEditText.setSelection(offset)
-                                editor.codeEditText.requestFocus()
+                                editor.jumpTo(lineNumber, column)
+                                editor.requestEditorFocus()
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -371,10 +361,12 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         val menu = mode.menu
         val item = menu[menu.size - 1]
 
-        if (!mReadOnly) {
+        if (!mReadOnly && !mEditorView.isReadOnly() && menu.findItem(R.id.action_delete_line) == null) {
             addMenuItem(menu, item.groupId, R.id.action_delete_line, 10000, R.string.text_delete_line) { mEditorMenu.deleteLine() }
         }
-        addMenuItem(menu, item.groupId, R.id.action_copy_line, 20000, R.string.text_copy_line) { mEditorMenu.copyLine() }
+        if (menu.findItem(R.id.action_copy_line) == null) {
+            addMenuItem(menu, item.groupId, R.id.action_copy_line, 20000, R.string.text_copy_line) { mEditorMenu.copyLine() }
+        }
 
         super.onActionModeStarted(mode)
     }
@@ -457,7 +449,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                         .subscribe({
                             // Save succeeded: remove draft for this file.
                             // zh-CN: 保存成功: 删除该文件对应草稿.
-                            draftFileHelper.deleteDraft()
+                            draftService.deleteDraft()
 
                             runCatching { d.dismiss() }
                             finishAndRemoveFromRecents()
@@ -505,28 +497,11 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         // zh-CN:
         // 当内容相对基线确实发生变化, 或 UI 表示 "需要保存" 时, 保存草稿.
         // 这能使状态恢复不再受 sticky/menu 状态偶发异常的影响.
-        val needDraft = mEditorView.isTextChanged || mEditorView.saveStickyDirty
-        if (!needDraft) {
+        if (!draftService.saveDraftToInstanceState(outState)) {
             super.onSaveInstanceState(outState)
             return
         }
 
-        val text = mEditorView.editor.text
-        when {
-            text.length < 256 * 1024 -> {
-                Log.d(LOG_TAG, "saveDraftText, length: ${text.length}")
-                outState.putString("text", text)
-            }
-            else -> {
-                Log.d(LOG_TAG, "saveDraftFile, length: ${text.length}")
-
-                // Use stable file key (real script path) to avoid accumulating tmp files.
-                // zh-CN: 使用稳定 key (脚本真实 path) 避免累计 tmp 文件.
-                draftFileHelper.saveDraft(text)?.let { tmp ->
-                    outState.putString("path", tmp.path)
-                }
-            }
-        }
         super.onSaveInstanceState(outState)
     }
 

@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autojs6.local/schemas/autojs6_indices.schema.json",
+  "title": "AutoJs6 ACE completion source",
+  "type": "object",
+  "required": [
+    "version",
+    "modules",
+    "globals",
+    "variables",
+    "globalMembers",
+    "snippets"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "modules": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/module"
+      }
+    },
+    "globals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+      },
+      "uniqueItems": true
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+      },
+      "uniqueItems": true
+    },
+    "globalMembers": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "const": "*"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+            },
+            "uniqueItems": true
+          }
+        ]
+      }
+    },
+    "snippets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/snippet"
+      }
+    }
+  },
+  "$defs": {
+    "module": {
+      "type": "object",
+      "required": [
+        "doc",
+        "members"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "doc": {
+          "type": "string"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+              },
+              {
+                "$ref": "#/$defs/member"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "member": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "function",
+            "member",
+            "module",
+            "variable"
+          ]
+        },
+        "doc": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "snippet": {
+      "type": "object",
+      "required": [
+        "name",
+        "snippet"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "snippet": {
+          "type": "string"
+        },
+        "meta": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

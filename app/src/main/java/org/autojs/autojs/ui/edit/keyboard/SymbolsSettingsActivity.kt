@@ -26,6 +26,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
+import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
@@ -93,6 +95,12 @@ class SymbolsSettingsActivity : BaseActivity() {
     // Guard flag to avoid handling spinner callback when we programmatically change selection.
     // zh-CN: 防护标记, 避免代码设置 spinner 选中项时触发回调逻辑.
     private var suppressSpinnerCallback: Boolean = false
+
+    private val defaultSymbolSet: SymbolsConfigStore.DefaultSymbolSet
+        get() = when (EditorEnginePreferences.get()) {
+            EditorEngineType.ACE -> SymbolsConfigStore.DefaultSymbolSet.ACE
+            EditorEngineType.NATIVE -> SymbolsConfigStore.DefaultSymbolSet.NATIVE
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -379,11 +387,15 @@ class SymbolsSettingsActivity : BaseActivity() {
         }
     }
 
+    private fun loadProfileForCurrentEngine(name: String): List<SymbolsConfigStore.SymbolItem> {
+        return SymbolsConfigStore.loadProfile(this, name, defaultSymbolSet)
+    }
+
     private fun switchToProfile(name: String) {
         currentProfileName = name
         SymbolsConfigStore.setActiveProfileName(this, name)
 
-        val loaded = SymbolsConfigStore.loadProfile(this, name)
+        val loaded = loadProfileForCurrentEngine(name)
 
         items.clear()
         items.addAll(loaded)
@@ -774,7 +786,7 @@ class SymbolsSettingsActivity : BaseActivity() {
                         return@input
                     }
 
-                    val oldItems = SymbolsConfigStore.loadProfile(this, oldName)
+                    val oldItems = loadProfileForCurrentEngine(oldName)
                     SymbolsConfigStore.saveProfile(this, newName, oldItems)
                     SymbolsConfigStore.deleteProfile(this, oldName)
                     SymbolsConfigStore.setActiveProfileName(this, newName)
@@ -814,12 +826,12 @@ class SymbolsSettingsActivity : BaseActivity() {
                     // zh-CN: 重要: 若基于 "空白配置", 则必须保持空白.
                     val baseItems = when (which) {
                         0 -> emptyList()
-                        1 -> SymbolsConfigStore.loadProfile(this, SymbolsConfigStore.PROFILE_DEFAULT_ID)
+                        1 -> loadProfileForCurrentEngine(SymbolsConfigStore.PROFILE_DEFAULT_ID)
                         2 -> items.toList()
                         else -> {
                             val idx = which - 3
                             val name = libraryProfiles.getOrNull(idx) ?: return@itemsCallbackSingleChoice false
-                            SymbolsConfigStore.loadProfile(this, name)
+                            loadProfileForCurrentEngine(name)
                         }
                     }
 
@@ -1180,7 +1192,7 @@ class SymbolsSettingsActivity : BaseActivity() {
 
     private fun doExportToUri(uri: Uri) {
         runCatching {
-            val json = SymbolsConfigStore.exportProfileToJson(this, currentProfileName)
+            val json = SymbolsConfigStore.exportProfileToJson(this, currentProfileName, defaultSymbolSet)
             contentResolver.openOutputStream(uri, "wt")?.use { out ->
                 out.write(json.toString(2).toByteArray(StandardCharsets.UTF_8))
                 out.flush()

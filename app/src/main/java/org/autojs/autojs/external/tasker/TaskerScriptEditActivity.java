@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.edit.EditorView;
-import org.autojs.autojs.ui.edit.editor.CodeEditor;
 import org.autojs.autojs.util.Observers;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.databinding.ActivityTaskerScriptEditBinding;
@@ -65,8 +64,7 @@ public class TaskerScriptEditActivity extends BaseActivity {
 
     @Override
     public void finish() {
-        CodeEditor editor = mEditorView.editor;
-        setResult(RESULT_OK, new Intent().putExtra(EXTRA_CONTENT, editor.getText()));
+        setResult(RESULT_OK, new Intent().putExtra(EXTRA_CONTENT, mEditorView.editor.getText()));
         TaskerScriptEditActivity.super.finish();
     }
 

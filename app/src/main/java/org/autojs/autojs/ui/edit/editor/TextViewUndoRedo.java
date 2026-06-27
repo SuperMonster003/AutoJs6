@@ -132,6 +132,12 @@ public class TextViewUndoRedo {
         mInitialHistoryPosition = mEditHistory.mmPosition;
     }
 
+    public void markTextAsChanged() {
+        if (mInitialHistoryPosition == mEditHistory.mmPosition) {
+            mInitialHistoryPosition = mEditHistory.mmPosition - 1;
+        }
+    }
+
     // =================================================================== //
 
     /**

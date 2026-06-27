@@ -23,7 +23,10 @@ import org.autojs.autojs.ui.edit.debug.CodeEvaluator;
 import org.autojs.autojs.ui.edit.debug.DebugBar;
 import org.autojs.autojs.ui.edit.debug.DebuggerSingleton;
 import org.autojs.autojs.ui.edit.debug.WatchingVariable;
-import org.autojs.autojs.ui.edit.editor.CodeEditor;
+import org.autojs.autojs.ui.edit.editor.engine.EditorBreakpoint;
+import org.autojs.autojs.ui.edit.editor.engine.EditorBreakpointChangeListener;
+import org.autojs.autojs.ui.edit.editor.engine.EditorCursorChangeListener;
+import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.FragmentDebugToolbarBinding;
@@ -45,7 +48,7 @@ import java.util.List;
 //  #     at org.mozilla.javascript.Kit.codeBug(Kit.java:353)
 //  #     at org.autojs.autojs.rhino.debug.Dim.interrupted(Dim.java:806)
 //  #     ... ...
-public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBinding> implements DebugCallback, CodeEditor.CursorChangeCallback, CodeEvaluator {
+public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBinding> implements DebugCallback, EditorCursorChangeListener, CodeEvaluator {
 
     private static final String LOG_TAG = "DebugToolbarFragment";
     private EditorView mEditorView;
@@ -62,7 +65,7 @@ public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBi
             updateWatchingVariables(positionStart, positionStart + itemCount);
         }
     };
-    private final CodeEditor.BreakpointChangeListener mBreakpointChangeListener = new CodeEditor.BreakpointChangeListener() {
+    private final EditorBreakpointChangeListener mBreakpointChangeListener = new EditorBreakpointChangeListener() {
         @Override
         public void onBreakpointChange(int line, boolean enabled) {
             if (mDebugger != null) {
@@ -121,10 +124,10 @@ public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBi
     }
 
     private void setupEditor() {
-        CodeEditor editor = mEditorView.editor;
+        ScriptEditorEngine editor = mEditorView.editor;
         editor.setRedoUndoEnabled(false);
         editor.addCursorChangeCallback(this);
-        editor.setBreakpointChangeListener(mBreakpointChangeListener);
+        mEditorView.getBreakpointModelStore().setChangeListener(mBreakpointChangeListener);
         DebugBar debugBar = mEditorView.debugBar;
         debugBar.registerVariableChangeObserver(mVariableChangeObserver);
         debugBar.setCodeEvaluator(this);
@@ -149,7 +152,7 @@ public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBi
         if (mEditorView == null) {
             return;
         }
-        CodeEditor editor = mEditorView.editor;
+        ScriptEditorEngine editor = mEditorView.editor;
         if (!TextUtils.equals(mInitialEditorSourceUrl, mCurrentEditorSourceUrl)) {
             editor.setText(mInitialEditorSource);
         }
@@ -188,10 +191,10 @@ public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBi
     public void updateSourceText(Dim.SourceInfo sourceInfo) {
         Log.d(LOG_TAG, "updateSourceText: url = " + sourceInfo.url());
         sourceInfo.removeAllBreakpoints();
-        for (CodeEditor.Breakpoint breakpoint : mEditorView.editor.getBreakpoints().values()) {
-            int line = breakpoint.line + 1;
+        for (EditorBreakpoint breakpoint : mEditorView.getBreakpointModelStore().getBreakpoints()) {
+            int line = breakpoint.getLine() + 1;
             if (sourceInfo.breakableLine(line)) {
-                sourceInfo.breakpoint(line, breakpoint.enabled);
+                sourceInfo.breakpoint(line, breakpoint.getEnabled());
                 Log.d(LOG_TAG, "not breakable: " + line);
             }
         }
@@ -308,9 +311,9 @@ public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBi
     public void onDestroy() {
         super.onDestroy();
         if (mEditorView != null) {
-            CodeEditor editor = mEditorView.editor;
+            ScriptEditorEngine editor = mEditorView.editor;
             editor.removeCursorChangeCallback(this);
-            editor.setBreakpointChangeListener(null);
+            mEditorView.getBreakpointModelStore().clearChangeListener();
             DebugBar debugBar = mEditorView.debugBar;
             debugBar.unregisterVariableChangeObserver(mVariableChangeObserver);
         }

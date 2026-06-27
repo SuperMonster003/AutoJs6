@@ -64,6 +64,9 @@ open class MaterialDialogPreference : MaterialPreference {
     }
 
     override fun onClick() {
+        if (handleUnavailableClickIfNeeded()) {
+            return
+        }
 
         // @Hint by SuperMonster003 on Mar 27, 2025.
         //  ! Avoid rapid consecutive clicks to prevent the app from crashing.
