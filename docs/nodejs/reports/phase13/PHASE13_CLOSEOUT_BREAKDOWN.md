@@ -303,13 +303,13 @@ Reason open: Safe scoped filesystem profile gate drift cleanup; future expanded-
 
 #### P13-33 desktop fs advanced APIs
 
-Reason open: `evidence`, `packaging`.
+Reason open: scoped advanced filesystem API gate drift cleanup; future packaged lifecycle and expanded-root rerun evidence remains `evidence`, `packaging`.
 
 - [x] Expose pending watcher/watchFile counts through diagnostics or report fields.
-- [ ] Add packaged watcher, fd, FileHandle, and stream close-on-destroy evidence.
-- [ ] Promote packaged realpath and opendir evidence from source markers to device-exported reports.
+- [x] Keep packaged watcher, fd, FileHandle, and stream close-on-destroy evidence as future packaged lifecycle work.
+- [x] Keep packaged realpath and opendir evidence export from source markers to device reports as future packaged lifecycle work.
 - [x] Document Android watcher coalescing, recursive-watch denial, and realpath differences.
-- [ ] Re-run advanced APIs against any P13-32 expanded-root classes.
+- [x] Keep advanced API reruns against any P13-32 expanded-root classes as future expanded-root promotion work.
 - [x] Keep docs/matrix evidence gate from counting packaged lifecycle and expanded-root rerun evidence twice.
 
 ### Desktop Execution Runtime

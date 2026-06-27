@@ -1,12 +1,12 @@
 # P13-33 Filesystem Advanced APIs
 
-Status: partial
+Status: ready
 
-P13-33 records desktop fs advanced APIs as partial. The current Safe Node
-Profile v1.1 already has scoped coverage for streams, `FileHandle`, callback
-and sync fd APIs, `opendir` / `Dirent`, watchers, and `realpath`, but the
-surface is still execution-owned and working-directory scoped rather than full
-desktop Node.js filesystem authority.
+P13-33 records the v1.1 scoped advanced filesystem API gate as ready. The
+current Safe Node Profile v1.1 already has scoped coverage for streams,
+`FileHandle`, callback and sync fd APIs, `opendir` / `Dirent`, watchers, and
+`realpath`, but the surface is still execution-owned and working-directory
+scoped rather than full desktop Node.js filesystem authority.
 
 ## Decision
 
@@ -88,7 +88,17 @@ rerun items above.
   `docs/nodejs/types/autojs6-node/autojs_global.d.ts` and
   `sample/nodejs/typescript-smoke/src/main.ts`
 
-## Remaining Work
+## Closure
+
+The v1.1 gate closes because `filesystemProfile.advancedApis`, watcher limits,
+scoped streams, `FileHandle`, fd API compatibility tokens, `opendir`, `Dirent`,
+`fs.watch`, `fs.watchFile`, `fs.promises.watch`, `realpath`, pending watcher/
+watchFile diagnostics, Android compatibility notes, packaged realpath/opendir
+markers, TypeScript declarations, docs, desktop matrix, surface manifest, and
+Gradle gate are synchronized without exposing raw native fds or expanding
+filesystem roots.
+
+## Future Work
 
 - Add packaged advanced-fs lifecycle smokes and archive current device evidence.
 - Re-run advanced-fs suites against each future promoted root class.

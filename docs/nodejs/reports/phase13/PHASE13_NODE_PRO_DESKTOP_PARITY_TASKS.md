@@ -247,9 +247,9 @@
   `/sdcard` expansion, grant persistence/revocation diagnostics, packaged
   expanded-root smoke, and per-root symlink/realpath/sensitive-path audit.
 
-## P13-33 Partial Landing Note
+## P13-33 Scoped Advanced Filesystem Note
 
-- P13-33 partial desktop fs advanced API gate records scoped streams,
+- P13-33 v1.1 scoped advanced filesystem API gate records scoped streams,
   `FileHandle`, fd APIs, `opendir`, watchers, and `realpath` as current partial
   evidence without expanding roots or exposing raw native fds.
 - Host verifier: `tools/nodejs/phase13/verify-filesystem-advanced-apis.js`.
@@ -258,9 +258,9 @@
 - Surface manifest evidence: `phase13-filesystem-advanced-apis`.
 - Android compatibility notes now document watcher coalescing,
   recursive-watch denial, and realpath differences.
-- Remaining P13-33 blockers: packaged watcher/fd/FileHandle/stream lifecycle
-  smoke, pending watcher/watchFile Kotlin diagnostics, expanded-root reruns,
-  and final full desktop fs semantics.
+- Future P13-33 packaged/expanded-root work: packaged watcher/fd/FileHandle/
+  stream lifecycle smoke, device-exported packaged realpath/opendir evidence,
+  expanded-root reruns, and final full desktop fs semantics.
 
 ## P13-34 Partial Landing Note
 
@@ -1354,7 +1354,7 @@ P13 task 本身使用以下执行状态：
       metadata, grant persistence/revocation diagnostics, packaged
       expanded-root smoke, and per-root symlink/realpath/sensitive-path audits.
 
-- [ ] P13-33: 推进 desktop fs advanced APIs。
+- [x] P13-33: 推进 desktop fs advanced APIs。
   - 范围：`fs.watch`、`fs.opendir`、FileHandle、fd API、stream、realpath 等。
   - 验收：
     - watcher 数量、fd 数量、close-on-destroy、packaged behavior 完整。
@@ -1370,6 +1370,17 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_33_FILESYSTEM_ADVANCED_APIS.md`。
     - Surface manifest evidence: `phase13-filesystem-advanced-apis`。
+    - Closure: P13-33 v1.1 completes the scoped advanced filesystem API gate
+      with `filesystemProfile.advancedApis`, watcher limits, scoped streams,
+      `FileHandle`, fd compatibility tokens, `opendir`, `Dirent`, `fs.watch`,
+      `fs.watchFile`, `fs.promises.watch`, `realpath`, pending watcher/
+      watchFile diagnostics, Android compatibility notes, packaged realpath/
+      opendir markers, TypeScript declarations, docs, desktop matrix, surface
+      manifest, and Gradle gate without raw native fd exposure or expanded
+      filesystem roots.
+    - Future packaged/expanded-root work: packaged watcher/fd/FileHandle/
+      stream lifecycle smoke, device-exported packaged realpath/opendir
+      evidence, expanded-root reruns, and final full desktop fs semantics.
 
 - [ ] P13-34: 推进 `worker_threads` 到 opt-in promoted。
   - 范围：启用真实 worker runtime，并定义 AutoJs bridge module 隔离规则。
