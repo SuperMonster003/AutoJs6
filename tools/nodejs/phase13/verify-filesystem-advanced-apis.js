@@ -104,7 +104,8 @@ function buildReport(files) {
       token(files.packagedSmokeTest, "packaged.url.opendir_url=true"),
       token(files.packagedPreflight, "packaged.fs.realpath=true"),
       token(files.packagedPreflight, "packaged.dirent.opendir=true"),
-      token(files.p13Report, "packaged realpath and opendir markers"),
+      token(files.p13Report, "Existing packaged smoke sources and preflight checks already include packaged"),
+      token(files.p13Report, "realpath and opendir markers:"),
     ], [
       "Promote packaged watcher/fd/FileHandle/stream evidence from runtime source markers to current device-exported report evidence.",
       "Document Android watcher coalescing, recursive-watch denial, and platform-specific realpath behavior in the final Desktop compatibility matrix.",
