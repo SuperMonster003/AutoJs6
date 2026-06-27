@@ -61,7 +61,7 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
                       processProfile.targetProfiles.join(",") === "safe_default,desktop_compat_opt_in" &&
                       processProfile.argv === "entry_and_project_runner_partial" &&
                       processProfile.env === "controlled_string_map" &&
-                      processProfile.envMutation === "script_local_mutable" &&
+                      processProfile.envMutation === "script_local_string_coercing_mutable" &&
                       processProfile.envSources === "request_map_plus_safe_defaults" &&
                       processProfile.envDefaultKeys.join(",") === "NODE_ENV,AUTOJS6_EMBEDDED_NODE,AUTOJS6_NODE_RUNTIME" &&
                       processProfile.envFilteredKeys.join(",") === "NODE_OPTIONS,NODE_INSPECT_RESUME_ON_START,NODE_COMPILE_CACHE,NODE_DISABLE_COMPILE_CACHE,AUTOJS6_NODE_COMPILE_CACHE_DIR,AUTOJS6_NODE_COMPILE_CACHE_KEY,AUTOJS6_NODE_COMPILE_CACHE_RUNTIME_KEY,AUTOJS6_NODE_COMPILE_CACHE_PROJECT_KEY,AUTOJS6_NODE_COMPILE_CACHE_LOADER" &&
@@ -93,6 +93,19 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
 
                     process.env.P13_PROCESS_MUTABLE = "changed";
                     delete process.env.P13_PROCESS_VISIBLE;
+                    process.env.P13_PROCESS_NUMBER = 7;
+                    process.env.P13_PROCESS_BOOL = false;
+                    process.env.P13_PROCESS_NULL = null;
+                    process.env.P13_PROCESS_UNDEFINED = undefined;
+                    Object.defineProperty(process.env, "P13_PROCESS_DEFINED", {
+                      value: 9,
+                      configurable: true,
+                      enumerable: true,
+                      writable: true
+                    });
+                    const envNumberDescriptor = Object.getOwnPropertyDescriptor(process.env, "P13_PROCESS_NUMBER");
+                    const envDefineDenied = denied(() => Object.defineProperty(process.env, "P13_PROCESS_BAD_DESCRIPTOR", { value: "x" }));
+                    const envSymbolDenied = denied(() => { process.env[Symbol("p13")] = "x"; });
 
                     const argvOk =
                       processBuiltin === process &&
@@ -112,7 +125,20 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
                       process.env.AUTOJS6_NODE_RUNTIME === "embedded" &&
                       process.env.P13_PROCESS_EMPTY === "" &&
                       process.env.P13_PROCESS_MUTABLE === "changed" &&
+                      process.env.P13_PROCESS_NUMBER === "7" &&
+                      process.env.P13_PROCESS_BOOL === "false" &&
+                      process.env.P13_PROCESS_NULL === "null" &&
+                      process.env.P13_PROCESS_UNDEFINED === "undefined" &&
+                      process.env.P13_PROCESS_DEFINED === "9" &&
                       process.env.P13_PROCESS_VISIBLE === undefined &&
+                      envNumberDescriptor &&
+                      envNumberDescriptor.value === "7" &&
+                      envNumberDescriptor.enumerable === true &&
+                      envNumberDescriptor.configurable === true &&
+                      envNumberDescriptor.writable === true &&
+                      Object.keys(process.env).includes("P13_PROCESS_NUMBER") &&
+                      envDefineDenied === "ERR_INVALID_OBJECT_DEFINE_PROPERTY" &&
+                      envSymbolDenied === "TypeError" &&
                       process.env.NODE_OPTIONS === undefined &&
                       process.env.NODE_INSPECT_RESUME_ON_START === undefined &&
                       process.env.NODE_COMPILE_CACHE === undefined &&
@@ -196,6 +222,7 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
                       report.header.commandLine[0] === "autojs6-node" &&
                       report.header.cwd === process.cwd() &&
                       report.environmentVariables.P13_PROCESS_MUTABLE === "changed" &&
+                      report.environmentVariables.P13_PROCESS_NUMBER === "7" &&
                       denied(() => process.report.writeReport()) === "ERR_AUTOJS6_PROCESS_API_DISABLED";
 
                     const stdioOk =
@@ -294,7 +321,7 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
                 result.stdout,
                 result.stdout.contains(
                     "p13process.profile=safe_process_subset_partial|true|safe_default,desktop_compat_opt_in|" +
-                        "entry_and_project_runner_partial|controlled_string_map|script_local_mutable|" +
+                        "entry_and_project_runner_partial|controlled_string_map|script_local_string_coercing_mutable|" +
                         "request_map_plus_safe_defaults|NODE_ENV,AUTOJS6_EMBEDDED_NODE,AUTOJS6_NODE_RUNTIME|" +
                         "NODE_OPTIONS,NODE_INSPECT_RESUME_ON_START,NODE_COMPILE_CACHE,NODE_DISABLE_COMPILE_CACHE," +
                         "AUTOJS6_NODE_COMPILE_CACHE_DIR,AUTOJS6_NODE_COMPILE_CACHE_KEY," +

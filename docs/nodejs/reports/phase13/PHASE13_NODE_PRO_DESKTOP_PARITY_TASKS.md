@@ -1592,14 +1592,14 @@ P13 task 本身使用以下执行状态：
     - `process.exit()` 与 AutoJs script lifecycle 协调。
   - Progress:
     - P13-44 partial landing 已添加 `processParityProfile` 诊断，记录当前
-      Safe process subset: `argv`、controlled mutable `env`、scoped
+      Safe process subset: `argv`、controlled string-coercing mutable `env`、scoped
       cwd/chdir、`exitCode`、versions、timing、cpu/memory/resourceUsage、
       lifecycle-mapped `process.exit(code)`、`process.permission`、
       `process.report.getReport()`、bounded stdio、`process` /
       `node:process` alias，以及 Android signal/native/process handle 差异。
     - Focused instrumentation:
       `NodeProcessParityPhase13DecisionInstrumentationTest` 验证
-      `processParityProfile`、env 敏感变量过滤、script-local env 写入、
+      `processParityProfile`、env 敏感变量过滤、script-local env 写入字符串化、
       scoped cwd/chdir、`process.exit(code)` lifecycle mapping、signal/native
       API 稳定拒绝、versions/resource/timing/report/permission/stdio 行为。
     - Existing evidence:

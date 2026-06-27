@@ -1989,9 +1989,10 @@ Phase 13 process/env/argv parity focused instrumentation:
 ```
 
 This suite verifies `processParityProfile` diagnostics, `process` /
-`node:process` aliases, argv metadata, script-local env mutation, sensitive env
-filtering, scoped cwd/chdir, `exitCode`, lifecycle-mapped `process.exit(code)`,
-stable denial for native exit and signal APIs, versions, timing,
+`node:process` aliases, argv metadata, string-coercing script-local env
+mutation, sensitive env filtering, scoped cwd/chdir, `exitCode`,
+lifecycle-mapped `process.exit(code)`, stable denial for native exit and signal
+APIs, versions, timing,
 CPU/memory/resource snapshots, permission/report facades, bounded stdio, and
 denial of private process/native entry points.
 P13-44 records process/env/argv parity as partial.

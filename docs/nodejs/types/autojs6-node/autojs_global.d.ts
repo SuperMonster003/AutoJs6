@@ -126,7 +126,7 @@ declare namespace AutoJs6Node {
     readonly targetProfiles: readonly string[];
     readonly argv: "entry_and_project_runner_partial" | string;
     readonly env: "controlled_string_map" | string;
-    readonly envMutation: "script_local_mutable" | string;
+    readonly envMutation: "script_local_string_coercing_mutable" | string;
     readonly envSources: "request_map_plus_safe_defaults" | string;
     readonly envDefaultKeys: readonly string[];
     readonly envFilteredKeys: readonly string[];

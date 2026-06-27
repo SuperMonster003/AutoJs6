@@ -7931,6 +7931,99 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     return report;
   }
+  function __autojs6_process_env_key(property) {
+    if (typeof property === "symbol") {
+      throw new TypeError("Cannot convert a Symbol value to a string");
+    }
+    return String(property);
+  }
+  function __autojs6_define_process_env_value(target, property, value) {
+    const key = __autojs6_process_env_key(property);
+    Object.defineProperty(target, key, {
+      value: String(value),
+      configurable: true,
+      enumerable: true,
+      writable: true
+    });
+    return true;
+  }
+  function __autojs6_process_env_define_error(message) {
+    const error = new TypeError(message);
+    try {
+      Object.defineProperty(error, "code", {
+        value: "ERR_INVALID_OBJECT_DEFINE_PROPERTY",
+        configurable: true,
+        enumerable: false,
+        writable: true
+      });
+    } catch (_) {}
+    return error;
+  }
+  function __autojs6_create_process_env(initialEnv) {
+    const target = Object.create(null);
+    const source = initialEnv && typeof initialEnv === "object" ? initialEnv : {};
+    for (const key of Object.keys(source)) {
+      __autojs6_define_process_env_value(target, key, source[key]);
+    }
+    if (typeof Proxy !== "function") {
+      return target;
+    }
+    return new Proxy(target, {
+      get: function(envTarget, property) {
+        if (typeof property === "symbol") {
+          return envTarget[property];
+        }
+        return envTarget[String(property)];
+      },
+      set: function(envTarget, property, value) {
+        return __autojs6_define_process_env_value(envTarget, property, value);
+      },
+      defineProperty: function(envTarget, property, descriptor) {
+        __autojs6_process_env_key(property);
+        if (!descriptor || typeof descriptor !== "object") {
+          return false;
+        }
+        if ("get" in descriptor || "set" in descriptor) {
+          throw __autojs6_process_env_define_error(
+            "'process.env' does not accept an accessor(getter/setter) descriptor"
+          );
+        }
+        if (
+          !Object.prototype.hasOwnProperty.call(descriptor, "value") ||
+          descriptor.configurable !== true ||
+          descriptor.enumerable !== true ||
+          descriptor.writable !== true
+        ) {
+          throw __autojs6_process_env_define_error(
+            "'process.env' only accepts a configurable, writable, and enumerable data descriptor"
+          );
+        }
+        return __autojs6_define_process_env_value(envTarget, property, descriptor.value);
+      },
+      deleteProperty: function(envTarget, property) {
+        if (typeof property === "symbol") {
+          return true;
+        }
+        delete envTarget[String(property)];
+        return true;
+      },
+      has: function(envTarget, property) {
+        if (typeof property === "symbol") {
+          return false;
+        }
+        return Object.prototype.hasOwnProperty.call(envTarget, String(property));
+      },
+      ownKeys: function(envTarget) {
+        return Object.keys(envTarget);
+      },
+      getOwnPropertyDescriptor: function(envTarget, property) {
+        if (typeof property === "symbol") {
+          return undefined;
+        }
+        return Object.getOwnPropertyDescriptor(envTarget, String(property));
+      }
+    });
+  }
   function __autojs6_define_existing_global_function(name) {
     const value = globalThis[name];
     if (typeof value === "function") {
@@ -7997,12 +8090,13 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       controlledEnv[key] = value;
     }
-    if (!__autojs6_define_process_property("env", controlledEnv, true)) {
+    const processEnv = __autojs6_create_process_env(controlledEnv);
+    if (!__autojs6_define_process_property("env", processEnv, true)) {
       try {
         for (const key of Object.keys(process.env || {})) {
           delete process.env[key];
         }
-        Object.assign(process.env, controlledEnv);
+        Object.assign(process.env, processEnv);
       } catch (_) {}
     }
     __autojs6_define_process_property(
@@ -9504,7 +9598,7 @@ std::string buildEmbeddedScriptExecutionSource(
         targetProfiles: Object.freeze(["safe_default", "desktop_compat_opt_in"]),
         argv: "entry_and_project_runner_partial",
         env: "controlled_string_map",
-        envMutation: "script_local_mutable",
+        envMutation: "script_local_string_coercing_mutable",
         envSources: "request_map_plus_safe_defaults",
         envDefaultKeys: Object.freeze(["NODE_ENV", "AUTOJS6_EMBEDDED_NODE", "AUTOJS6_NODE_RUNTIME"]),
         envFilteredKeys: Object.freeze([

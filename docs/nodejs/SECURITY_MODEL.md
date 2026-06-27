@@ -788,7 +788,7 @@ them safe.
 
 P13-44 records process/env/argv parity as partial. `processParityProfile` is
 diagnostic metadata only and does not grant raw process authority. The Safe
-subset keeps env script-local and filtered, cwd scoped, maps
+subset keeps env script-local, string-coercing, and filtered, cwd scoped, maps
 `process.exit(code)` to an embedded-script lifecycle result without native
 process termination, denies signals, keeps raw process handles unavailable,
 denies native bindings, and blocks `report.writeReport()` until separate

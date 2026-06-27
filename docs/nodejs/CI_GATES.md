@@ -794,12 +794,12 @@ bypass behavior, and `zlib/promises` unpromoted. Controlled
 `verifyNodePhase13ProcessParityDecision` records P13-44 as the process/env/argv
 parity decision gate. It requires `processParityProfile` diagnostics, focused
 process parity instrumentation, existing process sweep evidence, embedded
-project-runner argv/env/cwd evidence, env filtering evidence, modern-core
-process permission evidence, TypeScript declarations, surface manifest
-evidence, and docs updates while keeping native/raw process exit, Android
-signal delivery, raw inherited env, raw process handles, native bindings, and
-full desktop process parity unpromoted. P13-44 records process/env/argv parity
-as partial.
+project-runner argv/env/cwd evidence, string-coercing env mutation and env
+filtering evidence, modern-core process permission evidence, TypeScript
+declarations, surface manifest evidence, and docs updates while keeping
+native/raw process exit, Android signal delivery, raw inherited env, raw process
+handles, native bindings, and full desktop process parity unpromoted. P13-44
+records process/env/argv parity as partial.
 `verifyNodePhase13PackagedCapabilityMetadataDecision` records P13-45 as the
 packaged APK capability metadata decision gate. It requires
 `packagedCapabilityProfile`, structured `bridgePermissions.packagedMetadata`,

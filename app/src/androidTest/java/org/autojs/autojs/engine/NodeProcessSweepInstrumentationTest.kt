@@ -87,6 +87,35 @@ class NodeProcessSweepInstrumentationTest {
               assert.strictEqual(flags.size, 0);
               assert.strictEqual(flags.delete("--inspect"), false);
 
+              process.env.PROCESS_SWEEP_NUMBER = 12;
+              process.env.PROCESS_SWEEP_FALSE = false;
+              process.env.PROCESS_SWEEP_NULL = null;
+              process.env.PROCESS_SWEEP_UNDEFINED = undefined;
+              Object.defineProperty(process.env, "PROCESS_SWEEP_DEFINED", {
+                value: 34,
+                configurable: true,
+                enumerable: true,
+                writable: true
+              });
+              assert.strictEqual(process.env.PROCESS_SWEEP_NUMBER, "12");
+              assert.strictEqual(process.env.PROCESS_SWEEP_FALSE, "false");
+              assert.strictEqual(process.env.PROCESS_SWEEP_NULL, "null");
+              assert.strictEqual(process.env.PROCESS_SWEEP_UNDEFINED, "undefined");
+              assert.strictEqual(process.env.PROCESS_SWEEP_DEFINED, "34");
+              assert.deepStrictEqual(Object.getOwnPropertyDescriptor(process.env, "PROCESS_SWEEP_NUMBER"), {
+                value: "12",
+                writable: true,
+                enumerable: true,
+                configurable: true
+              });
+              assert.throws(
+                () => Object.defineProperty(process.env, "PROCESS_SWEEP_BAD_DESCRIPTOR", { value: "x" }),
+                /configurable, writable, and enumerable data descriptor/,
+              );
+              assert.throws(() => { process.env[Symbol("process-sweep")] = "x"; }, TypeError);
+              assert.strictEqual(delete process.env.PROCESS_SWEEP_NUMBER, true);
+              assert.strictEqual(process.env.PROCESS_SWEEP_NUMBER, undefined);
+
               process.exitCode = 23;
               assert.strictEqual(process.exitCode, 23);
 

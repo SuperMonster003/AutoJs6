@@ -11,7 +11,9 @@ surface-manifest evidence for the Safe process subset.
 - `process.argv`, `process.argv0`, `process.title`, `process.execArgv`, entry
   metadata, and project-runner argv propagation have focused evidence.
 - `process.env` is a script-local mutable string map seeded from controlled
-  request values plus safe defaults.
+  request values plus safe defaults. Script writes and compatible
+  `Object.defineProperty()` updates coerce assigned values to strings, matching
+  desktop Node.js behavior for common npm package checks.
 - Sensitive or host-control variables such as `NODE_OPTIONS`,
   `NODE_INSPECT_RESUME_ON_START`, `NODE_COMPILE_CACHE`, and AutoJs6 compile
   cache controls are filtered from script-visible env.

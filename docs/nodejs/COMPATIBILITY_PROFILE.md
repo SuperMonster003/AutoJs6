@@ -1316,10 +1316,11 @@ diagnostics.
 
 P13-44 records process/env/argv parity as partial. The runtime exposes
 `autojs6:profile.processParityProfile` to document the current Safe process
-subset: controlled mutable `process.env`, filtered sensitive env variables,
-scoped cwd/chdir, `process.argv`, `exitCode`, versions, timing, cpu/memory and
-`resourceUsage()` snapshots, `process.permission`, `process.report.getReport()`,
-bounded stdio, and `process.exit(code)` mapped to the embedded-script lifecycle.
+subset: controlled string-coercing mutable `process.env`, filtered sensitive env
+variables, scoped cwd/chdir, `process.argv`, `exitCode`, versions, timing,
+cpu/memory and `resourceUsage()` snapshots, `process.permission`,
+`process.report.getReport()`, bounded stdio, and `process.exit(code)` mapped to
+the embedded-script lifecycle.
 Native/raw process termination, Android signal delivery, raw inherited env, raw
 process handles, native bindings, `process.dlopen`, `process.binding`, and
 `report.writeReport()` remain unpromoted.
