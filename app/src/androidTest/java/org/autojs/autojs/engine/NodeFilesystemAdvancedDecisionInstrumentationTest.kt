@@ -153,6 +153,8 @@ class NodeFilesystemAdvancedDecisionInstrumentationTest {
             )
             assertTrue(result.stdout, result.stdout.contains("p13fsadvanced.ready=true"))
             assertEquals(0, result.pendingScopedFsStreamCount)
+            assertEquals(0, result.pendingScopedFsWatchCount)
+            assertEquals(0, result.pendingScopedFsWatchFileCount)
         } finally {
             workDir.deleteRecursively()
         }

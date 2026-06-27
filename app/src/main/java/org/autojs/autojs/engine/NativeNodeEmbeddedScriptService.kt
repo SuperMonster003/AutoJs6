@@ -3166,6 +3166,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 pendingScopedFsCallbacks = nativeValues["embedded_script.pending_scoped_fs_callbacks"]?.toIntOrNull(),
                 pendingScopedFsStreams = nativeValues["embedded_script.pending_scoped_fs_streams"]?.equals("true", ignoreCase = true),
                 pendingScopedFsStreamCount = nativeValues["embedded_script.pending_scoped_fs_stream_count"]?.toIntOrNull(),
+                pendingScopedFsWatchCount = nativeValues["embedded_script.pending_scoped_fs_watch_count"]?.toIntOrNull(),
+                pendingScopedFsWatchFileCount = nativeValues["embedded_script.pending_scoped_fs_watch_file_count"]?.toIntOrNull(),
                 pendingCryptoCallbacks = nativeValues["embedded_script.pending_crypto_callbacks"]?.toIntOrNull(),
                 pendingDnsCallbacks = nativeValues["embedded_script.pending_dns_callbacks"]?.toIntOrNull(),
                 pendingZlibCallbacks = nativeValues["embedded_script.pending_zlib_callbacks"]?.toIntOrNull(),
@@ -3623,6 +3625,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
             pendingScopedFsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS, it) }
             pendingScopedFsStreams?.let { putBoolean(EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS, it) }
             pendingScopedFsStreamCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT, it) }
+            pendingScopedFsWatchCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_COUNT, it) }
+            pendingScopedFsWatchFileCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_FILE_COUNT, it) }
             pendingCryptoCallbacks?.let { putInt(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS, it) }
             pendingDnsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_DNS_CALLBACKS, it) }
             pendingZlibCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS, it) }
@@ -3766,6 +3770,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     ?.getBoolean(EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS),
                 pendingScopedFsStreamCount = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT) }
                     ?.getInt(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT),
+                pendingScopedFsWatchCount = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_COUNT) }
+                    ?.getInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_COUNT),
+                pendingScopedFsWatchFileCount = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_FILE_COUNT) }
+                    ?.getInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_FILE_COUNT),
                 pendingCryptoCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS),
                 pendingDnsCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_DNS_CALLBACKS) }
@@ -3809,6 +3817,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS = "result_pending_scoped_fs_callbacks"
         private const val EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS = "result_pending_scoped_fs_streams"
         private const val EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT = "result_pending_scoped_fs_stream_count"
+        private const val EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_COUNT = "result_pending_scoped_fs_watch_count"
+        private const val EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_FILE_COUNT = "result_pending_scoped_fs_watch_file_count"
         private const val EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS = "result_pending_crypto_callbacks"
         private const val EXTRA_RESULT_PENDING_DNS_CALLBACKS = "result_pending_dns_callbacks"
         private const val EXTRA_RESULT_PENDING_ZLIB_CALLBACKS = "result_pending_zlib_callbacks"

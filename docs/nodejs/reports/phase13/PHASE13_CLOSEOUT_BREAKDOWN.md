@@ -302,7 +302,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 Reason open: `evidence`, `packaging`.
 
-- [ ] Expose pending watcher/watchFile counts through diagnostics or report fields.
+- [x] Expose pending watcher/watchFile counts through diagnostics or report fields.
 - [ ] Add packaged watcher, fd, FileHandle, and stream close-on-destroy evidence.
 - [ ] Promote packaged realpath and opendir evidence from source markers to device-exported reports.
 - [x] Document Android watcher coalescing, recursive-watch denial, and realpath differences.

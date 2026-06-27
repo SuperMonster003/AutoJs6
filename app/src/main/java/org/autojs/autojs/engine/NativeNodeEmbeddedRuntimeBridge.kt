@@ -8,6 +8,7 @@ import android.util.Log
 import org.autojs.autojs.App
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
+import org.json.JSONObject
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -750,63 +751,82 @@ object NativeNodeEmbeddedRuntimeBridge {
         startedAt: Long,
         nativeValues: Map<String, String>,
     ): EmbeddedScriptResult {
-        val envelopePresent = !nativeValues["embedded_script.result_json"].isNullOrBlank()
-        val status = nativeValues["embedded_script.status"].orEmpty()
+        val resultNativeValues = nativeValues.toMutableMap()
+        val resultEnvelope = resultNativeValues["embedded_script.result_json"]
+            ?.takeUnless { it.isBlank() }
+            ?.let { runCatching { JSONObject(it) }.getOrNull() }
+        fun fillResultEnvelopeInt(nativeKey: String, envelopeKey: String) {
+            if (!resultNativeValues[nativeKey].isNullOrBlank()) {
+                return
+            }
+            val value = resultEnvelope
+                ?.takeIf { it.has(envelopeKey) && !it.isNull(envelopeKey) }
+                ?.optInt(envelopeKey)
+                ?: return
+            resultNativeValues[nativeKey] = value.toString()
+        }
+        fillResultEnvelopeInt("embedded_script.pending_scoped_fs_watch_count", "pendingScopedFsWatchCount")
+        fillResultEnvelopeInt("embedded_script.pending_scoped_fs_watch_file_count", "pendingScopedFsWatchFileCount")
+
+        val envelopePresent = !resultNativeValues["embedded_script.result_json"].isNullOrBlank()
+        val status = resultNativeValues["embedded_script.status"].orEmpty()
         val nativeFailure = when {
-            status == "failed" -> nativeValues["embedded_script.detail"].takeUnless { it.isNullOrBlank() }
+            status == "failed" -> resultNativeValues["embedded_script.detail"].takeUnless { it.isNullOrBlank() }
                 ?: "Embedded script native lifecycle failed."
-            status == "skipped" -> nativeValues["embedded_script.detail"].takeUnless { it.isNullOrBlank() }
+            status == "skipped" -> resultNativeValues["embedded_script.detail"].takeUnless { it.isNullOrBlank() }
                 ?: "Embedded script native lifecycle was skipped."
             !envelopePresent -> "Embedded script did not return a result envelope."
             else -> null
         }
-        val scriptSucceeded = nativeValues["embedded_script.succeeded"].toBooleanValue()
+        val scriptSucceeded = resultNativeValues["embedded_script.succeeded"].toBooleanValue()
         val succeeded = nativeFailure == null && scriptSucceeded
-        val elapsedMs = nativeValues["timing.total.ms"].toLongValue()
+        val elapsedMs = resultNativeValues["timing.total.ms"].toLongValue()
             .takeIf { it > 0L }
             ?: (SystemClock.elapsedRealtime() - startedAt)
-        val embeddedStdout = nativeValues["embedded_script.stdout"].orEmpty()
-        val embeddedStderr = nativeValues["embedded_script.stderr"].orEmpty()
-        val stdoutCaptureText = nativeValues.captureText("stdout_capture")
-        val stderrCaptureText = nativeValues.captureText("stderr_capture")
+        val embeddedStdout = resultNativeValues["embedded_script.stdout"].orEmpty()
+        val embeddedStderr = resultNativeValues["embedded_script.stderr"].orEmpty()
+        val stdoutCaptureText = resultNativeValues.captureText("stdout_capture")
+        val stderrCaptureText = resultNativeValues.captureText("stderr_capture")
         return EmbeddedScriptResult(
             succeeded = succeeded,
-            exitCode = nativeValues["embedded_script.exit_code"]?.toIntOrNull()
+            exitCode = resultNativeValues["embedded_script.exit_code"]?.toIntOrNull()
                 ?: if (succeeded) 0 else 1,
-            resultText = nativeValues["embedded_script.result_text"].takeUnless { it.isNullOrBlank() },
+            resultText = resultNativeValues["embedded_script.result_text"].takeUnless { it.isNullOrBlank() },
             stdout = preferMoreCompleteCapture(embeddedStdout, stdoutCaptureText),
             stderr = preferMoreCompleteCapture(embeddedStderr, stderrCaptureText),
-            errorName = nativeValues["embedded_script.error_name"].takeUnless { it.isNullOrBlank() },
-            errorMessage = nativeFailure ?: nativeValues["embedded_script.error_message"].takeUnless { it.isNullOrBlank() },
-            errorStack = nativeValues["embedded_script.error_stack"].takeUnless { it.isNullOrBlank() },
-            errorCode = nativeValues["embedded_script.error_code"].takeUnless { it.isNullOrBlank() },
+            errorName = resultNativeValues["embedded_script.error_name"].takeUnless { it.isNullOrBlank() },
+            errorMessage = nativeFailure ?: resultNativeValues["embedded_script.error_message"].takeUnless { it.isNullOrBlank() },
+            errorStack = resultNativeValues["embedded_script.error_stack"].takeUnless { it.isNullOrBlank() },
+            errorCode = resultNativeValues["embedded_script.error_code"].takeUnless { it.isNullOrBlank() },
             elapsedMs = elapsedMs,
             processName = processName,
             pid = pid,
             sourceName = request.sourceName,
-            nativeValues = nativeValues,
-            timedOut = nativeValues["embedded_script.timed_out"].toBooleanValue(),
-            timeoutMs = nativeValues["embedded_script.timeout_ms"].toOptionalLong()?.takeIf { it > 0L },
-            workingDirectory = nativeValues["embedded_script.working_directory"].takeUnless { it.isNullOrBlank() }
+            nativeValues = resultNativeValues,
+            timedOut = resultNativeValues["embedded_script.timed_out"].toBooleanValue(),
+            timeoutMs = resultNativeValues["embedded_script.timeout_ms"].toOptionalLong()?.takeIf { it > 0L },
+            workingDirectory = resultNativeValues["embedded_script.working_directory"].takeUnless { it.isNullOrBlank() }
                 ?: request.workingDirectory,
-            pendingTimers = nativeValues["embedded_script.pending_timers"].toOptionalBoolean(),
-            pendingTimerCount = nativeValues["embedded_script.pending_timer_count"].toOptionalInt(),
-            pendingTimeoutCount = nativeValues["embedded_script.pending_timeout_count"].toOptionalInt(),
-            pendingIntervalCount = nativeValues["embedded_script.pending_interval_count"].toOptionalInt(),
-            pendingImmediateCount = nativeValues["embedded_script.pending_immediate_count"].toOptionalInt(),
-            pendingScopedFsCallbacks = nativeValues["embedded_script.pending_scoped_fs_callbacks"].toOptionalInt(),
-            pendingScopedFsStreams = nativeValues["embedded_script.pending_scoped_fs_streams"].toOptionalBoolean(),
-            pendingScopedFsStreamCount = nativeValues["embedded_script.pending_scoped_fs_stream_count"].toOptionalInt(),
-            pendingWorkers = nativeValues["embedded_script.pending_workers"].toOptionalBoolean(),
-            pendingWorkerCount = nativeValues["embedded_script.pending_worker_count"].toOptionalInt(),
-            pendingCryptoCallbacks = nativeValues["embedded_script.pending_crypto_callbacks"].toOptionalInt(),
-            pendingDnsCallbacks = nativeValues["embedded_script.pending_dns_callbacks"].toOptionalInt(),
-            pendingZlibCallbacks = nativeValues["embedded_script.pending_zlib_callbacks"].toOptionalInt(),
-            pendingNodeTestCallbacks = nativeValues["embedded_script.pending_node_test_callbacks"].toOptionalInt(),
-            pendingZlibStreams = nativeValues["embedded_script.pending_zlib_streams"].toOptionalBoolean(),
-            pendingZlibStreamCount = nativeValues["embedded_script.pending_zlib_stream_count"].toOptionalInt(),
-            pendingAsyncCallbacks = nativeValues["embedded_script.pending_async_callbacks"].toOptionalInt(),
-            pendingCallbacks = nativeValues["embedded_script.pending_callbacks"].toOptionalBoolean(),
+            pendingTimers = resultNativeValues["embedded_script.pending_timers"].toOptionalBoolean(),
+            pendingTimerCount = resultNativeValues["embedded_script.pending_timer_count"].toOptionalInt(),
+            pendingTimeoutCount = resultNativeValues["embedded_script.pending_timeout_count"].toOptionalInt(),
+            pendingIntervalCount = resultNativeValues["embedded_script.pending_interval_count"].toOptionalInt(),
+            pendingImmediateCount = resultNativeValues["embedded_script.pending_immediate_count"].toOptionalInt(),
+            pendingScopedFsCallbacks = resultNativeValues["embedded_script.pending_scoped_fs_callbacks"].toOptionalInt(),
+            pendingScopedFsStreams = resultNativeValues["embedded_script.pending_scoped_fs_streams"].toOptionalBoolean(),
+            pendingScopedFsStreamCount = resultNativeValues["embedded_script.pending_scoped_fs_stream_count"].toOptionalInt(),
+            pendingScopedFsWatchCount = resultNativeValues["embedded_script.pending_scoped_fs_watch_count"].toOptionalInt(),
+            pendingScopedFsWatchFileCount = resultNativeValues["embedded_script.pending_scoped_fs_watch_file_count"].toOptionalInt(),
+            pendingWorkers = resultNativeValues["embedded_script.pending_workers"].toOptionalBoolean(),
+            pendingWorkerCount = resultNativeValues["embedded_script.pending_worker_count"].toOptionalInt(),
+            pendingCryptoCallbacks = resultNativeValues["embedded_script.pending_crypto_callbacks"].toOptionalInt(),
+            pendingDnsCallbacks = resultNativeValues["embedded_script.pending_dns_callbacks"].toOptionalInt(),
+            pendingZlibCallbacks = resultNativeValues["embedded_script.pending_zlib_callbacks"].toOptionalInt(),
+            pendingNodeTestCallbacks = resultNativeValues["embedded_script.pending_node_test_callbacks"].toOptionalInt(),
+            pendingZlibStreams = resultNativeValues["embedded_script.pending_zlib_streams"].toOptionalBoolean(),
+            pendingZlibStreamCount = resultNativeValues["embedded_script.pending_zlib_stream_count"].toOptionalInt(),
+            pendingAsyncCallbacks = resultNativeValues["embedded_script.pending_async_callbacks"].toOptionalInt(),
+            pendingCallbacks = resultNativeValues["embedded_script.pending_callbacks"].toOptionalBoolean(),
         )
     }
 
@@ -17714,6 +17734,8 @@ object NativeNodeEmbeddedRuntimeBridge {
         val pendingScopedFsCallbacks: Int? = null,
         val pendingScopedFsStreams: Boolean? = null,
         val pendingScopedFsStreamCount: Int? = null,
+        val pendingScopedFsWatchCount: Int? = null,
+        val pendingScopedFsWatchFileCount: Int? = null,
         val pendingWorkers: Boolean? = null,
         val pendingWorkerCount: Int? = null,
         val pendingCryptoCallbacks: Int? = null,

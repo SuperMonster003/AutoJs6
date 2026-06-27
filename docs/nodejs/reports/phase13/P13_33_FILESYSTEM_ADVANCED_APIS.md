@@ -27,8 +27,6 @@ desktop Node.js filesystem authority.
 
 The following remain future work before P13-33 can move beyond partial:
 
-- Kotlin/device result diagnostics for pending watcher and watchFile counts, or
-  an equivalent host-report field;
 - packaged APK live-smoke coverage for watcher, fd, FileHandle, stream, and
   close-on-destroy behavior;
 - expanded-root reruns once P13-32 root authority providers exist;
@@ -61,10 +59,15 @@ These are evidence for realpath/opendir compatibility only. They are not a full
 packaged lifecycle proof for watcher, fd, FileHandle, stream, or
 close-on-destroy behavior.
 
+The P13-33 focused gate now also exposes `pendingScopedFsWatchCount` and
+`pendingScopedFsWatchFileCount` through Kotlin result diagnostics, including
+the adapter result-envelope fallback path, and asserts that both counts return
+to zero after closing the scoped watcher and `watchFile` resources.
+
 The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
 evidence-only for this partial decision. They do not add a separate P13-33
-blocker beyond the pending diagnostics, packaged device-exported evidence, and
-future expanded-root rerun items above.
+blocker beyond the packaged device-exported evidence and future expanded-root
+rerun items above.
 
 ## Verification
 
@@ -88,5 +91,4 @@ future expanded-root rerun items above.
 ## Remaining Work
 
 - Add packaged advanced-fs lifecycle smokes and archive current device evidence.
-- Surface pending watcher/watchFile cleanup counts through Kotlin diagnostics.
 - Re-run advanced-fs suites against each future promoted root class.
