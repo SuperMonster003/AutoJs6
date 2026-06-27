@@ -103,8 +103,12 @@ function buildReport(files) {
       token(files.phase10WorkerWasiBoundary, "rawWasiPromoted: false"),
       token(files.phase9WasmWasiPolicy, "controlled-wasi-facade"),
       token(files.desktopMatrix, "| `wasi` | `disabled` |"),
+      token(files.p13Report, "For P13-38 v1.1, pure WebAssembly is the supported runtime path"),
+      token(files.phase13Tasks, "For P13-38 v1.1, pure WebAssembly is the supported runtime path"),
+      token(files.compatibilityProfile, "pure WebAssembly is the supported runtime path and raw/controlled WASI"),
+      token(files.securityModel, "raw/controlled WASI APIs stay stable-denied"),
+      token(files.typesReadme, "raw/controlled WASI APIs stay"),
     ], [
-      "Design and implement the controlled `autojs6:wasi` facade or a limited `node:wasi` profile API.",
       "Implement scoped/authorized preopen mapping with lexical and realpath/symlink escape denial.",
       "Define args, env, virtual fd table, stdio, clock, random, process-exit, and network-denial policies with instrumentation.",
       "Add resource budgets for module size, memory pages, stdout/stderr, timeout, and concurrent instances.",

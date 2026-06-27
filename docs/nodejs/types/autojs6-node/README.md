@@ -127,7 +127,9 @@ reports pure WebAssembly availability, raw WASI denial, and future controlled
 WASI enablement requirements for scoped preopens, authorized roots, virtual fd
 tables, explicit args/env policy, bounded stdio, limited clock/random, resource
 budgets, worker integration, and packaged behavior. It does not declare
-`require("wasi")` or make WASI APIs callable.
+`require("wasi")` or make WASI APIs callable. For P13-38 v1.1, pure
+WebAssembly is the supported runtime path and raw/controlled WASI APIs stay
+stable-denied.
 
 P13-39 extends the `autojs6:profile` declaration with `nativeAddonProfile`. The
 field reports default native-addon denial and future Desktop enablement

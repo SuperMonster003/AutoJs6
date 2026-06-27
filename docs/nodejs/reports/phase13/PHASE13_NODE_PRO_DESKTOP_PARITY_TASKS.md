@@ -323,6 +323,24 @@
   smoke evidence, bridge/process/global leakage probes, and timeout/lifecycle
   stress evidence.
 
+## P13-38 Stable-Denied v1.1 Note
+
+- P13-38 records `wasiProfile` diagnostics, pure WebAssembly availability, raw
+  `wasi` / `node:wasi` require and resolve denial, and local shadow-package
+  protection.
+- For P13-38 v1.1, pure WebAssembly is the supported runtime path; raw WASI,
+  callable `autojs6:wasi`, and limited `node:wasi` profile APIs stay
+  stable-denied until a future Desktop-profile provider owns preopen, fd/env/
+  args, resource, worker, hostile-corpus, and packaged behavior evidence.
+- Host verifier:
+  `tools/nodejs/phase13/verify-controlled-wasi-profile-decision.js`.
+- Gradle gate: `:app:verifyNodePhase13ControlledWasiProfileDecision`.
+- Report: `docs/nodejs/reports/phase13/P13_38_CONTROLLED_WASI_PROFILE.md`.
+- Surface manifest evidence: `phase13-controlled-wasi-profile-decision`.
+- Remaining P13-38 blockers: scoped/authorized preopen broker, virtual fd/env/
+  args/stdio/clock/random policy, resource budgets, worker integration, hostile
+  WASI corpus, and packaged `.wasm`/WASI behavior.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current

@@ -31,6 +31,11 @@ raw WASI module. It records the contract a future controlled WASI
 implementation must satisfy before any preopen or WASI import surface can be
 promoted.
 
+For P13-38 v1.1, pure WebAssembly is the supported runtime path. Raw
+`wasi`, raw `node:wasi`, a callable `autojs6:wasi` facade, and a limited
+`node:wasi` profile API stay stable-denied; any future controlled WASI
+promotion remains a separate Desktop-profile provider decision.
+
 ## Evidence
 
 - `NodeWasiPhase13DecisionInstrumentationTest` verifies the frozen
@@ -45,8 +50,6 @@ promoted.
 
 ## Remaining Blockers
 
-- Design and implement the controlled `autojs6:wasi` facade or a limited
-  `node:wasi` profile API.
 - Implement scoped/authorized preopen mapping with lexical and realpath/symlink
   escape denial.
 - Define args, env, virtual fd table, stdio, clock, random, process-exit, and

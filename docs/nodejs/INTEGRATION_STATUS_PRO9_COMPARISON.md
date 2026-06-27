@@ -1328,7 +1328,9 @@ remain open.
 P13-38 records controlled WASI profile as partial: Safe Node now exposes
 `wasiProfile` diagnostics while keeping raw `wasi` and `node:wasi` denied.
 Pure WebAssembly remains available, but this is not yet Pro/desktop parity for
-WASI-oriented packages; scoped or user-authorized preopens, virtual fd tables,
+WASI-oriented packages. For v1.1, pure WebAssembly is the supported runtime
+path and raw/controlled WASI APIs stay stable-denied; scoped or
+user-authorized preopens, virtual fd tables,
 explicit args/env policy, limited clock/random, network/process-exit denial,
 resource budgets, worker integration, packaged `.wasm`/WASI behavior, and
 hostile corpus coverage remain open.

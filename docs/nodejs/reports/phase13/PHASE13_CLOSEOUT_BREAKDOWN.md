@@ -339,7 +339,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 Reason open: `implementation`, `policy`, `packaging`.
 
-- [ ] Implement a controlled `autojs6:wasi` facade or formally keep only pure WebAssembly.
+- [x] Formally keep only pure WebAssembly for P13-38 v1.1; raw `wasi`, raw `node:wasi`, and callable controlled WASI facades stay stable-denied.
 - [ ] Implement scoped/authorized preopen mapping with lexical and realpath escape denial.
 - [ ] Define args, env, virtual fd table, stdio, clock, random, process-exit, and network-denial policies.
 - [ ] Add module/memory/stdout/stderr/timeout/concurrency budgets.

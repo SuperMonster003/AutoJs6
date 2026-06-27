@@ -266,7 +266,7 @@ function nextStepForDisabled(name) {
     case "vm":
       return "P13-36 records vm module diagnostics as partial; Safe/default keeps vm denied while vm.Script/context/timeout, escape denial, memory budget, and packaged behavior evidence remain future work.";
     case "wasi":
-      return "P13-38 records controlled WASI diagnostics as partial; pure WebAssembly stays available while raw WASI remains denied and controlled preopens, fd/env/args, resource budgets, worker integration, and packaged behavior remain future work.";
+      return "P13-38 records controlled WASI diagnostics as partial; pure WebAssembly is the supported v1.1 runtime path while raw and controlled WASI APIs stay stable-denied, with controlled preopens, fd/env/args, resource budgets, worker integration, and packaged behavior remaining future work.";
     case "worker_threads":
       return "P13-34 records worker_threads opt-in diagnostics as partial; default denial, profile diagnostics, and native preflight are covered while native runnable evidence, crash/resource stress, packaged worker smoke, and final Desktop worker policy remain open.";
     case "zlib/promises":

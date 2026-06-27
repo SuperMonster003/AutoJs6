@@ -508,7 +508,9 @@ loopback ADB forwarding, artifact redaction, and packaged behavior evidence.
 P13-38 records controlled WASI profile as partial. AutoJs6 Node exposes
 `wasiProfile` diagnostics, and pure WebAssembly remains available, but raw
 `wasi`, `node:wasi`, controlled preopens, WASI fd/env/args surfaces, and
-packaged WASI behavior remain unavailable. Packages that require desktop WASI
+packaged WASI behavior remain unavailable. For P13-38 v1.1, pure WebAssembly is
+the supported runtime path and raw/controlled WASI APIs stay stable-denied.
+Packages that require desktop WASI
 still need a future controlled profile with scoped or user-authorized roots,
 resource budgets, and escape-denial evidence.
 

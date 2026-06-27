@@ -935,7 +935,9 @@ available while raw `wasi` / `node:wasi` stays denied. Any future controlled
 WASI profile must prove scoped or user-authorized preopens, virtual fd and
 bounded stdio behavior, explicit args, empty-by-default env, limited
 clock/random, network/process-exit denial, resource budgets, worker
-integration, and packaged `.wasm`/WASI behavior before promotion.
+integration, and packaged `.wasm`/WASI behavior before promotion. For P13-38
+v1.1, pure WebAssembly is the supported runtime path and raw/controlled WASI
+APIs stay stable-denied.
 
 `vm` is enabled as the native Node builtin for desktop npm compatibility, including `require("vm")`, `require("node:vm")`, `require.resolve("vm")`, and `require.resolve("node:vm")`. Local `node_modules/vm` packages cannot shadow the builtin. This is not a sandbox boundary; `autojs6:profile.vmProfile` records the native surface and remaining memory/packaged evidence. See `docs/nodejs/design/VM.md`.
 

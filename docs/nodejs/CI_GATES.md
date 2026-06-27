@@ -957,7 +957,9 @@ local shadow-package protection, existing Phase 9/10 WASM/WASI evidence,
 TypeScript declarations, surface manifest evidence, and docs updates while
 keeping callable WASI facades, scoped preopen broker, virtual fd/env/args
 policy, resource budgets, worker integration, and packaged `.wasm`/WASI
-behavior unpromoted. P13-38 records controlled WASI profile as partial.
+behavior unpromoted. For P13-38 v1.1, pure WebAssembly is the supported runtime
+path and raw/controlled WASI APIs stay stable-denied. P13-38 records controlled
+WASI profile as partial.
 `verifyNodePhase13NativeAddonLoadingDecision` records P13-39 as the native
 addon loading decision gate. It requires `nativeAddonProfile` diagnostics,
 stable `.node` require/resolve denial, private process native API denial,

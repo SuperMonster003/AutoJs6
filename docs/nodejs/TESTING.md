@@ -1176,7 +1176,8 @@ existing Phase 9/10 WASM/WASI evidence, TypeScript declarations, the desktop
 builtin matrix, and Phase13 docs. It keeps any callable `autojs6:wasi` facade,
 controlled `node:wasi` profile, scoped preopen broker, virtual fd/env/args
 policy, resource budgets, worker integration, and packaged `.wasm`/WASI
-behavior open.
+behavior open. For P13-38 v1.1, pure WebAssembly is the supported runtime path
+and raw/controlled WASI APIs stay stable-denied.
 
 Phase 13 native addon loading decision gate:
 

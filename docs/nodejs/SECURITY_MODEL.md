@@ -850,7 +850,9 @@ CPU/heap artifact redaction, app-private export, and packaged release denial.
 P13-38 records controlled WASI profile as partial. `wasiProfile` is diagnostic
 metadata only and does not expose raw WASI imports or a controlled facade.
 Pure WebAssembly remains available, but raw `wasi` and `node:wasi` remain
-denied. Any future controlled WASI opt-in must prove scoped or
+denied. For P13-38 v1.1, pure WebAssembly is the supported runtime path and
+raw/controlled WASI APIs stay stable-denied. Any future controlled WASI opt-in
+must prove scoped or
 user-authorized preopens, realpath/symlink escape denial, virtual fd tables,
 bounded stdio, explicit args, empty-by-default env, limited clock/random,
 network and process-exit denial, resource budgets, hostile corpus coverage,
