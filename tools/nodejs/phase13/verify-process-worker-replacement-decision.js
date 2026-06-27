@@ -110,7 +110,7 @@ function buildReport(files) {
       "P13-40 must separately design any scoped child_process runner; P13-35 does not promote raw spawn, fork, stdio streams, signals, or process handles.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, desktop matrix, surface manifest, and Gradle gate record P13-35", [
-      token(files.phase13Tasks, "P13-35 partial landing"),
+      token(files.phase13Tasks, "P13-35 partial process-worker replacement gate"),
       token(files.p13Report, "P13-35 records process-worker replacement as partial"),
       token(files.phase13GradleGate, "verifyNodePhase13ProcessWorkerReplacementDecision"),
       token(files.testingDoc, "verifyNodePhase13ProcessWorkerReplacementDecision"),
@@ -122,8 +122,6 @@ function buildReport(files) {
       token(files.typesReadme, "P13-35 extends the `autojs6:profile` declaration"),
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
-      token(files.desktopMatrix, "P13-35 records the process-worker replacement decision"),
-      token(files.builtinMatrixGenerator, "P13-35 records the process-worker replacement decision"),
       token(files.capabilityMatrix, "P13-35 process-worker replacement"),
     ], [
       "P13-35 remains partial until WorkerPool native evidence, process-worker packaging, slot accounting, cleanup, and UX are ready.",
