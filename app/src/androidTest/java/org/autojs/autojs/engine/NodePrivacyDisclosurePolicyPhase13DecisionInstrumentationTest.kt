@@ -53,6 +53,7 @@ class NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest {
             "ui_overlay",
             "accessibility",
             "network",
+            "raw_network",
             "filesystem_relaxation",
             "java_interop",
             "child_process",
@@ -107,6 +108,15 @@ class NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest {
         assertEquals(NodePrivacyDisclosurePolicy.DESKTOP_COMPAT_OPT_IN, network.getString("profile"))
         assertTrue(
             network
+                .getJSONArray("androidPermissions")
+                .toString()
+                .contains(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET),
+        )
+        val rawNetwork = surfaces.getValue("raw_network")
+        assertEquals("raw_network", rawNetwork.getString("capability"))
+        assertEquals(NodePrivacyDisclosurePolicy.DESKTOP_COMPAT_OPT_IN, rawNetwork.getString("profile"))
+        assertTrue(
+            rawNetwork
                 .getJSONArray("androidPermissions")
                 .toString()
                 .contains(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET),
@@ -166,7 +176,12 @@ class NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest {
                 assert.strictEqual(byId.accessibility.requiresSettingsIntent, true);
                 assert.strictEqual(byId.network.profile, "desktop_compat_opt_in");
                 assert.ok(byId.network.androidPermissions.includes("android.permission.INTERNET"));
+                assert.strictEqual(byId.raw_network.capability, "raw_network");
+                assert.strictEqual(byId.raw_network.profile, "desktop_compat_opt_in");
+                assert.ok(byId.raw_network.androidPermissions.includes("android.permission.INTERNET"));
                 assert.ok(policy.channels.some((channel) => channel.id === "foreground_service_notification"));
+                assert.ok(policy.channels.some((channel) => channel.id === "project_capability_review" && channel.requiredFor.includes("raw_network")));
+                assert.ok(policy.channels.some((channel) => channel.id === "packaged_metadata_review" && channel.requiredFor.includes("raw_network")));
                 console.log("p13privacy.policy=" + [
                   policy.schema,
                   policy.status,
@@ -194,7 +209,7 @@ class NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest {
                     "${NodePrivacyDisclosurePolicy.STATUS}|safe_default|false|true|true|true|true|true|true|",
             ),
         )
-        assertTrue(result.stdout, result.stdout.contains("|13"))
+        assertTrue(result.stdout, result.stdout.contains("|14"))
     }
 
     private fun JSONArray.byId(): Map<String, JSONObject> {

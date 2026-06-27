@@ -30,6 +30,7 @@ grant runtime authority.
 | `ui_overlay` | `ui.overlay` | `pro_compat_opt_in` | required | required | `SYSTEM_ALERT_WINDOW`, special-use foreground service, notification |
 | `accessibility` | `accessibility` | `pro_compat_opt_in` | required | required | accessibility settings disclosure |
 | `network` | `network` | `desktop_compat_opt_in` | required | not required by default | `android.permission.INTERNET` |
+| `raw_network` | `raw_network` | `desktop_compat_opt_in` | required | not required by default | `android.permission.INTERNET` and packaged raw network review |
 | `filesystem_relaxation` | `filesystem_relaxation` | `desktop_compat_opt_in` | required | not required by default | SAF/user-authorized roots before any expansion |
 | `java_interop` | `java_interop` | `pro_compat_opt_in` | required | not required by default | project capability review |
 | `shell_root` | `shell.root` | `pro_compat_opt_in` | required | required | root access disclosure |

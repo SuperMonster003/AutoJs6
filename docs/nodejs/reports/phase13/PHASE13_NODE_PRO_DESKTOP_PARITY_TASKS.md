@@ -1842,6 +1842,8 @@ P13 task 本身使用以下执行状态：
       悬浮窗、无障碍、网络、filesystem relaxation、Java interop、
       root/Shizuku shell、`child_process`、native addon、inspector、
       WASI 的 prompt/disclosure/Android permission/packaged denial 元数据。
+    - Privacy policy 现在单独暴露 `raw_network` disclosure surface，与
+      P13-50 corpus 和 P13-51 rollback id 对齐。
     - Node Doctor JSON/text 已新增 Privacy Disclosure Policy section；
       TypeScript declarations 和 smoke 已覆盖 `PrivacyDisclosurePolicy`、
       `PrivacyDisclosureSurface`、channel、packaged policy 和 Doctor privacy

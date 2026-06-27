@@ -10356,6 +10356,19 @@ std::string buildEmbeddedScriptExecutionSource(
           null
         ),
         __autojs6_privacy_disclosure_surface(
+          "raw_network",
+          "raw_network",
+          "desktop_compat_opt_in",
+          Object.freeze(["android.permission.INTERNET"]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "packaged_metadata_review",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
           "filesystem_relaxation",
           "filesystem_relaxation",
           "desktop_compat_opt_in",
@@ -10479,12 +10492,14 @@ std::string buildEmbeddedScriptExecutionSource(
         ]),
         __autojs6_privacy_disclosure_channel("project_capability_review", "required_before_promotion", [
           "network",
+          "raw_network",
           "java_interop",
           "child_process",
           "wasi"
         ]),
         __autojs6_privacy_disclosure_channel("packaged_metadata_review", "required_before_packaged_promotion", [
           "network",
+          "raw_network",
           "native_addon",
           "wasi"
         ]),

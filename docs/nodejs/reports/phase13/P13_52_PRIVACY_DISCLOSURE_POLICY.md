@@ -12,9 +12,12 @@ and disclosure surface.
   `autojs6-node-privacy-disclosure-policy-v1`.
 - Sensitive surfaces now have metadata for prompt channel, disclosure channel,
   Android permissions/settings, packaged behavior, and promotion blocker.
+- `raw_network` is listed separately from controlled `network`, so P13-50
+  corpus, P13-51 rollback, and P13-52 disclosure ids align for raw Node network
+  builtin promotion review.
 - The policy covers screenshot, recording, overlay, accessibility, network,
-  filesystem relaxation, Java interop, root/Shizuku shell, `child_process`,
-  native addon, inspector, and WASI.
+  raw network, filesystem relaxation, Java interop, root/Shizuku shell,
+  `child_process`, native addon, inspector, and WASI.
 - Runtime diagnostics expose
   `require("autojs6:profile").privacyDisclosurePolicy` as a frozen object.
 - Node Doctor JSON/text reports include a Privacy Disclosure Policy section.

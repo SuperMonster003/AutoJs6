@@ -1408,8 +1408,10 @@ P13-52 records privacy and disclosure policy as partial. The runtime exposes
 `NodePrivacyDisclosurePolicy`, to report prompt channels, foreground
 disclosure requirements, Android permissions/settings, packaged denial
 behavior, and promotion blockers for screenshot, recording, overlay,
-accessibility, network, filesystem relaxation, Java interop, root/Shizuku
-shell, `child_process`, native addon, inspector, and WASI. The policy keeps
+accessibility, network, raw network, filesystem relaxation, Java interop,
+root/Shizuku shell, `child_process`, native addon, inspector, and WASI. The
+`raw_network` disclosure surface aligns with P13-50/P13-51 raw Node network
+builtin ids. The policy keeps
 `implicitHighPrivilegeDenied` and `packagedImplicitHighPrivilegeDenied` true
 and does not grant authority; actual prompt UI, notification ownership, and
 packaged disclosure review remain future work.

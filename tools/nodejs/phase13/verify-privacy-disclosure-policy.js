@@ -36,6 +36,7 @@ const REQUIRED_SURFACES = [
   "ui_overlay",
   "accessibility",
   "network",
+  "raw_network",
   "filesystem_relaxation",
   "java_interop",
   "child_process",

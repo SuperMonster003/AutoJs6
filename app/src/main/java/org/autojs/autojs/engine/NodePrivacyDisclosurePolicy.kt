@@ -125,6 +125,17 @@ object NodePrivacyDisclosurePolicy {
             disclosureChannel = "packaged_metadata_review",
         ),
         DisclosureSurface(
+            id = "raw_network",
+            capability = "raw_network",
+            profile = DESKTOP_COMPAT_OPT_IN,
+            androidPermissions = NodeBridgePermissionManifest.androidPermissionsForCapabilities(
+                listOf(NodeBridgePermissionManifest.NETWORK),
+            ),
+            requiresUserPrompt = true,
+            promptChannel = "project_capability_review",
+            disclosureChannel = "packaged_metadata_review",
+        ),
+        DisclosureSurface(
             id = "filesystem_relaxation",
             capability = "filesystem_relaxation",
             profile = DESKTOP_COMPAT_OPT_IN,
@@ -225,12 +236,12 @@ object NodePrivacyDisclosurePolicy {
         DisclosureChannel(
             id = "project_capability_review",
             status = "required_before_promotion",
-            requiredFor = listOf("network", "java_interop", "child_process", "wasi"),
+            requiredFor = listOf("network", "raw_network", "java_interop", "child_process", "wasi"),
         ),
         DisclosureChannel(
             id = "packaged_metadata_review",
             status = "required_before_packaged_promotion",
-            requiredFor = listOf("network", "native_addon", "wasi"),
+            requiredFor = listOf("network", "raw_network", "native_addon", "wasi"),
         ),
         DisclosureChannel(
             id = "doctor_report",

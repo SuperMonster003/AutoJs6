@@ -863,8 +863,9 @@ the corpus-facing rollback id for raw Node network builtins.
 
 P13-52 records privacy and disclosure policy as partial. The policy requires
 user prompts before sensitive screenshot, recording, overlay, accessibility,
-network, filesystem relaxation, Java interop, shell/root/Shizuku,
-`child_process`, native addon, inspector, or WASI promotion; screenshot,
+network, raw network, filesystem relaxation, Java interop, shell/root/Shizuku,
+`child_process`, native addon, inspector, or WASI promotion; `raw_network`
+uses the same id as the P13-50 corpus and P13-51 rollback policy. Screenshot,
 recording, overlay, root shell, and inspector also require foreground
 disclosure/notification ownership. Packaged APKs keep
 `packagedImplicitHighPrivilegeDenied=true` and must not synthesize reviewed
