@@ -165,7 +165,6 @@ function buildReport(files) {
   ];
   const blockers = [
     ...scenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`)),
-    "P13-56 is documentation classification only; runtime Pro/Desktop profile promotion remains gated",
     "packaged Pro/Desktop migration cookbook, prompt/disclosure UX, and device permission matrix remain incomplete",
   ];
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;

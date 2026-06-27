@@ -65,6 +65,7 @@ Status is `partial`.
 This gate proves the migration and comparison docs use the same
 Pro-compatible, Desktop-compatible, and gated/diagnostic-only taxonomy without
 turning debug-only/provider POC evidence into formal availability. P13-57
-summary aggregation is linked as evidence. Runtime profile promotion, packaged
-Pro/Desktop migration cookbooks, prompt/disclosure UX, and device permission
-matrices remain open.
+summary aggregation is linked as evidence. Runtime profile promotion remains a
+gated dependency owned by the runtime/profile promotion tracks. The remaining
+P13-56 blocker is packaged Pro/Desktop migration cookbooks,
+prompt/disclosure UX, and device permission matrices.
