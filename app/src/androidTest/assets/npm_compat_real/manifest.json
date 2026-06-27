@@ -397,17 +397,53 @@
         "C ABI status parser",
         "legacy path blocker metadata"
       ]
+    },
+    {
+      "name": "stdlib-digest-stream-package",
+      "patterns": [
+        "Phase 13 stdlib corpus delta",
+        "crypto hash plus stream/consumers",
+        "pure JavaScript dependency snapshot"
+      ]
+    },
+    {
+      "name": "perf-async-hooks-package",
+      "patterns": [
+        "Phase 13 stdlib corpus delta",
+        "perf_hooks and async_hooks package",
+        "async context timing helper"
+      ]
+    },
+    {
+      "name": "url-buffer-codec-package",
+      "patterns": [
+        "Phase 13 stdlib corpus delta",
+        "URL and Buffer package",
+        "query codec helper"
+      ]
     }
   ],
   "phase13Compatibility": {
     "schema": "autojs6-phase13-dependency-compatibility-corpus-v1",
-    "fixtureCount": 50,
+    "fixtureCount": 53,
     "requiredReasonKinds": [
       "missing_builtin",
       "native_addon",
       "postinstall",
       "network",
       "fs"
+    ],
+    "targetedFixtureDeltas": [
+      {
+        "area": "stdlib",
+        "fixtures": [
+          "stdlib-digest-stream-package",
+          "perf-async-hooks-package",
+          "url-buffer-codec-package"
+        ],
+        "passDelta": 3,
+        "notes": "P13-43/P13-47 adds fixed pure-JS stdlib package snapshots for crypto+stream, perf_hooks+async_hooks, and URL+Buffer coverage."
+      }
     ],
     "categories": [
       {

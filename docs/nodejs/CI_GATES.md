@@ -823,12 +823,13 @@ marketplace install/update, signed archives, packaged plugin distribution, and
 plugin-granted host authority unpromoted. P13-46 records plugin system parity
 as partial.
 `verifyNodePhase13DependencyCompatibilityCorpus` records P13-47 as the
-dependency compatibility corpus gate. It requires the fixed 50-fixture real npm
-manifest, `phase13Compatibility` taxonomy, package/reason rows for
-`missing_builtin`, `native_addon`, `postinstall`, `network`, and `fs`, metadata
-instrumentation, differential pass-rate reporting, surface manifest evidence,
-and docs updates while keeping unsafe package execution, live registry drift,
-native payloads, lifecycle scripts, and postinstall downloads unpromoted.
+dependency compatibility corpus gate. It requires the fixed 53-fixture real npm
+manifest, `phase13Compatibility` taxonomy, targeted fixture deltas,
+package/reason rows for `missing_builtin`, `native_addon`, `postinstall`,
+`network`, and `fs`, metadata instrumentation, differential pass-rate
+reporting, surface manifest evidence, and docs updates while keeping unsafe
+package execution, live registry drift, native payloads, lifecycle scripts, and
+postinstall downloads unpromoted.
 P13-47 records dependency compatibility corpus as partial.
 `verifyNodePhase13PackageLockIntegrityPolicy` records P13-48 as the package
 lock and integrity policy gate. It requires `NodePackageIntegrityPolicy`,

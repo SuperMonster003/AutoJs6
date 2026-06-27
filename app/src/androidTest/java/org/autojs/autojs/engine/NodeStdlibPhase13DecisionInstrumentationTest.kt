@@ -280,7 +280,7 @@ class NodeStdlibPhase13DecisionInstrumentationTest {
                         "readline,readline/promises,tty,perf_hooks,async_hooks|" +
                         "bare_and_node_prefix|partial|builtin_precedence|controlled_partial|documented_stable|" +
                         "os.setPriority,real_network_interfaces,tty_raw_mode,zlib/promises,node:test/reporters|" +
-                        "bounded_callbacks_streams_crypto_zlib|real_npm_phase9_30_fixture_baseline|" +
+                        "bounded_callbacks_streams_crypto_zlib|real_npm_phase13_53_fixture_corpus|" +
                         "modern_core_s7_36_partial|existing_v1_1_smokes_partial|false|false|false|false|true|true|true|true",
                 ),
             )

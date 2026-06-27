@@ -1173,8 +1173,9 @@ low-risk builtins, and controlled `process.getBuiltinModule` now returns the
 same limited wrappers as `require()`, but it is not yet full Pro/Desktop
 stdlib parity. Broader module conformance, Android OS/terminal edge cases, raw
 `process.getBuiltinModule` bypass behavior, `zlib/promises`, raw native
-handles, unrestricted network behavior, and real npm corpus pass-rate growth
-remain open.
+handles, unrestricted network behavior, and broader real npm pass-rate
+dashboards remain open. The current stdlib corpus marker is
+`real_npm_phase13_53_fixture_corpus`.
 
 P13-44 records process/env/argv parity as partial: Safe Node now exposes
 `processParityProfile` diagnostics for controlled `process.env`,
@@ -1204,9 +1205,11 @@ plugin-granted host authority remain unavailable.
 P13-47 records dependency compatibility corpus as partial: the fixed real npm
 corpus now carries `phase13Compatibility` package reason categories for
 `missing_builtin`, `native_addon`, `postinstall`, `network`, and `fs`, and the
-desktop differential report can show pass-rate rows by category. This improves
-Pro/Desktop dependency planning without executing unsafe registry packages,
-native payloads, lifecycle scripts, or postinstall downloads.
+desktop differential report can show pass-rate rows by category. The current
+corpus has 53 offline fixtures with a stdlib `targetedFixtureDeltas` +3
+record. This improves Pro/Desktop dependency planning without executing unsafe
+registry packages, native payloads, lifecycle scripts, or postinstall
+downloads.
 
 P13-48 records package lock and integrity policy as partial: AutoJs6 Node now
 has a shared `NodePackageIntegrityPolicy` and runtime

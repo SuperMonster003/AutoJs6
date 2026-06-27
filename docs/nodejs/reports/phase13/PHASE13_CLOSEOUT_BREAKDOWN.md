@@ -393,7 +393,7 @@ Reason open: `evidence`, `implementation`.
 
 - [ ] Expand module-by-module hostile input coverage.
 - [ ] Add Android terminal/OS edge cases and lifecycle evidence.
-- [ ] Grow stdlib-dependent npm corpus and record pass-rate deltas.
+- [x] Grow stdlib-dependent npm corpus and record pass-rate deltas.
 - [ ] Document per-module Android differences and stable denials.
 
 #### P13-44 process/env/argv parity
@@ -431,7 +431,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 Reason open: `evidence`, `policy`.
 
 - [ ] Schedule connected AutoJs6 real npm corpus artifacts before host differential comparison.
-- [ ] Add targeted packages for stdlib, ESM, network, fs, and package-manager deltas.
+- [x] Add targeted packages for stdlib, ESM, network, fs, and package-manager deltas.
 - [ ] Keep live registry drift and unsafe package execution out of default CI.
 - [ ] Publish pass-rate deltas in the summary gate.
 

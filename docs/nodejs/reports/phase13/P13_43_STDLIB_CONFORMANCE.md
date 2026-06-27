@@ -42,9 +42,10 @@ that keep broader Desktop behavior future work.
   verify builtin aliases, shadowing, denials, AsyncLocalStorage, perf hooks,
   diagnostics channel, `node:test`, ESM builtin imports, and Web API promise
   behavior.
-- Existing `NodeRealNpmCompatInstrumentationTest` keeps the Phase 9 real npm
-  corpus baseline at 30 fixtures within the 50-fixture corpus; P13-43 does not
-  raise that corpus floor.
+- `NodeRealNpmCompatInstrumentationTest` now keeps the Phase 13 real npm
+  corpus at 53 fixtures, including three fixed stdlib-dependent package
+  snapshots for `crypto` + `stream/consumers`, `perf_hooks` + `async_hooks`,
+  and `URL` + `Buffer`.
 - Existing `NodeModernCoreDifferentialInstrumentationTest` keeps modern-core
   partial evidence for AsyncLocalStorage, `perf_hooks`, stream promises,
   WebCrypto, diagnostics, timers promises, and `node:test`.
@@ -56,9 +57,8 @@ that keep broader Desktop behavior future work.
 
 - Broader module-by-module conformance needs hostile inputs, more edge cases,
   and Android-specific unsupported behavior notes.
-- The real npm corpus still needs additional stdlib-dependent packages and
-  pass-rate deltas before P13-43 can satisfy the original corpus-growth
-  acceptance criterion.
+- Additional stdlib-dependent packages and broader connected differential
+  dashboards remain future work beyond the current +3 fixed-fixture delta.
 - Full desktop parity still needs future policy for raw native handles, broad
   terminal behavior, unrestricted network/OS surfaces, raw
   `process.getBuiltinModule` bypass behavior, and `zlib/promises`.

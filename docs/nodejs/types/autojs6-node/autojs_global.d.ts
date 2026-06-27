@@ -111,7 +111,7 @@ declare namespace AutoJs6Node {
     readonly androidDifferences: "documented_stable" | string;
     readonly androidUnsupported: readonly string[];
     readonly resourceLimits: "bounded_callbacks_streams_crypto_zlib" | string;
-    readonly npmCorpus: "real_npm_phase9_30_fixture_baseline" | string;
+    readonly npmCorpus: "real_npm_phase13_53_fixture_corpus" | string;
     readonly desktopDifferential: "modern_core_s7_36_partial" | string;
     readonly packagedBehavior: "existing_v1_1_smokes_partial" | string;
     readonly rawDesktopParity: boolean;

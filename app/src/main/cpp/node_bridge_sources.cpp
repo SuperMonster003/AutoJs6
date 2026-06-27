@@ -9586,7 +9586,7 @@ std::string buildEmbeddedScriptExecutionSource(
           "node:test/reporters"
         ]),
         resourceLimits: "bounded_callbacks_streams_crypto_zlib",
-        npmCorpus: "real_npm_phase9_30_fixture_baseline",
+        npmCorpus: "real_npm_phase13_53_fixture_corpus",
         desktopDifferential: "modern_core_s7_36_partial",
         packagedBehavior: "existing_v1_1_smokes_partial",
         rawDesktopParity: false,

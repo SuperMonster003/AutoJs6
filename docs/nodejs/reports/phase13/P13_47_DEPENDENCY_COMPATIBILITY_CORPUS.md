@@ -1,8 +1,8 @@
 # P13-47 Dependency Compatibility Corpus
 
 P13-47 records dependency compatibility corpus as partial. The current landing
-adds Phase 13 classification metadata to the fixed real npm corpus, keeps the
-offline fixture count at 50, extends the desktop differential report with
+adds Phase 13 classification metadata to the fixed real npm corpus, raises the
+offline fixture count to 53, extends the desktop differential report with
 category pass-rate rows, and adds a host verifier plus Gradle gate.
 
 ## Covered
@@ -12,6 +12,9 @@ category pass-rate rows, and adds a host verifier plus Gradle gate.
   `autojs6-phase13-dependency-compatibility-corpus-v1`.
 - The taxonomy covers the required P13-47 reason kinds:
   `missing_builtin`, `native_addon`, `postinstall`, `network`, and `fs`.
+- `targetedFixtureDeltas` records the Phase 13 stdlib +3 pass delta for
+  `stdlib-digest-stream-package`, `perf-async-hooks-package`, and
+  `url-buffer-codec-package`.
 - Each category records fixture references plus package/reason rows so reports
   can explain which package class is blocked and why.
 - `NodeRealNpmCompatInstrumentationTest.fixtureMetadataIsCompleteAndSafe`
@@ -31,8 +34,9 @@ category pass-rate rows, and adds a host verifier plus Gradle gate.
 
 - CI still needs to schedule the connected AutoJs6 real npm corpus and pass its
   connected-results artifact directory into the host differential report.
-- The corpus remains fixed and offline; live registry drift testing is still a
-  separate security and reproducibility problem.
+- The corpus remains fixed and offline after the 53-fixture expansion; live
+  registry drift testing is still a separate security and reproducibility
+  problem.
 - Unsafe package execution remains denied. Native addons, lifecycle scripts,
   postinstall downloads, and executable extraction are represented as metadata
   blocker categories, not vendored runnable payloads.
@@ -43,6 +47,9 @@ category pass-rate rows, and adds a host verifier plus Gradle gate.
 
 - Manifest taxonomy:
   `app/src/androidTest/assets/npm_compat_real/manifest.json`
+- Added fixed package fixtures:
+  `stdlib-digest-stream-package`, `perf-async-hooks-package`, and
+  `url-buffer-codec-package`
 - Metadata instrumentation:
   `NodeRealNpmCompatInstrumentationTest.fixtureMetadataIsCompleteAndSafe`
 - Differential report:

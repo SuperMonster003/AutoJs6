@@ -1305,7 +1305,8 @@ P13-43 records Node stdlib conformance as partial. The runtime exposes
 partial and returns the same limited wrappers as `require()`. `zlib/promises`,
 raw desktop parity, raw native handles, unrestricted network behavior, and
 broad terminal control remain unpromoted while broader Android difference
-coverage and real npm corpus growth stay future work.
+coverage and additional stdlib corpus expansion stay future work. The current
+stdlib npm corpus marker is `real_npm_phase13_53_fixture_corpus`.
 
 Large embedded result envelopes are bounded before Android Binder transport.
 Dedicated result fields carry `resultText`, `stdout`, `stderr`, `errorMessage`,
@@ -1347,13 +1348,14 @@ the host project/package permission manifest remains the authority ceiling and
 missing capabilities reject before plugin code runs.
 
 P13-47 records dependency compatibility corpus as partial. The fixed real npm
-corpus remains at 50 offline fixtures, and its manifest now records
+corpus now contains 53 offline fixtures, and its manifest records
 `phase13Compatibility` package reason categories for `missing_builtin`,
-`native_addon`, `postinstall`, `network`, and `fs`. The desktop differential
-report can show pass-rate rows by category when AutoJs6 results are supplied,
-but unsafe registry packages, native payloads, lifecycle scripts, and
-postinstall downloads are still represented as metadata blockers rather than
-runnable corpus content.
+`native_addon`, `postinstall`, `network`, and `fs` plus a stdlib
+`targetedFixtureDeltas` +3 pass delta. The desktop differential report can
+show pass-rate rows by category when AutoJs6 results are supplied, but unsafe
+registry packages, native payloads, lifecycle scripts, and postinstall
+downloads are still represented as metadata blockers rather than runnable
+corpus content.
 
 P13-48 records package lock and integrity policy as partial. The runtime
 exposes `autojs6:profile.packageIntegrityProfile`, backed by

@@ -275,6 +275,32 @@ class NodeRealNpmCompatInstrumentationTest {
         val requiredReasons = (0 until required.length()).map { required.getString(it) }.toSet()
         assertEquals(PHASE13_REQUIRED_REASON_KINDS, requiredReasons)
 
+        val targetedDeltas = metadata.getJSONArray("targetedFixtureDeltas")
+        var sawStdlibDelta = false
+        for (deltaIndex in 0 until targetedDeltas.length()) {
+            val delta = targetedDeltas.getJSONObject(deltaIndex)
+            val area = delta.getString("area")
+            assertTrue("unexpected targeted fixture delta area: $area", area in PHASE13_TARGETED_DELTA_AREAS)
+            assertTrue("targeted fixture delta notes missing for $area", delta.getString("notes").isNotBlank())
+            assertTrue("targeted fixture delta must not be negative for $area", delta.getInt("passDelta") >= 0)
+
+            val deltaFixtures = delta.getJSONArray("fixtures")
+            assertTrue("targeted fixture delta must reference fixtures for $area", deltaFixtures.length() > 0)
+            for (fixtureIndex in 0 until deltaFixtures.length()) {
+                val fixtureName = deltaFixtures.getString(fixtureIndex)
+                assertTrue("targeted fixture delta references unknown fixture: $fixtureName", fixtureName in fixtureNames)
+            }
+            if (area == "stdlib") {
+                sawStdlibDelta = true
+                assertEquals(3, delta.getInt("passDelta"))
+                assertEquals(
+                    setOf("stdlib-digest-stream-package", "perf-async-hooks-package", "url-buffer-codec-package"),
+                    (0 until deltaFixtures.length()).map { deltaFixtures.getString(it) }.toSet(),
+                )
+            }
+        }
+        assertTrue("missing stdlib targeted fixture delta", sawStdlibDelta)
+
         val categories = metadata.getJSONArray("categories")
         val seenReasons = mutableSetOf<String>()
         for (index in 0 until categories.length()) {
@@ -334,11 +360,18 @@ class NodeRealNpmCompatInstrumentationTest {
         private const val PHASE7_FIXTURE_COUNT = 13
         private const val PHASE8_FIXTURE_COUNT = 20
         private const val PHASE9_FIXTURE_COUNT = 30
-        private const val EXPECTED_FIXTURE_COUNT = 50
+        private const val EXPECTED_FIXTURE_COUNT = 53
         private const val REAL_NPM_FIXTURE_BATCH_SIZE = 6
         private const val REAL_NPM_FIXTURE_BATCH_TIMEOUT_MS = 30_000L
         private val FORBIDDEN_PACKAGE_SCRIPTS = setOf("preinstall", "install", "postinstall", "prepare")
         private val PHASE13_REQUIRED_REASON_KINDS = setOf("missing_builtin", "native_addon", "postinstall", "network", "fs")
+        private val PHASE13_TARGETED_DELTA_AREAS = setOf(
+            "stdlib",
+            "esm",
+            "network",
+            "fs",
+            "package_manager",
+        )
         private val REQUIRED_REAL_NPM_PATTERNS = setOf(
             "ESM-only small package",
             "hybrid CJS/ESM package",

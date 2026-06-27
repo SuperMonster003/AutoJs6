@@ -56,8 +56,15 @@ function buildReport(files) {
   const compatibility = manifest && manifest.phase13Compatibility || {};
   const fixtureNames = new Set((manifest && manifest.fixtures || []).map((fixture) => fixture.name));
   const categories = Array.isArray(compatibility.categories) ? compatibility.categories : [];
+  const targetedDeltas = Array.isArray(compatibility.targetedFixtureDeltas) ? compatibility.targetedFixtureDeltas : [];
   const reasonKinds = new Set(categories.map((category) => category.reasonKind));
   const surfaceEntry = surface(files.surfaceManifest.text, "packaging.plugins_distribution");
+  const targetedDeltaRows = targetedDeltas.map((delta) => ({
+    area: String(delta && delta.area || ""),
+    fixtures: Array.isArray(delta && delta.fixtures) ? delta.fixtures.map(String) : [],
+    passDelta: Number(delta && delta.passDelta),
+    notes: String(delta && delta.notes || ""),
+  }));
   const categoryRows = categories.map((category) => ({
     id: String(category.id || ""),
     title: String(category.title || ""),
@@ -82,13 +89,20 @@ function buildReport(files) {
       token(files.realNpmManifest, '"reasonKind": "fs"'),
       token(files.realNpmManifest, '"packages"'),
       token(files.realNpmManifest, '"reason"'),
-      token(files.realNpmManifest, '"fixtureCount": 50'),
+      token(files.realNpmManifest, '"fixtureCount": 53'),
+      token(files.realNpmManifest, '"targetedFixtureDeltas"'),
+      token(files.realNpmManifest, '"area": "stdlib"'),
+      token(files.realNpmManifest, '"stdlib-digest-stream-package"'),
+      token(files.realNpmManifest, '"perf-async-hooks-package"'),
+      token(files.realNpmManifest, '"url-buffer-codec-package"'),
+      token(files.realNpmManifest, '"passDelta": 3'),
     ]),
     scenario("instrumentation_and_differential", "Instrumentation and differential reports keep the taxonomy measurable", [
       token(files.realNpmTest, "assertPhase13CompatibilityMetadata"),
       token(files.realNpmTest, "PHASE13_REQUIRED_REASON_KINDS"),
+      token(files.realNpmTest, "PHASE13_TARGETED_DELTA_AREAS"),
       token(files.realNpmTest, "fixtureMetadataIsCompleteAndSafe"),
-      token(files.realNpmTest, "EXPECTED_FIXTURE_COUNT = 50"),
+      token(files.realNpmTest, "EXPECTED_FIXTURE_COUNT = 53"),
       token(files.differentialRunner, "phase13Compatibility: summarizePhase13CompatibilityCategories"),
       token(files.differentialRunner, "summarizePhase13CompatibilityCategories"),
       token(files.differentialRunner, "readAutoJsConnectedResults"),
@@ -143,13 +157,39 @@ function buildReport(files) {
       }
     }
   }
+  const deltaProblems = [];
+  const stdlibDelta = targetedDeltaRows.find((delta) => delta.area === "stdlib");
+  if (!stdlibDelta) {
+    deltaProblems.push("missing targeted fixture delta area: stdlib");
+  } else {
+    const requiredStdlibFixtures = ["stdlib-digest-stream-package", "perf-async-hooks-package", "url-buffer-codec-package"];
+    if (stdlibDelta.passDelta !== 3) {
+      deltaProblems.push("stdlib targeted fixture delta must record passDelta 3");
+    }
+    for (const fixture of requiredStdlibFixtures) {
+      if (!stdlibDelta.fixtures.includes(fixture)) {
+        deltaProblems.push(`stdlib targeted fixture delta missing fixture: ${fixture}`);
+      }
+    }
+  }
+  for (const delta of targetedDeltaRows) {
+    if (!delta.area || !delta.notes || !Number.isFinite(delta.passDelta) || delta.passDelta < 0) {
+      deltaProblems.push(`targeted fixture delta is incomplete: ${JSON.stringify(delta)}`);
+    }
+    for (const fixture of delta.fixtures) {
+      if (!fixtureNames.has(fixture)) {
+        deltaProblems.push(`targeted fixture delta ${delta.area} references unknown fixture: ${fixture}`);
+      }
+    }
+  }
 
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-47"), "P13-47 must remain listed in the Phase 13 checklist."),
     check("report-present", files.p13Report.exists, "P13-47 report must exist."),
     check("manifest-parseable", Boolean(manifest), "real npm corpus manifest must parse as JSON."),
-    check("fixture-count", fixtureNames.size === 50 && compatibility.fixtureCount === 50, "real npm corpus must keep the 50-fixture baseline."),
+    check("fixture-count", fixtureNames.size === 53 && compatibility.fixtureCount === 53, "real npm corpus must keep the 53-fixture baseline."),
     check("required-reason-kinds", categoryProblems.length === 0, "phase13Compatibility must cover required package reason categories."),
+    check("targeted-deltas", deltaProblems.length === 0, "phase13Compatibility must record targeted fixture deltas."),
     check("surface-present", Boolean(surfaceEntry), "`packaging.plugins_distribution` surface must exist."),
     check(
       "surface-evidence",
@@ -166,7 +206,7 @@ function buildReport(files) {
     ),
   ];
 
-  const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message).concat(categoryProblems);
+  const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message).concat(categoryProblems).concat(deltaProblems);
   const blockers = scenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`));
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;
   return {
@@ -182,6 +222,7 @@ function buildReport(files) {
     },
     fixtureCount: fixtureNames.size,
     requiredReasonKinds: REQUIRED_REASON_KINDS,
+    targetedDeltas: targetedDeltaRows,
     categories: categoryRows,
     scenarios,
     checks,
@@ -192,6 +233,7 @@ function buildReport(files) {
       phase13TaskComplete: false,
       finalBlockerClosable,
       taxonomyReady: scenarioById(scenarios, "manifest_taxonomy").status === "ready",
+      targetedDeltasReady: deltaProblems.length === 0,
       differentialCategoryReportingReady: scenarioById(scenarios, "instrumentation_and_differential").status !== "missing_evidence",
       unsafePackageExecutionPromoted: false,
       registryDriftTestingPromoted: false,
@@ -266,6 +308,17 @@ function renderMarkdown(report) {
       category.reasonKind,
       category.fixtures.join(", "),
       category.packages.map((row) => `${row.name}: ${row.reason}`).join("; "),
+    ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  }
+  lines.push("", "## Targeted Fixture Deltas", "");
+  lines.push("| Area | Fixtures | Pass delta | Notes |");
+  lines.push("| --- | --- | --- | --- |");
+  for (const delta of report.targetedDeltas) {
+    lines.push([
+      delta.area,
+      delta.fixtures.join(", "),
+      delta.passDelta,
+      delta.notes,
     ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
   }
   lines.push("", "## Scenarios", "");

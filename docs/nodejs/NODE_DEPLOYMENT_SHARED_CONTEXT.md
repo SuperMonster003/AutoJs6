@@ -14,6 +14,11 @@ budgets, or local-worktree constraints would save future retries.
   Node.js feature-branch changes.
 - `gradle.properties` may contain local experimental Node.js validation flags.
   Do not stage or commit those local switches unless explicitly requested.
+- When a Safe-profile denial test must ignore local experimental switches, pass
+  an explicit Gradle property on the command line instead of editing
+  `gradle.properties`. For example, fixed real npm corpus network-denial
+  validation can use `-Pautojs.nodejs.network.experimental=false` when the
+  local worktree has network experiments enabled.
 
 ## Timeout Defaults
 

@@ -1562,7 +1562,8 @@ P13 task 本身使用以下执行状态：
   - Progress:
     - P13-43 partial landing 已添加 `stdlibProfile` 诊断，记录当前 Safe
       Node stdlib subset、代表性模块状态、Android 稳定差异、npm corpus
-      基线和 desktop differential 证据，同时保持 raw desktop parity、
+      `real_npm_phase13_53_fixture_corpus` 和 desktop differential 证据，同时保持
+      raw desktop parity、
       raw native handles、unrestricted network、broad terminal、raw
       `process.getBuiltinModule` bypass 和 `zlib/promises` 未提升。
     - `process.getBuiltinModule` 现在是 controlled partial：允许的 builtin
@@ -1605,6 +1606,10 @@ P13 task 本身使用以下执行状态：
       `zlib/promises` 的稳定 denial。
     - 已新增 host verifier:
       `tools/nodejs/phase13/verify-stdlib-conformance-decision.js`。
+    - real npm corpus 已新增 3 个 stdlib-dependent fixed fixture：
+      `stdlib-digest-stream-package`、`perf-async-hooks-package` 和
+      `url-buffer-codec-package`，并在 `phase13Compatibility.targetedFixtureDeltas`
+      中记录 stdlib +3 pass delta。
     - Gradle gate:
       `:app:verifyNodePhase13StdlibConformanceDecision`。
     - Report:
@@ -1613,7 +1618,7 @@ P13 task 本身使用以下执行状态：
       `phase13-stdlib-conformance-decision`。
   - Remaining: full desktop stdlib parity、更多 hostile inputs/edge cases、
     Android terminal/OS 差异矩阵、更多 stdlib-dependent real npm corpus
-    fixture 和通过率提升仍未完成。
+    dashboard 和 packaged stdlib 行为证据仍未完成。
 
 - [ ] P13-44: 推进 process/env/argv parity。
   - 范围：补齐 `process.argv`、`process.env`、cwd、exit、signals、versions、
@@ -1726,7 +1731,10 @@ P13 task 本身使用以下执行状态：
     - P13 每次放开桌面能力都能看到 corpus 通过率变化。
   - Progress:
     - P13-47 partial landing 已在 `npm_compat_real/manifest.json` 增加
-      `phase13Compatibility` 分类元数据，固定 50 个离线 fixture baseline。
+      `phase13Compatibility` 分类元数据，固定 53 个离线 fixture baseline。
+    - `phase13Compatibility.targetedFixtureDeltas` 记录 stdlib +3 pass delta，
+      对应 `stdlib-digest-stream-package`、`perf-async-hooks-package` 和
+      `url-buffer-codec-package`。
     - 分类覆盖 `missing_builtin`、`native_addon`、`postinstall`、`network`
       和 `fs`，每类包含 package/reason rows 与 fixture 引用。
     - `NodeRealNpmCompatInstrumentationTest.fixtureMetadataIsCompleteAndSafe`
