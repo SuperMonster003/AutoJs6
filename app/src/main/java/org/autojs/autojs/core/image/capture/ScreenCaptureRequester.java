@@ -2,16 +2,15 @@ package org.autojs.autojs.core.image.capture;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemClock;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import org.autojs.autojs.AutoJs;
@@ -31,6 +30,8 @@ import java.util.concurrent.TimeoutException;
 public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks implements StartForResultActivity.Callback, OnActivityResultDelegate {
 
     private static final long ACTIVITY_CREATE_TIMEOUT = 5000L;
+    private static final long FOREGROUND_SERVICE_START_TIMEOUT = 5000L;
+    private static final long FOREGROUND_SERVICE_CHECK_INTERVAL = 50L;
     private static final int REQUEST_CODE_MEDIA_PROJECTION = 17777;
 
     private final Handler mHandler;
@@ -39,7 +40,7 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
     private WeakReference<Activity> mActivityRef = new WeakReference<>(null);
     private Callback mCallback;
     private Mediator mMediator;
-    private ServiceConnection mServiceConnection;
+    private boolean mWaitingForForegroundService;
 
     public ScreenCaptureRequester() {
         super();
@@ -85,8 +86,8 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
         //  ! 5. 通过 MediaProjection#createVirtualDisplay 调用启动媒体投影的屏幕捕获会话
         //  ! 总结就是, 要保证: 先授权, 再启动服务, 再录屏的顺序.
         //  !
-        //  ! 原代码在 ScreenCaptureRequesterImpl#requst 中 startService 会有时序问题, 此时用户还没授权完成时, Android 14 启动前台服务实测会崩溃.
-        //  ! 改成 bindService 并等待 onServiceConnected 回调.
+        //  ! ScreenCaptureRequesterImpl#request 中 startService 的原始代码可能存在时序问题, 如果用户尚未完成授权, 在 Android 14 上启动前台服务将会崩溃.
+        //  ! 应在获得同意后启动, 并等待服务实际进入前台状态.
         //  !
         //  ! en-US (translated by JetBrains AI Assistant on Jul 28, 2024):
         //  !
@@ -101,7 +102,7 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
         //  !
         //  ! The original code in ScreenCaptureRequesterImpl#request's startService may have timing issues,
         //  ! if the user has not yet completed authorization, starting the foreground service on Android 14 will crash.
-        //  ! Change it to bindService and wait for the onServiceConnected callback.
+        //  ! Start it after consent, and wait until the service actually enters foreground state.
 
         if (requestCode != REQUEST_CODE_MEDIA_PROJECTION) {
             return;
@@ -112,29 +113,27 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
         }
         var clazz = ScreenCapturerForegroundService.class;
         Context applicationContext = getApplication().getApplicationContext();
-        applicationContext.startService(new Intent(applicationContext, clazz));
-        if (ForegroundServiceUtils.isRunning(applicationContext, clazz)) {
-            onRequest(resultCode, data);
+        Intent serviceIntent = new Intent(applicationContext, clazz);
+        ScreenCapturerForegroundService.clearForegroundStartFailure();
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                applicationContext.startForegroundService(serviceIntent);
+            } else {
+                applicationContext.startService(serviceIntent);
+            }
+        } catch (RuntimeException e) {
+            onRequestError(e);
             return;
         }
-        mServiceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                onRequest(resultCode, data);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                /* Empty body. */
-            }
-        };
-        applicationContext.bindService(new Intent(applicationContext, clazz), mServiceConnection, Context.BIND_AUTO_CREATE);
+        mWaitingForForegroundService = true;
+        waitForForegroundService(applicationContext, clazz, resultCode, data,
+                SystemClock.uptimeMillis() + FOREGROUND_SERVICE_START_TIMEOUT);
     }
 
     @Override
     public void onActivityStopped(Activity activity) {
         super.onActivityStopped(activity);
-        if (activity == mActivityRef.get() && activity instanceof StartForResultActivity) {
+        if (activity == mActivityRef.get() && activity instanceof StartForResultActivity && !mWaitingForForegroundService) {
             if (mCallback != null) {
                 mCallback.onRequestResult(0, null);
                 recycle();
@@ -177,6 +176,35 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
                 mCallback.onRequestError(e);
                 recycle();
             }
+        }
+    }
+
+    private void waitForForegroundService(Context context, Class<?> clazz, int resultCode, @Nullable Intent data, long deadlineUptimeMillis) {
+        if (mCallback == null) {
+            return;
+        }
+        RuntimeException foregroundStartFailure = ScreenCapturerForegroundService.getForegroundStartFailure();
+        if (foregroundStartFailure != null) {
+            onRequestError(foregroundStartFailure);
+            return;
+        }
+        if (ScreenCapturerForegroundService.isForegroundStarted() || ForegroundServiceUtils.isRunning(context, clazz)) {
+            onRequest(resultCode, data);
+            return;
+        }
+        if (SystemClock.uptimeMillis() >= deadlineUptimeMillis) {
+            context.stopService(new Intent(context, clazz));
+            onRequestError(new TimeoutException("Start screen capture foreground service timeout (" + FOREGROUND_SERVICE_START_TIMEOUT + "ms)"));
+            return;
+        }
+        mHandler.postDelayed(() -> waitForForegroundService(context, clazz, resultCode, data, deadlineUptimeMillis),
+                FOREGROUND_SERVICE_CHECK_INTERVAL);
+    }
+
+    private void onRequestError(@NonNull Throwable t) {
+        if (mCallback != null) {
+            mCallback.onRequestError(t);
+            recycle();
         }
     }
 
@@ -231,16 +259,14 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
             }
             mActivityRef = new WeakReference<>(null);
         }
+        mWaitingForForegroundService = false;
         mCallback = null;
         getApplication().unregisterActivityLifecycleCallbacks(this);
         mHandler.removeCallbacksAndMessages(null);
     }
 
     public void unbindService() {
-        if (mServiceConnection != null) {
-            getApplication().getApplicationContext().unbindService(mServiceConnection);
-            mServiceConnection = null;
-        }
+        /* Empty body. */
     }
 
 }
