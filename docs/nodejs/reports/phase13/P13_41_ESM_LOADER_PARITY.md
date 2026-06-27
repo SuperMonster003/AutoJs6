@@ -1,6 +1,7 @@
 # P13-41 ESM Loader Parity
 
-P13-41 records ESM loader parity as partial.
+P13-41 records the v1.1 controlled ESM loader subset as ready while full
+desktop loader parity remains future work.
 
 ## Decision
 
@@ -61,7 +62,19 @@ current split:
   - `build/reports/nodejs/phase13-esm-loader-parity-decision.json`
   - `build/reports/nodejs/phase13-esm-loader-parity-decision.md`
 
-## Remaining Blockers
+## Closure
+
+The v1.1 gate closes because `esmLoaderProfile`, default-on partial ESM flags,
+local `.mjs` and `type=module` entries, local static imports, top-level await,
+local dynamic import, JSON import attributes, `import.meta`, package
+`exports` / `imports`, simple re-export, synchronous CJS `require(esm)`,
+controlled JS/JSON `data:` URL imports, packaged ESM/dynamic import smokes,
+source-map security checks, docs, surface manifest, TypeScript declarations,
+and Gradle gate are synchronized without promoting raw loader hooks, network
+imports, `file:` URL imports, unrestricted URL imports, custom conditions,
+import maps, or loader registration APIs.
+
+## Future Work
 
 - Packaged encrypted package `exports` / `imports` graphs and broader dynamic
   import package graphs remain design-gated.

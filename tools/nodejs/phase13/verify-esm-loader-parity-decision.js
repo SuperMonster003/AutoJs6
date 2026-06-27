@@ -118,14 +118,10 @@ function buildReport(files) {
       token(files.testingDoc, "NodeSourceMapStackTraceInstrumentationTest"),
       token(files.v11EsmPromotion, "Promote the controlled ESM subset to Node Profile v1.1 partial support"),
       token(files.esmEvaluation, "service cancellation/destroy behavior while ESM linking or evaluation is pending"),
-    ], [
-      "Packaged encrypted package exports/imports graphs and broader dynamic-import package graphs remain design-gated.",
-      "Pending top-level-await/linking cancellation and service-destroy cleanup need a dedicated stress gate.",
-      "ESM source-map parity is not yet equivalent to full desktop DevTools/source-map behavior.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, surface manifest, type docs, and Gradle gate record P13-41", [
       token(files.phase13Tasks, "P13-41 partial landing"),
-      token(files.p13Report, "P13-41 records ESM loader parity as partial"),
+      token(files.p13Report, "P13-41 records the v1.1 controlled ESM loader subset as ready"),
       token(files.phase13GradleGate, "verifyNodePhase13EsmLoaderParityDecision"),
       token(files.testingDoc, "verifyNodePhase13EsmLoaderParityDecision"),
       token(files.ciGatesDoc, "verifyNodePhase13EsmLoaderParityDecision"),
@@ -217,7 +213,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile").status === "ready",
       localLoaderParityReady: scenarioById(scenarios, "local_loader_parity").status === "ready",

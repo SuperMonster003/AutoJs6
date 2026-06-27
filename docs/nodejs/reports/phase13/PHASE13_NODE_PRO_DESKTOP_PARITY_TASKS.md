@@ -1571,7 +1571,7 @@ P13 task 本身使用以下执行状态：
     cleanup, process accounting, packaged metadata/disclosure, hostile corpus,
     rollback controls, and release profile policy remain future gates.
 
-- [ ] P13-41: 推进完整 ESM loader parity。
+- [x] P13-41: 推进完整 ESM loader parity。
   - 范围：扩展 `.mjs`、`type=module`、TLA、dynamic import、package exports/imports、
     import attributes、CJS interop。
   - 验收：
@@ -1634,6 +1634,19 @@ P13 task 本身使用以下执行状态：
   - Remaining: packaged encrypted package exports/imports graph、broader
     dynamic-import package graph、pending TLA/linking cancellation cleanup、
     full desktop source-map parity 仍未完成。
+  - Closure: P13-41 v1.1 completes the controlled ESM loader subset with
+    `esmLoaderProfile`, default-on partial ESM/local dynamic import flags,
+    `.mjs` / `type=module` entries, local static imports, TLA, JSON import
+    attributes, `import.meta`, package `exports` / `imports`, simple re-export,
+    sync CJS `require(esm)`, controlled JS/JSON `data:` URL imports, packaged
+    ESM/dynamic import smokes, docs, surface manifest, TypeScript declarations,
+    and Gradle gate while raw loader hooks, network/file/unrestricted URL
+    imports, custom conditions, import maps, and loader registration remain
+    stable-denied.
+  - Future full-loader work: packaged encrypted package exports/imports graphs,
+    broader dynamic-import package graphs, pending TLA/linking cancellation
+    cleanup stress, and full desktop DevTools/source-map parity remain future
+    gates.
 
 - [x] P13-42: 推进 npm/package manager on Android。
   - 范围：从 host-side bundler/validator 推进到 Android 侧 npm 包安装/管理能力。

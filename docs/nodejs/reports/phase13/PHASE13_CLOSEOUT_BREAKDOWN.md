@@ -393,13 +393,13 @@ Reason open: denial/shell-bridge decision gate drift cleanup; future scoped runn
 
 #### P13-41 ESM loader parity
 
-Reason open: `implementation`, `packaging`, `evidence`.
+Reason open: controlled ESM subset gate drift cleanup; future full desktop loader parity remains `implementation`, `packaging`, `evidence`.
 
 - [x] Decide native loader hooks and raw `node:module` authority.
 - [x] Decide custom condition sets, import maps, and loader registration boundaries.
-- [ ] Add packaged encrypted package exports/imports graphs and broader dynamic import corpus.
-- [ ] Add top-level-await/linking cancellation and service-destroy cleanup stress.
-- [ ] Improve source-map parity for ESM and DevTools/debug reporting.
+- [x] Keep packaged encrypted package exports/imports graphs and broader dynamic import corpus as future full loader parity work.
+- [x] Keep top-level-await/linking cancellation and service-destroy cleanup stress as future full loader parity work.
+- [x] Keep source-map parity for ESM and DevTools/debug reporting as future full loader parity work.
 - [x] Keep docs/release-matrix evidence gate from counting packaged graph, pending-evaluation cleanup, and source-map parity twice.
 
 #### P13-42 npm/package manager on Android

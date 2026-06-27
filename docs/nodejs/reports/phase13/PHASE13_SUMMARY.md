@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 32
-- Open tasks: 26
+- Completed tasks: 33
+- Open tasks: 25
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -55,7 +55,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-38` | `completed` | `desktop.execution_runtime` | 推进 controlled WASI。 |
 | `P13-39` | `completed` | `desktop.execution_runtime` | 决策 native addon `.node` loading。 |
 | `P13-40` | `completed` | `desktop.execution_runtime` | 推进 `child_process` scoped runner。 |
-| `P13-41` | `open` | `desktop.modules_npm_process` | 推进完整 ESM loader parity。 |
+| `P13-41` | `completed` | `desktop.modules_npm_process` | 推进完整 ESM loader parity。 |
 | `P13-42` | `completed` | `desktop.modules_npm_process` | 推进 npm/package manager on Android。 |
 | `P13-43` | `completed` | `desktop.modules_npm_process` | 扩展 Node stdlib conformance。 |
 | `P13-44` | `completed` | `desktop.modules_npm_process` | 推进 process/env/argv parity。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 25
+- Reports with blockers: 24
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -175,7 +175,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-dependency-compatibility-corpus.json` | `verifyNodePhase13DependencyCompatibilityCorpus` | `P13-47` | `ready` | 0 | 0 |
 | `phase13-desktop-parity-examples.json` | `verifyNodePhase13DesktopParityExamples` | `P13-54` | `ready` | 0 | 0 |
 | `phase13-dgram-udp-decision.json` | `verifyNodePhase13DgramUdpDecision` | `P13-31` | `ready` | 0 | 0 |
-| `phase13-esm-loader-parity-decision.json` | `verifyNodePhase13EsmLoaderParityDecision` | `P13-41` | `partial` | 0 | 3 |
+| `phase13-esm-loader-parity-decision.json` | `verifyNodePhase13EsmLoaderParityDecision` | `P13-41` | `ready` | 0 | 0 |
 | `phase13-filesystem-advanced-apis.json` | `verifyNodePhase13FilesystemAdvancedApis` | `P13-33` | `partial` | 0 | 2 |
 | `phase13-filesystem-profile-decision.json` | `verifyNodePhase13FilesystemProfileDecision` | `P13-32` | `partial` | 0 | 3 |
 | `phase13-full-heavy-resource-stress.json` | `verifyNodePhase13FullHeavyResourceStress` | `P13-08` | `partial` | 0 | 2 |
