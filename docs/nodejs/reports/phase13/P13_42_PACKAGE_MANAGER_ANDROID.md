@@ -98,6 +98,18 @@ unrestricted JavaScript package-manager mutation on Android. A script-visible
   - `tools/nodejs/phase13/verify-package-manager-android-decision.js`
   - `:app:verifyNodePhase13PackageManagerAndroidDecision`
 
+## Policy Decision
+
+- npm CLI, `npm.exec()`, `npm.runScript()`, registry install, publish, and pack
+  entry points stay denied on Android.
+- Lifecycle scripts, debug lifecycle execution, bin links/shims, symlink
+  materialization, native build/native payload execution, postinstall downloads,
+  and arbitrary executable launch stay denied.
+- Raw `node_modules` mutation is not a script authority. Android mutation stays
+  limited to the guarded local-unpacked app-private store path, requires
+  `package_manager.mutate`, `allowMutation: true`, and expected integrity from
+  a dry-run plan, and never grants registry/tarball install authority.
+
 ## Existing Substrate
 
 P13-09 already added `NodeAndroidPackageInstallManager`, which supports local

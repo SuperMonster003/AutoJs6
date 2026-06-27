@@ -206,7 +206,6 @@ function buildReport(files) {
       token(files.p13AndroidManagerReport, "`NodeAndroidPackageInstallManager` supports"),
       token(files.p13AndroidManagerVerifier, "verifyNodePhase13AndroidPackageInstallManager"),
     ], [
-      "No Android registry downloader, npm CLI, lifecycle/bin/native execution, or raw node_modules mutation API is promoted yet.",
       "Signed packaged native payloads, native build execution, lifecycle debug mode, and bin shim strategy remain future work.",
     ]),
     scenario("host_managed_install_equivalent", "Host-side package manager remains the equivalent npm install path while Android runtime install stays constrained", [
@@ -238,7 +237,7 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-42 Android package manager"),
     ], [
-      "P13-42 remains partial until Android-side registry install, unrestricted install authority, lifecycle policy, signed native payloads, and packaged distribution evidence close.",
+      "P13-42 remains partial until Android-side registry install, unrestricted install authority, signed native payloads, and packaged distribution evidence close.",
     ]),
   ];
 
@@ -376,6 +375,20 @@ function buildReport(files) {
         files.p13Report.text.includes("constrained to the local store substrate"),
       "P13-42 must keep host-managed install validation as the safe default until mobile install authority is reviewed.",
     ),
+    check(
+      "npm-cli-lifecycle-bin-native-mutation-policy-decided",
+      files.p13Report.text.includes("## Policy Decision") &&
+        files.p13Report.text.includes("npm CLI, `npm.exec()`, `npm.runScript()`, registry install, publish, and pack") &&
+        files.p13Report.text.includes("Lifecycle scripts, debug lifecycle execution, bin links/shims") &&
+        files.p13Report.text.includes("Raw `node_modules` mutation is not a script authority") &&
+        packageManagerProfile.includes('npmCli: "denied"') &&
+        packageManagerProfile.includes('lifecycleScripts: "denied"') &&
+        packageManagerProfile.includes('binLinks: "denied"') &&
+        packageManagerProfile.includes('nativeBuild: "denied"') &&
+        packageManagerProfile.includes("rawExecutables: false") &&
+        packageManagerProfile.includes("rawRegistryAccess: false"),
+      "P13-42 must decide npm CLI, lifecycle, bin, native execution, and raw node_modules mutation policy.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -404,6 +417,7 @@ function buildReport(files) {
       androidLocalStoreReady: scenarioById(scenarios, "android_local_store_substrate").status !== "missing_evidence",
       hostManagedEquivalentReady: scenarioById(scenarios, "host_managed_install_equivalent").status !== "missing_evidence",
       hostManagedInstallSafeDefault: checkById(checks, "host-managed-install-safe-default").passed,
+      npmCliLifecycleBinNativeMutationPolicyDecided: checkById(checks, "npm-cli-lifecycle-bin-native-mutation-policy-decided").passed,
       npmCliPromoted: false,
       npmFacadeReady: files.nodeBridgeSources.text.includes("function __autojs6_limited_npm()") &&
         files.typesNpm.text.includes('declare module "npm"'),

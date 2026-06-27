@@ -1925,10 +1925,11 @@ This host gate records P13-42 as partial. It requires
 `packageManagerProfile` diagnostics, the P13-09 Android local package store,
 the Phase 10 host-managed package manager boundary, focused instrumentation,
 TypeScript declarations, surface manifest evidence, release matrix updates,
-and Phase13 docs. It keeps Android npm CLI, registry download, lifecycle
-execution, bin shims, symlink materialization, native builds/native payloads,
-postinstall downloads, unrestricted package-manager operations, raw executable
-authority, and raw registry access open. The `package_manager` module exposes
+and Phase13 docs. It keeps Android npm CLI, lifecycle execution, bin shims,
+symlink materialization, native builds/native payloads, postinstall downloads,
+raw executable authority, and raw registry access stable-denied. Android
+registry download, unrestricted package-manager operations, signed native
+payloads, and packaged distribution remain open. The `package_manager` module exposes
 read-maintenance `status`/`policy`/`sourcePolicy`, dry-run
 `planInstall`/`planUpdate`/`planRemove`, policy-only
 `planRegistryInstall`/`planTarballInstall`, guarded `install`/`update`/
