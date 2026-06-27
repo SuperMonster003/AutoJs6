@@ -131,9 +131,7 @@ function buildReport(files) {
       token(files.desktopMatrix, "P13-38 records controlled WASI diagnostics as partial"),
       token(files.builtinMatrixGenerator, "P13-38 records controlled WASI diagnostics as partial"),
       token(files.capabilityMatrix, "P13-38 controlled WASI profile"),
-    ], [
-      "P13-38 remains partial until a real controlled WASI facade and preopen/resource/packaged evidence exist.",
-    ]),
+    ], []),
   ];
 
   const checks = [

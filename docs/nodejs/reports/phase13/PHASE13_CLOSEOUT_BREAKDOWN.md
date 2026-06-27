@@ -352,6 +352,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 - [ ] Define args, env, virtual fd table, stdio, clock, random, process-exit, and network-denial policies.
 - [ ] Add module/memory/stdout/stderr/timeout/concurrency budgets.
 - [ ] Add packaged `.wasm` assets, hostile WASI corpus, and worker/WASM integration evidence.
+- [x] Keep docs/matrix evidence gate from counting controlled facade, preopen, resource, packaged, hostile corpus, and worker/WASM evidence twice.
 
 #### P13-39 native addon loading
 

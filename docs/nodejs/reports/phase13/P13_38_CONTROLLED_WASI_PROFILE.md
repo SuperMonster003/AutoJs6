@@ -61,6 +61,11 @@ promotion remains a separate Desktop-profile provider decision.
 - Add hostile WASI corpus and worker/WASM integration evidence before
   promotion.
 
+The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
+evidence-only for this partial decision. They do not add a separate P13-38
+blocker beyond the controlled facade, preopen/fd/env/args, resource budget,
+packaged, hostile corpus, and worker/WASM evidence items above.
+
 ## Rollback
 
 Remove `wasiProfile`, the focused instrumentation test, the P13-38 verifier,
