@@ -224,7 +224,7 @@ function buildReport(files) {
       token(files.typeSmoke, "const broadcastDenied: Promise<never> = app.sendBroadcast"),
       token(files.typeSmoke, "const compatBroadcastDenied: Promise<never> = rhinoCompat.app.sendBroadcast"),
       token(files.conformanceTest, 'await expectRejectCode("app.sendBroadcast"'),
-      token(files.conformanceTest, "app sendBroadcast/root rejected stubs must not dispatch bridge requests"),
+      token(files.conformanceTest, "app raw Uri/kill/dual/sendBroadcast/root rejected stubs must not dispatch bridge requests"),
       token(files.intentBroadcastProviderReport, "Status: partial"),
       token(files.broadcastTasksDoc, "No JavaScript API is implemented yet."),
       token(files.securityModel, "P13-23 records app/intent/broadcast Pro parity as partial"),
