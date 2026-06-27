@@ -200,13 +200,13 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-23 app/intent/broadcast parity
 
-Reason open: `implementation`, `policy`, `evidence`, `packaging`.
+Reason open: `implementation`, `evidence`, `packaging`.
 
 - [ ] Add a descriptor alias matrix for Rhino activity short forms.
 - [ ] Add safe Activity short-form device smoke and invalid component/flag/extras negative tests.
 - [ ] Define redacted installed-app list schemas and privacy disclosure policy.
 - [ ] Add packaged scoped file view/edit evidence.
-- [ ] Decide `sendBroadcast`, raw `Uri`/`FileProvider`, dual-user, and root/Shizuku app tiers.
+- [x] Decide `sendBroadcast`, raw `Uri`/`FileProvider`, dual-user, and root/Shizuku app tiers.
 
 #### P13-24 shell/root/Shizuku
 

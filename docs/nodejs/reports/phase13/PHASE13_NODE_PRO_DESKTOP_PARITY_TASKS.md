@@ -71,6 +71,9 @@
   settings aliases, `app.launch()` as a `launchPackage()` alias, JSON-safe
   `app.parseUri()`, and stable fail-closed stubs for raw URI, kill, and
   dual-user app helpers backed by the existing scoped activity/settings bridge.
+- P13-23 keeps `app.sendBroadcast()`, raw Android `Uri` / `FileProvider`
+  handles, dual-user helpers, and root/Shizuku app tiers stable-denied for
+  v1.1; future promotion belongs under P13-22/P13-24 gates.
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.

@@ -105,7 +105,6 @@ function buildReport(files) {
       token(files.conformanceTest, "assert.deepStrictEqual(viewIntent.categories"),
     ], [
       "Add named Rhino activity short forms only after a separate descriptor alias matrix exists.",
-      "Add root/Shizuku execution examples only after the P13-24 shell capability path is promoted.",
     ]),
     scenario("android_start_activity_schema", "Android bridge parses category/categories, flags arrays, and JSON-safe extras", [
       token(files.protocol, "val appMethods = setOf("),
@@ -170,7 +169,6 @@ function buildReport(files) {
       token(files.p13Report, "`app.editFile()`"),
     ], [
       "Add packaged device evidence for scoped file view/edit Activity routing and disclosure.",
-      "Keep raw `Uri` / `FileProvider` handles unavailable to Node scripts.",
     ]),
     scenario("launch_alias_parity", "Rhino-style app.launch is a launchPackage alias without new bridge authority", [
       token(files.nodeBridgeSources, "launch: launchPackage"),
@@ -181,7 +179,6 @@ function buildReport(files) {
       token(files.p13Report, "`app.launchPackage()`"),
     ], [
       "Add migration examples for scripts that used Rhino global `launch()`.",
-      "Keep dual-user launch helpers under explicit P13-24 capability routing.",
     ]),
     scenario("rhino_app_helper_aliases", "Remaining Rhino app helper names are either JSON-safe or stable fail-closed stubs", [
       token(files.nodeBridgeSources, "function __autojs6_app_parse_uri_descriptor(value, methodName)"),
@@ -212,9 +209,6 @@ function buildReport(files) {
       token(files.p13Report, "`app.parseUri()`"),
       token(files.p13Report, "`app.getUriForFile()`"),
       token(files.p13Report, "`app.kill()`"),
-    ], [
-      "Keep raw Android `Uri` / `FileProvider` handles blocked until a scoped URI provider and disclosure model exist.",
-      "Keep root/Shizuku/dual-user helpers blocked until P13-24 explicit capability routing is promoted.",
     ]),
     scenario("broadcast_and_privileged_boundary", "Broadcast send and privileged Rhino options remain rejected before bridge dispatch", [
       token(files.nodeBridgeSources, "function __autojs6_app_send_broadcast_unavailable_error()"),
@@ -228,9 +222,19 @@ function buildReport(files) {
       token(files.intentBroadcastProviderReport, "Status: partial"),
       token(files.broadcastTasksDoc, "No JavaScript API is implemented yet."),
       token(files.securityModel, "P13-23 records app/intent/broadcast Pro parity as partial"),
-    ], [
-      "Promote broadcast send only after receiver authority, exported policy, manifest policy, user disclosure, and rate limits are complete.",
-      "Keep root and Shizuku under P13-24 rather than accepting privileged app options.",
+    ]),
+    scenario("stable_denied_app_tiers", "sendBroadcast, raw URI/FileProvider, dual-user, and root/Shizuku app tiers stay stable-denied", [
+      token(files.p13Report, "P13-23 keeps `app.sendBroadcast()`, raw Android `Uri` / `FileProvider`"),
+      token(files.p13Report, "handles, dual-user helpers, and root/Shizuku app tiers stable-denied for v1.1"),
+      token(files.phase13Tasks, "P13-23 keeps `app.sendBroadcast()`, raw Android `Uri` / `FileProvider`"),
+      token(files.nodeBridgeSources, "function __autojs6_app_send_broadcast_unavailable_error()"),
+      token(files.nodeBridgeSources, "function __autojs6_app_raw_uri_unavailable_error(methodName)"),
+      token(files.nodeBridgeSources, "function __autojs6_app_privileged_unavailable_error(methodName)"),
+      token(files.conformanceTest, "app raw Uri/kill/dual/sendBroadcast/root rejected stubs must not dispatch bridge requests"),
+      token(files.appTypes, "sendBroadcast(request: IntentRequest | string, options?: AutoJs6Node.BridgeCallOptions): Promise<never>;"),
+      token(files.appTypes, "getUriForFile(path: string): never;"),
+      token(files.appTypes, "startDualActivity(request: IntentRequest | string, options?: AutoJs6Node.BridgeCallOptions): Promise<never>;"),
+      token(files.appTypes, "kill(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<never>;"),
     ]),
     scenario("rhino_app_gap_inventory", "Rhino app augment remains broader than the Node app surface", [
       token(files.appRhino, "::intent.name"),
@@ -257,7 +261,7 @@ function buildReport(files) {
       token(files.typesReadme, "P13-23 records the partial app/intent/broadcast parity gate"),
       token(files.surfaceManifestDoc, "phase13-app-intent-broadcast-parity"),
     ], [
-      "Keep P13-23 open until broadcast send promotion, packaged smoke, negative corpus, raw installed-app list policy, and migration examples land.",
+      "Keep P13-23 open until packaged smoke, negative corpus, redacted installed-app list policy, alias matrix, and migration examples land.",
     ]),
   ];
   const checks = [
@@ -319,6 +323,7 @@ function buildReport(files) {
       androidStartActivitySchemaReady: scenarioById(scenarios, "android_start_activity_schema").status !== "missing_evidence",
       broadcastSendReady: false,
       rootShizukuAppOptionsReady: false,
+      stableDeniedAppTiers: scenarioById(scenarios, "stable_denied_app_tiers").status === "ready",
       rhinoAppHelperAliasStubsReady: scenarioById(scenarios, "rhino_app_helper_aliases").status !== "missing_evidence",
       rhinoAppFullParityReady: false,
       proSurfacePromoted: false,

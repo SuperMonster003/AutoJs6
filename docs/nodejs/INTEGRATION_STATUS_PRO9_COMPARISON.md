@@ -1027,8 +1027,9 @@ P13-23 records app/intent/broadcast Pro parity as partial: JSON-safe
 `app.query` lookups, scoped file view/edit helpers, `app.launch()` alias
 parity, and JSON-safe `app.parseUri()` descriptors are evidence-backed.
 `app.getUriForFile()`, `app.kill()`, dual-user helpers, and
-`app.sendBroadcast()` are stable denials, while raw URI/FileProvider handles,
-root/Shizuku app options, raw installed-app list APIs, packaged behavior, and
+`app.sendBroadcast()` are stable denials for P13-23 v1.1. Future raw
+URI/FileProvider, root/Shizuku/dual-user, and broadcast authority belongs under
+P13-22/P13-24 gates, while raw installed-app list APIs, packaged behavior, and
 raw Android app/intent objects remain blocked.
 
 P13-24 records shell/root/Shizuku capability promotion as partial: ordinary

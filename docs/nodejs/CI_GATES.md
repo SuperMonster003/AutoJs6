@@ -429,9 +429,9 @@ app/intent/broadcast Pro parity state: JSON-safe `app.intent()` descriptors,
 `app.startActivity()` descriptor normalization, TypeScript/conformance evidence,
 JSON-safe `app.parseUri()` descriptors, and stable `app.sendBroadcast()`,
 raw-URI, kill, dual-user, plus privileged app-option rejection are present,
-while broadcast send promotion, raw URI/FileProvider handles, root/Shizuku app
-routing, raw installed-app list APIs, packaged smoke, and raw Android app/intent
-objects remain blocked.
+with broadcast/raw URI/root/Shizuku/dual-user authority stable-denied for
+P13-23 v1.1. Raw installed-app list APIs, packaged smoke, alias matrix,
+negative corpus, and raw Android app/intent objects remain blocked.
 `verifyNodePhase13ShellRootShizukuCapability` records the P13-24 partial
 shell/root/Shizuku capability state: `shell`, `shell.root`, and
 `shell.shizuku` are split capability tokens, `execRoot()` routes through the
@@ -629,9 +629,9 @@ host promotion-status gate for app/intent/broadcast parity and keeps the surface
 partial: JSON-safe `app.intent()`, normalized `app.startActivity()`, scoped
 file view/edit helpers, `app.launch()` alias parity, JSON-safe
 `app.parseUri()`, and stable raw-URI/kill/dual-user rejections are covered,
-while `sendBroadcast` promotion, raw URI/FileProvider handles, root/Shizuku app
-options, raw installed-app list APIs, packaged behavior, and raw Android objects
-require separate evidence.
+while `sendBroadcast`, raw URI/FileProvider handles, and root/Shizuku app
+options stay stable-denied for P13-23 v1.1. Raw installed-app list APIs,
+packaged behavior, and raw Android objects require separate evidence.
 P13-24 additionally uses `verifyNodePhase13ShellRootShizukuCapability` as the
 host promotion-status gate for shell/root/Shizuku capability parity and keeps
 the surface partial: ordinary shell and explicit root facades are covered by

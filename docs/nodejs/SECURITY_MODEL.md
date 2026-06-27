@@ -666,9 +666,10 @@ P13-22 records IntentTask/broadcast task provider promotion as partial. The exis
 P13-23 records app/intent/broadcast Pro parity as partial. Node `app.intent()`
 and `app.startActivity()` accept only JSON-safe descriptors, and privileged
 Rhino options such as `root`, `shizuku`, `dual`, `user`, and `userId` are
-rejected before bridge dispatch. `app.sendBroadcast()` is a stable rejection
-stub until broadcast authority, manifest policy, user disclosure, rate limits,
-packaged smoke, and the P13-24 shell/root/Shizuku capability split are complete.
+rejected before bridge dispatch. `app.sendBroadcast()`, raw Android
+`Uri`/`FileProvider` handles, dual-user helpers, and root/Shizuku app tiers stay
+stable-denied for P13-23 v1.1; future promotion belongs under the P13-22
+broadcast provider or P13-24 shell/root/Shizuku capability gates.
 
 Future support must follow `docs/nodejs/design/WORK_MANAGER.md`:
 

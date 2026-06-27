@@ -88,20 +88,18 @@ No raw Android `Intent`, `Uri`, `Bundle`, `ComponentName`, `PackageManager`,
 `ResolveInfo`, `ApplicationInfo`, `PackageInfo`, `BroadcastReceiver`, or
 `Context` object crosses the bridge.
 
+P13-23 keeps `app.sendBroadcast()`, raw Android `Uri` / `FileProvider`
+handles, dual-user helpers, and root/Shizuku app tiers stable-denied for v1.1.
+Future promotion must land under the dedicated P13-22 broadcast provider or
+P13-24 shell/root/Shizuku capability gates instead of expanding the ordinary
+`app` bridge implicitly.
+
 ## Remaining Blockers
 
-- Raw Android `Uri`/`FileProvider` promotion for `getUriForFile()`.
-- `kill()` and dual-user helper promotion through explicit P13-24
-  root/Shizuku/dual-user capability surfaces.
 - Raw installed-app list APIs: `getInstalledApps()` and
   `getInstalledPackages()`.
 - Preset app aliases beyond exact package/name lookup.
 - Activity short-form mapping beyond URL strings and JSON-safe descriptors.
-- Root/Shizuku examples that combine `app.intentToShell()` with explicit
-  P13-24 shell capabilities.
-- Broadcast send promotion with receiver authority, exported/non-exported
-  policy, manifest synthesis, user disclosure, rate limits, and packaged smoke.
-- root/Shizuku/dual-user routes through explicit P13-24 capability surfaces.
 - Packaged privacy disclosure examples for exact app/package lookup.
 - Negative device tests for invalid component names, invalid flag values,
   non-object extras, and blocked privileged options.

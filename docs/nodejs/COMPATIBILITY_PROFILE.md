@@ -1716,10 +1716,12 @@ runtime.
     and `app.startActivity()` use JSON-safe descriptors with
     `category`/`categories`, numeric flag arrays, primitive extras, and scoped
     file view/edit Activity helpers. `app.parseUri()` returns JSON-safe URI
-    descriptors, while `app.getUriForFile()`, `app.kill()`, dual-user helpers,
-    and broadcast sending remain stable denials until raw URI/FileProvider
-    policy, root/Shizuku/dual-user routes, raw Android objects, raw
-    installed-app list APIs, and packaged app smoke are resolved.
+    descriptors. `app.getUriForFile()`, `app.kill()`, dual-user helpers, and
+    broadcast sending stay stable-denied for P13-23 v1.1; future raw
+    URI/FileProvider, root/Shizuku/dual-user, and broadcast authority belongs
+    under the P13-22/P13-24 gates. Redacted installed-app list APIs, packaged
+    app smoke, negative corpus, alias matrix, and migration examples remain
+    open.
 - `barcode` / `qrcode`
   - `detect(imageOrPath, options?): Promise<BarcodeSnapshot | null>`
   - `detectAll(imageOrPath, options?): Promise<readonly BarcodeSnapshot[]>`

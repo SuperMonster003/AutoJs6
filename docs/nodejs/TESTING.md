@@ -1494,9 +1494,10 @@ coverage, conformance coverage, and stable pre-dispatch rejection for
 `app.sendBroadcast()` plus privileged `root`/`shizuku`/`dual` app options. It
 also requires JSON-safe `app.parseUri()` evidence and stable denials for
 `app.getUriForFile()`, `app.kill()`, and dual-user helpers. It does not promote
-broadcast sending, raw URI/FileProvider handles, root/Shizuku routing through
-ordinary app APIs, raw installed-app list APIs, packaged behavior, or raw
-Android app/intent objects.
+broadcast sending, raw URI/FileProvider handles, or root/Shizuku routing through
+ordinary app APIs; those stay stable-denied for P13-23 v1.1. Raw installed-app
+list APIs, packaged behavior, negative corpus, and raw Android app/intent
+objects remain open.
 
 Phase 13 shell/root/Shizuku capability status gate:
 
