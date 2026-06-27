@@ -1978,13 +1978,16 @@ P13 task 本身使用以下执行状态：
     - `sample/nodejs/typescript-smoke/src/main.ts` now type-checks
       Safe/Pro/Desktop/Debug conditional profile differences without declaring
       denied desktop modules as callable modules.
+    - `verify-type-declaration-profiles` now checks P13-49 profile selection,
+      P13-51 rollback, and P13-52 privacy/disclosure type alignment through
+      `autojs_global.d.ts`, the type README, and `typescript-smoke`.
     - Host verifier:
       `tools/nodejs/phase13/verify-type-declaration-profiles.js`.
     - Gradle gate: `:app:verifyNodePhase13TypeDeclarationProfiles`.
     - Report:
       `docs/nodejs/reports/phase13/P13_55_TYPE_DECLARATION_PROFILES.md`.
-    - Remaining P13-55 blockers: runtime profile promotion, callable denied
-      desktop modules, and packaged profile authority remain gated.
+    - Remaining P13-55 blockers: runtime profile promotion and generated
+      declaration package release checks remain gated.
 
 - [ ] P13-56: 更新 migration and Pro9 comparison docs。
   - 范围：同步 `MIGRATION_FROM_RHINO.md`、`INTEGRATION_STATUS_PRO9_COMPARISON.md`、

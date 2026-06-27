@@ -903,11 +903,12 @@ package-manager parity remain unpromoted.
 profile-aware TypeScript declaration gate. It requires
 `profile_capabilities.d.ts`, `index.d.ts` wiring, declaration README updates,
 `typescript-smoke` Safe/Pro/Desktop/Debug conditional type coverage,
-`verifyAutoJs6NodeTypeDeclarations`, `typeCheckNodeTypescriptSmoke`, surface
-manifest evidence, release matrix updates, and docs updates while keeping the
-matrix metadata-only. P13-55 records TypeScript profile declarations as
-partial; runtime profile promotion and denied desktop module declarations
-remain unpromoted.
+P13-49 profile selection, P13-51 rollback, and P13-52 privacy/disclosure type
+alignment, `verifyAutoJs6NodeTypeDeclarations`, `typeCheckNodeTypescriptSmoke`,
+surface manifest evidence, release matrix updates, and docs updates while
+keeping the matrix metadata-only. P13-55 records TypeScript profile
+declarations as partial; runtime profile promotion and generated declaration
+package release checks remain unpromoted.
 `verifyNodePhase13MigrationPro9Comparison` records P13-56 as the migration and
 Pro9 comparison docs gate. It requires `MIGRATION_FROM_RHINO.md`,
 `INTEGRATION_STATUS_PRO9_COMPARISON.md`,

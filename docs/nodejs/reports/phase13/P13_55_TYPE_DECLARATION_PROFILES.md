@@ -14,6 +14,10 @@ The declaration matrix covers the P13-53 and P13-54 example surfaces:
   inspector, package manager, and sanitized pure JavaScript npm dependency
   usage.
 
+The gate also checks that profile declarations stay aligned with P13-49 profile
+selection diagnostics, P13-51 rollback policy, and P13-52 privacy/disclosure
+policy metadata.
+
 The file provides:
 
 - `RuntimeProfileId`
@@ -53,6 +57,10 @@ Reports:
 Status is `partial`.
 
 This gate proves the declaration matrix, package index wiring, README
-documentation, `typescript-smoke` Safe/Pro/Desktop coverage, and Phase 13 docs.
-Runtime profile promotion remains diagnostic-only; denied desktop modules are
-type-described as gated surfaces instead of callable module declarations.
+documentation, `typescript-smoke` Safe/Pro/Desktop coverage, P13-49/P13-51/P13-52
+profile policy type alignment, and Phase 13 docs. Denied desktop modules are
+enforced as type-described gated surfaces instead of callable module
+declarations.
+
+Remaining blockers are runtime profile promotion and generated declaration
+package release checks after promotion and release packaging.

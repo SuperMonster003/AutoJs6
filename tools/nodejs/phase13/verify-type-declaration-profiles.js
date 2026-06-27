@@ -131,6 +131,23 @@ function buildReport(files) {
       token(files.typesProfileCapabilities, "raw_network"),
       token(files.typesProfileCapabilities, "package_manager"),
     ]),
+    scenario("security_rollback_privacy_alignment", "Profile declarations stay aligned with P13-49 to P13-52 security, rollback, and privacy metadata", [
+      token(files.typesAutojsGlobal, "ProfileSelectionDiagnostics"),
+      token(files.typesAutojsGlobal, "ProfileSelectionFailureHint"),
+      token(files.typesAutojsGlobal, "ProfileRollbackPolicy"),
+      token(files.typesAutojsGlobal, "PrivacyDisclosurePolicy"),
+      token(files.typesAutojsGlobal, "metadata_only_no_authority"),
+      token(files.typesAutojsGlobal, "implicitHighPrivilegeDenied"),
+      token(files.typescriptSmoke, "autojsProfile.profileSelection"),
+      token(files.typescriptSmoke, "autojsProfile.profileRollbackPolicy"),
+      token(files.typescriptSmoke, "autojsProfile.privacyDisclosurePolicy"),
+      token(files.typescriptSmoke, "ProfileSelectionHighRiskCapability"),
+      token(files.typescriptSmoke, "ProfileRollbackPackagedDowngrade"),
+      token(files.typescriptSmoke, "PrivacyDisclosurePackagedPolicy"),
+      token(files.typesReadme, "P13-49 extends the `autojs6:profile` declaration with `profileSelection`"),
+      token(files.typesReadme, "P13-51 extends the `autojs6:profile` declaration with `profileRollbackPolicy`"),
+      token(files.typesReadme, "P13-52 extends the `autojs6:profile` declaration with"),
+    ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-55", [
       token(files.phase13Tasks, "P13-55 partial landing"),
       token(files.p13Report, "P13-55 records TypeScript profile declarations as partial"),
@@ -145,7 +162,7 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.surfaceManifestDoc, REPORT_BASENAME),
     ], [
-      "Conditional declaration matrix is metadata-only; runtime profile promotion and callable denied desktop modules remain future work.",
+      "Generated declaration package release checks remain gated until profile promotion and release packaging.",
     ]),
   ];
 
@@ -189,7 +206,6 @@ function buildReport(files) {
   const blockers = [
     ...scenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`)),
     "runtime profile promotion is still diagnostic-only and does not grant Pro/Desktop authority",
-    "denied desktop modules remain type-described as profile-gated surfaces, not callable module declarations",
   ];
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;
   return {
@@ -213,6 +229,8 @@ function buildReport(files) {
       finalBlockerClosable,
       declarationMatrixReady: scenarioById(scenarios, "profile_capability_matrix").status === "ready",
       typeSmokeCoversProfiles: scenarioById(scenarios, "typescript_smoke").status === "ready",
+      securityRollbackPrivacyAligned: scenarioById(scenarios, "security_rollback_privacy_alignment").status === "ready",
+      deniedDesktopModulesCallable: false,
       metadataOnly: true,
       grantsAuthority: false,
     },

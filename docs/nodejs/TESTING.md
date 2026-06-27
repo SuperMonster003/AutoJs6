@@ -2269,11 +2269,12 @@ Phase 13 profile-aware TypeScript declarations gate:
 This host gate records P13-55 as partial. It requires
 `profile_capabilities.d.ts`, `index.d.ts` wiring, declaration README updates,
 `typescript-smoke` Safe/Pro/Desktop/Debug conditional type coverage,
-`verifyAutoJs6NodeTypeDeclarations`, `typeCheckNodeTypescriptSmoke`, surface
-manifest evidence, release matrix updates, and Phase 13 docs. The matrix
-documents Pro/Desktop profile requirements and Safe-profile denial behavior
-without declaring denied desktop modules as callable modules or granting
-runtime authority.
+P13-49 profile selection, P13-51 rollback, and P13-52 privacy/disclosure type
+alignment, `verifyAutoJs6NodeTypeDeclarations`, `typeCheckNodeTypescriptSmoke`,
+surface manifest evidence, release matrix updates, and Phase 13 docs. The
+matrix documents Pro/Desktop profile requirements and Safe-profile denial
+behavior while verifying denied desktop modules stay type-described as gated
+surfaces instead of callable module declarations.
 
 Phase 13 migration and Pro9 comparison docs gate:
 
