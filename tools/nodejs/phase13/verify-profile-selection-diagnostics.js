@@ -82,9 +82,7 @@ function buildReport(files) {
       token(files.p13ProfileSelectionTest, 'getJSONObject("declarationExamples")'),
       token(files.p13ProfileSelectionTest, "desktop_compat_opt_in"),
       token(files.p13ProfileSelectionTest, "debug_unsafe_lab"),
-    ], [
-      "Profile selection remains diagnostic-only; project settings and packaged metadata do not yet promote effective Pro/Desktop/Debug profiles.",
-    ]),
+    ], []),
     scenario("runtime_profile_and_error_hints", "autojs6:profile and capability errors expose profile selection diagnostics to scripts", [
       token(files.nodeBridgeSources, "const profileSelection = __autojs6_profile_selection_report(featureFlags, bridgePermissionsReport);"),
       token(files.nodeBridgeSources, "profileSelection,"),
@@ -141,7 +139,7 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-49 profile selection diagnostics"),
     ], [
-      "Project settings UI, packaged builder UI, and actual effective profile switching remain future implementation work.",
+      "Project settings UI and packaged builder UI remain future implementation work.",
     ]),
   ];
 
@@ -194,6 +192,24 @@ function buildReport(files) {
         !runtimeBlock.includes("userSelectable: true"),
       "P13-49 must not promote Pro/Desktop/Debug profiles or expose user-selectable switching as enabled.",
     ),
+    check(
+      "effective-profile-switching-stable-denied",
+      hasAll(files.p13Report, [
+        "Effective Pro/Desktop/Debug",
+        "profile switching stays stable-denied for P13-49",
+        "v1.1",
+      ]) &&
+        hasAll(files.compatibilityProfile, [
+          "Effective Pro/Desktop/Debug",
+          "profile switching stays stable-denied for P13-49",
+          "v1.1",
+        ]) &&
+        kotlinBlock.includes('put("effectiveProfile", SAFE_DEFAULT)') &&
+        kotlinBlock.includes('put("profilePromotion", false)') &&
+        runtimeBlock.includes('effectiveProfile: "safe_default"') &&
+        runtimeBlock.includes("profilePromotion: false"),
+      "P13-49 must keep effective Pro/Desktop/Debug profile switching stable-denied for v1.1.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -222,6 +238,7 @@ function buildReport(files) {
       runtimeProfileSelectionReady: scenarioById(scenarios, "runtime_profile_and_error_hints").status === "ready",
       doctorUxReady: scenarioById(scenarios, "doctor_ux").status === "ready",
       deniedOrUndeclaredDiagnosticsExplicit: checkById(checks, "actionable-error-hints").passed,
+      effectiveProfileSwitchingStableDenied: checkById(checks, "effective-profile-switching-stable-denied").passed,
       profilePromotionPromoted: false,
       userSelectableProfilePromoted: false,
       effectiveProfile: "safe_default",
@@ -247,6 +264,10 @@ function token(file, value) {
     token: value,
     present: file.exists && file.text.includes(value),
   };
+}
+
+function hasAll(file, values) {
+  return file.exists && values.every((value) => file.text.includes(value));
 }
 
 function check(id, passed, message) {

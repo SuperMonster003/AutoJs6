@@ -465,7 +465,8 @@ exposes `profileSelection` diagnostics through `autojs6:profile` and Node
 Doctor so Pro/AutoX migrations can see requested profiles, declared high-risk
 capabilities, Android permission synthesis, and blocked promotions. Missing
 bridge capability errors now report the required profile, Node capability, and
-Android permissions, but effective authority remains `safe_default`.
+Android permissions, but effective authority remains `safe_default`. Effective
+Pro/Desktop/Debug profile switching stays stable-denied for P13-49 v1.1.
 
 P13-50 records relaxed-capability security corpus closeout. AutoJs6 Node now
 tracks raw network, filesystem relaxation, Java interop, `child_process`,

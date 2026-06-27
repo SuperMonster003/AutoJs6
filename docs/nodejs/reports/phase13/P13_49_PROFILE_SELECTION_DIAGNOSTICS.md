@@ -21,6 +21,9 @@ capability errors with profile, capability, and Android permission hints.
 - Denied or undeclared capability failures remain explicit: the stable error
   surface carries required profile, Node permission, Android permission, and
   declaration example diagnostics without promoting the requested profile.
+- Effective Pro/Desktop/Debug profile switching stays stable-denied for P13-49
+  v1.1. Requested profile metadata remains diagnostic-only and the effective
+  runtime profile remains `safe_default`.
 - `profileSelectionHint.declarationExamples` now carries JSON-safe
   `nodePermissions`, `projectJson.node.permissions`, and
   `packageJson.autojs6.node.permissions` snippets for the missing capabilities.
@@ -34,10 +37,8 @@ capability errors with profile, capability, and Android permission hints.
 
 - User-facing project settings and packaged builder controls are still future
   UX work.
-- Requested Pro/Desktop/Debug profiles do not grant authority yet.
-- Profile promotion, rollback UI, disclosure copy, and per-profile capability
-  enablement remain blocked until P13-50+ security, privacy, and rollback
-  evidence is complete.
+- Rollback UI, disclosure copy, and per-profile capability enablement remain
+  owned by P13-51/P13-52 and later promotion gates.
 
 ## Evidence
 

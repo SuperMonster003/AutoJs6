@@ -1231,7 +1231,8 @@ Doctor. Scripts can see requested Pro/Desktop/Debug metadata, declared
 high-risk capabilities, blocked promotions, and actionable failure hints for
 missing profile/capability/permission requirements. This improves migration
 debuggability for Pro/Desktop parity without promoting any profile beyond the
-current `safe_default` authority.
+current `safe_default` authority. Effective Pro/Desktop/Debug profile
+switching stays stable-denied for P13-49 v1.1.
 
 P13-50 records relaxed-capability security corpus closeout: AutoJs6 Node now
 tracks raw network, filesystem relaxation, Java interop, `child_process`,

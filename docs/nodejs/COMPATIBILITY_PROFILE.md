@@ -1389,7 +1389,8 @@ capability errors now include `requiredProfiles`, `requiredNodePermissions`,
 `project.json#node.permissions`, and
 `package.json#autojs6.node.permissions`. The effective
 profile remains `safe_default`; requested Pro/Desktop/Debug metadata is
-diagnostic-only and does not grant authority.
+diagnostic-only and does not grant authority. Effective Pro/Desktop/Debug
+profile switching stays stable-denied for P13-49 v1.1.
 
 P13-50 records relaxed-capability security corpus closeout. The corpus at
 `docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json` covers raw

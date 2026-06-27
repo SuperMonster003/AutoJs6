@@ -201,7 +201,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-process-parity-decision.json` | `verifyNodePhase13ProcessParityDecision` | `P13-44` | `partial` | 0 | 1 |
 | `phase13-process-worker-replacement-decision.json` | `verifyNodePhase13ProcessWorkerReplacementDecision` | `P13-35` | `partial` | 0 | 2 |
 | `phase13-profile-rollback-playbook.json` | `verifyNodePhase13ProfileRollbackPlaybook` | `P13-51` | `partial` | 0 | 2 |
-| `phase13-profile-selection-diagnostics.json` | `verifyNodePhase13ProfileSelectionDiagnostics` | `P13-49` | `partial` | 0 | 2 |
+| `phase13-profile-selection-diagnostics.json` | `verifyNodePhase13ProfileSelectionDiagnostics` | `P13-49` | `partial` | 0 | 1 |
 | `phase13-relaxed-capability-security-corpus.json` | `verifyNodePhase13RelaxedCapabilitySecurityCorpus` | `P13-50` | `ready` | 0 | 0 |
 | `phase13-rhino-import-helpers-decision.json` | `verifyNodePhase13RhinoImportHelpersDecision` | `P13-15` | `ready` | 0 | 0 |
 | `phase13-rhino-install-java-proxy.json` | `verifyNodePhase13RhinoInstallJavaProxy` | `P13-14` | `partial` | 0 | 3 |

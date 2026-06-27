@@ -453,7 +453,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 - [ ] Add project settings UI for requested profiles and capabilities.
 - [ ] Add packaged builder UI/metadata review for profile requests.
-- [ ] Implement actual effective Pro/Desktop/Debug profile switching only after P13-50 to P13-52 are satisfied.
+- [x] Keep actual effective Pro/Desktop/Debug profile switching stable-denied for v1.1; enable only after P13-50 to P13-52 and later promotion gates are satisfied.
 - [x] Keep diagnostics explicit for denied or undeclared capabilities.
 
 #### P13-50 relaxed capability security corpus

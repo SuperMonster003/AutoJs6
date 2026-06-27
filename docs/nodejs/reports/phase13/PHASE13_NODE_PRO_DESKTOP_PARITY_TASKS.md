@@ -1908,12 +1908,13 @@ P13 task 本身使用以下执行状态：
     - Current effective profile remains `safe_default`; requested
       `pro_compat_opt_in`, `desktop_compat_opt_in`, and `debug_unsafe_lab`
       metadata is diagnostic-only and does not grant authority.
+    - P13-49 v1.1 policy: effective Pro/Desktop/Debug profile switching stays
+      stable-denied; requested profile metadata remains diagnostic-only.
     - Gradle gate: `:app:verifyNodePhase13ProfileSelectionDiagnostics`。
     - Report:
       `docs/nodejs/reports/phase13/P13_49_PROFILE_SELECTION_DIAGNOSTICS.md`。
-    - Remaining P13-49 blockers: user-facing project settings UI, packaged
-      builder profile UI, actual profile promotion, rollback/disclosure UX, and
-      security/privacy corpus approval for relaxed capabilities.
+    - Remaining P13-49 blockers: user-facing project settings UI and packaged
+      builder profile UI.
 
 - [x] P13-50: 扩展 security corpus for relaxed capabilities。
   - 范围：为 raw network、fs 放宽、Java interop、child_process、native addon、
