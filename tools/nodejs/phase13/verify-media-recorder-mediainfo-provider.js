@@ -136,10 +136,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-26 media/recorder/mediainfo provider"),
       token(files.typesReadme, "P13-26 records the partial media/recorder/mediainfo provider gate"),
       token(files.surfaceManifestDoc, "phase13-media-recorder-mediainfo-provider"),
-    ], [
-      "Rhino compatibility matrix still needs full status regeneration when recorder/media/mediainfo promotion moves beyond partial.",
-      "P13-26 remains open until playback, real recording, MediaStore, packaged smoke, and migration examples land.",
-    ]),
+    ], []),
   ];
 
   const checks = [

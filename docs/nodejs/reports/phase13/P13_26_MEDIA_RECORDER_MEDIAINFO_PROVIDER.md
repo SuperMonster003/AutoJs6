@@ -74,3 +74,9 @@
   permission matrix.
 - Packaged media asset lookup, privacy copy, migration examples, and broader
   media corpus evidence.
+
+The compat/provider registry, process permission, docs, project tooling,
+surface manifest, and Gradle gate are evidence-only for this partial decision.
+They do not add separate P13-26 blockers beyond playback lifecycle, MediaStore
+policy, real recording, packaged media/recorder smoke, privacy copy, migration
+examples, and broader media corpus evidence above.
