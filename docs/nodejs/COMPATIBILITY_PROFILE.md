@@ -1980,10 +1980,11 @@ runtime.
     `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`
   - `Mathx.dist()` accepts JSON-safe point arrays and `{ x, y }` objects only;
     raw Android/OpenCV point and rect objects are not exposed
+  - Raw Android/OpenCV point and rect object parity is stable-denied for P13-27;
+    future compatibility requires a separate opt-in profile gate
   - P13-27 records utility-heavy Rhino modules promotion as partial: `zip`,
-    `canvas`, OpenCC/pinyin packaged resources, Rhino `util` split batches,
-    `sysprops`, and raw Canvas/Paint or Android/OpenCV object parity remain
-    open
+    `canvas` JSON drawing provider/raw Canvas/Paint decision, OpenCC/pinyin
+    packaged resources, Rhino `util` split batches, and `sysprops` remain open
 - `shell`
   - `exec(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`
   - `execRoot(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`

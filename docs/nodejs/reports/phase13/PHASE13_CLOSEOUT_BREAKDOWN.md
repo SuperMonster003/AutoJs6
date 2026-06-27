@@ -239,12 +239,12 @@ Reason open: `implementation`, `evidence`, `packaging`.
 
 #### P13-27 utility-heavy Rhino modules
 
-Reason open: `implementation`, `packaging`, `policy`.
+Reason open: `implementation`, `packaging`.
 
 - [x] Add separate pure helper gates for `Arrayx` and `Numberx`.
 - [ ] Add `zip`, `canvas`, OpenCC, and full pinyin resource providers.
 - [ ] Add packaged resource smoke and resource lookup diagnostics.
-- [ ] Decide raw Android/OpenCV object parity or keep stable denials.
+- [x] Decide raw Android/OpenCV object parity or keep stable denials.
 
 ### Desktop Network And Filesystem
 

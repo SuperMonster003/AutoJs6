@@ -63,6 +63,14 @@ perform default global `Math` or prototype mutation. Instead:
 This keeps migration ergonomic while avoiding hidden global changes in the
 Safe Node Profile.
 
+## Raw Object Boundary
+
+Raw Android/OpenCV `Point` and `Rect` object parity is stable-denied for
+P13-27. `Mathx.dist()` remains limited to numbers, arrays, and plain `{ x, y }`
+objects that can cross the Node bridge as JSON-safe values. Any future raw
+object compatibility must land under a separate opt-in profile gate with
+dedicated ownership, lifecycle, and permission evidence.
+
 ## Evidence
 
 - Runtime facade: `app/src/main/cpp/node_bridge_sources.cpp`
@@ -88,8 +96,6 @@ Safe Node Profile.
   diagnostics, and corpus evidence.
 - Rhino `util`: still needs smaller pure/type/density/logging split batches.
 - `sysprops`: needs Android system-property policy and privacy review.
-- Raw Android/OpenCV point/rect parity for `Mathx.dist` remains out of this
-  gate.
 
 ## Gate
 

@@ -82,8 +82,6 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "default global Math/prototype mutation is disabled"),
       token(files.nodeBridgeSources, 'nodeModules: Object.freeze(["jsox", "jsox.mathx", "jsox.arrayx", "jsox.numberx"])'),
       token(files.nodeBridgeSources, '"P13-27"'),
-    ], [
-      "Raw Android/OpenCV point/rect parity for Mathx.dist remains out of this gate.",
     ]),
     scenario("types_and_instrumentation", "types, conformance, and focused instrumentation cover jsox", [
       token(files.jsoxTypes, 'declare module "jsox"'),
@@ -136,10 +134,20 @@ function buildReport(files) {
       token(files.statusManifest, '"decision": "p13_27_pure_js_numberx_facade"'),
       token(files.statusManifest, '"decision": "p13_27_pure_js_mathx_facade"'),
     ], [
-      "P13-27 remains open until resource-backed and raw-object utility modules receive dedicated gates.",
+      "P13-27 remains open until resource-backed utility modules receive dedicated gates.",
+    ]),
+    scenario("raw_object_boundary", "raw Android/OpenCV object parity is stable-denied for P13-27", [
+      token(files.p13Report, "Raw Android/OpenCV `Point` and `Rect` object parity is stable-denied for"),
+      token(files.p13Report, "Any future raw"),
+      token(files.p13Report, "object compatibility must land under a separate opt-in profile gate"),
+      token(files.phase13Tasks, "Raw Android/OpenCV point/rect object parity is stable-denied for P13-27"),
+      token(files.compatibilityProfile, "Raw Android/OpenCV point and rect object parity is stable-denied for P13-27"),
+      token(files.securityModel, "Raw Android/OpenCV point or rect object"),
+      token(files.securityModel, "parity is stable-denied for P13-27"),
     ]),
   ];
 
+  const rawObjectBoundary = scenarioById(scenarios, "raw_object_boundary");
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-27"), "P13-27 must remain listed in the Phase 13 checklist."),
     check("report-present", files.p13Report.exists, "P13-27 report must exist."),
@@ -174,6 +182,11 @@ function buildReport(files) {
         !files.nodeBridgeSources.text.includes('if (name === "sysprops")'),
       "P13-27 must not expose zip, canvas, or sysprops before dedicated gates land.",
     ),
+    check(
+      "raw-android-opencv-object-parity-denied",
+      rawObjectBoundary.status === "ready",
+      "P13-27 must record raw Android/OpenCV object parity as stable-denied.",
+    ),
   ];
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
   const blockers = scenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`));
@@ -206,6 +219,7 @@ function buildReport(files) {
       pureJsoxReady: scenarioById(scenarios, "pure_jsox_runtime").status !== "missing_evidence",
       resourceBackedUtilitiesReady: false,
       rawAndroidUtilityParityReady: false,
+      rawAndroidOpenCvObjectParityStableDenied: rawObjectBoundary.status === "ready",
       proSurfacePromoted: false,
     },
   };

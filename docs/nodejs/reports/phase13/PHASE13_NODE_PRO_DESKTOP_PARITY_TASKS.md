@@ -146,9 +146,10 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md`.
 - Surface manifest evidence: `phase13-utility-heavy-rhino-modules`.
-- Remaining P13-27 blockers: `zip`, `canvas`, OpenCC packaged resources,
-  pinyin full dictionaries, Rhino `util` split batches, `sysprops`, and raw
-  Android Canvas/Paint or Android/OpenCV point/rect parity profile gates.
+- Raw Android/OpenCV point/rect object parity is stable-denied for P13-27.
+- Remaining P13-27 blockers: `zip`, `canvas` JSON drawing provider/raw
+  Canvas/Paint decision, OpenCC packaged resources, pinyin full dictionaries,
+  Rhino `util` split batches, and `sysprops`.
 
 ## P13-29 Partial Landing Note
 
@@ -1111,9 +1112,10 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13UtilityHeavyRhinoModules`.
     - Report:
       `docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md`.
-    - Open before closure: `zip`, `canvas`, OpenCC/pinyin packaged resources,
-      Rhino `util` helper split, `sysprops`, and raw Canvas/Paint or
-      Android/OpenCV object parity profile gates.
+    - Raw Android/OpenCV point/rect object parity is stable-denied for P13-27.
+    - Open before closure: `zip`, `canvas` JSON drawing provider/raw
+      Canvas/Paint decision, OpenCC/pinyin packaged resources, Rhino `util`
+      helper split, and `sysprops`.
 
 ### Track C: Desktop Node.js parity
 
