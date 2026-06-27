@@ -145,7 +145,7 @@ function buildReport(files) {
       token(files.p13Report, "separate provider-selector gate"),
       token(files.phase13Tasks, "Paddle/Rapid/plugin OCR provider selection"),
       token(files.providerRegistry, '"fallbackPromotion" to "blocked_until_Paddle_Rapid_plugin_model_selection_and_packaged_asset_policy_evidence"'),
-      token(files.rhinoCompatTypes, 'tap(mode: "mlkit"): "mlkit";'),
+      token(files.rhinoCompatTypes, 'tap(mode?: "mlkit"): "mlkit";'),
       token(files.typeSmoke, 'const compatOcrMode: "mlkit" = rhinoCompat.ocr.tap("mlkit");'),
     ]),
     scenario("security_packaged_raw_boundary", "Raw media/image/OCR objects remain blocked and packaged promotion is explicit", [
@@ -184,9 +184,7 @@ function buildReport(files) {
       token(files.typesReadme, "P13-20 records the partial screenshot/image/OCR promotion gate"),
       token(files.deviceMatrix, "P13-20 keeps screen_capture smoke manual"),
       token(files.surfaceManifestDoc, "phase13-screenshot-image-ocr-promotion"),
-    ], [
-      "Keep P13-20 checklist open until MediaProjection, advanced image, packaged OCR/image smoke, and packaged disclosure evidence land.",
-    ]),
+    ], []),
   ];
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-20"), "P13-20 must remain listed in the Phase 13 checklist."),

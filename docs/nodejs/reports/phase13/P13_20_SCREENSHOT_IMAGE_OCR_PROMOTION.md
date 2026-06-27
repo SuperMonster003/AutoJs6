@@ -74,6 +74,14 @@ parity stay stable-denied for P13-20 v1.1.
   metadata, Android permissions, provider absence, temporary-handle cleanup, and
   relaunch/crash recovery.
 
+The docs, compatibility notes, device matrix, surface manifest, and Gradle gate
+are evidence-only for this partial decision. They do not add a separate P13-20
+blocker beyond MediaProjection, advanced image processing, packaged OCR/image
+smoke, and packaged disclosure evidence above. The OCR fallback policy gate
+tracks the current `compat.ocr.tap("mlkit")` declaration and keeps
+Paddle/Rapid/plugin provider selection stable-denied until a separate provider
+selector gate exists.
+
 ## Gate
 
 Host verifier:

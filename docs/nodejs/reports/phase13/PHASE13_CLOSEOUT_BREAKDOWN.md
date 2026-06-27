@@ -177,6 +177,8 @@ Reason open: `implementation`, `evidence`, `packaging`.
 - [ ] Promote image operations such as save, clip, resize, grayscale, threshold, findImage, matchTemplate, and color matching.
 - [x] Define OCR fallback/model lookup policy for ML Kit, Paddle, Rapid, and plugin providers.
 - [ ] Add packaged image/OCR smoke, quota, temp-handle, and leak/stress evidence.
+- [x] Align OCR compat `tap("mlkit")` verifier token with the current optional-mode declaration.
+- [x] Keep docs/device-matrix evidence gate from counting MediaProjection, advanced image, packaged OCR/image, and disclosure evidence twice.
 
 ### Pro Tasks, App, Shell, Media, Utilities
 
