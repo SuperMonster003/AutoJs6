@@ -208,7 +208,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-rhino-java-adapter-decision.json` | `verifyNodePhase13RhinoJavaAdapterDecision` | `P13-16` | `partial` | 0 | 3 |
 | `phase13-screenshot-image-ocr-promotion.json` | `verifyNodePhase13ScreenshotImageOcrPromotion` | `P13-20` | `partial` | 0 | 9 |
 | `phase13-second-execution-slot-scheduler.json` | `verifyNodePhase13SecondExecutionSlotScheduler` | `P13-06` | `partial` | 0 | 1 |
-| `phase13-shell-root-shizuku-capability.json` | `verifyNodePhase13ShellRootShizukuCapability` | `P13-24` | `partial` | 0 | 3 |
+| `phase13-shell-root-shizuku-capability.json` | `verifyNodePhase13ShellRootShizukuCapability` | `P13-24` | `partial` | 0 | 2 |
 | `phase13-stdlib-conformance-decision.json` | `verifyNodePhase13StdlibConformanceDecision` | `P13-43` | `partial` | 0 | 2 |
 | `phase13-surface-manifest-verification.json` | `verifyNodePhase13SurfaceManifest` | `-` | `passed` | 0 | 0 |
 | `phase13-task-database-provider.json` | `verifyNodePhase13TaskDatabaseProvider` | `P13-21` | `partial` | 0 | 9 |

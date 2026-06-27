@@ -105,7 +105,7 @@ function buildReport(files) {
       token(files.shellTypes, "execRoot(command: string"),
       token(files.typeSmoke, "const rootShellResult: shell.ShellResult = await shell.execRoot"),
     ], [
-      "Add device root-available and root-unavailable matrix evidence without assuming `su` exists.",
+      "Add device root-available/root-unavailable matrix, packaged shell/root disclosure and rollback, audit taxonomy, and migration evidence without assuming `su` exists.",
       "Add cancellation-specific shell instrumentation that aborts an in-flight command through AbortSignal.",
     ]),
     scenario("shizuku_stable_denial", "Shizuku execution is explicit but still denied before bridge dispatch", [
@@ -140,9 +140,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-24 shell/root/Shizuku capability"),
       token(files.typesReadme, "P13-24 records the partial shell/root/Shizuku capability gate"),
       token(files.surfaceManifestDoc, "phase13-shell-root-shizuku-capability"),
-    ], [
-      "Keep P13-24 open until root device matrix, packaged shell/root disclosure, cancellation, and audit taxonomy evidence land.",
-    ]),
+    ], []),
   ];
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-24"), "P13-24 must remain listed in the Phase 13 checklist."),

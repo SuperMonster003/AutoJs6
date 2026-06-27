@@ -99,13 +99,15 @@ partial until user-facing disclosure and failure diagnostics are complete.
 
 ## Remaining Blockers
 
-- Root device matrix for devices with and without `su`, including stable denial
-  and command-result evidence.
+- Root/package evidence: device matrix for devices with and without `su`,
+  stable denial and command-result evidence, packaged shell/root capability
+  disclosure and rollback policy, expanded audit taxonomy, and migration
+  examples from Rhino `shell` and root shorthand.
 - AbortSignal cancellation instrumentation for in-flight shell commands.
-- Packaged shell/root capability disclosure and rollback policy.
-- Expanded audit report taxonomy for denied authorization, timeout, and
-  resource-limit failures.
-- Migration examples from Rhino `shell` and root shorthand.
+
+The docs, release matrix, surface manifest, and Gradle gate are evidence checks
+only. They do not add a separate blocker for the same root/package shell
+evidence.
 
 ## Verification
 
