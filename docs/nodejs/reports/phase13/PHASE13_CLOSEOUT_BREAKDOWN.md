@@ -268,6 +268,7 @@ Reason open: `evidence`, `policy`, `packaging`.
 - [ ] Attach packaged `network` to `android.permission.INTERNET` proof for this path.
 - [x] Keep full raw socket, DNS lookup, TLS session, and backpressure semantics scoped to P13-30 or later.
 - [x] Decide whether any per-request proxy support is provider-owned or stays denied.
+- [x] Keep future P13-30 raw `net` / `tls` / `dns` authority decisions from counting as P13-29 blockers.
 
 #### P13-30 `net` / `tls` / `dns`
 

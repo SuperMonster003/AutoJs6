@@ -45,7 +45,8 @@ The following remain unavailable:
 
 Full raw socket, DNS lookup, TLS session, and backpressure semantics stay scoped
 to P13-30 or later. P13-29 only tracks controlled fetch-backed client
-semantics.
+semantics, so future P13-30 raw `net` / `tls` / `dns` authority decisions do
+not count as separate P13-29 blockers.
 
 Per-request proxy support stays denied in P13-29; only provider/system-owned
 proxy behavior may exist behind controlled fetch.
@@ -69,4 +70,3 @@ proxy behavior may exist behind controlled fetch.
   `android.permission.INTERNET` for this path.
 - Run a live Android/OkHttp HTTP/HTTPS smoke under the existing experimental
   network provider flag.
-- Decide whether P13-30 allows any raw `net` / `tls` / `dns` opt-in authority.

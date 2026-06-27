@@ -90,8 +90,6 @@ function buildReport(files) {
       token(files.rawNetworkTest, "rawNetworkModulesStayDeniedAndCannotBeShadowed"),
       token(files.securityModel, "Raw network modules remain denied in the Safe profile"),
       token(files.compatibilityProfile, "P13-29 records HTTP/HTTPS client parity as partial"),
-    ], [
-      "P13-30 must decide whether any net/tls/dns opt-in authority exists beyond these denials.",
     ]),
     scenario("desktop_client_package_corpus", "offline npm-shaped client corpus covers redirects, TLS failure, and proxy denial", [
       token(files.httpNpmCorpusManifest, '"name": "redirect-follow-client"'),
@@ -127,7 +125,7 @@ function buildReport(files) {
       token(files.proComparison, "P13-29 records HTTP/HTTPS client parity as partial"),
       token(files.proAutoxNotes, "P13-29 records HTTP/HTTPS client parity as partial"),
     ], [
-      "P13-29 remains open until packaged INTERNET permission and live-provider HTTP evidence are attached.",
+      "Attach packaged APK evidence proving `network` maps to `android.permission.INTERNET` for this path.",
     ]),
   ];
 
