@@ -466,10 +466,10 @@ Reason open: corpus gate drift cleanup; future CI scheduling remains `evidence`.
 
 #### P13-48 package lock and integrity policy
 
-Reason open: `implementation`, `packaging`.
+Reason open: shared integrity policy gate drift cleanup; future plugin/marketplace distribution remains `implementation`, `packaging`.
 
-- [ ] Implement signed plugin archive extraction and update rollback.
-- [ ] Implement marketplace cache pruning and user-facing corruption recovery.
+- [x] Keep signed plugin archive extraction and update rollback as future plugin distribution work.
+- [x] Keep marketplace cache pruning and user-facing corruption recovery as future marketplace distribution work.
 - [x] Delegate signed native addon artifact verification to the P13-39 packaged native path; keep P13-48 as shared integrity policy and fail-closed diagnostics until that path exists.
 - [x] Unify integrity policy across package manager, plugins, and native payloads.
 

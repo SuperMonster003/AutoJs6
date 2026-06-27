@@ -1941,7 +1941,7 @@ P13 task 本身使用以下执行状态：
     live registry drift testing, and unsafe native/postinstall package execution
     remain outside the default corpus gate.
 
-- [ ] P13-48: 实现 package lock and integrity policy。
+- [x] P13-48: 实现 package lock and integrity policy。
   - 范围：为 Android-side package manager、plugins、native addon 做统一完整性策略。
   - 验收：
     - lockfile、hash、签名、回滚、缓存清理、损坏恢复完整。
@@ -1969,6 +1969,17 @@ P13 task 本身使用以下执行状态：
     - Signed native addon artifact verification is delegated to the P13-39
       packaged native path; P13-48 keeps the shared integrity policy and
       unsigned native addon load fail-closed until that path exists.
+    - Closure: P13-48 v1.1 keeps `NodePackageIntegrityPolicy`,
+      `packageIntegrityProfile`, Android local-store rollback/prune/corruption
+      recovery, shared plugin/native integrity vocabulary, P13-39 native-addon
+      delegation, and fail-closed unsigned plugin/native install, raw registry
+      install, lifecycle scripts, postinstall downloads, and unverified cache
+      reuse synchronized with docs, surface manifest, TypeScript declarations,
+      and Gradle gate.
+    - Future distribution work: signed plugin archive extraction/update,
+      marketplace cache prune/recovery UI, plugin rollback UI, runtime registry
+      install, mutating package-manager facades, user-facing corruption
+      diagnostics, and per-profile rollback UX remain future gates.
 
 ### Track E: Security, UX, and rollback
 

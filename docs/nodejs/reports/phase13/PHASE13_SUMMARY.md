@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 31
-- Open tasks: 27
+- Completed tasks: 32
+- Open tasks: 26
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -62,7 +62,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-45` | `completed` | `packaging.plugins_distribution` | 扩展 packaged APK capability metadata。 |
 | `P13-46` | `completed` | `packaging.plugins_distribution` | 推进 plugin system toward Pro/Desktop parity。 |
 | `P13-47` | `completed` | `packaging.plugins_distribution` | 增加 dependency compatibility corpus。 |
-| `P13-48` | `open` | `packaging.plugins_distribution` | 实现 package lock and integrity policy。 |
+| `P13-48` | `completed` | `packaging.plugins_distribution` | 实现 package lock and integrity policy。 |
 | `P13-49` | `completed` | `profile.promotion_model` | 实现 profile selection UX and diagnostics。 |
 | `P13-50` | `completed` | `security.rollback_privacy` | 扩展 security corpus for relaxed capabilities。 |
 | `P13-51` | `completed` | `security.rollback_privacy` | 增加 per-profile rollback playbook。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 26
+- Reports with blockers: 25
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -190,7 +190,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-net-tls-dns-staged-compatibility.json` | `verifyNodePhase13NetTlsDnsStagedCompatibility` | `P13-30` | `partial` | 0 | 6 |
 | `phase13-notifications-settings-power-manager.json` | `verifyNodePhase13NotificationsSettingsPowerManager` | `P13-25` | `partial` | 0 | 6 |
 | `phase13-overlay-provider-promotion.json` | `verifyNodePhase13OverlayProviderPromotion` | `P13-18` | `partial` | 0 | 5 |
-| `phase13-package-lock-integrity-policy.json` | `verifyNodePhase13PackageLockIntegrityPolicy` | `P13-48` | `partial` | 0 | 2 |
+| `phase13-package-lock-integrity-policy.json` | `verifyNodePhase13PackageLockIntegrityPolicy` | `P13-48` | `ready` | 0 | 0 |
 | `phase13-package-manager-android-decision.json` | `verifyNodePhase13PackageManagerAndroidDecision` | `P13-42` | `ready` | 0 | 0 |
 | `phase13-packaged-capability-metadata-decision.json` | `verifyNodePhase13PackagedCapabilityMetadataDecision` | `P13-45` | `ready` | 0 | 0 |
 | `phase13-packaged-long-running-service.json` | `verifyNodePhase13PackagedLongRunningService` | `P13-07` | `partial` | 0 | 2 |
