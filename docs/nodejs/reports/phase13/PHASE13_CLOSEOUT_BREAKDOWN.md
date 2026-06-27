@@ -374,6 +374,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 - [x] Reject arbitrary paths, downloaded binaries, shell operators, detached processes, and inherited handles.
 - [ ] Implement bounded stdio, timeout, cancellation, kill, and cleanup.
 - [ ] Add process accounting, packaged metadata, disclosure, hostile corpus, and rollback controls.
+- [x] Keep docs/matrix evidence gate from counting scoped runner allowlist, stdio/cleanup, packaged evidence, and hostile corpus twice.
 
 ### Desktop Modules, npm, Process
 

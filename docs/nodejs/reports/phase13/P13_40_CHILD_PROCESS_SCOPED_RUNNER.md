@@ -77,6 +77,12 @@ Safe/default profile.
   compatibility escape hatch or is replaced by a safer scoped runner for any
   release profile.
 
+The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
+evidence-only for this partial decision. They do not add a separate P13-40
+blocker beyond the scoped API, app-private allowlist, stdio/cancel/cleanup,
+process accounting, packaged metadata, hostile corpus, rollback, and debug-only
+native opt-in policy items above.
+
 ## Rollback
 
 Set `autojs.nodejs.child_process.experimental=false` or remove the BuildConfig

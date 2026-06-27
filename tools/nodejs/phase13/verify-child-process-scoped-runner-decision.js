@@ -159,9 +159,7 @@ function buildReport(files) {
       token(files.desktopMatrix, "P13-40 records child_process scoped-runner diagnostics as partial"),
       token(files.builtinMatrixGenerator, "P13-40 records child_process scoped-runner diagnostics as partial"),
       token(files.capabilityMatrix, "P13-40 child_process scoped runner"),
-    ], [
-      "P13-40 remains partial until a real scoped child_process runner has allowlisted app-private binaries, stdio/cancel/cleanup, packaged evidence, and hostile corpus coverage.",
-    ]),
+    ], []),
   ];
 
   const checks = [
