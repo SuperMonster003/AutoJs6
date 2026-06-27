@@ -32,6 +32,12 @@ in `expected-output.txt`. The runnable snippets under `snippets/` keep guarded
 try/catch paths and print explicit skip markers when a provider, permission, or
 profile is unavailable.
 
+The static catalog remains available for migration before runtime promotion:
+`main.cjs` is intentionally a catalog runner, and the root example manifest
+keeps `pro-parity-suite` out of the default app smoke path. High-risk snippets
+stay tied to `pro_compat_opt_in` metadata and remain outside the focused runtime
+smoke subset unless the relevant provider/profile gates are explicitly opened.
+
 `smoke.cjs` is the focused runtime smoke subset. It executes only the
 Activity-owned JSON UI path represented by `snippets/ui-layout.cjs` and the
 WorkManager one-shot schedule/cancel path represented by

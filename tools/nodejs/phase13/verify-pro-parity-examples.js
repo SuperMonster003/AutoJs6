@@ -211,6 +211,27 @@ function buildReport(repoRoot, files) {
       "`pro-parity-suite` must include a focused runtime smoke subset for already-covered UI and WorkManager paths.",
     ),
     check(
+      "static-catalog-available",
+      exampleManifest.status === "partial" &&
+        files.exampleMain.text.includes("entry.expectedOutput") &&
+        files.exampleExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}=PASS`) &&
+        files.exampleReadme.text.includes("The main entry is a catalog runner") &&
+        rootManifest.examples.some((entry) => entry.name === EXAMPLE_NAME && entry.mainAppSmoke === false),
+      "The static Pro parity catalog must remain available for migration before runtime promotion.",
+    ),
+    check(
+      "high-risk-snippets-opt-in-only",
+      entries.every((entry) => entry.targetProfile === "pro_compat_opt_in") &&
+        smokeSubset.profile === "pro_compat_opt_in" &&
+        REQUIRED_SMOKE_EXAMPLES.every((id) => smokeSubsetExamples.includes(id)) &&
+        !smokeSubsetExamples.includes("java-interop") &&
+        !smokeSubsetExamples.includes("rhino-install") &&
+        !smokeSubsetExamples.includes("overlay-floaty") &&
+        !smokeSubsetExamples.includes("screenshot-ocr") &&
+        !smokeSubsetExamples.includes("accessibility-selector"),
+      "High-risk Pro snippets must stay out of default runtime smoke and require explicit Pro opt-in metadata.",
+    ),
+    check(
       "readme-acceptance",
       files.exampleReadme.text.includes("$autojs.java") &&
         files.exampleReadme.text.includes("rhino.install") &&
@@ -288,10 +309,12 @@ function buildReport(repoRoot, files) {
       phase13TaskComplete: false,
       finalBlockerClosable,
       catalogReady: snippetScenarios.every((entry) => entry.status === "ready"),
+      staticCatalogAvailable: checkById(checks, "static-catalog-available").passed,
       defaultSmokeEnabled: false,
       smokeSubsetEnabled: smokeSubsetReady,
       smokeSubsetExamples,
       highRiskSnippetsStatic: true,
+      highRiskSnippetsOptInOnly: checkById(checks, "high-risk-snippets-opt-in-only").passed,
       packagedRuntimePromoted: false,
       grantsAuthority: false,
       targetProfile: "pro_compat_opt_in",
@@ -380,6 +403,10 @@ function token(file, value) {
 
 function check(id, passed, message) {
   return { id, passed: Boolean(passed), message };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function includesAll(text, values) {

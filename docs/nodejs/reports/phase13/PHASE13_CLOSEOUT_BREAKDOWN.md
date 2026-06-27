@@ -493,8 +493,8 @@ Reason open: `evidence`, `packaging`.
 - [x] Add focused runtime smoke for already-covered Activity-owned UI and WorkManager one-shot examples.
 - [ ] Convert static examples into live packaged Pro examples after provider promotion.
 - [ ] Add prompt/disclosure UI references and denial paths.
-- [ ] Execute high-risk snippets only under explicit opt-in profiles.
-- [ ] Keep static catalog available for migration before runtime promotion.
+- [x] Execute high-risk snippets only under explicit opt-in profiles.
+- [x] Keep static catalog available for migration before runtime promotion.
 
 #### P13-54 desktop Node parity examples
 
