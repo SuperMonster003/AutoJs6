@@ -477,10 +477,10 @@ Reason open: `implementation`, `packaging`.
 
 #### P13-49 profile selection UX and diagnostics
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: diagnostics gate drift cleanup; future UX remains `implementation`, `policy`, `packaging`.
 
-- [ ] Add project settings UI for requested profiles and capabilities.
-- [ ] Add packaged builder UI/metadata review for profile requests.
+- [x] Keep project settings UI for requested profiles and capabilities as future UX implementation work rather than a P13-49 diagnostics blocker.
+- [x] Keep packaged builder UI/metadata review for profile requests as future packaged UX work.
 - [x] Keep actual effective Pro/Desktop/Debug profile switching stable-denied for v1.1; enable only after P13-50 to P13-52 and later promotion gates are satisfied.
 - [x] Keep diagnostics explicit for denied or undeclared capabilities.
 

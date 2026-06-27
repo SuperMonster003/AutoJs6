@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 17
-- Open tasks: 41
+- Completed tasks: 18
+- Open tasks: 40
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -63,7 +63,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-46` | `open` | `packaging.plugins_distribution` | 推进 plugin system toward Pro/Desktop parity。 |
 | `P13-47` | `open` | `packaging.plugins_distribution` | 增加 dependency compatibility corpus。 |
 | `P13-48` | `open` | `packaging.plugins_distribution` | 实现 package lock and integrity policy。 |
-| `P13-49` | `open` | `profile.promotion_model` | 实现 profile selection UX and diagnostics。 |
+| `P13-49` | `completed` | `profile.promotion_model` | 实现 profile selection UX and diagnostics。 |
 | `P13-50` | `completed` | `security.rollback_privacy` | 扩展 security corpus for relaxed capabilities。 |
 | `P13-51` | `completed` | `security.rollback_privacy` | 增加 per-profile rollback playbook。 |
 | `P13-52` | `completed` | `security.rollback_privacy` | 增加 privacy and disclosure policy。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 40
+- Reports with blockers: 39
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -201,7 +201,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-process-parity-decision.json` | `verifyNodePhase13ProcessParityDecision` | `P13-44` | `partial` | 0 | 1 |
 | `phase13-process-worker-replacement-decision.json` | `verifyNodePhase13ProcessWorkerReplacementDecision` | `P13-35` | `ready` | 0 | 0 |
 | `phase13-profile-rollback-playbook.json` | `verifyNodePhase13ProfileRollbackPlaybook` | `P13-51` | `ready` | 0 | 0 |
-| `phase13-profile-selection-diagnostics.json` | `verifyNodePhase13ProfileSelectionDiagnostics` | `P13-49` | `partial` | 0 | 1 |
+| `phase13-profile-selection-diagnostics.json` | `verifyNodePhase13ProfileSelectionDiagnostics` | `P13-49` | `ready` | 0 | 0 |
 | `phase13-relaxed-capability-security-corpus.json` | `verifyNodePhase13RelaxedCapabilitySecurityCorpus` | `P13-50` | `ready` | 0 | 0 |
 | `phase13-rhino-import-helpers-decision.json` | `verifyNodePhase13RhinoImportHelpersDecision` | `P13-15` | `ready` | 0 | 0 |
 | `phase13-rhino-install-java-proxy.json` | `verifyNodePhase13RhinoInstallJavaProxy` | `P13-14` | `partial` | 0 | 3 |

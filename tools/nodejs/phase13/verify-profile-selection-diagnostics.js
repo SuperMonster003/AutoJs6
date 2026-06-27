@@ -138,8 +138,6 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-49 profile selection diagnostics"),
-    ], [
-      "Project settings UI and packaged builder UI remain future implementation work.",
     ]),
   ];
 
@@ -232,7 +230,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticSelectorReady: scenarioById(scenarios, "diagnostic_selector").status !== "missing_evidence",
       runtimeProfileSelectionReady: scenarioById(scenarios, "runtime_profile_and_error_hints").status === "ready",

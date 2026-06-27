@@ -1901,7 +1901,7 @@ P13 task 本身使用以下执行状态：
 
 ### Track E: Security, UX, and rollback
 
-- [ ] P13-49: 实现 profile selection UX and diagnostics。
+- [x] P13-49: 实现 profile selection UX and diagnostics。
   - 范围：为 Safe/Pro/Desktop/Debug profile 提供项目设置、打包设置和诊断输出。
   - 验收：
     - 用户能清楚看到启用了哪些高风险能力。
@@ -1924,7 +1924,10 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13ProfileSelectionDiagnostics`。
     - Report:
       `docs/nodejs/reports/phase13/P13_49_PROFILE_SELECTION_DIAGNOSTICS.md`。
-    - Remaining P13-49 blockers: user-facing project settings UI and packaged
+    - Closure: runtime profile selection diagnostics, Node Doctor profile
+      selection output, high-risk capability rows, missing-capability error
+      hints, and declaration examples are covered.
+    - Future implementation work: user-facing project settings UI and packaged
       builder profile UI.
 
 - [x] P13-50: 扩展 security corpus for relaxed capabilities。

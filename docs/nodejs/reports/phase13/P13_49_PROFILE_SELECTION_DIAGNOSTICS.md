@@ -1,9 +1,10 @@
 # P13-49 Profile Selection Diagnostics
 
-P13-49 records profile selection UX and diagnostics as partial. The current
-landing makes Safe/Pro/Desktop/Debug profile metadata visible to scripts and
-Node Doctor, reports declared high-risk capabilities, and upgrades missing
-capability errors with profile, capability, and Android permission hints.
+P13-49 records profile selection UX and diagnostics as partial capability
+evidence. The P13-49 diagnostics gate is ready: the current landing makes
+Safe/Pro/Desktop/Debug profile metadata visible to scripts and Node Doctor,
+reports declared high-risk capabilities, and upgrades missing capability errors
+with profile, capability, and Android permission hints.
 
 ## Covered
 
@@ -33,7 +34,7 @@ capability errors with profile, capability, and Android permission hints.
   `ProfileSelectionDiagnostics` and
   `AutoJsBridgeCapabilityNotDeclaredError`.
 
-## Remaining Work
+## Future Implementation Work
 
 - User-facing project settings and packaged builder controls are still future
   UX work.
