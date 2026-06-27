@@ -302,11 +302,12 @@ foreground microphone disclosure, or raw Android media objects on Rhino until a
 dedicated provider lands.
 
 P13-27 records utility-heavy Rhino modules promotion as partial. AutoJs6 Node
-now exposes pure `jsox.mathx` helpers through `require("jsox")`,
-`require("jsox.mathx")`, and `require("autojs6:compat").jsox`. Keep Rhino/Pro
-scripts that depend on default global `Math`/prototype mutation, `zip`,
-`canvas`, OpenCC/pinyin packaged dictionaries, `sysprops`, `Arrayx`, `Numberx`,
-or raw Android/OpenCV objects on Rhino until separate gates land.
+now exposes pure `jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` helpers
+through `require("jsox")`, direct submodule requires, and
+`require("autojs6:compat").jsox`. Keep Rhino/Pro scripts that depend on
+default global `Math`/prototype mutation, `zip`, `canvas`, OpenCC/pinyin
+packaged dictionaries, `sysprops`, or raw Android/OpenCV objects on Rhino until
+separate gates land.
 
 P13-29 records HTTP/HTTPS client parity as partial. AutoJs6 Node supports the
 controlled `http`/`https` client facade for request/get, stream response,

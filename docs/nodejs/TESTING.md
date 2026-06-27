@@ -1544,12 +1544,12 @@ Phase 13 utility-heavy Rhino modules status gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13UtilityHeavyRhinoModules
 ```
 
-This host gate records P13-27 as partial. It requires the pure `jsox.mathx`
-facade through `require("jsox")`, `require("jsox.mathx")`, and
-`autojs6:compat.jsox`, TypeScript coverage, conformance coverage, focused
-instrumentation, status-manifest/matrix updates, and cross-document evidence.
-It does not promote `zip`, `canvas`, OpenCC/pinyin packaged resources,
-`sysprops`, `Arrayx`, `Numberx`, raw Canvas/Paint, or raw Android/OpenCV
+This host gate records P13-27 as partial. It requires the pure `jsox.mathx`,
+`jsox.arrayx`, and `jsox.numberx` facades through `require("jsox")`, direct
+submodule requires, and `autojs6:compat.jsox`, TypeScript coverage, conformance
+coverage, focused instrumentation, status-manifest/matrix updates, and
+cross-document evidence. It does not promote `zip`, `canvas`, OpenCC/pinyin
+packaged resources, `sysprops`, raw Canvas/Paint, or raw Android/OpenCV
 objects.
 
 Phase 13 HTTP/HTTPS client parity status gate:

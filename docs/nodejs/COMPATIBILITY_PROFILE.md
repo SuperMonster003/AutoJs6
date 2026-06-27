@@ -1968,16 +1968,20 @@ runtime.
 - `jsox`, `jsox.mathx`, `autojs6:compat.jsox`
   - `jsox.mathx` exposes pure Rhino `Mathx` helpers for random values,
     statistics, distance, logarithms, powers, and min/max helpers
-  - `jsox.extend(target, "Mathx")` and `jsox.extendAll(target)` copy helpers
-    to an explicit target object only
+  - `jsox.arrayx` exposes pure Rhino `Arrayx` validation, set, sort, and
+    shuffle helpers
+  - `jsox.numberx` exposes pure Rhino `Numberx` validation, comparison,
+    clamp, formatting, and parsing helpers
+  - `jsox.extend(target, "Mathx" | "Arrayx" | "Numberx")` and
+    `jsox.extendAll(target)` copy helpers to an explicit target object only
   - default global `Math` or prototype mutation is blocked with
     `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`
   - `Mathx.dist()` accepts JSON-safe point arrays and `{ x, y }` objects only;
     raw Android/OpenCV point and rect objects are not exposed
   - P13-27 records utility-heavy Rhino modules promotion as partial: `zip`,
     `canvas`, OpenCC/pinyin packaged resources, Rhino `util` split batches,
-    `sysprops`, `Arrayx`, `Numberx`, and raw Canvas/Paint or Android/OpenCV
-    object parity remain open
+    `sysprops`, and raw Canvas/Paint or Android/OpenCV object parity remain
+    open
 - `shell`
   - `exec(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`
   - `execRoot(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`

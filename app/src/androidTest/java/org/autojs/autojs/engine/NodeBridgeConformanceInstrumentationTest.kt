@@ -417,6 +417,8 @@ class NodeBridgeConformanceInstrumentationTest {
               const compat = require("autojs6:compat");
               const jsox = require("jsox");
               const jsoxMathx = require("jsox.mathx");
+              const jsoxArrayx = require("jsox.arrayx");
+              const jsoxNumberx = require("jsox.numberx");
 
               [
                 ["toast", toast],
@@ -448,9 +450,15 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["jsox", jsox],
                 ["jsox.mathx", jsoxMathx],
                 ["jsox.mathx.alias", jsox.mathx],
+                ["jsox.arrayx", jsoxArrayx],
+                ["jsox.arrayx.alias", jsox.arrayx],
+                ["jsox.numberx", jsoxNumberx],
+                ["jsox.numberx.alias", jsox.numberx],
                 ["autojs6:compat", compat],
                 ["autojs6:compat.jsox", compat.jsox],
                 ["autojs6:compat.jsox.mathx", compat.jsox.mathx],
+                ["autojs6:compat.jsox.arrayx", compat.jsox.arrayx],
+                ["autojs6:compat.jsox.numberx", compat.jsox.numberx],
                 ["autojs6:compat.barcode", compat.barcode],
                 ["autojs6:compat.qrcode", compat.qrcode],
                 ["autojs6:compat.media", compat.media],
@@ -488,11 +496,23 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("npm", npm, ["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript", "installFromRegistry", "publish", "pack"]);
               expectExports("jsox", jsox, ["extend", "extendAll", "status"]);
               expectExports("jsox.mathx", jsoxMathx, ["randInt", "randomInt", "randFloat", "randomFloat", "random", "sum", "mean", "avg", "median", "var", "std", "cv", "mode", "dist", "logMn", "floorLog", "ceilLog", "roundLog", "floorPow", "ceilPow", "roundPow", "max", "maxi", "min", "mini"]);
+              expectExports("jsox.arrayx", jsoxArrayx, ["ensureArray", "distinct", "distinctBy", "union", "intersect", "subtract", "differ", "sortBy", "sortByDescending", "sortDescending", "sorted", "sortedBy", "sortedByDescending", "sortedDescending", "shuffle"]);
+              expectExports("jsox.numberx", jsoxNumberx, ["ensureNumber", "ensureNumberLike", "ensureNumbersLike", "check", "clamp", "clampTo", "toFixedNum", "padStart", "padEnd", "parseFloat", "parsePercent", "parseRatio", "parseAny"]);
+              assert.strictEqual(jsoxNumberx.ICU, 996);
               expectExports("autojs6:compat.jsox", compat.jsox, ["extend", "extendAll", "status"]);
               expectExports("autojs6:compat.jsox.mathx", compat.jsox.mathx, ["randInt", "randomInt", "randFloat", "randomFloat", "random", "sum", "mean", "avg", "median", "var", "std", "cv", "mode", "dist", "logMn", "floorLog", "ceilLog", "roundLog", "floorPow", "ceilPow", "roundPow", "max", "maxi", "min", "mini"]);
+              expectExports("autojs6:compat.jsox.arrayx", compat.jsox.arrayx, ["ensureArray", "distinct", "distinctBy", "union", "intersect", "subtract", "differ", "sortBy", "sortByDescending", "sortDescending", "sorted", "sortedBy", "sortedByDescending", "sortedDescending", "shuffle"]);
+              expectExports("autojs6:compat.jsox.numberx", compat.jsox.numberx, ["ensureNumber", "ensureNumberLike", "ensureNumbersLike", "check", "clamp", "clampTo", "toFixedNum", "padStart", "padEnd", "parseFloat", "parsePercent", "parseRatio", "parseAny"]);
+              assert.strictEqual(compat.jsox.numberx.ICU, 996);
               assert.strictEqual(jsox.mathx, jsox.Mathx);
+              assert.strictEqual(jsox.arrayx, jsox.Arrayx);
+              assert.strictEqual(jsox.numberx, jsox.Numberx);
               assert.strictEqual(jsox.mathx, jsoxMathx);
+              assert.strictEqual(jsox.arrayx, jsoxArrayx);
+              assert.strictEqual(jsox.numberx, jsoxNumberx);
               assert.strictEqual(compat.jsox.mathx, jsox.mathx);
+              assert.strictEqual(compat.jsox.arrayx, jsox.arrayx);
+              assert.strictEqual(compat.jsox.numberx, jsox.numberx);
               expectExports("autojs6:compat.barcode", compat.barcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
               expectExports("autojs6:compat.qrcode", compat.qrcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
               expectExports("autojs6:compat.media", compat.media, ["getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"]);
@@ -522,6 +542,8 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(globalThis.recorder, compat.recorder);
               assert.strictEqual(globalThis.jsox, compat.jsox);
               assert.strictEqual(globalThis.jsox.mathx.sum(1, 2, 3), 6);
+              assert.strictEqual(globalThis.jsox.arrayx.sorted([2, 1]).join(","), "1,2");
+              assert.strictEqual(globalThis.jsox.numberx.parseRatio("3:2"), 1.5);
               assert(compatInstall.globals.indexOf("ui") >= 0, "compat.install({ globals: true }) must install constrained ui global");
               assert.strictEqual(globalThis.ui, compat.ui);
               assert.strictEqual(globalThis.tasks, undefined, "compat.install({ globals: true }) must not install tasks global");

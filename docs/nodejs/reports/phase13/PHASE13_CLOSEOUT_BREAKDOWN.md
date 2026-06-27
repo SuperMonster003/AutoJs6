@@ -237,7 +237,7 @@ Reason open: `implementation`, `evidence`, `packaging`.
 
 Reason open: `implementation`, `packaging`, `policy`.
 
-- [ ] Add separate pure helper gates for `Arrayx` and `Numberx`.
+- [x] Add separate pure helper gates for `Arrayx` and `Numberx`.
 - [ ] Add `zip`, `canvas`, OpenCC, and full pinyin resource providers.
 - [ ] Add packaged resource smoke and resource lookup diagnostics.
 - [ ] Decide raw Android/OpenCV object parity or keep stable denials.
@@ -535,8 +535,9 @@ These items look closeable without inventing new high-risk runtime authority:
   `P13-23` to `P13-26`, `P13-31` to `P13-36`, `P13-42`, `P13-45`,
   `P13-52`, and the P13-57 summary gate. Current generated reports show no
   missing evidence-token or policy-violation false positives.
-- Expand provider-free utility coverage for `P13-27` (`Arrayx`, `Numberx`,
-  resource-free helpers) before touching raw Android object parity.
+- Completed provider-free utility coverage for `P13-27` (`Arrayx`,
+  `Numberx`, resource-free helpers). Raw Android object parity and
+  resource-backed utilities remain separate promotion gates.
 - Grow offline corpora for `P13-43` and `P13-47` with fixed package fixtures,
   because this does not require live registry access or new dangerous runtime
   authority.

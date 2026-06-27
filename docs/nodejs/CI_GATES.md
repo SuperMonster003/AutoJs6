@@ -451,10 +451,11 @@ fail-closed behavior are covered, while playback, real recorder sessions,
 MediaStore access, packaged media evidence, and raw Android media objects
 remain blocked.
 `verifyNodePhase13UtilityHeavyRhinoModules` records the P13-27 partial
-utility-heavy Rhino modules state: pure `jsox.mathx` helpers are covered
-through `jsox`, `jsox.mathx`, and `compat.jsox`, while `zip`, `canvas`,
-OpenCC/pinyin packaged resources, `sysprops`, `Arrayx`, `Numberx`, raw
-Canvas/Paint, and raw Android/OpenCV object parity remain blocked.
+utility-heavy Rhino modules state: pure `jsox.mathx`, `jsox.arrayx`, and
+`jsox.numberx` helpers are covered through `jsox`, direct submodule requires,
+and `compat.jsox`, while `zip`, `canvas`, OpenCC/pinyin packaged resources,
+`sysprops`, raw Canvas/Paint, and raw Android/OpenCV object parity remain
+blocked.
 `verifyNodePhase13HttpHttpsClientParity` records the P13-29 partial
 HTTP/HTTPS client parity state: controlled `http`/`https` request/get,
 stream-response, timeout, redirect, TLS/provider-error, proxy/tunnel denial,
@@ -651,10 +652,10 @@ foreground microphone disclosure, and raw Android media objects require
 separate evidence.
 P13-27 additionally uses `verifyNodePhase13UtilityHeavyRhinoModules` as the
 host promotion-status gate for utility-heavy Rhino module parity and keeps the
-surface partial: pure `jsox.mathx` helpers, explicit-target `jsox.extend()`,
-and `compat.jsox` are covered, while `zip`, `canvas`, OpenCC/pinyin packaged
-resources, Rhino `util` split batches, `sysprops`, `Arrayx`, `Numberx`, and raw
-Android/Canvas object parity require separate evidence.
+surface partial: pure `jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` helpers,
+explicit-target `jsox.extend()`, and `compat.jsox` are covered, while `zip`,
+`canvas`, OpenCC/pinyin packaged resources, Rhino `util` split batches,
+`sysprops`, and raw Android/Canvas object parity require separate evidence.
 P13-29 additionally uses `verifyNodePhase13HttpHttpsClientParity` as the host
 promotion-status gate for controlled HTTP/HTTPS client parity and keeps the
 desktop network/fs surface partial: client request, stream response, timeout,

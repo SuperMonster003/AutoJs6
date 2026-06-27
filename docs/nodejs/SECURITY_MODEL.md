@@ -580,13 +580,13 @@ MediaStore access, packaged media asset lookup, corpus/device evidence, and
 migration examples remain blocked.
 
 P13-27 records utility-heavy Rhino modules promotion as partial. The promoted
-`jsox.mathx` subset is pure JavaScript and does not require an Android bridge
-provider. `jsox.extend()` and `extendAll()` copy helpers only to an explicit
-target object; default global `Math` or prototype mutation is blocked by
-design. `Mathx.dist()` accepts JSON-safe point arrays and `{ x, y }` objects
-only. `zip`, `canvas`, OpenCC/pinyin packaged resources, `sysprops`, `Arrayx`,
-`Numberx`, raw Canvas/Paint, and raw Android/OpenCV point or rect objects
-remain blocked until separate provider/profile gates exist.
+`jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` subsets are pure JavaScript and
+do not require an Android bridge provider. `jsox.extend()` and `extendAll()`
+copy helpers only to an explicit target object; default global `Math` or
+prototype mutation is blocked by design. `Mathx.dist()` accepts JSON-safe point
+arrays and `{ x, y }` objects only. `zip`, `canvas`, OpenCC/pinyin packaged
+resources, `sysprops`, raw Canvas/Paint, and raw Android/OpenCV point or rect
+objects remain blocked until separate provider/profile gates exist.
 
 The `shell` bridge is the controlled AutoJs6 replacement for Node `child_process`, not an unrestricted process-spawning API. The migration path is intentionally narrow: `child_process.exec()` maps to `require("shell").exec()` when the project declares the `shell` bridge capability; S11-17 `require("autojs6:compat").shell(command, optionsOrRoot)` is only a callable compatibility wrapper over the same controlled facade. `spawn()`, `fork()`, streaming stdio, and interactive shells remain unsupported. It exposes `exec(command, options?)`, JS-layer `execFile(path, args?, options?)`, `checkAccess(options?)`, and `setDefaultTimeout(ms)`, and returns serialized `{ code, stdout, stderr }` results for command execution. `execFile()` validates a scoped relative path and string arguments, shell-quotes them, and then calls the same underlying `exec` bridge method. Commands run on a provider thread through a non-interactive shell; JavaScript never receives a `Process`, file descriptor, stream, signal handle, or raw Android shell object. Root mode is explicit through `options.root === true` or the migration shorthand `compat.shell(command, true)`, requires the separate `shell.root` capability when a manifest is enforced, and is never default. Shizuku execution remains unsupported in v1.1; `checkAccess({ shizuku: true })` reports it as unavailable instead of creating a fallback path. `cwd` is scoped to the execution working directory, `env` is JSON string-only, command output is bounded, and timeouts are enforced. The queued packaged fallback must not execute shell commands; `shell.exec()`, `shell.execFile()`, and `compat.shell()` require live bridge metadata so command results and denials are observable before the Promise settles.
 

@@ -34,6 +34,8 @@ import opencc = require("opencc");
 import pinyin = require("pinyin");
 import pinyin4j = require("pinyin4j");
 import jsox = require("jsox");
+import arrayx = require("jsox.arrayx");
+import numberx = require("jsox.numberx");
 import notifications = require("notifications");
 import sensors = require("sensors");
 import ui = require("ui");
@@ -335,6 +337,16 @@ async function smoke(): Promise<void> {
   const mathxTarget = jsox.extend({} as { sum(...values: readonly unknown[]): number }, "Mathx");
   const mathxTargetSum: number = mathxTarget.sum(1, 2, 3);
   const compatMathxMedian: number = rhinoCompat.jsox.mathx.median([1, 4, 2, 3]);
+  const arrayxDistinct: number[] = arrayx.distinct([1, 2, 1, 3]);
+  const arrayxSortedBy: string[] = jsox.arrayx.sortedBy(["aaa", "b", "cc"], (value) => value.length);
+  const arrayxTarget = jsox.extend({} as { union<T>(...arrays: readonly (readonly T[])[]): T[] }, "Arrayx");
+  const arrayxTargetUnion: number[] = arrayxTarget.union([1, 2], [2, 3]);
+  const compatArrayxIntersect: number[] = rhinoCompat.jsox.arrayx.intersect([1, 2, 3], [2, 3, 4]);
+  const numberxClamp: number = numberx.clamp(20, [10, 30]);
+  const numberxParsed: number = jsox.numberx.parseAny("18:9");
+  const numberxTarget = jsox.extend({} as { toFixedNum(num: unknown, fraction?: unknown): number }, "Numberx");
+  const numberxTargetFixed: number = numberxTarget.toFixedNum(123.456, 2);
+  const compatNumberxPadded: string = rhinoCompat.jsox.numberx.padStart(5, 2, 0);
 
   const notificationId: notifications.NotificationId = await notifications.notify({
     id: 710003,
@@ -958,6 +970,14 @@ async function smoke(): Promise<void> {
   void mathxDistance;
   void mathxTargetSum;
   void compatMathxMedian;
+  void arrayxDistinct;
+  void arrayxSortedBy;
+  void arrayxTargetUnion;
+  void compatArrayxIntersect;
+  void numberxClamp;
+  void numberxParsed;
+  void numberxTargetFixed;
+  void compatNumberxPadded;
   void notificationId;
   void notificationStatus;
   void notificationSettings;

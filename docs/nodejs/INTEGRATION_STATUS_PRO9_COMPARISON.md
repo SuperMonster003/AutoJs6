@@ -1059,13 +1059,14 @@ access, packaged media assets, migration examples, and raw Android media
 objects remain blocked.
 
 P13-27 records utility-heavy Rhino modules promotion as partial:
-`require("jsox")`, `require("jsox.mathx")`, and
-`require("autojs6:compat").jsox` now expose the pure Rhino `Mathx` helper
-subset. Scripts can migrate random/statistics/distance/log/pow/min/max helper
-usage to Node, and can copy helpers with `jsox.extend(target, "Mathx")`.
-Default global `Math` or prototype mutation, `zip`, `canvas`, OpenCC/pinyin
-packaged resources, `sysprops`, `Arrayx`, `Numberx`, and raw Android/OpenCV
-object parity remain blocked.
+`require("jsox")`, direct `jsox.mathx` / `jsox.arrayx` / `jsox.numberx`
+submodule requires, and `require("autojs6:compat").jsox` now expose the pure
+Rhino `Mathx`, `Arrayx`, and `Numberx` helper subsets. Scripts can migrate
+random/statistics/distance/log/pow/min/max helpers, array set/sort helpers, and
+number parse/clamp/format helpers to Node, and can copy helpers with
+`jsox.extend(target, "Mathx" | "Arrayx" | "Numberx")`. Default global `Math`
+or prototype mutation, `zip`, `canvas`, OpenCC/pinyin packaged resources,
+`sysprops`, and raw Android/OpenCV object parity remain blocked.
 
 P13-29 records HTTP/HTTPS client parity as partial: `require("http")`,
 `require("node:http")`, `require("https")`, and `require("node:https")`

@@ -72,10 +72,10 @@ P12-34 keeps promoted Phase 12 examples and stable rejection guidance synchroniz
 | 42 | formatter.bytes | bytes | supported | autojs6:compat, fmt, formatter | supported:7 | none | Review status manifest decision. |
 | 43 | console | console | partial | autojs6:compat, console | partial:35, supported:16, unsupported:3 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
 | 44 | plugins | plugins | partial | plugins | partial:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
-| 45 | jsox.arrayx | Arrayx | unsupported | - | unsupported:16 | none | Design a Node facade or record a permanent non-goal. |
-| 46 | jsox.numberx | Numberx | unsupported | - | unsupported:14 | none | Design a Node facade or record a permanent non-goal. |
-| 47 | jsox.mathx | Mathx | partial | autojs6:compat, jsox, jsox.mathx | partial:25 | none | P13-27 promotes the pure Mathx facade subset; raw Android/OpenCV point/rect parity and sibling JSOX modules remain deferred. |
-| 48 | jsox | jsox | partial | autojs6:compat, jsox | partial:3 | none | P13-27 exposes explicit-target `jsox.extend()` / `extendAll()` for Mathx; default global Math/prototype mutation remains blocked. |
+| 45 | jsox.arrayx | Arrayx | partial | autojs6:compat, jsox, jsox.arrayx | partial:16 | none | P13-27 promotes the pure Arrayx facade subset; default Array prototype mutation remains blocked. |
+| 46 | jsox.numberx | Numberx | partial | autojs6:compat, jsox, jsox.numberx | partial:14 | none | P13-27 promotes the pure Numberx facade subset; default Number/global parse mutation remains blocked. |
+| 47 | jsox.mathx | Mathx | partial | autojs6:compat, jsox, jsox.mathx | partial:25 | none | P13-27 promotes the pure Mathx facade subset; raw Android/OpenCV point/rect parity remains deferred. |
+| 48 | jsox | jsox | partial | autojs6:compat, jsox, jsox.arrayx, jsox.mathx, jsox.numberx | partial:3 | none | P13-27 promotes pure Mathx, Arrayx, and Numberx facade subsets through explicit-target `jsox.extend()` / `extendAll()`; default global Math/prototype mutation remains blocked. |
 | 49 | files | files | partial | autojs6:compat, files | blocked_by_design:1, partial:1, supported:2, unsupported:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 50 | cryptyo.crypto | crypto | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 51 | automator.root_automator | RootAutomator | blocked_by_design | - | blocked_by_design:1 | lifecycle_resource, raw_android_object | Keep denial documented and covered by policy tests. |
@@ -556,22 +556,22 @@ P12-34 keeps promoted Phase 12 examples and stable rejection guidance synchroniz
 ### jsox.arrayx
 
 - Key: `Arrayx`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:16
+- Status: `partial`
+- Node surface: autojs6:compat, jsox, jsox.arrayx
+- Coverage: `bridge_and_types`
+- API status: partial:16
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: P13-27 promotes the pure Arrayx facade subset; default Array prototype mutation remains blocked.
 
 ### jsox.numberx
 
 - Key: `Numberx`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:14
+- Status: `partial`
+- Node surface: autojs6:compat, jsox, jsox.numberx
+- Coverage: `bridge_and_types`
+- API status: partial:14
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: P13-27 promotes the pure Numberx facade subset; default Number/global parse mutation remains blocked.
 
 ### jsox.mathx
 
@@ -581,17 +581,17 @@ P12-34 keeps promoted Phase 12 examples and stable rejection guidance synchroniz
 - Coverage: `bridge_and_types`
 - API status: partial:25
 - Risks: none
-- Next step: P13-27 promotes the pure Mathx facade subset; raw Android/OpenCV point/rect parity and sibling JSOX modules remain deferred.
+- Next step: P13-27 promotes the pure Mathx facade subset; raw Android/OpenCV point/rect parity remains deferred.
 
 ### jsox
 
 - Key: `jsox`
 - Status: `partial`
-- Node surface: autojs6:compat, jsox
+- Node surface: autojs6:compat, jsox, jsox.arrayx, jsox.mathx, jsox.numberx
 - Coverage: `bridge_and_types`
 - API status: partial:3
 - Risks: none
-- Next step: P13-27 exposes explicit-target `jsox.extend()` / `extendAll()` for Mathx; default global Math/prototype mutation remains blocked.
+- Next step: P13-27 promotes pure Mathx, Arrayx, and Numberx facade subsets through explicit-target `jsox.extend()` / `extendAll()`; default global Math/prototype mutation remains blocked.
 
 ### files
 

@@ -60,39 +60,60 @@ function loadFiles(repoRoot) {
 function buildReport(files) {
   const proSurface = surface(files.surfaceManifest.text, "pro.tasks_app_shell_media_utils");
   const status = parseJson(files.statusManifest.text, {});
+  const jsoxArrayxStatus = moduleStatus(status, "jsox.arrayx");
+  const jsoxNumberxStatus = moduleStatus(status, "jsox.numberx");
   const jsoxMathxStatus = moduleStatus(status, "jsox.mathx");
   const jsoxStatus = moduleStatus(status, "jsox");
   const scenarios = [
-    scenario("pure_jsox_mathx_runtime", "jsox and jsox.mathx expose the pure Mathx facade without Android providers", [
+    scenario("pure_jsox_runtime", "jsox exposes pure Mathx, Arrayx, and Numberx facades without Android providers", [
       token(files.nodeBridgeSources, "let __autojs6_limited_jsox_mathx_cache = null"),
+      token(files.nodeBridgeSources, "let __autojs6_limited_jsox_arrayx_cache = null"),
+      token(files.nodeBridgeSources, "let __autojs6_limited_jsox_numberx_cache = null"),
       token(files.nodeBridgeSources, "let __autojs6_limited_jsox_cache = null"),
       token(files.nodeBridgeSources, "function __autojs6_limited_jsox_mathx()"),
+      token(files.nodeBridgeSources, "function __autojs6_limited_jsox_arrayx()"),
+      token(files.nodeBridgeSources, "function __autojs6_limited_jsox_numberx()"),
       token(files.nodeBridgeSources, "function __autojs6_limited_jsox()"),
       token(files.nodeBridgeSources, 'if (name === "jsox")'),
       token(files.nodeBridgeSources, 'if (name === "jsox.mathx")'),
+      token(files.nodeBridgeSources, 'if (name === "jsox.arrayx")'),
+      token(files.nodeBridgeSources, 'if (name === "jsox.numberx")'),
       token(files.nodeBridgeSources, "jsox: __autojs6_limited_jsox()"),
       token(files.nodeBridgeSources, "default global Math/prototype mutation is disabled"),
-      token(files.nodeBridgeSources, 'nodeModules: Object.freeze(["jsox", "jsox.mathx"])'),
+      token(files.nodeBridgeSources, 'nodeModules: Object.freeze(["jsox", "jsox.mathx", "jsox.arrayx", "jsox.numberx"])'),
       token(files.nodeBridgeSources, '"P13-27"'),
     ], [
-      "Only Mathx is promoted; Arrayx and Numberx still need separate pure helper gates.",
       "Raw Android/OpenCV point/rect parity for Mathx.dist remains out of this gate.",
     ]),
     scenario("types_and_instrumentation", "types, conformance, and focused instrumentation cover jsox", [
       token(files.jsoxTypes, 'declare module "jsox"'),
       token(files.jsoxTypes, 'declare module "jsox.mathx"'),
+      token(files.jsoxTypes, 'declare module "jsox.arrayx"'),
+      token(files.jsoxTypes, 'declare module "jsox.numberx"'),
       token(files.jsoxTypes, "export interface MathxModule"),
+      token(files.jsoxTypes, "export interface ArrayxModule"),
+      token(files.jsoxTypes, "export interface NumberxModule"),
       token(files.jsoxTypes, "export interface JsoxModule"),
       token(files.indexTypes, '/// <reference path="./jsox.d.ts" />'),
       token(files.rhinoCompatTypes, 'import jsox = require("jsox")'),
       token(files.rhinoCompatTypes, "readonly jsox: jsox.JsoxModule"),
       token(files.typeSmoke, 'import jsox = require("jsox")'),
+      token(files.typeSmoke, 'import arrayx = require("jsox.arrayx")'),
+      token(files.typeSmoke, 'import numberx = require("jsox.numberx")'),
       token(files.typeSmoke, "const compatMathxMedian: number = rhinoCompat.jsox.mathx.median"),
+      token(files.typeSmoke, "const compatArrayxIntersect: number[] = rhinoCompat.jsox.arrayx.intersect"),
+      token(files.typeSmoke, "const compatNumberxPadded: string = rhinoCompat.jsox.numberx.padStart"),
       token(files.conformanceTest, 'expectExports("jsox.mathx", jsoxMathx'),
+      token(files.conformanceTest, 'expectExports("jsox.arrayx", jsoxArrayx'),
+      token(files.conformanceTest, 'expectExports("jsox.numberx", jsoxNumberx'),
       token(files.conformanceTest, 'expectExports("autojs6:compat.jsox.mathx", compat.jsox.mathx'),
+      token(files.conformanceTest, 'expectExports("autojs6:compat.jsox.arrayx", compat.jsox.arrayx'),
+      token(files.conformanceTest, 'expectExports("autojs6:compat.jsox.numberx", compat.jsox.numberx'),
       token(files.utilityTest, "class NodeUtilityBridgeInstrumentationTest"),
       token(files.utilityTest, "jsJsoxMathxPureFacadeBlocksShadowingAndDefaultGlobalMutation"),
       token(files.utilityTest, "jsox.values=6|2.5|2.5|2.5|0.666666666667"),
+      token(files.utilityTest, "jsox.resolve=jsox|jsox.mathx|jsox.arrayx|jsox.numberx"),
+      token(files.utilityTest, "numberx.parseAny(\"0xFF\")"),
       token(files.utilityTest, "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"),
     ], [
       "Packaged APK resource smoke remains open because this batch is provider-free and resource-free.",
@@ -110,10 +131,12 @@ function buildReport(files) {
       token(files.proAutoxNotes, "P13-27 records utility-heavy Rhino modules promotion as partial"),
       token(files.capabilityMatrix, "P13-27 utility-heavy Rhino modules"),
       token(files.typesReadme, "P13-27 records the partial utility-heavy Rhino modules gate"),
-      token(files.rhinoMatrix, "P13-27 promotes the pure Mathx facade subset"),
+      token(files.rhinoMatrix, "P13-27 promotes pure Mathx, Arrayx, and Numberx facade subsets"),
+      token(files.statusManifest, '"decision": "p13_27_pure_js_arrayx_facade"'),
+      token(files.statusManifest, '"decision": "p13_27_pure_js_numberx_facade"'),
       token(files.statusManifest, '"decision": "p13_27_pure_js_mathx_facade"'),
     ], [
-      "P13-27 remains open until resource-heavy and raw-object utility modules receive dedicated gates.",
+      "P13-27 remains open until resource-backed and raw-object utility modules receive dedicated gates.",
     ]),
   ];
 
@@ -138,17 +161,18 @@ function buildReport(files) {
     ),
     check(
       "status-manifest-partial",
-      jsoxMathxStatus && jsoxMathxStatus.status === "partial" && jsoxStatus && jsoxStatus.status === "partial",
-      "`jsox.mathx` and `jsox` must be partial in the Rhino status manifest.",
+      jsoxArrayxStatus && jsoxArrayxStatus.status === "partial" &&
+        jsoxNumberxStatus && jsoxNumberxStatus.status === "partial" &&
+        jsoxMathxStatus && jsoxMathxStatus.status === "partial" &&
+        jsoxStatus && jsoxStatus.status === "partial",
+      "`jsox.arrayx`, `jsox.numberx`, `jsox.mathx`, and `jsox` must be partial in the Rhino status manifest.",
     ),
     check(
       "no-resource-heavy-runtime-promotion",
       !files.nodeBridgeSources.text.includes('if (name === "zip")') &&
         !files.nodeBridgeSources.text.includes('if (name === "canvas")') &&
-        !files.nodeBridgeSources.text.includes('if (name === "sysprops")') &&
-        !files.nodeBridgeSources.text.includes('if (name === "jsox.arrayx")') &&
-        !files.nodeBridgeSources.text.includes('if (name === "jsox.numberx")'),
-      "P13-27 must not expose zip, canvas, sysprops, jsox.arrayx, or jsox.numberx before dedicated gates land.",
+        !files.nodeBridgeSources.text.includes('if (name === "sysprops")'),
+      "P13-27 must not expose zip, canvas, or sysprops before dedicated gates land.",
     ),
   ];
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -167,6 +191,8 @@ function buildReport(files) {
     },
     statusManifest: {
       jsox: jsoxStatus ? jsoxStatus.status : "missing",
+      jsoxArrayx: jsoxArrayxStatus ? jsoxArrayxStatus.status : "missing",
+      jsoxNumberx: jsoxNumberxStatus ? jsoxNumberxStatus.status : "missing",
       jsoxMathx: jsoxMathxStatus ? jsoxMathxStatus.status : "missing",
     },
     scenarios,
@@ -177,7 +203,7 @@ function buildReport(files) {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
       phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
-      jsoxMathxReady: scenarioById(scenarios, "pure_jsox_mathx_runtime").status !== "missing_evidence",
+      pureJsoxReady: scenarioById(scenarios, "pure_jsox_runtime").status !== "missing_evidence",
       resourceBackedUtilitiesReady: false,
       rawAndroidUtilityParityReady: false,
       proSurfacePromoted: false,

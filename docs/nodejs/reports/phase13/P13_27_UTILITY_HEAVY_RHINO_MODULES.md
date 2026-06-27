@@ -3,13 +3,15 @@
 Status: partial.
 
 P13-27 is intentionally split. This landing promotes the pure JavaScript
-`jsox.mathx` subset first and keeps resource-backed or raw Android object
-surfaces behind later gates.
+`jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` subsets and keeps
+resource-backed or raw Android object surfaces behind later gates.
 
 ## Promoted Surface
 
 - `require("jsox")`
 - `require("jsox.mathx")`
+- `require("jsox.arrayx")`
+- `require("jsox.numberx")`
 - `require("autojs6:compat").jsox`
 - optional `compat.install({ globals: true })` installs `globalThis.jsox`
 
@@ -23,17 +25,38 @@ The promoted `Mathx` helper set includes:
   `floorPow`, `ceilPow`, `roundPow`
 - min/max helpers: `max`, `maxi`, `min`, `mini`
 
+The promoted `Arrayx` helper set includes:
+
+- validation and set helpers: `ensureArray`, `distinct`, `distinctBy`,
+  `union`, `intersect`, `subtract`, `differ`
+- sorting helpers: `sortBy`, `sortByDescending`, `sortDescending`, `sorted`,
+  `sortedBy`, `sortedByDescending`, `sortedDescending`
+- mutation helper: `shuffle`
+
+The promoted `Numberx` helper set includes:
+
+- validation and comparison helpers: `ensureNumber`, `ensureNumberLike`,
+  `ensureNumbersLike`, `check`
+- numeric helpers: `clamp`, `clampTo`, `toFixedNum`
+- string/parse helpers: `padStart`, `padEnd`, `parseFloat`, `parsePercent`,
+  `parseRatio`, `parseAny`
+- constant: `ICU`
+
 ## Compatibility Boundary
 
-`jsox.mathx` is synchronous and provider-free. It accepts JSON-safe numbers,
-arrays, and `{ x, y }` point objects. Raw Android/OpenCV `Point` and `Rect`
-objects do not cross into Node.
+`jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` are synchronous and
+provider-free. They accept JSON-safe numbers, arrays, and `{ x, y }` point
+objects where applicable. Raw Android/OpenCV `Point` and `Rect` objects do not
+cross into Node.
 
 Rhino `jsox.extend()` mutates JavaScript built-ins. The Node facade does not
 perform default global `Math` or prototype mutation. Instead:
 
 - `jsox.extend(target, "Mathx")` copies Mathx helpers to an explicit target.
-- `jsox.extendAll(target)` copies the currently promoted Mathx helper set.
+- `jsox.extend(target, "Arrayx")` copies Arrayx helpers to an explicit target.
+- `jsox.extend(target, "Numberx")` copies Numberx helpers to an explicit
+  target.
+- `jsox.extendAll(target)` copies the currently promoted pure helper set.
 - `jsox.extend("Mathx")` and `jsox.extendAll()` reject with
   `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`.
 
@@ -65,8 +88,6 @@ Safe Node Profile.
   diagnostics, and corpus evidence.
 - Rhino `util`: still needs smaller pure/type/density/logging split batches.
 - `sysprops`: needs Android system-property policy and privacy review.
-- `jsox.arrayx` and `jsox.numberx`: remain unsupported until separate pure JS
-  batches define exact semantics and mutation boundaries.
 - Raw Android/OpenCV point/rect parity for `Mathx.dist` remains out of this
   gate.
 

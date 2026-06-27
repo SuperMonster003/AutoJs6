@@ -290,13 +290,13 @@ P13-26 records the partial media/recorder/mediainfo provider gate.
 required for the promoted helpers; playback, real recorder sessions, MediaStore,
 packaged media assets, and foreground microphone disclosure remain future work.
 
-P13-27 records the partial utility-heavy Rhino modules gate. `jsox.mathx` is
-typed as a pure JavaScript `Mathx` facade through `require("jsox")`,
-`require("jsox.mathx")`, and `autojs6:compat.jsox`. `jsox.extend(target,
-"Mathx")` and `jsox.extendAll(target)` require explicit targets; default global
+P13-27 records the partial utility-heavy Rhino modules gate. `jsox.mathx`,
+`jsox.arrayx`, and `jsox.numberx` are typed as pure JavaScript facades through
+`require("jsox")`, direct submodule requires, and `autojs6:compat.jsox`.
+`jsox.extend(target, "Mathx" | "Arrayx" | "Numberx")` and
+`jsox.extendAll(target)` require explicit targets; default global
 `Math`/prototype mutation, `zip`, `canvas`, OpenCC/pinyin packaged resources,
-`sysprops`, `Arrayx`, `Numberx`, and raw Android/OpenCV object parity remain
-future work.
+`sysprops`, and raw Android/OpenCV object parity remain future work.
 
 P13-29 records the partial HTTP/HTTPS client parity gate. `http`/`node:http`
 and `https`/`node:https` are typed as controlled client facades over AutoJs6

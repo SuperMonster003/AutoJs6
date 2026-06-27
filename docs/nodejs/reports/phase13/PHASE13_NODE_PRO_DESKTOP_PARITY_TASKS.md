@@ -137,8 +137,9 @@
 ## P13-27 Partial Landing Note
 
 - P13-27 partial utility-heavy Rhino modules gate records the pure
-  `jsox.mathx` facade subset through `require("jsox")`,
-  `require("jsox.mathx")`, and explicit `autojs6:compat.jsox`.
+  `jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` facade subsets through
+  `require("jsox")`, direct submodule requires, and explicit
+  `autojs6:compat.jsox`.
 - Host verifier:
   `tools/nodejs/phase13/verify-utility-heavy-rhino-modules.js`.
 - Gradle gate: `:app:verifyNodePhase13UtilityHeavyRhinoModules`.
@@ -146,9 +147,8 @@
   `docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md`.
 - Surface manifest evidence: `phase13-utility-heavy-rhino-modules`.
 - Remaining P13-27 blockers: `zip`, `canvas`, OpenCC packaged resources,
-  pinyin full dictionaries, Rhino `util` split batches, `sysprops`, `Arrayx`,
-  `Numberx`, and raw Android Canvas/Paint or Android/OpenCV point/rect parity
-  profile gates.
+  pinyin full dictionaries, Rhino `util` split batches, `sysprops`, and raw
+  Android Canvas/Paint or Android/OpenCV point/rect parity profile gates.
 
 ## P13-29 Partial Landing Note
 
@@ -1108,8 +1108,8 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md`.
     - Open before closure: `zip`, `canvas`, OpenCC/pinyin packaged resources,
-      Rhino `util` helper split, `sysprops`, `Arrayx`, `Numberx`, and raw
-      Canvas/Paint or Android/OpenCV object parity profile gates.
+      Rhino `util` helper split, `sysprops`, and raw Canvas/Paint or
+      Android/OpenCV object parity profile gates.
 
 ### Track C: Desktop Node.js parity
 

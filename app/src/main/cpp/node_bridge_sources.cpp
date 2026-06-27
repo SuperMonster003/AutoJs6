@@ -8815,6 +8815,8 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_pinyin_cache = null;
   let __autojs6_limited_pinyin4j_cache = null;
   let __autojs6_limited_jsox_mathx_cache = null;
+  let __autojs6_limited_jsox_arrayx_cache = null;
+  let __autojs6_limited_jsox_numberx_cache = null;
   let __autojs6_limited_jsox_cache = null;
   let __autojs6_rhino_compat_facade_cache = null;
   let __autojs6_lifecycle_config_cache = undefined;
@@ -18811,6 +18813,387 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_jsox_mathx_round_pow(base, antilogarithm) {
     return Math.pow(Number(base), __autojs6_jsox_mathx_round_log(base, antilogarithm));
   }
+  function __autojs6_jsox_arrayx_require_array(value, apiName) {
+    if (!Array.isArray(value)) {
+      throw __autojs6_rhino_compat_error(
+        apiName + " requires a JavaScript Array.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    return value;
+  }
+  function __autojs6_jsox_arrayx_require_function(value, apiName) {
+    if (typeof value !== "function") {
+      throw __autojs6_rhino_compat_error(
+        apiName + " requires a JavaScript Function selector.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    return value;
+  }
+  function __autojs6_jsox_arrayx_ensure_array() {
+    Array.prototype.slice.call(arguments).forEach(function(value) {
+      __autojs6_jsox_arrayx_require_array(value, "jsox.arrayx.ensureArray");
+    });
+  }
+  function __autojs6_jsox_arrayx_distinct(arr) {
+    const input = __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.distinct");
+    return Array.from(new Set(input));
+  }
+  function __autojs6_jsox_arrayx_distinct_by(arr, selector) {
+    const input = __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.distinctBy");
+    const select = __autojs6_jsox_arrayx_require_function(selector, "jsox.arrayx.distinctBy");
+    const seen = new Set();
+    const result = [];
+    input.forEach(function(value) {
+      const key = select(value);
+      if (!seen.has(key)) {
+        seen.add(key);
+        result.push(value);
+      }
+    });
+    return result;
+  }
+  function __autojs6_jsox_arrayx_union() {
+    const args = Array.prototype.slice.call(arguments);
+    if (args.length === 0) {
+      throw __autojs6_rhino_compat_error(
+        "jsox.arrayx.union requires at least one array.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        "jsox.arrayx.union",
+        "invalid-option"
+      );
+    }
+    const result = [];
+    const seen = new Set();
+    args.forEach(function(value) {
+      __autojs6_jsox_arrayx_require_array(value, "jsox.arrayx.union").forEach(function(item) {
+        if (!seen.has(item)) {
+          seen.add(item);
+          result.push(item);
+        }
+      });
+    });
+    return result;
+  }
+  function __autojs6_jsox_arrayx_intersect() {
+    const args = Array.prototype.slice.call(arguments);
+    if (args.length === 0) {
+      throw __autojs6_rhino_compat_error(
+        "jsox.arrayx.intersect requires at least one array.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        "jsox.arrayx.intersect",
+        "invalid-option"
+      );
+    }
+    const first = __autojs6_jsox_arrayx_require_array(args[0], "jsox.arrayx.intersect");
+    const rest = args.slice(1).map(function(value) {
+      return new Set(__autojs6_jsox_arrayx_require_array(value, "jsox.arrayx.intersect"));
+    });
+    const seen = new Set();
+    const result = [];
+    first.forEach(function(item) {
+      if (!seen.has(item) && rest.every(function(set) { return set.has(item); })) {
+        seen.add(item);
+        result.push(item);
+      }
+    });
+    return result;
+  }
+  function __autojs6_jsox_arrayx_subtract(left, right) {
+    const source = __autojs6_jsox_arrayx_require_array(left, "jsox.arrayx.subtract");
+    const deny = new Set(__autojs6_jsox_arrayx_require_array(right, "jsox.arrayx.subtract"));
+    const seen = new Set();
+    const result = [];
+    source.forEach(function(item) {
+      if (!deny.has(item) && !seen.has(item)) {
+        seen.add(item);
+        result.push(item);
+      }
+    });
+    return result;
+  }
+  function __autojs6_jsox_arrayx_differ(left, right) {
+    return __autojs6_jsox_arrayx_union(
+      __autojs6_jsox_arrayx_subtract(left, right),
+      __autojs6_jsox_arrayx_subtract(right, left)
+    );
+  }
+  function __autojs6_jsox_arrayx_compare_asc(a, b) {
+    if (a > b) return 1;
+    if (a < b) return -1;
+    if (a === b) return 0;
+    const as = String(a);
+    const bs = String(b);
+    if (as > bs) return 1;
+    if (as < bs) return -1;
+    return 0;
+  }
+  function __autojs6_jsox_arrayx_compare_desc(a, b) {
+    return -__autojs6_jsox_arrayx_compare_asc(a, b);
+  }
+  function __autojs6_jsox_arrayx_compare_by(selector, descending) {
+    const select = __autojs6_jsox_arrayx_require_function(selector, descending ? "jsox.arrayx.sortByDescending" : "jsox.arrayx.sortBy");
+    return function(a, b) {
+      const left = select(a);
+      const right = select(b);
+      return descending
+        ? __autojs6_jsox_arrayx_compare_desc(left, right)
+        : __autojs6_jsox_arrayx_compare_asc(left, right);
+    };
+  }
+  function __autojs6_jsox_arrayx_sort_by(arr, selector) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortBy")
+      .sort(__autojs6_jsox_arrayx_compare_by(selector, false));
+  }
+  function __autojs6_jsox_arrayx_sort_by_descending(arr, selector) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortByDescending")
+      .sort(__autojs6_jsox_arrayx_compare_by(selector, true));
+  }
+  function __autojs6_jsox_arrayx_sort_descending(arr) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortDescending")
+      .sort(__autojs6_jsox_arrayx_compare_desc);
+  }
+  function __autojs6_jsox_arrayx_sorted(arr) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sorted")
+      .slice()
+      .sort(__autojs6_jsox_arrayx_compare_asc);
+  }
+  function __autojs6_jsox_arrayx_sorted_descending(arr) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortedDescending")
+      .slice()
+      .sort(__autojs6_jsox_arrayx_compare_desc);
+  }
+  function __autojs6_jsox_arrayx_sorted_by(arr, selector) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortedBy")
+      .slice()
+      .sort(__autojs6_jsox_arrayx_compare_by(selector, false));
+  }
+  function __autojs6_jsox_arrayx_sorted_by_descending(arr, selector) {
+    return __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.sortedByDescending")
+      .slice()
+      .sort(__autojs6_jsox_arrayx_compare_by(selector, true));
+  }
+  function __autojs6_jsox_arrayx_shuffle(arr) {
+    const target = __autojs6_jsox_arrayx_require_array(arr, "jsox.arrayx.shuffle");
+    for (let index = target.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      const value = target[index];
+      target[index] = target[swapIndex];
+      target[swapIndex] = value;
+    }
+    return target;
+  }
+  function __autojs6_limited_jsox_arrayx() {
+    if (__autojs6_limited_jsox_arrayx_cache) {
+      return __autojs6_limited_jsox_arrayx_cache;
+    }
+    __autojs6_limited_jsox_arrayx_cache = Object.freeze({
+      ensureArray: __autojs6_jsox_arrayx_ensure_array,
+      distinct: __autojs6_jsox_arrayx_distinct,
+      distinctBy: __autojs6_jsox_arrayx_distinct_by,
+      union: __autojs6_jsox_arrayx_union,
+      intersect: __autojs6_jsox_arrayx_intersect,
+      subtract: __autojs6_jsox_arrayx_subtract,
+      differ: __autojs6_jsox_arrayx_differ,
+      sortBy: __autojs6_jsox_arrayx_sort_by,
+      sortByDescending: __autojs6_jsox_arrayx_sort_by_descending,
+      sortDescending: __autojs6_jsox_arrayx_sort_descending,
+      sorted: __autojs6_jsox_arrayx_sorted,
+      sortedBy: __autojs6_jsox_arrayx_sorted_by,
+      sortedByDescending: __autojs6_jsox_arrayx_sorted_by_descending,
+      sortedDescending: __autojs6_jsox_arrayx_sorted_descending,
+      shuffle: __autojs6_jsox_arrayx_shuffle
+    });
+    return __autojs6_limited_jsox_arrayx_cache;
+  }
+  function __autojs6_jsox_numberx_invalid(apiName, message) {
+    throw __autojs6_rhino_compat_error(
+      message,
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      apiName,
+      "invalid-option"
+    );
+  }
+  function __autojs6_jsox_numberx_parse_percent(percent) {
+    if (percent === undefined || percent === null) return NaN;
+    const match = String(percent).trim().match(/^([+-]?\d+(?:\.\d+)?)(%*)$/);
+    if (!match) return NaN;
+    return Number(match[1]) / Math.pow(100, match[2].length);
+  }
+  function __autojs6_jsox_numberx_parse_ratio(ratio) {
+    if (ratio === undefined || ratio === null) return NaN;
+    const parts = String(ratio).trim().split(":").map(function(value) { return value.trim(); });
+    if (parts.length < 2) return NaN;
+    return Number(parts[0]) / Number(parts[1]);
+  }
+  function __autojs6_jsox_numberx_parse_any(value) {
+    if (value === undefined || value === null) return NaN;
+    if (typeof value === "number") return value;
+    const string = String(value).trim();
+    if (string.indexOf(":") >= 0) return __autojs6_jsox_numberx_parse_ratio(string);
+    if (string.indexOf("%") >= 0) return __autojs6_jsox_numberx_parse_percent(string);
+    return Number(string);
+  }
+  function __autojs6_jsox_numberx_ensure_number() {
+    const values = Array.prototype.slice.call(arguments);
+    if (values.length === 0) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumber", "jsox.numberx.ensureNumber requires at least one argument.");
+    }
+    values.forEach(function(value) {
+      if (typeof value !== "number") {
+        __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumber", "Argument must be a number.");
+      }
+    });
+  }
+  function __autojs6_jsox_numberx_ensure_number_like(value, allowNaN) {
+    if (value === undefined || value === null) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumberLike", "Argument for jsox.numberx.ensureNumberLike must not be null or undefined.");
+    }
+    if (typeof value === "number" && Number.isNaN(value)) {
+      if (allowNaN) return NaN;
+      __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumberLike", "Argument is NaN, which is not allowed for jsox.numberx.ensureNumberLike.");
+    }
+    const number = __autojs6_jsox_numberx_parse_any(value);
+    if (Number.isNaN(number)) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumberLike", "Argument cannot be taken as a number for jsox.numberx.ensureNumberLike.");
+    }
+    return number;
+  }
+  function __autojs6_jsox_numberx_ensure_numbers_like(values, allowNaN, containsNaN) {
+    if (!Array.isArray(values)) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumbersLike", "Argument \"numbers\" must be an array for jsox.numberx.ensureNumbersLike.");
+    }
+    const result = [];
+    values.forEach(function(value, index) {
+      if (value === undefined || value === null) {
+        __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumbersLike", "Argument[" + index + "] for jsox.numberx.ensureNumbersLike must not be null or undefined.");
+      }
+      if (typeof value === "number" && Number.isNaN(value)) {
+        if (!allowNaN) {
+          __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumbersLike", "Argument[" + index + "] is NaN, which is not allowed for jsox.numberx.ensureNumbersLike.");
+        }
+        if (containsNaN) result.push(NaN);
+        return;
+      }
+      const number = __autojs6_jsox_numberx_parse_any(value);
+      if (Number.isNaN(number)) {
+        __autojs6_jsox_numberx_invalid("jsox.numberx.ensureNumbersLike", "Argument[" + index + "] cannot be taken as a number for jsox.numberx.ensureNumbersLike.");
+      }
+      result.push(number);
+    });
+    return result;
+  }
+  function __autojs6_jsox_numberx_check() {
+    const inputs = Array.prototype.slice.call(arguments);
+    if (inputs.length === 0) return false;
+    if (inputs.length === 1) return typeof inputs[0] === "number";
+    if (inputs.length === 2) return __autojs6_jsox_numberx_check(inputs[0], "==", inputs[1]);
+    const operators = {
+      "<": function(a, b) { return a < b; },
+      "<=": function(a, b) { return a <= b; },
+      ">": function(a, b) { return a > b; },
+      ">=": function(a, b) { return a >= b; },
+      "=": function(a, b) { return a === b; },
+      "==": function(a, b) { return a === b; },
+      "!=": function(a, b) { return a !== b; },
+      "<>": function(a, b) { return a !== b; }
+    };
+    for (let index = 1; index < inputs.length; index += 2) {
+      const operator = inputs[index];
+      if (typeof operator !== "string" || !Object.prototype.hasOwnProperty.call(operators, operator)) {
+        __autojs6_jsox_numberx_invalid("jsox.numberx.check", "Arguments[" + index + "] for jsox.numberx.check must be a supported operator.");
+      }
+      const left = __autojs6_jsox_numberx_ensure_number_like(inputs[index - 1]);
+      const right = __autojs6_jsox_numberx_ensure_number_like(inputs[index + 1]);
+      if (!operators[operator](left, right)) return false;
+    }
+    return true;
+  }
+  function __autojs6_jsox_numberx_clamp(num) {
+    const x = __autojs6_jsox_numberx_ensure_number_like(num);
+    const values = __autojs6_jsox_mathx_flatten(Array.prototype.slice.call(arguments, 1));
+    const clamps = __autojs6_jsox_numberx_ensure_numbers_like(values).sort(function(a, b) { return a - b; });
+    if (clamps.length === 0) return x;
+    const min = clamps[0];
+    const max = clamps[clamps.length - 1];
+    if (x < min) return min;
+    if (x > max) return max;
+    return x;
+  }
+  function __autojs6_jsox_numberx_clamp_to(num, range, cycle) {
+    const x = __autojs6_jsox_numberx_ensure_number_like(num);
+    const sortedRange = __autojs6_jsox_numberx_ensure_numbers_like(range).sort(function(a, b) { return a - b; });
+    if (sortedRange.length === 0) return x;
+    const min = sortedRange[0];
+    const max = sortedRange[sortedRange.length - 1];
+    const t = cycle === undefined || cycle === null ? max - min : __autojs6_jsox_numberx_ensure_number_like(cycle);
+    if (!(t > 0)) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.clampTo", "Cycle must be a positive number.");
+    }
+    if (x < min) return x + Math.ceil((min - x) / t) * t;
+    if (x > max) return x - Math.ceil((x - max) / t) * t;
+    return x;
+  }
+  function __autojs6_jsox_numberx_to_fixed_num(num, fraction) {
+    return __autojs6_jsox_mathx_to_fixed_num(
+      __autojs6_jsox_numberx_parse_any(num),
+      fraction === undefined || fraction === null ? 0 : __autojs6_jsox_numberx_parse_any(fraction)
+    );
+  }
+  function __autojs6_jsox_numberx_parse_float(value, radix) {
+    if (value === undefined || value === null) return NaN;
+    const string = String(value);
+    if (radix === undefined || radix === null) return parseFloat(string);
+    let base = __autojs6_jsox_numberx_ensure_number_like(radix, true);
+    if (Number.isNaN(base) || !Number.isFinite(base)) base = 10;
+    const parts = string.split(".");
+    const fractionLength = parts.length > 1 ? parts[1].length : 0;
+    const compact = parts.join("");
+    return parseInt(compact, Math.round(base)) / Math.pow(base, fractionLength);
+  }
+  function __autojs6_jsox_numberx_pad_start(num, targetLength, pad) {
+    const length = Number(targetLength);
+    if (Number.isNaN(length) || !Number.isFinite(length)) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.padStart", "Argument \"targetLength\" for jsox.numberx.padStart must be a number.");
+    }
+    const padding = pad === undefined || pad === null ? "0" : String(pad);
+    return String(__autojs6_jsox_numberx_parse_any(num)).padStart(Math.round(length), padding);
+  }
+  function __autojs6_jsox_numberx_pad_end(num, targetLength, pad) {
+    const length = Number(targetLength);
+    if (Number.isNaN(length) || !Number.isFinite(length)) {
+      __autojs6_jsox_numberx_invalid("jsox.numberx.padEnd", "Argument \"targetLength\" for jsox.numberx.padEnd must be a number.");
+    }
+    const padding = pad === undefined || pad === null ? "0" : String(pad);
+    return String(__autojs6_jsox_numberx_parse_any(num)).padEnd(Math.round(length), padding);
+  }
+  function __autojs6_limited_jsox_numberx() {
+    if (__autojs6_limited_jsox_numberx_cache) {
+      return __autojs6_limited_jsox_numberx_cache;
+    }
+    __autojs6_limited_jsox_numberx_cache = Object.freeze({
+      ICU: 996,
+      ensureNumber: __autojs6_jsox_numberx_ensure_number,
+      ensureNumberLike: __autojs6_jsox_numberx_ensure_number_like,
+      ensureNumbersLike: __autojs6_jsox_numberx_ensure_numbers_like,
+      check: __autojs6_jsox_numberx_check,
+      clamp: __autojs6_jsox_numberx_clamp,
+      clampTo: __autojs6_jsox_numberx_clamp_to,
+      toFixedNum: __autojs6_jsox_numberx_to_fixed_num,
+      padStart: __autojs6_jsox_numberx_pad_start,
+      padEnd: __autojs6_jsox_numberx_pad_end,
+      parseFloat: __autojs6_jsox_numberx_parse_float,
+      parsePercent: __autojs6_jsox_numberx_parse_percent,
+      parseRatio: __autojs6_jsox_numberx_parse_ratio,
+      parseAny: __autojs6_jsox_numberx_parse_any
+    });
+    return __autojs6_limited_jsox_numberx_cache;
+  }
   function __autojs6_limited_jsox_mathx() {
     if (__autojs6_limited_jsox_mathx_cache) {
       return __autojs6_limited_jsox_mathx_cache;
@@ -18854,18 +19237,24 @@ std::string buildEmbeddedScriptExecutionSource(
     const names = __autojs6_jsox_module_names(moduleNames);
     names.forEach(function(name) {
       const normalized = (name.replace(/x$/i, "") + "x").toLowerCase();
-      if (normalized !== "mathx") {
+      const moduleValue = normalized === "mathx"
+        ? __autojs6_limited_jsox_mathx()
+        : normalized === "arrayx"
+          ? __autojs6_limited_jsox_arrayx()
+          : normalized === "numberx"
+            ? __autojs6_limited_jsox_numberx()
+            : null;
+      if (!moduleValue) {
         throw __autojs6_rhino_compat_error(
-          "jsox.extend currently supports the pure Mathx facade only.",
+          "jsox.extend currently supports the pure Mathx, Arrayx, and Numberx facades only.",
           __autojs6_rhino_compat_error_codes.unsupported,
           "jsox.extend",
           "unsupported"
         );
       }
-      const mathx = __autojs6_limited_jsox_mathx();
-      Object.keys(mathx).forEach(function(key) {
+      Object.keys(moduleValue).forEach(function(key) {
         Object.defineProperty(target, key, {
-          value: mathx[key],
+          value: moduleValue[key],
           enumerable: true,
           configurable: true,
           writable: true
@@ -18900,7 +19289,7 @@ std::string buildEmbeddedScriptExecutionSource(
         "default global Math/prototype mutation is disabled in the Node facade; pass an explicit target object."
       );
     }
-    return __autojs6_jsox_extend_target(target, ["Mathx"]);
+    return __autojs6_jsox_extend_target(target, ["Mathx", "Numberx", "Arrayx"]);
   }
   function __autojs6_limited_jsox() {
     if (__autojs6_limited_jsox_cache) {
@@ -18912,6 +19301,10 @@ std::string buildEmbeddedScriptExecutionSource(
     Object.defineProperties(jsox, {
       mathx: { value: __autojs6_limited_jsox_mathx(), enumerable: true },
       Mathx: { value: __autojs6_limited_jsox_mathx(), enumerable: true },
+      arrayx: { value: __autojs6_limited_jsox_arrayx(), enumerable: true },
+      Arrayx: { value: __autojs6_limited_jsox_arrayx(), enumerable: true },
+      numberx: { value: __autojs6_limited_jsox_numberx(), enumerable: true },
+      Numberx: { value: __autojs6_limited_jsox_numberx(), enumerable: true },
       extend: { value: __autojs6_jsox_extend, enumerable: true },
       extendAll: { value: __autojs6_jsox_extend_all, enumerable: true },
       status: {
@@ -18919,8 +19312,8 @@ std::string buildEmbeddedScriptExecutionSource(
           return Object.freeze({
             schema: "autojs6-node-jsox-v1",
             task: "P13-27",
-            modules: Object.freeze(["Mathx"]),
-            nodeModules: Object.freeze(["jsox", "jsox.mathx"]),
+            modules: Object.freeze(["Mathx", "Numberx", "Arrayx"]),
+            nodeModules: Object.freeze(["jsox", "jsox.mathx", "jsox.arrayx", "jsox.numberx"]),
             safeDefault: true,
             defaultGlobalMutation: false,
             rawAndroidObjects: false
@@ -19373,7 +19766,7 @@ std::string buildEmbeddedScriptExecutionSource(
     keys: __autojs6_rhino_compat_key_constants
   });
   const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "jsox", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "barcode", "qrcode", "media", "mediainfo", "recorder", "keys", "ui"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "jsox", "jsox.mathx", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "barcode", "qrcode", "media", "mediainfo", "recorder", "events.keys", "ui", "tasks"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "jsox", "jsox.mathx", "jsox.arrayx", "jsox.numberx", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "barcode", "qrcode", "media", "mediainfo", "recorder", "events.keys", "ui", "tasks"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -20723,7 +21116,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants, P12-09 constrained UI, P12-29 barcode/qrcode facades, P12-32 s13n.bytes, and P13-27 jsox.mathx; P12-17 compat.tasks stays module-only."
+        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants, P12-09 constrained UI, P12-29 barcode/qrcode facades, P12-32 s13n.bytes, and P13-27 jsox pure helpers; P12-17 compat.tasks stays module-only."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -45495,6 +45888,12 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "jsox.mathx") {
       return "jsox.mathx";
     }
+    if (name === "jsox.arrayx") {
+      return "jsox.arrayx";
+    }
+    if (name === "jsox.numberx") {
+      return "jsox.numberx";
+    }
     if (name === "autojs6:lifecycle") {
       return "autojs6:lifecycle";
     }
@@ -45830,6 +46229,12 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "jsox.mathx") {
       return __autojs6_limited_jsox_mathx();
+    }
+    if (name === "jsox.arrayx") {
+      return __autojs6_limited_jsox_arrayx();
+    }
+    if (name === "jsox.numberx") {
+      return __autojs6_limited_jsox_numberx();
     }
     if (name === "autojs6:lifecycle") {
       return __autojs6_limited_lifecycle();

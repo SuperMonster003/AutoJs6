@@ -8912,386 +8912,428 @@
     },
     {
       "id": "jsox.arrayx",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "partial",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "autojs6:compat",
+        "jsox",
+        "jsox.arrayx"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p13_27_pure_js_arrayx_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "P13-27 promotes the pure Arrayx facade through require(\"jsox\"), require(\"jsox.arrayx\"), and autojs6:compat.jsox.",
+        "Arrayx keeps JSON-safe JavaScript Array inputs only; sortBy/sortDescending/shuffle mutate only the explicit array argument.",
+        "Default global/prototype mutation remains blocked; helpers copy only to explicit targets through jsox.extend() or extendAll()."
       ],
       "apiEntries": [
         {
           "id": "jsox.arrayx.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.differ",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "differ",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.distinct",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "distinct",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.distinctBy",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "distinctBy",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.ensureArray",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "ensureArray",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.intersect",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "intersect",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.shuffle",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "shuffle",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.sortBy",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "sortBy",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.sortByDescending",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "sortByDescending",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.sortDescending",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "sortDescending",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.sorted",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "sorted",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.sortedBy",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "sortedBy",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.sortedByDescending",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "sortedByDescending",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.sortedDescending",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "sortedDescending",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.subtract",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "subtract",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.arrayx.union",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.arrayx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "union",
+          "decision": "p13_27_pure_js_arrayx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Arrayx helper to the Node jsox.arrayx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         }
       ]
     },
     {
       "id": "jsox.numberx",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "partial",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "autojs6:compat",
+        "jsox",
+        "jsox.numberx"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p13_27_pure_js_numberx_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "P13-27 promotes the pure Numberx facade through require(\"jsox\"), require(\"jsox.numberx\"), and autojs6:compat.jsox.",
+        "Numberx keeps JSON-safe number-like parsing, clamp, padding, and comparison helpers only.",
+        "Default global/prototype mutation remains blocked; helpers copy only to explicit targets through jsox.extend() or extendAll()."
       ],
       "apiEntries": [
         {
           "id": "jsox.numberx.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.check",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "check",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.clamp",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "clamp",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.clampTo",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "clampTo",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.ensureNumber",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "ensureNumber",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.ensureNumberLike",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "ensureNumberLike",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.ensureNumbersLike",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "ensureNumbersLike",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.padEnd",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "padEnd",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.padStart",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "padStart",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.parseAny",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "parseAny",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.parseFloat",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "parseFloat",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.parsePercent",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "parsePercent",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.parseRatio",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "parseRatio",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.numberx.toFixedNum",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.numberx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toFixedNum",
+          "decision": "p13_27_pure_js_numberx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Numberx helper to the Node jsox.numberx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         }
       ]
@@ -9311,7 +9353,7 @@
         "P12-31 decision: defer jsox.mathx as a pure JS batch after the smaller s13n pilot; P13-27 now promotes the pure Mathx subset.",
         "P13-27 promotes the pure Mathx facade through require(\"jsox\"), require(\"jsox.mathx\"), and autojs6:compat.jsox.",
         "Mathx keeps JSON-safe number and point inputs only; raw Android/OpenCV Point/Rect parity remains out of this profile gate.",
-        "zip, canvas, OpenCC packaged dictionaries, full pinyin dictionaries, sysprops, Arrayx, and Numberx remain deferred until separate resource/provider gates land."
+        "zip, canvas, OpenCC packaged dictionaries, full pinyin dictionaries, sysprops, and raw Android/OpenCV object parity remain deferred until separate resource/provider gates land."
       ],
       "apiEntries": [
         {
@@ -9647,12 +9689,15 @@
       "asyncMode": "sync",
       "nodeModules": [
         "autojs6:compat",
-        "jsox"
+        "jsox",
+        "jsox.mathx",
+        "jsox.arrayx",
+        "jsox.numberx"
       ],
       "bridgeModules": [],
       "decision": "p13_27_jsox_facade",
       "notes": [
-        "P13-27 exposes jsox as an explicit Node facade for the promoted Mathx subset.",
+        "P13-27 exposes jsox as an explicit Node facade for the promoted Mathx, Arrayx, and Numberx pure helper subsets.",
         "jsox.extend() and extendAll() copy helpers only to an explicit target object; default global Math/prototype mutation remains blocked by design."
       ],
       "apiEntries": [
@@ -9666,7 +9711,7 @@
           "decision": "p13_27_jsox_facade",
           "notes": [
             "P13-27 exposes this helper through require(\"jsox\") and autojs6:compat.jsox.",
-            "Default global Math/prototype mutation remains blocked; pass an explicit target object to copy Mathx helpers."
+            "Default global Math/prototype mutation remains blocked; pass an explicit target object to copy pure Mathx, Arrayx, or Numberx helpers."
           ]
         },
         {
@@ -9679,7 +9724,7 @@
           "decision": "p13_27_explicit_target_copy",
           "notes": [
             "P13-27 exposes this helper through require(\"jsox\") and autojs6:compat.jsox.",
-            "Default global Math/prototype mutation remains blocked; pass an explicit target object to copy Mathx helpers."
+            "Default global Math/prototype mutation remains blocked; pass an explicit target object to copy pure Mathx, Arrayx, or Numberx helpers."
           ]
         },
         {
@@ -9692,7 +9737,7 @@
           "decision": "p13_27_explicit_target_copy",
           "notes": [
             "P13-27 exposes this helper through require(\"jsox\") and autojs6:compat.jsox.",
-            "Default global Math/prototype mutation remains blocked; pass an explicit target object to copy Mathx helpers."
+            "Default global Math/prototype mutation remains blocked; pass an explicit target object to copy pure Mathx, Arrayx, or Numberx helpers."
           ]
         }
       ]
