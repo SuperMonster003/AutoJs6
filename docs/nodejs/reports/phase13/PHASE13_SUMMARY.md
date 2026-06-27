@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 25
-- Open tasks: 33
+- Completed tasks: 26
+- Open tasks: 32
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -45,7 +45,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-28` | `completed` | `desktop.network_fs` | 建立 Node builtin desktop parity matrix。 |
 | `P13-29` | `open` | `desktop.network_fs` | 推进 raw `http` / `https` client compatibility。 |
 | `P13-30` | `open` | `desktop.network_fs` | 推进 `net` / `tls` / `dns` staged compatibility。 |
-| `P13-31` | `open` | `desktop.network_fs` | 决策 `dgram` UDP capability。 |
+| `P13-31` | `completed` | `desktop.network_fs` | 决策 `dgram` UDP capability。 |
 | `P13-32` | `open` | `desktop.network_fs` | 放宽 filesystem profile。 |
 | `P13-33` | `open` | `desktop.network_fs` | 推进 desktop fs advanced APIs。 |
 | `P13-34` | `open` | `desktop.execution_runtime` | 推进 `worker_threads` 到 opt-in promoted。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 32
+- Reports with blockers: 31
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -174,7 +174,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-crash-evidence-automation.json` | `collectNodePhase13CrashEvidence` | `P13-05` | `ready` | 0 | 0 |
 | `phase13-dependency-compatibility-corpus.json` | `verifyNodePhase13DependencyCompatibilityCorpus` | `P13-47` | `ready` | 0 | 0 |
 | `phase13-desktop-parity-examples.json` | `verifyNodePhase13DesktopParityExamples` | `P13-54` | `ready` | 0 | 0 |
-| `phase13-dgram-udp-decision.json` | `verifyNodePhase13DgramUdpDecision` | `P13-31` | `partial` | 0 | 2 |
+| `phase13-dgram-udp-decision.json` | `verifyNodePhase13DgramUdpDecision` | `P13-31` | `ready` | 0 | 0 |
 | `phase13-esm-loader-parity-decision.json` | `verifyNodePhase13EsmLoaderParityDecision` | `P13-41` | `partial` | 0 | 3 |
 | `phase13-filesystem-advanced-apis.json` | `verifyNodePhase13FilesystemAdvancedApis` | `P13-33` | `partial` | 0 | 2 |
 | `phase13-filesystem-profile-decision.json` | `verifyNodePhase13FilesystemProfileDecision` | `P13-32` | `partial` | 0 | 3 |

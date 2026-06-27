@@ -76,9 +76,6 @@ function buildReport(files) {
       token(files.securityModel, "P13-31 records dgram UDP capability as stable-denied"),
       token(files.proComparison, "P13-31 records dgram UDP capability as stable-denied"),
       token(files.proAutoxNotes, "P13-31 records dgram UDP capability as stable-denied"),
-    ], [
-      "A future UDP promotion must split unicast client, server bind/listen, broadcast, multicast, and source-specific multicast into explicit capability tiers.",
-      "A future UDP promotion must prove Android background behavior, INTERNET/multicast permission mapping, packaged permission proof, packet budgets, fd/socket leak instrumentation, and lifecycle cleanup.",
     ]),
     scenario("docs_gate_and_matrix", "docs, desktop matrix, release matrix, and Gradle gate record the P13-31 decision", [
       token(files.phase13Tasks, "P13-31 stable-denied landing"),
@@ -150,7 +147,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       dgramStableDenied: scenarioById(scenarios, "stable_disabled_runtime_boundary").status !== "missing_evidence",
       udpClientPromoted: false,

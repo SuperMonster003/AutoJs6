@@ -1287,7 +1287,7 @@ P13 task 本身使用以下执行状态：
       `docs/nodejs/reports/phase13/P13_30_NET_TLS_DNS_STAGED_COMPATIBILITY.md`.
     - Surface manifest evidence: `phase13-net-tls-dns-staged-compatibility`.
 
-- [ ] P13-31: 决策 `dgram` UDP capability。
+- [x] P13-31: 决策 `dgram` UDP capability。
   - 范围：评估 UDP client/server 是否进入 Desktop profile。
   - 验收：
     - multicast/broadcast 默认拒绝或独立 capability。
@@ -1302,6 +1302,13 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13DgramUdpDecision`.
     - Report: `docs/nodejs/reports/phase13/P13_31_DGRAM_UDP_DECISION.md`.
     - Surface manifest evidence: `phase13-dgram-udp-decision`.
+    - Closure: current v1.1 keeps `dgram` / `node:dgram` stable-denied with no
+      shape-only facade, no local shadow bypass, no raw UDP socket, synced docs,
+      desktop matrix, release matrix, surface manifest, and Gradle gate.
+    - Future UDP promotion work: unicast client, server bind/listen, broadcast,
+      multicast, permission mapping, packet budgets, lifecycle cleanup,
+      fd/socket leak instrumentation, packaged permission proof, and live
+      Android UDP evidence remain future gates.
 
 - [ ] P13-32: 放宽 filesystem profile。
   - 范围：从 scoped project fs 扩展到用户显式授权目录、`/sdcard`、SAF 或 app

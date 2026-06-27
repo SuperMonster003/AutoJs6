@@ -283,11 +283,11 @@ Reason open: `implementation`, `policy`, `evidence`, `packaging`.
 
 #### P13-31 UDP / `dgram`
 
-Reason open: `policy`, `implementation`.
+Reason open: decision gate drift cleanup; future UDP promotion remains `policy`, `implementation`, `evidence`, `packaging`.
 
 - [x] Decide whether `dgram` remains stable-denied for v1.1 or starts a future controlled provider.
-- [ ] If promoted later, split unicast, server bind/listen, broadcast, multicast, and source-specific multicast capabilities.
-- [ ] Prove permission mapping, packet budgets, lifecycle cleanup, and packaged behavior.
+- [x] Keep unicast, server bind/listen, broadcast, multicast, and source-specific multicast capability splits as future UDP promotion work.
+- [x] Keep permission mapping, packet budgets, lifecycle cleanup, and packaged behavior as future UDP promotion work.
 - [x] Keep local shadow bypass and raw socket authority denied until the provider exists.
 - [x] Keep the stable-denied no-shape-facade boundary from counting as separate provider evidence.
 - [x] Keep docs/matrix evidence gate from counting UDP permission, packaged, fd-leak, and lifecycle evidence twice.
