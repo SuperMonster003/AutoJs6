@@ -310,6 +310,7 @@ Reason open: `external`, `evidence`, `policy`, `packaging`.
 - [ ] Add packaged worker smoke evidence.
 - [ ] Add crash/resource evidence for startup failure, exception, timeout, parent cleanup, and packaged failure modes.
 - [x] Decide nested worker policy and document SharedArrayBuffer, Atomics, resourceLimits, thread, and RSS ceilings.
+- [x] Keep docs/matrix evidence gate from counting native availability, packaged smoke, and crash/resource evidence twice.
 
 #### P13-35 process-worker replacement
 

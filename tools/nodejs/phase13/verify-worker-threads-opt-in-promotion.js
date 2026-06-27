@@ -129,9 +129,7 @@ function buildReport(files) {
       token(files.desktopMatrix, "P13-34 records worker_threads opt-in diagnostics as partial"),
       token(files.builtinMatrixGenerator, "P13-34 records worker_threads opt-in diagnostics as partial"),
       token(files.capabilityMatrix, "P13-34 worker_threads opt-in promotion"),
-    ], [
-      "P13-34 remains partial until native availability and current packaged/resource evidence are complete.",
-    ]),
+    ], []),
   ];
 
   const checks = [

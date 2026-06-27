@@ -62,6 +62,11 @@ The following remain future work before opt-in promotion can close:
   parent-completion cleanup, and packaged worker failure modes;
 - release disclosure for any future worker profile promotion.
 
+The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
+evidence-only for this partial decision. They do not add a separate P13-34
+blocker beyond native availability, the experimental gate archive, packaged
+worker smoke evidence, and crash/resource evidence.
+
 ## Verification
 
 - Host verifier: `tools/nodejs/phase13/verify-worker-threads-opt-in-promotion.js`
