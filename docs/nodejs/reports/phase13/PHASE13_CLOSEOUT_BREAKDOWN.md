@@ -407,7 +407,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 Reason open: `implementation`, `packaging`.
 
-- [ ] Ensure declared `node.permissions` evidence is present in verifier inputs.
+- [x] Ensure declared `node.permissions` evidence is present in verifier inputs.
 - [ ] Make packaged profile, builtin, native asset, and filesystem-root metadata drive reviewed synthesis rather than diagnostics only.
 - [ ] Add install/run synthesis, disclosure UX, and profile-specific runtime promotion evidence.
 - [ ] Keep undeclared bridge capability denial covered.

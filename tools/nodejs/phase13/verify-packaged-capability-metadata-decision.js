@@ -101,6 +101,8 @@ function buildReport(files) {
       token(files.p13PackagedTest, "p13packaged.metadata=autojs6-packaged-capability-metadata-v1|partial"),
       token(files.p13PackagedTest, "p13packaged.warnings=6|6|true|true|false"),
       token(files.p13PackagedTest, "p13packaged.denial=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|accessibility|0"),
+      token(files.p13PackagedTest, 'assertEquals(listOf("network"), manifest.permissions)'),
+      token(files.p13PackagedTest, "manifest.packagedMetadata.network.declaredCapability"),
       token(files.bridgeManifestTest, "packagedMetadataWarningsAreMirroredIntoManifestAndMetadata"),
       token(files.bridgeManifestTest, "packagedManifestMismatchUsesCapabilityManifestPermissions"),
       token(files.apkBuilder, "applyNodeBridgeAndroidManifestPermissions"),
@@ -108,7 +110,6 @@ function buildReport(files) {
       token(files.projectRuntimeDescriptor, "CAPABILITY_MANIFEST_VERSION"),
       token(files.projectRuntimeDescriptor, "currentJson("),
       token(files.projectLaunchDescriptor, "DESCRIPTOR_FILE_NAME = \".autojs6-node-launch.json\""),
-      token(files.packagedSmokeTest, "declared `node.permissions`"),
       token(files.workManagerTest, "jsWorkManagerModuleUsesFakeTransportAndSerializesPackagedMetadata"),
     ], [
       "Packaged profile, builtin, native asset, and filesystem-root metadata are diagnostic-only in P13-45.",

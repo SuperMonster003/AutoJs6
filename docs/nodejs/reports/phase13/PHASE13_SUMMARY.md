@@ -193,7 +193,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-overlay-provider-promotion.json` | `verifyNodePhase13OverlayProviderPromotion` | `P13-18` | `partial` | 0 | 7 |
 | `phase13-package-lock-integrity-policy.json` | `verifyNodePhase13PackageLockIntegrityPolicy` | `P13-48` | `partial` | 0 | 3 |
 | `phase13-package-manager-android-decision.json` | `verifyNodePhase13PackageManagerAndroidDecision` | `P13-42` | `partial` | 0 | 5 |
-| `phase13-packaged-capability-metadata-decision.json` | `verifyNodePhase13PackagedCapabilityMetadataDecision` | `P13-45` | `partial` | 0 | 4 |
+| `phase13-packaged-capability-metadata-decision.json` | `verifyNodePhase13PackagedCapabilityMetadataDecision` | `P13-45` | `partial` | 0 | 3 |
 | `phase13-packaged-long-running-service.json` | `verifyNodePhase13PackagedLongRunningService` | `P13-07` | `partial` | 0 | 2 |
 | `phase13-plugin-system-parity-decision.json` | `verifyNodePhase13PluginSystemParityDecision` | `P13-46` | `partial` | 0 | 3 |
 | `phase13-privacy-disclosure-policy.json` | `verifyNodePhase13PrivacyDisclosurePolicy` | `P13-52` | `partial` | 0 | 3 |
