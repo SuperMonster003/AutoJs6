@@ -15,6 +15,9 @@ Phase 13 verifier plus Gradle gate.
   manager operations.
 - Plugin manifests must stay inside the project plugin directory and request an
   exact `plugin.<id>` capability plus any bridge capabilities they need.
+- Plugin manifests cannot declare `plugin` or `plugin.*` namespace capabilities
+  in `autojs6.plugin.permissions`; plugin namespace ownership comes from the
+  manager-validated package id.
 - The host project/package permission manifest is the authority ceiling.
   Plugin-declared permissions do not grant extra host authority.
 - Missing host capabilities reject before plugin code runs.

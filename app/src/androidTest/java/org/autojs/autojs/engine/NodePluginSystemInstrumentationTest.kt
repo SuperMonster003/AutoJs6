@@ -155,6 +155,57 @@ class NodePluginSystemInstrumentationTest {
     }
 
     @Test
+    fun pluginNamespaceCapabilityPermissionIsRejectedBeforeCodeExecution() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node JS-only plugin namespace capability denial")
+        val workDir = freshWorkDir("node-plugin-namespace-permission")
+        try {
+            writePlugin(
+                workDir = workDir,
+                id = "org.example.namespace",
+                permissions = listOf("plugin.org.example.other"),
+                source = """
+                    globalThis.__autojs6NamespacePluginExecuted = true;
+                    module.exports = { ready: true };
+                """.trimIndent(),
+            )
+            val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(
+                listOf("plugin.org.example.namespace", "plugin.org.example.other"),
+            )
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    const plugins = require("plugins");
+                    try {
+                      plugins.load("org.example.namespace");
+                      console.log("plugins.namespace=allowed");
+                    } catch (error) {
+                      console.log("plugins.namespace=" + [
+                        error.code,
+                        error.autojs6Code,
+                        error.module,
+                        error.method,
+                        /plugin namespace capability/.test(String(error && error.message || "")),
+                        globalThis.__autojs6NamespacePluginExecuted === true
+                      ].join("|"));
+                    }
+                """.trimIndent(),
+                sourceName = File(workDir, "main.js").absolutePath,
+                workingDirectory = workDir,
+                runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("Node JS-only plugin namespace capability denial", result)
+            assertTrue(
+                result.stdout,
+                result.stdout.contains("plugins.namespace=${NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST}|${NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST}|plugins|load|true|false"),
+            )
+            assertFalse(result.stdout.contains("plugins.namespace=allowed"))
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun pluginNativeAddonFileIsRejected() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node JS-only plugin native addon denial")
         val workDir = freshWorkDir("node-plugin-native")

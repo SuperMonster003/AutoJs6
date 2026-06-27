@@ -683,6 +683,7 @@ async function smoke(): Promise<void> {
   const pluginSystemProfileStatus: string = autojsProfile.pluginSystemProfile.status;
   const pluginSystemProfileOperations: readonly string[] = autojsProfile.pluginSystemProfile.operations;
   const pluginSystemProfilePermissions: string = autojsProfile.pluginSystemProfile.permissionModel;
+  const pluginSystemProfileNamespacePermissions: string = autojsProfile.pluginSystemProfile.pluginNamespacePermissions;
   const pluginSystemProfilePackaged: string = autojsProfile.pluginSystemProfile.packagedDistribution;
   const pluginSystemProfileNative: boolean = autojsProfile.pluginSystemProfile.nativeAddonLoading;
   const packageIntegrityProfileStatus: string = autojsProfile.packageIntegrityProfile.status;
@@ -1040,6 +1041,7 @@ async function smoke(): Promise<void> {
   void pluginSystemProfileStatus;
   void pluginSystemProfileOperations;
   void pluginSystemProfilePermissions;
+  void pluginSystemProfileNamespacePermissions;
   void pluginSystemProfilePackaged;
   void pluginSystemProfileNative;
   void packageIntegrityProfileStatus;

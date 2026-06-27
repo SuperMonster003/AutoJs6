@@ -51,7 +51,8 @@ Manager rules:
 
 - plugin id resolves from `./plugins/<id>` under the Node working directory
 - `package.json` must contain `autojs6.plugin`
-- `autojs6.plugin.permissions` must be a string array
+- `autojs6.plugin.permissions` must be a string array of bridge capabilities;
+  it cannot declare `plugin` or `plugin.*` namespace capabilities
 - `autojs6.plugin.dependencies` may declare string plugin dependency ids for
   diagnostics; it does not auto-load dependencies
 - `autojs6.plugin.exports` may map named exports to `.js` or `.cjs` module
@@ -272,6 +273,9 @@ Rules:
 
 - a project must opt into using a plugin id
 - a project must declare the bridge capabilities the plugin will use
+- `autojs6.plugin.permissions` cannot request `plugin` or another `plugin.*`
+  namespace; plugin namespace ownership is assigned by the manager from the
+  package id
 - a plugin can export namespaced capabilities, such as
   `plugin.org.example.demo`
 - plugin-exported capabilities do not imply core bridge capabilities

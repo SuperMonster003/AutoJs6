@@ -210,6 +210,7 @@ declare namespace AutoJs6Node {
     readonly permissionModel: "exact_plugin_id_plus_requested_permissions" | string;
     readonly hostManifestEnforcement: "required_before_install_load_start" | string;
     readonly overDeclaredPluginCapabilities: "rejected_before_code_execution" | string;
+    readonly pluginNamespacePermissions: "rejected_in_manifest" | string;
     readonly androidProviderPlugins: "deferred" | "denied" | "partial" | string;
     readonly nativePlugins: "denied" | "deferred" | "partial" | string;
     readonly remoteMarketplace: "deferred" | "denied" | "partial" | string;

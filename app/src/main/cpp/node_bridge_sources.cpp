@@ -9698,6 +9698,7 @@ std::string buildEmbeddedScriptExecutionSource(
         permissionModel: "exact_plugin_id_plus_requested_permissions",
         hostManifestEnforcement: "required_before_install_load_start",
         overDeclaredPluginCapabilities: "rejected_before_code_execution",
+        pluginNamespacePermissions: "rejected_in_manifest",
         androidProviderPlugins: "deferred",
         nativePlugins: "denied",
         remoteMarketplace: "deferred",
@@ -26308,6 +26309,15 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return plugin;
   }
+  function __autojs6_plugin_assert_bridge_permission(normalized, id, methodName) {
+    if (normalized === "plugin" || normalized.indexOf("plugin.") === 0) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' cannot declare plugin namespace capability '" +
+          normalized + "' in autojs6.plugin.permissions; project metadata grants the exact plugin.<id> capability separately."
+      );
+    }
+  }
   function __autojs6_plugin_permissions(plugin, id, methodName) {
     let permissions = plugin.permissions;
     if (
@@ -26335,6 +26345,7 @@ std::string buildEmbeddedScriptExecutionSource(
         );
       }
       const normalized = __autojs6_bridge_normalize_capability(value);
+      __autojs6_plugin_assert_bridge_permission(normalized, id, methodName);
       if (normalized && !seen[normalized]) {
         seen[normalized] = true;
         output.push(normalized);
