@@ -174,6 +174,17 @@ function buildReport(files) {
         files.executionModePolicy.text.includes("supportedLaunchSurfaces = emptySet()"),
       "worker_computation must stay reserved with no supported launch surface.",
     ),
+    check(
+      "raw-process-authority-delegated-to-p13-40",
+      files.p13Report.text.includes("does not create a callable process-worker surface") &&
+        files.p13Report.text.includes("raw process") &&
+        files.p13Report.text.includes("handles, spawn/fork, stdio streams, signals") &&
+        files.p13Report.text.includes("P13-40 must separately decide any scoped `child_process` runner") &&
+        files.nodeBridgeSources.text.includes('childProcess: "denied"') &&
+        files.nodeBridgeSources.text.includes('shellBridge: "separate_scoped_command_bridge"') &&
+        files.shellTest.text.includes("shell.policy.child_process=ERR_AUTOJS6_BUILTIN_DISABLED"),
+      "P13-35 must keep raw spawn/fork/stdio/signals/process handles delegated to P13-40 while shell remains separate.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -202,6 +213,7 @@ function buildReport(files) {
       workerPoolPreferred: files.nodeBridgeSources.text.includes('preferredPrimitive: "worker_threads.WorkerPool"'),
       callableFacadeIntroduced: false,
       childProcessPromoted: false,
+      rawProcessAuthorityDelegatedToP13_40: checkById(checks, "raw-process-authority-delegated-to-p13-40").passed,
       workerComputationPromoted: false,
       secondExecutionSlotClosed: false,
       desktopSurfacePromoted: false,
@@ -231,6 +243,10 @@ function token(file, value) {
 
 function check(id, passed, message) {
   return { id, passed: Boolean(passed), message };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function scenarioById(scenarios, id) {

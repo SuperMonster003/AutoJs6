@@ -314,7 +314,7 @@ Reason open: `implementation`, `external`, `policy`.
 - [ ] Archive WorkerPool evidence on target ABIs.
 - [ ] Decide whether a user-facing process-worker surface exists.
 - [ ] Add slot accounting, cleanup, packaging, and UX for any promoted replacement.
-- [ ] Keep raw spawn/fork/stdio/signals/process handles delegated to P13-40.
+- [x] Keep raw spawn/fork/stdio/signals/process handles delegated to P13-40.
 
 #### P13-36 `vm`
 
