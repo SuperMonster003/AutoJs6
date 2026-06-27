@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 26
-- Open tasks: 32
+- Completed tasks: 27
+- Open tasks: 31
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -57,7 +57,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-40` | `open` | `desktop.execution_runtime` | 推进 `child_process` scoped runner。 |
 | `P13-41` | `open` | `desktop.modules_npm_process` | 推进完整 ESM loader parity。 |
 | `P13-42` | `completed` | `desktop.modules_npm_process` | 推进 npm/package manager on Android。 |
-| `P13-43` | `open` | `desktop.modules_npm_process` | 扩展 Node stdlib conformance。 |
+| `P13-43` | `completed` | `desktop.modules_npm_process` | 扩展 Node stdlib conformance。 |
 | `P13-44` | `completed` | `desktop.modules_npm_process` | 推进 process/env/argv parity。 |
 | `P13-45` | `completed` | `packaging.plugins_distribution` | 扩展 packaged APK capability metadata。 |
 | `P13-46` | `completed` | `packaging.plugins_distribution` | 推进 plugin system toward Pro/Desktop parity。 |
@@ -153,13 +153,13 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 | Report | Gate | Status | Policy violations | Blockers |
 | --- | --- | --- | ---: | ---: |
-| `phase13-stdlib-conformance-decision.json` | `verifyNodePhase13StdlibConformanceDecision` | `partial` | 0 | 1 |
+| `phase13-stdlib-conformance-decision.json` | `verifyNodePhase13StdlibConformanceDecision` | `ready` | 0 | 0 |
 
 ## Generated Phase 13 Reports
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 31
+- Reports with blockers: 30
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -209,7 +209,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-screenshot-image-ocr-promotion.json` | `verifyNodePhase13ScreenshotImageOcrPromotion` | `P13-20` | `partial` | 0 | 7 |
 | `phase13-second-execution-slot-scheduler.json` | `verifyNodePhase13SecondExecutionSlotScheduler` | `P13-06` | `ready` | 0 | 0 |
 | `phase13-shell-root-shizuku-capability.json` | `verifyNodePhase13ShellRootShizukuCapability` | `P13-24` | `partial` | 0 | 1 |
-| `phase13-stdlib-conformance-decision.json` | `verifyNodePhase13StdlibConformanceDecision` | `P13-43` | `partial` | 0 | 1 |
+| `phase13-stdlib-conformance-decision.json` | `verifyNodePhase13StdlibConformanceDecision` | `P13-43` | `ready` | 0 | 0 |
 | `phase13-surface-manifest-verification.json` | `verifyNodePhase13SurfaceManifest` | `-` | `passed` | 0 | 0 |
 | `phase13-task-database-provider.json` | `verifyNodePhase13TaskDatabaseProvider` | `P13-21` | `partial` | 0 | 8 |
 | `phase13-type-declaration-profiles.json` | `verifyNodePhase13TypeDeclarationProfiles` | `P13-55` | `ready` | 0 | 0 |

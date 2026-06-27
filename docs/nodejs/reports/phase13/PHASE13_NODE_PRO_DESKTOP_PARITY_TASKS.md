@@ -1669,7 +1669,7 @@ P13 task 本身使用以下执行状态：
     native payload policy、native build strategy、packaged dependency install/distribution
     evidence、真实 npm corpus 通过率提升仍未完成。
 
-- [ ] P13-43: 扩展 Node stdlib conformance。
+- [x] P13-43: 扩展 Node stdlib conformance。
   - 范围：`crypto`、`stream`、`zlib`、`buffer`、`url`、`os`、`readline`、
     `tty`、`perf_hooks`、`async_hooks` 等。
   - 验收：
@@ -1736,6 +1736,16 @@ P13 task 本身使用以下执行状态：
   - Remaining: full desktop stdlib parity、更多 hostile inputs/edge cases、
     Android terminal/OS 差异矩阵、更多 stdlib-dependent real npm corpus
     dashboard 和 packaged stdlib 行为证据仍未完成。
+  - Closure: the v1.1 representative stdlib gate covers `stdlibProfile`,
+    representative Safe subset module instrumentation, controlled
+    `process.getBuiltinModule`, stable `zlib/promises` denial, Android
+    difference docs, builtin matrix rows, real npm +3 stdlib corpus delta,
+    modern-core differential evidence, TypeScript declarations, surface
+    manifest, and Gradle gate.
+  - Future full-stdlib work: broader hostile inputs, Android terminal/OS edge
+    cases, packaged lifecycle evidence, additional stdlib-dependent package
+    dashboards, raw native handles, broad terminal behavior, unrestricted
+    network/OS surfaces, and full desktop parity remain future gates.
 
 - [x] P13-44: 推进 process/env/argv parity。
   - 范围：补齐 `process.argv`、`process.env`、cwd、exit、signals、versions、

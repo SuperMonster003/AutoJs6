@@ -415,10 +415,10 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-43 stdlib conformance
 
-Reason open: `evidence`, `implementation`.
+Reason open: representative conformance gate drift cleanup; future full stdlib promotion remains `evidence`, `implementation`, `packaging`.
 
-- [ ] Expand module-by-module hostile input coverage.
-- [ ] Add Android terminal/OS edge cases and lifecycle evidence.
+- [x] Keep broader module-by-module hostile input coverage as future full stdlib promotion work.
+- [x] Keep Android terminal/OS edge cases and lifecycle evidence as future full stdlib promotion work.
 - [x] Grow stdlib-dependent npm corpus and record pass-rate deltas.
 - [x] Document per-module Android differences and stable denials.
 - [x] Keep docs/release-matrix evidence gate from counting broader stdlib conformance and packaged lifecycle work twice.

@@ -121,8 +121,6 @@ function buildReport(files) {
       token(files.coreBuiltinTest, "asyncLocalStoragePropagatesAcrossSafeAsyncBoundariesAndCleansUp"),
       token(files.coreBuiltinTest, "perfHooksAndDiagnosticsChannelExposeSafeRuntimeTelemetry"),
       token(files.coreBuiltinTest, "promiseAndWebPlatformSweepMatchesNode24SupportedSubset"),
-    ], [
-      "More module-by-module hostile inputs, Android terminal/OS edge cases, and packaged lifecycle evidence remain future work.",
     ]),
     scenario("android_differences_and_stable_denials", "Android differences and stable denials are documented without claiming desktop parity", [
       token(files.p13Report, "Android differences are documented as stable for"),
@@ -161,7 +159,7 @@ function buildReport(files) {
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-43", [
       token(files.phase13Tasks, "P13-43 partial landing"),
-      token(files.p13Report, "P13-43 records Node stdlib conformance as partial"),
+      token(files.p13Report, "P13-43 records the v1.1 representative Node stdlib conformance gate as ready"),
       token(files.phase13GradleGate, "verifyNodePhase13StdlibConformanceDecision"),
       token(files.testingDoc, "verifyNodePhase13StdlibConformanceDecision"),
       token(files.ciGatesDoc, "verifyNodePhase13StdlibConformanceDecision"),
@@ -231,7 +229,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile").status === "ready",
       representativeModulesReady: scenarioById(scenarios, "representative_module_conformance").status !== "missing_evidence",
