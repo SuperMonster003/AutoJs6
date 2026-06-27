@@ -139,9 +139,7 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-39 native addon loading"),
-    ], [
-      "P13-39 remains partial until signed packaged native-addon loading, integrity checks, dependency scanning, and crash isolation are implemented.",
-    ]),
+    ], []),
   ];
 
   const checks = [

@@ -363,6 +363,7 @@ Reason open: `policy`, `implementation`, `packaging`.
 - [ ] Verify hashes and signatures before resolution.
 - [x] Keep native addon artifacts packaged-only and keep runtime download, npm build, lifecycle scripts, and postinstall execution denied.
 - [ ] Add dependency scan, APK-builder preflight, crash isolation, positive packaged smoke, and hostile corpus.
+- [x] Keep docs/release-matrix evidence gate from counting signed packaged native addon, integrity, dependency scan, and crash isolation work twice.
 
 #### P13-40 `child_process` scoped runner
 

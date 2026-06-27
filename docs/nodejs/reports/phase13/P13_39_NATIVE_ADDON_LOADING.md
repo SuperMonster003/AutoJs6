@@ -65,6 +65,11 @@ For downstream integrity gates, the same boundary is summarized as: runtime down
   code into, or beside, the embedded runtime.
 - Add packaged positive and hostile-corpus evidence before promotion.
 
+The docs, release matrix, surface manifest, and Gradle gate are evidence-only
+for this partial decision. They do not add a separate P13-39 blocker beyond the
+signed packaged manifest, ABI/version allowlist, integrity, dependency scan,
+crash isolation, and packaged hostile-corpus evidence items above.
+
 ## Rollback
 
 Remove `nativeAddonProfile`, the focused instrumentation test, the P13-39
