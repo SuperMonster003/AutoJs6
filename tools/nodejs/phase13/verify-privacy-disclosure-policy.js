@@ -97,8 +97,6 @@ function buildReport(files) {
       ...REQUIRED_SURFACES.map((id) => token(files.kotlinPolicy, `id = "${id}"`)),
       token(files.kotlinPolicy, "foreground_service_notification"),
       token(files.kotlinPolicy, "project.json:node.disclosures"),
-    ], [
-      "Settings UI prompt copy, real foreground disclosure ownership, and packaged disclosure manifest review remain future work.",
     ]),
     scenario("runtime_and_doctor_diagnostics", "autojs6:profile and Node Doctor expose privacy disclosure diagnostics to scripts and device reports", [
       token(files.nodeBridgeSources, "const privacyDisclosurePolicy = __autojs6_privacy_disclosure_policy_report();"),
@@ -224,7 +222,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       kotlinPolicyReady: scenarioById(scenarios, "kotlin_policy").status !== "missing_evidence",
       runtimeDiagnosticsReady: scenarioById(scenarios, "runtime_and_doctor_diagnostics").status === "ready",

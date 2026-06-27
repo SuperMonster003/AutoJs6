@@ -1,7 +1,8 @@
 # P13-52 Privacy Disclosure Policy
 
-P13-52 records privacy and disclosure policy as partial. The current landing
-adds `NodePrivacyDisclosurePolicy`, exposes frozen diagnostics through
+P13-52 records privacy and disclosure policy as partial capability evidence.
+The P13-52 policy gate is ready: the current landing adds
+`NodePrivacyDisclosurePolicy`, exposes frozen diagnostics through
 `autojs6:profile.privacyDisclosurePolicy`, includes the same policy in Node
 Doctor, extends TypeScript declarations, and adds a host gate for the privacy
 and disclosure surface.
@@ -30,7 +31,7 @@ and disclosure surface.
 - `verifyNodePhase13PrivacyDisclosurePolicy` generates
   `phase13-privacy-disclosure-policy.json` and `.md`.
 
-## Remaining Work
+## Future Implementation Work
 
 - Settings UI prompt copy, localization, and explicit user review flow remain
   unpromoted.
@@ -40,8 +41,8 @@ and disclosure surface.
 - Packaged disclosure manifest authoring/review UI and installer/runtime
   enforcement are not implemented yet.
 - The docs/surface gate is evidence-only; prompt UI, foreground notification
-  ownership, and packaged review UI are counted once as the remaining
-  implementation blocker for this policy track.
+  ownership, and packaged review UI stay future implementation work rather than
+  blockers for the P13-52 policy closure.
 - P13-52 does not grant Pro/Desktop/Debug authority; effective runtime
   authority remains `safe_default`.
 

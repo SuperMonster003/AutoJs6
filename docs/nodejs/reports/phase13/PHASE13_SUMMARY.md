@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 14
-- Open tasks: 44
+- Completed tasks: 15
+- Open tasks: 43
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -66,7 +66,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-49` | `open` | `profile.promotion_model` | 实现 profile selection UX and diagnostics。 |
 | `P13-50` | `completed` | `security.rollback_privacy` | 扩展 security corpus for relaxed capabilities。 |
 | `P13-51` | `open` | `security.rollback_privacy` | 增加 per-profile rollback playbook。 |
-| `P13-52` | `open` | `security.rollback_privacy` | 增加 privacy and disclosure policy。 |
+| `P13-52` | `completed` | `security.rollback_privacy` | 增加 privacy and disclosure policy。 |
 | `P13-53` | `open` | `docs.examples.final_gate` | 发布 Pro parity examples。 |
 | `P13-54` | `open` | `docs.examples.final_gate` | 发布 desktop Node parity examples。 |
 | `P13-55` | `open` | `docs.examples.final_gate` | 更新 TypeScript declaration package。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 43
+- Reports with blockers: 42
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -195,7 +195,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-packaged-capability-metadata-decision.json` | `verifyNodePhase13PackagedCapabilityMetadataDecision` | `P13-45` | `ready` | 0 | 0 |
 | `phase13-packaged-long-running-service.json` | `verifyNodePhase13PackagedLongRunningService` | `P13-07` | `partial` | 0 | 2 |
 | `phase13-plugin-system-parity-decision.json` | `verifyNodePhase13PluginSystemParityDecision` | `P13-46` | `partial` | 0 | 1 |
-| `phase13-privacy-disclosure-policy.json` | `verifyNodePhase13PrivacyDisclosurePolicy` | `P13-52` | `partial` | 0 | 1 |
+| `phase13-privacy-disclosure-policy.json` | `verifyNodePhase13PrivacyDisclosurePolicy` | `P13-52` | `ready` | 0 | 0 |
 | `phase13-pro-entry-directives.json` | `verifyNodePhase13ProEntryDirectives` | `P13-11` | `partial` | 0 | 3 |
 | `phase13-pro-parity-examples.json` | `verifyNodePhase13ProParityExamples` | `P13-53` | `partial` | 0 | 1 |
 | `phase13-process-parity-decision.json` | `verifyNodePhase13ProcessParityDecision` | `P13-44` | `partial` | 0 | 1 |

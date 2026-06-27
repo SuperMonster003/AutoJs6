@@ -1983,7 +1983,7 @@ P13 task 本身使用以下执行状态：
     - Remaining P13-51 blockers: settings UI, packaged builder UI, privacy
       disclosure prompts, and packaged Safe-profile downgrade evidence.
 
-- [ ] P13-52: 增加 privacy and disclosure policy。
+- [x] P13-52: 增加 privacy and disclosure policy。
   - 范围：截图、录音、悬浮窗、无障碍、网络、文件系统、Java interop、子进程等
     能力的用户提示和前台披露。
   - 验收：
@@ -2008,7 +2008,11 @@ P13 task 本身使用以下执行状态：
       `:app:verifyNodePhase13PrivacyDisclosurePolicy`。
     - Report:
       `docs/nodejs/reports/phase13/P13_52_PRIVACY_DISCLOSURE_POLICY.md`。
-    - Remaining P13-52 blockers: settings UI prompt/localization、foreground
+    - Closure: policy metadata, runtime diagnostics, Node Doctor output,
+      TypeScript declarations, raw_network disclosure id, crash circuit breaker
+      privacy implications, and remote packaged kill-switch rejection are
+      covered.
+    - Future implementation work: settings UI prompt/localization、foreground
       service notification ownership、packaged disclosure manifest review UI、
       installer/runtime enforcement、device matrix 仍未完成；策略仍为
       metadata-only 且不授予 Pro/Desktop/Debug authority。

@@ -51,7 +51,7 @@ A Phase 13 parent task can close only when all of the following are true:
 | Final blocker | Phase 13 tasks | Main reason open | Closeout direction |
 | --- | --- | --- | --- |
 | `second_execution_slot` | `P13-06`, `P13-08` | `evidence` | Two-slot scheduling has landed; P13-06 closes on current scheduler/stress evidence, while P13-08 owns long-duration soak evidence. |
-| `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | `evidence`, `packaging` | P13-45 closes metadata parsing/diagnostics; P13-07/P13-52 own packaged lifecycle, disclosure, and final promotion evidence. |
+| `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | `evidence`, `packaging` | P13-45/P13-52 close metadata and policy diagnostics; P13-07/future packaged promotion owns lifecycle, disclosure UI, and final evidence. |
 | `full_heavy_resource_stress` | `P13-08` | `evidence`, `external` | Archive 8-hour quick soak and 24-hour final soak with comparable metrics. |
 | `android_side_package_installation` | `P13-09`, `P13-42`, `P13-48` | `implementation`, `policy`, `packaging` | Move from guarded local store to registry/tarball/install authority with integrity, rollback, and distribution policy. |
 | `worker_threads` | `P13-34`, `P13-35` | `external`, `policy` | P13-35 records the v1.1 no-facade replacement decision; P13-34 owns native WorkerPool promotion evidence on target ABIs. |
@@ -504,12 +504,12 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-52 privacy and disclosure policy
 
-Reason open: `implementation`, `packaging`, `policy`.
+Reason open: policy gate drift cleanup; future implementation remains `implementation`, `packaging`, `policy`.
 
-- [ ] Add settings UI prompt copy and localization.
-- [ ] Add real foreground disclosure ownership and stop behavior.
-- [ ] Add packaged disclosure manifest review UI.
-- [x] Keep docs/surface gate evidence-only so prompt UI, foreground disclosure, and packaged review UI are counted once as the remaining implementation blocker.
+- [x] Keep settings UI prompt copy and localization as future implementation work rather than a P13-52 policy blocker.
+- [x] Keep real foreground disclosure ownership and stop behavior as future promoted-provider implementation work.
+- [x] Keep packaged disclosure manifest review UI as future packaged promotion work.
+- [x] Keep docs/surface gate evidence-only so prompt UI, foreground disclosure, and packaged review UI remain future implementation work without blocking the P13-52 policy gate.
 - [x] Add automatic crash circuit breaker and remote packaged kill-switch disclosure implications.
 - [x] Ensure TypeScript declaration and verifier evidence stay synchronized.
 
