@@ -457,7 +457,7 @@ capabilities, Android permission synthesis, and blocked promotions. Missing
 bridge capability errors now report the required profile, Node capability, and
 Android permissions, but effective authority remains `safe_default`.
 
-P13-50 records relaxed-capability security corpus as partial. AutoJs6 Node now
+P13-50 records relaxed-capability security corpus closeout. AutoJs6 Node now
 tracks raw network, filesystem relaxation, Java interop, `child_process`,
 native addon loading, inspector, and WASI in
 `RELAXED_CAPABILITY_SECURITY_CORPUS.json`, with positive tests, negative tests,

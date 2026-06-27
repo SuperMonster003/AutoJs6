@@ -844,7 +844,7 @@ bounded stdio, explicit args, empty-by-default env, limited clock/random,
 network and process-exit denial, resource budgets, hostile corpus coverage,
 and packaged behavior.
 
-P13-50 records relaxed-capability security corpus as partial. The structured
+P13-50 records relaxed-capability security corpus closeout. The structured
 corpus covers raw network, filesystem relaxation, Java interop,
 `child_process`, native addon loading, inspector, and WASI with positive
 evidence, negative abuse probes, CI evidence, runtime guards, promotion

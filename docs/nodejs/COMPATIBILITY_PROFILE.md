@@ -1383,7 +1383,7 @@ capability errors now include `requiredProfiles`, `requiredNodePermissions`,
 profile remains `safe_default`; requested Pro/Desktop/Debug metadata is
 diagnostic-only and does not grant authority.
 
-P13-50 records relaxed-capability security corpus as partial. The corpus at
+P13-50 records relaxed-capability security corpus closeout. The corpus at
 `docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json` covers raw
 network, filesystem relaxation, Java interop, `child_process`, native addon
 loading, inspector, and WASI with positive tests, negative tests, abuse cases,
@@ -1391,7 +1391,7 @@ CI evidence, runtime guards, promotion preconditions, and rollback posture. The 
 `verifyNodePhase13RelaxedCapabilitySecurityCorpus` and focused
 `NodeSecurityRegressionInstrumentationTest` additions prove the current
 runtime remains fail-closed while future Pro/Desktop/Debug promotion evidence
-is collected.
+is collected by P13-51/P13-52 and later promotion gates.
 
 P13-51 records per-profile rollback playbook as partial. The runtime exposes
 `autojs6:profile.profileRollbackPolicy`, backed by

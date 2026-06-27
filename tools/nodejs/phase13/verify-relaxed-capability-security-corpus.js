@@ -95,11 +95,51 @@ function buildReport(files) {
   );
   const focusedBlock = files.securityTest.text;
   const runtimeBlock = block(files.nodeBridgeSources.text, "function __autojs6_profile()", "  function __autojs6_profile_profile_order()");
+  const focusedInstrumentationPresent =
+    focusedBlock.includes("phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi") &&
+    focusedBlock.includes("phase13JavaInteropRelaxedCapabilityCorpusKeepsAllowlistAndDenials") &&
+    focusedBlock.includes("security.p13_50.ready=true");
+  const promotionPreconditionsLinkedToRollbackPrivacy = EXPECTED_CAPABILITIES.every((id) => {
+    const entry = capabilityMap.get(id);
+    const preconditions = Array.isArray(entry && entry.promotionPreconditions)
+      ? entry.promotionPreconditions.join("\n").toLowerCase()
+      : "";
+    return preconditions.includes("p13-51") && preconditions.includes("p13-52") && preconditions.includes("packaged");
+  });
+  const runtimeFailClosed =
+    runtimeBlock.includes("rawSockets: false") &&
+    runtimeBlock.includes("rawHostPaths: false") &&
+    runtimeBlock.includes("rawFdNumbers: false") &&
+    runtimeBlock.includes("rawProcessHandles: false") &&
+    runtimeBlock.includes('rawDlopen: "denied"') &&
+    runtimeBlock.includes("downloadExec: false") &&
+    runtimeBlock.includes('processExit: "denied"');
+  const forbiddenPromotions = [
+    "rawSockets: true",
+    "rawHostPaths: true",
+    "rawFdNumbers: true",
+    "rawProcessHandles: true",
+    "rawNativeHandles: true",
+    "downloadExec: true",
+    "unsignedNativeAddonLoad: true",
+    "profilePromotion: true",
+    "userSelectable: true",
+    'rawDlopen: "available"',
+    'processExit: "available"',
+  ];
+  const relaxedCapabilityPromotionAbsent = forbiddenPromotions.every((tokenValue) => !runtimeBlock.includes(tokenValue));
+  const releaseJavaInteropAndRawAuthorityUnpromoted =
+    runtimeFailClosed &&
+    relaxedCapabilityPromotionAbsent &&
+    runtimeBlock.includes('id: "java_interop"') &&
+    runtimeBlock.includes('diagnosticName: "javaInterop"') &&
+    runtimeBlock.includes("releaseForbidden: true");
 
   const scenarios = [
     scenario("corpus_descriptor", "Relaxed capability corpus records required positive, negative, abuse, CI, runtime guard, promotion precondition, and rollback evidence for every high-risk surface", [
       token(files.corpus, '"schema": "autojs6-node-relaxed-capability-security-corpus-v1"'),
       token(files.corpus, '"task": "P13-50"'),
+      token(files.corpus, '"status": "ready"'),
       token(files.corpus, '"profilePromotion": false'),
       token(files.corpus, '"rawCapabilitiesPromoted": false'),
       token(files.corpus, '"runtimeGuards"'),
@@ -114,8 +154,6 @@ function buildReport(files) {
         fact(files.corpus.relative, `${entry.id}.promotionPreconditions`, entry.hasPromotionPreconditions),
         fact(files.corpus.relative, `${entry.id}.rollback`, entry.hasRollback),
       ]),
-    ], [
-      "Corpus entries are evidence descriptors; P13-51/P13-52 still need rollback UX, privacy prompts, and runtime promotion controls.",
     ]),
     scenario("focused_security_regression", "NodeSecurityRegressionInstrumentationTest includes P13-50 focused positive and negative relaxed-capability probes", [
       token(files.securityTest, "phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi"),
@@ -164,49 +202,32 @@ function buildReport(files) {
       token(files.nodeBridgeSources, 'processExit: "denied"'),
       token(files.runtimeCapabilities, "nativeAddon"),
       token(files.bridgeManifest, "JAVA_INTEROP"),
-    ], [
-      "Safe-default raw network modules, expanded filesystem roots, child_process, native addons, inspector, raw WASI, and release Java interop remain unpromoted.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-50", [
       token(files.phase13Tasks, "P13-50 partial landing"),
-      token(files.p13Report, "P13-50 records relaxed-capability security corpus as partial"),
+      token(files.p13Report, "P13-50 records relaxed-capability security corpus closeout"),
       token(files.phase13GradleGate, "verifyNodePhase13RelaxedCapabilitySecurityCorpus"),
       token(files.testingDoc, "verifyNodePhase13RelaxedCapabilitySecurityCorpus"),
       token(files.ciGatesDoc, "verifyNodePhase13RelaxedCapabilitySecurityCorpus"),
-      token(files.compatibilityProfile, "P13-50 records relaxed-capability security corpus as partial"),
-      token(files.securityModel, "P13-50 records relaxed-capability security corpus as partial"),
-      token(files.proComparison, "P13-50 records relaxed-capability security corpus as partial"),
-      token(files.proAutoxNotes, "P13-50 records relaxed-capability security corpus as partial"),
+      token(files.compatibilityProfile, "P13-50 records relaxed-capability security corpus closeout"),
+      token(files.securityModel, "P13-50 records relaxed-capability security corpus closeout"),
+      token(files.proComparison, "P13-50 records relaxed-capability security corpus closeout"),
+      token(files.proAutoxNotes, "P13-50 records relaxed-capability security corpus closeout"),
       token(files.capabilityMatrix, "P13-50 relaxed capability security corpus"),
       token(files.relaxationRubric, "RELAXED_CAPABILITY_SECURITY_CORPUS.json"),
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
-    ], [
-      "P13-50 does not close rollback, privacy disclosure, or user prompt requirements for future relaxed capability promotion.",
     ]),
   ];
 
-  const forbiddenPromotions = [
-    "rawSockets: true",
-    "rawHostPaths: true",
-    "rawFdNumbers: true",
-    "rawProcessHandles: true",
-    "rawNativeHandles: true",
-    "downloadExec: true",
-    "unsignedNativeAddonLoad: true",
-    "profilePromotion: true",
-    "userSelectable: true",
-    'rawDlopen: "available"',
-    'processExit: "available"',
-  ];
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-50"), "P13-50 must remain listed in the Phase 13 checklist."),
     check("report-present", files.p13Report.exists, "P13-50 report must exist."),
     check("corpus-present", files.corpus.exists && Boolean(corpus), "P13-50 relaxed capability corpus JSON must exist and parse."),
     check(
       "corpus-schema",
-      corpus && corpus.schema === "autojs6-node-relaxed-capability-security-corpus-v1" && corpus.task === "P13-50" && corpus.status === "partial",
-      "corpus must declare the P13-50 schema, task, and partial status.",
+      corpus && corpus.schema === "autojs6-node-relaxed-capability-security-corpus-v1" && corpus.task === "P13-50" && corpus.status === "ready",
+      "corpus must declare the P13-50 schema, task, and ready status.",
     ),
     check(
       "corpus-policy",
@@ -226,26 +247,33 @@ function buildReport(files) {
     ),
     check(
       "focused-instrumentation-present",
-      focusedBlock.includes("phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi") &&
-        focusedBlock.includes("phase13JavaInteropRelaxedCapabilityCorpusKeepsAllowlistAndDenials") &&
-        focusedBlock.includes("security.p13_50.ready=true"),
+      focusedInstrumentationPresent,
       "focused P13-50 instrumentation tests must be present.",
     ),
     check(
+      "safe-default-regression-coverage",
+      allCapabilityEvidencePresent && focusedInstrumentationPresent && runtimeFailClosed,
+      "Safe-default regression coverage must cover raw network, expanded fs roots, Java interop, child_process, native addon, inspector, and WASI.",
+    ),
+    check(
+      "promotion-paths-linked-to-rollback-privacy",
+      promotionPreconditionsLinkedToRollbackPrivacy,
+      "each positive promotion path must link to P13-51 rollback, P13-52 privacy disclosure, and packaged metadata/review requirements.",
+    ),
+    check(
       "runtime-fail-closed",
-      runtimeBlock.includes("rawSockets: false") &&
-        runtimeBlock.includes("rawHostPaths: false") &&
-        runtimeBlock.includes("rawFdNumbers: false") &&
-        runtimeBlock.includes("rawProcessHandles: false") &&
-        runtimeBlock.includes('rawDlopen: "denied"') &&
-        runtimeBlock.includes("downloadExec: false") &&
-        runtimeBlock.includes('processExit: "denied"'),
+      runtimeFailClosed,
       "runtime profile metadata must keep raw sockets, raw paths, raw fds, raw process/native handles, dlopen, download-exec, and WASI process exit fail-closed.",
     ),
     check(
       "no-relaxed-capability-promotion",
-      forbiddenPromotions.every((tokenValue) => !runtimeBlock.includes(tokenValue)),
+      relaxedCapabilityPromotionAbsent,
       "P13-50 must not promote raw relaxed capabilities while recording the corpus.",
+    ),
+    check(
+      "release-java-raw-authority-unpromoted",
+      releaseJavaInteropAndRawAuthorityUnpromoted,
+      "release Java interop and raw authority must remain unpromoted until prompts and packaged behavior exist.",
     ),
   ];
 
@@ -270,12 +298,15 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       corpusDescriptorReady: allCapabilityEvidencePresent,
       focusedSecurityRegressionReady: scenarioById(scenarios, "focused_security_regression").status === "ready",
       companionEvidenceReady: scenarioById(scenarios, "companion_security_evidence").status === "ready",
-      runtimeFailClosed: checks.find((entry) => entry.id === "runtime-fail-closed").passed,
+      safeDefaultRegressionCoverageReady: checkById(checks, "safe-default-regression-coverage").passed,
+      promotionPathsLinkedToRollbackPrivacy: checkById(checks, "promotion-paths-linked-to-rollback-privacy").passed,
+      runtimeFailClosed: checkById(checks, "runtime-fail-closed").passed,
+      releaseJavaRawAuthorityUnpromoted: checkById(checks, "release-java-raw-authority-unpromoted").passed,
       rawCapabilitiesPromoted: false,
       rollbackUxReady: false,
       privacyDisclosureReady: false,
@@ -334,6 +365,10 @@ function check(id, passed, message) {
 
 function scenarioById(scenarios, id) {
   return scenarios.find((entry) => entry.id === id);
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function surface(text, id) {

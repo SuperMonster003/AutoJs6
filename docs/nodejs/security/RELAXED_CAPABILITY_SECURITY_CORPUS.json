@@ -1,7 +1,7 @@
 {
   "schema": "autojs6-node-relaxed-capability-security-corpus-v1",
   "task": "P13-50",
-  "status": "partial",
+  "status": "ready",
   "updatedAt": "2026-06-27",
   "policy": {
     "defaultProfile": "safe_default",
@@ -128,6 +128,7 @@
       "promotionPreconditions": [
         "P13-51 rollback playbook has a Java interop kill switch",
         "P13-52 privacy disclosure covers host object access and Android API reach",
+        "packaged APK metadata rejects Java interop authority unless reviewed allowlist and disclosure evidence exist",
         "allowlist review explicitly rejects process execution, class loading, reflection, and native loading",
         "allowlist and denylist tests are green on connected Android CI before enabling"
       ],
@@ -242,6 +243,7 @@
       "promotionPreconditions": [
         "P13-51 rollback playbook has an inspector/debug kill switch",
         "P13-52 privacy disclosure covers debugging, heap data, CPU profiles, and ADB forwarding",
+        "packaged APK metadata rejects inspector/debug authority in release builds",
         "debug-only builds require explicit user action and local attach constraints",
         "release attach, artifact export, and remote exposure abuse tests are green on connected Android CI before enabling"
       ],

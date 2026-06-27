@@ -1228,7 +1228,7 @@ missing profile/capability/permission requirements. This improves migration
 debuggability for Pro/Desktop parity without promoting any profile beyond the
 current `safe_default` authority.
 
-P13-50 records relaxed-capability security corpus as partial: AutoJs6 Node now
+P13-50 records relaxed-capability security corpus closeout: AutoJs6 Node now
 tracks raw network, filesystem relaxation, Java interop, `child_process`,
 native addon loading, inspector, and WASI in
 `RELAXED_CAPABILITY_SECURITY_CORPUS.json`, with positive tests, negative tests,

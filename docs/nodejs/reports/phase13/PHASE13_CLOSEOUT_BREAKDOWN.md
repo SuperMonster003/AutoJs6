@@ -460,9 +460,9 @@ Reason open: `implementation`, `policy`, `packaging`.
 Reason open: `policy`, `evidence`.
 
 - [ ] Convert descriptors into runnable promotion guards for each relaxed capability.
-- [ ] Keep Safe-default regression coverage for raw network, expanded fs roots, Java interop, child_process, native addon, inspector, and WASI.
-- [ ] Link every positive promotion path to rollback and privacy disclosure requirements.
-- [ ] Keep release Java interop and raw authority unpromoted until prompts and packaged behavior exist.
+- [x] Keep Safe-default regression coverage for raw network, expanded fs roots, Java interop, child_process, native addon, inspector, and WASI.
+- [x] Link every positive promotion path to rollback and privacy disclosure requirements.
+- [x] Keep release Java interop and raw authority unpromoted until prompts and packaged behavior exist.
 
 #### P13-51 rollback playbook
 

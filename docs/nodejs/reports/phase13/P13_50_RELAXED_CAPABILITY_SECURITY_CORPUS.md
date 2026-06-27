@@ -1,6 +1,6 @@
 # P13-50 Relaxed Capability Security Corpus
 
-P13-50 records relaxed-capability security corpus as partial. The current
+P13-50 records relaxed-capability security corpus closeout. The current
 landing adds a structured corpus for raw network, filesystem relaxation, Java
 interop, `child_process`, native addon loading, inspector, and WASI, then ties
 that corpus to focused Android regression tests and a host verifier.
@@ -24,10 +24,18 @@ that corpus to focused Android regression tests and a host verifier.
 - The corpus now requires per-capability `runtimeGuards` and
   `promotionPreconditions` so future opt-in promotion has explicit fail-closed,
   rollback, privacy, packaged metadata, and connected-CI prerequisites.
+- Every positive promotion path is linked to P13-51 rollback, P13-52 privacy
+  disclosure, packaged metadata/review, and connected Android CI
+  prerequisites.
+- Safe-default regression coverage remains explicit for raw network, expanded
+  filesystem roots, Java interop, `child_process`, native addon loading,
+  inspector, and WASI.
+- Release Java interop and raw authority remain unpromoted until prompts and
+  packaged behavior exist.
 - `verifyNodePhase13RelaxedCapabilitySecurityCorpus` generates
   `phase13-relaxed-capability-security-corpus.json` and `.md`.
 
-## Remaining Work
+## Boundary
 
 - P13-50 is a security-corpus landing, not a runtime promotion.
 - Real relaxed capability enablement still requires rollout controls, rollback

@@ -1813,7 +1813,7 @@ P13 task 本身使用以下执行状态：
       builder profile UI, actual profile promotion, rollback/disclosure UX, and
       security/privacy corpus approval for relaxed capabilities.
 
-- [ ] P13-50: 扩展 security corpus for relaxed capabilities。
+- [x] P13-50: 扩展 security corpus for relaxed capabilities。
   - 范围：为 raw network、fs 放宽、Java interop、child_process、native addon、
     inspector、WASI 增加攻击语料。
   - 验收：
@@ -1839,9 +1839,8 @@ P13 task 本身使用以下执行状态：
       `:app:verifyNodePhase13RelaxedCapabilitySecurityCorpus`。
     - Report:
       `docs/nodejs/reports/phase13/P13_50_RELAXED_CAPABILITY_SECURITY_CORPUS.md`。
-    - Remaining P13-50 blockers: real raw capability promotion、rollback UX、
-      privacy disclosure、user prompts、packaged behavior、final opt-in
-      promotion evidence 仍由 P13-51/P13-52 及后续 promotion gate 关闭。
+    - P13-50 closeout: corpus/security evidence is ready; real raw capability
+      promotion remains owned by P13-51/P13-52 and later promotion gates.
 
 - [ ] P13-51: 增加 per-profile rollback playbook。
   - 范围：更新 rollback 文档和 Gradle/property 开关。
