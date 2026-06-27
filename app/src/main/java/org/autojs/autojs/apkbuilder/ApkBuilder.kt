@@ -21,6 +21,7 @@ import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
@@ -34,6 +35,7 @@ import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.util.MD5Utils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
 import pxb.android.StringItem
 import pxb.android.axml.AxmlWriter
@@ -71,6 +73,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private var mPendingProjectConfigFile: File? = null
     private var mPendingProjectConfigJson: String? = null
     private var mBundledProjectConfigJson: String? = null
+    private var mLastPluginQueryDiagnostics: List<String> = emptyList()
 
     private lateinit var mProjectConfig: ProjectConfig
 
@@ -1152,42 +1155,152 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             )
         }
 
-        val infos = enabledServices.mapNotNull { si ->
-            val info = runCatching { queryPluginInfoBlocking(globalContext, si, pluginPair) }.getOrNull()
-            info?.let { si to it }
+        mLastPluginQueryDiagnostics = emptyList()
+
+        selectPluginVariant(enabledServices, pluginPair).also { attempt ->
+            mLastPluginQueryDiagnostics = attempt.diagnostics
+            attempt.selected?.let { return it }
         }
 
-        selectBestPluginVariantCandidate(infos, plugin.variants)?.let {
-            return it
+        if (tryWakePluginServices(enabledServices)) {
+            PLUGIN_WAKE_RETRY_DELAYS_MS.forEach { delayMs ->
+                sleepBeforePluginRetry(delayMs)
+                val retryEnabledServices = findServicesByAction(pm, action).filter { si ->
+                    PluginEnableStore.isEnabled(globalContext, si.packageName, defaultEnabled = true)
+                }
+                selectPluginVariant(retryEnabledServices, pluginPair).also { attempt ->
+                    mLastPluginQueryDiagnostics = attempt.diagnostics
+                    attempt.selected?.let { return it }
+                }
+            }
         }
+
+        val variantList = plugin.variants.joinToString("/") { it.variant.orEmpty() }
+        val detail = mLastPluginQueryDiagnostics
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(separator = "\n", prefix = "\n")
+            .orEmpty()
 
         throw IllegalStateException(
-            globalContext.getString(
-                R.string.error_no_available_enabled_plugin_variants_found,
-                moduleLabel,
-                plugin.variants.joinToString("/") { it.variant.orEmpty() },
-            )
+            globalContext.getString(R.string.error_no_available_enabled_plugin_variants_found, moduleLabel, variantList) + detail
         )
     }
 
-    private fun queryPluginInfoBlocking(context: Context, serviceInfo: ServiceInfo, pluginPair: Pair<Lib, PluginLib>): PluginLibVariant {
+    private fun selectPluginVariant(
+        services: List<ServiceInfo>,
+        pluginPair: Pair<Lib, PluginLib>,
+    ): PluginSelectionAttempt {
+        ensureNotCancelled()
+        val plugin = pluginPair.second
+        val results = services.map { si ->
+            runCatching {
+                val info = queryPluginInfoBlocking(globalContext, si, pluginPair)
+                PluginQueryResult(
+                    serviceInfo = si,
+                    pluginInfo = info,
+                    selectedVariant = resolvePluginVariant(plugin, info, si),
+                    error = null,
+                )
+            }.getOrElse { error ->
+                PluginQueryResult(
+                    serviceInfo = si,
+                    pluginInfo = null,
+                    selectedVariant = null,
+                    error = error,
+                )
+            }
+        }
+
+        val diagnostics = results.map(::formatPluginQueryDiagnostic)
+        val candidates = results.mapNotNull { result ->
+            result.selectedVariant?.let { variant -> result.serviceInfo to variant }
+        }
+
+        selectBestPluginVariantCandidate(candidates, plugin.variants)?.let {
+            return PluginSelectionAttempt(it, diagnostics)
+        }
+
+        return PluginSelectionAttempt(null, diagnostics)
+    }
+
+    private fun resolvePluginVariant(plugin: PluginLib, info: PluginInfo, serviceInfo: ServiceInfo): PluginLibVariant? {
+        val hints = listOfNotNull(
+            info.variant,
+            info.id,
+            info.name,
+            serviceInfo.packageName,
+            serviceInfo.name,
+        ).filter { it.isNotBlank() }
+
+        return plugin.variants.firstOrNull { variant ->
+            val expected = variant.variant ?: return@firstOrNull false
+            hints.any { hint -> isPluginVariantMatch(hint, expected) }
+        }
+    }
+
+    private fun isPluginVariantMatch(hint: String, expected: String): Boolean {
+        val normalizedHint = normalizePluginVariantHint(hint)
+        val normalizedExpected = normalizePluginVariantHint(expected)
+        return normalizedHint == normalizedExpected || normalizedHint.endsWith(normalizedExpected)
+    }
+
+    private fun normalizePluginVariantHint(text: String): String {
+        return text.lowercase().replace(Regex("[^a-z0-9]"), "")
+    }
+
+    private fun formatPluginQueryDiagnostic(result: PluginQueryResult): String {
+        val service = "${result.serviceInfo.packageName}/${result.serviceInfo.name}"
+        result.error?.let { error ->
+            return "$service: ${error.javaClass.simpleName}: ${error.message}"
+        }
+        val info = result.pluginInfo
+        val infoText = when (info) {
+            null -> "info=null"
+            else -> "info={id=${info.id}, engine=${info.engine}, variant=${info.variant}, name=${info.name}}"
+        }
+        val variantText = result.selectedVariant?.variant ?: "unmatched"
+        return "$service: selectedVariant=$variantText, $infoText"
+    }
+
+    private fun tryWakePluginServices(services: List<ServiceInfo>): Boolean {
+        ensureNotCancelled()
+        var didWake = false
+        services.map { it.packageName }.distinct().forEach { packageName ->
+            didWake = PluginWakeManager.tryAutoWakeIfNeeded(globalContext, packageName) || didWake
+        }
+        return didWake
+    }
+
+    private fun sleepBeforePluginRetry(delayMs: Long) {
+        ensureNotCancelled()
+        try {
+            Thread.sleep(delayMs)
+        } catch (e: InterruptedException) {
+            Thread.currentThread().interrupt()
+            throw CancellationException("Build aborted").apply { initCause(e) }
+        }
+        ensureNotCancelled()
+    }
+
+    private fun queryPluginInfoBlocking(context: Context, serviceInfo: ServiceInfo, pluginPair: Pair<Lib, PluginLib>): PluginInfo {
         ensureNotCancelled()
         // Bind service and call getInfo() synchronously (packaging-time only).
         // zh-CN: 同步绑定服务并调用 getInfo() (仅打包阶段使用).
         val latch = CountDownLatch(1)
-        var selectedVariant: String? = null
+        var pluginInfo: PluginInfo? = null
         var error: Throwable? = null
 
         val (lib, plugin) = pluginPair
 
         val intent = Intent(plugin.action).apply {
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             component = ComponentName(serviceInfo.packageName, serviceInfo.name)
         }
 
         val conn = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                 try {
-                    selectedVariant = plugin.onServiceConnected(binder)
+                    pluginInfo = plugin.onServiceConnected(binder)
                 } catch (t: Throwable) {
                     error = t
                 } finally {
@@ -1211,20 +1324,15 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
 
         try {
-            val ok = latch.await(15, TimeUnit.SECONDS)
+            val ok = latch.await(PLUGIN_INFO_QUERY_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             if (!ok) {
                 throw IllegalStateException(
                     globalContext.getString(R.string.error_timeout_while_querying_plugin_info, lib.label)
                 )
             }
             error?.let { throw it }
-            selectedVariant ?: throw IllegalStateException(
+            return pluginInfo ?: throw IllegalStateException(
                 globalContext.getString(R.string.error_plugin_returned_empty_info, lib.label)
-            )
-            return plugin.variants.firstOrNull {
-                it.variant.equals(selectedVariant, ignoreCase = true)
-            } ?: throw IllegalStateException(
-                globalContext.getString(R.string.error_plugin_returned_invalid_variant, lib.label, selectedVariant)
             )
         } finally {
             runCatching { context.unbindService(conn) }
@@ -1375,11 +1483,12 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     private fun findServicesByAction(pm: PackageManager, action: String): List<ServiceInfo> {
+        val intent = Intent(action).addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
         val resolveList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.queryIntentServices(Intent(action), PackageManager.ResolveInfoFlags.of(0))
+            pm.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0))
         } else {
             @Suppress("DEPRECATION")
-            pm.queryIntentServices(Intent(action), 0)
+            pm.queryIntentServices(intent, 0)
         }
         return resolveList.mapNotNull { it.serviceInfo }
     }
@@ -1588,7 +1697,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             plugin = PluginLib(
                 action = "org.autojs.plugin.PADDLE_OCR",
                 onServiceConnected = { binder: IBinder ->
-                    IOcrPlugin.Stub.asInterface(binder).info.variant.orEmpty()
+                    IOcrPlugin.Stub.asInterface(binder).info
                 },
                 variants = listOf(
                     PluginLibVariant(
@@ -1725,9 +1834,21 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
     }
 
+    private data class PluginSelectionAttempt(
+        val selected: Pair<ServiceInfo, PluginLibVariant>?,
+        val diagnostics: List<String>,
+    )
+
+    private data class PluginQueryResult(
+        val serviceInfo: ServiceInfo,
+        val pluginInfo: PluginInfo?,
+        val selectedVariant: PluginLibVariant?,
+        val error: Throwable?,
+    )
+
     data class PluginLib(
         val action: String,
-        val onServiceConnected: (IBinder) -> String,
+        val onServiceConnected: (IBinder) -> PluginInfo?,
         val variants: List<PluginLibVariant>,
     )
 
@@ -1747,6 +1868,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         const val TEMPLATE_APK_NAME = "template.apk"
         @JvmField
         val INRT_APP_ID = "${BuildConfig.APPLICATION_ID}.inrt"
+
+        private val PLUGIN_WAKE_RETRY_DELAYS_MS = longArrayOf(300L, 800L, 1500L)
+        private const val PLUGIN_INFO_QUERY_TIMEOUT_SECONDS = 60L
 
         private val TAG = ApkBuilder::class.java.simpleName
 

@@ -28,13 +28,20 @@ object PluginWakeManager {
             ComponentName(packageName, fullName)
         }
         val wakeComponent = metaComponent ?: run {
-            val implicitIntent = Intent(ACTION_WAKE).setPackage(packageName)
+            val implicitIntent = Intent(ACTION_WAKE)
+                .setPackage(packageName)
+                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             val info = pm.queryIntentActivities(implicitIntent, 0).firstOrNull()
             info?.activityInfo?.let { ComponentName(it.packageName, it.name) }
         }
         return when {
-            wakeComponent != null -> Intent().setComponent(wakeComponent)
-            else -> Intent(ACTION_WAKE).setPackage(packageName).takeIf { it.resolveActivity(pm) != null }
+            wakeComponent != null -> Intent()
+                .setComponent(wakeComponent)
+                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            else -> Intent(ACTION_WAKE)
+                .setPackage(packageName)
+                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                .takeIf { it.resolveActivity(pm) != null }
         }
     }
 }

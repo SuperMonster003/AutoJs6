@@ -454,6 +454,7 @@ object PaddleOcrPluginHost {
     private fun queryOcrServices(context: Context, packageName: String? = null): List<ServiceInfo> {
         val pm = context.packageManager
         val intent = Intent(ACTION_OCR).apply {
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             if (!packageName.isNullOrBlank()) {
                 setPackage(packageName)
             }
