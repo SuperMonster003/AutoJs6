@@ -146,9 +146,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-52 privacy disclosure policy"),
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
-    ], [
-      "P13-52 is a policy/diagnostic gate; actual prompts, notifications, and packaged review UI are not yet promoted.",
-    ]),
+    ], []),
   ];
 
   const checks = [

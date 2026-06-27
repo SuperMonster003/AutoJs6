@@ -481,6 +481,7 @@ Reason open: `implementation`, `packaging`, `policy`.
 - [ ] Add settings UI prompt copy and localization.
 - [ ] Add real foreground disclosure ownership and stop behavior.
 - [ ] Add packaged disclosure manifest review UI.
+- [x] Keep docs/surface gate evidence-only so prompt UI, foreground disclosure, and packaged review UI are counted once as the remaining implementation blocker.
 - [x] Add automatic crash circuit breaker and remote packaged kill-switch disclosure implications.
 - [x] Ensure TypeScript declaration and verifier evidence stay synchronized.
 

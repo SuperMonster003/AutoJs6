@@ -39,6 +39,9 @@ and disclosure surface.
   surfaces.
 - Packaged disclosure manifest authoring/review UI and installer/runtime
   enforcement are not implemented yet.
+- The docs/surface gate is evidence-only; prompt UI, foreground notification
+  ownership, and packaged review UI are counted once as the remaining
+  implementation blocker for this policy track.
 - P13-52 does not grant Pro/Desktop/Debug authority; effective runtime
   authority remains `safe_default`.
 
