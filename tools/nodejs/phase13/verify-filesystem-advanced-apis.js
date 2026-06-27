@@ -108,7 +108,6 @@ function buildReport(files) {
       token(files.p13Report, "realpath and opendir markers:"),
     ], [
       "Promote packaged watcher/fd/FileHandle/stream evidence from runtime source markers to current device-exported report evidence.",
-      "Document Android watcher coalescing, recursive-watch denial, and platform-specific realpath behavior in the final Desktop compatibility matrix.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, desktop matrix, surface manifest, and Gradle gate record P13-33", [
       token(files.phase13Tasks, "P13-33 partial landing"),
@@ -164,6 +163,16 @@ function buildReport(files) {
         !files.nodeBridgeSources.text.includes("androidSharedStorage: true"),
       "P13-33 must not expand filesystem roots.",
     ),
+    check(
+      "android-fs-differences-documented",
+      files.p13Report.text.includes("## Android Compatibility Notes") &&
+        files.p13Report.text.includes("Watcher events may be coalesced") &&
+        files.p13Report.text.includes("Recursive `fs.watch` remains denied on Android") &&
+        files.p13Report.text.includes("`realpath` resolves after scoped-path policy") &&
+        files.desktopMatrix.text.includes("Android watcher coalescing, recursive-watch denial, and realpath differences are documented") &&
+        files.builtinMatrixGenerator.text.includes("Android watcher coalescing, recursive-watch denial, and realpath differences are documented"),
+      "P13-33 must document Android watcher coalescing, recursive-watch denial, and realpath differences.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -193,7 +202,7 @@ function buildReport(files) {
       packagedRealpathOpendirEvidenceReady: scenarioById(scenarios, "opendir_realpath_packaged_evidence").status !== "missing_evidence",
       packagedAdvancedLifecycleEvidenceReady: false,
       expandedRootAdvancedRerunReady: false,
-      androidUnsupportedBehaviorMatrixReady: false,
+      androidUnsupportedBehaviorMatrixReady: checkById(checks, "android-fs-differences-documented").passed,
       rawFdPromoted: false,
       desktopSurfacePromoted: false,
     },
@@ -226,6 +235,10 @@ function check(id, passed, message) {
 
 function scenarioById(scenarios, id) {
   return scenarios.find((entry) => entry.id === id) || { status: "missing_evidence" };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function surface(text, id) {

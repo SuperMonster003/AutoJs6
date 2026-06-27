@@ -245,9 +245,11 @@
 - Gradle gate: `:app:verifyNodePhase13FilesystemAdvancedApis`.
 - Report: `docs/nodejs/reports/phase13/P13_33_FILESYSTEM_ADVANCED_APIS.md`.
 - Surface manifest evidence: `phase13-filesystem-advanced-apis`.
+- Android compatibility notes now document watcher coalescing,
+  recursive-watch denial, and realpath differences.
 - Remaining P13-33 blockers: packaged watcher/fd/FileHandle/stream lifecycle
   smoke, pending watcher/watchFile Kotlin diagnostics, expanded-root reruns,
-  Android unsupported behavior notes, and final full desktop fs semantics.
+  and final full desktop fs semantics.
 
 ## P13-34 Partial Landing Note
 

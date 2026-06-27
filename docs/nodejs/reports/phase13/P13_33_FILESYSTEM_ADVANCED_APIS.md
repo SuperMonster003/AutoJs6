@@ -32,11 +32,21 @@ The following remain future work before P13-33 can move beyond partial:
 - packaged APK live-smoke coverage for watcher, fd, FileHandle, stream, and
   close-on-destroy behavior;
 - expanded-root reruns once P13-32 root authority providers exist;
-- Android unsupported behavior notes for watcher coalescing, recursive-watch
-  denial, platform-specific realpath behavior, filesystem permission failures,
-  and package asset extraction differences;
 - final Desktop profile decision for full `fs` / `fs.promises` semantics,
   including APIs that remain platform-limited or intentionally denied.
+
+## Android Compatibility Notes
+
+- Watcher events may be coalesced by Android filesystem notifications and by
+  the scoped bridge event budget. Consumers must treat `rename` / `change`
+  event counts as advisory rather than one-to-one desktop event delivery.
+- Recursive `fs.watch` remains denied on Android. Callers must register
+  explicit watchers per authorized directory instead of relying on recursive
+  subtree watching.
+- `realpath` resolves after scoped-path policy and symlink escape checks.
+  Android package assets and provider-backed paths may differ from desktop
+  POSIX paths, so only working-directory and sandbox-root real paths are
+  portable P13-33 evidence.
 
 ## Packaged Evidence
 
@@ -75,5 +85,3 @@ close-on-destroy behavior.
 - Add packaged advanced-fs lifecycle smokes and archive current device evidence.
 - Surface pending watcher/watchFile cleanup counts through Kotlin diagnostics.
 - Re-run advanced-fs suites against each future promoted root class.
-- Expand the Android compatibility notes for platform-specific watcher and
-  realpath behavior before any Desktop profile promotion.
