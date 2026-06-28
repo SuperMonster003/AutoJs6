@@ -1050,6 +1050,15 @@ It also runs fixture-based contract checks from
 report shapes and fail-closed under-duration, missing-metric, leak/orphan, and
 unrecoverable-runtime shapes. Those fixtures are CI contract tests only and do
 not satisfy the 8h/24h soak requirement.
+Use `tools/nodejs/phase13/run-full-heavy-resource-soak.js` for the real device
+soaks:
+
+```powershell
+node tools/nodejs/phase13/run-full-heavy-resource-soak.js --kind quick --serial QV710AF65F --device-profile sony --archive
+node tools/nodejs/phase13/run-full-heavy-resource-soak.js --kind final --serial QV710AF65F --device-profile sony --archive
+```
+
+For short smoke validation, pass `--duration-ms` and leave `--archive` off.
 Use `tools/nodejs/phase13/archive-full-heavy-resource-soak.js` to validate and
 copy completed soak JSON into the canonical final-soak paths; the helper writes
 an archive audit report and refuses dirty or under-duration inputs.

@@ -104,6 +104,7 @@ Reason open: `evidence`, `external`.
 - [ ] Archive comparable memory, fd, thread, runtime, and orphan-process metrics.
 - [ ] Re-run `verifyNodePhase13FullHeavyResourceStress` and update the final summary.
 - [x] Keep final blocker registry prose from double-counting the canonical quick/final soak blockers while evidence files are absent.
+- [x] Add real-soak runner and instrumentation for reproducible 8h/24h device evidence collection.
 
 #### P13-09 Android-side package installation manager
 

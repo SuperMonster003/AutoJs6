@@ -1782,6 +1782,17 @@ under-duration, missing-metric, leak/orphan, and unrecoverable-runtime shapes.
 They validate the parser and fail-closed rules only; they are not soak evidence
 and do not set `quickSoakReady` or `finalSoakReady`.
 
+Run real device soaks through the host runner so device selection, timeout,
+report pull, and optional archive stay reproducible:
+
+```powershell
+node tools/nodejs/phase13/run-full-heavy-resource-soak.js --kind quick --serial QV710AF65F --device-profile sony --archive
+node tools/nodejs/phase13/run-full-heavy-resource-soak.js --kind final --serial QV710AF65F --device-profile sony --archive
+```
+
+Use `--duration-ms` only for smoke validation, and do not pass `--archive` for
+those under-duration runs.
+
 After a real device soak completes, archive it through the validator before
 placing it under the final-soak path:
 

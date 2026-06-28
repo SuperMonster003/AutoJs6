@@ -265,6 +265,18 @@ missing-metric, leak/orphan, or unrecoverable runtime samples. These fixtures
 are not performance evidence and must not be copied into
 `build/reports/nodejs/final-soak/`.
 
+Use the real-soak runner for the device runs. It pins the Android serial,
+starts the focused final-soak instrumentation, pulls the JSON report from the
+device, and optionally archives a completed report:
+
+```powershell
+node tools/nodejs/phase13/run-full-heavy-resource-soak.js --kind quick --serial QV710AF65F --device-profile sony --archive
+node tools/nodejs/phase13/run-full-heavy-resource-soak.js --kind final --serial QV710AF65F --device-profile sony --archive
+```
+
+For smoke validation, pass `--duration-ms` and leave `--archive` off so
+under-duration reports cannot replace canonical 8h/24h evidence.
+
 Use `tools/nodejs/phase13/archive-full-heavy-resource-soak.js` to copy only
 validated real soak outputs into `build/reports/nodejs/final-soak/`. Run it with
 `--dry-run` first when checking a candidate report.

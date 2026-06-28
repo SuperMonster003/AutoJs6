@@ -102,9 +102,12 @@ uninstalled, reinstalled, and reset as needed for Node.js validation.
   fail-closed network timeout instead of the default network-disabled denial.
   For Safe-profile denial evidence, pass
   `-Pautojs.nodejs.network.experimental=false` explicitly.
-- P13-08 has verifier and archive-helper coverage only. Do not synthesize
-  `quick-soak-8h.json` or `final-soak-24h.json`; archive only completed real
-  soak reports through `tools/nodejs/phase13/archive-full-heavy-resource-soak.js`.
+- P13-08 has verifier, real-soak runner, instrumentation, and archive-helper
+  coverage. Use `tools/nodejs/phase13/run-full-heavy-resource-soak.js` for the
+  8h/24h runs. Do not synthesize `quick-soak-8h.json` or
+  `final-soak-24h.json`; archive only completed real soak reports through
+  `tools/nodejs/phase13/archive-full-heavy-resource-soak.js`. Leave
+  `--archive` off when using `--duration-ms` for under-duration smoke tests.
 - For ABI status triage, use `:app:generateNodeFinalAbiStatus` when a
   non-failing report is needed. `:app:verifyNodeFinalAbiGate` is the strict
   gate for required ABI libraries and adapter ABI/export evidence. Runtime
