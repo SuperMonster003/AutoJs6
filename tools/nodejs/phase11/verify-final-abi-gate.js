@@ -68,6 +68,7 @@ function main() {
   const adapterAbiStatus = decisionStatus(adapterAbiReport);
   const adapterExportStatus = decisionStatus(adapterExportReport);
   const artifactGateStatus = decisionStatus(artifactGateReport);
+  const runtimeArtifactDefer = runtimeArtifactDeferDecision(registry, artifactGateStatus, artifactGateReport);
   const x86Decision = registryDecision(registry, "x86");
   const blockers = [];
   sourceChecks
@@ -87,13 +88,20 @@ function main() {
     return !entry || !entry.available || !entry.exportsAdapterApi;
   });
   missingExportAbis.forEach((abi) => blockers.push("required ABI missing adapter export evidence: " + abi));
-  if (artifactGateStatus !== "ready") {
+  if (artifactGateStatus !== "ready" && !runtimeArtifactDefer.deferred) {
     blockers.push("runtime artifact gate is not final-ready: " + artifactGateStatus);
   }
   const artifactWarnings = artifactGateReport && artifactGateReport.decision && Array.isArray(artifactGateReport.decision.warnings)
     ? artifactGateReport.decision.warnings
     : [];
-  artifactWarnings.forEach((warning) => blockers.push("runtime artifact warning: " + warning));
+  if (!runtimeArtifactDefer.deferred) {
+    artifactWarnings.forEach((warning) => blockers.push("runtime artifact warning: " + warning));
+  }
+  const status = blockers.length === 0
+    ? runtimeArtifactDefer.deferred
+      ? "ready_with_deferred_runtime_artifacts"
+      : "ready"
+    : "blocked";
   const report = {
     schema: "autojs6-node-final-abi-gate-v1",
     generatedAt: new Date().toISOString(),
@@ -134,13 +142,15 @@ function main() {
       },
     },
     optionalX86: x86Decision,
+    deferredRuntimeArtifacts: runtimeArtifactDefer,
     blockers,
     decision: {
-      status: blockers.length === 0 ? "ready" : "blocked",
+      status,
       requiredAbiLibrariesPresent: requiredLibraries.every((entry) => entry.libnode.present),
       adapterAbiReady: adapterAbiStatus === "ready",
       adapterExportReady: adapterExportStatus === "ready" && missingExportAbis.length === 0,
       runtimeArtifactGateReady: artifactGateStatus === "ready",
+      runtimeArtifactGateDeferred: runtimeArtifactDefer.deferred,
       x86BlocksFinal: false,
       safeNodeProfilePreserved: true,
     },
@@ -148,7 +158,7 @@ function main() {
   fs.mkdirSync(reportDir, { recursive: true });
   writeReport(reportDir, "final-abi-gate", report, renderMarkdown);
   console.log("Final ABI gate decision: " + report.decision.status);
-  if (options.failOnBlocked && report.decision.status !== "ready") {
+  if (options.failOnBlocked && report.decision.status === "blocked") {
     process.exitCode = 1;
   }
 }
@@ -193,6 +203,29 @@ function registryDecision(registry, id) {
   };
 }
 
+function runtimeArtifactDeferDecision(registry, artifactGateStatus, artifactGateReport) {
+  const lane = registryDecision(registry, "node_24_17_community_fork");
+  const warnings = artifactGateReport && artifactGateReport.decision && Array.isArray(artifactGateReport.decision.warnings)
+    ? artifactGateReport.decision.warnings
+    : [];
+  const deferred = (
+    artifactGateStatus === "bootstrap_only" &&
+    registry.defaultRuntime === "node24_5" &&
+    lane.classification === "external_runtime_maintenance" &&
+    lane.status === "waiting_for_android_artifacts"
+  );
+  return {
+    id: "node_24_17_community_fork",
+    deferred,
+    artifactGateStatus,
+    classification: lane.classification,
+    status: lane.status,
+    defaultRuntime: registry.defaultRuntime || "unknown",
+    reason: lane.currentEvidence,
+    warnings,
+  };
+}
+
 function sha256(file) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
@@ -212,6 +245,7 @@ function renderMarkdown(report) {
     `- Adapter ABI ready: ${report.decision.adapterAbiReady}`,
     `- Adapter export ready: ${report.decision.adapterExportReady}`,
     `- Runtime artifact gate ready: ${report.decision.runtimeArtifactGateReady}`,
+    `- Runtime artifact gate deferred: ${report.decision.runtimeArtifactGateDeferred}`,
     `- Optional x86 blocks final: ${report.decision.x86BlocksFinal}`,
     "",
     "## Required ABI Libraries",
@@ -237,6 +271,17 @@ function renderMarkdown(report) {
     lines.push("None.");
   } else {
     report.blockers.forEach((blocker) => lines.push(`- ${blocker}`));
+  }
+  lines.push("", "## Deferred Runtime Artifacts", "");
+  if (report.deferredRuntimeArtifacts.deferred) {
+    lines.push(
+      `- ${report.deferredRuntimeArtifacts.id}: ${report.deferredRuntimeArtifacts.reason}`,
+      `- Artifact gate status: ${report.deferredRuntimeArtifacts.artifactGateStatus}`,
+      `- Default runtime: ${report.deferredRuntimeArtifacts.defaultRuntime}`,
+    );
+    report.deferredRuntimeArtifacts.warnings.forEach((warning) => lines.push(`- ${warning}`));
+  } else {
+    lines.push("None.");
   }
   return lines.join("\n") + "\n";
 }

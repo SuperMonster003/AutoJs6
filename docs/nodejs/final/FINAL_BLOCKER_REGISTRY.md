@@ -132,3 +132,7 @@ stable and tested.
 
 Node 24.17 stays outside Phase 11 completion until Android shared-libnode
 artifacts exist for the required ABI set. Phase 11 continues on `node24_5`.
+While this lane is `waiting_for_android_artifacts`, the final ABI gate may
+record runtime artifact aggregate `bootstrap_only` as deferred external runtime
+maintenance after required `arm64-v8a`, `armeabi-v7a`, and `x86_64`
+`libnode.so` libraries plus adapter ABI/export evidence are ready.

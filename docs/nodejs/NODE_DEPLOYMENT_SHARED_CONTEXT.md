@@ -56,6 +56,10 @@ Observed examples:
 
 Preferred connected-test device serial: `QV710AF65F`.
 
+Secondary low-performance matrix device: `bek749scrwv4wo8h` (Xiaomi 12C /
+22120RN86C). Use it for non-destructive cross-device matrix evidence unless
+the user explicitly approves destructive install cleanup for that device.
+
 Before connected Android tests, inspect device state:
 
 ```powershell
@@ -103,5 +107,7 @@ uninstalled, reinstalled, and reset as needed for Node.js validation.
   soak reports through `tools/nodejs/phase13/archive-full-heavy-resource-soak.js`.
 - For ABI status triage, use `:app:generateNodeFinalAbiStatus` when a
   non-failing report is needed. `:app:verifyNodeFinalAbiGate` is the strict
-  gate and is expected to fail while the runtime artifact aggregate remains
-  `bootstrap_only`.
+  gate for required ABI libraries and adapter ABI/export evidence. Runtime
+  artifact aggregate `bootstrap_only` is treated as deferred external runtime
+  maintenance only while the registry keeps `node_24_17_community_fork` in
+  `waiting_for_android_artifacts` and the default runtime remains `node24_5`.

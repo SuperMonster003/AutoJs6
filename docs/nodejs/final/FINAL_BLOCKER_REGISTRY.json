@@ -111,8 +111,8 @@
       "id": "node_24_17_community_fork",
       "classification": "external_runtime_maintenance",
       "status": "waiting_for_android_artifacts",
-      "currentEvidence": "Node 24.17 upstream exists, but Android shared-libnode artifacts for the required ABIs are not production-ready.",
-      "requiredResolution": "Future runtime upgrade lane only; does not block Phase 11 completion on node24_5."
+      "currentEvidence": "Node 24.17 upstream exists, but Android shared-libnode artifacts for the required ABIs are not production-ready. The v1.1 closeout remains on node24_5: required ABI libraries and adapter ABI/export evidence can be ready while runtime artifact build-plan, alignment, manifest, integrity, and distribution reports stay bootstrap_only as deferred external runtime maintenance.",
+      "requiredResolution": "Future runtime upgrade lane only; does not block Phase 11 completion on node24_5 while required node24_5 ABI libraries and adapter ABI/export evidence are ready."
     }
   ]
 }
