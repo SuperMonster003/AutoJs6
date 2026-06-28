@@ -919,9 +919,10 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-rhino-install-java-proxy.js`.
     - Gradle gate: `:app:verifyNodePhase13RhinoInstallJavaProxy`.
     - Report: `docs/nodejs/reports/phase13/P13_14_RHINO_INSTALL_JAVA_PROXY.md`.
-  - Remaining: real Pro profile selector and packaged policy still block full
-    P13-14 closure; actual proxy-interface implementation remains future P13-16
-    provider work.
+  - Remaining: packaged policy still blocks full P13-14 closure. Real Pro
+    profile selector is delegated to the aggregate Java/Rhino surface gate
+    rather than counted as a separate P13-14 blocker; actual proxy-interface
+    implementation remains future P13-16 provider work.
 
 - [x] P13-15: 决策并实现 `importClass` / `importPackage` compatibility。
   - 范围：评估是否在 Pro profile 中提供 Rhino 迁移 helper。
