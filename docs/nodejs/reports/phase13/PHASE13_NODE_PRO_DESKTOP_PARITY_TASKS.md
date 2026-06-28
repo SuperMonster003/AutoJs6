@@ -334,7 +334,8 @@
   `ERR_AUTOJS6_WORKER_DISABLED`).
 - Remaining P13-34 blockers: native worker availability on target ABIs,
   native-available experimental worker gate evidence, packaged `.mjs` worker
-  smoke, worker crash evidence, and Android resource ceilings.
+  smoke, and Android resource ceilings. Current resource/crash evidence
+  references are recorded and tied to native-available reruns.
 
 ## P13-35 Partial Landing Note
 
@@ -1583,7 +1584,7 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - worker 可运行纯 JS、Node builtin、MessageChannel/TransferList 基础能力。
     - worker 默认不能访问 AutoJs bridge，除非后续单独 provider。
-    - nested worker、resource stress、crash evidence、packaged behavior 完整。
+    - nested worker、native-available resource/RSS reruns、packaged behavior 完整。
   - 进展：
     - P13-34 partial landing 已添加 `workerThreadsProfile` 诊断，保持默认拒绝。
     - 新增 focused gate:

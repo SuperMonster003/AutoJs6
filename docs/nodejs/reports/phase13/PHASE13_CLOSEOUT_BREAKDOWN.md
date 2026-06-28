@@ -395,7 +395,10 @@ Reason open: `external`, `evidence`, `policy`, `packaging`.
   `autojs.nodejs.worker_threads.experimental=true`; runnable/stress/packaged
   cases skipped because native preflight reported `ERR_AUTOJS6_WORKER_DISABLED`.
 - [ ] Add native-available packaged worker smoke evidence.
-- [ ] Add crash/resource evidence for startup failure, exception, timeout, parent cleanup, and packaged failure modes.
+- [x] Record current crash/resource evidence references for startup failure,
+  exception, timeout, parent cleanup, and packaged failure modes; native-
+  available reruns remain tied to the native availability and packaged worker
+  blockers above.
 - [x] Decide nested worker policy and document SharedArrayBuffer, Atomics, resourceLimits, thread, and RSS ceilings.
 - [x] Keep docs/matrix evidence gate from counting native availability, packaged smoke, and crash/resource evidence twice.
 

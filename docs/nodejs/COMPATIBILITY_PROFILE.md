@@ -1271,8 +1271,9 @@ denial, request-local experimental opt-in, native availability preflight,
 worker policy, bridge denial, nested-worker denial, WorkerPool, transfer-list,
 and packaged behavior state. It does not promote default, project, or packaged
 worker authority; native runnable evidence, archived experimental worker gate
-results, crash evidence, packaged `.mjs` worker smoke, and Android resource
-ceilings remain open.
+results, native-available packaged `.mjs` worker smoke, and Android resource
+ceilings remain open. Current resource/crash evidence references are recorded,
+but must be rerun on a native-worker-capable target before promotion.
 
 P13-35 records process-worker replacement as partial. The runtime exposes
 `autojs6:profile.processWorkerReplacementProfile` to document that the current

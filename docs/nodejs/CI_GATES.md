@@ -790,8 +790,10 @@ worker decision gate. It requires `workerThreadsProfile` diagnostics, default
 denial/shadow protection, request-local experimental native preflight, existing
 worker/MessageChannel/WorkerPool/resource/packaged evidence anchors, and docs
 updates while keeping default worker authority, project/package opt-in, native
-runnable claims, packaged worker promotion, crash evidence, nested-worker
-policy, and Android resource ceilings unpromoted.
+runnable claims, native-available packaged worker promotion, nested-worker
+policy, and Android resource ceilings unpromoted. Current resource/crash
+evidence references are recorded, but native-available resource/RSS reruns
+remain promotion work.
 `verifyNodePhase13ProcessWorkerReplacementDecision` records P13-35 as the
 process-worker replacement decision gate. It requires
 `processWorkerReplacementProfile` diagnostics, no callable

@@ -1136,8 +1136,10 @@ rejects worker threads by default, while `workerThreadsProfile` describes the
 request-local experimental preflight, worker policy, bridge isolation,
 MessageChannel/transfer-list/WorkerPool targets, and packaged worker state.
 This is not yet Pro/desktop parity for worker scripts because native
-availability, current experimental gate evidence, crash evidence, packaged
-`.mjs` worker smoke, and Android resource ceilings remain open.
+availability, native-available experimental gate evidence, native-available
+packaged `.mjs` worker smoke, and Android resource ceilings remain open. Current
+resource/crash evidence references are recorded, but must be rerun on a
+native-worker-capable target before promotion.
 
 P13-35 records process-worker replacement as partial: Safe Node now exposes
 `processWorkerReplacementProfile` diagnostics that choose
