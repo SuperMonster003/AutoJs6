@@ -3,9 +3,10 @@
 ## Status
 
 Decision gate. Android runtime npm/registry installation is not enabled by this
-document. Phase 13 adds a partial Android local package store plus guarded
-script-visible `package_manager` and `npm` facades for policy diagnostics,
-local-store operations, and plan-only source-boundary checks.
+document. Phase 13 closes the v1.1 Android local-store package installation
+substrate plus guarded script-visible `package_manager` and `npm` facades for
+policy diagnostics, local-store operations, and plan-only source-boundary
+checks.
 
 AutoJs6 Safe Node Profile supports checked-in pure JavaScript CommonJS dependencies under `node_modules`, but it does not run `npm install`, package lifecycle scripts, native addon builds, or package managers inside the Android runtime.
 
@@ -181,7 +182,7 @@ Supported:
 - package `main`, `exports`, `imports`, and self-reference under the current resolver
 - fixed offline compatibility fixtures
 - packaged APK inclusion of vetted JavaScript dependency files
-- partial Android local package store through `NodeAndroidPackageInstallManager`
+- v1.1 Android local-store substrate through `NodeAndroidPackageInstallManager`
   for already-unpacked app-private packages with transaction staging, store
   locking, cancellation checks, SHA-512 integrity, and
   install/update/remove/list/verify/prune operations plus dry-run
@@ -352,11 +353,11 @@ Current safety properties:
 
 This is not a full Android npm installer. Registry download, npm CLI install,
 unrestricted JS install/update/remove authority, signed native payload support,
-and plugin/package distribution integration remain deferred.
+and plugin/package distribution integration remain future promotion gates.
 
 P13-42 adds `packageManagerProfile` and
 `verifyNodePhase13PackageManagerAndroidDecision` to record this boundary as an
-Android package-manager partial. The current equivalent to
+Android package-manager guarded local-store decision. The current equivalent to
 `npm i --no-bin-links` is host-managed validation plus the Android local store
 substrate for already-unpacked packages. Android-side npm CLI execution,
 registry/tarball download, lifecycle execution, bin shims, native builds,

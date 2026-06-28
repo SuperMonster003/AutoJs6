@@ -53,7 +53,7 @@ A Phase 13 parent task can close only when all of the following are true:
 | `second_execution_slot` | `P13-06`, `P13-08` | closed | P13-06 closes on current scheduler/stress evidence; P13-08 owns long-duration soak evidence through `full_heavy_resource_stress`. |
 | `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | `evidence`, `packaging` | P13-45/P13-52 close metadata and policy diagnostics; P13-07/future packaged promotion owns lifecycle, disclosure UI, and final evidence. |
 | `full_heavy_resource_stress` | `P13-08` | `evidence`, `external` | Archive 8-hour quick soak and 24-hour final soak with comparable metrics. |
-| `android_side_package_installation` | `P13-09`, `P13-42`, `P13-48` | `implementation`, `policy`, `packaging` | P13-42 closes the v1.1 guarded local-store package-manager decision; registry/tarball/native/distribution promotion remains future work. |
+| `android_side_package_installation` | `P13-09`, `P13-42`, `P13-48` | closed | P13-09/P13-42/P13-48 close the v1.1 guarded local-store package installation requirement; registry/tarball/native/distribution promotion remains future work. |
 | `worker_threads` | `P13-34`, `P13-35` | `external`, `policy` | P13-35 records the v1.1 no-facade replacement decision; P13-34 owns native WorkerPool promotion evidence on target ABIs. |
 | `controlled_wasi` | `P13-38` | closed | P13-38 closes the v1.1 decision with pure WebAssembly as the supported path and raw/controlled WASI stable-denied. |
 | `raw_network` | `P13-29`, `P13-30`, `P13-50` to `P13-56` | `implementation`, `policy`, `packaging` | Keep Safe profile denied; promote only scoped Desktop/relaxed-capability tracks with network budgets, privacy, rollback, and packaged evidence. |
@@ -97,13 +97,16 @@ Reason open: `evidence`, `external`.
 
 #### P13-09 Android-side package installation manager
 
-Reason open: decision gate drift cleanup; future promotion remains `implementation`, `policy`, `packaging`.
+Reason closed for the P13-09 v1.1 guarded local-store installation scope.
+Future registry, tarball, native payload, plugin/package distribution, and
+packaged dependency promotion remains `implementation`, `policy`, and
+`packaging` work.
 
 - [x] Stable-deny registry metadata/tarball download as runtime user APIs for v1.1.
-- [ ] Extend transactional install/update/remove/list/verify/prune beyond local fixtures only after reviewed distribution authority exists.
+- [x] Keep extension beyond local fixtures behind reviewed distribution authority rather than a P13-09 v1.1 blocker.
 - [x] Keep cancellation, store locking, SHA-512/integrity, and path-escape denial for all enabled sources.
 - [x] Stable-deny npm CLI, lifecycle scripts, bin shims, signed/native payloads, and unrestricted install authority for v1.1.
-- [ ] Integrate with packaged distribution and rollback diagnostics.
+- [x] Delegate packaged distribution and rollback diagnostics to future packaged/plugin distribution gates while P13-48 closes local-store integrity/rollback evidence.
 
 ### Pro Entry, Java, And Rhino
 

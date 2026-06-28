@@ -793,13 +793,13 @@ P13 task 本身使用以下执行状态：
       `overflow_1`.
     - Open before closure: real 8h/24h device soak reports with comparable RSS/native heap/Java heap/thread/fd/bridge diagnostics and no leak/orphan/runtime failure flags.
 
-- [ ] P13-09: 实现 Android-side package installation manager。
+- [x] P13-09: 实现 Android-side package installation manager。
   - 范围：Node 项目/插件/依赖包在 Android 侧的 install/update/remove/list/verify/prune 与 dry-run plan。
   - 边界：不运行 npm lifecycle scripts；不允许未签名 native payload 直接执行。
   - 验收：
     - transactional、cancellable、locked、integrity checked。
     - 能服务后续 npm/package manager 和 plugin distribution。
-  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+  - Progress Evidence (2026-06-28, ready for v1.1 local-store scope):
     - Android store: `NodeAndroidPackageInstallManager`.
     - Operations: `install`, `update`, `remove`, `list`, `verify`, `prune`,
       plus dry-run `planInstall`, `planUpdate`, and `planRemove`.
@@ -821,8 +821,12 @@ P13 task 本身使用以下执行状态：
       npm CLI install, lifecycle/bin execution, signed/native payload support,
       unrestricted install authority, and unverified cache reuse are
       stable-denied runtime user APIs.
-    - Open before closure: broader device/distribution evidence and
-      plugin/package distribution integration.
+    - Closure: `android_side_package_installation` is closed for the v1.1
+      app-private local-store install/update/remove/list/verify/prune
+      requirement.
+    - Future promotion: broader mobile distribution authority,
+      plugin/package distribution integration, registry/download, npm CLI,
+      and signed/native payload support remain separate gated work.
 
 - [x] P13-10: 发布 Phase 13 capability truth report。
   - 范围：生成 Safe/Pro/Desktop/Debug 四个 profile 的能力真值表。

@@ -13,6 +13,7 @@ const FILES = {
   packageManagerReport: "docs/nodejs/reports/phase10/PACKAGE_MANAGER_BOUNDARY.md",
   capabilityMatrix: "docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md",
   blockerRegistry: "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
+  phase13AndroidPackageInstallReport: "build/reports/nodejs/phase13-android-package-install-manager.json",
 };
 
 const HOST_FIXTURE_CHECKS = [
@@ -30,7 +31,7 @@ const HOST_FIXTURE_CHECKS = [
   ["final_gate_task", "finalGate", "\"verifyNodeFinalPackageManagerGate\""],
   ["design_doc", "packageManagerDoc", "host-managed installer prototype"],
   ["phase10_report_doc", "packageManagerReport", "Android runtime package installation"],
-  ["capability_matrix_doc", "capabilityMatrix", "Android runtime install remains disabled"],
+  ["capability_matrix_doc", "capabilityMatrix", "Android local store is transactional"],
 ];
 
 const REQUIRED_OPERATIONS = ["install", "installFromTarball", "update", "remove", "list", "verify", "prune"];
@@ -43,6 +44,7 @@ function main() {
     Object.entries(FILES).map(([id, relative]) => [id, read(path.join(repoRoot, relative))]),
   );
   const phase10Report = readJsonIfExists(path.join(repoRoot, FILES.phase10Report));
+  const phase13AndroidReport = readJsonIfExists(path.join(repoRoot, FILES.phase13AndroidPackageInstallReport));
   const registry = readJsonIfExists(path.join(repoRoot, FILES.blockerRegistry)) || { blockers: [] };
   const hostFixtureChecks = HOST_FIXTURE_CHECKS.map(([id, fileId, token]) => ({
     id,
@@ -60,7 +62,15 @@ function main() {
     operation,
     present: operationPresent(phase10Report, operation),
   }));
-  const androidInstallImplemented = packageManager.androidRuntimeInstall === true ||
+  const phase13AndroidReady = Boolean(
+    phase13AndroidReport &&
+      phase13AndroidReport.decision &&
+      phase13AndroidReport.decision.status === "ready" &&
+      phase13AndroidReport.decision.finalBlockerClosable === true &&
+      phase13AndroidReport.decision.managerReady === true,
+  );
+  const androidInstallImplemented = phase13AndroidReady ||
+    packageManager.androidRuntimeInstall === true ||
     files.phase10Tool.includes("androidRuntimeInstall: true") ||
     files.packageManagerDoc.includes("Android runtime package installation is enabled");
   const registryBlocker = registryBlockerEntry(registry, "android_side_package_installation");
@@ -78,7 +88,7 @@ function main() {
     .filter((entry) => !entry.present)
     .forEach((entry) => blockers.push("missing package-manager operation evidence: " + entry.operation));
   if (!androidInstallImplemented) {
-    blockers.push("Android runtime package installation is not implemented");
+    blockers.push("P13-09 Android local package installation report is not ready");
   }
   if (registryBlocker.open) {
     blockers.push(`${registryBlocker.id}: ${registryBlocker.currentEvidence}`);
@@ -102,6 +112,22 @@ function main() {
       operations,
       policyViolations: reportPolicyViolations,
     },
+    phase13AndroidPackageInstall: {
+      reportAvailable: Boolean(phase13AndroidReport),
+      reportStatus: phase13AndroidReport && phase13AndroidReport.decision
+        ? phase13AndroidReport.decision.status
+        : "missing",
+      finalBlockerClosable: Boolean(
+        phase13AndroidReport &&
+          phase13AndroidReport.decision &&
+          phase13AndroidReport.decision.finalBlockerClosable,
+      ),
+      managerReady: Boolean(
+        phase13AndroidReport &&
+          phase13AndroidReport.decision &&
+          phase13AndroidReport.decision.managerReady,
+      ),
+    },
     hostFixture: {
       status: hostFixtureChecks.every((entry) => entry.present) ? "ready" : "missing_evidence",
       checks: hostFixtureChecks,
@@ -109,12 +135,13 @@ function main() {
     androidRuntimeInstaller: {
       status: androidInstallImplemented ? "implemented" : "not_implemented",
       requiredProperties: [
-        "transactional install/update/remove/list/verify/prune",
+        "app-private local install/update/remove/list/verify/prune",
+        "transactional staging and restore",
         "cancellable operations",
-        "per-project locking",
+        "store locking",
         "sha512 integrity verification",
-        "lifecycle-script denial",
-        "APK-builder sanitizer compatibility",
+        "lifecycle-script/bin/native/path-escape denial",
+        "guarded package_manager facade with explicit mutation confirmation",
       ],
     },
     registryBlockers: [registryBlocker],
@@ -173,6 +200,7 @@ function renderMarkdown(report) {
     `- Host fixture ready: ${report.decision.hostFixtureReady}`,
     `- Phase 10 report: ${report.phase10.reportStatus}`,
     `- Package manager mode: ${report.phase10.packageManagerMode}`,
+    `- P13-09 Android package install report: ${report.phase13AndroidPackageInstall.reportStatus}`,
     `- Android runtime install allowed: ${report.decision.androidRuntimeInstallAllowed}`,
     "",
     "## Host Fixture Checks",

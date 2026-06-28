@@ -345,7 +345,7 @@ host-managed `autojs6-pm` boundary with offline registry metadata, semver,
 tarball integrity, safe extraction, `autojs6-lock.json`, install/list/update/
 remove/verify/prune, and package compatibility analyzer negative tests. It does
 not enable full npm CLI behavior. `verifyNodePhase13AndroidPackageInstallManager`
-covers the partial Android local package store with transaction staging, store
+covers the closed v1.1 Android local-store substrate with transaction staging, store
 locking, cancellation, SHA-512 integrity, lifecycle/bin/native/path denial, and
 install/update/remove/list/verify/prune. It does not enable registry download,
 remote tarball install, unverified cache reuse, or unrestricted JavaScript

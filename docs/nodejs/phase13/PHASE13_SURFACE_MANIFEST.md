@@ -52,12 +52,14 @@ real fatal native SIGKILL chaos collection, packaged launch-surface marker
 contract, and signal-safe marker boundary evidence, P13-06 default one-shot
 scheduler gate, P13-07 partial packaged long-running dispatch gate, P13-08 full
 heavy stress report gate with contract fixtures/archive helper, and P13-09
-partial Android local package store. The surface remains `planned` until P13-05
-fully closes real packaged APK crash smoke and signal-safe fixed-size native
-marker proof, P13-06 adds packaged/fatal-crash/stress evidence, P13-07 adds
-packaged install/run restore/background-policy evidence, P13-08 has real 8h/24h
-clean soak reports, and P13-09 exposes a complete package
-installation/distribution path.
+v1.1 Android app-private local-store closure. The surface remains `planned`
+until P13-05 fully closes real packaged APK crash smoke and signal-safe
+fixed-size native marker proof, P13-06 adds packaged/fatal-crash/stress
+evidence, P13-07 adds packaged install/run restore/background-policy evidence,
+and P13-08 has real 8h/24h clean soak reports. Registry download, npm CLI,
+native payload, plugin/package distribution, and packaged dependency
+distribution remain future promotion gates rather than P13-09 local-store
+blockers.
 
 ## Rules
 

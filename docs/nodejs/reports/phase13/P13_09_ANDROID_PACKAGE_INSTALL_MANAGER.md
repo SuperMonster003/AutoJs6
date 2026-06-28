@@ -1,15 +1,16 @@
 # P13-09 Android Package Install Manager
 
-Status: partial
+Status: ready
 
-P13-09 starts the Android-side package installation manager without promoting a
-user-facing npm or registry installer. The landed pieces are a local,
-app-private package store that can install already-unpacked package directories
-after policy validation, plus a guarded `require("package_manager")` facade
-that reports policy, can dry-run install/update/remove planning, can perform
-explicit local install/update/remove mutations, and can list, verify, and prune
-the app-private store. It is intended as the Android runtime substrate for
-future dependency, plugin, and package distribution work.
+P13-09 closes the v1.1 Android-side package installation blocker for the local
+app-private store scope without promoting a user-facing npm or registry
+installer. The landed pieces are a local package store that can install
+already-unpacked package directories after policy validation, plus a guarded
+`require("package_manager")` facade that reports policy, can dry-run
+install/update/remove planning, can perform explicit local
+install/update/remove mutations, and can list, verify, and prune the
+app-private store. It is intended as the Android runtime substrate for future
+dependency, plugin, and package distribution work.
 
 ## Landed
 
@@ -101,7 +102,11 @@ distribution integration.
 - No lifecycle scripts are executed.
 - No signed native payload verification exists yet; native payload execution
   remains disabled.
-- The final blocker `android_side_package_installation` remains open.
+- The final blocker `android_side_package_installation` is closed for the
+  v1.1 local-store install/update/remove/list/verify/prune requirement.
+- Future registry download, npm CLI, signed/native payload, plugin
+  distribution, and packaged dependency distribution promotion remain gated by
+  separate reviewed authority, packaging, rollback, and disclosure evidence.
 
 ## Verification Notes
 
