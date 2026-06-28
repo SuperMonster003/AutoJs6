@@ -19,6 +19,12 @@ const REPORTS = [
   ["security_gate", "final-security-gate.json", false],
 ];
 
+const BLOCKER_ID_ALIASES = [
+  [/^missing required soak evidence:/, "full_heavy_resource_stress"],
+  [/^soak evidence duration is below .+:/, "full_heavy_resource_stress"],
+  [/^soak evidence reports leaks, orphan process, or unrecoverable runtime:/, "full_heavy_resource_stress"],
+];
+
 function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
@@ -145,13 +151,21 @@ function blockerIds(json) {
   }
   return json.blockers.map((entry) => {
     if (typeof entry === "string") {
-      return entry.split(":")[0].trim();
+      return blockerIdFromString(entry);
     }
     if (entry && typeof entry === "object" && typeof entry.id === "string") {
       return entry.id;
     }
     return "";
   }).filter(Boolean);
+}
+
+function blockerIdFromString(value) {
+  const alias = BLOCKER_ID_ALIASES.find(([pattern]) => pattern.test(value));
+  if (alias) {
+    return alias[1];
+  }
+  return value.split(":")[0].trim();
 }
 
 function decisionStatus(json) {
