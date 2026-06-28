@@ -723,10 +723,11 @@ and the existing Node project launch alignment coverage verify that
 `"nodejs ui"` and `"nodejs ui-thread"` parse into stable `NodeEntryDirective`
 metadata and flow through descriptor, source, project request, debug descriptor,
 native values, and failure markers. The P13-11 metadata directive gate is ready;
-Activity lifecycle, Back/Recents behavior, and packaged UI-entry evidence remain
-P13-17 / future packaged UI promotion work. The UI-thread policy is already
-defined as provider-owned asynchronous main-looper dispatch, not V8 execution on
-the Android main thread.
+direct UI provider evidence remains P13-17 work, while full packaged task
+relaunch, crash/disclosure, and UI-thread dispatch equivalence remain future
+packaged UI promotion work. The UI-thread policy is already defined as
+provider-owned asynchronous main-looper dispatch, not V8 execution on the
+Android main thread.
 
 Phase 13 `$autojs` global v1:
 
@@ -815,11 +816,13 @@ Phase 13 live UI provider promotion:
 state: direct `require("ui")` has live Activity provider evidence for JSON
 layouts, events, updates, close, provider cleanup, Back/Recents lifecycle, and
 explicit configuration-change destroy/recreate policy; `compat.ui` and type
-declarations stay aligned with the same JSON provider. The gate remains partial
-because packaged entry, task relaunch, crash recovery, and packaged disclosure
-evidence are still missing. Packaged missing-`ui` capability
-metadata denial is covered by
-`EmbeddedNodePackagedApkSmokeTest#installAndRunUiCapabilityBoundaryEmbeddedNodePackagedApk`.
+declarations stay aligned with the same JSON provider. Packaged missing-`ui`
+capability metadata denial is covered by
+`EmbeddedNodePackagedApkSmokeTest#installAndRunUiCapabilityBoundaryEmbeddedNodePackagedApk`,
+and packaged entry/update/close is covered by
+`EmbeddedNodePackagedApkSmokeTest#installAndRunUiBridgeEmbeddedNodePackagedApk`.
+The gate remains partial because packaged task relaunch, crash recovery, and
+packaged disclosure evidence are still missing.
 
 Phase 13 overlay provider promotion:
 

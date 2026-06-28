@@ -222,8 +222,9 @@ AutoJs6 behavior:
   lifecycle have live Activity evidence.
 - `require("autojs6:compat").ui` maps to the same JSON-only provider for Rhino
   migration.
-- packaged entry, task relaunch, crash recovery, and packaged disclosure
-  evidence remain unpromoted; configuration changes use an explicit
+- packaged entry/update/close smoke is covered, while task relaunch, crash
+  recovery, and packaged disclosure evidence remain unpromoted; configuration
+  changes use an explicit
   destroy/recreate policy with no live UI survival claim.
 - packaged missing-`ui` capability metadata rejects before dispatch.
 

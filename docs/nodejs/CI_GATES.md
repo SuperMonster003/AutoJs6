@@ -357,9 +357,10 @@ planRegistryInstall/planTarballInstall/install/update/remove/list/verify/prune.
 directive state for `"nodejs ui"` and `"nodejs ui-thread"`, including
 `NodeEntryDirective`, descriptor/project config metadata, debug/native values,
 and focused instrumentation. The P13-11 metadata directive gate is ready;
-Activity lifecycle, Back/Recents, and packaged UI-entry evidence remain P13-17 /
-future packaged UI promotion work. The UI-thread policy is provider-owned
-asynchronous main-looper dispatch, not V8 execution on the Android main thread.
+direct UI provider evidence remains P13-17 work, while full packaged task
+relaunch, crash/disclosure, and UI-thread dispatch equivalence remain future
+packaged UI promotion work. The UI-thread policy is provider-owned asynchronous
+main-looper dispatch, not V8 execution on the Android main thread.
 `verifyNodePhase13AutoJsGlobalV1` records the P13-12 read-only `$autojs`
 global v1 state: frozen global installation, `$autojs.version`,
 `$autojs.profile`, diagnostic-only `$autojs.androidContext`, gated
@@ -396,10 +397,11 @@ callback cleanup evidence land.
 `verifyNodePhase13LiveUiProviderPromotion` records the P13-17 partial live UI
 provider state: direct `require("ui")` Activity evidence is present for JSON
 layout, event drain, updates, close, provider cleanup, and Back/Recents
-lifecycle, while packaged entry, task relaunch, crash recovery, and
-user-visible packaged disclosure still block opt-in promotion. The same gate
-records explicit configuration-change destroy/recreate policy and packaged
-missing-`ui` capability denial without a live UI survival claim.
+lifecycle. The same gate records explicit configuration-change
+destroy/recreate policy, packaged missing-`ui` capability denial, and packaged
+entry/update/close smoke without a full live packaged UI survival claim.
+Packaged task relaunch, crash recovery, and user-visible packaged disclosure
+still block opt-in promotion.
 `verifyNodePhase13OverlayProviderPromotion` records the P13-18 partial
 `ui.overlay` provider state: JS facade/types, explicit capabilities, Android
 permission/settings/closeAll live gate, packaged `SYSTEM_ALERT_WINDOW` metadata
@@ -624,8 +626,8 @@ explicit JUnit skip.
 event delivery, provider cleanup, descriptor denial, and foreign-handle denial.
 P13-17 additionally uses `verifyNodePhase13LiveUiProviderPromotion` as the host
 promotion-status gate for this same provider and keeps packaged live UI
-provider-dependent until packaged entry, task relaunch, crash, and disclosure
-evidence lands.
+provider-dependent until packaged task relaunch, crash, and disclosure evidence
+lands.
 P13-18 additionally uses `verifyNodePhase13OverlayProviderPromotion` as the host
 promotion-status gate for `ui.overlay` and keeps the Android provider degraded:
 permission/settings/closeAll are live-gate methods, but live overlay creation

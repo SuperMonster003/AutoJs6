@@ -132,6 +132,17 @@ function buildReport(files) {
       token(files.packagedTest, "packaged.ui_boundary.metadata_denied=true"),
       token(files.packagedTest, "packaged.ui_boundary.raw_globals_absent=true"),
     ]),
+    scenario("packaged_entry_close_smoke", "Packaged UI entry, update, close, and raw-global boundary smoke is covered", [
+      token(files.packagedTest, "installAndRunUiBridgeEmbeddedNodePackagedApk"),
+      token(files.packagedTest, "buildPackagedUiBridgeApk"),
+      token(files.packagedTest, "UI_BRIDGE_NODE_PERMISSIONS"),
+      token(files.packagedTest, "packaged.ui_bridge.ready=true"),
+      token(files.packagedTest, "packaged.ui_bridge.shown=true"),
+      token(files.packagedTest, "packaged.ui_bridge.update=true"),
+      token(files.packagedTest, "packaged.ui_bridge.close=true"),
+      token(files.packagedTest, "packaged.ui_bridge.raw_globals_absent=true"),
+      token(files.packagedTest, "packaged.ui_bridge.pending=0"),
+    ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record the P13-17 promotion state", [
       token(files.p13Report, "Status: partial"),
       token(files.phase13Tasks, "P13-17"),
@@ -146,7 +157,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-17 live UI provider promotion"),
       token(files.surfaceManifestDoc, "phase13-live-ui-provider-promotion"),
     ], [
-      "Run a live packaged APK UI smoke that covers entry, close, task relaunch, crash, and user-visible disclosure evidence.",
+      "Add packaged UI task relaunch, crash recovery, and user-visible disclosure evidence.",
     ]),
   ];
   const checks = [
@@ -171,7 +182,7 @@ function buildReport(files) {
     check(
       "packaged-support-not-overclaimed",
       files.providerRegistry.text.includes("packagedProviderDependent") &&
-        files.providerRegistry.text.includes("blocked_until_live_packaged_entry_task_relaunch_crash_disclosure_evidence"),
+        files.providerRegistry.text.includes("blocked_until_live_packaged_task_relaunch_crash_disclosure_evidence"),
       "`ui` provider packaged support must remain provider-dependent until live packaged UI evidence lands.",
     ),
   ];
@@ -203,6 +214,7 @@ function buildReport(files) {
       rhinoCompatReady: scenarioById(scenarios, "rhino_compat_and_types").status === "ready",
       configurationChangePolicyReady: scenarioById(scenarios, "configuration_change_policy").status === "ready",
       packagedCapabilityBoundaryReady: scenarioById(scenarios, "packaged_capability_boundary").status === "ready",
+      packagedEntryCloseReady: scenarioById(scenarios, "packaged_entry_close_smoke").status === "ready",
       proSurfacePromoted: false,
     },
   };

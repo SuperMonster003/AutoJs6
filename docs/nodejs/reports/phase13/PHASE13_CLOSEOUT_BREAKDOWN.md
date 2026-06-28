@@ -120,7 +120,7 @@ packaged dependency promotion remains `implementation`, `policy`, and
 #### P13-11 Pro-style entry directives
 
 Reason closed for the P13-11 v1.1 metadata directive scope. Activity
-lifecycle belongs to P13-17, while packaged UI entry, task relaunch,
+lifecycle belongs to P13-17, while full packaged UI task relaunch,
 crash/disclosure promotion remains `evidence` / `packaging` work under future
 packaged UI promotion.
 
@@ -173,8 +173,10 @@ Reason open: `evidence`, `packaging`.
 - [x] Add explicit configuration-change destroy/recreate policy evidence.
 - [x] Add packaged capability/metadata denial smoke for missing `ui`
   capability, raw Android UI global absence, and zero pending bridge dispatch.
-- [ ] Run live packaged UI smoke for entry, close, task relaunch, crash, and
-  user-visible disclosure behavior.
+- [x] Add packaged UI entry/update/close smoke with raw global absence and zero
+  pending bridge dispatch.
+- [ ] Add packaged UI task relaunch, crash recovery, and user-visible
+  disclosure behavior.
 
 #### P13-18 floaty/overlay provider
 

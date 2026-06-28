@@ -5,7 +5,7 @@ Status: partial
 P13-17 records the current live `require("ui")` provider state for Phase 13.
 The Activity-owned provider is available for explicit Node UI sessions, but the
 surface is not promoted to `pro_compat_opt_in` yet because live packaged UI
-entry, task relaunch, crash, and disclosure evidence are still missing.
+task relaunch, crash recovery, and disclosure evidence are still missing.
 
 ## Implemented Evidence
 
@@ -44,12 +44,23 @@ entry, task relaunch, crash, and disclosure evidence are still missing.
   and
   `NodeUiBridgeInstrumentationTest#androidUiProviderRecordsRecentsTaskRemovalLifecycleEvent`
   with `-Pautojs.nodejs.test.deviceProfile=sony`.
+- Packaged device evidence: on 2026-06-28, `QV710AF65F` / Sony XQ-AT72 /
+  Android 12 passed
+  `EmbeddedNodePackagedApkSmokeTest#installAndRunUiBridgeEmbeddedNodePackagedApk`
+  with the packaged-smoke template override and
+  `-Pautojs.nodejs.test.deviceProfile=sony`.
 - Packaged capability boundary:
   `EmbeddedNodePackagedApkSmokeTest#installAndRunUiCapabilityBoundaryEmbeddedNodePackagedApk`
   verifies packaged metadata without `node.permissions: ["ui"]` rejects
   `ui.showLayout` with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, reports
   missing `ui`, keeps raw Android UI globals absent, and leaves no bridge
   dispatch pending.
+- Packaged entry/close smoke:
+  `EmbeddedNodePackagedApkSmokeTest#installAndRunUiBridgeEmbeddedNodePackagedApk`
+  verifies a packaged APK with `node.permissions: ["ui"]` can open a JSON UI,
+  observe the `shown` lifecycle event, apply `update`/`batchUpdate`, close the
+  handle, keep raw Android UI globals absent, and leave no bridge dispatch
+  pending.
 - Rhino migration: `require("autojs6:compat").ui` wraps the same JSON provider;
   packaged P12 evidence covers fake-transport routing and
   `packaged.rhino_compat.compat_ui=true`.
@@ -63,14 +74,14 @@ entry, task relaunch, crash, and disclosure evidence are still missing.
 - `RawView`, `WebView`, foreign handles, unsupported descriptors, and active
   UI session overflow reject with stable bridge errors.
 - The provider registry now reports packaged UI support as
-  `provider-dependent`; P13-17 must not claim live packaged UI promotion.
-- Packaged UI metadata denial is covered, but packaged live UI entry, task
-  relaunch, crash recovery, and user-visible disclosure remain unpromoted.
+  `provider-dependent`; P13-17 must not claim full live packaged UI promotion.
+- Packaged UI metadata denial and packaged entry/update/close smoke are
+  covered, but packaged task relaunch, crash recovery, and user-visible
+  disclosure remain unpromoted.
 
 ## Remaining Blockers
 
-- Live packaged APK UI smoke covering entry, close, task relaunch, crash, and
-  user-visible disclosure evidence.
+- Packaged UI task relaunch, crash recovery, and user-visible disclosure evidence.
 
 ## Gate
 

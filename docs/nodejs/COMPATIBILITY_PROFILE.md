@@ -148,21 +148,23 @@ thread dispatch, and packaged policy are proven.
 - encrypted script headers carrying the Node execution flag
 
 P13-11 records Pro-style UI entry directives through Node project launch
-metadata and diagnostics. Full Activity lifecycle launch, Back/Recents behavior,
-and packaged UI entry behavior remain unpromoted. `"nodejs ui-thread"` is a
+metadata and diagnostics. Concrete UI-thread directive behavior and full
+packaged UI lifecycle remain unpromoted. `"nodejs ui-thread"` is a
 compatibility intent and scheduling constraint: it does not run the V8 isolate
 on the Android main thread; Activity-owned providers must marshal UI work onto
 the main looper through bounded asynchronous bridge operations.
-P13-11 v1.1 closes the metadata directive scope only; live Activity lifecycle
-and packaged UI behavior remain owned by P13-17 / future packaged UI promotion.
+P13-11 v1.1 closes the metadata directive scope only; direct UI provider
+evidence remains owned by P13-17, while full packaged task relaunch,
+crash/disclosure, and UI-thread dispatch equivalence remain future packaged UI
+promotion work.
 
 P13-17 records the live `require("ui")` provider promotion gate. The direct
 Activity-owned JSON provider has live device evidence for layout, events,
 updates, close, provider cleanup, Back/Recents lifecycle, and explicit
-configuration-change destroy/recreate policy, while live packaged UI entry,
-task relaunch, crash evidence, and packaged disclosure remain unpromoted.
-Packaged missing-`ui`
-capability metadata rejects before dispatch.
+configuration-change destroy/recreate policy. Packaged missing-`ui` capability
+metadata rejects before dispatch, and packaged entry/update/close smoke is
+covered, while packaged task relaunch, crash evidence, and packaged disclosure
+remain unpromoted.
 
 ## Supported CommonJS Features
 
@@ -1970,7 +1972,7 @@ runtime.
   - requests require the `ui` capability
   - current JavaScript API, fake-provider tests, type declarations, and bridge protocol are reserved
   - Android provider starts an internal Activity and supports `Column`, `Row`, `Text`, `Button`, `Input`, `Image`, `ScrollView`, `List`, `Switch`, `Checkbox`, `Progress`, and `Tabs` descriptors, `update`, `batchUpdate`, Button/Input/List/Switch/Checkbox/Tabs/lifecycle events, state snapshots, `close`, provider-destroy cleanup, and a bounded active UI session count
-  - P13-17 records this as a partial live-provider promotion gate with live Back/Recents lifecycle evidence; packaged support is provider-dependent until packaged entry, task relaunch, crash, and disclosure evidence lands. Packaged missing-`ui` capability metadata rejects before dispatch. Configuration changes use an explicit destroy/recreate policy with no live UI survival claim
+  - P13-17 records this as a partial live-provider promotion gate with live Back/Recents lifecycle evidence and packaged entry/update/close smoke; packaged support is provider-dependent until packaged task relaunch, crash, and disclosure evidence lands. Packaged missing-`ui` capability metadata rejects before dispatch. Configuration changes use an explicit destroy/recreate policy with no live UI survival claim
   - `WebView` descriptors reject with a stable invalid-request error until a separate WebView security gate is designed
   - JavaScript receives only an opaque handle; no raw `Context`, `Activity`, `View`, `Window`, `Fragment`, `Handler`, Rhino `NativeView`, overlay window, Binder, or Java object crosses into Node
 - `ui.overlay`
