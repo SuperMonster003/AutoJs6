@@ -963,6 +963,13 @@ P13 task 本身使用以下执行状态：
       Button/Input/List/Switch/Checkbox/Tabs events, state snapshots, update,
       close, provider destroy cleanup, unsupported descriptor denial, WebView
       gate denial, foreign-handle denial, and active UI session limits.
+    - 2026-06-28 focused evidence adds Back/Activity-destroy lifecycle coverage:
+      `androidUiProviderRecordsBackActivityDestroyLifecycleEvent` calls
+      `NodeBridgeUiActivity.onBackPressed()` and verifies
+      `ui.lifecycle.back.reason=activity_destroyed` through `ui.drainEvents`.
+      Device evidence: `QV710AF65F` / Sony XQ-AT72 / Android 12 passed the
+      focused instrumentation method with
+      `-Pautojs.nodejs.test.deviceProfile=sony`.
     - `compat.ui` and direct `ui` type smoke remain aligned with the same
       JSON provider.
     - Provider registry now marks packaged UI support as provider-dependent
@@ -971,7 +978,7 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-live-ui-provider-promotion.js`.
     - Gradle gate: `:app:verifyNodePhase13LiveUiProviderPromotion`.
     - Report: `docs/nodejs/reports/phase13/P13_17_LIVE_UI_PROVIDER_PROMOTION.md`.
-  - Remaining: Back/Recents lifecycle evidence, orientation/configuration
+  - Remaining: Recents/task-removal lifecycle evidence, orientation/configuration
     policy evidence, live packaged APK UI smoke, crash/relaunch evidence, and
     packaged capability/disclosure denial evidence still block opt-in
     promotion.

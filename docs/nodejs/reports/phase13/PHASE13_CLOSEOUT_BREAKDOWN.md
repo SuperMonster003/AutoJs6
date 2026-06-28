@@ -149,7 +149,9 @@ Reason open: stable-denial decision drift cleanup; future proxy-interface promot
 
 Reason open: `evidence`, `packaging`.
 
-- [ ] Add Back/Recents lifecycle instrumentation.
+- [x] Add focused live Back/Activity-destroy lifecycle instrumentation.
+- [ ] Add Recents/task-removal lifecycle instrumentation and packaged task
+  relaunch evidence.
 - [ ] Add orientation/configuration-change policy evidence.
 - [ ] Run packaged UI smoke for entry, close, relaunch, and crash behavior.
 - [ ] Record packaged capability, metadata denial, and user-visible disclosure behavior.
