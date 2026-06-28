@@ -533,7 +533,8 @@ Reason open: policy gate drift cleanup; future implementation remains `implement
 
 #### P13-53 Pro parity examples
 
-Reason open: example-catalog gate drift cleanup; future packaged promotion remains `evidence`, `packaging`.
+Reason closed for the current v1.1 example-catalog gate; future packaged
+promotion remains `evidence`, `packaging`.
 
 - [x] Add focused runtime smoke for already-covered Activity-owned UI and WorkManager one-shot examples.
 - [x] Keep live packaged Pro examples as future work after provider promotion.
@@ -543,7 +544,8 @@ Reason open: example-catalog gate drift cleanup; future packaged promotion remai
 
 #### P13-54 desktop Node parity examples
 
-Reason open: example-catalog gate drift cleanup; future packaged promotion remains `evidence`, `packaging`.
+Reason closed for the current v1.1 example-catalog gate; future packaged
+promotion remains `evidence`, `packaging`.
 
 - [x] Add focused runtime smoke for already-promoted local ESM, controlled HTTP/HTTPS facade shape, checked-in pure JavaScript dependency, and scoped advanced fs examples.
 - [x] Keep packaged desktop examples as future work where providers are promoted.
@@ -553,7 +555,8 @@ Reason open: example-catalog gate drift cleanup; future packaged promotion remai
 
 #### P13-55 TypeScript declaration profiles
 
-Reason open: declaration gate drift cleanup; release packaging remains `implementation`, `policy`.
+Reason closed for the current declaration gate; release packaging remains
+future `implementation`, `policy`.
 
 - [x] Tie conditional declarations to actual runtime profile promotion.
 - [x] Keep denied modules type-described as gated surfaces, not silently callable defaults.
@@ -562,7 +565,8 @@ Reason open: declaration gate drift cleanup; release packaging remains `implemen
 
 #### P13-56 migration and Pro9 comparison docs
 
-Reason open: documentation gate drift cleanup; future docs remain `evidence`, `packaging`.
+Reason closed for the current documentation gate; future packaged/runtime docs
+remain `evidence`, `packaging`.
 
 - [x] Keep packaged Pro/Desktop migration cookbook as future documentation work once provider and profile promotion exists.
 - [x] Keep prompt/disclosure UX and device permission matrix as future documentation work after promoted runtime evidence exists.
@@ -590,9 +594,10 @@ These items look closeable without inventing new high-risk runtime authority:
 - Completed provider-free utility coverage for `P13-27` (`Arrayx`,
   `Numberx`, resource-free helpers). Raw Android object parity and
   resource-backed utilities remain separate promotion gates.
-- Grow offline corpora for `P13-43` and `P13-47` with fixed package fixtures,
-  because this does not require live registry access or new dangerous runtime
-  authority.
-- Continue converting static examples in `P13-53` and `P13-54` into smoke tests
-  only for already-promoted providers; keep high-risk snippets static until
-  profile/security gates are real.
+- Completed offline corpus growth for `P13-43` and `P13-47` with fixed package
+  fixtures; current corpus is `real_npm_phase13_60_fixture_corpus`.
+- Completed current safe smoke conversion for `P13-53` and `P13-54`: P13-53
+  covers Activity-owned UI and WorkManager one-shot examples, while P13-54
+  covers managed local ESM, controlled HTTP/HTTPS facade shape, checked-in pure
+  JavaScript dependency, and scoped advanced fs examples. Remaining high-risk
+  snippets stay static until profile/security/provider gates are real.
