@@ -43,6 +43,7 @@ function main() {
     })),
     ...reports
       .filter((entry) => entry.status === "blocked")
+      .filter((entry) => !isBlockedOnlyByKnownRegistry(entry, unresolvedRequiredInternalBlockers))
       .map((entry) => ({
         id: entry.id,
         reason: "report status is blocked",
@@ -93,8 +94,32 @@ function readReport(reportDir, id, file, required, repoRoot) {
     available,
     status: decisionStatus(json),
     policyViolationCount: Array.isArray(json && json.policyViolations) ? json.policyViolations.length : 0,
+    blockerIds: blockerIds(json),
     json,
   };
+}
+
+function isBlockedOnlyByKnownRegistry(report, unresolvedRequiredInternalBlockers) {
+  if (!report.available || report.status !== "blocked" || report.blockerIds.length === 0) {
+    return false;
+  }
+  const known = new Set(unresolvedRequiredInternalBlockers.map((entry) => entry.id));
+  return report.blockerIds.every((id) => known.has(id));
+}
+
+function blockerIds(json) {
+  if (!json || !Array.isArray(json.blockers)) {
+    return [];
+  }
+  return json.blockers.map((entry) => {
+    if (typeof entry === "string") {
+      return entry.split(":")[0].trim();
+    }
+    if (entry && typeof entry === "object" && typeof entry.id === "string") {
+      return entry.id;
+    }
+    return "";
+  }).filter(Boolean);
 }
 
 function decisionStatus(json) {
