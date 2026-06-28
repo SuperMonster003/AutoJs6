@@ -91,10 +91,10 @@ function buildReport(files) {
       token(files.typeSmoke, "AutoJsJavaObjectHandle"),
       token(files.typesReadme, "P13-13"),
     ]),
-    scenario("docs_gate", "Docs and Gradle gate record P13-13 partial evidence", [
+    scenario("docs_gate", "Docs and Gradle gate record P13-13 v1.1 allowlist closure", [
       token(files.phase13Tasks, "P13-13"),
       token(files.phase13Tasks, "verifyNodePhase13JavaInteropAllowlist"),
-      token(files.p13Report, "Status: partial"),
+      token(files.p13Report, "Status: ready"),
       token(files.gradleGate, "verifyNodePhase13JavaInteropAllowlist"),
       token(files.testingDoc, "verifyNodePhase13JavaInteropAllowlist"),
       token(files.ciGatesDoc, "verifyNodePhase13JavaInteropAllowlist"),
@@ -107,9 +107,12 @@ function buildReport(files) {
       token(files.p13Report, "P13-13 method budget policy is now defined"),
       token(files.compatibilityProfile, "P13-13 defines the method budget policy"),
       token(files.p13Report, "Pro profile promotion is delegated"),
-      token(files.compatibilityProfile, "Pro profile promotion is delegated"),
-    ], [
-      "Thread dispatch and setThreadMode semantics remain unimplemented.",
+      token(files.compatibilityProfile, "counted as a separate P13-13 allowlist blocker"),
+      token(files.p13Report, "P13-13 v1.1 stable-denies thread dispatch"),
+      token(files.javaDesign, "P13-13 v1.1 stable-denies thread dispatch"),
+      token(files.compatibilityProfile, "`$autojs.java.setDefaultThreadMode()` are stable-denied"),
+      token(files.typesGlobal, "setThreadMode(obj: unknown, threadMode: string): never;"),
+      token(files.typesGlobal, "setDefaultThreadMode(clazz: unknown, threadMode: string): never;"),
     ]),
     scenario("security_boundary", "Critical Java boundaries remain fail-closed", [
       token(files.javaDesign, "no reflection or class-loader access"),

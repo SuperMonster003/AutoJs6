@@ -118,11 +118,13 @@ Reason open: `implementation`, `evidence`.
 
 #### P13-13 Java interop allowlist
 
-Reason open: `implementation`, `policy`.
+Reason closed for the P13-13 v1.1 allowlist scope. Future allowlist expansion
+remains `implementation`, `policy`, and evidence work under the aggregate
+Java/Rhino surface gate.
 
-- [ ] Implement thread dispatch and `setThreadMode` semantics.
+- [x] Stable-deny thread dispatch and `setThreadMode` semantics for v1.1.
 - [x] Add a generic method-budget policy beyond the explicit allowlist and bridge timeout.
-- [ ] Extend allowlist coverage only with lifetime, cleanup, and denial instrumentation.
+- [x] Keep expanded allowlist coverage as future provider promotion work that requires lifetime, cleanup, and denial instrumentation.
 - [x] Keep Pro profile promotion blocked until Java/Rhino surface security is complete.
 
 #### P13-14 `rhino.install()` compatibility

@@ -365,15 +365,16 @@ global v1 state: frozen global installation, `$autojs.version`,
 `$autojs.profile`, diagnostic-only `$autojs.androidContext`, gated
 `$autojs.java`, TypeScript declarations, and focused instrumentation. It does
 not promote full Java/Rhino parity.
-`verifyNodePhase13JavaInteropAllowlist` records the P13-13 partial Java interop
+`verifyNodePhase13JavaInteropAllowlist` records the P13-13 ready Java interop
 allowlist state: `require("java")` and `$autojs.java` expose explicit
 findClass/type, constructor, static call, Rect instance call, Rect field read,
 and release/dispose helpers only when the build-time experiment is enabled.
 P13-13 also records the Java method budget policy for future allowlist
-expansion. Classloader, reflection, native-library, process authority, thread
-dispatch, and expanded-budget enforcement remain fail-closed. Pro profile
-promotion is delegated to the aggregate Java/Rhino surface gate rather than
-counted as a separate P13-13 allowlist blocker.
+expansion. Classloader, reflection, native-library, process authority,
+thread-dispatch / `$autojs.java.setThreadMode` APIs, and expanded-budget
+enforcement remain fail-closed. Pro profile promotion is delegated to the
+aggregate Java/Rhino surface gate rather than counted as a separate P13-13
+allowlist blocker.
 `verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 partial
 `rhino.install` state: default install rejection remains, while explicit
 experimental installs can add `Packages`, `java`, and `android` Java proxies

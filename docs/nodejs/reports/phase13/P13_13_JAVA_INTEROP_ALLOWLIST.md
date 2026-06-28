@@ -1,6 +1,6 @@
 # P13-13 Java Interop Allowlist
 
-- Status: partial
+- Status: ready
 - Gate: `:app:verifyNodePhase13JavaInteropAllowlist`
 - Runtime surface:
   - `require("java")`
@@ -61,10 +61,12 @@ This task does not implement dynamic dex/jar loading, unrestricted package
 imports, generic method invocation, field mutation, Java callback wrapping, or
 Rhino-style `JavaAdapter`.
 
-## Remaining
+## Closure
 
-- Thread dispatch and `$autojs.java.setThreadMode` /
-  `$autojs.java.setDefaultThreadMode` semantics remain stable rejections.
+P13-13 v1.1 stable-denies thread dispatch and
+`$autojs.java.setThreadMode` / `$autojs.java.setDefaultThreadMode` as runtime
+user APIs. Those declarations remain `never`, do not dispatch to the bridge,
+and are future Java/Rhino provider work rather than P13-13 allowlist blockers.
 
 Pro profile promotion is delegated to the aggregate Java/Rhino surface gate.
 P13-13 keeps Java interop default-disabled and build-time experimental; it no

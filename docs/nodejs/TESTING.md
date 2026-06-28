@@ -746,15 +746,15 @@ Phase 13 Java interop allowlist:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeJavaInteropBridgeInstrumentationTest"
 ```
 
-`verifyNodePhase13JavaInteropAllowlist` records the P13-13 partial Java interop
+`verifyNodePhase13JavaInteropAllowlist` records the P13-13 ready Java interop
 state: default-disabled Java interop, allowlisted `findClass` / constructor /
 static calls, Rect handle instance calls, Rect field reads, explicit
 release/dispose cleanup, TypeScript declarations, and fail-closed classloader /
 reflection / native-library / process boundaries. P13-13 also records the
-method budget policy for future allowlist expansion. It remains partial until
-thread dispatch and budget enforcement evidence for any expanded allowlist
-land. Pro profile promotion is delegated to the aggregate Java/Rhino surface
-gate rather than counted as a separate P13-13 allowlist blocker.
+method budget policy for future allowlist expansion and stable-denies
+thread-dispatch / `$autojs.java.setThreadMode` runtime APIs for v1.1. Pro
+profile promotion is delegated to the aggregate Java/Rhino surface gate rather
+than counted as a separate P13-13 allowlist blocker.
 
 Phase 13 `rhino.install` Java proxy:
 
