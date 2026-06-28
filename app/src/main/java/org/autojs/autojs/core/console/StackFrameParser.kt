@@ -2,7 +2,10 @@ package org.autojs.autojs.core.console
 
 object StackFrameParser {
 
-    private val stackFramePattern = Regex("""(^|[\s(])((?:file:)?(?:/[^\s)]+?|[^\s():]+?)\.js):(\d+)(?::(\d+))?""")
+    private val stackFramePattern = Regex(
+        """(^|[\s(])((?:file:)?(?:/[^\s)]+?|[^\s():]+?)(?:\.node\.js|\.(?:mjs|cjs|mts|cts|tsx?|js))):(\d+)(?::(\d+))?""",
+        RegexOption.IGNORE_CASE,
+    )
 
     @JvmStatic
     fun parse(text: CharSequence?): List<StackFrameLink> {
