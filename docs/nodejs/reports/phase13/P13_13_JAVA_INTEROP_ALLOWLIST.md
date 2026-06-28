@@ -32,6 +32,14 @@ The Android provider owns the Java object table and releases handles through the
 existing `NodeBridgeResourceRegistry`, so script stop, service destroy, and
 explicit release all converge on execution-scoped cleanup.
 
+P13-13 method budget policy is now defined for future allowlist expansion:
+every callable Java constructor/method/field must have an explicit allowlist
+row, per-call timeout, execution-scoped call budget, handle budget, bounded
+serialized argument/return size, and adjacent denial tests. Budget exhaustion
+must fail closed before dispatch, and no entry may return raw lifecycle objects,
+Binder handles, threads, file descriptors, streams, class loaders, reflection
+objects, native pointers, or mutable object graphs.
+
 ## Allowlist
 
 | Class | Constructors | Static methods | Instance methods | Fields |
@@ -57,8 +65,6 @@ Rhino-style `JavaAdapter`.
 
 - Thread dispatch and `$autojs.java.setThreadMode` /
   `$autojs.java.setDefaultThreadMode` semantics remain stable rejections.
-- A broader method budget model beyond the explicit allowlist plus bridge
-  timeout still needs a design gate.
 - Pro profile opt-in promotion remains blocked until the Java/Rhino P13 surface
   has complete migration, packaged, rollback, and security evidence.
 

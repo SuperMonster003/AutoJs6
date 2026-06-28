@@ -748,9 +748,10 @@ Phase 13 Java interop allowlist:
 state: default-disabled Java interop, allowlisted `findClass` / constructor /
 static calls, Rect handle instance calls, Rect field reads, explicit
 release/dispose cleanup, TypeScript declarations, and fail-closed classloader /
-reflection / native-library / process boundaries. It remains partial until
-thread dispatch, a complete method budget model, and Pro profile promotion
-land.
+reflection / native-library / process boundaries. P13-13 also records the
+method budget policy for future allowlist expansion. It remains partial until
+thread dispatch, budget enforcement evidence for any expanded allowlist, and
+Pro profile promotion land.
 
 Phase 13 `rhino.install` Java proxy:
 

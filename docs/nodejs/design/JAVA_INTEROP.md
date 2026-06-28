@@ -230,6 +230,24 @@ Current constraints:
   future bounded proxy-interface provider; current calls throw
   `ERR_AUTOJS6_JAVA_METHOD_DENIED` without bridge dispatch
 
+P13-13 Java method budget policy is design-locked for any promoted or expanded
+allowlist entry:
+
+- every callable constructor, static method, instance method, and field read
+  must have an explicit class/method allowlist row and a per-call timeout
+- every execution gets a bounded Java-call budget; budget exhaustion must fail
+  closed with a stable bridge/Java error before another Java call is dispatched
+- provider-owned handles count against an execution-scoped handle budget and
+  must be released on explicit release, script stop, and service destroy
+- arguments and return values stay JSON primitives, frozen value descriptors, or
+  short-lived opaque handles with bounded serialized byte size
+- no allowlist entry may return raw Android lifecycle objects, Binder handles,
+  threads, file descriptors, streams, class loaders, reflection objects, native
+  pointers, or mutable object graphs
+- every new allowlist entry requires positive tests, denial tests for adjacent
+  unsafe methods, cleanup evidence, and budget/timeout coverage before profile
+  promotion
+
 An even safer first step is to avoid generic Java calls and expose named bridge modules instead, such as `rect`, `uuid`, or additional `image` value helpers.
 
 ## Rhino Compatibility Shim

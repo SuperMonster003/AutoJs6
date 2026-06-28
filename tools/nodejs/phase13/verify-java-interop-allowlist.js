@@ -103,9 +103,11 @@ function buildReport(files) {
       token(files.proAutoxNotes, "P13-13"),
       token(files.capabilityMatrix, "Java interop allowlist"),
       token(files.surfaceManifestDoc, "phase13-java-interop-allowlist"),
+      token(files.javaDesign, "P13-13 Java method budget policy is design-locked"),
+      token(files.p13Report, "P13-13 method budget policy is now defined"),
+      token(files.compatibilityProfile, "P13-13 defines the method budget policy"),
     ], [
       "Thread dispatch and setThreadMode semantics remain unimplemented.",
-      "A generic method budget beyond explicit allowlist plus bridge timeout remains to be designed.",
       "Pro profile opt-in promotion remains blocked until the Java/Rhino P13 surface is complete.",
     ]),
     scenario("security_boundary", "Critical Java boundaries remain fail-closed", [
