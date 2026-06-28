@@ -359,6 +359,10 @@ object NodeWorkManagerBridgeScheduler {
 
     private fun scheduledNativeValues(result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?): JSONObject {
         val nativeValues = result?.nativeValues.orEmpty()
+        val scheduledModeValues = NodeExecutionModePolicy.nativeValues(
+            NodeExecutionModePolicy.MODE_SCHEDULED,
+            NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
+        )
         return JSONObject().apply {
             listOf(
                 "embedded_script.execution_mode",
@@ -372,7 +376,7 @@ object NodeWorkManagerBridgeScheduler {
                 "embedded_script.bridge_live_dispatch_status",
                 "embedded_script.bridge_resource.active_count",
             ).forEach { key ->
-                nativeValues[key]?.let { put(key, it) }
+                (nativeValues[key] ?: scheduledModeValues[key])?.let { put(key, it) }
             }
         }
     }

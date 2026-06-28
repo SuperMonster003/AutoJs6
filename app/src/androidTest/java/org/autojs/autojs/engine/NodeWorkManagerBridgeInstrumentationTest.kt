@@ -116,6 +116,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create work_manager shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true };""")
 
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("work_manager"))
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             """
             "nodejs";
@@ -327,6 +328,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
             "<embedded-autojs-work-manager-fake-source.js>",
             workingDirectory = workDir,
             timeoutMs = 10_000L,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("work_manager fake bridge", result)
