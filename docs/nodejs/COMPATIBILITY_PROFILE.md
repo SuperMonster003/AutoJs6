@@ -109,7 +109,9 @@ true })` Java proxy installer. It can install `Packages`, `java`, and `android`
 proxies onto `globalThis` or a caller-provided target only when Java interop is
 enabled. The default Safe Node Profile still rejects `rhino.install()` without
 that explicit option, and `importClass`, `importPackage`, and `JavaAdapter`
-remain unavailable.
+remain unavailable. Its P13-16 dependency is satisfied by the stable-denial
+`JavaAdapter` / `defineClass` decision; the actual proxy-interface provider is
+future P13-16 work.
 
 P13-15 closes the `importClass` / `importPackage` decision by keeping Rhino
 dynamic import semantics unsupported in Node. `require("rhino").importClass()`

@@ -374,8 +374,9 @@ fail-closed.
 `verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 partial
 `rhino.install` state: default install rejection remains, while explicit
 experimental installs can add `Packages`, `java`, and `android` Java proxies
-that route through the same allowlist bridge. `JavaAdapter`, packaged metadata,
-and full Pro profile promotion remain fail-closed.
+that route through the same allowlist bridge. The P13-16 `JavaAdapter` /
+`defineClass` replacement decision is satisfied as a stable-denial gate;
+packaged metadata and full Pro profile promotion remain fail-closed.
 `verifyNodePhase13RhinoImportHelpersDecision` records the P13-15 decision:
 `require("rhino").importClass()` and `.importPackage()` are stable
 `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED` helpers, no global helpers are installed,

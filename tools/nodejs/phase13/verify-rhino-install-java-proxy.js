@@ -19,6 +19,7 @@ const FILES = {
   typeSmoke: "sample/nodejs/typescript-smoke/src/main.ts",
   rhinoDesign: "docs/nodejs/design/RHINO_SHIM.md",
   javaDesign: "docs/nodejs/design/JAVA_INTEROP.md",
+  javaAdapterReport: "docs/nodejs/reports/phase13/P13_16_JAVA_ADAPTER_DECISION.md",
   compatibilityProfile: "docs/nodejs/COMPATIBILITY_PROFILE.md",
   testingDoc: "docs/nodejs/TESTING.md",
   ciGatesDoc: "docs/nodejs/CI_GATES.md",
@@ -104,9 +105,11 @@ function buildReport(files) {
       token(files.proAutoxNotes, "P13-14"),
       token(files.capabilityMatrix, "rhino.install Java proxy"),
       token(files.surfaceManifestDoc, "phase13-rhino-install-java-proxy"),
+      token(files.p13Report, "The P13-16 v1.1 replacement decision is satisfied for this gate"),
+      token(files.javaAdapterReport, "P13-16 v1.1 closure is a stable-denial decision"),
+      token(files.compatibilityProfile, "Its P13-16 dependency is satisfied by the stable-denial"),
     ], [
       "A real Pro profile runtime selector remains unimplemented.",
-      "JavaAdapter replacement remains P13-16 implementation work.",
       "Packaged APK policy remains fail-closed.",
     ]),
   ];
