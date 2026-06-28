@@ -328,7 +328,7 @@ loopback fetch/axios/`http.get()` evidence, and packaged `network` to
 raw sockets, proxy/tunnel options, `CONNECT`, custom TLS/session control, and
 per-request proxy configuration.
 
-P13-30 records net/tls/dns staged compatibility as partial. AutoJs6 Node now
+P13-30 records net/tls/dns staged compatibility as ready for the v1.1 limited-facade decision. AutoJs6 Node now
 keeps `net`, `tls`, `dns`, and `dns/promises` reserved and typed for package
 probing, `SocketAddress`, `BlockList`, TLS metadata, and deterministic
 loopback/IP-literal DNS lookup. Keep Pro/AutoX scripts that depend on real TCP

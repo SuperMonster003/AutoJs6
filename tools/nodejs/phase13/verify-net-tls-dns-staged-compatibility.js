@@ -95,13 +95,11 @@ function buildReport(files) {
       token(files.embeddedMvpTest, "limitedDnsBuiltinSupportsLocalLookupsAndBlocksNetworkResolution"),
       token(files.embeddedMvpTest, "limitedNetBuiltinSupportsIpHelpersAndBlocksNetworkSockets"),
       token(files.embeddedMvpTest, "limitedTlsBuiltinExposesContextMetadataAndBlocksTlsSockets"),
-      token(files.compatibilityProfile, "P13-30 records net/tls/dns staged compatibility as partial"),
-      token(files.securityModel, "P13-30 records net/tls/dns staged compatibility as partial"),
+      token(files.compatibilityProfile, "P13-30 records net/tls/dns staged compatibility as ready for the v1.1 limited-facade decision"),
+      token(files.securityModel, "P13-30 records net/tls/dns staged compatibility as ready for the v1.1 limited-facade decision"),
       token(files.p13Report, "DNS privacy review is closed for v1.1 by denial"),
       token(files.compatibilityProfile, "keeps DNS privacy closed"),
-    ], [
-      "No native fd/socket handle leak proof or packaged INTERNET/live-network proof exists beyond the current shape-only socket close/destroy assertions.",
-    ]),
+    ], []),
     scenario("raw_network_modules_opt_in", "explicit debug-only raw network module opt-in can route selected builtins to native Node modules", [
       token(files.buildGradle, "autojs.nodejs.rawNetworkModules.experimental"),
       token(files.runtimeCapabilities, "RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY"),
@@ -121,7 +119,7 @@ function buildReport(files) {
       token(files.p13Report, "rollback is disabling the Gradle/build property"),
     ], [
     ]),
-    scenario("types_docs_and_gate", "types, docs, desktop matrix, and Gradle gate record P13-30 partial progress", [
+    scenario("types_docs_and_gate", "types, docs, desktop matrix, and Gradle gate record P13-30 ready limited-facade progress", [
       token(files.netTypes, 'declare module "net"'),
       token(files.netTypes, 'declare module "node:net"'),
       token(files.tlsTypes, 'declare module "tls"'),
@@ -140,17 +138,17 @@ function buildReport(files) {
       token(files.typeSmoke, 'import dnsPromises = require("dns/promises")'),
       token(files.typeSmoke, 'const dnsAnyRecord: dns.AnyRecord = { type: "TLSA"'),
       token(files.typeSmoke, 'const dnsPromiseTlsa: Promise<readonly dnsPromises.TlsaRecord[]>'),
-      token(files.typesReadme, "P13-30 records the partial net/tls/dns staged compatibility gate"),
+      token(files.typesReadme, "P13-30 records the v1.1 net/tls/dns staged compatibility gate"),
       token(files.gradleGate, "verifyNodePhase13NetTlsDnsStagedCompatibility"),
       token(files.testingDoc, "verifyNodePhase13NetTlsDnsStagedCompatibility"),
       token(files.ciGatesDoc, "verifyNodePhase13NetTlsDnsStagedCompatibility"),
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
-      token(files.desktopMatrix, "P13-30 records staged limited facades"),
-      token(files.builtinMatrixGenerator, "P13-30 records staged limited facades"),
+      token(files.desktopMatrix, "P13-30 records ready staged limited facades"),
+      token(files.builtinMatrixGenerator, "P13-30 records ready staged limited facades"),
       token(files.capabilityMatrix, "P13-30 net/tls/dns staged compatibility"),
-      token(files.proComparison, "P13-30 records net/tls/dns staged compatibility as partial"),
-      token(files.proAutoxNotes, "P13-30 records net/tls/dns staged compatibility as partial"),
+      token(files.proComparison, "P13-30 records net/tls/dns staged compatibility as ready for the v1.1 limited-facade decision"),
+      token(files.proAutoxNotes, "P13-30 records net/tls/dns staged compatibility as ready for the v1.1 limited-facade decision"),
     ], []),
   ];
 

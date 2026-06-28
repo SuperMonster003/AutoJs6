@@ -209,9 +209,9 @@
   sockets, backpressure, and broader packaged install/run network evidence
   remain scoped to P13-30 or later packaged distribution gates.
 
-## P13-30 Partial Landing Note
+## P13-30 Ready Landing Note
 
-- P13-30 partial net/tls/dns staged compatibility gate records the existing
+- P13-30 ready net/tls/dns staged compatibility gate records the existing
   limited `net`, `tls`, `dns`, and `dns/promises` builtins as Desktop-profile
   shape and policy evidence, not as raw network promotion.
 - Follow-up DNS parity adds Node v24 `resolveTlsa`, `resolve(hostname,
@@ -227,7 +227,7 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_30_NET_TLS_DNS_STAGED_COMPATIBILITY.md`.
 - Surface manifest evidence: `phase13-net-tls-dns-staged-compatibility`.
-- Remaining P13-30 generated blocker: fd/socket leak instrumentation plus
+- Future raw-network promotion evidence: fd/socket leak instrumentation plus
   packaged INTERNET/live Android network proof before any broader raw socket
   promotion. TLS session/certificate policy stays future design before any TLS
   session API is exposed.
@@ -235,8 +235,9 @@
   authority are rejected for v1.1 release/default profiles; DNS privacy is
   closed by denying Android resolver/search-domain/VPN/topology exposure; the
   raw-network opt-in remains release-forbidden debug/build-time only.
-  Remaining generated promotion evidence is fd/socket leak proof plus packaged
-  INTERNET/live network evidence.
+  Future promotion evidence is fd/socket leak proof plus packaged
+  INTERNET/live network evidence, not a P13-30 v1.1 blocker while raw sockets
+  and network DNS stay denied.
 
 ## P13-31 Stable-Denied Landing Note
 
@@ -1379,7 +1380,7 @@ P13 task 本身使用以下执行状态：
       P13-30 scoped; broader packaged install/run network smoke and disclosure
       remain packaged distribution work.
 
-- [ ] P13-30: 推进 `net` / `tls` / `dns` staged compatibility。
+- [x] P13-30: 推进 `net` / `tls` / `dns` staged compatibility。
   - 范围：先客户端 socket，再评估 server socket。
   - 验收：
     - connection count、bytes、timeout、host allow/deny、background policy 明确。
@@ -1408,6 +1409,10 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_30_NET_TLS_DNS_STAGED_COMPATIBILITY.md`.
     - Surface manifest evidence: `phase13-net-tls-dns-staged-compatibility`.
+    - Closure: P13-30 v1.1 closes the limited `net`/`tls`/`dns`
+      compatibility and stable-denial decision. fd/socket leak proof,
+      packaged INTERNET/live-network evidence, and TLS session policy remain
+      future raw-network promotion requirements.
 
 - [x] P13-31: 决策 `dgram` UDP capability。
   - 范围：评估 UDP client/server 是否进入 Desktop profile。

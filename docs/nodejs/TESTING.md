@@ -1645,7 +1645,7 @@ Phase 13 net/tls/dns staged compatibility status gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13NetTlsDnsStagedCompatibility
 ```
 
-This host gate records P13-30 as partial. It requires the default limited `net`,
+This host gate records P13-30 as ready for the v1.1 limited-facade decision. It requires the default limited `net`,
 `tls`, `dns`, and `dns/promises` builtins, focused device evidence, the
 debug/build-time `autojs.nodejs.rawNetworkModules.experimental=true` native
 module opt-in path, TypeScript declarations, desktop builtin matrix updates,
@@ -1653,8 +1653,8 @@ security/profile docs, and release matrix text. It keeps release/default client
 sockets and server listen authority rejected for v1.1, keeps DNS privacy closed
 by denying resolver/search-domain/VPN/topology exposure, and keeps the raw
 network opt-in release-forbidden. TLS sessions, fd leak proof, packaged
-INTERNET proof, and live Android network evidence remain open for future
-promotion.
+INTERNET proof, and live Android network evidence remain future promotion
+gates before any raw socket or live network authority is promoted.
 
 Phase 13 dgram UDP decision gate:
 

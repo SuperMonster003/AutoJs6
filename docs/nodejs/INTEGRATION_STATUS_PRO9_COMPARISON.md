@@ -1086,7 +1086,7 @@ unrestricted desktop networking; server/listen, raw sockets, proxy/tunnel
 options, `CONNECT`, DNS/TLS session APIs, and broader packaged install/run
 network behavior remain blocked.
 
-P13-30 records net/tls/dns staged compatibility as partial: `require("net")`,
+P13-30 records net/tls/dns staged compatibility as ready for the v1.1 limited-facade decision: `require("net")`,
 `require("node:net")`, `require("tls")`, `require("node:tls")`,
 `require("dns")`, `require("node:dns")`, `require("dns/promises")`, and
 `require("node:dns/promises")` are reserved limited builtins with TypeScript
@@ -1094,7 +1094,8 @@ coverage and focused tests. They support package-probing shapes such as
 `SocketAddress`, `BlockList`, socket/server counters, TLS metadata, and
 loopback/IP-literal DNS lookup, while real sockets, server listeners, network
 DNS, Android resolver state, TLS sessions, fd/native handles, packaged INTERNET
-proof, and live Android network evidence remain blocked.
+proof, and live Android network evidence remain future raw-network promotion
+gates.
 
 P13-31 records dgram UDP capability as stable-denied: `require("dgram")`,
 `require("node:dgram")`, `require.resolve("dgram")`, transitive package

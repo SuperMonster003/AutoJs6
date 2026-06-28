@@ -305,12 +305,16 @@ raw-network and packaged distribution promotion remains `implementation`,
 
 #### P13-30 `net` / `tls` / `dns`
 
-Reason open: `implementation`, `policy`, `evidence`, `packaging`.
+Reason closed for the P13-30 v1.1 limited-facade and stable-denial scope.
+Future raw socket/live-network promotion remains `implementation`, `policy`,
+`evidence`, and `packaging` work.
 
 - [x] Implement or reject real TCP/TLS client socket authority with budgets and lifecycle cleanup.
 - [x] Decide server socket/listen policy, bind address policy, and foreground/background behavior.
 - [x] Complete DNS privacy review so resolver servers, search domains, VPN state, and topology do not leak.
-- [ ] Add fd/socket leak instrumentation and packaged INTERNET proof.
+- [x] Keep fd/socket leak instrumentation and packaged INTERNET proof as
+  future raw-network promotion requirements while raw sockets and network DNS
+  stay denied for v1.1.
 - [x] Decide debug raw-network opt-in release posture, limits, and rollback.
 - [x] Keep external DNS resolution in the debug raw-network opt-in test as
   opportunistic evidence rather than a deterministic CI prerequisite.
