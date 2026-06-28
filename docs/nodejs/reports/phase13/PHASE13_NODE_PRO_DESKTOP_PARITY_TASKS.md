@@ -1071,12 +1071,16 @@ P13 task 本身使用以下执行状态：
     - Current state: `require("ui.overlay")` has JS facade/types plus the
       P12-14 Android permission/settings/closeAll live gate; live
       `show`/`update`/`drainEvents`/per-handle `close` remains fail-closed.
+    - Packaged overlay capability boundary smoke now verifies metadata that
+      omits `ui.overlay` and `android.permission.SYSTEM_ALERT_WINDOW` rejects
+      `ui.overlay.show()` with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`,
+      keeps raw window globals absent, and leaves no bridge dispatch pending.
     - Raw `floaty.window()` / `floaty.rawWindow()` View parity remains outside
       this task and stays blocked by design.
   - Remaining: promoted Android overlay provider, permission granted/denied
     device matrix, foreground notification/disclosure ownership, packaged
-    install-run smoke, task-removal cleanup, relaunch/crash evidence, and real
-    overlay leak/stress evidence.
+    install-run positive smoke, task-removal cleanup, relaunch/crash evidence,
+    and real overlay leak/stress evidence.
 
 - [ ] P13-19: 扩展 accessibility/selector Pro parity。
   - 范围：补齐常用全局自动化函数和 selector DSL。

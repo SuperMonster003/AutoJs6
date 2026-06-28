@@ -348,7 +348,8 @@ P13-18 records the partial overlay provider promotion gate for these
 declarations. The TypeScript smoke sample imports `ui.overlay` and checks
 permission, settings, closeAll, show, handle, and event types, while Android
 live `show`/`update`/`drainEvents`/per-handle `close` remains fail-closed until
-a promoted overlay provider lands.
+a promoted overlay provider lands. Packaged missing-`ui.overlay` capability
+and missing `SYSTEM_ALERT_WINDOW` metadata denial are covered before dispatch.
 
 P13-19 records the partial accessibility selector promotion gate for the
 declared `accessibility` and explicit `autojs6:compat` selector types. Direct

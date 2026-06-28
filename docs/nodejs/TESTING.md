@@ -831,10 +831,11 @@ Phase 13 overlay provider promotion:
 `verifyNodePhase13OverlayProviderPromotion` records the P13-18 partial
 `ui.overlay` state: the JS facade, type declarations, explicit capabilities,
 Android permission/settings/closeAll live gate, packaged
-`SYSTEM_ALERT_WINDOW` metadata records, and raw Window/View denial are checked.
+`SYSTEM_ALERT_WINDOW` metadata records, packaged missing-`ui.overlay` /
+missing-`SYSTEM_ALERT_WINDOW` denial, and raw Window/View denial are checked.
 The gate remains partial because live `show`/`update`/`drainEvents`/per-handle
-`close`, foreground disclosure ownership, packaged install-run evidence, and
-real overlay leak/stress evidence are still missing.
+`close`, foreground disclosure ownership, positive packaged install-run
+evidence, and real overlay leak/stress evidence are still missing.
 
 Phase 13 accessibility selector promotion:
 

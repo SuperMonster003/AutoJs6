@@ -23,6 +23,12 @@ fail-closed for `show`, `update`, `drainEvents`, and per-handle `close`.
 - Packaged metadata: the app and project metadata record
   `android.permission.SYSTEM_ALERT_WINDOW`, and the provider registry labels
   packaged overlay support as provider-dependent.
+- Packaged boundary:
+  `EmbeddedNodePackagedApkSmokeTest#installAndRunOverlayCapabilityBoundaryEmbeddedNodePackagedApk`
+  verifies packaged metadata without `ui.overlay` rejects
+  `ui.overlay.show()` with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, omits
+  `android.permission.SYSTEM_ALERT_WINDOW`, keeps raw Android window globals
+  absent, and leaves no bridge dispatch pending.
 - Raw boundary: `floaty.window()`, `floaty.rawWindow()`, raw
   `WindowManager.LayoutParams`, hidden overlays, fully transparent overlays,
   raw `View`/`NativeView`, and raw `FloatyWindow`/`WindowBridge` handles remain
@@ -49,16 +55,15 @@ fail-closed for `show`, `update`, `drainEvents`, and per-handle `close`.
   settings behavior.
 - Connect foreground notification/disclosure ownership, stop action, and
   script/provider destroy cleanup for visible overlays.
-- Add packaged APK install-run smoke with explicit overlay metadata,
-  capability denial, disclosure denial, task removal cleanup, and relaunch or
-  crash evidence.
+- Add positive packaged APK install-run smoke with explicit overlay metadata,
+  foreground disclosure, task removal cleanup, and relaunch or crash evidence.
 - Add leak/stress evidence over real overlay windows and event queues.
 
 The docs, compatibility notes, design records, surface manifest, and Gradle
 gate are evidence-only for this partial decision. They do not add a separate
 P13-18 blocker beyond the live overlay provider, permission matrix, foreground
-disclosure/stop action, packaged metadata/denial, cleanup, and leak/stress
-evidence above.
+disclosure/stop action, positive packaged overlay behavior, cleanup, and
+leak/stress evidence above.
 
 ## Gate
 

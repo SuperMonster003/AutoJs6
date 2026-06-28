@@ -403,10 +403,11 @@ live UI survival claim.
 `verifyNodePhase13OverlayProviderPromotion` records the P13-18 partial
 `ui.overlay` provider state: JS facade/types, explicit capabilities, Android
 permission/settings/closeAll live gate, packaged `SYSTEM_ALERT_WINDOW` metadata
-records, and raw Window/View denial are present, while live overlay
+records, packaged missing-`ui.overlay`/missing-`SYSTEM_ALERT_WINDOW` denial,
+and raw Window/View denial are present, while live overlay
 `show`/`update`/`drainEvents`/per-handle `close`, foreground disclosure,
-packaged install-run behavior, and real overlay leak/stress evidence still
-block opt-in promotion.
+positive packaged install-run behavior, and real overlay leak/stress evidence
+still block opt-in promotion.
 `verifyNodePhase13AccessibilitySelectorPromotion` records the P13-19 partial
 `accessibility` selector state: selector v2 JSON descriptors, direct
 find/action APIs, explicit Rhino compat selector handles, unavailable-provider
@@ -628,8 +629,9 @@ lands.
 P13-18 additionally uses `verifyNodePhase13OverlayProviderPromotion` as the host
 promotion-status gate for `ui.overlay` and keeps the Android provider degraded:
 permission/settings/closeAll are live-gate methods, but live overlay creation
-methods remain fail-closed until a reviewed provider and packaged/leak evidence
-land.
+methods remain fail-closed until a reviewed provider and positive
+packaged/leak evidence land. Packaged missing-overlay capability/metadata
+denial is covered by the focused APK smoke.
 P13-19 additionally uses `verifyNodePhase13AccessibilitySelectorPromotion` as
 the host promotion-status gate for `accessibility` selector parity and keeps
 advanced automation blocked: the existing live provider remains selector-only
