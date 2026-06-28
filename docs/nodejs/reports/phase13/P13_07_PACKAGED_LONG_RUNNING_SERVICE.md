@@ -37,10 +37,19 @@ blocker remains open.
   `clean_exit`, verifies the clean Stop is not collected as next-launch crash
   evidence, and then verifies a running-service force-stop is still collected
   on the next cold launch.
+- The same focused smoke removes the packaged Activity task with
+  `am stack remove <taskId>`, verifies `NativeNodeEmbeddedScriptService`
+  receives `onTaskRemoved`, writes stopped status with `stopRequested=true`,
+  marks the active crash marker as `clean_exit`, and confirms task-removal
+  cleanup is not collected as next-launch crash evidence.
 - `NativeNodeEmbeddedScriptService` now marks interactive Stop as
   `native_process.exit` with `exitCode=0` before scheduling the embedded
   process exit, so an intentional foreground Stop is not classified as a
   restart crash.
+- `NativeNodeEmbeddedScriptService.onTaskRemoved(...)` now routes packaged task
+  removal through the same active interactive cleanup path as Stop, preserving
+  heartbeat shutdown, status snapshots, clean-exit crash evidence, foreground
+  notification removal, and process exit scheduling.
 - The packaged foreground path reuses the existing embedded Node project
   preprocessor, so encrypted project entries, CommonJS static preload,
   `moduleSources`, runtime module sources, `argv`, `env`, package script/bin
@@ -74,8 +83,8 @@ build/reports/nodejs/phase13-packaged-long-running-service.md
 ```
 
 The gate is expected to report `partial` until Android permission/background
-policy coverage, task-removal cleanup, packaged metadata/disclosure denial
-paths, and quota/resource stress coverage land.
+policy coverage, packaged metadata/disclosure denial paths, broader device
+matrix evidence, and quota/resource stress coverage land.
 
 ## Device Evidence
 
@@ -102,6 +111,9 @@ NodeLifecycleCheckpointStore: checkpoint.clear schema=autojs6-node-lifecycle-che
 NodeLifecycleCheckpointStore: checkpoint.read schema=autojs6-node-lifecycle-checkpoint-v1 ... exists=false ... launchSurface=packaged_long_running executionMode=interactive_long_running
 NativeNodeEmbeddedScriptService: runtime.heartbeat.stop ... reason=interactive.stop
 NodeCrashEvidenceStore: marker.terminal schema=autojs6-node-phase13-crash-marker-v1 ... state=clean_exit reason=native_process.exit ... exitCode=0 ... packageName=org.autojs6.packaged.node.crashevidence.smoke
+NativeNodeEmbeddedScriptService: interactive.task_removed ... processName=org.autojs6.packaged.node.crashevidence.smoke:nodejs_embedded
+NativeNodeEmbeddedScriptService: runtime.heartbeat.stop ... reason=interactive.task_removed
+NodeCrashEvidenceStore: marker.terminal schema=autojs6-node-phase13-crash-marker-v1 ... state=clean_exit reason=native_process.exit ... exitCode=0 ... packageName=org.autojs6.packaged.node.crashevidence.smoke
 NodeCrashEvidenceStore: marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1 ... state=collected_after_restart ... launchSurface=packaged_long_running executionMode=interactive_long_running
 ```
 
@@ -110,8 +122,8 @@ NodeCrashEvidenceStore: marker.collect schema=autojs6-node-phase13-next-launch-c
 - Record Android API-level behavior for foreground-service start restrictions,
   notification permission denial, missing foreground service permissions/types,
   and background launch limits.
-- Add task-removal cleanup evidence and broaden the foreground Stop/relaunch
-  evidence beyond the focused QV710AF65F smoke.
+- Broaden the foreground Stop/task-removal/relaunch/crash evidence beyond the
+  focused QV710AF65F smoke.
 - Record packaged metadata and disclosure denial paths before promotion.
 - Add packaged quota/resource stress for timers, bridge calls, provider-owned
   handles, status snapshots, destroy cleanup, and next-launch crash evidence.

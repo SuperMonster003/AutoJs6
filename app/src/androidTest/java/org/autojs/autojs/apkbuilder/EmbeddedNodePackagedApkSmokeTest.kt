@@ -13795,6 +13795,58 @@ $nodeConfigJson
                 missingSecondMarkers.isEmpty(),
             )
 
+            val secondExecutionId = extractPackagedLongRunningExecutionId(secondLogcat)
+            val removedTaskId = removePackagedTask(CRASH_EVIDENCE_PACKAGE_NAME)
+            val taskRemovedLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_TASK_REMOVED_MARKERS)
+            val taskRemovedRelevantLog = relevantPackagedLogcat(taskRemovedLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
+            val taskRemovedStatus = waitForPackagedInteractiveStatus(
+                packageName = CRASH_EVIDENCE_PACKAGE_NAME,
+                executionId = secondExecutionId,
+                label = "second packaged crash evidence status stopped after task removal",
+            ) { status ->
+                status.optString("state") == NodeInteractiveLongRunningStatusStore.STATE_STOPPED &&
+                        status.optBoolean("stopRequested")
+            }
+            assertPackagedLongRunningStatus(
+                label = "second packaged crash evidence task-removal stopped status",
+                status = taskRemovedStatus,
+                expectedExecutionId = secondExecutionId,
+                expectedState = NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
+                expectedStopRequested = true,
+            )
+            assertTrue(
+                "Packaged task removal should mark crash evidence as clean_exit (taskId=$removedTaskId).\n$taskRemovedRelevantLog",
+                taskRemovedLogcat.contains("marker.terminal schema=${NodeCrashEvidenceStore.MARKER_SCHEMA}") &&
+                        taskRemovedLogcat.contains("state=${NodeCrashEvidenceStore.STATE_CLEAN_EXIT}") &&
+                        taskRemovedLogcat.contains("reason=native_process.exit") &&
+                        taskRemovedLogcat.contains("exitCode=0"),
+            )
+            waitForPackagedForegroundNotificationRemoved(CRASH_EVIDENCE_PACKAGE_NAME)
+
+            shellWithTimeout("logcat -c", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
+            shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
+            Thread.sleep(1_000L)
+
+            val thirdLaunchOutput = shellWithTimeout(
+                "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity",
+            )
+            assumeTrue(
+                "Could not relaunch packaged crash evidence SplashActivity after task removal.\n$thirdLaunchOutput",
+                thirdLaunchOutput.contains("Starting", ignoreCase = true) ||
+                        thirdLaunchOutput.contains("Warning: Activity not started", ignoreCase = true),
+            )
+            val thirdLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS)
+            val thirdRelevantLog = relevantPackagedLogcat(thirdLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
+            assertFalse(
+                "Task-removal cleanup should not be collected as next-launch crash evidence.\n$thirdRelevantLog",
+                thirdLogcat.contains("marker.collect schema=${NodeCrashEvidenceStore.NEXT_LAUNCH_BUNDLE_SCHEMA}"),
+            )
+            val missingThirdMarkers = CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS.filterNot { thirdLogcat.contains(it) }
+            assertTrue(
+                "Packaged crash evidence third launch did not contain expected markers: $missingThirdMarkers\n$thirdRelevantLog",
+                missingThirdMarkers.isEmpty(),
+            )
+
             shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
             Thread.sleep(1_000L)
 
@@ -14133,6 +14185,28 @@ $nodeConfigJson
             return null
         }
         return runCatching { JSONObject(value.substring(start).trim()) }.getOrNull()
+    }
+
+    private fun removePackagedTask(packageName: String): Int {
+        val taskId = findPackagedTaskId(packageName)
+            ?: throw AssertionError("Could not find activity task for packaged smoke $packageName.")
+        val output = shellWithTimeout("am stack remove $taskId")
+        if (output.contains("Error", ignoreCase = true) || output.contains("Exception", ignoreCase = true)) {
+            throw AssertionError("Could not remove packaged task $taskId for $packageName.\n$output")
+        }
+        return taskId
+    }
+
+    private fun findPackagedTaskId(packageName: String): Int? {
+        val dump = shellWithTimeout("dumpsys activity activities", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
+        val taskLine = dump.lines().firstOrNull { line ->
+            line.contains("Task{") && line.contains(packageName)
+        } ?: return null
+        return Regex("""#(\d+)""")
+            .find(taskLine)
+            ?.groupValues
+            ?.getOrNull(1)
+            ?.toIntOrNull()
     }
 
     private fun tail(value: String, maxChars: Int = 4_000): String {
@@ -15410,6 +15484,16 @@ $nodeConfigJson
         private val CRASH_EVIDENCE_STOP_MARKERS = listOf(
             "runtime.heartbeat.stop",
             "reason=interactive.stop",
+            "marker.terminal schema=${NodeCrashEvidenceStore.MARKER_SCHEMA}",
+            "state=${NodeCrashEvidenceStore.STATE_CLEAN_EXIT}",
+            "reason=native_process.exit",
+            "exitCode=0",
+            "packageName=$CRASH_EVIDENCE_PACKAGE_NAME",
+        )
+        private val CRASH_EVIDENCE_TASK_REMOVED_MARKERS = listOf(
+            "interactive.task_removed",
+            "reason=interactive.task_removed",
+            "runtime.heartbeat.stop",
             "marker.terminal schema=${NodeCrashEvidenceStore.MARKER_SCHEMA}",
             "state=${NodeCrashEvidenceStore.STATE_CLEAN_EXIT}",
             "reason=native_process.exit",

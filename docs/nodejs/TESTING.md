@@ -98,8 +98,9 @@ P13-07 adds a packaged long-running dispatch gate for projects that declare
 `node.executionMode=interactive_long_running`; packaged status snapshots should
 use `launchSurface=packaged_long_running`, and the packaged crash-evidence
 smoke verifies `autojs6:lifecycle` checkpoint/read/clear markers from packaged
-mode. Final notification Stop action, task-removal cleanup, permission-denial,
-background-start, and quota/resource stress evidence remains open.
+mode plus Stop/task-removal clean-exit and relaunch behavior. Permission-denial,
+background-start, packaged metadata/disclosure, broader device matrix, and
+quota/resource stress evidence remain open.
 
 Current packaged lifecycle smoke evidence:
 
