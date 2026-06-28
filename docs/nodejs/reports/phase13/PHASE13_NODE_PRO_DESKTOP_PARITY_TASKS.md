@@ -163,9 +163,13 @@
 - P13-26 v1.1 stable-denies audio playback, MediaPlayer lifecycle, playlists,
   playback focus, external MediaStore access, broad media-library permissions,
   and screen/internal audio capture.
-- Remaining P13-26 blockers: real recorder sessions, foreground notification
-  disclosure, packaged media asset lookup, corpus evidence, privacy copy, and
-  migration examples.
+- Packaged APK smoke now covers declared metadata, bundled media asset lookup,
+  read-only audio stream snapshots, recorder status, recorder start denial, and
+  exact-capability denial for missing `media.audio` / `media.metadata` /
+  `media.recording`.
+- Remaining P13-26 blockers: real recorder sessions, foreground microphone
+  disclosure, cleanup/resource handles, broader corpus evidence, privacy copy,
+  and migration examples.
 
 ## P13-27 Partial Landing Note
 
@@ -1279,7 +1283,11 @@ P13 task 本身使用以下执行状态：
     - Fail-closed recorder boundary: `recorder.start()` and
       `recorder.stop()` require `media.recording` and return a stable provider
       missing error until foreground disclosure, permission flow, cleanup, and
-      packaged smoke exist.
+      real recorder provider evidence exist.
+    - Packaged APK smoke:
+      `EmbeddedNodePackagedApkSmokeTest#installAndRunMediaRecorderBridgeEmbeddedNodePackagedApks`
+      covers bundled asset lookup, recorder status, recorder start denial, and
+      exact-capability denial for missing specialized media capabilities.
     - Compat aliases: `autojs6:compat.media`, `autojs6:compat.mediainfo`,
       and `autojs6:compat.recorder`.
     - Types: `docs/nodejs/types/autojs6-node/media.d.ts`,
@@ -1295,8 +1303,9 @@ P13 task 本身使用以下执行状态：
     - Stable denial: playback provider, MediaPlayer lifecycle, external
       MediaStore access, broad media-library permissions, and screen/internal
       audio capture remain denied for v1.1.
-    - Open before closure: real recorder sessions, packaged media asset lookup,
-      privacy copy, corpus evidence, and migration examples.
+    - Open before closure: real recorder sessions, foreground microphone
+      disclosure, cleanup/resource handles, privacy copy, broader corpus
+      evidence, and migration examples.
 
 - [x] P13-27: 扩展 utility-heavy Rhino modules。
   - 范围：`zip`、`canvas`、`opencc`、`pinyin` full dictionary、`jsox`、

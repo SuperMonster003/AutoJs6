@@ -473,7 +473,10 @@ media/recorder/mediainfo provider state: `media.audio`, `media.metadata`, and
 scoped mediainfo reads, recorder status, and stable recorder start/stop
 fail-closed behavior are covered. Playback, MediaStore access, screen/internal
 audio capture, and raw Android media objects are stable-denied for v1.1, while
-real recorder sessions and packaged media evidence remain open.
+packaged bundled-asset lookup, recorder status, recorder start denial, and
+exact-denial smoke are covered. Real recorder sessions, foreground microphone
+disclosure, broader corpus evidence, privacy copy, and migration examples
+remain open.
 `verifyNodePhase13UtilityHeavyRhinoModules` records the P13-27 partial
 utility-heavy Rhino modules state: pure `jsox.mathx`, `jsox.arrayx`, and
 `jsox.numberx` helpers are covered through `jsox`, direct submodule requires,
@@ -681,8 +684,9 @@ the host promotion-status gate for media/recorder/mediainfo parity and keeps
 the surface partial: read-only audio stream snapshots, scoped mediainfo
 metadata, recorder status, and stable recorder provider-missing denials are
 covered. Playback, MediaStore access, and raw Android media objects are
-stable-denied for v1.1, while real recording, packaged media behavior, and
-foreground microphone disclosure require separate evidence.
+stable-denied for v1.1. Packaged media/recorder asset-status-denial smoke is
+covered, while real recording, foreground microphone disclosure, broader corpus
+evidence, privacy copy, and migration examples require separate evidence.
 P13-27 additionally uses `verifyNodePhase13UtilityHeavyRhinoModules` as the
 host promotion-status gate for utility-heavy Rhino module parity and keeps the
 surface partial: pure `jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` helpers,

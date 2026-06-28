@@ -17,6 +17,7 @@ const FILES = {
   nodeBridgeSources: "app/src/main/cpp/node_bridge_sources.cpp",
   conformanceTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
   mediaTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeMediaBridgeInstrumentationTest.kt",
+  packagedSmokeTest: "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt",
   permissionManifestTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgePermissionManifestInstrumentationTest.kt",
   providerRegistryTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeProviderRegistryInstrumentationTest.kt",
   processSweepTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeProcessSweepInstrumentationTest.kt",
@@ -85,6 +86,9 @@ function buildReport(files) {
       token(files.mediainfoTypes, 'declare module "mediainfo"'),
       token(files.mediaTest, "jsMediaModulesUseFakeTransportCompatFacadeAndBlockShadowing"),
       token(files.mediaTest, "androidProviderReturnsReadOnlyMediaSnapshotsAndRecorderFailsClosed"),
+      token(files.packagedSmokeTest, "installAndRunMediaRecorderBridgeEmbeddedNodePackagedApks"),
+      token(files.packagedSmokeTest, "packaged.media_recorder.media=true"),
+      token(files.packagedSmokeTest, "packaged.media_recorder.mediainfo=true"),
       token(files.conformanceTest, 'expectExports("media", media, ["getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"])'),
       token(files.typeSmoke, "const mediaInfoSnapshot: mediainfo.Snapshot"),
       token(files.p13Report, "P13-26 v1.1 stable-denies audio playback"),
@@ -92,7 +96,7 @@ function buildReport(files) {
       token(files.p13Report, "P13-26 v1.1 stable-denies external MediaStore"),
       token(files.compatibilityProfile, "external MediaStore access"),
     ], [
-      "Packaged media asset lookup and real audio/video corpus evidence remain open.",
+      "Broader real audio/video corpus evidence remains open.",
     ]),
     scenario("recorder_fail_closed", "recorder vocabulary is explicit and recording stays fail-closed", [
       token(files.permissionManifest, 'const val MEDIA_RECORDING = "media.recording"'),
@@ -109,13 +113,18 @@ function buildReport(files) {
       token(files.recorderTypes, 'declare module "recorder"'),
       token(files.mediaTest, "media.manifest.recording"),
       token(files.mediaTest, "recorder.start"),
+      token(files.packagedSmokeTest, "MEDIA_RECORDER_BRIDGE_NODE_PERMISSIONS"),
+      token(files.packagedSmokeTest, "packaged.media_recorder.recorder_status=true"),
+      token(files.packagedSmokeTest, "packaged.media_recorder.recorder_denial=true"),
+      token(files.packagedSmokeTest, "packaged.media_recorder_denial.audio=true"),
+      token(files.packagedSmokeTest, "packaged.media_recorder_denial.metadata=true"),
+      token(files.packagedSmokeTest, "packaged.media_recorder_denial.recording=true"),
       token(files.conformanceTest, 'expectExports("recorder", recorder, ["getStatus", "start", "stop"])'),
       token(files.typeSmoke, "const recorderStart: (options?: recorder.RecorderStartOptions) => Promise<never>"),
       token(files.p13Report, "Screen recording and internal/playback audio capture are stable-denied"),
       token(files.compatibilityProfile, "screen/internal audio capture is stable-denied for v1.1"),
     ], [
-      "Real audio recording start/stop/session handles require runtime permission flow, foreground notification disclosure, and cleanup.",
-      "Packaged recorder smoke, denial matrix, and privacy disclosure copy remain open.",
+      "Real audio recording start/stop/session handles require runtime permission flow, foreground notification disclosure, cleanup, and privacy copy.",
     ]),
     scenario("compat_provider_docs", "compat, provider registry, process permission, docs, and project tooling record P13-26", [
       token(files.providerRegistry, 'displayName = "media/mediainfo/recorder"'),
@@ -204,7 +213,8 @@ function buildReport(files) {
       recorderStartStopReady: false,
       playbackReady: false,
       mediaStoreReady: false,
-      packagedMediaReady: false,
+      packagedMediaReady: scenarioById(scenarios, "media_audio_mediainfo").status !== "missing_evidence" &&
+        scenarioById(scenarios, "recorder_fail_closed").status !== "missing_evidence",
       proSurfacePromoted: false,
     },
   };
