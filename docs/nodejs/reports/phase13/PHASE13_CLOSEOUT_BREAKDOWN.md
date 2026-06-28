@@ -301,7 +301,8 @@ Reason open: `implementation`, `evidence`, `packaging`.
   and exact-capability denial smoke evidence.
 - [ ] Add real recording start/stop/session handles, permission flow, foreground disclosure, and cleanup.
 - [x] Decide screen/internal audio recording policy.
-- [ ] Add real recorder privacy copy, broader media corpus, and migration examples.
+- [x] Add real recorder privacy copy and migration examples.
+- [ ] Add broader media corpus evidence.
 - [x] Keep docs/provider evidence gate from counting playback, MediaStore, recording, packaged smoke, privacy, and migration evidence twice.
 
 #### P13-27 utility-heavy Rhino modules

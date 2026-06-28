@@ -1068,9 +1068,9 @@ and `recorder.getStatus()` are evidence-backed JSON-safe helpers requiring
 exact `media.audio`, `media.metadata`, or `media.recording` where appropriate.
 Playback, MediaStore access, and raw Android media objects are stable-denied
 for v1.1. Packaged bundled-asset lookup, recorder status, recorder start
-denial, and exact-denial smoke are covered. Real recorder sessions, foreground
-microphone disclosure, broader corpus evidence, privacy copy, and migration
-examples remain future evidence.
+denial, exact-denial smoke, recorder privacy copy, and the `media-recorder` Pro
+migration example are covered. Real recorder sessions, foreground microphone
+disclosure/cleanup, and broader corpus evidence remain future evidence.
 
 P13-27 records utility-heavy Rhino modules promotion as partial:
 `require("jsox")`, direct `jsox.mathx` / `jsox.arrayx` / `jsox.numberx`

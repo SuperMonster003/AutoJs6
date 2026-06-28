@@ -82,13 +82,27 @@
 - Gradle gate:
   `:app:verifyNodePhase13MediaRecorderMediainfoProvider`
 
+## Privacy And Migration Evidence
+
+- `docs/nodejs/security/PRIVACY_DISCLOSURE_POLICY.md` records
+  `media_recording` / `media.recording` as a sensitive Pro surface requiring
+  user prompt, foreground disclosure, `RECORD_AUDIO`, and microphone foreground
+  service review before any real recording provider is promoted.
+- `sample/nodejs/pro-parity-suite/snippets/media-recorder.cjs` documents the
+  migration path from Rhino-style media/recorder usage to exact-capability Node
+  calls: read-only `media.getAudioStreamInfo()`, scoped `mediainfo.read()`,
+  `recorder.getStatus()`, and fail-closed `recorder.start()`.
+- The Pro example catalog keeps this snippet outside the default runtime smoke
+  subset, so it remains migration evidence and does not imply microphone
+  permission, foreground disclosure, or recorder session promotion.
+
 ## Remaining Blockers
 
 - Real recorder sessions with runtime permission flow, foreground disclosure,
-  resource handles, cleanup, cancellation, and privacy copy.
-- Broader real audio/video corpus evidence and migration examples.
+  resource handles, cleanup, and cancellation.
+- Broader real audio/video corpus evidence.
 
 The compat/provider registry, process permission, docs, project tooling,
 surface manifest, and Gradle gate are evidence-only for this partial decision.
 They do not add separate P13-26 blockers beyond real recording,
-privacy copy, migration examples, and broader media corpus evidence above.
+foreground disclosure, cleanup, and broader media corpus evidence above.

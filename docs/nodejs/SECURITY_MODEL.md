@@ -599,10 +599,10 @@ or Android media object handles.
 
 P13-26 records media/recorder/mediainfo provider promotion as partial.
 Playback and MediaStore access are stable-denied for v1.1. Packaged
-bundled-asset lookup, recorder status, recorder start denial, and exact-denial
-smoke are covered. Real recorder sessions, foreground-service microphone
-disclosure, broader corpus/device evidence, privacy copy, and migration
-examples remain future evidence.
+bundled-asset lookup, recorder status, recorder start denial, exact-denial
+smoke, recorder privacy copy, and the `media-recorder` Pro migration example
+are covered. Real recorder sessions, foreground-service microphone
+disclosure/cleanup, and broader corpus/device evidence remain future evidence.
 
 P13-27 records utility-heavy Rhino modules promotion as partial. The promoted
 `jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` subsets are pure JavaScript and

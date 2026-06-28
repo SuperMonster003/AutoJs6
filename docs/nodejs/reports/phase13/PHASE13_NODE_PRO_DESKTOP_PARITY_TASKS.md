@@ -170,9 +170,14 @@
   read-only audio stream snapshots, recorder status, recorder start denial, and
   exact-capability denial for missing `media.audio` / `media.metadata` /
   `media.recording`.
+- Privacy/migration evidence: P13-52 privacy policy records
+  `media_recording` / `media.recording` prompt, foreground disclosure,
+  `RECORD_AUDIO`, and microphone foreground service requirements, and
+  `sample/nodejs/pro-parity-suite/snippets/media-recorder.cjs` documents the
+  read-only media, scoped mediainfo, recorder status, and fail-closed recorder
+  migration path.
 - Remaining P13-26 blockers: real recorder sessions, foreground microphone
-  disclosure, cleanup/resource handles, broader corpus evidence, privacy copy,
-  and migration examples.
+  disclosure, cleanup/resource handles, and broader corpus evidence.
 
 ## P13-27 Partial Landing Note
 
@@ -1325,6 +1330,12 @@ P13 task 本身使用以下执行状态：
       `EmbeddedNodePackagedApkSmokeTest#installAndRunMediaRecorderBridgeEmbeddedNodePackagedApks`
       covers bundled asset lookup, recorder status, recorder start denial, and
       exact-capability denial for missing specialized media capabilities.
+    - Privacy/migration evidence: `PRIVACY_DISCLOSURE_POLICY.md` records
+      `media_recording` / `media.recording` prompt, foreground disclosure,
+      `RECORD_AUDIO`, and microphone foreground service requirements, and
+      `sample/nodejs/pro-parity-suite/snippets/media-recorder.cjs` documents
+      the read-only media, scoped mediainfo, recorder status, and fail-closed
+      recorder migration path.
     - Compat aliases: `autojs6:compat.media`, `autojs6:compat.mediainfo`,
       and `autojs6:compat.recorder`.
     - Types: `docs/nodejs/types/autojs6-node/media.d.ts`,
@@ -1341,8 +1352,7 @@ P13 task 本身使用以下执行状态：
       MediaStore access, broad media-library permissions, and screen/internal
       audio capture remain denied for v1.1.
     - Open before closure: real recorder sessions, foreground microphone
-      disclosure, cleanup/resource handles, privacy copy, broader corpus
-      evidence, and migration examples.
+      disclosure, cleanup/resource handles, and broader corpus evidence.
 
 - [x] P13-27: 扩展 utility-heavy Rhino modules。
   - 范围：`zip`、`canvas`、`opencc`、`pinyin` full dictionary、`jsox`、

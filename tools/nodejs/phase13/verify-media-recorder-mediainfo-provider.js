@@ -34,6 +34,10 @@ const FILES = {
   proComparison: "docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md",
   proAutoxNotes: "docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md",
   capabilityMatrix: "docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md",
+  privacyDisclosurePolicy: "docs/nodejs/security/PRIVACY_DISCLOSURE_POLICY.md",
+  proParityExamples: "sample/nodejs/pro-parity-suite/examples.json",
+  proParitySnippet: "sample/nodejs/pro-parity-suite/snippets/media-recorder.cjs",
+  proParityExpectedOutput: "sample/nodejs/pro-parity-suite/expected-output.txt",
   projectTool: "tools/nodejs/project/autojs6-node-project.js",
   gradleGate: "app/node-phase13-gate.gradle.kts",
 };
@@ -124,8 +128,22 @@ function buildReport(files) {
       token(files.p13Report, "Screen recording and internal/playback audio capture are stable-denied"),
       token(files.compatibilityProfile, "screen/internal audio capture is stable-denied for v1.1"),
     ], [
-      "Real audio recording start/stop/session handles require runtime permission flow, foreground notification disclosure, cleanup, and privacy copy.",
+      "Real audio recording start/stop/session handles require runtime permission flow, foreground notification disclosure, and cleanup.",
     ]),
+    scenario("privacy_migration_examples", "P13-26 records recorder privacy copy and migration examples before promotion", [
+      token(files.privacyDisclosurePolicy, "`media_recording`"),
+      token(files.privacyDisclosurePolicy, "`media.recording`"),
+      token(files.privacyDisclosurePolicy, "`RECORD_AUDIO` and microphone foreground service"),
+      token(files.proParityExamples, '"id": "media-recorder"'),
+      token(files.proParityExamples, '"media.recording"'),
+      token(files.proParitySnippet, "media.getAudioStreamInfo(\"music\""),
+      token(files.proParitySnippet, "mediainfo.read(\"sample.mp3\""),
+      token(files.proParitySnippet, "recorder.getStatus({ timeoutMs: 1000 })"),
+      token(files.proParitySnippet, "recorder.start({ path: \"record.m4a\""),
+      token(files.proParitySnippet, "sample.pro-parity-suite.media-recorder=PASS"),
+      token(files.proParityExpectedOutput, "sample.pro-parity-suite.media-recorder=PASS"),
+      token(files.p13Report, "Privacy And Migration Evidence"),
+    ], []),
     scenario("compat_provider_docs", "compat, provider registry, process permission, docs, and project tooling record P13-26", [
       token(files.providerRegistry, 'displayName = "media/mediainfo/recorder"'),
       token(files.providerRegistry, '"phase13Promotion" to "P13-26 partial media/recorder/mediainfo provider evidence gate"'),
@@ -211,6 +229,7 @@ function buildReport(files) {
       mediainfoReady: scenarioById(scenarios, "media_audio_mediainfo").status !== "missing_evidence",
       recorderStatusReady: scenarioById(scenarios, "recorder_fail_closed").status !== "missing_evidence",
       recorderStartStopReady: false,
+      privacyMigrationExamplesReady: scenarioById(scenarios, "privacy_migration_examples").status !== "missing_evidence",
       playbackReady: false,
       mediaStoreReady: false,
       packagedMediaReady: scenarioById(scenarios, "media_audio_mediainfo").status !== "missing_evidence" &&

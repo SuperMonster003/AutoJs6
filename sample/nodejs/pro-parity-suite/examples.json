@@ -71,6 +71,16 @@
       "skipReason": "notifications/settings or device.power provider may be unavailable"
     },
     {
+      "id": "media-recorder",
+      "title": "Media, mediainfo, and recorder migration",
+      "file": "snippets/media-recorder.cjs",
+      "targetProfile": "pro_compat_opt_in",
+      "requiredCapabilities": ["media", "media.audio", "media.metadata", "media.recording"],
+      "expectedOutput": "sample.pro-parity-suite.media-recorder=PASS",
+      "packagedBehavior": "read-only media status and recorder denial are covered; real recording requires privacy-reviewed foreground disclosure",
+      "skipReason": "media, mediainfo, recorder, or scoped media fixture may be unavailable"
+    },
+    {
       "id": "screenshot-ocr",
       "title": "screenshot plus OCR migration",
       "file": "snippets/screenshot-ocr.cjs",
