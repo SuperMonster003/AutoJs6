@@ -386,8 +386,12 @@ expecting `require("threads")`, `compat.threads`, a global `threads`, a global
 P12-20 rechecked `worker_threads`, process slot, and execution-mode maturity and
 kept that boundary. The internal worker path is native-availability gated, not a
 release migration target; `worker_computation` remains reserved, and
-`second_execution_slot` remains open. See
-[RHINO_THREADS_MATURITY_REVIEW.md](reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md).
+`second_execution_slot` was still open at P12. P13-06 later closed
+`second_execution_slot` for scheduler/stress evidence; P13-08 still owns
+long-duration soak through `full_heavy_resource_stress`. See
+[RHINO_THREADS_MATURITY_REVIEW.md](reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md)
+and
+[P13_06_SECOND_EXECUTION_SLOT_SCHEDULER.md](reports/phase13/P13_06_SECOND_EXECUTION_SLOT_SCHEDULER.md).
 
 P12-21 adds the Rhino threads migration cookbook:
 [RHINO_THREADS_MIGRATION_COOKBOOK.md](reports/phase12/RHINO_THREADS_MIGRATION_COOKBOOK.md).

@@ -755,8 +755,8 @@ process-worker replacement decision gate. It requires
 `processWorkerReplacementProfile` diagnostics, no callable
 `process_worker`/`compute_worker` facade, WorkerPool as the current replacement
 path, continued `child_process` denial, `shell` as a separate scoped command
-bridge, reserved `worker_computation`, open `second_execution_slot` relation,
-and docs updates while keeping native WorkerPool proof, packaged behavior, slot
+bridge, reserved `worker_computation`, P13-06-closed `second_execution_slot`
+diagnostics, and docs updates while keeping native WorkerPool proof, packaged behavior, slot
 accounting, cleanup stress, and future launch-surface evidence open. P13-35
 v1.1 has no user-facing process-worker API or UX; P13-40 is the separate track
 for any future scoped `child_process` runner.

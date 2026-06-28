@@ -9810,7 +9810,7 @@ std::string buildEmbeddedScriptExecutionSource(
         childProcess: "denied",
         shellBridge: "separate_scoped_command_bridge",
         executionMode: "worker_computation_reserved",
-        secondExecutionSlot: "not_closed",
+        secondExecutionSlot: "closed_by_p13_06",
         scopedScriptPath: "workingDirectory",
         messageSizeBytes: __autojs6_worker_threads_policy.maxMessageBytes,
         maxQueuedMessages: __autojs6_worker_threads_policy.maxQueuedMessages,

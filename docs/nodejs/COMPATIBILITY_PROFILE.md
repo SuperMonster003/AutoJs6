@@ -1249,8 +1249,8 @@ P13-35 records process-worker replacement as partial. The runtime exposes
 replacement path is request-local `worker_threads.WorkerPool`, not a new
 `process_worker` or `compute_worker` facade. `child_process` stays denied in
 the Safe/default profile, `shell` remains a separate scoped command bridge,
-`worker_computation` remains reserved, `second_execution_slot` is not closed by
-this decision, and raw process handles, spawn/fork, stdio streams, signals,
+`worker_computation` remains reserved, `second_execution_slot` is closed by
+P13-06 but not by this decision, and raw process handles, spawn/fork, stdio streams, signals,
 bridge modules, nested workers, and packaged process-worker behavior remain
 unpromoted. For P13-35 v1.1, there is no user-facing process-worker API or UX;
 P13-40 remains the separate track for any future scoped `child_process` runner.

@@ -32,15 +32,18 @@ Current crash evidence progress:
 
 Current multi-instance progress:
 
-- `second_execution_slot`: explicit one-shot routing can now select `primary`
-  or `overflow_1`; focused instrumentation covers `overflow_1` diagnostics and
-  concurrent primary/overflow execution in different Android service processes.
-  Phase 13 adds a client-side default one-shot scheduler that can lease
-  `primary` / `overflow_1` on eligible devices, preserves
-  `processPoolSlotSource` diagnostics, and reports full-pool queue/dequeue
-  diagnostics. Packaged
-  behavior, fatal slot-crash fallback/quarantine, and stress promotion remain
-  open.
+- `second_execution_slot`: closed by P13-06. Explicit one-shot routing can
+  select `primary` or `overflow_1`; focused instrumentation covers
+  `overflow_1` diagnostics and concurrent primary/overflow execution in
+  different Android service processes. Phase 13 adds a client-side default
+  one-shot scheduler that can lease `primary` / `overflow_1` on eligible
+  devices, preserves `processPoolSlotSource` diagnostics, reports full-pool
+  queue/dequeue diagnostics, propagates packaged process-pool slot metadata,
+  records no-restart crash marker fallback evidence, and adds focused
+  two-slot shared-resource stress. P13-08 still owns long-duration quick/final
+  soak evidence through the separate `full_heavy_resource_stress` blocker, and
+  automatic slot replacement/quarantine remains disabled until a future
+  pool-coordinator promotion.
 
 Current packaged long-running progress:
 

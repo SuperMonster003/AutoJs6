@@ -123,8 +123,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Final Blockers
 
 - Total blockers: 15
-- Completed blockers: 2
-- Open blockers: 8
+- Completed blockers: 3
+- Open blockers: 7
 - Deferred blockers: 1
 - Rejected blockers: 4
 
@@ -134,7 +134,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `crash_evidence_automation` | `completed` | `closed` | `required_internal` | Crash marker, next-launch collection, resource snapshot, timeline tail, symbolization, and chaos injection pass focused gates. |
 | `android_side_package_installation` | `open` | `open` | `required_internal` | Android package install/update/remove/list/verify/prune is transactional, cancellable, locked, integrity checked, and lifecycle-script free. |
 | `packaged_long_running` | `open` | `open` | `required_internal` | Packaged APK long-running mode has foreground notification, stop action, lifecycle handling, checkpoint, quota, and cleanup evidence. |
-| `second_execution_slot` | `open` | `open` | `required_internal` | At least two independent Node execution slots are available with isolated ResourceRegistry and crash evidence. |
+| `second_execution_slot` | `completed` | `closed` | `required_internal` | At least two independent Node execution slots are available with isolated ResourceRegistry and crash evidence. |
 | `full_heavy_resource_stress` | `open` | `open` | `required_internal` | 8-hour quick soak and 24-hour final soak show no monotonic leaks, orphan process, or unrecoverable runtime. |
 | `worker_threads` | `open` | `decision_required` | `conditional` | Implement controlled worker_threads or declare intentionally unsupported with an AutoJs6 process-worker replacement. |
 | `controlled_wasi` | `open` | `decision_required` | `conditional` | Either support only WebAssembly or implement a controlled autojs:wasi profile while keeping raw node:wasi disabled. |

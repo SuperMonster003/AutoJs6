@@ -1132,9 +1132,9 @@ P13-35 records process-worker replacement as partial: Safe Node now exposes
 `processWorkerReplacementProfile` diagnostics that choose
 `worker_threads.WorkerPool` as the current replacement path without introducing
 a `process_worker` or `compute_worker` facade. `child_process` remains denied,
-`shell` remains the scoped command bridge, and `worker_computation` plus
-`second_execution_slot` stay unpromoted until future evidence closes those
-gates. For v1.1 there is no user-facing process-worker API or UX; any scoped
+`shell` remains the scoped command bridge, `worker_computation` stays
+unpromoted, and `second_execution_slot` is inherited as closed by P13-06
+without promoting a process-worker facade. For v1.1 there is no user-facing process-worker API or UX; any scoped
 `child_process` runner remains a separate P13-40 track.
 
 P13-40 records child_process scoped runner as partial: Safe Node now exposes

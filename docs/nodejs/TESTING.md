@@ -1922,8 +1922,8 @@ This host gate records P13-35 as partial. It requires
 `processWorkerReplacementProfile` diagnostics, absence of a callable
 `process_worker`/`compute_worker` facade, default `child_process` denial,
 default worker denial, WorkerPool replacement-path evidence, reserved
-`worker_computation`, open `second_execution_slot` relation, TypeScript
-declarations, the desktop builtin matrix, and Phase13 docs. It keeps native
+`worker_computation`, P13-06-closed `second_execution_slot` diagnostics,
+TypeScript declarations, the desktop builtin matrix, and Phase13 docs. It keeps native
 WorkerPool evidence, packaged process-worker behavior, slot accounting,
 cleanup stress, and future launch-surface evidence open while keeping P13-35
 v1.1 without a user-facing process-worker API or UX. P13-40 is the separate

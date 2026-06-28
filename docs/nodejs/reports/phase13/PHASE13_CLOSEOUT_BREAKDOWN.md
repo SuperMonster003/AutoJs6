@@ -65,12 +65,15 @@ A Phase 13 parent task can close only when all of the following are true:
 
 #### P13-06 second execution slot
 
-Reason open: mostly `evidence`.
+Reason closed for the P13-06 scheduler/stress scope. Long-duration soak
+remains tracked by P13-08 / `full_heavy_resource_stress`.
 
 - [x] Refresh or replace the `defaultProcessPoolBusyResult` evidence token in the verifier/report.
 - [x] Attach current focused primary/overflow shared-resource stress evidence.
 - [x] Keep P13-08 long-duration soak evidence as the P13-08/final-promotion closure signal instead of a P13-06 blocker.
 - [x] Re-run `verifyNodePhase13SecondExecutionSlotScheduler` and summary generation with zero blockers.
+- [x] Close the `second_execution_slot` final blocker registry entry once the
+  P13-06 verifier reports ready with zero blockers.
 
 #### P13-07 packaged long-running service
 
