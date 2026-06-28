@@ -744,7 +744,7 @@ class AceCodeEditor @JvmOverloads constructor(
     fun requestEditorFocus() {
         eventHistory.record("focus_request", "requestEditorFocus")
         webView.requestFocus()
-        evaluateOrQueue("window.AutoJsAce && window.AutoJsAce.jumpTo($cursorLine, $cursorColumn);")
+        evaluateOrQueue("window.AutoJsAce && window.AutoJsAce.focus && window.AutoJsAce.focus('requestEditorFocus');")
     }
 
     fun destroy() {

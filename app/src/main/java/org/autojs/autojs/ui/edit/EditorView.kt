@@ -794,9 +794,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // Request focus without forcing soft keyboard.
         // zh-CN: 请求焦点但不强制弹出软键盘.
-        if (editor.engineType != EditorEngineType.ACE) {
-            editor.requestEditorFocus()
-        }
+        editor.requestEditorFocus()
 
         // Optionally ensure visible once.
         // zh-CN: 可选地确保一次可见.

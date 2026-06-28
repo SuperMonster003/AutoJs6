@@ -887,6 +887,17 @@
         return imeTextInputSelectionWindow.element !== null;
     }
 
+    function focusEditor(reason) {
+        if (!editor) {
+            return false;
+        }
+        editor.focus();
+        resetImeTextInputSelectionWindow(reason || "focus");
+        scrollCursorIntoViewSafely(reason || "focus");
+        notifyCursorChanged();
+        return typeof editor.isFocused === "function" ? editor.isFocused() : true;
+    }
+
     function handleImeTextInputSelectionChange() {
         if (!isAndroidUserAgent() || imeTextInputSelectionSyncing) {
             return;
@@ -1313,6 +1324,7 @@
         column = Math.max(0, Number(column) || 0);
         editor.focus();
         editor.gotoLine(row + 1, column, true);
+        resetImeTextInputSelectionWindow("jump_to");
         scheduleResize("jump_to");
         notifyCursorChanged();
     }
@@ -2051,6 +2063,7 @@
             cancelTouchInteraction: cancelAceMobileTouchInteraction,
             insertAtLine: insertAtLine,
             appendTextChunk: appendTextChunk,
+            focus: focusEditor,
             jumpTo: jumpTo,
             jumpToOffset: jumpToOffset,
             jumpToStart: jumpToStart,
@@ -2185,7 +2198,7 @@
         callBridge("notifyReady", [json]);
         callBridge("notifyEvent", ["ready", json]);
         scheduleResize("init");
-        editor.focus();
+        focusEditor("init");
     }
 
     function startEditor() {
