@@ -50,6 +50,12 @@ reflection, native library loading, process authority, raw `Context`, raw
 `Activity`, raw `View`, Binder, filesystem, and raw network authority remain
 denied.
 
+The P13-16 v1.1 replacement decision is satisfied for this gate:
+`rhino.JavaAdapter()` is a stable denial, global `JavaAdapter` remains absent,
+and `java.defineClass()` / `$autojs.java.defineClass()` are reserved
+denial-only future provider names. The actual proxy-interface provider remains
+future P13-16 provider work, not a prerequisite for the P13-14 Java proxy POC.
+
 Packaged APK metadata remains fail-closed. There is no Pro profile runtime
 selector yet; this POC is available only through explicit experimental test or
 debug configuration.
@@ -75,8 +81,6 @@ debug configuration.
 
 - Add a real Pro profile runtime selector instead of build/test-only
   experimental wiring.
-- Implement the actual P13-16 `JavaAdapter` / `defineClass` replacement
-  provider.
 - Add packaged APK metadata, rollback, and security evidence before any
   profile promotion.
 

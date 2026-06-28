@@ -204,7 +204,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-profile-selection-diagnostics.json` | `verifyNodePhase13ProfileSelectionDiagnostics` | `P13-49` | `ready` | 0 | 0 |
 | `phase13-relaxed-capability-security-corpus.json` | `verifyNodePhase13RelaxedCapabilitySecurityCorpus` | `P13-50` | `ready` | 0 | 0 |
 | `phase13-rhino-import-helpers-decision.json` | `verifyNodePhase13RhinoImportHelpersDecision` | `P13-15` | `ready` | 0 | 0 |
-| `phase13-rhino-install-java-proxy.json` | `verifyNodePhase13RhinoInstallJavaProxy` | `P13-14` | `partial` | 0 | 3 |
+| `phase13-rhino-install-java-proxy.json` | `verifyNodePhase13RhinoInstallJavaProxy` | `P13-14` | `partial` | 0 | 2 |
 | `phase13-rhino-java-adapter-decision.json` | `verifyNodePhase13RhinoJavaAdapterDecision` | `P13-16` | `ready` | 0 | 0 |
 | `phase13-screenshot-image-ocr-promotion.json` | `verifyNodePhase13ScreenshotImageOcrPromotion` | `P13-20` | `partial` | 0 | 7 |
 | `phase13-second-execution-slot-scheduler.json` | `verifyNodePhase13SecondExecutionSlotScheduler` | `P13-06` | `ready` | 0 | 0 |

@@ -765,8 +765,9 @@ install state: default `rhino.install()` rejection, `node_modules/rhino`
 shadowing protection, explicit experimental `Packages` / `java` / `android`
 proxy installation, Java allowlist routing, and continued absence of
 `importClass`, `importPackage`, and `JavaAdapter`. It remains partial until a
-real Pro profile selector, packaged policy, and the P13-16 `JavaAdapter`
-replacement decision land.
+real Pro profile selector and packaged policy land. The P13-16 `JavaAdapter` /
+`defineClass` replacement decision is already recorded as a stable-denial gate;
+the actual proxy-interface provider remains future P13-16 provider work.
 
 Phase 13 Rhino import helper decision:
 

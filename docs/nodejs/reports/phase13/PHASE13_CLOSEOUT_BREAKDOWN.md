@@ -130,7 +130,7 @@ Reason open: `implementation`, `policy`.
 Reason open: `implementation`, `packaging`.
 
 - [ ] Add a real Pro profile runtime selector that can grant the experimental Java proxy path.
-- [ ] Depend on the P13-16 proxy-interface or `defineClass` replacement decision.
+- [x] Depend on the P13-16 proxy-interface or `defineClass` replacement decision.
 - [ ] Add packaged policy, metadata, and denial behavior.
 - [ ] Keep default `rhino.install()` fail-closed until all above evidence exists.
 
