@@ -136,7 +136,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `packaged_long_running` | `open` | `open` | `required_internal` | Packaged APK long-running mode has foreground notification, stop action, lifecycle handling, checkpoint, quota, and cleanup evidence. |
 | `second_execution_slot` | `completed` | `closed` | `required_internal` | At least two independent Node execution slots are available with isolated ResourceRegistry and crash evidence. |
 | `full_heavy_resource_stress` | `open` | `open` | `required_internal` | 8-hour quick soak and 24-hour final soak show no monotonic leaks, orphan process, or unrecoverable runtime. |
-| `worker_threads` | `open` | `decision_required` | `conditional` | Implement controlled worker_threads or declare intentionally unsupported with an AutoJs6 process-worker replacement. |
+| `worker_threads` | `open` | `intentionally_unsupported` | `conditional` | Declared intentionally unsupported for v1.1 through the P13-34 worker_threads denial/preflight gate and the P13-35 no-facade process-worker replacement decision; future native-worker-capable promotion must reopen the P13-34 evidence gates. |
 | `controlled_wasi` | `completed` | `closed` | `conditional` | Either support only WebAssembly or implement a controlled autojs:wasi profile while keeping raw node:wasi disabled. |
 | `x86` | `deferred` | `optional` | `conditional` | Optional experiment only; does not block the three required ABIs. |
 | `native_addon` | `rejected` | `permanently_unsupported` | `intentional_non_goal` | Stable denial remains documented and tested. |
