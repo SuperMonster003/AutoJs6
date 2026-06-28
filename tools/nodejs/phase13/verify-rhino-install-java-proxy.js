@@ -107,9 +107,10 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, "phase13-rhino-install-java-proxy"),
       token(files.p13Report, "The P13-16 v1.1 replacement decision is satisfied for this gate"),
       token(files.javaAdapterReport, "P13-16 v1.1 closure is a stable-denial decision"),
-      token(files.compatibilityProfile, "Its P13-16 dependency is satisfied by the stable-denial"),
+      token(files.compatibilityProfile, "P13-16 dependency is satisfied"),
+      token(files.p13Report, "selector as a separate P13-14 blocker"),
+      token(files.compatibilityProfile, "separate P13-14 blocker"),
     ], [
-      "A real Pro profile runtime selector remains unimplemented.",
       "Packaged APK policy remains fail-closed.",
     ]),
   ];
