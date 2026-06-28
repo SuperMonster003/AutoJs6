@@ -1845,6 +1845,19 @@ as a single `EmbeddedNodePackagedApkSmokeTest` method inside
 `verifyNodeWorkerGate`; it skips before APK construction when the S7-24 native
 worker preflight reports unavailable.
 
+Current QV710AF65F P13-34 gate evidence on 2026-06-28:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.worker_threads.experimental=true" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+Result: passed on QV710AF65F / XQ-AT72 / Android 12 with `tests=16`,
+`failures=0`, and `skipped=14`. The runnable, resource-stress, and packaged
+worker cases skipped through the native preflight with
+`worker.preflight.status=unavailable` and `ERR_AUTOJS6_WORKER_DISABLED`, so this
+archives the current gate run but does not prove runnable worker support.
+
 Current experimental worker_threads resource stress instrumentation:
 
 ```powershell
@@ -1872,8 +1885,8 @@ request-local experimental preflight evidence, existing native-available worker,
 MessageChannel, transfer-list, WorkerPool, resource-stress, and packaged worker
 smoke source markers, TypeScript declarations, the desktop builtin matrix, and
 Phase13 docs. It keeps native runnable evidence on target ABIs, archived
-experimental worker gate output, packaged `.mjs` worker smoke evidence, crash
-evidence, and Android RSS/resource evidence open while nested-worker,
+native-available experimental worker gate output, packaged `.mjs` worker smoke
+evidence, crash evidence, and Android RSS/resource evidence open while nested-worker,
 SharedArrayBuffer/Atomics, resourceLimits, and one-worker thread ceilings are
 documented in the P13-34 report.
 
