@@ -128,11 +128,11 @@ function buildReport(files) {
       token(files.compatibilityProfile, 'reserved future input automation labels split gesture authority away from `accessibility`'),
       token(files.securityModel, 'Reserved future input automation labels split gesture authority away'),
       token(files.capabilityMatrix, '`input.gesture`, `input.gesture.root`, and `input.gesture.shizuku`'),
+      token(files.p13Report, "`swipe`, `gesture`, and `powerDialog` stay stable-denied"),
+      token(files.compatibilityProfile, "`swipe`, `gesture`, and `powerDialog` stay stable-denied"),
       token(files.permissionManifest, 'const val ACCESSIBILITY = "accessibility"'),
       token(files.executionModePolicy, '"accessibility"'),
-    ], [
-      "Design a separate gesture provider for swipe/gesture/powerDialog before exposing those APIs.",
-    ]),
+    ], []),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-19 as partial", [
       token(files.p13Report, 'Status: partial'),
       token(files.phase13Tasks, 'P13-19 partial accessibility selector promotion gate'),

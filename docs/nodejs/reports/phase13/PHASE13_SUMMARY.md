@@ -163,7 +163,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
-| `phase13-accessibility-selector-promotion.json` | `verifyNodePhase13AccessibilitySelectorPromotion` | `P13-19` | `partial` | 0 | 4 |
+| `phase13-accessibility-selector-promotion.json` | `verifyNodePhase13AccessibilitySelectorPromotion` | `P13-19` | `partial` | 0 | 3 |
 | `phase13-android-package-install-manager.json` | `verifyNodePhase13AndroidPackageInstallManager` | `P13-09` | `partial` | 0 | 4 |
 | `phase13-app-intent-broadcast-parity.json` | `verifyNodePhase13AppIntentBroadcastParity` | `P13-23` | `ready` | 0 | 0 |
 | `phase13-autojs-global-v1.json` | `verifyNodePhase13AutoJsGlobalV1` | `P13-12` | `ready` | 0 | 0 |
