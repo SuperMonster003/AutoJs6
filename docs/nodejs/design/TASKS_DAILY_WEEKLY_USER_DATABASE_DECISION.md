@@ -15,6 +15,13 @@ the existing Android/Rhino task database substrate, live `work_manager`
 scheduled-work provider, and `compat.tasks` one-shot migration, but it does not
 promote daily/weekly add/query/update/remove behavior yet.
 
+The future owner for daily/weekly/user task database parity is a dedicated
+Pro-only JSON-safe `tasks` database provider. It is not a `work_manager`
+extension and is not a Safe-profile module. The `tasks` provider name is
+reserved for future design only; the current `NodeBridgePermissionManifest`
+must not accept it until schema, migration, packaged behavior, scheduler
+semantics, disclosure, and rollback gates exist.
+
 The promoted `compat.tasks` methods are still the WorkManager-backed,
 Node-owned subset:
 
@@ -38,6 +45,10 @@ The rejected `compat.tasks` methods are explicit stable-error stubs:
 
 These stubs do not dispatch bridge requests and do not create persistent task
 database rows.
+
+For v1.1, `compat.tasks` remains Promise-only. It does not gain a synchronous
+Rhino database compatibility mode, and it must not wrap raw `TimedTask` rows or
+return live task objects.
 
 ## Why Provider Promotion Is Rejected
 

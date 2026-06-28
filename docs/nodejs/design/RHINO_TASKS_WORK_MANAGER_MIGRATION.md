@@ -138,8 +138,11 @@ S11-22 keeps one current capability:
 
 - `work_manager`
 
-No new canonical capability is added. A later implementation should decide whether
-full Rhino task compatibility needs additional capabilities such as:
+No new canonical capability is added. P13-21 reserves a future dedicated
+Pro-only JSON-safe `tasks` database provider for daily/weekly/user task
+database parity; it must not be implemented as a `work_manager` extension.
+Additional broadcast-oriented capabilities remain separate future design
+inputs, such as:
 
 - `tasks`
 - `tasks.intent`

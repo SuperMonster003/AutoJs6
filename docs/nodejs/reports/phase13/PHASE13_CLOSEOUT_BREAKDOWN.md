@@ -196,7 +196,10 @@ Reason open: `implementation`, `evidence`, `packaging`.
 
 Reason open: `implementation`, `policy`, `packaging`.
 
-- [ ] Decide whether daily/weekly/user tasks live in `tasks`, `work_manager`, or a Pro-only provider.
+- [x] Decide daily/weekly/user task database parity belongs to a dedicated
+  Pro-only JSON-safe future `tasks` provider, not a `work_manager` extension.
+- [x] Keep `compat.tasks` Promise-only in v1.1; do not add a synchronous Rhino
+  database compatibility mode before the provider exists.
 - [ ] Define JSON task schema, row ownership, id mapping, migrations, downgrade behavior, and legacy visibility.
 - [ ] Implement add/query/update/remove over frozen JSON snapshots.
 - [ ] Add capability metadata, disclosure, rollback, and packaged task smoke.

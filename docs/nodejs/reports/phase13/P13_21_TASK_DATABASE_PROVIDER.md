@@ -14,6 +14,10 @@ translation to `work_manager.schedulePeriodic()`. P13-21 keeps `require("tasks")
 global `tasks`, raw `TimedTask` objects, and raw `IntentTask` objects
 unavailable until a JSON-safe task database provider owns schema, migration,
 packaged behavior, scheduler semantics, and deletion/update policy.
+The future owner for daily/weekly/user task database parity is a dedicated
+Pro-only JSON-safe `tasks` database provider, not a `work_manager` extension.
+That provider name is reserved for future design only and is not accepted by
+the current capability manifest.
 
 ## Implemented Evidence
 
@@ -57,6 +61,10 @@ packaged behavior, scheduler semantics, and deletion/update policy.
 - Raw task object mutation remains blocked. A future provider must use
   JSON-safe descriptors and patch/update payloads rather than V8 access to
   Android/Rhino task objects.
+- `compat.tasks` remains a Promise-only migration facade in v1.1. It does not
+  gain a synchronous Rhino database compatibility mode, and daily/weekly task
+  database methods stay stable rejection stubs until the dedicated provider is
+  implemented.
 
 ## Remaining Blockers
 

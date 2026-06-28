@@ -81,8 +81,10 @@ function buildReport(files) {
       token(files.workManagerTest, "jsWorkManagerModuleUsesFakeTransportAndSerializesPackagedMetadata"),
       token(files.workManagerTest, "androidWorkManagerLiveProviderExecutesPackagedProjectEntryAndPersistsResult"),
       token(files.resourceRegistryTest, "androidProviderTracksWorkManagerTasksAndCancellation"),
+      token(files.p13Report, "The future owner for daily/weekly/user task database parity is a dedicated"),
+      token(files.taskDecisionDoc, "The future owner for daily/weekly/user task database parity is a dedicated"),
+      token(files.taskMigrationDoc, "P13-21 reserves a future dedicated"),
     ], [
-      "Define whether daily/weekly wall-clock tasks are a new `tasks` provider, a work_manager extension, or a separate Pro-only module.",
       "Add database-row ownership and id mapping between Node-owned task ids, Rhino timed task ids, and packaged app ids.",
     ]),
     scenario("rhino_compat_tasks_boundary", "compat.tasks keeps one-shot migration live and daily/weekly rejected before dispatch", [
@@ -98,9 +100,10 @@ function buildReport(files) {
       token(files.typesReadme, "P12-17 adds typed stable rejection stubs for `addDailyTask()`, `addWeeklyTask()`, and `updateTask()`"),
       token(files.phase11Tasks, "addDailyTask"),
       token(files.phase11Tasks, "addWeeklyTask"),
+      token(files.p13Report, "`compat.tasks` remains a Promise-only migration facade in v1.1"),
+      token(files.taskDecisionDoc, "For v1.1, `compat.tasks` remains Promise-only"),
     ], [
       "Promote daily/weekly only after a JSON-safe provider replaces the rejection stubs.",
-      "Decide whether compat.tasks should stay Promise-only or gain a Pro-only compatibility mode for task database snapshots.",
     ]),
     scenario("android_task_database_substrate", "Rhino/Android task database exists but raw rows and objects do not cross the Node bridge", [
       token(files.timedTaskRhino, "TimedTask.dailyTask("),
