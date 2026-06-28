@@ -1011,9 +1011,10 @@ await setClip("ready");
 AutoJs6 的 Node.js 集成已经超过“实验入口”阶段，具备 runtime、模块系统、
 受控文件系统、桥接协议、权限模型、类型声明、示例、测试和打包验证等核心骨架。
 
-P13-21 records task database provider promotion as partial: `work_manager` and
-`autojs6:compat.tasks` one-shot scheduling are evidence-backed, while direct
-`tasks`, daily/weekly/user database operations, IntentTask/broadcast triggers,
+P13-21 records task database provider promotion as partial: `work_manager`,
+`autojs6:compat.tasks` one-shot scheduling, and JSON-safe legacy `TimedTask`
+query/get snapshots are evidence-backed, while direct `tasks`,
+daily/weekly/user database mutation operations, IntentTask/broadcast triggers,
 packaged promotion, and raw task object mutation remain blocked.
 
 P13-22 records IntentTask/broadcast provider promotion as partial: Android/Rhino

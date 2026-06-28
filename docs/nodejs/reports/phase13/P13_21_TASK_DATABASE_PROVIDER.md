@@ -40,6 +40,12 @@ the current capability manifest.
   `TimedTask.dailyTask()`, `TimedTask.weeklyTask()`,
   `TimedTaskManager`, and `TimedTaskDatabase`, but those raw objects and rows do
   not cross into Node.
+- JSON snapshot boundary: `NodeTimedTaskSnapshots` records a JSON-safe
+  `autojs6-node-timed-task-snapshot-v1` shape for legacy `TimedTask`
+  query/get evidence. Snapshots include ids, script paths, repeat/end metadata,
+  execution timing fields, and immutable raw-object denial policy without
+  exposing `TimedTask`, `ExecutionConfig`, `PendingIntent`, scheduler handles,
+  WorkManager requests, database cursors, or mutable row handles.
 - Raw boundary: raw `TimedTask`, `IntentTask`, `WorkRequest`,
   `PendingIntent`, `AlarmManager`, `JobScheduler`, `WorkManager`,
   `BroadcastReceiver`, `Intent`, and database cursors are not exposed to Node.
@@ -75,11 +81,14 @@ the current capability manifest.
   version, source runtime, and visibility metadata. Downgrades leave legacy
   Rhino rows visible to Rhino, ignore unknown Node descriptor versions safely,
   and fail closed before mutating records whose owner/package does not match.
+- The current `NodeTimedTaskSnapshots` helper is read-only legacy evidence. It
+  does not accept mutable Node handles, expose a `tasks` provider, or perform
+  add/update/enable/disable/remove database mutations.
 
 ## Remaining Blockers
 
-- Add `add`, `query`, `get`, `update`, `enable/disable`, and `remove` provider
-  operations over JSON snapshots and ids, with no raw task object mutation.
+- Add `add`, `update`, `enable/disable`, and `remove` provider operations over
+  JSON descriptors, snapshots, and ids, with no raw task object mutation.
 - Define wall-clock scheduler semantics across reboot, timezone/clock changes,
   Doze, exact-alarm permission, WorkManager/JobScheduler fallback, and Android
   quota diagnostics.

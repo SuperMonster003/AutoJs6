@@ -637,9 +637,10 @@ Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1.
 P13-21 additionally uses `verifyNodePhase13TaskDatabaseProvider` as the host
 promotion-status gate for daily/weekly/user task database parity and keeps the
 provider partial: `work_manager` and `compat.tasks` one-shot scheduling are
-covered, while direct `require("tasks")`, daily/weekly database add/query/get/
-update/remove operations, packaged behavior, and raw task objects require
-separate evidence.
+covered, and JSON-safe legacy `TimedTask` query/get snapshots are recorded,
+while direct `require("tasks")`, daily/weekly database
+add/update/enable-disable/remove operations, packaged behavior, and raw task
+objects require separate evidence.
 P13-22 additionally uses `verifyNodePhase13IntentBroadcastProvider` as the host
 promotion-status gate for IntentTask/broadcast parity and keeps the provider
 partial: Android/Rhino receiver substrate and stable rejection stubs are

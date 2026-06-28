@@ -1,6 +1,9 @@
 package org.autojs.autojs.engine
 
+import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.timing.IntentTask
+import org.autojs.autojs.timing.TimedTask
+import org.joda.time.LocalTime
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -666,6 +669,80 @@ class NodeWorkManagerBridgeInstrumentationTest {
             checkNotNull(NodeIntentTaskSnapshots.getSnapshot(tasks, 102L)).getLong("id"),
         )
         assertEquals(null, NodeIntentTaskSnapshots.getSnapshot(tasks, 999L))
+    }
+
+    @Test
+    fun timedTaskSnapshotsStayJsonOnlyWithoutSchedulerHandles() {
+        val daily = TimedTask.dailyTask(
+            LocalTime(9, 30),
+            "jobs/daily.cjs",
+            ExecutionConfig(delay = 123L, interval = 456L, loopTimes = 3),
+        ).apply {
+            id = 201L
+            isScheduled = true
+            endMode = TimedTask.END_MODE_COUNT
+            endValue = 5L
+            finishedTimes = 2
+        }
+        val weekly = TimedTask.weeklyTask(
+            LocalTime(10, 15),
+            TimedTask.FLAG_MONDAY.toLong() + TimedTask.FLAG_FRIDAY.toLong(),
+            "jobs/weekly.cjs",
+            ExecutionConfig(),
+        ).apply {
+            id = 202L
+        }
+
+        val snapshot = NodeTimedTaskSnapshots.snapshot(daily)
+        assertEquals(NodeTimedTaskSnapshots.SCHEMA, snapshot.getString("schema"))
+        assertEquals(201L, snapshot.getLong("id"))
+        assertEquals("jobs/daily.cjs", snapshot.getString("scriptPath"))
+        assertEquals(TimedTask.REPEAT_MODE_DAILY, snapshot.getInt("repeatMode"))
+        assertEquals("daily", snapshot.getString("repeatModeName"))
+        assertEquals(TimedTask.END_MODE_COUNT, snapshot.getInt("endMode"))
+        assertEquals("count", snapshot.getString("endModeName"))
+        assertEquals(123L, snapshot.getLong("delay"))
+        assertEquals(456L, snapshot.getLong("interval"))
+        assertEquals(3, snapshot.getInt("loopTimes"))
+        assertEquals(5L, snapshot.getLong("endValue"))
+        assertEquals(2, snapshot.getInt("finishedTimes"))
+        assertTrue(snapshot.getBoolean("scheduled"))
+        assertTrue(snapshot.getBoolean("daily"))
+        assertFalse(snapshot.getBoolean("weekly"))
+        assertEquals("rhino_timed_task_database", snapshot.getString("legacyOwner"))
+        assertFalse(snapshot.getBoolean("nodeProviderOwned"))
+
+        val rawPolicy = snapshot.getJSONObject("rawObjectPolicy")
+        assertEquals("denied", rawPolicy.getString("rawTimedTask"))
+        assertEquals("denied", rawPolicy.getString("rawExecutionConfig"))
+        assertEquals("denied", rawPolicy.getString("rawPendingIntent"))
+        assertEquals("denied", rawPolicy.getString("rawAlarmManager"))
+        assertEquals("denied", rawPolicy.getString("rawJobScheduler"))
+        assertEquals("denied", rawPolicy.getString("rawWorkRequest"))
+        assertEquals("denied", rawPolicy.getString("databaseCursor"))
+        assertEquals("denied", rawPolicy.getString("mutableRowHandle"))
+
+        assertFalse(snapshot.has("timedTask"))
+        assertFalse(snapshot.has("executionConfig"))
+        assertFalse(snapshot.has("pendingIntent"))
+        assertFalse(snapshot.has("alarmManager"))
+        assertFalse(snapshot.has("jobScheduler"))
+        assertFalse(snapshot.has("workRequest"))
+        assertFalse(snapshot.has("databaseCursor"))
+        assertFalse(snapshot.has("rawTimedTask"))
+
+        val tasks = listOf(weekly, daily)
+        val queried = NodeTimedTaskSnapshots.querySnapshots(tasks, repeatMode = TimedTask.REPEAT_MODE_DAILY)
+        assertEquals(1, queried.length())
+        assertEquals(201L, queried.getJSONObject(0).getLong("id"))
+        val queriedByPath = NodeTimedTaskSnapshots.querySnapshots(tasks, scriptPath = "jobs/weekly.cjs")
+        assertEquals(1, queriedByPath.length())
+        assertEquals("weekly", queriedByPath.getJSONObject(0).getString("repeatModeName"))
+        assertEquals(
+            202L,
+            checkNotNull(NodeTimedTaskSnapshots.getSnapshot(tasks, 202L)).getLong("id"),
+        )
+        assertEquals(null, NodeTimedTaskSnapshots.getSnapshot(tasks, 999L))
     }
 
     private fun androidProvider(id: String, workDir: File): AndroidNodeBridgeCapabilityProvider {

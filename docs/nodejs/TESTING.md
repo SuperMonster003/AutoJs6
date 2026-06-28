@@ -1501,11 +1501,12 @@ Phase 13 task database provider status gate:
 This host gate records P13-21 as partial. It requires the live `work_manager`
 baseline, `compat.tasks` one-shot migration evidence, explicit daily/weekly /
 IntentTask rejection stubs, Android/Rhino `TimedTask` database substrate
-evidence, provider-registry raw object denial, surface-manifest evidence, and
+evidence, JSON-safe legacy `TimedTask` query/get snapshot evidence,
+provider-registry raw object denial, surface-manifest evidence, and
 cross-document policy anchors. P13-21 also records descriptor schema, opaque id
 mapping, migration/downgrade, and legacy visibility policy for the future
 provider. It does not promote `require("tasks")`, global `tasks`, packaged task
-database behavior, provider operations, or raw task object mutation.
+database behavior, mutating provider operations, or raw task object mutation.
 
 Phase 13 IntentTask/broadcast provider status gate:
 
