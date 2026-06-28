@@ -61,22 +61,30 @@ objects. JavaScript receives only JSON-safe snapshots and booleans. No raw
 Opening settings remains a user-visible Android settings handoff. Tests use
 `dryRun` so host/device gates do not launch Settings during automation.
 
+## v1.1 Stable Denials
+
+P13-25 v1.1 stable-denies notification actions, listener callbacks, grouped
+notifications, custom styles, remote input, inline replies, direct
+Do-Not-Disturb mutation, exact-alarm authority, and raw foreground-disclosure
+control. These require a future provider with packaged review, user-visible
+consent, notification ownership, callback cleanup, and rollback evidence.
+
+P13-25 v1.1 stable-denies direct power-manager authority: raw wake locks,
+direct Doze mutation, request-ignore-battery-optimizations mutation flows, and
+power-save callbacks are not exposed. The supported v1.1 surface is status
+inspection plus user-visible settings handoff.
+
 ## Remaining Blockers
 
-- Notification actions, grouped notifications, custom styles, listeners,
-  remote input, inline reply, foreground disclosure, Do-Not-Disturb, and exact
-  alarm policy.
-- Direct power-manager APIs, wake locks, power-save callbacks, request-ignore
-  battery-optimization flow, OEM power-manager behavior, and device matrix
+- OEM power-manager behavior, background-launch behavior, and device matrix
   evidence.
 - Packaged notification/settings/power disclosure, install/run smoke, rollback
   diagnostics, and migration examples.
 
 The docs, compatibility notes, surface manifest, and Gradle gate are
 evidence-only for this partial decision. They do not add a separate P13-25
-blocker beyond the notification actions/listeners, advanced settings helpers,
-wakelock/power APIs, OEM matrix, packaged disclosure, and install/run evidence
-items above.
+blocker beyond OEM/background-launch device evidence and packaged
+notification/settings/power disclosure plus install/run evidence above.
 
 ## Verification
 

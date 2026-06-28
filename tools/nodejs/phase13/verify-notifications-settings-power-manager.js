@@ -84,9 +84,9 @@ function buildReport(files) {
       token(files.notificationsTest, "notifications.settings_permissions=true"),
       token(files.conformanceTest, 'expectExports("notifications", notifications, ["notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings", "openNotificationSettings"])'),
       token(files.typeSmoke, "const notificationStatus: notifications.NotificationPermissionStatus"),
+      token(files.p13Report, "P13-25 v1.1 stable-denies notification actions"),
+      token(files.compatibilityProfile, "P13-25 v1.1 stable-denies notification actions"),
     ], [
-      "Notification actions, listener callbacks, groups, styles, remote input, and richer layouts remain blocked.",
-      "Direct Do-Not-Disturb, exact-alarm, foreground-disclosure, and packaged notification action evidence remain blocked.",
     ]),
     scenario("device_power_status", "device exposes explicit battery optimization status/settings evidence", [
       token(files.permissionManifest, 'const val DEVICE_POWER = "device.power"'),
@@ -106,8 +106,9 @@ function buildReport(files) {
       token(files.deviceTest, "device.power.manifest.denied"),
       token(files.conformanceTest, 'expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"])'),
       token(files.typeSmoke, "const compatBatteryIgnored: boolean = await rhinoCompat.device.isIgnoringBatteryOptimizations"),
+      token(files.p13Report, "P13-25 v1.1 stable-denies direct power-manager authority"),
+      token(files.compatibilityProfile, "P13-25 v1.1 stable-denies direct power-manager authority"),
     ], [
-      "Wake locks, direct Doze mutation, request-ignore-battery-optimizations flow, and power-save callbacks remain blocked.",
       "OEM power-manager matrices, packaged disclosure, and background launch behavior still need device evidence.",
     ]),
     scenario("provider_registry_boundary", "provider registry and tests keep the boundary JSON-only and auditable", [
@@ -127,7 +128,7 @@ function buildReport(files) {
       token(files.projectTool, '"notifications.settings"'),
       token(files.projectTool, '"device.power"'),
     ], [
-      "Notification and power-manager APIs still need packaged install/run evidence before profile promotion.",
+      "Notification and power-manager APIs still need packaged install/run/disclosure evidence before profile promotion.",
     ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-25 as partial", [
       token(files.p13Report, "Status: partial"),

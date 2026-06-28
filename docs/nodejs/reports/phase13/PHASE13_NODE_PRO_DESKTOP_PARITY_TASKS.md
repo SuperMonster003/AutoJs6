@@ -132,10 +132,12 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_25_NOTIFICATIONS_SETTINGS_POWER_MANAGER.md`.
 - Surface manifest evidence: `phase13-notifications-settings-power-manager`.
-- Remaining P13-25 blockers: notification actions/listeners/rich layouts,
-  Do-Not-Disturb/exact-alarm policy, direct wakelock/power-manager APIs, OEM
-  power behavior matrix, packaged disclosure/run evidence, and migration
-  examples.
+- P13-25 v1.1 stable-denies notification actions/listeners/rich layouts,
+  Do-Not-Disturb/exact-alarm authority, and direct power-manager authority
+  such as wake locks, direct Doze mutation, mutation request flows, and
+  callbacks.
+- Remaining P13-25 blockers: OEM power behavior matrix, background-launch
+  behavior, packaged disclosure/run evidence, and migration examples.
 
 ## P13-26 Partial Landing Note
 
@@ -1210,10 +1212,11 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13NotificationsSettingsPowerManager`.
     - Report:
       `docs/nodejs/reports/phase13/P13_25_NOTIFICATIONS_SETTINGS_POWER_MANAGER.md`.
-    - Open before closure: notification actions/listeners/rich layouts,
-      Do-Not-Disturb/exact-alarm policy, direct wakelock/power-manager APIs,
-      OEM/device matrix, packaged disclosure/run evidence, and migration
-      examples.
+    - Stable denial: notification actions/listeners/rich layouts,
+      Do-Not-Disturb/exact-alarm authority, and direct wakelock/power-manager
+      APIs remain denied for v1.1.
+    - Open before closure: OEM/device matrix, background-launch behavior,
+      packaged disclosure/run evidence, and migration examples.
 
 - [ ] P13-26: 扩展 media/recorder/mediainfo provider。
   - 范围：音频播放、录音、媒体元数据、MediaStore 相关能力。
