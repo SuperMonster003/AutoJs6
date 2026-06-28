@@ -38,6 +38,10 @@ P13-23 extends the existing Node `app` module without promoting the full Rhino
 - `app.launch()` is available as a Rhino-style alias for
   `app.launchPackage()`; it does not add a new Android bridge method or
   authority surface.
+- Rhino global `launch()` migration example coverage now lives in
+  `docs/nodejs/MIGRATION_FROM_RHINO.md`, where legacy `launch("pkg")`
+  rewrites to `await require("app").launch("pkg", { timeoutMs })` while
+  preserving `app.launchPackage()` as the clearer exact-package API.
 - `app.intentToShell()` serializes the same JSON-safe descriptors into `am`
   intent arguments for migration scripts. It is a pure helper and does not
   execute shell commands or dispatch Android bridge requests.
@@ -65,6 +69,8 @@ P13-23 extends the existing Node `app` module without promoting the full Rhino
   `app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt`
 - Type declarations: `docs/nodejs/types/autojs6-node/app.d.ts`
 - Type smoke: `sample/nodejs/typescript-smoke/src/main.ts`
+- Rhino global `launch()` migration example:
+  `docs/nodejs/MIGRATION_FROM_RHINO.md`
 - Conformance:
   `app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`
 - Host verifier:

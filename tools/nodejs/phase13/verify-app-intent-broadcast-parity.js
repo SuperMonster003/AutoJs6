@@ -25,6 +25,7 @@ const FILES = {
   compatibilityProfile: "docs/nodejs/COMPATIBILITY_PROFILE.md",
   testingDoc: "docs/nodejs/TESTING.md",
   ciGatesDoc: "docs/nodejs/CI_GATES.md",
+  migrationGuide: "docs/nodejs/MIGRATION_FROM_RHINO.md",
   proComparison: "docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md",
   proAutoxNotes: "docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md",
   capabilityMatrix: "docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md",
@@ -186,9 +187,12 @@ function buildReport(files) {
       token(files.conformanceTest, 'assert.strictEqual(await expectPromise("app.launch"'),
       token(files.p13Report, "`app.launch()`"),
       token(files.p13Report, "`app.launchPackage()`"),
-    ], [
-      "Add migration examples for scripts that used Rhino global `launch()`.",
-    ]),
+      token(files.p13Report, "Rhino global `launch()` migration example"),
+      token(files.migrationGuide, "Rhino global `launch(\"org.example.app\")` migration"),
+      token(files.migrationGuide, 'launch("org.example.app");'),
+      token(files.migrationGuide, 'const launched = await app.launch("org.example.app", { timeoutMs: 5000 });'),
+      token(files.migrationGuide, "`app.launch()` is a P13-23 alias for `app.launchPackage()`"),
+    ], []),
     scenario("rhino_app_helper_aliases", "Remaining Rhino app helper names are either JSON-safe or stable fail-closed stubs", [
       token(files.nodeBridgeSources, "function __autojs6_app_parse_uri_descriptor(value, methodName)"),
       token(files.nodeBridgeSources, "function __autojs6_app_raw_uri_unavailable_error(methodName)"),
