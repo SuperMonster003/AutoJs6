@@ -46,7 +46,7 @@ function main() {
       .filter((entry) => !isBlockedOnlyByKnownRegistry(entry, unresolvedRequiredInternalBlockers))
       .map((entry) => ({
         id: entry.id,
-        reason: "report status is blocked",
+        reason: blockedReportReason(entry),
       })),
   ];
   const status = policyViolations.length > 0 ? "failed" : blockers.length > 0 ? "blocked" : "completed";
@@ -105,6 +105,38 @@ function isBlockedOnlyByKnownRegistry(report, unresolvedRequiredInternalBlockers
   }
   const known = new Set(unresolvedRequiredInternalBlockers.map((entry) => entry.id));
   return report.blockerIds.every((id) => known.has(id));
+}
+
+function blockedReportReason(report) {
+  const messages = blockerMessages(report.json);
+  if (messages.length === 0) {
+    return "report status is blocked";
+  }
+  const visible = messages.slice(0, 3);
+  const hidden = messages.length - visible.length;
+  return visible.join("; ") + (hidden > 0 ? `; +${hidden} more` : "");
+}
+
+function blockerMessages(json) {
+  if (!json || !Array.isArray(json.blockers)) {
+    return [];
+  }
+  return json.blockers.map((entry) => {
+    if (typeof entry === "string") {
+      return entry;
+    }
+    if (entry && typeof entry === "object") {
+      const id = typeof entry.id === "string" ? entry.id : "blocker";
+      if (typeof entry.reason === "string") {
+        return `${id}: ${entry.reason}`;
+      }
+      if (typeof entry.message === "string") {
+        return `${id}: ${entry.message}`;
+      }
+      return id;
+    }
+    return "";
+  }).filter(Boolean);
 }
 
 function blockerIds(json) {
