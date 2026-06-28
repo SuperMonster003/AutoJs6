@@ -49,7 +49,8 @@
 - P13-22 partial IntentTask/broadcast provider gate records the current
   Android/Rhino `IntentTask`, `IntentTaskDatabase`, `BaseBroadcastReceiver`,
   `StaticBroadcastReceiver`, and `DynamicBroadcastReceivers` substrate plus the
-  existing `autojs6:compat.tasks` IntentTask rejection stubs.
+  existing `autojs6:compat.tasks` IntentTask rejection stubs and JSON-safe
+  query/get snapshot helper evidence.
 - Host verifier: `tools/nodejs/phase13/verify-intent-broadcast-provider.js`.
 - Gradle gate: `:app:verifyNodePhase13IntentBroadcastProvider`.
 - Report: `docs/nodejs/reports/phase13/P13_22_INTENT_BROADCAST_PROVIDER.md`.
@@ -60,7 +61,8 @@
 - Remaining P13-22 blockers: capability split, receiver authority,
   exported/non-exported policy, trigger payload serialization, packaged
   manifest synthesis, install/trigger/remove smoke, user disclosure, and raw
-  Intent/BroadcastReceiver profile decisions.
+  Intent/BroadcastReceiver profile decisions. JSON-only legacy row snapshots
+  are now covered without exposing raw `IntentTask` or receiver handles.
 
 ## P13-23 Ready Landing Note
 
@@ -1115,11 +1117,12 @@ P13 task 本身使用以下执行状态：
     - Current ready slice:
       - Android/Rhino `IntentTask`, `IntentTaskDatabase`, `TimedTaskManager`, `BaseBroadcastReceiver`, `StaticBroadcastReceiver`, and `DynamicBroadcastReceivers` exist as substrate.
       - `compat.tasks.addIntentTask/queryIntentTasks/getIntentTask/removeIntentTask` still reject with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` before bridge dispatch.
+      - `NodeIntentTaskSnapshots` records JSON-only query/get snapshot evidence without exposing raw `IntentTask` or receiver handles.
       - Node still cannot register Android receivers, mutate manifests, receive external broadcast wakeups, or access raw `Intent` / `BroadcastReceiver` / `IntentTask` objects.
     - Remaining blockers:
       - Capability split for app-local custom broadcasts, exported broadcasts, boot/user-unlocked, package events, startup, and exact-alarm triggers.
       - Receiver lifecycle ownership, exported policy, duplicate suppression, unregister/delete cleanup, and process-death recovery.
-      - Trigger payload JSON snapshots, packaged manifest synthesis, install/trigger/remove smokes, user disclosure, and rate-limit diagnostics.
+      - Trigger payload serialization, packaged manifest synthesis, install/trigger/remove smokes, user disclosure, and rate-limit diagnostics.
 
 - [x] P13-23: 扩展 app/intent/broadcast Pro parity。
   - 范围：补齐 `app` 模块启动应用、intent、URI、邮件、设置页、广播等能力。

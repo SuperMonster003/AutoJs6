@@ -31,6 +31,11 @@ packaged behavior, user disclosure, and install/trigger/remove evidence land.
 - Node boundary: `compat.tasks.addIntentTask()`, `queryIntentTasks()`,
   `getIntentTask(id)`, and `removeIntentTask(id)` reject with
   `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` before bridge dispatch.
+- JSON snapshot boundary: `NodeIntentTaskSnapshots` records a JSON-safe
+  `IntentTask` snapshot helper for future query/get migration evidence. It
+  serializes ids, script paths, actions, categories, data types, local scope,
+  legacy ownership, and explicit raw-object denial policy without registering
+  receivers or returning raw row handles.
 - Raw boundary: raw `BroadcastReceiver`, `Intent`, `IntentFilter`,
   `PendingIntent`, `Bundle`, `Uri`, `PackageManager`, signatures, icons,
   package lists, receiver handles, and raw `IntentTask` objects are not exposed
@@ -50,6 +55,9 @@ packaged behavior, user disclosure, and install/trigger/remove evidence land.
   files.
 - A future provider must return bounded JSON trigger payload snapshots instead
   of raw Android `Intent` or `Bundle` objects.
+- The `NodeIntentTaskSnapshots` helper is evidence for JSON-only row snapshots;
+  it is not a Node API, it does not register Android receivers, and it does not
+  transfer ownership of legacy Rhino rows to Node.
 - Legacy Rhino `IntentTask` rows remain owned by the Rhino task database and
   existing receiver stack. Future Node broadcast registrations must use separate
   provider-owned JSON descriptors with opaque Node task ids, while packaged
@@ -83,9 +91,9 @@ packaged behavior, user disclosure, and install/trigger/remove evidence land.
 
 The docs, compatibility notes, surface manifest, and Gradle gate are
 evidence-only for this partial decision. They do not add a separate P13-22
-blocker beyond receiver ownership/migration, JSON snapshots, capability split,
-manifest/export policy, trigger payload serialization, packaged trigger/remove
-smokes, consent, disclosure, and rollback evidence above.
+blocker beyond receiver ownership/migration, capability split, manifest/export
+policy, trigger payload serialization, packaged trigger/remove smokes, consent,
+disclosure, and rollback evidence above.
 
 ## Gate
 

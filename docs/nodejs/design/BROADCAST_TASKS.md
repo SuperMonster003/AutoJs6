@@ -10,7 +10,9 @@ P13-22 records this design gate as partial Phase 13 evidence only. Android/Rhino
 `IntentTask` persistence and receiver substrate exist, but Node still has no
 broadcast task provider, no receiver registration authority, no manifest
 mutation authority, no packaged install/trigger/remove smoke, and no raw
-`Intent` or `BroadcastReceiver` access.
+`Intent` or `BroadcastReceiver` access. A JSON-safe legacy `IntentTask`
+snapshot helper exists for query/get migration evidence only; it does not
+register receivers or expose raw row handles.
 
 ## Goal
 
