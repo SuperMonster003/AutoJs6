@@ -16,9 +16,10 @@ and disclosure surface.
 - `raw_network` is listed separately from controlled `network`, so P13-50
   corpus, P13-51 rollback, and P13-52 disclosure ids align for raw Node network
   builtin promotion review.
-- The policy covers screenshot, recording, overlay, accessibility, network,
-  raw network, filesystem relaxation, Java interop, root/Shizuku shell,
-  `child_process`, native addon, inspector, and WASI.
+- The policy covers screenshot, recording, overlay, accessibility, installed-app
+  query (`app.query`), network, raw network, filesystem relaxation, Java
+  interop, root/Shizuku shell, `child_process`, native addon, inspector, and
+  WASI.
 - Runtime diagnostics expose
   `require("autojs6:profile").privacyDisclosurePolicy` as a frozen object.
 - Node Doctor JSON/text reports include a Privacy Disclosure Policy section.

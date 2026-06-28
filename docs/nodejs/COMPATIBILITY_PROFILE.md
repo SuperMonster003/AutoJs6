@@ -1737,8 +1737,9 @@ runtime.
     URI/FileProvider, root/Shizuku/dual-user, and broadcast authority belongs
     under the P13-22/P13-24 gates. The descriptor alias and Rhino app gap
     matrices classify supported short forms, stable denials, and future-provider
-    work. Redacted installed-app list APIs, packaged app smoke, and migration
-    examples remain open.
+    work. `app_query` privacy disclosure and the future redacted installed-app
+    list schema are documented; packaged scoped-file Activity smoke remains
+    open.
 - `barcode` / `qrcode`
   - `detect(imageOrPath, options?): Promise<BarcodeSnapshot | null>`
   - `detectAll(imageOrPath, options?): Promise<readonly BarcodeSnapshot[]>`

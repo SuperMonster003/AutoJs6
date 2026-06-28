@@ -52,6 +52,7 @@ class NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest {
             "media_recording",
             "ui_overlay",
             "accessibility",
+            "app_query",
             "network",
             "raw_network",
             "filesystem_relaxation",
@@ -103,6 +104,12 @@ class NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest {
         val accessibility = surfaces.getValue("accessibility")
         assertTrue(accessibility.getBoolean("requiresSettingsIntent"))
         assertTrue(accessibility.getString("settingsIntent").contains("ACTION_ACCESSIBILITY_SETTINGS"))
+
+        val appQuery = surfaces.getValue("app_query")
+        assertEquals(NodeBridgePermissionManifest.APP_QUERY, appQuery.getString("capability"))
+        assertEquals(NodePrivacyDisclosurePolicy.PRO_COMPAT_OPT_IN, appQuery.getString("profile"))
+        assertFalse(appQuery.getBoolean("requiresForegroundDisclosure"))
+        assertFalse(appQuery.getBoolean("requiresNotification"))
 
         val network = surfaces.getValue("network")
         assertEquals(NodePrivacyDisclosurePolicy.DESKTOP_COMPAT_OPT_IN, network.getString("profile"))
@@ -192,12 +199,17 @@ class NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest {
                 assert.strictEqual(byId.screen_capture.implicitGrantAllowed, false);
                 assert.strictEqual(byId.ui_overlay.requiresSettingsIntent, true);
                 assert.strictEqual(byId.accessibility.requiresSettingsIntent, true);
+                assert.strictEqual(byId.app_query.capability, "app.query");
+                assert.strictEqual(byId.app_query.profile, "pro_compat_opt_in");
+                assert.strictEqual(byId.app_query.requiresForegroundDisclosure, false);
                 assert.strictEqual(byId.network.profile, "desktop_compat_opt_in");
                 assert.ok(byId.network.androidPermissions.includes("android.permission.INTERNET"));
                 assert.strictEqual(byId.raw_network.capability, "raw_network");
                 assert.strictEqual(byId.raw_network.profile, "desktop_compat_opt_in");
                 assert.ok(byId.raw_network.androidPermissions.includes("android.permission.INTERNET"));
                 assert.ok(policy.channels.some((channel) => channel.id === "foreground_service_notification"));
+                assert.ok(policy.channels.some((channel) => channel.id === "project_capability_review" && channel.requiredFor.includes("app_query")));
+                assert.ok(policy.channels.some((channel) => channel.id === "packaged_metadata_review" && channel.requiredFor.includes("app_query")));
                 assert.ok(policy.channels.some((channel) => channel.id === "project_capability_review" && channel.requiredFor.includes("raw_network")));
                 assert.ok(policy.channels.some((channel) => channel.id === "packaged_metadata_review" && channel.requiredFor.includes("raw_network")));
                 console.log("p13privacy.policy=" + [
@@ -227,7 +239,7 @@ class NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest {
                     "${NodePrivacyDisclosurePolicy.STATUS}|safe_default|false|true|true|true|true|true|true|",
             ),
         )
-        assertTrue(result.stdout, result.stdout.contains("|14"))
+        assertTrue(result.stdout, result.stdout.contains("|15"))
     }
 
     private fun JSONArray.byId(): Map<String, JSONObject> {

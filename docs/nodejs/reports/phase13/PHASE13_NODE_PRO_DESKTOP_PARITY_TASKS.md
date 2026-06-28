@@ -85,15 +85,17 @@
   short action/category constants, `url`/`package` descriptor aliases, raw app
   object/list APIs, and preset app aliases as supported, stable-denied, or
   future-provider work.
+- Installed-app query disclosure now records the `app_query` P13-52 privacy
+  surface, the `autojs6-node-app-query-redacted-list-v1` future list schema,
+  and packaged `app.query` disclosure metadata examples.
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
 - Report:
   `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
 - Surface manifest evidence: `phase13-app-intent-broadcast-parity`.
-- Remaining P13-23 blockers: raw URI/FileProvider promotion, raw installed-app
-  list APIs, broadcast send promotion, root/Shizuku/dual-user routing through
-  explicit capabilities, packaged smoke, and migration examples.
+- Remaining P13-23 blocker: packaged scoped file view/edit Activity routing and
+  disclosure evidence.
 
 ## P13-24 Partial Landing Note
 
@@ -1098,6 +1100,9 @@ P13 task 本身使用以下执行状态：
       action/category constants, `url`/`package` descriptor aliases, raw app
       object/list APIs, and preset app aliases as supported, stable-denied, or
       future-provider work.
+    - Installed-app query disclosure: `app_query` P13-52 privacy surface,
+      `autojs6-node-app-query-redacted-list-v1` future list schema, and
+      packaged `app.query` disclosure metadata examples.
     - Type declarations: `docs/nodejs/types/autojs6-node/app.d.ts`.
     - Type smoke: `sample/nodejs/typescript-smoke/src/main.ts`.
     - Focused conformance:
@@ -1107,9 +1112,8 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
     - Report:
       `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
-    - Open before closure: raw URI/FileProvider promotion, broadcast send
-      promotion, root/Shizuku/dual-user routing through P13-24 capabilities,
-      raw installed-app list APIs, packaged smoke, and migration examples.
+    - Open before closure: packaged scoped file view/edit Activity routing and
+      disclosure evidence.
 
 - [ ] P13-24: 扩展 shell/root/Shizuku 能力。
   - 范围：将 shell、root shell、Shizuku 拆成独立 capability。

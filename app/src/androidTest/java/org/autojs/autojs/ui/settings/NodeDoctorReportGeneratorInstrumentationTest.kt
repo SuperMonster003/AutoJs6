@@ -96,9 +96,11 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertTrue(privacyDisclosurePolicy.getBoolean("packagedImplicitHighPrivilegeDenied"))
         val disclosureSurfaces = privacyDisclosurePolicy.getJSONArray("surfaces").byId()
         assertTrue(disclosureSurfaces.containsKey("screen_capture"))
+        assertTrue(disclosureSurfaces.containsKey("app_query"))
         assertTrue(disclosureSurfaces.containsKey("network"))
         assertTrue(disclosureSurfaces.containsKey("java_interop"))
         assertTrue(disclosureSurfaces.getValue("screen_capture").getBoolean("requiresForegroundDisclosure"))
+        assertEquals("app.query", disclosureSurfaces.getValue("app_query").getString("capability"))
         assertTrue(
             disclosureSurfaces
                 .getValue("network")

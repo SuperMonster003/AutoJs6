@@ -29,6 +29,7 @@ grant runtime authority.
 | `media_recording` | `media.recording` | `pro_compat_opt_in` | required | required | `RECORD_AUDIO` and microphone foreground service |
 | `ui_overlay` | `ui.overlay` | `pro_compat_opt_in` | required | required | `SYSTEM_ALERT_WINDOW`, special-use foreground service, notification |
 | `accessibility` | `accessibility` | `pro_compat_opt_in` | required | required | accessibility settings disclosure |
+| `app_query` | `app.query` | `pro_compat_opt_in` | required | not required by default | project capability and packaged metadata review |
 | `network` | `network` | `desktop_compat_opt_in` | required | not required by default | `android.permission.INTERNET` |
 | `raw_network` | `raw_network` | `desktop_compat_opt_in` | required | not required by default | `android.permission.INTERNET` and packaged raw network review |
 | `filesystem_relaxation` | `filesystem_relaxation` | `desktop_compat_opt_in` | required | not required by default | SAF/user-authorized roots before any expansion |
