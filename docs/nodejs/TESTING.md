@@ -763,15 +763,16 @@ Phase 13 `rhino.install` Java proxy:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRhinoShimDesignGateInstrumentationTest"
 ```
 
-`verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 partial Rhino
+`verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 ready Rhino
 install state: default `rhino.install()` rejection, `node_modules/rhino`
 shadowing protection, explicit experimental `Packages` / `java` / `android`
 proxy installation, Java allowlist routing, and continued absence of
-`importClass`, `importPackage`, and `JavaAdapter`. It remains partial until
-packaged policy lands. Real Pro profile selector is delegated to the aggregate
-Java/Rhino surface gate rather than counted as a separate P13-14 blocker. The P13-16 `JavaAdapter` /
-`defineClass` replacement decision is already recorded as a stable-denial gate;
-the actual proxy-interface provider remains future P13-16 provider work.
+`importClass`, `importPackage`, and `JavaAdapter`. Packaged metadata remains
+fail-closed for v1.1. Real Pro profile selector is delegated to the aggregate
+Java/Rhino surface gate rather than counted as a separate P13-14 blocker. The
+P13-16 `JavaAdapter` / `defineClass` replacement decision is already recorded
+as a stable-denial gate; the actual proxy-interface provider remains future
+P13-16 provider work.
 
 Phase 13 Rhino import helper decision:
 

@@ -129,12 +129,14 @@ Java/Rhino surface gate.
 
 #### P13-14 `rhino.install()` compatibility
 
-Reason open: `implementation`, `packaging`.
+Reason closed for the P13-14 v1.1 Java proxy POC scope. Future packaged
+promotion remains `implementation` and `packaging` work under the aggregate
+Java/Rhino surface gate.
 
 - [x] Delegate the real Pro profile runtime selector to the aggregate Java/Rhino surface gate.
 - [x] Depend on the P13-16 proxy-interface or `defineClass` replacement decision.
-- [ ] Add packaged policy, metadata, and denial behavior.
-- [ ] Keep default `rhino.install()` fail-closed until all above evidence exists.
+- [x] Keep packaged policy, metadata, and denial behavior fail-closed for v1.1.
+- [x] Keep default `rhino.install()` fail-closed until explicit experimental Java proxy options are supplied.
 
 #### P13-16 `JavaAdapter` / `defineClass` replacement
 

@@ -375,14 +375,14 @@ thread-dispatch / `$autojs.java.setThreadMode` APIs, and expanded-budget
 enforcement remain fail-closed. Pro profile promotion is delegated to the
 aggregate Java/Rhino surface gate rather than counted as a separate P13-13
 allowlist blocker.
-`verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 partial
+`verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 ready
 `rhino.install` state: default install rejection remains, while explicit
 experimental installs can add `Packages`, `java`, and `android` Java proxies
 that route through the same allowlist bridge. The P13-16 `JavaAdapter` /
 `defineClass` replacement decision is satisfied as a stable-denial gate;
-packaged metadata remains fail-closed. Real Pro profile selector is delegated
-to the aggregate Java/Rhino surface gate rather than counted as a separate
-P13-14 blocker.
+packaged metadata remains fail-closed for v1.1. Real Pro profile selector is
+delegated to the aggregate Java/Rhino surface gate rather than counted as a
+separate P13-14 blocker.
 `verifyNodePhase13RhinoImportHelpersDecision` records the P13-15 decision:
 `require("rhino").importClass()` and `.importPackage()` are stable
 `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED` helpers, no global helpers are installed,
