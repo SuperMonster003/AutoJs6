@@ -366,7 +366,7 @@ class NodeRealNpmCompatInstrumentationTest {
         private const val PHASE7_FIXTURE_COUNT = 13
         private const val PHASE8_FIXTURE_COUNT = 20
         private const val PHASE9_FIXTURE_COUNT = 30
-        private const val EXPECTED_FIXTURE_COUNT = 55
+        private const val EXPECTED_FIXTURE_COUNT = 60
         private const val REAL_NPM_FIXTURE_BATCH_SIZE = 6
         private const val REAL_NPM_FIXTURE_BATCH_TIMEOUT_MS = 30_000L
         private val FORBIDDEN_PACKAGE_SCRIPTS = setOf("preinstall", "install", "postinstall", "prepare")

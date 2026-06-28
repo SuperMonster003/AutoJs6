@@ -803,7 +803,7 @@ but raw `process.getBuiltinModule` bypass behavior, `zlib/promises`, raw native
 handles, unrestricted network/OS surfaces, raw terminal control, and full
 desktop parity remain denied until separate Desktop-profile evidence proves
 them safe. The current stdlib npm corpus marker is
-`real_npm_phase13_55_fixture_corpus`.
+`real_npm_phase13_60_fixture_corpus`.
 
 P13-44 records process/env/argv parity as partial. `processParityProfile` is
 diagnostic metadata only and does not grant raw process authority. The Safe
@@ -830,10 +830,11 @@ declared by the host, and missing capabilities reject before plugin code runs.
 P13-47 records dependency compatibility corpus as partial. The real npm corpus
 taxonomy records `missing_builtin`, `native_addon`, `postinstall`, `network`,
 and `fs` package blocker reasons plus a stdlib `targetedFixtureDeltas` +5
-pass delta without adding unsafe runnable payloads. Native addons, lifecycle
-scripts, postinstall downloads, registry drift, and executable extraction
-remain denied by dependency scanning and runtime policy; P13-47 only improves
-reporting and pass-rate visibility by reason kind.
+pass delta plus ESM, network, filesystem, and package-manager targeted deltas
+without adding unsafe runnable payloads. Native addons, lifecycle scripts,
+postinstall downloads, registry drift, and executable extraction remain denied
+by dependency scanning and runtime policy; P13-47 only improves reporting and
+pass-rate visibility by reason kind.
 
 P13-36 records `vm` module promotion as partial. `vmProfile` is diagnostic
 metadata and does not make a second JavaScript context a security boundary.

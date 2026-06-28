@@ -44,9 +44,10 @@ that keep broader Desktop behavior future work.
   diagnostics channel, `node:test`, ESM builtin imports, and Web API promise
   behavior.
 - `NodeRealNpmCompatInstrumentationTest` now keeps the Phase 13 real npm
-  corpus at 55 fixtures, including five fixed stdlib-dependent package
+  corpus at 60 fixtures, including five fixed stdlib-dependent package
   snapshots for `crypto` + `stream/consumers`, `perf_hooks` + `async_hooks`,
-  `URL` + `Buffer`, `util` + `events`, and `path` + `querystring`.
+  `URL` + `Buffer`, `util` + `events`, and `path` + `querystring`, plus five
+  fixed ESM/network/fs/package-manager snapshots.
 - Existing `NodeModernCoreDifferentialInstrumentationTest` keeps modern-core
   partial evidence for AsyncLocalStorage, `perf_hooks`, stream promises,
   WebCrypto, diagnostics, timers promises, and `node:test`.
@@ -67,7 +68,8 @@ desktop parity.
 - Broader module-by-module conformance needs hostile inputs, more edge cases,
   Android terminal/OS edge cases, and packaged lifecycle evidence.
 - Additional stdlib-dependent packages and broader connected differential
-  dashboards remain future work beyond the current +5 fixed-fixture delta.
+  dashboards remain future work beyond the current stdlib +5 and
+  ESM/network/fs/package-manager +5 fixed-fixture deltas.
 - Full desktop parity still needs future policy for raw native handles, broad
   terminal behavior, unrestricted network/OS surfaces, raw
   `process.getBuiltinModule` bypass behavior, and `zlib/promises`.

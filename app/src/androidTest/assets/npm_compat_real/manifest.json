@@ -437,11 +437,51 @@
         "path and querystring package",
         "URL query helper"
       ]
+    },
+    {
+      "name": "esm-exports-conditions-package",
+      "patterns": [
+        "Phase 13 ESM corpus delta",
+        "package exports require condition",
+        "hybrid ESM metadata"
+      ]
+    },
+    {
+      "name": "network-policy-adapter-package",
+      "patterns": [
+        "Phase 13 network corpus delta",
+        "offline network adapter package",
+        "raw network policy metadata"
+      ]
+    },
+    {
+      "name": "scoped-fs-metadata-package",
+      "patterns": [
+        "Phase 13 filesystem corpus delta",
+        "scoped fs metadata package",
+        "temporary file cleanup"
+      ]
+    },
+    {
+      "name": "package-manager-metadata-package",
+      "patterns": [
+        "Phase 13 package-manager corpus delta",
+        "package metadata graph",
+        "dependency package metadata"
+      ]
+    },
+    {
+      "name": "lockfile-integrity-reader-v2",
+      "patterns": [
+        "Phase 13 package-manager corpus delta",
+        "package lock integrity metadata",
+        "lockfile v3 reader"
+      ]
     }
   ],
   "phase13Compatibility": {
     "schema": "autojs6-phase13-dependency-compatibility-corpus-v1",
-    "fixtureCount": 55,
+    "fixtureCount": 60,
     "requiredReasonKinds": [
       "missing_builtin",
       "native_addon",
@@ -461,6 +501,39 @@
         ],
         "passDelta": 5,
         "notes": "P13-43/P13-47 adds fixed pure-JS stdlib package snapshots for crypto+stream, perf_hooks+async_hooks, URL+Buffer, util+events, and path+querystring coverage."
+      },
+      {
+        "area": "esm",
+        "fixtures": [
+          "esm-exports-conditions-package"
+        ],
+        "passDelta": 1,
+        "notes": "P13-47 adds a fixed package exports/condition snapshot without enabling raw loader hooks."
+      },
+      {
+        "area": "network",
+        "fixtures": [
+          "network-policy-adapter-package"
+        ],
+        "passDelta": 1,
+        "notes": "P13-47 adds a fixed offline network-adapter snapshot that records policy metadata without live network I/O."
+      },
+      {
+        "area": "fs",
+        "fixtures": [
+          "scoped-fs-metadata-package"
+        ],
+        "passDelta": 1,
+        "notes": "P13-47 adds a fixed scoped-filesystem metadata snapshot with temporary file cleanup."
+      },
+      {
+        "area": "package_manager",
+        "fixtures": [
+          "package-manager-metadata-package",
+          "lockfile-integrity-reader-v2"
+        ],
+        "passDelta": 2,
+        "notes": "P13-47 adds fixed package metadata and lockfile integrity snapshots without registry access or lifecycle scripts."
       }
     ],
     "categories": [
@@ -536,7 +609,8 @@
           "http-client-package",
           "formdata-fetch-package",
           "fetch-adapter-v2",
-          "websocket-protocol-util"
+          "websocket-protocol-util",
+          "network-policy-adapter-package"
         ],
         "packages": [
           {
@@ -557,7 +631,10 @@
           "filehandle-package",
           "fs-watch-package",
           "lockfile-reader",
-          "module-graph-resolver"
+          "module-graph-resolver",
+          "scoped-fs-metadata-package",
+          "package-manager-metadata-package",
+          "lockfile-integrity-reader-v2"
         ],
         "packages": [
           {

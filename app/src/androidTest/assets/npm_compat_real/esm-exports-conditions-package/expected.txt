@@ -1,0 +1,1 @@
+realnpm.esm-exports-conditions=exports:require:feature:2

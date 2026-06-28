@@ -1,0 +1,13 @@
+{
+  "name": "@autojs6-fixtures/package-manager-metadata-package-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "pm-metadata-probe": "1.0.0",
+    "pm-metadata-leaf": "1.0.0"
+  }
+}
