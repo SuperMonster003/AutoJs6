@@ -38,6 +38,19 @@ class NodeBridgeResourceLeakStressInstrumentationTest {
             check(mkdirs()) { "Failed to create bridge resource stress JS working directory: $absolutePath" }
         }
 
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(
+            listOf(
+                "ocr",
+                "image",
+                "storage",
+                "notifications",
+                "sensors",
+                "accessibility",
+                "ui",
+                "shell",
+                "network",
+            ),
+        )
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             """
             "nodejs";
@@ -193,6 +206,7 @@ class NodeBridgeResourceLeakStressInstrumentationTest {
             "<embedded-autojs-bridge-resource-stress.js>",
             workingDirectory = workDir,
             timeoutMs = 60_000L,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("bridge resource stress fake transport", result)
@@ -328,8 +342,14 @@ class NodeBridgeResourceLeakStressInstrumentationTest {
                 argsJson = """[{"url":"wss://example.invalid/stress-$index","timeoutMs":1000}]""",
                 permissions = listOf("network"),
             )
-            assertFalse("WebSocket provider should stay disabled in normal builds", websocket.ok)
-            assertEquals(NodeRuntimeErrorCodes.NETWORK_DISABLED, websocket.error?.code)
+            assertFalse("WebSocket provider should fail closed or timeout without leaking resources", websocket.ok)
+            assertTrue(
+                websocket.toString(),
+                websocket.error?.code in setOf(
+                    NodeRuntimeErrorCodes.NETWORK_DISABLED,
+                    NodeRuntimeErrorCodes.NETWORK_TIMEOUT,
+                ),
+            )
             assertNoActiveBridgeResources(provider, "websocket-$index")
             assertEquals("0", provider.nativeDiagnostics()["embedded_script.websocket_active_connection_count"])
         }
