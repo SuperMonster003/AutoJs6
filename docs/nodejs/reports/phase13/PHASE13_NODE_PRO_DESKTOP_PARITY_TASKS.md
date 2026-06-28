@@ -784,10 +784,15 @@ P13 task 本身使用以下执行状态：
       clean-exit marker evidence, and cold relaunch without next-launch crash
       collection.
     - Device evidence: QV710AF65F / Sony XQ-AT72 / Android 12 passed the focused packaged crash-evidence smoke with fresh inrt template override; logcat contains `NodeLifecycleCheckpointStore` checkpoint write/read/clear markers, Stop `clean_exit`, task-removal `clean_exit`, and next-launch `NodeCrashEvidenceStore` collection.
+    - Packaged metadata/disclosure policy evidence: P13-45/P13-52 record
+      packaged `node.executionMode`/capability metadata as diagnostic review
+      metadata, keep unreviewed packaged high-privilege surfaces denied by
+      default, and leave disclosure manifest review/enforcement UI as future
+      promotion work.
     - Host verifier: `tools/nodejs/phase13/verify-packaged-long-running-service.js`.
     - Gradle gate: `:app:verifyNodePhase13PackagedLongRunningService`.
     - Report: `docs/nodejs/reports/phase13/P13_07_PACKAGED_LONG_RUNNING_SERVICE.md`.
-    - Open before closure: Android permission/background-start matrix, packaged metadata/disclosure denial paths, broader device matrix evidence, quota/stress evidence.
+    - Open before closure: Android permission/background-start matrix, broader device matrix evidence, quota/stress evidence, packaged disclosure review/enforcement UI.
 
 - [ ] P13-08: 完成 full heavy resource stress。
   - 范围：补齐 8 小时 quick soak 和 24 小时 final soak。

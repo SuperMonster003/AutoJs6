@@ -192,7 +192,9 @@ long-running status records restart policy `never`, `automaticRestart=false`,
 duration, active resources, and the Stop action; packaged long-running includes
 checkpoint/read/clear, Stop clean-exit, and task-removal clean-exit smoke
 evidence but remains partial until permission-denial, background-start,
-packaged disclosure, broader device matrix, and stress evidence land.
+broader device matrix, stress, and packaged disclosure review/enforcement UI
+evidence land. Packaged metadata/disclosure policy diagnostics are recorded by
+P13-45/P13-52.
 Automatic restart, broader quotas, and script-level
 cooperative stop beyond the interactive lifecycle module remain gated. S7-22
 adds `require("autojs6:lifecycle")` for interactive and packaged long-running

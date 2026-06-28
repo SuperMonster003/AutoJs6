@@ -26,6 +26,9 @@ const FILES = {
   longRunningDoc: "docs/nodejs/design/LONG_RUNNING_SERVICE.md",
   compatibilityProfile: "docs/nodejs/COMPATIBILITY_PROFILE.md",
   testingDoc: "docs/nodejs/TESTING.md",
+  packagedCapabilityMetadataReport: "docs/nodejs/reports/phase13/P13_45_PACKAGED_CAPABILITY_METADATA.md",
+  privacyDisclosurePolicyReport: "docs/nodejs/reports/phase13/P13_52_PRIVACY_DISCLOSURE_POLICY.md",
+  privacyDisclosurePolicy: "docs/nodejs/security/PRIVACY_DISCLOSURE_POLICY.md",
   sampleProject: "sample/nodejs/long-running-service/project.json",
   p13Report: "docs/nodejs/reports/phase13/P13_07_PACKAGED_LONG_RUNNING_SERVICE.md",
 };
@@ -141,6 +144,14 @@ function buildReport(files) {
       token(files.testingDoc, "Packaged service mode"),
       token(files.p13Report, "P13-07"),
     ]),
+    scenario("packaged_metadata_disclosure_policy", "Packaged metadata and disclosure denial policy is recorded before promotion", [
+      token(files.packagedCapabilityMetadataReport, "node.executionMode"),
+      token(files.packagedCapabilityMetadataReport, "diagnostic-only"),
+      token(files.privacyDisclosurePolicyReport, "Packaged disclosure manifest authoring/review UI and installer/runtime"),
+      token(files.privacyDisclosurePolicy, "defaultAction=deny_without_reviewed_disclosure_manifest"),
+      token(files.privacyDisclosurePolicy, "project.json:node.disclosures"),
+      token(files.p13Report, "P13-45/P13-52 now record packaged metadata and disclosure policy"),
+    ]),
     scenario("device_evidence_remaining", "Final packaged device evidence remains open", [
       token(files.p13Report, "Status: partial"),
       token(files.p13Report, "Open Before Closure"),
@@ -148,7 +159,7 @@ function buildReport(files) {
       token(files.packagedSmokeTest, "LAUNCH_SURFACE_PACKAGED_LONG_RUNNING"),
       token(files.packagedSmokeTest, "marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1"),
     ], [
-      "Final packaged foreground/device matrix evidence is still required: Android API/permission/background-start denial, packaged metadata/disclosure denial paths, broader device matrix evidence, and quota/resource stress.",
+      "Final packaged foreground/device evidence is still required: Android API/permission/background-start denial matrix, broader device matrix evidence, quota/resource stress, and packaged disclosure review/enforcement UI before promotion.",
     ]),
   ];
   const checks = [
@@ -187,6 +198,7 @@ function buildReport(files) {
       packagedStopSmokeReady: scenarioById(scenarios, "packaged_stop_smoke").status === "ready",
       packagedTaskRemovalSmokeReady: scenarioById(scenarios, "packaged_task_removal_smoke").status === "ready",
       failClosedReady: scenarioById(scenarios, "fail_closed").status === "ready",
+      packagedMetadataDisclosurePolicyReady: scenarioById(scenarios, "packaged_metadata_disclosure_policy").status === "ready",
       deviceEvidenceReady: scenarioById(scenarios, "device_evidence_remaining").status === "ready",
       safeNodeProfilePreserved: true,
     },

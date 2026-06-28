@@ -377,10 +377,11 @@ Current behavior remains:
 - service process exit is expected after one-shot execution settles
 - packaged Node entries remain one-shot unless they explicitly opt in with
   `node.executionMode=interactive_long_running`; that packaged long-running
-  path includes packaged `autojs6:lifecycle` checkpoint/read/clear smoke
-  evidence plus Stop/task-removal clean-exit smoke evidence, but remains
-  partial until Android policy, packaged metadata/disclosure, broader device
-  matrix, and quota/resource stress evidence land
+path includes packaged `autojs6:lifecycle` checkpoint/read/clear smoke
+evidence plus Stop/task-removal clean-exit smoke evidence, but remains
+  partial until Android policy, broader device matrix, quota/resource stress,
+  and packaged disclosure review/enforcement UI evidence land; packaged
+  metadata/disclosure policy diagnostics are recorded by P13-45/P13-52
 
 The future design gate is documented in [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md).
 
