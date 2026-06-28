@@ -254,6 +254,11 @@ Focused packaged `app` bridge smoke:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunAppBridgeEmbeddedNodePackagedApk"
 ```
 
+This smoke declares packaged `node.permissions` for `app.launch` and
+`app.activity`, verifies packaged `app.packageName`, launch routing, scoped
+`app.viewFile()` / `app.editFile()` Activity routing, and emits
+`packaged.app.view_file=true` plus `packaged.app.edit_file=true`.
+
 Focused packaged `clipboard` bridge smoke:
 
 ```powershell
@@ -1512,7 +1517,7 @@ Phase 13 app/intent/broadcast Pro parity status gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13AppIntentBroadcastParity
 ```
 
-This host gate records P13-23 as partial. It requires the JSON-safe
+This host gate records P13-23 bounded v1.1 app/intent evidence as ready. It requires the JSON-safe
 `app.intent()` helper, `app.startActivity()` descriptor normalization for
 `category`/`categories`, numeric flag arrays, and primitive extras, TypeScript
 coverage, conformance coverage, and stable pre-dispatch rejection for
@@ -1522,7 +1527,8 @@ also requires JSON-safe `app.parseUri()` evidence and stable denials for
 broadcast sending, raw URI/FileProvider handles, or root/Shizuku routing through
 ordinary app APIs; those stay stable-denied for P13-23 v1.1. `app_query`
 privacy disclosure and the future redacted installed-app list schema are
-documented; packaged scoped-file Activity behavior remains open.
+documented; packaged scoped-file Activity behavior is covered by the focused
+packaged app bridge smoke.
 The P13-23 descriptor alias and Rhino app gap matrices classify supported
 short forms, stable denials, and future-provider work in
 `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.

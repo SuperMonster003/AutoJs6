@@ -1024,15 +1024,16 @@ surface; receiver registration, manifest mutation, boot/package/startup/custom
 triggers, packaged install/trigger/remove behavior, and raw `Intent` /
 `BroadcastReceiver` objects remain blocked.
 
-P13-23 records app/intent/broadcast Pro parity as partial: JSON-safe
+P13-23 records bounded app/intent/broadcast Pro parity as ready: JSON-safe
 `app.intent()` descriptors, normalized `app.startActivity()` options, exact
 `app.query` lookups, scoped file view/edit helpers, `app.launch()` alias
 parity, and JSON-safe `app.parseUri()` descriptors are evidence-backed.
 `app.getUriForFile()`, `app.kill()`, dual-user helpers, and
 `app.sendBroadcast()` are stable denials for P13-23 v1.1. Future raw
 URI/FileProvider, root/Shizuku/dual-user, and broadcast authority belongs under
-P13-22/P13-24 gates, while raw installed-app list APIs, packaged behavior, and
-raw Android app/intent objects remain blocked.
+P13-22/P13-24 gates, while raw installed-app list APIs and raw Android
+app/intent objects remain future-provider work. Packaged scoped-file Activity
+routing is covered by the focused packaged app bridge smoke.
 
 P13-24 records shell/root/Shizuku capability promotion as partial: ordinary
 `shell.exec()` stays on the controlled provider, `shell.execRoot()` and

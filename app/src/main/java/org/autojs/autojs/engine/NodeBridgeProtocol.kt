@@ -58,6 +58,7 @@ import okhttp3.WebSocketListener
 import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.accessibility.OnKeyListener
+import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -4283,10 +4284,18 @@ class AndroidNodeBridgeCapabilityProvider(
                     isPackageInstalled(request.firstStringArg()).toString(),
                 )
                 "viewFile" -> dispatchScopedAppFileAction(request, "viewFile") { file ->
-                    IntentUtils.viewFile(appContext, file.absolutePath)
+                    IntentUtils.viewFile(
+                        context = appContext,
+                        path = file.absolutePath,
+                        fileProviderAuthority = appFileProviderAuthority(),
+                    )
                 }
                 "editFile" -> dispatchScopedAppFileAction(request, "editFile") { file ->
-                    IntentUtils.editFile(appContext, file.absolutePath)
+                    IntentUtils.editFile(
+                        context = appContext,
+                        path = file.absolutePath,
+                        fileProviderAuthority = appFileProviderAuthority(),
+                    )
                 }
                 "openAppSetting" -> {
                     openAppSetting(request.firstStringArg().ifBlank { appContext.packageName })
@@ -4767,6 +4776,13 @@ class AndroidNodeBridgeCapabilityProvider(
         val candidatePath = candidate.path
         return candidate.takeIf { candidatePath == basePath || candidatePath.startsWith(basePath + File.separator) }
     }
+
+    private fun appFileProviderAuthority(): String =
+        if (BuildConfig.isInrt) {
+            "${appContext.packageName}.fileprovider"
+        } else {
+            AppFileProvider.AUTHORITY
+        }
 
     private fun openAppSetting(packageName: String) {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {

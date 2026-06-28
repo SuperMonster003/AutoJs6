@@ -1728,7 +1728,7 @@ runtime.
   - `openAppSetting(packageName?, options?): Promise<void>`
   - `startActivity(intentOptions, options?): Promise<void>`
   - `sendBroadcast(intentOptionsOrName, options?): Promise<never>`
-  - P13-23 records app/intent/broadcast Pro parity as partial: `app.intent()`
+  - P13-23 records bounded app/intent/broadcast Pro parity as ready: `app.intent()`
     and `app.startActivity()` use JSON-safe descriptors with
     `category`/`categories`, numeric flag arrays, primitive extras, and scoped
     file view/edit Activity helpers. `app.parseUri()` returns JSON-safe URI
@@ -1738,8 +1738,8 @@ runtime.
     under the P13-22/P13-24 gates. The descriptor alias and Rhino app gap
     matrices classify supported short forms, stable denials, and future-provider
     work. `app_query` privacy disclosure and the future redacted installed-app
-    list schema are documented; packaged scoped-file Activity smoke remains
-    open.
+    list schema are documented; packaged scoped-file Activity smoke now covers
+    packaged `app.activity` metadata and view/edit routing.
 - `barcode` / `qrcode`
   - `detect(imageOrPath, options?): Promise<BarcodeSnapshot | null>`
   - `detectAll(imageOrPath, options?): Promise<readonly BarcodeSnapshot[]>`
@@ -2184,7 +2184,7 @@ leak/orphan, and unrecoverable-runtime shapes; those fixtures validate the gate
 only and do not count as soak evidence. A companion archive helper validates
 real completed soak JSON before copying it into the canonical final-soak path.
 
-The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path.
+The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id, and the focused packaged `app` smoke declares `app.launch` plus `app.activity` metadata before checking packaged launch and scoped `app.viewFile()` / `app.editFile()` Activity routing. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path.
 
 The v1.1 packaged bridge smoke declares `network`, `ocr`, `image`, `storage`, `ui`, and `work_manager` capabilities in packaged project metadata, then runs a JavaScript fake-transport fixture for controlled `fetch`, OCR over an opaque image handle, JSON `storage`/`storages` operations, UI layout/event/update/close calls, and `work_manager` metadata schedule/list/cancel serialization. It verifies the v1.1 bridge modules cannot be shadowed by project-local `node_modules` packages and that pending bridge calls drain to zero, proving these surfaces are not main-app-only without granting live Android provider authority in older templates. The `shell` module is intentionally not executed by queued fallback; packaged `shell.exec()` should remain a live-bridge-only capability. Packaged `work_manager` persistent registration also remains live-bridge-only; the fake-transport packaged smoke covers JavaScript serialization and routing only.
 

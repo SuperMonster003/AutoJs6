@@ -272,7 +272,7 @@ access raw `Intent` / `BroadcastReceiver` objects. For v1.1 these compat names
 remain Promise-returning stable rejection stubs until a dedicated JSON-safe
 broadcast provider owns the future surface.
 
-P13-23 records app/intent/broadcast Pro parity as partial. AutoJs6 Node now has
+P13-23 records bounded app/intent/broadcast Pro parity as ready. AutoJs6 Node now has
 JSON-safe `app.intent()` descriptors and stricter `app.startActivity()`
 descriptor parsing for `category`/`categories`, numeric flag arrays, and
 primitive extras, plus URL/email/settings/uninstall helpers, exact `app.query`
@@ -281,8 +281,9 @@ parity, and JSON-safe `app.parseUri()` descriptors. It keeps
 `app.getUriForFile()`, `app.kill()`, dual-user helpers, and
 `app.sendBroadcast()` as stable denials for P13-23 v1.1. Future raw
 URI/FileProvider, root/Shizuku/dual-user, and broadcast authority belongs under
-P13-22/P13-24 gates, while raw installed-app list APIs, packaged behavior, and
-raw Android app/intent objects remain blocked.
+P13-22/P13-24 gates, while raw installed-app list APIs and raw Android
+app/intent objects remain future-provider work. Packaged scoped-file Activity
+routing is covered by the focused packaged app bridge smoke.
 
 P13-24 records shell/root/Shizuku capability promotion as partial. AutoJs6 Node
 now has explicit `shell`, `shell.root`, and `shell.shizuku` capability tokens,

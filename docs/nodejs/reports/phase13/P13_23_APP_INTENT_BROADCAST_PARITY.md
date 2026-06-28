@@ -1,6 +1,6 @@
 # P13-23 App/Intent/Broadcast Pro Parity
 
-Status: partial
+Status: ready
 
 Date: 2026-06-24
 
@@ -73,6 +73,8 @@ P13-23 extends the existing Node `app` module without promoting the full Rhino
   `docs/nodejs/MIGRATION_FROM_RHINO.md`
 - Conformance:
   `app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`
+- Packaged scoped file Activity smoke:
+  `app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt#installAndRunAppBridgeEmbeddedNodePackagedApk`
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`
@@ -166,6 +168,23 @@ Packaged `app.query` disclosure examples:
 {"autojs6":{"node":{"permissions":["app.query"],"disclosures":["app_query_exact_lookup"]}}}
 ```
 
+## Packaged Scoped File Activity Evidence
+
+The focused packaged `app` bridge smoke now declares `node.permissions` for
+`app.launch` and `app.activity`, bundles `packaged-app-activity-smoke.txt`, and
+asserts `packaged.app.view_file=true` plus `packaged.app.edit_file=true` after
+calling `app.viewFile()` and `app.editFile()` from the packaged APK.
+
+The Android bridge selects the fixed main-app `AppFileProvider.AUTHORITY` for
+normal app builds and `${packageName}.fileprovider` for inrt/packaged builds,
+matching the packaged manifest authority rewrite.
+
+Packaged `app.activity` disclosure example:
+
+```json
+{"node":{"permissions":["app.launch","app.activity"],"disclosures":["app_activity_scoped_file_view_edit"]}}
+```
+
 ## Boundary
 
 P13-23 does not add `sendBroadcast` to the Android bridge dispatch table and
@@ -188,11 +207,10 @@ P13-24 shell/root/Shizuku capability gates instead of expanding the ordinary
 
 ## Remaining Blockers
 
-- Packaged device evidence for scoped file view/edit Activity routing and
-  disclosure.
+No P13-23 verifier blockers remain for the bounded v1.1 app/intent scope.
 
 The docs, compatibility notes, surface manifest, and Gradle gate are
-evidence-only for this partial decision. They do not add a separate P13-23
+evidence-only for this bounded v1.1 decision. They do not add a separate P13-23
 blocker beyond the safe Activity device smokes, redacted installed-app list
 policy, packaged scoped-file evidence, negative corpus, and privacy disclosure
 above.
@@ -206,4 +224,5 @@ node tools\nodejs\phase13\verify-app-intent-broadcast-parity.js --repo-root D:\i
 .\gradlew.bat --console=plain :app:verifyNodePhase13AppIntentBroadcastParity
 .\gradlew.bat --console=plain :app:verifyAutoJs6NodeTypeDeclarations :app:typeCheckNodeTypescriptSmoke
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeConformanceInstrumentationTest"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunAppBridgeEmbeddedNodePackagedApk" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```

@@ -11275,6 +11275,9 @@ class EmbeddedNodePackagedApkSmokeTest {
               const app = require("app");
               const resolved = require.resolve("app");
               const launchResult = await app.launchPackage(app.packageName, { timeoutMs: 3000 });
+              const activityFixturePath = "packaged-app-activity-smoke.txt";
+              const viewResult = await app.viewFile(activityFixturePath, { timeoutMs: 3000 });
+              const editResult = await app.editFile(activityFixturePath, { timeoutMs: 3000 });
               const resolveOk = resolved === "app";
               const packageOk = app.packageName === "$APP_BRIDGE_PACKAGE_NAME";
               const versionNameTypeOk = typeof app.versionName === "string";
@@ -11292,9 +11295,12 @@ class EmbeddedNodePackagedApkSmokeTest {
                 typeof app.launch === "function" &&
                 typeof app.startActivity === "function";
               const launchOk = launchResult === true;
+              const viewFileOk = viewResult === true;
+              const editFileOk = editResult === true;
               const shadowOk = app.shadow !== true;
               console.log("packaged.app.ready=" + (
-                resolveOk && packageOk && versionNameTypeOk && versionCodeTypeOk && surfaceOk && launchOk && shadowOk
+                resolveOk && packageOk && versionNameTypeOk && versionCodeTypeOk &&
+                surfaceOk && launchOk && viewFileOk && editFileOk && shadowOk
               ));
               console.log("packaged.app.resolve=" + resolveOk);
               console.log("packaged.app.package=" + packageOk);
@@ -11302,6 +11308,8 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.app.version_code_type=" + versionCodeTypeOk);
               console.log("packaged.app.surface=" + surfaceOk);
               console.log("packaged.app.launch=" + launchOk);
+              console.log("packaged.app.view_file=" + viewFileOk);
+              console.log("packaged.app.edit_file=" + editFileOk);
               console.log("packaged.app.shadow=" + shadowOk);
             }
 
@@ -11318,8 +11326,10 @@ class EmbeddedNodePackagedApkSmokeTest {
             mainScriptName = mainScriptName,
             mainScript = mainScript,
             extraFiles = mapOf(
+                "packaged-app-activity-smoke.txt" to "AutoJs6 packaged app activity smoke\n",
                 "node_modules/app/index.js" to """module.exports = { shadow: true };""" + "\n",
             ),
+            nodePermissions = listOf("app.launch", "app.activity"),
             runtimeMarkers = APP_BRIDGE_RUNTIME_MARKERS,
         )
     }
@@ -14794,6 +14804,8 @@ $nodeConfigJson
             "packaged.app.version_code_type=true",
             "packaged.app.surface=true",
             "packaged.app.launch=true",
+            "packaged.app.view_file=true",
+            "packaged.app.edit_file=true",
             "packaged.app.shadow=true",
         )
         private val CLIPBOARD_BRIDGE_RUNTIME_MARKERS = listOf(

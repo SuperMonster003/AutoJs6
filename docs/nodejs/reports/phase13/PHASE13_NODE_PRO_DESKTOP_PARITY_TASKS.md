@@ -62,9 +62,9 @@
   manifest synthesis, install/trigger/remove smoke, user disclosure, and raw
   Intent/BroadcastReceiver profile decisions.
 
-## P13-23 Partial Landing Note
+## P13-23 Ready Landing Note
 
-- P13-23 partial app/intent/broadcast Pro parity gate records JSON-safe
+- P13-23 bounded app/intent/broadcast Pro parity gate records JSON-safe
   `app.intent()` descriptors, stricter `app.startActivity()` descriptor
   parsing, and stable `app.sendBroadcast()` rejection.
 - Follow-up helper parity records short `action`/`category` normalization,
@@ -88,14 +88,16 @@
 - Installed-app query disclosure now records the `app_query` P13-52 privacy
   surface, the `autojs6-node-app-query-redacted-list-v1` future list schema,
   and packaged `app.query` disclosure metadata examples.
+- Packaged scoped file Activity evidence now covers packaged `app.activity`
+  metadata, `app.viewFile()` / `app.editFile()` routing, inrt fileprovider
+  authority selection, and packaged disclosure metadata examples.
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
 - Report:
   `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
 - Surface manifest evidence: `phase13-app-intent-broadcast-parity`.
-- Remaining P13-23 blocker: packaged scoped file view/edit Activity routing and
-  disclosure evidence.
+- Remaining P13-23 blockers: none for the bounded v1.1 app/intent scope.
 
 ## P13-24 Partial Landing Note
 
@@ -1073,7 +1075,7 @@ P13 task 本身使用以下执行状态：
       - Receiver ownership, exported policy, duplicate suppression, unregister/delete cleanup, and process-death recovery.
       - Trigger payload JSON snapshots, packaged manifest synthesis, install/trigger/remove smokes, user disclosure, and rate-limit diagnostics.
 
-- [ ] P13-23: 扩展 app/intent/broadcast Pro parity。
+- [x] P13-23: 扩展 app/intent/broadcast Pro parity。
   - 范围：补齐 `app` 模块启动应用、intent、URI、邮件、设置页、广播等能力。
   - 验收：
     - Intent JSON schema、flag/category/extras 类型、安全过滤明确。
@@ -1112,7 +1114,7 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
     - Report:
       `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
-    - Open before closure: packaged scoped file view/edit Activity routing and
+    - Closed evidence: packaged scoped file view/edit Activity routing and
       disclosure evidence.
 
 - [ ] P13-24: 扩展 shell/root/Shizuku 能力。
