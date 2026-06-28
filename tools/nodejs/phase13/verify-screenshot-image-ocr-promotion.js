@@ -83,8 +83,7 @@ function buildReport(files) {
       token(files.typeSmoke, "const capturer: mediaProjection.ScreenCapturer = await mediaProjection.requestScreenCapture"),
       token(files.deviceMatrix, "profile: `screen_capture`"),
     ], [
-      "Implement an Activity-owned MediaProjection provider for Node bridge requestScreenCapture/nextImage/stop.",
-      "Add packaged grant/denial behavior, foreground disclosure, stop action, task-removal cleanup, and relaunch/crash evidence.",
+      "Implement an Activity-owned MediaProjection provider for Node bridge requestScreenCapture/nextImage/stop, including permission prompt, foreground disclosure, stop action, cleanup, packaged grant/denial behavior, and relaunch/crash evidence.",
     ]),
     scenario("image_handle_surface", "Image/images expose typed opaque handles, fake full API coverage, and live scoped read/recycle only", [
       token(files.protocol, "val imageMethods = setOf("),
@@ -104,8 +103,7 @@ function buildReport(files) {
       token(files.imageTypes, 'declare module "image"'),
       token(files.typeSmoke, "const matches: readonly image.ImageMatch[] = await image.matchTemplate"),
     ], [
-      "Promote real save/clip/resize/grayscale/threshold/findImage/matchTemplate/findColor/findMultiColors providers.",
-      "Add packaged scoped asset, output path, quota, and leak/stress evidence for image processing.",
+      "Promote real save/clip/resize/grayscale/threshold/findImage/matchTemplate/findColor/findMultiColors providers with scoped input/output paths, quota, and leak/stress evidence.",
     ]),
     scenario("ocr_live_mlkit_provider", "OCR runs through provider-owned image handles and ML Kit live evidence", [
       token(files.protocol, 'val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")'),
@@ -120,9 +118,7 @@ function buildReport(files) {
       token(files.ocrTest, "androidOcrRejectsUnknownImageHandleWithoutLeakingResources"),
       token(files.ocrTypes, 'declare module "ocr"'),
       token(files.typeSmoke, "const ocrResults: readonly ocr.OcrResult[] = await ocr.recognize"),
-    ], [
-      "Add capture/path/temp-handle positive and denial evidence for packaged OCR workflows.",
-    ]),
+    ], []),
     scenario("rhino_compat_media_image_ocr", "Explicit Rhino compat wrappers route through the same controlled providers", [
       token(files.nodeBridgeSources, "function __autojs6_rhino_compat_request_screen_capture(options)"),
       token(files.nodeBridgeSources, "function __autojs6_rhino_compat_capture_screen(pathOrOptions, maybeOptions)"),
@@ -136,9 +132,7 @@ function buildReport(files) {
       token(files.phase11Tasks, "S11-19"),
       token(files.phase11Tasks, "S11-20"),
       token(files.phase11CleanupSecurity, "`image` | `verified_zero_after_recycle_or_stop`"),
-    ], [
-      "Add packaged compat-image and compat-OCR positive/negative smoke after live providers are promoted.",
-    ]),
+    ], []),
     scenario("ocr_fallback_policy_boundary", "Paddle/Rapid/plugin OCR provider selection stays stable-denied for v1.1", [
       token(files.p13Report, "Paddle/Rapid/plugin model"),
       token(files.p13Report, "stay stable-denied"),
@@ -159,7 +153,7 @@ function buildReport(files) {
       token(files.ocrTest, "ocr.manifest.denied="),
       token(files.securityModel, "JavaScript must never receive raw `Bitmap`, `Mat`, `ImageWrapper`, native pointer, or filesystem path handles outside the scoped policy."),
     ], [
-      "Add packaged capability metadata and disclosure denial evidence for screen capture and OCR/image access.",
+      "Add packaged screenshot/image/OCR capability metadata, positive/negative smokes, disclosure denial evidence, temporary-handle cleanup, and relaunch/crash recovery.",
     ]),
     scenario("raw_object_profile_boundary", "Raw Bitmap/OpenCV/MediaProjection object parity stays stable-denied for v1.1", [
       token(files.p13Report, "Raw Bitmap/OpenCV/MediaProjection object parity stays stable-denied"),
