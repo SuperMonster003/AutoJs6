@@ -136,7 +136,7 @@ function buildReport(files) {
   ];
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-06"), "P13-06 must remain listed in the Phase 13 checklist."),
-    check("blocker-open", blockerEntry && blockerEntry.status === "open", "`second_execution_slot` must remain open until full stress promotion evidence lands."),
+    check("blocker-closed", blockerEntry && blockerEntry.status === "closed", "`second_execution_slot` must be closed once P13-06 scheduler/stress evidence is ready; P13-08 owns long-duration soak evidence."),
     check("docs-present", files.p13Report.exists && files.p13Report.text.includes("P13-06"), "P13-06 report must document current progress."),
     check("policy-present", files.policy.exists && files.service.exists && files.bridge.exists, "Runtime policy/service/bridge files must exist."),
     check("ready-scenarios-have-evidence", scenarios.filter((entry) => entry.status === "ready").length >= 4, "At least explicit, default scheduler, busy, and isolation evidence must be ready."),

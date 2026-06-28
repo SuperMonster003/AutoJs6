@@ -207,8 +207,8 @@ for Phase 12 and kept the S11-25 conclusion:
 - runnable worker creation, stress, and packaged worker source graph evidence
   remain blocked until native workers are available and the focused suites pass;
 - `worker_computation` remains reserved and is not a `threads` replacement;
-- `second_execution_slot` remains open for default scheduling, packaged
-  behavior, per-slot crash evidence, and stress promotion;
+- P13-06 closes `second_execution_slot` for scheduler/stress evidence, while
+  P13-08 still owns long-duration soak through `full_heavy_resource_stress`;
 - P12-21 cookbook examples must avoid default workers and use `async` /
   `await`, `AbortController`, explicit `engines` execution slots, or
   `work_manager`;
@@ -231,12 +231,12 @@ and MessageChannel-style handoffs.
 
 P12-22 records that Phase 12 does not promote a compute/process-worker
 replacement API. `worker_computation` remains `reserved`,
-`second_execution_slot` remains open, and `worker_threads` remains default-off
-and native-availability gated. Any future API must be separately named, must not
-reuse `threads` or `worker_threads`, and must pass worker/process permissions,
-scoped script path, message size, cleanup, nested worker denial, bridge module
-isolation, resource stress, packaged behavior, and final blocker gates before
-becoming a script-author surface.
+P13-06 closes `second_execution_slot`, and `worker_threads` remains default-off
+and native-availability gated. Any future API must be separately named, must
+not reuse `threads` or `worker_threads`, and must pass worker/process
+permissions, scoped script path, message size, cleanup, nested worker denial,
+bridge module isolation, resource stress, packaged behavior, and final blocker
+gates before becoming a script-author surface.
 
 See `docs/nodejs/reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md`.
 

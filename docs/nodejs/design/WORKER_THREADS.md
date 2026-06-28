@@ -255,10 +255,11 @@ workers must be separately named and must not claim same-runtime Rhino parity.
 P12-22 records the current compute/process-worker decision in
 [../reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md](../reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md):
 Phase 12 does not add a new worker/process runtime API. `worker_computation`
-remains reserved, `second_execution_slot` remains open, and any future
-script-author API must pass worker/process permissions, scoped script path,
-message-size, cleanup, nested worker denial, bridge module isolation, resource
-stress, packaged behavior, and final blocker gates before promotion.
+remains reserved. P13-06 later closes `second_execution_slot` for
+scheduler/stress evidence, but any future script-author API must still pass
+worker/process permissions, scoped script path, message-size, cleanup, nested
+worker denial, bridge module isolation, resource stress, packaged behavior, and
+final blocker gates before promotion.
 
 Follow-up gates should add stronger native handle/thread leak diagnostics once
 worker support graduates beyond experimental mode.

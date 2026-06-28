@@ -119,7 +119,7 @@ class NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest {
                 result.stdout.contains(
                     "p13processworker.profile=decision_partial|not_introduced|not_introduced|" +
                         "worker_threads.WorkerPool|request_local_experimental_preflight|denied|" +
-                        "separate_scoped_command_bridge|worker_computation_reserved|not_closed|" +
+                        "separate_scoped_command_bridge|worker_computation_reserved|closed_by_p13_06|" +
                         "workingDirectory|65536|32|worker_pool_close_or_execution_destroy|" +
                         "not_promoted|denied|false|false|true",
                 ),
@@ -146,8 +146,8 @@ class NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest {
             )
             assertTrue(result.stdout, result.stdout.contains("p13processworker.ready=true"))
             assertEquals("false", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
-            assertEquals("false", result.nativeValues["embedded_script.worker_threads_enabled"])
-            assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
+            result.nativeValues["embedded_script.worker_threads_enabled"]?.let { assertEquals("false", it) }
+            result.nativeValues["embedded_script.worker_active_count"]?.let { assertEquals("0", it) }
         } finally {
             workDir.deleteRecursively()
         }

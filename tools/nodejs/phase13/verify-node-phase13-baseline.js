@@ -22,12 +22,12 @@ const EXPECTED_P13_TASKS = Object.freeze(Array.from({ length: 58 }, (_, index) =
 const EXPECTED_OPEN_REQUIRED_BLOCKERS = Object.freeze([
   "android_side_package_installation",
   "packaged_long_running",
-  "second_execution_slot",
   "full_heavy_resource_stress",
 ]);
 const EXPECTED_CLOSED_REQUIRED_BLOCKERS = Object.freeze([
   "adapter_v1_real_execution_path",
   "crash_evidence_automation",
+  "second_execution_slot",
 ]);
 
 const FILES = {

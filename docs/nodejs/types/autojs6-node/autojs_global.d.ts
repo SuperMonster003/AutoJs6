@@ -601,7 +601,7 @@ declare namespace AutoJs6Node {
     readonly childProcess: "denied" | string;
     readonly shellBridge: "separate_scoped_command_bridge" | string;
     readonly executionMode: "worker_computation_reserved" | string;
-    readonly secondExecutionSlot: "not_closed" | string;
+    readonly secondExecutionSlot: "closed_by_p13_06" | string;
     readonly scopedScriptPath: "workingDirectory" | string;
     readonly messageSizeBytes: number;
     readonly maxQueuedMessages: number;

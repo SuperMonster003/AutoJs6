@@ -81,7 +81,7 @@ function buildReport(files) {
       token(files.nodeBridgeSources, 'preferredPrimitive: "worker_threads.WorkerPool"'),
       token(files.nodeBridgeSources, 'workerThreads: "request_local_experimental_preflight"'),
       token(files.nodeBridgeSources, 'executionMode: "worker_computation_reserved"'),
-      token(files.nodeBridgeSources, 'secondExecutionSlot: "not_closed"'),
+      token(files.nodeBridgeSources, 'secondExecutionSlot: "closed_by_p13_06"'),
       token(files.executionModePolicy, "MODE_WORKER_COMPUTATION"),
       token(files.executionModePolicy, 'status = "reserved"'),
       token(files.executionModePolicy, "supportedLaunchSurfaces = emptySet()"),
@@ -216,7 +216,7 @@ function buildReport(files) {
       childProcessPromoted: false,
       rawProcessAuthorityDelegatedToP13_40: checkById(checks, "raw-process-authority-delegated-to-p13-40").passed,
       workerComputationPromoted: false,
-      secondExecutionSlotClosed: false,
+      secondExecutionSlotClosed: files.nodeBridgeSources.text.includes('secondExecutionSlot: "closed_by_p13_06"'),
       desktopSurfacePromoted: false,
     },
   };

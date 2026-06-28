@@ -12,7 +12,7 @@ native worker and execution slot evidence remains incomplete.
 - `child_process`: denied.
 - `shell`: remains a separate scoped command bridge, not a process-worker API.
 - `worker_computation`: reserved.
-- `second_execution_slot`: not closed by this decision.
+- `second_execution_slot`: closed by P13-06, not by this decision.
 - Scoped script path: `workingDirectory`.
 - Message policy: `65536` byte messages and `32` queued messages, inherited
   from the worker policy.
@@ -54,8 +54,9 @@ facade decision.
 - Process-worker packaged behavior is not defined.
 - Slot accounting and cleanup stress must be tied to any future user-facing API.
 - `worker_computation` needs a supported launch surface before it can execute.
-- `second_execution_slot` remains open for default scheduling, packaged
-  behavior, per-slot crash evidence, and stress promotion.
+- `second_execution_slot` closure is inherited from P13-06 scheduler/stress
+  evidence. P13-35 does not reopen it and does not use that closure to promote
+  a process-worker facade.
 
 The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
 evidence checks only. They do not add a second blocker for the same WorkerPool

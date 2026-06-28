@@ -40,8 +40,8 @@
     {
       "id": "second_execution_slot",
       "classification": "required_internal",
-      "status": "open",
-      "currentEvidence": "Explicit primary/overflow_1 one-shot slot selection routes to independent Android service processes; Phase 13 adds a client-side default one-shot scheduler that can lease primary/overflow_1 on eligible devices, preserves processPoolSlotSource diagnostics, reports full-pool queue/dequeue diagnostics, propagates descriptor/package processPoolSlot metadata, adds focused packaged overflow-slot smoke coverage, records explicit no-restart crash marker fallback evidence with primary survivor execution, and adds focused two-slot shared-resource stress across stdout/stderr, cwd/env/module/global isolation, timers, file handles, watchers, bridge pending/resource cleanup, and crash marker runtimeSlotId metadata. Automatic slot replacement/quarantine and long-duration P13-08 stress soak remain open.",
+      "status": "closed",
+      "currentEvidence": "Explicit primary/overflow_1 one-shot slot selection routes to independent Android service processes; Phase 13 adds a client-side default one-shot scheduler that can lease primary/overflow_1 on eligible devices, preserves processPoolSlotSource diagnostics, reports full-pool queue/dequeue diagnostics, propagates descriptor/package processPoolSlot metadata, adds focused packaged overflow-slot smoke coverage, records explicit no-restart crash marker fallback evidence with primary survivor execution, and adds focused two-slot shared-resource stress across stdout/stderr, cwd/env/module/global isolation, timers, file handles, watchers, bridge pending/resource cleanup, and crash marker runtimeSlotId metadata. The P13-06 verifier reports ready with zero blockers. P13-08 full_heavy_resource_stress owns long-duration quick/final soak evidence, and future automatic slot replacement/quarantine remains disabled until a pool-coordinator promotion.",
       "requiredResolution": "At least two independent Node execution slots are available with isolated ResourceRegistry and crash evidence."
     },
     {

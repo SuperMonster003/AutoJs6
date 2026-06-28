@@ -718,6 +718,8 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-second-execution-slot-scheduler.js`.
     - Gradle gate: `:app:verifyNodePhase13SecondExecutionSlotScheduler`.
     - Report: `docs/nodejs/reports/phase13/P13_06_SECOND_EXECUTION_SLOT_SCHEDULER.md`.
+    - Final blocker registry: `second_execution_slot` is closed by P13-06
+      ready evidence with zero verifier blockers.
     - Remaining outside P13-06 closure: P13-08 owns long-duration quick/final
       soak evidence across both active slots; future automatic slot
       replacement/quarantine stays disabled until a pool coordinator promotion.

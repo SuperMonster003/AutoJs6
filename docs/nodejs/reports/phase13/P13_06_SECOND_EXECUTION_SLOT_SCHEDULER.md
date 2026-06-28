@@ -103,12 +103,16 @@ The gate is expected to report `ready` with zero P13-06 blockers. P13-08 still
 owns the quick/final long-duration soak evidence before final profile
 promotion.
 
+The `second_execution_slot` final blocker registry entry is closed by this
+P13-06 evidence. Long-duration soak remains tracked only by
+`full_heavy_resource_stress`.
+
 ## Remaining Work
 
 - Keep `defaultSchedulerFallbackEnabled=false` until a future pool coordinator
   implements and tests automatic slot replacement/quarantine.
 - Reuse P13-08 long-duration quick/final soak evidence across both active slots
-  as the final profile-promotion signal for `second_execution_slot`.
+  as the final profile-promotion signal for `full_heavy_resource_stress`.
 
 P13-06 is complete once the scheduler verifier reports ready; P13-08 remains
 open for long-duration soak evidence.
