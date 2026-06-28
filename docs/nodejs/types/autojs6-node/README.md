@@ -289,9 +289,10 @@ P13-25 records the partial notifications/settings/power manager gate.
 schemas. Exact `notifications.settings` and `device.power` capabilities are
 required for settings/power helpers; packaged metadata/install-run,
 notification action-or-permission-denial, settings/power dry-run, and
-exact-denial smoke are covered. Notification actions/listeners, wakelocks,
-direct power-manager control, foreground disclosure UX, rollback diagnostics,
-and migration examples remain future work.
+exact-denial smoke are covered. Rollback diagnostics and the
+`notifications-power` Pro migration example are recorded. Notification
+actions/listeners, wakelocks, direct power-manager control, foreground
+disclosure UX, OEM matrices, and background-launch behavior remain future work.
 
 P13-26 records the partial media/recorder/mediainfo provider gate.
 `media.getAudioStreamVolume()`, `media.getAudioStreamMaxVolume()`,

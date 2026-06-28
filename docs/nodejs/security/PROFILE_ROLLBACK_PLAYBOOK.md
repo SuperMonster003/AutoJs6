@@ -34,6 +34,8 @@ promotion, privacy, and packaged gates are closed.
 | `native_addon` | `desktop_compat_opt_in` | `stable_denial_no_runtime_switch` | keep `.node` and `process.dlopen` denied |
 | `inspector` | `debug_unsafe_lab` | `debug_profile_only_no_runtime_switch` | keep inspector denied outside future debug session gate |
 | `wasi` | `desktop_compat_opt_in` | `stable_denial_no_runtime_switch` | keep raw WASI denied |
+| `notifications.settings` | `pro_compat_opt_in` | `stable_partial_status_settings_only` | keep notification ownership and foreground disclosure disabled; fall back to permission/status snapshots and user-visible settings handoff |
+| `device.power` | `pro_compat_opt_in` | `stable_partial_status_settings_only` | keep wakelock, Doze mutation, and request-ignore-battery-optimization mutation flows denied; fall back to battery-optimization status and user-visible settings handoff |
 
 Capabilities that are not promoted yet roll back by staying on their existing
 stable denial or Safe-profile scoped behavior.

@@ -16,6 +16,7 @@ The catalog covers:
 - Activity-owned UI layout.
 - Floaty-style overlay permission and settings flow.
 - WorkManager one-shot task migration.
+- Notifications settings and power status migration.
 - Screenshot plus OCR migration.
 - Accessibility selector migration.
 
@@ -47,9 +48,9 @@ permission, and profile denials explicit.
 Activity-owned JSON UI path represented by `snippets/ui-layout.cjs` and the
 WorkManager one-shot schedule/cancel path represented by
 `snippets/tasks-work-manager.cjs`. `smoke-output.txt` records the expected
-output. Java interop, Rhino global install, overlay, screenshot/OCR, and
-accessibility authority examples remain static until their providers and
-policy gates are promoted.
+output. Java interop, Rhino global install, overlay, notifications/power,
+screenshot/OCR, and accessibility authority examples remain static until their
+providers and policy gates are promoted.
 
 ## Gate
 

@@ -34,6 +34,10 @@ const FILES = {
   proAutoxNotes: "docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md",
   capabilityMatrix: "docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md",
   shellRootShizukuReport: "docs/nodejs/reports/phase13/P13_24_SHELL_ROOT_SHIZUKU_CAPABILITY.md",
+  profileRollbackPlaybook: "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+  proParityExamples: "sample/nodejs/pro-parity-suite/examples.json",
+  proParitySnippet: "sample/nodejs/pro-parity-suite/snippets/notifications-power.cjs",
+  proParityExpectedOutput: "sample/nodejs/pro-parity-suite/expected-output.txt",
   projectTool: "tools/nodejs/project/autojs6-node-project.js",
   gradleGate: "app/node-phase13-gate.gradle.kts",
 };
@@ -114,6 +118,19 @@ function buildReport(files) {
     ], [
       "OEM power-manager matrices, foreground disclosure UX, and background launch behavior still need broader device evidence.",
     ]),
+    scenario("rollback_migration_examples", "P13-25 records rollback diagnostics and migration examples before promotion", [
+      token(files.profileRollbackPlaybook, "`notifications.settings`"),
+      token(files.profileRollbackPlaybook, "`device.power`"),
+      token(files.profileRollbackPlaybook, "keep notification ownership and foreground disclosure disabled"),
+      token(files.proParityExamples, '"id": "notifications-power"'),
+      token(files.proParityExamples, '"notifications.settings"'),
+      token(files.proParityExamples, '"device.power"'),
+      token(files.proParitySnippet, "openNotificationSettings({ dryRun: true"),
+      token(files.proParitySnippet, "openBatteryOptimizationSettings({ dryRun: true"),
+      token(files.proParitySnippet, "sample.pro-parity-suite.notifications-power=PASS"),
+      token(files.proParityExpectedOutput, "sample.pro-parity-suite.notifications-power=PASS"),
+      token(files.p13Report, "Rollback And Migration Evidence"),
+    ], []),
     scenario("provider_registry_boundary", "provider registry and tests keep the boundary JSON-only and auditable", [
       token(files.providerRegistry, '"settingsCapability" to NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS'),
       token(files.providerRegistry, '"powerCapability" to NodeBridgePermissionManifest.DEVICE_POWER'),
@@ -212,6 +229,7 @@ function buildReport(files) {
       devicePowerSettingsReady: scenarioById(scenarios, "device_power_status").status !== "missing_evidence",
       advancedNotificationActionsReady: false,
       directPowerManagerReady: false,
+      rollbackMigrationExamplesReady: scenarioById(scenarios, "rollback_migration_examples").status !== "missing_evidence",
       packagedSettingsPowerReady: scenarioById(scenarios, "provider_registry_boundary").status !== "missing_evidence",
       proSurfacePromoted: false,
     },
