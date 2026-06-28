@@ -1657,7 +1657,7 @@ tasks.register<Exec>("generateNodeFinalProviderStatus") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
     inputs.files(
         nodePhase11ReportDir.map { it.file("phase10-provider-registry-v2.json") },
-        nodePhase11ReportDir.map { it.file("live-provider-summary.json") },
+        project.layout.buildDirectory.file("reports/nodejs/live-provider-summary.json"),
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-provider-gate.json") },
@@ -1697,7 +1697,7 @@ tasks.register<Exec>("verifyNodeFinalProviderGate") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
     inputs.files(
         nodePhase11ReportDir.map { it.file("phase10-provider-registry-v2.json") },
-        nodePhase11ReportDir.map { it.file("live-provider-summary.json") },
+        project.layout.buildDirectory.file("reports/nodejs/live-provider-summary.json"),
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-provider-gate.json") },

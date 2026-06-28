@@ -7,6 +7,7 @@ const path = require("path");
 const FILES = {
   phase10RegistryReport: "build/reports/nodejs/phase10-provider-registry-v2.json",
   liveProviderSummary: "build/reports/nodejs/live-provider-summary.json",
+  appLiveProviderSummary: "app/build/reports/nodejs/live-provider-summary.json",
   phase10Tool: "tools/nodejs/phase10/verify-provider-registry-v2.js",
   buildGradle: "app/build.gradle.kts",
   packagingPreflight: "app/embedded-node-packaging-preflight.gradle.kts",
@@ -63,7 +64,11 @@ function main() {
     Object.entries(FILES).map(([id, relative]) => [id, read(path.join(repoRoot, relative))]),
   );
   const registryReport = readJsonIfExists(path.join(repoRoot, FILES.phase10RegistryReport));
-  const liveSummary = readJsonIfExists(path.join(repoRoot, FILES.liveProviderSummary));
+  const liveSummarySource = firstExistingPath(repoRoot, [
+    FILES.liveProviderSummary,
+    FILES.appLiveProviderSummary,
+  ]);
+  const liveSummary = liveSummarySource ? readJsonIfExists(path.join(repoRoot, liveSummarySource)) : null;
   const registryChecks = REGISTRY_CHECKS.map(([id, fileId, token]) => ({
     id,
     file: FILES[fileId],
@@ -72,6 +77,7 @@ function main() {
   }));
   const registryStatus = decisionStatus(registryReport);
   const liveStatus = evaluateLiveSummary(liveSummary);
+  liveStatus.source = liveSummarySource;
   const blockers = [];
   registryChecks
     .filter((entry) => !entry.present)
@@ -190,6 +196,7 @@ function renderMarkdown(report) {
     "",
     "## Live Provider Summary",
     "",
+    `- Source: ${report.liveProvider.source || "missing"}`,
     `- Device profile: ${report.liveProvider.deviceProfile}`,
     `- Network experimental enabled: ${report.liveProvider.networkExperimentalEnabled}`,
     `- Fake providers allowed: ${report.liveProvider.fakeProvidersAllowed}`,
@@ -210,6 +217,10 @@ function renderMarkdown(report) {
 
 function read(file) {
   return fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+}
+
+function firstExistingPath(root, relatives) {
+  return relatives.find((relative) => fs.existsSync(path.join(root, relative))) || null;
 }
 
 function readJsonIfExists(file) {
