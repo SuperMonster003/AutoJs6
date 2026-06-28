@@ -582,9 +582,9 @@ Notification actions/listeners/rich layouts, Do-Not-Disturb/exact-alarm
 authority, direct wakelock/power-manager control, and request-ignore-battery-
 optimization mutation flows are stable-denied for v1.1. Packaged metadata,
 install/run, notification action-or-permission-denial, settings/power dry-run,
-and exact-denial smoke are covered. OEM power matrices, background-launch
-behavior, foreground disclosure UX, rollback diagnostics, and migration
-examples remain future evidence.
+exact-denial smoke, rollback diagnostics, and the `notifications-power` Pro
+migration example are covered. OEM power matrices, background-launch behavior,
+and foreground disclosure UX remain future evidence.
 
 The `media`, `mediainfo`, and `recorder` bridge modules expose only a partial
 P13-26 provider. `media` returns read-only Android audio-stream volume/status

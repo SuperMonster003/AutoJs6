@@ -1602,8 +1602,9 @@ Android notification/power objects for v1.1. Packaged metadata, install/run,
 notification action-or-permission-denial, settings/power dry-run, and exact
 denial paths are covered by
 `EmbeddedNodePackagedApkSmokeTest#installAndRunNotificationsSettingsPowerBridgeEmbeddedNodePackagedApks`.
-OEM power matrices, background-launch behavior, foreground disclosure UX,
-rollback diagnostics, and migration examples remain future evidence.
+Rollback diagnostics and the `notifications-power` Pro migration example are
+also covered. OEM power matrices, background-launch behavior, and foreground
+disclosure UX remain future evidence.
 
 Phase 13 media/recorder/mediainfo provider status gate:
 
