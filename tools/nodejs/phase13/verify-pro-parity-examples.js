@@ -14,6 +14,7 @@ const REQUIRED_EXAMPLES = Object.freeze([
   ["overlay-floaty", ["ui.overlay", "ui.overlay.permission"]],
   ["tasks-work-manager", ["work_manager"]],
   ["notifications-power", ["notifications", "notifications.settings", "device", "device.power"]],
+  ["media-recorder", ["media", "media.audio", "media.metadata", "media.recording"]],
   ["screenshot-ocr", ["screen_capture", "image", "ocr"]],
   ["accessibility-selector", ["accessibility"]],
 ]);
@@ -229,6 +230,7 @@ function buildReport(repoRoot, files) {
         !smokeSubsetExamples.includes("rhino-install") &&
         !smokeSubsetExamples.includes("overlay-floaty") &&
         !smokeSubsetExamples.includes("notifications-power") &&
+        !smokeSubsetExamples.includes("media-recorder") &&
         !smokeSubsetExamples.includes("screenshot-ocr") &&
         !smokeSubsetExamples.includes("accessibility-selector"),
       "High-risk Pro snippets must stay out of default runtime smoke and require explicit Pro opt-in metadata.",

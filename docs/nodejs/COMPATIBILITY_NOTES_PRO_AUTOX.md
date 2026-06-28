@@ -320,9 +320,10 @@ Node now has read-only audio stream snapshots, scoped file metadata through
 and `media.recording` boundaries. Keep Rhino/Pro scripts that depend on audio
 playback, MediaStore access, or raw Android media objects on Rhino because
 those paths are stable-denied for v1.1. Packaged bundled-asset lookup,
-recorder status, recorder start denial, and exact-denial smoke are covered.
-Real recording sessions, foreground microphone disclosure, broader corpus
-evidence, privacy copy, and migration examples remain future evidence.
+recorder status, recorder start denial, exact-denial smoke, recorder privacy
+copy, and the `media-recorder` Pro migration example are covered. Real
+recording sessions, foreground microphone disclosure/cleanup, and broader
+corpus evidence remain future evidence.
 
 P13-27 records utility-heavy Rhino modules promotion as partial. AutoJs6 Node
 now exposes pure `jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` helpers

@@ -17,6 +17,7 @@ The catalog covers:
 - Floaty-style overlay permission and settings flow.
 - WorkManager one-shot task migration.
 - Notifications settings and power status migration.
+- Media, mediainfo, and recorder migration.
 - Screenshot plus OCR migration.
 - Accessibility selector migration.
 
@@ -42,15 +43,17 @@ smoke subset unless the relevant provider/profile gates are explicitly opened.
 Prompt/disclosure UI references and denial paths remain metadata-only. The
 catalog links packaged-behavior rows to future disclosure, permission, service,
 and foreground-ownership review while guarded snippet skip paths keep provider,
-permission, and profile denials explicit.
+permission, and profile denials explicit. The media/recorder migration example
+is also static-only evidence until real recording, foreground microphone
+disclosure/cleanup, and broader corpus gates are promoted.
 
 `smoke.cjs` is the focused runtime smoke subset. It executes only the
 Activity-owned JSON UI path represented by `snippets/ui-layout.cjs` and the
 WorkManager one-shot schedule/cancel path represented by
 `snippets/tasks-work-manager.cjs`. `smoke-output.txt` records the expected
 output. Java interop, Rhino global install, overlay, notifications/power,
-screenshot/OCR, and accessibility authority examples remain static until their
-providers and policy gates are promoted.
+media/recorder, screenshot/OCR, and accessibility authority examples remain
+static until their providers and policy gates are promoted.
 
 ## Gate
 

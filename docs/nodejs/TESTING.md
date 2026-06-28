@@ -1623,9 +1623,9 @@ or raw Android media objects. Packaged bundled-asset lookup, recorder status,
 recorder start denial, and exact-denial smoke are covered by
 `EmbeddedNodePackagedApkSmokeTest#installAndRunMediaRecorderBridgeEmbeddedNodePackagedApks`.
 Screen/internal audio capture, playback, and MediaStore access are
-stable-denied for v1.1; real recording sessions, foreground microphone
-disclosure, broader corpus evidence, privacy copy, and migration examples
-remain open.
+stable-denied for v1.1; recorder privacy copy and the `media-recorder` Pro
+migration example are covered. Real recording sessions, foreground microphone
+disclosure/cleanup, and broader corpus evidence remain open.
 
 Phase 13 utility-heavy Rhino modules status gate:
 
