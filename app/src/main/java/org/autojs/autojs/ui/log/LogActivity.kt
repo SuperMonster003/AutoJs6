@@ -38,7 +38,7 @@ class LogActivity : BaseActivity() {
             setConsole(instance.globalConsole.also { mConsoleImpl = it })
             setLogActivity(this@LogActivity)
             setPinchToZoomEnabled(true)
-            setEnableStackFrameLinks(mEditorScriptPath != null)
+            setEnableStackFrameLinks(true)
             setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
                 openStackFrameTarget(fileName, lineNumber, columnNumber)
             }
