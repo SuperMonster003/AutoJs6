@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 41
-- Open tasks: 17
+- Completed tasks: 42
+- Open tasks: 16
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -27,7 +27,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-10` | `completed` | `profile.promotion_model` | 发布 Phase 13 capability truth report。 |
 | `P13-11` | `open` | `pro.entry_java_rhino` | 实现 Pro 风格 Node entry and UI-thread directives。 |
 | `P13-12` | `completed` | `pro.entry_java_rhino` | 定义并实现 `$autojs` global v1。 |
-| `P13-13` | `open` | `pro.entry_java_rhino` | 推进 `$autojs.java` / Java interop allowlist。 |
+| `P13-13` | `completed` | `pro.entry_java_rhino` | 推进 `$autojs.java` / Java interop allowlist。 |
 | `P13-14` | `open` | `pro.entry_java_rhino` | 推进 `require("rhino").install()` partial Pro compatibility。 |
 | `P13-15` | `completed` | `pro.entry_java_rhino` | 决策并实现 `importClass` / `importPackage` compatibility。 |
 | `P13-16` | `completed` | `pro.entry_java_rhino` | 决策 `JavaAdapter` / `$java.defineClass` replacement。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 16
+- Reports with blockers: 15
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -182,7 +182,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-http-https-client-parity.json` | `verifyNodePhase13HttpHttpsClientParity` | `P13-29` | `ready` | 0 | 0 |
 | `phase13-inspector-debug-profile-decision.json` | `verifyNodePhase13InspectorDebugProfileDecision` | `P13-37` | `ready` | 0 | 0 |
 | `phase13-intent-broadcast-provider.json` | `verifyNodePhase13IntentBroadcastProvider` | `P13-22` | `partial` | 0 | 3 |
-| `phase13-java-interop-allowlist.json` | `verifyNodePhase13JavaInteropAllowlist` | `P13-13` | `partial` | 0 | 1 |
+| `phase13-java-interop-allowlist.json` | `verifyNodePhase13JavaInteropAllowlist` | `P13-13` | `ready` | 0 | 0 |
 | `phase13-live-ui-provider-promotion.json` | `verifyNodePhase13LiveUiProviderPromotion` | `P13-17` | `partial` | 0 | 4 |
 | `phase13-media-recorder-mediainfo-provider.json` | `verifyNodePhase13MediaRecorderMediainfoProvider` | `P13-26` | `partial` | 0 | 3 |
 | `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56` | `ready` | 0 | 0 |

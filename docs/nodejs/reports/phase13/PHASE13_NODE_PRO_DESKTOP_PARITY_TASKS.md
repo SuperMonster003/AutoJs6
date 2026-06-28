@@ -889,10 +889,14 @@ P13 task 本身使用以下执行状态：
   - 边界：完整 Java object/thread parity 仍归 P13-13；`rhino.install`、
     `importClass`/`importPackage` 和 `JavaAdapter` 仍归 P13-14 到 P13-16。
 
-- [ ] P13-13: 推进 `$autojs.java` / Java interop allowlist。
-  - 范围：从默认关闭的 `java_interop` 实验推进到 Pro profile opt-in。
+- [x] P13-13: 推进 `$autojs.java` / Java interop allowlist。
+  - 范围：推进默认关闭的 `java_interop` 实验 allowlist evidence；Pro
+    profile opt-in 仍由 aggregate Java/Rhino surface gate 决定。
   - 验收：
-    - `findClass`、构造、静态方法、实例方法、字段读取、线程 dispatch 可用。
+    - `findClass`、构造、静态方法、实例方法、字段读取、release/cleanup
+      可用。
+    - 线程 dispatch / `$autojs.java.setThreadMode` runtime API 有明确
+      stable-denial。
     - 类/包 allowlist、denylist、method budget、timeout、thread mode 明确。
     - 禁止 classloader、reflection escape、native library loading、process authority。
     - Java object lifetime 和 destroy cleanup 有 evidence。
@@ -904,8 +908,9 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-java-interop-allowlist.js`.
     - Gradle gate: `:app:verifyNodePhase13JavaInteropAllowlist`.
     - Report: `docs/nodejs/reports/phase13/P13_13_JAVA_INTEROP_ALLOWLIST.md`.
-  - Remaining: thread dispatch and expanded-allowlist budget enforcement
-    evidence still block full P13-13 closure. Pro profile promotion is
+  - P13-13 v1.1 closure: thread dispatch and
+    `$autojs.java.setThreadMode` / `$autojs.java.setDefaultThreadMode` are
+    stable-denied runtime APIs, while expanded allowlist/provider promotion is
     delegated to the aggregate Java/Rhino surface gate rather than counted as a
     separate P13-13 allowlist blocker.
 

@@ -229,6 +229,10 @@ Current constraints:
 - P13-16 reserves `java.defineClass()` / `$autojs.java.defineClass()` for a
   future bounded proxy-interface provider; current calls throw
   `ERR_AUTOJS6_JAVA_METHOD_DENIED` without bridge dispatch
+- P13-13 v1.1 stable-denies thread dispatch and
+  `$autojs.java.setThreadMode()` / `$autojs.java.setDefaultThreadMode()` as
+  runtime user APIs; future thread-mode work must be owned by a Java/Rhino
+  provider promotion gate with lifecycle and main-thread evidence
 
 P13-13 Java method budget policy is design-locked for any promoted or expanded
 allowlist entry:
