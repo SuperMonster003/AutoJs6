@@ -424,9 +424,10 @@ stable-denied for P13-20 v1.1.
 `verifyNodePhase13TaskDatabaseProvider` records the P13-21 partial
 daily/weekly/user task database provider state: live `work_manager` scheduled
 work, `compat.tasks` one-shot migration, rejection stubs, Android/Rhino task
-database substrate evidence, and raw task object denial are present, while
-direct `tasks`, daily/weekly JSON provider operations, packaged task database
-promotion, and raw Rhino task mutation remain blocked.
+database substrate evidence, raw task object denial, and descriptor/id mapping
+policy are present, while direct `tasks`, daily/weekly JSON provider
+operations, packaged task database promotion, and raw Rhino task mutation remain
+blocked.
 `verifyNodePhase13IntentBroadcastProvider` records the P13-22 partial
 IntentTask/broadcast provider state: Android/Rhino `IntentTask` persistence,
 receiver substrate, `compat.tasks` IntentTask rejection stubs, and raw broadcast

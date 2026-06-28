@@ -84,8 +84,10 @@ function buildReport(files) {
       token(files.p13Report, "The future owner for daily/weekly/user task database parity is a dedicated"),
       token(files.taskDecisionDoc, "The future owner for daily/weekly/user task database parity is a dedicated"),
       token(files.taskMigrationDoc, "P13-21 reserves a future dedicated"),
+      token(files.p13Report, "P13-21 descriptor and id mapping policy:"),
+      token(files.taskDecisionDoc, "P13-21 descriptor and id mapping policy:"),
+      token(files.taskDecisionDoc, "Legacy Rhino row ids are snapshot"),
     ], [
-      "Add database-row ownership and id mapping between Node-owned task ids, Rhino timed task ids, and packaged app ids.",
     ]),
     scenario("rhino_compat_tasks_boundary", "compat.tasks keeps one-shot migration live and daily/weekly rejected before dispatch", [
       token(files.nodeBridgeSources, "function __autojs6_rhino_compat_tasks()"),
@@ -115,8 +117,9 @@ function buildReport(files) {
       token(files.timedTaskManager, "val allTasksAsList: List<TimedTask>"),
       token(files.taskDecisionDoc, "Task ownership: main app vs packaged app ownership"),
       token(files.taskMigrationDoc, "Mapping `addDailyTask()` or `addWeeklyTask()` to `schedulePeriodic()` would silently"),
+      token(files.p13Report, "Migration and downgrade policy: legacy `TimedTask` rows"),
+      token(files.taskDecisionDoc, "Downgrades must leave legacy Rhino rows visible"),
     ], [
-      "Define descriptor versioning, migration snapshots, downgrade behavior, and legacy row visibility.",
       "Add query/update/remove provider operations over frozen JSON task snapshots.",
     ]),
     scenario("security_packaged_raw_boundary", "Task provider promotion remains explicit and raw Android scheduler objects stay blocked", [

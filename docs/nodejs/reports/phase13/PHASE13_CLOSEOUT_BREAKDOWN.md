@@ -200,7 +200,7 @@ Reason open: `implementation`, `policy`, `packaging`.
   Pro-only JSON-safe future `tasks` provider, not a `work_manager` extension.
 - [x] Keep `compat.tasks` Promise-only in v1.1; do not add a synchronous Rhino
   database compatibility mode before the provider exists.
-- [ ] Define JSON task schema, row ownership, id mapping, migrations, downgrade behavior, and legacy visibility.
+- [x] Define JSON task schema, row ownership, id mapping, migrations, downgrade behavior, and legacy visibility.
 - [ ] Implement add/query/update/remove over frozen JSON snapshots.
 - [ ] Add capability metadata, disclosure, rollback, and packaged task smoke.
 - [x] Keep docs/surface evidence gate from counting task schema, ownership, JSON operations, scheduler semantics, and packaged evidence twice.
