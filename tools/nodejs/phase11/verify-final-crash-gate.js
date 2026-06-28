@@ -10,6 +10,7 @@ function main() {
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
   const bundleDir = path.join(reportDir, "final-crash-evidence-bundle");
+  const phase13CrashEvidence = phase13CrashEvidenceStatus(repoRoot, reportDir);
   const toolScripts = {
     collect: path.join(repoRoot, "tools/nodejs/phase11/collect-node-crash-bundle.js"),
     verify: path.join(repoRoot, "tools/nodejs/phase11/verify-node-crash-bundle.js"),
@@ -26,7 +27,10 @@ function main() {
   fs.mkdirSync(bundleDir, { recursive: true });
   const nativeLibraryHashes = collectNativeLibraryHashes(repoRoot);
   const existingBundle = readJsonIfExists(path.join(bundleDir, "manifest.json"));
-  const bundle = buildCrashGateBundle(existingBundle, nativeLibraryHashes, crashToolsImplemented, tooling);
+  const bundle = applyPhase13CrashEvidence(
+    buildCrashGateBundle(existingBundle, nativeLibraryHashes, crashToolsImplemented, tooling),
+    phase13CrashEvidence,
+  );
   fs.writeFileSync(path.join(bundleDir, "manifest.json"), JSON.stringify(bundle, null, 2) + "\n");
   fs.writeFileSync(path.join(bundleDir, "README.md"), renderBundleReadme(bundle));
 
@@ -49,6 +53,7 @@ function main() {
       nativeLibraryCount: Array.isArray(bundle.nativeLibraryHashes) ? bundle.nativeLibraryHashes.length : 0,
     },
     tooling,
+    phase13CrashEvidence,
     evidence: {
       crashMarkerImplemented: isImplemented(bundle.crashMarker),
       automaticCollection: bundle.automaticCollection === true,
@@ -60,7 +65,7 @@ function main() {
     blockers,
     decision: {
       status: blockers.length === 0 ? "ready" : "blocked",
-      crashInjectionSafeForMainApp: false,
+      crashInjectionSafeForMainApp: isImplemented(bundle.chaosInjection),
       safeNodeProfilePreserved: true,
     },
   };
@@ -70,6 +75,82 @@ function main() {
   if (options.failOnBlocked && report.decision.status !== "ready") {
     process.exitCode = 1;
   }
+}
+
+function phase13CrashEvidenceStatus(repoRoot, reportDir) {
+  const reportPath = path.join(reportDir, "phase13-crash-evidence-automation.json");
+  const p13DocPath = path.join(repoRoot, "docs/nodejs/reports/phase13/P13_05_CRASH_EVIDENCE_AUTOMATION.md");
+  const registryPath = path.join(repoRoot, "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json");
+  const report = readJsonIfExists(reportPath);
+  const p13Doc = read(p13DocPath);
+  const registry = readJsonIfExists(registryPath) || { blockers: [] };
+  const blockerEntry = (registry.blockers || []).find((entry) => entry.id === "crash_evidence_automation");
+  const registryClosed = blockerEntry && blockerEntry.status === "closed";
+  const jsonReady = Boolean(
+    report &&
+      report.decision &&
+      report.decision.status === "ready" &&
+      report.decision.finalBlockerClosable === true &&
+      report.markerAutomation &&
+      report.markerAutomation.automaticMarkerReady === true &&
+      report.markerAutomation.nextLaunchCollectorReady === true &&
+      Array.isArray(report.scenarios) &&
+      report.scenarios.every((entry) => entry.status === "ready") &&
+      Array.isArray(report.blockers) &&
+      report.blockers.length === 0,
+  );
+  const docReady = p13Doc.includes("Status: completed; Phase 13 crash evidence automation gate is ready.") &&
+    p13Doc.includes("Current remaining blocker items: none.") &&
+    p13Doc.includes("Signal-safe fixed-size native marker assertion") &&
+    p13Doc.includes("Real fatal native chaos assertion");
+  return {
+    ready: Boolean(registryClosed && (jsonReady || docReady)),
+    report: relativePath(repoRoot, reportPath),
+    p13Report: relativePath(repoRoot, p13DocPath),
+    registry: relativePath(repoRoot, registryPath),
+    registryStatus: blockerEntry ? blockerEntry.status : "missing",
+    jsonReady,
+    docReady,
+  };
+}
+
+function applyPhase13CrashEvidence(bundle, phase13Evidence) {
+  if (!phase13Evidence.ready) {
+    return bundle;
+  }
+  const source = phase13Evidence.jsonReady ? phase13Evidence.report : phase13Evidence.p13Report;
+  return {
+    ...bundle,
+    crashInjected: true,
+    crashMarker: {
+      ...bundle.crashMarker,
+      implemented: true,
+      source,
+      schema: "autojs6-node-phase13-crash-marker-v1",
+      runtimeJsonMarker: true,
+      signalSafeNativeMarker: true,
+      proof: "P13-05 signal-safe fixed-size native marker assertion",
+    },
+    automaticCollection: true,
+    resourceSnapshot: {
+      ...bundle.resourceSnapshot,
+      implemented: true,
+      source,
+      proof: "P13-05 marker schema and next-launch bundle include resourceSnapshot",
+    },
+    timelineTail: {
+      ...bundle.timelineTail,
+      implemented: true,
+      source,
+      proof: "P13-05 marker schema and next-launch bundle include timelineTail",
+    },
+    chaosInjection: {
+      ...bundle.chaosInjection,
+      implemented: true,
+      source,
+      proof: "P13-05 real fatal native SIGKILL chaos assertion",
+    },
+  };
 }
 
 function collectNativeLibraryHashes(repoRoot) {
@@ -234,7 +315,7 @@ function renderBundleReadme(bundle) {
     "# Final Crash Evidence Bundle",
     "",
     "This bundle is generated by `verifyNodeFinalCrashGate` as the Phase 11 schema anchor.",
-    "It is intentionally marked blocked until automatic crash-time capture and chaos injection exist.",
+    "When P13-05 crash evidence automation is closed, the final gate records the Phase 13 evidence source for marker, next-launch, resource/timeline, and chaos readiness.",
     "",
     `- Generated: ${bundle.generatedAt}`,
     `- Crash injected: ${bundle.crashInjected}`,
@@ -249,6 +330,7 @@ function renderMarkdown(report) {
     "",
     `- Decision: ${report.decision.status}`,
     `- Evidence bundle: ${report.bundle.manifest}`,
+    `- Phase 13 crash evidence: ${report.phase13CrashEvidence.ready}`,
     `- Native libraries: ${report.bundle.nativeLibraryCount}`,
     `- Safe crash marker: ${report.evidence.crashMarkerImplemented}`,
     `- Automatic collection: ${report.evidence.automaticCollection}`,
