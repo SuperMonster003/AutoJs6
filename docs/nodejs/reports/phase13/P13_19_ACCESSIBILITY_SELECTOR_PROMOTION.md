@@ -44,8 +44,9 @@ Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
 
 ## Boundaries
 
-- `swipe`, `gesture`, `powerDialog`, raw node handles, raw `UiObject`, and
-  root/Shizuku gesture fallbacks are not promoted by P13-19.
+- `swipe`, `gesture`, and `powerDialog` stay stable-denied for P13-19 v1.1.
+  Raw node handles, raw `UiObject`, and root/Shizuku gesture fallbacks are not
+  promoted by P13-19.
 - Reserved future capability labels split input automation away from
   `accessibility`: `input.gesture` for reviewed service-backed gestures,
   `input.gesture.root` for root/shell-backed input, and
@@ -70,9 +71,6 @@ Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
 
 - Add more Rhino selector aliases and common chain helpers beyond the current
   v2 descriptor subset, including scrollable helpers.
-- Add a separate reviewed gesture provider for `swipe`, `gesture`, and
-  `powerDialog`; any root or Shizuku-backed input path must use the reserved
-  future capability split above instead of falling back from `accessibility`.
 - Decide and test live coordinate-click behavior, or keep it as a stable
   fake-provider/compat-only surface with clear documentation.
 - Add packaged APK install-run evidence for accessibility service metadata,
@@ -84,8 +82,8 @@ Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
 The docs, compatibility notes, device matrix, surface manifest, and Gradle gate
 are evidence-only for this partial decision. They do not add a separate P13-19
 blocker beyond Rhino selector aliases, packaged accessibility-service lifecycle
-evidence, real-device selector/action matrices, gesture provider design, and
-future input-automation provider implementation.
+evidence, real-device selector/action matrices, and future input-automation
+provider implementation.
 
 ## Gate
 
