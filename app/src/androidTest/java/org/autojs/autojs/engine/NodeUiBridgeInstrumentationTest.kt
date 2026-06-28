@@ -121,6 +121,7 @@ class NodeUiBridgeInstrumentationTest {
             check(mkdirs()) { "Failed to create ui shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, showLayout: () => "shadow" };""")
 
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("ui"))
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             """
             "nodejs";
@@ -244,6 +245,7 @@ class NodeUiBridgeInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-ui-fake.js>",
             workingDirectory = workDir,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
             timeoutMs = 30_000L,
         )
 
@@ -277,6 +279,7 @@ class NodeUiBridgeInstrumentationTest {
             deleteRecursively()
             check(mkdirs()) { "Failed to create ui live working directory: $absolutePath" }
         }
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("ui"))
         try {
             thread(name = "AutoJs6NodeUiLiveJsTest", isDaemon = true) {
                 resultRef.set(
@@ -329,6 +332,7 @@ class NodeUiBridgeInstrumentationTest {
                         """.trimIndent(),
                         "<embedded-autojs-ui-live.js>",
                         workingDirectory = workDir,
+                        runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
                         timeoutMs = 30_000L,
                     ),
                 )
@@ -336,7 +340,17 @@ class NodeUiBridgeInstrumentationTest {
             }
 
             val activity = monitor.waitForActivityWithTimeout(10_000L) as? NodeBridgeUiActivity
-            assertNotNull("Node UI Activity did not open for JS live test", activity)
+            if (activity == null) {
+                latch.await(5, TimeUnit.SECONDS)
+                val result = resultRef.get()
+                assertNotNull(
+                    "Node UI Activity did not open for JS live test" + (
+                        result?.let { "\n${NodeEmbeddedTestHarness.describeResult("ui live bridge", it)}" }
+                            ?: "\nMissing JS live ui result"
+                        ),
+                    activity,
+                )
+            }
             assertTrue("Node UI Activity did not become ready", waitUntil {
                 var ready = false
                 instrumentation.runOnMainSync {
