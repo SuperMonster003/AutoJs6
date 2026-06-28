@@ -1049,9 +1049,9 @@ P13-25 records notifications/settings/power manager promotion as partial:
 `device.openBatteryOptimizationSettings({ dryRun: true })` are evidence-backed
 JSON-safe helpers requiring exact `notifications.settings` or `device.power`
 where appropriate. Notification actions/listeners/rich layouts,
-Do-Not-Disturb/exact-alarm policy, direct wakelock/power-manager APIs, OEM
-power matrices, packaged disclosure, and raw Android notification/power objects
-remain blocked.
+Do-Not-Disturb/exact-alarm authority, direct wakelock/power-manager APIs, and
+raw Android notification/power objects are stable-denied for v1.1; OEM power
+matrices and packaged disclosure remain future evidence.
 
 P13-26 records media/recorder/mediainfo provider promotion as partial:
 `media.getAudioStreamVolume()`, `media.getAudioStreamMaxVolume()`,

@@ -298,8 +298,9 @@ AutoJs6 Node now has JSON-safe notification permission/settings snapshots and
 battery-optimization status/settings dry-run helpers through exact
 `notifications.settings` and `device.power` boundaries. Keep Rhino/Pro scripts
 that depend on notification actions/listeners, rich layouts, Do-Not-Disturb,
-exact alarms, wakelocks, direct power-manager control, OEM power behavior, or
-packaged disclosure flows on Rhino until a dedicated provider lands.
+exact alarms, wakelocks, or direct power-manager control on Rhino because those
+paths are stable-denied for v1.1. OEM power behavior and packaged disclosure
+flows remain future evidence.
 
 P13-26 records media/recorder/mediainfo provider promotion as partial. AutoJs6
 Node now has read-only audio stream snapshots, scoped file metadata through

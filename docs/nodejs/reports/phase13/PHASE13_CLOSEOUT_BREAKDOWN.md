@@ -244,9 +244,9 @@ closure.
 
 Reason open: `implementation`, `evidence`, `packaging`.
 
-- [ ] Add notification actions, listeners, groups, styles, remote input, and richer layouts.
-- [ ] Add DND, exact alarm, foreground disclosure, and notification action packaged evidence.
-- [ ] Add wakelocks, request-ignore-battery-optimizations flow, callbacks, and direct mutation policy.
+- [x] Stable-deny notification actions, listeners, groups, styles, remote input, richer layouts, DND, and exact-alarm authority for v1.1.
+- [ ] Add foreground disclosure and packaged notification/settings action evidence before promotion.
+- [x] Stable-deny wakelocks, request-ignore-battery-optimizations mutation flows, callbacks, and direct power mutation for v1.1.
 - [ ] Add OEM matrix, packaged disclosure, and background-launch behavior evidence.
 - [x] Keep raw Notification/PowerManager/WakeLock/settings objects and device
   identifiers out of the Node surface.

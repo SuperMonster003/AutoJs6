@@ -1584,9 +1584,10 @@ This host gate records P13-25 as partial. It requires explicit
 `device.isIgnoringBatteryOptimizations()`, and
 `device.openBatteryOptimizationSettings({ dryRun: true })`, plus TypeScript,
 conformance, provider-registry, permission-manifest, and cross-document
-evidence. It does not promote notification actions/listeners/rich layouts,
-direct wakelock/power-manager APIs, Do-Not-Disturb/exact-alarm policy, OEM
-power matrices, packaged disclosure, or raw Android notification/power objects.
+evidence. It stable-denies notification actions/listeners/rich layouts, direct
+wakelock/power-manager APIs, Do-Not-Disturb/exact-alarm authority, and raw
+Android notification/power objects for v1.1. OEM power matrices and packaged
+disclosure remain future evidence.
 
 Phase 13 media/recorder/mediainfo provider status gate:
 
