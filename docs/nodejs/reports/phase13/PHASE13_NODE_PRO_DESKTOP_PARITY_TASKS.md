@@ -99,9 +99,9 @@
 - Surface manifest evidence: `phase13-app-intent-broadcast-parity`.
 - Remaining P13-23 blockers: none for the bounded v1.1 app/intent scope.
 
-## P13-24 Partial Landing Note
+## P13-24 Bounded v1.1 Landing Note
 
-- P13-24 partial shell/root/Shizuku capability gate records explicit
+- P13-24 bounded shell/root/Shizuku capability gate records explicit
   `shell.root` and `shell.shizuku` capability vocabulary, controlled
   `shell.exec()` resource ownership, `shell.execRoot()` routing through root
   capability, and stable `shell.execShizuku()` rejection.
@@ -115,9 +115,9 @@
   remain stable-denied; `shell.shizuku` is auditable vocabulary only until a
   dedicated Shizuku provider owns authorization, lifecycle, cleanup, packaged
   disclosure, and rollback evidence.
-- Remaining P13-24 blockers: root device matrix, AbortSignal cancellation
-  instrumentation, packaged disclosure/failure diagnostics, expanded audit
-  taxonomy, and migration examples.
+- Future promotion work outside P13-24 closure: root device matrix, packaged
+  disclosure/failure diagnostics, expanded audit taxonomy, migration examples,
+  and any real Shizuku execution provider.
 
 ## P13-25 Partial Landing Note
 
@@ -1119,13 +1119,13 @@ P13 task 本身使用以下执行状态：
     - Closed evidence: packaged scoped file view/edit Activity routing and
       disclosure evidence.
 
-- [ ] P13-24: 扩展 shell/root/Shizuku 能力。
+- [x] P13-24: 扩展 shell/root/Shizuku 能力。
   - 范围：将 shell、root shell、Shizuku 拆成独立 capability。
   - 验收：
     - root 和 Shizuku 必须显式声明、显式授权、可审计。
     - stdout/stderr/exitCode/timeout/cancel/resource cleanup 完整。
     - packaged APK 权限提示和失败路径清晰。
-  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+  - Closure Evidence (2026-06-28, bounded v1.1 ready):
     - Capability vocabulary: `shell`, `shell.root`, and `shell.shizuku`.
     - Root facade: `shell.execRoot()` and `compat.shell.execRoot()` route
       through the existing controlled `shell.exec()` bridge with `root: true`.
@@ -1156,10 +1156,13 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13ShellRootShizukuCapability`.
     - Report:
       `docs/nodejs/reports/phase13/P13_24_SHELL_ROOT_SHIZUKU_CAPABILITY.md`.
-    - Open before closure: root available/unavailable device matrix, Shizuku
-      service authorization and lifecycle, AbortSignal cancellation
-      instrumentation, packaged disclosure/failure diagnostics, expanded audit
-      taxonomy, and migration examples.
+    - Closed verifier status:
+      `verifyNodePhase13ShellRootShizukuCapability` reports ready with zero
+      blockers.
+    - Future promotion work outside P13-24 closure: root available/unavailable
+      device matrix, Shizuku service authorization and lifecycle, packaged
+      disclosure/failure diagnostics, expanded audit taxonomy, and migration
+      examples.
 
 - [ ] P13-25: 扩展 notifications/settings/power manager。
   - 范围：补齐通知渠道、设置、电池优化、唤醒/亮屏等 Pro 能力。

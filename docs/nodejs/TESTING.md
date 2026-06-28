@@ -1552,16 +1552,16 @@ Phase 13 shell/root/Shizuku capability status gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13ShellRootShizukuCapability
 ```
 
-This host gate records P13-24 as partial. It requires the explicit `shell`,
+This host gate records P13-24 as bounded ready. It requires the explicit `shell`,
 `shell.root`, and `shell.shizuku` capability split, `shell.execRoot()` and
 `compat.shell.execRoot()` facades over the controlled `shell.exec` provider,
 stable pre-dispatch rejection for `shell.execShizuku()` and `shell.exec(...,
 { shizuku: true })`, TypeScript coverage, conformance coverage, provider
 registry policy anchors, and cross-document evidence. It does not promote real
-Shizuku execution, root device matrix closure, packaged shell disclosure, or
-raw process/shizuku/root handles; Shizuku execution stays stable-denied for
-v1.1 until a dedicated provider owns authorization, lifecycle, cleanup,
-packaged disclosure, and rollback evidence.
+Shizuku execution, packaged shell disclosure, or raw process/shizuku/root
+handles; Shizuku execution and richer root device matrix handling stay future
+promotion work until a dedicated provider owns authorization, lifecycle,
+cleanup, packaged disclosure, rollback, and matrix evidence.
 
 Phase 13 notifications/settings/power manager status gate:
 

@@ -1,8 +1,8 @@
 # P13-24 Shell/Root/Shizuku Capability
 
-Status: partial
+Status: ready
 
-Date: 2026-06-24
+Date: 2026-06-28
 
 ## Landed Scope
 
@@ -14,7 +14,7 @@ vocabulary for ordinary shell, root shell, and Shizuku.
   `shell.exec(..., { root: true })`, `shell.execRoot(...)`, or
   `compat.shell(command, true)` is used under an enforced manifest.
 - `shell.shizuku` is now a defined capability token, but it is vocabulary-only
-  in this partial landing.
+  in this bounded v1.1 closure.
 - `shell.execRoot(command, options)` is a JavaScript facade over the existing
   `shell.exec()` bridge path with `root: true`.
 - `shell.execShizuku(command, options)` is a stable rejection stub returning
@@ -97,18 +97,22 @@ is promoted.
 
 Packaged queued fallback must not execute shell commands. Packaged shell use
 requires live bridge metadata plus explicit project capabilities, and remains
-partial until user-facing disclosure and failure diagnostics are complete.
+future promotion work until user-facing disclosure and failure diagnostics are
+complete.
 
-## Remaining Blockers
+## Future Promotion Scope
 
-- Root/package evidence: device matrix for devices with and without `su`,
-  stable denial and command-result evidence, packaged shell/root capability
-  disclosure and rollback policy, expanded audit taxonomy, and migration
-  examples from Rhino `shell` and root shorthand.
+- Root/package promotion evidence: device matrix for devices with and without
+  `su`, stable denial and command-result evidence, packaged shell/root
+  capability disclosure and rollback policy, expanded audit taxonomy, and
+  migration examples from Rhino `shell` and root shorthand.
+- Shizuku execution promotion: service binding, permission request/denial,
+  lifecycle, cleanup, packaged disclosure, rollback, and migration evidence.
 
-The docs, release matrix, surface manifest, and Gradle gate are evidence checks
-only. They do not add a separate blocker for the same root/package shell
-evidence.
+These future promotion lanes are not P13-24 v1.1 closure blockers. The P13-24
+bounded gate closes on explicit capability vocabulary, controlled shell cleanup,
+AbortSignal cancellation, root facade routing, metadata examples, and stable
+Shizuku denial.
 
 ## Verification
 

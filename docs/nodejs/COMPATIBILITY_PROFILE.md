@@ -2025,7 +2025,7 @@ runtime.
   - `env` accepts string keys and values only
   - command timeout returns a result with `code: 124`; invalid policy inputs reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`; `setDefaultTimeout()` changes only the per-module JS fallback timeout
   - `checkAccess({ root: true })` reports missing `shell.root` when a manifest is enforced and the capability is absent; `checkAccess({ shizuku: true })` always reports `shizuku: false` in v1.1 because Shizuku execution remains unsupported
-  - P13-24 records shell/root/Shizuku capability promotion as partial: `shell.shizuku` is a vocabulary-only token, root remains explicit, and Shizuku execution stays stable-denied for v1.1 until a dedicated provider owns authorization, lifecycle, cleanup, packaged disclosure, and rollback evidence
+  - P13-24 records bounded shell/root/Shizuku capability closure: `shell.shizuku` is a vocabulary-only token, root remains explicit, and Shizuku execution stays stable-denied for v1.1 until a dedicated provider owns authorization, lifecycle, cleanup, packaged disclosure, and rollback evidence
   - queued host fallback does not execute shell commands; packaged templates need live bridge metadata before `shell.exec()` can observe real command results
   - no interactive shell, streaming stdio, process object, signal control, `spawn`, `fork`, or `open` API is exposed
 - `fetch`

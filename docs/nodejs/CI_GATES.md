@@ -437,12 +437,12 @@ supported short forms, stable denials, and future-provider work. `app_query`
 privacy disclosure and the future redacted installed-app list schema are
 documented; packaged scoped-file Activity smoke now covers packaged
 `app.activity` metadata and view/edit routing.
-`verifyNodePhase13ShellRootShizukuCapability` records the P13-24 partial
-shell/root/Shizuku capability state: `shell`, `shell.root`, and
+`verifyNodePhase13ShellRootShizukuCapability` records the P13-24 bounded
+shell/root/Shizuku capability closure: `shell`, `shell.root`, and
 `shell.shizuku` are split capability tokens, `execRoot()` routes through the
 existing controlled shell provider, and Shizuku execution rejects before bridge
 dispatch while authorization, lifecycle, packaged disclosure, and device matrix
-evidence remain blocked.
+evidence remain future promotion work.
 `verifyNodePhase13NotificationsSettingsPowerManager` records the P13-25 partial
 notifications/settings/power manager state: `notifications.settings` and
 `device.power` are exact capability tokens, notification permission/settings
