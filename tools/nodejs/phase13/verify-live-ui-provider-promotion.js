@@ -76,6 +76,8 @@ function buildReport(files) {
       token(files.uiTest, "androidUiProviderOpensActivityDeliversEventsAndCleansOwnedResource"),
       token(files.uiTest, 'collected.hasEvent("click", "ok")'),
       token(files.uiTest, 'collected.hasEvent("tab", "tabs")'),
+      token(files.uiTest, "androidUiProviderRecordsBackActivityDestroyLifecycleEvent"),
+      token(files.uiTest, "ui.lifecycle.back.reason=activity_destroyed"),
     ]),
     scenario("json_handle_lifecycle", "JSON layout, updates, event drain, close, and provider cleanup are covered", [
       token(files.uiTypes, "showLayout(layoutJson"),
@@ -124,7 +126,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-17 live UI provider promotion"),
       token(files.surfaceManifestDoc, "phase13-live-ui-provider-promotion"),
     ], [
-      "Add Back/Recents Activity lifecycle instrumentation and packaged task relaunch evidence.",
+      "Add Recents/task-removal Activity lifecycle instrumentation and packaged task relaunch evidence.",
       "Add orientation or explicit configuration-change policy instrumentation.",
       "Run a live packaged APK UI smoke that covers entry, close, relaunch, and crash evidence.",
       "Record capability/metadata denial and user-visible disclosure behavior for packaged UI promotion.",

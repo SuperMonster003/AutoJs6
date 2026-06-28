@@ -500,6 +500,54 @@ class NodeUiBridgeInstrumentationTest {
         }
     }
 
+    @Suppress("DEPRECATION")
+    @Test
+    fun androidUiProviderRecordsBackActivityDestroyLifecycleEvent() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val monitor = instrumentation.addMonitor(NodeBridgeUiActivity::class.java.name, null, false)
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(context, id = "ui-live-provider-back"),
+        )
+        var handleId = ""
+        try {
+            val show = dispatch(
+                provider,
+                method = "showLayout",
+                argsJson = """[{"type":"Column","children":[{"type":"Text","id":"title","text":"Back lifecycle"}]}]""",
+            )
+            assertTrue(show.toString(), show.ok)
+            handleId = JSONObject(show.resultJson.orEmpty()).getString("id")
+            assertEquals(1, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.UI_SESSION))
+
+            val activity = monitor.waitForActivityWithTimeout(5_000L) as? NodeBridgeUiActivity
+            assertNotNull("Node UI Activity did not open for Back lifecycle evidence", activity)
+            instrumentation.waitForIdleSync()
+            instrumentation.runOnMainSync {
+                activity!!.onBackPressed()
+            }
+            assertTrue("Back did not finish the Node UI Activity", waitUntil {
+                activity!!.isFinishing || activity.isDestroyed
+            })
+
+            val events = waitForUiEvents(provider, handleId) { collected ->
+                collected.hasEventType("close")
+            }
+            val close = events.firstEventType("close")
+            assertEquals("ui.lifecycle.back.reason=activity_destroyed", "activity_destroyed", close.getString("reason"))
+            assertEquals(handleId, close.getString("handleId"))
+        } finally {
+            provider.destroy()
+            instrumentation.removeMonitor(monitor)
+            if (handleId.isNotBlank()) {
+                assertTrue("Back lifecycle UI session was not removed during cleanup", waitUntil {
+                    NodeBridgeUiSessionStore.get(handleId) == null
+                })
+            }
+            NodeBridgeUiSessionStore.closeAll("ui-back-lifecycle-test-cleanup")
+        }
+    }
+
     @Test
     fun androidUiProviderRejectsUnsupportedDescriptorsAndForeignHandles() {
         val provider = AndroidNodeBridgeCapabilityProvider(
@@ -620,6 +668,12 @@ class NodeUiBridgeInstrumentationTest {
         }
     }
 
+    private fun JSONArray.hasEventType(type: String): Boolean {
+        return (0 until length()).any { index ->
+            getJSONObject(index).optString("type") == type
+        }
+    }
+
     private fun JSONArray.firstEvent(type: String, id: String): JSONObject {
         for (index in 0 until length()) {
             val event = getJSONObject(index)
@@ -628,6 +682,16 @@ class NodeUiBridgeInstrumentationTest {
             }
         }
         throw AssertionError("Missing UI event $type/$id in $this")
+    }
+
+    private fun JSONArray.firstEventType(type: String): JSONObject {
+        for (index in 0 until length()) {
+            val event = getJSONObject(index)
+            if (event.optString("type") == type) {
+                return event
+            }
+        }
+        throw AssertionError("Missing UI event $type in $this")
     }
 
     private fun activeTypeCount(diagnostics: Map<String, String>, type: NodeBridgeResourceType): Int {

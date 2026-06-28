@@ -5,7 +5,7 @@ Status: partial
 P13-17 records the current live `require("ui")` provider state for Phase 13.
 The Activity-owned provider is available for explicit Node UI sessions, but the
 surface is not promoted to `pro_compat_opt_in` yet because live packaged UI,
-Back/Recents, orientation, relaunch, crash, and disclosure evidence are still
+Recents/task relaunch, orientation, crash, and disclosure evidence are still
 missing.
 
 ## Implemented Evidence
@@ -24,6 +24,14 @@ missing.
 - Resource ownership: UI sessions register as `NodeBridgeResourceType.UI_SESSION`
   and are released on `ui.close` or provider destroy through the bridge resource
   registry.
+- Back lifecycle: focused instrumentation calls `NodeBridgeUiActivity.onBackPressed()`
+  and verifies the live provider emits `ui.lifecycle.back.reason=activity_destroyed`
+  through `ui.drainEvents`; this is live Activity lifecycle evidence, not
+  packaged task relaunch or cleanup promotion.
+- Device evidence: on 2026-06-28, `QV710AF65F` / Sony XQ-AT72 / Android 12
+  passed the focused instrumentation method
+  `NodeUiBridgeInstrumentationTest#androidUiProviderRecordsBackActivityDestroyLifecycleEvent`
+  with `-Pautojs.nodejs.test.deviceProfile=sony`.
 - Rhino migration: `require("autojs6:compat").ui` wraps the same JSON provider;
   packaged P12 evidence covers fake-transport routing and
   `packaged.rhino_compat.compat_ui=true`.
@@ -41,8 +49,8 @@ missing.
 
 ## Remaining Blockers
 
-- Back/Recents Activity lifecycle instrumentation and packaged task relaunch
-  evidence.
+- Recents/task-removal Activity lifecycle instrumentation and packaged task
+  relaunch evidence.
 - Orientation or explicit configuration-change policy instrumentation.
 - Live packaged APK UI smoke covering entry, close, relaunch, and crash
   evidence.
