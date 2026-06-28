@@ -109,8 +109,10 @@ class NodeExampleProjectInstrumentationTest {
         val description = NodeEmbeddedTestHarness.describeResult("desktop-parity-suite safe subset smoke", result)
 
         NodeEmbeddedTestHarness.assertSucceeded("desktop-parity-suite safe subset smoke", result)
-        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.smoke.catalog=3"))
+        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.smoke.catalog=4"))
         assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.esm-loader=PASS"))
+        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.http-https.shape=function,function,function,function"))
+        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.http-https=PASS"))
         assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.npm-dependency=PASS"))
         assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.fs-advanced.handle=true"))
         assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.fs-advanced.watch=true"))

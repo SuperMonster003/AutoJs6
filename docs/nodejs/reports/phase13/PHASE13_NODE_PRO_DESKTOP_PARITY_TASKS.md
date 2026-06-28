@@ -2270,8 +2270,9 @@ P13 task 本身使用以下执行状态：
       relaxed-capability id.
     - The desktop suite now includes `smoke.cjs` plus
       `NodeExampleProjectInstrumentationTest#desktopParitySafeSubsetExamplesRun`
-      as safe subset smoke for managed local ESM, checked-in pure JavaScript
-      dependency behavior, and scoped advanced fs FileHandle/watch behavior.
+      as safe subset smoke for managed local ESM, controlled HTTP/HTTPS facade
+      shape without live network I/O, checked-in pure JavaScript dependency
+      behavior, and scoped advanced fs FileHandle/watch behavior.
     - Each catalog entry in `sample/nodejs/desktop-parity-suite/examples.json`
       records `desktop_compat_opt_in`, required capabilities, expected output,
       packaged behavior, skip reason, and Safe-profile denial output.

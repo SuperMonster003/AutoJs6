@@ -1,7 +1,9 @@
-sample.desktop-parity-suite.smoke.catalog=3
+sample.desktop-parity-suite.smoke.catalog=4
 sample.desktop-parity-suite.esm-loader.label=managed-local-esm
 sample.desktop-parity-suite.esm-loader.answer=42
 sample.desktop-parity-suite.esm-loader=PASS
+sample.desktop-parity-suite.http-https.shape=function,function,function,function
+sample.desktop-parity-suite.http-https=PASS
 sample.desktop-parity-suite.npm-dependency.sum=42
 sample.desktop-parity-suite.npm-dependency=PASS
 sample.desktop-parity-suite.fs-advanced.handle=true

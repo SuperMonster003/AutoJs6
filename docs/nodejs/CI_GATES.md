@@ -906,12 +906,13 @@ catalog, per-snippet `desktop_compat_opt_in` profile metadata, required
 capabilities, expected outputs, Safe-profile denial markers, packaged behavior,
 skip reasons, `verifyNodeExamples` registration,
 `NodeExampleProjectInstrumentationTest#desktopParitySafeSubsetExamplesRun`
-focused runtime smoke for managed local ESM, checked-in pure JavaScript
-dependency behavior, and scoped advanced fs FileHandle/watch behavior, surface
-manifest evidence, release matrix updates, and docs updates while keeping
-high-risk desktop snippets out of default runtime smoke. P13-54 records desktop
-Node parity examples as partial; packaged desktop parity, raw
-worker/network/expanded-root/WASI/inspector authority, and Android
+focused runtime smoke for managed local ESM, controlled HTTP/HTTPS facade shape
+without live network I/O, checked-in pure JavaScript dependency behavior, and
+scoped advanced fs FileHandle/watch behavior, surface manifest evidence, release
+matrix updates, and docs updates while keeping high-risk desktop snippets out of
+default runtime smoke. P13-54 records desktop Node parity examples as partial;
+packaged desktop parity, raw worker/raw-network/expanded-root/WASI/inspector
+authority, and Android
 package-manager parity remain unpromoted.
 `verifyNodePhase13TypeDeclarationProfiles` records P13-55 as the
 profile-aware TypeScript declaration gate. It requires

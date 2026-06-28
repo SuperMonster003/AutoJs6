@@ -6,7 +6,7 @@ const path = require("path");
 
 const REPORT_BASENAME = "phase13-desktop-parity-examples";
 const EXAMPLE_NAME = "desktop-parity-suite";
-const REQUIRED_SMOKE_EXAMPLES = Object.freeze(["esm-loader", "npm-dependency", "fs-advanced"]);
+const REQUIRED_SMOKE_EXAMPLES = Object.freeze(["esm-loader", "http-https", "npm-dependency", "fs-advanced"]);
 const REQUIRED_EXAMPLES = Object.freeze([
   ["esm-loader", ["esm_loader"]],
   ["worker-threads", ["worker_threads"]],
@@ -133,6 +133,8 @@ function buildReport(repoRoot, files) {
     REQUIRED_SMOKE_EXAMPLES.every((id) =>
       files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.${id}=PASS`) &&
       files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.${id}=PASS`)) &&
+    files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.http-https.shape=`) &&
+    files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.http-https.shape=function,function,function,function`) &&
     files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.fs-advanced.handle=true`) &&
     files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.fs-advanced.watch=true`) &&
     files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.fs-advanced.handle=true`) &&
@@ -257,7 +259,6 @@ function buildReport(repoRoot, files) {
         smokeSubset.profile === "safe_default" &&
         REQUIRED_SMOKE_EXAMPLES.every((id) => smokeSubsetExamples.includes(id)) &&
         !smokeSubsetExamples.includes("worker-threads") &&
-        !smokeSubsetExamples.includes("http-https") &&
         !smokeSubsetExamples.includes("raw-network") &&
         !smokeSubsetExamples.includes("wasi") &&
         !smokeSubsetExamples.includes("inspector"),

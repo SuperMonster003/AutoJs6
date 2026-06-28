@@ -5,8 +5,8 @@ desktop runtime parity remains partial. The landing adds
 `sample/nodejs/desktop-parity-suite` as a machine-verifiable catalog for
 desktop-style Node migration snippets without promoting the underlying
 high-risk desktop providers. It also includes a focused runtime smoke subset for
-already-promoted managed local ESM, checked-in pure JavaScript dependency, and
-scoped advanced filesystem behavior.
+already-promoted managed local ESM, controlled HTTP/HTTPS facade shape,
+checked-in pure JavaScript dependency, and scoped advanced filesystem behavior.
 
 ## Scope
 
@@ -36,13 +36,15 @@ the Safe-profile denial markers listed in `expected-output.txt`.
 `snippets/safe-denials.cjs` centralizes the Safe-profile rejection examples.
 
 `smoke.cjs` is the focused runtime smoke subset. It executes only the managed
-local ESM path represented by `snippets/esm-loader.cjs`, the checked-in
-`vendor/pure-math` dependency path represented by `snippets/npm-dependency.cjs`,
-and the scoped FileHandle plus non-persistent watcher path represented by
-`snippets/fs-advanced.cjs`. `smoke-output.txt` records the expected output.
-Worker, network, raw network, expanded filesystem-root, WASI, inspector, and
-package-manager authority examples remain static until their providers and
-policy gates are promoted.
+local ESM path represented by `snippets/esm-loader.cjs`, the controlled
+HTTP/HTTPS facade shape represented by `snippets/http-https.cjs`, the
+checked-in `vendor/pure-math` dependency path represented by
+`snippets/npm-dependency.cjs`, and the scoped FileHandle plus non-persistent
+watcher path represented by `snippets/fs-advanced.cjs`. `smoke-output.txt`
+records the expected output. The HTTP/HTTPS smoke checks facade shape only and
+does not dispatch live network I/O. Worker, raw network, expanded
+filesystem-root, WASI, inspector, and package-manager authority examples remain
+static until their providers and policy gates are promoted.
 
 Each example remains linked to profile metadata, capability requirements,
 integrity policy, and rollback guidance through `examples.json`, `project.json`,
