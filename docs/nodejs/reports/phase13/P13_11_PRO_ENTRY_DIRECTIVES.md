@@ -1,6 +1,6 @@
 # P13-11 Pro Entry Directives
 
-Status: partial
+Status: ready
 
 P13-11 starts the Auto.js Pro-style Node entry directive layer for
 `"nodejs ui"` and `"nodejs ui-thread"`. The landed scope formalizes parsing,
@@ -60,10 +60,12 @@ and blocking calls from JavaScript into the main looper remain unpromoted.
 Promotion requires Activity lifecycle and Back/Recents evidence plus provider
 tests showing bounded asynchronous main-thread dispatch and cleanup.
 
-## Not Promoted Yet
+## Closure
 
-- Full Activity lifecycle launch evidence is not complete.
-- Back/Recents behavior for packaged Node UI entries is not complete.
+P13-11 v1.1 closes the metadata directive scope. Activity lifecycle,
+Back/Recents, packaged UI entry, relaunch/crash recovery, and concrete
+provider-owned UI behavior remain P13-17 / future packaged UI promotion work,
+not entry directive metadata blockers.
 - This does not promote `require("ui")`; the existing provider remains a
   separate declarative bridge surface.
 - `$autojs`, Java interop, Rhino compatibility helpers, and
@@ -77,5 +79,6 @@ tests showing bounded asynchronous main-thread dispatch and cleanup.
 .\gradlew.bat --console=plain :app:verifyNodePhase13ProEntryDirectives
 ```
 
-The gate is expected to report `partial` with zero policy violations until the
-remaining Activity lifecycle and Back/Recents packaged evidence lands.
+The gate is expected to report `ready` with zero policy violations for the
+P13-11 metadata directive scope. Activity lifecycle and Back/Recents packaged
+evidence remain under P13-17 / future packaged UI promotion.
