@@ -270,7 +270,7 @@ URI/FileProvider policy, broadcast authority, and root/Shizuku separation land
 under their dedicated provider gates. Packaged scoped file Activity routing is
 covered by the focused packaged app bridge smoke.
 
-P13-24 records the partial shell/root/Shizuku capability gate. `shell.execRoot()`
+P13-24 records the bounded shell/root/Shizuku capability gate. `shell.execRoot()`
 and `compat.shell.execRoot()` are typed over the existing controlled
 `shell.exec(..., { root: true })` path, while `shell.execShizuku()` and
 `compat.shell.execShizuku()` are stable rejecting `Promise<never>` APIs for

@@ -108,8 +108,6 @@ function buildReport(files) {
       token(files.shellBridgeTest, "AbortController"),
       token(files.shellBridgeTest, "shell.abort.code="),
       token(files.shellBridgeTest, "shell.abort.pending=0"),
-    ], [
-      "Add device root-available/root-unavailable matrix, packaged shell/root disclosure and rollback, audit taxonomy, and migration evidence without assuming `su` exists.",
     ]),
     scenario("shizuku_stable_denial", "Shizuku execution is explicit but still denied before bridge dispatch", [
       token(files.nodeBridgeSources, "function __autojs6_shell_shizuku_unsupported_error(methodName)"),
@@ -128,20 +126,20 @@ function buildReport(files) {
       token(files.phase13Tasks, "For P13-24 v1.1, `shell.execShizuku()`"),
       token(files.compatibilityProfile, "Shizuku execution stays stable-denied for v1.1"),
       token(files.securityModel, "Shizuku execution is stable-denied"),
-      token(files.securityModel, "P13-24 records shell/root/Shizuku capability promotion as partial"),
+      token(files.securityModel, "P13-24 records bounded shell/root/Shizuku capability closure"),
       token(files.appIntentReport, "P13-24 shell/root/Shizuku capability gates"),
     ]),
-    scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-24 as partial", [
-      token(files.p13Report, "Status: partial"),
-      token(files.phase13Tasks, "P13-24 partial shell/root/Shizuku capability gate"),
+    scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-24 bounded v1.1 closure", [
+      token(files.p13Report, "Status: ready"),
+      token(files.phase13Tasks, "P13-24 bounded shell/root/Shizuku capability gate"),
       token(files.gradleGate, "verifyNodePhase13ShellRootShizukuCapability"),
       token(files.testingDoc, "verifyNodePhase13ShellRootShizukuCapability"),
       token(files.ciGatesDoc, "verifyNodePhase13ShellRootShizukuCapability"),
-      token(files.compatibilityProfile, "P13-24 records shell/root/Shizuku capability promotion as partial"),
-      token(files.proComparison, "P13-24 records shell/root/Shizuku capability promotion as partial"),
-      token(files.proAutoxNotes, "P13-24 records shell/root/Shizuku capability promotion as partial"),
+      token(files.compatibilityProfile, "P13-24 records bounded shell/root/Shizuku capability closure"),
+      token(files.proComparison, "P13-24 records bounded shell/root/Shizuku capability closure"),
+      token(files.proAutoxNotes, "P13-24 records bounded shell/root/Shizuku capability closure"),
       token(files.capabilityMatrix, "P13-24 shell/root/Shizuku capability"),
-      token(files.typesReadme, "P13-24 records the partial shell/root/Shizuku capability gate"),
+      token(files.typesReadme, "P13-24 records the bounded shell/root/Shizuku capability gate"),
       token(files.surfaceManifestDoc, "phase13-shell-root-shizuku-capability"),
     ], []),
   ];
@@ -157,7 +155,7 @@ function buildReport(files) {
     check(
       "surface-not-promoted",
       proSurface && !["opt_in_promoted", "default_promoted"].includes(proSurface.status),
-      "`pro.tasks_app_shell_media_utils` must not be promoted by the P13-24 partial gate.",
+      "`pro.tasks_app_shell_media_utils` must not be promoted by the P13-24 bounded gate.",
     ),
     check(
       "surface-evidence",

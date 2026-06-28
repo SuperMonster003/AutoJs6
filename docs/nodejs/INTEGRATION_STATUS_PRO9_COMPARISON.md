@@ -1035,7 +1035,7 @@ P13-22/P13-24 gates, while raw installed-app list APIs and raw Android
 app/intent objects remain future-provider work. Packaged scoped-file Activity
 routing is covered by the focused packaged app bridge smoke.
 
-P13-24 records shell/root/Shizuku capability promotion as partial: ordinary
+P13-24 records bounded shell/root/Shizuku capability closure: ordinary
 `shell.exec()` stays on the controlled provider, `shell.execRoot()` and
 `compat.shell.execRoot()` are explicit root facades requiring `shell.root`, and
 `shell.execShizuku()` / `shizuku: true` stay stable-denied for v1.1 until a

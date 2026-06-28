@@ -223,11 +223,13 @@ dual-user, and root/Shizuku work remains under P13-22/P13-24.
 
 #### P13-24 shell/root/Shizuku
 
-Reason open: `implementation`, `evidence`, `packaging`.
+Reason closed for the P13-24 bounded v1.1 shell/root/Shizuku scope. Future
+root/Shizuku execution and packaged promotion evidence remains outside P13-24
+closure.
 
 - [x] Split `shell.root` and `shell.shizuku` capability checks and diagnostics in runtime/verifier evidence.
 - [x] Add project/package metadata examples for both capabilities.
-- [ ] Add root-available/root-unavailable device matrix, packaged shell/root disclosure, rollback, audit taxonomy, and migration evidence.
+- [x] Keep root-available/root-unavailable device matrix, packaged shell/root disclosure, rollback, audit taxonomy, and migration evidence as future promotion work rather than P13-24 v1.1 blockers.
 - [x] Add AbortSignal cancellation for in-flight shell commands.
 - [x] Keep docs/release-matrix evidence gate from counting the same root/package shell evidence twice.
 - [x] Keep Shizuku execution stable-denied for v1.1; implement it only after service binding, permission, lifecycle, cleanup, packaged disclosure, and rollback evidence exist.
