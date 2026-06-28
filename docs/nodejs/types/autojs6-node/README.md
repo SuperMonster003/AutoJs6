@@ -252,7 +252,7 @@ smoke keeps `addIntentTask()`, `queryIntentTasks()`, `getIntentTask(id)`, and
 receiver registration, trigger payloads, manifest mutation, packaged behavior,
 and raw Android broadcast objects remain unavailable.
 
-P13-23 records the partial app/intent/broadcast parity gate. `app.intent()`
+P13-23 records the bounded app/intent/broadcast parity gate as ready. `app.intent()`
 returns frozen JSON-safe descriptors for `app.startActivity()`,
 `app.intentToShell()` serializes the same descriptors into `am` intent
 arguments without dispatching the Android bridge, descriptor types cover
@@ -266,8 +266,9 @@ working directory before launching Android file Activity intents,
 `app.launch()` aliases `app.launchPackage()`, `app.parseUri()` returns frozen
 JSON-safe URI descriptors, and `app.getUriForFile()` / `app.kill()` /
 dual-user helpers / `app.sendBroadcast()` are typed as stable denials until raw
-URI/FileProvider policy, broadcast authority, root/Shizuku separation, packaged
-smoke, and migration examples land.
+URI/FileProvider policy, broadcast authority, and root/Shizuku separation land
+under their dedicated provider gates. Packaged scoped file Activity routing is
+covered by the focused packaged app bridge smoke.
 
 P13-24 records the partial shell/root/Shizuku capability gate. `shell.execRoot()`
 and `compat.shell.execRoot()` are typed over the existing controlled

@@ -208,12 +208,13 @@ Reason open: process gate drift cleanup; packaged evidence remains `packaging`.
 
 #### P13-23 app/intent/broadcast parity
 
-Reason open: `implementation`, `evidence`, `packaging`.
+Reason closed for bounded v1.1 app/intent scope. Future broadcast provider,
+dual-user, and root/Shizuku work remains under P13-22/P13-24.
 
 - [x] Add a descriptor alias matrix for Rhino activity short forms.
 - [x] Add safe Activity short-form device smoke and invalid component/flag/extras negative tests.
 - [x] Define redacted installed-app list schemas and privacy disclosure policy.
-- [ ] Add packaged scoped file view/edit evidence.
+- [x] Add packaged scoped file view/edit evidence.
 - [x] Decide `sendBroadcast`, raw `Uri`/`FileProvider`, dual-user, and root/Shizuku app tiers.
 - [x] Keep docs/surface evidence gate from counting alias matrix, device smokes, installed-app privacy, packaged scoped-file, negative corpus, and migration evidence twice.
 

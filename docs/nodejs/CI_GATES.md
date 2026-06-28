@@ -426,8 +426,8 @@ receiver substrate, `compat.tasks` IntentTask rejection stubs, and raw broadcast
 object denial are present, while receiver registration, manifest mutation,
 capability split, packaged install/trigger/remove behavior, and external
 broadcast wakeups remain blocked.
-`verifyNodePhase13AppIntentBroadcastParity` records the P13-23 partial
-app/intent/broadcast Pro parity state: JSON-safe `app.intent()` descriptors,
+`verifyNodePhase13AppIntentBroadcastParity` records the P13-23 bounded
+app/intent/broadcast Pro parity state as ready: JSON-safe `app.intent()` descriptors,
 `app.startActivity()` descriptor normalization, TypeScript/conformance evidence,
 JSON-safe `app.parseUri()` descriptors, and stable `app.sendBroadcast()`,
 raw-URI, kill, dual-user, plus privileged app-option rejection are present,
@@ -435,7 +435,8 @@ with broadcast/raw URI/root/Shizuku/dual-user authority stable-denied for
 P13-23 v1.1. The descriptor alias and Rhino app gap matrices classify the
 supported short forms, stable denials, and future-provider work. `app_query`
 privacy disclosure and the future redacted installed-app list schema are
-documented; packaged scoped-file Activity smoke remains blocked.
+documented; packaged scoped-file Activity smoke now covers packaged
+`app.activity` metadata and view/edit routing.
 `verifyNodePhase13ShellRootShizukuCapability` records the P13-24 partial
 shell/root/Shizuku capability state: `shell`, `shell.root`, and
 `shell.shizuku` are split capability tokens, `execRoot()` routes through the
@@ -632,14 +633,14 @@ covered, while direct receiver registration, boot/package/custom triggers,
 manifest synthesis, packaged install/trigger/remove behavior, and raw broadcast
 objects require separate evidence.
 P13-23 additionally uses `verifyNodePhase13AppIntentBroadcastParity` as the
-host promotion-status gate for app/intent/broadcast parity and keeps the surface
-partial: JSON-safe `app.intent()`, normalized `app.startActivity()`, scoped
+host promotion-status gate for bounded app/intent/broadcast parity:
+JSON-safe `app.intent()`, normalized `app.startActivity()`, scoped
 file view/edit helpers, `app.launch()` alias parity, JSON-safe
 `app.parseUri()`, and stable raw-URI/kill/dual-user rejections are covered,
 while `sendBroadcast`, raw URI/FileProvider handles, and root/Shizuku app
 options stay stable-denied for P13-23 v1.1. `app_query` privacy disclosure and
 the future redacted installed-app list schema are documented; packaged scoped
-file Activity behavior still requires separate evidence.
+file Activity behavior is covered by the focused packaged app bridge smoke.
 P13-24 additionally uses `verifyNodePhase13ShellRootShizukuCapability` as the
 host promotion-status gate for shell/root/Shizuku capability parity and keeps
 the surface partial: ordinary shell and explicit root facades are covered by
