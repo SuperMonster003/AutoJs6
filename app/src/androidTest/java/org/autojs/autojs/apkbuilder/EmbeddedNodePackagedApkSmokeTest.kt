@@ -8346,6 +8346,29 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildUiBridgeEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged UI bridge smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedUiBridgeApk()
+    }
+
+    @Test
+    fun installAndRunUiBridgeEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged UI bridge install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged UI bridge install-and-run smoke")
+
+        val outputApk = buildPackagedUiBridgeApk()
+        assertInstallAndRunPackagedUiBridgeSmoke(outputApk)
+    }
+
+    @Test
     fun buildOverlayCapabilityBoundaryEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged overlay capability boundary smoke requires embedded script execution build support.",
@@ -11997,6 +12020,92 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedUiBridgeApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function waitForShown(handle) {
+              return await new Promise((resolve) => {
+                let off = function() {};
+                const timer = setTimeout(() => {
+                  off();
+                  resolve(false);
+                }, 4000);
+                off = handle.on("*", (event) => {
+                  if (event && event.type === "shown") {
+                    clearTimeout(timer);
+                    off();
+                    resolve(true);
+                  }
+                }, { drainIntervalMs: 20, timeoutMs: 5000 });
+              });
+            }
+
+            async function main() {
+              const bridge = require("autojs6:bridge");
+              const ui = require("ui");
+              const handle = await ui.showLayout({
+                type: "Column",
+                children: [
+                  { type: "Text", id: "title", text: "P13-17 packaged UI" },
+                  { type: "Progress", id: "progress", progress: 10, max: 100 },
+                  { type: "Button", id: "ok", text: "OK" }
+                ]
+              }, { drainIntervalMs: 20, timeoutMs: 5000 });
+              const shown = await waitForShown(handle);
+              await handle.update({ id: "title", text: "Packaged UI ready" }, { timeoutMs: 5000 });
+              await handle.batchUpdate([
+                { id: "progress", progress: 100 },
+                { id: "ok", text: "Done" }
+              ], { timeoutMs: 5000 });
+              await handle.close({ timeoutMs: 5000 });
+              const rawGlobalsAbsent = [
+                "Activity",
+                "Context",
+                "View",
+                "Window",
+                "NativeView",
+                "RawView",
+                "WebView"
+              ].every((name) => typeof globalThis[name] === "undefined");
+              const pending = bridge.__test.pendingCount();
+              const ready =
+                require.resolve("ui") === "ui" &&
+                Object.isFrozen(ui) &&
+                /^ui-/.test(handle.id) &&
+                shown &&
+                rawGlobalsAbsent &&
+                pending === 0;
+
+              console.log("packaged.ui_bridge.ready=" + ready);
+              console.log("packaged.ui_bridge.resolve=" + (require.resolve("ui") === "ui"));
+              console.log("packaged.ui_bridge.frozen=" + Object.isFrozen(ui));
+              console.log("packaged.ui_bridge.handle=" + /^ui-/.test(handle.id));
+              console.log("packaged.ui_bridge.shown=" + shown);
+              console.log("packaged.ui_bridge.update=true");
+              console.log("packaged.ui_bridge.close=true");
+              console.log("packaged.ui_bridge.raw_globals_absent=" + rawGlobalsAbsent);
+              console.log("packaged.ui_bridge.pending=" + pending);
+            }
+
+            return main().catch(error => {
+              console.error("packaged.ui_bridge.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-ui-bridge-smoke",
+            outputApkName = UI_BRIDGE_APK_NAME,
+            projectName = UI_BRIDGE_PROJECT_NAME,
+            packageName = UI_BRIDGE_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            nodePermissions = UI_BRIDGE_NODE_PERMISSIONS,
+            runtimeMarkers = UI_BRIDGE_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedOverlayCapabilityBoundaryApk(): File {
         val mainScriptName = "main.js"
         val mainScript = """
@@ -14329,6 +14438,16 @@ $nodeConfigJson
         )
     }
 
+    private fun assertInstallAndRunPackagedUiBridgeSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = UI_BRIDGE_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-ui-bridge-smoke.apk",
+            label = "packaged UI bridge smoke",
+            requiredMarkers = UI_BRIDGE_RUNTIME_MARKERS,
+        )
+    }
+
     private fun assertInstallAndRunPackagedOverlayCapabilityBoundarySmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
@@ -15631,6 +15750,12 @@ $nodeConfigJson
             "org.autojs6.packaged.node.ui.capability.boundary.smoke"
         private const val UI_CAPABILITY_BOUNDARY_APK_NAME =
             "PackagedNodeUiCapabilityBoundarySmoke_v1.0.0.apk"
+        private const val UI_BRIDGE_PROJECT_NAME =
+            "PackagedNodeUiBridgeSmoke"
+        private const val UI_BRIDGE_PACKAGE_NAME =
+            "org.autojs6.packaged.node.ui.bridge.smoke"
+        private const val UI_BRIDGE_APK_NAME =
+            "PackagedNodeUiBridgeSmoke_v1.0.0.apk"
         private const val OVERLAY_CAPABILITY_BOUNDARY_PROJECT_NAME =
             "PackagedNodeOverlayCapabilityBoundarySmoke"
         private const val OVERLAY_CAPABILITY_BOUNDARY_PACKAGE_NAME =
@@ -16045,6 +16170,20 @@ $nodeConfigJson
             "packaged.ui_boundary.metadata_denied=true",
             "packaged.ui_boundary.raw_globals_absent=true",
             "packaged.ui_boundary.pending=0",
+        )
+        private val UI_BRIDGE_NODE_PERMISSIONS = listOf(
+            "ui",
+        )
+        private val UI_BRIDGE_RUNTIME_MARKERS = listOf(
+            "packaged.ui_bridge.ready=true",
+            "packaged.ui_bridge.resolve=true",
+            "packaged.ui_bridge.frozen=true",
+            "packaged.ui_bridge.handle=true",
+            "packaged.ui_bridge.shown=true",
+            "packaged.ui_bridge.update=true",
+            "packaged.ui_bridge.close=true",
+            "packaged.ui_bridge.raw_globals_absent=true",
+            "packaged.ui_bridge.pending=0",
         )
         private val OVERLAY_CAPABILITY_BOUNDARY_NODE_PERMISSIONS = listOf(
             "toast",

@@ -57,15 +57,16 @@ runtime; Activity-owned providers such as the future UI bridge must marshal UI
 mutations, callbacks, and lifecycle events onto the Android main looper. Direct
 synchronous Rhino-style UI-thread execution, raw `Activity` / `View` access,
 and blocking calls from JavaScript into the main looper remain unpromoted.
-Promotion requires Activity lifecycle and Back/Recents evidence plus provider
-tests showing bounded asynchronous main-thread dispatch and cleanup.
+Further packaged UI promotion requires task relaunch, crash recovery, and
+disclosure evidence plus provider tests showing bounded asynchronous
+main-thread dispatch and cleanup.
 
 ## Closure
 
-P13-11 v1.1 closes the metadata directive scope. Activity lifecycle,
-Back/Recents, packaged UI entry, relaunch/crash recovery, and concrete
-provider-owned UI behavior remain P13-17 / future packaged UI promotion work,
-not entry directive metadata blockers.
+P13-11 v1.1 closes the metadata directive scope. Direct `require("ui")`
+provider evidence remains P13-17 work; full packaged task relaunch, crash
+recovery, disclosure, and UI-thread dispatch equivalence remain future packaged
+UI promotion work, not entry directive metadata blockers.
 - This does not promote `require("ui")`; the existing provider remains a
   separate declarative bridge surface.
 - `$autojs`, Java interop, Rhino compatibility helpers, and
@@ -80,5 +81,6 @@ not entry directive metadata blockers.
 ```
 
 The gate is expected to report `ready` with zero policy violations for the
-P13-11 metadata directive scope. Activity lifecycle and Back/Recents packaged
-evidence remain under P13-17 / future packaged UI promotion.
+P13-11 metadata directive scope. Direct UI provider evidence remains under
+P13-17, while full packaged task relaunch, crash recovery, disclosure, and
+UI-thread dispatch equivalence remain future packaged UI promotion work.

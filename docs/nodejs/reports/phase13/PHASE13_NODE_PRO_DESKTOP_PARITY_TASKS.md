@@ -889,7 +889,7 @@ P13 task 本身使用以下执行状态：
       the Android main thread.
   - P13-11 v1.1 closure: metadata parsing, propagation, packaged config
     rejection, and UI-thread policy are ready. Activity lifecycle remains
-    provider-owned P13-17 work; packaged UI entry, task relaunch, crash, and
+    provider-owned P13-17 work; full packaged task relaunch, crash, and
     disclosure evidence remain future packaged UI promotion work rather than
     P13-11 metadata blockers.
 
@@ -1046,20 +1046,27 @@ P13 task 本身使用以下执行状态：
     - `compat.ui` and direct `ui` type smoke remain aligned with the same
       JSON provider.
     - Provider registry now marks packaged UI support as provider-dependent
-      until live packaged entry/task-relaunch/crash/disclosure evidence
-      lands.
+      until packaged task-relaunch/crash/disclosure evidence lands.
     - Packaged UI capability boundary smoke now verifies a packaged APK with
       metadata that omits `ui` rejects `ui.showLayout` with
       `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, reports missing `ui`, keeps
       raw Android UI globals absent, and leaves no bridge dispatch pending.
+    - Packaged UI entry/close smoke now verifies a packaged APK with
+      `node.permissions: ["ui"]` can open a JSON UI, observe the `shown`
+      lifecycle event, apply `update`/`batchUpdate`, close the handle, keep raw
+      Android UI globals absent, and leave no bridge dispatch pending. Device
+      evidence: `QV710AF65F` / Sony XQ-AT72 / Android 12 passed
+      `EmbeddedNodePackagedApkSmokeTest#installAndRunUiBridgeEmbeddedNodePackagedApk`
+      with the packaged-smoke template override and
+      `-Pautojs.nodejs.test.deviceProfile=sony`.
     - Configuration-change policy is explicit: `NodeBridgeUiActivity` does not
       claim orientation/screen-size survival; Android destroy/recreate is the
       current behavior and is covered by instrumentation.
     - Host verifier: `tools/nodejs/phase13/verify-live-ui-provider-promotion.js`.
     - Gradle gate: `:app:verifyNodePhase13LiveUiProviderPromotion`.
     - Report: `docs/nodejs/reports/phase13/P13_17_LIVE_UI_PROVIDER_PROMOTION.md`.
-  - Remaining: live packaged APK UI smoke, task relaunch, crash recovery, and
-    user-visible packaged disclosure evidence still block opt-in promotion.
+  - Remaining: packaged task relaunch, crash recovery, and user-visible
+    packaged disclosure evidence still block opt-in promotion.
 
 - [ ] P13-18: 推进 live floaty/overlay provider 到 opt-in promoted。
   - 范围：基于 P12 overlay provider POC，开启 live show/update/drainEvents/close。

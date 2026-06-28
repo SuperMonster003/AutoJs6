@@ -94,7 +94,7 @@ function buildReport(files) {
       token(files.proComparison, "\"nodejs ui\""),
       token(files.proComparison, "P13-11"),
       token(files.p13Report, "P13-11 v1.1 closes the metadata directive scope"),
-      token(files.p13Report, "Back/Recents, packaged UI entry"),
+      token(files.p13Report, "full packaged task relaunch"),
       token(files.compatibilityProfile, "P13-11 v1.1 closes the metadata directive scope"),
     ]),
     scenario("docs_gate", "Docs and Gradle gate record P13-11 metadata directive closure", [

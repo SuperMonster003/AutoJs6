@@ -240,7 +240,7 @@ object NodeBridgeProviderRegistry {
             modules = listOf(NodeBridgeModules.UI),
             capabilities = listOf(NodeBridgePermissionManifest.UI),
             packagedSupport = packagedProviderDependent(
-                "P13-17 records live main-app Activity UI provider evidence plus Back/Recents and explicit configuration-change lifecycle policy; live packaged UI promotion still requires entry, task relaunch, crash, and disclosure evidence",
+                "P13-17 records live main-app Activity UI provider evidence plus packaged entry/update/close smoke; live packaged UI promotion still requires task relaunch, crash, and disclosure evidence",
             ),
         ),
         provider(
@@ -478,7 +478,7 @@ object NodeBridgeProviderRegistry {
             "maxActiveSessionsPerExecution" to "4",
             "phase13Promotion" to "P13-17 partial live provider evidence gate",
             "configurationChangePolicy" to "destroy_recreate_no_survival_claim",
-            "packagedPromotion" to "blocked_until_live_packaged_entry_task_relaunch_crash_disclosure_evidence",
+            "packagedPromotion" to "blocked_until_live_packaged_task_relaunch_crash_disclosure_evidence",
             "rawObjectPolicy" to "no raw View, Activity, Context, NativeView, or Java object crosses the bridge",
             "statusReason" to "Activity-owned declarative UI MVP",
         )
