@@ -56,6 +56,10 @@ package protection, docs, desktop matrix, surface manifest, TypeScript
 declarations, and Gradle gate are synchronized without introducing a callable
 WASI facade.
 
+The `controlled_wasi` final blocker registry entry is closed by this P13-38
+decision. Future `autojs6:wasi` provider work remains separate Desktop-profile
+promotion work rather than a P13-38 v1.1 blocker.
+
 ## Future Work
 
 - Implement scoped/authorized preopen mapping with lexical and realpath/symlink

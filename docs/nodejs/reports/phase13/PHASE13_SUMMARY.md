@@ -123,8 +123,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Final Blockers
 
 - Total blockers: 15
-- Completed blockers: 3
-- Open blockers: 7
+- Completed blockers: 4
+- Open blockers: 6
 - Deferred blockers: 1
 - Rejected blockers: 4
 
@@ -137,7 +137,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `second_execution_slot` | `completed` | `closed` | `required_internal` | At least two independent Node execution slots are available with isolated ResourceRegistry and crash evidence. |
 | `full_heavy_resource_stress` | `open` | `open` | `required_internal` | 8-hour quick soak and 24-hour final soak show no monotonic leaks, orphan process, or unrecoverable runtime. |
 | `worker_threads` | `open` | `decision_required` | `conditional` | Implement controlled worker_threads or declare intentionally unsupported with an AutoJs6 process-worker replacement. |
-| `controlled_wasi` | `open` | `decision_required` | `conditional` | Either support only WebAssembly or implement a controlled autojs:wasi profile while keeping raw node:wasi disabled. |
+| `controlled_wasi` | `completed` | `closed` | `conditional` | Either support only WebAssembly or implement a controlled autojs:wasi profile while keeping raw node:wasi disabled. |
 | `x86` | `deferred` | `optional` | `conditional` | Optional experiment only; does not block the three required ABIs. |
 | `native_addon` | `rejected` | `permanently_unsupported` | `intentional_non_goal` | Stable denial remains documented and tested. |
 | `unrestricted_child_process` | `rejected` | `permanently_unsupported` | `intentional_non_goal` | Stable denial remains documented and tested. |

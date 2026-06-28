@@ -94,11 +94,19 @@ Resolved in Phase 11:
 ## Conditional
 
 - `worker_threads`
-- `controlled_wasi`
 - `x86`
 
 These require a final product decision, but they may resolve as implemented,
 intentionally unsupported, or optional.
+
+Current controlled WASI decision:
+
+- `controlled_wasi`: closed by P13-38 for v1.1. Pure WebAssembly remains the
+  supported runtime path, while raw `wasi` / `node:wasi`, callable controlled
+  WASI facades, raw host paths, and raw fd/env/args surfaces stay denied. A
+  future `autojs6:wasi` provider remains separate Desktop-profile promotion
+  work requiring scoped preopens, virtual fd/env/args, resource budgets,
+  packaged evidence, hostile corpus, and worker/WASM integration evidence.
 
 ## Intentional Non-Goals
 
