@@ -27,8 +27,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.autojs.autojs.theme.ThemeColorHelper;
 import org.autojs.autojs.tool.MapBuilder;
@@ -46,11 +44,6 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
 
     private final static int sRefreshInterval = 100;
     
-    // Stack frame link pattern: matches "file:line" or "file:line:col" format
-    // Examples: "/sdcard/script.js:10", "script.js:10:5", "file:///path/to/script.js:42:3"
-    private static final Pattern STACK_FRAME_PATTERN = Pattern.compile(
-            "(?:file:)?((?:/[\\S]+?|[^\\s:]+?)\\.js):(\\d+)(?::(\\d+))?"
-    );
     private static final int LINK_COLOR = 0xFF2196F3; // Blue color for clickable links
     
     private boolean mEnableStackFrameLinks = false;
@@ -281,23 +274,23 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         String text = content.toString();
         SpannableString spannable = new SpannableString(text);
         
-        Matcher matcher = STACK_FRAME_PATTERN.matcher(text);
+        java.util.List<StackFrameParser.StackFrameLink> stackFrameLinks = StackFrameParser.parse(text);
         boolean hasLinks = false;
         
-        while (matcher.find()) {
+        for (StackFrameParser.StackFrameLink stackFrameLink : stackFrameLinks) {
             hasLinks = true;
-            final String fileName = matcher.group(1);
-            final int lineNumber = Integer.parseInt(matcher.group(2));
-            final int columnNumber = matcher.group(3) != null ? Integer.parseInt(matcher.group(3)) : 0;
+            final String fileName = stackFrameLink.getSourceName();
+            final int lineNumber = stackFrameLink.getLineIndex();
+            final int columnNumber = stackFrameLink.getColumnNumber();
             
-            final int start = matcher.start();
-            final int end = matcher.end();
+            final int start = stackFrameLink.getStart();
+            final int end = stackFrameLink.getEnd();
             
             ClickableSpan clickableSpan = new ClickableSpan() {
                 @Override
                 public void onClick(@NonNull View widget) {
                     if (mStackFrameClickListener != null) {
-                        mStackFrameClickListener.onStackFrameClick(fileName, lineNumber - 1, columnNumber);
+                        mStackFrameClickListener.onStackFrameClick(fileName, lineNumber, columnNumber);
                     }
                 }
             };
