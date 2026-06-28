@@ -433,7 +433,11 @@
   `existsOne` stay stable-denied for P13-19 v1.1.
 - Remaining P13-19 blockers: `swipe`/`gesture`/`powerDialog`, broader Rhino
   selector aliases, packaged accessibility service/settings lifecycle,
-  real-device matrix expansion, and root/Shizuku gesture tiers.
+  real-device matrix expansion, and reviewed gesture provider implementation.
+- Reserved future input automation labels split gesture authority away from
+  `accessibility`: `input.gesture`, `input.gesture.root`, and
+  `input.gesture.shizuku`. These labels are documentation-only in v1.1 and are
+  not declared by the current `NodeBridgePermissionManifest`.
 
 盘点日期：2026-06-24
 

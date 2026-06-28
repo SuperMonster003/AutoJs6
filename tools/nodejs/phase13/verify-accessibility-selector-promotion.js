@@ -124,11 +124,14 @@ function buildReport(files) {
       token(files.accessibilityTest, 'assertFalse(NodeBridgeModules.supports("accessibility", "pickup"))'),
       token(files.accessibilityTest, 'a11y.selector.rawLeak=true|true|true|-1'),
       token(files.securityModel, 'No raw `AccessibilityService`, `AccessibilityNodeInfo`, `UiObject`, or live selector object crosses into Node.'),
+      token(files.p13Report, 'Reserved future capability labels split input automation away from'),
+      token(files.compatibilityProfile, 'reserved future input automation labels split gesture authority away from `accessibility`'),
+      token(files.securityModel, 'Reserved future input automation labels split gesture authority away'),
+      token(files.capabilityMatrix, '`input.gesture`, `input.gesture.root`, and `input.gesture.shizuku`'),
       token(files.permissionManifest, 'const val ACCESSIBILITY = "accessibility"'),
       token(files.executionModePolicy, '"accessibility"'),
     ], [
       "Design a separate gesture provider for swipe/gesture/powerDialog before exposing those APIs.",
-      "Separate root/Shizuku input automation into explicit capabilities rather than silently falling back from accessibility.",
     ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-19 as partial", [
       token(files.p13Report, 'Status: partial'),

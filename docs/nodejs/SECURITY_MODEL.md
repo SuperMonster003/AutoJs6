@@ -513,6 +513,15 @@ image processing, and packaged capture/OCR behavior behind later gates.
 Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection
 object parity stay stable-denied for P13-20 v1.1.
 
+P13-19 keeps accessibility selector authority separate from raw input
+automation. Reserved future input automation labels split gesture authority away
+from `accessibility`: `input.gesture` for reviewed service-backed gestures,
+`input.gesture.root` for root/shell-backed input, and
+`input.gesture.shizuku` for Shizuku-backed input. These labels are
+documentation-only in v1.1, are not declared by the current
+`NodeBridgePermissionManifest`, and must not be silently implied by the
+`accessibility` capability.
+
 S11-21 records Rhino `events`/`events.keys`/input observer compatibility as design-gated. P12-03 promotes only `events.keys` constants through `autojs6:compat`; `require("autojs6:compat")` must not expose Rhino `events.__asEmitter__()`, Java `EventEmitter`, Rhino `ScriptableObject`, `Thread`, `MainThreadProxy`, raw `KeyEvent`, raw touch events, or Android listener objects. P12-05 adds a direct `input_observer` fake-source provider POC with bounded queues, `drainEvents`, explicit `close()`, ResourceRegistry-owned subscription cleanup, and capability checks for `input_observer` and `input_observer.keys`. P12-06 adds the accessibility live-source gate: `source: "accessibility"` registers a controlled `OnKeyListener` only when an operational AutoJs6 accessibility service is visible in the current process, queues JSON snapshots, and removes the listener through the same resource close path or accessibility-service disconnect callback. P12-07 adds cleanup/security diagnostics and scheduled/background rejection: active subscriptions, pending events, dropped events, and live listener count are reported; scheduled/background launch surfaces reject live observation before listener registration; fake queue overflow is bounded and reports `droppedCount`. Live touch observation, `input_observer.touch`, and `input_observer.intercept` remain separate rejected provider gates. Pure JavaScript code can use Node's built-in `node:events`. Packaged or background support must reject without a valid foreground/user-visible provider state; it must not create silent service-process key/touch listeners, shell/root/overlay fallback capture, or hidden key interception.
 
 The `storage` and `storages` bridge modules expose JSON-only key-value stores through frozen JavaScript handles. They require the `storage` capability, scope Android provider data by package identity, working directory, and store name, store values in app-private provider-owned SharedPreferences, and enforce bounded synchronous writes with per-value and per-store quotas. JavaScript must not receive raw `SharedPreferences`, database, file handles, `ContentResolver`, Android `Context`, or direct storage paths.

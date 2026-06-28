@@ -174,7 +174,8 @@ Reason open: `implementation`, `evidence`.
 - [x] Decide exact `waitFor`/`pickup`/`detect` semantics or keep stable denials.
 - [ ] Add packaged accessibility-service lifecycle evidence.
 - [ ] Add real-device matrix for selector actions, Back/Home/Recents, and denial paths.
-- [ ] Split gesture and root/Shizuku input automation into explicit future capabilities.
+- [ ] Design a reviewed gesture provider for `swipe`, `gesture`, and `powerDialog` before promotion.
+- [x] Split gesture and root/Shizuku input automation into explicit future capabilities.
 - [x] Keep docs/device-matrix evidence gate from counting selector aliases, packaged service, action matrix, gesture, and root/Shizuku evidence twice.
 
 #### P13-20 screenshot/image/OCR parity
