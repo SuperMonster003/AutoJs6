@@ -26,7 +26,8 @@ constrained facade described here, not Rhino's raw UI module.
 
 P13-17 records live Activity-owned `require("ui")` provider evidence for this
 JSON subset and keeps packaged live UI unpromoted until Back/Recents,
-orientation, relaunch/crash, and disclosure evidence lands.
+relaunch/crash, and disclosure evidence lands. Configuration changes use an
+explicit destroy/recreate policy with no live UI survival claim.
 
 ## Accepted Descriptor
 

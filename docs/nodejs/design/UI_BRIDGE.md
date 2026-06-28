@@ -15,7 +15,7 @@ default global `ui` injection disabled. P12-10 adds a compat.ui packaged marker
 and UI_SESSION cleanup evidence without promoting live packaged background UI.
 P13-17 records the Phase 13 live UI provider promotion gate: direct
 `require("ui")` live Activity evidence is present, but packaged live UI,
-Back/Recents, orientation, relaunch, crash, and disclosure evidence still block
+Back/Recents, relaunch, crash, and disclosure evidence still block
 `pro_compat_opt_in` promotion.
 
 ## Goal
@@ -157,8 +157,9 @@ The provider must make close idempotent. A stale JavaScript handle must reject
 with a stable bridge error instead of resurrecting an Activity.
 
 Rotation and process recreation are not allowed to silently detach UI from its
-owning Node execution. The first design may lock orientation or finish on
-configuration change, but that choice must be explicit and tested.
+owning Node execution. P13-17 chooses an explicit destroy/recreate
+configuration-change policy with no live UI survival claim; future promotion
+must re-open this if it wants state preservation across rotation.
 
 ## Packaged APK Behavior
 
@@ -166,8 +167,8 @@ Packaged APK behavior must be designed before shipping any UI module.
 
 P13-17 keeps live packaged UI in provider-dependent state. The provider registry
 may report the main-app Activity provider as available, but packaged support
-must not be treated as promoted until the Back/Recents, orientation,
-relaunch/crash, and disclosure evidence below is covered by device smoke.
+must not be treated as promoted until the Back/Recents, relaunch/crash, and
+disclosure evidence below is covered by device smoke.
 
 Open packaged requirements:
 
@@ -372,7 +373,7 @@ Minimum tests before promoting packaged live UI or WebView:
 - fake-provider success, failure, timeout, cancellation, and destroy tests
 - no raw-object serialization tests
 - Activity instrumentation for Back and configuration-change policy
-- rotation or explicit configuration-change policy test
+- explicit configuration-change destroy/recreate policy test
 - packaged APK smoke for UI entry, Back, crash, and relaunch behavior
 - WebView local asset, URL, JavaScript bridge, and storage isolation tests if
   WebView support is introduced
