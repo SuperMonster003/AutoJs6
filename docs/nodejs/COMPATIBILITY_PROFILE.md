@@ -1735,9 +1735,10 @@ runtime.
     descriptors. `app.getUriForFile()`, `app.kill()`, dual-user helpers, and
     broadcast sending stay stable-denied for P13-23 v1.1; future raw
     URI/FileProvider, root/Shizuku/dual-user, and broadcast authority belongs
-    under the P13-22/P13-24 gates. Redacted installed-app list APIs, packaged
-    app smoke, negative corpus, alias matrix, and migration examples remain
-    open.
+    under the P13-22/P13-24 gates. The descriptor alias and Rhino app gap
+    matrices classify supported short forms, stable denials, and future-provider
+    work. Redacted installed-app list APIs, packaged app smoke, and migration
+    examples remain open.
 - `barcode` / `qrcode`
   - `detect(imageOrPath, options?): Promise<BarcodeSnapshot | null>`
   - `detectAll(imageOrPath, options?): Promise<readonly BarcodeSnapshot[]>`
