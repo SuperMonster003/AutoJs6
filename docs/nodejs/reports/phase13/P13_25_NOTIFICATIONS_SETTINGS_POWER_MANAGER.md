@@ -25,6 +25,12 @@ state, and dry-run or open the battery-optimization settings page.
   They are not implied by base `notifications` or `device` declarations.
 - Provider registry details now expose the P13-25 policy anchors and keep raw
   Android manager/builder/intent/wakelock objects out of the Node surface.
+- Packaged APK smoke coverage now exercises declared `notifications`,
+  `notifications.settings`, `device`, and `device.power` metadata; notification
+  permission/settings snapshots; notification action-or-permission-denial
+  behavior; battery-optimization status/settings dry-run; device identifier
+  redaction; and packaged exact-capability denial for missing
+  `notifications.settings` / `device.power`.
 
 ## Evidence
 
@@ -45,6 +51,8 @@ state, and dry-run or open the battery-optimization settings page.
   `NodeBridgeConformanceInstrumentationTest`,
   `NodeBridgePermissionManifestInstrumentationTest`, and
   `NodeBridgeProviderRegistryInstrumentationTest`
+- Packaged APK smoke:
+  `EmbeddedNodePackagedApkSmokeTest#installAndRunNotificationsSettingsPowerBridgeEmbeddedNodePackagedApks`
 - Host verifier:
   `tools/nodejs/phase13/verify-notifications-settings-power-manager.js`
 - Gradle gate:
@@ -78,13 +86,13 @@ inspection plus user-visible settings handoff.
 
 - OEM power-manager behavior, background-launch behavior, and device matrix
   evidence.
-- Packaged notification/settings/power disclosure, install/run smoke, rollback
-  diagnostics, and migration examples.
+- Foreground disclosure UX, rollback diagnostics, and migration examples for
+  notification/settings/power promotion.
 
 The docs, compatibility notes, surface manifest, and Gradle gate are
 evidence-only for this partial decision. They do not add a separate P13-25
-blocker beyond OEM/background-launch device evidence and packaged
-notification/settings/power disclosure plus install/run evidence above.
+blocker beyond OEM/background-launch device evidence and foreground disclosure,
+rollback, and migration work above.
 
 ## Verification
 

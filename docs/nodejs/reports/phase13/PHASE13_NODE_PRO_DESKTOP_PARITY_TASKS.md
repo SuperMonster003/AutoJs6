@@ -140,8 +140,12 @@
   Do-Not-Disturb/exact-alarm authority, and direct power-manager authority
   such as wake locks, direct Doze mutation, mutation request flows, and
   callbacks.
+- Packaged APK smoke now covers notification/settings/power declared metadata,
+  install/run, action-or-permission-denial behavior, device-power dry-run, and
+  exact-capability denial for missing `notifications.settings` / `device.power`.
 - Remaining P13-25 blockers: OEM power behavior matrix, background-launch
-  behavior, packaged disclosure/run evidence, and migration examples.
+  behavior, foreground disclosure UX, rollback diagnostics, and migration
+  examples.
 
 ## P13-26 Partial Landing Note
 
@@ -1253,8 +1257,12 @@ P13 task 本身使用以下执行状态：
     - Stable denial: notification actions/listeners/rich layouts,
       Do-Not-Disturb/exact-alarm authority, and direct wakelock/power-manager
       APIs remain denied for v1.1.
+    - Packaged APK smoke:
+      `EmbeddedNodePackagedApkSmokeTest#installAndRunNotificationsSettingsPowerBridgeEmbeddedNodePackagedApks`
+      covers declared metadata, notification action-or-permission-denial,
+      settings/power dry-runs, and exact-capability denial.
     - Open before closure: OEM/device matrix, background-launch behavior,
-      packaged disclosure/run evidence, and migration examples.
+      foreground disclosure UX, rollback diagnostics, and migration examples.
 
 - [ ] P13-26: 扩展 media/recorder/mediainfo provider。
   - 范围：音频播放、录音、媒体元数据、MediaStore 相关能力。

@@ -576,8 +576,11 @@ The `device` bridge is privacy-safe by default. It exposes only coarse runtime/d
 P13-25 records notifications/settings/power manager promotion as partial.
 Notification actions/listeners/rich layouts, Do-Not-Disturb/exact-alarm
 authority, direct wakelock/power-manager control, and request-ignore-battery-
-optimization mutation flows are stable-denied for v1.1. OEM power matrices,
-packaged disclosure, and migration examples remain future evidence.
+optimization mutation flows are stable-denied for v1.1. Packaged metadata,
+install/run, notification action-or-permission-denial, settings/power dry-run,
+and exact-denial smoke are covered. OEM power matrices, background-launch
+behavior, foreground disclosure UX, rollback diagnostics, and migration
+examples remain future evidence.
 
 The `media`, `mediainfo`, and `recorder` bridge modules expose only a partial
 P13-26 provider. `media` returns read-only Android audio-stream volume/status

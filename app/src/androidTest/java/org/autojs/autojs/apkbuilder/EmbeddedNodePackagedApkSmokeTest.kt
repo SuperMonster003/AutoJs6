@@ -8269,6 +8269,33 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildNotificationsSettingsPowerBridgeEmbeddedNodePackagedApks() {
+        assumeTrue(
+            "Embedded Node.js packaged notifications/settings/power bridge smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedNotificationsSettingsPowerBridgeApk()
+        buildPackagedNotificationsSettingsPowerBridgeDenialApk()
+    }
+
+    @Test
+    fun installAndRunNotificationsSettingsPowerBridgeEmbeddedNodePackagedApks() {
+        assumeTrue(
+            "Embedded Node.js packaged notifications/settings/power bridge install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged notifications/settings/power bridge install-and-run smoke")
+
+        val outputApk = buildPackagedNotificationsSettingsPowerBridgeApk()
+        assertInstallAndRunPackagedNotificationsSettingsPowerBridgeSmoke(outputApk)
+
+        val denialOutputApk = buildPackagedNotificationsSettingsPowerBridgeDenialApk()
+        assertInstallAndRunPackagedNotificationsSettingsPowerBridgeDenialSmoke(denialOutputApk)
+    }
+
+    @Test
     fun buildV11BridgeEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged v1.1 bridge smoke requires embedded script execution build support.",
@@ -11458,6 +11485,172 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedNotificationsSettingsPowerBridgeApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            function bridgeCode(error) {
+              return String(error && (error.autojs6Code || error.code || ""));
+            }
+
+            async function tryNotificationAction(notifications) {
+              try {
+                const id = await notifications.notify({
+                  id: 9401,
+                  title: "AutoJs6 Node",
+                  text: "P13-25 packaged smoke",
+                  channel: "node-p13-25",
+                  ongoing: false,
+                  priority: "low"
+                }, { timeoutMs: 3000 });
+                await notifications.cancel(id, { timeoutMs: 3000 });
+                return { ok: true, id };
+              } catch (error) {
+                return { ok: false, code: bridgeCode(error) };
+              }
+            }
+
+            async function main() {
+              const notifications = require("notifications");
+              const device = require("device");
+
+              const notificationStatus = await notifications.getPermissionStatus({ timeoutMs: 3000 });
+              const notificationSettings = await notifications.openSettings({ dryRun: true, timeoutMs: 3000 });
+              const notificationSettingsAlias = await notifications.openNotificationSettings({ dryRun: true, timeoutMs: 3000 });
+              const notificationAction = await tryNotificationAction(notifications);
+              const ignoringBattery = await device.isIgnoringBatteryOptimizations({ timeoutMs: 3000 });
+              const batterySettings = await device.openBatteryOptimizationSettings({ dryRun: true, timeoutMs: 3000 });
+
+              const resolveOk = require.resolve("notifications") === "notifications" &&
+                require.resolve("device") === "device";
+              const shadowOk = notifications.shadow !== true && device.shadow !== true;
+              const notificationStatusOk =
+                notificationStatus.schema === "autojs6-node-notification-permission-status-v1" &&
+                typeof notificationStatus.notificationsEnabled === "boolean" &&
+                typeof notificationStatus.canOpenSettings === "boolean";
+              const notificationSettingsOk =
+                notificationSettings.schema === "autojs6-node-notification-permission-status-v1" &&
+                notificationSettings.dryRun === true &&
+                notificationSettings.opened === false &&
+                notificationSettingsAlias.dryRun === true &&
+                notificationSettingsAlias.opened === false;
+              const notificationActionOrDenied =
+                notificationAction.ok === true ||
+                notificationAction.code === "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED";
+              const devicePowerOk =
+                typeof ignoringBattery === "boolean" &&
+                batterySettings.schema === "autojs6-node-battery-optimization-settings-v1" &&
+                batterySettings.dryRun === true &&
+                batterySettings.opened === false;
+              const sensitiveOk = [
+                "imei",
+                "androidId",
+                "serial",
+                "phoneNumber",
+                "accounts",
+                "macAddress",
+                "ipAddress",
+                "fingerprint",
+                "brand",
+                "manufacturer"
+              ].every(name => typeof device[name] === "undefined");
+              const surfaceOk =
+                typeof notifications.getPermissionStatus === "function" &&
+                typeof notifications.openSettings === "function" &&
+                typeof notifications.openNotificationSettings === "function" &&
+                typeof device.isIgnoringBatteryOptimizations === "function" &&
+                typeof device.openBatteryOptimizationSettings === "function";
+              const ready = resolveOk && shadowOk && surfaceOk && notificationStatusOk &&
+                notificationSettingsOk && notificationActionOrDenied && devicePowerOk && sensitiveOk;
+
+              console.log("packaged.notifications_power.ready=" + ready);
+              console.log("packaged.notifications_power.resolve=" + resolveOk);
+              console.log("packaged.notifications_power.shadow=" + shadowOk);
+              console.log("packaged.notifications_power.surface=" + surfaceOk);
+              console.log("packaged.notifications_power.status=" + notificationStatusOk);
+              console.log("packaged.notifications_power.settings=" + notificationSettingsOk);
+              console.log("packaged.notifications_power.action_or_denial=" + notificationActionOrDenied);
+              console.log("packaged.notifications_power.device_power=" + devicePowerOk);
+              console.log("packaged.notifications_power.sensitive=" + sensitiveOk);
+            }
+
+            return main().catch(error => {
+              console.error("packaged.notifications_power.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-notifications-power-bridge-smoke",
+            outputApkName = NOTIFICATIONS_POWER_BRIDGE_APK_NAME,
+            projectName = NOTIFICATIONS_POWER_BRIDGE_PROJECT_NAME,
+            packageName = NOTIFICATIONS_POWER_BRIDGE_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraFiles = mapOf(
+                "node_modules/notifications/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/device/index.js" to """module.exports = { shadow: true, imei: "shadow" };""" + "\n",
+            ),
+            extraPermissions = listOf("android.permission.POST_NOTIFICATIONS"),
+            nodePermissions = NOTIFICATIONS_POWER_BRIDGE_NODE_PERMISSIONS,
+            runtimeMarkers = NOTIFICATIONS_POWER_BRIDGE_RUNTIME_MARKERS,
+        )
+    }
+
+    private fun buildPackagedNotificationsSettingsPowerBridgeDenialApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function denied(action) {
+              try {
+                await action();
+                return "allowed|";
+              } catch (error) {
+                const code = String(error && (error.autojs6Code || error.code || ""));
+                const missing = Array.isArray(error && error.missingCapabilities)
+                  ? error.missingCapabilities.join(",")
+                  : "";
+                return code + "|" + missing;
+              }
+            }
+
+            async function main() {
+              const notifications = require("notifications");
+              const device = require("device");
+              const settingsDenied = await denied(() => notifications.openSettings({ dryRun: true, timeoutMs: 1000 }));
+              const powerDenied = await denied(() => device.isIgnoringBatteryOptimizations({ timeoutMs: 1000 }));
+              const shadowOk = notifications.shadow !== true && device.shadow !== true;
+              const settingsOk = settingsDenied === "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED|notifications.settings";
+              const powerOk = powerDenied === "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED|device.power";
+              const ready = settingsOk && powerOk && shadowOk;
+              console.log("packaged.notifications_power_denial.ready=" + ready);
+              console.log("packaged.notifications_power_denial.settings=" + settingsOk);
+              console.log("packaged.notifications_power_denial.power=" + powerOk);
+              console.log("packaged.notifications_power_denial.shadow=" + shadowOk);
+            }
+
+            return main().catch(error => {
+              console.error("packaged.notifications_power_denial.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-notifications-power-denial-smoke",
+            outputApkName = NOTIFICATIONS_POWER_DENIAL_APK_NAME,
+            projectName = NOTIFICATIONS_POWER_DENIAL_PROJECT_NAME,
+            packageName = NOTIFICATIONS_POWER_DENIAL_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraFiles = mapOf(
+                "node_modules/notifications/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/device/index.js" to """module.exports = { shadow: true, imei: "shadow" };""" + "\n",
+            ),
+            nodePermissions = NOTIFICATIONS_POWER_DENIAL_NODE_PERMISSIONS,
+            runtimeMarkers = NOTIFICATIONS_POWER_DENIAL_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedV11BridgeApk(): File {
         val mainScriptName = "main.js"
         val mainScript = """
@@ -13539,6 +13732,26 @@ $nodeConfigJson
         )
     }
 
+    private fun assertInstallAndRunPackagedNotificationsSettingsPowerBridgeSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = NOTIFICATIONS_POWER_BRIDGE_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-notifications-power-bridge-smoke.apk",
+            label = "packaged notifications/settings/power bridge smoke",
+            requiredMarkers = NOTIFICATIONS_POWER_BRIDGE_RUNTIME_MARKERS,
+        )
+    }
+
+    private fun assertInstallAndRunPackagedNotificationsSettingsPowerBridgeDenialSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = NOTIFICATIONS_POWER_DENIAL_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-notifications-power-denial-smoke.apk",
+            label = "packaged notifications/settings/power bridge denial smoke",
+            requiredMarkers = NOTIFICATIONS_POWER_DENIAL_RUNTIME_MARKERS,
+        )
+    }
+
     private fun assertInstallAndRunPackagedV11BridgeSmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
@@ -14795,6 +15008,16 @@ $nodeConfigJson
         private const val DEVICE_BRIDGE_PROJECT_NAME = "PackagedNodeDeviceBridgeSmoke"
         private const val DEVICE_BRIDGE_PACKAGE_NAME = "org.autojs6.packaged.node.device.smoke"
         private const val DEVICE_BRIDGE_APK_NAME = "PackagedNodeDeviceBridgeSmoke_v1.0.0.apk"
+        private const val NOTIFICATIONS_POWER_BRIDGE_PROJECT_NAME = "PackagedNodeNotificationsPowerBridgeSmoke"
+        private const val NOTIFICATIONS_POWER_BRIDGE_PACKAGE_NAME =
+            "org.autojs6.packaged.node.notificationspower.smoke"
+        private const val NOTIFICATIONS_POWER_BRIDGE_APK_NAME =
+            "PackagedNodeNotificationsPowerBridgeSmoke_v1.0.0.apk"
+        private const val NOTIFICATIONS_POWER_DENIAL_PROJECT_NAME = "PackagedNodeNotificationsPowerDenialSmoke"
+        private const val NOTIFICATIONS_POWER_DENIAL_PACKAGE_NAME =
+            "org.autojs6.packaged.node.notificationspower.denial.smoke"
+        private const val NOTIFICATIONS_POWER_DENIAL_APK_NAME =
+            "PackagedNodeNotificationsPowerDenialSmoke_v1.0.0.apk"
         private const val V11_BRIDGE_PROJECT_NAME = "PackagedNodeV11BridgeSmoke"
         private const val V11_BRIDGE_PACKAGE_NAME = "org.autojs6.packaged.node.v11.bridge.smoke"
         private const val V11_BRIDGE_APK_NAME = "PackagedNodeV11BridgeSmoke_v1.0.0.apk"
@@ -15133,6 +15356,33 @@ $nodeConfigJson
             "packaged.device.values=true",
             "packaged.device.sensitive=true",
             "packaged.device.shadow=true",
+        )
+        private val NOTIFICATIONS_POWER_BRIDGE_NODE_PERMISSIONS = listOf(
+            "notifications",
+            "notifications.settings",
+            "device",
+            "device.power",
+        )
+        private val NOTIFICATIONS_POWER_BRIDGE_RUNTIME_MARKERS = listOf(
+            "packaged.notifications_power.ready=true",
+            "packaged.notifications_power.resolve=true",
+            "packaged.notifications_power.shadow=true",
+            "packaged.notifications_power.surface=true",
+            "packaged.notifications_power.status=true",
+            "packaged.notifications_power.settings=true",
+            "packaged.notifications_power.action_or_denial=true",
+            "packaged.notifications_power.device_power=true",
+            "packaged.notifications_power.sensitive=true",
+        )
+        private val NOTIFICATIONS_POWER_DENIAL_NODE_PERMISSIONS = listOf(
+            "notifications",
+            "device",
+        )
+        private val NOTIFICATIONS_POWER_DENIAL_RUNTIME_MARKERS = listOf(
+            "packaged.notifications_power_denial.ready=true",
+            "packaged.notifications_power_denial.settings=true",
+            "packaged.notifications_power_denial.power=true",
+            "packaged.notifications_power_denial.shadow=true",
         )
         private val V11_BRIDGE_NODE_PERMISSIONS = listOf(
             "network",

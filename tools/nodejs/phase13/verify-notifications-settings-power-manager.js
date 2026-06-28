@@ -18,6 +18,7 @@ const FILES = {
   conformanceTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
   notificationsTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeNotificationsBridgeInstrumentationTest.kt",
   deviceTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeDeviceBridgeInstrumentationTest.kt",
+  packagedSmokeTest: "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt",
   permissionManifestTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgePermissionManifestInstrumentationTest.kt",
   providerRegistryTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeProviderRegistryInstrumentationTest.kt",
   notificationsTypes: "docs/nodejs/types/autojs6-node/notifications.d.ts",
@@ -104,12 +105,14 @@ function buildReport(files) {
       token(files.nodeBridgeSources, 'permissions: ["device", "device.power"]'),
       token(files.deviceTypes, "DevicePowerSettingsResult"),
       token(files.deviceTest, "device.power.manifest.denied"),
+      token(files.packagedSmokeTest, "installAndRunNotificationsSettingsPowerBridgeEmbeddedNodePackagedApks"),
+      token(files.packagedSmokeTest, "packaged.notifications_power.device_power=true"),
       token(files.conformanceTest, 'expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"])'),
       token(files.typeSmoke, "const compatBatteryIgnored: boolean = await rhinoCompat.device.isIgnoringBatteryOptimizations"),
       token(files.p13Report, "P13-25 v1.1 stable-denies direct power-manager authority"),
       token(files.compatibilityProfile, "P13-25 v1.1 stable-denies direct power-manager authority"),
     ], [
-      "OEM power-manager matrices, packaged disclosure, and background launch behavior still need device evidence.",
+      "OEM power-manager matrices, foreground disclosure UX, and background launch behavior still need broader device evidence.",
     ]),
     scenario("provider_registry_boundary", "provider registry and tests keep the boundary JSON-only and auditable", [
       token(files.providerRegistry, '"settingsCapability" to NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS'),
@@ -127,9 +130,12 @@ function buildReport(files) {
       token(files.p13Report, "`PendingIntent`, `RemoteViews`, `Intent`, `PowerManager`, `WakeLock`"),
       token(files.projectTool, '"notifications.settings"'),
       token(files.projectTool, '"device.power"'),
-    ], [
-      "Notification and power-manager APIs still need packaged install/run/disclosure evidence before profile promotion.",
-    ]),
+      token(files.packagedSmokeTest, "NOTIFICATIONS_POWER_BRIDGE_NODE_PERMISSIONS"),
+      token(files.packagedSmokeTest, "packaged.notifications_power.settings=true"),
+      token(files.packagedSmokeTest, "packaged.notifications_power.action_or_denial=true"),
+      token(files.packagedSmokeTest, "packaged.notifications_power_denial.settings=true"),
+      token(files.packagedSmokeTest, "packaged.notifications_power_denial.power=true"),
+    ], []),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-25 as partial", [
       token(files.p13Report, "Status: partial"),
       token(files.phase13Tasks, "P13-25 partial notifications/settings/power manager gate"),
@@ -206,7 +212,7 @@ function buildReport(files) {
       devicePowerSettingsReady: scenarioById(scenarios, "device_power_status").status !== "missing_evidence",
       advancedNotificationActionsReady: false,
       directPowerManagerReady: false,
-      packagedSettingsPowerReady: false,
+      packagedSettingsPowerReady: scenarioById(scenarios, "provider_registry_boundary").status !== "missing_evidence",
       proSurfacePromoted: false,
     },
   };
