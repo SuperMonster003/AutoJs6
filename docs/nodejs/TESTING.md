@@ -1522,6 +1522,9 @@ also requires JSON-safe `app.parseUri()` evidence and stable denials for
 broadcast sending, raw URI/FileProvider handles, or root/Shizuku routing through
 ordinary app APIs; those stay stable-denied for P13-23 v1.1. Raw installed-app
 list APIs, packaged behavior, and raw Android app/intent objects remain open.
+The P13-23 descriptor alias and Rhino app gap matrices classify supported
+short forms, stable denials, and future-provider work in
+`docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
 
 Current P13-23 app.startActivity live provider evidence:
 

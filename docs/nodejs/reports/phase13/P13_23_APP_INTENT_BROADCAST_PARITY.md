@@ -101,6 +101,29 @@ and
 `NodeAutoJsBridgeInstrumentationTest#androidAppBridgeRejectsInvalidStartActivityDescriptors`
 also covers the Android provider-level invalid descriptor matrix.
 
+## Descriptor Alias And Gap Matrix
+
+`P13-23 descriptor alias matrix`:
+
+| Rhino / Pro shape | P13-23 Node status | Node path |
+| --- | --- | --- |
+| URL string `startActivity("https://example.com/path")` | supported | URL string normalizes to an `ACTION_VIEW` descriptor. |
+| Short `action: "VIEW"` | supported | `action: "VIEW"` expands to `android.intent.action.VIEW`. |
+| Short `category: "BROWSABLE"` | supported | `category: "BROWSABLE"` expands to `android.intent.category.BROWSABLE`. |
+| `url` descriptor alias | supported | `url` is normalized into descriptor `data`. |
+| `package` descriptor alias | supported | `package` is normalized into descriptor `packageName`. |
+| Named Rhino activity short forms beyond URL strings and JSON descriptors | stable-denied for v1.1 | Use explicit JSON-safe descriptors or keep the Rhino script on the Rhino engine. |
+| Root, Shizuku, dual-user, or raw Android object options | stable-denied for v1.1 | Use future P13-22/P13-24 gates instead of the ordinary `app` bridge. |
+
+`P13-23 Rhino app gap inventory`:
+
+| Rhino / Pro shape | P13-23 Node mapping |
+| --- | --- |
+| `getInstalledApps()` / `getInstalledPackages()` | Future redacted JSON provider plus disclosure policy; raw Java object lists stay blocked. |
+| Preset app aliases and localized app-name shortcuts | Exact `getPackageName(appName)` / `launchApp(appName)` lookup only, otherwise stable-denied for v1.1. |
+| Raw `Intent`, `Uri`, `FileProvider`, `ApplicationInfo`, and `PackageInfo` objects | JSON-safe descriptors only; raw Android objects do not cross into Node. |
+| `app.sendBroadcast()` / IntentTask mutation | Future P13-22 broadcast provider; stable-denied in P13-23. |
+
 ## Boundary
 
 P13-23 does not add `sendBroadcast` to the Android bridge dispatch table and
@@ -125,16 +148,14 @@ P13-24 shell/root/Shizuku capability gates instead of expanding the ordinary
 
 - Raw installed-app list APIs: `getInstalledApps()` and
   `getInstalledPackages()`.
-- Preset app aliases beyond exact package/name lookup.
-- Activity short-form mapping beyond URL strings and JSON-safe descriptors.
 - Packaged privacy disclosure examples for exact app/package lookup.
 - Migration examples for Rhino `app.intent()` and `app.startActivity()` scripts.
 
 The docs, compatibility notes, surface manifest, and Gradle gate are
 evidence-only for this partial decision. They do not add a separate P13-23
-blocker beyond the descriptor alias matrix, safe Activity device smokes,
-redacted installed-app list policy, packaged scoped-file evidence, negative
-corpus, privacy disclosure, and migration examples above.
+blocker beyond the safe Activity device smokes, redacted installed-app list
+policy, packaged scoped-file evidence, negative corpus, privacy disclosure, and
+migration examples above.
 
 ## Verification
 
