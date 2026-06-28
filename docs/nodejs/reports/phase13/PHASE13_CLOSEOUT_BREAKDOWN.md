@@ -99,10 +99,10 @@ Reason open: `evidence`, `external`.
 
 Reason open: decision gate drift cleanup; future promotion remains `implementation`, `policy`, `packaging`.
 
-- [ ] Implement registry metadata and tarball download into an app-private cache.
-- [ ] Extend transactional install/update/remove/list/verify/prune beyond local fixtures.
-- [ ] Keep cancellation, store locking, SHA-512/integrity, and path-escape denial for all sources.
-- [ ] Decide npm CLI, lifecycle scripts, bin shims, signed native payloads, and unrestricted install authority.
+- [x] Stable-deny registry metadata/tarball download as runtime user APIs for v1.1.
+- [ ] Extend transactional install/update/remove/list/verify/prune beyond local fixtures only after reviewed distribution authority exists.
+- [x] Keep cancellation, store locking, SHA-512/integrity, and path-escape denial for all enabled sources.
+- [x] Stable-deny npm CLI, lifecycle scripts, bin shims, signed/native payloads, and unrestricted install authority for v1.1.
 - [ ] Integrate with packaged distribution and rollback diagnostics.
 
 ### Pro Entry, Java, And Rhino

@@ -118,11 +118,10 @@ function buildReport(files) {
       token(files.typesPackageManager, "list(options?: ListOptions): Promise<readonly PackageRecord[]>"),
       token(files.typesPackageManager, "install(request: MutationSourceRequest): Promise<OperationResult>"),
       token(files.typesIndex, './package_manager.d.ts'),
-    ], [
-      "Registry download and npm CLI install remain disabled.",
-      "Install/update/remove remain local, project-scoped, integrity-checked, and gated by package_manager.mutate plus allowMutation until distribution policy is proven.",
-      "Signed native payload verification is not implemented; native payload execution remains disabled.",
-    ]),
+      token(files.p13Report, "P13-09 v1.1 stable-denies Android registry download"),
+      token(files.packageManagerDoc, "Registry download, npm CLI install"),
+      token(files.securityModel, "registry/npm execution"),
+    ], []),
     scenario("docs", "Docs record partial Android package install progress", [
       token(files.phase13Tasks, "P13-09"),
       token(files.p13Report, "Status: partial"),
