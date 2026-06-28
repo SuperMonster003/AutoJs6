@@ -4,8 +4,8 @@ Status: partial
 
 P13-17 records the current live `require("ui")` provider state for Phase 13.
 The Activity-owned provider is available for explicit Node UI sessions, but the
-surface is not promoted to `pro_compat_opt_in` yet because live packaged UI,
-Recents/task relaunch, crash, and disclosure evidence are still missing.
+surface is not promoted to `pro_compat_opt_in` yet because live packaged UI
+entry, Recents/task relaunch, crash, and disclosure evidence are still missing.
 
 ## Implemented Evidence
 
@@ -37,6 +37,12 @@ Recents/task relaunch, crash, and disclosure evidence are still missing.
   passed the focused instrumentation method
   `NodeUiBridgeInstrumentationTest#androidUiProviderRecordsBackActivityDestroyLifecycleEvent`
   with `-Pautojs.nodejs.test.deviceProfile=sony`.
+- Packaged capability boundary:
+  `EmbeddedNodePackagedApkSmokeTest#installAndRunUiCapabilityBoundaryEmbeddedNodePackagedApk`
+  verifies packaged metadata without `node.permissions: ["ui"]` rejects
+  `ui.showLayout` with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, reports
+  missing `ui`, keeps raw Android UI globals absent, and leaves no bridge
+  dispatch pending.
 - Rhino migration: `require("autojs6:compat").ui` wraps the same JSON provider;
   packaged P12 evidence covers fake-transport routing and
   `packaged.rhino_compat.compat_ui=true`.
@@ -51,15 +57,15 @@ Recents/task relaunch, crash, and disclosure evidence are still missing.
   UI session overflow reject with stable bridge errors.
 - The provider registry now reports packaged UI support as
   `provider-dependent`; P13-17 must not claim live packaged UI promotion.
+- Packaged UI metadata denial is covered, but packaged live UI entry, task
+  relaunch, crash recovery, and user-visible disclosure remain unpromoted.
 
 ## Remaining Blockers
 
 - Recents/task-removal Activity lifecycle instrumentation and packaged task
   relaunch evidence.
-- Live packaged APK UI smoke covering entry, close, relaunch, and crash
-  evidence.
-- Capability/metadata denial and user-visible disclosure behavior for packaged
-  UI promotion.
+- Live packaged APK UI smoke covering entry, close, relaunch, crash, and
+  user-visible disclosure evidence.
 
 ## Gate
 

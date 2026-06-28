@@ -258,7 +258,7 @@
         "P13-19",
         "P13-20"
       ],
-      "summary": "Promote live UI, floaty/overlay, accessibility/selector, screenshot/image/OCR Pro compatibility surfaces. P13-17 records partial live Activity-owned UI provider evidence while live packaged UI remains blocked. P13-18 records partial overlay provider evidence over the P12-14 permission/settings/cleanup live gate while live overlay creation remains fail-closed. P13-19 records partial accessibility selector evidence while advanced gesture, packaged service, and root/Shizuku tiers remain blocked. P13-20 records partial screenshot/image/OCR promotion evidence: scoped image read/recycle and ML Kit OCR are live, while MediaProjection, advanced image processing, packaged capture/OCR, and packaged disclosure evidence remain blocked; Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1.",
+      "summary": "Promote live UI, floaty/overlay, accessibility/selector, screenshot/image/OCR Pro compatibility surfaces. P13-17 records partial live Activity-owned UI provider evidence plus packaged UI capability/metadata denial while live packaged UI entry/relaunch/crash/disclosure remains blocked. P13-18 records partial overlay provider evidence over the P12-14 permission/settings/cleanup live gate while live overlay creation remains fail-closed. P13-19 records partial accessibility selector evidence while advanced gesture, packaged service, and root/Shizuku tiers remain blocked. P13-20 records partial screenshot/image/OCR promotion evidence: scoped image read/recycle and ML Kit OCR are live, while MediaProjection, advanced image processing, packaged capture/OCR, and packaged disclosure evidence remain blocked; Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1.",
       "risk": "high",
       "runtimeSurface": [
         "require(\"ui\") live provider",
@@ -274,6 +274,7 @@
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt",
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgeUiProvider.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeUiBridgeInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt#installAndRunUiCapabilityBoundaryEmbeddedNodePackagedApk",
         "docs/nodejs/types/autojs6-node/ui.d.ts",
         "build/reports/nodejs/phase13-live-ui-provider-promotion.json",
         "build/reports/nodejs/phase13-live-ui-provider-promotion.md",

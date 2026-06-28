@@ -1043,6 +1043,10 @@ P13 task 本身使用以下执行状态：
     - Provider registry now marks packaged UI support as provider-dependent
       until live packaged Back/Recents/relaunch/crash/disclosure evidence
       lands.
+    - Packaged UI capability boundary smoke now verifies a packaged APK with
+      metadata that omits `ui` rejects `ui.showLayout` with
+      `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, reports missing `ui`, keeps
+      raw Android UI globals absent, and leaves no bridge dispatch pending.
     - Configuration-change policy is explicit: `NodeBridgeUiActivity` does not
       claim orientation/screen-size survival; Android destroy/recreate is the
       current behavior and is covered by instrumentation.
@@ -1050,7 +1054,7 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13LiveUiProviderPromotion`.
     - Report: `docs/nodejs/reports/phase13/P13_17_LIVE_UI_PROVIDER_PROMOTION.md`.
   - Remaining: Recents/task-removal lifecycle evidence, live packaged APK UI
-    smoke, crash/relaunch evidence, and packaged capability/disclosure denial
+    smoke, crash/relaunch evidence, and user-visible packaged disclosure
     evidence still block opt-in promotion.
 
 - [ ] P13-18: 推进 live floaty/overlay provider 到 opt-in promoted。

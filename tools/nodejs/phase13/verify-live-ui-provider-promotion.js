@@ -121,6 +121,15 @@ function buildReport(files) {
       token(files.providerRegistry, '"configurationChangePolicy" to "destroy_recreate_no_survival_claim"'),
       token(files.p13Report, "Configuration changes are explicitly not a P13-17 survivability contract"),
     ]),
+    scenario("packaged_capability_boundary", "Packaged UI capability metadata denial is covered without claiming live packaged UI promotion", [
+      token(files.packagedTest, "installAndRunUiCapabilityBoundaryEmbeddedNodePackagedApk"),
+      token(files.packagedTest, 'const projectConfig = JSON.parse(fs.readFileSync("project.json", "utf8"));'),
+      token(files.packagedTest, 'nodePermissions.indexOf("ui") < 0'),
+      token(files.packagedTest, 'denied.code === "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED"'),
+      token(files.packagedTest, "packaged.ui_boundary.capability_denied=true"),
+      token(files.packagedTest, "packaged.ui_boundary.metadata_denied=true"),
+      token(files.packagedTest, "packaged.ui_boundary.raw_globals_absent=true"),
+    ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record the P13-17 promotion state", [
       token(files.p13Report, "Status: partial"),
       token(files.phase13Tasks, "P13-17"),
@@ -136,8 +145,7 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, "phase13-live-ui-provider-promotion"),
     ], [
       "Add Recents/task-removal Activity lifecycle instrumentation and packaged task relaunch evidence.",
-      "Run a live packaged APK UI smoke that covers entry, close, relaunch, and crash evidence.",
-      "Record capability/metadata denial and user-visible disclosure behavior for packaged UI promotion.",
+      "Run a live packaged APK UI smoke that covers entry, close, relaunch, crash, and user-visible disclosure evidence.",
     ]),
   ];
   const checks = [
@@ -193,6 +201,7 @@ function buildReport(files) {
       securityBoundaryReady: scenarioById(scenarios, "security_and_boundaries").status === "ready",
       rhinoCompatReady: scenarioById(scenarios, "rhino_compat_and_types").status === "ready",
       configurationChangePolicyReady: scenarioById(scenarios, "configuration_change_policy").status === "ready",
+      packagedCapabilityBoundaryReady: scenarioById(scenarios, "packaged_capability_boundary").status === "ready",
       proSurfacePromoted: false,
     },
   };

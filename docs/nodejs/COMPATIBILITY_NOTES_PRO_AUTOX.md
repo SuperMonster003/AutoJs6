@@ -225,6 +225,7 @@ AutoJs6 behavior:
 - live packaged UI, Back/Recents, relaunch/crash, and packaged disclosure
   evidence remain unpromoted; configuration changes use an explicit
   destroy/recreate policy with no live UI survival claim.
+- packaged missing-`ui` capability metadata rejects before dispatch.
 
 Porting note: migrate Rhino UI scripts to explicit `require("ui")` or
 `compat.ui` JSON descriptors instead of relying on raw `View`, `NativeView`,

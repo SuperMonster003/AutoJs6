@@ -338,8 +338,9 @@ P13-17 records the live `require("ui")` provider promotion gate for the
 declared `ui` types. Direct `ui.showLayout()` and `compat.ui.showLayout()` are
 typed over the same JSON-only Activity provider, but live packaged UI remains
 provider-dependent until Back/Recents, relaunch/crash, and disclosure evidence
-lands. Configuration changes use an explicit destroy/recreate policy with no
-live UI survival claim.
+lands. Packaged missing-`ui` capability metadata now rejects before dispatch;
+configuration changes use an explicit destroy/recreate policy with no live UI
+survival claim.
 
 `ui.overlay` is a P12-13 fake-provider POC over the P12-12A overlay contract. It exposes JSON-only `show`, `update`, `drainEvents`, `close`, `closeAll`, `hasPermission`, and `openPermissionSettings` shapes with opaque handles. P12-14 adds the Android live gate for permission snapshots, explicit settings dry-run/launch evidence, packaged `SYSTEM_ALERT_WINDOW` metadata, foreground disclosure requirements, and cleanup summaries; live overlay creation remains fail-closed.
 
