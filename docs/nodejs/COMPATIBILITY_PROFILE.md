@@ -1947,7 +1947,7 @@ runtime.
   - Android provider creates stable channel ids and records channel/ongoing metadata for owned notification resources
   - the provider tracks notifications owned by the current Node execution and cancels remaining owned notifications on provider destroy
   - JavaScript receives only numeric ids; no raw `Notification`, `NotificationChannel`, `PendingIntent`, `RemoteViews`, or Android object crosses into Node
-  - P13-25 records notifications/settings/power manager promotion as partial: P13-25 v1.1 stable-denies notification actions, listeners, richer layouts, Do-Not-Disturb, and exact-alarm authority; packaged metadata/install-run, notification action-or-permission-denial, and exact-denial smoke are covered, while foreground disclosure UX, rollback diagnostics, and migration examples remain open
+  - P13-25 records notifications/settings/power manager promotion as partial: P13-25 v1.1 stable-denies notification actions, listeners, richer layouts, Do-Not-Disturb, and exact-alarm authority; packaged metadata/install-run, notification action-or-permission-denial, exact-denial smoke, rollback diagnostics, and the `notifications-power` Pro migration example are covered, while foreground disclosure UX, OEM matrices, and background-launch behavior remain open
 - `sensors`
   - `getAvailableSensors(options?): Promise<readonly SensorInfo[]>`
   - `once(type, options?): Promise<SensorEvent>`
@@ -2012,7 +2012,7 @@ runtime.
   - `vibrate()` clamps duration to 10 seconds and packaged APKs that use it must declare `android.permission.VIBRATE`
   - privacy-sensitive identifiers are absent: IMEI, Android ID, serial, phone number, accounts, MAC/IP address, hardware fingerprint, brand, and manufacturer
   - no raw `Context`, `PowerManager`, `Vibrator`, display, or build objects are exposed to JavaScript
-  - P13-25 records notifications/settings/power manager promotion as partial: P13-25 v1.1 stable-denies direct power-manager authority including wake locks, direct Doze mutation, request-ignore-battery-optimization mutation flows, and callbacks; packaged settings/power dry-run and exact-denial smoke are covered, while OEM power-manager matrices, background-launch behavior, foreground disclosure UX, rollback diagnostics, and migration examples remain open
+  - P13-25 records notifications/settings/power manager promotion as partial: P13-25 v1.1 stable-denies direct power-manager authority including wake locks, direct Doze mutation, request-ignore-battery-optimization mutation flows, and callbacks; packaged settings/power dry-run, exact-denial smoke, rollback diagnostics, and the `notifications-power` Pro migration example are covered, while OEM power-manager matrices, background-launch behavior, and foreground disclosure UX remain open
 - `media`, `mediainfo`, `recorder`
   - `media.getAudioStreamVolume(stream?, options?): Promise<number>`
   - `media.getAudioStreamMaxVolume(stream?, options?): Promise<number>`

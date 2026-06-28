@@ -286,7 +286,7 @@ Reason open: `implementation`, `evidence`, `packaging`.
 - [ ] Add foreground disclosure UX and notification ownership evidence before promotion.
 - [x] Stable-deny wakelocks, request-ignore-battery-optimizations mutation flows, callbacks, and direct power mutation for v1.1.
 - [ ] Add OEM matrix and background-launch behavior evidence.
-- [ ] Add rollback diagnostics and migration examples for promotion.
+- [x] Add rollback diagnostics and migration examples for promotion.
 - [x] Keep raw Notification/PowerManager/WakeLock/settings objects and device
   identifiers out of the Node surface.
 - [x] Keep docs/surface evidence gate from counting notification actions, settings helpers, wakelock/power APIs, OEM matrix, and packaged evidence twice.

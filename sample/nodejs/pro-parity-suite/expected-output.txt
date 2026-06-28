@@ -1,9 +1,10 @@
-sample.pro-parity-suite.catalog=7
+sample.pro-parity-suite.catalog=8
 sample.pro-parity-suite.java-interop=PASS
 sample.pro-parity-suite.rhino-install=PASS
 sample.pro-parity-suite.ui-layout=PASS
 sample.pro-parity-suite.overlay-floaty=PASS
 sample.pro-parity-suite.tasks-work-manager=PASS
+sample.pro-parity-suite.notifications-power=PASS
 sample.pro-parity-suite.screenshot-ocr=PASS
 sample.pro-parity-suite.accessibility-selector=PASS
 sample.pro-parity-suite=PASS

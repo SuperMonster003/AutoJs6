@@ -61,6 +61,16 @@
       "skipReason": "WorkManager provider or persistent task database substrate may be unavailable"
     },
     {
+      "id": "notifications-power",
+      "title": "Notifications settings and power status migration",
+      "file": "snippets/notifications-power.cjs",
+      "targetProfile": "pro_compat_opt_in",
+      "requiredCapabilities": ["notifications", "notifications.settings", "device", "device.power"],
+      "expectedOutput": "sample.pro-parity-suite.notifications-power=PASS",
+      "packagedBehavior": "settings/status metadata is supported; notification ownership, foreground disclosure, and OEM power behavior remain gated",
+      "skipReason": "notifications/settings or device.power provider may be unavailable"
+    },
+    {
       "id": "screenshot-ocr",
       "title": "screenshot plus OCR migration",
       "file": "snippets/screenshot-ocr.cjs",

@@ -148,8 +148,7 @@
   install/run, action-or-permission-denial behavior, device-power dry-run, and
   exact-capability denial for missing `notifications.settings` / `device.power`.
 - Remaining P13-25 blockers: OEM power behavior matrix, background-launch
-  behavior, foreground disclosure UX, rollback diagnostics, and migration
-  examples.
+  behavior, and foreground disclosure UX.
 
 ## P13-26 Partial Landing Note
 
@@ -1298,8 +1297,13 @@ P13 task 本身使用以下执行状态：
       `EmbeddedNodePackagedApkSmokeTest#installAndRunNotificationsSettingsPowerBridgeEmbeddedNodePackagedApks`
       covers declared metadata, notification action-or-permission-denial,
       settings/power dry-runs, and exact-capability denial.
+    - Rollback/migration evidence: `PROFILE_ROLLBACK_PLAYBOOK.md` records
+      `notifications.settings` and `device.power` fallback actions, and
+      `sample/nodejs/pro-parity-suite/snippets/notifications-power.cjs`
+      documents the migration path through status snapshots and settings
+      dry-runs.
     - Open before closure: OEM/device matrix, background-launch behavior,
-      foreground disclosure UX, rollback diagnostics, and migration examples.
+      and foreground disclosure UX.
 
 - [ ] P13-26: 扩展 media/recorder/mediainfo provider。
   - 范围：音频播放、录音、媒体元数据、MediaStore 相关能力。

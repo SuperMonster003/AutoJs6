@@ -82,17 +82,34 @@ direct Doze mutation, request-ignore-battery-optimizations mutation flows, and
 power-save callbacks are not exposed. The supported v1.1 surface is status
 inspection plus user-visible settings handoff.
 
+## Rollback And Migration Evidence
+
+- `docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md` now records rollback
+  actions for `notifications.settings` and `device.power`: keep notification
+  ownership, foreground disclosure, wakelock, Doze mutation, and request-ignore-
+  battery-optimization mutation flows disabled while falling back to JSON-safe
+  status snapshots and user-visible settings handoff.
+- `sample/nodejs/pro-parity-suite/snippets/notifications-power.cjs` documents
+  the migration path from direct Rhino-style notification/settings and power
+  manager access to exact-capability Node calls:
+  `notifications.getPermissionStatus()`,
+  `notifications.openNotificationSettings({ dryRun: true })`,
+  `device.isIgnoringBatteryOptimizations()`, and
+  `device.openBatteryOptimizationSettings({ dryRun: true })`.
+- The example catalog keeps this snippet outside the default runtime smoke
+  subset, so it remains migration evidence and does not imply notification
+  ownership, foreground disclosure, or OEM power behavior promotion.
+
 ## Remaining Blockers
 
 - OEM power-manager behavior, background-launch behavior, and device matrix
   evidence.
-- Foreground disclosure UX, rollback diagnostics, and migration examples for
-  notification/settings/power promotion.
+- Foreground disclosure UX for notification/settings/power promotion.
 
 The docs, compatibility notes, surface manifest, and Gradle gate are
 evidence-only for this partial decision. They do not add a separate P13-25
-blocker beyond OEM/background-launch device evidence and foreground disclosure,
-rollback, and migration work above.
+blocker beyond OEM/background-launch device evidence and foreground disclosure
+work above.
 
 ## Verification
 
