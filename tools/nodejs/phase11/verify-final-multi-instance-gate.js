@@ -12,6 +12,7 @@ const FILES = {
   processPoolDoc: "docs/nodejs/design/PROCESS_POOL.md",
   multiInstanceDoc: "docs/nodejs/design/MULTI_INSTANCE.md",
   compatibilityDoc: "docs/nodejs/COMPATIBILITY_PROFILE.md",
+  phase13SecondSlotReport: "docs/nodejs/reports/phase13/P13_06_SECOND_EXECUTION_SLOT_SCHEDULER.md",
   blockerRegistry: "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
 };
 
@@ -22,7 +23,7 @@ const FOUNDATION_CHECKS = [
   ["explicit_effective_slot_count", "policy", "EXPLICIT_EFFECTIVE_MAX_ACTIVE_SLOTS"],
   ["requested_slot_plan", "policy", "requestedSlotId: String? = null"],
   ["request_extra", "service", "EXTRA_PROCESS_POOL_SLOT"],
-  ["client_requested_slot_plan", "service", "requestedSlotId = requestForService.processPoolSlot"],
+  ["client_requested_slot_plan", "service", "requestedSlotId = scheduledRequestForService.processPoolSlot"],
   ["selected_service_class", "service", "serviceClass = processPoolPlan.selectedSlot.serviceClass"],
   ["service_requested_slot_plan", "service", "requestedSlotId = preparedServiceRequest.processPoolSlot"],
   ["intent_restore", "service", "processPoolSlot = getStringExtra(EXTRA_PROCESS_POOL_SLOT)"],
@@ -34,6 +35,17 @@ const FOUNDATION_CHECKS = [
   ["process_pool_doc", "processPoolDoc", "explicit_two_slot"],
   ["multi_instance_doc", "multiInstanceDoc", "explicit `overflow_1`"],
   ["compatibility_doc", "compatibilityDoc", "explicit_two_slot"],
+];
+
+const DEFAULT_SCHEDULER_CHECKS = [
+  ["default_scheduler_status", "policy", "STATUS_DEFAULT_SCHEDULER_ENABLED"],
+  ["default_scheduler_mode", "policy", "MODE_DEFAULT_TWO_SLOT"],
+  ["default_scheduler_effective_slot_count", "policy", "DEFAULT_SCHEDULER_EFFECTIVE_MAX_ACTIVE_SLOTS"],
+  ["default_scheduler_selectable_slots", "policy", "defaultSchedulerSelectableSlots"],
+  ["default_scheduler_service_source", "service", "processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER"],
+  ["default_scheduler_concurrent_test", "test", "defaultSchedulerRoutesConcurrentOneShotScriptsToDifferentProcesses"],
+  ["default_scheduler_queue_test", "test", "defaultSchedulerQueuesWhenBothDefaultSlotsAreBusy"],
+  ["phase13_second_slot_ready", "phase13SecondSlotReport", "Status: ready for P13-06"],
 ];
 
 const FINAL_BLOCKER_IDS = [
@@ -61,6 +73,16 @@ function main() {
   const foundationBlockers = foundationChecks
     .filter((entry) => !entry.present)
     .map((entry) => `missing explicit two-slot evidence: ${entry.id}`);
+  const defaultSchedulerChecks = DEFAULT_SCHEDULER_CHECKS.map(([id, fileId, token]) => ({
+    id,
+    file: FILES[fileId],
+    token,
+    present: files[fileId].includes(token),
+  }));
+  const defaultSchedulerBlockers = defaultSchedulerChecks
+    .filter((entry) => !entry.present)
+    .map((entry) => `missing default scheduler evidence: ${entry.id}`);
+  const defaultSchedulerReady = defaultSchedulerBlockers.length === 0;
   const primaryOnlyDefault = files.policy.includes("STATUS_DESIGN_GATED") &&
     files.policy.includes("MODE_PRIMARY_ONLY") &&
     files.policy.includes("DEFAULT_EFFECTIVE_MAX_ACTIVE_SLOTS = 1");
@@ -69,10 +91,10 @@ function main() {
   const promotionChecks = [
     {
       id: "default_scheduler_routing",
-      ready: !primaryOnlyDefault,
-      evidence: primaryOnlyDefault
-        ? "default process-pool plan still reports design_gated / primary_only / max active slot count 1"
-        : "default scheduler routing no longer appears primary-only",
+      ready: defaultSchedulerReady,
+      evidence: defaultSchedulerReady
+        ? "P13-06 default scheduler routes eligible one-shot scripts across primary/overflow_1; primary-only remains the documented fallback for ineligible devices."
+        : "default scheduler routing evidence is incomplete",
     },
     {
       id: "long_running_dedicated_slot",
@@ -93,6 +115,7 @@ function main() {
     };
   });
   const promotionBlockers = [
+    ...defaultSchedulerBlockers,
     ...promotionChecks
       .filter((entry) => !entry.ready)
       .map((entry) => `${entry.id}: ${entry.evidence}`),
@@ -117,10 +140,17 @@ function main() {
       focusedInstrumentation: explicitTwoSlotReady,
       checks: foundationChecks,
     },
+    defaultScheduler: {
+      status: defaultSchedulerReady ? "ready" : "missing_evidence",
+      requestedSlots: ["primary", "overflow_1"],
+      fallbackSlot: "primary",
+      focusedInstrumentation: defaultSchedulerReady,
+      checks: defaultSchedulerChecks,
+    },
     promotion: {
-      defaultRuntimePath: primaryOnlyDefault ? "primary_only" : "multi_slot_candidate",
+      defaultRuntimePath: defaultSchedulerReady ? "default_scheduler_when_eligible" : primaryOnlyDefault ? "primary_only" : "multi_slot_candidate",
       explicitRuntimePath: explicitTwoSlotReady ? "explicit_primary_overflow_only" : "none",
-      defaultSchedulerPromoted: !primaryOnlyDefault,
+      defaultSchedulerPromoted: defaultSchedulerReady,
       longRunningDedicatedSlotPromoted: !longRunningSlotReserved,
       packagedSlotRoutingAllowed: !registryBlockers.some((entry) => (
         entry.open && ["android_side_package_installation", "packaged_long_running"].includes(entry.id)
@@ -134,7 +164,8 @@ function main() {
     decision: {
       status: blockers.length === 0 ? "ready" : "blocked",
       explicitTwoSlotReady,
-      defaultMultiSlotAllowed: explicitTwoSlotReady && !primaryOnlyDefault && promotionBlockers.length === 0,
+      defaultSchedulerReady,
+      defaultMultiSlotAllowed: explicitTwoSlotReady && defaultSchedulerReady && promotionBlockers.length === 0,
       packagedMultiSlotAllowed: explicitTwoSlotReady && promotionBlockers.length === 0,
       safeNodeProfilePreserved: true,
     },
@@ -153,6 +184,7 @@ function renderMarkdown(report) {
     "",
     `- Decision: ${report.decision.status}`,
     `- Explicit two-slot foundation: ${report.explicitTwoSlotFoundation.status}`,
+    `- Default scheduler: ${report.defaultScheduler.status}`,
     `- Default runtime path: ${report.promotion.defaultRuntimePath}`,
     `- Explicit runtime path: ${report.promotion.explicitRuntimePath}`,
     `- Default multi-slot allowed: ${report.decision.defaultMultiSlotAllowed}`,
@@ -164,6 +196,16 @@ function renderMarkdown(report) {
     "| --- | --- | --- |",
   ];
   report.explicitTwoSlotFoundation.checks.forEach((entry) => {
+    lines.push(`| ${entry.id} | ${entry.present} | ${entry.file} |`);
+  });
+  lines.push(
+    "",
+    "## Default Scheduler Checks",
+    "",
+    "| Check | Present | File |",
+    "| --- | --- | --- |",
+  );
+  report.defaultScheduler.checks.forEach((entry) => {
     lines.push(`| ${entry.id} | ${entry.present} | ${entry.file} |`);
   });
   lines.push(
