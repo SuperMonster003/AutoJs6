@@ -106,9 +106,10 @@ function buildReport(files) {
       token(files.javaDesign, "P13-13 Java method budget policy is design-locked"),
       token(files.p13Report, "P13-13 method budget policy is now defined"),
       token(files.compatibilityProfile, "P13-13 defines the method budget policy"),
+      token(files.p13Report, "Pro profile promotion is delegated"),
+      token(files.compatibilityProfile, "Pro profile promotion is delegated"),
     ], [
       "Thread dispatch and setThreadMode semantics remain unimplemented.",
-      "Pro profile opt-in promotion remains blocked until the Java/Rhino P13 surface is complete.",
     ]),
     scenario("security_boundary", "Critical Java boundaries remain fail-closed", [
       token(files.javaDesign, "no reflection or class-loader access"),

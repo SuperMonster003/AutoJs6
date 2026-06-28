@@ -102,7 +102,9 @@ P13-13 extends that experiment without changing the default profile. When
 `$autojs.java` support the allowlisted `java.lang.Math`, `java.util.UUID`, and
 provider-owned `android.graphics.Rect` handle surface, including selected Rect
 instance calls, field reads, and explicit `release` / `dispose` cleanup. Thread
-dispatch and Pro profile promotion remain unpromoted.
+dispatch remains unpromoted. Pro profile promotion is delegated to the
+aggregate Java/Rhino surface gate rather than counted as a separate P13-13
+allowlist blocker.
 
 P13-14 adds an explicit experimental `require("rhino").install({ experimental:
 true })` Java proxy installer. It can install `Packages`, `java`, and `android`

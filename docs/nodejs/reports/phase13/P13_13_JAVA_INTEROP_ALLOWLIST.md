@@ -65,8 +65,10 @@ Rhino-style `JavaAdapter`.
 
 - Thread dispatch and `$autojs.java.setThreadMode` /
   `$autojs.java.setDefaultThreadMode` semantics remain stable rejections.
-- Pro profile opt-in promotion remains blocked until the Java/Rhino P13 surface
-  has complete migration, packaged, rollback, and security evidence.
+
+Pro profile promotion is delegated to the aggregate Java/Rhino surface gate.
+P13-13 keeps Java interop default-disabled and build-time experimental; it no
+longer counts full Pro profile promotion as a separate allowlist blocker.
 
 ## Evidence
 
