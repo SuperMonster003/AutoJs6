@@ -401,7 +401,8 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun jumpTo(line: Int, column: Int = 0) {
-        invokeAce("jumpTo", "${line.coerceAtLeast(0)}, ${column.coerceAtLeast(0)}")
+        val (targetLine, targetColumn) = updateCursorSnapshotForJump(line, column)
+        invokeAce("jumpTo", "$targetLine, $targetColumn")
     }
 
     fun jumpToStart() {
@@ -1935,6 +1936,63 @@ class AceCodeEditor @JvmOverloads constructor(
             endLine = endPosition.first,
             endColumn = endPosition.second,
         )
+    }
+
+    private fun updateCursorSnapshotForJump(line: Int, column: Int): Pair<Int, Int> {
+        val requestedLine = line.coerceAtLeast(0)
+        val requestedColumn = column.coerceAtLeast(0)
+        if (textSnapshot.isEmpty()) {
+            cursorLine = requestedLine
+            cursorColumn = requestedColumn
+            cursorLineText = ""
+            selectionSnapshot = AceSelection(
+                startOffset = 0,
+                endOffset = 0,
+                startLine = requestedLine,
+                startColumn = requestedColumn,
+                endLine = requestedLine,
+                endColumn = requestedColumn,
+            )
+            selectedTextSnapshot = ""
+            return requestedLine to requestedColumn
+        }
+        val offset = offsetForPosition(requestedLine, requestedColumn)
+        val (safeLine, safeColumn) = positionForOffset(offset)
+        cursorLine = safeLine
+        cursorColumn = safeColumn
+        cursorLineText = lineTextAt(safeLine)
+        selectionSnapshot = selectionForOffsets(offset, offset)
+        selectedTextSnapshot = ""
+        return safeLine to safeColumn
+    }
+
+    private fun offsetForPosition(line: Int, column: Int): Int {
+        val targetLine = line.coerceAtLeast(0)
+        var currentLine = 0
+        var lineStart = 0
+        while (currentLine < targetLine && lineStart < textSnapshot.length) {
+            val nextLine = textSnapshot.indexOf('\n', lineStart)
+            if (nextLine < 0) {
+                return textSnapshot.length
+            }
+            lineStart = nextLine + 1
+            currentLine++
+        }
+        val lineEnd = textSnapshot.indexOf('\n', lineStart).let { index ->
+            if (index < 0) textSnapshot.length else index
+        }
+        return (lineStart + column.coerceAtLeast(0)).coerceAtMost(lineEnd)
+    }
+
+    private fun lineTextAt(line: Int): String {
+        if (textSnapshot.isEmpty()) {
+            return ""
+        }
+        val lineStart = offsetForPosition(line, 0)
+        val lineEnd = textSnapshot.indexOf('\n', lineStart).let { index ->
+            if (index < 0) textSnapshot.length else index
+        }
+        return textSnapshot.substring(lineStart, lineEnd)
     }
 
     private fun positionForOffset(offset: Int): Pair<Int, Int> {
