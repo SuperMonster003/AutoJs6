@@ -1057,9 +1057,9 @@ where appropriate. Notification actions/listeners/rich layouts,
 Do-Not-Disturb/exact-alarm authority, direct wakelock/power-manager APIs, and
 raw Android notification/power objects are stable-denied for v1.1. Packaged
 metadata/install-run, notification action-or-permission-denial, settings/power
-dry-run, and exact-denial smoke are covered; OEM power matrices,
-background-launch behavior, foreground disclosure UX, rollback diagnostics, and
-migration examples remain future evidence.
+dry-run, exact-denial smoke, rollback diagnostics, and the `notifications-power`
+Pro migration example are covered; OEM power matrices, background-launch
+behavior, and foreground disclosure UX remain future evidence.
 
 P13-26 records media/recorder/mediainfo provider promotion as partial:
 `media.getAudioStreamVolume()`, `media.getAudioStreamMaxVolume()`,

@@ -310,9 +310,9 @@ that depend on notification actions/listeners, rich layouts, Do-Not-Disturb,
 exact alarms, wakelocks, or direct power-manager control on Rhino because those
 paths are stable-denied for v1.1. Packaged metadata/install-run,
 notification action-or-permission-denial, settings/power dry-run, and
-exact-denial smoke are covered. OEM power behavior, background-launch behavior,
-foreground disclosure UX, rollback diagnostics, and migration examples remain
-future evidence.
+exact-denial smoke, rollback diagnostics, and the `notifications-power` Pro
+migration example are covered. OEM power behavior, background-launch behavior,
+and foreground disclosure UX remain future evidence.
 
 P13-26 records media/recorder/mediainfo provider promotion as partial. AutoJs6
 Node now has read-only audio stream snapshots, scoped file metadata through
