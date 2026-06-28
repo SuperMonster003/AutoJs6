@@ -339,8 +339,9 @@ P13-34 records `worker_threads` opt-in promotion as partial. The new
 `worker_threads` remains disabled, project/package opt-in remains unavailable,
 native workers must pass preflight before runnable claims, worker bridge modules
 remain denied, nested workers remain denied, and raw native handles do not cross
-into JavaScript. Crash evidence, packaged worker evidence, and Android resource
-ceilings remain required before this boundary can relax.
+into JavaScript. Current resource/crash evidence references are recorded, but
+native-available reruns, packaged worker evidence, and Android resource ceilings
+remain required before this boundary can relax.
 
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,

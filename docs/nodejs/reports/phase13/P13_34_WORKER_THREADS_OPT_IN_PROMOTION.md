@@ -48,7 +48,8 @@ stress, and packaged `.mjs` worker smoke.
   young generation, 32 MiB code range, and 8 MiB stack.
 - Android thread and RSS behavior remains evidence-gated. P13-34 documents the
   current one-worker thread ceiling, but it does not promote a release RSS
-  ceiling until the resource and crash evidence gates are current.
+  ceiling until the resource/crash anchors pass on a native-worker-capable
+  target.
 
 ## Current Device Evidence
 
@@ -66,6 +67,24 @@ the native preflight and skipped with `worker.preflight.status=unavailable` and
 `ERR_AUTOJS6_WORKER_DISABLED`. This archives the current device gate without
 claiming runnable worker support.
 
+## Resource And Crash Evidence References
+
+- `NodeWorkerThreadsResourceStressInstrumentationTest` records source anchors
+  for worker startup/resource lifecycle, worker exception recovery, timeout
+  recovery, parent-completion cleanup, WorkerPool failure/cancel/timeout
+  recovery, and bounded RSS/thread snapshots.
+- The P13-34 verifier now tracks the concrete stress markers:
+  `worker.resource.pool.failures`, `worker.resource.pool.cleanup.before=1|1`,
+  `worker.resource.throw=true|`, `worker.resource.timeout.recovery=v24.5.0`,
+  and `assertResourceGrowthBounded`.
+- These references are current promotion anchors only. They still skip on
+  QV710AF65F because native worker preflight reports unavailable, and they must
+  be re-run on a native-worker-capable target before runnable worker authority
+  can be promoted.
+- Packaged worker failure evidence remains native-available promotion work
+  because the current packaged `.mjs` worker smoke is source/skip evidence, not
+  device-exported runnable worker behavior.
+
 ## Boundary
 
 The following remain future work before opt-in promotion can close:
@@ -74,14 +93,12 @@ The following remain future work before opt-in promotion can close:
 - native-available `verifyNodeWorkerGate` evidence with
   `-Pautojs.nodejs.worker_threads.experimental=true`;
 - native-available device-exported packaged `.mjs` worker smoke evidence;
-- crash evidence for worker startup failure, worker exception, timeout,
-  parent-completion cleanup, and packaged worker failure modes;
 - release disclosure for any future worker profile promotion.
 
 The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
 evidence-only for this partial decision. They do not add a separate P13-34
-blocker beyond native availability, the experimental gate archive, packaged
-worker smoke evidence, and crash/resource evidence.
+blocker beyond native availability, the experimental gate archive, and
+native-available packaged worker smoke evidence.
 
 ## Verification
 
@@ -105,7 +122,7 @@ worker smoke evidence, and crash/resource evidence.
 
 - Run and archive the full runnable experimental worker gate on a
   native-worker-capable build/device.
-- Add current crash evidence references to the P13 gate output.
+- Re-run the resource/crash stress anchors on a native-worker-capable target.
 - Promote packaged worker smoke evidence from source markers to current
   device-exported reports.
 - Decide whether worker promotion belongs to Desktop opt-in only or a narrower

@@ -268,7 +268,7 @@ function nextStepForDisabled(name) {
     case "wasi":
       return "P13-38 records controlled WASI diagnostics as partial; pure WebAssembly is the supported v1.1 runtime path while raw and controlled WASI APIs stay stable-denied, with controlled preopens, fd/env/args, resource budgets, worker integration, and packaged behavior remaining future work.";
     case "worker_threads":
-      return "P13-34 records worker_threads opt-in diagnostics as partial; default denial, profile diagnostics, and native preflight are covered while native runnable evidence, crash/resource stress, packaged worker smoke, and final Desktop worker policy remain open.";
+      return "P13-34 records worker_threads opt-in diagnostics as partial; default denial, profile diagnostics, native preflight, and current resource/crash references are covered while native runnable evidence, native-available resource/RSS reruns, packaged worker smoke, and final Desktop worker policy remain open.";
     case "zlib/promises":
       return "P13-43 records zlib/promises as a stable disabled gap while callback, sync, and stream zlib subsets stay covered.";
     default:

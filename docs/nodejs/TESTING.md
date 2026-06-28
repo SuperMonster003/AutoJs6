@@ -1941,10 +1941,12 @@ request-local experimental preflight evidence, existing native-available worker,
 MessageChannel, transfer-list, WorkerPool, resource-stress, and packaged worker
 smoke source markers, TypeScript declarations, the desktop builtin matrix, and
 Phase13 docs. It keeps native runnable evidence on target ABIs, archived
-native-available experimental worker gate output, packaged `.mjs` worker smoke
-evidence, crash evidence, and Android RSS/resource evidence open while nested-worker,
-SharedArrayBuffer/Atomics, resourceLimits, and one-worker thread ceilings are
-documented in the P13-34 report.
+native-available experimental worker gate output, native-available packaged
+`.mjs` worker smoke evidence, release disclosure, and native-available Android
+RSS/resource reruns open. Current resource/crash evidence references are
+recorded in the P13-34 report, while nested-worker, SharedArrayBuffer/Atomics,
+resourceLimits, and one-worker thread ceilings are documented as policy
+boundaries.
 
 Phase 13 process-worker replacement decision gate:
 
