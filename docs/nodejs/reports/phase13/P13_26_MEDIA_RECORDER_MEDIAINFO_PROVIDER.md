@@ -43,6 +43,11 @@
   capture policy gate with foreground disclosure, stop action, capture config,
   app opt-out handling, packaged metadata, and denial evidence before any
   runtime API is accepted.
+- P13-26 v1.1 stable-denies audio playback, `MediaPlayer` lifecycle,
+  playlists, and playback focus. The current `media` surface is read-only
+  stream state, not a player provider.
+- P13-26 v1.1 stable-denies external MediaStore query/insert/update/delete,
+  broad media-library permissions, and mutable media collection access.
 - No raw `MediaPlayer`, `AudioManager`, `MediaRecorder`,
   `MediaMetadataRetriever`, `MediaInfo`, `MediaStore` cursor, `Uri`, file
   descriptor, or `Context` object crosses the bridge.
@@ -72,16 +77,13 @@
 
 ## Remaining Blockers
 
-- Audio playback, MediaPlayer lifecycle, playlists, and audio-focus behavior.
 - Real recorder sessions with runtime permission flow, foreground disclosure,
   resource handles, cleanup, cancellation, and packaged smoke.
-- MediaStore query/insert/update/delete policy and Android 13+ read media
-  permission matrix.
 - Packaged media asset lookup, privacy copy, migration examples, and broader
   media corpus evidence.
 
 The compat/provider registry, process permission, docs, project tooling,
 surface manifest, and Gradle gate are evidence-only for this partial decision.
-They do not add separate P13-26 blockers beyond playback lifecycle, MediaStore
-policy, real recording, packaged media/recorder smoke, privacy copy, migration
-examples, and broader media corpus evidence above.
+They do not add separate P13-26 blockers beyond real recording,
+packaged media/recorder smoke, privacy copy, migration examples, and broader
+media corpus evidence above.

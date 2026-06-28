@@ -87,9 +87,11 @@ function buildReport(files) {
       token(files.mediaTest, "androidProviderReturnsReadOnlyMediaSnapshotsAndRecorderFailsClosed"),
       token(files.conformanceTest, 'expectExports("media", media, ["getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"])'),
       token(files.typeSmoke, "const mediaInfoSnapshot: mediainfo.Snapshot"),
+      token(files.p13Report, "P13-26 v1.1 stable-denies audio playback"),
+      token(files.compatibilityProfile, "P13-26 v1.1 stable-denies audio playback"),
+      token(files.p13Report, "P13-26 v1.1 stable-denies external MediaStore"),
+      token(files.compatibilityProfile, "external MediaStore access"),
     ], [
-      "Audio playback, MediaPlayer lifecycle, playlists, and playback focus remain blocked.",
-      "External MediaStore query/insert/update/delete and broad media permissions remain blocked.",
       "Packaged media asset lookup and real audio/video corpus evidence remain open.",
     ]),
     scenario("recorder_fail_closed", "recorder vocabulary is explicit and recording stays fail-closed", [

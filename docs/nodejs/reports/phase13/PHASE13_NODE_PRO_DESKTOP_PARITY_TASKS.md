@@ -152,11 +152,12 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_26_MEDIA_RECORDER_MEDIAINFO_PROVIDER.md`.
 - Surface manifest evidence: `phase13-media-recorder-mediainfo-provider`.
-- Remaining P13-26 blockers: audio playback, real recorder sessions,
-  foreground notification disclosure, MediaStore permissions/policy, packaged
-  media asset lookup, corpus evidence, and migration examples. Screen/internal
-  audio capture is stable-denied for v1.1 pending a separate
-  MediaProjection/playback-capture policy gate.
+- P13-26 v1.1 stable-denies audio playback, MediaPlayer lifecycle, playlists,
+  playback focus, external MediaStore access, broad media-library permissions,
+  and screen/internal audio capture.
+- Remaining P13-26 blockers: real recorder sessions, foreground notification
+  disclosure, packaged media asset lookup, corpus evidence, privacy copy, and
+  migration examples.
 
 ## P13-27 Partial Landing Note
 
@@ -1246,11 +1247,11 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13MediaRecorderMediainfoProvider`.
     - Report:
       `docs/nodejs/reports/phase13/P13_26_MEDIA_RECORDER_MEDIAINFO_PROVIDER.md`.
-    - Open before closure: playback provider, real recorder sessions,
-      MediaStore policy, external media permission matrix, packaged media
-      asset lookup, privacy copy, corpus evidence, and migration examples.
-      Screen/internal audio capture is stable-denied for v1.1 pending a
-      separate MediaProjection/playback-capture policy gate.
+    - Stable denial: playback provider, MediaPlayer lifecycle, external
+      MediaStore access, broad media-library permissions, and screen/internal
+      audio capture remain denied for v1.1.
+    - Open before closure: real recorder sessions, packaged media asset lookup,
+      privacy copy, corpus evidence, and migration examples.
 
 - [x] P13-27: 扩展 utility-heavy Rhino modules。
   - 范围：`zip`、`canvas`、`opencc`、`pinyin` full dictionary、`jsox`、
