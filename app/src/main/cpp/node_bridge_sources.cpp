@@ -31168,35 +31168,6 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return line;
   }
-  function __autojs6_source_line_text_at(text, lineNumber) {
-    const source = String(text || "");
-    const targetLine = Math.max(1, Math.trunc(Number(lineNumber || 1)));
-    let line = 1;
-    let start = 0;
-    for (let i = 0; i < source.length; i += 1) {
-      if (line === targetLine) {
-        if (source.charAt(i) === "\n") {
-          return source.slice(start, i).replace(/\r$/, "");
-        }
-        continue;
-      }
-      if (source.charAt(i) === "\n") {
-        line += 1;
-        start = i + 1;
-      }
-    }
-    return line === targetLine ? source.slice(start).replace(/\r$/, "") : "";
-  }
-  function __autojs6_leading_horizontal_whitespace_count(text) {
-    const source = String(text || "");
-    let count = 0;
-    while (count < source.length) {
-      const ch = source.charAt(count);
-      if (ch !== " " && ch !== "\t") break;
-      count += 1;
-    }
-    return count;
-  }
   function __autojs6_create_generated_line_map_builder(sourceText) {
     const source = String(sourceText || "");
     let text = "";
@@ -31236,12 +31207,11 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_count_lines(text) {
     return String(text || "").split("\n").length;
   }
-  function __autojs6_register_generated_stack_mapping(sourceName, resolved, sourceText, lineMap, wrapperLineOffset) {
+  function __autojs6_register_generated_stack_mapping(sourceName, resolved, lineMap, wrapperLineOffset) {
     if (!Array.isArray(lineMap) || lineMap.length === 0) return;
     const record = {
       sourceName: String(sourceName || resolved || ""),
       resolved: String(resolved || sourceName || ""),
-      sourceText: String(sourceText || ""),
       lineMap: lineMap.slice(),
       wrapperLineOffset: Math.max(0, Number(wrapperLineOffset || 0))
     };
@@ -31258,13 +31228,10 @@ std::string buildEmbeddedScriptExecutionSource(
     if (generatedLine < 1 || generatedLine > record.lineMap.length) return null;
     const originalLine = Math.trunc(Number(record.lineMap[generatedLine - 1] || 0));
     if (originalLine < 1) return null;
-    const originalIndent = __autojs6_leading_horizontal_whitespace_count(
-      __autojs6_source_line_text_at(record.sourceText, originalLine)
-    );
     return {
       source: record.sourceName || String(fileName || ""),
       line: originalLine,
-      column: Math.max(1, Math.trunc(Number(columnNumber || 1))) + originalIndent
+      column: Math.max(1, Math.trunc(Number(columnNumber || 1)))
     };
   }
   function __autojs6_source_map_record_denial(sourceName, mapUrl, error) {
@@ -45394,7 +45361,7 @@ std::string buildEmbeddedScriptExecutionSource(
     cacheRecord.promise = (async function() {
       const transformedModule = __autojs6_esm_transform_module_source(record.source, resolved);
       const transformed = transformedModule.source;
-      __autojs6_register_generated_stack_mapping(record.sourceURL || resolved, resolved, record.source, transformedModule.lineMap, 4);
+      __autojs6_register_generated_stack_mapping(record.sourceURL || resolved, resolved, transformedModule.lineMap, 4);
       const moduleFunction = __autojs6_native_async_function(
         "__autojs6_load_esm_module",
         "__autojs6_dynamic_import",
@@ -45456,7 +45423,7 @@ std::string buildEmbeddedScriptExecutionSource(
     try {
       const transformedModule = __autojs6_esm_transform_module_source(record.source, resolved, true);
       const transformed = transformedModule.source;
-      __autojs6_register_generated_stack_mapping(record.sourceURL || resolved, resolved, record.source, transformedModule.lineMap, 4);
+      __autojs6_register_generated_stack_mapping(record.sourceURL || resolved, resolved, transformedModule.lineMap, 4);
       const moduleFunction = __autojs6_native_function(
         "__autojs6_load_esm_module_sync",
         "__autojs6_import_meta",
