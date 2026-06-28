@@ -123,7 +123,7 @@ Reason open: `implementation`, `policy`.
 - [ ] Implement thread dispatch and `setThreadMode` semantics.
 - [x] Add a generic method-budget policy beyond the explicit allowlist and bridge timeout.
 - [ ] Extend allowlist coverage only with lifetime, cleanup, and denial instrumentation.
-- [ ] Keep Pro profile promotion blocked until Java/Rhino surface security is complete.
+- [x] Keep Pro profile promotion blocked until Java/Rhino surface security is complete.
 
 #### P13-14 `rhino.install()` compatibility
 

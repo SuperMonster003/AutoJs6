@@ -182,7 +182,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-http-https-client-parity.json` | `verifyNodePhase13HttpHttpsClientParity` | `P13-29` | `ready` | 0 | 0 |
 | `phase13-inspector-debug-profile-decision.json` | `verifyNodePhase13InspectorDebugProfileDecision` | `P13-37` | `ready` | 0 | 0 |
 | `phase13-intent-broadcast-provider.json` | `verifyNodePhase13IntentBroadcastProvider` | `P13-22` | `partial` | 0 | 3 |
-| `phase13-java-interop-allowlist.json` | `verifyNodePhase13JavaInteropAllowlist` | `P13-13` | `partial` | 0 | 2 |
+| `phase13-java-interop-allowlist.json` | `verifyNodePhase13JavaInteropAllowlist` | `P13-13` | `partial` | 0 | 1 |
 | `phase13-live-ui-provider-promotion.json` | `verifyNodePhase13LiveUiProviderPromotion` | `P13-17` | `partial` | 0 | 4 |
 | `phase13-media-recorder-mediainfo-provider.json` | `verifyNodePhase13MediaRecorderMediainfoProvider` | `P13-26` | `partial` | 0 | 5 |
 | `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56` | `ready` | 0 | 0 |

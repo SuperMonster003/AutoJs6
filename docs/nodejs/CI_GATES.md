@@ -371,8 +371,9 @@ findClass/type, constructor, static call, Rect instance call, Rect field read,
 and release/dispose helpers only when the build-time experiment is enabled.
 P13-13 also records the Java method budget policy for future allowlist
 expansion. Classloader, reflection, native-library, process authority, thread
-dispatch, expanded-budget enforcement, and Pro profile promotion remain
-fail-closed.
+dispatch, and expanded-budget enforcement remain fail-closed. Pro profile
+promotion is delegated to the aggregate Java/Rhino surface gate rather than
+counted as a separate P13-13 allowlist blocker.
 `verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 partial
 `rhino.install` state: default install rejection remains, while explicit
 experimental installs can add `Packages`, `java`, and `android` Java proxies

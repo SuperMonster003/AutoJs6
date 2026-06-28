@@ -896,8 +896,10 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-java-interop-allowlist.js`.
     - Gradle gate: `:app:verifyNodePhase13JavaInteropAllowlist`.
     - Report: `docs/nodejs/reports/phase13/P13_13_JAVA_INTEROP_ALLOWLIST.md`.
-  - Remaining: thread dispatch, expanded-allowlist budget enforcement evidence,
-    and Pro profile promotion still block full P13-13 closure.
+  - Remaining: thread dispatch and expanded-allowlist budget enforcement
+    evidence still block full P13-13 closure. Pro profile promotion is
+    delegated to the aggregate Java/Rhino surface gate rather than counted as a
+    separate P13-13 allowlist blocker.
 
 - [ ] P13-14: 推进 `require("rhino").install()` partial Pro compatibility。
   - 范围：在 Pro profile 中安装 `Packages`、`java`、`android` 等 Rhino 风格入口。
