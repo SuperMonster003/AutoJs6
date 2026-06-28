@@ -10,20 +10,26 @@ import org.autojs.autojs.AutoJs.Companion.instance
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.util.IntentUtils.startSafelyWithOptions
 import org.autojs.autojs.util.ViewUtils.excludeFloatingActionButtonFromBottomNavigationBar
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityLogBinding
+import java.io.File
 
 class LogActivity : BaseActivity() {
 
     private lateinit var mConsoleImpl: GlobalConsole
+    private var mEditorScriptName: String? = null
+    private var mEditorScriptPath: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val activityLogBinding = ActivityLogBinding.inflate(layoutInflater)
+        mEditorScriptName = intent.getStringExtra(EXTRA_EDITOR_SCRIPT_NAME).takeUnless { it.isNullOrBlank() }
+        mEditorScriptPath = intent.getStringExtra(EXTRA_EDITOR_SCRIPT_PATH).takeUnless { it.isNullOrBlank() }
 
         setContentView(activityLogBinding.root)
         setToolbarAsBack(R.string.text_log)
@@ -32,11 +38,44 @@ class LogActivity : BaseActivity() {
             setConsole(instance.globalConsole.also { mConsoleImpl = it })
             setLogActivity(this@LogActivity)
             setPinchToZoomEnabled(true)
+            setEnableStackFrameLinks(mEditorScriptPath != null)
+            setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
+                openStackFrameTarget(fileName, lineNumber, columnNumber)
+            }
         }
 
         activityLogBinding.fab.apply {
             setOnClickListener { mConsoleImpl.clear() }
             excludeFloatingActionButtonFromBottomNavigationBar()
+        }
+    }
+
+    private fun openStackFrameTarget(fileName: String, lineNumber: Int, columnNumber: Int) {
+        if (lineNumber < 0) {
+            showToast(this, R.string.text_failed_to_locate, true)
+            return
+        }
+        val targetPath = StackFrameTargetResolver.resolveSourcePath(fileName, mEditorScriptPath)
+        if (targetPath == null) {
+            showToast(this, R.string.text_failed_to_locate, true)
+            return
+        }
+        val targetName = when {
+            StackFrameTargetResolver.matchesCurrentFile(fileName, mEditorScriptPath) -> mEditorScriptName
+            else -> File(targetPath).name
+        }
+        val opened = EditActivity.editFileAt(
+            context = this,
+            name = targetName,
+            path = targetPath,
+            lineNumber = lineNumber,
+            columnNumber = columnNumber.coerceAtLeast(0),
+            newTask = true,
+        )
+        if (opened) {
+            finish()
+        } else {
+            showToast(this, R.string.text_failed_to_locate, true)
         }
     }
 
@@ -94,11 +133,21 @@ class LogActivity : BaseActivity() {
 
     companion object {
 
+        private const val EXTRA_EDITOR_SCRIPT_NAME = "editor_script_name"
+        private const val EXTRA_EDITOR_SCRIPT_PATH = "editor_script_path"
         private const val RESULT_CODE_EXPORT = 33128
 
         @JvmStatic
         fun launch(context: Context) {
-            val intent = Intent(context, LogActivity::class.java)
+            launch(context, null, null)
+        }
+
+        @JvmStatic
+        fun launch(context: Context, scriptName: String?, scriptPath: String?) {
+            val intent = Intent(context, LogActivity::class.java).apply {
+                putExtra(EXTRA_EDITOR_SCRIPT_NAME, scriptName)
+                putExtra(EXTRA_EDITOR_SCRIPT_PATH, scriptPath)
+            }
             val options = ActivityOptions.makeCustomAnimation(context, R.anim.no_anim_fade_in, R.anim.no_anim_fade_out)
             intent.startSafelyWithOptions(context, options.toBundle())
         }

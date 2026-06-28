@@ -18,6 +18,22 @@ object StackFrameTargetResolver {
         return source == currentFileName || current.endsWith("/$source")
     }
 
+    fun resolveSourcePath(sourceName: String?, currentPath: String?): String? {
+        val source = normalizeSourceName(sourceName) ?: return null
+        val current = normalizeSourceName(currentPath)
+        if (current != null && matchesCurrentFile(source, current)) {
+            return current
+        }
+        if (isAbsolutePath(source)) {
+            return source
+        }
+        val currentDirectory = current
+            ?.substringBeforeLast('/', missingDelimiterValue = "")
+            ?.takeIf { it.isNotEmpty() }
+            ?: return null
+        return normalizeSourceName("$currentDirectory/$source")
+    }
+
     fun normalizeSourceName(sourceName: String?): String? {
         val trimmed = sourceName
             ?.trim()

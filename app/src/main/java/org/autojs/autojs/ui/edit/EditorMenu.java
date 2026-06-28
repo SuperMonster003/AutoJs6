@@ -365,7 +365,8 @@ public class EditorMenu {
                 key(R.string.default_key_editor_log_button_behavior)
         );
         if (Objects.equals(mode, key(R.string.key_editor_log_button_behavior_fullscreen_page))) {
-            LogActivity.launch(mContext);
+            Uri uri = mEditorView.getUri();
+            LogActivity.launch(mContext, mEditorView.getName(), uri == null ? null : uri.getPath());
             return;
         }
         showLogPanel();

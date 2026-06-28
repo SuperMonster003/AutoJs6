@@ -54,4 +54,37 @@ class StackFrameTargetResolverTest {
             )
         )
     }
+
+    @Test
+    fun resolveCurrentFileSourceToCurrentPath() {
+        assertEquals(
+            "/sdcard/project/src/main.ts",
+            StackFrameTargetResolver.resolveSourcePath(
+                "src/main.ts",
+                "/sdcard/project/src/main.ts",
+            )
+        )
+    }
+
+    @Test
+    fun resolveRelativeSiblingSourceAgainstCurrentPath() {
+        assertEquals(
+            "/sdcard/project/dep.mjs",
+            StackFrameTargetResolver.resolveSourcePath(
+                "dep.mjs",
+                "/sdcard/project/main.mjs",
+            )
+        )
+    }
+
+    @Test
+    fun resolveAbsoluteSourceWithoutCurrentPath() {
+        assertEquals(
+            "/sdcard/project/dep.cjs",
+            StackFrameTargetResolver.resolveSourcePath(
+                "/sdcard/project/dep.cjs",
+                null,
+            )
+        )
+    }
 }

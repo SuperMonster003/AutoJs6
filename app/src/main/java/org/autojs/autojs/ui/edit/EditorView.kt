@@ -179,7 +179,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             key(R.string.default_key_editor_log_button_behavior),
         )
         if (mode == key(R.string.key_editor_log_button_behavior_fullscreen_page)) {
-            LogActivity.launch(context)
+            LogActivity.launch(context, name, uri?.path)
             return
         }
         showLogPanel()
@@ -633,7 +633,25 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 // zh-CN: Intent 处理阶段结束 (实际文件加载可能仍在继续).
                 mEditorLoading = false
                 syncPrimaryMenuState()
+                applyInitialPositionIfRequested(intent)
             }
+    }
+
+    private fun applyInitialPositionIfRequested(intent: Intent) {
+        val lineNumber = intent.getIntExtra(EXTRA_INITIAL_LINE, -1)
+        if (lineNumber < 0) {
+            return
+        }
+        val columnNumber = intent.getIntExtra(EXTRA_INITIAL_COLUMN, 0).coerceAtLeast(0)
+        post {
+            if (lineNumber !in 0 until editor.lineCountSnapshot) {
+                return@post
+            }
+            runCatching {
+                editor.jumpTo(lineNumber, columnNumber)
+                editor.requestEditorFocus()
+            }
+        }
     }
 
     fun setRestoredText(text: String) {
@@ -2803,7 +2821,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun showErrorMessage(msg: String) {
         Snackbar.make(this@EditorView, /* context.getString(R.string.text_error) + ": " + msg */ msg, Snackbar.LENGTH_LONG)
-            .setAction(R.string.text_details) { LogActivity.launch(context) }
+            .setAction(R.string.text_details) { LogActivity.launch(context, name, uri?.path) }
             .show()
     }
 
@@ -3492,6 +3510,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         const val EXTRA_READ_ONLY = "readOnly"
         const val EXTRA_SAVE_ENABLED = "saveEnabled"
         const val EXTRA_RUN_ENABLED = "runEnabled"
+        const val EXTRA_INITIAL_LINE = "initialLine"
+        const val EXTRA_INITIAL_COLUMN = "initialColumn"
 
         private const val ACTION_RUN = "editor:run"
         private const val ACTION_FORCE_STOP = "editor:force_stop"

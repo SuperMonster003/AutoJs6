@@ -1,7 +1,6 @@
 package org.autojs.autojs.ui.log
 
 import android.animation.ValueAnimator
-import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -351,7 +350,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
             return
         }
         mDidLaunchFullLogActivity = true
-        startActivity(Intent(requireContext(), LogActivity::class.java))
+        LogActivity.launch(requireContext(), mScriptName, mScriptPath)
         dismissAllowingStateLoss()
     }
 

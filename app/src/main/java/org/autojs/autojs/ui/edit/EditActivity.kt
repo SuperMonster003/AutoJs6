@@ -563,6 +563,27 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
             }
 
         @JvmStatic
+        fun editFileAt(context: Context, name: String?, path: String?, lineNumber: Int, columnNumber: Int, newTask: Boolean) =
+            when {
+                newIntent(context).apply {
+                    putExtra(EditorView.EXTRA_PATH, path)
+                    putExtra(EditorView.EXTRA_NAME, name)
+                    putExtra(EditorView.EXTRA_INITIAL_LINE, lineNumber)
+                    putExtra(EditorView.EXTRA_INITIAL_COLUMN, columnNumber)
+                    if (newTask || context !is Activity) {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                }.startSafely(context) -> true
+                newIntentFallback(context, newTask).apply {
+                    putExtra(EditorView.EXTRA_PATH, path)
+                    putExtra(EditorView.EXTRA_NAME, name)
+                    putExtra(EditorView.EXTRA_INITIAL_LINE, lineNumber)
+                    putExtra(EditorView.EXTRA_INITIAL_COLUMN, columnNumber)
+                }.startSafely(context) -> true
+                else -> false
+            }
+
+        @JvmStatic
         fun viewContent(context: Context, name: String?, content: String?, newTask: Boolean) =
             when {
                 newIntent(context).apply {
