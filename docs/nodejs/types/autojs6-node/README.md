@@ -310,7 +310,7 @@ shape-only `Agent` fields are declared. Server/listen, raw sockets, proxy and
 tunnel options, custom TLS/session control, and broader packaged install/run
 network behavior remain future work.
 
-P13-30 records the partial net/tls/dns staged compatibility gate. By default,
+P13-30 records the v1.1 net/tls/dns staged compatibility gate. By default,
 `net`, `node:net`, `tls`, `node:tls`, `dns`, `node:dns`, `dns/promises`, and
 `node:dns/promises` are typed as limited builtins for package probing and
 deterministic local behavior: socket/server shapes, `SocketAddress`,

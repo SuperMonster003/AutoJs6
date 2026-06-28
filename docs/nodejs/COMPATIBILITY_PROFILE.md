@@ -1085,7 +1085,7 @@ fetch/axios/`http.get()` evidence, and packaged `network` to
 DNS/TLS session APIs, per-request proxy support, or broader packaged
 install/run network behavior.
 
-P13-30 records net/tls/dns staged compatibility as partial. By default, `require("net")`,
+P13-30 records net/tls/dns staged compatibility as ready for the v1.1 limited-facade decision. By default, `require("net")`,
 `require("node:net")`, `require("tls")`, `require("node:tls")`,
 `require("dns")`, `require("node:dns")`, `require("dns/promises")`, and
 `require("node:dns/promises")` resolve to reserved limited builtins that cannot
@@ -1094,7 +1094,7 @@ be shadowed. AutoJs6 Node exposes deterministic socket/server shape metadata,
 and DNS lookup for `localhost`, loopback aliases, and IP literals only. Real
 client sockets, server listeners, network DNS queries, Android resolver state,
 TLS sessions, fd/native handles, packaged INTERNET proof, and live Android
-network evidence remain unpromoted in Safe profile. The
+network evidence remain future raw-network promotion gates. The
 `autojs.nodejs.rawNetworkModules.experimental=true` debug/build-time opt-in
 routes CommonJS `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` to
 Node native builtins for Desktop parity experiments. P13-30 rejects real

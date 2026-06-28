@@ -627,7 +627,7 @@ raw Node network modules remain disabled by default: server/listen, raw sockets,
 DNS/TLS session control, proxy/tunnel options, `CONNECT`, upgrade, and custom
 connector hooks reject before raw transport authority can be acquired.
 
-P13-30 records net/tls/dns staged compatibility as partial. By default, the `net`, `tls`,
+P13-30 records net/tls/dns staged compatibility as ready for the v1.1 limited-facade decision. By default, the `net`, `tls`,
 `dns`, and `dns/promises` modules are reserved limited builtins for compatibility
 probing and deterministic local behavior only. `net.connect()`,
 `net.createConnection()`, `net.Server.listen()`, `tls.connect()`,

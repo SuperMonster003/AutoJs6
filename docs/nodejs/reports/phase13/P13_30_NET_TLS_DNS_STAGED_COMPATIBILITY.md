@@ -1,9 +1,9 @@
 # P13-30 net/tls/dns Staged Compatibility
 
-Status: partial
+Status: ready
 
-P13-30 records the existing `net` / `tls` / `dns` / `dns/promises` default
-limited builtins as a Desktop-profile staged compatibility subset, and adds a
+P13-30 records the v1.1 `net` / `tls` / `dns` / `dns/promises` default limited
+builtins as a Desktop-profile staged compatibility subset, and adds a
 debug/build-time raw Node network module opt-in for selected native Node
 builtins. The default surface remains shape-first and fail-closed: scripts can
 inspect common classes, constants, and loopback/IP-literal DNS helpers without
@@ -107,7 +107,7 @@ not behavior granted by the debug opt-in.
   `NodeRawNetworkPolicyInstrumentationTest` and the limited builtin sections in
   `EmbeddedScriptMvpInstrumentationTest`
 
-## Remaining Work
+## Future Promotion Work
 
 - Add native fd/socket leak instrumentation plus packaged INTERNET/live-network
   proof for close/destroy, timeout, process-stop, and provider-destroy paths
@@ -118,6 +118,7 @@ not behavior granted by the debug opt-in.
   remain denied.
 
 The type declarations, docs, desktop matrix, surface manifest, and Gradle gate
-are evidence-only for this partial decision. They do not add a separate P13-30
-blocker beyond the combined fd/socket leak and packaged INTERNET/live-network
-evidence item above.
+are evidence-only for this v1.1 limited-facade decision. Future raw socket or
+live network promotion must satisfy the fd/socket leak and packaged
+INTERNET/live-network evidence item above, but that evidence is not a P13-30
+v1.1 blocker while raw sockets and network DNS stay denied.

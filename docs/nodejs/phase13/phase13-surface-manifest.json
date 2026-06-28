@@ -423,7 +423,7 @@
         "P13-32",
         "P13-33"
       ],
-      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: P13-29 records controlled http/https client parity as ready for the controlled subset; P13-30 records limited net/tls/dns facades as partial; P13-31 records dgram/UDP as stable-denied; P13-32 records Safe filesystem profile diagnostics; P13-33 records scoped advanced fs APIs as partial while real sockets, network DNS, TLS sessions, broader roots, and full desktop fs semantics remain staged.",
+      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: P13-29 records controlled http/https client parity as ready for the controlled subset; P13-30 records limited net/tls/dns facades as ready for the v1.1 limited-facade decision; P13-31 records dgram/UDP as stable-denied; P13-32 records Safe filesystem profile diagnostics; P13-33 records scoped advanced fs APIs as partial while real sockets, network DNS, TLS sessions, broader roots, and full desktop fs semantics remain staged.",
       "risk": "high",
       "runtimeSurface": [
         "controlled node:http/node:https client facade",
