@@ -53,8 +53,9 @@ project may opt in with `node.executionMode=interactive_long_running`; the inrt
 launcher then prepares the encrypted project entry through the same Node project
 preprocessor used by one-shot packaged projects and starts the foreground
 service with `launchSurface=packaged_long_running`. The final blocker remains
-open until notification Stop action, task-removal cleanup, Android permission
-denial, background-start policy, and quota/resource stress evidence land.
+open until Android permission denial, background-start policy, packaged
+metadata/disclosure denial paths, broader device matrix evidence, and
+quota/resource stress evidence land.
 
 ## Goal
 
@@ -231,6 +232,12 @@ programmatic client stop path
 executionId)`. Stop requests mark the interactive status as stopping/stopped and
 schedule the isolated embedded Node process to exit. Console UI and packaged app
 stop controls remain future gates.
+
+P13-07 extends packaged cleanup evidence: the focused packaged smoke verifies
+foreground Stop clean-exit handling, `onTaskRemoved(...)` cleanup after the
+packaged Activity task is removed, cold relaunch without next-launch crash
+collection for both clean paths, and running-service force-stop crash
+collection.
 
 S7-22 adds the script-level cooperative stop callback for the interactive
 session surface. `lifecycle.onStop(handler)` receives a bounded stop reason, can

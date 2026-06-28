@@ -766,11 +766,16 @@ P13 task 本身使用以下执行状态：
       `stopRequested=true`, records `NodeCrashEvidenceStore` clean-exit marker
       evidence, verifies clean Stop is not collected on cold relaunch, then
       force-stops a running service and verifies next-launch collection.
-    - Device evidence: QV710AF65F / Sony XQ-AT72 / Android 12 passed the focused packaged crash-evidence smoke with fresh inrt template override; logcat contains `NodeLifecycleCheckpointStore` checkpoint write/read/clear markers, Stop `clean_exit`, and next-launch `NodeCrashEvidenceStore` collection.
+    - Packaged task-removal evidence: the same smoke removes the packaged
+      Activity task with `am stack remove <taskId>`, verifies service
+      `onTaskRemoved` cleanup, stopped status with `stopRequested=true`,
+      clean-exit marker evidence, and cold relaunch without next-launch crash
+      collection.
+    - Device evidence: QV710AF65F / Sony XQ-AT72 / Android 12 passed the focused packaged crash-evidence smoke with fresh inrt template override; logcat contains `NodeLifecycleCheckpointStore` checkpoint write/read/clear markers, Stop `clean_exit`, task-removal `clean_exit`, and next-launch `NodeCrashEvidenceStore` collection.
     - Host verifier: `tools/nodejs/phase13/verify-packaged-long-running-service.js`.
     - Gradle gate: `:app:verifyNodePhase13PackagedLongRunningService`.
     - Report: `docs/nodejs/reports/phase13/P13_07_PACKAGED_LONG_RUNNING_SERVICE.md`.
-    - Open before closure: task-removal cleanup, Android permission/background-start matrix, packaged metadata/disclosure denial paths, quota/stress evidence.
+    - Open before closure: Android permission/background-start matrix, packaged metadata/disclosure denial paths, broader device matrix evidence, quota/stress evidence.
 
 - [ ] P13-08: 完成 full heavy resource stress。
   - 范围：补齐 8 小时 quick soak 和 24 小时 final soak。

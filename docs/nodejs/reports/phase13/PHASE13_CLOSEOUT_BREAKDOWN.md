@@ -84,9 +84,12 @@ Reason open: `evidence`, `packaging`.
 - [x] Verify QV710AF65F packaged foreground notification record, Stop command,
   stopped status, clean-exit marker, clean Stop relaunch without collection,
   and running-service force-stop crash recovery.
+- [x] Verify QV710AF65F packaged task-removal cleanup, stopped status,
+  clean-exit marker, relaunch without collection, and subsequent force-stop
+  crash recovery.
 - [ ] Add Android version, notification permission, and background-start denial matrix.
-- [ ] Verify task-removal cleanup and broaden foreground/relaunch/crash
-  recovery evidence beyond the focused QV710AF65F smoke.
+- [ ] Broaden foreground/task-removal/relaunch/crash recovery evidence beyond
+  the focused QV710AF65F smoke.
 - [ ] Record packaged metadata and disclosure denial paths before promotion.
 
 #### P13-08 full heavy resource stress

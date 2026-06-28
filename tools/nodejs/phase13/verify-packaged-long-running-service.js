@@ -116,6 +116,16 @@ function buildReport(files) {
       token(files.packagedSmokeTest, "waitForPackagedForegroundNotificationRemoved"),
       token(files.p13Report, "verifies the clean Stop is not collected"),
     ]),
+    scenario("packaged_task_removal_smoke", "Packaged task removal cleans up service state without crash collection", [
+      token(files.embeddedService, "override fun onTaskRemoved"),
+      token(files.embeddedService, "interactive.task_removed"),
+      token(files.embeddedService, "stopActiveInteractiveLongRunning"),
+      token(files.packagedSmokeTest, "removePackagedTask"),
+      token(files.packagedSmokeTest, "am stack remove $taskId"),
+      token(files.packagedSmokeTest, "CRASH_EVIDENCE_TASK_REMOVED_MARKERS"),
+      token(files.packagedSmokeTest, "Task-removal cleanup should not be collected as next-launch crash evidence"),
+      token(files.p13Report, "The same focused smoke removes the packaged Activity task"),
+    ]),
     scenario("fail_closed", "Non-packaged direct script launches still reject service mode", [
       token(files.executionModePolicy, "supportedLaunchSurfaces = setOf("),
       token(files.executionModePolicy, "LAUNCH_SURFACE_SCRIPT"),
@@ -138,7 +148,7 @@ function buildReport(files) {
       token(files.packagedSmokeTest, "LAUNCH_SURFACE_PACKAGED_LONG_RUNNING"),
       token(files.packagedSmokeTest, "marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1"),
     ], [
-      "Final packaged foreground/device matrix evidence is still required: task-removal cleanup, Android API/permission/background-start denial, packaged metadata/disclosure denial paths, and quota/resource stress.",
+      "Final packaged foreground/device matrix evidence is still required: Android API/permission/background-start denial, packaged metadata/disclosure denial paths, broader device matrix evidence, and quota/resource stress.",
     ]),
   ];
   const checks = [
@@ -175,6 +185,7 @@ function buildReport(files) {
       foregroundLifecycleShared: scenarioById(scenarios, "foreground_lifecycle").status === "ready",
       packagedLifecycleSmokeReady: scenarioById(scenarios, "packaged_lifecycle_smoke").status === "ready",
       packagedStopSmokeReady: scenarioById(scenarios, "packaged_stop_smoke").status === "ready",
+      packagedTaskRemovalSmokeReady: scenarioById(scenarios, "packaged_task_removal_smoke").status === "ready",
       failClosedReady: scenarioById(scenarios, "fail_closed").status === "ready",
       deviceEvidenceReady: scenarioById(scenarios, "device_evidence_remaining").status === "ready",
       safeNodeProfilePreserved: true,

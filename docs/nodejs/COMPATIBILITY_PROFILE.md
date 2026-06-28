@@ -374,8 +374,9 @@ Current behavior remains:
 - packaged Node entries remain one-shot unless they explicitly opt in with
   `node.executionMode=interactive_long_running`; that packaged long-running
   path includes packaged `autojs6:lifecycle` checkpoint/read/clear smoke
-  evidence but remains partial until P13-07 Stop action, task-removal cleanup,
-  Android policy, and quota/resource stress evidence land
+  evidence plus Stop/task-removal clean-exit smoke evidence, but remains
+  partial until Android policy, packaged metadata/disclosure, broader device
+  matrix, and quota/resource stress evidence land
 
 The future design gate is documented in [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md).
 

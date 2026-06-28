@@ -186,6 +186,28 @@ open class NativeNodeEmbeddedScriptService : Service() {
         }
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        val executionId = activeExecutionId
+            ?.takeIf { activeExecutionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING }
+        if (executionId != null) {
+            Log.i(
+                TAG,
+                "interactive.task_removed executionId=$executionId " +
+                        "processName=${currentProcessName()} pid=${Process.myPid()}",
+            )
+            stopActiveInteractiveLongRunning(
+                requestedExecutionId = executionId,
+                startId = null,
+                ignoredReason = "interactive.task_removed.ignored",
+                transitionReason = "interactive.task_removed",
+                stopRequestReason = "interactive.task_removed.requested",
+                stoppingMessage = "interactive.task_removed.requested",
+                stoppedMessage = "interactive.task_removed.accepted",
+            )
+        }
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onTimeout(startId: Int) {
         handleForegroundServiceTimeout(
             startId = startId,
@@ -1547,14 +1569,34 @@ open class NativeNodeEmbeddedScriptService : Service() {
 
     private fun stopInteractiveLongRunning(intent: Intent, startId: Int) {
         val requestedExecutionId = intent.getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() }
+        stopActiveInteractiveLongRunning(
+            requestedExecutionId = requestedExecutionId,
+            startId = startId,
+            ignoredReason = "interactive.stop.ignored",
+            transitionReason = "interactive.stop",
+            stopRequestReason = "interactive.stop.requested",
+            stoppingMessage = "interactive.stop.requested",
+            stoppedMessage = "interactive.stop.accepted",
+        )
+    }
+
+    private fun stopActiveInteractiveLongRunning(
+        requestedExecutionId: String?,
+        startId: Int?,
+        ignoredReason: String,
+        transitionReason: String,
+        stopRequestReason: String,
+        stoppingMessage: String,
+        stoppedMessage: String,
+    ): Boolean {
         val executionId = activeExecutionId
         if (executionId == null || (requestedExecutionId != null && requestedExecutionId != executionId)) {
             Log.w(
                 TAG,
-                "interactive.stop.ignored requested=${requestedExecutionId.orEmpty()} active=${executionId.orEmpty()}",
+                "$ignoredReason requested=${requestedExecutionId.orEmpty()} active=${executionId.orEmpty()}",
             )
-            stopSelf(startId)
-            return
+            startId?.let { stopSelf(it) }
+            return false
         }
         activeLifecycle?.let { lifecycle ->
             if (lifecycle.state !in setOf(
@@ -1563,17 +1605,17 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     NodeEmbeddedRuntimeState.DESTROYED,
                 )
             ) {
-                lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "interactive.stop")
+                lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, transitionReason)
             }
         }
         val stoppingNativeValues = activeHeartbeatMonitor?.nativeValuesSnapshot("stopping")
             ?: activeLifecycle?.nativeValues().orEmpty()
-        activeHeartbeatMonitor?.stop("interactive.stop")
+        activeHeartbeatMonitor?.stop(transitionReason)
         activeHeartbeatMonitor = null
         NodeLifecycleCheckpointStore.writeStopRequest(
             file = activeLifecycleStopRequestFile,
             executionId = executionId,
-            reason = "interactive.stop.requested",
+            reason = stopRequestReason,
         )
         NodeInteractiveLongRunningStatusStore.write(
             context = this,
@@ -1583,7 +1625,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             workingDirectory = activeWorkingDirectory,
             startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
             stopRequested = true,
-            message = "interactive.stop.requested",
+            message = stoppingMessage,
             activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("stopping", stoppingNativeValues),
             nativeValues = stoppingNativeValues,
         )
@@ -1609,13 +1651,18 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 workingDirectory = workingDirectory,
                 startedAtEpochMs = startedAtEpochMs,
                 stopRequested = true,
-                message = "interactive.stop.accepted",
+                message = stoppedMessage,
                 activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("process_exit_scheduled", stoppingNativeValues),
                 nativeValues = stoppingNativeValues,
             )
-            stopSelf(startId)
+            if (startId != null) {
+                stopSelf(startId)
+            } else {
+                stopSelf()
+            }
             scheduleProcessExit(0)
         }, NodeLifecycleCheckpointStore.STOP_GRACE_MS)
+        return true
     }
 
     private fun handleForegroundServiceTimeout(
