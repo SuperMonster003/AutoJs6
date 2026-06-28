@@ -65,15 +65,19 @@ the current capability manifest.
   gain a synchronous Rhino database compatibility mode, and daily/weekly task
   database methods stay stable rejection stubs until the dedicated provider is
   implemented.
+- P13-21 descriptor and id mapping policy: future daily/weekly/user task
+  records use versioned JSON descriptors with opaque Node task ids. Legacy
+  Rhino row ids are snapshot metadata only and cannot be accepted as mutable
+  Node handles. Packaged app records use a package identity plus packaged task
+  id namespace so they cannot alias main-app Rhino rows or Node provider ids.
+- Migration and downgrade policy: legacy `TimedTask` rows may be copied or
+  translated into frozen snapshots carrying `legacyTimedTaskId`, compatibility
+  version, source runtime, and visibility metadata. Downgrades leave legacy
+  Rhino rows visible to Rhino, ignore unknown Node descriptor versions safely,
+  and fail closed before mutating records whose owner/package does not match.
 
 ## Remaining Blockers
 
-- Define a daily/weekly task descriptor schema with backend, scoped entry,
-  package identity, user-visible label, arguments, enabled state, timeout,
-  constraints, timezone, weekday flags, and descriptor version.
-- Implement task database migration and ownership rules for main-app and
-  packaged-app task records, including downgrade behavior and legacy Rhino row
-  visibility.
 - Add `add`, `query`, `get`, `update`, `enable/disable`, and `remove` provider
   operations over JSON snapshots and ids, with no raw task object mutation.
 - Define wall-clock scheduler semantics across reboot, timezone/clock changes,

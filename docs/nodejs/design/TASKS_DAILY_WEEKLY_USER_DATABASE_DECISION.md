@@ -50,6 +50,22 @@ For v1.1, `compat.tasks` remains Promise-only. It does not gain a synchronous
 Rhino database compatibility mode, and it must not wrap raw `TimedTask` rows or
 return live task objects.
 
+P13-21 descriptor and id mapping policy: the future `tasks` provider uses a
+versioned JSON descriptor, not raw `TimedTask` objects. The descriptor owns an
+opaque Node task id, backend, scoped entry, package identity, project identity,
+user-visible label, arguments, enabled state, timeout, constraints, timezone,
+weekday flags, and descriptor version. Legacy Rhino row ids are snapshot
+metadata only; a numeric Rhino id must never be accepted as a mutable Node task
+handle. Packaged app task records use their package identity and packaged task
+id namespace, so main-app rows, Node provider descriptors, and packaged records
+cannot alias one another.
+
+Migration from Rhino daily/weekly rows must copy or translate into frozen
+JSON snapshots with `legacyTimedTaskId`, compatibility version, source runtime,
+and visibility metadata. Downgrades must leave legacy Rhino rows visible to the
+Rhino task UI, ignore unknown Node descriptor versions safely, and fail closed
+instead of mutating rows whose owner does not match the current app/package.
+
 ## Why Provider Promotion Is Rejected
 
 Rhino daily/weekly tasks are user-visible AutoJs6 task database records. They

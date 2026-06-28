@@ -39,10 +39,10 @@
 - Gradle gate: `:app:verifyNodePhase13TaskDatabaseProvider`.
 - Report: `docs/nodejs/reports/phase13/P13_21_TASK_DATABASE_PROVIDER.md`.
 - Surface manifest evidence: `phase13-task-database-provider`.
-- Remaining P13-21 blockers: JSON task database schema, main-app vs packaged
-  ownership, add/query/update/remove daily/weekly operations, wall-clock
-  scheduler semantics, packaged metadata/manifest behavior, and raw
-  TimedTask/IntentTask profile decisions.
+- Remaining P13-21 blockers: add/query/update/remove daily/weekly operations,
+  wall-clock scheduler semantics, packaged metadata/manifest behavior, and raw
+  TimedTask/IntentTask profile decisions. JSON descriptor schema, id mapping,
+  migration/downgrade policy, and legacy visibility are now design-locked.
 
 ## P13-22 Partial Landing Note
 
@@ -1068,7 +1068,6 @@ P13 task 本身使用以下执行状态：
       - `compat.tasks.addDailyTask/addWeeklyTask/updateTask` and IntentTask methods still reject before bridge dispatch.
       - Android/Rhino `TimedTaskDatabase`, `TimedTaskManager`, and daily/weekly factory methods exist as substrate, but raw rows/objects do not cross into Node.
     - Remaining blockers:
-      - JSON task database descriptor schema, migration/downgrade policy, and main-app vs packaged ownership.
       - Daily/weekly add/query/get/update/remove provider operations over frozen JSON snapshots.
       - Wall-clock scheduler semantics, exact-alarm/WorkManager/JobScheduler fallback policy, packaged manifest/disclosure, and raw task object profile decision.
 
