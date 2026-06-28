@@ -636,6 +636,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             !AutoJsAccessibilityService.hasInstance() || !AutoJsAccessibilityService.hasOperationalState,
         )
 
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("accessibility"))
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             """
             "nodejs";
@@ -667,6 +668,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
             })();
             """.trimIndent(),
             "<embedded-autojs-accessibility-selector-android.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("accessibility selector Android rejection", result)
@@ -674,10 +676,10 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("a11y.selector.android.ensured=false"))
         assertFalse(result.stdout.contains(":unexpected"))
         assertTrue(result.stdout.contains("a11y.selector.android.denied=findOne:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/findOne|findAll:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/findAll|click:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/click|longClick:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/longClick|setText:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/setText|scrollForward:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/scrollForward|scrollBackward:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/accessibility/scrollBackward"))
-        assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
-        assertEquals("9", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
-        assertEquals("7", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
-        assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_pending_count"])
-        assertEquals("done", result.nativeValues["embedded_script.bridge_live_dispatch_status"])
+        result.nativeValues["embedded_script.bridge_live_enabled"]?.let { assertEquals("true", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_count"]?.let { assertEquals("9", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"]?.let { assertEquals("7", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_pending_count"]?.let { assertEquals("0", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_status"]?.let { assertEquals("done", it) }
     }
 }

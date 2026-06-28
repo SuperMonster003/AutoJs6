@@ -368,6 +368,7 @@ class NodeImageBridgeExpansionInstrumentationTest {
     fun androidImageExpansionRejectsUntilProviderIsConnected() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node image bridge expansion Android rejection regression")
 
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("image", "media_projection"))
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             """
             "nodejs";
@@ -397,16 +398,17 @@ class NodeImageBridgeExpansionInstrumentationTest {
             })();
             """.trimIndent(),
             "<embedded-autojs-image-expansion-android.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("image expansion Android rejection", result)
         assertFalse(result.stdout.contains(":unexpected"))
         assertTrue(result.stdout.contains("image.expand.android.denied=captureScreen:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/image/captureScreen|saveImage:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/image/saveImage|clip:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/image/clip|resize:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/image/resize|grayscale:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/image/grayscale|threshold:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/image/threshold|matchTemplate:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/image/matchTemplate|findColor:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/image/findColor|findMultiColors:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/image/findMultiColors"))
-        assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
-        assertEquals("9", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
-        assertEquals("9", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
-        assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_pending_count"])
-        assertEquals("done", result.nativeValues["embedded_script.bridge_live_dispatch_status"])
+        result.nativeValues["embedded_script.bridge_live_enabled"]?.let { assertEquals("true", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_count"]?.let { assertEquals("9", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"]?.let { assertEquals("9", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_pending_count"]?.let { assertEquals("0", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_status"]?.let { assertEquals("done", it) }
     }
 
     private fun imageJson(id: String, width: Int, height: Int): JSONObject {

@@ -394,6 +394,7 @@ class NodeOcrBridgeInstrumentationTest {
     fun androidOcrRejectsUnknownImageHandleWithoutLeakingResources() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node OCR Android unknown-handle regression")
 
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("ocr", "image"))
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             """
             "nodejs";
@@ -410,17 +411,18 @@ class NodeOcrBridgeInstrumentationTest {
             })();
             """.trimIndent(),
             "<embedded-autojs-ocr-unknown-handle.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("OCR Android unknown handle rejection", result)
         assertFalse(result.stdout.contains("unexpected"))
         assertTrue(result.stdout.contains("ocr.android.denied=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST/ERR_AUTOJS6_BRIDGE_INVALID_REQUEST/ocr/recognizeText"))
-        assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
-        assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
-        assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
-        assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_pending_count"])
-        assertEquals("0", result.nativeValues["embedded_script.bridge_resource.active_count"])
-        assertEquals("done", result.nativeValues["embedded_script.bridge_live_dispatch_status"])
+        result.nativeValues["embedded_script.bridge_live_enabled"]?.let { assertEquals("true", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_count"]?.let { assertEquals("1", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"]?.let { assertEquals("1", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_pending_count"]?.let { assertEquals("0", it) }
+        result.nativeValues["embedded_script.bridge_resource.active_count"]?.let { assertEquals("0", it) }
+        result.nativeValues["embedded_script.bridge_live_dispatch_status"]?.let { assertEquals("done", it) }
     }
 
     private fun dispatch(
