@@ -1521,8 +1521,20 @@ also requires JSON-safe `app.parseUri()` evidence and stable denials for
 `app.getUriForFile()`, `app.kill()`, and dual-user helpers. It does not promote
 broadcast sending, raw URI/FileProvider handles, or root/Shizuku routing through
 ordinary app APIs; those stay stable-denied for P13-23 v1.1. Raw installed-app
-list APIs, packaged behavior, negative corpus, and raw Android app/intent
-objects remain open.
+list APIs, packaged behavior, and raw Android app/intent objects remain open.
+
+Current P13-23 app.startActivity live provider evidence:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest#appStartActivityShortFormsAndNegativeCorpusUseLiveBridge,org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest#androidAppBridgeRejectsInvalidStartActivityDescriptors" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This QV710AF65F / XQ-AT72 / Android 12 smoke starts only the current package
+through short `MAIN`/`LAUNCHER` action/category descriptors, and asserts
+fail-closed invalid flags, non-object extras, and malformed component cases.
+The provider-level invalid descriptor matrix is covered by
+`NodeAutoJsBridgeInstrumentationTest#androidAppBridgeRejectsInvalidStartActivityDescriptors`.
 
 Phase 13 shell/root/Shizuku capability status gate:
 

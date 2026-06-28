@@ -78,6 +78,9 @@
 - P13-23 keeps `app.sendBroadcast()`, raw Android `Uri` / `FileProvider`
   handles, dual-user helpers, and root/Shizuku app tiers stable-denied for
   v1.1; future promotion belongs under P13-22/P13-24 gates.
+- Current QV710AF65F device evidence records `app.startActivity()` short
+  `MAIN`/`LAUNCHER` action/category descriptors for the current package plus
+  invalid flags, non-object extras, and malformed component fail-closed cases.
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
@@ -86,8 +89,8 @@
 - Surface manifest evidence: `phase13-app-intent-broadcast-parity`.
 - Remaining P13-23 blockers: raw URI/FileProvider promotion, raw installed-app
   list APIs, broadcast send promotion, root/Shizuku/dual-user routing through
-  explicit capabilities, packaged smoke, negative device corpus, preset alias
-  mapping, and migration examples.
+  explicit capabilities, packaged smoke, preset alias mapping, and migration
+  examples.
 
 ## P13-24 Partial Landing Note
 
@@ -1084,6 +1087,10 @@ P13 task 本身使用以下执行状态：
       stable fail-closed `app.getUriForFile()`, `app.kill()`, `app.killDual()`,
       `app.startDualActivity()`, `app.launchDual*()`, `app.openDual*()`,
       `app.uninstallDual()`, and `app.isDualInstalled()` stubs.
+    - Current QV710AF65F device evidence: `app.startActivity()` short
+      `MAIN`/`LAUNCHER` action/category descriptors for the current package,
+      invalid flags, non-object extras, and malformed component fail-closed
+      cases.
     - Type declarations: `docs/nodejs/types/autojs6-node/app.d.ts`.
     - Type smoke: `sample/nodejs/typescript-smoke/src/main.ts`.
     - Focused conformance:
@@ -1095,8 +1102,8 @@ P13 task 本身使用以下执行状态：
       `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
     - Open before closure: raw URI/FileProvider promotion, broadcast send
       promotion, root/Shizuku/dual-user routing through P13-24 capabilities,
-      raw installed-app list APIs, packaged smoke, negative device corpus,
-      preset alias mapping, and migration examples.
+      raw installed-app list APIs, packaged smoke, preset alias mapping, and
+      migration examples.
 
 - [ ] P13-24: 扩展 shell/root/Shizuku 能力。
   - 范围：将 shell、root shell、Shizuku 拆成独立 capability。
