@@ -1054,8 +1054,11 @@ P13-25 records notifications/settings/power manager promotion as partial:
 JSON-safe helpers requiring exact `notifications.settings` or `device.power`
 where appropriate. Notification actions/listeners/rich layouts,
 Do-Not-Disturb/exact-alarm authority, direct wakelock/power-manager APIs, and
-raw Android notification/power objects are stable-denied for v1.1; OEM power
-matrices and packaged disclosure remain future evidence.
+raw Android notification/power objects are stable-denied for v1.1. Packaged
+metadata/install-run, notification action-or-permission-denial, settings/power
+dry-run, and exact-denial smoke are covered; OEM power matrices,
+background-launch behavior, foreground disclosure UX, rollback diagnostics, and
+migration examples remain future evidence.
 
 P13-26 records media/recorder/mediainfo provider promotion as partial:
 `media.getAudioStreamVolume()`, `media.getAudioStreamMaxVolume()`,

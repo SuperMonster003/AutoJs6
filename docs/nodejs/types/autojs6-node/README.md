@@ -284,8 +284,11 @@ P13-25 records the partial notifications/settings/power manager gate.
 `device.isIgnoringBatteryOptimizations()`, and
 `device.openBatteryOptimizationSettings()` are typed with JSON-safe result
 schemas. Exact `notifications.settings` and `device.power` capabilities are
-required for settings/power helpers; notification actions/listeners, wakelocks,
-direct power-manager control, and packaged disclosure remain future work.
+required for settings/power helpers; packaged metadata/install-run,
+notification action-or-permission-denial, settings/power dry-run, and
+exact-denial smoke are covered. Notification actions/listeners, wakelocks,
+direct power-manager control, foreground disclosure UX, rollback diagnostics,
+and migration examples remain future work.
 
 P13-26 records the partial media/recorder/mediainfo provider gate.
 `media.getAudioStreamVolume()`, `media.getAudioStreamMaxVolume()`,

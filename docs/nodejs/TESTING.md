@@ -1590,8 +1590,12 @@ This host gate records P13-25 as partial. It requires explicit
 conformance, provider-registry, permission-manifest, and cross-document
 evidence. It stable-denies notification actions/listeners/rich layouts, direct
 wakelock/power-manager APIs, Do-Not-Disturb/exact-alarm authority, and raw
-Android notification/power objects for v1.1. OEM power matrices and packaged
-disclosure remain future evidence.
+Android notification/power objects for v1.1. Packaged metadata, install/run,
+notification action-or-permission-denial, settings/power dry-run, and exact
+denial paths are covered by
+`EmbeddedNodePackagedApkSmokeTest#installAndRunNotificationsSettingsPowerBridgeEmbeddedNodePackagedApks`.
+OEM power matrices, background-launch behavior, foreground disclosure UX,
+rollback diagnostics, and migration examples remain future evidence.
 
 Phase 13 media/recorder/mediainfo provider status gate:
 

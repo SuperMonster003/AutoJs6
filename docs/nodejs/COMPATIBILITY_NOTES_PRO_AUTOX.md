@@ -301,8 +301,11 @@ battery-optimization status/settings dry-run helpers through exact
 `notifications.settings` and `device.power` boundaries. Keep Rhino/Pro scripts
 that depend on notification actions/listeners, rich layouts, Do-Not-Disturb,
 exact alarms, wakelocks, or direct power-manager control on Rhino because those
-paths are stable-denied for v1.1. OEM power behavior and packaged disclosure
-flows remain future evidence.
+paths are stable-denied for v1.1. Packaged metadata/install-run,
+notification action-or-permission-denial, settings/power dry-run, and
+exact-denial smoke are covered. OEM power behavior, background-launch behavior,
+foreground disclosure UX, rollback diagnostics, and migration examples remain
+future evidence.
 
 P13-26 records media/recorder/mediainfo provider promotion as partial. AutoJs6
 Node now has read-only audio stream snapshots, scoped file metadata through

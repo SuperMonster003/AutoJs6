@@ -462,8 +462,11 @@ notifications/settings/power manager state: `notifications.settings` and
 snapshots and battery-optimization settings dry-run helpers are covered, while
 notification actions/listeners, Do-Not-Disturb/exact-alarm authority, direct
 wakelock/power-manager control, and raw Android notification/power objects are
-stable-denied for v1.1. OEM matrices and packaged disclosure remain future
-evidence.
+stable-denied for v1.1. OEM matrices, background-launch behavior, foreground
+disclosure UX, rollback diagnostics, and migration examples remain future
+evidence; packaged metadata, install/run, notification action-or-permission-
+denial, settings/power dry-run, and exact-denial smoke are covered by
+`EmbeddedNodePackagedApkSmokeTest#installAndRunNotificationsSettingsPowerBridgeEmbeddedNodePackagedApks`.
 `verifyNodePhase13MediaRecorderMediainfoProvider` records the P13-26 partial
 media/recorder/mediainfo provider state: `media.audio`, `media.metadata`, and
 `media.recording` are exact capability tokens, read-only media audio snapshots,
@@ -669,8 +672,10 @@ parity and keeps the surface partial: permission/settings snapshots and
 battery-optimization status/settings dry-run helpers are covered, while
 notification actions/listeners, direct power-manager APIs, wakelocks,
 Do-Not-Disturb/exact-alarm authority, and raw Android notification/power objects
-are stable-denied for v1.1. OEM matrices and packaged behavior require
-separate evidence.
+are stable-denied for v1.1. Packaged metadata/install-run and exact-denial
+smoke are covered, while OEM matrices, background-launch behavior, foreground
+disclosure UX, rollback diagnostics, and migration examples require separate
+evidence.
 P13-26 additionally uses `verifyNodePhase13MediaRecorderMediainfoProvider` as
 the host promotion-status gate for media/recorder/mediainfo parity and keeps
 the surface partial: read-only audio stream snapshots, scoped mediainfo

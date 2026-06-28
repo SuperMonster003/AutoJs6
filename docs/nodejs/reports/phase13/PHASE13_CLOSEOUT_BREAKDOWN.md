@@ -266,9 +266,12 @@ closure.
 Reason open: `implementation`, `evidence`, `packaging`.
 
 - [x] Stable-deny notification actions, listeners, groups, styles, remote input, richer layouts, DND, and exact-alarm authority for v1.1.
-- [ ] Add foreground disclosure and packaged notification/settings action evidence before promotion.
+- [x] Add packaged notification/settings/power install/run and exact-capability
+  denial smoke evidence.
+- [ ] Add foreground disclosure UX and notification ownership evidence before promotion.
 - [x] Stable-deny wakelocks, request-ignore-battery-optimizations mutation flows, callbacks, and direct power mutation for v1.1.
-- [ ] Add OEM matrix, packaged disclosure, and background-launch behavior evidence.
+- [ ] Add OEM matrix and background-launch behavior evidence.
+- [ ] Add rollback diagnostics and migration examples for promotion.
 - [x] Keep raw Notification/PowerManager/WakeLock/settings objects and device
   identifiers out of the Node surface.
 - [x] Keep docs/surface evidence gate from counting notification actions, settings helpers, wakelock/power APIs, OEM matrix, and packaged evidence twice.
