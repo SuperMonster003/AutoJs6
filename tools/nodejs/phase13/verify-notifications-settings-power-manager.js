@@ -122,11 +122,12 @@ function buildReport(files) {
       token(files.permissionManifestTest, "NodeBridgePermissionManifest.DEVICE_POWER"),
       token(files.deviceTest, "device.sensitive_absent=true"),
       token(files.notificationsTest, "assertNotificationResource"),
+      token(files.p13Report, "`Notification`, `NotificationCompat.Builder`, `NotificationManager`"),
+      token(files.p13Report, "`PendingIntent`, `RemoteViews`, `Intent`, `PowerManager`, `WakeLock`"),
       token(files.projectTool, '"notifications.settings"'),
       token(files.projectTool, '"device.power"'),
     ], [
       "Notification and power-manager APIs still need packaged install/run evidence before profile promotion.",
-      "No raw Android manager, builder, pending intent, wake lock, account, or identifier object may cross into Node.",
     ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-25 as partial", [
       token(files.p13Report, "Status: partial"),
@@ -141,7 +142,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-25 notifications/settings/power manager"),
       token(files.typesReadme, "P13-25 records the partial notifications/settings/power manager gate"),
       token(files.surfaceManifestDoc, "phase13-notifications-settings-power-manager"),
-      token(files.shellRootShizukuReport, "Status: partial"),
+      token(files.shellRootShizukuReport, "Status: ready"),
     ], []),
   ];
 
