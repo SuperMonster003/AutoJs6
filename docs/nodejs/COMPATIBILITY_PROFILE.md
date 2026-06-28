@@ -1089,7 +1089,12 @@ TLS sessions, fd/native handles, packaged INTERNET proof, and live Android
 network evidence remain unpromoted in Safe profile. The
 `autojs.nodejs.rawNetworkModules.experimental=true` debug/build-time opt-in
 routes CommonJS `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` to
-Node native builtins for Desktop parity experiments.
+Node native builtins for Desktop parity experiments. P13-30 rejects real
+TCP/TLS client sockets and server listen authority for v1.1 release/default
+profiles, keeps DNS privacy closed by denying Android resolver servers, private
+search domains, VPN/private DNS state, reverse lookup, custom DNS servers, and
+local topology, and keeps the raw-network opt-in release-forbidden with rollback
+through the build property.
 
 P13-31 records dgram UDP capability as stable-denied. `require("dgram")`,
 `require("node:dgram")`, `require.resolve("dgram")`, transitive package

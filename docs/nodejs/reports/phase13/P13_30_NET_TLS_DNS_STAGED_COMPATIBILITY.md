@@ -66,6 +66,36 @@ The following remain unavailable:
 - packaged APK INTERNET permission proof and live Android network evidence for
   this Desktop-profile path.
 
+## v1.1 Release Posture
+
+P13-30 keeps real TCP/TLS client socket authority rejected for v1.1
+release/default profiles. The supported release path is the controlled
+HTTP/HTTPS client facade from P13-29 plus the limited shape-only `net`/`tls`/DNS
+facades above. Any future raw client socket provider must be a separate
+promotion gate with host allow/deny policy, connection counts, byte/time
+budgets, background behavior, Android permission mapping, lifecycle cleanup,
+and rollback evidence.
+
+Server sockets are stable-denied for v1.1. `net.Server.listen()` and
+`tls.Server.listen()` remain fail-closed for every bind address, including
+loopback. No packaged metadata, project profile, or raw-network debug flag may
+turn an AutoJs6 app into a listening network server before a separate server
+socket provider owns bind-address policy, port ownership, foreground/background
+behavior, listener lifecycle cleanup, disclosure, and rollback.
+
+DNS privacy review is closed for v1.1 by denial. Default `dns` and
+`dns/promises` remain limited to loopback, localhost aliases, IP literals, and
+an empty frozen `getServers()` result. Android resolver servers, private search
+domains, VPN/private DNS state, reverse lookup, custom DNS servers, and local
+network topology are not exposed to JavaScript.
+
+`autojs.nodejs.rawNetworkModules.experimental=true` remains debug/build-time
+only, release-forbidden, and unavailable through project or packaged APK
+metadata. Its rollback is disabling the Gradle/build property. It has no
+published-profile stability contract and no AutoJs6-managed connection,
+byte, or time budget; those budgets are prerequisites for any future promotion,
+not behavior granted by the debug opt-in.
+
 ## Verification
 
 - Host verifier:
@@ -79,21 +109,15 @@ The following remain unavailable:
 
 ## Remaining Work
 
-- Decide whether the raw Node network module opt-in can graduate beyond
-  debug/build-time use, and define connection count, byte, timeout, host
-  allow/deny, and background execution policy.
-- Decide whether server sockets can ever be enabled, including bind-address,
-  port ownership, foreground disclosure, packaged rollback, and lifecycle
-  cleanup policy.
-- Add native fd/socket leak instrumentation for close/destroy, timeout,
-  process-stop, and provider-destroy paths before any broader raw socket
-  promotion.
-- Complete DNS privacy review before exposing Android resolver state, custom
-  DNS servers, reverse lookup, or private-network topology.
-- Define TLS session/certificate policy before exposing ALPN, certificate
-  chains, keying material, client certificates, or custom trust hooks.
+- Add native fd/socket leak instrumentation plus packaged INTERNET/live-network
+  proof for close/destroy, timeout, process-stop, and provider-destroy paths
+  before any broader raw socket promotion.
+- Track TLS session/certificate policy as future promotion design before
+  exposing ALPN, certificate chains, keying material, client certificates, or
+  custom trust hooks; it is not a separate P13-30 blocker while TLS sessions
+  remain denied.
 
 The type declarations, docs, desktop matrix, surface manifest, and Gradle gate
 are evidence-only for this partial decision. They do not add a separate P13-30
-blocker beyond the client/server socket, DNS privacy, raw-network opt-in,
-packaged INTERNET, TLS policy, and fd/socket leak evidence items above.
+blocker beyond the combined fd/socket leak and packaged INTERNET/live-network
+evidence item above.
