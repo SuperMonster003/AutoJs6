@@ -48,16 +48,16 @@ A Phase 13 parent task can close only when all of the following are true:
 
 ## Final Blocker Map
 
-| Final blocker | Phase 13 tasks | Main reason open | Closeout direction |
+| Final blocker | Phase 13 tasks | Summary state | Closeout direction |
 | --- | --- | --- | --- |
-| `second_execution_slot` | `P13-06`, `P13-08` | `evidence` | Two-slot scheduling has landed; P13-06 closes on current scheduler/stress evidence, while P13-08 owns long-duration soak evidence. |
+| `second_execution_slot` | `P13-06`, `P13-08` | closed | P13-06 closes on current scheduler/stress evidence; P13-08 owns long-duration soak evidence through `full_heavy_resource_stress`. |
 | `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | `evidence`, `packaging` | P13-45/P13-52 close metadata and policy diagnostics; P13-07/future packaged promotion owns lifecycle, disclosure UI, and final evidence. |
 | `full_heavy_resource_stress` | `P13-08` | `evidence`, `external` | Archive 8-hour quick soak and 24-hour final soak with comparable metrics. |
 | `android_side_package_installation` | `P13-09`, `P13-42`, `P13-48` | `implementation`, `policy`, `packaging` | P13-42 closes the v1.1 guarded local-store package-manager decision; registry/tarball/native/distribution promotion remains future work. |
 | `worker_threads` | `P13-34`, `P13-35` | `external`, `policy` | P13-35 records the v1.1 no-facade replacement decision; P13-34 owns native WorkerPool promotion evidence on target ABIs. |
-| `controlled_wasi` | `P13-38` | `implementation`, `policy` | Either implement a controlled WASI facade or keep raw WASI denied with pure WebAssembly as the supported path. |
+| `controlled_wasi` | `P13-38` | closed | P13-38 closes the v1.1 decision with pure WebAssembly as the supported path and raw/controlled WASI stable-denied. |
 | `raw_network` | `P13-29`, `P13-30`, `P13-50` to `P13-56` | `implementation`, `policy`, `packaging` | Keep Safe profile denied; promote only scoped Desktop/relaxed-capability tracks with network budgets, privacy, rollback, and packaged evidence. |
-| `node_24_17_community_fork` | future runtime lane | `external` | Track as future runtime maintenance; do not block current Node 24.5 Phase 13 work unless upgrade artifacts become available. |
+| `node_24_17_community_fork` | future runtime lane | deferred external maintenance | Track as future runtime maintenance; do not block current Node 24.5 Phase 13 work unless upgrade artifacts become available. |
 
 ## Task Closeout Checklist
 
