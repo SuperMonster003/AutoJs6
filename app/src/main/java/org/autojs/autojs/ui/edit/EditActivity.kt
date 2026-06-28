@@ -33,6 +33,7 @@ import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.edit.editor.service.EditorDraftService
 import org.autojs.autojs.ui.error.ErrorDialogActivity
 import org.autojs.autojs.ui.log.LogBottomSheet
+import org.autojs.autojs.ui.log.StackFrameTargetResolver
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
 import org.autojs.autojs.util.DialogUtils
@@ -185,17 +186,23 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
                 val bottomSheet = LogBottomSheet.newInstance(scriptName, scriptPath, mEditorView.getEditorTheme()?.backgroundColor)
                 bottomSheet.setOnStackFrameClickListener(object : LogBottomSheet.OnStackFrameClickListener {
-                    override fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int) {
-                        // Jump to the line in editor
-                        try {
-                            val editor = mEditorView.editor
-                            if (lineNumber >= 0 && lineNumber < editor.lineCountSnapshot) {
-                                val column = if (columnNumber > 0) columnNumber else 0
-                                editor.jumpTo(lineNumber, column)
-                                editor.requestEditorFocus()
+                    override fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int): Boolean {
+                        return try {
+                            val currentPath = mEditorView.uri?.path
+                            if (!StackFrameTargetResolver.matchesCurrentFile(fileName, currentPath)) {
+                                return false
                             }
+                            val editor = mEditorView.editor
+                            if (lineNumber !in 0 until editor.lineCountSnapshot) {
+                                return false
+                            }
+                            val column = if (columnNumber > 0) columnNumber else 0
+                            editor.jumpTo(lineNumber, column)
+                            editor.requestEditorFocus()
+                            true
                         } catch (e: Exception) {
                             e.printStackTrace()
+                            false
                         }
                     }
                 })

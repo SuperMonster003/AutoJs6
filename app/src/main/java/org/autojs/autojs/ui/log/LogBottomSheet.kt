@@ -20,6 +20,7 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ContextUtils.getColorForMode
 import org.autojs.autojs.util.ContextUtils.getColorsForMode
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.BottomSheetLogBinding
 import kotlin.math.roundToInt
@@ -56,7 +57,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
     private var mDidLaunchFullLogActivity = false
 
     interface OnStackFrameClickListener {
-        fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int)
+        fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int): Boolean
     }
 
     interface ScriptControlListener {
@@ -177,8 +178,12 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         binding.console.findViewById<View>(R.id.input_container)?.visibility = View.GONE
         binding.console.setEnableStackFrameLinks(true)
         binding.console.setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
-            mStackFrameClickListener?.onStackFrameClick(fileName, lineNumber, columnNumber)
-            dismissAllowingStateLoss()
+            val handled = mStackFrameClickListener?.onStackFrameClick(fileName, lineNumber, columnNumber) == true
+            if (handled) {
+                dismissAllowingStateLoss()
+            } else {
+                ViewUtils.showToast(requireContext(), R.string.text_failed_to_locate, true)
+            }
         }
         binding.console.setTextColors(
             context.getColorsForMode(
