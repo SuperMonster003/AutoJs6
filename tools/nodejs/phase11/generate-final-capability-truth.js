@@ -109,6 +109,10 @@ function main() {
     policyViolations.push("stable capabilities missing source/test evidence: " + stableMissingEvidence.join(", "));
   }
 
+  const blockers = unresolvedRequiredInternalBlockers.map((entry) => ({
+    id: entry.id,
+    reason: entry.currentEvidence,
+  }));
   const blocked = unresolvedRequiredInternalBlockers.length > 0;
   const report = {
     schema: "autojs6-node-final-capability-truth-v1",
@@ -127,6 +131,7 @@ function main() {
     stableHostOnly,
     stableMissingPackagedSupport,
     stableMissingCleanupEvidence,
+    blockers,
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : blocked ? "blocked" : "completed",
