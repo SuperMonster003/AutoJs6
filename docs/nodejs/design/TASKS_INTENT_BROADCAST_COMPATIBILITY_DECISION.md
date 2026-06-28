@@ -41,6 +41,12 @@ not to the main app's mutable Rhino task rows. Migration from legacy rows must
 be an explicit copy/translate step into versioned descriptors with user-visible
 review, downgrade behavior, and delete/disable ownership.
 
+P13-22 also records a JSON-safe `IntentTask` snapshot helper for query/get
+migration evidence. The helper serializes legacy row ids, script paths,
+actions, categories, data types, local scope, and raw-object denial policy, but
+it is not a Node API and does not expose raw `IntentTask`, `IntentFilter`,
+`Intent`, `BroadcastReceiver`, or receiver-handle objects.
+
 ## Rejected Runtime Authority
 
 P12-18 does not expose any of the following to Node scripts:

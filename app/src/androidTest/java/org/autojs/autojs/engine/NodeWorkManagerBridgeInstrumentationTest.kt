@@ -1,5 +1,6 @@
 package org.autojs.autojs.engine
 
+import org.autojs.autojs.timing.IntentTask
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -611,6 +612,60 @@ class NodeWorkManagerBridgeInstrumentationTest {
         )
         assertFalse(response.toString(), response.ok)
         assertEquals(NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED, response.error?.code)
+    }
+
+    @Test
+    fun intentTaskSnapshotsStayJsonOnlyWithoutReceiverHandles() {
+        val first = IntentTask().apply {
+            id = 101L
+            scriptPath = "jobs/package-added.cjs"
+            action = "org.autojs6.TEST_PACKAGE"
+            category = "android.intent.category.DEFAULT"
+            dataType = "text/plain"
+            isLocal = true
+        }
+        val second = IntentTask().apply {
+            id = 102L
+            scriptPath = "jobs/boot.cjs"
+            action = "android.intent.action.BOOT_COMPLETED"
+            isLocal = false
+        }
+
+        val snapshot = NodeIntentTaskSnapshots.snapshot(first)
+        assertEquals(NodeIntentTaskSnapshots.SCHEMA, snapshot.getString("schema"))
+        assertEquals(101L, snapshot.getLong("id"))
+        assertEquals("jobs/package-added.cjs", snapshot.getString("scriptPath"))
+        assertEquals("org.autojs6.TEST_PACKAGE", snapshot.getString("action"))
+        assertEquals("android.intent.category.DEFAULT", snapshot.getString("category"))
+        assertEquals("text/plain", snapshot.getString("dataType"))
+        assertTrue(snapshot.getBoolean("local"))
+        assertEquals("app-local", snapshot.getString("scope"))
+        assertEquals("rhino_intent_task_database", snapshot.getString("legacyOwner"))
+        assertFalse(snapshot.getBoolean("nodeProviderOwned"))
+
+        val rawPolicy = snapshot.getJSONObject("rawObjectPolicy")
+        assertEquals("denied", rawPolicy.getString("rawIntentTask"))
+        assertEquals("denied", rawPolicy.getString("rawIntentFilter"))
+        assertEquals("denied", rawPolicy.getString("rawIntent"))
+        assertEquals("denied", rawPolicy.getString("rawBroadcastReceiver"))
+        assertEquals("denied", rawPolicy.getString("rawReceiverHandle"))
+        assertEquals("denied", rawPolicy.getString("mutableRowHandle"))
+
+        assertFalse(snapshot.has("intentFilter"))
+        assertFalse(snapshot.has("receiver"))
+        assertFalse(snapshot.has("broadcastReceiver"))
+        assertFalse(snapshot.has("rawIntentTask"))
+        assertFalse(snapshot.has("rawReceiverHandle"))
+
+        val tasks = listOf(second, first)
+        val queried = NodeIntentTaskSnapshots.querySnapshots(tasks, action = "org.autojs6.TEST_PACKAGE")
+        assertEquals(1, queried.length())
+        assertEquals(101L, queried.getJSONObject(0).getLong("id"))
+        assertEquals(
+            102L,
+            checkNotNull(NodeIntentTaskSnapshots.getSnapshot(tasks, 102L)).getLong("id"),
+        )
+        assertEquals(null, NodeIntentTaskSnapshots.getSnapshot(tasks, 999L))
     }
 
     private fun androidProvider(id: String, workDir: File): AndroidNodeBridgeCapabilityProvider {
