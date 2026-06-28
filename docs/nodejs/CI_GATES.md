@@ -396,9 +396,10 @@ callback cleanup evidence land.
 `verifyNodePhase13LiveUiProviderPromotion` records the P13-17 partial live UI
 provider state: direct `require("ui")` Activity evidence is present for JSON
 layout, event drain, updates, close, and provider cleanup, while live packaged
-UI, Back/Recents, relaunch/crash, and packaged capability/disclosure denial
-evidence still block opt-in promotion. The same gate records explicit
-configuration-change destroy/recreate policy without a live UI survival claim.
+UI, Back/Recents, relaunch/crash, and user-visible packaged disclosure still
+block opt-in promotion. The same gate records explicit configuration-change
+destroy/recreate policy and packaged missing-`ui` capability denial without a
+live UI survival claim.
 `verifyNodePhase13OverlayProviderPromotion` records the P13-18 partial
 `ui.overlay` provider state: JS facade/types, explicit capabilities, Android
 permission/settings/closeAll live gate, packaged `SYSTEM_ALERT_WINDOW` metadata

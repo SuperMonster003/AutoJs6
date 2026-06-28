@@ -37,6 +37,7 @@ P13-17 adds the Phase 13 live UI provider promotion gate for the direct
 `require("ui")` Activity provider and keeps `compat.ui` mapped to the same
 JSON-only surface. The gate remains partial until live packaged UI,
 Back/Recents, relaunch/crash, and packaged disclosure evidence lands.
+Packaged missing-`ui` capability metadata rejects before dispatch.
 Configuration changes use an explicit destroy/recreate policy with no live UI
 survival claim.
 
@@ -174,7 +175,7 @@ Future UI compatibility work must be split into small tasks:
 - inset snapshots for status/navigation bar height queries
 - live packaged APK UI behavior and Back/Recents policy
 - P13-17 blocker closure for packaged live UI, relaunch/crash evidence, and
-  capability/disclosure denial evidence
+  user-visible disclosure evidence
 
 Floaty and overlay compatibility remains separate and is tracked by
 [FLOATY_NODE.md](FLOATY_NODE.md).

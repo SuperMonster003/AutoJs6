@@ -817,7 +817,9 @@ layouts, events, updates, close, provider cleanup, and explicit
 configuration-change destroy/recreate policy; `compat.ui` and type
 declarations stay aligned with the same JSON provider. The gate remains partial
 because live packaged UI, Back/Recents, relaunch/crash, and packaged
-capability/disclosure denial evidence are still missing.
+disclosure evidence are still missing. Packaged missing-`ui` capability
+metadata denial is covered by
+`EmbeddedNodePackagedApkSmokeTest#installAndRunUiCapabilityBoundaryEmbeddedNodePackagedApk`.
 
 Phase 13 overlay provider promotion:
 

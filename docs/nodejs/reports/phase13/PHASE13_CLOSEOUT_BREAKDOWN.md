@@ -171,8 +171,10 @@ Reason open: `evidence`, `packaging`.
 - [ ] Add Recents/task-removal lifecycle instrumentation and packaged task
   relaunch evidence.
 - [x] Add explicit configuration-change destroy/recreate policy evidence.
-- [ ] Run packaged UI smoke for entry, close, relaunch, and crash behavior.
-- [ ] Record packaged capability, metadata denial, and user-visible disclosure behavior.
+- [x] Add packaged capability/metadata denial smoke for missing `ui`
+  capability, raw Android UI global absence, and zero pending bridge dispatch.
+- [ ] Run live packaged UI smoke for entry, close, relaunch, crash, and
+  user-visible disclosure behavior.
 
 #### P13-18 floaty/overlay provider
 

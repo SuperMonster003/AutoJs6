@@ -8323,6 +8323,29 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildUiCapabilityBoundaryEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged UI capability boundary smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedUiCapabilityBoundaryApk()
+    }
+
+    @Test
+    fun installAndRunUiCapabilityBoundaryEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged UI capability boundary install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged UI capability boundary install-and-run smoke")
+
+        val outputApk = buildPackagedUiCapabilityBoundaryApk()
+        assertInstallAndRunPackagedUiCapabilityBoundarySmoke(outputApk)
+    }
+
+    @Test
     fun buildIntentBroadcastBoundaryEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged IntentTask/broadcast boundary smoke requires embedded script execution build support.",
@@ -11863,6 +11886,94 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedUiCapabilityBoundaryApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function rejected(action) {
+              try {
+                await action();
+                return { code: "allowed", missing: "", module: "", method: "" };
+              } catch (error) {
+                return {
+                  code: String(error && (error.autojs6Code || error.code || "")),
+                  missing: Array.isArray(error && error.missingCapabilities)
+                    ? error.missingCapabilities.join("|")
+                    : "",
+                  module: String(error && error.module || ""),
+                  method: String(error && error.method || "")
+                };
+              }
+            }
+
+            async function main() {
+              const fs = require("fs");
+              const bridge = require("autojs6:bridge");
+              const ui = require("ui");
+              const projectConfig = JSON.parse(fs.readFileSync("project.json", "utf8"));
+              const nodePermissions = projectConfig.node && Array.isArray(projectConfig.node.permissions)
+                ? projectConfig.node.permissions
+                : [];
+              const report = bridge.permissions();
+              const normalizedPermissions = Array.isArray(report.normalizedPermissions)
+                ? report.normalizedPermissions
+                : [];
+              const denied = await rejected(() => ui.showLayout({
+                type: "Column",
+                children: [
+                  { type: "Text", id: "title", text: "P13-17 UI capability boundary" },
+                  { type: "Button", id: "ok", text: "OK" }
+                ]
+              }, { timeoutMs: 1000 }));
+              const capabilityDeniedOk =
+                denied.code === "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED" &&
+                denied.missing === "ui" &&
+                denied.module === "ui" &&
+                denied.method === "showLayout";
+              const metadataDeniedOk =
+                nodePermissions.indexOf("toast") >= 0 &&
+                nodePermissions.indexOf("ui") < 0 &&
+                nodePermissions.indexOf("ui.overlay") < 0 &&
+                normalizedPermissions.indexOf("toast") >= 0 &&
+                normalizedPermissions.indexOf("ui") < 0;
+              const rawGlobalsAbsent = [
+                "Activity",
+                "Context",
+                "View",
+                "Window",
+                "NativeView",
+                "RawView",
+                "WebView"
+              ].every((name) => typeof globalThis[name] === "undefined");
+              const pending = bridge.__test.pendingCount();
+              const ready = capabilityDeniedOk && metadataDeniedOk && rawGlobalsAbsent && pending === 0;
+
+              console.log("packaged.ui_boundary.ready=" + ready);
+              console.log("packaged.ui_boundary.capability_denied=" + capabilityDeniedOk);
+              console.log("packaged.ui_boundary.missing=" + denied.missing);
+              console.log("packaged.ui_boundary.metadata_denied=" + metadataDeniedOk);
+              console.log("packaged.ui_boundary.raw_globals_absent=" + rawGlobalsAbsent);
+              console.log("packaged.ui_boundary.pending=" + pending);
+            }
+
+            return main().catch(error => {
+              console.error("packaged.ui_boundary.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-ui-capability-boundary-smoke",
+            outputApkName = UI_CAPABILITY_BOUNDARY_APK_NAME,
+            projectName = UI_CAPABILITY_BOUNDARY_PROJECT_NAME,
+            packageName = UI_CAPABILITY_BOUNDARY_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            nodePermissions = UI_CAPABILITY_BOUNDARY_NODE_PERMISSIONS,
+            runtimeMarkers = UI_CAPABILITY_BOUNDARY_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedIntentBroadcastBoundaryApk(): File {
         val mainScriptName = "main.js"
         val mainScript = """
@@ -14084,6 +14195,16 @@ $nodeConfigJson
         )
     }
 
+    private fun assertInstallAndRunPackagedUiCapabilityBoundarySmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = UI_CAPABILITY_BOUNDARY_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-ui-capability-boundary-smoke.apk",
+            label = "packaged UI capability boundary smoke",
+            requiredMarkers = UI_CAPABILITY_BOUNDARY_RUNTIME_MARKERS,
+        )
+    }
+
     private fun assertInstallAndRunPackagedIntentBroadcastBoundarySmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
@@ -15370,6 +15491,12 @@ $nodeConfigJson
             "org.autojs6.packaged.node.mediarecorder.denial.smoke"
         private const val MEDIA_RECORDER_DENIAL_APK_NAME =
             "PackagedNodeMediaRecorderDenialSmoke_v1.0.0.apk"
+        private const val UI_CAPABILITY_BOUNDARY_PROJECT_NAME =
+            "PackagedNodeUiCapabilityBoundarySmoke"
+        private const val UI_CAPABILITY_BOUNDARY_PACKAGE_NAME =
+            "org.autojs6.packaged.node.ui.capability.boundary.smoke"
+        private const val UI_CAPABILITY_BOUNDARY_APK_NAME =
+            "PackagedNodeUiCapabilityBoundarySmoke_v1.0.0.apk"
         private const val INTENT_BROADCAST_BOUNDARY_PROJECT_NAME =
             "PackagedNodeIntentBroadcastBoundarySmoke"
         private const val INTENT_BROADCAST_BOUNDARY_PACKAGE_NAME =
@@ -15767,6 +15894,17 @@ $nodeConfigJson
             "packaged.media_recorder_denial.metadata=true",
             "packaged.media_recorder_denial.recording=true",
             "packaged.media_recorder_denial.shadow=true",
+        )
+        private val UI_CAPABILITY_BOUNDARY_NODE_PERMISSIONS = listOf(
+            "toast",
+        )
+        private val UI_CAPABILITY_BOUNDARY_RUNTIME_MARKERS = listOf(
+            "packaged.ui_boundary.ready=true",
+            "packaged.ui_boundary.capability_denied=true",
+            "packaged.ui_boundary.missing=ui",
+            "packaged.ui_boundary.metadata_denied=true",
+            "packaged.ui_boundary.raw_globals_absent=true",
+            "packaged.ui_boundary.pending=0",
         )
         private val INTENT_BROADCAST_BOUNDARY_RUNTIME_MARKERS = listOf(
             "packaged.intent_broadcast.ready=true",
