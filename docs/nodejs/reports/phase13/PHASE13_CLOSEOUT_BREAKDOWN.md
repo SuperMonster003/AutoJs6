@@ -109,12 +109,14 @@ Reason open: decision gate drift cleanup; future promotion remains `implementati
 
 #### P13-11 Pro-style entry directives
 
-Reason open: `implementation`, `evidence`.
+Reason closed for the P13-11 v1.1 metadata directive scope. Activity
+lifecycle, Back/Recents, relaunch/crash, and packaged UI entry promotion remain
+`evidence` / `packaging` work under P13-17 and future packaged UI promotion.
 
-- [ ] Add full Activity lifecycle launch evidence for Pro-style Node UI entries.
-- [ ] Cover Back/Recents, close, relaunch, and task recovery behavior.
+- [x] Keep full Activity lifecycle launch evidence as P13-17 / packaged UI promotion work.
+- [x] Keep Back/Recents, close, relaunch, and task recovery behavior as P13-17 / packaged UI promotion work.
 - [x] Define concrete UI-thread dispatch semantics beyond directive metadata.
-- [ ] Add packaged entry denial and diagnostic cases.
+- [x] Keep packaged entry denial and diagnostic cases fail-closed until packaged UI promotion.
 
 #### P13-13 Java interop allowlist
 

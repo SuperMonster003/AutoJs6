@@ -93,14 +93,14 @@ function buildReport(files) {
       token(files.compatibilityProfile, "\"nodejs ui\""),
       token(files.proComparison, "\"nodejs ui\""),
       token(files.proComparison, "P13-11"),
-    ], [
-      "Full Activity lifecycle launch evidence is still required.",
-      "Back/Recents behavior for packaged Node UI entries is still required.",
+      token(files.p13Report, "P13-11 v1.1 closes the metadata directive scope"),
+      token(files.p13Report, "Back/Recents, packaged UI entry"),
+      token(files.compatibilityProfile, "P13-11 v1.1 closes the metadata directive scope"),
     ]),
-    scenario("docs_gate", "Docs and Gradle gate record P13-11 partial progress", [
+    scenario("docs_gate", "Docs and Gradle gate record P13-11 metadata directive closure", [
       token(files.phase13Tasks, "P13-11"),
       token(files.phase13Tasks, "verifyNodePhase13ProEntryDirectives"),
-      token(files.p13Report, "Status: partial"),
+      token(files.p13Report, "Status: ready"),
       token(files.testingDoc, "verifyNodePhase13ProEntryDirectives"),
       token(files.ciGatesDoc, "verifyNodePhase13ProEntryDirectives"),
       token(files.capabilityMatrix, "NodeEntryDirective"),

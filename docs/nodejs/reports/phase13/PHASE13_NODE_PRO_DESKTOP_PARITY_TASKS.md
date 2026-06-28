@@ -834,7 +834,7 @@ P13 task 本身使用以下执行状态：
 
 ### Track B: Auto.js Pro capability parity
 
-- [ ] P13-11: 实现 Pro 风格 Node entry and UI-thread directives。
+- [x] P13-11: 实现 Pro 风格 Node entry and UI-thread directives。
   - 范围：对齐 Pro 9 的 `"nodejs ui"`、`"nodejs ui-thread"` 语义。
   - 验收：
     - UI Activity 启动、非 UI 线程脚本、UI-thread dispatch 三者行为清晰。
@@ -852,12 +852,14 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-pro-entry-directives.js`.
     - Gradle gate: `:app:verifyNodePhase13ProEntryDirectives`.
     - Report: `docs/nodejs/reports/phase13/P13_11_PRO_ENTRY_DIRECTIVES.md`.
-    - 2026-06-28 UI-thread policy update: dispatch semantics are defined as
+    - 2026-06-28 metadata closure: dispatch semantics are defined as
       provider-owned async main-looper dispatch, not V8 isolate execution on
-      the Android main thread; Activity lifecycle, Back/Recents, and packaged
-      UI entry evidence still keep P13-11 partial.
-  - 未关闭原因：Activity lifecycle、Back/Recents 和实际 UI-thread dispatch
-    evidence 尚未完成，因此保持 `partial`。
+      the Android main thread.
+  - P13-11 v1.1 closure: metadata parsing, propagation, packaged config
+    rejection, and UI-thread policy are ready. Activity lifecycle,
+    Back/Recents, relaunch/crash, and packaged UI entry evidence remain
+    P13-17 / future packaged UI promotion work rather than P13-11 metadata
+    blockers.
 
 - [x] P13-12: 定义并实现 `$autojs` global v1。
   - 范围：提供 Pro 风格 `$autojs` 入口，但分层暴露能力。

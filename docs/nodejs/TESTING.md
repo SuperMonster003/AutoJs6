@@ -721,10 +721,11 @@ Phase 13 Pro-style Node entry directives:
 and the existing Node project launch alignment coverage verify that
 `"nodejs ui"` and `"nodejs ui-thread"` parse into stable `NodeEntryDirective`
 metadata and flow through descriptor, source, project request, debug descriptor,
-native values, and failure markers. The gate stays partial until Activity
-lifecycle, Back/Recents behavior, and packaged UI-entry evidence land. The
-UI-thread policy is already defined as provider-owned asynchronous main-looper
-dispatch, not V8 execution on the Android main thread.
+native values, and failure markers. The P13-11 metadata directive gate is ready;
+Activity lifecycle, Back/Recents behavior, and packaged UI-entry evidence remain
+P13-17 / future packaged UI promotion work. The UI-thread policy is already
+defined as provider-owned asynchronous main-looper dispatch, not V8 execution on
+the Android main thread.
 
 Phase 13 `$autojs` global v1:
 

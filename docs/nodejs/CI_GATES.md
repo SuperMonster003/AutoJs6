@@ -356,10 +356,10 @@ planRegistryInstall/planTarballInstall/install/update/remove/list/verify/prune.
 `verifyNodePhase13ProEntryDirectives` records the P13-11 Pro-style Node entry
 directive state for `"nodejs ui"` and `"nodejs ui-thread"`, including
 `NodeEntryDirective`, descriptor/project config metadata, debug/native values,
-and focused instrumentation. It remains partial until Activity lifecycle,
-Back/Recents, and packaged UI-entry evidence land. The UI-thread policy is
-provider-owned asynchronous main-looper dispatch, not V8 execution on the
-Android main thread.
+and focused instrumentation. The P13-11 metadata directive gate is ready;
+Activity lifecycle, Back/Recents, and packaged UI-entry evidence remain P13-17 /
+future packaged UI promotion work. The UI-thread policy is provider-owned
+asynchronous main-looper dispatch, not V8 execution on the Android main thread.
 `verifyNodePhase13AutoJsGlobalV1` records the P13-12 read-only `$autojs`
 global v1 state: frozen global installation, `$autojs.version`,
 `$autojs.profile`, diagnostic-only `$autojs.androidContext`, gated

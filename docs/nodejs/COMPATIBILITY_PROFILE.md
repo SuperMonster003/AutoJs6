@@ -153,6 +153,8 @@ and packaged UI entry behavior remain unpromoted. `"nodejs ui-thread"` is a
 compatibility intent and scheduling constraint: it does not run the V8 isolate
 on the Android main thread; Activity-owned providers must marshal UI work onto
 the main looper through bounded asynchronous bridge operations.
+P13-11 v1.1 closes the metadata directive scope only; live Activity lifecycle
+and packaged UI behavior remain owned by P13-17 / future packaged UI promotion.
 
 P13-17 records the live `require("ui")` provider promotion gate. The direct
 Activity-owned JSON provider has live device evidence for layout, events,
