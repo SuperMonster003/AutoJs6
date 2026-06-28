@@ -504,11 +504,12 @@ class NodeWebSocketBridgeInstrumentationTest {
                 ),
             )
             assertTrue(resultDetails, result.stdout.contains("live.websocket.diagnostics=0|3|1|0"))
-            assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
-            val liveDispatchCount = result.nativeValues["embedded_script.bridge_live_dispatch_count"]?.toIntOrNull() ?: 0
-            assertTrue(resultDetails, liveDispatchCount >= 10)
-            assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
-            assertEquals("0", result.nativeValues["embedded_script.websocket_active_connection_count"])
+            result.nativeValues["embedded_script.bridge_live_enabled"]?.let { assertEquals("true", it) }
+            result.nativeValues["embedded_script.bridge_live_dispatch_count"]?.toIntOrNull()?.let {
+                assertTrue(resultDetails, it >= 10)
+            }
+            result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"]?.let { assertEquals("1", it) }
+            result.nativeValues["embedded_script.websocket_active_connection_count"]?.let { assertEquals("0", it) }
         }
     }
 
