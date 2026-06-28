@@ -58,6 +58,8 @@
     };
     var imeTextInputSelectionSyncing = false;
     var lastImeTextInputSelectionNotifyAt = 0;
+    var imeTextInputSelectionSuppressUntil = 0;
+    var imeTextInputSelectionSuppressReason = "";
     var DEFAULT_FONT_FAMILY = '"JetBrains Mono", "Source Code Pro", monospace';
     var STATE_NOTIFY_THROTTLE_MS = 100;
     var TEXT_NOTIFY_THROTTLE_MS = 100;
@@ -72,6 +74,7 @@
     var RIGHT_EDGE_GESTURE_VERTICAL_SLOP = 24;
     var FOLD_TAP_TOUCH_SLOP_SQUARED = 100;
     var IME_TEXT_INPUT_SELECTION_MAX_DELTA = 64;
+    var IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS = 800;
 
     function callBridge(name, args) {
         try {
@@ -868,11 +871,37 @@
         return true;
     }
 
+    function shouldSuppressImeTextInputSelectionAfterReset(reason) {
+        reason = String(reason || "");
+        return reason === "move_cursor" ||
+            reason === "jump_to" ||
+            reason === "init" ||
+            reason.indexOf("focus") >= 0;
+    }
+
+    function clearImeTextInputSelectionSuppression() {
+        imeTextInputSelectionSuppressUntil = 0;
+        imeTextInputSelectionSuppressReason = "";
+    }
+
+    function suppressNextImeTextInputSelectionChange(reason) {
+        if (!isAndroidUserAgent()) {
+            return;
+        }
+        if (!shouldSuppressImeTextInputSelectionAfterReset(reason)) {
+            return;
+        }
+        imeTextInputSelectionSuppressReason = String(reason || "");
+        imeTextInputSelectionSuppressUntil =
+            Date.now() + IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS;
+    }
+
     function resetImeTextInputSelectionWindow(reason) {
         if (!isAndroidUserAgent()) {
             return false;
         }
         var textInput = editor && editor.textInput;
+        suppressNextImeTextInputSelectionChange(reason);
         imeTextInputSelectionSyncing = true;
         try {
             if (textInput && typeof textInput.resetSelection === "function") {
@@ -922,6 +951,21 @@
         var delta = start - previous;
         if (delta === 0) {
             syncImeTextInputSelectionWindow("");
+            return;
+        }
+        if (Date.now() <= imeTextInputSelectionSuppressUntil) {
+            callBridge("notifyEvent", [
+                "imeTextInputSelectionSuppressed",
+                JSON.stringify({
+                    reason: imeTextInputSelectionSuppressReason,
+                    previous: previous,
+                    start: start,
+                    delta: delta,
+                    length: value.length
+                })
+            ]);
+            clearImeTextInputSelectionSuppression();
+            syncImeTextInputSelectionWindow("selectionchange_suppressed");
             return;
         }
         if (Math.abs(delta) > IME_TEXT_INPUT_SELECTION_MAX_DELTA) {
@@ -1372,8 +1416,10 @@
     }
 
     function moveCursor(delta) {
+        delta = Number(delta) || 0;
         var selection = getSelectionState();
-        var next = Math.max(0, Math.min(selection.startOffset + (Number(delta) || 0), session.getValue().length));
+        var next = Math.max(0, Math.min(selection.startOffset + delta, session.getValue().length));
+        suppressNextImeTextInputSelectionChange("move_cursor");
         selectRange(next, next);
         resetImeTextInputSelectionWindow("move_cursor");
     }

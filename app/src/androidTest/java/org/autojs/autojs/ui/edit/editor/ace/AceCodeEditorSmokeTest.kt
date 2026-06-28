@@ -486,6 +486,58 @@ class AceCodeEditorSmokeTest {
     }
 
     @Test
+    fun focusedAceShortcutLeftRightMovesOneColumn() {
+        val initialText = "const value = 1;\n"
+        val file = createTempScriptFile("ace-shortcut-horizontal", initialText)
+        try {
+            val editorView = launchReadyEditActivity(file, initialText)
+            runOnMainSync {
+                editorView.editor.jumpTo(0, 5)
+                editorView.editor.requestEditorFocus()
+            }
+            waitUntil("ACE cursor should be focused at the starting column") {
+                runOnMainSync {
+                    editorView.editor.selection.startLine == 0 &&
+                        editorView.editor.selection.startColumn == 5
+                }
+            }
+
+            runOnMainSync {
+                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_bottom_bar)
+                    .codeCompletions
+                editorView.onHintClick(secondRow, 3)
+            }
+            waitUntil("ACE Right shortcut should move the cursor") {
+                runOnMainSync { editorView.editor.selection.startColumn != 5 }
+            }
+            SystemClock.sleep(IME_SELECTION_SETTLE_DELAY_MS)
+            assertEquals(
+                aceShortcutCursorDiagnostic(editorView),
+                6,
+                runOnMainSync { editorView.editor.selection.startColumn },
+            )
+
+            runOnMainSync {
+                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_bottom_bar)
+                    .codeCompletions
+                editorView.onHintClick(secondRow, 1)
+            }
+            waitUntil("ACE Left shortcut should move the cursor") {
+                runOnMainSync { editorView.editor.selection.startColumn != 6 }
+            }
+            SystemClock.sleep(IME_SELECTION_SETTLE_DELAY_MS)
+            assertEquals(
+                aceShortcutCursorDiagnostic(editorView),
+                5,
+                runOnMainSync { editorView.editor.selection.startColumn },
+            )
+        } finally {
+            finishLaunchedActivity()
+            file.delete()
+        }
+    }
+
+    @Test
     fun editActivityAppliesInitialAcePositionAfterFileLoad() {
         val targetLine = 10
         val targetColumn = 28
@@ -1118,6 +1170,18 @@ class AceCodeEditorSmokeTest {
         return editorView
     }
 
+    private fun aceShortcutCursorDiagnostic(editorView: EditorView): String {
+        return runOnMainSync {
+            val selection = editorView.editor.selection
+            val history = (editorView.editor as? AceScriptEditorEngine)
+                ?.createAceDiagnosticsSnapshot()
+                ?.runtimeEventHistory
+                .orEmpty()
+                .joinToString(separator = "\n")
+            "column=${selection.startColumn}, events:\n$history"
+        }
+    }
+
     private fun startEditActivitySync(file: File, initialLine: Int? = null, initialColumn: Int = 0): EditorView {
         EditorEnginePreferences.set(EditorEngineType.ACE)
         val intent = Intent(instrumentation.targetContext, EditActivity::class.java)
@@ -1626,6 +1690,7 @@ class AceCodeEditorSmokeTest {
         private const val BACKGROUND_RESTORE_DELAY_MS = 500L
         private const val IME_SHOW_DELAY_MS = 500L
         private const val IME_HIDE_DELAY_MS = 200L
+        private const val IME_SELECTION_SETTLE_DELAY_MS = 250L
         private const val PROGRAMMATIC_SCROLL_SUPPRESS_DELAY_MS = 350L
         private const val POLL_INTERVAL_MS = 50L
         private val ACE_CURSOR_VISIBILITY_SCRIPT = """
