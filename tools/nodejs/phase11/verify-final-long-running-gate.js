@@ -21,6 +21,7 @@ const FILES = {
   lifecycleStressTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedLifecycleStressInstrumentationTest.kt",
   designDoc: "docs/nodejs/design/LONG_RUNNING_SERVICE.md",
   phase10Doc: "docs/nodejs/reports/phase10/LONG_RUNNING_ACTIVATION.md",
+  phase13PackagedReport: "docs/nodejs/reports/phase13/P13_07_PACKAGED_LONG_RUNNING_SERVICE.md",
   blockerRegistry: "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
 };
 
@@ -42,8 +43,10 @@ const EVIDENCE_CHECKS = [
   ["interactive_test", "interactiveTest", "NodeInteractiveLongRunningInstrumentationTest"],
   ["stress_test", "stressTest", "NodeLongRunningStressInstrumentationTest"],
   ["lifecycle_queue_stress", "lifecycleStressTest", "queuedExecutionRunsAfterActiveExecution"],
-  ["packaged_doc_boundary", "designDoc", "Packaged service mode still remains disabled"],
+  ["packaged_doc_boundary", "designDoc", "packaged long-running launch surface"],
   ["phase10_doc_boundary", "phase10Doc", "Packaged long-running service mode"],
+  ["phase13_packaged_partial", "phase13PackagedReport", "Status: partial packaged dispatch, metadata/disclosure policy, and Stop/crash"],
+  ["phase13_packaged_stop_task_removal", "phase13PackagedReport", "The same focused smoke removes the packaged Activity task"],
 ];
 
 const REQUIRED_PHASE10_ITEMS = [
@@ -88,6 +91,9 @@ function main() {
     };
   });
   const registryBlockers = FINAL_BLOCKER_IDS.map((id) => registryBlockerEntry(registry, id));
+  const packagedLongRunningRegistryOpen = registryBlockers.some((entry) => (
+    entry.id === "packaged_long_running" && entry.open
+  ));
   const decision = phase10Report && phase10Report.decision ? phase10Report.decision : {};
   const phase10Status = decisionStatus(phase10Report);
   const blockers = [];
@@ -111,7 +117,7 @@ function main() {
   if (decision.automaticRestartEnabled !== false) {
     blockers.push("automatic restart must remain disabled");
   }
-  if (decision.packagedLongRunningPromoted !== true) {
+  if (decision.packagedLongRunningPromoted !== true && !packagedLongRunningRegistryOpen) {
     blockers.push("packaged long-running service mode is not promoted");
   }
   registryBlockers
