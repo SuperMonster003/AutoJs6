@@ -70,11 +70,9 @@ class LogActivity : BaseActivity() {
             path = targetPath,
             lineNumber = lineNumber,
             columnNumber = columnNumber.coerceAtLeast(0),
-            newTask = true,
+            newTask = false,
         )
-        if (opened) {
-            finish()
-        } else {
+        if (!opened) {
             showToast(this, R.string.text_failed_to_locate, true)
         }
     }

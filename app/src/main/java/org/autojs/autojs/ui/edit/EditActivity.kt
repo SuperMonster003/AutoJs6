@@ -186,23 +186,40 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
                 val bottomSheet = LogBottomSheet.newInstance(scriptName, scriptPath, mEditorView.getEditorTheme()?.backgroundColor)
                 bottomSheet.setOnStackFrameClickListener(object : LogBottomSheet.OnStackFrameClickListener {
-                    override fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int): Boolean {
+                    override fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int): LogBottomSheet.StackFrameClickResult {
                         return try {
+                            if (lineNumber < 0) {
+                                return LogBottomSheet.StackFrameClickResult.FAILED
+                            }
                             val currentPath = mEditorView.uri?.path
-                            if (!StackFrameTargetResolver.matchesCurrentFile(fileName, currentPath)) {
-                                return false
-                            }
-                            val editor = mEditorView.editor
-                            if (lineNumber !in 0 until editor.lineCountSnapshot) {
-                                return false
-                            }
                             val column = if (columnNumber > 0) columnNumber else 0
-                            editor.jumpTo(lineNumber, column)
-                            editor.requestEditorFocus()
-                            true
+                            if (StackFrameTargetResolver.matchesCurrentFile(fileName, currentPath)) {
+                                val editor = mEditorView.editor
+                                if (lineNumber !in 0 until editor.lineCountSnapshot) {
+                                    return LogBottomSheet.StackFrameClickResult.FAILED
+                                }
+                                editor.jumpTo(lineNumber, column)
+                                editor.requestEditorFocus()
+                                return LogBottomSheet.StackFrameClickResult.DISMISS
+                            }
+                            val targetPath = StackFrameTargetResolver.resolveSourcePath(fileName, currentPath)
+                                ?: return LogBottomSheet.StackFrameClickResult.FAILED
+                            val opened = editFileAt(
+                                context = this@EditActivity,
+                                name = File(targetPath).name,
+                                path = targetPath,
+                                lineNumber = lineNumber,
+                                columnNumber = column,
+                                newTask = false,
+                            )
+                            if (opened) {
+                                LogBottomSheet.StackFrameClickResult.KEEP_OPEN
+                            } else {
+                                LogBottomSheet.StackFrameClickResult.FAILED
+                            }
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            false
+                            LogBottomSheet.StackFrameClickResult.FAILED
                         }
                     }
                 })

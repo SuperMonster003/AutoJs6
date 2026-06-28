@@ -55,8 +55,14 @@ class LogBottomSheet : BottomSheetDialogFragment() {
     private var mDragStartHeight = 0
     private var mDidLaunchFullLogActivity = false
 
+    enum class StackFrameClickResult {
+        DISMISS,
+        KEEP_OPEN,
+        FAILED,
+    }
+
     interface OnStackFrameClickListener {
-        fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int): Boolean
+        fun onStackFrameClick(fileName: String, lineNumber: Int, columnNumber: Int): StackFrameClickResult
     }
 
     interface ScriptControlListener {
@@ -177,11 +183,10 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         binding.console.findViewById<View>(R.id.input_container)?.visibility = View.GONE
         binding.console.setEnableStackFrameLinks(true)
         binding.console.setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
-            val handled = mStackFrameClickListener?.onStackFrameClick(fileName, lineNumber, columnNumber) == true
-            if (handled) {
-                dismissAllowingStateLoss()
-            } else {
-                ViewUtils.showToast(requireContext(), R.string.text_failed_to_locate, true)
+            when (mStackFrameClickListener?.onStackFrameClick(fileName, lineNumber, columnNumber)) {
+                StackFrameClickResult.DISMISS -> dismissAllowingStateLoss()
+                StackFrameClickResult.KEEP_OPEN -> Unit
+                StackFrameClickResult.FAILED, null -> ViewUtils.showToast(requireContext(), R.string.text_failed_to_locate, true)
             }
         }
         binding.console.setTextColors(
