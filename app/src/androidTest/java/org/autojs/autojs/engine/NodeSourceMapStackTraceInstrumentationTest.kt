@@ -153,9 +153,9 @@ class NodeSourceMapStackTraceInstrumentationTest {
         )
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("ESM generated stack trace mapping", result), result.succeeded)
-        assertTrue(result.stderr, result.stderr.contains("${main.absolutePath}:6:"))
+        assertTrue(result.stderr, result.stderr.contains("${main.absolutePath}:6:15"))
         assertFalse(result.stderr, result.stderr.contains("${main.absolutePath}:13:"))
-        assertTrue(result.errorStack.orEmpty(), result.errorStack.orEmpty().contains("${main.absolutePath}:10:"))
+        assertTrue(result.errorStack.orEmpty(), result.errorStack.orEmpty().contains("${main.absolutePath}:10:15"))
         assertFalse(result.errorStack.orEmpty(), result.errorStack.orEmpty().contains("${main.absolutePath}:17:"))
         result.nativeValues["embedded_script.generated_stack_mapped_frame_count"]
             ?.toIntOrNull()
