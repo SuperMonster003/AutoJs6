@@ -1085,7 +1085,7 @@ P13 task 本身使用以下执行状态：
       - Node still cannot register Android receivers, mutate manifests, receive external broadcast wakeups, or access raw `Intent` / `BroadcastReceiver` / `IntentTask` objects.
     - Remaining blockers:
       - Capability split for app-local custom broadcasts, exported broadcasts, boot/user-unlocked, package events, startup, and exact-alarm triggers.
-      - Receiver ownership, exported policy, duplicate suppression, unregister/delete cleanup, and process-death recovery.
+      - Receiver lifecycle ownership, exported policy, duplicate suppression, unregister/delete cleanup, and process-death recovery.
       - Trigger payload JSON snapshots, packaged manifest synthesis, install/trigger/remove smokes, user disclosure, and rate-limit diagnostics.
 
 - [x] P13-23: 扩展 app/intent/broadcast Pro parity。

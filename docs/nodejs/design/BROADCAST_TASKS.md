@@ -37,6 +37,14 @@ AutoJs6 already has a broad Rhino-era broadcast task model:
 
 Node must extend this ownership model. It must not introduce a second receiver stack inside the Node runtime.
 
+Legacy Rhino `IntentTask` rows stay owned by the existing Rhino task database,
+`TimedTaskManager`, and AutoJs6 receiver stack. Future Node broadcast task
+records must be separate provider-owned JSON descriptors with opaque Node task
+ids. Packaged broadcast records stay under the packaged app identity, project
+metadata, and manifest patch report; they must not be shared mutable Rhino rows.
+Migration may copy or translate legacy rows into descriptors only through an
+explicit reviewed migration path, not by exposing row handles to Node.
+
 ## Capability Decisions
 
 | Capability | Decision | Reason |
