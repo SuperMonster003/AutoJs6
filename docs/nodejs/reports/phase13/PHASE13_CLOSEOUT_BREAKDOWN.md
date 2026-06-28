@@ -121,7 +121,7 @@ Reason open: `implementation`, `evidence`.
 Reason open: `implementation`, `policy`.
 
 - [ ] Implement thread dispatch and `setThreadMode` semantics.
-- [ ] Add a generic method-budget policy beyond the explicit allowlist and bridge timeout.
+- [x] Add a generic method-budget policy beyond the explicit allowlist and bridge timeout.
 - [ ] Extend allowlist coverage only with lifetime, cleanup, and denial instrumentation.
 - [ ] Keep Pro profile promotion blocked until Java/Rhino surface security is complete.
 

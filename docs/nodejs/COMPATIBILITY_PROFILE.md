@@ -883,6 +883,12 @@ The MVP allowlist includes:
 - `java.util.UUID` selected static UUID helpers
 - `android.graphics.Rect` construction as an opaque provider-owned handle
 
+P13-13 defines the method budget policy for future Java allowlist expansion:
+each constructor, static call, instance call, and field read needs an explicit
+allowlist row, per-call timeout, execution-scoped Java-call budget, handle
+budget, bounded serialized values, adjacent denial tests, and cleanup evidence.
+Budget exhaustion must fail closed before dispatch.
+
 Runtime, ProcessBuilder, System, ClassLoader, reflection, raw Android `Context`, filesystem, network, native library loading, and raw object graph traversal remain denied. `require("java")` and `require.resolve("java")` are intercepted before `node_modules` lookup, so a local `node_modules/java` package cannot shadow the disabled policy or the experimental bridge module.
 
 Current GA evaluation: `docs/nodejs/reports/JAVA_INTEROP_EVALUATION.md`.
