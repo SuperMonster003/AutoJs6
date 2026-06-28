@@ -187,7 +187,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-media-recorder-mediainfo-provider.json` | `verifyNodePhase13MediaRecorderMediainfoProvider` | `P13-26` | `partial` | 0 | 6 |
 | `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56` | `ready` | 0 | 0 |
 | `phase13-native-addon-loading-decision.json` | `verifyNodePhase13NativeAddonLoadingDecision` | `P13-39` | `ready` | 0 | 0 |
-| `phase13-net-tls-dns-staged-compatibility.json` | `verifyNodePhase13NetTlsDnsStagedCompatibility` | `P13-30` | `partial` | 0 | 6 |
+| `phase13-net-tls-dns-staged-compatibility.json` | `verifyNodePhase13NetTlsDnsStagedCompatibility` | `P13-30` | `partial` | 0 | 5 |
 | `phase13-notifications-settings-power-manager.json` | `verifyNodePhase13NotificationsSettingsPowerManager` | `P13-25` | `partial` | 0 | 6 |
 | `phase13-overlay-provider-promotion.json` | `verifyNodePhase13OverlayProviderPromotion` | `P13-18` | `partial` | 0 | 5 |
 | `phase13-package-lock-integrity-policy.json` | `verifyNodePhase13PackageLockIntegrityPolicy` | `P13-48` | `ready` | 0 | 0 |

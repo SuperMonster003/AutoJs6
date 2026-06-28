@@ -291,6 +291,8 @@ Reason open: `implementation`, `policy`, `evidence`, `packaging`.
 - [ ] Complete DNS privacy review so resolver servers, search domains, VPN state, and topology do not leak.
 - [ ] Add fd/socket leak instrumentation and packaged INTERNET proof.
 - [ ] Decide debug raw-network opt-in release posture, limits, and rollback.
+- [x] Keep external DNS resolution in the debug raw-network opt-in test as
+  opportunistic evidence rather than a deterministic CI prerequisite.
 - [x] Keep docs/type/matrix evidence gate from counting client/server socket, DNS privacy, TLS policy, packaged INTERNET, and fd leak evidence twice.
 
 #### P13-31 UDP / `dgram`

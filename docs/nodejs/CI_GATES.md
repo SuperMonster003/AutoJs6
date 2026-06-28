@@ -689,6 +689,9 @@ release-forbidden `autojs.nodejs.rawNetworkModules.experimental=true` native
 module opt-in path are covered, while release/default client sockets, server
 sockets, network DNS policy, TLS sessions, fd leak proof, packaged INTERNET
 evidence, and live Android network evidence require separate evidence.
+The raw-network opt-in external DNS sample is opportunistic evidence rather
+than a deterministic CI prerequisite: native DNS errors are accepted as long as
+AutoJs6 raw-network policy denial is not produced while the opt-in is enabled.
 P13-31 additionally uses `verifyNodePhase13DgramUdpDecision` as the host
 decision gate for UDP and keeps the desktop network/fs surface partial:
 `dgram`/`node:dgram`, `require.resolve()`, transitive package require, and

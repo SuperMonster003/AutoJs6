@@ -1348,6 +1348,10 @@ P13 task 本身使用以下执行状态：
       opt-in 通路；CommonJS `dns`、`dns/promises`、`http`、`https`、`net`、
       `tls` 会路由到 Node 原生 builtin，并包含用户侧
       `dns.resolve("www.github.com")` 样例路径的 focused instrumentation。
+    - External DNS sample policy: raw-network opt-in DNS resolution is
+      opportunistic evidence, not a deterministic CI prerequisite; native DNS
+      errors are accepted as long as AutoJs6 raw-network policy denial is not
+      produced while the opt-in is enabled.
     - Type declarations:
       `docs/nodejs/types/autojs6-node/net.d.ts`,
       `docs/nodejs/types/autojs6-node/tls.d.ts`,

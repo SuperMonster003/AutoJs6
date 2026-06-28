@@ -112,9 +112,10 @@ function buildReport(files) {
       token(files.p13NetworkTest, "rawNodeNetworkModulesExperimentalEnabled = true"),
       token(files.p13NetworkTest, 'dns.resolve("www.github.com"'),
       token(files.p13NetworkTest, "p13ntd.raw.sync=allowed|allowed|allowed"),
+      token(files.p13Report, "The external DNS sample is opportunistic evidence"),
+      token(files.ciGatesDoc, "raw-network opt-in external DNS sample is opportunistic evidence"),
     ], [
       "The opt-in is build/debug policy-gated and still needs host allow/deny, connection budgets, byte/time limits, lifecycle cleanup, and release/published-profile decisions.",
-      "The focused DNS sample rejects AutoJs6 policy errors but does not make external DNS availability a deterministic CI requirement.",
     ]),
     scenario("types_docs_and_gate", "types, docs, desktop matrix, and Gradle gate record P13-30 partial progress", [
       token(files.netTypes, 'declare module "net"'),
