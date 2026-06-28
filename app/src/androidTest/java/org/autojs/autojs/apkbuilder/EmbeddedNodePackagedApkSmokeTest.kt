@@ -8346,6 +8346,29 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildOverlayCapabilityBoundaryEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged overlay capability boundary smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedOverlayCapabilityBoundaryApk()
+    }
+
+    @Test
+    fun installAndRunOverlayCapabilityBoundaryEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged overlay capability boundary install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged overlay capability boundary install-and-run smoke")
+
+        val outputApk = buildPackagedOverlayCapabilityBoundaryApk()
+        assertInstallAndRunPackagedOverlayCapabilityBoundarySmoke(outputApk)
+    }
+
+    @Test
     fun buildIntentBroadcastBoundaryEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged IntentTask/broadcast boundary smoke requires embedded script execution build support.",
@@ -11974,6 +11997,107 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedOverlayCapabilityBoundaryApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function rejected(action) {
+              try {
+                await action();
+                return { code: "allowed", missing: "", module: "", method: "" };
+              } catch (error) {
+                return {
+                  code: String(error && (error.autojs6Code || error.code || "")),
+                  missing: Array.isArray(error && error.missingCapabilities)
+                    ? error.missingCapabilities.join("|")
+                    : "",
+                  module: String(error && error.module || ""),
+                  method: String(error && error.method || "")
+                };
+              }
+            }
+
+            async function main() {
+              const fs = require("fs");
+              const bridge = require("autojs6:bridge");
+              const overlay = require("ui.overlay");
+              const projectConfig = JSON.parse(fs.readFileSync("project.json", "utf8"));
+              const nodePermissions = projectConfig.node && Array.isArray(projectConfig.node.permissions)
+                ? projectConfig.node.permissions
+                : [];
+              const androidPermissions = Array.isArray(projectConfig.permissions)
+                ? projectConfig.permissions
+                : [];
+              const report = bridge.permissions();
+              const normalizedPermissions = Array.isArray(report.normalizedPermissions)
+                ? report.normalizedPermissions
+                : [];
+              const result = await rejected(() => overlay.show({
+                content: {
+                  type: "Text",
+                  text: "P13-18 overlay capability boundary"
+                },
+                window: {
+                  width: "wrap_content",
+                  height: "wrap_content"
+                },
+                disclosure: {
+                  title: "P13-18 overlay boundary",
+                  text: "Packaged overlay provider gate smoke"
+                }
+              }, { timeoutMs: 1000 }));
+              const showBoundaryOk =
+                result.code === "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED" &&
+                result.missing === "ui.overlay" &&
+                result.module === "ui.overlay" &&
+                result.method === "show";
+              const metadataDeniedOk =
+                nodePermissions.indexOf("toast") >= 0 &&
+                nodePermissions.indexOf("ui.overlay") < 0 &&
+                nodePermissions.indexOf("ui.overlay.permission") < 0 &&
+                nodePermissions.indexOf("ui.overlay.foreground") < 0 &&
+                nodePermissions.indexOf("ui.overlay.packaged") < 0 &&
+                normalizedPermissions.indexOf("toast") >= 0 &&
+                normalizedPermissions.indexOf("ui.overlay") < 0 &&
+                androidPermissions.indexOf("android.permission.SYSTEM_ALERT_WINDOW") < 0;
+              const rawGlobalsAbsent = [
+                "WindowManager",
+                "LayoutParams",
+                "FloatyWindow",
+                "WindowBridge",
+                "View",
+                "NativeView",
+                "RawWindow"
+              ].every((name) => typeof globalThis[name] === "undefined");
+              const pending = bridge.__test.pendingCount();
+              const ready = showBoundaryOk && metadataDeniedOk && rawGlobalsAbsent && pending === 0;
+
+              console.log("packaged.overlay_boundary.ready=" + ready);
+              console.log("packaged.overlay_boundary.show_boundary=" + showBoundaryOk);
+              console.log("packaged.overlay_boundary.result=" + result.code + "|" + result.missing);
+              console.log("packaged.overlay_boundary.metadata_denied=" + metadataDeniedOk);
+              console.log("packaged.overlay_boundary.raw_globals_absent=" + rawGlobalsAbsent);
+              console.log("packaged.overlay_boundary.pending=" + pending);
+            }
+
+            return main().catch(error => {
+              console.error("packaged.overlay_boundary.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-overlay-capability-boundary-smoke",
+            outputApkName = OVERLAY_CAPABILITY_BOUNDARY_APK_NAME,
+            projectName = OVERLAY_CAPABILITY_BOUNDARY_PROJECT_NAME,
+            packageName = OVERLAY_CAPABILITY_BOUNDARY_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            nodePermissions = OVERLAY_CAPABILITY_BOUNDARY_NODE_PERMISSIONS,
+            runtimeMarkers = OVERLAY_CAPABILITY_BOUNDARY_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedIntentBroadcastBoundaryApk(): File {
         val mainScriptName = "main.js"
         val mainScript = """
@@ -14205,6 +14329,16 @@ $nodeConfigJson
         )
     }
 
+    private fun assertInstallAndRunPackagedOverlayCapabilityBoundarySmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = OVERLAY_CAPABILITY_BOUNDARY_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-overlay-capability-boundary-smoke.apk",
+            label = "packaged overlay capability boundary smoke",
+            requiredMarkers = OVERLAY_CAPABILITY_BOUNDARY_RUNTIME_MARKERS,
+        )
+    }
+
     private fun assertInstallAndRunPackagedIntentBroadcastBoundarySmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
@@ -15497,6 +15631,12 @@ $nodeConfigJson
             "org.autojs6.packaged.node.ui.capability.boundary.smoke"
         private const val UI_CAPABILITY_BOUNDARY_APK_NAME =
             "PackagedNodeUiCapabilityBoundarySmoke_v1.0.0.apk"
+        private const val OVERLAY_CAPABILITY_BOUNDARY_PROJECT_NAME =
+            "PackagedNodeOverlayCapabilityBoundarySmoke"
+        private const val OVERLAY_CAPABILITY_BOUNDARY_PACKAGE_NAME =
+            "org.autojs6.packaged.node.overlay.capability.boundary.smoke"
+        private const val OVERLAY_CAPABILITY_BOUNDARY_APK_NAME =
+            "PackagedNodeOverlayCapabilityBoundarySmoke_v1.0.0.apk"
         private const val INTENT_BROADCAST_BOUNDARY_PROJECT_NAME =
             "PackagedNodeIntentBroadcastBoundarySmoke"
         private const val INTENT_BROADCAST_BOUNDARY_PACKAGE_NAME =
@@ -15905,6 +16045,17 @@ $nodeConfigJson
             "packaged.ui_boundary.metadata_denied=true",
             "packaged.ui_boundary.raw_globals_absent=true",
             "packaged.ui_boundary.pending=0",
+        )
+        private val OVERLAY_CAPABILITY_BOUNDARY_NODE_PERMISSIONS = listOf(
+            "toast",
+        )
+        private val OVERLAY_CAPABILITY_BOUNDARY_RUNTIME_MARKERS = listOf(
+            "packaged.overlay_boundary.ready=true",
+            "packaged.overlay_boundary.show_boundary=true",
+            "packaged.overlay_boundary.result=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED|ui.overlay",
+            "packaged.overlay_boundary.metadata_denied=true",
+            "packaged.overlay_boundary.raw_globals_absent=true",
+            "packaged.overlay_boundary.pending=0",
         )
         private val INTENT_BROADCAST_BOUNDARY_RUNTIME_MARKERS = listOf(
             "packaged.intent_broadcast.ready=true",

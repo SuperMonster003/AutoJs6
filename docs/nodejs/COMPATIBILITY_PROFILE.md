@@ -1983,7 +1983,8 @@ runtime.
   - descriptors are JSON-only and require user-visible disclosure text; raw `WindowManager.LayoutParams`, hidden overlays, and fully transparent overlays are rejected before dispatch
   - requests require explicit `ui.overlay` or `ui.overlay.permission`; base `ui` never implies overlay authority
   - P13-18 records this as a partial overlay-provider promotion gate over the P12-14 Android permission/settings/closeAll live gate
-  - live `show`, `update`, `drainEvents`, and per-handle `close` remain fail-closed until a controlled Android overlay provider, foreground disclosure ownership, packaged install-run evidence, and leak/stress coverage land
+  - packaged missing-`ui.overlay` capability and missing `SYSTEM_ALERT_WINDOW` metadata denial are covered before dispatch
+  - live `show`, `update`, `drainEvents`, and per-handle `close` remain fail-closed until a controlled Android overlay provider, foreground disclosure ownership, positive packaged install-run evidence, and leak/stress coverage land
   - `require("floaty")`, `compat.floaty`, global `floaty`, exact Rhino `floaty.window()` / `floaty.rawWindow()` raw View parity, and raw `WindowManager`, `FloatyWindow`, `WindowBridge`, `View`, `NativeView`, Binder, or Java objects remain unavailable
 - `clipboard`
   - `getText(options?): Promise<string>`

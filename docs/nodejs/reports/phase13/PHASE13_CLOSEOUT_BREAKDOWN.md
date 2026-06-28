@@ -183,7 +183,11 @@ Reason open: `implementation`, `evidence`, `packaging`.
 - [ ] Implement actual Android overlay show/update/drainEvents/close provider.
 - [ ] Record granted/denied `SYSTEM_ALERT_WINDOW` device matrix, including OEM settings behavior.
 - [ ] Add foreground disclosure ownership and stop action.
-- [ ] Add packaged install/run smoke, denial paths, and leak/cleanup stress.
+- [x] Add packaged overlay capability/metadata denial smoke for missing
+  `ui.overlay`, missing `SYSTEM_ALERT_WINDOW`, raw window global absence, and
+  zero pending bridge dispatch.
+- [ ] Add positive packaged overlay install/run smoke, foreground disclosure,
+  task-removal cleanup, relaunch/crash, and leak/stress evidence.
 - [x] Keep docs/design evidence gate from counting live overlay provider, permission matrix, foreground disclosure, packaged, and leak evidence twice.
 
 #### P13-19 accessibility/selector parity

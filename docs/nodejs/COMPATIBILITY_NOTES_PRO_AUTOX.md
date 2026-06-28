@@ -245,9 +245,11 @@ AutoJs6 behavior:
   `openPermissionSettings`.
 - `hasPermission`, `openPermissionSettings`, and `closeAll` have Android
   permission/settings/cleanup live-gate evidence.
+- packaged missing-`ui.overlay` capability and missing `SYSTEM_ALERT_WINDOW`
+  metadata denial are covered before dispatch.
 - live `show`, `update`, `drainEvents`, and per-handle `close` still fail
   closed until a real Android overlay provider, foreground disclosure,
-  packaged install-run behavior, and leak/stress evidence land.
+  positive packaged install-run behavior, and leak/stress evidence land.
 - `require("floaty")`, `compat.floaty`, global `floaty`, and exact Rhino raw
   `floaty.window()` / `floaty.rawWindow()` View parity remain unavailable.
 
