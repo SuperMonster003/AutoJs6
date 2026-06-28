@@ -222,8 +222,9 @@ AutoJs6 behavior:
   evidence.
 - `require("autojs6:compat").ui` maps to the same JSON-only provider for Rhino
   migration.
-- live packaged UI, Back/Recents, orientation/configuration-change,
-  relaunch/crash, and packaged disclosure evidence remain unpromoted.
+- live packaged UI, Back/Recents, relaunch/crash, and packaged disclosure
+  evidence remain unpromoted; configuration changes use an explicit
+  destroy/recreate policy with no live UI survival claim.
 
 Porting note: migrate Rhino UI scripts to explicit `require("ui")` or
 `compat.ui` JSON descriptors instead of relying on raw `View`, `NativeView`,

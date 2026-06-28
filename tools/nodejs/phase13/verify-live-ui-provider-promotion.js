@@ -12,6 +12,7 @@ const FILES = {
   surfaceManifest: "docs/nodejs/phase13/phase13-surface-manifest.json",
   surfaceManifestDoc: "docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md",
   providerRegistry: "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt",
+  appManifest: "app/src/main/AndroidManifest.xml",
   permissionManifest: "app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt",
   protocol: "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt",
   uiProvider: "app/src/main/java/org/autojs/autojs/engine/NodeBridgeUiProvider.kt",
@@ -112,6 +113,14 @@ function buildReport(files) {
       token(files.rhinoUiSubset, "P13-17"),
       token(files.typesReadme, "P13-17"),
     ]),
+    scenario("configuration_change_policy", "Node UI Activity uses explicit destroy/recreate configuration-change policy without a survival claim", [
+      token(files.appManifest, 'android:name="org.autojs.autojs.engine.NodeBridgeUiActivity"'),
+      token(files.appManifest, 'android:excludeFromRecents="true"'),
+      token(files.uiTest, "androidUiActivityKeepsConfigurationChangesAsDestroyPolicy"),
+      token(files.uiTest, "ui.configuration_change_policy=destroy_recreate_no_survival_claim"),
+      token(files.providerRegistry, '"configurationChangePolicy" to "destroy_recreate_no_survival_claim"'),
+      token(files.p13Report, "Configuration changes are explicitly not a P13-17 survivability contract"),
+    ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record the P13-17 promotion state", [
       token(files.p13Report, "Status: partial"),
       token(files.phase13Tasks, "P13-17"),
@@ -127,7 +136,6 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, "phase13-live-ui-provider-promotion"),
     ], [
       "Add Recents/task-removal Activity lifecycle instrumentation and packaged task relaunch evidence.",
-      "Add orientation or explicit configuration-change policy instrumentation.",
       "Run a live packaged APK UI smoke that covers entry, close, relaunch, and crash evidence.",
       "Record capability/metadata denial and user-visible disclosure behavior for packaged UI promotion.",
     ]),
@@ -154,7 +162,7 @@ function buildReport(files) {
     check(
       "packaged-support-not-overclaimed",
       files.providerRegistry.text.includes("packagedProviderDependent") &&
-        files.providerRegistry.text.includes("blocked_until_live_packaged_back_recents_orientation_relaunch_crash_evidence"),
+        files.providerRegistry.text.includes("blocked_until_live_packaged_back_recents_relaunch_crash_disclosure_evidence"),
       "`ui` provider packaged support must remain provider-dependent until live packaged UI evidence lands.",
     ),
   ];
@@ -184,6 +192,7 @@ function buildReport(files) {
       jsonLifecycleReady: scenarioById(scenarios, "json_handle_lifecycle").status === "ready",
       securityBoundaryReady: scenarioById(scenarios, "security_and_boundaries").status === "ready",
       rhinoCompatReady: scenarioById(scenarios, "rhino_compat_and_types").status === "ready",
+      configurationChangePolicyReady: scenarioById(scenarios, "configuration_change_policy").status === "ready",
       proSurfacePromoted: false,
     },
   };

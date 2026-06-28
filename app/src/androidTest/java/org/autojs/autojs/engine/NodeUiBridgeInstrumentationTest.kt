@@ -1,5 +1,7 @@
 package org.autojs.autojs.engine
 
+import android.content.ComponentName
+import android.content.pm.ActivityInfo
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
@@ -546,6 +548,27 @@ class NodeUiBridgeInstrumentationTest {
             }
             NodeBridgeUiSessionStore.closeAll("ui-back-lifecycle-test-cleanup")
         }
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun androidUiActivityKeepsConfigurationChangesAsDestroyPolicy() {
+        val info = context.packageManager.getActivityInfo(
+            ComponentName(context, NodeBridgeUiActivity::class.java),
+            0,
+        )
+        val configurationMask = ActivityInfo.CONFIG_ORIENTATION or
+            ActivityInfo.CONFIG_SCREEN_SIZE or
+            ActivityInfo.CONFIG_KEYBOARD_HIDDEN
+
+        assertEquals(
+            "ui.configuration_change_policy=destroy_recreate_no_survival_claim",
+            0,
+            info.configChanges and configurationMask,
+        )
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, info.screenOrientation)
+        assertFalse(info.exported)
+        assertTrue(info.flags and ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS != 0)
     }
 
     @Test

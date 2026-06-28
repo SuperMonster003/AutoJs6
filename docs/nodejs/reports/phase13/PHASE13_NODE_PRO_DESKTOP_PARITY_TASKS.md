@@ -1009,15 +1009,17 @@ P13 task 本身使用以下执行状态：
     - `compat.ui` and direct `ui` type smoke remain aligned with the same
       JSON provider.
     - Provider registry now marks packaged UI support as provider-dependent
-      until live packaged Back/Recents/orientation/relaunch/crash evidence
+      until live packaged Back/Recents/relaunch/crash/disclosure evidence
       lands.
+    - Configuration-change policy is explicit: `NodeBridgeUiActivity` does not
+      claim orientation/screen-size survival; Android destroy/recreate is the
+      current behavior and is covered by instrumentation.
     - Host verifier: `tools/nodejs/phase13/verify-live-ui-provider-promotion.js`.
     - Gradle gate: `:app:verifyNodePhase13LiveUiProviderPromotion`.
     - Report: `docs/nodejs/reports/phase13/P13_17_LIVE_UI_PROVIDER_PROMOTION.md`.
-  - Remaining: Recents/task-removal lifecycle evidence, orientation/configuration
-    policy evidence, live packaged APK UI smoke, crash/relaunch evidence, and
-    packaged capability/disclosure denial evidence still block opt-in
-    promotion.
+  - Remaining: Recents/task-removal lifecycle evidence, live packaged APK UI
+    smoke, crash/relaunch evidence, and packaged capability/disclosure denial
+    evidence still block opt-in promotion.
 
 - [ ] P13-18: 推进 live floaty/overlay provider 到 opt-in promoted。
   - 范围：基于 P12 overlay provider POC，开启 live show/update/drainEvents/close。

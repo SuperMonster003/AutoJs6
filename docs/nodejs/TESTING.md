@@ -812,11 +812,11 @@ Phase 13 live UI provider promotion:
 
 `verifyNodePhase13LiveUiProviderPromotion` records the P13-17 partial live UI
 state: direct `require("ui")` has live Activity provider evidence for JSON
-layouts, events, updates, close, and provider cleanup; `compat.ui` and type
+layouts, events, updates, close, provider cleanup, and explicit
+configuration-change destroy/recreate policy; `compat.ui` and type
 declarations stay aligned with the same JSON provider. The gate remains partial
-because live packaged UI, Back/Recents, orientation/configuration-change,
-relaunch/crash, and packaged capability/disclosure denial evidence are still
-missing.
+because live packaged UI, Back/Recents, relaunch/crash, and packaged
+capability/disclosure denial evidence are still missing.
 
 Phase 13 overlay provider promotion:
 

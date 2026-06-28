@@ -160,7 +160,7 @@ Reason open: `evidence`, `packaging`.
 - [x] Add focused live Back/Activity-destroy lifecycle instrumentation.
 - [ ] Add Recents/task-removal lifecycle instrumentation and packaged task
   relaunch evidence.
-- [ ] Add orientation/configuration-change policy evidence.
+- [x] Add explicit configuration-change destroy/recreate policy evidence.
 - [ ] Run packaged UI smoke for entry, close, relaunch, and crash behavior.
 - [ ] Record packaged capability, metadata denial, and user-visible disclosure behavior.
 

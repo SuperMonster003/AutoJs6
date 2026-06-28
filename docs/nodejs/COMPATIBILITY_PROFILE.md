@@ -158,9 +158,9 @@ and packaged UI behavior remain owned by P13-17 / future packaged UI promotion.
 
 P13-17 records the live `require("ui")` provider promotion gate. The direct
 Activity-owned JSON provider has live device evidence for layout, events,
-updates, close, and provider cleanup, while live packaged UI, Back/Recents,
-orientation/configuration-change policy, relaunch/crash evidence, and packaged
-capability/disclosure denial evidence remain unpromoted.
+updates, close, provider cleanup, and explicit configuration-change
+destroy/recreate policy, while live packaged UI, Back/Recents, relaunch/crash
+evidence, and packaged capability/disclosure denial evidence remain unpromoted.
 
 ## Supported CommonJS Features
 
@@ -1967,7 +1967,7 @@ runtime.
   - requests require the `ui` capability
   - current JavaScript API, fake-provider tests, type declarations, and bridge protocol are reserved
   - Android provider starts an internal Activity and supports `Column`, `Row`, `Text`, `Button`, `Input`, `Image`, `ScrollView`, `List`, `Switch`, `Checkbox`, `Progress`, and `Tabs` descriptors, `update`, `batchUpdate`, Button/Input/List/Switch/Checkbox/Tabs/lifecycle events, state snapshots, `close`, provider-destroy cleanup, and a bounded active UI session count
-  - P13-17 records this as a partial live-provider promotion gate; packaged support is provider-dependent until Back/Recents, orientation, relaunch/crash, and disclosure evidence lands
+  - P13-17 records this as a partial live-provider promotion gate; packaged support is provider-dependent until Back/Recents, relaunch/crash, and disclosure evidence lands. Configuration changes use an explicit destroy/recreate policy with no live UI survival claim
   - `WebView` descriptors reject with a stable invalid-request error until a separate WebView security gate is designed
   - JavaScript receives only an opaque handle; no raw `Context`, `Activity`, `View`, `Window`, `Fragment`, `Handler`, Rhino `NativeView`, overlay window, Binder, or Java object crosses into Node
 - `ui.overlay`
