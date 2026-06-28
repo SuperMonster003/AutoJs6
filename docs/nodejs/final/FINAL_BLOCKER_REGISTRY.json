@@ -61,8 +61,8 @@
     {
       "id": "controlled_wasi",
       "classification": "conditional",
-      "status": "decision_required",
-      "currentEvidence": "Pure WebAssembly works; raw node:wasi remains disabled.",
+      "status": "closed",
+      "currentEvidence": "P13-38 closes the v1.1 controlled_wasi decision by supporting only pure WebAssembly while keeping raw wasi/node:wasi, callable controlled WASI facades, raw host paths, and raw fd/env/args surfaces denied. A future autojs6:wasi provider remains separate Desktop-profile promotion work with scoped preopens, virtual fd/env/args, resource budgets, packaged evidence, hostile corpus, and worker/WASM integration evidence.",
       "requiredResolution": "Either support only WebAssembly or implement a controlled autojs:wasi profile while keeping raw node:wasi disabled."
     },
     {

@@ -367,7 +367,8 @@ Reason open: stable-denial gate drift cleanup; future debug-profile promotion re
 
 #### P13-38 controlled WASI
 
-Reason open: stable-denial gate drift cleanup; future controlled WASI promotion remains `implementation`, `policy`, `packaging`.
+Reason closed for the P13-38 v1.1 decision. Future controlled WASI promotion
+remains separate `implementation`, `policy`, and `packaging` work.
 
 - [x] Formally keep only pure WebAssembly for P13-38 v1.1; raw `wasi`, raw `node:wasi`, and callable controlled WASI facades stay stable-denied.
 - [x] Keep scoped/authorized preopen mapping with lexical and realpath escape denial as future controlled WASI promotion work.
@@ -375,6 +376,8 @@ Reason open: stable-denial gate drift cleanup; future controlled WASI promotion 
 - [x] Keep module/memory/stdout/stderr/timeout/concurrency budgets as future controlled WASI promotion work.
 - [x] Keep packaged `.wasm` assets, hostile WASI corpus, and worker/WASM integration evidence as future controlled WASI promotion work.
 - [x] Keep docs/matrix evidence gate from counting controlled facade, preopen, resource, packaged, hostile corpus, and worker/WASM evidence twice.
+- [x] Close the `controlled_wasi` final blocker registry entry for the
+  pure-WebAssembly-only v1.1 decision.
 
 #### P13-39 native addon loading
 
@@ -578,7 +581,7 @@ Reason open: `evidence`, `policy`.
 These items look closeable without inventing new high-risk runtime authority:
 
 - Completed verifier/document token drift cleanup for `P13-06`, `P13-18`,
-  `P13-23` to `P13-26`, `P13-29`, `P13-31` to `P13-36`, `P13-42`,
+  `P13-23` to `P13-26`, `P13-29`, `P13-31` to `P13-36`, `P13-38`, `P13-42`,
   `P13-45`, `P13-50`, `P13-52`, and the P13-57 summary gate. Current
   generated reports show no missing evidence-token or policy-violation false
   positives.
