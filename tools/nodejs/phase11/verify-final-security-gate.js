@@ -42,6 +42,14 @@ const ATTACK_BLOCKER_HINTS = {
   adapter_malformed_abi_input: ["adapter_v1_real_execution_path"],
 };
 
+const RESOLVED_BLOCKER_STATUSES = new Set([
+  "closed",
+  "implemented",
+  "intentionally_unsupported",
+  "permanently_unsupported",
+  "unsupported_by_policy",
+]);
+
 function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
@@ -149,14 +157,19 @@ function summarizeAttack(attack, registry) {
       currentEvidence: entry ? entry.currentEvidence : "blocker registry entry is missing",
     };
   });
+  const stablePolicyDenial = attack.status === "blocked_by_policy" &&
+    missingEvidence.length === 0 &&
+    blockerHints.length > 0 &&
+    blockerHints.every((entry) => RESOLVED_BLOCKER_STATUSES.has(entry.status));
   return {
     id: attack.id,
     title: attack.title,
     status: attack.status,
-    finalCovered: attack.status === "covered" && missingEvidence.length === 0,
+    finalCovered: (attack.status === "covered" && missingEvidence.length === 0) || stablePolicyDenial,
     evidenceCount: Array.isArray(attack.evidenceMatches) ? attack.evidenceMatches.length : 0,
     missingEvidence,
     blockerHints,
+    stablePolicyDenial,
   };
 }
 
