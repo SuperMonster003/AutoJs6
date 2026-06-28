@@ -5574,6 +5574,12 @@ std::string buildEmbeddedScriptExecutionSource(
     lastMap: "",
     lastError: ""
   };
+  const __autojs6_generated_stack_diagnostics = {
+    mappedFrameCount: 0,
+    lastSource: "",
+    lastGeneratedLine: 0,
+    lastOriginalLine: 0
+  };
   const __autojs6_compile_cache_diagnostics = {
     requested: false,
     enabled: false,
@@ -5596,6 +5602,7 @@ std::string buildEmbeddedScriptExecutionSource(
     hitMissStatus: "unavailable"
   };
   const __autojs6_source_map_cache = Object.create(null);
+  const __autojs6_generated_stack_mappings = Object.create(null);
   let __autojs6_runtime_module_accounting = null;
   const __autojs6_native_function = Function;
   const __autojs6_native_async_function = Object.getPrototypeOf(async function() {}).constructor;
@@ -5645,7 +5652,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (value && value.stack && (value.name || value.message)) {
       try {
-        return String(value.stack);
+        return __autojs6_apply_source_maps_to_stack(String(value.stack));
       } catch (_) {}
     }
     try {
@@ -31150,6 +31157,83 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return resolved;
   }
+  function __autojs6_source_line_at(text, index) {
+    const source = String(text || "");
+    const limit = Math.min(Math.max(0, Number(index || 0)), source.length);
+    let line = 1;
+    for (let i = 0; i < limit; i += 1) {
+      if (source.charAt(i) === "\n") {
+        line += 1;
+      }
+    }
+    return line;
+  }
+  function __autojs6_create_generated_line_map_builder(sourceText) {
+    const source = String(sourceText || "");
+    let text = "";
+    const lineMap = [];
+    let generatedLineIndex = 0;
+    let currentLineHasContent = false;
+    function setCurrentLine(sourceLine) {
+      if (!currentLineHasContent || !lineMap[generatedLineIndex]) {
+        lineMap[generatedLineIndex] = Math.max(1, Number(sourceLine || 1));
+      }
+    }
+    return {
+      append(start, end) {
+        const from = Math.max(0, Number(start || 0));
+        const to = Math.max(from, Math.min(Number(end || 0), source.length));
+        let sourceLine = __autojs6_source_line_at(source, from);
+        for (let index = from; index < to; index += 1) {
+          const ch = source.charAt(index);
+          setCurrentLine(sourceLine);
+          text += ch;
+          currentLineHasContent = true;
+          if (ch === "\n") {
+            sourceLine += 1;
+            generatedLineIndex += 1;
+            currentLineHasContent = false;
+          }
+        }
+      },
+      text() {
+        return text;
+      },
+      lineMap() {
+        return lineMap.slice();
+      }
+    };
+  }
+  function __autojs6_count_lines(text) {
+    return String(text || "").split("\n").length;
+  }
+  function __autojs6_register_generated_stack_mapping(sourceName, resolved, lineMap, wrapperLineOffset) {
+    if (!Array.isArray(lineMap) || lineMap.length === 0) return;
+    const record = {
+      sourceName: String(sourceName || resolved || ""),
+      resolved: String(resolved || sourceName || ""),
+      lineMap: lineMap.slice(),
+      wrapperLineOffset: Math.max(0, Number(wrapperLineOffset || 0))
+    };
+    for (const key of [record.sourceName, record.resolved]) {
+      if (key) {
+        __autojs6_generated_stack_mappings[key] = record;
+      }
+    }
+  }
+  function __autojs6_generated_stack_location(fileName, lineNumber, columnNumber) {
+    const record = __autojs6_generated_stack_mappings[String(fileName || "")];
+    if (!record) return null;
+    const generatedLine = Math.trunc(Number(lineNumber || 0)) - record.wrapperLineOffset;
+    if (generatedLine < 1 || generatedLine > record.lineMap.length) return null;
+    const originalLine = Math.trunc(Number(record.lineMap[generatedLine - 1] || 0));
+    if (originalLine < 1) return null;
+    return {
+      source: record.sourceName || String(fileName || ""),
+      line: originalLine,
+      column: Math.max(1, Math.trunc(Number(columnNumber || 1)))
+    };
+  }
   function __autojs6_source_map_record_denial(sourceName, mapUrl, error) {
     __autojs6_source_map_diagnostics.deniedCount += 1;
     __autojs6_source_map_diagnostics.lastSource = String(sourceName || "");
@@ -31450,17 +31534,29 @@ std::string buildEmbeddedScriptExecutionSource(
     if (!text) return "";
     const lines = text.split("\n");
     let mappedCount = 0;
+    let generatedMappedCount = 0;
     const mappedLines = lines.map(function(line) {
       let match = line.match(/^(\s*at\s+.*\()(.+):(\d+):(\d+)(\).*)$/);
       if (!match) {
         match = line.match(/^(\s*at\s+)(.+):(\d+):(\d+)()$/);
       }
       if (!match) return line;
+      const generated = __autojs6_generated_stack_location(match[2], Number(match[3]), Number(match[4]));
+      if (generated) {
+        generatedMappedCount += 1;
+        __autojs6_generated_stack_diagnostics.lastSource = String(generated.source || "");
+        __autojs6_generated_stack_diagnostics.lastGeneratedLine = Number(match[3]);
+        __autojs6_generated_stack_diagnostics.lastOriginalLine = generated.line;
+        return match[1] + generated.source + ":" + generated.line + ":" + generated.column + match[5];
+      }
       const mapped = __autojs6_source_map_stack_location(match[2], Number(match[3]), Number(match[4]));
       if (!mapped) return line;
       mappedCount += 1;
       return match[1] + mapped.source + ":" + mapped.line + ":" + mapped.column + match[5];
     });
+    if (generatedMappedCount > 0) {
+      __autojs6_generated_stack_diagnostics.mappedFrameCount += generatedMappedCount;
+    }
     if (mappedCount > 0) {
       __autojs6_source_map_diagnostics.mappedFrameCount += mappedCount;
     }
@@ -39857,7 +39953,7 @@ std::string buildEmbeddedScriptExecutionSource(
       try {
         const error = new Error(message);
         error.name = "Trace";
-        output = error.stack || output;
+        output = __autojs6_apply_source_maps_to_stack(error.stack || output);
       } catch (_) {}
       return consoleWrite(state, "stderr", [output]);
     }
@@ -39881,12 +39977,12 @@ std::string buildEmbeddedScriptExecutionSource(
     function consolePrintAllStackTrace(value) {
       let output = "";
       if (value && value.stack !== undefined && value.stack !== null) {
-        output = String(value.stack);
+        output = __autojs6_apply_source_maps_to_stack(String(value.stack));
       } else if (arguments.length > 0) {
         output = __autojs6_console_text(value);
       } else {
         try {
-          output = (new Error("Stack trace")).stack || "Stack trace";
+          output = __autojs6_apply_source_maps_to_stack((new Error("Stack trace")).stack || "Stack trace");
         } catch (_) {
           output = "Stack trace";
         }
@@ -44698,6 +44794,7 @@ std::string buildEmbeddedScriptExecutionSource(
     let defaultLocal = "";
     const state = importState || { nextIndex: 0, bindingLines: [] };
     if (!Array.isArray(state.bindingLines)) state.bindingLines = [];
+    if (!Array.isArray(state.bindingLineMap)) state.bindingLineMap = [];
     if (typeof state.nextIndex !== "number") state.nextIndex = 0;
     const reExportPattern = /(^|[\r\n;{}])\s*export\s*(?:(\*)\s*(?:as\s+([A-Za-z_$][0-9A-Za-z_$]*))?|(\{[^}]*\}))\s*from\s*(["'])([^"'\r\n]+)\5(?:\s+(with|assert)\s*\{([^}]*)\})?\s*;?/g;
     body = body.replace(reExportPattern, function(match, prefix, star, namespaceName, namedList, quote, specifier, attributeKind, attributeBody) {
@@ -44707,6 +44804,7 @@ std::string buildEmbeddedScriptExecutionSource(
         "const " + importVar + " = " + (syncMode ? "__autojs6_load_esm_module_sync" : "await __autojs6_load_esm_module") + "(" +
           JSON.stringify(specifier) + ", " + JSON.stringify(sourceName) + ", " + JSON.stringify(attributes) + ");"
       );
+      state.bindingLineMap.push(0);
       if (star) {
         if (namespaceName) {
           const exportedName = __autojs6_esm_validate_identifier(namespaceName, sourceName);
@@ -45086,31 +45184,37 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const importPattern = /(^|[\r\n;])\s*import\b\s*(?![.(])(?:(["'])([^"'\r\n]+)\2|([\s\S]*?)\s*from\s*(["'])([^"'\r\n]+)\5)(?:\s+(with|assert)\s*\{([^}]*)\})?[ \t]*(?=;|[\r\n]|$|\/\/|\/\*)/g;
     const bindingLines = [];
-    let body = "";
+    const bindingLineMap = [];
+    const bodyBuilder = __autojs6_create_generated_line_map_builder(sourceText);
     let cursor = 0;
     let importIndex = 0;
     let match;
     while ((match = importPattern.exec(sourceText)) !== null) {
       const statementStart = match.index + match[1].length;
       const statementEnd = importPattern.lastIndex;
-      body += sourceText.slice(cursor, statementStart);
+      bodyBuilder.append(cursor, statementStart);
       cursor = statementEnd;
       const importVar = "__autojs6_esm_import_" + importIndex++;
       const specifier = match[3] || match[6];
+      const statementOriginalLine = __autojs6_source_line_at(sourceText, statementStart);
       const attributes = __autojs6_esm_parse_static_import_attributes(match[7], match[8], filename, specifier);
       bindingLines.push(
         "const " + importVar + " = " + (syncMode ? "__autojs6_load_esm_module_sync" : "await __autojs6_load_esm_module") + "(" +
           JSON.stringify(specifier) + ", " + JSON.stringify(filename) + ", " + JSON.stringify(attributes) + ");"
       );
+      bindingLineMap.push(statementOriginalLine);
       const specifierText = match[4] === undefined ? "" : match[4];
-      Array.prototype.push.apply(
-        bindingLines,
-        __autojs6_esm_parse_import_bindings(specifierText, importVar, filename)
-      );
+      const parsedBindingLines = __autojs6_esm_parse_import_bindings(specifierText, importVar, filename);
+      Array.prototype.push.apply(bindingLines, parsedBindingLines);
+      for (let i = 0; i < parsedBindingLines.length; i += 1) {
+        bindingLineMap.push(statementOriginalLine);
+      }
     }
-    body += sourceText.slice(cursor);
+    bodyBuilder.append(cursor, sourceText.length);
+    const body = bodyBuilder.text();
     const exportTransform = __autojs6_esm_transform_exports(body, filename, syncMode, {
       bindingLines,
+      bindingLineMap,
       nextIndex: importIndex
     });
     const importMetaBody = __autojs6_transform_import_meta(exportTransform.body, filename);
@@ -45120,7 +45224,23 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_esm_has_residual_import_export(transformedBody)) {
       throw __autojs6_esm_error("Embedded Node partial ESM v1 found unsupported import/export syntax in " + filename + ".");
     }
-    return bindingLines.join("\n") + "\n" + transformedBody + "\n" + exportTransform.tail;
+    while (bindingLineMap.length < bindingLines.length) {
+      bindingLineMap.push(0);
+    }
+    const transformedLineMap = bindingLineMap.slice();
+    const bodyLineMap = bodyBuilder.lineMap();
+    const transformedBodyLineCount = __autojs6_count_lines(transformedBody);
+    for (let i = 0; i < transformedBodyLineCount; i += 1) {
+      transformedLineMap.push(bodyLineMap[Math.min(i, bodyLineMap.length - 1)] || 0);
+    }
+    const tailLineCount = exportTransform.tail ? __autojs6_count_lines(exportTransform.tail) : 0;
+    for (let i = 0; i < tailLineCount; i += 1) {
+      transformedLineMap.push(0);
+    }
+    return {
+      source: bindingLines.join("\n") + "\n" + transformedBody + "\n" + exportTransform.tail,
+      lineMap: transformedLineMap
+    };
   }
   function __autojs6_load_esm_module_sync(specifier, parentFilename, importAttributes) {
     const resolved = __autojs6_resolve_esm_module(specifier, parentFilename);
@@ -45239,7 +45359,9 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_esm_diagnostics.graphSize += 1;
     __autojs6_esm_diagnostics.graphModules.push(resolved);
     cacheRecord.promise = (async function() {
-      const transformed = __autojs6_esm_transform_module_source(record.source, resolved);
+      const transformedModule = __autojs6_esm_transform_module_source(record.source, resolved);
+      const transformed = transformedModule.source;
+      __autojs6_register_generated_stack_mapping(record.sourceURL || resolved, resolved, transformedModule.lineMap, 4);
       const moduleFunction = __autojs6_native_async_function(
         "__autojs6_load_esm_module",
         "__autojs6_dynamic_import",
@@ -45299,7 +45421,9 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_esm_diagnostics.graphSize += 1;
     __autojs6_esm_diagnostics.graphModules.push(resolved);
     try {
-      const transformed = __autojs6_esm_transform_module_source(record.source, resolved, true);
+      const transformedModule = __autojs6_esm_transform_module_source(record.source, resolved, true);
+      const transformed = transformedModule.source;
+      __autojs6_register_generated_stack_mapping(record.sourceURL || resolved, resolved, transformedModule.lineMap, 4);
       const moduleFunction = __autojs6_native_function(
         "__autojs6_load_esm_module_sync",
         "__autojs6_import_meta",
@@ -46733,6 +46857,10 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.sourceMapLastSource = __autojs6_source_map_diagnostics.lastSource;
     fields.sourceMapLastMap = __autojs6_source_map_diagnostics.lastMap;
     fields.sourceMapLastError = __autojs6_source_map_diagnostics.lastError;
+    fields.generatedStackMappedFrameCount = __autojs6_generated_stack_diagnostics.mappedFrameCount;
+    fields.generatedStackLastSource = __autojs6_generated_stack_diagnostics.lastSource;
+    fields.generatedStackLastGeneratedLine = __autojs6_generated_stack_diagnostics.lastGeneratedLine;
+    fields.generatedStackLastOriginalLine = __autojs6_generated_stack_diagnostics.lastOriginalLine;
     fields.compileCacheRequested = __autojs6_compile_cache_diagnostics.requested;
     fields.compileCacheEnabled = __autojs6_compile_cache_diagnostics.enabled;
     fields.compileCacheStatus = __autojs6_compile_cache_diagnostics.status;

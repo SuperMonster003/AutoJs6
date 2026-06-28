@@ -114,6 +114,56 @@ class NodeSourceMapStackTraceInstrumentationTest {
         )
     }
 
+    @Test
+    fun esmGeneratedStackFramesMapBackToOriginalSourceLines() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM generated stack trace mapping")
+        val workDir = freshWorkDir("node-esm-generated-stack")
+        val main = File(workDir, "main.mjs")
+        val dep = File(workDir, "dep.mjs")
+        val named = File(workDir, "named.mjs")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import value from "./dep.mjs";
+                import { marker } from "./named.mjs";
+
+                const combined = value + marker;
+                function fromConsole() {
+                    throw new Error("console mapped boom");
+                }
+
+                function fromFailure() {
+                    throw new Error("failure mapped boom");
+                }
+
+                try {
+                    fromConsole();
+                } catch (err) {
+                    console.error(err);
+                }
+
+                fromFailure();
+            """.trimIndent(),
+            sourceName = main.absolutePath,
+            workingDirectory = workDir,
+            moduleSources = mapOf(
+                dep.absolutePath to """export default "dep";""",
+                named.absolutePath to """export const marker = "named";""",
+            ),
+        )
+
+        assertFalse(NodeEmbeddedTestHarness.describeResult("ESM generated stack trace mapping", result), result.succeeded)
+        assertTrue(result.stderr, result.stderr.contains("${main.absolutePath}:6:"))
+        assertFalse(result.stderr, result.stderr.contains("${main.absolutePath}:13:"))
+        assertTrue(result.errorStack.orEmpty(), result.errorStack.orEmpty().contains("${main.absolutePath}:10:"))
+        assertFalse(result.errorStack.orEmpty(), result.errorStack.orEmpty().contains("${main.absolutePath}:17:"))
+        result.nativeValues["embedded_script.generated_stack_mapped_frame_count"]
+            ?.toIntOrNull()
+            ?.let { count ->
+                assertTrue(count.toString(), count >= 2)
+            }
+    }
+
     private fun failingBundle(message: String, sourceMapUrl: String): String {
         return """
             "nodejs";

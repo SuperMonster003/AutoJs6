@@ -116,6 +116,10 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.source_map_last_source", jsonStringField(text, "sourceMapLastSource"));
     putPayload(payload, "embedded_script.source_map_last_map", jsonStringField(text, "sourceMapLastMap"));
     putPayload(payload, "embedded_script.source_map_last_error", jsonStringField(text, "sourceMapLastError"));
+    putPayload(payload, "embedded_script.generated_stack_mapped_frame_count", jsonNumberField(text, "generatedStackMappedFrameCount"));
+    putPayload(payload, "embedded_script.generated_stack_last_source", jsonStringField(text, "generatedStackLastSource"));
+    putPayload(payload, "embedded_script.generated_stack_last_generated_line", jsonNumberField(text, "generatedStackLastGeneratedLine"));
+    putPayload(payload, "embedded_script.generated_stack_last_original_line", jsonNumberField(text, "generatedStackLastOriginalLine"));
     putPayload(payload, "embedded_script.compile_cache.requested", jsonBooleanField(text, "compileCacheRequested"));
     putPayload(payload, "embedded_script.compile_cache.enabled", jsonBooleanField(text, "compileCacheEnabled"));
     putPayload(payload, "embedded_script.compile_cache.status", jsonStringField(text, "compileCacheStatus"));

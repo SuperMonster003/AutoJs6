@@ -765,8 +765,23 @@ object NativeNodeEmbeddedRuntimeBridge {
                 ?: return
             resultNativeValues[nativeKey] = value.toString()
         }
+        fun fillResultEnvelopeString(nativeKey: String, envelopeKey: String) {
+            if (!resultNativeValues[nativeKey].isNullOrBlank()) {
+                return
+            }
+            val value = resultEnvelope
+                ?.takeIf { it.has(envelopeKey) && !it.isNull(envelopeKey) }
+                ?.optString(envelopeKey)
+                ?.takeUnless { it.isBlank() }
+                ?: return
+            resultNativeValues[nativeKey] = value
+        }
         fillResultEnvelopeInt("embedded_script.pending_scoped_fs_watch_count", "pendingScopedFsWatchCount")
         fillResultEnvelopeInt("embedded_script.pending_scoped_fs_watch_file_count", "pendingScopedFsWatchFileCount")
+        fillResultEnvelopeInt("embedded_script.generated_stack_mapped_frame_count", "generatedStackMappedFrameCount")
+        fillResultEnvelopeString("embedded_script.generated_stack_last_source", "generatedStackLastSource")
+        fillResultEnvelopeInt("embedded_script.generated_stack_last_generated_line", "generatedStackLastGeneratedLine")
+        fillResultEnvelopeInt("embedded_script.generated_stack_last_original_line", "generatedStackLastOriginalLine")
 
         val envelopePresent = !resultNativeValues["embedded_script.result_json"].isNullOrBlank()
         val status = resultNativeValues["embedded_script.status"].orEmpty()
