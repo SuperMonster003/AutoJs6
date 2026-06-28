@@ -54,7 +54,7 @@ A Phase 13 parent task can close only when all of the following are true:
 | `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | `evidence`, `packaging` | P13-45/P13-52 close metadata and policy diagnostics; P13-07/future packaged promotion owns lifecycle, disclosure UI, and final evidence. |
 | `full_heavy_resource_stress` | `P13-08` | `evidence`, `external` | Archive 8-hour quick soak and 24-hour final soak with comparable metrics. |
 | `android_side_package_installation` | `P13-09`, `P13-42`, `P13-48` | closed | P13-09/P13-42/P13-48 close the v1.1 guarded local-store package installation requirement; registry/tarball/native/distribution promotion remains future work. |
-| `worker_threads` | `P13-34`, `P13-35` | `external`, `policy` | P13-35 records the v1.1 no-facade replacement decision; P13-34 owns native WorkerPool promotion evidence on target ABIs. |
+| `worker_threads` | `P13-34`, `P13-35` | closed | P13-34 keeps worker_threads intentionally unsupported for v1.1 with native-preflight evidence; P13-35 records the no-facade replacement decision, and future native WorkerPool promotion must reopen P13-34 evidence gates. |
 | `controlled_wasi` | `P13-38` | closed | P13-38 closes the v1.1 decision with pure WebAssembly as the supported path and raw/controlled WASI stable-denied. |
 | `raw_network` | `P13-29`, `P13-30`, `P13-50` to `P13-56` | `implementation`, `policy`, `packaging` | Keep Safe profile denied; promote only scoped Desktop/relaxed-capability tracks with network budgets, privacy, rollback, and packaged evidence. |
 | `node_24_17_community_fork` | future runtime lane | deferred external maintenance | Track as future runtime maintenance; do not block current Node 24.5 Phase 13 work unless upgrade artifacts become available. |
@@ -388,7 +388,10 @@ packaged lifecycle and expanded-root rerun evidence remains `evidence` and
 
 #### P13-34 `worker_threads`
 
-Reason open: `external`, `evidence`, `policy`, `packaging`.
+Reason closed for the v1.1 final worker decision. `worker_threads` remains
+intentionally unsupported in v1.1 because native worker availability is missing
+on the target device/ABI evidence set; future runnable WorkerPool promotion is
+tracked as new P13-34 evidence work.
 
 - [ ] Prove native worker availability on the target promotion ABIs.
 - [x] Run and archive the current QV710AF65F experimental worker gate with
@@ -401,6 +404,9 @@ Reason open: `external`, `evidence`, `policy`, `packaging`.
   blockers above.
 - [x] Decide nested worker policy and document SharedArrayBuffer, Atomics, resourceLimits, thread, and RSS ceilings.
 - [x] Keep docs/matrix evidence gate from counting native availability, packaged smoke, and crash/resource evidence twice.
+- [x] Close the final `worker_threads` decision via explicit v1.1 intentional
+  non-support and the P13-35 no-facade replacement decision rather than by
+  promoting runnable worker authority.
 
 #### P13-35 process-worker replacement
 

@@ -54,9 +54,9 @@
     {
       "id": "worker_threads",
       "classification": "conditional",
-      "status": "decision_required",
-      "currentEvidence": "Default disabled and blocked by native availability.",
-      "requiredResolution": "Implement controlled worker_threads or declare intentionally unsupported with an AutoJs6 process-worker replacement."
+      "status": "intentionally_unsupported",
+      "currentEvidence": "P13-34 keeps worker_threads disabled by default, archives request-local native-preflight evidence on QV710AF65F / Sony XQ-AT72 / Android 12, and keeps runnable, resource-stress, and packaged worker authority blocked until native worker_threads is available on target ABIs. P13-35 closes the v1.1 process-worker replacement decision with diagnostic-only WorkerPool-preferred metadata, no user-facing process_worker/compute_worker/autojs6:process-worker facade, no packaged behavior, and no raw process handles.",
+      "requiredResolution": "Declared intentionally unsupported for v1.1 through the P13-34 worker_threads denial/preflight gate and the P13-35 no-facade process-worker replacement decision; future native-worker-capable promotion must reopen the P13-34 evidence gates."
     },
     {
       "id": "controlled_wasi",
