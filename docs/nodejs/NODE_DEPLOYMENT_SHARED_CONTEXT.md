@@ -34,6 +34,7 @@ Suggested minimum command timeouts:
 | Host verifiers and summary/report generation | 120000 ms to 240000 ms |
 | Kotlin compile, native build, packaging, or APK metadata tasks | 420000 ms to 600000 ms |
 | Connected instrumentation and packaged APK smoke tests | 600000 ms or more |
+| Native/runtime artifact aggregate checks | 900000 ms or more |
 | Long-running soak or stress tests | Expected runtime plus a clear margin |
 
 When a command is killed only by the outer tool timeout, do not record it as a
@@ -46,6 +47,10 @@ Observed examples:
   Phase 13 utility validation, then passed with a 420000 ms timeout.
 - Focused connected instrumentation gates have passed with a 600000 ms timeout
   on the primary device.
+- `verifyNodePhase7ResourceStressGate` with native rebuilds and live network
+  coverage has passed with an 1800000 ms timeout on the primary device.
+- The P13-07 packaged APK crash/lifecycle/Stop/task-removal focused smoke has
+  passed with an 1800000 ms timeout on the primary device.
 
 ## Device Selection
 
@@ -88,3 +93,15 @@ uninstalled, reinstalled, and reset as needed for Node.js validation.
   verifier, report token, or evidence path changes.
 - Stable-denial evidence should remain explicit when a capability is gated by
   policy, profile, packaging metadata, or missing native/runtime support.
+- When `-Pautojs.nodejs.network.experimental=true` is passed, bridge/resource
+  stress WebSocket cases may exercise the live network path and return a
+  fail-closed network timeout instead of the default network-disabled denial.
+  For Safe-profile denial evidence, pass
+  `-Pautojs.nodejs.network.experimental=false` explicitly.
+- P13-08 has verifier and archive-helper coverage only. Do not synthesize
+  `quick-soak-8h.json` or `final-soak-24h.json`; archive only completed real
+  soak reports through `tools/nodejs/phase13/archive-full-heavy-resource-soak.js`.
+- For ABI status triage, use `:app:generateNodeFinalAbiStatus` when a
+  non-failing report is needed. `:app:verifyNodeFinalAbiGate` is the strict
+  gate and is expected to fail while the runtime artifact aggregate remains
+  `bootstrap_only`.
