@@ -13,8 +13,8 @@ const COMPLETED_SURFACE_STATUSES = new Set(["default_promoted", "opt_in_promoted
 const OPEN_SURFACE_STATUSES = new Set(["planned", "debug_poc", "provider_poc"]);
 const DEFERRED_SURFACE_STATUSES = new Set(["design_locked"]);
 const REJECTED_SURFACE_STATUSES = new Set(["rejected"]);
-const OPEN_BLOCKER_STATUSES = new Set(["open", "decision_required", "waiting_for_android_artifacts"]);
-const DEFERRED_BLOCKER_STATUSES = new Set(["optional"]);
+const OPEN_BLOCKER_STATUSES = new Set(["open", "decision_required"]);
+const DEFERRED_BLOCKER_STATUSES = new Set(["optional", "waiting_for_android_artifacts"]);
 const REJECTED_BLOCKER_STATUSES = new Set(["permanently_unsupported"]);
 const PHASE13_REOPENED_BLOCKER_OVERRIDES = new Map([
   [
