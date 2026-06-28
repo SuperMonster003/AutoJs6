@@ -259,10 +259,11 @@ the provider is promoted.
 P13-21 records task database provider promotion as partial. AutoJs6 Node has
 live `work_manager` scheduling for Node-owned scoped entries and
 `require("autojs6:compat").tasks` one-shot disposable-task migration over that
-provider. It still does not expose direct `require("tasks")`, global `tasks`,
-daily/weekly wall-clock task database operations, IntentTask/broadcast task
-provider access, packaged task database promotion, or raw Rhino task object
-mutation.
+provider, plus JSON-safe legacy `TimedTask` query/get snapshots for migration
+evidence. It still does not expose direct `require("tasks")`, global `tasks`,
+daily/weekly wall-clock task database mutation operations,
+IntentTask/broadcast task provider access, packaged task database promotion, or
+raw Rhino task object mutation.
 
 P13-22 records IntentTask/broadcast provider promotion as partial. The
 Android/Rhino `IntentTask` database and receiver stack are present, and the

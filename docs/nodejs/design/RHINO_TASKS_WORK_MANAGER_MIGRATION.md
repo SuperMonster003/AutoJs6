@@ -131,6 +131,9 @@ stable rejection stubs for `compat.tasks.addDailyTask()` and
 `TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md` for the task ownership, database
 schema, migration snapshot, update/delete policy, and scheduler backend policy
 preconditions that must exist before revisiting provider promotion.
+P13-21 adds `NodeTimedTaskSnapshots` as read-only legacy `TimedTask` query/get
+shape evidence; it does not expose a `tasks` provider or allow Node to mutate
+legacy daily/weekly rows.
 
 ## Future Provider Split
 
@@ -163,6 +166,8 @@ Future provider responsibilities:
 - reconcile WorkManager ids, AutoJs6 task ids, and packaged app ids;
 - record last-run diagnostics, stdout/stderr snippets, exit/error metadata, timeout
   state, Android quota policy, and trigger source;
+- use JSON-safe legacy `TimedTask` snapshots for query/get/migration evidence
+  without accepting mutable Rhino row ids as Node handles;
 - never return raw `TimedTask`, `IntentTask`, `WorkRequest`, `PendingIntent`,
   `IntentFilter`, `BroadcastReceiver`, `AlarmManager`, `JobScheduler`, or
   `WorkManager` objects to JavaScript.

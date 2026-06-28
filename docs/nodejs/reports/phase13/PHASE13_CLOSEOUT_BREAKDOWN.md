@@ -209,7 +209,10 @@ Reason open: `implementation`, `policy`, `packaging`.
 - [x] Keep `compat.tasks` Promise-only in v1.1; do not add a synchronous Rhino
   database compatibility mode before the provider exists.
 - [x] Define JSON task schema, row ownership, id mapping, migrations, downgrade behavior, and legacy visibility.
-- [ ] Implement add/query/update/remove over frozen JSON snapshots.
+- [x] Add JSON-safe legacy `TimedTask` query/get snapshots without raw task,
+  scheduler, database cursor, or mutable row handles.
+- [ ] Implement add/update/enable-disable/remove provider operations after the
+  dedicated task capability and mutation policy exists.
 - [ ] Add capability metadata, disclosure, rollback, and packaged task smoke.
 - [x] Keep docs/surface evidence gate from counting task schema, ownership, JSON operations, scheduler semantics, and packaged evidence twice.
 

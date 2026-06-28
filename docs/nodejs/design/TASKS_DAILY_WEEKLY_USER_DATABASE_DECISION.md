@@ -12,8 +12,9 @@ provider surface.
 
 P13-21 reopens this area only as a partial Pro-profile provider gate. It records
 the existing Android/Rhino task database substrate, live `work_manager`
-scheduled-work provider, and `compat.tasks` one-shot migration, but it does not
-promote daily/weekly add/query/update/remove behavior yet.
+scheduled-work provider, `compat.tasks` one-shot migration, and JSON-safe
+legacy `TimedTask` query/get snapshots via `NodeTimedTaskSnapshots`, but it
+does not promote daily/weekly add/update/enable/disable/remove behavior yet.
 
 The future owner for daily/weekly/user task database parity is a dedicated
 Pro-only JSON-safe `tasks` database provider. It is not a `work_manager`
@@ -65,6 +66,10 @@ JSON snapshots with `legacyTimedTaskId`, compatibility version, source runtime,
 and visibility metadata. Downgrades must leave legacy Rhino rows visible to the
 Rhino task UI, ignore unknown Node descriptor versions safely, and fail closed
 instead of mutating rows whose owner does not match the current app/package.
+P13-21 now records the read-only legacy row snapshot boundary with
+`autojs6-node-timed-task-snapshot-v1`; snapshots include ids, script paths,
+repeat/end metadata, and timing fields while denying raw `TimedTask`,
+`ExecutionConfig`, scheduler, database cursor, and mutable row handles.
 
 ## Why Provider Promotion Is Rejected
 
@@ -88,7 +93,9 @@ following are designed, documented, implemented, and verified:
 - Database schema: descriptor version, Node backend, scoped entry, package
   metadata, timeout, constraints, arguments, enabled state, and task ids.
 - Migration snapshot: Rhino `TimedTask` to JSON snapshot shape, compatibility
-  versioning, downgrade behavior, and legacy row handling.
+  versioning, downgrade behavior, and legacy row handling. The current
+  `NodeTimedTaskSnapshots` helper covers read-only query/get shape evidence;
+  future provider promotion still owns persisted descriptor writes.
 - Update/delete policy: JSON patch descriptors, enabled/disabled state,
   reschedule behavior, delete ownership, and raw task object rejection.
 - Scheduler backend policy: AlarmManager, exact alarm permission, WorkManager

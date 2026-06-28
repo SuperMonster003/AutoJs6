@@ -34,15 +34,17 @@
 
 - P13-21 partial task database provider gate records the current
   `work_manager`, explicit `autojs6:compat.tasks`, and Android/Rhino
-  `TimedTask` database substrate.
+  `TimedTask` database substrate plus JSON-safe legacy `TimedTask` query/get
+  snapshot helper evidence.
 - Host verifier: `tools/nodejs/phase13/verify-task-database-provider.js`.
 - Gradle gate: `:app:verifyNodePhase13TaskDatabaseProvider`.
 - Report: `docs/nodejs/reports/phase13/P13_21_TASK_DATABASE_PROVIDER.md`.
 - Surface manifest evidence: `phase13-task-database-provider`.
-- Remaining P13-21 blockers: add/query/update/remove daily/weekly operations,
-  wall-clock scheduler semantics, packaged metadata/manifest behavior, and raw
-  TimedTask/IntentTask profile decisions. JSON descriptor schema, id mapping,
-  migration/downgrade policy, and legacy visibility are now design-locked.
+- Remaining P13-21 blockers: add/update/enable-disable/remove daily/weekly
+  operations, wall-clock scheduler semantics, packaged metadata/manifest
+  behavior, and raw TimedTask/IntentTask profile decisions. JSON descriptor
+  schema, id mapping, migration/downgrade policy, legacy visibility, and
+  JSON-only legacy `TimedTask` query/get snapshots are now covered.
 
 ## P13-22 Partial Landing Note
 
@@ -1098,8 +1100,9 @@ P13 task 本身使用以下执行状态：
       - `compat.tasks.addDisposableTask/queryTasks/queryTimedTasks/getTimedTask/removeTask/removeTimedTask` covers one-shot migration over WorkManager snapshots.
       - `compat.tasks.addDailyTask/addWeeklyTask/updateTask` and IntentTask methods still reject before bridge dispatch.
       - Android/Rhino `TimedTaskDatabase`, `TimedTaskManager`, and daily/weekly factory methods exist as substrate, but raw rows/objects do not cross into Node.
+      - `NodeTimedTaskSnapshots` records JSON-only query/get snapshot evidence without exposing raw `TimedTask`, scheduler, database cursor, or mutable row handles.
     - Remaining blockers:
-      - Daily/weekly add/query/get/update/remove provider operations over frozen JSON snapshots.
+      - Daily/weekly add/update/enable-disable/remove provider operations over frozen JSON snapshots and ids.
       - Wall-clock scheduler semantics, exact-alarm/WorkManager/JobScheduler fallback policy, packaged manifest/disclosure, and raw task object profile decision.
 
 - [ ] P13-22: 实现 IntentTask/broadcast task provider。

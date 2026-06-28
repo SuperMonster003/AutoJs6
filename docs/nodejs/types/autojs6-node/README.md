@@ -240,7 +240,8 @@ P13-23 also exposes scoped `app.viewFile()` / `app.editFile()` helpers for relat
 
 P12-15 locks the `compat.tasks` v1 scope to disposable one-shot add/remove/query wrappers over `work_manager`; P12-16 exposes that module-only facade as `require("autojs6:compat").tasks`. P12-17 adds typed stable rejection stubs for `addDailyTask()`, `addWeeklyTask()`, and `updateTask()`, plus `queryTimedTasks()`, `getTimedTask(id)`, and `removeTimedTask(id)` aliases for Node-owned WorkManager one-shot snapshots and ids only. P12-18 adds typed stable rejection stubs for `addIntentTask()`, `queryIntentTasks()`, `getIntentTask(id)`, and `removeIntentTask(id)`. This declaration package still does not expose `require("tasks")` or a global `tasks`.
 
-P13-21 records the partial task database provider gate for these declarations.
+P13-21 records the partial task database provider gate for these declarations
+and adds JSON-safe legacy `TimedTask` query/get snapshot evidence internally.
 The TypeScript smoke now keeps `work_manager` scheduling and `compat.tasks`
 one-shot aliases type-checked while daily/weekly/update/IntentTask helpers stay
 typed as stable rejecting `Promise<never>` APIs until a dedicated task database
