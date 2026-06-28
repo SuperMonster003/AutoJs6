@@ -836,6 +836,10 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-pro-entry-directives.js`.
     - Gradle gate: `:app:verifyNodePhase13ProEntryDirectives`.
     - Report: `docs/nodejs/reports/phase13/P13_11_PRO_ENTRY_DIRECTIVES.md`.
+    - 2026-06-28 UI-thread policy update: dispatch semantics are defined as
+      provider-owned async main-looper dispatch, not V8 isolate execution on
+      the Android main thread; Activity lifecycle, Back/Recents, and packaged
+      UI entry evidence still keep P13-11 partial.
   - 未关闭原因：Activity lifecycle、Back/Recents 和实际 UI-thread dispatch
     evidence 尚未完成，因此保持 `partial`。
 

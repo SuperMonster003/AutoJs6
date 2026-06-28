@@ -113,7 +113,7 @@ Reason open: `implementation`, `evidence`.
 
 - [ ] Add full Activity lifecycle launch evidence for Pro-style Node UI entries.
 - [ ] Cover Back/Recents, close, relaunch, and task recovery behavior.
-- [ ] Define concrete UI-thread dispatch semantics beyond directive metadata.
+- [x] Define concrete UI-thread dispatch semantics beyond directive metadata.
 - [ ] Add packaged entry denial and diagnostic cases.
 
 #### P13-13 Java interop allowlist

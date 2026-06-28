@@ -50,11 +50,20 @@ Packaged long-running service dispatch explicitly rejects UI entry directives
 for now. This prevents a project from combining the incomplete UI Activity
 lifecycle path with the foreground-service long-running path.
 
+P13-11 UI-thread dispatch policy: `"nodejs ui-thread"` is a compatibility
+intent and scheduling constraint, not permission to run the V8 isolate on the
+Android main thread. Node JavaScript continues to run in the controlled embedded
+runtime; Activity-owned providers such as the future UI bridge must marshal UI
+mutations, callbacks, and lifecycle events onto the Android main looper. Direct
+synchronous Rhino-style UI-thread execution, raw `Activity` / `View` access,
+and blocking calls from JavaScript into the main looper remain unpromoted.
+Promotion requires Activity lifecycle and Back/Recents evidence plus provider
+tests showing bounded asynchronous main-thread dispatch and cleanup.
+
 ## Not Promoted Yet
 
 - Full Activity lifecycle launch evidence is not complete.
 - Back/Recents behavior for packaged Node UI entries is not complete.
-- Concrete UI-thread dispatch semantics are not complete.
 - This does not promote `require("ui")`; the existing provider remains a
   separate declarative bridge surface.
 - `$autojs`, Java interop, Rhino compatibility helpers, and
@@ -69,5 +78,4 @@ lifecycle path with the foreground-service long-running path.
 ```
 
 The gate is expected to report `partial` with zero policy violations until the
-remaining Activity lifecycle, Back/Recents, and UI-thread dispatch evidence
-lands.
+remaining Activity lifecycle and Back/Recents packaged evidence lands.

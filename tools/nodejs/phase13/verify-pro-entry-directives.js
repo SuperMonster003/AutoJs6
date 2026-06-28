@@ -87,13 +87,15 @@ function buildReport(files) {
     ]),
     scenario("ui_provider_boundary", "Entry directives remain separate from the require(\"ui\") provider", [
       token(files.p13Report, "does not promote `require(\"ui\")`"),
+      token(files.p13Report, "P13-11 UI-thread dispatch policy:"),
+      token(files.p13Report, "not permission to run the V8 isolate on the"),
+      token(files.compatibilityProfile, "it does not run the V8 isolate"),
       token(files.compatibilityProfile, "\"nodejs ui\""),
       token(files.proComparison, "\"nodejs ui\""),
       token(files.proComparison, "P13-11"),
     ], [
       "Full Activity lifecycle launch evidence is still required.",
       "Back/Recents behavior for packaged Node UI entries is still required.",
-      "Concrete UI-thread dispatch semantics beyond metadata are still required.",
     ]),
     scenario("docs_gate", "Docs and Gradle gate record P13-11 partial progress", [
       token(files.phase13Tasks, "P13-11"),

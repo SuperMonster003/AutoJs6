@@ -143,7 +143,10 @@ thread dispatch, and packaged policy are proven.
 
 P13-11 records Pro-style UI entry directives through Node project launch
 metadata and diagnostics. Full Activity lifecycle launch, Back/Recents behavior,
-and concrete UI-thread dispatch parity remain unpromoted.
+and packaged UI entry behavior remain unpromoted. `"nodejs ui-thread"` is a
+compatibility intent and scheduling constraint: it does not run the V8 isolate
+on the Android main thread; Activity-owned providers must marshal UI work onto
+the main looper through bounded asynchronous bridge operations.
 
 P13-17 records the live `require("ui")` provider promotion gate. The direct
 Activity-owned JSON provider has live device evidence for layout, events,

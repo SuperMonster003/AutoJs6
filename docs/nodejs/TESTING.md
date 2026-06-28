@@ -722,7 +722,9 @@ and the existing Node project launch alignment coverage verify that
 `"nodejs ui"` and `"nodejs ui-thread"` parse into stable `NodeEntryDirective`
 metadata and flow through descriptor, source, project request, debug descriptor,
 native values, and failure markers. The gate stays partial until Activity
-lifecycle, Back/Recents behavior, and concrete UI-thread dispatch evidence land.
+lifecycle, Back/Recents behavior, and packaged UI-entry evidence land. The
+UI-thread policy is already defined as provider-owned asynchronous main-looper
+dispatch, not V8 execution on the Android main thread.
 
 Phase 13 `$autojs` global v1:
 
