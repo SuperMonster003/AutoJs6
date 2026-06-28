@@ -142,7 +142,9 @@ Java/Rhino surface gate.
 
 #### P13-16 `JavaAdapter` / `defineClass` replacement
 
-Reason open: stable-denial decision drift cleanup; future proxy-interface promotion remains `implementation`, `policy`, `evidence`.
+Reason closed for the P13-16 v1.1 stable-denial decision. Future
+proxy-interface promotion remains `implementation`, `policy`, and `evidence`
+work.
 
 - [x] Keep bounded proxy-interface or `java.defineClass()` provider implementation as future provider work rather than a P13-16 v1.1 decision blocker.
 - [x] Keep listener/interface examples backed by connected-device instrumentation as future provider promotion work.
@@ -271,7 +273,9 @@ Reason open: `implementation`, `evidence`, `packaging`.
 
 #### P13-27 utility-heavy Rhino modules
 
-Reason open: pure utility helper gate drift cleanup; future resource-backed utility promotion remains `implementation`, `packaging`.
+Reason closed for the P13-27 v1.1 pure utility helper gate. Future
+resource-backed utility promotion remains `implementation` and `packaging`
+work.
 
 - [x] Add separate pure helper gates for `Arrayx` and `Numberx`.
 - [x] Keep `zip`, `canvas`, OpenCC, and full pinyin resource providers as future resource-backed utility promotion work.
@@ -283,9 +287,9 @@ Reason open: pure utility helper gate drift cleanup; future resource-backed util
 
 #### P13-29 HTTP/HTTPS client parity
 
-Reason open: controlled client evidence drift cleanup; future raw-network and
-packaged distribution promotion remains `implementation`, `policy`,
-`packaging`.
+Reason closed for the P13-29 v1.1 controlled HTTP/HTTPS client gate. Future
+raw-network and packaged distribution promotion remains `implementation`,
+`policy`, `packaging`.
 
 - [x] Attach live Android/OkHttp HTTP and HTTPS request evidence through `verifyNodeLiveFetchGate`.
 - [x] Attach packaged `network` to `android.permission.INTERNET` proof through P13-45 packaged capability metadata.
@@ -308,7 +312,8 @@ Reason open: `implementation`, `policy`, `evidence`, `packaging`.
 
 #### P13-31 UDP / `dgram`
 
-Reason open: decision gate drift cleanup; future UDP promotion remains `policy`, `implementation`, `evidence`, `packaging`.
+Reason closed for the P13-31 v1.1 stable-denied UDP decision. Future UDP
+promotion remains `policy`, `implementation`, `evidence`, and `packaging` work.
 
 - [x] Decide whether `dgram` remains stable-denied for v1.1 or starts a future controlled provider.
 - [x] Keep unicast, server bind/listen, broadcast, multicast, and source-specific multicast capability splits as future UDP promotion work.
@@ -319,7 +324,9 @@ Reason open: decision gate drift cleanup; future UDP promotion remains `policy`,
 
 #### P13-32 filesystem profile relaxation
 
-Reason open: Safe scoped filesystem profile gate drift cleanup; future expanded-root promotion remains `implementation`, `policy`, `packaging`.
+Reason closed for the P13-32 v1.1 Safe scoped filesystem profile gate. Future
+expanded-root promotion remains `implementation`, `policy`, and `packaging`
+work.
 
 - [x] Keep user-authorized roots for SAF/document roots and app-private roots as future expanded-root promotion work.
 - [x] Keep manifest metadata, grant persistence, revocation, diagnostics, rollback, and packaged expanded-root smoke as future expanded-root promotion work.
@@ -328,7 +335,9 @@ Reason open: Safe scoped filesystem profile gate drift cleanup; future expanded-
 
 #### P13-33 desktop fs advanced APIs
 
-Reason open: scoped advanced filesystem API gate drift cleanup; future packaged lifecycle and expanded-root rerun evidence remains `evidence`, `packaging`.
+Reason closed for the P13-33 v1.1 scoped advanced filesystem API gate. Future
+packaged lifecycle and expanded-root rerun evidence remains `evidence` and
+`packaging` work.
 
 - [x] Expose pending watcher/watchFile counts through diagnostics or report fields.
 - [x] Keep packaged watcher, fd, FileHandle, and stream close-on-destroy evidence as future packaged lifecycle work.
@@ -354,7 +363,9 @@ Reason open: `external`, `evidence`, `policy`, `packaging`.
 
 #### P13-35 process-worker replacement
 
-Reason open: decision drift cleanup; future promotion remains `implementation`, `external`, `packaging`.
+Reason closed for the P13-35 v1.1 no-facade process-worker replacement
+decision. Future promotion remains `implementation`, `external`, and
+`packaging` work.
 
 - [x] Keep WorkerPool evidence on target ABIs owned by P13-34/future promotion rather than P13-35 decision closure.
 - [x] Keep P13-35 v1.1 without a user-facing process-worker facade or UX.
@@ -364,7 +375,8 @@ Reason open: decision drift cleanup; future promotion remains `implementation`, 
 
 #### P13-36 `vm`
 
-Reason open: `evidence`, `packaging`.
+Reason closed for the P13-36 v1.1 `vm` compatibility gate. Future broader
+packaged/profile promotion remains `evidence` and `packaging` work.
 
 - [x] Add focused memory and compiled-script budget evidence.
 - [x] Add timeout/lifecycle stress and leakage probes.
@@ -374,7 +386,9 @@ Reason open: `evidence`, `packaging`.
 
 #### P13-37 inspector/devtools
 
-Reason open: stable-denial gate drift cleanup; future debug-profile promotion remains `implementation`, `policy`, `packaging`.
+Reason closed for the P13-37 v1.1 stable-denied inspector/debug-profile
+decision. Future debug-profile promotion remains `implementation`, `policy`,
+and `packaging` work.
 
 - [x] Keep trusted debug UI or host command start/revoke flow as future debug-profile promotion work.
 - [x] Keep loopback-only listener descriptors, ADB forward setup/cleanup, and public-interface denial proof as future debug-profile promotion work.
@@ -399,7 +413,9 @@ remains separate `implementation`, `policy`, and `packaging` work.
 
 #### P13-39 native addon loading
 
-Reason open: stable-denial gate drift cleanup; future signed packaged native addon promotion remains `policy`, `implementation`, `packaging`.
+Reason closed for the P13-39 v1.1 stable-denied native-addon decision. Future
+signed packaged native-addon promotion remains `policy`, `implementation`, and
+`packaging` work.
 
 - [x] Keep signed packaged native-addon manifest with per-ABI artifacts as future native addon promotion work.
 - [x] Keep ABI and Node-API/version allowlists for embedded Node, Android ABI, NDK, and release channel as future native addon promotion work.
@@ -410,7 +426,9 @@ Reason open: stable-denial gate drift cleanup; future signed packaged native add
 
 #### P13-40 `child_process` scoped runner
 
-Reason open: denial/shell-bridge decision gate drift cleanup; future scoped runner promotion remains `implementation`, `policy`, `packaging`.
+Reason closed for the P13-40 v1.1 child_process denial/scoped-runner decision.
+Future scoped runner promotion remains `implementation`, `policy`, and
+`packaging` work.
 
 - [x] Keep scoped exec/execFile/spawn-style API shape as future scoped runner promotion work.
 - [x] Keep app-private binary packaging, allowlist metadata, hash checks, and path resolution as future scoped runner promotion work.
@@ -423,7 +441,9 @@ Reason open: denial/shell-bridge decision gate drift cleanup; future scoped runn
 
 #### P13-41 ESM loader parity
 
-Reason open: controlled ESM subset gate drift cleanup; future full desktop loader parity remains `implementation`, `packaging`, `evidence`.
+Reason closed for the P13-41 v1.1 controlled ESM subset gate. Future full
+desktop loader parity remains `implementation`, `packaging`, and `evidence`
+work.
 
 - [x] Decide native loader hooks and raw `node:module` authority.
 - [x] Decide custom condition sets, import maps, and loader registration boundaries.
@@ -434,7 +454,9 @@ Reason open: controlled ESM subset gate drift cleanup; future full desktop loade
 
 #### P13-42 npm/package manager on Android
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason closed for the P13-42 v1.1 guarded local-store package-manager
+decision. Future mobile install authority remains `implementation`, `policy`,
+and `packaging` work.
 
 - [x] Fix current verifier/source evidence for local-store `remove(name, version)`.
 - [x] Keep Android registry downloader, cache management, tarball extraction, and integrity-lock authority stable-denied as runtime user APIs for v1.1; implement only after a reviewed mobile install authority exists.
@@ -445,7 +467,9 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-43 stdlib conformance
 
-Reason open: representative conformance gate drift cleanup; future full stdlib promotion remains `evidence`, `implementation`, `packaging`.
+Reason closed for the P13-43 v1.1 representative stdlib conformance gate.
+Future full stdlib promotion remains `evidence`, `implementation`, and
+`packaging` work.
 
 - [x] Keep broader module-by-module hostile input coverage as future full stdlib promotion work.
 - [x] Keep Android terminal/OS edge cases and lifecycle evidence as future full stdlib promotion work.
@@ -455,7 +479,8 @@ Reason open: representative conformance gate drift cleanup; future full stdlib p
 
 #### P13-44 process/env/argv parity
 
-Reason open: `packaging`.
+Reason closed for the P13-44 v1.1 Safe process/env/argv parity gate. Future
+packaged lifecycle evidence remains `packaging` work.
 
 - [x] Decide full desktop process parity boundaries.
 - [x] Add Android signal delivery and native process termination evidence or stable denials.
@@ -466,7 +491,8 @@ Reason open: `packaging`.
 
 #### P13-45 packaged APK capability metadata
 
-Reason open: metadata gate drift cleanup; future promotion remains `implementation`, `packaging`.
+Reason closed for the P13-45 v1.1 packaged capability metadata gate. Future
+profile/runtime promotion remains `implementation` and `packaging` work.
 
 - [x] Ensure declared `node.permissions` evidence is present in verifier inputs.
 - [x] Keep packaged profile, builtin, native asset, and filesystem-root metadata diagnostic-only for v1.1.
@@ -475,7 +501,9 @@ Reason open: metadata gate drift cleanup; future promotion remains `implementati
 
 #### P13-46 plugin system parity
 
-Reason open: decision gate drift cleanup; future promotion remains `implementation`, `policy`, `packaging`.
+Reason closed for the P13-46 v1.1 plugin-system decision gate. Future plugin
+distribution promotion remains `implementation`, `policy`, and `packaging`
+work.
 
 - [x] Keep signed plugin archive install/update policy as future plugin distribution work.
 - [x] Keep Android provider plugin adapter design as future plugin distribution work.
@@ -487,7 +515,8 @@ Reason open: decision gate drift cleanup; future promotion remains `implementati
 
 #### P13-47 dependency compatibility corpus
 
-Reason open: corpus gate drift cleanup; future CI scheduling remains `evidence`.
+Reason closed for the P13-47 v1.1 dependency compatibility corpus gate. Future
+connected-device CI scheduling remains `evidence` work.
 
 - [x] Keep connected AutoJs6 real npm corpus artifact scheduling as future CI workflow work.
 - [x] Add targeted packages for stdlib, ESM, network, fs, and package-manager deltas.
@@ -496,7 +525,8 @@ Reason open: corpus gate drift cleanup; future CI scheduling remains `evidence`.
 
 #### P13-48 package lock and integrity policy
 
-Reason open: shared integrity policy gate drift cleanup; future plugin/marketplace distribution remains `implementation`, `packaging`.
+Reason closed for the P13-48 v1.1 shared integrity policy gate. Future
+plugin/marketplace distribution remains `implementation` and `packaging` work.
 
 - [x] Keep signed plugin archive extraction and update rollback as future plugin distribution work.
 - [x] Keep marketplace cache pruning and user-facing corruption recovery as future marketplace distribution work.
@@ -507,7 +537,8 @@ Reason open: shared integrity policy gate drift cleanup; future plugin/marketpla
 
 #### P13-49 profile selection UX and diagnostics
 
-Reason open: diagnostics gate drift cleanup; future UX remains `implementation`, `policy`, `packaging`.
+Reason closed for the P13-49 v1.1 profile-selection diagnostics gate. Future
+UX remains `implementation`, `policy`, and `packaging` work.
 
 - [x] Keep project settings UI for requested profiles and capabilities as future UX implementation work rather than a P13-49 diagnostics blocker.
 - [x] Keep packaged builder UI/metadata review for profile requests as future packaged UX work.
@@ -516,7 +547,8 @@ Reason open: diagnostics gate drift cleanup; future UX remains `implementation`,
 
 #### P13-50 relaxed capability security corpus
 
-Reason open: security-corpus checklist drift cleanup; future runtime
+Reason closed for the P13-50 v1.1 relaxed-capability security corpus gate.
+Future runtime
 relaxed-capability promotion remains gated by rollout, rollback, privacy, and
 packaged evidence.
 
@@ -527,7 +559,8 @@ packaged evidence.
 
 #### P13-51 rollback playbook
 
-Reason open: playbook gate drift cleanup; future implementation remains `implementation`, `policy`, `packaging`.
+Reason closed for the P13-51 v1.1 rollback playbook gate. Future implementation
+remains `implementation`, `policy`, and `packaging` work.
 
 - [x] Defer runtime profile promotion rollback controls and automatic crash circuit breaker wiring until effective profile switching is promoted.
 - [x] Keep settings UI and packaged builder rollback controls as future implementation work rather than P13-51 playbook blockers.
@@ -536,7 +569,8 @@ Reason open: playbook gate drift cleanup; future implementation remains `impleme
 
 #### P13-52 privacy and disclosure policy
 
-Reason open: policy gate drift cleanup; future implementation remains `implementation`, `packaging`, `policy`.
+Reason closed for the P13-52 v1.1 privacy/disclosure policy gate. Future
+implementation remains `implementation`, `packaging`, and `policy` work.
 
 - [x] Keep settings UI prompt copy and localization as future implementation work rather than a P13-52 policy blocker.
 - [x] Keep real foreground disclosure ownership and stop behavior as future promoted-provider implementation work.
