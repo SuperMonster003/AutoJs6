@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 44
-- Open tasks: 14
+- Completed tasks: 45
+- Open tasks: 13
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -23,7 +23,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-06` | `completed` | `runtime.graduation_blockers` | 推进 second execution slot 到可调度状态。 |
 | `P13-07` | `open` | `runtime.graduation_blockers` | 推进 packaged long-running service mode。 |
 | `P13-08` | `open` | `runtime.graduation_blockers` | 完成 full heavy resource stress。 |
-| `P13-09` | `open` | `runtime.graduation_blockers` | 实现 Android-side package installation manager。 |
+| `P13-09` | `completed` | `runtime.graduation_blockers` | 实现 Android-side package installation manager。 |
 | `P13-10` | `completed` | `profile.promotion_model` | 发布 Phase 13 capability truth report。 |
 | `P13-11` | `completed` | `pro.entry_java_rhino` | 实现 Pro 风格 Node entry and UI-thread directives。 |
 | `P13-12` | `completed` | `pro.entry_java_rhino` | 定义并实现 `$autojs` global v1。 |
@@ -99,7 +99,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 | Surface | Status | Risk | Tasks | Evidence | Summary |
 | --- | --- | --- | --- | --- | --- |
-| `runtime.graduation_blockers` | `planned` | `high` | `P13-05`, `P13-06`, `P13-07`, `P13-08`, `P13-09` | 51 item(s) | Close required internal blockers: crash evidence automation, second execution slot scheduling, packaged long-running service mode, full heavy resource stress, and Android-side package installation. P13-05 now includes simulated native fatal running-marker collection, real fatal native SIGKILL chaos collection, packaged launch-surface marker contract, passing packaged APK crash smoke, and native signal-safe fixed-size marker proof. P13-06 now includes default two-slot scheduling, descriptor/package processPoolSlot metadata, explicit packaged overflow-slot smoke coverage, full-pool queue/dequeue diagnostics, no-restart crash marker fallback evidence, and focused primary/overflow shared-resource stress while long-duration P13-08 soak remains open. P13-09 now includes a source-authority-aware guarded local mutation package_manager facade for status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/remove/list/verify/prune while registry download, npm CLI, signed native payloads, and distribution integration remain open. |
+| `runtime.graduation_blockers` | `planned` | `high` | `P13-05`, `P13-06`, `P13-07`, `P13-08`, `P13-09` | 51 item(s) | Close required internal blockers: crash evidence automation, second execution slot scheduling, packaged long-running service mode, full heavy resource stress, and Android-side package installation. P13-05 now includes simulated native fatal running-marker collection, real fatal native SIGKILL chaos collection, packaged launch-surface marker contract, passing packaged APK crash smoke, and native signal-safe fixed-size marker proof. P13-06 now includes default two-slot scheduling, descriptor/package processPoolSlot metadata, explicit packaged overflow-slot smoke coverage, full-pool queue/dequeue diagnostics, no-restart crash marker fallback evidence, and focused primary/overflow shared-resource stress while long-duration P13-08 soak remains open. P13-09 now closes the v1.1 app-private local-store install/update/remove/list/verify/prune requirement with a source-authority-aware guarded local mutation package_manager facade for status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/remove/list/verify/prune, while registry download, npm CLI, signed native payloads, and distribution integration remain future promotion gates. |
 | `pro.entry_java_rhino` | `debug_poc` | `critical` | `P13-11`, `P13-12`, `P13-13`, `P13-14`, `P13-15`, `P13-16` | 37 item(s) | Auto.js Pro-style Node entry directives, $autojs global, Java interop, rhino.install(), importClass/importPackage, JavaAdapter, and defineClass replacement decisions. |
 | `pro.ui_automation_media` | `debug_poc` | `high` | `P13-17`, `P13-18`, `P13-19`, `P13-20` | 37 item(s) | Promote live UI, floaty/overlay, accessibility/selector, screenshot/image/OCR Pro compatibility surfaces. P13-17 records partial live Activity-owned UI provider evidence while live packaged UI remains blocked. P13-18 records partial overlay provider evidence over the P12-14 permission/settings/cleanup live gate while live overlay creation remains fail-closed. P13-19 records partial accessibility selector evidence while advanced gesture, packaged service, and root/Shizuku tiers remain blocked. P13-20 records partial screenshot/image/OCR promotion evidence: scoped image read/recycle and ML Kit OCR are live, while MediaProjection, advanced image processing, packaged capture/OCR, and packaged disclosure evidence remain blocked; Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1. |
 | `pro.tasks_app_shell_media_utils` | `debug_poc` | `high` | `P13-21`, `P13-22`, `P13-23`, `P13-24`, `P13-25`, `P13-26`, `P13-27` | 68 item(s) | Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager, compat.tasks one-shot migration, and JSON-safe legacy TimedTask query/get snapshots are available, while daily/weekly task database add/update/enable-disable/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked. P13-22 records partial IntentTask/broadcast provider evidence: Android/Rhino receiver substrate, JSON-safe legacy IntentTask query/get snapshots, and compat.tasks rejection stubs are available; compat IntentTask names remain Promise-returning stable rejection stubs until a dedicated JSON-safe broadcast provider owns the future surface, while receiver capability split, manifest synthesis, trigger payloads, packaged install/trigger/remove, exported policy, and raw Intent/BroadcastReceiver profile decisions remain blocked. P13-23 records bounded app/intent/broadcast parity as ready: JSON-safe app.intent descriptors, stricter app.startActivity descriptor parsing, URL/email/settings/uninstall helpers, exact app.query installed-app lookups, scoped file view/edit helpers, app.launch alias parity, JSON-safe app.parseUri descriptors, packaged scoped-file Activity smoke, and stable raw-URI/kill/dual-user rejection stubs are available; raw installed-app list APIs remain future redacted-provider work, while sendBroadcast, raw Uri/FileProvider handles, root/Shizuku app options, and dual-user promotion stay stable-denied for P13-23 v1.1. P13-24 records bounded shell/root/Shizuku capability evidence as ready: shell.root and shell.shizuku are explicit capability tokens, execRoot routes through the controlled shell bridge, and execShizuku is a stable rejection; Shizuku execution stays stable-denied for P13-24 v1.1 until a dedicated provider owns authorization, lifecycle, cleanup, packaged disclosure, and rollback evidence, while root device matrix and packaged shell/root evidence remain future promotion work. P13-25 records partial notifications/settings/power manager evidence: notification permission/settings snapshots and battery-optimization status/settings dry-run helpers are available behind explicit notifications.settings and device.power capabilities while actions/listeners/wakelocks/direct power control and packaged evidence remain blocked. P13-26 records partial media/recorder/mediainfo provider evidence: read-only audio stream snapshots, scoped mediainfo metadata, recorder status, and compat aliases are available behind exact media.audio/media.metadata/media.recording capabilities while playback, real recording, MediaStore, packaged media evidence, and migration examples remain blocked. P13-27 records partial utility-heavy Rhino modules evidence: pure jsox.mathx, jsox.arrayx, and jsox.numberx helpers are available through jsox, direct submodule requires, and compat.jsox while zip, canvas JSON drawing/raw Canvas/Paint decision, OpenCC/pinyin packaged resources, and sysprops remain blocked; raw Android/OpenCV point/rect object parity is stable-denied for P13-27. |
@@ -123,8 +123,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Final Blockers
 
 - Total blockers: 15
-- Completed blockers: 4
-- Open blockers: 5
+- Completed blockers: 5
+- Open blockers: 4
 - Deferred blockers: 2
 - Rejected blockers: 4
 
@@ -132,7 +132,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | --- | --- | --- | --- | --- |
 | `adapter_v1_real_execution_path` | `completed` | `closed` | `required_internal` | adapter_v1 creates, executes, polls, stops, diagnoses, and destroys the Node 24.5 runtime for script, CommonJS, ESM, dynamic import, bridge, and packaged execution. |
 | `crash_evidence_automation` | `completed` | `closed` | `required_internal` | Crash marker, next-launch collection, resource snapshot, timeline tail, symbolization, and chaos injection pass focused gates. |
-| `android_side_package_installation` | `open` | `open` | `required_internal` | Android package install/update/remove/list/verify/prune is transactional, cancellable, locked, integrity checked, and lifecycle-script free. |
+| `android_side_package_installation` | `completed` | `closed` | `required_internal` | Android package install/update/remove/list/verify/prune is transactional, cancellable, locked, integrity checked, and lifecycle-script free. |
 | `packaged_long_running` | `open` | `open` | `required_internal` | Packaged APK long-running mode has foreground notification, stop action, lifecycle handling, checkpoint, quota, and cleanup evidence. |
 | `second_execution_slot` | `completed` | `closed` | `required_internal` | At least two independent Node execution slots are available with isolated ResourceRegistry and crash evidence. |
 | `full_heavy_resource_stress` | `open` | `open` | `required_internal` | 8-hour quick soak and 24-hour final soak show no monotonic leaks, orphan process, or unrecoverable runtime. |
@@ -159,12 +159,12 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 13
+- Reports with blockers: 12
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
 | `phase13-accessibility-selector-promotion.json` | `verifyNodePhase13AccessibilitySelectorPromotion` | `P13-19` | `partial` | 0 | 2 |
-| `phase13-android-package-install-manager.json` | `verifyNodePhase13AndroidPackageInstallManager` | `P13-09` | `partial` | 0 | 1 |
+| `phase13-android-package-install-manager.json` | `verifyNodePhase13AndroidPackageInstallManager` | `P13-09` | `ready` | 0 | 0 |
 | `phase13-app-intent-broadcast-parity.json` | `verifyNodePhase13AppIntentBroadcastParity` | `P13-23` | `ready` | 0 | 0 |
 | `phase13-autojs-global-v1.json` | `verifyNodePhase13AutoJsGlobalV1` | `P13-12` | `ready` | 0 | 0 |
 | `phase13-baseline-verification.json` | `verifyNodePhase13Baseline` | `-` | `passed` | 0 | 0 |

@@ -70,7 +70,8 @@ Current full heavy resource stress progress:
 
 Current Android package installation progress:
 
-- `android_side_package_installation`: Phase 13 adds
+- `android_side_package_installation`: closed by P13-09/P13-42/P13-48 for the
+  v1.1 local-store requirement. Phase 13 adds
   `NodeAndroidPackageInstallManager`, an app-private local package store with
   transactional install/update/remove/list/verify/prune, cancellation, store
   locking, SHA-512 integrity, lifecycle/bin/native/path-escape denial, and
@@ -79,10 +80,10 @@ Current Android package installation progress:
   policy-only source planning
   status/policy/sourcePolicy/planInstall/planUpdate/planRemove/planRegistryInstall/planTarballInstall/install/update/remove/list/verify/prune
   plus guarded `npm` alias facade while npm CLI, registry, lifecycle, bin,
-  native payload, and unrestricted install authority remain denied. The
-  blocker remains open until registry/download implementation, npm CLI
-  decision, signed native-payload decision, and plugin/package distribution
-  integration land.
+  native payload, and unrestricted install authority remain denied. Registry
+  download, npm CLI, signed/native payloads, plugin/package distribution, and
+  packaged dependency distribution remain future promotion gates requiring
+  reviewed authority, rollback, disclosure, and packaged evidence.
 
 Resolved in Phase 11:
 

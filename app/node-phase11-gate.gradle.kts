@@ -1335,7 +1335,11 @@ tasks.register<Exec>("generateNodeFinalPackageManagerStatus") {
     group = "verification"
     description = "Writes the current Phase 11 package-manager status without failing on Android install blockers."
 
-    dependsOn("verifyNodePackageManagerGate", "generateNodeFinalCapabilityTruth")
+    dependsOn(
+        "verifyNodePackageManagerGate",
+        "verifyNodePhase13AndroidPackageInstallManager",
+        "generateNodeFinalCapabilityTruth",
+    )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-package-manager-gate.js")
     inputs.file(scriptFile)
@@ -1347,6 +1351,7 @@ tasks.register<Exec>("generateNodeFinalPackageManagerStatus") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/PACKAGE_MANAGER_BOUNDARY.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
     inputs.file(nodePhase11ReportDir.map { it.file("phase10-package-manager-boundary.json") })
+    inputs.file(nodePhase11ReportDir.map { it.file("phase13-android-package-install-manager.json") })
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-package-manager-gate.json") },
         nodePhase11ReportDir.map { it.file("final-package-manager-gate.md") },
@@ -1367,7 +1372,11 @@ tasks.register<Exec>("verifyNodeFinalPackageManagerGate") {
     group = "verification"
     description = "Strict final package-manager gate; blocked until Android-side package installation is implemented."
 
-    dependsOn("verifyNodePackageManagerGate", "generateNodeFinalCapabilityTruth")
+    dependsOn(
+        "verifyNodePackageManagerGate",
+        "verifyNodePhase13AndroidPackageInstallManager",
+        "generateNodeFinalCapabilityTruth",
+    )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-package-manager-gate.js")
     inputs.file(scriptFile)
@@ -1379,6 +1388,7 @@ tasks.register<Exec>("verifyNodeFinalPackageManagerGate") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/PACKAGE_MANAGER_BOUNDARY.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
     inputs.file(nodePhase11ReportDir.map { it.file("phase10-package-manager-boundary.json") })
+    inputs.file(nodePhase11ReportDir.map { it.file("phase13-android-package-install-manager.json") })
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-package-manager-gate.json") },
         nodePhase11ReportDir.map { it.file("final-package-manager-gate.md") },

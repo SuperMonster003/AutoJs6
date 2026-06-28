@@ -86,7 +86,7 @@ function buildReport(files) {
       token(files.manager, "ERROR_PATH_ESCAPE"),
       token(files.managerTest, "rejectsLifecycleScriptsNativePayloadsBinEntriesAndCancellation"),
     ]),
-    scenario("future_distribution", "Manager records dependency/plugin/project package kinds and a guarded mutation script facade for later distribution", [
+    scenario("future_distribution", "Manager records dependency/plugin/project package kinds and a guarded mutation script facade while future distribution stays gated", [
       token(files.manager, "KIND_DEPENDENCY"),
       token(files.manager, "KIND_PLUGIN"),
       token(files.manager, "KIND_PROJECT"),
@@ -122,9 +122,9 @@ function buildReport(files) {
       token(files.packageManagerDoc, "Registry download, npm CLI install"),
       token(files.securityModel, "registry/npm execution"),
     ], []),
-    scenario("docs", "Docs record partial Android package install progress", [
+    scenario("docs", "Docs record ready Android local package install progress and future distribution gates", [
       token(files.phase13Tasks, "P13-09"),
-      token(files.p13Report, "Status: partial"),
+      token(files.p13Report, "Status: ready"),
       token(files.packageManagerDoc, "NodeAndroidPackageInstallManager"),
       token(files.testingDoc, "NodeAndroidPackageInstallManagerInstrumentationTest"),
       token(files.securityModel, "NodeAndroidPackageInstallManager"),
@@ -132,7 +132,7 @@ function buildReport(files) {
     ]),
   ];
   const checks = [
-    check("blocker-open", blockerEntry && blockerEntry.status === "open", "`android_side_package_installation` must remain open until runtime exposure and distribution evidence land."),
+    check("blocker-closed", blockerEntry && blockerEntry.status === "closed", "`android_side_package_installation` must be closed once the v1.1 local-store install/update/remove/list/verify/prune requirements are satisfied."),
     check("manager-present", files.manager.exists, "Android package install manager source must exist."),
     check("test-present", files.managerTest.exists, "Android package install manager focused instrumentation must exist."),
     check("report-present", files.p13Report.exists, "P13-09 report must document current progress."),
@@ -141,7 +141,7 @@ function buildReport(files) {
   const blockers = [
     ...scenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`)),
   ];
-  if (blockerEntry && blockerEntry.status === "open") {
+  if (blockerEntry && blockerEntry.status !== "closed") {
     blockers.push(`android_side_package_installation: ${blockerEntry.currentEvidence}`);
   }
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;

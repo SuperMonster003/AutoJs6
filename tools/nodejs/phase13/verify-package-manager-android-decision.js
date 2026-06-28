@@ -216,7 +216,7 @@ function buildReport(files) {
       token(files.phase10PackageManager, "binLinks: false"),
       token(files.phase10PackageManagerReport, "`autojs6-lock.json` generation"),
       token(files.phase10PackageManagerReport, "scripts, `.bin` execution, native addons"),
-      token(files.designPackageManager, "partial Android local package store through `NodeAndroidPackageInstallManager`"),
+      token(files.designPackageManager, "v1.1 Android local-store substrate through `NodeAndroidPackageInstallManager`"),
     ], []),
     scenario("docs_gate_and_matrix", "Docs, release matrix, surface manifest, and Gradle gate record P13-42", [
       token(files.phase13Tasks, "P13-42 partial landing"),

@@ -790,27 +790,30 @@ java.lang.StringBuilder;      // 当前不是默认 Node 能力
 `docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` 中仍为 open 的 required internal
 blockers：
 
-- `crash_evidence_automation`
-- `android_side_package_installation`
 - `packaged_long_running`
-- `second_execution_slot`
 - `full_heavy_resource_stress`
 
 含义：
 
-- crash marker、next-launch collection、symbolization、chaos injection 尚未形成
-  完整自动化闭环。
-- P13-09 已补 Android 端 app-private local package store，支持
-  install/update/remove/list/verify/prune、transaction、cancel、lock 和
-  integrity；JS API、registry/download、signed native payload 和 distribution
-  integration 尚未完成。
 - packaged APK long-running Node service mode 尚未完成。
-- 第二执行 slot 已有显式 one-shot 路由和 focused instrumentation，但默认调度、
-  packaged 行为、slot crash evidence 和 stress promotion 仍未完成。
 - P13-08 已补 `verifyNodePhase13FullHeavyResourceStress` 状态 gate、可比较
   report contract、accepted/rejected 形状 fixtures 和归档前校验 helper；
   fixtures 只验证 gate fail-closed 规则，真实 8 小时 quick soak 和 24 小时
   final soak 证据仍未完成。
+
+已关闭但仍与后续 promotion 相关的 required internal blockers：
+
+- `crash_evidence_automation`：P13-05 已补 crash marker、next-launch
+  collection、packaged crash smoke、native SIGKILL chaos collection 和
+  signal-safe fixed-size marker 证据。
+- `second_execution_slot`：P13-06 已补默认 two-slot 调度、packaged
+  overflow-slot smoke、no-restart crash marker fallback 和 focused
+  primary/overflow shared-resource stress。长测 soak 继续由 P13-08 /
+  `full_heavy_resource_stress` 负责。
+- `android_side_package_installation`：P13-09/P13-42/P13-48 已关闭 v1.1
+  app-private local-store install/update/remove/list/verify/prune blocker；
+  registry/download、npm CLI、signed/native payload、plugin/package
+  distribution integration 仍是后续 gated promotion work。
 
 ### Conditional decisions
 
