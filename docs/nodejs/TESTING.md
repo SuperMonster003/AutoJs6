@@ -96,8 +96,26 @@ include `executionMode=interactive_long_running`,
 restart policy `never`, `automaticRestart=false`, and the Stop action name.
 P13-07 adds a packaged long-running dispatch gate for projects that declare
 `node.executionMode=interactive_long_running`; packaged status snapshots should
-use `launchSurface=packaged_long_running`, while final install/run,
-restore/cleanup, permission-denial, and background-start evidence remains open.
+use `launchSurface=packaged_long_running`, and the packaged crash-evidence
+smoke verifies `autojs6:lifecycle` checkpoint/read/clear markers from packaged
+mode. Final notification Stop action, task-removal cleanup, permission-denial,
+background-start, and quota/resource stress evidence remains open.
+
+Current packaged lifecycle smoke evidence:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:assembleInrtDebug
+adb -s QV710AF65F push app\build\outputs\apk\inrt\debug\inrt-v6.7.1-alpha4-universal.apk /data/local/tmp/autojs6-inrt-debug-template.apk
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest `
+  "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunCrashEvidenceEmbeddedNodePackagedApk" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.embeddedNode.packagedSmokeTemplateOverride=true" `
+  "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+The focused run passes on QV710AF65F / Sony XQ-AT72 / Android 12 and expects
+`NodeLifecycleCheckpointStore` checkpoint write/read/clear logcat markers plus
+next-launch `NodeCrashEvidenceStore` collection.
 `NodeAndroidRuntimePolicyInstrumentationTest` verifies the embedded Node service
 manifest/type/permission diagnostics, background foreground-service start
 denial classification, missing or invalid foreground-service type diagnostics,

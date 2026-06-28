@@ -76,7 +76,8 @@ Reason open: mostly `evidence`.
 
 Reason open: `evidence`, `packaging`.
 
-- [ ] Add packaged `autojs6:lifecycle` restore and cleanup evidence.
+- [x] Add packaged `autojs6:lifecycle` checkpoint/read/clear smoke evidence
+  with QV710AF65F focused packaged smoke coverage.
 - [ ] Add Android version, notification permission, and background-start denial matrix.
 - [ ] Verify foreground notification, stop action, checkpoint, task-removal cleanup, relaunch, and crash recovery.
 - [ ] Record packaged metadata and disclosure denial paths before promotion.

@@ -34,7 +34,7 @@
       "id": "packaged_long_running",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Interactive long-running works; Phase 13 adds partial packaged dispatch through node.executionMode=interactive_long_running, a packaged_long_running launch surface, inrt foreground-service routing, host verification, and a focused packaged crash evidence smoke that installs and starts packaged long-running mode with fresh inrt template override. Full foreground Stop action, lifecycle restore/cleanup, Android permission/background-start matrix, and quota/stress evidence remain open.",
+      "currentEvidence": "Interactive long-running works; Phase 13 adds partial packaged dispatch through node.executionMode=interactive_long_running, a packaged_long_running launch surface, inrt foreground-service routing, host verification, focused packaged crash evidence smoke, and packaged autojs6:lifecycle checkpoint/read/clear smoke with launchSurface=packaged_long_running passing on QV710AF65F / Sony XQ-AT72 / Android 12. Full foreground Stop action, task-removal cleanup, Android permission/background-start matrix, and quota/stress evidence remain open.",
       "requiredResolution": "Packaged APK long-running mode has foreground notification, stop action, lifecycle handling, checkpoint, quota, and cleanup evidence."
     },
     {

@@ -43,18 +43,18 @@ enable implicit service mode for ordinary script execution.
 Task S7-22 adds a cooperative checkpoint and explicit restore protocol for the
 same interactive runtime. `require("autojs6:lifecycle")` exposes
 `checkpoint()`, `readCheckpoint()`, `clearCheckpoint()`, `onCheckpoint()`,
-`onRestore()`, and `onStop()` only through the explicit interactive session
-surface. Checkpoints are JSON-serializable data only, size-limited to 64 KiB,
-stored atomically under app-private project-scoped storage, and never trigger an
-automatic restart.
+`onRestore()`, and `onStop()` only through the explicit interactive and
+packaged long-running surfaces. Checkpoints are JSON-serializable data only,
+size-limited to 64 KiB, stored atomically under app-private project-scoped
+storage, and never trigger an automatic restart.
 
 Task P13-07 adds the first packaged long-running dispatch path. A packaged Node
 project may opt in with `node.executionMode=interactive_long_running`; the inrt
 launcher then prepares the encrypted project entry through the same Node project
 preprocessor used by one-shot packaged projects and starts the foreground
 service with `launchSurface=packaged_long_running`. The final blocker remains
-open until install/run smoke, packaged lifecycle restore/cleanup, Android
-permission denial, and background-start policy evidence land.
+open until notification Stop action, task-removal cleanup, Android permission
+denial, background-start policy, and quota/resource stress evidence land.
 
 ## Goal
 

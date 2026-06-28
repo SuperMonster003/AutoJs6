@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -10,6 +11,8 @@ import java.util.Locale
 
 object NodeLifecycleCheckpointStore {
 
+    private const val TAG = "NodeLifecycleCheckpointStore"
+    const val CHECKPOINT_MARKER_SCHEMA = "autojs6-node-lifecycle-checkpoint-v1"
     const val RUNTIME_MODULE_NAME = "autojs6:lifecycle-config"
     const val BRIDGE_MODULE_NAME = "lifecycle"
     const val METHOD_CHECKPOINT = "checkpoint"
@@ -28,8 +31,7 @@ object NodeLifecycleCheckpointStore {
         stopRequestFile: File?,
     ): String {
         val scope = projectScope(context, engineInfo.cwd)
-        val interactiveLifecycle = executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
-            launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
+        val explicitLongRunningLifecycle = isExplicitLongRunningLifecycle(executionMode, launchSurface)
         return JSONObject().apply {
             put("schemaVersion", SCHEMA_VERSION)
             put("executionId", engineInfo.id)
@@ -40,7 +42,7 @@ object NodeLifecycleCheckpointStore {
             put("executionMode", executionMode)
             put("launchSurface", launchSurface)
             put("checkpoint", JSONObject().apply {
-                put("enabled", interactiveLifecycle)
+                put("enabled", explicitLongRunningLifecycle)
                 put("maxBytes", MAX_CHECKPOINT_BYTES)
                 put("automaticRestart", false)
                 put("restartPolicy", "never")
@@ -112,18 +114,39 @@ object NodeLifecycleCheckpointStore {
             put("checkpoint", parseJsonValue(checkpointJson))
         }
         writeJsonAtomic(checkpointFile(context, scope), record)
+        Log.i(
+            TAG,
+            "checkpoint.write schema=$CHECKPOINT_MARKER_SCHEMA projectKey=${scope.projectKey} " +
+                "reason=${record.optString("reason")} launchSurface=${engineInfo.launchSurface} " +
+                "executionMode=${engineInfo.executionMode} packageName=${scope.packageName} " +
+                "checkpointBytes=$checkpointBytes",
+        )
         return JSONObject(record.toString())
     }
 
     fun readCheckpoint(context: Context, engineInfo: NodeBridgeEngineInfo): JSONObject? {
         ensureInteractiveLifecycle(engineInfo, METHOD_READ_CHECKPOINT)
-        return readCheckpoint(context, projectScope(context, engineInfo.cwd))
+        val scope = projectScope(context, engineInfo.cwd)
+        val record = readCheckpoint(context, scope)
+        Log.i(
+            TAG,
+            "checkpoint.read schema=$CHECKPOINT_MARKER_SCHEMA projectKey=${scope.projectKey} " +
+                "exists=${record != null} launchSurface=${engineInfo.launchSurface} " +
+                "executionMode=${engineInfo.executionMode} packageName=${scope.packageName}",
+        )
+        return record
     }
 
     fun clearCheckpoint(context: Context, engineInfo: NodeBridgeEngineInfo): JSONObject {
         ensureInteractiveLifecycle(engineInfo, METHOD_CLEAR_CHECKPOINT)
         val scope = projectScope(context, engineInfo.cwd)
         val deleted = checkpointFile(context, scope).delete()
+        Log.i(
+            TAG,
+            "checkpoint.clear schema=$CHECKPOINT_MARKER_SCHEMA projectKey=${scope.projectKey} " +
+                "deleted=$deleted launchSurface=${engineInfo.launchSurface} " +
+                "executionMode=${engineInfo.executionMode} packageName=${scope.packageName}",
+        )
         return JSONObject().apply {
             put("schemaVersion", SCHEMA_VERSION)
             put("projectKey", scope.projectKey)
@@ -158,8 +181,7 @@ object NodeLifecycleCheckpointStore {
     fun nativeDiagnostics(context: Context, engineInfo: NodeBridgeEngineInfo): Map<String, String> {
         val scope = projectScope(context, engineInfo.cwd)
         val record = readCheckpoint(context, scope)
-        val enabled = engineInfo.executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
-            engineInfo.launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
+        val enabled = isExplicitLongRunningLifecycle(engineInfo)
         return linkedMapOf(
             "embedded_script.lifecycle_checkpoint.enabled" to enabled.toString(),
             "embedded_script.lifecycle_checkpoint.project_key" to scope.projectKey,
@@ -173,19 +195,28 @@ object NodeLifecycleCheckpointStore {
     }
 
     private fun ensureInteractiveLifecycle(engineInfo: NodeBridgeEngineInfo, method: String) {
-        if (
-            engineInfo.executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
-            engineInfo.launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
-        ) {
+        if (isExplicitLongRunningLifecycle(engineInfo)) {
             return
         }
         throw NodeLifecycleCheckpointException(
             NodeBridgeError.permissionDenied(
-                message = "AutoJs6 lifecycle.$method is available only inside the explicit interactive long-running runtime.",
+                message = "AutoJs6 lifecycle.$method is available only inside the explicit interactive or packaged long-running runtime.",
                 module = BRIDGE_MODULE_NAME,
                 method = method,
             ),
         )
+    }
+
+    private fun isExplicitLongRunningLifecycle(engineInfo: NodeBridgeEngineInfo): Boolean {
+        return isExplicitLongRunningLifecycle(engineInfo.executionMode, engineInfo.launchSurface)
+    }
+
+    private fun isExplicitLongRunningLifecycle(executionMode: String, launchSurface: String): Boolean {
+        return executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
+            launchSurface in setOf(
+                NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+                NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING,
+            )
     }
 
     private fun readCheckpoint(context: Context, scope: ProjectScope): JSONObject? {

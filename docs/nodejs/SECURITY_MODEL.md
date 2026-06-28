@@ -189,9 +189,10 @@ capability broker before execution. Direct script requests for non-`one_shot`
 modes still reject before user code.
 Interactive
 long-running status records restart policy `never`, `automaticRestart=false`,
-duration, active resources, and the Stop action; packaged long-running remains
-partial until install/run, restore/cleanup, permission-denial, background-start,
-and stress evidence land. Automatic restart, broader quotas, and script-level
+duration, active resources, and the Stop action; packaged long-running includes
+checkpoint/read/clear smoke evidence but remains partial until Stop action,
+task-removal cleanup, permission-denial, background-start, and stress evidence
+land. Automatic restart, broader quotas, and script-level
 cooperative stop beyond the interactive lifecycle module remain gated. S7-22
 adds `require("autojs6:lifecycle")` for interactive and packaged long-running
 sessions:
