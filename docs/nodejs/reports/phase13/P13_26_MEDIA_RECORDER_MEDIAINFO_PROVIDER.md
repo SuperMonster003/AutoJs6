@@ -38,6 +38,11 @@
   volume snapshots.
 - `recorder` exposes status plus explicit capability and Android permission
   vocabulary, but does not start microphone capture.
+- Screen recording and internal/playback audio capture are stable-denied for
+  P13-26 v1.1. They require a separate MediaProjection and Android playback
+  capture policy gate with foreground disclosure, stop action, capture config,
+  app opt-out handling, packaged metadata, and denial evidence before any
+  runtime API is accepted.
 - No raw `MediaPlayer`, `AudioManager`, `MediaRecorder`,
   `MediaMetadataRetriever`, `MediaInfo`, `MediaStore` cursor, `Uri`, file
   descriptor, or `Context` object crosses the bridge.

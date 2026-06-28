@@ -109,9 +109,10 @@ function buildReport(files) {
       token(files.mediaTest, "recorder.start"),
       token(files.conformanceTest, 'expectExports("recorder", recorder, ["getStatus", "start", "stop"])'),
       token(files.typeSmoke, "const recorderStart: (options?: recorder.RecorderStartOptions) => Promise<never>"),
+      token(files.p13Report, "Screen recording and internal/playback audio capture are stable-denied"),
+      token(files.compatibilityProfile, "screen/internal audio capture is stable-denied for v1.1"),
     ], [
       "Real audio recording start/stop/session handles require runtime permission flow, foreground notification disclosure, and cleanup.",
-      "Screen/internal audio recording and Android 10+ capture policy decisions remain blocked.",
       "Packaged recorder smoke, denial matrix, and privacy disclosure copy remain open.",
     ]),
     scenario("compat_provider_docs", "compat, provider registry, process permission, docs, and project tooling record P13-26", [

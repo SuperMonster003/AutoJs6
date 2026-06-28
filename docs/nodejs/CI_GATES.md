@@ -463,8 +463,10 @@ media/recorder/mediainfo provider state: `media.audio`, `media.metadata`, and
 `media.recording` are exact capability tokens, read-only media audio snapshots,
 scoped mediainfo reads, recorder status, and stable recorder start/stop
 fail-closed behavior are covered, while playback, real recorder sessions,
-MediaStore access, packaged media evidence, and raw Android media objects
-remain blocked.
+screen/internal audio capture, MediaStore access, packaged media evidence, and
+raw Android media objects remain blocked. Screen/internal audio capture is
+stable-denied for v1.1 until a separate MediaProjection/playback-capture policy
+gate exists.
 `verifyNodePhase13UtilityHeavyRhinoModules` records the P13-27 partial
 utility-heavy Rhino modules state: pure `jsox.mathx`, `jsox.arrayx`, and
 `jsox.numberx` helpers are covered through `jsox`, direct submodule requires,

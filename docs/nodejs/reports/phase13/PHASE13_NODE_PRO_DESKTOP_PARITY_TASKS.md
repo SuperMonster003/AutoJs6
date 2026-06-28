@@ -152,7 +152,9 @@
 - Surface manifest evidence: `phase13-media-recorder-mediainfo-provider`.
 - Remaining P13-26 blockers: audio playback, real recorder sessions,
   foreground notification disclosure, MediaStore permissions/policy, packaged
-  media asset lookup, corpus evidence, and migration examples.
+  media asset lookup, corpus evidence, and migration examples. Screen/internal
+  audio capture is stable-denied for v1.1 pending a separate
+  MediaProjection/playback-capture policy gate.
 
 ## P13-27 Partial Landing Note
 
@@ -1235,6 +1237,8 @@ P13 task 本身使用以下执行状态：
     - Open before closure: playback provider, real recorder sessions,
       MediaStore policy, external media permission matrix, packaged media
       asset lookup, privacy copy, corpus evidence, and migration examples.
+      Screen/internal audio capture is stable-denied for v1.1 pending a
+      separate MediaProjection/playback-capture policy gate.
 
 - [x] P13-27: 扩展 utility-heavy Rhino modules。
   - 范围：`zip`、`canvas`、`opencc`、`pinyin` full dictionary、`jsox`、
