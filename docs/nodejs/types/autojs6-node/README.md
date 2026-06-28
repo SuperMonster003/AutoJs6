@@ -296,7 +296,9 @@ P13-26 records the partial media/recorder/mediainfo provider gate.
 `recorder.getStatus()` are typed with JSON-safe result schemas. Exact
 `media.audio`, `media.metadata`, and `media.recording` capabilities are
 required for the promoted helpers; playback, real recorder sessions, MediaStore,
-packaged media assets, and foreground microphone disclosure remain future work.
+foreground microphone disclosure, broader corpus evidence, privacy copy, and
+migration examples remain future work. Packaged bundled-asset lookup, recorder
+status, recorder start denial, and exact-denial smoke are covered.
 
 P13-27 records the partial utility-heavy Rhino modules gate. `jsox.mathx`,
 `jsox.arrayx`, and `jsox.numberx` are typed as pure JavaScript facades through

@@ -282,9 +282,11 @@ Reason open: `implementation`, `evidence`, `packaging`.
 
 - [x] Stable-deny audio playback, MediaPlayer lifecycle, playlists, and focus policy for v1.1.
 - [x] Stable-deny MediaStore query/insert/update/delete and broad media-library permissions for v1.1.
+- [x] Add packaged media asset lookup, recorder status, recorder start denial,
+  and exact-capability denial smoke evidence.
 - [ ] Add real recording start/stop/session handles, permission flow, foreground disclosure, and cleanup.
 - [x] Decide screen/internal audio recording policy.
-- [ ] Add packaged media assets, recorder smoke, denial matrix, and privacy copy.
+- [ ] Add real recorder privacy copy, broader media corpus, and migration examples.
 - [x] Keep docs/provider evidence gate from counting playback, MediaStore, recording, packaged smoke, privacy, and migration evidence twice.
 
 #### P13-27 utility-heavy Rhino modules

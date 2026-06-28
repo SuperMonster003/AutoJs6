@@ -38,6 +38,11 @@
   volume snapshots.
 - `recorder` exposes status plus explicit capability and Android permission
   vocabulary, but does not start microphone capture.
+- Packaged APK smoke coverage now exercises declared `media`, `media.audio`,
+  `media.metadata`, and `media.recording` metadata; bundled media asset lookup
+  through scoped `mediainfo`; read-only audio stream snapshots; recorder status;
+  stable recorder start denial; and packaged exact-capability denial for
+  missing `media.audio` / `media.metadata` / `media.recording`.
 - Screen recording and internal/playback audio capture are stable-denied for
   P13-26 v1.1. They require a separate MediaProjection and Android playback
   capture policy gate with foreground disclosure, stop action, capture config,
@@ -64,6 +69,8 @@
   `app/src/main/cpp/node_bridge_sources.cpp`
 - Instrumentation:
   `app/src/androidTest/java/org/autojs/autojs/engine/NodeMediaBridgeInstrumentationTest.kt`
+- Packaged APK smoke:
+  `EmbeddedNodePackagedApkSmokeTest#installAndRunMediaRecorderBridgeEmbeddedNodePackagedApks`
 - Conformance:
   `app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`
 - Types:
@@ -78,12 +85,10 @@
 ## Remaining Blockers
 
 - Real recorder sessions with runtime permission flow, foreground disclosure,
-  resource handles, cleanup, cancellation, and packaged smoke.
-- Packaged media asset lookup, privacy copy, migration examples, and broader
-  media corpus evidence.
+  resource handles, cleanup, cancellation, and privacy copy.
+- Broader real audio/video corpus evidence and migration examples.
 
 The compat/provider registry, process permission, docs, project tooling,
 surface manifest, and Gradle gate are evidence-only for this partial decision.
 They do not add separate P13-26 blockers beyond real recording,
-packaged media/recorder smoke, privacy copy, migration examples, and broader
-media corpus evidence above.
+privacy copy, migration examples, and broader media corpus evidence above.

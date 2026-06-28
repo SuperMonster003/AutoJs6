@@ -8296,6 +8296,33 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildMediaRecorderBridgeEmbeddedNodePackagedApks() {
+        assumeTrue(
+            "Embedded Node.js packaged media/recorder bridge smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedMediaRecorderBridgeApk()
+        buildPackagedMediaRecorderBridgeDenialApk()
+    }
+
+    @Test
+    fun installAndRunMediaRecorderBridgeEmbeddedNodePackagedApks() {
+        assumeTrue(
+            "Embedded Node.js packaged media/recorder bridge install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged media/recorder bridge install-and-run smoke")
+
+        val outputApk = buildPackagedMediaRecorderBridgeApk()
+        assertInstallAndRunPackagedMediaRecorderBridgeSmoke(outputApk)
+
+        val denialOutputApk = buildPackagedMediaRecorderBridgeDenialApk()
+        assertInstallAndRunPackagedMediaRecorderBridgeDenialSmoke(denialOutputApk)
+    }
+
+    @Test
     fun buildV11BridgeEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged v1.1 bridge smoke requires embedded script execution build support.",
@@ -11651,6 +11678,168 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedMediaRecorderBridgeApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            function bridgeCode(error) {
+              return String(error && (error.autojs6Code || error.code || ""));
+            }
+
+            async function denied(action) {
+              try {
+                await action();
+                return "allowed";
+              } catch (error) {
+                return bridgeCode(error);
+              }
+            }
+
+            async function main() {
+              const media = require("media");
+              const mediainfo = require("mediainfo");
+              const recorder = require("recorder");
+
+              const volume = await media.getAudioStreamVolume("music", { timeoutMs: 3000 });
+              const maxVolume = await media.getAudioStreamMaxVolume("music", { timeoutMs: 3000 });
+              const audioInfo = await media.getAudioStreamInfo("music", { timeoutMs: 3000 });
+              const snapshot = await mediainfo.read("sample.mp3", { includeInform: false, timeoutMs: 3000 });
+              const format = await mediainfo.get("sample.mp3", "general", "Format", { timeoutMs: 3000 });
+              const status = await recorder.getStatus({ timeoutMs: 3000 });
+              const startDenied = await denied(() => recorder.start({ path: "record.m4a", timeoutMs: 1000 }));
+
+              const resolveOk = require.resolve("media") === "media" &&
+                require.resolve("mediainfo") === "mediainfo" &&
+                require.resolve("recorder") === "recorder";
+              const shadowOk = media.shadow !== true && mediainfo.shadow !== true && recorder.shadow !== true;
+              const mediaOk =
+                Number.isInteger(volume) &&
+                Number.isInteger(maxVolume) &&
+                audioInfo.schema === "autojs6-node-media-audio-stream-v1" &&
+                audioInfo.stream === "music" &&
+                Number.isInteger(audioInfo.volume) &&
+                Number.isInteger(audioInfo.maxVolume);
+              const mediainfoOk =
+                snapshot.schema === "autojs6-node-mediainfo-snapshot-v1" &&
+                snapshot.path === "sample.mp3" &&
+                snapshot.fileName === "sample.mp3" &&
+                typeof snapshot.sizeBytes === "number" &&
+                typeof snapshot.inform === "string" &&
+                typeof format !== "undefined";
+              const recorderStatusOk =
+                status.schema === "autojs6-node-recorder-status-v1" &&
+                status.recording === false &&
+                status.providerAvailable === false &&
+                status.foregroundDisclosureRequired === true &&
+                status.reason === "blocked_until_privacy_reviewed_recorder_provider";
+              const recorderDenialOk = startDenied === "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED";
+              const surfaceOk =
+                typeof media.getAudioStreamInfo === "function" &&
+                typeof mediainfo.read === "function" &&
+                typeof mediainfo.get === "function" &&
+                typeof recorder.getStatus === "function" &&
+                typeof recorder.start === "function" &&
+                typeof recorder.stop === "function";
+              const ready = resolveOk && shadowOk && surfaceOk && mediaOk &&
+                mediainfoOk && recorderStatusOk && recorderDenialOk;
+
+              console.log("packaged.media_recorder.ready=" + ready);
+              console.log("packaged.media_recorder.resolve=" + resolveOk);
+              console.log("packaged.media_recorder.shadow=" + shadowOk);
+              console.log("packaged.media_recorder.surface=" + surfaceOk);
+              console.log("packaged.media_recorder.media=" + mediaOk);
+              console.log("packaged.media_recorder.mediainfo=" + mediainfoOk);
+              console.log("packaged.media_recorder.recorder_status=" + recorderStatusOk);
+              console.log("packaged.media_recorder.recorder_denial=" + recorderDenialOk);
+            }
+
+            return main().catch(error => {
+              console.error("packaged.media_recorder.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-media-recorder-bridge-smoke",
+            outputApkName = MEDIA_RECORDER_BRIDGE_APK_NAME,
+            projectName = MEDIA_RECORDER_BRIDGE_PROJECT_NAME,
+            packageName = MEDIA_RECORDER_BRIDGE_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraFiles = mapOf(
+                "sample.mp3" to "sample-media\n",
+                "node_modules/media/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/mediainfo/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/recorder/index.js" to """module.exports = { shadow: true };""" + "\n",
+            ),
+            extraPermissions = listOf(
+                "android.permission.RECORD_AUDIO",
+                "android.permission.FOREGROUND_SERVICE_MICROPHONE",
+            ),
+            nodePermissions = MEDIA_RECORDER_BRIDGE_NODE_PERMISSIONS,
+            runtimeMarkers = MEDIA_RECORDER_BRIDGE_RUNTIME_MARKERS,
+        )
+    }
+
+    private fun buildPackagedMediaRecorderBridgeDenialApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function denied(action) {
+              try {
+                await action();
+                return "allowed|";
+              } catch (error) {
+                const code = String(error && (error.autojs6Code || error.code || ""));
+                const missing = Array.isArray(error && error.missingCapabilities)
+                  ? error.missingCapabilities.join(",")
+                  : "";
+                return code + "|" + missing;
+              }
+            }
+
+            async function main() {
+              const media = require("media");
+              const mediainfo = require("mediainfo");
+              const recorder = require("recorder");
+              const audioDenied = await denied(() => media.getAudioStreamInfo("music", { timeoutMs: 1000 }));
+              const metadataDenied = await denied(() => mediainfo.read("sample.mp3", { timeoutMs: 1000 }));
+              const recordingDenied = await denied(() => recorder.getStatus({ timeoutMs: 1000 }));
+              const shadowOk = media.shadow !== true && mediainfo.shadow !== true && recorder.shadow !== true;
+              const audioOk = audioDenied === "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED|media.audio";
+              const metadataOk = metadataDenied === "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED|media.metadata";
+              const recordingOk = recordingDenied === "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED|media.recording";
+              const ready = audioOk && metadataOk && recordingOk && shadowOk;
+              console.log("packaged.media_recorder_denial.ready=" + ready);
+              console.log("packaged.media_recorder_denial.audio=" + audioOk);
+              console.log("packaged.media_recorder_denial.metadata=" + metadataOk);
+              console.log("packaged.media_recorder_denial.recording=" + recordingOk);
+              console.log("packaged.media_recorder_denial.shadow=" + shadowOk);
+            }
+
+            return main().catch(error => {
+              console.error("packaged.media_recorder_denial.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-media-recorder-denial-smoke",
+            outputApkName = MEDIA_RECORDER_DENIAL_APK_NAME,
+            projectName = MEDIA_RECORDER_DENIAL_PROJECT_NAME,
+            packageName = MEDIA_RECORDER_DENIAL_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraFiles = mapOf(
+                "node_modules/media/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/mediainfo/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/recorder/index.js" to """module.exports = { shadow: true };""" + "\n",
+            ),
+            nodePermissions = MEDIA_RECORDER_DENIAL_NODE_PERMISSIONS,
+            runtimeMarkers = MEDIA_RECORDER_DENIAL_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedV11BridgeApk(): File {
         val mainScriptName = "main.js"
         val mainScript = """
@@ -13752,6 +13941,26 @@ $nodeConfigJson
         )
     }
 
+    private fun assertInstallAndRunPackagedMediaRecorderBridgeSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = MEDIA_RECORDER_BRIDGE_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-media-recorder-bridge-smoke.apk",
+            label = "packaged media/recorder bridge smoke",
+            requiredMarkers = MEDIA_RECORDER_BRIDGE_RUNTIME_MARKERS,
+        )
+    }
+
+    private fun assertInstallAndRunPackagedMediaRecorderBridgeDenialSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = MEDIA_RECORDER_DENIAL_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-media-recorder-denial-smoke.apk",
+            label = "packaged media/recorder bridge denial smoke",
+            requiredMarkers = MEDIA_RECORDER_DENIAL_RUNTIME_MARKERS,
+        )
+    }
+
     private fun assertInstallAndRunPackagedV11BridgeSmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
@@ -15018,6 +15227,16 @@ $nodeConfigJson
             "org.autojs6.packaged.node.notificationspower.denial.smoke"
         private const val NOTIFICATIONS_POWER_DENIAL_APK_NAME =
             "PackagedNodeNotificationsPowerDenialSmoke_v1.0.0.apk"
+        private const val MEDIA_RECORDER_BRIDGE_PROJECT_NAME = "PackagedNodeMediaRecorderBridgeSmoke"
+        private const val MEDIA_RECORDER_BRIDGE_PACKAGE_NAME =
+            "org.autojs6.packaged.node.mediarecorder.smoke"
+        private const val MEDIA_RECORDER_BRIDGE_APK_NAME =
+            "PackagedNodeMediaRecorderBridgeSmoke_v1.0.0.apk"
+        private const val MEDIA_RECORDER_DENIAL_PROJECT_NAME = "PackagedNodeMediaRecorderDenialSmoke"
+        private const val MEDIA_RECORDER_DENIAL_PACKAGE_NAME =
+            "org.autojs6.packaged.node.mediarecorder.denial.smoke"
+        private const val MEDIA_RECORDER_DENIAL_APK_NAME =
+            "PackagedNodeMediaRecorderDenialSmoke_v1.0.0.apk"
         private const val V11_BRIDGE_PROJECT_NAME = "PackagedNodeV11BridgeSmoke"
         private const val V11_BRIDGE_PACKAGE_NAME = "org.autojs6.packaged.node.v11.bridge.smoke"
         private const val V11_BRIDGE_APK_NAME = "PackagedNodeV11BridgeSmoke_v1.0.0.apk"
@@ -15383,6 +15602,32 @@ $nodeConfigJson
             "packaged.notifications_power_denial.settings=true",
             "packaged.notifications_power_denial.power=true",
             "packaged.notifications_power_denial.shadow=true",
+        )
+        private val MEDIA_RECORDER_BRIDGE_NODE_PERMISSIONS = listOf(
+            "media",
+            "media.audio",
+            "media.metadata",
+            "media.recording",
+        )
+        private val MEDIA_RECORDER_BRIDGE_RUNTIME_MARKERS = listOf(
+            "packaged.media_recorder.ready=true",
+            "packaged.media_recorder.resolve=true",
+            "packaged.media_recorder.shadow=true",
+            "packaged.media_recorder.surface=true",
+            "packaged.media_recorder.media=true",
+            "packaged.media_recorder.mediainfo=true",
+            "packaged.media_recorder.recorder_status=true",
+            "packaged.media_recorder.recorder_denial=true",
+        )
+        private val MEDIA_RECORDER_DENIAL_NODE_PERMISSIONS = listOf(
+            "media",
+        )
+        private val MEDIA_RECORDER_DENIAL_RUNTIME_MARKERS = listOf(
+            "packaged.media_recorder_denial.ready=true",
+            "packaged.media_recorder_denial.audio=true",
+            "packaged.media_recorder_denial.metadata=true",
+            "packaged.media_recorder_denial.recording=true",
+            "packaged.media_recorder_denial.shadow=true",
         )
         private val V11_BRIDGE_NODE_PERMISSIONS = listOf(
             "network",

@@ -1611,9 +1611,13 @@ This host gate records P13-26 as partial. It requires exact `media.audio`,
 `recorder.stop()`, plus TypeScript, conformance, provider-registry,
 permission-manifest, and cross-document evidence. It does not promote playback,
 real recording sessions, screen/internal audio capture, MediaStore access,
-packaged media assets, or raw Android media objects. Screen/internal audio
-capture, playback, and MediaStore access are stable-denied for v1.1; real
-recording sessions and packaged media evidence remain open.
+or raw Android media objects. Packaged bundled-asset lookup, recorder status,
+recorder start denial, and exact-denial smoke are covered by
+`EmbeddedNodePackagedApkSmokeTest#installAndRunMediaRecorderBridgeEmbeddedNodePackagedApks`.
+Screen/internal audio capture, playback, and MediaStore access are
+stable-denied for v1.1; real recording sessions, foreground microphone
+disclosure, broader corpus evidence, privacy copy, and migration examples
+remain open.
 
 Phase 13 utility-heavy Rhino modules status gate:
 

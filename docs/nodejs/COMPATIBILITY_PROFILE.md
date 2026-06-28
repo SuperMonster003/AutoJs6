@@ -2018,7 +2018,7 @@ runtime.
   - `media.audio`, `media.metadata`, and `media.recording` are exact capabilities and are not implied by `media`
   - `mediainfo` accepts only relative paths inside the scoped Node working directory
   - no raw `MediaPlayer`, `AudioManager`, `MediaRecorder`, `MediaMetadataRetriever`, `MediaInfo`, `MediaStore`, `Uri`, file descriptor, or Android `Context` object is exposed to JavaScript
-  - P13-26 records media/recorder/mediainfo provider promotion as partial: screen/internal audio capture is stable-denied for v1.1 pending a separate MediaProjection/playback-capture policy gate; P13-26 v1.1 stable-denies audio playback and external MediaStore access; real recorder sessions, foreground disclosure, packaged media asset lookup, corpus evidence, and migration examples remain open
+  - P13-26 records media/recorder/mediainfo provider promotion as partial: screen/internal audio capture is stable-denied for v1.1 pending a separate MediaProjection/playback-capture policy gate; P13-26 v1.1 stable-denies audio playback and external MediaStore access; packaged bundled-asset lookup, recorder status, recorder start denial, and exact-denial smoke are covered, while real recorder sessions, foreground disclosure, broader corpus evidence, privacy copy, and migration examples remain open
 - `jsox`, `jsox.mathx`, `autojs6:compat.jsox`
   - `jsox.mathx` exposes pure Rhino `Mathx` helpers for random values,
     statistics, distance, logarithms, powers, and min/max helpers
