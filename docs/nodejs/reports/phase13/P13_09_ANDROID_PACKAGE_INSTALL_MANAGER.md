@@ -85,6 +85,13 @@ distribution and package-manager work can build on the same store.
 
 ## Not Promoted Yet
 
+P13-09 v1.1 stable-denies Android registry download, remote tarball install,
+npm CLI install, lifecycle execution, bin shim execution, signed/native payload
+verification, native payload execution, unrestricted JavaScript install
+authority, and unverified cache reuse as runtime user APIs. Future distribution
+promotion must go through a reviewed mobile install authority and packaged
+distribution integration.
+
 - No Android registry downloader is enabled.
 - No Android remote tarball installer or unverified cache reuse is enabled.
 - No npm CLI install is enabled on Android.

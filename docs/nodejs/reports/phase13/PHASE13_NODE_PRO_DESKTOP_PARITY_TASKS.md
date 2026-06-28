@@ -813,9 +813,12 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-android-package-install-manager.js`.
     - Gradle gate: `:app:verifyNodePhase13AndroidPackageInstallManager`.
     - Report: `docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md`.
-    - Open before closure: registry/download policy, npm CLI decision,
-      signed native-payload decision, broader device/distribution evidence,
-      and plugin/package distribution integration.
+    - P13-09 v1.1 policy: Android registry download, remote tarball install,
+      npm CLI install, lifecycle/bin execution, signed/native payload support,
+      unrestricted install authority, and unverified cache reuse are
+      stable-denied runtime user APIs.
+    - Open before closure: broader device/distribution evidence and
+      plugin/package distribution integration.
 
 - [x] P13-10: 发布 Phase 13 capability truth report。
   - 范围：生成 Safe/Pro/Desktop/Debug 四个 profile 的能力真值表。
