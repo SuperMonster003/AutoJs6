@@ -5,7 +5,7 @@ Status: partial
 P13-17 records the current live `require("ui")` provider state for Phase 13.
 The Activity-owned provider is available for explicit Node UI sessions, but the
 surface is not promoted to `pro_compat_opt_in` yet because live packaged UI
-entry, Recents/task relaunch, crash, and disclosure evidence are still missing.
+entry, task relaunch, crash, and disclosure evidence are still missing.
 
 ## Implemented Evidence
 
@@ -27,6 +27,11 @@ entry, Recents/task relaunch, crash, and disclosure evidence are still missing.
   and verifies the live provider emits `ui.lifecycle.back.reason=activity_destroyed`
   through `ui.drainEvents`; this is live Activity lifecycle evidence, not
   packaged task relaunch or cleanup promotion.
+- Recents/task-removal lifecycle: focused instrumentation moves the live UI
+  task to the back, calls `finishAndRemoveTask()`, and verifies the provider
+  emits `ui.lifecycle.recents_task_removed.reason=activity_destroyed` through
+  `ui.drainEvents`; this is still live Activity evidence, not packaged task
+  relaunch or cleanup promotion.
 - Configuration-change policy: focused instrumentation verifies
   `NodeBridgeUiActivity` does not declare orientation/screen-size
   `configChanges`, keeps `screenOrientation` unspecified, is not exported, and
@@ -34,8 +39,10 @@ entry, Recents/task relaunch, crash, and disclosure evidence are still missing.
   The current policy is Android destroy/recreate with no live UI session
   survival claim.
 - Device evidence: on 2026-06-28, `QV710AF65F` / Sony XQ-AT72 / Android 12
-  passed the focused instrumentation method
+  passed the focused instrumentation methods
   `NodeUiBridgeInstrumentationTest#androidUiProviderRecordsBackActivityDestroyLifecycleEvent`
+  and
+  `NodeUiBridgeInstrumentationTest#androidUiProviderRecordsRecentsTaskRemovalLifecycleEvent`
   with `-Pautojs.nodejs.test.deviceProfile=sony`.
 - Packaged capability boundary:
   `EmbeddedNodePackagedApkSmokeTest#installAndRunUiCapabilityBoundaryEmbeddedNodePackagedApk`
@@ -62,9 +69,7 @@ entry, Recents/task relaunch, crash, and disclosure evidence are still missing.
 
 ## Remaining Blockers
 
-- Recents/task-removal Activity lifecycle instrumentation and packaged task
-  relaunch evidence.
-- Live packaged APK UI smoke covering entry, close, relaunch, crash, and
+- Live packaged APK UI smoke covering entry, close, task relaunch, crash, and
   user-visible disclosure evidence.
 
 ## Gate

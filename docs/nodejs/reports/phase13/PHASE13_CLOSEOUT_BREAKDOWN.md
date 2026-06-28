@@ -120,11 +120,12 @@ packaged dependency promotion remains `implementation`, `policy`, and
 #### P13-11 Pro-style entry directives
 
 Reason closed for the P13-11 v1.1 metadata directive scope. Activity
-lifecycle, Back/Recents, relaunch/crash, and packaged UI entry promotion remain
-`evidence` / `packaging` work under P13-17 and future packaged UI promotion.
+lifecycle belongs to P13-17, while packaged UI entry, task relaunch,
+crash/disclosure promotion remains `evidence` / `packaging` work under future
+packaged UI promotion.
 
-- [x] Keep full Activity lifecycle launch evidence as P13-17 / packaged UI promotion work.
-- [x] Keep Back/Recents, close, relaunch, and task recovery behavior as P13-17 / packaged UI promotion work.
+- [x] Keep Activity lifecycle launch evidence as P13-17 provider work.
+- [x] Keep packaged close, relaunch, and task recovery behavior as future packaged UI promotion work.
 - [x] Define concrete UI-thread dispatch semantics beyond directive metadata.
 - [x] Keep packaged entry denial and diagnostic cases fail-closed until packaged UI promotion.
 
@@ -168,12 +169,11 @@ work.
 Reason open: `evidence`, `packaging`.
 
 - [x] Add focused live Back/Activity-destroy lifecycle instrumentation.
-- [ ] Add Recents/task-removal lifecycle instrumentation and packaged task
-  relaunch evidence.
+- [x] Add focused live Recents/task-removal lifecycle instrumentation.
 - [x] Add explicit configuration-change destroy/recreate policy evidence.
 - [x] Add packaged capability/metadata denial smoke for missing `ui`
   capability, raw Android UI global absence, and zero pending bridge dispatch.
-- [ ] Run live packaged UI smoke for entry, close, relaunch, crash, and
+- [ ] Run live packaged UI smoke for entry, close, task relaunch, crash, and
   user-visible disclosure behavior.
 
 #### P13-18 floaty/overlay provider

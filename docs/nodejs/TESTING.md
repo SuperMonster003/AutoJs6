@@ -813,11 +813,11 @@ Phase 13 live UI provider promotion:
 
 `verifyNodePhase13LiveUiProviderPromotion` records the P13-17 partial live UI
 state: direct `require("ui")` has live Activity provider evidence for JSON
-layouts, events, updates, close, provider cleanup, and explicit
-configuration-change destroy/recreate policy; `compat.ui` and type
+layouts, events, updates, close, provider cleanup, Back/Recents lifecycle, and
+explicit configuration-change destroy/recreate policy; `compat.ui` and type
 declarations stay aligned with the same JSON provider. The gate remains partial
-because live packaged UI, Back/Recents, relaunch/crash, and packaged
-disclosure evidence are still missing. Packaged missing-`ui` capability
+because packaged entry, task relaunch, crash recovery, and packaged disclosure
+evidence are still missing. Packaged missing-`ui` capability
 metadata denial is covered by
 `EmbeddedNodePackagedApkSmokeTest#installAndRunUiCapabilityBoundaryEmbeddedNodePackagedApk`.
 

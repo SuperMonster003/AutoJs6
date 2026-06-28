@@ -535,11 +535,11 @@ The `ui` bridge module exposes an Activity-owned live MVP under the `ui` capabil
 
 P13-17 records the live UI provider promotion state without widening this
 boundary. The main-app Activity provider has device evidence for JSON layout,
-event drain, update, close, and provider cleanup, but packaged live UI remains
-provider-dependent until Back/Recents, relaunch/crash, and packaged disclosure
-evidence lands. Packaged missing-`ui` capability metadata now rejects before
-dispatch. Configuration changes use an explicit destroy/recreate policy with
-no live UI survival claim.
+event drain, update, close, provider cleanup, and Back/Recents lifecycle, but
+packaged live UI remains provider-dependent until packaged entry, task
+relaunch, crash, and disclosure evidence lands. Packaged missing-`ui`
+capability metadata now rejects before dispatch. Configuration changes use an
+explicit destroy/recreate policy with no live UI survival claim.
 
 S11-23 records Rhino `ui` compatibility as design-gated. `ui.layout()` and `ui.layoutFile()` may migrate only through constrained JSON descriptors passed to `require("ui").showLayout()`, and updates must use `UiHandle.update()` / `UiHandle.batchUpdate()`. `ui.run()` and `ui.post()` are blocked by design for Node because they imply JavaScript execution on Android's main thread; Node callbacks run on the Node event loop after bounded `drainEvents` snapshots. `ui.inflate()`, `setContentView(view)`, `findView()`, `root`, widget registries, `R`, and Activity emitters must not expose `NativeView` or Android `View` objects to Node.
 
