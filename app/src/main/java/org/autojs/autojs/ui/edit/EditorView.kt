@@ -342,6 +342,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @Volatile
     private var mLastAceDiagnosticsSnapshot: AceDiagnosticsSnapshot? = null
 
+    private var mPendingInitialPosition: InitialPositionRequest? = null
+
     // Active large-file loading cancel flag.
     // zh-CN: 大文件加载的取消标记 (当前会话).
     private val mLargeFileCancel = AtomicBoolean(false)
@@ -643,15 +645,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return
         }
         val columnNumber = intent.getIntExtra(EXTRA_INITIAL_COLUMN, 0).coerceAtLeast(0)
-        post {
-            if (lineNumber !in 0 until editor.lineCountSnapshot) {
-                return@post
-            }
-            runCatching {
-                editor.jumpTo(lineNumber, columnNumber)
-                editor.requestEditorFocus()
-            }
-        }
+        mPendingInitialPosition = InitialPositionRequest(lineNumber, columnNumber)
+        post { applyPendingInitialPositionIfPossible(clearOutOfRange = false) }
     }
 
     fun setRestoredText(text: String) {
@@ -790,15 +785,42 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun ensureEditorHasCursorAfterLoadIfNeeded() {
         // Ensure there is a visible caret after loading, so jump operations can work.
         // zh-CN: 加载完成后确保存在可见光标, 以使跳转操作可用.
-        if (editor.textSnapshot.isEmpty()) return
+        if (editor.textSnapshot.isEmpty() && mPendingInitialPosition == null) return
+        val appliedInitialPosition = applyPendingInitialPositionIfPossible(clearOutOfRange = true)
 
         // Request focus without forcing soft keyboard.
         // zh-CN: 请求焦点但不强制弹出软键盘.
-        editor.requestEditorFocus()
+        if (!appliedInitialPosition) {
+            editor.requestEditorFocus()
+        }
 
         // Optionally ensure visible once.
         // zh-CN: 可选地确保一次可见.
         ensureCursorVisibleIfPossible()
+    }
+
+    private fun applyPendingInitialPositionIfPossible(clearOutOfRange: Boolean): Boolean {
+        val request = mPendingInitialPosition ?: return false
+        if (editor.textSnapshot.isEmpty() && !clearOutOfRange) {
+            return false
+        }
+        if (request.lineNumber !in 0 until effectiveInitialPositionLineCount()) {
+            if (clearOutOfRange) {
+                mPendingInitialPosition = null
+            }
+            return false
+        }
+        runCatching {
+            editor.jumpTo(request.lineNumber, request.columnNumber)
+            editor.requestEditorFocus()
+            mPendingInitialPosition = null
+        }
+        return mPendingInitialPosition == null
+    }
+
+    private fun effectiveInitialPositionLineCount(): Int {
+        val textLineCount = editor.textSnapshot.count { it == '\n' } + 1
+        return maxOf(editor.lineCountSnapshot, textLineCount)
     }
 
     private fun setLoadingBar(loading: Boolean) {
@@ -3496,6 +3518,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun cleanBeforeExit() {
         mTmpSavedFileForRunning?.deleteOnExit()
     }
+
+    private data class InitialPositionRequest(
+        val lineNumber: Int,
+        val columnNumber: Int,
+    )
 
     companion object {
 

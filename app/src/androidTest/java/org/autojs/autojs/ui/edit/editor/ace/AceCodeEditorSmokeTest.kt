@@ -486,6 +486,40 @@ class AceCodeEditorSmokeTest {
     }
 
     @Test
+    fun editActivityAppliesInitialAcePositionAfterFileLoad() {
+        val targetLine = 10
+        val targetColumn = 28
+        val initialText = (0 until 60).joinToString(separator = "\n", postfix = "\n") { index ->
+            if (index == targetLine) {
+                "    const value = await fetchSomethingForInitialJump();"
+            } else {
+                "const line$index = $index;"
+            }
+        }
+        val file = createTempScriptFile("ace-initial-position", initialText)
+        try {
+            val editorView = launchReadyEditActivity(
+                file = file,
+                expectedText = initialText,
+                initialLine = targetLine,
+                initialColumn = targetColumn,
+            )
+
+            waitUntil("ACE EditActivity should apply initial stack position after file load") {
+                runOnMainSync {
+                    val selection = editorView.editor.selection
+                    selection.isCollapsed &&
+                        selection.startLine == targetLine &&
+                        selection.startColumn == targetColumn
+                }
+            }
+        } finally {
+            finishLaunchedActivity()
+            file.delete()
+        }
+    }
+
+    @Test
     fun aceLargeFileStaysOnAceEditor() {
         val largeText = buildLargeScriptText()
         val file = createTempScriptFile("ace-ux-large", largeText)
@@ -1064,8 +1098,13 @@ class AceCodeEditorSmokeTest {
         return editor
     }
 
-    private fun launchReadyEditActivity(file: File, expectedText: String): EditorView {
-        val editorView = startEditActivitySync(file)
+    private fun launchReadyEditActivity(
+        file: File,
+        expectedText: String,
+        initialLine: Int? = null,
+        initialColumn: Int = 0,
+    ): EditorView {
+        val editorView = startEditActivitySync(file, initialLine, initialColumn)
         waitUntil("EditActivity should start with ACE editor") {
             runOnMainSync {
                 editorView.editor.engineType == EditorEngineType.ACE &&
@@ -1079,14 +1118,18 @@ class AceCodeEditorSmokeTest {
         return editorView
     }
 
-    private fun startEditActivitySync(file: File): EditorView {
+    private fun startEditActivitySync(file: File, initialLine: Int? = null, initialColumn: Int = 0): EditorView {
         EditorEnginePreferences.set(EditorEngineType.ACE)
-        val launched = instrumentation.startActivitySync(
-            Intent(instrumentation.targetContext, EditActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .putExtra(EditorView.EXTRA_PATH, file.absolutePath)
-                .putExtra(EditorView.EXTRA_NAME, file.nameWithoutExtension),
-        ) as EditActivity
+        val intent = Intent(instrumentation.targetContext, EditActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .putExtra(EditorView.EXTRA_PATH, file.absolutePath)
+            .putExtra(EditorView.EXTRA_NAME, file.nameWithoutExtension)
+        if (initialLine != null) {
+            intent
+                .putExtra(EditorView.EXTRA_INITIAL_LINE, initialLine)
+                .putExtra(EditorView.EXTRA_INITIAL_COLUMN, initialColumn)
+        }
+        val launched = instrumentation.startActivitySync(intent) as EditActivity
         activity = launched
         launchedEditActivities.add(launched)
         instrumentation.waitForIdleSync()
