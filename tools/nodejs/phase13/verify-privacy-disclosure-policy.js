@@ -35,6 +35,7 @@ const REQUIRED_SURFACES = [
   "media_recording",
   "ui_overlay",
   "accessibility",
+  "app_query",
   "network",
   "raw_network",
   "filesystem_relaxation",

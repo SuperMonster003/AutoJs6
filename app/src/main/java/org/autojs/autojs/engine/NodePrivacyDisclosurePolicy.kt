@@ -117,6 +117,15 @@ object NodePrivacyDisclosurePolicy {
             settingsIntent = "android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS",
         ),
         DisclosureSurface(
+            id = "app_query",
+            capability = NodeBridgePermissionManifest.APP_QUERY,
+            profile = PRO_COMPAT_OPT_IN,
+            androidPermissions = emptyList(),
+            requiresUserPrompt = true,
+            promptChannel = "project_capability_review",
+            disclosureChannel = "packaged_metadata_review",
+        ),
+        DisclosureSurface(
             id = "network",
             capability = NodeBridgePermissionManifest.NETWORK,
             profile = DESKTOP_COMPAT_OPT_IN,
@@ -239,12 +248,12 @@ object NodePrivacyDisclosurePolicy {
         DisclosureChannel(
             id = "project_capability_review",
             status = "required_before_promotion",
-            requiredFor = listOf("network", "raw_network", "java_interop", "child_process", "wasi"),
+            requiredFor = listOf("app_query", "network", "raw_network", "java_interop", "child_process", "wasi"),
         ),
         DisclosureChannel(
             id = "packaged_metadata_review",
             status = "required_before_packaged_promotion",
-            requiredFor = listOf("network", "raw_network", "native_addon", "wasi"),
+            requiredFor = listOf("app_query", "network", "raw_network", "native_addon", "wasi"),
         ),
         DisclosureChannel(
             id = "doctor_report",

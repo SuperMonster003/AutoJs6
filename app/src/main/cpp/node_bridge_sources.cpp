@@ -10346,6 +10346,19 @@ std::string buildEmbeddedScriptExecutionSource(
           "android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS"
         ),
         __autojs6_privacy_disclosure_surface(
+          "app_query",
+          "app.query",
+          "pro_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "packaged_metadata_review",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
           "network",
           "network",
           "desktop_compat_opt_in",
@@ -10494,6 +10507,7 @@ std::string buildEmbeddedScriptExecutionSource(
           "shell_shizuku"
         ]),
         __autojs6_privacy_disclosure_channel("project_capability_review", "required_before_promotion", [
+          "app_query",
           "network",
           "raw_network",
           "java_interop",
@@ -10501,6 +10515,7 @@ std::string buildEmbeddedScriptExecutionSource(
           "wasi"
         ]),
         __autojs6_privacy_disclosure_channel("packaged_metadata_review", "required_before_packaged_promotion", [
+          "app_query",
           "network",
           "raw_network",
           "native_addon",

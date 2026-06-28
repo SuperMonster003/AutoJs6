@@ -124,6 +124,48 @@ also covers the Android provider-level invalid descriptor matrix.
 | Raw `Intent`, `Uri`, `FileProvider`, `ApplicationInfo`, and `PackageInfo` objects | JSON-safe descriptors only; raw Android objects do not cross into Node. |
 | `app.sendBroadcast()` / IntentTask mutation | Future P13-22 broadcast provider; stable-denied in P13-23. |
 
+## Installed-App Query Privacy Policy
+
+Exact app/package lookup is the only P13-23 promoted query shape:
+`app.getPackageName(appName)`, `app.getAppName(packageName)`, and
+`app.isInstalled(packageName)` require the explicit `app.query` capability and
+return JSON-safe `string | null` or `boolean` results. P13-52 now lists
+`app_query` / `app.query` as a disclosure surface with project capability review
+and packaged metadata review channels.
+
+Future raw list APIs must use `autojs6-node-app-query-redacted-list-v1` instead
+of raw Android Java objects. The allowed item fields are:
+
+```json
+{
+  "schema": "autojs6-node-app-query-redacted-list-v1",
+  "items": [
+    {
+      "packageName": "org.example.app",
+      "appName": "Example",
+      "installed": true,
+      "visibilityLimited": true,
+      "source": "package_manager_redacted"
+    }
+  ]
+}
+```
+
+The schema forbids `ApplicationInfo`, `PackageInfo`, APK paths, data dirs,
+installer package names, signatures, requested permissions, UID/user ids,
+flags, and install/update timestamps until a later provider has a reviewed
+privacy model for each field.
+
+Packaged `app.query` disclosure examples:
+
+```json
+{"node":{"permissions":["app.query"],"disclosures":["app_query_exact_lookup"]}}
+```
+
+```json
+{"autojs6":{"node":{"permissions":["app.query"],"disclosures":["app_query_exact_lookup"]}}}
+```
+
 ## Boundary
 
 P13-23 does not add `sendBroadcast` to the Android bridge dispatch table and
@@ -146,16 +188,14 @@ P13-24 shell/root/Shizuku capability gates instead of expanding the ordinary
 
 ## Remaining Blockers
 
-- Raw installed-app list APIs: `getInstalledApps()` and
-  `getInstalledPackages()`.
-- Packaged privacy disclosure examples for exact app/package lookup.
-- Migration examples for Rhino `app.intent()` and `app.startActivity()` scripts.
+- Packaged device evidence for scoped file view/edit Activity routing and
+  disclosure.
 
 The docs, compatibility notes, surface manifest, and Gradle gate are
 evidence-only for this partial decision. They do not add a separate P13-23
 blocker beyond the safe Activity device smokes, redacted installed-app list
-policy, packaged scoped-file evidence, negative corpus, privacy disclosure, and
-migration examples above.
+policy, packaged scoped-file evidence, negative corpus, and privacy disclosure
+above.
 
 ## Verification
 

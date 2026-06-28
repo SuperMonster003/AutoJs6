@@ -433,9 +433,9 @@ JSON-safe `app.parseUri()` descriptors, and stable `app.sendBroadcast()`,
 raw-URI, kill, dual-user, plus privileged app-option rejection are present,
 with broadcast/raw URI/root/Shizuku/dual-user authority stable-denied for
 P13-23 v1.1. The descriptor alias and Rhino app gap matrices classify the
-supported short forms, stable denials, and future-provider work. Raw
-installed-app list APIs, packaged smoke, negative corpus, and raw Android
-app/intent objects remain blocked.
+supported short forms, stable denials, and future-provider work. `app_query`
+privacy disclosure and the future redacted installed-app list schema are
+documented; packaged scoped-file Activity smoke remains blocked.
 `verifyNodePhase13ShellRootShizukuCapability` records the P13-24 partial
 shell/root/Shizuku capability state: `shell`, `shell.root`, and
 `shell.shizuku` are split capability tokens, `execRoot()` routes through the
@@ -637,8 +637,9 @@ partial: JSON-safe `app.intent()`, normalized `app.startActivity()`, scoped
 file view/edit helpers, `app.launch()` alias parity, JSON-safe
 `app.parseUri()`, and stable raw-URI/kill/dual-user rejections are covered,
 while `sendBroadcast`, raw URI/FileProvider handles, and root/Shizuku app
-options stay stable-denied for P13-23 v1.1. Raw installed-app list APIs,
-packaged behavior, and raw Android objects require separate evidence.
+options stay stable-denied for P13-23 v1.1. `app_query` privacy disclosure and
+the future redacted installed-app list schema are documented; packaged scoped
+file Activity behavior still requires separate evidence.
 P13-24 additionally uses `verifyNodePhase13ShellRootShizukuCapability` as the
 host promotion-status gate for shell/root/Shizuku capability parity and keeps
 the surface partial: ordinary shell and explicit root facades are covered by
