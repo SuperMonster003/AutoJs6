@@ -50,7 +50,7 @@ object Scripts {
     private val BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER = object : SimpleScriptExecutionListener() {
 
         override fun onSuccess(execution: ScriptExecution, result: Any?) {
-            globalAppContext.sendBroadcast(Intent(ACTION_ON_EXECUTION_FINISHED))
+            globalAppContext.sendBroadcast(newExecutionFinishedIntent())
         }
 
         override fun onException(execution: ScriptExecution, e: Throwable) {
@@ -63,13 +63,13 @@ object Scripts {
             }
             if (ScriptInterruptedException.causedByInterrupt(e)) {
                 globalAppContext.sendBroadcast(
-                    Intent(ACTION_ON_EXECUTION_FINISHED)
+                    newExecutionFinishedIntent()
                         .putExtra(EXTRA_EXCEPTION_LINE_NUMBER, line)
                         .putExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, col)
                 )
             } else {
                 globalAppContext.sendBroadcast(
-                    Intent(ACTION_ON_EXECUTION_FINISHED)
+                    newExecutionFinishedIntent()
                         .putExtra(EXTRA_EXCEPTION_MESSAGE, e.message)
                         .putExtra(EXTRA_EXCEPTION_LINE_NUMBER, line)
                         .putExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, col)
@@ -77,6 +77,10 @@ object Scripts {
             }
         }
 
+    }
+
+    private fun newExecutionFinishedIntent(): Intent {
+        return Intent(ACTION_ON_EXECUTION_FINISHED).setPackage(globalAppContext.packageName)
     }
 
     @JvmStatic
