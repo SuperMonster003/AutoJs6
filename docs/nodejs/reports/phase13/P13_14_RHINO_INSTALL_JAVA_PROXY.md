@@ -1,6 +1,6 @@
 # P13-14 rhino.install Java Proxy
 
-- Status: partial
+- Status: ready
 - Gate: `:app:verifyNodePhase13RhinoInstallJavaProxy`
 - Runtime surface:
   - `require("rhino").install({ experimental: true, globals: true })`
@@ -56,10 +56,12 @@ and `java.defineClass()` / `$autojs.java.defineClass()` are reserved
 denial-only future provider names. The actual proxy-interface provider remains
 future P13-16 provider work, not a prerequisite for the P13-14 Java proxy POC.
 
-Packaged APK metadata remains fail-closed. Real Pro profile selector is
-delegated to the aggregate Java/Rhino surface gate; this POC is available only
-through explicit experimental test or debug configuration and does not count the
-selector as a separate P13-14 blocker.
+P13-14 v1.1 packaged policy remains fail-closed: packaged APK metadata cannot
+enable `rhino.install()` or Java proxy globals, and no manifest authority is
+added by this gate. Real Pro profile selector is delegated to the aggregate
+Java/Rhino surface gate; this POC is available only through explicit
+experimental test or debug configuration and does not count the selector as a
+separate P13-14 blocker.
 
 ## Evidence
 
@@ -78,10 +80,15 @@ selector as a separate P13-14 blocker.
   - `build/reports/nodejs/phase13-rhino-install-java-proxy.json`
   - `build/reports/nodejs/phase13-rhino-install-java-proxy.md`
 
-## Remaining
+## Closure
 
-- Add packaged APK metadata, rollback, and security evidence before any
-  profile promotion.
+P13-14 closes the v1.1 Java proxy POC scope because default `rhino.install()`
+stays fail-closed, explicit experimental installs route only through the
+P13-13 Java allowlist, packaged metadata remains denied, and Pro profile
+promotion remains owned by the aggregate Java/Rhino surface gate.
+
+Future packaged APK metadata, rollback, and security evidence remain required
+before any promoted Pro profile can enable this surface.
 
 ## Validation
 

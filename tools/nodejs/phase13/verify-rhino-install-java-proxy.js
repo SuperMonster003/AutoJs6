@@ -93,10 +93,10 @@ function buildReport(files) {
       token(files.typeSmoke, 'rhino.install({ experimental: true, target: {} })'),
       token(files.typesReadme, "P13-14"),
     ]),
-    scenario("docs_gate", "Docs and Gradle gate record P13-14 partial evidence", [
+    scenario("docs_gate", "Docs and Gradle gate record P13-14 v1.1 Java proxy closure", [
       token(files.phase13Tasks, "P13-14"),
       token(files.phase13Tasks, "verifyNodePhase13RhinoInstallJavaProxy"),
-      token(files.p13Report, "Status: partial"),
+      token(files.p13Report, "Status: ready"),
       token(files.gradleGate, "verifyNodePhase13RhinoInstallJavaProxy"),
       token(files.testingDoc, "verifyNodePhase13RhinoInstallJavaProxy"),
       token(files.ciGatesDoc, "verifyNodePhase13RhinoInstallJavaProxy"),
@@ -108,10 +108,11 @@ function buildReport(files) {
       token(files.p13Report, "The P13-16 v1.1 replacement decision is satisfied for this gate"),
       token(files.javaAdapterReport, "P13-16 v1.1 closure is a stable-denial decision"),
       token(files.compatibilityProfile, "P13-16 dependency is satisfied"),
-      token(files.p13Report, "selector as a separate P13-14 blocker"),
+      token(files.p13Report, "separate P13-14 blocker"),
       token(files.compatibilityProfile, "separate P13-14 blocker"),
-    ], [
-      "Packaged APK policy remains fail-closed.",
+      token(files.p13Report, "P13-14 v1.1 packaged policy remains fail-closed"),
+      token(files.compatibilityProfile, "Packaged metadata remains fail-closed for P13-14 v1.1"),
+      token(files.capabilityMatrix, "No packaged default support and no new manifest authority"),
     ]),
   ];
   const checks = [

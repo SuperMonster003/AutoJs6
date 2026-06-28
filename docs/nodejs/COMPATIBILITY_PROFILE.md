@@ -116,7 +116,8 @@ remain unavailable. Real Pro profile selector is delegated to the aggregate
 Java/Rhino surface gate rather than counted as a separate P13-14 blocker. Its
 P13-16 dependency is satisfied by the stable-denial `JavaAdapter` /
 `defineClass` decision; the actual proxy-interface provider is future P13-16
-work.
+work. Packaged metadata remains fail-closed for P13-14 v1.1 and cannot enable
+`rhino.install()` or Java proxy globals.
 
 P13-15 closes the `importClass` / `importPackage` decision by keeping Rhino
 dynamic import semantics unsupported in Node. `require("rhino").importClass()`

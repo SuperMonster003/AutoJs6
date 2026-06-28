@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 42
-- Open tasks: 16
+- Completed tasks: 43
+- Open tasks: 15
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -28,7 +28,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-11` | `open` | `pro.entry_java_rhino` | 实现 Pro 风格 Node entry and UI-thread directives。 |
 | `P13-12` | `completed` | `pro.entry_java_rhino` | 定义并实现 `$autojs` global v1。 |
 | `P13-13` | `completed` | `pro.entry_java_rhino` | 推进 `$autojs.java` / Java interop allowlist。 |
-| `P13-14` | `open` | `pro.entry_java_rhino` | 推进 `require("rhino").install()` partial Pro compatibility。 |
+| `P13-14` | `completed` | `pro.entry_java_rhino` | 推进 `require("rhino").install()` partial Pro compatibility。 |
 | `P13-15` | `completed` | `pro.entry_java_rhino` | 决策并实现 `importClass` / `importPackage` compatibility。 |
 | `P13-16` | `completed` | `pro.entry_java_rhino` | 决策 `JavaAdapter` / `$java.defineClass` replacement。 |
 | `P13-17` | `open` | `pro.ui_automation_media` | 推进 live UI provider 到 opt-in promoted。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 15
+- Reports with blockers: 14
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -204,7 +204,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-profile-selection-diagnostics.json` | `verifyNodePhase13ProfileSelectionDiagnostics` | `P13-49` | `ready` | 0 | 0 |
 | `phase13-relaxed-capability-security-corpus.json` | `verifyNodePhase13RelaxedCapabilitySecurityCorpus` | `P13-50` | `ready` | 0 | 0 |
 | `phase13-rhino-import-helpers-decision.json` | `verifyNodePhase13RhinoImportHelpersDecision` | `P13-15` | `ready` | 0 | 0 |
-| `phase13-rhino-install-java-proxy.json` | `verifyNodePhase13RhinoInstallJavaProxy` | `P13-14` | `partial` | 0 | 1 |
+| `phase13-rhino-install-java-proxy.json` | `verifyNodePhase13RhinoInstallJavaProxy` | `P13-14` | `ready` | 0 | 0 |
 | `phase13-rhino-java-adapter-decision.json` | `verifyNodePhase13RhinoJavaAdapterDecision` | `P13-16` | `ready` | 0 | 0 |
 | `phase13-screenshot-image-ocr-promotion.json` | `verifyNodePhase13ScreenshotImageOcrPromotion` | `P13-20` | `partial` | 0 | 3 |
 | `phase13-second-execution-slot-scheduler.json` | `verifyNodePhase13SecondExecutionSlotScheduler` | `P13-06` | `ready` | 0 | 0 |
