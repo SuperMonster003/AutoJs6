@@ -1,7 +1,7 @@
 # P13-07 Packaged Long-Running Service
 
-Status: partial packaged dispatch and Stop/crash evidence landed; final
-blocker remains open.
+Status: partial packaged dispatch, metadata/disclosure policy, and Stop/crash
+evidence landed; final blocker remains open.
 
 ## Landed In Phase 13
 
@@ -60,6 +60,12 @@ blocker remains open.
   metadata, and restart policy `never`.
 - The `long-running-service` sample now documents packaged long-running as a
   partial opt-in path.
+- P13-45/P13-52 now record packaged metadata and disclosure policy for packaged
+  promotion: packaged executionMode/capability fields remain diagnostic review
+  metadata, unreviewed packaged high-privilege surfaces default to
+  `deny_without_reviewed_disclosure_manifest`, and disclosure manifest review
+  plus runtime/installer enforcement remains future promotion work rather than
+  implicit authority.
 
 ## Host Gate
 
@@ -83,8 +89,8 @@ build/reports/nodejs/phase13-packaged-long-running-service.md
 ```
 
 The gate is expected to report `partial` until Android permission/background
-policy coverage, packaged metadata/disclosure denial paths, broader device
-matrix evidence, and quota/resource stress coverage land.
+policy coverage, broader device matrix evidence, quota/resource stress coverage,
+and packaged disclosure review/enforcement UI land.
 
 ## Device Evidence
 
@@ -124,7 +130,7 @@ NodeCrashEvidenceStore: marker.collect schema=autojs6-node-phase13-next-launch-c
   and background launch limits.
 - Broaden the foreground Stop/task-removal/relaunch/crash evidence beyond the
   focused QV710AF65F smoke.
-- Record packaged metadata and disclosure denial paths before promotion.
+- Implement packaged disclosure manifest review/enforcement UI before promotion.
 - Add packaged quota/resource stress for timers, bridge calls, provider-owned
   handles, status snapshots, destroy cleanup, and next-launch crash evidence.
 

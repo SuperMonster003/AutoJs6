@@ -53,10 +53,14 @@ Current packaged long-running progress:
   launch surface, inrt foreground-service routing, a host verifier, and focused
   packaged lifecycle checkpoint/read/clear plus foreground Stop
   clean-exit/relaunch/crash-recovery and task-removal clean-exit/relaunch smoke
-  evidence passing on QV710AF65F / Sony XQ-AT72 / Android 12. Android
-  permission/background-start policy coverage, packaged metadata/disclosure
-  denial paths, broader device matrix evidence, and quota/stress promotion
-  remain open.
+  evidence passing on QV710AF65F / Sony XQ-AT72 / Android 12. P13-45/P13-52
+  record packaged metadata and disclosure policy diagnostics:
+  executionMode/capability metadata remains review metadata, and unreviewed
+  packaged high-privilege surfaces default to
+  `deny_without_reviewed_disclosure_manifest`. Android
+  permission/background-start policy coverage, broader device matrix evidence,
+  quota/stress promotion, and packaged disclosure review/enforcement UI remain
+  open.
 
 Current full heavy resource stress progress:
 

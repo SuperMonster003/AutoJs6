@@ -90,7 +90,10 @@ Reason open: `evidence`, `packaging`.
 - [ ] Add Android version, notification permission, and background-start denial matrix.
 - [ ] Broaden foreground/task-removal/relaunch/crash recovery evidence beyond
   the focused QV710AF65F smoke.
-- [ ] Record packaged metadata and disclosure denial paths before promotion.
+- [x] Record packaged metadata and disclosure denial policy through the
+  P13-45/P13-52 gates before promotion.
+- [ ] Implement packaged disclosure review/enforcement UI before final
+  promotion.
 
 #### P13-08 full heavy resource stress
 
