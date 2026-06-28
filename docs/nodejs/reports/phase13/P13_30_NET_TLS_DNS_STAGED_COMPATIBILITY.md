@@ -45,6 +45,10 @@ native builtin modules.
   opt-in path that verifies native `http` / `net` / `tls` construction does not
   throw AutoJs6 network-denied errors and exercises the user-facing
   `dns.resolve("www.github.com")` sample path.
+- The external DNS sample is opportunistic evidence, not a deterministic CI
+  prerequisite: the focused opt-in test accepts either native DNS resolution or
+  a native DNS error, and only asserts that AutoJs6 raw-network policy denial is
+  not produced while the debug/build-time opt-in is enabled.
 
 ## Boundary
 
