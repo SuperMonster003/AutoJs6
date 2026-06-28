@@ -1510,6 +1510,9 @@ class AndroidNodeBridgeCapabilityProvider(
         if (selector.has("enabled") && (!markMatcher() || selector.optBoolean("enabled") != isEnabled)) {
             return false
         }
+        if (selector.has("scrollable") && (!markMatcher() || selector.optBoolean("scrollable") != isScrollable)) {
+            return false
+        }
         if (selector.has("depth") && (!markMatcher() || selector.optInt("depth", -1) != depth)) {
             return false
         }

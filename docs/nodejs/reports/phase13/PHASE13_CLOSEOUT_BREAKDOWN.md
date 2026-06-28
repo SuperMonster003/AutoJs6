@@ -176,9 +176,9 @@ Reason open: `implementation`, `evidence`, `packaging`.
 
 #### P13-19 accessibility/selector parity
 
-Reason open: `implementation`, `evidence`.
+Reason open: `evidence`.
 
-- [ ] Add Rhino selector aliases and chain helpers beyond the current descriptor subset.
+- [x] Add Rhino selector aliases and chain helpers beyond the current descriptor subset.
 - [x] Decide exact `waitFor`/`pickup`/`detect` semantics or keep stable denials.
 - [ ] Add packaged accessibility-service lifecycle evidence.
 - [ ] Add real-device matrix for selector actions, Back/Home/Recents, and denial paths.

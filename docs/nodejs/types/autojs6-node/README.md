@@ -344,8 +344,8 @@ declared `accessibility` and explicit `autojs6:compat` selector types. Direct
 selector descriptors, frozen node snapshots, selector find/action calls, Rhino
 compat selector handles, and unavailable-provider rejection are covered by
 host/device/type evidence. `swipe`, `gesture`, `powerDialog`, direct
-`waitFor`, broader Rhino selector aliases, packaged accessibility service
-lifecycle, and root/Shizuku tiers remain unpromoted.
+`waitFor`, packaged accessibility service lifecycle, and root/Shizuku tiers
+remain unpromoted.
 
 P13-20 records the partial screenshot/image/OCR promotion gate for the declared
 `media_projection`, `image`/`images`, `ocr`, and explicit `autojs6:compat`

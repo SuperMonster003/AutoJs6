@@ -19760,9 +19760,11 @@ std::string buildEmbeddedScriptExecutionSource(
     blockedByDesign: "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
   });
   const __autojs6_rhino_selector_handle_type = "autojs6.rhino.selector.handle";
-  const __autojs6_rhino_selector_builder_names = Object.freeze(["text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains"]);
+  const __autojs6_rhino_selector_builder_names = Object.freeze(["text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "scrollable", "depth", "boundsInside", "boundsContains"]);
+  const __autojs6_rhino_selector_alias_names = Object.freeze(["description", "descriptionContains", "descriptionMatches", "idContains", "classNameContains"]);
+  const __autojs6_rhino_selector_chain_names = Object.freeze(__autojs6_rhino_selector_builder_names.concat(__autojs6_rhino_selector_alias_names));
   const __autojs6_rhino_selector_action_names = Object.freeze(["click", "back", "home", "recentApps", "recents"]);
-  const __autojs6_rhino_selector_global_names = Object.freeze(["selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents"]);
+  const __autojs6_rhino_selector_global_names = Object.freeze(["selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "scrollable", "depth", "boundsInside", "boundsContains", "description", "descriptionContains", "descriptionMatches", "idContains", "classNameContains", "click", "back", "home", "recentApps", "recents"]);
   let __autojs6_rhino_selector_dsl_cache = null;
   let __autojs6_rhino_compat_shell_cache = null;
   let __autojs6_rhino_compat_images_cache = null;
@@ -19788,7 +19790,7 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_rhino_compat_events = Object.freeze({
     keys: __autojs6_rhino_compat_key_constants
   });
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "jsox", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "barcode", "qrcode", "media", "mediainfo", "recorder", "keys", "ui"]);
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "jsox", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "scrollable", "depth", "boundsInside", "boundsContains", "description", "descriptionContains", "descriptionMatches", "idContains", "classNameContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "barcode", "qrcode", "media", "mediainfo", "recorder", "keys", "ui"]);
   const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "jsox", "jsox.mathx", "jsox.arrayx", "jsox.numberx", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "barcode", "qrcode", "media", "mediainfo", "recorder", "events.keys", "ui", "tasks"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
@@ -20599,8 +20601,30 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     return Object.freeze(target);
   }
+  function __autojs6_rhino_selector_literal_contains_pattern(value) {
+    const text = value === undefined || value === null ? "" : String(value);
+    return Object.freeze({
+      pattern: ".*" + text.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&") + ".*",
+      flags: ""
+    });
+  }
   function __autojs6_rhino_selector_build_descriptor(builderName, args) {
     const accessibility = __autojs6_limited_accessibility();
+    if (builderName === "description") {
+      return accessibility.desc.apply(accessibility, args);
+    }
+    if (builderName === "descriptionContains") {
+      return accessibility.descContains.apply(accessibility, args);
+    }
+    if (builderName === "descriptionMatches") {
+      return accessibility.descMatches.apply(accessibility, args);
+    }
+    if (builderName === "idContains") {
+      return accessibility.idMatches(__autojs6_rhino_selector_literal_contains_pattern(args[0]));
+    }
+    if (builderName === "classNameContains") {
+      return accessibility.classNameMatches(__autojs6_rhino_selector_literal_contains_pattern(args[0]));
+    }
     return accessibility[builderName].apply(accessibility, args);
   }
   function __autojs6_rhino_selector_options(options, apiName) {
@@ -20724,7 +20748,7 @@ std::string buildEmbeddedScriptExecutionSource(
         });
       }
     };
-    __autojs6_rhino_selector_builder_names.forEach(function(builderName) {
+    __autojs6_rhino_selector_chain_names.forEach(function(builderName) {
       Object.defineProperty(handle, builderName, {
         value: function() {
           const nextDescriptor = __autojs6_rhino_selector_build_descriptor(builderName, arguments);
@@ -20767,7 +20791,7 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_rhino_selector_dsl_cache;
     }
     const selector = {};
-    __autojs6_rhino_selector_builder_names.forEach(function(builderName) {
+    __autojs6_rhino_selector_chain_names.forEach(function(builderName) {
       selector[builderName] = __autojs6_rhino_selector_builder(builderName);
     });
     selector.click = __autojs6_rhino_selector_click;
@@ -21063,9 +21087,15 @@ std::string buildEmbeddedScriptExecutionSource(
       classNameMatches: selector.classNameMatches,
       clickable: selector.clickable,
       enabled: selector.enabled,
+      scrollable: selector.scrollable,
       depth: selector.depth,
       boundsInside: selector.boundsInside,
       boundsContains: selector.boundsContains,
+      description: selector.description,
+      descriptionContains: selector.descriptionContains,
+      descriptionMatches: selector.descriptionMatches,
+      idContains: selector.idContains,
+      classNameContains: selector.classNameContains,
       click: selector.click,
       back: selector.back,
       home: selector.home,
@@ -21238,9 +21268,15 @@ std::string buildEmbeddedScriptExecutionSource(
       classNameMatches: selector.classNameMatches,
       clickable: selector.clickable,
       enabled: selector.enabled,
+      scrollable: selector.scrollable,
       depth: selector.depth,
       boundsInside: selector.boundsInside,
       boundsContains: selector.boundsContains,
+      description: selector.description,
+      descriptionContains: selector.descriptionContains,
+      descriptionMatches: selector.descriptionMatches,
+      idContains: selector.idContains,
+      classNameContains: selector.classNameContains,
       click: selector.click,
       back: selector.back,
       home: selector.home,
@@ -23888,6 +23924,7 @@ std::string buildEmbeddedScriptExecutionSource(
     "classNameMatches",
     "clickable",
     "enabled",
+    "scrollable",
     "depth",
     "boundsInside",
     "boundsContains"
@@ -23964,7 +24001,7 @@ std::string buildEmbeddedScriptExecutionSource(
         fieldName === "idMatches" || fieldName === "classNameMatches") {
       return __autojs6_accessibility_selector_regex(value, methodName, fieldName);
     }
-    if (fieldName === "clickable" || fieldName === "enabled") {
+    if (fieldName === "clickable" || fieldName === "enabled" || fieldName === "scrollable") {
       return __autojs6_accessibility_selector_boolean(value);
     }
     if (fieldName === "depth") {
@@ -24282,6 +24319,9 @@ std::string buildEmbeddedScriptExecutionSource(
       },
       enabled: function(value) {
         return __autojs6_accessibility_selector("enabled", value, "enabled");
+      },
+      scrollable: function(value) {
+        return __autojs6_accessibility_selector("scrollable", value, "scrollable");
       },
       depth: function(value) {
         return __autojs6_accessibility_selector("depth", value, "depth");

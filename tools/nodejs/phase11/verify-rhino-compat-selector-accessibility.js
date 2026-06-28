@@ -158,12 +158,14 @@ function createCompatHarness(compatBlock) {
         colors: Object.freeze({ rgb() { return 0; } }),
         formatter: Object.freeze({ bytes() { return ""; } }),
         converter: Object.freeze({ bytes() { return 0; } }),
+        s13n: Object.freeze({ stringify(value) { return JSON.stringify(value); }, parse(value) { return JSON.parse(value); } }),
         mime: Object.freeze(function mime() { return Object.freeze({ type: "", subtype: "", parameters: Object.freeze({}) }); }),
         nanoid: Object.freeze(function nanoid() { return ""; }),
         util: Object.freeze({ format(value) { return String(value); }, inspect(value) { return String(value); } }),
         opencc: Object.freeze(function opencc() { return ""; }),
         pinyin: Object.freeze(function pinyin() { return []; }),
         pinyin4j: Object.freeze(function pinyin4j() { return ""; }),
+        jsox: Object.freeze({ stringify(value) { return JSON.stringify(value); }, parse(value) { return JSON.parse(value); } }),
         storage: Object.freeze({ create() { return {}; }, open() { return {}; } }),
         storages: Object.freeze({ create() { return {}; }, open() { return {}; } }),
         database: Object.freeze({ open() { return Promise.resolve({ close() { return Promise.resolve(true); } }); } }),
@@ -215,7 +217,16 @@ function createCompatHarness(compatBlock) {
           findMultiColors() { return Promise.resolve(null); },
           getSize() { return Object.freeze({ width: 1, height: 1 }); },
           recycle() { return Promise.resolve(undefined); }
-        })
+        }),
+        barcode: Object.freeze({
+          scan() { return Promise.resolve([]); },
+          detect() { return Promise.resolve([]); },
+          recognize() { return Promise.resolve([]); }
+        }),
+        media: Object.freeze({ scanFile() { return Promise.resolve(true); } }),
+        mediainfo: Object.freeze(function mediainfo() { return Promise.resolve(Object.freeze({ tracks: Object.freeze([]) })); }),
+        recorder: Object.freeze({ start() { return Promise.resolve(Object.freeze({ id: "recorder" })); }, stop() { return Promise.resolve(true); } }),
+        ui: Object.freeze({ create() { return Promise.reject(new Error("ui unavailable")); } })
       };
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
@@ -264,7 +275,7 @@ function createCompatHarness(compatBlock) {
       }
       function selectorBuilder(field) {
         return function(value) {
-          if (field === "clickable" || field === "enabled") return descriptor(field, value !== false);
+          if (field === "clickable" || field === "enabled" || field === "scrollable") return descriptor(field, value !== false);
           if (field === "depth") return descriptor(field, Math.max(0, Math.trunc(Number(value))));
           if (field === "boundsInside" || field === "boundsContains") return descriptor(field, boundsInput(arguments, field));
           if (field.endsWith("Matches")) return descriptor(field, patternInput(value, field));
@@ -284,6 +295,7 @@ function createCompatHarness(compatBlock) {
         classNameMatches: selectorBuilder("classNameMatches"),
         clickable: selectorBuilder("clickable"),
         enabled: selectorBuilder("enabled"),
+        scrollable: selectorBuilder("scrollable"),
         depth: selectorBuilder("depth"),
         boundsInside: selectorBuilder("boundsInside"),
         boundsContains: selectorBuilder("boundsContains"),
@@ -334,12 +346,14 @@ function createCompatHarness(compatBlock) {
       function __autojs6_limited_colors() { return moduleStubs.colors; }
       function __autojs6_limited_formatter() { return moduleStubs.formatter; }
       function __autojs6_limited_converter() { return moduleStubs.converter; }
+      function __autojs6_limited_s13n() { return moduleStubs.s13n; }
       function __autojs6_limited_mime() { return moduleStubs.mime; }
       function __autojs6_limited_nanoid() { return moduleStubs.nanoid; }
       function __autojs6_limited_util() { return moduleStubs.util; }
       function __autojs6_limited_opencc() { return moduleStubs.opencc; }
       function __autojs6_limited_pinyin() { return moduleStubs.pinyin; }
       function __autojs6_limited_pinyin4j() { return moduleStubs.pinyin4j; }
+      function __autojs6_limited_jsox() { return moduleStubs.jsox; }
       function __autojs6_limited_storage(moduleName) { return moduleName === "storages" ? moduleStubs.storages : moduleStubs.storage; }
       function __autojs6_limited_database(moduleName) { return moduleName === "sqlite" ? moduleStubs.sqlite : moduleStubs.database; }
       function __autojs6_limited_console() { return moduleStubs.console; }
@@ -349,6 +363,11 @@ function createCompatHarness(compatBlock) {
       function __autojs6_limited_shell() { return moduleStubs.shell; }
       function __autojs6_limited_image() { return moduleStubs.images; }
       function __autojs6_limited_ocr() { return Object.freeze({ recognize() { return Promise.resolve([]); }, recognizeText() { return Promise.resolve(""); }, detectTextBounds() { return Promise.resolve([]); } }); }
+      function __autojs6_limited_barcode() { return moduleStubs.barcode; }
+      function __autojs6_limited_media() { return moduleStubs.media; }
+      function __autojs6_limited_mediainfo() { return moduleStubs.mediainfo; }
+      function __autojs6_limited_recorder() { return moduleStubs.recorder; }
+      function __autojs6_limited_ui() { return moduleStubs.ui; }
       function __autojs6_limited_accessibility() { return accessibilityStub; }
       ${compatBlock}
       return {

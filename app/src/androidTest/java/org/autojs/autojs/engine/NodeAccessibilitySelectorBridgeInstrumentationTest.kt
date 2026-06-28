@@ -55,6 +55,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
                     assertEquals("OK", selector.getJSONObject("textMatches").getString("pattern"))
                     assertEquals("i", selector.getJSONObject("textMatches").getString("flags"))
                     assertTrue(selector.getBoolean("clickable"))
+                    assertFalse(selector.getBoolean("scrollable"))
                     assertEquals(2, selector.getInt("depth"))
                     assertEquals(100, selector.getJSONObject("boundsInside").getInt("right"))
                     NodeBridgeResponse.success(request.id, node.toString())
@@ -96,7 +97,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
                 "a11y-find-one",
                 "accessibility",
                 "findOne",
-                """[{"type":"autojs6.accessibility.selector","version":1,"textMatches":{"pattern":"OK","flags":"i"},"clickable":true,"depth":2,"boundsInside":{"left":0,"top":0,"right":100,"bottom":100}},{"timeoutMs":1000}]""",
+                """[{"type":"autojs6.accessibility.selector","version":1,"textMatches":{"pattern":"OK","flags":"i"},"clickable":true,"scrollable":false,"depth":2,"boundsInside":{"left":0,"top":0,"right":100,"bottom":100}},{"timeoutMs":1000}]""",
                 1000L,
                 listOf("accessibility"),
             ),
@@ -197,6 +198,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
                     assert.strictEqual(selector.textMatches.pattern, "OK");
                     assert.strictEqual(selector.textMatches.flags, "i");
                     assert.strictEqual(selector.clickable, true);
+                    assert.strictEqual(selector.scrollable, false);
                     assert.strictEqual(selector.depth, 2);
                     assert.strictEqual(selector.boundsInside.right, 100);
                     result = {
@@ -257,6 +259,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
                 {},
                 accessibility.textMatches(/OK/i),
                 accessibility.clickable(true),
+                accessibility.scrollable(false),
                 accessibility.depth(2),
                 accessibility.boundsInside(0, 0, 100, 100)
               ));
@@ -292,6 +295,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
                 typeof accessibility.classNameMatches,
                 typeof accessibility.clickable,
                 typeof accessibility.enabled,
+                typeof accessibility.scrollable,
                 typeof accessibility.depth,
                 typeof accessibility.boundsInside,
                 typeof accessibility.boundsContains,
@@ -303,6 +307,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
                 advanced.textMatches.pattern,
                 advanced.textMatches.flags,
                 advanced.clickable,
+                advanced.scrollable,
                 advanced.depth,
                 advanced.boundsInside.right,
                 Object.isFrozen(advanced.textMatches),
@@ -314,7 +319,7 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
               console.log("a11y.selector.clicked=" + clicked);
               console.log("a11y.selector.actions=" + [longClicked, textSet, scrolledForward, scrolledBackward].join("|"));
               console.log("a11y.selector.requests=" + requests.map(r => r.method).join("|"));
-              console.log("a11y.selector.findOne.args=" + requests[0].args[0].type + "/" + requests[0].args[0].version + "/" + requests[0].args[0].textMatches.pattern + "/" + requests[0].args[0].textMatches.flags + "/" + requests[0].args[0].clickable + "/" + requests[0].args[0].depth + "/" + requests[0].args[0].boundsInside.right + "/" + requests[0].args[1].timeoutMs);
+              console.log("a11y.selector.findOne.args=" + requests[0].args[0].type + "/" + requests[0].args[0].version + "/" + requests[0].args[0].textMatches.pattern + "/" + requests[0].args[0].textMatches.flags + "/" + requests[0].args[0].clickable + "/" + requests[0].args[0].scrollable + "/" + requests[0].args[0].depth + "/" + requests[0].args[0].boundsInside.right + "/" + requests[0].args[1].timeoutMs);
               console.log("a11y.selector.findAll.args=" + requests[1].args[0].descMatches.pattern + "/" + requests[1].args[0].enabled + "/" + requests[1].args[0].boundsContains.left + "/" + requests[1].args[1].timeoutMs);
               console.log("a11y.selector.click.args=" + requests[2].args[0].desc + "/" + requests[2].args[1].timeoutMs);
               console.log("a11y.selector.setText.args=" + requests[4].args[0].idMatches.pattern + "/" + requests[4].args[1] + "/" + requests[4].args[2].timeoutMs);
@@ -331,17 +336,17 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("a11y.selector.resolve=accessibility"))
         assertTrue(result.stdout.contains("a11y.selector.shadow=false"))
         assertTrue(result.stdout.contains("a11y.selector.frozen=true"))
-        assertTrue(result.stdout.contains("a11y.selector.builders=function|function|function|function|function|function|function|function|function|function|function|function|function|function|function|undefined"))
+        assertTrue(result.stdout.contains("a11y.selector.builders=function|function|function|function|function|function|function|function|function|function|function|function|function|function|function|function|undefined"))
         assertTrue(result.stdout.contains("""a11y.selector.shape={"type":"autojs6.accessibility.selector","version":1,"text":"OK"}"""))
         assertTrue(result.stdout.contains("a11y.selector.selectorFrozen=true"))
-        assertTrue(result.stdout.contains("a11y.selector.v2=OK|i|true|2|100|true|true"))
+        assertTrue(result.stdout.contains("a11y.selector.v2=OK|i|true|false|2|100|true|true"))
         assertTrue(result.stdout.contains("a11y.selector.one=OK/Confirm/android:id/button1/1/true/true"))
         assertTrue(result.stdout.contains("a11y.selector.rawLeak=true|true|true|-1"))
         assertTrue(result.stdout.contains("a11y.selector.all=2/OK/false/true/true"))
         assertTrue(result.stdout.contains("a11y.selector.clicked=true"))
         assertTrue(result.stdout.contains("a11y.selector.actions=true|true|true|true"))
         assertTrue(result.stdout.contains("a11y.selector.requests=findOne|findAll|click|longClick|setText|scrollForward|scrollBackward"))
-        assertTrue(result.stdout.contains("a11y.selector.findOne.args=autojs6.accessibility.selector/1/OK/i/true/2/100/1234"))
+        assertTrue(result.stdout.contains("a11y.selector.findOne.args=autojs6.accessibility.selector/1/OK/i/true/false/2/100/1234"))
         assertTrue(result.stdout.contains("a11y.selector.findAll.args=Conf.*/false/1/1235"))
         assertTrue(result.stdout.contains("a11y.selector.click.args=Confirm/1236"))
         assertTrue(result.stdout.contains("a11y.selector.setText.args=.*:id/input/Typed/1238"))
@@ -371,6 +376,9 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
                     assert.strictEqual(selector.text, "OK");
                     assert.strictEqual(selector.descContains, "Confirm");
                     assert.strictEqual(selector.clickable, true);
+                    assert.strictEqual(selector.scrollable, true);
+                    assert.strictEqual(selector.idMatches.pattern, ".*button1.*");
+                    assert.strictEqual(selector.classNameMatches.pattern, ".*Button.*");
                     assert.strictEqual(request.args[1].timeoutMs, 3000);
                     result = {
                       text: "OK",
@@ -417,9 +425,10 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
               });
 
               const compat = require("autojs6:compat");
-              const defaultGlobals = ["selector", "text", "click", "back", "home"].every(name => !(name in globalThis));
+              const defaultGlobals = ["selector", "text", "description", "scrollable", "click", "back", "home"].every(name => !(name in globalThis));
               const base = compat.text("OK");
-              const chained = base.descContains("Confirm").clickable();
+              const chained = base.descriptionContains("Confirm").scrollable().idContains("button1").classNameContains("Button").clickable();
+              const aliasExact = compat.selector.description("Confirm").descriptionMatches(/Conf.*/i);
               const one = await chained.findOne(3000);
               const all = await chained.find({ timeoutMs: 3001 });
               const clicked = await chained.click({ timeoutMs: 3002 });
@@ -440,7 +449,13 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
                 Object.isFrozen(chained.descriptor),
                 base.descriptor.descContains === undefined,
                 chained.descriptor.descContains,
-                chained.descriptor.clickable
+                chained.descriptor.clickable,
+                chained.descriptor.scrollable,
+                chained.descriptor.idMatches.pattern,
+                chained.descriptor.classNameMatches.pattern,
+                aliasExact.descriptor.desc,
+                aliasExact.descriptor.descMatches.pattern,
+                aliasExact.descriptor.descMatches.flags
               ].join("|"));
               console.log("rhino.compat.selector.results=" + [
                 one.text,
@@ -458,9 +473,13 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
               console.log("rhino.compat.selector.install=" + [
                 install.globals.indexOf("selector") >= 0,
                 install.globals.indexOf("text") >= 0,
+                install.globals.indexOf("description") >= 0,
+                install.globals.indexOf("scrollable") >= 0,
                 install.globals.indexOf("click") >= 0,
                 globalThis.selector === compat.selector,
                 globalThis.text === compat.text,
+                globalThis.description === compat.description,
+                globalThis.scrollable === compat.scrollable,
                 globalThis.click === compat.click
               ].join("|"));
               console.log("rhino.compat.selector.requests=" + requests.map(r => r.method).join("|"));
@@ -475,9 +494,9 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("rhino.compat.selector.defaultGlobals=true"))
         assertTrue(result.stdout.contains("rhino.compat.selector.status="))
         assertFalse(result.stdout.contains("rhino.compat.selector.status=-1"))
-        assertTrue(result.stdout.contains("rhino.compat.selector.shape=autojs6.rhino.selector.handle|autojs6.accessibility.selector|true|true|true|true|true|Confirm|true"))
+        assertTrue(result.stdout.contains("rhino.compat.selector.shape=autojs6.rhino.selector.handle|autojs6.accessibility.selector|true|true|true|true|true|Confirm|true|true|.*button1.*|.*Button.*|Confirm|Conf.*|i"))
         assertTrue(result.stdout.contains("rhino.compat.selector.results=OK|true|true|true|true|2|true|true|true|true|true"))
-        assertTrue(result.stdout.contains("rhino.compat.selector.install=true|true|true|true|true|true"))
+        assertTrue(result.stdout.contains("rhino.compat.selector.install=true|true|true|true|true|true|true|true|true|true"))
         assertTrue(result.stdout.contains("rhino.compat.selector.requests=findOne|findAll|click|click|back|home|recentApps"))
         assertTrue(result.stdout.contains("rhino.compat.selector.timeouts=3000|3001|3002|3003|3004|3005|3006"))
         assertTrue(result.stdout.contains("rhino.compat.selector.pending=0"))
