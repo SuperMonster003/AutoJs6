@@ -14,7 +14,7 @@ tasks are persistent Android entry points. They can change app behavior after a
 script exits, at boot, on package events, or through external broadcasts. P13-22
 therefore keeps direct provider registration unavailable until capability
 split, receiver authority, manifest synthesis, trigger payload serialization,
-packaged behavior, user disclosure, and install/trigger/remove evidence land.
+packaged trigger/remove behavior, and user disclosure evidence land.
 
 ## Implemented Evidence
 
@@ -40,6 +40,12 @@ packaged behavior, user disclosure, and install/trigger/remove evidence land.
   `PendingIntent`, `Bundle`, `Uri`, `PackageManager`, signatures, icons,
   package lists, receiver handles, and raw `IntentTask` objects are not exposed
   to Node.
+- Packaged boundary: `EmbeddedNodePackagedApkSmokeTest#installAndRunIntentBroadcastBoundaryEmbeddedNodePackagedApk`
+  verifies packaged `compat.tasks` IntentTask methods still reject before bridge
+  dispatch, future `tasks.*` modules remain unavailable, raw Android broadcast
+  globals are absent, `BroadcastChannel` remains JavaScript-only, and packaged
+  project metadata does not accept future `tasks`, `tasks.intent`,
+  `tasks.broadcast`, `tasks.boot`, or `tasks.package_events` capabilities.
 
 ## Boundaries
 
@@ -81,9 +87,10 @@ packaged behavior, user disclosure, and install/trigger/remove evidence land.
   unregister/delete cleanup, process-death recovery, and receiver-thread
   non-execution
   guarantees.
-- Add packaged APK metadata, manifest patch reports, receiver export state,
-  `RECEIVE_BOOT_COMPLETED`, package data-scheme declarations, install-run
-  positive/negative smokes, and trigger/remove tests.
+- Add provider-owned packaged APK metadata, manifest patch reports, receiver
+  export state, `RECEIVE_BOOT_COMPLETED`, package data-scheme declarations,
+  trigger payload tests, install/trigger/remove positive smokes, and denial
+  tests for that future promoted provider.
 - Add trigger payload serialization with byte budgets and privacy filtering for
   package names, replacing state, uid, timestamps, and custom payloads.
 - Add user-visible consent, task UI visibility, disable/delete authority,
@@ -92,8 +99,8 @@ packaged behavior, user disclosure, and install/trigger/remove evidence land.
 The docs, compatibility notes, surface manifest, and Gradle gate are
 evidence-only for this partial decision. They do not add a separate P13-22
 blocker beyond receiver ownership/migration, capability split, manifest/export
-policy, trigger payload serialization, packaged trigger/remove smokes, consent,
-disclosure, and rollback evidence above.
+policy, trigger payload serialization, future positive packaged
+install/trigger/remove smokes, consent, disclosure, and rollback evidence above.
 
 ## Gate
 

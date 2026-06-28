@@ -8323,6 +8323,29 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildIntentBroadcastBoundaryEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged IntentTask/broadcast boundary smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedIntentBroadcastBoundaryApk()
+    }
+
+    @Test
+    fun installAndRunIntentBroadcastBoundaryEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged IntentTask/broadcast boundary install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged IntentTask/broadcast boundary install-and-run smoke")
+
+        val outputApk = buildPackagedIntentBroadcastBoundaryApk()
+        assertInstallAndRunPackagedIntentBroadcastBoundarySmoke(outputApk)
+    }
+
+    @Test
     fun buildV11BridgeEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged v1.1 bridge smoke requires embedded script execution build support.",
@@ -11840,6 +11863,106 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedIntentBroadcastBoundaryApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function rejected(action) {
+              try {
+                await action();
+                return "allowed|";
+              } catch (error) {
+                const code = String(error && (error.autojs6Code || error.code || ""));
+                const message = String(error && error.message || "");
+                return code + "|" + message;
+              }
+            }
+
+            function moduleDenied(name) {
+              try {
+                require(name);
+                return false;
+              } catch (error) {
+                return true;
+              }
+            }
+
+            async function main() {
+              const fs = require("fs");
+              const compat = require("autojs6:compat");
+              const tasks = compat.tasks;
+              const futureTaskCapabilities = [
+                "tasks",
+                "tasks.intent",
+                "tasks.broadcast",
+                "tasks.boot",
+                "tasks.package_events"
+              ];
+              const rejectedResults = [
+                await rejected(() => tasks.addIntentTask({
+                  path: "main.js",
+                  action: "org.autojs6.node.P13_22"
+                })),
+                await rejected(() => tasks.queryIntentTasks({ action: "org.autojs6.node.P13_22" })),
+                await rejected(() => tasks.getIntentTask("p13-22")),
+                await rejected(() => tasks.removeIntentTask("p13-22"))
+              ];
+              const compatRejectedOk = rejectedResults.every((entry) =>
+                entry.indexOf("ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED|") === 0
+              );
+              const futureModulesDenied = futureTaskCapabilities.every(moduleDenied);
+              const projectConfig = JSON.parse(fs.readFileSync("project.json", "utf8"));
+              const nodePermissions = projectConfig.node && Array.isArray(projectConfig.node.permissions)
+                ? projectConfig.node.permissions
+                : [];
+              const androidPermissions = Array.isArray(projectConfig.permissions)
+                ? projectConfig.permissions
+                : [];
+              const rawGlobalsAbsent = [
+                "BroadcastReceiver",
+                "Intent",
+                "IntentFilter",
+                "PendingIntent",
+                "Bundle"
+              ].every((name) => typeof globalThis[name] === "undefined");
+              const broadcastChannelIsJsOnly = typeof BroadcastChannel === "function";
+              const surfaceOk =
+                typeof tasks.addIntentTask === "function" &&
+                typeof tasks.queryIntentTasks === "function" &&
+                typeof tasks.getIntentTask === "function" &&
+                typeof tasks.removeIntentTask === "function";
+              const metadataDeniedOk =
+                futureTaskCapabilities.every((capability) => nodePermissions.indexOf(capability) < 0) &&
+                androidPermissions.indexOf("android.permission.RECEIVE_BOOT_COMPLETED") < 0;
+              const ready = compatRejectedOk && futureModulesDenied && rawGlobalsAbsent &&
+                broadcastChannelIsJsOnly && surfaceOk && metadataDeniedOk;
+
+              console.log("packaged.intent_broadcast.ready=" + ready);
+              console.log("packaged.intent_broadcast.compat_rejected=" + compatRejectedOk);
+              console.log("packaged.intent_broadcast.future_modules_denied=" + futureModulesDenied);
+              console.log("packaged.intent_broadcast.raw_globals_absent=" + rawGlobalsAbsent);
+              console.log("packaged.intent_broadcast.broadcast_channel_js_only=" + broadcastChannelIsJsOnly);
+              console.log("packaged.intent_broadcast.surface=" + surfaceOk);
+              console.log("packaged.intent_broadcast.metadata_denied=" + metadataDeniedOk);
+            }
+
+            return main().catch(error => {
+              console.error("packaged.intent_broadcast.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-intent-broadcast-boundary-smoke",
+            outputApkName = INTENT_BROADCAST_BOUNDARY_APK_NAME,
+            projectName = INTENT_BROADCAST_BOUNDARY_PROJECT_NAME,
+            packageName = INTENT_BROADCAST_BOUNDARY_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            runtimeMarkers = INTENT_BROADCAST_BOUNDARY_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedV11BridgeApk(): File {
         val mainScriptName = "main.js"
         val mainScript = """
@@ -13961,6 +14084,16 @@ $nodeConfigJson
         )
     }
 
+    private fun assertInstallAndRunPackagedIntentBroadcastBoundarySmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = INTENT_BROADCAST_BOUNDARY_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-intent-broadcast-boundary-smoke.apk",
+            label = "packaged IntentTask/broadcast boundary smoke",
+            requiredMarkers = INTENT_BROADCAST_BOUNDARY_RUNTIME_MARKERS,
+        )
+    }
+
     private fun assertInstallAndRunPackagedV11BridgeSmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
@@ -15237,6 +15370,12 @@ $nodeConfigJson
             "org.autojs6.packaged.node.mediarecorder.denial.smoke"
         private const val MEDIA_RECORDER_DENIAL_APK_NAME =
             "PackagedNodeMediaRecorderDenialSmoke_v1.0.0.apk"
+        private const val INTENT_BROADCAST_BOUNDARY_PROJECT_NAME =
+            "PackagedNodeIntentBroadcastBoundarySmoke"
+        private const val INTENT_BROADCAST_BOUNDARY_PACKAGE_NAME =
+            "org.autojs6.packaged.node.intentbroadcast.boundary.smoke"
+        private const val INTENT_BROADCAST_BOUNDARY_APK_NAME =
+            "PackagedNodeIntentBroadcastBoundarySmoke_v1.0.0.apk"
         private const val V11_BRIDGE_PROJECT_NAME = "PackagedNodeV11BridgeSmoke"
         private const val V11_BRIDGE_PACKAGE_NAME = "org.autojs6.packaged.node.v11.bridge.smoke"
         private const val V11_BRIDGE_APK_NAME = "PackagedNodeV11BridgeSmoke_v1.0.0.apk"
@@ -15628,6 +15767,15 @@ $nodeConfigJson
             "packaged.media_recorder_denial.metadata=true",
             "packaged.media_recorder_denial.recording=true",
             "packaged.media_recorder_denial.shadow=true",
+        )
+        private val INTENT_BROADCAST_BOUNDARY_RUNTIME_MARKERS = listOf(
+            "packaged.intent_broadcast.ready=true",
+            "packaged.intent_broadcast.compat_rejected=true",
+            "packaged.intent_broadcast.future_modules_denied=true",
+            "packaged.intent_broadcast.raw_globals_absent=true",
+            "packaged.intent_broadcast.broadcast_channel_js_only=true",
+            "packaged.intent_broadcast.surface=true",
+            "packaged.intent_broadcast.metadata_denied=true",
         )
         private val V11_BRIDGE_NODE_PERMISSIONS = listOf(
             "network",

@@ -250,8 +250,11 @@ provider lands.
 P13-22 records the partial IntentTask/broadcast provider gate. The TypeScript
 smoke keeps `addIntentTask()`, `queryIntentTasks()`, `getIntentTask(id)`, and
 `removeIntentTask(id)` typed as stable rejecting `Promise<never>` APIs while
-receiver registration, trigger payloads, manifest mutation, packaged behavior,
-and raw Android broadcast objects remain unavailable.
+receiver registration, trigger payloads, provider-owned manifest mutation,
+positive packaged trigger/remove behavior, and raw Android broadcast objects
+remain unavailable. Packaged denial/boundary smoke covers stable rejection
+stubs, future `tasks.*` module absence, raw broadcast global absence, and future
+task/broadcast capability denial.
 
 P13-23 records the bounded app/intent/broadcast parity gate as ready. `app.intent()`
 returns frozen JSON-safe descriptors for `app.startActivity()`,

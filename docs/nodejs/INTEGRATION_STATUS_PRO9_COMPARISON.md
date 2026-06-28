@@ -1021,12 +1021,13 @@ daily/weekly/user database mutation operations, IntentTask/broadcast triggers,
 packaged promotion, and raw task object mutation remain blocked.
 
 P13-22 records IntentTask/broadcast provider promotion as partial: Android/Rhino
-receiver substrate and stable `compat.tasks` rejection stubs are
+receiver substrate, stable `compat.tasks` rejection stubs, JSON-safe legacy
+`IntentTask` snapshots, and packaged denial/metadata-boundary smoke are
 evidence-backed. For v1.1 these compat names remain Promise-returning stable
 rejection stubs until a dedicated JSON-safe broadcast provider owns the future
-surface; receiver registration, manifest mutation, boot/package/startup/custom
-triggers, packaged install/trigger/remove behavior, and raw `Intent` /
-`BroadcastReceiver` objects remain blocked.
+surface; receiver registration, provider-owned manifest mutation,
+boot/package/startup/custom triggers, positive packaged install/trigger/remove
+behavior, and raw `Intent` / `BroadcastReceiver` objects remain blocked.
 
 P13-23 records bounded app/intent/broadcast Pro parity as ready: JSON-safe
 `app.intent()` descriptors, normalized `app.startActivity()` options, exact

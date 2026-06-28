@@ -228,12 +228,16 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-22 IntentTask/broadcast provider
 
-Reason open: process gate drift cleanup; packaged evidence remains `packaging`.
+Reason open: `implementation`, `policy`, `packaging`.
 
 - [x] Replace stable rejection stubs only after a JSON-safe broadcast provider exists.
 - [x] Define ownership between legacy Rhino rows, Node descriptors, and packaged records.
 - [x] Add query/get snapshots without exposing raw IntentTask or receiver handles.
-- [ ] Add manifest synthesis, exported/non-exported policy, trigger payloads, and install/trigger/remove packaged smoke.
+- [x] Add packaged denial/metadata-boundary smoke for stable rejection stubs,
+  future `tasks.*` module absence, raw broadcast global absence, and no future
+  task/broadcast capability acceptance.
+- [ ] Add manifest synthesis, exported/non-exported policy, trigger payloads,
+  and future provider-owned positive install/trigger/remove packaged smoke.
 - [x] Keep docs/surface evidence gate from counting receiver ownership, JSON snapshots, manifest/export policy, trigger payloads, packaged trigger/remove, and consent evidence twice.
 
 #### P13-23 app/intent/broadcast parity

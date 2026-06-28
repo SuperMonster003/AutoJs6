@@ -53,6 +53,9 @@
   `StaticBroadcastReceiver`, and `DynamicBroadcastReceivers` substrate plus the
   existing `autojs6:compat.tasks` IntentTask rejection stubs and JSON-safe
   query/get snapshot helper evidence.
+- Packaged boundary smoke now verifies `compat.tasks` IntentTask rejection
+  stubs, future `tasks.*` module absence, raw broadcast global absence, and
+  packaged metadata denial for future task/broadcast capabilities.
 - Host verifier: `tools/nodejs/phase13/verify-intent-broadcast-provider.js`.
 - Gradle gate: `:app:verifyNodePhase13IntentBroadcastProvider`.
 - Report: `docs/nodejs/reports/phase13/P13_22_INTENT_BROADCAST_PROVIDER.md`.
@@ -61,10 +64,11 @@
   Promise-returning stable rejection stubs until a dedicated JSON-safe broadcast
   provider owns the future surface.
 - Remaining P13-22 blockers: capability split, receiver authority,
-  exported/non-exported policy, trigger payload serialization, packaged
-  manifest synthesis, install/trigger/remove smoke, user disclosure, and raw
-  Intent/BroadcastReceiver profile decisions. JSON-only legacy row snapshots
-  are now covered without exposing raw `IntentTask` or receiver handles.
+  exported/non-exported policy, trigger payload serialization, provider-owned
+  packaged manifest synthesis, positive install/trigger/remove smoke, user
+  disclosure, and raw Intent/BroadcastReceiver profile decisions. JSON-only
+  legacy row snapshots and packaged denial/boundary smoke are now covered
+  without exposing raw `IntentTask` or receiver handles.
 
 ## P13-23 Ready Landing Note
 
@@ -1145,11 +1149,16 @@ P13 task 本身使用以下执行状态：
       - Android/Rhino `IntentTask`, `IntentTaskDatabase`, `TimedTaskManager`, `BaseBroadcastReceiver`, `StaticBroadcastReceiver`, and `DynamicBroadcastReceivers` exist as substrate.
       - `compat.tasks.addIntentTask/queryIntentTasks/getIntentTask/removeIntentTask` still reject with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` before bridge dispatch.
       - `NodeIntentTaskSnapshots` records JSON-only query/get snapshot evidence without exposing raw `IntentTask` or receiver handles.
+      - Packaged boundary smoke verifies stable rejection stubs, future
+        `tasks.*` module absence, raw broadcast global absence, and no future
+        task/broadcast capability acceptance in packaged metadata.
       - Node still cannot register Android receivers, mutate manifests, receive external broadcast wakeups, or access raw `Intent` / `BroadcastReceiver` / `IntentTask` objects.
     - Remaining blockers:
       - Capability split for app-local custom broadcasts, exported broadcasts, boot/user-unlocked, package events, startup, and exact-alarm triggers.
       - Receiver lifecycle ownership, exported policy, duplicate suppression, unregister/delete cleanup, and process-death recovery.
-      - Trigger payload serialization, packaged manifest synthesis, install/trigger/remove smokes, user disclosure, and rate-limit diagnostics.
+      - Trigger payload serialization, provider-owned packaged manifest
+        synthesis, positive install/trigger/remove smokes, user disclosure, and
+        rate-limit diagnostics.
 
 - [x] P13-23: 扩展 app/intent/broadcast Pro parity。
   - 范围：补齐 `app` 模块启动应用、intent、URI、邮件、设置页、广播等能力。
