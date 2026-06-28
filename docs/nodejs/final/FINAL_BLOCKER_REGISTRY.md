@@ -51,10 +51,11 @@ Current packaged long-running progress:
   partial packaged dispatch path through
   `node.executionMode=interactive_long_running`, the `packaged_long_running`
   launch surface, inrt foreground-service routing, a host verifier, and focused
-  packaged lifecycle checkpoint/read/clear smoke evidence passing on
-  QV710AF65F / Sony XQ-AT72 / Android 12. Full notification Stop action,
-  task-removal cleanup, Android permission/background-start policy coverage,
-  and quota/stress promotion remain open.
+  packaged lifecycle checkpoint/read/clear plus foreground Stop
+  clean-exit/relaunch/crash-recovery smoke evidence passing on QV710AF65F /
+  Sony XQ-AT72 / Android 12. Task-removal cleanup, Android
+  permission/background-start policy coverage, packaged metadata/disclosure
+  denial paths, and quota/stress promotion remain open.
 
 Current full heavy resource stress progress:
 

@@ -81,8 +81,12 @@ Reason open: `evidence`, `packaging`.
 
 - [x] Add packaged `autojs6:lifecycle` checkpoint/read/clear smoke evidence
   with QV710AF65F focused packaged smoke coverage.
+- [x] Verify QV710AF65F packaged foreground notification record, Stop command,
+  stopped status, clean-exit marker, clean Stop relaunch without collection,
+  and running-service force-stop crash recovery.
 - [ ] Add Android version, notification permission, and background-start denial matrix.
-- [ ] Verify foreground notification, stop action, checkpoint, task-removal cleanup, relaunch, and crash recovery.
+- [ ] Verify task-removal cleanup and broaden foreground/relaunch/crash
+  recovery evidence beyond the focused QV710AF65F smoke.
 - [ ] Record packaged metadata and disclosure denial paths before promotion.
 
 #### P13-08 full heavy resource stress

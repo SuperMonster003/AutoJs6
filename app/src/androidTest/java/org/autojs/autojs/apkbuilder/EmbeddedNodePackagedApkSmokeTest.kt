@@ -10,7 +10,9 @@ import android.provider.MediaStore
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.engine.EmbeddedNodeFixtureCorpus
 import org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine
+import org.autojs.autojs.engine.NodeCrashEvidenceStore
 import org.autojs.autojs.engine.NodeExecutionModePolicy
+import org.autojs.autojs.engine.NodeInteractiveLongRunningStatusStore
 import org.autojs.autojs.engine.NodeLifecycleCheckpointStore
 import org.autojs.autojs.engine.NodeEmbeddedProcessPoolPolicy
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
@@ -13715,6 +13717,84 @@ $nodeConfigJson
                 missingFirstMarkers.isEmpty(),
             )
 
+            val firstExecutionId = extractPackagedLongRunningExecutionId(firstLogcat)
+            val runningStatus = waitForPackagedInteractiveStatus(
+                packageName = CRASH_EVIDENCE_PACKAGE_NAME,
+                executionId = firstExecutionId,
+                label = "first packaged crash evidence status running",
+            ) { status ->
+                status.optString("state") == NodeInteractiveLongRunningStatusStore.STATE_RUNNING &&
+                        status.optString("launchSurface") == NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING
+            }
+            assertPackagedLongRunningStatus(
+                label = "first packaged crash evidence running status",
+                status = runningStatus,
+                expectedExecutionId = firstExecutionId,
+                expectedState = NodeInteractiveLongRunningStatusStore.STATE_RUNNING,
+                expectedStopRequested = false,
+            )
+
+            val foregroundRecord = waitForPackagedForegroundNotification(CRASH_EVIDENCE_PACKAGE_NAME)
+            assertTrue(
+                "Packaged foreground notification should expose the Stop action.\n$foregroundRecord",
+                foregroundRecord.contains("\"Stop\"") && foregroundRecord.contains("startService"),
+            )
+
+            assertTrue(
+                "Packaged foreground notification Stop command should accept the active execution.",
+                stopPackagedLongRunningViaRunAs(CRASH_EVIDENCE_PACKAGE_NAME, firstExecutionId),
+            )
+
+            val stopLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_STOP_MARKERS)
+            val stopRelevantLog = relevantPackagedLogcat(stopLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
+            val stoppedStatus = waitForPackagedInteractiveStatus(
+                packageName = CRASH_EVIDENCE_PACKAGE_NAME,
+                executionId = firstExecutionId,
+                label = "first packaged crash evidence status stopped",
+            ) { status ->
+                status.optString("state") == NodeInteractiveLongRunningStatusStore.STATE_STOPPED &&
+                        status.optBoolean("stopRequested")
+            }
+            assertPackagedLongRunningStatus(
+                label = "first packaged crash evidence stopped status",
+                status = stoppedStatus,
+                expectedExecutionId = firstExecutionId,
+                expectedState = NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
+                expectedStopRequested = true,
+            )
+            assertTrue(
+                "Packaged foreground Stop action should mark crash evidence as clean_exit.\n$stopRelevantLog",
+                stopLogcat.contains("marker.terminal schema=${NodeCrashEvidenceStore.MARKER_SCHEMA}") &&
+                        stopLogcat.contains("state=${NodeCrashEvidenceStore.STATE_CLEAN_EXIT}") &&
+                        stopLogcat.contains("reason=native_process.exit") &&
+                        stopLogcat.contains("exitCode=0"),
+            )
+            waitForPackagedForegroundNotificationRemoved(CRASH_EVIDENCE_PACKAGE_NAME)
+
+            shellWithTimeout("logcat -c", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
+            shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
+            Thread.sleep(1_000L)
+
+            val secondLaunchOutput = shellWithTimeout(
+                "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity",
+            )
+            assumeTrue(
+                "Could not relaunch packaged crash evidence SplashActivity after Stop action.\n$secondLaunchOutput",
+                secondLaunchOutput.contains("Starting", ignoreCase = true) ||
+                        secondLaunchOutput.contains("Warning: Activity not started", ignoreCase = true),
+            )
+            val secondLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS)
+            val secondRelevantLog = relevantPackagedLogcat(secondLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
+            assertFalse(
+                "Clean Stop action should not be collected as next-launch crash evidence.\n$secondRelevantLog",
+                secondLogcat.contains("marker.collect schema=${NodeCrashEvidenceStore.NEXT_LAUNCH_BUNDLE_SCHEMA}"),
+            )
+            val missingSecondMarkers = CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS.filterNot { secondLogcat.contains(it) }
+            assertTrue(
+                "Packaged crash evidence second launch did not contain expected markers: $missingSecondMarkers\n$secondRelevantLog",
+                missingSecondMarkers.isEmpty(),
+            )
+
             shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
             Thread.sleep(1_000L)
 
@@ -13903,6 +13983,160 @@ $nodeConfigJson
             }
         }
         return logcat
+    }
+
+    private fun extractPackagedLongRunningExecutionId(logcat: String): String {
+        val patterns = listOf(
+            Regex("""autojs6\.inrt\.node_project_packaged_long_running\.v1 executionId=([A-Za-z0-9_.-]+)"""),
+            Regex("""script\.enter executionId=([A-Za-z0-9_.-]+)"""),
+        )
+        patterns.forEach { pattern ->
+            pattern.find(logcat)?.groupValues?.getOrNull(1)?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+        throw AssertionError("Packaged long-running executionId was not present in logcat.\n${tail(logcat)}")
+    }
+
+    private fun waitForPackagedInteractiveStatus(
+        packageName: String,
+        executionId: String,
+        label: String,
+        predicate: (JSONObject) -> Boolean,
+    ): JSONObject {
+        val deadline = SystemClock.elapsedRealtime() + PACKAGED_STATUS_WAIT_TIMEOUT_MS
+        var lastRaw = ""
+        var lastStatus: JSONObject? = null
+        while (SystemClock.elapsedRealtime() < deadline) {
+            lastRaw = shellWithTimeout(
+                "run-as $packageName cat files/nodejs/interactive-long-running/$executionId.json 2>/dev/null",
+                PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS,
+            )
+            lastStatus = parseJsonObject(lastRaw)
+            if (lastStatus?.let(predicate) == true) {
+                return lastStatus
+            }
+            Thread.sleep(PACKAGED_STATUS_WAIT_POLL_MS)
+        }
+        throw AssertionError(
+            "Timed out waiting for $label for $packageName/$executionId.\n" +
+                    "Last status=${lastStatus?.toString(2).orEmpty()}\n" +
+                    "Last raw=${tail(lastRaw)}",
+        )
+    }
+
+    private fun assertPackagedLongRunningStatus(
+        label: String,
+        status: JSONObject,
+        expectedExecutionId: String,
+        expectedState: String,
+        expectedStopRequested: Boolean,
+    ) {
+        assertEquals("$label executionId", expectedExecutionId, status.getString("executionId"))
+        assertEquals("$label state", expectedState, status.getString("state"))
+        assertEquals(
+            "$label launch surface",
+            NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING,
+            status.getString("launchSurface"),
+        )
+        assertEquals(
+            "$label stop action",
+            NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME,
+            status.getString("stopAction"),
+        )
+        assertEquals("$label stopRequested", expectedStopRequested, status.getBoolean("stopRequested"))
+        assertEquals(
+            "$label checkpoint package",
+            CRASH_EVIDENCE_PACKAGE_NAME,
+            status.getJSONObject("checkpoint").getString("packageName"),
+        )
+    }
+
+    private fun waitForPackagedForegroundNotification(packageName: String): String {
+        val deadline = SystemClock.elapsedRealtime() + PACKAGED_NOTIFICATION_WAIT_TIMEOUT_MS
+        var lastRecord = ""
+        while (SystemClock.elapsedRealtime() < deadline) {
+            lastRecord = activeNotificationRecord(packageName)
+            if (
+                lastRecord.contains("id=$PACKAGED_INTERACTIVE_NOTIFICATION_ID") &&
+                lastRecord.contains("channel=org.autojs.autojs.engine.NativeNodeEmbeddedScriptService.foreground") &&
+                lastRecord.contains("\"Stop\"") &&
+                lastRecord.contains("startService")
+            ) {
+                return lastRecord
+            }
+            Thread.sleep(PACKAGED_STATUS_WAIT_POLL_MS)
+        }
+        throw AssertionError("Timed out waiting for packaged foreground notification for $packageName.\n${tail(lastRecord)}")
+    }
+
+    private fun waitForPackagedForegroundNotificationRemoved(packageName: String) {
+        val deadline = SystemClock.elapsedRealtime() + PACKAGED_NOTIFICATION_WAIT_TIMEOUT_MS
+        var lastRecord = ""
+        while (SystemClock.elapsedRealtime() < deadline) {
+            lastRecord = activeNotificationRecord(packageName)
+            if (lastRecord.isBlank()) {
+                return
+            }
+            Thread.sleep(PACKAGED_STATUS_WAIT_POLL_MS)
+        }
+        throw AssertionError("Timed out waiting for packaged foreground notification removal for $packageName.\n${tail(lastRecord)}")
+    }
+
+    private fun stopPackagedLongRunningViaRunAs(
+        packageName: String,
+        executionId: String,
+    ): Boolean {
+        val output = shellWithTimeout(
+            "run-as $packageName am startservice --user 0 " +
+                    "-n $packageName/org.autojs.autojs.engine.NativeNodeEmbeddedScriptService " +
+                    "-a ${NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME} " +
+                    "--es execution_id $executionId",
+            PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS,
+        )
+        return output.contains("Starting service", ignoreCase = true) &&
+                !output.contains("Exception", ignoreCase = true) &&
+                !output.contains("Error:", ignoreCase = true) &&
+                !output.contains("Permission Denial", ignoreCase = true)
+    }
+
+    private fun activeNotificationRecord(packageName: String): String {
+        val dump = shellWithTimeout("dumpsys notification --noredact", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
+        val section = activeNotificationListSection(dump)
+        val lines = section.lines()
+        val start = lines.indexOfFirst {
+            it.contains("NotificationRecord(") && it.contains("pkg=$packageName")
+        }
+        if (start < 0) {
+            return ""
+        }
+        val end = (start + 1 until lines.size).firstOrNull { index ->
+            lines[index].startsWith("    NotificationRecord(")
+        } ?: lines.size
+        return lines.subList(start, end).joinToString("\n")
+    }
+
+    private fun activeNotificationListSection(dump: String): String {
+        val start = dump.indexOf("  Notification List:").takeIf { it >= 0 } ?: return dump
+        val end = listOf(
+            "\n  mUseAttentionLight=",
+            "\n  Snoozed notifications:",
+            "\n  Ranking Config:",
+        )
+            .mapNotNull { marker -> dump.indexOf(marker, start).takeIf { it >= 0 } }
+            .minOrNull()
+            ?: dump.length
+        return dump.substring(start, end)
+    }
+
+    private fun parseJsonObject(value: String): JSONObject? {
+        val start = value.indexOf('{')
+        if (start < 0) {
+            return null
+        }
+        return runCatching { JSONObject(value.substring(start).trim()) }.getOrNull()
+    }
+
+    private fun tail(value: String, maxChars: Int = 4_000): String {
+        return if (value.length <= maxChars) value else value.takeLast(maxChars)
     }
 
     private fun stableInrtRequestDiagnosticsMarkers(markers: List<String>): List<String> {
@@ -15173,11 +15407,24 @@ $nodeConfigJson
             "executionMode=${NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING}",
             "packageName=$CRASH_EVIDENCE_PACKAGE_NAME",
         )
+        private val CRASH_EVIDENCE_STOP_MARKERS = listOf(
+            "runtime.heartbeat.stop",
+            "reason=interactive.stop",
+            "marker.terminal schema=${NodeCrashEvidenceStore.MARKER_SCHEMA}",
+            "state=${NodeCrashEvidenceStore.STATE_CLEAN_EXIT}",
+            "reason=native_process.exit",
+            "exitCode=0",
+            "packageName=$CRASH_EVIDENCE_PACKAGE_NAME",
+        )
         private val CRASH_EVIDENCE_TEMPLATE_DEX_MARKERS = listOf(
             "marker.begin schema=",
             "marker.collect schema=",
             "autojs6-node-phase13-next-launch-crash-bundle-v1",
         )
+        private const val PACKAGED_INTERACTIVE_NOTIFICATION_ID = 0xA6E4
+        private const val PACKAGED_STATUS_WAIT_TIMEOUT_MS = 30_000L
+        private const val PACKAGED_STATUS_WAIT_POLL_MS = 250L
+        private const val PACKAGED_NOTIFICATION_WAIT_TIMEOUT_MS = 15_000L
         private const val PACKAGED_SMOKE_PUBLIC_EXPORT_DIR =
             "/sdcard/Download/AutoJs6/embedded-node-packaged-smoke"
         private const val PACKAGED_SMOKE_FIXTURE_CACHE_DIR_NAME = "embedded-node-packaged-fixture-cache"
