@@ -29,8 +29,10 @@ promotion remains gated by the Phase 13 integrity, disclosure, and rollback
 policies before any static snippet can become a packaged smoke.
 
 `smoke.cjs` is the focused runtime smoke subset. It executes only
-`snippets/esm-loader.cjs` equivalent local ESM behavior, the checked-in
+`snippets/esm-loader.cjs` equivalent local ESM behavior, the controlled
+HTTP/HTTPS facade shape used by `snippets/http-https.cjs`, the checked-in
 `vendor/pure-math` dependency path used by `snippets/npm-dependency.cjs`, and
 the scoped FileHandle plus non-persistent watcher path represented by
-`snippets/fs-advanced.cjs`. It does not execute worker, network, expanded
-filesystem-root, WASI, inspector, or package manager authority examples.
+`snippets/fs-advanced.cjs`. The HTTP/HTTPS smoke does not dispatch live network
+I/O. It does not execute worker, raw network, expanded filesystem-root, WASI,
+inspector, or package manager authority examples.

@@ -6,8 +6,8 @@
     "entry": "smoke.cjs",
     "expectedOutput": "smoke-output.txt",
     "profile": "safe_default",
-    "examples": ["esm-loader", "npm-dependency", "fs-advanced"],
-    "description": "Runs already-promoted managed local ESM, checked-in pure JavaScript dependency, and scoped advanced filesystem snippets without enabling high-risk desktop authority."
+    "examples": ["esm-loader", "http-https", "npm-dependency", "fs-advanced"],
+    "description": "Runs already-promoted managed local ESM, controlled HTTP/HTTPS facade shape, checked-in pure JavaScript dependency, and scoped advanced filesystem snippets without enabling high-risk desktop authority or live network I/O."
   },
   "examples": [
     {

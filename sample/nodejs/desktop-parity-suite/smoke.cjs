@@ -21,6 +21,20 @@ function runNpmDependency() {
   console.log("sample.desktop-parity-suite.npm-dependency=PASS");
 }
 
+function runHttpHttps() {
+  const http = require("http");
+  const https = require("https");
+  const shape = [
+    typeof http.request,
+    typeof http.get,
+    typeof https.request,
+    typeof https.get,
+  ].join(",");
+  assert.equal(shape, "function,function,function,function");
+  console.log("sample.desktop-parity-suite.http-https.shape=" + shape);
+  console.log("sample.desktop-parity-suite.http-https=PASS");
+}
+
 async function runFsAdvanced() {
   const dir = "./desktop-parity-fs-smoke";
   const file = dir + "/out.txt";
@@ -45,8 +59,9 @@ async function runFsAdvanced() {
 }
 
 (async function main() {
-  console.log("sample.desktop-parity-suite.smoke.catalog=3");
+  console.log("sample.desktop-parity-suite.smoke.catalog=4");
   await runEsmLoader();
+  runHttpHttps();
   runNpmDependency();
   await runFsAdvanced();
   console.log("sample.desktop-parity-suite.smoke=PASS");
