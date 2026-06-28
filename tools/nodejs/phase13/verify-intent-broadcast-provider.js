@@ -118,8 +118,10 @@ function buildReport(files) {
       token(files.dynamicBroadcastReceivers, "context.registerReceiver(mDefaultActionReceiver"),
       token(files.dynamicBroadcastReceivers, "InAppEventBus.streamOf(action)"),
       token(files.dynamicBroadcastReceivers, "fun unregisterAll()"),
+      token(files.p13Report, "Legacy Rhino `IntentTask` rows remain owned by the Rhino task database"),
+      token(files.broadcastTasksDoc, "separate provider-owned JSON descriptors with opaque Node task"),
+      token(files.taskIntentDecisionDoc, "separate JSON descriptors with opaque Node task ids"),
     ], [
-      "Define ownership and migration between legacy Rhino IntentTask rows, Node descriptors, and packaged app task records.",
       "Add JSON snapshots for query/get without exposing raw IntentTask or receiver handles.",
     ]),
     scenario("security_packaged_manifest_boundary", "Receiver authority, manifest mutation, and raw broadcast objects remain blocked", [

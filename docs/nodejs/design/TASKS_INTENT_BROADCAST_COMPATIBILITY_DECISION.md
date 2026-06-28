@@ -32,6 +32,15 @@ The stubs fail before bridge dispatch. They do not create `IntentTask` database
 rows, query existing Rhino `IntentTask` records, register or unregister
 receivers, add manifest entries, or expose trigger payloads.
 
+Legacy Rhino `IntentTask` rows remain owned by the Rhino task database and the
+existing AutoJs6 receiver stack. A future Node broadcast provider must persist
+separate JSON descriptors with opaque Node task ids; it must not wrap live
+Rhino rows or share mutable `IntentTask` objects with JavaScript. Packaged
+broadcast records belong to the packaged app identity and manifest metadata,
+not to the main app's mutable Rhino task rows. Migration from legacy rows must
+be an explicit copy/translate step into versioned descriptors with user-visible
+review, downgrade behavior, and delete/disable ownership.
+
 ## Rejected Runtime Authority
 
 P12-18 does not expose any of the following to Node scripts:

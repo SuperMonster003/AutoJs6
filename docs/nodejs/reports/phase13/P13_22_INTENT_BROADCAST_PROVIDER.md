@@ -50,6 +50,12 @@ packaged behavior, user disclosure, and install/trigger/remove evidence land.
   files.
 - A future provider must return bounded JSON trigger payload snapshots instead
   of raw Android `Intent` or `Bundle` objects.
+- Legacy Rhino `IntentTask` rows remain owned by the Rhino task database and
+  existing receiver stack. Future Node broadcast registrations must use separate
+  provider-owned JSON descriptors with opaque Node task ids, while packaged
+  broadcast records belong to packaged app identity and manifest metadata.
+  Migration from legacy rows must copy/translate into versioned descriptors; it
+  must not expose live row handles or mutable `IntentTask` objects to Node.
 - For P13-22 v1.1, `compat.tasks.addIntentTask()`,
   `queryIntentTasks()`, `getIntentTask(id)`, and `removeIntentTask(id)` remain
   Promise-returning stable rejection stubs. A future promotion must be owned by
@@ -63,8 +69,9 @@ packaged behavior, user disclosure, and install/trigger/remove evidence land.
 - Define trigger descriptors with backend, scoped entry, actions, categories,
   data schemes, local/exported state, timeout, arguments, task id, package
   identity, and descriptor version.
-- Implement receiver ownership with duplicate suppression, unregister/delete
-  cleanup, process-death recovery, and receiver-thread non-execution
+- Implement receiver lifecycle ownership with duplicate suppression,
+  unregister/delete cleanup, process-death recovery, and receiver-thread
+  non-execution
   guarantees.
 - Add packaged APK metadata, manifest patch reports, receiver export state,
   `RECEIVE_BOOT_COMPLETED`, package data-scheme declarations, install-run
