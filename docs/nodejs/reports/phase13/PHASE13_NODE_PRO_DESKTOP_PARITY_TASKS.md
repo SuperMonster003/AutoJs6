@@ -1819,7 +1819,7 @@ P13 task 本身使用以下执行状态：
   - Progress:
     - P13-43 partial landing 已添加 `stdlibProfile` 诊断，记录当前 Safe
       Node stdlib subset、代表性模块状态、Android 稳定差异、npm corpus
-      `real_npm_phase13_55_fixture_corpus` 和 desktop differential 证据，同时保持
+      `real_npm_phase13_60_fixture_corpus` 和 desktop differential 证据，同时保持
       raw desktop parity、
       raw native handles、unrestricted network、broad terminal、raw
       `process.getBuiltinModule` bypass 和 `zlib/promises` 未提升。
@@ -1863,10 +1863,14 @@ P13 task 本身使用以下执行状态：
       `zlib/promises` 的稳定 denial。
     - 已新增 host verifier:
       `tools/nodejs/phase13/verify-stdlib-conformance-decision.js`。
-    - real npm corpus 已新增 3 个 stdlib-dependent fixed fixture：
+    - real npm corpus 已新增 10 个 Phase 13 fixed fixture：
       `stdlib-digest-stream-package`、`perf-async-hooks-package` 和
-      `url-buffer-codec-package`，并在 `phase13Compatibility.targetedFixtureDeltas`
-      中记录 stdlib +5 pass delta。
+      `url-buffer-codec-package`、`util-events-package`、
+      `path-querystring-package`、`esm-exports-conditions-package`、
+      `network-policy-adapter-package`、`scoped-fs-metadata-package`、
+      `package-manager-metadata-package` 和 `lockfile-integrity-reader-v2`，
+      并在 `phase13Compatibility.targetedFixtureDeltas` 中记录 stdlib +5
+      以及 ESM/network/fs/package_manager +5 pass delta。
     - Gradle gate:
       `:app:verifyNodePhase13StdlibConformanceDecision`。
     - Report:
@@ -2013,10 +2017,14 @@ P13 task 本身使用以下执行状态：
     - P13 每次放开桌面能力都能看到 corpus 通过率变化。
   - Progress:
     - P13-47 partial landing 已在 `npm_compat_real/manifest.json` 增加
-      `phase13Compatibility` 分类元数据，固定 53 个离线 fixture baseline。
-    - `phase13Compatibility.targetedFixtureDeltas` 记录 stdlib +5 pass delta，
-      对应 `stdlib-digest-stream-package`、`perf-async-hooks-package` 和
-      `url-buffer-codec-package`。
+      `phase13Compatibility` 分类元数据，固定 60 个离线 fixture baseline。
+    - `phase13Compatibility.targetedFixtureDeltas` 记录 stdlib +5 pass delta
+      以及 ESM/network/fs/package_manager +5 pass delta，对应
+      `stdlib-digest-stream-package`、`perf-async-hooks-package`、
+      `url-buffer-codec-package`、`util-events-package`、
+      `path-querystring-package`、`esm-exports-conditions-package`、
+      `network-policy-adapter-package`、`scoped-fs-metadata-package`、
+      `package-manager-metadata-package` 和 `lockfile-integrity-reader-v2`。
     - 分类覆盖 `missing_builtin`、`native_addon`、`postinstall`、`network`
       和 `fs`，每类包含 package/reason rows 与 fixture 引用。
     - `NodeRealNpmCompatInstrumentationTest.fixtureMetadataIsCompleteAndSafe`
@@ -2036,10 +2044,10 @@ P13 task 本身使用以下执行状态：
       artifact 目录传给 host differential report。
     - 真实 registry drift、unsafe native/postinstall 包执行仍保持拒绝，仅以
       metadata blocker category 表达。
-  - Closure: the v1.1 fixed 55-fixture corpus, P13 compatibility taxonomy,
-    required reason kinds, stdlib +5 targeted delta, metadata instrumentation,
-    differential category reporting, summary rows, docs, surface manifest, and
-    Gradle gate are covered.
+  - Closure: the v1.1 fixed 60-fixture corpus, P13 compatibility taxonomy,
+    required reason kinds, stdlib +5 and ESM/network/fs/package_manager +5
+    targeted deltas, metadata instrumentation, differential category reporting,
+    summary rows, docs, surface manifest, and Gradle gate are covered.
   - Future CI work: connected AutoJs6 real npm corpus artifact scheduling,
     live registry drift testing, and unsafe native/postinstall package execution
     remain outside the default corpus gate.

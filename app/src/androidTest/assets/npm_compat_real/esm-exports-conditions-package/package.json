@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/esm-exports-conditions-package-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "exports-conditions-probe": "1.0.0"
+  }
+}

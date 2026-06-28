@@ -1315,7 +1315,7 @@ partial and returns the same limited wrappers as `require()`. `zlib/promises`,
 raw desktop parity, raw native handles, unrestricted network behavior, and
 broad terminal control remain unpromoted while broader Android difference
 coverage and additional stdlib corpus expansion stay future work. The current
-stdlib npm corpus marker is `real_npm_phase13_55_fixture_corpus`.
+stdlib npm corpus marker is `real_npm_phase13_60_fixture_corpus`.
 
 Large embedded result envelopes are bounded before Android Binder transport.
 Dedicated result fields carry `resultText`, `stdout`, `stderr`, `errorMessage`,
@@ -1357,11 +1357,12 @@ the host project/package permission manifest remains the authority ceiling and
 missing capabilities reject before plugin code runs.
 
 P13-47 records dependency compatibility corpus as partial. The fixed real npm
-corpus now contains 55 offline fixtures, and its manifest records
+corpus now contains 60 offline fixtures, and its manifest records
 `phase13Compatibility` package reason categories for `missing_builtin`,
 `native_addon`, `postinstall`, `network`, and `fs` plus a stdlib
-`targetedFixtureDeltas` +5 pass delta. The desktop differential report can
-show pass-rate rows by category when AutoJs6 results are supplied, but unsafe
+`targetedFixtureDeltas` +5 pass delta plus ESM, network, filesystem, and
+package-manager targeted deltas. The desktop differential report can show
+pass-rate rows by category when AutoJs6 results are supplied, but unsafe
 registry packages, native payloads, lifecycle scripts, and postinstall
 downloads are still represented as metadata blockers rather than runnable
 corpus content.

@@ -836,7 +836,7 @@ marketplace install/update, signed archives, packaged plugin distribution, and
 plugin-granted host authority unpromoted. P13-46 records plugin system parity
 as partial.
 `verifyNodePhase13DependencyCompatibilityCorpus` records P13-47 as the
-dependency compatibility corpus gate. It requires the fixed 55-fixture real npm
+dependency compatibility corpus gate. It requires the fixed 60-fixture real npm
 manifest, `phase13Compatibility` taxonomy, targeted fixture deltas,
 package/reason rows for `missing_builtin`, `native_addon`, `postinstall`,
 `network`, and `fs`, metadata instrumentation, differential pass-rate

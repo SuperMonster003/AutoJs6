@@ -1,0 +1,1 @@
+realnpm.package-manager-metadata=pmmeta:pm-metadata-probe:pm-metadata-leaf:1.0.0

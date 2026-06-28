@@ -418,7 +418,7 @@ wrappers as `require()`. Desktop packages that need broader OS/terminal
 behavior, raw `process.getBuiltinModule` bypass behavior, `zlib/promises`,
 unrestricted network/native handles, or full Node stdlib parity still need
 later Desktop-profile work. The current stdlib corpus marker is
-`real_npm_phase13_55_fixture_corpus`.
+`real_npm_phase13_60_fixture_corpus`.
 
 P13-44 records process/env/argv parity as partial. AutoJs6 Node exposes
 `processParityProfile` diagnostics for controlled `process.env`,
@@ -449,8 +449,9 @@ distribution, and plugin-granted host authority remain unavailable.
 P13-47 records dependency compatibility corpus as partial. AutoJs6 Node now
 classifies the fixed real npm corpus with `phase13Compatibility` package reason
 categories for `missing_builtin`, `native_addon`, `postinstall`, `network`,
-and `fs`, plus a stdlib `targetedFixtureDeltas` +5 record; the differential
-report can show pass-rate rows by category when AutoJs6 results are supplied.
+and `fs`, plus stdlib +5 and ESM/network/fs/package-manager targeted deltas;
+the differential report can show pass-rate rows by category when AutoJs6
+results are supplied.
 Unsafe registry packages, native payloads, lifecycle scripts, and postinstall
 downloads remain blocked.
 

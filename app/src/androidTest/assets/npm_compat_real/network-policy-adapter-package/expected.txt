@@ -1,0 +1,1 @@
+realnpm.network-policy-adapter=networkpolicy:https:denied:adapter
