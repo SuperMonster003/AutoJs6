@@ -1604,8 +1604,8 @@ This host gate records P13-26 as partial. It requires exact `media.audio`,
 permission-manifest, and cross-document evidence. It does not promote playback,
 real recording sessions, screen/internal audio capture, MediaStore access,
 packaged media assets, or raw Android media objects. Screen/internal audio
-capture is stable-denied for v1.1 until a separate MediaProjection/playback
-capture policy gate exists.
+capture, playback, and MediaStore access are stable-denied for v1.1; real
+recording sessions and packaged media evidence remain open.
 
 Phase 13 utility-heavy Rhino modules status gate:
 

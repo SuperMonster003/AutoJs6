@@ -256,8 +256,8 @@ Reason open: `implementation`, `evidence`, `packaging`.
 
 Reason open: `implementation`, `evidence`, `packaging`.
 
-- [ ] Add audio playback and MediaPlayer lifecycle with focus policy.
-- [ ] Decide and implement MediaStore query/insert/update/delete boundaries.
+- [x] Stable-deny audio playback, MediaPlayer lifecycle, playlists, and focus policy for v1.1.
+- [x] Stable-deny MediaStore query/insert/update/delete and broad media-library permissions for v1.1.
 - [ ] Add real recording start/stop/session handles, permission flow, foreground disclosure, and cleanup.
 - [x] Decide screen/internal audio recording policy.
 - [ ] Add packaged media assets, recorder smoke, denial matrix, and privacy copy.

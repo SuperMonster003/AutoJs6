@@ -589,9 +589,9 @@ JavaScript must not receive raw `MediaPlayer`, `MediaRecorder`, `AudioManager`,
 or Android media object handles.
 
 P13-26 records media/recorder/mediainfo provider promotion as partial.
-Playback, real recorder sessions, foreground-service microphone disclosure,
-MediaStore access, packaged media asset lookup, corpus/device evidence, and
-migration examples remain blocked.
+Playback and MediaStore access are stable-denied for v1.1. Real recorder
+sessions, foreground-service microphone disclosure, packaged media asset lookup,
+corpus/device evidence, and migration examples remain future evidence.
 
 P13-27 records utility-heavy Rhino modules promotion as partial. The promoted
 `jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` subsets are pure JavaScript and
