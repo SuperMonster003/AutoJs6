@@ -97,10 +97,13 @@ function buildReport(files) {
       token(files.packagedSmokeTest, "packaged.worker_threads.esm.ready=true"),
       token(files.buildGradle, "installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk"),
       token(files.workerDesignDoc, "Runnable coverage is skipped when the preflight reports native workers unavailable"),
+      token(files.p13Report, "QV710AF65F / XQ-AT72 / Android 12"),
+      token(files.p13Report, "tests=16, failures=0,"),
+      token(files.p13Report, "worker.preflight.status=unavailable"),
+      token(files.testingDoc, "Current QV710AF65F P13-34 gate evidence"),
     ], [
-      "Current default device evidence may still report native worker_threads unavailable; runnable opt-in promotion requires native availability on target ABIs.",
-      "Run and archive the experimental worker gate with `-Pautojs.nodejs.worker_threads.experimental=true` on the target promotion device.",
-      "Promote packaged worker smoke from source markers to current device-exported evidence.",
+      "Native-runnable opt-in promotion requires `worker.preflight.status=available` on target ABIs/devices.",
+      "Promote packaged worker smoke from source markers/native-unavailable skip to native-available device-exported evidence.",
     ]),
     scenario("resource_crash_packaged_blockers", "resource stress, timeout cleanup, and packaged behavior remain required before opt-in promotion", [
       token(files.workerStressTest, "worker.resource.timeout.recovery=v24.5.0"),
@@ -206,6 +209,8 @@ function buildReport(files) {
       profileDiagnosticExposed: files.nodeBridgeSources.text.includes("workerThreadsProfile: Object.freeze({"),
       requestLocalExperimentalPreflightReady: scenarioById(scenarios, "experimental_preflight_and_isolation").status !== "missing_evidence",
       workerPolicyBoundariesDocumented: checkById(checks, "worker-policy-boundaries-documented").passed,
+      currentUnavailableGateEvidenceArchived: files.p13Report.text.includes("QV710AF65F / XQ-AT72 / Android 12") &&
+        files.p13Report.text.includes("worker.preflight.status=unavailable"),
       nativeRunnableEvidenceRequired: true,
       packagedWorkerEvidenceReady: false,
       crashEvidenceReady: false,

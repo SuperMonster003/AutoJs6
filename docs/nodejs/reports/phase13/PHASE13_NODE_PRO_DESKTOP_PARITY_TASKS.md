@@ -285,9 +285,14 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_34_WORKER_THREADS_OPT_IN_PROMOTION.md`.
 - Surface manifest evidence: `phase13-worker-threads-opt-in-promotion`.
+- Current QV710AF65F gate evidence: 2026-06-28
+  `:app:verifyNodeWorkerGate -Pautojs.nodejs.worker_threads.experimental=true`
+  passed with native-unavailable skips (`tests=16`, `failures=0`,
+  `skipped=14`, `worker.preflight.status=unavailable`,
+  `ERR_AUTOJS6_WORKER_DISABLED`).
 - Remaining P13-34 blockers: native worker availability on target ABIs,
-  archived experimental worker gate evidence, packaged `.mjs` worker smoke,
-  worker crash evidence, nested-worker policy, and Android resource ceilings.
+  native-available experimental worker gate evidence, packaged `.mjs` worker
+  smoke, worker crash evidence, and Android resource ceilings.
 
 ## P13-35 Partial Landing Note
 

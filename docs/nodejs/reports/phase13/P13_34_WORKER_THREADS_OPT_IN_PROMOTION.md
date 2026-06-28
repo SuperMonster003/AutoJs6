@@ -50,14 +50,30 @@ stress, and packaged `.mjs` worker smoke.
   current one-worker thread ceiling, but it does not promote a release RSS
   ceiling until the resource and crash evidence gates are current.
 
+## Current Device Evidence
+
+QV710AF65F / XQ-AT72 / Android 12 ran the current experimental worker gate on
+2026-06-28 with:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.worker_threads.experimental=true" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+Result: passed with native-unavailable skips (`tests=16, failures=0,
+skipped=14`). The runnable, resource-stress, and packaged worker paths reached
+the native preflight and skipped with `worker.preflight.status=unavailable` and
+`ERR_AUTOJS6_WORKER_DISABLED`. This archives the current device gate without
+claiming runnable worker support.
+
 ## Boundary
 
 The following remain future work before opt-in promotion can close:
 
-- native worker availability on the target promotion ABIs;
-- current connected evidence for `verifyNodeWorkerGate` with
+- native worker availability on the target promotion ABIs/devices;
+- native-available `verifyNodeWorkerGate` evidence with
   `-Pautojs.nodejs.worker_threads.experimental=true`;
-- current device-exported packaged `.mjs` worker smoke evidence;
+- native-available device-exported packaged `.mjs` worker smoke evidence;
 - crash evidence for worker startup failure, worker exception, timeout,
   parent-completion cleanup, and packaged worker failure modes;
 - release disclosure for any future worker profile promotion.
@@ -87,8 +103,8 @@ worker smoke evidence, and crash/resource evidence.
 
 ## Remaining Work
 
-- Run and archive the full experimental worker gate on a native-worker-capable
-  build/device.
+- Run and archive the full runnable experimental worker gate on a
+  native-worker-capable build/device.
 - Add current crash evidence references to the P13 gate output.
 - Promote packaged worker smoke evidence from source markers to current
   device-exported reports.

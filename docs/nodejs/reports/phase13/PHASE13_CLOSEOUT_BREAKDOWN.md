@@ -322,8 +322,10 @@ Reason open: scoped advanced filesystem API gate drift cleanup; future packaged 
 Reason open: `external`, `evidence`, `policy`, `packaging`.
 
 - [ ] Prove native worker availability on the target promotion ABIs.
-- [ ] Run and archive the experimental worker gate with `autojs.nodejs.worker_threads.experimental=true`.
-- [ ] Add packaged worker smoke evidence.
+- [x] Run and archive the current QV710AF65F experimental worker gate with
+  `autojs.nodejs.worker_threads.experimental=true`; runnable/stress/packaged
+  cases skipped because native preflight reported `ERR_AUTOJS6_WORKER_DISABLED`.
+- [ ] Add native-available packaged worker smoke evidence.
 - [ ] Add crash/resource evidence for startup failure, exception, timeout, parent cleanup, and packaged failure modes.
 - [x] Decide nested worker policy and document SharedArrayBuffer, Atomics, resourceLimits, thread, and RSS ceilings.
 - [x] Keep docs/matrix evidence gate from counting native availability, packaged smoke, and crash/resource evidence twice.

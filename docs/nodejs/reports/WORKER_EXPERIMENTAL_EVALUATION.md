@@ -86,6 +86,18 @@ Result: failed, 1/1 tests. The pure-JS worker test still reaches
 `embedded_script.request.worker_threads_experimental_enabled=true`, then fails with `ERR_AUTOJS6_WORKER_DISABLED` because
 native `worker_threads` is unavailable in this Embedded Node build.
 
+P13-34 recheck on 2026-06-28:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.worker_threads.experimental=true" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+Result: passed on QV710AF65F / XQ-AT72 / Android 12 with 16 selected tests,
+0 failures, and 14 native-unavailable skips. The skipped runnable,
+resource-stress, and packaged worker paths reported
+`worker.preflight.status=unavailable` and `ERR_AUTOJS6_WORKER_DISABLED`.
+
 Earlier exploratory runs also checked the full worker group:
 
 ```powershell
@@ -119,6 +131,8 @@ The default-disabled gate is supported and passed on the Sony device:
 - S7-24 default `verifyNodeWorkerGate` passes with bootstrap/design coverage
 - S7-24 experimental `verifyNodeWorkerGate` passes with runnable/stress
   promotion tests skipped because native workers are unavailable
+- P13-34 QV710AF65F experimental `verifyNodeWorkerGate` passes with the same
+  native-unavailable preflight and no runnable worker promotion
 
 No worker execution case was proven supported in this Embedded Node build.
 
