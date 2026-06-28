@@ -13,6 +13,7 @@
       | "classNameMatches"
       | "clickable"
       | "enabled"
+      | "scrollable"
       | "depth"
       | "boundsInside"
       | "boundsContains";
@@ -39,6 +40,7 @@
       readonly classNameMatches?: SelectorPattern;
       readonly clickable?: boolean;
       readonly enabled?: boolean;
+      readonly scrollable?: boolean;
       readonly depth?: number;
       readonly boundsInside?: AutoJs6Node.Bounds;
       readonly boundsContains?: AutoJs6Node.Bounds;
@@ -86,6 +88,7 @@
       classNameMatches(value: SelectorPatternInput): SelectorDescriptor;
       clickable(value?: boolean): SelectorDescriptor;
       enabled(value?: boolean): SelectorDescriptor;
+      scrollable(value?: boolean): SelectorDescriptor;
       depth(value: number): SelectorDescriptor;
       boundsInside(bounds: AutoJs6Node.Bounds): SelectorDescriptor;
       boundsInside(left: number, top: number, right: number, bottom: number): SelectorDescriptor;

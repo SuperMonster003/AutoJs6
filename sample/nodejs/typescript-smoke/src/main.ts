@@ -199,15 +199,16 @@ async function smoke(): Promise<void> {
   const scrolledBackward: boolean = await accessibility.scrollBackward(accessibility.enabled(false), { timeoutMs: 1000 });
   const insideSelector: accessibility.SelectorDescriptor = accessibility.boundsInside(0, 0, 100, 100);
   const depthSelector: accessibility.SelectorDescriptor = accessibility.depth(2);
+  const scrollableSelector: accessibility.SelectorDescriptor = accessibility.scrollable(false);
   await accessibility.back({ timeoutMs: 1000 });
   await accessibility.home({ timeoutMs: 1000 });
   await accessibility.recentApps({ timeoutMs: 1000 });
 
-  const rhinoSelector: rhinoCompat.RhinoSelectorHandle = rhinoCompat.text("OK").descContains("Confirm").clickable();
+  const rhinoSelector: rhinoCompat.RhinoSelectorHandle = rhinoCompat.text("OK").descriptionContains("Confirm").scrollable(false).clickable();
   const rhinoNode = await rhinoSelector.findOne(1000);
   const rhinoNodes: readonly accessibility.UiNodeSnapshot[] = await rhinoSelector.find({ timeoutMs: 1000 });
   const rhinoClicked: boolean = await rhinoSelector.click({ timeoutMs: 1000 });
-  const rhinoExists: boolean = await rhinoCompat.selector.id("submit").enabled().exists(1000);
+  const rhinoExists: boolean = await rhinoCompat.selector.description("Submit").idContains("submit").classNameContains("Button").enabled().exists(1000);
   const rhinoPointClicked: boolean = await rhinoCompat.click(1, 2, { timeoutMs: 1000 });
   const rhinoEnabled: false = rhino.isEnabled();
   const rhinoStatus: rhino.Status = rhino.status();

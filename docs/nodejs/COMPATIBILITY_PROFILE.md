@@ -1809,6 +1809,7 @@ runtime.
   - `classNameMatches(value): Selector`
   - `clickable(value?): Selector`
   - `enabled(value?): Selector`
+  - `scrollable(value?): Selector`
   - `depth(value): Selector`
   - `boundsInside(bounds): Selector`
   - `boundsContains(bounds): Selector`
@@ -1829,13 +1830,14 @@ runtime.
   - `findAll(selector, options?): Promise<readonly UiNode[]>`
   - selector descriptors are frozen plain JSON values such as `{ type: "autojs6.accessibility.selector", version: 1, text: "OK" }`
   - selector v2 fields remain JSON-only descriptors: regular expressions are serialized as `{ pattern, flags }`, bounds are `{ left, top, right, bottom }`, and no raw selector or node object crosses the bridge
+  - explicit `autojs6:compat` selector handles include Rhino migration aliases such as `description*`, `idContains`, and `classNameContains`; aliases compile to direct JSON descriptor fields instead of exposing live Rhino selector objects
   - returned `UiNode` values are frozen JSON snapshots only; no live `AccessibilityNodeInfo`, `UiObject`, or selector object crosses into Node
   - current JavaScript API, fake-provider tests, and bridge protocol are stable
   - when an operational AutoJs6 accessibility service is visible in the current process, the Android provider can validate `isEnabled`, `ensureEnabled`, `findByText`, selector `findOne`/`findAll`, selector `click`/`longClick`/`setText`/`scrollForward`/`scrollBackward`, and Back/Home/Recents global actions through controlled JSON snapshots and booleans
   - the focused accessibility/image gate launches a controlled Activity and exercises real selector `findOne`/`click` only when the service is already enabled; it does not modify device accessibility settings
   - when an accessibility provider is unavailable in the current process, including isolated embedded service processes that cannot see the main-process service instance, `isEnabled`/`ensureEnabled` return `false` and action/query methods reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
   - Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and `existsOne` stay stable-denied for P13-19 v1.1 because they can imply live Rhino node handles or callback return values
-  - P13-19 records the current accessibility selector promotion state as partial: direct `accessibility` and explicit `autojs6:compat` selector handles are covered by host/device/type evidence, while broader Rhino selector aliases, packaged service/settings lifecycle, and expanded real-device evidence remain blocked
+  - P13-19 records the current accessibility selector promotion state as partial: direct `accessibility` and explicit `autojs6:compat` selector handles are covered by host/device/type evidence, while packaged service/settings lifecycle and expanded real-device evidence remain blocked
   - `swipe`, `gesture`, and `powerDialog` stay stable-denied for P13-19 v1.1 and belong to future input automation provider work rather than the current selector gate
   - reserved future input automation labels split gesture authority away from `accessibility`: `input.gesture` for reviewed service-backed gestures, `input.gesture.root` for root/shell-backed input, and `input.gesture.shizuku` for Shizuku-backed input; these labels are documentation-only in v1.1 and are not declared by the current `NodeBridgePermissionManifest`
 - `input_observer`

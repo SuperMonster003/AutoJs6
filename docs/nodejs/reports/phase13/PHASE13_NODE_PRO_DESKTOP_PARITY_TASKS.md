@@ -445,8 +445,8 @@
 - `swipe`, `gesture`, and `powerDialog` stay stable-denied for P13-19 v1.1 and
   belong to future input automation provider work rather than the current
   selector gate.
-- Remaining P13-19 blockers: broader Rhino selector aliases, packaged
-  accessibility service/settings lifecycle, and real-device matrix expansion.
+- Remaining P13-19 blockers: packaged accessibility service/settings lifecycle
+  and real-device matrix expansion.
 - Reserved future input automation labels split gesture authority away from
   `accessibility`: `input.gesture`, `input.gesture.root`, and
   `input.gesture.shizuku`. These labels are documentation-only in v1.1 and are

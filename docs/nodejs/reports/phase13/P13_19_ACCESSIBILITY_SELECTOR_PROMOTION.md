@@ -12,7 +12,7 @@ through the explicit compat loader.
 
 The surface is not promoted to `pro_compat_opt_in` yet. Full Auto.js Pro
 automation parity still needs a packaged accessibility-service lifecycle,
-broader selector aliases, gesture APIs, and clear root/Shizuku separation.
+gesture APIs, and clear root/Shizuku separation.
 Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
 `existsOne` stay stable-denied for P13-19 v1.1.
 
@@ -23,7 +23,7 @@ Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
   `back`, `home`, `recentApps`, `findByText`, `clickText`, `findOne`,
   `findAll`, `longClick`, `setText`, `scrollForward`, and `scrollBackward`.
 - Selector builders: `text`, `desc`, `id`, `className`, contains/matches
-  variants, `clickable`, `enabled`, `depth`, `boundsInside`, and
+  variants, `clickable`, `enabled`, `scrollable`, `depth`, `boundsInside`, and
   `boundsContains` produce frozen selector descriptors.
 - Android live path: when an operational AutoJs6 accessibility service is
   visible in the current process, the provider can run selector find/action
@@ -32,7 +32,8 @@ Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
   resolve `false`.
 - Rhino compat facade: `compat.text("OK").findOne(1000)`, `find()`,
   `findAll()`, `click()`, `longClick()`, `setText()`, `scrollForward()`,
-  `scrollBackward()`, `exists()`, selector builders, coordinate `click`,
+  `scrollBackward()`, `exists()`, selector builders, Rhino aliases
+  `description*`, `idContains`, `classNameContains`, coordinate `click`,
   `back`, `home`, `recentApps`, and `recents` are Promise-based wrappers over
   the same accessibility bridge.
 - Raw boundary: raw `AccessibilityService`, `AccessibilityNodeInfo`,
@@ -69,10 +70,6 @@ Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
 
 ## Remaining Blockers
 
-- Add more Rhino selector aliases and common chain helpers beyond the current
-  v2 descriptor subset, including scrollable helpers.
-- Decide and test live coordinate-click behavior, or keep it as a stable
-  fake-provider/compat-only surface with clear documentation.
 - Add packaged APK install-run evidence for accessibility service metadata,
   settings guidance, provider availability, service disconnect cleanup,
   missing-capability denial, and user-visible disclosure.
@@ -81,9 +78,8 @@ Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
 
 The docs, compatibility notes, device matrix, surface manifest, and Gradle gate
 are evidence-only for this partial decision. They do not add a separate P13-19
-blocker beyond Rhino selector aliases, packaged accessibility-service lifecycle
-evidence, real-device selector/action matrices, and future input-automation
-provider implementation.
+blocker beyond packaged accessibility-service lifecycle evidence, real-device
+selector/action matrices, and future input-automation provider implementation.
 
 ## Gate
 
