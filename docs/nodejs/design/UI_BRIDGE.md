@@ -14,9 +14,9 @@ JSON-only migration subset in
 default global `ui` injection disabled. P12-10 adds a compat.ui packaged marker
 and UI_SESSION cleanup evidence without promoting live packaged background UI.
 P13-17 records the Phase 13 live UI provider promotion gate: direct
-`require("ui")` live Activity evidence is present, but packaged live UI,
-Back/Recents, relaunch, crash, and disclosure evidence still block
-`pro_compat_opt_in` promotion.
+`require("ui")` live Activity evidence is present, including Back/Recents
+lifecycle, but packaged entry, task relaunch, crash, and disclosure evidence
+still block `pro_compat_opt_in` promotion.
 
 ## Goal
 
@@ -167,7 +167,7 @@ Packaged APK behavior must be designed before shipping any UI module.
 
 P13-17 keeps live packaged UI in provider-dependent state. The provider registry
 may report the main-app Activity provider as available, but packaged support
-must not be treated as promoted until the Back/Recents, relaunch/crash, and
+must not be treated as promoted until packaged entry, task relaunch, crash, and
 disclosure evidence below is covered by device smoke.
 
 Open packaged requirements:

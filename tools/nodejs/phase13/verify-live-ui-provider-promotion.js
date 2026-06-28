@@ -79,6 +79,8 @@ function buildReport(files) {
       token(files.uiTest, 'collected.hasEvent("tab", "tabs")'),
       token(files.uiTest, "androidUiProviderRecordsBackActivityDestroyLifecycleEvent"),
       token(files.uiTest, "ui.lifecycle.back.reason=activity_destroyed"),
+      token(files.uiTest, "androidUiProviderRecordsRecentsTaskRemovalLifecycleEvent"),
+      token(files.uiTest, "ui.lifecycle.recents_task_removed.reason=activity_destroyed"),
     ]),
     scenario("json_handle_lifecycle", "JSON layout, updates, event drain, close, and provider cleanup are covered", [
       token(files.uiTypes, "showLayout(layoutJson"),
@@ -144,8 +146,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-17 live UI provider promotion"),
       token(files.surfaceManifestDoc, "phase13-live-ui-provider-promotion"),
     ], [
-      "Add Recents/task-removal Activity lifecycle instrumentation and packaged task relaunch evidence.",
-      "Run a live packaged APK UI smoke that covers entry, close, relaunch, crash, and user-visible disclosure evidence.",
+      "Run a live packaged APK UI smoke that covers entry, close, task relaunch, crash, and user-visible disclosure evidence.",
     ]),
   ];
   const checks = [
@@ -170,7 +171,7 @@ function buildReport(files) {
     check(
       "packaged-support-not-overclaimed",
       files.providerRegistry.text.includes("packagedProviderDependent") &&
-        files.providerRegistry.text.includes("blocked_until_live_packaged_back_recents_relaunch_crash_disclosure_evidence"),
+        files.providerRegistry.text.includes("blocked_until_live_packaged_entry_task_relaunch_crash_disclosure_evidence"),
       "`ui` provider packaged support must remain provider-dependent until live packaged UI evidence lands.",
     ),
   ];

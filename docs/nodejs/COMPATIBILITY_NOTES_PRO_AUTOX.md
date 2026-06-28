@@ -218,11 +218,11 @@ AutoJs6 behavior:
 - P13-11 records the entry directive metadata path, but it does not yet make
   Pro-style UI-thread execution equivalent.
 - P13-17 records the live `require("ui")` provider promotion gate: JSON
-  layout, update, event drain, close, and provider cleanup have live Activity
-  evidence.
+  layout, update, event drain, close, provider cleanup, and Back/Recents
+  lifecycle have live Activity evidence.
 - `require("autojs6:compat").ui` maps to the same JSON-only provider for Rhino
   migration.
-- live packaged UI, Back/Recents, relaunch/crash, and packaged disclosure
+- packaged entry, task relaunch, crash recovery, and packaged disclosure
   evidence remain unpromoted; configuration changes use an explicit
   destroy/recreate policy with no live UI survival claim.
 - packaged missing-`ui` capability metadata rejects before dispatch.

@@ -888,10 +888,10 @@ P13 task 本身使用以下执行状态：
       provider-owned async main-looper dispatch, not V8 isolate execution on
       the Android main thread.
   - P13-11 v1.1 closure: metadata parsing, propagation, packaged config
-    rejection, and UI-thread policy are ready. Activity lifecycle,
-    Back/Recents, relaunch/crash, and packaged UI entry evidence remain
-    P13-17 / future packaged UI promotion work rather than P13-11 metadata
-    blockers.
+    rejection, and UI-thread policy are ready. Activity lifecycle remains
+    provider-owned P13-17 work; packaged UI entry, task relaunch, crash, and
+    disclosure evidence remain future packaged UI promotion work rather than
+    P13-11 metadata blockers.
 
 - [x] P13-12: 定义并实现 `$autojs` global v1。
   - 范围：提供 Pro 风格 `$autojs` 入口，但分层暴露能力。
@@ -1035,13 +1035,18 @@ P13 task 本身使用以下执行状态：
       `androidUiProviderRecordsBackActivityDestroyLifecycleEvent` calls
       `NodeBridgeUiActivity.onBackPressed()` and verifies
       `ui.lifecycle.back.reason=activity_destroyed` through `ui.drainEvents`.
+    - 2026-06-28 focused evidence also adds live Recents/task-removal lifecycle
+      coverage: `androidUiProviderRecordsRecentsTaskRemovalLifecycleEvent`
+      calls `moveTaskToBack(true)` and `finishAndRemoveTask()` and verifies
+      `ui.lifecycle.recents_task_removed.reason=activity_destroyed` through
+      `ui.drainEvents`.
       Device evidence: `QV710AF65F` / Sony XQ-AT72 / Android 12 passed the
-      focused instrumentation method with
+      focused instrumentation methods with
       `-Pautojs.nodejs.test.deviceProfile=sony`.
     - `compat.ui` and direct `ui` type smoke remain aligned with the same
       JSON provider.
     - Provider registry now marks packaged UI support as provider-dependent
-      until live packaged Back/Recents/relaunch/crash/disclosure evidence
+      until live packaged entry/task-relaunch/crash/disclosure evidence
       lands.
     - Packaged UI capability boundary smoke now verifies a packaged APK with
       metadata that omits `ui` rejects `ui.showLayout` with
@@ -1053,9 +1058,8 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-live-ui-provider-promotion.js`.
     - Gradle gate: `:app:verifyNodePhase13LiveUiProviderPromotion`.
     - Report: `docs/nodejs/reports/phase13/P13_17_LIVE_UI_PROVIDER_PROMOTION.md`.
-  - Remaining: Recents/task-removal lifecycle evidence, live packaged APK UI
-    smoke, crash/relaunch evidence, and user-visible packaged disclosure
-    evidence still block opt-in promotion.
+  - Remaining: live packaged APK UI smoke, task relaunch, crash recovery, and
+    user-visible packaged disclosure evidence still block opt-in promotion.
 
 - [ ] P13-18: 推进 live floaty/overlay provider 到 opt-in promoted。
   - 范围：基于 P12 overlay provider POC，开启 live show/update/drainEvents/close。

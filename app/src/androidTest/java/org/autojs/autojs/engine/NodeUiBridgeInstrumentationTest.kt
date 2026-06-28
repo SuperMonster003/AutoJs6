@@ -550,6 +550,56 @@ class NodeUiBridgeInstrumentationTest {
         }
     }
 
+    @Test
+    fun androidUiProviderRecordsRecentsTaskRemovalLifecycleEvent() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val monitor = instrumentation.addMonitor(NodeBridgeUiActivity::class.java.name, null, false)
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(context, id = "ui-live-provider-recents"),
+        )
+        var handleId = ""
+        try {
+            val show = dispatch(
+                provider,
+                method = "showLayout",
+                argsJson = """[{"type":"Column","children":[{"type":"Text","id":"title","text":"Recents task removal"}]}]""",
+            )
+            assertTrue(show.toString(), show.ok)
+            handleId = JSONObject(show.resultJson.orEmpty()).getString("id")
+            assertEquals(1, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.UI_SESSION))
+
+            val activity = monitor.waitForActivityWithTimeout(5_000L) as? NodeBridgeUiActivity
+            assertNotNull("Node UI Activity did not open for Recents/task-removal lifecycle evidence", activity)
+            instrumentation.waitForIdleSync()
+            var movedToBack = false
+            instrumentation.runOnMainSync {
+                movedToBack = activity!!.moveTaskToBack(true)
+                activity.finishAndRemoveTask()
+            }
+            assertTrue("Node UI Activity task did not move to back before task removal", movedToBack)
+            assertTrue("Task removal did not finish the Node UI Activity", waitUntil {
+                activity!!.isFinishing || activity.isDestroyed
+            })
+
+            val events = waitForUiEvents(provider, handleId) { collected ->
+                collected.hasEventType("close")
+            }
+            val close = events.firstEventType("close")
+            assertEquals("ui.lifecycle.recents_task_removed.reason=activity_destroyed", "activity_destroyed", close.getString("reason"))
+            assertEquals(handleId, close.getString("handleId"))
+        } finally {
+            provider.destroy()
+            instrumentation.removeMonitor(monitor)
+            if (handleId.isNotBlank()) {
+                assertTrue("Recents/task-removal lifecycle UI session was not removed during cleanup", waitUntil {
+                    NodeBridgeUiSessionStore.get(handleId) == null
+                })
+            }
+            NodeBridgeUiSessionStore.closeAll("ui-recents-task-removal-test-cleanup")
+        }
+    }
+
     @Suppress("DEPRECATION")
     @Test
     fun androidUiActivityKeepsConfigurationChangesAsDestroyPolicy() {

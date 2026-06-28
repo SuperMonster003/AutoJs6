@@ -35,8 +35,9 @@ metadata, event delivery, update, batch update, close, and zero pending bridge
 calls; it does not promote live packaged Activity UI as a background surface.
 P13-17 adds the Phase 13 live UI provider promotion gate for the direct
 `require("ui")` Activity provider and keeps `compat.ui` mapped to the same
-JSON-only surface. The gate remains partial until live packaged UI,
-Back/Recents, relaunch/crash, and packaged disclosure evidence lands.
+JSON-only surface. The gate records live Back/Recents lifecycle evidence and
+remains partial until packaged entry, task relaunch, crash, and packaged
+disclosure evidence lands.
 Packaged missing-`ui` capability metadata rejects before dispatch.
 Configuration changes use an explicit destroy/recreate policy with no live UI
 survival claim.
