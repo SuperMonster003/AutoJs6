@@ -518,6 +518,29 @@ Node:
 })();
 ```
 
+Rhino global `launch("org.example.app")` migration:
+
+```js
+launch("org.example.app");
+```
+
+Node:
+
+```js
+"nodejs";
+
+(async function main() {
+  const app = require("app");
+  const launched = await app.launch("org.example.app", { timeoutMs: 5000 });
+  console.log("launched=" + launched);
+})();
+```
+
+`app.launch()` is a P13-23 alias for `app.launchPackage()` and does not add a
+new Android bridge method. Prefer `app.launchPackage()` in new code when the
+intent is exact package launch, and use `app.launch()` only when preserving a
+Rhino-style name makes migration clearer.
+
 Rhino `threads.disposable()` code that waits with `blockedGet()` should become
 a Promise flow:
 
