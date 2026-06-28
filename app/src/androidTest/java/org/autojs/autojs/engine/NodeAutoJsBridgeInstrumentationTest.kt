@@ -435,6 +435,67 @@ class NodeAutoJsBridgeInstrumentationTest {
     }
 
     @Test
+    fun appStartActivityShortFormsAndNegativeCorpusUseLiveBridge() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const app = require("app");
+              const expectedNegativeMarkers = {
+                flags: "app.live.negative.flags=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|app|startActivity",
+                extras: "app.live.negative.extras=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|app|startActivity",
+                component: "app.live.negative.component=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|app|startActivity"
+              };
+              async function expectDenied(label, promise) {
+                try {
+                  await promise;
+                  throw new Error("app.live.negative." + label + "=unexpected");
+                } catch (error) {
+                  const marker = "app.live.negative." + label + "=" + [
+                    error && (error.autojs6Code || error.code),
+                    error && error.module,
+                    error && error.method
+                  ].join("|");
+                  const expected = expectedNegativeMarkers[label];
+                  if (marker !== expected) {
+                    throw new Error(marker);
+                  }
+                  console.log(marker);
+                }
+              }
+
+              await app.startActivity({
+                action: "MAIN",
+                category: "LAUNCHER",
+                packageName: app.packageName
+              }, { timeoutMs: 2000 });
+              console.log("app.live.short_forms=true");
+
+              await expectDenied("flags", app.startActivity({
+                action: "MAIN",
+                packageName: app.packageName,
+                flags: "not-a-flag"
+              }, { timeoutMs: 2000 }));
+              await expectDenied("extras", app.startActivity({
+                action: "MAIN",
+                packageName: app.packageName,
+                extras: "not-an-object"
+              }, { timeoutMs: 2000 }));
+              await expectDenied("component", app.startActivity({
+                component: "malformed-component"
+              }, { timeoutMs: 2000 }));
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-app-start-activity-live-source.js>",
+            timeoutMs = 10_000L,
+        )
+
+        assertTrue(result.errorMessage.orEmpty() + "\n" + result.stdout, result.succeeded)
+    }
+
+    @Test
     fun enginesModuleExposesCurrentEngineAndLiveBridgeMethods() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -1067,30 +1128,39 @@ class NodeAutoJsBridgeInstrumentationTest {
     }
 
     @Test
-    fun androidAppBridgeRejectsInvalidStartActivityDescriptor() {
+    fun androidAppBridgeRejectsInvalidStartActivityDescriptors() {
         val provider = AndroidNodeBridgeCapabilityProvider(context)
-        val latch = CountDownLatch(1)
-        var response: NodeBridgeResponse? = null
-        provider.dispatch(
-            NodeBridgeRequest(
-                id = "app-invalid",
-                module = "app",
-                method = "startActivity",
-                argsJson = "[{}]",
-                timeoutMs = 1000L,
-                permissions = listOf("app.activity"),
-            ),
-        ) {
-            response = it
-            latch.countDown()
-        }
+        val cases = listOf(
+            "missing-target" to "[{}]",
+            "invalid-component" to """[{"component":"malformed-component"}]""",
+            "invalid-flags" to """[{"action":"android.intent.action.MAIN","flags":"not-a-flag"}]""",
+            "invalid-extras" to """[{"action":"android.intent.action.MAIN","extras":"not-an-object"}]""",
+        )
 
-        assertTrue("Timed out waiting for Android app bridge response", latch.await(2, TimeUnit.SECONDS))
-        val actual = checkNotNull(response)
-        assertFalse(actual.ok)
-        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, actual.error?.code)
-        assertEquals("app", actual.error?.module)
-        assertEquals("startActivity", actual.error?.method)
+        cases.forEach { (label, argsJson) ->
+            val latch = CountDownLatch(1)
+            var response: NodeBridgeResponse? = null
+            provider.dispatch(
+                NodeBridgeRequest(
+                    id = "app-invalid-$label",
+                    module = "app",
+                    method = "startActivity",
+                    argsJson = argsJson,
+                    timeoutMs = 1000L,
+                    permissions = listOf("app.activity"),
+                ),
+            ) {
+                response = it
+                latch.countDown()
+            }
+
+            assertTrue("Timed out waiting for Android app bridge response: $label", latch.await(2, TimeUnit.SECONDS))
+            val actual = checkNotNull(response)
+            assertFalse(label, actual.ok)
+            assertEquals(label, NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, actual.error?.code)
+            assertEquals(label, "app", actual.error?.module)
+            assertEquals(label, "startActivity", actual.error?.method)
+        }
     }
 
     @Test

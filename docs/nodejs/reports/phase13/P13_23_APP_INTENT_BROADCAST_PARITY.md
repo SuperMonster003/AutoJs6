@@ -74,6 +74,27 @@ P13-23 extends the existing Node `app` module without promoting the full Rhino
   `build/reports/nodejs/phase13-app-intent-broadcast-parity.json` and
   `build/reports/nodejs/phase13-app-intent-broadcast-parity.md`
 
+## Current Device Evidence
+
+QV710AF65F / XQ-AT72 / Android 12 runs the current P13-23
+`app.startActivity()` live provider evidence through:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest#appStartActivityShortFormsAndNegativeCorpusUseLiveBridge,org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest#androidAppBridgeRejectsInvalidStartActivityDescriptors" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+The focused smoke starts only the current package via short
+`MAIN`/`LAUNCHER` action/category descriptors. It also asserts fail-closed
+negative cases for invalid flags, non-object extras, and malformed components
+with source markers:
+`app.live.negative.flags=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|app|startActivity`,
+`app.live.negative.extras=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|app|startActivity`,
+and
+`app.live.negative.component=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|app|startActivity`.
+`NodeAutoJsBridgeInstrumentationTest#androidAppBridgeRejectsInvalidStartActivityDescriptors`
+also covers the Android provider-level invalid descriptor matrix.
+
 ## Boundary
 
 P13-23 does not add `sendBroadcast` to the Android bridge dispatch table and
@@ -101,8 +122,6 @@ P13-24 shell/root/Shizuku capability gates instead of expanding the ordinary
 - Preset app aliases beyond exact package/name lookup.
 - Activity short-form mapping beyond URL strings and JSON-safe descriptors.
 - Packaged privacy disclosure examples for exact app/package lookup.
-- Negative device tests for invalid component names, invalid flag values,
-  non-object extras, and blocked privileged options.
 - Migration examples for Rhino `app.intent()` and `app.startActivity()` scripts.
 
 The docs, compatibility notes, surface manifest, and Gradle gate are
