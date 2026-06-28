@@ -272,7 +272,10 @@ Node still cannot register Android receivers, receive boot/package/custom
 broadcast triggers, mutate packaged manifests, inspect raw trigger payloads, or
 access raw `Intent` / `BroadcastReceiver` objects. For v1.1 these compat names
 remain Promise-returning stable rejection stubs until a dedicated JSON-safe
-broadcast provider owns the future surface.
+broadcast provider owns the future surface. Packaged denial/boundary smoke now
+covers those stable rejection stubs, future `tasks.*` module absence, raw
+broadcast global absence, and future task/broadcast capability denial; positive
+packaged trigger/remove behavior remains future provider work.
 
 P13-23 records bounded app/intent/broadcast Pro parity as ready. AutoJs6 Node now has
 JSON-safe `app.intent()` descriptors and stricter `app.startActivity()`

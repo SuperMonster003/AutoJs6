@@ -436,9 +436,10 @@ blocked.
 `verifyNodePhase13IntentBroadcastProvider` records the P13-22 partial
 IntentTask/broadcast provider state: Android/Rhino `IntentTask` persistence,
 receiver substrate, `compat.tasks` IntentTask rejection stubs, and raw broadcast
-object denial are present, while receiver registration, manifest mutation,
-capability split, packaged install/trigger/remove behavior, and external
-broadcast wakeups remain blocked.
+object denial are present; packaged denial/metadata-boundary smoke verifies
+future `tasks.*` modules and task/broadcast capabilities stay unavailable.
+Receiver registration, manifest mutation, capability split, positive packaged
+install/trigger/remove behavior, and external broadcast wakeups remain blocked.
 `verifyNodePhase13AppIntentBroadcastParity` records the P13-23 bounded
 app/intent/broadcast Pro parity state as ready: JSON-safe `app.intent()` descriptors,
 `app.startActivity()` descriptor normalization, TypeScript/conformance evidence,
@@ -651,8 +652,10 @@ P13-22 additionally uses `verifyNodePhase13IntentBroadcastProvider` as the host
 promotion-status gate for IntentTask/broadcast parity and keeps the provider
 partial: Android/Rhino receiver substrate and stable rejection stubs are
 covered, while direct receiver registration, boot/package/custom triggers,
-manifest synthesis, packaged install/trigger/remove behavior, and raw broadcast
-objects require separate evidence.
+manifest synthesis, positive packaged install/trigger/remove behavior, and raw
+broadcast objects require separate evidence. Packaged denial/metadata-boundary
+smoke covers stable rejection stubs, future `tasks.*` module absence, and
+future task/broadcast capability denial.
 P13-23 additionally uses `verifyNodePhase13AppIntentBroadcastParity` as the
 host promotion-status gate for bounded app/intent/broadcast parity:
 JSON-safe `app.intent()`, normalized `app.startActivity()`, scoped
