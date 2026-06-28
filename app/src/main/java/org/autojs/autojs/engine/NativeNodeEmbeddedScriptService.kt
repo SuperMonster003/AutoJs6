@@ -1591,6 +1591,16 @@ open class NativeNodeEmbeddedScriptService : Service() {
         val workingDirectory = activeWorkingDirectory
         val startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L }
         Handler(Looper.getMainLooper()).postDelayed({
+            NodeCrashEvidenceStore.markNativeProcessExit(
+                context = this,
+                marker = activeCrashMarker,
+                exitCode = 0,
+                elapsedMs = activeStartedAtEpochMs
+                    .takeIf { it > 0L }
+                    ?.let { (System.currentTimeMillis() - it).coerceAtLeast(0L) }
+                    ?: 0L,
+            )
+            activeCrashMarker = null
             NodeInteractiveLongRunningStatusStore.write(
                 context = this,
                 executionId = executionId,

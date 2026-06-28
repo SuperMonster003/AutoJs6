@@ -104,6 +104,18 @@ function buildReport(files) {
       token(files.longRunningDoc, "packaged long-running surfaces"),
       token(files.compatibilityProfile, "interactive or packaged long-running runtime"),
     ]),
+    scenario("packaged_stop_smoke", "Packaged long-running Stop marks clean exit and preserves crash recovery", [
+      token(files.embeddedService, "NodeCrashEvidenceStore.markNativeProcessExit"),
+      token(files.embeddedService, "exitCode = 0"),
+      token(files.packagedSmokeTest, "waitForPackagedForegroundNotification"),
+      token(files.packagedSmokeTest, "stopPackagedLongRunningViaRunAs"),
+      token(files.packagedSmokeTest, "run-as $packageName am startservice --user 0"),
+      token(files.packagedSmokeTest, "CRASH_EVIDENCE_STOP_MARKERS"),
+      token(files.packagedSmokeTest, "NodeCrashEvidenceStore.STATE_CLEAN_EXIT"),
+      token(files.packagedSmokeTest, "Clean Stop action should not be collected as next-launch crash evidence"),
+      token(files.packagedSmokeTest, "waitForPackagedForegroundNotificationRemoved"),
+      token(files.p13Report, "verifies the clean Stop is not collected"),
+    ]),
     scenario("fail_closed", "Non-packaged direct script launches still reject service mode", [
       token(files.executionModePolicy, "supportedLaunchSurfaces = setOf("),
       token(files.executionModePolicy, "LAUNCH_SURFACE_SCRIPT"),
@@ -126,7 +138,7 @@ function buildReport(files) {
       token(files.packagedSmokeTest, "LAUNCH_SURFACE_PACKAGED_LONG_RUNNING"),
       token(files.packagedSmokeTest, "marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1"),
     ], [
-      "Final packaged foreground/device matrix evidence is still required: notification Stop action, task-removal cleanup, Android API/permission/background-start denial, and quota/resource stress.",
+      "Final packaged foreground/device matrix evidence is still required: task-removal cleanup, Android API/permission/background-start denial, packaged metadata/disclosure denial paths, and quota/resource stress.",
     ]),
   ];
   const checks = [
@@ -162,6 +174,7 @@ function buildReport(files) {
       packagedDispatchReady: scenarioById(scenarios, "packaged_dispatch").status === "ready",
       foregroundLifecycleShared: scenarioById(scenarios, "foreground_lifecycle").status === "ready",
       packagedLifecycleSmokeReady: scenarioById(scenarios, "packaged_lifecycle_smoke").status === "ready",
+      packagedStopSmokeReady: scenarioById(scenarios, "packaged_stop_smoke").status === "ready",
       failClosedReady: scenarioById(scenarios, "fail_closed").status === "ready",
       deviceEvidenceReady: scenarioById(scenarios, "device_evidence_remaining").status === "ready",
       safeNodeProfilePreserved: true,

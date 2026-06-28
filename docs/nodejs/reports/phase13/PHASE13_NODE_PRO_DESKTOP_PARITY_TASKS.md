@@ -760,11 +760,17 @@ P13 task 本身使用以下执行状态：
     - Foreground service entry: `NativeNodeEmbeddedScriptService.startPackagedLongRunning(...)`.
     - Status evidence: `NodeInteractiveLongRunningStatusStore.launchSurface=packaged_long_running`.
     - Packaged lifecycle smoke: `installAndRunCrashEvidenceEmbeddedNodePackagedApk` verifies `autojs6:lifecycle` checkpoint/read/clear markers with `launchSurface=packaged_long_running`.
-    - Device evidence: QV710AF65F / Sony XQ-AT72 / Android 12 passed the focused packaged crash-evidence smoke with fresh inrt template override; logcat contains `NodeLifecycleCheckpointStore` checkpoint write/read/clear markers and next-launch `NodeCrashEvidenceStore` collection.
+    - Packaged Stop/crash evidence: the focused packaged crash-evidence smoke
+      verifies foreground notification Stop metadata, stops through packaged
+      UID `run-as ... am startservice --user 0`, observes stopped status with
+      `stopRequested=true`, records `NodeCrashEvidenceStore` clean-exit marker
+      evidence, verifies clean Stop is not collected on cold relaunch, then
+      force-stops a running service and verifies next-launch collection.
+    - Device evidence: QV710AF65F / Sony XQ-AT72 / Android 12 passed the focused packaged crash-evidence smoke with fresh inrt template override; logcat contains `NodeLifecycleCheckpointStore` checkpoint write/read/clear markers, Stop `clean_exit`, and next-launch `NodeCrashEvidenceStore` collection.
     - Host verifier: `tools/nodejs/phase13/verify-packaged-long-running-service.js`.
     - Gradle gate: `:app:verifyNodePhase13PackagedLongRunningService`.
     - Report: `docs/nodejs/reports/phase13/P13_07_PACKAGED_LONG_RUNNING_SERVICE.md`.
-    - Open before closure: foreground notification Stop action, task-removal cleanup, Android permission/background-start matrix, quota/stress evidence.
+    - Open before closure: task-removal cleanup, Android permission/background-start matrix, packaged metadata/disclosure denial paths, quota/stress evidence.
 
 - [ ] P13-08: 完成 full heavy resource stress。
   - 范围：补齐 8 小时 quick soak 和 24 小时 final soak。
