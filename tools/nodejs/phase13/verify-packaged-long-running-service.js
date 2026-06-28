@@ -14,6 +14,7 @@ const FILES = {
   embeddedService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt",
   projectRunner: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedProjectRunner.kt",
   embeddedEngine: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedJavaScriptEngine.kt",
+  lifecycleStore: "app/src/main/java/org/autojs/autojs/engine/NodeLifecycleCheckpointStore.kt",
   assetsLauncher: "app/src/main/java/org/autojs/autojs/inrt/launch/AssetsProjectLauncher.kt",
   projectConfig: "app/src/main/java/org/autojs/autojs/project/ProjectConfig.java",
   launchDescriptor: "app/src/main/java/org/autojs/autojs/script/NodeProjectLaunchDescriptor.kt",
@@ -87,6 +88,22 @@ function buildReport(files) {
       token(files.statusStore, "NodeLifecycleCheckpointStore.statusSnapshot"),
       token(files.interactiveTest, "interactiveRuntimeCheckpointsOnStopAndRestoresOnlyWhenExplicitlyRequested"),
     ]),
+    scenario("packaged_lifecycle_smoke", "Packaged long-running mode can checkpoint, read, and clear lifecycle state", [
+      token(files.lifecycleStore, "NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING"),
+      token(files.lifecycleStore, "explicit interactive or packaged long-running runtime"),
+      token(files.lifecycleStore, "CHECKPOINT_MARKER_SCHEMA"),
+      token(files.lifecycleStore, "checkpoint.write schema=$CHECKPOINT_MARKER_SCHEMA"),
+      token(files.lifecycleStore, "checkpoint.read schema=$CHECKPOINT_MARKER_SCHEMA"),
+      token(files.lifecycleStore, "checkpoint.clear schema=$CHECKPOINT_MARKER_SCHEMA"),
+      token(files.packagedSmokeTest, "recordPackagedLifecycleEvidence"),
+      token(files.packagedSmokeTest, "NodeLifecycleCheckpointStore.CHECKPOINT_MARKER_SCHEMA"),
+      token(files.packagedSmokeTest, "packaged.crash_evidence.lifecycle_checkpoint=true"),
+      token(files.packagedSmokeTest, "packaged.crash_evidence.lifecycle_launch_surface=${NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING}"),
+      token(files.packagedSmokeTest, "packaged.crash_evidence.lifecycle_clear_deleted=true"),
+      token(files.p13Report, "Packaged lifecycle smoke"),
+      token(files.longRunningDoc, "packaged long-running surfaces"),
+      token(files.compatibilityProfile, "interactive or packaged long-running runtime"),
+    ]),
     scenario("fail_closed", "Non-packaged direct script launches still reject service mode", [
       token(files.executionModePolicy, "supportedLaunchSurfaces = setOf("),
       token(files.executionModePolicy, "LAUNCH_SURFACE_SCRIPT"),
@@ -109,8 +126,7 @@ function buildReport(files) {
       token(files.packagedSmokeTest, "LAUNCH_SURFACE_PACKAGED_LONG_RUNNING"),
       token(files.packagedSmokeTest, "marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1"),
     ], [
-      "`autojs6:lifecycle` restore/cleanup evidence from packaged mode is still required.",
-      "Android version, notification permission, and background-start denial matrix is still required.",
+      "Final packaged foreground/device matrix evidence is still required: notification Stop action, task-removal cleanup, Android API/permission/background-start denial, and quota/resource stress.",
     ]),
   ];
   const checks = [
@@ -145,6 +161,7 @@ function buildReport(files) {
       metadataPolicyReady: scenarioById(scenarios, "metadata_policy").status === "ready",
       packagedDispatchReady: scenarioById(scenarios, "packaged_dispatch").status === "ready",
       foregroundLifecycleShared: scenarioById(scenarios, "foreground_lifecycle").status === "ready",
+      packagedLifecycleSmokeReady: scenarioById(scenarios, "packaged_lifecycle_smoke").status === "ready",
       failClosedReady: scenarioById(scenarios, "fail_closed").status === "ready",
       deviceEvidenceReady: scenarioById(scenarios, "device_evidence_remaining").status === "ready",
       safeNodeProfilePreserved: true,

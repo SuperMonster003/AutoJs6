@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.engine.EmbeddedNodeFixtureCorpus
 import org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine
 import org.autojs.autojs.engine.NodeExecutionModePolicy
+import org.autojs.autojs.engine.NodeLifecycleCheckpointStore
 import org.autojs.autojs.engine.NodeEmbeddedProcessPoolPolicy
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.engine.NodeWorkerThreadsTestSupport
@@ -9431,6 +9432,35 @@ class EmbeddedNodePackagedApkSmokeTest {
                 "nodejs";
                 console.log("packaged.crash_evidence.started=true");
                 console.log("packaged.crash_evidence.pid=" + process.pid);
+                (async function recordPackagedLifecycleEvidence() {
+                  console.log("packaged.crash_evidence.lifecycle_begin=true");
+                  const lifecycle = require("autojs6:lifecycle");
+                  const checkpoint = await lifecycle.checkpoint({
+                    phase: "packaged-crash-evidence",
+                    pid: process.pid
+                  }, { reason: "packaged-crash-evidence-smoke" });
+                  console.log("packaged.crash_evidence.lifecycle_checkpoint_written=true");
+                  const restored = await lifecycle.readCheckpoint();
+                  console.log("packaged.crash_evidence.lifecycle_checkpoint_read=true");
+                  const cleared = await lifecycle.clearCheckpoint();
+                  console.log("packaged.crash_evidence.lifecycle_checkpoint_cleared=true");
+                  const afterClear = await lifecycle.readCheckpoint();
+                  const checkpointReady =
+                    checkpoint &&
+                    checkpoint.launchSurface === "${NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING}" &&
+                    restored &&
+                    restored.checkpoint &&
+                    restored.checkpoint.phase === "packaged-crash-evidence" &&
+                    cleared &&
+                    cleared.deleted === true &&
+                    afterClear === null;
+                  console.log("packaged.crash_evidence.lifecycle_checkpoint=" + checkpointReady);
+                  console.log("packaged.crash_evidence.lifecycle_launch_surface=" + checkpoint.launchSurface);
+                  console.log("packaged.crash_evidence.lifecycle_clear_deleted=" + (cleared.deleted === true));
+                })().catch((error) => {
+                  console.log("packaged.crash_evidence.lifecycle_checkpoint=false");
+                  console.log("packaged.crash_evidence.lifecycle_error=" + (error && (error.code || error.message) || error));
+                });
                 setInterval(() => {}, 250);
             """.trimIndent() + "\n",
             runtimeMarkers = CRASH_EVIDENCE_RUNTIME_MARKERS,
@@ -13891,8 +13921,12 @@ $nodeConfigJson
                         it.contains("dynamic import") ||
                         it.contains("NativeNode") ||
                         it.contains("NodeCrashEvidenceStore") ||
+                        it.contains("NodeLifecycleCheckpointStore") ||
                         it.contains("marker.begin") ||
                         it.contains("marker.collect") ||
+                        it.contains("checkpoint.write") ||
+                        it.contains("checkpoint.read") ||
+                        it.contains("checkpoint.clear") ||
                         it.contains("autojs6-node-phase13") ||
                         it.contains(NodeProjectLaunchDiagnostics.LAUNCH_FAILURE_MARKER) ||
                         it.contains(NodeProjectLaunchDiagnostics.RUNNER_REQUEST_FAILURE_MARKER) ||
@@ -15101,6 +15135,9 @@ $nodeConfigJson
         )
         private val CRASH_EVIDENCE_RUNTIME_MARKERS = listOf(
             "packaged.crash_evidence.started=true",
+            "packaged.crash_evidence.lifecycle_checkpoint=true",
+            "packaged.crash_evidence.lifecycle_launch_surface=${NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING}",
+            "packaged.crash_evidence.lifecycle_clear_deleted=true",
         )
         private val CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS = listOf(
             "autojs6.inrt.node_project_packaged_long_running.v1",
@@ -15109,6 +15146,12 @@ $nodeConfigJson
             "launchSurface=${NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING}",
             "executionMode=${NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING}",
             "packageName=$CRASH_EVIDENCE_PACKAGE_NAME",
+            "NodeLifecycleCheckpointStore",
+            "checkpoint.write schema=${NodeLifecycleCheckpointStore.CHECKPOINT_MARKER_SCHEMA}",
+            "checkpoint.read schema=${NodeLifecycleCheckpointStore.CHECKPOINT_MARKER_SCHEMA}",
+            "exists=true",
+            "checkpoint.clear schema=${NodeLifecycleCheckpointStore.CHECKPOINT_MARKER_SCHEMA}",
+            "deleted=true",
         )
         private val CRASH_EVIDENCE_COLLECTION_MARKERS = listOf(
             "marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1",

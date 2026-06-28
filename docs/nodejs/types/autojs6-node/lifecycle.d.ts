@@ -16,7 +16,7 @@ declare module "autojs6:lifecycle" {
       readonly automaticRestart: false;
       readonly restartPolicy: "never";
       readonly executionMode: "interactive_long_running" | string;
-      readonly launchSurface: "interactive_session" | string;
+      readonly launchSurface: "interactive_session" | "packaged_long_running" | string;
     }
 
     export interface CheckpointRecord {
@@ -27,7 +27,7 @@ declare module "autojs6:lifecycle" {
       readonly executionId: string;
       readonly sourceName: string;
       readonly executionMode: "interactive_long_running" | string;
-      readonly launchSurface: "interactive_session" | string;
+      readonly launchSurface: "interactive_session" | "packaged_long_running" | string;
       readonly reason: string;
       readonly checkpointBytes: number;
       readonly createdAtEpochMs: number;

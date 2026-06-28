@@ -47,10 +47,11 @@ Current packaged long-running progress:
 - `packaged_long_running`: interactive long-running works, and Phase 13 adds a
   partial packaged dispatch path through
   `node.executionMode=interactive_long_running`, the `packaged_long_running`
-  launch surface, inrt foreground-service routing, and a host verifier.
-  Packaged install/run smoke, `autojs6:lifecycle` restore/cleanup evidence,
-  Android permission/background-start policy coverage, and quota/stress
-  promotion remain open.
+  launch surface, inrt foreground-service routing, a host verifier, and focused
+  packaged lifecycle checkpoint/read/clear smoke evidence passing on
+  QV710AF65F / Sony XQ-AT72 / Android 12. Full notification Stop action,
+  task-removal cleanup, Android permission/background-start policy coverage,
+  and quota/stress promotion remain open.
 
 Current full heavy resource stress progress:
 

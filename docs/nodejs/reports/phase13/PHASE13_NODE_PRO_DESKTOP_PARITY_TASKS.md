@@ -720,10 +720,12 @@ P13 task 本身使用以下执行状态：
     - Packaged inrt dispatch: `AssetsProjectLauncher.startPackagedLongRunningIfRequested(...)`.
     - Foreground service entry: `NativeNodeEmbeddedScriptService.startPackagedLongRunning(...)`.
     - Status evidence: `NodeInteractiveLongRunningStatusStore.launchSurface=packaged_long_running`.
+    - Packaged lifecycle smoke: `installAndRunCrashEvidenceEmbeddedNodePackagedApk` verifies `autojs6:lifecycle` checkpoint/read/clear markers with `launchSurface=packaged_long_running`.
+    - Device evidence: QV710AF65F / Sony XQ-AT72 / Android 12 passed the focused packaged crash-evidence smoke with fresh inrt template override; logcat contains `NodeLifecycleCheckpointStore` checkpoint write/read/clear markers and next-launch `NodeCrashEvidenceStore` collection.
     - Host verifier: `tools/nodejs/phase13/verify-packaged-long-running-service.js`.
     - Gradle gate: `:app:verifyNodePhase13PackagedLongRunningService`.
     - Report: `docs/nodejs/reports/phase13/P13_07_PACKAGED_LONG_RUNNING_SERVICE.md`.
-    - Open before closure: install-and-run packaged APK smoke, packaged `autojs6:lifecycle` restore/cleanup evidence, Android permission/background-start matrix, quota/stress evidence.
+    - Open before closure: foreground notification Stop action, task-removal cleanup, Android permission/background-start matrix, quota/stress evidence.
 
 - [ ] P13-08: 完成 full heavy resource stress。
   - 范围：补齐 8 小时 quick soak 和 24 小时 final soak。
