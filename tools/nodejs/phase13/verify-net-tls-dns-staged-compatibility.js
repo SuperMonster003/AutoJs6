@@ -81,9 +81,10 @@ function buildReport(files) {
       token(files.p13NetworkTest, "p13ntd.dns.lookup=127.0.0.1:4,::1:6"),
       token(files.p13NetworkTest, "p13ntd.dns.shape=function|function|function|function|ECANCELLED"),
       token(files.p13NetworkTest, "p13ntd.tls.shape=TLSv1.2|true|false"),
+      token(files.p13Report, "P13-30 keeps real TCP/TLS client socket authority rejected for v1.1"),
+      token(files.p13Report, "Server sockets are stable-denied for v1.1"),
+      token(files.compatibilityProfile, "rejects real"),
     ], [
-      "Real TCP/TLS client sockets remain unpromoted until connection budgets, host policy, Android permission mapping, background behavior, and fd cleanup evidence land.",
-      "Server sockets remain staged until listener lifecycle, bind address policy, port ownership, foreground/background behavior, and packaged rollback evidence exist.",
     ]),
     scenario("negative_network_boundary", "default Safe profile raw socket, DNS, server, TLS session, and shadow-bypass paths remain denied", [
       token(files.p13NetworkTest, "p13ntd.net.denials=ERR_AUTOJS6_NETWORK_DISABLED"),
@@ -96,9 +97,10 @@ function buildReport(files) {
       token(files.embeddedMvpTest, "limitedTlsBuiltinExposesContextMetadataAndBlocksTlsSockets"),
       token(files.compatibilityProfile, "P13-30 records net/tls/dns staged compatibility as partial"),
       token(files.securityModel, "P13-30 records net/tls/dns staged compatibility as partial"),
+      token(files.p13Report, "DNS privacy review is closed for v1.1 by denial"),
+      token(files.compatibilityProfile, "keeps DNS privacy closed"),
     ], [
-      "DNS remains loopback/IP-literal-only and must not expose Android resolver servers, private search domains, VPN state, or local network topology.",
-      "No native fd/socket handle leak proof exists beyond the current shape-only socket close/destroy assertions.",
+      "No native fd/socket handle leak proof or packaged INTERNET/live-network proof exists beyond the current shape-only socket close/destroy assertions.",
     ]),
     scenario("raw_network_modules_opt_in", "explicit debug-only raw network module opt-in can route selected builtins to native Node modules", [
       token(files.buildGradle, "autojs.nodejs.rawNetworkModules.experimental"),
@@ -114,8 +116,10 @@ function buildReport(files) {
       token(files.p13NetworkTest, "p13ntd.raw.sync=allowed|allowed|allowed"),
       token(files.p13Report, "The external DNS sample is opportunistic evidence"),
       token(files.ciGatesDoc, "raw-network opt-in external DNS sample is opportunistic evidence"),
+      token(files.p13Report, "remains debug/build-time"),
+      token(files.p13Report, "release-forbidden"),
+      token(files.p13Report, "rollback is disabling the Gradle/build property"),
     ], [
-      "The opt-in is build/debug policy-gated and still needs host allow/deny, connection budgets, byte/time limits, lifecycle cleanup, and release/published-profile decisions.",
     ]),
     scenario("types_docs_and_gate", "types, docs, desktop matrix, and Gradle gate record P13-30 partial progress", [
       token(files.netTypes, 'declare module "net"'),

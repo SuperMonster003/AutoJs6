@@ -291,11 +291,11 @@ packaged distribution promotion remains `implementation`, `policy`,
 
 Reason open: `implementation`, `policy`, `evidence`, `packaging`.
 
-- [ ] Implement or reject real TCP/TLS client socket authority with budgets and lifecycle cleanup.
-- [ ] Decide server socket/listen policy, bind address policy, and foreground/background behavior.
-- [ ] Complete DNS privacy review so resolver servers, search domains, VPN state, and topology do not leak.
+- [x] Implement or reject real TCP/TLS client socket authority with budgets and lifecycle cleanup.
+- [x] Decide server socket/listen policy, bind address policy, and foreground/background behavior.
+- [x] Complete DNS privacy review so resolver servers, search domains, VPN state, and topology do not leak.
 - [ ] Add fd/socket leak instrumentation and packaged INTERNET proof.
-- [ ] Decide debug raw-network opt-in release posture, limits, and rollback.
+- [x] Decide debug raw-network opt-in release posture, limits, and rollback.
 - [x] Keep external DNS resolution in the debug raw-network opt-in test as
   opportunistic evidence rather than a deterministic CI prerequisite.
 - [x] Keep docs/type/matrix evidence gate from counting client/server socket, DNS privacy, TLS policy, packaged INTERNET, and fd leak evidence twice.

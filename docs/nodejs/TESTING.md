@@ -1644,9 +1644,11 @@ This host gate records P13-30 as partial. It requires the default limited `net`,
 debug/build-time `autojs.nodejs.rawNetworkModules.experimental=true` native
 module opt-in path, TypeScript declarations, desktop builtin matrix updates,
 security/profile docs, and release matrix text. It keeps release/default client
-sockets, server sockets, network DNS policy, TLS sessions, fd leak proof,
-packaged INTERNET proof, and live Android network
-evidence open.
+sockets and server listen authority rejected for v1.1, keeps DNS privacy closed
+by denying resolver/search-domain/VPN/topology exposure, and keeps the raw
+network opt-in release-forbidden. TLS sessions, fd leak proof, packaged
+INTERNET proof, and live Android network evidence remain open for future
+promotion.
 
 Phase 13 dgram UDP decision gate:
 

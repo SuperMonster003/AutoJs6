@@ -220,10 +220,16 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_30_NET_TLS_DNS_STAGED_COMPATIBILITY.md`.
 - Surface manifest evidence: `phase13-net-tls-dns-staged-compatibility`.
-- Remaining P13-30 blockers: real client socket authority, server socket
-  decision, connection/byte/timeout/background policy, DNS privacy review,
-  TLS session/certificate policy, fd leak instrumentation, packaged INTERNET
-  proof, and live Android network evidence.
+- Remaining P13-30 generated blocker: fd/socket leak instrumentation plus
+  packaged INTERNET/live Android network proof before any broader raw socket
+  promotion. TLS session/certificate policy stays future design before any TLS
+  session API is exposed.
+- 2026-06-28 policy update: real TCP/TLS client sockets and server listen
+  authority are rejected for v1.1 release/default profiles; DNS privacy is
+  closed by denying Android resolver/search-domain/VPN/topology exposure; the
+  raw-network opt-in remains release-forbidden debug/build-time only.
+  Remaining generated promotion evidence is fd/socket leak proof plus packaged
+  INTERNET/live network evidence.
 
 ## P13-31 Stable-Denied Landing Note
 
