@@ -67,7 +67,7 @@
     var ACTION_MODE_NOTIFY_THROTTLE_MS = 0;
     var SELECTION_BROWSE_REVEAL_SUPPRESS_MS = 1600;
     var ACTION_MODE_SCROLL_SUPPRESS_GRACE_MS = 650;
-    var TEXT_MUTATION_SELECTION_MENU_SUPPRESS_MS = 700;
+    var TEXT_MUTATION_SELECTION_MENU_SUPPRESS_MS = 1200;
     var TOUCH_ANCHOR_MAX_AGE_MS = 2500;
     var RIGHT_EDGE_GESTURE_GUARD_CSS_PX = 24;
     var RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X = 14;
@@ -465,7 +465,7 @@
                     1
             );
             rightEdgeGestureGuardTracking = isRightEdgeGestureTouchStart(touch, viewportWidth);
-            rightEdgeGestureGuardActive = rightEdgeGestureGuardTracking;
+            rightEdgeGestureGuardActive = false;
             rightEdgeGestureGuardNotified = false;
             rightEdgeGestureGuardStartX = touch ? Number(touch.clientX) : 0;
             rightEdgeGestureGuardStartY = touch ? Number(touch.clientY) : 0;

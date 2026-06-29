@@ -195,7 +195,10 @@ class AceCodeEditor @JvmOverloads constructor(
     private var lastTextTouchX = -1f
     private var lastTextTouchY = -1f
     private var lastTextTouchAtUptimeMillis = 0L
+    private var rightEdgeBackGestureTouchGuardTracking = false
     private var rightEdgeBackGestureTouchGuardActive = false
+    private var rightEdgeBackGestureTouchGuardStartX = 0f
+    private var rightEdgeBackGestureTouchGuardStartY = 0f
     private var lastRightEdgeBackGestureGuardAtUptimeMillis = 0L
     private var bridgeEventWindowStartedAtUptimeMillis = 0L
     private var bridgeEventWindowCount = 0
@@ -571,25 +574,23 @@ class AceCodeEditor @JvmOverloads constructor(
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 val systemGestureInsetRight = currentSystemGestureInsetRight()
-                rightEdgeBackGestureTouchGuardActive = shouldGuardRightEdgeBackGestureTouchStart(
+                rightEdgeBackGestureTouchGuardTracking = shouldGuardRightEdgeBackGestureTouchStart(
                     x = event.x,
                     viewWidth = webView.width,
                     systemGestureInsetRight = systemGestureInsetRight,
                 )
-                if (rightEdgeBackGestureTouchGuardActive) {
-                    userTouching = false
-                    lastRightEdgeBackGestureGuardAtUptimeMillis = SystemClock.uptimeMillis()
-                    suppressSelectionActionModeForPointerGuard("right_edge_back_gesture")
-                    eventHistory.record(
-                        "right_edge_back_gesture_guard",
-                        "x=${event.x.roundToInt()},width=${webView.width},insetRight=$systemGestureInsetRight",
-                    )
-                }
+                rightEdgeBackGestureTouchGuardActive = false
+                rightEdgeBackGestureTouchGuardStartX = event.x
+                rightEdgeBackGestureTouchGuardStartY = event.y
+            }
+            MotionEvent.ACTION_MOVE -> {
+                maybeActivateRightEdgeBackGestureTouchGuard(event)
             }
             MotionEvent.ACTION_UP,
             MotionEvent.ACTION_CANCEL,
                 -> {
                 val consumed = rightEdgeBackGestureTouchGuardActive
+                rightEdgeBackGestureTouchGuardTracking = false
                 rightEdgeBackGestureTouchGuardActive = false
                 if (consumed) {
                     userTouching = false
@@ -599,6 +600,28 @@ class AceCodeEditor @JvmOverloads constructor(
             }
         }
         return rightEdgeBackGestureTouchGuardActive
+    }
+
+    private fun maybeActivateRightEdgeBackGestureTouchGuard(event: MotionEvent) {
+        if (rightEdgeBackGestureTouchGuardActive || !rightEdgeBackGestureTouchGuardTracking) {
+            return
+        }
+        val density = resources.displayMetrics.density
+        val dx = event.x - rightEdgeBackGestureTouchGuardStartX
+        val dy = abs(event.y - rightEdgeBackGestureTouchGuardStartY)
+        val activateDelta = density * RIGHT_EDGE_BACK_GESTURE_ACTIVATE_DELTA_DP
+        val verticalSlop = density * RIGHT_EDGE_BACK_GESTURE_VERTICAL_SLOP_DP
+        if (dx > -activateDelta || dy > verticalSlop) {
+            return
+        }
+        rightEdgeBackGestureTouchGuardActive = true
+        userTouching = false
+        lastRightEdgeBackGestureGuardAtUptimeMillis = SystemClock.uptimeMillis()
+        suppressSelectionActionModeForPointerGuard("right_edge_back_gesture")
+        eventHistory.record(
+            "right_edge_back_gesture_guard",
+            "x=${event.x.roundToInt()},startX=${rightEdgeBackGestureTouchGuardStartX.roundToInt()},width=${webView.width}",
+        )
     }
 
     private fun currentSystemGestureInsetRight(): Int {
@@ -2303,10 +2326,12 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val IME_HEIGHT_THRESHOLD_DP = 80f
         private const val RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 24f
         private const val RIGHT_EDGE_BACK_GESTURE_MAX_WIDTH_RATIO = 0.08f
+        private const val RIGHT_EDGE_BACK_GESTURE_ACTIVATE_DELTA_DP = 14f
+        private const val RIGHT_EDGE_BACK_GESTURE_VERTICAL_SLOP_DP = 24f
         private const val RIGHT_EDGE_BACK_GESTURE_HAPTIC_SUPPRESS_MS = 1_500L
         private const val ACTION_MODE_AFTER_TOUCH_DELAY_MS = 48L
-        private const val ACTION_MODE_RESTORE_AFTER_TOUCH_DELAY_MS = 80L
-        private const val ACTION_MODE_POST_TOUCH_STABILIZE_MS = 1_200L
+        private const val ACTION_MODE_RESTORE_AFTER_TOUCH_DELAY_MS = 120L
+        private const val ACTION_MODE_POST_TOUCH_STABILIZE_MS = 2_000L
         private const val ACTION_MODE_TOUCH_ANCHOR_MAX_AGE_MS = 2_000L
         private const val ACTION_MODE_TOUCH_ANCHOR_HEIGHT_DP = 24f
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
