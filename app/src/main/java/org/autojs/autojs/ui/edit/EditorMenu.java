@@ -11,8 +11,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ListView;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
+import androidx.appcompat.view.menu.MenuPopupHelper;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.CompoundButtonCompat;
 import com.afollestad.materialdialogs.MaterialDialog;
 import org.autojs.autojs.core.pref.Pref;
@@ -36,8 +39,6 @@ import org.autojs.autojs6.R;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import static org.autojs.autojs.util.StringUtils.key;
@@ -121,9 +122,7 @@ public class EditorMenu {
 
     private void tintOverflowMenuCheckBoxesNow(View anchorRoot) {
         tintOverflowMenuCheckBoxesInRoot(anchorRoot);
-        for (View root : getWindowRootViews()) {
-            tintOverflowMenuCheckBoxesInRoot(root);
-        }
+        tintOverflowMenuCheckBoxesInToolbarPopup(anchorRoot);
     }
 
     private void tintOverflowMenuCheckBoxesInRoot(View root) {
@@ -171,7 +170,7 @@ public class EditorMenu {
                 ThemeColorManager.getColorPrimary(),
                 2.3f
         );
-        int uncheckedColor = mContext.getColor(R.color.day_night_alpha_60);
+        int uncheckedColor = mContext.getColor(R.color.day_night_alpha_40);
         int[][] states = new int[][]{
                 new int[]{android.R.attr.state_checked},
                 new int[]{-android.R.attr.state_checked},
@@ -180,25 +179,51 @@ public class EditorMenu {
         checkBox.invalidate();
     }
 
-    private List<View> getWindowRootViews() {
-        List<View> roots = new ArrayList<>();
-        try {
-            Class<?> windowManagerGlobalClass = Class.forName("android.view.WindowManagerGlobal");
-            Object windowManagerGlobal = windowManagerGlobalClass.getMethod("getInstance").invoke(null);
-            Field viewsField = windowManagerGlobalClass.getDeclaredField("mViews");
-            viewsField.setAccessible(true);
-            Object views = viewsField.get(windowManagerGlobal);
-            if (views instanceof List<?>) {
-                for (Object view : (List<?>) views) {
-                    if (view instanceof View) {
-                        roots.add((View) view);
-                    }
+    private void tintOverflowMenuCheckBoxesInToolbarPopup(View anchorRoot) {
+        Toolbar toolbar = anchorRoot.findViewById(R.id.toolbar);
+        if (toolbar == null) {
+            return;
+        }
+        ListView listView = getOverflowPopupListView(toolbar);
+        if (listView == null) {
+            return;
+        }
+        listView.post(() -> {
+            for (int i = 0; i < listView.getChildCount(); i++) {
+                View itemView = listView.getChildAt(i);
+                if (containsReadOnlyMenuTitle(itemView)) {
+                    tintMenuCheckBoxes(itemView);
                 }
+            }
+        });
+    }
+
+    @Nullable
+    private ListView getOverflowPopupListView(Toolbar toolbar) {
+        try {
+            Object presenter = getField(toolbar, Toolbar.class, "mOuterActionMenuPresenter");
+            if (presenter == null) {
+                return null;
+            }
+            Object overflowPopup = getField(presenter, presenter.getClass(), "mOverflowPopup");
+            if (overflowPopup == null) {
+                Object postedRunnable = getField(presenter, presenter.getClass(), "mPostedOpenRunnable");
+                overflowPopup = postedRunnable == null ? null : getField(postedRunnable, postedRunnable.getClass(), "mPopup");
+            }
+            if (overflowPopup instanceof MenuPopupHelper) {
+                return ((MenuPopupHelper) overflowPopup).getListView();
             }
         } catch (ReflectiveOperationException | RuntimeException ignored) {
             // Best effort only; menu behavior should not depend on this cosmetic tint pass.
         }
-        return roots;
+        return null;
+    }
+
+    @Nullable
+    private Object getField(Object receiver, Class<?> ownerClass, String fieldName) throws ReflectiveOperationException {
+        Field field = ownerClass.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(receiver);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
