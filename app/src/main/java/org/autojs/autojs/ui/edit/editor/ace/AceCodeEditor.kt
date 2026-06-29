@@ -194,6 +194,7 @@ class AceCodeEditor @JvmOverloads constructor(
     private var selectionActionModeExpectedFinish = false
     private var selectionActionModeStabilizeUntilUptimeMillis = 0L
     private var selectionActionModeStabilizeRestarted = false
+    private var textMutationActionModeSuppressUntilUptimeMillis = 0L
     private var lastTextTouchX = -1f
     private var lastTextTouchY = -1f
     private var lastTextTouchAtUptimeMillis = 0L
@@ -1028,6 +1029,16 @@ class AceCodeEditor @JvmOverloads constructor(
                 hasSelection = hasSelection,
                 selectAll = selectAll,
             )
+            if (shouldSuppressSelectionActionModeForTextMutation()) {
+                pendingSelectionActionModeRequest = null
+                mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
+                eventHistory.record(
+                    "action_mode_suppressed",
+                    "reason=text_mutation,selectionLength=${selectedTextSnapshot.length}",
+                )
+                finishSelectionActionMode()
+                return@postToMain
+            }
             if (userTouching && !selectAll) {
                 pendingSelectionActionModeRequest = request
                 eventHistory.record(
@@ -1336,6 +1347,10 @@ class AceCodeEditor @JvmOverloads constructor(
         selectionActionModeStabilizeRestarted = false
     }
 
+    private fun shouldSuppressSelectionActionModeForTextMutation(): Boolean {
+        return SystemClock.uptimeMillis() <= textMutationActionModeSuppressUntilUptimeMillis
+    }
+
     private fun stabilizeSelectionActionModeAfterTouch() {
         if (selectedTextSnapshot.isEmpty() && pendingSelectionActionModeRequest == null) {
             return
@@ -1552,6 +1567,13 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     private fun suppressTextMutationSelectionMenu(reason: String) {
+        textMutationActionModeSuppressUntilUptimeMillis = maxOf(
+            textMutationActionModeSuppressUntilUptimeMillis,
+            SystemClock.uptimeMillis() + ACTION_MODE_TEXT_MUTATION_SUPPRESS_MS,
+        )
+        pendingSelectionActionModeRequest = null
+        mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
+        finishSelectionActionMode()
         if (isReady) {
             invokeAce("suppressTextMutationSelectionMenu", quote(reason))
         }
@@ -2237,6 +2259,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ACTION_MODE_AFTER_TOUCH_DELAY_MS = 48L
         private const val ACTION_MODE_RESTORE_AFTER_TOUCH_DELAY_MS = 120L
         private const val ACTION_MODE_POST_TOUCH_STABILIZE_MS = 2_000L
+        private const val ACTION_MODE_TEXT_MUTATION_SUPPRESS_MS = 1_200L
         private const val ACTION_MODE_TOUCH_ANCHOR_MAX_AGE_MS = 2_000L
         private const val ACTION_MODE_TOUCH_ANCHOR_HEIGHT_DP = 24f
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
