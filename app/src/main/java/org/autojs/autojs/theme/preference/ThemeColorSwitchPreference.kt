@@ -6,7 +6,7 @@ import android.content.res.TypedArray
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
-import android.widget.Checkable
+import android.widget.CompoundButton
 import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
@@ -100,7 +100,7 @@ open class ThemeColorSwitchPreference :
         holder.itemView.alpha = if (availableForCurrentContext && isEnabled) 1f else UNAVAILABLE_ALPHA
         mCheckableView?.isEnabled = isEnabled && availableForCurrentContext
         if (!availableForCurrentContext) {
-            (mCheckableView as? Checkable)?.isChecked = unavailableChecked
+            setCheckableViewCheckedWithoutPreferenceCallback(unavailableChecked)
         }
         if (buttonColor != Color.TRANSPARENT) {
             applyColor()
@@ -152,6 +152,13 @@ open class ThemeColorSwitchPreference :
     }
 
     protected fun getAttrString(a: TypedArray, index: Int): String? = a.getString(index)
+
+    private fun setCheckableViewCheckedWithoutPreferenceCallback(checked: Boolean) {
+        (mCheckableView as? CompoundButton)?.let { view ->
+            view.setOnCheckedChangeListener(null)
+            view.isChecked = checked
+        }
+    }
 
     companion object {
         private const val UNAVAILABLE_ALPHA = 0.58f
