@@ -45,6 +45,7 @@
     var lastTouchAt = 0;
     var programmaticScrollUntil = 0;
     var foldTapCandidate = null;
+    var gutterFoldClickSuppressUntil = 0;
     var imeTextInputSelectionWindow = {
         installed: false,
         element: null,
@@ -648,12 +649,11 @@
         wrapScrollMethod(editor, "scrollToLine");
     }
 
-    function installCursorRevealSuppression() {
-        var renderer = editor && editor.renderer;
-        if (!renderer || typeof renderer.scrollCursorIntoView !== "function" || renderer.scrollCursorIntoView.__autojs6CursorRevealGuarded) {
+    function wrapCursorRevealMethod(owner, methodName) {
+        if (!owner || typeof owner[methodName] !== "function" || owner[methodName].__autojs6CursorRevealGuarded) {
             return;
         }
-        var original = renderer.scrollCursorIntoView;
+        var original = owner[methodName];
         var wrapped = function() {
             if (Date.now() <= cursorRevealSuppressUntil) {
                 return;
@@ -662,7 +662,14 @@
         };
         wrapped.__autojs6CursorRevealGuarded = true;
         wrapped.__autojs6Original = original;
-        renderer.scrollCursorIntoView = wrapped;
+        owner[methodName] = wrapped;
+    }
+
+    function installCursorRevealSuppression() {
+        var renderer = editor && editor.renderer;
+        wrapCursorRevealMethod(renderer, "scrollCursorIntoView");
+        wrapCursorRevealMethod(renderer, "scrollSelectionIntoView");
+        wrapCursorRevealMethod(editor, "scrollToLine");
     }
 
     function dispatchTextChanged(includeText) {
@@ -1726,10 +1733,21 @@
     function runPreservingScroll(reason, callback) {
         var scrollLeft = currentScrollLeft();
         var scrollTop = currentScrollTop();
-        cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + 500);
+        var selectionRange = editor && editor.getSelectionRange && editor.getSelectionRange();
+        if (selectionRange && selectionRange.clone) {
+            selectionRange = selectionRange.clone();
+        }
+        cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + 900);
         var changed = !!callback();
         if (!changed) {
             return false;
+        }
+        if (selectionRange && editor && editor.selection && editor.selection.setRange) {
+            try {
+                editor.selection.setRange(selectionRange, false);
+            } catch (ignore) {
+                // Selection preservation is best-effort; scroll preservation is the primary goal.
+            }
         }
         scrollToPosition(scrollLeft, scrollTop);
         setTimeout(function() {
@@ -1747,6 +1765,9 @@
         setTimeout(function() {
             scrollToPosition(scrollLeft, scrollTop);
         }, 384);
+        setTimeout(function() {
+            scrollToPosition(scrollLeft, scrollTop);
+        }, 768);
         notifyStateChanged(reason);
         return true;
     }
@@ -1979,10 +2000,50 @@
         return false;
     }
 
+    function positionFromDomEvent(event) {
+        if (!editor || !editor.renderer || !editor.renderer.screenToTextCoordinates) {
+            return editor && editor.getCursorPosition && editor.getCursorPosition();
+        }
+        return editor.renderer.screenToTextCoordinates(event.clientX, event.clientY);
+    }
+
+    function toggleGutterFoldFromDomEvent(event) {
+        if (!foldMarkersEnabled || !editor || !session || !isGutterFoldWidgetEvent(event && event.target, event)) {
+            return false;
+        }
+        var position = positionFromDomEvent(event);
+        if (!position) {
+            return false;
+        }
+        if (toggleFoldWidgetAt(position.row, event)) {
+            gutterFoldClickSuppressUntil = Date.now() + 700;
+            stopFoldPlaceholderClick(event);
+            callBridge("notifyEvent", [
+                "gutterFoldToggled",
+                JSON.stringify({ row: position.row })
+            ]);
+            return true;
+        }
+        return false;
+    }
+
+    function stopGutterFoldClickAfterMouseDown(event) {
+        if (Date.now() > gutterFoldClickSuppressUntil) {
+            return false;
+        }
+        if (!isGutterFoldWidgetEvent(event && event.target, event)) {
+            return false;
+        }
+        stopFoldPlaceholderClick(event);
+        return true;
+    }
+
     function installFoldPlaceholderClickCapture() {
         if (!editor || !editor.container || !editor.container.addEventListener) {
             return;
         }
+        editor.container.addEventListener("mousedown", toggleGutterFoldFromDomEvent, true);
+        editor.container.addEventListener("click", stopGutterFoldClickAfterMouseDown, true);
         ["touchstart", "touchmove", "touchend", "touchcancel"].forEach(function(type) {
             editor.container.addEventListener(type, handleFoldPlaceholderTouch, true);
         });
