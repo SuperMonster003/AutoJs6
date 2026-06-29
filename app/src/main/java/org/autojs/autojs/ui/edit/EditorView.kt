@@ -1502,7 +1502,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mFunctionsKeyboard.setClickCallback(this)
 
         val beautifyOnLongClick = View.OnLongClickListener {
-            true.also { mCommandDispatcher.beautifyCode() }
+            true.also {
+                actionForMenuItem(R.id.action_beautify)?.let(::recordAceHistoryAction)
+                mCommandDispatcher.beautifyCode()
+            }
         }
         mShowFunctionsButton.setOnLongClickListener(beautifyOnLongClick)
         mAceShowFunctionsButton.setOnLongClickListener(beautifyOnLongClick)
