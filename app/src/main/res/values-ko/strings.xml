@@ -1445,7 +1445,7 @@
     <string name="text_symbols_profile_name_conflict">프로필 이름이 이미 존재합니다</string>
     <string name="text_symbols_profile_name_hint">프로필 이름</string>
     <string name="text_symbols_profile_name_invalid">프로필 이름은 비워 둘 수 없습니다</string>
-    <string name="text_symbols_settings">기호 설정</string>
+    <string name="text_symbols_settings">빠른 기호 설정</string>
     <string name="text_tailor_made_developer">맞춤형 개발자</string>
     <string name="text_task">일</string>
     <string name="text_text_size">텍스트 크기</string>

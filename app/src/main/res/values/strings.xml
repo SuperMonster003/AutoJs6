@@ -1824,7 +1824,7 @@
     <string name="text_symbols_profile_name_conflict">Profile name already exists</string>
     <string name="text_symbols_profile_name_hint">Profile name</string>
     <string name="text_symbols_profile_name_invalid">Profile name cannot be empty</string>
-    <string name="text_symbols_settings">Symbols settings</string>
+    <string name="text_symbols_settings">Shortcut symbol settings</string>
     <string name="text_tailor_made_developer">Tailor-made developer</string>
     <string name="text_task">Task</string>
     <string name="text_text_size">Text size</string>
@@ -1932,7 +1932,7 @@
     <string name="text_editor_gestures">Gestures</string>
     <string name="text_editor_gutter_markers">Gutter markers</string>
     <string name="text_editor_performance">Performance</string>
-    <string name="text_editor_shortcut_input_bar">Shortcut input bar</string>
+    <string name="text_editor_shortcut_input_bar">Shortcut symbol settings</string>
     <string name="summary_code_editor_settings">Open the full code editor settings page.</string>
     <string name="summary_editor_shortcut_input_bar">Configure shortcut input symbols shared by editor engines.</string>
     <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter.</string>

@@ -1443,7 +1443,7 @@
     <string name="text_symbols_profile_name_conflict">Le nom du profil existe deja</string>
     <string name="text_symbols_profile_name_hint">Nom du profil</string>
     <string name="text_symbols_profile_name_invalid">Le nom du profil ne peut pas etre vide</string>
-    <string name="text_symbols_settings">Param des symboles</string>
+    <string name="text_symbols_settings">Paramètres des symboles rapides</string>
     <string name="text_tailor_made_developer">Développeur sur mesure</string>
     <string name="text_task">Task</string>
     <string name="text_text_size">Taille du texte</string>

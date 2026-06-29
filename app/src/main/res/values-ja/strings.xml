@@ -1444,7 +1444,7 @@
     <string name="text_symbols_profile_name_conflict">プロファイル名が既に存在します</string>
     <string name="text_symbols_profile_name_hint">プロファイル名</string>
     <string name="text_symbols_profile_name_invalid">プロファイル名は空にできません</string>
-    <string name="text_symbols_settings">シンボル設定</string>
+    <string name="text_symbols_settings">クイック記号設定</string>
     <string name="text_tailor_made_developer">テーラーメイド開発者</string>
     <string name="text_task">タスク</string>
     <string name="text_text_size">文字サイズ</string>

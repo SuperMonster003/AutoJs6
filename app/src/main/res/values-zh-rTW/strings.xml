@@ -1445,7 +1445,7 @@
     <string name="text_symbols_profile_name_conflict">配置名稱已存在</string>
     <string name="text_symbols_profile_name_hint">配置名稱</string>
     <string name="text_symbols_profile_name_invalid">配置名稱不能為空</string>
-    <string name="text_symbols_settings">符號設定</string>
+    <string name="text_symbols_settings">快捷符號設定</string>
     <string name="text_tailor_made_developer">二次開發者</string>
     <string name="text_task">任務</string>
     <string name="text_text_size">字型大小</string>

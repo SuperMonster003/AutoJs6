@@ -1445,7 +1445,7 @@
     <string name="text_symbols_profile_name_conflict">اسم ملف التعريف موجود بالفعل</string>
     <string name="text_symbols_profile_name_hint">اسم الملف</string>
     <string name="text_symbols_profile_name_invalid">لا يمكن ترك اسم ملف التعريف فارغا</string>
-    <string name="text_symbols_settings">إعدادات الرموز</string>
+    <string name="text_symbols_settings">إعدادات الرموز السريعة</string>
     <string name="text_tailor_made_developer">مطور مصممة خصيصا</string>
     <string name="text_task">مهمة</string>
     <string name="text_text_size">حجم الخط</string>

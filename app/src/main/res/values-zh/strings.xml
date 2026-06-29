@@ -1448,7 +1448,7 @@
     <string name="text_symbols_profile_name_conflict">配置名称已存在</string>
     <string name="text_symbols_profile_name_hint">配置名称</string>
     <string name="text_symbols_profile_name_invalid">配置名称不能为空</string>
-    <string name="text_symbols_settings">符号设置</string>
+    <string name="text_symbols_settings">快捷符号设置</string>
     <string name="text_tailor_made_developer">二次开发者</string>
     <string name="text_task">任务</string>
     <string name="text_text_size">字体大小</string>
@@ -1611,7 +1611,7 @@
     <string name="text_editor_gestures">操作手势</string>
     <string name="text_editor_gutter_markers">边栏标记</string>
     <string name="text_editor_performance">性能</string>
-    <string name="text_editor_shortcut_input_bar">快捷输入栏</string>
+    <string name="text_editor_shortcut_input_bar">快捷符号设置</string>
     <string name="summary_code_editor_settings">打开完整的代码编辑器设置页面。</string>
     <string name="summary_editor_shortcut_input_bar">配置两个编辑器引擎共用的快捷输入符号。</string>
     <plurals name="text_ace_action_used_times">

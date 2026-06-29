@@ -1443,7 +1443,7 @@
     <string name="text_symbols_profile_name_conflict">Имя профиля уже существует</string>
     <string name="text_symbols_profile_name_hint">Имя профиля</string>
     <string name="text_symbols_profile_name_invalid">Имя профиля не может быть пустым</string>
-    <string name="text_symbols_settings">Настройки символов</string>
+    <string name="text_symbols_settings">Настройки быстрых символов</string>
     <string name="text_tailor_made_developer">Индивидуальный разработчик</string>
     <string name="text_task">Задание</string>
     <string name="text_text_size">Размер текста</string>

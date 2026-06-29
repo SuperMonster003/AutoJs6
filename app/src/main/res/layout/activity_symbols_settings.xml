@@ -80,7 +80,8 @@
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="4dp"
                     android:paddingHorizontal="3dp"
-                    android:src="@drawable/ic_add_black_48dp" />
+                    android:src="@drawable/ic_add_black_48dp"
+                    app:tint="@color/text_color_primary_alpha_70" />
 
                 <ImageView
                     android:id="@+id/ivDeleteProfile"
@@ -88,7 +89,8 @@
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="4dp"
                     android:paddingHorizontal="5dp"
-                    android:src="@drawable/ic_close_black_48dp" />
+                    android:src="@drawable/ic_close_black_48dp"
+                    app:tint="@color/text_color_primary_alpha_70" />
 
                 <ImageView
                     android:id="@+id/ivMoreProfile"
@@ -96,7 +98,8 @@
                     android:layout_height="match_parent"
                     android:paddingHorizontal="4dp"
                     android:layout_marginHorizontal="4dp"
-                    android:src="@drawable/ic_more_vert_black_48dp" />
+                    android:src="@drawable/ic_more_vert_black_48dp"
+                    app:tint="@color/text_color_primary_alpha_70" />
             </LinearLayout>
         </LinearLayout>
 
