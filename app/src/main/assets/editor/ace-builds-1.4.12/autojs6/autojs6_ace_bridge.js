@@ -405,6 +405,10 @@
             null;
     }
 
+    function clientPointFromDomEvent(event) {
+        return touchFromEvent(event) || event || null;
+    }
+
     function rememberTouchAnchor(event) {
         var touch = touchFromEvent(event);
         if (!touch) {
@@ -1827,11 +1831,67 @@
         };
     }
 
+    function hasModifiedFoldClick(domEvent) {
+        domEvent = domEvent || {};
+        return !!(domEvent.shiftKey || domEvent.ctrlKey || domEvent.metaKey || domEvent.altKey);
+    }
+
+    function findFoldAtRow(row) {
+        if (!session) {
+            return null;
+        }
+        try {
+            var foldLine = session.getFoldLine && session.getFoldLine(row);
+            if (foldLine && foldLine.folds && foldLine.folds.length) {
+                for (var i = 0; i < foldLine.folds.length; i += 1) {
+                    var fold = foldLine.folds[i];
+                    if (fold && fold.start && fold.end &&
+                        fold.start.row <= row && fold.end.row >= row) {
+                        return fold;
+                    }
+                }
+                return foldLine.folds[0];
+            }
+            var lineLength = getLine(row).length;
+            if (session.getFoldAt) {
+                return session.getFoldAt(row, 0, 1) ||
+                    session.getFoldAt(row, lineLength, -1) ||
+                    session.getFoldAt(row, 0, 0) ||
+                    session.getFoldAt(row, lineLength, 0);
+            }
+        } catch (error) {
+            notifyRecoverableError("foldFind", error);
+        }
+        return null;
+    }
+
+    function toggleFoldWidgetDirectly(row) {
+        try {
+            var fold = findFoldAtRow(row);
+            if (fold && session.expandFold) {
+                session.expandFold(fold);
+                return true;
+            }
+            if (!session.getFoldWidgetRange || !session.addFold) {
+                return false;
+            }
+            var range = session.getFoldWidgetRange(row);
+            if (!range || (range.isEmpty && range.isEmpty())) {
+                return false;
+            }
+            session.addFold("...", range);
+            return true;
+        } catch (error) {
+            notifyRecoverableError("foldToggleDirect", error);
+            return false;
+        }
+    }
+
     function toggleFoldWidgetAt(row, domEvent) {
         if (!session) {
             return false;
         }
-        if (session.$toggleFoldWidget) {
+        if (session.$toggleFoldWidget && hasModifiedFoldClick(domEvent)) {
             return runPreservingScroll("foldToggled", function() {
                 try {
                     return !!session.$toggleFoldWidget(row, foldWidgetOptionsFromDomEvent(domEvent));
@@ -1841,7 +1901,19 @@
                 }
             });
         }
-        return expandFoldAt(row, 0);
+        return runPreservingScroll("foldToggled", function() {
+            if (toggleFoldWidgetDirectly(row)) {
+                return true;
+            }
+            if (session.$toggleFoldWidget) {
+                try {
+                    return !!session.$toggleFoldWidget(row, foldWidgetOptionsFromDomEvent(domEvent));
+                } catch (error) {
+                    notifyRecoverableError("foldToggle", error);
+                }
+            }
+            return false;
+        });
     }
 
     function hasClassToken(target, token) {
@@ -1868,14 +1940,15 @@
     }
 
     function isGutterFoldWidgetEvent(target, domEvent) {
+        var point = clientPointFromDomEvent(domEvent);
         var foldWidget = findAncestorWithClassToken(target, "ace_fold-widget", editor && editor.container);
         if (!foldWidget && target && target.querySelector) {
             foldWidget = target.querySelector(".ace_fold-widget");
         }
         return !!foldWidget && isPointInsideElement(
             foldWidget,
-            domEvent && domEvent.clientX,
-            domEvent && domEvent.clientY
+            point && point.clientX,
+            point && point.clientY
         );
     }
 
@@ -2008,7 +2081,11 @@
         if (!editor || !editor.renderer || !editor.renderer.screenToTextCoordinates) {
             return editor && editor.getCursorPosition && editor.getCursorPosition();
         }
-        return editor.renderer.screenToTextCoordinates(event.clientX, event.clientY);
+        var point = clientPointFromDomEvent(event);
+        return editor.renderer.screenToTextCoordinates(
+            point && point.clientX,
+            point && point.clientY
+        );
     }
 
     function toggleGutterFoldFromDomEvent(event) {
@@ -2047,6 +2124,7 @@
             return;
         }
         editor.container.addEventListener("mousedown", toggleGutterFoldFromDomEvent, true);
+        editor.container.addEventListener("touchstart", toggleGutterFoldFromDomEvent, true);
         editor.container.addEventListener("click", stopGutterFoldClickAfterMouseDown, true);
         ["touchstart", "touchmove", "touchend", "touchcancel"].forEach(function(type) {
             editor.container.addEventListener(type, handleFoldPlaceholderTouch, true);
