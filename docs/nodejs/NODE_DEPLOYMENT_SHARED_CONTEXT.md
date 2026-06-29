@@ -56,6 +56,10 @@ Observed examples:
 
 Preferred connected-test device serial: `QV710AF65F`.
 
+Secondary low-performance matrix device: `bek749scrwv4wo8h` (Xiaomi 12C /
+22120RN86C). Use it for non-destructive cross-device matrix evidence unless
+the user explicitly approves destructive install cleanup for that device.
+
 Before connected Android tests, inspect device state:
 
 ```powershell
@@ -98,10 +102,15 @@ uninstalled, reinstalled, and reset as needed for Node.js validation.
   fail-closed network timeout instead of the default network-disabled denial.
   For Safe-profile denial evidence, pass
   `-Pautojs.nodejs.network.experimental=false` explicitly.
-- P13-08 has verifier and archive-helper coverage only. Do not synthesize
-  `quick-soak-8h.json` or `final-soak-24h.json`; archive only completed real
-  soak reports through `tools/nodejs/phase13/archive-full-heavy-resource-soak.js`.
+- P13-08 has verifier, real-soak runner, instrumentation, and archive-helper
+  coverage. Use `tools/nodejs/phase13/run-full-heavy-resource-soak.js` for the
+  8h/24h runs. Do not synthesize `quick-soak-8h.json` or
+  `final-soak-24h.json`; archive only completed real soak reports through
+  `tools/nodejs/phase13/archive-full-heavy-resource-soak.js`. Leave
+  `--archive` off when using `--duration-ms` for under-duration smoke tests.
 - For ABI status triage, use `:app:generateNodeFinalAbiStatus` when a
   non-failing report is needed. `:app:verifyNodeFinalAbiGate` is the strict
-  gate and is expected to fail while the runtime artifact aggregate remains
-  `bootstrap_only`.
+  gate for required ABI libraries and adapter ABI/export evidence. Runtime
+  artifact aggregate `bootstrap_only` is treated as deferred external runtime
+  maintenance only while the registry keeps `node_24_17_community_fork` in
+  `waiting_for_android_artifacts` and the default runtime remains `node24_5`.

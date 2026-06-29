@@ -13,6 +13,10 @@ required 8 hour quick soak and 24 hour final soak.
 
 - Host verifier:
   `tools/nodejs/phase13/verify-full-heavy-resource-stress.js`
+- Real soak runner:
+  `tools/nodejs/phase13/run-full-heavy-resource-soak.js`
+- Real soak instrumentation:
+  `NodeFinalSoakInstrumentationTest.fullHeavyResourceSoakProducesArchiveReadyReport`
 - Archive helper:
   `tools/nodejs/phase13/archive-full-heavy-resource-soak.js`
 - Contract fixtures:
@@ -71,6 +75,32 @@ incomplete shapes before real long-duration evidence is archived:
 The generated `phase13-full-heavy-resource-stress` report exposes these under
 `contractFixtures`; any mismatch is treated as a policy violation in the host
 gate.
+
+## Real Soak Runner
+
+Run the real final-soak instrumentation through the host runner so the device
+serial, timeout, report pull, and optional archive step stay reproducible:
+
+```powershell
+node tools/nodejs/phase13/run-full-heavy-resource-soak.js `
+  --kind quick `
+  --serial QV710AF65F `
+  --device-profile sony `
+  --archive
+
+node tools/nodejs/phase13/run-full-heavy-resource-soak.js `
+  --kind final `
+  --serial QV710AF65F `
+  --device-profile sony `
+  --archive
+```
+
+The runner starts
+`NodeFinalSoakInstrumentationTest#fullHeavyResourceSoakProducesArchiveReadyReport`,
+passes the expected duration (`8h` for `quick`, `24h` for `final`), pulls
+`/sdcard/Download/AutoJs6/nodejs/final-soak`, and writes a host run audit under
+`build/reports/nodejs/final-soak-runs/`. Use `--duration-ms` only for
+under-duration smoke tests, and leave `--archive` off for those smoke runs.
 
 ## Archive Helper
 

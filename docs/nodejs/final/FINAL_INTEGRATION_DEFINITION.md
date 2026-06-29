@@ -118,3 +118,10 @@ diagnostics:
 Node 24.17 stays outside final integration completion until Android
 `libnode.so` artifacts and headers exist for the required ABIs. The default
 runtime remains `node24_5` in Phase 11.
+
+For the v1.1 closeout, required ABI completion means the checked-in Node 24.5
+runtime libraries for `arm64-v8a`, `armeabi-v7a`, and `x86_64` are present and
+the adapter ABI/export reports are ready. Runtime artifact build-plan,
+alignment, manifest, integrity, and distribution reports may remain
+`bootstrap_only` only as recorded external runtime maintenance for the future
+Node 24.17 lane.
