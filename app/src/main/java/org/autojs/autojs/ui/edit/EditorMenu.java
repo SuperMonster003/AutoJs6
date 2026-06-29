@@ -2,27 +2,17 @@ package org.autojs.autojs.ui.edit;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.ListView;
-import android.widget.TextView;
 import androidx.annotation.Nullable;
-import androidx.appcompat.view.menu.MenuPopupHelper;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.widget.CompoundButtonCompat;
 import com.afollestad.materialdialogs.MaterialDialog;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
-import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher;
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
@@ -30,7 +20,6 @@ import org.autojs.autojs.ui.log.LogActivity;
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.util.ClipboardUtils;
-import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
@@ -38,7 +27,6 @@ import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 import static org.autojs.autojs.util.StringUtils.key;
@@ -109,121 +97,6 @@ public class EditorMenu {
         item.setCheckable(true);
         item.setChecked(readOnly);
         item.setTitle(R.string.text_ace_read_only_mode);
-    }
-
-    public void tintOverflowMenuCheckBoxes(View root) {
-        if (root == null) {
-            return;
-        }
-        for (long delay : OVERFLOW_MENU_CHECK_BOX_TINT_DELAYS_MS) {
-            root.postDelayed(() -> tintOverflowMenuCheckBoxesNow(root), delay);
-        }
-    }
-
-    private void tintOverflowMenuCheckBoxesNow(View anchorRoot) {
-        tintOverflowMenuCheckBoxesInRoot(anchorRoot);
-        tintOverflowMenuCheckBoxesInToolbarPopup(anchorRoot);
-    }
-
-    private void tintOverflowMenuCheckBoxesInRoot(View root) {
-        if (root == null || root.getWindowVisibility() != View.VISIBLE) {
-            return;
-        }
-        if (!containsReadOnlyMenuTitle(root)) {
-            return;
-        }
-        tintMenuCheckBoxes(root);
-    }
-
-    private boolean containsReadOnlyMenuTitle(View view) {
-        if (view instanceof TextView && TextUtils.equals(((TextView) view).getText(), mContext.getString(R.string.text_ace_read_only_mode))) {
-            return true;
-        }
-        if (!(view instanceof ViewGroup)) {
-            return false;
-        }
-        ViewGroup group = (ViewGroup) view;
-        for (int i = 0; i < group.getChildCount(); i++) {
-            if (containsReadOnlyMenuTitle(group.getChildAt(i))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void tintMenuCheckBoxes(View view) {
-        if (view instanceof CheckBox) {
-            tintMenuCheckBox((CheckBox) view);
-        }
-        if (!(view instanceof ViewGroup)) {
-            return;
-        }
-        ViewGroup group = (ViewGroup) view;
-        for (int i = 0; i < group.getChildCount(); i++) {
-            tintMenuCheckBoxes(group.getChildAt(i));
-        }
-    }
-
-    private void tintMenuCheckBox(CheckBox checkBox) {
-        int checkedColor = ColorUtils.adjustColorForContrast(
-                mContext.getColor(R.color.window_background),
-                ThemeColorManager.getColorPrimary(),
-                2.3f
-        );
-        int uncheckedColor = mContext.getColor(R.color.day_night_alpha_40);
-        int[][] states = new int[][]{
-                new int[]{android.R.attr.state_checked},
-                new int[]{-android.R.attr.state_checked},
-        };
-        CompoundButtonCompat.setButtonTintList(checkBox, new ColorStateList(states, new int[]{checkedColor, uncheckedColor}));
-        checkBox.invalidate();
-    }
-
-    private void tintOverflowMenuCheckBoxesInToolbarPopup(View anchorRoot) {
-        Toolbar toolbar = anchorRoot.findViewById(R.id.toolbar);
-        if (toolbar == null) {
-            return;
-        }
-        ListView listView = getOverflowPopupListView(toolbar);
-        if (listView == null) {
-            return;
-        }
-        listView.post(() -> {
-            for (int i = 0; i < listView.getChildCount(); i++) {
-                View itemView = listView.getChildAt(i);
-                if (containsReadOnlyMenuTitle(itemView)) {
-                    tintMenuCheckBoxes(itemView);
-                }
-            }
-        });
-    }
-
-    @Nullable
-    private ListView getOverflowPopupListView(Toolbar toolbar) {
-        try {
-            Object presenter = getField(toolbar, Toolbar.class, "mOuterActionMenuPresenter");
-            if (presenter == null) {
-                return null;
-            }
-            Object overflowPopup = getField(presenter, presenter.getClass(), "mOverflowPopup");
-            if (overflowPopup == null) {
-                Object postedRunnable = getField(presenter, presenter.getClass(), "mPostedOpenRunnable");
-                overflowPopup = postedRunnable == null ? null : getField(postedRunnable, postedRunnable.getClass(), "mPopup");
-            }
-            if (overflowPopup instanceof MenuPopupHelper) {
-                return ((MenuPopupHelper) overflowPopup).getListView();
-            }
-        } catch (ReflectiveOperationException | RuntimeException ignored) {
-            // Best effort only; menu behavior should not depend on this cosmetic tint pass.
-        }
-        return null;
-    }
-
-    @Nullable
-    private Object getField(Object receiver, Class<?> ownerClass, String fieldName) throws ReflectiveOperationException {
-        Field field = ownerClass.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(receiver);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -563,7 +436,5 @@ public class EditorMenu {
         }
         return false;
     }
-
-    private static final long[] OVERFLOW_MENU_CHECK_BOX_TINT_DELAYS_MS = new long[]{0L, 32L, 96L, 192L};
 
 }

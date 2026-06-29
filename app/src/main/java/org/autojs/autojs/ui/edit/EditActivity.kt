@@ -265,14 +265,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         mEditorMenu.prepareOptionsMenu(menu)
-        mEditorMenu.tintOverflowMenuCheckBoxes(window.decorView)
         return super.onPrepareOptionsMenu(menu)
-    }
-
-    override fun onMenuOpened(featureId: Int, menu: Menu): Boolean {
-        val opened = super.onMenuOpened(featureId, menu)
-        mEditorMenu.tintOverflowMenuCheckBoxes(window.decorView)
-        return opened
     }
 
     private fun TextView.adjustTitleTextView() = this.post {
