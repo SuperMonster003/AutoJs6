@@ -1610,6 +1610,7 @@
     <string name="text_editor_assistance">辅助</string>
     <string name="text_editor_gestures">操作手势</string>
     <string name="text_editor_gutter_markers">边栏标记</string>
+    <string name="text_editor_performance">性能</string>
     <string name="text_editor_shortcut_input_bar">快捷输入栏</string>
     <string name="summary_code_editor_settings">打开完整的代码编辑器设置页面。</string>
     <string name="summary_editor_shortcut_input_bar">配置两个编辑器引擎共用的快捷输入符号。</string>

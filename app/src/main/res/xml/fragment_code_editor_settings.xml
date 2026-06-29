@@ -19,6 +19,24 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
+        app:title="@string/text_editor_performance">
+
+        <org.autojs.autojs.ui.settings.EditorCodeHighlightThresholdPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_editor_code_highlight_threshold_bytes"
+            app:title="@string/text_editor_code_highlight_threshold"
+            app:longClickPrompt="@string/description_editor_code_highlight_threshold" />
+
+        <org.autojs.autojs.ui.settings.EditorLargeFileModeThresholdPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_editor_large_file_mode_threshold_bytes"
+            app:title="@string/text_editor_large_file_mode_threshold"
+            app:longClickPrompt="@string/description_editor_large_file_mode_threshold" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
         app:title="@string/text_appearance">
 
         <org.autojs.autojs.ui.settings.EditorThemePreference

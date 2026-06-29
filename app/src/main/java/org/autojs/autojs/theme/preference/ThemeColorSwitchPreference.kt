@@ -6,6 +6,7 @@ import android.content.res.TypedArray
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
+import android.widget.Checkable
 import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
@@ -40,6 +41,9 @@ open class ThemeColorSwitchPreference :
     private var _titleColor: Int? = null
     private var _summaryColor: Int? = null
     private var _buttonColor = Color.TRANSPARENT
+    private var availableForCurrentContext = true
+    private var unavailableChecked = false
+    private var unavailableClickHandler: (() -> Unit)? = null
 
     override var titleColor: Int?
         get() = _titleColor
@@ -93,6 +97,11 @@ open class ThemeColorSwitchPreference :
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         mCheckableView = holder.findViewById(Resources.getSystem().getIdentifier("switch_widget", "id", "android"))
+        holder.itemView.alpha = if (availableForCurrentContext && isEnabled) 1f else UNAVAILABLE_ALPHA
+        mCheckableView?.isEnabled = isEnabled && availableForCurrentContext
+        if (!availableForCurrentContext) {
+            (mCheckableView as? Checkable)?.isChecked = unavailableChecked
+        }
         if (buttonColor != Color.TRANSPARENT) {
             applyColor()
         }
@@ -103,6 +112,25 @@ open class ThemeColorSwitchPreference :
         summaryColor?.let { color ->
             holder.itemView.findViewById<TextView>(android.R.id.summary)?.setTextColor(color)
         }
+    }
+
+    override fun onClick() {
+        if (!availableForCurrentContext) {
+            unavailableClickHandler?.invoke()
+            return
+        }
+        super.onClick()
+    }
+
+    fun setAvailableForCurrentContext(
+        available: Boolean,
+        unavailableChecked: Boolean = false,
+        onUnavailableClick: (() -> Unit)? = null,
+    ) {
+        availableForCurrentContext = available
+        this.unavailableChecked = unavailableChecked
+        unavailableClickHandler = onUnavailableClick
+        notifyChanged()
     }
 
     override fun setThemeColor(color: ThemeColor) {
@@ -124,5 +152,9 @@ open class ThemeColorSwitchPreference :
     }
 
     protected fun getAttrString(a: TypedArray, index: Int): String? = a.getString(index)
+
+    companion object {
+        private const val UNAVAILABLE_ALPHA = 0.58f
+    }
 
 }

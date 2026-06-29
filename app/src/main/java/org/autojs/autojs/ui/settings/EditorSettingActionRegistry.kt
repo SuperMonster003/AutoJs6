@@ -15,6 +15,8 @@ object EditorSettingActionRegistry {
 
     private val specs = listOf(
         Spec(R.string.key_editor_engine, R.string.text_editor_engine),
+        Spec(R.string.key_editor_code_highlight_threshold_bytes, R.string.text_editor_code_highlight_threshold),
+        Spec(R.string.key_editor_large_file_mode_threshold_bytes, R.string.text_editor_large_file_mode_threshold),
         Spec(R.string.key_editor_theme, R.string.text_editor_theme),
         Spec(R.string.key_ace_editor_font, R.string.text_ace_editor_font),
         Spec(R.string.key_editor_text_size, R.string.text_text_size),

@@ -22,12 +22,26 @@ class EditorCodeHighlightThresholdPreference : MaterialPreference {
     constructor(context: Context) : super(context)
 
     init {
-        summaryProvider = SummaryProvider<EditorCodeHighlightThresholdPreference> {
-            EditorThresholdSettings.formatCodeHighlightSummary(prefContext, Pref.codeHighlightThresholdChars)
+        useThresholdSummaryProvider()
+    }
+
+    fun setAvailableForCurrentEngine(
+        available: Boolean,
+        unavailableSummary: CharSequence,
+        onUnavailableClick: () -> Unit,
+    ) {
+        setAvailableForCurrentContext(available, onUnavailableClick)
+        if (available) {
+            useThresholdSummaryProvider()
+        } else {
+            summaryProvider = SummaryProvider<EditorCodeHighlightThresholdPreference> { unavailableSummary }
         }
     }
 
     override fun onClick() {
+        if (handleUnavailableClickIfNeeded()) {
+            return
+        }
         if (dialog?.isShowing == true) {
             return
         }
@@ -44,5 +58,11 @@ class EditorCodeHighlightThresholdPreference : MaterialPreference {
         dialog?.dismiss()
         dialog = null
         super.onDetached()
+    }
+
+    private fun useThresholdSummaryProvider() {
+        summaryProvider = SummaryProvider<EditorCodeHighlightThresholdPreference> {
+            EditorThresholdSettings.formatCodeHighlightSummary(prefContext, Pref.codeHighlightThresholdChars)
+        }
     }
 }

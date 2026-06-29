@@ -22,12 +22,26 @@ class EditorLargeFileModeThresholdPreference : MaterialPreference {
     constructor(context: Context) : super(context)
 
     init {
-        summaryProvider = SummaryProvider<EditorLargeFileModeThresholdPreference> {
-            EditorThresholdSettings.formatLargeFileModeSummary(prefContext, Pref.largeFileModeThresholdBytes)
+        useThresholdSummaryProvider()
+    }
+
+    fun setAvailableForCurrentEngine(
+        available: Boolean,
+        unavailableSummary: CharSequence,
+        onUnavailableClick: () -> Unit,
+    ) {
+        setAvailableForCurrentContext(available, onUnavailableClick)
+        if (available) {
+            useThresholdSummaryProvider()
+        } else {
+            summaryProvider = SummaryProvider<EditorLargeFileModeThresholdPreference> { unavailableSummary }
         }
     }
 
     override fun onClick() {
+        if (handleUnavailableClickIfNeeded()) {
+            return
+        }
         if (dialog?.isShowing == true) {
             return
         }
@@ -44,5 +58,11 @@ class EditorLargeFileModeThresholdPreference : MaterialPreference {
         dialog?.dismiss()
         dialog = null
         super.onDetached()
+    }
+
+    private fun useThresholdSummaryProvider() {
+        summaryProvider = SummaryProvider<EditorLargeFileModeThresholdPreference> {
+            EditorThresholdSettings.formatLargeFileModeSummary(prefContext, Pref.largeFileModeThresholdBytes)
+        }
     }
 }

@@ -10,10 +10,10 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.theme.preference.MaterialPreference
-import org.autojs.autojs.theme.ThemeColorManager
-import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
+import org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
@@ -123,18 +123,15 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
 
     private fun syncEditorEnginePreferenceAvailability() {
         val aceSelected = EditorEnginePreferences.get() == EditorEngineType.ACE
+        val nativeSelected = !aceSelected
         setPreferenceAvailable(R.string.key_ace_editor_font, aceSelected)
         setPreferenceAvailable(R.string.key_ace_lsp_enabled, aceSelected, R.string.summary_ace_lsp_enabled)
         setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected, R.string.summary_ace_word_wrap_enabled)
         setPreferenceAvailable(R.string.key_editor_word_wrap_indent_style, aceSelected, R.string.summary_editor_word_wrap_indent_style)
         setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected, R.string.summary_editor_gutter_width_mode)
         setPreferenceAvailable(R.string.key_editor_fold_markers_enabled, aceSelected, R.string.summary_editor_fold_markers_enabled)
-
-        if (!aceSelected) {
-            EditorDisplayPreferences.setWordWrapEnabled(false)
-            EditorDisplayPreferences.setWordWrapIndentStyle(EditorDisplayPreferences.WORD_WRAP_INDENT_STYLE_CONTINUATION)
-            EditorDisplayPreferences.setGutterWidthMode(EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED)
-        }
+        setPreferenceAvailable(R.string.key_editor_code_highlight_threshold_bytes, nativeSelected)
+        setPreferenceAvailable(R.string.key_editor_large_file_mode_threshold_bytes, nativeSelected)
 
         if (!aceSelected && currentPinchToZoomKey() == getString(R.string.key_editor_pinch_to_zoom_scale_view)) {
             Pref.putString(
@@ -159,24 +156,52 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
                 unavailablePreferenceKeys.add(preferenceKey)
             }
 
-            isEnabled = available || this !is SwitchPreference
-            isSelectable = available || this !is SwitchPreference
-            if (this is MaterialPreference) {
-                setAvailableForCurrentContext(available) {
-                    showUnavailableEditorSettingHint(unavailableSummary)
-                }
+            val onUnavailableClick = {
+                showUnavailableEditorSettingHint(unavailableSummary)
+            }
+            if (this is ThemeColorSwitchPreference) {
+                isEnabled = true
+                isSelectable = true
+                setAvailableForCurrentContext(
+                    available = available,
+                    unavailableChecked = false,
+                    onUnavailableClick = onUnavailableClick,
+                )
+            } else {
+                isEnabled = available || this !is SwitchPreference
+                isSelectable = available || this !is SwitchPreference
+            }
+            if (this is MaterialPreference &&
+                this !is EditorCodeHighlightThresholdPreference &&
+                this !is EditorLargeFileModeThresholdPreference
+            ) {
+                setAvailableForCurrentContext(available, onUnavailableClick)
             }
 
-            if (this is MaterialListPreference) {
-                if (available) {
-                    useEntrySummaryProvider()
-                } else {
-                    useStaticSummaryProvider(unavailableSummary)
+            when (this) {
+                is MaterialListPreference -> {
+                    if (available) {
+                        useEntrySummaryProvider()
+                    } else {
+                        useStaticSummaryProvider(unavailableSummary)
+                    }
                 }
-            } else if (enabledSummaryRes != null) {
-                summary = if (available) getString(enabledSummaryRes) else unavailableSummary
-            } else if (!available) {
-                summary = unavailableSummary
+                is EditorCodeHighlightThresholdPreference -> {
+                    setAvailableForCurrentEngine(available, unavailableSummary, onUnavailableClick)
+                }
+                is EditorLargeFileModeThresholdPreference -> {
+                    setAvailableForCurrentEngine(available, unavailableSummary, onUnavailableClick)
+                }
+                else -> {
+                    when {
+                        enabledSummaryRes != null -> {
+                            summary = if (available) getString(enabledSummaryRes) else unavailableSummary
+                        }
+                        !available -> {
+                            summary = unavailableSummary
+                        }
+                    }
+                }
             }
         }
     }

@@ -1539,4 +1539,5 @@
     <string name="text_xiaomi_background_popup_permission">後台彈出界面</string>
     <string name="warn_continue_operation_without_saving_settings">設置尚未保存, 確定要繼續操作嗎</string>
     <string name="warn_exit_without_saving_settings">設置尚未保存, 確定要退出嗎</string>
+    <string name="text_editor_performance">性能</string>
 </resources>
