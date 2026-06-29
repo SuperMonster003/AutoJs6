@@ -35,6 +35,7 @@
     var resizeScheduled = false;
     var resizeFallbackTimer = null;
     var resizeReason = "";
+    var cursorRevealSuppressUntil = 0;
     var firstPaintNotified = false;
     var lastSelectionBrowseScrollAt = 0;
     var lastSelectionChangedAt = 0;
@@ -334,6 +335,11 @@
             textMutationSelectionMenuSuppressUntil,
             Date.now() + TEXT_MUTATION_SELECTION_MENU_SUPPRESS_MS
         );
+    }
+
+    function suppressTextMutationSelectionMenu(reason) {
+        markTextMutationSelectionMenuSuppressed(reason || "ime_text_mutation");
+        suppressSelectionActionModeMenu(reason || "ime_text_mutation");
     }
 
     function shouldSuppressSelectionActionModeAfterTextMutation() {
@@ -640,6 +646,23 @@
             wrapScrollMethod(editor.renderer, "scrollToX");
         }
         wrapScrollMethod(editor, "scrollToLine");
+    }
+
+    function installCursorRevealSuppression() {
+        var renderer = editor && editor.renderer;
+        if (!renderer || typeof renderer.scrollCursorIntoView !== "function" || renderer.scrollCursorIntoView.__autojs6CursorRevealGuarded) {
+            return;
+        }
+        var original = renderer.scrollCursorIntoView;
+        var wrapped = function() {
+            if (Date.now() <= cursorRevealSuppressUntil) {
+                return;
+            }
+            return original.apply(this, arguments);
+        };
+        wrapped.__autojs6CursorRevealGuarded = true;
+        wrapped.__autojs6Original = original;
+        renderer.scrollCursorIntoView = wrapped;
     }
 
     function dispatchTextChanged(includeText) {
@@ -1329,13 +1352,32 @@
         if (!delta || !editor || !session) {
             return;
         }
-        if (Math.abs(delta) <= 64 && editor.navigateLeft && editor.navigateRight) {
+        if (Math.abs(delta) <= 64) {
             suppressNextImeTextInputSelectionChange("move_cursor");
-            if (delta < 0) {
-                editor.navigateLeft(Math.abs(delta));
-            } else {
-                editor.navigateRight(delta);
+            var range = editor.getSelectionRange();
+            var position = !range.isEmpty() ?
+                (delta < 0 ? range.start : range.end) :
+                editor.getCursorPosition();
+            var steps = Math.abs(delta);
+            while (steps > 0) {
+                if (delta < 0) {
+                    if (position.column > 0) {
+                        position = { row: position.row, column: position.column - 1 };
+                    } else if (position.row > 0) {
+                        position = { row: position.row - 1, column: getLine(position.row - 1).length };
+                    }
+                } else {
+                    var lineLength = getLine(position.row).length;
+                    if (position.column < lineLength) {
+                        position = { row: position.row, column: position.column + 1 };
+                    } else if (position.row + 1 < session.getLength()) {
+                        position = { row: position.row + 1, column: 0 };
+                    }
+                }
+                steps -= 1;
             }
+            editor.clearSelection();
+            editor.moveCursorToPosition(position);
             resetImeTextInputSelectionWindow("move_cursor");
             scrollCursorIntoViewSafely("moveCursor");
             notifyCursorChanged();
@@ -1684,6 +1726,7 @@
     function runPreservingScroll(reason, callback) {
         var scrollLeft = currentScrollLeft();
         var scrollTop = currentScrollTop();
+        cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + 500);
         var changed = !!callback();
         if (!changed) {
             return false;
@@ -1695,6 +1738,15 @@
         setTimeout(function() {
             scrollToPosition(scrollLeft, scrollTop);
         }, 32);
+        setTimeout(function() {
+            scrollToPosition(scrollLeft, scrollTop);
+        }, 96);
+        setTimeout(function() {
+            scrollToPosition(scrollLeft, scrollTop);
+        }, 192);
+        setTimeout(function() {
+            scrollToPosition(scrollLeft, scrollTop);
+        }, 384);
         notifyStateChanged(reason);
         return true;
     }
@@ -2019,6 +2071,7 @@
         session.on("changeScrollTop", notifyScrollChanged);
         session.on("changeScrollLeft", notifyScrollChanged);
         installScrollChangeHooks();
+        installCursorRevealSuppression();
 
         editor.selection.on("changeCursor", notifyCursorChanged);
         editor.selection.on("changeSelection", notifySelectionChanged);
@@ -2075,6 +2128,7 @@
             moveCompletionSelectionOrCursor: moveCompletionSelectionOrCursor,
             handleEscapeKey: handleEscapeKey,
             suppressSelectionActionModeMenu: suppressSelectionActionModeMenu,
+            suppressTextMutationSelectionMenu: suppressTextMutationSelectionMenu,
             cancelTouchInteraction: cancelAceMobileTouchInteraction,
             insertAtLine: insertAtLine,
             appendTextChunk: appendTextChunk,

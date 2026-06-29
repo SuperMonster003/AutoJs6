@@ -104,6 +104,9 @@ class AceCodeEditor @JvmOverloads constructor(
         softKeyboardSelectionHandler = { offset, delta, source ->
             handleSoftKeyboardCursorSelection(offset, delta, source)
         },
+        imeTextMutationHandler = { reason ->
+            suppressTextMutationSelectionMenu(reason)
+        },
         allowHostActionModeStart = {
             startingHostSelectionActionMode
         },
@@ -1548,6 +1551,12 @@ class AceCodeEditor @JvmOverloads constructor(
         )
     }
 
+    private fun suppressTextMutationSelectionMenu(reason: String) {
+        if (isReady) {
+            invokeAce("suppressTextMutationSelectionMenu", quote(reason))
+        }
+    }
+
     private fun isSoftKeyboardCursorKey(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode != KeyEvent.KEYCODE_DPAD_LEFT && keyCode != KeyEvent.KEYCODE_DPAD_RIGHT) {
             return false
@@ -1562,10 +1571,14 @@ class AceCodeEditor @JvmOverloads constructor(
         context: Context,
         private val softKeyboardCursorKeyHandler: (Int, KeyEvent) -> Boolean,
         private val softKeyboardSelectionHandler: (Int, Int, String) -> Unit,
+        private val imeTextMutationHandler: (String) -> Unit,
         private val allowHostActionModeStart: () -> Boolean,
         private val onSuppressedActionModeStart: () -> Unit,
     ) : WebView(context) {
         override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+            if (event.action == KeyEvent.ACTION_DOWN && (event.keyCode == KeyEvent.KEYCODE_DEL || event.keyCode == KeyEvent.KEYCODE_FORWARD_DEL)) {
+                imeTextMutationHandler("dispatchKeyEvent:${event.keyCode}")
+            }
             return softKeyboardCursorKeyHandler(event.keyCode, event) || super.dispatchKeyEvent(event)
         }
 
@@ -1576,17 +1589,17 @@ class AceCodeEditor @JvmOverloads constructor(
                 private var ignoreSelectionUntilUptimeMillis = 0L
 
                 override fun commitText(text: CharSequence?, newCursorPosition: Int): Boolean {
-                    markImeTextMutation()
+                    markImeTextMutation("commitText")
                     return super.commitText(text, newCursorPosition)
                 }
 
                 override fun setComposingText(text: CharSequence?, newCursorPosition: Int): Boolean {
-                    markImeTextMutation()
+                    markImeTextMutation("setComposingText")
                     return super.setComposingText(text, newCursorPosition)
                 }
 
                 override fun deleteSurroundingText(beforeLength: Int, afterLength: Int): Boolean {
-                    markImeTextMutation()
+                    markImeTextMutation("deleteSurroundingText")
                     return super.deleteSurroundingText(beforeLength, afterLength)
                 }
 
@@ -1613,10 +1626,11 @@ class AceCodeEditor @JvmOverloads constructor(
                     return super.setSelection(start, end)
                 }
 
-                private fun markImeTextMutation() {
+                private fun markImeTextMutation(reason: String) {
                     lastCollapsedSelection = -1
                     ignoreSelectionUntilUptimeMillis =
                         SystemClock.uptimeMillis() + IME_TEXT_INPUT_SELECTION_SUPPRESS_MS
+                    imeTextMutationHandler(reason)
                 }
             }
         }
