@@ -210,6 +210,7 @@ class AceCodeEditor @JvmOverloads constructor(
     private var baseTextSizeSp = DEFAULT_TEXT_SIZE_SP
     private var viewZoomScale = 1f
     private var pinchGestureActive = false
+    private var pinchTouchSuppressUntilUptimeMillis = 0L
     private var pinchZoomStrategy = PinchZoomStrategy.CHANGE_TEXT_SIZE
     private var lastTextSizeScaleFactor = 1.0
     private val changeTextSizeScaleGestureDetector = ScaleGestureDetector(context, ChangeTextSizeScaleListener())
@@ -564,11 +565,28 @@ class AceCodeEditor @JvmOverloads constructor(
             PinchZoomStrategy.DISABLED -> null
         } ?: return false
 
+        val action = event.actionMasked
+        val suppressingRecentPinchTouch = isPinchTouchSuppressed()
         detector.onTouchEvent(event)
-        if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
+        val handlingPinch = pinchGestureActive || detector.isInProgress || event.pointerCount > 1
+        if (handlingPinch) {
+            markPinchTouchSuppressed()
+        }
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             pinchGestureActive = false
         }
-        return pinchGestureActive || detector.isInProgress || event.pointerCount > 1
+        return handlingPinch || suppressingRecentPinchTouch
+    }
+
+    private fun markPinchTouchSuppressed() {
+        pinchTouchSuppressUntilUptimeMillis = maxOf(
+            pinchTouchSuppressUntilUptimeMillis,
+            SystemClock.uptimeMillis() + PINCH_TOUCH_SUPPRESS_MS,
+        )
+    }
+
+    private fun isPinchTouchSuppressed(): Boolean {
+        return SystemClock.uptimeMillis() <= pinchTouchSuppressUntilUptimeMillis
     }
 
     private fun recordTextTouch(event: MotionEvent) {
@@ -617,6 +635,7 @@ class AceCodeEditor @JvmOverloads constructor(
         if (baseTextSizeSp <= 0f) {
             return
         }
+        val previousBaseTextSizeSp = baseTextSizeSp
         val effectiveSize = currentScaleViewTextSizeSp()
         val committedSize = effectiveSize
             .roundToInt()
@@ -624,10 +643,14 @@ class AceCodeEditor @JvmOverloads constructor(
             .toFloat()
         val shouldApplyCommittedSize = viewZoomScale != 1f ||
             abs(committedSize - effectiveSize) >= MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP
+        val shouldPersistCommittedSize = viewZoomScale != 1f ||
+            abs(committedSize - previousBaseTextSizeSp) >= MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP
         baseTextSizeSp = committedSize
         viewZoomScale = 1f
         if (shouldApplyCommittedSize) {
             applyEffectiveTextSizeSp(committedSize, focusX, focusY)
+        }
+        if (shouldPersistCommittedSize) {
             onTextSizeSpChangedByGesture?.invoke(committedSize, true)
         }
     }
@@ -1499,6 +1522,9 @@ class AceCodeEditor @JvmOverloads constructor(
             eventHistory.record(if (hasFocus) "focus" else "blur", "webView")
         }
         webView.setOnTouchListener { _, event ->
+            if (handlePinchToZoomTouch(event)) {
+                return@setOnTouchListener true
+            }
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_POINTER_DOWN,
@@ -1519,7 +1545,7 @@ class AceCodeEditor @JvmOverloads constructor(
                     schedulePendingSelectionActionModeAfterTouch()
                 }
             }
-            handlePinchToZoomTouch(event)
+            false
         }
 
         webView.settings.apply {
@@ -2126,6 +2152,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
             pinchGestureActive = true
+            markPinchTouchSuppressed()
             lastTextSizeScaleFactor = 1.0
             cancelAceTouchInteraction("pinch_zoom_begin")
             return true
@@ -2146,6 +2173,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
         override fun onScaleEnd(detector: ScaleGestureDetector) {
             pinchGestureActive = false
+            markPinchTouchSuppressed()
             lastTextSizeScaleFactor = 1.0
             onTextSizeSpChangedByGesture?.invoke(baseTextSizeSp, true)
             cancelAceTouchInteraction("pinch_zoom_end")
@@ -2157,6 +2185,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
             pinchGestureActive = true
+            markPinchTouchSuppressed()
             cancelAceTouchInteraction("pinch_zoom_begin")
             return true
         }
@@ -2168,6 +2197,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
         override fun onScaleEnd(detector: ScaleGestureDetector) {
             pinchGestureActive = false
+            markPinchTouchSuppressed()
             commitScaleViewTextSizeGesture(detector.focusX, detector.focusY)
             cancelAceTouchInteraction("pinch_zoom_end")
             super.onScaleEnd(detector)
@@ -2283,6 +2313,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ACTION_MODE_TOUCH_ANCHOR_MAX_AGE_MS = 2_000L
         private const val ACTION_MODE_TOUCH_ANCHOR_HEIGHT_DP = 24f
         private const val INITIAL_FOCUS_RETRY_DELAY_MS = 120L
+        private const val PINCH_TOUCH_SUPPRESS_MS = 320L
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
         private const val BRIDGE_EVENT_STORM_THRESHOLD = 60
         private const val ACTION_MODE_COPY = 1
