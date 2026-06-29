@@ -1419,6 +1419,22 @@
 
     function moveCursor(delta) {
         delta = Number(delta) || 0;
+        if (!delta || !editor || !session) {
+            return;
+        }
+        if (Math.abs(delta) <= 64 && editor.navigateLeft && editor.navigateRight) {
+            suppressNextImeTextInputSelectionChange("move_cursor");
+            if (delta < 0) {
+                editor.navigateLeft(Math.abs(delta));
+            } else {
+                editor.navigateRight(delta);
+            }
+            resetImeTextInputSelectionWindow("move_cursor");
+            scrollCursorIntoViewSafely("moveCursor");
+            notifyCursorChanged();
+            notifySelectionChanged();
+            return;
+        }
         var selection = getSelectionState();
         var next = Math.max(0, Math.min(selection.startOffset + delta, session.getValue().length));
         suppressNextImeTextInputSelectionChange("move_cursor");
