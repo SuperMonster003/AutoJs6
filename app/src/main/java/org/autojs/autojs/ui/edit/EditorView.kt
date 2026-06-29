@@ -1640,10 +1640,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             showToast(context, R.string.text_loading_with_dots)
             return
         }
-        if (!mReadOnlyLockedByIntent && targetType != EditorEngineType.ACE && mReadOnly) {
-            applySessionReadOnly(false)
-        }
-
         val oldEditor = editor
         mSwitchingEditorEngine = true
         runCatching {
