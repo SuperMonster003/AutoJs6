@@ -109,7 +109,7 @@ public class EditorMenu {
         SpannableString spanned = new SpannableString(title);
         int markerColor = readOnly
                 ? ColorUtils.adjustColorForContrast(mContext.getColor(R.color.window_background), ThemeColorManager.getColorPrimary(), 2.3f)
-                : mContext.getColor(R.color.day_night_full);
+                : mContext.getColor(R.color.day_night);
         spanned.setSpan(new ForegroundColorSpan(markerColor), 0, marker.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return spanned;
     }
