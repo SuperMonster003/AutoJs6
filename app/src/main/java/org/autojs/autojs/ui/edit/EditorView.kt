@@ -1739,6 +1739,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mLargeFileMode = oldLargeFileMode && editor.engineType == EditorEngineType.NATIVE
         saveStickyDirty = oldSaveStickyDirty || snapshot.dirty
         mHadDirectEditSinceSave = oldHadDirectEditSinceSave || snapshot.dirty
+        setEnhanceBarInteractive(!mReadOnly && !mEditorLoading)
 
         syncPrimaryMenuState()
         activity.invalidateOptionsMenu()

@@ -136,6 +136,13 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
         } else {
             mFunctionsLayout.requestLayout();
         }
+        if (mContentView != null) {
+            LinearLayout.LayoutParams contentParams = (LinearLayout.LayoutParams) mContentView.getLayoutParams();
+            contentParams.height = 0;
+            contentParams.weight = 1.0F;
+            mContentView.setLayoutParams(contentParams);
+            mContentView.requestLayout();
+        }
 
         if (showSoftInput && wasVisible) {
             showSoftInput();
