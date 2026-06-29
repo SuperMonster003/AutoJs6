@@ -2,15 +2,17 @@ package org.autojs.autojs.ui.edit;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.text.InputType;
-import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
 import androidx.annotation.Nullable;
+import androidx.core.widget.CompoundButtonCompat;
 import com.afollestad.materialdialogs.MaterialDialog;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.model.indices.AndroidClass;
@@ -99,19 +101,43 @@ public class EditorMenu {
         boolean readOnly = mEditorView.isReadOnly();
         item.setVisible(visible);
         item.setEnabled(mEditorView.canToggleReadOnlyMode());
-        item.setCheckable(false);
-        item.setTitle(buildReadOnlyMenuTitle(readOnly));
+        item.setCheckable(true);
+        item.setChecked(readOnly);
+        item.setTitle(R.string.text_ace_read_only_mode);
     }
 
-    private CharSequence buildReadOnlyMenuTitle(boolean readOnly) {
-        String marker = readOnly ? "\u2611" : "\u2610";
-        String title = marker + "  " + mContext.getString(R.string.text_ace_read_only_mode);
-        SpannableString spanned = new SpannableString(title);
-        int markerColor = readOnly
-                ? ColorUtils.adjustColorForContrast(mContext.getColor(R.color.window_background), ThemeColorManager.getColorPrimary(), 2.3f)
-                : mContext.getColor(R.color.day_night);
-        spanned.setSpan(new ForegroundColorSpan(markerColor), 0, marker.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        return spanned;
+    public void tintOverflowMenuCheckBoxes(View root) {
+        if (root == null) {
+            return;
+        }
+        root.post(() -> tintOverflowMenuCheckBoxesNow(root));
+    }
+
+    private void tintOverflowMenuCheckBoxesNow(View view) {
+        if (view instanceof CheckBox) {
+            tintMenuCheckBox((CheckBox) view);
+        }
+        if (!(view instanceof ViewGroup)) {
+            return;
+        }
+        ViewGroup group = (ViewGroup) view;
+        for (int i = 0; i < group.getChildCount(); i++) {
+            tintOverflowMenuCheckBoxesNow(group.getChildAt(i));
+        }
+    }
+
+    private void tintMenuCheckBox(CheckBox checkBox) {
+        int checkedColor = ColorUtils.adjustColorForContrast(
+                mContext.getColor(R.color.window_background),
+                ThemeColorManager.getColorPrimary(),
+                2.3f
+        );
+        int uncheckedColor = mContext.getColor(R.color.day_night);
+        int[][] states = new int[][]{
+                new int[]{android.R.attr.state_checked},
+                new int[]{-android.R.attr.state_checked},
+        };
+        CompoundButtonCompat.setButtonTintList(checkBox, new ColorStateList(states, new int[]{checkedColor, uncheckedColor}));
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
