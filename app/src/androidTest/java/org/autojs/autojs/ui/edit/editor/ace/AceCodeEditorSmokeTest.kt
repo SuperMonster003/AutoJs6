@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.os.Build
 import android.os.SystemClock
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
@@ -296,53 +295,6 @@ class AceCodeEditorSmokeTest {
                 state.getBoolean("hostSelectionActionMode") &&
                 state.getString("mobileMenuDisplay") == "none"
         }
-    }
-
-    @Test
-    fun rightEdgeGestureGuardUsesSystemGestureInsetOrFallback() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            return
-        }
-        val editor = launchReadyEditor()
-        val viewWidth = 1080
-        val gestureInsetRight = 48
-
-        assertTrue(
-            runOnMainSync {
-                editor.shouldGuardRightEdgeBackGestureTouchStartForTest(
-                    x = viewWidth - 1f,
-                    viewWidth = viewWidth,
-                    systemGestureInsetRight = gestureInsetRight,
-                )
-            },
-        )
-        assertFalse(
-            runOnMainSync {
-                editor.shouldGuardRightEdgeBackGestureTouchStartForTest(
-                    x = viewWidth - gestureInsetRight - 32f,
-                    viewWidth = viewWidth,
-                    systemGestureInsetRight = gestureInsetRight,
-                )
-            },
-        )
-        assertTrue(
-            runOnMainSync {
-                editor.shouldGuardRightEdgeBackGestureTouchStartForTest(
-                    x = viewWidth - 1f,
-                    viewWidth = viewWidth,
-                    systemGestureInsetRight = 0,
-                )
-            },
-        )
-        assertFalse(
-            runOnMainSync {
-                editor.shouldGuardRightEdgeBackGestureTouchStartForTest(
-                    x = viewWidth - 320f,
-                    viewWidth = viewWidth,
-                    systemGestureInsetRight = 0,
-                )
-            },
-        )
     }
 
     @Test

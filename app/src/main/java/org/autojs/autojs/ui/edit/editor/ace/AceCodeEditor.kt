@@ -39,7 +39,6 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
-import androidx.annotation.VisibleForTesting
 import org.autojs.autojs.core.pref.Pref.getString
 import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
@@ -195,11 +194,6 @@ class AceCodeEditor @JvmOverloads constructor(
     private var lastTextTouchX = -1f
     private var lastTextTouchY = -1f
     private var lastTextTouchAtUptimeMillis = 0L
-    private var rightEdgeBackGestureTouchGuardTracking = false
-    private var rightEdgeBackGestureTouchGuardActive = false
-    private var rightEdgeBackGestureTouchGuardStartX = 0f
-    private var rightEdgeBackGestureTouchGuardStartY = 0f
-    private var lastRightEdgeBackGestureGuardAtUptimeMillis = 0L
     private var bridgeEventWindowStartedAtUptimeMillis = 0L
     private var bridgeEventWindowCount = 0
     private var lastBridgeEventWindowCount = 0
@@ -570,90 +564,6 @@ class AceCodeEditor @JvmOverloads constructor(
         return pinchGestureActive || detector.isInProgress || event.pointerCount > 1
     }
 
-    private fun handleRightEdgeBackGestureTouch(event: MotionEvent): Boolean {
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                val systemGestureInsetRight = currentSystemGestureInsetRight()
-                rightEdgeBackGestureTouchGuardTracking = shouldGuardRightEdgeBackGestureTouchStart(
-                    x = event.x,
-                    viewWidth = webView.width,
-                    systemGestureInsetRight = systemGestureInsetRight,
-                )
-                rightEdgeBackGestureTouchGuardActive = false
-                rightEdgeBackGestureTouchGuardStartX = event.x
-                rightEdgeBackGestureTouchGuardStartY = event.y
-            }
-            MotionEvent.ACTION_MOVE -> {
-                maybeActivateRightEdgeBackGestureTouchGuard(event)
-            }
-            MotionEvent.ACTION_UP,
-            MotionEvent.ACTION_CANCEL,
-                -> {
-                val consumed = rightEdgeBackGestureTouchGuardActive
-                rightEdgeBackGestureTouchGuardTracking = false
-                rightEdgeBackGestureTouchGuardActive = false
-                if (consumed) {
-                    userTouching = false
-                    lastRightEdgeBackGestureGuardAtUptimeMillis = SystemClock.uptimeMillis()
-                }
-                return consumed
-            }
-        }
-        return rightEdgeBackGestureTouchGuardActive
-    }
-
-    private fun maybeActivateRightEdgeBackGestureTouchGuard(event: MotionEvent) {
-        if (rightEdgeBackGestureTouchGuardActive || !rightEdgeBackGestureTouchGuardTracking) {
-            return
-        }
-        val density = resources.displayMetrics.density
-        val dx = event.x - rightEdgeBackGestureTouchGuardStartX
-        val dy = abs(event.y - rightEdgeBackGestureTouchGuardStartY)
-        val activateDelta = density * RIGHT_EDGE_BACK_GESTURE_ACTIVATE_DELTA_DP
-        val verticalSlop = density * RIGHT_EDGE_BACK_GESTURE_VERTICAL_SLOP_DP
-        if (dx > -activateDelta || dy > verticalSlop) {
-            return
-        }
-        rightEdgeBackGestureTouchGuardActive = true
-        userTouching = false
-        lastRightEdgeBackGestureGuardAtUptimeMillis = SystemClock.uptimeMillis()
-        suppressSelectionActionModeForPointerGuard("right_edge_back_gesture")
-        eventHistory.record(
-            "right_edge_back_gesture_guard",
-            "x=${event.x.roundToInt()},startX=${rightEdgeBackGestureTouchGuardStartX.roundToInt()},width=${webView.width}",
-        )
-    }
-
-    private fun currentSystemGestureInsetRight(): Int {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            return 0
-        }
-        return webView.rootWindowInsets?.systemGestureInsets?.right ?: 0
-    }
-
-    private fun shouldGuardRightEdgeBackGestureTouchStart(
-        x: Float,
-        viewWidth: Int,
-        systemGestureInsetRight: Int,
-    ): Boolean {
-        val guardWidth = rightEdgeBackGestureGuardWidth(viewWidth, systemGestureInsetRight)
-        return guardWidth > 0 && x >= viewWidth - guardWidth && x <= viewWidth
-    }
-
-    private fun rightEdgeBackGestureGuardWidth(viewWidth: Int, systemGestureInsetRight: Int): Int {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || viewWidth <= 0) {
-            return 0
-        }
-        val minimumGuardWidth = (resources.displayMetrics.density * RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP).roundToInt()
-        val maximumGuardWidth = (viewWidth * RIGHT_EDGE_BACK_GESTURE_MAX_WIDTH_RATIO).roundToInt().coerceAtLeast(1)
-        val insetOrFallback = if (systemGestureInsetRight > 0) {
-            systemGestureInsetRight
-        } else {
-            minimumGuardWidth
-        }
-        return maxOf(insetOrFallback, minimumGuardWidth).coerceAtMost(maximumGuardWidth)
-    }
-
     private fun recordTextTouch(event: MotionEvent) {
         if (event.pointerCount != 1 || webView.width <= 0 || webView.height <= 0) {
             return
@@ -665,13 +575,6 @@ class AceCodeEditor @JvmOverloads constructor(
         lastTextTouchY = event.y
         lastTextTouchAtUptimeMillis = SystemClock.uptimeMillis()
     }
-
-    @VisibleForTesting
-    internal fun shouldGuardRightEdgeBackGestureTouchStartForTest(
-        x: Float,
-        viewWidth: Int,
-        systemGestureInsetRight: Int,
-    ): Boolean = shouldGuardRightEdgeBackGestureTouchStart(x, viewWidth, systemGestureInsetRight)
 
     private fun changeBaseTextSizeBy(delta: Int, focusX: Float, focusY: Float) {
         val next = (baseTextSizeSp.roundToInt() + delta)
@@ -1144,10 +1047,6 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun performLongPressFeedback() {
         postToMain {
-            if (SystemClock.uptimeMillis() - lastRightEdgeBackGestureGuardAtUptimeMillis <= RIGHT_EDGE_BACK_GESTURE_HAPTIC_SUPPRESS_MS) {
-                eventHistory.record("long_press_feedback_suppressed", "right_edge_back_gesture")
-                return@postToMain
-            }
             webView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         }
     }
@@ -1577,9 +1476,6 @@ class AceCodeEditor @JvmOverloads constructor(
             eventHistory.record(if (hasFocus) "focus" else "blur", "webView")
         }
         webView.setOnTouchListener { _, event ->
-            if (handleRightEdgeBackGestureTouch(event)) {
-                return@setOnTouchListener true
-            }
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_POINTER_DOWN,
@@ -2324,11 +2220,6 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val IME_TEXT_INPUT_SELECTION_SUPPRESS_MS = 120L
         private const val RESIZE_SETTLE_DELAY_MS = 120L
         private const val IME_HEIGHT_THRESHOLD_DP = 80f
-        private const val RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 24f
-        private const val RIGHT_EDGE_BACK_GESTURE_MAX_WIDTH_RATIO = 0.08f
-        private const val RIGHT_EDGE_BACK_GESTURE_ACTIVATE_DELTA_DP = 14f
-        private const val RIGHT_EDGE_BACK_GESTURE_VERTICAL_SLOP_DP = 24f
-        private const val RIGHT_EDGE_BACK_GESTURE_HAPTIC_SUPPRESS_MS = 1_500L
         private const val ACTION_MODE_AFTER_TOUCH_DELAY_MS = 48L
         private const val ACTION_MODE_RESTORE_AFTER_TOUCH_DELAY_MS = 120L
         private const val ACTION_MODE_POST_TOUCH_STABILIZE_MS = 2_000L

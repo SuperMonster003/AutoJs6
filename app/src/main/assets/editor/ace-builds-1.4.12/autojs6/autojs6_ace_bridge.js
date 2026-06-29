@@ -43,11 +43,6 @@
     var lastTouchClientY = -1;
     var lastTouchAt = 0;
     var programmaticScrollUntil = 0;
-    var rightEdgeGestureGuardActive = false;
-    var rightEdgeGestureGuardNotified = false;
-    var rightEdgeGestureGuardStartX = 0;
-    var rightEdgeGestureGuardStartY = 0;
-    var rightEdgeGestureGuardTracking = false;
     var foldTapCandidate = null;
     var imeTextInputSelectionWindow = {
         installed: false,
@@ -69,9 +64,6 @@
     var ACTION_MODE_SCROLL_SUPPRESS_GRACE_MS = 650;
     var TEXT_MUTATION_SELECTION_MENU_SUPPRESS_MS = 1200;
     var TOUCH_ANCHOR_MAX_AGE_MS = 2500;
-    var RIGHT_EDGE_GESTURE_GUARD_CSS_PX = 24;
-    var RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X = 14;
-    var RIGHT_EDGE_GESTURE_VERTICAL_SLOP = 24;
     var FOLD_TAP_TOUCH_SLOP_SQUARED = 100;
     var IME_TEXT_INPUT_SELECTION_MAX_DELTA = 64;
     var IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS = 800;
@@ -385,22 +377,6 @@
         ]);
     }
 
-    function rightEdgeGestureGuardWidth() {
-        var viewportWidth = Math.max(
-            1,
-            Number(global.innerWidth) ||
-                Number(document.documentElement && document.documentElement.clientWidth) ||
-                1
-        );
-        return Math.min(Math.round(viewportWidth * 0.08), RIGHT_EDGE_GESTURE_GUARD_CSS_PX);
-    }
-
-    function isRightEdgeGestureTouchStart(touch, viewportWidth) {
-        return isAndroidUserAgent() &&
-            !!touch &&
-            Number(touch.clientX) >= viewportWidth - rightEdgeGestureGuardWidth();
-    }
-
     function stopDomTouchEvent(event) {
         if (!event) {
             return;
@@ -436,75 +412,6 @@
         return lastTouchClientX >= 0 &&
             lastTouchClientY >= 0 &&
             Date.now() - lastTouchAt <= TOUCH_ANCHOR_MAX_AGE_MS;
-    }
-
-    function maybeActivateRightEdgeGestureGuard(event) {
-        if (rightEdgeGestureGuardActive || !rightEdgeGestureGuardTracking) {
-            return;
-        }
-        var touch = touchFromEvent(event);
-        if (!touch) {
-            return;
-        }
-        var dx = Number(touch.clientX) - rightEdgeGestureGuardStartX;
-        var dy = Math.abs(Number(touch.clientY) - rightEdgeGestureGuardStartY);
-        if (dx <= -RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X && dy <= RIGHT_EDGE_GESTURE_VERTICAL_SLOP) {
-            rightEdgeGestureGuardActive = true;
-        }
-    }
-
-    function handleRightEdgeGestureGuardTouch(event) {
-        var type = event && event.type;
-        rememberTouchAnchor(event);
-        if (type === "touchstart") {
-            var touch = touchFromEvent(event);
-            var viewportWidth = Math.max(
-                1,
-                Number(global.innerWidth) ||
-                    Number(document.documentElement && document.documentElement.clientWidth) ||
-                    1
-            );
-            rightEdgeGestureGuardTracking = isRightEdgeGestureTouchStart(touch, viewportWidth);
-            rightEdgeGestureGuardActive = false;
-            rightEdgeGestureGuardNotified = false;
-            rightEdgeGestureGuardStartX = touch ? Number(touch.clientX) : 0;
-            rightEdgeGestureGuardStartY = touch ? Number(touch.clientY) : 0;
-        } else if (type === "touchmove") {
-            maybeActivateRightEdgeGestureGuard(event);
-        }
-        if (rightEdgeGestureGuardActive) {
-            if (!rightEdgeGestureGuardNotified) {
-                cancelAceMobileTouchInteraction(
-                    type === "touchstart" ?
-                        "right_edge_back_gesture_dom_touch_start" :
-                        "right_edge_back_gesture_dom"
-                );
-            } else {
-                suppressSelectionActionModeMenu("right_edge_back_gesture_dom");
-            }
-            stopDomTouchEvent(event);
-            if (!rightEdgeGestureGuardNotified) {
-                rightEdgeGestureGuardNotified = true;
-                callBridge("notifyEvent", [
-                    "rightEdgeGestureDomGuard",
-                    JSON.stringify({ type: String(type || "") })
-                ]);
-            }
-        }
-        if (type === "touchend" || type === "touchcancel") {
-            rightEdgeGestureGuardActive = false;
-            rightEdgeGestureGuardNotified = false;
-            rightEdgeGestureGuardTracking = false;
-        }
-    }
-
-    function installRightEdgeGestureGuard() {
-        if (!document || !document.addEventListener) {
-            return;
-        }
-        ["touchstart", "touchmove", "touchend", "touchcancel"].forEach(function(type) {
-            document.addEventListener(type, handleRightEdgeGestureGuardTouch, true);
-        });
     }
 
     function installAceMobileTouchCancellation() {
@@ -2055,7 +1962,6 @@
         if (document && document.body && document.body.classList) {
             document.body.classList.add("autojs6-host-selection-action-mode");
         }
-        installRightEdgeGestureGuard();
         installAceMobileTouchCancellation();
         installFoldPlaceholderClickCapture();
         installDynamicWrapGutterWidthPatch();
