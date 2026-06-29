@@ -1774,48 +1774,90 @@
         }, false);
     }
 
+    function runPreservingScroll(reason, callback) {
+        var scrollLeft = currentScrollLeft();
+        var scrollTop = currentScrollTop();
+        var changed = !!callback();
+        if (!changed) {
+            return false;
+        }
+        scrollToPosition(scrollLeft, scrollTop);
+        setTimeout(function() {
+            scrollToPosition(scrollLeft, scrollTop);
+        }, 0);
+        setTimeout(function() {
+            scrollToPosition(scrollLeft, scrollTop);
+        }, 32);
+        notifyStateChanged(reason);
+        return true;
+    }
+
     function expandFoldAt(row, column) {
         if (!session) {
             return false;
         }
-        try {
-            var fold = session.getFoldAt &&
-                (session.getFoldAt(row, column, 1) ||
-                    session.getFoldAt(row, column, -1) ||
-                    session.getFoldAt(row, column, 0));
-            if (fold && session.expandFold) {
-                session.expandFold(fold);
-                notifyStateChanged("foldExpanded");
-                return true;
-            }
-            var foldLine = session.getFoldLine && session.getFoldLine(row);
-            if (foldLine && foldLine.folds && foldLine.folds.length && session.expandFold) {
-                session.expandFold(foldLine.folds[0]);
-                notifyStateChanged("foldExpanded");
-                return true;
-            }
-            var lineLength = getLine(row).length;
-            if (session.getFoldAt && session.expandFold) {
-                for (var probeColumn = 0; probeColumn <= lineLength; probeColumn += 1) {
-                    fold = session.getFoldAt(row, probeColumn, 1) ||
-                        session.getFoldAt(row, probeColumn, -1) ||
-                        session.getFoldAt(row, probeColumn, 0);
-                    if (fold) {
-                        session.expandFold(fold);
-                        notifyStateChanged("foldExpanded");
-                        return true;
+        return runPreservingScroll("foldExpanded", function() {
+            try {
+                var fold = session.getFoldAt &&
+                    (session.getFoldAt(row, column, 1) ||
+                        session.getFoldAt(row, column, -1) ||
+                        session.getFoldAt(row, column, 0));
+                if (fold && session.expandFold) {
+                    session.expandFold(fold);
+                    return true;
+                }
+                var foldLine = session.getFoldLine && session.getFoldLine(row);
+                if (foldLine && foldLine.folds && foldLine.folds.length && session.expandFold) {
+                    session.expandFold(foldLine.folds[0]);
+                    return true;
+                }
+                var lineLength = getLine(row).length;
+                if (session.getFoldAt && session.expandFold) {
+                    for (var probeColumn = 0; probeColumn <= lineLength; probeColumn += 1) {
+                        fold = session.getFoldAt(row, probeColumn, 1) ||
+                            session.getFoldAt(row, probeColumn, -1) ||
+                            session.getFoldAt(row, probeColumn, 0);
+                        if (fold) {
+                            session.expandFold(fold);
+                            return true;
+                        }
                     }
                 }
+                if (session.unfold) {
+                    session.unfold(row, true);
+                    return true;
+                }
+            } catch (error) {
+                notifyRecoverableError("foldExpand", error);
             }
-            if (session.unfold) {
-                session.unfold(row, true);
-                notifyStateChanged("foldExpanded");
-                return true;
-            }
-        } catch (error) {
-            notifyRecoverableError("foldExpand", error);
+            return false;
+        });
+    }
+
+    function foldWidgetOptionsFromDomEvent(domEvent) {
+        domEvent = domEvent || {};
+        return {
+            children: !!domEvent.shiftKey,
+            all: !!(domEvent.ctrlKey || domEvent.metaKey),
+            siblings: !!domEvent.altKey
+        };
+    }
+
+    function toggleFoldWidgetAt(row, domEvent) {
+        if (!session) {
+            return false;
         }
-        return false;
+        if (session.$toggleFoldWidget) {
+            return runPreservingScroll("foldToggled", function() {
+                try {
+                    return !!session.$toggleFoldWidget(row, foldWidgetOptionsFromDomEvent(domEvent));
+                } catch (error) {
+                    notifyRecoverableError("foldToggle", error);
+                    return false;
+                }
+            });
+        }
+        return expandFoldAt(row, 0);
     }
 
     function hasClassToken(target, token) {
@@ -2084,14 +2126,17 @@
         });
 
         editor.on("guttermousedown", function(event) {
-            if (!breakpointMarkersEnabled) {
-                return;
-            }
             var target = event.domEvent.target;
             if (!target || target.className.indexOf("ace_gutter-cell") === -1) {
                 return;
             }
             if (foldMarkersEnabled && isGutterFoldWidgetEvent(target, event.domEvent)) {
+                if (toggleFoldWidgetAt(event.getDocumentPosition().row, event.domEvent)) {
+                    event.stop();
+                }
+                return;
+            }
+            if (!breakpointMarkersEnabled) {
                 return;
             }
             if (event.clientX > target.getBoundingClientRect().left + 24) {
