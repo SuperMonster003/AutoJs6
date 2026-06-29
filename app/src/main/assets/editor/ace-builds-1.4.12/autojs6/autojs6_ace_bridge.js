@@ -314,7 +314,7 @@
 
     function suppressSelectionActionModeMenu(reason) {
         if (!hasActiveSelection()) {
-            setSelectionMenuSuppressed(false);
+            setSelectionMenuSuppressed(shouldSuppressSelectionActionModeAfterTextMutation());
             finishNativeActionMode("selectionActionModeFinished");
             return;
         }
@@ -522,6 +522,10 @@
         if (!selection.text) {
             setSelectionMenuSuppressed(false);
             finishNativeActionMode("selectionActionModeFinished");
+            return;
+        }
+        if (shouldSuppressSelectionActionModeAfterTextMutation()) {
+            suppressSelectionActionModeMenu("text_mutation_action_mode");
             return;
         }
         if (selectionMenuSuppressed) {

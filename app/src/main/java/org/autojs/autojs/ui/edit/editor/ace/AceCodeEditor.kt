@@ -110,6 +110,9 @@ class AceCodeEditor @JvmOverloads constructor(
         allowHostActionModeStart = {
             startingHostSelectionActionMode
         },
+        suppressHostActionModeStart = {
+            shouldSuppressSelectionActionModeForTextMutation()
+        },
         onSuppressedActionModeStart = {
             eventHistory.record("webview_action_mode_suppressed")
         },
@@ -1597,6 +1600,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private val softKeyboardSelectionHandler: (Int, Int, String) -> Unit,
         private val imeTextMutationHandler: (String) -> Unit,
         private val allowHostActionModeStart: () -> Boolean,
+        private val suppressHostActionModeStart: () -> Boolean,
         private val onSuppressedActionModeStart: () -> Unit,
     ) : WebView(context) {
         override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -1625,6 +1629,20 @@ class AceCodeEditor @JvmOverloads constructor(
                 override fun deleteSurroundingText(beforeLength: Int, afterLength: Int): Boolean {
                     markImeTextMutation("deleteSurroundingText")
                     return super.deleteSurroundingText(beforeLength, afterLength)
+                }
+
+                override fun deleteSurroundingTextInCodePoints(beforeLength: Int, afterLength: Int): Boolean {
+                    markImeTextMutation("deleteSurroundingTextInCodePoints")
+                    return super.deleteSurroundingTextInCodePoints(beforeLength, afterLength)
+                }
+
+                override fun sendKeyEvent(event: KeyEvent): Boolean {
+                    if (event.action == KeyEvent.ACTION_DOWN &&
+                        (event.keyCode == KeyEvent.KEYCODE_DEL || event.keyCode == KeyEvent.KEYCODE_FORWARD_DEL)
+                    ) {
+                        markImeTextMutation("InputConnection.sendKeyEvent:${event.keyCode}")
+                    }
+                    return super.sendKeyEvent(event)
                 }
 
                 override fun setSelection(start: Int, end: Int): Boolean {
@@ -1672,7 +1690,7 @@ class AceCodeEditor @JvmOverloads constructor(
         }
 
         private fun startHostActionModeIfAllowed(block: () -> ActionMode?): ActionMode? {
-            if (allowHostActionModeStart()) {
+            if (allowHostActionModeStart() && !suppressHostActionModeStart()) {
                 return block()
             }
             onSuppressedActionModeStart()
