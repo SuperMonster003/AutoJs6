@@ -864,6 +864,8 @@ class AceCodeEditor @JvmOverloads constructor(
         lastFirstPaintAtUptimeMillis = SystemClock.uptimeMillis()
         eventHistory.record("first_paint")
         hideLoadingOverlay()
+        requestEditorFocus()
+        mainHandler.postDelayed({ requestEditorFocus() }, INITIAL_FOCUS_RETRY_DELAY_MS)
     }
 
     private fun handleResizeDone(payloadJson: String?) {
@@ -2262,6 +2264,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ACTION_MODE_TEXT_MUTATION_SUPPRESS_MS = 1_200L
         private const val ACTION_MODE_TOUCH_ANCHOR_MAX_AGE_MS = 2_000L
         private const val ACTION_MODE_TOUCH_ANCHOR_HEIGHT_DP = 24f
+        private const val INITIAL_FOCUS_RETRY_DELAY_MS = 120L
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
         private const val BRIDGE_EVENT_STORM_THRESHOLD = 60
         private const val ACTION_MODE_COPY = 1
