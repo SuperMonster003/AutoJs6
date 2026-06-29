@@ -874,6 +874,7 @@
     function shouldSuppressImeTextInputSelectionAfterReset(reason) {
         reason = String(reason || "");
         return reason === "move_cursor" ||
+            reason === "select_range" ||
             reason === "jump_to" ||
             reason === "init" ||
             reason.indexOf("focus") >= 0;
@@ -1257,6 +1258,7 @@
         var start = indexToPosition(startOffset);
         var end = indexToPosition(endOffset);
         editor.selection.setRange(new Range(start.row, start.column, end.row, end.column), false);
+        resetImeTextInputSelectionWindow("select_range");
         scrollCursorIntoViewSafely("selectRange");
         notifyCursorChanged();
         notifySelectionChanged();

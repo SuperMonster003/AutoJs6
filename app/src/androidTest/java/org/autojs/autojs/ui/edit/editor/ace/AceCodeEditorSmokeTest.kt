@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.SystemClock
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.webkit.WebView
 import android.widget.TextView
@@ -502,35 +503,36 @@ class AceCodeEditorSmokeTest {
                 }
             }
 
-            runOnMainSync {
-                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_bottom_bar)
-                    .codeCompletions
-                editorView.onHintClick(secondRow, 3)
+            var expectedColumn = 5
+            repeat(6) {
+                val previousColumn = expectedColumn
+                clickAceBottomShortcut(editorView, 3)
+                expectedColumn += 1
+                waitUntil("ACE Right shortcut should move the cursor to $expectedColumn") {
+                    runOnMainSync { editorView.editor.selection.startColumn != previousColumn }
+                }
+                SystemClock.sleep(IME_SELECTION_SETTLE_DELAY_MS)
+                assertEquals(
+                    aceShortcutCursorDiagnostic(editorView),
+                    expectedColumn,
+                    runOnMainSync { editorView.editor.selection.startColumn },
+                )
             }
-            waitUntil("ACE Right shortcut should move the cursor") {
-                runOnMainSync { editorView.editor.selection.startColumn != 5 }
-            }
-            SystemClock.sleep(IME_SELECTION_SETTLE_DELAY_MS)
-            assertEquals(
-                aceShortcutCursorDiagnostic(editorView),
-                6,
-                runOnMainSync { editorView.editor.selection.startColumn },
-            )
 
-            runOnMainSync {
-                val secondRow = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_bottom_bar)
-                    .codeCompletions
-                editorView.onHintClick(secondRow, 1)
+            repeat(6) {
+                val previousColumn = expectedColumn
+                clickAceBottomShortcut(editorView, 1)
+                expectedColumn -= 1
+                waitUntil("ACE Left shortcut should move the cursor to $expectedColumn") {
+                    runOnMainSync { editorView.editor.selection.startColumn != previousColumn }
+                }
+                SystemClock.sleep(IME_SELECTION_SETTLE_DELAY_MS)
+                assertEquals(
+                    aceShortcutCursorDiagnostic(editorView),
+                    expectedColumn,
+                    runOnMainSync { editorView.editor.selection.startColumn },
+                )
             }
-            waitUntil("ACE Left shortcut should move the cursor") {
-                runOnMainSync { editorView.editor.selection.startColumn != 6 }
-            }
-            SystemClock.sleep(IME_SELECTION_SETTLE_DELAY_MS)
-            assertEquals(
-                aceShortcutCursorDiagnostic(editorView),
-                5,
-                runOnMainSync { editorView.editor.selection.startColumn },
-            )
         } finally {
             finishLaunchedActivity()
             file.delete()
@@ -1180,6 +1182,27 @@ class AceCodeEditorSmokeTest {
                 .joinToString(separator = "\n")
             "column=${selection.startColumn}, events:\n$history"
         }
+    }
+
+    private fun clickAceBottomShortcut(editorView: EditorView, index: Int) {
+        runOnMainSync {
+            val bar = editorView.findViewById<CodeCompletionBar>(R.id.ace_shortcut_bottom_bar)
+            val item = bar.getChildAt(index)
+                ?: error("ACE bottom shortcut item $index should be visible")
+            val downTime = SystemClock.uptimeMillis()
+            val x = item.width / 2f
+            val y = item.height / 2f
+            val down = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, y, 0)
+            val up = MotionEvent.obtain(downTime, downTime + 50, MotionEvent.ACTION_UP, x, y, 0)
+            try {
+                item.dispatchTouchEvent(down)
+                item.dispatchTouchEvent(up)
+            } finally {
+                down.recycle()
+                up.recycle()
+            }
+        }
+        instrumentation.waitForIdleSync()
     }
 
     private fun startEditActivitySync(file: File, initialLine: Int? = null, initialColumn: Int = 0): EditorView {
