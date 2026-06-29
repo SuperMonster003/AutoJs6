@@ -270,8 +270,7 @@ class AceScriptEditorEngine(
     }
 
     override fun moveCursor(deltaChars: Int) {
-        val target = (selection.startOffset + deltaChars).coerceIn(0, textSnapshot.length)
-        selectRange(target, target)
+        aceCodeEditor.moveCursor(deltaChars)
     }
 
     @Throws(EditorSearchSyntaxException::class)
