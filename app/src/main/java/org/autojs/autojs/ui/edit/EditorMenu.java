@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.core.widget.CompoundButtonCompat;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -34,6 +35,9 @@ import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static org.autojs.autojs.util.StringUtils.key;
@@ -110,10 +114,45 @@ public class EditorMenu {
         if (root == null) {
             return;
         }
-        root.post(() -> tintOverflowMenuCheckBoxesNow(root));
+        for (long delay : OVERFLOW_MENU_CHECK_BOX_TINT_DELAYS_MS) {
+            root.postDelayed(() -> tintOverflowMenuCheckBoxesNow(root), delay);
+        }
     }
 
-    private void tintOverflowMenuCheckBoxesNow(View view) {
+    private void tintOverflowMenuCheckBoxesNow(View anchorRoot) {
+        tintOverflowMenuCheckBoxesInRoot(anchorRoot);
+        for (View root : getWindowRootViews()) {
+            tintOverflowMenuCheckBoxesInRoot(root);
+        }
+    }
+
+    private void tintOverflowMenuCheckBoxesInRoot(View root) {
+        if (root == null || root.getWindowVisibility() != View.VISIBLE) {
+            return;
+        }
+        if (!containsReadOnlyMenuTitle(root)) {
+            return;
+        }
+        tintMenuCheckBoxes(root);
+    }
+
+    private boolean containsReadOnlyMenuTitle(View view) {
+        if (view instanceof TextView && TextUtils.equals(((TextView) view).getText(), mContext.getString(R.string.text_ace_read_only_mode))) {
+            return true;
+        }
+        if (!(view instanceof ViewGroup)) {
+            return false;
+        }
+        ViewGroup group = (ViewGroup) view;
+        for (int i = 0; i < group.getChildCount(); i++) {
+            if (containsReadOnlyMenuTitle(group.getChildAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void tintMenuCheckBoxes(View view) {
         if (view instanceof CheckBox) {
             tintMenuCheckBox((CheckBox) view);
         }
@@ -122,7 +161,7 @@ public class EditorMenu {
         }
         ViewGroup group = (ViewGroup) view;
         for (int i = 0; i < group.getChildCount(); i++) {
-            tintOverflowMenuCheckBoxesNow(group.getChildAt(i));
+            tintMenuCheckBoxes(group.getChildAt(i));
         }
     }
 
@@ -132,12 +171,34 @@ public class EditorMenu {
                 ThemeColorManager.getColorPrimary(),
                 2.3f
         );
-        int uncheckedColor = mContext.getColor(R.color.day_night);
+        int uncheckedColor = mContext.getColor(R.color.day_night_alpha_60);
         int[][] states = new int[][]{
                 new int[]{android.R.attr.state_checked},
                 new int[]{-android.R.attr.state_checked},
         };
         CompoundButtonCompat.setButtonTintList(checkBox, new ColorStateList(states, new int[]{checkedColor, uncheckedColor}));
+        checkBox.invalidate();
+    }
+
+    private List<View> getWindowRootViews() {
+        List<View> roots = new ArrayList<>();
+        try {
+            Class<?> windowManagerGlobalClass = Class.forName("android.view.WindowManagerGlobal");
+            Object windowManagerGlobal = windowManagerGlobalClass.getMethod("getInstance").invoke(null);
+            Field viewsField = windowManagerGlobalClass.getDeclaredField("mViews");
+            viewsField.setAccessible(true);
+            Object views = viewsField.get(windowManagerGlobal);
+            if (views instanceof List<?>) {
+                for (Object view : (List<?>) views) {
+                    if (view instanceof View) {
+                        roots.add((View) view);
+                    }
+                }
+            }
+        } catch (ReflectiveOperationException | RuntimeException ignored) {
+            // Best effort only; menu behavior should not depend on this cosmetic tint pass.
+        }
+        return roots;
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -477,4 +538,7 @@ public class EditorMenu {
         }
         return false;
     }
+
+    private static final long[] OVERFLOW_MENU_CHECK_BOX_TINT_DELAYS_MS = new long[]{0L, 32L, 96L, 192L};
+
 }
