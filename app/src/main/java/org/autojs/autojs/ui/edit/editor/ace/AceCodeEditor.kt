@@ -91,6 +91,12 @@ class AceCodeEditor @JvmOverloads constructor(
     private val restoreSelectionActionModeRunnable = Runnable {
         restoreUnexpectedSelectionActionModeAfterTouch()
     }
+    private val pinchSoftInputHideRunnable = Runnable {
+        hideSoftInputIfPinchOpenedIt()
+    }
+    private val pinchSoftInputLateHideRunnable = Runnable {
+        hideSoftInputIfPinchOpenedIt()
+    }
     private val imeSettleRunnable = Runnable {
         scheduleAceResize("ime_settle", RESIZE_SETTLE_DELAY_MS)
         healthMonitor.resumeHeartbeat()
@@ -204,6 +210,8 @@ class AceCodeEditor @JvmOverloads constructor(
     private var domPinchTouchActive = false
     private var bridgePinchActive = false
     private var pinchSoftInputSuppressUntilUptimeMillis = 0L
+    private var pinchSelectionActionModeSuppressUntilUptimeMillis = 0L
+    private var pinchStartedWithImeVisible = false
     private var bridgeEventWindowStartedAtUptimeMillis = 0L
     private var bridgeEventWindowCount = 0
     private var lastBridgeEventWindowCount = 0
@@ -576,8 +584,10 @@ class AceCodeEditor @JvmOverloads constructor(
                         bridgePinchActive = false
                         return@postToMain
                     }
+                    pinchStartedWithImeVisible = isImeVisibleOrShowing()
                     bridgePinchActive = true
                     markPinchTouchSuppressed()
+                    suppressSelectionActionModeAfterPinch()
                     suppressSoftInputAfterPinch()
                     pendingSelectionActionModeRequest = null
                     mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
@@ -598,6 +608,7 @@ class AceCodeEditor @JvmOverloads constructor(
                     }
                     bridgePinchActive = false
                     markPinchTouchSuppressed()
+                    suppressSelectionActionModeAfterPinch()
                     suppressSoftInputAfterPinch()
                     cancelAceTouchInteraction("pinch_zoom_$phase")
                 }
@@ -646,10 +657,42 @@ class AceCodeEditor @JvmOverloads constructor(
             pinchSoftInputSuppressUntilUptimeMillis,
             SystemClock.uptimeMillis() + PINCH_SOFT_INPUT_SUPPRESS_MS,
         )
+        if (!pinchStartedWithImeVisible) {
+            hideSoftInputIfPinchOpenedIt()
+            mainHandler.removeCallbacks(pinchSoftInputHideRunnable)
+            mainHandler.removeCallbacks(pinchSoftInputLateHideRunnable)
+            mainHandler.postDelayed(pinchSoftInputHideRunnable, PINCH_SOFT_INPUT_HIDE_DELAY_MS)
+            mainHandler.postDelayed(pinchSoftInputLateHideRunnable, PINCH_SOFT_INPUT_LATE_HIDE_DELAY_MS)
+        }
+    }
+
+    private fun suppressSelectionActionModeAfterPinch() {
+        pinchSelectionActionModeSuppressUntilUptimeMillis = maxOf(
+            pinchSelectionActionModeSuppressUntilUptimeMillis,
+            SystemClock.uptimeMillis() + PINCH_SELECTION_ACTION_MODE_SUPPRESS_MS,
+        )
     }
 
     private fun isPinchTouchSuppressed(): Boolean {
         return SystemClock.uptimeMillis() <= pinchTouchSuppressUntilUptimeMillis
+    }
+
+    private fun isPinchSelectionActionModeSuppressed(): Boolean {
+        return bridgePinchActive ||
+            domPinchTouchActive ||
+            SystemClock.uptimeMillis() <= pinchSelectionActionModeSuppressUntilUptimeMillis
+    }
+
+    private fun isImeVisibleOrShowing(): Boolean {
+        return imeController.state == AceImeState.VISIBLE || imeController.state == AceImeState.SHOWING
+    }
+
+    private fun hideSoftInputIfPinchOpenedIt() {
+        if (pinchStartedWithImeVisible) {
+            return
+        }
+        eventHistory.record("ime_hide_for_pinch", "suppressUntil=$pinchSoftInputSuppressUntilUptimeMillis")
+        ViewUtils.hideSoftInput(webView)
     }
 
     private fun recordTextTouch(event: MotionEvent) {
@@ -790,6 +833,8 @@ class AceCodeEditor @JvmOverloads constructor(
         mainHandler.removeCallbacks(imeSettleRunnable)
         mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
         mainHandler.removeCallbacks(restoreSelectionActionModeRunnable)
+        mainHandler.removeCallbacks(pinchSoftInputHideRunnable)
+        mainHandler.removeCallbacks(pinchSoftInputLateHideRunnable)
         pendingScripts.clear()
         webView.stopLoading()
         runCatching { webView.removeJavascriptInterface(JS_BRIDGE_NAME) }
@@ -1145,6 +1190,17 @@ class AceCodeEditor @JvmOverloads constructor(
                 hasSelection = hasSelection,
                 selectAll = selectAll,
             )
+            if (isPinchSelectionActionModeSuppressed()) {
+                pendingSelectionActionModeRequest = null
+                mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
+                eventHistory.record(
+                    "action_mode_suppressed",
+                    "reason=pinch_zoom,selectionLength=${selectedTextSnapshot.length}",
+                )
+                finishSelectionActionMode()
+                cancelAceTouchInteraction("pinch_action_mode")
+                return@postToMain
+            }
             if (shouldSuppressSelectionActionModeForTextMutation()) {
                 pendingSelectionActionModeRequest = null
                 mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
@@ -1177,6 +1233,10 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun performLongPressFeedback() {
         postToMain {
+            if (isPinchSelectionActionModeSuppressed()) {
+                eventHistory.record("long_press_feedback_suppressed", "reason=pinch_zoom")
+                return@postToMain
+            }
             webView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         }
     }
@@ -1603,8 +1663,13 @@ class AceCodeEditor @JvmOverloads constructor(
     private fun handleDomPinchTouchDispatch(event: MotionEvent): Boolean? {
         when (event.actionMasked) {
             MotionEvent.ACTION_POINTER_DOWN -> {
+                if (!domPinchTouchActive) {
+                    pinchStartedWithImeVisible = isImeVisibleOrShowing()
+                }
                 domPinchTouchActive = true
                 userTouching = true
+                markPinchTouchSuppressed()
+                suppressSelectionActionModeAfterPinch()
                 onUserTouchInTextArea?.invoke()
                 return false
             }
@@ -1613,12 +1678,16 @@ class AceCodeEditor @JvmOverloads constructor(
                 if (domPinchTouchActive || event.pointerCount > 1) {
                     domPinchTouchActive = true
                     userTouching = true
+                    markPinchTouchSuppressed()
+                    suppressSelectionActionModeAfterPinch()
                     return false
                 }
             }
 
             MotionEvent.ACTION_POINTER_UP -> {
                 if (domPinchTouchActive) {
+                    markPinchTouchSuppressed()
+                    suppressSelectionActionModeAfterPinch()
                     return false
                 }
             }
@@ -1630,6 +1699,7 @@ class AceCodeEditor @JvmOverloads constructor(
                     domPinchTouchActive = false
                     userTouching = false
                     markPinchTouchSuppressed()
+                    suppressSelectionActionModeAfterPinch()
                     suppressSoftInputAfterPinch()
                     return true
                 }
@@ -2452,6 +2522,9 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val INITIAL_FOCUS_RETRY_DELAY_MS = 120L
         private const val PINCH_TOUCH_SUPPRESS_MS = 320L
         private const val PINCH_SOFT_INPUT_SUPPRESS_MS = 800L
+        private const val PINCH_SOFT_INPUT_HIDE_DELAY_MS = 160L
+        private const val PINCH_SOFT_INPUT_LATE_HIDE_DELAY_MS = 420L
+        private const val PINCH_SELECTION_ACTION_MODE_SUPPRESS_MS = 1_600L
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
         private const val BRIDGE_EVENT_STORM_THRESHOLD = 60
         private const val ACTION_MODE_COPY = 1
