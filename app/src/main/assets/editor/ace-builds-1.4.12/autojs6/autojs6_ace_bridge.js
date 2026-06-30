@@ -52,6 +52,10 @@
     var bridgePinchZoomCurrentFontSizeSp = 14;
     var bridgePinchZoomLastFocus = { x: 0, y: 0 };
     var bridgePinchSelectionSuppressUntil = 0;
+    var bridgePinchImeSuppressUntil = 0;
+    var bridgePinchImeRestoreTimer = null;
+    var bridgePinchImeElement = null;
+    var bridgePinchImeElementWasReadOnly = false;
     var programmaticScrollUntil = 0;
     var foldTapCandidate = null;
     var gutterFoldClickSuppressUntil = 0;
@@ -79,6 +83,7 @@
     var IME_TEXT_INPUT_SELECTION_MAX_DELTA = 64;
     var IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS = 800;
     var PINCH_CURSOR_REVEAL_SUPPRESS_MS = 3000;
+    var PINCH_IME_SUPPRESS_MS = 1800;
     var MIN_FONT_SIZE_SP = 4;
     var MAX_FONT_SIZE_SP = 96;
 
@@ -376,6 +381,87 @@
         return bridgePinchZoomActive || Date.now() <= bridgePinchSelectionSuppressUntil;
     }
 
+    function extendBridgePinchImeSuppression(durationMs) {
+        bridgePinchImeSuppressUntil = Math.max(
+            bridgePinchImeSuppressUntil,
+            Date.now() + (Number(durationMs) || PINCH_IME_SUPPRESS_MS)
+        );
+    }
+
+    function shouldSuppressImeForPinch() {
+        return Date.now() <= bridgePinchImeSuppressUntil;
+    }
+
+    function restoreBridgePinchImeElementIfReady() {
+        if (shouldSuppressImeForPinch()) {
+            scheduleBridgePinchImeRestore();
+            return;
+        }
+        if (bridgePinchImeElement) {
+            try {
+                bridgePinchImeElement.readOnly = bridgePinchImeElementWasReadOnly;
+                if (!bridgePinchImeElementWasReadOnly) {
+                    bridgePinchImeElement.removeAttribute("readonly");
+                }
+            } catch (ignore) {
+                // The textarea may have been replaced during editor teardown.
+            }
+        }
+        bridgePinchImeElement = null;
+        bridgePinchImeElementWasReadOnly = false;
+        bridgePinchImeRestoreTimer = null;
+    }
+
+    function scheduleBridgePinchImeRestore() {
+        if (bridgePinchImeRestoreTimer !== null) {
+            clearTimeout(bridgePinchImeRestoreTimer);
+        }
+        bridgePinchImeRestoreTimer = setTimeout(restoreBridgePinchImeElementIfReady, Math.max(
+            16,
+            bridgePinchImeSuppressUntil - Date.now() + 16
+        ));
+    }
+
+    function suppressBridgePinchIme(durationMs) {
+        extendBridgePinchImeSuppression(durationMs);
+        var element = getImeTextInputElement();
+        if (element) {
+            if (bridgePinchImeElement !== element) {
+                if (bridgePinchImeElement) {
+                    try {
+                        bridgePinchImeElement.readOnly = bridgePinchImeElementWasReadOnly;
+                        if (!bridgePinchImeElementWasReadOnly) {
+                            bridgePinchImeElement.removeAttribute("readonly");
+                        }
+                    } catch (ignore0) {
+                        // The previous textarea may have been detached.
+                    }
+                }
+                bridgePinchImeElement = element;
+                bridgePinchImeElementWasReadOnly = !!element.readOnly;
+            }
+            try {
+                element.readOnly = true;
+                element.setAttribute("readonly", "readonly");
+                if (typeof element.blur === "function") {
+                    element.blur();
+                }
+            } catch (ignore) {
+                // Keep pinch handling non-fatal if WebView refuses textarea mutation.
+            }
+        }
+        try {
+            if (document && document.activeElement && document.activeElement !== document.body &&
+                typeof document.activeElement.blur === "function"
+            ) {
+                document.activeElement.blur();
+            }
+        } catch (ignore2) {
+            // Best-effort IME suppression.
+        }
+        scheduleBridgePinchImeRestore();
+    }
+
     function clearSelectionForPinch(reason) {
         markBridgePinchSelectionSuppressed(1400);
         try {
@@ -530,6 +616,7 @@
         bridgePinchZoomCurrentFontSizeSp = currentFontSizeSp;
         bridgePinchZoomLastFocus = focus;
         cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + PINCH_CURSOR_REVEAL_SUPPRESS_MS);
+        suppressBridgePinchIme(PINCH_IME_SUPPRESS_MS);
         cancelAceMobileTouchInteraction("pinch_zoom_begin");
         markBridgePinchSelectionSuppressed(1600);
         notifyBridgePinchZoom("begin", currentFontSizeSp, focus);
@@ -539,6 +626,7 @@
         if (!bridgePinchZoomActive || !scale || scale <= 0) {
             return;
         }
+        extendBridgePinchImeSuppression(PINCH_IME_SUPPRESS_MS);
         extendBridgePinchSelectionSuppression(1600);
         var targetSize = clampFontSizeSp(bridgePinchZoomBaseFontSizeSp * scale);
         if (Math.abs(targetSize - bridgePinchZoomCurrentFontSizeSp) < 0.025) {
@@ -570,6 +658,7 @@
             );
             bridgePinchZoomActive = false;
             cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + PINCH_CURSOR_REVEAL_SUPPRESS_MS);
+            suppressBridgePinchIme(PINCH_IME_SUPPRESS_MS);
             markBridgePinchSelectionSuppressed(1600);
             stopDomTouchEvent(event);
         }
@@ -1049,6 +1138,14 @@
 
     function focusEditor(reason) {
         if (!editor) {
+            return false;
+        }
+        if (shouldSuppressImeForPinch()) {
+            suppressBridgePinchIme(PINCH_IME_SUPPRESS_MS);
+            callBridge("notifyEvent", [
+                "focusSuppressedForPinch",
+                JSON.stringify({ reason: String(reason || "focus") })
+            ]);
             return false;
         }
         editor.focus();

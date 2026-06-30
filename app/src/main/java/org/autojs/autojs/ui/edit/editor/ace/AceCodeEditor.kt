@@ -1662,6 +1662,7 @@ class AceCodeEditor @JvmOverloads constructor(
                 userTouching = true
                 markPinchTouchSuppressed()
                 suppressSelectionActionModeAfterPinch()
+                suppressSoftInputAfterPinch()
                 onUserTouchInTextArea?.invoke()
                 return false
             }
@@ -1672,6 +1673,7 @@ class AceCodeEditor @JvmOverloads constructor(
                     userTouching = true
                     markPinchTouchSuppressed()
                     suppressSelectionActionModeAfterPinch()
+                    suppressSoftInputAfterPinch()
                     return false
                 }
             }
@@ -1680,6 +1682,7 @@ class AceCodeEditor @JvmOverloads constructor(
                 if (domPinchTouchActive) {
                     markPinchTouchSuppressed()
                     suppressSelectionActionModeAfterPinch()
+                    suppressSoftInputAfterPinch()
                     return false
                 }
             }
@@ -2557,7 +2560,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ACTION_MODE_TOUCH_ANCHOR_HEIGHT_DP = 24f
         private const val INITIAL_FOCUS_RETRY_DELAY_MS = 120L
         private const val PINCH_TOUCH_SUPPRESS_MS = 320L
-        private const val PINCH_SOFT_INPUT_SUPPRESS_MS = 800L
+        private const val PINCH_SOFT_INPUT_SUPPRESS_MS = 1_800L
         private const val PINCH_SELECTION_ACTION_MODE_SUPPRESS_MS = 1_600L
         private const val SINGLE_TOUCH_SCROLL_CANCEL_SLOP_DP = 2.5f
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
