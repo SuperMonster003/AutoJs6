@@ -413,6 +413,51 @@
         return touchFromEvent(event) || event || null;
     }
 
+    function resetAceBuiltInBodyZoom() {
+        if (!document || !document.body || !document.body.style) {
+            return;
+        }
+        if (document.body.style.zoom && document.body.style.zoom !== "1") {
+            document.body.style.zoom = "1";
+            if (editor && editor.renderer && editor.renderer.onResize) {
+                editor.renderer.onResize(true);
+            }
+        }
+    }
+
+    function suppressAceBuiltInPinchZoom(event) {
+        if (!event || !event.touches || event.touches.length < 2) {
+            return false;
+        }
+        resetAceBuiltInBodyZoom();
+        stopDomTouchEvent(event);
+        return true;
+    }
+
+    function suppressAceBuiltInGestureZoom(event) {
+        resetAceBuiltInBodyZoom();
+        stopDomTouchEvent(event);
+        return true;
+    }
+
+    function installAceBuiltInPinchZoomSuppression() {
+        if (!editor || !editor.container || !editor.container.addEventListener) {
+            return;
+        }
+        resetAceBuiltInBodyZoom();
+        ["touchstart", "touchmove"].forEach(function(type) {
+            editor.container.addEventListener(type, suppressAceBuiltInPinchZoom, true);
+        });
+        ["touchend", "touchcancel"].forEach(function(type) {
+            editor.container.addEventListener(type, resetAceBuiltInBodyZoom, true);
+        });
+        if (document && document.addEventListener) {
+            document.addEventListener("gesturestart", suppressAceBuiltInGestureZoom, true);
+            document.addEventListener("gesturechange", suppressAceBuiltInGestureZoom, true);
+            document.addEventListener("gestureend", resetAceBuiltInBodyZoom, true);
+        }
+    }
+
     function rememberTouchAnchor(event) {
         var touch = touchFromEvent(event);
         if (!touch) {
@@ -2198,6 +2243,7 @@
         // ACE 1.4.12 ext-language_tools references a global `editor` in insertMatch().
         global.editor = editor;
         session = editor.getSession();
+        installAceBuiltInPinchZoomSuppression();
         if (document && document.body && document.body.classList) {
             document.body.classList.add("autojs6-host-selection-action-mode");
         }
