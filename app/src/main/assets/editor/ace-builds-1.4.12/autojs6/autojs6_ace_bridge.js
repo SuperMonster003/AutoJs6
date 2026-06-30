@@ -78,6 +78,7 @@
     var FOLD_TAP_TOUCH_SLOP_SQUARED = 100;
     var IME_TEXT_INPUT_SELECTION_MAX_DELTA = 64;
     var IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS = 800;
+    var PINCH_CURSOR_REVEAL_SUPPRESS_MS = 3000;
     var MIN_FONT_SIZE_SP = 4;
     var MAX_FONT_SIZE_SP = 96;
 
@@ -359,12 +360,16 @@
     }
 
     function markBridgePinchSelectionSuppressed(durationMs) {
+        extendBridgePinchSelectionSuppression(durationMs);
+        setSelectionMenuSuppressed(true);
+        finishNativeActionMode("selectionActionModeSuppressed");
+    }
+
+    function extendBridgePinchSelectionSuppression(durationMs) {
         bridgePinchSelectionSuppressUntil = Math.max(
             bridgePinchSelectionSuppressUntil,
             Date.now() + (Number(durationMs) || 1200)
         );
-        setSelectionMenuSuppressed(true);
-        finishNativeActionMode("selectionActionModeSuppressed");
     }
 
     function shouldSuppressSelectionActionModeForPinch() {
@@ -524,7 +529,7 @@
         bridgePinchZoomBaseFontSizeSp = currentFontSizeSp;
         bridgePinchZoomCurrentFontSizeSp = currentFontSizeSp;
         bridgePinchZoomLastFocus = focus;
-        cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + 1200);
+        cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + PINCH_CURSOR_REVEAL_SUPPRESS_MS);
         cancelAceMobileTouchInteraction("pinch_zoom_begin");
         markBridgePinchSelectionSuppressed(1600);
         notifyBridgePinchZoom("begin", currentFontSizeSp, focus);
@@ -534,7 +539,7 @@
         if (!bridgePinchZoomActive || !scale || scale <= 0) {
             return;
         }
-        markBridgePinchSelectionSuppressed(1600);
+        extendBridgePinchSelectionSuppression(1600);
         var targetSize = clampFontSizeSp(bridgePinchZoomBaseFontSizeSp * scale);
         if (Math.abs(targetSize - bridgePinchZoomCurrentFontSizeSp) < 0.025) {
             return;
@@ -564,8 +569,7 @@
                 bridgePinchZoomLastFocus
             );
             bridgePinchZoomActive = false;
-            cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + 1200);
-            cancelAceMobileTouchInteraction("pinch_zoom_end");
+            cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + PINCH_CURSOR_REVEAL_SUPPRESS_MS);
             markBridgePinchSelectionSuppressed(1600);
             stopDomTouchEvent(event);
         }
@@ -1837,7 +1841,7 @@
         if (!isFinite(x) || !isFinite(y)) {
             return applyFontSizeSp(size, { reason: "pinch_font_size", deferRefresh: false });
         }
-        cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + 1200);
+        cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + PINCH_CURSOR_REVEAL_SUPPRESS_MS);
         var anchor = renderer.screenToTextCoordinates(x, y);
         var appliedSize = applyFontSizeSp(size, { reason: "pinch_font_size", deferRefresh: false });
         var after = renderer.textToScreenCoordinates(anchor.row, anchor.column);

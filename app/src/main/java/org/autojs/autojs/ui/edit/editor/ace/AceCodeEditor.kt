@@ -23,6 +23,7 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
@@ -74,6 +75,10 @@ class AceCodeEditor @JvmOverloads constructor(
     private val bridge = AceBridge(this)
     private val textMirror = AceTextMirror()
     private val imeController = AceImeController(IME_REQUEST_COALESCE_MS)
+    private val singleTouchScrollCancelSlopPx = minOf(
+        ViewConfiguration.get(context).scaledTouchSlop.toFloat(),
+        resources.displayMetrics.density * SINGLE_TOUCH_SCROLL_CANCEL_SLOP_DP,
+    ).coerceAtLeast(1f)
     private val eventHistory = AceRuntimeEventHistory()
     private val lspServerManager = AceLspServerManager()
     private val healthMonitor = AceRuntimeHealthMonitor(mainHandler) { failure ->
@@ -90,12 +95,6 @@ class AceCodeEditor @JvmOverloads constructor(
     }
     private val restoreSelectionActionModeRunnable = Runnable {
         restoreUnexpectedSelectionActionModeAfterTouch()
-    }
-    private val pinchSoftInputHideRunnable = Runnable {
-        hideSoftInputIfPinchOpenedIt()
-    }
-    private val pinchSoftInputLateHideRunnable = Runnable {
-        hideSoftInputIfPinchOpenedIt()
     }
     private val imeSettleRunnable = Runnable {
         scheduleAceResize("ime_settle", RESIZE_SETTLE_DELAY_MS)
@@ -117,10 +116,13 @@ class AceCodeEditor @JvmOverloads constructor(
             startingHostSelectionActionMode
         },
         suppressHostActionModeStart = {
-            shouldSuppressSelectionActionModeForTextMutation()
+            shouldSuppressSelectionActionModeForTextMutation() || isPinchSelectionActionModeSuppressed()
         },
         onSuppressedActionModeStart = {
             eventHistory.record("webview_action_mode_suppressed")
+        },
+        suppressImeInputConnection = {
+            shouldSuppressSoftInputForPinch()
         },
     )
     private val loadingOverlay: View = View(context).apply {
@@ -212,6 +214,9 @@ class AceCodeEditor @JvmOverloads constructor(
     private var pinchSoftInputSuppressUntilUptimeMillis = 0L
     private var pinchSelectionActionModeSuppressUntilUptimeMillis = 0L
     private var pinchStartedWithImeVisible = false
+    private var singleTouchStartX = 0f
+    private var singleTouchStartY = 0f
+    private var singleTouchMoveCancelled = false
     private var bridgeEventWindowStartedAtUptimeMillis = 0L
     private var bridgeEventWindowCount = 0
     private var lastBridgeEventWindowCount = 0
@@ -610,7 +615,6 @@ class AceCodeEditor @JvmOverloads constructor(
                     markPinchTouchSuppressed()
                     suppressSelectionActionModeAfterPinch()
                     suppressSoftInputAfterPinch()
-                    cancelAceTouchInteraction("pinch_zoom_$phase")
                 }
             }
         }
@@ -657,13 +661,6 @@ class AceCodeEditor @JvmOverloads constructor(
             pinchSoftInputSuppressUntilUptimeMillis,
             SystemClock.uptimeMillis() + PINCH_SOFT_INPUT_SUPPRESS_MS,
         )
-        if (!pinchStartedWithImeVisible) {
-            hideSoftInputIfPinchOpenedIt()
-            mainHandler.removeCallbacks(pinchSoftInputHideRunnable)
-            mainHandler.removeCallbacks(pinchSoftInputLateHideRunnable)
-            mainHandler.postDelayed(pinchSoftInputHideRunnable, PINCH_SOFT_INPUT_HIDE_DELAY_MS)
-            mainHandler.postDelayed(pinchSoftInputLateHideRunnable, PINCH_SOFT_INPUT_LATE_HIDE_DELAY_MS)
-        }
     }
 
     private fun suppressSelectionActionModeAfterPinch() {
@@ -687,12 +684,9 @@ class AceCodeEditor @JvmOverloads constructor(
         return imeController.state == AceImeState.VISIBLE || imeController.state == AceImeState.SHOWING
     }
 
-    private fun hideSoftInputIfPinchOpenedIt() {
-        if (pinchStartedWithImeVisible) {
-            return
-        }
-        eventHistory.record("ime_hide_for_pinch", "suppressUntil=$pinchSoftInputSuppressUntilUptimeMillis")
-        ViewUtils.hideSoftInput(webView)
+    private fun shouldSuppressSoftInputForPinch(): Boolean {
+        return !pinchStartedWithImeVisible &&
+            SystemClock.uptimeMillis() <= pinchSoftInputSuppressUntilUptimeMillis
     }
 
     private fun recordTextTouch(event: MotionEvent) {
@@ -833,8 +827,6 @@ class AceCodeEditor @JvmOverloads constructor(
         mainHandler.removeCallbacks(imeSettleRunnable)
         mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
         mainHandler.removeCallbacks(restoreSelectionActionModeRunnable)
-        mainHandler.removeCallbacks(pinchSoftInputHideRunnable)
-        mainHandler.removeCallbacks(pinchSoftInputLateHideRunnable)
         pendingScripts.clear()
         webView.stopLoading()
         runCatching { webView.removeJavascriptInterface(JS_BRIDGE_NAME) }
@@ -1109,7 +1101,7 @@ class AceCodeEditor @JvmOverloads constructor(
         }
         postToMain {
             val now = SystemClock.uptimeMillis()
-            if (now <= pinchSoftInputSuppressUntilUptimeMillis) {
+            if (shouldSuppressSoftInputForPinch()) {
                 eventHistory.record(
                     "ime_show_blocked",
                     "reason=pinch_zoom,remaining=${pinchSoftInputSuppressUntilUptimeMillis - now}",
@@ -1708,6 +1700,41 @@ class AceCodeEditor @JvmOverloads constructor(
         return null
     }
 
+    private fun handleSingleTouchScrollGuard(event: MotionEvent) {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                singleTouchStartX = event.x
+                singleTouchStartY = event.y
+                singleTouchMoveCancelled = false
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                if (event.pointerCount != 1 || singleTouchMoveCancelled) {
+                    return
+                }
+                if (selectedTextSnapshot.isNotEmpty() || selectionActionMode != null) {
+                    return
+                }
+                val dx = event.x - singleTouchStartX
+                val dy = event.y - singleTouchStartY
+                if (dx * dx + dy * dy < singleTouchScrollCancelSlopPx * singleTouchScrollCancelSlopPx) {
+                    return
+                }
+                singleTouchMoveCancelled = true
+                pendingSelectionActionModeRequest = null
+                mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
+                cancelSelectionActionModeRestore()
+                cancelAceTouchInteraction("single_finger_scroll")
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL,
+                -> {
+                singleTouchMoveCancelled = false
+            }
+        }
+    }
+
     private fun configureWebView() {
         webView.setBackgroundColor(editorBackgroundColor())
         webView.isFocusable = true
@@ -1721,6 +1748,7 @@ class AceCodeEditor @JvmOverloads constructor(
             handleDomPinchTouchDispatch(event)?.let { consume ->
                 return@setOnTouchListener consume
             }
+            handleSingleTouchScrollGuard(event)
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_POINTER_DOWN,
@@ -1824,6 +1852,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private val allowHostActionModeStart: () -> Boolean,
         private val suppressHostActionModeStart: () -> Boolean,
         private val onSuppressedActionModeStart: () -> Unit,
+        private val suppressImeInputConnection: () -> Boolean,
     ) : WebView(context) {
         override fun dispatchKeyEvent(event: KeyEvent): Boolean {
             if (event.action == KeyEvent.ACTION_DOWN && (event.keyCode == KeyEvent.KEYCODE_DEL || event.keyCode == KeyEvent.KEYCODE_FORWARD_DEL)) {
@@ -1832,7 +1861,14 @@ class AceCodeEditor @JvmOverloads constructor(
             return softKeyboardCursorKeyHandler(event.keyCode, event) || super.dispatchKeyEvent(event)
         }
 
+        override fun onCheckIsTextEditor(): Boolean {
+            return !suppressImeInputConnection() && super.onCheckIsTextEditor()
+        }
+
         override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
+            if (suppressImeInputConnection()) {
+                return null
+            }
             val baseConnection = super.onCreateInputConnection(outAttrs) ?: return null
             return object : InputConnectionWrapper(baseConnection, true) {
                 private var lastCollapsedSelection = -1
@@ -2522,9 +2558,8 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val INITIAL_FOCUS_RETRY_DELAY_MS = 120L
         private const val PINCH_TOUCH_SUPPRESS_MS = 320L
         private const val PINCH_SOFT_INPUT_SUPPRESS_MS = 800L
-        private const val PINCH_SOFT_INPUT_HIDE_DELAY_MS = 160L
-        private const val PINCH_SOFT_INPUT_LATE_HIDE_DELAY_MS = 420L
         private const val PINCH_SELECTION_ACTION_MODE_SUPPRESS_MS = 1_600L
+        private const val SINGLE_TOUCH_SCROLL_CANCEL_SLOP_DP = 2.5f
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
         private const val BRIDGE_EVENT_STORM_THRESHOLD = 60
         private const val ACTION_MODE_COPY = 1
