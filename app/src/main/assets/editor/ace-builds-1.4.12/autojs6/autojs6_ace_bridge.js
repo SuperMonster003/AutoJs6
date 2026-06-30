@@ -51,6 +51,7 @@
     var bridgePinchZoomBaseFontSizeSp = 14;
     var bridgePinchZoomCurrentFontSizeSp = 14;
     var bridgePinchZoomLastFocus = { x: 0, y: 0 };
+    var bridgePinchZoomAnchor = null;
     var bridgePinchSelectionSuppressUntil = 0;
     var bridgePinchImeSuppressUntil = 0;
     var bridgePinchImeRestoreTimer = null;
@@ -462,6 +463,28 @@
         scheduleBridgePinchImeRestore();
     }
 
+    function releaseBridgePinchImeSuppression(reason) {
+        if (bridgePinchImeRestoreTimer !== null) {
+            clearTimeout(bridgePinchImeRestoreTimer);
+            bridgePinchImeRestoreTimer = null;
+        }
+        bridgePinchImeSuppressUntil = 0;
+        restoreBridgePinchImeElementIfReady();
+        callBridge("notifyEvent", [
+            "pinchImeSuppressionReleased",
+            JSON.stringify({ reason: String(reason || "user_touch") })
+        ]);
+    }
+
+    function releaseBridgePinchImeSuppressionForUserTouch(event) {
+        if (bridgePinchZoomActive || !event || !event.touches || event.touches.length !== 1) {
+            return;
+        }
+        if (shouldSuppressImeForPinch()) {
+            releaseBridgePinchImeSuppression("single_touch");
+        }
+    }
+
     function clearSelectionForPinch(reason) {
         markBridgePinchSelectionSuppressed(1400);
         try {
@@ -609,12 +632,88 @@
         return callBridgeString("getPinchToZoomStrategy", "change_text_size") !== "disabled";
     }
 
+    function rendererViewportRect() {
+        var renderer = editor && editor.renderer;
+        var element = renderer && (renderer.scroller || renderer.container);
+        return element && element.getBoundingClientRect ? element.getBoundingClientRect() : null;
+    }
+
+    function rendererCharacterWidth() {
+        var renderer = editor && editor.renderer;
+        var width = renderer && Number(renderer.characterWidth);
+        if (!width && renderer && renderer.layerConfig) {
+            width = Number(renderer.layerConfig.characterWidth);
+        }
+        return width > 0 ? width : 1;
+    }
+
+    function rendererLineHeight() {
+        var renderer = editor && editor.renderer;
+        var height = renderer && Number(renderer.lineHeight);
+        if (!height && renderer && renderer.layerConfig) {
+            height = Number(renderer.layerConfig.lineHeight);
+        }
+        return height > 0 ? height : 1;
+    }
+
+    function rendererTextPadding() {
+        var renderer = editor && editor.renderer;
+        return renderer ? Number(renderer.$padding) || 0 : 0;
+    }
+
+    function capturePinchZoomAnchor(focus) {
+        var rect = rendererViewportRect();
+        var x = Number(focus && focus.x);
+        var y = Number(focus && focus.y);
+        if (!rect || !isFinite(x) || !isFinite(y)) {
+            return null;
+        }
+        return {
+            screenColumn: (x + currentScrollLeft() - rect.left - rendererTextPadding()) / rendererCharacterWidth(),
+            screenRow: (y + currentScrollTop() - rect.top) / rendererLineHeight()
+        };
+    }
+
+    function restorePinchZoomAnchor(focus) {
+        var rect = rendererViewportRect();
+        var anchor = bridgePinchZoomAnchor;
+        var x = Number(focus && focus.x);
+        var y = Number(focus && focus.y);
+        if (!rect || !anchor || !isFinite(x) || !isFinite(y)) {
+            return false;
+        }
+        scrollToPosition(
+            anchor.screenColumn * rendererCharacterWidth() + rendererTextPadding() + rect.left - x,
+            anchor.screenRow * rendererLineHeight() + rect.top - y
+        );
+        return true;
+    }
+
+    function schedulePinchZoomAnchorRestore(focus) {
+        var anchor = bridgePinchZoomAnchor;
+        var focusCopy = focus ? { x: Number(focus.x), y: Number(focus.y) } : null;
+        if (!anchor || !focusCopy || !isFinite(focusCopy.x) || !isFinite(focusCopy.y)) {
+            return;
+        }
+        var restore = function() {
+            if (bridgePinchZoomAnchor === anchor) {
+                restorePinchZoomAnchor(focusCopy);
+            }
+        };
+        if (global && global.requestAnimationFrame) {
+            global.requestAnimationFrame(restore);
+        } else {
+            setTimeout(restore, 16);
+        }
+    }
+
     function startBridgePinchZoom(distance, focus) {
         bridgePinchZoomActive = true;
         bridgePinchZoomStartDistance = distance;
         bridgePinchZoomBaseFontSizeSp = currentFontSizeSp;
         bridgePinchZoomCurrentFontSizeSp = currentFontSizeSp;
         bridgePinchZoomLastFocus = focus;
+        bridgePinchZoomAnchor = capturePinchZoomAnchor(focus);
         cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + PINCH_CURSOR_REVEAL_SUPPRESS_MS);
         suppressBridgePinchIme(PINCH_IME_SUPPRESS_MS);
         cancelAceMobileTouchInteraction("pinch_zoom_begin");
@@ -630,6 +729,7 @@
         extendBridgePinchSelectionSuppression(1600);
         var targetSize = clampFontSizeSp(bridgePinchZoomBaseFontSizeSp * scale);
         if (Math.abs(targetSize - bridgePinchZoomCurrentFontSizeSp) < 0.025) {
+            restorePinchZoomAnchor(focus);
             return;
         }
         bridgePinchZoomCurrentFontSizeSp = applyFontSizeSpKeepingFocusForPinch(targetSize, focus);
@@ -661,6 +761,12 @@
             suppressBridgePinchIme(PINCH_IME_SUPPRESS_MS);
             markBridgePinchSelectionSuppressed(1600);
             stopDomTouchEvent(event);
+            schedulePinchZoomAnchorRestore(bridgePinchZoomLastFocus);
+            setTimeout(function(anchor) {
+                if (bridgePinchZoomAnchor === anchor) {
+                    bridgePinchZoomAnchor = null;
+                }
+            }, 160, bridgePinchZoomAnchor);
         }
         resetAceBuiltInBodyZoom();
     }
@@ -673,6 +779,7 @@
         ["touchstart", "touchmove"].forEach(function(type) {
             editor.container.addEventListener(type, suppressAceBuiltInPinchZoom, true);
         });
+        editor.container.addEventListener("touchstart", releaseBridgePinchImeSuppressionForUserTouch, true);
         ["touchend", "touchcancel"].forEach(function(type) {
             editor.container.addEventListener(type, finishBridgePinchZoom, true);
         });
@@ -1932,17 +2039,18 @@
         if (!editor || !editor.renderer || !editor.renderer.screenToTextCoordinates || !editor.renderer.textToScreenCoordinates) {
             return applyFontSizeSp(size, { reason: "pinch_font_size", deferRefresh: false });
         }
-        var renderer = editor.renderer;
         var x = Number(focus && focus.x);
         var y = Number(focus && focus.y);
         if (!isFinite(x) || !isFinite(y)) {
             return applyFontSizeSp(size, { reason: "pinch_font_size", deferRefresh: false });
         }
         cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + PINCH_CURSOR_REVEAL_SUPPRESS_MS);
-        var anchor = renderer.screenToTextCoordinates(x, y);
+        if (!bridgePinchZoomAnchor) {
+            bridgePinchZoomAnchor = capturePinchZoomAnchor(focus);
+        }
         var appliedSize = applyFontSizeSp(size, { reason: "pinch_font_size", deferRefresh: false });
-        var after = renderer.textToScreenCoordinates(anchor.row, anchor.column);
-        scrollByDelta(after.pageX - x, after.pageY - y);
+        restorePinchZoomAnchor(focus);
+        schedulePinchZoomAnchorRestore(focus);
         return appliedSize;
     }
 

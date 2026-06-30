@@ -663,6 +663,16 @@ class AceCodeEditor @JvmOverloads constructor(
         )
     }
 
+    private fun releaseSoftInputSuppressionAfterPinch(reason: String) {
+        val now = SystemClock.uptimeMillis()
+        if (now > pinchSoftInputSuppressUntilUptimeMillis) {
+            return
+        }
+        pinchSoftInputSuppressUntilUptimeMillis = 0L
+        pinchStartedWithImeVisible = false
+        eventHistory.record("ime_show_unblocked", "reason=$reason", now)
+    }
+
     private fun suppressSelectionActionModeAfterPinch() {
         pinchSelectionActionModeSuppressUntilUptimeMillis = maxOf(
             pinchSelectionActionModeSuppressUntilUptimeMillis,
@@ -1750,6 +1760,9 @@ class AceCodeEditor @JvmOverloads constructor(
         webView.setOnTouchListener { _, event ->
             handleDomPinchTouchDispatch(event)?.let { consume ->
                 return@setOnTouchListener consume
+            }
+            if (event.actionMasked == MotionEvent.ACTION_DOWN && event.pointerCount == 1 && !domPinchTouchActive) {
+                releaseSoftInputSuppressionAfterPinch("single_touch")
             }
             handleSingleTouchScrollGuard(event)
             when (event.actionMasked) {
