@@ -817,6 +817,7 @@
     <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">仅对大于 %1$s 的文件启用大文件模式</string>
     <string name="text_editor_log_button_behavior">编辑器日志按钮行为</string>
     <string name="text_editor_theme">编辑器主题</string>
+    <string name="text_editor_theme_mode">编辑器主题使用方式</string>
     <string name="text_email">邮箱</string>
     <string name="text_email_cannot_be_empty">邮箱不能为空</string>
     <string name="text_email_format_error">邮箱格式错误</string>
@@ -1547,6 +1548,8 @@
     <string name="entry_ace_editor_font_system_monospace">系统等宽字体</string>
     <string name="entry_editor_engine_ace">Ace</string>
     <string name="entry_editor_engine_native">JsDroidEditor</string>
+    <string name="entry_editor_theme_mode_separate">亮暗主题分开</string>
+    <string name="entry_editor_theme_mode_unified">亮暗主题统一</string>
     <string name="entry_editor_gutter_width_mode_dynamic">动态</string>
     <string name="entry_editor_gutter_width_mode_fixed">固定</string>
     <string name="entry_editor_word_wrap_indent_style_classic">顶格续行</string>
@@ -1608,6 +1611,7 @@
     <string name="description_editor_gutter_width_mode_preference">动态宽度会跟随当前可见行号位数变化。固定宽度会预留稳定的最小宽度，并且只在看到更高位数的行号时增大。</string>
     <string name="description_editor_word_wrap_indent_style_preference">延续缩进会让自动换行后的视觉续行与原行缩进对齐。顶格续行会让视觉续行从可视区域边缘开始。</string>
     <string name="description_editor_engine_preference">Ace 是默认编辑器引擎。JsDroidEditor 仍可作为 fallback 使用，也可以手动选择。</string>
+    <string name="description_editor_theme_mode_preference">选择代码编辑器是否在 AutoJs6 亮色模式和暗色模式下分别记忆主题，或在两种模式下始终使用同一个主题。</string>
     <string name="text_code_editor_settings">代码编辑器设置</string>
     <string name="text_editor_assistance">辅助</string>
     <string name="text_editor_gestures">操作手势</string>

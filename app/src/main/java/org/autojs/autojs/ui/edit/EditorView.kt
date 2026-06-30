@@ -517,7 +517,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             key(R.string.key_editor_text_size),
             key(R.string.key_ace_editor_font),
                 -> post { themeFontService.applyEditorPreferences() }
-            key(R.string.key_editor_theme) -> post { applyCurrentEditorThemePreference() }
+            key(R.string.key_editor_theme),
+            key(R.string.key_editor_theme_light),
+            key(R.string.key_editor_theme_dark),
+            key(R.string.key_editor_theme_mode),
+                -> post { applyCurrentEditorThemePreference() }
             key(R.string.key_editor_engine) -> post { applyCurrentEditorEnginePreference() }
         }
     }

@@ -80,7 +80,7 @@ class EditorThemeFontService(
 
     fun persistAndApplyTheme(theme: Theme): Theme {
         applyTheme(theme)
-        Themes.setCurrent(theme.name)
+        Themes.setCurrent(context, theme.name)
         return theme
     }
 

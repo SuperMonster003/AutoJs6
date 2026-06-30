@@ -158,6 +158,16 @@
         <item>@string/entry_editor_engine_native</item>
     </string-array>
 
+    <string-array name="keys_editor_theme_mode">
+        <item>@string/key_editor_theme_mode_separate</item>
+        <item>@string/key_editor_theme_mode_unified</item>
+    </string-array>
+
+    <string-array name="values_editor_theme_mode">
+        <item>@string/entry_editor_theme_mode_separate</item>
+        <item>@string/entry_editor_theme_mode_unified</item>
+    </string-array>
+
     <string-array name="keys_editor_gutter_width_mode">
         <item>@string/key_editor_gutter_width_mode_dynamic</item>
         <item>@string/key_editor_gutter_width_mode_fixed</item>

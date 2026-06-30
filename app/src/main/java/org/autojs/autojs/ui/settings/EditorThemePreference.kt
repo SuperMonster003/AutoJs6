@@ -6,7 +6,6 @@ import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.ui.edit.theme.Themes
@@ -35,7 +34,7 @@ class EditorThemePreference : MaterialPreference {
 
     private fun init() {
         summaryProvider = SummaryProvider<EditorThemePreference> {
-            Pref.currentTheme ?: prefContext.getString(R.string.text_default)
+            Themes.getCurrentThemeName(prefContext) ?: prefContext.getString(R.string.text_default)
         }
     }
 
@@ -53,7 +52,7 @@ class EditorThemePreference : MaterialPreference {
     }
 
     private fun showThemeDialog(themes: List<Theme>) {
-        val current = Pref.currentTheme
+        val current = Themes.getCurrentThemeName(prefContext)
         val selectedIndex = themes.indexOfFirst { it.name == current }.coerceAtLeast(0)
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(prefContext)
@@ -61,7 +60,7 @@ class EditorThemePreference : MaterialPreference {
                 .items(themes)
                 .choiceWidgetThemeColor()
                 .itemsCallbackSingleChoice(selectedIndex) { _, _, which, _ ->
-                    Themes.setCurrent(themes[which].name)
+                    Themes.setCurrent(prefContext, themes[which].name)
                     notifyChanged()
                     true
                 }
@@ -71,5 +70,9 @@ class EditorThemePreference : MaterialPreference {
                 .positiveColorRes(R.color.dialog_button_attraction)
                 .build()
         }
+    }
+
+    fun refreshSummary() {
+        notifyChanged()
     }
 }

@@ -4,7 +4,9 @@ import android.content.Context;
 
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,7 +83,7 @@ public class Themes {
     }
 
     public static Observable<Theme> getCurrent(Context context) {
-        String currentTheme = ViewUtils.isNightModeYes(context) ? DARK_THEME : Pref.getCurrentTheme();
+        String currentTheme = getCurrentThemeName(context);
         if (currentTheme == null) {
             return getDefault(context);
         }
@@ -96,6 +98,58 @@ public class Themes {
     }
 
     public static void setCurrent(String name) {
-        Pref.setCurrentTheme(name);
+        setCurrent(GlobalAppContext.get(), name);
+    }
+
+    public static void setCurrent(Context context, String name) {
+        if (isSeparateLightDarkMode()) {
+            if (ViewUtils.isNightModeYes(context)) {
+                Pref.putString(R.string.key_editor_theme_dark, name);
+            } else {
+                Pref.putString(R.string.key_editor_theme_light, name);
+            }
+        } else {
+            Pref.setCurrentTheme(name);
+        }
+    }
+
+    public static String getCurrentThemeName(Context context) {
+        if (!isSeparateLightDarkMode()) {
+            String activeSeparateTheme = ViewUtils.isNightModeYes(context)
+                    ? Pref.getStringOrNull(R.string.key_editor_theme_dark)
+                    : Pref.getStringOrNull(R.string.key_editor_theme_light);
+            return firstNonBlank(
+                    Pref.getCurrentTheme(),
+                    activeSeparateTheme,
+                    Pref.getStringOrNull(R.string.key_editor_theme_light),
+                    Pref.getStringOrNull(R.string.key_editor_theme_dark),
+                    DEFAULT_THEME
+            );
+        }
+        if (ViewUtils.isNightModeYes(context)) {
+            return firstNonBlank(Pref.getStringOrNull(R.string.key_editor_theme_dark), DARK_THEME);
+        }
+        return firstNonBlank(
+                Pref.getStringOrNull(R.string.key_editor_theme_light),
+                Pref.getCurrentTheme(),
+                DEFAULT_THEME
+        );
+    }
+
+    public static boolean isSeparateLightDarkMode() {
+        String mode = Pref.getString(
+                R.string.key_editor_theme_mode,
+                org.autojs.autojs.util.StringUtils.key(R.string.default_key_editor_theme_mode)
+        );
+        return !org.autojs.autojs.util.StringUtils.key(R.string.key_editor_theme_mode_unified).equals(mode);
+    }
+
+    private static String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.trim().isEmpty()) {
+                return value;
+            }
+        }
+        return null;
     }
 }

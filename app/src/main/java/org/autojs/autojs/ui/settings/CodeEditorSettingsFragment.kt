@@ -68,6 +68,14 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         ) {
             syncEditorEnginePreferenceAvailability()
         }
+        if (
+            key == getString(R.string.key_editor_theme_mode) ||
+            key == getString(R.string.key_editor_theme) ||
+            key == getString(R.string.key_editor_theme_light) ||
+            key == getString(R.string.key_editor_theme_dark)
+        ) {
+            findPreference<EditorThemePreference>(getString(R.string.key_editor_theme))?.refreshSummary()
+        }
     }
 
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
