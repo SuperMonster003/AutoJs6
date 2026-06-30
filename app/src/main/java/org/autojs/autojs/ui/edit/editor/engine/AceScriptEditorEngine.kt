@@ -120,7 +120,7 @@ class AceScriptEditorEngine(
     init {
         aceCodeEditor.listener = createAceListener()
         aceCodeEditor.onTextSizeSpChangedByGesture = { size, persist ->
-            fontSizeSp = size.coerceIn(8f, 40f)
+            fontSizeSp = size.coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
             if (persist) {
                 setEditorTextSize(fontSizeSp.roundToInt())
             }
@@ -388,7 +388,7 @@ class AceScriptEditorEngine(
     }
 
     override fun setTextSizeSp(size: Float) {
-        fontSizeSp = size.coerceIn(8f, 40f)
+        fontSizeSp = size.coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
         aceCodeEditor.setTextSizeSp(fontSizeSp)
     }
 
@@ -731,5 +731,7 @@ class AceScriptEditorEngine(
 
     companion object {
         private const val DEFAULT_TEXT_SIZE_SP = 14f
+        private const val MIN_TEXT_SIZE_SP = 4f
+        private const val MAX_TEXT_SIZE_SP = 96f
     }
 }

@@ -25,6 +25,8 @@
     var textNotifyIncludeText = false;
     var cursorNotifyTimer = null;
     var actionModeNotifyTimer = null;
+    var fontMetricsRefreshTimer = null;
+    var fontMetricsRefreshFrameScheduled = false;
     var lastActionModeSelectedText = "";
     var nativeActionModeActive = false;
     var selectionMenuSuppressed = false;
@@ -69,6 +71,8 @@
     var FOLD_TAP_TOUCH_SLOP_SQUARED = 100;
     var IME_TEXT_INPUT_SELECTION_MAX_DELTA = 64;
     var IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS = 800;
+    var MIN_FONT_SIZE_SP = 4;
+    var MAX_FONT_SIZE_SP = 96;
 
     function callBridge(name, args) {
         try {
@@ -1492,9 +1496,10 @@
     }
 
     function applyFontSizeSp(size) {
-        var sp = Math.max(8, Math.min(Number(size) || 14, 40));
+        var sp = Math.max(MIN_FONT_SIZE_SP, Math.min(Number(size) || 14, MAX_FONT_SIZE_SP));
         editor.setFontSize(sp + "px");
-        refreshFontMetricsForCoordinateMapping();
+        forceRendererCoordinateRefresh("font_size_apply");
+        scheduleFontMetricsRefresh("font_size_apply");
         return sp;
     }
 
@@ -1503,6 +1508,46 @@
         if (renderer && renderer.updateFontSize) {
             renderer.updateFontSize();
         }
+    }
+
+    function forceRendererCoordinateRefresh(reason) {
+        if (!editor || !editor.renderer) {
+            return;
+        }
+        var renderer = editor.renderer;
+        refreshFontMetricsForCoordinateMapping();
+        if (editor.resize) {
+            editor.resize(true);
+        }
+        if (renderer.updateFull) {
+            renderer.updateFull(true);
+        } else if (renderer.updateText) {
+            renderer.updateText();
+        }
+        if (renderer.updateCursor) {
+            renderer.updateCursor();
+        }
+    }
+
+    function scheduleFontMetricsRefresh(reason) {
+        var refresh = function() {
+            fontMetricsRefreshFrameScheduled = false;
+            forceRendererCoordinateRefresh(reason || "font_size_deferred");
+        };
+        if (!fontMetricsRefreshFrameScheduled && global && global.requestAnimationFrame) {
+            fontMetricsRefreshFrameScheduled = true;
+            global.requestAnimationFrame(refresh);
+        } else if (!fontMetricsRefreshFrameScheduled) {
+            fontMetricsRefreshFrameScheduled = true;
+            setTimeout(refresh, 0);
+        }
+        if (fontMetricsRefreshTimer !== null) {
+            clearTimeout(fontMetricsRefreshTimer);
+        }
+        fontMetricsRefreshTimer = setTimeout(function() {
+            fontMetricsRefreshTimer = null;
+            forceRendererCoordinateRefresh(reason || "font_size_deferred");
+        }, 32);
     }
 
     function setFontSizeSp(size) {
@@ -1559,8 +1604,7 @@
         if (!editor || !editor.resize) {
             return;
         }
-        refreshFontMetricsForCoordinateMapping();
-        editor.resize(true);
+        forceRendererCoordinateRefresh(reason);
         callBridge("notifyEvent", [
             "resizeDone",
             JSON.stringify({ reason: String(reason || "font_size_focus_changed") })

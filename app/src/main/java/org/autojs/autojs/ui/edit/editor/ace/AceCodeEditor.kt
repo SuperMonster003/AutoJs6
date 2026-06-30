@@ -212,6 +212,9 @@ class AceCodeEditor @JvmOverloads constructor(
     private var pinchGestureActive = false
     private var pinchTouchSuppressUntilUptimeMillis = 0L
     private var pinchZoomStrategy = PinchZoomStrategy.CHANGE_TEXT_SIZE
+    private var scaleViewGestureChanged = false
+    private var lastPinchFocusX = 0f
+    private var lastPinchFocusY = 0f
     private var lastTextSizeScaleFactor = 1.0
     private val changeTextSizeScaleGestureDetector = ScaleGestureDetector(context, ChangeTextSizeScaleListener())
     private val scaleViewScaleGestureDetector = ScaleGestureDetector(context, ScaleViewScaleListener())
@@ -573,6 +576,7 @@ class AceCodeEditor @JvmOverloads constructor(
             markPinchTouchSuppressed()
         }
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            commitScaleViewTextSizeGestureIfNeeded()
             pinchGestureActive = false
         }
         return handlingPinch || suppressingRecentPinchTouch
@@ -618,13 +622,18 @@ class AceCodeEditor @JvmOverloads constructor(
         if (scaleFactor <= 0f || baseTextSizeSp <= 0f) {
             return
         }
-        val currentSize = currentScaleViewTextSizeSp()
+        lastPinchFocusX = focusX
+        lastPinchFocusY = focusY
+        val currentSize = baseTextSizeSp
         val nextSize = (currentSize * scaleFactor).coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
         if (abs(nextSize - currentSize) < MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP) {
             return
         }
-        viewZoomScale = (nextSize / baseTextSizeSp).coerceIn(MIN_VIEW_ZOOM_SCALE, MAX_VIEW_ZOOM_SCALE)
+        baseTextSizeSp = nextSize
+        viewZoomScale = 1f
+        scaleViewGestureChanged = true
         applyEffectiveTextSizeSp(nextSize, focusX, focusY)
+        onTextSizeSpChangedByGesture?.invoke(nextSize, false)
     }
 
     private fun currentScaleViewTextSizeSp(): Float {
@@ -643,15 +652,23 @@ class AceCodeEditor @JvmOverloads constructor(
             .toFloat()
         val shouldApplyCommittedSize = viewZoomScale != 1f ||
             abs(committedSize - effectiveSize) >= MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP
-        val shouldPersistCommittedSize = viewZoomScale != 1f ||
+        val shouldPersistCommittedSize = scaleViewGestureChanged ||
+            viewZoomScale != 1f ||
             abs(committedSize - previousBaseTextSizeSp) >= MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP
         baseTextSizeSp = committedSize
         viewZoomScale = 1f
+        scaleViewGestureChanged = false
         if (shouldApplyCommittedSize) {
             applyEffectiveTextSizeSp(committedSize, focusX, focusY)
         }
         if (shouldPersistCommittedSize) {
             onTextSizeSpChangedByGesture?.invoke(committedSize, true)
+        }
+    }
+
+    private fun commitScaleViewTextSizeGestureIfNeeded() {
+        if (pinchZoomStrategy == PinchZoomStrategy.SCALE_VIEW && scaleViewGestureChanged) {
+            commitScaleViewTextSizeGesture(lastPinchFocusX, lastPinchFocusY)
         }
     }
 
@@ -2186,6 +2203,10 @@ class AceCodeEditor @JvmOverloads constructor(
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
             pinchGestureActive = true
             markPinchTouchSuppressed()
+            scaleViewGestureChanged = false
+            viewZoomScale = 1f
+            lastPinchFocusX = detector.focusX
+            lastPinchFocusY = detector.focusY
             cancelAceTouchInteraction("pinch_zoom_begin")
             return true
         }
@@ -2198,7 +2219,7 @@ class AceCodeEditor @JvmOverloads constructor(
         override fun onScaleEnd(detector: ScaleGestureDetector) {
             pinchGestureActive = false
             markPinchTouchSuppressed()
-            commitScaleViewTextSizeGesture(detector.focusX, detector.focusY)
+            commitScaleViewTextSizeGesture(lastPinchFocusX, lastPinchFocusY)
             cancelAceTouchInteraction("pinch_zoom_end")
             super.onScaleEnd(detector)
         }
@@ -2320,8 +2341,8 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ACTION_MODE_PASTE = 2
         private const val ACTION_MODE_SELECT_ALL = 3
         private const val DEFAULT_TEXT_SIZE_SP = 14f
-        private const val MIN_TEXT_SIZE_SP = 8f
-        private const val MAX_TEXT_SIZE_SP = 40f
+        private const val MIN_TEXT_SIZE_SP = 4f
+        private const val MAX_TEXT_SIZE_SP = 96f
         private const val MIN_VIEW_ZOOM_SCALE = MIN_TEXT_SIZE_SP / DEFAULT_TEXT_SIZE_SP
         private const val MAX_VIEW_ZOOM_SCALE = MAX_TEXT_SIZE_SP / DEFAULT_TEXT_SIZE_SP
         private const val MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP = 0.05f
