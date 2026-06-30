@@ -52,6 +52,8 @@
     var bridgePinchZoomCurrentFontSizeSp = 14;
     var bridgePinchZoomLastFocus = { x: 0, y: 0 };
     var bridgePinchZoomAnchor = null;
+    var bridgePinchZoomSelectionRange = null;
+    var bridgePinchPostTouchSuppressUntil = 0;
     var bridgePinchSelectionSuppressUntil = 0;
     var bridgePinchImeSuppressUntil = 0;
     var bridgePinchImeRestoreTimer = null;
@@ -85,6 +87,8 @@
     var IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS = 800;
     var PINCH_CURSOR_REVEAL_SUPPRESS_MS = 3000;
     var PINCH_IME_SUPPRESS_MS = 1800;
+    var PINCH_POST_TOUCH_SUPPRESS_MS = 650;
+    var PINCH_CURSOR_RESTORE_MS = 700;
     var MIN_FONT_SIZE_SP = 4;
     var MAX_FONT_SIZE_SP = 96;
 
@@ -288,6 +292,30 @@
         };
     }
 
+    function cloneEditorSelectionRange() {
+        if (!editor || !editor.getSelectionRange) {
+            return null;
+        }
+        var range = editor.getSelectionRange();
+        return range && range.clone ? range.clone() : range;
+    }
+
+    function restoreEditorSelectionRange(range, reason) {
+        if (!range || !editor || !editor.selection || !editor.selection.setRange) {
+            return false;
+        }
+        cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + PINCH_CURSOR_REVEAL_SUPPRESS_MS);
+        try {
+            editor.selection.setRange(range.clone ? range.clone() : range, false);
+            resetImeTextInputSelectionWindow(reason || "selection_restore");
+            notifyCursorChanged();
+            notifySelectionChanged();
+            return true;
+        } catch (ignore) {
+            return false;
+        }
+    }
+
     function hasActiveSelection() {
         return !!getSelectionState().text;
     }
@@ -480,9 +508,83 @@
         if (bridgePinchZoomActive || !event || !event.touches || event.touches.length !== 1) {
             return;
         }
+        releaseBridgePinchPostTouchSuppression("single_touch");
         if (shouldSuppressImeForPinch()) {
             releaseBridgePinchImeSuppression("single_touch");
         }
+    }
+
+    function markBridgePinchPostTouchSuppressed(durationMs) {
+        bridgePinchPostTouchSuppressUntil = Math.max(
+            bridgePinchPostTouchSuppressUntil,
+            Date.now() + (Number(durationMs) || PINCH_POST_TOUCH_SUPPRESS_MS)
+        );
+    }
+
+    function shouldSuppressPostPinchTouchEvent(event) {
+        if (bridgePinchZoomActive || !event) {
+            return false;
+        }
+        if (Date.now() > bridgePinchPostTouchSuppressUntil) {
+            return false;
+        }
+        return event.type !== "touchstart";
+    }
+
+    function releaseBridgePinchPostTouchSuppression(reason) {
+        var hadSuppression = Date.now() <= bridgePinchPostTouchSuppressUntil ||
+            bridgePinchZoomAnchor !== null ||
+            bridgePinchZoomSelectionRange !== null;
+        bridgePinchPostTouchSuppressUntil = 0;
+        bridgePinchZoomAnchor = null;
+        bridgePinchZoomSelectionRange = null;
+        if (!hadSuppression) {
+            return;
+        }
+        callBridge("notifyEvent", [
+            "pinchPostTouchSuppressionReleased",
+            JSON.stringify({ reason: String(reason || "user_touch") })
+        ]);
+    }
+
+    function restorePinchZoomSelection(reason) {
+        return restoreEditorSelectionRange(
+            bridgePinchZoomSelectionRange,
+            reason || "pinch_selection_restore"
+        );
+    }
+
+    function schedulePinchZoomSelectionRestore(reason) {
+        var range = bridgePinchZoomSelectionRange;
+        if (!range) {
+            return;
+        }
+        [0, 32, 96, 192, 384].forEach(function(delay) {
+            setTimeout(function() {
+                if (bridgePinchZoomSelectionRange === range) {
+                    restorePinchZoomSelection(reason || "pinch_selection_restore");
+                }
+            }, delay);
+        });
+        setTimeout(function() {
+            if (bridgePinchZoomSelectionRange === range) {
+                bridgePinchZoomSelectionRange = null;
+            }
+        }, PINCH_CURSOR_RESTORE_MS);
+    }
+
+    function suppressPostPinchTouchEvent(event) {
+        if (!shouldSuppressPostPinchTouchEvent(event)) {
+            return false;
+        }
+        restorePinchZoomSelection("post_pinch_touch");
+        restorePinchZoomAnchor(bridgePinchZoomLastFocus);
+        stopDomTouchEvent(event);
+        callBridge("notifyEvent", [
+            "postPinchTouchSuppressed",
+            JSON.stringify({ type: String(event.type || "") })
+        ]);
+        return true;
     }
 
     function clearSelectionForPinch(reason) {
@@ -714,6 +816,8 @@
         bridgePinchZoomCurrentFontSizeSp = currentFontSizeSp;
         bridgePinchZoomLastFocus = focus;
         bridgePinchZoomAnchor = capturePinchZoomAnchor(focus);
+        bridgePinchZoomSelectionRange = cloneEditorSelectionRange();
+        bridgePinchPostTouchSuppressUntil = 0;
         cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + PINCH_CURSOR_REVEAL_SUPPRESS_MS);
         suppressBridgePinchIme(PINCH_IME_SUPPRESS_MS);
         cancelAceMobileTouchInteraction("pinch_zoom_begin");
@@ -759,14 +863,20 @@
             bridgePinchZoomActive = false;
             cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + PINCH_CURSOR_REVEAL_SUPPRESS_MS);
             suppressBridgePinchIme(PINCH_IME_SUPPRESS_MS);
+            markBridgePinchPostTouchSuppressed(PINCH_POST_TOUCH_SUPPRESS_MS);
             markBridgePinchSelectionSuppressed(1600);
+            restorePinchZoomSelection("pinch_zoom_end");
             stopDomTouchEvent(event);
+            resetAceBuiltInBodyZoom();
+            restorePinchZoomAnchor(bridgePinchZoomLastFocus);
             schedulePinchZoomAnchorRestore(bridgePinchZoomLastFocus);
+            schedulePinchZoomSelectionRestore("pinch_zoom_end_deferred");
             setTimeout(function(anchor) {
                 if (bridgePinchZoomAnchor === anchor) {
                     bridgePinchZoomAnchor = null;
                 }
             }, 160, bridgePinchZoomAnchor);
+            return;
         }
         resetAceBuiltInBodyZoom();
     }
@@ -782,6 +892,9 @@
         editor.container.addEventListener("touchstart", releaseBridgePinchImeSuppressionForUserTouch, true);
         ["touchend", "touchcancel"].forEach(function(type) {
             editor.container.addEventListener(type, finishBridgePinchZoom, true);
+        });
+        ["touchend", "touchcancel", "mousedown", "mouseup", "click", "dblclick", "contextmenu"].forEach(function(type) {
+            editor.container.addEventListener(type, suppressPostPinchTouchEvent, true);
         });
         if (document && document.addEventListener) {
             document.addEventListener("gesturestart", suppressAceBuiltInGestureZoom, true);
