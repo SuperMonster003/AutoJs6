@@ -203,7 +203,7 @@ class AceCodeEditor @JvmOverloads constructor(
     private var lastTextTouchAtUptimeMillis = 0L
     private var domPinchTouchActive = false
     private var bridgePinchActive = false
-    private var bridgePinchBaseTextSizeSp = DEFAULT_TEXT_SIZE_SP
+    private var pinchSoftInputSuppressUntilUptimeMillis = 0L
     private var bridgeEventWindowStartedAtUptimeMillis = 0L
     private var bridgeEventWindowCount = 0
     private var lastBridgeEventWindowCount = 0
@@ -564,68 +564,52 @@ class AceCodeEditor @JvmOverloads constructor(
         return getString(R.string.key_editor_pinch_to_zoom_strategy, R.string.default_key_editor_pinch_to_zoom_strategy)
     }
 
-    internal fun handleBridgePinchZoom(scaleFactor: Double, focusX: Double, focusY: Double, phase: String) {
+    internal fun handleBridgePinchZoom(textSizeSp: Double, focusX: Double, focusY: Double, phase: String) {
         postToMain {
-            if (!isReady || destroyed || pinchZoomStrategy == PinchZoomStrategy.DISABLED) {
+            if (!isReady || destroyed) {
                 bridgePinchActive = false
                 return@postToMain
             }
-            val safeScaleFactor = scaleFactor
-                .takeIf { it.isFinite() && it > 0.0 }
-                ?.toFloat()
-                ?: return@postToMain
-            val safeFocusX = focusX.takeIf { it.isFinite() }?.toFloat() ?: 0f
-            val safeFocusY = focusY.takeIf { it.isFinite() }?.toFloat() ?: 0f
             when (phase) {
                 "begin" -> {
+                    if (pinchZoomStrategy == PinchZoomStrategy.DISABLED) {
+                        bridgePinchActive = false
+                        return@postToMain
+                    }
                     bridgePinchActive = true
-                    bridgePinchBaseTextSizeSp = baseTextSizeSp
                     markPinchTouchSuppressed()
+                    suppressSoftInputAfterPinch()
                     pendingSelectionActionModeRequest = null
                     mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
                     finishSelectionActionMode()
-                }
-                "change" -> {
-                    if (!bridgePinchActive) {
-                        bridgePinchActive = true
-                        bridgePinchBaseTextSizeSp = baseTextSizeSp
-                    }
-                    val targetSize = bridgePinchTargetTextSize(safeScaleFactor)
-                    applyBridgePinchTextSize(targetSize, safeFocusX, safeFocusY, persist = false)
+                    cancelAceTouchInteraction("pinch_zoom_begin")
                 }
                 "end", "cancel" -> {
-                    if (bridgePinchActive) {
-                        val targetSize = bridgePinchTargetTextSize(safeScaleFactor)
+                    if (bridgePinchActive && phase == "end" && pinchZoomStrategy != PinchZoomStrategy.DISABLED) {
+                        val targetSize = textSizeSp
+                            .takeIf { it.isFinite() && it > 0.0 }
+                            ?.toFloat()
+                            ?: baseTextSizeSp
+                        val safeSize = targetSize
                             .roundToInt()
                             .coerceIn(MIN_TEXT_SIZE_SP.roundToInt(), MAX_TEXT_SIZE_SP.roundToInt())
                             .toFloat()
-                        applyBridgePinchTextSize(targetSize, safeFocusX, safeFocusY, persist = true)
+                        syncBridgePinchTextSize(safeSize, persist = true)
                     }
                     bridgePinchActive = false
                     markPinchTouchSuppressed()
+                    suppressSoftInputAfterPinch()
+                    cancelAceTouchInteraction("pinch_zoom_$phase")
                 }
             }
         }
     }
 
-    private fun bridgePinchTargetTextSize(scaleFactor: Float): Float {
-        val scaled = bridgePinchBaseTextSizeSp * scaleFactor
-        return when (pinchZoomStrategy) {
-            PinchZoomStrategy.CHANGE_TEXT_SIZE -> scaled.roundToInt().toFloat()
-            PinchZoomStrategy.SCALE_VIEW -> scaled
-            PinchZoomStrategy.DISABLED -> baseTextSizeSp
-        }.coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
-    }
-
-    private fun applyBridgePinchTextSize(size: Float, focusX: Float, focusY: Float, persist: Boolean) {
+    private fun syncBridgePinchTextSize(size: Float, persist: Boolean) {
         val safeSize = size.coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
-        if (!persist && abs(safeSize - baseTextSizeSp) < MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP) {
-            return
-        }
         baseTextSizeSp = safeSize
         viewZoomScale = 1f
         scaleViewGestureChanged = false
-        applyEffectiveTextSizeSpCssFocus(safeSize, focusX, focusY)
         onTextSizeSpChangedByGesture?.invoke(safeSize, persist)
     }
 
@@ -654,6 +638,13 @@ class AceCodeEditor @JvmOverloads constructor(
         pinchTouchSuppressUntilUptimeMillis = maxOf(
             pinchTouchSuppressUntilUptimeMillis,
             SystemClock.uptimeMillis() + PINCH_TOUCH_SUPPRESS_MS,
+        )
+    }
+
+    private fun suppressSoftInputAfterPinch() {
+        pinchSoftInputSuppressUntilUptimeMillis = maxOf(
+            pinchSoftInputSuppressUntilUptimeMillis,
+            SystemClock.uptimeMillis() + PINCH_SOFT_INPUT_SUPPRESS_MS,
         )
     }
 
@@ -750,11 +741,6 @@ class AceCodeEditor @JvmOverloads constructor(
         val focusCssX = focusX / cssScale
         val focusCssY = focusY / cssScale
         invokeAce("setFontSizeSpKeepingFocus", "$safeSize, $focusCssX, $focusCssY")
-    }
-
-    private fun applyEffectiveTextSizeSpCssFocus(size: Float, focusX: Float, focusY: Float) {
-        val safeSize = size.coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
-        invokeAce("setFontSizeSpKeepingFocus", "$safeSize, $focusX, $focusY")
     }
 
     fun toggleBreakpoint(line: Int) {
@@ -1067,6 +1053,10 @@ class AceCodeEditor @JvmOverloads constructor(
         return lspServerManager.bridgeOptionsJson()
     }
 
+    internal fun bridgePinchToZoomStrategy(): String {
+        return pinchZoomStrategy.bridgeName
+    }
+
     internal fun showSoftInput() {
         if (readOnly) {
             eventHistory.record("ime_show_blocked", "readOnly=true")
@@ -1074,6 +1064,14 @@ class AceCodeEditor @JvmOverloads constructor(
         }
         postToMain {
             val now = SystemClock.uptimeMillis()
+            if (now <= pinchSoftInputSuppressUntilUptimeMillis) {
+                eventHistory.record(
+                    "ime_show_blocked",
+                    "reason=pinch_zoom,remaining=${pinchSoftInputSuppressUntilUptimeMillis - now}",
+                    now,
+                )
+                return@postToMain
+            }
             val decision = imeController.requestShow(now)
             eventHistory.record(
                 "ime_show_request",
@@ -1602,26 +1600,26 @@ class AceCodeEditor @JvmOverloads constructor(
         return (resources.displayMetrics.density * IME_HEIGHT_THRESHOLD_DP).toInt()
     }
 
-    private fun handleDomPinchTouchPassThrough(event: MotionEvent): Boolean {
+    private fun handleDomPinchTouchDispatch(event: MotionEvent): Boolean? {
         when (event.actionMasked) {
             MotionEvent.ACTION_POINTER_DOWN -> {
                 domPinchTouchActive = true
                 userTouching = true
                 onUserTouchInTextArea?.invoke()
-                return true
+                return false
             }
 
             MotionEvent.ACTION_MOVE -> {
                 if (domPinchTouchActive || event.pointerCount > 1) {
                     domPinchTouchActive = true
                     userTouching = true
-                    return true
+                    return false
                 }
             }
 
             MotionEvent.ACTION_POINTER_UP -> {
                 if (domPinchTouchActive) {
-                    return true
+                    return false
                 }
             }
 
@@ -1631,11 +1629,13 @@ class AceCodeEditor @JvmOverloads constructor(
                 if (domPinchTouchActive) {
                     domPinchTouchActive = false
                     userTouching = false
+                    markPinchTouchSuppressed()
+                    suppressSoftInputAfterPinch()
                     return true
                 }
             }
         }
-        return false
+        return null
     }
 
     private fun configureWebView() {
@@ -1648,8 +1648,8 @@ class AceCodeEditor @JvmOverloads constructor(
             eventHistory.record(if (hasFocus) "focus" else "blur", "webView")
         }
         webView.setOnTouchListener { _, event ->
-            if (handleDomPinchTouchPassThrough(event)) {
-                return@setOnTouchListener false
+            handleDomPinchTouchDispatch(event)?.let { consume ->
+                return@setOnTouchListener consume
             }
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN,
@@ -2340,6 +2340,13 @@ class AceCodeEditor @JvmOverloads constructor(
         DISABLED,
         ;
 
+        val bridgeName: String
+            get() = when (this) {
+                CHANGE_TEXT_SIZE -> "change_text_size"
+                SCALE_VIEW -> "scale_view"
+                DISABLED -> "disabled"
+            }
+
         companion object {
             fun fromKey(key: String?): PinchZoomStrategy = when (key) {
                 key(R.string.key_editor_pinch_to_zoom_scale_view) -> SCALE_VIEW
@@ -2444,6 +2451,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ACTION_MODE_TOUCH_ANCHOR_HEIGHT_DP = 24f
         private const val INITIAL_FOCUS_RETRY_DELAY_MS = 120L
         private const val PINCH_TOUCH_SUPPRESS_MS = 320L
+        private const val PINCH_SOFT_INPUT_SUPPRESS_MS = 800L
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
         private const val BRIDGE_EVENT_STORM_THRESHOLD = 60
         private const val ACTION_MODE_COPY = 1

@@ -45,9 +45,11 @@
     var lastTouchClientX = -1;
     var lastTouchClientY = -1;
     var lastTouchAt = 0;
+    var currentFontSizeSp = 14;
     var bridgePinchZoomActive = false;
     var bridgePinchZoomStartDistance = 0;
-    var bridgePinchZoomLastScale = 1;
+    var bridgePinchZoomBaseFontSizeSp = 14;
+    var bridgePinchZoomCurrentFontSizeSp = 14;
     var bridgePinchZoomLastFocus = { x: 0, y: 0 };
     var programmaticScrollUntil = 0;
     var foldTapCandidate = null;
@@ -439,16 +441,15 @@
             return false;
         }
         resetAceBuiltInBodyZoom();
+        if (!bridgePinchZoomActive && !isBridgePinchZoomEnabled()) {
+            stopDomTouchEvent(event);
+            return true;
+        }
         if (!bridgePinchZoomActive || event.type === "touchstart") {
-            bridgePinchZoomActive = true;
-            bridgePinchZoomStartDistance = distance;
-            bridgePinchZoomLastScale = 1;
-            bridgePinchZoomLastFocus = focus;
-            notifyBridgePinchZoom("begin", 1, focus);
+            startBridgePinchZoom(distance, focus);
         } else {
-            bridgePinchZoomLastScale = distance / bridgePinchZoomStartDistance;
             bridgePinchZoomLastFocus = focus;
-            notifyBridgePinchZoom("change", bridgePinchZoomLastScale, focus);
+            applyBridgePinchZoom(distance / bridgePinchZoomStartDistance, focus);
         }
         stopDomTouchEvent(event);
         return true;
@@ -479,10 +480,36 @@
         };
     }
 
-    function notifyBridgePinchZoom(phase, scale, focus) {
+    function isBridgePinchZoomEnabled() {
+        return callBridgeString("getPinchToZoomStrategy", "change_text_size") !== "disabled";
+    }
+
+    function startBridgePinchZoom(distance, focus) {
+        bridgePinchZoomActive = true;
+        bridgePinchZoomStartDistance = distance;
+        bridgePinchZoomBaseFontSizeSp = currentFontSizeSp;
+        bridgePinchZoomCurrentFontSizeSp = currentFontSizeSp;
+        bridgePinchZoomLastFocus = focus;
+        cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + 1200);
+        cancelAceMobileTouchInteraction("pinch_zoom_begin");
+        notifyBridgePinchZoom("begin", currentFontSizeSp, focus);
+    }
+
+    function applyBridgePinchZoom(scale, focus) {
+        if (!bridgePinchZoomActive || !scale || scale <= 0) {
+            return;
+        }
+        var targetSize = clampFontSizeSp(bridgePinchZoomBaseFontSizeSp * scale);
+        if (Math.abs(targetSize - bridgePinchZoomCurrentFontSizeSp) < 0.025) {
+            return;
+        }
+        bridgePinchZoomCurrentFontSizeSp = applyFontSizeSpKeepingFocusForPinch(targetSize, focus);
+    }
+
+    function notifyBridgePinchZoom(phase, fontSizeSp, focus) {
         focus = focus || bridgePinchZoomLastFocus || { x: 0, y: 0 };
         callBridge("handlePinchZoom", [
-            Number(scale) || 1,
+            Number(fontSizeSp) || currentFontSizeSp || 14,
             Number(focus.x) || 0,
             Number(focus.y) || 0,
             String(phase || "")
@@ -491,12 +518,18 @@
 
     function finishBridgePinchZoom(event) {
         if (bridgePinchZoomActive) {
+            var finalSize = Math.round(bridgePinchZoomCurrentFontSizeSp);
+            if (Math.abs(finalSize - bridgePinchZoomCurrentFontSizeSp) >= 0.001) {
+                bridgePinchZoomCurrentFontSizeSp = applyFontSizeSpKeepingFocusForPinch(finalSize, bridgePinchZoomLastFocus);
+            }
             notifyBridgePinchZoom(
                 event && event.type === "touchcancel" ? "cancel" : "end",
-                bridgePinchZoomLastScale,
+                bridgePinchZoomCurrentFontSizeSp,
                 bridgePinchZoomLastFocus
             );
             bridgePinchZoomActive = false;
+            cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + 1200);
+            cancelAceMobileTouchInteraction("pinch_zoom_end");
             stopDomTouchEvent(event);
         }
         resetAceBuiltInBodyZoom();
@@ -1602,11 +1635,19 @@
         notifyStateChanged("themeChanged");
     }
 
-    function applyFontSizeSp(size) {
-        var sp = Math.max(MIN_FONT_SIZE_SP, Math.min(Number(size) || 14, MAX_FONT_SIZE_SP));
+    function clampFontSizeSp(size) {
+        return Math.max(MIN_FONT_SIZE_SP, Math.min(Number(size) || 14, MAX_FONT_SIZE_SP));
+    }
+
+    function applyFontSizeSp(size, options) {
+        options = options || {};
+        var sp = clampFontSizeSp(size);
+        currentFontSizeSp = sp;
         editor.setFontSize(sp + "px");
-        forceRendererCoordinateRefresh("font_size_apply");
-        scheduleFontMetricsRefresh("font_size_apply");
+        forceRendererCoordinateRefresh(options.reason || "font_size_apply");
+        if (options.deferRefresh !== false) {
+            scheduleFontMetricsRefresh(options.reason || "font_size_apply");
+        }
         return sp;
     }
 
@@ -1737,6 +1778,24 @@
         scrollByDelta(after.pageX - x, after.pageY - y);
         resizeForFocusPreservingFontSize("font_size_focus_after_scroll");
         notifyStateChanged("fontSizeFocusChanged");
+    }
+
+    function applyFontSizeSpKeepingFocusForPinch(size, focus) {
+        if (!editor || !editor.renderer || !editor.renderer.screenToTextCoordinates || !editor.renderer.textToScreenCoordinates) {
+            return applyFontSizeSp(size, { reason: "pinch_font_size", deferRefresh: false });
+        }
+        var renderer = editor.renderer;
+        var x = Number(focus && focus.x);
+        var y = Number(focus && focus.y);
+        if (!isFinite(x) || !isFinite(y)) {
+            return applyFontSizeSp(size, { reason: "pinch_font_size", deferRefresh: false });
+        }
+        cursorRevealSuppressUntil = Math.max(cursorRevealSuppressUntil, Date.now() + 1200);
+        var anchor = renderer.screenToTextCoordinates(x, y);
+        var appliedSize = applyFontSizeSp(size, { reason: "pinch_font_size", deferRefresh: false });
+        var after = renderer.textToScreenCoordinates(anchor.row, anchor.column);
+        scrollByDelta(after.pageX - x, after.pageY - y);
+        return appliedSize;
     }
 
     function setFontFamily(fontFamily) {

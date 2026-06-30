@@ -88,6 +88,11 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun getPinchToZoomStrategy(): String {
+        return editor.bridgePinchToZoomStrategy()
+    }
+
+    @JavascriptInterface
     fun shouldForceJsInitThrow(): Boolean {
         return AceEditorTestHooks.shouldForceJsInitThrow()
     }
