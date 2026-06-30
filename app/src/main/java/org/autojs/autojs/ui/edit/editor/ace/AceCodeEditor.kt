@@ -201,6 +201,9 @@ class AceCodeEditor @JvmOverloads constructor(
     private var lastTextTouchX = -1f
     private var lastTextTouchY = -1f
     private var lastTextTouchAtUptimeMillis = 0L
+    private var domPinchTouchActive = false
+    private var bridgePinchActive = false
+    private var bridgePinchBaseTextSizeSp = DEFAULT_TEXT_SIZE_SP
     private var bridgeEventWindowStartedAtUptimeMillis = 0L
     private var bridgeEventWindowCount = 0
     private var lastBridgeEventWindowCount = 0
@@ -561,6 +564,71 @@ class AceCodeEditor @JvmOverloads constructor(
         return getString(R.string.key_editor_pinch_to_zoom_strategy, R.string.default_key_editor_pinch_to_zoom_strategy)
     }
 
+    internal fun handleBridgePinchZoom(scaleFactor: Double, focusX: Double, focusY: Double, phase: String) {
+        postToMain {
+            if (!isReady || destroyed || pinchZoomStrategy == PinchZoomStrategy.DISABLED) {
+                bridgePinchActive = false
+                return@postToMain
+            }
+            val safeScaleFactor = scaleFactor
+                .takeIf { it.isFinite() && it > 0.0 }
+                ?.toFloat()
+                ?: return@postToMain
+            val safeFocusX = focusX.takeIf { it.isFinite() }?.toFloat() ?: 0f
+            val safeFocusY = focusY.takeIf { it.isFinite() }?.toFloat() ?: 0f
+            when (phase) {
+                "begin" -> {
+                    bridgePinchActive = true
+                    bridgePinchBaseTextSizeSp = baseTextSizeSp
+                    markPinchTouchSuppressed()
+                    pendingSelectionActionModeRequest = null
+                    mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
+                    finishSelectionActionMode()
+                }
+                "change" -> {
+                    if (!bridgePinchActive) {
+                        bridgePinchActive = true
+                        bridgePinchBaseTextSizeSp = baseTextSizeSp
+                    }
+                    val targetSize = bridgePinchTargetTextSize(safeScaleFactor)
+                    applyBridgePinchTextSize(targetSize, safeFocusX, safeFocusY, persist = false)
+                }
+                "end", "cancel" -> {
+                    if (bridgePinchActive) {
+                        val targetSize = bridgePinchTargetTextSize(safeScaleFactor)
+                            .roundToInt()
+                            .coerceIn(MIN_TEXT_SIZE_SP.roundToInt(), MAX_TEXT_SIZE_SP.roundToInt())
+                            .toFloat()
+                        applyBridgePinchTextSize(targetSize, safeFocusX, safeFocusY, persist = true)
+                    }
+                    bridgePinchActive = false
+                    markPinchTouchSuppressed()
+                }
+            }
+        }
+    }
+
+    private fun bridgePinchTargetTextSize(scaleFactor: Float): Float {
+        val scaled = bridgePinchBaseTextSizeSp * scaleFactor
+        return when (pinchZoomStrategy) {
+            PinchZoomStrategy.CHANGE_TEXT_SIZE -> scaled.roundToInt().toFloat()
+            PinchZoomStrategy.SCALE_VIEW -> scaled
+            PinchZoomStrategy.DISABLED -> baseTextSizeSp
+        }.coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
+    }
+
+    private fun applyBridgePinchTextSize(size: Float, focusX: Float, focusY: Float, persist: Boolean) {
+        val safeSize = size.coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
+        if (!persist && abs(safeSize - baseTextSizeSp) < MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP) {
+            return
+        }
+        baseTextSizeSp = safeSize
+        viewZoomScale = 1f
+        scaleViewGestureChanged = false
+        applyEffectiveTextSizeSpCssFocus(safeSize, focusX, focusY)
+        onTextSizeSpChangedByGesture?.invoke(safeSize, persist)
+    }
+
     private fun handlePinchToZoomTouch(event: MotionEvent): Boolean {
         val detector = when (pinchZoomStrategy) {
             PinchZoomStrategy.CHANGE_TEXT_SIZE -> changeTextSizeScaleGestureDetector
@@ -682,6 +750,11 @@ class AceCodeEditor @JvmOverloads constructor(
         val focusCssX = focusX / cssScale
         val focusCssY = focusY / cssScale
         invokeAce("setFontSizeSpKeepingFocus", "$safeSize, $focusCssX, $focusCssY")
+    }
+
+    private fun applyEffectiveTextSizeSpCssFocus(size: Float, focusX: Float, focusY: Float) {
+        val safeSize = size.coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
+        invokeAce("setFontSizeSpKeepingFocus", "$safeSize, $focusX, $focusY")
     }
 
     fun toggleBreakpoint(line: Int) {
@@ -1529,6 +1602,42 @@ class AceCodeEditor @JvmOverloads constructor(
         return (resources.displayMetrics.density * IME_HEIGHT_THRESHOLD_DP).toInt()
     }
 
+    private fun handleDomPinchTouchPassThrough(event: MotionEvent): Boolean {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                domPinchTouchActive = true
+                userTouching = true
+                onUserTouchInTextArea?.invoke()
+                return true
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                if (domPinchTouchActive || event.pointerCount > 1) {
+                    domPinchTouchActive = true
+                    userTouching = true
+                    return true
+                }
+            }
+
+            MotionEvent.ACTION_POINTER_UP -> {
+                if (domPinchTouchActive) {
+                    return true
+                }
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL,
+                -> {
+                if (domPinchTouchActive) {
+                    domPinchTouchActive = false
+                    userTouching = false
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
     private fun configureWebView() {
         webView.setBackgroundColor(editorBackgroundColor())
         webView.isFocusable = true
@@ -1539,8 +1648,8 @@ class AceCodeEditor @JvmOverloads constructor(
             eventHistory.record(if (hasFocus) "focus" else "blur", "webView")
         }
         webView.setOnTouchListener { _, event ->
-            if (handlePinchToZoomTouch(event)) {
-                return@setOnTouchListener true
+            if (handleDomPinchTouchPassThrough(event)) {
+                return@setOnTouchListener false
             }
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN,

@@ -45,6 +45,10 @@
     var lastTouchClientX = -1;
     var lastTouchClientY = -1;
     var lastTouchAt = 0;
+    var bridgePinchZoomActive = false;
+    var bridgePinchZoomStartDistance = 0;
+    var bridgePinchZoomLastScale = 1;
+    var bridgePinchZoomLastFocus = { x: 0, y: 0 };
     var programmaticScrollUntil = 0;
     var foldTapCandidate = null;
     var gutterFoldClickSuppressUntil = 0;
@@ -429,7 +433,23 @@
         if (!event || !event.touches || event.touches.length < 2) {
             return false;
         }
+        var distance = pinchDistanceFromTouches(event.touches);
+        var focus = pinchFocusFromTouches(event.touches);
+        if (!distance || distance <= 0) {
+            return false;
+        }
         resetAceBuiltInBodyZoom();
+        if (!bridgePinchZoomActive || event.type === "touchstart") {
+            bridgePinchZoomActive = true;
+            bridgePinchZoomStartDistance = distance;
+            bridgePinchZoomLastScale = 1;
+            bridgePinchZoomLastFocus = focus;
+            notifyBridgePinchZoom("begin", 1, focus);
+        } else {
+            bridgePinchZoomLastScale = distance / bridgePinchZoomStartDistance;
+            bridgePinchZoomLastFocus = focus;
+            notifyBridgePinchZoom("change", bridgePinchZoomLastScale, focus);
+        }
         stopDomTouchEvent(event);
         return true;
     }
@@ -438,6 +458,48 @@
         resetAceBuiltInBodyZoom();
         stopDomTouchEvent(event);
         return true;
+    }
+
+    function pinchDistanceFromTouches(touches) {
+        if (!touches || touches.length < 2) {
+            return 0;
+        }
+        var dx = Number(touches[0].clientX) - Number(touches[1].clientX);
+        var dy = Number(touches[0].clientY) - Number(touches[1].clientY);
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function pinchFocusFromTouches(touches) {
+        if (!touches || touches.length < 2) {
+            return bridgePinchZoomLastFocus;
+        }
+        return {
+            x: (Number(touches[0].clientX) + Number(touches[1].clientX)) / 2,
+            y: (Number(touches[0].clientY) + Number(touches[1].clientY)) / 2
+        };
+    }
+
+    function notifyBridgePinchZoom(phase, scale, focus) {
+        focus = focus || bridgePinchZoomLastFocus || { x: 0, y: 0 };
+        callBridge("handlePinchZoom", [
+            Number(scale) || 1,
+            Number(focus.x) || 0,
+            Number(focus.y) || 0,
+            String(phase || "")
+        ]);
+    }
+
+    function finishBridgePinchZoom(event) {
+        if (bridgePinchZoomActive) {
+            notifyBridgePinchZoom(
+                event && event.type === "touchcancel" ? "cancel" : "end",
+                bridgePinchZoomLastScale,
+                bridgePinchZoomLastFocus
+            );
+            bridgePinchZoomActive = false;
+            stopDomTouchEvent(event);
+        }
+        resetAceBuiltInBodyZoom();
     }
 
     function installAceBuiltInPinchZoomSuppression() {
@@ -449,12 +511,12 @@
             editor.container.addEventListener(type, suppressAceBuiltInPinchZoom, true);
         });
         ["touchend", "touchcancel"].forEach(function(type) {
-            editor.container.addEventListener(type, resetAceBuiltInBodyZoom, true);
+            editor.container.addEventListener(type, finishBridgePinchZoom, true);
         });
         if (document && document.addEventListener) {
             document.addEventListener("gesturestart", suppressAceBuiltInGestureZoom, true);
             document.addEventListener("gesturechange", suppressAceBuiltInGestureZoom, true);
-            document.addEventListener("gestureend", resetAceBuiltInBodyZoom, true);
+            document.addEventListener("gestureend", finishBridgePinchZoom, true);
         }
     }
 

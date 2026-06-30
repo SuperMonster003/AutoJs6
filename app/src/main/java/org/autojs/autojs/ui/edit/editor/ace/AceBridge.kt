@@ -125,6 +125,11 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun handlePinchZoom(scaleFactor: Double, focusX: Double, focusY: Double, phase: String?) {
+        editor.handleBridgePinchZoom(scaleFactor, focusX, focusY, phase.orEmpty())
+    }
+
+    @JavascriptInterface
     fun read(uri: String?): String {
         return unavailableFileAccess(uri)
     }
