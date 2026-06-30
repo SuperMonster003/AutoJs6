@@ -1564,6 +1564,8 @@
     <string name="text_ace_read_only_mode_enabled">只读模式已启用</string>
     <string name="text_ace_read_only_mode_disabled">只读模式已关闭</string>
     <string name="text_ace_action_favorites">行为收藏夹</string>
+    <string name="text_usage_instructions">使用说明</string>
+    <string name="description_ace_action_favorites">行为收藏夹会记录常用的编辑器行为，例如运行、保存、格式化、菜单操作、长按菜单操作以及编辑器设置操作。点击星星按钮可打开此列表，点击条目可重新执行对应行为，长按星星按钮可重复上一次行为，拖动条目可调整顺序，向右滑动可固定或取消固定，向左滑动可删除。</string>
     <string name="text_ace_action_history_empty">暂无编辑器行为历史</string>
     <string name="text_ace_action_pin">固定</string>
     <string name="text_ace_action_pinned">已固定</string>

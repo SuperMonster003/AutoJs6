@@ -1162,6 +1162,8 @@
     <string name="text_editor_breakpoint_markers_enabled">Breakpoint markers</string>
     <string name="text_editor_fold_markers_enabled">Code folding markers</string>
     <string name="text_ace_action_favorites">Action favorites</string>
+    <string name="text_usage_instructions">Usage</string>
+    <string name="description_ace_action_favorites">Action favorites records editor actions you use often, such as run, save, formatting, menu actions, long-press actions, and editor setting actions. Tap the star button to open this list, tap an item to repeat the action, long-press the star button to repeat the most recent action, drag items to reorder them, swipe right to pin or unpin, and swipe left to delete.</string>
     <string name="text_ace_action_history_empty">No editor action history</string>
     <string name="text_ace_action_pin">Pin</string>
     <string name="text_ace_action_pinned">Pinned</string>
