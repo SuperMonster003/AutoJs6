@@ -303,7 +303,7 @@ class CodeEditor : HVScrollView {
                 mScaleGestureDetector = mScaleGestureDetectorForChangeTextSize
             }
             key(R.string.key_editor_pinch_to_zoom_scale_view) -> {
-                // TODO by SuperMonster003 on Oct 17, 2022.
+                mScaleGestureDetector = mScaleGestureDetectorForChangeTextSize
             }
             key(R.string.key_editor_pinch_to_zoom_disable) -> {
                 mScaleGestureDetector = null

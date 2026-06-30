@@ -5,8 +5,6 @@ import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.preference.MaterialPreference
-import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
-import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.StringUtils.key
@@ -41,17 +39,11 @@ class EditorPinchToZoomPreference : MaterialPreference {
             return
         }
         val itemKeys = keys()
-        val disabledIndices = disabledIndices(itemKeys)
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(prefContext)
                 .title(R.string.text_pinch_to_zoom)
                 .items(values())
                 .choiceWidgetThemeColor()
-                .also { builder ->
-                    if (disabledIndices.isNotEmpty()) {
-                        builder.itemsDisabledIndices(*disabledIndices.toTypedArray())
-                    }
-                }
                 .itemsCallbackSingleChoice(currentIndex()) { _, _, which, _ ->
                     Pref.putString(key(R.string.key_editor_pinch_to_zoom_strategy), itemKeys[which])
                     notifyChanged()
@@ -67,10 +59,7 @@ class EditorPinchToZoomPreference : MaterialPreference {
 
     private fun currentIndex(): Int {
         val keys = keys()
-        val current = Pref.getString(
-            key(R.string.key_editor_pinch_to_zoom_strategy),
-            key(R.string.default_key_editor_pinch_to_zoom_strategy),
-        )
+        val current = currentKey()
         return keys.indexOf(current).coerceAtLeast(0)
     }
 
@@ -86,10 +75,15 @@ class EditorPinchToZoomPreference : MaterialPreference {
         return prefContext.resources.getStringArray(R.array.values_editor_pinch_to_zoom_strategy).toList()
     }
 
-    private fun disabledIndices(itemKeys: List<String>): List<Int> {
-        if (EditorEnginePreferences.get() == EditorEngineType.ACE) {
-            return emptyList()
+    private fun currentKey(): String {
+        val current = Pref.getString(
+            key(R.string.key_editor_pinch_to_zoom_strategy),
+            key(R.string.default_key_editor_pinch_to_zoom_strategy),
+        )
+        return if (current == key(R.string.key_editor_pinch_to_zoom_scale_view)) {
+            key(R.string.key_editor_pinch_to_zoom_change_text_size)
+        } else {
+            current
         }
-        return listOfNotNull(itemKeys.indexOf(key(R.string.key_editor_pinch_to_zoom_scale_view)).takeIf { it >= 0 })
     }
 }

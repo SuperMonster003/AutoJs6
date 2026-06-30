@@ -133,7 +133,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         setPreferenceAvailable(R.string.key_editor_code_highlight_threshold_bytes, nativeSelected)
         setPreferenceAvailable(R.string.key_editor_large_file_mode_threshold_bytes, nativeSelected)
 
-        if (!aceSelected && currentPinchToZoomKey() == getString(R.string.key_editor_pinch_to_zoom_scale_view)) {
+        if (currentPinchToZoomKey() == getString(R.string.key_editor_pinch_to_zoom_scale_view)) {
             Pref.putString(
                 key(R.string.key_editor_pinch_to_zoom_strategy),
                 key(R.string.key_editor_pinch_to_zoom_change_text_size),

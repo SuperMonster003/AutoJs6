@@ -2465,13 +2465,12 @@ class AceCodeEditor @JvmOverloads constructor(
         val bridgeName: String
             get() = when (this) {
                 CHANGE_TEXT_SIZE -> "change_text_size"
-                SCALE_VIEW -> "scale_view"
+                SCALE_VIEW -> "change_text_size"
                 DISABLED -> "disabled"
             }
 
         companion object {
             fun fromKey(key: String?): PinchZoomStrategy = when (key) {
-                key(R.string.key_editor_pinch_to_zoom_scale_view) -> SCALE_VIEW
                 key(R.string.key_editor_pinch_to_zoom_disable) -> DISABLED
                 else -> CHANGE_TEXT_SIZE
             }
