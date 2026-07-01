@@ -158,6 +158,23 @@ foreground disclosure. It records ownership and denial expectations:
   `RemoteViews`, DND mutation, foreground disclosure stop action, and packaged
   post/cancel behavior stay future-promotion blockers.
 
+## P14-23 settings/power denial sync
+
+P14-23 does not add a new error code or promote direct power-manager mutation.
+It records the current `device.power` denial expectations:
+
+- Missing `device.power` capability for battery optimization APIs still rejects
+  before bridge dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- `device.openBatteryOptimizationSettings({ dryRun: true })` remains the
+  automated-test path; settings mutation or request-ignore-battery-optimizations
+  prompt flows require reviewed copy and rollback evidence before promotion.
+- Direct Doze mutation, wake locks, exact-alarm scheduling, background-launch
+  bypasses, raw `PowerManager`, raw `WakeLock`, raw `AlarmManager`,
+  `PendingIntent`, `Intent`, `Context`, OEM manager handles, and Java objects
+  stay future-promotion blockers.
+- Android 12/15+ OEM matrix, exact-alarm state, background-launch restriction,
+  and prompt/rollback archives must exist before any mutation flow is promoted.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

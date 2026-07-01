@@ -3175,6 +3175,13 @@ writes `phase14-notification-ownership.json` plus `.md`, imports live
 permission/status/settings handoff evidence, manifest denials, and keeps
 packaged post/cancel, foreground disclosure/stop action, device matrix,
 advanced notification, and rollback cleanup archives unpromoted.
+`:app:verifyNodePhase14SettingsPowerOemBackgroundMatrix` depends on the P14-22
+notification ownership gate and the Phase 13 notifications/settings/power gate.
+It writes `phase14-settings-power-oem-background-matrix.json` plus `.md`,
+imports `device.power` battery optimization status/settings dry-run evidence,
+records Android 12/15+, exact-alarm, background-launch, OEM, prompt, and
+rollback archive requirements, and keeps direct power-manager, wake-lock,
+exact-alarm, and background-launch mutation authority denied.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

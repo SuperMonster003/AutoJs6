@@ -1185,6 +1185,12 @@ plus `.md`, imports P13-25 notification/settings evidence and live Android
 post/cancel ownership evidence, records foreground disclosure/stop-action and
 advanced notification boundaries, and keeps packaged notification promotion
 unpromoted.
+The `:app:verifyNodePhase14SettingsPowerOemBackgroundMatrix` gate writes
+`phase14-settings-power-oem-background-matrix.json` plus `.md`, imports P13-25
+`device.power` status/settings dry-run evidence, records Android 12/15+,
+exact-alarm, background-launch, OEM, prompt, and rollback archive requirements,
+and keeps direct power-manager, wake-lock, exact-alarm, and background-launch
+mutation authority denied.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

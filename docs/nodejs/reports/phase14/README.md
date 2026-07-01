@@ -141,3 +141,10 @@ foreground disclosure evidence as `partial`. It imports P13-25
 notification/settings evidence and live Android `notify`/`cancel` ownership
 coverage while keeping packaged post/cancel, foreground disclosure/stop action,
 permission matrix, advanced notification, and rollback cleanup archives open.
+
+`P14_23_SETTINGS_POWER_OEM_BACKGROUND_MATRIX.md` records settings/power OEM
+and background-launch matrix evidence as `partial`. It imports P13-25
+`device.power` status/settings dry-run evidence, records Android 12/15+,
+exact-alarm, background-launch, OEM, prompt, and rollback archive requirements,
+and keeps direct power-manager mutation authority unpromoted behind
+`:app:verifyNodePhase14SettingsPowerOemBackgroundMatrix`.

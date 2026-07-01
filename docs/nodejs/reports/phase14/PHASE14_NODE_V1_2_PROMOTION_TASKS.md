@@ -559,6 +559,28 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-23: Add settings/power OEM and background-launch matrix.
   - Scope: battery optimization state, exact-alarm state, settings dry-run,
     background launch behavior, Android 15+ restrictions, and OEM notes.
+  - Gate: `:app:verifyNodePhase14SettingsPowerOemBackgroundMatrix`.
+  - Settings/power OEM and background-launch matrix gate deployed:
+    - Adds `docs/nodejs/phase14/settings-power-oem-background-matrix.json`
+      and `PHASE14_SETTINGS_POWER_OEM_BACKGROUND_MATRIX.md`.
+    - Imports P13-25 `device.power` battery optimization status/settings
+      dry-run evidence, `autojs6-node-battery-optimization-settings-v1`
+      snapshots, exact manifest denial, raw-object denial, and sensitive
+      device-field omission evidence.
+    - Records Android 12 class and Android 15+ class matrix requirements for
+      battery optimization status/settings, exact-alarm state,
+      background-launch behavior, OEM notes, task removal, crash recovery,
+      disclosure handoff, and rollback behavior.
+    - Keeps request-ignore-battery-optimizations mutation, direct Doze
+      mutation, wake locks, exact-alarm scheduling, background-launch bypass,
+      raw `PowerManager`, raw `WakeLock`, raw `AlarmManager`, `PendingIntent`,
+      `Intent`, `Context`, OEM manager handles, and Java objects denied.
+    - Keeps Android 12/15+ OEM matrix, exact-alarm state,
+      background-launch restriction, and prompt/rollback archives open as
+      `future_promotion`.
+    - Writes
+      `build/reports/nodejs/phase14-settings-power-oem-background-matrix.json`
+      and `.md`.
   - Acceptance: mutation flows stay denied unless a reviewed prompt and
     rollback path exists.
 
