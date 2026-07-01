@@ -30,6 +30,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14PackagedTaskSchedulingSmoke`
 - `:app:verifyNodePhase14IntentBroadcastProvider`
 - `:app:verifyNodePhase14PackagedBroadcastTriggerRemoveSmoke`
+- `:app:verifyNodePhase14NotificationOwnership`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -134,3 +135,9 @@ packaged IntentTask/broadcast boundary smoke, reserves future positive
 install/trigger/remove/relaunch/crash/denial markers, and keeps positive
 trigger, cleanup, relaunch/crash, undeclared-capability, and exported receiver
 archives open.
+
+`P14_22_NOTIFICATION_OWNERSHIP.md` records notification ownership and
+foreground disclosure evidence as `partial`. It imports P13-25
+notification/settings evidence and live Android `notify`/`cancel` ownership
+coverage while keeping packaged post/cancel, foreground disclosure/stop action,
+permission matrix, advanced notification, and rollback cleanup archives open.

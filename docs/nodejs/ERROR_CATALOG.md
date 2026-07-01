@@ -141,6 +141,23 @@ execution. It records packaged denial and cleanup expectations:
 - Exported receivers remain unavailable unless a later gate adds explicit
   metadata, allowlists, permission policy, abuse review, and device evidence.
 
+## P14-22 notification ownership denial sync
+
+P14-22 does not add a new error code or promote packaged notification
+foreground disclosure. It records ownership and denial expectations:
+
+- Missing `notifications` or `notifications.settings` capabilities still reject
+  before bridge dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Missing Android `POST_NOTIFICATIONS` permission or disabled app
+  notifications still reject notification posting with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`.
+- `cancel` and `cancelAll` must close only provider-owned active notification
+  records; unknown ids remain no-op and must not expose or cancel raw external
+  notification handles.
+- Actions, groups, styles, inline reply, remote input, listeners,
+  `RemoteViews`, DND mutation, foreground disclosure stop action, and packaged
+  post/cancel behavior stay future-promotion blockers.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

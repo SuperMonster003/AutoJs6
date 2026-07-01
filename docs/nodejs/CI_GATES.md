@@ -1085,6 +1085,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedTaskSchedulingSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase14IntentBroadcastProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedBroadcastTriggerRemoveSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase14NotificationOwnership
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1178,6 +1179,11 @@ The packaged broadcast trigger/remove smoke gate writes
 current packaged IntentTask/broadcast boundary smoke, reserves future positive
 install/trigger/remove/relaunch/crash/denial markers, records owner-scoped
 cleanup policy, and keeps packaged broadcast task trigger/remove promotion
+unpromoted.
+The notification ownership gate writes `phase14-notification-ownership.json`
+plus `.md`, imports P13-25 notification/settings evidence and live Android
+post/cancel ownership evidence, records foreground disclosure/stop-action and
+advanced notification boundaries, and keeps packaged notification promotion
 unpromoted.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash

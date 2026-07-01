@@ -534,7 +534,25 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-22: Add notification ownership and foreground disclosure evidence.
   - Scope: notification post/cancel ownership, stop action, permission denial,
     group/style/action stable denial or promotion decision, and cleanup.
-  - Gate: proposed `:app:verifyNodePhase14NotificationOwnership`.
+  - Gate: `:app:verifyNodePhase14NotificationOwnership`.
+  - Notification ownership gate deployed:
+    - Adds `docs/nodejs/phase14/notification-ownership-plan.json` and
+      `PHASE14_NOTIFICATION_OWNERSHIP.md`.
+    - Imports P13-25 notification/settings evidence, JSON-safe permission
+      snapshots, packaged notification/settings/power boundary evidence, and
+      exact `notifications.settings` capability denial.
+    - Imports live Android provider evidence for `notify`, `cancel`,
+      `cancelAll`, `getPermissionStatus`, and `openSettings`, including
+      `NOTIFICATION` resource registration, cancel cleanup, provider destroy
+      cleanup, and POST_NOTIFICATIONS permission-denied behavior.
+    - Records owner-scoped notification id handling, update release,
+      `MAX_ACTIVE_NOTIFICATIONS`, foreground disclosure/stop-action
+      requirements, and Safe downgrade cleanup policy.
+    - Keeps packaged post/cancel, foreground disclosure/stop action,
+      permission device matrix, advanced actions/groups/styles decision, and
+      rollback cleanup archives open as `future_promotion`.
+    - Writes `build/reports/nodejs/phase14-notification-ownership.json` and
+      `.md`.
   - Acceptance: Node can cancel only owned notifications and cannot expose raw
     `Notification`, `PendingIntent`, `RemoteViews`, or listener handles.
 
