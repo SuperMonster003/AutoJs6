@@ -123,6 +123,10 @@ Use `screen_capture` only for manual physical-device validation after preparing 
   optional Android capture lifecycle evidence, but the Node bridge
   MediaProjection provider remains unavailable until permission prompt,
   foreground disclosure, stop cleanup, and packaged behavior are promoted.
+- P14-13 imports this smoke as an Activity-owned MediaProjection provider
+  anchor and keeps Android 12 class, Android 15+ class, foreground
+  disclosure/stop action, and task-removal/relaunch/crash archives open before
+  any `media_projection` promotion.
 
 Recommended command:
 

@@ -21,6 +21,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14PackagedOverlayPositiveSmoke`
 - `:app:verifyNodePhase14AccessibilityLifecycle`
 - `:app:verifyNodePhase14AccessibilitySelectorActionMatrix`
+- `:app:verifyNodePhase14MediaProjectionProvider`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -64,3 +65,10 @@ coverage, extends the manual accessibility profile with `longClick` and
 optional Recents coverage, imports P13-24 root/Shizuku denial evidence, and
 keeps Android 12/15+, global-action, and unsupported-tier archives as
 future-promotion blockers.
+
+`P14_13_MEDIA_PROJECTION_PROVIDER.md` records the Activity-owned
+MediaProjection provider contract as `partial`. It imports the P13-20
+screenshot/image/OCR state and the optional real-device `screen_capture` smoke
+anchor, keeps `media_projection` fail-closed, and keeps Android 12/15+ prompt
+capture, foreground disclosure/stop action, and task-removal/relaunch/crash
+archives as future-promotion blockers.

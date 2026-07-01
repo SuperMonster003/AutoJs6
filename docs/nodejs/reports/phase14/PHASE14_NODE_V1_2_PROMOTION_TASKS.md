@@ -310,7 +310,27 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-13: Implement Activity-owned MediaProjection provider.
   - Scope: request prompt, capture, stop, foreground disclosure, stop action,
     task removal cleanup, relaunch, crash recovery, and denial behavior.
-  - Gate: proposed `:app:verifyNodePhase14MediaProjectionProvider`.
+  - Gate: `:app:verifyNodePhase14MediaProjectionProvider`.
+  - MediaProjection provider gate deployed:
+    - Adds `docs/nodejs/phase14/media-projection-provider-plan.json` and
+      `PHASE14_MEDIA_PROJECTION_PROVIDER.md` for the Activity-owned
+      MediaProjection provider contract.
+    - Imports P13-20 screenshot/image/OCR evidence while keeping
+      `screenCaptureBridgeProviderReady=false` and `media_projection`
+      fail-closed.
+    - Imports the optional real-device `screen_capture` smoke anchor:
+      `NodeScreenCaptureRealDeviceSmokeInstrumentationTest#capturesOneFrameAfterUserGrantsScreenCapturePermission`.
+    - Records the raw object boundary for `MediaProjection`, `ImageReader`,
+      `Bitmap`, `Image`, display/surface objects, `ScreenCapturer`,
+      `ImageWrapper`, `Context`, `Activity`, and `Intent`.
+    - Writes `build/reports/nodejs/phase14-media-projection-provider.json`
+      and `.md`.
+    - Keeps open blockers
+      `media_projection_android12_prompt_capture_archive`,
+      `media_projection_android15_plus_prompt_capture_archive`,
+      `media_projection_foreground_disclosure_stop_action_archive`, and
+      `media_projection_task_removal_relaunch_crash_archive` as
+      `future_promotion`.
   - Acceptance: no raw `MediaProjection`, `ImageReader`, `Bitmap`, or display
     object escapes into Node.
 

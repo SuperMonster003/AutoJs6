@@ -3039,6 +3039,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedOverlayPositiveSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilityLifecycle
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilitySelectorActionMatrix
+.\gradlew.bat --console=plain :app:verifyNodePhase14MediaProjectionProvider
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3091,6 +3092,13 @@ Phase 13 shell/root/Shizuku gate. It writes
 selector/action real-device matrix, and keeps Android 12/15+ selector action,
 safe global-action, and unsupported-tier diagnostics archives as
 future-promotion blockers.
+`verifyNodePhase14MediaProjectionProvider` depends on the P14-12 selector
+matrix gate and the Phase 13 screenshot/image/OCR promotion gate. It writes
+`phase14-media-projection-provider.json` plus `.md`, verifies the
+Activity-owned MediaProjection provider contract, imports the optional
+`screen_capture` smoke anchor, keeps `media_projection` fail-closed, and keeps
+Android 12/15+ prompt capture, foreground disclosure/stop action, and
+task-removal/relaunch/crash archives as future-promotion blockers.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

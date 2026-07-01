@@ -1076,6 +1076,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedOverlayPositiveSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilityLifecycle
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilitySelectorActionMatrix
+.\gradlew.bat --console=plain :app:verifyNodePhase14MediaProjectionProvider
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1117,6 +1118,12 @@ selector/action real-device matrix, imports P13-19 selector and P13-24
 root/Shizuku denial evidence, and keeps Android 12/15+ selector action, safe
 global-action, and unsupported-tier diagnostics archives as future-promotion
 blockers.
+The MediaProjection provider gate writes
+`phase14-media-projection-provider.json` plus `.md`, verifies the
+Activity-owned prompt/capture contract, imports P13-20 and the optional
+`screen_capture` smoke anchor, keeps `media_projection` fail-closed, and keeps
+Android 12/15+ prompt capture, foreground disclosure/stop action, and
+task-removal/relaunch/crash archives as future-promotion blockers.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
