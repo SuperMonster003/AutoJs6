@@ -25,6 +25,7 @@ grant runtime authority.
 
 | Surface | Capability | Target profile | Prompt | Foreground disclosure | Android permission or setting |
 | --- | --- | --- | --- | --- | --- |
+| `live_ui` | `ui` | `pro_compat_opt_in` | required | required for packaged promotion | packaged Activity launch, relaunch, stop, and cleanup disclosure |
 | `screen_capture` | `screen_capture` | `pro_compat_opt_in` | required | required | MediaProjection prompt and foreground service permissions |
 | `media_recording` | `media.recording` | `pro_compat_opt_in` | required | required | `RECORD_AUDIO` and microphone foreground service |
 | `ui_overlay` | `ui.overlay` | `pro_compat_opt_in` | required | required | `SYSTEM_ALERT_WINDOW`, special-use foreground service, notification |

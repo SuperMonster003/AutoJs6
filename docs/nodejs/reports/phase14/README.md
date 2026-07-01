@@ -13,7 +13,16 @@ Foundation gates:
 - `:app:verifyNodePhase14SurfaceManifest`
 - `:app:verifyNodePhase14PromotionContracts`
 
+Provider POC gates:
+
+- `:app:verifyNodePhase14LiveUiProviderPackaged`
+
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
 media/recorder, and `worker_threads`. These items are v1.2 promotion work, not
 v1.1 release blockers.
+
+`P14_07_LIVE_UI_PROVIDER_PACKAGED.md` records the current packaged live UI
+state as `provider_poc`. It imports the `P13-17` packaged capability-denial and
+entry/update/close smoke evidence while keeping packaged task relaunch, crash
+recovery, and user-visible disclosure as future-promotion blockers.

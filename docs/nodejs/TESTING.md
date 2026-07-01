@@ -3033,6 +3033,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14Baseline
 .\gradlew.bat --console=plain :app:verifyNodePhase14SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase14PromotionContracts
+.\gradlew.bat --console=plain :app:verifyNodePhase14LiveUiProviderPackaged
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3047,6 +3048,12 @@ reopen. `verifyNodePhase14SurfaceManifest` writes
 promotion state vocabulary, report conventions, release-blocker
 classification, packaged high-privilege disclosure contract, rollback/crash
 circuit breaker contract, and Android 12 / Android 15+ device matrix fields.
+`verifyNodePhase14LiveUiProviderPackaged` depends on the Phase 13 live UI
+provider gate and the Phase 14 promotion contract gate. It writes
+`phase14-live-ui-provider-packaged.json` plus `.md`, imports the `P13-17`
+packaged UI capability-denial and entry/update/close smoke evidence, records
+`pro.ui_automation_media` as `provider_poc`, and keeps packaged task relaunch,
+crash recovery, and user-visible disclosure as future-promotion blockers.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

@@ -176,7 +176,15 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Scope: packaged UI task relaunch, task removal, crash recovery,
     user-visible disclosure, raw Android global absence, and pending-dispatch
     drain.
-  - Gate: proposed `:app:verifyNodePhase14LiveUiProviderPackaged`.
+  - Gate: `:app:verifyNodePhase14LiveUiProviderPackaged`.
+  - Partial gate deployed:
+    - Imports `P13-17` packaged capability-denial and entry/update/close smoke.
+    - Records `pro.ui_automation_media` as `provider_poc`, not promoted.
+    - Writes `build/reports/nodejs/phase14-live-ui-provider-packaged.json`
+      and `.md`.
+    - Keeps open blockers `packaged_task_relaunch`,
+      `packaged_crash_recovery`, and `packaged_user_visible_disclosure` as
+      `future_promotion`.
   - Acceptance: packaged UI entry/update/close/relaunch/crash smoke reports
     zero leaked handles and zero pending bridge dispatch.
 

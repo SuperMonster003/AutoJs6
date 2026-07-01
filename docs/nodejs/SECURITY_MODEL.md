@@ -543,7 +543,9 @@ packaged live UI remains provider-dependent until packaged task relaunch,
 crash, and disclosure evidence lands. Packaged missing-`ui` capability
 metadata now rejects before dispatch, and packaged entry/update/close smoke is
 covered. Configuration changes use an explicit destroy/recreate policy with no
-live UI survival claim.
+live UI survival claim. P14-07 imports this state as a `provider_poc` and keeps
+packaged task relaunch, crash recovery, and user-visible disclosure as future
+promotion blockers.
 
 S11-23 records Rhino `ui` compatibility as design-gated. `ui.layout()` and `ui.layoutFile()` may migrate only through constrained JSON descriptors passed to `require("ui").showLayout()`, and updates must use `UiHandle.update()` / `UiHandle.batchUpdate()`. `ui.run()` and `ui.post()` are blocked by design for Node because they imply JavaScript execution on Android's main thread; Node callbacks run on the Node event loop after bounded `drainEvents` snapshots. `ui.inflate()`, `setContentView(view)`, `findView()`, `root`, widget registries, `R`, and Activity emitters must not expose `NativeView` or Android `View` objects to Node.
 

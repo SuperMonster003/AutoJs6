@@ -1070,6 +1070,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14Baseline
 .\gradlew.bat --console=plain :app:verifyNodePhase14SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase14PromotionContracts
+.\gradlew.bat --console=plain :app:verifyNodePhase14LiveUiProviderPackaged
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1080,7 +1081,11 @@ Gradle wiring, and exact P14-00 through P14-39 task ownership. The promotion
 contracts gate verifies shared v1.2 promotion states, report conventions,
 release-blocker classification, packaged high-privilege disclosure, rollback
 and crash circuit breaker fields, and Android 12 / Android 15+ device matrix
-requirements.
+requirements. The packaged live UI provider gate writes
+`phase14-live-ui-provider-packaged.json` plus `.md`, imports the `P13-17`
+packaged UI capability-denial and entry/update/close smoke evidence, records
+`pro.ui_automation_media` as `provider_poc`, and keeps packaged task relaunch,
+crash recovery, and user-visible disclosure as future-promotion blockers.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

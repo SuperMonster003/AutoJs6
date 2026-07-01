@@ -103,7 +103,7 @@
     },
     {
       "id": "pro.ui_automation_media",
-      "status": "planned",
+      "status": "provider_poc",
       "profiles": [
         "pro_compat_opt_in"
       ],
@@ -119,7 +119,7 @@
         "P14-15",
         "P14-16"
       ],
-      "summary": "Promote packaged live UI, Android overlay, accessibility selector lifecycle, MediaProjection, advanced image operations, packaged OCR/image quotas, and synchronized docs/types.",
+      "summary": "Promote packaged live UI, Android overlay, accessibility selector lifecycle, MediaProjection, advanced image operations, packaged OCR/image quotas, and synchronized docs/types. P14-07 currently records packaged live UI provider POC evidence without promotion.",
       "risk": "high",
       "runtimeSurface": [
         "require(\"ui\") packaged live provider",
@@ -134,7 +134,12 @@
         "docs/nodejs/reports/phase13/P13_18_OVERLAY_PROVIDER_PROMOTION.md",
         "docs/nodejs/reports/phase13/P13_19_ACCESSIBILITY_SELECTOR_PROMOTION.md",
         "docs/nodejs/reports/phase13/P13_20_SCREENSHOT_IMAGE_OCR_PROMOTION.md",
-        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"
+        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md",
+        "docs/nodejs/reports/phase14/P14_07_LIVE_UI_PROVIDER_PACKAGED.md",
+        "tools/nodejs/phase14/verify-node-phase14-live-ui-packaged.js",
+        ":app:verifyNodePhase14LiveUiProviderPackaged",
+        "build/reports/nodejs/phase14-live-ui-provider-packaged.json",
+        "build/reports/nodejs/phase14-live-ui-provider-packaged.md"
       ],
       "rollback": "Fail closed to current Phase 13 provider POC or stable denial behavior for UI, overlay, accessibility, MediaProjection, image, and OCR surfaces."
     },
