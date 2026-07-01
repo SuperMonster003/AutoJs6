@@ -1,6 +1,6 @@
 # P13-08 Full Heavy Resource Stress
 
-Status: partial
+Status: ready
 
 P13-08 tracks the final internal blocker for long-duration runtime stability.
 The existing Phase 7 and Phase 11 gates already cover the short stress anchors:
@@ -34,15 +34,17 @@ required 8 hour quick soak and 24 hour final soak.
 - Focused two-slot resource stress:
   `NodeEmbeddedProcessPoolPolicyInstrumentationTest.concurrentSlotsStressSharedResourcesRemainIsolated`
 
-The gate is intentionally non-closing while either long-duration report is
-missing, under-duration, missing comparable metrics, or reporting leaks,
-orphan processes, or unrecoverable runtime failures.
+The gate now closes after the canonical quick and final long-duration reports
+are archived, duration-ready, comparable, and clean. It remains fail-closed if
+either report is missing, under-duration, missing comparable metrics, or
+reporting leaks, orphan processes, or unrecoverable runtime failures.
 
 The generated verifier report counts the two canonical missing soak reports
 once: `quick-soak-8h.json` and `final-soak-24h.json`. The final blocker
 registry entry remains open during that period, but it is reported as a
 separate blocker only after both reports are archived and ready and the registry
-entry still has not been closed.
+entry still has not been closed. The registry entry is now closed on the
+2026-06-29 to 2026-07-01 Xiaomi Android 15 evidence below.
 
 ## Focused Two-Slot Resource Stress
 
@@ -167,15 +169,27 @@ Minimal accepted shape:
 }
 ```
 
-## Open Before Closure
+## Closure Evidence
 
-- Run and archive the 8 hour quick soak report.
-- Run and archive the 24 hour final soak report.
-- Verify no monotonic RSS/native-handle/image/socket/provider leak.
-- Verify service restart, slot failover, provider destroy, worker cleanup, and
-  packaged long-running cleanup leave no orphan process or owned resource.
-- Keep the focused two-slot resource stress passing while collecting the
-  long-duration reports.
-- Close `full_heavy_resource_stress` in
-  `docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` only after both reports are
-  available and ready.
+- Quick soak:
+  `build/reports/nodejs/final-soak/quick-soak-8h.json`
+  passed on Xiaomi 23046RP50C / Android 15 with `8.000855h`, 868 cycles,
+  106 samples, and zero failures.
+- Final soak:
+  `build/reports/nodejs/final-soak/final-soak-24h.json`
+  passed on Xiaomi 23046RP50C / Android 15 with `24.000369h`, 2579 cycles,
+  290 samples, and zero failures.
+- Both reports expose RSS, Java heap, native heap, thread count, fd count, and
+  bridge diagnostics.
+- Both reports record `monotonicLeaks=false`, `orphanProcess=false`, and
+  `unrecoverableRuntime=false`.
+- The closure preserves the P13-06/P13-08 stress anchor for service restart,
+  slot failover, provider destroy, worker cleanup, and packaged long-running
+  cleanup so those paths do not leave orphan processes or owned resources.
+- Host run audit:
+  `build/reports/nodejs/final-soak-runs/official-xiaomi-android15-after-reboot-final-24h/run.json`
+  completed with Gradle exit 0, report pull exit 0, archive exit 0,
+  `readyForArchive=true`, and `archived=true`.
+- `full_heavy_resource_stress` is closed in
+  `docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` after both canonical reports
+  became available and ready.

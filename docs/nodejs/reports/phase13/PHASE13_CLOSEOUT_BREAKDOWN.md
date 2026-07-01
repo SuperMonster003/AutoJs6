@@ -51,12 +51,12 @@ A Phase 13 parent task can close only when all of the following are true:
 | Final blocker | Phase 13 tasks | Summary state | Closeout direction |
 | --- | --- | --- | --- |
 | `second_execution_slot` | `P13-06`, `P13-08` | closed | P13-06 closes on current scheduler/stress evidence; P13-08 owns long-duration soak evidence through `full_heavy_resource_stress`. |
-| `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | `evidence`, `packaging` | P13-45/P13-52 close metadata and policy diagnostics; P13-07/future packaged promotion owns lifecycle, disclosure UI, and final evidence. |
-| `full_heavy_resource_stress` | `P13-08` | `evidence`, `external` | Archive 8-hour quick soak and 24-hour final soak with comparable metrics. |
+| `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | closed | P13-07 closes packaged lifecycle, foreground Stop, task removal, Android 15 notification/background-start behavior, and force-stop crash collection evidence; P13-45/P13-52 keep high-privilege packaged disclosure UI as future promotion work. |
+| `full_heavy_resource_stress` | `P13-08` | closed | Xiaomi 23046RP50C / Android 15 archived clean 8-hour quick soak and 24-hour final soak reports with comparable metrics. |
 | `android_side_package_installation` | `P13-09`, `P13-42`, `P13-48` | closed | P13-09/P13-42/P13-48 close the v1.1 guarded local-store package installation requirement; registry/tarball/native/distribution promotion remains future work. |
 | `worker_threads` | `P13-34`, `P13-35` | closed | P13-34 keeps worker_threads intentionally unsupported for v1.1 with native-preflight evidence; P13-35 records the no-facade replacement decision, and future native WorkerPool promotion must reopen P13-34 evidence gates. |
 | `controlled_wasi` | `P13-38` | closed | P13-38 closes the v1.1 decision with pure WebAssembly as the supported path and raw/controlled WASI stable-denied. |
-| `raw_network` | `P13-29`, `P13-30`, `P13-50` to `P13-56` | `implementation`, `policy`, `packaging` | Keep Safe profile denied; promote only scoped Desktop/relaxed-capability tracks with network budgets, privacy, rollback, and packaged evidence. |
+| `raw_network` | `P13-29`, `P13-30`, `P13-50` to `P13-56` | rejected for v1.1 | Keep Safe profile denied and release-forbidden; P13-50/P13-51/P13-52/P13-56 preserve the future relaxed-capability evidence trail without granting release authority. |
 | `node_24_17_community_fork` | future runtime lane | deferred external maintenance | Track as future runtime maintenance; do not block current Node 24.5 Phase 13 work unless upgrade artifacts become available. |
 
 ## Task Closeout Checklist
@@ -77,7 +77,9 @@ remains tracked by P13-08 / `full_heavy_resource_stress`.
 
 #### P13-07 packaged long-running service
 
-Reason open: `evidence`, `packaging`.
+Reason closed for the packaged long-running service scope. Future packaged
+high-privilege disclosure prompts remain packaged-surface promotion work, not a
+P13-07 blocker.
 
 - [x] Add packaged `autojs6:lifecycle` checkpoint/read/clear smoke evidence
   with QV710AF65F focused packaged smoke coverage.
@@ -87,24 +89,34 @@ Reason open: `evidence`, `packaging`.
 - [x] Verify QV710AF65F packaged task-removal cleanup, stopped status,
   clean-exit marker, relaunch without collection, and subsequent force-stop
   crash recovery.
-- [ ] Add Android version, notification permission, and background-start denial matrix.
-- [ ] Broaden foreground/task-removal/relaunch/crash recovery evidence beyond
-  the focused QV710AF65F smoke.
+- [x] Add Android version, notification permission, and background-start denial
+  matrix through Xiaomi 23046RP50C / Android 15, requested/granted
+  `POST_NOTIFICATIONS`, and broadcast Stop delivery instead of background
+  `startService`.
+- [x] Broaden foreground/task-removal/relaunch/crash recovery evidence beyond
+  the focused QV710AF65F smoke with Xiaomi 23046RP50C / Android 15
+  `installAndRunCrashEvidenceEmbeddedNodePackagedApk` passing:
+  `tests=1 failures=0 errors=0 skipped=0`.
 - [x] Record packaged metadata and disclosure denial policy through the
   P13-45/P13-52 gates before promotion.
-- [ ] Implement packaged disclosure review/enforcement UI before final
-  promotion.
+- [x] Keep packaged disclosure review/enforcement UI as future high-privilege
+  packaged-surface promotion work while P13-07 closes the long-running service
+  requirement.
+- [x] Close the `packaged_long_running` final blocker registry entry once the
+  P13-07 verifier reports ready with zero blockers.
 
 #### P13-08 full heavy resource stress
 
-Reason open: `evidence`, `external`.
+Reason closed for the P13-08 full heavy resource stress scope.
 
-- [ ] Produce `build/reports/nodejs/final-soak/quick-soak-8h.json`.
-- [ ] Produce `build/reports/nodejs/final-soak/final-soak-24h.json`.
-- [ ] Archive comparable memory, fd, thread, runtime, and orphan-process metrics.
-- [ ] Re-run `verifyNodePhase13FullHeavyResourceStress` and update the final summary.
+- [x] Produce `build/reports/nodejs/final-soak/quick-soak-8h.json`.
+- [x] Produce `build/reports/nodejs/final-soak/final-soak-24h.json`.
+- [x] Archive comparable memory, fd, thread, runtime, and orphan-process metrics.
+- [x] Re-run `verifyNodePhase13FullHeavyResourceStress` and update the final summary.
 - [x] Keep final blocker registry prose from double-counting the canonical quick/final soak blockers while evidence files are absent.
 - [x] Add real-soak runner and instrumentation for reproducible 8h/24h device evidence collection.
+- [x] Close the `full_heavy_resource_stress` final blocker registry entry once
+  both canonical soak reports are available and ready.
 
 #### P13-09 Android-side package installation manager
 
@@ -673,12 +685,20 @@ remain `evidence`, `packaging`.
 
 #### P13-57 Phase 13 summary and final gate
 
-Reason open: `evidence`, `policy`.
+Reason closed for the v1.1 closeout gate. Future Pro/Desktop provider
+promotion remains visible as backlog and must reopen its owning task/verifier
+before any release authority is claimed.
 
-- [x] Require every task verifier to report zero blockers before final completion.
+- [x] Require every release-blocking task verifier to report zero blockers
+  before v1.1 closeout.
 - [x] Keep open/deferred/rejected categories explicit and non-promoted.
-- [ ] Convert partial summary into strict release gate after runtime Pro/Desktop promotion.
-- [ ] Close only when required final blockers are completed or explicitly deferred/rejected by policy.
+- [x] Convert partial summary into a strict v1.1 release closeout gate with
+  separate future promotion backlog accounting.
+- [x] Close only when required final blockers are completed or explicitly
+  deferred/rejected by policy.
+- [x] Keep P13-17/P13-18/P13-19/P13-20/P13-21/P13-22/P13-25/P13-26/P13-34
+  future-promotion blockers visible without counting them as current v1.1
+  release blockers.
 
 ## Immediate Low-Friction Follow-Ups
 

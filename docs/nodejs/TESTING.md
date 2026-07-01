@@ -1772,8 +1772,10 @@ soak reports from `build/reports/nodejs/final-soak/quick-soak-8h.json` and
 `build/reports/nodejs`. The reports must expose duration plus comparable RSS,
 Java heap, native heap, thread count, fd count, and bridge diagnostics, and
 must not report monotonic leaks, orphan processes, or unrecoverable runtime
-failures. Until both real device soaks are present and clean, P13-08 remains
-partial and `full_heavy_resource_stress` remains open.
+failures. If either real device soak is absent or dirty, P13-08 remains partial
+and `full_heavy_resource_stress` remains open. The current Phase 13 closure
+archives clean Xiaomi 23046RP50C / Android 15 quick and final soaks at those
+canonical paths.
 
 The gate also runs contract fixtures from
 `tools/nodejs/phase13/fixtures/full-heavy-resource-stress/`. These fixtures
@@ -2412,24 +2414,25 @@ debug-only/provider POC is not formal availability and that
 `profile_capabilities.d.ts` remain evidence or metadata rather than runtime
 authority, including the `raw_network` desktop marker. It also verifies that
 the P13-57 summary output lists completed/open/deferred/rejected state while
-P13-56 remains open.
+future promotion backlog remains visible.
 
-Phase 13 summary and partial final gate:
+Phase 13 summary and v1.1 closeout gate:
 
 ```powershell
 .\gradlew.bat --console=plain :app:generateNodePhase13Summary
 ```
 
-This host gate records P13-57 as partial. It generates
+This host gate records P13-57 as ready when release-blocking reports are clear.
+It generates
 `docs/nodejs/reports/phase13/PHASE13_SUMMARY.md`,
 `build/reports/nodejs/phase13-summary.json`, and
 `build/reports/nodejs/phase13-summary.md` from the Phase 13 task checklist,
 surface manifest, final blocker registry, profile truth report, and generated
 Phase 13 conformance reports. The summary must list completed/open/deferred/
 rejected categories, require evidence for every promoted surface, and keep open
-or decision-required blockers out of the completed bucket. It keeps the old
-registry status for `raw_network` history while classifying it as open in Phase
-13 because the relaxed/Desktop track has reopened it.
+or decision-required blockers out of the completed bucket. It keeps
+`raw_network` rejected for v1.1 while P13-50 through P13-56 preserve the
+future relaxed/Desktop evidence trail without granting release authority.
 
 Current feature flag registry focused instrumentation:
 

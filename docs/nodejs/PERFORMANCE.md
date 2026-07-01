@@ -256,7 +256,9 @@ parseable start/end timestamps), RSS, Java heap, native heap, thread count, fd
 count, and bridge diagnostics. `verifyNodePhase13FullHeavyResourceStress`
 keeps the final blocker open when either report is missing, below duration,
 missing comparable metrics, or reporting failures, monotonic leaks, orphan
-processes, or unrecoverable runtime state.
+processes, or unrecoverable runtime state. The current Phase 13 closure uses
+the archived Xiaomi 23046RP50C / Android 15 quick and final reports at these
+canonical paths.
 
 The verifier also contains contract fixtures under
 `tools/nodejs/phase13/fixtures/full-heavy-resource-stress/`. They prove that the

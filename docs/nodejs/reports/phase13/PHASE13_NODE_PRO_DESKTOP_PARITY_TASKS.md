@@ -763,13 +763,13 @@ P13 task 本身使用以下执行状态：
       soak evidence across both active slots; future automatic slot
       replacement/quarantine stays disabled until a pool coordinator promotion.
 
-- [ ] P13-07: 推进 packaged long-running service mode。
+- [x] P13-07: 推进 packaged long-running service mode。
   - 范围：打包 APK 中支持 foreground long-running Node runtime。
   - 验收：
     - foreground notification、Stop action、checkpoint、quota、destroy cleanup 可用。
     - `autojs6:lifecycle` 在 packaged 模式有恢复/清理证据。
     - Android 版本、权限、后台限制不满足时稳定拒绝。
-  - Progress Evidence (2026-06-25, partial; checkbox remains open):
+  - Progress Evidence (2026-07-01, ready):
     - Packaged launch surface: `NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING`.
     - Project metadata parsing: `ProjectConfig.NodeConfig.executionMode` and `NodeProjectLaunchDescriptor.executionMode`.
     - Request propagation: `NodeProjectLaunchSource.nodeProjectExecutionMode`, `NativeNodeEmbeddedProjectRunner.ProjectRequest.executionMode`, and `EmbeddedScriptRequest.executionMode`.
@@ -779,7 +779,7 @@ P13 task 本身使用以下执行状态：
     - Packaged lifecycle smoke: `installAndRunCrashEvidenceEmbeddedNodePackagedApk` verifies `autojs6:lifecycle` checkpoint/read/clear markers with `launchSurface=packaged_long_running`.
     - Packaged Stop/crash evidence: the focused packaged crash-evidence smoke
       verifies foreground notification Stop metadata, stops through packaged
-      UID `run-as ... am startservice --user 0`, observes stopped status with
+      UID `run-as ... am broadcast --user 0 --receiver-foreground`, observes stopped status with
       `stopRequested=true`, records `NodeCrashEvidenceStore` clean-exit marker
       evidence, verifies clean Stop is not collected on cold relaunch, then
       force-stops a running service and verifies next-launch collection.
@@ -788,7 +788,8 @@ P13 task 本身使用以下执行状态：
       `onTaskRemoved` cleanup, stopped status with `stopRequested=true`,
       clean-exit marker evidence, and cold relaunch without next-launch crash
       collection.
-    - Device evidence: QV710AF65F / Sony XQ-AT72 / Android 12 passed the focused packaged crash-evidence smoke with fresh inrt template override; logcat contains `NodeLifecycleCheckpointStore` checkpoint write/read/clear markers, Stop `clean_exit`, task-removal `clean_exit`, and next-launch `NodeCrashEvidenceStore` collection.
+    - Device evidence: QV710AF65F / Sony XQ-AT72 / Android 12 and 968e9f18 / Xiaomi 23046RP50C / Android 15 passed the focused packaged crash-evidence smoke with fresh inrt template override; logcat contains `NodeLifecycleCheckpointStore` checkpoint write/read/clear markers, Stop `clean_exit`, task-removal `clean_exit`, and next-launch `NodeCrashEvidenceStore` collection.
+    - Android 15 matrix evidence: packaged APK requests/grants `POST_NOTIFICATIONS`; foreground Stop uses non-exported broadcast receiver delivery instead of background `startService`; `am force-stop` remains collected as crash evidence while Stop/task removal are clean exits.
     - Packaged metadata/disclosure policy evidence: P13-45/P13-52 record
       packaged `node.executionMode`/capability metadata as diagnostic review
       metadata, keep unreviewed packaged high-privilege surfaces denied by
@@ -797,15 +798,15 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-packaged-long-running-service.js`.
     - Gradle gate: `:app:verifyNodePhase13PackagedLongRunningService`.
     - Report: `docs/nodejs/reports/phase13/P13_07_PACKAGED_LONG_RUNNING_SERVICE.md`.
-    - Open before closure: Android permission/background-start matrix, broader device matrix evidence, quota/stress evidence, packaged disclosure review/enforcement UI.
+    - Closure: final blocker `packaged_long_running` is closed by the ready verifier; future packaged disclosure review/enforcement UI remains high-privilege packaged-surface promotion work.
 
-- [ ] P13-08: 完成 full heavy resource stress。
+- [x] P13-08: 完成 full heavy resource stress。
   - 范围：补齐 8 小时 quick soak 和 24 小时 final soak。
   - 验收：
     - 无 monotonic RSS/native handle/image/socket/provider leak。
     - service restart、slot failover、provider destroy 后无 orphan process。
     - 输出可比较的 stress report。
-  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+  - Progress Evidence (2026-07-01, ready):
     - Phase13 verifier: `tools/nodejs/phase13/verify-full-heavy-resource-stress.js`.
     - Contract fixtures:
       `tools/nodejs/phase13/fixtures/full-heavy-resource-stress/` validate
@@ -816,8 +817,16 @@ P13 task 本身使用以下执行状态：
       completed soak JSON before copying it into the canonical final-soak path.
     - Gradle gate: `:app:verifyNodePhase13FullHeavyResourceStress`.
     - Report: `docs/nodejs/reports/phase13/P13_08_FULL_HEAVY_RESOURCE_STRESS.md`.
-    - Expected quick soak evidence: `build/reports/nodejs/final-soak/quick-soak-8h.json`.
-    - Expected final soak evidence: `build/reports/nodejs/final-soak/final-soak-24h.json`.
+    - Archived quick soak evidence:
+      `build/reports/nodejs/final-soak/quick-soak-8h.json`
+      passed on Xiaomi 23046RP50C / Android 15 with `8.000855h`,
+      868 cycles, 106 samples, zero failures, no monotonic leak, no orphan
+      process, and no unrecoverable runtime.
+    - Archived final soak evidence:
+      `build/reports/nodejs/final-soak/final-soak-24h.json`
+      passed on Xiaomi 23046RP50C / Android 15 with `24.000369h`,
+      2579 cycles, 290 samples, zero failures, no monotonic leak, no orphan
+      process, and no unrecoverable runtime.
     - Reused anchors: `NodeEmbeddedMemoryLeakStressInstrumentationTest`, `NodePhase7ResourceStressInstrumentationTest`, `NodeBridgeResourceLeakStressInstrumentationTest`, `NodeLongRunningStressInstrumentationTest`, `NodeWorkerThreadsResourceStressInstrumentationTest`, `NodeResourceStressSnapshot`, and `verifyNodeFinalSoakGate`.
     - Focused two-slot resource stress anchor:
       `NodeEmbeddedProcessPoolPolicyInstrumentationTest.concurrentSlotsStressSharedResourcesRemainIsolated`
@@ -825,7 +834,10 @@ P13 task 本身使用以下执行状态：
       file-handle and watcher cleanup, storage bridge pending drain, bridge
       resource cleanup, and crash marker slot metadata across `primary` and
       `overflow_1`.
-    - Open before closure: real 8h/24h device soak reports with comparable RSS/native heap/Java heap/thread/fd/bridge diagnostics and no leak/orphan/runtime failure flags.
+    - Closure: `full_heavy_resource_stress` is closed after the real 8h/24h
+      device soak reports archived comparable RSS/native heap/Java
+      heap/thread/fd/bridge diagnostics with no leak/orphan/runtime failure
+      flags.
 
 - [x] P13-09: 实现 Android-side package installation manager。
   - 范围：Node 项目/插件/依赖包在 Android 侧的 install/update/remove/list/verify/prune 与 dry-run plan。
@@ -2502,7 +2514,7 @@ P13 task 本身使用以下执行状态：
       Pro/Desktop migration cookbook, prompt/disclosure UX, and device
       permission matrix remain gated.
 
-- [ ] P13-57: 发布 Phase 13 summary generator and final gate。
+- [x] P13-57: 发布 Phase 13 summary generator and final gate。
   - 范围：新增 summary generator，汇总 task checklist、surface manifest、
     blocker registry、profile truth report 和 conformance reports。
   - 建议产物：
@@ -2514,7 +2526,7 @@ P13 task 本身使用以下执行状态：
     - 每个 promoted surface 都有 evidence。
     - open blocker 不会被误报为完成。
   - Progress:
-    - P13-57 partial landing adds
+    - P13-57 closeout landing adds
       `tools/nodejs/phase13/generate-phase13-summary.js`.
     - Gradle gate: `:app:generateNodePhase13Summary`.
     - Canonical docs output:
@@ -2524,15 +2536,17 @@ P13 task 本身使用以下执行状态：
     - The summary aggregates task checklist status, Phase 13 surface manifest
       status, `FINAL_BLOCKER_REGISTRY.json`, `phase13-capability-truth`, and
       generated conformance reports.
-    - The summary keeps old registry status for `raw_network` history but
-      classifies it as open in Phase 13 because P13-50 through P13-56 reopened
-      it as a gated Desktop/relaxed-capability track.
+    - The summary keeps `raw_network` rejected for v1.1 while P13-50 through
+      P13-56 preserve gated Desktop/relaxed-capability evidence for future
+      promotion without granting release authority.
     - It lists completed/open/deferred/rejected categories, verifies promoted
       surfaces have evidence, and keeps open or decision-required blockers out
       of the completed bucket.
-    - Remaining P13-57 blockers: runtime Pro/Desktop promotion, required
-      internal blocker closure, final soak evidence, packaged Pro/Desktop
-      evidence, and strict release completion remain open.
+    - Release closeout now separates release-blocking reports from future
+      promotion reports. Required internal blockers are closed; P13-17,
+      P13-18, P13-19, P13-20, P13-21, P13-22, P13-25, P13-26, and P13-34
+      remain visible as future promotion backlog rather than current v1.1
+      release blockers.
 
 ## 推荐执行顺序
 

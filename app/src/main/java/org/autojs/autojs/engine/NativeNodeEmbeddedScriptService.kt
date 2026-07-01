@@ -3,6 +3,7 @@
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.ComponentCallbacks2
 import android.content.ComponentName
 import android.content.Context
@@ -39,6 +40,17 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import java.util.UUID
 import kotlin.system.exitProcess
+
+private fun File.deleteRecursivelyIfExists(): Boolean {
+    if (!exists()) {
+        return true
+    }
+    return runCatching {
+        deleteRecursively()
+    }.getOrElse {
+        !exists()
+    }
+}
 
 open class NativeNodeEmbeddedScriptService : Service() {
 
@@ -395,7 +407,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             null
         }
         if (interactiveSession) {
-            lifecycleStopRequestFile?.parentFile?.deleteRecursively()
+            lifecycleStopRequestFile?.parentFile?.deleteRecursivelyIfExists()
             lifecycleStopRequestFile?.parentFile?.mkdirs()
             activeLifecycleStopRequestFile = lifecycleStopRequestFile
         }
@@ -663,10 +675,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
             terminalCrashEvidenceMarked = true
             receiver?.send(RESULT_SCRIPT, failureResult.toBundle())
         } finally {
-            File(File(cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId)).deleteRecursively()
+            File(File(cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId)).deleteRecursivelyIfExists()
             activeHeartbeatMonitor?.stop("script.finally")
             activeHeartbeatMonitor = null
-            lifecycleStopRequestFile?.parentFile?.deleteRecursively()
+            lifecycleStopRequestFile?.parentFile?.deleteRecursivelyIfExists()
             bridgeSession.stop()
             val queueStatus = releaseExecutionSlot(executionId)
             val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
@@ -1292,7 +1304,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         }
 
         init {
-            root.deleteRecursively()
+            root.deleteRecursivelyIfExists()
             requestDir.mkdirs()
             responseDir.mkdirs()
         }
@@ -1320,7 +1332,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 }
             }
             provider.destroy()
-            requestDir.parentFile?.deleteRecursively()
+            requestDir.parentFile?.deleteRecursivelyIfExists()
         }
 
         fun appendNativeValues(
@@ -1746,11 +1758,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
             Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        val stopIntent = Intent(this, NativeNodeEmbeddedScriptService::class.java).apply {
+        val stopIntent = Intent(this, NativeNodeEmbeddedInteractiveStopReceiver::class.java).apply {
             action = ACTION_STOP_INTERACTIVE
             putExtra(EXTRA_EXECUTION_ID, executionId)
         }
-        val stopPendingIntent = PendingIntent.getService(
+        val stopPendingIntent = PendingIntent.getBroadcast(
             this,
             INTERACTIVE_STOP_REQUEST_CODE,
             stopIntent,
@@ -2224,7 +2236,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 )
             } finally {
                 component?.let { CLIENT_RUNNING_SCRIPT_COMPONENTS.remove(executionId, it) }
-                requestSpoolFile?.parentFile?.deleteRecursively()
+                requestSpoolFile?.parentFile?.deleteRecursivelyIfExists()
                 if (defaultSlotLease != null && component != null) {
                     settleBetweenQueuedExecutions()
                 }
@@ -2402,7 +2414,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                         activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("service_start_failed"),
                         nativeValues = failure.nativeValues,
                     )
-                    requestSpoolFile.parentFile?.deleteRecursively()
+                    requestSpoolFile.parentFile?.deleteRecursivelyIfExists()
                     return InteractiveLongRunningSession(executionId, false, status, failure)
                 }
                 return InteractiveLongRunningSession(
@@ -2411,7 +2423,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     status = NodeInteractiveLongRunningStatusStore.read(appContext, executionId),
                 )
             } catch (e: Throwable) {
-                requestSpoolFile?.parentFile?.deleteRecursively()
+                requestSpoolFile?.parentFile?.deleteRecursivelyIfExists()
                 val failure = processCrashedOrTimedOut(
                     request = requestForService,
                     message = "Interactive embedded script service failed to start.\n${e.message ?: e.javaClass.name}",
@@ -2470,6 +2482,15 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 )
             }
             return startOutcome.component != null
+        }
+
+        fun stopInteractiveLongRunning(context: Context, intent: Intent): Boolean {
+            if (intent.action != ACTION_STOP_INTERACTIVE) {
+                return false
+            }
+            val executionId = intent.getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() }
+                ?: return false
+            return stopInteractiveLongRunning(context, executionId)
         }
 
         fun interactiveLongRunningStatus(context: Context, executionId: String): JSONObject? {
@@ -3440,7 +3461,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         ): File {
             val root = File(File(context.cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId))
-            root.deleteRecursively()
+            root.deleteRecursivelyIfExists()
             if (!root.mkdirs() && !root.isDirectory) {
                 error("Failed to create embedded script request spool directory: ${root.absolutePath}")
             }
@@ -3891,6 +3912,19 @@ open class NativeNodeEmbeddedScriptService : Service() {
 class NativeNodeEmbeddedScriptServiceSlot1 : NativeNodeEmbeddedScriptService()
 
 class NativeNodeEmbeddedScriptServiceSlot2 : NativeNodeEmbeddedScriptService()
+
+class NativeNodeEmbeddedInteractiveStopReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (!NativeNodeEmbeddedScriptService.stopInteractiveLongRunning(context, intent)) {
+            Log.w(TAG, "interactive.stop.broadcast_ignored action=${intent.action.orEmpty()}")
+        }
+    }
+
+    private companion object {
+        private const val TAG = "NativeNodeEmbeddedInteractiveStopReceiver"
+    }
+}
 
 private fun NodeBridgeRequest.dispatchExceptionResponse(error: Throwable): NodeBridgeResponse {
     return NodeBridgeResponse.failure(

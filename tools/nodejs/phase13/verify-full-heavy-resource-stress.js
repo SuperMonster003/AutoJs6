@@ -117,7 +117,7 @@ function buildReport(files, soakReports, contractFixtures) {
   const blockerEntry = blocker(files.blockerRegistry.text, "full_heavy_resource_stress");
   const anchorChecks = [
     token(files.phase13Tasks, "P13-08"),
-    token(files.p13Report, "Status: partial"),
+    token(files.p13Report, "Status: ready"),
     token(files.soakRunner, "autojs6-node-phase13-full-heavy-resource-soak-runner-v1"),
     token(files.soakRunner, "NodeFinalSoakInstrumentationTest#fullHeavyResourceSoakProducesArchiveReadyReport"),
     token(files.archiveScript, "autojs6-node-phase13-full-heavy-resource-stress-archive-v1"),
