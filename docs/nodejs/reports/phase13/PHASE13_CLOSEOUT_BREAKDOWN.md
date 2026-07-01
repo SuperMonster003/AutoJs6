@@ -1,16 +1,40 @@
 # Phase 13 Closeout Breakdown
 
-Status: living closeout plan for the remaining open Phase 13 tasks.
+Status: v1.1 closeout gate is ready; this remains the living backlog for
+future Pro/Desktop provider promotion.
 
 Shared Node.js deployment constraints, timeout defaults, and device-selection
 rules are recorded in
 [`NODE_DEPLOYMENT_SHARED_CONTEXT.md`](../../NODE_DEPLOYMENT_SHARED_CONTEXT.md).
 
-Phase 13 intentionally keeps many parent tasks open after partial landings.
-Most open items are not regressions; they are promotion gates that require one
-or more of implementation, connected-device evidence, packaged APK evidence,
-security/product decisions, or external runtime availability before the parent
-task can be marked complete.
+Phase 13 v1.1 is closed for release-gating purposes once
+`:app:generateNodePhase13Summary` reports `ready` with zero open final blockers,
+zero required-internal blockers, zero policy violations, and zero
+release-blocking reports. Phase 13 intentionally keeps many parent tasks open
+after partial landings. These open items are not regressions; they are promotion
+gates that require one or more of implementation, connected-device evidence,
+packaged APK evidence, security/product decisions, or external runtime
+availability before the parent task can be promoted.
+
+## Current Closeout State
+
+Validation command:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNodePhase13Summary
+```
+
+Last verified: 2026-07-01.
+
+| Gate item | State |
+| --- | --- |
+| `generateNodePhase13Summary` | `ready` |
+| Open final blockers | 0 |
+| Required internal blockers still open | 0 |
+| Release-blocking reports | 0 |
+| Reports with policy violations | 0 |
+| Future promotion reports with blockers | 9 |
+| Future promotion tasks | `P13-17`, `P13-18`, `P13-19`, `P13-20`, `P13-21`, `P13-22`, `P13-25`, `P13-26`, `P13-34` |
 
 ## Open Reason Taxonomy
 
