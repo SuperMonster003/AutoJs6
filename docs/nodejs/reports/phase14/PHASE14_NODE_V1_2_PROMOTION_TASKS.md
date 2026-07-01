@@ -381,9 +381,23 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: OCR remains stable-denied when provider/model is absent and
     promoted only for explicit provider modes with archived evidence.
 
-- [ ] P14-16: Sync UI/automation/media docs, examples, and declarations.
+- [x] P14-16: Sync UI/automation/media docs, examples, and declarations.
   - Scope: TypeScript declarations, Pro migration examples, release matrix,
     compatibility profile, security docs, and error catalog.
+  - Gate: `:app:verifyNodePhase14UiAutomationMediaDocSync`.
+  - UI/automation/media docs sync gate deployed:
+    - Adds `docs/nodejs/phase14/ui-automation-media-doc-sync.json` and
+      `PHASE14_UI_AUTOMATION_MEDIA_DOC_SYNC.md`.
+    - Adds `docs/nodejs/releases/NODE_PROFILE_V1_2_UI_AUTOMATION_MEDIA_MATRIX.md`
+      as the v1.2 UI/automation/media release matrix.
+    - Syncs declaration notes, Pro parity example policy, compatibility
+      profile, security model, and error catalog under the same
+      `provider_poc_not_promoted` decision.
+    - Keeps only `ui-layout` and `tasks-work-manager` in the Pro parity runtime
+      smoke subset; overlay, media/recorder, screenshot/OCR, and accessibility
+      snippets remain static, guarded, or denial-oriented.
+    - Writes `build/reports/nodejs/phase14-ui-automation-media-doc-sync.json`
+      and `.md`.
   - Acceptance: examples execute only for promoted paths and stay static or
     denied for future-only high-risk snippets.
 

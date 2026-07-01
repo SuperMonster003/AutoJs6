@@ -24,6 +24,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14MediaProjectionProvider`
 - `:app:verifyNodePhase14AdvancedImageOperations`
 - `:app:verifyNodePhase14PackagedImageOcrEvidence`
+- `:app:verifyNodePhase14UiAutomationMediaDocSync`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -87,3 +88,9 @@ contract as `partial`. It imports P13-20 live ML Kit OCR, P14-14 image quota
 and invalid-input boundaries, and packaged v1.1 fake-provider OCR smoke while
 keeping model-absence, explicit provider-mode, quota/leak stress, and
 capture/disclosure archives as future-promotion blockers.
+
+`P14_16_UI_AUTOMATION_MEDIA_DOC_SYNC.md` records the UI/automation/media docs,
+examples, declarations, release matrix, compatibility, security, and error
+catalog sync as `ready`. It keeps `pro.ui_automation_media` at
+`provider_poc_not_promoted` and ensures high-risk Pro examples stay static,
+guarded, or denial-oriented unless their source provider gates are promoted.

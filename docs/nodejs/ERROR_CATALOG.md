@@ -39,6 +39,23 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: enable the required Android capability, use a supported provider, or keep the operation behind a feature check.
 - Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
+## P14-16 UI/automation/media denial sync
+
+P14-16 docs sync does not add a new error code. It records the expected denial
+surface for UI/automation/media migration examples while
+`pro.ui_automation_media` remains `provider_poc_not_promoted`:
+
+- Missing project/package capability metadata rejects before provider dispatch
+  with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Unpromoted provider paths such as overlay creation without promoted
+  permission/disclosure evidence, accessibility when the service is unavailable,
+  MediaProjection capture from the Node bridge, advanced image operations,
+  packaged OCR/model lookup, and recorder sessions remain
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` or provider-specific stable denials.
+- Provider failures after a declared and permitted request still use
+  `ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED`; callers should not interpret provider
+  failure as permission or profile promotion.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

@@ -3042,6 +3042,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14MediaProjectionProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14AdvancedImageOperations
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedImageOcrEvidence
+.\gradlew.bat --console=plain :app:verifyNodePhase14UiAutomationMediaDocSync
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3116,6 +3117,14 @@ packaged image/OCR evidence contract, imports live ML Kit OCR, image-handle
 quota/invalid-input boundaries, and packaged fake-provider OCR smoke, and keeps
 packaged model-absence, explicit provider-mode, quota/leak stress, and
 capture/disclosure archives as future-promotion blockers.
+`verifyNodePhase14UiAutomationMediaDocSync` depends on the P14-15 packaged
+image/OCR evidence gate and the Phase 13 Pro example, declaration, and
+migration docs gates. It writes `phase14-ui-automation-media-doc-sync.json`
+plus `.md`, verifies the P14-16 docs sync matrix, keeps
+`pro.ui_automation_media` at `provider_poc_not_promoted`, and ensures only the
+already covered Pro parity smoke subset executes while overlay, media/recorder,
+screenshot/OCR, and accessibility snippets remain static, guarded, or
+denial-oriented.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

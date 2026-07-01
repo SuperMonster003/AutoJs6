@@ -1904,6 +1904,7 @@ runtime.
   - no raw OCR engine, model path, native pointer, `Bitmap`, `Mat`, `ImageWrapper`, or Java object crosses into Node
   - Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1
   - P13-20 records the current screenshot/image/OCR promotion state as partial: scoped `image.readImage()`/`recycle()` and ML Kit OCR over provider-owned image handles are live, while MediaProjection bridge prompting, advanced image processing, packaged capture/OCR behavior, and packaged disclosure evidence remain blocked
+  - P14-16 docs sync records the UI/automation/media declaration, example, release-matrix, security, and error-catalog state as `provider_poc_not_promoted`; typed migration snippets are documentation evidence, while overlay, packaged accessibility, MediaProjection capture, advanced image, packaged OCR/model, and recorder-session runtime examples remain static, guarded, or denial-oriented until their source provider gates are promoted
 - `storage` / `storages`
   - `create(name): StorageStore`
   - `open(name): StorageStore`

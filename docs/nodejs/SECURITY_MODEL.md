@@ -517,6 +517,16 @@ image processing, and packaged capture/OCR behavior behind later gates.
 Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection
 object parity stay stable-denied for P13-20 v1.1.
 
+P14-16 docs sync keeps the combined UI/automation/media migration surface at
+`provider_poc_not_promoted`. Type declarations and Pro parity snippets may
+describe UI, overlay, accessibility, MediaProjection, image/OCR, and
+media/recorder shapes, but examples that require unpromoted Android authority
+must remain static, guarded, or denial-oriented. This prevents documentation
+from implying packaged disclosure, overlay foreground ownership, accessibility
+service enablement, screen-capture prompting, advanced image processing,
+packaged OCR/model lookup, or recorder-session authority before the matching
+provider gates are promoted.
+
 P13-19 keeps accessibility selector authority separate from raw input
 automation. Reserved future input automation labels split gesture authority away
 from `accessibility`: `input.gesture` for reviewed service-backed gestures,

@@ -371,6 +371,14 @@ bridge prompting, advanced image processing, packaged capture/OCR behavior,
 Paddle/Rapid fallback, and raw Bitmap/OpenCV profile decisions remain
 unpromoted.
 
+P14-16 docs sync records the v1.2 `pro.ui_automation_media` declaration state
+as `provider_poc_not_promoted`. The checked-in declarations remain useful for
+typing migration code, but UI packaged lifecycle, overlay creation, packaged
+accessibility, MediaProjection capture, advanced image processing, packaged
+OCR/model behavior, and recorder sessions still require their own provider,
+disclosure, packaged, and device-matrix evidence before examples can be treated
+as promoted runtime paths.
+
 P12-34 is a documentation synchronization gate rather than a new declaration
 surface. It keeps this README aligned with `MIGRATION_FROM_RHINO.md`, the Pro 9
 comparison, `RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`, `SECURITY_MODEL.md`, and

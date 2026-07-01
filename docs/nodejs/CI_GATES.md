@@ -1079,6 +1079,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14MediaProjectionProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14AdvancedImageOperations
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedImageOcrEvidence
+.\gradlew.bat --console=plain :app:verifyNodePhase14UiAutomationMediaDocSync
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1139,6 +1140,11 @@ image/OCR model and quota policy, imports P13-20 live ML Kit OCR, P14-14
 image quota/invalid-input boundaries, and packaged fake-provider OCR smoke, and
 keeps model-absence, explicit provider-mode, quota/leak stress, and
 capture/disclosure archives as future-promotion blockers.
+The UI/automation/media docs sync gate writes
+`phase14-ui-automation-media-doc-sync.json` plus `.md`, verifies the P14-16
+docs/examples/declarations sync matrix, release matrix, compatibility profile,
+security model, and error catalog, and keeps `pro.ui_automation_media` at
+`provider_poc_not_promoted` without adding runtime authority.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

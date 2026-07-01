@@ -119,6 +119,13 @@ catalog remains migration evidence for migration shape and docs parity;
 packaged Pro execution remains gated by provider promotion, disclosure review,
 and device permission evidence.
 
+P14-16 docs sync keeps this policy unchanged for the v1.2
+`pro.ui_automation_media` surface. Only the already covered `ui-layout` and
+`tasks-work-manager` paths execute in the focused Pro parity smoke subset;
+overlay, media/recorder, screenshot/OCR, and accessibility snippets remain
+static, guarded, or denial-oriented until their provider, packaged disclosure,
+permission, and device-matrix archives are promoted.
+
 ## Phase 13 Desktop Node Parity Examples
 
 `sample/nodejs/desktop-parity-suite` is a migration catalog for desktop-style

@@ -547,3 +547,73 @@ tasks.register<Exec>("verifyNodePhase14PackagedImageOcrEvidence") {
         nodePhase14ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase14UiAutomationMediaDocSync") {
+    group = "verification"
+    description = "Verifies the Phase 14 UI/automation/media docs, examples, declarations, release matrix, and error guidance sync gate."
+
+    dependsOn(
+        "verifyNodePhase14PackagedImageOcrEvidence",
+        "verifyNodePhase13ProParityExamples",
+        "verifyNodePhase13TypeDeclarationProfiles",
+        "verifyNodePhase13MigrationPro9Comparison",
+        "verifyAutoJs6NodeTypeDeclarations",
+        "verifyNodeExamples",
+    )
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase14/verify-node-phase14-ui-automation-media-doc-sync.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_16_UI_AUTOMATION_MEDIA_DOC_SYNC.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/ui-automation-media-doc-sync.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_UI_AUTOMATION_MEDIA_DOC_SYNC.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_2_UI_AUTOMATION_MEDIA_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/EXAMPLES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/pro-parity-suite/examples.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/pro-parity-suite/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/typescript-smoke/src/main.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/ui.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/ui_overlay.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/accessibility.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/media_projection.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/image.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/images.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/ocr.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/media.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/mediainfo.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/recorder.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase14-gate.gradle.kts"))
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-live-ui-provider-packaged.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-overlay-provider.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-overlay-permission-oem-matrix.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-packaged-overlay-positive-smoke.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-accessibility-lifecycle.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-accessibility-selector-action-matrix.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-media-projection-provider.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-advanced-image-operations.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-packaged-image-ocr-evidence.json") })
+    outputs.files(
+        nodePhase14ReportDir.map { it.file("phase14-ui-automation-media-doc-sync.json") },
+        nodePhase14ReportDir.map { it.file("phase14-ui-automation-media-doc-sync.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase14ReportDir.get().asFile.absolutePath,
+    )
+}
