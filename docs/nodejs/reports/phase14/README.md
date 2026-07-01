@@ -182,3 +182,10 @@ imports the P13-34 unavailable native-preflight evidence, audits Android loader
 and crash-signature anchors, and refreshes `worker_threads` as intentional
 non-support until a target ABI reports `worker.preflight.status=available`
 behind `:app:verifyNodePhase14WorkerNativeAvailability`.
+
+`P14_29_WORKER_RUNNABLE_PACKAGED_SMOKE.md` records the worker runnable and
+packaged smoke gate as `ready` with a `conditional_skip_native_unavailable`
+decision. It verifies the existing Worker lifecycle, message, WorkerPool,
+exception/timeout, cleanup, nested-denial, and packaged `.mjs` smoke source
+anchors while keeping runnable execution, packaged execution, and worker
+authority disabled behind `:app:verifyNodePhase14WorkerRunnablePackagedSmoke`.

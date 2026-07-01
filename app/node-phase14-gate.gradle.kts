@@ -1282,3 +1282,50 @@ tasks.register<Exec>("verifyNodePhase14WorkerNativeAvailability") {
         nodePhase14ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase14WorkerRunnablePackagedSmoke") {
+    group = "verification"
+    description = "Verifies the Phase 14 conditional worker runnable and packaged smoke gate."
+
+    dependsOn("verifyNodePhase14WorkerNativeAvailability")
+
+    val scriptFile =
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase14/verify-node-phase14-worker-runnable-packaged-smoke.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_29_WORKER_RUNNABLE_PACKAGED_SMOKE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/worker-runnable-packaged-smoke-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_WORKER_RUNNABLE_PACKAGED_SMOKE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_34_WORKER_THREADS_OPT_IN_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsExperimentalInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/WORKER_THREADS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase14-gate.gradle.kts"))
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-worker-native-availability.json") })
+    outputs.files(
+        nodePhase14ReportDir.map { it.file("phase14-worker-runnable-packaged-smoke.json") },
+        nodePhase14ReportDir.map { it.file("phase14-worker-runnable-packaged-smoke.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase14ReportDir.get().asFile.absolutePath,
+    )
+}

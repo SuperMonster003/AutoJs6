@@ -260,6 +260,21 @@ availability decision around the existing worker errors:
   native loader diagnostics, not user-script worker authority.
 - Default, project, packaged, and process-worker authority remain unpromoted.
 
+## P14-29 worker runnable/packaged smoke decision
+
+P14-29 does not add a new error code. It records the runnable and packaged
+worker smoke gate as `conditional_skip_native_unavailable`:
+
+- `ERR_AUTOJS6_WORKER_DISABLED` remains the current precondition failure for
+  runnable and packaged Worker execution.
+- `ERR_AUTOJS6_WORKER_LIMIT_EXCEEDED`,
+  `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`, `ERR_AUTOJS6_WORKER_TIMEOUT`, and
+  WorkerPool task errors remain native-available source anchors only.
+- Packaged `.mjs` worker markers such as
+  `packaged.worker_threads.esm.ready=true` are not release evidence until the
+  native preflight reports `worker.preflight.status=available`.
+- Default, project, packaged, and process-worker authority remain unpromoted.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

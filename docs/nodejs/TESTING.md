@@ -1976,6 +1976,20 @@ process-worker facade authority unpromoted. P14-29 and P14-30 runnable/resource
 worker gates remain conditional on a future `worker.preflight.status=available`
 result.
 
+Phase 14 worker runnable/packaged smoke gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14WorkerRunnablePackagedSmoke
+```
+
+This host gate records P14-29 as ready with
+`conditional_skip_native_unavailable`. It imports P14-28 native availability,
+verifies source anchors for basic Worker lifecycle, CJS/ESM entries, worker
+capability isolation, MessageChannel/transfer, WorkerPool, exception/timeout
+recovery, parent cleanup, nested Worker denial, and packaged `.mjs` smoke, and
+keeps runnable execution, packaged execution, default authority,
+project/package opt-in, and process-worker facade promotion disabled.
+
 Phase 13 process-worker replacement decision gate:
 
 ```powershell

@@ -1284,6 +1284,14 @@ v1.2 records `worker_threads` as intentional non-support for runnable workers.
 profile, and P14-29/P14-30 worker smoke/resource promotion can start only after
 a target ABI reports `worker.preflight.status=available`.
 
+P14-29 records the worker runnable/packaged smoke gate as conditional. Source
+anchors for basic Worker lifecycle, CJS/ESM entries, capability isolation,
+MessageChannel/transfer, WorkerPool, exception/timeout recovery, parent
+cleanup, nested Worker denial, and packaged `.mjs` smoke remain tracked, but
+`runnableSmokeExecuted=false` and `packagedSmokeExecuted=false` while native
+workers are unavailable. No compatibility profile can advertise worker runtime
+authority until native, packaged, and resource gates pass together.
+
 P13-35 records process-worker replacement as partial. The runtime exposes
 `autojs6:profile.processWorkerReplacementProfile` to document that the current
 replacement path is request-local `worker_threads.WorkerPool`, not a new

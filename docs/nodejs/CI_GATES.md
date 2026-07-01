@@ -1220,6 +1220,13 @@ machine report, verifies Node 24.5 `libnode.so` artifacts for `arm64-v8a`,
 crash-signature anchors, and refreshes v1.2 `worker_threads` as intentional
 non-support until `worker.preflight.status=available` is archived on target
 ABIs.
+The `:app:verifyNodePhase14WorkerRunnablePackagedSmoke` gate writes
+`phase14-worker-runnable-packaged-smoke.json` plus `.md`, imports P14-28 native
+availability, verifies source anchors for runnable Worker lifecycle, CJS/ESM
+entries, capability isolation, MessageChannel/transfer, WorkerPool,
+exception/timeout recovery, parent cleanup, nested Worker denial, and packaged
+`.mjs` smoke, and records `conditional_skip_native_unavailable` without
+promoting worker authority.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

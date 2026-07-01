@@ -352,6 +352,14 @@ No default, project, packaged, or process-worker authority is promoted, and
 P14-29/P14-30 runnable/resource gates remain conditional on
 `worker.preflight.status=available`.
 
+P14-29 records the worker runnable/packaged smoke gate as conditional. Existing
+source anchors cover Worker lifecycle, CJS/ESM entries, worker capability
+isolation, MessageChannel/transfer, WorkerPool, exception/timeout recovery,
+parent cleanup, nested Worker denial, and packaged `.mjs` smoke. Because
+P14-28 reports native workers unavailable, these anchors do not grant runnable
+execution, packaged worker behavior, default authority, project/package opt-in,
+or a process-worker facade.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

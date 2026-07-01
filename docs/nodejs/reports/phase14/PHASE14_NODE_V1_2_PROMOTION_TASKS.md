@@ -716,9 +716,29 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: v1.2 either has native runnable worker proof on target ABIs or
     a refreshed intentional non-support decision.
 
-- [ ] P14-29: Add worker runnable and packaged smoke if native support exists.
+- [x] P14-29: Add worker runnable and packaged smoke if native support exists.
   - Scope: basic worker, message passing, termination, timeout, exception,
     parent cleanup, nested worker policy, and packaged behavior.
+  - Gate: `:app:verifyNodePhase14WorkerRunnablePackagedSmoke`.
+  - Worker runnable/packaged smoke gate deployed:
+    - Adds `docs/nodejs/phase14/worker-runnable-packaged-smoke-plan.json` and
+      `PHASE14_WORKER_RUNNABLE_PACKAGED_SMOKE.md`.
+    - Adds
+      `docs/nodejs/reports/phase14/P14_29_WORKER_RUNNABLE_PACKAGED_SMOKE.md`.
+    - Imports P14-28 generated worker native availability report as the
+      required precondition.
+    - Records `conditional_skip_native_unavailable` because current native
+      preflight remains `worker.preflight.status=unavailable` with
+      `ERR_AUTOJS6_WORKER_DISABLED`.
+    - Verifies source anchors for basic Worker lifecycle, CJS/ESM entries,
+      worker capability isolation, MessageChannel/transfer, WorkerPool,
+      exception/timeout recovery, parent cleanup, nested Worker denial, and
+      packaged `.mjs` smoke.
+    - Keeps runnable smoke execution, packaged smoke execution, default
+      authority, project/package opt-in, and process-worker facade promotion
+      disabled until native, packaged, and resource gates pass.
+    - Writes `build/reports/nodejs/phase14-worker-runnable-packaged-smoke.json`
+      and `.md`.
   - Acceptance: worker authority remains disabled by default until packaged and
     resource gates pass.
 

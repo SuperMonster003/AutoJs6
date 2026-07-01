@@ -337,7 +337,7 @@
         "P14-31",
         "P14-32"
       ],
-      "summary": "Decide worker_threads v1.2 promotion from native ABI evidence, add runnable/package/resource gates if available, and keep process-worker replacement bounded. P14-28 refreshes the native availability audit as intentional non-support for v1.2 runnable workers until worker.preflight.status=available is archived on target ABIs.",
+      "summary": "Decide worker_threads v1.2 promotion from native ABI evidence, add runnable/package/resource gates if available, and keep process-worker replacement bounded. P14-28 refreshes the native availability audit as intentional non-support for v1.2 runnable workers until worker.preflight.status=available is archived on target ABIs. P14-29 adds the conditional runnable/packaged smoke gate and keeps source-only worker anchors from promoting authority while native workers are unavailable.",
       "risk": "critical",
       "runtimeSurface": [
         "worker_threads native availability",
@@ -356,7 +356,14 @@
         "tools/nodejs/phase14/verify-node-phase14-worker-native-availability.js",
         ":app:verifyNodePhase14WorkerNativeAvailability",
         "build/reports/nodejs/phase14-worker-native-availability.json",
-        "build/reports/nodejs/phase14-worker-native-availability.md"
+        "build/reports/nodejs/phase14-worker-native-availability.md",
+        "docs/nodejs/phase14/worker-runnable-packaged-smoke-plan.json",
+        "docs/nodejs/phase14/PHASE14_WORKER_RUNNABLE_PACKAGED_SMOKE.md",
+        "docs/nodejs/reports/phase14/P14_29_WORKER_RUNNABLE_PACKAGED_SMOKE.md",
+        "tools/nodejs/phase14/verify-node-phase14-worker-runnable-packaged-smoke.js",
+        ":app:verifyNodePhase14WorkerRunnablePackagedSmoke",
+        "build/reports/nodejs/phase14-worker-runnable-packaged-smoke.json",
+        "build/reports/nodejs/phase14-worker-runnable-packaged-smoke.md"
       ],
       "rollback": "Keep worker_threads intentionally unsupported and keep process-worker replacement without a user-facing facade unless native and packaged gates pass."
     },
