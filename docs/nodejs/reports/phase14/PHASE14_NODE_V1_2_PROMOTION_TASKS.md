@@ -283,6 +283,27 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-12: Add selector/action real-device matrix.
   - Scope: selector aliases, chain helpers, Back/Home/Recents, click/longClick
     where allowed, denial for gesture/root/Shizuku tiers.
+  - Gate: `:app:verifyNodePhase14AccessibilitySelectorActionMatrix`.
+  - Selector/action matrix gate deployed:
+    - Adds `docs/nodejs/phase14/accessibility-selector-action-matrix.json`
+      and `PHASE14_ACCESSIBILITY_SELECTOR_ACTION_MATRIX.md` for Android 12
+      and Android 15+ accessibility selector/action archive requirements.
+    - Extends the manual `accessibility` device profile smoke with controlled
+      selector `longClick` and optional `recentApps` coverage when
+      `autojs.nodejs.accessibilitySmoke.globalActions=true`.
+    - Imports P13-19 direct selector, Rhino compat alias/chain,
+      timeout/cancellation, missing-service denial, and raw-object boundary
+      evidence.
+    - Imports P13-24 root/Shizuku stable denial evidence so gesture/root/
+      Shizuku tiers remain separate from `accessibility`.
+    - Writes
+      `build/reports/nodejs/phase14-accessibility-selector-action-matrix.json`
+      and `.md`.
+    - Keeps open blockers `accessibility_selector_android12_action_archive`,
+      `accessibility_selector_android15_plus_action_archive`,
+      `accessibility_selector_global_actions_recents_archive`, and
+      `accessibility_selector_unsupported_tier_diagnostics_archive` as
+      `future_promotion`.
   - Acceptance: matrix covers success, timeout, missing service, missing
     capability, and unsupported action diagnostics.
 

@@ -1,0 +1,233 @@
+{
+  "schema": "autojs6-node-phase14-accessibility-selector-action-matrix-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "updatedAt": "2026-07-01",
+  "task": "P14-12",
+  "surface": "accessibility",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "minimumMatrixPolicy": "Selector/action promotion requires archived Android 12 class and Android 15+ class device evidence with the AutoJs6 accessibility service enabled manually before pro_compat_opt_in promotion.",
+  "requiredDeviceClasses": [
+    "android_12_class",
+    "android_15_plus_class"
+  ],
+  "requiredFields": [
+    "deviceSerial",
+    "deviceModel",
+    "androidVersion",
+    "apiLevel",
+    "packageIdentity",
+    "profile",
+    "serviceState",
+    "settingsPreparedByUser",
+    "capabilities",
+    "directSelectorApis",
+    "compatSelectorApis",
+    "globalActions",
+    "timeoutBehavior",
+    "missingServiceBehavior",
+    "missingCapabilityBehavior",
+    "unsupportedActionDiagnostics",
+    "rawObjectBoundary",
+    "reportPath"
+  ],
+  "requiredSelectorActionScenarios": [
+    "direct selector builders and action facade",
+    "Rhino compat selector aliases and chain helpers",
+    "service-enabled findByText/findOne/click/longClick controlled UI",
+    "Back/Home/Recents optional global actions",
+    "timeout and cancellation cleanup",
+    "missing service denial",
+    "missing capability denial",
+    "gesture/root/Shizuku unsupported tier diagnostics",
+    "raw AccessibilityService/AccessibilityNodeInfo/UiObject absence"
+  ],
+  "evidenceRows": [
+    {
+      "id": "p13_selector_bridge_import",
+      "deviceClass": "host_or_instrumentation_import",
+      "status": "imported_selector_bridge",
+      "deviceSerial": "not_archived",
+      "deviceModel": "not_archived",
+      "androidVersion": "not_archived",
+      "apiLevel": "not_archived",
+      "packageIdentity": "org.autojs.autojs.debug",
+      "profile": "pro_compat_opt_in_candidate",
+      "serviceState": "fake_transport_and_unavailable_provider_imported",
+      "settingsPreparedByUser": "not_applicable_to_imported_host_evidence",
+      "capabilities": [
+        "accessibility"
+      ],
+      "directSelectorApis": [
+        "text",
+        "desc",
+        "id",
+        "className",
+        "textContains",
+        "descContains",
+        "textMatches",
+        "descMatches",
+        "idMatches",
+        "classNameMatches",
+        "clickable",
+        "enabled",
+        "scrollable",
+        "depth",
+        "boundsInside",
+        "boundsContains",
+        "findOne",
+        "findAll",
+        "click",
+        "longClick",
+        "setText",
+        "scrollForward",
+        "scrollBackward"
+      ],
+      "compatSelectorApis": [
+        "description",
+        "descriptionContains",
+        "descriptionMatches",
+        "idContains",
+        "classNameContains",
+        "findOne(number)",
+        "find",
+        "findAll",
+        "click",
+        "longClick",
+        "setText",
+        "scrollForward",
+        "scrollBackward",
+        "exists"
+      ],
+      "globalActions": [
+        "back",
+        "home",
+        "recentApps",
+        "recents"
+      ],
+      "timeoutBehavior": "timeout and AbortSignal cancellation imported from NodeAccessibilitySelectorBridgeInstrumentationTest",
+      "missingServiceBehavior": "isEnabled/ensureEnabled return false and selector actions reject ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "missingCapabilityBehavior": "accessibility methods require explicit accessibility capability through NodeBridgePermissionManifest",
+      "unsupportedActionDiagnostics": "swipe, gesture, powerDialog, raw node, root input, and Shizuku tiers are not implied by accessibility",
+      "rawObjectBoundary": "AccessibilityService, AccessibilityNodeInfo, UiObject, live selector, Context, Binder, and Java object handles are absent",
+      "reportPath": "docs/nodejs/reports/phase13/P13_19_ACCESSIBILITY_SELECTOR_PROMOTION.md"
+    },
+    {
+      "id": "p14_11_packaged_lifecycle_import",
+      "deviceClass": "packaged_fixture_import",
+      "status": "imported_packaged_lifecycle_boundary",
+      "deviceSerial": "not_archived",
+      "deviceModel": "not_archived",
+      "androidVersion": "not_archived",
+      "apiLevel": "not_archived",
+      "packageIdentity": "org.autojs6.packaged.node.accessibility.lifecycle.smoke",
+      "profile": "pro_compat_opt_in_candidate",
+      "serviceState": "packaged_disabled_state_denial_imported",
+      "settingsPreparedByUser": "must_not_auto_enable_service",
+      "capabilities": [
+        "accessibility"
+      ],
+      "directSelectorApis": [
+        "findOne",
+        "findAll",
+        "click",
+        "longClick",
+        "setText",
+        "scrollForward",
+        "scrollBackward"
+      ],
+      "compatSelectorApis": [],
+      "globalActions": [],
+      "timeoutBehavior": "not_claimed_by_packaged_lifecycle_import",
+      "missingServiceBehavior": "packaged disabled-state denial path imported from P14-11",
+      "missingCapabilityBehavior": "packaged missing-capability archive remains pending",
+      "unsupportedActionDiagnostics": "unsupported helper absence imported from P14-11",
+      "rawObjectBoundary": "raw service/node globals remain absent in packaged fixture contract",
+      "reportPath": "docs/nodejs/reports/phase14/P14_11_ACCESSIBILITY_LIFECYCLE.md"
+    },
+    {
+      "id": "android_12_accessibility_selector_action_archive",
+      "deviceClass": "android_12_class",
+      "status": "missing_device_archive",
+      "deviceSerial": "pending_android_12_device_archive",
+      "deviceModel": "pending_android_12_device_archive",
+      "androidVersion": "12",
+      "apiLevel": "pending_android_12_api_level",
+      "packageIdentity": "pending_debug_or_packaged_identity",
+      "profile": "accessibility",
+      "serviceState": "pending_user_enabled_accessibility_service",
+      "settingsPreparedByUser": "pending_manual_enablement",
+      "capabilities": [
+        "accessibility"
+      ],
+      "directSelectorApis": [
+        "pending_findByText_findOne_click_longClick"
+      ],
+      "compatSelectorApis": [
+        "pending_alias_chain_helpers"
+      ],
+      "globalActions": [
+        "pending_back_home_recentApps_when_safe"
+      ],
+      "timeoutBehavior": "pending",
+      "missingServiceBehavior": "pending",
+      "missingCapabilityBehavior": "pending",
+      "unsupportedActionDiagnostics": "pending",
+      "rawObjectBoundary": "pending",
+      "reportPath": "pending_android_12_accessibility_selector_action_archive"
+    },
+    {
+      "id": "android_15_plus_accessibility_selector_action_archive",
+      "deviceClass": "android_15_plus_class",
+      "status": "missing_device_archive",
+      "deviceSerial": "pending_android_15_plus_device_archive",
+      "deviceModel": "pending_android_15_plus_device_archive",
+      "androidVersion": "15+",
+      "apiLevel": "pending_android_15_plus_api_level",
+      "packageIdentity": "pending_debug_or_packaged_identity",
+      "profile": "accessibility",
+      "serviceState": "pending_user_enabled_accessibility_service",
+      "settingsPreparedByUser": "pending_manual_enablement",
+      "capabilities": [
+        "accessibility"
+      ],
+      "directSelectorApis": [
+        "pending_findByText_findOne_click_longClick"
+      ],
+      "compatSelectorApis": [
+        "pending_alias_chain_helpers"
+      ],
+      "globalActions": [
+        "pending_back_home_recentApps_when_safe"
+      ],
+      "timeoutBehavior": "pending",
+      "missingServiceBehavior": "pending",
+      "missingCapabilityBehavior": "pending",
+      "unsupportedActionDiagnostics": "pending",
+      "rawObjectBoundary": "pending",
+      "reportPath": "pending_android_15_plus_accessibility_selector_action_archive"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "accessibility_selector_android12_action_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Archived Android 12 class accessibility profile run with user-enabled service covering findByText, findOne, click, longClick, timeout, missing service, and missing capability behavior."
+    },
+    {
+      "id": "accessibility_selector_android15_plus_action_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Archived Android 15+ class accessibility profile run with user-enabled service covering findByText, findOne, click, longClick, timeout, missing service, and missing capability behavior."
+    },
+    {
+      "id": "accessibility_selector_global_actions_recents_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Back/Home/Recents global action archive recorded only on devices where those actions are safe to trigger."
+    },
+    {
+      "id": "accessibility_selector_unsupported_tier_diagnostics_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Archived diagnostics proving gesture/root/Shizuku tiers remain separate, unsupported or explicitly denied, and do not leak raw accessibility objects."
+    }
+  ]
+}

@@ -622,7 +622,7 @@ accessibility provider unavailable errors, scoped `image.readImage()` to OCR to
 `image.recycle()` live behavior, and screenshot/advanced image fail-closed
 paths. If the AutoJs6 accessibility service is already enabled on the device,
 it also launches a controlled Activity and validates real selector `findOne`
-and selector `click`; otherwise that single real-accessibility smoke is an
+selector `click`, and selector `longClick`; otherwise that single real-accessibility smoke is an
 explicit JUnit skip.
 `verifyNodeLiveUiGate` validates the Activity-owned UI provider, JavaScript
 event delivery, provider cleanup, descriptor denial, and foreign-handle denial.
@@ -1075,6 +1075,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14OverlayPermissionOemMatrix
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedOverlayPositiveSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilityLifecycle
+.\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilitySelectorActionMatrix
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1110,6 +1111,12 @@ The accessibility lifecycle gate writes
 accessibility lifecycle fixture, imports the P13-19 selector denial boundary,
 and keeps user-enabled service, settings round-trip, task removal/relaunch,
 disconnect, and missing-capability archives as future-promotion blockers.
+The accessibility selector/action matrix gate writes
+`phase14-accessibility-selector-action-matrix.json` plus `.md`, verifies the
+selector/action real-device matrix, imports P13-19 selector and P13-24
+root/Shizuku denial evidence, and keeps Android 12/15+ selector action, safe
+global-action, and unsupported-tier diagnostics archives as future-promotion
+blockers.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

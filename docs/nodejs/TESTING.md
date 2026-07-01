@@ -1283,7 +1283,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=accessibility"
 ```
 
-Enable the current branch's AutoJs6 accessibility service manually before running it. The profile is not part of normal PR, Sony, full, nightly, or release gates; it launches a controlled test UI and validates `isEnabled`, `ensureEnabled`, `findByText`, selector `findOne`, and selector `click` through the Android provider path. Add `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke.globalActions=true` only when it is safe for the test to trigger Back/Home.
+Enable the current branch's AutoJs6 accessibility service manually before running it. The profile is not part of normal PR, Sony, full, nightly, or release gates; it launches a controlled test UI and validates `isEnabled`, `ensureEnabled`, `findByText`, selector `findOne`, selector `click`, and selector `longClick` through the Android provider path. Add `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke.globalActions=true` only when it is safe for the test to trigger Back/Home/Recents.
 
 Focused accessibility/image live gate:
 
@@ -1292,7 +1292,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeLiveAccessibilityImageGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This focused gate runs selector timeout/cancellation, Android accessibility unavailable rejection, scoped `image.readImage()` to OCR to `image.recycle()` live behavior, OCR unknown-handle cleanup, and screenshot/advanced image fail-closed coverage. It also enables the controlled Activity accessibility smoke; that smoke validates real `isEnabled`, `ensureEnabled`, `findByText`, selector `findOne`, selector `click`, stale JSON snapshot behavior, and post-click lookup when the AutoJs6 accessibility service is already enabled, and otherwise records an explicit JUnit skip without changing device accessibility settings.
+This focused gate runs selector timeout/cancellation, Android accessibility unavailable rejection, scoped `image.readImage()` to OCR to `image.recycle()` live behavior, OCR unknown-handle cleanup, and screenshot/advanced image fail-closed coverage. It also enables the controlled Activity accessibility smoke; that smoke validates real `isEnabled`, `ensureEnabled`, `findByText`, selector `findOne`, selector `click`, selector `longClick`, stale JSON snapshot behavior, and post-action lookup when the AutoJs6 accessibility service is already enabled, and otherwise records an explicit JUnit skip without changing device accessibility settings.
 
 Optional real-device `screen_capture` smoke:
 
@@ -3038,6 +3038,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14OverlayPermissionOemMatrix
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedOverlayPositiveSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilityLifecycle
+.\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilitySelectorActionMatrix
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3082,6 +3083,13 @@ It writes `phase14-accessibility-lifecycle.json` plus `.md`, verifies the
 packaged accessibility lifecycle fixture, imports the P13-19 selector denial
 boundary, and keeps user-enabled service, settings round-trip, task
 removal/relaunch, disconnect, and missing-capability archives as
+future-promotion blockers.
+`verifyNodePhase14AccessibilitySelectorActionMatrix` depends on the P14-11
+accessibility lifecycle gate, the Phase 13 accessibility selector gate, and the
+Phase 13 shell/root/Shizuku gate. It writes
+`phase14-accessibility-selector-action-matrix.json` plus `.md`, verifies the
+selector/action real-device matrix, and keeps Android 12/15+ selector action,
+safe global-action, and unsupported-tier diagnostics archives as
 future-promotion blockers.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.

@@ -20,6 +20,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14OverlayPermissionOemMatrix`
 - `:app:verifyNodePhase14PackagedOverlayPositiveSmoke`
 - `:app:verifyNodePhase14AccessibilityLifecycle`
+- `:app:verifyNodePhase14AccessibilitySelectorActionMatrix`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -56,3 +57,10 @@ lifecycle fixture as `partial`. It adds a packaged APK fixture with explicit
 the P13-19 selector denial boundary, and keeps user-enabled service, settings
 round-trip, task removal/relaunch, disconnect, and missing-capability archives
 as future-promotion blockers.
+
+`P14_12_ACCESSIBILITY_SELECTOR_ACTION_MATRIX.md` records the selector/action
+real-device matrix as `partial`. It imports P13-19 selector and compat alias
+coverage, extends the manual accessibility profile with `longClick` and
+optional Recents coverage, imports P13-24 root/Shizuku denial evidence, and
+keeps Android 12/15+, global-action, and unsupported-tier archives as
+future-promotion blockers.
