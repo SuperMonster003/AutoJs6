@@ -1,0 +1,81 @@
+{
+  "schema": "autojs6-node-phase14-packaged-image-ocr-evidence-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-15",
+  "title": "Packaged image/OCR quota and model evidence",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "minimumPromotionPolicy": "Packaged image/OCR promotion requires explicit provider-mode selection, stable model-absence denial, scoped packaged image input, temporary-handle quota, leak/stress evidence, and no raw OCR/image/model objects crossing into Node.",
+  "operationContract": {
+    "modules": [
+      "image",
+      "images",
+      "ocr",
+      "autojs6:compat"
+    ],
+    "imageCapability": "image",
+    "ocrCapability": "ocr",
+    "screenCaptureCapability": "screen_capture",
+    "defaultOcrEngine": "mlkit-chinese",
+    "explicitOcrModes": [
+      "mlkit"
+    ],
+    "stableDeniedProviderFamilies": [
+      "paddle",
+      "rapid",
+      "plugin"
+    ],
+    "packagedSupport": {
+      "image": "degraded",
+      "ocr": "provider-dependent"
+    },
+    "modelAbsenceStableDenied": true,
+    "temporaryImageHandlesQuotaBound": true,
+    "recycleRequiredAfterCompatPathInput": true,
+    "scopedPackagedInputRequired": true,
+    "packagedCaptureRequiresMediaProjectionPromotion": true,
+    "rawObjectsDenied": [
+      "TextRecognizer",
+      "OCR engine",
+      "ML Kit Text",
+      "Paddle model",
+      "Rapid model",
+      "plugin OCR service",
+      "Bitmap",
+      "Mat",
+      "ImageWrapper",
+      "MediaProjection",
+      "native pointer",
+      "model path",
+      "Java object"
+    ]
+  },
+  "importedEvidence": [
+    "P13-20 scoped readImage/recycle and live ML Kit OCR over provider-owned image handles",
+    "P14-14 advanced image invalid-input and quota boundary",
+    "v1.1 packaged fake-provider bridge smoke for ocr plus image capability permissions",
+    "OCR unknown/recycled image-handle denial with active resource count returning to zero"
+  ],
+  "requiredArchives": [
+    {
+      "id": "packaged_ocr_model_absence_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged APK run where ML Kit/Paddle/Rapid/plugin OCR model assets or services are absent, producing stable unavailable/degraded bridge errors without leaking OCR/image resources."
+    },
+    {
+      "id": "packaged_ocr_explicit_provider_mode_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Explicit packaged OCR provider-mode evidence for mlkit success and Paddle/Rapid/plugin stable-denied lookup diagnostics."
+    },
+    {
+      "id": "packaged_image_ocr_quota_leak_stress_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged image/OCR temp-handle quota, repeated read/OCR/recycle loops, provider destroy, timeout, and leak/stress archive with active image and OCR resources returning to zero."
+    },
+    {
+      "id": "packaged_capture_ocr_disclosure_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged capture-to-OCR evidence with MediaProjection foreground disclosure, stop action, task removal/relaunch cleanup, and missing-capability denial."
+    }
+  ]
+}

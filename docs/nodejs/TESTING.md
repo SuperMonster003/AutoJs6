@@ -3041,6 +3041,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilitySelectorActionMatrix
 .\gradlew.bat --console=plain :app:verifyNodePhase14MediaProjectionProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14AdvancedImageOperations
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedImageOcrEvidence
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3108,6 +3109,13 @@ invalid-input, scoped `readImage`/`recycle`, OCR-handle, and quota evidence,
 keeps live Android save/transform/matching/color operations fail-closed, and
 keeps live provider, leak/stress, and packaged scoped-output archives as
 future-promotion blockers.
+`verifyNodePhase14PackagedImageOcrEvidence` depends on the P14-14 advanced
+image operations gate and the Phase 13 screenshot/image/OCR promotion gate. It
+writes `phase14-packaged-image-ocr-evidence.json` plus `.md`, verifies the
+packaged image/OCR evidence contract, imports live ML Kit OCR, image-handle
+quota/invalid-input boundaries, and packaged fake-provider OCR smoke, and keeps
+packaged model-absence, explicit provider-mode, quota/leak stress, and
+capture/disclosure archives as future-promotion blockers.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

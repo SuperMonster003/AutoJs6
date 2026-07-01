@@ -1078,6 +1078,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilitySelectorActionMatrix
 .\gradlew.bat --console=plain :app:verifyNodePhase14MediaProjectionProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14AdvancedImageOperations
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedImageOcrEvidence
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1132,6 +1133,12 @@ invalid-input, scoped `readImage`/`recycle`, OCR-handle, and quota evidence,
 keeps live Android save/transform/matching/color operations fail-closed, and
 keeps live provider, leak/stress, and packaged scoped-output archives as
 future-promotion blockers.
+The packaged image/OCR evidence gate writes
+`phase14-packaged-image-ocr-evidence.json` plus `.md`, verifies packaged
+image/OCR model and quota policy, imports P13-20 live ML Kit OCR, P14-14
+image quota/invalid-input boundaries, and packaged fake-provider OCR smoke, and
+keeps model-absence, explicit provider-mode, quota/leak stress, and
+capture/disclosure archives as future-promotion blockers.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

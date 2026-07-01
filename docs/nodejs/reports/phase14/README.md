@@ -23,6 +23,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14AccessibilitySelectorActionMatrix`
 - `:app:verifyNodePhase14MediaProjectionProvider`
 - `:app:verifyNodePhase14AdvancedImageOperations`
+- `:app:verifyNodePhase14PackagedImageOcrEvidence`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -80,3 +81,9 @@ TypeScript, invalid-input, scoped `readImage`/`recycle`, OCR handle, and quota
 evidence, keeps live Android save/transform/matching/color operations
 fail-closed, and keeps live provider, leak/stress, and packaged scoped-output
 archives as future-promotion blockers.
+
+`P14_15_PACKAGED_IMAGE_OCR_EVIDENCE.md` records the packaged image/OCR evidence
+contract as `partial`. It imports P13-20 live ML Kit OCR, P14-14 image quota
+and invalid-input boundaries, and packaged v1.1 fake-provider OCR smoke while
+keeping model-absence, explicit provider-mode, quota/leak stress, and
+capture/disclosure archives as future-promotion blockers.

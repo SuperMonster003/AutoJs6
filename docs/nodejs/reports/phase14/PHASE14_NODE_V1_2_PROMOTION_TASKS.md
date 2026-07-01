@@ -362,6 +362,22 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-15: Add packaged image/OCR quota and model evidence.
   - Scope: ML Kit optional mode, Paddle/Rapid/plugin provider lookup policy,
     packaged model absence, temp-handle quota, and leak/stress evidence.
+  - Gate: `:app:verifyNodePhase14PackagedImageOcrEvidence`.
+  - Packaged image/OCR evidence gate deployed:
+    - Adds `docs/nodejs/phase14/packaged-image-ocr-evidence-plan.json` and
+      `PHASE14_PACKAGED_IMAGE_OCR_EVIDENCE.md` for the packaged image/OCR
+      evidence contract.
+    - Imports P13-20 scoped `readImage`/`recycle`, live ML Kit OCR,
+      unknown/recycled-handle denial, and active resource cleanup evidence.
+    - Imports P14-14 image invalid-input and quota boundary evidence.
+    - Imports packaged v1.1 fake-provider OCR smoke for module resolution,
+      `ocr` plus `image` capability checks, shadowing denial, and pending-call
+      cleanup.
+    - Keeps Paddle/Rapid/plugin provider selection stable-denied and packaged
+      model absence, explicit provider-mode, quota/leak stress, and
+      capture/disclosure archives open as `future_promotion`.
+    - Writes `build/reports/nodejs/phase14-packaged-image-ocr-evidence.json`
+      and `.md`.
   - Acceptance: OCR remains stable-denied when provider/model is absent and
     promoted only for explicit provider modes with archived evidence.
 
