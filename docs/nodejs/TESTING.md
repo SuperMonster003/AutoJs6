@@ -3046,6 +3046,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskDatabaseProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskSchemaMigrationRollback
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedTaskSchedulingSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase14IntentBroadcastProvider
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3151,6 +3152,13 @@ packaged project-entry scheduled-runner anchor, records package-identity row
 ownership policy, and keeps future packaged `tasks` database rows,
 process-death/relaunch, task-removal cleanup, disclosure, and Safe downgrade
 archives unpromoted.
+`verifyNodePhase14IntentBroadcastProvider` depends on the P14-19 packaged task
+scheduling gate plus the Phase 13 IntentTask/broadcast and app/intent gates. It
+writes `phase14-intent-broadcast-provider.json` plus `.md`, imports P13-22
+receiver substrate, compat rejection, JSON snapshot, and packaged boundary
+evidence, defines the future `tasks.broadcast` descriptor, manifest/export,
+payload, and remove cleanup contract, and keeps runtime `tasks.broadcast`
+authority and future task/broadcast capabilities unpromoted.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

@@ -477,7 +477,28 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-20: Implement JSON-safe IntentTask/broadcast provider.
   - Scope: owned descriptors, manifest synthesis, exported/non-exported
     policy, permission gates, trigger payload schema, and remove behavior.
-  - Gate: proposed `:app:verifyNodePhase14IntentBroadcastProvider`.
+  - Gate: `:app:verifyNodePhase14IntentBroadcastProvider`.
+  - IntentTask/broadcast provider contract gate deployed:
+    - Adds `docs/nodejs/phase14/intent-broadcast-provider-plan.json` and
+      `PHASE14_INTENT_BROADCAST_PROVIDER.md`.
+    - Imports P13-22 Android/Rhino receiver substrate, JSON-safe
+      `NodeIntentTaskSnapshots`, `compat.tasks` IntentTask rejection stubs, and
+      packaged denial/metadata-boundary smoke.
+    - Defines future `tasks.broadcast` JSON descriptor operations:
+      `register`, `list`, `get`, `enable`, `disable`, `remove`, and
+      `validateManifestPatch`.
+    - Records manifest synthesis rules for packaged opt-in receivers,
+      `RECEIVE_BOOT_COMPLETED`, package data scheme, non-exported defaults,
+      exported receiver denial, and deterministic patch reports.
+    - Records bounded trigger payload snapshots, privacy filtering,
+      receiver-thread non-execution, owner-scoped remove cleanup, dynamic
+      receiver unregister, pending execution cancellation, legacy row
+      preservation, and cross-package denial.
+    - Keeps live provider, manifest synthesis, exported/permission policy,
+      trigger payload schema, and remove cleanup archives open as
+      `future_promotion`.
+    - Writes `build/reports/nodejs/phase14-intent-broadcast-provider.json`
+      and `.md`.
   - Acceptance: no raw `Intent`, `PendingIntent`, `BroadcastReceiver`, or
     Android component object is exposed.
 

@@ -1083,6 +1083,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskDatabaseProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskSchemaMigrationRollback
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedTaskSchedulingSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase14IntentBroadcastProvider
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1165,6 +1166,12 @@ The packaged task scheduling smoke gate writes
 project-entry scheduled-runner evidence, records package-identity row
 ownership and Safe downgrade policy, and keeps packaged `tasks` database row
 promotion unpromoted.
+The IntentTask/broadcast provider gate writes
+`phase14-intent-broadcast-provider.json` plus `.md`, imports the P13-22
+receiver substrate, compat rejection, JSON snapshot, and packaged boundary
+evidence, records future `tasks.broadcast` descriptor, manifest/export,
+payload, and owner-scoped remove cleanup contracts, and keeps runtime broadcast
+task authority unpromoted.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

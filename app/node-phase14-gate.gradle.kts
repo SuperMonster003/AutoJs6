@@ -777,3 +777,72 @@ tasks.register<Exec>("verifyNodePhase14PackagedTaskSchedulingSmoke") {
         nodePhase14ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase14IntentBroadcastProvider") {
+    group = "verification"
+    description = "Verifies the Phase 14 JSON-safe IntentTask/broadcast provider contract gate."
+
+    dependsOn(
+        "verifyNodePhase14PackagedTaskSchedulingSmoke",
+        "verifyNodePhase13IntentBroadcastProvider",
+        "verifyNodePhase13AppIntentBroadcastParity",
+    )
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase14/verify-node-phase14-intent-broadcast-provider.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_20_INTENT_BROADCAST_PROVIDER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/intent-broadcast-provider-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_INTENT_BROADCAST_PROVIDER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-promotion-contracts.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/task-database-provider-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/task-schema-migration-rollback-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/packaged-task-scheduling-smoke-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_17_TASK_DATABASE_PROVIDER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_18_TASK_SCHEMA_MIGRATION_ROLLBACK.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_19_PACKAGED_TASK_SCHEDULING_SMOKE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_22_INTENT_BROADCAST_PROVIDER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/BROADCAST_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/TASKS_INTENT_BROADCAST_COMPATIBILITY_DECISION.md"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeIntentTaskSnapshots.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/runtime/api/augment/tasks/Tasks.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/timing/IntentTask.java"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/storage/database/IntentTaskDatabase.java"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/timing/TimedTaskManager.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/external/receiver/BaseBroadcastReceiver.java"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/external/receiver/StaticBroadcastReceiver.java"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/external/receiver/DynamicBroadcastReceivers.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase14-gate.gradle.kts"))
+    inputs.file(nodePhase14ReportDir.map { it.file("phase13-intent-broadcast-provider.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-task-database-provider.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-task-schema-migration-rollback.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-packaged-task-scheduling-smoke.json") })
+    outputs.files(
+        nodePhase14ReportDir.map { it.file("phase14-intent-broadcast-provider.json") },
+        nodePhase14ReportDir.map { it.file("phase14-intent-broadcast-provider.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase14ReportDir.get().asFile.absolutePath,
+    )
+}

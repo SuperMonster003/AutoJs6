@@ -106,6 +106,25 @@ promotion:
 - Process-death, relaunch, disclosure, stop-action, and crash recovery gaps
   stay future-promotion blockers rather than release-blocking errors.
 
+## P14-20 IntentTask/broadcast denial sync
+
+P14-20 does not add a new error code or promote `tasks.broadcast`. It records
+the denial and cleanup expectations for future broadcast task promotion:
+
+- `require("tasks")`, `require("tasks.broadcast")`, global `tasks`, and
+  future task/broadcast capabilities stay unavailable until a live provider is
+  promoted.
+- `compat.tasks.addIntentTask()`, `queryIntentTasks()`, `getIntentTask(id)`,
+  and `removeIntentTask(id)` continue to reject before bridge dispatch with the
+  existing Rhino compatibility unsupported path.
+- Exported receivers, boot/user-unlocked/package/startup/exact-alarm triggers,
+  manifest mutation, and external broadcast wakeups remain permission-denied or
+  unavailable until explicit metadata, user disclosure, and device evidence
+  exist.
+- Trigger payload failures must surface stable invalid-request or
+  permission-denied diagnostics, never raw `Intent`, `Bundle`, `Uri`, receiver
+  handle, `PackageManager`, or database exceptions.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

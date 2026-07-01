@@ -28,6 +28,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14TaskDatabaseProvider`
 - `:app:verifyNodePhase14TaskSchemaMigrationRollback`
 - `:app:verifyNodePhase14PackagedTaskSchedulingSmoke`
+- `:app:verifyNodePhase14IntentBroadcastProvider`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -117,3 +118,11 @@ schedule/list/cancel smoke and live packaged project-entry scheduled-runner
 evidence while keeping packaged task database add/list/enable-disable/remove,
 process death/relaunch, task-removal cleanup, disclosure, and Safe downgrade
 archives open.
+
+`P14_20_INTENT_BROADCAST_PROVIDER.md` records the JSON-safe
+IntentTask/broadcast provider contract as `partial`. It imports P13-22
+receiver substrate, compat rejection, JSON snapshot, and packaged boundary
+evidence, defines future `tasks.broadcast` descriptor, manifest, exported
+policy, trigger payload, and remove semantics, and keeps live provider,
+manifest synthesis, exported/permission policy, payload, and cleanup archives
+open.

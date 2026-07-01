@@ -224,7 +224,7 @@
         "P14-26",
         "P14-27"
       ],
-      "summary": "Promote JSON-safe task mutations, IntentTask/broadcast provider behavior, notification ownership, power/OEM matrix, recorder sessions, packaged media stress, and synchronized docs/types. P14-17 adds the JSON-safe task database mutation contract and archive gate; P14-18 adds the task schema migration and rollback fixture contract; P14-19 adds the packaged task scheduling smoke baseline. Runtime authority remains unpromoted.",
+      "summary": "Promote JSON-safe task mutations, IntentTask/broadcast provider behavior, notification ownership, power/OEM matrix, recorder sessions, packaged media stress, and synchronized docs/types. P14-17 adds the JSON-safe task database mutation contract and archive gate; P14-18 adds the task schema migration and rollback fixture contract; P14-19 adds the packaged task scheduling smoke baseline; P14-20 adds the JSON-safe IntentTask/broadcast provider contract. Runtime authority remains unpromoted.",
       "risk": "high",
       "runtimeSurface": [
         "JSON-safe task database mutations",
@@ -261,7 +261,14 @@
         "tools/nodejs/phase14/verify-node-phase14-packaged-task-scheduling-smoke.js",
         ":app:verifyNodePhase14PackagedTaskSchedulingSmoke",
         "build/reports/nodejs/phase14-packaged-task-scheduling-smoke.json",
-        "build/reports/nodejs/phase14-packaged-task-scheduling-smoke.md"
+        "build/reports/nodejs/phase14-packaged-task-scheduling-smoke.md",
+        "docs/nodejs/phase14/intent-broadcast-provider-plan.json",
+        "docs/nodejs/phase14/PHASE14_INTENT_BROADCAST_PROVIDER.md",
+        "docs/nodejs/reports/phase14/P14_20_INTENT_BROADCAST_PROVIDER.md",
+        "tools/nodejs/phase14/verify-node-phase14-intent-broadcast-provider.js",
+        ":app:verifyNodePhase14IntentBroadcastProvider",
+        "build/reports/nodejs/phase14-intent-broadcast-provider.json",
+        "build/reports/nodejs/phase14-intent-broadcast-provider.md"
       ],
       "rollback": "Disable promoted Pro task/device/media capability switches and retain v1.1 JSON-safe snapshots, stable denial stubs, and scoped read-only provider behavior."
     },
