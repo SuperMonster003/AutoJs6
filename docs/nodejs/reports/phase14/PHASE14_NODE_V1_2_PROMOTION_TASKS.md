@@ -337,6 +337,25 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-14: Promote advanced image operations.
   - Scope: save, clip, resize, grayscale, threshold, findImage, matchTemplate,
     color matching, temp-handle quota, and recycle semantics.
+  - Gate: `:app:verifyNodePhase14AdvancedImageOperations`.
+  - Advanced image operations gate deployed:
+    - Adds `docs/nodejs/phase14/advanced-image-operations-plan.json` and
+      `PHASE14_ADVANCED_IMAGE_OPERATIONS.md` for the advanced image operation
+      promotion contract.
+    - Imports P13-20 fake-provider, TypeScript, invalid-input,
+      scoped `readImage`/`recycle`, OCR image-handle, and image-handle quota
+      evidence.
+    - Imports P14-13 MediaProjection boundary so `captureScreen` and
+      screenshot-backed compat helpers remain blocked until prompt/capture
+      ownership is promoted.
+    - Keeps live Android save/transform/matching/color operations fail-closed
+      instead of exposing raw Bitmap/OpenCV/ImageWrapper handles.
+    - Writes `build/reports/nodejs/phase14-advanced-image-operations.json`
+      and `.md`.
+    - Keeps open blockers `image_advanced_transform_provider_archive`,
+      `image_matching_color_provider_archive`,
+      `image_temp_handle_quota_leak_stress_archive`, and
+      `image_packaged_scoped_output_archive` as `future_promotion`.
   - Acceptance: operations work on opaque image handles with bounded memory and
     stable errors for invalid/recycled handles.
 

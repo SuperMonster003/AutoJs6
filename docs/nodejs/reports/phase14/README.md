@@ -22,6 +22,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14AccessibilityLifecycle`
 - `:app:verifyNodePhase14AccessibilitySelectorActionMatrix`
 - `:app:verifyNodePhase14MediaProjectionProvider`
+- `:app:verifyNodePhase14AdvancedImageOperations`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -71,4 +72,11 @@ MediaProjection provider contract as `partial`. It imports the P13-20
 screenshot/image/OCR state and the optional real-device `screen_capture` smoke
 anchor, keeps `media_projection` fail-closed, and keeps Android 12/15+ prompt
 capture, foreground disclosure/stop action, and task-removal/relaunch/crash
+archives as future-promotion blockers.
+
+`P14_14_ADVANCED_IMAGE_OPERATIONS.md` records the advanced image operation
+promotion contract as `partial`. It imports P13-20 fake-provider,
+TypeScript, invalid-input, scoped `readImage`/`recycle`, OCR handle, and quota
+evidence, keeps live Android save/transform/matching/color operations
+fail-closed, and keeps live provider, leak/stress, and packaged scoped-output
 archives as future-promotion blockers.

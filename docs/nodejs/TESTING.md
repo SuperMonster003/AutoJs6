@@ -3040,6 +3040,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilityLifecycle
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilitySelectorActionMatrix
 .\gradlew.bat --console=plain :app:verifyNodePhase14MediaProjectionProvider
+.\gradlew.bat --console=plain :app:verifyNodePhase14AdvancedImageOperations
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3099,6 +3100,14 @@ Activity-owned MediaProjection provider contract, imports the optional
 `screen_capture` smoke anchor, keeps `media_projection` fail-closed, and keeps
 Android 12/15+ prompt capture, foreground disclosure/stop action, and
 task-removal/relaunch/crash archives as future-promotion blockers.
+`verifyNodePhase14AdvancedImageOperations` depends on the P14-13
+MediaProjection provider gate and the Phase 13 screenshot/image/OCR promotion
+gate. It writes `phase14-advanced-image-operations.json` plus `.md`, verifies
+the advanced image operation contract, imports fake-provider, TypeScript,
+invalid-input, scoped `readImage`/`recycle`, OCR-handle, and quota evidence,
+keeps live Android save/transform/matching/color operations fail-closed, and
+keeps live provider, leak/stress, and packaged scoped-output archives as
+future-promotion blockers.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

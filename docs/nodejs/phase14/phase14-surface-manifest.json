@@ -119,7 +119,7 @@
         "P14-15",
         "P14-16"
       ],
-      "summary": "Promote packaged live UI, Android overlay, accessibility selector lifecycle, MediaProjection, advanced image operations, packaged OCR/image quotas, and synchronized docs/types. P14-07 records packaged live UI provider POC evidence; P14-08 adds an Android overlay provider POC; P14-09 adds the overlay permission/OEM matrix; P14-10 adds the packaged overlay positive smoke/stress fixture; P14-11 adds the packaged accessibility lifecycle fixture; P14-12 adds the selector/action real-device matrix; P14-13 adds the Activity-owned MediaProjection provider contract and archive gate. None are promoted.",
+      "summary": "Promote packaged live UI, Android overlay, accessibility selector lifecycle, MediaProjection, advanced image operations, packaged OCR/image quotas, and synchronized docs/types. P14-07 records packaged live UI provider POC evidence; P14-08 adds an Android overlay provider POC; P14-09 adds the overlay permission/OEM matrix; P14-10 adds the packaged overlay positive smoke/stress fixture; P14-11 adds the packaged accessibility lifecycle fixture; P14-12 adds the selector/action real-device matrix; P14-13 adds the Activity-owned MediaProjection provider contract and archive gate; P14-14 adds the advanced image operation promotion contract and archive gate. None are promoted.",
       "risk": "high",
       "runtimeSurface": [
         "require(\"ui\") packaged live provider",
@@ -179,7 +179,14 @@
         "tools/nodejs/phase14/verify-node-phase14-media-projection-provider.js",
         ":app:verifyNodePhase14MediaProjectionProvider",
         "build/reports/nodejs/phase14-media-projection-provider.json",
-        "build/reports/nodejs/phase14-media-projection-provider.md"
+        "build/reports/nodejs/phase14-media-projection-provider.md",
+        "docs/nodejs/phase14/advanced-image-operations-plan.json",
+        "docs/nodejs/phase14/PHASE14_ADVANCED_IMAGE_OPERATIONS.md",
+        "docs/nodejs/reports/phase14/P14_14_ADVANCED_IMAGE_OPERATIONS.md",
+        "tools/nodejs/phase14/verify-node-phase14-advanced-image-operations.js",
+        ":app:verifyNodePhase14AdvancedImageOperations",
+        "build/reports/nodejs/phase14-advanced-image-operations.json",
+        "build/reports/nodejs/phase14-advanced-image-operations.md"
       ],
       "rollback": "Fail closed to current Phase 13 provider POC or stable denial behavior for UI, overlay, accessibility, MediaProjection, image, and OCR surfaces."
     },

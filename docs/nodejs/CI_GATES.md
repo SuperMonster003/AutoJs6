@@ -1077,6 +1077,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilityLifecycle
 .\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilitySelectorActionMatrix
 .\gradlew.bat --console=plain :app:verifyNodePhase14MediaProjectionProvider
+.\gradlew.bat --console=plain :app:verifyNodePhase14AdvancedImageOperations
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1124,6 +1125,13 @@ Activity-owned prompt/capture contract, imports P13-20 and the optional
 `screen_capture` smoke anchor, keeps `media_projection` fail-closed, and keeps
 Android 12/15+ prompt capture, foreground disclosure/stop action, and
 task-removal/relaunch/crash archives as future-promotion blockers.
+The advanced image operations gate writes
+`phase14-advanced-image-operations.json` plus `.md`, verifies the advanced
+image operation contract, imports P13-20 fake-provider, TypeScript,
+invalid-input, scoped `readImage`/`recycle`, OCR-handle, and quota evidence,
+keeps live Android save/transform/matching/color operations fail-closed, and
+keeps live provider, leak/stress, and packaged scoped-output archives as
+future-promotion blockers.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
