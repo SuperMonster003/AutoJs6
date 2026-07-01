@@ -175,3 +175,10 @@ declarations, release matrix, migration cookbook, compatibility, security,
 error, testing, and CI sync as `ready`. It imports P14-17 through P14-26 reports
 and keeps the surface state as `provider_poc_not_promoted` behind
 `:app:verifyNodePhase14TaskDeviceMediaDocSync`.
+
+`P14_28_WORKER_NATIVE_AVAILABILITY.md` records the v1.2 worker native
+availability audit as `ready`. It verifies Node 24.5 target ABI artifacts,
+imports the P13-34 unavailable native-preflight evidence, audits Android loader
+and crash-signature anchors, and refreshes `worker_threads` as intentional
+non-support until a target ABI reports `worker.preflight.status=available`
+behind `:app:verifyNodePhase14WorkerNativeAvailability`.

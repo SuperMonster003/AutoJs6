@@ -245,6 +245,21 @@ authority. It records documentation consistency expectations:
   raw Android objects, raw file descriptors, and Java objects stay governed by
   the stable denial codes already documented in their source gates.
 
+## P14-28 worker native availability decision
+
+P14-28 does not add a new error code. It refreshes the v1.2 worker native
+availability decision around the existing worker errors:
+
+- `ERR_AUTOJS6_WORKER_DISABLED` remains the expected native-unavailable
+  preflight outcome for the current Node 24.5 artifacts.
+- `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`, `ERR_AUTOJS6_WORKER_TIMEOUT`, and
+  WorkerPool errors stay future runnable-gate evidence until native workers are
+  available.
+- Android loader failures for ABI mismatch, missing `libnode.so`, missing
+  `libc++_shared.so`, missing dependent libraries, and missing symbols remain
+  native loader diagnostics, not user-script worker authority.
+- Default, project, packaged, and process-worker authority remain unpromoted.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

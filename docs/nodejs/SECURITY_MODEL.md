@@ -343,6 +343,15 @@ into JavaScript. Current resource/crash evidence references are recorded, but
 native-available reruns, packaged worker evidence, and Android resource ceilings
 remain required before this boundary can relax.
 
+P14-28 refreshes the v1.2 worker native availability audit. The audited Node
+24.5 target ABI set is `arm64-v8a`, `armeabi-v7a`, and `x86_64`; `x86` stays
+fail-fast. The imported P13-34 machine report still records
+`worker.preflight.status=unavailable` with `ERR_AUTOJS6_WORKER_DISABLED`, so
+v1.2 keeps `worker_threads` intentionally unsupported for runnable execution.
+No default, project, packaged, or process-worker authority is promoted, and
+P14-29/P14-30 runnable/resource gates remain conditional on
+`worker.preflight.status=available`.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

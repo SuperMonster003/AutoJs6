@@ -1275,6 +1275,15 @@ results, native-available packaged `.mjs` worker smoke, and Android resource
 ceilings remain open. Current resource/crash evidence references are recorded,
 but must be rerun on a native-worker-capable target before promotion.
 
+P14-28 refreshes the v1.2 worker native availability audit. The current Node
+24.5 artifacts cover `arm64-v8a`, `armeabi-v7a`, and `x86_64`, while `x86`
+stays unsupported and fail-fast. The imported P13-34 preflight remains
+`worker.preflight.status=unavailable` with `ERR_AUTOJS6_WORKER_DISABLED`, so
+v1.2 records `worker_threads` as intentional non-support for runnable workers.
+`node:worker_threads` remains a shape-only compatibility facade in the default
+profile, and P14-29/P14-30 worker smoke/resource promotion can start only after
+a target ABI reports `worker.preflight.status=available`.
+
 P13-35 records process-worker replacement as partial. The runtime exposes
 `autojs6:profile.processWorkerReplacementProfile` to document that the current
 replacement path is request-local `worker_threads.WorkerPool`, not a new

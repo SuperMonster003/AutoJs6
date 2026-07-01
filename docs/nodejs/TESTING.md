@@ -1961,6 +1961,21 @@ recorded in the P13-34 report, while nested-worker, SharedArrayBuffer/Atomics,
 resourceLimits, and one-worker thread ceilings are documented as policy
 boundaries.
 
+Phase 14 worker native availability audit:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14WorkerNativeAvailability
+```
+
+This host gate records P14-28 as ready with a refreshed intentional non-support
+decision. It verifies Node 24.5 `libnode.so` artifacts for `arm64-v8a`,
+`armeabi-v7a`, and `x86_64`, confirms `x86` remains fail-fast, imports the
+P13-34 generated worker report, audits Android loader and crash-signature
+anchors, and keeps default/project/packaged worker authority plus
+process-worker facade authority unpromoted. P14-29 and P14-30 runnable/resource
+worker gates remain conditional on a future `worker.preflight.status=available`
+result.
+
 Phase 13 process-worker replacement decision gate:
 
 ```powershell

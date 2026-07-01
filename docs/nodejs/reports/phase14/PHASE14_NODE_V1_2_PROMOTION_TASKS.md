@@ -690,10 +690,29 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 
 ### P3 Desktop Runtime Follow-Up
 
-- [ ] P14-28: Audit native `worker_threads` availability on target ABIs.
+- [x] P14-28: Audit native `worker_threads` availability on target ABIs.
   - Scope: required ABIs, current Node 24.5 artifacts, native preflight,
     Android loader behavior, and crash signatures.
-  - Gate: proposed `:app:verifyNodePhase14WorkerNativeAvailability`.
+  - Gate: `:app:verifyNodePhase14WorkerNativeAvailability`.
+  - Worker native availability audit deployed:
+    - Adds `docs/nodejs/phase14/worker-native-availability-audit.json` and
+      `PHASE14_WORKER_NATIVE_AVAILABILITY.md`.
+    - Adds `docs/nodejs/reports/phase14/P14_28_WORKER_NATIVE_AVAILABILITY.md`.
+    - Verifies Node 24.5 `libnode.so` artifacts for `arm64-v8a`,
+      `armeabi-v7a`, and `x86_64`, while keeping `x86` fail-fast.
+    - Imports P13-34 generated worker report evidence and confirms current
+      `worker.preflight.status=unavailable` /
+      `ERR_AUTOJS6_WORKER_DISABLED` evidence is still the v1.2 audit source.
+    - Verifies Android loader and crash-signature anchors for ABI mismatch,
+      missing `libnode.so`, missing `libc++_shared.so`, missing dependent
+      libraries, missing symbols, and `libnode.handle.*` diagnostics.
+    - Refreshes the v1.2 decision as
+      `intentional_non_support_refreshed`: default, project, packaged, and
+      process-worker authority remain unpromoted.
+    - Keeps P14-29/P14-30 runnable and resource gates conditional on a future
+      `worker.preflight.status=available` result.
+    - Writes `build/reports/nodejs/phase14-worker-native-availability.json`
+      and `.md`.
   - Acceptance: v1.2 either has native runnable worker proof on target ABIs or
     a refreshed intentional non-support decision.
 

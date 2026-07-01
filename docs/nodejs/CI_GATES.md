@@ -1213,6 +1213,13 @@ The `:app:verifyNodePhase14TaskDeviceMediaDocSync` gate writes
 P14-26 generated reports, verifies TypeScript declaration references, release
 matrix rows, migration cookbook, examples, compatibility, security, error, and
 CI docs, and keeps runtime authority unchanged.
+The `:app:verifyNodePhase14WorkerNativeAvailability` gate writes
+`phase14-worker-native-availability.json` plus `.md`, imports the P13-34 worker
+machine report, verifies Node 24.5 `libnode.so` artifacts for `arm64-v8a`,
+`armeabi-v7a`, and `x86_64`, keeps `x86` fail-fast, audits Android loader and
+crash-signature anchors, and refreshes v1.2 `worker_threads` as intentional
+non-support until `worker.preflight.status=available` is archived on target
+ABIs.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
