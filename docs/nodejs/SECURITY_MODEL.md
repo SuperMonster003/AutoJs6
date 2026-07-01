@@ -557,6 +557,16 @@ P12-11 selects the Provider path for a controlled JSON-only overlay provider. Th
 
 After P12-14, `require("floaty")`, `compat.floaty`, and global `floaty` remain absent; `require("ui.overlay")` is a fake transport POC plus live gate and not live overlay authority. Raw Rhino-window examples may use `compat.blockedByDesign()` with `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`, but provider work must move through the JSON-only overlay contract instead of dispatching raw Rhino window bridge requests. No Node execution mode may create a hidden overlay, silently request overlay permission, inject `SYSTEM_ALERT_WINDOW` without explicit package metadata, or register overlay resources outside the provider lifecycle.
 
+P14-08 adds a provider POC for `ui.overlay`: `show`, `update`, `drainEvents`,
+`close`, and `closeAll` are JSON-only and provider-owned when
+`SYSTEM_ALERT_WINDOW` is already granted. The provider registers
+`OVERLAY_SESSION` resources, removes them on close/closeAll/provider destroy,
+and still denies raw `WindowManager`, `LayoutParams`, `FloatyWindow`,
+`WindowBridge`, `View`, `Context`, and Java object exposure. Packaged overlay
+promotion remains blocked until foreground disclosure/stop action, packaged
+positive smoke, task-removal/relaunch/crash behavior, and leak/stress evidence
+land.
+
 P13-18 records the overlay provider promotion state as partial. Permission
 snapshots, settings dry-run/launch evidence, explicit overlay capabilities,
 packaged `SYSTEM_ALERT_WINDOW` metadata records, type coverage, and cleanup

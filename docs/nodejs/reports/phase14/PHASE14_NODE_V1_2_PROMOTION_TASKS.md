@@ -191,7 +191,19 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-08: Implement Android overlay provider v1.
   - Scope: `show`, `update`, `drainEvents`, `close`, lifecycle cleanup,
     permission denial, and handle ownership.
-  - Gate: proposed `:app:verifyNodePhase14OverlayProvider`.
+  - Gate: `:app:verifyNodePhase14OverlayProvider`.
+  - Provider POC deployed:
+    - Adds controlled JSON-only `ui.overlay` provider POC for
+      `show`/`update`/`drainEvents`/`close`/`closeAll`.
+    - Requires user-granted `SYSTEM_ALERT_WINDOW` before live overlay creation
+      and fails closed with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` otherwise.
+    - Registers provider-owned `OVERLAY_SESSION` resources and cleans them up
+      on `close`, `closeAll`, and provider destroy.
+    - Writes `build/reports/nodejs/phase14-overlay-provider.json` and `.md`.
+    - Keeps open blockers `overlay_permission_granted_device_evidence`,
+      `overlay_foreground_disclosure_stop_action`,
+      `packaged_overlay_positive_smoke`, and `overlay_leak_stress_evidence` as
+      `future_promotion`.
   - Acceptance: provider works with `SYSTEM_ALERT_WINDOW` granted and fails
     closed without raw `window`/`View`/`Context` exposure.
 

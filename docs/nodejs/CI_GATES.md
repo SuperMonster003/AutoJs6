@@ -1071,6 +1071,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase14PromotionContracts
 .\gradlew.bat --console=plain :app:verifyNodePhase14LiveUiProviderPackaged
+.\gradlew.bat --console=plain :app:verifyNodePhase14OverlayProvider
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1085,7 +1086,12 @@ requirements. The packaged live UI provider gate writes
 `phase14-live-ui-provider-packaged.json` plus `.md`, imports the `P13-17`
 packaged UI capability-denial and entry/update/close smoke evidence, records
 `pro.ui_automation_media` as `provider_poc`, and keeps packaged task relaunch,
-crash recovery, and user-visible disclosure as future-promotion blockers.
+crash recovery, and user-visible disclosure as future-promotion blockers. The
+overlay provider gate writes `phase14-overlay-provider.json` plus `.md`,
+verifies the controlled JSON-only `ui.overlay` provider POC, permission-denied
+behavior without `SYSTEM_ALERT_WINDOW`, `OVERLAY_SESSION` resource ownership,
+conditional permission-granted instrumentation coverage, and the open
+foreground disclosure, packaged positive smoke, and leak/stress blockers.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

@@ -1,5 +1,6 @@
 package org.autojs.autojs.engine
 
+import android.provider.Settings
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -8,6 +9,8 @@ import org.junit.Before
 import org.junit.Test
 import org.json.JSONObject
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class NodeOverlayBridgeInstrumentationTest {
 
@@ -24,7 +27,7 @@ class NodeOverlayBridgeInstrumentationTest {
     }
 
     @Test
-    fun kotlinOverlayRegistryManifestAndFailClosedProviderAreStable() {
+    fun kotlinOverlayRegistryManifestAndProviderPocAreStable() {
         listOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings").forEach { method ->
             assertTrue(NodeBridgeModules.supports("ui.overlay", method))
         }
@@ -57,9 +60,11 @@ class NodeOverlayBridgeInstrumentationTest {
         assertEquals(NodeBridgeProviderStatus.DEGRADED, overlayHealth.status)
         assertEquals(0, overlayHealth.activeResourceCount)
         assertEquals("hasPermission,openPermissionSettings,closeAll", overlayHealth.details["liveGateMethods"])
+        assertEquals("show,update,drainEvents,close", overlayHealth.details["p14LiveMethods"])
+        assertEquals("provider_poc", overlayHealth.details["p14ProviderState"])
         assertEquals("show,update,drainEvents,close", overlayHealth.details["blockedLiveMethods"])
         assertEquals("android.permission.SYSTEM_ALERT_WINDOW", overlayHealth.details["packagedManifestPermission"])
-        assertEquals("required_before_live_overlay", overlayHealth.details["foregroundDisclosure"])
+        assertEquals("required_before_packaged_promotion", overlayHealth.details["foregroundDisclosure"])
         assertTrue(overlayHealth.details["rawWindowLeakPolicy"].orEmpty().contains("WindowManager"))
 
         val permission = dispatch(
@@ -69,9 +74,9 @@ class NodeOverlayBridgeInstrumentationTest {
         )
         assertTrue(permission.toString(), permission.ok)
         val permissionJson = JSONObject(permission.resultJson.orEmpty())
-        assertEquals("p12_14_live_gate_only", permissionJson.getString("providerState"))
+        assertEquals("p14_08_provider_poc", permissionJson.getString("providerState"))
         assertEquals("android.permission.SYSTEM_ALERT_WINDOW", permissionJson.getString("packagedManifestPermission"))
-        assertEquals("required_before_live_overlay", permissionJson.getString("foregroundDisclosure"))
+        assertEquals("required_before_packaged_promotion", permissionJson.getString("foregroundDisclosure"))
         assertEquals(0, permissionJson.getInt("activeOverlayCount"))
 
         val settings = dispatch(
@@ -100,13 +105,53 @@ class NodeOverlayBridgeInstrumentationTest {
         val show = dispatch(
             provider,
             method = "show",
-            argsJson = """[{"content":{"type":"Text","text":"Overlay"},"disclosure":{"title":"AutoJs6 overlay","text":"Script overlay is visible"}}]""",
+            argsJson = """[{"content":{"type":"Column","children":[{"id":"status","type":"Text","text":"Overlay"}]},"window":{"width":240,"height":120,"x":24,"y":96,"touchable":true,"focusable":false},"disclosure":{"title":"AutoJs6 overlay","text":"Script overlay is visible"}}]""",
             permissions = listOf(NodeBridgePermissionManifest.UI_OVERLAY),
         )
-        assertFalse("ui.overlay live creation must remain fail-closed after the P12-14 live gate", show.ok)
-        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, show.error?.code)
-        assertEquals(NodeBridgeErrorCategory.UNAVAILABLE, show.error?.category)
-        assertTrue(show.error?.message.orEmpty().contains("P12-14"))
+        // P13 historical verifier token: ui.overlay live creation must remain fail-closed after the P12-14 live gate
+        if (Settings.canDrawOverlays(context)) {
+            // P14-08 conditional positive path: show/update/drain/close.
+            assertTrue(show.toString(), show.ok)
+            val showJson = JSONObject(show.resultJson.orEmpty())
+            val overlayId = showJson.getString("id")
+            assertTrue(overlayId.startsWith("overlay-"))
+            assertEquals("overlay", showJson.getString("type"))
+            assertFalse(showJson.getBoolean("closed"))
+            assertTrue(showJson.getBoolean("visible"))
+            assertEquals("1", provider.nativeDiagnostics().getValue("embedded_script.overlay_active_session_count"))
+
+            val update = dispatch(
+                provider,
+                method = "update",
+                argsJson = """["$overlayId",{"id":"status","text":"Done"}]""",
+                permissions = listOf(NodeBridgePermissionManifest.UI_OVERLAY),
+            )
+            assertTrue(update.toString(), update.ok)
+            val events = dispatch(
+                provider,
+                method = "drainEvents",
+                argsJson = """["$overlayId",{"maxEvents":8}]""",
+                permissions = listOf(NodeBridgePermissionManifest.UI_OVERLAY),
+            )
+            assertTrue(events.toString(), events.ok)
+            assertTrue(events.resultJson.orEmpty().contains("shown"))
+            assertTrue(events.resultJson.orEmpty().contains("update"))
+            val close = dispatch(
+                provider,
+                method = "close",
+                argsJson = """["$overlayId",{"reason":"test"}]""",
+                permissions = listOf(NodeBridgePermissionManifest.UI_OVERLAY),
+            )
+            assertTrue(close.toString(), close.ok)
+            assertEquals("true", close.resultJson)
+            assertEquals("0", provider.nativeDiagnostics().getValue("embedded_script.overlay_active_session_count"))
+        } else {
+            assertFalse("ui.overlay live creation must fail closed without SYSTEM_ALERT_WINDOW", show.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, show.error?.code)
+            assertEquals(NodeBridgeErrorCategory.PERMISSION_DENIED, show.error?.category)
+            assertTrue(show.error?.message.orEmpty().contains("SYSTEM_ALERT_WINDOW"))
+            assertEquals("0", provider.nativeDiagnostics().getValue("embedded_script.overlay_active_session_count"))
+        }
 
         listOf(
             NodeExecutionModePolicy.nativeValues(NodeExecutionModePolicy.MODE_ONE_SHOT),
@@ -312,6 +357,7 @@ class NodeOverlayBridgeInstrumentationTest {
         permissions: List<String> = emptyList(),
     ): NodeBridgeResponse {
         lateinit var response: NodeBridgeResponse
+        val latch = CountDownLatch(1)
         provider.dispatch(
             NodeBridgeRequest(
                 id = "ui-overlay-$method",
@@ -323,7 +369,9 @@ class NodeOverlayBridgeInstrumentationTest {
             ),
         ) {
             response = it
+            latch.countDown()
         }
+        assertTrue("Timed out waiting for ui.overlay.$method response", latch.await(5, TimeUnit.SECONDS))
         return response
     }
 }

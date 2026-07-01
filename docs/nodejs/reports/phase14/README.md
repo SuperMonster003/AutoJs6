@@ -16,6 +16,7 @@ Foundation gates:
 Provider POC gates:
 
 - `:app:verifyNodePhase14LiveUiProviderPackaged`
+- `:app:verifyNodePhase14OverlayProvider`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -26,3 +27,9 @@ v1.1 release blockers.
 state as `provider_poc`. It imports the `P13-17` packaged capability-denial and
 entry/update/close smoke evidence while keeping packaged task relaunch, crash
 recovery, and user-visible disclosure as future-promotion blockers.
+
+`P14_08_OVERLAY_PROVIDER_V1.md` records the current Android overlay provider
+state as `provider_poc`. It adds controlled JSON-only overlay session creation
+for permission-granted devices while keeping permission-granted evidence,
+foreground disclosure/stop action, packaged positive smoke, and leak/stress
+coverage as future-promotion blockers.

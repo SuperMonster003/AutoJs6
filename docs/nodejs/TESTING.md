@@ -3034,6 +3034,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase14PromotionContracts
 .\gradlew.bat --console=plain :app:verifyNodePhase14LiveUiProviderPackaged
+.\gradlew.bat --console=plain :app:verifyNodePhase14OverlayProvider
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3054,6 +3055,13 @@ provider gate and the Phase 14 promotion contract gate. It writes
 packaged UI capability-denial and entry/update/close smoke evidence, records
 `pro.ui_automation_media` as `provider_poc`, and keeps packaged task relaunch,
 crash recovery, and user-visible disclosure as future-promotion blockers.
+`verifyNodePhase14OverlayProvider` depends on the Phase 13 overlay provider
+gate and the Phase 14 live UI packaged gate. It writes
+`phase14-overlay-provider.json` plus `.md`, verifies the controlled JSON-only
+`ui.overlay` provider POC, permission-denied behavior without
+`SYSTEM_ALERT_WINDOW`, `OVERLAY_SESSION` resource ownership, conditional
+permission-granted instrumentation coverage, and the open foreground
+disclosure, packaged positive smoke, and leak/stress blockers.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

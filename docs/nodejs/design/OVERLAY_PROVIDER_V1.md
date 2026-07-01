@@ -24,6 +24,14 @@ Window/View denial. It intentionally leaves live overlay creation blocked until
 foreground disclosure, packaged install-run, task-removal cleanup, crash/relaunch,
 and real overlay leak/stress evidence exist.
 
+P14-08 adds a controlled Android overlay provider POC for
+`show`/`update`/`drainEvents`/`close`/`closeAll`. It creates provider-owned
+JSON-only overlay sessions only when `SYSTEM_ALERT_WINDOW` is already granted,
+keeps raw `WindowManager`, `LayoutParams`, `FloatyWindow`, `WindowBridge`,
+`View`, and `Context` objects out of JavaScript, and records the remaining
+foreground disclosure, packaged positive smoke, and stress evidence as future
+promotion work.
+
 The first module name is:
 
 ```js
