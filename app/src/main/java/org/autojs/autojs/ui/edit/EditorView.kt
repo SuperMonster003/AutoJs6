@@ -510,6 +510,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         EditorDisplayPreferences.KEY_BREAKPOINT_MARKERS_ENABLED,
         EditorDisplayPreferences.KEY_FOLD_MARKERS_ENABLED,
         EditorDisplayPreferences.KEY_GUTTER_WIDTH_MODE,
+        EditorDisplayPreferences.KEY_FONT_LIGATURES_ENABLED,
+        EditorDisplayPreferences.KEY_FONT_STYLES_ENABLED,
     )
 
     private val mEditorPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
@@ -1727,7 +1729,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             registerFunctionsKeyboardBackHandler()
         }
 
-        themeFontService.currentTheme?.let { themeFontService.applyTheme(it) }
+        applyCurrentEditorThemePreference()
         editor.restoreStateSnapshot(snapshot)
         editor.setReadOnly(mReadOnly)
 
@@ -2406,7 +2408,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @SuppressLint("CheckResult")
     fun selectEditorTheme() {
         editor.setProgress(true)
-        Themes.getAllThemes(context)
+        Themes.getAllThemes(context, editor.engineType)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { themes: List<Theme> ->
@@ -2442,11 +2444,19 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun selectEditorTheme(themes: List<Theme>) {
         val i = themes.indexOf(themeFontService.currentTheme).coerceAtLeast(0)
+        val defaultIndex = themes.indexOfFirst { it.name == Themes.getDefaultThemeName(context, editor.engineType) }.coerceAtLeast(0)
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
                 .title(R.string.text_editor_theme)
                 .items(themes)
                 .choiceWidgetThemeColor()
+                .options(
+                    listOf(
+                        MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) { dialog ->
+                            dialog.selectedIndex = defaultIndex
+                        },
+                    ),
+                )
                 .itemsCallbackSingleChoice(i) { _, _, which, _ ->
                     themes[which].let {
                         themeFontService.persistAndApplyTheme(it)

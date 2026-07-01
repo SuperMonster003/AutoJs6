@@ -384,7 +384,7 @@ class AceScriptEditorEngine(
 
     override fun setTheme(theme: Theme) {
         themeKey = theme.name
-        aceCodeEditor.setTheme(theme.toAceTheme())
+        aceCodeEditor.setTheme(theme.aceTheme ?: theme.toAceTheme())
     }
 
     override fun setTextSizeSp(size: Float) {

@@ -36,7 +36,7 @@ class EditorThemeFontService(
     var currentTheme: Theme? = null
         private set
 
-    fun loadCurrentTheme(): Observable<Theme?> = Themes.getCurrent(context)
+    fun loadCurrentTheme(): Observable<Theme?> = Themes.getCurrent(context, currentEditor().engineType)
 
     fun applyEditorPreferences() {
         val editor = currentEditor()

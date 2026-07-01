@@ -7,6 +7,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.theme.preference.MaterialPreference
+import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.ui.edit.theme.Themes
 import org.autojs.autojs.util.DialogUtils
@@ -34,7 +35,7 @@ class EditorThemePreference : MaterialPreference {
 
     private fun init() {
         summaryProvider = SummaryProvider<EditorThemePreference> {
-            Themes.getCurrentThemeName(prefContext) ?: prefContext.getString(R.string.text_default)
+            Themes.getCurrentThemeName(prefContext, EditorEnginePreferences.get()) ?: prefContext.getString(R.string.text_default)
         }
     }
 
@@ -43,7 +44,7 @@ class EditorThemePreference : MaterialPreference {
         if (handleUnavailableClickIfNeeded()) {
             return
         }
-        Themes.getAllThemes(prefContext)
+        Themes.getAllThemes(prefContext, EditorEnginePreferences.get())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(::showThemeDialog) {
@@ -52,13 +53,22 @@ class EditorThemePreference : MaterialPreference {
     }
 
     private fun showThemeDialog(themes: List<Theme>) {
-        val current = Themes.getCurrentThemeName(prefContext)
+        val engineType = EditorEnginePreferences.get()
+        val current = Themes.getCurrentThemeName(prefContext, engineType)
         val selectedIndex = themes.indexOfFirst { it.name == current }.coerceAtLeast(0)
+        val defaultIndex = themes.indexOfFirst { it.name == Themes.getDefaultThemeName(prefContext, engineType) }.coerceAtLeast(0)
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(prefContext)
                 .title(R.string.text_editor_theme)
                 .items(themes)
                 .choiceWidgetThemeColor()
+                .options(
+                    listOf(
+                        MaterialDialog.OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_use_default)) { dialog ->
+                            dialog.selectedIndex = defaultIndex
+                        },
+                    ),
+                )
                 .itemsCallbackSingleChoice(selectedIndex) { _, _, which, _ ->
                     Themes.setCurrent(prefContext, themes[which].name)
                     notifyChanged()

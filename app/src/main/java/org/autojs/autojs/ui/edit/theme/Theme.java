@@ -5,6 +5,7 @@ import android.util.SparseIntArray;
 
 import androidx.annotation.NonNull;
 
+import org.autojs.autojs.model.editor.EditorColors;
 import org.autojs.autojs.model.editor.EditorTheme;
 import org.autojs.autojs.model.editor.TokenColor;
 import org.autojs.autojs.util.ColorUtils;
@@ -12,6 +13,8 @@ import org.autojs.autojs.util.ColorUtils;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Stardust on Feb 16, 2018.
@@ -25,22 +28,40 @@ public class Theme {
     private int mImeBarBackgroundColor = 0xDDFFFFFF;
     private int mImeBarForegroundColor = Color.WHITE;
     private final EditorTheme mEditorTheme;
+    private final String mAceTheme;
+    private final boolean mAceOnly;
     private int mLineHighlightBackground;
     private final int mBreakpointColor;
     private int mDebuggingLineBackground;
 
     public Theme(EditorTheme theme) {
-        mEditorTheme = theme;
-        mBackgroundColor = parseColor(theme.getEditorColors().getEditorBackground(), mBackgroundColor);
-        mForegroundColor = parseColor(theme.getEditorColors().getEditorForeground(), mForegroundColor);
-        mLineNumberColor = parseColor(theme.getEditorColors().getLineNumberForeground(), mLineNumberColor);
-        mImeBarBackgroundColor = parseColor(theme.getEditorColors().getImeBackgroundColor(), mImeBarBackgroundColor);
-        mImeBarForegroundColor = parseColor(theme.getEditorColors().getImeForegroundColor(), mImeBarForegroundColor);
-        mLineHighlightBackground = parseColor(theme.getEditorColors().getLineHighlightBackground(), mLineHighlightBackground);
-        mDebuggingLineBackground = parseColor(theme.getEditorColors().getDebuggingLineBackground(), mDebuggingLineBackground);
-        mBreakpointColor = parseColor(theme.getEditorColors().getBreakpointForeground(), mBackgroundColor);
+        this(theme, null, false);
+    }
 
-        for (TokenColor tokenColor : theme.getTokenColors()) {
+    private Theme(EditorTheme theme, String aceTheme, boolean aceOnly) {
+        mEditorTheme = theme;
+        mAceTheme = aceTheme;
+        mAceOnly = aceOnly;
+
+        EditorColors editorColors = theme.getEditorColors();
+        if (editorColors != null) {
+            mBackgroundColor = parseColor(editorColors.getEditorBackground(), mBackgroundColor);
+            mForegroundColor = parseColor(editorColors.getEditorForeground(), mForegroundColor);
+            mLineNumberColor = parseColor(editorColors.getLineNumberForeground(), mLineNumberColor);
+            mImeBarBackgroundColor = parseColor(editorColors.getImeBackgroundColor(), mImeBarBackgroundColor);
+            mImeBarForegroundColor = parseColor(editorColors.getImeForegroundColor(), mImeBarForegroundColor);
+            mLineHighlightBackground = parseColor(editorColors.getLineHighlightBackground(), mLineHighlightBackground);
+            mDebuggingLineBackground = parseColor(editorColors.getDebuggingLineBackground(), mDebuggingLineBackground);
+            mBreakpointColor = parseColor(editorColors.getBreakpointForeground(), mBackgroundColor);
+        } else {
+            mBreakpointColor = mBackgroundColor;
+        }
+
+        List<TokenColor> tokenColors = theme.getTokenColors();
+        if (tokenColors == null) {
+            tokenColors = Collections.emptyList();
+        }
+        for (TokenColor tokenColor : tokenColors) {
             String foregroundStr = tokenColor.getSettings().getForeground();
             if (foregroundStr == null)
                 continue;
@@ -106,8 +127,35 @@ public class Theme {
         }
     }
 
+    public static Theme fromAceTheme(String name, String aceTheme, boolean dark, String backgroundColor, String foregroundColor) {
+        EditorTheme editorTheme = new EditorTheme();
+        editorTheme.setName(name);
+        editorTheme.setTokenColors(Collections.emptyList());
+
+        EditorColors editorColors = new EditorColors();
+        editorColors.setEditorBackground(backgroundColor);
+        editorColors.setEditorForeground(foregroundColor);
+        editorColors.setLineNumberForeground(dark ? "#9E9E9E" : "#757575");
+        editorColors.setImeBackgroundColor(dark ? "#dd1e1e1e" : "#ddf0f1f2");
+        editorColors.setImeForegroundColor(dark ? "#f1f1f1" : "#222327");
+        editorColors.setLineHighlightBackground(dark ? "#2e2e35" : "#e8ebf0");
+        editorColors.setBreakpointForeground("#1976D2");
+        editorColors.setDebuggingLineBackground("#40c4ff");
+        editorTheme.setEditorColors(editorColors);
+
+        return new Theme(editorTheme, aceTheme, true);
+    }
+
     public int getBackgroundColor() {
         return mBackgroundColor;
+    }
+
+    public String getAceTheme() {
+        return mAceTheme;
+    }
+
+    public boolean isAceOnly() {
+        return mAceOnly;
     }
 
     public int getImeBarBackgroundColor() {

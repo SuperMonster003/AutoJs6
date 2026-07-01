@@ -87,6 +87,8 @@
     <string name="key_ace_editor_font_ibm_plex_mono" translatable="false">ibm_plex_mono</string>
     <string name="key_ace_editor_font_hack" translatable="false">hack</string>
     <string name="key_ace_editor_font_source_code_pro" translatable="false">source_code_pro</string>
+    <string name="key_ace_font_ligatures_enabled" translatable="false">key_$_ace_font_ligatures_enabled</string>
+    <string name="key_ace_font_styles_enabled" translatable="false">key_$_ace_font_styles_enabled</string>
     <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
     <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
     <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
@@ -1200,6 +1202,8 @@
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Ace editor failed (%1$s); switched to JsDroidEditor. Copy Ace diagnostics from the More menu for details</string>
     <string name="text_ace_large_file_uses_native_editor">Ace editor is routed to JsDroidEditor by the active fallback policy</string>
+    <string name="text_ace_font_ligatures_enabled">Font ligatures</string>
+    <string name="text_ace_font_styles_enabled">Font styles</string>
     <string name="text_ace_word_wrap_enabled">Word wrap</string>
     <string name="text_editor_gutter_width_mode">Gutter width</string>
     <string name="text_editor_word_wrap_indent_style">Wrap indentation</string>
@@ -1964,6 +1968,8 @@
     <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter</string>
     <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine</string>
+    <string name="summary_ace_font_ligatures_enabled">Render supported operator combinations as code-font ligatures</string>
+    <string name="summary_ace_font_styles_enabled">Allow bold, italic, and other code-font styles</string>
     <string name="summary_ace_lsp_enabled">Enable experimental LSP configuration</string>
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
     <string name="summary_editor_gutter_width_mode">Choose whether the gutter follows visible line digits or keeps a stable session width</string>
@@ -1972,6 +1978,8 @@
     <string name="description_editor_engine_preference">Ace is the default editor engine. JsDroidEditor remains available as a fallback and can be selected explicitly.</string>
     <string name="description_editor_theme_mode_preference">Choose whether the editor remembers separate themes for AutoJs6 light and dark modes, or uses one shared theme in both modes.</string>
     <string name="description_ace_editor_font_preference">Choose the Ace editor font. The list includes Android system monospace and open-source code fonts with author/developer information; the actual system monospace face is decided by Android and the device vendor.</string>
+    <string name="description_ace_font_ligatures_enabled_preference">Enable OpenType font ligatures for fonts that support them. Operators such as ===, !==, =&gt;, and &lt;= may be drawn as joined glyphs. This only changes how code is displayed.</string>
+    <string name="description_ace_font_styles_enabled_preference">Allow Ace themes and syntax highlighting to use bold, italic, and other font styles. When disabled, code text is forced to the regular normal style without changing colors or content.</string>
     <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
     <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>

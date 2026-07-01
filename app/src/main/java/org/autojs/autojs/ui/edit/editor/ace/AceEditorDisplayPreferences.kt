@@ -6,6 +6,8 @@ object AceEditorDisplayPreferences {
 
     const val KEY_ACE_WORD_WRAP_ENABLED = EditorDisplayPreferences.KEY_WORD_WRAP_ENABLED
     const val KEY_ACE_LINE_NUMBERS_ENABLED = EditorDisplayPreferences.KEY_LINE_NUMBERS_ENABLED
+    const val KEY_ACE_FONT_LIGATURES_ENABLED = EditorDisplayPreferences.KEY_FONT_LIGATURES_ENABLED
+    const val KEY_ACE_FONT_STYLES_ENABLED = EditorDisplayPreferences.KEY_FONT_STYLES_ENABLED
 
     fun isWordWrapEnabled(): Boolean {
         return EditorDisplayPreferences.isWordWrapEnabled()
@@ -53,5 +55,21 @@ object AceEditorDisplayPreferences {
 
     fun setGutterWidthMode(mode: String) {
         EditorDisplayPreferences.setGutterWidthMode(mode)
+    }
+
+    fun isFontLigaturesEnabled(): Boolean {
+        return EditorDisplayPreferences.isFontLigaturesEnabled()
+    }
+
+    fun setFontLigaturesEnabled(enabled: Boolean) {
+        EditorDisplayPreferences.setFontLigaturesEnabled(enabled)
+    }
+
+    fun isFontStylesEnabled(): Boolean {
+        return EditorDisplayPreferences.isFontStylesEnabled()
+    }
+
+    fun setFontStylesEnabled(enabled: Boolean) {
+        EditorDisplayPreferences.setFontStylesEnabled(enabled)
     }
 }

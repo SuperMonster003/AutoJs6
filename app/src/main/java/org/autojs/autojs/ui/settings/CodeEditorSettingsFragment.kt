@@ -69,6 +69,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
             syncEditorEnginePreferenceAvailability()
         }
         if (
+            key == getString(R.string.key_editor_engine) ||
             key == getString(R.string.key_editor_theme_mode) ||
             key == getString(R.string.key_editor_theme) ||
             key == getString(R.string.key_editor_theme_light) ||
@@ -133,6 +134,8 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         val aceSelected = EditorEnginePreferences.get() == EditorEngineType.ACE
         val nativeSelected = !aceSelected
         setPreferenceAvailable(R.string.key_ace_editor_font, aceSelected)
+        setPreferenceAvailable(R.string.key_ace_font_ligatures_enabled, aceSelected, R.string.summary_ace_font_ligatures_enabled)
+        setPreferenceAvailable(R.string.key_ace_font_styles_enabled, aceSelected, R.string.summary_ace_font_styles_enabled)
         setPreferenceAvailable(R.string.key_ace_lsp_enabled, aceSelected, R.string.summary_ace_lsp_enabled)
         setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected, R.string.summary_ace_word_wrap_enabled)
         setPreferenceAvailable(R.string.key_editor_word_wrap_indent_style, aceSelected, R.string.summary_editor_word_wrap_indent_style)
@@ -193,6 +196,9 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
                     } else {
                         useStaticSummaryProvider(unavailableSummary)
                     }
+                }
+                is AceEditorFontPreference -> {
+                    setAvailableForCurrentEngine(available, unavailableSummary)
                 }
                 is EditorCodeHighlightThresholdPreference -> {
                     setAvailableForCurrentEngine(available, unavailableSummary, onUnavailableClick)

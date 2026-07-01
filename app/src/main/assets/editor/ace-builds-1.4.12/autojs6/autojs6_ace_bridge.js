@@ -89,8 +89,34 @@
     var PINCH_IME_SUPPRESS_MS = 1800;
     var PINCH_POST_TOUCH_SUPPRESS_MS = 650;
     var PINCH_CURSOR_RESTORE_MS = 700;
-    var MIN_FONT_SIZE_SP = 4;
+    var MIN_FONT_SIZE_SP = 1;
     var MAX_FONT_SIZE_SP = 96;
+    var DARK_ACE_THEMES = {
+        "ace/theme/ambiance": true,
+        "ace/theme/chaos": true,
+        "ace/theme/clouds_midnight": true,
+        "ace/theme/cobalt": true,
+        "ace/theme/dracula": true,
+        "ace/theme/gob": true,
+        "ace/theme/gruvbox": true,
+        "ace/theme/idle_fingers": true,
+        "ace/theme/kr_theme": true,
+        "ace/theme/merbivore": true,
+        "ace/theme/merbivore_soft": true,
+        "ace/theme/mono_industrial": true,
+        "ace/theme/monokai": true,
+        "ace/theme/nord_dark": true,
+        "ace/theme/pastel_on_dark": true,
+        "ace/theme/solarized_dark": true,
+        "ace/theme/terminal": true,
+        "ace/theme/tomorrow_night": true,
+        "ace/theme/tomorrow_night_blue": true,
+        "ace/theme/tomorrow_night_bright": true,
+        "ace/theme/tomorrow_night_eighties": true,
+        "ace/theme/twilight": true,
+        "ace/theme/vibrant_ink": true,
+        "ace/theme/visual_studio_dark": true
+    };
 
     function callBridge(name, args) {
         try {
@@ -170,8 +196,10 @@
     }
 
     function applyThemeClass(theme) {
-        var dark = String(theme || "").toLowerCase().indexOf("night") >= 0 ||
-            String(theme || "").toLowerCase().indexOf("dark") >= 0;
+        var themeName = String(theme || "").toLowerCase();
+        var dark = Object.prototype.hasOwnProperty.call(DARK_ACE_THEMES, themeName)
+            ? DARK_ACE_THEMES[themeName]
+            : themeName.indexOf("night") >= 0 || themeName.indexOf("dark") >= 0;
         document.documentElement.classList.toggle("ace-theme-dark", dark);
         document.body.classList.toggle("ace-theme-dark", dark);
     }
@@ -182,6 +210,34 @@
             document.documentElement.style.setProperty("--autojs6-editor-font-family", resolved);
         }
         return resolved;
+    }
+
+    function applyFontLigaturesEnabled(enabled) {
+        var enabledValue = enabled === true || String(enabled).toLowerCase() === "true";
+        if (document && document.documentElement && document.documentElement.style) {
+            document.documentElement.style.setProperty(
+                "--autojs6-editor-font-ligatures",
+                enabledValue ? "normal" : "none"
+            );
+            document.documentElement.style.setProperty(
+                "--autojs6-editor-font-feature-settings",
+                enabledValue ? "\"liga\" 1, \"calt\" 1" : "\"liga\" 0, \"calt\" 0"
+            );
+        }
+        return enabledValue;
+    }
+
+    function applyFontStylesEnabled(enabled) {
+        var enabledValue = enabled === true || String(enabled).toLowerCase() === "true";
+        var disabled = !enabledValue;
+        if (document && document.documentElement && document.documentElement.classList) {
+            document.documentElement.classList.toggle("autojs6-font-styles-disabled", disabled);
+        }
+        if (document && document.body && document.body.classList) {
+            document.body.classList.toggle("autojs6-font-styles-disabled", disabled);
+        }
+        setEditorContainerClass("autojs6-font-styles-disabled", disabled);
+        return enabledValue;
     }
 
     function notifyFirstPaint() {
@@ -2180,6 +2236,18 @@
         notifyStateChanged("fontFamilyChanged");
     }
 
+    function setFontLigaturesEnabled(enabled) {
+        applyFontLigaturesEnabled(enabled);
+        scheduleResize("font_ligatures_changed");
+        notifyStateChanged("fontLigaturesChanged");
+    }
+
+    function setFontStylesEnabled(enabled) {
+        applyFontStylesEnabled(enabled);
+        scheduleResize("font_styles_changed");
+        notifyStateChanged("fontStylesChanged");
+    }
+
     function setWordWrapEnabled(enabled) {
         enabled = !!enabled;
         session.setUseWrapMode(enabled);
@@ -2761,6 +2829,8 @@
         foldMarkersEnabled = callBridgeBoolean("isFoldMarkersEnabled", true);
         gutterWidthMode = normalizeGutterWidthMode(callBridgeString("getGutterWidthMode", "dynamic"));
         var initialFontFamily = applyFontFamily(callBridge("getFontFamily") || DEFAULT_FONT_FAMILY);
+        applyFontLigaturesEnabled(callBridgeBoolean("isFontLigaturesEnabled", true));
+        applyFontStylesEnabled(callBridgeBoolean("isFontStylesEnabled", true));
         applyThemeClass(initialTheme);
         editor.setTheme(initialTheme);
         editor.setOptions({
@@ -2890,6 +2960,8 @@
             setFontSizeSp: setFontSizeSp,
             setFontSizeSpKeepingFocus: setFontSizeSpKeepingFocus,
             setFontFamily: setFontFamily,
+            setFontLigaturesEnabled: setFontLigaturesEnabled,
+            setFontStylesEnabled: setFontStylesEnabled,
             setWordWrapEnabled: setWordWrapEnabled,
             setWordWrapIndentStyle: setWordWrapIndentStyle,
             setLineNumbersEnabled: setLineNumbersEnabled,

@@ -53,6 +53,16 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun isFontLigaturesEnabled(): Boolean {
+        return editor.bridgeFontLigaturesEnabled()
+    }
+
+    @JavascriptInterface
+    fun isFontStylesEnabled(): Boolean {
+        return editor.bridgeFontStylesEnabled()
+    }
+
+    @JavascriptInterface
     fun isWordWrapEnabled(): Boolean {
         return editor.bridgeWordWrapEnabled()
     }

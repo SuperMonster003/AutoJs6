@@ -27,6 +27,20 @@ class AceEditorFontPreference : MaterialPreference {
     }
 
     private fun init() {
+        useCurrentFontSummaryProvider()
+    }
+
+    fun setAvailableForCurrentEngine(available: Boolean, unavailableSummary: CharSequence) {
+        if (available) {
+            useCurrentFontSummaryProvider()
+        } else {
+            summaryProvider = SummaryProvider<AceEditorFontPreference> {
+                unavailableSummary
+            }
+        }
+    }
+
+    private fun useCurrentFontSummaryProvider() {
         summaryProvider = SummaryProvider<AceEditorFontPreference> {
             currentFont().displayName(prefContext)
         }

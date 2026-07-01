@@ -15,12 +15,12 @@ object EditorSettingActionRegistry {
 
     private val specs = listOf(
         Spec(R.string.key_editor_engine, R.string.text_editor_engine),
-        Spec(R.string.key_editor_code_highlight_threshold_bytes, R.string.text_editor_code_highlight_threshold),
-        Spec(R.string.key_editor_large_file_mode_threshold_bytes, R.string.text_editor_large_file_mode_threshold),
         Spec(R.string.key_editor_theme_mode, R.string.text_editor_theme_mode),
         Spec(R.string.key_editor_theme, R.string.text_editor_theme),
         Spec(R.string.key_ace_editor_font, R.string.text_ace_editor_font),
         Spec(R.string.key_editor_text_size, R.string.text_text_size),
+        Spec(R.string.key_ace_font_ligatures_enabled, R.string.text_ace_font_ligatures_enabled),
+        Spec(R.string.key_ace_font_styles_enabled, R.string.text_ace_font_styles_enabled),
         Spec(R.string.key_ace_word_wrap_enabled, R.string.text_ace_word_wrap_enabled),
         Spec(R.string.key_editor_word_wrap_indent_style, R.string.text_editor_word_wrap_indent_style),
         Spec(R.string.key_editor_log_button_behavior, R.string.text_editor_log_button_behavior),
@@ -32,6 +32,8 @@ object EditorSettingActionRegistry {
         Spec(R.string.key_editor_breakpoint_markers_enabled, R.string.text_editor_breakpoint_markers_enabled),
         Spec(R.string.key_ace_line_numbers_enabled, R.string.text_ace_line_numbers_enabled),
         Spec(R.string.key_editor_fold_markers_enabled, R.string.text_editor_fold_markers_enabled),
+        Spec(R.string.key_editor_code_highlight_threshold_bytes, R.string.text_editor_code_highlight_threshold),
+        Spec(R.string.key_editor_large_file_mode_threshold_bytes, R.string.text_editor_large_file_mode_threshold),
     )
 
     fun actionIdForPreferenceKey(preferenceKey: String): String = "$ACTION_ID_PREFIX$preferenceKey"

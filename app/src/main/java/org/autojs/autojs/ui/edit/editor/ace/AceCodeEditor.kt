@@ -561,6 +561,8 @@ class AceCodeEditor @JvmOverloads constructor(
         invokeAce("setBreakpointMarkersEnabled", EditorDisplayPreferences.isBreakpointMarkersEnabled().toString())
         invokeAce("setFoldMarkersEnabled", EditorDisplayPreferences.isFoldMarkersEnabled().toString())
         invokeAce("setGutterWidthMode", quote(EditorDisplayPreferences.gutterWidthMode()))
+        invokeAce("setFontLigaturesEnabled", EditorDisplayPreferences.isFontLigaturesEnabled().toString())
+        invokeAce("setFontStylesEnabled", EditorDisplayPreferences.isFontStylesEnabled().toString())
     }
 
     private fun applyPinchToZoomStrategy(newKey: String?) {
@@ -1070,6 +1072,14 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun bridgeFontFamily(): String {
         return AceEditorFontPreferences.get().cssFontFamily
+    }
+
+    internal fun bridgeFontLigaturesEnabled(): Boolean {
+        return AceEditorDisplayPreferences.isFontLigaturesEnabled()
+    }
+
+    internal fun bridgeFontStylesEnabled(): Boolean {
+        return AceEditorDisplayPreferences.isFontStylesEnabled()
     }
 
     internal fun bridgeWordWrapEnabled(): Boolean {
@@ -1788,6 +1798,7 @@ class AceCodeEditor @JvmOverloads constructor(
             false
         }
 
+        val minimumFontSize = resources.getInteger(R.integer.editor_text_size_min_value).coerceAtLeast(1)
         webView.settings.apply {
             javaScriptEnabled = true
             javaScriptCanOpenWindowsAutomatically = false
@@ -1801,6 +1812,8 @@ class AceCodeEditor @JvmOverloads constructor(
             displayZoomControls = false
             setSupportZoom(false)
             setSupportMultipleWindows(false)
+            this.minimumFontSize = minimumFontSize
+            minimumLogicalFontSize = minimumFontSize
             cacheMode = WebSettings.LOAD_DEFAULT
             mediaPlaybackRequiresUserGesture = true
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW

@@ -19,24 +19,6 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
-        app:title="@string/text_editor_performance">
-
-        <org.autojs.autojs.ui.settings.EditorCodeHighlightThresholdPreference
-            app:layout="@layout/preference_custom"
-            app:key="@string/key_editor_code_highlight_threshold_bytes"
-            app:title="@string/text_editor_code_highlight_threshold"
-            app:longClickPrompt="@string/description_editor_code_highlight_threshold" />
-
-        <org.autojs.autojs.ui.settings.EditorLargeFileModeThresholdPreference
-            app:layout="@layout/preference_custom"
-            app:key="@string/key_editor_large_file_mode_threshold_bytes"
-            app:title="@string/text_editor_large_file_mode_threshold"
-            app:longClickPrompt="@string/description_editor_large_file_mode_threshold" />
-
-    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
-
-    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-        app:layout="@layout/preference_category_custom"
         app:title="@string/text_appearance">
 
         <org.autojs.autojs.theme.preference.MaterialListPreference
@@ -63,6 +45,22 @@
             app:layout="@layout/preference_custom"
             app:key="@string/key_editor_text_size"
             app:title="@string/text_text_size" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_font_ligatures_enabled"
+            app:defaultValue="@bool/pref_ace_font_ligatures_enabled"
+            app:title="@string/text_ace_font_ligatures_enabled"
+            app:summary="@string/summary_ace_font_ligatures_enabled"
+            app:longClickPrompt="@string/description_ace_font_ligatures_enabled_preference" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_font_styles_enabled"
+            app:defaultValue="@bool/pref_ace_font_styles_enabled"
+            app:title="@string/text_ace_font_styles_enabled"
+            app:summary="@string/summary_ace_font_styles_enabled"
+            app:longClickPrompt="@string/description_ace_font_styles_enabled_preference" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:layout="@layout/preference_custom"
@@ -172,6 +170,24 @@
             app:title="@string/text_editor_fold_markers_enabled"
             app:summary="@string/summary_editor_fold_markers_enabled"
             app:longClickPrompt="@string/description_editor_fold_markers_enabled_preference" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_editor_performance">
+
+        <org.autojs.autojs.ui.settings.EditorCodeHighlightThresholdPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_editor_code_highlight_threshold_bytes"
+            app:title="@string/text_editor_code_highlight_threshold"
+            app:longClickPrompt="@string/description_editor_code_highlight_threshold" />
+
+        <org.autojs.autojs.ui.settings.EditorLargeFileModeThresholdPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_editor_large_file_mode_threshold_bytes"
+            app:title="@string/text_editor_large_file_mode_threshold"
+            app:longClickPrompt="@string/description_editor_large_file_mode_threshold" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 

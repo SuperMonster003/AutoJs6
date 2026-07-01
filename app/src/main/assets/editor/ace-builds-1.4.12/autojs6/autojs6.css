@@ -72,6 +72,8 @@
 
 :root {
     --autojs6-editor-font-family: "Iosevka", "JetBrains Mono", "Source Code Pro", monospace;
+    --autojs6-editor-font-ligatures: normal;
+    --autojs6-editor-font-feature-settings: "liga" 1, "calt" 1;
 }
 
 html,
@@ -110,9 +112,20 @@ body.ace-ready #editor {
 #editor,
 .ace_editor {
     font-family: var(--autojs6-editor-font-family);
+    font-variant-ligatures: var(--autojs6-editor-font-ligatures);
+    font-feature-settings: var(--autojs6-editor-font-feature-settings);
     line-height: 1.45;
     -webkit-user-select: text;
     user-select: text;
+}
+
+#editor.autojs6-font-styles-disabled .ace_text-layer,
+#editor.autojs6-font-styles-disabled .ace_text-layer *,
+#editor.autojs6-font-styles-disabled .ace_gutter,
+#editor.autojs6-font-styles-disabled .ace_gutter * {
+    font-style: normal !important;
+    font-weight: 400 !important;
+    font-synthesis: none !important;
 }
 
 .ace_gutter-cell.ace_breakpoint {

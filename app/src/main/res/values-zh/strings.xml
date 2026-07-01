@@ -1581,6 +1581,8 @@
     <string name="text_ace_ime_stress_running">IME 压力测试: %1$d/%2$d</string>
     <string name="text_ace_insert">插入</string>
     <string name="text_ace_large_file_uses_native_editor">当前 fallback 策略已将 Ace 编辑器切换到 JsDroidEditor</string>
+    <string name="text_ace_font_ligatures_enabled">字体连字</string>
+    <string name="text_ace_font_styles_enabled">特殊字体样式</string>
     <string name="text_ace_line_numbers_enabled">行号</string>
     <string name="text_editor_breakpoint_markers_enabled">断点标记</string>
     <string name="text_editor_fold_markers_enabled">代码折叠标记</string>
@@ -1596,11 +1598,15 @@
     <string name="summary_editor_breakpoint_markers_enabled">在编辑器边栏中显示断点标记</string>
     <string name="summary_editor_fold_markers_enabled">在编辑器边栏中显示代码折叠标记</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">不适用于当前编辑器引擎</string>
+    <string name="summary_ace_font_ligatures_enabled">将支持的操作符组合显示为代码字体连字</string>
+    <string name="summary_ace_font_styles_enabled">允许代码显示粗体、斜体等字体样式</string>
     <string name="summary_ace_lsp_enabled">启用实验性的 LSP 配置</string>
     <string name="summary_ace_word_wrap_enabled">在编辑器可视区域内对长行自动换行</string>
     <string name="summary_editor_gutter_width_mode">选择边栏跟随可见行号位数变化, 或在当前会话中保持稳定宽度</string>
     <string name="summary_editor_word_wrap_indent_style">选择自动换行后的视觉续行缩进方式</string>
     <string name="description_ace_editor_font_preference">选择 Ace 编辑器字体. 列表包含 Android 系统默认等宽字体, 以及带作者/开发者信息的开源代码字体; 系统等宽字体的实际字形由 Android 系统和设备厂商决定.</string>
+    <string name="description_ace_font_ligatures_enabled_preference">为支持字体连字的字体启用 OpenType 连字特性. 类似 ===, !==, =&gt;, &lt;= 的操作符可能显示为连写字形. 此设置只改变代码的显示方式.</string>
+    <string name="description_ace_font_styles_enabled_preference">允许 Ace 主题和语法高亮使用粗体、斜体等字体样式. 关闭后, 代码文本会强制使用 Regular/normal 样式, 不改变颜色或代码内容.</string>
     <string name="description_ace_line_numbers_enabled_preference">显示或隐藏编辑器边栏行号. 代码折叠/断点和边栏布局仍然可用.</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">显示或隐藏编辑器边栏中的断点标记. 断点数据和调试菜单操作仍然可用.</string>
     <string name="description_editor_fold_markers_enabled_preference">显示或隐藏编辑器边栏中的代码折叠标记. JsDroidEditor 没有折叠标记显示面.</string>

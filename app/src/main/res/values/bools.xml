@@ -3,6 +3,8 @@
     <bool name="leak_canary_add_dynamic_shortcut">false</bool>
     <bool name="leak_canary_add_launcher_icon">true</bool>
     <bool name="leak_canary_enabled">true</bool>
+    <bool name="pref_ace_font_ligatures_enabled">true</bool>
+    <bool name="pref_ace_font_styles_enabled">true</bool>
     <bool name="pref_ace_line_numbers_enabled">true</bool>
     <bool name="pref_ace_lsp_enabled">false</bool>
     <bool name="pref_ace_word_wrap_enabled">false</bool>

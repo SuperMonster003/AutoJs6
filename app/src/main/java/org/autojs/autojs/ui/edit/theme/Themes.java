@@ -5,6 +5,7 @@ import android.content.Context;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.app.GlobalAppContext;
+import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
@@ -47,11 +48,26 @@ public class Themes {
         return subject;
     }
 
+    public static Observable<List<Theme>> getAllThemes(Context context, EditorEngineType engineType) {
+        if (engineType == EditorEngineType.ACE) {
+            return Observable.just(AceEditorThemes.getAll());
+        }
+        return getAllThemes(context);
+    }
+
     public static Observable<Theme> getDefault(Context context) {
         if (sDefaultTheme != null)
             return Observable.just(sDefaultTheme);
         return getAllThemes(context)
                 .map(themes -> sDefaultTheme);
+    }
+
+    public static Observable<Theme> getDefault(Context context, EditorEngineType engineType) {
+        if (engineType == EditorEngineType.ACE) {
+            boolean darkDefault = !isSeparateLightDarkMode() || ViewUtils.isNightModeYes(context);
+            return Observable.just(AceEditorThemes.getDefault(darkDefault));
+        }
+        return getDefault(context);
     }
 
     private synchronized static void setThemes(List<Theme> themes) {
@@ -83,13 +99,25 @@ public class Themes {
     }
 
     public static Observable<Theme> getCurrent(Context context) {
-        String currentTheme = getCurrentThemeName(context);
+        return getCurrent(context, EditorEngineType.NATIVE);
+    }
+
+    public static Observable<Theme> getCurrent(Context context, EditorEngineType engineType) {
+        String currentTheme = getCurrentThemeName(context, engineType);
+        if (engineType == EditorEngineType.ACE) {
+            Theme aceTheme = AceEditorThemes.findByName(currentTheme);
+            if (aceTheme != null) {
+                return Observable.just(aceTheme);
+            }
+            return getDefault(context, EditorEngineType.ACE);
+        }
         if (currentTheme == null) {
             return getDefault(context);
         }
         return getAllThemes(context).map(themes -> {
+            String nativeThemeName = resolveNativeThemeName(context, currentTheme);
             for (Theme theme : themes) {
-                if (currentTheme.equals(theme.getName())) {
+                if (nativeThemeName.equals(theme.getName())) {
                     return theme;
                 }
             }
@@ -114,6 +142,34 @@ public class Themes {
     }
 
     public static String getCurrentThemeName(Context context) {
+        return getCurrentThemeName(context, EditorEngineType.NATIVE);
+    }
+
+    public static String getCurrentThemeName(Context context, EditorEngineType engineType) {
+        if (engineType == EditorEngineType.ACE) {
+            String currentTheme = getCurrentThemeNameRawWithoutDefault(context);
+            Theme theme = AceEditorThemes.findByName(currentTheme);
+            if (theme != null) {
+                return theme.getName();
+            }
+            return getDefaultThemeName(context, engineType);
+        }
+        String currentTheme = getCurrentThemeNameRaw(context);
+        return resolveNativeThemeName(context, currentTheme);
+    }
+
+    public static String getDefaultThemeName(Context context, EditorEngineType engineType) {
+        if (engineType == EditorEngineType.ACE) {
+            boolean darkDefault = !isSeparateLightDarkMode() || ViewUtils.isNightModeYes(context);
+            return AceEditorThemes.getDefault(darkDefault).getName();
+        }
+        if (isSeparateLightDarkMode() && ViewUtils.isNightModeYes(context)) {
+            return DARK_THEME;
+        }
+        return DEFAULT_THEME;
+    }
+
+    private static String getCurrentThemeNameRaw(Context context) {
         if (!isSeparateLightDarkMode()) {
             String activeSeparateTheme = ViewUtils.isNightModeYes(context)
                     ? Pref.getStringOrNull(R.string.key_editor_theme_dark)
@@ -134,6 +190,28 @@ public class Themes {
                 Pref.getCurrentTheme(),
                 DEFAULT_THEME
         );
+    }
+
+    private static String getCurrentThemeNameRawWithoutDefault(Context context) {
+        if (!isSeparateLightDarkMode()) {
+            return firstNonBlank(Pref.getCurrentTheme());
+        }
+        if (ViewUtils.isNightModeYes(context)) {
+            return firstNonBlank(Pref.getStringOrNull(R.string.key_editor_theme_dark));
+        }
+        return firstNonBlank(Pref.getStringOrNull(R.string.key_editor_theme_light));
+    }
+
+    private static String resolveNativeThemeName(Context context, String name) {
+        if (DARK_THEME.equals(name)) {
+            return DARK_THEME;
+        }
+        if (DEFAULT_THEME.equals(name)) {
+            return DEFAULT_THEME;
+        }
+        return ViewUtils.isNightModeYes(context) && isSeparateLightDarkMode()
+                ? DARK_THEME
+                : DEFAULT_THEME;
     }
 
     public static boolean isSeparateLightDarkMode() {
