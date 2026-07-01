@@ -429,6 +429,25 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-18: Add task schema migrations and rollback evidence.
   - Scope: versioned JSON schema, downgrade behavior, corruption recovery,
     packaged row ownership, and legacy visibility.
+  - Gate: `:app:verifyNodePhase14TaskSchemaMigrationRollback`.
+  - Task schema migration and rollback gate deployed:
+    - Adds `docs/nodejs/phase14/task-schema-migration-rollback-plan.json` and
+      `PHASE14_TASK_SCHEMA_MIGRATION_ROLLBACK.md`.
+    - Imports P14-17 task database provider contract evidence and keeps
+      schema migration/rollback marked not ready for live promotion.
+    - Defines fixture coverage for `current_descriptor_v1`,
+      `older_descriptor_v0`, `legacy_timed_task_snapshot_v1`,
+      `corrupt_descriptor`, `unknown_future_schema`, and
+      `packaged_owner_mismatch`.
+    - Records Safe downgrade, Pro disable, packaged rollback, corruption
+      quarantine, unknown schema preservation, and legacy `TimedTask`
+      visibility policy.
+    - Keeps live migration tests, corruption recovery archive, downgrade
+      legacy visibility archive, and packaged rollback archive open as
+      `future_promotion`.
+    - Writes
+      `build/reports/nodejs/phase14-task-schema-migration-rollback.json` and
+      `.md`.
   - Acceptance: migration tests cover current, older, corrupt, and unknown
     schema versions.
 

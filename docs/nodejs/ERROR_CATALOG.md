@@ -75,6 +75,21 @@ promoted:
 - Raw `TimedTask`, scheduler, database cursor, mutable row handle,
   `IntentTask`, `PendingIntent`, `Intent`, and Java objects remain blocked.
 
+## P14-18 task schema migration rollback denial sync
+
+P14-18 does not add a new error code. It records how future schema migration
+and rollback failures must stay stable:
+
+- Current and older descriptor fixtures remain contract-only until a live
+  migrator exists; mutation attempts still use the P14-17 denial surface.
+- Corrupt descriptors must fail closed, be quarantined, and avoid scheduler
+  reschedule; callers should receive stable invalid-request diagnostics rather
+  than a raw database or parser exception.
+- Unknown future schema descriptors must be preserved without mutation and
+  reported as unsupported or invalid for the current provider version.
+- Packaged owner mismatch must deny cross-package aliasing and must not delete
+  main-app or legacy Rhino rows.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

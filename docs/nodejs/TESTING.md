@@ -3044,6 +3044,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedImageOcrEvidence
 .\gradlew.bat --console=plain :app:verifyNodePhase14UiAutomationMediaDocSync
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskDatabaseProvider
+.\gradlew.bat --console=plain :app:verifyNodePhase14TaskSchemaMigrationRollback
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3134,6 +3135,13 @@ JSON-safe task database mutation contract, imports P13-21 `work_manager`,
 `pro.tasks_device_media` at `provider_poc`, and keeps `require("tasks")`, live
 database mutation, schema migration, wall-clock scheduler parity, and packaged
 task rows unpromoted.
+`verifyNodePhase14TaskSchemaMigrationRollback` depends on the P14-17 task
+database provider gate. It writes
+`phase14-task-schema-migration-rollback.json` plus `.md`, verifies the P14-18
+current/older/legacy/corrupt/unknown/packaged-owner fixture matrix, records
+Safe downgrade, Pro disable, packaged rollback, corruption quarantine, unknown
+schema preservation, and legacy `TimedTask` visibility policy, and keeps live
+migration tests unpromoted.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

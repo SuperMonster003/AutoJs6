@@ -26,6 +26,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14PackagedImageOcrEvidence`
 - `:app:verifyNodePhase14UiAutomationMediaDocSync`
 - `:app:verifyNodePhase14TaskDatabaseProvider`
+- `:app:verifyNodePhase14TaskSchemaMigrationRollback`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -102,3 +103,9 @@ provider contract as `partial`. It imports P13-21 `work_manager`,
 `require("tasks")`, future `tasks` capabilities, live database mutation,
 schema migration, wall-clock scheduler parity, and packaged task rows
 unpromoted.
+
+`P14_18_TASK_SCHEMA_MIGRATION_ROLLBACK.md` records the task schema migration
+and rollback contract as `partial`. It adds current, older, legacy snapshot,
+corrupt, unknown, and packaged owner-mismatch fixture coverage while keeping
+live migration tests, corruption recovery, downgrade legacy visibility, and
+packaged rollback archives open.
