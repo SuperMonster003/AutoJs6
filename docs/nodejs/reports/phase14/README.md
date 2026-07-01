@@ -197,3 +197,13 @@ cleanup, exception/timeout recovery, RSS snapshots, and thread-count bounded
 assertions while recording Java heap, native heap, fd, queue, active worker, and
 active WorkerPool deltas as future native-available archives behind
 `:app:verifyNodePhase14WorkerResourceRssStress`.
+
+`P14_31_PROCESS_WORKER_REPLACEMENT_DECISION.md` records the process-worker
+replacement decision as `ready` with a `no_user_facing_facade_v1_2` decision.
+It imports P13-35, P14-28, P14-29, and P14-30 reports, verifies the diagnostic
+`processWorkerReplacementProfile`, absence of callable `process_worker` /
+`compute_worker` facades, default `child_process` denial, separate `shell`
+bridge policy, reserved `worker_computation`, and keeps raw process handles,
+stdio, signals, `spawn`, `fork`, packaged process-worker behavior, and
+WorkerPool replacement API authority unpromoted behind
+`:app:verifyNodePhase14ProcessWorkerReplacementDecision`.

@@ -1311,6 +1311,17 @@ bridge modules, nested workers, and packaged process-worker behavior remain
 unpromoted. For P13-35 v1.1, there is no user-facing process-worker API or UX;
 P13-40 remains the separate track for any future scoped `child_process` runner.
 
+P14-31 closes the v1.2 process-worker replacement decision as
+`no_user_facing_facade_v1_2`. It imports the P13-35 diagnostic profile plus the
+P14-28/P14-29/P14-30 worker availability, runnable/package, and resource gates,
+and keeps the compatibility surface unchanged: no `process_worker`,
+`compute_worker`, `autojs6:process-worker`, WorkerPool replacement API,
+raw process handles, stdio streams, signals, `spawn`, `fork`, or packaged
+process-worker behavior is promoted. Any future replacement API must be
+WorkerPool-compatible and backed by native WorkerPool evidence, execution slot
+accounting, cleanup/resource stress, packaged behavior, user-facing launch UX,
+security corpus, and rollback evidence.
+
 P13-40 records child_process scoped runner as partial. The runtime exposes
 `autojs6:profile.childProcessProfile` to document that `child_process` and
 `node:child_process` remain denied by default while the existing `shell` bridge

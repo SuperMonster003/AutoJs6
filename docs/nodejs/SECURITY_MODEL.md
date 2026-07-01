@@ -368,6 +368,16 @@ queue, active worker, and active WorkerPool deltas remain future
 native-available archive requirements, so resource evidence does not relax the
 default worker denial.
 
+P14-31 closes the v1.2 process-worker replacement decision as
+`no_user_facing_facade_v1_2`. The P13-35 diagnostic profile remains visible,
+but no `process_worker`, `compute_worker`, `autojs6:process-worker`,
+WorkerPool replacement API, raw process handle, stdio stream, signal,
+`spawn`, `fork`, or packaged process-worker behavior is promoted. Future
+replacement work must first prove native WorkerPool evidence, execution slot
+accounting, cleanup/resource stress, packaged behavior, user-visible launch UX,
+security corpus coverage, rollback policy, and separation from `child_process`
+and `shell`.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

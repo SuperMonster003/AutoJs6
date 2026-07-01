@@ -767,9 +767,30 @@ A Phase 14 task can be marked complete only when all applicable items are true:
       and `.md`.
   - Acceptance: no monotonic leaks, orphan workers, or unrecoverable runtime.
 
-- [ ] P14-31: Decide process-worker replacement for v1.2.
+- [x] P14-31: Decide process-worker replacement for v1.2.
   - Scope: keep no user-facing facade, or define a WorkerPool-compatible API
     that accounts for execution slots, cleanup, packaging, and UX.
+  - Gate: `:app:verifyNodePhase14ProcessWorkerReplacementDecision`.
+  - Process-worker replacement decision gate deployed:
+    - Adds `docs/nodejs/phase14/process-worker-replacement-decision.json` and
+      `PHASE14_PROCESS_WORKER_REPLACEMENT_DECISION.md`.
+    - Adds
+      `docs/nodejs/reports/phase14/P14_31_PROCESS_WORKER_REPLACEMENT_DECISION.md`.
+    - Imports P13-35 process-worker replacement plus P14-28 native
+      availability, P14-29 runnable/packaged smoke, and P14-30 resource/RSS
+      stress generated reports.
+    - Records `no_user_facing_facade_v1_2` while current native worker
+      preflight remains `worker.preflight.status=unavailable`.
+    - Verifies `processWorkerReplacementProfile`, absence of callable
+      `process_worker` / `compute_worker` facades, default `child_process`
+      denial, separate `shell` bridge policy, reserved `worker_computation`,
+      and P13-06 second-slot closure diagnostics.
+    - Keeps raw process handles, stdio, signals, `spawn`, `fork`, packaged
+      process-worker behavior, and WorkerPool replacement API authority
+      unpromoted.
+    - Writes
+      `build/reports/nodejs/phase14-process-worker-replacement-decision.json`
+      and `.md`.
   - Acceptance: no raw process handles, stdio, signals, `spawn`, or `fork` are
     exposed.
 

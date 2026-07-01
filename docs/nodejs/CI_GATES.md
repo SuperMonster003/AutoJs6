@@ -1234,6 +1234,15 @@ WorkerPool stress, cleanup, exception/timeout recovery, RSS snapshots, and
 thread-count bounded assertions, and records worker-specific Java heap, native
 heap, fd, queue, active worker, and active WorkerPool deltas as future
 native-available archive requirements.
+The `:app:verifyNodePhase14ProcessWorkerReplacementDecision` gate writes
+`phase14-process-worker-replacement-decision.json` plus `.md`, imports P13-35,
+P14-28, P14-29, and P14-30 generated reports, verifies
+`processWorkerReplacementProfile`, absence of callable `process_worker` /
+`compute_worker` facades, default `child_process` denial, separate `shell`
+bridge policy, reserved `worker_computation`, and records
+`no_user_facing_facade_v1_2` without promoting raw process handles, stdio,
+signals, `spawn`, `fork`, packaged process-worker behavior, or WorkerPool
+replacement API authority.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

@@ -1,0 +1,68 @@
+{
+  "schema": "autojs6-node-phase14-process-worker-replacement-decision-v1",
+  "task": "P14-31",
+  "status": "ready",
+  "decision": "no_user_facing_facade_v1_2",
+  "promotionState": "process_worker_facade_closed",
+  "sourceGates": [
+    "P13-35",
+    "P14-28",
+    "P14-29",
+    "P14-30"
+  ],
+  "v1_2Decision": {
+    "runtimeAuthorityChanged": false,
+    "processWorkerFacadePromoted": false,
+    "computeWorkerFacadePromoted": false,
+    "workerPoolReplacementApiPromoted": false,
+    "childProcessPromoted": false,
+    "shellBridgePromotedByThisGate": false,
+    "rawProcessHandlesPromoted": false,
+    "spawnForkStdioSignalsPromoted": false,
+    "workerComputationLaunchSurfacePromoted": false,
+    "packagedProcessWorkerPromoted": false
+  },
+  "replacementDirection": {
+    "diagnosticProfile": "autojs6:profile.processWorkerReplacementProfile",
+    "preferredPrimitive": "worker_threads.WorkerPool",
+    "api": "not_introduced",
+    "facade": "not_introduced",
+    "workerThreads": "request_local_experimental_preflight",
+    "executionMode": "worker_computation_reserved",
+    "secondExecutionSlot": "closed_by_p13_06",
+    "cleanup": "worker_pool_close_or_execution_destroy",
+    "messageSizeBytes": 65536,
+    "maxQueuedMessages": 32
+  },
+  "workerPreconditions": {
+    "nativeAvailable": false,
+    "runnableSmokeExecuted": false,
+    "packagedSmokeExecuted": false,
+    "resourceStressExecuted": false,
+    "currentError": "ERR_AUTOJS6_WORKER_DISABLED",
+    "requiredStatus": "worker.preflight.status=available"
+  },
+  "deniedSurfaces": [
+    "process_worker",
+    "compute_worker",
+    "autojs6:process-worker",
+    "global process_worker",
+    "global compute_worker",
+    "raw Process handles",
+    "spawn",
+    "fork",
+    "stdio streams",
+    "signal handles",
+    "packaged process-worker behavior",
+    "worker_computation launch surface"
+  ],
+  "futureApiRequirements": [
+    "native WorkerPool evidence on selected target ABIs",
+    "execution slot accounting tied to the scheduler and service lifecycle",
+    "WorkerPool cleanup, cancellation, timeout, and resource/RSS archives",
+    "packaged behavior and project metadata disclosure",
+    "user-visible launch UX and rollback policy",
+    "explicit separation from child_process scoped-runner work"
+  ],
+  "rollback": "Keep P14-31 as a no-facade decision; remove only this decision gate and docs if a future phase replaces it with a WorkerPool-compatible API backed by native, resource, packaged, UX, and security evidence."
+}

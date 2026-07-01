@@ -291,6 +291,21 @@ gate as `conditional_skip_native_unavailable`:
 - Worker authority remains disabled until native, packaged, and resource gates
   pass together.
 
+## P14-31 process-worker replacement decision
+
+P14-31 does not add a new error code. It records the process-worker replacement
+decision as `no_user_facing_facade_v1_2`:
+
+- `process_worker`, `compute_worker`, and `autojs6:process-worker` remain
+  absent rather than rejecting with new runtime-specific codes.
+- `child_process` and `node:child_process` keep the existing disabled-builtin
+  error shape in stable profiles.
+- `shell` remains the separately permissioned scoped command bridge and is not
+  process-worker authority.
+- Raw process handles, stdio streams, signals, `spawn`, `fork`, packaged
+  process-worker behavior, and WorkerPool replacement API authority remain
+  unpromoted until a future WorkerPool-compatible gate owns the evidence.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

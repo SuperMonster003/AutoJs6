@@ -337,7 +337,7 @@
         "P14-31",
         "P14-32"
       ],
-      "summary": "Decide worker_threads v1.2 promotion from native ABI evidence, add runnable/package/resource gates if available, and keep process-worker replacement bounded. P14-28 refreshes the native availability audit as intentional non-support for v1.2 runnable workers until worker.preflight.status=available is archived on target ABIs. P14-29 adds the conditional runnable/packaged smoke gate and keeps source-only worker anchors from promoting authority while native workers are unavailable. P14-30 adds the conditional resource/RSS stress gate and records worker-specific heap/fd/resource archives as future native-available requirements.",
+      "summary": "Decide worker_threads v1.2 promotion from native ABI evidence, add runnable/package/resource gates if available, and keep process-worker replacement bounded. P14-28 refreshes the native availability audit as intentional non-support for v1.2 runnable workers until worker.preflight.status=available is archived on target ABIs. P14-29 adds the conditional runnable/packaged smoke gate and keeps source-only worker anchors from promoting authority while native workers are unavailable. P14-30 adds the conditional resource/RSS stress gate and records worker-specific heap/fd/resource archives as future native-available requirements. P14-31 closes the process-worker replacement decision for v1.2 with no user-facing facade and no raw process authority.",
       "risk": "critical",
       "runtimeSurface": [
         "worker_threads native availability",
@@ -370,7 +370,14 @@
         "tools/nodejs/phase14/verify-node-phase14-worker-resource-rss-stress.js",
         ":app:verifyNodePhase14WorkerResourceRssStress",
         "build/reports/nodejs/phase14-worker-resource-rss-stress.json",
-        "build/reports/nodejs/phase14-worker-resource-rss-stress.md"
+        "build/reports/nodejs/phase14-worker-resource-rss-stress.md",
+        "docs/nodejs/phase14/process-worker-replacement-decision.json",
+        "docs/nodejs/phase14/PHASE14_PROCESS_WORKER_REPLACEMENT_DECISION.md",
+        "docs/nodejs/reports/phase14/P14_31_PROCESS_WORKER_REPLACEMENT_DECISION.md",
+        "tools/nodejs/phase14/verify-node-phase14-process-worker-replacement-decision.js",
+        ":app:verifyNodePhase14ProcessWorkerReplacementDecision",
+        "build/reports/nodejs/phase14-process-worker-replacement-decision.json",
+        "build/reports/nodejs/phase14-process-worker-replacement-decision.md"
       ],
       "rollback": "Keep worker_threads intentionally unsupported and keep process-worker replacement without a user-facing facade unless native and packaged gates pass."
     },

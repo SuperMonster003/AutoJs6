@@ -2005,6 +2005,23 @@ RSS snapshots, and thread-count bounded assertions, and records worker-specific
 Java heap, native heap, fd count, queue, active worker, and active WorkerPool
 deltas as future native-available archive requirements.
 
+Phase 14 process-worker replacement decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14ProcessWorkerReplacementDecision
+```
+
+This host gate records P14-31 as ready with
+`no_user_facing_facade_v1_2`. It imports P13-35, P14-28, P14-29, and P14-30
+generated reports, verifies `processWorkerReplacementProfile`, absence of
+callable `process_worker` / `compute_worker` facades, default `child_process`
+denial, separate `shell` bridge policy, reserved `worker_computation`, and the
+current native-worker-unavailable state. It keeps raw process handles, stdio,
+signals, `spawn`, `fork`, packaged process-worker behavior, and WorkerPool
+replacement API authority unpromoted until a future WorkerPool-compatible gate
+owns native, slot-accounting, cleanup/resource, packaged, UX, and security
+evidence.
+
 Phase 13 process-worker replacement decision gate:
 
 ```powershell
