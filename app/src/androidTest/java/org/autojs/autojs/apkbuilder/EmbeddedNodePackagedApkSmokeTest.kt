@@ -8403,6 +8403,16 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildAccessibilityLifecycleEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged accessibility lifecycle smoke fixture requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedAccessibilityLifecycleApk()
+    }
+
+    @Test
     fun buildIntentBroadcastBoundaryEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged IntentTask/broadcast boundary smoke requires embedded script execution build support.",
@@ -12414,6 +12424,169 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedAccessibilityLifecycleApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function denied(action) {
+              try {
+                await action();
+                return { allowed: true, code: "", autojs6Code: "", module: "", method: "" };
+              } catch (error) {
+                return {
+                  allowed: false,
+                  code: String(error && error.code || ""),
+                  autojs6Code: String(error && error.autojs6Code || ""),
+                  module: String(error && error.module || ""),
+                  method: String(error && error.method || "")
+                };
+              }
+            }
+
+            async function main() {
+              const fs = require("fs");
+              const bridge = require("autojs6:bridge");
+              const profile = require("autojs6:profile");
+              const accessibility = require("accessibility");
+              const projectConfig = JSON.parse(fs.readFileSync("project.json", "utf8"));
+              const nodePermissions = projectConfig.node && Array.isArray(projectConfig.node.permissions)
+                ? projectConfig.node.permissions
+                : [];
+              const androidPermissions = Array.isArray(projectConfig.permissions)
+                ? projectConfig.permissions
+                : [];
+              const permissionReport = bridge.permissions();
+              const normalizedPermissions = Array.isArray(permissionReport.normalizedPermissions)
+                ? permissionReport.normalizedPermissions
+                : [];
+              const metadataOk =
+                nodePermissions.indexOf("accessibility") >= 0 &&
+                normalizedPermissions.indexOf("accessibility") >= 0 &&
+                androidPermissions.indexOf("android.permission.BIND_ACCESSIBILITY_SERVICE") >= 0;
+              const policy = profile.privacyDisclosurePolicy;
+              const surface = (policy.surfaces || []).find((entry) => entry && entry.id === "accessibility");
+              const surfaceAndroidPermissions = surface && Array.isArray(surface.androidPermissions)
+                ? surface.androidPermissions
+                : [];
+              const privacyPolicyOk =
+                surface &&
+                surface.capability === "accessibility" &&
+                surface.profile === "pro_compat_opt_in" &&
+                surfaceAndroidPermissions.indexOf("android.permission.BIND_ACCESSIBILITY_SERVICE") >= 0 &&
+                surface.requiresUserPrompt === true &&
+                surface.requiresForegroundDisclosure === true &&
+                surface.requiresSettingsIntent === true &&
+                surface.disclosureChannel === "accessibility_service_description" &&
+                surface.settingsIntent === "android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS" &&
+                surface.authority === "metadata_only_no_authority" &&
+                surface.packagedBehavior === "deny_without_reviewed_disclosure_manifest";
+              const settingsContractOk =
+                surface &&
+                surface.requiresSettingsIntent === true &&
+                surface.settingsIntent === "android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS" &&
+                surface.disclosureChannel === "accessibility_service_description";
+              const packagedPolicy = policy.packagedPolicy || {};
+              const packagedPolicyOk =
+                packagedPolicy.requiresDisclosureManifest === true &&
+                packagedPolicy.reviewedManifestRequiredForPromotion === true &&
+                packagedPolicy.defaultAction === "deny_without_reviewed_disclosure_manifest" &&
+                packagedPolicy.grantsAuthority === false;
+              const enabled = await accessibility.isEnabled({ timeoutMs: 1000 });
+              const ensured = await accessibility.ensureEnabled({ prompt: false, timeoutMs: 1000 });
+              const selector = accessibility.text("P14-11 accessibility lifecycle");
+              const deniedActions = [
+                ["findOne", () => accessibility.findOne(selector, { timeoutMs: 1000 })],
+                ["findAll", () => accessibility.findAll(selector, { timeoutMs: 1000 })],
+                ["click", () => accessibility.click(selector, { timeoutMs: 1000 })],
+                ["longClick", () => accessibility.longClick(selector, { timeoutMs: 1000 })],
+                ["setText", () => accessibility.setText(selector, "Typed", { timeoutMs: 1000 })],
+                ["scrollForward", () => accessibility.scrollForward(selector, { timeoutMs: 1000 })],
+                ["scrollBackward", () => accessibility.scrollBackward(selector, { timeoutMs: 1000 })]
+              ];
+              const denials = [];
+              for (const action of deniedActions) {
+                const result = await denied(action[1]);
+                denials.push({ method: action[0], result });
+              }
+              const disabledDenialOk =
+                enabled === false &&
+                ensured === false &&
+                denials.every((entry) =>
+                  entry.result.allowed === false &&
+                  entry.result.code === "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED" &&
+                  entry.result.autojs6Code === "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED" &&
+                  entry.result.module === "accessibility" &&
+                  entry.result.method === entry.method
+                );
+              const denialSummary = denials.map((entry) =>
+                entry.method + ":" +
+                entry.result.code + "/" +
+                entry.result.autojs6Code + "/" +
+                entry.result.module + "/" +
+                entry.result.method
+              ).join("|");
+              const rawGlobalsAbsent = [
+                "AccessibilityService",
+                "AccessibilityNodeInfo",
+                "UiObject",
+                "UiSelector",
+                "Context",
+                "Service",
+                "Binder"
+              ].every((name) => typeof globalThis[name] === "undefined");
+              const unsupportedHelpersAbsent = [
+                "swipe",
+                "gesture",
+                "powerDialog",
+                "waitFor",
+                "pickup"
+              ].every((name) => typeof accessibility[name] === "undefined");
+              const pending = bridge.__test.pendingCount();
+              const ready = metadataOk &&
+                privacyPolicyOk &&
+                settingsContractOk &&
+                packagedPolicyOk &&
+                disabledDenialOk &&
+                rawGlobalsAbsent &&
+                unsupportedHelpersAbsent &&
+                pending === 0;
+
+              console.log("packaged.accessibility_lifecycle.ready=" + ready);
+              console.log("packaged.accessibility_lifecycle.metadata=" + metadataOk);
+              console.log("packaged.accessibility_lifecycle.privacy_policy=" + privacyPolicyOk);
+              console.log("packaged.accessibility_lifecycle.settings_contract=" + settingsContractOk);
+              console.log("packaged.accessibility_lifecycle.packaged_policy=" + packagedPolicyOk);
+              console.log("packaged.accessibility_lifecycle.disabled_state=" + (enabled === false && ensured === false));
+              console.log("packaged.accessibility_lifecycle.denial_paths=" + disabledDenialOk);
+              console.log("packaged.accessibility_lifecycle.denied_methods=" + denialSummary);
+              console.log("packaged.accessibility_lifecycle.settings_intent=" + (surface && surface.settingsIntent));
+              console.log("packaged.accessibility_lifecycle.raw_globals_absent=" + rawGlobalsAbsent);
+              console.log("packaged.accessibility_lifecycle.unsupported_helpers_absent=" + unsupportedHelpersAbsent);
+              console.log("packaged.accessibility_lifecycle.pending=" + pending);
+              if (!ready) {
+                process.exitCode = 1;
+              }
+            }
+
+            return main().catch(error => {
+              console.error("packaged.accessibility_lifecycle.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-accessibility-lifecycle-smoke",
+            outputApkName = ACCESSIBILITY_LIFECYCLE_APK_NAME,
+            projectName = ACCESSIBILITY_LIFECYCLE_PROJECT_NAME,
+            packageName = ACCESSIBILITY_LIFECYCLE_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraPermissions = listOf("android.permission.BIND_ACCESSIBILITY_SERVICE"),
+            nodePermissions = ACCESSIBILITY_LIFECYCLE_NODE_PERMISSIONS,
+            runtimeMarkers = ACCESSIBILITY_LIFECYCLE_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedIntentBroadcastBoundaryApk(): File {
         val mainScriptName = "main.js"
         val mainScript = """
@@ -16104,6 +16277,12 @@ $nodeConfigJson
             "org.autojs6.packaged.node.overlay.positive.smoke"
         private const val OVERLAY_POSITIVE_APK_NAME =
             "PackagedNodeOverlayPositiveSmoke_v1.0.0.apk"
+        private const val ACCESSIBILITY_LIFECYCLE_PROJECT_NAME =
+            "PackagedNodeAccessibilityLifecycleSmoke"
+        private const val ACCESSIBILITY_LIFECYCLE_PACKAGE_NAME =
+            "org.autojs6.packaged.node.accessibility.lifecycle.smoke"
+        private const val ACCESSIBILITY_LIFECYCLE_APK_NAME =
+            "PackagedNodeAccessibilityLifecycleSmoke_v1.0.0.apk"
         private const val INTENT_BROADCAST_BOUNDARY_PROJECT_NAME =
             "PackagedNodeIntentBroadcastBoundarySmoke"
         private const val INTENT_BROADCAST_BOUNDARY_PACKAGE_NAME =
@@ -16559,6 +16738,22 @@ $nodeConfigJson
             "packaged.overlay_positive.leak_summary=true",
             "packaged.overlay_positive.raw_globals_absent=true",
             "packaged.overlay_positive.pending=0",
+        )
+        private val ACCESSIBILITY_LIFECYCLE_NODE_PERMISSIONS = listOf(
+            "accessibility",
+        )
+        private val ACCESSIBILITY_LIFECYCLE_RUNTIME_MARKERS = listOf(
+            "packaged.accessibility_lifecycle.ready=true",
+            "packaged.accessibility_lifecycle.metadata=true",
+            "packaged.accessibility_lifecycle.privacy_policy=true",
+            "packaged.accessibility_lifecycle.settings_contract=true",
+            "packaged.accessibility_lifecycle.packaged_policy=true",
+            "packaged.accessibility_lifecycle.disabled_state=true",
+            "packaged.accessibility_lifecycle.denial_paths=true",
+            "packaged.accessibility_lifecycle.settings_intent=android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS",
+            "packaged.accessibility_lifecycle.raw_globals_absent=true",
+            "packaged.accessibility_lifecycle.unsupported_helpers_absent=true",
+            "packaged.accessibility_lifecycle.pending=0",
         )
         private val INTENT_BROADCAST_BOUNDARY_RUNTIME_MARKERS = listOf(
             "packaged.intent_broadcast.ready=true",

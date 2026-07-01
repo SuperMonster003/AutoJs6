@@ -3037,6 +3037,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14OverlayProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14OverlayPermissionOemMatrix
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedOverlayPositiveSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilityLifecycle
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3075,6 +3076,13 @@ permission/OEM matrix gate. It writes
 packaged overlay positive smoke/stress fixture, and keeps install-run,
 foreground disclosure/stop action, task-removal/relaunch/crash, and
 event-drain/leak-stress archives as future-promotion blockers.
+`verifyNodePhase14AccessibilityLifecycle` depends on the P14-10 packaged
+overlay positive gate and the Phase 13 accessibility selector promotion gate.
+It writes `phase14-accessibility-lifecycle.json` plus `.md`, verifies the
+packaged accessibility lifecycle fixture, imports the P13-19 selector denial
+boundary, and keeps user-enabled service, settings round-trip, task
+removal/relaunch, disconnect, and missing-capability archives as
+future-promotion blockers.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

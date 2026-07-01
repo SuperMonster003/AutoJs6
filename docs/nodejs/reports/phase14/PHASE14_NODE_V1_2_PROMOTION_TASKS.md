@@ -255,7 +255,28 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-11: Add accessibility-service packaged lifecycle evidence.
   - Scope: service enabled/disabled state, packaged ownership, settings launch,
     task removal, relaunch, and denial paths.
-  - Gate: proposed `:app:verifyNodePhase14AccessibilityLifecycle`.
+  - Gate: `:app:verifyNodePhase14AccessibilityLifecycle`.
+  - Packaged lifecycle fixture deployed:
+    - Adds `docs/nodejs/phase14/accessibility-lifecycle-plan.json`
+      and `PHASE14_ACCESSIBILITY_LIFECYCLE.md` for the packaged
+      accessibility lifecycle contract.
+    - Adds
+      `EmbeddedNodePackagedApkSmokeTest#buildAccessibilityLifecycleEmbeddedNodePackagedApk`
+      to build a packaged APK declaring `accessibility` and
+      `android.permission.BIND_ACCESSIBILITY_SERVICE`.
+    - Imports the P13-19 selector/live denial evidence and verifies the
+      `ACTION_ACCESSIBILITY_SETTINGS`, `accessibility_service_description`,
+      and reviewed-disclosure packaged policy contract.
+    - Defines runtime markers for metadata, privacy/settings contract,
+      disabled-state denial paths, raw global absence, unsupported helper
+      absence, and pending dispatch cleanup.
+    - Writes `build/reports/nodejs/phase14-accessibility-lifecycle.json`
+      and `.md`.
+    - Keeps open blockers `accessibility_packaged_service_enabled_archive`,
+      `accessibility_settings_round_trip_archive`,
+      `accessibility_task_removal_relaunch_archive`, and
+      `accessibility_disconnect_missing_capability_denial_archive` as
+      `future_promotion`.
   - Acceptance: packaged service lifecycle does not leak raw service handles
     and leaves selector globals fail-closed when capability is missing.
 

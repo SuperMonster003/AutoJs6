@@ -19,6 +19,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14OverlayProvider`
 - `:app:verifyNodePhase14OverlayPermissionOemMatrix`
 - `:app:verifyNodePhase14PackagedOverlayPositiveSmoke`
+- `:app:verifyNodePhase14AccessibilityLifecycle`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -48,3 +49,10 @@ explicit overlay capability metadata and `SYSTEM_ALERT_WINDOW` while keeping
 install-run archives, foreground disclosure/stop action, task
 removal/relaunch/crash behavior, and event drain/leak-stress evidence as
 future-promotion blockers.
+
+`P14_11_ACCESSIBILITY_LIFECYCLE.md` records the packaged accessibility
+lifecycle fixture as `partial`. It adds a packaged APK fixture with explicit
+`accessibility` capability metadata and `BIND_ACCESSIBILITY_SERVICE`, imports
+the P13-19 selector denial boundary, and keeps user-enabled service, settings
+round-trip, task removal/relaunch, disconnect, and missing-capability archives
+as future-promotion blockers.
