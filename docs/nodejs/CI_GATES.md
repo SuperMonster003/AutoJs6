@@ -1082,6 +1082,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14UiAutomationMediaDocSync
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskDatabaseProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskSchemaMigrationRollback
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedTaskSchedulingSmoke
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1158,6 +1159,12 @@ The task schema migration rollback gate writes
 fixture matrix for current, older, legacy snapshot, corrupt, unknown, and
 packaged owner-mismatch descriptors, records downgrade/corruption/unknown
 schema/packaged rollback policy, and keeps live migration tests unpromoted.
+The packaged task scheduling smoke gate writes
+`phase14-packaged-task-scheduling-smoke.json` plus `.md`, imports packaged
+`work_manager` schedule/list/cancel fake-provider smoke and live packaged
+project-entry scheduled-runner evidence, records package-identity row
+ownership and Safe downgrade policy, and keeps packaged `tasks` database row
+promotion unpromoted.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

@@ -27,6 +27,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14UiAutomationMediaDocSync`
 - `:app:verifyNodePhase14TaskDatabaseProvider`
 - `:app:verifyNodePhase14TaskSchemaMigrationRollback`
+- `:app:verifyNodePhase14PackagedTaskSchedulingSmoke`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -109,3 +110,10 @@ and rollback contract as `partial`. It adds current, older, legacy snapshot,
 corrupt, unknown, and packaged owner-mismatch fixture coverage while keeping
 live migration tests, corruption recovery, downgrade legacy visibility, and
 packaged rollback archives open.
+
+`P14_19_PACKAGED_TASK_SCHEDULING_SMOKE.md` records the packaged task scheduling
+smoke baseline as `partial`. It imports packaged `work_manager` fake-provider
+schedule/list/cancel smoke and live packaged project-entry scheduled-runner
+evidence while keeping packaged task database add/list/enable-disable/remove,
+process death/relaunch, task-removal cleanup, disclosure, and Safe downgrade
+archives open.

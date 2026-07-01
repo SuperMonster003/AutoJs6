@@ -454,6 +454,23 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-19: Add packaged task scheduling smoke.
   - Scope: packaged add/list/enable-disable/remove, process death, relaunch,
     task removal, disclosure, and Safe downgrade.
+  - Gate: `:app:verifyNodePhase14PackagedTaskSchedulingSmoke`.
+  - Packaged task scheduling smoke gate deployed:
+    - Adds `docs/nodejs/phase14/packaged-task-scheduling-smoke-plan.json` and
+      `PHASE14_PACKAGED_TASK_SCHEDULING_SMOKE.md`.
+    - Imports packaged v1.1 fake-provider `work_manager` smoke for
+      `scheduleOnce`, `list`, `cancel`, capability metadata, shadowing denial,
+      and pending-call cleanup.
+    - Imports the live Android `work_manager` packaged project-entry
+      scheduled-runner anchor with persisted `lastRun` / `runHistory`.
+    - Records package-identity row ownership, cross-package denial, task
+      removal cleanup, Safe downgrade, disclosure, relaunch, and crash
+      recovery requirements for the future `tasks` provider.
+    - Keeps packaged task database positive smoke, process death/relaunch,
+      task removal cleanup, and disclosure/Safe downgrade archives open as
+      `future_promotion`.
+    - Writes `build/reports/nodejs/phase14-packaged-task-scheduling-smoke.json`
+      and `.md`.
   - Acceptance: packaged task rows remain scoped to the package identity and
     are removed or disabled according to rollback policy.
 

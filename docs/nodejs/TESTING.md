@@ -3045,6 +3045,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14UiAutomationMediaDocSync
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskDatabaseProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskSchemaMigrationRollback
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedTaskSchedulingSmoke
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3142,6 +3143,14 @@ current/older/legacy/corrupt/unknown/packaged-owner fixture matrix, records
 Safe downgrade, Pro disable, packaged rollback, corruption quarantine, unknown
 schema preservation, and legacy `TimedTask` visibility policy, and keeps live
 migration tests unpromoted.
+`verifyNodePhase14PackagedTaskSchedulingSmoke` depends on the P14-18 schema
+rollback gate and Phase 13 packaged capability metadata gate. It writes
+`phase14-packaged-task-scheduling-smoke.json` plus `.md`, imports packaged
+v1.1 fake-provider `work_manager` schedule/list/cancel smoke and the live
+packaged project-entry scheduled-runner anchor, records package-identity row
+ownership policy, and keeps future packaged `tasks` database rows,
+process-death/relaunch, task-removal cleanup, disclosure, and Safe downgrade
+archives unpromoted.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

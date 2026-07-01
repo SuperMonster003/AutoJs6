@@ -90,6 +90,22 @@ and rollback failures must stay stable:
 - Packaged owner mismatch must deny cross-package aliasing and must not delete
   main-app or legacy Rhino rows.
 
+## P14-19 packaged task scheduling denial sync
+
+P14-19 does not add a new error code or promote packaged `tasks` database
+rows. It records the denial and rollback expectations for future packaged task
+promotion:
+
+- Packaged `work_manager` smoke may schedule/list/cancel only through the
+  declared `work_manager` bridge capability; undeclared capability metadata
+  remains `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Future packaged `tasks` database rows must reject cross-package owner/id
+  mismatches with stable invalid-request or permission-denied diagnostics.
+- Task removal and Safe downgrade must disable or remove only rows owned by
+  the packaged app identity and must not mutate main-app or legacy Rhino rows.
+- Process-death, relaunch, disclosure, stop-action, and crash recovery gaps
+  stay future-promotion blockers rather than release-blocking errors.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.
