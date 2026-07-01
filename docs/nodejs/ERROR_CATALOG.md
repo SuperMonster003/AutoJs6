@@ -275,6 +275,22 @@ worker smoke gate as `conditional_skip_native_unavailable`:
   native preflight reports `worker.preflight.status=available`.
 - Default, project, packaged, and process-worker authority remain unpromoted.
 
+## P14-30 worker resource/RSS stress decision
+
+P14-30 does not add a new error code. It records the worker resource/RSS stress
+gate as `conditional_skip_native_unavailable`:
+
+- Worker resource errors and cleanup counters remain source anchors until the
+  native preflight reports `worker.preflight.status=available`.
+- `ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT`,
+  `ERR_AUTOJS6_WORKER_TERMINATED`, and WorkerPool task errors remain
+  native-available recovery evidence, not release support.
+- RSS/thread source anchors are present, but Java heap, native heap, fd count,
+  message queue, active worker, and active WorkerPool deltas still need a
+  native-worker-capable archive.
+- Worker authority remains disabled until native, packaged, and resource gates
+  pass together.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

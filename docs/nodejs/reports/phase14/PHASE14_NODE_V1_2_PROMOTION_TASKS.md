@@ -742,9 +742,29 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: worker authority remains disabled by default until packaged and
     resource gates pass.
 
-- [ ] P14-30: Add worker resource and RSS stress if native support exists.
+- [x] P14-30: Add worker resource and RSS stress if native support exists.
   - Scope: thread count, RSS, Java/native heap, fd count, message queues,
     cleanup, repeated start/stop, and crash recovery.
+  - Gate: `:app:verifyNodePhase14WorkerResourceRssStress`.
+  - Worker resource/RSS stress gate deployed:
+    - Adds `docs/nodejs/phase14/worker-resource-rss-stress-plan.json` and
+      `PHASE14_WORKER_RESOURCE_RSS_STRESS.md`.
+    - Adds `docs/nodejs/reports/phase14/P14_30_WORKER_RESOURCE_RSS_STRESS.md`.
+    - Imports P14-28 native availability and P14-29 runnable/packaged smoke
+      generated reports.
+    - Records `conditional_skip_native_unavailable` while current native
+      preflight remains `worker.preflight.status=unavailable`.
+    - Verifies source anchors for 100 sequential Worker create/terminate,
+      WorkerPool reuse/failure/cancel/timeout/transfer/shutdown, parent cleanup,
+      pending worker-message cleanup, exception recovery, timeout recovery,
+      RSS snapshots, and thread-count bounded assertions.
+    - Records Java heap, native heap, fd count, message queue, active worker,
+      and active WorkerPool deltas as future native-available archive
+      requirements.
+    - Keeps resource stress execution and worker authority promotion disabled
+      until native, packaged, and resource gates pass together.
+    - Writes `build/reports/nodejs/phase14-worker-resource-rss-stress.json`
+      and `.md`.
   - Acceptance: no monotonic leaks, orphan workers, or unrecoverable runtime.
 
 - [ ] P14-31: Decide process-worker replacement for v1.2.

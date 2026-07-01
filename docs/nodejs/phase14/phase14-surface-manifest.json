@@ -337,7 +337,7 @@
         "P14-31",
         "P14-32"
       ],
-      "summary": "Decide worker_threads v1.2 promotion from native ABI evidence, add runnable/package/resource gates if available, and keep process-worker replacement bounded. P14-28 refreshes the native availability audit as intentional non-support for v1.2 runnable workers until worker.preflight.status=available is archived on target ABIs. P14-29 adds the conditional runnable/packaged smoke gate and keeps source-only worker anchors from promoting authority while native workers are unavailable.",
+      "summary": "Decide worker_threads v1.2 promotion from native ABI evidence, add runnable/package/resource gates if available, and keep process-worker replacement bounded. P14-28 refreshes the native availability audit as intentional non-support for v1.2 runnable workers until worker.preflight.status=available is archived on target ABIs. P14-29 adds the conditional runnable/packaged smoke gate and keeps source-only worker anchors from promoting authority while native workers are unavailable. P14-30 adds the conditional resource/RSS stress gate and records worker-specific heap/fd/resource archives as future native-available requirements.",
       "risk": "critical",
       "runtimeSurface": [
         "worker_threads native availability",
@@ -363,7 +363,14 @@
         "tools/nodejs/phase14/verify-node-phase14-worker-runnable-packaged-smoke.js",
         ":app:verifyNodePhase14WorkerRunnablePackagedSmoke",
         "build/reports/nodejs/phase14-worker-runnable-packaged-smoke.json",
-        "build/reports/nodejs/phase14-worker-runnable-packaged-smoke.md"
+        "build/reports/nodejs/phase14-worker-runnable-packaged-smoke.md",
+        "docs/nodejs/phase14/worker-resource-rss-stress-plan.json",
+        "docs/nodejs/phase14/PHASE14_WORKER_RESOURCE_RSS_STRESS.md",
+        "docs/nodejs/reports/phase14/P14_30_WORKER_RESOURCE_RSS_STRESS.md",
+        "tools/nodejs/phase14/verify-node-phase14-worker-resource-rss-stress.js",
+        ":app:verifyNodePhase14WorkerResourceRssStress",
+        "build/reports/nodejs/phase14-worker-resource-rss-stress.json",
+        "build/reports/nodejs/phase14-worker-resource-rss-stress.md"
       ],
       "rollback": "Keep worker_threads intentionally unsupported and keep process-worker replacement without a user-facing facade unless native and packaged gates pass."
     },

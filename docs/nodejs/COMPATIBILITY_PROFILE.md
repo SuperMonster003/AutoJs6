@@ -1292,6 +1292,14 @@ cleanup, nested Worker denial, and packaged `.mjs` smoke remain tracked, but
 workers are unavailable. No compatibility profile can advertise worker runtime
 authority until native, packaged, and resource gates pass together.
 
+P14-30 records the worker resource/RSS stress gate as conditional. Source
+anchors for sequential Worker create/terminate cycles, WorkerPool stress,
+cleanup, exception/timeout recovery, RSS snapshots, and thread-count bounded
+assertions are tracked, but `resourceStressExecuted=false` while native workers
+are unavailable. Worker-specific Java heap, native heap, fd count, message
+queue, active worker, and active WorkerPool deltas remain future
+native-available archive requirements before compatibility can be broadened.
+
 P13-35 records process-worker replacement as partial. The runtime exposes
 `autojs6:profile.processWorkerReplacementProfile` to document that the current
 replacement path is request-local `worker_threads.WorkerPool`, not a new

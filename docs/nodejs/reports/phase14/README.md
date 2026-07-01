@@ -189,3 +189,11 @@ decision. It verifies the existing Worker lifecycle, message, WorkerPool,
 exception/timeout, cleanup, nested-denial, and packaged `.mjs` smoke source
 anchors while keeping runnable execution, packaged execution, and worker
 authority disabled behind `:app:verifyNodePhase14WorkerRunnablePackagedSmoke`.
+
+`P14_30_WORKER_RESOURCE_RSS_STRESS.md` records the worker resource/RSS stress
+gate as `ready` with a `conditional_skip_native_unavailable` decision. It
+verifies source anchors for sequential Worker cycles, WorkerPool stress,
+cleanup, exception/timeout recovery, RSS snapshots, and thread-count bounded
+assertions while recording Java heap, native heap, fd, queue, active worker, and
+active WorkerPool deltas as future native-available archives behind
+`:app:verifyNodePhase14WorkerResourceRssStress`.

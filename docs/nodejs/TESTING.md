@@ -1990,6 +1990,21 @@ recovery, parent cleanup, nested Worker denial, and packaged `.mjs` smoke, and
 keeps runnable execution, packaged execution, default authority,
 project/package opt-in, and process-worker facade promotion disabled.
 
+Phase 14 worker resource/RSS stress gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14WorkerResourceRssStress
+```
+
+This host gate records P14-30 as ready with
+`conditional_skip_native_unavailable`. It imports P14-28 and P14-29 generated
+reports, verifies source anchors for 100 sequential Worker create/terminate
+cycles, WorkerPool reuse/failure/cancel/timeout/transfer/shutdown, parent
+cleanup, pending worker-message cleanup, exception recovery, timeout recovery,
+RSS snapshots, and thread-count bounded assertions, and records worker-specific
+Java heap, native heap, fd count, queue, active worker, and active WorkerPool
+deltas as future native-available archive requirements.
+
 Phase 13 process-worker replacement decision gate:
 
 ```powershell

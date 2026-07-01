@@ -360,6 +360,14 @@ P14-28 reports native workers unavailable, these anchors do not grant runnable
 execution, packaged worker behavior, default authority, project/package opt-in,
 or a process-worker facade.
 
+P14-30 records the worker resource/RSS stress gate as conditional. Current
+source anchors cover sequential Worker create/terminate cycles, WorkerPool
+stress, cleanup, exception recovery, timeout recovery, RSS snapshots, and
+thread-count bounded assertions. Java heap, native heap, fd count, message
+queue, active worker, and active WorkerPool deltas remain future
+native-available archive requirements, so resource evidence does not relax the
+default worker denial.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

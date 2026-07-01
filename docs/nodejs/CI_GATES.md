@@ -1227,6 +1227,13 @@ entries, capability isolation, MessageChannel/transfer, WorkerPool,
 exception/timeout recovery, parent cleanup, nested Worker denial, and packaged
 `.mjs` smoke, and records `conditional_skip_native_unavailable` without
 promoting worker authority.
+The `:app:verifyNodePhase14WorkerResourceRssStress` gate writes
+`phase14-worker-resource-rss-stress.json` plus `.md`, imports P14-28 and
+P14-29 generated reports, verifies source anchors for sequential Worker cycles,
+WorkerPool stress, cleanup, exception/timeout recovery, RSS snapshots, and
+thread-count bounded assertions, and records worker-specific Java heap, native
+heap, fd, queue, active worker, and active WorkerPool deltas as future
+native-available archive requirements.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
