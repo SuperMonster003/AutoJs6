@@ -29,6 +29,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14TaskSchemaMigrationRollback`
 - `:app:verifyNodePhase14PackagedTaskSchedulingSmoke`
 - `:app:verifyNodePhase14IntentBroadcastProvider`
+- `:app:verifyNodePhase14PackagedBroadcastTriggerRemoveSmoke`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -126,3 +127,10 @@ evidence, defines future `tasks.broadcast` descriptor, manifest, exported
 policy, trigger payload, and remove semantics, and keeps live provider,
 manifest synthesis, exported/permission policy, payload, and cleanup archives
 open.
+
+`P14_21_PACKAGED_BROADCAST_TRIGGER_REMOVE_SMOKE.md` records the packaged
+broadcast trigger/remove smoke contract as `partial`. It imports the current
+packaged IntentTask/broadcast boundary smoke, reserves future positive
+install/trigger/remove/relaunch/crash/denial markers, and keeps positive
+trigger, cleanup, relaunch/crash, undeclared-capability, and exported receiver
+archives open.

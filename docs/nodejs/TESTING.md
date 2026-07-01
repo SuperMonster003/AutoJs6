@@ -3047,6 +3047,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskSchemaMigrationRollback
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedTaskSchedulingSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase14IntentBroadcastProvider
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedBroadcastTriggerRemoveSmoke
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3159,6 +3160,13 @@ receiver substrate, compat rejection, JSON snapshot, and packaged boundary
 evidence, defines the future `tasks.broadcast` descriptor, manifest/export,
 payload, and remove cleanup contract, and keeps runtime `tasks.broadcast`
 authority and future task/broadcast capabilities unpromoted.
+`verifyNodePhase14PackagedBroadcastTriggerRemoveSmoke` depends on the P14-20
+IntentTask/broadcast provider contract. It writes
+`phase14-packaged-broadcast-trigger-remove-smoke.json` plus `.md`, imports the
+current packaged IntentTask/broadcast boundary smoke, reserves future positive
+install/trigger/remove/relaunch/crash/denial markers, records owner-scoped
+cleanup policy, and keeps packaged `tasks.broadcast` trigger/remove authority
+unpromoted.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

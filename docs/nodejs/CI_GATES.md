@@ -1084,6 +1084,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14TaskSchemaMigrationRollback
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedTaskSchedulingSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase14IntentBroadcastProvider
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedBroadcastTriggerRemoveSmoke
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1172,6 +1173,12 @@ receiver substrate, compat rejection, JSON snapshot, and packaged boundary
 evidence, records future `tasks.broadcast` descriptor, manifest/export,
 payload, and owner-scoped remove cleanup contracts, and keeps runtime broadcast
 task authority unpromoted.
+The packaged broadcast trigger/remove smoke gate writes
+`phase14-packaged-broadcast-trigger-remove-smoke.json` plus `.md`, imports the
+current packaged IntentTask/broadcast boundary smoke, reserves future positive
+install/trigger/remove/relaunch/crash/denial markers, records owner-scoped
+cleanup policy, and keeps packaged broadcast task trigger/remove promotion
+unpromoted.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

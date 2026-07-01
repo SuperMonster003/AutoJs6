@@ -505,6 +505,29 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-21: Add packaged broadcast trigger/remove smoke.
   - Scope: install/run, trigger delivery, payload validation, receiver cleanup,
     relaunch, crash recovery, and denial for undeclared capabilities.
+  - Gate: `:app:verifyNodePhase14PackagedBroadcastTriggerRemoveSmoke`.
+  - Packaged broadcast trigger/remove smoke gate deployed:
+    - Adds
+      `docs/nodejs/phase14/packaged-broadcast-trigger-remove-smoke-plan.json`
+      and `PHASE14_PACKAGED_BROADCAST_TRIGGER_REMOVE_SMOKE.md`.
+    - Imports P13-22 packaged IntentTask/broadcast boundary smoke for
+      compat rejection, future module denial, raw global absence,
+      JavaScript-only `BroadcastChannel`, surface presence, and metadata
+      denial.
+    - Imports P14-20 descriptor, manifest/export, trigger payload, and remove
+      cleanup contracts as the future positive smoke source.
+    - Reserves future packaged positive markers for install, register, payload
+      validation, delivery, remove cleanup, relaunch, crash recovery, and
+      undeclared-capability denial.
+    - Records owner-scoped cleanup for descriptors, dynamic receivers, owned
+      manifest patches, pending executions, post-remove delivery denial,
+      legacy Rhino row preservation, and cross-package remove denial.
+    - Keeps positive trigger, remove cleanup, relaunch/crash recovery,
+      undeclared-capability denial, and exported receiver policy archives open
+      as `future_promotion`.
+    - Writes
+      `build/reports/nodejs/phase14-packaged-broadcast-trigger-remove-smoke.json`
+      and `.md`.
   - Acceptance: exported receivers are denied unless explicitly declared and
     documented.
 

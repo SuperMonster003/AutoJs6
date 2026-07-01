@@ -125,6 +125,22 @@ the denial and cleanup expectations for future broadcast task promotion:
   permission-denied diagnostics, never raw `Intent`, `Bundle`, `Uri`, receiver
   handle, `PackageManager`, or database exceptions.
 
+## P14-21 packaged broadcast trigger/remove denial sync
+
+P14-21 does not add a new error code or promote packaged broadcast-triggered
+execution. It records packaged denial and cleanup expectations:
+
+- Current packaged IntentTask/broadcast smoke must keep future modules and
+  metadata denied until `tasks.broadcast` is promoted.
+- Positive packaged trigger/remove smoke remains future work and must prove
+  install, register, payload validation, delivery, remove cleanup, relaunch,
+  crash recovery, and undeclared-capability denial before promotion.
+- Remove cleanup must disable or delete only descriptors and receiver patches
+  owned by the packaged app identity, cancel pending owned executions, prevent
+  post-remove delivery, and preserve legacy Rhino rows.
+- Exported receivers remain unavailable unless a later gate adds explicit
+  metadata, allowlists, permission policy, abuse review, and device evidence.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.
