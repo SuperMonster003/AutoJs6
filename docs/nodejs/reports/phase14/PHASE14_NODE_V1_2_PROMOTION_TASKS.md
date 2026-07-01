@@ -230,6 +230,25 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-10: Add packaged overlay positive smoke and stress.
   - Scope: install/run, foreground disclosure, stop action, task-removal
     cleanup, relaunch, crash recovery, event drain, and leak/stress evidence.
+  - Gate: `:app:verifyNodePhase14PackagedOverlayPositiveSmoke`.
+  - Packaged positive fixture deployed:
+    - Adds `docs/nodejs/phase14/packaged-overlay-positive-smoke-plan.json`
+      and `PHASE14_PACKAGED_OVERLAY_POSITIVE_SMOKE.md` for the packaged
+      overlay positive smoke/stress contract.
+    - Adds
+      `EmbeddedNodePackagedApkSmokeTest#buildOverlayPositiveEmbeddedNodePackagedApk`
+      to build a packaged APK declaring `ui.overlay*` capabilities and
+      `android.permission.SYSTEM_ALERT_WINDOW`.
+    - Defines runtime markers for permission snapshot, foreground disclosure
+      text, show/update/event drain, close/closeAll, three-session stress,
+      leak summary, raw global absence, and pending dispatch cleanup.
+    - Writes
+      `build/reports/nodejs/phase14-packaged-overlay-positive-smoke.json`
+      and `.md`.
+    - Keeps open blockers `packaged_overlay_positive_device_archive`,
+      `packaged_overlay_foreground_disclosure_stop_action`,
+      `packaged_overlay_task_removal_relaunch_crash`, and
+      `packaged_overlay_event_drain_leak_stress` as `future_promotion`.
   - Acceptance: packaged overlay can be promoted only if foreground disclosure
     and cleanup pass on the device matrix.
 

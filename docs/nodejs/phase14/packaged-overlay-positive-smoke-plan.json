@@ -1,0 +1,81 @@
+{
+  "schema": "autojs6-node-phase14-packaged-overlay-positive-smoke-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "updatedAt": "2026-07-01",
+  "task": "P14-10",
+  "surface": "ui.overlay",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "fixture": {
+    "androidTestClass": "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt",
+    "buildMethod": "buildOverlayPositiveEmbeddedNodePackagedApk",
+    "builderMethod": "buildPackagedOverlayPositiveSmokeApk",
+    "projectName": "PackagedNodeOverlayPositiveSmoke",
+    "packageName": "org.autojs6.packaged.node.overlay.positive.smoke",
+    "apkName": "PackagedNodeOverlayPositiveSmoke_v1.0.0.apk",
+    "requiredNodePermissions": [
+      "ui.overlay",
+      "ui.overlay.permission",
+      "ui.overlay.foreground",
+      "ui.overlay.packaged"
+    ],
+    "requiredAndroidPermissions": [
+      "android.permission.SYSTEM_ALERT_WINDOW"
+    ],
+    "runtimeMarkers": [
+      "packaged.overlay_positive.ready=true",
+      "packaged.overlay_positive.metadata=true",
+      "packaged.overlay_positive.permission_snapshot=true",
+      "packaged.overlay_positive.permission_granted=true",
+      "packaged.overlay_positive.disclosure=true",
+      "packaged.overlay_positive.show=true",
+      "packaged.overlay_positive.update=true",
+      "packaged.overlay_positive.event_drain=true",
+      "packaged.overlay_positive.close=true",
+      "packaged.overlay_positive.close_all=true",
+      "packaged.overlay_positive.stress_sessions=3",
+      "packaged.overlay_positive.leak_summary=true",
+      "packaged.overlay_positive.raw_globals_absent=true",
+      "packaged.overlay_positive.pending=0"
+    ]
+  },
+  "manualArchiveRequirements": {
+    "requiredDeviceClasses": [
+      "android_12_class",
+      "android_15_plus_class"
+    ],
+    "requiresUserGrantedOverlayPermission": true,
+    "requiresForegroundDisclosureReview": true,
+    "requiredScenarios": [
+      "install and launch packaged overlay positive APK",
+      "record user-granted SYSTEM_ALERT_WINDOW before overlay show",
+      "show/update/drainEvents/close success",
+      "foreground disclosure and stop action review",
+      "task removal cleanup",
+      "package relaunch and crash recovery",
+      "three-session stress loop with zero pending dispatch and zero remaining overlays"
+    ]
+  },
+  "blockers": [
+    {
+      "id": "packaged_overlay_positive_device_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Archived install-run logs for the packaged overlay positive APK on the Android 12 and Android 15+ matrix."
+    },
+    {
+      "id": "packaged_overlay_foreground_disclosure_stop_action",
+      "classification": "future_promotion",
+      "requiredEvidence": "Foreground disclosure ownership and stop-action behavior reviewed while packaged overlay is visible."
+    },
+    {
+      "id": "packaged_overlay_task_removal_relaunch_crash",
+      "classification": "future_promotion",
+      "requiredEvidence": "Task removal cleanup, package relaunch behavior, and crash recovery evidence for packaged overlay sessions."
+    },
+    {
+      "id": "packaged_overlay_event_drain_leak_stress",
+      "classification": "future_promotion",
+      "requiredEvidence": "Event drain and leak/stress archive proving three overlay sessions close with zero pending dispatch and zero remaining overlays."
+    }
+  ]
+}

@@ -18,6 +18,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14LiveUiProviderPackaged`
 - `:app:verifyNodePhase14OverlayProvider`
 - `:app:verifyNodePhase14OverlayPermissionOemMatrix`
+- `:app:verifyNodePhase14PackagedOverlayPositiveSmoke`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -39,4 +40,11 @@ coverage as future-promotion blockers.
 matrix as `partial`. It imports the P14-08 permission-denied boundary, reserves
 Android 12 and Android 15+ archive rows, and keeps granted device evidence,
 OEM settings round-trip notes, and task removal/relaunch evidence as
+future-promotion blockers.
+
+`P14_10_PACKAGED_OVERLAY_POSITIVE_SMOKE.md` records the packaged overlay
+positive smoke/stress fixture as `partial`. It adds a packaged APK fixture with
+explicit overlay capability metadata and `SYSTEM_ALERT_WINDOW` while keeping
+install-run archives, foreground disclosure/stop action, task
+removal/relaunch/crash behavior, and event drain/leak-stress evidence as
 future-promotion blockers.

@@ -8393,6 +8393,16 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildOverlayPositiveEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged overlay positive smoke fixture requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedOverlayPositiveSmokeApk()
+    }
+
+    @Test
     fun buildIntentBroadcastBoundaryEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged IntentTask/broadcast boundary smoke requires embedded script execution build support.",
@@ -12213,6 +12223,197 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedOverlayPositiveSmokeApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function main() {
+              const fs = require("fs");
+              const bridge = require("autojs6:bridge");
+              const overlay = require("ui.overlay");
+              const projectConfig = JSON.parse(fs.readFileSync("project.json", "utf8"));
+              const nodePermissions = projectConfig.node && Array.isArray(projectConfig.node.permissions)
+                ? projectConfig.node.permissions
+                : [];
+              const androidPermissions = Array.isArray(projectConfig.permissions)
+                ? projectConfig.permissions
+                : [];
+              const report = bridge.permissions();
+              const normalizedPermissions = Array.isArray(report.normalizedPermissions)
+                ? report.normalizedPermissions
+                : [];
+              const requiredNodePermissions = [
+                "ui.overlay",
+                "ui.overlay.permission",
+                "ui.overlay.foreground",
+                "ui.overlay.packaged"
+              ];
+              const metadataOk = requiredNodePermissions.every((permission) =>
+                nodePermissions.indexOf(permission) >= 0 &&
+                normalizedPermissions.indexOf(permission) >= 0
+              ) && androidPermissions.indexOf("android.permission.SYSTEM_ALERT_WINDOW") >= 0;
+              const rawGlobalsAbsent = [
+                "WindowManager",
+                "LayoutParams",
+                "FloatyWindow",
+                "WindowBridge",
+                "View",
+                "NativeView",
+                "RawWindow"
+              ].every((name) => typeof globalThis[name] === "undefined");
+              const permission = await overlay.hasPermission({ timeoutMs: 1000 });
+              const permissionSnapshotOk =
+                permission &&
+                typeof permission.granted === "boolean" &&
+                permission.packagedManifestPermission === "android.permission.SYSTEM_ALERT_WINDOW" &&
+                permission.foregroundDisclosure === "required_before_packaged_promotion";
+              const descriptor = {
+                content: {
+                  type: "Column",
+                  children: [
+                    { id: "title", type: "Text", text: "P14-10 packaged overlay" },
+                    { id: "status", type: "Text", text: "Starting" },
+                    { id: "stop", type: "Button", text: "Stop" }
+                  ]
+                },
+                window: {
+                  width: 260,
+                  height: 132,
+                  x: 24,
+                  y: 96,
+                  touchable: true,
+                  focusable: false
+                },
+                disclosure: {
+                  title: "P14-10 packaged overlay",
+                  text: "AutoJs6 Node packaged overlay smoke is visible"
+                }
+              };
+              const disclosureOk =
+                descriptor.disclosure.title.indexOf("P14-10") >= 0 &&
+                descriptor.disclosure.text.indexOf("visible") >= 0;
+              let showOk = false;
+              let updateOk = false;
+              let eventDrainOk = false;
+              let closeOk = false;
+              let closeAllOk = false;
+              let stressOk = false;
+              let stressSessions = 0;
+              let leakOk = false;
+
+              if (permission && permission.granted === true) {
+                const first = await overlay.show(descriptor, { timeoutMs: 5000 });
+                showOk =
+                  first &&
+                  typeof first.id === "string" &&
+                  first.type === "overlay" &&
+                  first.closed === false;
+                const firstEvents = await first.drainEvents({ maxEvents: 16, timeoutMs: 5000 });
+                eventDrainOk = Array.isArray(firstEvents) &&
+                  firstEvents.some((event) => event.type === "shown" && event.overlayId === first.id);
+                const update = await first.update({ id: "status", text: "Updated" }, { timeoutMs: 5000 });
+                const updateEvents = await first.drainEvents({ maxEvents: 16, timeoutMs: 5000 });
+                updateOk =
+                  update &&
+                  update.id === first.id &&
+                  Array.isArray(updateEvents) &&
+                  updateEvents.some((event) => event.type === "update" && event.overlayId === first.id);
+                closeOk = await first.close({ reason: "p14_10_positive_close", timeoutMs: 5000 }) === true;
+                const afterFirstClose = await overlay.closeAll({
+                  reason: "p14_10_positive_after_first_close",
+                  timeoutMs: 5000
+                });
+                closeAllOk = afterFirstClose && afterFirstClose.remainingCount === 0;
+
+                stressOk = true;
+                for (let index = 0; index < 3; index += 1) {
+                  const handle = await overlay.show({
+                    content: {
+                      type: "Text",
+                      id: "stress",
+                      text: "P14-10 stress " + index
+                    },
+                    window: {
+                      width: 220,
+                      height: 96,
+                      x: 24 + index * 8,
+                      y: 96 + index * 8,
+                      touchable: true,
+                      focusable: false
+                    },
+                    disclosure: descriptor.disclosure
+                  }, { timeoutMs: 5000 });
+                  const events = await handle.drainEvents({ maxEvents: 16, timeoutMs: 5000 });
+                  const closeResult = await handle.close({ reason: "p14_10_positive_stress", timeoutMs: 5000 });
+                  stressOk = stressOk &&
+                    typeof handle.id === "string" &&
+                    Array.isArray(events) &&
+                    events.length <= 16 &&
+                    closeResult === true;
+                  stressSessions += 1;
+                }
+                const finalCleanup = await overlay.closeAll({
+                  reason: "p14_10_positive_final_cleanup",
+                  timeoutMs: 5000
+                });
+                leakOk = finalCleanup && finalCleanup.remainingCount === 0;
+              }
+
+              const pending = bridge.__test.pendingCount();
+              const ready = metadataOk &&
+                permissionSnapshotOk &&
+                permission &&
+                permission.granted === true &&
+                disclosureOk &&
+                showOk &&
+                updateOk &&
+                eventDrainOk &&
+                closeOk &&
+                closeAllOk &&
+                stressOk &&
+                stressSessions === 3 &&
+                leakOk &&
+                rawGlobalsAbsent &&
+                pending === 0;
+
+              console.log("packaged.overlay_positive.ready=" + ready);
+              console.log("packaged.overlay_positive.metadata=" + metadataOk);
+              console.log("packaged.overlay_positive.permission_snapshot=" + permissionSnapshotOk);
+              console.log("packaged.overlay_positive.permission_granted=" + (permission && permission.granted === true));
+              console.log("packaged.overlay_positive.disclosure=" + disclosureOk);
+              console.log("packaged.overlay_positive.show=" + showOk);
+              console.log("packaged.overlay_positive.update=" + updateOk);
+              console.log("packaged.overlay_positive.event_drain=" + eventDrainOk);
+              console.log("packaged.overlay_positive.close=" + closeOk);
+              console.log("packaged.overlay_positive.close_all=" + closeAllOk);
+              console.log("packaged.overlay_positive.stress_sessions=" + stressSessions);
+              console.log("packaged.overlay_positive.leak_summary=" + leakOk);
+              console.log("packaged.overlay_positive.raw_globals_absent=" + rawGlobalsAbsent);
+              console.log("packaged.overlay_positive.pending=" + pending);
+              if (!ready) {
+                process.exitCode = 1;
+              }
+            }
+
+            return main().catch(error => {
+              console.error("packaged.overlay_positive.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-overlay-positive-smoke",
+            outputApkName = OVERLAY_POSITIVE_APK_NAME,
+            projectName = OVERLAY_POSITIVE_PROJECT_NAME,
+            packageName = OVERLAY_POSITIVE_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraPermissions = listOf("android.permission.SYSTEM_ALERT_WINDOW"),
+            nodePermissions = OVERLAY_POSITIVE_NODE_PERMISSIONS,
+            runtimeMarkers = OVERLAY_POSITIVE_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedIntentBroadcastBoundaryApk(): File {
         val mainScriptName = "main.js"
         val mainScript = """
@@ -15897,6 +16098,12 @@ $nodeConfigJson
             "org.autojs6.packaged.node.overlay.capability.boundary.smoke"
         private const val OVERLAY_CAPABILITY_BOUNDARY_APK_NAME =
             "PackagedNodeOverlayCapabilityBoundarySmoke_v1.0.0.apk"
+        private const val OVERLAY_POSITIVE_PROJECT_NAME =
+            "PackagedNodeOverlayPositiveSmoke"
+        private const val OVERLAY_POSITIVE_PACKAGE_NAME =
+            "org.autojs6.packaged.node.overlay.positive.smoke"
+        private const val OVERLAY_POSITIVE_APK_NAME =
+            "PackagedNodeOverlayPositiveSmoke_v1.0.0.apk"
         private const val INTENT_BROADCAST_BOUNDARY_PROJECT_NAME =
             "PackagedNodeIntentBroadcastBoundarySmoke"
         private const val INTENT_BROADCAST_BOUNDARY_PACKAGE_NAME =
@@ -16330,6 +16537,28 @@ $nodeConfigJson
             "packaged.overlay_boundary.metadata_denied=true",
             "packaged.overlay_boundary.raw_globals_absent=true",
             "packaged.overlay_boundary.pending=0",
+        )
+        private val OVERLAY_POSITIVE_NODE_PERMISSIONS = listOf(
+            "ui.overlay",
+            "ui.overlay.permission",
+            "ui.overlay.foreground",
+            "ui.overlay.packaged",
+        )
+        private val OVERLAY_POSITIVE_RUNTIME_MARKERS = listOf(
+            "packaged.overlay_positive.ready=true",
+            "packaged.overlay_positive.metadata=true",
+            "packaged.overlay_positive.permission_snapshot=true",
+            "packaged.overlay_positive.permission_granted=true",
+            "packaged.overlay_positive.disclosure=true",
+            "packaged.overlay_positive.show=true",
+            "packaged.overlay_positive.update=true",
+            "packaged.overlay_positive.event_drain=true",
+            "packaged.overlay_positive.close=true",
+            "packaged.overlay_positive.close_all=true",
+            "packaged.overlay_positive.stress_sessions=3",
+            "packaged.overlay_positive.leak_summary=true",
+            "packaged.overlay_positive.raw_globals_absent=true",
+            "packaged.overlay_positive.pending=0",
         )
         private val INTENT_BROADCAST_BOUNDARY_RUNTIME_MARKERS = listOf(
             "packaged.intent_broadcast.ready=true",

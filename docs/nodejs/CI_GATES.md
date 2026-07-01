@@ -1073,6 +1073,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14LiveUiProviderPackaged
 .\gradlew.bat --console=plain :app:verifyNodePhase14OverlayProvider
 .\gradlew.bat --console=plain :app:verifyNodePhase14OverlayPermissionOemMatrix
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedOverlayPositiveSmoke
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1098,6 +1099,11 @@ The overlay permission/OEM matrix gate writes
 permission-denied boundary, reserves Android 12 and Android 15+ archive rows,
 and keeps granted device, OEM settings round-trip, and task removal/relaunch
 evidence as future-promotion blockers.
+The packaged overlay positive smoke gate writes
+`phase14-packaged-overlay-positive-smoke.json` plus `.md`, verifies the
+packaged overlay positive smoke/stress fixture, and keeps install-run,
+foreground disclosure/stop action, task-removal/relaunch/crash, and
+event-drain/leak-stress archives as future-promotion blockers.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
