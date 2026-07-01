@@ -331,7 +331,7 @@ function buildChecks(files, report, markdown) {
     ),
     check(
       "task-checklist-current",
-      files.p13Tasks.text.includes("- [x] P13-28: 建立 Node builtin desktop parity matrix。") &&
+      files.p13Tasks.text.includes("- [x] P13-28: 建立 Node builtin desktop parity matrix") &&
         files.p13Tasks.text.includes("generateNodeBuiltinDesktopParityMatrix"),
       "Phase 13 task checklist must record P13-28 evidence.",
     ),

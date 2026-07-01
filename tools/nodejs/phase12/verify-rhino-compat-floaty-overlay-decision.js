@@ -169,7 +169,7 @@ function buildChecks(files) {
       /\[x\]\s+P12-11/.test(files.phase12Tasks.text) &&
         files.phase12Tasks.text.includes("FLOATY_OVERLAY_PHASE12_DECISION.md") &&
         files.phase12Tasks.text.includes("verifyNodeRhinoCompatFloatyOverlayDecision") &&
-        files.phase12Tasks.text.includes("Decision：Provider path") &&
+        files.phase12Tasks.text.includes("Provider path") &&
         files.phase12Tasks.text.includes("P12-12A"),
       "Phase 12 task plan must mark P12-11 complete with decision and gate evidence.",
     ),

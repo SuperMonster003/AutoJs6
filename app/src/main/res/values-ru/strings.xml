@@ -483,7 +483,7 @@
     <string name="summary_foreground_service_inrt">Служба на переднем плане позволяет более стабильно поддерживать работу приложения и скриптов в фоновом режиме</string>
     <string name="summary_guard_mode">Предотвращение действий автоматизации из скриптов, когда AutoJs6 находится на переднем плане</string>
     <string name="summary_not_showing_main_activity">Выполнять скрипт напрямую, не показывая основную активность</string>
-    <string name="summary_plugin_auto_check_updates">Автоматически проверять обновления плагинов каждые 1 час (потянуть для обновления — проверить немедленно)</string>
+    <string name="summary_plugin_auto_check_updates">Автоматически проверять обновления плагинов каждые 1 час (потянуть для обновления - проверить немедленно)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">Глобальная опция \"Автоматически проверять обновления плагинов\" отключена, этот параметр недоступен</string>
     <string name="summary_plugin_auto_check_updates_per_plugin">Автоматически проверять обновления и показывать подсказки об обновлении в элементах плагинов</string>
     <string name="summary_plugin_auto_mount">Автоматически монтировать этот объект плагина в среду выполнения скрипта</string>

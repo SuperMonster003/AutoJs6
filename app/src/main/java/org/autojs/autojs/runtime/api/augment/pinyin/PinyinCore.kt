@@ -109,7 +109,7 @@ object PinyinCore {
      * 单姓处理, 将单个姓氏转换为拼音.
      *
      * @param hans 姓氏字符串.
-     * @param options 转换选项 (包括风格、多音字选项等).
+     * @param options 转换选项 (包括风格/多音字选项等).
      * @return 转换后的拼音列表.
      */
     private fun singleSurname(hans: String, options: NativeObject): List<List<String>> {

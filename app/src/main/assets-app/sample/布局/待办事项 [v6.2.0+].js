@@ -40,7 +40,7 @@ let storage = storages.create('todoList');
 // 从storage获取todo列表
 let todoList = storage.get('items', [ {
     title: '写操作系统作业',
-    summary: '明天第1～2节',
+    summary: '明天第1-2节',
     color: '#f44336',
     done: false,
 }, {
@@ -90,7 +90,7 @@ ui.todoList.on('item_click', function (item, i, itemView, listView) {
 });
 
 ui.todoList.on('item_long_click', function (e, item, i, itemView, listView) {
-    confirm('确定要删除' + item.title + '吗？')
+    confirm('确定要删除' + item.title + '吗?')
         .then(ok => {
             if (ok) {
                 todoList.splice(i, 1);

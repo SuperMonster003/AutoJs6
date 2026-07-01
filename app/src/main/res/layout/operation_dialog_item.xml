@@ -22,13 +22,14 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="12dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -42,24 +43,12 @@
                 tools:text="@string/text_sample_string"
                 android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/usage_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical|end"
-                android:textColor="@color/day_night"
-                android:textSize="13sp"
-                android:visibility="gone"
-                tools:text="&lt;15&gt;"
-                tools:visibility="visible" />
-
         </LinearLayout>
 
         <TextView
             android:id="@+id/subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:gravity="center_vertical"
             android:textColor="@color/day_night"
             android:textSize="12sp"
@@ -68,5 +57,16 @@
             tools:text="@string/text_sample_string" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/usage_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|end"
+        android:textColor="@color/day_night"
+        android:textSize="13sp"
+        android:visibility="gone"
+        tools:text="&lt;15&gt;"
+        tools:visibility="visible" />
 
 </LinearLayout>

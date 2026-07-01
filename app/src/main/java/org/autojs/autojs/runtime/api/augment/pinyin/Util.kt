@@ -44,7 +44,7 @@ object Util {
      * 合并多个拼音数组, 形成一个新的二维数组.
      * 每两个拼音元素形成一个元组数组.
      *
-     * @param arr 二维数组（每组拼音数组）
+     * @param arr 二维数组 (每组拼音数组)
      * @return 合并后的二维拼音数组, 如 [[hai, qian], [huan, qian]]
      */
     fun compact(arr: List<List<String>>): List<List<String>> = when {

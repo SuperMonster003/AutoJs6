@@ -79,7 +79,8 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
     }
 
     public TextSizeSettingDialogBuilder initialValue(int value) {
-        mSeekBar.setProgress(value - mMinTextSize);
+        int safeValue = Math.max(mMinTextSize, Math.min(value, mMaxTextSize));
+        mSeekBar.setProgress(safeValue - mMinTextSize);
         return this;
     }
 

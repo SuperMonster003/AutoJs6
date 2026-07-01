@@ -997,10 +997,10 @@
 * `Amélioration` Adoption de Material Color pour améliorer la lisibilité des polices en thème normal et nuit dans la Console
 * `Amélioration` Références faibles sauvegardées pour toutes les instances d'ImageWrapper et récupération automatique après fin du script (expérimental)
 * `Dépendance` Ajout de la version 3.1.0 de CircleImageView
-* `Dépendance` Mise à jour d‘Android Analytics de la version 13.1.0 à 13.3.0
+* `Dépendance` Mise à jour d'Android Analytics de la version 13.1.0 à 13.3.0
 * `Dépendance` Mise à jour des outils de construction Gradle de la version 7.3.0-alpha06 à 7.4.0-alpha02
-* `Dépendance` Mise à jour d‘Android Job de la version 1.4.2 à 1.4.3
-* `Dépendance` Mise à jour d‘Android Material de la version 1.5.0 à 1.6.0
+* `Dépendance` Mise à jour d'Android Job de la version 1.4.2 à 1.4.3
+* `Dépendance` Mise à jour d'Android Material de la version 1.5.0 à 1.6.0
 * `Dépendance` Mise à jour de CrashReport de la version 2.6.6 à 4.0.4
 * `Dépendance` Mise à jour de Glide de la version 4.13.1 à 4.13.2
 * `Dépendance` Mise à jour de Joda Time de la version 2.10.13 à 2.10.14

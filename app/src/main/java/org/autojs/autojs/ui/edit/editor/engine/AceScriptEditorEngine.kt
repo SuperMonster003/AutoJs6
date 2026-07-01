@@ -731,7 +731,7 @@ class AceScriptEditorEngine(
 
     companion object {
         private const val DEFAULT_TEXT_SIZE_SP = 14f
-        private const val MIN_TEXT_SIZE_SP = 4f
+        private const val MIN_TEXT_SIZE_SP = 1f
         private const val MAX_TEXT_SIZE_SP = 96f
     }
 }

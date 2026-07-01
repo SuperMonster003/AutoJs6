@@ -32,7 +32,7 @@ public class PngQuantBridge {
      * PNG 的 Deflate 压缩阶段完全<strong>无损</strong>; 图像失真来自量化过程: 32 位真彩被映射到
      * ≤256 色调色板, 失真程度由 {@code quality} 决定.
      * <ul>
-     *     <li>{@code quality} 取值 0–100, 对应 libimagequant 允许的 （MSE×10）上限; 数值越小, 容许误差越大, 文件越小.</li>
+     *     <li>{@code quality} 取值 0–100, 对应 libimagequant 允许的 (MSE×10) 上限; 数值越小, 容许误差越大, 文件越小.</li>
      *     <li>许多图片用 256 色即可精准表示, 因此即便 {@code quality}=1 也可能与原图几乎无差别, 体积却可缩至原来的 5–20 %.</li>
      *     <li>PNG 规范不支持在压缩阶段引入有损处理, 因此不会像 JPEG 那样再出现马赛克等失真.</li>
      * </ul>

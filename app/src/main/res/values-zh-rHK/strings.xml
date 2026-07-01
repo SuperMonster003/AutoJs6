@@ -460,8 +460,8 @@
     <string name="prompt_plugin_abi_mismatch_before_download">插件 ABI 列表與當前設備 ABI 列表沒有交集.\n\n插件 ABI: %1$s\n設備 ABI: %2$s\n\n是否仍繼續下載?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">插件 ABI 列表與當前設備 ABI 列表沒有交集.\n\n插件 ABI: %1$s\n設備 ABI: %2$s\n\n是否仍繼續開啓?</string>
     <string name="prompt_plugin_hide_from_center">插件隱藏後將不再出現在插件中心列表中. 可在插件中心 \"全局設置\" 中管理所有隱藏插件.</string>
-    <string name="prompt_plugin_mount_conflict_override">目標 \"%1$s\" 已存在 (類型: %2$s). 繼續將覆蓋該對象，是否繼續.</string>
-    <string name="prompt_plugin_mount_occupied_by_plugin">目標 \"%1$s\" 已被插件 \"%2$s\" (%3$s) 佔用. 請先關閉該插件的自動掛載，或修改當前掛載目標.</string>
+    <string name="prompt_plugin_mount_conflict_override">目標 \"%1$s\" 已存在 (類型: %2$s). 繼續將覆蓋該對象, 是否繼續.</string>
+    <string name="prompt_plugin_mount_occupied_by_plugin">目標 \"%1$s\" 已被插件 \"%2$s\" (%3$s) 佔用. 請先關閉該插件的自動掛載, 或修改當前掛載目標.</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">需要重啓應用才能完成文檔源切換</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">部分內容可能需要重啓應用才能完成語言切換</string>
     <string name="screen_capturer_foreground_notification_channel_name">屏幕捕獲器前台服務</string>
@@ -480,7 +480,7 @@
     <string name="summary_guard_mode">當 AutoJs6 前置時禁用自動化行為以避免誤操作</string>
     <string name="summary_not_showing_main_activity">啓動應用後直接運行腳本</string>
     <string name="summary_plugin_auto_check_updates">每小時自動檢查一次插件更新 (下拉刷新立即檢查)</string>
-    <string name="summary_plugin_auto_check_updates_disabled_by_global">全局 \"自動檢查插件更新\" 已禁用，此項不可用</string>
+    <string name="summary_plugin_auto_check_updates_disabled_by_global">全局 \"自動檢查插件更新\" 已禁用, 此項不可用</string>
     <string name="summary_plugin_auto_check_updates_per_plugin">自動檢查更新並在插件條目顯示更新提示</string>
     <string name="summary_plugin_auto_mount">自動將此插件對象掛載到腳本運行環境</string>
     <string name="summary_plugin_auto_mount_manage">查看並管理已啓用自動掛載的插件</string>

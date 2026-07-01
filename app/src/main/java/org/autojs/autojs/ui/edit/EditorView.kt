@@ -68,6 +68,7 @@ import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorAssets
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontDialog
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorTestHooks
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
@@ -2424,30 +2425,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun selectAceEditorFont() {
-        val fonts = themeFontService.availableAceFonts()
-        val current = themeFontService.currentAceFont()
-        val currentIndex = fonts.indexOf(current).coerceAtLeast(0)
-        val labels = fonts.map { themeFontService.aceEditorFontLabel(it) }
-
         DialogUtils.buildAndShowAdaptive {
-            MaterialDialog.Builder(context)
-                .title(R.string.text_ace_editor_font)
-                .items(labels)
-                .choiceWidgetThemeColor()
-                .itemsCallbackSingleChoice(currentIndex) { _, _, which, _ ->
-                    val font = fonts[which]
-                    themeFontService.persistAndApplyAceFont(font)
-                    showToast(
-                        context,
-                        context.getString(R.string.text_ace_editor_font_changed, themeFontService.aceEditorFontLabel(font)),
-                    )
-                    true
-                }
-                .negativeText(R.string.dialog_button_cancel)
-                .negativeColorRes(R.color.dialog_button_default)
-                .positiveText(R.string.dialog_button_confirm)
-                .positiveColorRes(R.color.dialog_button_attraction)
-                .build()
+            AceEditorFontDialog.build(context, themeFontService.currentAceFont()) { font ->
+                themeFontService.persistAndApplyAceFont(font)
+                showToast(
+                    context,
+                    context.getString(R.string.text_ace_editor_font_changed, themeFontService.aceEditorFontLabel(font)),
+                )
+            }
         }
     }
 

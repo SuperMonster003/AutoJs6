@@ -18,11 +18,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="mdtp_done_label" msgid="7007948707597430919">"完了"</string>
-    <string name="mdtp_hour_picker_description" msgid="7586639618712934060">"円形スライダー（時）"</string>
-    <string name="mdtp_minute_picker_description" msgid="6024811202872705251">"円形スライダー（分）"</string>
+    <string name="mdtp_hour_picker_description" msgid="7586639618712934060">"円形スライダー (時)"</string>
+    <string name="mdtp_minute_picker_description" msgid="6024811202872705251">"円形スライダー (分)"</string>
     <string name="mdtp_select_hours" msgid="7651068754188418859">"時間を選択"</string>
     <string name="mdtp_select_minutes" msgid="8327182090226828481">"分を選択"</string>
-    <string name="mdtp_day_picker_description" msgid="3968620852217927702">"日グリッド（月別）"</string>
+    <string name="mdtp_day_picker_description" msgid="3968620852217927702">"日グリッド (月別)"</string>
     <string name="mdtp_year_picker_description" msgid="6963340404644587098">"年リスト"</string>
     <string name="mdtp_select_day" msgid="3973338219107019769">"月と日を選択"</string>
     <string name="mdtp_select_year" msgid="2603330600102539372">"年を選択"</string>

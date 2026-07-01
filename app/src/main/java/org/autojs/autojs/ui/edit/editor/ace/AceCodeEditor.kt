@@ -2581,7 +2581,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val ACTION_MODE_PASTE = 2
         private const val ACTION_MODE_SELECT_ALL = 3
         private const val DEFAULT_TEXT_SIZE_SP = 14f
-        private const val MIN_TEXT_SIZE_SP = 4f
+        private const val MIN_TEXT_SIZE_SP = 1f
         private const val MAX_TEXT_SIZE_SP = 96f
         private const val MIN_VIEW_ZOOM_SCALE = MIN_TEXT_SIZE_SP / DEFAULT_TEXT_SIZE_SP
         private const val MAX_VIEW_ZOOM_SCALE = MAX_TEXT_SIZE_SP / DEFAULT_TEXT_SIZE_SP

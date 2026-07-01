@@ -19,21 +19,21 @@
     </plurals>
 
     <plurals name="error_method_only_accepts_n_arguments">
-        <item quantity="one">La méthode n’accepte que %d argument</item>
-        <item quantity="many">La méthode n’accepte que %d arguments</item>
-        <item quantity="other">La méthode n’accepte que %d arguments</item>
+        <item quantity="one">La méthode n\'accepte que %d argument</item>
+        <item quantity="many">La méthode n\'accepte que %d arguments</item>
+        <item quantity="other">La méthode n\'accepte que %d arguments</item>
     </plurals>
 
     <plurals name="error_method_only_accepts_no_more_than_n_arguments">
-        <item quantity="one">La méthode n’accepte pas plus de %d argument</item>
-        <item quantity="many">La méthode n’accepte pas plus de %d arguments</item>
-        <item quantity="other">La méthode n’accepte pas plus de %d arguments</item>
+        <item quantity="one">La méthode n\'accepte pas plus de %d argument</item>
+        <item quantity="many">La méthode n\'accepte pas plus de %d arguments</item>
+        <item quantity="other">La méthode n\'accepte pas plus de %d arguments</item>
     </plurals>
 
     <plurals name="error_method_only_accepts_no_less_than_n_arguments">
-        <item quantity="one">La méthode n’accepte pas moins de %d argument</item>
-        <item quantity="many">La méthode n’accepte pas moins de %d arguments</item>
-        <item quantity="other">La méthode n’accepte pas moins de %d arguments</item>
+        <item quantity="one">La méthode n\'accepte pas moins de %d argument</item>
+        <item quantity="many">La méthode n\'accepte pas moins de %d arguments</item>
+        <item quantity="other">La méthode n\'accepte pas moins de %d arguments</item>
     </plurals>
 
 </resources>

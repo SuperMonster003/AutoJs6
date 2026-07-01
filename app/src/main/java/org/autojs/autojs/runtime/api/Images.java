@@ -642,12 +642,17 @@ public class Images {
         return ImageWrapper.ofBitmap(mScriptRuntime, BitmapUtils.bitmapFromByteArrayOrThrow(bytes));
     }
 
-    /** @noinspection deprecation */
+    @SuppressWarnings("deprecation")
     private Bitmap.CompressFormat parseImageFormat(String format) {
         return switch (format.toLowerCase(Language.getPrefLanguage().getLocale())) {
             case "png" -> Bitmap.CompressFormat.PNG;
             case "jpeg", "jpg" -> Bitmap.CompressFormat.JPEG;
-            case "webp" -> Bitmap.CompressFormat.WEBP;
+            case "webp" -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    yield Bitmap.CompressFormat.WEBP_LOSSY;
+                }
+                yield Bitmap.CompressFormat.WEBP;
+            }
             case "webp_lossy", "webp-lossy" -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     yield Bitmap.CompressFormat.WEBP_LOSSY;

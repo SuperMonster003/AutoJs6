@@ -20,7 +20,6 @@ import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.ui.edit.theme.Themes
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs6.R
 
 class EditorThemeFontService(
     private val context: Context,
@@ -91,8 +90,6 @@ class EditorThemeFontService(
 
     fun currentTextSize(): Int = currentEditor().getTextSizeSp().toInt()
 
-    fun availableAceFonts(): List<AceEditorFont> = AceEditorFont.entries.toList()
-
     fun currentAceFont(): AceEditorFont = AceEditorFontPreferences.get()
 
     fun applyPreferredAceFont() {
@@ -103,13 +100,7 @@ class EditorThemeFontService(
         applyAceFont(font, persist = true)
     }
 
-    fun aceEditorFontLabel(font: AceEditorFont): String {
-        return when (font) {
-            AceEditorFont.JETBRAINS_MONO -> context.getString(R.string.entry_ace_editor_font_jetbrains_mono)
-            AceEditorFont.SOURCE_CODE_PRO -> context.getString(R.string.entry_ace_editor_font_source_code_pro)
-            AceEditorFont.SYSTEM_MONOSPACE -> context.getString(R.string.entry_ace_editor_font_system_monospace)
-        }
-    }
+    fun aceEditorFontLabel(font: AceEditorFont): String = font.displayName(context)
 
     private fun applyAceFont(font: AceEditorFont, persist: Boolean) {
         if (persist) {

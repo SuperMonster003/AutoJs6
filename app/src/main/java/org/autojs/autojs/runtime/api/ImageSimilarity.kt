@@ -479,7 +479,7 @@ object ImageSimilarity {
     // /**
     //  * Normalized Similarity based on MSE.
     //  *
-    //  * zh-CN: 基于均方误差（MSE）的规范化相似度.
+    //  * zh-CN: 基于均方误差 (MSE) 的规范化相似度.
     //  *
     //  * This function calculates the similarity between two images, scaled to the range 0..1.
     //  * A value of 0 indicates completely dissimilar images, while a value of 1 indicates identical images.

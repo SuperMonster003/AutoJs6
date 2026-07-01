@@ -460,8 +460,8 @@
     <string name="prompt_plugin_abi_mismatch_before_download">插件 ABI 列表与当前设备 ABI 列表没有交集.\n\n插件 ABI: %1$s\n设备 ABI: %2$s\n\n是否仍继续下载?</string>
     <string name="prompt_plugin_abi_mismatch_before_enable">插件 ABI 列表与当前设备 ABI 列表没有交集.\n\n插件 ABI: %1$s\n设备 ABI: %2$s\n\n是否仍继续开启?</string>
     <string name="prompt_plugin_hide_from_center">插件隐藏后将不再出现在插件中心列表中. 可在插件中心 \"全局设置\" 中管理所有隐藏插件.</string>
-    <string name="prompt_plugin_mount_conflict_override">目标 \"%1$s\" 已存在 (类型: %2$s). 继续将覆盖该对象，是否继续.</string>
-    <string name="prompt_plugin_mount_occupied_by_plugin">目标 \"%1$s\" 已被插件 \"%2$s\" (%3$s) 占用. 请先关闭该插件的自动挂载，或修改当前挂载目标.</string>
+    <string name="prompt_plugin_mount_conflict_override">目标 \"%1$s\" 已存在 (类型: %2$s). 继续将覆盖该对象, 是否继续.</string>
+    <string name="prompt_plugin_mount_occupied_by_plugin">目标 \"%1$s\" 已被插件 \"%2$s\" (%3$s) 占用. 请先关闭该插件的自动挂载, 或修改当前挂载目标.</string>
     <string name="prompt_restart_is_needed_for_docs_source_switch">需要重启应用才能完成文档源切换</string>
     <string name="prompt_restart_may_be_needed_for_language_switch">部分内容可能需要重启应用才能完成语言切换</string>
     <string name="screen_capturer_foreground_notification_channel_name">屏幕捕获器前台服务</string>
@@ -480,7 +480,7 @@
     <string name="summary_guard_mode">当 AutoJs6 前置时禁用自动化行为以避免误操作</string>
     <string name="summary_not_showing_main_activity">启动应用后直接运行脚本</string>
     <string name="summary_plugin_auto_check_updates">每小时自动检查一次插件更新 (下拉刷新立即检查)</string>
-    <string name="summary_plugin_auto_check_updates_disabled_by_global">全局 \"自动检查插件更新\" 已禁用，此项不可用</string>
+    <string name="summary_plugin_auto_check_updates_disabled_by_global">全局 \"自动检查插件更新\" 已禁用, 此项不可用</string>
     <string name="summary_plugin_auto_check_updates_per_plugin">自动检查更新并在插件条目显示更新提示</string>
     <string name="summary_plugin_auto_mount">自动将此插件对象挂载到脚本运行环境</string>
     <string name="summary_plugin_auto_mount_manage">查看并管理已启用自动挂载的插件</string>
@@ -1543,12 +1543,10 @@
     <string name="text_xiaomi_background_popup_permission">后台弹出界面</string>
     <string name="warn_continue_operation_without_saving_settings">设置尚未保存, 确定要继续操作吗</string>
     <string name="warn_exit_without_saving_settings">设置尚未保存, 确定要退出吗</string>
-    <string name="entry_ace_editor_font_jetbrains_mono">JetBrains Mono</string>
-    <string name="entry_ace_editor_font_source_code_pro">Source Code Pro</string>
-    <string name="entry_ace_editor_font_system_monospace">系统等宽字体</string>
+    <string name="entry_ace_editor_font_system_monospace">Android 系统默认等宽字体</string>
     <string name="entry_editor_engine_ace">Ace</string>
     <string name="entry_editor_engine_native">JsDroidEditor</string>
-    <string name="entry_editor_theme_mode_separate">亮暗主题分开</string>
+    <string name="entry_editor_theme_mode_separate">亮暗主题分离</string>
     <string name="entry_editor_theme_mode_unified">亮暗主题统一</string>
     <string name="entry_editor_gutter_width_mode_dynamic">动态</string>
     <string name="entry_editor_gutter_width_mode_fixed">固定</string>
@@ -1560,7 +1558,7 @@
     <string name="text_ace_editor_debug_status">%1$s | 行 %2$d | 光标 %3$d:%4$d | 断点 %5$d | 已修改 %6$s</string>
     <string name="text_ace_editor_debug_status_loading">正在加载 Ace 编辑器...</string>
     <string name="text_ace_editor_debug_text_length">Ace 文本长度: %1$d</string>
-    <string name="text_ace_editor_fallback_native" formatted="true">Ace 编辑器失败 (%1$s); 已切换到 JsDroidEditor。可在更多菜单中复制 Ace 诊断信息</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">Ace 编辑器失败 (%1$s); 已切换到 JsDroidEditor. 可在更多菜单中复制 Ace 诊断信息.</string>
     <string name="text_ace_editor_font">编辑器字体</string>
     <string name="text_ace_editor_font_changed" formatted="true">编辑器字体已切换为 %s</string>
     <string name="text_ace_read_only_mode">只读模式</string>
@@ -1568,7 +1566,7 @@
     <string name="text_ace_read_only_mode_disabled">只读模式已关闭</string>
     <string name="text_ace_action_favorites">行为收藏夹</string>
     <string name="text_usage_instructions">使用说明</string>
-    <string name="description_ace_action_favorites">行为收藏夹会记录常用的编辑器行为，例如运行、保存、格式化、菜单操作、长按菜单操作以及编辑器设置操作。点击星星按钮可打开此列表，点击条目可重新执行对应行为，长按星星按钮可重复上一次行为，拖动条目可调整顺序，向右滑动可固定或取消固定，向左滑动可删除。</string>
+    <string name="description_ace_action_favorites">行为收藏夹会记录常用的编辑器行为, 例如运行/保存/格式化/菜单操作/长按菜单操作以及编辑器设置操作. 点击星星按钮可打开此列表, 点击条目可重新执行对应行为, 长按星星按钮可重复上一次行为, 拖动条目可调整顺序, 向右滑动可固定或取消固定, 向左滑动可删除.</string>
     <string name="text_ace_action_history_empty">暂无编辑器行为历史</string>
     <string name="text_ace_action_pin">固定</string>
     <string name="text_ace_action_pinned">已固定</string>
@@ -1593,33 +1591,33 @@
     <string name="text_editor_word_wrap_indent_style">换行缩进</string>
     <string name="text_editor_engine">编辑器引擎</string>
     <string name="text_editor_engine_switched" formatted="true">编辑器引擎已切换为 %s</string>
-    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">编辑器引擎已切换为 %s。不同编辑器引擎之间不会保留撤销/重做历史</string>
-    <string name="summary_ace_line_numbers_enabled">在编辑器边栏中显示行号。</string>
-    <string name="summary_editor_breakpoint_markers_enabled">在编辑器边栏中显示断点标记。</string>
-    <string name="summary_editor_fold_markers_enabled">在编辑器边栏中显示代码折叠标记。</string>
-    <string name="summary_editor_setting_unavailable_for_current_engine">不适用于当前编辑器引擎。</string>
-    <string name="summary_ace_lsp_enabled">启用实验性的 LSP 配置；静态补全仍作为 fallback。</string>
-    <string name="summary_ace_word_wrap_enabled">在编辑器可视区域内对长行自动换行。</string>
-    <string name="summary_editor_gutter_width_mode">选择边栏跟随可见行号位数变化，或在当前会话中保持稳定宽度。</string>
-    <string name="summary_editor_word_wrap_indent_style">选择自动换行后的视觉续行缩进方式。</string>
-    <string name="description_ace_editor_font_preference">选择编辑器字体。JetBrains Mono 为默认字体；Source Code Pro 和系统等宽字体作为 fallback。</string>
-    <string name="description_ace_line_numbers_enabled_preference">显示或隐藏编辑器边栏行号。代码折叠、断点和边栏布局仍然可用。</string>
-    <string name="description_editor_breakpoint_markers_enabled_preference">显示或隐藏编辑器边栏中的断点标记。断点数据和调试菜单操作仍然可用。</string>
-    <string name="description_editor_fold_markers_enabled_preference">显示或隐藏编辑器边栏中的代码折叠标记。JsDroidEditor 没有折叠标记显示面。</string>
-    <string name="description_ace_lsp_enabled_preference">实验性 LSP 支持默认关闭。当前版本仅暴露桥接配置；如果没有可用的 LSP server，编辑器会继续使用静态补全。</string>
-    <string name="description_ace_word_wrap_enabled_preference">为长行启用编辑器自动换行模式。此设置不会修改文件内容。</string>
-    <string name="description_editor_gutter_width_mode_preference">动态宽度会跟随当前可见行号位数变化。固定宽度会预留稳定的最小宽度，并且只在看到更高位数的行号时增大。</string>
-    <string name="description_editor_word_wrap_indent_style_preference">延续缩进会让自动换行后的视觉续行与原行缩进对齐。顶格续行会让视觉续行从可视区域边缘开始。</string>
-    <string name="description_editor_engine_preference">Ace 是默认编辑器引擎。JsDroidEditor 仍可作为 fallback 使用，也可以手动选择。</string>
-    <string name="description_editor_theme_mode_preference">选择代码编辑器是否在 AutoJs6 亮色模式和暗色模式下分别记忆主题，或在两种模式下始终使用同一个主题。</string>
+    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">编辑器引擎已切换为 %s. 不同编辑器引擎之间不会保留撤销/重做历史.</string>
+    <string name="summary_ace_line_numbers_enabled">在编辑器边栏中显示行号</string>
+    <string name="summary_editor_breakpoint_markers_enabled">在编辑器边栏中显示断点标记</string>
+    <string name="summary_editor_fold_markers_enabled">在编辑器边栏中显示代码折叠标记</string>
+    <string name="summary_editor_setting_unavailable_for_current_engine">不适用于当前编辑器引擎</string>
+    <string name="summary_ace_lsp_enabled">启用实验性的 LSP 配置</string>
+    <string name="summary_ace_word_wrap_enabled">在编辑器可视区域内对长行自动换行</string>
+    <string name="summary_editor_gutter_width_mode">选择边栏跟随可见行号位数变化, 或在当前会话中保持稳定宽度</string>
+    <string name="summary_editor_word_wrap_indent_style">选择自动换行后的视觉续行缩进方式</string>
+    <string name="description_ace_editor_font_preference">选择 Ace 编辑器字体. 列表包含 Android 系统默认等宽字体, 以及带作者/开发者信息的开源代码字体; 系统等宽字体的实际字形由 Android 系统和设备厂商决定.</string>
+    <string name="description_ace_line_numbers_enabled_preference">显示或隐藏编辑器边栏行号. 代码折叠/断点和边栏布局仍然可用.</string>
+    <string name="description_editor_breakpoint_markers_enabled_preference">显示或隐藏编辑器边栏中的断点标记. 断点数据和调试菜单操作仍然可用.</string>
+    <string name="description_editor_fold_markers_enabled_preference">显示或隐藏编辑器边栏中的代码折叠标记. JsDroidEditor 没有折叠标记显示面.</string>
+    <string name="description_ace_lsp_enabled_preference">实验性 LSP 支持默认关闭. 当前版本仅暴露桥接配置; 如果没有可用的 LSP server, 编辑器会继续使用静态补全.</string>
+    <string name="description_ace_word_wrap_enabled_preference">为长行启用编辑器自动换行模式. 此设置不会修改文件内容.</string>
+    <string name="description_editor_gutter_width_mode_preference">动态宽度会跟随当前可见行号位数变化. 固定宽度会预留稳定的最小宽度, 并且只在看到更高位数的行号时增大.</string>
+    <string name="description_editor_word_wrap_indent_style_preference">延续缩进会让自动换行后的视觉续行与原行缩进对齐. 顶格续行会让视觉续行从可视区域边缘开始.</string>
+    <string name="description_editor_engine_preference">Ace 是默认编辑器引擎. JsDroidEditor 仍可作为 fallback 使用, 也可以手动选择.</string>
+    <string name="description_editor_theme_mode_preference">选择代码编辑器是否在 AutoJs6 亮色模式和暗色模式下分别记忆主题, 或在两种模式下始终使用同一个主题.</string>
     <string name="text_code_editor_settings">代码编辑器设置</string>
     <string name="text_editor_assistance">辅助</string>
     <string name="text_editor_gestures">操作手势</string>
     <string name="text_editor_gutter_markers">边栏标记</string>
     <string name="text_editor_performance">性能</string>
     <string name="text_editor_shortcut_input_bar">快捷符号设置</string>
-    <string name="summary_code_editor_settings">打开完整的代码编辑器设置页面。</string>
-    <string name="summary_editor_shortcut_input_bar">配置两个编辑器引擎共用的快捷输入符号。</string>
+    <string name="summary_code_editor_settings">打开完整的代码编辑器设置页面</string>
+    <string name="summary_editor_shortcut_input_bar">配置两个编辑器引擎共用的快捷输入符号</string>
     <plurals name="text_ace_action_used_times">
         <item quantity="other">使用 %1$d 次</item>
     </plurals>

@@ -615,7 +615,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         // @Hint by SuperMonster003 on Dec 29, 2025.
         //  ! Only clean up accessibility event callbacks registered
         //  ! by the current script to avoid affecting other still-running scripts.
-        //  ! zh-CN: 只清理当前脚本注册的无障碍事件回调，避免影响其他仍在运行的脚本.
+        //  ! zh-CN: 只清理当前脚本注册的无障碍事件回调, 避免影响其他仍在运行的脚本.
         //  # ignoresException({ AccessibilityService.clearAccessibilityEventCallback() })
         ignoresException { automator.removeAllEventsForThisRuntime() }
 

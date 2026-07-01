@@ -7,30 +7,6 @@
 }
 
 @font-face {
-    font-family: "JetBrains Mono";
-    font-style: italic;
-    font-weight: 400;
-    font-display: swap;
-    src: url("../fonts/jetbrains-mono/JetBrainsMono-Italic.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "JetBrains Mono";
-    font-style: normal;
-    font-weight: 700;
-    font-display: swap;
-    src: url("../fonts/jetbrains-mono/JetBrainsMono-Bold.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "JetBrains Mono";
-    font-style: italic;
-    font-weight: 700;
-    font-display: swap;
-    src: url("../fonts/jetbrains-mono/JetBrainsMono-BoldItalic.woff2") format("woff2");
-}
-
-@font-face {
     font-family: "Source Code Pro";
     font-style: normal;
     font-weight: 400;
@@ -39,27 +15,63 @@
 }
 
 @font-face {
-    font-family: "Source Code Pro";
-    font-style: italic;
+    font-family: "Iosevka";
+    font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url("../fonts/source-code-pro/SourceCodePro-Italic.woff2") format("woff2");
+    src: url("../fonts/iosevka/Iosevka-Regular.woff2") format("woff2");
 }
 
 @font-face {
-    font-family: "Source Code Pro";
+    font-family: "Iosevka Slab";
     font-style: normal;
-    font-weight: 700;
+    font-weight: 400;
     font-display: swap;
-    src: url("../fonts/source-code-pro/SourceCodePro-Bold.woff2") format("woff2");
+    src: url("../fonts/iosevka-slab/IosevkaSlab-Regular.woff2") format("woff2");
 }
 
 @font-face {
-    font-family: "Source Code Pro";
-    font-style: italic;
-    font-weight: 700;
+    font-family: "Fira Code";
+    font-style: normal;
+    font-weight: 400;
     font-display: swap;
-    src: url("../fonts/source-code-pro/SourceCodePro-BoldItalic.woff2") format("woff2");
+    src: url("../fonts/fira-code/FiraCode-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Cascadia Code";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/cascadia-code/CascadiaCode-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Intel One Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/intel-one-mono/IntelOneMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/ibm-plex-mono/IBMPlexMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Hack";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/hack/Hack-Regular.woff2") format("woff2");
+}
+
+:root {
+    --autojs6-editor-font-family: "Iosevka", "JetBrains Mono", "Source Code Pro", monospace;
 }
 
 html,
@@ -97,7 +109,7 @@ body.ace-ready #editor {
 
 #editor,
 .ace_editor {
-    font-family: "JetBrains Mono", "Source Code Pro", monospace;
+    font-family: var(--autojs6-editor-font-family);
     line-height: 1.45;
     -webkit-user-select: text;
     user-select: text;
@@ -176,7 +188,7 @@ body.autojs6-host-selection-action-mode .ace_mobile-menu {
     background: #ffffff;
     color: #172033;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
-    font-family: "JetBrains Mono", "Source Code Pro", monospace;
+    font-family: var(--autojs6-editor-font-family);
     font-size: 12px;
     line-height: 1.45;
     pointer-events: none;
@@ -196,7 +208,7 @@ body.autojs6-host-selection-action-mode .ace_mobile-menu {
     background: #ffffff;
     color: #172033;
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
-    font-family: "JetBrains Mono", "Source Code Pro", monospace;
+    font-family: var(--autojs6-editor-font-family);
     font-size: 13px;
     line-height: 1.35;
     pointer-events: none;

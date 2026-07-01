@@ -165,7 +165,7 @@ assertIncludes(FILES.strings, '<string name="key_editor_engine_native" translata
 assertIncludes(FILES.strings, '<string name="key_editor_engine_ace" translatable="false">ace</string>');
 assertIncludes(FILES.strings, '<string name="entry_editor_engine_ace">Ace</string>');
 assertIncludes(FILES.strings, '<string name="text_ace_lsp_enabled">LSP smart completion (experimental)</string>');
-assertIncludes(FILES.strings, '<string name="summary_ace_lsp_enabled">Enable experimental LSP configuration; static completion remains the fallback.</string>');
+assertIncludes(FILES.strings, '<string name="summary_ace_lsp_enabled">Enable experimental LSP configuration</string>');
 assertIncludes(FILES.strings, 'name="text_editor_gutter_width_mode"', "English editor gutter width mode string");
 assertIncludes(FILES.stringsZh, 'name="entry_editor_engine_ace"', "Simplified Chinese ACE editor engine entry");
 assertIncludes(FILES.stringsZh, 'name="text_ace_lsp_enabled"', "Simplified Chinese ACE LSP string");

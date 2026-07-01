@@ -176,6 +176,14 @@
         document.body.classList.toggle("ace-theme-dark", dark);
     }
 
+    function applyFontFamily(fontFamily) {
+        var resolved = fontFamily || DEFAULT_FONT_FAMILY;
+        if (document && document.documentElement && document.documentElement.style) {
+            document.documentElement.style.setProperty("--autojs6-editor-font-family", resolved);
+        }
+        return resolved;
+    }
+
     function notifyFirstPaint() {
         if (firstPaintNotified) {
             return;
@@ -2168,7 +2176,7 @@
     }
 
     function setFontFamily(fontFamily) {
-        editor.setOption("fontFamily", fontFamily || DEFAULT_FONT_FAMILY);
+        editor.setOption("fontFamily", applyFontFamily(fontFamily));
         notifyStateChanged("fontFamilyChanged");
     }
 
@@ -2752,6 +2760,7 @@
         breakpointMarkersEnabled = callBridgeBoolean("isBreakpointMarkersEnabled", true);
         foldMarkersEnabled = callBridgeBoolean("isFoldMarkersEnabled", true);
         gutterWidthMode = normalizeGutterWidthMode(callBridgeString("getGutterWidthMode", "dynamic"));
+        var initialFontFamily = applyFontFamily(callBridge("getFontFamily") || DEFAULT_FONT_FAMILY);
         applyThemeClass(initialTheme);
         editor.setTheme(initialTheme);
         editor.setOptions({
@@ -2766,7 +2775,7 @@
             highlightActiveLine: true,
             indentedSoftWrap: normalizeWordWrapIndentStyle(wordWrapIndentStyle) !== "classic",
             wrap: wordWrapEnabled,
-            fontFamily: callBridge("getFontFamily") || DEFAULT_FONT_FAMILY
+            fontFamily: initialFontFamily
         });
         session.setUseWrapMode(wordWrapEnabled);
         setEditorContainerClass("autojs6-hide-breakpoint-markers", !breakpointMarkersEnabled);

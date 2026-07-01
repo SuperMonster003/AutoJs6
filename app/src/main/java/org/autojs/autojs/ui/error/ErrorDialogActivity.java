@@ -16,7 +16,7 @@ import java.util.Objects;
 /**
  * A simple activity to show error dialogs when a context is not available or valid
  * for showing dialogs directly.
- * zh-CN: 一个简单的 Activity，用于在上下文不可用或无效而无法直接显示对话框时显示错误对话框.
+ * zh-CN: 一个简单的 Activity, 用于在上下文不可用或无效而无法直接显示对话框时显示错误对话框.
  */
 public class ErrorDialogActivity extends BaseActivity {
 
@@ -36,7 +36,7 @@ public class ErrorDialogActivity extends BaseActivity {
         String positiveButtonText = intent.getStringExtra(EXTRA_POSITIVE_BUTTON_TEXT);
 
         // If no positive button text provided, use default dismiss text.
-        // zh-CN: 如果没有提供确认按钮文本，则使用默认的关闭文本.
+        // zh-CN: 如果没有提供确认按钮文本, 则使用默认的关闭文本.
         if (positiveButtonText == null) {
             positiveButtonText = getString(R.string.dialog_button_dismiss);
         }

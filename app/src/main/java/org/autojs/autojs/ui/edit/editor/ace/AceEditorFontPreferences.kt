@@ -9,7 +9,7 @@ object AceEditorFontPreferences {
     @JvmStatic
     fun get(): AceEditorFont {
         return AceEditorFont.fromPreferenceValue(
-            Pref.getString(KEY_ACE_EDITOR_FONT, AceEditorFont.JETBRAINS_MONO.preferenceValue),
+            Pref.getString(KEY_ACE_EDITOR_FONT, AceEditorFont.IOSEVKA.preferenceValue),
         )
     }
 

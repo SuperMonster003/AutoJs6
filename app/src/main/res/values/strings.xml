@@ -77,9 +77,16 @@
     <string name="id_launcher_shortcut_settings" translatable="false">shortcut_$_settings</string>
     <string name="key_a11y_service" translatable="false">key_$_a11y_service</string>
     <string name="key_ace_editor_font" translatable="false">key_$_ace_editor_font</string>
-    <string name="key_ace_editor_font_jetbrains_mono" translatable="false">jetbrains_mono</string>
-    <string name="key_ace_editor_font_source_code_pro" translatable="false">source_code_pro</string>
     <string name="key_ace_editor_font_system_monospace" translatable="false">system_monospace</string>
+    <string name="key_ace_editor_font_iosevka" translatable="false">iosevka</string>
+    <string name="key_ace_editor_font_iosevka_slab" translatable="false">iosevka_slab</string>
+    <string name="key_ace_editor_font_jetbrains_mono" translatable="false">jetbrains_mono</string>
+    <string name="key_ace_editor_font_fira_code" translatable="false">fira_code</string>
+    <string name="key_ace_editor_font_cascadia_code" translatable="false">cascadia_code</string>
+    <string name="key_ace_editor_font_intel_one_mono" translatable="false">intel_one_mono</string>
+    <string name="key_ace_editor_font_ibm_plex_mono" translatable="false">ibm_plex_mono</string>
+    <string name="key_ace_editor_font_hack" translatable="false">hack</string>
+    <string name="key_ace_editor_font_source_code_pro" translatable="false">source_code_pro</string>
     <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
     <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
     <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
@@ -437,7 +444,7 @@
     <string name="description_stable_mode">Stable mode makes it more stable when getting layout bounds, but some results may be ignored.\nA11y service\'s restart required.</string>
     <string name="description_theme_color_preference">Theme color is applied to widgets including but not limited to the following ones:\nStatus bar\nAppbar\nFile icon\nTask item icon\nFAB\nSettings category title\nSwitch button\n\nNote: As of AutoJs6 version 6.2.0, there has been no difference between primary color, primary dark color and accent color yet.</string>
     <string name="description_timed_task_backend">Controls the underlying mechanism for triggering scripts on a schedule.\n\nAlarmManager: With the \"Allow setting alarms and reminders\" permission granted, scheduled tasks can fire closer to the exact time.\nWorkManager: System-friendly; suitable for non-critical tasks that can tolerate some delay.\nJobScheduler: Legacy implementation kept for compatibility; higher chance of delays.</string>
-    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Use cases and differences:\n\n1. AlarmManager\nBest for time-sensitive tasks, e.g., [reminders/strictly scheduled scripts/...].\nOn Android 12+ with the \"Allow setting alarms and reminders\" permission, tasks can run more on time even when the screen is off or the device is idle.\nWithout it, the system may degrade exactness or delay execution.\n\n2. WorkManager\nBest for tasks that don’t require strict timing, e.g., [non-critical sync/cleanup/statistics/...].\nScheduling depends on [battery/network/charging/idle policies/...], so execution may be postponed when the screen is off or idle.\nWhile it can’t guarantee exact timing, it excels at [reliable completion/retries/chaining/unique work de-duplication].\n\n3. JobScheduler\nHistorical implementation for compatibility.\nOn newer Android versions, tasks may be delayed more noticeably.\nGenerally not recommended unless required for compatibility.</string>
+    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">Use cases and differences:\n\n1. AlarmManager\nBest for time-sensitive tasks, e.g., [reminders/strictly scheduled scripts/...].\nOn Android 12+ with the \"Allow setting alarms and reminders\" permission, tasks can run more on time even when the screen is off or the device is idle.\nWithout it, the system may degrade exactness or delay execution.\n\n2. WorkManager\nBest for tasks that don\'t require strict timing, e.g., [non-critical sync/cleanup/statistics/...].\nScheduling depends on [battery/network/charging/idle policies/...], so execution may be postponed when the screen is off or idle.\nWhile it can\'t guarantee exact timing, it excels at [reliable completion/retries/chaining/unique work de-duplication].\n\n3. JobScheduler\nHistorical implementation for compatibility.\nOn newer Android versions, tasks may be delayed more noticeably.\nGenerally not recommended unless required for compatibility.</string>
     <string name="description_usage_stats_access">Provides access to device usage history and statistics which results in currentPackage() a more accurate result</string>
     <string name="description_write_secure_settings">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="description_write_system_settings">The \"write system settings\" permission allows AutoJs6 to modify some system settings, so scripts can change system parameters such as [ screen brightness / auto-rotate / screen timeout ].</string>
@@ -525,9 +532,16 @@
     <string name="entry_editor_gutter_width_mode_fixed">Fixed</string>
     <string name="entry_editor_word_wrap_indent_style_classic">Flush continuation</string>
     <string name="entry_editor_word_wrap_indent_style_continuation">Continuation indent</string>
-    <string name="entry_ace_editor_font_jetbrains_mono">JetBrains Mono</string>
-    <string name="entry_ace_editor_font_source_code_pro">Source Code Pro</string>
-    <string name="entry_ace_editor_font_system_monospace">System monospace</string>
+    <string name="entry_ace_editor_font_jetbrains_mono" translatable="false">JetBrains Mono</string>
+    <string name="entry_ace_editor_font_iosevka" translatable="false">Iosevka</string>
+    <string name="entry_ace_editor_font_iosevka_slab" translatable="false">Iosevka Slab</string>
+    <string name="entry_ace_editor_font_fira_code" translatable="false">Fira Code</string>
+    <string name="entry_ace_editor_font_cascadia_code" translatable="false">Cascadia Code</string>
+    <string name="entry_ace_editor_font_intel_one_mono" translatable="false">Intel One Mono</string>
+    <string name="entry_ace_editor_font_ibm_plex_mono" translatable="false">IBM Plex Mono</string>
+    <string name="entry_ace_editor_font_hack" translatable="false">Hack</string>
+    <string name="entry_ace_editor_font_source_code_pro" translatable="false">Source Code Pro</string>
+    <string name="entry_ace_editor_font_system_monospace">Android system monospace</string>
     <string name="entry_file_extensions_not_show">Hide all file extensions</string>
     <string name="entry_file_extensions_show_all">Show all file extensions</string>
     <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
@@ -1944,20 +1958,20 @@
     <string name="text_editor_gutter_markers">Gutter markers</string>
     <string name="text_editor_performance">Performance</string>
     <string name="text_editor_shortcut_input_bar">Shortcut symbol settings</string>
-    <string name="summary_code_editor_settings">Open the full code editor settings page.</string>
-    <string name="summary_editor_shortcut_input_bar">Configure shortcut input symbols shared by editor engines.</string>
-    <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter.</string>
-    <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter.</string>
-    <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter.</string>
-    <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine.</string>
-    <string name="summary_ace_lsp_enabled">Enable experimental LSP configuration; static completion remains the fallback.</string>
-    <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport.</string>
-    <string name="summary_editor_gutter_width_mode">Choose whether the gutter follows visible line digits or keeps a stable session width.</string>
-    <string name="summary_editor_word_wrap_indent_style">Choose how wrapped visual continuation lines are indented.</string>
+    <string name="summary_code_editor_settings">Open the full code editor settings page</string>
+    <string name="summary_editor_shortcut_input_bar">Configure shortcut input symbols shared by editor engines</string>
+    <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter</string>
+    <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter</string>
+    <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter</string>
+    <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine</string>
+    <string name="summary_ace_lsp_enabled">Enable experimental LSP configuration</string>
+    <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
+    <string name="summary_editor_gutter_width_mode">Choose whether the gutter follows visible line digits or keeps a stable session width</string>
+    <string name="summary_editor_word_wrap_indent_style">Choose how wrapped visual continuation lines are indented</string>
     <string name="text_ace_lsp_enabled">LSP smart completion (experimental)</string>
     <string name="description_editor_engine_preference">Ace is the default editor engine. JsDroidEditor remains available as a fallback and can be selected explicitly.</string>
     <string name="description_editor_theme_mode_preference">Choose whether the editor remembers separate themes for AutoJs6 light and dark modes, or uses one shared theme in both modes.</string>
-    <string name="description_ace_editor_font_preference">Choose the editor font. JetBrains Mono is the default; Source Code Pro and system monospace are available fallbacks.</string>
+    <string name="description_ace_editor_font_preference">Choose the Ace editor font. The list includes Android system monospace and open-source code fonts with author/developer information; the actual system monospace face is decided by Android and the device vendor.</string>
     <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
     <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>

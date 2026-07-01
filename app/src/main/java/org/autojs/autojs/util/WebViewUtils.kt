@@ -29,11 +29,11 @@ class WebViewUtils {
         //  !   - Android System WebView (or similar Google Chrome browsers) version >= 105
         //  ! Reference: https://stackoverflow.com/questions/57449900/letting-webview-on-android-work-with-prefers-color-scheme-dark
         //  ! zh-CN:
-        //  ! 当前特性需满足如下要求：
+        //  ! 当前特性需满足如下要求:
         //  ! - 安卓 API 级别 >= 29 (10) [Q]:
-        //  !   - 安卓系统 WebView（或类似 Google Chrome 浏览器）版本 >= 76
+        //  !   - 安卓系统 WebView (或类似 Google Chrome 浏览器) 版本 >= 76
         //  ! - 安卓 API 级别 <= 28 (9) [P]:
-        //  !   - 安卓系统 WebView（或类似 Google Chrome 浏览器）版本 >= 105
+        //  !   - 安卓系统 WebView (或类似 Google Chrome 浏览器) 版本 >= 105
         //  ! 参阅: https://stackoverflow.com/questions/57449900/letting-webview-on-android-work-with-prefers-color-scheme-dark
         @JvmStatic
         fun adaptDarkMode(webView: WebView) {

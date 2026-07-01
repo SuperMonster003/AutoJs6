@@ -1,16 +1,15 @@
 package org.autojs.autojs.ui.edit.keyboard
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.graphics.drawable.DrawableCompat
@@ -18,7 +17,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.ViewUtils
@@ -47,15 +45,25 @@ object AceActionFavoritesDialog {
         }
         val adapter = FavoritesAdapter(context, entries.toMutableList(), onActionSelected)
         recyclerView.adapter = adapter
-        val dialogContent = createDialogContent(context, recyclerView)
 
         val dialog = DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
-                .customView(dialogContent, false)
+                .title(R.string.text_ace_action_favorites)
+                .options(listOf(MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_usage_instructions)) {
+                    DialogUtils.buildAndShowAdaptive {
+                        MaterialDialog.Builder(context)
+                            .title(R.string.text_usage_instructions)
+                            .content(R.string.description_ace_action_favorites)
+                            .positiveText(R.string.dialog_button_confirm)
+                            .positiveColorRes(R.color.dialog_button_attraction)
+                            .build()
+                    }
+                }))
+                .customView(recyclerView, false)
                 .neutralText(R.string.dialog_button_clear_items)
                 .neutralColorRes(R.color.dialog_button_caution)
                 .onNeutral { d, _ -> confirmClear(context, d) }
-                .negativeText(R.string.dialog_button_cancel)
+                .negativeText(R.string.dialog_button_dismiss)
                 .negativeColorRes(R.color.dialog_button_default)
                 .onNegative { d, _ -> d.dismiss() }
                 .autoDismiss(false)
@@ -63,55 +71,6 @@ object AceActionFavoritesDialog {
         }
         adapter.dialog = dialog
         attachTouchHelper(context, recyclerView, adapter)
-    }
-
-    private fun createDialogContent(context: Context, recyclerView: RecyclerView): View {
-        val horizontalPadding = DisplayUtils.dpToPx(24f).roundToInt()
-        val titleRow = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            setPadding(horizontalPadding, DisplayUtils.dpToPx(18f).roundToInt(), DisplayUtils.dpToPx(8f).roundToInt(), DisplayUtils.dpToPx(6f).roundToInt())
-        }
-        val title = TextView(context).apply {
-            text = context.getString(R.string.text_ace_action_favorites)
-            textSize = 20f
-            setTextColor(context.getColor(R.color.day_night))
-            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-        }
-        val help = TextView(context).apply {
-            text = context.getString(R.string.text_usage_instructions)
-            textSize = 14f
-            setTextColor(ThemeColorManager.colorPrimary)
-            gravity = android.view.Gravity.CENTER
-            minHeight = DisplayUtils.dpToPx(40f).roundToInt()
-            setPadding(DisplayUtils.dpToPx(12f).roundToInt(), 0, DisplayUtils.dpToPx(12f).roundToInt(), 0)
-            setBackgroundResource(selectableItemBackgroundRes(context))
-            setOnClickListener { showUsageInstructions(context) }
-        }
-        titleRow.addView(title)
-        titleRow.addView(help)
-        return LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            addView(titleRow)
-            addView(recyclerView)
-        }
-    }
-
-    private fun selectableItemBackgroundRes(context: Context): Int {
-        return TypedValue().also {
-            context.theme.resolveAttribute(android.R.attr.selectableItemBackground, it, true)
-        }.resourceId
-    }
-
-    private fun showUsageInstructions(context: Context) {
-        DialogUtils.buildAndShowAdaptive {
-            MaterialDialog.Builder(context)
-                .title(R.string.text_usage_instructions)
-                .content(R.string.description_ace_action_favorites)
-                .positiveText(R.string.dialog_button_confirm)
-                .positiveColorRes(R.color.dialog_button_attraction)
-                .build()
-        }
     }
 
     private fun attachTouchHelper(
@@ -233,6 +192,7 @@ object AceActionFavoritesDialog {
             )
             holder.title.text = entry.label
             holder.usageCount.visibility = View.VISIBLE
+            @SuppressLint("SetTextI18n")
             holder.usageCount.text = "<${entry.usageCount}>"
             val payloadSummary = entry.payloadSummary
             if (payloadSummary.isNullOrBlank()) {
@@ -242,7 +202,7 @@ object AceActionFavoritesDialog {
                 holder.subtitle.text = payloadSummary
             }
             holder.icon.setImageResource(
-                if (entry.pinned) R.drawable.ic_thumbtacks else R.drawable.ic_ali_fx,
+                if (entry.pinned) R.drawable.ic_thumbtacks else R.drawable.ic_asterisk_small,
             )
             holder.icon.imageTintList = ColorStateList.valueOf(context.getColor(R.color.day_night))
             holder.itemView.setOnClickListener {
