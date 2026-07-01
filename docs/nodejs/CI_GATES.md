@@ -1243,6 +1243,16 @@ bridge policy, reserved `worker_computation`, and records
 `no_user_facing_facade_v1_2` without promoting raw process handles, stdio,
 signals, `spawn`, `fork`, packaged process-worker behavior, or WorkerPool
 replacement API authority.
+The `:app:verifyNodePhase14DesktopRuntimeDocSync` gate writes
+`phase14-desktop-runtime-doc-sync.json` plus `.md`, imports P14-28 through
+P14-31 generated reports, verifies TypeScript declaration references, worker
+design docs, desktop examples, release matrix, migration cookbook,
+compatibility profile, security model, security corpus, error catalog,
+Pro/AutoX migration notes, testing, and CI docs, and records
+`worker_intentionally_unsupported_v1_2` without promoting runnable workers,
+packaged workers, WorkerPool replacement API, process-worker facade, raw
+process handles, stdio, signals, `spawn`, `fork`, or stable `child_process`
+authority.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

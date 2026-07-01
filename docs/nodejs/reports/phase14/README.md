@@ -207,3 +207,12 @@ bridge policy, reserved `worker_computation`, and keeps raw process handles,
 stdio, signals, `spawn`, `fork`, packaged process-worker behavior, and
 WorkerPool replacement API authority unpromoted behind
 `:app:verifyNodePhase14ProcessWorkerReplacementDecision`.
+
+`P14_32_DESKTOP_RUNTIME_DOC_SYNC.md` records the desktop runtime docs and
+release-policy sync as `ready` with a
+`worker_intentionally_unsupported_v1_2` decision. It imports P14-28 through
+P14-31 generated reports and verifies TypeScript declaration references,
+worker design docs, desktop examples, release matrix, migration cookbook,
+compatibility profile, security model, security corpus, error catalog,
+Pro/AutoX migration notes, testing, and CI docs behind
+`:app:verifyNodePhase14DesktopRuntimeDocSync`.

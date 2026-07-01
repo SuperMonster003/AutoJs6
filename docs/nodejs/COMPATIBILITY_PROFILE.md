@@ -1322,6 +1322,14 @@ WorkerPool-compatible and backed by native WorkerPool evidence, execution slot
 accounting, cleanup/resource stress, packaged behavior, user-facing launch UX,
 security corpus, and rollback evidence.
 
+P14-32 records the v1.2 desktop runtime doc/release sync as
+`worker_intentionally_unsupported_v1_2`. Type declarations, examples, worker
+design docs, release matrix, migration cookbook, security corpus, testing, and
+CI all use the same policy: runnable `worker_threads`, packaged workers,
+WorkerPool replacement API, process-worker facade, raw process handles, stdio,
+signals, `spawn`, `fork`, and stable `child_process` authority remain
+unpromoted for v1.2.
+
 P13-40 records child_process scoped runner as partial. The runtime exposes
 `autojs6:profile.childProcessProfile` to document that `child_process` and
 `node:child_process` remain denied by default while the existing `shell` bridge

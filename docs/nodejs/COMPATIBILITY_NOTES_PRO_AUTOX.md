@@ -387,6 +387,13 @@ future profile promotes them. For v1.1 there is no user-facing process-worker
 API or UX, and any scoped `child_process` runner remains a separate P13-40
 track.
 
+P14-32 records the v1.2 desktop runtime doc/release sync as
+`worker_intentionally_unsupported_v1_2`. Pro/AutoX migration docs should keep
+`worker_threads`, WorkerPool replacement APIs, process-worker facades,
+packaged workers, raw process handles, stdio streams, signals, `spawn`, `fork`,
+and stable `child_process` authority out of v1.2 runtime claims until native,
+packaged, resource, UX, security, and rollback evidence exists.
+
 P13-40 records child_process scoped runner as partial. AutoJs6 Node exposes
 `childProcessProfile` diagnostics and keeps `child_process` /
 `node:child_process` denied by default. Debug/Desktop compatibility builds can

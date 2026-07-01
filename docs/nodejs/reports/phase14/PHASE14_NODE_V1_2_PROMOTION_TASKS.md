@@ -794,9 +794,30 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: no raw process handles, stdio, signals, `spawn`, or `fork` are
     exposed.
 
-- [ ] P14-32: Sync desktop runtime docs and release policy.
+- [x] P14-32: Sync desktop runtime docs and release policy.
   - Scope: worker policy, process-worker decision, TypeScript declarations,
     release matrix, migration docs, and security corpus.
+  - Gate: `:app:verifyNodePhase14DesktopRuntimeDocSync`.
+  - Desktop runtime docs/release policy sync gate deployed:
+    - Adds `docs/nodejs/phase14/desktop-runtime-doc-sync.json` and
+      `PHASE14_DESKTOP_RUNTIME_DOC_SYNC.md`.
+    - Adds `docs/nodejs/phase14/PHASE14_DESKTOP_RUNTIME_MIGRATION_COOKBOOK.md`.
+    - Adds
+      `docs/nodejs/releases/NODE_PROFILE_V1_2_DESKTOP_RUNTIME_MATRIX.md`.
+    - Adds `docs/nodejs/reports/phase14/P14_32_DESKTOP_RUNTIME_DOC_SYNC.md`.
+    - Imports P14-28 worker native availability, P14-29 runnable/packaged
+      smoke, P14-30 resource/RSS stress, and P14-31 process-worker replacement
+      generated reports.
+    - Records `worker_intentionally_unsupported_v1_2` and keeps
+      `worker_threads`, packaged workers, WorkerPool replacement API,
+      process-worker facade, raw process handles, stdio, signals, `spawn`,
+      `fork`, and stable `child_process` authority unpromoted.
+    - Syncs TypeScript declaration references, worker design docs, desktop
+      examples, release matrix, migration cookbook, compatibility profile,
+      security model, security corpus, error catalog, Pro/AutoX migration notes,
+      testing, and CI docs.
+    - Writes `build/reports/nodejs/phase14-desktop-runtime-doc-sync.json` and
+      `.md`.
   - Acceptance: worker support is either promoted with evidence or explicitly
     remains intentionally unsupported for v1.2.
 

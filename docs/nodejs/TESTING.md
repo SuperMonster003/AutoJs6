@@ -2022,6 +2022,22 @@ replacement API authority unpromoted until a future WorkerPool-compatible gate
 owns native, slot-accounting, cleanup/resource, packaged, UX, and security
 evidence.
 
+Phase 14 desktop runtime docs/release policy sync gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14DesktopRuntimeDocSync
+```
+
+This host gate records P14-32 as ready with
+`worker_intentionally_unsupported_v1_2`. It imports P14-28, P14-29, P14-30, and
+P14-31 generated reports, verifies TypeScript declaration references, worker
+design docs, desktop examples, release matrix, migration cookbook,
+compatibility profile, security model, security corpus, error catalog,
+Pro/AutoX migration notes, testing, and CI docs. It keeps runnable workers,
+packaged workers, WorkerPool replacement API, process-worker facade, raw
+process handles, stdio, signals, `spawn`, `fork`, and stable `child_process`
+authority unpromoted for v1.2.
+
 Phase 13 process-worker replacement decision gate:
 
 ```powershell

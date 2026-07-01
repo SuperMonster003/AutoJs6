@@ -110,6 +110,14 @@ process-worker replacement path is `worker_threads.WorkerPool`, while the
 callable `process_worker`/`compute_worker` facade, raw `child_process`, raw
 process handles, and packaged process-worker behavior remain unintroduced.
 
+P14-32 records the v1.2 desktop runtime declaration sync as
+`worker_intentionally_unsupported_v1_2`. `workerThreadsProfile`,
+`processWorkerReplacementProfile`, and `childProcessProfile` remain diagnostic
+declarations only: they do not make runnable workers, packaged workers,
+WorkerPool replacement APIs, `process_worker`, `compute_worker`,
+`autojs6:process-worker`, raw process handles, stdio streams, signals, `spawn`,
+`fork`, or stable `child_process` authority callable.
+
 P13-36 extends the `autojs6:profile` declaration with `vmProfile`. The field
 reports native VM availability, non-sandbox boundaries, and the focused
 Desktop/Debug evidence for repeated compiled scripts, native timeout

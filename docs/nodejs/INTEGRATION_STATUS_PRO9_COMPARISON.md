@@ -1150,6 +1150,13 @@ unpromoted, and `second_execution_slot` is inherited as closed by P13-06
 without promoting a process-worker facade. For v1.1 there is no user-facing process-worker API or UX; any scoped
 `child_process` runner remains a separate P13-40 track.
 
+P14-32 records the v1.2 desktop runtime doc/release sync as
+`worker_intentionally_unsupported_v1_2`: runnable `worker_threads`, packaged
+workers, WorkerPool replacement APIs, `process_worker`, `compute_worker`,
+raw process handles, stdio streams, signals, `spawn`, `fork`, and stable
+`child_process` authority remain unpromoted until native, packaged, resource,
+UX, security, and rollback evidence exists.
+
 P13-40 records child_process scoped runner as partial: Safe Node now exposes
 `childProcessProfile` diagnostics while `child_process` and
 `node:child_process` stay denied. The current migration path remains the

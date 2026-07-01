@@ -378,6 +378,14 @@ accounting, cleanup/resource stress, packaged behavior, user-visible launch UX,
 security corpus coverage, rollback policy, and separation from `child_process`
 and `shell`.
 
+P14-32 records the v1.2 desktop runtime doc/release sync as
+`worker_intentionally_unsupported_v1_2`. The security corpus now carries an
+explicit `worker_threads` entry tied to P14-28 through P14-32 evidence, and the
+`child_process` corpus entry references the P14-31 no-facade process-worker
+decision. This sync does not relax default worker denial, `node:worker_threads`
+shape-only behavior, process-worker absence, raw process denial, or the
+separate scoped `shell` bridge boundary.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

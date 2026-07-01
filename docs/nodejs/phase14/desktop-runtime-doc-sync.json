@@ -1,0 +1,47 @@
+{
+  "schema": "autojs6-node-phase14-desktop-runtime-doc-sync-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-32",
+  "title": "Desktop runtime docs and release policy sync",
+  "status": "ready",
+  "promotionState": "desktop_runtime_docs_synced",
+  "surface": "desktop.worker_runtime",
+  "releaseDecision": "worker_intentionally_unsupported_v1_2",
+  "minimumPolicy": "P14-32 synchronizes worker_threads, process-worker replacement, TypeScript declaration references, migration docs, release matrix, security corpus, compatibility text, error guidance, testing, and CI gates without promoting runtime authority.",
+  "sourceGates": [
+    "P14-28",
+    "P14-29",
+    "P14-30",
+    "P14-31"
+  ],
+  "syncedDeclarationModules": [
+    "autojs6:profile.workerThreadsProfile",
+    "autojs6:profile.processWorkerReplacementProfile",
+    "autojs6:profile.childProcessProfile"
+  ],
+  "syncedDocs": [
+    "docs/nodejs/types/autojs6-node/README.md",
+    "docs/nodejs/design/WORKER_THREADS.md",
+    "docs/nodejs/EXAMPLES.md",
+    "docs/nodejs/releases/NODE_PROFILE_V1_2_DESKTOP_RUNTIME_MATRIX.md",
+    "docs/nodejs/phase14/PHASE14_DESKTOP_RUNTIME_MIGRATION_COOKBOOK.md",
+    "docs/nodejs/COMPATIBILITY_PROFILE.md",
+    "docs/nodejs/SECURITY_MODEL.md",
+    "docs/nodejs/ERROR_CATALOG.md",
+    "docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json",
+    "docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md",
+    "docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md",
+    "docs/nodejs/TESTING.md",
+    "docs/nodejs/CI_GATES.md"
+  ],
+  "examplePolicy": {
+    "runnableDesktopWorkerSmokeSubset": [],
+    "staticOrDeniedHighRiskExamples": [
+      "sample/nodejs/desktop-parity-suite:worker_threads"
+    ],
+    "rule": "Desktop worker examples remain guarded, static, or denial-oriented for v1.2. Runnable Worker, packaged Worker, WorkerPool replacement API, process-worker facade, and raw child_process examples are not release evidence until native, resource, packaged, UX, and security gates pass."
+  },
+  "releaseMatrix": "docs/nodejs/releases/NODE_PROFILE_V1_2_DESKTOP_RUNTIME_MATRIX.md",
+  "migrationCookbook": "docs/nodejs/phase14/PHASE14_DESKTOP_RUNTIME_MIGRATION_COOKBOOK.md",
+  "runtimeAuthorityChanged": false
+}

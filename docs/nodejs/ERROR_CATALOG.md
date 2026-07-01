@@ -306,6 +306,22 @@ decision as `no_user_facing_facade_v1_2`:
   process-worker behavior, and WorkerPool replacement API authority remain
   unpromoted until a future WorkerPool-compatible gate owns the evidence.
 
+## P14-32 desktop runtime doc sync
+
+P14-32 does not add a new error code. It records desktop runtime docs and
+release policy as `worker_intentionally_unsupported_v1_2`:
+
+- `ERR_AUTOJS6_WORKER_DISABLED` remains the expected runnable worker preflight
+  failure for current v1.2 evidence.
+- `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`, worker timeout, WorkerPool task, and
+  worker resource errors remain future native-available evidence only.
+- `child_process` / `node:child_process` keep the existing disabled-builtin
+  error shape in stable profiles.
+- `process_worker`, `compute_worker`, and `autojs6:process-worker` remain
+  absent, not newly introduced rejecting modules.
+- `shell` remains the separate scoped command bridge and is not process-worker
+  or raw process authority.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

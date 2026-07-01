@@ -160,6 +160,9 @@ The catalog remains migration evidence for desktop parity planning; packaged
 desktop execution, raw worker/raw-network/expanded-root/WASI/inspector authority,
 and Android package-manager parity remain gated by future promotion evidence.
 
+P14-32 docs sync keeps the v1.2 desktop runtime examples guarded under the
+`worker_intentionally_unsupported_v1_2` release decision. `worker_threads`, WorkerPool, process-worker, and raw `child_process` examples remain static, guarded, or denial-oriented; they are not runnable v1.2 release smoke until native worker availability, packaged worker behavior, WorkerPool resource stress, process-worker UX, security corpus, and rollback gates pass.
+
 ## Smoke Coverage
 
 Instrumentation smoke currently runs:
