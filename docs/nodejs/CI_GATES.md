@@ -1208,6 +1208,11 @@ The `:app:verifyNodePhase14MediaPlaybackMediaStoreBoundary` gate writes
 and MediaStore stable-denial evidence, keeps playback, playlists, scanFile,
 MediaStore, broad media-library permissions, and raw media handles denied, and
 records future scoped-provider requirements.
+The `:app:verifyNodePhase14TaskDeviceMediaDocSync` gate writes
+`phase14-task-device-media-doc-sync.json` plus `.md`, imports P14-17 through
+P14-26 generated reports, verifies TypeScript declaration references, release
+matrix rows, migration cookbook, examples, compatibility, security, error, and
+CI docs, and keeps runtime authority unchanged.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

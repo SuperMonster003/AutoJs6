@@ -126,6 +126,14 @@ overlay, media/recorder, screenshot/OCR, and accessibility snippets remain
 static, guarded, or denial-oriented until their provider, packaged disclosure,
 permission, and device-matrix archives are promoted.
 
+P14-27 docs sync keeps the same rule for the v1.2 `pro.tasks_device_media`
+surface. `tasks-work-manager` remains the only task/device/media focused smoke
+path; `notifications-power` and `media-recorder` stay migration evidence and
+guarded/denial-oriented examples until task database mutation, broadcast task
+registration, notification disclosure, OEM power matrices, real recorder
+sessions, packaged recorder stress, playback, and MediaStore provider gates are
+promoted.
+
 ## Phase 13 Desktop Node Parity Examples
 
 `sample/nodejs/desktop-parity-suite` is a migration catalog for desktop-style

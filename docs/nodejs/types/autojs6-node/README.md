@@ -379,6 +379,16 @@ OCR/model behavior, and recorder sessions still require their own provider,
 disclosure, packaged, and device-matrix evidence before examples can be treated
 as promoted runtime paths.
 
+P14-27 docs sync records the v1.2 `pro.tasks_device_media` declaration state as
+`provider_poc_not_promoted`. The checked-in declarations for `work_manager`,
+`autojs6:compat.tasks`, `notifications`, `device`, `media`, `mediainfo`, and
+`recorder` remain useful for migration code and denial-oriented tests, but task
+database mutation, IntentTask/broadcast registration, packaged notification
+foreground disclosure, OEM power mutation, real recorder sessions, packaged
+recorder start/stop, playback, MediaStore, and broad media-library permissions
+still require dedicated provider, disclosure, packaged, rollback, and device
+evidence before examples can be treated as promoted runtime paths.
+
 P12-34 is a documentation synchronization gate rather than a new declaration
 surface. It keeps this README aligned with `MIGRATION_FROM_RHINO.md`, the Pro 9
 comparison, `RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`, `SECURITY_MODEL.md`, and

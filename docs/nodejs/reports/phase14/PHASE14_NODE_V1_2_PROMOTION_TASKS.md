@@ -661,9 +661,30 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: raw media library mutation, playlist, and broad storage
     permissions remain denied unless a full provider gate is opened.
 
-- [ ] P14-27: Sync task/device/media docs, examples, and declarations.
+- [x] P14-27: Sync task/device/media docs, examples, and declarations.
   - Scope: TypeScript declarations, migration cookbook, release matrix, error
     catalog, compatibility profile, and CI gates.
+  - Gate: `:app:verifyNodePhase14TaskDeviceMediaDocSync`.
+  - Task/device/media docs sync gate deployed:
+    - Adds `docs/nodejs/phase14/task-device-media-doc-sync.json` and
+      `PHASE14_TASK_DEVICE_MEDIA_DOC_SYNC.md`.
+    - Adds
+      `docs/nodejs/releases/NODE_PROFILE_V1_2_TASK_DEVICE_MEDIA_MATRIX.md`.
+    - Adds
+      `docs/nodejs/phase14/PHASE14_TASK_DEVICE_MEDIA_MIGRATION_COOKBOOK.md`.
+    - Imports P14-17 through P14-26 generated reports and keeps
+      `provider_poc_not_promoted` as the release documentation state.
+    - Verifies TypeScript declaration references for `work_manager`,
+      `autojs6:compat.tasks`, `notifications`, `device`, `media`,
+      `mediainfo`, `recorder`, and `autojs6:compat`.
+    - Keeps `tasks-work-manager` as the only task/device/media focused smoke
+      path; `notifications-power` and `media-recorder` remain guarded migration
+      and denial-oriented examples.
+    - Syncs release matrix, migration cookbook, compatibility profile, security
+      model, error catalog, testing, and CI gates without changing runtime
+      authority.
+    - Writes `build/reports/nodejs/phase14-task-device-media-doc-sync.json`
+      and `.md`.
   - Acceptance: every promoted task/device/media method has docs, examples,
     stable errors, and denial examples.
 

@@ -230,6 +230,21 @@ expectations:
   `ParcelFileDescriptor`, raw file descriptors, playlist handles, `Context`,
   and Java objects stay future-promotion blockers.
 
+## P14-27 task/device/media docs sync denial sync
+
+P14-27 does not add a new error code or promote task/device/media runtime
+authority. It records documentation consistency expectations:
+
+- `tasks-work-manager` remains the only task/device/media focused Pro smoke
+  path.
+- `notifications-power` and `media-recorder` remain migration evidence and
+  guarded/denial-oriented examples.
+- Task database mutation, IntentTask/broadcast registration, notification
+  foreground disclosure, OEM power mutation, real recorder sessions, packaged
+  recorder start/stop, playback, MediaStore, broad media-library permissions,
+  raw Android objects, raw file descriptors, and Java objects stay governed by
+  the stable denial codes already documented in their source gates.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

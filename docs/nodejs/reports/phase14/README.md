@@ -169,3 +169,9 @@ evidence, keeps playback, playlists, scanFile, MediaStore, broad media-library
 permissions, and raw media handles denied, and requires a future scoped
 provider gate before any of those surfaces can be promoted behind
 `:app:verifyNodePhase14MediaPlaybackMediaStoreBoundary`.
+
+`P14_27_TASK_DEVICE_MEDIA_DOC_SYNC.md` records task/device/media docs, examples,
+declarations, release matrix, migration cookbook, compatibility, security,
+error, testing, and CI sync as `ready`. It imports P14-17 through P14-26 reports
+and keeps the surface state as `provider_poc_not_promoted` behind
+`:app:verifyNodePhase14TaskDeviceMediaDocSync`.

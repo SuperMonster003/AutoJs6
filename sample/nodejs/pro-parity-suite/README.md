@@ -34,3 +34,9 @@ the WorkManager one-shot schedule/cancel path represented by
 `snippets/tasks-work-manager.cjs`. It does not execute Java interop, Rhino
 global install, overlay, notifications/power, media/recorder, screenshot/OCR,
 or accessibility authority examples.
+
+P14-27 docs sync keeps `tasks-work-manager` as the only task/device/media
+runtime smoke path. `notifications-power` and `media-recorder` remain migration
+evidence and guarded/denial-oriented snippets until notification disclosure,
+OEM power behavior, real recorder sessions, packaged recorder stress, playback,
+and MediaStore provider gates are promoted.

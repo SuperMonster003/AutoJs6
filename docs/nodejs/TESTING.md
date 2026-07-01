@@ -3202,6 +3202,12 @@ gate. It writes `phase14-media-playback-mediastore-boundary.json` plus `.md`,
 imports playback and MediaStore stable-denial evidence, keeps playback,
 playlists, scanFile, MediaStore, broad media-library permissions, and raw media
 handles denied, and records future scoped-provider requirements.
+`:app:verifyNodePhase14TaskDeviceMediaDocSync` depends on the P14-26 media
+playback/MediaStore boundary gate. It writes
+`phase14-task-device-media-doc-sync.json` plus `.md`, imports P14-17 through
+P14-26 generated reports, verifies TypeScript declaration references, release
+matrix rows, migration cookbook, examples, compatibility, security, error, and
+CI docs, and keeps runtime authority unchanged.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable
