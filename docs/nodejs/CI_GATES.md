@@ -1063,6 +1063,25 @@ Use `tools/nodejs/phase13/archive-full-heavy-resource-soak.js` to validate and
 copy completed soak JSON into the canonical final-soak paths; the helper writes
 an archive audit report and refuses dirty or under-duration inputs.
 
+`verifyNodePhase14Baseline` and `verifyNodePhase14SurfaceManifest` are the
+Phase 14 v1.2 foundation gates:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14Baseline
+.\gradlew.bat --console=plain :app:verifyNodePhase14SurfaceManifest
+.\gradlew.bat --console=plain :app:verifyNodePhase14PromotionContracts
+```
+
+The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
+v1.1 closeout state as the starting contract, imports the nine Phase 13
+future-promotion tasks, and writes `phase14-baseline-verification.json` plus
+`.md`. The surface manifest gate verifies the Phase 14 manifest, schema/docs,
+Gradle wiring, and exact P14-00 through P14-39 task ownership. The promotion
+contracts gate verifies shared v1.2 promotion states, report conventions,
+release-blocker classification, packaged high-privilege disclosure, rollback
+and crash circuit breaker fields, and Android 12 / Android 15+ device matrix
+requirements.
+
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
 collector, embedded/native process marker writers, required crash marker

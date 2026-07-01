@@ -3027,6 +3027,27 @@ gate so RC-blocking experimental, protocol-gated, blocked, and explicit-subgate 
 `verifyNodeV11RcReadiness` writes `app/build/reports/nodejs/v1.1-rc-readiness.json` and requires a clean beta summary,
 ready packaged aggregate, and beta blocker statuses of `deferred` or `closed` before RC planning starts.
 
+Phase 14 v1.2 foundation gates:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14Baseline
+.\gradlew.bat --console=plain :app:verifyNodePhase14SurfaceManifest
+.\gradlew.bat --console=plain :app:verifyNodePhase14PromotionContracts
+```
+
+`verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
+`build/reports/nodejs/phase14-baseline-verification.json` plus `.md`. It
+requires the Phase 13 v1.1 closeout gate to remain `ready`, imports the nine
+Phase 13 future-promotion tasks, and fails if required internal final blockers
+reopen. `verifyNodePhase14SurfaceManifest` writes
+`phase14-surface-manifest-verification.json` plus `.md` and verifies the Phase
+14 surface manifest maps P14-00 through P14-39 exactly once.
+`verifyNodePhase14PromotionContracts` writes
+`phase14-promotion-contracts.json` plus `.md` and verifies the shared v1.2
+promotion state vocabulary, report conventions, release-blocker
+classification, packaged high-privilege disclosure contract, rollback/crash
+circuit breaker contract, and Android 12 / Android 15+ device matrix fields.
+
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable
 doctor reports.

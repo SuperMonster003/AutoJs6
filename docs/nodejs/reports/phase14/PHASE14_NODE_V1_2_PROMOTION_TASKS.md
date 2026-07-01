@@ -87,54 +87,88 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 
 ### P0 Branch And Gate Foundation
 
-- [ ] P14-00: Record Phase 14 baseline from the Phase 13 closeout.
+- [x] P14-00: Record Phase 14 baseline from the Phase 13 closeout.
   - Inputs: Phase 13 summary JSON, closeout breakdown, final blocker registry,
     v1.1 capability matrix, current branch name.
   - Output: `build/reports/nodejs/phase14-baseline-verification.json`.
-  - Gate: proposed `:app:verifyNodePhase14Baseline`.
+  - Gate: `:app:verifyNodePhase14Baseline`.
   - Acceptance: confirms Phase 13 release gate remains `ready`, imports the 9
     future-promotion tasks, and fails if v1.1 final blockers reopen.
+  - Landed:
+    - `tools/nodejs/phase14/verify-node-phase14-baseline.js`
+    - `app/node-phase14-gate.gradle.kts`
+    - `build/reports/nodejs/phase14-baseline-verification.json`
+    - `build/reports/nodejs/phase14-baseline-verification.md`
 
-- [ ] P14-01: Create Phase 14 surface manifest.
+- [x] P14-01: Create Phase 14 surface manifest.
   - Output: `docs/nodejs/phase14/phase14-surface-manifest.json` and companion
     markdown.
-  - Gate: proposed `:app:verifyNodePhase14SurfaceManifest`.
+  - Gate: `:app:verifyNodePhase14SurfaceManifest`.
   - Acceptance: every P14 task maps to exactly one surface, profile, risk tier,
     report path, rollback hook, and owner evidence class.
+  - Landed:
+    - `docs/nodejs/phase14/phase14-surface-manifest.json`
+    - `docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md`
+    - `docs/nodejs/schemas/phase14_surface_manifest.schema.json`
+    - `tools/nodejs/phase14/verify-node-phase14-surface-manifest.js`
+    - `build/reports/nodejs/phase14-surface-manifest-verification.json`
+    - `build/reports/nodejs/phase14-surface-manifest-verification.md`
 
-- [ ] P14-02: Define v1.2 capability promotion vocabulary.
+- [x] P14-02: Define v1.2 capability promotion vocabulary.
   - Scope: `safe_default`, `pro_compat_opt_in`, `desktop_compat_opt_in`,
     `debug_unsafe_lab`, and `permanently_unsupported`.
   - Acceptance: docs distinguish `implemented`, `packaged_ready`,
     `device_matrix_ready`, `policy_ready`, `stable_denied`, and
     `future_only`.
+  - Gate: `:app:verifyNodePhase14PromotionContracts`.
+  - Landed:
+    - `docs/nodejs/phase14/phase14-promotion-contracts.json`
+    - `docs/nodejs/phase14/PHASE14_PROMOTION_CONTRACTS.md`
 
-- [ ] P14-03: Add Phase 14 verifier/report conventions.
+- [x] P14-03: Add Phase 14 verifier/report conventions.
   - Scope: report schemas, deterministic report names, markdown mirrors, and
     release-blocker classification.
   - Acceptance: verifiers can classify blockers as `release_blocking`,
     `future_promotion`, `external`, or `intentional_non_goal`.
+  - Gate: `:app:verifyNodePhase14PromotionContracts`.
+  - Landed:
+    - report name pattern `phase14-<surface-or-task>.json`
+    - required report fields, markdown mirror policy, status vocabulary, and
+      blocker classification vocabulary
 
-- [ ] P14-04: Define packaged high-privilege disclosure contract.
+- [x] P14-04: Define packaged high-privilege disclosure contract.
   - Scope: manifest metadata, install/run review copy, foreground notification
     ownership, stop action, and user-visible denial diagnostics.
   - Acceptance: live UI, overlay, MediaProjection, recorder, tasks,
     notifications, shell/root, and future profile switching can share the same
     disclosure vocabulary.
+  - Gate: `:app:verifyNodePhase14PromotionContracts`.
+  - Landed:
+    - shared high-privilege packaged disclosure fields
+    - raw Android object denial list for provider promotion
 
-- [ ] P14-05: Define rollback and crash circuit breaker hooks for promoted
+- [x] P14-05: Define rollback and crash circuit breaker hooks for promoted
   providers.
   - Scope: provider-level disable flags, Safe fallback, crash threshold,
     packaged downgrade behavior, and Node Doctor diagnostics.
   - Acceptance: docs and runtime diagnostics can identify which promoted
     provider was disabled and why.
+  - Gate: `:app:verifyNodePhase14PromotionContracts`.
+  - Landed:
+    - provider/package scoped disable policy
+    - default crash circuit breaker threshold and required diagnostics
 
-- [ ] P14-06: Define v1.2 device and packaged evidence matrix.
+- [x] P14-06: Define v1.2 device and packaged evidence matrix.
   - Required matrix: at least one Android 12 class device and one Android 15+
     class device for high-privilege provider behavior.
   - Acceptance: matrix records permission state, notification permission,
     background-start behavior, task removal, relaunch, crash recovery, and OEM
     quirks.
+  - Gate: `:app:verifyNodePhase14PromotionContracts`.
+  - Landed:
+    - Android 12 class and Android 15+ class minimum matrix policy
+    - required permission, lifecycle, foreground disclosure, crash recovery,
+      resource, OEM, and report path fields
 
 ### P1 Pro UI, Overlay, Automation, Screenshot, OCR
 

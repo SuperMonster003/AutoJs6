@@ -1,0 +1,269 @@
+{
+  "schema": "autojs6-node-phase14-surface-manifest-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "updatedAt": "2026-07-01",
+  "profileVocabulary": [
+    "safe_default",
+    "pro_compat_opt_in",
+    "desktop_compat_opt_in",
+    "debug_unsafe_lab",
+    "permanently_unsupported"
+  ],
+  "statusVocabulary": [
+    "planned",
+    "design_locked",
+    "debug_poc",
+    "provider_poc",
+    "opt_in_promoted",
+    "default_promoted",
+    "rejected"
+  ],
+  "surfaces": [
+    {
+      "id": "phase14.baseline",
+      "status": "default_promoted",
+      "profiles": [
+        "safe_default"
+      ],
+      "tasks": [
+        "P14-00"
+      ],
+      "summary": "Phase 14 baseline verifier that imports the Phase 13 v1.1 closeout state, final blocker registry, and future-promotion backlog.",
+      "risk": "low",
+      "runtimeSurface": [],
+      "evidence": [
+        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md",
+        "docs/nodejs/reports/phase13/PHASE13_SUMMARY.md",
+        "docs/nodejs/reports/phase13/PHASE13_CLOSEOUT_BREAKDOWN.md",
+        "tools/nodejs/phase14/verify-node-phase14-baseline.js",
+        ":app:verifyNodePhase14Baseline",
+        "build/reports/nodejs/phase14-baseline-verification.json",
+        "build/reports/nodejs/phase14-baseline-verification.md"
+      ],
+      "rollback": "Remove the Phase 14 baseline gate and keep the Phase 13 v1.1 closeout as the latest planning source."
+    },
+    {
+      "id": "phase14.surface_manifest",
+      "status": "default_promoted",
+      "profiles": [
+        "safe_default"
+      ],
+      "tasks": [
+        "P14-01"
+      ],
+      "summary": "Machine-readable Phase 14 manifest and verifier for v1.2 task ownership, status, profile, risk, evidence, and rollback tracking.",
+      "risk": "low",
+      "runtimeSurface": [],
+      "evidence": [
+        "docs/nodejs/phase14/phase14-surface-manifest.json",
+        "docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md",
+        "docs/nodejs/schemas/phase14_surface_manifest.schema.json",
+        "tools/nodejs/phase14/verify-node-phase14-surface-manifest.js",
+        ":app:verifyNodePhase14SurfaceManifest",
+        "build/reports/nodejs/phase14-surface-manifest-verification.json",
+        "build/reports/nodejs/phase14-surface-manifest-verification.md"
+      ],
+      "rollback": "Revert the Phase 14 manifest and verifier without changing runtime behavior."
+    },
+    {
+      "id": "phase14.promotion_contracts",
+      "status": "design_locked",
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "tasks": [
+        "P14-02",
+        "P14-03",
+        "P14-04",
+        "P14-05",
+        "P14-06"
+      ],
+      "summary": "Shared v1.2 capability vocabulary, report conventions, packaged high-privilege disclosure contract, rollback hooks, and device evidence matrix.",
+      "risk": "high",
+      "runtimeSurface": [
+        "v1.2 capability promotion vocabulary",
+        "release_blocking and future_promotion report classification",
+        "packaged high-privilege disclosure contract",
+        "provider rollback and crash circuit breaker hooks",
+        "Android 12 and Android 15+ evidence matrix"
+      ],
+      "evidence": [
+        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md",
+        "docs/nodejs/phase14/phase14-promotion-contracts.json",
+        "docs/nodejs/phase14/PHASE14_PROMOTION_CONTRACTS.md",
+        "tools/nodejs/phase14/verify-node-phase14-promotion-contracts.js",
+        ":app:verifyNodePhase14PromotionContracts",
+        "build/reports/nodejs/phase14-promotion-contracts.json",
+        "build/reports/nodejs/phase14-promotion-contracts.md"
+      ],
+      "rollback": "Keep Phase 13 v1.1 profile behavior and deny effective Pro/Desktop promotion until shared contracts are complete."
+    },
+    {
+      "id": "pro.ui_automation_media",
+      "status": "planned",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "tasks": [
+        "P14-07",
+        "P14-08",
+        "P14-09",
+        "P14-10",
+        "P14-11",
+        "P14-12",
+        "P14-13",
+        "P14-14",
+        "P14-15",
+        "P14-16"
+      ],
+      "summary": "Promote packaged live UI, Android overlay, accessibility selector lifecycle, MediaProjection, advanced image operations, packaged OCR/image quotas, and synchronized docs/types.",
+      "risk": "high",
+      "runtimeSurface": [
+        "require(\"ui\") packaged live provider",
+        "require(\"ui.overlay\") Android overlay provider",
+        "accessibility selector service lifecycle",
+        "MediaProjection capture provider",
+        "opaque image handle processing",
+        "OCR provider/model selection"
+      ],
+      "evidence": [
+        "docs/nodejs/reports/phase13/P13_17_LIVE_UI_PROVIDER_PROMOTION.md",
+        "docs/nodejs/reports/phase13/P13_18_OVERLAY_PROVIDER_PROMOTION.md",
+        "docs/nodejs/reports/phase13/P13_19_ACCESSIBILITY_SELECTOR_PROMOTION.md",
+        "docs/nodejs/reports/phase13/P13_20_SCREENSHOT_IMAGE_OCR_PROMOTION.md",
+        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"
+      ],
+      "rollback": "Fail closed to current Phase 13 provider POC or stable denial behavior for UI, overlay, accessibility, MediaProjection, image, and OCR surfaces."
+    },
+    {
+      "id": "pro.tasks_device_media",
+      "status": "planned",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "tasks": [
+        "P14-17",
+        "P14-18",
+        "P14-19",
+        "P14-20",
+        "P14-21",
+        "P14-22",
+        "P14-23",
+        "P14-24",
+        "P14-25",
+        "P14-26",
+        "P14-27"
+      ],
+      "summary": "Promote JSON-safe task mutations, IntentTask/broadcast provider behavior, notification ownership, power/OEM matrix, recorder sessions, packaged media stress, and synchronized docs/types.",
+      "risk": "high",
+      "runtimeSurface": [
+        "JSON-safe task database mutations",
+        "packaged task row ownership",
+        "IntentTask and broadcast trigger provider",
+        "notification ownership and foreground disclosure",
+        "settings/power status and OEM matrix",
+        "MediaRecorder session provider",
+        "packaged recorder and media stress"
+      ],
+      "evidence": [
+        "docs/nodejs/reports/phase13/P13_21_TASK_DATABASE_PROVIDER.md",
+        "docs/nodejs/reports/phase13/P13_22_INTENT_BROADCAST_PROVIDER.md",
+        "docs/nodejs/reports/phase13/P13_25_NOTIFICATIONS_SETTINGS_POWER_MANAGER.md",
+        "docs/nodejs/reports/phase13/P13_26_MEDIA_RECORDER_MEDIAINFO_PROVIDER.md",
+        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"
+      ],
+      "rollback": "Disable promoted Pro task/device/media capability switches and retain v1.1 JSON-safe snapshots, stable denial stubs, and scoped read-only provider behavior."
+    },
+    {
+      "id": "desktop.worker_runtime",
+      "status": "planned",
+      "profiles": [
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "tasks": [
+        "P14-28",
+        "P14-29",
+        "P14-30",
+        "P14-31",
+        "P14-32"
+      ],
+      "summary": "Decide worker_threads v1.2 promotion from native ABI evidence, add runnable/package/resource gates if available, and keep process-worker replacement bounded.",
+      "risk": "critical",
+      "runtimeSurface": [
+        "worker_threads native availability",
+        "worker runnable smoke",
+        "packaged worker behavior",
+        "worker resource and RSS stress",
+        "process-worker replacement policy"
+      ],
+      "evidence": [
+        "docs/nodejs/reports/phase13/P13_34_WORKER_THREADS_OPT_IN_PROMOTION.md",
+        "docs/nodejs/releases/V1_1_WORKER_POLICY.md",
+        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"
+      ],
+      "rollback": "Keep worker_threads intentionally unsupported and keep process-worker replacement without a user-facing facade unless native and packaged gates pass."
+    },
+    {
+      "id": "security.packaged_release_gates",
+      "status": "planned",
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "tasks": [
+        "P14-33",
+        "P14-34"
+      ],
+      "summary": "Expand the v1.2 security regression corpus and packaged aggregate smoke for every promoted capability and denial boundary.",
+      "risk": "critical",
+      "runtimeSurface": [
+        "v1.2 security regression corpus",
+        "packaged aggregate smoke",
+        "raw object denial",
+        "packaged metadata mismatch denial",
+        "Safe downgrade evidence"
+      ],
+      "evidence": [
+        "docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json",
+        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"
+      ],
+      "rollback": "Disable all v1.2 promoted capability switches, keep Safe profile default, and block packaged promotion if aggregate security or packaged smoke fails."
+    },
+    {
+      "id": "docs.examples.final_gate",
+      "status": "planned",
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in"
+      ],
+      "tasks": [
+        "P14-35",
+        "P14-36",
+        "P14-37",
+        "P14-38",
+        "P14-39"
+      ],
+      "summary": "Update v1.2 type declarations, migration docs, examples, release checklist, Phase 14 summary gate, and next-branch handoff.",
+      "risk": "medium",
+      "runtimeSurface": [
+        "autojs6-node TypeScript declarations",
+        "v1.2 migration and Pro comparison docs",
+        "Phase 14 summary generator",
+        "v1.2 release candidate checklist",
+        "next-phase backlog handoff"
+      ],
+      "evidence": [
+        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md",
+        "docs/nodejs/reports/phase14/README.md"
+      ],
+      "rollback": "Keep v1.2 examples and docs marked as future-only until runtime promotion evidence and the final Phase 14 summary gate are ready."
+    }
+  ]
+}
