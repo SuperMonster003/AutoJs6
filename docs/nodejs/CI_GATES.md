@@ -1197,6 +1197,12 @@ packaged media/recorder boundary smoke, and exact `media.recording` denial
 evidence, records runtime prompt, foreground disclosure, session resource,
 temporary output, crash cleanup, and packaged stress requirements, and keeps
 real `recorder.start()` / `recorder.stop()` unpromoted.
+The `:app:verifyNodePhase14PackagedRecorderMediaStress` gate writes
+`phase14-packaged-recorder-media-stress.json` plus `.md`, imports the current
+packaged media/recorder status and denial boundary smoke, reserves positive
+start/stop, foreground disclosure, task removal, relaunch/crash, quota,
+temporary output cleanup, and denial archives, and keeps packaged recorder
+start/stop unpromoted.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

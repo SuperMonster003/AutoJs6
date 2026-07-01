@@ -195,6 +195,22 @@ records the current recorder denial expectations:
   `ParcelFileDescriptor`, raw file descriptors, `Uri`, `Context`, foreground
   service handles, and Java objects stay future-promotion blockers.
 
+## P14-25 packaged recorder/media stress denial sync
+
+P14-25 does not add a new error code or promote packaged recorder start/stop.
+It records packaged stress denial expectations:
+
+- Current packaged media/recorder evidence may prove `recorder.getStatus()`,
+  start denial, and missing `media.recording` capability denial only.
+- Positive packaged start/stop remains denied until visible microphone
+  foreground disclosure, deterministic stop behavior, task removal cleanup,
+  relaunch/crash recovery, quota enforcement, temporary output cleanup, missing
+  Android permission denial, denied prompt, metadata mismatch, and Safe
+  downgrade archives exist.
+- Packaged recorder must continue to deny raw media recorder objects, raw file
+  descriptors, broad media-library permissions, and background microphone
+  capture without user-visible foreground disclosure.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

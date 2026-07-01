@@ -155,3 +155,10 @@ defines runtime permission, foreground disclosure, ResourceRegistry session,
 temporary output, crash cleanup, and packaged stress requirements, and keeps
 `recorder.start()` / `recorder.stop()` unpromoted behind
 `:app:verifyNodePhase14RecorderProvider`.
+
+`P14_25_PACKAGED_RECORDER_MEDIA_STRESS.md` records packaged recorder/media
+stress evidence as `partial`. It imports the current packaged media/recorder
+boundary smoke, reserves positive start/stop, foreground disclosure, task
+removal, relaunch/crash, quota, temp cleanup, and denial archives, and keeps
+packaged recorder start/stop unpromoted behind
+`:app:verifyNodePhase14PackagedRecorderMediaStress`.

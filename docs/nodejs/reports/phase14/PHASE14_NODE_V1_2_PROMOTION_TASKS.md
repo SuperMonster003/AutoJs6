@@ -613,6 +613,23 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-25: Add packaged recorder and media stress evidence.
   - Scope: packaged recorder start/stop, task removal, relaunch, crash
     recovery, quota, temporary file cleanup, and denial without capability.
+  - Gate: `:app:verifyNodePhase14PackagedRecorderMediaStress`.
+  - Packaged recorder/media stress gate deployed:
+    - Adds `docs/nodejs/phase14/packaged-recorder-media-stress-plan.json`
+      and `PHASE14_PACKAGED_RECORDER_MEDIA_STRESS.md`.
+    - Imports P13-26 packaged media/recorder boundary smoke for module
+      resolution, read-only media snapshots, scoped mediainfo, recorder status,
+      stable start denial, and missing `media.recording` capability denial.
+    - Imports P14-24 recorder provider requirements for runtime prompt,
+      foreground disclosure, session resource ownership, temporary output
+      cleanup, crash cleanup, and rollback.
+    - Reserves future packaged stress rows for positive start/stop, visible
+      microphone foreground disclosure, stop action, task removal, relaunch,
+      crash recovery, quota enforcement, temporary file cleanup, missing
+      Android permission, denied prompt, metadata mismatch, and Safe downgrade.
+    - Writes
+      `build/reports/nodejs/phase14-packaged-recorder-media-stress.json` and
+      `.md`.
   - Acceptance: microphone foreground disclosure is visible and stop behavior
     is deterministic.
 

@@ -3189,6 +3189,13 @@ packaged media/recorder boundary smoke, and exact `media.recording` denial
 evidence, records runtime prompt, foreground disclosure, session resource,
 temporary output, crash cleanup, and packaged stress requirements, and keeps
 real `recorder.start()` / `recorder.stop()` unpromoted.
+`:app:verifyNodePhase14PackagedRecorderMediaStress` depends on the P14-24
+recorder provider gate and the Phase 13 media/recorder/mediainfo gate. It
+writes `phase14-packaged-recorder-media-stress.json` plus `.md`, imports the
+current packaged media/recorder status and denial boundary smoke, reserves
+positive start/stop, foreground disclosure, task removal, relaunch/crash,
+quota, temporary output cleanup, and denial archives, and keeps packaged
+recorder start/stop unpromoted.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable
