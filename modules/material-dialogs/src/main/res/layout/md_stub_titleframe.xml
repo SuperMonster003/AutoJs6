@@ -26,8 +26,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:maxLines="5"
-        android:ellipsize="end"
         android:textSize="@dimen/md_title_textsize"
         tools:text="Title" />
 
