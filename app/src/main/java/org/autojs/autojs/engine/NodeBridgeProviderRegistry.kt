@@ -387,7 +387,7 @@ object NodeBridgeProviderRegistry {
         BARCODE_PROVIDER -> barcodeDetails(context)
         MEDIA_PROVIDER -> linkedMapOf(
             "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,mediainfo.read,mediainfo.get,recorder.getStatus",
-            "blockedMethods" to "recorder.start,recorder.stop,media.play,media.pause,media.stop,media.scanFile,mediaStore.query,mediaStore.insert",
+            "blockedMethods" to "recorder.start,recorder.stop,media.play,media.pause,media.resume,media.stop,media.seek,media.scanFile,media.playlist,media.queue,mediaStore.query,mediaStore.insert,mediaStore.update,mediaStore.delete,mediaStore.openFile",
             "capability" to NodeBridgePermissionManifest.MEDIA,
             "audioCapability" to NodeBridgePermissionManifest.MEDIA_AUDIO,
             "metadataCapability" to NodeBridgePermissionManifest.MEDIA_METADATA,
@@ -406,6 +406,10 @@ object NodeBridgeProviderRegistry {
             "phase14PackagedRecorderMediaStress" to "P14-25 packaged recorder/media stress evidence gate",
             "recorderPackagedStressPolicy" to "packaged_start_stop_task_removal_relaunch_crash_quota_temp_cleanup_required_before_promotion",
             "mediaPackagedStressPolicy" to "current_packaged_media_recorder_stress_is_boundary_only_no_microphone_capture",
+            "phase14MediaPlaybackMediaStoreBoundary" to "P14-26 media playback and MediaStore boundary decision gate",
+            "mediaPlaybackPolicy" to "v1_2_stable_denied_until_scoped_provider_audio_focus_lifecycle_packaged_evidence",
+            "mediaStoreBoundaryPolicy" to "query_insert_update_delete_scanFile_broad_media_library_permissions_stable_denied",
+            "mediaFutureCapabilityPolicy" to "future_media_playback_media_library_media_library_mutate_capabilities_require_new_gate",
             "recorderPolicy" to "recorder exposes getStatus only; start/stop fail closed until foreground disclosure, permission, lifecycle, cleanup, and packaged smoke are promoted",
             "rawObjectPolicy" to "no raw MediaPlayer, AudioManager, MediaRecorder, AudioRecord, AudioPlaybackCaptureConfiguration, MediaMetadataRetriever, MediaInfo, MediaStore cursor, ParcelFileDescriptor, Uri, file descriptor, foreground service handle, or Context object crosses the bridge",
             "statusReason" to "P13-26 partial gate promotes JSON-safe scoped metadata and read-only audio status while recording/playback/MediaStore remain blocked",

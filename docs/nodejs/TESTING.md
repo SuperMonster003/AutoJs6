@@ -3196,6 +3196,12 @@ current packaged media/recorder status and denial boundary smoke, reserves
 positive start/stop, foreground disclosure, task removal, relaunch/crash,
 quota, temporary output cleanup, and denial archives, and keeps packaged
 recorder start/stop unpromoted.
+`:app:verifyNodePhase14MediaPlaybackMediaStoreBoundary` depends on the P14-25
+packaged recorder/media stress gate and the Phase 13 media/recorder/mediainfo
+gate. It writes `phase14-media-playback-mediastore-boundary.json` plus `.md`,
+imports playback and MediaStore stable-denial evidence, keeps playback,
+playlists, scanFile, MediaStore, broad media-library permissions, and raw media
+handles denied, and records future scoped-provider requirements.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

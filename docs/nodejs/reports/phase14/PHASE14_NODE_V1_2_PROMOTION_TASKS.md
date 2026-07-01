@@ -636,6 +636,28 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-26: Decide MediaStore and playback boundaries for v1.2.
   - Scope: keep stable-denied or define a scoped future provider with explicit
     ownership, permissions, and privacy behavior.
+  - Gate: `:app:verifyNodePhase14MediaPlaybackMediaStoreBoundary`.
+  - Media playback/MediaStore boundary gate deployed:
+    - Adds
+      `docs/nodejs/phase14/media-playback-mediastore-boundary-plan.json` and
+      `PHASE14_MEDIA_PLAYBACK_MEDIASTORE_BOUNDARY.md`.
+    - Imports P13-26 stable denial for audio playback, `MediaPlayer`
+      lifecycle, playlists, playback focus, external MediaStore
+      query/insert/update/delete, broad media-library permissions, mutable
+      media collection access, and raw media objects.
+    - Keeps the current promoted media surface limited to
+      `media.getAudioStreamVolume()`, `media.getAudioStreamMaxVolume()`,
+      `media.getAudioStreamInfo()`, `mediainfo.read()`, and `mediainfo.get()`.
+    - Records future-provider requirements for exact `media.playback`,
+      `media.library`, and `media.library.mutate` style capabilities,
+      owner-scoped handles, Android permission matrix, packaged evidence,
+      Safe downgrade, and raw object denial.
+    - Keeps playback, playlist/queue, `scanFile`, MediaStore, broad media
+      permissions, raw `MediaPlayer`, raw `ContentResolver`, raw `Uri`, raw
+      `ParcelFileDescriptor`, raw file descriptors, and Java objects denied.
+    - Writes
+      `build/reports/nodejs/phase14-media-playback-mediastore-boundary.json`
+      and `.md`.
   - Acceptance: raw media library mutation, playlist, and broad storage
     permissions remain denied unless a full provider gate is opened.
 

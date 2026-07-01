@@ -224,7 +224,7 @@
         "P14-26",
         "P14-27"
       ],
-      "summary": "Promote JSON-safe task mutations, IntentTask/broadcast provider behavior, notification ownership, power/OEM matrix, recorder sessions, packaged media stress, and synchronized docs/types. P14-17 adds the JSON-safe task database mutation contract and archive gate; P14-18 adds the task schema migration and rollback fixture contract; P14-19 adds the packaged task scheduling smoke baseline; P14-20 adds the JSON-safe IntentTask/broadcast provider contract; P14-21 adds the packaged broadcast trigger/remove smoke contract; P14-22 adds notification ownership and foreground disclosure evidence; P14-23 adds the settings/power OEM and background-launch matrix gate; P14-24 adds the real recorder session promotion gate; P14-25 adds the packaged recorder/media stress gate. Runtime authority remains unpromoted.",
+      "summary": "Promote JSON-safe task mutations, IntentTask/broadcast provider behavior, notification ownership, power/OEM matrix, recorder sessions, packaged media stress, and synchronized docs/types. P14-17 adds the JSON-safe task database mutation contract and archive gate; P14-18 adds the task schema migration and rollback fixture contract; P14-19 adds the packaged task scheduling smoke baseline; P14-20 adds the JSON-safe IntentTask/broadcast provider contract; P14-21 adds the packaged broadcast trigger/remove smoke contract; P14-22 adds notification ownership and foreground disclosure evidence; P14-23 adds the settings/power OEM and background-launch matrix gate; P14-24 adds the real recorder session promotion gate; P14-25 adds the packaged recorder/media stress gate; P14-26 adds the media playback/MediaStore boundary gate. Runtime authority remains unpromoted.",
       "risk": "high",
       "runtimeSurface": [
         "JSON-safe task database mutations",
@@ -303,7 +303,14 @@
         "tools/nodejs/phase14/verify-node-phase14-packaged-recorder-media-stress.js",
         ":app:verifyNodePhase14PackagedRecorderMediaStress",
         "build/reports/nodejs/phase14-packaged-recorder-media-stress.json",
-        "build/reports/nodejs/phase14-packaged-recorder-media-stress.md"
+        "build/reports/nodejs/phase14-packaged-recorder-media-stress.md",
+        "docs/nodejs/phase14/media-playback-mediastore-boundary-plan.json",
+        "docs/nodejs/phase14/PHASE14_MEDIA_PLAYBACK_MEDIASTORE_BOUNDARY.md",
+        "docs/nodejs/reports/phase14/P14_26_MEDIA_PLAYBACK_MEDIASTORE_BOUNDARY.md",
+        "tools/nodejs/phase14/verify-node-phase14-media-playback-mediastore-boundary.js",
+        ":app:verifyNodePhase14MediaPlaybackMediaStoreBoundary",
+        "build/reports/nodejs/phase14-media-playback-mediastore-boundary.json",
+        "build/reports/nodejs/phase14-media-playback-mediastore-boundary.md"
       ],
       "rollback": "Disable promoted Pro task/device/media capability switches and retain v1.1 JSON-safe snapshots, stable denial stubs, and scoped read-only provider behavior."
     },

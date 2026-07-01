@@ -211,6 +211,25 @@ It records packaged stress denial expectations:
   descriptors, broad media-library permissions, and background microphone
   capture without user-visible foreground disclosure.
 
+## P14-26 media playback/MediaStore denial sync
+
+P14-26 does not add a new error code or promote playback, playlist, scanFile,
+MediaStore, or broad media-library permissions. It records the current denial
+expectations:
+
+- `media` remains limited to read-only audio-stream status methods and does
+  not expose playback lifecycle, playlist/queue, scanner, or player handles.
+- `mediainfo` remains scoped to relative files inside the Node working
+  directory and does not grant MediaStore or shared-storage access.
+- MediaStore query/insert/update/delete/open-file and broad `READ_MEDIA_*` /
+  `MANAGE_EXTERNAL_STORAGE` permissions stay denied until a future scoped
+  provider gate defines exact capabilities, ownership, Android permission
+  matrix, packaged evidence, privacy behavior, rollback, and raw object denial.
+- Raw `MediaPlayer`, `AudioTrack`, `AudioFocusRequest`, `ContentResolver`,
+  `MediaStore` cursor, `MediaScannerConnection`, `Uri`,
+  `ParcelFileDescriptor`, raw file descriptors, playlist handles, `Context`,
+  and Java objects stay future-promotion blockers.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

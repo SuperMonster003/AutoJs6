@@ -1203,6 +1203,11 @@ packaged media/recorder status and denial boundary smoke, reserves positive
 start/stop, foreground disclosure, task removal, relaunch/crash, quota,
 temporary output cleanup, and denial archives, and keeps packaged recorder
 start/stop unpromoted.
+The `:app:verifyNodePhase14MediaPlaybackMediaStoreBoundary` gate writes
+`phase14-media-playback-mediastore-boundary.json` plus `.md`, imports playback
+and MediaStore stable-denial evidence, keeps playback, playlists, scanFile,
+MediaStore, broad media-library permissions, and raw media handles denied, and
+records future scoped-provider requirements.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

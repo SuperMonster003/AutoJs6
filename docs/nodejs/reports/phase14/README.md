@@ -162,3 +162,10 @@ boundary smoke, reserves positive start/stop, foreground disclosure, task
 removal, relaunch/crash, quota, temp cleanup, and denial archives, and keeps
 packaged recorder start/stop unpromoted behind
 `:app:verifyNodePhase14PackagedRecorderMediaStress`.
+
+`P14_26_MEDIA_PLAYBACK_MEDIASTORE_BOUNDARY.md` records media playback and
+MediaStore boundary evidence as `partial`. It imports P13-26 stable-denial
+evidence, keeps playback, playlists, scanFile, MediaStore, broad media-library
+permissions, and raw media handles denied, and requires a future scoped
+provider gate before any of those surfaces can be promoted behind
+`:app:verifyNodePhase14MediaPlaybackMediaStoreBoundary`.
