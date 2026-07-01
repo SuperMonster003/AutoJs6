@@ -25,6 +25,7 @@ Provider POC gates:
 - `:app:verifyNodePhase14AdvancedImageOperations`
 - `:app:verifyNodePhase14PackagedImageOcrEvidence`
 - `:app:verifyNodePhase14UiAutomationMediaDocSync`
+- `:app:verifyNodePhase14TaskDatabaseProvider`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -94,3 +95,10 @@ examples, declarations, release matrix, compatibility, security, and error
 catalog sync as `ready`. It keeps `pro.ui_automation_media` at
 `provider_poc_not_promoted` and ensures high-risk Pro examples stay static,
 guarded, or denial-oriented unless their source provider gates are promoted.
+
+`P14_17_TASK_DATABASE_PROVIDER.md` records the JSON-safe task database mutation
+provider contract as `partial`. It imports P13-21 `work_manager`,
+`compat.tasks`, and `NodeTimedTaskSnapshots` evidence while keeping
+`require("tasks")`, future `tasks` capabilities, live database mutation,
+schema migration, wall-clock scheduler parity, and packaged task rows
+unpromoted.

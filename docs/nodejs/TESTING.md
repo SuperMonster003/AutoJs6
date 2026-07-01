@@ -3043,6 +3043,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14AdvancedImageOperations
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedImageOcrEvidence
 .\gradlew.bat --console=plain :app:verifyNodePhase14UiAutomationMediaDocSync
+.\gradlew.bat --console=plain :app:verifyNodePhase14TaskDatabaseProvider
 ```
 
 `verifyNodePhase14Baseline` depends on `generateNodePhase13Summary` and writes
@@ -3125,6 +3126,14 @@ plus `.md`, verifies the P14-16 docs sync matrix, keeps
 already covered Pro parity smoke subset executes while overlay, media/recorder,
 screenshot/OCR, and accessibility snippets remain static, guarded, or
 denial-oriented.
+`verifyNodePhase14TaskDatabaseProvider` depends on the P14-16 docs sync gate
+and the Phase 13 task database provider gate. It writes
+`phase14-task-database-provider.json` plus `.md`, verifies the P14-17
+JSON-safe task database mutation contract, imports P13-21 `work_manager`,
+`compat.tasks`, and `NodeTimedTaskSnapshots` evidence, keeps
+`pro.tasks_device_media` at `provider_poc`, and keeps `require("tasks")`, live
+database mutation, schema migration, wall-clock scheduler parity, and packaged
+task rows unpromoted.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

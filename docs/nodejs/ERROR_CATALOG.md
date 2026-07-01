@@ -56,6 +56,25 @@ surface for UI/automation/media migration examples while
   `ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED`; callers should not interpret provider
   failure as permission or profile promotion.
 
+## P14-17 task database mutation denial sync
+
+P14-17 does not add a new error code or expose `require("tasks")`. It records
+the stable denial surface required before future task database mutation can be
+promoted:
+
+- Missing future `tasks` capability metadata must reject before provider
+  dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED` or the existing
+  disabled-module error shape.
+- Invalid JSON descriptors, invalid JSON patches, owner/id namespace mismatch,
+  and legacy numeric `TimedTask` ids used as mutable handles must reject with
+  `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST` or a future provider-specific stable
+  validation code.
+- `compat.tasks.addDailyTask()`, `addWeeklyTask()`, and IntentTask helpers
+  remain `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`; `compat.tasks.updateTask()`
+  remains `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`.
+- Raw `TimedTask`, scheduler, database cursor, mutable row handle,
+  `IntentTask`, `PendingIntent`, `Intent`, and Java objects remain blocked.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

@@ -406,7 +406,23 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-17: Implement JSON-safe task database mutations.
   - Scope: add, update, enable, disable, remove, list, get, ownership mapping,
     id mapping, and stable errors.
-  - Gate: proposed `:app:verifyNodePhase14TaskDatabaseProvider`.
+  - Gate: `:app:verifyNodePhase14TaskDatabaseProvider`.
+  - Task database provider contract gate deployed:
+    - Adds `docs/nodejs/phase14/task-database-provider-plan.json` and
+      `PHASE14_TASK_DATABASE_PROVIDER.md` for the JSON-safe task database
+      mutation contract.
+    - Imports P13-21 `work_manager`, `compat.tasks`, and
+      `NodeTimedTaskSnapshots` evidence without exposing `require("tasks")`.
+    - Reserves future `add`, `update`, `enable`, `disable`, `remove`, `list`,
+      and `get` operations over versioned JSON descriptors and patches.
+    - Records owner/id mapping boundaries for opaque Node ids, legacy
+      `TimedTask` ids, packaged task ids, project identity, and package
+      identity.
+    - Keeps live mutation provider, ownership/id mapping archive, schema
+      migration/rollback, wall-clock scheduler, and packaged mutation smoke
+      archives open as `future_promotion`.
+    - Writes `build/reports/nodejs/phase14-task-database-provider.json` and
+      `.md`.
   - Acceptance: no raw `TimedTask`, scheduler, database cursor, or mutable row
     handle is exposed.
 

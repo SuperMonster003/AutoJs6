@@ -1,0 +1,130 @@
+{
+  "schema": "autojs6-node-phase14-task-database-provider-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-17",
+  "title": "JSON-safe task database mutation provider",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "surface": "pro.tasks_device_media",
+  "minimumPromotionPolicy": "Task database promotion requires JSON-only descriptors and patches, explicit owner/id mapping, stable errors, schema migration and rollback evidence, packaged row ownership, and no raw task, scheduler, cursor, or mutable row handles crossing into Node.",
+  "operationContract": {
+    "providerName": "tasks",
+    "targetProfile": "pro_compat_opt_in",
+    "capability": "tasks",
+    "currentRuntimeAuthority": "not_exposed",
+    "currentMigrationFacade": "autojs6:compat.tasks",
+    "descriptorSchema": "autojs6-node-task-database-descriptor-v1",
+    "operations": [
+      "add",
+      "update",
+      "enable",
+      "disable",
+      "remove",
+      "list",
+      "get"
+    ],
+    "stableDeniedCurrentMethods": [
+      "require(\"tasks\")",
+      "global tasks",
+      "compat.tasks.addDailyTask",
+      "compat.tasks.addWeeklyTask",
+      "compat.tasks.updateTask",
+      "compat.tasks.addIntentTask",
+      "compat.tasks.queryIntentTasks",
+      "compat.tasks.getIntentTask",
+      "compat.tasks.removeIntentTask"
+    ],
+    "stableErrors": [
+      "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED",
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
+      "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
+    ],
+    "ownershipMapping": {
+      "idNamespaces": [
+        "nodeTaskId",
+        "legacyTimedTaskId",
+        "packagedTaskId"
+      ],
+      "ownerFields": [
+        "profile",
+        "sourceRuntime",
+        "projectIdentity",
+        "packageIdentity",
+        "workingDirectory",
+        "descriptorVersion"
+      ],
+      "legacyTimedTaskIdsMutable": false,
+      "packagedRowsMainAppAliasAllowed": false
+    },
+    "jsonDescriptorFields": [
+      "schema",
+      "id",
+      "type",
+      "enabled",
+      "entry",
+      "scriptPath",
+      "arguments",
+      "timezone",
+      "time",
+      "daysOfWeek",
+      "constraints",
+      "timeoutMs",
+      "owner",
+      "createdAtEpochMs",
+      "updatedAtEpochMs"
+    ],
+    "rawObjectsDenied": [
+      "TimedTask",
+      "IntentTask",
+      "TaskScheduler",
+      "TimedTaskScheduler",
+      "AlarmManager",
+      "JobScheduler",
+      "WorkManager",
+      "WorkRequest",
+      "PendingIntent",
+      "BroadcastReceiver",
+      "Intent",
+      "database cursor",
+      "mutable row handle",
+      "ExecutionConfig",
+      "Android Context",
+      "Java object"
+    ]
+  },
+  "importedEvidence": [
+    "P13-21 records the existing work_manager bridge, compat.tasks one-shot migration facade, and read-only NodeTimedTaskSnapshots evidence.",
+    "work_manager remains the only currently exposed scheduled-task module.",
+    "compat.tasks daily/weekly/update and IntentTask methods reject before bridge dispatch.",
+    "require(\"tasks\"), global tasks, future task capabilities, raw TimedTask objects, database cursors, and mutable row handles remain unavailable."
+  ],
+  "requiredArchives": [
+    {
+      "id": "task_database_live_mutation_provider_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Live provider evidence for add, update, enable, disable, remove, list, and get over JSON descriptors and patches without raw task objects."
+    },
+    {
+      "id": "task_database_ownership_id_mapping_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Owner and id mapping evidence proving Node ids, legacy TimedTask ids, packaged task ids, project identity, and package identity cannot alias across owners."
+    },
+    {
+      "id": "task_database_schema_migration_rollback_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Schema version, downgrade, corruption recovery, unknown-version fail-closed, and rollback behavior for task descriptors and legacy row visibility."
+    },
+    {
+      "id": "task_database_wall_clock_scheduler_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Daily/weekly wall-clock scheduler evidence covering timezone and clock changes, reboot, Doze, exact-alarm permission, WorkManager/JobScheduler fallback, and quota diagnostics."
+    },
+    {
+      "id": "packaged_task_database_mutation_smoke_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged APK add/list/enable-disable/remove smoke proving packaged row ownership, disclosure, process death/relaunch behavior, task removal, and Safe downgrade policy."
+    }
+  ]
+}

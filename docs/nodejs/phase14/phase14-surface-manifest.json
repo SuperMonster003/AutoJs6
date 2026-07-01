@@ -207,7 +207,7 @@
     },
     {
       "id": "pro.tasks_device_media",
-      "status": "planned",
+      "status": "provider_poc",
       "profiles": [
         "pro_compat_opt_in"
       ],
@@ -224,7 +224,7 @@
         "P14-26",
         "P14-27"
       ],
-      "summary": "Promote JSON-safe task mutations, IntentTask/broadcast provider behavior, notification ownership, power/OEM matrix, recorder sessions, packaged media stress, and synchronized docs/types.",
+      "summary": "Promote JSON-safe task mutations, IntentTask/broadcast provider behavior, notification ownership, power/OEM matrix, recorder sessions, packaged media stress, and synchronized docs/types. P14-17 adds the JSON-safe task database mutation contract and archive gate while keeping runtime authority unpromoted.",
       "risk": "high",
       "runtimeSurface": [
         "JSON-safe task database mutations",
@@ -240,7 +240,14 @@
         "docs/nodejs/reports/phase13/P13_22_INTENT_BROADCAST_PROVIDER.md",
         "docs/nodejs/reports/phase13/P13_25_NOTIFICATIONS_SETTINGS_POWER_MANAGER.md",
         "docs/nodejs/reports/phase13/P13_26_MEDIA_RECORDER_MEDIAINFO_PROVIDER.md",
-        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"
+        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md",
+        "docs/nodejs/phase14/task-database-provider-plan.json",
+        "docs/nodejs/phase14/PHASE14_TASK_DATABASE_PROVIDER.md",
+        "docs/nodejs/reports/phase14/P14_17_TASK_DATABASE_PROVIDER.md",
+        "tools/nodejs/phase14/verify-node-phase14-task-database-provider.js",
+        ":app:verifyNodePhase14TaskDatabaseProvider",
+        "build/reports/nodejs/phase14-task-database-provider.json",
+        "build/reports/nodejs/phase14-task-database-provider.md"
       ],
       "rollback": "Disable promoted Pro task/device/media capability switches and retain v1.1 JSON-safe snapshots, stable denial stubs, and scoped read-only provider behavior."
     },

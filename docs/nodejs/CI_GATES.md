@@ -1080,6 +1080,7 @@ Phase 14 v1.2 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase14AdvancedImageOperations
 .\gradlew.bat --console=plain :app:verifyNodePhase14PackagedImageOcrEvidence
 .\gradlew.bat --console=plain :app:verifyNodePhase14UiAutomationMediaDocSync
+.\gradlew.bat --console=plain :app:verifyNodePhase14TaskDatabaseProvider
 ```
 
 The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
@@ -1145,6 +1146,12 @@ The UI/automation/media docs sync gate writes
 docs/examples/declarations sync matrix, release matrix, compatibility profile,
 security model, and error catalog, and keeps `pro.ui_automation_media` at
 `provider_poc_not_promoted` without adding runtime authority.
+The task database provider gate writes
+`phase14-task-database-provider.json` plus `.md`, verifies the P14-17
+JSON-safe task database mutation contract, imports P13-21 task database
+evidence, keeps `pro.tasks_device_media` at `provider_poc`, and keeps live
+database mutation, schema migration, wall-clock scheduler parity, packaged task
+rows, `require("tasks")`, and future `tasks` capabilities unpromoted.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
