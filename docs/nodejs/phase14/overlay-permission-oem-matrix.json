@@ -1,0 +1,168 @@
+{
+  "schema": "autojs6-node-phase14-overlay-permission-oem-matrix-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "updatedAt": "2026-07-01",
+  "task": "P14-09",
+  "surface": "ui.overlay",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "minimumMatrixPolicy": "Overlay promotion requires archived Android 12 class and Android 15+ class device evidence before pro_compat_opt_in promotion.",
+  "requiredDeviceClasses": [
+    "android_12_class",
+    "android_15_plus_class"
+  ],
+  "requiredFields": [
+    "deviceSerial",
+    "deviceModel",
+    "androidVersion",
+    "apiLevel",
+    "packageIdentity",
+    "profile",
+    "capabilities",
+    "androidPermissionsRequested",
+    "androidPermissionsGranted",
+    "notificationPermissionState",
+    "backgroundStartBehavior",
+    "settingsRoundTripBehavior",
+    "taskRemovalBehavior",
+    "relaunchBehavior",
+    "crashRecoveryBehavior",
+    "foregroundDisclosureBehavior",
+    "stopActionBehavior",
+    "leakOrResourceSummary",
+    "oemQuirks",
+    "reportPath"
+  ],
+  "requiredOverlayScenarios": [
+    "SYSTEM_ALERT_WINDOW denied fail-closed copy",
+    "SYSTEM_ALERT_WINDOW granted show/update/drainEvents/close",
+    "openPermissionSettings settings round-trip",
+    "task removal cleanup",
+    "package relaunch behavior",
+    "OEM permission/settings behavior notes"
+  ],
+  "evidenceRows": [
+    {
+      "id": "p14_08_denied_boundary_import",
+      "deviceClass": "host_or_instrumentation_import",
+      "status": "imported_denied_boundary",
+      "deviceSerial": "not_archived",
+      "deviceModel": "not_archived",
+      "androidVersion": "not_archived",
+      "apiLevel": "not_archived",
+      "packageIdentity": "org.autojs.autojs.debug",
+      "profile": "pro_compat_opt_in_candidate",
+      "capabilities": [
+        "ui.overlay",
+        "ui.overlay.permission",
+        "ui.overlay.foreground",
+        "ui.overlay.packaged"
+      ],
+      "androidPermissionsRequested": [
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ],
+      "androidPermissionsGranted": [],
+      "notificationPermissionState": "not_applicable_to_denied_boundary_import",
+      "backgroundStartBehavior": "not_claimed",
+      "settingsRoundTripBehavior": "settings intent dry-run and launch boundary imported from P12-14/P13-18/P14-08 gates",
+      "taskRemovalBehavior": "not_recorded",
+      "relaunchBehavior": "not_recorded",
+      "crashRecoveryBehavior": "not_recorded",
+      "foregroundDisclosureBehavior": "not_recorded",
+      "stopActionBehavior": "not_recorded",
+      "leakOrResourceSummary": "active overlay session count remains zero when permission is denied",
+      "oemQuirks": "not_recorded",
+      "reportPath": "docs/nodejs/reports/phase14/P14_08_OVERLAY_PROVIDER_V1.md"
+    },
+    {
+      "id": "android_12_overlay_permission_oem_archive",
+      "deviceClass": "android_12_class",
+      "status": "missing_device_archive",
+      "deviceSerial": "pending_android_12_device_archive",
+      "deviceModel": "pending_android_12_device_archive",
+      "androidVersion": "12",
+      "apiLevel": "pending_android_12_api_level",
+      "packageIdentity": "pending_packaged_or_debug_identity",
+      "profile": "pro_compat_opt_in_candidate",
+      "capabilities": [
+        "ui.overlay",
+        "ui.overlay.permission",
+        "ui.overlay.foreground",
+        "ui.overlay.packaged"
+      ],
+      "androidPermissionsRequested": [
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ],
+      "androidPermissionsGranted": [
+        "pending_user_grant"
+      ],
+      "notificationPermissionState": "pending",
+      "backgroundStartBehavior": "pending",
+      "settingsRoundTripBehavior": "pending",
+      "taskRemovalBehavior": "pending",
+      "relaunchBehavior": "pending",
+      "crashRecoveryBehavior": "pending",
+      "foregroundDisclosureBehavior": "pending",
+      "stopActionBehavior": "pending",
+      "leakOrResourceSummary": "pending",
+      "oemQuirks": "pending",
+      "reportPath": "pending_android_12_overlay_permission_oem_archive"
+    },
+    {
+      "id": "android_15_plus_overlay_permission_oem_archive",
+      "deviceClass": "android_15_plus_class",
+      "status": "missing_device_archive",
+      "deviceSerial": "pending_android_15_plus_device_archive",
+      "deviceModel": "pending_android_15_plus_device_archive",
+      "androidVersion": "15+",
+      "apiLevel": "pending_android_15_plus_api_level",
+      "packageIdentity": "pending_packaged_or_debug_identity",
+      "profile": "pro_compat_opt_in_candidate",
+      "capabilities": [
+        "ui.overlay",
+        "ui.overlay.permission",
+        "ui.overlay.foreground",
+        "ui.overlay.packaged"
+      ],
+      "androidPermissionsRequested": [
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ],
+      "androidPermissionsGranted": [
+        "pending_user_grant"
+      ],
+      "notificationPermissionState": "pending",
+      "backgroundStartBehavior": "pending",
+      "settingsRoundTripBehavior": "pending",
+      "taskRemovalBehavior": "pending",
+      "relaunchBehavior": "pending",
+      "crashRecoveryBehavior": "pending",
+      "foregroundDisclosureBehavior": "pending",
+      "stopActionBehavior": "pending",
+      "leakOrResourceSummary": "pending",
+      "oemQuirks": "pending",
+      "reportPath": "pending_android_15_plus_overlay_permission_oem_archive"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "overlay_android12_granted_device_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Archived Android 12 class device run with SYSTEM_ALERT_WINDOW granted and show/update/drainEvents/close plus denial copy recorded."
+    },
+    {
+      "id": "overlay_android15_plus_granted_device_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Archived Android 15+ class device run with SYSTEM_ALERT_WINDOW granted and show/update/drainEvents/close plus denial copy recorded."
+    },
+    {
+      "id": "overlay_settings_round_trip_oem_notes",
+      "classification": "future_promotion",
+      "requiredEvidence": "OEM-specific overlay settings round-trip notes for permission grant, revoke, and returned permission snapshot."
+    },
+    {
+      "id": "overlay_task_removal_relaunch_evidence",
+      "classification": "future_promotion",
+      "requiredEvidence": "Task removal cleanup and package relaunch behavior over visible overlay sessions on the required device matrix."
+    }
+  ]
+}

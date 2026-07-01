@@ -186,3 +186,48 @@ tasks.register<Exec>("verifyNodePhase14OverlayProvider") {
         nodePhase14ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase14OverlayPermissionOemMatrix") {
+    group = "verification"
+    description = "Verifies the Phase 14 overlay permission and OEM evidence matrix gate."
+
+    dependsOn("verifyNodePhase14OverlayProvider")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase14/verify-node-phase14-overlay-permission-oem-matrix.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_09_OVERLAY_PERMISSION_OEM_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/overlay-permission-oem-matrix.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_OVERLAY_PERMISSION_OEM_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-promotion-contracts.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_PROMOTION_CONTRACTS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_08_OVERLAY_PROVIDER_V1.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_18_OVERLAY_PROVIDER_PROMOTION.md"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeOverlayBridgeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/OVERLAY_PROVIDER_V1.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase14-gate.gradle.kts"))
+    inputs.file(nodePhase14ReportDir.map { it.file("phase13-overlay-provider-promotion.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-overlay-provider.json") })
+    outputs.files(
+        nodePhase14ReportDir.map { it.file("phase14-overlay-permission-oem-matrix.json") },
+        nodePhase14ReportDir.map { it.file("phase14-overlay-permission-oem-matrix.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase14ReportDir.get().asFile.absolutePath,
+    )
+}

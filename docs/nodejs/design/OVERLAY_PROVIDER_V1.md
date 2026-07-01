@@ -32,6 +32,12 @@ keeps raw `WindowManager`, `LayoutParams`, `FloatyWindow`, `WindowBridge`,
 foreground disclosure, packaged positive smoke, and stress evidence as future
 promotion work.
 
+P14-09 adds the overlay permission/OEM matrix for this provider POC. The matrix
+imports the permission-denied boundary, reserves Android 12 class and Android
+15+ class archive rows, and keeps permission-granted runs, settings round-trip
+OEM notes, task-removal cleanup, and relaunch behavior as future promotion
+evidence before any opt-in promotion claim.
+
 The first module name is:
 
 ```js

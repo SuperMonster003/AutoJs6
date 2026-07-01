@@ -210,6 +210,20 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-09: Add overlay permission and OEM matrix.
   - Scope: granted/denied `SYSTEM_ALERT_WINDOW`, settings round-trip, task
     removal, relaunch, and OEM behavior notes.
+  - Gate: `:app:verifyNodePhase14OverlayPermissionOemMatrix`.
+  - Matrix gate deployed:
+    - Adds `docs/nodejs/phase14/overlay-permission-oem-matrix.json` and
+      `PHASE14_OVERLAY_PERMISSION_OEM_MATRIX.md` for required Android 12 /
+      Android 15+ overlay evidence rows.
+    - Imports the P14-08 permission-denied fail-closed boundary without
+      claiming permission-granted device coverage.
+    - Writes
+      `build/reports/nodejs/phase14-overlay-permission-oem-matrix.json` and
+      `.md`.
+    - Keeps open blockers `overlay_android12_granted_device_archive`,
+      `overlay_android15_plus_granted_device_archive`,
+      `overlay_settings_round_trip_oem_notes`, and
+      `overlay_task_removal_relaunch_evidence` as `future_promotion`.
   - Acceptance: at least Android 12 and Android 15+ evidence are archived, with
     denial copy and settings behavior recorded.
 
