@@ -148,3 +148,10 @@ and background-launch matrix evidence as `partial`. It imports P13-25
 exact-alarm, background-launch, OEM, prompt, and rollback archive requirements,
 and keeps direct power-manager mutation authority unpromoted behind
 `:app:verifyNodePhase14SettingsPowerOemBackgroundMatrix`.
+
+`P14_24_RECORDER_PROVIDER.md` records real recorder session promotion evidence
+as `partial`. It imports P13-26 recorder status and packaged boundary smoke,
+defines runtime permission, foreground disclosure, ResourceRegistry session,
+temporary output, crash cleanup, and packaged stress requirements, and keeps
+`recorder.start()` / `recorder.stop()` unpromoted behind
+`:app:verifyNodePhase14RecorderProvider`.

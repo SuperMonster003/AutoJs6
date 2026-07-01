@@ -398,8 +398,13 @@ object NodeBridgeProviderRegistry {
             "recorderStatusSchema" to "autojs6-node-recorder-status-v1",
             "phase13Promotion" to "P13-26 partial media/recorder/mediainfo provider evidence gate",
             "pathPolicy" to "mediainfo accepts only relative paths inside the scoped Node working directory",
+            "phase14RecorderProviderPromotion" to "P14-24 real recorder session promotion gate",
+            "recorderSessionPolicy" to "real_session_requires_record_audio_prompt_foreground_disclosure_resource_handle_temp_output_crash_cleanup",
+            "recorderStartStopPolicy" to "start_stop_stay_denied_until_runtime_permission_session_cleanup_packaged_stress",
+            "recorderForegroundDisclosurePolicy" to "microphone_foreground_disclosure_and_stop_action_required_before_start",
+            "recorderTempOutputPolicy" to "future_temp_outputs_must_be_owned_scoped_and_deleted_on_stop_destroy_crash_rollback",
             "recorderPolicy" to "recorder exposes getStatus only; start/stop fail closed until foreground disclosure, permission, lifecycle, cleanup, and packaged smoke are promoted",
-            "rawObjectPolicy" to "no raw MediaPlayer, AudioManager, MediaRecorder, MediaMetadataRetriever, MediaInfo, MediaStore cursor, Uri, file descriptor, or Context object crosses the bridge",
+            "rawObjectPolicy" to "no raw MediaPlayer, AudioManager, MediaRecorder, AudioRecord, AudioPlaybackCaptureConfiguration, MediaMetadataRetriever, MediaInfo, MediaStore cursor, ParcelFileDescriptor, Uri, file descriptor, foreground service handle, or Context object crosses the bridge",
             "statusReason" to "P13-26 partial gate promotes JSON-safe scoped metadata and read-only audio status while recording/playback/MediaStore remain blocked",
         )
         NOTIFICATIONS_PROVIDER -> linkedMapOf(

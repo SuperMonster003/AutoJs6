@@ -3182,6 +3182,13 @@ imports `device.power` battery optimization status/settings dry-run evidence,
 records Android 12/15+, exact-alarm, background-launch, OEM, prompt, and
 rollback archive requirements, and keeps direct power-manager, wake-lock,
 exact-alarm, and background-launch mutation authority denied.
+`:app:verifyNodePhase14RecorderProvider` depends on the P14-23 settings/power
+matrix gate and the Phase 13 media/recorder/mediainfo gate. It writes
+`phase14-recorder-provider.json` plus `.md`, imports `recorder.getStatus()`,
+packaged media/recorder boundary smoke, and exact `media.recording` denial
+evidence, records runtime prompt, foreground disclosure, session resource,
+temporary output, crash cleanup, and packaged stress requirements, and keeps
+real `recorder.start()` / `recorder.stop()` unpromoted.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

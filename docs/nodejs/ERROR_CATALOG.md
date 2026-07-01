@@ -175,6 +175,26 @@ It records the current `device.power` denial expectations:
 - Android 12/15+ OEM matrix, exact-alarm state, background-launch restriction,
   and prompt/rollback archives must exist before any mutation flow is promoted.
 
+## P14-24 recorder denial sync
+
+P14-24 does not add a new error code or promote real microphone capture. It
+records the current recorder denial expectations:
+
+- Missing `media.recording` capability still rejects before bridge dispatch
+  with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- `recorder.getStatus()` may return the
+  `autojs6-node-recorder-status-v1` snapshot and
+  `blocked_until_privacy_reviewed_recorder_provider` reason.
+- `recorder.start()` and `recorder.stop()` remain denied with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until runtime microphone prompt,
+  foreground disclosure/stop action, session resource, temp output cleanup,
+  crash cleanup, packaged stress, and rollback archives exist.
+- Pause/resume, screen recording, internal/playback audio capture, raw
+  `MediaRecorder`, raw `AudioRecord`, raw
+  `AudioPlaybackCaptureConfiguration`, `MediaProjection`,
+  `ParcelFileDescriptor`, raw file descriptors, `Uri`, `Context`, foreground
+  service handles, and Java objects stay future-promotion blockers.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

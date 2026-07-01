@@ -1191,6 +1191,12 @@ The `:app:verifyNodePhase14SettingsPowerOemBackgroundMatrix` gate writes
 exact-alarm, background-launch, OEM, prompt, and rollback archive requirements,
 and keeps direct power-manager, wake-lock, exact-alarm, and background-launch
 mutation authority denied.
+The `:app:verifyNodePhase14RecorderProvider` gate writes
+`phase14-recorder-provider.json` plus `.md`, imports P13-26 recorder status,
+packaged media/recorder boundary smoke, and exact `media.recording` denial
+evidence, records runtime prompt, foreground disclosure, session resource,
+temporary output, crash cleanup, and packaged stress requirements, and keeps
+real `recorder.start()` / `recorder.stop()` unpromoted.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

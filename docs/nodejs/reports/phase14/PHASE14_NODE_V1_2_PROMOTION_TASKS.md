@@ -587,7 +587,26 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 - [ ] P14-24: Implement real recorder session promotion.
   - Scope: microphone prompt, start, pause/resume if supported, stop, status,
     foreground disclosure, temp output ownership, and crash cleanup.
-  - Gate: proposed `:app:verifyNodePhase14RecorderProvider`.
+  - Gate: `:app:verifyNodePhase14RecorderProvider`.
+  - Recorder provider gate deployed:
+    - Adds `docs/nodejs/phase14/recorder-provider-plan.json` and
+      `PHASE14_RECORDER_PROVIDER.md`.
+    - Imports P13-26 `recorder.getStatus()` evidence,
+      `autojs6-node-recorder-status-v1` status snapshots, packaged
+      media/recorder boundary smoke, and exact `media.recording` denial.
+    - Records real session requirements for runtime `RECORD_AUDIO` prompt,
+      foreground microphone disclosure, stop action, ResourceRegistry session
+      ownership, scoped temporary output ownership, provider destroy cleanup,
+      crash cleanup, task removal cleanup, Safe downgrade, and packaged stress.
+    - Keeps `recorder.start()`, `recorder.stop()`, pause/resume, screen
+      recording, internal/playback audio capture, raw `MediaRecorder`, raw
+      `AudioRecord`, raw `AudioPlaybackCaptureConfiguration`,
+      `MediaProjection`, `ParcelFileDescriptor`, raw file descriptors, `Uri`,
+      `Context`, foreground service handles, and Java objects unpromoted.
+    - Keeps runtime permission prompt, foreground disclosure/stop action,
+      temp output cleanup, crash cleanup, and packaged start/stop stress
+      archives open as `future_promotion`.
+    - Writes `build/reports/nodejs/phase14-recorder-provider.json` and `.md`.
   - Acceptance: no raw `MediaRecorder`, file descriptor, or broad media-library
     permission escapes into Node.
 

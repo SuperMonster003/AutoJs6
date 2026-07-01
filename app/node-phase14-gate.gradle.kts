@@ -998,3 +998,56 @@ tasks.register<Exec>("verifyNodePhase14SettingsPowerOemBackgroundMatrix") {
         nodePhase14ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase14RecorderProvider") {
+    group = "verification"
+    description = "Verifies the Phase 14 real recorder session promotion gate."
+
+    dependsOn(
+        "verifyNodePhase14SettingsPowerOemBackgroundMatrix",
+        "verifyNodePhase13MediaRecorderMediainfoProvider",
+    )
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase14/verify-node-phase14-recorder-provider.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_24_RECORDER_PROVIDER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/recorder-provider-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_RECORDER_PROVIDER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_26_MEDIA_RECORDER_MEDIAINFO_PROVIDER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-promotion-contracts.json"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeMediaBridgeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/recorder.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/security/PRIVACY_DISCLOSURE_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase14-gate.gradle.kts"))
+    inputs.file(nodePhase14ReportDir.map { it.file("phase13-media-recorder-mediainfo-provider.json") })
+    inputs.file(nodePhase14ReportDir.map { it.file("phase14-settings-power-oem-background-matrix.json") })
+    outputs.files(
+        nodePhase14ReportDir.map { it.file("phase14-recorder-provider.json") },
+        nodePhase14ReportDir.map { it.file("phase14-recorder-provider.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase14ReportDir.get().asFile.absolutePath,
+    )
+}
