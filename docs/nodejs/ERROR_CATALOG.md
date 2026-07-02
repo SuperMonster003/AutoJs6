@@ -447,6 +447,18 @@ partial overlay provider gate through `:app:verifyNodePhase16OverlayProviderProm
 - Rollback uses the `NODE_PROVIDER_OVERLAY_DISABLED` diagnostic label and the
   `node.provider.overlay.enabled` disable flag recorded by P16-03.
 
+## P16-06 overlay OEM matrix
+
+P16-06 does not add new error codes or promote runtime authority. It records a
+partial overlay OEM matrix gate through `:app:verifyNodePhase16OverlayOemMatrix`:
+
+- Missing Android 12/15+ granted-device archives, OEM notes,
+  task-removal/relaunch evidence, foreground disclosure/stop action, or
+  security/type/docs sync keeps `overlay` at `provider_poc_not_promoted`.
+- Missing `SYSTEM_ALERT_WINDOW` still rejects with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`.
+- Matrix gaps are future-promotion blockers, not release-blocking error codes.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native

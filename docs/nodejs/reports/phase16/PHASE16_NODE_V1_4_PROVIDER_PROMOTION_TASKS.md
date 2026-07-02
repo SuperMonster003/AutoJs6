@@ -153,7 +153,20 @@ A Phase 16 task can be marked complete only when all applicable items are true:
 
 - [ ] P16-06: Close overlay permission and OEM matrix.
   - Source backlog: `P15-06`.
-  - Gate: proposed `:app:verifyNodePhase16OverlayOemMatrix`.
+  - Gate: `:app:verifyNodePhase16OverlayOemMatrix`.
+  - Partial gate deployed:
+    - `docs/nodejs/phase16/overlay-oem-matrix-plan.json`
+    - `docs/nodejs/phase16/PHASE16_OVERLAY_OEM_MATRIX.md`
+    - `tools/nodejs/phase16/verify-node-phase16-overlay-oem-matrix.js`
+    - `docs/nodejs/reports/phase16/P16_06_OVERLAY_OEM_MATRIX.md`
+    - `build/reports/nodejs/phase16-overlay-oem-matrix.json`
+    - `build/reports/nodejs/phase16-overlay-oem-matrix.md`
+  - Open blockers: `overlay_android12_granted_device_archive`,
+    `overlay_android15_plus_granted_device_archive`,
+    `overlay_settings_round_trip_oem_notes`,
+    `overlay_task_removal_relaunch_evidence`,
+    `overlay_foreground_disclosure_stop_action_archive`, and
+    `phase16_security_type_doc_sync`.
 
 - [ ] P16-07: Add packaged overlay positive smoke and stress.
   - Source backlog: `P15-07`.

@@ -238,3 +238,49 @@ tasks.register<Exec>("verifyNodePhase16OverlayProviderPromotion") {
         nodePhase16ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase16OverlayOemMatrix") {
+    group = "verification"
+    description = "Verifies the Phase 16 Node v1.4 overlay OEM matrix partial gate."
+
+    dependsOn("verifyNodePhase16OverlayProviderPromotion")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase16/verify-node-phase16-overlay-oem-matrix.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/overlay-oem-matrix-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/PHASE16_OVERLAY_OEM_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase16/P16_06_OVERLAY_OEM_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/phase16-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/node-v1-4-promotion-contracts.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/node-v1-4-disclosure-rollback-audit.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/overlay-provider-promotion-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/overlay-oem-matrix-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/P15_06_OVERLAY_OEM_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/overlay-permission-oem-matrix.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_09_OVERLAY_PERMISSION_OEM_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase16/PHASE16_NODE_V1_4_PROVIDER_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase16/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase16-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(nodePhase16ReportDir.map { it.file("phase16-promotion-contracts.json") })
+    inputs.file(nodePhase16ReportDir.map { it.file("phase16-disclosure-rollback-audit.json") })
+    inputs.file(nodePhase16ReportDir.map { it.file("phase16-overlay-provider-promotion.json") })
+    outputs.files(
+        nodePhase16ReportDir.map { it.file("phase16-overlay-oem-matrix.json") },
+        nodePhase16ReportDir.map { it.file("phase16-overlay-oem-matrix.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase16ReportDir.get().asFile.absolutePath,
+    )
+}
