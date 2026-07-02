@@ -104,10 +104,17 @@ A Phase 16 task can be marked complete only when all applicable items are true:
     - `build/reports/nodejs/phase16-promotion-contracts.json`
     - `build/reports/nodejs/phase16-promotion-contracts.md`
 
-- [ ] P16-03: Add v1.4 disclosure and rollback audit gate.
-  - Gate: proposed `:app:verifyNodePhase16DisclosureRollbackAudit`.
+- [x] P16-03: Add v1.4 disclosure and rollback audit gate.
+  - Gate: `:app:verifyNodePhase16DisclosureRollbackAudit`.
   - Acceptance: every promotable provider declares rollback, disclosure, Safe
     downgrade, and crash-breaker proof paths before runtime authority changes.
+  - Landed:
+    - `docs/nodejs/phase16/node-v1-4-disclosure-rollback-audit.json`
+    - `docs/nodejs/phase16/PHASE16_NODE_V1_4_DISCLOSURE_ROLLBACK_AUDIT.md`
+    - `tools/nodejs/phase16/verify-node-phase16-disclosure-rollback-audit.js`
+    - `docs/nodejs/reports/phase16/P16_03_DISCLOSURE_ROLLBACK_AUDIT.md`
+    - `build/reports/nodejs/phase16-disclosure-rollback-audit.json`
+    - `build/reports/nodejs/phase16-disclosure-rollback-audit.md`
 
 ### P1 Pro UI, Overlay, Automation, Screenshot, OCR
 

@@ -3645,6 +3645,7 @@ Phase 16 starts from the Phase 15 summary handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase16Baseline
 .\gradlew.bat --console=plain :app:verifyNodePhase16SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase16PromotionContracts
+.\gradlew.bat --console=plain :app:verifyNodePhase16DisclosureRollbackAudit
 ```
 
 `verifyNodePhase16Baseline` writes `phase16-baseline-verification.json` plus
@@ -3661,3 +3662,9 @@ imported Phase 15 backlog task is owned.
 vocabulary. It fails if any provider can become opt-in promoted without
 implementation, connected device, packaged APK, disclosure, rollback, security,
 TypeScript, release docs, Safe downgrade, and raw-object denial evidence.
+`verifyNodePhase16DisclosureRollbackAudit` writes
+`phase16-disclosure-rollback-audit.json` plus `.md` and verifies disclosure
+proof paths, rollback proof paths, provider disable flags, foreground
+notification ownership, Stop actions, Safe downgrade, diagnostic codes, and
+crash circuit breaker markers for every promotable v1.4 provider before
+runtime authority changes.

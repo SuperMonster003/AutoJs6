@@ -402,6 +402,20 @@ the v1.4 provider promotion bars through `:app:verifyNodePhase16PromotionContrac
   boundary proves permission, privacy, packaged, rollback, Safe downgrade, and
   raw-object denial evidence.
 
+## P16-03 v1.4 disclosure and rollback audit
+
+P16-03 does not add new error codes or promote runtime authority. It records
+the disclosure, rollback, disable-flag, diagnostic, and crash circuit breaker
+proof requirements through `:app:verifyNodePhase16DisclosureRollbackAudit`:
+
+- Missing disclosure or rollback evidence keeps providers unpromoted.
+- Provider disable diagnostics use stable `NODE_PROVIDER_*` diagnostic labels
+  while script-visible failures continue to use the existing bridge and
+  provider-specific error catalog.
+- Crash circuit breaker fallback must return the provider to Safe-profile or
+  stable-denied behavior without exposing raw Android objects.
+- Safe downgrade must remain user-visible for packaged projects.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native

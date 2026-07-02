@@ -12,6 +12,7 @@ Foundation gates:
 - `:app:verifyNodePhase16Baseline`
 - `:app:verifyNodePhase16SurfaceManifest`
 - `:app:verifyNodePhase16PromotionContracts`
+- `:app:verifyNodePhase16DisclosureRollbackAudit`
 
 Phase 16 imports the Phase 15 future backlog for live UI, overlay,
 accessibility, screenshot/OCR, task providers, notifications/power,
@@ -32,3 +33,9 @@ evidence class, gate, and rollback hook metadata for each task.
 implementation, connected device, packaged APK, user-visible disclosure,
 rollback, security, TypeScript, release docs, Safe downgrade, and raw-object
 denial evidence. It does not promote runtime authority.
+
+`P16-03` records the v1.4 disclosure and rollback audit as `passed` when every
+promotable provider declares high-privilege disclosure fields, rollback fields,
+disable flags, diagnostics, Safe downgrade behavior, foreground notification
+ownership, Stop action, and crash circuit breaker markers before runtime
+authority changes.

@@ -1569,6 +1569,7 @@ The release gate still relies on packaged smoke APK artifacts being current when
 .\gradlew.bat --console=plain :app:verifyNodePhase16Baseline
 .\gradlew.bat --console=plain :app:verifyNodePhase16SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase16PromotionContracts
+.\gradlew.bat --console=plain :app:verifyNodePhase16DisclosureRollbackAudit
 ```
 
 The `:app:verifyNodePhase16Baseline` gate writes
@@ -1583,6 +1584,11 @@ The `:app:verifyNodePhase16PromotionContracts` gate writes
 `phase16-promotion-contracts.json` plus `.md` and verifies that no v1.4
 provider can become opt-in promoted without device, packaged, disclosure,
 rollback, security, docs, type, Safe downgrade, and raw-object denial evidence.
+The `:app:verifyNodePhase16DisclosureRollbackAudit` gate writes
+`phase16-disclosure-rollback-audit.json` plus `.md` and verifies disclosure,
+rollback, disable-flag, diagnostic, Safe downgrade, Stop action, foreground
+notification, and crash circuit breaker requirements before any provider
+authority can be promoted.
 
 ## Manual Heavy Checks
 
