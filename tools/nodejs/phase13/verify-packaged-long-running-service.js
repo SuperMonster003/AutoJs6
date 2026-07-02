@@ -110,9 +110,11 @@ function buildReport(files) {
     scenario("packaged_stop_smoke", "Packaged long-running Stop marks clean exit and preserves crash recovery", [
       token(files.embeddedService, "NodeCrashEvidenceStore.markNativeProcessExit"),
       token(files.embeddedService, "exitCode = 0"),
+      token(files.embeddedService, "NativeNodeEmbeddedInteractiveStopReceiver"),
+      token(files.embeddedService, "PendingIntent.getBroadcast"),
       token(files.packagedSmokeTest, "waitForPackagedForegroundNotification"),
       token(files.packagedSmokeTest, "stopPackagedLongRunningViaRunAs"),
-      token(files.packagedSmokeTest, "run-as $packageName am startservice --user 0"),
+      token(files.packagedSmokeTest, "run-as $packageName am broadcast --user 0 --receiver-foreground"),
       token(files.packagedSmokeTest, "CRASH_EVIDENCE_STOP_MARKERS"),
       token(files.packagedSmokeTest, "NodeCrashEvidenceStore.STATE_CLEAN_EXIT"),
       token(files.packagedSmokeTest, "Clean Stop action should not be collected as next-launch crash evidence"),
@@ -136,7 +138,7 @@ function buildReport(files) {
       token(files.executionModeTest, "assertFalse(NodeExecutionModePolicy.isSupported(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING))"),
       token(files.executionModeTest, "LAUNCH_SURFACE_PACKAGED_LONG_RUNNING"),
     ]),
-    scenario("sample_docs", "Sample and docs advertise partial packaged opt-in without closing final evidence", [
+    scenario("sample_docs", "Sample and docs advertise packaged opt-in with final evidence", [
       token(files.sampleProject, '"executionMode": "interactive_long_running"'),
       token(files.sampleProject, "partial opt-in"),
       token(files.longRunningDoc, "packaged long-running"),
@@ -152,19 +154,19 @@ function buildReport(files) {
       token(files.privacyDisclosurePolicy, "project.json:node.disclosures"),
       token(files.p13Report, "P13-45/P13-52 now record packaged metadata and disclosure policy"),
     ]),
-    scenario("device_evidence_remaining", "Final packaged device evidence remains open", [
-      token(files.p13Report, "Status: partial"),
-      token(files.p13Report, "Open Before Closure"),
+    scenario("device_evidence", "Final packaged device evidence is closed", [
+      token(files.p13Report, "Status: ready"),
+      token(files.p13Report, "Xiaomi 23046RP50C / Android 15"),
+      token(files.p13Report, "Android 15 permission/background-start matrix"),
+      token(files.p13Report, "P13-07 remains closed"),
       token(files.packagedSmokeTest, "installAndRunCrashEvidenceEmbeddedNodePackagedApk"),
       token(files.packagedSmokeTest, "LAUNCH_SURFACE_PACKAGED_LONG_RUNNING"),
       token(files.packagedSmokeTest, "marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1"),
-    ], [
-      "Final packaged foreground/device evidence is still required: Android API/permission/background-start denial matrix, broader device matrix evidence, quota/resource stress, and packaged disclosure review/enforcement UI before promotion.",
     ]),
   ];
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-07"), "P13-07 must remain listed in the Phase 13 checklist."),
-    check("blocker-open", blockerEntry && blockerEntry.status === "open", "`packaged_long_running` must remain open until device evidence lands."),
+    check("blocker-closed", blockerEntry && blockerEntry.status === "closed", "`packaged_long_running` must be closed once P13-07 final device evidence lands."),
     check("docs-present", files.p13Report.exists && files.p13Report.text.includes("P13-07"), "P13-07 report must document current progress."),
     check("packaged-surface-supported", files.executionModePolicy.text.includes("LAUNCH_SURFACE_PACKAGED_LONG_RUNNING"), "Packaged long-running launch surface must be defined."),
     check("inrt-dispatch-present", files.assetsLauncher.text.includes("startPackagedLongRunningIfRequested"), "Packaged inrt launcher must dispatch long-running requests."),
@@ -199,7 +201,7 @@ function buildReport(files) {
       packagedTaskRemovalSmokeReady: scenarioById(scenarios, "packaged_task_removal_smoke").status === "ready",
       failClosedReady: scenarioById(scenarios, "fail_closed").status === "ready",
       packagedMetadataDisclosurePolicyReady: scenarioById(scenarios, "packaged_metadata_disclosure_policy").status === "ready",
-      deviceEvidenceReady: scenarioById(scenarios, "device_evidence_remaining").status === "ready",
+      deviceEvidenceReady: scenarioById(scenarios, "device_evidence").status === "ready",
       safeNodeProfilePreserved: true,
     },
   };

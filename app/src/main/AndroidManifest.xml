@@ -482,6 +482,11 @@
                 android:value="Run isolated embedded Node scripts without touching the main app process" />
         </service>
 
+        <receiver
+            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedInteractiveStopReceiver"
+            android:exported="false"
+            android:process=":nodejs_embedded" />
+
         <service
             android:name="org.autojs.autojs.engine.NativeNodeEmbeddedScriptServiceSlot1"
             android:exported="false"

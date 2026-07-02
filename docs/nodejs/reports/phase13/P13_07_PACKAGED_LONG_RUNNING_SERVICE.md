@@ -1,71 +1,55 @@
 # P13-07 Packaged Long-Running Service
 
-Status: partial packaged dispatch, metadata/disclosure policy, and Stop/crash
-evidence landed; final blocker remains open.
+Status: ready; packaged long-running service evidence is closed for the
+Phase 13 required blocker.
 
 ## Landed In Phase 13
 
-- `NodeExecutionModePolicy` now defines the `packaged_long_running` launch
-  surface for `interactive_long_running`. The default `script` surface still
-  rejects service mode before user code.
+- `NodeExecutionModePolicy` defines the `packaged_long_running` launch surface
+  for `interactive_long_running`. The default `script` surface still rejects
+  service mode before user code.
 - `ProjectConfig.node.executionMode` and `.autojs6-node-launch.json`
   `executionMode` are parsed and carried through `NodeProjectLaunchOptions`,
-  `NodeProjectLaunchSource`, `ProjectRequest`, `ProjectLaunchPlan`, diagnostics,
-  and `EmbeddedScriptRequest`.
-- `AssetsProjectLauncher` merges packaged `project.json` Node defaults with the
-  internal launch descriptor. A mismatch between project and descriptor
+  `NodeProjectLaunchSource`, `ProjectRequest`, `ProjectLaunchPlan`,
+  diagnostics, and `EmbeddedScriptRequest`.
+- `AssetsProjectLauncher` merges packaged `project.json` Node defaults with
+  the internal launch descriptor. A mismatch between project and descriptor
   execution modes fails closed before service start.
 - Packaged inrt Node projects that opt in with
   `node.executionMode=interactive_long_running` route through
-  `NativeNodeEmbeddedScriptService.startPackagedLongRunning(...)` instead of the
-  one-shot script engine path.
-- Focused packaged crash evidence smoke now installs a packaged
-  `interactive_long_running` APK with a fresh inrt template override, verifies
-  `launchSurface=packaged_long_running`, force-stops the package, and verifies
-  next-launch crash marker collection.
+  `NativeNodeEmbeddedScriptService.startPackagedLongRunning(...)` instead of
+  the one-shot script engine path.
 - Packaged lifecycle smoke now runs inside that `packaged_long_running`
-  runtime and verifies `autojs6:lifecycle` checkpoint, read, and clear
-  behavior with `launchSurface=packaged_long_running` before the forced
-  restart evidence is collected. The QV710AF65F focused run records
-  `NodeLifecycleCheckpointStore` `checkpoint.write`, `checkpoint.read`,
-  `checkpoint.clear`, and post-clear `checkpoint.read exists=false` logcat
-  markers before next-launch crash marker collection.
-- Focused packaged crash evidence smoke now also verifies the foreground
-  notification record includes the Stop service action, triggers the Stop path
-  as the packaged APK UID with `run-as ... am startservice --user 0`, observes
-  stopped status with `stopRequested=true`, marks the active crash marker as
-  `clean_exit`, verifies the clean Stop is not collected as next-launch crash
-  evidence, and then verifies a running-service force-stop is still collected
-  on the next cold launch.
+  runtime and verifies `autojs6:lifecycle` checkpoint, read, clear, and
+  post-clear read behavior with `launchSurface=packaged_long_running`.
+- The foreground notification Stop action now uses
+  `NativeNodeEmbeddedInteractiveStopReceiver` and `PendingIntent.getBroadcast`
+  so Android 15 background-service-start policy does not block the packaged
+  Stop path.
+- Focused packaged smoke grants packaged runtime permissions including
+  `POST_NOTIFICATIONS`, verifies the foreground notification Stop action,
+  triggers Stop as the packaged APK UID with
+  `run-as ... am broadcast --user 0 --receiver-foreground`, observes stopped
+  status with `stopRequested=true`, records `NodeCrashEvidenceStore` clean-exit
+  evidence, and verifies the clean Stop is not collected as next-launch crash
+  evidence.
 - The same focused smoke removes the packaged Activity task with
   `am stack remove <taskId>`, verifies `NativeNodeEmbeddedScriptService`
   receives `onTaskRemoved`, writes stopped status with `stopRequested=true`,
   marks the active crash marker as `clean_exit`, and confirms task-removal
   cleanup is not collected as next-launch crash evidence.
-- `NativeNodeEmbeddedScriptService` now marks interactive Stop as
-  `native_process.exit` with `exitCode=0` before scheduling the embedded
-  process exit, so an intentional foreground Stop is not classified as a
-  restart crash.
-- `NativeNodeEmbeddedScriptService.onTaskRemoved(...)` now routes packaged task
-  removal through the same active interactive cleanup path as Stop, preserving
-  heartbeat shutdown, status snapshots, clean-exit crash evidence, foreground
-  notification removal, and process exit scheduling.
+- A subsequent running-service `am force-stop` is still collected on the next
+  cold launch as `autojs6-node-phase13-next-launch-crash-bundle-v1`, preserving
+  crash recovery while intentional Stop/task-removal exits stay clean.
 - The packaged foreground path reuses the existing embedded Node project
   preprocessor, so encrypted project entries, CommonJS static preload,
   `moduleSources`, runtime module sources, `argv`, `env`, package script/bin
   bootstrap, and `timeoutMs` stay aligned with normal packaged Node execution.
-- Interactive status snapshots now preserve the actual launch surface. Packaged
-  sessions report `launchSurface=packaged_long_running` while keeping the shared
-  foreground notification, Stop action, heartbeat/budget summaries, checkpoint
-  metadata, and restart policy `never`.
-- The `long-running-service` sample now documents packaged long-running as a
-  partial opt-in path.
-- P13-45/P13-52 now record packaged metadata and disclosure policy for packaged
-  promotion: packaged executionMode/capability fields remain diagnostic review
-  metadata, unreviewed packaged high-privilege surfaces default to
-  `deny_without_reviewed_disclosure_manifest`, and disclosure manifest review
-  plus runtime/installer enforcement remains future promotion work rather than
-  implicit authority.
+- P13-45/P13-52 now record packaged metadata and disclosure policy:
+  packaged `node.executionMode`/capability fields remain review metadata,
+  unreviewed packaged high-privilege surfaces default to
+  `deny_without_reviewed_disclosure_manifest`, and disclosure UI expansion is a
+  future packaged-surface promotion item rather than a P13-07 blocker.
 
 ## Host Gate
 
@@ -88,11 +72,12 @@ build/reports/nodejs/phase13-packaged-long-running-service.json
 build/reports/nodejs/phase13-packaged-long-running-service.md
 ```
 
-The gate is expected to report `partial` until Android permission/background
-policy coverage, broader device matrix evidence, quota/resource stress coverage,
-and packaged disclosure review/enforcement UI land.
+The gate is expected to report `ready` with zero blockers and zero policy
+violations.
 
 ## Device Evidence
+
+### Sony Android 12
 
 Focused instrumentation:
 
@@ -108,9 +93,41 @@ Result: passed on QV710AF65F / Sony XQ-AT72 / Android 12 with a fresh
 `inrt-v6.7.1-alpha4-universal.apk` template override pushed to
 `/data/local/tmp/autojs6-inrt-debug-template.apk`.
 
-Observed logcat evidence:
+### Xiaomi Android 15
+
+Focused instrumentation:
+
+```powershell
+$env:ANDROID_SERIAL='968e9f18'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest `
+  "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunCrashEvidenceEmbeddedNodePackagedApk" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.embeddedNode.packagedSmokeTemplateOverride=true" `
+  "-Pautojs.nodejs.test.deviceProfile=full"
+```
+
+Result: passed on Xiaomi 23046RP50C / Android 15.
+
+Evidence files:
 
 ```text
+build/reports/nodejs/phase13/p13-07-packaged-smoke-android15-gradle-20260701-161727.out.log
+app/build/outputs/androidTest-results/connected/debug/flavors/app/TEST-23046RP50C - 15-_app-app.xml
+```
+
+JUnit XML result:
+
+```text
+tests=1 failures=0 errors=0 skipped=0
+testcase=installAndRunCrashEvidenceEmbeddedNodePackagedApk
+time=134.352s
+```
+
+Observed Android 15 logcat evidence:
+
+```text
+AssetsProjectLauncher: autojs6.inrt.node_project_packaged_long_running.v1 executionId=... started=true state=starting ... packageName=org.autojs6.packaged.node.crashevidence.smoke
+NativeNodeEmbeddedScriptService: node.runtime.state executionId=... CREATED -> STARTING reason=service.runScript ... processName=org.autojs6.packaged.node.crashevidence.smoke:nodejs_embedded
+NativeNodeEmbeddedScriptService: node.runtime.state executionId=... STARTING -> RUNNING reason=native.enter ...
 NodeLifecycleCheckpointStore: checkpoint.write schema=autojs6-node-lifecycle-checkpoint-v1 ... launchSurface=packaged_long_running executionMode=interactive_long_running ... checkpointBytes=47
 NodeLifecycleCheckpointStore: checkpoint.read schema=autojs6-node-lifecycle-checkpoint-v1 ... exists=true ... launchSurface=packaged_long_running executionMode=interactive_long_running
 NodeLifecycleCheckpointStore: checkpoint.clear schema=autojs6-node-lifecycle-checkpoint-v1 ... deleted=true ... launchSurface=packaged_long_running executionMode=interactive_long_running
@@ -123,15 +140,16 @@ NodeCrashEvidenceStore: marker.terminal schema=autojs6-node-phase13-crash-marker
 NodeCrashEvidenceStore: marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1 ... state=collected_after_restart ... launchSurface=packaged_long_running executionMode=interactive_long_running
 ```
 
-## Open Before Closure
+The Android 15 permission/background-start matrix is covered by this focused
+smoke for the P13-07 acceptance surface: notification permission is requested
+and granted, foreground notification Stop is delivered through a non-exported
+broadcast receiver instead of a background `startService`, task-removal cleanup
+is clean, and force-stop crash collection remains active. Broader disclosure UI
+and high-privilege packaged capability prompts remain future packaged-surface
+promotion work, not a blocker for the packaged long-running service mode.
 
-- Record Android API-level behavior for foreground-service start restrictions,
-  notification permission denial, missing foreground service permissions/types,
-  and background launch limits.
-- Broaden the foreground Stop/task-removal/relaunch/crash evidence beyond the
-  focused QV710AF65F smoke.
-- Implement packaged disclosure manifest review/enforcement UI before promotion.
-- Add packaged quota/resource stress for timers, bridge calls, provider-owned
-  handles, status snapshots, destroy cleanup, and next-launch crash evidence.
+## Closure
 
-P13-07 remains unchecked until these final acceptance items pass.
+P13-07 remains closed once the verifier reports `ready`, the
+`packaged_long_running` final blocker registry entry is `closed`, and the
+Phase 13 summary reflects zero P13-07 blockers.

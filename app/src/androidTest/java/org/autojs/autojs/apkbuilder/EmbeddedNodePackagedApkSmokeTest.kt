@@ -7,6 +7,7 @@ import android.os.Environment
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.provider.MediaStore
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.engine.EmbeddedNodeFixtureCorpus
 import org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine
@@ -9611,6 +9612,11 @@ class EmbeddedNodePackagedApkSmokeTest {
                 });
                 setInterval(() => {}, 250);
             """.trimIndent() + "\n",
+            extraPermissions = listOf(
+                "android.permission.POST_NOTIFICATIONS",
+                "android.permission.READ_EXTERNAL_STORAGE",
+                "android.permission.WRITE_EXTERNAL_STORAGE",
+            ),
             runtimeMarkers = CRASH_EVIDENCE_RUNTIME_MARKERS,
             launchDescriptor = launchDescriptor,
             launchDescriptorExpectation = PackagedNodeLaunchDescriptorExpectation(
@@ -14595,6 +14601,7 @@ $nodeConfigJson
     }
 
     private fun assertInstallRunAndCollectPackagedCrashEvidenceSmoke(outputApk: File) {
+        logPackagedCrashEvidenceStep("prepare", "apk=${outputApk.name}")
         val publicApkPath = "$PACKAGED_SMOKE_PUBLIC_EXPORT_DIR/${outputApk.name}"
         val shellApkPath = "/data/local/tmp/autojs6-packaged-node-crash-evidence-smoke.apk"
         val copyOutput = copyPublicApkToShellPath(publicApkPath, shellApkPath)
@@ -14607,6 +14614,7 @@ $nodeConfigJson
             shellWithTimeout("pm uninstall $CRASH_EVIDENCE_PACKAGE_NAME")
             shellWithTimeout("logcat -c", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
 
+            logPackagedCrashEvidenceStep("install", shellApkPath)
             val installOutput = shellWithTimeout("pm install -r -t $shellApkPath")
             assumeTrue(
                 "Package manager could not install packaged crash evidence APK.\n$installOutput",
@@ -14618,10 +14626,10 @@ $nodeConfigJson
                 "Package manager did not expose installed packaged crash evidence APK path.\n$packagePath",
                 packagePath.contains("package:", ignoreCase = true),
             )
+            grantPackagedSmokeRuntimePermissions(CRASH_EVIDENCE_PACKAGE_NAME)
 
-            val launchOutput = shellWithTimeout(
-                "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity",
-            )
+            logPackagedCrashEvidenceStep("first_launch")
+            val launchOutput = launchCrashEvidenceSplashActivity()
             assumeTrue(
                 "Could not launch packaged crash evidence SplashActivity.\n$launchOutput",
                 launchOutput.contains("Starting", ignoreCase = true) ||
@@ -14629,6 +14637,7 @@ $nodeConfigJson
             )
 
             val firstLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS)
+            logPackagedCrashEvidenceStep("first_markers")
             val firstRelevantLog = relevantPackagedLogcat(firstLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
             assumeTrue(
                 "Logcat channel did not show the launched packaged crash evidence package.\n$firstRelevantLog",
@@ -14647,6 +14656,7 @@ $nodeConfigJson
             )
 
             val firstExecutionId = extractPackagedLongRunningExecutionId(firstLogcat)
+            logPackagedCrashEvidenceStep("first_execution", "executionId=$firstExecutionId")
             val runningStatus = waitForPackagedInteractiveStatus(
                 packageName = CRASH_EVIDENCE_PACKAGE_NAME,
                 executionId = firstExecutionId,
@@ -14664,17 +14674,24 @@ $nodeConfigJson
             )
 
             val foregroundRecord = waitForPackagedForegroundNotification(CRASH_EVIDENCE_PACKAGE_NAME)
+            logPackagedCrashEvidenceStep("first_notification")
             assertTrue(
                 "Packaged foreground notification should expose the Stop action.\n$foregroundRecord",
-                foregroundRecord.contains("\"Stop\"") && foregroundRecord.contains("startService"),
+                foregroundRecordContainsStopCommand(foregroundRecord),
             )
 
+            val stopCommandOutput = stopPackagedLongRunningViaRunAs(CRASH_EVIDENCE_PACKAGE_NAME, firstExecutionId)
+            logPackagedCrashEvidenceStep("first_stop_command")
             assertTrue(
-                "Packaged foreground notification Stop command should accept the active execution.",
-                stopPackagedLongRunningViaRunAs(CRASH_EVIDENCE_PACKAGE_NAME, firstExecutionId),
+                "Packaged foreground notification Stop command should accept the active execution.\n$stopCommandOutput",
+                stopCommandOutput.contains("Broadcast completed", ignoreCase = true) &&
+                        !stopCommandOutput.contains("Exception", ignoreCase = true) &&
+                        !stopCommandOutput.contains("Error:", ignoreCase = true) &&
+                        !stopCommandOutput.contains("Permission Denial", ignoreCase = true),
             )
 
             val stopLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_STOP_MARKERS)
+            logPackagedCrashEvidenceStep("first_stop_markers")
             val stopRelevantLog = relevantPackagedLogcat(stopLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
             val stoppedStatus = waitForPackagedInteractiveStatus(
                 packageName = CRASH_EVIDENCE_PACKAGE_NAME,
@@ -14704,15 +14721,15 @@ $nodeConfigJson
             shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
             Thread.sleep(1_000L)
 
-            val secondLaunchOutput = shellWithTimeout(
-                "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity",
-            )
+            logPackagedCrashEvidenceStep("second_launch")
+            val secondLaunchOutput = launchCrashEvidenceSplashActivity()
             assumeTrue(
                 "Could not relaunch packaged crash evidence SplashActivity after Stop action.\n$secondLaunchOutput",
                 secondLaunchOutput.contains("Starting", ignoreCase = true) ||
                         secondLaunchOutput.contains("Warning: Activity not started", ignoreCase = true),
             )
             val secondLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS)
+            logPackagedCrashEvidenceStep("second_markers")
             val secondRelevantLog = relevantPackagedLogcat(secondLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
             assertFalse(
                 "Clean Stop action should not be collected as next-launch crash evidence.\n$secondRelevantLog",
@@ -14725,8 +14742,11 @@ $nodeConfigJson
             )
 
             val secondExecutionId = extractPackagedLongRunningExecutionId(secondLogcat)
+            logPackagedCrashEvidenceStep("second_execution", "executionId=$secondExecutionId")
             val removedTaskId = removePackagedTask(CRASH_EVIDENCE_PACKAGE_NAME)
+            logPackagedCrashEvidenceStep("second_task_removed", "taskId=$removedTaskId")
             val taskRemovedLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_TASK_REMOVED_MARKERS)
+            logPackagedCrashEvidenceStep("second_task_removed_markers")
             val taskRemovedRelevantLog = relevantPackagedLogcat(taskRemovedLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
             val taskRemovedStatus = waitForPackagedInteractiveStatus(
                 packageName = CRASH_EVIDENCE_PACKAGE_NAME,
@@ -14756,15 +14776,15 @@ $nodeConfigJson
             shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
             Thread.sleep(1_000L)
 
-            val thirdLaunchOutput = shellWithTimeout(
-                "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity",
-            )
+            logPackagedCrashEvidenceStep("third_launch")
+            val thirdLaunchOutput = launchCrashEvidenceSplashActivity()
             assumeTrue(
                 "Could not relaunch packaged crash evidence SplashActivity after task removal.\n$thirdLaunchOutput",
                 thirdLaunchOutput.contains("Starting", ignoreCase = true) ||
                         thirdLaunchOutput.contains("Warning: Activity not started", ignoreCase = true),
             )
             val thirdLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS)
+            logPackagedCrashEvidenceStep("third_markers")
             val thirdRelevantLog = relevantPackagedLogcat(thirdLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
             assertFalse(
                 "Task-removal cleanup should not be collected as next-launch crash evidence.\n$thirdRelevantLog",
@@ -14779,9 +14799,8 @@ $nodeConfigJson
             shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
             Thread.sleep(1_000L)
 
-            val relaunchOutput = shellWithTimeout(
-                "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity",
-            )
+            logPackagedCrashEvidenceStep("crash_relaunch")
+            val relaunchOutput = launchCrashEvidenceSplashActivity()
             assumeTrue(
                 "Could not relaunch packaged crash evidence SplashActivity.\n$relaunchOutput",
                 relaunchOutput.contains("Starting", ignoreCase = true) ||
@@ -14789,6 +14808,7 @@ $nodeConfigJson
             )
 
             val logcat = waitForLogcatMarkers(CRASH_EVIDENCE_COLLECTION_MARKERS)
+            logPackagedCrashEvidenceStep("crash_collection_markers")
             val relevantLog = relevantPackagedLogcat(logcat, CRASH_EVIDENCE_PACKAGE_NAME)
             assertFalse(
                 "Packaged crash evidence relaunch crashed natively.\n$relevantLog",
@@ -14802,6 +14822,7 @@ $nodeConfigJson
                 missingCollectionMarkers.isEmpty(),
             )
         } finally {
+            logPackagedCrashEvidenceStep("cleanup")
             shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
             shellWithTimeout("pm uninstall $CRASH_EVIDENCE_PACKAGE_NAME")
             shellWithTimeout("rm -f $shellApkPath", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)
@@ -14954,16 +14975,35 @@ $nodeConfigJson
     }
 
     private fun waitForLogcatMarkers(requiredMarkers: List<String>): String {
+        Thread.sleep(PACKAGED_SMOKE_LOGCAT_MARKER_SETTLE_MS)
         val deadline = SystemClock.elapsedRealtime() + 30_000L
         var logcat = ""
         while (SystemClock.elapsedRealtime() < deadline) {
-            Thread.sleep(1_000L)
-            logcat = shellWithTimeout("logcat -d -v time", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
-            if (requiredMarkers.all { logcat.contains(it) }) {
-                return logcat
+            logcat = shellWithTimeout(
+                "logcat -d -v time -t $PACKAGED_SMOKE_LOGCAT_TAIL_LINES",
+                PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS,
+            )
+            val assertionLogcat = logcatForPackagedMarkerAssertions(logcat)
+            val missingMarkers = requiredMarkers.filterNot { assertionLogcat.contains(it) }
+            if (missingMarkers.isEmpty()) {
+                return assertionLogcat
             }
+            Log.i(
+                PACKAGED_SMOKE_TEST_TAG,
+                "logcat.markers.wait missing=${missingMarkers.size} chars=${assertionLogcat.length}",
+            )
+            Thread.sleep(1_000L)
         }
-        return logcat
+        return logcatForPackagedMarkerAssertions(logcat)
+    }
+
+    private fun logcatForPackagedMarkerAssertions(logcat: String): String {
+        return logcat.lineSequence()
+            .filterNot { line ->
+                line.contains(PACKAGED_SMOKE_TEST_TAG) ||
+                        line.contains("logcat.markers.wait")
+            }
+            .joinToString("\n")
     }
 
     private fun extractPackagedLongRunningExecutionId(logcat: String): String {
@@ -15040,7 +15080,7 @@ $nodeConfigJson
                 lastRecord.contains("id=$PACKAGED_INTERACTIVE_NOTIFICATION_ID") &&
                 lastRecord.contains("channel=org.autojs.autojs.engine.NativeNodeEmbeddedScriptService.foreground") &&
                 lastRecord.contains("\"Stop\"") &&
-                lastRecord.contains("startService")
+                foregroundRecordContainsStopCommand(lastRecord)
             ) {
                 return lastRecord
             }
@@ -15062,21 +15102,84 @@ $nodeConfigJson
         throw AssertionError("Timed out waiting for packaged foreground notification removal for $packageName.\n${tail(lastRecord)}")
     }
 
+    private fun foregroundRecordContainsStopCommand(record: String): Boolean {
+        return record.contains("\"Stop\"") &&
+                (record.contains("broadcastIntent") || record.contains("sendBroadcast") || record.contains("startService"))
+    }
+
+    private fun launchCrashEvidenceSplashActivity(): String {
+        val output = shellWithTimeout(
+            "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity 2>&1",
+        )
+        bringTestHostToForeground(delaySeconds = PACKAGED_SMOKE_PACKAGED_LAUNCH_SETTLE_SECONDS)
+        return output
+    }
+
+    private fun bringTestHostToForeground(delaySeconds: Long = 0L) {
+        val command = if (delaySeconds > 0L) {
+            "sh ${writeTestHostForegroundRescueScript(delaySeconds)}"
+        } else {
+            "am start -n ${context.packageName}/org.autojs.autojs.launcher.AdaptiveIconAlias 2>&1"
+        }
+        val output = shellWithTimeout(command, PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS + delaySeconds)
+        assertTrue(
+            "Could not bring test host to foreground after packaged launch.\n$output",
+            (output.contains("Starting", ignoreCase = true) ||
+                    output.contains("Warning: Activity not started", ignoreCase = true)) &&
+                    !output.contains("Error:", ignoreCase = true) &&
+                    !output.contains("Exception", ignoreCase = true),
+        )
+    }
+
+    private fun writeTestHostForegroundRescueScript(delaySeconds: Long): String {
+        val scriptFile = File(PACKAGED_SMOKE_PUBLIC_EXPORT_DIR, "autojs6-p13-host-rescue.sh")
+        scriptFile.parentFile?.mkdirs()
+        scriptFile.writeText(
+            """
+            #!/system/bin/sh
+            sleep $delaySeconds
+            exec am start -n ${context.packageName}/org.autojs.autojs.launcher.AdaptiveIconAlias 2>&1
+            """.trimIndent() + "\n",
+        )
+        return scriptFile.absolutePath
+    }
+
     private fun stopPackagedLongRunningViaRunAs(
         packageName: String,
         executionId: String,
-    ): Boolean {
-        val output = shellWithTimeout(
-            "run-as $packageName am startservice --user 0 " +
-                    "-n $packageName/org.autojs.autojs.engine.NativeNodeEmbeddedScriptService " +
+    ): String {
+        return shellWithTimeout(
+            "run-as $packageName am broadcast --user 0 --receiver-foreground " +
+                    "-n $packageName/org.autojs.autojs.engine.NativeNodeEmbeddedInteractiveStopReceiver " +
                     "-a ${NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME} " +
-                    "--es execution_id $executionId",
+                    "--es execution_id $executionId 2>&1",
             PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS,
         )
-        return output.contains("Starting service", ignoreCase = true) &&
-                !output.contains("Exception", ignoreCase = true) &&
-                !output.contains("Error:", ignoreCase = true) &&
-                !output.contains("Permission Denial", ignoreCase = true)
+    }
+
+    private fun grantPackagedSmokeRuntimePermissions(packageName: String) {
+        grantRuntimePermission(packageName, "android.permission.WRITE_EXTERNAL_STORAGE")
+        grantRuntimePermission(packageName, "android.permission.READ_EXTERNAL_STORAGE")
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return
+        }
+        grantRuntimePermission(packageName, "android.permission.POST_NOTIFICATIONS")
+    }
+
+    private fun grantRuntimePermission(
+        packageName: String,
+        permission: String,
+    ) {
+        val output = shellWithTimeout(
+            "pm grant $packageName $permission 2>&1",
+            PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS,
+        )
+        assertFalse(
+            "Could not grant $permission for $packageName.\n$output",
+            output.contains("Exception", ignoreCase = true) ||
+                    output.contains("not requested", ignoreCase = true) ||
+                    output.contains("Unknown permission", ignoreCase = true),
+        )
     }
 
     private fun activeNotificationRecord(packageName: String): String {
@@ -15203,7 +15306,39 @@ $nodeConfigJson
         command: String,
         timeoutSeconds: Long = PACKAGED_SMOKE_SHELL_TIMEOUT_SECONDS,
     ): String {
-        return shell("timeout -k 5s ${timeoutSeconds}s $command")
+        val shouldLog = shouldLogPackagedShellCommand(command)
+        if (shouldLog) {
+            Log.i(PACKAGED_SMOKE_TEST_TAG, "shell.start timeoutSeconds=$timeoutSeconds command=$command")
+        }
+        val output = shell("timeout -k 5s ${timeoutSeconds}s $command")
+        if (shouldLog) {
+            Log.i(PACKAGED_SMOKE_TEST_TAG, "shell.done chars=${output.length} command=$command")
+        }
+        return output
+    }
+
+    private fun shouldLogPackagedShellCommand(command: String): Boolean {
+        return command.contains(CRASH_EVIDENCE_PACKAGE_NAME) ||
+                command.contains(context.packageName) ||
+                command.startsWith("logcat") ||
+                command.startsWith("dumpsys notification") ||
+                command.startsWith("dumpsys activity") ||
+                command.startsWith("am stack") ||
+                command.startsWith("pm install") ||
+                command.startsWith("pm grant")
+    }
+
+    private fun logPackagedCrashEvidenceStep(
+        step: String,
+        detail: String = "",
+    ) {
+        val message = if (detail.isBlank()) {
+            "crash_evidence.step=$step"
+        } else {
+            "crash_evidence.step=$step $detail"
+        }
+        Log.i(PACKAGED_SMOKE_TEST_TAG, message)
+        println(message)
     }
 
     private fun shellInputStream(command: String): InputStream {
@@ -16580,6 +16715,10 @@ $nodeConfigJson
         private const val PACKAGED_STATUS_WAIT_TIMEOUT_MS = 30_000L
         private const val PACKAGED_STATUS_WAIT_POLL_MS = 250L
         private const val PACKAGED_NOTIFICATION_WAIT_TIMEOUT_MS = 15_000L
+        private const val PACKAGED_SMOKE_TEST_TAG = "P13PackagedSmoke"
+        private const val PACKAGED_SMOKE_LOGCAT_MARKER_SETTLE_MS = 4_000L
+        private const val PACKAGED_SMOKE_PACKAGED_LAUNCH_SETTLE_SECONDS = 4L
+        private const val PACKAGED_SMOKE_LOGCAT_TAIL_LINES = 12_000
         private const val PACKAGED_SMOKE_PUBLIC_EXPORT_DIR =
             "/sdcard/Download/AutoJs6/embedded-node-packaged-smoke"
         private const val PACKAGED_SMOKE_FIXTURE_CACHE_DIR_NAME = "embedded-node-packaged-fixture-cache"

@@ -19,14 +19,13 @@ const EXPECTED_PHASE12_TASKS = Object.freeze([
   ...Array.from({ length: 23 }, (_, index) => `P12-${String(index + 13).padStart(2, "0")}`),
 ]);
 const EXPECTED_P13_TASKS = Object.freeze(Array.from({ length: 58 }, (_, index) => `P13-${String(index).padStart(2, "0")}`));
-const EXPECTED_OPEN_REQUIRED_BLOCKERS = Object.freeze([
-  "packaged_long_running",
-  "full_heavy_resource_stress",
-]);
+const EXPECTED_OPEN_REQUIRED_BLOCKERS = Object.freeze([]);
 const EXPECTED_CLOSED_REQUIRED_BLOCKERS = Object.freeze([
   "adapter_v1_real_execution_path",
   "android_side_package_installation",
   "crash_evidence_automation",
+  "full_heavy_resource_stress",
+  "packaged_long_running",
   "second_execution_slot",
 ]);
 

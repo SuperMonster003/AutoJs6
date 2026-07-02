@@ -58,6 +58,7 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
             "android.permission.READ_EXTERNAL_STORAGE",
             "android.permission.WRITE_EXTERNAL_STORAGE",
             "android.permission.MANAGE_EXTERNAL_STORAGE",
+            "android.permission.POST_NOTIFICATIONS",
             "android.permission.FOREGROUND_SERVICE",
             "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
             "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",

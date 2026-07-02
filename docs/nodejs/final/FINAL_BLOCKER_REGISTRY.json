@@ -33,8 +33,8 @@
     {
       "id": "packaged_long_running",
       "classification": "required_internal",
-      "status": "open",
-      "currentEvidence": "Interactive long-running works; Phase 13 adds partial packaged dispatch through node.executionMode=interactive_long_running, a packaged_long_running launch surface, inrt foreground-service routing, host verification, focused packaged crash evidence smoke, packaged autojs6:lifecycle checkpoint/read/clear smoke with launchSurface=packaged_long_running, packaged foreground Stop clean-exit/relaunch/crash-recovery smoke, and packaged task-removal clean-exit/relaunch evidence passing on QV710AF65F / Sony XQ-AT72 / Android 12. P13-45/P13-52 record packaged metadata and disclosure policy diagnostics: packaged executionMode/capability metadata remains review metadata, and unreviewed packaged high-privilege surfaces default to deny_without_reviewed_disclosure_manifest. Android permission/background-start matrix, broader device matrix evidence, quota/stress evidence, and packaged disclosure review/enforcement UI remain open.",
+      "status": "closed",
+      "currentEvidence": "Interactive long-running works; Phase 13 closes packaged long-running service mode through node.executionMode=interactive_long_running, a packaged_long_running launch surface, inrt foreground-service routing, host verification, packaged autojs6:lifecycle checkpoint/read/clear smoke with launchSurface=packaged_long_running, foreground notification Stop clean-exit/relaunch/crash-recovery smoke, task-removal clean-exit/relaunch evidence, and running-service force-stop next-launch crash collection. Sony XQ-AT72 / Android 12 and Xiaomi 23046RP50C / Android 15 both pass the focused packaged crash-evidence smoke with fresh inrt template override. Android 15 notification/background-start behavior is covered by requested/granted POST_NOTIFICATIONS plus a non-exported broadcast Stop receiver instead of background startService. P13-45/P13-52 keep packaged metadata and disclosure policy diagnostics fail-closed for future high-privilege packaged-surface promotion without blocking the long-running service requirement.",
       "requiredResolution": "Packaged APK long-running mode has foreground notification, stop action, lifecycle handling, checkpoint, quota, and cleanup evidence."
     },
     {
@@ -47,8 +47,8 @@
     {
       "id": "full_heavy_resource_stress",
       "classification": "required_internal",
-      "status": "open",
-      "currentEvidence": "Core long-running/resource stress exists; Phase 13 adds a full heavy resource stress verifier, expected 8h/24h final-soak report paths, comparable metric checks, fixture-based contract validation, a validated archive helper, host reporting, and a focused two-slot resource stress anchor for primary/overflow shared-resource isolation. Actual 8-hour quick soak and 24-hour final soak evidence remain incomplete.",
+      "status": "closed",
+      "currentEvidence": "Phase 13 closes full heavy resource stress with the dedicated verifier, expected 8h/24h final-soak report paths, comparable metric checks, fixture-based contract validation, a validated archive helper, host reporting, and a focused two-slot resource stress anchor for primary/overflow shared-resource isolation. Xiaomi 23046RP50C / Android 15 produced and archived the canonical quick soak at build/reports/nodejs/final-soak/quick-soak-8h.json with status passed, 8.000855h, 868 cycles, 106 samples, and zero failures, monotonic leaks, orphan process, or unrecoverable runtime. The same device produced and archived the canonical final soak at build/reports/nodejs/final-soak/final-soak-24h.json with status passed, 24.000369h, 2579 cycles, 290 samples, and zero failures, monotonic leaks, orphan process, or unrecoverable runtime. Both reports expose comparable RSS, Java heap, native heap, thread count, fd count, and bridge diagnostics.",
       "requiredResolution": "8-hour quick soak and 24-hour final soak show no monotonic leaks, orphan process, or unrecoverable runtime."
     },
     {

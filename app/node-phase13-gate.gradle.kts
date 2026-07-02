@@ -2489,7 +2489,7 @@ tasks.register<Exec>("verifyNodePhase13MigrationPro9Comparison") {
 
 tasks.register<Exec>("generateNodePhase13Summary") {
     group = "verification"
-    description = "Generates the Phase 13 summary and partial final gate report."
+    description = "Generates the Phase 13 summary and v1.1 closeout gate report."
 
     dependsOn("verifyNodePhase13MigrationPro9Comparison")
 

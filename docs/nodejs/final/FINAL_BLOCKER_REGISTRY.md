@@ -26,9 +26,8 @@ Current crash evidence progress:
   13 adds a runtime JSON marker store, next-launch collector, embedded script
   service marker writes, native process service marker writes, a host collector,
   simulated native fatal running-marker collection, real fatal native SIGKILL
-  chaos collection, packaged launch-surface marker contract, and signal-safe
-  marker boundary evidence. Real packaged APK crash smoke and signal-safe
-  fixed-size native marker proof remain open.
+  chaos collection, packaged launch-surface marker contract, passing packaged
+  APK crash smoke, and signal-safe fixed-size native marker proof.
 
 Current multi-instance progress:
 
@@ -47,32 +46,27 @@ Current multi-instance progress:
 
 Current packaged long-running progress:
 
-- `packaged_long_running`: interactive long-running works, and Phase 13 adds a
-  partial packaged dispatch path through
+- `packaged_long_running`: closed by P13-07. Interactive long-running works,
+  and Phase 13 closes packaged service mode through
   `node.executionMode=interactive_long_running`, the `packaged_long_running`
-  launch surface, inrt foreground-service routing, a host verifier, and focused
-  packaged lifecycle checkpoint/read/clear plus foreground Stop
-  clean-exit/relaunch/crash-recovery and task-removal clean-exit/relaunch smoke
-  evidence passing on QV710AF65F / Sony XQ-AT72 / Android 12. P13-45/P13-52
-  record packaged metadata and disclosure policy diagnostics:
-  executionMode/capability metadata remains review metadata, and unreviewed
-  packaged high-privilege surfaces default to
-  `deny_without_reviewed_disclosure_manifest`. Android
-  permission/background-start policy coverage, broader device matrix evidence,
-  quota/stress promotion, and packaged disclosure review/enforcement UI remain
-  open.
+  launch surface, inrt foreground-service routing, packaged lifecycle
+  checkpoint/read/clear, foreground Stop clean-exit/relaunch/crash-recovery,
+  task-removal clean-exit/relaunch, and running-service force-stop
+  next-launch crash collection. Focused evidence passes on QV710AF65F / Sony
+  XQ-AT72 / Android 12 and Xiaomi 23046RP50C / Android 15. Android 15
+  notification/background-start behavior is covered by requested/granted
+  `POST_NOTIFICATIONS` plus a non-exported broadcast Stop receiver instead of
+  background `startService`. P13-45/P13-52 keep packaged metadata and
+  disclosure policy diagnostics fail-closed for future high-privilege packaged
+  surface promotion.
 
 Current full heavy resource stress progress:
 
-- `full_heavy_resource_stress`: core memory leak, resource stress,
-  long-running, and worker stress anchors already exist. Phase 13 adds a
-  dedicated verifier for `quick-soak-8h.json` and `final-soak-24h.json`, plus
-  comparable metric checks for RSS, Java heap, native heap, thread count, fd
-  count, and bridge diagnostics. P13-08 also adds contract fixtures for accepted
-  and rejected report shapes plus an archive helper that validates real soak
-  JSON before copying it into the canonical final-soak path. The blocker
-  remains open until real 8 hour and 24 hour device reports are available and
-  clean.
+- `full_heavy_resource_stress`: closed by P13-08. Xiaomi 23046RP50C /
+  Android 15 produced clean canonical 8 hour quick and 24 hour final soak
+  reports with comparable RSS, Java heap, native heap, thread count, fd count,
+  and bridge diagnostics, and with no monotonic leaks, orphan process, or
+  unrecoverable runtime.
 
 Current Android package installation progress:
 

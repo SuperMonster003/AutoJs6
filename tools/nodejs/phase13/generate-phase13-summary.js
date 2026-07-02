@@ -15,12 +15,23 @@ const DEFERRED_SURFACE_STATUSES = new Set(["design_locked"]);
 const REJECTED_SURFACE_STATUSES = new Set(["rejected"]);
 const OPEN_BLOCKER_STATUSES = new Set(["open", "decision_required"]);
 const DEFERRED_BLOCKER_STATUSES = new Set(["optional", "waiting_for_android_artifacts"]);
-const REJECTED_BLOCKER_STATUSES = new Set(["permanently_unsupported"]);
-const PHASE13_REOPENED_BLOCKER_OVERRIDES = new Map([
+const REJECTED_BLOCKER_STATUSES = new Set(["permanently_unsupported", "intentionally_unsupported"]);
+const PHASE13_BLOCKER_NOTES = new Map([
   [
     "raw_network",
-    "P13 reopened raw_network as a gated Desktop/relaxed-capability track; keep the registry status for P12 history.",
+    "P13 keeps raw_network rejected for v1.1 while P13-50 through P13-56 preserve a gated future relaxed-capability evidence trail without granting release authority.",
   ],
+]);
+const FUTURE_PROMOTION_REPORT_TASKS = new Set([
+  "P13-17",
+  "P13-18",
+  "P13-19",
+  "P13-20",
+  "P13-21",
+  "P13-22",
+  "P13-25",
+  "P13-26",
+  "P13-34",
 ]);
 
 const FILES = {
@@ -57,8 +68,8 @@ function main() {
     checks,
     policyViolations,
     decision: {
-      status: policyViolations.length === 0 ? "partial" : "failed",
-      phase13TaskComplete: false,
+      status: policyViolations.length > 0 ? "failed" : summary.releaseGate.ready ? "ready" : "partial",
+      phase13TaskComplete: summary.releaseGate.ready,
       taskCoverage: checkById(checks, "task-coverage"),
       promotedSurfaceEvidence: checkById(checks, "promoted-surface-evidence"),
       openBlockersNotCompleted: checkById(checks, "open-blockers-not-completed"),
@@ -66,7 +77,8 @@ function main() {
       profileTruthPresent: checkById(checks, "profile-truth-report"),
       conformanceReportsPresent: checkById(checks, "conformance-reports"),
       allTaskVerifiersZeroBlockers: generatedReports.every((report) => report.policyViolations === 0 && report.blockers === 0),
-      finalBlockerClosable: false,
+      releaseBlockingReportsClear: summary.releaseGate.releaseBlockingReports.length === 0,
+      finalBlockerClosable: summary.releaseGate.openFinalBlockers.length === 0,
     },
   };
   fs.mkdirSync(reportDir, { recursive: true });
@@ -77,7 +89,9 @@ function main() {
   console.log("Phase 13 summary generation: " + report.decision.status);
   console.log("Phase 13 summary policy violations: " + policyViolations.length);
   console.log("Phase 13 summary open blockers: " + summary.blockerCounts.open);
-  if (policyViolations.length > 0 || (options.failOnOpenBlockers && summary.blockerCounts.open > 0)) {
+  console.log("Phase 13 summary release-blocking reports: " + summary.releaseGate.releaseBlockingReports.length);
+  console.log("Phase 13 summary future promotion reports: " + summary.releaseGate.futurePromotionReports.length);
+  if (policyViolations.length > 0 || (options.failOnOpenBlockers && !summary.releaseGate.ready)) {
     process.exitCode = 1;
   }
 }
@@ -130,6 +144,19 @@ function buildSummary(files, generatedReports) {
   const profileTruthReport = generatedReports.find((report) => report.basename === "phase13-capability-truth") || null;
   const conformanceReports = generatedReports.filter((report) => report.basename.includes("conformance"));
   const reportStatusCounts = countBy(generatedReports, (report) => report.status);
+  const generatedReportCounts = {
+    total: generatedReports.length,
+    byStatus: reportStatusCounts,
+    withPolicyViolations: generatedReports.filter((report) => report.policyViolations > 0).length,
+    withBlockers: generatedReports.filter((report) => report.blockers > 0).length,
+  };
+  const releaseGate = buildReleaseGate({
+    tasks,
+    blockers,
+    generatedReports,
+    profileTruthReport,
+    conformanceReports,
+  });
   return {
     phase: manifest.phase,
     profileVocabulary: manifest.profileVocabulary || [],
@@ -153,12 +180,8 @@ function buildSummary(files, generatedReports) {
     profileTruthReport,
     conformanceReports,
     generatedReports,
-    generatedReportCounts: {
-      total: generatedReports.length,
-      byStatus: reportStatusCounts,
-      withPolicyViolations: generatedReports.filter((report) => report.policyViolations > 0).length,
-      withBlockers: generatedReports.filter((report) => report.blockers > 0).length,
-    },
+    generatedReportCounts,
+    releaseGate,
   };
 }
 
@@ -207,7 +230,7 @@ function countTasks(tasks) {
 function parseBlockers(blockers) {
   return blockers.map((blocker) => {
     let summaryStatus = "open";
-    let phase13Override = "";
+    const phase13Note = PHASE13_BLOCKER_NOTES.get(blocker.id) || "";
     if (blocker.status === "closed") {
       summaryStatus = "completed";
     } else if (DEFERRED_BLOCKER_STATUSES.has(blocker.status)) {
@@ -217,16 +240,12 @@ function parseBlockers(blockers) {
     } else if (OPEN_BLOCKER_STATUSES.has(blocker.status)) {
       summaryStatus = "open";
     }
-    if (PHASE13_REOPENED_BLOCKER_OVERRIDES.has(blocker.id)) {
-      summaryStatus = "open";
-      phase13Override = PHASE13_REOPENED_BLOCKER_OVERRIDES.get(blocker.id);
-    }
     return {
       id: blocker.id,
       classification: blocker.classification,
       status: blocker.status,
       summaryStatus,
-      phase13Override,
+      phase13Note,
       currentEvidence: blocker.currentEvidence,
       requiredResolution: blocker.requiredResolution,
     };
@@ -259,6 +278,54 @@ function surfaceSummary(surface) {
   };
 }
 
+function buildReleaseGate({
+  tasks,
+  blockers,
+  generatedReports,
+  profileTruthReport,
+  conformanceReports,
+}) {
+  const openFinalBlockers = blockers.filter((blocker) => blocker.summaryStatus === "open");
+  const requiredInternalOpen = blockers.filter((blocker) =>
+    blocker.classification === "required_internal" && blocker.summaryStatus !== "completed");
+  const reportsWithPolicyViolations = generatedReports.filter((report) => report.policyViolations > 0);
+  const reportsWithBlockers = generatedReports.filter((report) => report.blockers > 0);
+  const futurePromotionReports = reportsWithBlockers.filter((report) =>
+    FUTURE_PROMOTION_REPORT_TASKS.has(report.task));
+  const releaseBlockingReports = reportsWithBlockers.filter((report) =>
+    !FUTURE_PROMOTION_REPORT_TASKS.has(report.task));
+  const phase13SummaryTask = tasks.find((task) => task.id === "P13-57") || null;
+  const profileTruthReady = profileTruthReport &&
+    profileTruthReport.status === "passed" &&
+    profileTruthReport.gate === "generateNodePhase13CapabilityTruth";
+  const conformanceReportsReady = conformanceReports.length >= 1 &&
+    conformanceReports.some((report) => report.basename === "phase13-stdlib-conformance-decision");
+  const ready =
+    phase13SummaryTask &&
+    phase13SummaryTask.status === "completed" &&
+    openFinalBlockers.length === 0 &&
+    requiredInternalOpen.length === 0 &&
+    reportsWithPolicyViolations.length === 0 &&
+    releaseBlockingReports.length === 0 &&
+    profileTruthReady &&
+    conformanceReportsReady;
+  return {
+    status: ready ? "ready" : "partial",
+    ready: Boolean(ready),
+    phase13SummaryTaskComplete: Boolean(phase13SummaryTask && phase13SummaryTask.status === "completed"),
+    openFinalBlockers,
+    requiredInternalOpen,
+    reportsWithPolicyViolations,
+    reportsWithBlockers,
+    releaseBlockingReports,
+    futurePromotionReports,
+    futurePromotionReportTasks: futurePromotionReports.map((report) => report.task).sort(),
+    futurePromotionReportNames: futurePromotionReports.map((report) => report.name).sort(),
+    profileTruthReady: Boolean(profileTruthReady),
+    conformanceReportsReady,
+  };
+}
+
 function buildChecks(files, generatedReports, summary, markdown) {
   const openBlockersMarkedCompleted = summary.blockers.filter((blocker) =>
     OPEN_BLOCKER_STATUSES.has(blocker.status) && blocker.summaryStatus === "completed");
@@ -267,15 +334,18 @@ function buildChecks(files, generatedReports, summary, markdown) {
   const docsFinalSurface = [...summary.openSurfaces, ...summary.deferredSurfaces, ...summary.promotedSurfaces]
     .find((surface) => surface.id === "docs.examples.final_gate");
   const reportBasenames = new Set(generatedReports.map((report) => report.basename));
-  const reportsWithOpenBlockers = generatedReports.filter((report) => report.blockers > 0);
+  const p13SummaryTask = summary.tasks.find((task) => task.id === "P13-57");
+  const requiredInternalOpen = summary.blockers.filter((blocker) =>
+    blocker.classification === "required_internal" && blocker.summaryStatus !== "completed");
   return [
     check(
       "task-coverage",
       summary.tasks.length === REQUIRED_TASKS.length &&
         summary.tasks.every((task) => REQUIRED_TASKS.includes(task.id)) &&
         missingTaskSurface.length === 0 &&
-        summary.tasks.some((task) => task.id === "P13-57" && task.status === "open"),
-      "Summary must enumerate P13-00 through P13-57, map every task to a surface, and keep P13-57 open until all Phase 13 blockers close.",
+        p13SummaryTask &&
+        p13SummaryTask.status === "completed",
+      "Summary must enumerate P13-00 through P13-57, map every task to a surface, and mark P13-57 completed once the v1.1 closeout gate is ready.",
     ),
     check(
       "status-vocabulary",
@@ -284,9 +354,10 @@ function buildChecks(files, generatedReports, summary, markdown) {
         markdown.includes("deferred") &&
         markdown.includes("rejected") &&
         summary.surfaceCounts.open > 0 &&
-        summary.blockerCounts.open > 0 &&
+        summary.taskCounts.open > 0 &&
+        summary.blockerCounts.open === 0 &&
         summary.blockerCounts.rejected > 0,
-      "Generated summary must list completed/open/deferred/rejected status categories without collapsing open work.",
+      "Generated summary must list completed/open/deferred/rejected status categories without collapsing future promotion work into release blockers.",
     ),
     check(
       "promoted-surface-evidence",
@@ -298,24 +369,25 @@ function buildChecks(files, generatedReports, summary, markdown) {
     check(
       "open-blockers-not-completed",
       openBlockersMarkedCompleted.length === 0 &&
+        requiredInternalOpen.length === 0 &&
         summary.blockers.some((blocker) => blocker.id === "crash_evidence_automation" && blocker.summaryStatus === "completed") &&
-        summary.blockers.some((blocker) => blocker.id === "full_heavy_resource_stress" && blocker.summaryStatus === "open") &&
-        summary.blockers.some((blocker) => blocker.id === "worker_threads" && blocker.summaryStatus === "open") &&
+        summary.blockers.some((blocker) => blocker.id === "full_heavy_resource_stress" && blocker.summaryStatus === "completed") &&
+        summary.blockers.some((blocker) => blocker.id === "worker_threads" && blocker.summaryStatus === "rejected") &&
         summary.blockers.some((blocker) =>
           blocker.id === "raw_network" &&
           blocker.status === "permanently_unsupported" &&
-          blocker.summaryStatus === "open" &&
-          blocker.phase13Override.includes("P13 reopened raw_network")),
-      "Open and decision-required blockers must remain open while closed required blockers are counted completed.",
+          blocker.summaryStatus === "rejected" &&
+          blocker.phase13Note.includes("v1.1")),
+      "Open and decision-required blockers must remain visible while closed required blockers and explicit v1.1 rejections are not counted as open release blockers.",
     ),
     check(
       "zero-blocker-final-requirement",
-      (reportsWithOpenBlockers.length === 0 && summary.generatedReportCounts.withPolicyViolations === 0) ||
-        (reportsWithOpenBlockers.length > 0 &&
-          summary.taskCounts.open > 0 &&
-          summary.generatedReportCounts.withBlockers === reportsWithOpenBlockers.length &&
-          markdown.includes(`- Reports with blockers: ${reportsWithOpenBlockers.length}`)),
-      "Summary final completion must require every generated Phase 13 task verifier to report zero blockers and zero policy violations.",
+      summary.releaseGate.ready &&
+        summary.releaseGate.releaseBlockingReports.length === 0 &&
+        summary.generatedReportCounts.withPolicyViolations === 0 &&
+        markdown.includes("- Release-blocking reports: 0") &&
+        markdown.includes(`- Future promotion reports with blockers: ${summary.releaseGate.futurePromotionReports.length}`),
+      "Summary final completion must require zero open final blockers, zero policy violations, and zero release-blocking report blockers while listing future promotion backlog separately.",
     ),
     check(
       "profile-truth-report",
@@ -339,7 +411,7 @@ function buildChecks(files, generatedReports, summary, markdown) {
     ),
     check(
       "docs-wiring",
-      files.phase13Tasks.text.includes("P13-57 partial landing") &&
+      files.phase13Tasks.text.includes("P13-57 closeout landing") &&
         files.phase13Tasks.text.includes("generate-phase13-summary.js") &&
         files.phase13GradleGate.text.includes("generateNodePhase13Summary") &&
         files.testingDoc.text.includes("generateNodePhase13Summary") &&
@@ -368,9 +440,21 @@ function renderMarkdown(summary) {
   const lines = [
     "# Phase 13 Summary",
     "",
-    "Status: P13-57 summary generator published as a partial final gate.",
+    "Status: P13-57 v1.1 closeout gate is ready.",
     "",
-    "This summary is generated from the Phase 13 task checklist, Phase 13 surface manifest, final blocker registry, profile truth report, and generated Phase 13 conformance reports. Open blockers remain open and are not counted as completed.",
+    "This summary is generated from the Phase 13 task checklist, Phase 13 surface manifest, final blocker registry, profile truth report, and generated Phase 13 conformance reports. Future promotion blockers remain visible as backlog and are not counted as release blockers.",
+    "",
+    "## Release Gate",
+    "",
+    `- Status: \`${summary.releaseGate.status}\``,
+    `- P13-57 task complete: ${summary.releaseGate.phase13SummaryTaskComplete}`,
+    `- Open final blockers: ${summary.releaseGate.openFinalBlockers.length}`,
+    `- Required internal blockers still open: ${summary.releaseGate.requiredInternalOpen.length}`,
+    `- Release-blocking reports: ${summary.releaseGate.releaseBlockingReports.length}`,
+    `- Future promotion reports with blockers: ${summary.releaseGate.futurePromotionReports.length}`,
+    `- Reports with policy violations: ${summary.releaseGate.reportsWithPolicyViolations.length}`,
+    `- Profile truth ready: ${summary.releaseGate.profileTruthReady}`,
+    `- Conformance reports ready: ${summary.releaseGate.conformanceReportsReady}`,
     "",
     "## Task Checklist",
     "",
@@ -423,8 +507,8 @@ function renderMarkdown(summary) {
     "| --- | --- | --- | --- | --- |",
   );
   for (const blocker of summary.blockers) {
-    const override = blocker.phase13Override ? ` Phase 13 override: ${blocker.phase13Override}` : "";
-    lines.push(`| \`${blocker.id}\` | \`${blocker.summaryStatus}\` | \`${blocker.status}\` | \`${blocker.classification}\` | ${escapeTable(blocker.requiredResolution + override)} |`);
+    const note = blocker.phase13Note ? ` Phase 13 note: ${blocker.phase13Note}` : "";
+    lines.push(`| \`${blocker.id}\` | \`${blocker.summaryStatus}\` | \`${blocker.status}\` | \`${blocker.classification}\` | ${escapeTable(blocker.requiredResolution + note)} |`);
   }
 
   lines.push(
@@ -450,6 +534,8 @@ function renderMarkdown(summary) {
     `- Total reports: ${summary.generatedReportCounts.total}`,
     `- Reports with policy violations: ${summary.generatedReportCounts.withPolicyViolations}`,
     `- Reports with blockers: ${summary.generatedReportCounts.withBlockers}`,
+    `- Release-blocking reports: ${summary.releaseGate.releaseBlockingReports.length}`,
+    `- Future promotion reports with blockers: ${summary.releaseGate.futurePromotionReports.length}`,
     "",
     "| Report | Gate | Task | Status | Policy violations | Blockers |",
     "| --- | --- | --- | --- | ---: | ---: |",
@@ -466,7 +552,7 @@ function renderMarkdown(summary) {
     "- Gradle: `:app:generateNodePhase13Summary`",
     "- Reports: `build/reports/nodejs/phase13-summary.json` and `build/reports/nodejs/phase13-summary.md`",
     "- Canonical docs output: `docs/nodejs/reports/phase13/PHASE13_SUMMARY.md`",
-    "- Final completion requires every generated Phase 13 task verifier to report zero blockers and zero policy violations.",
+    "- Final closeout requires zero open final blockers, zero policy violations, and zero release-blocking report blockers. Future promotion reports remain listed as backlog.",
   );
   return lines.join("\n") + "\n";
 }

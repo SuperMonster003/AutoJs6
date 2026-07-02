@@ -979,15 +979,15 @@ and examples, the `raw_network` desktop marker, or profile declarations remain
 evidence only. The gate also links P13-56 to the P13-57
 completed/open/deferred/rejected summary output without closing runtime or
 packaged migration blockers.
-`generateNodePhase13Summary` records P13-57 as the Phase 13 summary and partial
-final gate. It requires the task checklist, surface manifest, final blocker
+`generateNodePhase13Summary` records P13-57 as the Phase 13 summary and v1.1
+closeout gate. It requires the task checklist, surface manifest, final blocker
 registry, `phase13-capability-truth`, generated conformance reports, Testing/CI
 docs, release matrix updates, and `docs/nodejs/reports/phase13/PHASE13_SUMMARY.md`.
 The gate lists completed/open/deferred/rejected categories, requires evidence
 for every promoted surface, and keeps open or decision-required blockers out of
-the completed bucket. It preserves the old registry status for `raw_network`
-history but classifies it as open in Phase 13 after the relaxed/Desktop track
-reopened it.
+the completed bucket. It keeps `raw_network` rejected for v1.1 while P13-50
+through P13-56 preserve a future relaxed/Desktop evidence trail without
+granting release authority.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, native `vm`/`node:vm`
 require/resolve behavior, local shadow-package protection, the updated VM
