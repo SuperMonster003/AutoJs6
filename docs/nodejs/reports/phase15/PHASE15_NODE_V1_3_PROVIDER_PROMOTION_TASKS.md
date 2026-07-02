@@ -381,9 +381,24 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-16: Add packaged broadcast trigger/remove smoke.
   - Source backlog: `P14-21`.
-  - Gate: proposed `:app:installAndRunNodeV13PackagedBroadcastSmoke`.
+  - Gate: `:app:installAndRunNodeV13PackagedBroadcastSmoke`.
   - Acceptance: trigger, remove, relaunch, denial, metadata mismatch, and
     rollback are archived.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/packaged-broadcast-smoke-plan.json`
+    - `docs/nodejs/phase15/PHASE15_PACKAGED_BROADCAST_SMOKE.md`
+    - `docs/nodejs/reports/phase15/P15_16_PACKAGED_BROADCAST_SMOKE.md`
+    - `tools/nodejs/phase15/verify-node-phase15-packaged-broadcast-smoke.js`
+    - `build/reports/nodejs/phase15-packaged-broadcast-smoke.json`
+    - `build/reports/nodejs/phase15-packaged-broadcast-smoke.md`
+  - Still open: `packaged_broadcast_trigger_positive_archive`,
+    `packaged_broadcast_remove_cleanup_archive`,
+    `packaged_broadcast_relaunch_crash_recovery_archive`,
+    `packaged_broadcast_undeclared_capability_denial_archive`,
+    `packaged_broadcast_exported_receiver_policy_archive`,
+    `packaged_broadcast_metadata_mismatch_archive`,
+    `packaged_broadcast_safe_downgrade_archive`, and
+    `phase15_task_device_media_doc_sync`.
 
 - [ ] P15-17: Promote notification ownership and foreground disclosure behavior.
   - Source backlog: `P14-22`.

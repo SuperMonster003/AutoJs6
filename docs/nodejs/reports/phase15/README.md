@@ -55,6 +55,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15TaskSchemaRollback`
 - `:app:installAndRunNodeV13PackagedTaskSmoke`
 - `:app:verifyNodePhase15IntentBroadcastPromotion`
+- `:app:installAndRunNodeV13PackagedBroadcastSmoke`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -140,3 +141,10 @@ dependency gate. It keeps `intent_broadcast` unpromoted until live provider
 registration, manifest synthesis, exported receiver policy, trigger payload
 validation, owner cleanup, packaged trigger/remove smoke, cross-package
 denial, Safe downgrade, and security/type/docs sync land.
+
+`P15-16` currently reports `partial`: it imports the P14 packaged broadcast
+trigger/remove smoke contract plus the P15-15 `intent_broadcast` dependency
+gate. It keeps packaged broadcast trigger/remove unpromoted until positive
+trigger delivery, remove cleanup, relaunch/crash recovery, undeclared
+capability denial, exported receiver policy, metadata mismatch, Safe
+downgrade, and security/type/docs sync land.

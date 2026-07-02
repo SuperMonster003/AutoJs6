@@ -1320,6 +1320,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskSchemaRollback
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedTaskSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15IntentBroadcastPromotion
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedBroadcastSmoke
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1428,6 +1429,13 @@ provider registration, manifest synthesis, exported receiver policy, trigger
 payload validation, owner cleanup, packaged trigger/remove smoke,
 cross-package denial, Safe downgrade, and security/type/docs evidence are
 archived.
+The `:app:installAndRunNodeV13PackagedBroadcastSmoke` gate writes
+`phase15-packaged-broadcast-smoke.json` plus `.md`, imports the P14-21
+packaged broadcast trigger/remove smoke contract and the P15-15
+`intent_broadcast` dependency gate. It keeps packaged broadcast trigger/remove
+unpromoted until positive trigger delivery, remove cleanup, relaunch/crash
+recovery, undeclared capability denial, exported receiver policy, metadata
+mismatch, Safe downgrade, and security/type/docs evidence are archived.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

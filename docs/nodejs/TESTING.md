@@ -3424,6 +3424,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskSchemaRollback
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedTaskSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15IntentBroadcastPromotion
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedBroadcastSmoke
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3532,3 +3533,10 @@ ownership dependency gate. It reports `partial` until live provider
 registration, manifest synthesis, exported receiver policy, trigger payload
 validation, owner cleanup, packaged trigger/remove smoke, cross-package denial,
 Safe downgrade, and security/type/docs evidence are attached.
+`installAndRunNodeV13PackagedBroadcastSmoke` writes
+`phase15-packaged-broadcast-smoke.json` plus `.md`, imports the P14-21
+packaged broadcast trigger/remove smoke contract and the P15-15
+`intent_broadcast` dependency gate. It reports `partial` until positive
+trigger delivery, remove cleanup, relaunch/crash recovery, undeclared
+capability denial, exported receiver policy, metadata mismatch, Safe
+downgrade, and security/type/docs evidence are attached.
