@@ -3413,6 +3413,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15PromotionContracts
 .\gradlew.bat --console=plain :app:verifyNodePhase15DisclosureRollbackAudit
 .\gradlew.bat --console=plain :app:verifyNodePhase15PackagedLiveUiPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15OverlayProviderPromotion
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3441,3 +3442,10 @@ provider POC and P13 packaged UI evidence, and reports `partial` until
 packaged live UI relaunch, task-removal cleanup, crash recovery, reviewed
 disclosure, Android 15+ archive, and downstream security/type/docs sync
 evidence are attached.
+`verifyNodePhase15OverlayProviderPromotion` writes
+`phase15-overlay-provider-promotion.json` plus `.md`, imports the P14-08
+controlled overlay provider POC, permission-denied/raw-object boundaries, the
+conditional permission-granted fixture, and P13 packaged overlay denial
+evidence, and reports `partial` until Android 12/15+ granted-permission,
+foreground disclosure, cleanup stress, packaged positive smoke, OEM matrix,
+and security/type/docs archives are attached.

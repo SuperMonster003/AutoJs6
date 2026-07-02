@@ -156,9 +156,22 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-05: Promote Android overlay provider permission-granted path.
   - Source backlog: `P14-08`.
-  - Gate: proposed `:app:verifyNodePhase15OverlayProviderPromotion`.
+  - Gate: `:app:verifyNodePhase15OverlayProviderPromotion`.
   - Acceptance: overlay sessions use scoped handles, permission checks,
     foreground disclosure, owner cleanup, and raw object denial.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/overlay-provider-promotion-plan.json`
+    - `docs/nodejs/phase15/PHASE15_OVERLAY_PROVIDER_PROMOTION.md`
+    - `docs/nodejs/reports/phase15/P15_05_OVERLAY_PROVIDER_PROMOTION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-overlay-provider-promotion.js`
+    - `build/reports/nodejs/phase15-overlay-provider-promotion.json`
+    - `build/reports/nodejs/phase15-overlay-provider-promotion.md`
+  - Still open: `overlay_permission_granted_android12_archive`,
+    `overlay_permission_granted_android15_archive`,
+    `overlay_foreground_disclosure_stop_action_archive`,
+    `overlay_owner_cleanup_leak_stress_archive`,
+    `packaged_overlay_positive_smoke_archive`, `overlay_oem_matrix_archive`,
+    and `phase15_security_type_doc_sync`.
 
 - [ ] P15-06: Close overlay permission and OEM matrix.
   - Source backlog: `P14-09`.
