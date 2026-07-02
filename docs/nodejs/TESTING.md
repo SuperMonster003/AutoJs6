@@ -3649,6 +3649,7 @@ Phase 16 starts from the Phase 15 summary handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase16PackagedLiveUiPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase16OverlayProviderPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase16OverlayOemMatrix
+.\gradlew.bat --console=plain :app:installAndRunNodeV14PackagedOverlaySmoke
 ```
 
 `verifyNodePhase16Baseline` writes `phase16-baseline-verification.json` plus
@@ -3690,3 +3691,10 @@ matrix partial gate and P14 matrix contract, depends on P16-05, and reports
 `partial` until Android 12/15+ granted-device archives, OEM notes,
 task-removal/relaunch evidence, foreground disclosure/stop action, and
 downstream security/type/docs sync evidence are attached.
+`installAndRunNodeV14PackagedOverlaySmoke` writes
+`phase16-packaged-overlay-smoke.json` plus `.md`, imports the P15-07 packaged
+overlay smoke partial gate, P14 packaged overlay fixture, P16-05 provider gate,
+and P16-06 OEM matrix gate, and reports `partial` until packaged install-run
+archives, Android 12/15+ device coverage, disclosure/stop action, task
+removal/relaunch/crash behavior, stress/leak proof, and downstream
+security/type/docs sync evidence are attached.

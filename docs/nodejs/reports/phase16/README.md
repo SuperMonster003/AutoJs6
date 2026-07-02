@@ -16,6 +16,7 @@ Foundation gates:
 - `:app:verifyNodePhase16PackagedLiveUiPromotion`
 - `:app:verifyNodePhase16OverlayProviderPromotion`
 - `:app:verifyNodePhase16OverlayOemMatrix`
+- `:app:installAndRunNodeV14PackagedOverlaySmoke`
 
 Phase 16 imports the Phase 15 future backlog for live UI, overlay,
 accessibility, screenshot/OCR, task providers, notifications/power,
@@ -58,3 +59,10 @@ boundary, P16 contracts, and the P16-04 live UI foundation while keeping
 partial gate and P14 matrix contract, depends on P16-05, and keeps the Android
 12/15+ granted-device archives, OEM notes, task-removal/relaunch evidence,
 foreground disclosure/stop action, and security/type/docs sync open.
+
+`P16-07` currently reports `partial`: it imports the P15 packaged overlay
+smoke partial gate, P14 packaged overlay fixture contract, P16-05 provider
+gate, and P16-06 OEM matrix gate while keeping packaged install-run archives,
+Android 12/15+ device coverage, disclosure/stop action, task
+removal/relaunch/crash behavior, stress/leak proof, and security/type/docs
+sync open.

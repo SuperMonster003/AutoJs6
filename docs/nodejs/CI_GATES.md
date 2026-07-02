@@ -1573,6 +1573,7 @@ The release gate still relies on packaged smoke APK artifacts being current when
 .\gradlew.bat --console=plain :app:verifyNodePhase16PackagedLiveUiPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase16OverlayProviderPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase16OverlayOemMatrix
+.\gradlew.bat --console=plain :app:installAndRunNodeV14PackagedOverlaySmoke
 ```
 
 The `:app:verifyNodePhase16Baseline` gate writes
@@ -1608,6 +1609,12 @@ The `:app:verifyNodePhase16OverlayOemMatrix` gate writes
 overlay permission/OEM matrix, and keeps required Android 12/15+ granted-device
 archives, OEM notes, task-removal/relaunch evidence, foreground disclosure/stop
 action, and P16 security/type/docs evidence open.
+The `:app:installAndRunNodeV14PackagedOverlaySmoke` gate writes
+`phase16-packaged-overlay-smoke.json` plus `.md`, imports P15-07 packaged
+overlay smoke, P14 packaged overlay fixture, P16-05 provider promotion, and
+P16-06 OEM matrix evidence, and keeps packaged install-run archives, Android
+12/15+ device coverage, disclosure/stop action, task removal/relaunch/crash
+behavior, stress/leak proof, and P16 security/type/docs evidence open.
 
 ## Manual Heavy Checks
 

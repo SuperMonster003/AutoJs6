@@ -170,7 +170,20 @@ A Phase 16 task can be marked complete only when all applicable items are true:
 
 - [ ] P16-07: Add packaged overlay positive smoke and stress.
   - Source backlog: `P15-07`.
-  - Gate: proposed `:app:installAndRunNodeV14PackagedOverlaySmoke`.
+  - Gate: `:app:installAndRunNodeV14PackagedOverlaySmoke`.
+  - Partial gate deployed:
+    - `docs/nodejs/phase16/packaged-overlay-smoke-plan.json`
+    - `docs/nodejs/phase16/PHASE16_PACKAGED_OVERLAY_SMOKE.md`
+    - `tools/nodejs/phase16/verify-node-phase16-packaged-overlay-smoke.js`
+    - `docs/nodejs/reports/phase16/P16_07_PACKAGED_OVERLAY_SMOKE.md`
+    - `build/reports/nodejs/phase16-packaged-overlay-smoke.json`
+    - `build/reports/nodejs/phase16-packaged-overlay-smoke.md`
+  - Open blockers: `packaged_overlay_positive_smoke_archive`,
+    `packaged_overlay_positive_device_archive`,
+    `packaged_overlay_foreground_disclosure_stop_action`,
+    `packaged_overlay_task_removal_relaunch_crash`,
+    `packaged_overlay_event_drain_leak_stress`, and
+    `phase16_security_type_doc_sync`.
 
 - [ ] P16-08: Close accessibility lifecycle and selector/action matrix.
   - Source backlog: `P15-08`.

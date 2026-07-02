@@ -459,6 +459,22 @@ partial overlay OEM matrix gate through `:app:verifyNodePhase16OverlayOemMatrix`
   `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`.
 - Matrix gaps are future-promotion blockers, not release-blocking error codes.
 
+## P16-07 packaged overlay smoke
+
+P16-07 does not add new error codes or promote runtime authority. It records a
+partial packaged overlay smoke gate through `:app:installAndRunNodeV14PackagedOverlaySmoke`:
+
+- `overlay` remains `provider_poc_not_promoted` until packaged install-run
+  archives, Android 12/15+ coverage, foreground disclosure/stop action, task
+  removal/relaunch/crash behavior, stress/leak proof, and downstream
+  security/type/docs evidence are archived.
+- Missing `ui.overlay` capability metadata still rejects before provider
+  dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Missing `SYSTEM_ALERT_WINDOW` still rejects provider dispatch with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`.
+- Missing packaged smoke archives are future-promotion blockers, not
+  release-blocking error codes.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native
