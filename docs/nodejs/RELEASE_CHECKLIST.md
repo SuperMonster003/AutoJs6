@@ -101,8 +101,10 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] packaged `device` bridge smoke passes, keeps sensitive identifiers absent, declares `android.permission.VIBRATE`, and cannot be shadowed by `node_modules/device`
 - [ ] packaged v1.1 bridge smoke passes for controlled `fetch`, OCR, `storage`/`storages`, UI, and `work_manager` fake transport with declared `node.permissions`, bridge-module shadowing protection, and zero pending bridge calls
 - [ ] packaged `engines` bridge smoke passes after the inrt template carries live bridge metadata
-- [ ] template APK refreshed when inrt bytecode or manifest changes
-- [ ] template reproducibility report records `template.refresh.ready=true`, template APK SHA-256, normalized manifest SHA-256, and native lib injection policy
+- [ ] slim template APK refreshed when inrt bytecode or manifest changes
+- [ ] template reproducibility report records `template.refresh.ready=true`, template APK SHA-256, normalized manifest SHA-256, and slim native-lib injection policy
+- [ ] production `template.apk` contains no `libnode.so`, `libautojs6-node.so`, or `libc++_shared.so`
+- [ ] full Embedded Node inrt test template generated through `:app:embeddedNodeRefreshFullInrtTemplateApk` when runtime-template testing needs native libraries
 - [ ] `NativeNodeEmbeddedScriptService` exists in manifest
 - [ ] `NativeNodeEmbeddedScriptService` exists in Dex
 - [ ] service uses `android:process=":nodejs_embedded"`

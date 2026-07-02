@@ -1628,6 +1628,7 @@ Some checks remain explicit because they need a prepared device, a recently expo
 - worker resource stress
 - packaged APK output verifier with `-Pautojs.embeddedNode.packagedApk=<apk>`
 - `verifyRhinoOnlyBuild` rollback verification
-- template refresh through `embeddedNodeRefreshInrtTemplateApk`
+- slim production template refresh through `embeddedNodeRefreshInrtTemplateApk`
+- full Embedded Node inrt test template generation through `embeddedNodeRefreshFullInrtTemplateApk`
 
 Do not add retries around security assertions, resource leak assertions, or packaged smoke script failures. Use [FLAKE_POLICY.md](FLAKE_POLICY.md) for classification.

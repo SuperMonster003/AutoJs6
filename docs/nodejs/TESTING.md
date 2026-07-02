@@ -2872,9 +2872,24 @@ Template refresh and smoke artifact collection:
 .\gradlew.bat --console=plain :app:embeddedNodePullPackagedSmokeApks
 ```
 
+The production inrt template is intentionally slim. `assembleInrtRelease` and
+`embeddedNodeRefreshInrtTemplateApk` default to `rhinoOnly` and must not carry
+`libnode.so`, `libautojs6-node.so`, or `libc++_shared.so` in
+`app/src/main/assets-app/template.apk`. Packaged projects that enable the
+`Embedded Node.js` library inject those native files from the host APK according
+to the selected ABI policy.
+
+Full Embedded Node inrt templates for runtime/template testing are generated as
+build outputs only and do not replace `assets-app/template.apk`:
+
+```powershell
+.\gradlew.bat --console=plain :app:assembleInrtFullNodeRelease
+.\gradlew.bat --console=plain :app:embeddedNodeRefreshFullInrtTemplateApk
+```
+
 `verifyNodeTemplateReproducibility` writes `app/build/reports/embedded-node/template-reproducibility.txt` and fails before
-packaged smoke when the checked-in template is stale, missing the embedded script service, missing the expected arm64
-native runtime seed, carrying x86 Node runtime entries, or unable to produce a deterministic normalized manifest hash.
+packaged smoke when the checked-in slim template is stale, missing the embedded script service, carrying Embedded Node
+native runtime entries, carrying x86 Node runtime entries, or unable to produce a deterministic normalized manifest hash.
 
 ## ABI Matrix
 
@@ -2900,9 +2915,9 @@ Expected policy:
 
 Release packaging profiles:
 
-- `nodeFull`: default, requires all supported Node ABIs
+- `nodeFull`: default for main app builds and explicit full-node inrt test templates, requires all supported Node ABIs
 - `nodeMini`: supports a smaller explicit ABI set
-- `rhinoOnly`: must not package `libnode.so` or `libautojs6-node.so`
+- `rhinoOnly`: default for ordinary production inrt template builds, must not package `libnode.so` or `libautojs6-node.so`
 
 Rollback flavor verification:
 

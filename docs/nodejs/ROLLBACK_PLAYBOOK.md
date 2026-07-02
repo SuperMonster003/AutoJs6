@@ -90,7 +90,7 @@ If packaged APK generation is affected:
   "-Pautojs.embeddedNode.packagedApk=<path-to-apk>"
 ```
 
-3. Refresh or replace `app/src/main/assets-app/template.apk` only through the documented template refresh gate.
+3. Refresh or replace the slim `app/src/main/assets-app/template.apk` only through the documented template refresh gate.
 4. Re-run packaged smoke on the primary device before restoring packaged Node release channels.
 
 Do not manually delete native libraries from a packaged APK and publish it as a Node-enabled build. Use `rhinoOnly` only for a deliberate non-Node rollback artifact.
