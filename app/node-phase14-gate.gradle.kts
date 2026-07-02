@@ -1552,3 +1552,56 @@ tasks.register<Exec>("verifyNodePhase14SecurityRegressionCorpus") {
         nodePhase14ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("installAndRunNodeV12PackagedSmoke") {
+    group = "verification"
+    description = "Runs the Phase 14 Node v1.2 packaged aggregate smoke contract gate."
+
+    dependsOn("verifyNodePhase14SecurityRegressionCorpus")
+
+    val scriptFile =
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase14/install-and-run-node-v12-packaged-smoke.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_34_NODE_V1_2_PACKAGED_AGGREGATE_SMOKE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/node-v1-2-packaged-aggregate-smoke-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_NODE_V1_2_PACKAGED_AGGREGATE_SMOKE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/security/NODE_PROFILE_V1_2_SECURITY_REGRESSION_CORPUS.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase14-gate.gradle.kts"))
+    listOf(
+        "phase14-live-ui-provider-packaged.json",
+        "phase14-packaged-overlay-positive-smoke.json",
+        "phase14-accessibility-lifecycle.json",
+        "phase14-packaged-image-ocr-evidence.json",
+        "phase14-packaged-task-scheduling-smoke.json",
+        "phase14-packaged-broadcast-trigger-remove-smoke.json",
+        "phase14-notification-ownership.json",
+        "phase14-settings-power-oem-background-matrix.json",
+        "phase14-packaged-recorder-media-stress.json",
+        "phase14-worker-runnable-packaged-smoke.json",
+        "phase14-security-regression-corpus.json",
+    ).forEach { reportName ->
+        inputs.file(nodePhase14ReportDir.map { it.file(reportName) })
+    }
+    outputs.files(
+        nodePhase14ReportDir.map { it.file("phase14-packaged-aggregate-smoke.json") },
+        nodePhase14ReportDir.map { it.file("phase14-packaged-aggregate-smoke.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase14ReportDir.get().asFile.absolutePath,
+    )
+}

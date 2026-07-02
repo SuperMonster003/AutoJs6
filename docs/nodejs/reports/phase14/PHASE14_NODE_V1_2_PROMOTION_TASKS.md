@@ -849,10 +849,30 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: every promoted capability has positive, negative, and abuse
     cases.
 
-- [ ] P14-34: Add v1.2 packaged aggregate smoke.
+- [x] P14-34: Add v1.2 packaged aggregate smoke.
   - Scope: packaged Pro provider smoke for every promoted packaged-capable
     v1.2 surface, plus undeclared capability denial and Safe downgrade.
-  - Gate: proposed `:app:installAndRunNodeV12PackagedSmoke`.
+  - Gate: `:app:installAndRunNodeV12PackagedSmoke`.
+  - Packaged aggregate smoke gate deployed:
+    - Adds
+      `docs/nodejs/phase14/node-v1-2-packaged-aggregate-smoke-plan.json`
+      and `PHASE14_NODE_V1_2_PACKAGED_AGGREGATE_SMOKE.md`.
+    - Adds
+      `docs/nodejs/reports/phase14/P14_34_NODE_V1_2_PACKAGED_AGGREGATE_SMOKE.md`.
+    - Adds
+      `tools/nodejs/phase14/install-and-run-node-v12-packaged-smoke.js`
+      plus Gradle entry `:app:installAndRunNodeV12PackagedSmoke`.
+    - Imports P14-07, P14-10, P14-11, P14-15, P14-19, P14-21, P14-22,
+      P14-23, P14-25, P14-29, and P14-33 generated reports.
+    - Requires every aggregate suite to define a declared positive path or
+      conditional skip, undeclared capability denial, packaged metadata
+      mismatch denial, Safe downgrade behavior, cleanup, and report artifact
+      coverage.
+    - Records `packaged_aggregate_smoke_contract_ready` in
+      `host_contract_ready` mode without claiming real device packaged
+      install-run archive success.
+    - Writes `build/reports/nodejs/phase14-packaged-aggregate-smoke.json`
+      and `.md`.
   - Acceptance: packaged smoke can be run from a deterministic Gradle entry
     and writes report artifacts under `build/reports/nodejs`.
 

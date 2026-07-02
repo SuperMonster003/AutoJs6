@@ -398,6 +398,15 @@ denial, path escape, permission bypass, lifecycle cleanup, packaged metadata
 mismatch, and Safe downgrade as release security boundary categories for P14-34
 and later closeout gates.
 
+P14-34 records the v1.2 packaged aggregate smoke contract through
+`:app:installAndRunNodeV12PackagedSmoke`. The gate imports packaged-capable
+provider reports plus the P14-33 corpus and requires each aggregate suite to
+cover a declared positive path or conditional skip, undeclared capability
+denial, packaged metadata mismatch denial, Safe downgrade behavior, cleanup,
+and report artifacts. The current run mode is `host_contract_ready`; it does
+not grant new authority and does not claim real device packaged install-run
+success until archives are attached.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

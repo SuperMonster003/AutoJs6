@@ -337,6 +337,22 @@ corpus as `security_corpus_expanded_no_authority_promoted`:
   before provider dispatch with the existing capability/permission diagnostics.
 - Runtime authority remains unchanged.
 
+## P14-34 packaged aggregate smoke
+
+P14-34 does not add a new error code. It records the v1.2 packaged aggregate
+smoke as `packaged_aggregate_smoke_contract_ready` behind
+`:app:installAndRunNodeV12PackagedSmoke`:
+
+- Existing undeclared capability, Android permission, packaged metadata
+  mismatch, Safe downgrade, and provider cleanup diagnostics remain canonical.
+- The aggregate gate imports packaged-capable P14 reports and requires every
+  suite to document a positive path or conditional skip plus denial, downgrade,
+  cleanup, and report artifact coverage.
+- The current run mode is `host_contract_ready`; real packaged install-run
+  failures must come from future device archives, not from a new host-only
+  error shape.
+- Runtime authority remains unchanged.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

@@ -403,7 +403,7 @@
         "P14-33",
         "P14-34"
       ],
-      "summary": "Expand the v1.2 security regression corpus and packaged aggregate smoke for every promoted capability and denial boundary. P14-33 adds the v1.2 security regression corpus gate with positive, negative, abuse, runtime guard, promotion precondition, and rollback entries for high-risk provider families while keeping runtime authority unchanged.",
+      "summary": "Expand the v1.2 security regression corpus and packaged aggregate smoke for every promoted capability and denial boundary. P14-33 adds the v1.2 security regression corpus gate with positive, negative, abuse, runtime guard, promotion precondition, and rollback entries for high-risk provider families while keeping runtime authority unchanged. P14-34 adds the deterministic packaged aggregate smoke entry and report contract for packaged-capable v1.2 surfaces without claiming real device install-run success until archives are attached.",
       "risk": "critical",
       "runtimeSurface": [
         "v1.2 security regression corpus",
@@ -422,7 +422,14 @@
         "tools/nodejs/phase14/verify-node-phase14-security-regression-corpus.js",
         ":app:verifyNodePhase14SecurityRegressionCorpus",
         "build/reports/nodejs/phase14-security-regression-corpus.json",
-        "build/reports/nodejs/phase14-security-regression-corpus.md"
+        "build/reports/nodejs/phase14-security-regression-corpus.md",
+        "docs/nodejs/phase14/node-v1-2-packaged-aggregate-smoke-plan.json",
+        "docs/nodejs/phase14/PHASE14_NODE_V1_2_PACKAGED_AGGREGATE_SMOKE.md",
+        "docs/nodejs/reports/phase14/P14_34_NODE_V1_2_PACKAGED_AGGREGATE_SMOKE.md",
+        "tools/nodejs/phase14/install-and-run-node-v12-packaged-smoke.js",
+        ":app:installAndRunNodeV12PackagedSmoke",
+        "build/reports/nodejs/phase14-packaged-aggregate-smoke.json",
+        "build/reports/nodejs/phase14-packaged-aggregate-smoke.md"
       ],
       "rollback": "Disable all v1.2 promoted capability switches, keep Safe profile default, and block packaged promotion if aggregate security or packaged smoke fails."
     },

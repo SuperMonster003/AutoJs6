@@ -2377,6 +2377,22 @@ worker/process-worker, and packaged metadata/Safe downgrade boundaries. It is a
 host corpus gate; connected-device and packaged APK execution remain owned by
 the focused provider gates and P14-34 packaged aggregate smoke.
 
+Phase 14 v1.2 packaged aggregate smoke gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:installAndRunNodeV12PackagedSmoke
+```
+
+This deterministic host contract gate writes
+`phase14-packaged-aggregate-smoke.json` plus `.md` under
+`build/reports/nodejs`. It imports the packaged-capable P14 provider reports and
+the P14-33 security corpus, then verifies aggregate suite coverage for declared
+positive paths or conditional skips, undeclared capability denial, packaged
+metadata mismatch denial, Safe downgrade behavior, cleanup, and report
+artifacts. The current run mode is `host_contract_ready`; real device packaged
+install-run archives are still future evidence and are not claimed by this
+gate.
+
 Phase 13 profile rollback playbook gate:
 
 ```powershell

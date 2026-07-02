@@ -226,3 +226,13 @@ overlay, accessibility, MediaProjection, image/OCR, tasks, broadcast,
 notifications, power, recorder/media, MediaStore/playback, worker/process, and
 packaged metadata/Safe downgrade boundaries behind
 `:app:verifyNodePhase14SecurityRegressionCorpus`.
+
+`P14_34_NODE_V1_2_PACKAGED_AGGREGATE_SMOKE.md` records the v1.2 packaged
+aggregate smoke as `ready` with a
+`packaged_aggregate_smoke_contract_ready` decision. It imports P14-07, P14-10,
+P14-11, P14-15, P14-19, P14-21, P14-22, P14-23, P14-25, P14-29, and P14-33
+generated reports, verifies aggregate suite contracts for positive or
+conditional paths, undeclared capability denial, packaged metadata mismatch,
+Safe downgrade, cleanup, and report artifacts, and writes
+`phase14-packaged-aggregate-smoke.json` plus `.md` behind
+`:app:installAndRunNodeV12PackagedSmoke`.

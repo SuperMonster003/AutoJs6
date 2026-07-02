@@ -1260,6 +1260,13 @@ abuse, runtime guard, promotion precondition, and rollback entries, and covers
 raw object denial, path escape, permission bypass, lifecycle cleanup, packaged
 metadata mismatch, and Safe downgrade categories without promoting runtime
 authority.
+The `:app:installAndRunNodeV12PackagedSmoke` gate writes
+`phase14-packaged-aggregate-smoke.json` plus `.md`, depends on the P14-33
+security corpus gate, imports packaged-capable provider reports, and verifies
+the v1.2 aggregate packaged smoke contract for positive or conditional paths,
+undeclared capability denial, packaged metadata mismatch, Safe downgrade,
+cleanup, and report artifacts. It runs in `host_contract_ready` mode until real
+device packaged install-run archives are attached.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
