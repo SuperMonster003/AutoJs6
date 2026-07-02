@@ -889,3 +889,60 @@ tasks.register<Exec>("verifyNodePhase15NotificationPromotion") {
         nodePhase15ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase15SettingsPowerPromotion") {
+    group = "verification"
+    description = "Verifies the Phase 15 settings/power OEM and background-launch promotion evidence gate."
+
+    dependsOn("verifyNodePhase15NotificationPromotion", "verifyNodePhase14SettingsPowerOemBackgroundMatrix")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase15/verify-node-phase15-settings-power-promotion.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/settings-power-promotion-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/PHASE15_SETTINGS_POWER_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/P15_18_SETTINGS_POWER_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/PHASE15_NODE_V1_3_PROVIDER_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/phase15-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/node-v1-3-promotion-contracts.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/node-v1-3-disclosure-rollback-audit.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/notification-promotion-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/settings-power-oem-background-matrix.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_SETTINGS_POWER_OEM_BACKGROUND_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_23_SETTINGS_POWER_OEM_BACKGROUND_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_25_NOTIFICATIONS_SETTINGS_POWER_MANAGER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeDeviceBridgeInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/device.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase15-gate.gradle.kts"))
+    inputs.file(nodePhase15ReportDir.map { it.file("phase13-notifications-settings-power-manager.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase14-settings-power-oem-background-matrix.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-notification-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-promotion-contracts.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-disclosure-rollback-audit.json") })
+    outputs.files(
+        nodePhase15ReportDir.map { it.file("phase15-settings-power-promotion.json") },
+        nodePhase15ReportDir.map { it.file("phase15-settings-power-promotion.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase15ReportDir.get().asFile.absolutePath,
+    )
+}

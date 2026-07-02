@@ -3426,6 +3426,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15IntentBroadcastPromotion
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedBroadcastSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15NotificationPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15SettingsPowerPromotion
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3548,3 +3549,10 @@ packaged broadcast dependency gate. It reports `partial` until packaged
 post/cancel, foreground disclosure/stop action, Android permission matrix,
 advanced notification decision, rollback cleanup, Safe downgrade, raw-object
 security coverage, and security/type/docs evidence are attached.
+`verifyNodePhase15SettingsPowerPromotion` writes
+`phase15-settings-power-promotion.json` plus `.md`, imports the P14-23
+settings/power OEM and background-launch matrix and the P15-17 notification
+dependency gate. It reports `partial` until Android 12/15+ OEM matrix archives,
+exact-alarm state, background-launch restrictions, reviewed prompt/rollback
+evidence, packaged disclosure/stop action, Safe downgrade, raw-object security
+coverage, and task/device/media docs sync evidence are attached.

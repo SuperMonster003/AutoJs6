@@ -57,6 +57,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15IntentBroadcastPromotion`
 - `:app:installAndRunNodeV13PackagedBroadcastSmoke`
 - `:app:verifyNodePhase15NotificationPromotion`
+- `:app:verifyNodePhase15SettingsPowerPromotion`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -156,3 +157,10 @@ broadcast dependency gate. It keeps `notifications` unpromoted until packaged
 post/cancel, foreground disclosure/stop action, Android permission matrix,
 advanced notification decision, rollback cleanup, Safe downgrade, raw-object
 security coverage, and security/type/docs sync land.
+
+`P15-18` currently reports `partial`: it imports the P14 settings/power OEM and
+background-launch matrix plus the P15-17 notification dependency gate. It keeps
+`settings_power` unpromoted until Android 12/15+ OEM matrix archives,
+exact-alarm state, background-launch restrictions, reviewed prompt/rollback
+evidence, packaged disclosure/stop action, Safe downgrade, raw-object security
+coverage, and task/device/media docs sync land.

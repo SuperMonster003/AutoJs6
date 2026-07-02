@@ -423,9 +423,25 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-18: Close settings/power OEM and background-launch matrix.
   - Source backlog: `P14-23`.
-  - Gate: proposed `:app:verifyNodePhase15SettingsPowerPromotion`.
+  - Gate: `:app:verifyNodePhase15SettingsPowerPromotion`.
   - Acceptance: prompt copy, dry-run/mutation boundary, OEM notes, exact-alarm
     state, denial, and rollback evidence are archived.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/settings-power-promotion-plan.json`
+    - `docs/nodejs/phase15/PHASE15_SETTINGS_POWER_PROMOTION.md`
+    - `docs/nodejs/reports/phase15/P15_18_SETTINGS_POWER_PROMOTION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-settings-power-promotion.js`
+    - `build/reports/nodejs/phase15-settings-power-promotion.json`
+    - `build/reports/nodejs/phase15-settings-power-promotion.md`
+  - Still open: `settings_power_android12_oem_matrix_archive`,
+    `settings_power_android15_plus_oem_matrix_archive`,
+    `settings_power_exact_alarm_state_archive`,
+    `settings_power_background_launch_restriction_archive`,
+    `settings_power_mutation_prompt_rollback_archive`,
+    `settings_power_packaged_disclosure_stop_action_archive`,
+    `settings_power_safe_downgrade_archive`,
+    `settings_power_raw_object_denial_security_archive`, and
+    `phase15_task_device_media_doc_sync`.
 
 - [ ] P15-19: Promote real recorder session provider.
   - Source backlog: `P14-24`.

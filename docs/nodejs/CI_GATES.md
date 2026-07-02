@@ -1322,6 +1322,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15IntentBroadcastPromotion
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedBroadcastSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15NotificationPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15SettingsPowerPromotion
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1444,6 +1445,14 @@ packaged broadcast dependency gate. It keeps `notifications` unpromoted until
 packaged post/cancel, foreground disclosure/stop action, Android permission
 matrix, advanced notification decision, rollback cleanup, Safe downgrade,
 raw-object security coverage, and security/type/docs evidence are archived.
+The `:app:verifyNodePhase15SettingsPowerPromotion` gate writes
+`phase15-settings-power-promotion.json` plus `.md`, imports the P14-23
+settings/power OEM and background-launch matrix and the P15-17 notification
+dependency gate. It keeps `settings_power` unpromoted until Android 12/15+ OEM
+matrix archives, exact-alarm state, background-launch restrictions, reviewed
+prompt/rollback evidence, packaged disclosure/stop action, Safe downgrade,
+raw-object security coverage, and task/device/media docs sync evidence are
+archived.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
