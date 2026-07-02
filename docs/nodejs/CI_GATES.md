@@ -1310,6 +1310,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15DisclosureRollbackAudit
 .\gradlew.bat --console=plain :app:verifyNodePhase15PackagedLiveUiPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15OverlayProviderPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15OverlayOemMatrix
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1341,6 +1342,13 @@ provider POC evidence, permission-denied/raw-object boundaries, and the
 conditional permission-granted fixture, and keeps `overlay` unpromoted until
 Android 12/15+ granted-permission archives, foreground disclosure, cleanup
 stress, packaged positive smoke, OEM matrix, and security/type/docs evidence
+are archived.
+The `:app:verifyNodePhase15OverlayOemMatrix` gate writes
+`phase15-overlay-oem-matrix.json` plus `.md`, imports the P14-09 overlay
+permission/OEM matrix and P15-05 overlay provider gate, validates the required
+Android 12 and Android 15+ device slots, and keeps `overlay` unpromoted until
+granted-permission archives, OEM settings notes, task removal/relaunch
+behavior, foreground disclosure/stop action, and security/type/docs evidence
 are archived.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash

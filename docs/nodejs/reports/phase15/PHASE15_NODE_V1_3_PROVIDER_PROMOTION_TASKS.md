@@ -175,9 +175,22 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-06: Close overlay permission and OEM matrix.
   - Source backlog: `P14-09`.
-  - Gate: proposed `:app:verifyNodePhase15OverlayOemMatrix`.
+  - Gate: `:app:verifyNodePhase15OverlayOemMatrix`.
   - Acceptance: Android 12 and Android 15+ class devices record grant, denial,
     settings round-trip, task removal, relaunch, and OEM notes.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/overlay-oem-matrix-plan.json`
+    - `docs/nodejs/phase15/PHASE15_OVERLAY_OEM_MATRIX.md`
+    - `docs/nodejs/reports/phase15/P15_06_OVERLAY_OEM_MATRIX.md`
+    - `tools/nodejs/phase15/verify-node-phase15-overlay-oem-matrix.js`
+    - `build/reports/nodejs/phase15-overlay-oem-matrix.json`
+    - `build/reports/nodejs/phase15-overlay-oem-matrix.md`
+  - Still open: `overlay_android12_granted_device_archive`,
+    `overlay_android15_plus_granted_device_archive`,
+    `overlay_settings_round_trip_oem_notes`,
+    `overlay_task_removal_relaunch_evidence`,
+    `overlay_foreground_disclosure_stop_action_archive`, and
+    `phase15_security_type_doc_sync`.
 
 - [ ] P15-07: Add packaged overlay positive smoke and stress.
   - Source backlog: `P14-10`.

@@ -3414,6 +3414,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15DisclosureRollbackAudit
 .\gradlew.bat --console=plain :app:verifyNodePhase15PackagedLiveUiPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15OverlayProviderPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15OverlayOemMatrix
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3449,3 +3450,10 @@ conditional permission-granted fixture, and P13 packaged overlay denial
 evidence, and reports `partial` until Android 12/15+ granted-permission,
 foreground disclosure, cleanup stress, packaged positive smoke, OEM matrix,
 and security/type/docs archives are attached.
+`verifyNodePhase15OverlayOemMatrix` writes
+`phase15-overlay-oem-matrix.json` plus `.md`, imports the P14-09 overlay
+permission/OEM matrix and P15-05 overlay provider gate, validates the required
+Android 12 and Android 15+ device slots, and reports `partial` until
+granted-permission archives, OEM settings notes, task removal/relaunch
+behavior, foreground disclosure/stop action, and security/type/docs evidence
+are attached.
