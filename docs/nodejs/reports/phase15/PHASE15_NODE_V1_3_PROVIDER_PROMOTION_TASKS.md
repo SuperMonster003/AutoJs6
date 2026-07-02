@@ -213,9 +213,25 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-08: Close accessibility lifecycle and selector/action matrix.
   - Source backlog: `P14-11`, `P14-12`.
-  - Gate: proposed `:app:verifyNodePhase15AccessibilityPromotion`.
+  - Gate: `:app:verifyNodePhase15AccessibilityPromotion`.
   - Acceptance: service lifecycle, selector/action matrix, packaged behavior,
     permission denial, and raw accessibility object denial are covered.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/accessibility-promotion-plan.json`
+    - `docs/nodejs/phase15/PHASE15_ACCESSIBILITY_PROMOTION.md`
+    - `docs/nodejs/reports/phase15/P15_08_ACCESSIBILITY_PROMOTION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-accessibility-promotion.js`
+    - `build/reports/nodejs/phase15-accessibility-promotion.json`
+    - `build/reports/nodejs/phase15-accessibility-promotion.md`
+  - Still open: `accessibility_packaged_service_enabled_archive`,
+    `accessibility_settings_round_trip_archive`,
+    `accessibility_task_removal_relaunch_archive`,
+    `accessibility_disconnect_missing_capability_denial_archive`,
+    `accessibility_selector_android12_action_archive`,
+    `accessibility_selector_android15_plus_action_archive`,
+    `accessibility_selector_global_actions_recents_archive`,
+    `accessibility_selector_unsupported_tier_diagnostics_archive`, and
+    `phase15_security_type_doc_sync`.
 
 - [ ] P15-09: Promote Activity-owned MediaProjection provider.
   - Source backlog: `P14-13`.

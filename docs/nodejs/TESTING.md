@@ -3416,6 +3416,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15OverlayProviderPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15OverlayOemMatrix
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedOverlaySmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15AccessibilityPromotion
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3465,3 +3466,11 @@ P15-05 and P15-06 overlay gates, and reports `partial` until packaged
 install-run archives, Android 12/15+ coverage, disclosure/stop action, task
 removal/relaunch/crash behavior, stress/leak proof, and security/type/docs
 evidence are attached.
+`verifyNodePhase15AccessibilityPromotion` writes
+`phase15-accessibility-promotion.json` plus `.md`, imports the P14-11
+accessibility lifecycle fixture and P14-12 selector/action matrix, imports P13
+selector and shell/root/Shizuku boundary evidence, and reports `partial` until
+Android 12/15+ service-enabled archives, settings round-trip, task
+removal/relaunch, disconnect/missing-capability denial, safe global-action
+diagnostics, unsupported-tier diagnostics, and security/type/docs evidence are
+attached.

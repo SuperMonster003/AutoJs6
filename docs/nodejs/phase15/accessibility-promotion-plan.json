@@ -1,0 +1,148 @@
+{
+  "schema": "autojs6-node-phase15-accessibility-promotion-plan-v1",
+  "phase": "Phase 15: Node v1.3 Provider Promotion",
+  "task": "P15-08",
+  "sourceBacklogTasks": [
+    "P14-11",
+    "P14-12"
+  ],
+  "providerId": "accessibility",
+  "status": "partial",
+  "promotionState": "provider_poc_not_promoted",
+  "runtimeAuthorityChanged": false,
+  "targetState": "opt_in_promoted_after_accessibility_lifecycle_and_selector_matrix_closure",
+  "sourceReports": [
+    "build/reports/nodejs/phase14-accessibility-lifecycle.json",
+    "build/reports/nodejs/phase14-accessibility-selector-action-matrix.json"
+  ],
+  "requiredDeviceClasses": [
+    "android_12_class",
+    "android_15_plus_class"
+  ],
+  "requiredSelectorActionScenarios": [
+    "direct selector builders and action facade",
+    "Rhino compat selector aliases and chain helpers",
+    "service-enabled findByText/findOne/click/longClick controlled UI",
+    "Back/Home/Recents optional global actions",
+    "timeout and cancellation cleanup",
+    "missing service denial",
+    "missing capability denial",
+    "gesture/root/Shizuku unsupported tier diagnostics",
+    "raw AccessibilityService/AccessibilityNodeInfo/UiObject absence"
+  ],
+  "readyEvidence": [
+    {
+      "id": "phase14_accessibility_lifecycle_fixture",
+      "source": "docs/nodejs/phase14/accessibility-lifecycle-plan.json",
+      "meaning": "P14-11 defines the packaged accessibility lifecycle fixture, service permission metadata, privacy/settings contract, disabled-state denial, and pending-dispatch cleanup markers."
+    },
+    {
+      "id": "phase14_accessibility_disabled_denial_boundary",
+      "source": "build/reports/nodejs/phase14-accessibility-lifecycle.json",
+      "meaning": "The P14-11 gate verifies disabled/unavailable accessibility service behavior remains fail-closed with stable permission-denied diagnostics."
+    },
+    {
+      "id": "phase14_accessibility_selector_action_matrix",
+      "source": "docs/nodejs/phase14/accessibility-selector-action-matrix.json",
+      "meaning": "P14-12 defines required Android 12 and Android 15+ selector/action matrix rows, global-action constraints, missing-service denial, missing-capability denial, unsupported tier diagnostics, and raw object boundary evidence."
+    },
+    {
+      "id": "phase13_accessibility_selector_bridge",
+      "source": "build/reports/nodejs/phase13-accessibility-selector-promotion.json",
+      "meaning": "P13-19 selector DSL, Rhino compat aliases, timeout/cancellation cleanup, missing-service denial, and raw object absence are imported."
+    },
+    {
+      "id": "phase13_shell_root_shizuku_separation",
+      "source": "build/reports/nodejs/phase13-shell-root-shizuku-capability.json",
+      "meaning": "Gesture/root/Shizuku tiers stay separate from accessibility selector authority."
+    },
+    {
+      "id": "phase15_promotion_contracts",
+      "source": "docs/nodejs/phase15/node-v1-3-promotion-contracts.json",
+      "meaning": "The v1.3 provider promotion contracts keep accessibility at provider_poc until connected device, packaged APK, disclosure, rollback, security, TypeScript, docs, Safe downgrade, and raw-object-denial evidence are closed."
+    },
+    {
+      "id": "phase15_disclosure_rollback_contract",
+      "source": "docs/nodejs/phase15/node-v1-3-disclosure-rollback-audit.json",
+      "meaning": "Accessibility still requires prompt, manifest metadata, install/run copy, foreground disclosure, stop action, disable flag, diagnostics, rollback proof, and crash circuit breaker evidence before promotion."
+    },
+    {
+      "id": "phase15_surface_manifest_mapping",
+      "source": "docs/nodejs/phase15/phase15-surface-manifest.json",
+      "meaning": "P15-08 is owned by the pro UI/overlay lane as device_matrix_archive evidence with the accessibility rollback hook."
+    }
+  ],
+  "requiredPromotionEvidence": [
+    "accessibility_packaged_service_enabled_archive",
+    "accessibility_settings_round_trip_archive",
+    "accessibility_task_removal_relaunch_archive",
+    "accessibility_disconnect_missing_capability_denial_archive",
+    "accessibility_selector_android12_action_archive",
+    "accessibility_selector_android15_plus_action_archive",
+    "accessibility_selector_global_actions_recents_archive",
+    "accessibility_selector_unsupported_tier_diagnostics_archive",
+    "phase15_security_type_doc_sync"
+  ],
+  "openBlockers": [
+    {
+      "id": "accessibility_packaged_service_enabled_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Archived packaged install-run with user-enabled accessibility service and provider availability on Android 12 and Android 15+."
+    },
+    {
+      "id": "accessibility_settings_round_trip_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Accessibility settings launch guidance and return-to-app state recorded without auto-enabling the service."
+    },
+    {
+      "id": "accessibility_task_removal_relaunch_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Task removal cleanup and package relaunch behavior for the packaged accessibility lifecycle."
+    },
+    {
+      "id": "accessibility_disconnect_missing_capability_denial_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Service disconnect cleanup and packaged missing-capability denial with raw selector/service handles absent."
+    },
+    {
+      "id": "accessibility_selector_android12_action_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Archived Android 12 class accessibility profile run with user-enabled service covering findByText, findOne, click, longClick, timeout, missing service, and missing capability behavior."
+    },
+    {
+      "id": "accessibility_selector_android15_plus_action_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Archived Android 15+ class accessibility profile run with user-enabled service covering findByText, findOne, click, longClick, timeout, missing service, and missing capability behavior."
+    },
+    {
+      "id": "accessibility_selector_global_actions_recents_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Back/Home/Recents global action archive recorded only on devices where those actions are safe to trigger."
+    },
+    {
+      "id": "accessibility_selector_unsupported_tier_diagnostics_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Archived diagnostics proving gesture/root/Shizuku tiers remain separate, unsupported or explicitly denied, and do not leak raw accessibility objects."
+    },
+    {
+      "id": "phase15_security_type_doc_sync",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "P15-11, P15-23, P15-25, and P15-26 synchronize docs, TypeScript declarations, security corpus, migration, compatibility, and release notes before accessibility can be marked promoted."
+    }
+  ],
+  "rollback": {
+    "disableFlag": "node.provider.accessibility.enabled",
+    "diagnosticCode": "NODE_PROVIDER_ACCESSIBILITY_DISABLED",
+    "safeFallback": "return stable denial for selector and action authority",
+    "crashCircuitBreaker": "3 provider crashes within 24h per package/profile/capability"
+  }
+}
