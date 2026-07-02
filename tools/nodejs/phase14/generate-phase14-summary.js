@@ -464,10 +464,10 @@ function buildChecks(files, generatedReports, capabilityTruthReport, summary, ma
     check(
       "future-work-visible",
       summary.openFutureWork.openTasks.length > 0 &&
-        summary.openFutureWork.closeoutTasks.length === 2 &&
+        summary.openFutureWork.closeoutTasks.length >= 1 &&
+        summary.openFutureWork.closeoutTasks.some((task) => task.id === "P14-39") &&
         summary.openFutureWork.futurePromotionReports.length > 0 &&
         markdown.includes("## Open Future Work") &&
-        markdown.includes("P14-38") &&
         markdown.includes("P14-39") &&
         markdown.includes("provider_poc") &&
         markdown.includes("future_promotion"),

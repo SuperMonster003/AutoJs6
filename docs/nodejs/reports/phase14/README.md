@@ -37,6 +37,7 @@ Docs, examples, and final gates:
 - `:app:verifyNodePhase14TypeDeclarationProfiles`
 - `:app:verifyNodePhase14MigrationProComparison`
 - `:app:generateNodePhase14Summary`
+- `:app:verifyNodePhase14ReleaseCandidateChecklist`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -269,3 +270,10 @@ type profile report, P14-36 migration comparison report, and current Phase 14
 generated reports, keeps future-promotion blockers visible, and writes
 `phase14-summary.json`, `phase14-summary.md`, and `PHASE14_SUMMARY.md` behind
 `:app:generateNodePhase14Summary`.
+
+`P14_38_RELEASE_CANDIDATE_CHECKLIST.md` records the v1.2 release candidate
+checklist as `ready` with a `release_candidate_checklist_ready` decision. It
+adds the RC checklist and release notes draft, imports the P14-37 summary plus
+security, packaged, type, migration, and docs-sync reports, and writes
+`phase14-release-candidate-checklist.json` plus `.md` behind
+`:app:verifyNodePhase14ReleaseCandidateChecklist`.

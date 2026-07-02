@@ -950,9 +950,25 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: v1.2 closeout requires zero open final blockers, zero policy
     violations, and zero release-blocking reports.
 
-- [ ] P14-38: Create v1.2 release candidate checklist.
+- [x] P14-38: Create v1.2 release candidate checklist.
   - Scope: host gates, connected-device gates, packaged APK gates, docs sync,
     examples sync, TypeScript smoke, and release notes.
+  - Gate: `:app:verifyNodePhase14ReleaseCandidateChecklist`.
+  - Release candidate checklist gate deployed:
+    - Adds `docs/nodejs/phase14/node-v1-2-rc-checklist.json` and
+      `PHASE14_NODE_V1_2_RC_CHECKLIST.md`.
+    - Adds `docs/nodejs/releases/NODE_PROFILE_V1_2_RC_CHECKLIST.md`.
+    - Adds `docs/nodejs/releases/NODE_PROFILE_V1_2_RELEASE_NOTES_DRAFT.md`.
+    - Adds
+      `docs/nodejs/reports/phase14/P14_38_RELEASE_CANDIDATE_CHECKLIST.md`.
+    - Adds
+      `tools/nodejs/phase14/verify-node-phase14-release-candidate-checklist.js`
+      plus Gradle entry `:app:verifyNodePhase14ReleaseCandidateChecklist`.
+    - Imports P14-37 summary, P14-33 security corpus, P14-34 packaged
+      aggregate smoke, P14-35 type declaration profiles, P14-36 migration
+      comparison, and P14-16/P14-27/P14-32 docs sync reports.
+    - Records `release_candidate_checklist_ready` while keeping release tag
+      approval false and runtime authority unchanged.
   - Acceptance: checklist separates required v1.2 blockers from v1.3 future
     promotion backlog.
 

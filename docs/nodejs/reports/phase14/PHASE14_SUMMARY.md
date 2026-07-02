@@ -22,8 +22,8 @@ This summary is generated from the Phase 14 task checklist, Phase 14 surface man
 ## Task Checklist
 
 - Total tasks: 40
-- Completed tasks: 19
-- Open tasks: 21
+- Completed tasks: 20
+- Open tasks: 20
 
 | Task | Status | Surface | Title |
 | --- | --- | --- | --- |
@@ -65,7 +65,7 @@ This summary is generated from the Phase 14 task checklist, Phase 14 surface man
 | `P14-35` | `completed` | `docs.examples.final_gate` | Update TypeScript declaration profiles for v1.2. |
 | `P14-36` | `completed` | `docs.examples.final_gate` | Update migration and Pro comparison docs for v1.2. |
 | `P14-37` | `completed` | `docs.examples.final_gate` | Create Phase 14 summary generator and gate. |
-| `P14-38` | `open` | `docs.examples.final_gate` | Create v1.2 release candidate checklist. |
+| `P14-38` | `completed` | `docs.examples.final_gate` | Create v1.2 release candidate checklist. |
 | `P14-39` | `open` | `docs.examples.final_gate` | Close Phase 14 and prepare the next branch handoff. |
 
 ## Surface Status
@@ -96,7 +96,7 @@ This summary is generated from the Phase 14 task checklist, Phase 14 surface man
 | --- | --- | --- | --- | --- | --- |
 | `pro.ui_automation_media` | `provider_poc` | `high` | `P14-07`, `P14-08`, `P14-09`, `P14-10`, `P14-11`, `P14-12`, `P14-13`, `P14-14`, `P14-15`, `P14-16` | 72 item(s) | Promote packaged live UI, Android overlay, accessibility selector lifecycle, MediaProjection, advanced image operations, packaged OCR/image quotas, and synchronized docs/types. P14-07 records packaged live UI provider POC evidence; P14-08 adds an Android overlay provider POC; P14-09 adds the overlay permission/OEM matrix; P14-10 adds the packaged overlay positive smoke/stress fixture; P14-11 adds the packaged accessibility lifecycle fixture; P14-12 adds the selector/action real-device matrix; P14-13 adds the Activity-owned MediaProjection provider contract and archive gate; P14-14 adds the advanced image operation promotion contract and archive gate; P14-15 adds the packaged image/OCR evidence contract and archive gate; P14-16 syncs docs, examples, declarations, release matrix, compatibility, security, and error guidance. None are promoted. |
 | `pro.tasks_device_media` | `provider_poc` | `high` | `P14-17`, `P14-18`, `P14-19`, `P14-20`, `P14-21`, `P14-22`, `P14-23`, `P14-24`, `P14-25`, `P14-26`, `P14-27` | 84 item(s) | Promote JSON-safe task mutations, IntentTask/broadcast provider behavior, notification ownership, power/OEM matrix, recorder sessions, packaged media stress, and synchronized docs/types. P14-17 adds the JSON-safe task database mutation contract and archive gate; P14-18 adds the task schema migration and rollback fixture contract; P14-19 adds the packaged task scheduling smoke baseline; P14-20 adds the JSON-safe IntentTask/broadcast provider contract; P14-21 adds the packaged broadcast trigger/remove smoke contract; P14-22 adds notification ownership and foreground disclosure evidence; P14-23 adds the settings/power OEM and background-launch matrix gate; P14-24 adds the real recorder session promotion gate; P14-25 adds the packaged recorder/media stress gate; P14-26 adds the media playback/MediaStore boundary gate; P14-27 adds the task/device/media docs/examples/declarations sync gate. Runtime authority remains unpromoted. |
-| `docs.examples.final_gate` | `planned` | `medium` | `P14-35`, `P14-36`, `P14-37`, `P14-38`, `P14-39` | 29 item(s) | Update v1.2 type declarations, migration docs, examples, release checklist, Phase 14 summary gate, and next-branch handoff. P14-35 adds the v1.2 TypeScript declaration profile matrix with metadata-only capability rows for callable, provider POC, stable-denied, intentionally unsupported, and packaged aggregate surfaces while keeping runtime authority unchanged. P14-36 records v1.2 migration and Pro comparison claim sync so docs match executable evidence and do not imply raw Android object parity. P14-37 adds the generated summary gate, imports final blockers and generated reports, and keeps future promotion work visible without counting it as release-blocking. |
+| `docs.examples.final_gate` | `planned` | `medium` | `P14-35`, `P14-36`, `P14-37`, `P14-38`, `P14-39` | 38 item(s) | Update v1.2 type declarations, migration docs, examples, release checklist, Phase 14 summary gate, and next-branch handoff. P14-35 adds the v1.2 TypeScript declaration profile matrix with metadata-only capability rows for callable, provider POC, stable-denied, intentionally unsupported, and packaged aggregate surfaces while keeping runtime authority unchanged. P14-36 records v1.2 migration and Pro comparison claim sync so docs match executable evidence and do not imply raw Android object parity. P14-37 adds the generated summary gate, imports final blockers and generated reports, and keeps future promotion work visible without counting it as release-blocking. P14-38 adds the v1.2 release candidate checklist, release notes draft, and verifier that separates required v1.2 blockers from v1.3 future promotion backlog. |
 
 ## Deferred Surfaces
 
@@ -144,7 +144,7 @@ This summary is generated from the Phase 14 task checklist, Phase 14 surface man
 
 ## Generated Phase 14 Reports
 
-- Total reports: 33
+- Total reports: 34
 - Reports with policy violations: 0
 - Reports with blockers: 19
 - Release-blocking reports: 0
@@ -174,6 +174,7 @@ This summary is generated from the Phase 14 task checklist, Phase 14 surface man
 | `phase14-process-worker-replacement-decision.json` | `-` | `P14-31` | `ready` | 0 | 0 | - |
 | `phase14-promotion-contracts.json` | `verifyNodePhase14PromotionContracts` | `P14-02..P14-06` | `ready` | 0 | 0 | - |
 | `phase14-recorder-provider.json` | `-` | `P14-24` | `partial` | 0 | 5 | `future_promotion`: 5 |
+| `phase14-release-candidate-checklist.json` | `-` | `P14-38` | `ready` | 0 | 0 | - |
 | `phase14-security-regression-corpus.json` | `-` | `P14-33` | `ready` | 0 | 0 | - |
 | `phase14-settings-power-oem-background-matrix.json` | `-` | `P14-23` | `partial` | 0 | 5 | `future_promotion`: 5 |
 | `phase14-surface-manifest-verification.json` | `verifyNodePhase14SurfaceManifest` | `-` | `passed` | 0 | 0 | - |
@@ -188,8 +189,8 @@ This summary is generated from the Phase 14 task checklist, Phase 14 surface man
 
 ## Open Future Work
 
-- Open tasks: 21
-- Remaining closeout handoff tasks: `P14-38`, `P14-39`
+- Open tasks: 20
+- Remaining closeout handoff tasks: `P14-39`
 - Future promotion reports with blockers: 19
 
 | Task | Surface | Title |
@@ -213,7 +214,6 @@ This summary is generated from the Phase 14 task checklist, Phase 14 surface man
 | `P14-24` | `pro.tasks_device_media` | Implement real recorder session promotion. |
 | `P14-25` | `pro.tasks_device_media` | Add packaged recorder and media stress evidence. |
 | `P14-26` | `pro.tasks_device_media` | Decide MediaStore and playback boundaries for v1.2. |
-| `P14-38` | `docs.examples.final_gate` | Create v1.2 release candidate checklist. |
 | `P14-39` | `docs.examples.final_gate` | Close Phase 14 and prepare the next branch handoff. |
 
 | Future promotion report | Task | Status | Blocker classifications |

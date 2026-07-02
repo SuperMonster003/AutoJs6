@@ -1,0 +1,52 @@
+{
+  "schema": "autojs6-node-phase14-rc-checklist-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-38",
+  "title": "Node Profile v1.2 release candidate checklist",
+  "status": "ready",
+  "decision": "release_candidate_checklist_ready",
+  "surface": "docs.examples.final_gate",
+  "gradleTask": ":app:verifyNodePhase14ReleaseCandidateChecklist",
+  "runtimeAuthorityChanged": false,
+  "requiredV12RcGates": {
+    "hostGates": [
+      ":app:generateNodePhase14Summary",
+      ":app:verifyNodePhase14ReleaseCandidateChecklist",
+      ":app:verifyAutoJs6NodeTypeDeclarations",
+      ":app:typeCheckNodeTypescriptSmoke",
+      ":app:verifyNodeExamples"
+    ],
+    "connectedDeviceGates": [
+      "production release gate on the selected RC device before tag approval",
+      "no new high-privilege provider positive device gate is required for v1.2 while provider reports remain provider_poc_not_promoted"
+    ],
+    "packagedApkGates": [
+      ":app:installAndRunNodeV12PackagedSmoke",
+      "production packaged install-run evidence before any release tag approval"
+    ],
+    "docsExamplesTypes": [
+      "P14-16 UI/automation/media docs sync",
+      "P14-27 task/device/media docs sync",
+      "P14-32 desktop runtime docs sync",
+      "P14-35 type declaration profiles",
+      "P14-36 migration and Pro comparison"
+    ],
+    "releaseNotes": [
+      "docs/nodejs/releases/NODE_PROFILE_V1_2_RELEASE_NOTES_DRAFT.md"
+    ]
+  },
+  "futureBacklogPolicy": {
+    "classification": "v1.3 future promotion backlog",
+    "source": "docs/nodejs/reports/phase14/PHASE14_SUMMARY.md",
+    "nonBlockingBlockerClassifications": [
+      "future_promotion",
+      "external",
+      "intentional_non_goal"
+    ]
+  },
+  "reportArtifacts": [
+    "build/reports/nodejs/phase14-release-candidate-checklist.json",
+    "build/reports/nodejs/phase14-release-candidate-checklist.md"
+  ],
+  "minimumPolicy": "P14-38 records a ready release-candidate checklist without granting release tag approval or changing runtime authority."
+}

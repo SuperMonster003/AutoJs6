@@ -1288,6 +1288,12 @@ capability truth, P14-35 type profile report, P14-36 migration comparison
 report, and current Phase 14 generated reports. It requires zero open final
 blockers, zero policy violations, and zero release-blocking reports while
 listing future-promotion blockers as backlog.
+The `:app:verifyNodePhase14ReleaseCandidateChecklist` gate writes
+`phase14-release-candidate-checklist.json` plus `.md`, depends on P14-37,
+imports the summary, security, packaged, type, migration, and docs-sync
+reports, and verifies the v1.2 RC checklist plus release notes draft. It
+separates required v1.2 blockers from v1.3 future promotion backlog and is not
+release tag approval.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

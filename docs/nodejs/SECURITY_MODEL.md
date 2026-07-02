@@ -432,6 +432,14 @@ new authority; it enforces the closeout policy that open final blockers, policy
 violations, and release-blocking reports are all zero while future-promotion
 blockers remain visible as backlog.
 
+P14-38 records the v1.2 release candidate checklist through
+`:app:verifyNodePhase14ReleaseCandidateChecklist`. The checklist imports the
+P14-37 summary, security corpus, packaged aggregate smoke, type declarations,
+migration comparison, and docs-sync reports. It keeps release tag approval
+false, keeps Safe as the default profile, and requires release notes to separate
+required v1.2 blockers from v1.3 future promotion backlog without promoting raw
+Android object parity or new runtime authority.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

@@ -396,6 +396,22 @@ P14-37 does not add a new error code. It records the Phase 14 summary gate as
   blockers remain visible as backlog rather than new runtime errors.
 - Runtime authority remains unchanged.
 
+## P14-38 release candidate checklist
+
+P14-38 does not add a new error code. It records the v1.2 release candidate
+checklist as `release_candidate_checklist_ready` behind
+`:app:verifyNodePhase14ReleaseCandidateChecklist`:
+
+- Existing capability, permission, packaged metadata, Safe downgrade,
+  stable-denial, unsupported-worker, raw-object denial, and release-blocker
+  diagnostics remain canonical.
+- The checklist separates required v1.2 RC blockers from the v1.3 future
+  promotion backlog.
+- Release notes draft labels such as `provider_poc_not_promoted`,
+  `worker_intentionally_unsupported_v1_2`, `host_contract_ready`, and
+  `phase14_summary_gate_ready` are evidence labels, not new error codes.
+- Runtime authority remains unchanged and release tag approval remains false.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

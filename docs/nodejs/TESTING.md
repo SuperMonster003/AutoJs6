@@ -2439,6 +2439,21 @@ writes `phase14-summary.json`, `phase14-summary.md`, and
 violations, and zero release-blocking reports, and keeps future-promotion
 blockers visible as backlog.
 
+Phase 14 v1.2 release candidate checklist gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14ReleaseCandidateChecklist
+```
+
+This host gate records P14-38 as ready with
+`release_candidate_checklist_ready`. It depends on the P14-37 summary gate,
+imports the summary, security corpus, packaged aggregate smoke, type
+declaration profile report, migration comparison report, and docs-sync reports,
+and verifies `NODE_PROFILE_V1_2_RC_CHECKLIST.md` plus
+`NODE_PROFILE_V1_2_RELEASE_NOTES_DRAFT.md`. The checklist separates required
+v1.2 RC blockers from the v1.3 future promotion backlog and does not grant
+release tag approval or runtime authority.
+
 Phase 13 profile rollback playbook gate:
 
 ```powershell
