@@ -83,6 +83,16 @@ helpers include `NodeProfileV12ModeFor`, `NodeProfileV12StateFor`,
 `NodeProfileV12StableDeniedCapabilityName`. They are metadata-only and keep
 future-only methods visibly gated; they do not promote runtime authority.
 
+P15-25 adds the v1.3 `NodeProfileV13CapabilityCatalog` and
+`NodeProfileV13DeclarationMatrix`. This matrix records Phase 15 provider POC
+rows, docs/type/release sync metadata, the v1.3 security regression corpus, the
+v1.3 packaged aggregate smoke contract, and the MediaStore/playback
+stable-denied rows. The helpers include `NodeProfileV13ModeFor`,
+`NodeProfileV13StateFor`, `NodeProfileV13PackagedEvidenceFor`,
+`NodeProfileV13FutureOnlyFor`, and `NodeProfileV13StableDeniedCapabilityName`.
+They are metadata-only and keep future-only or stable-denied methods visibly
+gated; they do not promote runtime authority.
+
 The `autojs6:lifecycle` module is available only inside the explicit interactive long-running runtime. It stores JSON-only project-scoped checkpoints for explicit restore and does not enable automatic restart.
 
 P13-12 adds the read-only `$autojs` global v1 and the matching

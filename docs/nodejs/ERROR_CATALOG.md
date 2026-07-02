@@ -319,6 +319,24 @@ the v1.3 deterministic packaged aggregate smoke contract through
 - The P15-24 surface manifest mapping remains `planned` by critical-risk
   policy; a host packaged aggregate contract cannot promote provider authority.
 
+## P15-25 type declaration profiles
+
+P15-25 does not add a new error code or promote runtime authority. It records
+v1.3 TypeScript declaration profile truth through
+`:app:verifyNodePhase15TypeDeclarationProfiles`:
+
+- `NodeProfileV13CapabilityCatalog` and `NodeProfileV13DeclarationMatrix`
+  remain metadata-only.
+- Provider POC rows, docs sync rows, security corpus rows, packaged aggregate
+  rows, and MediaStore/playback stable-denied rows keep `grantsAuthority:
+  false`.
+- Future-only and stable-denied methods remain visibly gated in TypeScript
+  smoke.
+- The declaration matrix does not make task database mutation,
+  IntentTask/broadcast registration, notifications/power mutation, recorder
+  sessions, playback, MediaStore, raw Android objects, raw file descriptors, or
+  Java objects callable authority.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native

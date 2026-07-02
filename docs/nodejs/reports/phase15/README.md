@@ -64,6 +64,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15TaskDeviceMediaDocSync`
 - `:app:verifyNodePhase15SecurityRegressionCorpus`
 - `:app:installAndRunNodeV13PackagedAggregateSmoke`
+- `:app:verifyNodePhase15TypeDeclarationProfiles`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -216,3 +217,10 @@ capability denial, packaged metadata mismatch denial, Safe downgrade, cleanup,
 stable-denied boundary preservation, and report artifacts without claiming
 real device install-run success or changing runtime authority. The P15-24
 surface manifest mapping remains `planned` by critical-risk policy.
+
+`P15-25` reports `ready`: it extends `profile_capabilities.d.ts` with
+`NodeProfileV13CapabilityCatalog`, v1.3 capability state helpers, packaged
+evidence helpers, future-only helpers, stable-denied helpers, and
+`NodeProfileV13DeclarationMatrix`. TypeScript smoke now covers provider POC,
+docs sync, security corpus, packaged aggregate, and stable-denied rows as
+metadata-only profile truth without promoting runtime authority.

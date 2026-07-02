@@ -536,7 +536,7 @@
       "evidenceClass": "type_profile_sync",
       "rollbackHook": "keep_declarations_future_only",
       "gate": ":app:verifyNodePhase15TypeDeclarationProfiles",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "task": "P15-26",

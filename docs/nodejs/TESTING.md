@@ -3433,6 +3433,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskDeviceMediaDocSync
 .\gradlew.bat --console=plain :app:verifyNodePhase15SecurityRegressionCorpus
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedAggregateSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15TypeDeclarationProfiles
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3611,3 +3612,10 @@ stable-denied boundary preservation, and report artifacts. It is
 `host_contract_ready` only; it does not claim real device install-run success or
 runtime authority changes, and P15-24 remains `planned` in the surface manifest
 by critical-risk policy.
+`verifyNodePhase15TypeDeclarationProfiles` writes
+`phase15-type-declaration-profiles.json` plus `.md`, imports P14-35, P15-11,
+P15-22, P15-23, and P15-24, and reports `ready` when
+`NodeProfileV13CapabilityCatalog`, `NodeProfileV13DeclarationMatrix`, v1.3
+mode/state/packaged/future-only/stable-denied helpers, and TypeScript smoke
+assertions keep provider POC, docs sync, security corpus, packaged aggregate,
+and stable-denied rows metadata-only with `grantsAuthority: false`.

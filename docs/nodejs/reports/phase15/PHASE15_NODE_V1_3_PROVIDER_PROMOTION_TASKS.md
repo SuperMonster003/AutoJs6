@@ -562,10 +562,23 @@ A Phase 15 task can be marked complete only when all applicable items are true:
     The P15-24 surface manifest mapping remains `planned` by critical-risk
     policy.
 
-- [ ] P15-25: Update TypeScript declaration authority profile for v1.3.
-  - Gate: proposed `:app:verifyNodePhase15TypeDeclarationProfiles`.
+- [x] P15-25: Update TypeScript declaration authority profile for v1.3.
+  - Gate: `:app:verifyNodePhase15TypeDeclarationProfiles`.
   - Acceptance: callable, opt-in promoted, future-only, and stable-denied
     declarations match runtime evidence.
+  - Type declaration profile gate deployed:
+    - `docs/nodejs/phase15/node-v1-3-type-declaration-profiles.json`
+    - `docs/nodejs/phase15/PHASE15_NODE_V1_3_TYPE_DECLARATION_PROFILES.md`
+    - `docs/nodejs/reports/phase15/P15_25_TYPE_DECLARATION_PROFILES.md`
+    - `docs/nodejs/types/autojs6-node/profile_capabilities.d.ts`
+    - `sample/nodejs/typescript-smoke/src/main.ts`
+    - `tools/nodejs/phase15/verify-node-phase15-type-declaration-profiles.js`
+    - `build/reports/nodejs/phase15-type-declaration-profiles.json`
+    - `build/reports/nodejs/phase15-type-declaration-profiles.md`
+  - Decision: P15-25 adds metadata-only v1.3 TypeScript declaration profile
+    truth with provider POC, docs sync, security corpus, packaged aggregate,
+    and stable-denied rows. It keeps future-only and stable-denied methods
+    visibly gated and does not change runtime authority.
 
 - [ ] P15-26: Update migration, Pro comparison, compatibility, and release notes.
   - Gate: proposed `:app:verifyNodePhase15MigrationProComparison`.

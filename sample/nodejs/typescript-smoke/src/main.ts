@@ -810,6 +810,34 @@ async function smoke(): Promise<void> {
     v12DeclarationMatrix.capabilities.worker_threads;
   const v12CatalogPackagedAggregate: AutoJs6Node.NodeProfileV12CapabilityFor<"packaged.aggregate"> =
     v12DeclarationMatrix.capabilities["packaged.aggregate"];
+  const v13OverlayMode: AutoJs6Node.NodeProfileV13ModeFor<"ui.overlay", "pro_compat_opt_in"> = "profile_gated";
+  const v13MediaProjectionMode: AutoJs6Node.NodeProfileV13ModeFor<"media_projection", "pro_compat_opt_in"> = "profile_gated";
+  const v13WorkManagerMode: AutoJs6Node.NodeProfileV13ModeFor<"work_manager", "pro_compat_opt_in"> = "partial";
+  const v13RecorderSafeMode: AutoJs6Node.NodeProfileV13ModeFor<"recorder.session", "safe_default"> = "denied";
+  const v13MediaPlaybackMode: AutoJs6Node.NodeProfileV13ModeFor<"media.playback", "pro_compat_opt_in"> = "denied";
+  const v13OverlayState: AutoJs6Node.NodeProfileV13StateFor<"ui.overlay"> = "provider_poc_not_promoted";
+  const v13SecurityState: AutoJs6Node.NodeProfileV13StateFor<"security.regression"> = "security_corpus_ready_no_authority";
+  const v13PackagedAggregateEvidence: AutoJs6Node.NodeProfileV13PackagedEvidenceFor<"packaged.aggregate"> = "host_contract_ready";
+  const v13SecurityEvidence: AutoJs6Node.NodeProfileV13PackagedEvidenceFor<"security.regression"> = "security_corpus_ready";
+  const v13RecorderFutureOnly: AutoJs6Node.NodeProfileV13FutureOnlyFor<"recorder.session"> = true;
+  const v13PackagedAggregateFutureOnly: AutoJs6Node.NodeProfileV13FutureOnlyFor<"packaged.aggregate"> = false;
+  const v13FutureOnlyCapability: AutoJs6Node.NodeProfileV13FutureOnlyCapabilityName = "media.playback";
+  const v13StableDeniedCapability: AutoJs6Node.NodeProfileV13StableDeniedCapabilityName = "mediastore";
+  const v13DeclarationMatrix: AutoJs6Node.NodeProfileV13DeclarationMatrix = {
+    schema: "autojs6-node-profile-v1-3-declaration-matrix-v1",
+    profileVersion: "v1.3",
+    status: "v1_3_type_declarations_ready",
+    sourceGates: ["P14-35", "P15-11", "P15-22", "P15-23", "P15-24", "P15-25"],
+    capabilities: {} as AutoJs6Node.NodeProfileV13CapabilityCatalog,
+    metadataOnly: true,
+    grantsAuthority: false
+  };
+  const v13CatalogOverlay: AutoJs6Node.NodeProfileV13CapabilityFor<"ui.overlay"> =
+    v13DeclarationMatrix.capabilities["ui.overlay"];
+  const v13CatalogSecurity: AutoJs6Node.NodeProfileV13CapabilityFor<"security.regression"> =
+    v13DeclarationMatrix.capabilities["security.regression"];
+  const v13CatalogPackagedAggregate: AutoJs6Node.NodeProfileV13CapabilityFor<"packaged.aggregate"> =
+    v13DeclarationMatrix.capabilities["packaged.aggregate"];
   const typedCapabilityError = {} as AutoJs6Node.AutoJsBridgeCapabilityNotDeclaredError;
   const capabilityErrorProfiles: readonly string[] = typedCapabilityError.requiredProfiles;
   const capabilityErrorNodePermissions: readonly string[] = typedCapabilityError.requiredNodePermissions;

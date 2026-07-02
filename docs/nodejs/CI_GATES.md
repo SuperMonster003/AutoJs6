@@ -1329,6 +1329,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskDeviceMediaDocSync
 .\gradlew.bat --console=plain :app:verifyNodePhase15SecurityRegressionCorpus
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedAggregateSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15TypeDeclarationProfiles
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1509,6 +1510,13 @@ stable-denied boundary preservation, and report artifacts. It is
 `host_contract_ready` only; it does not claim real device install-run success or
 runtime authority changes, and P15-24 remains `planned` in the surface manifest
 by critical-risk policy.
+The `:app:verifyNodePhase15TypeDeclarationProfiles` gate writes
+`phase15-type-declaration-profiles.json` plus `.md`, imports P14-35, P15-11,
+P15-22, P15-23, and P15-24, and reports `ready` when
+`NodeProfileV13CapabilityCatalog`, `NodeProfileV13DeclarationMatrix`, v1.3
+mode/state/packaged/future-only/stable-denied helpers, and TypeScript smoke
+assertions keep provider POC, docs sync, security corpus, packaged aggregate,
+and stable-denied rows metadata-only with `grantsAuthority: false`.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
