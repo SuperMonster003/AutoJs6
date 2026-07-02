@@ -1,0 +1,274 @@
+# Phase 15 Node v1.3 Provider Promotion Tasks
+
+Status: initial executable plan for `feature/nodejs-runtime-v1.3`.
+
+Phase 15 starts from the Phase 14 v1.2 closeout handoff. Phase 14 closed the
+v1.2 release-gating handoff with zero open final blockers, zero policy
+violations, and zero release-blocking reports. The remaining provider POC work
+is imported here as v1.3 future promotion backlog, not as a v1.2 regression.
+
+Primary input:
+
+- [`PHASE14_CLOSEOUT_BREAKDOWN.md`](../phase14/PHASE14_CLOSEOUT_BREAKDOWN.md)
+- [`PHASE14_SUMMARY.md`](../phase14/PHASE14_SUMMARY.md)
+- [`PHASE14_FUTURE_BACKLOG.json`](../phase14/PHASE14_FUTURE_BACKLOG.json)
+- [`PHASE14_NEXT_BRANCH_HANDOFF.md`](../phase14/PHASE14_NEXT_BRANCH_HANDOFF.md)
+
+## v1.3 Goal
+
+Node Profile v1.3 should convert selected v1.2 provider POC reports into
+real opt-in Pro/Desktop provider promotion only when implementation, connected
+device evidence, packaged APK behavior, user-visible disclosure, rollback,
+security regression coverage, TypeScript declarations, migration docs, and
+release notes all agree.
+
+The Safe profile remains conservative. Provider promotion must stay opt-in,
+diagnosable, reversible, and scoped to JSON-safe or opaque-handle boundaries.
+
+## Imported v1.3 Backlog
+
+| Phase 14 task | Phase 15 lane | v1.3 direction |
+| --- | --- | --- |
+| `P14-07` | Pro UI | Close packaged live UI relaunch, crash recovery, and disclosure evidence. |
+| `P14-08` | Pro UI | Promote Android overlay provider permission-granted path. |
+| `P14-09` | Pro UI | Close overlay permission and OEM matrix archives. |
+| `P14-10` | Pro UI | Add packaged overlay positive smoke and stress evidence. |
+| `P14-11` | Pro automation | Close packaged accessibility lifecycle evidence. |
+| `P14-12` | Pro automation | Close selector/action real-device matrix. |
+| `P14-13` | Pro media | Promote Activity-owned MediaProjection provider. |
+| `P14-14` | Pro media | Promote advanced image operation provider. |
+| `P14-15` | Pro media | Close packaged image/OCR quota and model evidence. |
+| `P14-17` | Pro tasks | Promote JSON-safe task database mutations. |
+| `P14-18` | Pro tasks | Close task schema migration and rollback evidence. |
+| `P14-19` | Pro tasks | Add packaged task scheduling smoke. |
+| `P14-20` | Pro tasks | Promote JSON-safe IntentTask/broadcast provider. |
+| `P14-21` | Pro tasks | Add packaged broadcast trigger/remove smoke. |
+| `P14-22` | Pro device | Promote notification ownership and foreground disclosure behavior. |
+| `P14-23` | Pro device | Close settings/power OEM and background-launch matrix. |
+| `P14-24` | Pro media | Promote real recorder session provider. |
+| `P14-25` | Pro media | Add packaged recorder/media stress evidence. |
+| `P14-26` | Pro media | Decide scoped MediaStore and playback promotion boundary. |
+
+## Non-Goals Unless Reopened Explicitly
+
+- Raw Android object parity.
+- Raw `Context`, `Activity`, `View`, `Bitmap`, `Intent`, `MediaProjection`,
+  `MediaRecorder`, `TimedTask`, `BroadcastReceiver`, `Notification`,
+  `WakeLock`, `Uri`, `PendingIntent`, `ContentResolver`, file descriptor, or
+  Java object handles.
+- Native addon `.node` loading, unrestricted child process, raw network
+  modules, production inspector, and unrestricted package installation.
+- Release tag approval. Phase 15 gates are evidence and planning gates until a
+  dedicated RC/tag gate is run for the exact commit.
+
+## Closeout Rule
+
+A Phase 15 task can be marked complete only when all applicable items are true:
+
+- A focused host verifier exists and reports `ready` or `passed`.
+- Connected-device evidence is archived for promoted behavior.
+- Packaged APK evidence exists for packaged behavior, or the task explicitly
+  records why the capability stays main-app-only or denied.
+- Disclosure, foreground service ownership, stop action, privacy, rollback,
+  crash recovery, and Safe downgrade behavior are covered for high-privilege
+  surfaces.
+- Stable denial branches stay tested for every authority that remains
+  unsupported.
+- Docs, examples, TypeScript declarations, security corpus, CI docs, migration
+  docs, and release notes are synchronized.
+
+## Task Checklist
+
+### P0 Baseline And Promotion Contract Refresh
+
+- [x] P15-00: Record Phase 15 baseline from the Phase 14 closeout handoff.
+  - Inputs: Phase 14 summary JSON, closeout handoff report, future backlog
+    export, final blocker registry, current branch name.
+  - Output: `build/reports/nodejs/phase15-baseline-verification.json`.
+  - Gate: `:app:verifyNodePhase15Baseline`.
+  - Acceptance: confirms Phase 14 closeout handoff remains `ready`, imports
+    the 19 v1.3 future backlog tasks, and fails if final blockers reopen.
+  - Landed:
+    - `docs/nodejs/phase15/node-v1-3-baseline.json`
+    - `docs/nodejs/phase15/PHASE15_NODE_V1_3_BASELINE.md`
+    - `tools/nodejs/phase15/verify-node-phase15-baseline.js`
+    - `app/node-phase15-gate.gradle.kts`
+    - `build/reports/nodejs/phase15-baseline-verification.json`
+    - `build/reports/nodejs/phase15-baseline-verification.md`
+
+- [ ] P15-01: Create Phase 15 surface manifest.
+  - Scope: map every P15 task to owner surface, source backlog task, profile,
+    risk, evidence class, and rollback hook.
+  - Gate: proposed `:app:verifyNodePhase15SurfaceManifest`.
+  - Acceptance: P15-00 through P15-27 map exactly once and every imported
+    P14 backlog task is owned.
+
+- [ ] P15-02: Refresh v1.3 opt-in promotion bars.
+  - Scope: promoted, provider POC, future-only, stable-denied, and rejected
+    vocabulary for v1.3.
+  - Gate: proposed `:app:verifyNodePhase15PromotionContracts`.
+  - Acceptance: no provider can become opt-in promoted without device,
+    packaged, disclosure, rollback, security, docs, and type evidence.
+
+- [ ] P15-03: Add v1.3 disclosure and rollback audit gate.
+  - Scope: high-privilege prompts, foreground notifications, stop actions,
+    Safe downgrade, provider disable flags, and crash circuit breaker evidence.
+  - Gate: proposed `:app:verifyNodePhase15DisclosureRollbackAudit`.
+  - Acceptance: every promotable provider declares a rollback and disclosure
+    proof path before runtime authority changes.
+
+### P1 Pro UI, Overlay, Automation, Screenshot, OCR
+
+- [ ] P15-04: Close packaged live UI relaunch and crash recovery.
+  - Source backlog: `P14-07`.
+  - Gate: proposed `:app:verifyNodePhase15PackagedLiveUiPromotion`.
+  - Acceptance: packaged live UI relaunch, task removal, crash recovery,
+    pending-dispatch drain, disclosure, and cleanup pass on required devices.
+
+- [ ] P15-05: Promote Android overlay provider permission-granted path.
+  - Source backlog: `P14-08`.
+  - Gate: proposed `:app:verifyNodePhase15OverlayProviderPromotion`.
+  - Acceptance: overlay sessions use scoped handles, permission checks,
+    foreground disclosure, owner cleanup, and raw object denial.
+
+- [ ] P15-06: Close overlay permission and OEM matrix.
+  - Source backlog: `P14-09`.
+  - Gate: proposed `:app:verifyNodePhase15OverlayOemMatrix`.
+  - Acceptance: Android 12 and Android 15+ class devices record grant, denial,
+    settings round-trip, task removal, relaunch, and OEM notes.
+
+- [ ] P15-07: Add packaged overlay positive smoke and stress.
+  - Source backlog: `P14-10`.
+  - Gate: proposed `:app:installAndRunNodeV13PackagedOverlaySmoke`.
+  - Acceptance: packaged overlay create/update/close, denial, Safe downgrade,
+    crash cleanup, and resource stress are archived.
+
+- [ ] P15-08: Close accessibility lifecycle and selector/action matrix.
+  - Source backlog: `P14-11`, `P14-12`.
+  - Gate: proposed `:app:verifyNodePhase15AccessibilityPromotion`.
+  - Acceptance: service lifecycle, selector/action matrix, packaged behavior,
+    permission denial, and raw accessibility object denial are covered.
+
+- [ ] P15-09: Promote Activity-owned MediaProjection provider.
+  - Source backlog: `P14-13`.
+  - Gate: proposed `:app:verifyNodePhase15MediaProjectionPromotion`.
+  - Acceptance: prompt, foreground disclosure, capture lifecycle, task removal,
+    crash cleanup, Safe downgrade, and raw object denial are archived.
+
+- [ ] P15-10: Promote advanced image and OCR packaged evidence.
+  - Source backlog: `P14-14`, `P14-15`.
+  - Gate: proposed `:app:verifyNodePhase15ImageOcrPromotion`.
+  - Acceptance: image handles, quotas, OCR model selection, packaged archives,
+    cleanup, and raw bitmap denial are verified.
+
+- [ ] P15-11: Sync UI/automation/media docs, examples, declarations, and release notes.
+  - Gate: proposed `:app:verifyNodePhase15UiAutomationMediaDocSync`.
+  - Acceptance: promoted and future-only state matches executable evidence.
+
+### P2 Pro Task, Device, And Media Providers
+
+- [ ] P15-12: Promote JSON-safe task database mutations.
+  - Source backlog: `P14-17`.
+  - Gate: proposed `:app:verifyNodePhase15TaskDatabasePromotion`.
+  - Acceptance: add/update/enable-disable/remove/list ownership, migration,
+    rollback, and cross-package denial are covered.
+
+- [ ] P15-13: Close task schema migration and rollback evidence.
+  - Source backlog: `P14-18`.
+  - Gate: proposed `:app:verifyNodePhase15TaskSchemaRollback`.
+  - Acceptance: legacy rows, packaged rows, downgrade cleanup, backup, and
+    rollback fixtures pass.
+
+- [ ] P15-14: Add packaged task scheduling smoke.
+  - Source backlog: `P14-19`.
+  - Gate: proposed `:app:installAndRunNodeV13PackagedTaskSmoke`.
+  - Acceptance: schedule/list/cancel, relaunch, task removal, denial, and Safe
+    downgrade are archived.
+
+- [ ] P15-15: Promote JSON-safe IntentTask and broadcast provider.
+  - Source backlog: `P14-20`.
+  - Gate: proposed `:app:verifyNodePhase15IntentBroadcastPromotion`.
+  - Acceptance: manifest synthesis, exported policy, payload validation,
+    owner cleanup, and raw receiver/intent denial are verified.
+
+- [ ] P15-16: Add packaged broadcast trigger/remove smoke.
+  - Source backlog: `P14-21`.
+  - Gate: proposed `:app:installAndRunNodeV13PackagedBroadcastSmoke`.
+  - Acceptance: trigger, remove, relaunch, denial, metadata mismatch, and
+    rollback are archived.
+
+- [ ] P15-17: Promote notification ownership and foreground disclosure behavior.
+  - Source backlog: `P14-22`.
+  - Gate: proposed `:app:verifyNodePhase15NotificationPromotion`.
+  - Acceptance: packaged post/cancel, foreground disclosure, stop action,
+    Android permission matrix, and raw notification object denial are covered.
+
+- [ ] P15-18: Close settings/power OEM and background-launch matrix.
+  - Source backlog: `P14-23`.
+  - Gate: proposed `:app:verifyNodePhase15SettingsPowerPromotion`.
+  - Acceptance: prompt copy, dry-run/mutation boundary, OEM notes, exact-alarm
+    state, denial, and rollback evidence are archived.
+
+- [ ] P15-19: Promote real recorder session provider.
+  - Source backlog: `P14-24`.
+  - Gate: proposed `:app:verifyNodePhase15RecorderPromotion`.
+  - Acceptance: microphone prompt, start/stop, foreground disclosure, temp
+    output cleanup, crash cleanup, and raw media object denial pass.
+
+- [ ] P15-20: Add packaged recorder and media stress evidence.
+  - Source backlog: `P14-25`.
+  - Gate: proposed `:app:installAndRunNodeV13PackagedRecorderSmoke`.
+  - Acceptance: packaged start/stop, relaunch, task removal, quota, denial,
+    Safe downgrade, and cleanup are archived.
+
+- [ ] P15-21: Decide scoped MediaStore and playback promotion boundary.
+  - Source backlog: `P14-26`.
+  - Gate: proposed `:app:verifyNodePhase15MediaStorePlaybackDecision`.
+  - Acceptance: either stable denial remains documented or scoped provider
+    requirements are fully met with permission and privacy evidence.
+
+- [ ] P15-22: Sync task/device/media docs, examples, declarations, and release notes.
+  - Gate: proposed `:app:verifyNodePhase15TaskDeviceMediaDocSync`.
+  - Acceptance: promoted and future-only state matches executable evidence.
+
+### P3 Security, Types, Packaged Aggregate, And Migration
+
+- [ ] P15-23: Update v1.3 security regression corpus.
+  - Gate: proposed `:app:verifyNodePhase15SecurityRegressionCorpus`.
+  - Acceptance: every newly promoted provider has positive, negative, abuse,
+    rollback, metadata mismatch, and raw-object denial cases.
+
+- [ ] P15-24: Add v1.3 packaged aggregate smoke.
+  - Gate: proposed `:app:installAndRunNodeV13PackagedAggregateSmoke`.
+  - Acceptance: every packaged-capable promoted provider has deterministic
+    positive, denial, Safe downgrade, cleanup, and report artifacts.
+
+- [ ] P15-25: Update TypeScript declaration authority profile for v1.3.
+  - Gate: proposed `:app:verifyNodePhase15TypeDeclarationProfiles`.
+  - Acceptance: callable, opt-in promoted, future-only, and stable-denied
+    declarations match runtime evidence.
+
+- [ ] P15-26: Update migration, Pro comparison, compatibility, and release notes.
+  - Gate: proposed `:app:verifyNodePhase15MigrationProComparison`.
+  - Acceptance: docs do not overclaim raw Android object parity or provider
+    promotion beyond executable evidence.
+
+### P4 Summary And Handoff
+
+- [ ] P15-27: Generate Phase 15 summary and next branch handoff.
+  - Gate: proposed `:app:generateNodePhase15Summary`.
+  - Acceptance: zero open v1.3 release blockers, future backlog visible, and
+    next branch handoff documented.
+
+## Suggested Initial Execution Order
+
+1. Run P15-00 through P15-03 first to lock ownership, promotion bars, and
+   rollback/disclosure rules.
+2. Start with P15-04 through P15-07 because packaged live UI and overlay have
+   the clearest v1.3 user-facing payoff.
+3. Run P15-08 through P15-10 only after disclosure and resource cleanup are
+   stable for UI/overlay.
+4. Promote task database before IntentTask/broadcast because broadcast rows
+   depend on task ownership and rollback conventions.
+5. Do not update declarations or release notes as promoted until the matching
+   runtime, device, packaged, and security gates are ready.
