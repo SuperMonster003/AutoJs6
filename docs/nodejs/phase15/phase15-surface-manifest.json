@@ -476,7 +476,7 @@
       "evidenceClass": "boundary_decision_archive",
       "rollbackHook": "keep_mediastore_playback_denied",
       "gate": ":app:verifyNodePhase15MediaStorePlaybackDecision",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "task": "P15-22",

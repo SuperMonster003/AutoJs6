@@ -1,0 +1,211 @@
+{
+  "schema": "autojs6-node-phase15-mediastore-playback-decision-plan-v1",
+  "phase": "Phase 15: Node v1.3 Provider Promotion",
+  "task": "P15-21",
+  "title": "Scoped MediaStore and playback promotion boundary decision",
+  "status": "ready",
+  "promotionState": "stable_denied",
+  "providerId": "mediastore_playback",
+  "surface": "pro.tasks_device_media",
+  "sourceBacklogTasks": [
+    "P14-26"
+  ],
+  "upstreamGates": [
+    ":app:installAndRunNodeV13PackagedRecorderSmoke",
+    ":app:verifyNodePhase14MediaPlaybackMediaStoreBoundary"
+  ],
+  "runtimeAuthorityChanged": false,
+  "decision": {
+    "result": "keep_stable_denied",
+    "reason": "v1.3 keeps playback, playlists, scanFile, MediaStore query/mutation, broad media-library permissions, and raw media handles denied until a future scoped provider gate supplies exact capabilities, ownership, permission, packaged, privacy, rollback, and raw-object denial evidence.",
+    "currentAllowedSurface": [
+      "media.getAudioStreamVolume",
+      "media.getAudioStreamMaxVolume",
+      "media.getAudioStreamInfo",
+      "mediainfo.read",
+      "mediainfo.get"
+    ],
+    "currentCapabilityScope": [
+      "media",
+      "media.audio",
+      "media.metadata"
+    ],
+    "playbackPromoted": false,
+    "playlistPromoted": false,
+    "scanFilePromoted": false,
+    "mediaStoreQueryPromoted": false,
+    "mediaStoreMutationPromoted": false,
+    "broadStoragePermissionPromoted": false,
+    "futureScopedProviderAllowedOnlyWithNewGate": true
+  },
+  "stableDeniedSurfaces": [
+    {
+      "id": "media_playback_lifecycle",
+      "status": "stable_denied",
+      "blockedMethods": [
+        "media.play",
+        "media.pause",
+        "media.resume",
+        "media.stop",
+        "media.seek",
+        "media.setVolume",
+        "media.setLooping"
+      ],
+      "requiredFutureEvidence": "A scoped playback provider must define source ownership, lifecycle handles, audio focus, background behavior, notification or foreground disclosure where needed, packaged stress, and rollback cleanup."
+    },
+    {
+      "id": "media_playlist_queue",
+      "status": "stable_denied",
+      "blockedMethods": [
+        "media.playlist",
+        "media.queue",
+        "media.next",
+        "media.previous"
+      ],
+      "requiredFutureEvidence": "Playlist and queue behavior requires bounded JSON descriptors, owner-scoped handles, lifecycle cleanup, and privacy review before promotion."
+    },
+    {
+      "id": "media_scan_file",
+      "status": "stable_denied",
+      "blockedMethods": [
+        "media.scanFile",
+        "media.scanDir"
+      ],
+      "requiredFutureEvidence": "Media scanner integration requires scoped paths, package ownership, denial for broad external paths, and device/package evidence."
+    },
+    {
+      "id": "media_store_query_mutation",
+      "status": "stable_denied",
+      "blockedMethods": [
+        "mediaStore.query",
+        "mediaStore.insert",
+        "mediaStore.update",
+        "mediaStore.delete",
+        "mediaStore.openFile"
+      ],
+      "requiredFutureEvidence": "MediaStore access requires a dedicated scoped provider with exact capabilities, Android permission matrix, owner-scoped rows, privacy review, packaged evidence, and rollback cleanup."
+    },
+    {
+      "id": "broad_media_library_permissions",
+      "status": "stable_denied",
+      "blockedMethods": [
+        "READ_MEDIA_AUDIO",
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_IMAGES",
+        "MANAGE_EXTERNAL_STORAGE",
+        "broad shared-storage roots"
+      ],
+      "requiredFutureEvidence": "Broad media-library or shared-storage permissions are denied unless a future gate proves necessity, user disclosure, least privilege, and downgrade behavior."
+    }
+  ],
+  "futureProviderRequirements": {
+    "exactCapabilitiesRequired": true,
+    "candidateCapabilities": [
+      "media.playback",
+      "media.library",
+      "media.library.mutate"
+    ],
+    "jsonDescriptorsOnly": true,
+    "ownerScopedHandlesRequired": true,
+    "activityOrForegroundOwnershipRequired": true,
+    "androidPermissionMatrixRequired": true,
+    "packagedPositiveAndDenialEvidenceRequired": true,
+    "safeDowngradeRequired": true,
+    "rawObjectsDenied": [
+      "MediaPlayer",
+      "AudioTrack",
+      "AudioFocusRequest",
+      "MediaStore cursor",
+      "ContentResolver",
+      "Uri",
+      "ParcelFileDescriptor",
+      "file descriptor",
+      "MediaScannerConnection",
+      "playlist handle",
+      "Context",
+      "Java object"
+    ]
+  },
+  "readyEvidence": [
+    {
+      "id": "phase14_mediastore_playback_boundary",
+      "source": "build/reports/nodejs/phase14-media-playback-mediastore-boundary.json",
+      "status": "ready",
+      "summary": "P14-26 imports playback and MediaStore stable-denial evidence while keeping the media surface read-only."
+    },
+    {
+      "id": "phase15_packaged_recorder_dependency_gate",
+      "source": "build/reports/nodejs/phase15-packaged-recorder-smoke.json",
+      "status": "ready",
+      "summary": "P15-20 keeps packaged recorder/media stress partial and unpromoted before MediaStore/playback boundary promotion can be decided."
+    },
+    {
+      "id": "phase15_promotion_contracts",
+      "source": "build/reports/nodejs/phase15-promotion-contracts.json",
+      "status": "ready",
+      "summary": "The mediastore_playback provider remains stable_denied until every promotion evidence bar is satisfied by a future scoped provider gate."
+    },
+    {
+      "id": "phase15_disclosure_rollback_contract",
+      "source": "build/reports/nodejs/phase15-disclosure-rollback-audit.json",
+      "status": "ready",
+      "summary": "The mediastore_playback provider declares denial diagnostics, disclosure, rollback, Safe downgrade, and crash circuit breaker requirements."
+    },
+    {
+      "id": "phase15_surface_manifest_mapping",
+      "source": "docs/nodejs/phase15/phase15-surface-manifest.json",
+      "status": "ready",
+      "summary": "P15-21 owns P14-26 under pro.tasks_device_media with boundary_decision_archive evidence."
+    }
+  ],
+  "openBlockers": [
+    {
+      "id": "media_playback_scoped_provider_decision_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Decision archive for scoped playback provider or continued stable denial, covering exact capabilities, source ownership, lifecycle handles, audio focus, background behavior, packaged evidence, and rollback."
+    },
+    {
+      "id": "media_playlist_queue_denial_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Playlist/queue stable-denial or scoped-provider archive proving bounded descriptors, owner-scoped handles, and cleanup."
+    },
+    {
+      "id": "mediastore_scoped_query_mutation_decision_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "MediaStore scoped query/mutation decision archive covering exact capabilities, Android permission matrix, owner-scoped rows, privacy behavior, packaged evidence, and rollback cleanup."
+    },
+    {
+      "id": "broad_media_library_permission_denial_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Broad media-library permission denial archive for READ_MEDIA_* and MANAGE_EXTERNAL_STORAGE, including user disclosure and downgrade behavior if any future exception is proposed."
+    },
+    {
+      "id": "packaged_playback_mediastore_denial_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged APK denial archive proving playback, playlist, scanFile, MediaStore, broad storage, raw handles, and metadata mismatch stay denied without a full provider gate."
+    },
+    {
+      "id": "mediastore_playback_safe_downgrade_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Safe downgrade proof that provider disable keeps MediaStore/playback mutations denied, preserves read-only media status, and emits scoped diagnostics."
+    },
+    {
+      "id": "mediastore_playback_raw_object_denial_security_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Security regression coverage proving MediaPlayer, AudioTrack, AudioFocusRequest, ContentResolver, MediaStore cursor, Uri, ParcelFileDescriptor, file descriptors, playlist handles, Context, and Java objects remain denied."
+    },
+    {
+      "id": "phase15_task_device_media_doc_sync",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "P15-22, P15-23, P15-25, and P15-26 sync before any future playback or MediaStore scoped provider can be marked promoted."
+    }
+  ]
+}

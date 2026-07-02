@@ -60,6 +60,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15SettingsPowerPromotion`
 - `:app:verifyNodePhase15RecorderPromotion`
 - `:app:installAndRunNodeV13PackagedRecorderSmoke`
+- `:app:verifyNodePhase15MediaStorePlaybackDecision`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -181,3 +182,11 @@ start/stop, foreground microphone disclosure, deterministic stop, task
 removal/relaunch/crash cleanup, quota and temporary output cleanup, packaged
 denial, Safe downgrade, raw-object security coverage, and task/device/media
 docs sync archives land.
+
+`P15-21` reports `ready`: it imports the P14 MediaStore/playback boundary and
+the P15-20 packaged recorder dependency gate, then records
+`mediastore_playback` as `stable_denied` for v1.3. Runtime authority remains
+unchanged; playback, playlists, `scanFile`, MediaStore query/mutation, broad
+media-library permissions, and raw media handles stay denied until a future
+scoped provider gate supplies exact capabilities, ownership, permission,
+packaged, privacy, rollback, Safe downgrade, and raw-object denial evidence.

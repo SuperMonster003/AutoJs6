@@ -485,11 +485,28 @@ A Phase 15 task can be marked complete only when all applicable items are true:
     `packaged_recorder_raw_object_denial_security_archive`, and
     `phase15_task_device_media_doc_sync`.
 
-- [ ] P15-21: Decide scoped MediaStore and playback promotion boundary.
+- [x] P15-21: Decide scoped MediaStore and playback promotion boundary.
   - Source backlog: `P14-26`.
-  - Gate: proposed `:app:verifyNodePhase15MediaStorePlaybackDecision`.
+  - Gate: `:app:verifyNodePhase15MediaStorePlaybackDecision`.
   - Acceptance: either stable denial remains documented or scoped provider
     requirements are fully met with permission and privacy evidence.
+  - Stable-denied decision gate deployed:
+    - `docs/nodejs/phase15/mediastore-playback-decision-plan.json`
+    - `docs/nodejs/phase15/PHASE15_MEDIASTORE_PLAYBACK_DECISION.md`
+    - `docs/nodejs/reports/phase15/P15_21_MEDIASTORE_PLAYBACK_DECISION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-mediastore-playback-decision.js`
+    - `build/reports/nodejs/phase15-mediastore-playback-decision.json`
+    - `build/reports/nodejs/phase15-mediastore-playback-decision.md`
+  - Decision: `mediastore_playback` remains `stable_denied` for v1.3; no
+    runtime authority changes. Future scoped-provider work remains tracked by
+    `media_playback_scoped_provider_decision_archive`,
+    `media_playlist_queue_denial_archive`,
+    `mediastore_scoped_query_mutation_decision_archive`,
+    `broad_media_library_permission_denial_archive`,
+    `packaged_playback_mediastore_denial_archive`,
+    `mediastore_playback_safe_downgrade_archive`,
+    `mediastore_playback_raw_object_denial_security_archive`, and
+    `phase15_task_device_media_doc_sync`.
 
 - [ ] P15-22: Sync task/device/media docs, examples, declarations, and release notes.
   - Gate: proposed `:app:verifyNodePhase15TaskDeviceMediaDocSync`.

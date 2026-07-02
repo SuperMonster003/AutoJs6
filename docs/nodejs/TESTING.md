@@ -3429,6 +3429,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15SettingsPowerPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15RecorderPromotion
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedRecorderSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15MediaStorePlaybackDecision
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3573,3 +3574,12 @@ reports `partial` until positive packaged start/stop, foreground microphone
 disclosure, deterministic stop, task removal/relaunch/crash cleanup, quota and
 temporary output cleanup, packaged denial, Safe downgrade, raw-object security
 coverage, and task/device/media docs sync evidence are attached.
+`verifyNodePhase15MediaStorePlaybackDecision` writes
+`phase15-mediastore-playback-decision.json` plus `.md`, imports the P14-26
+MediaStore/playback boundary and the P15-20 packaged recorder dependency gate,
+and reports `ready` when `mediastore_playback` remains `stable_denied` with no
+runtime authority change. Playback, playlists, `scanFile`, MediaStore
+query/mutation, broad media-library permissions, and raw media handles remain
+denied until a future scoped provider gate supplies exact capabilities,
+ownership, permission, packaged, privacy, rollback, Safe downgrade, and
+raw-object denial evidence.
