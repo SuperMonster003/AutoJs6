@@ -448,7 +448,7 @@
         "P14-38",
         "P14-39"
       ],
-      "summary": "Update v1.2 type declarations, migration docs, examples, release checklist, Phase 14 summary gate, and next-branch handoff.",
+      "summary": "Update v1.2 type declarations, migration docs, examples, release checklist, Phase 14 summary gate, and next-branch handoff. P14-35 adds the v1.2 TypeScript declaration profile matrix with metadata-only capability rows for callable, provider POC, stable-denied, intentionally unsupported, and packaged aggregate surfaces while keeping runtime authority unchanged.",
       "risk": "medium",
       "runtimeSurface": [
         "autojs6-node TypeScript declarations",
@@ -459,7 +459,16 @@
       ],
       "evidence": [
         "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md",
-        "docs/nodejs/reports/phase14/README.md"
+        "docs/nodejs/reports/phase14/README.md",
+        "docs/nodejs/phase14/node-v1-2-type-declaration-profiles.json",
+        "docs/nodejs/phase14/PHASE14_NODE_V1_2_TYPE_DECLARATION_PROFILES.md",
+        "docs/nodejs/reports/phase14/P14_35_TYPE_DECLARATION_PROFILES.md",
+        "docs/nodejs/types/autojs6-node/profile_capabilities.d.ts",
+        "sample/nodejs/typescript-smoke/src/main.ts",
+        "tools/nodejs/phase14/verify-node-phase14-type-declaration-profiles.js",
+        ":app:verifyNodePhase14TypeDeclarationProfiles",
+        "build/reports/nodejs/phase14-type-declaration-profiles.json",
+        "build/reports/nodejs/phase14-type-declaration-profiles.md"
       ],
       "rollback": "Keep v1.2 examples and docs marked as future-only until runtime promotion evidence and the final Phase 14 summary gate are ready."
     }

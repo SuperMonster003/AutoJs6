@@ -32,6 +32,10 @@ Provider POC gates:
 - `:app:verifyNodePhase14PackagedBroadcastTriggerRemoveSmoke`
 - `:app:verifyNodePhase14NotificationOwnership`
 
+Docs, examples, and final gates:
+
+- `:app:verifyNodePhase14TypeDeclarationProfiles`
+
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
 media/recorder, and `worker_threads`. These items are v1.2 promotion work, not
@@ -236,3 +240,12 @@ conditional paths, undeclared capability denial, packaged metadata mismatch,
 Safe downgrade, cleanup, and report artifacts, and writes
 `phase14-packaged-aggregate-smoke.json` plus `.md` behind
 `:app:installAndRunNodeV12PackagedSmoke`.
+
+`P14_35_TYPE_DECLARATION_PROFILES.md` records the v1.2 TypeScript declaration
+profiles as `ready` with a `type_declaration_profiles_v1_2_ready` decision. It
+extends `profile_capabilities.d.ts` with `NodeProfileV12CapabilityCatalog`,
+v1.2 state helpers, packaged evidence helpers, future-only helpers,
+stable-denied helpers, and `NodeProfileV12DeclarationMatrix`, extends the
+TypeScript smoke with v1.2 profile assertions, keeps declarations
+metadata-only, and writes `phase14-type-declaration-profiles.json` plus `.md`
+behind `:app:verifyNodePhase14TypeDeclarationProfiles`.

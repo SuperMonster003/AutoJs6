@@ -2393,6 +2393,21 @@ artifacts. The current run mode is `host_contract_ready`; real device packaged
 install-run archives are still future evidence and are not claimed by this
 gate.
 
+Phase 14 v1.2 TypeScript declaration profile gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14TypeDeclarationProfiles
+```
+
+This host gate records P14-35 as ready with
+`type_declaration_profiles_v1_2_ready`. It depends on the P14-34 packaged
+aggregate smoke gate, the P13-55 declaration profile gate, and the TypeScript
+smoke compile. It verifies `NodeProfileV12CapabilityCatalog`,
+`NodeProfileV12DeclarationMatrix`, v1.2 promoted callable declaration rows,
+provider POC rows, stable-denied rows, intentionally unsupported
+worker/process-worker rows, packaged aggregate metadata, and visible
+future-only gating without changing runtime authority.
+
 Phase 13 profile rollback playbook gate:
 
 ```powershell

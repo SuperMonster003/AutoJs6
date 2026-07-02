@@ -1605,3 +1605,62 @@ tasks.register<Exec>("installAndRunNodeV12PackagedSmoke") {
         nodePhase14ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase14TypeDeclarationProfiles") {
+    group = "verification"
+    description = "Verifies the Phase 14 Node v1.2 TypeScript declaration profile matrix."
+
+    dependsOn(
+        "installAndRunNodeV12PackagedSmoke",
+        "verifyNodePhase13TypeDeclarationProfiles",
+        "verifyAutoJs6NodeTypeDeclarations",
+        "typeCheckNodeTypescriptSmoke",
+    )
+
+    val scriptFile =
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase14/verify-node-phase14-type-declaration-profiles.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_35_TYPE_DECLARATION_PROFILES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/node-v1-2-type-declaration-profiles.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_NODE_V1_2_TYPE_DECLARATION_PROFILES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/index.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/profile_capabilities.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/package.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/typescript-smoke/src/main.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/typescript-smoke/tsconfig.json"))
+    inputs.file(project.layout.projectDirectory.file("node-examples.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase14-gate.gradle.kts"))
+    listOf(
+        "phase13-type-declaration-profiles.json",
+        "phase14-ui-automation-media-doc-sync.json",
+        "phase14-task-device-media-doc-sync.json",
+        "phase14-desktop-runtime-doc-sync.json",
+        "phase14-security-regression-corpus.json",
+        "phase14-packaged-aggregate-smoke.json",
+    ).forEach { reportName ->
+        inputs.file(nodePhase14ReportDir.map { it.file(reportName) })
+    }
+    outputs.files(
+        nodePhase14ReportDir.map { it.file("phase14-type-declaration-profiles.json") },
+        nodePhase14ReportDir.map { it.file("phase14-type-declaration-profiles.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase14ReportDir.get().asFile.absolutePath,
+    )
+}

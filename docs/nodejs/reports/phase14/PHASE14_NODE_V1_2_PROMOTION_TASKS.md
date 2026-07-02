@@ -876,9 +876,29 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: packaged smoke can be run from a deterministic Gradle entry
     and writes report artifacts under `build/reports/nodejs`.
 
-- [ ] P14-35: Update TypeScript declaration profiles for v1.2.
+- [x] P14-35: Update TypeScript declaration profiles for v1.2.
   - Scope: promoted APIs, gated surfaces, stable-denied modules, profile
     capability metadata, and examples.
+  - Gate: `:app:verifyNodePhase14TypeDeclarationProfiles`.
+  - Type declaration profile gate deployed:
+    - Adds `docs/nodejs/phase14/node-v1-2-type-declaration-profiles.json`
+      and `PHASE14_NODE_V1_2_TYPE_DECLARATION_PROFILES.md`.
+    - Adds `docs/nodejs/reports/phase14/P14_35_TYPE_DECLARATION_PROFILES.md`.
+    - Adds
+      `tools/nodejs/phase14/verify-node-phase14-type-declaration-profiles.js`
+      plus Gradle entry `:app:verifyNodePhase14TypeDeclarationProfiles`.
+    - Extends `docs/nodejs/types/autojs6-node/profile_capabilities.d.ts`
+      with `NodeProfileV12CapabilityCatalog`,
+      `NodeProfileV12ModeFor`, packaged evidence helpers, future-only helpers,
+      stable-denied helpers, and `NodeProfileV12DeclarationMatrix`.
+    - Extends `sample/nodejs/typescript-smoke/src/main.ts` with v1.2 profile
+      assertions for callable declarations, provider POC rows, stable-denied
+      rows, intentionally unsupported worker/process-worker rows, and the
+      packaged aggregate smoke row.
+    - Records `type_declaration_profiles_v1_2_ready` while keeping
+      declarations metadata-only and runtime authority unchanged.
+    - Writes `build/reports/nodejs/phase14-type-declaration-profiles.json`
+      and `.md`.
   - Acceptance: type smoke covers promoted APIs and keeps future-only methods
     visibly gated.
 

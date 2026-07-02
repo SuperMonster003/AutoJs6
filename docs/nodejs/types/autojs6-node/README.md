@@ -74,6 +74,15 @@ they do not declare denied desktop modules as callable modules or grant
 runtime authority.
 The profile declaration matrix does not declare denied desktop modules as callable modules.
 
+P14-35 adds the v1.2 `NodeProfileV12CapabilityCatalog` and
+`NodeProfileV12DeclarationMatrix`. This matrix records callable declaration
+rows, provider POC rows, stable-denied rows, intentionally unsupported
+worker/process-worker rows, and the P14-34 packaged aggregate smoke row. The
+helpers include `NodeProfileV12ModeFor`, `NodeProfileV12StateFor`,
+`NodeProfileV12PackagedEvidenceFor`, `NodeProfileV12FutureOnlyFor`, and
+`NodeProfileV12StableDeniedCapabilityName`. They are metadata-only and keep
+future-only methods visibly gated; they do not promote runtime authority.
+
 The `autojs6:lifecycle` module is available only inside the explicit interactive long-running runtime. It stores JSON-only project-scoped checkpoints for explicit restore and does not enable automatic restart.
 
 P13-12 adds the read-only `$autojs` global v1 and the matching

@@ -353,6 +353,20 @@ smoke as `packaged_aggregate_smoke_contract_ready` behind
   error shape.
 - Runtime authority remains unchanged.
 
+## P14-35 type declaration profiles
+
+P14-35 does not add a new error code. It records v1.2 TypeScript declaration
+profiles as `type_declaration_profiles_v1_2_ready` behind
+`:app:verifyNodePhase14TypeDeclarationProfiles`:
+
+- Existing capability, permission, packaged metadata, Safe downgrade,
+  stable-denial, and unsupported-worker diagnostics remain canonical.
+- `NodeProfileV12CapabilityCatalog` and `NodeProfileV12DeclarationMatrix` are
+  metadata-only and do not make future-only methods successful.
+- Type smoke keeps provider POC, stable-denied, intentionally unsupported, and
+  packaged aggregate rows visible to TypeScript users.
+- Runtime authority remains unchanged.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

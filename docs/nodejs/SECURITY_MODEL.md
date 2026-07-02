@@ -407,6 +407,14 @@ and report artifacts. The current run mode is `host_contract_ready`; it does
 not grant new authority and does not claim real device packaged install-run
 success until archives are attached.
 
+P14-35 updates the TypeScript declaration profile matrix through
+`:app:verifyNodePhase14TypeDeclarationProfiles`. The new
+`NodeProfileV12CapabilityCatalog` records callable declaration rows, provider
+POC rows, stable-denied rows, intentionally unsupported worker/process-worker
+rows, and packaged aggregate metadata as declaration-only profile truth. The
+matrix keeps `metadataOnly: true` and `grantsAuthority: false`; future-only
+methods remain visibly gated and runtime authority remains unchanged.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

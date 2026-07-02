@@ -783,6 +783,33 @@ async function smoke(): Promise<void> {
     profileDeclarationMatrix.modules.worker_threads;
   const profileCatalogRawNetwork: AutoJs6Node.ProfileModuleFor<"raw_network"> =
     profileDeclarationMatrix.modules.raw_network;
+  const v12OverlayMode: AutoJs6Node.NodeProfileV12ModeFor<"ui.overlay", "pro_compat_opt_in"> = "profile_gated";
+  const v12MediaProjectionMode: AutoJs6Node.NodeProfileV12ModeFor<"media_projection", "pro_compat_opt_in"> = "profile_gated";
+  const v12WorkManagerMode: AutoJs6Node.NodeProfileV12ModeFor<"work_manager", "pro_compat_opt_in"> = "partial";
+  const v12RecorderMode: AutoJs6Node.NodeProfileV12ModeFor<"recorder.session", "safe_default"> = "denied";
+  const v12WorkerMode: AutoJs6Node.NodeProfileV12ModeFor<"worker_threads", "desktop_compat_opt_in"> = "denied";
+  const v12OverlayState: AutoJs6Node.NodeProfileV12StateFor<"ui.overlay"> = "provider_poc_not_promoted";
+  const v12PackagedAggregateEvidence: AutoJs6Node.NodeProfileV12PackagedEvidenceFor<"packaged.aggregate"> = "host_contract_ready";
+  const v12WorkerEvidence: AutoJs6Node.NodeProfileV12PackagedEvidenceFor<"worker_threads"> = "conditional_skip_native_unavailable";
+  const v12RecorderFutureOnly: AutoJs6Node.NodeProfileV12FutureOnlyFor<"recorder.session"> = true;
+  const v12PackagedAggregateFutureOnly: AutoJs6Node.NodeProfileV12FutureOnlyFor<"packaged.aggregate"> = false;
+  const v12FutureOnlyCapability: AutoJs6Node.NodeProfileV12FutureOnlyCapabilityName = "worker_threads";
+  const v12StableDeniedCapability: AutoJs6Node.NodeProfileV12StableDeniedCapabilityName = "media.playback";
+  const v12DeclarationMatrix: AutoJs6Node.NodeProfileV12DeclarationMatrix = {
+    schema: "autojs6-node-profile-v1-2-declaration-matrix-v1",
+    profileVersion: "v1.2",
+    status: "v1_2_type_declarations_ready",
+    sourceGates: ["P14-07", "P14-10", "P14-11", "P14-13", "P14-14", "P14-15", "P14-17", "P14-19", "P14-21", "P14-22", "P14-23", "P14-25", "P14-26", "P14-31", "P14-32", "P14-34", "P14-35"],
+    capabilities: {} as AutoJs6Node.NodeProfileV12CapabilityCatalog,
+    metadataOnly: true,
+    grantsAuthority: false
+  };
+  const v12CatalogOverlay: AutoJs6Node.NodeProfileV12CapabilityFor<"ui.overlay"> =
+    v12DeclarationMatrix.capabilities["ui.overlay"];
+  const v12CatalogWorker: AutoJs6Node.NodeProfileV12CapabilityFor<"worker_threads"> =
+    v12DeclarationMatrix.capabilities.worker_threads;
+  const v12CatalogPackagedAggregate: AutoJs6Node.NodeProfileV12CapabilityFor<"packaged.aggregate"> =
+    v12DeclarationMatrix.capabilities["packaged.aggregate"];
   const typedCapabilityError = {} as AutoJs6Node.AutoJsBridgeCapabilityNotDeclaredError;
   const capabilityErrorProfiles: readonly string[] = typedCapabilityError.requiredProfiles;
   const capabilityErrorNodePermissions: readonly string[] = typedCapabilityError.requiredNodePermissions;
@@ -1134,6 +1161,22 @@ async function smoke(): Promise<void> {
   void profileCatalogJava;
   void profileCatalogWorker;
   void profileCatalogRawNetwork;
+  void v12OverlayMode;
+  void v12MediaProjectionMode;
+  void v12WorkManagerMode;
+  void v12RecorderMode;
+  void v12WorkerMode;
+  void v12OverlayState;
+  void v12PackagedAggregateEvidence;
+  void v12WorkerEvidence;
+  void v12RecorderFutureOnly;
+  void v12PackagedAggregateFutureOnly;
+  void v12FutureOnlyCapability;
+  void v12StableDeniedCapability;
+  void v12DeclarationMatrix;
+  void v12CatalogOverlay;
+  void v12CatalogWorker;
+  void v12CatalogPackagedAggregate;
   void capabilityErrorProfiles;
   void capabilityErrorNodePermissions;
   void capabilityErrorAndroidPermissions;
