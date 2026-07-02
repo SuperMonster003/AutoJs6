@@ -416,6 +416,20 @@ proof requirements through `:app:verifyNodePhase16DisclosureRollbackAudit`:
   stable-denied behavior without exposing raw Android objects.
 - Safe downgrade must remain user-visible for packaged projects.
 
+## P16-04 packaged live UI promotion
+
+P16-04 does not add new error codes or promote runtime authority. It records a
+partial packaged live UI gate through `:app:verifyNodePhase16PackagedLiveUiPromotion`:
+
+- `live_ui` remains `provider_poc_not_promoted` until packaged relaunch,
+  task-removal cleanup, crash recovery, reviewed disclosure, Android 15+, and
+  downstream security/type/docs evidence are archived.
+- Missing `ui` capability metadata still rejects before provider dispatch with
+  `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Raw Android UI globals and handles remain unavailable to packaged Node code.
+- Rollback uses the `NODE_PROVIDER_LIVE_UI_DISABLED` diagnostic label and the
+  `node.provider.live_ui.enabled` disable flag recorded by P16-03.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native

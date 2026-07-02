@@ -3646,6 +3646,7 @@ Phase 16 starts from the Phase 15 summary handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase16SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase16PromotionContracts
 .\gradlew.bat --console=plain :app:verifyNodePhase16DisclosureRollbackAudit
+.\gradlew.bat --console=plain :app:verifyNodePhase16PackagedLiveUiPromotion
 ```
 
 `verifyNodePhase16Baseline` writes `phase16-baseline-verification.json` plus
@@ -3668,3 +3669,9 @@ proof paths, rollback proof paths, provider disable flags, foreground
 notification ownership, Stop actions, Safe downgrade, diagnostic codes, and
 crash circuit breaker markers for every promotable v1.4 provider before
 runtime authority changes.
+`verifyNodePhase16PackagedLiveUiPromotion` writes
+`phase16-packaged-live-ui-promotion.json` plus `.md`, imports the P15-04
+packaged live UI partial gate, P13/P14 packaged UI evidence, and P16
+promotion/disclosure contracts, and reports `partial` until packaged live UI
+relaunch, task-removal cleanup, crash recovery, reviewed disclosure, Android
+15+, and downstream security/type/docs sync evidence are attached.

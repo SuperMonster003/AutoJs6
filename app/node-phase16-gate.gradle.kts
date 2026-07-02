@@ -139,3 +139,49 @@ tasks.register<Exec>("verifyNodePhase16DisclosureRollbackAudit") {
         nodePhase16ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase16PackagedLiveUiPromotion") {
+    group = "verification"
+    description = "Verifies the Phase 16 Node v1.4 packaged live UI promotion partial gate."
+
+    dependsOn("verifyNodePhase16DisclosureRollbackAudit")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase16/verify-node-phase16-packaged-live-ui-promotion.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/packaged-live-ui-promotion-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/PHASE16_PACKAGED_LIVE_UI_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase16/P16_04_PACKAGED_LIVE_UI_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/phase16-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/node-v1-4-promotion-contracts.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase16/node-v1-4-disclosure-rollback-audit.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/packaged-live-ui-promotion-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/PHASE15_PACKAGED_LIVE_UI_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/P15_04_PACKAGED_LIVE_UI_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_07_LIVE_UI_PROVIDER_PACKAGED.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_17_LIVE_UI_PROVIDER_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase16/PHASE16_NODE_V1_4_PROVIDER_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase16/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase16-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(nodePhase16ReportDir.map { it.file("phase16-promotion-contracts.json") })
+    inputs.file(nodePhase16ReportDir.map { it.file("phase16-disclosure-rollback-audit.json") })
+    outputs.files(
+        nodePhase16ReportDir.map { it.file("phase16-packaged-live-ui-promotion.json") },
+        nodePhase16ReportDir.map { it.file("phase16-packaged-live-ui-promotion.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase16ReportDir.get().asFile.absolutePath,
+    )
+}

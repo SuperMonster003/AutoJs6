@@ -120,7 +120,16 @@ A Phase 16 task can be marked complete only when all applicable items are true:
 
 - [ ] P16-04: Close packaged live UI relaunch and crash recovery.
   - Source backlog: `P15-04`.
-  - Gate: proposed `:app:verifyNodePhase16PackagedLiveUiPromotion`.
+  - Gate: `:app:verifyNodePhase16PackagedLiveUiPromotion`.
+  - Partial gate deployed:
+    - `docs/nodejs/phase16/packaged-live-ui-promotion-plan.json`
+    - `docs/nodejs/phase16/PHASE16_PACKAGED_LIVE_UI_PROMOTION.md`
+    - `tools/nodejs/phase16/verify-node-phase16-packaged-live-ui-promotion.js`
+    - `docs/nodejs/reports/phase16/P16_04_PACKAGED_LIVE_UI_PROMOTION.md`
+    - `build/reports/nodejs/phase16-packaged-live-ui-promotion.json`
+    - `build/reports/nodejs/phase16-packaged-live-ui-promotion.md`
+  - Remaining: packaged relaunch, task-removal cleanup, crash recovery,
+    reviewed disclosure, Android 15+, and P16 security/type/docs sync evidence.
 
 - [ ] P16-05: Promote Android overlay provider permission-granted path.
   - Source backlog: `P15-05`.

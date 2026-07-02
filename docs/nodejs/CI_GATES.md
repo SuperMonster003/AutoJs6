@@ -1570,6 +1570,7 @@ The release gate still relies on packaged smoke APK artifacts being current when
 .\gradlew.bat --console=plain :app:verifyNodePhase16SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase16PromotionContracts
 .\gradlew.bat --console=plain :app:verifyNodePhase16DisclosureRollbackAudit
+.\gradlew.bat --console=plain :app:verifyNodePhase16PackagedLiveUiPromotion
 ```
 
 The `:app:verifyNodePhase16Baseline` gate writes
@@ -1589,6 +1590,11 @@ The `:app:verifyNodePhase16DisclosureRollbackAudit` gate writes
 rollback, disable-flag, diagnostic, Safe downgrade, Stop action, foreground
 notification, and crash circuit breaker requirements before any provider
 authority can be promoted.
+The `:app:verifyNodePhase16PackagedLiveUiPromotion` gate writes
+`phase16-packaged-live-ui-promotion.json` plus `.md`, imports P15-04 and
+P13/P14 packaged live UI evidence, and keeps `live_ui` unpromoted until
+packaged relaunch, task-removal cleanup, crash recovery, reviewed disclosure,
+Android 15+, and P16 security/type/docs evidence are archived.
 
 ## Manual Heavy Checks
 

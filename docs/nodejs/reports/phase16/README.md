@@ -13,6 +13,7 @@ Foundation gates:
 - `:app:verifyNodePhase16SurfaceManifest`
 - `:app:verifyNodePhase16PromotionContracts`
 - `:app:verifyNodePhase16DisclosureRollbackAudit`
+- `:app:verifyNodePhase16PackagedLiveUiPromotion`
 
 Phase 16 imports the Phase 15 future backlog for live UI, overlay,
 accessibility, screenshot/OCR, task providers, notifications/power,
@@ -39,3 +40,9 @@ promotable provider declares high-privilege disclosure fields, rollback fields,
 disable flags, diagnostics, Safe downgrade behavior, foreground notification
 ownership, Stop action, and crash circuit breaker markers before runtime
 authority changes.
+
+`P16-04` currently reports `partial`: it imports P13/P14/P15 packaged live UI
+evidence plus the P16 promotion and disclosure/rollback contracts, keeps
+`live_ui` at `provider_poc_not_promoted`, and lists packaged relaunch,
+task-removal cleanup, crash recovery, reviewed disclosure, Android 15+, and
+P16 security/type/docs sync as future-promotion blockers.
