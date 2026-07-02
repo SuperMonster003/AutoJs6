@@ -359,9 +359,25 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-15: Promote JSON-safe IntentTask and broadcast provider.
   - Source backlog: `P14-20`.
-  - Gate: proposed `:app:verifyNodePhase15IntentBroadcastPromotion`.
+  - Gate: `:app:verifyNodePhase15IntentBroadcastPromotion`.
   - Acceptance: manifest synthesis, exported policy, payload validation,
     owner cleanup, and raw receiver/intent denial are verified.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/intent-broadcast-promotion-plan.json`
+    - `docs/nodejs/phase15/PHASE15_INTENT_BROADCAST_PROMOTION.md`
+    - `docs/nodejs/reports/phase15/P15_15_INTENT_BROADCAST_PROMOTION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-intent-broadcast-promotion.js`
+    - `build/reports/nodejs/phase15-intent-broadcast-promotion.json`
+    - `build/reports/nodejs/phase15-intent-broadcast-promotion.md`
+  - Still open: `intent_broadcast_live_provider_archive`,
+    `intent_broadcast_manifest_synthesis_archive`,
+    `intent_broadcast_exported_permission_policy_archive`,
+    `intent_broadcast_trigger_payload_schema_archive`,
+    `intent_broadcast_remove_cleanup_archive`,
+    `intent_broadcast_packaged_trigger_remove_smoke_archive`,
+    `intent_broadcast_cross_package_denial_archive`,
+    `intent_broadcast_safe_downgrade_archive`, and
+    `phase15_task_device_media_doc_sync`.
 
 - [ ] P15-16: Add packaged broadcast trigger/remove smoke.
   - Source backlog: `P14-21`.

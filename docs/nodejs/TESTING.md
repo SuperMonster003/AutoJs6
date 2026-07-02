@@ -3423,6 +3423,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskDatabasePromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskSchemaRollback
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedTaskSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15IntentBroadcastPromotion
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3524,3 +3525,10 @@ anchor, and the P15-12/P15-13 dependency gates. It reports `partial` until
 packaged task database positive smoke, process-death/relaunch, task-removal
 cleanup, disclosure/Safe downgrade, cross-package denial, missing-capability
 denial, Safe downgrade, and security/type/docs evidence are attached.
+`verifyNodePhase15IntentBroadcastPromotion` writes
+`phase15-intent-broadcast-promotion.json` plus `.md`, imports the P14-20
+JSON-safe IntentTask/broadcast provider contract and the P15-14 packaged task
+ownership dependency gate. It reports `partial` until live provider
+registration, manifest synthesis, exported receiver policy, trigger payload
+validation, owner cleanup, packaged trigger/remove smoke, cross-package denial,
+Safe downgrade, and security/type/docs evidence are attached.

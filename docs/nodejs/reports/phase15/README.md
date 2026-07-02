@@ -54,6 +54,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15TaskDatabasePromotion`
 - `:app:verifyNodePhase15TaskSchemaRollback`
 - `:app:installAndRunNodeV13PackagedTaskSmoke`
+- `:app:verifyNodePhase15IntentBroadcastPromotion`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -131,4 +132,11 @@ smoke, the live packaged project-entry scheduled-runner anchor, and the P15-12
 / P15-13 dependency gates. It keeps packaged task scheduling unpromoted until
 packaged task database positive smoke, process-death/relaunch, task-removal
 cleanup, disclosure/Safe downgrade, cross-package denial, missing-capability
+denial, Safe downgrade, and security/type/docs sync land.
+
+`P15-15` currently reports `partial`: it imports the P14 JSON-safe
+IntentTask/broadcast provider contract plus the P15-14 packaged task ownership
+dependency gate. It keeps `intent_broadcast` unpromoted until live provider
+registration, manifest synthesis, exported receiver policy, trigger payload
+validation, owner cleanup, packaged trigger/remove smoke, cross-package
 denial, Safe downgrade, and security/type/docs sync land.

@@ -1319,6 +1319,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskDatabasePromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskSchemaRollback
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedTaskSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15IntentBroadcastPromotion
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1418,6 +1419,14 @@ P15-12/P15-13 dependency gates. It keeps packaged task scheduling unpromoted
 until packaged task database positive smoke, process-death/relaunch,
 task-removal cleanup, disclosure/Safe downgrade, cross-package denial,
 missing-capability denial, Safe downgrade, and security/type/docs evidence are
+archived.
+The `:app:verifyNodePhase15IntentBroadcastPromotion` gate writes
+`phase15-intent-broadcast-promotion.json` plus `.md`, imports the P14-20
+JSON-safe IntentTask/broadcast provider contract and the P15-14 packaged task
+ownership dependency gate. It keeps `intent_broadcast` unpromoted until live
+provider registration, manifest synthesis, exported receiver policy, trigger
+payload validation, owner cleanup, packaged trigger/remove smoke,
+cross-package denial, Safe downgrade, and security/type/docs evidence are
 archived.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
