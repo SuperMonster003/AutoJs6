@@ -1,0 +1,19 @@
+{
+  "schema": "autojs6-node-phase16-baseline-plan-v1",
+  "phase": "Phase 16: Node v1.4 Provider Promotion",
+  "task": "P16-00",
+  "title": "Phase 16 baseline from Phase 15 summary handoff",
+  "status": "ready",
+  "decision": "phase16_baseline_ready",
+  "branch": "feature/nodejs-runtime-v1.4",
+  "gradleTask": ":app:verifyNodePhase16Baseline",
+  "runtimeAuthorityChanged": false,
+  "sourceInputs": [
+    "docs/nodejs/reports/phase15/PHASE15_SUMMARY.md",
+    "docs/nodejs/reports/phase15/PHASE15_FUTURE_BACKLOG.json",
+    "docs/nodejs/reports/phase15/PHASE15_NEXT_BRANCH_HANDOFF.md",
+    "build/reports/nodejs/phase15-summary.json"
+  ],
+  "expectedImportedBacklogCount": 17,
+  "minimumPolicy": "P16-00 starts v1.4 from the Phase 15 summary handoff without treating future-promotion blockers as release blockers or changing runtime authority."
+}

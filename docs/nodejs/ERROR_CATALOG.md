@@ -371,6 +371,20 @@ the v1.3 summary and next-branch handoff through
   `stable_denied`, `host_contract_ready`, raw-object denial, and unchanged
   runtime-authority boundaries.
 
+## P16-00/P16-01 v1.4 foundation
+
+P16-00 and P16-01 do not add new error codes or promote runtime authority.
+They record the v1.4 baseline and surface manifest through
+`:app:verifyNodePhase16Baseline` and
+`:app:verifyNodePhase16SurfaceManifest`:
+
+- The baseline imports the Phase 15 summary handoff and v1.4 future backlog.
+- The surface manifest maps `P16-00` through `P16-27` exactly once and owns
+  every imported Phase 15 backlog task.
+- Provider POC rows, `stable_denied` rows, `host_contract_ready` packaged
+  aggregate evidence, raw-object denial, and unchanged runtime-authority
+  boundaries remain in force.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native

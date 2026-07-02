@@ -2585,6 +2585,7 @@ apply(from = "node-phase12-gate.gradle.kts")
 apply(from = "node-phase13-gate.gradle.kts")
 apply(from = "node-phase14-gate.gradle.kts")
 apply(from = "node-phase15-gate.gradle.kts")
+apply(from = "node-phase16-gate.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

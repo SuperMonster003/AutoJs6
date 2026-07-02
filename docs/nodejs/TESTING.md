@@ -3635,3 +3635,22 @@ writes `PHASE15_NEXT_BRANCH_HANDOFF.md`. It imports every Phase 15 report
 through P15-26, reports `ready` only with zero policy violations and zero
 release-blocking reports, and keeps `future_promotion` blockers visible for
 the suggested `feature/nodejs-runtime-v1.4` handoff.
+
+## Phase 16 v1.4 Foundation Gates
+
+Phase 16 starts from the Phase 15 summary handoff on
+`feature/nodejs-runtime-v1.4`:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase16Baseline
+.\gradlew.bat --console=plain :app:verifyNodePhase16SurfaceManifest
+```
+
+`verifyNodePhase16Baseline` writes `phase16-baseline-verification.json` plus
+`.md` and fails if the Phase 15 summary handoff, branch, v1.4 future backlog,
+or release-blocking report state no longer match the v1.4 start contract.
+`verifyNodePhase16SurfaceManifest` writes
+`phase16-surface-manifest-verification.json` plus `.md` and verifies that
+`P16-00` through `P16-27` map exactly once with owner surface, profile, risk,
+evidence class, gate, and rollback hook metadata. It also verifies that every
+imported Phase 15 backlog task is owned.

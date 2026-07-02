@@ -1563,6 +1563,22 @@ Scope:
 
 The release gate still relies on packaged smoke APK artifacts being current when packaged host verification is part of the selected path. See [TESTING.md](TESTING.md) for packaged smoke artifact collection.
 
+## Phase 16 v1.4 Foundation Gates
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase16Baseline
+.\gradlew.bat --console=plain :app:verifyNodePhase16SurfaceManifest
+```
+
+The `:app:verifyNodePhase16Baseline` gate writes
+`phase16-baseline-verification.json` plus `.md`, requires the Phase 15 summary
+handoff to remain ready, verifies `feature/nodejs-runtime-v1.4`, and imports
+the v1.4 future-promotion backlog without reopening release-blocking reports.
+The `:app:verifyNodePhase16SurfaceManifest` gate writes
+`phase16-surface-manifest-verification.json` plus `.md` and verifies that every
+`P16-00` through `P16-27` task has one owner surface, source backlog metadata,
+profile, risk, evidence class, gate, and rollback hook.
+
 ## Manual Heavy Checks
 
 Some checks remain explicit because they need a prepared device, a recently exported APK, or a failure-specific budget:
