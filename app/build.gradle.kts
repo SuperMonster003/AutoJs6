@@ -91,12 +91,7 @@ val nodeJsRuntimeBackend = providers.gradleProperty("autojs.nodejs.backend").orE
     .trim()
     .lowercase()
     .let { if (it in setOf("rhino", "native", "embedded", "auto")) it else "embedded" }
-val nodeJsDefaultReleaseFlavor = if (isInrtTaskRequested && !isFullNodeInrtTemplateTaskRequested) {
-    "rhinoOnly"
-} else {
-    "nodeFull"
-}
-val nodeJsReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse(nodeJsDefaultReleaseFlavor).get()
+val nodeJsConfiguredReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
     .trim()
     .let { requested ->
         when (requested.lowercase()) {
@@ -109,6 +104,11 @@ val nodeJsReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor"
             )
         }
     }
+val nodeJsReleaseFlavor = if (isInrtTaskRequested && !isFullNodeInrtTemplateTaskRequested) {
+    "rhinoOnly"
+} else {
+    nodeJsConfiguredReleaseFlavor
+}
 val nodeJsReleaseSupportedAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
 val nodeJsReleaseKnownAbis = nodeJsReleaseSupportedAbis + "x86"
 val nodeJsRuntimeSlot = providers.gradleProperty("autojs.nodejs.runtimeSlot").orElse("node24_5").get()

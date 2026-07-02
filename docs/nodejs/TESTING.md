@@ -2873,7 +2873,7 @@ Template refresh and smoke artifact collection:
 ```
 
 The production inrt template is intentionally slim. `assembleInrtRelease` and
-`embeddedNodeRefreshInrtTemplateApk` default to `rhinoOnly` and must not carry
+`embeddedNodeRefreshInrtTemplateApk` force `rhinoOnly` and must not carry
 `libnode.so`, `libautojs6-node.so`, or `libc++_shared.so` in
 `app/src/main/assets-app/template.apk`. Packaged projects that enable the
 `Embedded Node.js` library inject those native files from the host APK according

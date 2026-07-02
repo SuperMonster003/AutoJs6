@@ -17,7 +17,8 @@ Valid values:
 ## nodeFull
 
 `nodeFull` is the default profile for main app builds that include AutoJs6 Safe Node Profile.
-Ordinary production `inrt` template builds default to `rhinoOnly` so the checked-in template APK stays small; use
+Ordinary production `inrt` template builds force `rhinoOnly` so the checked-in template APK stays small even when
+`gradle.properties` selects `nodeFull` for the main app; use
 `assembleInrtFullNodeRelease` or `embeddedNodeRefreshFullInrtTemplateApk` when a full Embedded Node template artifact is
 needed for runtime testing.
 
