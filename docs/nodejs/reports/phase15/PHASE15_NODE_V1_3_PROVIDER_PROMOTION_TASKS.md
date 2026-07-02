@@ -123,12 +123,18 @@ A Phase 15 task can be marked complete only when all applicable items are true:
     - `build/reports/nodejs/phase15-promotion-contracts.json`
     - `build/reports/nodejs/phase15-promotion-contracts.md`
 
-- [ ] P15-03: Add v1.3 disclosure and rollback audit gate.
+- [x] P15-03: Add v1.3 disclosure and rollback audit gate.
   - Scope: high-privilege prompts, foreground notifications, stop actions,
     Safe downgrade, provider disable flags, and crash circuit breaker evidence.
-  - Gate: proposed `:app:verifyNodePhase15DisclosureRollbackAudit`.
+  - Gate: `:app:verifyNodePhase15DisclosureRollbackAudit`.
   - Acceptance: every promotable provider declares a rollback and disclosure
     proof path before runtime authority changes.
+  - Landed:
+    - `docs/nodejs/phase15/node-v1-3-disclosure-rollback-audit.json`
+    - `docs/nodejs/phase15/PHASE15_NODE_V1_3_DISCLOSURE_ROLLBACK_AUDIT.md`
+    - `tools/nodejs/phase15/verify-node-phase15-disclosure-rollback-audit.js`
+    - `build/reports/nodejs/phase15-disclosure-rollback-audit.json`
+    - `build/reports/nodejs/phase15-disclosure-rollback-audit.md`
 
 ### P1 Pro UI, Overlay, Automation, Screenshot, OCR
 

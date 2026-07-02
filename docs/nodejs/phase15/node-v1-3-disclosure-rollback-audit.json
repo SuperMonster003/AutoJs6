@@ -1,0 +1,648 @@
+{
+  "schema": "autojs6-node-phase15-disclosure-rollback-audit-v1",
+  "phase": "Phase 15: Node v1.3 Provider Promotion",
+  "task": "P15-03",
+  "updatedAt": "2026-07-02",
+  "branch": "feature/nodejs-runtime-v1.3",
+  "runtimeAuthorityChanged": false,
+  "requiredDisclosureFields": [
+    "highPrivilegePrompt",
+    "manifestMetadata",
+    "installReviewCopy",
+    "runReviewCopy",
+    "foregroundNotificationOwnership",
+    "stopAction",
+    "permissionDeniedDiagnostic",
+    "undeclaredCapabilityDiagnostic",
+    "privacyDisclosure",
+    "taskRemovalCleanup",
+    "relaunchBehavior",
+    "crashRecoveryBehavior",
+    "safeDowngradeDisclosure"
+  ],
+  "requiredRollbackFields": [
+    "disableFlag",
+    "disableScope",
+    "diagnosticCode",
+    "userVisibleMessage",
+    "safeFallback",
+    "packagedDowngradeBehavior",
+    "dataRetention",
+    "reEnablePath",
+    "nodeDoctorSignal",
+    "crashCircuitBreakerMarker"
+  ],
+  "crashCircuitBreaker": {
+    "threshold": "3 provider crashes within 24h per package/profile/capability",
+    "action": "disable the promoted provider and fall back to stable denial or Safe profile behavior until user or developer review",
+    "markerFields": [
+      "providerId",
+      "profileId",
+      "capabilityId",
+      "packageIdentity",
+      "crashCount",
+      "firstCrashAt",
+      "lastCrashAt",
+      "disableReason"
+    ]
+  },
+  "providerAudits": [
+    {
+      "providerId": "live_ui",
+      "currentState": "provider_poc",
+      "p15Tasks": [
+        "P15-04"
+      ],
+      "sourceBacklogTasks": [
+        "P14-07"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_04_PACKAGED_LIVE_UI_PROMOTION.md",
+        "build/reports/nodejs/phase15-packaged-live-ui-promotion.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-packaged-live-ui-promotion.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.live_ui.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_LIVE_UI_DISABLED",
+      "safeDowngrade": "return stable denial in Safe profile and stop dispatching UI sessions",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "required_before_promotion"
+    },
+    {
+      "providerId": "overlay",
+      "currentState": "provider_poc",
+      "p15Tasks": [
+        "P15-05",
+        "P15-06",
+        "P15-07"
+      ],
+      "sourceBacklogTasks": [
+        "P14-08",
+        "P14-09",
+        "P14-10"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_05_OVERLAY_PROVIDER_PROMOTION.md",
+        "build/reports/nodejs/phase15-overlay-provider-promotion.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-overlay-provider-promotion.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.overlay.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_OVERLAY_DISABLED",
+      "safeDowngrade": "deny overlay creation and clean owner-scoped overlay handles",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "required_before_promotion"
+    },
+    {
+      "providerId": "accessibility",
+      "currentState": "provider_poc",
+      "p15Tasks": [
+        "P15-08"
+      ],
+      "sourceBacklogTasks": [
+        "P14-11",
+        "P14-12"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_08_ACCESSIBILITY_PROMOTION.md",
+        "build/reports/nodejs/phase15-accessibility-promotion.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-accessibility-promotion.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.accessibility.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_ACCESSIBILITY_DISABLED",
+      "safeDowngrade": "return stable denial for selector and action authority",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "required_before_promotion"
+    },
+    {
+      "providerId": "media_projection",
+      "currentState": "provider_poc",
+      "p15Tasks": [
+        "P15-09"
+      ],
+      "sourceBacklogTasks": [
+        "P14-13"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_09_MEDIA_PROJECTION_PROMOTION.md",
+        "build/reports/nodejs/phase15-media-projection-promotion.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-media-projection-promotion.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.media_projection.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_MEDIA_PROJECTION_DISABLED",
+      "safeDowngrade": "revoke capture session handles and return screen capture denial",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "required_before_promotion"
+    },
+    {
+      "providerId": "image_ocr",
+      "currentState": "provider_poc",
+      "p15Tasks": [
+        "P15-10"
+      ],
+      "sourceBacklogTasks": [
+        "P14-14",
+        "P14-15"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_10_IMAGE_OCR_PROMOTION.md",
+        "build/reports/nodejs/phase15-image-ocr-promotion.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-image-ocr-promotion.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.image_ocr.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_IMAGE_OCR_DISABLED",
+      "safeDowngrade": "deny live image/OCR authority and release opaque image handles",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "required_before_promotion"
+    },
+    {
+      "providerId": "task_database",
+      "currentState": "provider_poc",
+      "p15Tasks": [
+        "P15-12",
+        "P15-13",
+        "P15-14"
+      ],
+      "sourceBacklogTasks": [
+        "P14-17",
+        "P14-18",
+        "P14-19"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_12_TASK_DATABASE_PROMOTION.md",
+        "build/reports/nodejs/phase15-task-database-promotion.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-task-schema-rollback.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.task_database.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_TASK_DATABASE_DISABLED",
+      "safeDowngrade": "preserve rows and deny package-owned task mutations",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "required_before_promotion"
+    },
+    {
+      "providerId": "intent_broadcast",
+      "currentState": "provider_poc",
+      "p15Tasks": [
+        "P15-15",
+        "P15-16"
+      ],
+      "sourceBacklogTasks": [
+        "P14-20",
+        "P14-21"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_15_INTENT_BROADCAST_PROMOTION.md",
+        "build/reports/nodejs/phase15-intent-broadcast-promotion.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-packaged-broadcast-smoke.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.intent_broadcast.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_INTENT_BROADCAST_DISABLED",
+      "safeDowngrade": "remove package-owned receivers and deny broadcast trigger authority",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "required_before_promotion"
+    },
+    {
+      "providerId": "notifications",
+      "currentState": "provider_poc",
+      "p15Tasks": [
+        "P15-17"
+      ],
+      "sourceBacklogTasks": [
+        "P14-22"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_17_NOTIFICATION_PROMOTION.md",
+        "build/reports/nodejs/phase15-notification-promotion.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-notification-promotion.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.notifications.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_NOTIFICATIONS_DISABLED",
+      "safeDowngrade": "cancel package-owned notifications and deny foreground disclosure takeover",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "required_before_promotion"
+    },
+    {
+      "providerId": "settings_power",
+      "currentState": "provider_poc",
+      "p15Tasks": [
+        "P15-18"
+      ],
+      "sourceBacklogTasks": [
+        "P14-23"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_18_SETTINGS_POWER_PROMOTION.md",
+        "build/reports/nodejs/phase15-settings-power-promotion.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-settings-power-promotion.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.settings_power.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_SETTINGS_POWER_DISABLED",
+      "safeDowngrade": "keep settings and power mutations denied while preserving dry-run status reads",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "required_before_promotion"
+    },
+    {
+      "providerId": "recorder",
+      "currentState": "provider_poc",
+      "p15Tasks": [
+        "P15-19",
+        "P15-20"
+      ],
+      "sourceBacklogTasks": [
+        "P14-24",
+        "P14-25"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_19_RECORDER_PROMOTION.md",
+        "build/reports/nodejs/phase15-recorder-promotion.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-packaged-recorder-smoke.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.recorder.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_RECORDER_DISABLED",
+      "safeDowngrade": "stop active recorder sessions, clean temp output, and deny new captures",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "required_before_promotion"
+    },
+    {
+      "providerId": "mediastore_playback",
+      "currentState": "stable_denied",
+      "p15Tasks": [
+        "P15-21"
+      ],
+      "sourceBacklogTasks": [
+        "P14-26"
+      ],
+      "disclosureProofPaths": [
+        "docs/nodejs/reports/phase15/P15_21_MEDIASTORE_PLAYBACK_DECISION.md",
+        "build/reports/nodejs/phase15-mediastore-playback-decision.json"
+      ],
+      "rollbackProofPaths": [
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "build/reports/nodejs/phase15-mediastore-playback-decision.json"
+      ],
+      "requiredDisclosureFields": [
+        "highPrivilegePrompt",
+        "manifestMetadata",
+        "installReviewCopy",
+        "runReviewCopy",
+        "foregroundNotificationOwnership",
+        "stopAction",
+        "permissionDeniedDiagnostic",
+        "undeclaredCapabilityDiagnostic",
+        "privacyDisclosure",
+        "taskRemovalCleanup",
+        "relaunchBehavior",
+        "crashRecoveryBehavior",
+        "safeDowngradeDisclosure"
+      ],
+      "requiredRollbackFields": [
+        "disableFlag",
+        "disableScope",
+        "diagnosticCode",
+        "userVisibleMessage",
+        "safeFallback",
+        "packagedDowngradeBehavior",
+        "dataRetention",
+        "reEnablePath",
+        "nodeDoctorSignal",
+        "crashCircuitBreakerMarker"
+      ],
+      "disableFlag": "node.provider.mediastore_playback.enabled",
+      "disableScope": "per-provider and per-packaged-project",
+      "diagnosticCode": "NODE_PROVIDER_MEDIASTORE_PLAYBACK_DENIED",
+      "safeDowngrade": "keep MediaStore and playback mutations denied with scoped status diagnostics",
+      "foregroundNotificationRequired": true,
+      "stopActionRequired": true,
+      "crashCircuitBreakerRequired": true,
+      "status": "stable_denial_required"
+    }
+  ]
+}

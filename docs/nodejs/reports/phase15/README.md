@@ -12,6 +12,7 @@ Foundation gates:
 - `:app:verifyNodePhase15Baseline`
 - `:app:verifyNodePhase15SurfaceManifest`
 - `:app:verifyNodePhase15PromotionContracts`
+- `:app:verifyNodePhase15DisclosureRollbackAudit`
 
 Phase 15 imports the Phase 14 future backlog for live UI, overlay,
 accessibility, screenshot/OCR, task providers, notifications/power,
@@ -33,3 +34,9 @@ evidence class, gate, and rollback hook metadata for each task.
 current and every promotable provider requires implementation, connected
 device, packaged APK, disclosure, rollback, security, TypeScript, docs, Safe
 downgrade, and raw-object denial evidence before opt-in promotion.
+
+`P15-03` records the v1.3 disclosure and rollback audit as `ready` when every
+promotable provider declares prompt, manifest metadata, install/run copy,
+foreground notification ownership, stop action, privacy, Safe downgrade,
+provider disable flag, diagnostic code, rollback proof path, and crash circuit
+breaker marker requirements before runtime authority changes.

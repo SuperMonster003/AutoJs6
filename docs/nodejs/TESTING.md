@@ -3411,6 +3411,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15Baseline
 .\gradlew.bat --console=plain :app:verifyNodePhase15SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase15PromotionContracts
+.\gradlew.bat --console=plain :app:verifyNodePhase15DisclosureRollbackAudit
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3427,3 +3428,9 @@ imported Phase 14 backlog task is owned.
 vocabulary. It fails if any provider is marked promoted before implementation,
 connected device, packaged APK, disclosure, rollback, security, TypeScript,
 docs, Safe downgrade, and raw-object denial evidence bars are all present.
+`verifyNodePhase15DisclosureRollbackAudit` writes
+`phase15-disclosure-rollback-audit.json` plus `.md` and verifies disclosure
+proof paths, rollback proof paths, provider disable flags, foreground
+notification ownership, stop actions, Safe downgrade, diagnostic codes, and
+crash circuit breaker markers for every promotable provider before runtime
+authority changes.

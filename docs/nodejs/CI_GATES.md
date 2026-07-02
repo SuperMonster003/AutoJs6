@@ -1307,6 +1307,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15Baseline
 .\gradlew.bat --console=plain :app:verifyNodePhase15SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase15PromotionContracts
+.\gradlew.bat --console=plain :app:verifyNodePhase15DisclosureRollbackAudit
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1321,6 +1322,11 @@ The `:app:verifyNodePhase15PromotionContracts` gate writes
 `phase15-promotion-contracts.json` plus `.md` and verifies that no provider can
 become opt-in promoted without device, packaged, disclosure, rollback,
 security, docs, type, Safe downgrade, and raw-object denial evidence.
+The `:app:verifyNodePhase15DisclosureRollbackAudit` gate writes
+`phase15-disclosure-rollback-audit.json` plus `.md` and verifies prompt,
+manifest metadata, install/run copy, foreground notification, stop action,
+privacy, Safe downgrade, provider disable flag, diagnostic, rollback proof, and
+crash circuit breaker requirements for every promotable provider.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

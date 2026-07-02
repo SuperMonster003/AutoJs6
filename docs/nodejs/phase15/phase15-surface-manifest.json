@@ -206,7 +206,7 @@
       "evidenceClass": "disclosure_rollback_audit",
       "rollbackHook": "fail_closed_to_safe_profile",
       "gate": ":app:verifyNodePhase15DisclosureRollbackAudit",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "task": "P15-04",
