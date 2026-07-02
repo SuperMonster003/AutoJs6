@@ -216,3 +216,13 @@ worker design docs, desktop examples, release matrix, migration cookbook,
 compatibility profile, security model, security corpus, error catalog,
 Pro/AutoX migration notes, testing, and CI docs behind
 `:app:verifyNodePhase14DesktopRuntimeDocSync`.
+
+`P14_33_SECURITY_REGRESSION_CORPUS.md` records the v1.2 security regression
+corpus expansion as `ready` with a
+`security_corpus_expanded_no_authority_promoted` decision. It imports P14-07
+through P14-32 generated reports and verifies positive, negative, abuse,
+runtime guard, promotion precondition, and rollback entries for live UI,
+overlay, accessibility, MediaProjection, image/OCR, tasks, broadcast,
+notifications, power, recorder/media, MediaStore/playback, worker/process, and
+packaged metadata/Safe downgrade boundaries behind
+`:app:verifyNodePhase14SecurityRegressionCorpus`.

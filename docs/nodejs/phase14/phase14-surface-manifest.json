@@ -392,7 +392,7 @@
     },
     {
       "id": "security.packaged_release_gates",
-      "status": "planned",
+      "status": "design_locked",
       "profiles": [
         "safe_default",
         "pro_compat_opt_in",
@@ -403,7 +403,7 @@
         "P14-33",
         "P14-34"
       ],
-      "summary": "Expand the v1.2 security regression corpus and packaged aggregate smoke for every promoted capability and denial boundary.",
+      "summary": "Expand the v1.2 security regression corpus and packaged aggregate smoke for every promoted capability and denial boundary. P14-33 adds the v1.2 security regression corpus gate with positive, negative, abuse, runtime guard, promotion precondition, and rollback entries for high-risk provider families while keeping runtime authority unchanged.",
       "risk": "critical",
       "runtimeSurface": [
         "v1.2 security regression corpus",
@@ -414,7 +414,15 @@
       ],
       "evidence": [
         "docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json",
-        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"
+        "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md",
+        "docs/nodejs/phase14/security-regression-corpus-plan.json",
+        "docs/nodejs/phase14/PHASE14_SECURITY_REGRESSION_CORPUS.md",
+        "docs/nodejs/security/NODE_PROFILE_V1_2_SECURITY_REGRESSION_CORPUS.json",
+        "docs/nodejs/reports/phase14/P14_33_SECURITY_REGRESSION_CORPUS.md",
+        "tools/nodejs/phase14/verify-node-phase14-security-regression-corpus.js",
+        ":app:verifyNodePhase14SecurityRegressionCorpus",
+        "build/reports/nodejs/phase14-security-regression-corpus.json",
+        "build/reports/nodejs/phase14-security-regression-corpus.md"
       ],
       "rollback": "Disable all v1.2 promoted capability switches, keep Safe profile default, and block packaged promotion if aggregate security or packaged smoke fails."
     },

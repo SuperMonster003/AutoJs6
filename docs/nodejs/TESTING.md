@@ -2360,6 +2360,23 @@ allowlist/denylist behavior. P13-50 records relaxed-capability security corpus
 as partial; runtime guards and promotion preconditions remain evidence-only and
 do not grant authority.
 
+Phase 14 v1.2 security regression corpus gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14SecurityRegressionCorpus
+```
+
+This host gate records P14-33 as ready with
+`security_corpus_expanded_no_authority_promoted`. It imports P14-07 through
+P14-32 generated reports and verifies
+`NODE_PROFILE_V1_2_SECURITY_REGRESSION_CORPUS.json` coverage for positive,
+negative, abuse, runtime guard, promotion precondition, and rollback entries
+across live UI, overlay, accessibility, MediaProjection, image/OCR, tasks,
+broadcast, notifications, power, recorder/media, MediaStore/playback,
+worker/process-worker, and packaged metadata/Safe downgrade boundaries. It is a
+host corpus gate; connected-device and packaged APK execution remain owned by
+the focused provider gates and P14-34 packaged aggregate smoke.
+
 Phase 13 profile rollback playbook gate:
 
 ```powershell

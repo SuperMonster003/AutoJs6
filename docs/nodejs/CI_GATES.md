@@ -1253,6 +1253,13 @@ Pro/AutoX migration notes, testing, and CI docs, and records
 packaged workers, WorkerPool replacement API, process-worker facade, raw
 process handles, stdio, signals, `spawn`, `fork`, or stable `child_process`
 authority.
+The `:app:verifyNodePhase14SecurityRegressionCorpus` gate writes
+`phase14-security-regression-corpus.json` plus `.md`, imports P14-07 through
+P14-32 generated reports, verifies the v1.2 security corpus positive, negative,
+abuse, runtime guard, promotion precondition, and rollback entries, and covers
+raw object denial, path escape, permission bypass, lifecycle cleanup, packaged
+metadata mismatch, and Safe downgrade categories without promoting runtime
+authority.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

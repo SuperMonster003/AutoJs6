@@ -823,11 +823,29 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 
 ### P4 Security, Examples, Release Matrix, Final Gate
 
-- [ ] P14-33: Expand v1.2 security regression corpus.
+- [x] P14-33: Expand v1.2 security regression corpus.
   - Scope: promoted UI/overlay/accessibility/MediaProjection/tasks/broadcast/
     notifications/recorder/worker paths, raw object denial, path escape,
     permission bypass, lifecycle cleanup, and packaged metadata mismatch.
-  - Gate: proposed `:app:verifyNodePhase14SecurityRegressionCorpus`.
+  - Gate: `:app:verifyNodePhase14SecurityRegressionCorpus`.
+  - Security regression corpus gate deployed:
+    - Adds `docs/nodejs/phase14/security-regression-corpus-plan.json` and
+      `PHASE14_SECURITY_REGRESSION_CORPUS.md`.
+    - Adds
+      `docs/nodejs/security/NODE_PROFILE_V1_2_SECURITY_REGRESSION_CORPUS.json`.
+    - Adds `docs/nodejs/reports/phase14/P14_33_SECURITY_REGRESSION_CORPUS.md`.
+    - Imports P14-07 through P14-32 generated reports.
+    - Records `security_corpus_expanded_no_authority_promoted` and keeps
+      runtime authority unchanged.
+    - Requires positive, negative, abuse, runtime guard, promotion
+      precondition, and rollback entries for live UI, overlay, accessibility,
+      MediaProjection, image/OCR, task database, IntentTask/broadcast,
+      notifications, power settings, recorder/media, MediaStore/playback,
+      worker/process-worker, and packaged metadata/Safe downgrade boundaries.
+    - Covers raw object denial, path escape, permission bypass, lifecycle
+      cleanup, packaged metadata mismatch, and Safe downgrade categories.
+    - Writes `build/reports/nodejs/phase14-security-regression-corpus.json`
+      and `.md`.
   - Acceptance: every promoted capability has positive, negative, and abuse
     cases.
 

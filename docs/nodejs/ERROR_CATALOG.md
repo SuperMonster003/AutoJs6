@@ -322,6 +322,21 @@ release policy as `worker_intentionally_unsupported_v1_2`:
 - `shell` remains the separate scoped command bridge and is not process-worker
   or raw process authority.
 
+## P14-33 security regression corpus
+
+P14-33 does not add a new error code. It records the v1.2 security regression
+corpus as `security_corpus_expanded_no_authority_promoted`:
+
+- Existing raw object, path escape, permission, lifecycle cleanup, packaged
+  metadata mismatch, and Safe downgrade errors remain the canonical runtime
+  diagnostics.
+- The corpus requires positive, negative, abuse, runtime guard, promotion
+  precondition, and rollback entries before later packaged aggregate smoke can
+  count as release evidence.
+- Missing or mismatched high-privilege packaged metadata must continue to reject
+  before provider dispatch with the existing capability/permission diagnostics.
+- Runtime authority remains unchanged.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

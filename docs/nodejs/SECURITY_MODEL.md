@@ -386,6 +386,18 @@ decision. This sync does not relax default worker denial, `node:worker_threads`
 shape-only behavior, process-worker absence, raw process denial, or the
 separate scoped `shell` bridge boundary.
 
+P14-33 records the v1.2 security regression corpus expansion in
+`docs/nodejs/security/NODE_PROFILE_V1_2_SECURITY_REGRESSION_CORPUS.json`.
+The corpus imports P14-07 through P14-32 as source gates and requires positive,
+negative, abuse, runtime guard, promotion precondition, and rollback entries
+for live UI, overlay, accessibility, MediaProjection, image/OCR, task
+database, IntentTask/broadcast, notifications, power settings, recorder/media,
+MediaStore/playback, worker/process-worker, packaged metadata mismatch, and
+Safe downgrade. It keeps runtime authority unchanged and treats raw object
+denial, path escape, permission bypass, lifecycle cleanup, packaged metadata
+mismatch, and Safe downgrade as release security boundary categories for P14-34
+and later closeout gates.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

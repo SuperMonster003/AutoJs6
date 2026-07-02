@@ -1,0 +1,491 @@
+{
+  "schema": "autojs6-node-profile-v1-2-security-regression-corpus-v1",
+  "task": "P14-33",
+  "status": "ready",
+  "updatedAt": "2026-07-02",
+  "releaseDecision": "security_corpus_expanded_no_authority_promoted",
+  "policy": {
+    "defaultProfile": "safe_default",
+    "profilePromotion": false,
+    "runtimeAuthorityChanged": false,
+    "minimumEvidencePerCapability": [
+      "positiveCases",
+      "negativeCases",
+      "abuseCases",
+      "runtimeGuards",
+      "promotionPreconditions",
+      "rollback"
+    ],
+    "boundaryCategories": [
+      "raw_object_denial",
+      "path_escape",
+      "permission_bypass",
+      "lifecycle_cleanup",
+      "packaged_metadata_mismatch",
+      "safe_downgrade"
+    ],
+    "boundarySummary": "The v1.2 corpus explicitly covers raw object denial, path escape, permission bypass, lifecycle cleanup, packaged metadata mismatch, and Safe downgrade."
+  },
+  "capabilities": [
+    {
+      "id": "live_ui",
+      "surface": "pro.ui_automation_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "critical",
+      "sourceGates": [
+        "P14-07",
+        "P14-16"
+      ],
+      "currentState": "provider_poc_not_promoted",
+      "positiveCases": [
+        "JSON-only live UI layout, event drain, update, close, and provider cleanup evidence remains imported from the Phase 13 live UI provider gate",
+        "P14-07 keeps packaged entry/update/close smoke evidence as provider POC evidence only"
+      ],
+      "negativeCases": [
+        "missing packaged ui capability rejects before provider dispatch",
+        "raw Activity, View, Window, Fragment, Handler, NativeView, Context, Binder, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "packaged metadata mismatch attempts to open UI without reviewed capability",
+        "background or scheduled execution tries to create a hidden Activity-owned UI",
+        "event callback payload attempts to carry executable JavaScript or raw Android object handles"
+      ],
+      "runtimeGuards": [
+        "UiHandle is opaque and ResourceRegistry-owned",
+        "bridge request payloads are JSON-only",
+        "provider destroy closes owned UI sessions and drains pending callbacks"
+      ],
+      "promotionPreconditions": [
+        "packaged task relaunch, crash recovery, disclosure, and Safe downgrade archives must pass before promotion",
+        "P14-34 packaged aggregate smoke must include undeclared capability denial and stale metadata mismatch coverage"
+      ],
+      "rollback": "Disable packaged live UI promotion and keep the Phase 13 provider POC/fail-closed behavior."
+    },
+    {
+      "id": "overlay",
+      "surface": "pro.ui_automation_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "critical",
+      "sourceGates": [
+        "P14-08",
+        "P14-09",
+        "P14-10",
+        "P14-16"
+      ],
+      "currentState": "provider_poc_not_promoted",
+      "positiveCases": [
+        "JSON-only overlay show, update, drainEvents, close, and closeAll provider POC evidence is recorded",
+        "overlay permission/OEM matrix records Android 12 and Android 15+ archive requirements"
+      ],
+      "negativeCases": [
+        "permission-denied overlay creation remains fail-closed",
+        "raw WindowManager, LayoutParams, FloatyWindow, WindowBridge, View, Context, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "SYSTEM_ALERT_WINDOW packaged metadata mismatch",
+        "silent background overlay creation without foreground disclosure",
+        "permission revocation followed by stale overlay handle update"
+      ],
+      "runtimeGuards": [
+        "overlay sessions are ResourceRegistry-owned",
+        "closeAll and provider destroy remove owned overlay resources",
+        "scheduled/background silent overlays remain rejected"
+      ],
+      "promotionPreconditions": [
+        "foreground disclosure with stop action, packaged positive smoke, task-removal cleanup, relaunch/crash behavior, and leak stress must pass",
+        "P14-34 packaged aggregate smoke must include undeclared overlay capability and permission-denial cases"
+      ],
+      "rollback": "Disable overlay promotion and keep ui.overlay as provider POC or stable denial until permission/disclosure/device evidence passes."
+    },
+    {
+      "id": "accessibility",
+      "surface": "pro.ui_automation_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "critical",
+      "sourceGates": [
+        "P14-11",
+        "P14-12",
+        "P14-16"
+      ],
+      "currentState": "provider_poc_not_promoted",
+      "positiveCases": [
+        "selector/action matrix imports JSON descriptor and compat alias evidence",
+        "packaged accessibility lifecycle fixture records explicit accessibility capability metadata and service declaration requirements"
+      ],
+      "negativeCases": [
+        "missing accessibility service or capability rejects before action dispatch",
+        "raw AccessibilityService, AccessibilityNodeInfo, UiObject, Context, Binder, selector handle, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "packaged metadata mismatch tries to enable accessibility silently",
+        "root or Shizuku fallback attempts to bypass unsupported gesture tiers",
+        "stale node snapshot is reused after service disconnect"
+      ],
+      "runtimeGuards": [
+        "selector results are frozen JSON snapshots",
+        "timeout and cancellation paths are bounded",
+        "service disconnect and provider destroy clear owned handles"
+      ],
+      "promotionPreconditions": [
+        "Android 12/15+ enabled-service archives, settings round-trip, disconnect, task-removal/relaunch, and unsupported-tier evidence must pass",
+        "P14-34 packaged aggregate smoke must include missing service, undeclared capability, and stale metadata denial"
+      ],
+      "rollback": "Keep accessibility provider POC disabled for packaged promotion and fall back to explicit stable denial."
+    },
+    {
+      "id": "media_projection",
+      "surface": "pro.ui_automation_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "critical",
+      "sourceGates": [
+        "P14-13",
+        "P14-16"
+      ],
+      "currentState": "provider_poc_not_promoted",
+      "positiveCases": [
+        "Activity-owned MediaProjection provider contract is documented",
+        "P13 screenshot/image/OCR state and optional real-device screen_capture smoke anchors are imported"
+      ],
+      "negativeCases": [
+        "media_projection remains fail-closed without prompt grant and foreground disclosure evidence",
+        "raw MediaProjection, ImageReader, Bitmap, VirtualDisplay, Intent, Activity, Context, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "background capture without user prompt",
+        "packaged metadata mismatch tries to synthesize screen capture authority",
+        "stale capture handle remains usable after stop or task removal"
+      ],
+      "runtimeGuards": [
+        "capture provider must be Activity-owned",
+        "capture resources must be ResourceRegistry-owned",
+        "stop, provider destroy, task removal, and crash recovery must close capture resources"
+      ],
+      "promotionPreconditions": [
+        "Android 12/15+ prompt grant/denial, one-frame capture, stop action, task-removal/relaunch/crash, and raw object absence archives must pass",
+        "P14-34 packaged aggregate smoke must keep screen_capture metadata mismatch denied"
+      ],
+      "rollback": "Keep media_projection disabled and preserve existing screenshot/image/OCR stable denial until Activity-owned evidence passes."
+    },
+    {
+      "id": "image_ocr",
+      "surface": "pro.ui_automation_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "high",
+      "sourceGates": [
+        "P14-14",
+        "P14-15",
+        "P14-16"
+      ],
+      "currentState": "provider_poc_not_promoted",
+      "positiveCases": [
+        "scoped readImage, recycle, fake-provider OCR, ML Kit OCR, invalid input, quota, and packaged fake-provider smoke evidence is imported",
+        "opaque image handle and OCR result shapes are documented in declaration and migration sync"
+      ],
+      "negativeCases": [
+        "live transform/match/color operations remain fail-closed until live provider evidence exists",
+        "raw Bitmap, Mat, ImageReader, Canvas, Paint, file descriptor, native pointer, Context, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "path escape through image read/save",
+        "unrecycled image handle leak",
+        "OCR provider-mode mismatch or model-absence bypass"
+      ],
+      "runtimeGuards": [
+        "image handles are opaque ids",
+        "quota and recycle paths are explicit",
+        "scoped filesystem validation applies to image inputs and outputs"
+      ],
+      "promotionPreconditions": [
+        "live image provider, packaged scoped output, quota/leak stress, capture/disclosure, provider-mode, and model-absence archives must pass",
+        "P14-34 packaged aggregate smoke must include image/OCR undeclared capability and stale handle denial"
+      ],
+      "rollback": "Keep advanced image and OCR promotion disabled while preserving scoped fake-provider and stable denial behavior."
+    },
+    {
+      "id": "task_database",
+      "surface": "pro.tasks_device_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "critical",
+      "sourceGates": [
+        "P14-17",
+        "P14-18",
+        "P14-19",
+        "P14-27"
+      ],
+      "currentState": "provider_poc_not_promoted",
+      "positiveCases": [
+        "JSON-safe task database mutation descriptors and schema migration fixtures are documented",
+        "packaged work_manager fake-provider schedule/list/cancel smoke and scheduled_runner entry evidence are imported"
+      ],
+      "negativeCases": [
+        "require(\"tasks\"), raw task database mutation, wall-clock daily/weekly scheduler parity, and packaged task row authority remain unpromoted",
+        "raw TimedTask, IntentTask, WorkManager, AlarmManager, JobScheduler, PendingIntent, database cursor, Intent, Context, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "path escape through scheduled script entry",
+        "packaged owner mismatch attempts to mutate another package row",
+        "corrupt or unknown future schema triggers unsafe reschedule"
+      ],
+      "runtimeGuards": [
+        "Node task ids are opaque and owner-scoped",
+        "Safe downgrade preserves legacy Rhino rows and ignores Node descriptors",
+        "corrupt descriptors quarantine without scheduler mutation"
+      ],
+      "promotionPreconditions": [
+        "live mutation tests, schema migration/rollback, packaged ownership/disclosure, task removal cleanup, process death, relaunch, and Safe downgrade archives must pass",
+        "P14-34 packaged aggregate smoke must include owner mismatch and undeclared task capability denial"
+      ],
+      "rollback": "Disable task database promotion, ignore Node-owned descriptors on Safe downgrade, and preserve legacy Rhino task rows."
+    },
+    {
+      "id": "intent_broadcast",
+      "surface": "pro.tasks_device_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "critical",
+      "sourceGates": [
+        "P14-20",
+        "P14-21",
+        "P14-27"
+      ],
+      "currentState": "provider_poc_not_promoted",
+      "positiveCases": [
+        "future tasks.broadcast descriptor, manifest patch, exported policy, trigger payload, and remove semantics are documented",
+        "packaged boundary smoke proves compat IntentTask helpers reject and future broadcast modules remain denied"
+      ],
+      "negativeCases": [
+        "static/dynamic receiver registration, manifest mutation, boot/package/custom wakeups, and raw trigger payload access remain unpromoted",
+        "raw BroadcastReceiver, Intent, IntentFilter, PendingIntent, Bundle, Uri, PackageManager, receiver handle, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "exported receiver metadata bypass without reviewed permission policy",
+        "oversized or privacy-sensitive broadcast payload",
+        "trigger after owner-scoped remove"
+      ],
+      "runtimeGuards": [
+        "future broadcast descriptors must be JSON-only and owner-scoped",
+        "custom receivers default to non-exported",
+        "payloads must be bounded and privacy-filtered"
+      ],
+      "promotionPreconditions": [
+        "positive install/trigger/remove, manifest synthesis, exported/permission policy, payload filtering, relaunch/crash, undeclared-capability, and cleanup archives must pass",
+        "P14-34 packaged aggregate smoke must include exported receiver denial and post-remove no-delivery evidence"
+      ],
+      "rollback": "Keep broadcast task authority unpromoted and remove only owner-scoped future descriptors on rollback."
+    },
+    {
+      "id": "notifications",
+      "surface": "pro.tasks_device_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "high",
+      "sourceGates": [
+        "P14-22",
+        "P14-27"
+      ],
+      "currentState": "provider_poc_not_promoted",
+      "positiveCases": [
+        "owned notify, cancel, cancelAll, permission status, and settings handoff evidence is recorded",
+        "provider destroy cancellation for owned active notifications is documented"
+      ],
+      "negativeCases": [
+        "packaged post/cancel and foreground disclosure remain unpromoted",
+        "raw Notification, NotificationChannel, NotificationManager, PendingIntent, RemoteViews, Intent, listener handle, StatusBarNotification, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "cancel unrelated app notification id",
+        "post notification without POST_NOTIFICATIONS state or packaged disclosure",
+        "advanced action/listener metadata mismatch"
+      ],
+      "runtimeGuards": [
+        "notification ids are owned by current Node execution",
+        "cancel and cancelAll are scoped to owned records",
+        "provider destroy cancels remaining owned active notifications"
+      ],
+      "promotionPreconditions": [
+        "packaged post/cancel, foreground disclosure/stop action, Android 12/15+ permission matrix, advanced notification decision, and rollback cleanup archives must pass",
+        "P14-34 packaged aggregate smoke must include undeclared notification capability and Safe downgrade behavior"
+      ],
+      "rollback": "Disable notification promotion and cancel only provider-owned active notifications."
+    },
+    {
+      "id": "power_settings",
+      "surface": "pro.tasks_device_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "high",
+      "sourceGates": [
+        "P14-23",
+        "P14-27"
+      ],
+      "currentState": "provider_poc_not_promoted",
+      "positiveCases": [
+        "device.power battery optimization status and settings dry-run evidence is recorded",
+        "Android 12/15+, OEM, exact-alarm, background-launch, prompt, and rollback archive requirements are documented"
+      ],
+      "negativeCases": [
+        "request-ignore-battery-optimizations mutation, Doze mutation, wake locks, exact-alarm scheduling, and background-launch bypass remain denied",
+        "raw PowerManager, WakeLock, AlarmManager, PendingIntent, Intent, Context, OEM manager, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "permission bypass through settings intent mutation",
+        "background-launch bypass disguised as power prompt",
+        "exact-alarm metadata injection without reviewed prompt"
+      ],
+      "runtimeGuards": [
+        "device.power must be declared exactly",
+        "settings launch supports dryRun for tests",
+        "power state mutation stays stable-denied"
+      ],
+      "promotionPreconditions": [
+        "Android 12/15+ OEM matrix, exact-alarm state, background-launch restrictions, reviewed prompt, and rollback archives must pass",
+        "P14-34 packaged aggregate smoke must include power metadata mismatch denial"
+      ],
+      "rollback": "Keep direct power mutation disabled and leave only read/dry-run status helpers."
+    },
+    {
+      "id": "recorder_media",
+      "surface": "pro.tasks_device_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "critical",
+      "sourceGates": [
+        "P14-24",
+        "P14-25",
+        "P14-27"
+      ],
+      "currentState": "provider_poc_not_promoted",
+      "positiveCases": [
+        "recorder.getStatus and packaged recorder/media denial boundary smoke evidence is recorded",
+        "real recorder session contract documents runtime permission, foreground disclosure, ResourceRegistry session, temporary output, and cleanup requirements"
+      ],
+      "negativeCases": [
+        "recorder.start, recorder.stop, pause/resume, and packaged microphone recording remain unpromoted",
+        "raw MediaRecorder, AudioRecord, AudioPlaybackCaptureConfiguration, MediaProjection, ParcelFileDescriptor, file descriptor, Uri, Context, foreground service handle, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "microphone capture without runtime prompt or foreground disclosure",
+        "temporary output path escape",
+        "packaged relaunch or crash leaves active recording session"
+      ],
+      "runtimeGuards": [
+        "future recorder sessions must be ResourceRegistry-owned",
+        "temporary output must be scoped and cleaned on stop/destroy",
+        "foreground disclosure and stop action are required before recording promotion"
+      ],
+      "promotionPreconditions": [
+        "runtime microphone prompt, foreground disclosure, stop action, task removal, relaunch/crash, quota, temp cleanup, denied prompt, packaged start/stop stress, and Safe downgrade archives must pass",
+        "P14-34 packaged aggregate smoke must include missing Android permission and undeclared media.recording capability denial"
+      ],
+      "rollback": "Keep recorder start/stop disabled, close owned future sessions, and remove only scoped temporary output."
+    },
+    {
+      "id": "media_playback_mediastore",
+      "surface": "pro.tasks_device_media",
+      "profile": "pro_compat_opt_in",
+      "risk": "critical",
+      "sourceGates": [
+        "P14-26",
+        "P14-27"
+      ],
+      "currentState": "stable_denied_future_only",
+      "positiveCases": [
+        "read-only audio status and scoped mediainfo remain documented",
+        "media playback and MediaStore boundary decision records stable-denied future-only state"
+      ],
+      "negativeCases": [
+        "playback, playlists, scanFile, MediaStore query/insert/update/delete/open-file, broad media permissions, and mutable media collection access remain denied",
+        "raw MediaPlayer, AudioTrack, AudioFocusRequest, ContentResolver, MediaStore cursor, MediaScannerConnection, Uri, ParcelFileDescriptor, file descriptor, playlist handle, Context, and Java object exposure remains denied"
+      ],
+      "abuseCases": [
+        "broad READ_MEDIA or MANAGE_EXTERNAL_STORAGE permission bypass",
+        "MediaStore path escape through open-file descriptor",
+        "playlist handle survives provider destroy"
+      ],
+      "runtimeGuards": [
+        "media future capabilities require new provider gate",
+        "broad media-library permissions stay stable-denied",
+        "raw media handles never cross into JavaScript"
+      ],
+      "promotionPreconditions": [
+        "scoped playback/provider decision, playlist/queue decision, MediaStore permission matrix, packaged denial, privacy, rollback, and raw object denial archives must pass",
+        "P14-34 packaged aggregate smoke must keep MediaStore metadata mismatch denied"
+      ],
+      "rollback": "Keep media playback and MediaStore future-only with stable denial."
+    },
+    {
+      "id": "worker_threads_process_worker",
+      "surface": "desktop.worker_runtime",
+      "profile": "desktop_compat_opt_in",
+      "risk": "critical",
+      "sourceGates": [
+        "P14-28",
+        "P14-29",
+        "P14-30",
+        "P14-31",
+        "P14-32"
+      ],
+      "currentState": "worker_intentionally_unsupported_v1_2",
+      "positiveCases": [
+        "workerThreadsProfile and processWorkerReplacementProfile diagnostics are documented",
+        "P14-28 audits Node 24.5 ABI artifacts and records native worker unavailability"
+      ],
+      "negativeCases": [
+        "runnable worker, packaged worker, WorkerPool replacement API, process_worker, compute_worker, and autojs6:process-worker remain unpromoted",
+        "raw process handles, stdio streams, signals, spawn, fork, stable child_process authority, bridge modules, nested workers, and raw native handles remain denied"
+      ],
+      "abuseCases": [
+        "process-worker facade bypass through WorkerPool",
+        "worker bridge module import",
+        "packaged .mjs worker source graph without native preflight",
+        "raw child_process shell confusion"
+      ],
+      "runtimeGuards": [
+        "worker.preflight.status=available is required before runnable promotion",
+        "node:worker_threads remains shape-only while native workers are unavailable",
+        "child_process remains disabled and shell remains separate scoped bridge"
+      ],
+      "promotionPreconditions": [
+        "native, runnable, packaged, resource/RSS, execution slot, UX, security corpus, and rollback evidence must pass before worker/process promotion",
+        "P14-34 packaged aggregate smoke must not count worker source anchors as packaged release evidence while native preflight is unavailable"
+      ],
+      "rollback": "Keep autojs.nodejs.worker_threads.experimental=false, project/package worker opt-in disabled, no process-worker facade, and child_process denied."
+    },
+    {
+      "id": "packaged_metadata_safe_downgrade",
+      "surface": "security.packaged_release_gates",
+      "profile": "safe_default",
+      "risk": "critical",
+      "sourceGates": [
+        "P14-02",
+        "P14-06",
+        "P14-10",
+        "P14-11",
+        "P14-19",
+        "P14-21",
+        "P14-25",
+        "P14-33"
+      ],
+      "currentState": "security_corpus_only",
+      "positiveCases": [
+        "Phase 14 promotion contracts define packaged high-privilege disclosure fields and raw object denials",
+        "packaged fixture gates record explicit metadata requirements for overlay, accessibility, tasks, broadcast, recorder/media, and image/OCR surfaces"
+      ],
+      "negativeCases": [
+        "undeclared capability, stale packaged descriptor, metadata mismatch, and Safe downgrade must reject before provider dispatch",
+        "packaged metadata cannot synthesize unreviewed Android permissions, profile switches, expanded filesystem roots, or high-privilege providers"
+      ],
+      "abuseCases": [
+        "package declares Android permission without node permission",
+        "package declares future capability before provider promotion",
+        "Safe downgrade leaves persistent task, receiver, overlay, notification, recorder, or worker authority active"
+      ],
+      "runtimeGuards": [
+        "packaged high-privilege disclosure contract requires manifestMetadata, installReviewCopy, runReviewCopy, foreground disclosure, stop action, denied diagnostics, cleanup, privacy, and rollback fields",
+        "profile switches default to Safe and remain default-off",
+        "packaged aggregate smoke must prove undeclared capability denial and Safe downgrade cleanup"
+      ],
+      "promotionPreconditions": [
+        "P14-34 packaged aggregate smoke must produce deterministic build/reports/nodejs artifacts",
+        "P14-37 summary gate must report zero release-blocking security corpus violations before closeout"
+      ],
+      "rollback": "Disable promoted capability switches, keep Safe profile default, and remove only package-owned high-privilege state on downgrade."
+    }
+  ]
+}
