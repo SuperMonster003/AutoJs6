@@ -6693,7 +6693,7 @@ var ts;
                         fileCallback(fileName, FileWatcherEventKind.Changed);
                     }
                 }
-            }, 
+            },
             /*recursive*/ false, PollingInterval.Medium, fallbackOptions);
             watcher.referenceCount = 0;
             dirWatchers.set(dirPath, watcher);
@@ -7041,7 +7041,7 @@ var ts;
                 case ts.WatchFileKind.DynamicPriorityPolling:
                     return ensureDynamicPollingWatchFile()(fileName, callback, pollingInterval, /*options*/ undefined);
                 case ts.WatchFileKind.UseFsEvents:
-                    return fsWatch(fileName, 0 /* File */, createFsWatchCallbackForFileWatcherCallback(fileName, callback, fileExists), 
+                    return fsWatch(fileName, 0 /* File */, createFsWatchCallbackForFileWatcherCallback(fileName, callback, fileExists),
                     /*recursive*/ false, pollingInterval, ts.getFallbackOptions(options));
                 case ts.WatchFileKind.UseFsEventsOnParentDirectory:
                     if (!nonPollingWatchFile) {
@@ -7116,10 +7116,10 @@ var ts;
             var watchDirectoryKind = ts.Debug.checkDefined(watchDirectoryOptions.watchDirectory);
             switch (watchDirectoryKind) {
                 case ts.WatchDirectoryKind.FixedPollingInterval:
-                    return pollingWatchFile(directoryName, function () { return callback(directoryName); }, PollingInterval.Medium, 
+                    return pollingWatchFile(directoryName, function () { return callback(directoryName); }, PollingInterval.Medium,
                     /*options*/ undefined);
                 case ts.WatchDirectoryKind.DynamicPriorityPolling:
-                    return ensureDynamicPollingWatchFile()(directoryName, function () { return callback(directoryName); }, PollingInterval.Medium, 
+                    return ensureDynamicPollingWatchFile()(directoryName, function () { return callback(directoryName); }, PollingInterval.Medium,
                     /*options*/ undefined);
                 case ts.WatchDirectoryKind.UseFsEvents:
                     return fsWatch(directoryName, 1 /* Directory */, createFsWatchCallbackForDirectoryWatcherCallback(directoryName, callback, options, useCaseSensitiveFileNames, getCurrentDirectory), recursive, PollingInterval.Medium, ts.getFallbackOptions(watchDirectoryOptions));
@@ -21578,8 +21578,8 @@ var ts;
         //
         // @api
         function createTypeParameterDeclaration(name, constraint, defaultType) {
-            var node = createBaseNamedDeclaration(159 /* TypeParameter */, 
-            /*decorators*/ undefined, 
+            var node = createBaseNamedDeclaration(159 /* TypeParameter */,
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, name);
             node.constraint = constraint;
             node.default = defaultType;
@@ -21648,7 +21648,7 @@ var ts;
         //
         // @api
         function createPropertySignature(modifiers, name, questionToken, type) {
-            var node = createBaseNamedDeclaration(162 /* PropertySignature */, 
+            var node = createBaseNamedDeclaration(162 /* PropertySignature */,
             /*decorators*/ undefined, modifiers, name);
             node.type = type;
             node.questionToken = questionToken;
@@ -21695,7 +21695,7 @@ var ts;
         }
         // @api
         function createMethodSignature(modifiers, name, questionToken, typeParameters, parameters, type) {
-            var node = createBaseSignatureDeclaration(164 /* MethodSignature */, 
+            var node = createBaseSignatureDeclaration(164 /* MethodSignature */,
             /*decorators*/ undefined, modifiers, name, typeParameters, parameters, type);
             node.questionToken = questionToken;
             node.transformFlags = 1 /* ContainsTypeScript */;
@@ -21753,9 +21753,9 @@ var ts;
         }
         // @api
         function createConstructorDeclaration(decorators, modifiers, parameters, body) {
-            var node = createBaseFunctionLikeDeclaration(166 /* Constructor */, decorators, modifiers, 
-            /*name*/ undefined, 
-            /*typeParameters*/ undefined, parameters, 
+            var node = createBaseFunctionLikeDeclaration(166 /* Constructor */, decorators, modifiers,
+            /*name*/ undefined,
+            /*typeParameters*/ undefined, parameters,
             /*type*/ undefined, body);
             node.transformFlags |= 256 /* ContainsES2015 */;
             return node;
@@ -21771,7 +21771,7 @@ var ts;
         }
         // @api
         function createGetAccessorDeclaration(decorators, modifiers, name, parameters, type, body) {
-            return createBaseFunctionLikeDeclaration(167 /* GetAccessor */, decorators, modifiers, name, 
+            return createBaseFunctionLikeDeclaration(167 /* GetAccessor */, decorators, modifiers, name,
             /*typeParameters*/ undefined, parameters, type, body);
         }
         // @api
@@ -21787,8 +21787,8 @@ var ts;
         }
         // @api
         function createSetAccessorDeclaration(decorators, modifiers, name, parameters, body) {
-            return createBaseFunctionLikeDeclaration(168 /* SetAccessor */, decorators, modifiers, name, 
-            /*typeParameters*/ undefined, parameters, 
+            return createBaseFunctionLikeDeclaration(168 /* SetAccessor */, decorators, modifiers, name,
+            /*typeParameters*/ undefined, parameters,
             /*type*/ undefined, body);
         }
         // @api
@@ -21803,9 +21803,9 @@ var ts;
         }
         // @api
         function createCallSignature(typeParameters, parameters, type) {
-            var node = createBaseSignatureDeclaration(169 /* CallSignature */, 
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
+            var node = createBaseSignatureDeclaration(169 /* CallSignature */,
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
             /*name*/ undefined, typeParameters, parameters, type);
             node.transformFlags = 1 /* ContainsTypeScript */;
             return node;
@@ -21820,9 +21820,9 @@ var ts;
         }
         // @api
         function createConstructSignature(typeParameters, parameters, type) {
-            var node = createBaseSignatureDeclaration(170 /* ConstructSignature */, 
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
+            var node = createBaseSignatureDeclaration(170 /* ConstructSignature */,
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
             /*name*/ undefined, typeParameters, parameters, type);
             node.transformFlags = 1 /* ContainsTypeScript */;
             return node;
@@ -21837,8 +21837,8 @@ var ts;
         }
         // @api
         function createIndexSignature(decorators, modifiers, parameters, type) {
-            var node = createBaseSignatureDeclaration(171 /* IndexSignature */, decorators, modifiers, 
-            /*name*/ undefined, 
+            var node = createBaseSignatureDeclaration(171 /* IndexSignature */, decorators, modifiers,
+            /*name*/ undefined,
             /*typeParameters*/ undefined, parameters, type);
             node.transformFlags = 1 /* ContainsTypeScript */;
             return node;
@@ -21908,9 +21908,9 @@ var ts;
         }
         // @api
         function createFunctionTypeNode(typeParameters, parameters, type) {
-            var node = createBaseSignatureDeclaration(174 /* FunctionType */, 
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
+            var node = createBaseSignatureDeclaration(174 /* FunctionType */,
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
             /*name*/ undefined, typeParameters, parameters, type);
             node.transformFlags = 1 /* ContainsTypeScript */;
             return node;
@@ -21934,8 +21934,8 @@ var ts;
                     ts.Debug.fail("Incorrect number of arguments specified.");
         }
         function createConstructorTypeNode1(modifiers, typeParameters, parameters, type) {
-            var node = createBaseSignatureDeclaration(175 /* ConstructorType */, 
-            /*decorators*/ undefined, modifiers, 
+            var node = createBaseSignatureDeclaration(175 /* ConstructorType */,
+            /*decorators*/ undefined, modifiers,
             /*name*/ undefined, typeParameters, parameters, type);
             node.transformFlags = 1 /* ContainsTypeScript */;
             return node;
@@ -22282,8 +22282,8 @@ var ts;
         }
         // @api
         function createBindingElement(dotDotDotToken, propertyName, name, initializer) {
-            var node = createBaseBindingLikeDeclaration(198 /* BindingElement */, 
-            /*decorators*/ undefined, 
+            var node = createBaseBindingLikeDeclaration(198 /* BindingElement */,
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, name, initializer);
             node.propertyName = asName(propertyName);
             node.dotDotDotToken = dotDotDotToken;
@@ -22600,7 +22600,7 @@ var ts;
         }
         // @api
         function createFunctionExpression(modifiers, asteriskToken, name, typeParameters, parameters, type, body) {
-            var node = createBaseFunctionLikeDeclaration(208 /* FunctionExpression */, 
+            var node = createBaseFunctionLikeDeclaration(208 /* FunctionExpression */,
             /*decorators*/ undefined, modifiers, name, typeParameters, parameters, type, body);
             node.asteriskToken = asteriskToken;
             node.transformFlags |= propagateChildFlags(node.asteriskToken);
@@ -22634,8 +22634,8 @@ var ts;
         }
         // @api
         function createArrowFunction(modifiers, typeParameters, parameters, type, equalsGreaterThanToken, body) {
-            var node = createBaseFunctionLikeDeclaration(209 /* ArrowFunction */, 
-            /*decorators*/ undefined, modifiers, 
+            var node = createBaseFunctionLikeDeclaration(209 /* ArrowFunction */,
+            /*decorators*/ undefined, modifiers,
             /*name*/ undefined, typeParameters, parameters, type, parenthesizerRules().parenthesizeConciseBodyOfArrowFunction(body));
             node.equalsGreaterThanToken = equalsGreaterThanToken !== null && equalsGreaterThanToken !== void 0 ? equalsGreaterThanToken : createToken(38 /* EqualsGreaterThanToken */);
             node.transformFlags |=
@@ -23397,8 +23397,8 @@ var ts;
         }
         // @api
         function createVariableDeclaration(name, exclamationToken, type, initializer) {
-            var node = createBaseVariableLikeDeclaration(249 /* VariableDeclaration */, 
-            /*decorators*/ undefined, 
+            var node = createBaseVariableLikeDeclaration(249 /* VariableDeclaration */,
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, name, type, initializer && parenthesizerRules().parenthesizeExpressionForDisallowedComma(initializer));
             node.exclamationToken = exclamationToken;
             node.transformFlags |= propagateChildFlags(node.exclamationToken);
@@ -23611,8 +23611,8 @@ var ts;
         }
         // @api
         function createNamespaceExportDeclaration(name) {
-            var node = createBaseNamedDeclaration(259 /* NamespaceExportDeclaration */, 
-            /*decorators*/ undefined, 
+            var node = createBaseNamedDeclaration(259 /* NamespaceExportDeclaration */,
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, name);
             node.transformFlags = 1 /* ContainsTypeScript */;
             return node;
@@ -23824,8 +23824,8 @@ var ts;
         }
         // @api
         function createMissingDeclaration() {
-            var node = createBaseDeclaration(271 /* MissingDeclaration */, 
-            /*decorators*/ undefined, 
+            var node = createBaseDeclaration(271 /* MissingDeclaration */,
+            /*decorators*/ undefined,
             /*modifiers*/ undefined);
             return node;
         }
@@ -23879,10 +23879,10 @@ var ts;
         }
         // @api
         function createJSDocFunctionType(parameters, type) {
-            var node = createBaseSignatureDeclaration(308 /* JSDocFunctionType */, 
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
-            /*name*/ undefined, 
+            var node = createBaseSignatureDeclaration(308 /* JSDocFunctionType */,
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
+            /*name*/ undefined,
             /*typeParameters*/ undefined, parameters, type);
             return node;
         }
@@ -24436,9 +24436,9 @@ var ts;
         // @api
         function createCatchClause(variableDeclaration, block) {
             var node = createBaseNode(287 /* CatchClause */);
-            variableDeclaration = !ts.isString(variableDeclaration) ? variableDeclaration : createVariableDeclaration(variableDeclaration, 
-            /*exclamationToken*/ undefined, 
-            /*type*/ undefined, 
+            variableDeclaration = !ts.isString(variableDeclaration) ? variableDeclaration : createVariableDeclaration(variableDeclaration,
+            /*exclamationToken*/ undefined,
+            /*type*/ undefined,
             /*initializer*/ undefined);
             node.variableDeclaration = variableDeclaration;
             node.block = block;
@@ -24461,8 +24461,8 @@ var ts;
         //
         // @api
         function createPropertyAssignment(name, initializer) {
-            var node = createBaseNamedDeclaration(288 /* PropertyAssignment */, 
-            /*decorators*/ undefined, 
+            var node = createBaseNamedDeclaration(288 /* PropertyAssignment */,
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, name);
             node.initializer = parenthesizerRules().parenthesizeExpressionForDisallowedComma(initializer);
             node.transformFlags |=
@@ -24491,8 +24491,8 @@ var ts;
         }
         // @api
         function createShorthandPropertyAssignment(name, objectAssignmentInitializer) {
-            var node = createBaseNamedDeclaration(289 /* ShorthandPropertyAssignment */, 
-            /*decorators*/ undefined, 
+            var node = createBaseNamedDeclaration(289 /* ShorthandPropertyAssignment */,
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, name);
             node.objectAssignmentInitializer = objectAssignmentInitializer && parenthesizerRules().parenthesizeExpressionForDisallowedComma(objectAssignmentInitializer);
             node.transformFlags |=
@@ -24823,23 +24823,23 @@ var ts;
         }
         function createImmediatelyInvokedFunctionExpression(statements, param, paramValue) {
             return createCallExpression(createFunctionExpression(
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, 
-            /*name*/ undefined, 
-            /*typeParameters*/ undefined, 
-            /*parameters*/ param ? [param] : [], 
-            /*type*/ undefined, createBlock(statements, /*multiLine*/ true)), 
-            /*typeArguments*/ undefined, 
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined,
+            /*name*/ undefined,
+            /*typeParameters*/ undefined,
+            /*parameters*/ param ? [param] : [],
+            /*type*/ undefined, createBlock(statements, /*multiLine*/ true)),
+            /*typeArguments*/ undefined,
             /*argumentsArray*/ paramValue ? [paramValue] : []);
         }
         function createImmediatelyInvokedArrowFunction(statements, param, paramValue) {
             return createCallExpression(createArrowFunction(
-            /*modifiers*/ undefined, 
-            /*typeParameters*/ undefined, 
-            /*parameters*/ param ? [param] : [], 
-            /*type*/ undefined, 
-            /*equalsGreaterThanToken*/ undefined, createBlock(statements, /*multiLine*/ true)), 
-            /*typeArguments*/ undefined, 
+            /*modifiers*/ undefined,
+            /*typeParameters*/ undefined,
+            /*parameters*/ param ? [param] : [],
+            /*type*/ undefined,
+            /*equalsGreaterThanToken*/ undefined, createBlock(statements, /*multiLine*/ true)),
+            /*typeArguments*/ undefined,
             /*argumentsArray*/ paramValue ? [paramValue] : []);
         }
         function createVoidZero() {
@@ -24847,14 +24847,14 @@ var ts;
         }
         function createExportDefault(expression) {
             return createExportAssignment(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
             /*isExportEquals*/ false, expression);
         }
         function createExternalModuleExport(exportName) {
             return createExportDeclaration(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
             /*isTypeOnly*/ false, createNamedExports([
                 createExportSpecifier(/*propertyName*/ undefined, exportName)
             ]));
@@ -24868,7 +24868,7 @@ var ts;
                 : factory.createStrictEquality(createTypeOfExpression(value), createStringLiteral(tag));
         }
         function createMethodCall(object, methodName, argumentsList) {
-            return createCallExpression(createPropertyAccessExpression(object, methodName), 
+            return createCallExpression(createPropertyAccessExpression(object, methodName),
             /*typeArguments*/ undefined, argumentsList);
         }
         function createFunctionBindCall(target, thisArg, argumentsList) {
@@ -26154,12 +26154,12 @@ var ts;
                     argumentsArray.push(descriptor);
                 }
             }
-            return factory.createCallExpression(getUnscopedHelperName("__decorate"), 
+            return factory.createCallExpression(getUnscopedHelperName("__decorate"),
             /*typeArguments*/ undefined, argumentsArray);
         }
         function createMetadataHelper(metadataKey, metadataValue) {
             context.requestEmitHelper(ts.metadataHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__metadata"), 
+            return factory.createCallExpression(getUnscopedHelperName("__metadata"),
             /*typeArguments*/ undefined, [
                 factory.createStringLiteral(metadataKey),
                 metadataValue
@@ -26167,7 +26167,7 @@ var ts;
         }
         function createParamHelper(expression, parameterOffset, location) {
             context.requestEmitHelper(ts.paramHelper);
-            return ts.setTextRange(factory.createCallExpression(getUnscopedHelperName("__param"), 
+            return ts.setTextRange(factory.createCallExpression(getUnscopedHelperName("__param"),
             /*typeArguments*/ undefined, [
                 factory.createNumericLiteral(parameterOffset + ""),
                 expression
@@ -26176,11 +26176,11 @@ var ts;
         // ES2018 Helpers
         function createAssignHelper(attributesSegments) {
             if (context.getCompilerOptions().target >= 2 /* ES2015 */) {
-                return factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("Object"), "assign"), 
+                return factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("Object"), "assign"),
                 /*typeArguments*/ undefined, attributesSegments);
             }
             context.requestEmitHelper(ts.assignHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__assign"), 
+            return factory.createCallExpression(getUnscopedHelperName("__assign"),
             /*typeArguments*/ undefined, attributesSegments);
         }
         function createAwaitHelper(expression) {
@@ -26192,7 +26192,7 @@ var ts;
             context.requestEmitHelper(ts.asyncGeneratorHelper);
             // Mark this node as originally an async function
             (generatorFunc.emitNode || (generatorFunc.emitNode = {})).flags |= 262144 /* AsyncFunctionBody */ | 524288 /* ReuseTempVariableScope */;
-            return factory.createCallExpression(getUnscopedHelperName("__asyncGenerator"), 
+            return factory.createCallExpression(getUnscopedHelperName("__asyncGenerator"),
             /*typeArguments*/ undefined, [
                 hasLexicalThis ? factory.createThis() : factory.createVoidZero(),
                 factory.createIdentifier("arguments"),
@@ -26202,12 +26202,12 @@ var ts;
         function createAsyncDelegatorHelper(expression) {
             context.requestEmitHelper(ts.awaitHelper);
             context.requestEmitHelper(ts.asyncDelegator);
-            return factory.createCallExpression(getUnscopedHelperName("__asyncDelegator"), 
+            return factory.createCallExpression(getUnscopedHelperName("__asyncDelegator"),
             /*typeArguments*/ undefined, [expression]);
         }
         function createAsyncValuesHelper(expression) {
             context.requestEmitHelper(ts.asyncValues);
-            return factory.createCallExpression(getUnscopedHelperName("__asyncValues"), 
+            return factory.createCallExpression(getUnscopedHelperName("__asyncValues"),
             /*typeArguments*/ undefined, [expression]);
         }
         // ES2018 Destructuring Helpers
@@ -26226,8 +26226,8 @@ var ts;
                         var temp = computedTempVariables[computedTempVariableOffset];
                         computedTempVariableOffset++;
                         // typeof _tmp === "symbol" ? _tmp : _tmp + ""
-                        propertyNames.push(factory.createConditionalExpression(factory.createTypeCheck(temp, "symbol"), 
-                        /*questionToken*/ undefined, temp, 
+                        propertyNames.push(factory.createConditionalExpression(factory.createTypeCheck(temp, "symbol"),
+                        /*questionToken*/ undefined, temp,
                         /*colonToken*/ undefined, factory.createAdd(temp, factory.createStringLiteral(""))));
                     }
                     else {
@@ -26235,7 +26235,7 @@ var ts;
                     }
                 }
             }
-            return factory.createCallExpression(getUnscopedHelperName("__rest"), 
+            return factory.createCallExpression(getUnscopedHelperName("__rest"),
             /*typeArguments*/ undefined, [
                 value,
                 ts.setTextRange(factory.createArrayLiteralExpression(propertyNames), location)
@@ -26245,14 +26245,14 @@ var ts;
         function createAwaiterHelper(hasLexicalThis, hasLexicalArguments, promiseConstructor, body) {
             context.requestEmitHelper(ts.awaiterHelper);
             var generatorFunc = factory.createFunctionExpression(
-            /*modifiers*/ undefined, factory.createToken(41 /* AsteriskToken */), 
-            /*name*/ undefined, 
-            /*typeParameters*/ undefined, 
-            /*parameters*/ [], 
+            /*modifiers*/ undefined, factory.createToken(41 /* AsteriskToken */),
+            /*name*/ undefined,
+            /*typeParameters*/ undefined,
+            /*parameters*/ [],
             /*type*/ undefined, body);
             // Mark this node as originally an async function
             (generatorFunc.emitNode || (generatorFunc.emitNode = {})).flags |= 262144 /* AsyncFunctionBody */ | 524288 /* ReuseTempVariableScope */;
-            return factory.createCallExpression(getUnscopedHelperName("__awaiter"), 
+            return factory.createCallExpression(getUnscopedHelperName("__awaiter"),
             /*typeArguments*/ undefined, [
                 hasLexicalThis ? factory.createThis() : factory.createVoidZero(),
                 hasLexicalArguments ? factory.createIdentifier("arguments") : factory.createVoidZero(),
@@ -26263,28 +26263,28 @@ var ts;
         // ES2015 Helpers
         function createExtendsHelper(name) {
             context.requestEmitHelper(ts.extendsHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__extends"), 
+            return factory.createCallExpression(getUnscopedHelperName("__extends"),
             /*typeArguments*/ undefined, [name, factory.createUniqueName("_super", 16 /* Optimistic */ | 32 /* FileLevel */)]);
         }
         function createTemplateObjectHelper(cooked, raw) {
             context.requestEmitHelper(ts.templateObjectHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__makeTemplateObject"), 
+            return factory.createCallExpression(getUnscopedHelperName("__makeTemplateObject"),
             /*typeArguments*/ undefined, [cooked, raw]);
         }
         function createSpreadArrayHelper(to, from) {
             context.requestEmitHelper(ts.spreadArrayHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__spreadArray"), 
+            return factory.createCallExpression(getUnscopedHelperName("__spreadArray"),
             /*typeArguments*/ undefined, [to, from]);
         }
         // ES2015 Destructuring Helpers
         function createValuesHelper(expression) {
             context.requestEmitHelper(ts.valuesHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__values"), 
+            return factory.createCallExpression(getUnscopedHelperName("__values"),
             /*typeArguments*/ undefined, [expression]);
         }
         function createReadHelper(iteratorRecord, count) {
             context.requestEmitHelper(ts.readHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__read"), 
+            return factory.createCallExpression(getUnscopedHelperName("__read"),
             /*typeArguments*/ undefined, count !== undefined
                 ? [iteratorRecord, factory.createNumericLiteral(count + "")]
                 : [iteratorRecord]);
@@ -26292,18 +26292,18 @@ var ts;
         // ES2015 Generator Helpers
         function createGeneratorHelper(body) {
             context.requestEmitHelper(ts.generatorHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__generator"), 
+            return factory.createCallExpression(getUnscopedHelperName("__generator"),
             /*typeArguments*/ undefined, [factory.createThis(), body]);
         }
         // ES Module Helpers
         function createCreateBindingHelper(module, inputName, outputName) {
             context.requestEmitHelper(ts.createBindingHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__createBinding"), 
+            return factory.createCallExpression(getUnscopedHelperName("__createBinding"),
             /*typeArguments*/ undefined, __spreadArray([factory.createIdentifier("exports"), module, inputName], (outputName ? [outputName] : [])));
         }
         function createImportStarHelper(expression) {
             context.requestEmitHelper(ts.importStarHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__importStar"), 
+            return factory.createCallExpression(getUnscopedHelperName("__importStar"),
             /*typeArguments*/ undefined, [expression]);
         }
         function createImportStarCallbackHelper() {
@@ -26312,14 +26312,14 @@ var ts;
         }
         function createImportDefaultHelper(expression) {
             context.requestEmitHelper(ts.importDefaultHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__importDefault"), 
+            return factory.createCallExpression(getUnscopedHelperName("__importDefault"),
             /*typeArguments*/ undefined, [expression]);
         }
         function createExportStarHelper(moduleExpression, exportsExpression) {
             if (exportsExpression === void 0) { exportsExpression = factory.createIdentifier("exports"); }
             context.requestEmitHelper(ts.exportStarHelper);
             context.requestEmitHelper(ts.createBindingHelper);
-            return factory.createCallExpression(getUnscopedHelperName("__exportStar"), 
+            return factory.createCallExpression(getUnscopedHelperName("__exportStar"),
             /*typeArguments*/ undefined, [moduleExpression, exportsExpression]);
         }
         // Class Fields Helpers
@@ -27531,7 +27531,7 @@ var ts;
                 argumentsList.push(children[0]);
             }
         }
-        return ts.setTextRange(factory.createCallExpression(callee, 
+        return ts.setTextRange(factory.createCallExpression(callee,
         /*typeArguments*/ undefined, argumentsList), location);
     }
     ts.createExpressionForJsxElement = createExpressionForJsxElement;
@@ -27550,7 +27550,7 @@ var ts;
                 argumentsList.push(children[0]);
             }
         }
-        return ts.setTextRange(factory.createCallExpression(createJsxFactoryExpression(factory, jsxFactoryEntity, reactNamespace, parentElement), 
+        return ts.setTextRange(factory.createCallExpression(createJsxFactoryExpression(factory, jsxFactoryEntity, reactNamespace, parentElement),
         /*typeArguments*/ undefined, argumentsList), location);
     }
     ts.createExpressionForJsxFragment = createExpressionForJsxFragment;
@@ -27558,11 +27558,11 @@ var ts;
     function createForOfBindingStatement(factory, node, boundValue) {
         if (ts.isVariableDeclarationList(node)) {
             var firstDeclaration = ts.first(node.declarations);
-            var updatedDeclaration = factory.updateVariableDeclaration(firstDeclaration, firstDeclaration.name, 
-            /*exclamationToken*/ undefined, 
+            var updatedDeclaration = factory.updateVariableDeclaration(firstDeclaration, firstDeclaration.name,
+            /*exclamationToken*/ undefined,
             /*type*/ undefined, boundValue);
             return ts.setTextRange(factory.createVariableStatement(
-            /*modifiers*/ undefined, factory.updateVariableDeclarationList(node, [updatedDeclaration])), 
+            /*modifiers*/ undefined, factory.updateVariableDeclarationList(node, [updatedDeclaration])),
             /*location*/ node);
         }
         else {
@@ -27613,16 +27613,16 @@ var ts;
             return ts.setTextRange(factory.createObjectDefinePropertyCall(receiver, createExpressionForPropertyName(factory, property.name), factory.createPropertyDescriptor({
                 enumerable: factory.createFalse(),
                 configurable: true,
-                get: getAccessor && ts.setTextRange(ts.setOriginalNode(factory.createFunctionExpression(getAccessor.modifiers, 
-                /*asteriskToken*/ undefined, 
-                /*name*/ undefined, 
-                /*typeParameters*/ undefined, getAccessor.parameters, 
+                get: getAccessor && ts.setTextRange(ts.setOriginalNode(factory.createFunctionExpression(getAccessor.modifiers,
+                /*asteriskToken*/ undefined,
+                /*name*/ undefined,
+                /*typeParameters*/ undefined, getAccessor.parameters,
                 /*type*/ undefined, getAccessor.body // TODO: GH#18217
                 ), getAccessor), getAccessor),
-                set: setAccessor && ts.setTextRange(ts.setOriginalNode(factory.createFunctionExpression(setAccessor.modifiers, 
-                /*asteriskToken*/ undefined, 
-                /*name*/ undefined, 
-                /*typeParameters*/ undefined, setAccessor.parameters, 
+                set: setAccessor && ts.setTextRange(ts.setOriginalNode(factory.createFunctionExpression(setAccessor.modifiers,
+                /*asteriskToken*/ undefined,
+                /*name*/ undefined,
+                /*typeParameters*/ undefined, setAccessor.parameters,
                 /*type*/ undefined, setAccessor.body // TODO: GH#18217
                 ), setAccessor), setAccessor)
             }, !multiLine)), firstAccessor);
@@ -27633,19 +27633,19 @@ var ts;
         return ts.setOriginalNode(ts.setTextRange(factory.createAssignment(createMemberAccessForPropertyName(factory, receiver, property.name, /*location*/ property.name), property.initializer), property), property);
     }
     function createExpressionForShorthandPropertyAssignment(factory, property, receiver) {
-        return ts.setOriginalNode(ts.setTextRange(factory.createAssignment(createMemberAccessForPropertyName(factory, receiver, property.name, /*location*/ property.name), factory.cloneNode(property.name)), 
-        /*location*/ property), 
+        return ts.setOriginalNode(ts.setTextRange(factory.createAssignment(createMemberAccessForPropertyName(factory, receiver, property.name, /*location*/ property.name), factory.cloneNode(property.name)),
+        /*location*/ property),
         /*original*/ property);
     }
     function createExpressionForMethodDeclaration(factory, method, receiver) {
-        return ts.setOriginalNode(ts.setTextRange(factory.createAssignment(createMemberAccessForPropertyName(factory, receiver, method.name, /*location*/ method.name), ts.setOriginalNode(ts.setTextRange(factory.createFunctionExpression(method.modifiers, method.asteriskToken, 
-        /*name*/ undefined, 
-        /*typeParameters*/ undefined, method.parameters, 
+        return ts.setOriginalNode(ts.setTextRange(factory.createAssignment(createMemberAccessForPropertyName(factory, receiver, method.name, /*location*/ method.name), ts.setOriginalNode(ts.setTextRange(factory.createFunctionExpression(method.modifiers, method.asteriskToken,
+        /*name*/ undefined,
+        /*typeParameters*/ undefined, method.parameters,
         /*type*/ undefined, method.body // TODO: GH#18217
-        ), 
-        /*location*/ method), 
-        /*original*/ method)), 
-        /*location*/ method), 
+        ),
+        /*location*/ method),
+        /*original*/ method)),
+        /*location*/ method),
         /*original*/ method);
     }
     function createExpressionForObjectLiteralElementLike(factory, node, property, receiver) {
@@ -27801,7 +27801,7 @@ var ts;
             }
             if (namedBindings) {
                 var externalHelpersImportDeclaration = nodeFactory.createImportDeclaration(
-                /*decorators*/ undefined, 
+                /*decorators*/ undefined,
                 /*modifiers*/ undefined, nodeFactory.createImportClause(/*isTypeOnly*/ false, /*name*/ undefined, namedBindings), nodeFactory.createStringLiteral(ts.externalHelpersModuleNameText));
                 ts.addEmitFlags(externalHelpersImportDeclaration, 67108864 /* NeverApplyImportHelper */);
                 return externalHelpersImportDeclaration;
@@ -30647,12 +30647,12 @@ var ts;
                 parseExpected(58 /* ColonToken */);
             }
             return finishNode(factory.createParameterDeclaration(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
-            /*dotDotDotToken*/ undefined, 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
+            /*dotDotDotToken*/ undefined,
             // TODO(rbuckton): JSDoc parameters don't have names (except `this`/`new`), should we manufacture an empty identifier?
-            name, 
-            /*questionToken*/ undefined, parseJSDocType(), 
+            name,
+            /*questionToken*/ undefined, parseJSDocType(),
             /*initializer*/ undefined), pos);
         }
         function parseJSDocType() {
@@ -30761,10 +30761,10 @@ var ts;
             var hasJSDoc = hasPrecedingJSDocComment();
             if (token() === 107 /* ThisKeyword */) {
                 var node_1 = factory.createParameterDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, 
-                /*dotDotDotToken*/ undefined, createIdentifier(/*isIdentifier*/ true), 
-                /*questionToken*/ undefined, parseTypeAnnotation(), 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined,
+                /*dotDotDotToken*/ undefined, createIdentifier(/*isIdentifier*/ true),
+                /*questionToken*/ undefined, parseTypeAnnotation(),
                 /*initializer*/ undefined);
                 return withJSDoc(finishNode(node_1, pos), hasJSDoc);
             }
@@ -31351,8 +31351,8 @@ var ts;
         }
         function parseTypeParameterOfInferType() {
             var pos = getNodePos();
-            return finishNode(factory.createTypeParameterDeclaration(parseIdentifier(), 
-            /*constraint*/ undefined, 
+            return finishNode(factory.createTypeParameterDeclaration(parseIdentifier(),
+            /*constraint*/ undefined,
             /*defaultType*/ undefined), pos);
         }
         function parseInferType() {
@@ -31725,11 +31725,11 @@ var ts;
         function parseSimpleArrowFunctionExpression(pos, identifier, asyncModifier) {
             ts.Debug.assert(token() === 38 /* EqualsGreaterThanToken */, "parseSimpleArrowFunctionExpression should only have been called if we had a =>");
             var parameter = factory.createParameterDeclaration(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
-            /*dotDotDotToken*/ undefined, identifier, 
-            /*questionToken*/ undefined, 
-            /*type*/ undefined, 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
+            /*dotDotDotToken*/ undefined, identifier,
+            /*questionToken*/ undefined,
+            /*type*/ undefined,
             /*initializer*/ undefined);
             finishNode(parameter, identifier.pos);
             var parameters = createNodeArray([parameter], parameter.pos, parameter.end);
@@ -35150,7 +35150,7 @@ var ts;
                     if (parseOptional(24 /* DotToken */)) {
                         var body = parseJSDocTypeNameWithNamespace(/*nested*/ true);
                         var jsDocNamespaceNode = factory.createModuleDeclaration(
-                        /*decorators*/ undefined, 
+                        /*decorators*/ undefined,
                         /*modifiers*/ undefined, typeNameOrNamespaceName, body, nested ? 4 /* NestedNamespace */ : undefined);
                         return finishNode(jsDocNamespaceNode, pos);
                     }
@@ -37552,7 +37552,7 @@ var ts;
         result.path = ts.toPath(configFileName, cwd, ts.createGetCanonicalFileName(host.useCaseSensitiveFileNames));
         result.resolvedPath = result.path;
         result.originalFileName = result.fileName;
-        return parseJsonSourceFileConfigFileContent(result, host, ts.getNormalizedAbsolutePath(ts.getDirectoryPath(configFileName), cwd), optionsToExtend, ts.getNormalizedAbsolutePath(configFileName, cwd), 
+        return parseJsonSourceFileConfigFileContent(result, host, ts.getNormalizedAbsolutePath(ts.getDirectoryPath(configFileName), cwd), optionsToExtend, ts.getNormalizedAbsolutePath(configFileName, cwd),
         /*resolutionStack*/ undefined, extraFileExtensions, extendedConfigCache, watchOptionsToExtend);
     }
     ts.getParsedCommandLineOfConfigFile = getParsedCommandLineOfConfigFile;
@@ -37841,7 +37841,7 @@ var ts;
                         return validateValue(convertObjectLiteralExpressionToJson(objectLiteralExpression, elementOptions, extraKeyDiagnostics, optionName));
                     }
                     else {
-                        return validateValue(convertObjectLiteralExpressionToJson(objectLiteralExpression, /* knownOptions*/ undefined, 
+                        return validateValue(convertObjectLiteralExpressionToJson(objectLiteralExpression, /* knownOptions*/ undefined,
                         /*extraKeyDiagnosticMessage */ undefined, /*parentOption*/ undefined));
                     }
                 case 199 /* ArrayLiteralExpression */:
@@ -43459,7 +43459,7 @@ var ts;
                 return false;
             }
             if (currentFlow === unreachableFlow) {
-                var reportError = 
+                var reportError =
                 // report error on all statements except empty ones
                 (ts.isStatementButNotDeclaration(node) && node.kind !== 231 /* EmptyStatement */) ||
                     // report error on class declarations
@@ -48533,10 +48533,10 @@ var ts;
                 var name = ts.getNameFromIndexInfo(indexInfo) || "x";
                 var indexerTypeNode = ts.factory.createKeywordTypeNode(kind === 0 /* String */ ? 147 /* StringKeyword */ : 144 /* NumberKeyword */);
                 var indexingParameter = ts.factory.createParameterDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, 
-                /*dotDotDotToken*/ undefined, name, 
-                /*questionToken*/ undefined, indexerTypeNode, 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined,
+                /*dotDotDotToken*/ undefined, name,
+                /*questionToken*/ undefined, indexerTypeNode,
                 /*initializer*/ undefined);
                 if (!typeNode) {
                     typeNode = typeToTypeNodeHelper(indexInfo.type || anyType, context);
@@ -48654,7 +48654,7 @@ var ts;
                 var isOptional = parameterDeclaration && isOptionalParameter(parameterDeclaration) || ts.getCheckFlags(parameterSymbol) & 16384 /* OptionalParameter */;
                 var questionToken = isOptional ? ts.factory.createToken(57 /* QuestionToken */) : undefined;
                 var parameterNode = ts.factory.createParameterDeclaration(
-                /*decorators*/ undefined, modifiers, dotDotDotToken, name, questionToken, parameterTypeNode, 
+                /*decorators*/ undefined, modifiers, dotDotDotToken, name, questionToken, parameterTypeNode,
                 /*initializer*/ undefined);
                 context.approximateLength += ts.symbolName(parameterSymbol).length + 3;
                 return parameterNode;
@@ -48666,7 +48666,7 @@ var ts;
                         }
                         var visited = ts.visitEachChild(node, elideInitializerAndSetEmitFlags, ts.nullTransformationContext, /*nodesVisitor*/ undefined, elideInitializerAndSetEmitFlags);
                         if (ts.isBindingElement(visited)) {
-                            visited = ts.factory.updateBindingElement(visited, visited.dotDotDotToken, visited.propertyName, visited.name, 
+                            visited = ts.factory.updateBindingElement(visited, visited.dotDotDotToken, visited.propertyName, visited.name,
                             /*initializer*/ undefined);
                         }
                         if (!ts.nodeIsSynthesized(visited)) {
@@ -49250,25 +49250,25 @@ var ts;
                     }
                     if ((ts.isExpressionWithTypeArguments(node) || ts.isTypeReferenceNode(node)) && ts.isJSDocIndexSignature(node)) {
                         return ts.factory.createTypeLiteralNode([ts.factory.createIndexSignature(
-                            /*decorators*/ undefined, 
+                            /*decorators*/ undefined,
                             /*modifiers*/ undefined, [ts.factory.createParameterDeclaration(
-                                /*decorators*/ undefined, 
-                                /*modifiers*/ undefined, 
-                                /*dotdotdotToken*/ undefined, "x", 
+                                /*decorators*/ undefined,
+                                /*modifiers*/ undefined,
+                                /*dotdotdotToken*/ undefined, "x",
                                 /*questionToken*/ undefined, ts.visitNode(node.typeArguments[0], visitExistingNodeTreeSymbols))], ts.visitNode(node.typeArguments[1], visitExistingNodeTreeSymbols))]);
                     }
                     if (ts.isJSDocFunctionType(node)) {
                         if (ts.isJSDocConstructSignature(node)) {
                             var newTypeNode_1;
                             return ts.factory.createConstructorTypeNode(node.modifiers, ts.visitNodes(node.typeParameters, visitExistingNodeTreeSymbols), ts.mapDefined(node.parameters, function (p, i) { return p.name && ts.isIdentifier(p.name) && p.name.escapedText === "new" ? (newTypeNode_1 = p.type, undefined) : ts.factory.createParameterDeclaration(
-                            /*decorators*/ undefined, 
-                            /*modifiers*/ undefined, getEffectiveDotDotDotForParameter(p), getNameForJSDocFunctionParameter(p, i), p.questionToken, ts.visitNode(p.type, visitExistingNodeTreeSymbols), 
+                            /*decorators*/ undefined,
+                            /*modifiers*/ undefined, getEffectiveDotDotDotForParameter(p), getNameForJSDocFunctionParameter(p, i), p.questionToken, ts.visitNode(p.type, visitExistingNodeTreeSymbols),
                             /*initializer*/ undefined); }), ts.visitNode(newTypeNode_1 || node.type, visitExistingNodeTreeSymbols) || ts.factory.createKeywordTypeNode(128 /* AnyKeyword */));
                         }
                         else {
                             return ts.factory.createFunctionTypeNode(ts.visitNodes(node.typeParameters, visitExistingNodeTreeSymbols), ts.map(node.parameters, function (p, i) { return ts.factory.createParameterDeclaration(
-                            /*decorators*/ undefined, 
-                            /*modifiers*/ undefined, getEffectiveDotDotDotForParameter(p), getNameForJSDocFunctionParameter(p, i), p.questionToken, ts.visitNode(p.type, visitExistingNodeTreeSymbols), 
+                            /*decorators*/ undefined,
+                            /*modifiers*/ undefined, getEffectiveDotDotDotForParameter(p), getNameForJSDocFunctionParameter(p, i), p.questionToken, ts.visitNode(p.type, visitExistingNodeTreeSymbols),
                             /*initializer*/ undefined); }), ts.visitNode(node.type, visitExistingNodeTreeSymbols) || ts.factory.createKeywordTypeNode(128 /* AnyKeyword */));
                         }
                     }
@@ -49398,9 +49398,9 @@ var ts;
                         var body = ns.body;
                         if (ts.length(excessExports)) {
                             ns = ts.factory.updateModuleDeclaration(ns, ns.decorators, ns.modifiers, ns.name, body = ts.factory.updateModuleBlock(body, ts.factory.createNodeArray(__spreadArray(__spreadArray([], ns.body.statements), [ts.factory.createExportDeclaration(
-                                /*decorators*/ undefined, 
-                                /*modifiers*/ undefined, 
-                                /*isTypeOnly*/ false, ts.factory.createNamedExports(ts.map(ts.flatMap(excessExports, function (e) { return getNamesOfDeclaration(e); }), function (id) { return ts.factory.createExportSpecifier(/*alias*/ undefined, id); })), 
+                                /*decorators*/ undefined,
+                                /*modifiers*/ undefined,
+                                /*isTypeOnly*/ false, ts.factory.createNamedExports(ts.map(ts.flatMap(excessExports, function (e) { return getNamesOfDeclaration(e); }), function (id) { return ts.factory.createExportSpecifier(/*alias*/ undefined, id); })),
                                 /*moduleSpecifier*/ undefined)]))));
                             statements = __spreadArray(__spreadArray(__spreadArray([], statements.slice(0, nsIndex)), [ns]), statements.slice(nsIndex + 1));
                         }
@@ -49424,9 +49424,9 @@ var ts;
                     if (ts.length(exports) > 1) {
                         var nonExports = ts.filter(statements, function (d) { return !ts.isExportDeclaration(d) || !!d.moduleSpecifier || !d.exportClause; });
                         statements = __spreadArray(__spreadArray([], nonExports), [ts.factory.createExportDeclaration(
-                            /*decorators*/ undefined, 
-                            /*modifiers*/ undefined, 
-                            /*isTypeOnly*/ false, ts.factory.createNamedExports(ts.flatMap(exports, function (e) { return ts.cast(e.exportClause, ts.isNamedExports).elements; })), 
+                            /*decorators*/ undefined,
+                            /*modifiers*/ undefined,
+                            /*isTypeOnly*/ false, ts.factory.createNamedExports(ts.flatMap(exports, function (e) { return ts.cast(e.exportClause, ts.isNamedExports).elements; })),
                             /*moduleSpecifier*/ undefined)]);
                     }
                     // Pass 2b: Also combine all `export {} from "..."` declarations as needed
@@ -49439,8 +49439,8 @@ var ts;
                                     // remove group members from statements and then merge group members and add back to statements
                                     statements = __spreadArray(__spreadArray([], ts.filter(statements, function (s) { return group_1.indexOf(s) === -1; })), [
                                         ts.factory.createExportDeclaration(
-                                        /*decorators*/ undefined, 
-                                        /*modifiers*/ undefined, 
+                                        /*decorators*/ undefined,
+                                        /*modifiers*/ undefined,
                                         /*isTypeOnly*/ false, ts.factory.createNamedExports(ts.flatMap(group_1, function (e) { return ts.cast(e.exportClause, ts.isNamedExports).elements; })), group_1[0].moduleSpecifier)
                                     ]);
                                 }
@@ -49622,8 +49622,8 @@ var ts;
                                     && type.symbol && ts.isSourceFile(type.symbol.valueDeclaration)) {
                                     var alias = localName === propertyAccessRequire.parent.right.escapedText ? undefined : propertyAccessRequire.parent.right;
                                     addResult(ts.factory.createExportDeclaration(
-                                    /*decorators*/ undefined, 
-                                    /*modifiers*/ undefined, 
+                                    /*decorators*/ undefined,
+                                    /*modifiers*/ undefined,
                                     /*isTypeOnly*/ false, ts.factory.createNamedExports([ts.factory.createExportSpecifier(alias, localName)])), 0 /* None */);
                                     context.tracker.trackSymbol(type.symbol, context.enclosingDeclaration, 111551 /* Value */);
                                 }
@@ -49655,8 +49655,8 @@ var ts;
                                         // ```
                                         // To create an export named `g` that does _not_ shadow the local `g`
                                         addResult(ts.factory.createExportDeclaration(
-                                        /*decorators*/ undefined, 
-                                        /*modifiers*/ undefined, 
+                                        /*decorators*/ undefined,
+                                        /*modifiers*/ undefined,
                                         /*isTypeOnly*/ false, ts.factory.createNamedExports([ts.factory.createExportSpecifier(name, localName)])), 0 /* None */);
                                         needsExportDeclaration = false;
                                         needsPostExportDefault = false;
@@ -49708,8 +49708,8 @@ var ts;
                     }
                     else if (needsExportDeclaration) {
                         addResult(ts.factory.createExportDeclaration(
-                        /*decorators*/ undefined, 
-                        /*modifiers*/ undefined, 
+                        /*decorators*/ undefined,
+                        /*modifiers*/ undefined,
                         /*isTypeOnly*/ false, ts.factory.createNamedExports([ts.factory.createExportSpecifier(getInternalSymbolName(symbol, symbolName), symbolName)])), 0 /* None */);
                     }
                 }
@@ -49791,7 +49791,7 @@ var ts;
                     var indexSignatures = serializeIndexSignatures(interfaceType, baseType);
                     var heritageClauses = !ts.length(baseTypes) ? undefined : [ts.factory.createHeritageClause(93 /* ExtendsKeyword */, ts.mapDefined(baseTypes, function (b) { return trySerializeAsTypeReference(b, 111551 /* Value */); }))];
                     addResult(ts.factory.createInterfaceDeclaration(
-                    /*decorators*/ undefined, 
+                    /*decorators*/ undefined,
                     /*modifiers*/ undefined, getInternalSymbolName(symbol, symbolName), typeParamDecls, heritageClauses, __spreadArray(__spreadArray(__spreadArray(__spreadArray([], indexSignatures), constructSignatures), callSignatures), members)), modifierFlags);
                 }
                 function getNamespaceMembersForSerialization(symbol) {
@@ -49817,8 +49817,8 @@ var ts;
                         var containingFile_1 = ts.getSourceFileOfNode(context.enclosingDeclaration);
                         var localName = getInternalSymbolName(symbol, symbolName);
                         var nsBody = ts.factory.createModuleBlock([ts.factory.createExportDeclaration(
-                            /*decorators*/ undefined, 
-                            /*modifiers*/ undefined, 
+                            /*decorators*/ undefined,
+                            /*modifiers*/ undefined,
                             /*isTypeOnly*/ false, ts.factory.createNamedExports(ts.mapDefined(ts.filter(mergedMembers, function (n) { return n.escapedName !== "export=" /* ExportEquals */; }), function (s) {
                                 var _a, _b;
                                 var name = ts.unescapeLeadingUnderscores(s.escapedName);
@@ -49834,7 +49834,7 @@ var ts;
                                 return ts.factory.createExportSpecifier(name === targetName ? undefined : targetName, name);
                             })))]);
                         addResult(ts.factory.createModuleDeclaration(
-                        /*decorators*/ undefined, 
+                        /*decorators*/ undefined,
                         /*modifiers*/ undefined, ts.factory.createIdentifier(localName), nsBody, 16 /* Namespace */), 0 /* None */);
                     }
                 }
@@ -49909,8 +49909,8 @@ var ts;
                         results = oldResults;
                         // replace namespace with synthetic version
                         var defaultReplaced = ts.map(declarations, function (d) { return ts.isExportAssignment(d) && !d.isExportEquals && ts.isIdentifier(d.expression) ? ts.factory.createExportDeclaration(
-                        /*decorators*/ undefined, 
-                        /*modifiers*/ undefined, 
+                        /*decorators*/ undefined,
+                        /*modifiers*/ undefined,
                         /*isTypeOnly*/ false, ts.factory.createNamedExports([ts.factory.createExportSpecifier(d.expression, ts.factory.createIdentifier("default" /* Default */))])) : d; });
                         var exportModifierStripped = ts.every(defaultReplaced, function (d) { return ts.hasSyntacticModifier(d, 1 /* Export */); }) ? ts.map(defaultReplaced, removeExportModifier) : defaultReplaced;
                         fakespace = ts.factory.updateModuleDeclaration(fakespace, fakespace.decorators, fakespace.modifiers, fakespace.name, ts.factory.createModuleBlock(exportModifierStripped));
@@ -49987,10 +49987,10 @@ var ts;
                     // Boil down all private properties into a single one.
                     var privateProperties = hasPrivateIdentifier ?
                         [ts.factory.createPropertyDeclaration(
-                            /*decorators*/ undefined, 
-                            /*modifiers*/ undefined, ts.factory.createPrivateIdentifier("#private"), 
-                            /*questionOrExclamationToken*/ undefined, 
-                            /*type*/ undefined, 
+                            /*decorators*/ undefined,
+                            /*modifiers*/ undefined, ts.factory.createPrivateIdentifier("#private"),
+                            /*questionOrExclamationToken*/ undefined,
+                            /*type*/ undefined,
                             /*initializer*/ undefined)] :
                         ts.emptyArray;
                     var publicProperties = ts.flatMap(publicSymbolProps, function (p) { return serializePropertySymbolForClass(p, /*isStatic*/ false, baseTypes[0]); });
@@ -50009,7 +50009,7 @@ var ts;
                     var indexSignatures = serializeIndexSignatures(classType, baseTypes[0]);
                     context.enclosingDeclaration = oldEnclosing;
                     addResult(ts.setTextRange(ts.factory.createClassDeclaration(
-                    /*decorators*/ undefined, 
+                    /*decorators*/ undefined,
                     /*modifiers*/ undefined, localName, typeParamDecls, heritageClauses, __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], indexSignatures), staticMembers), constructors), publicProperties), privateProperties)), symbol.declarations && ts.filter(symbol.declarations, function (d) { return ts.isClassDeclaration(d) || ts.isClassExpression(d); })[0]), modifierFlags);
                 }
                 function serializeAsAlias(symbol, localName, modifierFlags) {
@@ -50038,7 +50038,7 @@ var ts;
                                 var specifier_1 = getSpecifierForModuleSymbol(target.parent || target, context); // './lib'
                                 var propertyName = node.propertyName;
                                 addResult(ts.factory.createImportDeclaration(
-                                /*decorators*/ undefined, 
+                                /*decorators*/ undefined,
                                 /*modifiers*/ undefined, ts.factory.createImportClause(/*isTypeOnly*/ false, /*name*/ undefined, ts.factory.createNamedImports([ts.factory.createImportSpecifier(propertyName && ts.isIdentifier(propertyName) ? ts.factory.createIdentifier(ts.idText(propertyName)) : undefined, ts.factory.createIdentifier(localName))])), ts.factory.createStringLiteral(specifier_1)), 0 /* None */);
                                 break;
                             }
@@ -50060,13 +50060,13 @@ var ts;
                                 var specifier_2 = getSpecifierForModuleSymbol(target.parent || target, context); // 'y'
                                 // import _x = require('y');
                                 addResult(ts.factory.createImportEqualsDeclaration(
-                                /*decorators*/ undefined, 
-                                /*modifiers*/ undefined, 
+                                /*decorators*/ undefined,
+                                /*modifiers*/ undefined,
                                 /*isTypeOnly*/ false, uniqueName, ts.factory.createExternalModuleReference(ts.factory.createStringLiteral(specifier_2))), 0 /* None */);
                                 // import x = _x.z
                                 addResult(ts.factory.createImportEqualsDeclaration(
-                                /*decorators*/ undefined, 
-                                /*modifiers*/ undefined, 
+                                /*decorators*/ undefined,
+                                /*modifiers*/ undefined,
                                 /*isTypeOnly*/ false, ts.factory.createIdentifier(localName), ts.factory.createQualifiedName(uniqueName, initializer.name)), modifierFlags);
                                 break;
                             }
@@ -50082,8 +50082,8 @@ var ts;
                             // an external `import localName = require("whatever")`
                             var isLocalImport = !(target.flags & 512 /* ValueModule */) && !ts.isVariableDeclaration(node);
                             addResult(ts.factory.createImportEqualsDeclaration(
-                            /*decorators*/ undefined, 
-                            /*modifiers*/ undefined, 
+                            /*decorators*/ undefined,
+                            /*modifiers*/ undefined,
                             /*isTypeOnly*/ false, ts.factory.createIdentifier(localName), isLocalImport
                                 ? symbolToName(target, context, 67108863 /* All */, /*expectsIdentifier*/ false)
                                 : ts.factory.createExternalModuleReference(ts.factory.createStringLiteral(getSpecifierForModuleSymbol(target, context)))), isLocalImport ? modifierFlags : 0 /* None */);
@@ -50096,8 +50096,8 @@ var ts;
                             break;
                         case 262 /* ImportClause */:
                             addResult(ts.factory.createImportDeclaration(
-                            /*decorators*/ undefined, 
-                            /*modifiers*/ undefined, ts.factory.createImportClause(/*isTypeOnly*/ false, ts.factory.createIdentifier(localName), /*namedBindings*/ undefined), 
+                            /*decorators*/ undefined,
+                            /*modifiers*/ undefined, ts.factory.createImportClause(/*isTypeOnly*/ false, ts.factory.createIdentifier(localName), /*namedBindings*/ undefined),
                             // We use `target.parent || target` below as `target.parent` is unset when the target is a module which has been export assigned
                             // And then made into a default by the `esModuleInterop` or `allowSyntheticDefaultImports` flag
                             // In such cases, the `target` refers to the module itself already
@@ -50105,20 +50105,20 @@ var ts;
                             break;
                         case 263 /* NamespaceImport */:
                             addResult(ts.factory.createImportDeclaration(
-                            /*decorators*/ undefined, 
+                            /*decorators*/ undefined,
                             /*modifiers*/ undefined, ts.factory.createImportClause(/*isTypeOnly*/ false, /*importClause*/ undefined, ts.factory.createNamespaceImport(ts.factory.createIdentifier(localName))), ts.factory.createStringLiteral(getSpecifierForModuleSymbol(target, context))), 0 /* None */);
                             break;
                         case 269 /* NamespaceExport */:
                             addResult(ts.factory.createExportDeclaration(
-                            /*decorators*/ undefined, 
-                            /*modifiers*/ undefined, 
+                            /*decorators*/ undefined,
+                            /*modifiers*/ undefined,
                             /*isTypeOnly*/ false, ts.factory.createNamespaceExport(ts.factory.createIdentifier(localName)), ts.factory.createStringLiteral(getSpecifierForModuleSymbol(target, context))), 0 /* None */);
                             break;
                         case 265 /* ImportSpecifier */:
                             addResult(ts.factory.createImportDeclaration(
-                            /*decorators*/ undefined, 
+                            /*decorators*/ undefined,
                             /*modifiers*/ undefined, ts.factory.createImportClause(
-                            /*isTypeOnly*/ false, 
+                            /*isTypeOnly*/ false,
                             /*importClause*/ undefined, ts.factory.createNamedImports([
                                 ts.factory.createImportSpecifier(localName !== verbatimTargetName ? ts.factory.createIdentifier(verbatimTargetName) : undefined, ts.factory.createIdentifier(localName))
                             ])), ts.factory.createStringLiteral(getSpecifierForModuleSymbol(target.parent || target, context))), 0 /* None */);
@@ -50153,8 +50153,8 @@ var ts;
                 }
                 function serializeExportSpecifier(localName, targetName, specifier) {
                     addResult(ts.factory.createExportDeclaration(
-                    /*decorators*/ undefined, 
-                    /*modifiers*/ undefined, 
+                    /*decorators*/ undefined,
+                    /*modifiers*/ undefined,
                     /*isTypeOnly*/ false, ts.factory.createNamedExports([ts.factory.createExportSpecifier(localName !== targetName ? targetName : undefined, localName)]), specifier), 0 /* None */);
                 }
                 /**
@@ -50194,7 +50194,7 @@ var ts;
                         context.tracker.trackSymbol = ts.noop;
                         if (isExportAssignmentCompatibleSymbolName) {
                             results.push(ts.factory.createExportAssignment(
-                            /*decorators*/ undefined, 
+                            /*decorators*/ undefined,
                             /*modifiers*/ undefined, isExportEquals, symbolToExpression(target, context, 67108863 /* All */)));
                         }
                         else {
@@ -50209,8 +50209,8 @@ var ts;
                                 // serialize as `import _Ref = t.arg.et; export { _Ref as name }`
                                 var varName = getUnusedName(name, symbol);
                                 addResult(ts.factory.createImportEqualsDeclaration(
-                                /*decorators*/ undefined, 
-                                /*modifiers*/ undefined, 
+                                /*decorators*/ undefined,
+                                /*modifiers*/ undefined,
                                 /*isTypeOnly*/ false, ts.factory.createIdentifier(varName), symbolToName(target, context, 67108863 /* All */, /*expectsIdentifier*/ false)), 0 /* None */);
                                 serializeExportSpecifier(name, varName);
                             }
@@ -50240,7 +50240,7 @@ var ts;
                         }
                         if (isExportAssignmentCompatibleSymbolName) {
                             results.push(ts.factory.createExportAssignment(
-                            /*decorators*/ undefined, 
+                            /*decorators*/ undefined,
                             /*modifiers*/ undefined, isExportEquals, ts.factory.createIdentifier(varName)));
                             return true;
                         }
@@ -50292,16 +50292,16 @@ var ts;
                             if (p.flags & 65536 /* SetAccessor */) {
                                 result.push(ts.setTextRange(ts.factory.createSetAccessorDeclaration(
                                 /*decorators*/ undefined, ts.factory.createModifiersFromModifierFlags(flag), name, [ts.factory.createParameterDeclaration(
-                                    /*decorators*/ undefined, 
-                                    /*modifiers*/ undefined, 
-                                    /*dotDotDotToken*/ undefined, "arg", 
-                                    /*questionToken*/ undefined, isPrivate ? undefined : serializeTypeForDeclaration(context, getTypeOfSymbol(p), p, enclosingDeclaration, includePrivateSymbol, bundled))], 
+                                    /*decorators*/ undefined,
+                                    /*modifiers*/ undefined,
+                                    /*dotDotDotToken*/ undefined, "arg",
+                                    /*questionToken*/ undefined, isPrivate ? undefined : serializeTypeForDeclaration(context, getTypeOfSymbol(p), p, enclosingDeclaration, includePrivateSymbol, bundled))],
                                 /*body*/ undefined), ts.find(p.declarations, ts.isSetAccessor) || firstPropertyLikeDecl));
                             }
                             if (p.flags & 32768 /* GetAccessor */) {
                                 var isPrivate_1 = modifierFlags & 8 /* Private */;
                                 result.push(ts.setTextRange(ts.factory.createGetAccessorDeclaration(
-                                /*decorators*/ undefined, ts.factory.createModifiersFromModifierFlags(flag), name, [], isPrivate_1 ? undefined : serializeTypeForDeclaration(context, getTypeOfSymbol(p), p, enclosingDeclaration, includePrivateSymbol, bundled), 
+                                /*decorators*/ undefined, ts.factory.createModifiersFromModifierFlags(flag), name, [], isPrivate_1 ? undefined : serializeTypeForDeclaration(context, getTypeOfSymbol(p), p, enclosingDeclaration, includePrivateSymbol, bundled),
                                 /*body*/ undefined), ts.find(p.declarations, ts.isGetAccessor) || firstPropertyLikeDecl));
                             }
                             return result;
@@ -50310,7 +50310,7 @@ var ts;
                         // If this happens, we assume the accessor takes priority, as it imposes more constraints
                         else if (p.flags & (4 /* Property */ | 3 /* Variable */ | 98304 /* Accessor */)) {
                             return ts.setTextRange(createProperty(
-                            /*decorators*/ undefined, ts.factory.createModifiersFromModifierFlags((isReadonlySymbol(p) ? 64 /* Readonly */ : 0) | flag), name, p.flags & 16777216 /* Optional */ ? ts.factory.createToken(57 /* QuestionToken */) : undefined, isPrivate ? undefined : serializeTypeForDeclaration(context, getTypeOfSymbol(p), p, enclosingDeclaration, includePrivateSymbol, bundled), 
+                            /*decorators*/ undefined, ts.factory.createModifiersFromModifierFlags((isReadonlySymbol(p) ? 64 /* Readonly */ : 0) | flag), name, p.flags & 16777216 /* Optional */ ? ts.factory.createToken(57 /* QuestionToken */) : undefined, isPrivate ? undefined : serializeTypeForDeclaration(context, getTypeOfSymbol(p), p, enclosingDeclaration, includePrivateSymbol, bundled),
                             // TODO: https://github.com/microsoft/TypeScript/pull/32372#discussion_r328386357
                             // interface members can't have initializers, however class members _can_
                             /*initializer*/ undefined), ts.find(p.declarations, ts.or(ts.isPropertyDeclaration, ts.isVariableDeclaration)) || firstPropertyLikeDecl);
@@ -50320,8 +50320,8 @@ var ts;
                             var signatures = getSignaturesOfType(type, 0 /* Call */);
                             if (flag & 8 /* Private */) {
                                 return ts.setTextRange(createProperty(
-                                /*decorators*/ undefined, ts.factory.createModifiersFromModifierFlags((isReadonlySymbol(p) ? 64 /* Readonly */ : 0) | flag), name, p.flags & 16777216 /* Optional */ ? ts.factory.createToken(57 /* QuestionToken */) : undefined, 
-                                /*type*/ undefined, 
+                                /*decorators*/ undefined, ts.factory.createModifiersFromModifierFlags((isReadonlySymbol(p) ? 64 /* Readonly */ : 0) | flag), name, p.flags & 16777216 /* Optional */ ? ts.factory.createToken(57 /* QuestionToken */) : undefined,
+                                /*type*/ undefined,
                                 /*initializer*/ undefined), ts.find(p.declarations, ts.isFunctionLikeDeclaration) || signatures[0] && signatures[0].declaration || p.declarations[0]);
                             }
                             var results_1 = [];
@@ -50378,8 +50378,8 @@ var ts;
                         }
                         if (privateProtected) {
                             return [ts.setTextRange(ts.factory.createConstructorDeclaration(
-                                /*decorators*/ undefined, ts.factory.createModifiersFromModifierFlags(privateProtected), 
-                                /*parameters*/ [], 
+                                /*decorators*/ undefined, ts.factory.createModifiersFromModifierFlags(privateProtected),
+                                /*parameters*/ [],
                                 /*body*/ undefined), signatures[0].declaration)];
                         }
                     }
@@ -52976,7 +52976,7 @@ var ts;
             return sig;
         }
         function cloneSignature(sig) {
-            var result = createSignature(sig.declaration, sig.typeParameters, sig.thisParameter, sig.parameters, /*resolvedReturnType*/ undefined, 
+            var result = createSignature(sig.declaration, sig.typeParameters, sig.thisParameter, sig.parameters, /*resolvedReturnType*/ undefined,
             /*resolvedTypePredicate*/ undefined, sig.minArgumentCount, sig.flags & 39 /* PropagatingFlags */);
             result.target = sig.target;
             result.mapper = sig.mapper;
@@ -53242,8 +53242,8 @@ var ts;
             var params = combineUnionParameters(left, right, paramMapper);
             var thisParam = combineUnionThisParam(left.thisParameter, right.thisParameter, paramMapper);
             var minArgCount = Math.max(left.minArgumentCount, right.minArgumentCount);
-            var result = createSignature(declaration, typeParams, thisParam, params, 
-            /*resolvedReturnType*/ undefined, 
+            var result = createSignature(declaration, typeParams, thisParam, params,
+            /*resolvedReturnType*/ undefined,
             /*resolvedTypePredicate*/ undefined, minArgCount, (left.flags | right.flags) & 39 /* PropagatingFlags */);
             result.unionSignatures = ts.concatenate(left.unionSignatures || [left], [right]);
             if (paramMapper) {
@@ -54544,7 +54544,7 @@ var ts;
                     ts.isConstructorDeclaration(declaration) && ts.hasSyntacticModifier(declaration.parent, 128 /* Abstract */)) {
                     flags |= 4 /* Abstract */;
                 }
-                links.resolvedSignature = createSignature(declaration, typeParameters, thisParameter, parameters, 
+                links.resolvedSignature = createSignature(declaration, typeParameters, thisParameter, parameters,
                 /*resolvedReturnType*/ undefined, /*resolvedTypePredicate*/ undefined, minArgumentCount, flags);
             }
             return links.resolvedSignature;
@@ -55769,7 +55769,7 @@ var ts;
             var target = type.target;
             var endIndex = getTypeReferenceArity(type) - endSkipCount;
             return index > target.fixedLength ? getRestArrayTypeOfTupleType(type) || createTupleType(ts.emptyArray) :
-                createTupleType(getTypeArguments(type).slice(index, endIndex), target.elementFlags.slice(index, endIndex), 
+                createTupleType(getTypeArguments(type).slice(index, endIndex), target.elementFlags.slice(index, endIndex),
                 /*readonly*/ false, target.labeledElementDeclarations && target.labeledElementDeclarations.slice(index, endIndex));
         }
         function getKnownKeysOfTupleType(type) {
@@ -56436,7 +56436,7 @@ var ts;
         }
         function getLiteralTypeFromProperties(type, include, includeOrigin) {
             var origin = includeOrigin && (ts.getObjectFlags(type) & (3 /* ClassOrInterface */ | 4 /* Reference */) || type.aliasSymbol) ? createOriginIndexType(type) : undefined;
-            return getUnionType(ts.map(getPropertiesOfType(type), function (p) { return getLiteralTypeFromProperty(p, include); }), 1 /* Literal */, 
+            return getUnionType(ts.map(getPropertiesOfType(type), function (p) { return getLiteralTypeFromProperty(p, include); }), 1 /* Literal */,
             /*aliasSymbol*/ undefined, /*aliasTypeArguments*/ undefined, origin);
         }
         function getNonEnumNumberIndexInfo(type) {
@@ -57835,8 +57835,8 @@ var ts;
             // Don't compute resolvedReturnType and resolvedTypePredicate now,
             // because using `mapper` now could trigger inferences to become fixed. (See `createInferenceContext`.)
             // See GH#17600.
-            var result = createSignature(signature.declaration, freshTypeParameters, signature.thisParameter && instantiateSymbol(signature.thisParameter, mapper), instantiateList(signature.parameters, mapper, instantiateSymbol), 
-            /*resolvedReturnType*/ undefined, 
+            var result = createSignature(signature.declaration, freshTypeParameters, signature.thisParameter && instantiateSymbol(signature.thisParameter, mapper), instantiateList(signature.parameters, mapper, instantiateSymbol),
+            /*resolvedReturnType*/ undefined,
             /*resolvedTypePredicate*/ undefined, signature.minArgumentCount, signature.flags & 39 /* PropagatingFlags */);
             result.target = signature;
             result.mapper = mapper;
@@ -58776,7 +58776,7 @@ var ts;
             return checkTypeRelatedTo(source, target, comparableRelation, errorNode, headMessage, containingMessageChain);
         }
         function isSignatureAssignableTo(source, target, ignoreReturnTypes) {
-            return compareSignaturesRelated(source, target, ignoreReturnTypes ? 4 /* IgnoreReturnTypes */ : 0, /*reportErrors*/ false, 
+            return compareSignaturesRelated(source, target, ignoreReturnTypes ? 4 /* IgnoreReturnTypes */ : 0, /*reportErrors*/ false,
             /*errorReporter*/ undefined, /*errorReporter*/ undefined, compareTypesAssignable, /*reportUnreliableMarkers*/ undefined) !== 0 /* False */;
         }
         /**
@@ -63288,7 +63288,7 @@ var ts;
             var links = getNodeLinks(node);
             if (!links.resolvedSymbol) {
                 links.resolvedSymbol = !ts.nodeIsMissing(node) &&
-                    resolveName(node, node.escapedText, 111551 /* Value */ | 1048576 /* ExportValue */, getCannotFindNameDiagnosticForName(node), node, !ts.isWriteOnlyAccess(node), 
+                    resolveName(node, node.escapedText, 111551 /* Value */ | 1048576 /* ExportValue */, getCannotFindNameDiagnosticForName(node), node, !ts.isWriteOnlyAccess(node),
                     /*excludeGlobals*/ false, ts.Diagnostics.Cannot_find_name_0_Did_you_mean_1) || unknownSymbol;
             }
             return links.resolvedSymbol;
@@ -66361,7 +66361,7 @@ var ts;
         // type of T.
         function getContextualTypeForElementExpression(arrayContextualType, index) {
             return arrayContextualType && (getTypeOfPropertyOfContextualType(arrayContextualType, "" + index)
-                || mapType(arrayContextualType, function (t) { return getIteratedTypeOrElementType(1 /* Element */, t, undefinedType, /*errorNode*/ undefined, /*checkAssignability*/ false); }, 
+                || mapType(arrayContextualType, function (t) { return getIteratedTypeOrElementType(1 /* Element */, t, undefinedType, /*errorNode*/ undefined, /*checkAssignability*/ false); },
                 /*noReductions*/ true));
         }
         // In a contextually typed conditional expression, the true/false expressions are contextually typed by the same type.
@@ -68892,7 +68892,7 @@ var ts;
             // can be specified by users through attributes property.
             var paramType = getEffectiveFirstArgumentForJsxSignature(signature, node);
             var attributesType = checkExpressionWithContextualType(node.attributes, paramType, /*inferenceContext*/ undefined, checkMode);
-            return checkTagNameDoesNotExpectTooManyArguments() && checkTypeRelatedToAndOptionallyElaborate(attributesType, paramType, relation, reportErrors ? node.tagName : undefined, node.attributes, 
+            return checkTagNameDoesNotExpectTooManyArguments() && checkTypeRelatedToAndOptionallyElaborate(attributesType, paramType, relation, reportErrors ? node.tagName : undefined, node.attributes,
             /*headMessage*/ undefined, containingMessageChain, errorOutputContainer);
             function checkTagNameDoesNotExpectTooManyArguments() {
                 var _a;
@@ -69621,10 +69621,10 @@ var ts;
             if (candidates.some(signatureHasLiteralTypes)) {
                 flags |= 2 /* HasLiteralTypes */;
             }
-            return createSignature(candidates[0].declaration, 
+            return createSignature(candidates[0].declaration,
             /*typeParameters*/ undefined, // Before calling this we tested for `!candidates.some(c => !!c.typeParameters)`.
-            thisParameter, parameters, 
-            /*resolvedReturnType*/ getIntersectionType(candidates.map(getReturnTypeOfSignature)), 
+            thisParameter, parameters,
+            /*resolvedReturnType*/ getIntersectionType(candidates.map(getReturnTypeOfSignature)),
             /*typePredicate*/ undefined, minArgumentCount, flags);
         }
         function getNumNonRestParameters(signature) {
@@ -70118,9 +70118,9 @@ var ts;
             var declaration = ts.factory.createFunctionTypeNode(/*typeParameters*/ undefined, [ts.factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotdotdot*/ undefined, "props", /*questionMark*/ undefined, nodeBuilder.typeToTypeNode(result, node))], returnNode ? ts.factory.createTypeReferenceNode(returnNode, /*typeArguments*/ undefined) : ts.factory.createKeywordTypeNode(128 /* AnyKeyword */));
             var parameterSymbol = createSymbol(1 /* FunctionScopedVariable */, "props");
             parameterSymbol.type = result;
-            return createSignature(declaration, 
-            /*typeParameters*/ undefined, 
-            /*thisParameter*/ undefined, [parameterSymbol], typeSymbol ? getDeclaredTypeOfSymbol(typeSymbol) : errorType, 
+            return createSignature(declaration,
+            /*typeParameters*/ undefined,
+            /*thisParameter*/ undefined, [parameterSymbol], typeSymbol ? getDeclaredTypeOfSymbol(typeSymbol) : errorType,
             /*returnTypePredicate*/ undefined, 1, 0 /* None */);
         }
         function resolveJsxOpeningLikeElement(node, candidatesOutArray, checkMode) {
@@ -73068,7 +73068,7 @@ var ts;
                     else {
                         if (typePredicate.type) {
                             var leadingError = function () { return ts.chainDiagnosticMessages(/*details*/ undefined, ts.Diagnostics.A_type_predicate_s_type_must_be_assignable_to_its_parameter_s_type); };
-                            checkTypeAssignableTo(typePredicate.type, getTypeOfSymbol(signature.parameters[typePredicate.parameterIndex]), node.type, 
+                            checkTypeAssignableTo(typePredicate.type, getTypeOfSymbol(signature.parameters[typePredicate.parameterIndex]), node.type,
                             /*headMessage*/ undefined, leadingError);
                         }
                     }
@@ -74674,7 +74674,7 @@ var ts;
                 // Since the javascript won't do semantic analysis like typescript,
                 // if the javascript file comes before the typescript file and both contain same name functions,
                 // checkFunctionOrConstructorSymbol wouldn't be called if we didnt ignore javascript function.
-                var firstDeclaration = ts.find(localSymbol.declarations, 
+                var firstDeclaration = ts.find(localSymbol.declarations,
                 // Get first non javascript function declaration
                 function (declaration) { return declaration.kind === node.kind && !(declaration.flags & 131072 /* JavaScriptFile */); });
                 // Only type check the symbol once
@@ -77775,7 +77775,7 @@ var ts;
             if (!node.parent.parent.moduleSpecifier) {
                 var exportedName = node.propertyName || node.name;
                 // find immediate value referenced by exported name (SymbolFlags.Alias is set so we don't chase down aliases)
-                var symbol = resolveName(exportedName, exportedName.escapedText, 111551 /* Value */ | 788968 /* Type */ | 1920 /* Namespace */ | 2097152 /* Alias */, 
+                var symbol = resolveName(exportedName, exportedName.escapedText, 111551 /* Value */ | 788968 /* Type */ | 1920 /* Namespace */ | 2097152 /* Alias */,
                 /*nameNotFoundMessage*/ undefined, /*nameArg*/ undefined, /*isUse*/ true);
                 if (symbol && (symbol === undefinedSymbol || symbol === globalThisSymbol || isGlobalSourceFile(getDeclarationContainer(symbol.declarations[0])))) {
                     error(exportedName, ts.Diagnostics.Cannot_export_0_Only_local_declarations_can_be_exported_from_a_module, ts.idText(exportedName));
@@ -78548,7 +78548,7 @@ var ts;
             }
             if (name.parent.kind === 266 /* ExportAssignment */ && ts.isEntityNameExpression(name)) {
                 // Even an entity name expression that doesn't resolve as an entityname may still typecheck as a property access expression
-                var success = resolveEntityName(name, 
+                var success = resolveEntityName(name,
                 /*all meanings*/ 111551 /* Value */ | 788968 /* Type */ | 1920 /* Namespace */ | 2097152 /* Alias */, /*ignoreErrors*/ true);
                 if (success && success !== unknownSymbol) {
                     return success;
@@ -81527,14 +81527,14 @@ var ts;
         var factory = context.factory;
         context.addInitializationStatement(factory.createVariableStatement(
         /*modifiers*/ undefined, factory.createVariableDeclarationList([
-            factory.createVariableDeclaration(parameter.name, 
+            factory.createVariableDeclaration(parameter.name,
             /*exclamationToken*/ undefined, parameter.type, parameter.initializer ?
-                factory.createConditionalExpression(factory.createStrictEquality(factory.getGeneratedNameForNode(parameter), factory.createVoidZero()), 
-                /*questionToken*/ undefined, parameter.initializer, 
+                factory.createConditionalExpression(factory.createStrictEquality(factory.getGeneratedNameForNode(parameter), factory.createVoidZero()),
+                /*questionToken*/ undefined, parameter.initializer,
                 /*colonToken*/ undefined, factory.getGeneratedNameForNode(parameter)) :
                 factory.getGeneratedNameForNode(parameter)),
         ])));
-        return factory.updateParameterDeclaration(parameter, parameter.decorators, parameter.modifiers, parameter.dotDotDotToken, factory.getGeneratedNameForNode(parameter), parameter.questionToken, parameter.type, 
+        return factory.updateParameterDeclaration(parameter, parameter.decorators, parameter.modifiers, parameter.dotDotDotToken, factory.getGeneratedNameForNode(parameter), parameter.questionToken, parameter.type,
         /*initializer*/ undefined);
     }
     function addDefaultValueAssignmentForInitializer(parameter, name, initializer, context) {
@@ -81542,7 +81542,7 @@ var ts;
         context.addInitializationStatement(factory.createIfStatement(factory.createTypeCheck(factory.cloneNode(name), "undefined"), ts.setEmitFlags(ts.setTextRange(factory.createBlock([
             factory.createExpressionStatement(ts.setEmitFlags(ts.setTextRange(factory.createAssignment(ts.setEmitFlags(factory.cloneNode(name), 48 /* NoSourceMap */), ts.setEmitFlags(initializer, 48 /* NoSourceMap */ | ts.getEmitFlags(initializer) | 1536 /* NoComments */)), parameter), 1536 /* NoComments */))
         ]), parameter), 1 /* SingleLine */ | 32 /* NoTrailingSourceMap */ | 384 /* NoTokenSourceMaps */ | 1536 /* NoComments */)));
-        return factory.updateParameterDeclaration(parameter, parameter.decorators, parameter.modifiers, parameter.dotDotDotToken, parameter.name, parameter.questionToken, parameter.type, 
+        return factory.updateParameterDeclaration(parameter, parameter.decorators, parameter.modifiers, parameter.dotDotDotToken, parameter.name, parameter.questionToken, parameter.type,
         /*initializer*/ undefined);
     }
     function visitFunctionBody(node, visitor, context, nodeVisitor) {
@@ -81592,7 +81592,7 @@ var ts;
             case 162 /* PropertySignature */:
                 return factory.updatePropertySignature(node, nodesVisitor(node.modifiers, visitor, ts.isToken), nodeVisitor(node.name, visitor, ts.isPropertyName), nodeVisitor(node.questionToken, tokenVisitor, ts.isToken), nodeVisitor(node.type, visitor, ts.isTypeNode));
             case 163 /* PropertyDeclaration */:
-                return factory.updatePropertyDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), nodeVisitor(node.name, visitor, ts.isPropertyName), 
+                return factory.updatePropertyDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), nodeVisitor(node.name, visitor, ts.isPropertyName),
                 // QuestionToken and ExclamationToken is uniqued in Property Declaration and the signature of 'updateProperty' is that too
                 nodeVisitor(node.questionToken || node.exclamationToken, tokenVisitor, ts.isToken), nodeVisitor(node.type, visitor, ts.isTypeNode), nodeVisitor(node.initializer, visitor, ts.isExpression));
             case 164 /* MethodSignature */:
@@ -81923,7 +81923,7 @@ var ts;
         };
         function addSource(fileName) {
             enter();
-            var source = ts.getRelativePathToDirectoryOrUrl(sourcesDirectoryPath, fileName, host.getCurrentDirectory(), host.getCanonicalFileName, 
+            var source = ts.getRelativePathToDirectoryOrUrl(sourcesDirectoryPath, fileName, host.getCurrentDirectory(), host.getCanonicalFileName,
             /*isAbsolutePathAnUrl*/ true);
             var sourceIndex = sourceToSourceIndexMap.get(source);
             if (sourceIndex === undefined) {
@@ -83032,8 +83032,8 @@ var ts;
         }
         for (var _i = 0, pendingDeclarations_1 = pendingDeclarations; _i < pendingDeclarations_1.length; _i++) {
             var _a = pendingDeclarations_1[_i], pendingExpressions_1 = _a.pendingExpressions, name = _a.name, value = _a.value, location = _a.location, original = _a.original;
-            var variable = context.factory.createVariableDeclaration(name, 
-            /*exclamationToken*/ undefined, 
+            var variable = context.factory.createVariableDeclaration(name,
+            /*exclamationToken*/ undefined,
             /*type*/ undefined, pendingExpressions_1 ? context.factory.inlineExpressions(ts.append(pendingExpressions_1, value)) : value);
             variable.original = original;
             ts.setTextRange(variable, location);
@@ -83168,7 +83168,7 @@ var ts;
             // Read the elements of the iterable into an array
             value = ensureIdentifier(flattenContext, ts.setTextRange(flattenContext.context.getEmitHelperFactory().createReadHelper(value, numElements > 0 && ts.getRestIndicatorOfBindingOrAssignmentElement(elements[numElements - 1])
                 ? undefined
-                : numElements), location), 
+                : numElements), location),
             /*reuseIdentifierExpressions*/ false, location);
         }
         else if (numElements !== 1 && (flattenContext.level < 1 /* ObjectRest */ || numElements === 0)
@@ -83976,8 +83976,8 @@ var ts;
                 ts.setEmitFlags(iife, 33554432 /* TypeScriptClassWrapper */);
                 var varStatement = factory.createVariableStatement(
                 /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                    factory.createVariableDeclaration(factory.getLocalName(node, /*allowComments*/ false, /*allowSourceMaps*/ false), 
-                    /*exclamationToken*/ undefined, 
+                    factory.createVariableDeclaration(factory.getLocalName(node, /*allowComments*/ false, /*allowSourceMaps*/ false),
+                    /*exclamationToken*/ undefined,
                     /*type*/ undefined, iife)
                 ]));
                 ts.setOriginalNode(varStatement, node);
@@ -84023,7 +84023,7 @@ var ts;
                 ? ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier)
                 : undefined;
             var classDeclaration = factory.createClassDeclaration(
-            /*decorators*/ undefined, modifiers, name, 
+            /*decorators*/ undefined, modifiers, name,
             /*typeParameters*/ undefined, ts.visitNodes(node.heritageClauses, visitor, ts.isHeritageClause), transformClassMembers(node));
             // To better align with the old emitter, we should not emit a trailing source map
             // entry if the class has static properties.
@@ -84141,8 +84141,8 @@ var ts;
             //                                         or decoratedClassAlias if the class contain self-reference.
             var statement = factory.createVariableStatement(
             /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                factory.createVariableDeclaration(declName, 
-                /*exclamationToken*/ undefined, 
+                factory.createVariableDeclaration(declName,
+                /*exclamationToken*/ undefined,
                 /*type*/ undefined, classAlias ? factory.createAssignment(classAlias, classExpression) : classExpression)
             ], 1 /* Let */));
             ts.setOriginalNode(statement, node);
@@ -84155,8 +84155,8 @@ var ts;
                 return ts.visitEachChild(node, visitor, context);
             }
             var classExpression = factory.createClassExpression(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, node.name, 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined, node.name,
             /*typeParameters*/ undefined, ts.visitNodes(node.heritageClauses, visitor, ts.isHeritageClause), transformClassMembers(node));
             ts.setOriginalNode(classExpression, node);
             ts.setTextRange(classExpression, node);
@@ -84177,10 +84177,10 @@ var ts;
                     var parameter = parametersWithPropertyAssignments_1[_i];
                     if (ts.isIdentifier(parameter.name)) {
                         members.push(ts.setOriginalNode(factory.createPropertyDeclaration(
-                        /*decorators*/ undefined, 
-                        /*modifiers*/ undefined, parameter.name, 
-                        /*questionOrExclamationToken*/ undefined, 
-                        /*type*/ undefined, 
+                        /*decorators*/ undefined,
+                        /*modifiers*/ undefined, parameter.name,
+                        /*questionOrExclamationToken*/ undefined,
+                        /*type*/ undefined,
                         /*initializer*/ undefined), parameter));
                     }
                 }
@@ -84831,8 +84831,8 @@ var ts;
                     }
                     var serialized = serializeEntityNameAsExpressionFallback(node.typeName);
                     var temp = factory.createTempVariable(hoistVariableDeclaration);
-                    return factory.createConditionalExpression(factory.createTypeCheck(factory.createAssignment(temp, serialized), "function"), 
-                    /*questionToken*/ undefined, temp, 
+                    return factory.createConditionalExpression(factory.createTypeCheck(factory.createAssignment(temp, serialized), "function"),
+                    /*questionToken*/ undefined, temp,
                     /*colonToken*/ undefined, factory.createIdentifier("Object"));
                 case ts.TypeReferenceSerializationKind.TypeWithConstructSignatureAndValue:
                     return serializeEntityNameAsExpression(node.typeName);
@@ -84918,8 +84918,8 @@ var ts;
          * available.
          */
         function getGlobalSymbolNameWithFallback() {
-            return factory.createConditionalExpression(factory.createTypeCheck(factory.createIdentifier("Symbol"), "function"), 
-            /*questionToken*/ undefined, factory.createIdentifier("Symbol"), 
+            return factory.createConditionalExpression(factory.createTypeCheck(factory.createIdentifier("Symbol"), "function"),
+            /*questionToken*/ undefined, factory.createIdentifier("Symbol"),
             /*colonToken*/ undefined, factory.createIdentifier("Object"));
         }
         /**
@@ -84928,8 +84928,8 @@ var ts;
          */
         function getGlobalBigIntNameWithFallback() {
             return languageVersion < 99 /* ESNext */
-                ? factory.createConditionalExpression(factory.createTypeCheck(factory.createIdentifier("BigInt"), "function"), 
-                /*questionToken*/ undefined, factory.createIdentifier("BigInt"), 
+                ? factory.createConditionalExpression(factory.createTypeCheck(factory.createIdentifier("BigInt"), "function"),
+                /*questionToken*/ undefined, factory.createIdentifier("BigInt"),
                 /*colonToken*/ undefined, factory.createIdentifier("Object"))
                 : factory.createIdentifier("BigInt");
         }
@@ -85005,7 +85005,7 @@ var ts;
          * @param node The ExpressionWithTypeArguments to transform.
          */
         function visitExpressionWithTypeArguments(node) {
-            return factory.updateExpressionWithTypeArguments(node, ts.visitNode(node.expression, visitor, ts.isLeftHandSideExpression), 
+            return factory.updateExpressionWithTypeArguments(node, ts.visitNode(node.expression, visitor, ts.isLeftHandSideExpression),
             /*typeArguments*/ undefined);
         }
         /**
@@ -85021,9 +85021,9 @@ var ts;
             if (node.flags & 8388608 /* Ambient */ || ts.hasSyntacticModifier(node, 128 /* Abstract */)) {
                 return undefined;
             }
-            var updated = factory.updatePropertyDeclaration(node, 
-            /*decorators*/ undefined, ts.visitNodes(node.modifiers, visitor, ts.isModifier), visitPropertyNameOfClassElement(node), 
-            /*questionOrExclamationToken*/ undefined, 
+            var updated = factory.updatePropertyDeclaration(node,
+            /*decorators*/ undefined, ts.visitNodes(node.modifiers, visitor, ts.isModifier), visitPropertyNameOfClassElement(node),
+            /*questionOrExclamationToken*/ undefined,
             /*type*/ undefined, ts.visitNode(node.initializer, visitor));
             if (updated !== node) {
                 // While we emit the source map for the node after skipping decorators and modifiers,
@@ -85037,8 +85037,8 @@ var ts;
             if (!shouldEmitFunctionLikeDeclaration(node)) {
                 return undefined;
             }
-            return factory.updateConstructorDeclaration(node, 
-            /*decorators*/ undefined, 
+            return factory.updateConstructorDeclaration(node,
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, ts.visitParameterList(node.parameters, visitor, context), transformConstructorBody(node.body, node));
         }
         function transformConstructorBody(body, constructor) {
@@ -85095,10 +85095,10 @@ var ts;
             if (!shouldEmitFunctionLikeDeclaration(node)) {
                 return undefined;
             }
-            var updated = factory.updateMethodDeclaration(node, 
-            /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), node.asteriskToken, visitPropertyNameOfClassElement(node), 
-            /*questionToken*/ undefined, 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+            var updated = factory.updateMethodDeclaration(node,
+            /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), node.asteriskToken, visitPropertyNameOfClassElement(node),
+            /*questionToken*/ undefined,
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, ts.visitFunctionBody(node.body, visitor, context));
             if (updated !== node) {
                 // While we emit the source map for the node after skipping decorators and modifiers,
@@ -85121,8 +85121,8 @@ var ts;
             if (!shouldEmitAccessorDeclaration(node)) {
                 return undefined;
             }
-            var updated = factory.updateGetAccessorDeclaration(node, 
-            /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), visitPropertyNameOfClassElement(node), ts.visitParameterList(node.parameters, visitor, context), 
+            var updated = factory.updateGetAccessorDeclaration(node,
+            /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), visitPropertyNameOfClassElement(node), ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, ts.visitFunctionBody(node.body, visitor, context) || factory.createBlock([]));
             if (updated !== node) {
                 // While we emit the source map for the node after skipping decorators and modifiers,
@@ -85136,7 +85136,7 @@ var ts;
             if (!shouldEmitAccessorDeclaration(node)) {
                 return undefined;
             }
-            var updated = factory.updateSetAccessorDeclaration(node, 
+            var updated = factory.updateSetAccessorDeclaration(node,
             /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), visitPropertyNameOfClassElement(node), ts.visitParameterList(node.parameters, visitor, context), ts.visitFunctionBody(node.body, visitor, context) || factory.createBlock([]));
             if (updated !== node) {
                 // While we emit the source map for the node after skipping decorators and modifiers,
@@ -85150,9 +85150,9 @@ var ts;
             if (!shouldEmitFunctionLikeDeclaration(node)) {
                 return factory.createNotEmittedStatement(node);
             }
-            var updated = factory.updateFunctionDeclaration(node, 
-            /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), node.asteriskToken, node.name, 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+            var updated = factory.updateFunctionDeclaration(node,
+            /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), node.asteriskToken, node.name,
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, ts.visitFunctionBody(node.body, visitor, context) || factory.createBlock([]));
             if (isExportOfNamespace(node)) {
                 var statements = [updated];
@@ -85165,14 +85165,14 @@ var ts;
             if (!shouldEmitFunctionLikeDeclaration(node)) {
                 return factory.createOmittedExpression();
             }
-            var updated = factory.updateFunctionExpression(node, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), node.asteriskToken, node.name, 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+            var updated = factory.updateFunctionExpression(node, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), node.asteriskToken, node.name,
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, ts.visitFunctionBody(node.body, visitor, context) || factory.createBlock([]));
             return updated;
         }
         function visitArrowFunction(node) {
-            var updated = factory.updateArrowFunction(node, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+            var updated = factory.updateArrowFunction(node, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier),
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, node.equalsGreaterThanToken, ts.visitFunctionBody(node.body, visitor, context));
             return updated;
         }
@@ -85180,10 +85180,10 @@ var ts;
             if (ts.parameterIsThisKeyword(node)) {
                 return undefined;
             }
-            var updated = factory.updateParameterDeclaration(node, 
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, node.dotDotDotToken, ts.visitNode(node.name, visitor, ts.isBindingName), 
-            /*questionToken*/ undefined, 
+            var updated = factory.updateParameterDeclaration(node,
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined, node.dotDotDotToken, ts.visitNode(node.name, visitor, ts.isBindingName),
+            /*questionToken*/ undefined,
             /*type*/ undefined, ts.visitNode(node.initializer, visitor, ts.isExpression));
             if (updated !== node) {
                 // While we emit the source map for the node after skipping decorators and modifiers,
@@ -85211,17 +85211,17 @@ var ts;
         function transformInitializedVariable(node) {
             var name = node.name;
             if (ts.isBindingPattern(name)) {
-                return ts.flattenDestructuringAssignment(node, visitor, context, 0 /* All */, 
+                return ts.flattenDestructuringAssignment(node, visitor, context, 0 /* All */,
                 /*needsValue*/ false, createNamespaceExportExpression);
             }
             else {
-                return ts.setTextRange(factory.createAssignment(getNamespaceMemberNameWithSourceMapsAndWithoutComments(name), ts.visitNode(node.initializer, visitor, ts.isExpression)), 
+                return ts.setTextRange(factory.createAssignment(getNamespaceMemberNameWithSourceMapsAndWithoutComments(name), ts.visitNode(node.initializer, visitor, ts.isExpression)),
                 /*location*/ node);
             }
         }
         function visitVariableDeclaration(node) {
-            return factory.updateVariableDeclaration(node, ts.visitNode(node.name, visitor, ts.isBindingName), 
-            /*exclamationToken*/ undefined, 
+            return factory.updateVariableDeclaration(node, ts.visitNode(node.name, visitor, ts.isBindingName),
+            /*exclamationToken*/ undefined,
             /*type*/ undefined, ts.visitNode(node.initializer, visitor, ts.isExpression));
         }
         function visitParenthesizedExpression(node) {
@@ -85261,23 +85261,23 @@ var ts;
             return factory.createPartiallyEmittedExpression(expression, node);
         }
         function visitCallExpression(node) {
-            return factory.updateCallExpression(node, ts.visitNode(node.expression, visitor, ts.isExpression), 
+            return factory.updateCallExpression(node, ts.visitNode(node.expression, visitor, ts.isExpression),
             /*typeArguments*/ undefined, ts.visitNodes(node.arguments, visitor, ts.isExpression));
         }
         function visitNewExpression(node) {
-            return factory.updateNewExpression(node, ts.visitNode(node.expression, visitor, ts.isExpression), 
+            return factory.updateNewExpression(node, ts.visitNode(node.expression, visitor, ts.isExpression),
             /*typeArguments*/ undefined, ts.visitNodes(node.arguments, visitor, ts.isExpression));
         }
         function visitTaggedTemplateExpression(node) {
-            return factory.updateTaggedTemplateExpression(node, ts.visitNode(node.tag, visitor, ts.isExpression), 
+            return factory.updateTaggedTemplateExpression(node, ts.visitNode(node.tag, visitor, ts.isExpression),
             /*typeArguments*/ undefined, ts.visitNode(node.template, visitor, ts.isExpression));
         }
         function visitJsxSelfClosingElement(node) {
-            return factory.updateJsxSelfClosingElement(node, ts.visitNode(node.tagName, visitor, ts.isJsxTagNameExpression), 
+            return factory.updateJsxSelfClosingElement(node, ts.visitNode(node.tagName, visitor, ts.isJsxTagNameExpression),
             /*typeArguments*/ undefined, ts.visitNode(node.attributes, visitor, ts.isJsxAttributes));
         }
         function visitJsxJsxOpeningElement(node) {
-            return factory.updateJsxOpeningElement(node, ts.visitNode(node.tagName, visitor, ts.isJsxTagNameExpression), 
+            return factory.updateJsxOpeningElement(node, ts.visitNode(node.tagName, visitor, ts.isJsxTagNameExpression),
             /*typeArguments*/ undefined, ts.visitNode(node.attributes, visitor, ts.isJsxAttributes));
         }
         /**
@@ -85336,11 +85336,11 @@ var ts;
             //      ...
             //  })(x || (x = {}));
             var enumStatement = factory.createExpressionStatement(factory.createCallExpression(factory.createFunctionExpression(
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, 
-            /*name*/ undefined, 
-            /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, parameterName)], 
-            /*type*/ undefined, transformEnumBody(node, containerName)), 
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined,
+            /*name*/ undefined,
+            /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, parameterName)],
+            /*type*/ undefined, transformEnumBody(node, containerName)),
             /*typeArguments*/ undefined, [moduleArg]));
             ts.setOriginalNode(enumStatement, node);
             if (varAdded) {
@@ -85370,7 +85370,7 @@ var ts;
             ts.insertStatementsAfterStandardPrologue(statements, endLexicalEnvironment());
             ts.addRange(statements, members);
             currentNamespaceContainerName = savedCurrentNamespaceLocalName;
-            return factory.createBlock(ts.setTextRange(factory.createNodeArray(statements), /*location*/ node.members), 
+            return factory.createBlock(ts.setTextRange(factory.createNodeArray(statements), /*location*/ node.members),
             /*multiLine*/ true);
         }
         /**
@@ -85565,11 +85565,11 @@ var ts;
             //      x_1.y = ...;
             //  })(x || (x = {}));
             var moduleStatement = factory.createExpressionStatement(factory.createCallExpression(factory.createFunctionExpression(
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, 
-            /*name*/ undefined, 
-            /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, parameterName)], 
-            /*type*/ undefined, transformModuleBody(node, containerName)), 
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined,
+            /*name*/ undefined,
+            /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, parameterName)],
+            /*type*/ undefined, transformModuleBody(node, containerName)),
             /*typeArguments*/ undefined, [moduleArg]));
             ts.setOriginalNode(moduleStatement, node);
             if (varAdded) {
@@ -85625,8 +85625,8 @@ var ts;
             currentNamespaceContainerName = savedCurrentNamespaceContainerName;
             currentNamespace = savedCurrentNamespace;
             currentScopeFirstDeclarationsOfName = savedCurrentScopeFirstDeclarationsOfName;
-            var block = factory.createBlock(ts.setTextRange(factory.createNodeArray(statements), 
-            /*location*/ statementsLocation), 
+            var block = factory.createBlock(ts.setTextRange(factory.createNodeArray(statements),
+            /*location*/ statementsLocation),
             /*multiLine*/ true);
             ts.setTextRange(block, blockLocation);
             // namespace hello.hi.world {
@@ -85680,8 +85680,8 @@ var ts;
             return importClause ||
                 compilerOptions.importsNotUsedAsValues === 1 /* Preserve */ ||
                 compilerOptions.importsNotUsedAsValues === 2 /* Error */
-                ? factory.updateImportDeclaration(node, 
-                /*decorators*/ undefined, 
+                ? factory.updateImportDeclaration(node,
+                /*decorators*/ undefined,
                 /*modifiers*/ undefined, importClause, node.moduleSpecifier)
                 : undefined;
         }
@@ -85759,8 +85759,8 @@ var ts;
             // Elide the export declaration if all of its named exports are elided.
             var exportClause = ts.visitNode(node.exportClause, visitNamedExportBindings, ts.isNamedExportBindings);
             return exportClause
-                ? factory.updateExportDeclaration(node, 
-                /*decorators*/ undefined, 
+                ? factory.updateExportDeclaration(node,
+                /*decorators*/ undefined,
                 /*modifiers*/ undefined, node.isTypeOnly, exportClause, node.moduleSpecifier)
                 : undefined;
         }
@@ -85818,8 +85818,8 @@ var ts;
                 // If the alias is unreferenced but we want to keep the import, replace with 'import "mod"'.
                 if (!isReferenced && compilerOptions.importsNotUsedAsValues === 1 /* Preserve */) {
                     return ts.setOriginalNode(ts.setTextRange(factory.createImportDeclaration(
-                    /*decorators*/ undefined, 
-                    /*modifiers*/ undefined, 
+                    /*decorators*/ undefined,
+                    /*modifiers*/ undefined,
                     /*importClause*/ undefined, node.moduleReference.expression), node), node);
                 }
                 return isReferenced ? ts.visitEachChild(node, visitor, context) : undefined;
@@ -85833,8 +85833,8 @@ var ts;
                 //  export var ${name} = ${moduleReference};
                 //  var ${name} = ${moduleReference};
                 return ts.setOriginalNode(ts.setTextRange(factory.createVariableStatement(ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), factory.createVariableDeclarationList([
-                    ts.setOriginalNode(factory.createVariableDeclaration(node.name, 
-                    /*exclamationToken*/ undefined, 
+                    ts.setOriginalNode(factory.createVariableDeclaration(node.name,
+                    /*exclamationToken*/ undefined,
                     /*type*/ undefined, moduleReference), node)
                 ])), node), node);
             }
@@ -86072,7 +86072,7 @@ var ts;
                     var substitute = (applicableSubstitutions & 2 /* NamespaceExports */ && container.kind === 256 /* ModuleDeclaration */) ||
                         (applicableSubstitutions & 8 /* NonQualifiedEnumMembers */ && container.kind === 255 /* EnumDeclaration */);
                     if (substitute) {
-                        return ts.setTextRange(factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(container), node), 
+                        return ts.setTextRange(factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(container), node),
                         /*location*/ node);
                     }
                 }
@@ -86266,10 +86266,10 @@ var ts;
             ts.Debug.assert(!ts.some(node.decorators));
             if (!shouldTransformPrivateFields && ts.isPrivateIdentifier(node.name)) {
                 // Initializer is elided as the field is initialized in transformConstructor.
-                return factory.updatePropertyDeclaration(node, 
-                /*decorators*/ undefined, ts.visitNodes(node.modifiers, visitor, ts.isModifier), node.name, 
-                /*questionOrExclamationToken*/ undefined, 
-                /*type*/ undefined, 
+                return factory.updatePropertyDeclaration(node,
+                /*decorators*/ undefined, ts.visitNodes(node.modifiers, visitor, ts.isModifier), node.name,
+                /*questionOrExclamationToken*/ undefined,
+                /*type*/ undefined,
                 /*initializer*/ undefined);
             }
             // Create a temporary variable to store a computed property name (if necessary).
@@ -86359,11 +86359,11 @@ var ts;
                 // Transform call expressions of private names to properly bind the `this` parameter.
                 var _a = factory.createCallBinding(node.expression, hoistVariableDeclaration, languageVersion), thisArg = _a.thisArg, target = _a.target;
                 if (ts.isCallChain(node)) {
-                    return factory.updateCallChain(node, factory.createPropertyAccessChain(ts.visitNode(target, visitor), node.questionDotToken, "call"), 
-                    /*questionDotToken*/ undefined, 
+                    return factory.updateCallChain(node, factory.createPropertyAccessChain(ts.visitNode(target, visitor), node.questionDotToken, "call"),
+                    /*questionDotToken*/ undefined,
                     /*typeArguments*/ undefined, __spreadArray([ts.visitNode(thisArg, visitor, ts.isExpression)], ts.visitNodes(node.arguments, visitor, ts.isExpression)));
                 }
-                return factory.updateCallExpression(node, factory.createPropertyAccessExpression(ts.visitNode(target, visitor), "call"), 
+                return factory.updateCallExpression(node, factory.createPropertyAccessExpression(ts.visitNode(target, visitor), "call"),
                 /*typeArguments*/ undefined, __spreadArray([ts.visitNode(thisArg, visitor, ts.isExpression)], ts.visitNodes(node.arguments, visitor, ts.isExpression)));
             }
             return ts.visitEachChild(node, visitor, context);
@@ -86372,8 +86372,8 @@ var ts;
             if (shouldTransformPrivateFields && ts.isPrivateIdentifierPropertyAccessExpression(node.tag)) {
                 // Bind the `this` correctly for tagged template literals when the tag is a private identifier property access.
                 var _a = factory.createCallBinding(node.tag, hoistVariableDeclaration, languageVersion), thisArg = _a.thisArg, target = _a.target;
-                return factory.updateTaggedTemplateExpression(node, factory.createCallExpression(factory.createPropertyAccessExpression(ts.visitNode(target, visitor), "bind"), 
-                /*typeArguments*/ undefined, [ts.visitNode(thisArg, visitor, ts.isExpression)]), 
+                return factory.updateTaggedTemplateExpression(node, factory.createCallExpression(factory.createPropertyAccessExpression(ts.visitNode(target, visitor), "bind"),
+                /*typeArguments*/ undefined, [ts.visitNode(thisArg, visitor, ts.isExpression)]),
                 /*typeArguments*/ undefined, ts.visitNode(node.template, visitor, ts.isTemplateLiteral));
             }
             return ts.visitEachChild(node, visitor, context);
@@ -86446,8 +86446,8 @@ var ts;
             var extendsClauseElement = ts.getEffectiveBaseTypeNode(node);
             var isDerivedClass = !!(extendsClauseElement && ts.skipOuterExpressions(extendsClauseElement.expression).kind !== 103 /* NullKeyword */);
             var statements = [
-                factory.updateClassDeclaration(node, 
-                /*decorators*/ undefined, node.modifiers, node.name, 
+                factory.updateClassDeclaration(node,
+                /*decorators*/ undefined, node.modifiers, node.name,
                 /*typeParameters*/ undefined, ts.visitNodes(node.heritageClauses, visitor, ts.isHeritageClause), transformClassMembers(node, isDerivedClass))
             ];
             // Write any pending expressions from elided or moved computed property names
@@ -86480,7 +86480,7 @@ var ts;
             var staticProperties = ts.getProperties(node, /*requireInitializer*/ true, /*isStatic*/ true);
             var extendsClauseElement = ts.getEffectiveBaseTypeNode(node);
             var isDerivedClass = !!(extendsClauseElement && ts.skipOuterExpressions(extendsClauseElement.expression).kind !== 103 /* NullKeyword */);
-            var classExpression = factory.updateClassExpression(node, ts.visitNodes(node.decorators, visitor, ts.isDecorator), node.modifiers, node.name, 
+            var classExpression = factory.updateClassExpression(node, ts.visitNodes(node.decorators, visitor, ts.isDecorator), node.modifiers, node.name,
             /*typeParameters*/ undefined, ts.visitNodes(node.heritageClauses, visitor, ts.isHeritageClause), transformClassMembers(node, isDerivedClass));
             if (ts.some(staticProperties) || ts.some(pendingExpressions)) {
                 if (isDecoratedClassDeclaration) {
@@ -86559,7 +86559,7 @@ var ts;
                 return undefined;
             }
             return ts.startOnNewLine(ts.setOriginalNode(ts.setTextRange(factory.createConstructorDeclaration(
-            /*decorators*/ undefined, 
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, parameters !== null && parameters !== void 0 ? parameters : [], body), constructor || node), constructor));
         }
         function transformConstructorBody(node, constructor, isDerivedClass) {
@@ -86580,7 +86580,7 @@ var ts;
                 //
                 //  super(...arguments);
                 //
-                statements.push(factory.createExpressionStatement(factory.createCallExpression(factory.createSuper(), 
+                statements.push(factory.createExpressionStatement(factory.createCallExpression(factory.createSuper(),
                 /*typeArguments*/ undefined, [factory.createSpreadElement(factory.createIdentifier("arguments"))])));
             }
             if (constructor) {
@@ -86614,9 +86614,9 @@ var ts;
                 ts.addRange(statements, ts.visitNodes(constructor.body.statements, visitor, ts.isStatement, indexOfFirstStatement));
             }
             statements = factory.mergeLexicalEnvironment(statements, endLexicalEnvironment());
-            return ts.setTextRange(factory.createBlock(ts.setTextRange(factory.createNodeArray(statements), 
-            /*location*/ constructor ? constructor.body.statements : node.members), 
-            /*multiLine*/ true), 
+            return ts.setTextRange(factory.createBlock(ts.setTextRange(factory.createNodeArray(statements),
+            /*location*/ constructor ? constructor.body.statements : node.members),
+            /*multiLine*/ true),
             /*location*/ constructor ? constructor.body : undefined);
         }
         /**
@@ -86804,7 +86804,7 @@ var ts;
             var weakMapName = factory.createUniqueName("_" + text.substring(1), 16 /* Optimistic */ | 8 /* ReservedInNestedScopes */);
             hoistVariableDeclaration(weakMapName);
             getPrivateIdentifierEnvironment().set(name.escapedText, { placement: 0 /* InstanceField */, weakMapName: weakMapName });
-            getPendingExpressions().push(factory.createAssignment(weakMapName, factory.createNewExpression(factory.createIdentifier("WeakMap"), 
+            getPendingExpressions().push(factory.createAssignment(weakMapName, factory.createNewExpression(factory.createIdentifier("WeakMap"),
             /*typeArguments*/ undefined, [])));
         }
         function accessPrivateIdentifier(name) {
@@ -86843,13 +86843,13 @@ var ts;
             // Explicit parens required because of v8 regression (https://bugs.chromium.org/p/v8/issues/detail?id=9560)
             factory.createParenthesizedExpression(factory.createObjectLiteralExpression([
                 factory.createSetAccessorDeclaration(
-                /*decorators*/ undefined, 
+                /*decorators*/ undefined,
                 /*modifiers*/ undefined, "value", [factory.createParameterDeclaration(
-                    /*decorators*/ undefined, 
-                    /*modifiers*/ undefined, 
-                    /*dotDotDotToken*/ undefined, parameter, 
-                    /*questionToken*/ undefined, 
-                    /*type*/ undefined, 
+                    /*decorators*/ undefined,
+                    /*modifiers*/ undefined,
+                    /*dotDotDotToken*/ undefined, parameter,
+                    /*questionToken*/ undefined,
+                    /*type*/ undefined,
                     /*initializer*/ undefined)], factory.createBlock([factory.createExpressionStatement(createPrivateIdentifierAssignment(info, receiver, parameter, 62 /* EqualsToken */))]))
             ])), "value");
         }
@@ -86906,7 +86906,7 @@ var ts;
     }
     ts.transformClassFields = transformClassFields;
     function createPrivateInstanceFieldInitializer(receiver, initializer, weakMapName) {
-        return ts.factory.createCallExpression(ts.factory.createPropertyAccessExpression(weakMapName, "set"), 
+        return ts.factory.createCallExpression(ts.factory.createPropertyAccessExpression(weakMapName, "set"),
         /*typeArguments*/ undefined, [receiver, initializer || ts.factory.createVoidZero()]);
     }
 })(ts || (ts = {}));
@@ -87130,10 +87130,10 @@ var ts;
          * @param node The node to visit.
          */
         function visitMethodDeclaration(node) {
-            return factory.updateMethodDeclaration(node, 
-            /*decorators*/ undefined, ts.visitNodes(node.modifiers, visitor, ts.isModifier), node.asteriskToken, node.name, 
-            /*questionToken*/ undefined, 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+            return factory.updateMethodDeclaration(node,
+            /*decorators*/ undefined, ts.visitNodes(node.modifiers, visitor, ts.isModifier), node.asteriskToken, node.name,
+            /*questionToken*/ undefined,
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, ts.getFunctionFlags(node) & 2 /* Async */
                 ? transformAsyncFunctionBody(node)
                 : ts.visitFunctionBody(node.body, visitor, context));
@@ -87147,9 +87147,9 @@ var ts;
          * @param node The node to visit.
          */
         function visitFunctionDeclaration(node) {
-            return factory.updateFunctionDeclaration(node, 
-            /*decorators*/ undefined, ts.visitNodes(node.modifiers, visitor, ts.isModifier), node.asteriskToken, node.name, 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+            return factory.updateFunctionDeclaration(node,
+            /*decorators*/ undefined, ts.visitNodes(node.modifiers, visitor, ts.isModifier), node.asteriskToken, node.name,
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, ts.getFunctionFlags(node) & 2 /* Async */
                 ? transformAsyncFunctionBody(node)
                 : ts.visitFunctionBody(node.body, visitor, context));
@@ -87163,8 +87163,8 @@ var ts;
          * @param node The node to visit.
          */
         function visitFunctionExpression(node) {
-            return factory.updateFunctionExpression(node, ts.visitNodes(node.modifiers, visitor, ts.isModifier), node.asteriskToken, node.name, 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+            return factory.updateFunctionExpression(node, ts.visitNodes(node.modifiers, visitor, ts.isModifier), node.asteriskToken, node.name,
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, ts.getFunctionFlags(node) & 2 /* Async */
                 ? transformAsyncFunctionBody(node)
                 : ts.visitFunctionBody(node.body, visitor, context));
@@ -87178,8 +87178,8 @@ var ts;
          * @param node The node to visit.
          */
         function visitArrowFunction(node) {
-            return factory.updateArrowFunction(node, ts.visitNodes(node.modifiers, visitor, ts.isModifier), 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+            return factory.updateArrowFunction(node, ts.visitNodes(node.modifiers, visitor, ts.isModifier),
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, node.equalsGreaterThanToken, ts.getFunctionFlags(node) & 2 /* Async */
                 ? transformAsyncFunctionBody(node)
                 : ts.visitFunctionBody(node.body, visitor, context));
@@ -87432,7 +87432,7 @@ var ts;
                 var argumentExpression = ts.isPropertyAccessExpression(expression)
                     ? substitutePropertyAccessExpression(expression)
                     : substituteElementAccessExpression(expression);
-                return factory.createCallExpression(factory.createPropertyAccessExpression(argumentExpression, "call"), 
+                return factory.createCallExpression(factory.createPropertyAccessExpression(argumentExpression, "call"),
                 /*typeArguments*/ undefined, __spreadArray([
                     factory.createThis()
                 ], node.arguments));
@@ -87449,11 +87449,11 @@ var ts;
         }
         function createSuperElementAccessInAsyncMethod(argumentExpression, location) {
             if (enclosingSuperContainerFlags & 4096 /* AsyncMethodWithSuperBinding */) {
-                return ts.setTextRange(factory.createPropertyAccessExpression(factory.createCallExpression(factory.createUniqueName("_superIndex", 16 /* Optimistic */ | 32 /* FileLevel */), 
+                return ts.setTextRange(factory.createPropertyAccessExpression(factory.createCallExpression(factory.createUniqueName("_superIndex", 16 /* Optimistic */ | 32 /* FileLevel */),
                 /*typeArguments*/ undefined, [argumentExpression]), "value"), location);
             }
             else {
-                return ts.setTextRange(factory.createCallExpression(factory.createUniqueName("_superIndex", 16 /* Optimistic */ | 32 /* FileLevel */), 
+                return ts.setTextRange(factory.createCallExpression(factory.createUniqueName("_superIndex", 16 /* Optimistic */ | 32 /* FileLevel */),
                 /*typeArguments*/ undefined, [argumentExpression]), location);
             }
         }
@@ -87469,34 +87469,34 @@ var ts;
             var name = ts.unescapeLeadingUnderscores(key);
             var getterAndSetter = [];
             getterAndSetter.push(factory.createPropertyAssignment("get", factory.createArrowFunction(
-            /* modifiers */ undefined, 
-            /* typeParameters */ undefined, 
-            /* parameters */ [], 
-            /* type */ undefined, 
+            /* modifiers */ undefined,
+            /* typeParameters */ undefined,
+            /* parameters */ [],
+            /* type */ undefined,
             /* equalsGreaterThanToken */ undefined, ts.setEmitFlags(factory.createPropertyAccessExpression(ts.setEmitFlags(factory.createSuper(), 4 /* NoSubstitution */), name), 4 /* NoSubstitution */))));
             if (hasBinding) {
                 getterAndSetter.push(factory.createPropertyAssignment("set", factory.createArrowFunction(
-                /* modifiers */ undefined, 
-                /* typeParameters */ undefined, 
+                /* modifiers */ undefined,
+                /* typeParameters */ undefined,
                 /* parameters */ [
                     factory.createParameterDeclaration(
-                    /* decorators */ undefined, 
-                    /* modifiers */ undefined, 
-                    /* dotDotDotToken */ undefined, "v", 
-                    /* questionToken */ undefined, 
-                    /* type */ undefined, 
+                    /* decorators */ undefined,
+                    /* modifiers */ undefined,
+                    /* dotDotDotToken */ undefined, "v",
+                    /* questionToken */ undefined,
+                    /* type */ undefined,
                     /* initializer */ undefined)
-                ], 
-                /* type */ undefined, 
+                ],
+                /* type */ undefined,
                 /* equalsGreaterThanToken */ undefined, factory.createAssignment(ts.setEmitFlags(factory.createPropertyAccessExpression(ts.setEmitFlags(factory.createSuper(), 4 /* NoSubstitution */), name), 4 /* NoSubstitution */), factory.createIdentifier("v")))));
             }
             accessors.push(factory.createPropertyAssignment(name, factory.createObjectLiteralExpression(getterAndSetter)));
         });
         return factory.createVariableStatement(
         /* modifiers */ undefined, factory.createVariableDeclarationList([
-            factory.createVariableDeclaration(factory.createUniqueName("_super", 16 /* Optimistic */ | 32 /* FileLevel */), 
-            /*exclamationToken*/ undefined, 
-            /* type */ undefined, factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("Object"), "create"), 
+            factory.createVariableDeclaration(factory.createUniqueName("_super", 16 /* Optimistic */ | 32 /* FileLevel */),
+            /*exclamationToken*/ undefined,
+            /* type */ undefined, factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("Object"), "create"),
             /* typeArguments */ undefined, [
                 factory.createNull(),
                 factory.createObjectLiteralExpression(accessors, /* multiline */ true)
@@ -87699,7 +87699,7 @@ var ts;
         }
         function visitAwaitExpression(node) {
             if (enclosingFunctionFlags & 2 /* Async */ && enclosingFunctionFlags & 1 /* Generator */) {
-                return ts.setOriginalNode(ts.setTextRange(factory.createYieldExpression(/*asteriskToken*/ undefined, emitHelpers().createAwaitHelper(ts.visitNode(node.expression, visitor, ts.isExpression))), 
+                return ts.setOriginalNode(ts.setTextRange(factory.createYieldExpression(/*asteriskToken*/ undefined, emitHelpers().createAwaitHelper(ts.visitNode(node.expression, visitor, ts.isExpression))),
                 /*location*/ node), node);
             }
             return ts.visitEachChild(node, visitor, context);
@@ -87905,7 +87905,7 @@ var ts;
         function visitVariableDeclarationWorker(node, exportedVariableStatement) {
             // If we are here it is because the name contains a binding pattern with a rest somewhere in it.
             if (ts.isBindingPattern(node.name) && node.name.transformFlags & 16384 /* ContainsObjectRestOrSpread */) {
-                return ts.flattenDestructuringBinding(node, visitor, context, 1 /* ObjectRest */, 
+                return ts.flattenDestructuringBinding(node, visitor, context, 1 /* ObjectRest */,
                 /*rval*/ undefined, exportedVariableStatement);
             }
             return ts.visitEachChild(node, visitor, context);
@@ -87951,7 +87951,7 @@ var ts;
                 }
                 return factory.updateForOfStatement(node, node.awaitModifier, ts.setTextRange(factory.createVariableDeclarationList([
                     ts.setTextRange(factory.createVariableDeclaration(temp), node.initializer)
-                ], 1 /* Let */), node.initializer), node.expression, ts.setTextRange(factory.createBlock(ts.setTextRange(factory.createNodeArray(statements), statementsLocation), 
+                ], 1 /* Let */), node.initializer), node.expression, ts.setTextRange(factory.createBlock(ts.setTextRange(factory.createNodeArray(statements), statementsLocation),
                 /*multiLine*/ true), bodyLocation));
             }
             return node;
@@ -87970,7 +87970,7 @@ var ts;
             else {
                 statements.push(statement);
             }
-            return ts.setEmitFlags(ts.setTextRange(factory.createBlock(ts.setTextRange(factory.createNodeArray(statements), statementsLocation), 
+            return ts.setEmitFlags(ts.setTextRange(factory.createBlock(ts.setTextRange(factory.createNodeArray(statements), statementsLocation),
             /*multiLine*/ true), bodyLocation), 48 /* NoSourceMap */ | 384 /* NoTokenSourceMaps */);
         }
         function createDownlevelAwait(expression) {
@@ -88000,10 +88000,10 @@ var ts;
             /*initializer*/ ts.setEmitFlags(ts.setTextRange(factory.createVariableDeclarationList([
                 ts.setTextRange(factory.createVariableDeclaration(iterator, /*exclamationToken*/ undefined, /*type*/ undefined, initializer), node.expression),
                 factory.createVariableDeclaration(result)
-            ]), node.expression), 2097152 /* NoHoisting */), 
-            /*condition*/ factory.createComma(factory.createAssignment(result, createDownlevelAwait(callNext)), factory.createLogicalNot(getDone)), 
-            /*incrementor*/ undefined, 
-            /*statement*/ convertForOfStatementHead(node, getValue)), 
+            ]), node.expression), 2097152 /* NoHoisting */),
+            /*condition*/ factory.createComma(factory.createAssignment(result, createDownlevelAwait(callNext)), factory.createLogicalNot(getDone)),
+            /*incrementor*/ undefined,
+            /*statement*/ convertForOfStatementHead(node, getValue)),
             /*location*/ node), 256 /* NoTokenTrailingSourceMaps */);
             return factory.createTryStatement(factory.createBlock([
                 factory.restoreEnclosingLabel(forStatement, outermostLabeledStatement)
@@ -88015,8 +88015,8 @@ var ts;
                 factory.createTryStatement(
                 /*tryBlock*/ factory.createBlock([
                     ts.setEmitFlags(factory.createIfStatement(factory.createLogicalAnd(factory.createLogicalAnd(result, factory.createLogicalNot(getDone)), factory.createAssignment(returnMethod, factory.createPropertyAccessExpression(iterator, "return"))), factory.createExpressionStatement(createDownlevelAwait(callReturn))), 1 /* SingleLine */)
-                ]), 
-                /*catchClause*/ undefined, 
+                ]),
+                /*catchClause*/ undefined,
                 /*finallyBlock*/ ts.setEmitFlags(factory.createBlock([
                     ts.setEmitFlags(factory.createIfStatement(errorRecord, factory.createThrowStatement(factory.createPropertyAccessExpression(errorRecord, "error"))), 1 /* SingleLine */)
                 ]), 1 /* SingleLine */))
@@ -88026,10 +88026,10 @@ var ts;
             if (node.transformFlags & 16384 /* ContainsObjectRestOrSpread */) {
                 // Binding patterns are converted into a generated name and are
                 // evaluated inside the function body.
-                return factory.updateParameterDeclaration(node, 
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, node.dotDotDotToken, factory.getGeneratedNameForNode(node), 
-                /*questionToken*/ undefined, 
+                return factory.updateParameterDeclaration(node,
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined, node.dotDotDotToken, factory.getGeneratedNameForNode(node),
+                /*questionToken*/ undefined,
                 /*type*/ undefined, ts.visitNode(node.initializer, visitor, ts.isExpression));
             }
             return ts.visitEachChild(node, visitor, context);
@@ -88037,7 +88037,7 @@ var ts;
         function visitConstructorDeclaration(node) {
             var savedEnclosingFunctionFlags = enclosingFunctionFlags;
             enclosingFunctionFlags = 0 /* Normal */;
-            var updated = factory.updateConstructorDeclaration(node, 
+            var updated = factory.updateConstructorDeclaration(node,
             /*decorators*/ undefined, node.modifiers, ts.visitParameterList(node.parameters, visitor, context), transformFunctionBody(node));
             enclosingFunctionFlags = savedEnclosingFunctionFlags;
             return updated;
@@ -88045,8 +88045,8 @@ var ts;
         function visitGetAccessorDeclaration(node) {
             var savedEnclosingFunctionFlags = enclosingFunctionFlags;
             enclosingFunctionFlags = 0 /* Normal */;
-            var updated = factory.updateGetAccessorDeclaration(node, 
-            /*decorators*/ undefined, node.modifiers, ts.visitNode(node.name, visitor, ts.isPropertyName), ts.visitParameterList(node.parameters, visitor, context), 
+            var updated = factory.updateGetAccessorDeclaration(node,
+            /*decorators*/ undefined, node.modifiers, ts.visitNode(node.name, visitor, ts.isPropertyName), ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, transformFunctionBody(node));
             enclosingFunctionFlags = savedEnclosingFunctionFlags;
             return updated;
@@ -88054,7 +88054,7 @@ var ts;
         function visitSetAccessorDeclaration(node) {
             var savedEnclosingFunctionFlags = enclosingFunctionFlags;
             enclosingFunctionFlags = 0 /* Normal */;
-            var updated = factory.updateSetAccessorDeclaration(node, 
+            var updated = factory.updateSetAccessorDeclaration(node,
             /*decorators*/ undefined, node.modifiers, ts.visitNode(node.name, visitor, ts.isPropertyName), ts.visitParameterList(node.parameters, visitor, context), transformFunctionBody(node));
             enclosingFunctionFlags = savedEnclosingFunctionFlags;
             return updated;
@@ -88062,13 +88062,13 @@ var ts;
         function visitMethodDeclaration(node) {
             var savedEnclosingFunctionFlags = enclosingFunctionFlags;
             enclosingFunctionFlags = ts.getFunctionFlags(node);
-            var updated = factory.updateMethodDeclaration(node, 
+            var updated = factory.updateMethodDeclaration(node,
             /*decorators*/ undefined, enclosingFunctionFlags & 1 /* Generator */
                 ? ts.visitNodes(node.modifiers, visitorNoAsyncModifier, ts.isModifier)
                 : node.modifiers, enclosingFunctionFlags & 2 /* Async */
                 ? undefined
-                : node.asteriskToken, ts.visitNode(node.name, visitor, ts.isPropertyName), ts.visitNode(/*questionToken*/ undefined, visitor, ts.isToken), 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+                : node.asteriskToken, ts.visitNode(node.name, visitor, ts.isPropertyName), ts.visitNode(/*questionToken*/ undefined, visitor, ts.isToken),
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, enclosingFunctionFlags & 2 /* Async */ && enclosingFunctionFlags & 1 /* Generator */
                 ? transformAsyncGeneratorFunctionBody(node)
                 : transformFunctionBody(node));
@@ -88078,13 +88078,13 @@ var ts;
         function visitFunctionDeclaration(node) {
             var savedEnclosingFunctionFlags = enclosingFunctionFlags;
             enclosingFunctionFlags = ts.getFunctionFlags(node);
-            var updated = factory.updateFunctionDeclaration(node, 
+            var updated = factory.updateFunctionDeclaration(node,
             /*decorators*/ undefined, enclosingFunctionFlags & 1 /* Generator */
                 ? ts.visitNodes(node.modifiers, visitorNoAsyncModifier, ts.isModifier)
                 : node.modifiers, enclosingFunctionFlags & 2 /* Async */
                 ? undefined
-                : node.asteriskToken, node.name, 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+                : node.asteriskToken, node.name,
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, enclosingFunctionFlags & 2 /* Async */ && enclosingFunctionFlags & 1 /* Generator */
                 ? transformAsyncGeneratorFunctionBody(node)
                 : transformFunctionBody(node));
@@ -88094,8 +88094,8 @@ var ts;
         function visitArrowFunction(node) {
             var savedEnclosingFunctionFlags = enclosingFunctionFlags;
             enclosingFunctionFlags = ts.getFunctionFlags(node);
-            var updated = factory.updateArrowFunction(node, node.modifiers, 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+            var updated = factory.updateArrowFunction(node, node.modifiers,
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, node.equalsGreaterThanToken, transformFunctionBody(node));
             enclosingFunctionFlags = savedEnclosingFunctionFlags;
             return updated;
@@ -88107,8 +88107,8 @@ var ts;
                 ? ts.visitNodes(node.modifiers, visitorNoAsyncModifier, ts.isModifier)
                 : node.modifiers, enclosingFunctionFlags & 2 /* Async */
                 ? undefined
-                : node.asteriskToken, node.name, 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+                : node.asteriskToken, node.name,
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, enclosingFunctionFlags & 2 /* Async */ && enclosingFunctionFlags & 1 /* Generator */
                 ? transformAsyncGeneratorFunctionBody(node)
                 : transformFunctionBody(node));
@@ -88125,9 +88125,9 @@ var ts;
             capturedSuperProperties = new ts.Set();
             hasSuperElementAccess = false;
             var returnStatement = factory.createReturnStatement(emitHelpers().createAsyncGeneratorHelper(factory.createFunctionExpression(
-            /*modifiers*/ undefined, factory.createToken(41 /* AsteriskToken */), node.name && factory.getGeneratedNameForNode(node.name), 
-            /*typeParameters*/ undefined, 
-            /*parameters*/ [], 
+            /*modifiers*/ undefined, factory.createToken(41 /* AsteriskToken */), node.name && factory.getGeneratedNameForNode(node.name),
+            /*typeParameters*/ undefined,
+            /*parameters*/ [],
             /*type*/ undefined, factory.updateBlock(node.body, ts.visitLexicalEnvironment(node.body.statements, visitor, context, statementOffset))), !!(hierarchyFacts & 1 /* HasLexicalThis */)));
             // Minor optimization, emit `_super` helper to capture `super` access in an arrow.
             // This step isn't needed if we eventually transform this to ES5.
@@ -88177,8 +88177,8 @@ var ts;
                 var parameter = _a[_i];
                 if (parameter.transformFlags & 16384 /* ContainsObjectRestOrSpread */) {
                     var temp = factory.getGeneratedNameForNode(parameter);
-                    var declarations = ts.flattenDestructuringBinding(parameter, visitor, context, 1 /* ObjectRest */, temp, 
-                    /*doNotRecordTempVariablesInLine*/ false, 
+                    var declarations = ts.flattenDestructuringBinding(parameter, visitor, context, 1 /* ObjectRest */, temp,
+                    /*doNotRecordTempVariablesInLine*/ false,
                     /*skipInitializer*/ true);
                     if (ts.some(declarations)) {
                         var statement = factory.createVariableStatement(
@@ -88280,7 +88280,7 @@ var ts;
                 var argumentExpression = ts.isPropertyAccessExpression(expression)
                     ? substitutePropertyAccessExpression(expression)
                     : substituteElementAccessExpression(expression);
-                return factory.createCallExpression(factory.createPropertyAccessExpression(argumentExpression, "call"), 
+                return factory.createCallExpression(factory.createPropertyAccessExpression(argumentExpression, "call"),
                 /*typeArguments*/ undefined, __spreadArray([
                     factory.createThis()
                 ], node.arguments));
@@ -88297,11 +88297,11 @@ var ts;
         }
         function createSuperElementAccessInAsyncMethod(argumentExpression, location) {
             if (enclosingSuperContainerFlags & 4096 /* AsyncMethodWithSuperBinding */) {
-                return ts.setTextRange(factory.createPropertyAccessExpression(factory.createCallExpression(factory.createIdentifier("_superIndex"), 
+                return ts.setTextRange(factory.createPropertyAccessExpression(factory.createCallExpression(factory.createIdentifier("_superIndex"),
                 /*typeArguments*/ undefined, [argumentExpression]), "value"), location);
             }
             else {
-                return ts.setTextRange(factory.createCallExpression(factory.createIdentifier("_superIndex"), 
+                return ts.setTextRange(factory.createCallExpression(factory.createIdentifier("_superIndex"),
                 /*typeArguments*/ undefined, [argumentExpression]), location);
             }
         }
@@ -88469,7 +88469,7 @@ var ts;
                             rightExpression = factory.createFunctionCallCall(rightExpression, leftThisArg.kind === 105 /* SuperKeyword */ ? factory.createThis() : leftThisArg, ts.visitNodes(segment.arguments, visitor, ts.isExpression));
                         }
                         else {
-                            rightExpression = factory.createCallExpression(rightExpression, 
+                            rightExpression = factory.createCallExpression(rightExpression,
                             /*typeArguments*/ undefined, ts.visitNodes(segment.arguments, visitor, ts.isExpression));
                         }
                         break;
@@ -88492,8 +88492,8 @@ var ts;
                 right = factory.createTempVariable(hoistVariableDeclaration);
                 left = factory.createAssignment(right, left);
             }
-            return ts.setTextRange(factory.createConditionalExpression(createNotNullCondition(left, right), 
-            /*questionToken*/ undefined, right, 
+            return ts.setTextRange(factory.createConditionalExpression(createNotNullCondition(left, right),
+            /*questionToken*/ undefined, right,
             /*colonToken*/ undefined, ts.visitNode(node.right, visitor, ts.isExpression)), node);
         }
         function visitDeleteExpression(node) {
@@ -88639,8 +88639,8 @@ var ts;
                     else if (ts.isExternalOrCommonJsModule(node)) {
                         // Add `require` statement
                         var requireStatement = factory.createVariableStatement(/*modifiers*/ undefined, factory.createVariableDeclarationList([
-                            factory.createVariableDeclaration(factory.createObjectBindingPattern(ts.map(ts.arrayFrom(importSpecifiersMap.values()), function (s) { return factory.createBindingElement(/*dotdotdot*/ undefined, s.propertyName, s.name); })), 
-                            /*exclaimationToken*/ undefined, 
+                            factory.createVariableDeclaration(factory.createObjectBindingPattern(ts.map(ts.arrayFrom(importSpecifiersMap.values()), function (s) { return factory.createBindingElement(/*dotdotdot*/ undefined, s.propertyName, s.name); })),
+                            /*exclaimationToken*/ undefined,
                             /*type*/ undefined, factory.createCallExpression(factory.createIdentifier("require"), /*typeArguments*/ undefined, [factory.createStringLiteral(importSource)]))
                         ], 2 /* Const */));
                         ts.setParentRecursive(requireStatement, /*incremental*/ false);
@@ -88842,7 +88842,7 @@ var ts;
                     childrenProps = result;
                 }
             }
-            return visitJsxOpeningLikeElementOrFragmentJSX(getImplicitJsxFragmentReference(), childrenProps || factory.createObjectLiteralExpression([]), 
+            return visitJsxOpeningLikeElementOrFragmentJSX(getImplicitJsxFragmentReference(), childrenProps || factory.createObjectLiteralExpression([]),
             /*keyAttr*/ undefined, ts.length(ts.getSemanticJsxChildren(children)), isChild, location);
         }
         function visitJsxOpeningFragmentCreateElement(node, children, isChild, location) {
@@ -89770,8 +89770,8 @@ var ts;
             //          }
             //          return C;
             //      }());
-            var variable = factory.createVariableDeclaration(factory.getLocalName(node, /*allowComments*/ true), 
-            /*exclamationToken*/ undefined, 
+            var variable = factory.createVariableDeclaration(factory.getLocalName(node, /*allowComments*/ true),
+            /*exclamationToken*/ undefined,
             /*type*/ undefined, transformClassLikeDeclarationToExpression(node));
             ts.setOriginalNode(variable, node);
             var statements = [];
@@ -89846,10 +89846,10 @@ var ts;
             }
             var extendsClauseElement = ts.getClassExtendsHeritageElement(node);
             var classFunction = factory.createFunctionExpression(
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, 
-            /*name*/ undefined, 
-            /*typeParameters*/ undefined, extendsClauseElement ? [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, factory.createUniqueName("_super", 16 /* Optimistic */ | 32 /* FileLevel */))] : [], 
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined,
+            /*name*/ undefined,
+            /*typeParameters*/ undefined, extendsClauseElement ? [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, factory.createUniqueName("_super", 16 /* Optimistic */ | 32 /* FileLevel */))] : [],
             /*type*/ undefined, transformClassBody(node, extendsClauseElement));
             // To preserve the behavior of the old emitter, we explicitly indent
             // the body of the function here if it was requested in an earlier
@@ -89863,7 +89863,7 @@ var ts;
             var outer = factory.createPartiallyEmittedExpression(inner);
             ts.setTextRangeEnd(outer, ts.skipTrivia(currentText, node.pos));
             ts.setEmitFlags(outer, 1536 /* NoComments */);
-            var result = factory.createParenthesizedExpression(factory.createCallExpression(outer, 
+            var result = factory.createParenthesizedExpression(factory.createCallExpression(outer,
             /*typeArguments*/ undefined, extendsClauseElement
                 ? [ts.visitNode(extendsClauseElement.expression, visitor, ts.isExpression)]
                 : []));
@@ -89909,7 +89909,7 @@ var ts;
          */
         function addExtendsHelperIfNeeded(statements, node, extendsClauseElement) {
             if (extendsClauseElement) {
-                statements.push(ts.setTextRange(factory.createExpressionStatement(emitHelpers().createExtendsHelper(factory.getInternalName(node))), 
+                statements.push(ts.setTextRange(factory.createExpressionStatement(emitHelpers().createExtendsHelper(factory.getInternalName(node))),
                 /*location*/ extendsClauseElement));
             }
         }
@@ -89927,10 +89927,10 @@ var ts;
             var constructor = ts.getFirstConstructorWithBody(node);
             var hasSynthesizedSuper = hasSynthesizedDefaultSuperCall(constructor, extendsClauseElement !== undefined);
             var constructorFunction = factory.createFunctionDeclaration(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, name, 
-            /*typeParameters*/ undefined, transformConstructorParameters(constructor, hasSynthesizedSuper), 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined, name,
+            /*typeParameters*/ undefined, transformConstructorParameters(constructor, hasSynthesizedSuper),
             /*type*/ undefined, transformConstructorBody(constructor, node, extendsClauseElement, hasSynthesizedSuper));
             ts.setTextRange(constructorFunction, constructor || node);
             if (extendsClauseElement) {
@@ -90111,8 +90111,8 @@ var ts;
                 // ```
                 insertCaptureThisForNodeIfNeeded(prologue, constructor);
             }
-            var block = factory.createBlock(ts.setTextRange(factory.createNodeArray(ts.concatenate(prologue, statements)), 
-            /*location*/ constructor.body.statements), 
+            var block = factory.createBlock(ts.setTextRange(factory.createNodeArray(ts.concatenate(prologue, statements)),
+            /*location*/ constructor.body.statements),
             /*multiLine*/ true);
             ts.setTextRange(block, constructor.body);
             return block;
@@ -90164,25 +90164,25 @@ var ts;
                 // Binding patterns are converted into a generated name and are
                 // evaluated inside the function body.
                 return ts.setOriginalNode(ts.setTextRange(factory.createParameterDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, 
-                /*dotDotDotToken*/ undefined, factory.getGeneratedNameForNode(node), 
-                /*questionToken*/ undefined, 
-                /*type*/ undefined, 
-                /*initializer*/ undefined), 
-                /*location*/ node), 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined,
+                /*dotDotDotToken*/ undefined, factory.getGeneratedNameForNode(node),
+                /*questionToken*/ undefined,
+                /*type*/ undefined,
+                /*initializer*/ undefined),
+                /*location*/ node),
                 /*original*/ node);
             }
             else if (node.initializer) {
                 // Initializers are elided
                 return ts.setOriginalNode(ts.setTextRange(factory.createParameterDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, 
-                /*dotDotDotToken*/ undefined, node.name, 
-                /*questionToken*/ undefined, 
-                /*type*/ undefined, 
-                /*initializer*/ undefined), 
-                /*location*/ node), 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined,
+                /*dotDotDotToken*/ undefined, node.name,
+                /*questionToken*/ undefined,
+                /*type*/ undefined,
+                /*initializer*/ undefined),
+                /*location*/ node),
                 /*original*/ node);
             }
             else {
@@ -90303,10 +90303,10 @@ var ts;
             // var param = [];
             prologueStatements.push(ts.setEmitFlags(ts.setTextRange(factory.createVariableStatement(
             /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                factory.createVariableDeclaration(declarationName, 
-                /*exclamationToken*/ undefined, 
+                factory.createVariableDeclaration(declarationName,
+                /*exclamationToken*/ undefined,
                 /*type*/ undefined, factory.createArrayLiteralExpression([]))
-            ])), 
+            ])),
             /*location*/ parameter), 1048576 /* CustomPrologue */));
             // for (var _i = restIndex; _i < arguments.length; _i++) {
             //   param[_i - restIndex] = arguments[_i];
@@ -90316,7 +90316,7 @@ var ts;
             ]), parameter), ts.setTextRange(factory.createLessThan(temp, factory.createPropertyAccessExpression(factory.createIdentifier("arguments"), "length")), parameter), ts.setTextRange(factory.createPostfixIncrement(temp), parameter), factory.createBlock([
                 ts.startOnNewLine(ts.setTextRange(factory.createExpressionStatement(factory.createAssignment(factory.createElementAccessExpression(expressionName, restIndex === 0
                     ? temp
-                    : factory.createSubtract(temp, factory.createNumericLiteral(restIndex))), factory.createElementAccessExpression(factory.createIdentifier("arguments"), temp))), 
+                    : factory.createSubtract(temp, factory.createNumericLiteral(restIndex))), factory.createElementAccessExpression(factory.createIdentifier("arguments"), temp))),
                 /*location*/ parameter))
             ]));
             ts.setEmitFlags(forStatement, 1048576 /* CustomPrologue */);
@@ -90348,8 +90348,8 @@ var ts;
             enableSubstitutionsForCapturedThis();
             var captureThisStatement = factory.createVariableStatement(
             /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                factory.createVariableDeclaration(factory.createUniqueName("_this", 16 /* Optimistic */ | 32 /* FileLevel */), 
-                /*exclamationToken*/ undefined, 
+                factory.createVariableDeclaration(factory.createUniqueName("_this", 16 /* Optimistic */ | 32 /* FileLevel */),
+                /*exclamationToken*/ undefined,
                 /*type*/ undefined, initializer)
             ]));
             ts.setEmitFlags(captureThisStatement, 1536 /* NoComments */ | 1048576 /* CustomPrologue */);
@@ -90378,8 +90378,8 @@ var ts;
                     case 208 /* FunctionExpression */:
                         // Functions can be called or constructed, and may have a `this` due to
                         // being a member or when calling an imported function via `other_1.f()`.
-                        newTarget = factory.createConditionalExpression(factory.createLogicalAnd(ts.setEmitFlags(factory.createThis(), 4 /* NoSubstitution */), factory.createBinaryExpression(ts.setEmitFlags(factory.createThis(), 4 /* NoSubstitution */), 101 /* InstanceOfKeyword */, factory.getLocalName(node))), 
-                        /*questionToken*/ undefined, factory.createPropertyAccessExpression(ts.setEmitFlags(factory.createThis(), 4 /* NoSubstitution */), "constructor"), 
+                        newTarget = factory.createConditionalExpression(factory.createLogicalAnd(ts.setEmitFlags(factory.createThis(), 4 /* NoSubstitution */), factory.createBinaryExpression(ts.setEmitFlags(factory.createThis(), 4 /* NoSubstitution */), 101 /* InstanceOfKeyword */, factory.getLocalName(node))),
+                        /*questionToken*/ undefined, factory.createPropertyAccessExpression(ts.setEmitFlags(factory.createThis(), 4 /* NoSubstitution */), "constructor"),
                         /*colonToken*/ undefined, factory.createVoidZero());
                         break;
                     default:
@@ -90387,8 +90387,8 @@ var ts;
                 }
                 var captureNewTargetStatement = factory.createVariableStatement(
                 /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                    factory.createVariableDeclaration(factory.createUniqueName("_newTarget", 16 /* Optimistic */ | 32 /* FileLevel */), 
-                    /*exclamationToken*/ undefined, 
+                    factory.createVariableDeclaration(factory.createUniqueName("_newTarget", 16 /* Optimistic */ | 32 /* FileLevel */),
+                    /*exclamationToken*/ undefined,
                     /*type*/ undefined, newTarget)
                 ]));
                 ts.setEmitFlags(captureNewTargetStatement, 1536 /* NoComments */ | 1048576 /* CustomPrologue */);
@@ -90527,7 +90527,7 @@ var ts;
                 properties.push(setter);
             }
             properties.push(factory.createPropertyAssignment("enumerable", getAccessor || setAccessor ? factory.createFalse() : factory.createTrue()), factory.createPropertyAssignment("configurable", factory.createTrue()));
-            var call = factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("Object"), "defineProperty"), 
+            var call = factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("Object"), "defineProperty"),
             /*typeArguments*/ undefined, [
                 target,
                 propertyName,
@@ -90551,10 +90551,10 @@ var ts;
             convertedLoopState = undefined;
             var ancestorFacts = enterSubtree(15232 /* ArrowFunctionExcludes */, 66 /* ArrowFunctionIncludes */);
             var func = factory.createFunctionExpression(
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, 
-            /*name*/ undefined, 
-            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined,
+            /*name*/ undefined,
+            /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
             /*type*/ undefined, transformFunctionBody(node));
             ts.setTextRange(func, node);
             ts.setOriginalNode(func, node);
@@ -90585,9 +90585,9 @@ var ts;
                 : node.name;
             exitSubtree(ancestorFacts, 49152 /* FunctionSubtreeExcludes */, 0 /* None */);
             convertedLoopState = savedConvertedLoopState;
-            return factory.updateFunctionExpression(node, 
-            /*modifiers*/ undefined, node.asteriskToken, name, 
-            /*typeParameters*/ undefined, parameters, 
+            return factory.updateFunctionExpression(node,
+            /*modifiers*/ undefined, node.asteriskToken, name,
+            /*typeParameters*/ undefined, parameters,
             /*type*/ undefined, body);
         }
         /**
@@ -90606,9 +90606,9 @@ var ts;
                 : node.name;
             exitSubtree(ancestorFacts, 49152 /* FunctionSubtreeExcludes */, 0 /* None */);
             convertedLoopState = savedConvertedLoopState;
-            return factory.updateFunctionDeclaration(node, 
-            /*decorators*/ undefined, ts.visitNodes(node.modifiers, visitor, ts.isModifier), node.asteriskToken, name, 
-            /*typeParameters*/ undefined, parameters, 
+            return factory.updateFunctionDeclaration(node,
+            /*decorators*/ undefined, ts.visitNodes(node.modifiers, visitor, ts.isModifier), node.asteriskToken, name,
+            /*typeParameters*/ undefined, parameters,
             /*type*/ undefined, body);
         }
         /**
@@ -90632,9 +90632,9 @@ var ts;
             exitSubtree(ancestorFacts, 49152 /* FunctionSubtreeExcludes */, 0 /* None */);
             convertedLoopState = savedConvertedLoopState;
             return ts.setOriginalNode(ts.setTextRange(factory.createFunctionExpression(
-            /*modifiers*/ undefined, node.asteriskToken, name, 
-            /*typeParameters*/ undefined, parameters, 
-            /*type*/ undefined, body), location), 
+            /*modifiers*/ undefined, node.asteriskToken, name,
+            /*typeParameters*/ undefined, parameters,
+            /*type*/ undefined, body), location),
             /*original*/ node);
         }
         /**
@@ -90953,7 +90953,7 @@ var ts;
             var ancestorFacts = enterSubtree(32 /* ExportedVariableStatement */, 0 /* None */);
             var updated;
             if (ts.isBindingPattern(node.name)) {
-                updated = ts.flattenDestructuringBinding(node, visitor, context, 0 /* All */, 
+                updated = ts.flattenDestructuringBinding(node, visitor, context, 0 /* All */,
                 /*value*/ undefined, (ancestorFacts & 32 /* ExportedVariableStatement */) !== 0);
             }
             else {
@@ -91036,8 +91036,8 @@ var ts;
                     // to emit it separately.
                     statements.push(ts.setTextRange(factory.createVariableStatement(
                     /*modifiers*/ undefined, ts.setOriginalNode(ts.setTextRange(factory.createVariableDeclarationList([
-                        factory.createVariableDeclaration(firstOriginalDeclaration ? firstOriginalDeclaration.name : factory.createTempVariable(/*recordTempVariable*/ undefined), 
-                        /*exclamationToken*/ undefined, 
+                        factory.createVariableDeclaration(firstOriginalDeclaration ? firstOriginalDeclaration.name : factory.createTempVariable(/*recordTempVariable*/ undefined),
+                        /*exclamationToken*/ undefined,
                         /*type*/ undefined, boundValue)
                     ]), ts.moveRangePos(initializer, -1)), initializer)), ts.moveRangeEnd(initializer, -1)));
                 }
@@ -91069,7 +91069,7 @@ var ts;
             }
         }
         function createSyntheticBlockForConvertedStatements(statements) {
-            return ts.setEmitFlags(factory.createBlock(factory.createNodeArray(statements), 
+            return ts.setEmitFlags(factory.createBlock(factory.createNodeArray(statements),
             /*multiLine*/ true), 48 /* NoSourceMap */ | 384 /* NoTokenSourceMaps */);
         }
         function convertForOfStatementForArray(node, outermostLabeledStatement, convertedLoopBodyStatements) {
@@ -91107,10 +91107,10 @@ var ts;
             /*initializer*/ ts.setEmitFlags(ts.setTextRange(factory.createVariableDeclarationList([
                 ts.setTextRange(factory.createVariableDeclaration(counter, /*exclamationToken*/ undefined, /*type*/ undefined, factory.createNumericLiteral(0)), ts.moveRangePos(node.expression, -1)),
                 ts.setTextRange(factory.createVariableDeclaration(rhsReference, /*exclamationToken*/ undefined, /*type*/ undefined, expression), node.expression)
-            ]), node.expression), 2097152 /* NoHoisting */), 
-            /*condition*/ ts.setTextRange(factory.createLessThan(counter, factory.createPropertyAccessExpression(rhsReference, "length")), node.expression), 
-            /*incrementor*/ ts.setTextRange(factory.createPostfixIncrement(counter), node.expression), 
-            /*statement*/ convertForOfStatementHead(node, factory.createElementAccessExpression(rhsReference, counter), convertedLoopBodyStatements)), 
+            ]), node.expression), 2097152 /* NoHoisting */),
+            /*condition*/ ts.setTextRange(factory.createLessThan(counter, factory.createPropertyAccessExpression(rhsReference, "length")), node.expression),
+            /*incrementor*/ ts.setTextRange(factory.createPostfixIncrement(counter), node.expression),
+            /*statement*/ convertForOfStatementHead(node, factory.createElementAccessExpression(rhsReference, counter), convertedLoopBodyStatements)),
             /*location*/ node);
             // Disable trailing source maps for the OpenParenToken to align source map emit with the old emitter.
             ts.setEmitFlags(forStatement, 256 /* NoTokenTrailingSourceMaps */);
@@ -91136,10 +91136,10 @@ var ts;
             /*initializer*/ ts.setEmitFlags(ts.setTextRange(factory.createVariableDeclarationList([
                 ts.setTextRange(factory.createVariableDeclaration(iterator, /*exclamationToken*/ undefined, /*type*/ undefined, initializer), node.expression),
                 factory.createVariableDeclaration(result, /*exclamationToken*/ undefined, /*type*/ undefined, next)
-            ]), node.expression), 2097152 /* NoHoisting */), 
-            /*condition*/ factory.createLogicalNot(factory.createPropertyAccessExpression(result, "done")), 
-            /*incrementor*/ factory.createAssignment(result, next), 
-            /*statement*/ convertForOfStatementHead(node, factory.createPropertyAccessExpression(result, "value"), convertedLoopBodyStatements)), 
+            ]), node.expression), 2097152 /* NoHoisting */),
+            /*condition*/ factory.createLogicalNot(factory.createPropertyAccessExpression(result, "done")),
+            /*incrementor*/ factory.createAssignment(result, next),
+            /*statement*/ convertForOfStatementHead(node, factory.createPropertyAccessExpression(result, "value"), convertedLoopBodyStatements)),
             /*location*/ node), 256 /* NoTokenTrailingSourceMaps */);
             return factory.createTryStatement(factory.createBlock([
                 factory.restoreEnclosingLabel(forStatement, outermostLabeledStatement, convertedLoopState && resetLabel)
@@ -91151,8 +91151,8 @@ var ts;
                 factory.createTryStatement(
                 /*tryBlock*/ factory.createBlock([
                     ts.setEmitFlags(factory.createIfStatement(factory.createLogicalAnd(factory.createLogicalAnd(result, factory.createLogicalNot(factory.createPropertyAccessExpression(result, "done"))), factory.createAssignment(returnMethod, factory.createPropertyAccessExpression(iterator, "return"))), factory.createExpressionStatement(factory.createFunctionCallCall(returnMethod, iterator, []))), 1 /* SingleLine */),
-                ]), 
-                /*catchClause*/ undefined, 
+                ]),
+                /*catchClause*/ undefined,
                 /*finallyBlock*/ ts.setEmitFlags(factory.createBlock([
                     ts.setEmitFlags(factory.createIfStatement(errorRecord, factory.createThrowStatement(factory.createPropertyAccessExpression(errorRecord, "error"))), 1 /* SingleLine */)
                 ]), 1 /* SingleLine */))
@@ -91302,7 +91302,7 @@ var ts;
             return factory.updateForStatement(node, ts.visitNode(initializerFunction ? initializerFunction.part : node.initializer, visitorWithUnusedExpressionResult, ts.isForInitializer), ts.visitNode(shouldConvertCondition ? undefined : node.condition, visitor, ts.isExpression), ts.visitNode(shouldConvertIncrementor ? undefined : node.incrementor, visitorWithUnusedExpressionResult, ts.isExpression), convertedLoopBody);
         }
         function convertForOfStatement(node, convertedLoopBody) {
-            return factory.updateForOfStatement(node, 
+            return factory.updateForOfStatement(node,
             /*awaitModifier*/ undefined, ts.visitNode(node.initializer, visitor, ts.isForInitializer), ts.visitNode(node.expression, visitor, ts.isExpression), convertedLoopBody);
         }
         function convertForInStatement(node, convertedLoopBody) {
@@ -91370,8 +91370,8 @@ var ts;
                 }
                 else {
                     // this is top level converted loop and we need to create an alias for 'arguments' object
-                    (extraVariableDeclarations || (extraVariableDeclarations = [])).push(factory.createVariableDeclaration(state.argumentsName, 
-                    /*exclamationToken*/ undefined, 
+                    (extraVariableDeclarations || (extraVariableDeclarations = [])).push(factory.createVariableDeclaration(state.argumentsName,
+                    /*exclamationToken*/ undefined,
                     /*type*/ undefined, factory.createIdentifier("arguments")));
                 }
             }
@@ -91386,8 +91386,8 @@ var ts;
                     // NOTE:
                     // if converted loops were all nested in arrow function then we'll always emit '_this' so convertedLoopState.thisName will not be set.
                     // If it is set this means that all nested loops are not nested in arrow function and it is safe to capture 'this'.
-                    (extraVariableDeclarations || (extraVariableDeclarations = [])).push(factory.createVariableDeclaration(state.thisName, 
-                    /*exclamationToken*/ undefined, 
+                    (extraVariableDeclarations || (extraVariableDeclarations = [])).push(factory.createVariableDeclaration(state.thisName,
+                    /*exclamationToken*/ undefined,
                     /*type*/ undefined, factory.createIdentifier("this")));
                 }
             }
@@ -91472,13 +91472,13 @@ var ts;
             // from affecting the initial value for `i` outside of the per-iteration environment.
             var functionDeclaration = factory.createVariableStatement(
             /*modifiers*/ undefined, ts.setEmitFlags(factory.createVariableDeclarationList([
-                factory.createVariableDeclaration(functionName, 
-                /*exclamationToken*/ undefined, 
+                factory.createVariableDeclaration(functionName,
+                /*exclamationToken*/ undefined,
                 /*type*/ undefined, ts.setEmitFlags(factory.createFunctionExpression(
-                /*modifiers*/ undefined, containsYield ? factory.createToken(41 /* AsteriskToken */) : undefined, 
-                /*name*/ undefined, 
-                /*typeParameters*/ undefined, 
-                /*parameters*/ undefined, 
+                /*modifiers*/ undefined, containsYield ? factory.createToken(41 /* AsteriskToken */) : undefined,
+                /*name*/ undefined,
+                /*typeParameters*/ undefined,
+                /*parameters*/ undefined,
                 /*type*/ undefined, ts.visitNode(factory.createBlock(statements, /*multiLine*/ true), visitor, ts.isBlock)), emitFlags))
             ]), 2097152 /* NoHoisting */));
             var part = factory.createVariableDeclarationList(ts.map(currentState.loopOutParameters, createOutVariable));
@@ -91578,12 +91578,12 @@ var ts;
             //  }
             var functionDeclaration = factory.createVariableStatement(
             /*modifiers*/ undefined, ts.setEmitFlags(factory.createVariableDeclarationList([
-                factory.createVariableDeclaration(functionName, 
-                /*exclamationToken*/ undefined, 
+                factory.createVariableDeclaration(functionName,
+                /*exclamationToken*/ undefined,
                 /*type*/ undefined, ts.setEmitFlags(factory.createFunctionExpression(
-                /*modifiers*/ undefined, containsYield ? factory.createToken(41 /* AsteriskToken */) : undefined, 
-                /*name*/ undefined, 
-                /*typeParameters*/ undefined, currentState.loopParameters, 
+                /*modifiers*/ undefined, containsYield ? factory.createToken(41 /* AsteriskToken */) : undefined,
+                /*name*/ undefined,
+                /*typeParameters*/ undefined, currentState.loopParameters,
                 /*type*/ undefined, loopBody), emitFlags))
             ]), 2097152 /* NoHoisting */));
             var part = generateCallToConvertedLoop(functionName, currentState, outerState, containsYield);
@@ -91833,7 +91833,7 @@ var ts;
             ts.Debug.assert(!ts.isComputedPropertyName(node.name));
             var functionExpression = transformFunctionLikeToExpression(node, /*location*/ ts.moveRangePos(node, -1), /*name*/ undefined, /*container*/ undefined);
             ts.setEmitFlags(functionExpression, 512 /* NoLeadingComments */ | ts.getEmitFlags(functionExpression));
-            return ts.setTextRange(factory.createPropertyAssignment(node.name, functionExpression), 
+            return ts.setTextRange(factory.createPropertyAssignment(node.name, functionExpression),
             /*location*/ node);
         }
         /**
@@ -91865,7 +91865,7 @@ var ts;
          * @param node A ShorthandPropertyAssignment node.
          */
         function visitShorthandPropertyAssignment(node) {
-            return ts.setTextRange(factory.createPropertyAssignment(node.name, visitIdentifier(factory.cloneNode(node.name))), 
+            return ts.setTextRange(factory.createPropertyAssignment(node.name, visitIdentifier(factory.cloneNode(node.name))),
             /*location*/ node);
         }
         function visitComputedPropertyName(node) {
@@ -91907,7 +91907,7 @@ var ts;
                 ts.some(node.arguments, ts.isSpreadElement)) {
                 return visitCallExpressionWithPotentialCapturedThisAssignment(node, /*assignToCapturedThis*/ true);
             }
-            return factory.updateCallExpression(node, ts.visitNode(node.expression, callExpressionVisitor, ts.isExpression), 
+            return factory.updateCallExpression(node, ts.visitNode(node.expression, callExpressionVisitor, ts.isExpression),
             /*typeArguments*/ undefined, ts.visitNodes(node.arguments, visitor, ts.isExpression));
         }
         function visitTypeScriptClassWrapper(node) {
@@ -92015,12 +92015,12 @@ var ts;
             ts.addRange(statements, classStatements, /*start*/ 1);
             // Recreate any outer parentheses or partially-emitted expressions to preserve source map
             // and comment locations.
-            return factory.restoreOuterExpressions(node.expression, factory.restoreOuterExpressions(variable.initializer, factory.restoreOuterExpressions(aliasAssignment && aliasAssignment.right, factory.updateCallExpression(call, factory.restoreOuterExpressions(call.expression, factory.updateFunctionExpression(func, 
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, 
-            /*name*/ undefined, 
-            /*typeParameters*/ undefined, func.parameters, 
-            /*type*/ undefined, factory.updateBlock(func.body, statements))), 
+            return factory.restoreOuterExpressions(node.expression, factory.restoreOuterExpressions(variable.initializer, factory.restoreOuterExpressions(aliasAssignment && aliasAssignment.right, factory.updateCallExpression(call, factory.restoreOuterExpressions(call.expression, factory.updateFunctionExpression(func,
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined,
+            /*name*/ undefined,
+            /*typeParameters*/ undefined, func.parameters,
+            /*type*/ undefined, factory.updateBlock(func.body, statements))),
             /*typeArguments*/ undefined, call.arguments))));
         }
         function visitImmediateSuperCallInBody(node) {
@@ -92089,7 +92089,7 @@ var ts;
                 // [output]
                 //      new ((_a = C).bind.apply(_a, [void 0].concat(a)))()
                 var _a = factory.createCallBinding(factory.createPropertyAccessExpression(node.expression, "bind"), hoistVariableDeclaration), target = _a.target, thisArg = _a.thisArg;
-                return factory.createNewExpression(factory.createFunctionApplyCall(ts.visitNode(target, visitor, ts.isExpression), thisArg, transformAndSpreadElements(factory.createNodeArray(__spreadArray([factory.createVoidZero()], node.arguments)), /*needsUniqueCopy*/ false, /*multiLine*/ false, /*hasTrailingComma*/ false)), 
+                return factory.createNewExpression(factory.createFunctionApplyCall(ts.visitNode(target, visitor, ts.isExpression), thisArg, transformAndSpreadElements(factory.createNodeArray(__spreadArray([factory.createVoidZero()], node.arguments)), /*needsUniqueCopy*/ false, /*multiLine*/ false, /*hasTrailingComma*/ false)),
                 /*typeArguments*/ undefined, []);
             }
             return ts.visitEachChild(node, visitor, context);
@@ -92996,10 +92996,10 @@ var ts;
             // Currently, we only support generators that were originally async functions.
             if (node.asteriskToken) {
                 node = ts.setOriginalNode(ts.setTextRange(factory.createFunctionDeclaration(
-                /*decorators*/ undefined, node.modifiers, 
-                /*asteriskToken*/ undefined, node.name, 
-                /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
-                /*type*/ undefined, transformGeneratorFunctionBody(node.body)), 
+                /*decorators*/ undefined, node.modifiers,
+                /*asteriskToken*/ undefined, node.name,
+                /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
+                /*type*/ undefined, transformGeneratorFunctionBody(node.body)),
                 /*location*/ node), node);
             }
             else {
@@ -93034,10 +93034,10 @@ var ts;
             // Currently, we only support generators that were originally async functions.
             if (node.asteriskToken) {
                 node = ts.setOriginalNode(ts.setTextRange(factory.createFunctionExpression(
-                /*modifiers*/ undefined, 
-                /*asteriskToken*/ undefined, node.name, 
-                /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context), 
-                /*type*/ undefined, transformGeneratorFunctionBody(node.body)), 
+                /*modifiers*/ undefined,
+                /*asteriskToken*/ undefined, node.name,
+                /*typeParameters*/ undefined, ts.visitParameterList(node.parameters, visitor, context),
+                /*type*/ undefined, transformGeneratorFunctionBody(node.body)),
                 /*location*/ node), node);
             }
             else {
@@ -93560,8 +93560,8 @@ var ts;
                 //  .mark resumeLabel
                 //      new (_b.apply(_a, _c.concat([%sent%, 2])));
                 var _a = factory.createCallBinding(factory.createPropertyAccessExpression(node.expression, "bind"), hoistVariableDeclaration), target = _a.target, thisArg = _a.thisArg;
-                return ts.setOriginalNode(ts.setTextRange(factory.createNewExpression(factory.createFunctionApplyCall(cacheExpression(ts.visitNode(target, visitor, ts.isExpression)), thisArg, visitElements(node.arguments, 
-                /*leadingElement*/ factory.createVoidZero())), 
+                return ts.setOriginalNode(ts.setTextRange(factory.createNewExpression(factory.createFunctionApplyCall(cacheExpression(ts.visitNode(target, visitor, ts.isExpression)), thisArg, visitElements(node.arguments,
+                /*leadingElement*/ factory.createVoidZero())),
                 /*typeArguments*/ undefined, []), node), node);
             }
             return ts.visitEachChild(node, visitor, context);
@@ -93878,7 +93878,7 @@ var ts;
                 var initializer = node.initializer;
                 hoistVariableDeclaration(keysIndex);
                 emitAssignment(keysArray, factory.createArrayLiteralExpression());
-                emitStatement(factory.createForInStatement(key, ts.visitNode(node.expression, visitor, ts.isExpression), factory.createExpressionStatement(factory.createCallExpression(factory.createPropertyAccessExpression(keysArray, "push"), 
+                emitStatement(factory.createForInStatement(key, ts.visitNode(node.expression, visitor, ts.isExpression), factory.createExpressionStatement(factory.createCallExpression(factory.createPropertyAccessExpression(keysArray, "push"),
                 /*typeArguments*/ undefined, [key]))));
                 emitAssignment(keysIndex, factory.createNumericLiteral(0));
                 var conditionLabel = defineLabel();
@@ -93980,11 +93980,11 @@ var ts;
             return ts.visitEachChild(node, visitor, context);
         }
         function transformAndEmitReturnStatement(node) {
-            emitReturn(ts.visitNode(node.expression, visitor, ts.isExpression), 
+            emitReturn(ts.visitNode(node.expression, visitor, ts.isExpression),
             /*location*/ node);
         }
         function visitReturnStatement(node) {
-            return createInlineReturn(ts.visitNode(node.expression, visitor, ts.isExpression), 
+            return createInlineReturn(ts.visitNode(node.expression, visitor, ts.isExpression),
             /*location*/ node);
         }
         function transformAndEmitWithStatement(node) {
@@ -94143,7 +94143,7 @@ var ts;
         function transformAndEmitThrowStatement(node) {
             var _a;
             // TODO(rbuckton): `expression` should be required on `throw`.
-            emitThrow(ts.visitNode((_a = node.expression) !== null && _a !== void 0 ? _a : factory.createVoidZero(), visitor, ts.isExpression), 
+            emitThrow(ts.visitNode((_a = node.expression) !== null && _a !== void 0 ? _a : factory.createVoidZero(), visitor, ts.isExpression),
             /*location*/ node);
         }
         function transformAndEmitTryStatement(node) {
@@ -94680,7 +94680,7 @@ var ts;
          * Creates an expression that can be used to resume from a Yield operation.
          */
         function createGeneratorResume(location) {
-            return ts.setTextRange(factory.createCallExpression(factory.createPropertyAccessExpression(state, "sent"), 
+            return ts.setTextRange(factory.createCallExpression(factory.createPropertyAccessExpression(state, "sent"),
             /*typeArguments*/ undefined, []), location);
         }
         /**
@@ -94822,11 +94822,11 @@ var ts;
             withBlockStack = undefined;
             var buildResult = buildStatements();
             return emitHelpers().createGeneratorHelper(ts.setEmitFlags(factory.createFunctionExpression(
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, 
-            /*name*/ undefined, 
-            /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, state)], 
-            /*type*/ undefined, factory.createBlock(buildResult, 
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined,
+            /*name*/ undefined,
+            /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, state)],
+            /*type*/ undefined, factory.createBlock(buildResult,
             /*multiLine*/ buildResult.length > 0)), 524288 /* ReuseTempVariableScope */));
         }
         /**
@@ -94927,7 +94927,7 @@ var ts;
                     // indicate entry into a protected region by pushing the label numbers
                     // for each block in the protected region.
                     var startLabel = currentExceptionBlock.startLabel, catchLabel = currentExceptionBlock.catchLabel, finallyLabel = currentExceptionBlock.finallyLabel, endLabel = currentExceptionBlock.endLabel;
-                    statements.unshift(factory.createExpressionStatement(factory.createCallExpression(factory.createPropertyAccessExpression(factory.createPropertyAccessExpression(state, "trys"), "push"), 
+                    statements.unshift(factory.createExpressionStatement(factory.createCallExpression(factory.createPropertyAccessExpression(factory.createPropertyAccessExpression(state, "trys"), "push"),
                     /*typeArguments*/ undefined, [
                         factory.createArrayLiteralExpression([
                             createLabel(startLabel),
@@ -95325,7 +95325,7 @@ var ts;
             //
             //     define(mofactory.updateSourceFile", "module2"], function ...
             var updated = factory.updateSourceFile(node, ts.setTextRange(factory.createNodeArray([
-                factory.createExpressionStatement(factory.createCallExpression(define, 
+                factory.createExpressionStatement(factory.createCallExpression(define,
                 /*typeArguments*/ undefined, __spreadArray(__spreadArray([], (moduleName ? [moduleName] : [])), [
                     // Add the dependency array argument:
                     //
@@ -95340,16 +95340,16 @@ var ts;
                     jsonSourceFile ?
                         jsonSourceFile.statements.length ? jsonSourceFile.statements[0].expression : factory.createObjectLiteralExpression() :
                         factory.createFunctionExpression(
-                        /*modifiers*/ undefined, 
-                        /*asteriskToken*/ undefined, 
-                        /*name*/ undefined, 
+                        /*modifiers*/ undefined,
+                        /*asteriskToken*/ undefined,
+                        /*name*/ undefined,
                         /*typeParameters*/ undefined, __spreadArray([
                             factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, "require"),
                             factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, "exports")
-                        ], importAliasNames), 
+                        ], importAliasNames),
                         /*type*/ undefined, transformAsynchronousModuleBody(node))
                 ])))
-            ]), 
+            ]),
             /*location*/ node.statements));
             ts.addEmitHelpers(updated, context.readEmitHelpers());
             return updated;
@@ -95363,17 +95363,17 @@ var ts;
             var _a = collectAsynchronousDependencies(node, /*includeNonAmdDependencies*/ false), aliasedModuleNames = _a.aliasedModuleNames, unaliasedModuleNames = _a.unaliasedModuleNames, importAliasNames = _a.importAliasNames;
             var moduleName = ts.tryGetModuleNameFromFile(factory, node, host, compilerOptions);
             var umdHeader = factory.createFunctionExpression(
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, 
-            /*name*/ undefined, 
-            /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, "factory")], 
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined,
+            /*name*/ undefined,
+            /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, "factory")],
             /*type*/ undefined, ts.setTextRange(factory.createBlock([
                 factory.createIfStatement(factory.createLogicalAnd(factory.createTypeCheck(factory.createIdentifier("module"), "object"), factory.createTypeCheck(factory.createPropertyAccessExpression(factory.createIdentifier("module"), "exports"), "object")), factory.createBlock([
                     factory.createVariableStatement(
                     /*modifiers*/ undefined, [
-                        factory.createVariableDeclaration("v", 
-                        /*exclamationToken*/ undefined, 
-                        /*type*/ undefined, factory.createCallExpression(factory.createIdentifier("factory"), 
+                        factory.createVariableDeclaration("v",
+                        /*exclamationToken*/ undefined,
+                        /*type*/ undefined, factory.createCallExpression(factory.createIdentifier("factory"),
                         /*typeArguments*/ undefined, [
                             factory.createIdentifier("require"),
                             factory.createIdentifier("exports")
@@ -95381,7 +95381,7 @@ var ts;
                     ]),
                     ts.setEmitFlags(factory.createIfStatement(factory.createStrictInequality(factory.createIdentifier("v"), factory.createIdentifier("undefined")), factory.createExpressionStatement(factory.createAssignment(factory.createPropertyAccessExpression(factory.createIdentifier("module"), "exports"), factory.createIdentifier("v")))), 1 /* SingleLine */)
                 ]), factory.createIfStatement(factory.createLogicalAnd(factory.createTypeCheck(factory.createIdentifier("define"), "function"), factory.createPropertyAccessExpression(factory.createIdentifier("define"), "amd")), factory.createBlock([
-                    factory.createExpressionStatement(factory.createCallExpression(factory.createIdentifier("define"), 
+                    factory.createExpressionStatement(factory.createCallExpression(factory.createIdentifier("define"),
                     /*typeArguments*/ undefined, __spreadArray(__spreadArray([], (moduleName ? [moduleName] : [])), [
                         factory.createArrayLiteralExpression(__spreadArray(__spreadArray([
                             factory.createStringLiteral("require"),
@@ -95390,8 +95390,8 @@ var ts;
                         factory.createIdentifier("factory")
                     ])))
                 ])))
-            ], 
-            /*multiLine*/ true), 
+            ],
+            /*multiLine*/ true),
             /*location*/ undefined));
             // Create an updated SourceFile:
             //
@@ -95405,22 +95405,22 @@ var ts;
             //      }
             //  })(function ...)
             var updated = factory.updateSourceFile(node, ts.setTextRange(factory.createNodeArray([
-                factory.createExpressionStatement(factory.createCallExpression(umdHeader, 
+                factory.createExpressionStatement(factory.createCallExpression(umdHeader,
                 /*typeArguments*/ undefined, [
                     // Add the module body function argument:
                     //
                     //     function (require, exports) ...
                     factory.createFunctionExpression(
-                    /*modifiers*/ undefined, 
-                    /*asteriskToken*/ undefined, 
-                    /*name*/ undefined, 
+                    /*modifiers*/ undefined,
+                    /*asteriskToken*/ undefined,
+                    /*name*/ undefined,
                     /*typeParameters*/ undefined, __spreadArray([
                         factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, "require"),
                         factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, "exports")
-                    ], importAliasNames), 
+                    ], importAliasNames),
                     /*type*/ undefined, transformAsynchronousModuleBody(node))
                 ]))
-            ]), 
+            ]),
             /*location*/ node.statements));
             ts.addEmitHelpers(updated, context.readEmitHelpers());
             return updated;
@@ -95679,19 +95679,19 @@ var ts;
             if (ts.isSimpleCopiableExpression(arg)) {
                 var argClone = ts.isGeneratedIdentifier(arg) ? arg : ts.isStringLiteral(arg) ? factory.createStringLiteralFromNode(arg) : ts.setEmitFlags(ts.setTextRange(factory.cloneNode(arg), arg), 1536 /* NoComments */);
                 return factory.createConditionalExpression(
-                /*condition*/ factory.createIdentifier("__syncRequire"), 
-                /*questionToken*/ undefined, 
-                /*whenTrue*/ createImportCallExpressionCommonJS(arg, containsLexicalThis), 
-                /*colonToken*/ undefined, 
+                /*condition*/ factory.createIdentifier("__syncRequire"),
+                /*questionToken*/ undefined,
+                /*whenTrue*/ createImportCallExpressionCommonJS(arg, containsLexicalThis),
+                /*colonToken*/ undefined,
                 /*whenFalse*/ createImportCallExpressionAMD(argClone, containsLexicalThis));
             }
             else {
                 var temp = factory.createTempVariable(hoistVariableDeclaration);
                 return factory.createComma(factory.createAssignment(temp, arg), factory.createConditionalExpression(
-                /*condition*/ factory.createIdentifier("__syncRequire"), 
-                /*questionToken*/ undefined, 
-                /*whenTrue*/ createImportCallExpressionCommonJS(temp, containsLexicalThis), 
-                /*colonToken*/ undefined, 
+                /*condition*/ factory.createIdentifier("__syncRequire"),
+                /*questionToken*/ undefined,
+                /*whenTrue*/ createImportCallExpressionCommonJS(temp, containsLexicalThis),
+                /*colonToken*/ undefined,
                 /*whenFalse*/ createImportCallExpressionAMD(temp, containsLexicalThis)));
             }
         }
@@ -95709,23 +95709,23 @@ var ts;
                 factory.createParameterDeclaration(/*decorator*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, /*name*/ reject)
             ];
             var body = factory.createBlock([
-                factory.createExpressionStatement(factory.createCallExpression(factory.createIdentifier("require"), 
+                factory.createExpressionStatement(factory.createCallExpression(factory.createIdentifier("require"),
                 /*typeArguments*/ undefined, [factory.createArrayLiteralExpression([arg || factory.createOmittedExpression()]), resolve, reject]))
             ]);
             var func;
             if (languageVersion >= 2 /* ES2015 */) {
                 func = factory.createArrowFunction(
-                /*modifiers*/ undefined, 
-                /*typeParameters*/ undefined, parameters, 
-                /*type*/ undefined, 
+                /*modifiers*/ undefined,
+                /*typeParameters*/ undefined, parameters,
+                /*type*/ undefined,
                 /*equalsGreaterThanToken*/ undefined, body);
             }
             else {
                 func = factory.createFunctionExpression(
-                /*modifiers*/ undefined, 
-                /*asteriskToken*/ undefined, 
-                /*name*/ undefined, 
-                /*typeParameters*/ undefined, parameters, 
+                /*modifiers*/ undefined,
+                /*asteriskToken*/ undefined,
+                /*name*/ undefined,
+                /*typeParameters*/ undefined, parameters,
                 /*type*/ undefined, body);
                 // if there is a lexical 'this' in the import call arguments, ensure we indicate
                 // that this new function expression indicates it captures 'this' so that the
@@ -95754,19 +95754,19 @@ var ts;
             var func;
             if (languageVersion >= 2 /* ES2015 */) {
                 func = factory.createArrowFunction(
-                /*modifiers*/ undefined, 
-                /*typeParameters*/ undefined, 
-                /*parameters*/ [], 
-                /*type*/ undefined, 
+                /*modifiers*/ undefined,
+                /*typeParameters*/ undefined,
+                /*parameters*/ [],
+                /*type*/ undefined,
                 /*equalsGreaterThanToken*/ undefined, requireCall);
             }
             else {
                 func = factory.createFunctionExpression(
-                /*modifiers*/ undefined, 
-                /*asteriskToken*/ undefined, 
-                /*name*/ undefined, 
-                /*typeParameters*/ undefined, 
-                /*parameters*/ [], 
+                /*modifiers*/ undefined,
+                /*asteriskToken*/ undefined,
+                /*name*/ undefined,
+                /*typeParameters*/ undefined,
+                /*parameters*/ [],
                 /*type*/ undefined, factory.createBlock([factory.createReturnStatement(requireCall)]));
                 // if there is a lexical 'this' in the import call arguments, ensure we indicate
                 // that this new function expression indicates it captures 'this' so that the
@@ -95815,8 +95815,8 @@ var ts;
                     var variables = [];
                     if (namespaceDeclaration && !ts.isDefaultImport(node)) {
                         // import * as n from "mod";
-                        variables.push(factory.createVariableDeclaration(factory.cloneNode(namespaceDeclaration.name), 
-                        /*exclamationToken*/ undefined, 
+                        variables.push(factory.createVariableDeclaration(factory.cloneNode(namespaceDeclaration.name),
+                        /*exclamationToken*/ undefined,
                         /*type*/ undefined, getHelperExpressionForImport(node, createRequireCall(node))));
                     }
                     else {
@@ -95824,18 +95824,18 @@ var ts;
                         // import { x, y } from "mod";
                         // import d, { x, y } from "mod";
                         // import d, * as n from "mod";
-                        variables.push(factory.createVariableDeclaration(factory.getGeneratedNameForNode(node), 
-                        /*exclamationToken*/ undefined, 
+                        variables.push(factory.createVariableDeclaration(factory.getGeneratedNameForNode(node),
+                        /*exclamationToken*/ undefined,
                         /*type*/ undefined, getHelperExpressionForImport(node, createRequireCall(node))));
                         if (namespaceDeclaration && ts.isDefaultImport(node)) {
-                            variables.push(factory.createVariableDeclaration(factory.cloneNode(namespaceDeclaration.name), 
-                            /*exclamationToken*/ undefined, 
+                            variables.push(factory.createVariableDeclaration(factory.cloneNode(namespaceDeclaration.name),
+                            /*exclamationToken*/ undefined,
                             /*type*/ undefined, factory.getGeneratedNameForNode(node)));
                         }
                     }
                     statements = ts.append(statements, ts.setOriginalNode(ts.setTextRange(factory.createVariableStatement(
-                    /*modifiers*/ undefined, factory.createVariableDeclarationList(variables, languageVersion >= 2 /* ES2015 */ ? 2 /* Const */ : 0 /* None */)), 
-                    /*location*/ node), 
+                    /*modifiers*/ undefined, factory.createVariableDeclarationList(variables, languageVersion >= 2 /* ES2015 */ ? 2 /* Const */ : 0 /* None */)),
+                    /*location*/ node),
                     /*original*/ node));
                 }
             }
@@ -95843,10 +95843,10 @@ var ts;
                 // import d, * as n from "mod";
                 statements = ts.append(statements, factory.createVariableStatement(
                 /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                    ts.setOriginalNode(ts.setTextRange(factory.createVariableDeclaration(factory.cloneNode(namespaceDeclaration.name), 
-                    /*exclamationToken*/ undefined, 
-                    /*type*/ undefined, factory.getGeneratedNameForNode(node)), 
-                    /*location*/ node), 
+                    ts.setOriginalNode(ts.setTextRange(factory.createVariableDeclaration(factory.cloneNode(namespaceDeclaration.name),
+                    /*exclamationToken*/ undefined,
+                    /*type*/ undefined, factory.getGeneratedNameForNode(node)),
+                    /*location*/ node),
                     /*original*/ node)
                 ], languageVersion >= 2 /* ES2015 */ ? 2 /* Const */ : 0 /* None */)));
             }
@@ -95888,10 +95888,10 @@ var ts;
                 else {
                     statements = ts.append(statements, ts.setOriginalNode(ts.setTextRange(factory.createVariableStatement(
                     /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                        factory.createVariableDeclaration(factory.cloneNode(node.name), 
-                        /*exclamationToken*/ undefined, 
+                        factory.createVariableDeclaration(factory.cloneNode(node.name),
+                        /*exclamationToken*/ undefined,
                         /*type*/ undefined, createRequireCall(node))
-                    ], 
+                    ],
                     /*flags*/ languageVersion >= 2 /* ES2015 */ ? 2 /* Const */ : 0 /* None */)), node), node));
                 }
             }
@@ -95928,11 +95928,11 @@ var ts;
                 if (moduleKind !== ts.ModuleKind.AMD) {
                     statements.push(ts.setOriginalNode(ts.setTextRange(factory.createVariableStatement(
                     /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                        factory.createVariableDeclaration(generatedName, 
-                        /*exclamationToken*/ undefined, 
+                        factory.createVariableDeclaration(generatedName,
+                        /*exclamationToken*/ undefined,
                         /*type*/ undefined, createRequireCall(node))
-                    ])), 
-                    /*location*/ node), 
+                    ])),
+                    /*location*/ node),
                     /* original */ node));
                 }
                 for (var _i = 0, _a = node.exportClause.elements; _i < _a.length; _i++) {
@@ -95995,10 +95995,10 @@ var ts;
             var statements;
             if (ts.hasSyntacticModifier(node, 1 /* Export */)) {
                 statements = ts.append(statements, ts.setOriginalNode(ts.setTextRange(factory.createFunctionDeclaration(
-                /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), node.asteriskToken, factory.getDeclarationName(node, /*allowComments*/ true, /*allowSourceMaps*/ true), 
-                /*typeParameters*/ undefined, ts.visitNodes(node.parameters, moduleExpressionElementVisitor), 
-                /*type*/ undefined, ts.visitEachChild(node.body, moduleExpressionElementVisitor, context)), 
-                /*location*/ node), 
+                /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), node.asteriskToken, factory.getDeclarationName(node, /*allowComments*/ true, /*allowSourceMaps*/ true),
+                /*typeParameters*/ undefined, ts.visitNodes(node.parameters, moduleExpressionElementVisitor),
+                /*type*/ undefined, ts.visitEachChild(node.body, moduleExpressionElementVisitor, context)),
+                /*location*/ node),
                 /*original*/ node));
             }
             else {
@@ -96023,7 +96023,7 @@ var ts;
             var statements;
             if (ts.hasSyntacticModifier(node, 1 /* Export */)) {
                 statements = ts.append(statements, ts.setOriginalNode(ts.setTextRange(factory.createClassDeclaration(
-                /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), factory.getDeclarationName(node, /*allowComments*/ true, /*allowSourceMaps*/ true), 
+                /*decorators*/ undefined, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), factory.getDeclarationName(node, /*allowComments*/ true, /*allowSourceMaps*/ true),
                 /*typeParameters*/ undefined, ts.visitNodes(node.heritageClauses, moduleExpressionElementVisitor), ts.visitNodes(node.members, moduleExpressionElementVisitor)), node), node));
             }
             else {
@@ -96062,7 +96062,7 @@ var ts;
                     }
                     else if (variable.initializer) {
                         if (!ts.isBindingPattern(variable.name) && (ts.isArrowFunction(variable.initializer) || ts.isFunctionExpression(variable.initializer) || ts.isClassExpression(variable.initializer))) {
-                            var expression = factory.createAssignment(ts.setTextRange(factory.createPropertyAccessExpression(factory.createIdentifier("exports"), variable.name), 
+                            var expression = factory.createAssignment(ts.setTextRange(factory.createPropertyAccessExpression(factory.createIdentifier("exports"), variable.name),
                             /*location*/ variable.name), factory.createIdentifier(ts.getTextOfIdentifierOrLiteral(variable.name)));
                             var updatedVariable = factory.createVariableDeclaration(variable.name, variable.exclamationToken, variable.type, ts.visitNode(variable.initializer, moduleExpressionElementVisitor));
                             variables = ts.append(variables, updatedVariable);
@@ -96120,12 +96120,12 @@ var ts;
          */
         function transformInitializedVariable(node) {
             if (ts.isBindingPattern(node.name)) {
-                return ts.flattenDestructuringAssignment(ts.visitNode(node, moduleExpressionElementVisitor), 
-                /*visitor*/ undefined, context, 0 /* All */, 
+                return ts.flattenDestructuringAssignment(ts.visitNode(node, moduleExpressionElementVisitor),
+                /*visitor*/ undefined, context, 0 /* All */,
                 /*needsValue*/ false, createAllExportExpressions);
             }
             else {
-                return factory.createAssignment(ts.setTextRange(factory.createPropertyAccessExpression(factory.createIdentifier("exports"), node.name), 
+                return factory.createAssignment(ts.setTextRange(factory.createPropertyAccessExpression(factory.createIdentifier("exports"), node.name),
                 /*location*/ node.name), node.initializer ? ts.visitNode(node.initializer, moduleExpressionElementVisitor) : factory.createVoidZero());
             }
         }
@@ -96334,7 +96334,7 @@ var ts;
                 statement = factory.createExpressionStatement(createExportExpression(factory.createIdentifier("__esModule"), factory.createTrue()));
             }
             else {
-                statement = factory.createExpressionStatement(factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("Object"), "defineProperty"), 
+                statement = factory.createExpressionStatement(factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("Object"), "defineProperty"),
                 /*typeArguments*/ undefined, [
                     factory.createIdentifier("exports"),
                     factory.createStringLiteral("__esModule"),
@@ -96370,18 +96370,18 @@ var ts;
          * @param location The location to use for source maps and comments for the export.
          */
         function createExportExpression(name, value, location, liveBinding) {
-            return ts.setTextRange(liveBinding && languageVersion !== 0 /* ES3 */ ? factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("Object"), "defineProperty"), 
+            return ts.setTextRange(liveBinding && languageVersion !== 0 /* ES3 */ ? factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("Object"), "defineProperty"),
             /*typeArguments*/ undefined, [
                 factory.createIdentifier("exports"),
                 factory.createStringLiteralFromNode(name),
                 factory.createObjectLiteralExpression([
                     factory.createPropertyAssignment("enumerable", factory.createTrue()),
                     factory.createPropertyAssignment("get", factory.createFunctionExpression(
-                    /*modifiers*/ undefined, 
-                    /*asteriskToken*/ undefined, 
-                    /*name*/ undefined, 
-                    /*typeParameters*/ undefined, 
-                    /*parameters*/ [], 
+                    /*modifiers*/ undefined,
+                    /*asteriskToken*/ undefined,
+                    /*name*/ undefined,
+                    /*typeParameters*/ undefined,
+                    /*parameters*/ [],
                     /*type*/ undefined, factory.createBlock([factory.createReturnStatement(value)])))
                 ])
             ]) : factory.createAssignment(factory.createPropertyAccessExpression(factory.createIdentifier("exports"), factory.cloneNode(name)), value), location);
@@ -96504,18 +96504,18 @@ var ts;
             if (!(ts.isGeneratedIdentifier(node) && !(node.autoGenerateFlags & 64 /* AllowNameSubstitution */)) && !ts.isLocalName(node)) {
                 var exportContainer = resolver.getReferencedExportContainer(node, ts.isExportName(node));
                 if (exportContainer && exportContainer.kind === 297 /* SourceFile */) {
-                    return ts.setTextRange(factory.createPropertyAccessExpression(factory.createIdentifier("exports"), factory.cloneNode(node)), 
+                    return ts.setTextRange(factory.createPropertyAccessExpression(factory.createIdentifier("exports"), factory.cloneNode(node)),
                     /*location*/ node);
                 }
                 var importDeclaration = resolver.getReferencedImportDeclaration(node);
                 if (importDeclaration) {
                     if (ts.isImportClause(importDeclaration)) {
-                        return ts.setTextRange(factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(importDeclaration.parent), factory.createIdentifier("default")), 
+                        return ts.setTextRange(factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(importDeclaration.parent), factory.createIdentifier("default")),
                         /*location*/ node);
                     }
                     else if (ts.isImportSpecifier(importDeclaration)) {
                         var name = importDeclaration.propertyName || importDeclaration.name;
-                        return ts.setTextRange(factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(((_b = (_a = importDeclaration.parent) === null || _a === void 0 ? void 0 : _a.parent) === null || _b === void 0 ? void 0 : _b.parent) || importDeclaration), factory.cloneNode(name)), 
+                        return ts.setTextRange(factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(((_b = (_a = importDeclaration.parent) === null || _a === void 0 ? void 0 : _a.parent) === null || _b === void 0 ? void 0 : _b.parent) || importDeclaration), factory.cloneNode(name)),
                         /*location*/ node);
                     }
                 }
@@ -96579,7 +96579,7 @@ var ts;
                 var exportedNames = getExports(node.operand);
                 if (exportedNames) {
                     var expression = node.kind === 215 /* PostfixUnaryExpression */
-                        ? ts.setTextRange(factory.createBinaryExpression(node.operand, factory.createToken(node.operator === 45 /* PlusPlusToken */ ? 63 /* PlusEqualsToken */ : 64 /* MinusEqualsToken */), factory.createNumericLiteral(1)), 
+                        ? ts.setTextRange(factory.createBinaryExpression(node.operand, factory.createToken(node.operator === 45 /* PlusPlusToken */ ? 63 /* PlusEqualsToken */ : 64 /* MinusEqualsToken */), factory.createNumericLiteral(1)),
                         /*location*/ node)
                         : node;
                     for (var _i = 0, exportedNames_3 = exportedNames; _i < exportedNames_3.length; _i++) {
@@ -96684,13 +96684,13 @@ var ts;
             var dependencyGroups = collectDependencyGroups(moduleInfo.externalImports);
             var moduleBodyBlock = createSystemModuleBody(node, dependencyGroups);
             var moduleBodyFunction = factory.createFunctionExpression(
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, 
-            /*name*/ undefined, 
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined,
+            /*name*/ undefined,
             /*typeParameters*/ undefined, [
                 factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, exportFunction),
                 factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, contextObject)
-            ], 
+            ],
             /*type*/ undefined, moduleBodyBlock);
             // Write the call to `System.register`
             // Clear the emit-helpers flag for later passes since we'll have already used it in the module body
@@ -96698,7 +96698,7 @@ var ts;
             var moduleName = ts.tryGetModuleNameFromFile(factory, node, host, compilerOptions);
             var dependencies = factory.createArrayLiteralExpression(ts.map(dependencyGroups, function (dependencyGroup) { return dependencyGroup.name; }));
             var updated = ts.setEmitFlags(factory.updateSourceFile(node, ts.setTextRange(factory.createNodeArray([
-                factory.createExpressionStatement(factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("System"), "register"), 
+                factory.createExpressionStatement(factory.createCallExpression(factory.createPropertyAccessExpression(factory.createIdentifier("System"), "register"),
                 /*typeArguments*/ undefined, moduleName
                     ? [moduleName, dependencies, moduleBodyFunction]
                     : [dependencies, moduleBodyFunction]))
@@ -96805,8 +96805,8 @@ var ts;
             // var __moduleName = context_1 && context_1.id;
             statements.push(factory.createVariableStatement(
             /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                factory.createVariableDeclaration("__moduleName", 
-                /*exclamationToken*/ undefined, 
+                factory.createVariableDeclaration("__moduleName",
+                /*exclamationToken*/ undefined,
                 /*type*/ undefined, factory.createLogicalAnd(contextObject, factory.createPropertyAccessExpression(contextObject, "id")))
             ])));
             // Visit the synthetic external helpers import declaration if present
@@ -96829,11 +96829,11 @@ var ts;
                 undefined;
             var moduleObject = factory.createObjectLiteralExpression([
                 factory.createPropertyAssignment("setters", createSettersArray(exportStarFunction, dependencyGroups)),
-                factory.createPropertyAssignment("execute", factory.createFunctionExpression(modifiers, 
-                /*asteriskToken*/ undefined, 
-                /*name*/ undefined, 
-                /*typeParameters*/ undefined, 
-                /*parameters*/ [], 
+                factory.createPropertyAssignment("execute", factory.createFunctionExpression(modifiers,
+                /*asteriskToken*/ undefined,
+                /*name*/ undefined,
+                /*typeParameters*/ undefined,
+                /*parameters*/ [],
                 /*type*/ undefined, factory.createBlock(executeStatements, /*multiLine*/ true)))
             ], /*multiLine*/ true);
             statements.push(factory.createReturnStatement(moduleObject));
@@ -96885,8 +96885,8 @@ var ts;
             var exportedNamesStorageRef = factory.createUniqueName("exportedNames");
             statements.push(factory.createVariableStatement(
             /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                factory.createVariableDeclaration(exportedNamesStorageRef, 
-                /*exclamationToken*/ undefined, 
+                factory.createVariableDeclaration(exportedNamesStorageRef,
+                /*exclamationToken*/ undefined,
                 /*type*/ undefined, factory.createObjectLiteralExpression(exportedNames, /*multiline*/ true))
             ])));
             var exportStarFunction = createExportStarFunction(exportedNamesStorageRef);
@@ -96907,19 +96907,19 @@ var ts;
             var exports = factory.createIdentifier("exports");
             var condition = factory.createStrictInequality(n, factory.createStringLiteral("default"));
             if (localNames) {
-                condition = factory.createLogicalAnd(condition, factory.createLogicalNot(factory.createCallExpression(factory.createPropertyAccessExpression(localNames, "hasOwnProperty"), 
+                condition = factory.createLogicalAnd(condition, factory.createLogicalNot(factory.createCallExpression(factory.createPropertyAccessExpression(localNames, "hasOwnProperty"),
                 /*typeArguments*/ undefined, [n])));
             }
             return factory.createFunctionDeclaration(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
-            /*asteriskToken*/ undefined, exportStarFunction, 
-            /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, m)], 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
+            /*asteriskToken*/ undefined, exportStarFunction,
+            /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, m)],
             /*type*/ undefined, factory.createBlock([
                 factory.createVariableStatement(
                 /*modifiers*/ undefined, factory.createVariableDeclarationList([
-                    factory.createVariableDeclaration(exports, 
-                    /*exclamationToken*/ undefined, 
+                    factory.createVariableDeclaration(exports,
+                    /*exclamationToken*/ undefined,
                     /*type*/ undefined, factory.createObjectLiteralExpression([]))
                 ])),
                 factory.createForInStatement(factory.createVariableDeclarationList([
@@ -96927,7 +96927,7 @@ var ts;
                 ]), m, factory.createBlock([
                     ts.setEmitFlags(factory.createIfStatement(condition, factory.createExpressionStatement(factory.createAssignment(factory.createElementAccessExpression(exports, n), factory.createElementAccessExpression(m, n)))), 1 /* SingleLine */)
                 ])),
-                factory.createExpressionStatement(factory.createCallExpression(exportFunction, 
+                factory.createExpressionStatement(factory.createCallExpression(exportFunction,
                 /*typeArguments*/ undefined, [exports]))
             ], /*multiline*/ true));
         }
@@ -96978,11 +96978,11 @@ var ts;
                                         var e = _d[_c];
                                         properties.push(factory.createPropertyAssignment(factory.createStringLiteral(ts.idText(e.name)), factory.createElementAccessExpression(parameterName, factory.createStringLiteral(ts.idText(e.propertyName || e.name)))));
                                     }
-                                    statements.push(factory.createExpressionStatement(factory.createCallExpression(exportFunction, 
+                                    statements.push(factory.createExpressionStatement(factory.createCallExpression(exportFunction,
                                     /*typeArguments*/ undefined, [factory.createObjectLiteralExpression(properties, /*multiline*/ true)])));
                                 }
                                 else {
-                                    statements.push(factory.createExpressionStatement(factory.createCallExpression(exportFunction, 
+                                    statements.push(factory.createExpressionStatement(factory.createCallExpression(exportFunction,
                                     /*typeArguments*/ undefined, [
                                         factory.createStringLiteral(ts.idText(entry.exportClause.name)),
                                         parameterName
@@ -96995,17 +96995,17 @@ var ts;
                                 // emit as:
                                 //
                                 //  exportStar(foo_1_1);
-                                statements.push(factory.createExpressionStatement(factory.createCallExpression(exportStarFunction, 
+                                statements.push(factory.createExpressionStatement(factory.createCallExpression(exportStarFunction,
                                 /*typeArguments*/ undefined, [parameterName])));
                             }
                             break;
                     }
                 }
                 setters.push(factory.createFunctionExpression(
-                /*modifiers*/ undefined, 
-                /*asteriskToken*/ undefined, 
-                /*name*/ undefined, 
-                /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, parameterName)], 
+                /*modifiers*/ undefined,
+                /*asteriskToken*/ undefined,
+                /*name*/ undefined,
+                /*typeParameters*/ undefined, [factory.createParameterDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, /*dotDotDotToken*/ undefined, parameterName)],
                 /*type*/ undefined, factory.createBlock(statements, /*multiLine*/ true)));
             }
             return factory.createArrayLiteralExpression(setters, /*multiLine*/ true);
@@ -97103,8 +97103,8 @@ var ts;
          */
         function visitFunctionDeclaration(node) {
             if (ts.hasSyntacticModifier(node, 1 /* Export */)) {
-                hoistedStatements = ts.append(hoistedStatements, factory.updateFunctionDeclaration(node, node.decorators, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), node.asteriskToken, factory.getDeclarationName(node, /*allowComments*/ true, /*allowSourceMaps*/ true), 
-                /*typeParameters*/ undefined, ts.visitNodes(node.parameters, destructuringAndImportCallVisitor, ts.isParameterDeclaration), 
+                hoistedStatements = ts.append(hoistedStatements, factory.updateFunctionDeclaration(node, node.decorators, ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), node.asteriskToken, factory.getDeclarationName(node, /*allowComments*/ true, /*allowSourceMaps*/ true),
+                /*typeParameters*/ undefined, ts.visitNodes(node.parameters, destructuringAndImportCallVisitor, ts.isParameterDeclaration),
                 /*type*/ undefined, ts.visitNode(node.body, destructuringAndImportCallVisitor, ts.isBlock)));
             }
             else {
@@ -97131,8 +97131,8 @@ var ts;
             var name = factory.getLocalName(node);
             hoistVariableDeclaration(name);
             // Rewrite the class declaration into an assignment of a class expression.
-            statements = ts.append(statements, ts.setTextRange(factory.createExpressionStatement(factory.createAssignment(name, ts.setTextRange(factory.createClassExpression(ts.visitNodes(node.decorators, destructuringAndImportCallVisitor, ts.isDecorator), 
-            /*modifiers*/ undefined, node.name, 
+            statements = ts.append(statements, ts.setTextRange(factory.createExpressionStatement(factory.createAssignment(name, ts.setTextRange(factory.createClassExpression(ts.visitNodes(node.decorators, destructuringAndImportCallVisitor, ts.isDecorator),
+            /*modifiers*/ undefined, node.name,
             /*typeParameters*/ undefined, ts.visitNodes(node.heritageClauses, destructuringAndImportCallVisitor, ts.isHeritageClause), ts.visitNodes(node.members, destructuringAndImportCallVisitor, ts.isClassElement)), node))), node));
             if (hasAssociatedEndOfDeclarationMarker(node)) {
                 // Defer exports until we encounter an EndOfDeclarationMarker node
@@ -97218,7 +97218,7 @@ var ts;
         function transformInitializedVariable(node, isExportedDeclaration) {
             var createAssignment = isExportedDeclaration ? createExportedVariableAssignment : createNonExportedVariableAssignment;
             return ts.isBindingPattern(node.name)
-                ? ts.flattenDestructuringAssignment(node, destructuringAndImportCallVisitor, context, 0 /* All */, 
+                ? ts.flattenDestructuringAssignment(node, destructuringAndImportCallVisitor, context, 0 /* All */,
                 /*needsValue*/ false, createAssignment)
                 : node.initializer ? createAssignment(node.name, ts.visitNode(node.initializer, destructuringAndImportCallVisitor, ts.isExpression)) : node.name;
         }
@@ -97761,7 +97761,7 @@ var ts;
             var firstArgument = ts.visitNode(ts.firstOrUndefined(node.arguments), destructuringAndImportCallVisitor);
             // Only use the external module name if it differs from the first argument. This allows us to preserve the quote style of the argument on output.
             var argument = externalModuleName && (!firstArgument || !ts.isStringLiteral(firstArgument) || firstArgument.text !== externalModuleName.text) ? externalModuleName : firstArgument;
-            return factory.createCallExpression(factory.createPropertyAccessExpression(contextObject, factory.createIdentifier("import")), 
+            return factory.createCallExpression(factory.createPropertyAccessExpression(contextObject, factory.createIdentifier("import")),
             /*typeArguments*/ undefined, argument ? [argument] : []);
         }
         /**
@@ -97771,7 +97771,7 @@ var ts;
          */
         function visitDestructuringAssignment(node) {
             if (hasExportedReferenceInDestructuringTarget(node.left)) {
-                return ts.flattenDestructuringAssignment(node, destructuringAndImportCallVisitor, context, 0 /* All */, 
+                return ts.flattenDestructuringAssignment(node, destructuringAndImportCallVisitor, context, 0 /* All */,
                 /*needsValue*/ true);
             }
             return ts.visitEachChild(node, destructuringAndImportCallVisitor, context);
@@ -97902,11 +97902,11 @@ var ts;
                 var importDeclaration = resolver.getReferencedImportDeclaration(name);
                 if (importDeclaration) {
                     if (ts.isImportClause(importDeclaration)) {
-                        return ts.setTextRange(factory.createPropertyAssignment(factory.cloneNode(name), factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(importDeclaration.parent), factory.createIdentifier("default"))), 
+                        return ts.setTextRange(factory.createPropertyAssignment(factory.cloneNode(name), factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(importDeclaration.parent), factory.createIdentifier("default"))),
                         /*location*/ node);
                     }
                     else if (ts.isImportSpecifier(importDeclaration)) {
-                        return ts.setTextRange(factory.createPropertyAssignment(factory.cloneNode(name), factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(((_b = (_a = importDeclaration.parent) === null || _a === void 0 ? void 0 : _a.parent) === null || _b === void 0 ? void 0 : _b.parent) || importDeclaration), factory.cloneNode(importDeclaration.propertyName || importDeclaration.name))), 
+                        return ts.setTextRange(factory.createPropertyAssignment(factory.cloneNode(name), factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(((_b = (_a = importDeclaration.parent) === null || _a === void 0 ? void 0 : _a.parent) === null || _b === void 0 ? void 0 : _b.parent) || importDeclaration), factory.cloneNode(importDeclaration.propertyName || importDeclaration.name))),
                         /*location*/ node);
                     }
                 }
@@ -97956,11 +97956,11 @@ var ts;
                 var importDeclaration = resolver.getReferencedImportDeclaration(node);
                 if (importDeclaration) {
                     if (ts.isImportClause(importDeclaration)) {
-                        return ts.setTextRange(factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(importDeclaration.parent), factory.createIdentifier("default")), 
+                        return ts.setTextRange(factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(importDeclaration.parent), factory.createIdentifier("default")),
                         /*location*/ node);
                     }
                     else if (ts.isImportSpecifier(importDeclaration)) {
-                        return ts.setTextRange(factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(((_b = (_a = importDeclaration.parent) === null || _a === void 0 ? void 0 : _a.parent) === null || _b === void 0 ? void 0 : _b.parent) || importDeclaration), factory.cloneNode(importDeclaration.propertyName || importDeclaration.name)), 
+                        return ts.setTextRange(factory.createPropertyAccessExpression(factory.getGeneratedNameForNode(((_b = (_a = importDeclaration.parent) === null || _a === void 0 ? void 0 : _a.parent) === null || _b === void 0 ? void 0 : _b.parent) || importDeclaration), factory.cloneNode(importDeclaration.propertyName || importDeclaration.name)),
                         /*location*/ node);
                     }
                 }
@@ -98155,14 +98155,14 @@ var ts;
             var oldIdentifier = node.exportClause.name;
             var synthName = factory.getGeneratedNameForNode(oldIdentifier);
             var importDecl = factory.createImportDeclaration(
-            /*decorators*/ undefined, 
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, factory.createImportClause(
-            /*isTypeOnly*/ false, 
+            /*isTypeOnly*/ false,
             /*name*/ undefined, factory.createNamespaceImport(synthName)), node.moduleSpecifier);
             ts.setOriginalNode(importDecl, node.exportClause);
             var exportDecl = ts.isExportNamespaceAsDefaultDeclaration(node) ? factory.createExportDefault(synthName) : factory.createExportDeclaration(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
             /*isTypeOnly*/ false, factory.createNamedExports([factory.createExportSpecifier(synthName, oldIdentifier)]));
             ts.setOriginalNode(exportDecl, node);
             return [importDecl, exportDecl];
@@ -98964,7 +98964,7 @@ var ts;
                         declFileName = paths.declarationFilePath || paths.jsFilePath || file.fileName;
                     }
                     if (declFileName) {
-                        var specifier = ts.moduleSpecifiers.getModuleSpecifier(__assign(__assign({}, options), { baseUrl: options.baseUrl && ts.toPath(options.baseUrl, host.getCurrentDirectory(), host.getCanonicalFileName) }), currentSourceFile, ts.toPath(outputFilePath, host.getCurrentDirectory(), host.getCanonicalFileName), ts.toPath(declFileName, host.getCurrentDirectory(), host.getCanonicalFileName), host, 
+                        var specifier = ts.moduleSpecifiers.getModuleSpecifier(__assign(__assign({}, options), { baseUrl: options.baseUrl && ts.toPath(options.baseUrl, host.getCurrentDirectory(), host.getCanonicalFileName) }), currentSourceFile, ts.toPath(outputFilePath, host.getCurrentDirectory(), host.getCanonicalFileName), ts.toPath(declFileName, host.getCurrentDirectory(), host.getCanonicalFileName), host,
                         /*preferences*/ undefined);
                         if (!ts.pathIsRelative(specifier)) {
                             // If some compiler option/symlink/whatever allows access to the file containing the ambient module declaration
@@ -98973,7 +98973,7 @@ var ts;
                             recordTypeReferenceDirectivesIfNecessary([specifier]);
                             return;
                         }
-                        var fileName = ts.getRelativePathToDirectoryOrUrl(outputFilePath, declFileName, host.getCurrentDirectory(), host.getCanonicalFileName, 
+                        var fileName = ts.getRelativePathToDirectoryOrUrl(outputFilePath, declFileName, host.getCurrentDirectory(), host.getCanonicalFileName,
                         /*isAbsolutePathAnUrl*/ false);
                         if (ts.startsWith(fileName, "./") && ts.hasExtension(fileName)) {
                             fileName = fileName.substring(2);
@@ -99033,7 +99033,7 @@ var ts;
                 oldDiag = getSymbolAccessibilityDiagnostic;
                 getSymbolAccessibilityDiagnostic = ts.createGetSymbolAccessibilityDiagnosticForNode(p);
             }
-            var newParam = factory.updateParameterDeclaration(p, 
+            var newParam = factory.updateParameterDeclaration(p,
             /*decorators*/ undefined, maskModifiers(p, modifierMask), p.dotDotDotToken, filterBindingPatternInitializers(p.name), resolver.isOptionalParameter(p) ? (p.questionToken || factory.createToken(57 /* QuestionToken */)) : undefined, ensureType(p, type || p.type, /*ignorePrivate*/ true), // Ignore private param props, since this type is going straight back into a param
             ensureNoInitializer(p));
             if (!suppressNewDiagnosticContexts) {
@@ -99160,8 +99160,8 @@ var ts;
                 }
                 if (!newValueParameter) {
                     newValueParameter = factory.createParameterDeclaration(
-                    /*decorators*/ undefined, 
-                    /*modifiers*/ undefined, 
+                    /*decorators*/ undefined,
+                    /*modifiers*/ undefined,
                     /*dotDotDotToken*/ undefined, "value");
                 }
                 newParams = ts.append(newParams, newValueParameter);
@@ -99218,7 +99218,7 @@ var ts;
             if (decl.moduleReference.kind === 272 /* ExternalModuleReference */) {
                 // Rewrite external module names if necessary
                 var specifier = ts.getExternalModuleImportEqualsDeclarationExpression(decl);
-                return factory.updateImportEqualsDeclaration(decl, 
+                return factory.updateImportEqualsDeclaration(decl,
                 /*decorators*/ undefined, decl.modifiers, decl.isTypeOnly, decl.name, factory.updateExternalModuleReference(decl.moduleReference, rewriteModuleSpecifier(decl, specifier)));
             }
             else {
@@ -99232,14 +99232,14 @@ var ts;
         function transformImportDeclaration(decl) {
             if (!decl.importClause) {
                 // import "mod" - possibly needed for side effects? (global interface patches, module augmentations, etc)
-                return factory.updateImportDeclaration(decl, 
+                return factory.updateImportDeclaration(decl,
                 /*decorators*/ undefined, decl.modifiers, decl.importClause, rewriteModuleSpecifier(decl, decl.moduleSpecifier));
             }
             // The `importClause` visibility corresponds to the default's visibility.
             var visibleDefaultBinding = decl.importClause && decl.importClause.name && resolver.isDeclarationVisible(decl.importClause) ? decl.importClause.name : undefined;
             if (!decl.importClause.namedBindings) {
                 // No named bindings (either namespace or list), meaning the import is just default or should be elided
-                return visibleDefaultBinding && factory.updateImportDeclaration(decl, /*decorators*/ undefined, decl.modifiers, factory.updateImportClause(decl.importClause, decl.importClause.isTypeOnly, visibleDefaultBinding, 
+                return visibleDefaultBinding && factory.updateImportDeclaration(decl, /*decorators*/ undefined, decl.modifiers, factory.updateImportClause(decl.importClause, decl.importClause.isTypeOnly, visibleDefaultBinding,
                 /*namedBindings*/ undefined), rewriteModuleSpecifier(decl, decl.moduleSpecifier));
             }
             if (decl.importClause.namedBindings.kind === 263 /* NamespaceImport */) {
@@ -99250,13 +99250,13 @@ var ts;
             // Named imports (optionally with visible default)
             var bindingList = ts.mapDefined(decl.importClause.namedBindings.elements, function (b) { return resolver.isDeclarationVisible(b) ? b : undefined; });
             if ((bindingList && bindingList.length) || visibleDefaultBinding) {
-                return factory.updateImportDeclaration(decl, 
+                return factory.updateImportDeclaration(decl,
                 /*decorators*/ undefined, decl.modifiers, factory.updateImportClause(decl.importClause, decl.importClause.isTypeOnly, visibleDefaultBinding, bindingList && bindingList.length ? factory.updateNamedImports(decl.importClause.namedBindings, bindingList) : undefined), rewriteModuleSpecifier(decl, decl.moduleSpecifier));
             }
             // Augmentation of export depends on import
             if (resolver.isImportRequiredByAugmentation(decl)) {
-                return factory.updateImportDeclaration(decl, 
-                /*decorators*/ undefined, decl.modifiers, 
+                return factory.updateImportDeclaration(decl,
+                /*decorators*/ undefined, decl.modifiers,
                 /*importClause*/ undefined, rewriteModuleSpecifier(decl, decl.moduleSpecifier));
             }
             // Nothing visible
@@ -99375,8 +99375,8 @@ var ts;
                     case 166 /* Constructor */: {
                         // A constructor declaration may not have a type annotation
                         var ctor = factory.createConstructorDeclaration(
-                        /*decorators*/ undefined, 
-                        /*modifiers*/ ensureModifiers(input), updateParamsList(input, input.parameters, 0 /* None */), 
+                        /*decorators*/ undefined,
+                        /*modifiers*/ ensureModifiers(input), updateParamsList(input, input.parameters, 0 /* None */),
                         /*body*/ undefined);
                         return cleanup(ctor);
                     }
@@ -99385,8 +99385,8 @@ var ts;
                             return cleanup(/*returnValue*/ undefined);
                         }
                         var sig = factory.createMethodDeclaration(
-                        /*decorators*/ undefined, ensureModifiers(input), 
-                        /*asteriskToken*/ undefined, input.name, input.questionToken, ensureTypeParams(input, input.typeParameters), updateParamsList(input, input.parameters), ensureType(input, input.type), 
+                        /*decorators*/ undefined, ensureModifiers(input),
+                        /*asteriskToken*/ undefined, input.name, input.questionToken, ensureTypeParams(input, input.typeParameters), updateParamsList(input, input.parameters), ensureType(input, input.type),
                         /*body*/ undefined);
                         return cleanup(sig);
                     }
@@ -99395,23 +99395,23 @@ var ts;
                             return cleanup(/*returnValue*/ undefined);
                         }
                         var accessorType = getTypeAnnotationFromAllAccessorDeclarations(input, resolver.getAllAccessorDeclarations(input));
-                        return cleanup(factory.updateGetAccessorDeclaration(input, 
-                        /*decorators*/ undefined, ensureModifiers(input), input.name, updateAccessorParamsList(input, ts.hasEffectiveModifier(input, 8 /* Private */)), ensureType(input, accessorType), 
+                        return cleanup(factory.updateGetAccessorDeclaration(input,
+                        /*decorators*/ undefined, ensureModifiers(input), input.name, updateAccessorParamsList(input, ts.hasEffectiveModifier(input, 8 /* Private */)), ensureType(input, accessorType),
                         /*body*/ undefined));
                     }
                     case 168 /* SetAccessor */: {
                         if (ts.isPrivateIdentifier(input.name)) {
                             return cleanup(/*returnValue*/ undefined);
                         }
-                        return cleanup(factory.updateSetAccessorDeclaration(input, 
-                        /*decorators*/ undefined, ensureModifiers(input), input.name, updateAccessorParamsList(input, ts.hasEffectiveModifier(input, 8 /* Private */)), 
+                        return cleanup(factory.updateSetAccessorDeclaration(input,
+                        /*decorators*/ undefined, ensureModifiers(input), input.name, updateAccessorParamsList(input, ts.hasEffectiveModifier(input, 8 /* Private */)),
                         /*body*/ undefined));
                     }
                     case 163 /* PropertyDeclaration */:
                         if (ts.isPrivateIdentifier(input.name)) {
                             return cleanup(/*returnValue*/ undefined);
                         }
-                        return cleanup(factory.updatePropertyDeclaration(input, 
+                        return cleanup(factory.updatePropertyDeclaration(input,
                         /*decorators*/ undefined, ensureModifiers(input), input.name, input.questionToken, ensureType(input, input.type), ensureNoInitializer(input)));
                     case 162 /* PropertySignature */:
                         if (ts.isPrivateIdentifier(input.name)) {
@@ -99428,7 +99428,7 @@ var ts;
                         return cleanup(factory.updateCallSignature(input, ensureTypeParams(input, input.typeParameters), updateParamsList(input, input.parameters), ensureType(input, input.type)));
                     }
                     case 171 /* IndexSignature */: {
-                        return cleanup(factory.updateIndexSignature(input, 
+                        return cleanup(factory.updateIndexSignature(input,
                         /*decorators*/ undefined, ensureModifiers(input), updateParamsList(input, input.parameters), ts.visitNode(input.type, visitDeclarationSubtree) || factory.createKeywordTypeNode(128 /* AnyKeyword */)));
                     }
                     case 249 /* VariableDeclaration */: {
@@ -99512,7 +99512,7 @@ var ts;
                     resultHasScopeMarker = true;
                     // Always visible if the parent node isn't dropped for being not visible
                     // Rewrite external module names if necessary
-                    return factory.updateExportDeclaration(input, 
+                    return factory.updateExportDeclaration(input,
                     /*decorators*/ undefined, input.modifiers, input.isTypeOnly, input.exportClause, rewriteModuleSpecifier(input, input.moduleSpecifier));
                 }
                 case 266 /* ExportAssignment */: {
@@ -99581,17 +99581,17 @@ var ts;
             var previousNeedsDeclare = needsDeclare;
             switch (input.kind) {
                 case 254 /* TypeAliasDeclaration */: // Type aliases get `declare`d if need be (for legacy support), but that's all
-                    return cleanup(factory.updateTypeAliasDeclaration(input, 
+                    return cleanup(factory.updateTypeAliasDeclaration(input,
                     /*decorators*/ undefined, ensureModifiers(input), input.name, ts.visitNodes(input.typeParameters, visitDeclarationSubtree, ts.isTypeParameterDeclaration), ts.visitNode(input.type, visitDeclarationSubtree, ts.isTypeNode)));
                 case 253 /* InterfaceDeclaration */: {
-                    return cleanup(factory.updateInterfaceDeclaration(input, 
+                    return cleanup(factory.updateInterfaceDeclaration(input,
                     /*decorators*/ undefined, ensureModifiers(input), input.name, ensureTypeParams(input, input.typeParameters), transformHeritageClauses(input.heritageClauses), ts.visitNodes(input.members, visitDeclarationSubtree)));
                 }
                 case 251 /* FunctionDeclaration */: {
                     // Generators lose their generator-ness, excepting their return type
-                    var clean = cleanup(factory.updateFunctionDeclaration(input, 
-                    /*decorators*/ undefined, ensureModifiers(input), 
-                    /*asteriskToken*/ undefined, input.name, ensureTypeParams(input, input.typeParameters), updateParamsList(input, input.parameters), ensureType(input, input.type), 
+                    var clean = cleanup(factory.updateFunctionDeclaration(input,
+                    /*decorators*/ undefined, ensureModifiers(input),
+                    /*asteriskToken*/ undefined, input.name, ensureTypeParams(input, input.typeParameters), updateParamsList(input, input.parameters), ensureType(input, input.type),
                     /*body*/ undefined));
                     if (clean && resolver.isExpandoFunctionDeclaration(input)) {
                         var props = resolver.getPropertiesOfContainerFunction(input);
@@ -99622,8 +99622,8 @@ var ts;
                         }
                         else {
                             declarations.push(factory.createExportDeclaration(
-                            /*decorators*/ undefined, 
-                            /*modifiers*/ undefined, 
+                            /*decorators*/ undefined,
+                            /*modifiers*/ undefined,
                             /*isTypeOnly*/ false, factory.createNamedExports(ts.map(exportMappings_1, function (_a) {
                                 var gen = _a[0], exp = _a[1];
                                 return factory.createExportSpecifier(gen, exp);
@@ -99634,15 +99634,15 @@ var ts;
                             return [clean, namespaceDecl];
                         }
                         var modifiers = factory.createModifiersFromModifierFlags((ts.getEffectiveModifierFlags(clean) & ~513 /* ExportDefault */) | 2 /* Ambient */);
-                        var cleanDeclaration = factory.updateFunctionDeclaration(clean, 
-                        /*decorators*/ undefined, modifiers, 
-                        /*asteriskToken*/ undefined, clean.name, clean.typeParameters, clean.parameters, clean.type, 
+                        var cleanDeclaration = factory.updateFunctionDeclaration(clean,
+                        /*decorators*/ undefined, modifiers,
+                        /*asteriskToken*/ undefined, clean.name, clean.typeParameters, clean.parameters, clean.type,
                         /*body*/ undefined);
-                        var namespaceDeclaration = factory.updateModuleDeclaration(namespaceDecl, 
+                        var namespaceDeclaration = factory.updateModuleDeclaration(namespaceDecl,
                         /*decorators*/ undefined, modifiers, namespaceDecl.name, namespaceDecl.body);
                         var exportDefaultDeclaration = factory.createExportAssignment(
-                        /*decorators*/ undefined, 
-                        /*modifiers*/ undefined, 
+                        /*decorators*/ undefined,
+                        /*modifiers*/ undefined,
                         /*isExportEquals*/ false, namespaceDecl.name);
                         if (ts.isSourceFile(input.parent)) {
                             resultHasExternalModuleIndicator = true;
@@ -99684,7 +99684,7 @@ var ts;
                         needsScopeFixMarker = oldNeedsScopeFix;
                         resultHasScopeMarker = oldHasScopeFix;
                         var mods = ensureModifiers(input);
-                        return cleanup(factory.updateModuleDeclaration(input, 
+                        return cleanup(factory.updateModuleDeclaration(input,
                         /*decorators*/ undefined, mods, ts.isExternalModuleAugmentation(input) ? rewriteModuleSpecifier(input, input.name) : input.name, body));
                     }
                     else {
@@ -99696,7 +99696,7 @@ var ts;
                         var id = ts.getOriginalNodeId(inner); // TODO: GH#18217
                         var body = lateStatementReplacementMap.get(id);
                         lateStatementReplacementMap.delete(id);
-                        return cleanup(factory.updateModuleDeclaration(input, 
+                        return cleanup(factory.updateModuleDeclaration(input,
                         /*decorators*/ undefined, mods, input.name, body));
                     }
                 }
@@ -99732,8 +99732,8 @@ var ts;
                                     }
                                     elems = elems || [];
                                     elems.push(factory.createPropertyDeclaration(
-                                    /*decorators*/ undefined, ensureModifiers(param), elem.name, 
-                                    /*questionToken*/ undefined, ensureType(elem, /*type*/ undefined), 
+                                    /*decorators*/ undefined, ensureModifiers(param), elem.name,
+                                    /*questionToken*/ undefined, ensureType(elem, /*type*/ undefined),
                                     /*initializer*/ undefined));
                                 }
                                 return elems;
@@ -99746,10 +99746,10 @@ var ts;
                     // Prevents other classes with the same public members from being used in place of the current class
                     var privateIdentifier = hasPrivateIdentifier ? [
                         factory.createPropertyDeclaration(
-                        /*decorators*/ undefined, 
-                        /*modifiers*/ undefined, factory.createPrivateIdentifier("#private"), 
-                        /*questionToken*/ undefined, 
-                        /*type*/ undefined, 
+                        /*decorators*/ undefined,
+                        /*modifiers*/ undefined, factory.createPrivateIdentifier("#private"),
+                        /*questionToken*/ undefined,
+                        /*type*/ undefined,
                         /*initializer*/ undefined)
                     ] : undefined;
                     var memberNodes = ts.concatenate(ts.concatenate(privateIdentifier, parameterProperties), ts.visitNodes(input.members, visitDeclarationSubtree));
@@ -99776,12 +99776,12 @@ var ts;
                             }
                             return factory.updateHeritageClause(clause, ts.visitNodes(factory.createNodeArray(ts.filter(clause.types, function (t) { return ts.isEntityNameExpression(t.expression) || t.expression.kind === 103 /* NullKeyword */; })), visitDeclarationSubtree));
                         }));
-                        return [statement, cleanup(factory.updateClassDeclaration(input, 
+                        return [statement, cleanup(factory.updateClassDeclaration(input,
                             /*decorators*/ undefined, modifiers, input.name, typeParameters, heritageClauses, members))]; // TODO: GH#18217
                     }
                     else {
                         var heritageClauses = transformHeritageClauses(input.heritageClauses);
-                        return cleanup(factory.updateClassDeclaration(input, 
+                        return cleanup(factory.updateClassDeclaration(input,
                         /*decorators*/ undefined, modifiers, input.name, typeParameters, heritageClauses, members));
                     }
                 }
@@ -101046,7 +101046,7 @@ var ts;
                     sourceMapDir = ts.combinePaths(host.getCommonSourceDirectory(), sourceMapDir);
                     return encodeURI(ts.getRelativePathToDirectoryOrUrl(ts.getDirectoryPath(ts.normalizePath(filePath)), // get the relative sourceMapDir path based on jsFilePath
                     ts.combinePaths(sourceMapDir, sourceMapFile), // this is where user expects to see sourceMap
-                    host.getCurrentDirectory(), host.getCanonicalFileName, 
+                    host.getCurrentDirectory(), host.getCanonicalFileName,
                     /*isAbsolutePathAnUrl*/ true));
                 }
                 else {
@@ -101160,7 +101160,7 @@ var ts;
         if (!buildInfo.bundle || !buildInfo.bundle.js || (declarationText && !buildInfo.bundle.dts))
             return buildInfoPath;
         var buildInfoDirectory = ts.getDirectoryPath(ts.getNormalizedAbsolutePath(buildInfoPath, host.getCurrentDirectory()));
-        var ownPrependInput = ts.createInputFiles(jsFileText, declarationText, sourceMapFilePath, sourceMapText, declarationMapPath, declarationMapText, jsFilePath, declarationFilePath, buildInfoPath, buildInfo, 
+        var ownPrependInput = ts.createInputFiles(jsFileText, declarationText, sourceMapFilePath, sourceMapText, declarationMapPath, declarationMapText, jsFilePath, declarationFilePath, buildInfoPath, buildInfo,
         /*onlyOwnText*/ true);
         var outputFiles = [];
         var prependNodes = ts.createPrependNodes(config.projectReferences, getCommandLine, function (f) { return host.readFile(f); });
@@ -101224,7 +101224,7 @@ var ts;
             redirectTargetsMap: ts.createMultiMap(),
             getFileIncludeReasons: ts.notImplemented,
         };
-        emitFiles(ts.notImplementedResolver, emitHost, 
+        emitFiles(ts.notImplementedResolver, emitHost,
         /*targetSourceFile*/ undefined, ts.getTransformers(config.options, customTransformers));
         return outputFiles;
     }
@@ -105312,7 +105312,7 @@ var ts;
                 return;
             }
             var _a = ts.getLineAndCharacterOfPosition(sourceMapSource, pos), sourceLine = _a.line, sourceCharacter = _a.character;
-            sourceMapGenerator.addMapping(writer.getLine(), writer.getColumn(), sourceMapSourceIndex, sourceLine, sourceCharacter, 
+            sourceMapGenerator.addMapping(writer.getLine(), writer.getColumn(), sourceMapSourceIndex, sourceLine, sourceCharacter,
             /*nameIndex*/ undefined);
         }
         function emitSourcePos(source, pos) {
@@ -107297,10 +107297,10 @@ var ts;
             ts.Debug.assert(!ts.outFile(options));
             ts.tracing === null || ts.tracing === void 0 ? void 0 : ts.tracing.push("emit" /* Emit */, "emitBuildInfo", {}, /*separateBeginAndEnd*/ true);
             ts.performance.mark("beforeEmit");
-            var emitResult = ts.emitFiles(ts.notImplementedResolver, getEmitHost(writeFileCallback), 
-            /*targetSourceFile*/ undefined, 
-            /*transformers*/ ts.noTransformers, 
-            /*emitOnlyDtsFiles*/ false, 
+            var emitResult = ts.emitFiles(ts.notImplementedResolver, getEmitHost(writeFileCallback),
+            /*targetSourceFile*/ undefined,
+            /*transformers*/ ts.noTransformers,
+            /*emitOnlyDtsFiles*/ false,
             /*onlyBuildInfo*/ true);
             ts.performance.mark("afterEmit");
             ts.performance.measure("Emit", "beforeEmit", "afterEmit");
@@ -107374,7 +107374,7 @@ var ts;
             // checked is to not pass the file to getEmitResolver.
             var emitResolver = getDiagnosticsProducingTypeChecker().getEmitResolver(ts.outFile(options) ? undefined : sourceFile, cancellationToken);
             ts.performance.mark("beforeEmit");
-            var emitResult = ts.emitFiles(emitResolver, getEmitHost(writeFileCallback), sourceFile, ts.getTransformers(options, customTransformers, emitOnlyDtsFiles), emitOnlyDtsFiles, 
+            var emitResult = ts.emitFiles(emitResolver, getEmitHost(writeFileCallback), sourceFile, ts.getTransformers(options, customTransformers, emitOnlyDtsFiles), emitOnlyDtsFiles,
             /*onlyBuildInfo*/ false, forceDtsEmit);
             ts.performance.mark("afterEmit");
             ts.performance.measure("Emit", "beforeEmit", "afterEmit");
@@ -108256,8 +108256,8 @@ var ts;
         }
         function processReferencedFiles(file, isDefaultLib) {
             ts.forEach(file.referencedFiles, function (ref, index) {
-                processSourceFile(resolveTripleslashReference(ref.fileName, file.fileName), isDefaultLib, 
-                /*ignoreNoDefaultLib*/ false, 
+                processSourceFile(resolveTripleslashReference(ref.fileName, file.fileName), isDefaultLib,
+                /*ignoreNoDefaultLib*/ false,
                 /*packageId*/ undefined, { kind: ts.FileIncludeKind.ReferenceFile, file: file.path, index: index, });
             });
         }
@@ -108390,8 +108390,8 @@ var ts;
                     }
                     else if (shouldAddFile) {
                         var path = toPath(resolvedFileName);
-                        findSourceFile(resolvedFileName, path, 
-                        /*isDefaultLib*/ false, 
+                        findSourceFile(resolvedFileName, path,
+                        /*isDefaultLib*/ false,
                         /*ignoreNoDefaultLib*/ false, { kind: ts.FileIncludeKind.Import, file: file.path, index: index, }, resolution.packageId);
                     }
                     if (isFromNodeModulesSearch) {
@@ -109559,9 +109559,9 @@ var ts;
                 }
             }
             else {
-                var emitOutput_1 = getFileEmitOutput(programOfThisState, sourceFile, 
-                /*emitOnlyDtsFiles*/ true, cancellationToken, 
-                /*customTransformers*/ undefined, 
+                var emitOutput_1 = getFileEmitOutput(programOfThisState, sourceFile,
+                /*emitOnlyDtsFiles*/ true, cancellationToken,
+                /*customTransformers*/ undefined,
                 /*forceDtsEmit*/ true);
                 var firstDts_1 = emitOutput_1.outputFiles &&
                     programOfThisState.getCompilerOptions().declarationMap ?
@@ -110481,11 +110481,11 @@ var ts;
                             return undefined;
                         }
                         var affected_1 = ts.Debug.checkDefined(state.program);
-                        return toAffectedFileEmitResult(state, 
+                        return toAffectedFileEmitResult(state,
                         // When whole program is affected, do emit only once (eg when --out or --outFile is specified)
                         // Otherwise just affected file
-                        affected_1.emitBuildInfo(writeFile || ts.maybeBind(host, host.writeFile), cancellationToken), affected_1, 1 /* Full */, 
-                        /*isPendingEmitFile*/ false, 
+                        affected_1.emitBuildInfo(writeFile || ts.maybeBind(host, host.writeFile), cancellationToken), affected_1, 1 /* Full */,
+                        /*isPendingEmitFile*/ false,
                         /*isBuildInfoEmit*/ true);
                     }
                     (affected = pendingAffectedFile.affectedFile, emitKind = pendingAffectedFile.emitKind);
@@ -110498,7 +110498,7 @@ var ts;
                     affected = program;
                 }
             }
-            return toAffectedFileEmitResult(state, 
+            return toAffectedFileEmitResult(state,
             // When whole program is affected, do emit only once (eg when --out or --outFile is specified)
             // Otherwise just affected file
             ts.Debug.checkDefined(state.program).emit(affected === state.program ? undefined : affected, writeFile || ts.maybeBind(host, host.writeFile), cancellationToken, emitOnlyDtsFiles || emitKind === 0 /* DtsOnly */, customTransformers), affected, emitKind, isPendingEmitFile);
@@ -111737,7 +111737,7 @@ var ts;
             var getCanonicalFileName = ts.hostGetCanonicalFileName(host);
             var allFileNames = new ts.Map();
             var importedFileFromNodeModules = false;
-            forEachFileNameOfModule(importingFileName, importedFileName, host, 
+            forEachFileNameOfModule(importingFileName, importedFileName, host,
             /*preferSymlinks*/ true, function (path, isRedirect) {
                 var isInNodeModules = ts.pathContainsNodeModules(path);
                 allFileNames.set(path, { path: getCanonicalFileName(path), isRedirect: isRedirect, isInNodeModules: isInNodeModules });
@@ -112720,7 +112720,7 @@ var ts;
         // Cache for the module resolution
         var resolutionCache = ts.createResolutionCache(compilerHost, configFileName ?
             ts.getDirectoryPath(ts.getNormalizedAbsolutePath(configFileName, currentDirectory)) :
-            currentDirectory, 
+            currentDirectory,
         /*logChangesWhenResolvingModule*/ false);
         // Resolve module using host module resolution strategy if provided otherwise use resolution cache to resolve module names
         compilerHost.resolveModuleNames = host.resolveModuleNames ?
@@ -113737,9 +113737,9 @@ var ts;
             var declDiagnostics;
             var reportDeclarationDiagnostics = function (d) { return (declDiagnostics || (declDiagnostics = [])).push(d); };
             var outputFiles = [];
-            var emitResult = ts.emitFilesAndReportErrors(program, reportDeclarationDiagnostics, 
-            /*write*/ undefined, 
-            /*reportSummary*/ undefined, function (name, text, writeByteOrderMark) { return outputFiles.push({ name: name, text: text, writeByteOrderMark: writeByteOrderMark }); }, cancellationToken, 
+            var emitResult = ts.emitFilesAndReportErrors(program, reportDeclarationDiagnostics,
+            /*write*/ undefined,
+            /*reportSummary*/ undefined, function (name, text, writeByteOrderMark) { return outputFiles.push({ name: name, text: text, writeByteOrderMark: writeByteOrderMark }); }, cancellationToken,
             /*emitOnlyDts*/ false, customTransformers).emitResult;
             // Don't emit .d.ts if there are decl file errors
             if (declDiagnostics) {
@@ -113776,7 +113776,7 @@ var ts;
                     newestDeclarationFileContentChangedTime = newer(priorChangeTime, newestDeclarationFileContentChangedTime);
                 }
             });
-            finishEmit(emitterDiagnostics, emittedOutputs, newestDeclarationFileContentChangedTime, 
+            finishEmit(emitterDiagnostics, emittedOutputs, newestDeclarationFileContentChangedTime,
             /*newestDeclarationFileContentChangedTimeIsMaximumDate*/ anyDtsChanged, outputFiles.length ? outputFiles[0].name : ts.getFirstProjectOutput(config, !host.useCaseSensitiveFileNames()), resultFlags);
             return emitResult;
         }
@@ -113852,7 +113852,7 @@ var ts;
                 emittedOutputs.set(toPath(state, name), name);
                 ts.writeFile(writeFileCallback ? { writeFile: writeFileCallback } : compilerHost, emitterDiagnostics, name, text, writeByteOrderMark);
             });
-            var emitDiagnostics = finishEmit(emitterDiagnostics, emittedOutputs, minimumDate, 
+            var emitDiagnostics = finishEmit(emitterDiagnostics, emittedOutputs, minimumDate,
             /*newestDeclarationFileContentChangedTimeIsMaximumDate*/ false, outputFiles[0].name, BuildResultFlags.DeclarationOutputUnchanged);
             return { emitSkipped: false, diagnostics: emitDiagnostics };
         }
@@ -116468,7 +116468,7 @@ var ts;
                 return n;
             }
             return ts.firstDefined(n.getChildren(sourceFile), function (child) {
-                var shouldDiveInChildNode = 
+                var shouldDiveInChildNode =
                 // previous token is enclosed somewhere in the child
                 (child.pos <= previousToken.pos && child.end > previousToken.end) ||
                     // previous token ends exactly at the beginning of child
@@ -117100,7 +117100,7 @@ var ts;
     ts.makeImportIfNecessary = makeImportIfNecessary;
     function makeImport(defaultImport, namedImports, moduleSpecifier, quotePreference, isTypeOnly) {
         return ts.factory.createImportDeclaration(
-        /*decorators*/ undefined, 
+        /*decorators*/ undefined,
         /*modifiers*/ undefined, defaultImport || namedImports
             ? ts.factory.createImportClause(!!isTypeOnly, defaultImport, namedImports && namedImports.length ? ts.factory.createNamedImports(namedImports) : undefined)
             : undefined, typeof moduleSpecifier === "string" ? makeStringLiteral(moduleSpecifier, quotePreference) : moduleSpecifier);
@@ -120243,7 +120243,7 @@ var ts;
             }
             var entries = [];
             if (isUncheckedFile(sourceFile, compilerOptions)) {
-                var uniqueNames = getCompletionEntriesFromSymbols(symbols, entries, 
+                var uniqueNames = getCompletionEntriesFromSymbols(symbols, entries,
                 /* contextToken */ undefined, location, sourceFile, typeChecker, compilerOptions.target, log, completionKind, preferences, propertyAccessToConvert, completionData.isJsxIdentifierExpected, isJsxInitializer, recommendedCompletion, symbolToOriginInfoMap, symbolToSortTextMap);
                 getJSCompletionEntries(sourceFile, location.pos, uniqueNames, compilerOptions.target, entries); // TODO: GH#18217
             }
@@ -120251,7 +120251,7 @@ var ts;
                 if (!isNewIdentifierLocation && (!symbols || symbols.length === 0) && keywordFilters === 0 /* None */) {
                     return undefined;
                 }
-                getCompletionEntriesFromSymbols(symbols, entries, 
+                getCompletionEntriesFromSymbols(symbols, entries,
                 /* contextToken */ undefined, location, sourceFile, typeChecker, compilerOptions.target, log, completionKind, preferences, propertyAccessToConvert, completionData.isJsxIdentifierExpected, isJsxInitializer, recommendedCompletion, symbolToOriginInfoMap, symbolToSortTextMap);
             }
             if (keywordFilters !== 0 /* None */) {
@@ -125460,7 +125460,7 @@ var ts;
                         }
                     }
                     result.push(base || root || sym);
-                }, 
+                },
                 // when try to find implementation, implementations is true, and not allowed to find base class
                 /*allowBaseTypes*/ function () { return !implementations; });
                 return result;
@@ -125468,7 +125468,7 @@ var ts;
             /**
              * @param allowBaseTypes return true means it would try to find in base class or interface.
              */
-            function forEachRelatedSymbol(symbol, location, checker, isForRenamePopulateSearchSymbolSet, onlyIncludeBindingElementAtReferenceLocation, 
+            function forEachRelatedSymbol(symbol, location, checker, isForRenamePopulateSearchSymbolSet, onlyIncludeBindingElementAtReferenceLocation,
             /**
              * @param baseSymbol This symbol means one property/mehtod from base class or interface when it is not null or undefined,
              */
@@ -125611,7 +125611,7 @@ var ts;
             }
             function getRelatedSymbol(search, referenceSymbol, referenceLocation, state) {
                 var checker = state.checker;
-                return forEachRelatedSymbol(referenceSymbol, referenceLocation, checker, /*isForRenamePopulateSearchSymbolSet*/ false, 
+                return forEachRelatedSymbol(referenceSymbol, referenceLocation, checker, /*isForRenamePopulateSearchSymbolSet*/ false,
                 /*onlyIncludeBindingElementAtReferenceLocation*/ state.options.use !== 2 /* Rename */ || !!state.options.providePrefixAndSuffixTextForRename, function (sym, rootSymbol, baseSymbol, kind) {
                     // check whether the symbol used to search itself is just the searched one.
                     if (baseSymbol) {
@@ -125624,7 +125624,7 @@ var ts;
                         // For a base type, use the symbol for the derived type. For a synthetic (e.g. union) property, use the union symbol.
                         ? { symbol: rootSymbol && !(ts.getCheckFlags(sym) & 6 /* Synthetic */) ? rootSymbol : sym, kind: kind }
                         : undefined;
-                }, 
+                },
                 /*allowBaseTypes*/ function (rootSymbol) {
                     return !(search.parents && !search.parents.some(function (parent) { return explicitlyInheritsFrom(rootSymbol.parent, parent, state.inheritsFromCache, checker); }));
                 });
@@ -127723,9 +127723,9 @@ var ts;
                         }
                     }
                     lastANode = a.node = ts.setTextRange(ts.factory.createClassDeclaration(
-                    /* decorators */ undefined, 
-                    /* modifiers */ undefined, a.name || ts.factory.createIdentifier("__class__"), 
-                    /* typeParameters */ undefined, 
+                    /* decorators */ undefined,
+                    /* modifiers */ undefined, a.name || ts.factory.createIdentifier("__class__"),
+                    /* typeParameters */ undefined,
                     /* heritageClauses */ undefined, []), a.node);
                 }
                 else {
@@ -127748,9 +127748,9 @@ var ts;
                     if (!a.additionalNodes)
                         a.additionalNodes = [];
                     a.additionalNodes.push(ts.setTextRange(ts.factory.createClassDeclaration(
-                    /* decorators */ undefined, 
-                    /* modifiers */ undefined, a.name || ts.factory.createIdentifier("__class__"), 
-                    /* typeParameters */ undefined, 
+                    /* decorators */ undefined,
+                    /* modifiers */ undefined, a.name || ts.factory.createIdentifier("__class__"),
+                    /* typeParameters */ undefined,
                     /* heritageClauses */ undefined, []), b.node));
                 }
                 return true;
@@ -128208,7 +128208,7 @@ var ts;
                 else if (hasModuleDeclarationMatchingSpecifier(sourceFile, moduleSpecifier)) {
                     // If we’re in a declaration file, it’s safe to remove the import clause from it
                     if (sourceFile.isDeclarationFile) {
-                        usedImports.push(ts.factory.createImportDeclaration(importDecl.decorators, importDecl.modifiers, 
+                        usedImports.push(ts.factory.createImportDeclaration(importDecl.decorators, importDecl.modifiers,
                         /*importClause*/ undefined, moduleSpecifier));
                     }
                     // If we’re not in a declaration file, we can’t remove the import clause even though
@@ -130144,7 +130144,7 @@ var ts;
                     var type = declaration.symbol && typeChecker.getTypeOfSymbolAtLocation(declaration.symbol, declaration);
                     var callSignatures = type && type.getCallSignatures();
                     if (callSignatures && callSignatures.length) {
-                        return typeChecker.runWithCancellationToken(cancellationToken, function (typeChecker) { return createSignatureHelpItems(callSignatures, callSignatures[0], argumentInfo, sourceFile, typeChecker, 
+                        return typeChecker.runWithCancellationToken(cancellationToken, function (typeChecker) { return createSignatureHelpItems(callSignatures, callSignatures[0], argumentInfo, sourceFile, typeChecker,
                         /*useFullPrefix*/ true); });
                     }
                 });
@@ -136165,9 +136165,9 @@ var ts;
                 var sourceFile = context.sourceFile;
                 var changes = ts.textChanges.ChangeTracker.with(context, function (changes) {
                     var exportDeclaration = ts.factory.createExportDeclaration(
-                    /*decorators*/ undefined, 
-                    /*modifiers*/ undefined, 
-                    /*isTypeOnly*/ false, ts.factory.createNamedExports([]), 
+                    /*decorators*/ undefined,
+                    /*modifiers*/ undefined,
+                    /*isTypeOnly*/ false, ts.factory.createNamedExports([]),
                     /*moduleSpecifier*/ undefined);
                     changes.insertNodeAtEndOfScope(sourceFile, sourceFile, exportDeclaration);
                 });
@@ -136864,10 +136864,10 @@ var ts;
         }
         function transformJSDocIndexSignature(node) {
             var index = ts.factory.createParameterDeclaration(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
-            /*dotDotDotToken*/ undefined, node.typeArguments[0].kind === 144 /* NumberKeyword */ ? "n" : "s", 
-            /*questionToken*/ undefined, ts.factory.createTypeReferenceNode(node.typeArguments[0].kind === 144 /* NumberKeyword */ ? "number" : "string", []), 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
+            /*dotDotDotToken*/ undefined, node.typeArguments[0].kind === 144 /* NumberKeyword */ ? "n" : "s",
+            /*questionToken*/ undefined, ts.factory.createTypeReferenceNode(node.typeArguments[0].kind === 144 /* NumberKeyword */ ? "number" : "string", []),
             /*initializer*/ undefined);
             var indexSignature = ts.factory.createTypeLiteralNode([ts.factory.createIndexSignature(/*decorators*/ undefined, /*modifiers*/ undefined, [index], node.typeArguments[1])]);
             ts.setEmitFlags(indexSignature, 1 /* SingleLine */);
@@ -137004,7 +137004,7 @@ var ts;
                         ? assignmentBinaryExpression.parent : assignmentBinaryExpression;
                     changes.delete(sourceFile, nodeToDelete);
                     if (!assignmentExpr) {
-                        members.push(ts.factory.createPropertyDeclaration([], modifiers, symbol.name, /*questionToken*/ undefined, 
+                        members.push(ts.factory.createPropertyDeclaration([], modifiers, symbol.name, /*questionToken*/ undefined,
                         /*type*/ undefined, /*initializer*/ undefined));
                         return members;
                     }
@@ -137052,7 +137052,7 @@ var ts;
                     }
                     function createFunctionExpressionMember(members, functionExpression, name) {
                         var fullModifiers = ts.concatenate(modifiers, getModifierKindFromSource(functionExpression, 129 /* AsyncKeyword */));
-                        var method = ts.factory.createMethodDeclaration(/*decorators*/ undefined, fullModifiers, /*asteriskToken*/ undefined, name, /*questionToken*/ undefined, 
+                        var method = ts.factory.createMethodDeclaration(/*decorators*/ undefined, fullModifiers, /*asteriskToken*/ undefined, name, /*questionToken*/ undefined,
                         /*typeParameters*/ undefined, functionExpression.parameters, /*type*/ undefined, functionExpression.body);
                         ts.copyLeadingComments(assignmentBinaryExpression, method, sourceFile);
                         return members.concat(method);
@@ -137069,7 +137069,7 @@ var ts;
                             bodyBlock = ts.factory.createBlock([ts.factory.createReturnStatement(arrowFunctionBody)]);
                         }
                         var fullModifiers = ts.concatenate(modifiers, getModifierKindFromSource(arrowFunction, 129 /* AsyncKeyword */));
-                        var method = ts.factory.createMethodDeclaration(/*decorators*/ undefined, fullModifiers, /*asteriskToken*/ undefined, name, /*questionToken*/ undefined, 
+                        var method = ts.factory.createMethodDeclaration(/*decorators*/ undefined, fullModifiers, /*asteriskToken*/ undefined, name, /*questionToken*/ undefined,
                         /*typeParameters*/ undefined, arrowFunction.parameters, /*type*/ undefined, bodyBlock);
                         ts.copyLeadingComments(assignmentBinaryExpression, method, sourceFile);
                         return members.concat(method);
@@ -137086,7 +137086,7 @@ var ts;
                     memberElements.unshift(ts.factory.createConstructorDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, initializer.parameters, initializer.body));
                 }
                 var modifiers = getModifierKindFromSource(node.parent.parent, 92 /* ExportKeyword */);
-                var cls = ts.factory.createClassDeclaration(/*decorators*/ undefined, modifiers, node.name, 
+                var cls = ts.factory.createClassDeclaration(/*decorators*/ undefined, modifiers, node.name,
                 /*typeParameters*/ undefined, /*heritageClauses*/ undefined, memberElements);
                 // Don't call copyComments here because we'll already leave them in place
                 return cls;
@@ -137097,7 +137097,7 @@ var ts;
                     memberElements.unshift(ts.factory.createConstructorDeclaration(/*decorators*/ undefined, /*modifiers*/ undefined, node.parameters, node.body));
                 }
                 var modifiers = getModifierKindFromSource(node, 92 /* ExportKeyword */);
-                var cls = ts.factory.createClassDeclaration(/*decorators*/ undefined, modifiers, node.name, 
+                var cls = ts.factory.createClassDeclaration(/*decorators*/ undefined, modifiers, node.name,
                 /*typeParameters*/ undefined, /*heritageClauses*/ undefined, memberElements);
                 // Don't call copyComments here because we'll already leave them in place
                 return cls;
@@ -137429,7 +137429,7 @@ var ts;
             return [
                 ts.factory.createVariableStatement(
                 /*modifiers*/ undefined, ts.factory.createVariableDeclarationList([
-                    ts.factory.createVariableDeclaration(ts.getSynthesizedDeepClone(getNode(variableName)), 
+                    ts.factory.createVariableDeclaration(ts.getSynthesizedDeepClone(getNode(variableName)),
                     /*exclamationToken*/ undefined, typeAnnotation, rightHandSide)
                 ], 2 /* Const */))
             ];
@@ -138124,8 +138124,8 @@ var ts;
         }
         function makeExportDeclaration(exportSpecifiers, moduleSpecifier) {
             return ts.factory.createExportDeclaration(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
             /*isTypeOnly*/ false, exportSpecifiers && ts.factory.createNamedExports(exportSpecifiers), moduleSpecifier === undefined ? undefined : ts.factory.createStringLiteral(moduleSpecifier));
         }
         function convertedImports(newImports, useSitesToUnqualify) {
@@ -138213,11 +138213,11 @@ var ts;
                 changes.insertModifierBefore(context.sourceFile, 149 /* TypeKeyword */, exportClause);
             }
             else {
-                var valueExportDeclaration = ts.factory.updateExportDeclaration(exportDeclaration, exportDeclaration.decorators, exportDeclaration.modifiers, 
+                var valueExportDeclaration = ts.factory.updateExportDeclaration(exportDeclaration, exportDeclaration.decorators, exportDeclaration.modifiers,
                 /*isTypeOnly*/ false, ts.factory.updateNamedExports(exportClause, ts.filter(exportClause.elements, function (e) { return !ts.contains(typeExportSpecifiers, e); })), exportDeclaration.moduleSpecifier);
                 var typeExportDeclaration = ts.factory.createExportDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined,
                 /*isTypeOnly*/ true, ts.factory.createNamedExports(typeExportSpecifiers), exportDeclaration.moduleSpecifier);
                 changes.replaceNode(context.sourceFile, exportDeclaration, valueExportDeclaration, {
                     leadingTriviaOption: ts.textChanges.LeadingTriviaOption.IncludeAll,
@@ -138278,10 +138278,10 @@ var ts;
             // `import type foo, { Bar }` is not allowed, so move `foo` to new declaration
             if (importClause.name && importClause.namedBindings) {
                 changes.deleteNodeRangeExcludingEnd(context.sourceFile, importClause.name, importDeclaration.importClause.namedBindings);
-                changes.insertNodeBefore(context.sourceFile, importDeclaration, ts.factory.updateImportDeclaration(importDeclaration, 
-                /*decorators*/ undefined, 
+                changes.insertNodeBefore(context.sourceFile, importDeclaration, ts.factory.updateImportDeclaration(importDeclaration,
+                /*decorators*/ undefined,
                 /*modifiers*/ undefined, ts.factory.createImportClause(
-                /*isTypeOnly*/ true, importClause.name, 
+                /*isTypeOnly*/ true, importClause.name,
                 /*namedBindings*/ undefined), importDeclaration.moduleSpecifier));
             }
         }
@@ -138649,7 +138649,7 @@ var ts;
         function isTypeOnlyPosition(sourceFile, position) {
             return ts.isValidTypeOnlyAliasUseSite(ts.getTokenAtPosition(sourceFile, position));
         }
-        function getFixForImport(exportInfos, symbolName, 
+        function getFixForImport(exportInfos, symbolName,
         /** undefined only for missing JSX namespace */
         position, preferTypeOnlyImport, useRequire, program, sourceFile, host, preferences) {
             var checker = program.getTypeChecker();
@@ -139122,11 +139122,11 @@ var ts;
             if (namespaceLikeImport) {
                 var declaration = namespaceLikeImport.importKind === 3 /* CommonJS */
                     ? ts.factory.createImportEqualsDeclaration(
-                    /*decorators*/ undefined, 
+                    /*decorators*/ undefined,
                     /*modifiers*/ undefined, typeOnly, ts.factory.createIdentifier(namespaceLikeImport.name), ts.factory.createExternalModuleReference(quotedModuleSpecifier))
                     : ts.factory.createImportDeclaration(
-                    /*decorators*/ undefined, 
-                    /*modifiers*/ undefined, ts.factory.createImportClause(typeOnly, 
+                    /*decorators*/ undefined,
+                    /*modifiers*/ undefined, ts.factory.createImportClause(typeOnly,
                     /*name*/ undefined, ts.factory.createNamespaceImport(ts.factory.createIdentifier(namespaceLikeImport.name))), quotedModuleSpecifier);
                 statements = ts.combine(statements, declaration);
             }
@@ -139155,8 +139155,8 @@ var ts;
         function createConstEqualsRequireDeclaration(name, quotedModuleSpecifier) {
             return ts.factory.createVariableStatement(
             /*modifiers*/ undefined, ts.factory.createVariableDeclarationList([
-                ts.factory.createVariableDeclaration(typeof name === "string" ? ts.factory.createIdentifier(name) : name, 
-                /*exclamationToken*/ undefined, 
+                ts.factory.createVariableDeclaration(typeof name === "string" ? ts.factory.createIdentifier(name) : name,
+                /*exclamationToken*/ undefined,
                 /*type*/ undefined, ts.factory.createCallExpression(ts.factory.createIdentifier("require"), /*typeArguments*/ undefined, [quotedModuleSpecifier]))
             ], 2 /* Const */));
         }
@@ -139218,7 +139218,7 @@ var ts;
             var _a;
             var getCanonicalFileName = ts.hostGetCanonicalFileName(moduleSpecifierResolutionHost);
             var globalTypingsCache = (_a = moduleSpecifierResolutionHost.getGlobalTypingsCacheLocation) === null || _a === void 0 ? void 0 : _a.call(moduleSpecifierResolutionHost);
-            return !!ts.moduleSpecifiers.forEachFileNameOfModule(from.fileName, to.fileName, moduleSpecifierResolutionHost, 
+            return !!ts.moduleSpecifiers.forEachFileNameOfModule(from.fileName, to.fileName, moduleSpecifierResolutionHost,
             /*preferSymlinks*/ false, function (toPath) {
                 var toFile = program.getSourceFile(toPath);
                 // Determine to import using toPath only if toPath is what we were looking at
@@ -139748,11 +139748,11 @@ var ts;
                     if (ts.hasSyntacticModifier(declaration, 256 /* Async */)) {
                         exprType = checker.createPromiseType(exprType);
                     }
-                    var newSig = checker.createSignature(declaration, sig.typeParameters, sig.thisParameter, sig.parameters, exprType, 
+                    var newSig = checker.createSignature(declaration, sig.typeParameters, sig.thisParameter, sig.parameters, exprType,
                     /*typePredicate*/ undefined, sig.minArgumentCount, sig.flags);
                     exprType = checker.createAnonymousType(
-                    /*symbol*/ undefined, ts.createSymbolTable(), [newSig], [], 
-                    /*stringIndexInfo*/ undefined, 
+                    /*symbol*/ undefined, ts.createSymbolTable(), [newSig], [],
+                    /*stringIndexInfo*/ undefined,
                     /*numberIndexInfo*/ undefined);
                 }
                 else {
@@ -140030,10 +140030,10 @@ var ts;
             }
             else if (ts.isPrivateIdentifier(token)) {
                 var property = ts.factory.createPropertyDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, tokenName, 
-                /*questionToken*/ undefined, 
-                /*type*/ undefined, 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined, tokenName,
+                /*questionToken*/ undefined,
+                /*type*/ undefined,
                 /*initializer*/ undefined);
                 var lastProp = getNodeToInsertPropertyAfter(classDeclaration);
                 if (lastProp) {
@@ -140087,9 +140087,9 @@ var ts;
         }
         function addPropertyDeclaration(changeTracker, declSourceFile, classDeclaration, tokenName, typeNode, modifierFlags) {
             var property = ts.factory.createPropertyDeclaration(
-            /*decorators*/ undefined, 
-            /*modifiers*/ modifierFlags ? ts.factory.createNodeArray(ts.factory.createModifiersFromModifierFlags(modifierFlags)) : undefined, tokenName, 
-            /*questionToken*/ undefined, typeNode, 
+            /*decorators*/ undefined,
+            /*modifiers*/ modifierFlags ? ts.factory.createNodeArray(ts.factory.createModifiersFromModifierFlags(modifierFlags)) : undefined, tokenName,
+            /*questionToken*/ undefined, typeNode,
             /*initializer*/ undefined);
             var lastProp = getNodeToInsertPropertyAfter(classDeclaration);
             if (lastProp) {
@@ -140114,13 +140114,13 @@ var ts;
             // Index signatures cannot have the static modifier.
             var stringTypeNode = ts.factory.createKeywordTypeNode(147 /* StringKeyword */);
             var indexingParameter = ts.factory.createParameterDeclaration(
-            /*decorators*/ undefined, 
-            /*modifiers*/ undefined, 
-            /*dotDotDotToken*/ undefined, "x", 
-            /*questionToken*/ undefined, stringTypeNode, 
+            /*decorators*/ undefined,
+            /*modifiers*/ undefined,
+            /*dotDotDotToken*/ undefined, "x",
+            /*questionToken*/ undefined, stringTypeNode,
             /*initializer*/ undefined);
             var indexSignature = ts.factory.createIndexSignature(
-            /*decorators*/ undefined, 
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, [indexingParameter], typeNode);
             var changes = ts.textChanges.ChangeTracker.with(context, function (t) { return t.insertNodeAtClassStart(declSourceFile, classDeclaration, indexSignature); });
             // No fixId here because code-fix-all currently only works on adding individual named properties.
@@ -142555,7 +142555,7 @@ var ts;
                         }
                     }
                     addClassElement(ts.factory.createPropertyDeclaration(
-                    /*decorators*/ undefined, modifiers, name, optional ? ts.factory.createToken(57 /* QuestionToken */) : undefined, typeNode, 
+                    /*decorators*/ undefined, modifiers, name, optional ? ts.factory.createToken(57 /* QuestionToken */) : undefined, typeNode,
                     /*initializer*/ undefined));
                     break;
                 case 167 /* GetAccessor */:
@@ -142687,7 +142687,7 @@ var ts;
                     }
                 }
             }
-            return ts.factory.updateMethodDeclaration(signatureDeclaration, 
+            return ts.factory.updateMethodDeclaration(signatureDeclaration,
             /*decorators*/ undefined, modifiers, signatureDeclaration.asteriskToken, name, optional ? ts.factory.createToken(57 /* QuestionToken */) : undefined, typeParameters, parameters, type, body);
         }
         function createSignatureDeclarationFromCallExpression(kind, context, importAdder, call, name, modifierFlags, contextNode) {
@@ -142721,7 +142721,7 @@ var ts;
                 : checker.typeToTypeNode(contextualType, contextNode, /*flags*/ undefined, tracker);
             if (kind === 165 /* MethodDeclaration */) {
                 return ts.factory.createMethodDeclaration(
-                /*decorators*/ undefined, modifiers, asteriskToken, name, 
+                /*decorators*/ undefined, modifiers, asteriskToken, name,
                 /*questionToken*/ undefined, typeParameters, parameters, type, ts.isInterfaceDeclaration(contextNode) ? undefined : createStubbedMethodBody(quotePreference));
             }
             return ts.factory.createFunctionDeclaration(
@@ -142744,12 +142744,12 @@ var ts;
             var parameters = [];
             for (var i = 0; i < argCount; i++) {
                 var newParameter = ts.factory.createParameterDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, 
-                /*dotDotDotToken*/ undefined, 
-                /*name*/ names && names[i] || "arg" + i, 
-                /*questionToken*/ minArgumentCount !== undefined && i >= minArgumentCount ? ts.factory.createToken(57 /* QuestionToken */) : undefined, 
-                /*type*/ inJs ? undefined : types && types[i] || ts.factory.createKeywordTypeNode(128 /* AnyKeyword */), 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined,
+                /*dotDotDotToken*/ undefined,
+                /*name*/ names && names[i] || "arg" + i,
+                /*questionToken*/ minArgumentCount !== undefined && i >= minArgumentCount ? ts.factory.createToken(57 /* QuestionToken */) : undefined,
+                /*type*/ inJs ? undefined : types && types[i] || ts.factory.createKeywordTypeNode(128 /* AnyKeyword */),
                 /*initializer*/ undefined);
                 parameters.push(newParameter);
             }
@@ -142779,29 +142779,29 @@ var ts;
             if (someSigHasRestParameter) {
                 var anyArrayType = ts.factory.createArrayTypeNode(ts.factory.createKeywordTypeNode(128 /* AnyKeyword */));
                 var restParameter = ts.factory.createParameterDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, ts.factory.createToken(25 /* DotDotDotToken */), maxArgsParameterSymbolNames[maxNonRestArgs] || "rest", 
-                /*questionToken*/ maxNonRestArgs >= minArgumentCount ? ts.factory.createToken(57 /* QuestionToken */) : undefined, anyArrayType, 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined, ts.factory.createToken(25 /* DotDotDotToken */), maxArgsParameterSymbolNames[maxNonRestArgs] || "rest",
+                /*questionToken*/ maxNonRestArgs >= minArgumentCount ? ts.factory.createToken(57 /* QuestionToken */) : undefined, anyArrayType,
                 /*initializer*/ undefined);
                 parameters.push(restParameter);
             }
-            return createStubbedMethod(modifiers, name, optional, 
-            /*typeParameters*/ undefined, parameters, 
+            return createStubbedMethod(modifiers, name, optional,
+            /*typeParameters*/ undefined, parameters,
             /*returnType*/ undefined, quotePreference);
         }
         function createStubbedMethod(modifiers, name, optional, typeParameters, parameters, returnType, quotePreference) {
             return ts.factory.createMethodDeclaration(
-            /*decorators*/ undefined, modifiers, 
+            /*decorators*/ undefined, modifiers,
             /*asteriskToken*/ undefined, name, optional ? ts.factory.createToken(57 /* QuestionToken */) : undefined, typeParameters, parameters, returnType, createStubbedMethodBody(quotePreference));
         }
         function createStubbedMethodBody(quotePreference) {
             return createStubbedBody(ts.Diagnostics.Method_not_implemented.message, quotePreference);
         }
         function createStubbedBody(text, quotePreference) {
-            return ts.factory.createBlock([ts.factory.createThrowStatement(ts.factory.createNewExpression(ts.factory.createIdentifier("Error"), 
-                /*typeArguments*/ undefined, 
+            return ts.factory.createBlock([ts.factory.createThrowStatement(ts.factory.createNewExpression(ts.factory.createIdentifier("Error"),
+                /*typeArguments*/ undefined,
                 // TODO Handle auto quote preference.
-                [ts.factory.createStringLiteral(text, /*isSingleQuote*/ quotePreference === 0 /* Single */)]))], 
+                [ts.factory.createStringLiteral(text, /*isSingleQuote*/ quotePreference === 0 /* Single */)]))],
             /*multiline*/ true);
         }
         codefix.createStubbedBody = createStubbedBody;
@@ -143013,7 +143013,7 @@ var ts;
         codefix.getAccessorConvertiblePropertyAtPosition = getAccessorConvertiblePropertyAtPosition;
         function generateGetAccessor(fieldName, accessorName, type, modifiers, isStatic, container) {
             return ts.factory.createGetAccessorDeclaration(
-            /*decorators*/ undefined, modifiers, accessorName, 
+            /*decorators*/ undefined, modifiers, accessorName,
             /*parameters*/ undefined, // TODO: GH#18217
             type, ts.factory.createBlock([
                 ts.factory.createReturnStatement(createAccessorAccessExpression(fieldName, isStatic, container))
@@ -143022,9 +143022,9 @@ var ts;
         function generateSetAccessor(fieldName, accessorName, type, modifiers, isStatic, container) {
             return ts.factory.createSetAccessorDeclaration(
             /*decorators*/ undefined, modifiers, accessorName, [ts.factory.createParameterDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, 
-                /*dotDotDotToken*/ undefined, ts.factory.createIdentifier("value"), 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined,
+                /*dotDotDotToken*/ undefined, ts.factory.createIdentifier("value"),
                 /*questionToken*/ undefined, type)], ts.factory.createBlock([
                 ts.factory.createExpressionStatement(ts.factory.createAssignment(createAccessorAccessExpression(fieldName, isStatic, container), ts.factory.createIdentifier("value")))
             ], /*multiLine*/ true));
@@ -143119,8 +143119,8 @@ var ts;
             if (ts.getEmitModuleKind(opts) === ts.ModuleKind.CommonJS) {
                 // import Bluebird = require("bluebird");
                 variations.push(createAction(context, sourceFile, node, ts.factory.createImportEqualsDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined,
                 /*isTypeOnly*/ false, namespace.name, ts.factory.createExternalModuleReference(node.moduleSpecifier))));
             }
             return variations;
@@ -143604,7 +143604,7 @@ var ts;
             var otherMembers = members.filter(function (member) { return !ts.isIndexSignatureDeclaration(member); });
             var parameter = ts.first(indexSignature.parameters);
             var mappedTypeParameter = ts.factory.createTypeParameterDeclaration(ts.cast(parameter.name, ts.isIdentifier), parameter.type);
-            var mappedIntersectionType = ts.factory.createMappedTypeNode(ts.hasEffectiveReadonlyModifier(indexSignature) ? ts.factory.createModifier(142 /* ReadonlyKeyword */) : undefined, mappedTypeParameter, 
+            var mappedIntersectionType = ts.factory.createMappedTypeNode(ts.hasEffectiveReadonlyModifier(indexSignature) ? ts.factory.createModifier(142 /* ReadonlyKeyword */) : undefined, mappedTypeParameter,
             /*nameType*/ undefined, indexSignature.questionToken, indexSignature.type);
             var intersectionType = ts.factory.createIntersectionTypeNode(__spreadArray(__spreadArray(__spreadArray([], ts.getAllSuperTypeNodes(container)), [
                 mappedIntersectionType
@@ -143713,7 +143713,7 @@ var ts;
             var importClause = ts.Debug.checkDefined(importDeclaration.importClause);
             changes.replaceNode(context.sourceFile, importDeclaration, ts.factory.updateImportDeclaration(importDeclaration, importDeclaration.decorators, importDeclaration.modifiers, ts.factory.updateImportClause(importClause, importClause.isTypeOnly, importClause.name, /*namedBindings*/ undefined), importDeclaration.moduleSpecifier));
             changes.insertNodeAfter(context.sourceFile, importDeclaration, ts.factory.createImportDeclaration(
-            /*decorators*/ undefined, 
+            /*decorators*/ undefined,
             /*modifiers*/ undefined, ts.factory.updateImportClause(importClause, importClause.isTypeOnly, /*name*/ undefined, importClause.namedBindings), importDeclaration.moduleSpecifier));
         }
     })(codefix = ts.codefix || (ts.codefix = {}));
@@ -144609,8 +144609,8 @@ var ts;
                     }
                     return ts.factory.createNodeArray([
                         ts.factory.createParameterDeclaration(
-                        /*decorators*/ undefined, 
-                        /*modifiers*/ undefined, ts.factory.createToken(25 /* DotDotDotToken */), "args", 
+                        /*decorators*/ undefined,
+                        /*modifiers*/ undefined, ts.factory.createToken(25 /* DotDotDotToken */), "args",
                         /*questionToken*/ undefined, ts.factory.createUnionTypeNode(ts.map(signatureDeclarations, convertSignatureParametersToTuple)))
                     ]);
                 }
@@ -145429,10 +145429,10 @@ var ts;
                         typeNode = ts.codefix.typeToAutoImportableTypeNode(checker, importAdder, type, scope, scriptTarget, 1 /* NoTruncation */);
                     }
                     var paramDecl = ts.factory.createParameterDeclaration(
-                    /*decorators*/ undefined, 
-                    /*modifiers*/ undefined, 
-                    /*dotDotDotToken*/ undefined, 
-                    /*name*/ name, 
+                    /*decorators*/ undefined,
+                    /*modifiers*/ undefined,
+                    /*dotDotDotToken*/ undefined,
+                    /*name*/ name,
                     /*questionToken*/ undefined, typeNode);
                     parameters.push(paramDecl);
                     if (usage.usage === 2 /* Write */) {
@@ -145469,7 +145469,7 @@ var ts;
                         modifiers.push(ts.factory.createModifier(129 /* AsyncKeyword */));
                     }
                     newFunction = ts.factory.createMethodDeclaration(
-                    /*decorators*/ undefined, modifiers.length ? modifiers : undefined, range.facts & RangeFacts.IsGenerator ? ts.factory.createToken(41 /* AsteriskToken */) : undefined, functionName, 
+                    /*decorators*/ undefined, modifiers.length ? modifiers : undefined, range.facts & RangeFacts.IsGenerator ? ts.factory.createToken(41 /* AsteriskToken */) : undefined, functionName,
                     /*questionToken*/ undefined, typeParameters, parameters, returnType, body);
                 }
                 else {
@@ -145522,15 +145522,15 @@ var ts;
                         for (var _i = 0, exposedVariableDeclarations_1 = exposedVariableDeclarations; _i < exposedVariableDeclarations_1.length; _i++) {
                             var variableDeclaration = exposedVariableDeclarations_1[_i];
                             bindingElements.push(ts.factory.createBindingElement(
-                            /*dotDotDotToken*/ undefined, 
-                            /*propertyName*/ undefined, 
+                            /*dotDotDotToken*/ undefined,
+                            /*propertyName*/ undefined,
                             /*name*/ ts.getSynthesizedDeepClone(variableDeclaration.name)));
                             // Being returned through an object literal will have widened the type.
                             var variableType = checker.typeToTypeNode(checker.getBaseTypeOfLiteralType(checker.getTypeAtLocation(variableDeclaration)), scope, 1 /* NoTruncation */);
                             typeElements.push(ts.factory.createPropertySignature(
-                            /*modifiers*/ undefined, 
-                            /*name*/ variableDeclaration.symbol.name, 
-                            /*questionToken*/ undefined, 
+                            /*modifiers*/ undefined,
+                            /*name*/ variableDeclaration.symbol.name,
+                            /*questionToken*/ undefined,
                             /*type*/ variableType));
                             sawExplicitType = sawExplicitType || variableDeclaration.type !== undefined;
                             commonNodeFlags = commonNodeFlags & variableDeclaration.parent.flags;
@@ -145540,9 +145540,9 @@ var ts;
                             ts.setEmitFlags(typeLiteral, 1 /* SingleLine */);
                         }
                         newNodes.push(ts.factory.createVariableStatement(
-                        /*modifiers*/ undefined, ts.factory.createVariableDeclarationList([ts.factory.createVariableDeclaration(ts.factory.createObjectBindingPattern(bindingElements), 
-                            /*exclamationToken*/ undefined, 
-                            /*type*/ typeLiteral, 
+                        /*modifiers*/ undefined, ts.factory.createVariableDeclarationList([ts.factory.createVariableDeclaration(ts.factory.createObjectBindingPattern(bindingElements),
+                            /*exclamationToken*/ undefined,
+                            /*type*/ typeLiteral,
                             /*initializer*/ call)], commonNodeFlags)));
                     }
                 }
@@ -145652,7 +145652,7 @@ var ts;
                     }
                     modifiers.push(ts.factory.createModifier(142 /* ReadonlyKeyword */));
                     var newVariable = ts.factory.createPropertyDeclaration(
-                    /*decorators*/ undefined, modifiers, localNameText, 
+                    /*decorators*/ undefined, modifiers, localNameText,
                     /*questionToken*/ undefined, variableType, initializer);
                     var localReference = ts.factory.createPropertyAccessExpression(rangeFacts & RangeFacts.InStaticRegion
                         ? ts.factory.createIdentifier(scope.name.getText()) // TODO: GH#18217
@@ -145767,9 +145767,9 @@ var ts;
                             if ((!firstParameter || (ts.isIdentifier(firstParameter.name) && firstParameter.name.escapedText !== "this"))) {
                                 var thisType = checker.getTypeOfSymbolAtLocation(functionSignature.thisParameter, node);
                                 parameters.splice(0, 0, ts.factory.createParameterDeclaration(
-                                /* decorators */ undefined, 
-                                /* modifiers */ undefined, 
-                                /* dotDotDotToken */ undefined, "this", 
+                                /* decorators */ undefined,
+                                /* modifiers */ undefined,
+                                /* dotDotDotToken */ undefined, "this",
                                 /* questionToken */ undefined, checker.typeToTypeNode(thisType, scope, 1 /* NoTruncation */)));
                             }
                         }
@@ -146554,7 +146554,7 @@ var ts;
         function doTypeAliasChange(changes, file, name, info) {
             var firstStatement = info.firstStatement, selection = info.selection, typeParameters = info.typeParameters;
             var newTypeNode = ts.factory.createTypeAliasDeclaration(
-            /* decorators */ undefined, 
+            /* decorators */ undefined,
             /* modifiers */ undefined, name, typeParameters.map(function (id) { return ts.factory.updateTypeParameterDeclaration(id, id.name, id.constraint, /* defaultType */ undefined); }), selection);
             changes.insertNodeBefore(file, firstStatement, ts.ignoreSourceNewlines(newTypeNode), /* blankLineBetween */ true);
             changes.replaceNode(file, selection, ts.factory.createTypeReferenceNode(name, typeParameters.map(function (id) { return ts.factory.createTypeReferenceNode(id.name, /* typeArguments */ undefined); })), { leadingTriviaOption: ts.textChanges.LeadingTriviaOption.Exclude, trailingTriviaOption: ts.textChanges.TrailingTriviaOption.ExcludeWhitespace });
@@ -146563,8 +146563,8 @@ var ts;
             var _a;
             var firstStatement = info.firstStatement, selection = info.selection, typeParameters = info.typeParameters, typeElements = info.typeElements;
             var newTypeNode = ts.factory.createInterfaceDeclaration(
-            /* decorators */ undefined, 
-            /* modifiers */ undefined, name, typeParameters, 
+            /* decorators */ undefined,
+            /* modifiers */ undefined, name, typeParameters,
             /* heritageClauses */ undefined, typeElements);
             ts.setTextRange(newTypeNode, (_a = typeElements[0]) === null || _a === void 0 ? void 0 : _a.parent);
             changes.insertNodeBefore(file, firstStatement, ts.ignoreSourceNewlines(newTypeNode), /* blankLineBetween */ true);
@@ -147920,16 +147920,16 @@ var ts;
                     objectInitializer = ts.factory.createObjectLiteralExpression();
                 }
                 var objectParameter = ts.factory.createParameterDeclaration(
-                /*decorators*/ undefined, 
-                /*modifiers*/ undefined, 
-                /*dotDotDotToken*/ undefined, objectParameterName, 
+                /*decorators*/ undefined,
+                /*modifiers*/ undefined,
+                /*dotDotDotToken*/ undefined, objectParameterName,
                 /*questionToken*/ undefined, objectParameterType, objectInitializer);
                 if (hasThisParameter(functionDeclaration.parameters)) {
                     var thisParameter = functionDeclaration.parameters[0];
                     var newThisParameter = ts.factory.createParameterDeclaration(
-                    /*decorators*/ undefined, 
-                    /*modifiers*/ undefined, 
-                    /*dotDotDotToken*/ undefined, thisParameter.name, 
+                    /*decorators*/ undefined,
+                    /*modifiers*/ undefined,
+                    /*dotDotDotToken*/ undefined, thisParameter.name,
                     /*questionToken*/ undefined, thisParameter.type);
                     ts.suppressLeadingAndTrailingTrivia(newThisParameter.name);
                     ts.copyComments(thisParameter.name, newThisParameter.name);
@@ -147942,7 +147942,7 @@ var ts;
                 return ts.factory.createNodeArray([objectParameter]);
                 function createBindingElementFromParameterDeclaration(parameterDeclaration) {
                     var element = ts.factory.createBindingElement(
-                    /*dotDotDotToken*/ undefined, 
+                    /*dotDotDotToken*/ undefined,
                     /*propertyName*/ undefined, getParameterName(parameterDeclaration), ts.isRestParameter(parameterDeclaration) && isOptionalParameter(parameterDeclaration) ? ts.factory.createArrayLiteralExpression() : parameterDeclaration.initializer);
                     ts.suppressLeadingAndTrailingTrivia(element);
                     if (parameterDeclaration.initializer && element.initializer) {
@@ -151761,14 +151761,14 @@ var ts;
         };
         LanguageServiceShimObject.prototype.getEncodedSyntacticClassifications = function (fileName, start, length) {
             var _this = this;
-            return this.forwardJSONCall("getEncodedSyntacticClassifications('" + fileName + "', " + start + ", " + length + ")", 
+            return this.forwardJSONCall("getEncodedSyntacticClassifications('" + fileName + "', " + start + ", " + length + ")",
             // directly serialize the spans out to a string.  This is much faster to decode
             // on the managed side versus a full JSON array.
             function () { return convertClassifications(_this.languageService.getEncodedSyntacticClassifications(fileName, ts.createTextSpan(start, length))); });
         };
         LanguageServiceShimObject.prototype.getEncodedSemanticClassifications = function (fileName, start, length) {
             var _this = this;
-            return this.forwardJSONCall("getEncodedSemanticClassifications('" + fileName + "', " + start + ", " + length + ")", 
+            return this.forwardJSONCall("getEncodedSemanticClassifications('" + fileName + "', " + start + ", " + length + ")",
             // directly serialize the spans out to a string.  This is much faster to decode
             // on the managed side versus a full JSON array.
             function () { return convertClassifications(_this.languageService.getEncodedSemanticClassifications(fileName, ts.createTextSpan(start, length))); });
@@ -152011,7 +152011,7 @@ var ts;
         };
         LanguageServiceShimObject.prototype.getEmitOutputObject = function (fileName) {
             var _this = this;
-            return forwardCall(this.logger, "getEmitOutput('" + fileName + "')", 
+            return forwardCall(this.logger, "getEmitOutput('" + fileName + "')",
             /*returnJson*/ false, function () { return _this.languageService.getEmitOutput(fileName); }, this.logPerformance);
         };
         LanguageServiceShimObject.prototype.toggleLineComment = function (fileName, textRange) {
