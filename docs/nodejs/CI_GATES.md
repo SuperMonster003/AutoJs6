@@ -1323,6 +1323,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedBroadcastSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15NotificationPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15SettingsPowerPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15RecorderPromotion
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1451,6 +1452,14 @@ settings/power OEM and background-launch matrix and the P15-17 notification
 dependency gate. It keeps `settings_power` unpromoted until Android 12/15+ OEM
 matrix archives, exact-alarm state, background-launch restrictions, reviewed
 prompt/rollback evidence, packaged disclosure/stop action, Safe downgrade,
+raw-object security coverage, and task/device/media docs sync evidence are
+archived.
+The `:app:verifyNodePhase15RecorderPromotion` gate writes
+`phase15-recorder-promotion.json` plus `.md`, imports the P14-24 real recorder
+session provider contract and the P15-18 settings/power dependency gate. It
+keeps `recorder` unpromoted until runtime microphone prompt ownership,
+foreground disclosure/stop action, scoped session and temporary output cleanup,
+crash/task-removal cleanup, packaged start/stop stress, Safe downgrade,
 raw-object security coverage, and task/device/media docs sync evidence are
 archived.
 

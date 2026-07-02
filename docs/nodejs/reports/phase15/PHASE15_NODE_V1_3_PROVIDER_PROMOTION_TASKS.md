@@ -445,9 +445,24 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-19: Promote real recorder session provider.
   - Source backlog: `P14-24`.
-  - Gate: proposed `:app:verifyNodePhase15RecorderPromotion`.
+  - Gate: `:app:verifyNodePhase15RecorderPromotion`.
   - Acceptance: microphone prompt, start/stop, foreground disclosure, temp
     output cleanup, crash cleanup, and raw media object denial pass.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/recorder-promotion-plan.json`
+    - `docs/nodejs/phase15/PHASE15_RECORDER_PROMOTION.md`
+    - `docs/nodejs/reports/phase15/P15_19_RECORDER_PROMOTION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-recorder-promotion.js`
+    - `build/reports/nodejs/phase15-recorder-promotion.json`
+    - `build/reports/nodejs/phase15-recorder-promotion.md`
+  - Still open: `recorder_runtime_permission_prompt_archive`,
+    `recorder_foreground_disclosure_stop_action_archive`,
+    `recorder_temp_output_ownership_cleanup_archive`,
+    `recorder_crash_cleanup_session_resource_archive`,
+    `recorder_packaged_start_stop_stress_archive`,
+    `recorder_safe_downgrade_archive`,
+    `recorder_raw_object_denial_security_archive`, and
+    `phase15_task_device_media_doc_sync`.
 
 - [ ] P15-20: Add packaged recorder and media stress evidence.
   - Source backlog: `P14-25`.

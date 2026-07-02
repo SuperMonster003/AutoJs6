@@ -58,6 +58,7 @@ Provider promotion gates:
 - `:app:installAndRunNodeV13PackagedBroadcastSmoke`
 - `:app:verifyNodePhase15NotificationPromotion`
 - `:app:verifyNodePhase15SettingsPowerPromotion`
+- `:app:verifyNodePhase15RecorderPromotion`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -164,3 +165,10 @@ background-launch matrix plus the P15-17 notification dependency gate. It keeps
 exact-alarm state, background-launch restrictions, reviewed prompt/rollback
 evidence, packaged disclosure/stop action, Safe downgrade, raw-object security
 coverage, and task/device/media docs sync land.
+
+`P15-19` currently reports `partial`: it imports the P14 real recorder session
+promotion contract plus the P15-18 settings/power dependency gate. It keeps
+`recorder` unpromoted until runtime microphone prompt ownership, foreground
+disclosure/stop action, scoped session and temporary output cleanup,
+crash/task-removal cleanup, packaged start/stop stress, Safe downgrade,
+raw-object security coverage, and task/device/media docs sync land.

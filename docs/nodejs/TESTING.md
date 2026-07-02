@@ -3427,6 +3427,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedBroadcastSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15NotificationPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15SettingsPowerPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15RecorderPromotion
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3556,3 +3557,11 @@ dependency gate. It reports `partial` until Android 12/15+ OEM matrix archives,
 exact-alarm state, background-launch restrictions, reviewed prompt/rollback
 evidence, packaged disclosure/stop action, Safe downgrade, raw-object security
 coverage, and task/device/media docs sync evidence are attached.
+`verifyNodePhase15RecorderPromotion` writes
+`phase15-recorder-promotion.json` plus `.md`, imports the P14-24 real recorder
+session provider contract and the P15-18 settings/power dependency gate. It
+reports `partial` until runtime microphone prompt ownership, foreground
+disclosure/stop action, scoped session and temporary output cleanup,
+crash/task-removal cleanup, packaged start/stop stress, Safe downgrade,
+raw-object security coverage, and task/device/media docs sync evidence are
+attached.
