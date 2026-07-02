@@ -96,12 +96,19 @@ A Phase 15 task can be marked complete only when all applicable items are true:
     - `build/reports/nodejs/phase15-baseline-verification.json`
     - `build/reports/nodejs/phase15-baseline-verification.md`
 
-- [ ] P15-01: Create Phase 15 surface manifest.
+- [x] P15-01: Create Phase 15 surface manifest.
   - Scope: map every P15 task to owner surface, source backlog task, profile,
     risk, evidence class, and rollback hook.
-  - Gate: proposed `:app:verifyNodePhase15SurfaceManifest`.
+  - Gate: `:app:verifyNodePhase15SurfaceManifest`.
   - Acceptance: P15-00 through P15-27 map exactly once and every imported
     P14 backlog task is owned.
+  - Landed:
+    - `docs/nodejs/phase15/phase15-surface-manifest.json`
+    - `docs/nodejs/phase15/PHASE15_SURFACE_MANIFEST.md`
+    - `docs/nodejs/schemas/phase15_surface_manifest.schema.json`
+    - `tools/nodejs/phase15/verify-node-phase15-surface-manifest.js`
+    - `build/reports/nodejs/phase15-surface-manifest-verification.json`
+    - `build/reports/nodejs/phase15-surface-manifest-verification.md`
 
 - [ ] P15-02: Refresh v1.3 opt-in promotion bars.
   - Scope: promoted, provider POC, future-only, stable-denied, and rejected

@@ -1,0 +1,572 @@
+{
+  "schema": "autojs6-node-phase15-surface-manifest-v1",
+  "phase": "Phase 15: Node v1.3 Provider Promotion",
+  "updatedAt": "2026-07-02",
+  "branch": "feature/nodejs-runtime-v1.3",
+  "profileVocabulary": [
+    "safe_default",
+    "pro_compat_opt_in",
+    "desktop_compat_opt_in",
+    "debug_unsafe_lab",
+    "permanently_unsupported"
+  ],
+  "riskVocabulary": [
+    "low",
+    "medium",
+    "high",
+    "critical"
+  ],
+  "evidenceClassVocabulary": [
+    "host_foundation",
+    "surface_manifest",
+    "promotion_contract",
+    "disclosure_rollback_audit",
+    "packaged_device_archive",
+    "provider_runtime_device_archive",
+    "device_oem_matrix",
+    "packaged_smoke_archive",
+    "device_matrix_archive",
+    "permission_lifecycle_archive",
+    "packaged_media_archive",
+    "doc_type_release_sync",
+    "provider_mutation_archive",
+    "migration_rollback_fixture",
+    "provider_manifest_archive",
+    "foreground_disclosure_archive",
+    "packaged_stress_archive",
+    "boundary_decision_archive",
+    "security_regression_corpus",
+    "packaged_aggregate_archive",
+    "type_profile_sync",
+    "migration_release_sync",
+    "summary_handoff_report"
+  ],
+  "importedBacklog": {
+    "source": "docs/nodejs/reports/phase14/PHASE14_FUTURE_BACKLOG.json",
+    "classification": "v1.3 future promotion backlog",
+    "tasks": [
+      "P14-07",
+      "P14-08",
+      "P14-09",
+      "P14-10",
+      "P14-11",
+      "P14-12",
+      "P14-13",
+      "P14-14",
+      "P14-15",
+      "P14-17",
+      "P14-18",
+      "P14-19",
+      "P14-20",
+      "P14-21",
+      "P14-22",
+      "P14-23",
+      "P14-24",
+      "P14-25",
+      "P14-26"
+    ]
+  },
+  "ownerSurfaces": [
+    {
+      "id": "phase15.baseline",
+      "summary": "v1.3 branch baseline imported from the Phase 14 closeout handoff.",
+      "profiles": [
+        "safe_default"
+      ],
+      "risk": "low",
+      "rollbackHook": "remove_phase15_baseline_gate"
+    },
+    {
+      "id": "phase15.surface_manifest",
+      "summary": "Task ownership manifest for Phase 15 provider promotion work.",
+      "profiles": [
+        "safe_default"
+      ],
+      "risk": "low",
+      "rollbackHook": "revert_surface_manifest_gate"
+    },
+    {
+      "id": "phase15.promotion_contracts",
+      "summary": "v1.3 opt-in promotion vocabulary, evidence bars, and report rules.",
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "risk": "high",
+      "rollbackHook": "block_opt_in_promotion_until_contracts_pass"
+    },
+    {
+      "id": "phase15.disclosure_rollback_audit",
+      "summary": "Audit requirements for disclosure, rollback, disable flags, and crash breakers.",
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in"
+      ],
+      "risk": "high",
+      "rollbackHook": "fail_closed_to_safe_profile"
+    },
+    {
+      "id": "pro.ui_overlay_automation_media",
+      "summary": "Live UI, overlay, accessibility, MediaProjection, image, and OCR promotion lane.",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "rollbackHook": "disable_pro_ui_overlay_automation_media"
+    },
+    {
+      "id": "pro.tasks_device_media",
+      "summary": "Task database, broadcast, notification, settings, recorder, and media boundary lane.",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "rollbackHook": "disable_pro_task_device_media"
+    },
+    {
+      "id": "security.types.packaged_migration",
+      "summary": "Security, packaged aggregate, TypeScript, migration, compatibility, and release sync lane.",
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "risk": "critical",
+      "rollbackHook": "block_release_candidate_until_sync_passes"
+    },
+    {
+      "id": "phase15.summary_handoff",
+      "summary": "Phase 15 summary and next-branch handoff lane.",
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in"
+      ],
+      "risk": "medium",
+      "rollbackHook": "keep_phase15_open_until_summary_ready"
+    }
+  ],
+  "taskMappings": [
+    {
+      "task": "P15-00",
+      "ownerSurface": "phase15.baseline",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "safe_default"
+      ],
+      "risk": "low",
+      "evidenceClass": "host_foundation",
+      "rollbackHook": "remove_phase15_baseline_gate",
+      "gate": ":app:verifyNodePhase15Baseline",
+      "status": "ready"
+    },
+    {
+      "task": "P15-01",
+      "ownerSurface": "phase15.surface_manifest",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "safe_default"
+      ],
+      "risk": "low",
+      "evidenceClass": "surface_manifest",
+      "rollbackHook": "revert_surface_manifest_gate",
+      "gate": ":app:verifyNodePhase15SurfaceManifest",
+      "status": "ready"
+    },
+    {
+      "task": "P15-02",
+      "ownerSurface": "phase15.promotion_contracts",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "risk": "high",
+      "evidenceClass": "promotion_contract",
+      "rollbackHook": "block_opt_in_promotion_until_contracts_pass",
+      "gate": ":app:verifyNodePhase15PromotionContracts",
+      "status": "planned"
+    },
+    {
+      "task": "P15-03",
+      "ownerSurface": "phase15.disclosure_rollback_audit",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "disclosure_rollback_audit",
+      "rollbackHook": "fail_closed_to_safe_profile",
+      "gate": ":app:verifyNodePhase15DisclosureRollbackAudit",
+      "status": "planned"
+    },
+    {
+      "task": "P15-04",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "sourceBacklogTasks": [
+        "P14-07"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "packaged_device_archive",
+      "rollbackHook": "disable_live_ui_provider",
+      "gate": ":app:verifyNodePhase15PackagedLiveUiPromotion",
+      "status": "planned"
+    },
+    {
+      "task": "P15-05",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "sourceBacklogTasks": [
+        "P14-08"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "provider_runtime_device_archive",
+      "rollbackHook": "disable_overlay_provider",
+      "gate": ":app:verifyNodePhase15OverlayProviderPromotion",
+      "status": "planned"
+    },
+    {
+      "task": "P15-06",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "sourceBacklogTasks": [
+        "P14-09"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "device_oem_matrix",
+      "rollbackHook": "disable_overlay_provider",
+      "gate": ":app:verifyNodePhase15OverlayOemMatrix",
+      "status": "planned"
+    },
+    {
+      "task": "P15-07",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "sourceBacklogTasks": [
+        "P14-10"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "packaged_smoke_archive",
+      "rollbackHook": "disable_overlay_provider",
+      "gate": ":app:installAndRunNodeV13PackagedOverlaySmoke",
+      "status": "planned"
+    },
+    {
+      "task": "P15-08",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "sourceBacklogTasks": [
+        "P14-11",
+        "P14-12"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "device_matrix_archive",
+      "rollbackHook": "disable_accessibility_provider",
+      "gate": ":app:verifyNodePhase15AccessibilityPromotion",
+      "status": "planned"
+    },
+    {
+      "task": "P15-09",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "sourceBacklogTasks": [
+        "P14-13"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "permission_lifecycle_archive",
+      "rollbackHook": "disable_media_projection_provider",
+      "gate": ":app:verifyNodePhase15MediaProjectionPromotion",
+      "status": "planned"
+    },
+    {
+      "task": "P15-10",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "sourceBacklogTasks": [
+        "P14-14",
+        "P14-15"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "packaged_media_archive",
+      "rollbackHook": "disable_image_ocr_provider",
+      "gate": ":app:verifyNodePhase15ImageOcrPromotion",
+      "status": "planned"
+    },
+    {
+      "task": "P15-11",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "medium",
+      "evidenceClass": "doc_type_release_sync",
+      "rollbackHook": "keep_ui_automation_media_docs_future_only",
+      "gate": ":app:verifyNodePhase15UiAutomationMediaDocSync",
+      "status": "planned"
+    },
+    {
+      "task": "P15-12",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [
+        "P14-17"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "provider_mutation_archive",
+      "rollbackHook": "disable_task_database_provider",
+      "gate": ":app:verifyNodePhase15TaskDatabasePromotion",
+      "status": "planned"
+    },
+    {
+      "task": "P15-13",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [
+        "P14-18"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "migration_rollback_fixture",
+      "rollbackHook": "disable_task_database_provider",
+      "gate": ":app:verifyNodePhase15TaskSchemaRollback",
+      "status": "planned"
+    },
+    {
+      "task": "P15-14",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [
+        "P14-19"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "packaged_smoke_archive",
+      "rollbackHook": "disable_packaged_task_scheduling",
+      "gate": ":app:installAndRunNodeV13PackagedTaskSmoke",
+      "status": "planned"
+    },
+    {
+      "task": "P15-15",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [
+        "P14-20"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "provider_manifest_archive",
+      "rollbackHook": "disable_intent_broadcast_provider",
+      "gate": ":app:verifyNodePhase15IntentBroadcastPromotion",
+      "status": "planned"
+    },
+    {
+      "task": "P15-16",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [
+        "P14-21"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "packaged_smoke_archive",
+      "rollbackHook": "disable_intent_broadcast_provider",
+      "gate": ":app:installAndRunNodeV13PackagedBroadcastSmoke",
+      "status": "planned"
+    },
+    {
+      "task": "P15-17",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [
+        "P14-22"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "foreground_disclosure_archive",
+      "rollbackHook": "disable_notification_provider",
+      "gate": ":app:verifyNodePhase15NotificationPromotion",
+      "status": "planned"
+    },
+    {
+      "task": "P15-18",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [
+        "P14-23"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "device_oem_matrix",
+      "rollbackHook": "disable_settings_power_provider",
+      "gate": ":app:verifyNodePhase15SettingsPowerPromotion",
+      "status": "planned"
+    },
+    {
+      "task": "P15-19",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [
+        "P14-24"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "permission_lifecycle_archive",
+      "rollbackHook": "disable_recorder_provider",
+      "gate": ":app:verifyNodePhase15RecorderPromotion",
+      "status": "planned"
+    },
+    {
+      "task": "P15-20",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [
+        "P14-25"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "packaged_stress_archive",
+      "rollbackHook": "disable_recorder_provider",
+      "gate": ":app:installAndRunNodeV13PackagedRecorderSmoke",
+      "status": "planned"
+    },
+    {
+      "task": "P15-21",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [
+        "P14-26"
+      ],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "high",
+      "evidenceClass": "boundary_decision_archive",
+      "rollbackHook": "keep_mediastore_playback_denied",
+      "gate": ":app:verifyNodePhase15MediaStorePlaybackDecision",
+      "status": "planned"
+    },
+    {
+      "task": "P15-22",
+      "ownerSurface": "pro.tasks_device_media",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "risk": "medium",
+      "evidenceClass": "doc_type_release_sync",
+      "rollbackHook": "keep_task_device_media_docs_future_only",
+      "gate": ":app:verifyNodePhase15TaskDeviceMediaDocSync",
+      "status": "planned"
+    },
+    {
+      "task": "P15-23",
+      "ownerSurface": "security.types.packaged_migration",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "risk": "critical",
+      "evidenceClass": "security_regression_corpus",
+      "rollbackHook": "block_promotion_on_security_regression",
+      "gate": ":app:verifyNodePhase15SecurityRegressionCorpus",
+      "status": "planned"
+    },
+    {
+      "task": "P15-24",
+      "ownerSurface": "security.types.packaged_migration",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "risk": "critical",
+      "evidenceClass": "packaged_aggregate_archive",
+      "rollbackHook": "block_promotion_on_packaged_aggregate_failure",
+      "gate": ":app:installAndRunNodeV13PackagedAggregateSmoke",
+      "status": "planned"
+    },
+    {
+      "task": "P15-25",
+      "ownerSurface": "security.types.packaged_migration",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in"
+      ],
+      "risk": "medium",
+      "evidenceClass": "type_profile_sync",
+      "rollbackHook": "keep_declarations_future_only",
+      "gate": ":app:verifyNodePhase15TypeDeclarationProfiles",
+      "status": "planned"
+    },
+    {
+      "task": "P15-26",
+      "ownerSurface": "security.types.packaged_migration",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in"
+      ],
+      "risk": "medium",
+      "evidenceClass": "migration_release_sync",
+      "rollbackHook": "keep_migration_docs_future_only",
+      "gate": ":app:verifyNodePhase15MigrationProComparison",
+      "status": "planned"
+    },
+    {
+      "task": "P15-27",
+      "ownerSurface": "phase15.summary_handoff",
+      "sourceBacklogTasks": [],
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in"
+      ],
+      "risk": "medium",
+      "evidenceClass": "summary_handoff_report",
+      "rollbackHook": "keep_phase15_open_until_summary_ready",
+      "gate": ":app:generateNodePhase15Summary",
+      "status": "planned"
+    }
+  ]
+}

@@ -10,6 +10,7 @@ Primary checklist:
 Foundation gates:
 
 - `:app:verifyNodePhase15Baseline`
+- `:app:verifyNodePhase15SurfaceManifest`
 
 Phase 15 imports the Phase 14 future backlog for live UI, overlay,
 accessibility, screenshot/OCR, task providers, notifications/power,
@@ -20,3 +21,8 @@ not v1.2 release blockers.
 handoff remains ready, the current branch is `feature/nodejs-runtime-v1.3`, and
 the 19 provider backlog tasks are imported from
 `PHASE14_FUTURE_BACKLOG.json`.
+
+`P15-01` records the v1.3 surface manifest as `passed` when
+`phase15-surface-manifest.json` maps `P15-00` through `P15-27` exactly once,
+owns every imported Phase 14 backlog task, and declares profile, risk,
+evidence class, gate, and rollback hook metadata for each task.
