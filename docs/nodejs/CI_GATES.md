@@ -1571,6 +1571,7 @@ The release gate still relies on packaged smoke APK artifacts being current when
 .\gradlew.bat --console=plain :app:verifyNodePhase16PromotionContracts
 .\gradlew.bat --console=plain :app:verifyNodePhase16DisclosureRollbackAudit
 .\gradlew.bat --console=plain :app:verifyNodePhase16PackagedLiveUiPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase16OverlayProviderPromotion
 ```
 
 The `:app:verifyNodePhase16Baseline` gate writes
@@ -1595,6 +1596,12 @@ The `:app:verifyNodePhase16PackagedLiveUiPromotion` gate writes
 P13/P14 packaged live UI evidence, and keeps `live_ui` unpromoted until
 packaged relaunch, task-removal cleanup, crash recovery, reviewed disclosure,
 Android 15+, and P16 security/type/docs evidence are archived.
+The `:app:verifyNodePhase16OverlayProviderPromotion` gate writes
+`phase16-overlay-provider-promotion.json` plus `.md`, imports P15-05 and
+P13/P14 overlay evidence, and keeps `overlay` unpromoted until Android 12/15+
+permission-granted archives, foreground disclosure/stop action, owner cleanup
+stress, packaged positive smoke, OEM matrix, and P16 security/type/docs
+evidence are archived.
 
 ## Manual Heavy Checks
 

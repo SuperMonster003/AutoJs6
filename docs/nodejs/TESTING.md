@@ -3647,6 +3647,7 @@ Phase 16 starts from the Phase 15 summary handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase16PromotionContracts
 .\gradlew.bat --console=plain :app:verifyNodePhase16DisclosureRollbackAudit
 .\gradlew.bat --console=plain :app:verifyNodePhase16PackagedLiveUiPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase16OverlayProviderPromotion
 ```
 
 `verifyNodePhase16Baseline` writes `phase16-baseline-verification.json` plus
@@ -3675,3 +3676,10 @@ packaged live UI partial gate, P13/P14 packaged UI evidence, and P16
 promotion/disclosure contracts, and reports `partial` until packaged live UI
 relaunch, task-removal cleanup, crash recovery, reviewed disclosure, Android
 15+, and downstream security/type/docs sync evidence are attached.
+`verifyNodePhase16OverlayProviderPromotion` writes
+`phase16-overlay-provider-promotion.json` plus `.md`, imports the P15-05
+overlay provider partial gate, P14 overlay provider POC, P13 packaged overlay
+boundary, P16 contracts, and P16-04 live UI foundation, and reports `partial`
+until Android 12/15+ permission-granted archives, foreground disclosure/stop
+action, owner cleanup stress, packaged positive smoke, OEM matrix, and
+downstream security/type/docs sync evidence are attached.

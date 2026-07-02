@@ -14,6 +14,7 @@ Foundation gates:
 - `:app:verifyNodePhase16PromotionContracts`
 - `:app:verifyNodePhase16DisclosureRollbackAudit`
 - `:app:verifyNodePhase16PackagedLiveUiPromotion`
+- `:app:verifyNodePhase16OverlayProviderPromotion`
 
 Phase 16 imports the Phase 15 future backlog for live UI, overlay,
 accessibility, screenshot/OCR, task providers, notifications/power,
@@ -46,3 +47,8 @@ evidence plus the P16 promotion and disclosure/rollback contracts, keeps
 `live_ui` at `provider_poc_not_promoted`, and lists packaged relaunch,
 task-removal cleanup, crash recovery, reviewed disclosure, Android 15+, and
 P16 security/type/docs sync as future-promotion blockers.
+
+`P16-05` currently reports `partial`: it imports the P15 overlay provider
+partial gate, P14 controlled overlay provider POC, P13 packaged overlay
+boundary, P16 contracts, and the P16-04 live UI foundation while keeping
+`overlay` at `provider_poc_not_promoted`.

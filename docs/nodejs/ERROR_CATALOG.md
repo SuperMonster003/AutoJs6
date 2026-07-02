@@ -430,6 +430,23 @@ partial packaged live UI gate through `:app:verifyNodePhase16PackagedLiveUiPromo
 - Rollback uses the `NODE_PROVIDER_LIVE_UI_DISABLED` diagnostic label and the
   `node.provider.live_ui.enabled` disable flag recorded by P16-03.
 
+## P16-05 overlay provider promotion
+
+P16-05 does not add new error codes or promote runtime authority. It records a
+partial overlay provider gate through `:app:verifyNodePhase16OverlayProviderPromotion`:
+
+- `overlay` remains `provider_poc_not_promoted` until Android 12/15+
+  permission-granted archives, foreground disclosure/stop action, owner cleanup
+  stress, packaged positive smoke, OEM matrix, and downstream
+  security/type/docs evidence are archived.
+- Missing `ui.overlay` capability metadata still rejects before provider
+  dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Missing `SYSTEM_ALERT_WINDOW` still rejects provider dispatch with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`.
+- Raw Android overlay objects and handles remain unavailable to Node code.
+- Rollback uses the `NODE_PROVIDER_OVERLAY_DISABLED` diagnostic label and the
+  `node.provider.overlay.enabled` disable flag recorded by P16-03.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native

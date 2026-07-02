@@ -133,7 +133,23 @@ A Phase 16 task can be marked complete only when all applicable items are true:
 
 - [ ] P16-05: Promote Android overlay provider permission-granted path.
   - Source backlog: `P15-05`.
-  - Gate: proposed `:app:verifyNodePhase16OverlayProviderPromotion`.
+  - Gate: `:app:verifyNodePhase16OverlayProviderPromotion`.
+  - Partial gate deployed:
+    - `docs/nodejs/phase16/overlay-provider-promotion-plan.json`
+    - `docs/nodejs/phase16/PHASE16_OVERLAY_PROVIDER_PROMOTION.md`
+    - `tools/nodejs/phase16/verify-node-phase16-overlay-provider-promotion.js`
+    - `docs/nodejs/reports/phase16/P16_05_OVERLAY_PROVIDER_PROMOTION.md`
+    - `build/reports/nodejs/phase16-overlay-provider-promotion.json`
+    - `build/reports/nodejs/phase16-overlay-provider-promotion.md`
+  - Remaining: Android 12/15+ permission-granted archives, foreground
+    disclosure/stop action, owner cleanup stress, packaged positive smoke,
+    OEM matrix, and P16 security/type/docs sync evidence.
+  - Open blockers: `overlay_permission_granted_android12_archive`,
+    `overlay_permission_granted_android15_archive`,
+    `overlay_foreground_disclosure_stop_action_archive`,
+    `overlay_owner_cleanup_leak_stress_archive`,
+    `packaged_overlay_positive_smoke_archive`, `overlay_oem_matrix_archive`,
+    and `phase16_security_type_doc_sync`.
 
 - [ ] P16-06: Close overlay permission and OEM matrix.
   - Source backlog: `P15-06`.
