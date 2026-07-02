@@ -493,3 +493,64 @@ tasks.register<Exec>("verifyNodePhase15ImageOcrPromotion") {
         nodePhase15ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase15UiAutomationMediaDocSync") {
+    group = "verification"
+    description = "Verifies the Phase 15 UI, automation, media docs, examples, declarations, and release sync gate."
+
+    dependsOn("verifyNodePhase15ImageOcrPromotion", "verifyNodePhase14UiAutomationMediaDocSync")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase15/verify-node-phase15-ui-automation-media-doc-sync.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/ui-automation-media-doc-sync.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/PHASE15_UI_AUTOMATION_MEDIA_DOC_SYNC.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/P15_11_UI_AUTOMATION_MEDIA_DOC_SYNC.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/PHASE15_NODE_V1_3_PROVIDER_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/phase15-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_3_UI_AUTOMATION_MEDIA_SYNC.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/EXAMPLES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/pro-parity-suite/examples.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/pro-parity-suite/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/typescript-smoke/src/main.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/ui.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/ui_overlay.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/accessibility.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/media_projection.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/image.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/images.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/ocr.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/media.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/mediainfo.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/recorder.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase15-gate.gradle.kts"))
+    inputs.file(nodePhase15ReportDir.map { it.file("phase14-ui-automation-media-doc-sync.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-packaged-live-ui-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-overlay-provider-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-overlay-oem-matrix.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-packaged-overlay-smoke.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-accessibility-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-media-projection-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-image-ocr-promotion.json") })
+    outputs.files(
+        nodePhase15ReportDir.map { it.file("phase15-ui-automation-media-doc-sync.json") },
+        nodePhase15ReportDir.map { it.file("phase15-ui-automation-media-doc-sync.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase15ReportDir.get().asFile.absolutePath,
+    )
+}

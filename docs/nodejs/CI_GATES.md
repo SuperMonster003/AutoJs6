@@ -1315,6 +1315,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15AccessibilityPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15MediaProjectionPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15ImageOcrPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15UiAutomationMediaDocSync
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1385,6 +1386,12 @@ keeps `image_ocr` unpromoted until live transform/matching archives, packaged
 scoped output, packaged OCR model/provider-mode archives, quota/leak stress,
 capture-to-OCR disclosure, Safe downgrade proof, and security/type/docs
 evidence are archived.
+The `:app:verifyNodePhase15UiAutomationMediaDocSync` gate writes
+`phase15-ui-automation-media-doc-sync.json` plus `.md`, imports the P15-04
+through P15-10 partial provider reports and the P14-16 docs sync report, and
+keeps release-facing docs, examples, TypeScript declaration notes,
+compatibility, security, error guidance, TESTING, and CI_GATES aligned at
+`provider_poc_not_promoted` without adding runtime authority.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

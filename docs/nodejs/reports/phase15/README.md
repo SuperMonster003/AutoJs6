@@ -50,6 +50,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15AccessibilityPromotion`
 - `:app:verifyNodePhase15MediaProjectionPromotion`
 - `:app:verifyNodePhase15ImageOcrPromotion`
+- `:app:verifyNodePhase15UiAutomationMediaDocSync`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -100,3 +101,9 @@ image/OCR evidence and the P15 MediaProjection dependency gate. It keeps
 output, packaged OCR model/provider-mode archives, quota/leak stress,
 capture-to-OCR disclosure, Safe downgrade proof, and security/type/docs sync
 land.
+
+`P15-11` reports `ready`: it imports the P15-04 through P15-10 partial provider
+reports and the P14-16 docs sync report, then verifies that examples,
+TypeScript declaration notes, release-facing text, compatibility, security,
+error guidance, TESTING, and CI_GATES all keep the UI/automation/media lane at
+`provider_poc_not_promoted` without adding runtime authority.

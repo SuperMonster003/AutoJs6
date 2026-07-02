@@ -1949,6 +1949,7 @@ runtime.
   - Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1
   - P13-20 records the current screenshot/image/OCR promotion state as partial: scoped `image.readImage()`/`recycle()` and ML Kit OCR over provider-owned image handles are live, while MediaProjection bridge prompting, advanced image processing, packaged capture/OCR behavior, and packaged disclosure evidence remain blocked
   - P14-16 docs sync records the UI/automation/media declaration, example, release-matrix, security, and error-catalog state as `provider_poc_not_promoted`; typed migration snippets are documentation evidence, while overlay, packaged accessibility, MediaProjection capture, advanced image, packaged OCR/model, and recorder-session runtime examples remain static, guarded, or denial-oriented until their source provider gates are promoted
+  - P15-11 docs sync records the v1.3 UI/automation/media declaration, example, release-note, security, and error-catalog state as `provider_poc_not_promoted`; P15-04 through P15-10 are partial executable provider gates, while packaged live UI, overlay, packaged accessibility, MediaProjection capture, advanced image, packaged OCR/model, and recorder-session runtime examples remain future-only until provider-specific archives and downstream security/type/release gates are promoted
 - `storage` / `storages`
   - `create(name): StorageStore`
   - `open(name): StorageStore`

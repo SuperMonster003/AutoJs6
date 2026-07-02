@@ -126,6 +126,14 @@ overlay, media/recorder, screenshot/OCR, and accessibility snippets remain
 static, guarded, or denial-oriented until their provider, packaged disclosure,
 permission, and device-matrix archives are promoted.
 
+P15-11 docs sync keeps this policy unchanged for the v1.3
+`pro.ui_overlay_automation_media` surface. P15-04 through P15-10 are executable
+partial provider gates, but the focused Pro parity smoke subset still contains
+only `ui-layout` and `tasks-work-manager`. Overlay, media/recorder,
+screenshot/OCR, and accessibility examples remain `provider_poc_not_promoted`,
+static, guarded, or denial-oriented until the matching provider, packaged,
+disclosure, rollback, security, and release sync gates are promoted.
+
 P14-27 docs sync keeps the same rule for the v1.2 `pro.tasks_device_media`
 surface. `tasks-work-manager` remains the only task/device/media focused smoke
 path; `notifications-power` and `media-recorder` stay migration evidence and

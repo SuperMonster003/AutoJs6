@@ -3419,6 +3419,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15AccessibilityPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15MediaProjectionPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15ImageOcrPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15UiAutomationMediaDocSync
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3492,3 +3493,9 @@ reports `partial` until live transform/matching archives, packaged scoped
 output, packaged OCR model/provider-mode archives, quota/leak stress,
 capture-to-OCR disclosure, Safe downgrade proof, and security/type/docs
 evidence are attached.
+`verifyNodePhase15UiAutomationMediaDocSync` writes
+`phase15-ui-automation-media-doc-sync.json` plus `.md`, imports the P15-04
+through P15-10 partial provider reports and the P14-16 docs sync report, and
+reports `ready` when examples, TypeScript declaration notes, release-facing
+text, compatibility, security, error guidance, TESTING, and CI_GATES keep the
+lane at `provider_poc_not_promoted` without adding runtime authority.

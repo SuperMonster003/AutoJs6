@@ -56,6 +56,26 @@ surface for UI/automation/media migration examples while
   `ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED`; callers should not interpret provider
   failure as permission or profile promotion.
 
+## P15-11 UI/automation/media denial sync
+
+P15-11 docs sync does not add a new error code. It records the v1.3
+release-facing denial surface while `pro.ui_overlay_automation_media` remains
+`provider_poc_not_promoted`:
+
+- P15-04 through P15-10 partial provider gates do not convert missing
+  project/package capability metadata into promoted authority; missing
+  declarations still reject before provider dispatch with
+  `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Packaged live UI relaunch, overlay permission/disclosure, packaged
+  accessibility, MediaProjection capture, advanced image processing, packaged
+  OCR/model lookup, and recorder-session paths remain
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` or provider-specific stable denials
+  until their provider-specific archives and downstream security/type/release
+  sync gates are promoted.
+- P15-11 is documentation synchronization only; provider failures still use
+  `ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED` and must not be interpreted as release
+  promotion.
+
 ## P14-17 task database mutation denial sync
 
 P14-17 does not add a new error code or expose `require("tasks")`. It records

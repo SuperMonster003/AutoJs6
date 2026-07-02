@@ -276,9 +276,20 @@ A Phase 15 task can be marked complete only when all applicable items are true:
     `image_ocr_safe_downgrade_archive`, and
     `phase15_security_type_doc_sync`.
 
-- [ ] P15-11: Sync UI/automation/media docs, examples, declarations, and release notes.
-  - Gate: proposed `:app:verifyNodePhase15UiAutomationMediaDocSync`.
+- [x] P15-11: Sync UI/automation/media docs, examples, declarations, and release notes.
+  - Gate: `:app:verifyNodePhase15UiAutomationMediaDocSync`.
   - Acceptance: promoted and future-only state matches executable evidence.
+  - UI/automation/media docs sync gate deployed:
+    - `docs/nodejs/phase15/ui-automation-media-doc-sync.json`
+    - `docs/nodejs/phase15/PHASE15_UI_AUTOMATION_MEDIA_DOC_SYNC.md`
+    - `docs/nodejs/releases/NODE_PROFILE_V1_3_UI_AUTOMATION_MEDIA_SYNC.md`
+    - `docs/nodejs/reports/phase15/P15_11_UI_AUTOMATION_MEDIA_DOC_SYNC.md`
+    - `tools/nodejs/phase15/verify-node-phase15-ui-automation-media-doc-sync.js`
+    - `build/reports/nodejs/phase15-ui-automation-media-doc-sync.json`
+    - `build/reports/nodejs/phase15-ui-automation-media-doc-sync.md`
+  - Decision: P15-04 through P15-10 remain partial and unpromoted; P15-11
+    records `provider_poc_not_promoted` docs, examples, declaration, security,
+    error, CI, and release-facing state without changing runtime authority.
 
 ### P2 Pro Task, Device, And Media Providers
 

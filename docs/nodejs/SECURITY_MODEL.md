@@ -632,6 +632,15 @@ service enablement, screen-capture prompting, advanced image processing,
 packaged OCR/model lookup, or recorder-session authority before the matching
 provider gates are promoted.
 
+P15-11 docs sync keeps the v1.3 UI/automation/media release-facing state at
+`provider_poc_not_promoted`. P15-04 through P15-10 may be cited as partial
+provider evidence only; they do not permit docs, examples, release text, or
+declaration notes to imply packaged live UI relaunch, overlay foreground
+ownership, packaged accessibility service behavior, MediaProjection capture,
+advanced image processing, packaged OCR/model lookup, or recorder authority
+before provider-specific disclosure, rollback, Safe downgrade, security, type,
+and release sync evidence is promoted.
+
 P13-19 keeps accessibility selector authority separate from raw input
 automation. Reserved future input automation labels split gesture authority away
 from `accessibility`: `input.gesture` for reviewed service-backed gestures,

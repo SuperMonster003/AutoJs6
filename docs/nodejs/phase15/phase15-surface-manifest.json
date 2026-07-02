@@ -326,7 +326,7 @@
       "evidenceClass": "doc_type_release_sync",
       "rollbackHook": "keep_ui_automation_media_docs_future_only",
       "gate": ":app:verifyNodePhase15UiAutomationMediaDocSync",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "task": "P15-12",
