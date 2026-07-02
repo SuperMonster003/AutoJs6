@@ -424,6 +424,14 @@ It also keeps raw Android object parity denied for raw `Context`, `Activity`,
 `BroadcastReceiver`, `Notification`, and `WakeLock` objects. Runtime authority
 remains unchanged.
 
+P14-37 records the Phase 14 summary gate through
+`:app:generateNodePhase14Summary`. The gate imports the final blocker registry,
+Phase 13 capability truth, P14-35 type profile report, P14-36 migration
+comparison report, and current Phase 14 generated reports. It does not grant
+new authority; it enforces the closeout policy that open final blockers, policy
+violations, and release-blocking reports are all zero while future-promotion
+blockers remain visible as backlog.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

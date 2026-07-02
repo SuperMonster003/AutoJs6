@@ -1,0 +1,41 @@
+{
+  "schema": "autojs6-node-phase14-summary-gate-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-37",
+  "title": "Phase 14 v1.2 summary generator and closeout policy gate",
+  "status": "ready",
+  "decision": "phase14_summary_gate_ready",
+  "surface": "docs.examples.final_gate",
+  "gradleTask": ":app:generateNodePhase14Summary",
+  "runtimeAuthorityChanged": false,
+  "sourceInputs": [
+    "docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md",
+    "docs/nodejs/phase14/phase14-surface-manifest.json",
+    "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
+    "build/reports/nodejs/phase13-capability-truth.json",
+    "build/reports/nodejs/phase14-*.json"
+  ],
+  "releaseBlockingPolicy": {
+    "openFinalBlockerStatuses": [
+      "open",
+      "decision_required"
+    ],
+    "releaseBlockingReportBlockerClassification": "release_blocking",
+    "nonBlockingReportBlockerClassifications": [
+      "future_promotion",
+      "external",
+      "intentional_non_goal"
+    ],
+    "requiredZeroCounts": [
+      "open final blockers",
+      "policy violations",
+      "release-blocking reports"
+    ]
+  },
+  "reportArtifacts": [
+    "build/reports/nodejs/phase14-summary.json",
+    "build/reports/nodejs/phase14-summary.md",
+    "docs/nodejs/reports/phase14/PHASE14_SUMMARY.md"
+  ],
+  "minimumPolicy": "P14-37 generates the Phase 14 summary and marks the summary gate ready only when final blockers, policy violations, and release-blocking reports are all zero while future promotion work remains visible."
+}

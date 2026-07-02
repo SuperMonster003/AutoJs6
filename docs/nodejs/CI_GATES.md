@@ -1281,6 +1281,13 @@ reports, and verifies that v1.2 migration/Pro comparison docs cover Pro
 UI/floaty, accessibility, screenshot/OCR, tasks, notifications, recorder,
 worker policy, packaged behavior, and rollback. It fails if docs stop tying
 claims to executable evidence or imply raw Android object parity.
+The `:app:generateNodePhase14Summary` gate writes `phase14-summary.json`,
+`phase14-summary.md`, and `PHASE14_SUMMARY.md`, depends on P14-36, imports the
+Phase 14 task checklist, surface manifest, final blocker registry, Phase 13
+capability truth, P14-35 type profile report, P14-36 migration comparison
+report, and current Phase 14 generated reports. It requires zero open final
+blockers, zero policy violations, and zero release-blocking reports while
+listing future-promotion blockers as backlog.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

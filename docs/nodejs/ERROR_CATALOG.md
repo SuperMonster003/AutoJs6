@@ -382,6 +382,20 @@ comparison docs as `migration_pro_comparison_v1_2_ready` behind
   worker policy, packaged behavior, and rollback docs remain evidence-bound.
 - Runtime authority remains unchanged.
 
+## P14-37 Phase 14 summary
+
+P14-37 does not add a new error code. It records the Phase 14 summary gate as
+`phase14_summary_gate_ready` behind `:app:generateNodePhase14Summary`:
+
+- Existing capability, permission, packaged metadata, Safe downgrade,
+  stable-denial, unsupported-worker, raw-object denial, and release-blocker
+  diagnostics remain canonical.
+- The summary gate requires zero open final blockers, zero policy violations,
+  and zero release-blocking reports.
+- Reports with `future_promotion`, `external`, or `intentional_non_goal`
+  blockers remain visible as backlog rather than new runtime errors.
+- Runtime authority remains unchanged.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

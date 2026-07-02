@@ -2423,6 +2423,22 @@ tasks, notifications, recorder, worker policy, packaged behavior, and rollback.
 The gate fails if docs stop saying claims match executable evidence or imply
 raw Android object parity.
 
+Phase 14 v1.2 summary gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNodePhase14Summary
+```
+
+This host gate records P14-37 as ready with
+`phase14_summary_gate_ready`. It depends on the P14-36 migration comparison
+gate, imports the Phase 14 task checklist, surface manifest, final blocker
+registry, Phase 13 capability truth, P14-35 type declaration profile report,
+P14-36 migration comparison report, and current Phase 14 generated reports. It
+writes `phase14-summary.json`, `phase14-summary.md`, and
+`PHASE14_SUMMARY.md`, requires zero open final blockers, zero policy
+violations, and zero release-blocking reports, and keeps future-promotion
+blockers visible as backlog.
+
 Phase 13 profile rollback playbook gate:
 
 ```powershell

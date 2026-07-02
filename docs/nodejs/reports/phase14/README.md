@@ -36,6 +36,7 @@ Docs, examples, and final gates:
 
 - `:app:verifyNodePhase14TypeDeclarationProfiles`
 - `:app:verifyNodePhase14MigrationProComparison`
+- `:app:generateNodePhase14Summary`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -260,3 +261,11 @@ decision. It syncs migration claims across `MIGRATION_FROM_RHINO.md`,
 P14-35 reports, verifies that claims match executable evidence and do not imply
 raw Android object parity, and writes `phase14-migration-pro-comparison.json`
 plus `.md` behind `:app:verifyNodePhase14MigrationProComparison`.
+
+`P14_37_PHASE14_SUMMARY_GATE.md` records the Phase 14 summary gate as `ready`
+with a `phase14_summary_gate_ready` decision. It imports the task checklist,
+surface manifest, final blocker registry, Phase 13 capability truth, P14-35
+type profile report, P14-36 migration comparison report, and current Phase 14
+generated reports, keeps future-promotion blockers visible, and writes
+`phase14-summary.json`, `phase14-summary.md`, and `PHASE14_SUMMARY.md` behind
+`:app:generateNodePhase14Summary`.

@@ -1721,3 +1721,81 @@ tasks.register<Exec>("verifyNodePhase14MigrationProComparison") {
         nodePhase14ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("generateNodePhase14Summary") {
+    group = "verification"
+    description = "Generates the Phase 14 v1.2 summary and closeout policy gate report."
+
+    dependsOn("verifyNodePhase14MigrationProComparison")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase14/generate-phase14-summary.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_37_PHASE14_SUMMARY_GATE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/node-v1-2-summary-gate.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_NODE_V1_2_SUMMARY_GATE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase14-gate.gradle.kts"))
+    inputs.file(nodePhase14ReportDir.map { it.file("phase13-capability-truth.json") })
+    listOf(
+        "phase14-accessibility-lifecycle.json",
+        "phase14-accessibility-selector-action-matrix.json",
+        "phase14-advanced-image-operations.json",
+        "phase14-baseline-verification.json",
+        "phase14-desktop-runtime-doc-sync.json",
+        "phase14-intent-broadcast-provider.json",
+        "phase14-live-ui-provider-packaged.json",
+        "phase14-media-playback-mediastore-boundary.json",
+        "phase14-media-projection-provider.json",
+        "phase14-migration-pro-comparison.json",
+        "phase14-notification-ownership.json",
+        "phase14-overlay-permission-oem-matrix.json",
+        "phase14-overlay-provider.json",
+        "phase14-packaged-aggregate-smoke.json",
+        "phase14-packaged-broadcast-trigger-remove-smoke.json",
+        "phase14-packaged-image-ocr-evidence.json",
+        "phase14-packaged-overlay-positive-smoke.json",
+        "phase14-packaged-recorder-media-stress.json",
+        "phase14-packaged-task-scheduling-smoke.json",
+        "phase14-process-worker-replacement-decision.json",
+        "phase14-promotion-contracts.json",
+        "phase14-recorder-provider.json",
+        "phase14-security-regression-corpus.json",
+        "phase14-settings-power-oem-background-matrix.json",
+        "phase14-surface-manifest-verification.json",
+        "phase14-task-database-provider.json",
+        "phase14-task-device-media-doc-sync.json",
+        "phase14-task-schema-migration-rollback.json",
+        "phase14-type-declaration-profiles.json",
+        "phase14-ui-automation-media-doc-sync.json",
+        "phase14-worker-native-availability.json",
+        "phase14-worker-resource-rss-stress.json",
+        "phase14-worker-runnable-packaged-smoke.json",
+    ).forEach { reportName ->
+        inputs.file(nodePhase14ReportDir.map { it.file(reportName) })
+    }
+    outputs.files(
+        nodePhase14ReportDir.map { it.file("phase14-summary.json") },
+        nodePhase14ReportDir.map { it.file("phase14-summary.md") },
+        rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_SUMMARY.md"),
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase14ReportDir.get().asFile.absolutePath,
+        "--docs-output",
+        rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_SUMMARY.md").asFile.absolutePath,
+    )
+}

@@ -448,7 +448,7 @@
         "P14-38",
         "P14-39"
       ],
-      "summary": "Update v1.2 type declarations, migration docs, examples, release checklist, Phase 14 summary gate, and next-branch handoff. P14-35 adds the v1.2 TypeScript declaration profile matrix with metadata-only capability rows for callable, provider POC, stable-denied, intentionally unsupported, and packaged aggregate surfaces while keeping runtime authority unchanged. P14-36 records v1.2 migration and Pro comparison claim sync so docs match executable evidence and do not imply raw Android object parity.",
+      "summary": "Update v1.2 type declarations, migration docs, examples, release checklist, Phase 14 summary gate, and next-branch handoff. P14-35 adds the v1.2 TypeScript declaration profile matrix with metadata-only capability rows for callable, provider POC, stable-denied, intentionally unsupported, and packaged aggregate surfaces while keeping runtime authority unchanged. P14-36 records v1.2 migration and Pro comparison claim sync so docs match executable evidence and do not imply raw Android object parity. P14-37 adds the generated summary gate, imports final blockers and generated reports, and keeps future promotion work visible without counting it as release-blocking.",
       "risk": "medium",
       "runtimeSurface": [
         "autojs6-node TypeScript declarations",
@@ -478,7 +478,15 @@
         "tools/nodejs/phase14/verify-node-phase14-migration-pro-comparison.js",
         ":app:verifyNodePhase14MigrationProComparison",
         "build/reports/nodejs/phase14-migration-pro-comparison.json",
-        "build/reports/nodejs/phase14-migration-pro-comparison.md"
+        "build/reports/nodejs/phase14-migration-pro-comparison.md",
+        "docs/nodejs/phase14/node-v1-2-summary-gate.json",
+        "docs/nodejs/phase14/PHASE14_NODE_V1_2_SUMMARY_GATE.md",
+        "docs/nodejs/reports/phase14/P14_37_PHASE14_SUMMARY_GATE.md",
+        "tools/nodejs/phase14/generate-phase14-summary.js",
+        ":app:generateNodePhase14Summary",
+        "build/reports/nodejs/phase14-summary.json",
+        "build/reports/nodejs/phase14-summary.md",
+        "docs/nodejs/reports/phase14/PHASE14_SUMMARY.md"
       ],
       "rollback": "Keep v1.2 examples and docs marked as future-only until runtime promotion evidence and the final Phase 14 summary gate are ready."
     }

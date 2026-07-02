@@ -927,11 +927,26 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: claims match executable evidence and do not imply raw Android
     object parity.
 
-- [ ] P14-37: Create Phase 14 summary generator and gate.
+- [x] P14-37: Create Phase 14 summary generator and gate.
   - Scope: aggregate task checklist, surface manifest, final blocker registry,
     capability truth, generated reports, open future work, and release-blocking
     report classification.
-  - Gate: proposed `:app:generateNodePhase14Summary`.
+  - Gate: `:app:generateNodePhase14Summary`.
+  - Phase 14 summary gate deployed:
+    - Adds `docs/nodejs/phase14/node-v1-2-summary-gate.json` and
+      `PHASE14_NODE_V1_2_SUMMARY_GATE.md`.
+    - Adds `docs/nodejs/reports/phase14/P14_37_PHASE14_SUMMARY_GATE.md`.
+    - Adds `tools/nodejs/phase14/generate-phase14-summary.js` plus Gradle
+      entry `:app:generateNodePhase14Summary`.
+    - Generates `build/reports/nodejs/phase14-summary.json`,
+      `build/reports/nodejs/phase14-summary.md`, and canonical docs output
+      `docs/nodejs/reports/phase14/PHASE14_SUMMARY.md`.
+    - Imports the Phase 14 task checklist, Phase 14 surface manifest, final
+      blocker registry, Phase 13 capability truth, P14-35 type declaration
+      profile report, P14-36 migration comparison report, and all current
+      Phase 14 generated reports.
+    - Records `phase14_summary_gate_ready` while keeping P14-38 and P14-39 as
+      open closeout handoff tasks.
   - Acceptance: v1.2 closeout requires zero open final blockers, zero policy
     violations, and zero release-blocking reports.
 
