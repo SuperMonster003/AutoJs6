@@ -1408,6 +1408,46 @@ raw `TimedTask`, raw `BroadcastReceiver`, raw `Notification`, or raw `WakeLock`
 object parity.
 No v1.2 Pro comparison row should imply raw `View` parity.
 
+## Phase 15 v1.3 Migration And Pro Comparison
+
+P15-26 records v1.3 migration and Pro comparison docs as ready. These claims
+match executable evidence and do not imply raw Android object parity. The v1.3
+Pro comparison state has no newly promoted providers, and runtime authority
+remains unchanged.
+
+The v1.3 Pro comparison status is:
+
+- Pro UI and floaty: live UI and overlay remain `provider_poc_not_promoted`
+  until device, disclosure, cleanup, packaged, security, TypeScript
+  declarations, migration, and rollback evidence pass.
+- accessibility: selector/action and guarded examples remain migration
+  evidence; service-enabled device archives, disclosure, security corpus,
+  packaged behavior, and rollback evidence are still required.
+- screenshot/OCR: MediaProjection and image/OCR remain
+  `provider_poc_not_promoted`; capture, raw image handles, OCR provider modes,
+  and packaged OCR claims stay tied to executable evidence.
+- tasks: task database, schema migration, packaged task scheduling, and
+  IntentTask/broadcast remain `provider_poc_not_promoted`.
+- notifications: notification ownership and settings/power remain
+  `provider_poc_not_promoted`.
+- recorder: recorder sessions and packaged recorder stress remain
+  `provider_poc_not_promoted`.
+- MediaStore/playback: playback, playlists, MediaStore query/mutation, broad
+  media permissions, and raw media handles remain `stable_denied`.
+- security corpus: P15-23 is
+  `security_corpus_updated_no_authority_promoted`.
+- packaged behavior: P15-24 is `host_contract_ready`, not real device
+  install-run release approval.
+- TypeScript declarations: `NodeProfileV13CapabilityCatalog` is metadata-only.
+- rollback: Safe downgrade, profile rollback, packaged metadata mismatch,
+  provider disable flags, and Pro comparison claim rollback remain required.
+
+No v1.3 Pro comparison row grants raw `Context`, raw `Activity`, raw `View`,
+raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw
+`TimedTask`, raw `BroadcastReceiver`, raw `Notification`, raw `WakeLock`, raw
+`ContentResolver`, raw `MediaStore`, raw file descriptors, or Java objects.
+No v1.3 Pro comparison row grants raw `ContentResolver` authority.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

@@ -580,10 +580,25 @@ A Phase 15 task can be marked complete only when all applicable items are true:
     and stable-denied rows. It keeps future-only and stable-denied methods
     visibly gated and does not change runtime authority.
 
-- [ ] P15-26: Update migration, Pro comparison, compatibility, and release notes.
-  - Gate: proposed `:app:verifyNodePhase15MigrationProComparison`.
+- [x] P15-26: Update migration, Pro comparison, compatibility, and release notes.
+  - Gate: `:app:verifyNodePhase15MigrationProComparison`.
   - Acceptance: docs do not overclaim raw Android object parity or provider
     promotion beyond executable evidence.
+  - Migration and Pro comparison gate deployed:
+    - `docs/nodejs/phase15/node-v1-3-migration-pro-comparison.json`
+    - `docs/nodejs/phase15/PHASE15_NODE_V1_3_MIGRATION_PRO_COMPARISON.md`
+    - `docs/nodejs/releases/NODE_PROFILE_V1_3_RELEASE_NOTES_DRAFT.md`
+    - `docs/nodejs/reports/phase15/P15_26_MIGRATION_PRO_COMPARISON.md`
+    - `tools/nodejs/phase15/verify-node-phase15-migration-pro-comparison.js`
+    - `build/reports/nodejs/phase15-migration-pro-comparison.json`
+    - `build/reports/nodejs/phase15-migration-pro-comparison.md`
+  - Decision: P15-26 records v1.3 migration, Pro comparison,
+    compatibility, examples, and release-note claim sync as
+    `migration_pro_comparison_v1_3_ready`. It imports P14-36, P15-11,
+    P15-22, P15-23, P15-24, and P15-25, keeps Pro UI/floaty,
+    accessibility, screenshot/OCR, tasks, notifications, recorder, and
+    MediaStore/playback tied to executable evidence, and does not change
+    runtime authority or raw Android object parity.
 
 ### P4 Summary And Handoff
 

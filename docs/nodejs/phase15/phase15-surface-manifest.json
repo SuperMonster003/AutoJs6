@@ -551,7 +551,7 @@
       "evidenceClass": "migration_release_sync",
       "rollbackHook": "keep_migration_docs_future_only",
       "gate": ":app:verifyNodePhase15MigrationProComparison",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "task": "P15-27",

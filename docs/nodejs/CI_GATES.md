@@ -1517,6 +1517,14 @@ P15-22, P15-23, and P15-24, and reports `ready` when
 mode/state/packaged/future-only/stable-denied helpers, and TypeScript smoke
 assertions keep provider POC, docs sync, security corpus, packaged aggregate,
 and stable-denied rows metadata-only with `grantsAuthority: false`.
+The `:app:verifyNodePhase15MigrationProComparison` gate writes
+`phase15-migration-pro-comparison.json` plus `.md`, imports P14-36, P15-11,
+P15-22, P15-23, P15-24, and P15-25, and reports `ready` when migration, Pro
+comparison, Pro/AutoX compatibility, compatibility profile, examples, and
+release notes all keep claims matched to executable evidence. It records no
+newly promoted providers, no runtime authority change, no raw Android object
+parity, and keeps provider POC, stable-denied, security corpus, packaged
+aggregate, TypeScript declaration, and rollback language aligned.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

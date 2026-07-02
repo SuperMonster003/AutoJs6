@@ -285,3 +285,24 @@ Node bridge examples may declare the capability surface in `project.json`:
 ```
 
 When `node.permissions` is present, undeclared bridge calls reject before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`. Older examples without the field keep compatibility mode.
+
+## Phase 15 v1.3 Migration And Pro Comparison
+
+P15-26 records v1.3 migration and Pro comparison docs as ready. These claims
+match executable evidence and do not imply raw Android object parity. The v1.3
+examples state has no newly promoted providers, and runtime authority remains
+unchanged.
+
+The v1.3 examples keep Pro UI and floaty, accessibility, screenshot/OCR, tasks,
+notifications, recorder, MediaStore/playback, security corpus, packaged
+behavior, TypeScript declarations, and rollback claims bound to executable
+evidence. `provider_poc_not_promoted` examples remain guarded or
+denial-oriented; MediaStore/playback examples remain `stable_denied`; P15-23 is
+`security_corpus_updated_no_authority_promoted`; P15-24 is
+`host_contract_ready`; and `NodeProfileV13CapabilityCatalog` is metadata-only.
+
+No v1.3 example row grants raw `Context`, raw `Activity`, raw `View`, raw
+`Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw
+`TimedTask`, raw `BroadcastReceiver`, raw `Notification`, raw `WakeLock`, raw
+`ContentResolver`, raw `MediaStore`, raw file descriptors, or Java objects.
+No v1.3 example row grants raw `ContentResolver` authority.

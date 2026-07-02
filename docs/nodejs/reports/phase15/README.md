@@ -224,3 +224,12 @@ evidence helpers, future-only helpers, stable-denied helpers, and
 `NodeProfileV13DeclarationMatrix`. TypeScript smoke now covers provider POC,
 docs sync, security corpus, packaged aggregate, and stable-denied rows as
 metadata-only profile truth without promoting runtime authority.
+
+`P15-26` reports `ready`: `:app:verifyNodePhase15MigrationProComparison`
+imports P14-36, P15-11, P15-22, P15-23, P15-24, and P15-25, then verifies that
+migration, Pro comparison, Pro/AutoX compatibility, compatibility profile,
+examples, and v1.3 release notes all carry the same executable-evidence
+boundary. The docs record no newly promoted providers, keep runtime authority
+unchanged, preserve `provider_poc_not_promoted`, `stable_denied`,
+`host_contract_ready`, `security_corpus_updated_no_authority_promoted`, and
+`NodeProfileV13CapabilityCatalog` labels, and reject raw Android object parity.

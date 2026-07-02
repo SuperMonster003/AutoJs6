@@ -2330,6 +2330,27 @@ raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw
 `TimedTask`, raw `BroadcastReceiver`, raw `Notification`, or raw `WakeLock`
 objects as migration parity.
 
+## Phase 15 v1.3 Migration And Pro Comparison
+
+P15-26 records v1.3 migration and Pro comparison docs as ready. These claims
+match executable evidence and do not imply raw Android object parity. The v1.3
+compatibility profile has no newly promoted providers, and runtime authority
+remains unchanged.
+
+The v1.3 compatibility profile keeps Pro UI and floaty, accessibility,
+screenshot/OCR, tasks, notifications, recorder, MediaStore/playback, security
+corpus, packaged behavior, TypeScript declarations, and rollback claims tied to
+their source gates. `provider_poc_not_promoted` surfaces remain POC, docs, or
+partial executable evidence; MediaStore/playback remains `stable_denied`;
+P15-23 is `security_corpus_updated_no_authority_promoted`; P15-24 is
+`host_contract_ready`; and `NodeProfileV13CapabilityCatalog` remains
+metadata-only.
+
+No v1.3 compatibility profile row grants raw `Context`, raw `Activity`, raw
+`View`, raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`,
+raw `TimedTask`, raw `BroadcastReceiver`, raw `Notification`, raw `WakeLock`,
+raw `ContentResolver`, raw `MediaStore`, raw file descriptors, or Java objects.
+
 ## Error Code Compatibility
 
 Errors keep existing Node-style or legacy `code` values for compatibility. AutoJs6-specific canonical codes are exposed through `error.autojs6Code`. When a legacy AutoJs6 code is preserved, `error.legacyCode` repeats the legacy `code`.

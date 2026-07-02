@@ -337,6 +337,25 @@ v1.3 TypeScript declaration profile truth through
   sessions, playback, MediaStore, raw Android objects, raw file descriptors, or
   Java objects callable authority.
 
+## P15-26 migration and Pro comparison
+
+P15-26 does not add a new error code or promote runtime authority. It records
+v1.3 migration, Pro comparison, compatibility, examples, and release-note claim
+sync through `:app:verifyNodePhase15MigrationProComparison`:
+
+- The gate imports P14-36, P15-11, P15-22, P15-23, P15-24, and P15-25.
+- Claims must match executable evidence and must not imply raw Android object
+  parity.
+- Provider POC rows remain `provider_poc_not_promoted`; MediaStore/playback
+  remains `stable_denied`; packaged aggregate evidence remains
+  `host_contract_ready`.
+- `NodeProfileV13CapabilityCatalog` remains metadata-only and runtime
+  authority remains unchanged.
+- The docs do not make task database mutation, IntentTask/broadcast
+  registration, notifications/power mutation, recorder sessions, playback,
+  MediaStore, raw Android objects, raw file descriptors, or Java objects
+  callable authority.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native
