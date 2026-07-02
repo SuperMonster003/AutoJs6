@@ -48,6 +48,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15OverlayOemMatrix`
 - `:app:installAndRunNodeV13PackagedOverlaySmoke`
 - `:app:verifyNodePhase15AccessibilityPromotion`
+- `:app:verifyNodePhase15MediaProjectionPromotion`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -82,3 +83,11 @@ boundaries. It keeps `accessibility` unpromoted until Android 12/15+
 service-enabled archives, settings round-trip, task removal/relaunch,
 disconnect/missing-capability denial, safe global-action diagnostics,
 unsupported-tier diagnostics, and security/type/docs sync land.
+
+`P15-09` currently reports `partial`: it imports the P14 Activity-owned
+MediaProjection contract, optional screen_capture prompt/capture smoke, P13
+screenshot/image/OCR evidence, and P15 disclosure/rollback requirements. It
+keeps `media_projection` unpromoted until Android 12/15+ prompt/capture
+archives, foreground disclosure/stop action, task removal/relaunch/crash
+evidence, packaged APK evidence, Safe downgrade proof, and security/type/docs
+sync land.

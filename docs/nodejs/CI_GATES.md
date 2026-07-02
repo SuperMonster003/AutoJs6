@@ -1313,6 +1313,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15OverlayOemMatrix
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedOverlaySmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15AccessibilityPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15MediaProjectionPromotion
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1367,6 +1368,14 @@ unpromoted until Android 12/15+ service-enabled archives, settings round-trip,
 task removal/relaunch, disconnect/missing-capability denial, safe
 global-action diagnostics, unsupported-tier diagnostics, and security/type/docs
 evidence are archived.
+The `:app:verifyNodePhase15MediaProjectionPromotion` gate writes
+`phase15-media-projection-promotion.json` plus `.md`, imports the P14-13
+Activity-owned MediaProjection contract, optional screen_capture prompt/capture
+smoke, P13 screenshot/image/OCR evidence, and P15 disclosure/rollback
+requirements, and keeps `media_projection` unpromoted until Android 12/15+
+prompt/capture archives, foreground disclosure/stop action, task
+removal/relaunch/crash evidence, packaged APK evidence, Safe downgrade proof,
+and security/type/docs evidence are archived.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

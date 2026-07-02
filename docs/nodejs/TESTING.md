@@ -3417,6 +3417,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15OverlayOemMatrix
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedOverlaySmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15AccessibilityPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15MediaProjectionPromotion
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3474,3 +3475,11 @@ Android 12/15+ service-enabled archives, settings round-trip, task
 removal/relaunch, disconnect/missing-capability denial, safe global-action
 diagnostics, unsupported-tier diagnostics, and security/type/docs evidence are
 attached.
+`verifyNodePhase15MediaProjectionPromotion` writes
+`phase15-media-projection-promotion.json` plus `.md`, imports the P14-13
+Activity-owned MediaProjection contract, optional screen_capture prompt/capture
+smoke, P13 screenshot/image/OCR evidence, and P15 disclosure/rollback
+requirements, and reports `partial` until Android 12/15+ prompt/capture
+archives, foreground disclosure/stop action, task removal/relaunch/crash
+evidence, packaged APK evidence, Safe downgrade proof, and security/type/docs
+evidence are attached.

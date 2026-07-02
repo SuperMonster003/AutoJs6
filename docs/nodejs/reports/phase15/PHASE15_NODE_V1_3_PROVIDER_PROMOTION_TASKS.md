@@ -235,9 +235,23 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-09: Promote Activity-owned MediaProjection provider.
   - Source backlog: `P14-13`.
-  - Gate: proposed `:app:verifyNodePhase15MediaProjectionPromotion`.
+  - Gate: `:app:verifyNodePhase15MediaProjectionPromotion`.
   - Acceptance: prompt, foreground disclosure, capture lifecycle, task removal,
     crash cleanup, Safe downgrade, and raw object denial are archived.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/media-projection-promotion-plan.json`
+    - `docs/nodejs/phase15/PHASE15_MEDIA_PROJECTION_PROMOTION.md`
+    - `docs/nodejs/reports/phase15/P15_09_MEDIA_PROJECTION_PROMOTION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-media-projection-promotion.js`
+    - `build/reports/nodejs/phase15-media-projection-promotion.json`
+    - `build/reports/nodejs/phase15-media-projection-promotion.md`
+  - Still open: `media_projection_android12_prompt_capture_archive`,
+    `media_projection_android15_plus_prompt_capture_archive`,
+    `media_projection_foreground_disclosure_stop_action_archive`,
+    `media_projection_task_removal_relaunch_crash_archive`,
+    `media_projection_packaged_apk_evidence_archive`,
+    `media_projection_safe_downgrade_archive`, and
+    `phase15_security_type_doc_sync`.
 
 - [ ] P15-10: Promote advanced image and OCR packaged evidence.
   - Source backlog: `P14-14`, `P14-15`.
