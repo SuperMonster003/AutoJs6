@@ -1,0 +1,153 @@
+{
+  "schema": "autojs6-node-phase14-notification-ownership-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-22",
+  "title": "Notification ownership and foreground disclosure evidence",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "surface": "pro.tasks_device_media",
+  "sourceGates": [
+    "P13-25",
+    "P14-04",
+    "P14-21"
+  ],
+  "minimumPromotionPolicy": "Notification promotion requires owned post/cancel/cancelAll evidence, permission denial and settings handoff evidence, foreground disclosure and stop-action behavior for long-running or packaged work, packaged post/cancel evidence, rollback cleanup, and stable denial or explicit promotion decisions for actions, groups, styles, inline replies, listeners, and raw notification objects.",
+  "ownershipContract": {
+    "providerName": "notifications",
+    "capability": "notifications",
+    "settingsCapability": "notifications.settings",
+    "androidPermission": "android.permission.POST_NOTIFICATIONS",
+    "resourceType": "NOTIFICATION",
+    "liveMethods": [
+      "notify",
+      "cancel",
+      "cancelAll",
+      "getPermissionStatus",
+      "openSettings"
+    ],
+    "ownedIdPolicy": "provider-owned notification ids are ResourceRegistry backed; cancel only closes active owned records and unknown ids are no-op",
+    "updatePolicy": "notify with an existing owned id releases the old record before registering the replacement",
+    "destroyPolicy": "provider destroy closes owned notification handles and cancels active records",
+    "maxActiveNotifications": 32,
+    "permissionDeniedCode": "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+    "capabilityDeniedCode": "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED",
+    "currentLivePostCancelEvidence": true,
+    "currentPermissionDenialEvidence": true,
+    "foregroundDisclosureStopActionReady": false,
+    "packagedPostCancelReady": false
+  },
+  "foregroundDisclosureContract": {
+    "requiredBeforePackagedPromotion": true,
+    "appliesTo": [
+      "packaged ongoing notifications",
+      "scheduled/background Node tasks that rely on notification visibility",
+      "future foreground-service disclosure handoff",
+      "notification stop action for user-owned cancellation"
+    ],
+    "requiredFields": [
+      "title",
+      "text",
+      "channel",
+      "ongoing",
+      "owner",
+      "taskId",
+      "packageIdentity",
+      "stopAction",
+      "rollbackBehavior"
+    ],
+    "stopActionRequired": true,
+    "safeDowngradeAction": "cancel_owned_notifications_and_disable_future_packaged_disclosure_metadata"
+  },
+  "advancedNotificationBoundary": {
+    "stableDeniedOrFutureDecisionRequired": true,
+    "blockedFeatures": [
+      "actions",
+      "listener callbacks",
+      "notification groups",
+      "custom styles",
+      "inline reply",
+      "remote input",
+      "RemoteViews",
+      "notification listener handles",
+      "Do Not Disturb mutation"
+    ],
+    "rawObjectsDenied": [
+      "Notification",
+      "NotificationCompat.Builder",
+      "NotificationManager",
+      "NotificationChannel",
+      "PendingIntent",
+      "RemoteViews",
+      "Intent",
+      "Context",
+      "listener handle",
+      "StatusBarNotification",
+      "Java object"
+    ]
+  },
+  "evidenceMatrix": [
+    {
+      "id": "live_post_cancel_owned_resource",
+      "status": "imported",
+      "source": "NodeNotificationsBridgeInstrumentationTest androidProviderPostsOrReportsNotificationPermissionAndTracksOwnedResource",
+      "requiredEvidence": "Live provider posts or reports POST_NOTIFICATIONS denial, registers a NOTIFICATION resource, cancel removes it, and provider destroy closes active owned records."
+    },
+    {
+      "id": "permission_status_settings_handoff",
+      "status": "imported",
+      "source": "P13-25 notifications/settings gate",
+      "requiredEvidence": "getPermissionStatus and openSettings return JSON-safe permission/status snapshots, with dry-run support for automated tests."
+    },
+    {
+      "id": "manifest_capability_denials",
+      "status": "imported",
+      "source": "NodeNotificationsBridgeInstrumentationTest manifest denial tests",
+      "requiredEvidence": "notifications and notifications.settings capabilities reject before bridge dispatch when missing."
+    },
+    {
+      "id": "future_packaged_post_cancel",
+      "status": "future_promotion",
+      "source": "future packaged notifications archive",
+      "requiredEvidence": "Packaged APK post/cancel/cancelAll smoke with package identity ownership, notification permission state, relaunch, task removal, and Safe downgrade evidence."
+    },
+    {
+      "id": "future_foreground_disclosure_stop_action",
+      "status": "future_promotion",
+      "source": "future foreground disclosure archive",
+      "requiredEvidence": "User-visible disclosure and stop action evidence for packaged or long-running notification-backed Node work."
+    },
+    {
+      "id": "future_advanced_notification_decision",
+      "status": "future_promotion",
+      "source": "future advanced notification archive",
+      "requiredEvidence": "Explicit stable-denial or promotion decision for actions, groups, styles, inline replies, listener callbacks, RemoteViews, and DND mutation."
+    }
+  ],
+  "requiredArchives": [
+    {
+      "id": "notification_packaged_post_cancel_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged APK post/cancel/cancelAll archive proving package identity ownership, notification permission handling, relaunch, task removal cleanup, and Safe downgrade behavior."
+    },
+    {
+      "id": "notification_foreground_disclosure_stop_action_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Foreground disclosure and stop-action archive for ongoing packaged notifications and long-running or scheduled Node work."
+    },
+    {
+      "id": "notification_permission_denial_device_matrix_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Android 12 and Android 15+ permission-denied/granted matrix covering POST_NOTIFICATIONS, disabled app notifications, settings round-trip, and denial copy."
+    },
+    {
+      "id": "notification_advanced_action_group_style_decision_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Stable-denial or promotion archive for notification actions, groups, styles, inline reply, remote input, listeners, RemoteViews, and DND mutation."
+    },
+    {
+      "id": "notification_rollback_cleanup_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Rollback cleanup archive proving owned notification ids, channels, foreground disclosure metadata, and packaged downgrade behavior are cleaned without touching external notifications."
+    }
+  ]
+}

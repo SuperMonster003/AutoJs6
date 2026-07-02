@@ -119,6 +119,21 @@ catalog remains migration evidence for migration shape and docs parity;
 packaged Pro execution remains gated by provider promotion, disclosure review,
 and device permission evidence.
 
+P14-16 docs sync keeps this policy unchanged for the v1.2
+`pro.ui_automation_media` surface. Only the already covered `ui-layout` and
+`tasks-work-manager` paths execute in the focused Pro parity smoke subset;
+overlay, media/recorder, screenshot/OCR, and accessibility snippets remain
+static, guarded, or denial-oriented until their provider, packaged disclosure,
+permission, and device-matrix archives are promoted.
+
+P14-27 docs sync keeps the same rule for the v1.2 `pro.tasks_device_media`
+surface. `tasks-work-manager` remains the only task/device/media focused smoke
+path; `notifications-power` and `media-recorder` stay migration evidence and
+guarded/denial-oriented examples until task database mutation, broadcast task
+registration, notification disclosure, OEM power matrices, real recorder
+sessions, packaged recorder stress, playback, and MediaStore provider gates are
+promoted.
+
 ## Phase 13 Desktop Node Parity Examples
 
 `sample/nodejs/desktop-parity-suite` is a migration catalog for desktop-style
@@ -144,6 +159,26 @@ P13-54 keeps high-risk desktop examples out of the default runtime smoke list.
 The catalog remains migration evidence for desktop parity planning; packaged
 desktop execution, raw worker/raw-network/expanded-root/WASI/inspector authority,
 and Android package-manager parity remain gated by future promotion evidence.
+
+P14-32 docs sync keeps the v1.2 desktop runtime examples guarded under the
+`worker_intentionally_unsupported_v1_2` release decision. `worker_threads`, WorkerPool, process-worker, and raw `child_process` examples remain static, guarded, or denial-oriented; they are not runnable v1.2 release smoke until native worker availability, packaged worker behavior, WorkerPool resource stress, process-worker UX, security corpus, and rollback gates pass.
+
+P14-36 records v1.2 migration and Pro comparison docs as ready. Example claims
+match executable evidence and do not imply raw Android object parity. Pro UI and
+floaty, accessibility, screenshot/OCR, tasks, notifications, recorder, worker
+policy, packaged behavior, and rollback examples must keep their current
+evidence labels: `provider_poc_not_promoted`,
+`worker_intentionally_unsupported_v1_2`, `host_contract_ready`, and
+`NodeProfileV12CapabilityCatalog` are not runtime grants, and runtime authority
+remains unchanged. Example docs must not imply raw `Context`, raw `Activity`,
+raw `View`, raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw
+`MediaRecorder`, raw `TimedTask`, raw `BroadcastReceiver`, raw `Notification`,
+or raw `WakeLock` object parity.
+P14-36 claims match executable evidence for Pro UI and floaty, accessibility,
+screenshot/OCR, tasks, notifications, recorder, worker policy, packaged
+behavior, and rollback.
+runtime authority remains unchanged.
+Example docs must not imply raw `MediaRecorder` object parity.
 
 ## Smoke Coverage
 

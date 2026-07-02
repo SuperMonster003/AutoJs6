@@ -1,0 +1,88 @@
+{
+  "schema": "autojs6-node-phase14-packaged-recorder-media-stress-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-25",
+  "title": "Packaged recorder and media stress evidence",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "surface": "pro.tasks_device_media",
+  "sourceGates": [
+    "P13-26",
+    "P14-04",
+    "P14-24"
+  ],
+  "minimumPromotionPolicy": "Packaged recorder promotion requires positive packaged start/stop evidence with visible microphone foreground disclosure, deterministic stop behavior, task removal cleanup, relaunch/crash recovery, quota enforcement, temporary output cleanup, missing capability denial, missing Android permission denial, and rollback behavior.",
+  "packagedBoundaryContract": {
+    "providerName": "recorder",
+    "capability": "media.recording",
+    "currentPackagedBoundaryReady": true,
+    "currentPackagedStatusReady": true,
+    "currentPackagedStartDenied": true,
+    "currentPackagedMissingCapabilityDenied": true,
+    "positivePackagedStartStopReady": false,
+    "foregroundDisclosureVisibleReady": false,
+    "deterministicStopReady": false,
+    "taskRemovalCleanupReady": false,
+    "relaunchCrashRecoveryReady": false,
+    "quotaAndTempCleanupReady": false
+  },
+  "stressMatrix": [
+    {
+      "id": "packaged_status_and_denial_boundary",
+      "status": "imported",
+      "source": "P13-26 packaged media/recorder bridge smoke",
+      "requiredEvidence": "Packaged project resolves media, mediainfo, and recorder modules, returns recorder status, denies start, and rejects missing media.audio/media.metadata/media.recording capabilities."
+    },
+    {
+      "id": "future_packaged_start_stop_positive",
+      "status": "future_promotion",
+      "source": "future packaged recorder start/stop archive",
+      "requiredEvidence": "Packaged APK starts a microphone recorder session, surfaces visible foreground disclosure, returns JSON-safe session/status, stops deterministically, and closes owned resources."
+    },
+    {
+      "id": "future_task_removal_relaunch_crash_cleanup",
+      "status": "future_promotion",
+      "source": "future packaged recorder lifecycle archive",
+      "requiredEvidence": "Task removal, app relaunch, process death, provider crash, and Safe downgrade stop owned sessions and clean temporary outputs without leaking microphone capture."
+    },
+    {
+      "id": "future_quota_temp_output_cleanup",
+      "status": "future_promotion",
+      "source": "future packaged recorder quota archive",
+      "requiredEvidence": "Quota limits, scoped temporary output paths, delete-on-stop, delete-on-destroy, failure cleanup, and rollback cleanup are deterministic."
+    },
+    {
+      "id": "future_permission_denial_matrix",
+      "status": "future_promotion",
+      "source": "future packaged recorder denial archive",
+      "requiredEvidence": "Missing capability, missing Android RECORD_AUDIO permission, denied runtime prompt, missing foreground-service microphone metadata, and Safe downgrade denials remain stable."
+    }
+  ],
+  "requiredArchives": [
+    {
+      "id": "packaged_recorder_start_stop_positive_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged recorder positive start/stop archive with visible microphone foreground disclosure, stop action, JSON-safe session/status, and owned resource cleanup."
+    },
+    {
+      "id": "packaged_recorder_task_removal_relaunch_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged recorder task removal, relaunch, and provider/process crash archive proving deterministic stop and temporary output cleanup."
+    },
+    {
+      "id": "packaged_recorder_quota_temp_cleanup_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged recorder quota and scoped temporary output archive proving no raw file descriptor, no broad media-library permission, and cleanup on stop/destroy/failure/rollback."
+    },
+    {
+      "id": "packaged_recorder_denial_without_capability_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged recorder denial archive for missing media.recording, missing Android permission, denied prompt, and metadata mismatch before bridge dispatch."
+    },
+    {
+      "id": "packaged_recorder_foreground_disclosure_stop_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged recorder microphone foreground disclosure and stop-action archive proving user-visible ownership and deterministic stop behavior."
+    }
+  ]
+}

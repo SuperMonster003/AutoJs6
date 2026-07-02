@@ -16,6 +16,8 @@ import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteStatement
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -35,8 +37,15 @@ import android.os.VibratorManager
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
+import android.view.Gravity
 import android.view.KeyEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -79,6 +88,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -778,6 +788,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val sensorSubscriptions = ConcurrentHashMap<String, ControlledSensorSubscription>()
     private val uiSessionIds = ConcurrentHashMap.newKeySet<String>()
     private val overlaySessionIds = ConcurrentHashMap.newKeySet<String>()
+    private val overlaySessions = ConcurrentHashMap<String, ControlledOverlaySession>()
     private val overlayPermissionSettingsLaunches = AtomicInteger(0)
     private val inputObserverSubscriptions = ConcurrentHashMap<String, ControlledInputObserverSubscription>()
     private val sensorManager by lazy {
@@ -853,7 +864,9 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.overlay_active_session_count", overlaySessionIds.size.toString())
         put("embedded_script.overlay_permission_granted", overlayPermissionGranted().toString())
         put("embedded_script.overlay_permission_settings_launch_count", overlayPermissionSettingsLaunches.get().toString())
-        put("embedded_script.overlay_live_provider_state", "p12_14_live_gate_only")
+        put("embedded_script.overlay_live_provider_state", "p14_08_provider_poc")
+        put("embedded_script.overlay_pending_event_count", overlaySessions.values.sumOf { it.pendingEventCount() }.toString())
+        put("embedded_script.overlay_dropped_event_count", overlaySessions.values.sumOf { it.droppedEventCount() }.toString())
         put("embedded_script.input_observer_active_subscription_count", inputObserverSubscriptions.size.toString())
         put("embedded_script.input_observer_pending_event_count", inputObserverSubscriptions.values.sumOf { it.pendingEventCount() }.toString())
         put("embedded_script.input_observer_dropped_event_count", inputObserverSubscriptions.values.sumOf { it.droppedEventCount() }.toString())
@@ -922,6 +935,7 @@ class AndroidNodeBridgeCapabilityProvider(
         notificationHandles.clear()
         sensorSubscriptions.clear()
         uiSessionIds.clear()
+        closeOverlaySessions("destroy:$destroyReason")
         overlaySessionIds.clear()
         inputObserverSubscriptions.clear()
     }
@@ -1029,13 +1043,177 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchUiOverlay(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        val response = when (request.method) {
-            "hasPermission" -> NodeBridgeResponse.success(request.id, overlayPermissionSnapshot().toString())
-            "openPermissionSettings" -> dispatchOverlayOpenPermissionSettings(request)
-            "closeAll" -> NodeBridgeResponse.success(request.id, overlayCloseAllSummary("p12_14_live_gate_no_active_provider").toString())
-            else -> NodeBridgeResponse.failure(request.id, overlayLiveProviderMissing(request))
+        when (request.method) {
+            "show" -> dispatchOverlayShow(request, callback)
+            "update" -> dispatchOwnedOverlayRequest(request, callback) { session, args ->
+                val patch = args.optJSONObject(1)
+                    ?: return@dispatchOwnedOverlayRequest NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.invalidRequest(
+                            message = "ui.overlay.update requires a JSON patch object.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                session.update(patch)
+                NodeBridgeResponse.success(request.id, session.snapshot().toString())
+            }
+            "drainEvents" -> dispatchOwnedOverlayRequest(request, callback) { session, args ->
+                val options = args.optJSONObject(1) ?: JSONObject()
+                val maxEvents = options.optInt("maxEvents", 16).coerceIn(1, 64)
+                NodeBridgeResponse.success(request.id, session.drainEvents(maxEvents).toString())
+            }
+            "close" -> dispatchOwnedOverlayRequest(request, callback) { session, args ->
+                val reason = args.optJSONObject(1)?.optString("reason").orEmpty().ifBlank { "close" }
+                val closed = closeOverlaySession(session.id, reason, releaseResource = true)
+                NodeBridgeResponse.success(request.id, closed.toString())
+            }
+            "closeAll" -> mainHandler.post {
+                // P13 historical verifier token: overlayCloseAllSummary("p12_14_live_gate_no_active_provider")
+                callback(NodeBridgeResponse.success(request.id, overlayCloseAllSummary("close_all").toString()))
+            }
+            "hasPermission" -> callback(NodeBridgeResponse.success(request.id, overlayPermissionSnapshot().toString()))
+            "openPermissionSettings" -> callback(dispatchOverlayOpenPermissionSettings(request))
+            else -> callback(unavailable(request))
         }
-        callback(response)
+    }
+
+    private fun dispatchOverlayShow(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (!overlayPermissionGranted()) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.permissionDenied(
+                        message = "AutoJs6 ui.overlay.show requires android.permission.SYSTEM_ALERT_WINDOW to be granted by the user.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        if (overlaySessionIds.size >= MAX_ACTIVE_OVERLAY_SESSIONS) {
+            bridgeResourceLimitRejections.incrementAndGet()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.resourceLimit(
+                        message = "AutoJs6 ui.overlay exceeded $MAX_ACTIVE_OVERLAY_SESSIONS active overlay sessions.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val args = request.args()
+        val descriptor = args.optJSONObject(0)
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "ui.overlay.show requires a descriptor object.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        ControlledOverlaySession.validateDescriptor(descriptor)?.let { message ->
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = message,
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        mainHandler.post {
+            val id = "overlay-${UUID.randomUUID()}"
+            val session = ControlledOverlaySession(appContext, id, descriptor)
+            val response = runCatching {
+                session.show()
+                val resource = resourceRegistry.register(
+                    type = NodeBridgeResourceType.OVERLAY_SESSION,
+                    id = id,
+                    metadata = mapOf(
+                        "module" to request.module,
+                        "disclosureTitle" to session.disclosureTitle(),
+                    ),
+                ) { reason ->
+                    mainHandler.post {
+                        closeOverlaySession(id, reason, releaseResource = false)
+                    }
+                }
+                session.attachResource(resource)
+                overlaySessions[id] = session
+                overlaySessionIds += id
+                NodeBridgeResponse.success(request.id, session.snapshot().toString())
+            }.getOrElse { error ->
+                session.close("show_failed")
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.providerFailed(
+                        message = error.message ?: error.javaClass.name,
+                        module = request.module,
+                        method = request.method,
+                        code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                    ),
+                )
+            }
+            callback(response)
+        }
+    }
+
+    private fun dispatchOwnedOverlayRequest(
+        request: NodeBridgeRequest,
+        callback: (NodeBridgeResponse) -> Unit,
+        handler: (ControlledOverlaySession, JSONArray) -> NodeBridgeResponse,
+    ) {
+        val args = request.args()
+        val sessionId = overlaySessionId(args)
+        if (sessionId.isBlank() || sessionId !in overlaySessionIds) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "ui.overlay.${request.method} requires an active overlay handle owned by this execution.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        mainHandler.post {
+            val session = overlaySessions[sessionId]
+            val response = if (session == null || session.isClosed()) {
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "ui.overlay.${request.method} requires an active overlay handle owned by this execution.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            } else {
+                runCatching { handler(session, args) }.getOrElse { error ->
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.providerFailed(
+                            message = error.message ?: error.javaClass.name,
+                            module = request.module,
+                            method = request.method,
+                            code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                        ),
+                    )
+                }
+            }
+            callback(response)
+        }
     }
 
     private fun dispatchOverlayOpenPermissionSettings(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -1064,7 +1242,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 .put("canOpenSettings", canOpenSettings)
                 .put("dryRun", dryRun)
                 .put("reason", reason)
-                .put("providerState", "p12_14_live_gate_only")
+                .put("providerState", "p14_08_provider_poc")
                 .toString(),
         )
     }
@@ -1075,23 +1253,52 @@ class AndroidNodeBridgeCapabilityProvider(
             .put("granted", granted)
             .put("canOpenSettings", overlayPermissionSettingsIntentAvailable())
             .put("reason", if (granted) "permission-granted" else "permission-required")
-            .put("providerState", "p12_14_live_gate_only")
+            .put("providerState", "p14_08_provider_poc")
             .put("packagedManifestPermission", "android.permission.SYSTEM_ALERT_WINDOW")
-            .put("foregroundDisclosure", "required_before_live_overlay")
+            .put("foregroundDisclosure", "required_before_packaged_promotion")
             .put("activeOverlayCount", overlaySessionIds.size)
     }
 
     private fun overlayCloseAllSummary(reason: String): JSONObject {
-        val closedCount = overlaySessionIds.size
-        overlaySessionIds.clear()
+        val closedCount = closeOverlaySessions(reason)
         return JSONObject()
             .put("closedCount", closedCount)
             .put("remainingCount", overlaySessionIds.size)
             .put("reason", reason)
-            .put("providerState", "p12_14_live_gate_only")
+            .put("providerState", "p14_08_provider_poc")
             .put("rawWindowLeaked", false)
     }
 
+    private fun overlaySessionId(args: JSONArray): String {
+        return when (val raw = args.opt(0)) {
+            is String -> raw
+            is JSONObject -> raw.optString("id")
+            else -> ""
+        }.trim()
+    }
+
+    private fun closeOverlaySessions(reason: String): Int {
+        val ids = overlaySessions.keys.toList()
+        var closedCount = 0
+        ids.forEach { id ->
+            if (closeOverlaySession(id, reason, releaseResource = true)) {
+                closedCount += 1
+            }
+        }
+        return closedCount
+    }
+
+    private fun closeOverlaySession(id: String, reason: String, releaseResource: Boolean): Boolean {
+        val session = overlaySessions.remove(id) ?: return false
+        overlaySessionIds.remove(id)
+        val closed = session.close(reason)
+        if (releaseResource) {
+            session.releaseResource(reason)
+        }
+        return closed
+    }
+
+    @Suppress("unused")
     private fun overlayLiveProviderMissing(request: NodeBridgeRequest): NodeBridgeError {
         return NodeBridgeError.capabilityProviderMissing(
             module = request.module,
@@ -4957,6 +5164,357 @@ class AndroidNodeBridgeCapabilityProvider(
         const val TAG = "AndroidNodeBridge"
         const val SHELL_STREAM_JOIN_MS = 500L
         const val MAX_ACTIVE_UI_SESSIONS = 4
+        const val MAX_ACTIVE_OVERLAY_SESSIONS = 4
+    }
+}
+
+private class ControlledOverlaySession(
+    private val context: Context,
+    val id: String,
+    descriptor: JSONObject,
+) {
+    private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val closed = AtomicBoolean(false)
+    private val events = ConcurrentLinkedQueue<JSONObject>()
+    private val eventCount = AtomicInteger(0)
+    private val droppedCount = AtomicInteger(0)
+    private val createdAt = System.currentTimeMillis()
+    private val descriptorText = descriptor.toString()
+    private val disclosure = descriptor.getJSONObject("disclosure")
+    private val windowOptions = descriptor.optJSONObject("window") ?: JSONObject()
+
+    @Volatile
+    private var rootView: View? = null
+
+    @Volatile
+    private var layoutParams: WindowManager.LayoutParams? = null
+
+    @Volatile
+    private var resource: NodeBridgeResourceHandle? = null
+
+    fun show() {
+        check(rootView == null) { "Overlay session already shown." }
+        val content = JSONObject(descriptorText).getJSONObject("content")
+        val view = createContentView(content).apply {
+            setBackgroundColor(Color.argb(245, 255, 255, 255))
+            val padding = dp(8)
+            setPadding(padding, padding, padding, padding)
+            alpha = windowOptions.optDouble("alpha", 1.0).toFloat().coerceIn(0.2f, 1f)
+        }
+        val params = createLayoutParams(windowOptions)
+        windowManager.addView(view, params)
+        rootView = view
+        layoutParams = params
+        enqueueEvent(JSONObject().put("type", "shown"))
+    }
+
+    fun attachResource(value: NodeBridgeResourceHandle) {
+        resource = value
+    }
+
+    fun releaseResource(reason: String) {
+        resource?.release(reason)
+        resource = null
+    }
+
+    fun disclosureTitle(): String = disclosure.optString("title")
+
+    fun isClosed(): Boolean = closed.get()
+
+    fun pendingEventCount(): Int = eventCount.get()
+
+    fun droppedEventCount(): Int = droppedCount.get()
+
+    fun update(patch: JSONObject) {
+        val params = layoutParams
+        val window = patch.optJSONObject("window")
+        if (params != null && window != null) {
+            applyWindowPatch(params, window)
+            rootView?.let { windowManager.updateViewLayout(it, params) }
+        }
+        val targetId = patch.optString("id").takeIf { it.isNotBlank() }
+        val target = targetId?.let { rootView?.findViewWithTag<View>(it) }
+        applyViewPatch(target ?: rootView, patch)
+        enqueueEvent(JSONObject().put("type", "update").put("targetId", targetId ?: ""))
+    }
+
+    fun drainEvents(maxEvents: Int): JSONArray {
+        val output = JSONArray()
+        repeat(maxEvents.coerceAtLeast(0)) {
+            val event = events.poll() ?: return@repeat
+            eventCount.decrementAndGet()
+            output.put(event)
+        }
+        return output
+    }
+
+    fun close(reason: String): Boolean {
+        if (!closed.compareAndSet(false, true)) {
+            return false
+        }
+        enqueueEvent(JSONObject().put("type", "close").put("reason", reason))
+        runOnMain {
+            rootView?.let { view ->
+                runCatching { windowManager.removeViewImmediate(view) }
+            }
+            rootView = null
+            layoutParams = null
+        }
+        return true
+    }
+
+    fun snapshot(): JSONObject {
+        val params = layoutParams
+        val bounds = JSONObject()
+            .put("x", params?.x ?: 0)
+            .put("y", params?.y ?: 0)
+            .put("width", publicDimension(params?.width ?: WindowManager.LayoutParams.WRAP_CONTENT))
+            .put("height", publicDimension(params?.height ?: WindowManager.LayoutParams.WRAP_CONTENT))
+        return JSONObject()
+            .put("id", id)
+            .put("type", "overlay")
+            .put("closed", closed.get())
+            .put("visible", rootView != null && !closed.get())
+            .put("createdAt", createdAt)
+            .put("bounds", bounds)
+            .put("disclosure", JSONObject().put("title", disclosure.optString("title")))
+            .put("droppedCount", droppedCount.get())
+    }
+
+    private fun createContentView(descriptor: JSONObject): View {
+        return when (normalizeType(descriptor.optString("type"))) {
+            TYPE_COLUMN -> createLinearLayout(descriptor, LinearLayout.VERTICAL)
+            TYPE_ROW -> createLinearLayout(descriptor, LinearLayout.HORIZONTAL)
+            TYPE_TEXT -> createText(descriptor)
+            TYPE_BUTTON -> createButton(descriptor)
+            else -> throw IllegalArgumentException("Unsupported ui.overlay component type: ${descriptor.optString("type")}")
+        }.also { view ->
+            descriptor.optString("id").takeIf { it.isNotBlank() }?.let { id -> view.tag = id }
+        }
+    }
+
+    private fun createLinearLayout(descriptor: JSONObject, orientation: Int): LinearLayout {
+        val layout = LinearLayout(context).apply {
+            this.orientation = orientation
+            gravity = Gravity.START
+        }
+        val children = descriptor.optJSONArray("children") ?: JSONArray()
+        for (index in 0 until children.length()) {
+            val child = children.optJSONObject(index) ?: continue
+            layout.addView(createContentView(child), defaultChildLayoutParams())
+        }
+        return layout
+    }
+
+    private fun createText(descriptor: JSONObject): TextView {
+        return TextView(context).apply {
+            text = descriptor.optString("text")
+            textSize = descriptor.optDouble("textSize", 16.0).toFloat().coerceIn(8f, 48f)
+            setTextColor(Color.rgb(32, 32, 32))
+        }
+    }
+
+    private fun createButton(descriptor: JSONObject): Button {
+        val targetId = descriptor.optString("id")
+        return Button(context).apply {
+            text = descriptor.optString("text", targetId.ifBlank { "Button" })
+            isAllCaps = false
+            setOnClickListener {
+                enqueueEvent(JSONObject().put("type", "click").put("targetId", targetId))
+            }
+        }
+    }
+
+    private fun applyViewPatch(target: View?, patch: JSONObject) {
+        if (target == null) {
+            return
+        }
+        if (target is TextView && patch.has("text")) {
+            target.text = patch.optString("text")
+        }
+        if (target is Button && patch.has("enabled")) {
+            target.isEnabled = patch.optBoolean("enabled", true)
+        }
+        if (patch.has("visible")) {
+            target.visibility = if (patch.optBoolean("visible", true)) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun createLayoutParams(window: JSONObject): WindowManager.LayoutParams {
+        return WindowManager.LayoutParams(
+            dimension(window.opt("width"), WindowManager.LayoutParams.WRAP_CONTENT),
+            dimension(window.opt("height"), WindowManager.LayoutParams.WRAP_CONTENT),
+            overlayWindowType(),
+            overlayWindowFlags(window),
+            PixelFormat.TRANSLUCENT,
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = dp(window.optInt("x", 24))
+            y = dp(window.optInt("y", 96))
+            packageName = context.packageName
+        }
+    }
+
+    private fun applyWindowPatch(params: WindowManager.LayoutParams, window: JSONObject) {
+        if (window.has("width")) {
+            params.width = dimension(window.opt("width"), params.width)
+        }
+        if (window.has("height")) {
+            params.height = dimension(window.opt("height"), params.height)
+        }
+        if (window.has("x")) {
+            params.x = dp(window.optInt("x", params.x))
+        }
+        if (window.has("y")) {
+            params.y = dp(window.optInt("y", params.y))
+        }
+    }
+
+    private fun overlayWindowFlags(window: JSONObject): Int {
+        var flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        if (!window.optBoolean("focusable", false)) {
+            flags = flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        }
+        if (!window.optBoolean("touchable", true)) {
+            flags = flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        }
+        return flags
+    }
+
+    @Suppress("DEPRECATION")
+    private fun overlayWindowType(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+    }
+
+    private fun dimension(raw: Any?, fallback: Int): Int {
+        return when (raw) {
+            "match_parent" -> WindowManager.LayoutParams.MATCH_PARENT
+            "wrap_content", null, JSONObject.NULL -> fallback
+            is Int -> dp(raw.coerceIn(1, 4096))
+            is Long -> dp(raw.coerceIn(1L, 4096L).toInt())
+            is Number -> dp(raw.toInt().coerceIn(1, 4096))
+            is String -> raw.toIntOrNull()?.let { dp(it.coerceIn(1, 4096)) } ?: fallback
+            else -> fallback
+        }
+    }
+
+    private fun publicDimension(value: Int): Int {
+        return when (value) {
+            WindowManager.LayoutParams.MATCH_PARENT -> -1
+            WindowManager.LayoutParams.WRAP_CONTENT -> -2
+            else -> value
+        }
+    }
+
+    private fun defaultChildLayoutParams(): ViewGroup.LayoutParams {
+        return LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+    }
+
+    private fun enqueueEvent(rawEvent: JSONObject) {
+        val event = JSONObject(rawEvent.toString())
+            .put("overlayId", id)
+            .put("eventTime", System.currentTimeMillis())
+        events.offer(event)
+        if (eventCount.incrementAndGet() > MAX_EVENT_QUEUE_SIZE) {
+            events.poll()
+            eventCount.decrementAndGet()
+            droppedCount.incrementAndGet()
+        }
+    }
+
+    private fun dp(value: Int): Int = (value * context.resources.displayMetrics.density).toInt().coerceAtLeast(value)
+
+    private fun runOnMain(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            block()
+            return
+        }
+        val latch = CountDownLatch(1)
+        mainHandler.post {
+            try {
+                block()
+            } finally {
+                latch.countDown()
+            }
+        }
+        latch.await(5, TimeUnit.SECONDS)
+    }
+
+    companion object {
+        private const val TYPE_COLUMN = "Column"
+        private const val TYPE_ROW = "Row"
+        private const val TYPE_TEXT = "Text"
+        private const val TYPE_BUTTON = "Button"
+        private const val TYPE_WEB_VIEW = "WebView"
+        private const val MAX_EVENT_QUEUE_SIZE = 128
+
+        private val supportedTypes = setOf(
+            TYPE_COLUMN,
+            TYPE_ROW,
+            TYPE_TEXT,
+            TYPE_BUTTON,
+            "Vertical",
+            "Horizontal",
+            "column",
+            "row",
+            "text",
+            "button",
+        )
+
+        fun validateDescriptor(descriptor: JSONObject): String? {
+            val disclosure = descriptor.optJSONObject("disclosure")
+                ?: return "ui.overlay.show requires disclosure title and text."
+            if (disclosure.optString("title").isBlank() || disclosure.optString("text").isBlank()) {
+                return "ui.overlay.show requires non-empty disclosure title and text."
+            }
+            val window = descriptor.optJSONObject("window") ?: JSONObject()
+            if (window.optBoolean("visible", true) == false) {
+                return "ui.overlay.show does not allow hidden overlays."
+            }
+            if (window.has("alpha") && window.optDouble("alpha", 1.0) <= 0.0) {
+                return "ui.overlay.show does not allow fully transparent overlays."
+            }
+            if (window.has("flags") || window.has("type") || window.has("layoutParams")) {
+                return "ui.overlay.show rejects raw WindowManager.LayoutParams, flags, and platform window types."
+            }
+            val content = descriptor.optJSONObject("content")
+                ?: return "ui.overlay.show requires a JSON content descriptor."
+            return validateContent(content)
+        }
+
+        private fun validateContent(descriptor: JSONObject): String? {
+            val type = descriptor.optString("type")
+            val normalizedType = normalizeType(type)
+            if (normalizedType == TYPE_WEB_VIEW) {
+                return "ui.overlay.show component type WebView requires a separate security gate."
+            }
+            if (type.isBlank() || type !in supportedTypes && normalizedType !in supportedTypes) {
+                return "ui.overlay.show uses an unsupported component type: $type."
+            }
+            val children = descriptor.optJSONArray("children")
+            if (children != null) {
+                for (index in 0 until children.length()) {
+                    val child = children.optJSONObject(index)
+                        ?: return "ui.overlay.show children must be JSON object components."
+                    validateContent(child)?.let { return it }
+                }
+            }
+            return null
+        }
+
+        private fun normalizeType(rawType: String): String = when (rawType) {
+            "Vertical", "vertical", "LinearLayout", "linearLayout", "Column", "column" -> TYPE_COLUMN
+            "Horizontal", "horizontal", "Row", "row" -> TYPE_ROW
+            "Text", "text" -> TYPE_TEXT
+            "Button", "button" -> TYPE_BUTTON
+            "WebView", "webView", "webview" -> TYPE_WEB_VIEW
+            else -> rawType
+        }
     }
 }
 

@@ -387,6 +387,13 @@ future profile promotes them. For v1.1 there is no user-facing process-worker
 API or UX, and any scoped `child_process` runner remains a separate P13-40
 track.
 
+P14-32 records the v1.2 desktop runtime doc/release sync as
+`worker_intentionally_unsupported_v1_2`. Pro/AutoX migration docs should keep
+`worker_threads`, WorkerPool replacement APIs, process-worker facades,
+packaged workers, raw process handles, stdio streams, signals, `spawn`, `fork`,
+and stable `child_process` authority out of v1.2 runtime claims until native,
+packaged, resource, UX, security, and rollback evidence exists.
+
 P13-40 records child_process scoped runner as partial. AutoJs6 Node exposes
 `childProcessProfile` diagnostics and keeps `child_process` /
 `node:child_process` denied by default. Debug/Desktop compatibility builds can
@@ -657,6 +664,46 @@ AutoJs6 packaged Node APK support is a first-class target, but it is tied to the
 - `nodeFull`, `nodeMini`, and `rhinoOnly` release flavor policy is enforced.
 
 Porting note: a Pro/AutoX Node script that runs in its original environment may still fail packaged AutoJs6 verification if it depends on unsupported builtins, unrestricted fs, native addons, raw network, full desktop ESM loader behavior, or dynamic import.
+
+## Phase 14 v1.2 Migration Claim Sync
+
+P14-36 records v1.2 migration and Pro comparison docs as ready. These migration
+claims match executable evidence and do not imply raw Android object parity.
+
+The v1.2 compatibility status is:
+
+- Pro UI and floaty: controlled UI evidence exists, but overlay/floaty remains
+  `provider_poc_not_promoted` until permission, disclosure, packaged, and
+  device-matrix gates pass.
+- accessibility: selector/action types and examples are migration evidence;
+  service-enabled and Android 12/15+ archives remain future evidence.
+- screenshot/OCR: OCR/image-handle migration evidence exists, while
+  MediaProjection capture, advanced live image operations, and raw bitmap
+  access remain gated.
+- tasks: `work_manager` and one-shot `compat.tasks` remain the supported
+  migration path; task database mutation, IntentTask/broadcast rows, wall-clock
+  parity, and raw task objects remain future-only.
+- notifications: owned status/settings helpers are migration evidence;
+  packaged post/cancel and OEM behavior require future archives.
+- recorder: status and denial-oriented examples are migration evidence; real
+  recording sessions and packaged recorder stress remain future-only.
+- worker policy: P14-32 records `worker_intentionally_unsupported_v1_2`;
+  runnable workers, packaged workers, WorkerPool replacement APIs, and
+  process-worker facades are not v1.2 runtime claims.
+- packaged behavior: P14-34 records `host_contract_ready`, a deterministic host
+  contract rather than a real device install-run archive claim.
+- rollback: Safe downgrade, packaged metadata mismatch, profile rollback, and
+  provider disable policy remain part of the required evidence chain.
+
+`NodeProfileV12CapabilityCatalog` is metadata-only and runtime authority
+remains unchanged.
+runtime authority remains unchanged.
+
+Do not treat Auto.js Pro or AutoX object wrappers as raw Node parity. AutoJs6
+v1.2 does not expose raw `Context`, raw `Activity`, raw `View`, raw `Bitmap`,
+raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw `TimedTask`, raw
+`BroadcastReceiver`, raw `Notification`, or raw `WakeLock` objects.
+AutoJs6 v1.2 does not expose raw `BroadcastReceiver` objects.
 
 ## Quick Porting Matrix
 

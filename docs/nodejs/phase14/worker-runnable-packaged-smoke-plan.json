@@ -1,0 +1,32 @@
+{
+  "schema": "autojs6-node-phase14-worker-runnable-packaged-smoke-v1",
+  "task": "P14-29",
+  "status": "ready",
+  "decision": "conditional_skip_native_unavailable",
+  "promotionState": "worker_authority_disabled",
+  "sourceGate": "P14-28",
+  "nativePrecondition": {
+    "requiredStatus": "worker.preflight.status=available",
+    "currentStatus": "worker.preflight.status=unavailable",
+    "currentError": "ERR_AUTOJS6_WORKER_DISABLED",
+    "nativeAvailable": false
+  },
+  "smokeState": {
+    "sourceAnchorsPresent": true,
+    "runnableSmokeExecuted": false,
+    "packagedSmokeExecuted": false,
+    "skippedReason": "native_worker_unavailable",
+    "runtimeAuthorityChanged": false,
+    "defaultWorkerThreadsPromoted": false,
+    "projectOrPackagedOptInPromoted": false
+  },
+  "requiredNativeAvailableCoverage": [
+    "basic Worker construction, workerData, parentPort message, exit, terminate, and max-worker rejection",
+    "CJS, .mjs, and package.json type=module worker entry resolution",
+    "worker capability isolation and nested Worker denial",
+    "MessageChannel, MessagePort, transferList, clone error, message size, and queue limits",
+    "WorkerPool reuse, queue overflow, cancel, running timeout, shutdown, and diagnostics",
+    "packaged .mjs worker smoke with source graph packaging and builtin import"
+  ],
+  "rollback": "Keep P14-29 as a conditional skipped gate until P14-28 reports nativeAvailable=true; do not expose default, project, packaged, or process-worker authority from source-only smoke anchors."
+}

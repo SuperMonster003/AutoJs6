@@ -17,7 +17,9 @@ P13-17 records the Phase 13 live UI provider promotion gate: direct
 `require("ui")` live Activity evidence is present, including Back/Recents
 lifecycle, and packaged entry/update/close smoke is present. Packaged task
 relaunch, crash, and disclosure evidence still block `pro_compat_opt_in`
-promotion.
+promotion. P14-07 records a partial packaged live UI gate that imports this
+evidence into the v1.2 provider lane while keeping the open packaged blockers
+visible.
 
 ## Goal
 

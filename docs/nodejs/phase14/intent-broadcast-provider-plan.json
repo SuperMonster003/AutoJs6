@@ -1,0 +1,199 @@
+{
+  "schema": "autojs6-node-phase14-intent-broadcast-provider-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-20",
+  "title": "JSON-safe IntentTask/broadcast provider",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "surface": "pro.tasks_device_media",
+  "sourceGates": [
+    "P13-22",
+    "P13-23",
+    "P14-17",
+    "P14-18",
+    "P14-19"
+  ],
+  "minimumPromotionPolicy": "IntentTask/broadcast promotion requires provider-owned JSON descriptors, explicit capability split, manifest synthesis, exported/non-exported receiver policy, permission gates, trigger payload snapshots, remove cleanup, packaged install/trigger/remove evidence, and no raw Intent, PendingIntent, BroadcastReceiver, receiver handle, or Android component object crossing into Node.",
+  "providerContract": {
+    "futureProvider": "tasks.broadcast",
+    "currentRuntimeAuthority": "not_exposed",
+    "currentMigrationFacade": "autojs6:compat.tasks",
+    "descriptorSchema": "autojs6-node-intent-broadcast-descriptor-v1",
+    "operations": [
+      "register",
+      "list",
+      "get",
+      "enable",
+      "disable",
+      "remove",
+      "validateManifestPatch"
+    ],
+    "stableDeniedCurrentMethods": [
+      "require(\"tasks\")",
+      "require(\"tasks.broadcast\")",
+      "global tasks",
+      "compat.tasks.addIntentTask",
+      "compat.tasks.queryIntentTasks",
+      "compat.tasks.getIntentTask",
+      "compat.tasks.removeIntentTask",
+      "app.sendBroadcast"
+    ],
+    "triggerTypes": [
+      "custom_local",
+      "custom_package_private",
+      "boot_completed",
+      "user_unlocked",
+      "package_event",
+      "startup",
+      "exact_alarm"
+    ],
+    "firstCandidateTriggers": [
+      "custom_local",
+      "custom_package_private",
+      "package_event_self_update"
+    ],
+    "rawObjectsDenied": [
+      "Intent",
+      "IntentFilter",
+      "PendingIntent",
+      "BroadcastReceiver",
+      "Bundle",
+      "Uri",
+      "PackageManager",
+      "ResolveInfo",
+      "ActivityInfo",
+      "signature",
+      "icon",
+      "package list",
+      "receiver handle",
+      "IntentTask",
+      "database cursor",
+      "mutable row handle",
+      "Android Context",
+      "Java object"
+    ]
+  },
+  "descriptorContract": {
+    "requiredFields": [
+      "schema",
+      "descriptorVersion",
+      "id",
+      "owner",
+      "entry",
+      "backend",
+      "trigger",
+      "manifest",
+      "payloadPolicy",
+      "enabled",
+      "createdAtEpochMs",
+      "updatedAtEpochMs"
+    ],
+    "ownerFields": [
+      "profile",
+      "sourceRuntime",
+      "projectIdentity",
+      "packageIdentity",
+      "workingDirectory",
+      "descriptorVersion"
+    ],
+    "entryRules": [
+      "entry path must be project-relative or working-directory-relative",
+      "absolute paths, NUL bytes, .. segments, symlink escapes, and realpath escapes are denied before persistence",
+      "backend accepts embedded only until another launch backend has evidence"
+    ],
+    "idPolicy": "opaque Node broadcast task ids cannot alias legacy Rhino IntentTask ids or packaged ids from another package identity",
+    "legacyRowsMutable": false,
+    "packagedRowsMainAppAliasAllowed": false
+  },
+  "manifestSynthesisContract": {
+    "dynamicManifestMutationFromNodeAllowed": false,
+    "packagedPatchRequired": true,
+    "bootPermissionOptInOnly": true,
+    "receiveBootCompletedPermission": "android.permission.RECEIVE_BOOT_COMPLETED",
+    "packageDataSchemeRequired": true,
+    "packageDataScheme": "package",
+    "customReceiversDefaultExported": false,
+    "exportedReceiversDefaultAllowed": false,
+    "exportedReceiverRequires": [
+      "explicit packaged metadata",
+      "reviewed action allowlist",
+      "signature or app-private permission policy",
+      "abuse review",
+      "device matrix evidence"
+    ],
+    "reportFields": [
+      "receivers",
+      "actions",
+      "categories",
+      "dataSchemes",
+      "permissions",
+      "exported",
+      "foregroundServiceImplications",
+      "unsupportedTriggers"
+    ]
+  },
+  "triggerPayloadContract": {
+    "schema": "autojs6-node-broadcast-trigger-payload-v1",
+    "rawIntentAllowed": false,
+    "maxPayloadBytes": 8192,
+    "allowedFields": [
+      "schema",
+      "taskId",
+      "triggerType",
+      "action",
+      "categories",
+      "dataScheme",
+      "packageName",
+      "replacing",
+      "uid",
+      "timestampEpochMs",
+      "extras"
+    ],
+    "privacyFilteredFields": [
+      "signature",
+      "icon",
+      "applicationLabel",
+      "installSource",
+      "packageList",
+      "rawExtras"
+    ],
+    "receiverThreadPolicy": "receiver validates, snapshots, enqueues, and returns without running Node on the receiver thread",
+    "rateLimitPolicy": "per descriptor cooldown and maximum pending executions are required before promotion"
+  },
+  "removeBehavior": {
+    "removeOwnedDescriptor": true,
+    "unregisterDynamicReceiver": true,
+    "disableStaticReceiverOrPatchOnPackagedRemove": true,
+    "cancelPendingExecutions": true,
+    "preserveLegacyRhinoRows": true,
+    "denyCrossPackageRemove": true,
+    "safeDowngradeAction": "disable_or_remove_owned_broadcast_descriptors_and_receiver_patches"
+  },
+  "requiredArchives": [
+    {
+      "id": "intent_broadcast_live_provider_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Live JSON-safe provider evidence for register, list, get, enable, disable, remove, and validateManifestPatch without raw Android broadcast objects."
+    },
+    {
+      "id": "intent_broadcast_manifest_synthesis_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Manifest synthesis evidence for packaged opt-in receivers, boot permission, package data scheme, non-exported defaults, and deterministic patch reports."
+    },
+    {
+      "id": "intent_broadcast_exported_permission_policy_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Exported receiver denial/default evidence plus allowlist, permission, abuse-review, and Android 12/15+ matrix proof for any exported receiver promotion."
+    },
+    {
+      "id": "intent_broadcast_trigger_payload_schema_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Trigger payload serialization evidence proving bounded JSON snapshots, privacy filtering, no raw Intent/Bundle/Uri handles, and receiver-thread non-execution."
+    },
+    {
+      "id": "intent_broadcast_remove_cleanup_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Remove/disable evidence proving owned descriptor cleanup, dynamic receiver unregister, pending execution cancellation, packaged patch cleanup, and legacy Rhino row preservation."
+    }
+  ]
+}

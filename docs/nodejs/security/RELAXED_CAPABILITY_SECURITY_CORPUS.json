@@ -2,7 +2,7 @@
   "schema": "autojs6-node-relaxed-capability-security-corpus-v1",
   "task": "P13-50",
   "status": "ready",
-  "updatedAt": "2026-06-27",
+  "updatedAt": "2026-07-02",
   "policy": {
     "defaultProfile": "safe_default",
     "profilePromotion": false,
@@ -135,6 +135,51 @@
       "rollback": "Keep NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED false in release and reject project/package overrides."
     },
     {
+      "id": "worker_threads",
+      "profile": "desktop_compat_opt_in",
+      "risk": "critical",
+      "positiveTests": [
+        "workerThreadsProfile documents default denial, request-local native preflight, MessageChannel, WorkerPool, transfer-list, and packaged behavior state",
+        "P14-28 audits Node 24.5 target ABI artifacts and records worker native availability as intentionally unsupported for v1.2"
+      ],
+      "negativeTests": [
+        "Safe profile keeps worker_threads disabled by default",
+        "node:worker_threads remains shape-only while native preflight is unavailable",
+        "workers cannot access bridge modules, nested workers, raw native handles, raw process APIs, shell, or child_process"
+      ],
+      "abuseCases": [
+        "worker bridge module import",
+        "nested worker creation",
+        "WorkerPool queue/resource exhaustion",
+        "packaged worker source graph without native preflight",
+        "process-worker facade bypass through WorkerPool"
+      ],
+      "ciEvidence": [
+        "NodeWorkerThreadsBootstrapInstrumentationTest",
+        "NodeWorkerThreadsExperimentalInstrumentationTest",
+        "NodeWorkerThreadsResourceStressInstrumentationTest",
+        "verifyNodePhase14WorkerNativeAvailability",
+        "verifyNodePhase14WorkerRunnablePackagedSmoke",
+        "verifyNodePhase14WorkerResourceRssStress",
+        "verifyNodePhase14DesktopRuntimeDocSync"
+      ],
+      "runtimeGuards": [
+        "ERR_AUTOJS6_WORKER_DISABLED for unavailable runnable workers",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED for worker bridge access when workers become native-available",
+        "worker_threads experimental flag remains false in release profiles",
+        "project and packaged worker opt-in remains unavailable for v1.2",
+        "process-worker facade remains absent"
+      ],
+      "promotionPreconditions": [
+        "P14-32 desktop runtime doc sync keeps worker_intentionally_unsupported_v1_2 until native, packaged, resource, UX, security, and rollback evidence exists",
+        "P14-28 must report native worker availability on every selected target ABI before runnable promotion",
+        "P14-29 runnable and packaged smoke must execute on native-worker-capable devices",
+        "P14-30 resource/RSS stress must archive Java heap, native heap, fd, thread, queue, worker, and WorkerPool deltas",
+        "P14-31 process-worker replacement must remain no-facade unless a future WorkerPool-compatible API owns slot accounting and packaged UX"
+      ],
+      "rollback": "Keep autojs.nodejs.worker_threads.experimental=false, keep project/package worker opt-in disabled, and keep node:worker_threads as shape-only until native, packaged, resource, security, and rollback gates pass."
+    },
+    {
       "id": "child_process",
       "profile": "desktop_compat_opt_in",
       "risk": "high",
@@ -164,6 +209,7 @@
         "detached mode, inherited fds, signals, and raw stdio streams remain unavailable"
       ],
       "promotionPreconditions": [
+        "P14-31 process-worker replacement keeps no user-facing facade and no raw process authority for v1.2",
         "P13-51 rollback playbook has a child_process scoped-runner kill switch",
         "P13-52 privacy disclosure covers command execution and process output",
         "packaged APK metadata records allowed binaries, cwd, env, timeout, and stdio policy",

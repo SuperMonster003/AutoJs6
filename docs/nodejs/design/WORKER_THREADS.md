@@ -2,6 +2,15 @@
 
 Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and runnable `worker_threads` authority remains disabled in normal AutoJs6 Safe Node Profile runs. The default profile exposes only a `node:worker_threads` shape facade for npm feature detection. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support. S7-26 prepares limited MessageChannel/transferList coverage for native-worker-capable builds. S7-29 adds stress and packaged `.mjs` worker smoke coverage to the same internal gate, but it does not promote workers to a user-visible release surface. P12-20 rechecked this as part of Rhino `threads` migration and kept worker_threads out of the default migration path. P12-22 defers a compute/process-worker replacement API and requires separate naming plus permissions, scoped path, message, cleanup, nested-worker denial, bridge-isolation, stress, packaged, and `second_execution_slot` gates before any future script-author surface.
 
+P14-32 records the v1.2 desktop runtime release policy as
+`worker_intentionally_unsupported_v1_2`. P14-28 keeps native runnable workers
+unavailable on the current target evidence, P14-29 and P14-30 keep runnable,
+packaged, and resource gates as conditional skips, and P14-31 keeps
+process-worker replacement as a no-facade decision. This design doc therefore
+remains a future-promotion reference, not a v1.2 release claim for runnable
+workers, WorkerPool replacement APIs, packaged workers, or raw process
+authority.
+
 ## Goal
 
 AutoJs6 keeps an experimental worker_threads design for bounded pure JavaScript computation, but the default runtime must not expose desktop Node worker authority.

@@ -1,0 +1,83 @@
+{
+  "schema": "autojs6-node-phase14-advanced-image-operations-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "updatedAt": "2026-07-01",
+  "task": "P14-14",
+  "surface": "image",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "minimumPromotionPolicy": "Advanced image operations require provider-owned opaque handles, scoped output paths, bounded temporary-handle quota, invalid/recycled-handle denial, leak/stress evidence, and packaged scoped-file evidence before pro_compat_opt_in promotion.",
+  "operationContract": {
+    "moduleAliases": [
+      "image",
+      "images"
+    ],
+    "capability": "image",
+    "liveImportedMethods": [
+      "readImage",
+      "recycle"
+    ],
+    "transformMethods": [
+      "saveImage",
+      "clip",
+      "resize",
+      "grayscale",
+      "threshold"
+    ],
+    "matchingAndColorMethods": [
+      "findImage",
+      "matchTemplate",
+      "findColor",
+      "findMultiColors"
+    ],
+    "javascriptOnlyMethods": [
+      "getSize"
+    ],
+    "captureDependency": "media_projection",
+    "opaqueHandleOnly": true,
+    "derivedHandlesCountAgainstQuota": true,
+    "recycleRequiredForDerivedHandles": true,
+    "scopedOutputPathRequired": true,
+    "rawObjectsDenied": [
+      "Bitmap",
+      "Mat",
+      "ImageWrapper",
+      "OpenCV object",
+      "native pointer",
+      "filesystem path handle",
+      "MediaProjection",
+      "ImageReader"
+    ]
+  },
+  "evidenceImports": {
+    "phase13Report": "docs/nodejs/reports/phase13/P13_20_SCREENSHOT_IMAGE_OCR_PROMOTION.md",
+    "phase13Gate": ":app:verifyNodePhase13ScreenshotImageOcrPromotion",
+    "phase14MediaProjectionGate": ":app:verifyNodePhase14MediaProjectionProvider",
+    "fakeProviderCoverage": "NodeImageBridgeExpansionInstrumentationTest#jsImageExpansionUsesFakeTransportAndBlocksShadowing",
+    "invalidInputCoverage": "NodeImageBridgeExpansionInstrumentationTest#jsImageExpansionRejectsInvalidPathsAndHandlesBeforeDispatch",
+    "androidFailClosedCoverage": "NodeImageBridgeExpansionInstrumentationTest#androidImageExpansionRejectsUntilProviderIsConnected",
+    "quotaCoverage": "NodeBridgeConcurrencyLimitsInstrumentationTest#jsImageHandleLimitAllowsRecycleThenReuse"
+  },
+  "blockers": [
+    {
+      "id": "image_advanced_transform_provider_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Live Android provider evidence for saveImage, clip, resize, grayscale, and threshold over opaque provider-owned image handles."
+    },
+    {
+      "id": "image_matching_color_provider_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Live Android provider evidence for findImage, matchTemplate, findColor, and findMultiColors with deterministic JSON point/match snapshots."
+    },
+    {
+      "id": "image_temp_handle_quota_leak_stress_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Temporary derived-handle quota, repeated recycle, provider destroy, timeout, and leak/stress archive with active image resources returning to zero."
+    },
+    {
+      "id": "image_packaged_scoped_output_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged scoped input/output path evidence for read, save, transform, matching/color denial or success, relaunch cleanup, and missing-capability denial."
+    }
+  ]
+}

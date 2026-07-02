@@ -1,0 +1,182 @@
+{
+  "schema": "autojs6-node-phase14-promotion-contracts-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "updatedAt": "2026-07-01",
+  "capabilityPromotionStates": [
+    {
+      "id": "implemented",
+      "meaning": "Runtime/provider code exists behind an explicit capability or profile gate.",
+      "releaseMeaning": "Not sufficient for release promotion without policy, device, packaged, rollback, and docs evidence."
+    },
+    {
+      "id": "packaged_ready",
+      "meaning": "Packaged APK install/run, metadata, relaunch, task-removal, denial, and cleanup evidence exists where the capability can run packaged.",
+      "releaseMeaning": "Required for packaged-capable high-privilege providers before v1.2 promotion."
+    },
+    {
+      "id": "device_matrix_ready",
+      "meaning": "Required Android device matrix evidence exists, including permission and OEM behavior.",
+      "releaseMeaning": "Required for high-privilege Android providers before promotion beyond host-only gates."
+    },
+    {
+      "id": "policy_ready",
+      "meaning": "Threat model, privacy disclosure, rollback, stable errors, TypeScript, migration, and release docs are synchronized.",
+      "releaseMeaning": "Required before a capability can move from future-only or POC into opt-in promotion."
+    },
+    {
+      "id": "stable_denied",
+      "meaning": "The capability or authority is intentionally denied with a stable diagnostic surface and regression coverage.",
+      "releaseMeaning": "Acceptable v1.2 final state when promotion requirements are not met."
+    },
+    {
+      "id": "future_only",
+      "meaning": "Tracked as future work and excluded from v1.2 release-blocking counts.",
+      "releaseMeaning": "Must remain visible in summary reports without granting runtime authority."
+    }
+  ],
+  "reportConventions": {
+    "reportNamePattern": "phase14-<surface-or-task>.json",
+    "markdownMirrorRequired": true,
+    "schemaPattern": "autojs6-node-phase14-<surface-or-task>-v1",
+    "requiredReportFields": [
+      "schema",
+      "generatedAt",
+      "gate",
+      "task",
+      "status",
+      "checks",
+      "policyViolations",
+      "blockers",
+      "decision"
+    ],
+    "statusValues": [
+      "passed",
+      "ready",
+      "partial",
+      "failed",
+      "blocked",
+      "archived"
+    ],
+    "blockerClassifications": [
+      {
+        "id": "release_blocking",
+        "meaning": "Must be closed before v1.2 closeout can report ready."
+      },
+      {
+        "id": "future_promotion",
+        "meaning": "Visible backlog for v1.3+ or later v1.2 follow-up, excluded from release-blocking counts."
+      },
+      {
+        "id": "external",
+        "meaning": "Depends on unavailable native/runtime/device artifacts or long-running environment availability."
+      },
+      {
+        "id": "intentional_non_goal",
+        "meaning": "Rejected or intentionally unsupported behavior with stable denial requirements."
+      }
+    ]
+  },
+  "packagedHighPrivilegeDisclosure": {
+    "requiredForSurfaces": [
+      "live_ui",
+      "overlay",
+      "accessibility",
+      "media_projection",
+      "recorder",
+      "task_database",
+      "intent_broadcast",
+      "notifications",
+      "power_settings",
+      "shell_root",
+      "profile_switching"
+    ],
+    "requiredFields": [
+      "manifestMetadata",
+      "installReviewCopy",
+      "runReviewCopy",
+      "foregroundNotificationOwnership",
+      "stopAction",
+      "permissionDeniedDiagnostic",
+      "undeclaredCapabilityDiagnostic",
+      "taskRemovalCleanup",
+      "relaunchBehavior",
+      "crashRecoveryBehavior",
+      "privacyDisclosure",
+      "rollbackBehavior"
+    ],
+    "rawObjectDenials": [
+      "Context",
+      "Activity",
+      "View",
+      "Window",
+      "Bitmap",
+      "ImageReader",
+      "MediaProjection",
+      "MediaRecorder",
+      "Intent",
+      "BroadcastReceiver",
+      "PendingIntent",
+      "Notification",
+      "RemoteViews",
+      "WakeLock",
+      "TimedTask",
+      "database cursor"
+    ]
+  },
+  "rollbackAndCircuitBreaker": {
+    "providerDisableScope": "per-provider and per-packaged-project",
+    "safeFallbackRequired": true,
+    "nodeDoctorDiagnosticRequired": true,
+    "crashCircuitBreaker": {
+      "defaultThreshold": "3 provider crashes within 24h per package/profile/capability",
+      "action": "disable promoted provider and fall back to stable denial or Safe-profile behavior until user or developer review",
+      "requiredEvidence": [
+        "crash marker",
+        "provider id",
+        "profile id",
+        "capability id",
+        "package identity",
+        "last crash timestamp",
+        "disable reason"
+      ]
+    },
+    "rollbackRequiredFields": [
+      "disableFlag",
+      "diagnosticCode",
+      "userVisibleMessage",
+      "safeFallback",
+      "dataRetention",
+      "packagedDowngradeBehavior",
+      "reEnablePath"
+    ]
+  },
+  "deviceEvidenceMatrix": {
+    "requiredDeviceClasses": [
+      "android_12_class",
+      "android_15_plus_class"
+    ],
+    "requiredFields": [
+      "deviceSerial",
+      "deviceModel",
+      "androidVersion",
+      "apiLevel",
+      "packageIdentity",
+      "profile",
+      "capabilities",
+      "androidPermissionsRequested",
+      "androidPermissionsGranted",
+      "notificationPermissionState",
+      "backgroundStartBehavior",
+      "settingsRoundTripBehavior",
+      "taskRemovalBehavior",
+      "relaunchBehavior",
+      "crashRecoveryBehavior",
+      "foregroundDisclosureBehavior",
+      "stopActionBehavior",
+      "leakOrResourceSummary",
+      "oemQuirks",
+      "reportPath"
+    ],
+    "minimumMatrixPolicy": "High-privilege Android providers need one Android 12 class device and one Android 15+ class device before v1.2 promotion."
+  }
+}

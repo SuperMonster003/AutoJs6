@@ -343,6 +343,111 @@ into JavaScript. Current resource/crash evidence references are recorded, but
 native-available reruns, packaged worker evidence, and Android resource ceilings
 remain required before this boundary can relax.
 
+P14-28 refreshes the v1.2 worker native availability audit. The audited Node
+24.5 target ABI set is `arm64-v8a`, `armeabi-v7a`, and `x86_64`; `x86` stays
+fail-fast. The imported P13-34 machine report still records
+`worker.preflight.status=unavailable` with `ERR_AUTOJS6_WORKER_DISABLED`, so
+v1.2 keeps `worker_threads` intentionally unsupported for runnable execution.
+No default, project, packaged, or process-worker authority is promoted, and
+P14-29/P14-30 runnable/resource gates remain conditional on
+`worker.preflight.status=available`.
+
+P14-29 records the worker runnable/packaged smoke gate as conditional. Existing
+source anchors cover Worker lifecycle, CJS/ESM entries, worker capability
+isolation, MessageChannel/transfer, WorkerPool, exception/timeout recovery,
+parent cleanup, nested Worker denial, and packaged `.mjs` smoke. Because
+P14-28 reports native workers unavailable, these anchors do not grant runnable
+execution, packaged worker behavior, default authority, project/package opt-in,
+or a process-worker facade.
+
+P14-30 records the worker resource/RSS stress gate as conditional. Current
+source anchors cover sequential Worker create/terminate cycles, WorkerPool
+stress, cleanup, exception recovery, timeout recovery, RSS snapshots, and
+thread-count bounded assertions. Java heap, native heap, fd count, message
+queue, active worker, and active WorkerPool deltas remain future
+native-available archive requirements, so resource evidence does not relax the
+default worker denial.
+
+P14-31 closes the v1.2 process-worker replacement decision as
+`no_user_facing_facade_v1_2`. The P13-35 diagnostic profile remains visible,
+but no `process_worker`, `compute_worker`, `autojs6:process-worker`,
+WorkerPool replacement API, raw process handle, stdio stream, signal,
+`spawn`, `fork`, or packaged process-worker behavior is promoted. Future
+replacement work must first prove native WorkerPool evidence, execution slot
+accounting, cleanup/resource stress, packaged behavior, user-visible launch UX,
+security corpus coverage, rollback policy, and separation from `child_process`
+and `shell`.
+
+P14-32 records the v1.2 desktop runtime doc/release sync as
+`worker_intentionally_unsupported_v1_2`. The security corpus now carries an
+explicit `worker_threads` entry tied to P14-28 through P14-32 evidence, and the
+`child_process` corpus entry references the P14-31 no-facade process-worker
+decision. This sync does not relax default worker denial, `node:worker_threads`
+shape-only behavior, process-worker absence, raw process denial, or the
+separate scoped `shell` bridge boundary.
+
+P14-33 records the v1.2 security regression corpus expansion in
+`docs/nodejs/security/NODE_PROFILE_V1_2_SECURITY_REGRESSION_CORPUS.json`.
+The corpus imports P14-07 through P14-32 as source gates and requires positive,
+negative, abuse, runtime guard, promotion precondition, and rollback entries
+for live UI, overlay, accessibility, MediaProjection, image/OCR, task
+database, IntentTask/broadcast, notifications, power settings, recorder/media,
+MediaStore/playback, worker/process-worker, packaged metadata mismatch, and
+Safe downgrade. It keeps runtime authority unchanged and treats raw object
+denial, path escape, permission bypass, lifecycle cleanup, packaged metadata
+mismatch, and Safe downgrade as release security boundary categories for P14-34
+and later closeout gates.
+
+P14-34 records the v1.2 packaged aggregate smoke contract through
+`:app:installAndRunNodeV12PackagedSmoke`. The gate imports packaged-capable
+provider reports plus the P14-33 corpus and requires each aggregate suite to
+cover a declared positive path or conditional skip, undeclared capability
+denial, packaged metadata mismatch denial, Safe downgrade behavior, cleanup,
+and report artifacts. The current run mode is `host_contract_ready`; it does
+not grant new authority and does not claim real device packaged install-run
+success until archives are attached.
+
+P14-35 updates the TypeScript declaration profile matrix through
+`:app:verifyNodePhase14TypeDeclarationProfiles`. The new
+`NodeProfileV12CapabilityCatalog` records callable declaration rows, provider
+POC rows, stable-denied rows, intentionally unsupported worker/process-worker
+rows, and packaged aggregate metadata as declaration-only profile truth. The
+matrix keeps `metadataOnly: true` and `grantsAuthority: false`; future-only
+methods remain visibly gated and runtime authority remains unchanged.
+
+P14-36 records v1.2 migration and Pro comparison claim sync through
+`:app:verifyNodePhase14MigrationProComparison`. The gate keeps migration docs
+tied to executable evidence for Pro UI/floaty, accessibility, screenshot/OCR,
+tasks, notifications, recorder, worker policy, packaged behavior, and rollback.
+It also keeps raw Android object parity denied for raw `Context`, `Activity`,
+`View`, `Bitmap`, `Intent`, `MediaProjection`, `MediaRecorder`, `TimedTask`,
+`BroadcastReceiver`, `Notification`, and `WakeLock` objects. Runtime authority
+remains unchanged.
+
+P14-37 records the Phase 14 summary gate through
+`:app:generateNodePhase14Summary`. The gate imports the final blocker registry,
+Phase 13 capability truth, P14-35 type profile report, P14-36 migration
+comparison report, and current Phase 14 generated reports. It does not grant
+new authority; it enforces the closeout policy that open final blockers, policy
+violations, and release-blocking reports are all zero while future-promotion
+blockers remain visible as backlog.
+
+P14-38 records the v1.2 release candidate checklist through
+`:app:verifyNodePhase14ReleaseCandidateChecklist`. The checklist imports the
+P14-37 summary, security corpus, packaged aggregate smoke, type declarations,
+migration comparison, and docs-sync reports. It keeps release tag approval
+false, keeps Safe as the default profile, and requires release notes to separate
+required v1.2 blockers from v1.3 future promotion backlog without promoting raw
+Android object parity or new runtime authority.
+
+P14-39 records the v1.2 closeout handoff through
+`:app:verifyNodePhase14CloseoutHandoff`. The gate updates the final blocker
+registry with a Phase 14 closeout marker, exports the v1.3 future promotion
+backlog, and records the next branch handoff. It does not reopen final blockers,
+does not change the Safe default, and does not promote provider POC reports,
+raw Android object parity, or packaged host-contract evidence into runtime
+authority.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are
@@ -517,6 +622,16 @@ image processing, and packaged capture/OCR behavior behind later gates.
 Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection
 object parity stay stable-denied for P13-20 v1.1.
 
+P14-16 docs sync keeps the combined UI/automation/media migration surface at
+`provider_poc_not_promoted`. Type declarations and Pro parity snippets may
+describe UI, overlay, accessibility, MediaProjection, image/OCR, and
+media/recorder shapes, but examples that require unpromoted Android authority
+must remain static, guarded, or denial-oriented. This prevents documentation
+from implying packaged disclosure, overlay foreground ownership, accessibility
+service enablement, screen-capture prompting, advanced image processing,
+packaged OCR/model lookup, or recorder-session authority before the matching
+provider gates are promoted.
+
 P13-19 keeps accessibility selector authority separate from raw input
 automation. Reserved future input automation labels split gesture authority away
 from `accessibility`: `input.gesture` for reviewed service-backed gestures,
@@ -543,7 +658,9 @@ packaged live UI remains provider-dependent until packaged task relaunch,
 crash, and disclosure evidence lands. Packaged missing-`ui` capability
 metadata now rejects before dispatch, and packaged entry/update/close smoke is
 covered. Configuration changes use an explicit destroy/recreate policy with no
-live UI survival claim.
+live UI survival claim. P14-07 imports this state as a `provider_poc` and keeps
+packaged task relaunch, crash recovery, and user-visible disclosure as future
+promotion blockers.
 
 S11-23 records Rhino `ui` compatibility as design-gated. `ui.layout()` and `ui.layoutFile()` may migrate only through constrained JSON descriptors passed to `require("ui").showLayout()`, and updates must use `UiHandle.update()` / `UiHandle.batchUpdate()`. `ui.run()` and `ui.post()` are blocked by design for Node because they imply JavaScript execution on Android's main thread; Node callbacks run on the Node event loop after bounded `drainEvents` snapshots. `ui.inflate()`, `setContentView(view)`, `findView()`, `root`, widget registries, `R`, and Activity emitters must not expose `NativeView` or Android `View` objects to Node.
 
@@ -554,6 +671,16 @@ S11-24 keeps Rhino `floaty` and overlay compatibility design-gated. There is no 
 P12-11 selects the Provider path for a controlled JSON-only overlay provider. That decision still keeps exact Rhino `floaty.window()` and `floaty.rawWindow()` raw overlay wrappers as a permanent non-goal for Node. P12-12A locks the explicit `ui.overlay` capability, permission checks, foreground disclosure, packaged manifest, opaque handle, and cleanup contract in [OVERLAY_PROVIDER_V1.md](design/OVERLAY_PROVIDER_V1.md). P12-13 exposes `require("ui.overlay")` only through fake transport for JS facade, capability, handle lifecycle, and denial-path evidence. P12-14 adds the Android live gate for permission snapshots, explicit settings dry-run/launch evidence, `SYSTEM_ALERT_WINDOW` packaged metadata, foreground disclosure requirements, and closeAll cleanup summaries; scheduled/background silent overlays remain rejected and live overlay creation remains fail-closed.
 
 After P12-14, `require("floaty")`, `compat.floaty`, and global `floaty` remain absent; `require("ui.overlay")` is a fake transport POC plus live gate and not live overlay authority. Raw Rhino-window examples may use `compat.blockedByDesign()` with `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`, but provider work must move through the JSON-only overlay contract instead of dispatching raw Rhino window bridge requests. No Node execution mode may create a hidden overlay, silently request overlay permission, inject `SYSTEM_ALERT_WINDOW` without explicit package metadata, or register overlay resources outside the provider lifecycle.
+
+P14-08 adds a provider POC for `ui.overlay`: `show`, `update`, `drainEvents`,
+`close`, and `closeAll` are JSON-only and provider-owned when
+`SYSTEM_ALERT_WINDOW` is already granted. The provider registers
+`OVERLAY_SESSION` resources, removes them on close/closeAll/provider destroy,
+and still denies raw `WindowManager`, `LayoutParams`, `FloatyWindow`,
+`WindowBridge`, `View`, `Context`, and Java object exposure. Packaged overlay
+promotion remains blocked until foreground disclosure/stop action, packaged
+positive smoke, task-removal/relaunch/crash behavior, and leak/stress evidence
+land.
 
 P13-18 records the overlay provider promotion state as partial. Permission
 snapshots, settings dry-run/launch evidence, explicit overlay capabilities,
@@ -685,6 +812,28 @@ The `work_manager` bridge is a controlled scheduled-task surface, not direct And
 Node scripts have only the Task 65/180/S7-15/S7-21 `work_manager` controlled scheduling MVP plus the P12-16/P12-17/P12-18 `compat.tasks` wrapper over that MVP. `require("tasks")`, global `tasks`, and raw Rhino task objects remain unavailable. P12-17 rejection stubs for daily/weekly tasks and `updateTask()` must fail before bridge dispatch; P12-18 rejection stubs for IntentTask/broadcast tasks must also fail before bridge dispatch. For P13-22 v1.1, `compat.tasks.addIntentTask()`, `queryIntentTasks()`, `getIntentTask(id)`, and `removeIntentTask(id)` remain Promise-returning stable rejection stubs until a dedicated JSON-safe broadcast provider owns the future surface. Node scripts do not have authority to register broadcast, boot, package-event, exact-alarm, raw Android scheduler, interactive background UI, or arbitrary long-running background tasks.
 
 P13-21 records daily/weekly/user task database promotion as partial. The existing Android/Rhino `TimedTask` and `IntentTask` database substrate is evidence only; `NodeTimedTaskSnapshots` adds JSON-safe legacy `TimedTask` query/get snapshot evidence without exposing raw scheduler or database handles. Node still has no `tasks` capability, no direct task database provider, no mutating daily/weekly task operations, no packaged task database promotion, no wall-clock daily/weekly scheduler parity, and no raw `TimedTask`, `IntentTask`, WorkManager, PendingIntent, AlarmManager, JobScheduler, BroadcastReceiver, Intent, or cursor object access.
+
+P14-17 records the v1.2 JSON-safe task database mutation contract as partial. A future Pro-only `tasks` provider must use versioned JSON descriptors and patches for `add`, `update`, `enable`, `disable`, `remove`, `list`, and `get`, plus opaque owner-scoped ids for Node, legacy `TimedTask`, and packaged rows. The current runtime still has no `tasks` capability, no `require("tasks")`, no live database mutation, no schema migration/rollback evidence, no wall-clock scheduler parity, and no packaged task row authority. Raw `TimedTask`, scheduler, database cursor, mutable row handle, `IntentTask`, `PendingIntent`, `Intent`, and Java objects remain blocked.
+
+P14-18 records task schema migration and rollback as partial. Current, older, corrupt, unknown future, legacy snapshot, and packaged owner-mismatch descriptor shapes are contract fixtures only. Safe downgrade must ignore Node descriptors and keep legacy Rhino rows visible; Pro disable must not delete legacy `TimedTask` rows; packaged rollback must affect only rows owned by the packaged app identity; corrupt descriptors must be quarantined without scheduler reschedule; unknown future schemas must be preserved without mutation. Live migrators and live migration tests remain unpromoted.
+
+P14-19 records packaged task scheduling smoke as partial. Existing packaged `work_manager` smoke covers module resolution, declared `work_manager` permission metadata, fake-provider `scheduleOnce` / `list` / `cancel`, shadowing denial, and pending-call cleanup; live instrumentation covers a packaged project entry through the `scheduled_runner` launch surface. This does not promote packaged `tasks` database rows. Future packaged task rows must be scoped to package identity, deny cross-package aliasing, preserve legacy Rhino rows, and disable or remove only owned rows during task removal or Safe downgrade. Process-death, relaunch, crash recovery, disclosure, and stop-action evidence remain future promotion work.
+
+P14-20 records the JSON-safe IntentTask/broadcast provider contract as partial. Future broadcast task descriptors must be provider-owned JSON records with opaque Node ids, package/project identity, scoped entry paths, manifest patch policy, payload policy, and owner-scoped remove behavior. Packaged receivers are opt-in, custom receivers default to non-exported, exported receivers remain denied without explicit metadata, allowlists, permission policy, abuse review, and device evidence, and trigger payloads must be bounded privacy-filtered JSON snapshots. This does not promote `tasks.broadcast`, future task/broadcast capabilities, manifest mutation from Node, external broadcast wakeups, or raw `Intent`, `PendingIntent`, `BroadcastReceiver`, `Bundle`, `Uri`, receiver-handle, package-list, or Java object access.
+
+P14-21 records the packaged broadcast trigger/remove smoke contract as partial. Existing packaged boundary smoke proves compat IntentTask helpers reject, future broadcast task modules are denied, raw broadcast globals are absent, `BroadcastChannel` remains JavaScript-only, and future metadata plus `RECEIVE_BOOT_COMPLETED` are not accepted. Future positive packaged smoke must prove opt-in install, descriptor registration, bounded payload delivery, owner-scoped remove cleanup, no post-remove delivery, relaunch/crash recovery without duplicate receivers, undeclared-capability denial, and exported receiver denial unless explicit reviewed metadata and permission policy are present.
+
+P14-22 records notification ownership and foreground disclosure evidence as partial. Live provider evidence proves owned notification ids are ResourceRegistry-backed, `cancel` and `cancelAll` close only active owned records, provider destroy cancels owned active notifications, and POST_NOTIFICATIONS denial is surfaced as a stable bridge permission error. Packaged post/cancel, foreground disclosure/stop action, Android 12/15+ permission matrix, advanced notification actions/groups/styles/inline-reply/listener decisions, and rollback cleanup remain future promotion work. Raw `Notification`, `NotificationCompat.Builder`, `NotificationManager`, `NotificationChannel`, `PendingIntent`, `RemoteViews`, `Intent`, listener handle, `StatusBarNotification`, and Java objects must not cross into Node.
+
+P14-23 records settings/power OEM and background-launch matrix evidence as partial. The current Node surface is limited to `device.isIgnoringBatteryOptimizations()` and `device.openBatteryOptimizationSettings({ dryRun: true })` behind explicit `device.power` capability checks. Android 12/15+ OEM behavior, exact-alarm state, background-launch restrictions, reviewed prompt copy, and rollback cleanup remain future promotion work. Request-ignore-battery-optimizations mutation, direct Doze mutation, wake locks, exact-alarm scheduling, background-launch bypasses, raw `PowerManager`, raw `WakeLock`, raw `AlarmManager`, `PendingIntent`, `Intent`, `Context`, OEM manager handles, and Java objects must not cross into Node.
+
+P14-24 records real recorder session promotion evidence as partial. The current Node surface remains `recorder.getStatus()` plus fail-closed `recorder.start()` / `recorder.stop()` behind exact `media.recording` capability checks. Real recording requires runtime microphone prompt ownership, foreground microphone disclosure, stop action, ResourceRegistry-backed session handles, scoped temporary output ownership, provider destroy cleanup, process crash cleanup, task removal cleanup, packaged start/stop stress, and rollback evidence before promotion. Raw `MediaRecorder`, `AudioRecord`, `AudioPlaybackCaptureConfiguration`, `MediaProjection`, `ParcelFileDescriptor`, file descriptors, `Uri`, `Context`, foreground service handles, and Java objects must not cross into Node.
+
+P14-25 records packaged recorder/media stress evidence as partial. Existing packaged smoke covers recorder status and denial boundaries only; it does not grant packaged microphone capture. Positive packaged start/stop requires visible foreground microphone disclosure, deterministic stop, task removal cleanup, relaunch/crash recovery, quota limits, scoped temporary output cleanup, missing capability and Android permission denial, denied prompt behavior, metadata mismatch diagnostics, and Safe downgrade evidence before promotion.
+
+P14-26 records media playback and MediaStore boundary evidence as partial. The v1.2 media surface stays read-only audio status plus scoped `mediainfo`; playback, playlists, `scanFile`, MediaStore query/insert/update/delete/open-file, broad `READ_MEDIA_*` / `MANAGE_EXTERNAL_STORAGE`, mutable media collection access, raw `MediaPlayer`, `AudioTrack`, `AudioFocusRequest`, `ContentResolver`, `MediaStore` cursor, `MediaScannerConnection`, `Uri`, `ParcelFileDescriptor`, file descriptors, playlist handles, `Context`, and Java objects remain denied unless a future scoped provider gate supplies exact capabilities, ownership, permission matrix, packaged evidence, privacy behavior, rollback, and raw object denial.
+
+P14-27 docs sync records the v1.2 `pro.tasks_device_media` documentation state as `provider_poc_not_promoted`. It does not grant runtime authority. Task database mutation, IntentTask/broadcast registration, packaged notification foreground disclosure, OEM power mutation, real recorder sessions, packaged recorder start/stop, playback, MediaStore, broad media-library permissions, raw Android scheduler/broadcast/task/media objects, raw file descriptors, and Java objects remain denied unless their dedicated provider gates are promoted.
 
 P13-22 records IntentTask/broadcast task provider promotion as partial. The existing Android/Rhino receiver stack remains substrate evidence only; packaged denial/metadata-boundary smoke verifies the current runtime still rejects `compat.tasks` IntentTask helpers, keeps future `tasks.*` modules unavailable, exposes no raw Android broadcast globals, and does not accept future task/broadcast capabilities in packaged metadata. Node still cannot register static or dynamic receivers, mutate packaged manifests, accept external broadcast wakeups, inject boot/package receivers, observe raw trigger payloads, or access raw `BroadcastReceiver`, `Intent`, `IntentFilter`, `PendingIntent`, `Bundle`, `Uri`, `PackageManager`, signature, icon, package-list, or receiver-handle objects.
 

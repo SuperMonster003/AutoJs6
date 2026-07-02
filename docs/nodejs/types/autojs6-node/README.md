@@ -74,6 +74,15 @@ they do not declare denied desktop modules as callable modules or grant
 runtime authority.
 The profile declaration matrix does not declare denied desktop modules as callable modules.
 
+P14-35 adds the v1.2 `NodeProfileV12CapabilityCatalog` and
+`NodeProfileV12DeclarationMatrix`. This matrix records callable declaration
+rows, provider POC rows, stable-denied rows, intentionally unsupported
+worker/process-worker rows, and the P14-34 packaged aggregate smoke row. The
+helpers include `NodeProfileV12ModeFor`, `NodeProfileV12StateFor`,
+`NodeProfileV12PackagedEvidenceFor`, `NodeProfileV12FutureOnlyFor`, and
+`NodeProfileV12StableDeniedCapabilityName`. They are metadata-only and keep
+future-only methods visibly gated; they do not promote runtime authority.
+
 The `autojs6:lifecycle` module is available only inside the explicit interactive long-running runtime. It stores JSON-only project-scoped checkpoints for explicit restore and does not enable automatic restart.
 
 P13-12 adds the read-only `$autojs` global v1 and the matching
@@ -109,6 +118,14 @@ P13-35 extends the `autojs6:profile` declaration with
 process-worker replacement path is `worker_threads.WorkerPool`, while the
 callable `process_worker`/`compute_worker` facade, raw `child_process`, raw
 process handles, and packaged process-worker behavior remain unintroduced.
+
+P14-32 records the v1.2 desktop runtime declaration sync as
+`worker_intentionally_unsupported_v1_2`. `workerThreadsProfile`,
+`processWorkerReplacementProfile`, and `childProcessProfile` remain diagnostic
+declarations only: they do not make runnable workers, packaged workers,
+WorkerPool replacement APIs, `process_worker`, `compute_worker`,
+`autojs6:process-worker`, raw process handles, stdio streams, signals, `spawn`,
+`fork`, or stable `child_process` authority callable.
 
 P13-36 extends the `autojs6:profile` declaration with `vmProfile`. The field
 reports native VM availability, non-sandbox boundaries, and the focused
@@ -370,6 +387,24 @@ raw object denials are covered by host/device/type evidence. MediaProjection
 bridge prompting, advanced image processing, packaged capture/OCR behavior,
 Paddle/Rapid fallback, and raw Bitmap/OpenCV profile decisions remain
 unpromoted.
+
+P14-16 docs sync records the v1.2 `pro.ui_automation_media` declaration state
+as `provider_poc_not_promoted`. The checked-in declarations remain useful for
+typing migration code, but UI packaged lifecycle, overlay creation, packaged
+accessibility, MediaProjection capture, advanced image processing, packaged
+OCR/model behavior, and recorder sessions still require their own provider,
+disclosure, packaged, and device-matrix evidence before examples can be treated
+as promoted runtime paths.
+
+P14-27 docs sync records the v1.2 `pro.tasks_device_media` declaration state as
+`provider_poc_not_promoted`. The checked-in declarations for `work_manager`,
+`autojs6:compat.tasks`, `notifications`, `device`, `media`, `mediainfo`, and
+`recorder` remain useful for migration code and denial-oriented tests, but task
+database mutation, IntentTask/broadcast registration, packaged notification
+foreground disclosure, OEM power mutation, real recorder sessions, packaged
+recorder start/stop, playback, MediaStore, and broad media-library permissions
+still require dedicated provider, disclosure, packaged, rollback, and device
+evidence before examples can be treated as promoted runtime paths.
 
 P12-34 is a documentation synchronization gate rather than a new declaration
 surface. It keeps this README aligned with `MIGRATION_FROM_RHINO.md`, the Pro 9

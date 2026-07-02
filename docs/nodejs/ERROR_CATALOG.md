@@ -39,6 +39,394 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: enable the required Android capability, use a supported provider, or keep the operation behind a feature check.
 - Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
+## P14-16 UI/automation/media denial sync
+
+P14-16 docs sync does not add a new error code. It records the expected denial
+surface for UI/automation/media migration examples while
+`pro.ui_automation_media` remains `provider_poc_not_promoted`:
+
+- Missing project/package capability metadata rejects before provider dispatch
+  with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Unpromoted provider paths such as overlay creation without promoted
+  permission/disclosure evidence, accessibility when the service is unavailable,
+  MediaProjection capture from the Node bridge, advanced image operations,
+  packaged OCR/model lookup, and recorder sessions remain
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` or provider-specific stable denials.
+- Provider failures after a declared and permitted request still use
+  `ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED`; callers should not interpret provider
+  failure as permission or profile promotion.
+
+## P14-17 task database mutation denial sync
+
+P14-17 does not add a new error code or expose `require("tasks")`. It records
+the stable denial surface required before future task database mutation can be
+promoted:
+
+- Missing future `tasks` capability metadata must reject before provider
+  dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED` or the existing
+  disabled-module error shape.
+- Invalid JSON descriptors, invalid JSON patches, owner/id namespace mismatch,
+  and legacy numeric `TimedTask` ids used as mutable handles must reject with
+  `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST` or a future provider-specific stable
+  validation code.
+- `compat.tasks.addDailyTask()`, `addWeeklyTask()`, and IntentTask helpers
+  remain `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`; `compat.tasks.updateTask()`
+  remains `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`.
+- Raw `TimedTask`, scheduler, database cursor, mutable row handle,
+  `IntentTask`, `PendingIntent`, `Intent`, and Java objects remain blocked.
+
+## P14-18 task schema migration rollback denial sync
+
+P14-18 does not add a new error code. It records how future schema migration
+and rollback failures must stay stable:
+
+- Current and older descriptor fixtures remain contract-only until a live
+  migrator exists; mutation attempts still use the P14-17 denial surface.
+- Corrupt descriptors must fail closed, be quarantined, and avoid scheduler
+  reschedule; callers should receive stable invalid-request diagnostics rather
+  than a raw database or parser exception.
+- Unknown future schema descriptors must be preserved without mutation and
+  reported as unsupported or invalid for the current provider version.
+- Packaged owner mismatch must deny cross-package aliasing and must not delete
+  main-app or legacy Rhino rows.
+
+## P14-19 packaged task scheduling denial sync
+
+P14-19 does not add a new error code or promote packaged `tasks` database
+rows. It records the denial and rollback expectations for future packaged task
+promotion:
+
+- Packaged `work_manager` smoke may schedule/list/cancel only through the
+  declared `work_manager` bridge capability; undeclared capability metadata
+  remains `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Future packaged `tasks` database rows must reject cross-package owner/id
+  mismatches with stable invalid-request or permission-denied diagnostics.
+- Task removal and Safe downgrade must disable or remove only rows owned by
+  the packaged app identity and must not mutate main-app or legacy Rhino rows.
+- Process-death, relaunch, disclosure, stop-action, and crash recovery gaps
+  stay future-promotion blockers rather than release-blocking errors.
+
+## P14-20 IntentTask/broadcast denial sync
+
+P14-20 does not add a new error code or promote `tasks.broadcast`. It records
+the denial and cleanup expectations for future broadcast task promotion:
+
+- `require("tasks")`, `require("tasks.broadcast")`, global `tasks`, and
+  future task/broadcast capabilities stay unavailable until a live provider is
+  promoted.
+- `compat.tasks.addIntentTask()`, `queryIntentTasks()`, `getIntentTask(id)`,
+  and `removeIntentTask(id)` continue to reject before bridge dispatch with the
+  existing Rhino compatibility unsupported path.
+- Exported receivers, boot/user-unlocked/package/startup/exact-alarm triggers,
+  manifest mutation, and external broadcast wakeups remain permission-denied or
+  unavailable until explicit metadata, user disclosure, and device evidence
+  exist.
+- Trigger payload failures must surface stable invalid-request or
+  permission-denied diagnostics, never raw `Intent`, `Bundle`, `Uri`, receiver
+  handle, `PackageManager`, or database exceptions.
+
+## P14-21 packaged broadcast trigger/remove denial sync
+
+P14-21 does not add a new error code or promote packaged broadcast-triggered
+execution. It records packaged denial and cleanup expectations:
+
+- Current packaged IntentTask/broadcast smoke must keep future modules and
+  metadata denied until `tasks.broadcast` is promoted.
+- Positive packaged trigger/remove smoke remains future work and must prove
+  install, register, payload validation, delivery, remove cleanup, relaunch,
+  crash recovery, and undeclared-capability denial before promotion.
+- Remove cleanup must disable or delete only descriptors and receiver patches
+  owned by the packaged app identity, cancel pending owned executions, prevent
+  post-remove delivery, and preserve legacy Rhino rows.
+- Exported receivers remain unavailable unless a later gate adds explicit
+  metadata, allowlists, permission policy, abuse review, and device evidence.
+
+## P14-22 notification ownership denial sync
+
+P14-22 does not add a new error code or promote packaged notification
+foreground disclosure. It records ownership and denial expectations:
+
+- Missing `notifications` or `notifications.settings` capabilities still reject
+  before bridge dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Missing Android `POST_NOTIFICATIONS` permission or disabled app
+  notifications still reject notification posting with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`.
+- `cancel` and `cancelAll` must close only provider-owned active notification
+  records; unknown ids remain no-op and must not expose or cancel raw external
+  notification handles.
+- Actions, groups, styles, inline reply, remote input, listeners,
+  `RemoteViews`, DND mutation, foreground disclosure stop action, and packaged
+  post/cancel behavior stay future-promotion blockers.
+
+## P14-23 settings/power denial sync
+
+P14-23 does not add a new error code or promote direct power-manager mutation.
+It records the current `device.power` denial expectations:
+
+- Missing `device.power` capability for battery optimization APIs still rejects
+  before bridge dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- `device.openBatteryOptimizationSettings({ dryRun: true })` remains the
+  automated-test path; settings mutation or request-ignore-battery-optimizations
+  prompt flows require reviewed copy and rollback evidence before promotion.
+- Direct Doze mutation, wake locks, exact-alarm scheduling, background-launch
+  bypasses, raw `PowerManager`, raw `WakeLock`, raw `AlarmManager`,
+  `PendingIntent`, `Intent`, `Context`, OEM manager handles, and Java objects
+  stay future-promotion blockers.
+- Android 12/15+ OEM matrix, exact-alarm state, background-launch restriction,
+  and prompt/rollback archives must exist before any mutation flow is promoted.
+
+## P14-24 recorder denial sync
+
+P14-24 does not add a new error code or promote real microphone capture. It
+records the current recorder denial expectations:
+
+- Missing `media.recording` capability still rejects before bridge dispatch
+  with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- `recorder.getStatus()` may return the
+  `autojs6-node-recorder-status-v1` snapshot and
+  `blocked_until_privacy_reviewed_recorder_provider` reason.
+- `recorder.start()` and `recorder.stop()` remain denied with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until runtime microphone prompt,
+  foreground disclosure/stop action, session resource, temp output cleanup,
+  crash cleanup, packaged stress, and rollback archives exist.
+- Pause/resume, screen recording, internal/playback audio capture, raw
+  `MediaRecorder`, raw `AudioRecord`, raw
+  `AudioPlaybackCaptureConfiguration`, `MediaProjection`,
+  `ParcelFileDescriptor`, raw file descriptors, `Uri`, `Context`, foreground
+  service handles, and Java objects stay future-promotion blockers.
+
+## P14-25 packaged recorder/media stress denial sync
+
+P14-25 does not add a new error code or promote packaged recorder start/stop.
+It records packaged stress denial expectations:
+
+- Current packaged media/recorder evidence may prove `recorder.getStatus()`,
+  start denial, and missing `media.recording` capability denial only.
+- Positive packaged start/stop remains denied until visible microphone
+  foreground disclosure, deterministic stop behavior, task removal cleanup,
+  relaunch/crash recovery, quota enforcement, temporary output cleanup, missing
+  Android permission denial, denied prompt, metadata mismatch, and Safe
+  downgrade archives exist.
+- Packaged recorder must continue to deny raw media recorder objects, raw file
+  descriptors, broad media-library permissions, and background microphone
+  capture without user-visible foreground disclosure.
+
+## P14-26 media playback/MediaStore denial sync
+
+P14-26 does not add a new error code or promote playback, playlist, scanFile,
+MediaStore, or broad media-library permissions. It records the current denial
+expectations:
+
+- `media` remains limited to read-only audio-stream status methods and does
+  not expose playback lifecycle, playlist/queue, scanner, or player handles.
+- `mediainfo` remains scoped to relative files inside the Node working
+  directory and does not grant MediaStore or shared-storage access.
+- MediaStore query/insert/update/delete/open-file and broad `READ_MEDIA_*` /
+  `MANAGE_EXTERNAL_STORAGE` permissions stay denied until a future scoped
+  provider gate defines exact capabilities, ownership, Android permission
+  matrix, packaged evidence, privacy behavior, rollback, and raw object denial.
+- Raw `MediaPlayer`, `AudioTrack`, `AudioFocusRequest`, `ContentResolver`,
+  `MediaStore` cursor, `MediaScannerConnection`, `Uri`,
+  `ParcelFileDescriptor`, raw file descriptors, playlist handles, `Context`,
+  and Java objects stay future-promotion blockers.
+
+## P14-27 task/device/media docs sync denial sync
+
+P14-27 does not add a new error code or promote task/device/media runtime
+authority. It records documentation consistency expectations:
+
+- `tasks-work-manager` remains the only task/device/media focused Pro smoke
+  path.
+- `notifications-power` and `media-recorder` remain migration evidence and
+  guarded/denial-oriented examples.
+- Task database mutation, IntentTask/broadcast registration, notification
+  foreground disclosure, OEM power mutation, real recorder sessions, packaged
+  recorder start/stop, playback, MediaStore, broad media-library permissions,
+  raw Android objects, raw file descriptors, and Java objects stay governed by
+  the stable denial codes already documented in their source gates.
+
+## P14-28 worker native availability decision
+
+P14-28 does not add a new error code. It refreshes the v1.2 worker native
+availability decision around the existing worker errors:
+
+- `ERR_AUTOJS6_WORKER_DISABLED` remains the expected native-unavailable
+  preflight outcome for the current Node 24.5 artifacts.
+- `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`, `ERR_AUTOJS6_WORKER_TIMEOUT`, and
+  WorkerPool errors stay future runnable-gate evidence until native workers are
+  available.
+- Android loader failures for ABI mismatch, missing `libnode.so`, missing
+  `libc++_shared.so`, missing dependent libraries, and missing symbols remain
+  native loader diagnostics, not user-script worker authority.
+- Default, project, packaged, and process-worker authority remain unpromoted.
+
+## P14-29 worker runnable/packaged smoke decision
+
+P14-29 does not add a new error code. It records the runnable and packaged
+worker smoke gate as `conditional_skip_native_unavailable`:
+
+- `ERR_AUTOJS6_WORKER_DISABLED` remains the current precondition failure for
+  runnable and packaged Worker execution.
+- `ERR_AUTOJS6_WORKER_LIMIT_EXCEEDED`,
+  `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`, `ERR_AUTOJS6_WORKER_TIMEOUT`, and
+  WorkerPool task errors remain native-available source anchors only.
+- Packaged `.mjs` worker markers such as
+  `packaged.worker_threads.esm.ready=true` are not release evidence until the
+  native preflight reports `worker.preflight.status=available`.
+- Default, project, packaged, and process-worker authority remain unpromoted.
+
+## P14-30 worker resource/RSS stress decision
+
+P14-30 does not add a new error code. It records the worker resource/RSS stress
+gate as `conditional_skip_native_unavailable`:
+
+- Worker resource errors and cleanup counters remain source anchors until the
+  native preflight reports `worker.preflight.status=available`.
+- `ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT`,
+  `ERR_AUTOJS6_WORKER_TERMINATED`, and WorkerPool task errors remain
+  native-available recovery evidence, not release support.
+- RSS/thread source anchors are present, but Java heap, native heap, fd count,
+  message queue, active worker, and active WorkerPool deltas still need a
+  native-worker-capable archive.
+- Worker authority remains disabled until native, packaged, and resource gates
+  pass together.
+
+## P14-31 process-worker replacement decision
+
+P14-31 does not add a new error code. It records the process-worker replacement
+decision as `no_user_facing_facade_v1_2`:
+
+- `process_worker`, `compute_worker`, and `autojs6:process-worker` remain
+  absent rather than rejecting with new runtime-specific codes.
+- `child_process` and `node:child_process` keep the existing disabled-builtin
+  error shape in stable profiles.
+- `shell` remains the separately permissioned scoped command bridge and is not
+  process-worker authority.
+- Raw process handles, stdio streams, signals, `spawn`, `fork`, packaged
+  process-worker behavior, and WorkerPool replacement API authority remain
+  unpromoted until a future WorkerPool-compatible gate owns the evidence.
+
+## P14-32 desktop runtime doc sync
+
+P14-32 does not add a new error code. It records desktop runtime docs and
+release policy as `worker_intentionally_unsupported_v1_2`:
+
+- `ERR_AUTOJS6_WORKER_DISABLED` remains the expected runnable worker preflight
+  failure for current v1.2 evidence.
+- `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`, worker timeout, WorkerPool task, and
+  worker resource errors remain future native-available evidence only.
+- `child_process` / `node:child_process` keep the existing disabled-builtin
+  error shape in stable profiles.
+- `process_worker`, `compute_worker`, and `autojs6:process-worker` remain
+  absent, not newly introduced rejecting modules.
+- `shell` remains the separate scoped command bridge and is not process-worker
+  or raw process authority.
+
+## P14-33 security regression corpus
+
+P14-33 does not add a new error code. It records the v1.2 security regression
+corpus as `security_corpus_expanded_no_authority_promoted`:
+
+- Existing raw object, path escape, permission, lifecycle cleanup, packaged
+  metadata mismatch, and Safe downgrade errors remain the canonical runtime
+  diagnostics.
+- The corpus requires positive, negative, abuse, runtime guard, promotion
+  precondition, and rollback entries before later packaged aggregate smoke can
+  count as release evidence.
+- Missing or mismatched high-privilege packaged metadata must continue to reject
+  before provider dispatch with the existing capability/permission diagnostics.
+- Runtime authority remains unchanged.
+
+## P14-34 packaged aggregate smoke
+
+P14-34 does not add a new error code. It records the v1.2 packaged aggregate
+smoke as `packaged_aggregate_smoke_contract_ready` behind
+`:app:installAndRunNodeV12PackagedSmoke`:
+
+- Existing undeclared capability, Android permission, packaged metadata
+  mismatch, Safe downgrade, and provider cleanup diagnostics remain canonical.
+- The aggregate gate imports packaged-capable P14 reports and requires every
+  suite to document a positive path or conditional skip plus denial, downgrade,
+  cleanup, and report artifact coverage.
+- The current run mode is `host_contract_ready`; real packaged install-run
+  failures must come from future device archives, not from a new host-only
+  error shape.
+- Runtime authority remains unchanged.
+
+## P14-35 type declaration profiles
+
+P14-35 does not add a new error code. It records v1.2 TypeScript declaration
+profiles as `type_declaration_profiles_v1_2_ready` behind
+`:app:verifyNodePhase14TypeDeclarationProfiles`:
+
+- Existing capability, permission, packaged metadata, Safe downgrade,
+  stable-denial, and unsupported-worker diagnostics remain canonical.
+- `NodeProfileV12CapabilityCatalog` and `NodeProfileV12DeclarationMatrix` are
+  metadata-only and do not make future-only methods successful.
+- Type smoke keeps provider POC, stable-denied, intentionally unsupported, and
+  packaged aggregate rows visible to TypeScript users.
+- Runtime authority remains unchanged.
+
+## P14-36 migration and Pro comparison
+
+P14-36 does not add a new error code. It records v1.2 migration and Pro
+comparison docs as `migration_pro_comparison_v1_2_ready` behind
+`:app:verifyNodePhase14MigrationProComparison`:
+
+- Existing capability, permission, packaged metadata, Safe downgrade,
+  stable-denial, unsupported-worker, and raw-object denial diagnostics remain
+  canonical.
+- Migration docs must keep claims tied to executable evidence and must not
+  imply raw Android object parity.
+- Pro UI/floaty, accessibility, screenshot/OCR, tasks, notifications, recorder,
+  worker policy, packaged behavior, and rollback docs remain evidence-bound.
+- Runtime authority remains unchanged.
+
+## P14-37 Phase 14 summary
+
+P14-37 does not add a new error code. It records the Phase 14 summary gate as
+`phase14_summary_gate_ready` behind `:app:generateNodePhase14Summary`:
+
+- Existing capability, permission, packaged metadata, Safe downgrade,
+  stable-denial, unsupported-worker, raw-object denial, and release-blocker
+  diagnostics remain canonical.
+- The summary gate requires zero open final blockers, zero policy violations,
+  and zero release-blocking reports.
+- Reports with `future_promotion`, `external`, or `intentional_non_goal`
+  blockers remain visible as backlog rather than new runtime errors.
+- Runtime authority remains unchanged.
+
+## P14-38 release candidate checklist
+
+P14-38 does not add a new error code. It records the v1.2 release candidate
+checklist as `release_candidate_checklist_ready` behind
+`:app:verifyNodePhase14ReleaseCandidateChecklist`:
+
+- Existing capability, permission, packaged metadata, Safe downgrade,
+  stable-denial, unsupported-worker, raw-object denial, and release-blocker
+  diagnostics remain canonical.
+- The checklist separates required v1.2 RC blockers from the v1.3 future
+  promotion backlog.
+- Release notes draft labels such as `provider_poc_not_promoted`,
+  `worker_intentionally_unsupported_v1_2`, `host_contract_ready`, and
+  `phase14_summary_gate_ready` are evidence labels, not new error codes.
+- Runtime authority remains unchanged and release tag approval remains false.
+
+## P14-39 closeout handoff
+
+P14-39 does not add a new error code. It records the v1.2 closeout handoff as
+`phase14_closeout_handoff_ready` behind
+`:app:verifyNodePhase14CloseoutHandoff`:
+
+- Existing capability, permission, packaged metadata, Safe downgrade,
+  stable-denial, unsupported-worker, raw-object denial, and release-blocker
+  diagnostics remain canonical.
+- The final blocker registry records a Phase 14 closeout marker without
+  reopening final blockers.
+- The v1.3 future promotion backlog is exported for the next branch, not
+  converted into runtime errors.
+- Runtime authority remains unchanged.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

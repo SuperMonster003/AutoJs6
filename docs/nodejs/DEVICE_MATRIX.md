@@ -94,11 +94,15 @@ Use `accessibility` only for manual physical-device validation after enabling th
 
 - profile: `accessibility`
 - primary device: Sony XQ-AT72 `QV710AF65F`
-- use: controlled real-device `accessibility` provider smoke for `isEnabled`, `ensureEnabled`, `findByText`, and `clickText`
-- optional extra: pass `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke.globalActions=true` only when it is safe for the test to trigger Back/Home
+- use: controlled real-device `accessibility` provider smoke for `isEnabled`, `ensureEnabled`, `findByText`, selector `findOne`, selector `click`, and selector `longClick`
+- optional extra: pass `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke.globalActions=true` only when it is safe for the test to trigger Back/Home/Recents
 - P13-19 keeps optional accessibility smoke manual: the promotion gate records
   selector/provider evidence, but it still requires explicit user-side service
   enablement and does not modify Android accessibility settings.
+- P14-12 keeps Android 12 and Android 15+ selector/action archives open until
+  user-enabled service state, missing service, missing capability,
+  timeout/cancellation, safe Back/Home/Recents, and unsupported
+  gesture/root/Shizuku diagnostics are recorded.
 
 Recommended command:
 
@@ -119,6 +123,10 @@ Use `screen_capture` only for manual physical-device validation after preparing 
   optional Android capture lifecycle evidence, but the Node bridge
   MediaProjection provider remains unavailable until permission prompt,
   foreground disclosure, stop cleanup, and packaged behavior are promoted.
+- P14-13 imports this smoke as an Activity-owned MediaProjection provider
+  anchor and keeps Android 12 class, Android 15+ class, foreground
+  disclosure/stop action, and task-removal/relaunch/crash archives open before
+  any `media_projection` promotion.
 
 Recommended command:
 

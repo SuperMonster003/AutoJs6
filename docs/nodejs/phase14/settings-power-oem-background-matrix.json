@@ -1,0 +1,113 @@
+{
+  "schema": "autojs6-node-phase14-settings-power-oem-background-matrix-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-23",
+  "title": "Settings/power OEM and background-launch matrix",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "surface": "pro.tasks_device_media",
+  "sourceGates": [
+    "P13-25",
+    "P14-04",
+    "P14-22"
+  ],
+  "minimumPromotionPolicy": "Settings/power promotion requires Android 12 class and Android 15+ class device evidence for battery optimization status, settings dry-run or reviewed prompt handoff, exact-alarm state, background launch restrictions, OEM power-manager notes, rollback behavior, and stable denial for direct mutation flows.",
+  "matrixContract": {
+    "providerName": "device",
+    "capability": "device",
+    "powerCapability": "device.power",
+    "settingsResultSchema": "autojs6-node-battery-optimization-settings-v1",
+    "currentLiveMethods": [
+      "isIgnoringBatteryOptimizations",
+      "openBatteryOptimizationSettings"
+    ],
+    "currentMutationAuthority": "not_exposed",
+    "batteryOptimizationStatusReady": true,
+    "settingsDryRunReady": true,
+    "exactAlarmStateReady": false,
+    "backgroundLaunchMatrixReady": false,
+    "oemNotesReady": false,
+    "android15RestrictionMatrixReady": false,
+    "reviewedPromptAndRollbackReady": false
+  },
+  "requiredDeviceRows": [
+    {
+      "id": "android12_battery_optimization_status_settings",
+      "status": "future_promotion",
+      "deviceClass": "android_12_class",
+      "requiredEvidence": "Battery optimization status, settings dry-run, settings round-trip, package identity, declared capabilities, denial copy, rollback behavior, and OEM notes from an Android 12 class device."
+    },
+    {
+      "id": "android15_plus_battery_optimization_status_settings",
+      "status": "future_promotion",
+      "deviceClass": "android_15_plus_class",
+      "requiredEvidence": "Battery optimization status, settings dry-run, settings round-trip, package identity, declared capabilities, denial copy, Android 15+ background restriction notes, rollback behavior, and OEM notes."
+    },
+    {
+      "id": "exact_alarm_state_denial",
+      "status": "future_promotion",
+      "deviceClass": "android_12_class_and_android_15_plus_class",
+      "requiredEvidence": "Exact-alarm state observation or explicit stable denial evidence without exposing AlarmManager, PendingIntent, or schedule-exact mutation authority."
+    },
+    {
+      "id": "background_launch_restrictions",
+      "status": "future_promotion",
+      "deviceClass": "android_12_class_and_android_15_plus_class",
+      "requiredEvidence": "Foreground/background launch behavior matrix for packaged and interactive Node entry points, including Android 15+ restrictions and denial diagnostics."
+    },
+    {
+      "id": "oem_power_manager_notes",
+      "status": "future_promotion",
+      "deviceClass": "android_12_class_and_android_15_plus_class",
+      "requiredEvidence": "OEM-specific power-manager notes, settings landing behavior, user-facing prompt copy, task removal behavior, crash recovery, and rollback cleanup."
+    }
+  ],
+  "mutationDenialContract": {
+    "requestIgnoreBatteryOptimizationsMutationPromoted": false,
+    "directDozeMutationPromoted": false,
+    "wakeLockPromoted": false,
+    "exactAlarmSchedulingPromoted": false,
+    "backgroundLaunchBypassPromoted": false,
+    "reviewedPromptRequired": true,
+    "rollbackPathRequired": true,
+    "stableErrorRequired": true,
+    "rawObjectsDenied": [
+      "PowerManager",
+      "WakeLock",
+      "AlarmManager",
+      "PendingIntent",
+      "Intent",
+      "Context",
+      "Settings Activity result handle",
+      "OEM manager",
+      "Java object"
+    ]
+  },
+  "requiredArchives": [
+    {
+      "id": "settings_power_android12_oem_matrix_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Android 12 class device archive covering battery optimization status, settings dry-run/round-trip, capabilities, package identity, denial copy, OEM notes, task removal, crash recovery, and rollback behavior."
+    },
+    {
+      "id": "settings_power_android15_plus_oem_matrix_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Android 15+ class device archive covering background launch restrictions, battery optimization status/settings behavior, capabilities, package identity, denial copy, OEM notes, task removal, crash recovery, and rollback behavior."
+    },
+    {
+      "id": "settings_power_exact_alarm_state_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Exact-alarm state observation or stable denial archive proving AlarmManager, PendingIntent, and exact scheduling mutation authority do not cross into Node."
+    },
+    {
+      "id": "settings_power_background_launch_restriction_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged and interactive background-launch restriction archive proving Android 15+ restrictions, denial diagnostics, and foreground disclosure handoff behavior."
+    },
+    {
+      "id": "settings_power_mutation_prompt_rollback_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Reviewed prompt copy and rollback archive for any future request-ignore-battery-optimizations, direct power-manager, wake-lock, exact-alarm, or background-launch mutation flow."
+    }
+  ]
+}

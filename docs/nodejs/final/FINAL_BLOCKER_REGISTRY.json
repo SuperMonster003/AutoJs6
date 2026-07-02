@@ -3,6 +3,20 @@
   "phase": "Phase 11: Node Platform Completion & Graduation",
   "defaultRuntime": "node24_5",
   "node2417Lane": "external_runtime_maintenance",
+  "phase14Closeout": {
+    "status": "ready",
+    "task": "P14-39",
+    "decision": "phase14_closeout_handoff_ready",
+    "openFinalBlockers": 0,
+    "releaseBlockingReports": 0,
+    "futureBacklog": "docs/nodejs/reports/phase14/PHASE14_FUTURE_BACKLOG.json",
+    "evidence": [
+      "docs/nodejs/reports/phase14/PHASE14_CLOSEOUT_BREAKDOWN.md",
+      "docs/nodejs/reports/phase14/PHASE14_SUMMARY.md",
+      "docs/nodejs/reports/phase14/PHASE14_NEXT_BRANCH_HANDOFF.md",
+      "build/reports/nodejs/phase14-closeout-handoff.json"
+    ]
+  },
   "finalStatusVocabulary": [
     "completed",
     "blocked"

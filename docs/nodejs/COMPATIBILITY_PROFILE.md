@@ -1275,6 +1275,31 @@ results, native-available packaged `.mjs` worker smoke, and Android resource
 ceilings remain open. Current resource/crash evidence references are recorded,
 but must be rerun on a native-worker-capable target before promotion.
 
+P14-28 refreshes the v1.2 worker native availability audit. The current Node
+24.5 artifacts cover `arm64-v8a`, `armeabi-v7a`, and `x86_64`, while `x86`
+stays unsupported and fail-fast. The imported P13-34 preflight remains
+`worker.preflight.status=unavailable` with `ERR_AUTOJS6_WORKER_DISABLED`, so
+v1.2 records `worker_threads` as intentional non-support for runnable workers.
+`node:worker_threads` remains a shape-only compatibility facade in the default
+profile, and P14-29/P14-30 worker smoke/resource promotion can start only after
+a target ABI reports `worker.preflight.status=available`.
+
+P14-29 records the worker runnable/packaged smoke gate as conditional. Source
+anchors for basic Worker lifecycle, CJS/ESM entries, capability isolation,
+MessageChannel/transfer, WorkerPool, exception/timeout recovery, parent
+cleanup, nested Worker denial, and packaged `.mjs` smoke remain tracked, but
+`runnableSmokeExecuted=false` and `packagedSmokeExecuted=false` while native
+workers are unavailable. No compatibility profile can advertise worker runtime
+authority until native, packaged, and resource gates pass together.
+
+P14-30 records the worker resource/RSS stress gate as conditional. Source
+anchors for sequential Worker create/terminate cycles, WorkerPool stress,
+cleanup, exception/timeout recovery, RSS snapshots, and thread-count bounded
+assertions are tracked, but `resourceStressExecuted=false` while native workers
+are unavailable. Worker-specific Java heap, native heap, fd count, message
+queue, active worker, and active WorkerPool deltas remain future
+native-available archive requirements before compatibility can be broadened.
+
 P13-35 records process-worker replacement as partial. The runtime exposes
 `autojs6:profile.processWorkerReplacementProfile` to document that the current
 replacement path is request-local `worker_threads.WorkerPool`, not a new
@@ -1285,6 +1310,25 @@ P13-06 but not by this decision, and raw process handles, spawn/fork, stdio stre
 bridge modules, nested workers, and packaged process-worker behavior remain
 unpromoted. For P13-35 v1.1, there is no user-facing process-worker API or UX;
 P13-40 remains the separate track for any future scoped `child_process` runner.
+
+P14-31 closes the v1.2 process-worker replacement decision as
+`no_user_facing_facade_v1_2`. It imports the P13-35 diagnostic profile plus the
+P14-28/P14-29/P14-30 worker availability, runnable/package, and resource gates,
+and keeps the compatibility surface unchanged: no `process_worker`,
+`compute_worker`, `autojs6:process-worker`, WorkerPool replacement API,
+raw process handles, stdio streams, signals, `spawn`, `fork`, or packaged
+process-worker behavior is promoted. Any future replacement API must be
+WorkerPool-compatible and backed by native WorkerPool evidence, execution slot
+accounting, cleanup/resource stress, packaged behavior, user-facing launch UX,
+security corpus, and rollback evidence.
+
+P14-32 records the v1.2 desktop runtime doc/release sync as
+`worker_intentionally_unsupported_v1_2`. Type declarations, examples, worker
+design docs, release matrix, migration cookbook, security corpus, testing, and
+CI all use the same policy: runnable `worker_threads`, packaged workers,
+WorkerPool replacement API, process-worker facade, raw process handles, stdio,
+signals, `spawn`, `fork`, and stable `child_process` authority remain
+unpromoted for v1.2.
 
 P13-40 records child_process scoped runner as partial. The runtime exposes
 `autojs6:profile.childProcessProfile` to document that `child_process` and
@@ -1904,6 +1948,7 @@ runtime.
   - no raw OCR engine, model path, native pointer, `Bitmap`, `Mat`, `ImageWrapper`, or Java object crosses into Node
   - Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1
   - P13-20 records the current screenshot/image/OCR promotion state as partial: scoped `image.readImage()`/`recycle()` and ML Kit OCR over provider-owned image handles are live, while MediaProjection bridge prompting, advanced image processing, packaged capture/OCR behavior, and packaged disclosure evidence remain blocked
+  - P14-16 docs sync records the UI/automation/media declaration, example, release-matrix, security, and error-catalog state as `provider_poc_not_promoted`; typed migration snippets are documentation evidence, while overlay, packaged accessibility, MediaProjection capture, advanced image, packaged OCR/model, and recorder-session runtime examples remain static, guarded, or denial-oriented until their source provider gates are promoted
 - `storage` / `storages`
   - `create(name): StorageStore`
   - `open(name): StorageStore`
@@ -2125,6 +2170,17 @@ runtime.
   - provider-owned task registrations are tracked as bridge resources; explicit `cancel()` removes persisted records and cancels the unique WorkManager work
   - raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, and IntentFilter objects remain unavailable to JavaScript
   - P13-21 records the current daily/weekly/user task database provider state as partial: `work_manager`, `compat.tasks` one-shot migration, and JSON-safe legacy `TimedTask` query/get snapshots are live evidence, while direct `require("tasks")`, global `tasks`, daily/weekly add/update/enable-disable/remove, packaged task-database promotion, and raw `TimedTask` / `IntentTask` mutation remain blocked
+  - P14-17 records the v1.2 JSON-safe task database mutation contract as partial: future `add`, `update`, `enable`, `disable`, `remove`, `list`, and `get` operations must use versioned JSON descriptors, JSON patches, opaque owner-scoped ids, and stable errors; `require("tasks")`, a `tasks` capability, live mutation, schema migration, wall-clock scheduler parity, packaged task rows, and raw `TimedTask` / scheduler / database cursor / mutable row handles remain unpromoted
+  - P14-18 records the task schema migration and rollback contract as partial: fixture coverage reserves current, older, legacy snapshot, corrupt, unknown future schema, and packaged owner-mismatch inputs; Safe downgrade, Pro disable, packaged rollback, corruption quarantine, unknown schema preservation, and legacy `TimedTask` visibility are documented, while live migration tests and runtime migrators remain unpromoted
+  - P14-19 records the packaged task scheduling smoke baseline as partial: packaged fake-provider `work_manager` schedule/list/cancel smoke and live packaged project-entry scheduled-runner evidence are imported, while packaged `tasks` database add/list/enable-disable/remove, process death/relaunch, task removal cleanup, disclosure, and Safe downgrade archives remain unpromoted
+  - P14-20 records the JSON-safe IntentTask/broadcast provider contract as partial: future `tasks.broadcast` descriptors, manifest synthesis, exported receiver policy, trigger payload snapshots, and owner-scoped remove cleanup are defined, while runtime `tasks.broadcast` authority, future task/broadcast capabilities, packaged trigger/remove smoke, and raw Android broadcast objects remain unpromoted
+  - P14-21 records the packaged broadcast trigger/remove smoke contract as partial: the current packaged IntentTask/broadcast boundary smoke is imported and future positive install/trigger/remove/relaunch/crash/denial markers are reserved, while packaged `tasks.broadcast` trigger delivery, receiver cleanup archives, exported receiver promotion, and undeclared-capability evidence remain unpromoted
+  - P14-22 records notification ownership and foreground disclosure evidence as partial: live `notifications.notify` / `cancel` / `cancelAll` ownership, permission/status/settings handoff, and raw-object denial evidence are imported, while packaged post/cancel, foreground disclosure/stop action, permission device matrix, advanced notification actions/groups/styles, and rollback cleanup archives remain unpromoted
+  - P14-23 records settings/power OEM and background-launch matrix evidence as partial: P13-25 `device.power` battery optimization status/settings dry-run evidence is imported, Android 12/15+, exact-alarm, background-launch, OEM, prompt, and rollback archive requirements are documented, and request-ignore-battery-optimizations mutation, direct Doze mutation, wake locks, exact-alarm scheduling, background-launch bypass, raw `PowerManager`, raw `WakeLock`, raw `AlarmManager`, `PendingIntent`, `Intent`, `Context`, OEM manager handles, and Java objects remain unpromoted
+  - P14-24 records real recorder session promotion evidence as partial: P13-26 `recorder.getStatus()` and packaged media/recorder boundary evidence are imported, runtime microphone prompt, foreground disclosure/stop action, ResourceRegistry session ownership, scoped temporary output cleanup, crash cleanup, task removal cleanup, Safe downgrade, and packaged start/stop stress requirements are documented, and `recorder.start()`, `recorder.stop()`, pause/resume, screen recording, internal/playback audio capture, raw `MediaRecorder`, raw `AudioRecord`, raw `AudioPlaybackCaptureConfiguration`, `MediaProjection`, `ParcelFileDescriptor`, raw file descriptors, `Uri`, `Context`, foreground service handles, and Java objects remain unpromoted
+  - P14-25 records packaged recorder/media stress evidence as partial: current packaged media/recorder status and denial boundary smoke is imported, while positive packaged start/stop, visible microphone foreground disclosure, stop action, task removal, relaunch/crash recovery, quota enforcement, scoped temporary output cleanup, missing Android permission, denied prompt, metadata mismatch, and Safe downgrade archives remain unpromoted
+  - P14-26 records media playback and MediaStore boundary evidence as partial: P13-26 playback and external MediaStore stable-denial evidence is imported, the promoted media surface remains read-only audio status plus scoped `mediainfo`, and playback, playlists, `scanFile`, MediaStore query/insert/update/delete/open-file, broad `READ_MEDIA_*` / `MANAGE_EXTERNAL_STORAGE`, raw `MediaPlayer`, raw `AudioTrack`, raw `ContentResolver`, raw `Uri`, raw `ParcelFileDescriptor`, raw file descriptors, playlist handles, and Java objects remain denied unless a future scoped provider gate opens exact capabilities and packaged evidence
+  - P14-27 docs sync records the v1.2 `pro.tasks_device_media` declaration, example, release-matrix, migration-cookbook, compatibility, security, error, testing, and CI state as `provider_poc_not_promoted`; `tasks-work-manager` remains the only task/device/media focused smoke path, while `notifications-power` and `media-recorder` remain guarded migration evidence
   - P13-22 records the current IntentTask/broadcast task provider state as partial: Android/Rhino receiver substrate, `compat.tasks` IntentTask rejection stubs, JSON-safe legacy `IntentTask` snapshots, and packaged denial/metadata-boundary smoke are evidence, while receiver registration, boot/package/startup/custom broadcast triggers, provider-owned manifest mutation, positive packaged trigger/remove behavior, and raw `Intent` / `BroadcastReceiver` objects remain blocked
   - `compat.tasks.addIntentTask()`, `queryIntentTasks()`, `getIntentTask(id)`, and `removeIntentTask(id)` stay Promise-returning stable rejection stubs until a dedicated JSON-safe broadcast provider owns the future surface
 
@@ -2252,6 +2308,25 @@ Current policy:
 - Future broadcast, startup, boot, and package-event task support is deferred behind `docs/nodejs/design/BROADCAST_TASKS.md` and a user-visible permission flow.
 
 See `docs/nodejs/design/WORK_MANAGER.md` for the current design decision.
+
+## Phase 14 v1.2 Migration And Pro Comparison Claim Sync
+
+P14-36 records v1.2 migration and Pro comparison docs as ready. These migration
+claims match executable evidence and do not imply raw Android object parity.
+
+The v1.2 compatibility profile keeps Pro UI and floaty, accessibility,
+screenshot/OCR, tasks, notifications, recorder, worker policy, packaged
+behavior, and rollback claims tied to their source gates. `provider_poc_not_promoted`
+surfaces remain POC or documentation evidence, P14-32 keeps
+`worker_intentionally_unsupported_v1_2`, P14-34 keeps packaged aggregate smoke
+at `host_contract_ready`, and P14-35 keeps `NodeProfileV12CapabilityCatalog`
+metadata-only. Runtime authority remains unchanged.
+runtime authority remains unchanged.
+
+AutoJs6 Node v1.2 does not expose raw `Context`, raw `Activity`, raw `View`,
+raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw
+`TimedTask`, raw `BroadcastReceiver`, raw `Notification`, or raw `WakeLock`
+objects as migration parity.
 
 ## Error Code Compatibility
 

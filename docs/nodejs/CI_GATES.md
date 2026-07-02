@@ -622,7 +622,7 @@ accessibility provider unavailable errors, scoped `image.readImage()` to OCR to
 `image.recycle()` live behavior, and screenshot/advanced image fail-closed
 paths. If the AutoJs6 accessibility service is already enabled on the device,
 it also launches a controlled Activity and validates real selector `findOne`
-and selector `click`; otherwise that single real-accessibility smoke is an
+selector `click`, and selector `longClick`; otherwise that single real-accessibility smoke is an
 explicit JUnit skip.
 `verifyNodeLiveUiGate` validates the Activity-owned UI provider, JavaScript
 event delivery, provider cleanup, descriptor denial, and foreign-handle denial.
@@ -1062,6 +1062,244 @@ For short smoke validation, pass `--duration-ms` and leave `--archive` off.
 Use `tools/nodejs/phase13/archive-full-heavy-resource-soak.js` to validate and
 copy completed soak JSON into the canonical final-soak paths; the helper writes
 an archive audit report and refuses dirty or under-duration inputs.
+
+`verifyNodePhase14Baseline` and `verifyNodePhase14SurfaceManifest` are the
+Phase 14 v1.2 foundation gates:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14Baseline
+.\gradlew.bat --console=plain :app:verifyNodePhase14SurfaceManifest
+.\gradlew.bat --console=plain :app:verifyNodePhase14PromotionContracts
+.\gradlew.bat --console=plain :app:verifyNodePhase14LiveUiProviderPackaged
+.\gradlew.bat --console=plain :app:verifyNodePhase14OverlayProvider
+.\gradlew.bat --console=plain :app:verifyNodePhase14OverlayPermissionOemMatrix
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedOverlayPositiveSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilityLifecycle
+.\gradlew.bat --console=plain :app:verifyNodePhase14AccessibilitySelectorActionMatrix
+.\gradlew.bat --console=plain :app:verifyNodePhase14MediaProjectionProvider
+.\gradlew.bat --console=plain :app:verifyNodePhase14AdvancedImageOperations
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedImageOcrEvidence
+.\gradlew.bat --console=plain :app:verifyNodePhase14UiAutomationMediaDocSync
+.\gradlew.bat --console=plain :app:verifyNodePhase14TaskDatabaseProvider
+.\gradlew.bat --console=plain :app:verifyNodePhase14TaskSchemaMigrationRollback
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedTaskSchedulingSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase14IntentBroadcastProvider
+.\gradlew.bat --console=plain :app:verifyNodePhase14PackagedBroadcastTriggerRemoveSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase14NotificationOwnership
+```
+
+The baseline gate depends on `generateNodePhase13Summary`, keeps the Phase 13
+v1.1 closeout state as the starting contract, imports the nine Phase 13
+future-promotion tasks, and writes `phase14-baseline-verification.json` plus
+`.md`. The surface manifest gate verifies the Phase 14 manifest, schema/docs,
+Gradle wiring, and exact P14-00 through P14-39 task ownership. The promotion
+contracts gate verifies shared v1.2 promotion states, report conventions,
+release-blocker classification, packaged high-privilege disclosure, rollback
+and crash circuit breaker fields, and Android 12 / Android 15+ device matrix
+requirements. The packaged live UI provider gate writes
+`phase14-live-ui-provider-packaged.json` plus `.md`, imports the `P13-17`
+packaged UI capability-denial and entry/update/close smoke evidence, records
+`pro.ui_automation_media` as `provider_poc`, and keeps packaged task relaunch,
+crash recovery, and user-visible disclosure as future-promotion blockers. The
+overlay provider gate writes `phase14-overlay-provider.json` plus `.md`,
+verifies the controlled JSON-only `ui.overlay` provider POC, permission-denied
+behavior without `SYSTEM_ALERT_WINDOW`, `OVERLAY_SESSION` resource ownership,
+conditional permission-granted instrumentation coverage, and the open
+foreground disclosure, packaged positive smoke, and leak/stress blockers.
+The overlay permission/OEM matrix gate writes
+`phase14-overlay-permission-oem-matrix.json` plus `.md`, imports the
+permission-denied boundary, reserves Android 12 and Android 15+ archive rows,
+and keeps granted device, OEM settings round-trip, and task removal/relaunch
+evidence as future-promotion blockers.
+The packaged overlay positive smoke gate writes
+`phase14-packaged-overlay-positive-smoke.json` plus `.md`, verifies the
+packaged overlay positive smoke/stress fixture, and keeps install-run,
+foreground disclosure/stop action, task-removal/relaunch/crash, and
+event-drain/leak-stress archives as future-promotion blockers.
+The accessibility lifecycle gate writes
+`phase14-accessibility-lifecycle.json` plus `.md`, verifies the packaged
+accessibility lifecycle fixture, imports the P13-19 selector denial boundary,
+and keeps user-enabled service, settings round-trip, task removal/relaunch,
+disconnect, and missing-capability archives as future-promotion blockers.
+The accessibility selector/action matrix gate writes
+`phase14-accessibility-selector-action-matrix.json` plus `.md`, verifies the
+selector/action real-device matrix, imports P13-19 selector and P13-24
+root/Shizuku denial evidence, and keeps Android 12/15+ selector action, safe
+global-action, and unsupported-tier diagnostics archives as future-promotion
+blockers.
+The MediaProjection provider gate writes
+`phase14-media-projection-provider.json` plus `.md`, verifies the
+Activity-owned prompt/capture contract, imports P13-20 and the optional
+`screen_capture` smoke anchor, keeps `media_projection` fail-closed, and keeps
+Android 12/15+ prompt capture, foreground disclosure/stop action, and
+task-removal/relaunch/crash archives as future-promotion blockers.
+The advanced image operations gate writes
+`phase14-advanced-image-operations.json` plus `.md`, verifies the advanced
+image operation contract, imports P13-20 fake-provider, TypeScript,
+invalid-input, scoped `readImage`/`recycle`, OCR-handle, and quota evidence,
+keeps live Android save/transform/matching/color operations fail-closed, and
+keeps live provider, leak/stress, and packaged scoped-output archives as
+future-promotion blockers.
+The packaged image/OCR evidence gate writes
+`phase14-packaged-image-ocr-evidence.json` plus `.md`, verifies packaged
+image/OCR model and quota policy, imports P13-20 live ML Kit OCR, P14-14
+image quota/invalid-input boundaries, and packaged fake-provider OCR smoke, and
+keeps model-absence, explicit provider-mode, quota/leak stress, and
+capture/disclosure archives as future-promotion blockers.
+The UI/automation/media docs sync gate writes
+`phase14-ui-automation-media-doc-sync.json` plus `.md`, verifies the P14-16
+docs/examples/declarations sync matrix, release matrix, compatibility profile,
+security model, and error catalog, and keeps `pro.ui_automation_media` at
+`provider_poc_not_promoted` without adding runtime authority.
+The task database provider gate writes
+`phase14-task-database-provider.json` plus `.md`, verifies the P14-17
+JSON-safe task database mutation contract, imports P13-21 task database
+evidence, keeps `pro.tasks_device_media` at `provider_poc`, and keeps live
+database mutation, schema migration, wall-clock scheduler parity, packaged task
+rows, `require("tasks")`, and future `tasks` capabilities unpromoted.
+The task schema migration rollback gate writes
+`phase14-task-schema-migration-rollback.json` plus `.md`, verifies the P14-18
+fixture matrix for current, older, legacy snapshot, corrupt, unknown, and
+packaged owner-mismatch descriptors, records downgrade/corruption/unknown
+schema/packaged rollback policy, and keeps live migration tests unpromoted.
+The packaged task scheduling smoke gate writes
+`phase14-packaged-task-scheduling-smoke.json` plus `.md`, imports packaged
+`work_manager` schedule/list/cancel fake-provider smoke and live packaged
+project-entry scheduled-runner evidence, records package-identity row
+ownership and Safe downgrade policy, and keeps packaged `tasks` database row
+promotion unpromoted.
+The IntentTask/broadcast provider gate writes
+`phase14-intent-broadcast-provider.json` plus `.md`, imports the P13-22
+receiver substrate, compat rejection, JSON snapshot, and packaged boundary
+evidence, records future `tasks.broadcast` descriptor, manifest/export,
+payload, and owner-scoped remove cleanup contracts, and keeps runtime broadcast
+task authority unpromoted.
+The packaged broadcast trigger/remove smoke gate writes
+`phase14-packaged-broadcast-trigger-remove-smoke.json` plus `.md`, imports the
+current packaged IntentTask/broadcast boundary smoke, reserves future positive
+install/trigger/remove/relaunch/crash/denial markers, records owner-scoped
+cleanup policy, and keeps packaged broadcast task trigger/remove promotion
+unpromoted.
+The notification ownership gate writes `phase14-notification-ownership.json`
+plus `.md`, imports P13-25 notification/settings evidence and live Android
+post/cancel ownership evidence, records foreground disclosure/stop-action and
+advanced notification boundaries, and keeps packaged notification promotion
+unpromoted.
+The `:app:verifyNodePhase14SettingsPowerOemBackgroundMatrix` gate writes
+`phase14-settings-power-oem-background-matrix.json` plus `.md`, imports P13-25
+`device.power` status/settings dry-run evidence, records Android 12/15+,
+exact-alarm, background-launch, OEM, prompt, and rollback archive requirements,
+and keeps direct power-manager, wake-lock, exact-alarm, and background-launch
+mutation authority denied.
+The `:app:verifyNodePhase14RecorderProvider` gate writes
+`phase14-recorder-provider.json` plus `.md`, imports P13-26 recorder status,
+packaged media/recorder boundary smoke, and exact `media.recording` denial
+evidence, records runtime prompt, foreground disclosure, session resource,
+temporary output, crash cleanup, and packaged stress requirements, and keeps
+real `recorder.start()` / `recorder.stop()` unpromoted.
+The `:app:verifyNodePhase14PackagedRecorderMediaStress` gate writes
+`phase14-packaged-recorder-media-stress.json` plus `.md`, imports the current
+packaged media/recorder status and denial boundary smoke, reserves positive
+start/stop, foreground disclosure, task removal, relaunch/crash, quota,
+temporary output cleanup, and denial archives, and keeps packaged recorder
+start/stop unpromoted.
+The `:app:verifyNodePhase14MediaPlaybackMediaStoreBoundary` gate writes
+`phase14-media-playback-mediastore-boundary.json` plus `.md`, imports playback
+and MediaStore stable-denial evidence, keeps playback, playlists, scanFile,
+MediaStore, broad media-library permissions, and raw media handles denied, and
+records future scoped-provider requirements.
+The `:app:verifyNodePhase14TaskDeviceMediaDocSync` gate writes
+`phase14-task-device-media-doc-sync.json` plus `.md`, imports P14-17 through
+P14-26 generated reports, verifies TypeScript declaration references, release
+matrix rows, migration cookbook, examples, compatibility, security, error, and
+CI docs, and keeps runtime authority unchanged.
+The `:app:verifyNodePhase14WorkerNativeAvailability` gate writes
+`phase14-worker-native-availability.json` plus `.md`, imports the P13-34 worker
+machine report, verifies Node 24.5 `libnode.so` artifacts for `arm64-v8a`,
+`armeabi-v7a`, and `x86_64`, keeps `x86` fail-fast, audits Android loader and
+crash-signature anchors, and refreshes v1.2 `worker_threads` as intentional
+non-support until `worker.preflight.status=available` is archived on target
+ABIs.
+The `:app:verifyNodePhase14WorkerRunnablePackagedSmoke` gate writes
+`phase14-worker-runnable-packaged-smoke.json` plus `.md`, imports P14-28 native
+availability, verifies source anchors for runnable Worker lifecycle, CJS/ESM
+entries, capability isolation, MessageChannel/transfer, WorkerPool,
+exception/timeout recovery, parent cleanup, nested Worker denial, and packaged
+`.mjs` smoke, and records `conditional_skip_native_unavailable` without
+promoting worker authority.
+The `:app:verifyNodePhase14WorkerResourceRssStress` gate writes
+`phase14-worker-resource-rss-stress.json` plus `.md`, imports P14-28 and
+P14-29 generated reports, verifies source anchors for sequential Worker cycles,
+WorkerPool stress, cleanup, exception/timeout recovery, RSS snapshots, and
+thread-count bounded assertions, and records worker-specific Java heap, native
+heap, fd, queue, active worker, and active WorkerPool deltas as future
+native-available archive requirements.
+The `:app:verifyNodePhase14ProcessWorkerReplacementDecision` gate writes
+`phase14-process-worker-replacement-decision.json` plus `.md`, imports P13-35,
+P14-28, P14-29, and P14-30 generated reports, verifies
+`processWorkerReplacementProfile`, absence of callable `process_worker` /
+`compute_worker` facades, default `child_process` denial, separate `shell`
+bridge policy, reserved `worker_computation`, and records
+`no_user_facing_facade_v1_2` without promoting raw process handles, stdio,
+signals, `spawn`, `fork`, packaged process-worker behavior, or WorkerPool
+replacement API authority.
+The `:app:verifyNodePhase14DesktopRuntimeDocSync` gate writes
+`phase14-desktop-runtime-doc-sync.json` plus `.md`, imports P14-28 through
+P14-31 generated reports, verifies TypeScript declaration references, worker
+design docs, desktop examples, release matrix, migration cookbook,
+compatibility profile, security model, security corpus, error catalog,
+Pro/AutoX migration notes, testing, and CI docs, and records
+`worker_intentionally_unsupported_v1_2` without promoting runnable workers,
+packaged workers, WorkerPool replacement API, process-worker facade, raw
+process handles, stdio, signals, `spawn`, `fork`, or stable `child_process`
+authority.
+The `:app:verifyNodePhase14SecurityRegressionCorpus` gate writes
+`phase14-security-regression-corpus.json` plus `.md`, imports P14-07 through
+P14-32 generated reports, verifies the v1.2 security corpus positive, negative,
+abuse, runtime guard, promotion precondition, and rollback entries, and covers
+raw object denial, path escape, permission bypass, lifecycle cleanup, packaged
+metadata mismatch, and Safe downgrade categories without promoting runtime
+authority.
+The `:app:installAndRunNodeV12PackagedSmoke` gate writes
+`phase14-packaged-aggregate-smoke.json` plus `.md`, depends on the P14-33
+security corpus gate, imports packaged-capable provider reports, and verifies
+the v1.2 aggregate packaged smoke contract for positive or conditional paths,
+undeclared capability denial, packaged metadata mismatch, Safe downgrade,
+cleanup, and report artifacts. It runs in `host_contract_ready` mode until real
+device packaged install-run archives are attached.
+The `:app:verifyNodePhase14TypeDeclarationProfiles` gate writes
+`phase14-type-declaration-profiles.json` plus `.md`, depends on P14-34, P13-55,
+`verifyAutoJs6NodeTypeDeclarations`, and `typeCheckNodeTypescriptSmoke`, and
+verifies the v1.2 TypeScript declaration profile matrix. It covers promoted
+callable declarations, provider POC rows, stable-denied rows, intentionally
+unsupported worker/process-worker rows, packaged aggregate metadata, and
+visible future-only gating without promoting runtime authority.
+The `:app:verifyNodePhase14MigrationProComparison` gate writes
+`phase14-migration-pro-comparison.json` plus `.md`, depends on P14-35 and
+P13-56, imports P14-16, P14-27, P14-32, P14-33, P14-34, and P14-35 generated
+reports, and verifies that v1.2 migration/Pro comparison docs cover Pro
+UI/floaty, accessibility, screenshot/OCR, tasks, notifications, recorder,
+worker policy, packaged behavior, and rollback. It fails if docs stop tying
+claims to executable evidence or imply raw Android object parity.
+The `:app:generateNodePhase14Summary` gate writes `phase14-summary.json`,
+`phase14-summary.md`, and `PHASE14_SUMMARY.md`, depends on P14-36, imports the
+Phase 14 task checklist, surface manifest, final blocker registry, Phase 13
+capability truth, P14-35 type profile report, P14-36 migration comparison
+report, and current Phase 14 generated reports. It requires zero open final
+blockers, zero policy violations, and zero release-blocking reports while
+listing future-promotion blockers as backlog.
+The `:app:verifyNodePhase14ReleaseCandidateChecklist` gate writes
+`phase14-release-candidate-checklist.json` plus `.md`, depends on P14-37,
+imports the summary, security, packaged, type, migration, and docs-sync
+reports, and verifies the v1.2 RC checklist plus release notes draft. It
+separates required v1.2 blockers from v1.3 future promotion backlog and is not
+release tag approval.
+The `:app:verifyNodePhase14CloseoutHandoff` gate writes
+`phase14-closeout-handoff.json` plus `.md`, depends on P14-38, imports the
+summary and RC checklist reports, verifies the Phase 14 closeout breakdown,
+future backlog export, next branch handoff, and final blocker registry closeout
+marker, and confirms `feature/nodejs-runtime-v1.3` can start from the documented
+backlog without reopening final blockers.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

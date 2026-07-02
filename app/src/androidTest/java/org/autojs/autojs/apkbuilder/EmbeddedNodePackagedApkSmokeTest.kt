@@ -8393,6 +8393,26 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildOverlayPositiveEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged overlay positive smoke fixture requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedOverlayPositiveSmokeApk()
+    }
+
+    @Test
+    fun buildAccessibilityLifecycleEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged accessibility lifecycle smoke fixture requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedAccessibilityLifecycleApk()
+    }
+
+    @Test
     fun buildIntentBroadcastBoundaryEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged IntentTask/broadcast boundary smoke requires embedded script execution build support.",
@@ -12213,6 +12233,360 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedOverlayPositiveSmokeApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function main() {
+              const fs = require("fs");
+              const bridge = require("autojs6:bridge");
+              const overlay = require("ui.overlay");
+              const projectConfig = JSON.parse(fs.readFileSync("project.json", "utf8"));
+              const nodePermissions = projectConfig.node && Array.isArray(projectConfig.node.permissions)
+                ? projectConfig.node.permissions
+                : [];
+              const androidPermissions = Array.isArray(projectConfig.permissions)
+                ? projectConfig.permissions
+                : [];
+              const report = bridge.permissions();
+              const normalizedPermissions = Array.isArray(report.normalizedPermissions)
+                ? report.normalizedPermissions
+                : [];
+              const requiredNodePermissions = [
+                "ui.overlay",
+                "ui.overlay.permission",
+                "ui.overlay.foreground",
+                "ui.overlay.packaged"
+              ];
+              const metadataOk = requiredNodePermissions.every((permission) =>
+                nodePermissions.indexOf(permission) >= 0 &&
+                normalizedPermissions.indexOf(permission) >= 0
+              ) && androidPermissions.indexOf("android.permission.SYSTEM_ALERT_WINDOW") >= 0;
+              const rawGlobalsAbsent = [
+                "WindowManager",
+                "LayoutParams",
+                "FloatyWindow",
+                "WindowBridge",
+                "View",
+                "NativeView",
+                "RawWindow"
+              ].every((name) => typeof globalThis[name] === "undefined");
+              const permission = await overlay.hasPermission({ timeoutMs: 1000 });
+              const permissionSnapshotOk =
+                permission &&
+                typeof permission.granted === "boolean" &&
+                permission.packagedManifestPermission === "android.permission.SYSTEM_ALERT_WINDOW" &&
+                permission.foregroundDisclosure === "required_before_packaged_promotion";
+              const descriptor = {
+                content: {
+                  type: "Column",
+                  children: [
+                    { id: "title", type: "Text", text: "P14-10 packaged overlay" },
+                    { id: "status", type: "Text", text: "Starting" },
+                    { id: "stop", type: "Button", text: "Stop" }
+                  ]
+                },
+                window: {
+                  width: 260,
+                  height: 132,
+                  x: 24,
+                  y: 96,
+                  touchable: true,
+                  focusable: false
+                },
+                disclosure: {
+                  title: "P14-10 packaged overlay",
+                  text: "AutoJs6 Node packaged overlay smoke is visible"
+                }
+              };
+              const disclosureOk =
+                descriptor.disclosure.title.indexOf("P14-10") >= 0 &&
+                descriptor.disclosure.text.indexOf("visible") >= 0;
+              let showOk = false;
+              let updateOk = false;
+              let eventDrainOk = false;
+              let closeOk = false;
+              let closeAllOk = false;
+              let stressOk = false;
+              let stressSessions = 0;
+              let leakOk = false;
+
+              if (permission && permission.granted === true) {
+                const first = await overlay.show(descriptor, { timeoutMs: 5000 });
+                showOk =
+                  first &&
+                  typeof first.id === "string" &&
+                  first.type === "overlay" &&
+                  first.closed === false;
+                const firstEvents = await first.drainEvents({ maxEvents: 16, timeoutMs: 5000 });
+                eventDrainOk = Array.isArray(firstEvents) &&
+                  firstEvents.some((event) => event.type === "shown" && event.overlayId === first.id);
+                const update = await first.update({ id: "status", text: "Updated" }, { timeoutMs: 5000 });
+                const updateEvents = await first.drainEvents({ maxEvents: 16, timeoutMs: 5000 });
+                updateOk =
+                  update &&
+                  update.id === first.id &&
+                  Array.isArray(updateEvents) &&
+                  updateEvents.some((event) => event.type === "update" && event.overlayId === first.id);
+                closeOk = await first.close({ reason: "p14_10_positive_close", timeoutMs: 5000 }) === true;
+                const afterFirstClose = await overlay.closeAll({
+                  reason: "p14_10_positive_after_first_close",
+                  timeoutMs: 5000
+                });
+                closeAllOk = afterFirstClose && afterFirstClose.remainingCount === 0;
+
+                stressOk = true;
+                for (let index = 0; index < 3; index += 1) {
+                  const handle = await overlay.show({
+                    content: {
+                      type: "Text",
+                      id: "stress",
+                      text: "P14-10 stress " + index
+                    },
+                    window: {
+                      width: 220,
+                      height: 96,
+                      x: 24 + index * 8,
+                      y: 96 + index * 8,
+                      touchable: true,
+                      focusable: false
+                    },
+                    disclosure: descriptor.disclosure
+                  }, { timeoutMs: 5000 });
+                  const events = await handle.drainEvents({ maxEvents: 16, timeoutMs: 5000 });
+                  const closeResult = await handle.close({ reason: "p14_10_positive_stress", timeoutMs: 5000 });
+                  stressOk = stressOk &&
+                    typeof handle.id === "string" &&
+                    Array.isArray(events) &&
+                    events.length <= 16 &&
+                    closeResult === true;
+                  stressSessions += 1;
+                }
+                const finalCleanup = await overlay.closeAll({
+                  reason: "p14_10_positive_final_cleanup",
+                  timeoutMs: 5000
+                });
+                leakOk = finalCleanup && finalCleanup.remainingCount === 0;
+              }
+
+              const pending = bridge.__test.pendingCount();
+              const ready = metadataOk &&
+                permissionSnapshotOk &&
+                permission &&
+                permission.granted === true &&
+                disclosureOk &&
+                showOk &&
+                updateOk &&
+                eventDrainOk &&
+                closeOk &&
+                closeAllOk &&
+                stressOk &&
+                stressSessions === 3 &&
+                leakOk &&
+                rawGlobalsAbsent &&
+                pending === 0;
+
+              console.log("packaged.overlay_positive.ready=" + ready);
+              console.log("packaged.overlay_positive.metadata=" + metadataOk);
+              console.log("packaged.overlay_positive.permission_snapshot=" + permissionSnapshotOk);
+              console.log("packaged.overlay_positive.permission_granted=" + (permission && permission.granted === true));
+              console.log("packaged.overlay_positive.disclosure=" + disclosureOk);
+              console.log("packaged.overlay_positive.show=" + showOk);
+              console.log("packaged.overlay_positive.update=" + updateOk);
+              console.log("packaged.overlay_positive.event_drain=" + eventDrainOk);
+              console.log("packaged.overlay_positive.close=" + closeOk);
+              console.log("packaged.overlay_positive.close_all=" + closeAllOk);
+              console.log("packaged.overlay_positive.stress_sessions=" + stressSessions);
+              console.log("packaged.overlay_positive.leak_summary=" + leakOk);
+              console.log("packaged.overlay_positive.raw_globals_absent=" + rawGlobalsAbsent);
+              console.log("packaged.overlay_positive.pending=" + pending);
+              if (!ready) {
+                process.exitCode = 1;
+              }
+            }
+
+            return main().catch(error => {
+              console.error("packaged.overlay_positive.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-overlay-positive-smoke",
+            outputApkName = OVERLAY_POSITIVE_APK_NAME,
+            projectName = OVERLAY_POSITIVE_PROJECT_NAME,
+            packageName = OVERLAY_POSITIVE_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraPermissions = listOf("android.permission.SYSTEM_ALERT_WINDOW"),
+            nodePermissions = OVERLAY_POSITIVE_NODE_PERMISSIONS,
+            runtimeMarkers = OVERLAY_POSITIVE_RUNTIME_MARKERS,
+        )
+    }
+
+    private fun buildPackagedAccessibilityLifecycleApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function denied(action) {
+              try {
+                await action();
+                return { allowed: true, code: "", autojs6Code: "", module: "", method: "" };
+              } catch (error) {
+                return {
+                  allowed: false,
+                  code: String(error && error.code || ""),
+                  autojs6Code: String(error && error.autojs6Code || ""),
+                  module: String(error && error.module || ""),
+                  method: String(error && error.method || "")
+                };
+              }
+            }
+
+            async function main() {
+              const fs = require("fs");
+              const bridge = require("autojs6:bridge");
+              const profile = require("autojs6:profile");
+              const accessibility = require("accessibility");
+              const projectConfig = JSON.parse(fs.readFileSync("project.json", "utf8"));
+              const nodePermissions = projectConfig.node && Array.isArray(projectConfig.node.permissions)
+                ? projectConfig.node.permissions
+                : [];
+              const androidPermissions = Array.isArray(projectConfig.permissions)
+                ? projectConfig.permissions
+                : [];
+              const permissionReport = bridge.permissions();
+              const normalizedPermissions = Array.isArray(permissionReport.normalizedPermissions)
+                ? permissionReport.normalizedPermissions
+                : [];
+              const metadataOk =
+                nodePermissions.indexOf("accessibility") >= 0 &&
+                normalizedPermissions.indexOf("accessibility") >= 0 &&
+                androidPermissions.indexOf("android.permission.BIND_ACCESSIBILITY_SERVICE") >= 0;
+              const policy = profile.privacyDisclosurePolicy;
+              const surface = (policy.surfaces || []).find((entry) => entry && entry.id === "accessibility");
+              const surfaceAndroidPermissions = surface && Array.isArray(surface.androidPermissions)
+                ? surface.androidPermissions
+                : [];
+              const privacyPolicyOk =
+                surface &&
+                surface.capability === "accessibility" &&
+                surface.profile === "pro_compat_opt_in" &&
+                surfaceAndroidPermissions.indexOf("android.permission.BIND_ACCESSIBILITY_SERVICE") >= 0 &&
+                surface.requiresUserPrompt === true &&
+                surface.requiresForegroundDisclosure === true &&
+                surface.requiresSettingsIntent === true &&
+                surface.disclosureChannel === "accessibility_service_description" &&
+                surface.settingsIntent === "android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS" &&
+                surface.authority === "metadata_only_no_authority" &&
+                surface.packagedBehavior === "deny_without_reviewed_disclosure_manifest";
+              const settingsContractOk =
+                surface &&
+                surface.requiresSettingsIntent === true &&
+                surface.settingsIntent === "android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS" &&
+                surface.disclosureChannel === "accessibility_service_description";
+              const packagedPolicy = policy.packagedPolicy || {};
+              const packagedPolicyOk =
+                packagedPolicy.requiresDisclosureManifest === true &&
+                packagedPolicy.reviewedManifestRequiredForPromotion === true &&
+                packagedPolicy.defaultAction === "deny_without_reviewed_disclosure_manifest" &&
+                packagedPolicy.grantsAuthority === false;
+              const enabled = await accessibility.isEnabled({ timeoutMs: 1000 });
+              const ensured = await accessibility.ensureEnabled({ prompt: false, timeoutMs: 1000 });
+              const selector = accessibility.text("P14-11 accessibility lifecycle");
+              const deniedActions = [
+                ["findOne", () => accessibility.findOne(selector, { timeoutMs: 1000 })],
+                ["findAll", () => accessibility.findAll(selector, { timeoutMs: 1000 })],
+                ["click", () => accessibility.click(selector, { timeoutMs: 1000 })],
+                ["longClick", () => accessibility.longClick(selector, { timeoutMs: 1000 })],
+                ["setText", () => accessibility.setText(selector, "Typed", { timeoutMs: 1000 })],
+                ["scrollForward", () => accessibility.scrollForward(selector, { timeoutMs: 1000 })],
+                ["scrollBackward", () => accessibility.scrollBackward(selector, { timeoutMs: 1000 })]
+              ];
+              const denials = [];
+              for (const action of deniedActions) {
+                const result = await denied(action[1]);
+                denials.push({ method: action[0], result });
+              }
+              const disabledDenialOk =
+                enabled === false &&
+                ensured === false &&
+                denials.every((entry) =>
+                  entry.result.allowed === false &&
+                  entry.result.code === "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED" &&
+                  entry.result.autojs6Code === "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED" &&
+                  entry.result.module === "accessibility" &&
+                  entry.result.method === entry.method
+                );
+              const denialSummary = denials.map((entry) =>
+                entry.method + ":" +
+                entry.result.code + "/" +
+                entry.result.autojs6Code + "/" +
+                entry.result.module + "/" +
+                entry.result.method
+              ).join("|");
+              const rawGlobalsAbsent = [
+                "AccessibilityService",
+                "AccessibilityNodeInfo",
+                "UiObject",
+                "UiSelector",
+                "Context",
+                "Service",
+                "Binder"
+              ].every((name) => typeof globalThis[name] === "undefined");
+              const unsupportedHelpersAbsent = [
+                "swipe",
+                "gesture",
+                "powerDialog",
+                "waitFor",
+                "pickup"
+              ].every((name) => typeof accessibility[name] === "undefined");
+              const pending = bridge.__test.pendingCount();
+              const ready = metadataOk &&
+                privacyPolicyOk &&
+                settingsContractOk &&
+                packagedPolicyOk &&
+                disabledDenialOk &&
+                rawGlobalsAbsent &&
+                unsupportedHelpersAbsent &&
+                pending === 0;
+
+              console.log("packaged.accessibility_lifecycle.ready=" + ready);
+              console.log("packaged.accessibility_lifecycle.metadata=" + metadataOk);
+              console.log("packaged.accessibility_lifecycle.privacy_policy=" + privacyPolicyOk);
+              console.log("packaged.accessibility_lifecycle.settings_contract=" + settingsContractOk);
+              console.log("packaged.accessibility_lifecycle.packaged_policy=" + packagedPolicyOk);
+              console.log("packaged.accessibility_lifecycle.disabled_state=" + (enabled === false && ensured === false));
+              console.log("packaged.accessibility_lifecycle.denial_paths=" + disabledDenialOk);
+              console.log("packaged.accessibility_lifecycle.denied_methods=" + denialSummary);
+              console.log("packaged.accessibility_lifecycle.settings_intent=" + (surface && surface.settingsIntent));
+              console.log("packaged.accessibility_lifecycle.raw_globals_absent=" + rawGlobalsAbsent);
+              console.log("packaged.accessibility_lifecycle.unsupported_helpers_absent=" + unsupportedHelpersAbsent);
+              console.log("packaged.accessibility_lifecycle.pending=" + pending);
+              if (!ready) {
+                process.exitCode = 1;
+              }
+            }
+
+            return main().catch(error => {
+              console.error("packaged.accessibility_lifecycle.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-accessibility-lifecycle-smoke",
+            outputApkName = ACCESSIBILITY_LIFECYCLE_APK_NAME,
+            projectName = ACCESSIBILITY_LIFECYCLE_PROJECT_NAME,
+            packageName = ACCESSIBILITY_LIFECYCLE_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraPermissions = listOf("android.permission.BIND_ACCESSIBILITY_SERVICE"),
+            nodePermissions = ACCESSIBILITY_LIFECYCLE_NODE_PERMISSIONS,
+            runtimeMarkers = ACCESSIBILITY_LIFECYCLE_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedIntentBroadcastBoundaryApk(): File {
         val mainScriptName = "main.js"
         val mainScript = """
@@ -15897,6 +16271,18 @@ $nodeConfigJson
             "org.autojs6.packaged.node.overlay.capability.boundary.smoke"
         private const val OVERLAY_CAPABILITY_BOUNDARY_APK_NAME =
             "PackagedNodeOverlayCapabilityBoundarySmoke_v1.0.0.apk"
+        private const val OVERLAY_POSITIVE_PROJECT_NAME =
+            "PackagedNodeOverlayPositiveSmoke"
+        private const val OVERLAY_POSITIVE_PACKAGE_NAME =
+            "org.autojs6.packaged.node.overlay.positive.smoke"
+        private const val OVERLAY_POSITIVE_APK_NAME =
+            "PackagedNodeOverlayPositiveSmoke_v1.0.0.apk"
+        private const val ACCESSIBILITY_LIFECYCLE_PROJECT_NAME =
+            "PackagedNodeAccessibilityLifecycleSmoke"
+        private const val ACCESSIBILITY_LIFECYCLE_PACKAGE_NAME =
+            "org.autojs6.packaged.node.accessibility.lifecycle.smoke"
+        private const val ACCESSIBILITY_LIFECYCLE_APK_NAME =
+            "PackagedNodeAccessibilityLifecycleSmoke_v1.0.0.apk"
         private const val INTENT_BROADCAST_BOUNDARY_PROJECT_NAME =
             "PackagedNodeIntentBroadcastBoundarySmoke"
         private const val INTENT_BROADCAST_BOUNDARY_PACKAGE_NAME =
@@ -16330,6 +16716,44 @@ $nodeConfigJson
             "packaged.overlay_boundary.metadata_denied=true",
             "packaged.overlay_boundary.raw_globals_absent=true",
             "packaged.overlay_boundary.pending=0",
+        )
+        private val OVERLAY_POSITIVE_NODE_PERMISSIONS = listOf(
+            "ui.overlay",
+            "ui.overlay.permission",
+            "ui.overlay.foreground",
+            "ui.overlay.packaged",
+        )
+        private val OVERLAY_POSITIVE_RUNTIME_MARKERS = listOf(
+            "packaged.overlay_positive.ready=true",
+            "packaged.overlay_positive.metadata=true",
+            "packaged.overlay_positive.permission_snapshot=true",
+            "packaged.overlay_positive.permission_granted=true",
+            "packaged.overlay_positive.disclosure=true",
+            "packaged.overlay_positive.show=true",
+            "packaged.overlay_positive.update=true",
+            "packaged.overlay_positive.event_drain=true",
+            "packaged.overlay_positive.close=true",
+            "packaged.overlay_positive.close_all=true",
+            "packaged.overlay_positive.stress_sessions=3",
+            "packaged.overlay_positive.leak_summary=true",
+            "packaged.overlay_positive.raw_globals_absent=true",
+            "packaged.overlay_positive.pending=0",
+        )
+        private val ACCESSIBILITY_LIFECYCLE_NODE_PERMISSIONS = listOf(
+            "accessibility",
+        )
+        private val ACCESSIBILITY_LIFECYCLE_RUNTIME_MARKERS = listOf(
+            "packaged.accessibility_lifecycle.ready=true",
+            "packaged.accessibility_lifecycle.metadata=true",
+            "packaged.accessibility_lifecycle.privacy_policy=true",
+            "packaged.accessibility_lifecycle.settings_contract=true",
+            "packaged.accessibility_lifecycle.packaged_policy=true",
+            "packaged.accessibility_lifecycle.disabled_state=true",
+            "packaged.accessibility_lifecycle.denial_paths=true",
+            "packaged.accessibility_lifecycle.settings_intent=android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS",
+            "packaged.accessibility_lifecycle.raw_globals_absent=true",
+            "packaged.accessibility_lifecycle.unsupported_helpers_absent=true",
+            "packaged.accessibility_lifecycle.pending=0",
         )
         private val INTENT_BROADCAST_BOUNDARY_RUNTIME_MARKERS = listOf(
             "packaged.intent_broadcast.ready=true",

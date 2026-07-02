@@ -30,6 +30,12 @@ class NodeAccessibilitySmokeActivity : Activity() {
                 status.text = CLICKED_TEXT
                 clickLatch.countDown()
             }
+            setOnLongClickListener {
+                longClickCount.incrementAndGet()
+                status.text = LONG_CLICKED_TEXT
+                longClickLatch.countDown()
+                true
+            }
         }
         setContentView(
             LinearLayout(this).apply {
@@ -59,21 +65,34 @@ class NodeAccessibilitySmokeActivity : Activity() {
         const val BUTTON_TEXT = "AutoJs6 Node accessibility smoke click"
         const val BUTTON_DESC = "AutoJs6 Node accessibility smoke button"
         const val CLICKED_TEXT = "AutoJs6 Node accessibility smoke clicked"
+        const val LONG_CLICKED_TEXT = "AutoJs6 Node accessibility smoke long clicked"
 
         private val clickCount = AtomicInteger(0)
+        private val longClickCount = AtomicInteger(0)
 
         @Volatile
         private var clickLatch = CountDownLatch(1)
 
+        @Volatile
+        private var longClickLatch = CountDownLatch(1)
+
         fun reset() {
             clickCount.set(0)
+            longClickCount.set(0)
             clickLatch = CountDownLatch(1)
+            longClickLatch = CountDownLatch(1)
         }
 
         fun awaitClick(timeoutMs: Long): Boolean {
             return clickLatch.await(timeoutMs, TimeUnit.MILLISECONDS)
         }
 
+        fun awaitLongClick(timeoutMs: Long): Boolean {
+            return longClickLatch.await(timeoutMs, TimeUnit.MILLISECONDS)
+        }
+
         fun clickedCount(): Int = clickCount.get()
+
+        fun longClickedCount(): Int = longClickCount.get()
     }
 }

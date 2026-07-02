@@ -375,13 +375,17 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
         }
         if (!profileCapabilitiesText.contains("ProfileModuleCatalog") ||
             !profileCapabilitiesText.contains("ProfileModuleModeFor") ||
-            !profileCapabilitiesText.contains("desktop_compat_opt_in")
+            !profileCapabilitiesText.contains("desktop_compat_opt_in") ||
+            !profileCapabilitiesText.contains("NodeProfileV12CapabilityCatalog") ||
+            !profileCapabilitiesText.contains("NodeProfileV12DeclarationMatrix")
         ) {
             throw GradleException("profile_capabilities.d.ts must declare the profile-aware module catalog and conditional helpers.")
         }
         if (!sampleText.contains("""ProfileModuleModeFor<"java", "safe_default">""") ||
             !sampleText.contains("""ProfileModuleModeFor<"worker_threads", "desktop_compat_opt_in">""") ||
-            !sampleText.contains("ProfileDeclarationMatrix")
+            !sampleText.contains("ProfileDeclarationMatrix") ||
+            !sampleText.contains("""NodeProfileV12ModeFor<"ui.overlay", "pro_compat_opt_in">""") ||
+            !sampleText.contains("NodeProfileV12DeclarationMatrix")
         ) {
             throw GradleException("typescript-smoke sample must cover Safe/Pro/Desktop profile declaration differences.")
         }

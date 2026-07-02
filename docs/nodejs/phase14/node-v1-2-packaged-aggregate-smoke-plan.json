@@ -1,0 +1,130 @@
+{
+  "schema": "autojs6-node-phase14-packaged-aggregate-smoke-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-34",
+  "title": "Node v1.2 packaged aggregate smoke",
+  "status": "ready",
+  "decision": "packaged_aggregate_smoke_contract_ready",
+  "surface": "security.packaged_release_gates",
+  "gradleTask": ":app:installAndRunNodeV12PackagedSmoke",
+  "runMode": "host_contract_ready",
+  "runtimeAuthorityChanged": false,
+  "sourceGates": [
+    "P14-07",
+    "P14-10",
+    "P14-11",
+    "P14-15",
+    "P14-19",
+    "P14-21",
+    "P14-22",
+    "P14-23",
+    "P14-25",
+    "P14-29",
+    "P14-33"
+  ],
+  "requiredAggregateCases": [
+    "declared packaged capability positive path or conditional skip",
+    "undeclared capability denial",
+    "packaged metadata mismatch denial",
+    "Safe downgrade behavior",
+    "task removal or provider destroy cleanup",
+    "report artifact under build/reports/nodejs"
+  ],
+  "smokeSuites": [
+    {
+      "id": "packaged_live_ui",
+      "sourceGate": "P14-07",
+      "currentExecutionState": "imported_packaged_entry_update_close_smoke",
+      "positivePath": "packaged live UI entry/update/close smoke",
+      "undeclaredCapabilityDenial": true,
+      "packagedMetadataMismatchDenial": true,
+      "safeDowngradeRequired": true,
+      "cleanupRequired": true
+    },
+    {
+      "id": "packaged_overlay",
+      "sourceGate": "P14-10",
+      "currentExecutionState": "future_device_archive_required",
+      "positivePath": "show/update/drainEvents/close with SYSTEM_ALERT_WINDOW already granted",
+      "undeclaredCapabilityDenial": true,
+      "packagedMetadataMismatchDenial": true,
+      "safeDowngradeRequired": true,
+      "cleanupRequired": true
+    },
+    {
+      "id": "packaged_accessibility",
+      "sourceGate": "P14-11",
+      "currentExecutionState": "future_device_archive_required",
+      "positivePath": "enabled service lifecycle plus selector/action smoke",
+      "undeclaredCapabilityDenial": true,
+      "packagedMetadataMismatchDenial": true,
+      "safeDowngradeRequired": true,
+      "cleanupRequired": true
+    },
+    {
+      "id": "packaged_image_ocr",
+      "sourceGate": "P14-15",
+      "currentExecutionState": "imported_fake_provider_ocr_smoke",
+      "positivePath": "packaged OCR over opaque image handle with pending bridge calls drained",
+      "undeclaredCapabilityDenial": true,
+      "packagedMetadataMismatchDenial": true,
+      "safeDowngradeRequired": true,
+      "cleanupRequired": true
+    },
+    {
+      "id": "packaged_task_scheduling",
+      "sourceGate": "P14-19",
+      "currentExecutionState": "imported_work_manager_fake_provider_smoke",
+      "positivePath": "scheduleOnce/list/cancel through packaged work_manager fake provider",
+      "undeclaredCapabilityDenial": true,
+      "packagedMetadataMismatchDenial": true,
+      "safeDowngradeRequired": true,
+      "cleanupRequired": true
+    },
+    {
+      "id": "packaged_broadcast",
+      "sourceGate": "P14-21",
+      "currentExecutionState": "future_positive_trigger_archive_required",
+      "positivePath": "install/register/trigger/remove owner-scoped broadcast descriptor",
+      "undeclaredCapabilityDenial": true,
+      "packagedMetadataMismatchDenial": true,
+      "safeDowngradeRequired": true,
+      "cleanupRequired": true
+    },
+    {
+      "id": "packaged_notifications_power",
+      "sourceGate": "P14-22/P14-23",
+      "currentExecutionState": "future_disclosure_and_oem_archive_required",
+      "positivePath": "owned notification post/cancel plus settings/power dry-run matrix",
+      "undeclaredCapabilityDenial": true,
+      "packagedMetadataMismatchDenial": true,
+      "safeDowngradeRequired": true,
+      "cleanupRequired": true
+    },
+    {
+      "id": "packaged_recorder_media",
+      "sourceGate": "P14-25",
+      "currentExecutionState": "imported_status_and_denial_boundary_smoke",
+      "positivePath": "future recorder start/stop with foreground disclosure and scoped temp output",
+      "undeclaredCapabilityDenial": true,
+      "packagedMetadataMismatchDenial": true,
+      "safeDowngradeRequired": true,
+      "cleanupRequired": true
+    },
+    {
+      "id": "packaged_worker_threads",
+      "sourceGate": "P14-29",
+      "currentExecutionState": "conditional_skip_native_unavailable",
+      "positivePath": "future packaged .mjs worker smoke after worker.preflight.status=available",
+      "undeclaredCapabilityDenial": true,
+      "packagedMetadataMismatchDenial": true,
+      "safeDowngradeRequired": true,
+      "cleanupRequired": true
+    }
+  ],
+  "reportArtifacts": [
+    "build/reports/nodejs/phase14-packaged-aggregate-smoke.json",
+    "build/reports/nodejs/phase14-packaged-aggregate-smoke.md"
+  ],
+  "minimumPolicy": "P14-34 adds a deterministic aggregate packaged smoke entry and report contract. It does not claim real install-run execution until device-exported archives are attached."
+}

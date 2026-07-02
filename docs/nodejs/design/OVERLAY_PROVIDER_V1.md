@@ -24,6 +24,28 @@ Window/View denial. It intentionally leaves live overlay creation blocked until
 foreground disclosure, packaged install-run, task-removal cleanup, crash/relaunch,
 and real overlay leak/stress evidence exist.
 
+P14-08 adds a controlled Android overlay provider POC for
+`show`/`update`/`drainEvents`/`close`/`closeAll`. It creates provider-owned
+JSON-only overlay sessions only when `SYSTEM_ALERT_WINDOW` is already granted,
+keeps raw `WindowManager`, `LayoutParams`, `FloatyWindow`, `WindowBridge`,
+`View`, and `Context` objects out of JavaScript, and records the remaining
+foreground disclosure, packaged positive smoke, and stress evidence as future
+promotion work.
+
+P14-09 adds the overlay permission/OEM matrix for this provider POC. The matrix
+imports the permission-denied boundary, reserves Android 12 class and Android
+15+ class archive rows, and keeps permission-granted runs, settings round-trip
+OEM notes, task-removal cleanup, and relaunch behavior as future promotion
+evidence before any opt-in promotion claim.
+
+P14-10 adds a packaged overlay positive smoke/stress fixture. The packaged APK
+declares `ui.overlay`, `ui.overlay.permission`, `ui.overlay.foreground`,
+`ui.overlay.packaged`, and `android.permission.SYSTEM_ALERT_WINDOW`; its
+runtime marker contract covers permission snapshots, foreground disclosure
+text, show/update/drainEvents/close/closeAll, three-session stress, leak
+summary, raw global absence, and zero pending dispatch. Promotion still waits
+for real Android 12 and Android 15+ install-run archives.
+
 The first module name is:
 
 ```js

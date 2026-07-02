@@ -1,0 +1,152 @@
+{
+  "schema": "autojs6-node-phase14-media-playback-mediastore-boundary-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-26",
+  "title": "Media playback and MediaStore boundary decision",
+  "status": "partial",
+  "promotionState": "provider_poc",
+  "surface": "pro.tasks_device_media",
+  "sourceGates": [
+    "P13-26",
+    "P14-04",
+    "P14-25"
+  ],
+  "minimumPromotionPolicy": "Media playback, playlists, scanFile, MediaStore query/insert/update/delete, and broad media-library permissions remain stable-denied for v1.2 unless a future scoped provider defines ownership, exact capabilities, permission prompts, privacy behavior, packaged evidence, rollback, and raw object denial.",
+  "boundaryDecision": {
+    "providerName": "media",
+    "currentPromotedMethods": [
+      "media.getAudioStreamVolume",
+      "media.getAudioStreamMaxVolume",
+      "media.getAudioStreamInfo",
+      "mediainfo.read",
+      "mediainfo.get"
+    ],
+    "currentCapabilityScope": [
+      "media",
+      "media.audio",
+      "media.metadata"
+    ],
+    "playbackPromoted": false,
+    "playlistPromoted": false,
+    "scanFilePromoted": false,
+    "mediaStoreQueryPromoted": false,
+    "mediaStoreMutationPromoted": false,
+    "broadStoragePermissionPromoted": false,
+    "futureScopedProviderAllowedOnlyWithNewGate": true
+  },
+  "stableDeniedSurfaces": [
+    {
+      "id": "media_playback_lifecycle",
+      "status": "stable_denied",
+      "blockedMethods": [
+        "media.play",
+        "media.pause",
+        "media.resume",
+        "media.stop",
+        "media.seek",
+        "media.setVolume",
+        "media.setLooping"
+      ],
+      "requiredFutureEvidence": "A scoped playback provider must define source ownership, lifecycle handles, audio focus, background behavior, notification/foreground disclosure where needed, packaged stress, and rollback cleanup."
+    },
+    {
+      "id": "media_playlist_queue",
+      "status": "stable_denied",
+      "blockedMethods": [
+        "media.playlist",
+        "media.queue",
+        "media.next",
+        "media.previous"
+      ],
+      "requiredFutureEvidence": "Playlist and queue behavior requires bounded JSON descriptors, owner-scoped handles, lifecycle cleanup, and privacy review before promotion."
+    },
+    {
+      "id": "media_scan_file",
+      "status": "stable_denied",
+      "blockedMethods": [
+        "media.scanFile",
+        "media.scanDir"
+      ],
+      "requiredFutureEvidence": "Media scanner integration requires scoped paths, package ownership, denial for broad external paths, and device/package evidence."
+    },
+    {
+      "id": "media_store_query_mutation",
+      "status": "stable_denied",
+      "blockedMethods": [
+        "mediaStore.query",
+        "mediaStore.insert",
+        "mediaStore.update",
+        "mediaStore.delete",
+        "mediaStore.openFile"
+      ],
+      "requiredFutureEvidence": "MediaStore access requires a dedicated scoped provider with exact capabilities, Android permission matrix, owner-scoped rows, privacy review, packaged evidence, and rollback cleanup."
+    },
+    {
+      "id": "broad_media_library_permissions",
+      "status": "stable_denied",
+      "blockedMethods": [
+        "READ_MEDIA_AUDIO",
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_IMAGES",
+        "MANAGE_EXTERNAL_STORAGE",
+        "broad shared-storage roots"
+      ],
+      "requiredFutureEvidence": "Broad media-library or shared-storage permissions are denied unless a future gate proves necessity, user disclosure, least privilege, and downgrade behavior."
+    }
+  ],
+  "futureProviderRequirements": {
+    "exactCapabilitiesRequired": true,
+    "candidateCapabilities": [
+      "media.playback",
+      "media.library",
+      "media.library.mutate"
+    ],
+    "jsonDescriptorsOnly": true,
+    "ownerScopedHandlesRequired": true,
+    "activityOrForegroundOwnershipRequired": true,
+    "androidPermissionMatrixRequired": true,
+    "packagedPositiveAndDenialEvidenceRequired": true,
+    "safeDowngradeRequired": true,
+    "rawObjectsDenied": [
+      "MediaPlayer",
+      "AudioTrack",
+      "AudioFocusRequest",
+      "MediaStore cursor",
+      "ContentResolver",
+      "Uri",
+      "ParcelFileDescriptor",
+      "file descriptor",
+      "MediaScannerConnection",
+      "playlist handle",
+      "Context",
+      "Java object"
+    ]
+  },
+  "requiredArchives": [
+    {
+      "id": "media_playback_scoped_provider_decision_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Decision archive for scoped playback provider or stable denial, covering exact capabilities, source ownership, lifecycle handles, audio focus, background behavior, packaged evidence, and rollback."
+    },
+    {
+      "id": "media_playlist_queue_denial_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Playlist/queue stable-denial or scoped-provider archive proving bounded descriptors, owner-scoped handles, and cleanup."
+    },
+    {
+      "id": "mediastore_scoped_query_mutation_decision_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "MediaStore scoped query/mutation decision archive covering exact capabilities, Android permission matrix, owner-scoped rows, privacy behavior, packaged evidence, and rollback cleanup."
+    },
+    {
+      "id": "broad_media_library_permission_denial_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Broad media-library permission denial archive for READ_MEDIA_* and MANAGE_EXTERNAL_STORAGE, including user disclosure and downgrade behavior if any future exception is proposed."
+    },
+    {
+      "id": "packaged_playback_mediastore_denial_archive",
+      "classification": "future_promotion",
+      "requiredEvidence": "Packaged APK denial archive proving playback, playlist, scanFile, MediaStore, broad storage, raw handles, and metadata mismatch stay denied without a full provider gate."
+    }
+  ]
+}

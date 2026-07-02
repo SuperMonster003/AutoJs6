@@ -97,12 +97,30 @@ class NodeAccessibilityRealDeviceSmokeInstrumentationTest {
         )
         assertEquals(1, NodeAccessibilitySmokeActivity.clickedCount())
 
+        val longClicked = provider.dispatchAccessibilityRequest(
+            method = "longClick",
+            argsJson = JSONArray()
+                .put(selector(NodeAccessibilitySmokeActivity.BUTTON_TEXT))
+                .put(JSONObject().put("timeoutMs", 1000))
+                .toString(),
+        )
+        assertTrue(longClicked.error?.message.orEmpty(), longClicked.ok)
+        assertEquals("true", longClicked.resultJson)
+        assertTrue(
+            "Timed out waiting for controlled accessibility smoke button long click",
+            NodeAccessibilitySmokeActivity.awaitLongClick(2_000L),
+        )
+        assertEquals(1, NodeAccessibilitySmokeActivity.longClickedCount())
+
         val clickedText = provider.dispatchAccessibilityRequest(
             method = "findByText",
-            argsJson = """["${NodeAccessibilitySmokeActivity.CLICKED_TEXT}",{"timeoutMs":1000}]""",
+            argsJson = """["${NodeAccessibilitySmokeActivity.LONG_CLICKED_TEXT}",{"timeoutMs":1000}]""",
         )
         assertTrue(clickedText.error?.message.orEmpty(), clickedText.ok)
-        assertEquals(NodeAccessibilitySmokeActivity.CLICKED_TEXT, JSONObject(clickedText.resultJson ?: "null").getString("text"))
+        assertEquals(
+            NodeAccessibilitySmokeActivity.LONG_CLICKED_TEXT,
+            JSONObject(clickedText.resultJson ?: "null").getString("text"),
+        )
         assertEquals(NodeAccessibilitySmokeActivity.TARGET_TEXT, selectorNode.getString("text"))
 
         if (accessibilityGlobalActionsEnabled()) {
@@ -114,6 +132,11 @@ class NodeAccessibilityRealDeviceSmokeInstrumentationTest {
             val home = provider.dispatchAccessibilityRequest("home")
             assertTrue(home.error?.message.orEmpty(), home.ok)
             assertEquals("true", home.resultJson)
+
+            launchSmokeActivity()
+            val recents = provider.dispatchAccessibilityRequest("recentApps")
+            assertTrue(recents.error?.message.orEmpty(), recents.ok)
+            assertEquals("true", recents.resultJson)
         }
     }
 
