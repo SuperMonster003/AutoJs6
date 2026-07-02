@@ -1327,6 +1327,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedRecorderSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15MediaStorePlaybackDecision
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskDeviceMediaDocSync
+.\gradlew.bat --console=plain :app:verifyNodePhase15SecurityRegressionCorpus
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1489,6 +1490,14 @@ when declarations, examples, release-facing text, compatibility, security,
 error guidance, TESTING, and CI_GATES keep the lane at
 `provider_poc_not_promoted` with `mediastore_playback` `stable_denied` and no
 runtime authority change.
+The `:app:verifyNodePhase15SecurityRegressionCorpus` gate writes
+`phase15-security-regression-corpus.json` plus `.md`, imports P14-33 and P15-04
+through P15-22, updates the v1.3 security corpus, and reports `ready` only when
+all provider families retain positive, negative, abuse, runtime guard,
+promotion precondition, rollback, metadata mismatch, raw-object denial, Safe
+downgrade, foreground disclosure, cross-package ownership denial, and
+stable-denied boundary coverage without runtime authority changes. P15-23
+remains `planned` in the surface manifest by critical-risk policy.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

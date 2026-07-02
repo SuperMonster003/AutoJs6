@@ -526,10 +526,23 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 ### P3 Security, Types, Packaged Aggregate, And Migration
 
-- [ ] P15-23: Update v1.3 security regression corpus.
-  - Gate: proposed `:app:verifyNodePhase15SecurityRegressionCorpus`.
+- [x] P15-23: Update v1.3 security regression corpus.
+  - Gate: `:app:verifyNodePhase15SecurityRegressionCorpus`.
   - Acceptance: every newly promoted provider has positive, negative, abuse,
     rollback, metadata mismatch, and raw-object denial cases.
+  - Security regression corpus gate deployed:
+    - `docs/nodejs/phase15/security-regression-corpus-plan.json`
+    - `docs/nodejs/phase15/PHASE15_SECURITY_REGRESSION_CORPUS.md`
+    - `docs/nodejs/security/NODE_PROFILE_V1_3_SECURITY_REGRESSION_CORPUS.json`
+    - `docs/nodejs/reports/phase15/P15_23_SECURITY_REGRESSION_CORPUS.md`
+    - `tools/nodejs/phase15/verify-node-phase15-security-regression-corpus.js`
+    - `build/reports/nodejs/phase15-security-regression-corpus.json`
+    - `build/reports/nodejs/phase15-security-regression-corpus.md`
+  - Decision: P15-23 updates the v1.3 security regression corpus from P14-33
+    and P15-04 through P15-22 with no newly promoted providers and no runtime
+    authority change. P15-04 through P15-20 remain partial, P15-21 remains
+    `stable_denied`, and the P15-23 surface manifest mapping remains
+    `planned` by critical-risk policy.
 
 - [ ] P15-24: Add v1.3 packaged aggregate smoke.
   - Gate: proposed `:app:installAndRunNodeV13PackagedAggregateSmoke`.

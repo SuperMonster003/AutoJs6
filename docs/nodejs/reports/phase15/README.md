@@ -62,6 +62,7 @@ Provider promotion gates:
 - `:app:installAndRunNodeV13PackagedRecorderSmoke`
 - `:app:verifyNodePhase15MediaStorePlaybackDecision`
 - `:app:verifyNodePhase15TaskDeviceMediaDocSync`
+- `:app:verifyNodePhase15SecurityRegressionCorpus`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -197,3 +198,11 @@ task/device/media docs sync report, then verifies that declarations, examples,
 release-facing text, compatibility, security, error guidance, TESTING, and
 CI_GATES keep the task/device/media lane at `provider_poc_not_promoted` with
 `mediastore_playback` `stable_denied` and no runtime authority change.
+
+`P15-23` reports `ready`: it imports P14-33 plus P15-04 through P15-22, updates
+`NODE_PROFILE_V1_3_SECURITY_REGRESSION_CORPUS.json`, and verifies positive,
+negative, abuse, runtime guard, promotion precondition, rollback, metadata
+mismatch, raw-object denial, Safe downgrade, foreground disclosure,
+cross-package ownership denial, and stable-denied boundary coverage without
+promoting runtime authority. The P15-23 surface manifest mapping remains
+`planned` by critical-risk policy.

@@ -1179,3 +1179,62 @@ tasks.register<Exec>("verifyNodePhase15TaskDeviceMediaDocSync") {
         nodePhase15ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase15SecurityRegressionCorpus") {
+    group = "verification"
+    description = "Verifies the Phase 15 v1.3 security regression corpus update."
+
+    dependsOn("verifyNodePhase15TaskDeviceMediaDocSync", "verifyNodePhase14SecurityRegressionCorpus")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase15/verify-node-phase15-security-regression-corpus.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/security-regression-corpus-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/PHASE15_SECURITY_REGRESSION_CORPUS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/security/NODE_PROFILE_V1_3_SECURITY_REGRESSION_CORPUS.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/security/NODE_PROFILE_V1_2_SECURITY_REGRESSION_CORPUS.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/P15_23_SECURITY_REGRESSION_CORPUS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/PHASE15_NODE_V1_3_PROVIDER_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/phase15-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/node-v1-3-promotion-contracts.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/node-v1-3-disclosure-rollback-audit.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase15-gate.gradle.kts"))
+    inputs.file(nodePhase15ReportDir.map { it.file("phase14-security-regression-corpus.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-packaged-live-ui-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-overlay-provider-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-overlay-oem-matrix.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-packaged-overlay-smoke.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-accessibility-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-media-projection-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-image-ocr-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-ui-automation-media-doc-sync.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-task-database-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-task-schema-rollback.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-packaged-task-smoke.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-intent-broadcast-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-packaged-broadcast-smoke.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-notification-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-settings-power-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-recorder-promotion.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-packaged-recorder-smoke.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-mediastore-playback-decision.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-task-device-media-doc-sync.json") })
+    outputs.files(
+        nodePhase15ReportDir.map { it.file("phase15-security-regression-corpus.json") },
+        nodePhase15ReportDir.map { it.file("phase15-security-regression-corpus.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase15ReportDir.get().asFile.absolutePath,
+    )
+}

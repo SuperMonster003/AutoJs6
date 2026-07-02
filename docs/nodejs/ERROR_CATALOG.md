@@ -283,6 +283,22 @@ authority. It records the v1.3 documentation consistency state:
   descriptors, and Java objects stay governed by the stable denial codes
   already documented in their source gates.
 
+## P15-23 security regression corpus
+
+P15-23 does not add a new error code or promote runtime authority. It updates
+the v1.3 security regression corpus and keeps the existing denial catalog as
+the source for provider-facing errors:
+
+- P15-04 through P15-20 remain `provider_poc_not_promoted` partial gates.
+- P15-21 keeps `mediastore_playback` `stable_denied`.
+- P15-11 and P15-22 remain docs/type/release sync gates only.
+- Raw Android objects, raw file descriptors, Java objects, permission bypasses,
+  packaged metadata mismatch, foreground disclosure gaps, cross-package owner
+  bypasses, Safe downgrade failures, and stable-denied MediaStore/playback
+  attempts remain covered by their existing source-gate diagnostics.
+- The P15-23 surface manifest mapping remains `planned` by critical-risk
+  policy; a host security corpus update cannot promote provider authority.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native
