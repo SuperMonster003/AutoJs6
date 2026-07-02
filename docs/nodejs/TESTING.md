@@ -3434,6 +3434,8 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15SecurityRegressionCorpus
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedAggregateSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15TypeDeclarationProfiles
+.\gradlew.bat --console=plain :app:verifyNodePhase15MigrationProComparison
+.\gradlew.bat --console=plain :app:generateNodePhase15Summary
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3627,3 +3629,9 @@ release notes all keep claims matched to executable evidence. It records no
 newly promoted providers, no runtime authority change, no raw Android object
 parity, and keeps provider POC, stable-denied, security corpus, packaged
 aggregate, TypeScript declaration, and rollback language aligned.
+`:app:generateNodePhase15Summary` writes `phase15-summary.json` plus `.md`,
+generates `PHASE15_SUMMARY.md`, exports `PHASE15_FUTURE_BACKLOG.json`, and
+writes `PHASE15_NEXT_BRANCH_HANDOFF.md`. It imports every Phase 15 report
+through P15-26, reports `ready` only with zero policy violations and zero
+release-blocking reports, and keeps `future_promotion` blockers visible for
+the suggested `feature/nodejs-runtime-v1.4` handoff.

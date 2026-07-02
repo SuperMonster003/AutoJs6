@@ -1330,6 +1330,8 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15SecurityRegressionCorpus
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedAggregateSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15TypeDeclarationProfiles
+.\gradlew.bat --console=plain :app:verifyNodePhase15MigrationProComparison
+.\gradlew.bat --console=plain :app:generateNodePhase15Summary
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1525,6 +1527,13 @@ release notes all keep claims matched to executable evidence. It records no
 newly promoted providers, no runtime authority change, no raw Android object
 parity, and keeps provider POC, stable-denied, security corpus, packaged
 aggregate, TypeScript declaration, and rollback language aligned.
+The `:app:generateNodePhase15Summary` gate writes `phase15-summary.json` plus
+`.md`, generates `PHASE15_SUMMARY.md`, exports
+`PHASE15_FUTURE_BACKLOG.json`, and writes `PHASE15_NEXT_BRANCH_HANDOFF.md`.
+It imports every Phase 15 report through P15-26, reports `ready` only with zero
+policy violations and zero release-blocking reports, and keeps
+`future_promotion` blockers visible for the suggested
+`feature/nodejs-runtime-v1.4` handoff.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

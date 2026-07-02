@@ -65,6 +65,8 @@ Provider promotion gates:
 - `:app:verifyNodePhase15SecurityRegressionCorpus`
 - `:app:installAndRunNodeV13PackagedAggregateSmoke`
 - `:app:verifyNodePhase15TypeDeclarationProfiles`
+- `:app:verifyNodePhase15MigrationProComparison`
+- `:app:generateNodePhase15Summary`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -233,3 +235,10 @@ boundary. The docs record no newly promoted providers, keep runtime authority
 unchanged, preserve `provider_poc_not_promoted`, `stable_denied`,
 `host_contract_ready`, `security_corpus_updated_no_authority_promoted`, and
 `NodeProfileV13CapabilityCatalog` labels, and reject raw Android object parity.
+
+`P15-27` reports `ready`: `:app:generateNodePhase15Summary` imports all Phase
+15 reports through P15-26, generates `PHASE15_SUMMARY.md`, exports
+`PHASE15_FUTURE_BACKLOG.json`, and writes `PHASE15_NEXT_BRANCH_HANDOFF.md`.
+The summary records zero release-blocking reports, keeps `future_promotion`
+blockers visible for v1.4, suggests `feature/nodejs-runtime-v1.4`, and leaves
+runtime authority unchanged.

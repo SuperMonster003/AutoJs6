@@ -566,7 +566,7 @@
       "evidenceClass": "summary_handoff_report",
       "rollbackHook": "keep_phase15_open_until_summary_ready",
       "gate": ":app:generateNodePhase15Summary",
-      "status": "planned"
+      "status": "ready"
     }
   ]
 }

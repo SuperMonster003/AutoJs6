@@ -602,10 +602,24 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 ### P4 Summary And Handoff
 
-- [ ] P15-27: Generate Phase 15 summary and next branch handoff.
-  - Gate: proposed `:app:generateNodePhase15Summary`.
+- [x] P15-27: Generate Phase 15 summary and next branch handoff.
+  - Gate: `:app:generateNodePhase15Summary`.
   - Acceptance: zero open v1.3 release blockers, future backlog visible, and
     next branch handoff documented.
+  - Summary handoff gate deployed:
+    - `docs/nodejs/phase15/node-v1-3-summary-handoff.json`
+    - `docs/nodejs/phase15/PHASE15_NODE_V1_3_SUMMARY_HANDOFF.md`
+    - `docs/nodejs/reports/phase15/P15_27_PHASE15_SUMMARY_HANDOFF.md`
+    - `docs/nodejs/reports/phase15/PHASE15_SUMMARY.md`
+    - `docs/nodejs/reports/phase15/PHASE15_FUTURE_BACKLOG.json`
+    - `docs/nodejs/reports/phase15/PHASE15_NEXT_BRANCH_HANDOFF.md`
+    - `tools/nodejs/phase15/generate-phase15-summary.js`
+    - `build/reports/nodejs/phase15-summary.json`
+    - `build/reports/nodejs/phase15-summary.md`
+  - Decision: P15-27 records `phase15_summary_handoff_ready`, keeps v1.3
+    release-blocking reports at zero, exports the v1.4 future promotion
+    backlog, and documents the next branch handoff without changing runtime
+    authority.
 
 ## Suggested Initial Execution Order
 

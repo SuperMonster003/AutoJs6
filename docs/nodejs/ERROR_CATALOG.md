@@ -356,6 +356,21 @@ sync through `:app:verifyNodePhase15MigrationProComparison`:
   MediaStore, raw Android objects, raw file descriptors, or Java objects
   callable authority.
 
+## P15-27 summary and next-branch handoff
+
+P15-27 does not add a new error code or promote runtime authority. It records
+the v1.3 summary and next-branch handoff through
+`:app:generateNodePhase15Summary`:
+
+- The gate imports every Phase 15 report through P15-26.
+- The summary is ready only with zero policy violations and zero
+  release-blocking reports.
+- `PHASE15_FUTURE_BACKLOG.json` keeps `future_promotion` blockers visible for
+  v1.4.
+- `PHASE15_NEXT_BRANCH_HANDOFF.md` carries Safe default, provider POC,
+  `stable_denied`, `host_contract_ready`, raw-object denial, and unchanged
+  runtime-authority boundaries.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native
