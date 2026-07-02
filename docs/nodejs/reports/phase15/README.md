@@ -40,3 +40,13 @@ promotable provider declares prompt, manifest metadata, install/run copy,
 foreground notification ownership, stop action, privacy, Safe downgrade,
 provider disable flag, diagnostic code, rollback proof path, and crash circuit
 breaker marker requirements before runtime authority changes.
+
+Provider promotion gates:
+
+- `:app:verifyNodePhase15PackagedLiveUiPromotion`
+
+`P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
+evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
+`provider_poc_not_promoted`, and lists the remaining packaged relaunch, task
+removal cleanup, crash recovery, disclosure, Android 15+, and downstream
+security/type/docs sync archives required before promotion.

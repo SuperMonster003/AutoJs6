@@ -3412,6 +3412,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase15PromotionContracts
 .\gradlew.bat --console=plain :app:verifyNodePhase15DisclosureRollbackAudit
+.\gradlew.bat --console=plain :app:verifyNodePhase15PackagedLiveUiPromotion
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3434,3 +3435,9 @@ proof paths, rollback proof paths, provider disable flags, foreground
 notification ownership, stop actions, Safe downgrade, diagnostic codes, and
 crash circuit breaker markers for every promotable provider before runtime
 authority changes.
+`verifyNodePhase15PackagedLiveUiPromotion` writes
+`phase15-packaged-live-ui-promotion.json` plus `.md`, imports the P14-07 live UI
+provider POC and P13 packaged UI evidence, and reports `partial` until
+packaged live UI relaunch, task-removal cleanup, crash recovery, reviewed
+disclosure, Android 15+ archive, and downstream security/type/docs sync
+evidence are attached.

@@ -140,9 +140,19 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-04: Close packaged live UI relaunch and crash recovery.
   - Source backlog: `P14-07`.
-  - Gate: proposed `:app:verifyNodePhase15PackagedLiveUiPromotion`.
+  - Gate: `:app:verifyNodePhase15PackagedLiveUiPromotion`.
   - Acceptance: packaged live UI relaunch, task removal, crash recovery,
     pending-dispatch drain, disclosure, and cleanup pass on required devices.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/packaged-live-ui-promotion-plan.json`
+    - `docs/nodejs/phase15/PHASE15_PACKAGED_LIVE_UI_PROMOTION.md`
+    - `docs/nodejs/reports/phase15/P15_04_PACKAGED_LIVE_UI_PROMOTION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-packaged-live-ui-promotion.js`
+    - `build/reports/nodejs/phase15-packaged-live-ui-promotion.json`
+    - `build/reports/nodejs/phase15-packaged-live-ui-promotion.md`
+  - Still open: packaged live UI task relaunch archive, task-removal cleanup
+    archive, crash recovery archive, user-visible disclosure archive, Android
+    15+ packaged archive, and downstream security/type/docs sync.
 
 - [ ] P15-05: Promote Android overlay provider permission-granted path.
   - Source backlog: `P14-08`.

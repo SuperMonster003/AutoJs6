@@ -1308,6 +1308,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15SurfaceManifest
 .\gradlew.bat --console=plain :app:verifyNodePhase15PromotionContracts
 .\gradlew.bat --console=plain :app:verifyNodePhase15DisclosureRollbackAudit
+.\gradlew.bat --console=plain :app:verifyNodePhase15PackagedLiveUiPromotion
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1327,6 +1328,12 @@ The `:app:verifyNodePhase15DisclosureRollbackAudit` gate writes
 manifest metadata, install/run copy, foreground notification, stop action,
 privacy, Safe downgrade, provider disable flag, diagnostic, rollback proof, and
 crash circuit breaker requirements for every promotable provider.
+The `:app:verifyNodePhase15PackagedLiveUiPromotion` gate writes
+`phase15-packaged-live-ui-promotion.json` plus `.md`, imports P14-07 and P13
+packaged UI evidence, and keeps `live_ui` at `provider_poc_not_promoted` until
+provider-specific packaged relaunch, task removal cleanup, crash recovery,
+reviewed disclosure, Android 15+, and downstream security/type/docs evidence
+are archived.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
