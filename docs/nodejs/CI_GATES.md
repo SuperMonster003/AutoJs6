@@ -1317,6 +1317,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15ImageOcrPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15UiAutomationMediaDocSync
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskDatabasePromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15TaskSchemaRollback
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1400,6 +1401,13 @@ and TimedTask snapshot evidence, and P15 disclosure/rollback requirements. It
 keeps `task_database` unpromoted until live mutation, owner/id mapping, schema
 migration/rollback, wall-clock scheduler, packaged mutation smoke,
 cross-package denial, disclosure/stop action, Safe downgrade, and
+security/type/docs evidence are archived.
+The `:app:verifyNodePhase15TaskSchemaRollback` gate writes
+`phase15-task-schema-rollback.json` plus `.md`, imports the P14-18 schema
+migration and rollback contract and the P15-12 task database dependency gate.
+It keeps task schema migration and rollback unpromoted until live migration
+tests, corruption recovery, legacy visibility downgrade, packaged rollback,
+backup/restore, Safe downgrade, cross-package rollback denial, and
 security/type/docs evidence are archived.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash

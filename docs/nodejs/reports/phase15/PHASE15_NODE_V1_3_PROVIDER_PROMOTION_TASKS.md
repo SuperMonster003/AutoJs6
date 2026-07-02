@@ -317,9 +317,24 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-13: Close task schema migration and rollback evidence.
   - Source backlog: `P14-18`.
-  - Gate: proposed `:app:verifyNodePhase15TaskSchemaRollback`.
+  - Gate: `:app:verifyNodePhase15TaskSchemaRollback`.
   - Acceptance: legacy rows, packaged rows, downgrade cleanup, backup, and
     rollback fixtures pass.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/task-schema-rollback-plan.json`
+    - `docs/nodejs/phase15/PHASE15_TASK_SCHEMA_ROLLBACK.md`
+    - `docs/nodejs/reports/phase15/P15_13_TASK_SCHEMA_ROLLBACK.md`
+    - `tools/nodejs/phase15/verify-node-phase15-task-schema-rollback.js`
+    - `build/reports/nodejs/phase15-task-schema-rollback.json`
+    - `build/reports/nodejs/phase15-task-schema-rollback.md`
+  - Still open: `task_schema_live_migration_tests_archive`,
+    `task_schema_corruption_recovery_archive`,
+    `task_schema_downgrade_legacy_visibility_archive`,
+    `task_schema_packaged_rollback_archive`,
+    `task_schema_backup_restore_archive`,
+    `task_schema_safe_downgrade_archive`,
+    `task_schema_cross_package_rollback_denial_archive`, and
+    `phase15_task_device_media_doc_sync`.
 
 - [ ] P15-14: Add packaged task scheduling smoke.
   - Source backlog: `P14-19`.

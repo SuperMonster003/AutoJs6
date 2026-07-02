@@ -3421,6 +3421,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15ImageOcrPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15UiAutomationMediaDocSync
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskDatabasePromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15TaskSchemaRollback
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3508,3 +3509,9 @@ reports `partial` until live mutation, owner/id mapping, schema
 migration/rollback, wall-clock scheduler, packaged mutation smoke,
 cross-package denial, disclosure/stop action, Safe downgrade, and
 security/type/docs evidence are attached.
+`verifyNodePhase15TaskSchemaRollback` writes
+`phase15-task-schema-rollback.json` plus `.md`, imports the P14-18 schema
+migration and rollback contract and the P15-12 task database dependency gate.
+It reports `partial` until live migration tests, corruption recovery, legacy
+visibility downgrade, packaged rollback, backup/restore, Safe downgrade,
+cross-package rollback denial, and security/type/docs evidence are attached.

@@ -52,6 +52,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15ImageOcrPromotion`
 - `:app:verifyNodePhase15UiAutomationMediaDocSync`
 - `:app:verifyNodePhase15TaskDatabasePromotion`
+- `:app:verifyNodePhase15TaskSchemaRollback`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -116,3 +117,9 @@ snapshot evidence, and P15 disclosure/rollback requirements. It keeps
 schema migration/rollback, wall-clock scheduler evidence, packaged mutation
 smoke, cross-package denial, disclosure/stop action, Safe downgrade, and
 security/type/docs sync land.
+
+`P15-13` currently reports `partial`: it imports the P14 schema migration and
+rollback contract plus the P15-12 task database dependency gate. It keeps task
+schema migration and rollback unpromoted until live migration tests, corruption
+recovery, legacy visibility downgrade, packaged rollback, backup/restore, Safe
+downgrade, cross-package rollback denial, and security/type/docs sync land.
