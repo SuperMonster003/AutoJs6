@@ -1,0 +1,185 @@
+{
+  "schema": "autojs6-node-phase15-packaged-task-smoke-plan-v1",
+  "phase": "Phase 15: Node v1.3 Provider Promotion",
+  "task": "P15-14",
+  "title": "Packaged task scheduling smoke",
+  "status": "partial",
+  "promotionState": "provider_poc_not_promoted",
+  "providerId": "task_database",
+  "sourceBacklogTasks": [
+    "P14-19"
+  ],
+  "upstreamGates": [
+    ":app:verifyNodePhase15TaskDatabasePromotion",
+    ":app:verifyNodePhase15TaskSchemaRollback"
+  ],
+  "surface": "pro.tasks_device_media",
+  "minimumPromotionPolicy": "Packaged task scheduling promotion requires packaged APK add/list/enable-disable/remove evidence, relaunch and task-removal cleanup archives, denial matrix coverage, user-visible disclosure, stop action, rollback, Safe downgrade, and package-identity ownership proof before the future tasks provider can be promoted.",
+  "smokeContract": {
+    "currentModule": "work_manager",
+    "futureProvider": "tasks",
+    "currentPackagedEvidence": [
+      "v1_1_packaged_fake_provider_work_manager_schedule_list_cancel",
+      "live_work_manager_packaged_project_entry_scheduled_runner"
+    ],
+    "futureOperations": [
+      "add",
+      "list",
+      "enable",
+      "disable",
+      "remove"
+    ],
+    "workManagerOperationsImported": [
+      "scheduleOnce",
+      "list",
+      "cancel"
+    ],
+    "packagedTaskRowsPromoted": false,
+    "processDeathRelaunchPromoted": false,
+    "taskRemovalCleanupPromoted": false,
+    "foregroundDisclosurePromoted": false,
+    "safeDowngradePromoted": false,
+    "runtimeAuthorityChanged": false,
+    "rawObjectsDenied": [
+      "TimedTask",
+      "IntentTask",
+      "TaskScheduler",
+      "WorkManager",
+      "WorkRequest",
+      "PendingIntent",
+      "database cursor",
+      "mutable row handle"
+    ]
+  },
+  "ownershipContract": {
+    "packageIdentityRequired": true,
+    "packagedRowsMainAppAliasAllowed": false,
+    "legacyRowsPreserved": true,
+    "safeDowngradeAction": "disable_or_remove_owned_packaged_rows",
+    "taskRemovalAction": "disable_or_remove_owned_packaged_rows_and_cancel_owned_scheduled_work",
+    "crossPackageRemovePolicy": "deny",
+    "missingCapabilityPolicy": "deny_require_tasks_and_future_tasks_capability_until_provider_promotion",
+    "rowVisibility": "packaged rows are visible only to the owning packaged app/provider until an audited user-visible task UI exists"
+  },
+  "smokeMatrix": [
+    {
+      "id": "packaged_work_manager_fake_schedule_list_cancel",
+      "status": "imported",
+      "source": "EmbeddedNodePackagedApkSmokeTest v1.1 bridge fake provider",
+      "requiredEvidence": "Packaged APK resolves work_manager, declares work_manager permission, scheduleOnce/list/cancel succeeds through fake provider, shadowing is denied, and pending bridge calls return to zero."
+    },
+    {
+      "id": "live_work_manager_packaged_project_entry",
+      "status": "imported",
+      "source": "NodeWorkManagerBridgeInstrumentationTest live provider",
+      "requiredEvidence": "Live Android provider schedules a packaged project entry through work_manager, executes via scheduled_runner, persists lastRun/runHistory, and can cancel the owned work."
+    },
+    {
+      "id": "future_tasks_database_add_list_enable_disable_remove",
+      "status": "future_promotion",
+      "source": "future tasks provider",
+      "requiredEvidence": "Packaged APK add/list/enable-disable/remove over JSON-safe task database rows with package identity ownership."
+    },
+    {
+      "id": "future_process_death_relaunch_task_removal",
+      "status": "future_promotion",
+      "source": "future packaged archive",
+      "requiredEvidence": "Process death, relaunch, task removal cleanup, and crash recovery evidence for packaged task rows."
+    },
+    {
+      "id": "future_packaged_task_disclosure_stop_action_safe_downgrade",
+      "status": "future_promotion",
+      "source": "future packaged archive",
+      "requiredEvidence": "Install/run disclosure, foreground notification ownership, stop action, Safe downgrade, rollback, and package-scoped disable/remove evidence."
+    },
+    {
+      "id": "future_packaged_task_denial_matrix",
+      "status": "future_promotion",
+      "source": "future packaged archive",
+      "requiredEvidence": "Cross-package mutation denial, missing tasks capability denial, metadata mismatch denial, and raw object denial evidence."
+    }
+  ],
+  "readyEvidence": [
+    {
+      "id": "phase14_packaged_task_scheduling_contract",
+      "source": "build/reports/nodejs/phase14-packaged-task-scheduling-smoke.json",
+      "meaning": "P14-19 imports packaged work_manager schedule/list/cancel and the live packaged project-entry scheduled-runner anchor while leaving future task database rows unpromoted."
+    },
+    {
+      "id": "phase15_task_database_dependency_gate",
+      "source": "build/reports/nodejs/phase15-task-database-promotion.json",
+      "meaning": "P15-12 keeps task_database unpromoted and lists task mutation, packaged mutation, disclosure, Safe downgrade, and docs blockers."
+    },
+    {
+      "id": "phase15_task_schema_dependency_gate",
+      "source": "build/reports/nodejs/phase15-task-schema-rollback.json",
+      "meaning": "P15-13 keeps schema migration and rollback fixture-only while packaged rollback, backup, Safe downgrade, and cross-package denial archives remain open."
+    },
+    {
+      "id": "phase15_promotion_contracts",
+      "source": "build/reports/nodejs/phase15-promotion-contracts.json",
+      "meaning": "The task_database provider remains provider_poc until implementation, device, packaged, disclosure, rollback, security, type, docs, Safe downgrade, and raw-object denial evidence all pass."
+    },
+    {
+      "id": "phase15_disclosure_rollback_contract",
+      "source": "build/reports/nodejs/phase15-disclosure-rollback-audit.json",
+      "meaning": "The task_database provider declares disclosure, stop action, rollback, task-removal, relaunch, crash recovery, and Safe downgrade requirements."
+    },
+    {
+      "id": "phase15_surface_manifest_mapping",
+      "source": "docs/nodejs/phase15/phase15-surface-manifest.json",
+      "meaning": "P15-14 owns P14-19 under pro.tasks_device_media with packaged_smoke_archive evidence."
+    }
+  ],
+  "openBlockers": [
+    {
+      "id": "packaged_task_database_positive_smoke_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged APK add/list/enable-disable/remove smoke over future tasks database rows with package identity ownership."
+    },
+    {
+      "id": "packaged_task_process_death_relaunch_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged task process-death, relaunch, crash recovery, and last-run diagnostic archive."
+    },
+    {
+      "id": "packaged_task_removal_cleanup_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Task removal cleanup evidence proving owned scheduled work is cancelled and package-scoped rows are disabled or removed."
+    },
+    {
+      "id": "packaged_task_disclosure_safe_downgrade_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged disclosure, stop action, Safe downgrade, and rollback evidence for task database promotion."
+    },
+    {
+      "id": "packaged_task_cross_package_denial_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged cross-package add/update/remove denial evidence proving package-owned rows cannot alias main-app or legacy Rhino rows."
+    },
+    {
+      "id": "packaged_task_missing_capability_denial_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Missing future tasks capability and require(\"tasks\") denial archive with stable diagnostics."
+    },
+    {
+      "id": "packaged_task_safe_downgrade_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Provider-disable Safe downgrade proof that packaged task rows are preserved, disabled, or removed according to owner policy."
+    },
+    {
+      "id": "phase15_task_device_media_doc_sync",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "P15-22, P15-23, P15-25, and P15-26 sync before packaged task scheduling can be marked promoted."
+    }
+  ],
+  "runtimeAuthorityChanged": false
+}

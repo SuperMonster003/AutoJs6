@@ -338,9 +338,24 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-14: Add packaged task scheduling smoke.
   - Source backlog: `P14-19`.
-  - Gate: proposed `:app:installAndRunNodeV13PackagedTaskSmoke`.
+  - Gate: `:app:installAndRunNodeV13PackagedTaskSmoke`.
   - Acceptance: schedule/list/cancel, relaunch, task removal, denial, and Safe
     downgrade are archived.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/packaged-task-smoke-plan.json`
+    - `docs/nodejs/phase15/PHASE15_PACKAGED_TASK_SMOKE.md`
+    - `docs/nodejs/reports/phase15/P15_14_PACKAGED_TASK_SMOKE.md`
+    - `tools/nodejs/phase15/verify-node-phase15-packaged-task-smoke.js`
+    - `build/reports/nodejs/phase15-packaged-task-smoke.json`
+    - `build/reports/nodejs/phase15-packaged-task-smoke.md`
+  - Still open: `packaged_task_database_positive_smoke_archive`,
+    `packaged_task_process_death_relaunch_archive`,
+    `packaged_task_removal_cleanup_archive`,
+    `packaged_task_disclosure_safe_downgrade_archive`,
+    `packaged_task_cross_package_denial_archive`,
+    `packaged_task_missing_capability_denial_archive`,
+    `packaged_task_safe_downgrade_archive`, and
+    `phase15_task_device_media_doc_sync`.
 
 - [ ] P15-15: Promote JSON-safe IntentTask and broadcast provider.
   - Source backlog: `P14-20`.

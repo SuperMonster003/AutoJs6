@@ -53,6 +53,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15UiAutomationMediaDocSync`
 - `:app:verifyNodePhase15TaskDatabasePromotion`
 - `:app:verifyNodePhase15TaskSchemaRollback`
+- `:app:installAndRunNodeV13PackagedTaskSmoke`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -123,3 +124,11 @@ rollback contract plus the P15-12 task database dependency gate. It keeps task
 schema migration and rollback unpromoted until live migration tests, corruption
 recovery, legacy visibility downgrade, packaged rollback, backup/restore, Safe
 downgrade, cross-package rollback denial, and security/type/docs sync land.
+
+`P15-14` currently reports `partial`: it imports the P14 packaged task
+scheduling smoke contract, the packaged `work_manager` schedule/list/cancel
+smoke, the live packaged project-entry scheduled-runner anchor, and the P15-12
+/ P15-13 dependency gates. It keeps packaged task scheduling unpromoted until
+packaged task database positive smoke, process-death/relaunch, task-removal
+cleanup, disclosure/Safe downgrade, cross-package denial, missing-capability
+denial, Safe downgrade, and security/type/docs sync land.

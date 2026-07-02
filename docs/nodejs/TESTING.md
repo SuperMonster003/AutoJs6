@@ -3422,6 +3422,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15UiAutomationMediaDocSync
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskDatabasePromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskSchemaRollback
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedTaskSmoke
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3515,3 +3516,11 @@ migration and rollback contract and the P15-12 task database dependency gate.
 It reports `partial` until live migration tests, corruption recovery, legacy
 visibility downgrade, packaged rollback, backup/restore, Safe downgrade,
 cross-package rollback denial, and security/type/docs evidence are attached.
+`installAndRunNodeV13PackagedTaskSmoke` writes
+`phase15-packaged-task-smoke.json` plus `.md`, imports the P14-19 packaged
+task scheduling smoke contract, the packaged `work_manager`
+schedule/list/cancel smoke, the live packaged project-entry scheduled-runner
+anchor, and the P15-12/P15-13 dependency gates. It reports `partial` until
+packaged task database positive smoke, process-death/relaunch, task-removal
+cleanup, disclosure/Safe downgrade, cross-package denial, missing-capability
+denial, Safe downgrade, and security/type/docs evidence are attached.
