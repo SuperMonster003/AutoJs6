@@ -1311,6 +1311,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15PackagedLiveUiPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15OverlayProviderPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15OverlayOemMatrix
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedOverlaySmoke
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1350,6 +1351,13 @@ Android 12 and Android 15+ device slots, and keeps `overlay` unpromoted until
 granted-permission archives, OEM settings notes, task removal/relaunch
 behavior, foreground disclosure/stop action, and security/type/docs evidence
 are archived.
+The `:app:installAndRunNodeV13PackagedOverlaySmoke` gate writes
+`phase15-packaged-overlay-smoke.json` plus `.md`, imports the P14-10 packaged
+overlay positive smoke/stress fixture and marker contract, depends on the
+P15-05 and P15-06 overlay gates, and keeps `overlay` unpromoted until packaged
+install-run archives, Android 12/15+ coverage, disclosure/stop action, task
+removal/relaunch/crash behavior, stress/leak proof, and security/type/docs
+evidence are archived.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

@@ -3415,6 +3415,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15PackagedLiveUiPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15OverlayProviderPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15OverlayOemMatrix
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedOverlaySmoke
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3457,3 +3458,10 @@ Android 12 and Android 15+ device slots, and reports `partial` until
 granted-permission archives, OEM settings notes, task removal/relaunch
 behavior, foreground disclosure/stop action, and security/type/docs evidence
 are attached.
+`installAndRunNodeV13PackagedOverlaySmoke` writes
+`phase15-packaged-overlay-smoke.json` plus `.md`, imports the P14-10 packaged
+overlay positive smoke/stress fixture and marker contract, depends on the
+P15-05 and P15-06 overlay gates, and reports `partial` until packaged
+install-run archives, Android 12/15+ coverage, disclosure/stop action, task
+removal/relaunch/crash behavior, stress/leak proof, and security/type/docs
+evidence are attached.

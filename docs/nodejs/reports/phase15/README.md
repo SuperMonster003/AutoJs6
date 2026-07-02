@@ -46,6 +46,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15PackagedLiveUiPromotion`
 - `:app:verifyNodePhase15OverlayProviderPromotion`
 - `:app:verifyNodePhase15OverlayOemMatrix`
+- `:app:installAndRunNodeV13PackagedOverlaySmoke`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -65,4 +66,11 @@ permission/OEM matrix, validates the required Android 12 and Android 15+
 device slots, and depends on the P15-05 overlay provider gate. It keeps
 `overlay` unpromoted until granted-permission archives, OEM settings notes,
 task removal/relaunch behavior, foreground disclosure/stop action, and
+security/type/docs sync land.
+
+`P15-07` currently reports `partial`: it imports the P14 packaged overlay
+positive smoke/stress fixture, marker contract, and APK metadata, then depends
+on the P15-05 and P15-06 overlay gates. It keeps `overlay` unpromoted until
+packaged install-run archives, Android 12/15+ coverage, disclosure/stop action,
+task removal/relaunch/crash behavior, stress/leak proof, and
 security/type/docs sync land.

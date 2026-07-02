@@ -194,9 +194,22 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-07: Add packaged overlay positive smoke and stress.
   - Source backlog: `P14-10`.
-  - Gate: proposed `:app:installAndRunNodeV13PackagedOverlaySmoke`.
+  - Gate: `:app:installAndRunNodeV13PackagedOverlaySmoke`.
   - Acceptance: packaged overlay create/update/close, denial, Safe downgrade,
     crash cleanup, and resource stress are archived.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/packaged-overlay-smoke-plan.json`
+    - `docs/nodejs/phase15/PHASE15_PACKAGED_OVERLAY_SMOKE.md`
+    - `docs/nodejs/reports/phase15/P15_07_PACKAGED_OVERLAY_SMOKE.md`
+    - `tools/nodejs/phase15/verify-node-phase15-packaged-overlay-smoke.js`
+    - `build/reports/nodejs/phase15-packaged-overlay-smoke.json`
+    - `build/reports/nodejs/phase15-packaged-overlay-smoke.md`
+  - Still open: `packaged_overlay_positive_smoke_archive`,
+    `packaged_overlay_positive_device_archive`,
+    `packaged_overlay_foreground_disclosure_stop_action`,
+    `packaged_overlay_task_removal_relaunch_crash`,
+    `packaged_overlay_event_drain_leak_stress`, and
+    `phase15_security_type_doc_sync`.
 
 - [ ] P15-08: Close accessibility lifecycle and selector/action matrix.
   - Source backlog: `P14-11`, `P14-12`.
