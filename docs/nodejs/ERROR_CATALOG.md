@@ -367,6 +367,21 @@ profiles as `type_declaration_profiles_v1_2_ready` behind
   packaged aggregate rows visible to TypeScript users.
 - Runtime authority remains unchanged.
 
+## P14-36 migration and Pro comparison
+
+P14-36 does not add a new error code. It records v1.2 migration and Pro
+comparison docs as `migration_pro_comparison_v1_2_ready` behind
+`:app:verifyNodePhase14MigrationProComparison`:
+
+- Existing capability, permission, packaged metadata, Safe downgrade,
+  stable-denial, unsupported-worker, and raw-object denial diagnostics remain
+  canonical.
+- Migration docs must keep claims tied to executable evidence and must not
+  imply raw Android object parity.
+- Pro UI/floaty, accessibility, screenshot/OCR, tasks, notifications, recorder,
+  worker policy, packaged behavior, and rollback docs remain evidence-bound.
+- Runtime authority remains unchanged.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

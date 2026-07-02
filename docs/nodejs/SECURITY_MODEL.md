@@ -415,6 +415,15 @@ rows, and packaged aggregate metadata as declaration-only profile truth. The
 matrix keeps `metadataOnly: true` and `grantsAuthority: false`; future-only
 methods remain visibly gated and runtime authority remains unchanged.
 
+P14-36 records v1.2 migration and Pro comparison claim sync through
+`:app:verifyNodePhase14MigrationProComparison`. The gate keeps migration docs
+tied to executable evidence for Pro UI/floaty, accessibility, screenshot/OCR,
+tasks, notifications, recorder, worker policy, packaged behavior, and rollback.
+It also keeps raw Android object parity denied for raw `Context`, `Activity`,
+`View`, `Bitmap`, `Intent`, `MediaProjection`, `MediaRecorder`, `TimedTask`,
+`BroadcastReceiver`, `Notification`, and `WakeLock` objects. Runtime authority
+remains unchanged.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are

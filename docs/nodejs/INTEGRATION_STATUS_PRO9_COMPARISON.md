@@ -1364,6 +1364,50 @@ explicit args/env policy, limited clock/random, network/process-exit denial,
 resource budgets, worker integration, packaged `.wasm`/WASI behavior, and
 hostile corpus coverage remain open.
 
+## Phase 14 v1.2 Migration And Pro Comparison Claim Sync
+
+P14-36 records v1.2 migration and Pro comparison docs as ready. These migration
+claims match executable evidence and do not imply raw Android object parity.
+
+The v1.2 Pro comparison status is:
+
+- Pro UI and floaty: runnable evidence is limited to controlled UI paths and
+  existing focused smoke; overlay/floaty remains `provider_poc_not_promoted`.
+- accessibility: selector/action declarations and guarded examples are
+  migration evidence, while service-enabled lifecycle and Android 12/15+ action
+  archives remain future evidence.
+- screenshot/OCR: OCR and image declarations are migration evidence, while
+  MediaProjection capture, advanced live operations, and raw image handles
+  remain gated.
+- tasks: `work_manager` and one-shot `compat.tasks` are the migration path;
+  task database mutation, IntentTask/broadcast rows, wall-clock parity, and raw
+  task objects remain future-only.
+- notifications: ownership/status/settings helpers are migration evidence;
+  foreground disclosure, packaged post/cancel, and OEM behavior remain required
+  before broader Pro claims.
+- recorder: status and denial-oriented examples are migration evidence; real
+  recording sessions, foreground microphone disclosure, temp output ownership,
+  and packaged stress remain future-only.
+- worker policy: P14-32 records `worker_intentionally_unsupported_v1_2`;
+  runnable workers, packaged workers, WorkerPool replacement APIs,
+  process-worker facades, and raw `child_process` are not v1.2 Pro/Desktop
+  runtime claims.
+- packaged behavior: P14-34 is `host_contract_ready`, not a real device
+  install-run archive claim.
+- rollback: Safe downgrade, packaged metadata mismatch, profile rollback, and
+  provider disable policy are part of the v1.2 migration evidence.
+
+`NodeProfileV12CapabilityCatalog` is metadata-only. It documents migration
+requirements without granting runtime authority; runtime authority remains
+unchanged.
+runtime authority remains unchanged.
+
+No v1.2 Pro comparison row should imply raw `Context`, raw `Activity`, raw
+`View`, raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`,
+raw `TimedTask`, raw `BroadcastReceiver`, raw `Notification`, or raw `WakeLock`
+object parity.
+No v1.2 Pro comparison row should imply raw `View` parity.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

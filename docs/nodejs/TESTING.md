@@ -2408,6 +2408,21 @@ provider POC rows, stable-denied rows, intentionally unsupported
 worker/process-worker rows, packaged aggregate metadata, and visible
 future-only gating without changing runtime authority.
 
+Phase 14 v1.2 migration and Pro comparison docs gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14MigrationProComparison
+```
+
+This host gate records P14-36 as ready with
+`migration_pro_comparison_v1_2_ready`. It depends on the P14-35 declaration
+profile gate and the P13-56 migration/Pro9 comparison gate, imports P14-16,
+P14-27, P14-32, P14-33, P14-34, and P14-35 generated reports, and verifies
+that v1.2 migration docs cover Pro UI/floaty, accessibility, screenshot/OCR,
+tasks, notifications, recorder, worker policy, packaged behavior, and rollback.
+The gate fails if docs stop saying claims match executable evidence or imply
+raw Android object parity.
+
 Phase 13 profile rollback playbook gate:
 
 ```powershell

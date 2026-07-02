@@ -1015,3 +1015,46 @@ For release flavors and ABI policy, see `docs/nodejs/design/RELEASE_FLAVORS.md`.
   device evidence contract.
 - Run examples under `sample/nodejs/` for reference.
 - Re-run packaged APK verification when the script is packaged.
+
+## Phase 14 v1.2 Migration Claim Sync
+
+P14-36 records v1.2 migration and Pro comparison docs as ready. These migration
+claims match executable evidence and do not imply raw Android object parity.
+
+The v1.2 migration status is:
+
+- Pro UI and floaty: `ui.showLayout` and the existing focused UI smoke remain
+  the runnable migration path; `ui.overlay` and floaty-style behavior remain
+  `provider_poc_not_promoted` until permission, disclosure, event-drain,
+  packaged, and device-matrix archives are promoted.
+- accessibility: selector/action declarations and guarded examples are
+  migration evidence; service-enabled lifecycle and Android 12/15+ action
+  archives remain future evidence.
+- screenshot/OCR: OCR and image-handle declarations are available as guarded
+  migration evidence; screenshot/MediaProjection capture, advanced image live
+  operations, and raw image handles remain gated.
+- tasks: `work_manager` and one-shot `compat.tasks` stay the migration path;
+  task database mutation, IntentTask/broadcast rows, wall-clock parity, and raw
+  task objects remain future-only.
+- notifications: owned notification/status/settings helpers are migration
+  evidence; foreground disclosure, packaged post/cancel, and OEM matrix
+  archives remain required before broader Pro claims.
+- recorder: `recorder.getStatus()` and denial-oriented examples are migration
+  evidence; real recorder sessions, foreground microphone disclosure, temp
+  output ownership, and packaged stress remain future-only.
+- worker policy: P14-32 records `worker_intentionally_unsupported_v1_2`;
+  runnable `worker_threads`, packaged workers, WorkerPool replacement APIs,
+  process-worker facades, and raw `child_process` remain unavailable.
+- packaged behavior: P14-34 records the aggregate packaged gate as
+  `host_contract_ready`; it is a deterministic host contract, not a real
+  device install-run success claim.
+- rollback: Safe downgrade, profile rollback, packaged metadata mismatch, and
+  provider disable policy remain required migration evidence.
+
+`NodeProfileV12CapabilityCatalog` is the TypeScript metadata source for these
+rows. It is declaration-only, and runtime authority remains unchanged.
+
+Do not migrate scripts by expecting raw `Context`, raw `Activity`, raw `View`,
+raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw
+`TimedTask`, raw `BroadcastReceiver`, raw `Notification`, or raw `WakeLock`
+objects to be exposed in Node.

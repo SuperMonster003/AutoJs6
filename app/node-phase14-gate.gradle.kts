@@ -1664,3 +1664,60 @@ tasks.register<Exec>("verifyNodePhase14TypeDeclarationProfiles") {
         nodePhase14ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase14MigrationProComparison") {
+    group = "verification"
+    description = "Verifies the Phase 14 Node v1.2 migration and Pro comparison docs claim sync."
+
+    dependsOn(
+        "verifyNodePhase14TypeDeclarationProfiles",
+        "verifyNodePhase13MigrationPro9Comparison",
+    )
+
+    val scriptFile =
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase14/verify-node-phase14-migration-pro-comparison.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/PHASE14_NODE_V1_2_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_36_MIGRATION_PRO_COMPARISON.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/node-v1-2-migration-pro-comparison.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_NODE_V1_2_MIGRATION_PRO_COMPARISON.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/EXAMPLES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/profile_capabilities.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/phase14-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase14-gate.gradle.kts"))
+    listOf(
+        "phase13-migration-pro9-comparison.json",
+        "phase14-ui-automation-media-doc-sync.json",
+        "phase14-task-device-media-doc-sync.json",
+        "phase14-desktop-runtime-doc-sync.json",
+        "phase14-security-regression-corpus.json",
+        "phase14-packaged-aggregate-smoke.json",
+        "phase14-type-declaration-profiles.json",
+    ).forEach { reportName ->
+        inputs.file(nodePhase14ReportDir.map { it.file(reportName) })
+    }
+    outputs.files(
+        nodePhase14ReportDir.map { it.file("phase14-migration-pro-comparison.json") },
+        nodePhase14ReportDir.map { it.file("phase14-migration-pro-comparison.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase14ReportDir.get().asFile.absolutePath,
+    )
+}

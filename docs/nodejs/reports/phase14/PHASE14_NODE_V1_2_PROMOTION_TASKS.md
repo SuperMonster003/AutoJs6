@@ -902,9 +902,28 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: type smoke covers promoted APIs and keeps future-only methods
     visibly gated.
 
-- [ ] P14-36: Update migration and Pro comparison docs for v1.2.
+- [x] P14-36: Update migration and Pro comparison docs for v1.2.
   - Scope: Pro UI, floaty, accessibility, screenshot/OCR, tasks,
     notifications, recorder, worker policy, packaged behavior, and rollback.
+  - Gate: `:app:verifyNodePhase14MigrationProComparison`.
+  - Migration and Pro comparison gate deployed:
+    - Adds `docs/nodejs/phase14/node-v1-2-migration-pro-comparison.json`
+      and `PHASE14_NODE_V1_2_MIGRATION_PRO_COMPARISON.md`.
+    - Adds `docs/nodejs/reports/phase14/P14_36_MIGRATION_PRO_COMPARISON.md`.
+    - Adds
+      `tools/nodejs/phase14/verify-node-phase14-migration-pro-comparison.js`
+      plus Gradle entry `:app:verifyNodePhase14MigrationProComparison`.
+    - Syncs v1.2 migration claims in `MIGRATION_FROM_RHINO.md`,
+      `INTEGRATION_STATUS_PRO9_COMPARISON.md`,
+      `COMPATIBILITY_NOTES_PRO_AUTOX.md`, `COMPATIBILITY_PROFILE.md`, and
+      `EXAMPLES.md`.
+    - Imports P13-56 plus P14-16, P14-27, P14-32, P14-33, P14-34, and P14-35
+      generated reports.
+    - Records `migration_pro_comparison_v1_2_ready`, requires claims to match
+      executable evidence, and keeps raw Android object parity explicitly
+      denied.
+    - Writes `build/reports/nodejs/phase14-migration-pro-comparison.json`
+      and `.md`.
   - Acceptance: claims match executable evidence and do not imply raw Android
     object parity.
 

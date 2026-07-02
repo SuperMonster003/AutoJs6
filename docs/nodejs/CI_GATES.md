@@ -1274,6 +1274,13 @@ verifies the v1.2 TypeScript declaration profile matrix. It covers promoted
 callable declarations, provider POC rows, stable-denied rows, intentionally
 unsupported worker/process-worker rows, packaged aggregate metadata, and
 visible future-only gating without promoting runtime authority.
+The `:app:verifyNodePhase14MigrationProComparison` gate writes
+`phase14-migration-pro-comparison.json` plus `.md`, depends on P14-35 and
+P13-56, imports P14-16, P14-27, P14-32, P14-33, P14-34, and P14-35 generated
+reports, and verifies that v1.2 migration/Pro comparison docs cover Pro
+UI/floaty, accessibility, screenshot/OCR, tasks, notifications, recorder,
+worker policy, packaged behavior, and rollback. It fails if docs stop tying
+claims to executable evidence or imply raw Android object parity.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

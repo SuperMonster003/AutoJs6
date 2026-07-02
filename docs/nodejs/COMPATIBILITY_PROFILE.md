@@ -2309,6 +2309,25 @@ Current policy:
 
 See `docs/nodejs/design/WORK_MANAGER.md` for the current design decision.
 
+## Phase 14 v1.2 Migration And Pro Comparison Claim Sync
+
+P14-36 records v1.2 migration and Pro comparison docs as ready. These migration
+claims match executable evidence and do not imply raw Android object parity.
+
+The v1.2 compatibility profile keeps Pro UI and floaty, accessibility,
+screenshot/OCR, tasks, notifications, recorder, worker policy, packaged
+behavior, and rollback claims tied to their source gates. `provider_poc_not_promoted`
+surfaces remain POC or documentation evidence, P14-32 keeps
+`worker_intentionally_unsupported_v1_2`, P14-34 keeps packaged aggregate smoke
+at `host_contract_ready`, and P14-35 keeps `NodeProfileV12CapabilityCatalog`
+metadata-only. Runtime authority remains unchanged.
+runtime authority remains unchanged.
+
+AutoJs6 Node v1.2 does not expose raw `Context`, raw `Activity`, raw `View`,
+raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw
+`TimedTask`, raw `BroadcastReceiver`, raw `Notification`, or raw `WakeLock`
+objects as migration parity.
+
 ## Error Code Compatibility
 
 Errors keep existing Node-style or legacy `code` values for compatibility. AutoJs6-specific canonical codes are exposed through `error.autojs6Code`. When a legacy AutoJs6 code is preserved, `error.legacyCode` repeats the legacy `code`.

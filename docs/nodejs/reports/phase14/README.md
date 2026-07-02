@@ -35,6 +35,7 @@ Provider POC gates:
 Docs, examples, and final gates:
 
 - `:app:verifyNodePhase14TypeDeclarationProfiles`
+- `:app:verifyNodePhase14MigrationProComparison`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -249,3 +250,13 @@ stable-denied helpers, and `NodeProfileV12DeclarationMatrix`, extends the
 TypeScript smoke with v1.2 profile assertions, keeps declarations
 metadata-only, and writes `phase14-type-declaration-profiles.json` plus `.md`
 behind `:app:verifyNodePhase14TypeDeclarationProfiles`.
+
+`P14_36_MIGRATION_PRO_COMPARISON.md` records the v1.2 migration and Pro
+comparison docs as `ready` with a `migration_pro_comparison_v1_2_ready`
+decision. It syncs migration claims across `MIGRATION_FROM_RHINO.md`,
+`INTEGRATION_STATUS_PRO9_COMPARISON.md`,
+`COMPATIBILITY_NOTES_PRO_AUTOX.md`, `COMPATIBILITY_PROFILE.md`, and
+`EXAMPLES.md`, imports P13-56 plus P14-16, P14-27, P14-32, P14-33, P14-34, and
+P14-35 reports, verifies that claims match executable evidence and do not imply
+raw Android object parity, and writes `phase14-migration-pro-comparison.json`
+plus `.md` behind `:app:verifyNodePhase14MigrationProComparison`.
