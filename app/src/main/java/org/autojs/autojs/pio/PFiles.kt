@@ -34,13 +34,15 @@ object PFiles {
     }
 
     private val DEFAULT_OPEN_MODE: String = OpenMode.READ.abbr
+    private val TYPE_SCRIPT_DECLARATION_EXTENSIONS = listOf(".d.ts", ".d.mts", ".d.cts")
 
     const val DEFAULT_BUFFER_SIZE = 8192
 
     @JvmField
     val DEFAULT_ENCODING: String = Charset.defaultCharset().name()
 
-    private val sGlobalAppContext = GlobalAppContext.get()
+    private val sGlobalAppContext: Context
+        get() = GlobalAppContext.get()
 
     @JvmOverloads
     @JvmStatic
@@ -350,6 +352,10 @@ object PFiles {
     @JvmStatic
     fun getNameWithoutExtension(filePath: String): String {
         val fileName = getName(filePath)
+        val lowerCaseFileName = fileName.lowercase(Locale.ROOT)
+        TYPE_SCRIPT_DECLARATION_EXTENSIONS.firstOrNull { lowerCaseFileName.endsWith(it) }?.let {
+            return fileName.dropLast(it.length)
+        }
         var b = fileName.lastIndexOf('.')
         if (b < 0) b = fileName.length
         return fileName.take(b)

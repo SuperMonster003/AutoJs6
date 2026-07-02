@@ -152,6 +152,9 @@ public abstract class JavaScriptSource extends ScriptSource {
             return false;
         }
         String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
+        if (isTypeScriptDeclarationFileName(lowerCaseName)) {
+            return false;
+        }
         return lowerCaseName.endsWith(".mjs") ||
                 lowerCaseName.endsWith(".cjs") ||
                 lowerCaseName.endsWith(".mts") ||
@@ -166,6 +169,9 @@ public abstract class JavaScriptSource extends ScriptSource {
             return false;
         }
         String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
+        if (isTypeScriptDeclarationFileName(lowerCaseName)) {
+            return false;
+        }
         return lowerCaseName.endsWith(".js") ||
                 lowerCaseName.endsWith(".mjs") ||
                 lowerCaseName.endsWith(".cjs") ||
@@ -173,6 +179,16 @@ public abstract class JavaScriptSource extends ScriptSource {
                 lowerCaseName.endsWith(".cts") ||
                 lowerCaseName.endsWith(".ts") ||
                 lowerCaseName.endsWith(".tsx");
+    }
+
+    public static boolean isTypeScriptDeclarationFileName(String fileName) {
+        if (fileName == null) {
+            return false;
+        }
+        String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
+        return lowerCaseName.endsWith(".d.ts") ||
+                lowerCaseName.endsWith(".d.mts") ||
+                lowerCaseName.endsWith(".d.cts");
     }
 
     @Override

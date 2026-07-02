@@ -555,7 +555,11 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
         val runtimeSources = linkedMapOf<String, String>()
         root.walkTopDown()
-            .filter { file -> file.isFile && file.extension.lowercase() in RUNTIME_MODULE_SOURCE_EXTENSIONS }
+            .filter { file ->
+                file.isFile &&
+                    file.extension.lowercase() in RUNTIME_MODULE_SOURCE_EXTENSIONS &&
+                    !NodeTypeScriptStripper.isTypeScriptDeclarationSourceName(file.name)
+            }
             .map { file -> file to file.relativePathInside(root) }
             .sortedWith(
                 compareBy<Pair<File, String>>(
@@ -586,6 +590,9 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     }
 
     private fun isEsmSourceName(sourceName: String, workingDirectory: String?): Boolean {
+        if (NodeTypeScriptStripper.isTypeScriptDeclarationSourceName(sourceName)) {
+            return false
+        }
         val extension = File(sourceName).extension.lowercase()
         if (extension == MJS_EXTENSION || extension == MTS_EXTENSION) {
             return true
@@ -649,7 +656,10 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                     val moduleSource = normalizeEmbeddedSource(sourceText(moduleFile))
                     moduleSources[moduleKey] = moduleSource
                     stats.recordPreloadedModule(moduleFile, moduleSource, depth)
-                    if (moduleFile.extension.lowercase() in COMMON_JS_RECURSIVE_SOURCE_EXTENSIONS) {
+                    if (
+                        moduleFile.extension.lowercase() in COMMON_JS_RECURSIVE_SOURCE_EXTENSIONS &&
+                        !NodeTypeScriptStripper.isTypeScriptDeclarationSourceName(moduleFile.name)
+                    ) {
                         collectCommonJsModuleSources(
                             source = moduleSource,
                             parentDirectory = moduleFile.parentFile ?: rootDirectory,
@@ -932,7 +942,8 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             .firstOrNull { candidate ->
                 candidate.isFile &&
                         candidate.isInsideOrSame(rootDirectory) &&
-                        candidate.extension.lowercase() in COMMON_JS_MODULE_EXTENSIONS
+                        candidate.extension.lowercase() in COMMON_JS_MODULE_EXTENSIONS &&
+                        !NodeTypeScriptStripper.isTypeScriptDeclarationSourceName(candidate.name)
             }
     }
 

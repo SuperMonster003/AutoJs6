@@ -20,6 +20,9 @@ object NodeTypeScriptStripper {
     ) : IllegalArgumentException(message)
 
     fun stripIfTypeScript(sourceName: String, source: String): Result {
+        if (isTypeScriptDeclarationSourceName(sourceName)) {
+            return Result(source = source, stripped = false)
+        }
         val extension = sourceName.extension().lowercase(Locale.ROOT)
         if (extension == "tsx") {
             throw unsupportedExtension(sourceName)
@@ -49,11 +52,20 @@ object NodeTypeScriptStripper {
     }
 
     fun isTypeScriptSourceName(sourceName: String): Boolean {
-        return sourceName.extension().lowercase(Locale.ROOT) in TYPESCRIPT_EXTENSIONS
+        return !isTypeScriptDeclarationSourceName(sourceName) &&
+            sourceName.extension().lowercase(Locale.ROOT) in TYPESCRIPT_EXTENSIONS
     }
 
     fun isUnsupportedTypeScriptSourceName(sourceName: String): Boolean {
-        return sourceName.extension().equals("tsx", ignoreCase = true)
+        return !isTypeScriptDeclarationSourceName(sourceName) &&
+            sourceName.extension().equals("tsx", ignoreCase = true)
+    }
+
+    fun isTypeScriptDeclarationSourceName(sourceName: String): Boolean {
+        val lowerCaseName = sourceName.lowercase(Locale.ROOT)
+        return lowerCaseName.endsWith(".d.ts") ||
+            lowerCaseName.endsWith(".d.mts") ||
+            lowerCaseName.endsWith(".d.cts")
     }
 
     private fun detectUnsupportedSyntax(sourceName: String, source: String) {
