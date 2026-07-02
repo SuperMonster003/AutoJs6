@@ -138,9 +138,84 @@ function valuesFor(completer, line, prefix) {
   return complete(completer, line, prefix).map((item) => item.value || item.caption);
 }
 
+function captionsFor(completer, line, prefix) {
+  return complete(completer, line, prefix).map((item) => item.caption || item.value);
+}
+
 function completionFor(completer, line, prefix, value) {
   return complete(completer, line, prefix)
     .find((item) => (item.value || item.caption) === value);
+}
+
+function createFakeEditor(line) {
+  let text = String(line || "");
+  let cursor = { row: 0, column: text.length };
+  const insertAtCursor = (value) => {
+    value = String(value || "");
+    text = `${text.slice(0, cursor.column)}${value}${text.slice(cursor.column)}`;
+    cursor = { row: 0, column: cursor.column + value.length };
+  };
+  return {
+    session: {
+      getLine(row) {
+        return row === 0 ? text : "";
+      },
+      replace(range, value) {
+        if (range.start.row !== 0 || range.end.row !== 0) {
+          throw new Error(`Unexpected multi-row replace ${JSON.stringify(range)}`);
+        }
+        const start = range.start.column;
+        const end = range.end.column;
+        value = String(value || "");
+        text = `${text.slice(0, start)}${value}${text.slice(end)}`;
+        cursor = { row: 0, column: start + value.length };
+      },
+    },
+    renderer: {
+      scrollCursorIntoView() {},
+    },
+    selection: {
+      moveToPosition(pos) {
+        cursor = { row: pos.row, column: pos.column };
+      },
+    },
+    getCursorPosition() {
+      return { row: cursor.row, column: cursor.column };
+    },
+    moveCursorTo(row, column) {
+      cursor = { row, column };
+    },
+    execCommand(name, value) {
+      if (name !== "insertstring") {
+        throw new Error(`Unexpected command ${name}`);
+      }
+      insertAtCursor(value);
+    },
+    insert: insertAtCursor,
+    getText() {
+      return text;
+    },
+  };
+}
+
+function acceptedTextFor(completer, line, prefix, value) {
+  return acceptedStateFor(completer, line, prefix, value).text;
+}
+
+function acceptedStateFor(completer, line, prefix, value) {
+  const completion = completionFor(completer, line, prefix, value);
+  if (!completion) {
+    throw new Error(`${line}: missing completion ${value}`);
+  }
+  const editor = createFakeEditor(line);
+  const accepted = completer.insertMatch(editor, completion);
+  if (accepted === false) {
+    throw new Error(`${line}: insertMatch rejected ${value}`);
+  }
+  return {
+    text: editor.getText(),
+    cursor: editor.getCursorPosition(),
+  };
 }
 
 function assertIncludes(actual, expected, label) {
@@ -189,6 +264,35 @@ function assertHoverIncludes(completer, line, token, expectedCaption, expectedDo
   }
 }
 
+function sessionFor(line) {
+  return {
+    getValue() {
+      return line;
+    },
+    getLine(row) {
+      return row === 0 ? line : "";
+    },
+    doc: {
+      positionToIndex(pos) {
+        return pos.column;
+      },
+    },
+  };
+}
+
+function assertSignatureHelp(completer, line, expected) {
+  const help = completer.getSignatureHelp(sessionFor(line), { row: 0, column: line.length });
+  if (!help) {
+    throw new Error(`${line}: missing signature help`);
+  }
+  for (const [key, value] of Object.entries(expected)) {
+    if (help[key] !== value) {
+      throw new Error(`${line}: unexpected ${key}: actual=${help[key]}, expected=${value}`);
+    }
+  }
+  return help;
+}
+
 function createAutoJs6Completer() {
   const sandbox = createSandbox();
   runScript(sandbox, GENERATED_INDEX_PATH);
@@ -222,14 +326,30 @@ function assertLanguageToolsAcceptShim() {
 
 function assertMobileBridgeStabilityHooks() {
   const bridge = fs.readFileSync(BRIDGE_PATH, "utf8");
-  for (const expected of ["scheduleResize", "recoverableError", "firstPaint", "requestFirstPaint"]) {
+  for (const expected of [
+    "scheduleResize",
+    "recoverableError",
+    "firstPaint",
+    "requestFirstPaint",
+    "insertShortcutText",
+    "skipExistingClosingPair",
+    "shortcut_insert",
+    "installMemberCompletionDotTrigger",
+    "installTouchCursorSelectionGuard",
+    "touch_cursor",
+    "isSingleInsertedText",
+    "scheduleMemberCompletionAfterDot",
+    "restartMemberCompletionAfterDot",
+    'resetImeTextInputSelectionWindow("shortcut_insert")',
+    "popup.container.scrollLeft += dx",
+  ]) {
     if (!bridge.includes(expected)) {
       throw new Error(`ACE mobile stability hook is missing from bridge: ${expected}`);
     }
   }
 
   const css = fs.readFileSync(CSS_PATH, "utf8");
-  for (const expected of ["visibility: hidden", "body.ace-ready #editor"]) {
+  for (const expected of ["visibility: hidden", "body.ace-ready #editor", ".ace_editor.ace_autocomplete"]) {
     if (!css.includes(expected)) {
       throw new Error(`ACE first-paint CSS guard is missing: ${expected}`);
     }
@@ -254,9 +374,60 @@ assertIncludes(valuesFor(completer, "threads.st", "st"), ["start"], "threads.st"
 assertIncludes(valuesFor(completer, "engines.my", "my"), ["myEngine"], "engines.my");
 assertIncludes(valuesFor(completer, "Object.prototype.", ""), ["hasOwnProperty", "toString"], "Object.prototype.");
 assertIncludes(valuesFor(completer, "Object.", ""), ["assign", "keys", "hasOwn"], "Object.");
+assertIncludes(valuesFor(completer, "app.", ""), ["launch", "autojs", "versionCode"], "app.");
+assertIncludes(captionsFor(completer, "app.", ""), ["launch"], "app. caption");
 assertIncludes(valuesFor(completer, "obj.has", "has"), ["hasOwnProperty"], "generic object prototype fallback");
 assertIncludes(valuesFor(completer, "Array.prototype.ma", "ma"), ["map"], "Array.prototype.ma");
+assertIncludes(valuesFor(completer, '"abc".', ""), ["trim", "toUpperCase"], 'literal "abc".');
+assertIncludes(captionsFor(completer, '"abc".', ""), ["trim"], 'literal "abc". caption');
+assertIncludes(valuesFor(completer, "[].", ""), ["map", "push"], "literal [].");
+assertIncludes(valuesFor(completer, "(1).", ""), ["toFixed", "toString"], "literal (1).");
+assertIncludes(valuesFor(completer, "({}).", ""), ["hasOwnProperty", "toString"], "literal ({}).");
 assertIncludes(valuesFor(completer, "JSON.str", "str"), ["stringify"], "JSON.str");
+assertIncludes(valuesFor(completer, "app.autojs.", ""), ["version", "setRootMode", "getRootMode"], "app.autojs.");
+assertIncludes(valuesFor(completer, "RootMod", "RootMod"), ["RootMode"], "RootMod");
+assertIncludes(captionsFor(completer, "app.laun", "laun"), ["launch"], "app.laun caption");
+assertIncludes(
+  captionsFor(completer, "Object.prototype.", ""),
+  ["hasOwnProperty"],
+  "Object.prototype. caption",
+);
+const launchCompletion = completionFor(completer, "app.laun", "laun", "launch");
+if (!launchCompletion || launchCompletion.snippet !== "launch(${1})") {
+  throw new Error(`app.laun should insert a call snippet; actual=${JSON.stringify(launchCompletion)}`);
+}
+const hasOwnPropertyCompletion = completionFor(completer, "Object.prototype.", "", "hasOwnProperty");
+if (!hasOwnPropertyCompletion || hasOwnPropertyCompletion.caption !== "hasOwnProperty") {
+  throw new Error(
+    `Object.prototype. should display a short member caption and insert only the member; ` +
+      `actual=${JSON.stringify(hasOwnPropertyCompletion)}`,
+  );
+}
+const objectToStringCompletion = completionFor(completer, "Object.prototype.", "", "toString");
+if (!objectToStringCompletion || objectToStringCompletion.snippet !== "toString()") {
+  throw new Error(
+    `Object.prototype.toString should insert a no-arg call snippet; actual=${JSON.stringify(objectToStringCompletion)}`,
+  );
+}
+if (acceptedTextFor(completer, "app.auto", "auto", "autojs") !== "app.autojs") {
+  throw new Error("app.autojs member accept should preserve the receiver");
+}
+if (acceptedTextFor(completer, "device.base", "base", "baseOS") !== "device.baseOS") {
+  throw new Error("device.baseOS member accept should preserve the receiver");
+}
+if (acceptedTextFor(completer, "Object.prototype.", "", "hasOwnProperty") !== "Object.prototype.hasOwnProperty()") {
+  throw new Error("Object.prototype member accept should preserve the full receiver chain");
+}
+const objectToStringAccepted = acceptedStateFor(completer, "Object.prototype.", "", "toString");
+if (objectToStringAccepted.text !== "Object.prototype.toString()") {
+  throw new Error("Object.prototype.toString accept should preserve the full receiver chain");
+}
+if (objectToStringAccepted.cursor.column !== "Object.prototype.toString()".length) {
+  throw new Error("No-arg method accept should leave the cursor after the closing paren");
+}
+if (acceptedTextFor(completer, "app.laun", "laun", "launch") !== "app.launch()") {
+  throw new Error("function member accept should insert a call snippet after the receiver");
+}
 assertDocIncludes(
   completer,
   "app.la",
@@ -292,6 +463,16 @@ assertHoverIncludes(
   "Object.prototype.hasOwnProperty",
   "Object.prototype.hasOwnProperty(propertyKey: PropertyKey): boolean;",
 );
+assertSignatureHelp(completer, "app.launch(", {
+  caption: "app.launch",
+  signature: "launch(app: App | App.Alias | App.PackageName): boolean",
+  activeParameter: 0,
+});
+assertSignatureHelp(completer, "app.autojs.setRootMode('root', ", {
+  caption: "app.autojs.setRootMode",
+  signature: "setRootMode(mode: number | boolean | 'auto' | 'root' | 'non-root', isWriteIntoPreference?: boolean | 'write_into_pref'): void",
+  activeParameter: 1,
+});
 
 const fallbackCompleter = createFallbackCompleter();
 assertIncludes(valuesFor(fallbackCompleter, "app.la", "la"), ["launch", "launchApp"], "fallback app.la");

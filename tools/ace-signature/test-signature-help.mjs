@@ -67,6 +67,9 @@ function createSandbox() {
               child.parentNode = this;
               return child;
             },
+            contains(child) {
+              return child === this || this.children.includes(child);
+            },
             removeChild(child) {
               this.children = this.children.filter((it) => it !== child);
               child.parentNode = null;
@@ -93,6 +96,10 @@ function createSandbox() {
             this.children.push(child);
             child.parentNode = this;
             return child;
+          },
+          removeChild(child) {
+            this.children = this.children.filter((it) => it !== child);
+            child.parentNode = null;
           },
         },
         documentElement: {
@@ -127,6 +134,30 @@ function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+function createEmitter() {
+  const handlers = new Map();
+  return {
+    on(name, callback) {
+      handlers.set(name, [...(handlers.get(name) || []), callback]);
+    },
+    off(name, callback) {
+      handlers.set(name, (handlers.get(name) || []).filter((it) => it !== callback));
+    },
+    emit(name, event) {
+      for (const callback of handlers.get(name) || []) {
+        callback(event);
+      }
+    },
+    listenerCount(name) {
+      return (handlers.get(name) || []).length;
+    },
+  };
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function assertSignature(api, text, offset, expected) {
@@ -189,8 +220,11 @@ const session = {
     },
   },
 };
+const commands = createEmitter();
+let cursorColumn = "Function.prototype.apply(this, ".length;
 const editor = {
   session,
+  commands,
   container: {
     addEventListener() {},
     removeEventListener() {},
@@ -210,10 +244,11 @@ const editor = {
   },
   on() {},
   getCursorPosition() {
-    return { row: 0, column: "Function.prototype.apply(this, ".length };
+    return { row: 0, column: cursorColumn };
   },
 };
 const controller = api.createController({ editor, session, delayMs: 1 });
+assert(commands.listenerCount("afterExec") === 1, "Controller should listen for command afterExec");
 assert(controller.showAtPosition({ row: 0, column: "Function.prototype.apply(this, ".length }) === true, "Controller should show apply signature");
 const state = controller.getState();
 assert(state.visible === true, "Controller state should become visible");
@@ -221,6 +256,13 @@ assert(state.signature === "apply(thisArg: any, argArray?: any): any", `Unexpect
 assert(state.activeParameter === 1, `Unexpected active parameter: ${state.activeParameter}`);
 controller.hide();
 assert(controller.getState().visible === false, "Controller should hide signature help");
+session.value = "Function.prototype.apply(";
+cursorColumn = "Function.prototype.apply(".length;
+commands.emit("afterExec", { command: { name: "insertstring" }, args: "(" });
+await wait(5);
+assert(controller.getState().visible === true, "Controller should show signature help after typing an opening paren");
+controller.destroy();
+assert(commands.listenerCount("afterExec") === 0, "Controller should remove command afterExec listener");
 
 const html = fs.readFileSync(HTML_PATH, "utf8");
 assert(
@@ -231,7 +273,10 @@ assert(
 
 const css = fs.readFileSync(CSS_PATH, "utf8");
 assert(css.includes(".autojs6_signature_tooltip"), "Signature tooltip CSS is missing");
-assert(css.includes("pointer-events: none"), "Signature tooltip must not steal touch input");
+assert(css.includes("pointer-events: auto"), "Signature tooltip should receive touch input");
+assert(css.includes("overflow: auto"), "Signature tooltip should be scrollable");
+assert(css.includes("-webkit-overflow-scrolling: touch"), "Signature tooltip should use momentum touch scrolling");
+assert(css.includes("autojs6_signature_tooltip_compact"), "Signature tooltip compact fallback CSS is missing");
 
 const bridge = fs.readFileSync(BRIDGE_PATH, "utf8");
 for (const expected of [
@@ -248,5 +293,11 @@ const sourceCode = fs.readFileSync(SIGNATURE_HELP_PATH, "utf8");
 assert(!sourceCode.includes("fetch("), "Signature help must not fetch resources");
 assert(!sourceCode.includes("XMLHttpRequest"), "Signature help must not use XHR");
 assert(!sourceCode.includes("eval("), "Signature help must not use eval");
+assert(sourceCode.includes('"afterExec"'), "Signature help should listen to Ace afterExec events");
+assert(sourceCode.includes("hideFromEditorPointer"), "Signature help should keep tooltip touch events visible");
+assert(sourceCode.includes("isInsideTooltipEvent"), "Signature help should identify tooltip touch events");
+assert(sourceCode.includes("autocompletePopupRect"), "Signature help should inspect autocomplete popup geometry");
+assert(sourceCode.includes("rectsOverlap"), "Signature help should avoid overlapping autocomplete popup");
+assert(sourceCode.includes("setCompactFallback"), "Signature help should support compact collision fallback");
 
 console.log("ACE signature help tests passed.");

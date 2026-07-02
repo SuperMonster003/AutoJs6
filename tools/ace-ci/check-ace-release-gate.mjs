@@ -346,7 +346,10 @@ assertIncludes(FILES.aceFallbackPolicy, "else -> true");
 
 assertIncludes(FILES.aceLspServerManager, 'STATE_DISABLED = "disabled"');
 assertIncludes(FILES.aceLspServerManager, 'STATE_CONFIGURED_NO_SERVER = "configured-no-server"');
+assertIncludes(FILES.aceLspServerManager, 'STATE_LOCAL_LANGUAGE_SERVICE = "local-language-service"');
 assertIncludes(FILES.aceLspServerManager, 'TRANSPORT_UNAVAILABLE = "unavailable"');
+assertIncludes(FILES.aceLspServerManager, 'TRANSPORT_IN_PROCESS = "in-process"');
+assertIncludes(FILES.aceLspServerManager, 'DIAGNOSTIC_PROVIDER_ACE_JSHINT = "ace-jshint"');
 assertIncludes(FILES.aceLspServerManager, "startSupported = false");
 assertIncludes(FILES.aceLspServerManager, "serverAvailable = false");
 assertNotIncludes(FILES.aceLspServerManager, "WebSocket");

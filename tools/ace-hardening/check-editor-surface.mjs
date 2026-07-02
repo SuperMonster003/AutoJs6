@@ -19,8 +19,24 @@ const CSS_PATH = path.join(ACE_ROOT, "autojs6", "autojs6.css");
 const BRIDGE_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_ace_bridge.js");
 const COMPLETER_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_completer.js");
 const LSP_CLIENT_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_lsp_client.js");
+const TS_SERVICE_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_ts_language_service.js");
 const TOOLTIP_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_tooltip.js");
 const SIGNATURE_HELP_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_signature_help.js");
+const ACE_BRIDGE_KT_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "ace",
+  "AceBridge.kt",
+);
 const ACE_CODE_EDITOR_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -35,6 +51,37 @@ const ACE_CODE_EDITOR_PATH = path.join(
   "editor",
   "ace",
   "AceCodeEditor.kt",
+);
+const ACE_LSP_PREFERENCES_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "ace",
+  "AceEditorLspPreferences.kt",
+);
+const ACE_LSP_SERVER_MANAGER_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "ace",
+  "lsp",
+  "AceLspServerManager.kt",
 );
 const ACE_SCRIPT_EDITOR_ENGINE_PATH = path.join(
   PROJECT_ROOT,
@@ -282,6 +329,19 @@ const CODE_EDITOR_SETTINGS_FRAGMENT_PATH = path.join(
   "settings",
   "CodeEditorSettingsFragment.kt",
 );
+const ACE_LSP_FILE_TYPES_PREFERENCE_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "settings",
+  "AceLspFileTypesPreference.kt",
+);
 const EDITOR_SETTING_ACTION_REGISTRY_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -294,6 +354,15 @@ const EDITOR_SETTING_ACTION_REGISTRY_PATH = path.join(
   "ui",
   "settings",
   "EditorSettingActionRegistry.kt",
+);
+const CODE_EDITOR_SETTINGS_XML_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "res",
+  "xml",
+  "fragment_code_editor_settings.xml",
 );
 const FRAGMENT_HOST_MATERIAL_DIALOG_PATH = path.join(
   PROJECT_ROOT,
@@ -360,9 +429,13 @@ const css = read(CSS_PATH);
 const bridge = read(BRIDGE_PATH);
 const completer = read(COMPLETER_PATH);
 const lspClient = read(LSP_CLIENT_PATH);
+const tsService = read(TS_SERVICE_PATH);
 const tooltip = read(TOOLTIP_PATH);
 const signatureHelp = read(SIGNATURE_HELP_PATH);
+const aceBridgeKt = read(ACE_BRIDGE_KT_PATH);
 const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
+const aceLspPreferences = read(ACE_LSP_PREFERENCES_PATH);
+const aceLspServerManager = read(ACE_LSP_SERVER_MANAGER_PATH);
 const aceScriptEditorEngine = read(ACE_SCRIPT_EDITOR_ENGINE_PATH);
 const nativeCodeEditorEngine = read(NATIVE_CODE_EDITOR_ENGINE_PATH);
 const codeEditText = read(CODE_EDIT_TEXT_PATH);
@@ -381,7 +454,9 @@ const symbolsConfigStore = read(SYMBOLS_CONFIG_STORE_PATH);
 const symbolsSettingsActivity = read(SYMBOLS_SETTINGS_ACTIVITY_PATH);
 const codeEditorSettingsDialog = read(CODE_EDITOR_SETTINGS_DIALOG_PATH);
 const codeEditorSettingsFragment = read(CODE_EDITOR_SETTINGS_FRAGMENT_PATH);
+const aceLspFileTypesPreference = read(ACE_LSP_FILE_TYPES_PREFERENCE_PATH);
 const editorSettingActionRegistry = read(EDITOR_SETTING_ACTION_REGISTRY_PATH);
+const codeEditorSettingsXml = read(CODE_EDITOR_SETTINGS_XML_PATH);
 const fragmentHostMaterialDialog = read(FRAGMENT_HOST_MATERIAL_DIALOG_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
@@ -399,13 +474,20 @@ assertOrder(
   ],
   "ACE editor bootstrap order",
 );
+if (
+  html.includes('<script src="./autojs6/typescript/typescriptServices.js"></script>') ||
+  html.includes('<script src="./autojs6/autojs6_ts_language_service.js"></script>')
+) {
+  throw new Error("ACE TypeScript service must be loaded lazily after first paint");
+}
 
 assertMatch(css, /html,\s*body,\s*#editor\s*\{[\s\S]*overflow:\s*hidden/, "ACE root overflow guard");
 assertMatch(css, /#editor\s*\{[\s\S]*visibility:\s*hidden/, "hidden editor before first paint");
 assertMatch(css, /body\.ace-ready #editor\s*\{[\s\S]*visibility:\s*visible/, "visible editor after first paint");
 assertMatch(css, /html\s*\{[\s\S]*background:\s*#f7f8fa/, "light first-paint background");
 assertMatch(css, /html\.ace-theme-dark,\s*body\.ace-theme-dark,\s*body\.ace-theme-dark #editor\s*\{[\s\S]*background:\s*#1e1e1e/, "dark first-paint background");
-assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*JetBrains Mono/, "stable ACE font stack");
+assertIncludes(css, '--autojs6-editor-font-family: "Iosevka", "JetBrains Mono", "Source Code Pro", monospace;', "stable ACE font stack variable");
+assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*font-family:\s*var\(--autojs6-editor-font-family\)/, "stable ACE font stack usage");
 assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*-webkit-user-select:\s*text/, "ACE text selection enabled");
 assertMatch(css, /\.ace_gutter-cell\.ace_breakpoint\s*\{[\s\S]*radial-gradient/, "breakpoint gutter marker");
 assertMatch(css, /\.ace_gutter-cell\.ace_breakpoint\s*\{[\s\S]*7px center/, "breakpoint gutter marker anchor");
@@ -426,7 +508,9 @@ assertMatch(css, /\.ace_marker-layer \.ace_bracket\s*\{[\s\S]*background:\s*rgba
 assertMatch(css, /body\.ace-theme-dark \.ace_marker-layer \.ace_bracket\s*\{[\s\S]*rgba\(45,\s*212,\s*191,\s*0\.28\)/, "dark bracket match contrast");
 assertMatch(css, /\.autojs6_hover_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE hover tooltip must not steal touch input");
 assertMatch(css, /body\.ace-theme-dark \.autojs6_hover_tooltip\s*\{[\s\S]*background:\s*#20242b/, "ACE hover tooltip dark style");
-assertMatch(css, /\.autojs6_signature_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE signature tooltip must not steal touch input");
+assertMatch(css, /\.autojs6_signature_tooltip\s*\{[\s\S]*pointer-events:\s*auto/, "ACE signature tooltip receives touch scrolling input");
+assertMatch(css, /\.autojs6_signature_tooltip\s*\{[\s\S]*touch-action:\s*pan-x pan-y/, "ACE signature tooltip supports two-axis touch scrolling");
+assertIncludes(css, ".autojs6_signature_tooltip_compact", "ACE signature tooltip compact fallback style");
 assertMatch(css, /body\.ace-theme-dark \.autojs6_signature_tooltip\s*\{[\s\S]*background:\s*#f7f7f7/, "ACE signature tooltip dark editor contrast");
 if (/^\.ace_mobile-menu\s*\{[^}]*display:\s*none/m.test(css)) {
   throw new Error("ACE mobile menu must not be globally hidden");
@@ -447,10 +531,8 @@ assertIncludes(bridge, "var selectionMenuSuppressed = false;", "selection menu s
 assertIncludes(bridge, "var textMutationSelectionMenuSuppressUntil = 0;", "text-mutation selection-menu suppression window");
 assertIncludes(bridge, "var imeTextInputSelectionWindow = {", "IME hidden textarea selection window state");
 assertIncludes(bridge, "var ACTION_MODE_NOTIFY_THROTTLE_MS = 0;", "selection action-mode immediate handoff");
-assertIncludes(bridge, "var TEXT_MUTATION_SELECTION_MENU_SUPPRESS_MS = 700;", "text mutation selection-menu suppression duration");
+assertIncludes(bridge, "var TEXT_MUTATION_SELECTION_MENU_SUPPRESS_MS = 1200;", "text mutation selection-menu suppression duration");
 assertIncludes(bridge, "var IME_TEXT_INPUT_SELECTION_MAX_DELTA = 64;", "IME hidden textarea selection max delta");
-assertIncludes(bridge, "var RIGHT_EDGE_GESTURE_GUARD_CSS_PX = 24;", "DOM right-edge gesture guard width");
-assertIncludes(bridge, "var RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X = 14;", "DOM right-edge gesture swipe activation threshold");
 assertIncludes(bridge, "function setNativeActionModeActive(active)", "native action-mode state class helper");
 assertIncludes(bridge, 'document.body.classList.toggle("autojs6-native-action-mode", active)', "native action-mode host class toggle");
 assertIncludes(bridge, "function suppressSelectionActionModeMenu(reason)", "stale selection menu suppression helper");
@@ -460,13 +542,6 @@ assertIncludes(bridge, 'suppressSelectionActionModeMenu("text_mutation_selection
 assertIncludes(bridge, "markTextMutationSelectionMenuSuppressed(operation)", "bridge text mutations suppress transient selection menus");
 assertIncludes(bridge, 'markTextMutationSelectionMenuSuppressed("session_change:"', "session text changes suppress transient selection menus");
 assertIncludes(bridge, "suppressSelectionActionModeMenu: suppressSelectionActionModeMenu", "native pointer guard selection menu suppression API");
-assertIncludes(bridge, "function handleRightEdgeGestureGuardTouch(event)", "DOM right-edge gesture guard");
-assertIncludes(bridge, "function maybeActivateRightEdgeGestureGuard(event)", "DOM right-edge gesture deferred activation");
-assertIncludes(bridge, "function isRightEdgeGestureTouchStart(touch, viewportWidth)", "DOM right-edge touchstart guard predicate");
-assertIncludes(bridge, "rightEdgeGestureGuardActive = rightEdgeGestureGuardTracking;", "DOM right-edge touchstart activates guard");
-assertIncludes(bridge, "dx <= -RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X", "DOM right-edge guard requires a left swipe");
-assertIncludes(bridge, '"right_edge_back_gesture_dom_touch_start"', "DOM right-edge touchstart cancels ACE long-touch state");
-assertIncludes(bridge, 'document.addEventListener(type, handleRightEdgeGestureGuardTouch, true)', "DOM right-edge gesture capture listener");
 assertIncludes(bridge, "function wrapScrollMethod(owner, methodName)", "scroll method hook wrapper");
 assertIncludes(bridge, 'wrapScrollMethod(editor.renderer, "scrollToY")', "renderer vertical scroll hook");
 assertIncludes(bridge, 'wrapScrollMethod(session, "setScrollTop")', "session vertical scroll hook");
@@ -480,7 +555,7 @@ assertIncludes(bridge, "textInput.resetSelection();", "Android IME selection win
 assertIncludes(bridge, '"imeTextInputSelectionDropped"', "Android IME large selection delta guard diagnostics");
 assertIncludes(bridge, 'resetImeTextInputSelectionWindow("move_cursor")', "Android IME cursor movement resets textarea window");
 assertMatch(bridge, /function afterTwoFrames\(callback\)[\s\S]*raf\(function\(\)[\s\S]*raf\(callback\);[\s\S]*\}\);[\s\S]*\}/, "double requestAnimationFrame first-paint guard");
-assertMatch(bridge, /function requestFirstPaint\(reason\)[\s\S]*scheduleResize\(reason \|\| "first_paint"\);[\s\S]*afterTwoFrames\(notifyFirstPaint\);[\s\S]*\}/, "first-paint resize before reveal");
+assertMatch(bridge, /function requestFirstPaint\(reason\)[\s\S]*scheduleResize\(reason \|\| "first_paint"\);[\s\S]*requestFirstPaintCheck\(reason \|\| "first_paint"\);[\s\S]*\}/, "first-paint resize before visual readiness check");
 assertIncludes(bridge, "requestFirstPaint: requestFirstPaint", "first-paint public API");
 assertIncludes(bridge, "resizeFallbackTimer = setTimeout(function()", "resize fallback timer");
 assertIncludes(bridge, 'JSON.stringify({ reason: String(reason || "") })', "resizeDone reason payload");
@@ -528,7 +603,7 @@ assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line
 assertIncludes(bridge, "setBreakpointMarkersEnabled: setBreakpointMarkersEnabled", "ACE breakpoint marker runtime API");
 assertIncludes(bridge, "setFoldMarkersEnabled: setFoldMarkersEnabled", "ACE fold marker runtime API");
 assertIncludes(bridge, "setGutterWidthMode: setGutterWidthMode", "ACE gutter width mode runtime API");
-assertIncludes(bridge, "function applyFontSizeSp(size)", "ACE font-size helper without implicit resize");
+assertIncludes(bridge, "function applyFontSizeSp(size, options)", "ACE font-size helper without implicit resize");
 assertIncludes(bridge, "function refreshFontMetricsForCoordinateMapping()", "ACE zoom refreshes font metrics for coordinate mapping");
 assertIncludes(bridge, "refreshFontMetricsForCoordinateMapping();", "ACE font-size changes refresh coordinate metrics");
 assertIncludes(bridge, "renderer.updateFontSize()", "ACE coordinate metric refresh uses renderer font-size update");
@@ -548,6 +623,12 @@ if (focusZoomFunction.includes('scheduleResize("font_size_changed")')) {
   throw new Error("ACE focus-preserving zoom must not schedule cursor-revealing font-size resize");
 }
 assertIncludes(bridge, "function insertTab()", "ACE shortcut TAB helper");
+assertIncludes(bridge, "function insertShortcutText(text)", "ACE shortcut text insertion helper");
+assertIncludes(bridge, "function skipExistingClosingPair(text)", "ACE shortcut closing-pair skip helper");
+assertIncludes(bridge, "shortcut_insert", "ACE shortcut insert suppresses stale IME selection sync");
+assertIncludes(bridge, 'resetImeTextInputSelectionWindow("shortcut_insert")', "ACE shortcut insertion resets IME textarea selection window");
+assertIncludes(bridge, "function installTouchCursorSelectionGuard()", "ACE touch cursor guard installer");
+assertIncludes(bridge, "touch_cursor", "ACE touch cursor guard suppresses stale IME selection sync");
 assertIncludes(bridge, "function isCompletionPopupOpen()", "ACE completion popup state helper");
 assertIncludes(bridge, "function moveCompletionSelectionOrCursor(delta)", "ACE completion selection shortcut helper");
 assertIncludes(bridge, "function acceptCompletionOrInsertTab()", "ACE completion accept shortcut helper");
@@ -560,7 +641,15 @@ assertIncludes(bridge, "acceptCompletionOrInsertTab: acceptCompletionOrInsertTab
 assertIncludes(bridge, "moveCompletionSelectionOrCursor: moveCompletionSelectionOrCursor", "ACE completion selection public API");
 assertIncludes(bridge, "handleEscapeKey: handleEscapeKey", "ACE shortcut ESC public API");
 assertIncludes(bridge, "var lspClient = null;", "ACE LSP client bridge slot");
+assertIncludes(bridge, "var lspCompletionCompleter = null;", "ACE LSP completion proxy slot");
 assertIncludes(bridge, "global.AutoJsAceLspClient.install", "ACE LSP client install");
+assertIncludes(bridge, "warmUpLspAfterFirstPaint", "ACE LSP first-paint warm-up hook");
+assertIncludes(bridge, "function firstPaintReadinessSnapshot()", "ACE first-paint visual readiness check");
+assertIncludes(bridge, "FIRST_PAINT_STABLE_FRAME_COUNT", "ACE first-paint stable-frame gate");
+assertIncludes(bridge, "isFirstPaintThemeReady", "ACE first-paint waits for theme consistency");
+assertIncludes(bridge, "firstPaintForced", "ACE first-paint timeout fallback event");
+assertIncludes(bridge, "function installLspCompletionCompleter()", "ACE LSP completion proxy installer");
+assertIncludes(bridge, "removeLanguageToolCompleter(staticCompleter)", "ACE LSP proxy replaces standalone static completer");
 assertIncludes(bridge, "getLspState: function()", "ACE LSP state public API");
 assertIncludes(bridge, "getLspHover: function(row, column)", "ACE LSP hover public API");
 assertIncludes(bridge, "global.AutoJsAceTooltip.install", "ACE tooltip install");
@@ -573,15 +662,57 @@ assertIncludes(bridge, "showSignatureHelp: function(row, column)", "ACE signatur
 assertIncludes(bridge, "getSignatureHelpState: function()", "ACE signature help state public API");
 
 assertIncludes(lspClient, "global.AutoJsAceLspClient", "ACE LSP client global");
-assertIncludes(lspClient, "completionProvider: serverReady ? \"server\" : COMPLETION_PROVIDER_STATIC", "ACE LSP completion fallback provider");
-assertIncludes(lspClient, "hoverProvider: serverReady ? \"server\" : HOVER_PROVIDER_STATIC", "ACE LSP hover fallback provider");
-assertIncludes(lspClient, "serverAvailable === true", "ACE LSP server availability gate");
-assertIncludes(lspClient, "typeof options.serverUri === \"string\"", "ACE LSP server URI gate");
+assertIncludes(lspClient, "COMPLETION_PROVIDER_TYPESCRIPT", "ACE LSP TypeScript completion provider");
+assertIncludes(lspClient, "DIAGNOSTIC_PROVIDER_TYPESCRIPT", "ACE LSP TypeScript diagnostic provider");
+assertIncludes(lspClient, "TS_RUNTIME_SCRIPT_SRC", "ACE LSP lazy TypeScript runtime script");
+assertIncludes(lspClient, "TS_SERVICE_SCRIPT_SRC", "ACE LSP lazy TypeScript service script");
+assertIncludes(lspClient, "ensureTsLanguageServiceLoaded", "ACE LSP lazy TypeScript loader");
+assertIncludes(lspClient, "global.AutoJsAceTsLanguageService.create", "ACE LSP TypeScript service creation");
+assertIncludes(lspClient, "documentUri: state.documentUri", "ACE LSP passes document URI into TypeScript service");
+assertIncludes(lspClient, "isJsonDocumentUri", "ACE LSP JSON document detection");
+assertIncludes(lspClient, "jsonSyntaxDiagnostics", "ACE LSP JSON syntax diagnostics");
+assertIncludes(lspClient, "tsService.setDocumentUri(state.documentUri)", "ACE LSP refresh updates TypeScript document URI");
+assertIncludes(lspClient, "getTsServiceState(state.enabled || !!tsService)", "ACE LSP avoids loading TS service while disabled");
+assertIncludes(lspClient, "warmUp: warmUp", "ACE LSP exposes lazy warm-up hook");
 assertIncludes(lspClient, "getCompletions: getCompletions", "ACE LSP completion hook");
 assertIncludes(lspClient, "getHover: getHover", "ACE LSP hover hook");
 if (lspClient.includes("WebSocket") || lspClient.includes("new Worker")) {
-  throw new Error("LSP client must stay off WebSocket and worker transports in alpha path");
+  throw new Error("LSP client must stay off WebSocket and worker transports in preview path");
 }
+
+assertIncludes(tsService, "global.AutoJsAceTsLanguageService", "ACE TypeScript service global");
+assertIncludes(tsService, "typescriptServices.js unavailable", "ACE TypeScript service runtime guard");
+assertIncludes(tsService, "loadTextFromBridge", "ACE TypeScript service native asset loader");
+assertIncludes(tsService, "file:///autojs6/types/lib.autojs6.extra.d.ts", "ACE TypeScript service extra declaration lib");
+assertIncludes(tsService, "function scriptKindForFileName", "ACE TypeScript service script-kind selection");
+assertIncludes(tsService, "ts.ScriptKind.JSON", "ACE TypeScript service JSON script kind");
+assertIncludes(tsService, "getScriptKind: function(fileName)", "ACE TypeScript host exposes script kind");
+assertIncludes(tsService, "setDocumentUri: setDocumentUri", "ACE TypeScript service can change current document URI");
+assertIncludes(tsService, "getCompletionsAtPosition", "ACE TypeScript service completion API");
+assertIncludes(tsService, "getSignatureHelpItems", "ACE TypeScript service signature API");
+assertIncludes(tsService, "getSemanticDiagnostics", "ACE TypeScript service diagnostics API");
+
+assertIncludes(aceBridgeKt, "fun read(uri: String?): String", "native ACE bridge asset read hook");
+assertIncludes(aceBridgeKt, "isAllowedReadAsset", "native ACE bridge read whitelist");
+assertIncludes(aceBridgeKt, '"autojs6/typescript/"', "native ACE bridge permits TypeScript declaration assets only");
+assertIncludes(aceBridgeKt, "fun write(uri: String?, text: String?): String", "native ACE bridge write remains explicit");
+assertIncludes(aceBridgeKt, "File access is not available from the ACE editor bridge", "native ACE bridge keeps write disabled");
+
+assertIncludes(aceLspPreferences, "KEY_ACE_LSP_FILE_TYPES", "ACE LSP file-type preference key");
+assertIncludes(aceLspPreferences, "DEFAULT_FILE_TYPES", "ACE LSP default file-type suffixes");
+assertIncludes(aceLspPreferences, "fun getFileTypes()", "ACE LSP file-type getter");
+assertIncludes(aceLspPreferences, "fun resetFileTypes()", "ACE LSP file-type default reset");
+assertIncludes(aceLspPreferences, "fun isDocumentAllowed(documentPathOrName: String?)", "ACE LSP document type gate");
+assertIncludes(aceLspPreferences, "fun normalizeFileTypes", "ACE LSP file-type normalization");
+assertIncludes(aceLspPreferences, '".node.js"', "ACE LSP default Node.js suffix");
+
+assertIncludes(aceLspServerManager, "documentAllowedProvider", "ACE LSP manager injectable document-type gate");
+assertIncludes(aceLspServerManager, 'MANAGER_NAME = "native-preview"', "ACE LSP manager uses preview identity");
+assertIncludes(aceLspServerManager, "fun setDocumentPath(path: String?)", "ACE LSP manager document path setter");
+assertIncludes(aceLspServerManager, "fun documentUriForPath(path: String?)", "ACE LSP manager derives document URI from path");
+assertIncludes(aceLspServerManager, "encodePathSegment", "ACE LSP manager escapes synthetic document URI file name");
+assertIncludes(aceLspServerManager, "STATE_DISABLED_FILE_TYPE", "ACE LSP unsupported file type state");
+assertIncludes(aceLspServerManager, "REASON_DISABLED_FILE_TYPE", "ACE LSP unsupported file type reason");
 
 assertIncludes(tooltip, "global.AutoJsAceTooltip", "ACE tooltip global");
 assertIncludes(tooltip, "loadMarkdownRenderer: function()", "ACE tooltip lazy markdown renderer");
@@ -623,6 +754,9 @@ assertIncludes(aceCodeEditor, '"bridge_event_storm",', "bridge event storm diagn
 assertIncludes(aceCodeEditor, '"count=$bridgeEventWindowCount,windowMillis=$BRIDGE_EVENT_WINDOW_MS,last=$name"', "bridge event storm diagnostics payload");
 assertIncludes(aceCodeEditor, "private val lspServerManager = AceLspServerManager()", "ACE LSP manager");
 assertIncludes(aceCodeEditor, "lspServerManager.bridgeOptionsJson()", "ACE LSP bridge options");
+assertIncludes(aceCodeEditor, "fun setDocumentPath(path: String?)", "ACE LSP document path bridge");
+assertIncludes(aceCodeEditor, "lspServerManager.setDocumentPath(path)", "ACE LSP manager receives document path");
+assertIncludes(aceCodeEditor, 'invokeAce("refreshLsp")', "ACE LSP runtime refresh hook");
 assertIncludes(aceCodeEditor, 'invokeAce("setWordWrapIndentStyle", quote(EditorDisplayPreferences.wordWrapIndentStyle()))', "native ACE word wrap indentation runtime bridge call");
 assertIncludes(aceCodeEditor, "bridgeWordWrapIndentStyle", "native ACE word wrap indentation bridge getter");
 assertIncludes(aceCodeEditor, 'eventHistory.record("lsp_manager"', "ACE LSP manager event history");
@@ -635,7 +769,7 @@ assertIncludes(aceCodeEditor, "scaleViewBy", "ACE scale-view zoom handler");
 assertIncludes(aceCodeEditor, "setFontSizeSpKeepingFocus", "ACE focus-preserving zoom native call");
 assertIncludes(aceCodeEditor, "currentScaleViewTextSizeSp", "ACE scale-view effective text-size tracker");
 assertIncludes(aceCodeEditor, "commitScaleViewTextSizeGesture", "ACE scale-view final text-size commit");
-assertIncludes(aceCodeEditor, "commitScaleViewTextSizeGesture(detector.focusX, detector.focusY)", "ACE scale-view pinch commits on gesture end");
+assertIncludes(aceCodeEditor, "commitScaleViewTextSizeGesture(lastPinchFocusX, lastPinchFocusY)", "ACE scale-view pinch commits on gesture end");
 assertIncludes(aceCodeEditor, "onTextSizeSpChangedByGesture?.invoke(committedSize, true)", "ACE scale-view pinch saves committed text size");
 assertIncludes(aceCodeEditor, "fun insertTab()", "native ACE shortcut TAB bridge call");
 assertIncludes(aceCodeEditor, "fun acceptCompletionOrInsertTab()", "native ACE completion accept bridge call");
@@ -673,20 +807,22 @@ assertIncludes(aceCodeEditor, "setFallbackSelectionActionModeRect", "ACE action-
 assertIncludes(aceCodeEditor, "invalidateContentRect()", "ACE floating action-mode rect invalidation");
 assertIncludes(aceCodeEditor, "override fun startActionMode(callback: ActionMode.Callback", "ACE WebView action-mode suppression");
 assertIncludes(aceCodeEditor, '"webview_action_mode_suppressed"', "ACE WebView action-mode suppression diagnostics");
-assertIncludes(aceCodeEditor, "suppressSelectionActionModeForPointerGuard", "ACE right-edge gesture selection suppression");
-assertIncludes(aceCodeEditor, "val insetOrFallback = if (systemGestureInsetRight > 0)", "ACE right-edge gesture fallback width");
-assertIncludes(aceCodeEditor, "RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 24f", "ACE right-edge gesture narrow fallback");
+assertIncludes(aceCodeEditor, "handleSingleTouchScrollGuard", "ACE single-touch scroll guard");
+assertIncludes(aceCodeEditor, "singleTouchScrollCancelSlopPx", "ACE single-touch scroll guard slop");
+assertIncludes(aceCodeEditor, 'cancelAceTouchInteraction("single_finger_scroll")', "ACE single-touch scroll cancels stale mobile touch state");
 
 assertIncludes(aceScriptEditorEngine, "notifyPinchToZoomStrategyChanged", "ACE pinch zoom strategy forwarding");
 assertIncludes(aceScriptEditorEngine, "onTextSizeSpChangedByGesture", "ACE pinch text-size state callback");
 assertIncludes(aceScriptEditorEngine, "var onAceStateChanged", "ACE engine state-change callback");
 assertIncludes(aceScriptEditorEngine, "override fun onStateChanged", "ACE engine forwards bridge state changes");
+assertIncludes(aceScriptEditorEngine, "override fun setDocumentPath(path: String?)", "ACE engine forwards LSP document path");
+assertIncludes(aceScriptEditorEngine, "fun refreshLsp()", "ACE engine exposes LSP refresh");
 assertIncludes(nativeCodeEditorEngine, "codeEditor.setWordWrapEnabled(false)", "Native editor keeps word wrap disabled");
 assertIncludes(nativeCodeEditorEngine, "gutterWidthMode = EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED", "Native editor keeps fixed gutter width");
 assertIncludes(codeEditText, "fun setWordWrapEnabled(enabled: Boolean)", "Native word wrap edit text toggle");
 assertIncludes(codeEditText, "fun getLogicalLineForVisualLine", "Native wrapped visual-line to logical-line mapping");
-assertIncludes(editorPinchToZoomPreference, "EditorEnginePreferences.get() == EditorEngineType.ACE", "ACE-only scale-view preference enablement");
-assertIncludes(editorPinchToZoomPreference, "indexOf(key(R.string.key_editor_pinch_to_zoom_scale_view))", "Native scale-view preference remains disabled");
+assertIncludes(editorPinchToZoomPreference, "current == key(R.string.key_editor_pinch_to_zoom_scale_view)", "scale-view pinch preference is normalized for unsupported engines");
+assertIncludes(editorPinchToZoomPreference, "key(R.string.key_editor_pinch_to_zoom_change_text_size)", "unsupported scale-view preference falls back to text-size pinch");
 
 assertIncludes(editorView, "AceShortcutPanel.topRowCompletions", "ACE shortcut top row binding");
 assertIncludes(editorView, "AceShortcutPanel.bottomRowCompletions", "ACE shortcut bottom row binding");
@@ -709,10 +845,14 @@ assertIncludes(editorView, "key(R.string.key_ace_editor_font)", "editor font pre
 assertIncludes(editorView, "key(R.string.key_editor_text_size)", "editor text-size preference changes apply to current editor");
 assertIncludes(editorView, "key(R.string.key_editor_theme)", "editor theme preference changes apply to current editor");
 assertIncludes(editorView, "key(R.string.key_editor_engine)", "editor engine preference changes apply to current editor");
+assertIncludes(editorView, "key(R.string.key_ace_lsp_file_types)", "LSP file-type preference changes refresh current ACE editor");
 assertIncludes(editorView, "themeFontService.applyEditorPreferences()", "editor font/text-size live preference applier");
 assertIncludes(editorView, "applyCurrentEditorThemePreference", "editor theme live preference applier");
 assertIncludes(editorView, "applyCurrentEditorEnginePreference", "editor engine live preference applier");
 assertIncludes(editorView, "switchEditorEngine(EditorEnginePreferences.get())", "editor engine live preference switcher");
+assertIncludes(editorView, "currentDocumentPathOrName", "editor tracks current document path for LSP");
+assertIncludes(editorView, "syncEditorDocumentPath()", "editor syncs document path into ACE LSP manager");
+assertIncludes(editorView, "editor.setDocumentPath(currentDocumentPathOrName())", "editor forwards document path to current engine");
 assertIncludes(editorView, "toggleAceShortcutReturnPoint", "ACE shortcut TAB return toggle");
 assertIncludes(editorView, "showAceActionHistoryDialog", "ACE action history dialog");
 assertIncludes(editorView, "repeatLastAceAction", "ACE repeat last action handler");
@@ -754,10 +894,11 @@ assertIncludes(editorMenu, "mEditorView::showJumpToLineDialog", "editor overflow
 assertIncludes(editorMenu, "mEditorView::startBuildApkActivity", "editor overflow menu shares build APK launcher");
 assertIncludes(editorMenu, "mEditorView::showFileDetailsDialog", "editor overflow menu shares file details launcher");
 assertIncludes(editorMenu, "mEditorView::showJavaClassSearchDialog", "editor overflow menu shares Java class search launcher");
-assertIncludes(editorMenu, "buildReadOnlyMenuTitle", "editor read-only menu themed title marker");
-assertIncludes(editorMenu, "item.setCheckable(false)", "editor read-only menu avoids system default checkbox tint");
-assertIncludes(editorMenu, "ThemeColorManager.getColorPrimary()", "editor read-only menu uses runtime theme color");
-assertIncludes(editorMenu, "ForegroundColorSpan", "editor read-only menu colors checkbox marker");
+assertIncludes(editorMenu, "prepareReadOnlyMenu(menu)", "editor read-only menu preparation hook");
+assertIncludes(editorMenu, "item.setVisible(visible)", "editor read-only menu respects intent lock visibility");
+assertIncludes(editorMenu, "item.setEnabled(mEditorView.canToggleReadOnlyMode())", "editor read-only menu respects toggle availability");
+assertIncludes(editorMenu, "item.setCheckable(true)", "editor read-only menu uses native checked state");
+assertIncludes(editorMenu, "item.setChecked(readOnly)", "editor read-only menu syncs checked state");
 assertIncludes(functionsKeyboardHelper, "mFunctionsLayout == null", "function keyboard hide tolerates missing layout");
 assertIncludes(functionsKeyboardHelper, "mFunctionsLayout.setVisibility(View.GONE)", "function keyboard hide always clears visibility");
 assertIncludes(functionsKeyboardHelper, "params != null && params.height != 0", "function keyboard hide clears stale height");
@@ -786,7 +927,7 @@ assertIncludes(aceActionHistoryStore, "data class Action", "ACE generic action h
 assertIncludes(aceActionHistoryStore, "fun getRankedEntries", "ACE action history ranking API");
 assertIncludes(aceActionHistoryStore, "fun getLastActionId", "ACE action history last action API");
 assertIncludes(aceActionHistoryStore, "fun getLastAction", "ACE generic last action lookup");
-assertIncludes(aceActionHistoryStore, 'entryComparator(root.optString("lastActionId"))', "ACE action favorites latest-action ranking");
+assertIncludes(aceActionHistoryStore, "values.sortedWith(entryComparator())", "ACE action favorites ranking uses current comparator");
 assertIncludes(aceActionHistoryStore, 'LEGACY_SHORTCUT_ACTION_PREFIX = "command:"', "ACE action favorites filters legacy shortcut clicks");
 assertIncludes(aceActionHistoryStore, 'DEPRECATED_CANCEL_SEARCH_ACTION_ID = "editor:cancel_search"', "ACE action favorites filters accidental cancel-search action");
 assertIncludes(aceActionHistoryStore, "fun applyFavoritesOrder", "ACE action favorites order API");
@@ -796,7 +937,8 @@ assertIncludes(aceActionHistoryStore, "payloadSummary", "ACE action history payl
 assertIncludes(aceActionHistoryStore, "usageCount", "ACE action history frequency field");
 assertIncludes(aceActionHistoryStore, "lastUsedAt", "ACE action history recency field");
 assertIncludes(aceActionHistoryStore, "manualOrder", "ACE action history manual order field");
-assertIncludes(aceActionHistoryStore, "compareManualOrder(left, right)", "ACE action favorites manual unpinned reorder ranking");
+assertIncludes(aceActionHistoryStore, "private fun compareUnpinned(left: Entry, right: Entry): Int", "ACE action favorites unpinned comparator");
+assertIncludes(aceActionHistoryStore, "compareValues(right.lastUsedAt, left.lastUsedAt)", "ACE action favorites unpinned recency ranking");
 
 assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT", "ACE action favorites swipe gestures");
 assertIncludes(aceActionFavoritesDialog, "onActionSelected: (AceActionHistoryStore.Action) -> Unit", "ACE action favorites generic callback");
@@ -818,21 +960,31 @@ assertIncludes(codeEditorSettingsDialog, ".widgetThemeColor()", "editor settings
 assertIncludes(codeEditorSettingsDialog, "initialPreferenceKey", "editor settings dialog can open a requested preference");
 assertIncludes(codeEditorSettingsDialog, "recordAceActionFavorites", "editor settings dialog can enable ACE action tracking");
 assertIncludes(codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected", "editor settings disables word wrap for non-Ace engines");
+assertIncludes(codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_ace_lsp_enabled, aceSelected", "editor settings disables LSP for non-Ace engines");
+assertIncludes(codeEditorSettingsFragment, "syncAceLspFileTypesPreferenceVisibility", "editor settings updates LSP file-type preference visibility");
+assertIncludes(codeEditorSettingsFragment, "AceEditorLspPreferences.isEnabled()", "editor settings hides LSP file-type preference while LSP is disabled");
 assertIncludes(codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected", "editor settings disables gutter width mode for non-Ace engines");
-assertIncludes(codeEditorSettingsFragment, "EditorDisplayPreferences.setWordWrapEnabled(false)", "editor settings normalizes native word wrap value");
-assertIncludes(codeEditorSettingsFragment, "EditorDisplayPreferences.setGutterWidthMode(EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED)", "editor settings normalizes native gutter width value");
+assertIncludes(codeEditorSettingsFragment, "unavailablePreferenceKeys.add(preferenceKey)", "editor settings tracks unavailable preferences");
+assertIncludes(codeEditorSettingsFragment, "useStaticSummaryProvider(unavailableSummary)", "editor settings shows unavailable summary for list preferences");
 assertIncludes(codeEditorSettingsFragment, "isEnabled = available || this !is SwitchPreference", "editor settings keep non-switch unavailable items clickable for feedback");
 assertIncludes(codeEditorSettingsFragment, "showUnavailableEditorSettingHint", "editor settings show unavailable-option feedback");
 assertIncludes(codeEditorSettingsFragment, "ViewUtils.showSnack(requireView(), message)", "editor settings dialog uses snackbar for unavailable options");
 assertIncludes(codeEditorSettingsFragment, "ViewUtils.showToast(requireContext(), message)", "standalone editor settings page uses toast for unavailable options");
 assertIncludes(codeEditorSettingsFragment, "recordAceSettingAction", "editor settings records open-ended setting actions");
 assertIncludes(codeEditorSettingsFragment, "EditorSettingActionRegistry.actionIdForPreferenceKey", "editor settings records stable setting action ids");
+assertIncludes(aceLspFileTypesPreference, "class AceLspFileTypesPreference", "ACE LSP file-type preference widget");
+assertIncludes(aceLspFileTypesPreference, "AceEditorLspPreferences.DEFAULT_FILE_TYPES", "ACE LSP file-type dialog can restore defaults");
+assertIncludes(aceLspFileTypesPreference, "AceEditorLspPreferences.setFileTypes", "ACE LSP file-type dialog saves suffixes");
+assertIncludes(aceLspFileTypesPreference, "itemsCallbackMultiChoice", "ACE LSP file-type dialog uses multi-choice selection");
+assertIncludes(codeEditorSettingsXml, "AceLspFileTypesPreference", "editor settings XML includes LSP file-type preference");
+assertIncludes(codeEditorSettingsXml, "@string/key_ace_lsp_file_types", "editor settings XML uses LSP file-type key");
 assertIncludes(materialPreference, "setAvailableForCurrentContext", "material preference supports contextual unavailable visual state");
 assertIncludes(materialPreference, "holder.itemView.alpha = if (availableForCurrentContext)", "material preference dims unavailable non-switch rows");
 assertIncludes(materialPreference, "handleUnavailableClickIfNeeded", "material preference intercepts unavailable non-switch clicks");
 assertIncludes(editorSettingActionRegistry, "ACTION_ID_PREFIX = \"editor_setting:\"", "editor setting actions use stable id prefix");
 assertIncludes(editorSettingActionRegistry, "R.string.key_editor_engine", "editor engine setting action is registered");
 assertIncludes(editorSettingActionRegistry, "R.string.key_ace_word_wrap_enabled", "word wrap setting action is registered");
+assertIncludes(editorSettingActionRegistry, "R.string.key_ace_lsp_file_types", "LSP file-type setting action is registered");
 assertIncludes(editorSettingActionRegistry, "R.string.key_editor_text_size", "font-size setting action is registered");
 assertIncludes(editorSettingActionRegistry, "R.string.key_editor_shortcut_input_bar", "shortcut input setting action is registered");
 assertIncludes(fragmentHostMaterialDialog, "class FragmentHostMaterialDialog", "fragment-hosting MaterialDialog wrapper");

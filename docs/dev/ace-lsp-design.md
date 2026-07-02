@@ -1,6 +1,6 @@
 # ACE LSP Design
 
-ACE LSP support is experimental and disabled by default. The stable editor path must remain usable without loading `lsp.js`, opening a WebSocket, or starting a local language server.
+ACE LSP support is a preview feature and disabled by default. The stable editor path must remain usable without loading Pro's `lsp.js`, opening a WebSocket, or starting an external language server.
 
 ## Current State
 
@@ -9,26 +9,30 @@ ACE LSP support is experimental and disabled by default. The stable editor path 
 - Bridge method: `autojs.getLspOptions()`
 - Default bridge response: `{}`
 - Native manager: `AceLspServerManager`
-- Enabled bridge response: structured options with `manager=native-alpha`,
-  `transport=unavailable`, `serverAvailable=false`,
-  `startSupported=false`, and `fallback=static-completion`
+- Enabled bridge response: structured options with `manager=native-preview`,
+  `state=local-language-service`, `transport=in-process`,
+  `serverAvailable=false`, `startSupported=false`, and
+  `fallback=static-completion`
 - Bundled declaration file: `autojs6/types/lib.autojs6.d.ts`
 - Bundled declaration source: selected `@sm003/autojs6-dts` `aj6-int-*.d.ts` files under `autojs6/types/autojs6`
 
-The current build has a native alpha manager for deterministic state,
-diagnostics, and bridge options. It does not start or connect to an LSP server,
-open a WebSocket, or load `lsp.js`. The selected upstream declaration files
-currently feed static completion generation; loading the full Android/library
-declaration graph into a server is still deferred.
+The current build has a native preview manager for deterministic state,
+diagnostics, file-type gating, and bridge options. It does not start or connect
+to an external LSP server, open a WebSocket, or load Pro's `lsp.js`. The
+selected upstream declaration files feed both the generated static AutoJs6
+index and the local TypeScript language service declaration set. Loading a full
+project-wide Android/library declaration graph into a server is still deferred.
 
-The ACE page also has a small LSP client facade. It reads
-`autojs.getLspOptions()`, exposes completion and hover hooks, and reports
-`static-fallback` providers when LSP is disabled or when the native alpha
-manager reports no server. In the current alpha path those hooks delegate to the
-generated static AutoJs6 completion index, including hover doc text for known
-globals and module members. The facade must not create a transport unless
-native options later report both `serverAvailable=true` and a non-empty
-`serverUri`.
+The ACE page has a local LSP client facade. It reads
+`autojs.getLspOptions()`, exposes completion, hover, diagnostics, and signature
+hooks, and reports `static-fallback` providers when LSP is disabled. When
+enabled it starts with the generated local AutoJs6 index and local syntax
+diagnostics while the TypeScript service is loading. The ACE page intentionally
+does not load `typescriptServices.js` during the bootstrap path; after first
+paint, the client lazily loads and warms the bundled TypeScript language
+service. Once ready, completion, hover, diagnostics, and signature help can
+report `typescript-language-service` providers. JSON files use JSON-aware
+diagnostics. The generated AutoJs6 index remains the fast startup fallback.
 
 Hover tooltip rendering is handled by `AutoJsAceTooltip`. It is optional at the
 bridge boundary, creates its DOM lazily, and loads only the local safe markdown
@@ -37,7 +41,9 @@ does not fetch markdown resources.
 
 ## Server Lifecycle
 
-The first supported implementation should define these items before any default-on behavior:
+The current implementation intentionally has no external server lifecycle. A
+future server-backed implementation should define these items before any
+default-on behavior:
 
 - Server location: local Android process, embedded JS runtime, or external debug endpoint.
 - Transport: WebSocket is the most likely option, but it must be created only when the feature flag is enabled.
@@ -55,37 +61,46 @@ The first supported implementation should define these items before any default-
 LSP failures are non-fatal editor failures.
 
 - LSP initialization failure: disable LSP for the current ACE instance and keep static completion.
-- Invalid `serverUri`: emit `lspError`, disable LSP, keep editing.
+- Diagnostic engine load failure: keep editing and use the local syntax fallback.
+- Invalid future `serverUri`: emit `lspError`, disable the server transport, keep editing.
 - Completion or hover failure: record diagnostics and keep static completion.
 - Native ACE fallback is reserved for editor runtime failures such as page load errors, ready timeout, JS fatal errors, and renderer process loss.
 
 ## Minimal Feature Scope
 
-The current client-side alpha supports:
+The current client-side preview supports:
 
-- completion hooks with static fallback
-- hover hooks with static fallback
+- completion through the bundled TypeScript language service, with local AutoJs6 index fallback
+- hover through the bundled TypeScript language service, with local AutoJs6 index fallback
+- diagnostics through the bundled TypeScript language service, JSON syntax diagnostics, and local syntax fallback
+- signature help through the bundled TypeScript language service, with local signature-table fallback
+- configurable file-type gating for JavaScript, TypeScript, JSON, Auto.js, and Node.js suffixes
 - optional hover tooltip rendering with local safe markdown
 
 Deferred:
 
 - server-backed completion transport
 - server-backed hover transport
-- diagnostics
 - definition
+- references
 - rename
+- document symbols
+- formatting and code actions
 - project-wide indexing
 
 ## Verification
 
 - Default setting produces no WebSocket.
 - `getLspOptions()` returns `{}` when disabled.
-- Enabling the setting returns native-alpha structured options but still preserves static completion when no server exists.
-- `AutoJsAceLspClient` reports `completionProvider=static-fallback` and
-  `hoverProvider=static-fallback` when no server exists.
+- Enabling the setting returns native-preview structured options for the
+  in-process local language service.
+- `AutoJsAceLspClient` reports local-index/static providers immediately after
+  bootstrap, then can switch to `typescript-language-service` providers after
+  the first-paint warm-up completes.
 - `AceDiagnostics` reports `lspEnabled`, `lspState`, `lspTransport`,
-  `lspRootUri`, `lspDocumentUri`, and `lspFallback`.
-- `node tools/ace-lsp/test-lsp-client.mjs` passes and verifies static fallback
-  completion/hover behavior without WebSocket or worker transport.
+  `lspRootUri`, `lspDocumentUri`, `lspFallback`, and provider labels.
+- `node tools/ace-lsp/test-lsp-client.mjs` passes and verifies local
+  completion/hover plus diagnostics behavior without WebSocket or worker
+  transport.
 - `node tools/ace-tooltip/test-tooltip.mjs` passes and verifies lazy tooltip DOM
   creation plus local escaped markdown rendering.

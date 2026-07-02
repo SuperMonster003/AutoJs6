@@ -57,13 +57,20 @@ selection handles, and CJK composition.
 - Accepting a highlighted completion with Enter or by tapping the popup must insert the item without an ACE fallback.
 - `autojs_indices.js` is a fallback only; AutoJs6-specific entries should be added to the source JSON.
 - Broad AutoJs6 API entries should come from the bundled `aj6-int-*.d.ts` declaration source first; source JSON fallback entries are for parser gaps and curated global member exposure.
-- `ACE LSP smart completion (experimental)` is off by default.
+- `ACE LSP smart completion (preview)` is off by default.
 - With LSP off, `getLspOptions()` returns `{}` and no WebSocket is created.
 - With LSP off or on without a server, `AutoJsAceLspClient` reports
   `completionProvider=static-fallback` and `hoverProvider=static-fallback`.
 - With LSP on and no server available, ACE remains editable, static completion
   still works, and hover hooks can resolve AutoJs6 declaration doc text from
   the static index.
+- With LSP on, the bundled TypeScript language service should become active
+  after first paint and provide completion, hover, diagnostics, and signature
+  help while keeping static completion as fallback.
+- Valid JSON files should not receive JavaScript semicolon diagnostics, and
+  invalid JSON files should receive JSON syntax diagnostics.
+- The LSP file-type preference should hide while LSP is disabled, support
+  restoring defaults, and gate LSP startup by selected file suffixes.
 - `AutoJsAceTooltip` creates its DOM and safe markdown renderer lazily when a
   hover tooltip is requested.
 - Tooltip markdown rendering is local only, escapes raw HTML, and does not fetch
@@ -465,7 +472,7 @@ Failure logs:
 
 Preconditions:
 - ACE editor is selected in settings.
-- `ACE LSP smart completion (experimental)` is off.
+- `ACE LSP smart completion (preview)` is off.
 
 Steps:
 1. Open `ace-basic.js`.
@@ -484,31 +491,37 @@ Failure logs:
 - `lspError`
 - `WebSocket`
 
-### ACE-LSP-002: LSP flag without server
+### ACE-LSP-002: LSP local language service
 
 Preconditions:
 - ACE editor is selected in settings.
-- `ACE LSP smart completion (experimental)` is on.
+- `ACE LSP smart completion (preview)` is on.
 
 Steps:
 1. Open `ace-basic.js`.
 2. Trigger completion for `console.lo`.
 3. Hover-query or debug-query `app.launch`.
-4. Copy ACE diagnostics.
+4. Enter a syntax error such as `function bad(` and run `validateLsp()`.
+5. Copy ACE diagnostics.
 
 Expected:
 - ACE remains editable.
 - Static completion returns `console.log`.
-- Diagnostics include `lspEnabled=true` and `lspState=configured-no-server`.
-- Diagnostics include `lspTransport=unavailable`,
+- Diagnostics include `lspEnabled=true` and `lspState=local-language-service`.
+- Diagnostics include `lspTransport=in-process`,
   `lspDocumentUri=file:///autojs6/editor/current.js`, and
   `lspFallback=static-completion`.
-- `getLspOptions()` includes `manager=native-alpha`,
+- `getLspOptions()` includes `manager=native-preview`,
   `serverAvailable=false`, and `startSupported=false`.
-- `getLspState()` reports `completionProvider=static-fallback` and
-  `hoverProvider=static-fallback`.
+- Immediately after bootstrap, `getLspState()` can report
+  `completionProvider=local-index`, `hoverProvider=local-index`,
+  `diagnosticProvider=ace-jshint`, and `signatureProvider=static-local`.
+- After first paint and TypeScript warm-up, `getLspState()` can report
+  `typescript-language-service` for completion, hover, diagnostics, and
+  signature help.
 - `getLspHover()` can return declaration doc text for `app.launch` from the
   static index.
+- `validateLsp()` returns at least one diagnostic for the syntax error.
 - `showLspTooltip()` can show the same hover content through the local tooltip
   renderer without external resource loading.
 

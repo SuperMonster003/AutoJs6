@@ -831,6 +831,8 @@ class AceCodeEditorSmokeTest {
         assertEquals("disabled", disabledLsp.getString("state"))
         assertEquals("static-fallback", disabledLsp.getString("completionProvider"))
         assertEquals("static-fallback", disabledLsp.getString("hoverProvider"))
+        assertEquals("disabled", disabledLsp.getString("diagnosticProvider"))
+        assertEquals("static-local", disabledLsp.getString("signatureProvider"))
         assertFalse(disabledLsp.getBoolean("serverReady"))
         assertTrue(disabledState.getBoolean("shown"))
         assertEquals("app.launch", disabledState.getJSONObject("hover").getString("caption"))
@@ -847,7 +849,7 @@ class AceCodeEditorSmokeTest {
         activity = null
 
         val lspEditor = launchReadyEditor(lspEnabled = true)
-        val enabledNoServer = evaluateJsonObject(
+        val enabledLocalService = evaluateJsonObject(
             lspEditor,
             """
                 (function() {
@@ -855,20 +857,46 @@ class AceCodeEditorSmokeTest {
                 })();
             """.trimIndent(),
         )
-        assertTrue(enabledNoServer.getBoolean("enabled"))
-        assertEquals("configured-no-server", enabledNoServer.getString("state"))
-        assertEquals("unavailable", enabledNoServer.getString("transport"))
-        assertEquals("static-completion", enabledNoServer.getString("fallback"))
-        assertEquals("static-fallback", enabledNoServer.getString("completionProvider"))
-        assertEquals("static-fallback", enabledNoServer.getString("hoverProvider"))
-        assertFalse(enabledNoServer.getBoolean("serverReady"))
-        assertFalse(enabledNoServer.getBoolean("serverAvailable"))
+        assertTrue(enabledLocalService.getBoolean("enabled"))
+        assertEquals("local-language-service", enabledLocalService.getString("state"))
+        assertEquals("in-process", enabledLocalService.getString("transport"))
+        assertEquals("static-completion", enabledLocalService.getString("fallback"))
+        assertEquals("typescript-language-service", enabledLocalService.getString("completionProvider"))
+        assertEquals("typescript-language-service", enabledLocalService.getString("hoverProvider"))
+        assertEquals("typescript-language-service", enabledLocalService.getString("diagnosticProvider"))
+        assertEquals("typescript-language-service", enabledLocalService.getString("signatureProvider"))
+        assertFalse(enabledLocalService.getBoolean("serverReady"))
+        assertFalse(enabledLocalService.getBoolean("serverAvailable"))
+        assertTrue(enabledLocalService.getBoolean("localServiceReady"))
+
+        runOnMainSync {
+            lspEditor.setText("function bad(\n")
+        }
+        waitForEditorText(lspEditor, "function bad(\n", "ACE text should be ready before LSP diagnostics smoke")
+        val diagnosticsResult = evaluateJsonObject(
+            lspEditor,
+            """
+                (function() {
+                    var diagnostics = window.AutoJsAce.validateLsp();
+                    return JSON.stringify({
+                        state: window.AutoJsAce.getLspState(),
+                        diagnostics: diagnostics
+                    });
+                })();
+            """.trimIndent(),
+        )
+        assertTrue(diagnosticsResult.getJSONArray("diagnostics").length() > 0)
+        assertTrue(diagnosticsResult.getJSONObject("state").getInt("diagnosticsCount") > 0)
 
         val fallbackResult = runCompletionAcceptSmoke(lspEditor)
-        assertTrue("LSP no-server completion smoke should finish", fallbackResult.getBoolean("ok"))
+        assertTrue("LSP local-service completion smoke should finish", fallbackResult.getBoolean("ok"))
         assertCompletionText(fallbackResult, "files.read", "files.read")
         val snapshot = runOnMainSync { lspEditor.createDiagnosticsSnapshot() }
         assertEquals(AceHealthState.RUNNING.name, snapshot.aceHealthState)
+        assertEquals("local-language-service", snapshot.lspState)
+        assertEquals("in-process", snapshot.lspTransport)
+        assertEquals("typescript-language-service", snapshot.lspCompletionProvider)
+        assertEquals("typescript-language-service", snapshot.lspDiagnosticProvider)
         assertNull(snapshot.lastFailureType)
         assertFalse(snapshot.runtimeEventHistory.any { it.contains("fallback") })
     }

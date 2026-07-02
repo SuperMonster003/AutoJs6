@@ -37,7 +37,7 @@ docs/dev/ace-release-publishing-cleanup.md
   and uses the latest `textSnapshot`, which is TextMirror-backed for ACE.
 - Renderer-gone and JS-init fatal debug hooks remain present for device/debug
   validation.
-- Server-backed LSP transport remains unavailable in the alpha path; no
+- Server-backed LSP transport remains unavailable in the preview path; no
   WebSocket, worker, process, or runtime server startup is exposed.
 - Public `VisualEditorAce` exposure remains deferred; no `VISUAL_ACE` enum,
   preference key, or menu item exists.
