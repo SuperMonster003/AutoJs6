@@ -85,6 +85,8 @@ function main() {
       futureWorkRecorded: summary.openFutureWork.openTasks.length > 0 &&
         summary.summaryGate.futurePromotionReports.length > 0,
       closeoutPolicyReady: summary.summaryGate.closeoutPolicyReady,
+      phase14CloseoutHandoffReady: summary.openFutureWork.closeoutTasks.length === 0 &&
+        summary.tasks.some((task) => task.id === "P14-39" && task.status === "completed"),
       phase14FullyClosed: summary.openFutureWork.openTasks.length === 0,
       phase14CloseoutTasksRemaining: summary.openFutureWork.closeoutTasks.map((task) => task.id),
       runtimeAuthorityChanged: false,
@@ -464,11 +466,12 @@ function buildChecks(files, generatedReports, capabilityTruthReport, summary, ma
     check(
       "future-work-visible",
       summary.openFutureWork.openTasks.length > 0 &&
-        summary.openFutureWork.closeoutTasks.length >= 1 &&
-        summary.openFutureWork.closeoutTasks.some((task) => task.id === "P14-39") &&
+        (
+          summary.openFutureWork.closeoutTasks.some((task) => task.id === "P14-39") ||
+          summary.tasks.some((task) => task.id === "P14-39" && task.status === "completed")
+        ) &&
         summary.openFutureWork.futurePromotionReports.length > 0 &&
         markdown.includes("## Open Future Work") &&
-        markdown.includes("P14-39") &&
         markdown.includes("provider_poc") &&
         markdown.includes("future_promotion"),
       "Summary must keep open P14 tasks, future promotion reports, and final handoff tasks visible.",
@@ -526,6 +529,7 @@ function renderMarkdown(summary) {
     `- Phase 13 capability truth ready: ${summary.summaryGate.capabilityTruthReady}`,
     `- P14-35 type declarations ready: ${summary.summaryGate.typeDeclarationsReady}`,
     `- P14-36 migration comparison ready: ${summary.summaryGate.migrationComparisonReady}`,
+    `- Phase 14 closeout handoff ready: ${summary.openFutureWork.closeoutTasks.length === 0 && summary.tasks.some((task) => task.id === "P14-39" && task.status === "completed")}`,
     `- Phase 14 fully closed: ${summary.openFutureWork.openTasks.length === 0}`,
     "",
     "## Task Checklist",
@@ -636,7 +640,7 @@ function renderMarkdown(summary) {
     "- Gradle: `:app:generateNodePhase14Summary`",
     "- Reports: `build/reports/nodejs/phase14-summary.json` and `build/reports/nodejs/phase14-summary.md`",
     "- Canonical docs output: `docs/nodejs/reports/phase14/PHASE14_SUMMARY.md`",
-    "- P14-37 requires zero open final blockers, zero policy violations, and zero release-blocking reports. P14-38 and P14-39 remain explicit closeout handoff tasks until they are deployed.",
+    "- P14-37 requires zero open final blockers, zero policy violations, and zero release-blocking reports. Remaining closeout handoff tasks stay visible until they are deployed.",
   );
   return lines.join("\n") + "\n";
 }

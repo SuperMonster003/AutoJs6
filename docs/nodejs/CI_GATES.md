@@ -1294,6 +1294,12 @@ imports the summary, security, packaged, type, migration, and docs-sync
 reports, and verifies the v1.2 RC checklist plus release notes draft. It
 separates required v1.2 blockers from v1.3 future promotion backlog and is not
 release tag approval.
+The `:app:verifyNodePhase14CloseoutHandoff` gate writes
+`phase14-closeout-handoff.json` plus `.md`, depends on P14-38, imports the
+summary and RC checklist reports, verifies the Phase 14 closeout breakdown,
+future backlog export, next branch handoff, and final blocker registry closeout
+marker, and confirms `feature/nodejs-runtime-v1.3` can start from the documented
+backlog without reopening final blockers.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

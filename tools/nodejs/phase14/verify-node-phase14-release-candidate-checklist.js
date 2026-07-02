@@ -135,7 +135,11 @@ function buildReport(files) {
       value("zeroOpenFinal", summary.decision && summary.decision.zeroOpenFinalBlockers === true),
       value("zeroPolicy", summary.decision && summary.decision.zeroPolicyViolations === true),
       value("zeroReleaseBlocking", summary.decision && summary.decision.zeroReleaseBlockingReports === true),
-      value("futureBacklogVisible", futureBacklogCount >= 19 && openTasks.includes("P14-39")),
+      value("futureBacklogVisible", futureBacklogCount >= 19 && (
+        openTasks.includes("P14-39") ||
+        (Array.isArray(summary.tasks) &&
+          summary.tasks.some((task) => task.id === "P14-39" && task.status === "completed"))
+      )),
     ]),
     scenario("rc_checklist_sections", "RC checklist separates required blockers from future promotion backlog", [
       ...REQUIRED_RC_SECTIONS.map((entry) => token(files.rcChecklist, entry)),

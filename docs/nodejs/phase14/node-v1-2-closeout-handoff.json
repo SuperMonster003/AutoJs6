@@ -1,0 +1,26 @@
+{
+  "schema": "autojs6-node-phase14-closeout-handoff-plan-v1",
+  "phase": "Phase 14: Node v1.2 Provider Promotion",
+  "task": "P14-39",
+  "title": "Node Profile v1.2 closeout and next branch handoff",
+  "status": "ready",
+  "decision": "phase14_closeout_handoff_ready",
+  "surface": "docs.examples.final_gate",
+  "gradleTask": ":app:verifyNodePhase14CloseoutHandoff",
+  "runtimeAuthorityChanged": false,
+  "sourceInputs": [
+    "build/reports/nodejs/phase14-summary.json",
+    "build/reports/nodejs/phase14-release-candidate-checklist.json",
+    "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
+    "docs/nodejs/reports/phase14/PHASE14_FUTURE_BACKLOG.json"
+  ],
+  "outputs": [
+    "docs/nodejs/reports/phase14/PHASE14_CLOSEOUT_BREAKDOWN.md",
+    "docs/nodejs/reports/phase14/PHASE14_FUTURE_BACKLOG.json",
+    "docs/nodejs/reports/phase14/PHASE14_NEXT_BRANCH_HANDOFF.md",
+    "build/reports/nodejs/phase14-closeout-handoff.json",
+    "build/reports/nodejs/phase14-closeout-handoff.md"
+  ],
+  "nextBranch": "feature/nodejs-runtime-v1.3",
+  "minimumPolicy": "P14-39 closes Phase 14 for v1.2 release-gating handoff with zero final blockers reopened and exports provider promotion backlog for the next branch."
+}

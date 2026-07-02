@@ -412,6 +412,21 @@ checklist as `release_candidate_checklist_ready` behind
   `phase14_summary_gate_ready` are evidence labels, not new error codes.
 - Runtime authority remains unchanged and release tag approval remains false.
 
+## P14-39 closeout handoff
+
+P14-39 does not add a new error code. It records the v1.2 closeout handoff as
+`phase14_closeout_handoff_ready` behind
+`:app:verifyNodePhase14CloseoutHandoff`:
+
+- Existing capability, permission, packaged metadata, Safe downgrade,
+  stable-denial, unsupported-worker, raw-object denial, and release-blocker
+  diagnostics remain canonical.
+- The final blocker registry records a Phase 14 closeout marker without
+  reopening final blockers.
+- The v1.3 future promotion backlog is exported for the next branch, not
+  converted into runtime errors.
+- Runtime authority remains unchanged.
+
 ## ERR_AUTOJS6_BRIDGE_PROCESS_DEAD
 
 - Meaning: The bridge process or service was destroyed before a pending request completed.

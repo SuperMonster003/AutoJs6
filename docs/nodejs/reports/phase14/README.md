@@ -38,6 +38,7 @@ Docs, examples, and final gates:
 - `:app:verifyNodePhase14MigrationProComparison`
 - `:app:generateNodePhase14Summary`
 - `:app:verifyNodePhase14ReleaseCandidateChecklist`
+- `:app:verifyNodePhase14CloseoutHandoff`
 
 Phase 14 carries forward the Phase 13 future-promotion backlog for live UI,
 overlay, accessibility, screenshot/OCR, task providers, notifications/power,
@@ -277,3 +278,9 @@ adds the RC checklist and release notes draft, imports the P14-37 summary plus
 security, packaged, type, migration, and docs-sync reports, and writes
 `phase14-release-candidate-checklist.json` plus `.md` behind
 `:app:verifyNodePhase14ReleaseCandidateChecklist`.
+
+`P14_39_CLOSEOUT_HANDOFF.md` records the Phase 14 closeout handoff as `ready`
+with a `phase14_closeout_handoff_ready` decision. It adds the closeout
+breakdown, future backlog export, next branch handoff note, and final blocker
+registry closeout marker, then writes `phase14-closeout-handoff.json` plus
+`.md` behind `:app:verifyNodePhase14CloseoutHandoff`.

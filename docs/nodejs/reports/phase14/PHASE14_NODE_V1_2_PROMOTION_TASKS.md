@@ -945,8 +945,8 @@ A Phase 14 task can be marked complete only when all applicable items are true:
       blocker registry, Phase 13 capability truth, P14-35 type declaration
       profile report, P14-36 migration comparison report, and all current
       Phase 14 generated reports.
-    - Records `phase14_summary_gate_ready` while keeping P14-38 and P14-39 as
-      open closeout handoff tasks.
+    - Records `phase14_summary_gate_ready` while keeping remaining closeout
+      handoff tasks visible until they are deployed.
   - Acceptance: v1.2 closeout requires zero open final blockers, zero policy
     violations, and zero release-blocking reports.
 
@@ -972,9 +972,25 @@ A Phase 14 task can be marked complete only when all applicable items are true:
   - Acceptance: checklist separates required v1.2 blockers from v1.3 future
     promotion backlog.
 
-- [ ] P14-39: Close Phase 14 and prepare the next branch handoff.
+- [x] P14-39: Close Phase 14 and prepare the next branch handoff.
   - Scope: closeout breakdown, summary docs, final blocker registry updates,
     future backlog export, and branch handoff note.
+  - Gate: `:app:verifyNodePhase14CloseoutHandoff`.
+  - Closeout handoff gate deployed:
+    - Adds `docs/nodejs/phase14/node-v1-2-closeout-handoff.json` and
+      `PHASE14_NODE_V1_2_CLOSEOUT_HANDOFF.md`.
+    - Adds `docs/nodejs/reports/phase14/PHASE14_CLOSEOUT_BREAKDOWN.md`.
+    - Adds `docs/nodejs/reports/phase14/PHASE14_FUTURE_BACKLOG.json`.
+    - Adds `docs/nodejs/reports/phase14/PHASE14_NEXT_BRANCH_HANDOFF.md`.
+    - Adds `docs/nodejs/reports/phase14/P14_39_CLOSEOUT_HANDOFF.md`.
+    - Adds `tools/nodejs/phase14/verify-node-phase14-closeout-handoff.js`
+      plus Gradle entry `:app:verifyNodePhase14CloseoutHandoff`.
+    - Updates `docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` and `.md` with
+      the Phase 14 closeout marker while keeping final blockers closed or
+      intentionally deferred/rejected.
+    - Records `phase14_closeout_handoff_ready`, exports the v1.3 future
+      promotion backlog, and names `feature/nodejs-runtime-v1.3` as the next
+      branch handoff target.
   - Acceptance: `feature/nodejs-runtime-v1.2` can be committed with a clean
     worktree and the next branch can start from a documented backlog.
 
@@ -1001,6 +1017,7 @@ A Phase 14 task can be marked complete only when all applicable items are true:
 Phase 14 is ready to close when:
 
 - `generateNodePhase14Summary` reports `ready`.
+- `verifyNodePhase14CloseoutHandoff` reports `ready`.
 - All v1.2 release-blocking reports have zero blockers.
 - Future-only reports are visible and excluded from release-blocking counts.
 - The Safe profile remains default and fail-closed.

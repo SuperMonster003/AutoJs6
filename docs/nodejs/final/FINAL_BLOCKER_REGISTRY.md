@@ -9,6 +9,13 @@ docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json
 The registry separates required internal blockers from conditional decisions,
 intentional Safe Node Profile non-goals, and external runtime maintenance.
 
+## Phase 14 closeout update
+
+Phase 14 did not reopen final blockers. P14-39 records
+`phase14_closeout_handoff_ready` with zero open final blockers, zero
+release-blocking reports, and a v1.3 future promotion backlog exported at
+`docs/nodejs/reports/phase14/PHASE14_FUTURE_BACKLOG.json`.
+
 ## Required Internal
 
 - `crash_evidence_automation`

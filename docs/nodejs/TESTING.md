@@ -2454,6 +2454,20 @@ and verifies `NODE_PROFILE_V1_2_RC_CHECKLIST.md` plus
 v1.2 RC blockers from the v1.3 future promotion backlog and does not grant
 release tag approval or runtime authority.
 
+Phase 14 v1.2 closeout handoff gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase14CloseoutHandoff
+```
+
+This host gate records P14-39 as ready with
+`phase14_closeout_handoff_ready`. It depends on the P14-38 release candidate
+checklist gate, imports the latest summary and RC checklist reports, verifies
+`PHASE14_CLOSEOUT_BREAKDOWN.md`, `PHASE14_FUTURE_BACKLOG.json`,
+`PHASE14_NEXT_BRANCH_HANDOFF.md`, and the final blocker registry closeout
+marker, and confirms the v1.3 future promotion backlog is exported without
+reopening final blockers or changing runtime authority.
+
 Phase 13 profile rollback playbook gate:
 
 ```powershell

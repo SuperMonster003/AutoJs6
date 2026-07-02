@@ -440,6 +440,14 @@ false, keeps Safe as the default profile, and requires release notes to separate
 required v1.2 blockers from v1.3 future promotion backlog without promoting raw
 Android object parity or new runtime authority.
 
+P14-39 records the v1.2 closeout handoff through
+`:app:verifyNodePhase14CloseoutHandoff`. The gate updates the final blocker
+registry with a Phase 14 closeout marker, exports the v1.3 future promotion
+backlog, and records the next branch handoff. It does not reopen final blockers,
+does not change the Safe default, and does not promote provider POC reports,
+raw Android object parity, or packaged host-contract evidence into runtime
+authority.
+
 S11-25 records the Rhino `threads` migration policy separately from the
 internal worker policy. Rhino `threads.start()`, `threads.pool()`,
 `threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are
