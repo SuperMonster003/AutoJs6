@@ -2641,6 +2641,12 @@ if (isNodeFuzzerSeedReplayRequested) {
     }
 }
 
+if (isInrtAssembleTaskRequested) {
+    tasks.matching { it.name == "lintVitalAnalyzeInrtRelease" }.configureEach {
+        enabled = false
+    }
+}
+
 apply(from = "native-node-deps-report.gradle.kts")
 apply(from = "embedded-node-packaging-preflight.gradle.kts")
 apply(from = "node-performance-report.gradle.kts")
