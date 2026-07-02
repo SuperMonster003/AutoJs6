@@ -6,6 +6,8 @@ object AceEditorDisplayPreferences {
 
     const val KEY_ACE_WORD_WRAP_ENABLED = EditorDisplayPreferences.KEY_WORD_WRAP_ENABLED
     const val KEY_ACE_LINE_NUMBERS_ENABLED = EditorDisplayPreferences.KEY_LINE_NUMBERS_ENABLED
+    const val KEY_ACE_PRINT_MARGIN_ENABLED = EditorDisplayPreferences.KEY_PRINT_MARGIN_ENABLED
+    const val KEY_ACE_INDENT_GUIDES_ENABLED = EditorDisplayPreferences.KEY_INDENT_GUIDES_ENABLED
     const val KEY_ACE_FONT_LIGATURES_ENABLED = EditorDisplayPreferences.KEY_FONT_LIGATURES_ENABLED
     const val KEY_ACE_FONT_STYLES_ENABLED = EditorDisplayPreferences.KEY_FONT_STYLES_ENABLED
 
@@ -31,6 +33,22 @@ object AceEditorDisplayPreferences {
 
     fun setLineNumbersEnabled(enabled: Boolean) {
         EditorDisplayPreferences.setLineNumbersEnabled(enabled)
+    }
+
+    fun isPrintMarginEnabled(): Boolean {
+        return EditorDisplayPreferences.isPrintMarginEnabled()
+    }
+
+    fun setPrintMarginEnabled(enabled: Boolean) {
+        EditorDisplayPreferences.setPrintMarginEnabled(enabled)
+    }
+
+    fun isIndentGuidesEnabled(): Boolean {
+        return EditorDisplayPreferences.isIndentGuidesEnabled()
+    }
+
+    fun setIndentGuidesEnabled(enabled: Boolean) {
+        EditorDisplayPreferences.setIndentGuidesEnabled(enabled)
     }
 
     fun isBreakpointMarkersEnabled(): Boolean {

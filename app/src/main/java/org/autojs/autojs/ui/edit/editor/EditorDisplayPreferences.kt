@@ -7,6 +7,8 @@ object EditorDisplayPreferences {
     const val KEY_WORD_WRAP_ENABLED = "key_\$_ace_word_wrap_enabled"
     const val KEY_WORD_WRAP_INDENT_STYLE = "key_\$_editor_word_wrap_indent_style"
     const val KEY_LINE_NUMBERS_ENABLED = "key_\$_ace_line_numbers_enabled"
+    const val KEY_PRINT_MARGIN_ENABLED = "key_\$_ace_print_margin_enabled"
+    const val KEY_INDENT_GUIDES_ENABLED = "key_\$_ace_indent_guides_enabled"
     const val KEY_BREAKPOINT_MARKERS_ENABLED = "key_\$_editor_breakpoint_markers_enabled"
     const val KEY_FOLD_MARKERS_ENABLED = "key_\$_editor_fold_markers_enabled"
     const val KEY_GUTTER_WIDTH_MODE = "key_\$_editor_gutter_width_mode"
@@ -21,6 +23,8 @@ object EditorDisplayPreferences {
     private const val DEFAULT_WORD_WRAP_ENABLED = false
     private const val DEFAULT_WORD_WRAP_INDENT_STYLE = WORD_WRAP_INDENT_STYLE_CONTINUATION
     private const val DEFAULT_LINE_NUMBERS_ENABLED = true
+    private const val DEFAULT_PRINT_MARGIN_ENABLED = false
+    private const val DEFAULT_INDENT_GUIDES_ENABLED = true
     private const val DEFAULT_BREAKPOINT_MARKERS_ENABLED = true
     private const val DEFAULT_FOLD_MARKERS_ENABLED = true
     private const val DEFAULT_GUTTER_WIDTH_MODE = GUTTER_WIDTH_MODE_DYNAMIC
@@ -54,6 +58,22 @@ object EditorDisplayPreferences {
 
     fun setLineNumbersEnabled(enabled: Boolean) {
         Pref.putBoolean(KEY_LINE_NUMBERS_ENABLED, enabled)
+    }
+
+    fun isPrintMarginEnabled(): Boolean {
+        return Pref.getBoolean(KEY_PRINT_MARGIN_ENABLED, DEFAULT_PRINT_MARGIN_ENABLED)
+    }
+
+    fun setPrintMarginEnabled(enabled: Boolean) {
+        Pref.putBoolean(KEY_PRINT_MARGIN_ENABLED, enabled)
+    }
+
+    fun isIndentGuidesEnabled(): Boolean {
+        return Pref.getBoolean(KEY_INDENT_GUIDES_ENABLED, DEFAULT_INDENT_GUIDES_ENABLED)
+    }
+
+    fun setIndentGuidesEnabled(enabled: Boolean) {
+        Pref.putBoolean(KEY_INDENT_GUIDES_ENABLED, enabled)
     }
 
     fun isBreakpointMarkersEnabled(): Boolean {

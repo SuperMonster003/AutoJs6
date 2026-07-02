@@ -5,6 +5,7 @@ import org.autojs.autojs.core.pref.Pref
 object AceEditorLspPreferences {
     const val KEY_ACE_LSP_ENABLED = "key_\$_ace_lsp_enabled"
     const val KEY_ACE_LSP_FILE_TYPES = "key_\$_ace_lsp_file_types"
+    private val TYPE_SCRIPT_DECLARATION_EXTENSIONS = listOf(".d.ts", ".d.mts", ".d.cts")
 
     val DEFAULT_FILE_TYPES = listOf(
         ".js",
@@ -65,7 +66,17 @@ object AceEditorLspPreferences {
             ?.lowercase()
             ?.takeIf { it.isNotBlank() }
             ?: return false
-        return getFileTypes().any { normalized.endsWith(it) }
+        return matchesFileType(normalized, getFileTypes())
+    }
+
+    fun matchesFileType(fileName: String, fileTypes: Collection<String>): Boolean {
+        val normalizedFileName = fileName.trim().replace('\\', '/').substringAfterLast('/').lowercase()
+        val normalizedFileTypes = normalizeFileTypes(fileTypes)
+        val declarationExtension = TYPE_SCRIPT_DECLARATION_EXTENSIONS.firstOrNull { normalizedFileName.endsWith(it) }
+        if (declarationExtension != null) {
+            return declarationExtension in normalizedFileTypes
+        }
+        return normalizedFileTypes.any { normalizedFileName.endsWith(it) }
     }
 
     fun normalizeFileTypes(raw: String?): List<String> {

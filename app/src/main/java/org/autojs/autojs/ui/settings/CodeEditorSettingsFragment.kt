@@ -9,16 +9,17 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import androidx.recyclerview.widget.RecyclerView
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
+import org.autojs.autojs.ui.edit.editor.EditorPinchToZoomPreferences
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
-import org.autojs.autojs.util.StringUtils.key
+import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
@@ -26,11 +27,16 @@ import org.autojs.autojs6.R
 class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     private var suppressedPreferenceActionKey: String? = null
+    private var themePreviewHandler: ((Theme) -> Unit)? = null
+    private var preferencesCreated = false
     private val unavailablePreferenceKeys = mutableSetOf<String>()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        EditorPinchToZoomPreferences.migrateLegacyPreferenceIfNeeded()
         setPreferencesFromResource(R.xml.fragment_code_editor_settings, rootKey)
+        preferencesCreated = true
         syncEditorEnginePreferenceAvailability()
+        syncThemePreviewPreference()
         suppressedPreferenceActionKey = initialPreferenceKey.takeIf { suppressInitialActionRecord }
     }
 
@@ -65,8 +71,8 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (
             key == getString(R.string.key_editor_engine) ||
-            key == getString(R.string.key_editor_pinch_to_zoom_strategy) ||
-            key == getString(R.string.key_ace_lsp_enabled)
+            key == getString(R.string.key_ace_lsp_enabled) ||
+            key == getString(R.string.key_ace_word_wrap_enabled)
         ) {
             syncEditorEnginePreferenceAvailability()
         }
@@ -100,6 +106,11 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
                 }
             }
         }
+    }
+
+    fun setThemePreviewHandler(handler: ((Theme) -> Unit)?) {
+        themePreviewHandler = handler
+        syncThemePreviewPreference()
     }
 
     private fun openInitialPreferenceIfNeeded() {
@@ -138,27 +149,51 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         setPreferenceAvailable(R.string.key_ace_editor_font, aceSelected)
         setPreferenceAvailable(R.string.key_ace_font_ligatures_enabled, aceSelected, R.string.summary_ace_font_ligatures_enabled)
         setPreferenceAvailable(R.string.key_ace_font_styles_enabled, aceSelected, R.string.summary_ace_font_styles_enabled)
+        setPreferenceAvailable(R.string.key_ace_print_margin_enabled, aceSelected, R.string.summary_ace_print_margin_enabled)
+        setPreferenceAvailable(R.string.key_ace_indent_guides_enabled, aceSelected, R.string.summary_ace_indent_guides_enabled)
         setPreferenceAvailable(R.string.key_ace_lsp_enabled, aceSelected, R.string.summary_ace_lsp_enabled)
         syncAceLspFileTypesPreferenceVisibility(aceSelected)
         setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected, R.string.summary_ace_word_wrap_enabled)
-        setPreferenceAvailable(R.string.key_editor_word_wrap_indent_style, aceSelected, R.string.summary_editor_word_wrap_indent_style)
+        syncWordWrapIndentPreferenceVisibility(aceSelected)
         setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected, R.string.summary_editor_gutter_width_mode)
         setPreferenceAvailable(R.string.key_editor_fold_markers_enabled, aceSelected, R.string.summary_editor_fold_markers_enabled)
         setPreferenceAvailable(R.string.key_editor_code_highlight_threshold_bytes, nativeSelected)
         setPreferenceAvailable(R.string.key_editor_large_file_mode_threshold_bytes, nativeSelected)
+    }
 
-        if (currentPinchToZoomKey() == getString(R.string.key_editor_pinch_to_zoom_scale_view)) {
-            Pref.putString(
-                key(R.string.key_editor_pinch_to_zoom_strategy),
-                key(R.string.key_editor_pinch_to_zoom_change_text_size),
-            )
+    private fun syncThemePreviewPreference() {
+        if (!preferencesCreated) {
+            return
         }
-        findPreference<EditorPinchToZoomPreference>(getString(R.string.key_editor_pinch_to_zoom_strategy))?.refreshSummary()
+        val handler = themePreviewHandler.takeIf { embeddedInDialog }
+        findPreference<EditorThemePreference>(getString(R.string.key_editor_theme))
+            ?.setThemePreviewHandler(handler)
     }
 
     private fun syncAceLspFileTypesPreferenceVisibility(aceSelected: Boolean) {
         findPreference<Preference>(getString(R.string.key_ace_lsp_file_types))?.apply {
             isVisible = aceSelected && AceEditorLspPreferences.isEnabled()
+        }
+    }
+
+    private fun syncWordWrapIndentPreferenceVisibility(aceSelected: Boolean) {
+        val visible = aceSelected && EditorDisplayPreferences.isWordWrapEnabled()
+        val preferenceKey = getString(R.string.key_editor_word_wrap_indent_style)
+        findPreference<Preference>(preferenceKey)?.apply {
+            if (visible) {
+                isVisible = true
+                setPreferenceAvailable(
+                    R.string.key_editor_word_wrap_indent_style,
+                    true,
+                    R.string.summary_editor_word_wrap_indent_style,
+                )
+            } else {
+                key?.let(unavailablePreferenceKeys::remove)
+                if (this is MaterialListPreference) {
+                    useEntrySummaryProvider()
+                }
+                isVisible = false
+            }
         }
     }
 
@@ -235,13 +270,6 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         } else {
             ViewUtils.showToast(requireContext(), message)
         }
-    }
-
-    private fun currentPinchToZoomKey(): String {
-        return Pref.getString(
-            key(R.string.key_editor_pinch_to_zoom_strategy),
-            key(R.string.default_key_editor_pinch_to_zoom_strategy),
-        )
     }
 
     private val embeddedInDialog: Boolean

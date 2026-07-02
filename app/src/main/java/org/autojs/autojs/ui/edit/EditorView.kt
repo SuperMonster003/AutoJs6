@@ -8,6 +8,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
@@ -20,11 +21,13 @@ import android.text.InputType
 import android.util.AttributeSet
 import android.util.SparseBooleanArray
 import android.view.Choreographer
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -32,6 +35,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
@@ -387,6 +391,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mFunctionsKeyboard: FunctionsKeyboardView = binding.functionsKeyboard
     private val mDocsWebView: EWebView = binding.docs
     private val mDrawerLayout: DrawerLayout = binding.drawerLayout
+    private val mThemePreviewBar: View = binding.themePreviewBar
+    private val mThemePreviewTitle: TextView = binding.themePreviewTitle
+    private val mThemePreviewIndex: TextView = binding.themePreviewIndex
+    private val mThemePreviewList: ImageView = binding.themePreviewList
+    private val mThemePreviewFilter: ImageView = binding.themePreviewFilter
+    private val mThemePreviewPrevious: ImageView = binding.themePreviewPrevious
+    private val mThemePreviewNext: ImageView = binding.themePreviewNext
+    private val mThemePreviewExit: ImageView = binding.themePreviewExit
+    private val mThemePreviewUse: ImageView = binding.themePreviewUse
 
     private var mCurrentCharsetConfidence: Int = 0
     private var mCurrentCharset: Charset = EditorFileService.DEFAULT_CHARSET_TO_WRITE_FILE
@@ -422,6 +435,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mAceShortcutReturnSelection: EditorSelection? = null
     private var mAceShortcutLastObservedSelection: EditorSelection? = null
     private var mAceShortcutReturnJumpInProgress = false
+    private var mDrawerGestureGuardDepth = 0
+    private var mAceShortcutBottomBarDrawerGuardInstalled = false
+    private var mThemePreviewActive = false
+    private var mThemePreviewReturnToThemeDialog = false
+    private var mThemePreviewThemes: List<Theme> = emptyList()
+    private var mThemePreviewCurrentTheme: Theme? = null
+    private var mThemePreviewOriginalTheme: Theme? = null
+    private var mThemePreviewFilterMode = ThemePreviewFilter.All
 
     private val mUiHandler = Handler(Looper.getMainLooper())
 
@@ -518,6 +539,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         EditorDisplayPreferences.KEY_WORD_WRAP_ENABLED,
         EditorDisplayPreferences.KEY_WORD_WRAP_INDENT_STYLE,
         EditorDisplayPreferences.KEY_LINE_NUMBERS_ENABLED,
+        EditorDisplayPreferences.KEY_PRINT_MARGIN_ENABLED,
+        EditorDisplayPreferences.KEY_INDENT_GUIDES_ENABLED,
         EditorDisplayPreferences.KEY_BREAKPOINT_MARKERS_ENABLED,
         EditorDisplayPreferences.KEY_FOLD_MARKERS_ENABLED,
         EditorDisplayPreferences.KEY_GUTTER_WIDTH_MODE,
@@ -537,6 +560,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             key(R.string.key_editor_theme_mode),
                 -> post { applyCurrentEditorThemePreference() }
             key(R.string.key_editor_engine) -> post { applyCurrentEditorEnginePreference() }
+            key(R.string.key_editor_pinch_to_zoom_change_text_size_enabled) -> post { editor.notifyPinchToZoomStrategyChanged(null) }
             key(R.string.key_ace_lsp_enabled),
             key(R.string.key_ace_lsp_file_types),
                 -> post { (editor as? AceScriptEditorEngine)?.refreshLsp() }
@@ -555,6 +579,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         setUpEditor()
         setUpInputMethodEnhancedBar()
         setUpFunctionsKeyboard()
+        setUpThemePreviewer()
         setUpImeInsetsHandling()
         setMenuItemStatus(R.id.save, false)
         mDocsWebView.apply {
@@ -1531,6 +1556,320 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
         mShowFunctionsButton.setOnLongClickListener(beautifyOnLongClick)
         mAceShowFunctionsButton.setOnLongClickListener(beautifyOnLongClick)
+        setUpDrawerGestureGuards()
+    }
+
+    private fun setUpDrawerGestureGuards() {
+        installDrawerGestureGuard(mShowFunctionsButton)
+        installDrawerGestureGuard(mAceShowFunctionsButton)
+        installLeftEdgeDrawerGestureGuard(mAceShortcutBottomBar, ACE_SHORTCUT_ITEM_WIDTH_DP)
+    }
+
+    private fun installDrawerGestureGuard(view: View) {
+        var guarding = false
+        view.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    guarding = true
+                    beginDrawerGestureGuard()
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (guarding) {
+                        mDrawerLayout.requestDisallowInterceptTouchEvent(true)
+                    }
+                }
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+                    if (guarding) {
+                        endDrawerGestureGuard()
+                    }
+                    guarding = false
+                }
+            }
+            false
+        }
+    }
+
+    private fun installLeftEdgeDrawerGestureGuard(view: RecyclerView, widthDp: Float) {
+        if (mAceShortcutBottomBarDrawerGuardInstalled) {
+            return
+        }
+        mAceShortcutBottomBarDrawerGuardInstalled = true
+        val guardWidthPx = widthDp * view.resources.displayMetrics.density
+        var guarding = false
+        view.addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
+            override fun onInterceptTouchEvent(rv: RecyclerView, event: MotionEvent): Boolean {
+                handleEvent(event)
+                return false
+            }
+
+            private fun handleEvent(event: MotionEvent) {
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> {
+                        guarding = event.x in 0f..guardWidthPx
+                        if (guarding) {
+                            beginDrawerGestureGuard()
+                        }
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        if (guarding) {
+                            mDrawerLayout.requestDisallowInterceptTouchEvent(true)
+                        }
+                    }
+                    MotionEvent.ACTION_UP,
+                    MotionEvent.ACTION_CANCEL -> {
+                        if (guarding) {
+                            endDrawerGestureGuard()
+                        }
+                        guarding = false
+                    }
+                }
+            }
+        })
+    }
+
+    private fun installLeftEdgeDrawerGestureGuard(view: View, widthDp: Float) {
+        val guardWidthPx = widthDp * view.resources.displayMetrics.density
+        var guarding = false
+        view.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    guarding = event.x in 0f..guardWidthPx
+                    if (guarding) {
+                        beginDrawerGestureGuard()
+                    }
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (guarding) {
+                        mDrawerLayout.requestDisallowInterceptTouchEvent(true)
+                    }
+                }
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+                    if (guarding) {
+                        endDrawerGestureGuard()
+                    }
+                    guarding = false
+                }
+            }
+            false
+        }
+    }
+
+    private fun beginDrawerGestureGuard() {
+        if (mDrawerGestureGuardDepth++ == 0) {
+            if (!mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.START)
+            }
+            mDrawerLayout.requestDisallowInterceptTouchEvent(true)
+        }
+    }
+
+    private fun endDrawerGestureGuard() {
+        if (mDrawerGestureGuardDepth <= 0) {
+            mDrawerGestureGuardDepth = 0
+            return
+        }
+        if (--mDrawerGestureGuardDepth == 0) {
+            mDrawerLayout.requestDisallowInterceptTouchEvent(false)
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.START)
+        }
+    }
+
+    private fun setUpThemePreviewer() {
+        mThemePreviewFilter.setOnClickListener { cycleThemePreviewFilter() }
+        mThemePreviewPrevious.setOnClickListener { moveThemePreview(-1) }
+        mThemePreviewNext.setOnClickListener { moveThemePreview(1) }
+        mThemePreviewList.setOnClickListener { showThemePreviewList() }
+        mThemePreviewUse.setOnClickListener { finishThemePreview(useTheme = true) }
+        mThemePreviewExit.setOnClickListener { finishThemePreview(useTheme = false) }
+    }
+
+    @SuppressLint("CheckResult")
+    private fun openThemePreviewer(returnToThemeDialog: Boolean, initialTheme: Theme? = null) {
+        if (mThemePreviewActive && mThemePreviewThemes.isNotEmpty()) {
+            mThemePreviewReturnToThemeDialog = mThemePreviewReturnToThemeDialog || returnToThemeDialog
+            mThemePreviewBar.isVisible = true
+            if (initialTheme != null) {
+                previewTheme(initialTheme)
+            } else {
+                syncThemePreviewWithAppliedTheme(themeFontService.currentTheme ?: mThemePreviewCurrentTheme)
+            }
+            return
+        }
+
+        editor.setProgress(true)
+        Themes.getAllThemes(context, editor.engineType)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ themes ->
+                editor.setProgress(false)
+                startThemePreviewer(themes, returnToThemeDialog, initialTheme)
+            }) { error ->
+                editor.setProgress(false)
+                showToast(context, error.message ?: error.toString(), true)
+            }
+    }
+
+    private fun startThemePreviewer(themes: List<Theme>, returnToThemeDialog: Boolean, initialTheme: Theme? = null) {
+        if (themes.isEmpty()) {
+            return
+        }
+        val activeTheme = themeFontService.currentTheme
+        if (!mThemePreviewActive) {
+            mThemePreviewOriginalTheme = activeTheme
+            mThemePreviewFilterMode = ThemePreviewFilter.All
+        }
+        mThemePreviewThemes = themes
+        mThemePreviewReturnToThemeDialog = mThemePreviewReturnToThemeDialog || returnToThemeDialog
+        mThemePreviewActive = true
+        mThemePreviewBar.isVisible = true
+
+        val previewTheme = initialTheme?.let { initial ->
+            themes.firstOrNull { it == initial } ?: initial
+        } ?: activeTheme?.let { active ->
+            themes.firstOrNull { it == active } ?: active
+        } ?: themes.first()
+        previewTheme(previewTheme)
+    }
+
+    private fun previewTheme(theme: Theme) {
+        mThemePreviewCurrentTheme = mThemePreviewThemes.firstOrNull { it == theme } ?: theme
+        themeFontService.applyTheme(mThemePreviewCurrentTheme)
+        refreshThemePreviewBar(mThemePreviewCurrentTheme)
+    }
+
+    private fun syncThemePreviewWithAppliedTheme(theme: Theme?) {
+        if (!mThemePreviewActive || theme == null) {
+            return
+        }
+        mThemePreviewCurrentTheme = mThemePreviewThemes.firstOrNull { it == theme } ?: theme
+        refreshThemePreviewBar(mThemePreviewCurrentTheme)
+    }
+
+    private fun refreshThemePreviewBar(theme: Theme?) {
+        if (theme == null) {
+            return
+        }
+        mThemePreviewTitle.text = theme.name
+        mThemePreviewIndex.text = formatThemePreviewIndex(theme)
+        mThemePreviewFilter.setImageResource(mThemePreviewFilterMode.iconResId)
+        mThemePreviewFilter.contentDescription = context.getString(mThemePreviewFilterMode.labelResId)
+        val backgroundColor = themeFontService.inputMethodBarBackgroundColor(theme)
+        val foregroundColor = themeFontService.inputMethodBarForegroundColor(theme)
+        mThemePreviewBar.setBackgroundColor(backgroundColor)
+        themePreviewTextViews().forEach { it.setTextColor(foregroundColor) }
+        themePreviewImageViews().forEach { it.imageTintList = ColorStateList.valueOf(foregroundColor) }
+    }
+
+    private fun formatThemePreviewIndex(theme: Theme): String {
+        val themes = filteredThemePreviewThemes()
+        val width = themes.size.toString().length.coerceAtLeast(2)
+        val index = themes.indexOf(theme).takeIf { it >= 0 }?.plus(1)
+        val indexText = index?.toString()?.padStart(width, '0') ?: "--"
+        val totalText = themes.size.toString().padStart(width, '0')
+        return "$indexText/$totalText"
+    }
+
+    private fun filteredThemePreviewThemes(): List<Theme> {
+        return mThemePreviewThemes.filter { mThemePreviewFilterMode.allows(it) }
+    }
+
+    private fun themePreviewTextViews(): List<TextView> = listOf(
+        mThemePreviewTitle,
+        mThemePreviewIndex,
+    )
+
+    private fun themePreviewImageViews(): List<ImageView> = listOf(
+        mThemePreviewList,
+        mThemePreviewFilter,
+        mThemePreviewPrevious,
+        mThemePreviewNext,
+        mThemePreviewExit,
+        mThemePreviewUse,
+    )
+
+    private fun cycleThemePreviewFilter() {
+        mThemePreviewFilterMode = mThemePreviewFilterMode.next()
+        refreshThemePreviewBar(mThemePreviewCurrentTheme)
+    }
+
+    private fun moveThemePreview(delta: Int) {
+        val themes = mThemePreviewThemes
+        if (themes.isEmpty()) {
+            return
+        }
+        if (themes.none { mThemePreviewFilterMode.allows(it) }) {
+            showToast(context, R.string.text_theme_preview_no_available_theme)
+            return
+        }
+        val size = themes.size
+        var index = themes.indexOf(mThemePreviewCurrentTheme)
+        if (index < 0) {
+            index = if (delta > 0) -1 else 0
+        }
+        repeat(size) {
+            index = (index + delta + size) % size
+            val candidate = themes[index]
+            if (mThemePreviewFilterMode.allows(candidate)) {
+                previewTheme(candidate)
+                return
+            }
+        }
+    }
+
+    private fun showThemePreviewList() {
+        val themes = filteredThemePreviewThemes()
+        if (themes.isEmpty()) {
+            showToast(context, R.string.text_theme_preview_no_available_theme)
+            return
+        }
+        val current = mThemePreviewCurrentTheme
+        val items = themes.map { theme ->
+            val marker = if (theme == current) "* " else "  "
+            marker + theme.name
+        }
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_theme_previewer)
+                .items(items)
+                .itemsCallback { dialog, _, which, _ ->
+                    val theme = themes.getOrNull(which) ?: return@itemsCallback
+                    previewTheme(theme)
+                    dialog.dismiss()
+                }
+                .negativeText(R.string.dialog_button_dismiss)
+                .negativeColorRes(R.color.dialog_button_default)
+                .build()
+        }
+    }
+
+    private fun finishThemePreview(useTheme: Boolean) {
+        if (!mThemePreviewActive) {
+            return
+        }
+        val returnToThemeDialog = mThemePreviewReturnToThemeDialog
+        val selectedTheme = mThemePreviewCurrentTheme
+        val originalTheme = mThemePreviewOriginalTheme
+
+        mThemePreviewActive = false
+        mThemePreviewReturnToThemeDialog = false
+        mThemePreviewThemes = emptyList()
+        mThemePreviewCurrentTheme = null
+        mThemePreviewOriginalTheme = null
+        mThemePreviewBar.isVisible = false
+
+        if (useTheme && selectedTheme != null) {
+            themeFontService.persistAndApplyTheme(selectedTheme)
+        } else if (originalTheme != null) {
+            themeFontService.applyTheme(originalTheme)
+        } else {
+            applyCurrentEditorThemePreference()
+        }
+
+        if (returnToThemeDialog) {
+            post { selectEditorTheme() }
+        }
     }
 
     private fun setUpInputMethodEnhancedBar() {
@@ -2013,7 +2352,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun setTheme(theme: Theme?) {
-        themeFontService.applyTheme(theme)
+        themeFontService.applyTheme(theme)?.let(::syncThemePreviewWithAppliedTheme)
     }
 
     @SuppressLint("CheckResult")
@@ -2461,6 +2800,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun selectEditorTheme(themes: List<Theme>) {
         val i = themes.indexOf(themeFontService.currentTheme).coerceAtLeast(0)
         val defaultIndex = themes.indexOfFirst { it.name == Themes.getDefaultThemeName(context, editor.engineType) }.coerceAtLeast(0)
+        fun previewFromDialog(dialog: MaterialDialog) {
+            val selectedTheme = themes.getOrNull(dialog.selectedIndex) ?: themeFontService.currentTheme ?: themes[i]
+            dialog.dismiss()
+            recordAceHistoryAction(themePreviewerHistoryAction())
+            openThemePreviewer(returnToThemeDialog = true, initialTheme = selectedTheme)
+        }
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
                 .title(R.string.text_editor_theme)
@@ -2481,6 +2826,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 }
                 .negativeText(R.string.dialog_button_cancel)
                 .negativeColorRes(R.color.dialog_button_default)
+                .neutralText(R.string.dialog_button_preview)
+                .neutralColorRes(R.color.dialog_button_default)
+                .onNeutral { dialog, _ ->
+                    previewFromDialog(dialog)
+                }
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_attraction)
                 .build()
@@ -3026,6 +3376,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             initialPreferenceKey = initialPreferenceKey,
             recordAceActionFavorites = editor.engineType == EditorEngineType.ACE,
             suppressInitialActionRecord = suppressInitialSettingActionRecord,
+            themePreviewHandler = { theme ->
+                recordAceHistoryAction(themePreviewerHistoryAction())
+                openThemePreviewer(returnToThemeDialog = true, initialTheme = theme)
+            },
         )
     }
 
@@ -3092,6 +3446,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_COPY_ACE_DIAGNOSTICS -> true.also { copyAceDiagnosticsToClipboard() }
             ACTION_OPEN_BY_OTHER_APPS -> true.also { openByOtherApps() }
             ACTION_VERSION_HISTORY -> true.also { showVersionHistoryDialog() }
+            ACTION_THEME_PREVIEWER -> true.also { openThemePreviewer(returnToThemeDialog = false) }
             ACTION_EXIT_EDITOR -> true.also { triggerHostBackPress() }
             ACTION_JUMP_TO_PREVIOUS_CURSOR -> toggleAceShortcutReturnPoint()
             else -> executeEditorSettingHistoryAction(action)
@@ -3261,8 +3616,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             R.string.text_build_apk,
             mutatesText = false,
             payloadJson = path?.let { historyPayload(PAYLOAD_PATH to it) },
-            payloadSummary = path?.let { compactHistorySummary(File(it).name.ifBlank { it }) },
+        payloadSummary = path?.let { compactHistorySummary(File(it).name.ifBlank { it }) },
         )
+    }
+
+    private fun themePreviewerHistoryAction(): AceActionHistoryStore.Action {
+        return historyAction(ACTION_THEME_PREVIEWER, R.string.text_theme_previewer, mutatesText = false)
     }
 
     private fun actionForHistoryRecord(action: AceActionHistoryStore.Action): AceActionHistoryStore.Action {
@@ -3555,6 +3914,28 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val columnNumber: Int,
     )
 
+    private enum class ThemePreviewFilter(
+        @param:StringRes val labelResId: Int,
+        @param:DrawableRes val iconResId: Int,
+    ) {
+        All(R.string.text_theme_preview_filter_all, R.drawable.ic_day_and_night),
+        Dark(R.string.text_theme_preview_filter_dark, R.drawable.ic_moon),
+        Light(R.string.text_theme_preview_filter_light, R.drawable.ic_sun),
+        ;
+
+        fun allows(theme: Theme): Boolean = when (this) {
+            All -> true
+            Dark -> theme.isDark
+            Light -> !theme.isDark
+        }
+
+        fun next(): ThemePreviewFilter = when (this) {
+            All -> Dark
+            Dark -> Light
+            Light -> All
+        }
+    }
+
     companion object {
 
 
@@ -3606,8 +3987,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_COPY_ACE_DIAGNOSTICS = "editor:copy_ace_diagnostics"
         private const val ACTION_OPEN_BY_OTHER_APPS = "editor:open_by_other_apps"
         private const val ACTION_VERSION_HISTORY = "editor:version_history"
+        private const val ACTION_THEME_PREVIEWER = "editor:theme_previewer"
         private const val ACTION_EXIT_EDITOR = "editor:exit"
         private const val ACTION_JUMP_TO_PREVIOUS_CURSOR = "editor:jump_to_previous_cursor"
+
+        private const val ACE_SHORTCUT_ITEM_WIDTH_DP = 40f
 
         private const val PAYLOAD_QUERY = "query"
         private const val PAYLOAD_REPLACEMENT = "replacement"

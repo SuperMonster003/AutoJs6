@@ -30,6 +30,7 @@ public class Theme {
     private final EditorTheme mEditorTheme;
     private final String mAceTheme;
     private final boolean mAceOnly;
+    private final boolean mDark;
     private int mLineHighlightBackground;
     private final int mBreakpointColor;
     private int mDebuggingLineBackground;
@@ -39,6 +40,10 @@ public class Theme {
     }
 
     private Theme(EditorTheme theme, String aceTheme, boolean aceOnly) {
+        this(theme, aceTheme, aceOnly, null);
+    }
+
+    private Theme(EditorTheme theme, String aceTheme, boolean aceOnly, Boolean dark) {
         mEditorTheme = theme;
         mAceTheme = aceTheme;
         mAceOnly = aceOnly;
@@ -70,6 +75,7 @@ public class Theme {
                 setTokenColor(scope, foreground);
             }
         }
+        mDark = dark != null ? dark : isDarkColor(mBackgroundColor);
     }
 
     private int parseColor(String color, int defaultValue) {
@@ -143,11 +149,15 @@ public class Theme {
         editorColors.setDebuggingLineBackground("#40c4ff");
         editorTheme.setEditorColors(editorColors);
 
-        return new Theme(editorTheme, aceTheme, true);
+        return new Theme(editorTheme, aceTheme, true, dark);
     }
 
     public int getBackgroundColor() {
         return mBackgroundColor;
+    }
+
+    public int getForegroundColor() {
+        return mForegroundColor;
     }
 
     public String getAceTheme() {
@@ -156,6 +166,10 @@ public class Theme {
 
     public boolean isAceOnly() {
         return mAceOnly;
+    }
+
+    public boolean isDark() {
+        return mDark;
     }
 
     public int getImeBarBackgroundColor() {
@@ -201,6 +215,14 @@ public class Theme {
 
     public int getDebuggingLineBackgroundColor() {
         return mDebuggingLineBackground;
+    }
+
+    private static boolean isDarkColor(int color) {
+        double red = Color.red(color) / 255.0;
+        double green = Color.green(color) / 255.0;
+        double blue = Color.blue(color) / 255.0;
+        double luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+        return luminance < 0.5;
     }
 
 }

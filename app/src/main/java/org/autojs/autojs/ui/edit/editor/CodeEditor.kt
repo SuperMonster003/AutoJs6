@@ -15,7 +15,6 @@ import android.view.WindowManager
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import org.autojs.autojs.core.pref.Pref.getEditorTextSize
-import org.autojs.autojs.core.pref.Pref.getString
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.script.JsBeautifier
 import org.autojs.autojs.theme.ThemeColorHelper
@@ -23,7 +22,6 @@ import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ClipboardUtils.setClip
 import org.autojs.autojs.util.DisplayUtils.pxToSp
 import org.autojs.autojs.util.StringUtils.indexOf
-import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
@@ -293,21 +291,11 @@ class CodeEditor : HVScrollView {
         }, remain)
     }
 
-    private fun applyScaleGesture(key: String? = null) {
-        var niceKey = key
-        if (niceKey == null) {
-            niceKey = getString(R.string.key_editor_pinch_to_zoom_strategy, R.string.default_key_editor_pinch_to_zoom_strategy)
-        }
-        when (niceKey) {
-            key(R.string.key_editor_pinch_to_zoom_change_text_size) -> {
-                mScaleGestureDetector = mScaleGestureDetectorForChangeTextSize
-            }
-            key(R.string.key_editor_pinch_to_zoom_scale_view) -> {
-                mScaleGestureDetector = mScaleGestureDetectorForChangeTextSize
-            }
-            key(R.string.key_editor_pinch_to_zoom_disable) -> {
-                mScaleGestureDetector = null
-            }
+    private fun applyScaleGesture() {
+        mScaleGestureDetector = if (EditorPinchToZoomPreferences.isChangeTextSizeEnabled()) {
+            mScaleGestureDetectorForChangeTextSize
+        } else {
+            null
         }
     }
 
@@ -773,7 +761,7 @@ class CodeEditor : HVScrollView {
     }
 
     fun notifyPinchToZoomStrategyChanged(newKey: String?) {
-        applyScaleGesture(newKey)
+        applyScaleGesture()
     }
 
     class Breakpoint(@JvmField var line: Int) {

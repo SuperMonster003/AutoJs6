@@ -11,6 +11,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
+import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ContextUtils.findActivity
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs6.R
@@ -18,6 +19,8 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 class CodeEditorSettingsDialog : DialogFragment() {
+
+    private var themePreviewHandler: ((Theme) -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,7 +42,9 @@ class CodeEditorSettingsDialog : DialogFragment() {
                         initialPreferenceKey = initialPreferenceKey,
                         recordAceActionFavorites = recordAceActionFavorites,
                         suppressInitialActionRecord = suppressInitialActionRecord,
-                    ),
+                    ).apply {
+                        setThemePreviewHandler(createThemePreviewHandler())
+                    },
                 )
                 .commit()
         }
@@ -87,6 +92,23 @@ class CodeEditorSettingsDialog : DialogFragment() {
             ?.openPreference(preferenceKey, suppressActionRecord)
     }
 
+    fun setThemePreviewHandler(handler: ((Theme) -> Unit)?) {
+        themePreviewHandler = handler
+        if (!isAdded) {
+            return
+        }
+        (childFragmentManager.findFragmentById(R.id.code_editor_settings_dialog_container) as? CodeEditorSettingsFragment)
+            ?.setThemePreviewHandler(createThemePreviewHandler())
+    }
+
+    private fun createThemePreviewHandler(): ((Theme) -> Unit)? {
+        val handler = themePreviewHandler ?: return null
+        return { theme ->
+            dismissAllowingStateLoss()
+            handler(theme)
+        }
+    }
+
     private val initialPreferenceKey: String?
         get() = arguments?.getString(ARG_INITIAL_PREFERENCE_KEY)
 
@@ -110,6 +132,7 @@ class CodeEditorSettingsDialog : DialogFragment() {
             initialPreferenceKey: String? = null,
             recordAceActionFavorites: Boolean = false,
             suppressInitialActionRecord: Boolean = false,
+            themePreviewHandler: ((Theme) -> Unit)? = null,
         ) {
             val activity = context.findActivity()
             if (activity !is FragmentActivity || activity.isFinishing || activity.isDestroyed) {
@@ -123,10 +146,12 @@ class CodeEditorSettingsDialog : DialogFragment() {
             }
             val existingDialog = fragmentManager.findFragmentByTag(TAG) as? CodeEditorSettingsDialog
             if (existingDialog != null) {
+                existingDialog.setThemePreviewHandler(themePreviewHandler)
                 initialPreferenceKey?.let { existingDialog.openPreference(it, suppressInitialActionRecord) }
                 return
             }
             CodeEditorSettingsDialog().apply {
+                setThemePreviewHandler(themePreviewHandler)
                 arguments = Bundle().apply {
                     putBoolean(ARG_RECORD_ACE_ACTION_FAVORITES, recordAceActionFavorites)
                     putBoolean(ARG_SUPPRESS_INITIAL_ACTION_RECORD, suppressInitialActionRecord)

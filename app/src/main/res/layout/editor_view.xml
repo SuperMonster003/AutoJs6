@@ -79,6 +79,7 @@
                                 android:background="?selectableItemBackgroundBorderless"
                                 android:contentDescription="@string/text_function"
                                 android:padding="6dp"
+                                android:scaleType="centerInside"
                                 android:src="@drawable/ic_ali_fx"
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"
@@ -128,6 +129,7 @@
                                     android:background="?selectableItemBackgroundBorderless"
                                     android:contentDescription="@string/text_function"
                                     android:padding="6dp"
+                                    android:scaleType="centerInside"
                                     android:src="@drawable/ic_ali_fx"
                                     app:tint="#222329" />
 
@@ -186,6 +188,122 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/theme_preview_bar"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:orientation="vertical"
+                android:paddingStart="12dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="4dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/theme_preview_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:singleLine="true"
+                        android:textSize="14sp"
+                        tools:text="Crimson Editor" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/theme_preview_list"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/text_theme_preview_list"
+                        android:padding="10dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_list" />
+
+                    <ImageView
+                        android:id="@+id/theme_preview_filter"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/text_theme_preview_filter_all"
+                        android:padding="10dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_day_and_night" />
+
+                    <ImageView
+                        android:id="@+id/theme_preview_previous"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/text_theme_preview_previous"
+                        android:padding="6dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_skip_previous_black_48dp" />
+
+                    <TextView
+                        android:id="@+id/theme_preview_index"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:singleLine="true"
+                        android:textSize="13sp"
+                        tools:text="12/48" />
+
+                    <ImageView
+                        android:id="@+id/theme_preview_next"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/text_theme_preview_next"
+                        android:padding="6dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_skip_next_black_48dp" />
+
+                    <ImageView
+                        android:id="@+id/theme_preview_exit"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/text_theme_preview_exit"
+                        android:padding="6dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_close_black_48dp" />
+
+                    <ImageView
+                        android:id="@+id/theme_preview_use"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/text_theme_preview_use"
+                        android:padding="7dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/mt_ic_check_white_36dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <org.autojs.autojs.ui.edit.debug.DebugBar
                 android:id="@+id/debug_bar"

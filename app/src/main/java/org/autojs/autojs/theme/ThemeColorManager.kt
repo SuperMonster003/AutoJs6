@@ -20,7 +20,7 @@ object ThemeColorManager {
         // R.color.md_blue_gray_900
         isInrt -> "#263238"
         // R.color.theme_color_default
-        else -> "#00695C"
+        else -> "#FFDEAD"
     }.let { ThemeColor(ColorUtils.parseColor(it)) }
 
     @JvmStatic

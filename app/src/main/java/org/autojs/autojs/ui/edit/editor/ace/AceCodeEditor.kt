@@ -40,8 +40,8 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
-import org.autojs.autojs.core.pref.Pref.getString
 import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
+import org.autojs.autojs.ui.edit.editor.EditorPinchToZoomPreferences
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceRuntimeEventHistory
@@ -52,7 +52,6 @@ import org.autojs.autojs.ui.edit.editor.ace.health.AceJsErrorClassifier
 import org.autojs.autojs.ui.edit.editor.ace.health.AceRuntimeHealthMonitor
 import org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManager
 import org.autojs.autojs.util.ClipboardUtils
-import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.json.JSONArray
@@ -320,7 +319,7 @@ class AceCodeEditor @JvmOverloads constructor(
         setBackgroundColor(editorBackgroundColor())
         addView(webView, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         addView(loadingOverlay, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-        applyPinchToZoomStrategy(null)
+        applyPinchToZoomStrategy()
         configureWebView()
     }
 
@@ -569,7 +568,7 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     fun notifyPinchToZoomStrategyChanged(newKey: String?) {
-        applyPinchToZoomStrategy(newKey)
+        applyPinchToZoomStrategy()
     }
 
     fun setFontFamily(fontFamily: String) {
@@ -580,6 +579,8 @@ class AceCodeEditor @JvmOverloads constructor(
         invokeAce("setWordWrapEnabled", EditorDisplayPreferences.isWordWrapEnabled().toString())
         invokeAce("setWordWrapIndentStyle", quote(EditorDisplayPreferences.wordWrapIndentStyle()))
         invokeAce("setLineNumbersEnabled", EditorDisplayPreferences.isLineNumbersEnabled().toString())
+        invokeAce("setPrintMarginEnabled", EditorDisplayPreferences.isPrintMarginEnabled().toString())
+        invokeAce("setIndentGuidesEnabled", EditorDisplayPreferences.isIndentGuidesEnabled().toString())
         invokeAce("setBreakpointMarkersEnabled", EditorDisplayPreferences.isBreakpointMarkersEnabled().toString())
         invokeAce("setFoldMarkersEnabled", EditorDisplayPreferences.isFoldMarkersEnabled().toString())
         invokeAce("setGutterWidthMode", quote(EditorDisplayPreferences.gutterWidthMode()))
@@ -587,18 +588,16 @@ class AceCodeEditor @JvmOverloads constructor(
         invokeAce("setFontStylesEnabled", EditorDisplayPreferences.isFontStylesEnabled().toString())
     }
 
-    private fun applyPinchToZoomStrategy(newKey: String?) {
-        pinchZoomStrategy = PinchZoomStrategy.fromKey(newKey ?: currentPinchToZoomStrategyKey())
+    private fun applyPinchToZoomStrategy() {
+        pinchZoomStrategy = PinchZoomStrategy.fromChangeTextSizeEnabled(
+            EditorPinchToZoomPreferences.isChangeTextSizeEnabled(),
+        )
         pinchGestureActive = false
         lastTextSizeScaleFactor = 1.0
         if (pinchZoomStrategy != PinchZoomStrategy.SCALE_VIEW && viewZoomScale != 1f) {
             viewZoomScale = 1f
             applyEffectiveTextSizeSp(baseTextSizeSp, focusX = null, focusY = null)
         }
-    }
-
-    private fun currentPinchToZoomStrategyKey(): String {
-        return getString(R.string.key_editor_pinch_to_zoom_strategy, R.string.default_key_editor_pinch_to_zoom_strategy)
     }
 
     internal fun handleBridgePinchZoom(textSizeSp: Double, focusX: Double, focusY: Double, phase: String) {
@@ -1114,6 +1113,14 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun bridgeLineNumbersEnabled(): Boolean {
         return AceEditorDisplayPreferences.isLineNumbersEnabled()
+    }
+
+    internal fun bridgePrintMarginEnabled(): Boolean {
+        return AceEditorDisplayPreferences.isPrintMarginEnabled()
+    }
+
+    internal fun bridgeIndentGuidesEnabled(): Boolean {
+        return AceEditorDisplayPreferences.isIndentGuidesEnabled()
     }
 
     internal fun bridgeBreakpointMarkersEnabled(): Boolean {
@@ -2505,10 +2512,8 @@ class AceCodeEditor @JvmOverloads constructor(
             }
 
         companion object {
-            fun fromKey(key: String?): PinchZoomStrategy = when (key) {
-                key(R.string.key_editor_pinch_to_zoom_disable) -> DISABLED
-                else -> CHANGE_TEXT_SIZE
-            }
+            fun fromChangeTextSizeEnabled(enabled: Boolean): PinchZoomStrategy =
+                if (enabled) CHANGE_TEXT_SIZE else DISABLED
         }
     }
 

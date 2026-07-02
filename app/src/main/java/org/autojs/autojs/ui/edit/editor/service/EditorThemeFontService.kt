@@ -59,7 +59,7 @@ class EditorThemeFontService(
             val loadingTextColor = ColorUtils.adjustColorForContrast(imeBarBackgroundColor, appThemeColor, 3.6)
             loadingBarText.setTextColor(loadingTextColor)
 
-            val textColor = it.imeBarForegroundColor
+            val textColor = resolveImeBarForegroundColor(it)
             completionBars.forEach { bar -> bar.setTextColor(textColor) }
             showFunctionsButtons.forEach { button -> button.setColorFilter(textColor) }
 
@@ -90,6 +90,35 @@ class EditorThemeFontService(
 
     fun currentTextSize(): Int = currentEditor().getTextSizeSp().toInt()
 
+    fun inputMethodBarBackgroundColor(theme: Theme): Int = theme.imeBarBackgroundColor
+
+    fun inputMethodBarForegroundColor(theme: Theme): Int = resolveImeBarForegroundColor(theme)
+
+    private fun resolveImeBarForegroundColor(theme: Theme): Int {
+        val themeTone = theme.foregroundColor
+        if (!isChromaticThemeTone(themeTone)) {
+            return theme.imeBarForegroundColor
+        }
+        return ColorUtils.adjustColorForContrast(
+            theme.imeBarBackgroundColor,
+            themeTone,
+            minimumContrast = 3.0,
+        )
+    }
+
+    private fun isChromaticThemeTone(color: Int): Boolean {
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        val channelSpread = maxOf(red, green, blue) - minOf(red, green, blue)
+        if (channelSpread < CHROMATIC_CHANNEL_SPREAD_THRESHOLD) {
+            return false
+        }
+        val hsv = FloatArray(3)
+        Color.RGBToHSV(red, green, blue, hsv)
+        return hsv[1] >= CHROMATIC_SATURATION_THRESHOLD
+    }
+
     fun currentAceFont(): AceEditorFont = AceEditorFontPreferences.get()
 
     fun applyPreferredAceFont() {
@@ -107,5 +136,10 @@ class EditorThemeFontService(
             AceEditorFontPreferences.set(font)
         }
         (currentEditor() as? AceScriptEditorEngine)?.setAceEditorFont(font)
+    }
+
+    private companion object {
+        const val CHROMATIC_CHANNEL_SPREAD_THRESHOLD = 36
+        const val CHROMATIC_SATURATION_THRESHOLD = 0.14f
     }
 }

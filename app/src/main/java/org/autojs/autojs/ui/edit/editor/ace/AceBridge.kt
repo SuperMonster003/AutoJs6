@@ -78,6 +78,16 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun isPrintMarginEnabled(): Boolean {
+        return editor.bridgePrintMarginEnabled()
+    }
+
+    @JavascriptInterface
+    fun isIndentGuidesEnabled(): Boolean {
+        return editor.bridgeIndentGuidesEnabled()
+    }
+
+    @JavascriptInterface
     fun isBreakpointMarkersEnabled(): Boolean {
         return editor.bridgeBreakpointMarkersEnabled()
     }

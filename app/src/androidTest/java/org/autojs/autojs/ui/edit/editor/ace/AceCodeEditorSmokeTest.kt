@@ -64,6 +64,8 @@ class AceCodeEditorSmokeTest {
         AceEditorTestHooks.reset()
         AceEditorDisplayPreferences.setWordWrapEnabled(false)
         AceEditorDisplayPreferences.setLineNumbersEnabled(true)
+        AceEditorDisplayPreferences.setPrintMarginEnabled(false)
+        AceEditorDisplayPreferences.setIndentGuidesEnabled(true)
         AceEditorDisplayPreferences.setBreakpointMarkersEnabled(true)
         AceEditorDisplayPreferences.setFoldMarkersEnabled(true)
         AceEditorLspPreferences.setEnabled(false)
@@ -124,6 +126,8 @@ class AceCodeEditorSmokeTest {
     fun displayPreferencesApplyToAceSession() {
         AceEditorDisplayPreferences.setWordWrapEnabled(true)
         AceEditorDisplayPreferences.setLineNumbersEnabled(false)
+        AceEditorDisplayPreferences.setPrintMarginEnabled(false)
+        AceEditorDisplayPreferences.setIndentGuidesEnabled(false)
         AceEditorDisplayPreferences.setBreakpointMarkersEnabled(false)
         AceEditorDisplayPreferences.setFoldMarkersEnabled(false)
         val editor = launchReadyEditor()
@@ -135,6 +139,8 @@ class AceCodeEditorSmokeTest {
                     return JSON.stringify({
                         wrap: editor.session.getUseWrapMode(),
                         showLineNumbers: editor.getOption("showLineNumbers"),
+                        showPrintMargin: editor.getOption("showPrintMargin"),
+                        displayIndentGuides: editor.getOption("displayIndentGuides"),
                         showFoldWidgets: editor.getOption("showFoldWidgets"),
                         hidesBreakpointMarkers: editor.container.classList.contains("autojs6-hide-breakpoint-markers"),
                         hidesFoldMarkers: editor.container.classList.contains("autojs6-hide-fold-markers"),
@@ -142,6 +148,8 @@ class AceCodeEditorSmokeTest {
                         hasRuntimeApi:
                             typeof window.AutoJsAce.setWordWrapEnabled === "function" &&
                             typeof window.AutoJsAce.setLineNumbersEnabled === "function" &&
+                            typeof window.AutoJsAce.setPrintMarginEnabled === "function" &&
+                            typeof window.AutoJsAce.setIndentGuidesEnabled === "function" &&
                             typeof window.AutoJsAce.setBreakpointMarkersEnabled === "function" &&
                             typeof window.AutoJsAce.setFoldMarkersEnabled === "function"
                     });
@@ -150,6 +158,8 @@ class AceCodeEditorSmokeTest {
         )
         assertTrue(initialState.getBoolean("wrap"))
         assertFalse(initialState.getBoolean("showLineNumbers"))
+        assertFalse(initialState.getBoolean("showPrintMargin"))
+        assertFalse(initialState.getBoolean("displayIndentGuides"))
         assertFalse(initialState.getBoolean("showFoldWidgets"))
         assertTrue(initialState.getBoolean("hidesBreakpointMarkers"))
         assertTrue(initialState.getBoolean("hidesFoldMarkers"))
@@ -162,11 +172,15 @@ class AceCodeEditorSmokeTest {
                 (function() {
                     window.AutoJsAce.setWordWrapEnabled(false);
                     window.AutoJsAce.setLineNumbersEnabled(true);
+                    window.AutoJsAce.setPrintMarginEnabled(true);
+                    window.AutoJsAce.setIndentGuidesEnabled(true);
                     window.AutoJsAce.setBreakpointMarkersEnabled(true);
                     window.AutoJsAce.setFoldMarkersEnabled(true);
                     return JSON.stringify({
                         wrap: editor.session.getUseWrapMode(),
                         showLineNumbers: editor.getOption("showLineNumbers"),
+                        showPrintMargin: editor.getOption("showPrintMargin"),
+                        displayIndentGuides: editor.getOption("displayIndentGuides"),
                         showFoldWidgets: editor.getOption("showFoldWidgets"),
                         hidesBreakpointMarkers: editor.container.classList.contains("autojs6-hide-breakpoint-markers"),
                         hidesFoldMarkers: editor.container.classList.contains("autojs6-hide-fold-markers")
@@ -176,6 +190,8 @@ class AceCodeEditorSmokeTest {
         )
         assertFalse(toggledState.getBoolean("wrap"))
         assertTrue(toggledState.getBoolean("showLineNumbers"))
+        assertTrue(toggledState.getBoolean("showPrintMargin"))
+        assertTrue(toggledState.getBoolean("displayIndentGuides"))
         assertTrue(toggledState.getBoolean("showFoldWidgets"))
         assertFalse(toggledState.getBoolean("hidesBreakpointMarkers"))
         assertFalse(toggledState.getBoolean("hidesFoldMarkers"))

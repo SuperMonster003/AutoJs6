@@ -1,10 +1,15 @@
 package org.autojs.autojs.ui.edit.completion;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -29,7 +34,6 @@ import org.autojs.autojs6.R;
 public class CodeCompletionBar extends RecyclerView {
 
     private static final int ITEM_HORIZONTAL_PADDING_DP = 12;
-    private static final int ICON_ITEM_HORIZONTAL_PADDING_DP = 10;
     private static final int ICON_ITEM_MIN_WIDTH_DP = 40;
     private static final int ICON_SIZE_DP = 24;
     private static final long LONG_PRESS_REPEAT_INTERVAL_MS = 80;
@@ -158,6 +162,7 @@ public class CodeCompletionBar extends RecyclerView {
         applyItemLayoutParams(textView);
         int iconResId = mCodeCompletions.getIconResId(position);
         if (iconResId == 0) {
+            textView.setForeground(null);
             textView.setText(mCodeCompletions.getHint(position));
             textView.setContentDescription(null);
             textView.setMinWidth(0);
@@ -174,27 +179,22 @@ public class CodeCompletionBar extends RecyclerView {
         }
 
         Drawable icon = ContextCompat.getDrawable(getContext(), iconResId);
+        textView.setCompoundDrawables(null, null, null, null);
         textView.setText("");
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         textView.setContentDescription(mCodeCompletions.getHint(position));
         textView.setMinWidth(dp(ICON_ITEM_MIN_WIDTH_DP));
-        textView.setPadding(
-                dp(ICON_ITEM_HORIZONTAL_PADDING_DP),
-                0,
-                dp(ICON_ITEM_HORIZONTAL_PADDING_DP),
-                0
-        );
+        textView.setPadding(0, 0, 0, 0);
         if (icon == null) {
-            textView.setCompoundDrawables(null, null, null, null);
+            textView.setForeground(null);
             return;
         }
 
         Drawable wrappedIcon = DrawableCompat.wrap(icon.mutate());
         DrawableCompat.setTint(wrappedIcon, mTextColor != 0 ? mTextColor : textView.getCurrentTextColor());
         int iconSize = dp(ICON_SIZE_DP);
-        wrappedIcon.setBounds(0, 0, iconSize, iconSize);
-        textView.setCompoundDrawables(wrappedIcon, null, null, null);
-        textView.setCompoundDrawablePadding(0);
+        textView.setForeground(new FixedSizeDrawable(wrappedIcon, iconSize));
+        textView.setForegroundGravity(Gravity.CENTER);
     }
 
     private void applyItemLayoutParams(TextView textView) {
@@ -212,6 +212,51 @@ public class CodeCompletionBar extends RecyclerView {
 
     private static int dp(int value) {
         return Math.round(DisplayUtils.dpToPx(value));
+    }
+
+    private static class FixedSizeDrawable extends Drawable {
+
+        private final Drawable mDrawable;
+        private final int mSize;
+
+        FixedSizeDrawable(@NonNull Drawable drawable, int size) {
+            mDrawable = drawable;
+            mSize = size;
+        }
+
+        @Override
+        public void draw(@NonNull Canvas canvas) {
+            Rect bounds = getBounds();
+            int left = bounds.left + (bounds.width() - mSize) / 2;
+            int top = bounds.top + (bounds.height() - mSize) / 2;
+            mDrawable.setBounds(left, top, left + mSize, top + mSize);
+            mDrawable.draw(canvas);
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+            mDrawable.setAlpha(alpha);
+        }
+
+        @Override
+        public void setColorFilter(@Nullable ColorFilter colorFilter) {
+            mDrawable.setColorFilter(colorFilter);
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            return mSize;
+        }
+
+        @Override
+        public int getIntrinsicHeight() {
+            return mSize;
+        }
     }
 
     private static class FlowLayoutManager extends RecyclerView.LayoutManager {

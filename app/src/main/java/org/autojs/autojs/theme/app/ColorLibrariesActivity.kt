@@ -218,6 +218,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                     titleRes = R.string.color_library_title_default_colors,
                     identifierRes = R.string.color_library_identifier_default_colors,
                     colors = listOf(
+                        R.color.web_navajo_white to R.string.web_navajo_white,
                         R.color.md_teal_800 to R.string.md_teal_800,
                         R.color.md_blue_gray_800 to R.string.md_blue_gray_800,
                         R.color.window_background_light to R.string.color_name_window_background_light,

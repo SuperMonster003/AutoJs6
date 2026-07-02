@@ -1062,6 +1062,63 @@
         });
     }
 
+    function installDiagnosticsTooltipTouchScroller(node) {
+        if (!node) {
+            return;
+        }
+        node.style.boxSizing = "border-box";
+        node.style.maxWidth = "calc(100vw - 16px)";
+        node.style.maxHeight = "45vh";
+        node.style.overflow = "auto";
+        node.style.touchAction = "pan-x pan-y";
+        node.style.webkitOverflowScrolling = "touch";
+        installTouchDragScroller(node, function(dx, dy) {
+            var beforeLeft = node.scrollLeft;
+            var beforeTop = node.scrollTop;
+            node.scrollLeft += dx;
+            node.scrollTop += dy;
+            return node.scrollLeft !== beforeLeft ||
+                node.scrollTop !== beforeTop ||
+                node.scrollWidth > node.clientWidth ||
+                node.scrollHeight > node.clientHeight;
+        });
+    }
+
+    function installDiagnosticsTooltipTouchScrollers() {
+        if (!document || !document.querySelectorAll) {
+            return;
+        }
+        var nodes = document.querySelectorAll(".error_widget");
+        for (var i = 0; i < nodes.length; i += 1) {
+            installDiagnosticsTooltipTouchScroller(nodes[i]);
+        }
+    }
+
+    function scheduleDiagnosticsTooltipTouchScrollers() {
+        var run = function() {
+            installDiagnosticsTooltipTouchScrollers();
+        };
+        setTimeout(run, 0);
+        setTimeout(run, 80);
+    }
+
+    function hideAceTooltipNodes() {
+        if (!document || !document.querySelectorAll) {
+            return;
+        }
+        var nodes = document.querySelectorAll(".ace_tooltip");
+        for (var i = 0; i < nodes.length; i += 1) {
+            nodes[i].style.display = "none";
+        }
+    }
+
+    function scheduleAceTooltipHide() {
+        hideAceTooltipNodes();
+        setTimeout(hideAceTooltipNodes, 0);
+        setTimeout(hideAceTooltipNodes, 80);
+        setTimeout(hideAceTooltipNodes, 240);
+    }
+
     function installCompletionPopupTouchScrollPatch() {
         try {
             if (!global.ace || typeof global.ace.require !== "function") {
@@ -2911,6 +2968,19 @@
         notifyStateChanged("lineNumbersChanged");
     }
 
+    function setPrintMarginEnabled(enabled) {
+        editor.setOption("showPrintMargin", !!enabled);
+        notifyStateChanged("printMarginChanged");
+    }
+
+    function setIndentGuidesEnabled(enabled) {
+        editor.setOption("displayIndentGuides", !!enabled);
+        if (editor.renderer && editor.renderer.updateText) {
+            editor.renderer.updateText();
+        }
+        notifyStateChanged("indentGuidesChanged");
+    }
+
     function setEditorContainerClass(className, enabled) {
         if (editor && editor.container && editor.container.classList) {
             editor.container.classList.toggle(className, !!enabled);
@@ -3201,6 +3271,142 @@
         );
     }
 
+    function isDiagnosticGutterCell(target) {
+        return hasClassToken(target, "ace_error") ||
+            hasClassToken(target, "ace_warning") ||
+            hasClassToken(target, "ace_info");
+    }
+
+    function rowHasDiagnosticAnnotation(row) {
+        if (!session || typeof session.getAnnotations !== "function" || row < 0) {
+            return false;
+        }
+        var annotations = session.getAnnotations() || [];
+        for (var i = 0; i < annotations.length; i += 1) {
+            if (annotations[i] && annotations[i].row === row) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function isDiagnosticGutterMarkerEvent(target, aceEvent) {
+        if (!target || !target.getBoundingClientRect) {
+            return false;
+        }
+        var position = aceEvent && typeof aceEvent.getDocumentPosition === "function" ?
+            aceEvent.getDocumentPosition() :
+            null;
+        if (!isDiagnosticGutterCell(target) && !rowHasDiagnosticAnnotation(position && position.row)) {
+            return false;
+        }
+        var point = clientPointFromDomEvent(aceEvent && aceEvent.domEvent || aceEvent);
+        var clientX = Number(point && point.clientX);
+        if (!isFinite(clientX)) {
+            return true;
+        }
+        return clientX <= target.getBoundingClientRect().left + 24;
+    }
+
+    function getDiagnosticWidgetAtRow(row) {
+        if (!session || !session.widgetManager || typeof session.widgetManager.getWidgetsAtRow !== "function") {
+            return null;
+        }
+        var widgets = session.widgetManager.getWidgetsAtRow(row) || [];
+        for (var i = 0; i < widgets.length; i += 1) {
+            if (widgets[i] && widgets[i].type === "errorMarker") {
+                return widgets[i];
+            }
+        }
+        return null;
+    }
+
+    function destroyDiagnosticWidget(widget) {
+        if (!widget) {
+            return false;
+        }
+        var mouseHandler = editor && editor.$mouseHandler;
+        var wasMousePressed = mouseHandler && mouseHandler.isMousePressed;
+        try {
+            if (mouseHandler) {
+                mouseHandler.isMousePressed = false;
+            }
+            if (typeof widget.destroy === "function") {
+                widget.destroy();
+            } else if (session && session.widgetManager && typeof session.widgetManager.removeLineWidget === "function") {
+                session.widgetManager.removeLineWidget(widget);
+            }
+            return true;
+        } finally {
+            if (mouseHandler) {
+                mouseHandler.isMousePressed = wasMousePressed;
+            }
+        }
+    }
+
+    function closeDiagnosticWidgetAtRow(row) {
+        return destroyDiagnosticWidget(getDiagnosticWidgetAtRow(row));
+    }
+
+    function showDiagnosticMarkerAtPosition(position) {
+        if (!editor || !global.ace || typeof global.ace.require !== "function") {
+            return false;
+        }
+        try {
+            if (position && editor.selection && typeof editor.selection.moveToPosition === "function") {
+                editor.selection.moveToPosition({
+                    row: position.row,
+                    column: Number(position.column) || 0
+                });
+            }
+            var errorMarker = global.ace.require("ace/ext/error_marker");
+            if (errorMarker && typeof errorMarker.showErrorMarker === "function") {
+                errorMarker.showErrorMarker(editor, 1);
+                scheduleDiagnosticsTooltipTouchScrollers();
+                scheduleAceTooltipHide();
+                return true;
+            }
+        } catch (error) {
+            notifyRecoverableError("diagnosticGutter", error);
+        }
+        return false;
+    }
+
+    function toggleDiagnosticMarkerFromGutterEvent(aceEvent) {
+        var position = aceEvent && typeof aceEvent.getDocumentPosition === "function" ?
+            aceEvent.getDocumentPosition() :
+            null;
+        scheduleAceTooltipHide();
+        if (position && closeDiagnosticWidgetAtRow(position.row)) {
+            return true;
+        }
+        setTimeout(function() {
+            showDiagnosticMarkerAtPosition(position);
+        }, 80);
+        return true;
+    }
+
+    function isDiagnosticGutterDomEvent(domEvent) {
+        var target = domEvent && domEvent.target;
+        var gutterCell = findAncestorWithClassToken(target, "ace_gutter-cell", editor && editor.container);
+        return !!gutterCell && isDiagnosticGutterCell(gutterCell);
+    }
+
+    function installDiagnosticGutterTooltipSuppression() {
+        if (!editor || !editor.container || !editor.container.addEventListener) {
+            return;
+        }
+        var suppress = function(event) {
+            if (!isDiagnosticGutterDomEvent(event)) {
+                return;
+            }
+            scheduleAceTooltipHide();
+            event.stopPropagation();
+        };
+        editor.container.addEventListener("mouseover", suppress, true);
+        editor.container.addEventListener("mousemove", suppress, true);
+    }
+
     function isFoldPlaceholderTarget(target) {
         while (target && target !== editor.container) {
             if (hasClassToken(target, "ace_gutter-cell") || hasClassToken(target, "ace_fold-widget")) {
@@ -3409,6 +3615,7 @@
             document.body.classList.add("autojs6-host-selection-action-mode");
         }
         installAceMobileTouchCancellation();
+        installDiagnosticGutterTooltipSuppression();
         installFoldPlaceholderClickCapture();
         installDynamicWrapGutterWidthPatch();
         session.setMode("ace/mode/javascript");
@@ -3419,6 +3626,8 @@
         var initialTheme = callBridge("getTheme") || "ace/theme/textmate";
         var wordWrapEnabled = callBridgeBoolean("isWordWrapEnabled", false);
         var wordWrapIndentStyle = callBridgeString("getWordWrapIndentStyle", "continuation");
+        var printMarginEnabled = callBridgeBoolean("isPrintMarginEnabled", false);
+        var indentGuidesEnabled = callBridgeBoolean("isIndentGuidesEnabled", true);
         lineNumbersEnabled = callBridgeBoolean("isLineNumbersEnabled", true);
         breakpointMarkersEnabled = callBridgeBoolean("isBreakpointMarkersEnabled", true);
         foldMarkersEnabled = callBridgeBoolean("isFoldMarkersEnabled", true);
@@ -3432,7 +3641,8 @@
             enableBasicAutocompletion: true,
             enableLiveAutocompletion: true,
             enableSnippets: true,
-            showPrintMargin: false,
+            showPrintMargin: printMarginEnabled,
+            displayIndentGuides: indentGuidesEnabled,
             showLineNumbers: lineNumbersEnabled,
             showFoldWidgets: foldMarkersEnabled,
             showGutter: hasVisibleGutterContent(),
@@ -3495,6 +3705,11 @@
                 if (toggleFoldWidgetAt(event.getDocumentPosition().row, event.domEvent)) {
                     event.stop();
                 }
+                return;
+            }
+            if (isDiagnosticGutterMarkerEvent(target, event)) {
+                toggleDiagnosticMarkerFromGutterEvent(event);
+                event.stop();
                 return;
             }
             if (!breakpointMarkersEnabled) {
@@ -3566,6 +3781,8 @@
             setWordWrapEnabled: setWordWrapEnabled,
             setWordWrapIndentStyle: setWordWrapIndentStyle,
             setLineNumbersEnabled: setLineNumbersEnabled,
+            setPrintMarginEnabled: setPrintMarginEnabled,
+            setIndentGuidesEnabled: setIndentGuidesEnabled,
             setBreakpointMarkersEnabled: setBreakpointMarkersEnabled,
             setFoldMarkersEnabled: setFoldMarkersEnabled,
             setGutterWidthMode: setGutterWidthMode,

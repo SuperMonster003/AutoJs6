@@ -17,6 +17,8 @@ import org.autojs.autojs6.R
 
 class EditorThemePreference : MaterialPreference {
 
+    private var themePreviewHandler: ((Theme) -> Unit)? = null
+
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         init()
     }
@@ -57,8 +59,13 @@ class EditorThemePreference : MaterialPreference {
         val current = Themes.getCurrentThemeName(prefContext, engineType)
         val selectedIndex = themes.indexOfFirst { it.name == current }.coerceAtLeast(0)
         val defaultIndex = themes.indexOfFirst { it.name == Themes.getDefaultThemeName(prefContext, engineType) }.coerceAtLeast(0)
+        fun previewFromDialog(dialog: MaterialDialog) {
+            val selectedTheme = themes.getOrNull(dialog.selectedIndex) ?: themes[selectedIndex]
+            dialog.dismiss()
+            themePreviewHandler?.invoke(selectedTheme)
+        }
         DialogUtils.buildAndShowAdaptive {
-            MaterialDialog.Builder(prefContext)
+            val builder = MaterialDialog.Builder(prefContext)
                 .title(R.string.text_editor_theme)
                 .items(themes)
                 .choiceWidgetThemeColor()
@@ -76,10 +83,23 @@ class EditorThemePreference : MaterialPreference {
                 }
                 .negativeText(R.string.dialog_button_cancel)
                 .negativeColorRes(R.color.dialog_button_default)
+
+            if (themePreviewHandler != null) {
+                builder
+                    .neutralText(R.string.dialog_button_preview)
+                    .neutralColorRes(R.color.dialog_button_default)
+                    .onNeutral { dialog, _ -> previewFromDialog(dialog) }
+            }
+
+            builder
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_attraction)
                 .build()
         }
+    }
+
+    fun setThemePreviewHandler(handler: ((Theme) -> Unit)?) {
+        themePreviewHandler = handler
     }
 
     fun refreshSummary() {

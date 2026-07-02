@@ -92,6 +92,8 @@
     <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
     <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
     <string name="key_ace_lsp_file_types" translatable="false">key_$_ace_lsp_file_types</string>
+    <string name="key_ace_print_margin_enabled" translatable="false">key_$_ace_print_margin_enabled</string>
+    <string name="key_ace_indent_guides_enabled" translatable="false">key_$_ace_indent_guides_enabled</string>
     <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
     <string name="key_editor_breakpoint_markers_enabled" translatable="false">key_$_editor_breakpoint_markers_enabled</string>
     <string name="key_editor_fold_markers_enabled" translatable="false">key_$_editor_fold_markers_enabled</string>
@@ -140,6 +142,7 @@
     <string name="key_editor_log_button_behavior" translatable="false">key_$_editor_log_button_behavior</string>
     <string name="key_editor_log_button_behavior_bottom_sheet" translatable="false">key_$_editor_log_button_behavior_bottom_sheet</string>
     <string name="key_editor_log_button_behavior_fullscreen_page" translatable="false">key_$_editor_log_button_behavior_fullscreen_page</string>
+    <string name="key_editor_pinch_to_zoom_change_text_size_enabled" translatable="false">key_$_editor_pinch_to_zoom_change_text_size_enabled</string>
     <string name="key_editor_pinch_to_zoom_change_text_size" translatable="false">key_$_editor_pinch_to_zoom_change_text_size</string>
     <string name="key_editor_pinch_to_zoom_disable" translatable="false">key_$_editor_pinch_to_zoom_disable</string>
     <string name="key_editor_pinch_to_zoom_scale_view" translatable="false">key_$_editor_pinch_to_zoom_scale_view</string>
@@ -1178,6 +1181,17 @@
     <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">Enable large file mode only for files larger than %1$s</string>
     <string name="text_editor_log_button_behavior">Editor log button behavior</string>
     <string name="text_editor_theme">Editor theme</string>
+    <string name="text_theme_previewer">Theme previewer</string>
+    <string name="text_theme_preview_previous">Prev</string>
+    <string name="text_theme_preview_next">Next</string>
+    <string name="text_theme_preview_list">List</string>
+    <string name="text_theme_preview_use">Use</string>
+    <string name="text_theme_preview_exit">Exit</string>
+    <string name="text_theme_preview_filter_all">All</string>
+    <string name="text_theme_preview_filter_dark">Dark</string>
+    <string name="text_theme_preview_filter_light">Light</string>
+    <string name="text_theme_preview_unavailable_for_filter">Unavailable for current filter</string>
+    <string name="text_theme_preview_no_available_theme">No theme is available for current filter</string>
     <string name="text_editor_theme_mode">Editor theme mode</string>
     <string name="text_ace_editor_font">Editor font</string>
     <string name="text_ace_editor_font_changed" formatted="true">Editor font switched to %s</string>
@@ -1185,6 +1199,8 @@
     <string name="text_ace_read_only_mode_enabled">Read-only mode enabled</string>
     <string name="text_ace_read_only_mode_disabled">Read-only mode disabled</string>
     <string name="text_ace_line_numbers_enabled">Line numbers</string>
+    <string name="text_ace_print_margin_enabled">Print margin</string>
+    <string name="text_ace_indent_guides_enabled">Indent guides</string>
     <string name="text_editor_breakpoint_markers_enabled">Breakpoint markers</string>
     <string name="text_editor_fold_markers_enabled">Code folding markers</string>
     <string name="text_ace_action_favorites">Action favorites</string>
@@ -1605,6 +1621,7 @@
     <string name="text_permissions">Permissions</string>
     <string name="text_permissions_list">Permissions</string>
     <string name="text_pin_shortcut_not_unsupported">Pinning shortcuts to launcher is not supported</string>
+    <string name="text_editor_pinch_to_zoom_change_text_size_enabled">Pinch changes text size</string>
     <string name="text_pinch_to_zoom">Pinch to zoom</string>
     <string name="text_play">Play</string>
     <string name="text_please_choose">Please choose</string>
@@ -1966,6 +1983,8 @@
     <string name="summary_code_editor_settings">Open the full code editor settings page</string>
     <string name="summary_editor_shortcut_input_bar">Configure shortcut input symbols shared by editor engines</string>
     <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter</string>
+    <string name="summary_ace_print_margin_enabled">Show the right-side column limit guide</string>
+    <string name="summary_ace_indent_guides_enabled">Show vertical guides for code indentation</string>
     <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter</string>
     <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine</string>
@@ -1974,6 +1993,7 @@
     <string name="summary_ace_lsp_enabled">Enable LSP-powered editor assistance preview</string>
     <string name="summary_ace_lsp_file_types">Choose file types that can use LSP features</string>
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
+    <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">Change editor text size with pinch gestures</string>
     <string name="summary_editor_gutter_width_mode">Choose whether the gutter follows visible line digits or keeps a stable session width</string>
     <string name="summary_editor_word_wrap_indent_style">Choose how wrapped visual continuation lines are indented</string>
     <string name="text_ace_lsp_enabled">LSP smart completion (preview)</string>
@@ -1984,6 +2004,8 @@
     <string name="description_ace_font_ligatures_enabled_preference">Enable OpenType font ligatures for fonts that support them. Operators such as ===, !==, =&gt;, and &lt;= may be drawn as joined glyphs. This only changes how code is displayed.</string>
     <string name="description_ace_font_styles_enabled_preference">Allow Ace themes and syntax highlighting to use bold, italic, and other font styles. When disabled, code text is forced to the regular normal style without changing colors or content.</string>
     <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
+    <string name="description_ace_print_margin_enabled_preference">Show or hide the Ace editor print margin guide. This is the right-side column limit line and only changes how code is displayed.</string>
+    <string name="description_ace_indent_guides_enabled_preference">Show or hide vertical indentation guides in the code area. This only changes how code is displayed.</string>
     <string name="description_ace_lsp_file_types_preference">LSP is only started for files whose names end with one of the selected suffixes. Use default restores the JavaScript, TypeScript, JSON, Auto.js, and Node.js suffix set.</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
     <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>

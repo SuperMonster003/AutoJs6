@@ -817,6 +817,17 @@
     <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">仅对大于 %1$s 的文件启用大文件模式</string>
     <string name="text_editor_log_button_behavior">编辑器日志按钮行为</string>
     <string name="text_editor_theme">编辑器主题</string>
+    <string name="text_theme_previewer">主题预览器</string>
+    <string name="text_theme_preview_previous">上一个</string>
+    <string name="text_theme_preview_next">下一个</string>
+    <string name="text_theme_preview_list">列表</string>
+    <string name="text_theme_preview_use">使用</string>
+    <string name="text_theme_preview_exit">退出</string>
+    <string name="text_theme_preview_filter_all">全部</string>
+    <string name="text_theme_preview_filter_dark">暗色</string>
+    <string name="text_theme_preview_filter_light">亮色</string>
+    <string name="text_theme_preview_unavailable_for_filter">不在当前筛选范围内</string>
+    <string name="text_theme_preview_no_available_theme">当前筛选范围内没有可用主题</string>
     <string name="text_editor_theme_mode">编辑器主题使用方式</string>
     <string name="text_email">邮箱</string>
     <string name="text_email_cannot_be_empty">邮箱不能为空</string>
@@ -1200,6 +1211,7 @@
     <string name="text_permissions">权限</string>
     <string name="text_permissions_list">权限列表</string>
     <string name="text_pin_shortcut_not_unsupported">将快捷方式固定到启动器不被支持</string>
+    <string name="text_editor_pinch_to_zoom_change_text_size_enabled">手势缩放更改字体大小</string>
     <string name="text_pinch_to_zoom">手势缩放</string>
     <string name="text_play">播放</string>
     <string name="text_please_choose">请选择</string>
@@ -1584,6 +1596,8 @@
     <string name="text_ace_font_ligatures_enabled">字体连字</string>
     <string name="text_ace_font_styles_enabled">特殊字体样式</string>
     <string name="text_ace_line_numbers_enabled">行号</string>
+    <string name="text_ace_print_margin_enabled">打印参考线</string>
+    <string name="text_ace_indent_guides_enabled">缩进参考线</string>
     <string name="text_editor_breakpoint_markers_enabled">断点标记</string>
     <string name="text_editor_fold_markers_enabled">代码折叠标记</string>
     <string name="text_ace_lsp_enabled">LSP 智能补全 (预览)</string>
@@ -1596,6 +1610,8 @@
     <string name="text_editor_engine_switched" formatted="true">编辑器引擎已切换为 %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">编辑器引擎已切换为 %s. 不同编辑器引擎之间不会保留撤销/重做历史.</string>
     <string name="summary_ace_line_numbers_enabled">在编辑器边栏中显示行号</string>
+    <string name="summary_ace_print_margin_enabled">显示编辑器右侧的列数限制参考线</string>
+    <string name="summary_ace_indent_guides_enabled">显示代码缩进位置的竖直参考线</string>
     <string name="summary_editor_breakpoint_markers_enabled">在编辑器边栏中显示断点标记</string>
     <string name="summary_editor_fold_markers_enabled">在编辑器边栏中显示代码折叠标记</string>
     <string name="summary_editor_setting_unavailable_for_current_engine">不适用于当前编辑器引擎</string>
@@ -1604,12 +1620,15 @@
     <string name="summary_ace_lsp_enabled">启用 LSP 驱动的编辑辅助预览</string>
     <string name="summary_ace_lsp_file_types">选择可启用 LSP 功能的文件类型</string>
     <string name="summary_ace_word_wrap_enabled">在编辑器可视区域内对长行自动换行</string>
+    <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">使用手势缩放调整编辑器字体大小</string>
     <string name="summary_editor_gutter_width_mode">选择边栏跟随可见行号位数变化, 或在当前会话中保持稳定宽度</string>
     <string name="summary_editor_word_wrap_indent_style">选择自动换行后的视觉续行缩进方式</string>
     <string name="description_ace_editor_font_preference">选择 Ace 编辑器字体. 列表包含 Android 系统默认等宽字体, 以及带作者/开发者信息的开源代码字体; 系统等宽字体的实际字形由 Android 系统和设备厂商决定.</string>
     <string name="description_ace_font_ligatures_enabled_preference">为支持字体连字的字体启用 OpenType 连字特性. 类似 ===, !==, =&gt;, &lt;= 的操作符可能显示为连写字形. 此设置只改变代码的显示方式.</string>
     <string name="description_ace_font_styles_enabled_preference">允许 Ace 主题和语法高亮使用粗体、斜体等字体样式. 关闭后, 代码文本会强制使用 Regular/normal 样式, 不改变颜色或代码内容.</string>
     <string name="description_ace_line_numbers_enabled_preference">显示或隐藏编辑器边栏行号. 代码折叠/断点和边栏布局仍然可用.</string>
+    <string name="description_ace_print_margin_enabled_preference">显示或隐藏 Ace 编辑器右侧的打印参考线. 此设置只改变代码的显示方式.</string>
+    <string name="description_ace_indent_guides_enabled_preference">显示或隐藏代码区域中的缩进参考线. 此设置只改变代码的显示方式.</string>
     <string name="description_ace_lsp_file_types_preference">LSP 仅会针对文件名符合所选后缀的文件启动. 使用默认值会恢复 JavaScript、TypeScript、JSON、Auto.js 与 Node.js 相关后缀.</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">显示或隐藏编辑器边栏中的断点标记. 断点数据和调试菜单操作仍然可用.</string>
     <string name="description_editor_fold_markers_enabled_preference">显示或隐藏编辑器边栏中的代码折叠标记. JsDroidEditor 没有折叠标记显示面.</string>

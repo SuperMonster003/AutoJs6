@@ -254,6 +254,22 @@ body.autojs6-host-selection-action-mode .ace_mobile-menu {
     -webkit-overflow-scrolling: touch;
 }
 
+.error_widget,
+.ace_tooltip {
+    box-sizing: border-box;
+    max-width: calc(100vw - 16px) !important;
+    max-height: 45vh !important;
+    overflow: auto !important;
+    touch-action: pan-x pan-y;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.error_widget {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
 @media (max-width: 496px) {
     .autojs6_hover_tooltip {
         max-width: calc(100vw - 16px);

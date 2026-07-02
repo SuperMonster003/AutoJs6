@@ -7,6 +7,8 @@ import org.autojs.autojs6.R
 object EditorSettingActionRegistry {
 
     private const val ACTION_ID_PREFIX = "editor_setting:"
+    private const val LEGACY_PINCH_TO_ZOOM_STRATEGY_KEY = "key_\$_editor_pinch_to_zoom_strategy"
+    private const val PINCH_TO_ZOOM_CHANGE_TEXT_SIZE_ENABLED_KEY = "key_\$_editor_pinch_to_zoom_change_text_size_enabled"
 
     private data class Spec(
         @param:StringRes val preferenceKeyRes: Int,
@@ -21,6 +23,8 @@ object EditorSettingActionRegistry {
         Spec(R.string.key_editor_text_size, R.string.text_text_size),
         Spec(R.string.key_ace_font_ligatures_enabled, R.string.text_ace_font_ligatures_enabled),
         Spec(R.string.key_ace_font_styles_enabled, R.string.text_ace_font_styles_enabled),
+        Spec(R.string.key_ace_print_margin_enabled, R.string.text_ace_print_margin_enabled),
+        Spec(R.string.key_ace_indent_guides_enabled, R.string.text_ace_indent_guides_enabled),
         Spec(R.string.key_ace_word_wrap_enabled, R.string.text_ace_word_wrap_enabled),
         Spec(R.string.key_editor_word_wrap_indent_style, R.string.text_editor_word_wrap_indent_style),
         Spec(R.string.key_editor_log_button_behavior, R.string.text_editor_log_button_behavior),
@@ -28,7 +32,7 @@ object EditorSettingActionRegistry {
         Spec(R.string.key_editor_shortcut_input_bar, R.string.text_editor_shortcut_input_bar),
         Spec(R.string.key_ace_lsp_enabled, R.string.text_ace_lsp_enabled),
         Spec(R.string.key_ace_lsp_file_types, R.string.text_ace_lsp_file_types),
-        Spec(R.string.key_editor_pinch_to_zoom_strategy, R.string.text_pinch_to_zoom),
+        Spec(R.string.key_editor_pinch_to_zoom_change_text_size_enabled, R.string.text_editor_pinch_to_zoom_change_text_size_enabled),
         Spec(R.string.key_editor_gutter_width_mode, R.string.text_editor_gutter_width_mode),
         Spec(R.string.key_editor_breakpoint_markers_enabled, R.string.text_editor_breakpoint_markers_enabled),
         Spec(R.string.key_ace_line_numbers_enabled, R.string.text_ace_line_numbers_enabled),
@@ -42,6 +46,7 @@ object EditorSettingActionRegistry {
     fun preferenceKeyFromActionId(actionId: String): String? {
         return actionId.removePrefix(ACTION_ID_PREFIX)
             .takeIf { it.length != actionId.length }
+            ?.let(::normalizePreferenceKey)
     }
 
     fun labelForPreferenceKey(context: Context, preferenceKey: String): String? {
@@ -57,6 +62,14 @@ object EditorSettingActionRegistry {
     }
 
     private fun specForPreferenceKey(context: Context, preferenceKey: String): Spec? {
-        return specs.firstOrNull { context.getString(it.preferenceKeyRes) == preferenceKey }
+        val normalizedKey = normalizePreferenceKey(preferenceKey)
+        return specs.firstOrNull { context.getString(it.preferenceKeyRes) == normalizedKey }
+    }
+
+    private fun normalizePreferenceKey(preferenceKey: String): String {
+        return when (preferenceKey) {
+            LEGACY_PINCH_TO_ZOOM_STRATEGY_KEY -> PINCH_TO_ZOOM_CHANGE_TEXT_SIZE_ENABLED_KEY
+            else -> preferenceKey
+        }
     }
 }
