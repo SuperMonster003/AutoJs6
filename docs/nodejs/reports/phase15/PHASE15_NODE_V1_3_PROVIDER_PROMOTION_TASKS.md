@@ -508,9 +508,21 @@ A Phase 15 task can be marked complete only when all applicable items are true:
     `mediastore_playback_raw_object_denial_security_archive`, and
     `phase15_task_device_media_doc_sync`.
 
-- [ ] P15-22: Sync task/device/media docs, examples, declarations, and release notes.
-  - Gate: proposed `:app:verifyNodePhase15TaskDeviceMediaDocSync`.
+- [x] P15-22: Sync task/device/media docs, examples, declarations, and release notes.
+  - Gate: `:app:verifyNodePhase15TaskDeviceMediaDocSync`.
   - Acceptance: promoted and future-only state matches executable evidence.
+  - Task/device/media docs sync gate deployed:
+    - `docs/nodejs/phase15/task-device-media-doc-sync.json`
+    - `docs/nodejs/phase15/PHASE15_TASK_DEVICE_MEDIA_DOC_SYNC.md`
+    - `docs/nodejs/releases/NODE_PROFILE_V1_3_TASK_DEVICE_MEDIA_SYNC.md`
+    - `docs/nodejs/reports/phase15/P15_22_TASK_DEVICE_MEDIA_DOC_SYNC.md`
+    - `tools/nodejs/phase15/verify-node-phase15-task-device-media-doc-sync.js`
+    - `build/reports/nodejs/phase15-task-device-media-doc-sync.json`
+    - `build/reports/nodejs/phase15-task-device-media-doc-sync.md`
+  - Decision: P15-12 through P15-20 remain partial and unpromoted; P15-21
+    remains `stable_denied`; P15-22 records `provider_poc_not_promoted` docs,
+    examples, declarations, security, error, CI, and release-facing state
+    without changing runtime authority.
 
 ### P3 Security, Types, Packaged Aggregate, And Migration
 

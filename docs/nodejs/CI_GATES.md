@@ -1326,6 +1326,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15RecorderPromotion
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedRecorderSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15MediaStorePlaybackDecision
+.\gradlew.bat --console=plain :app:verifyNodePhase15TaskDeviceMediaDocSync
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1481,6 +1482,13 @@ query/mutation, broad media-library permissions, and raw media handles remain
 denied until a future scoped provider gate supplies exact capabilities,
 ownership, permission, packaged, privacy, rollback, Safe downgrade, and
 raw-object denial evidence.
+The `:app:verifyNodePhase15TaskDeviceMediaDocSync` gate writes
+`phase15-task-device-media-doc-sync.json` plus `.md`, imports P15-12 through
+P15-21 and the P14 task/device/media docs sync report, and reports `ready`
+when declarations, examples, release-facing text, compatibility, security,
+error guidance, TESTING, and CI_GATES keep the lane at
+`provider_poc_not_promoted` with `mediastore_playback` `stable_denied` and no
+runtime authority change.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

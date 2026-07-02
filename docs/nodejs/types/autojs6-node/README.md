@@ -413,6 +413,17 @@ recorder start/stop, playback, MediaStore, and broad media-library permissions
 still require dedicated provider, disclosure, packaged, rollback, and device
 evidence before examples can be treated as promoted runtime paths.
 
+P15-22 docs sync records the v1.3 `pro.tasks_device_media` declaration state as
+`provider_poc_not_promoted` with `mediastore_playback` kept `stable_denied`.
+The checked-in declarations for `work_manager`, `autojs6:compat.tasks`,
+`notifications`, `device`, `media`, `mediainfo`, `recorder`, and
+`profile_capabilities` remain migration and denial-test evidence until task
+database mutation, IntentTask/broadcast registration, packaged task/broadcast
+behavior, notification foreground ownership, OEM power mutation, real recorder
+sessions, packaged recorder start/stop, playback, MediaStore, broad
+media-library permissions, raw media handles, Safe downgrade, security, and
+release sync evidence are promoted together.
+
 P12-34 is a documentation synchronization gate rather than a new declaration
 surface. It keeps this README aligned with `MIGRATION_FROM_RHINO.md`, the Pro 9
 comparison, `RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`, `SECURITY_MODEL.md`, and

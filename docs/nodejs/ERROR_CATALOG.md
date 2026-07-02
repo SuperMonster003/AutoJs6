@@ -265,6 +265,24 @@ authority. It records documentation consistency expectations:
   raw Android objects, raw file descriptors, and Java objects stay governed by
   the stable denial codes already documented in their source gates.
 
+## P15-22 task/device/media docs sync denial sync
+
+P15-22 does not add a new error code or promote task/device/media runtime
+authority. It records the v1.3 documentation consistency state:
+
+- `tasks-work-manager` remains the only task/device/media focused Pro smoke
+  path.
+- `notifications-power` and `media-recorder` remain static, guarded, or
+  denial-oriented migration evidence.
+- P15-12 through P15-20 remain `provider_poc_not_promoted` partial gates, and
+  P15-21 keeps `mediastore_playback` `stable_denied`.
+- Task database mutation, IntentTask/broadcast registration, packaged
+  task/broadcast mutation, notification foreground ownership, OEM power
+  mutation, real recorder sessions, packaged recorder start/stop, playback,
+  MediaStore, broad media-library permissions, raw Android objects, raw file
+  descriptors, and Java objects stay governed by the stable denial codes
+  already documented in their source gates.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native

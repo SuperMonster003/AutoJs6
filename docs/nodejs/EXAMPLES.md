@@ -142,6 +142,12 @@ registration, notification disclosure, OEM power matrices, real recorder
 sessions, packaged recorder stress, playback, and MediaStore provider gates are
 promoted.
 
+P15-22 docs sync keeps the same rule for the v1.3 `pro.tasks_device_media`
+surface. `tasks-work-manager` remains the only task/device/media focused smoke
+path; `notifications-power` and `media-recorder` remain static, guarded, or
+denial-oriented while P15-12 through P15-20 stay `provider_poc_not_promoted`
+and P15-21 keeps MediaStore/playback `stable_denied`.
+
 ## Phase 13 Desktop Node Parity Examples
 
 `sample/nodejs/desktop-parity-suite` is a migration catalog for desktop-style

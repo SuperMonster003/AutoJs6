@@ -3430,6 +3430,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15RecorderPromotion
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedRecorderSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15MediaStorePlaybackDecision
+.\gradlew.bat --console=plain :app:verifyNodePhase15TaskDeviceMediaDocSync
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3583,3 +3584,10 @@ query/mutation, broad media-library permissions, and raw media handles remain
 denied until a future scoped provider gate supplies exact capabilities,
 ownership, permission, packaged, privacy, rollback, Safe downgrade, and
 raw-object denial evidence.
+`verifyNodePhase15TaskDeviceMediaDocSync` writes
+`phase15-task-device-media-doc-sync.json` plus `.md`, imports P15-12 through
+P15-21 and the P14 task/device/media docs sync report, and reports `ready`
+when declarations, examples, release-facing text, compatibility, security,
+error guidance, TESTING, and CI_GATES keep the lane at
+`provider_poc_not_promoted` with `mediastore_playback` `stable_denied` and no
+runtime authority change.

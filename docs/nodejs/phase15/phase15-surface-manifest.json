@@ -489,7 +489,7 @@
       "evidenceClass": "doc_type_release_sync",
       "rollbackHook": "keep_task_device_media_docs_future_only",
       "gate": ":app:verifyNodePhase15TaskDeviceMediaDocSync",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "task": "P15-23",
