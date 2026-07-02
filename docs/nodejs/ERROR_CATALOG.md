@@ -299,6 +299,26 @@ the source for provider-facing errors:
 - The P15-23 surface manifest mapping remains `planned` by critical-risk
   policy; a host security corpus update cannot promote provider authority.
 
+## P15-24 packaged aggregate smoke
+
+P15-24 does not add a new error code or promote runtime authority. It records
+the v1.3 deterministic packaged aggregate smoke contract through
+`:app:installAndRunNodeV13PackagedAggregateSmoke`:
+
+- The gate is `host_contract_ready`; it does not claim real device install-run
+  success or release tag approval.
+- Packaged live UI, overlay, accessibility, MediaProjection, image/OCR,
+  task scheduling, broadcast, notifications/power, recorder/media, and
+  MediaStore/playback denial rows must retain undeclared capability denial,
+  packaged metadata mismatch denial, Safe downgrade behavior, cleanup, and
+  report artifact coverage.
+- P15-21 keeps MediaStore/playback stable-denied inside the packaged aggregate.
+- P15-23 remains the imported security corpus source for raw-object denial,
+  metadata mismatch, Safe downgrade, foreground disclosure, ownership, and
+  stable-denied coverage.
+- The P15-24 surface manifest mapping remains `planned` by critical-risk
+  policy; a host packaged aggregate contract cannot promote provider authority.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native

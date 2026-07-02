@@ -1328,6 +1328,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15MediaStorePlaybackDecision
 .\gradlew.bat --console=plain :app:verifyNodePhase15TaskDeviceMediaDocSync
 .\gradlew.bat --console=plain :app:verifyNodePhase15SecurityRegressionCorpus
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedAggregateSmoke
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1498,6 +1499,16 @@ promotion precondition, rollback, metadata mismatch, raw-object denial, Safe
 downgrade, foreground disclosure, cross-package ownership denial, and
 stable-denied boundary coverage without runtime authority changes. P15-23
 remains `planned` in the surface manifest by critical-risk policy.
+The `:app:installAndRunNodeV13PackagedAggregateSmoke` gate writes
+`phase15-packaged-aggregate-smoke.json` plus `.md`, imports P15-04, P15-07,
+P15-08, P15-09, P15-10, P15-14, P15-16, P15-17, P15-18, P15-20, P15-21, and
+P15-23, and reports `ready` when the deterministic packaged aggregate contract
+covers declared positive paths or conditional skips, undeclared capability
+denial, packaged metadata mismatch denial, Safe downgrade, cleanup,
+stable-denied boundary preservation, and report artifacts. It is
+`host_contract_ready` only; it does not claim real device install-run success or
+runtime authority changes, and P15-24 remains `planned` in the surface manifest
+by critical-risk policy.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

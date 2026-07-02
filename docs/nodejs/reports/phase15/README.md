@@ -63,6 +63,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15MediaStorePlaybackDecision`
 - `:app:verifyNodePhase15TaskDeviceMediaDocSync`
 - `:app:verifyNodePhase15SecurityRegressionCorpus`
+- `:app:installAndRunNodeV13PackagedAggregateSmoke`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -206,3 +207,12 @@ mismatch, raw-object denial, Safe downgrade, foreground disclosure,
 cross-package ownership denial, and stable-denied boundary coverage without
 promoting runtime authority. The P15-23 surface manifest mapping remains
 `planned` by critical-risk policy.
+
+`P15-24` reports `ready`: it adds the v1.3 deterministic packaged aggregate
+smoke contract in `host_contract_ready` mode, imports P15-04, P15-07, P15-08,
+P15-09, P15-10, P15-14, P15-16, P15-17, P15-18, P15-20, P15-21, and P15-23,
+and verifies declared positive paths or conditional skips, undeclared
+capability denial, packaged metadata mismatch denial, Safe downgrade, cleanup,
+stable-denied boundary preservation, and report artifacts without claiming
+real device install-run success or changing runtime authority. The P15-24
+surface manifest mapping remains `planned` by critical-risk policy.

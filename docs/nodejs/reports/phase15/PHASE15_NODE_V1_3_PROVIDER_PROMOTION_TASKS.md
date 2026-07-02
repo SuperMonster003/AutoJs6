@@ -544,10 +544,23 @@ A Phase 15 task can be marked complete only when all applicable items are true:
     `stable_denied`, and the P15-23 surface manifest mapping remains
     `planned` by critical-risk policy.
 
-- [ ] P15-24: Add v1.3 packaged aggregate smoke.
-  - Gate: proposed `:app:installAndRunNodeV13PackagedAggregateSmoke`.
+- [x] P15-24: Add v1.3 packaged aggregate smoke.
+  - Gate: `:app:installAndRunNodeV13PackagedAggregateSmoke`.
   - Acceptance: every packaged-capable promoted provider has deterministic
     positive, denial, Safe downgrade, cleanup, and report artifacts.
+  - Packaged aggregate smoke gate deployed:
+    - `docs/nodejs/phase15/node-v1-3-packaged-aggregate-smoke-plan.json`
+    - `docs/nodejs/phase15/PHASE15_NODE_V1_3_PACKAGED_AGGREGATE_SMOKE.md`
+    - `docs/nodejs/reports/phase15/P15_24_NODE_V1_3_PACKAGED_AGGREGATE_SMOKE.md`
+    - `tools/nodejs/phase15/install-and-run-node-v13-packaged-aggregate-smoke.js`
+    - `build/reports/nodejs/phase15-packaged-aggregate-smoke.json`
+    - `build/reports/nodejs/phase15-packaged-aggregate-smoke.md`
+  - Decision: P15-24 adds a deterministic `host_contract_ready` aggregate
+    packaged smoke contract over P15-04, P15-07, P15-08, P15-09, P15-10,
+    P15-14, P15-16, P15-17, P15-18, P15-20, P15-21, and P15-23 without
+    claiming real device install-run success or changing runtime authority.
+    The P15-24 surface manifest mapping remains `planned` by critical-risk
+    policy.
 
 - [ ] P15-25: Update TypeScript declaration authority profile for v1.3.
   - Gate: proposed `:app:verifyNodePhase15TypeDeclarationProfiles`.
