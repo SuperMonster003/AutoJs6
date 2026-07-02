@@ -255,9 +255,26 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-10: Promote advanced image and OCR packaged evidence.
   - Source backlog: `P14-14`, `P14-15`.
-  - Gate: proposed `:app:verifyNodePhase15ImageOcrPromotion`.
+  - Gate: `:app:verifyNodePhase15ImageOcrPromotion`.
   - Acceptance: image handles, quotas, OCR model selection, packaged archives,
     cleanup, and raw bitmap denial are verified.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/image-ocr-promotion-plan.json`
+    - `docs/nodejs/phase15/PHASE15_IMAGE_OCR_PROMOTION.md`
+    - `docs/nodejs/reports/phase15/P15_10_IMAGE_OCR_PROMOTION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-image-ocr-promotion.js`
+    - `build/reports/nodejs/phase15-image-ocr-promotion.json`
+    - `build/reports/nodejs/phase15-image-ocr-promotion.md`
+  - Still open: `image_advanced_transform_provider_archive`,
+    `image_matching_color_provider_archive`,
+    `image_temp_handle_quota_leak_stress_archive`,
+    `image_packaged_scoped_output_archive`,
+    `packaged_ocr_model_absence_archive`,
+    `packaged_ocr_explicit_provider_mode_archive`,
+    `packaged_image_ocr_quota_leak_stress_archive`,
+    `packaged_capture_ocr_disclosure_archive`,
+    `image_ocr_safe_downgrade_archive`, and
+    `phase15_security_type_doc_sync`.
 
 - [ ] P15-11: Sync UI/automation/media docs, examples, declarations, and release notes.
   - Gate: proposed `:app:verifyNodePhase15UiAutomationMediaDocSync`.

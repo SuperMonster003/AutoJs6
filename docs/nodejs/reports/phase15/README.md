@@ -49,6 +49,7 @@ Provider promotion gates:
 - `:app:installAndRunNodeV13PackagedOverlaySmoke`
 - `:app:verifyNodePhase15AccessibilityPromotion`
 - `:app:verifyNodePhase15MediaProjectionPromotion`
+- `:app:verifyNodePhase15ImageOcrPromotion`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -91,3 +92,11 @@ keeps `media_projection` unpromoted until Android 12/15+ prompt/capture
 archives, foreground disclosure/stop action, task removal/relaunch/crash
 evidence, packaged APK evidence, Safe downgrade proof, and security/type/docs
 sync land.
+
+`P15-10` currently reports `partial`: it imports the P14 advanced image
+operation contract and packaged image/OCR evidence contract, plus P13 scoped
+image/OCR evidence and the P15 MediaProjection dependency gate. It keeps
+`image_ocr` unpromoted until live transform/matching archives, packaged scoped
+output, packaged OCR model/provider-mode archives, quota/leak stress,
+capture-to-OCR disclosure, Safe downgrade proof, and security/type/docs sync
+land.
