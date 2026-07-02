@@ -51,6 +51,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15MediaProjectionPromotion`
 - `:app:verifyNodePhase15ImageOcrPromotion`
 - `:app:verifyNodePhase15UiAutomationMediaDocSync`
+- `:app:verifyNodePhase15TaskDatabasePromotion`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -107,3 +108,11 @@ reports and the P14-16 docs sync report, then verifies that examples,
 TypeScript declaration notes, release-facing text, compatibility, security,
 error guidance, TESTING, and CI_GATES all keep the UI/automation/media lane at
 `provider_poc_not_promoted` without adding runtime authority.
+
+`P15-12` currently reports `partial`: it imports the P14 JSON-safe task
+database mutation contract, P13 `work_manager`/`compat.tasks`/TimedTask
+snapshot evidence, and P15 disclosure/rollback requirements. It keeps
+`task_database` unpromoted until live mutation archives, owner/id mapping,
+schema migration/rollback, wall-clock scheduler evidence, packaged mutation
+smoke, cross-package denial, disclosure/stop action, Safe downgrade, and
+security/type/docs sync land.

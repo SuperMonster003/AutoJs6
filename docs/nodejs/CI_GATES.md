@@ -1316,6 +1316,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase15MediaProjectionPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15ImageOcrPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15UiAutomationMediaDocSync
+.\gradlew.bat --console=plain :app:verifyNodePhase15TaskDatabasePromotion
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1392,6 +1393,14 @@ through P15-10 partial provider reports and the P14-16 docs sync report, and
 keeps release-facing docs, examples, TypeScript declaration notes,
 compatibility, security, error guidance, TESTING, and CI_GATES aligned at
 `provider_poc_not_promoted` without adding runtime authority.
+The `:app:verifyNodePhase15TaskDatabasePromotion` gate writes
+`phase15-task-database-promotion.json` plus `.md`, imports the P14-17
+JSON-safe task database mutation contract, P13 `work_manager`/`compat.tasks`
+and TimedTask snapshot evidence, and P15 disclosure/rollback requirements. It
+keeps `task_database` unpromoted until live mutation, owner/id mapping, schema
+migration/rollback, wall-clock scheduler, packaged mutation smoke,
+cross-package denial, disclosure/stop action, Safe downgrade, and
+security/type/docs evidence are archived.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

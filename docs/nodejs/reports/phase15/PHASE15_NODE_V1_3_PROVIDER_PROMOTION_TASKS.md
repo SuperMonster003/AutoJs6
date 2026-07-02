@@ -295,9 +295,25 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-12: Promote JSON-safe task database mutations.
   - Source backlog: `P14-17`.
-  - Gate: proposed `:app:verifyNodePhase15TaskDatabasePromotion`.
+  - Gate: `:app:verifyNodePhase15TaskDatabasePromotion`.
   - Acceptance: add/update/enable-disable/remove/list ownership, migration,
     rollback, and cross-package denial are covered.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/task-database-promotion-plan.json`
+    - `docs/nodejs/phase15/PHASE15_TASK_DATABASE_PROMOTION.md`
+    - `docs/nodejs/reports/phase15/P15_12_TASK_DATABASE_PROMOTION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-task-database-promotion.js`
+    - `build/reports/nodejs/phase15-task-database-promotion.json`
+    - `build/reports/nodejs/phase15-task-database-promotion.md`
+  - Still open: `task_database_live_mutation_provider_archive`,
+    `task_database_ownership_id_mapping_archive`,
+    `task_database_schema_migration_rollback_archive`,
+    `task_database_wall_clock_scheduler_archive`,
+    `packaged_task_database_mutation_smoke_archive`,
+    `task_database_cross_package_denial_archive`,
+    `task_database_disclosure_stop_action_archive`,
+    `task_database_safe_downgrade_archive`, and
+    `phase15_task_device_media_doc_sync`.
 
 - [ ] P15-13: Close task schema migration and rollback evidence.
   - Source backlog: `P14-18`.
