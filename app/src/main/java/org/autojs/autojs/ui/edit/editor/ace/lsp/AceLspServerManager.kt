@@ -1,13 +1,26 @@
 package org.autojs.autojs.ui.edit.editor.ace.lsp
 
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 class AceLspServerManager(
     private val enabledProvider: () -> Boolean = { AceEditorLspPreferences.isEnabled() },
+    private val documentAllowedProvider: (String?) -> Boolean = { AceEditorLspPreferences.isDocumentAllowed(it) },
 ) {
 
     private var attached = false
     private var sessionRevision = 0L
+    private var documentPath: String? = SYNTHETIC_DOCUMENT_URI
+
+    fun setDocumentPath(path: String?) {
+        val normalized = path?.takeIf { it.isNotBlank() }
+        if (documentPath == normalized) {
+            return
+        }
+        documentPath = normalized
+        sessionRevision += 1
+    }
 
     fun attach() {
         if (!attached) {
@@ -33,19 +46,33 @@ class AceLspServerManager(
                 sessionRevision = sessionRevision,
             )
         }
+        if (!documentAllowedProvider(documentPath)) {
+            return AceLspServerSnapshot(
+                enabled = false,
+                attached = attached,
+                state = STATE_DISABLED_FILE_TYPE,
+                reason = REASON_DISABLED_FILE_TYPE,
+                sessionRevision = sessionRevision,
+            )
+        }
         return AceLspServerSnapshot(
             enabled = true,
             attached = attached,
-            state = STATE_CONFIGURED_NO_SERVER,
-            transport = TRANSPORT_UNAVAILABLE,
+            state = STATE_LOCAL_LANGUAGE_SERVICE,
+            transport = TRANSPORT_IN_PROCESS,
             serverUri = null,
             rootUri = SYNTHETIC_ROOT_URI,
-            documentUri = SYNTHETIC_DOCUMENT_URI,
+            documentUri = documentUriForPath(documentPath),
             libraryUris = DEFAULT_LIBRARY_URIS,
             fallback = FALLBACK_STATIC_COMPLETION,
             startSupported = false,
             serverAvailable = false,
-            reason = REASON_NO_ALPHA_SERVER_ENDPOINT,
+            reason = REASON_LOCAL_LANGUAGE_SERVICE,
+            completionProvider = COMPLETION_PROVIDER_TYPESCRIPT,
+            hoverProvider = HOVER_PROVIDER_TYPESCRIPT,
+            diagnosticProvider = DIAGNOSTIC_PROVIDER_TYPESCRIPT,
+            signatureProvider = SIGNATURE_PROVIDER_TYPESCRIPT,
+            features = DEFAULT_FEATURES,
             sessionRevision = sessionRevision,
         )
     }
@@ -70,6 +97,12 @@ class AceLspServerManager(
             append(",\"startSupported\":").append(snapshot.startSupported)
             append(",\"serverAvailable\":").append(snapshot.serverAvailable)
             append(",\"reason\":").appendJsonString(snapshot.reason)
+            append(",\"completionProvider\":").appendJsonString(snapshot.completionProvider)
+            append(",\"hoverProvider\":").appendJsonString(snapshot.hoverProvider)
+            append(",\"diagnosticProvider\":").appendJsonString(snapshot.diagnosticProvider)
+            append(",\"signatureProvider\":").appendJsonString(snapshot.signatureProvider)
+            append(",\"features\":")
+            append(snapshot.features.joinToString(prefix = "[", postfix = "]") { jsonString(it) })
             append("}")
         }
     }
@@ -79,19 +112,57 @@ class AceLspServerManager(
     }
 
     companion object {
-        const val MANAGER_NAME = "native-alpha"
+        const val MANAGER_NAME = "native-preview"
         const val STATE_DISABLED = "disabled"
+        const val STATE_DISABLED_FILE_TYPE = "disabled-file-type"
         const val STATE_CONFIGURED_NO_SERVER = "configured-no-server"
+        const val STATE_LOCAL_LANGUAGE_SERVICE = "local-language-service"
         const val TRANSPORT_UNAVAILABLE = "unavailable"
+        const val TRANSPORT_IN_PROCESS = "in-process"
         const val FALLBACK_STATIC_COMPLETION = "static-completion"
         const val REASON_NO_ALPHA_SERVER_ENDPOINT = "no-alpha-server-endpoint"
+        const val REASON_DISABLED_FILE_TYPE = "file-type-disabled"
+        const val REASON_LOCAL_LANGUAGE_SERVICE = "browser-local-language-service"
+        const val COMPLETION_PROVIDER_LOCAL_INDEX = "local-index"
+        const val HOVER_PROVIDER_LOCAL_INDEX = "local-index"
+        const val COMPLETION_PROVIDER_TYPESCRIPT = "typescript-language-service"
+        const val HOVER_PROVIDER_TYPESCRIPT = "typescript-language-service"
+        const val DIAGNOSTIC_PROVIDER_ACE_JSHINT = "ace-jshint"
+        const val DIAGNOSTIC_PROVIDER_TYPESCRIPT = "typescript-language-service"
+        const val SIGNATURE_PROVIDER_STATIC_LOCAL = "static-local"
+        const val SIGNATURE_PROVIDER_TYPESCRIPT = "typescript-language-service"
         const val SYNTHETIC_ROOT_URI = "file:///autojs6/editor"
         const val SYNTHETIC_DOCUMENT_URI = "file:///autojs6/editor/current.js"
 
-        val DEFAULT_LIBRARY_URIS = listOf("autojs6/types/lib.autojs6.d.ts")
+        val DEFAULT_LIBRARY_URIS = listOf(
+            "autojs6/typescript/lib.es2020.d.ts",
+            "autojs6/types/lib.autojs6.d.ts",
+            "autojs6/types/lib.autojs6.extra.d.ts",
+        )
+        val DEFAULT_FEATURES = listOf("completion", "hover", "diagnostics", "signatureHelp")
 
         fun preferenceSnapshot(): AceLspServerSnapshot {
             return AceLspServerManager().snapshot()
+        }
+
+        fun documentUriForPath(path: String?): String {
+            val fileName = documentFileName(path)
+            return "$SYNTHETIC_ROOT_URI/${encodePathSegment(fileName)}"
+        }
+
+        private fun documentFileName(path: String?): String {
+            return path
+                ?.substringBefore('?')
+                ?.substringBefore('#')
+                ?.replace('\\', '/')
+                ?.substringAfterLast('/')
+                ?.takeIf { it.isNotBlank() }
+                ?: SYNTHETIC_DOCUMENT_URI.substringAfterLast('/')
+        }
+
+        private fun encodePathSegment(value: String): String {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.name())
+                .replace("+", "%20")
         }
 
         private fun jsonString(value: String?): String {
@@ -138,5 +209,10 @@ data class AceLspServerSnapshot(
     val startSupported: Boolean = false,
     val serverAvailable: Boolean = false,
     val reason: String? = null,
+    val completionProvider: String? = null,
+    val hoverProvider: String? = null,
+    val diagnosticProvider: String? = null,
+    val signatureProvider: String? = null,
+    val features: List<String> = emptyList(),
     val sessionRevision: Long = 0L,
 )

@@ -155,6 +155,13 @@ class AceScriptEditorEngine(
         aceCodeEditor.insert(text.orEmpty())
     }
 
+    fun insertShortcutText(text: String?) {
+        if (!canMutateText()) {
+            return
+        }
+        aceCodeEditor.insertShortcutText(text.orEmpty())
+    }
+
     override fun insert(line: Int, text: String?) {
         if (!canMutateText()) {
             return
@@ -400,6 +407,14 @@ class AceScriptEditorEngine(
 
     override fun notifyDisplayPreferencesChanged() {
         aceCodeEditor.notifyDisplayPreferencesChanged()
+    }
+
+    override fun setDocumentPath(path: String?) {
+        aceCodeEditor.setDocumentPath(path)
+    }
+
+    fun refreshLsp() {
+        aceCodeEditor.refreshLsp()
     }
 
     override fun addCursorChangeCallback(listener: EditorCursorChangeListener) {

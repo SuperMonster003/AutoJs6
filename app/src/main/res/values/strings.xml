@@ -91,6 +91,7 @@
     <string name="key_ace_font_styles_enabled" translatable="false">key_$_ace_font_styles_enabled</string>
     <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
     <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
+    <string name="key_ace_lsp_file_types" translatable="false">key_$_ace_lsp_file_types</string>
     <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
     <string name="key_editor_breakpoint_markers_enabled" translatable="false">key_$_editor_breakpoint_markers_enabled</string>
     <string name="key_editor_fold_markers_enabled" translatable="false">key_$_editor_fold_markers_enabled</string>
@@ -1970,20 +1971,23 @@
     <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine</string>
     <string name="summary_ace_font_ligatures_enabled">Render supported operator combinations as code-font ligatures</string>
     <string name="summary_ace_font_styles_enabled">Allow bold, italic, and other code-font styles</string>
-    <string name="summary_ace_lsp_enabled">Enable experimental LSP configuration</string>
+    <string name="summary_ace_lsp_enabled">Enable LSP-powered editor assistance preview</string>
+    <string name="summary_ace_lsp_file_types">Choose file types that can use LSP features</string>
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
     <string name="summary_editor_gutter_width_mode">Choose whether the gutter follows visible line digits or keeps a stable session width</string>
     <string name="summary_editor_word_wrap_indent_style">Choose how wrapped visual continuation lines are indented</string>
-    <string name="text_ace_lsp_enabled">LSP smart completion (experimental)</string>
+    <string name="text_ace_lsp_enabled">LSP smart completion (preview)</string>
+    <string name="text_ace_lsp_file_types">LSP file types</string>
     <string name="description_editor_engine_preference">Ace is the default editor engine. JsDroidEditor remains available as a fallback and can be selected explicitly.</string>
     <string name="description_editor_theme_mode_preference">Choose whether the editor remembers separate themes for AutoJs6 light and dark modes, or uses one shared theme in both modes.</string>
     <string name="description_ace_editor_font_preference">Choose the Ace editor font. The list includes Android system monospace and open-source code fonts with author/developer information; the actual system monospace face is decided by Android and the device vendor.</string>
     <string name="description_ace_font_ligatures_enabled_preference">Enable OpenType font ligatures for fonts that support them. Operators such as ===, !==, =&gt;, and &lt;= may be drawn as joined glyphs. This only changes how code is displayed.</string>
     <string name="description_ace_font_styles_enabled_preference">Allow Ace themes and syntax highlighting to use bold, italic, and other font styles. When disabled, code text is forced to the regular normal style without changing colors or content.</string>
     <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
+    <string name="description_ace_lsp_file_types_preference">LSP is only started for files whose names end with one of the selected suffixes. Use default restores the JavaScript, TypeScript, JSON, Auto.js, and Node.js suffix set.</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
     <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>
-    <string name="description_ace_lsp_enabled_preference">Experimental LSP support is off by default. The current build only exposes bridge options; if no LSP server is available, the editor keeps using static completion.</string>
+    <string name="description_ace_lsp_enabled_preference">Preview LSP support is off by default. When enabled, the editor uses a local TypeScript language service for completion, hover, signature help, and diagnostics, with static completion kept as a fallback.</string>
     <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
     <string name="description_editor_gutter_width_mode_preference">Dynamic width follows currently visible line-number digits. Fixed width preallocates a stable minimum and grows only when larger visible line numbers require it.</string>
     <string name="description_editor_word_wrap_indent_style_preference">Continuation indent keeps wrapped visual lines aligned with the original indentation. Flush continuation starts wrapped visual lines at the viewport edge.</string>

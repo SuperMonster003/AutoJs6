@@ -29,6 +29,10 @@ object AceDiagnostics {
             lspRootUri = lspSnapshot.rootUri,
             lspDocumentUri = lspSnapshot.documentUri,
             lspFallback = lspSnapshot.fallback,
+            lspCompletionProvider = lspSnapshot.completionProvider,
+            lspHoverProvider = lspSnapshot.hoverProvider,
+            lspDiagnosticProvider = lspSnapshot.diagnosticProvider,
+            lspSignatureProvider = lspSnapshot.signatureProvider,
             lspServerAvailable = lspSnapshot.serverAvailable,
             lspStartSupported = lspSnapshot.startSupported,
             lspSessionRevision = lspSnapshot.sessionRevision,
@@ -97,6 +101,10 @@ object AceDiagnostics {
             appendLine("lspRootUri=${snapshot.lspRootUri.orUnknown()}")
             appendLine("lspDocumentUri=${snapshot.lspDocumentUri.orUnknown()}")
             appendLine("lspFallback=${snapshot.lspFallback.orUnknown()}")
+            appendLine("lspCompletionProvider=${snapshot.lspCompletionProvider.orUnknown()}")
+            appendLine("lspHoverProvider=${snapshot.lspHoverProvider.orUnknown()}")
+            appendLine("lspDiagnosticProvider=${snapshot.lspDiagnosticProvider.orUnknown()}")
+            appendLine("lspSignatureProvider=${snapshot.lspSignatureProvider.orUnknown()}")
             appendLine("lspServerAvailable=${snapshot.lspServerAvailable}")
             appendLine("lspStartSupported=${snapshot.lspStartSupported}")
             appendLine("lspSessionRevision=${snapshot.lspSessionRevision}")
@@ -175,4 +183,5 @@ object AceDiagnostics {
 
     const val LSP_DISABLED = AceLspServerManager.STATE_DISABLED
     const val LSP_CONFIGURED_NO_SERVER = AceLspServerManager.STATE_CONFIGURED_NO_SERVER
+    const val LSP_LOCAL_LANGUAGE_SERVICE = AceLspServerManager.STATE_LOCAL_LANGUAGE_SERVICE
 }

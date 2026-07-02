@@ -1586,7 +1586,8 @@
     <string name="text_ace_line_numbers_enabled">行号</string>
     <string name="text_editor_breakpoint_markers_enabled">断点标记</string>
     <string name="text_editor_fold_markers_enabled">代码折叠标记</string>
-    <string name="text_ace_lsp_enabled">LSP 智能补全 (实验性)</string>
+    <string name="text_ace_lsp_enabled">LSP 智能补全 (预览)</string>
+    <string name="text_ace_lsp_file_types">LSP 文件类型</string>
     <string name="text_ace_set_sample">设置示例</string>
     <string name="text_ace_word_wrap_enabled">自动换行</string>
     <string name="text_editor_gutter_width_mode">边栏宽度</string>
@@ -1600,7 +1601,8 @@
     <string name="summary_editor_setting_unavailable_for_current_engine">不适用于当前编辑器引擎</string>
     <string name="summary_ace_font_ligatures_enabled">将支持的操作符组合显示为代码字体连字</string>
     <string name="summary_ace_font_styles_enabled">允许代码显示粗体、斜体等字体样式</string>
-    <string name="summary_ace_lsp_enabled">启用实验性的 LSP 配置</string>
+    <string name="summary_ace_lsp_enabled">启用 LSP 驱动的编辑辅助预览</string>
+    <string name="summary_ace_lsp_file_types">选择可启用 LSP 功能的文件类型</string>
     <string name="summary_ace_word_wrap_enabled">在编辑器可视区域内对长行自动换行</string>
     <string name="summary_editor_gutter_width_mode">选择边栏跟随可见行号位数变化, 或在当前会话中保持稳定宽度</string>
     <string name="summary_editor_word_wrap_indent_style">选择自动换行后的视觉续行缩进方式</string>
@@ -1608,9 +1610,10 @@
     <string name="description_ace_font_ligatures_enabled_preference">为支持字体连字的字体启用 OpenType 连字特性. 类似 ===, !==, =&gt;, &lt;= 的操作符可能显示为连写字形. 此设置只改变代码的显示方式.</string>
     <string name="description_ace_font_styles_enabled_preference">允许 Ace 主题和语法高亮使用粗体、斜体等字体样式. 关闭后, 代码文本会强制使用 Regular/normal 样式, 不改变颜色或代码内容.</string>
     <string name="description_ace_line_numbers_enabled_preference">显示或隐藏编辑器边栏行号. 代码折叠/断点和边栏布局仍然可用.</string>
+    <string name="description_ace_lsp_file_types_preference">LSP 仅会针对文件名符合所选后缀的文件启动. 使用默认值会恢复 JavaScript、TypeScript、JSON、Auto.js 与 Node.js 相关后缀.</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">显示或隐藏编辑器边栏中的断点标记. 断点数据和调试菜单操作仍然可用.</string>
     <string name="description_editor_fold_markers_enabled_preference">显示或隐藏编辑器边栏中的代码折叠标记. JsDroidEditor 没有折叠标记显示面.</string>
-    <string name="description_ace_lsp_enabled_preference">实验性 LSP 支持默认关闭. 当前版本仅暴露桥接配置; 如果没有可用的 LSP server, 编辑器会继续使用静态补全.</string>
+    <string name="description_ace_lsp_enabled_preference">LSP 预览支持默认关闭. 启用后, 编辑器会使用本地 TypeScript 语言服务提供补全、悬停提示、参数提示和语法诊断, 并保留静态补全作为 fallback.</string>
     <string name="description_ace_word_wrap_enabled_preference">为长行启用编辑器自动换行模式. 此设置不会修改文件内容.</string>
     <string name="description_editor_gutter_width_mode_preference">动态宽度会跟随当前可见行号位数变化. 固定宽度会预留稳定的最小宽度, 并且只在看到更高位数的行号时增大.</string>
     <string name="description_editor_word_wrap_indent_style_preference">延续缩进会让自动换行后的视觉续行与原行缩进对齐. 顶格续行会让视觉续行从可视区域边缘开始.</string>

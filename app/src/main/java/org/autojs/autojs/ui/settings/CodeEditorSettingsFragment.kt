@@ -14,6 +14,7 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
@@ -64,7 +65,8 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (
             key == getString(R.string.key_editor_engine) ||
-            key == getString(R.string.key_editor_pinch_to_zoom_strategy)
+            key == getString(R.string.key_editor_pinch_to_zoom_strategy) ||
+            key == getString(R.string.key_ace_lsp_enabled)
         ) {
             syncEditorEnginePreferenceAvailability()
         }
@@ -137,6 +139,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         setPreferenceAvailable(R.string.key_ace_font_ligatures_enabled, aceSelected, R.string.summary_ace_font_ligatures_enabled)
         setPreferenceAvailable(R.string.key_ace_font_styles_enabled, aceSelected, R.string.summary_ace_font_styles_enabled)
         setPreferenceAvailable(R.string.key_ace_lsp_enabled, aceSelected, R.string.summary_ace_lsp_enabled)
+        syncAceLspFileTypesPreferenceVisibility(aceSelected)
         setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected, R.string.summary_ace_word_wrap_enabled)
         setPreferenceAvailable(R.string.key_editor_word_wrap_indent_style, aceSelected, R.string.summary_editor_word_wrap_indent_style)
         setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected, R.string.summary_editor_gutter_width_mode)
@@ -151,6 +154,12 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
             )
         }
         findPreference<EditorPinchToZoomPreference>(getString(R.string.key_editor_pinch_to_zoom_strategy))?.refreshSummary()
+    }
+
+    private fun syncAceLspFileTypesPreferenceVisibility(aceSelected: Boolean) {
+        findPreference<Preference>(getString(R.string.key_ace_lsp_file_types))?.apply {
+            isVisible = aceSelected && AceEditorLspPreferences.isEnabled()
+        }
     }
 
     private fun setPreferenceAvailable(

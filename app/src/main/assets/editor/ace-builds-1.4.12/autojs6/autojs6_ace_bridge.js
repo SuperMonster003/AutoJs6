@@ -6,6 +6,7 @@
     var session = null;
     var Range = null;
     var staticCompleter = null;
+    var lspCompletionCompleter = null;
     var lspClient = null;
     var tooltipController = null;
     var signatureHelpController = null;
@@ -25,6 +26,7 @@
     var textNotifyIncludeText = false;
     var cursorNotifyTimer = null;
     var actionModeNotifyTimer = null;
+    var memberCompletionRestartTimer = null;
     var fontMetricsRefreshTimer = null;
     var fontMetricsRefreshFrameScheduled = false;
     var lastActionModeSelectedText = "";
@@ -39,6 +41,9 @@
     var resizeReason = "";
     var cursorRevealSuppressUntil = 0;
     var firstPaintNotified = false;
+    var firstPaintRequestStartedAt = 0;
+    var firstPaintStableFrames = 0;
+    var firstPaintLastSignature = "";
     var lastSelectionBrowseScrollAt = 0;
     var lastSelectionChangedAt = 0;
     var lastSelectionActionModeStartedAt = 0;
@@ -85,6 +90,8 @@
     var FOLD_TAP_TOUCH_SLOP_SQUARED = 100;
     var IME_TEXT_INPUT_SELECTION_MAX_DELTA = 64;
     var IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS = 800;
+    var FIRST_PAINT_STABLE_FRAME_COUNT = 3;
+    var FIRST_PAINT_MAX_WAIT_MS = 1800;
     var PINCH_CURSOR_REVEAL_SUPPRESS_MS = 3000;
     var PINCH_IME_SUPPRESS_MS = 1800;
     var PINCH_POST_TOUCH_SUPPRESS_MS = 650;
@@ -247,6 +254,20 @@
         firstPaintNotified = true;
         document.body.classList.add("ace-ready");
         callBridge("notifyEvent", ["firstPaint", lightweightStateJson()]);
+        warmUpLspAfterFirstPaint();
+    }
+
+    function warmUpLspAfterFirstPaint() {
+        if (!lspClient || typeof lspClient.warmUp !== "function") {
+            return;
+        }
+        setTimeout(function() {
+            try {
+                lspClient.warmUp();
+            } catch (error) {
+                notifyRecoverableError("lspWarmUp", error);
+            }
+        }, 48);
     }
 
     function afterTwoFrames(callback) {
@@ -256,9 +277,147 @@
         });
     }
 
+    function colorLuminance(color) {
+        color = String(color || "").toLowerCase();
+        if (!color || color === "transparent") {
+            return 0;
+        }
+        var match = /rgba?\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)(?:\s*,\s*([0-9.]+))?\s*\)/.exec(color);
+        if (!match) {
+            return null;
+        }
+        var alpha = match[4] === undefined ? 1 : Number(match[4]);
+        if (alpha === 0) {
+            return 0;
+        }
+        var r = Number(match[1]) || 0;
+        var g = Number(match[2]) || 0;
+        var b = Number(match[3]) || 0;
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    function isDarkCssColor(color) {
+        var luminance = colorLuminance(color);
+        return luminance === null ? true : luminance < 150;
+    }
+
+    function computedStyleOf(node) {
+        if (!node || !global.getComputedStyle) {
+            return null;
+        }
+        try {
+            return global.getComputedStyle(node);
+        } catch (ignore) {
+            return null;
+        }
+    }
+
+    function isVisibleElement(node) {
+        if (!node || !node.getBoundingClientRect) {
+            return false;
+        }
+        var rect = node.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+    }
+
+    function isFirstPaintThemeReady(container, gutter) {
+        if (!document || !document.body || !document.body.classList || !document.body.classList.contains("ace-theme-dark")) {
+            return true;
+        }
+        var editorStyle = computedStyleOf(container);
+        if (editorStyle && !isDarkCssColor(editorStyle.backgroundColor)) {
+            return false;
+        }
+        if (!isVisibleElement(gutter)) {
+            return true;
+        }
+        var gutterStyle = computedStyleOf(gutter);
+        return !gutterStyle || isDarkCssColor(gutterStyle.backgroundColor);
+    }
+
+    function firstPaintReadinessSnapshot() {
+        var container = editor && editor.container;
+        var renderer = editor && editor.renderer;
+        if (!container || !renderer || !container.querySelector || !container.getBoundingClientRect) {
+            return { ready: false, signature: "missing-editor" };
+        }
+        var scroller = container.querySelector(".ace_scroller");
+        var textLayer = container.querySelector(".ace_text-layer");
+        var gutter = container.querySelector(".ace_gutter");
+        var rect = container.getBoundingClientRect();
+        var scrollerRect = scroller && scroller.getBoundingClientRect ? scroller.getBoundingClientRect() : { width: 0, height: 0, left: 0 };
+        var gutterRect = gutter && gutter.getBoundingClientRect ? gutter.getBoundingClientRect() : { width: 0, height: 0 };
+        var lineHeight = Number(renderer.lineHeight) || 0;
+        var characterWidth = Number(renderer.characterWidth) || 0;
+        var themeReady = isFirstPaintThemeReady(container, gutter);
+        var ready = rect.width > 0 &&
+            rect.height > 0 &&
+            scrollerRect.width > 0 &&
+            scrollerRect.height > 0 &&
+            !!textLayer &&
+            lineHeight > 0 &&
+            characterWidth > 0 &&
+            themeReady;
+        var containerStyle = computedStyleOf(container);
+        var gutterStyle = computedStyleOf(gutter);
+        return {
+            ready: ready,
+            signature: [
+                Math.round(rect.width),
+                Math.round(rect.height),
+                Math.round(scrollerRect.left),
+                Math.round(scrollerRect.width),
+                Math.round(gutterRect.width),
+                Math.round(lineHeight),
+                Math.round(characterWidth),
+                container.className,
+                containerStyle && containerStyle.backgroundColor || "",
+                gutterStyle && gutterStyle.backgroundColor || ""
+            ].join("|")
+        };
+    }
+
+    function requestFirstPaintCheck(reason) {
+        if (firstPaintNotified) {
+            return;
+        }
+        var snapshot = firstPaintReadinessSnapshot();
+        var now = Date.now();
+        if (snapshot.ready && snapshot.signature === firstPaintLastSignature) {
+            firstPaintStableFrames += 1;
+        } else {
+            firstPaintStableFrames = snapshot.ready ? 1 : 0;
+            firstPaintLastSignature = snapshot.signature;
+        }
+        if (firstPaintStableFrames >= FIRST_PAINT_STABLE_FRAME_COUNT) {
+            notifyFirstPaint();
+            return;
+        }
+        if (firstPaintRequestStartedAt > 0 && now - firstPaintRequestStartedAt >= FIRST_PAINT_MAX_WAIT_MS) {
+            callBridge("notifyEvent", [
+                "firstPaintForced",
+                JSON.stringify({
+                    reason: String(reason || ""),
+                    signature: String(snapshot.signature || "")
+                })
+            ]);
+            notifyFirstPaint();
+            return;
+        }
+        var raf = global.requestAnimationFrame || function(run) { return setTimeout(run, 16); };
+        raf(function() {
+            requestFirstPaintCheck(reason);
+        });
+    }
+
     function requestFirstPaint(reason) {
         scheduleResize(reason || "first_paint");
-        afterTwoFrames(notifyFirstPaint);
+        firstPaintRequestStartedAt = Date.now();
+        firstPaintStableFrames = 0;
+        firstPaintLastSignature = "";
+        afterTwoFrames(function() {
+            requestFirstPaintCheck(reason || "first_paint");
+        });
     }
 
     function clampRow(row) {
@@ -731,6 +890,212 @@
 
     function clientPointFromDomEvent(event) {
         return touchFromEvent(event) || event || null;
+    }
+
+    var nonPassiveCaptureTouchOptions = null;
+
+    function getNonPassiveCaptureTouchOptions() {
+        if (nonPassiveCaptureTouchOptions !== null) {
+            return nonPassiveCaptureTouchOptions;
+        }
+        nonPassiveCaptureTouchOptions = true;
+        try {
+            var options = { capture: true };
+            Object.defineProperty(options, "passive", {
+                get: function() {
+                    nonPassiveCaptureTouchOptions = { capture: true, passive: false };
+                    return false;
+                }
+            });
+            var probe = function() {};
+            global.addEventListener("autojs6-passive-probe", probe, options);
+            global.removeEventListener("autojs6-passive-probe", probe, options);
+        } catch (ignore) {
+            nonPassiveCaptureTouchOptions = true;
+        }
+        return nonPassiveCaptureTouchOptions;
+    }
+
+    function installTouchDragScroller(element, scrollBy) {
+        if (!element || element.$autojs6TouchDragScrollerInstalled || !element.addEventListener) {
+            return;
+        }
+        element.$autojs6TouchDragScrollerInstalled = true;
+        var state = null;
+        var options = getNonPassiveCaptureTouchOptions();
+
+        function onTouchStart(event) {
+            if (!event || !event.touches || event.touches.length !== 1) {
+                state = null;
+                return;
+            }
+            var touch = touchFromEvent(event);
+            if (!touch) {
+                state = null;
+                return;
+            }
+            state = {
+                startX: Number(touch.clientX) || 0,
+                startY: Number(touch.clientY) || 0,
+                lastX: Number(touch.clientX) || 0,
+                lastY: Number(touch.clientY) || 0,
+                moved: false
+            };
+        }
+
+        function onTouchMove(event) {
+            if (!state) {
+                return;
+            }
+            var touch = touchFromEvent(event);
+            if (!touch) {
+                return;
+            }
+            var x = Number(touch.clientX) || 0;
+            var y = Number(touch.clientY) || 0;
+            var totalDx = x - state.startX;
+            var totalDy = y - state.startY;
+            if (!state.moved && Math.max(Math.abs(totalDx), Math.abs(totalDy)) < 6) {
+                return;
+            }
+            var dx = state.lastX - x;
+            var dy = state.lastY - y;
+            state.lastX = x;
+            state.lastY = y;
+            state.moved = true;
+            if (scrollBy(dx, dy, event) !== false) {
+                stopDomTouchEvent(event);
+            }
+        }
+
+        function onTouchEnd(event) {
+            if (state && state.moved) {
+                stopDomTouchEvent(event);
+            }
+            state = null;
+        }
+
+        element.addEventListener("touchstart", onTouchStart, options);
+        element.addEventListener("touchmove", onTouchMove, options);
+        element.addEventListener("touchend", onTouchEnd, options);
+        element.addEventListener("touchcancel", onTouchEnd, options);
+    }
+
+    function installAcePopupTouchScroller(popup) {
+        if (!popup || !popup.container || !popup.renderer) {
+            return;
+        }
+        popup.container.style.touchAction = "none";
+        popup.container.style.webkitUserSelect = "none";
+        popup.container.style.overflowX = "auto";
+        popup.container.style.overflowY = "hidden";
+        popup.container.style.maxWidth = "calc(100vw - 16px)";
+        installTouchDragScroller(popup.container, function(dx, dy) {
+            var scrolled = false;
+            var beforeLeft = popup.container.scrollLeft;
+            popup.container.scrollLeft += dx;
+            scrolled = popup.container.scrollLeft !== beforeLeft;
+            if (popup.renderer && typeof popup.renderer.scrollBy === "function") {
+                popup.renderer.scrollBy(0, dy);
+                scrolled = true;
+            } else if (popup.container.scrollHeight > popup.container.clientHeight) {
+                var beforeTop = popup.container.scrollTop;
+                popup.container.scrollTop += dy;
+                scrolled = scrolled || popup.container.scrollTop !== beforeTop;
+            }
+            if (popup.container.scrollWidth > popup.container.clientWidth) {
+                return true;
+            }
+            return scrolled;
+        });
+    }
+
+    function fitDocTooltipToViewport(node) {
+        if (!node || !node.getBoundingClientRect) {
+            return;
+        }
+        var doc = document && document.documentElement || {};
+        var viewportWidth = Math.max(Number(global.innerWidth) || 0, Number(doc.clientWidth) || 0, 320);
+        var viewportHeight = Math.max(Number(global.innerHeight) || 0, Number(doc.clientHeight) || 0, 240);
+        var edge = 8;
+        node.style.boxSizing = "border-box";
+        node.style.maxWidth = Math.max(160, viewportWidth - edge * 2) + "px";
+        node.style.maxHeight = Math.max(96, Math.round(viewportHeight * 0.45)) + "px";
+
+        var rect = node.getBoundingClientRect();
+        if (rect.left < edge || rect.right > viewportWidth - edge || node.scrollWidth > node.clientWidth) {
+            node.style.left = edge + "px";
+            node.style.right = edge + "px";
+        }
+
+        rect = node.getBoundingClientRect();
+        if (rect.top < edge) {
+            node.style.top = edge + "px";
+            node.style.bottom = "";
+        } else if (rect.bottom > viewportHeight - edge) {
+            node.style.top = "";
+            node.style.bottom = edge + "px";
+        }
+    }
+
+    function installDocTooltipTouchScroller(node) {
+        if (!node) {
+            return;
+        }
+        node.style.boxSizing = "border-box";
+        node.style.maxWidth = "calc(100vw - 16px)";
+        node.style.maxHeight = "45vh";
+        node.style.overflow = "auto";
+        node.style.whiteSpace = "pre";
+        node.style.touchAction = "pan-x pan-y";
+        node.style.webkitOverflowScrolling = "touch";
+        fitDocTooltipToViewport(node);
+        installTouchDragScroller(node, function(dx, dy) {
+            var beforeLeft = node.scrollLeft;
+            var beforeTop = node.scrollTop;
+            node.scrollLeft += dx;
+            node.scrollTop += dy;
+            return node.scrollLeft !== beforeLeft ||
+                node.scrollTop !== beforeTop ||
+                node.scrollWidth > node.clientWidth ||
+                node.scrollHeight > node.clientHeight;
+        });
+    }
+
+    function installCompletionPopupTouchScrollPatch() {
+        try {
+            if (!global.ace || typeof global.ace.require !== "function") {
+                return;
+            }
+            var autocomplete = global.ace.require("ace/autocomplete");
+            var Autocomplete = autocomplete && autocomplete.Autocomplete;
+            var prototype = Autocomplete && Autocomplete.prototype;
+            if (!prototype || prototype.$autojs6TouchScrollPatched) {
+                return;
+            }
+
+            var originalInit = prototype.$init;
+            if (typeof originalInit === "function") {
+                prototype.$init = function() {
+                    var popup = originalInit.apply(this, arguments);
+                    installAcePopupTouchScroller(popup);
+                    return popup;
+                };
+            }
+
+            var originalShowDocTooltip = prototype.showDocTooltip;
+            if (typeof originalShowDocTooltip === "function") {
+                prototype.showDocTooltip = function() {
+                    var result = originalShowDocTooltip.apply(this, arguments);
+                    installDocTooltipTouchScroller(this.tooltipNode);
+                    return result;
+                };
+            }
+
+            prototype.$autojs6TouchScrollPatched = true;
+        } catch (error) {
+            notifyRecoverableError("completionTouchScroll", error);
+        }
     }
 
     function resetAceBuiltInBodyZoom() {
@@ -1379,6 +1744,8 @@
         return reason === "move_cursor" ||
             reason === "select_range" ||
             reason === "jump_to" ||
+            reason === "shortcut_insert" ||
+            reason === "touch_cursor" ||
             reason === "init" ||
             reason.indexOf("focus") >= 0;
     }
@@ -1821,10 +2188,176 @@
         }, false);
     }
 
+    function isEditorSelectionEmpty() {
+        if (!editor || !editor.selection) {
+            return true;
+        }
+        if (typeof editor.selection.isEmpty === "function") {
+            return editor.selection.isEmpty();
+        }
+        if (typeof editor.getSelectionRange === "function") {
+            var range = editor.getSelectionRange();
+            return !!(range && range.start && range.end &&
+                range.start.row === range.end.row &&
+                range.start.column === range.end.column);
+        }
+        return true;
+    }
+
+    function skipExistingClosingPair(text) {
+        text = String(text || "");
+        if (text !== ")" && text !== "]") {
+            return false;
+        }
+        if (!editor || !session || !isEditorSelectionEmpty()) {
+            return false;
+        }
+        var pos = editor.getCursorPosition && editor.getCursorPosition();
+        if (!pos) {
+            return false;
+        }
+        var line = String(session.getLine(pos.row) || "");
+        if (line.charAt(pos.column) !== text) {
+            return false;
+        }
+        if (editor.moveCursorTo) {
+            editor.moveCursorTo(pos.row, pos.column + 1);
+        } else if (editor.selection && editor.selection.moveTo) {
+            editor.selection.moveTo(pos.row, pos.column + 1);
+        }
+        if (editor.renderer && editor.renderer.scrollCursorIntoView) {
+            editor.renderer.scrollCursorIntoView();
+        }
+        resetImeTextInputSelectionWindow("shortcut_insert");
+        notifyCursorChanged();
+        notifyStateChanged("shortcutClosingSkipped");
+        return true;
+    }
+
+    function insertShortcutText(text) {
+        text = String(text || "");
+        return runTextMutation("insertShortcutText", function() {
+            if (skipExistingClosingPair(text)) {
+                return true;
+            }
+            editor.insert(text);
+            resetImeTextInputSelectionWindow("shortcut_insert");
+            return true;
+        }, false);
+    }
+
     function isCompletionPopupOpen() {
         var completer = editor && editor.completer;
         var popup = completer && completer.popup;
         return !!(completer && completer.activated && popup && popup.isOpen);
+    }
+
+    function commandInsertedText(event) {
+        var args = event && event.args;
+        if (typeof args === "string") {
+            return args;
+        }
+        if (args && typeof args.text === "string") {
+            return args.text;
+        }
+        if (args && typeof args.value === "string") {
+            return args.value;
+        }
+        return "";
+    }
+
+    function isCursorAfterMemberDot() {
+        if (!editor || !session || !editor.getCursorPosition) {
+            return false;
+        }
+        var pos = editor.getCursorPosition();
+        var line = String(session.getLine(pos.row) || "").substring(0, pos.column);
+        return /(?:[A-Za-z_$][A-Za-z0-9_$]*|\]|\)|\}|"|'|`)\.$/.test(line);
+    }
+
+    function isSingleInsertedText(delta, text) {
+        if (!delta || delta.action !== "insert") {
+            return false;
+        }
+        if (typeof delta.text === "string") {
+            return delta.text === text;
+        }
+        return Array.isArray(delta.lines) &&
+            delta.lines.length === 1 &&
+            delta.lines[0] === text;
+    }
+
+    function restartMemberCompletionAfterDot() {
+        memberCompletionRestartTimer = null;
+        if (!editor || !isCursorAfterMemberDot()) {
+            return;
+        }
+        if (editor.completer && typeof editor.completer.detach === "function") {
+            editor.completer.detach();
+        }
+        if (editor.execCommand) {
+            editor.execCommand("startAutocomplete");
+            notifyStateChanged("memberCompletionRestarted");
+        }
+    }
+
+    function scheduleMemberCompletionAfterDot() {
+        if (memberCompletionRestartTimer !== null) {
+            clearTimeout(memberCompletionRestartTimer);
+        }
+        memberCompletionRestartTimer = global.setTimeout(restartMemberCompletionAfterDot, 30);
+    }
+
+    function installMemberCompletionDotTrigger() {
+        if (!editor || !editor.commands || !editor.commands.on || editor.$autojs6MemberCompletionDotTriggerInstalled) {
+            return;
+        }
+        editor.commands.on("afterExec", function(event) {
+            if (!event || !event.command || event.command.name !== "insertstring") {
+                return;
+            }
+            if (commandInsertedText(event) !== ".") {
+                return;
+            }
+            scheduleMemberCompletionAfterDot();
+        });
+        editor.$autojs6MemberCompletionDotTriggerInstalled = true;
+    }
+
+    function installTouchCursorSelectionGuard() {
+        if (!editor || !editor.container || !editor.container.addEventListener || editor.$autojs6TouchCursorSelectionGuardInstalled) {
+            return;
+        }
+        var touchCursorTimer = null;
+        var options = getNonPassiveCaptureTouchOptions();
+
+        function scheduleTouchCursorSelectionReset(reason) {
+            if (!isAndroidUserAgent()) {
+                return;
+            }
+            suppressNextImeTextInputSelectionChange("touch_cursor");
+            if (touchCursorTimer !== null) {
+                clearTimeout(touchCursorTimer);
+            }
+            touchCursorTimer = setTimeout(function() {
+                touchCursorTimer = null;
+                resetImeTextInputSelectionWindow(reason || "touch_cursor");
+            }, 48);
+        }
+
+        editor.container.addEventListener("touchstart", function() {
+            scheduleTouchCursorSelectionReset("touch_cursor_start");
+        }, options);
+        editor.container.addEventListener("touchend", function() {
+            scheduleTouchCursorSelectionReset("touch_cursor_end");
+        }, options);
+        editor.container.addEventListener("touchcancel", function() {
+            scheduleTouchCursorSelectionReset("touch_cursor_cancel");
+        }, options);
+        editor.container.addEventListener("mousedown", function() {
+            scheduleTouchCursorSelectionReset("touch_cursor_mouse");
+        }, true);
+        editor.$autojs6TouchCursorSelectionGuardInstalled = true;
     }
 
     function moveCompletionSelectionOrCursor(delta) {
@@ -1852,6 +2385,67 @@
             }, false);
         }
         return insertTab();
+    }
+
+    function languageToolsModule() {
+        try {
+            return global.ace && global.ace.require && global.ace.require("ace/ext/language_tools");
+        } catch (error) {
+            notifyCompletionError("ACE language tools unavailable: " + error, error);
+            return null;
+        }
+    }
+
+    function removeLanguageToolCompleter(completer) {
+        var languageTools = languageToolsModule();
+        var completers = languageTools && languageTools.completers;
+        if (!completer || !Array.isArray(completers)) {
+            return false;
+        }
+        var index = completers.indexOf(completer);
+        if (index < 0) {
+            return false;
+        }
+        completers.splice(index, 1);
+        return true;
+    }
+
+    function installLspCompletionCompleter() {
+        if (lspCompletionCompleter || !lspClient) {
+            return;
+        }
+        var languageTools = languageToolsModule();
+        if (!languageTools || typeof languageTools.addCompleter !== "function") {
+            return;
+        }
+        lspCompletionCompleter = {
+            identifierRegexps: staticCompleter && staticCompleter.identifierRegexps,
+            retrievePrecedingIdentifier: staticCompleter && staticCompleter.retrievePrecedingIdentifier,
+            getCompletions: function(activeEditor, activeSession, pos, prefix, callback) {
+                if (!lspClient || typeof lspClient.getCompletions !== "function") {
+                    callback(null, []);
+                    return;
+                }
+                lspClient.getCompletions(activeEditor, activeSession, pos, prefix, callback);
+            },
+            getDocTooltip: function(item) {
+                if (item && item.docText) {
+                    return { docText: item.docText };
+                }
+                if (staticCompleter && typeof staticCompleter.getDocTooltip === "function") {
+                    return staticCompleter.getDocTooltip(item);
+                }
+                return null;
+            },
+            insertMatch: function(activeEditor, completion) {
+                if (staticCompleter && typeof staticCompleter.insertMatch === "function") {
+                    return staticCompleter.insertMatch(activeEditor, completion);
+                }
+                return false;
+            }
+        };
+        languageTools.addCompleter(lspCompletionCompleter);
+        removeLanguageToolCompleter(staticCompleter);
     }
 
     function handleEscapeKey() {
@@ -2809,6 +3403,7 @@
         // ACE 1.4.12 ext-language_tools references a global `editor` in insertMatch().
         global.editor = editor;
         session = editor.getSession();
+        installCompletionPopupTouchScrollPatch();
         installAceBuiltInPinchZoomSuppression();
         if (document && document.body && document.body.classList) {
             document.body.classList.add("autojs6-host-selection-action-mode");
@@ -2847,6 +3442,8 @@
             wrap: wordWrapEnabled,
             fontFamily: initialFontFamily
         });
+        installMemberCompletionDotTrigger();
+        installTouchCursorSelectionGuard();
         session.setUseWrapMode(wordWrapEnabled);
         setEditorContainerClass("autojs6-hide-breakpoint-markers", !breakpointMarkersEnabled);
         setEditorContainerClass("autojs6-hide-fold-markers", !foldMarkersEnabled);
@@ -2864,6 +3461,9 @@
         session.on("change", function(delta) {
             if (suppressChange) {
                 return;
+            }
+            if (isSingleInsertedText(delta, ".")) {
+                scheduleMemberCompletionAfterDot();
             }
             markTextMutationSelectionMenuSuppressed("session_change:" + String(delta && delta.action || ""));
             dirty = true;
@@ -2925,6 +3525,7 @@
             setTextDirty: setTextDirty,
             markClean: markClean,
             insert: insert,
+            insertShortcutText: insertShortcutText,
             insertTab: insertTab,
             acceptCompletionOrInsertTab: acceptCompletionOrInsertTab,
             moveCompletionSelectionOrCursor: moveCompletionSelectionOrCursor,
@@ -2984,6 +3585,12 @@
             getLspHover: function(row, column) {
                 return lspClient ? lspClient.getHover({ row: row, column: column }) : null;
             },
+            getLspDiagnostics: function() {
+                return lspClient && lspClient.getDiagnostics ? lspClient.getDiagnostics() : [];
+            },
+            validateLsp: function() {
+                return lspClient && lspClient.validateNow ? lspClient.validateNow() : [];
+            },
             showLspTooltip: function(row, column) {
                 return tooltipController ?
                     tooltipController.showAtPosition({ row: row, column: column }) :
@@ -2998,6 +3605,9 @@
                 return tooltipController ? tooltipController.getState() : null;
             },
             getSignatureHelp: function(row, column) {
+                if (lspClient && lspClient.getSignatureHelp) {
+                    return lspClient.getSignatureHelp({ row: row, column: column });
+                }
                 return global.AutoJsAceSignatureHelp ?
                     global.AutoJsAceSignatureHelp.findSignatureHelp(session, { row: row, column: column }) :
                     null;
@@ -3031,6 +3641,7 @@
                     },
                     notifyError: notifyLspError
                 });
+                installLspCompletionCompleter();
             } catch (error) {
                 notifyLspError("ACE LSP client disabled: " + error, error);
             }
@@ -3058,6 +3669,12 @@
                 signatureHelpController = global.AutoJsAceSignatureHelp.install({
                     editor: editor,
                     session: session,
+                    getSignatureHelp: function(pos) {
+                        if (lspClient && lspClient.getSignatureHelp) {
+                            return lspClient.getSignatureHelp(pos);
+                        }
+                        return global.AutoJsAceSignatureHelp.findSignatureHelp(session, pos);
+                    },
                     notifyError: function(message, error) {
                         notifyRecoverableError(message, error);
                     }

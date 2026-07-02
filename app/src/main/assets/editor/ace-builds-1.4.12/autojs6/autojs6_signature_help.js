@@ -340,17 +340,101 @@
             };
         }
 
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(value, max));
+        }
+
+        function isRectVisible(rect) {
+            return !!(rect &&
+                Number(rect.width) > 0 &&
+                Number(rect.height) > 0 &&
+                Number(rect.right) > Number(rect.left) &&
+                Number(rect.bottom) > Number(rect.top));
+        }
+
+        function autocompletePopupRect() {
+            var popup = editor && editor.completer && editor.completer.popup &&
+                editor.completer.popup.container;
+            if (!popup && global.document && typeof global.document.querySelector === "function") {
+                popup = global.document.querySelector(".ace_autocomplete");
+            }
+            if (!popup || typeof popup.getBoundingClientRect !== "function") {
+                return null;
+            }
+            var style = global.getComputedStyle ? global.getComputedStyle(popup) : null;
+            if (style && (style.display === "none" || style.visibility === "hidden")) {
+                return null;
+            }
+            var rect = popup.getBoundingClientRect();
+            return isRectVisible(rect) ? rect : null;
+        }
+
+        function rectsOverlap(left, top, width, height, rect, gap) {
+            gap = Number(gap) || 0;
+            if (!rect) {
+                return false;
+            }
+            return left < rect.right + gap &&
+                left + width > rect.left - gap &&
+                top < rect.bottom + gap &&
+                top + height > rect.top - gap;
+        }
+
+        function setCompactFallback(box, enabled, maxHeight) {
+            if (box.classList && typeof box.classList.toggle === "function") {
+                box.classList.toggle("autojs6_signature_tooltip_compact", !!enabled);
+            }
+            box.style.maxHeight = enabled && maxHeight > 0 ? Math.round(maxHeight) + "px" : "";
+        }
+
         function positionElement(pos) {
             var box = ensureElement();
+            setCompactFallback(box, false, 0);
             var viewport = viewportSize();
             var point = pointFor(pos);
             var lineHeight = editor && editor.renderer && editor.renderer.lineHeight || 20;
             var width = box.offsetWidth || 360;
             var height = box.offsetHeight || 72;
-            var left = Math.min(point.x, viewport.width - width - EDGE_PADDING);
-            var top = Math.min(point.y + lineHeight + 6, viewport.height - height - EDGE_PADDING);
-            box.style.left = Math.max(EDGE_PADDING, Math.round(left)) + "px";
-            box.style.top = Math.max(EDGE_PADDING, Math.round(top)) + "px";
+            var left = clamp(point.x, EDGE_PADDING, viewport.width - width - EDGE_PADDING);
+            var popup = autocompletePopupRect();
+            var gap = 6;
+            var candidates = [
+                point.y + lineHeight + gap,
+                point.y - height - gap
+            ];
+            if (popup) {
+                candidates.push(popup.top - height - gap);
+                candidates.push(popup.bottom + gap);
+            }
+            var top = null;
+            for (var i = 0; i < candidates.length; i++) {
+                var candidate = candidates[i];
+                if (candidate < EDGE_PADDING || candidate + height > viewport.height - EDGE_PADDING) {
+                    continue;
+                }
+                if (!rectsOverlap(left, candidate, width, height, popup, gap)) {
+                    top = candidate;
+                    break;
+                }
+            }
+            if (top === null) {
+                top = clamp(point.y + lineHeight + gap, EDGE_PADDING, viewport.height - height - EDGE_PADDING);
+            }
+            if (popup && rectsOverlap(left, top, width, height, popup, gap)) {
+                var above = Math.max(0, popup.top - EDGE_PADDING - gap);
+                var below = Math.max(0, viewport.height - popup.bottom - EDGE_PADDING - gap);
+                var useAbove = above >= below;
+                var available = Math.max(useAbove ? above : below, Math.min(height, 96));
+                setCompactFallback(box, true, available);
+                height = Math.min(box.offsetHeight || height, available);
+                top = useAbove ? EDGE_PADDING : popup.bottom + gap;
+                if (useAbove) {
+                    top = Math.max(EDGE_PADDING, popup.top - gap - height);
+                }
+                top = clamp(top, EDGE_PADDING, viewport.height - height - EDGE_PADDING);
+            }
+            box.style.left = Math.round(left) + "px";
+            box.style.top = Math.round(top) + "px";
         }
 
         function renderSignature(help) {
@@ -366,10 +450,17 @@
             return html;
         }
 
+        function resolveSignatureHelp(pos) {
+            if (typeof config.getSignatureHelp === "function") {
+                return config.getSignatureHelp(pos);
+            }
+            return findSignatureHelp(session, pos);
+        }
+
         function showAtPosition(pos) {
             try {
                 pos = normalizePosition(pos || (editor && editor.getCursorPosition && editor.getCursorPosition()));
-                var help = findSignatureHelp(session, pos);
+                var help = resolveSignatureHelp(pos);
                 if (!help) {
                     hide();
                     return false;
@@ -400,6 +491,43 @@
             }, delayMs);
         }
 
+        function commandName(event) {
+            return event && event.command && event.command.name || "";
+        }
+
+        function commandText(event) {
+            var args = event && event.args;
+            if (typeof args === "string") {
+                return args;
+            }
+            if (args && typeof args.text === "string") {
+                return args.text;
+            }
+            if (args && typeof args.value === "string") {
+                return args.value;
+            }
+            return "";
+        }
+
+        function shouldScheduleAfterExec(event) {
+            var name = commandName(event);
+            if (name === "insertstring") {
+                var text = commandText(event);
+                return text === "(" || text === "," || text === ")" || text.indexOf("(") >= 0;
+            }
+            return name === "insertMatch" ||
+                name === "backspace" ||
+                name === "del" ||
+                name === "remove" ||
+                name === "paste";
+        }
+
+        function onAfterExec(event) {
+            if (shouldScheduleAfterExec(event)) {
+                schedule();
+            }
+        }
+
         function hide() {
             if (timer !== null) {
                 clearTimeout(timer);
@@ -410,6 +538,20 @@
             }
             visible = false;
             lastSignature = null;
+        }
+
+        function isInsideTooltipEvent(event) {
+            var target = event && event.target;
+            return !!(element && target && (
+                target === element ||
+                (typeof element.contains === "function" && element.contains(target))
+            ));
+        }
+
+        function hideFromEditorPointer(event) {
+            if (!isInsideTooltipEvent(event)) {
+                hide();
+            }
         }
 
         function attach() {
@@ -423,10 +565,13 @@
                 session.on("changeScrollTop", hide);
                 session.on("changeScrollLeft", hide);
             }
+            if (editor.commands && editor.commands.on) {
+                editor.commands.on("afterExec", onAfterExec);
+            }
             if (editor.container && editor.container.addEventListener) {
-                editor.container.addEventListener("mousedown", hide);
-                editor.container.addEventListener("touchstart", hide);
-                editor.container.addEventListener("wheel", hide);
+                editor.container.addEventListener("mousedown", hideFromEditorPointer);
+                editor.container.addEventListener("touchstart", hideFromEditorPointer);
+                editor.container.addEventListener("wheel", hideFromEditorPointer);
             }
             attached = true;
         }
@@ -442,10 +587,17 @@
                 session.off("changeScrollTop", hide);
                 session.off("changeScrollLeft", hide);
             }
+            if (attached && editor && editor.commands) {
+                if (editor.commands.off) {
+                    editor.commands.off("afterExec", onAfterExec);
+                } else if (editor.commands.removeListener) {
+                    editor.commands.removeListener("afterExec", onAfterExec);
+                }
+            }
             if (attached && editor && editor.container && editor.container.removeEventListener) {
-                editor.container.removeEventListener("mousedown", hide);
-                editor.container.removeEventListener("touchstart", hide);
-                editor.container.removeEventListener("wheel", hide);
+                editor.container.removeEventListener("mousedown", hideFromEditorPointer);
+                editor.container.removeEventListener("touchstart", hideFromEditorPointer);
+                editor.container.removeEventListener("wheel", hideFromEditorPointer);
             }
             attached = false;
         }

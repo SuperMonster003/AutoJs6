@@ -263,6 +263,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         onSaveAsSucceeded = { dest ->
             uri = Uri.fromFile(dest)
             name = getNameWithoutExtension(dest.path)
+            syncEditorDocumentPath()
             editor.markTextAsSaved()
             saveStickyDirty = false
             mHadDirectEditSinceSave = false
@@ -304,6 +305,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
     var uri: Uri? = null
+
+    private fun currentDocumentPathOrName(): String? {
+        return uri?.path?.takeIf { it.isNotBlank() }
+            ?: uri?.toString()?.takeIf { it.isNotBlank() }
+            ?: _name?.takeIf { it.isNotBlank() }
+    }
+
+    private fun syncEditorDocumentPath() {
+        editor.setDocumentPath(currentDocumentPathOrName())
+    }
 
     var scriptExecutionId = ScriptExecution.NO_ID
         private set
@@ -526,6 +537,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             key(R.string.key_editor_theme_mode),
                 -> post { applyCurrentEditorThemePreference() }
             key(R.string.key_editor_engine) -> post { applyCurrentEditorEnginePreference() }
+            key(R.string.key_ace_lsp_enabled),
+            key(R.string.key_ace_lsp_file_types),
+                -> post { (editor as? AceScriptEditorEngine)?.refreshLsp() }
         }
     }
 
@@ -723,6 +737,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 name = getNameWithoutExtension(it)
             }
         }
+        syncEditorDocumentPath()
 
         return when {
             content != null -> Observable.just(content)
@@ -1732,6 +1747,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         applyCurrentEditorThemePreference()
         editor.restoreStateSnapshot(snapshot)
         editor.setReadOnly(mReadOnly)
+        syncEditorDocumentPath()
 
         oldEditor.destroy()
         if (persistPreference) {
@@ -2865,6 +2881,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (handleAceShortcutClick(completions[pos])) {
             return
         }
+        if (handleAceSymbolClick(completions[pos])) {
+            return
+        }
         mCommandDispatcher.onCompletionClick(completions, pos)
     }
 
@@ -2922,6 +2941,19 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return AceShortcutPanel.actionOf(completion)
             ?.let { executeAceShortcutAction(it, record = false) }
             ?: false
+    }
+
+    private fun handleAceSymbolClick(completion: CodeCompletion): Boolean {
+        if (editor.engineType != EditorEngineType.ACE || completion.url != null) {
+            return false
+        }
+        if (AceShortcutPanel.commandOf(completion) != null) {
+            return false
+        }
+        val insertText = completion.insertText.takeIf { it.isNotEmpty() } ?: return false
+        val aceEditor = editor as? AceScriptEditorEngine ?: return false
+        aceEditor.insertShortcutText(insertText)
+        return true
     }
 
     private fun handleAceShortcutLongClick(completion: CodeCompletion): Boolean {

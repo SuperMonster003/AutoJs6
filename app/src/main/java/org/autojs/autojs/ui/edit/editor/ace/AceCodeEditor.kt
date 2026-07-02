@@ -263,6 +263,10 @@ class AceCodeEditor @JvmOverloads constructor(
             lspRootUri = lspSnapshot.rootUri,
             lspDocumentUri = lspSnapshot.documentUri,
             lspFallback = lspSnapshot.fallback,
+            lspCompletionProvider = lspSnapshot.completionProvider,
+            lspHoverProvider = lspSnapshot.hoverProvider,
+            lspDiagnosticProvider = lspSnapshot.diagnosticProvider,
+            lspSignatureProvider = lspSnapshot.signatureProvider,
             lspServerAvailable = lspSnapshot.serverAvailable,
             lspStartSupported = lspSnapshot.startSupported,
             lspSessionRevision = lspSnapshot.sessionRevision,
@@ -348,6 +352,17 @@ class AceCodeEditor @JvmOverloads constructor(
 
     fun isUserTouching(): Boolean = userTouching
 
+    fun setDocumentPath(path: String?) {
+        lspServerManager.setDocumentPath(path)
+        refreshLsp()
+    }
+
+    fun refreshLsp() {
+        if (isReady) {
+            invokeAce("refreshLsp")
+        }
+    }
+
     fun setText(text: String?) {
         resetTextMirror(text.orEmpty())
         dirty = false
@@ -381,6 +396,13 @@ class AceCodeEditor @JvmOverloads constructor(
             return
         }
         invokeAce("insert", quote(text.orEmpty()))
+    }
+
+    fun insertShortcutText(text: String?) {
+        if (!canMutateText("insertShortcutText")) {
+            return
+        }
+        invokeAce("insertShortcutText", quote(text.orEmpty()))
     }
 
     fun insertTab() {

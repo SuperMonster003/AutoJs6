@@ -152,6 +152,14 @@ body.ace-ready #editor {
     left: 0 !important;
 }
 
+.ace_editor.ace_autocomplete {
+    max-width: calc(100vw - 16px);
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
 .autojs6_debug_line {
     position: absolute;
     z-index: 5;
@@ -214,7 +222,8 @@ body.autojs6-host-selection-action-mode .ace_mobile-menu {
     z-index: 31;
     box-sizing: border-box;
     max-width: 560px;
-    overflow: hidden;
+    max-height: 45vh;
+    overflow: auto;
     padding: 7px 10px;
     border: 1px solid rgba(31, 41, 55, 0.2);
     border-radius: 2px;
@@ -224,9 +233,25 @@ body.autojs6-host-selection-action-mode .ace_mobile-menu {
     font-family: var(--autojs6-editor-font-family);
     font-size: 13px;
     line-height: 1.35;
-    pointer-events: none;
-    -webkit-user-select: none;
-    user-select: none;
+    pointer-events: auto;
+    touch-action: pan-x pan-y;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+.autojs6_signature_tooltip_compact {
+    max-height: min(32vh, 168px);
+}
+
+.ace_doc-tooltip {
+    box-sizing: border-box;
+    max-width: calc(100vw - 16px);
+    max-height: 45vh;
+    overflow: auto;
+    white-space: pre;
+    -webkit-overflow-scrolling: touch;
 }
 
 @media (max-width: 496px) {
@@ -260,6 +285,7 @@ body.autojs6-host-selection-action-mode .ace_mobile-menu {
 
 .autojs6_signature_tooltip_signature {
     white-space: nowrap;
+    overflow-wrap: normal;
 }
 
 .autojs6_signature_tooltip_active {

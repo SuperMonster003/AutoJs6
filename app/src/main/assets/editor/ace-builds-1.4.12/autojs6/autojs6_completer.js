@@ -2,6 +2,8 @@
     "use strict";
 
     var IDENTIFIER_REGEX = /[a-zA-Z_0-9$]/;
+    var IDENTIFIER_CHAIN_REGEX = /[A-Za-z0-9_$.]/;
+    var CALL_SNIPPET_VALUE_REGEX = /^[A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)?$/;
 
     function nameOf(item) {
         return item && (item.name || item.key || item.value);
@@ -191,19 +193,81 @@
         ]
     };
 
+    var ECMASCRIPT_CONSTRUCTORS = [
+        "Object", "Array", "String", "Number", "Boolean", "Date", "RegExp", "Promise", "Function", "Error"
+    ];
+
+    function isFunctionItem(item) {
+        return !!item && (item.type === "function" || item.kind === "function");
+    }
+
+    function parameterTextFromSignature(signature, name) {
+        signature = String(signature || "");
+        name = String(name || "");
+        var openIndex = -1;
+        if (name) {
+            openIndex = signature.indexOf(name + "(");
+            if (openIndex >= 0) {
+                openIndex += name.length;
+            }
+        }
+        if (openIndex < 0) {
+            openIndex = signature.indexOf("(");
+        }
+        if (openIndex < 0) {
+            return null;
+        }
+        var depth = 0;
+        for (var i = openIndex; i < signature.length; i++) {
+            var ch = signature.charAt(i);
+            if (ch === "(") {
+                depth++;
+            } else if (ch === ")") {
+                depth--;
+                if (depth === 0) {
+                    return signature.substring(openIndex + 1, i);
+                }
+            }
+        }
+        return null;
+    }
+
+    function functionHasParameters(item, value) {
+        var signature = item && (item.signature || item.doc) || "";
+        var parameters = parameterTextFromSignature(signature, nameOf(item) || value);
+        return parameters === null || parameters.trim().length > 0;
+    }
+
+    function functionSnippetFor(value, item) {
+        value = String(value || "");
+        if (!CALL_SNIPPET_VALUE_REGEX.test(value)) {
+            return "";
+        }
+        return value + (functionHasParameters(item, value) ? "(${1})" : "()");
+    }
+
     function toCompletion(item, score, options) {
         var name = nameOf(item);
+        var value = options && options.value || item.value || name;
         var completion = {
             caption: options && options.caption || item.caption || name,
-            value: options && options.value || item.value || name,
+            value: value,
             meta: options && options.meta || item.meta || item.type || "autojs",
             score: score,
             docText: item.doc || item.summary || item.signature || ""
         };
+        if (options && options.memberContext) {
+            completion.autojs6MemberContext = options.memberContext;
+        }
         if (item.snippet) {
             completion.snippet = item.snippet;
-        } else if (item.value && item.value.indexOf("${") >= 0) {
-            completion.snippet = item.value;
+        } else if (value && String(value).indexOf("${") >= 0) {
+            completion.snippet = value;
+        } else if (isFunctionItem(item)) {
+            var snippet = functionSnippetFor(value, item);
+            if (snippet) {
+                completion.snippet = snippet;
+            }
         }
         return completion;
     }
@@ -215,6 +279,8 @@
             type: property.type || property.kind || (property.variable ? "variable" : "function"),
             doc: property.doc || property.summary || "",
             signature: property.signature,
+            caption: property.caption,
+            qualifiedCaption: property.qualifiedCaption,
             meta: property.meta
         };
     }
@@ -223,6 +289,7 @@
         var normalized = {
             globals: [],
             modules: Object.create(null),
+            aliases: Object.create(null),
             snippets: indices && indices.snippets || []
         };
 
@@ -244,7 +311,7 @@
                     }
                 });
             });
-            return appendEcmascriptBuiltins(normalized);
+            return finalizeSource(normalized);
         }
 
         indices = indices || {};
@@ -261,7 +328,7 @@
                 }
             });
         }
-        return appendEcmascriptBuiltins(normalized);
+        return finalizeSource(normalized);
     }
 
     function appendUniqueByName(items, additions, normalizer) {
@@ -281,10 +348,132 @@
             }
             appendUniqueByName(source.modules[moduleName], ECMASCRIPT_MODULES[moduleName], normalizeProperty);
         });
+        appendConstructorPrototypeMembers(source);
         return source;
     }
 
+    function appendAutoJs6RuntimeGlobals(source) {
+        appendUniqueByName(source.globals, [{
+            name: "RootMode",
+            type: "class",
+            doc: "class RootMode extends org.autojs.autojs.util.RootUtils.RootMode;\nGlobal AutoJs6 root mode class.",
+            signature: "RootMode: typeof org.autojs.autojs.util.RootUtils.RootMode;"
+        }], normalizeProperty);
+        return source;
+    }
+
+    function appendConstructorPrototypeMembers(source) {
+        ECMASCRIPT_CONSTRUCTORS.forEach(function(constructorName) {
+            var prototypeModule = constructorName + ".prototype";
+            if (!Array.isArray(source.modules[prototypeModule])) {
+                return;
+            }
+            if (!Array.isArray(source.modules[constructorName])) {
+                source.modules[constructorName] = [];
+            }
+            appendUniqueByName(source.modules[constructorName], [{
+                name: "prototype",
+                value: "prototype",
+                type: "property",
+                meta: constructorName,
+                caption: prototypeModule,
+                qualifiedCaption: prototypeModule,
+                doc: prototypeModule + ": " + constructorName + ";\nThe shared prototype object for " + constructorName + " instances."
+            }], normalizeProperty);
+        });
+    }
+
+    function escapeRegExp(value) {
+        return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function lowerFirst(value) {
+        value = String(value || "");
+        return value ? value.charAt(0).toLowerCase() + value.slice(1) : "";
+    }
+
+    function typeNameFromProperty(item) {
+        var name = nameOf(item);
+        var signature = String(item && (item.signature || item.doc) || "");
+        if (!name || !signature) {
+            return "";
+        }
+        var match = RegExp("^\\s*" + escapeRegExp(name) + "\\??\\s*:\\s*([^;\\n]+)").exec(signature);
+        return match ? match[1].trim() : "";
+    }
+
+    function candidateModuleNamesFromType(typeName) {
+        typeName = String(typeName || "")
+            .replace(/\s*\[\]\s*$/, "")
+            .replace(/<.*$/, "")
+            .replace(/\s+/g, "")
+            .trim();
+        if (!typeName) {
+            return [];
+        }
+        var last = typeName.split(".").pop();
+        var candidates = [typeName, last, lowerFirst(last)];
+        if (/^(Internal|AutoJs6)\./.test(typeName)) {
+            candidates.unshift(lowerFirst(last));
+        }
+        return candidates;
+    }
+
+    function moduleNameForType(source, typeText) {
+        var parts = String(typeText || "").split(/[|&]/);
+        for (var i = 0; i < parts.length; i++) {
+            var candidates = candidateModuleNamesFromType(parts[i]);
+            for (var j = 0; j < candidates.length; j++) {
+                if (source.modules && Object.prototype.hasOwnProperty.call(source.modules, candidates[j])) {
+                    return candidates[j];
+                }
+            }
+        }
+        return "";
+    }
+
+    function buildModuleAliases(source) {
+        source.aliases = source.aliases || Object.create(null);
+        Object.keys(source.modules || {}).forEach(function(moduleName) {
+            var members = source.modules[moduleName];
+            if (!Array.isArray(members)) {
+                return;
+            }
+            members.forEach(function(member) {
+                if (!member || member.type !== "variable") {
+                    return;
+                }
+                var target = moduleNameForType(source, typeNameFromProperty(member));
+                if (target) {
+                    source.aliases[moduleName + "." + nameOf(member)] = target;
+                }
+            });
+        });
+        return source;
+    }
+
+    function finalizeSource(source) {
+        appendEcmascriptBuiltins(source);
+        appendAutoJs6RuntimeGlobals(source);
+        buildModuleAliases(source);
+        return source;
+    }
+
+    function resolveModuleName(source, moduleName) {
+        if (!source || !moduleName) {
+            return moduleName;
+        }
+        if (source.modules && Object.prototype.hasOwnProperty.call(source.modules, moduleName)) {
+            return moduleName;
+        }
+        if (source.aliases && Object.prototype.hasOwnProperty.call(source.aliases, moduleName)) {
+            return source.aliases[moduleName];
+        }
+        return moduleName;
+    }
+
     function membersForModule(source, moduleName) {
+        moduleName = resolveModuleName(source, moduleName);
         if (!source || !source.modules || !Object.prototype.hasOwnProperty.call(source.modules, moduleName)) {
             return null;
         }
@@ -292,16 +481,62 @@
         return Array.isArray(members) ? members : null;
     }
 
+    function literalMemberContextFromLine(line) {
+        var suffix = "\\.([A-Za-z_$][A-Za-z0-9_$]*)?$";
+        var match = RegExp("((?:\\\"(?:\\\\.|[^\\\"\\\\])*\\\"|'(?:\\\\.|[^'\\\\])*'|`(?:\\\\.|[^`\\\\])*`))" + suffix).exec(line);
+        if (match) {
+            return {
+                moduleName: "String.prototype",
+                captionModuleName: match[1],
+                memberPrefix: match[2] || ""
+            };
+        }
+        match = RegExp("(\\[[^\\]\\r\\n]*\\])" + suffix).exec(line);
+        if (match) {
+            return {
+                moduleName: "Array.prototype",
+                captionModuleName: match[1],
+                memberPrefix: match[2] || ""
+            };
+        }
+        match = RegExp("(\\(\\s*[+-]?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?\\s*\\))" + suffix).exec(line);
+        if (match) {
+            return {
+                moduleName: "Number.prototype",
+                captionModuleName: match[1],
+                memberPrefix: match[2] || ""
+            };
+        }
+        match = RegExp("(\\(\\s*(?:true|false)\\s*\\))" + suffix).exec(line);
+        if (match) {
+            return {
+                moduleName: "Boolean.prototype",
+                captionModuleName: match[1],
+                memberPrefix: match[2] || ""
+            };
+        }
+        match = RegExp("(\\(\\s*\\{[^()\\r\\n]*\\}\\s*\\))" + suffix).exec(line);
+        if (match) {
+            return {
+                moduleName: "Object.prototype",
+                captionModuleName: match[1],
+                memberPrefix: match[2] || ""
+            };
+        }
+        return null;
+    }
+
     function findMemberContext(session, pos) {
         var line = session.getLine(pos.row).substring(0, pos.column);
         var match = /((?:[A-Za-z_$][A-Za-z0-9_$]*\.)*[A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)?$/.exec(line);
-        if (!match) {
-            return null;
+        if (match) {
+            return {
+                moduleName: match[1],
+                captionModuleName: match[1],
+                memberPrefix: match[2] || ""
+            };
         }
-        return {
-            moduleName: match[1],
-            memberPrefix: match[2] || ""
-        };
+        return literalMemberContextFromLine(line);
     }
 
     function identifierAt(line, column) {
@@ -398,6 +633,11 @@
     }
 
     function retrievePrecedingIdentifier(text, pos) {
+        text = String(text || "");
+        pos = Math.max(0, Math.min(Number(pos) || 0, text.length));
+        if (pos > 0 && text.charAt(pos - 1) === ".") {
+            return "";
+        }
         var buf = [];
         for (var i = pos - 1; i >= 0; i--) {
             if (IDENTIFIER_REGEX.test(text[i]) || (i === pos - 1 && text[i] === ".")) {
@@ -407,6 +647,118 @@
             }
         }
         return buf.reverse().join("");
+    }
+
+    function sessionOf(editor) {
+        return editor && (editor.session || (typeof editor.getSession === "function" ? editor.getSession() : null)) || null;
+    }
+
+    function cursorOf(editor) {
+        return normalizePosition(editor && editor.getCursorPosition && editor.getCursorPosition());
+    }
+
+    function moveCursorTo(editor, row, column) {
+        row = Math.max(0, Number(row) || 0);
+        column = Math.max(0, Number(column) || 0);
+        if (editor && typeof editor.moveCursorTo === "function") {
+            editor.moveCursorTo(row, column);
+            return;
+        }
+        if (editor && editor.selection && typeof editor.selection.moveToPosition === "function") {
+            editor.selection.moveToPosition({ row: row, column: column });
+            return;
+        }
+        if (editor && editor.selection && typeof editor.selection.moveCursorTo === "function") {
+            editor.selection.moveCursorTo(row, column);
+        }
+    }
+
+    function stripSnippetMarkers(snippet) {
+        return String(snippet || "")
+            .replace(/\$\{\d+:([^}]*)\}/g, "$1")
+            .replace(/\$\{\d+\}/g, "")
+            .replace(/\$\d+/g, "");
+    }
+
+    function insertSnippet(editor, snippet) {
+        var snippetManager = null;
+        try {
+            snippetManager = global.ace &&
+                typeof global.ace.require === "function" &&
+                global.ace.require("ace/snippets").snippetManager;
+        } catch (ignore) {
+            snippetManager = null;
+        }
+        if (snippetManager && typeof snippetManager.insertSnippet === "function") {
+            snippetManager.insertSnippet(editor, snippet);
+            return;
+        }
+        if (editor && typeof editor.execCommand === "function") {
+            editor.execCommand("insertstring", stripSnippetMarkers(snippet));
+        } else if (editor && typeof editor.insert === "function") {
+            editor.insert(stripSnippetMarkers(snippet));
+        }
+    }
+
+    function insertText(editor, text) {
+        text = String(text || "");
+        if (editor && typeof editor.execCommand === "function") {
+            editor.execCommand("insertstring", text);
+            return;
+        }
+        if (editor && typeof editor.insert === "function") {
+            editor.insert(text);
+        }
+    }
+
+    function completionText(completion) {
+        return String(completion && (completion.value || completion.caption || completion.name) || "");
+    }
+
+    function replacementRangeForCompletion(editor) {
+        var session = sessionOf(editor);
+        var pos = cursorOf(editor);
+        var replaceLength = 0;
+        if (session && typeof session.getLine === "function") {
+            var context = findMemberContext(session, pos);
+            if (context) {
+                replaceLength = String(context.memberPrefix || "").length;
+            } else {
+                var line = String(session.getLine(pos.row) || "");
+                var prefix = retrievePrecedingIdentifier(line, pos.column);
+                var dotIndex = prefix.lastIndexOf(".");
+                replaceLength = dotIndex >= 0 ? prefix.length - dotIndex - 1 : prefix.length;
+            }
+        }
+        return {
+            start: {
+                row: pos.row,
+                column: Math.max(0, pos.column - replaceLength)
+            },
+            end: {
+                row: pos.row,
+                column: pos.column
+            }
+        };
+    }
+
+    function replaceCompletionRange(editor, completion) {
+        var session = sessionOf(editor);
+        var range = replacementRangeForCompletion(editor);
+        var text = completionText(completion);
+        if (session && typeof session.replace === "function") {
+            session.replace(range, "");
+            moveCursorTo(editor, range.start.row, range.start.column);
+        }
+        if (completion && completion.snippet) {
+            insertSnippet(editor, completion.snippet);
+        } else {
+            insertText(editor, text);
+        }
+        if (editor && editor.renderer && typeof editor.renderer.scrollCursorIntoView === "function") {
+            editor.renderer.scrollCursorIntoView();
+        }
+        return true;
     }
 
     function collect(items, prefix, score, mapper) {
@@ -432,6 +784,300 @@
         });
     }
 
+    function globalNames(source) {
+        var seen = Object.create(null);
+        var names = [];
+
+        function add(name) {
+            name = String(name || "");
+            if (!name || seen[name]) {
+                return;
+            }
+            seen[name] = true;
+            names.push(name);
+        }
+
+        (source.globals || []).forEach(function(item) {
+            add(nameOf(item));
+        });
+        Object.keys(source.modules || {}).forEach(function(moduleName) {
+            if (moduleName.indexOf(".") < 0) {
+                add(moduleName);
+            }
+        });
+        return names;
+    }
+
+    function normalizePosition(pos) {
+        pos = pos || {};
+        return {
+            row: Math.max(0, Number(pos.row) || 0),
+            column: Math.max(0, Number(pos.column) || 0)
+        };
+    }
+
+    function positionToIndex(session, pos) {
+        if (session && session.doc && typeof session.doc.positionToIndex === "function") {
+            return session.doc.positionToIndex(pos, 0);
+        }
+        var index = 0;
+        for (var row = 0; row < pos.row; row++) {
+            index += String(session.getLine(row) || "").length + 1;
+        }
+        return index + pos.column;
+    }
+
+    function textFromSession(session) {
+        if (!session) {
+            return "";
+        }
+        if (typeof session.getValue === "function") {
+            return String(session.getValue() || "");
+        }
+        var lines = [];
+        var length = typeof session.getLength === "function" ? session.getLength() : 1;
+        for (var row = 0; row < length; row++) {
+            lines.push(session.getLine(row) || "");
+        }
+        return lines.join("\n");
+    }
+
+    function readCalleeBefore(text, openIndex) {
+        var end = openIndex - 1;
+        while (end >= 0 && /\s/.test(text.charAt(end))) {
+            end--;
+        }
+        var start = end;
+        while (start >= 0 && IDENTIFIER_CHAIN_REGEX.test(text.charAt(start))) {
+            start--;
+        }
+        return text.substring(start + 1, end + 1).replace(/^\.+|\.+$/g, "");
+    }
+
+    function findOpenParen(text, offset) {
+        var depth = 0;
+        var quote = "";
+        var escaped = false;
+        for (var i = Math.max(0, offset - 1); i >= 0; i--) {
+            var ch = text.charAt(i);
+            if (quote) {
+                if (escaped) {
+                    escaped = false;
+                } else if (ch === "\\") {
+                    escaped = true;
+                } else if (ch === quote) {
+                    quote = "";
+                }
+                continue;
+            }
+            if (ch === "\"" || ch === "'" || ch === "`") {
+                quote = ch;
+                continue;
+            }
+            if (ch === ")") {
+                depth++;
+                continue;
+            }
+            if (ch === "(") {
+                if (depth === 0) {
+                    return i;
+                }
+                depth--;
+            }
+        }
+        return -1;
+    }
+
+    function countActiveParameter(text, start, end) {
+        var depth = 0;
+        var quote = "";
+        var escaped = false;
+        var count = 0;
+        for (var i = start; i < end; i++) {
+            var ch = text.charAt(i);
+            if (quote) {
+                if (escaped) {
+                    escaped = false;
+                } else if (ch === "\\") {
+                    escaped = true;
+                } else if (ch === quote) {
+                    quote = "";
+                }
+                continue;
+            }
+            if (ch === "\"" || ch === "'" || ch === "`") {
+                quote = ch;
+                continue;
+            }
+            if (ch === "(" || ch === "[" || ch === "{" || ch === "<") {
+                depth++;
+                continue;
+            }
+            if (ch === ")" || ch === "]" || ch === "}" || ch === ">") {
+                depth = Math.max(0, depth - 1);
+                continue;
+            }
+            if (ch === "," && depth === 0) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    function findMatchingCloseParen(text, openIndex) {
+        var depth = 0;
+        var quote = "";
+        var escaped = false;
+        for (var i = openIndex; i < text.length; i++) {
+            var ch = text.charAt(i);
+            if (quote) {
+                if (escaped) {
+                    escaped = false;
+                } else if (ch === "\\") {
+                    escaped = true;
+                } else if (ch === quote) {
+                    quote = "";
+                }
+                continue;
+            }
+            if (ch === "\"" || ch === "'" || ch === "`") {
+                quote = ch;
+                continue;
+            }
+            if (ch === "(") {
+                depth++;
+                continue;
+            }
+            if (ch === ")") {
+                depth--;
+                if (depth === 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    function splitTopLevelCommaList(value) {
+        value = String(value || "");
+        if (!value.trim()) {
+            return [];
+        }
+        var result = [];
+        var start = 0;
+        var depth = 0;
+        var quote = "";
+        var escaped = false;
+        for (var i = 0; i < value.length; i++) {
+            var ch = value.charAt(i);
+            if (quote) {
+                if (escaped) {
+                    escaped = false;
+                } else if (ch === "\\") {
+                    escaped = true;
+                } else if (ch === quote) {
+                    quote = "";
+                }
+                continue;
+            }
+            if (ch === "\"" || ch === "'" || ch === "`") {
+                quote = ch;
+                continue;
+            }
+            if (ch === "(" || ch === "[" || ch === "{" || ch === "<") {
+                depth++;
+                continue;
+            }
+            if (ch === ")" || ch === "]" || ch === "}" || ch === ">") {
+                depth = Math.max(0, depth - 1);
+                continue;
+            }
+            if (ch === "," && depth === 0) {
+                result.push(value.substring(start, i).trim());
+                start = i + 1;
+            }
+        }
+        result.push(value.substring(start).trim());
+        return result.filter(function(item) { return !!item; });
+    }
+
+    function parseSignature(signature) {
+        signature = String(signature || "").replace(/;\s*$/, "");
+        var openIndex = signature.indexOf("(");
+        if (openIndex < 0) {
+            return null;
+        }
+        var closeIndex = findMatchingCloseParen(signature, openIndex);
+        if (closeIndex < 0) {
+            return null;
+        }
+        var suffix = signature.substring(closeIndex + 1);
+        var returnMatch = /^\s*:\s*(.+)$/.exec(suffix);
+        return {
+            signature: signature,
+            parameters: splitTopLevelCommaList(signature.substring(openIndex + 1, closeIndex)),
+            returnType: returnMatch ? returnMatch[1].trim() : ""
+        };
+    }
+
+    function findSignatureItem(source, callee) {
+        callee = String(callee || "").replace(/^\.+|\.+$/g, "");
+        if (!callee) {
+            return null;
+        }
+        var dot = callee.lastIndexOf(".");
+        if (dot > 0) {
+            var moduleName = callee.substring(0, dot);
+            var memberName = callee.substring(dot + 1);
+            var members = membersForContext(source, moduleName);
+            var member = members && findByName(members, memberName);
+            if (member) {
+                return {
+                    item: member,
+                    caption: moduleName + "." + memberName
+                };
+            }
+        }
+        var globalItem = findByName(source.globals, callee);
+        return globalItem ? {
+            item: globalItem,
+            caption: callee
+        } : null;
+    }
+
+    function findSignatureHelp(source, session, pos) {
+        if (!session) {
+            return null;
+        }
+        pos = normalizePosition(pos);
+        var text = textFromSession(session);
+        var offset = positionToIndex(session, pos);
+        offset = Math.max(0, Math.min(offset, text.length));
+        var openIndex = findOpenParen(text, offset);
+        if (openIndex < 0) {
+            return null;
+        }
+        var callee = readCalleeBefore(text, openIndex);
+        var resolved = findSignatureItem(source, callee);
+        if (!resolved || !resolved.item || !resolved.item.signature) {
+            return null;
+        }
+        var parsed = parseSignature(resolved.item.signature);
+        if (!parsed) {
+            return null;
+        }
+        var activeParameter = countActiveParameter(text, openIndex + 1, offset);
+        return {
+            caption: resolved.caption,
+            callee: callee,
+            signature: parsed.signature,
+            parameters: parsed.parameters,
+            activeParameter: Math.min(activeParameter, Math.max(0, parsed.parameters.length - 1)),
+            returnType: parsed.returnType,
+            docText: resolved.item.doc || resolved.item.summary || ""
+        };
+    }
+
     function createCompleter(indices) {
         var source = normalizeIndices(indices);
         return {
@@ -441,17 +1087,16 @@
                 var memberContext = findMemberContext(session, pos);
                 var members = memberContext && membersForContext(source, memberContext.moduleName);
                 if (members) {
-                    var replaceWithQualifiedName = (prefix || "").indexOf(".") >= 0;
                     callback(null, dedupe(collect(
                         members,
                         memberContext.memberPrefix,
                         1000,
                         function(item, name) {
-                            var qualifiedName = memberContext.moduleName + "." + name;
                             return toCompletion(item, 1000, {
-                                caption: replaceWithQualifiedName ? qualifiedName : name,
-                                value: replaceWithQualifiedName ? qualifiedName : name,
-                                meta: memberContext.moduleName
+                                caption: name,
+                                value: name,
+                                meta: memberContext.moduleName,
+                                memberContext: memberContext.moduleName
                             });
                         }
                     )));
@@ -478,6 +1123,22 @@
 
             getHover: function(session, pos) {
                 return findHover(source, session, pos);
+            },
+
+            getSignatureHelp: function(session, pos) {
+                return findSignatureHelp(source, session, pos);
+            },
+
+            insertMatch: function(editor, completion) {
+                return replaceCompletionRange(editor, completion);
+            },
+
+            getSource: function() {
+                return source;
+            },
+
+            getGlobalNames: function() {
+                return globalNames(source);
             }
         };
     }

@@ -121,6 +121,13 @@
             app:summary="@string/summary_ace_lsp_enabled"
             app:longClickPrompt="@string/description_ace_lsp_enabled_preference" />
 
+        <org.autojs.autojs.ui.settings.AceLspFileTypesPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_ace_lsp_file_types"
+            app:title="@string/text_ace_lsp_file_types"
+            app:summary="@string/summary_ace_lsp_file_types"
+            app:longClickPrompt="@string/description_ace_lsp_file_types_preference" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
