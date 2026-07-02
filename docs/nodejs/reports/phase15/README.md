@@ -59,6 +59,7 @@ Provider promotion gates:
 - `:app:verifyNodePhase15NotificationPromotion`
 - `:app:verifyNodePhase15SettingsPowerPromotion`
 - `:app:verifyNodePhase15RecorderPromotion`
+- `:app:installAndRunNodeV13PackagedRecorderSmoke`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -172,3 +173,11 @@ promotion contract plus the P15-18 settings/power dependency gate. It keeps
 disclosure/stop action, scoped session and temporary output cleanup,
 crash/task-removal cleanup, packaged start/stop stress, Safe downgrade,
 raw-object security coverage, and task/device/media docs sync land.
+
+`P15-20` currently reports `partial`: it imports the P14 packaged
+recorder/media stress contract plus the P15-19 recorder dependency gate. It
+keeps packaged recorder start/stop unpromoted until positive packaged
+start/stop, foreground microphone disclosure, deterministic stop, task
+removal/relaunch/crash cleanup, quota and temporary output cleanup, packaged
+denial, Safe downgrade, raw-object security coverage, and task/device/media
+docs sync archives land.

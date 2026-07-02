@@ -466,9 +466,24 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-20: Add packaged recorder and media stress evidence.
   - Source backlog: `P14-25`.
-  - Gate: proposed `:app:installAndRunNodeV13PackagedRecorderSmoke`.
+  - Gate: `:app:installAndRunNodeV13PackagedRecorderSmoke`.
   - Acceptance: packaged start/stop, relaunch, task removal, quota, denial,
     Safe downgrade, and cleanup are archived.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/packaged-recorder-smoke-plan.json`
+    - `docs/nodejs/phase15/PHASE15_PACKAGED_RECORDER_SMOKE.md`
+    - `docs/nodejs/reports/phase15/P15_20_PACKAGED_RECORDER_SMOKE.md`
+    - `tools/nodejs/phase15/verify-node-phase15-packaged-recorder-smoke.js`
+    - `build/reports/nodejs/phase15-packaged-recorder-smoke.json`
+    - `build/reports/nodejs/phase15-packaged-recorder-smoke.md`
+  - Still open: `packaged_recorder_start_stop_positive_archive`,
+    `packaged_recorder_task_removal_relaunch_archive`,
+    `packaged_recorder_quota_temp_cleanup_archive`,
+    `packaged_recorder_denial_without_capability_archive`,
+    `packaged_recorder_foreground_disclosure_stop_archive`,
+    `packaged_recorder_safe_downgrade_archive`,
+    `packaged_recorder_raw_object_denial_security_archive`, and
+    `phase15_task_device_media_doc_sync`.
 
 - [ ] P15-21: Decide scoped MediaStore and playback promotion boundary.
   - Source backlog: `P14-26`.

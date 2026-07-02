@@ -3428,6 +3428,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:verifyNodePhase15NotificationPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15SettingsPowerPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase15RecorderPromotion
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedRecorderSmoke
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3565,3 +3566,10 @@ disclosure/stop action, scoped session and temporary output cleanup,
 crash/task-removal cleanup, packaged start/stop stress, Safe downgrade,
 raw-object security coverage, and task/device/media docs sync evidence are
 attached.
+`installAndRunNodeV13PackagedRecorderSmoke` writes
+`phase15-packaged-recorder-smoke.json` plus `.md`, imports the P14-25 packaged
+recorder/media stress contract and the P15-19 recorder dependency gate. It
+reports `partial` until positive packaged start/stop, foreground microphone
+disclosure, deterministic stop, task removal/relaunch/crash cleanup, quota and
+temporary output cleanup, packaged denial, Safe downgrade, raw-object security
+coverage, and task/device/media docs sync evidence are attached.
