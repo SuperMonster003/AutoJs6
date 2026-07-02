@@ -1,0 +1,221 @@
+{
+  "schema": "autojs6-node-phase15-notification-promotion-plan-v1",
+  "phase": "Phase 15: Node v1.3 Provider Promotion",
+  "task": "P15-17",
+  "title": "Notification ownership and foreground disclosure promotion",
+  "status": "partial",
+  "promotionState": "provider_poc_not_promoted",
+  "providerId": "notifications",
+  "sourceBacklogTasks": [
+    "P14-22"
+  ],
+  "upstreamGates": [
+    ":app:installAndRunNodeV13PackagedBroadcastSmoke",
+    ":app:verifyNodePhase14NotificationOwnership"
+  ],
+  "surface": "pro.tasks_device_media",
+  "minimumPromotionPolicy": "Notification promotion requires owned live post/cancel evidence, packaged post/cancel/cancelAll archives, foreground disclosure, stop action, Android permission matrix, rollback cleanup, Safe downgrade, advanced notification boundary decisions, security, TypeScript declarations, docs, and raw-object denial coverage before notification authority can be marked promoted.",
+  "ownershipContract": {
+    "providerName": "notifications",
+    "capability": "notifications",
+    "settingsCapability": "notifications.settings",
+    "androidPermission": "android.permission.POST_NOTIFICATIONS",
+    "resourceType": "NOTIFICATION",
+    "liveMethods": [
+      "notify",
+      "cancel",
+      "cancelAll",
+      "getPermissionStatus",
+      "openSettings"
+    ],
+    "ownedIdPolicy": "provider-owned notification ids are ResourceRegistry backed; cancel only closes active owned records and unknown ids are no-op",
+    "updatePolicy": "notify with an existing owned id releases the old record before registering the replacement",
+    "destroyPolicy": "provider destroy closes owned notification handles and cancels active records",
+    "maxActiveNotifications": 32,
+    "permissionDeniedCode": "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+    "capabilityDeniedCode": "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED",
+    "currentLivePostCancelEvidence": true,
+    "currentPermissionDenialEvidence": true,
+    "foregroundDisclosureStopActionReady": false,
+    "packagedPostCancelReady": false,
+    "runtimeAuthorityChanged": false
+  },
+  "foregroundDisclosureContract": {
+    "requiredBeforePackagedPromotion": true,
+    "appliesTo": [
+      "packaged ongoing notifications",
+      "scheduled/background Node tasks that rely on notification visibility",
+      "future foreground-service disclosure handoff",
+      "notification stop action for user-owned cancellation"
+    ],
+    "requiredFields": [
+      "title",
+      "text",
+      "channel",
+      "ongoing",
+      "owner",
+      "taskId",
+      "packageIdentity",
+      "stopAction",
+      "rollbackBehavior"
+    ],
+    "stopActionRequired": true,
+    "foregroundNotificationRequired": true,
+    "safeDowngradeAction": "cancel_owned_notifications_and_disable_future_packaged_disclosure_metadata"
+  },
+  "advancedNotificationBoundary": {
+    "stableDeniedOrFutureDecisionRequired": true,
+    "blockedFeatures": [
+      "actions",
+      "listener callbacks",
+      "notification groups",
+      "custom styles",
+      "inline reply",
+      "remote input",
+      "RemoteViews",
+      "notification listener handles",
+      "Do Not Disturb mutation"
+    ],
+    "rawObjectsDenied": [
+      "Notification",
+      "NotificationCompat.Builder",
+      "NotificationManager",
+      "NotificationChannel",
+      "PendingIntent",
+      "RemoteViews",
+      "Intent",
+      "Context",
+      "listener handle",
+      "StatusBarNotification",
+      "Java object"
+    ]
+  },
+  "evidenceMatrix": [
+    {
+      "id": "live_post_cancel_owned_resource",
+      "status": "imported",
+      "source": "NodeNotificationsBridgeInstrumentationTest androidProviderPostsOrReportsNotificationPermissionAndTracksOwnedResource",
+      "requiredEvidence": "Live provider posts or reports POST_NOTIFICATIONS denial, registers a NOTIFICATION resource, cancel removes it, and provider destroy closes active owned records."
+    },
+    {
+      "id": "permission_status_settings_handoff",
+      "status": "imported",
+      "source": "P13-25 notifications/settings gate",
+      "requiredEvidence": "getPermissionStatus and openSettings return JSON-safe permission/status snapshots, with dry-run support for automated tests."
+    },
+    {
+      "id": "manifest_capability_denials",
+      "status": "imported",
+      "source": "NodeNotificationsBridgeInstrumentationTest manifest denial tests",
+      "requiredEvidence": "notifications and notifications.settings capabilities reject before bridge dispatch when missing."
+    },
+    {
+      "id": "future_packaged_post_cancel",
+      "status": "future_promotion",
+      "source": "future packaged notifications archive",
+      "requiredEvidence": "Packaged APK post/cancel/cancelAll smoke with package identity ownership, notification permission state, relaunch, task removal, and Safe downgrade evidence."
+    },
+    {
+      "id": "future_foreground_disclosure_stop_action",
+      "status": "future_promotion",
+      "source": "future foreground disclosure archive",
+      "requiredEvidence": "User-visible disclosure and stop action evidence for packaged or long-running notification-backed Node work."
+    },
+    {
+      "id": "future_permission_device_matrix",
+      "status": "future_promotion",
+      "source": "future device matrix archive",
+      "requiredEvidence": "Android 12 and Android 15+ permission-denied/granted matrix covering POST_NOTIFICATIONS, disabled notifications, settings round-trip, and denial copy."
+    },
+    {
+      "id": "future_advanced_notification_decision",
+      "status": "future_promotion",
+      "source": "future advanced notification archive",
+      "requiredEvidence": "Explicit stable-denial or promotion decision for actions, groups, styles, inline replies, listener callbacks, RemoteViews, and DND mutation."
+    },
+    {
+      "id": "future_rollback_cleanup_safe_downgrade",
+      "status": "future_promotion",
+      "source": "future rollback archive",
+      "requiredEvidence": "Rollback cleanup archive proving owned notification ids, channels, foreground disclosure metadata, and packaged downgrade behavior are cleaned without touching external notifications."
+    }
+  ],
+  "readyEvidence": [
+    {
+      "id": "phase14_notification_ownership_contract",
+      "source": "build/reports/nodejs/phase14-notification-ownership.json",
+      "meaning": "P14-22 imports owned live post/cancel, permission/settings handoff, manifest denial, and raw-object denial evidence while keeping packaged notification archives open."
+    },
+    {
+      "id": "phase15_packaged_broadcast_dependency_gate",
+      "source": "build/reports/nodejs/phase15-packaged-broadcast-smoke.json",
+      "meaning": "P15-16 keeps packaged broadcast and task/device foreground disclosure dependencies unpromoted."
+    },
+    {
+      "id": "phase15_promotion_contracts",
+      "source": "build/reports/nodejs/phase15-promotion-contracts.json",
+      "meaning": "The notifications provider remains provider_poc until implementation, device, packaged, disclosure, rollback, security, type, docs, Safe downgrade, and raw-object denial evidence all pass."
+    },
+    {
+      "id": "phase15_disclosure_rollback_contract",
+      "source": "build/reports/nodejs/phase15-disclosure-rollback-audit.json",
+      "meaning": "The notifications provider declares disable flags, diagnostics, foreground notification ownership, stop actions, packaged downgrade behavior, and Safe downgrade requirements."
+    },
+    {
+      "id": "phase15_surface_manifest_mapping",
+      "source": "docs/nodejs/phase15/phase15-surface-manifest.json",
+      "meaning": "P15-17 owns P14-22 under pro.tasks_device_media with foreground_disclosure_archive evidence."
+    }
+  ],
+  "openBlockers": [
+    {
+      "id": "notification_packaged_post_cancel_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged APK post/cancel/cancelAll archive proving package identity ownership, notification permission handling, relaunch, task removal cleanup, and Safe downgrade behavior."
+    },
+    {
+      "id": "notification_foreground_disclosure_stop_action_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Foreground disclosure and stop-action archive for ongoing packaged notifications and long-running or scheduled Node work."
+    },
+    {
+      "id": "notification_permission_denial_device_matrix_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Android 12 and Android 15+ permission-denied/granted matrix covering POST_NOTIFICATIONS, disabled app notifications, settings round-trip, and denial copy."
+    },
+    {
+      "id": "notification_advanced_action_group_style_decision_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Stable-denial or promotion archive for notification actions, groups, styles, inline reply, remote input, listeners, RemoteViews, and DND mutation."
+    },
+    {
+      "id": "notification_rollback_cleanup_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Rollback cleanup archive proving owned notification ids, channels, foreground disclosure metadata, and packaged downgrade behavior are cleaned without touching external notifications."
+    },
+    {
+      "id": "notification_safe_downgrade_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Provider-disable Safe downgrade proof that package-owned notifications are cancelled and future packaged disclosure metadata is disabled."
+    },
+    {
+      "id": "notification_raw_object_denial_security_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Security regression coverage proving raw Notification, NotificationChannel, PendingIntent, RemoteViews, StatusBarNotification, listener handle, Context, Intent, and Java objects remain denied."
+    },
+    {
+      "id": "phase15_task_device_media_doc_sync",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "P15-22, P15-23, P15-25, and P15-26 sync before notification ownership can be marked promoted."
+    }
+  ],
+  "runtimeAuthorityChanged": false
+}

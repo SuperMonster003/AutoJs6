@@ -56,6 +56,7 @@ Provider promotion gates:
 - `:app:installAndRunNodeV13PackagedTaskSmoke`
 - `:app:verifyNodePhase15IntentBroadcastPromotion`
 - `:app:installAndRunNodeV13PackagedBroadcastSmoke`
+- `:app:verifyNodePhase15NotificationPromotion`
 
 `P15-04` currently reports `partial`: it imports P13/P14 packaged live UI
 evidence and P15 disclosure/rollback requirements, keeps `live_ui` at
@@ -148,3 +149,10 @@ gate. It keeps packaged broadcast trigger/remove unpromoted until positive
 trigger delivery, remove cleanup, relaunch/crash recovery, undeclared
 capability denial, exported receiver policy, metadata mismatch, Safe
 downgrade, and security/type/docs sync land.
+
+`P15-17` currently reports `partial`: it imports the P14 notification
+ownership and foreground disclosure contract plus the P15-16 packaged
+broadcast dependency gate. It keeps `notifications` unpromoted until packaged
+post/cancel, foreground disclosure/stop action, Android permission matrix,
+advanced notification decision, rollback cleanup, Safe downgrade, raw-object
+security coverage, and security/type/docs sync land.

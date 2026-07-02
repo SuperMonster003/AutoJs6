@@ -1321,6 +1321,7 @@ Phase 15 v1.3 foundation gates:
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedTaskSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15IntentBroadcastPromotion
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedBroadcastSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15NotificationPromotion
 ```
 
 The `:app:verifyNodePhase15Baseline` gate writes
@@ -1436,6 +1437,13 @@ packaged broadcast trigger/remove smoke contract and the P15-15
 unpromoted until positive trigger delivery, remove cleanup, relaunch/crash
 recovery, undeclared capability denial, exported receiver policy, metadata
 mismatch, Safe downgrade, and security/type/docs evidence are archived.
+The `:app:verifyNodePhase15NotificationPromotion` gate writes
+`phase15-notification-promotion.json` plus `.md`, imports the P14-22
+notification ownership and foreground disclosure contract and the P15-16
+packaged broadcast dependency gate. It keeps `notifications` unpromoted until
+packaged post/cancel, foreground disclosure/stop action, Android permission
+matrix, advanced notification decision, rollback cleanup, Safe downgrade,
+raw-object security coverage, and security/type/docs evidence are archived.
 
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch

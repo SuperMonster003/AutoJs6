@@ -833,3 +833,59 @@ tasks.register<Exec>("installAndRunNodeV13PackagedBroadcastSmoke") {
         nodePhase15ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase15NotificationPromotion") {
+    group = "verification"
+    description = "Verifies the Phase 15 notification ownership and foreground disclosure promotion evidence gate."
+
+    dependsOn("installAndRunNodeV13PackagedBroadcastSmoke", "verifyNodePhase14NotificationOwnership")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase15/verify-node-phase15-notification-promotion.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/notification-promotion-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/PHASE15_NOTIFICATION_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/P15_17_NOTIFICATION_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/PHASE15_NODE_V1_3_PROVIDER_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/phase15-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/node-v1-3-promotion-contracts.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/node-v1-3-disclosure-rollback-audit.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/packaged-broadcast-smoke-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/notification-ownership-plan.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase14/PHASE14_NOTIFICATION_OWNERSHIP.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase14/P14_22_NOTIFICATION_OWNERSHIP.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_25_NOTIFICATIONS_SETTINGS_POWER_MANAGER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeNotificationsBridgeInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/notifications.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase15-gate.gradle.kts"))
+    inputs.file(nodePhase15ReportDir.map { it.file("phase13-notifications-settings-power-manager.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase14-notification-ownership.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-packaged-broadcast-smoke.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-promotion-contracts.json") })
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-disclosure-rollback-audit.json") })
+    outputs.files(
+        nodePhase15ReportDir.map { it.file("phase15-notification-promotion.json") },
+        nodePhase15ReportDir.map { it.file("phase15-notification-promotion.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase15ReportDir.get().asFile.absolutePath,
+    )
+}

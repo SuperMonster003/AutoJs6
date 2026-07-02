@@ -3425,6 +3425,7 @@ Phase 15 starts from the Phase 14 closeout handoff on
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedTaskSmoke
 .\gradlew.bat --console=plain :app:verifyNodePhase15IntentBroadcastPromotion
 .\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedBroadcastSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15NotificationPromotion
 ```
 
 `verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
@@ -3540,3 +3541,10 @@ packaged broadcast trigger/remove smoke contract and the P15-15
 trigger delivery, remove cleanup, relaunch/crash recovery, undeclared
 capability denial, exported receiver policy, metadata mismatch, Safe
 downgrade, and security/type/docs evidence are attached.
+`verifyNodePhase15NotificationPromotion` writes
+`phase15-notification-promotion.json` plus `.md`, imports the P14-22
+notification ownership and foreground disclosure contract and the P15-16
+packaged broadcast dependency gate. It reports `partial` until packaged
+post/cancel, foreground disclosure/stop action, Android permission matrix,
+advanced notification decision, rollback cleanup, Safe downgrade, raw-object
+security coverage, and security/type/docs evidence are attached.

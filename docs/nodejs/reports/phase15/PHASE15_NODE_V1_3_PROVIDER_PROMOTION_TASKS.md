@@ -402,9 +402,24 @@ A Phase 15 task can be marked complete only when all applicable items are true:
 
 - [ ] P15-17: Promote notification ownership and foreground disclosure behavior.
   - Source backlog: `P14-22`.
-  - Gate: proposed `:app:verifyNodePhase15NotificationPromotion`.
+  - Gate: `:app:verifyNodePhase15NotificationPromotion`.
   - Acceptance: packaged post/cancel, foreground disclosure, stop action,
     Android permission matrix, and raw notification object denial are covered.
+  - Partial gate deployed:
+    - `docs/nodejs/phase15/notification-promotion-plan.json`
+    - `docs/nodejs/phase15/PHASE15_NOTIFICATION_PROMOTION.md`
+    - `docs/nodejs/reports/phase15/P15_17_NOTIFICATION_PROMOTION.md`
+    - `tools/nodejs/phase15/verify-node-phase15-notification-promotion.js`
+    - `build/reports/nodejs/phase15-notification-promotion.json`
+    - `build/reports/nodejs/phase15-notification-promotion.md`
+  - Still open: `notification_packaged_post_cancel_archive`,
+    `notification_foreground_disclosure_stop_action_archive`,
+    `notification_permission_denial_device_matrix_archive`,
+    `notification_advanced_action_group_style_decision_archive`,
+    `notification_rollback_cleanup_archive`,
+    `notification_safe_downgrade_archive`,
+    `notification_raw_object_denial_security_archive`, and
+    `phase15_task_device_media_doc_sync`.
 
 - [ ] P15-18: Close settings/power OEM and background-launch matrix.
   - Source backlog: `P14-23`.
