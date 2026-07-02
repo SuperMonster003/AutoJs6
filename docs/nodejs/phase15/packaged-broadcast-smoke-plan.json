@@ -1,0 +1,208 @@
+{
+  "schema": "autojs6-node-phase15-packaged-broadcast-smoke-plan-v1",
+  "phase": "Phase 15: Node v1.3 Provider Promotion",
+  "task": "P15-16",
+  "title": "Packaged broadcast trigger/remove smoke",
+  "status": "partial",
+  "promotionState": "provider_poc_not_promoted",
+  "providerId": "intent_broadcast",
+  "sourceBacklogTasks": [
+    "P14-21"
+  ],
+  "upstreamGates": [
+    ":app:verifyNodePhase15IntentBroadcastPromotion",
+    ":app:verifyNodePhase14PackagedBroadcastTriggerRemoveSmoke"
+  ],
+  "surface": "pro.tasks_device_media",
+  "minimumPromotionPolicy": "Packaged broadcast trigger/remove smoke promotion requires install-run evidence for opted-in receiver metadata, descriptor registration, bounded payload trigger delivery, remove cleanup, relaunch, crash recovery, metadata mismatch denial, undeclared-capability denial, exported receiver policy, rollback, and Safe downgrade before tasks.broadcast can be promoted.",
+  "smokeContract": {
+    "futureProvider": "tasks.broadcast",
+    "currentPackagedBoundary": "embedded-node-packaged-intent-broadcast-boundary-smoke",
+    "currentBoundaryEvidenceImported": true,
+    "positiveTriggerRemovePromoted": false,
+    "runtimeAuthorityChanged": false,
+    "futureOperations": [
+      "install",
+      "register",
+      "trigger",
+      "validatePayload",
+      "list",
+      "remove",
+      "relaunch",
+      "crashRecover"
+    ],
+    "currentBoundaryMarkers": [
+      "packaged.intent_broadcast.ready=true",
+      "packaged.intent_broadcast.compat_rejected=true",
+      "packaged.intent_broadcast.future_modules_denied=true",
+      "packaged.intent_broadcast.raw_globals_absent=true",
+      "packaged.intent_broadcast.broadcast_channel_js_only=true",
+      "packaged.intent_broadcast.surface=true",
+      "packaged.intent_broadcast.metadata_denied=true"
+    ],
+    "requiredPositiveMarkers": [
+      "packaged.broadcast_trigger.install=true",
+      "packaged.broadcast_trigger.register=true",
+      "packaged.broadcast_trigger.payload_valid=true",
+      "packaged.broadcast_trigger.delivered=true",
+      "packaged.broadcast_trigger.remove_cleanup=true",
+      "packaged.broadcast_trigger.relaunch=true",
+      "packaged.broadcast_trigger.crash_recovery=true",
+      "packaged.broadcast_trigger.undeclared_capability_denied=true"
+    ]
+  },
+  "packagedMetadataContract": {
+    "metadataOptInRequired": true,
+    "capabilitiesDeniedNow": [
+      "tasks",
+      "tasks.intent",
+      "tasks.broadcast",
+      "tasks.boot",
+      "tasks.package_events"
+    ],
+    "bootPermissionDeniedNow": "android.permission.RECEIVE_BOOT_COMPLETED",
+    "futureCapabilities": [
+      "tasks.broadcast.local",
+      "tasks.broadcast.package_private",
+      "tasks.broadcast.boot",
+      "tasks.broadcast.package_events"
+    ],
+    "receiverPatchReportRequired": true,
+    "defaultExported": false,
+    "exportedReceiverAllowedNow": false,
+    "exportedReceiverRequires": [
+      "explicit packaged metadata",
+      "reviewed action allowlist",
+      "signature or app-private permission policy",
+      "abuse review",
+      "device matrix evidence"
+    ],
+    "metadataMismatchPolicy": "deny_before_receiver_patch_or_dispatch"
+  },
+  "triggerRemoveMatrix": [
+    {
+      "id": "current_packaged_boundary_denial_smoke",
+      "status": "imported",
+      "source": "P13-22 packaged IntentTask/broadcast boundary smoke",
+      "requiredEvidence": "Packaged APK verifies compat IntentTask rejection, future module denial, raw global absence, JavaScript-only BroadcastChannel, surface presence, and metadata denial."
+    },
+    {
+      "id": "future_packaged_local_custom_trigger",
+      "status": "future_promotion",
+      "source": "future tasks.broadcast provider",
+      "requiredEvidence": "Packaged APK registers an app-local or package-private custom trigger, receives one bounded JSON payload, records task id/action/timestamp, and does not expose raw Android objects."
+    },
+    {
+      "id": "future_packaged_remove_cleanup",
+      "status": "future_promotion",
+      "source": "future tasks.broadcast provider",
+      "requiredEvidence": "Remove disables or deletes the owned descriptor, unregisters dynamic receivers or removes owned manifest patches, cancels pending executions, and prevents later trigger delivery."
+    },
+    {
+      "id": "future_packaged_relaunch_crash_recovery",
+      "status": "future_promotion",
+      "source": "future packaged archive",
+      "requiredEvidence": "Relaunch and crash recovery preserve visible descriptors without duplicate receiver registration or orphan pending executions."
+    },
+    {
+      "id": "future_undeclared_capability_and_exported_denial",
+      "status": "future_promotion",
+      "source": "future packaged archive",
+      "requiredEvidence": "Undeclared tasks.broadcast capabilities reject before dispatch; exported receiver requests reject unless explicit reviewed metadata and permission policy are present."
+    },
+    {
+      "id": "future_metadata_mismatch_safe_downgrade",
+      "status": "future_promotion",
+      "source": "future packaged archive",
+      "requiredEvidence": "Metadata mismatch, package identity mismatch, provider disable, rollback, and Safe downgrade deny trigger authority and remove or disable only owned receiver patches."
+    }
+  ],
+  "cleanupContract": {
+    "removeOwnedDescriptor": true,
+    "unregisterDynamicReceiver": true,
+    "removeOwnedManifestPatch": true,
+    "cancelPendingExecutions": true,
+    "preventPostRemoveDelivery": true,
+    "preserveLegacyRhinoRows": true,
+    "denyCrossPackageRemove": true,
+    "safeDowngradeAction": "disable_or_remove_owned_broadcast_descriptors_receiver_patches_and_pending_executions"
+  },
+  "readyEvidence": [
+    {
+      "id": "phase14_packaged_broadcast_trigger_remove_contract",
+      "source": "build/reports/nodejs/phase14-packaged-broadcast-trigger-remove-smoke.json",
+      "meaning": "P14-21 imports current packaged IntentTask/broadcast boundary denial smoke and reserves future trigger/remove/relaunch/exported receiver archives."
+    },
+    {
+      "id": "phase15_intent_broadcast_dependency_gate",
+      "source": "build/reports/nodejs/phase15-intent-broadcast-promotion.json",
+      "meaning": "P15-15 keeps intent_broadcast unpromoted and validates descriptor, manifest/export, payload/remove, disclosure, rollback, and runtime denial contracts."
+    },
+    {
+      "id": "phase15_promotion_contracts",
+      "source": "build/reports/nodejs/phase15-promotion-contracts.json",
+      "meaning": "The intent_broadcast provider remains provider_poc until implementation, device, packaged, disclosure, rollback, security, type, docs, Safe downgrade, and raw-object denial evidence all pass."
+    },
+    {
+      "id": "phase15_disclosure_rollback_contract",
+      "source": "build/reports/nodejs/phase15-disclosure-rollback-audit.json",
+      "meaning": "The intent_broadcast provider declares disable flags, diagnostics, disclosure fields, packaged downgrade behavior, and Safe downgrade requirements."
+    },
+    {
+      "id": "phase15_surface_manifest_mapping",
+      "source": "docs/nodejs/phase15/phase15-surface-manifest.json",
+      "meaning": "P15-16 owns P14-21 under pro.tasks_device_media with packaged_smoke_archive evidence."
+    }
+  ],
+  "openBlockers": [
+    {
+      "id": "packaged_broadcast_trigger_positive_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged APK positive trigger archive for app-local or package-private broadcast descriptor registration, payload delivery, and JSON-only payload validation."
+    },
+    {
+      "id": "packaged_broadcast_remove_cleanup_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged remove cleanup archive proving owned descriptor cleanup, receiver unregister or manifest patch cleanup, pending execution cancellation, and no post-remove delivery."
+    },
+    {
+      "id": "packaged_broadcast_relaunch_crash_recovery_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged relaunch and crash recovery archive proving no duplicate receivers, orphan pending executions, or lost visible descriptors."
+    },
+    {
+      "id": "packaged_broadcast_undeclared_capability_denial_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged denial archive for missing tasks.broadcast capabilities, unsupported triggers, metadata mismatch, and exported receiver requests."
+    },
+    {
+      "id": "packaged_broadcast_exported_receiver_policy_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged exported receiver policy archive with explicit metadata, allowlist, permission model, abuse review, and Android 12/15+ evidence before any exported receiver is promoted."
+    },
+    {
+      "id": "packaged_broadcast_metadata_mismatch_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged metadata mismatch and package identity mismatch denial evidence proving receiver patches cannot be replayed or aliased across owners."
+    },
+    {
+      "id": "packaged_broadcast_safe_downgrade_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Provider-disable Safe downgrade proof that package-owned receiver patches, descriptors, and pending executions are removed or disabled while broadcast trigger authority is denied."
+    },
+    {
+      "id": "phase15_task_device_media_doc_sync",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "P15-22, P15-23, P15-25, and P15-26 sync before packaged broadcast trigger/remove smoke can be marked promoted."
+    }
+  ],
+  "runtimeAuthorityChanged": false
+}

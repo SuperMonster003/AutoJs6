@@ -1058,3 +1058,43 @@ Do not migrate scripts by expecting raw `Context`, raw `Activity`, raw `View`,
 raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw
 `TimedTask`, raw `BroadcastReceiver`, raw `Notification`, or raw `WakeLock`
 objects to be exposed in Node.
+
+## Phase 15 v1.3 Migration And Pro Comparison
+
+P15-26 records v1.3 migration and Pro comparison docs as ready. These claims
+match executable evidence and do not imply raw Android object parity. The v1.3
+migration state has no newly promoted providers, and runtime authority remains
+unchanged.
+
+The v1.3 migration status is:
+
+- Pro UI and floaty: live UI and overlay remain `provider_poc_not_promoted`
+  until device, disclosure, cleanup, packaged, security, TypeScript
+  declarations, migration, and rollback evidence pass.
+- accessibility: selector/action and guarded examples remain migration
+  evidence; service-enabled device archives, disclosure, security corpus,
+  packaged behavior, and rollback evidence are still required.
+- screenshot/OCR: MediaProjection and image/OCR remain
+  `provider_poc_not_promoted`; capture, raw image handles, OCR provider modes,
+  and packaged OCR claims stay tied to executable evidence.
+- tasks: task database, schema migration, packaged task scheduling, and
+  IntentTask/broadcast remain `provider_poc_not_promoted`.
+- notifications: notification ownership and settings/power remain
+  `provider_poc_not_promoted`.
+- recorder: recorder sessions and packaged recorder stress remain
+  `provider_poc_not_promoted`.
+- MediaStore/playback: playback, playlists, MediaStore query/mutation, broad
+  media permissions, and raw media handles remain `stable_denied`.
+- security corpus: P15-23 is
+  `security_corpus_updated_no_authority_promoted`.
+- packaged behavior: P15-24 is `host_contract_ready`, not real device
+  install-run release approval.
+- TypeScript declarations: `NodeProfileV13CapabilityCatalog` is metadata-only.
+- rollback: Safe downgrade, profile rollback, packaged metadata mismatch,
+  provider disable flags, and migration claim rollback remain required.
+
+No v1.3 migration row grants raw `Context`, raw `Activity`, raw `View`, raw
+`Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw
+`TimedTask`, raw `BroadcastReceiver`, raw `Notification`, raw `WakeLock`, raw
+`ContentResolver`, raw `MediaStore`, raw file descriptors, or Java objects.
+No v1.3 migration row grants raw `ContentResolver` authority.

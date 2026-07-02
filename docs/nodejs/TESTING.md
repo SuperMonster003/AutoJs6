@@ -2872,9 +2872,24 @@ Template refresh and smoke artifact collection:
 .\gradlew.bat --console=plain :app:embeddedNodePullPackagedSmokeApks
 ```
 
+The production inrt template is intentionally slim. `assembleInrtRelease` and
+`embeddedNodeRefreshInrtTemplateApk` force `rhinoOnly` and must not carry
+`libnode.so`, `libautojs6-node.so`, or `libc++_shared.so` in
+`app/src/main/assets-app/template.apk`. Packaged projects that enable the
+`Embedded Node.js` library inject those native files from the host APK according
+to the selected ABI policy.
+
+Full Embedded Node inrt templates for runtime/template testing are generated as
+build outputs only and do not replace `assets-app/template.apk`:
+
+```powershell
+.\gradlew.bat --console=plain :app:assembleInrtFullNodeRelease
+.\gradlew.bat --console=plain :app:embeddedNodeRefreshFullInrtTemplateApk
+```
+
 `verifyNodeTemplateReproducibility` writes `app/build/reports/embedded-node/template-reproducibility.txt` and fails before
-packaged smoke when the checked-in template is stale, missing the embedded script service, missing the expected arm64
-native runtime seed, carrying x86 Node runtime entries, or unable to produce a deterministic normalized manifest hash.
+packaged smoke when the checked-in slim template is stale, missing the embedded script service, carrying Embedded Node
+native runtime entries, carrying x86 Node runtime entries, or unable to produce a deterministic normalized manifest hash.
 
 ## ABI Matrix
 
@@ -2900,9 +2915,9 @@ Expected policy:
 
 Release packaging profiles:
 
-- `nodeFull`: default, requires all supported Node ABIs
+- `nodeFull`: default for main app builds and explicit full-node inrt test templates, requires all supported Node ABIs
 - `nodeMini`: supports a smaller explicit ABI set
-- `rhinoOnly`: must not package `libnode.so` or `libautojs6-node.so`
+- `rhinoOnly`: default for ordinary production inrt template builds, must not package `libnode.so` or `libautojs6-node.so`
 
 Rollback flavor verification:
 
@@ -3401,3 +3416,300 @@ doctor reports.
 `-Pautojs.embeddedNode.packagedApk=<apk>` it also runs the standalone output verifier and gated diagnostic report for that
 APK; otherwise it uses the packaged smoke host aggregate reports produced from device-exported APKs.
 Focused instrumentation classes still use the explicit `connectedAppDebugAndroidTest` commands above when a device gate is required.
+
+## Phase 15 v1.3 Foundation Gates
+
+Phase 15 starts from the Phase 14 closeout handoff on
+`feature/nodejs-runtime-v1.3`:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase15Baseline
+.\gradlew.bat --console=plain :app:verifyNodePhase15SurfaceManifest
+.\gradlew.bat --console=plain :app:verifyNodePhase15PromotionContracts
+.\gradlew.bat --console=plain :app:verifyNodePhase15DisclosureRollbackAudit
+.\gradlew.bat --console=plain :app:verifyNodePhase15PackagedLiveUiPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15OverlayProviderPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15OverlayOemMatrix
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedOverlaySmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15AccessibilityPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15MediaProjectionPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15ImageOcrPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15UiAutomationMediaDocSync
+.\gradlew.bat --console=plain :app:verifyNodePhase15TaskDatabasePromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15TaskSchemaRollback
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedTaskSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15IntentBroadcastPromotion
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedBroadcastSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15NotificationPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15SettingsPowerPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase15RecorderPromotion
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedRecorderSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15MediaStorePlaybackDecision
+.\gradlew.bat --console=plain :app:verifyNodePhase15TaskDeviceMediaDocSync
+.\gradlew.bat --console=plain :app:verifyNodePhase15SecurityRegressionCorpus
+.\gradlew.bat --console=plain :app:installAndRunNodeV13PackagedAggregateSmoke
+.\gradlew.bat --console=plain :app:verifyNodePhase15TypeDeclarationProfiles
+.\gradlew.bat --console=plain :app:verifyNodePhase15MigrationProComparison
+.\gradlew.bat --console=plain :app:generateNodePhase15Summary
+```
+
+`verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
+`.md` and fails if the Phase 14 closeout handoff, branch, imported future
+backlog, or final blocker registry no longer match the v1.3 start contract.
+`verifyNodePhase15SurfaceManifest` writes
+`phase15-surface-manifest-verification.json` plus `.md` and verifies that
+`P15-00` through `P15-27` map exactly once with owner surface, profile, risk,
+evidence class, gate, and rollback hook metadata. It also verifies that every
+imported Phase 14 backlog task is owned.
+`verifyNodePhase15PromotionContracts` writes
+`phase15-promotion-contracts.json` plus `.md` and verifies the v1.3
+`promoted`, `provider_poc`, `future_only`, `stable_denied`, and `rejected`
+vocabulary. It fails if any provider is marked promoted before implementation,
+connected device, packaged APK, disclosure, rollback, security, TypeScript,
+docs, Safe downgrade, and raw-object denial evidence bars are all present.
+`verifyNodePhase15DisclosureRollbackAudit` writes
+`phase15-disclosure-rollback-audit.json` plus `.md` and verifies disclosure
+proof paths, rollback proof paths, provider disable flags, foreground
+notification ownership, stop actions, Safe downgrade, diagnostic codes, and
+crash circuit breaker markers for every promotable provider before runtime
+authority changes.
+`verifyNodePhase15PackagedLiveUiPromotion` writes
+`phase15-packaged-live-ui-promotion.json` plus `.md`, imports the P14-07 live UI
+provider POC and P13 packaged UI evidence, and reports `partial` until
+packaged live UI relaunch, task-removal cleanup, crash recovery, reviewed
+disclosure, Android 15+ archive, and downstream security/type/docs sync
+evidence are attached.
+`verifyNodePhase15OverlayProviderPromotion` writes
+`phase15-overlay-provider-promotion.json` plus `.md`, imports the P14-08
+controlled overlay provider POC, permission-denied/raw-object boundaries, the
+conditional permission-granted fixture, and P13 packaged overlay denial
+evidence, and reports `partial` until Android 12/15+ granted-permission,
+foreground disclosure, cleanup stress, packaged positive smoke, OEM matrix,
+and security/type/docs archives are attached.
+`verifyNodePhase15OverlayOemMatrix` writes
+`phase15-overlay-oem-matrix.json` plus `.md`, imports the P14-09 overlay
+permission/OEM matrix and P15-05 overlay provider gate, validates the required
+Android 12 and Android 15+ device slots, and reports `partial` until
+granted-permission archives, OEM settings notes, task removal/relaunch
+behavior, foreground disclosure/stop action, and security/type/docs evidence
+are attached.
+`installAndRunNodeV13PackagedOverlaySmoke` writes
+`phase15-packaged-overlay-smoke.json` plus `.md`, imports the P14-10 packaged
+overlay positive smoke/stress fixture and marker contract, depends on the
+P15-05 and P15-06 overlay gates, and reports `partial` until packaged
+install-run archives, Android 12/15+ coverage, disclosure/stop action, task
+removal/relaunch/crash behavior, stress/leak proof, and security/type/docs
+evidence are attached.
+`verifyNodePhase15AccessibilityPromotion` writes
+`phase15-accessibility-promotion.json` plus `.md`, imports the P14-11
+accessibility lifecycle fixture and P14-12 selector/action matrix, imports P13
+selector and shell/root/Shizuku boundary evidence, and reports `partial` until
+Android 12/15+ service-enabled archives, settings round-trip, task
+removal/relaunch, disconnect/missing-capability denial, safe global-action
+diagnostics, unsupported-tier diagnostics, and security/type/docs evidence are
+attached.
+`verifyNodePhase15MediaProjectionPromotion` writes
+`phase15-media-projection-promotion.json` plus `.md`, imports the P14-13
+Activity-owned MediaProjection contract, optional screen_capture prompt/capture
+smoke, P13 screenshot/image/OCR evidence, and P15 disclosure/rollback
+requirements, and reports `partial` until Android 12/15+ prompt/capture
+archives, foreground disclosure/stop action, task removal/relaunch/crash
+evidence, packaged APK evidence, Safe downgrade proof, and security/type/docs
+evidence are attached.
+`verifyNodePhase15ImageOcrPromotion` writes
+`phase15-image-ocr-promotion.json` plus `.md`, imports the P14-14 advanced
+image operation contract and P14-15 packaged image/OCR evidence contract, plus
+P13 scoped image/OCR evidence and the P15 MediaProjection dependency gate, and
+reports `partial` until live transform/matching archives, packaged scoped
+output, packaged OCR model/provider-mode archives, quota/leak stress,
+capture-to-OCR disclosure, Safe downgrade proof, and security/type/docs
+evidence are attached.
+`verifyNodePhase15UiAutomationMediaDocSync` writes
+`phase15-ui-automation-media-doc-sync.json` plus `.md`, imports the P15-04
+through P15-10 partial provider reports and the P14-16 docs sync report, and
+reports `ready` when examples, TypeScript declaration notes, release-facing
+text, compatibility, security, error guidance, TESTING, and CI_GATES keep the
+lane at `provider_poc_not_promoted` without adding runtime authority.
+`verifyNodePhase15TaskDatabasePromotion` writes
+`phase15-task-database-promotion.json` plus `.md`, imports the P14-17
+JSON-safe task database mutation contract, P13 `work_manager`/`compat.tasks`
+and TimedTask snapshot evidence, and P15 disclosure/rollback requirements. It
+reports `partial` until live mutation, owner/id mapping, schema
+migration/rollback, wall-clock scheduler, packaged mutation smoke,
+cross-package denial, disclosure/stop action, Safe downgrade, and
+security/type/docs evidence are attached.
+`verifyNodePhase15TaskSchemaRollback` writes
+`phase15-task-schema-rollback.json` plus `.md`, imports the P14-18 schema
+migration and rollback contract and the P15-12 task database dependency gate.
+It reports `partial` until live migration tests, corruption recovery, legacy
+visibility downgrade, packaged rollback, backup/restore, Safe downgrade,
+cross-package rollback denial, and security/type/docs evidence are attached.
+`installAndRunNodeV13PackagedTaskSmoke` writes
+`phase15-packaged-task-smoke.json` plus `.md`, imports the P14-19 packaged
+task scheduling smoke contract, the packaged `work_manager`
+schedule/list/cancel smoke, the live packaged project-entry scheduled-runner
+anchor, and the P15-12/P15-13 dependency gates. It reports `partial` until
+packaged task database positive smoke, process-death/relaunch, task-removal
+cleanup, disclosure/Safe downgrade, cross-package denial, missing-capability
+denial, Safe downgrade, and security/type/docs evidence are attached.
+`verifyNodePhase15IntentBroadcastPromotion` writes
+`phase15-intent-broadcast-promotion.json` plus `.md`, imports the P14-20
+JSON-safe IntentTask/broadcast provider contract and the P15-14 packaged task
+ownership dependency gate. It reports `partial` until live provider
+registration, manifest synthesis, exported receiver policy, trigger payload
+validation, owner cleanup, packaged trigger/remove smoke, cross-package denial,
+Safe downgrade, and security/type/docs evidence are attached.
+`installAndRunNodeV13PackagedBroadcastSmoke` writes
+`phase15-packaged-broadcast-smoke.json` plus `.md`, imports the P14-21
+packaged broadcast trigger/remove smoke contract and the P15-15
+`intent_broadcast` dependency gate. It reports `partial` until positive
+trigger delivery, remove cleanup, relaunch/crash recovery, undeclared
+capability denial, exported receiver policy, metadata mismatch, Safe
+downgrade, and security/type/docs evidence are attached.
+`verifyNodePhase15NotificationPromotion` writes
+`phase15-notification-promotion.json` plus `.md`, imports the P14-22
+notification ownership and foreground disclosure contract and the P15-16
+packaged broadcast dependency gate. It reports `partial` until packaged
+post/cancel, foreground disclosure/stop action, Android permission matrix,
+advanced notification decision, rollback cleanup, Safe downgrade, raw-object
+security coverage, and security/type/docs evidence are attached.
+`verifyNodePhase15SettingsPowerPromotion` writes
+`phase15-settings-power-promotion.json` plus `.md`, imports the P14-23
+settings/power OEM and background-launch matrix and the P15-17 notification
+dependency gate. It reports `partial` until Android 12/15+ OEM matrix archives,
+exact-alarm state, background-launch restrictions, reviewed prompt/rollback
+evidence, packaged disclosure/stop action, Safe downgrade, raw-object security
+coverage, and task/device/media docs sync evidence are attached.
+`verifyNodePhase15RecorderPromotion` writes
+`phase15-recorder-promotion.json` plus `.md`, imports the P14-24 real recorder
+session provider contract and the P15-18 settings/power dependency gate. It
+reports `partial` until runtime microphone prompt ownership, foreground
+disclosure/stop action, scoped session and temporary output cleanup,
+crash/task-removal cleanup, packaged start/stop stress, Safe downgrade,
+raw-object security coverage, and task/device/media docs sync evidence are
+attached.
+`installAndRunNodeV13PackagedRecorderSmoke` writes
+`phase15-packaged-recorder-smoke.json` plus `.md`, imports the P14-25 packaged
+recorder/media stress contract and the P15-19 recorder dependency gate. It
+reports `partial` until positive packaged start/stop, foreground microphone
+disclosure, deterministic stop, task removal/relaunch/crash cleanup, quota and
+temporary output cleanup, packaged denial, Safe downgrade, raw-object security
+coverage, and task/device/media docs sync evidence are attached.
+`verifyNodePhase15MediaStorePlaybackDecision` writes
+`phase15-mediastore-playback-decision.json` plus `.md`, imports the P14-26
+MediaStore/playback boundary and the P15-20 packaged recorder dependency gate,
+and reports `ready` when `mediastore_playback` remains `stable_denied` with no
+runtime authority change. Playback, playlists, `scanFile`, MediaStore
+query/mutation, broad media-library permissions, and raw media handles remain
+denied until a future scoped provider gate supplies exact capabilities,
+ownership, permission, packaged, privacy, rollback, Safe downgrade, and
+raw-object denial evidence.
+`verifyNodePhase15TaskDeviceMediaDocSync` writes
+`phase15-task-device-media-doc-sync.json` plus `.md`, imports P15-12 through
+P15-21 and the P14 task/device/media docs sync report, and reports `ready`
+when declarations, examples, release-facing text, compatibility, security,
+error guidance, TESTING, and CI_GATES keep the lane at
+`provider_poc_not_promoted` with `mediastore_playback` `stable_denied` and no
+runtime authority change.
+`verifyNodePhase15SecurityRegressionCorpus` writes
+`phase15-security-regression-corpus.json` plus `.md`, imports P14-33 and P15-04
+through P15-22, updates the v1.3 security corpus, and reports `ready` only when
+all provider families retain positive, negative, abuse, runtime guard,
+promotion precondition, rollback, metadata mismatch, raw-object denial, Safe
+downgrade, foreground disclosure, cross-package ownership denial, and
+stable-denied boundary coverage without runtime authority changes. P15-23
+remains `planned` in the surface manifest by critical-risk policy.
+`installAndRunNodeV13PackagedAggregateSmoke` writes
+`phase15-packaged-aggregate-smoke.json` plus `.md`, imports P15-04, P15-07,
+P15-08, P15-09, P15-10, P15-14, P15-16, P15-17, P15-18, P15-20, P15-21, and
+P15-23, and reports `ready` when the deterministic packaged aggregate contract
+covers declared positive paths or conditional skips, undeclared capability
+denial, packaged metadata mismatch denial, Safe downgrade, cleanup,
+stable-denied boundary preservation, and report artifacts. It is
+`host_contract_ready` only; it does not claim real device install-run success or
+runtime authority changes, and P15-24 remains `planned` in the surface manifest
+by critical-risk policy.
+`verifyNodePhase15TypeDeclarationProfiles` writes
+`phase15-type-declaration-profiles.json` plus `.md`, imports P14-35, P15-11,
+P15-22, P15-23, and P15-24, and reports `ready` when
+`NodeProfileV13CapabilityCatalog`, `NodeProfileV13DeclarationMatrix`, v1.3
+mode/state/packaged/future-only/stable-denied helpers, and TypeScript smoke
+assertions keep provider POC, docs sync, security corpus, packaged aggregate,
+and stable-denied rows metadata-only with `grantsAuthority: false`.
+`:app:verifyNodePhase15MigrationProComparison` writes
+`phase15-migration-pro-comparison.json` plus `.md`, imports P14-36, P15-11,
+P15-22, P15-23, P15-24, and P15-25, and reports `ready` when migration, Pro
+comparison, Pro/AutoX compatibility, compatibility profile, examples, and
+release notes all keep claims matched to executable evidence. It records no
+newly promoted providers, no runtime authority change, no raw Android object
+parity, and keeps provider POC, stable-denied, security corpus, packaged
+aggregate, TypeScript declaration, and rollback language aligned.
+`:app:generateNodePhase15Summary` writes `phase15-summary.json` plus `.md`,
+generates `PHASE15_SUMMARY.md`, exports `PHASE15_FUTURE_BACKLOG.json`, and
+writes `PHASE15_NEXT_BRANCH_HANDOFF.md`. It imports every Phase 15 report
+through P15-26, reports `ready` only with zero policy violations and zero
+release-blocking reports, and keeps `future_promotion` blockers visible for
+the suggested `feature/nodejs-runtime-v1.4` handoff.
+
+## Phase 16 v1.4 Foundation Gates
+
+Phase 16 starts from the Phase 15 summary handoff on
+`feature/nodejs-runtime-v1.4`:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase16Baseline
+.\gradlew.bat --console=plain :app:verifyNodePhase16SurfaceManifest
+.\gradlew.bat --console=plain :app:verifyNodePhase16PromotionContracts
+.\gradlew.bat --console=plain :app:verifyNodePhase16DisclosureRollbackAudit
+.\gradlew.bat --console=plain :app:verifyNodePhase16PackagedLiveUiPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase16OverlayProviderPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase16OverlayOemMatrix
+.\gradlew.bat --console=plain :app:installAndRunNodeV14PackagedOverlaySmoke
+```
+
+`verifyNodePhase16Baseline` writes `phase16-baseline-verification.json` plus
+`.md` and fails if the Phase 15 summary handoff, branch, v1.4 future backlog,
+or release-blocking report state no longer match the v1.4 start contract.
+`verifyNodePhase16SurfaceManifest` writes
+`phase16-surface-manifest-verification.json` plus `.md` and verifies that
+`P16-00` through `P16-27` map exactly once with owner surface, profile, risk,
+evidence class, gate, and rollback hook metadata. It also verifies that every
+imported Phase 15 backlog task is owned.
+`verifyNodePhase16PromotionContracts` writes
+`phase16-promotion-contracts.json` plus `.md` and verifies the v1.4
+`promoted`, `provider_poc`, `future_only`, `stable_denied`, and `rejected`
+vocabulary. It fails if any provider can become opt-in promoted without
+implementation, connected device, packaged APK, disclosure, rollback, security,
+TypeScript, release docs, Safe downgrade, and raw-object denial evidence.
+`verifyNodePhase16DisclosureRollbackAudit` writes
+`phase16-disclosure-rollback-audit.json` plus `.md` and verifies disclosure
+proof paths, rollback proof paths, provider disable flags, foreground
+notification ownership, Stop actions, Safe downgrade, diagnostic codes, and
+crash circuit breaker markers for every promotable v1.4 provider before
+runtime authority changes.
+`verifyNodePhase16PackagedLiveUiPromotion` writes
+`phase16-packaged-live-ui-promotion.json` plus `.md`, imports the P15-04
+packaged live UI partial gate, P13/P14 packaged UI evidence, and P16
+promotion/disclosure contracts, and reports `partial` until packaged live UI
+relaunch, task-removal cleanup, crash recovery, reviewed disclosure, Android
+15+, and downstream security/type/docs sync evidence are attached.
+`verifyNodePhase16OverlayProviderPromotion` writes
+`phase16-overlay-provider-promotion.json` plus `.md`, imports the P15-05
+overlay provider partial gate, P14 overlay provider POC, P13 packaged overlay
+boundary, P16 contracts, and P16-04 live UI foundation, and reports `partial`
+until Android 12/15+ permission-granted archives, foreground disclosure/stop
+action, owner cleanup stress, packaged positive smoke, OEM matrix, and
+downstream security/type/docs sync evidence are attached.
+`verifyNodePhase16OverlayOemMatrix` writes
+`phase16-overlay-oem-matrix.json` plus `.md`, imports the P15-06 overlay OEM
+matrix partial gate and P14 matrix contract, depends on P16-05, and reports
+`partial` until Android 12/15+ granted-device archives, OEM notes,
+task-removal/relaunch evidence, foreground disclosure/stop action, and
+downstream security/type/docs sync evidence are attached.
+`installAndRunNodeV14PackagedOverlaySmoke` writes
+`phase16-packaged-overlay-smoke.json` plus `.md`, imports the P15-07 packaged
+overlay smoke partial gate, P14 packaged overlay fixture, P16-05 provider gate,
+and P16-06 OEM matrix gate, and reports `partial` until packaged install-run
+archives, Android 12/15+ device coverage, disclosure/stop action, task
+removal/relaunch/crash behavior, stress/leak proof, and downstream
+security/type/docs sync evidence are attached.

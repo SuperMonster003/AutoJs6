@@ -4,6 +4,7 @@ import com.android.build.api.variant.FilterConfiguration
 import groovy.json.JsonOutput
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import java.time.Instant
+import java.time.ZonedDateTime
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.text.RegexOption.IGNORE_CASE
 
@@ -37,6 +38,8 @@ val flavorNameInrt = "inrt"
 val buildTypeDebug = "debug"
 val buildTypeRelease = "release"
 val buildActionAssemble = "assemble"
+val taskNameAssembleInrtFullNodeRelease = "assembleInrtFullNodeRelease"
+val taskNameEmbeddedNodeRefreshFullInrtTemplateApk = "embeddedNodeRefreshFullInrtTemplateApk"
 
 fun normalizeNodeJsHeaderDir(root: File): File {
     return listOf(
@@ -50,6 +53,15 @@ fun normalizeNodeJsHeaderDir(root: File): File {
 fun File.nodeJsCmakePath(): String = absolutePath.replace('\\', '/')
 
 val taskNames: List<String> = gradle.startParameter.taskNames
+
+fun isGradleTaskRequested(taskName: String): Boolean =
+    taskNames.any { requested ->
+        requested == taskName || requested == ":$flavorNameApp:$taskName" || requested.endsWith(":$taskName")
+    }
+
+val isFullNodeInrtTemplateTaskRequested =
+    isGradleTaskRequested(taskNameAssembleInrtFullNodeRelease) ||
+            isGradleTaskRequested(taskNameEmbeddedNodeRefreshFullInrtTemplateApk)
 val nodeJsIdentityProfile = providers.gradleProperty("autojs.nodejs.identity").orElse("production").get()
     .trim()
     .lowercase()
@@ -79,7 +91,7 @@ val nodeJsRuntimeBackend = providers.gradleProperty("autojs.nodejs.backend").orE
     .trim()
     .lowercase()
     .let { if (it in setOf("rhino", "native", "embedded", "auto")) it else "embedded" }
-val nodeJsReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
+val nodeJsConfiguredReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
     .trim()
     .let { requested ->
         when (requested.lowercase()) {
@@ -92,6 +104,11 @@ val nodeJsReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor"
             )
         }
     }
+val nodeJsReleaseFlavor = if (isInrtTaskRequested && !isFullNodeInrtTemplateTaskRequested) {
+    "rhinoOnly"
+} else {
+    nodeJsConfiguredReleaseFlavor
+}
 val nodeJsReleaseSupportedAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
 val nodeJsReleaseKnownAbis = nodeJsReleaseSupportedAbis + "x86"
 val nodeJsRuntimeSlot = providers.gradleProperty("autojs.nodejs.runtimeSlot").orElse("node24_5").get()
@@ -2509,6 +2526,67 @@ androidComponents {
     }
 }
 
+tasks.register(taskNameAssembleInrtFullNodeRelease) {
+    group = "build"
+    description = "Builds a full Embedded Node.js inrt release APK for template/runtime testing without updating assets-app/template.apk."
+
+    dependsOn("packageInrtRelease")
+    outputs.file(layout.buildDirectory.file("outputs/apk/inrt/full-node-template/template-node-full.apk"))
+    outputs.file(layout.buildDirectory.file("reports/embedded-node/inrt-full-node-template-assemble.txt"))
+    outputs.upToDateWhen { false }
+
+    doFirst {
+        if (nodeJsReleaseFlavor == "rhinoOnly" || !isNodeJsNativeRuntimeRequested) {
+            throw GradleException(
+                "$taskNameAssembleInrtFullNodeRelease requires Embedded Node native runtime packaging. " +
+                        "Do not pass -Pautojs.nodejs.releaseFlavor=rhinoOnly."
+            )
+        }
+    }
+
+    doLast {
+        val sourceApk = file("build/outputs/apk/inrt/release").listFiles { candidate ->
+            candidate.isFile &&
+                    candidate.extension.equals(utils.FILE_EXTENSION_APK, ignoreCase = true) &&
+                    candidate.name.contains("universal", ignoreCase = true)
+        }?.maxByOrNull(File::lastModified)
+            ?: throw GradleException("inrtRelease universal APK was not produced.")
+        val outputApk = layout.buildDirectory
+            .file("outputs/apk/inrt/full-node-template/template-node-full.apk")
+            .get()
+            .asFile
+        val reportFile = layout.buildDirectory
+            .file("reports/embedded-node/inrt-full-node-template-assemble.txt")
+            .get()
+            .asFile
+        outputApk.parentFile.mkdirs()
+        reportFile.parentFile.mkdirs()
+        sourceApk.copyTo(outputApk, overwrite = true)
+        reportFile.writeText(
+            buildString {
+                appendLine("Embedded Node.js full inrt template APK assemble report")
+                appendLine("Generated at: ${ZonedDateTime.now()}")
+                appendLine()
+                appendLine("Source:")
+                appendLine("  APK: ${sourceApk.absolutePath}")
+                appendLine("  bytes: ${sourceApk.length()}")
+                appendLine()
+                appendLine("Output:")
+                appendLine("  APK: ${outputApk.absolutePath}")
+                appendLine("  bytes: ${outputApk.length()}")
+                appendLine()
+                appendLine("Node packaging:")
+                appendLine("  autojs.nodejs.releaseFlavor=$nodeJsReleaseFlavor")
+                appendLine("  autojs.nodejs.releaseAbis=${if (nodeJsReleaseExpectedAbis.isEmpty()) "none" else nodeJsReleaseExpectedAbis.joinToString()}")
+                appendLine("  autojs.nodejs.backend=$effectiveNodeJsRuntimeBackend")
+                appendLine("  native runtime requested=$isNodeJsNativeRuntimeRequested")
+                appendLine("  updates assets-app/template.apk=false")
+            }
+        )
+        logger.lifecycle("Embedded Node.js full inrt template APK: ${outputApk.absolutePath}")
+    }
+}
+
 tasks.register("printNodeTestDeviceProfile") {
     group = "verification"
     description = "Prints the Embedded Node instrumentation classes selected by autojs.nodejs.test.deviceProfile."
@@ -2584,6 +2662,8 @@ apply(from = "node-phase11-gate.gradle.kts")
 apply(from = "node-phase12-gate.gradle.kts")
 apply(from = "node-phase13-gate.gradle.kts")
 apply(from = "node-phase14-gate.gradle.kts")
+apply(from = "node-phase15-gate.gradle.kts")
+apply(from = "node-phase16-gate.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

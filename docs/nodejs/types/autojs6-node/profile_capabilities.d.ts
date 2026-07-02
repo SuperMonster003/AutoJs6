@@ -99,7 +99,7 @@ declare namespace AutoJs6Node {
   }
 
   /** Node Profile release labels used by declaration-only profile metadata. */
-  export type NodeProfileVersionId = "v1.1" | "v1.2";
+  export type NodeProfileVersionId = "v1.1" | "v1.2" | "v1.3";
 
   /** P14 source gates that define the v1.2 declaration profile rows. */
   export type NodeProfileV12SourceGate =
@@ -243,6 +243,156 @@ declare namespace AutoJs6Node {
     readonly status: "v1_2_type_declarations_ready";
     readonly sourceGates: readonly NodeProfileV12SourceGate[];
     readonly capabilities: NodeProfileV12CapabilityCatalog;
+    readonly metadataOnly: true;
+    readonly grantsAuthority: false;
+  }
+
+  /** P15 source gates that define the v1.3 declaration profile rows. */
+  export type NodeProfileV13SourceGate =
+    | "P14-35"
+    | "P15-04"
+    | "P15-07"
+    | "P15-08"
+    | "P15-09"
+    | "P15-10"
+    | "P15-11"
+    | "P15-12"
+    | "P15-13"
+    | "P15-14"
+    | "P15-16"
+    | "P15-17"
+    | "P15-18"
+    | "P15-20"
+    | "P15-21"
+    | "P15-22"
+    | "P15-23"
+    | "P15-24"
+    | "P15-25";
+
+  export type NodeProfileV13CapabilityState =
+    | "provider_poc_not_promoted"
+    | "doc_sync_ready_no_authority"
+    | "security_corpus_ready_no_authority"
+    | "host_contract_ready"
+    | "stable_denied";
+
+  export type NodeProfileV13TypeSurface =
+    | "callable_declaration"
+    | "denial_declaration"
+    | "diagnostic_declaration"
+    | "declaration_only_metadata";
+
+  export type NodeProfileV13PackagedEvidence =
+    | "not_applicable"
+    | "imported_packaged_smoke"
+    | "host_contract_ready"
+    | "future_device_archive_required"
+    | "stable_denied"
+    | "security_corpus_ready";
+
+  export interface NodeProfileV13CapabilitySpec<
+    TCapability extends string,
+    TTargetProfile extends RuntimeProfileId,
+    TSafeDefault extends ProfileModuleMode,
+    TTargetMode extends ProfileModuleMode,
+    TState extends NodeProfileV13CapabilityState,
+    TTypeSurface extends NodeProfileV13TypeSurface,
+    TPackagedEvidence extends NodeProfileV13PackagedEvidence,
+    TSourceGate extends NodeProfileV13SourceGate,
+    TFutureOnly extends boolean,
+  > {
+    readonly capability: TCapability;
+    readonly targetProfile: TTargetProfile;
+    readonly safeDefault: TSafeDefault;
+    readonly targetMode: TTargetMode;
+    readonly v13State: TState;
+    readonly typeSurface: TTypeSurface;
+    readonly packagedEvidence: TPackagedEvidence;
+    readonly sourceGate: TSourceGate;
+    readonly futureOnly: TFutureOnly;
+    readonly metadataOnly: true;
+    readonly grantsAuthority: false;
+    readonly note: string;
+  }
+
+  /**
+   * v1.3 declaration matrix for provider POC, host-contract, docs-sync,
+   * security-corpus, and stable-denied surfaces.
+   *
+   * This matrix is declaration-only. It records the type-level profile truth
+   * for Phase 15 reports, but it does not promote runtime capability, does not
+   * make future-only methods successful, and does not declare raw Android
+   * objects, raw file descriptors, or Java objects as callable authority.
+   */
+  export interface NodeProfileV13CapabilityCatalog {
+    readonly "ui.live": NodeProfileV13CapabilitySpec<"ui.live", "pro_compat_opt_in", "profile_gated", "partial", "provider_poc_not_promoted", "callable_declaration", "future_device_archive_required", "P15-04", true>;
+    readonly "ui.overlay": NodeProfileV13CapabilitySpec<"ui.overlay", "pro_compat_opt_in", "denied", "profile_gated", "provider_poc_not_promoted", "callable_declaration", "future_device_archive_required", "P15-07", true>;
+    readonly "accessibility": NodeProfileV13CapabilitySpec<"accessibility", "pro_compat_opt_in", "partial", "partial", "provider_poc_not_promoted", "callable_declaration", "future_device_archive_required", "P15-08", true>;
+    readonly "media_projection": NodeProfileV13CapabilitySpec<"media_projection", "pro_compat_opt_in", "denied", "profile_gated", "provider_poc_not_promoted", "callable_declaration", "future_device_archive_required", "P15-09", true>;
+    readonly "image.advanced": NodeProfileV13CapabilitySpec<"image.advanced", "pro_compat_opt_in", "partial", "partial", "provider_poc_not_promoted", "callable_declaration", "future_device_archive_required", "P15-10", true>;
+    readonly "ocr": NodeProfileV13CapabilitySpec<"ocr", "pro_compat_opt_in", "partial", "partial", "provider_poc_not_promoted", "callable_declaration", "future_device_archive_required", "P15-10", true>;
+    readonly "tasks.database": NodeProfileV13CapabilitySpec<"tasks.database", "pro_compat_opt_in", "denied", "profile_gated", "provider_poc_not_promoted", "denial_declaration", "future_device_archive_required", "P15-12", true>;
+    readonly "tasks.schema": NodeProfileV13CapabilitySpec<"tasks.schema", "pro_compat_opt_in", "denied", "profile_gated", "provider_poc_not_promoted", "denial_declaration", "future_device_archive_required", "P15-13", true>;
+    readonly "work_manager": NodeProfileV13CapabilitySpec<"work_manager", "pro_compat_opt_in", "partial", "partial", "provider_poc_not_promoted", "callable_declaration", "imported_packaged_smoke", "P15-14", true>;
+    readonly "tasks.broadcast": NodeProfileV13CapabilitySpec<"tasks.broadcast", "pro_compat_opt_in", "denied", "profile_gated", "provider_poc_not_promoted", "denial_declaration", "future_device_archive_required", "P15-16", true>;
+    readonly "notifications": NodeProfileV13CapabilitySpec<"notifications", "pro_compat_opt_in", "partial", "partial", "provider_poc_not_promoted", "callable_declaration", "future_device_archive_required", "P15-17", true>;
+    readonly "device.power": NodeProfileV13CapabilitySpec<"device.power", "pro_compat_opt_in", "partial", "partial", "provider_poc_not_promoted", "callable_declaration", "future_device_archive_required", "P15-18", true>;
+    readonly "recorder.session": NodeProfileV13CapabilitySpec<"recorder.session", "pro_compat_opt_in", "denied", "profile_gated", "provider_poc_not_promoted", "denial_declaration", "future_device_archive_required", "P15-20", true>;
+    readonly "media.playback": NodeProfileV13CapabilitySpec<"media.playback", "pro_compat_opt_in", "denied", "denied", "stable_denied", "denial_declaration", "stable_denied", "P15-21", true>;
+    readonly "mediastore": NodeProfileV13CapabilitySpec<"mediastore", "pro_compat_opt_in", "denied", "denied", "stable_denied", "denial_declaration", "stable_denied", "P15-21", true>;
+    readonly "docs.types.release_sync": NodeProfileV13CapabilitySpec<"docs.types.release_sync", "safe_default", "partial", "partial", "doc_sync_ready_no_authority", "declaration_only_metadata", "not_applicable", "P15-22", false>;
+    readonly "security.regression": NodeProfileV13CapabilitySpec<"security.regression", "safe_default", "denied", "profile_gated", "security_corpus_ready_no_authority", "declaration_only_metadata", "security_corpus_ready", "P15-23", false>;
+    readonly "packaged.aggregate": NodeProfileV13CapabilitySpec<"packaged.aggregate", "pro_compat_opt_in", "denied", "profile_gated", "host_contract_ready", "declaration_only_metadata", "host_contract_ready", "P15-24", false>;
+  }
+
+  export type NodeProfileV13CapabilityName = keyof NodeProfileV13CapabilityCatalog;
+  export type NodeProfileV13CapabilityFor<TCapability extends NodeProfileV13CapabilityName> =
+    NodeProfileV13CapabilityCatalog[TCapability];
+  export type NodeProfileV13RequiredProfileFor<TCapability extends NodeProfileV13CapabilityName> =
+    NodeProfileV13CapabilityFor<TCapability>["targetProfile"];
+  export type NodeProfileV13SafeDefaultModeFor<TCapability extends NodeProfileV13CapabilityName> =
+    NodeProfileV13CapabilityFor<TCapability>["safeDefault"];
+  export type NodeProfileV13TargetModeFor<TCapability extends NodeProfileV13CapabilityName> =
+    NodeProfileV13CapabilityFor<TCapability>["targetMode"];
+  export type NodeProfileV13StateFor<TCapability extends NodeProfileV13CapabilityName> =
+    NodeProfileV13CapabilityFor<TCapability>["v13State"];
+  export type NodeProfileV13TypeSurfaceFor<TCapability extends NodeProfileV13CapabilityName> =
+    NodeProfileV13CapabilityFor<TCapability>["typeSurface"];
+  export type NodeProfileV13PackagedEvidenceFor<TCapability extends NodeProfileV13CapabilityName> =
+    NodeProfileV13CapabilityFor<TCapability>["packagedEvidence"];
+  export type NodeProfileV13FutureOnlyFor<TCapability extends NodeProfileV13CapabilityName> =
+    NodeProfileV13CapabilityFor<TCapability>["futureOnly"];
+
+  export type NodeProfileV13ModeFor<
+    TCapability extends NodeProfileV13CapabilityName,
+    TProfile extends RuntimeProfileId,
+  > = TProfile extends "safe_default"
+    ? NodeProfileV13SafeDefaultModeFor<TCapability>
+    : TProfile extends NodeProfileV13RequiredProfileFor<TCapability>
+      ? NodeProfileV13TargetModeFor<TCapability>
+      : "denied";
+
+  export type NodeProfileV13FutureOnlyCapabilityName = {
+    [TCapability in NodeProfileV13CapabilityName]: NodeProfileV13FutureOnlyFor<TCapability> extends true
+      ? TCapability
+      : never;
+  }[NodeProfileV13CapabilityName];
+
+  export type NodeProfileV13CapabilityNameByState<TState extends NodeProfileV13CapabilityState> = {
+    [TCapability in NodeProfileV13CapabilityName]: NodeProfileV13StateFor<TCapability> extends TState
+      ? TCapability
+      : never;
+  }[NodeProfileV13CapabilityName];
+
+  export type NodeProfileV13StableDeniedCapabilityName =
+    NodeProfileV13CapabilityNameByState<"stable_denied">;
+
+  export interface NodeProfileV13DeclarationMatrix {
+    readonly schema: "autojs6-node-profile-v1-3-declaration-matrix-v1";
+    readonly profileVersion: "v1.3";
+    readonly status: "v1_3_type_declarations_ready";
+    readonly sourceGates: readonly NodeProfileV13SourceGate[];
+    readonly capabilities: NodeProfileV13CapabilityCatalog;
     readonly metadataOnly: true;
     readonly grantsAuthority: false;
   }

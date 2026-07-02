@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autojs6.local/schemas/phase16_surface_manifest.schema.json",
+  "title": "AutoJs6 Node Phase 16 Surface Manifest",
+  "type": "object",
+  "required": [
+    "schema",
+    "phase",
+    "branch",
+    "importedBacklog",
+    "ownerSurfaces",
+    "taskMappings"
+  ],
+  "properties": {
+    "schema": {
+      "const": "autojs6-node-phase16-surface-manifest-v1"
+    },
+    "phase": {
+      "const": "Phase 16: Node v1.4 Provider Promotion"
+    },
+    "branch": {
+      "const": "feature/nodejs-runtime-v1.4"
+    },
+    "importedBacklog": {
+      "type": "object",
+      "required": [
+        "source",
+        "classification",
+        "tasks"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "classification": {
+          "const": "v1.4 future promotion backlog"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^P15-\\d{2}$"
+          }
+        }
+      }
+    },
+    "ownerSurfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "summary",
+          "profiles",
+          "risk",
+          "rollbackHook"
+        ]
+      }
+    },
+    "taskMappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "task",
+          "ownerSurface",
+          "sourceBacklogTasks",
+          "profiles",
+          "risk",
+          "evidenceClass",
+          "rollbackHook",
+          "gate",
+          "status"
+        ],
+        "properties": {
+          "task": {
+            "type": "string",
+            "pattern": "^P16-\\d{2}$"
+          },
+          "sourceBacklogTasks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^P15-\\d{2}$"
+            }
+          }
+        }
+      }
+    }
+  }
+}

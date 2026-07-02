@@ -83,6 +83,16 @@ helpers include `NodeProfileV12ModeFor`, `NodeProfileV12StateFor`,
 `NodeProfileV12StableDeniedCapabilityName`. They are metadata-only and keep
 future-only methods visibly gated; they do not promote runtime authority.
 
+P15-25 adds the v1.3 `NodeProfileV13CapabilityCatalog` and
+`NodeProfileV13DeclarationMatrix`. This matrix records Phase 15 provider POC
+rows, docs/type/release sync metadata, the v1.3 security regression corpus, the
+v1.3 packaged aggregate smoke contract, and the MediaStore/playback
+stable-denied rows. The helpers include `NodeProfileV13ModeFor`,
+`NodeProfileV13StateFor`, `NodeProfileV13PackagedEvidenceFor`,
+`NodeProfileV13FutureOnlyFor`, and `NodeProfileV13StableDeniedCapabilityName`.
+They are metadata-only and keep future-only or stable-denied methods visibly
+gated; they do not promote runtime authority.
+
 The `autojs6:lifecycle` module is available only inside the explicit interactive long-running runtime. It stores JSON-only project-scoped checkpoints for explicit restore and does not enable automatic restart.
 
 P13-12 adds the read-only `$autojs` global v1 and the matching
@@ -396,6 +406,13 @@ OCR/model behavior, and recorder sessions still require their own provider,
 disclosure, packaged, and device-matrix evidence before examples can be treated
 as promoted runtime paths.
 
+P15-11 docs sync records the v1.3 `pro.ui_overlay_automation_media` declaration state
+as `provider_poc_not_promoted`. P15-04 through P15-10 add executable partial
+provider gates, but the declarations remain migration and denial-test evidence
+until packaged live UI, overlay, accessibility, MediaProjection, advanced image,
+packaged OCR/model, disclosure, rollback, security, and release sync evidence
+is promoted together.
+
 P14-27 docs sync records the v1.2 `pro.tasks_device_media` declaration state as
 `provider_poc_not_promoted`. The checked-in declarations for `work_manager`,
 `autojs6:compat.tasks`, `notifications`, `device`, `media`, `mediainfo`, and
@@ -405,6 +422,17 @@ foreground disclosure, OEM power mutation, real recorder sessions, packaged
 recorder start/stop, playback, MediaStore, and broad media-library permissions
 still require dedicated provider, disclosure, packaged, rollback, and device
 evidence before examples can be treated as promoted runtime paths.
+
+P15-22 docs sync records the v1.3 `pro.tasks_device_media` declaration state as
+`provider_poc_not_promoted` with `mediastore_playback` kept `stable_denied`.
+The checked-in declarations for `work_manager`, `autojs6:compat.tasks`,
+`notifications`, `device`, `media`, `mediainfo`, `recorder`, and
+`profile_capabilities` remain migration and denial-test evidence until task
+database mutation, IntentTask/broadcast registration, packaged task/broadcast
+behavior, notification foreground ownership, OEM power mutation, real recorder
+sessions, packaged recorder start/stop, playback, MediaStore, broad
+media-library permissions, raw media handles, Safe downgrade, security, and
+release sync evidence are promoted together.
 
 P12-34 is a documentation synchronization gate rather than a new declaration
 surface. It keeps this README aligned with `MIGRATION_FROM_RHINO.md`, the Pro 9

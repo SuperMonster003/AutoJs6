@@ -16,7 +16,11 @@ Valid values:
 
 ## nodeFull
 
-`nodeFull` is the default profile for builds that include AutoJs6 Safe Node Profile.
+`nodeFull` is the default profile for main app builds that include AutoJs6 Safe Node Profile.
+Ordinary production `inrt` template builds force `rhinoOnly` so the checked-in template APK stays small even when
+`gradle.properties` selects `nodeFull` for the main app; use
+`assembleInrtFullNodeRelease` or `embeddedNodeRefreshFullInrtTemplateApk` when a full Embedded Node template artifact is
+needed for runtime testing.
 
 Required ABIs:
 
@@ -37,6 +41,7 @@ Expected use:
 - full release candidates
 - side-load builds where APK size is acceptable
 - regression testing across supported native runtime ABIs
+- full Embedded Node inrt test templates generated outside `assets-app/template.apk`
 
 ## nodeMini
 
@@ -84,6 +89,7 @@ Expected use:
 - smallest compatibility build
 - low-end devices
 - emergency fallback releases that preserve Rhino scripts without shipping Node
+- ordinary production `assembleInrtRelease` template APKs, with Embedded Node native libraries injected later only when the packaged project selects the `Embedded Node.js` library
 
 ## ABI Policy
 
@@ -138,5 +144,6 @@ Smoke APK checks can still pass an explicit `autojs.embeddedNode.expectedAbis` v
 - publish `nodeFull` as per-ABI APKs or split APKs when possible
 - use `nodeMini` for arm64-only side-load channels
 - keep `rhinoOnly` as a small fallback profile
+- keep the production inrt template slim and let the APK builder inject Embedded Node native libraries on demand
 
 User-facing download notes should call out that `nodeFull` carries the full Embedded Node runtime for all supported ABIs, `nodeMini` narrows the ABI set for smaller side-load builds, and `rhinoOnly` is a no-Node compatibility fallback. Avoid making universal multi-ABI Embedded Node APKs the default distribution unless the larger download size is acceptable for that channel.

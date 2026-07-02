@@ -1,0 +1,149 @@
+{
+  "schema": "autojs6-node-phase15-packaged-recorder-smoke-plan-v1",
+  "phase": "Phase 15: Node v1.3 Provider Promotion",
+  "task": "P15-20",
+  "title": "Packaged recorder and media stress evidence",
+  "status": "partial",
+  "promotionState": "provider_poc_not_promoted",
+  "providerId": "recorder",
+  "surface": "pro.tasks_device_media",
+  "sourceBacklogTasks": [
+    "P14-25"
+  ],
+  "upstreamGates": [
+    ":app:verifyNodePhase15RecorderPromotion",
+    ":app:verifyNodePhase14PackagedRecorderMediaStress"
+  ],
+  "runtimeAuthorityChanged": false,
+  "minimumPromotionPolicy": "Packaged recorder promotion requires positive packaged start/stop evidence with visible microphone foreground disclosure, deterministic stop behavior, task removal cleanup, relaunch/crash recovery, quota enforcement, temporary output cleanup, missing capability denial, missing Android permission denial, metadata mismatch denial, Safe downgrade, and raw object denial.",
+  "packagedBoundaryContract": {
+    "providerName": "recorder",
+    "capability": "media.recording",
+    "currentPackagedBoundaryReady": true,
+    "currentPackagedStatusReady": true,
+    "currentPackagedStartDenied": true,
+    "currentPackagedMissingCapabilityDenied": true,
+    "positivePackagedStartStopReady": false,
+    "foregroundDisclosureVisibleReady": false,
+    "deterministicStopReady": false,
+    "taskRemovalCleanupReady": false,
+    "relaunchCrashRecoveryReady": false,
+    "quotaAndTempCleanupReady": false,
+    "safeDowngradeReady": false,
+    "rawObjectDenialReady": false
+  },
+  "stressMatrix": [
+    {
+      "id": "packaged_status_and_denial_boundary",
+      "status": "imported",
+      "source": "P13-26 packaged media/recorder bridge smoke",
+      "requiredEvidence": "Packaged project resolves media, mediainfo, and recorder modules, returns recorder status, denies start, and rejects missing media.audio/media.metadata/media.recording capabilities."
+    },
+    {
+      "id": "future_packaged_start_stop_positive",
+      "status": "future_promotion",
+      "source": "future packaged recorder start/stop archive",
+      "requiredEvidence": "Packaged APK starts a microphone recorder session, surfaces visible foreground disclosure, returns JSON-safe session/status, stops deterministically, and closes owned resources."
+    },
+    {
+      "id": "future_task_removal_relaunch_crash_cleanup",
+      "status": "future_promotion",
+      "source": "future packaged recorder lifecycle archive",
+      "requiredEvidence": "Task removal, app relaunch, process death, provider crash, and Safe downgrade stop owned sessions and clean temporary outputs without leaking microphone capture."
+    },
+    {
+      "id": "future_quota_temp_output_cleanup",
+      "status": "future_promotion",
+      "source": "future packaged recorder quota archive",
+      "requiredEvidence": "Quota limits, scoped temporary output paths, delete-on-stop, delete-on-destroy, failure cleanup, and rollback cleanup are deterministic."
+    },
+    {
+      "id": "future_permission_denial_matrix",
+      "status": "future_promotion",
+      "source": "future packaged recorder denial archive",
+      "requiredEvidence": "Missing capability, missing Android RECORD_AUDIO permission, denied runtime prompt, missing foreground-service microphone metadata, and Safe downgrade denials remain stable."
+    }
+  ],
+  "readyEvidence": [
+    {
+      "id": "phase14_packaged_recorder_media_stress_contract",
+      "source": "build/reports/nodejs/phase14-packaged-recorder-media-stress.json",
+      "status": "ready",
+      "summary": "P14-25 imports packaged media/recorder status and denial boundary smoke while keeping positive packaged recorder start/stop blocked."
+    },
+    {
+      "id": "phase15_recorder_dependency_gate",
+      "source": "build/reports/nodejs/phase15-recorder-promotion.json",
+      "status": "ready",
+      "summary": "P15-19 recorder promotion remains partial and unpromoted before packaged recorder stress can proceed."
+    },
+    {
+      "id": "phase15_promotion_contracts",
+      "source": "build/reports/nodejs/phase15-promotion-contracts.json",
+      "status": "ready",
+      "summary": "P15 contracts keep recorder at provider_poc until every opt-in promotion evidence bar is satisfied."
+    },
+    {
+      "id": "phase15_disclosure_rollback_contract",
+      "source": "build/reports/nodejs/phase15-disclosure-rollback-audit.json",
+      "status": "ready",
+      "summary": "Recorder disclosure, provider-disable, Safe downgrade, and crash circuit breaker requirements are declared before runtime authority changes."
+    },
+    {
+      "id": "phase15_surface_manifest_mapping",
+      "source": "docs/nodejs/phase15/phase15-surface-manifest.json",
+      "status": "ready",
+      "summary": "P15-20 is mapped to pro.tasks_device_media with the disable_recorder_provider rollback hook and packaged stress evidence class."
+    }
+  ],
+  "openBlockers": [
+    {
+      "id": "packaged_recorder_start_stop_positive_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged recorder positive start/stop archive with visible microphone foreground disclosure, stop action, JSON-safe session/status, and owned resource cleanup."
+    },
+    {
+      "id": "packaged_recorder_task_removal_relaunch_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged recorder task removal, relaunch, and provider/process crash archive proving deterministic stop and temporary output cleanup."
+    },
+    {
+      "id": "packaged_recorder_quota_temp_cleanup_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged recorder quota and scoped temporary output archive proving no raw file descriptor, no broad media-library permission, and cleanup on stop/destroy/failure/rollback."
+    },
+    {
+      "id": "packaged_recorder_denial_without_capability_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged recorder denial archive for missing media.recording, missing Android permission, denied prompt, and metadata mismatch before bridge dispatch."
+    },
+    {
+      "id": "packaged_recorder_foreground_disclosure_stop_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged recorder microphone foreground disclosure and stop-action archive proving user-visible ownership and deterministic stop behavior."
+    },
+    {
+      "id": "packaged_recorder_safe_downgrade_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged provider-disable Safe downgrade archive proving owned sessions stop, temporary outputs are cleaned, and future packaged recorder start remains denied."
+    },
+    {
+      "id": "packaged_recorder_raw_object_denial_security_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Security regression coverage proving packaged recorder cannot expose raw MediaRecorder, AudioRecord, AudioPlaybackCaptureConfiguration, MediaProjection, ParcelFileDescriptor, Uri, Context, foreground service handles, file descriptors, or Java objects."
+    },
+    {
+      "id": "phase15_task_device_media_doc_sync",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "P15-22, P15-23, P15-25, and P15-26 sync before packaged recorder can be marked promoted."
+    }
+  ]
+}

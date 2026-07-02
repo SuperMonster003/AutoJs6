@@ -56,6 +56,26 @@ surface for UI/automation/media migration examples while
   `ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED`; callers should not interpret provider
   failure as permission or profile promotion.
 
+## P15-11 UI/automation/media denial sync
+
+P15-11 docs sync does not add a new error code. It records the v1.3
+release-facing denial surface while `pro.ui_overlay_automation_media` remains
+`provider_poc_not_promoted`:
+
+- P15-04 through P15-10 partial provider gates do not convert missing
+  project/package capability metadata into promoted authority; missing
+  declarations still reject before provider dispatch with
+  `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Packaged live UI relaunch, overlay permission/disclosure, packaged
+  accessibility, MediaProjection capture, advanced image processing, packaged
+  OCR/model lookup, and recorder-session paths remain
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` or provider-specific stable denials
+  until their provider-specific archives and downstream security/type/release
+  sync gates are promoted.
+- P15-11 is documentation synchronization only; provider failures still use
+  `ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED` and must not be interpreted as release
+  promotion.
+
 ## P14-17 task database mutation denial sync
 
 P14-17 does not add a new error code or expose `require("tasks")`. It records
@@ -244,6 +264,216 @@ authority. It records documentation consistency expectations:
   recorder start/stop, playback, MediaStore, broad media-library permissions,
   raw Android objects, raw file descriptors, and Java objects stay governed by
   the stable denial codes already documented in their source gates.
+
+## P15-22 task/device/media docs sync denial sync
+
+P15-22 does not add a new error code or promote task/device/media runtime
+authority. It records the v1.3 documentation consistency state:
+
+- `tasks-work-manager` remains the only task/device/media focused Pro smoke
+  path.
+- `notifications-power` and `media-recorder` remain static, guarded, or
+  denial-oriented migration evidence.
+- P15-12 through P15-20 remain `provider_poc_not_promoted` partial gates, and
+  P15-21 keeps `mediastore_playback` `stable_denied`.
+- Task database mutation, IntentTask/broadcast registration, packaged
+  task/broadcast mutation, notification foreground ownership, OEM power
+  mutation, real recorder sessions, packaged recorder start/stop, playback,
+  MediaStore, broad media-library permissions, raw Android objects, raw file
+  descriptors, and Java objects stay governed by the stable denial codes
+  already documented in their source gates.
+
+## P15-23 security regression corpus
+
+P15-23 does not add a new error code or promote runtime authority. It updates
+the v1.3 security regression corpus and keeps the existing denial catalog as
+the source for provider-facing errors:
+
+- P15-04 through P15-20 remain `provider_poc_not_promoted` partial gates.
+- P15-21 keeps `mediastore_playback` `stable_denied`.
+- P15-11 and P15-22 remain docs/type/release sync gates only.
+- Raw Android objects, raw file descriptors, Java objects, permission bypasses,
+  packaged metadata mismatch, foreground disclosure gaps, cross-package owner
+  bypasses, Safe downgrade failures, and stable-denied MediaStore/playback
+  attempts remain covered by their existing source-gate diagnostics.
+- The P15-23 surface manifest mapping remains `planned` by critical-risk
+  policy; a host security corpus update cannot promote provider authority.
+
+## P15-24 packaged aggregate smoke
+
+P15-24 does not add a new error code or promote runtime authority. It records
+the v1.3 deterministic packaged aggregate smoke contract through
+`:app:installAndRunNodeV13PackagedAggregateSmoke`:
+
+- The gate is `host_contract_ready`; it does not claim real device install-run
+  success or release tag approval.
+- Packaged live UI, overlay, accessibility, MediaProjection, image/OCR,
+  task scheduling, broadcast, notifications/power, recorder/media, and
+  MediaStore/playback denial rows must retain undeclared capability denial,
+  packaged metadata mismatch denial, Safe downgrade behavior, cleanup, and
+  report artifact coverage.
+- P15-21 keeps MediaStore/playback stable-denied inside the packaged aggregate.
+- P15-23 remains the imported security corpus source for raw-object denial,
+  metadata mismatch, Safe downgrade, foreground disclosure, ownership, and
+  stable-denied coverage.
+- The P15-24 surface manifest mapping remains `planned` by critical-risk
+  policy; a host packaged aggregate contract cannot promote provider authority.
+
+## P15-25 type declaration profiles
+
+P15-25 does not add a new error code or promote runtime authority. It records
+v1.3 TypeScript declaration profile truth through
+`:app:verifyNodePhase15TypeDeclarationProfiles`:
+
+- `NodeProfileV13CapabilityCatalog` and `NodeProfileV13DeclarationMatrix`
+  remain metadata-only.
+- Provider POC rows, docs sync rows, security corpus rows, packaged aggregate
+  rows, and MediaStore/playback stable-denied rows keep `grantsAuthority:
+  false`.
+- Future-only and stable-denied methods remain visibly gated in TypeScript
+  smoke.
+- The declaration matrix does not make task database mutation,
+  IntentTask/broadcast registration, notifications/power mutation, recorder
+  sessions, playback, MediaStore, raw Android objects, raw file descriptors, or
+  Java objects callable authority.
+
+## P15-26 migration and Pro comparison
+
+P15-26 does not add a new error code or promote runtime authority. It records
+v1.3 migration, Pro comparison, compatibility, examples, and release-note claim
+sync through `:app:verifyNodePhase15MigrationProComparison`:
+
+- The gate imports P14-36, P15-11, P15-22, P15-23, P15-24, and P15-25.
+- Claims must match executable evidence and must not imply raw Android object
+  parity.
+- Provider POC rows remain `provider_poc_not_promoted`; MediaStore/playback
+  remains `stable_denied`; packaged aggregate evidence remains
+  `host_contract_ready`.
+- `NodeProfileV13CapabilityCatalog` remains metadata-only and runtime
+  authority remains unchanged.
+- The docs do not make task database mutation, IntentTask/broadcast
+  registration, notifications/power mutation, recorder sessions, playback,
+  MediaStore, raw Android objects, raw file descriptors, or Java objects
+  callable authority.
+
+## P15-27 summary and next-branch handoff
+
+P15-27 does not add a new error code or promote runtime authority. It records
+the v1.3 summary and next-branch handoff through
+`:app:generateNodePhase15Summary`:
+
+- The gate imports every Phase 15 report through P15-26.
+- The summary is ready only with zero policy violations and zero
+  release-blocking reports.
+- `PHASE15_FUTURE_BACKLOG.json` keeps `future_promotion` blockers visible for
+  v1.4.
+- `PHASE15_NEXT_BRANCH_HANDOFF.md` carries Safe default, provider POC,
+  `stable_denied`, `host_contract_ready`, raw-object denial, and unchanged
+  runtime-authority boundaries.
+
+## P16-00/P16-01 v1.4 foundation
+
+P16-00 and P16-01 do not add new error codes or promote runtime authority.
+They record the v1.4 baseline and surface manifest through
+`:app:verifyNodePhase16Baseline` and
+`:app:verifyNodePhase16SurfaceManifest`:
+
+- The baseline imports the Phase 15 summary handoff and v1.4 future backlog.
+- The surface manifest maps `P16-00` through `P16-27` exactly once and owns
+  every imported Phase 15 backlog task.
+- Provider POC rows, `stable_denied` rows, `host_contract_ready` packaged
+  aggregate evidence, raw-object denial, and unchanged runtime-authority
+  boundaries remain in force.
+
+## P16-02 v1.4 promotion contracts
+
+P16-02 does not add new error codes or promote runtime authority. It records
+the v1.4 provider promotion bars through `:app:verifyNodePhase16PromotionContracts`:
+
+- Missing v1.4 implementation, connected-device, packaged APK, disclosure,
+  rollback, security, TypeScript, release-doc, Safe-downgrade, or raw-object
+  denial evidence keeps providers at `provider_poc`, `future_only`,
+  `stable_denied`, or `rejected`.
+- Missing capability metadata still rejects before provider dispatch with
+  `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Unpromoted provider requests still use `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
+  or existing provider-specific stable denials.
+- `mediastore_playback` remains `stable_denied` until a later scoped provider
+  boundary proves permission, privacy, packaged, rollback, Safe downgrade, and
+  raw-object denial evidence.
+
+## P16-03 v1.4 disclosure and rollback audit
+
+P16-03 does not add new error codes or promote runtime authority. It records
+the disclosure, rollback, disable-flag, diagnostic, and crash circuit breaker
+proof requirements through `:app:verifyNodePhase16DisclosureRollbackAudit`:
+
+- Missing disclosure or rollback evidence keeps providers unpromoted.
+- Provider disable diagnostics use stable `NODE_PROVIDER_*` diagnostic labels
+  while script-visible failures continue to use the existing bridge and
+  provider-specific error catalog.
+- Crash circuit breaker fallback must return the provider to Safe-profile or
+  stable-denied behavior without exposing raw Android objects.
+- Safe downgrade must remain user-visible for packaged projects.
+
+## P16-04 packaged live UI promotion
+
+P16-04 does not add new error codes or promote runtime authority. It records a
+partial packaged live UI gate through `:app:verifyNodePhase16PackagedLiveUiPromotion`:
+
+- `live_ui` remains `provider_poc_not_promoted` until packaged relaunch,
+  task-removal cleanup, crash recovery, reviewed disclosure, Android 15+, and
+  downstream security/type/docs evidence are archived.
+- Missing `ui` capability metadata still rejects before provider dispatch with
+  `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Raw Android UI globals and handles remain unavailable to packaged Node code.
+- Rollback uses the `NODE_PROVIDER_LIVE_UI_DISABLED` diagnostic label and the
+  `node.provider.live_ui.enabled` disable flag recorded by P16-03.
+
+## P16-05 overlay provider promotion
+
+P16-05 does not add new error codes or promote runtime authority. It records a
+partial overlay provider gate through `:app:verifyNodePhase16OverlayProviderPromotion`:
+
+- `overlay` remains `provider_poc_not_promoted` until Android 12/15+
+  permission-granted archives, foreground disclosure/stop action, owner cleanup
+  stress, packaged positive smoke, OEM matrix, and downstream
+  security/type/docs evidence are archived.
+- Missing `ui.overlay` capability metadata still rejects before provider
+  dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Missing `SYSTEM_ALERT_WINDOW` still rejects provider dispatch with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`.
+- Raw Android overlay objects and handles remain unavailable to Node code.
+- Rollback uses the `NODE_PROVIDER_OVERLAY_DISABLED` diagnostic label and the
+  `node.provider.overlay.enabled` disable flag recorded by P16-03.
+
+## P16-06 overlay OEM matrix
+
+P16-06 does not add new error codes or promote runtime authority. It records a
+partial overlay OEM matrix gate through `:app:verifyNodePhase16OverlayOemMatrix`:
+
+- Missing Android 12/15+ granted-device archives, OEM notes,
+  task-removal/relaunch evidence, foreground disclosure/stop action, or
+  security/type/docs sync keeps `overlay` at `provider_poc_not_promoted`.
+- Missing `SYSTEM_ALERT_WINDOW` still rejects with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`.
+- Matrix gaps are future-promotion blockers, not release-blocking error codes.
+
+## P16-07 packaged overlay smoke
+
+P16-07 does not add new error codes or promote runtime authority. It records a
+partial packaged overlay smoke gate through `:app:installAndRunNodeV14PackagedOverlaySmoke`:
+
+- `overlay` remains `provider_poc_not_promoted` until packaged install-run
+  archives, Android 12/15+ coverage, foreground disclosure/stop action, task
+  removal/relaunch/crash behavior, stress/leak proof, and downstream
+  security/type/docs evidence are archived.
+- Missing `ui.overlay` capability metadata still rejects before provider
+  dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Missing `SYSTEM_ALERT_WINDOW` still rejects provider dispatch with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`.
+- Missing packaged smoke archives are future-promotion blockers, not
+  release-blocking error codes.
 
 ## P14-28 worker native availability decision
 

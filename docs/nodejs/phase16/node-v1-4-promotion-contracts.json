@@ -1,0 +1,439 @@
+{
+  "schema": "autojs6-node-phase16-promotion-contracts-v1",
+  "phase": "Phase 16: Node v1.4 Provider Promotion",
+  "task": "P16-02",
+  "updatedAt": "2026-07-02",
+  "branch": "feature/nodejs-runtime-v1.4",
+  "promotionStateVocabulary": [
+    "promoted",
+    "provider_poc",
+    "future_only",
+    "stable_denied",
+    "rejected"
+  ],
+  "optInPromotionRequiredEvidence": [
+    "implementation_gate",
+    "connected_device_evidence",
+    "packaged_apk_evidence",
+    "user_visible_disclosure",
+    "rollback_disable_path",
+    "security_regression_corpus",
+    "typescript_declaration_profile",
+    "migration_compat_release_docs",
+    "safe_downgrade_behavior",
+    "raw_object_denial_regression"
+  ],
+  "stateTransitions": [
+    {
+      "from": "provider_poc",
+      "to": "promoted",
+      "requires": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "fallback": [
+        "future_only",
+        "stable_denied",
+        "rejected"
+      ]
+    },
+    {
+      "from": "future_only",
+      "to": "provider_poc",
+      "requires": [
+        "implementation_gate",
+        "security_regression_corpus",
+        "raw_object_denial_regression"
+      ],
+      "fallback": [
+        "stable_denied",
+        "rejected"
+      ]
+    },
+    {
+      "from": "stable_denied",
+      "to": "provider_poc",
+      "requires": [
+        "implementation_gate",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "fallback": [
+        "stable_denied",
+        "rejected"
+      ]
+    }
+  ],
+  "providerPromotionBars": [
+    {
+      "providerId": "live_ui",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "currentState": "provider_poc",
+      "profiles": [
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-04"
+      ],
+      "sourceBacklogTasks": [
+        "P15-04"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-packaged-live-ui-promotion.json",
+      "rollbackHook": "disable_live_ui_provider",
+      "safeDefaultBehavior": "deny live UI authority unless every v1.4 opt-in promotion bar is attached"
+    },
+    {
+      "providerId": "overlay",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "currentState": "provider_poc",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-05",
+        "P16-06",
+        "P16-07"
+      ],
+      "sourceBacklogTasks": [
+        "P15-05",
+        "P15-06",
+        "P15-07"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-overlay-provider-promotion.json",
+      "rollbackHook": "disable_overlay_provider",
+      "safeDefaultBehavior": "deny overlay creation unless permission, foreground disclosure, OEM, packaged, rollback, and security evidence all pass"
+    },
+    {
+      "providerId": "accessibility",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "currentState": "provider_poc",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-08"
+      ],
+      "sourceBacklogTasks": [
+        "P15-08"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-accessibility-promotion.json",
+      "rollbackHook": "disable_accessibility_provider",
+      "safeDefaultBehavior": "deny accessibility actions unless lifecycle, selector/action, downgrade, and raw-object denial evidence pass"
+    },
+    {
+      "providerId": "media_projection",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "currentState": "provider_poc",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-09"
+      ],
+      "sourceBacklogTasks": [
+        "P15-09"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-media-projection-promotion.json",
+      "rollbackHook": "disable_media_projection_provider",
+      "safeDefaultBehavior": "deny capture unless Activity-owned prompt, foreground disclosure, cleanup, packaged, rollback, and security evidence pass"
+    },
+    {
+      "providerId": "image_ocr",
+      "ownerSurface": "pro.ui_overlay_automation_media",
+      "currentState": "provider_poc",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-10"
+      ],
+      "sourceBacklogTasks": [
+        "P15-10"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-image-ocr-promotion.json",
+      "rollbackHook": "disable_image_ocr_provider",
+      "safeDefaultBehavior": "deny advanced image/OCR authority unless scoped image handles, model/provider mode, quota, rollback, and security evidence pass"
+    },
+    {
+      "providerId": "task_database",
+      "ownerSurface": "pro.tasks_device_media",
+      "currentState": "provider_poc",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-12",
+        "P16-13",
+        "P16-14"
+      ],
+      "sourceBacklogTasks": [
+        "P15-12",
+        "P15-13",
+        "P15-14"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-task-database-promotion.json",
+      "rollbackHook": "disable_task_database_provider",
+      "safeDefaultBehavior": "deny task database mutation unless ownership, schema rollback, packaged scheduling, downgrade, and security evidence pass"
+    },
+    {
+      "providerId": "intent_broadcast",
+      "ownerSurface": "pro.tasks_device_media",
+      "currentState": "provider_poc",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-15",
+        "P16-16"
+      ],
+      "sourceBacklogTasks": [
+        "P15-15",
+        "P15-16"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-intent-broadcast-promotion.json",
+      "rollbackHook": "disable_intent_broadcast_provider",
+      "safeDefaultBehavior": "deny IntentTask/broadcast registration unless manifest, ownership, trigger/remove, downgrade, and security evidence pass"
+    },
+    {
+      "providerId": "notifications",
+      "ownerSurface": "pro.tasks_device_media",
+      "currentState": "provider_poc",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-17"
+      ],
+      "sourceBacklogTasks": [
+        "P15-17"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-notification-promotion.json",
+      "rollbackHook": "disable_notification_provider",
+      "safeDefaultBehavior": "deny notification foreground ownership unless user-visible disclosure, stop action, packaged, downgrade, and security evidence pass"
+    },
+    {
+      "providerId": "settings_power",
+      "ownerSurface": "pro.tasks_device_media",
+      "currentState": "provider_poc",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-18"
+      ],
+      "sourceBacklogTasks": [
+        "P15-18"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-settings-power-promotion.json",
+      "rollbackHook": "disable_settings_power_provider",
+      "safeDefaultBehavior": "deny settings/power mutation unless OEM, Android version, prompt, rollback, and raw-object denial evidence pass"
+    },
+    {
+      "providerId": "recorder",
+      "ownerSurface": "pro.tasks_device_media",
+      "currentState": "provider_poc",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-19",
+        "P16-20"
+      ],
+      "sourceBacklogTasks": [
+        "P15-19",
+        "P15-20"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-recorder-promotion.json",
+      "rollbackHook": "disable_recorder_provider",
+      "safeDefaultBehavior": "deny microphone recording unless prompt, foreground disclosure, session cleanup, packaged stress, rollback, and security evidence pass"
+    },
+    {
+      "providerId": "mediastore_playback",
+      "ownerSurface": "pro.tasks_device_media",
+      "currentState": "stable_denied",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "p16Tasks": [
+        "P16-21"
+      ],
+      "sourceBacklogTasks": [
+        "P15-21"
+      ],
+      "requiredEvidence": [
+        "implementation_gate",
+        "connected_device_evidence",
+        "packaged_apk_evidence",
+        "user_visible_disclosure",
+        "rollback_disable_path",
+        "security_regression_corpus",
+        "typescript_declaration_profile",
+        "migration_compat_release_docs",
+        "safe_downgrade_behavior",
+        "raw_object_denial_regression"
+      ],
+      "promotionReport": "phase16-mediastore-playback-scope-decision.json",
+      "rollbackHook": "keep_mediastore_playback_denied",
+      "safeDefaultBehavior": "keep playback, MediaStore, broad media permissions, raw media handles, and raw file descriptors denied unless a scoped provider boundary fully passes"
+    }
+  ],
+  "reportConventions": {
+    "reportNamePrefix": "phase16-",
+    "schemaPattern": "autojs6-node-phase16-<surface-or-task>-v1",
+    "statusField": "status",
+    "notPromotedStatus": "partial",
+    "stableDeniedStatus": "ready",
+    "requiredProviderFields": [
+      "providerId",
+      "currentState",
+      "p16Tasks",
+      "sourceBacklogTasks",
+      "requiredEvidence",
+      "rollbackHook",
+      "safeDefaultBehavior"
+    ]
+  },
+  "guardRails": {
+    "safeProfileDefault": true,
+    "noRuntimeAuthorityByDefault": true,
+    "rawAndroidObjectsDenied": true,
+    "packagedApkParityRequired": true,
+    "connectedDeviceEvidenceRequired": true,
+    "rollbackRequiredBeforePromotion": true,
+    "securityCorpusRequiredBeforePromotion": true,
+    "typeDeclarationRequiredBeforePromotion": true,
+    "releaseDocsRequiredBeforePromotion": true,
+    "stableDeniedRequiresExplicitDecision": true
+  }
+}

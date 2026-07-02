@@ -1,0 +1,19 @@
+{
+  "schema": "autojs6-node-phase15-baseline-plan-v1",
+  "phase": "Phase 15: Node v1.3 Provider Promotion",
+  "task": "P15-00",
+  "title": "Phase 15 baseline from Phase 14 closeout handoff",
+  "status": "ready",
+  "decision": "phase15_baseline_ready",
+  "branch": "feature/nodejs-runtime-v1.3",
+  "gradleTask": ":app:verifyNodePhase15Baseline",
+  "runtimeAuthorityChanged": false,
+  "sourceInputs": [
+    "docs/nodejs/reports/phase14/PHASE14_CLOSEOUT_BREAKDOWN.md",
+    "docs/nodejs/reports/phase14/PHASE14_FUTURE_BACKLOG.json",
+    "docs/nodejs/reports/phase14/PHASE14_NEXT_BRANCH_HANDOFF.md",
+    "build/reports/nodejs/phase14-closeout-handoff.json"
+  ],
+  "expectedImportedBacklogCount": 19,
+  "minimumPolicy": "P15-00 starts v1.3 from the Phase 14 closeout handoff without reopening final blockers or changing runtime authority."
+}

@@ -1,0 +1,178 @@
+{
+  "schema": "autojs6-node-phase15-settings-power-promotion-plan-v1",
+  "phase": "Phase 15: Node v1.3 Provider Promotion",
+  "task": "P15-18",
+  "title": "Settings/power OEM and background-launch promotion",
+  "status": "partial",
+  "promotionState": "provider_poc_not_promoted",
+  "providerId": "settings_power",
+  "surface": "pro.tasks_device_media",
+  "sourceBacklogTasks": [
+    "P14-23"
+  ],
+  "upstreamGates": [
+    ":app:verifyNodePhase15NotificationPromotion",
+    ":app:verifyNodePhase14SettingsPowerOemBackgroundMatrix"
+  ],
+  "runtimeAuthorityChanged": false,
+  "minimumPromotionPolicy": "Settings/power promotion requires Android 12 class and Android 15+ class archives for battery optimization state, settings handoff, exact-alarm state, background-launch restrictions, OEM notes, reviewed prompt copy, rollback cleanup, stable denial diagnostics, packaged disclosure, Safe downgrade, and raw object denial.",
+  "matrixContract": {
+    "providerName": "device",
+    "capability": "device",
+    "powerCapability": "device.power",
+    "settingsResultSchema": "autojs6-node-battery-optimization-settings-v1",
+    "currentLiveMethods": [
+      "isIgnoringBatteryOptimizations",
+      "openBatteryOptimizationSettings"
+    ],
+    "currentMutationAuthority": "not_exposed",
+    "batteryOptimizationStatusReady": true,
+    "settingsDryRunReady": true,
+    "exactAlarmStateReady": false,
+    "backgroundLaunchMatrixReady": false,
+    "oemNotesReady": false,
+    "android15RestrictionMatrixReady": false,
+    "reviewedPromptAndRollbackReady": false
+  },
+  "requiredDeviceRows": [
+    {
+      "id": "android12_battery_optimization_status_settings",
+      "status": "future_promotion",
+      "deviceClass": "android_12_class",
+      "requiredEvidence": "Battery optimization status, settings dry-run, settings round-trip, package identity, declared capabilities, denial copy, rollback behavior, and OEM notes from an Android 12 class device."
+    },
+    {
+      "id": "android15_plus_battery_optimization_status_settings",
+      "status": "future_promotion",
+      "deviceClass": "android_15_plus_class",
+      "requiredEvidence": "Battery optimization status, settings dry-run, settings round-trip, package identity, declared capabilities, denial copy, Android 15+ background restriction notes, rollback behavior, and OEM notes."
+    },
+    {
+      "id": "exact_alarm_state_denial",
+      "status": "future_promotion",
+      "deviceClass": "android_12_class_and_android_15_plus_class",
+      "requiredEvidence": "Exact-alarm state observation or explicit stable denial evidence without exposing AlarmManager, PendingIntent, or schedule-exact mutation authority."
+    },
+    {
+      "id": "background_launch_restrictions",
+      "status": "future_promotion",
+      "deviceClass": "android_12_class_and_android_15_plus_class",
+      "requiredEvidence": "Foreground/background launch behavior matrix for packaged and interactive Node entry points, including Android 15+ restrictions and denial diagnostics."
+    },
+    {
+      "id": "oem_power_manager_notes",
+      "status": "future_promotion",
+      "deviceClass": "android_12_class_and_android_15_plus_class",
+      "requiredEvidence": "OEM-specific power-manager notes, settings landing behavior, user-facing prompt copy, task removal behavior, crash recovery, and rollback cleanup."
+    }
+  ],
+  "mutationDenialContract": {
+    "requestIgnoreBatteryOptimizationsMutationPromoted": false,
+    "directDozeMutationPromoted": false,
+    "wakeLockPromoted": false,
+    "exactAlarmSchedulingPromoted": false,
+    "backgroundLaunchBypassPromoted": false,
+    "reviewedPromptRequired": true,
+    "rollbackPathRequired": true,
+    "stableErrorRequired": true,
+    "rawObjectsDenied": [
+      "PowerManager",
+      "WakeLock",
+      "AlarmManager",
+      "PendingIntent",
+      "Intent",
+      "Context",
+      "Settings Activity result handle",
+      "OEM manager",
+      "Java object"
+    ]
+  },
+  "readyEvidence": [
+    {
+      "id": "phase14_settings_power_matrix_contract",
+      "source": "build/reports/nodejs/phase14-settings-power-oem-background-matrix.json",
+      "status": "ready",
+      "summary": "P14-23 imports P13-25 device.power status/settings dry-run evidence and records OEM/background-launch promotion archives."
+    },
+    {
+      "id": "phase15_notification_dependency_gate",
+      "source": "build/reports/nodejs/phase15-notification-promotion.json",
+      "status": "ready",
+      "summary": "P15-17 notification ownership remains partial and unpromoted before settings/power promotion can proceed."
+    },
+    {
+      "id": "phase15_promotion_contracts",
+      "source": "build/reports/nodejs/phase15-promotion-contracts.json",
+      "status": "ready",
+      "summary": "P15 contracts keep settings_power at provider_poc until every opt-in promotion evidence bar is satisfied."
+    },
+    {
+      "id": "phase15_disclosure_rollback_contract",
+      "source": "build/reports/nodejs/phase15-disclosure-rollback-audit.json",
+      "status": "ready",
+      "summary": "Disclosure, provider-disable, Safe downgrade, and crash circuit breaker requirements exist before runtime authority changes."
+    },
+    {
+      "id": "phase15_surface_manifest_mapping",
+      "source": "docs/nodejs/phase15/phase15-surface-manifest.json",
+      "status": "ready",
+      "summary": "P15-18 is mapped to pro.tasks_device_media with a settings/power rollback hook and device OEM matrix evidence class."
+    }
+  ],
+  "openBlockers": [
+    {
+      "id": "settings_power_android12_oem_matrix_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Android 12 class device archive covering battery optimization status, settings dry-run/round-trip, capabilities, package identity, denial copy, OEM notes, task removal, crash recovery, and rollback behavior."
+    },
+    {
+      "id": "settings_power_android15_plus_oem_matrix_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Android 15+ class device archive covering background launch restrictions, battery optimization status/settings behavior, capabilities, package identity, denial copy, OEM notes, task removal, crash recovery, and rollback behavior."
+    },
+    {
+      "id": "settings_power_exact_alarm_state_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Exact-alarm state observation or stable denial archive proving AlarmManager, PendingIntent, and exact scheduling mutation authority do not cross into Node."
+    },
+    {
+      "id": "settings_power_background_launch_restriction_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged and interactive background-launch restriction archive proving Android 15+ restrictions, denial diagnostics, and foreground disclosure handoff behavior."
+    },
+    {
+      "id": "settings_power_mutation_prompt_rollback_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Reviewed prompt copy and rollback archive for any future request-ignore-battery-optimizations, direct power-manager, wake-lock, exact-alarm, or background-launch mutation flow."
+    },
+    {
+      "id": "settings_power_packaged_disclosure_stop_action_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Packaged settings/power disclosure and stop-action archive covering notification ownership, task removal, relaunch, and reviewed user copy."
+    },
+    {
+      "id": "settings_power_safe_downgrade_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Provider-disable Safe downgrade proof that keeps mutation flows denied while preserving JSON-safe status reads and settings dry-run behavior."
+    },
+    {
+      "id": "settings_power_raw_object_denial_security_archive",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "Security regression coverage proving raw PowerManager, WakeLock, AlarmManager, PendingIntent, Intent, Context, OEM manager, settings result handle, and Java objects remain denied."
+    },
+    {
+      "id": "phase15_task_device_media_doc_sync",
+      "classification": "future_promotion",
+      "releaseBlocking": false,
+      "requiredEvidence": "P15-22, P15-23, P15-25, and P15-26 sync before settings/power can be marked promoted."
+    }
+  ]
+}

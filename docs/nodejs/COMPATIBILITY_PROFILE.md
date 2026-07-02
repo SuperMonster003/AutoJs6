@@ -1949,6 +1949,7 @@ runtime.
   - Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1
   - P13-20 records the current screenshot/image/OCR promotion state as partial: scoped `image.readImage()`/`recycle()` and ML Kit OCR over provider-owned image handles are live, while MediaProjection bridge prompting, advanced image processing, packaged capture/OCR behavior, and packaged disclosure evidence remain blocked
   - P14-16 docs sync records the UI/automation/media declaration, example, release-matrix, security, and error-catalog state as `provider_poc_not_promoted`; typed migration snippets are documentation evidence, while overlay, packaged accessibility, MediaProjection capture, advanced image, packaged OCR/model, and recorder-session runtime examples remain static, guarded, or denial-oriented until their source provider gates are promoted
+  - P15-11 docs sync records the v1.3 UI/automation/media declaration, example, release-note, security, and error-catalog state as `provider_poc_not_promoted`; P15-04 through P15-10 are partial executable provider gates, while packaged live UI, overlay, packaged accessibility, MediaProjection capture, advanced image, packaged OCR/model, and recorder-session runtime examples remain future-only until provider-specific archives and downstream security/type/release gates are promoted
 - `storage` / `storages`
   - `create(name): StorageStore`
   - `open(name): StorageStore`
@@ -2181,6 +2182,7 @@ runtime.
   - P14-25 records packaged recorder/media stress evidence as partial: current packaged media/recorder status and denial boundary smoke is imported, while positive packaged start/stop, visible microphone foreground disclosure, stop action, task removal, relaunch/crash recovery, quota enforcement, scoped temporary output cleanup, missing Android permission, denied prompt, metadata mismatch, and Safe downgrade archives remain unpromoted
   - P14-26 records media playback and MediaStore boundary evidence as partial: P13-26 playback and external MediaStore stable-denial evidence is imported, the promoted media surface remains read-only audio status plus scoped `mediainfo`, and playback, playlists, `scanFile`, MediaStore query/insert/update/delete/open-file, broad `READ_MEDIA_*` / `MANAGE_EXTERNAL_STORAGE`, raw `MediaPlayer`, raw `AudioTrack`, raw `ContentResolver`, raw `Uri`, raw `ParcelFileDescriptor`, raw file descriptors, playlist handles, and Java objects remain denied unless a future scoped provider gate opens exact capabilities and packaged evidence
   - P14-27 docs sync records the v1.2 `pro.tasks_device_media` declaration, example, release-matrix, migration-cookbook, compatibility, security, error, testing, and CI state as `provider_poc_not_promoted`; `tasks-work-manager` remains the only task/device/media focused smoke path, while `notifications-power` and `media-recorder` remain guarded migration evidence
+  - P15-22 docs sync records the v1.3 `pro.tasks_device_media` declaration, example, release-note, compatibility, security, error, testing, and CI state as `provider_poc_not_promoted` with `mediastore_playback` kept `stable_denied`; P15-12 through P15-20 remain partial executable provider gates, P15-21 remains the stable-denied boundary decision, `tasks-work-manager` remains the only task/device/media focused smoke path, and `notifications-power` / `media-recorder` remain guarded migration evidence
   - P13-22 records the current IntentTask/broadcast task provider state as partial: Android/Rhino receiver substrate, `compat.tasks` IntentTask rejection stubs, JSON-safe legacy `IntentTask` snapshots, and packaged denial/metadata-boundary smoke are evidence, while receiver registration, boot/package/startup/custom broadcast triggers, provider-owned manifest mutation, positive packaged trigger/remove behavior, and raw `Intent` / `BroadcastReceiver` objects remain blocked
   - `compat.tasks.addIntentTask()`, `queryIntentTasks()`, `getIntentTask(id)`, and `removeIntentTask(id)` stay Promise-returning stable rejection stubs until a dedicated JSON-safe broadcast provider owns the future surface
 
@@ -2327,6 +2329,27 @@ AutoJs6 Node v1.2 does not expose raw `Context`, raw `Activity`, raw `View`,
 raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw
 `TimedTask`, raw `BroadcastReceiver`, raw `Notification`, or raw `WakeLock`
 objects as migration parity.
+
+## Phase 15 v1.3 Migration And Pro Comparison
+
+P15-26 records v1.3 migration and Pro comparison docs as ready. These claims
+match executable evidence and do not imply raw Android object parity. The v1.3
+compatibility profile has no newly promoted providers, and runtime authority
+remains unchanged.
+
+The v1.3 compatibility profile keeps Pro UI and floaty, accessibility,
+screenshot/OCR, tasks, notifications, recorder, MediaStore/playback, security
+corpus, packaged behavior, TypeScript declarations, and rollback claims tied to
+their source gates. `provider_poc_not_promoted` surfaces remain POC, docs, or
+partial executable evidence; MediaStore/playback remains `stable_denied`;
+P15-23 is `security_corpus_updated_no_authority_promoted`; P15-24 is
+`host_contract_ready`; and `NodeProfileV13CapabilityCatalog` remains
+metadata-only.
+
+No v1.3 compatibility profile row grants raw `Context`, raw `Activity`, raw
+`View`, raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`,
+raw `TimedTask`, raw `BroadcastReceiver`, raw `Notification`, raw `WakeLock`,
+raw `ContentResolver`, raw `MediaStore`, raw file descriptors, or Java objects.
 
 ## Error Code Compatibility
 

@@ -2,6 +2,7 @@ import groovy.json.JsonSlurper
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.time.ZonedDateTime
 import java.util.Properties
 import java.util.zip.ZipFile
 
@@ -350,6 +351,7 @@ private val embeddedNodePackagingAndroidPermissionsByBridgeCapability = mapOf(
 )
 private val embeddedNodePackagingSpecialUseFgsSubtypeProperty = "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
 private val embeddedNodePackagingRefreshTaskName = "embeddedNodeRefreshInrtTemplateApk"
+private val embeddedNodePackagingFullRefreshTaskName = "embeddedNodeRefreshFullInrtTemplateApk"
 private val embeddedNodePackagedSmokePullTaskName = "embeddedNodePullPackagedSmokeApks"
 private val embeddedNodePackagedSmokeHostVerifyTaskName = "embeddedNodePackagedSmokeHostVerify"
 private val embeddedNodePackagingSmokePublicExportDir = "/sdcard/Download/AutoJs6/embedded-node-packaged-smoke"
@@ -375,7 +377,10 @@ private fun embeddedNodePackagingTaskRequested(taskName: String): Boolean =
         requested == taskName || requested == ":app:$taskName" || requested.endsWith(":$taskName")
     }
 
-if (embeddedNodePackagingTaskRequested(embeddedNodePackagingRefreshTaskName)) {
+if (
+    embeddedNodePackagingTaskRequested(embeddedNodePackagingRefreshTaskName) ||
+    embeddedNodePackagingTaskRequested(embeddedNodePackagingFullRefreshTaskName)
+) {
     tasks.matching { it.name == "lintVitalAnalyzeInrtRelease" }.configureEach {
         enabled = false
     }
@@ -1438,6 +1443,57 @@ private fun StringBuilder.appendEmbeddedNodePackagingTemplateFreshness(
     appendLine("  $label freshness missing: ${if (freshness.missing.isEmpty()) "none" else freshness.missing.joinToString()}")
 }
 
+private fun embeddedNodePackagingTemplateRuntimeDexReady(freshness: EmbeddedNodePackagingTemplateFreshness): Boolean =
+    freshness.templateApk.isFile &&
+            freshness.manifestServiceReady &&
+            freshness.manifestPermissionsReady &&
+            freshness.dexDefinesScriptService &&
+            freshness.dexBridgeReady &&
+            freshness.inrtNodeProjectRunnerReady &&
+            freshness.inrtNodeProjectLaunchSourceReady &&
+            freshness.inrtNodeProjectStableRequestDiagnosticsReady &&
+            freshness.inrtNodeProjectStableFailureDiagnosticsReady
+
+private fun embeddedNodePackagingTemplateSlimNativePolicyReady(
+    freshness: EmbeddedNodePackagingTemplateFreshness,
+): Boolean =
+    !freshness.hasLibnode &&
+            !freshness.hasBridge &&
+            !freshness.hasLibcxx &&
+            !freshness.x86NodeRuntimePresent
+
+private fun embeddedNodePackagingSlimTemplateReady(freshness: EmbeddedNodePackagingTemplateFreshness): Boolean =
+    embeddedNodePackagingTemplateRuntimeDexReady(freshness) &&
+            embeddedNodePackagingTemplateSlimNativePolicyReady(freshness)
+
+private fun embeddedNodePackagingSlimTemplateMissing(freshness: EmbeddedNodePackagingTemplateFreshness): List<String> =
+    buildList {
+        if (!freshness.templateApk.isFile) add("template APK")
+        if (!freshness.manifestPermissionsReady) add("foreground service permissions")
+        if (!freshness.manifestServiceReady) add("NativeNodeEmbeddedScriptService manifest declaration")
+        if (!freshness.dexDefinesScriptService) add("dex class_def for NativeNodeEmbeddedScriptService")
+        if (!freshness.dexDefinesRuntimeBridge) add("dex class_def for NativeNodeEmbeddedRuntimeBridge")
+        if (!freshness.dexContainsCurrentLifecycleWithModulesMethod) {
+            add("dex string $embeddedNodePackagingCurrentLifecycleWithModulesMethodName")
+        }
+        if (!freshness.inrtNodeProjectRunnerReady) add("dex string $embeddedNodePackagingInrtNodeProjectRunnerMarker")
+        if (!freshness.inrtNodeProjectLaunchSourceReady) {
+            add("dex string $embeddedNodePackagingInrtNodeProjectLaunchSourceMarker")
+        }
+        freshness.dexContainsInrtNodeProjectStableRequestMarkers
+            .filterValues { present -> !present }
+            .keys
+            .forEach { marker -> add("dex string $marker") }
+        freshness.dexContainsInrtNodeProjectStableFailureMarkers
+            .filterValues { present -> !present }
+            .keys
+            .forEach { marker -> add("dex string $marker") }
+        if (freshness.hasLibnode) add("slim template must not include libnode.so")
+        if (freshness.hasBridge) add("slim template must not include libautojs6-node.so")
+        if (freshness.hasLibcxx) add("slim template must not include libc++_shared.so")
+        if (freshness.x86NodeRuntimePresent) add("x86 Node runtime should be absent")
+    }.distinct()
+
 private fun embeddedNodePackagingAllNativeLibsInSource(sourceJniLibsRoot: File, abi: String): Boolean =
     embeddedNodePackagingNativeLibs.all { libName -> sourceJniLibsRoot.resolve("$abi/$libName").isFile }
 
@@ -1460,7 +1516,7 @@ private fun embeddedNodePackagingSourceContainsAny(file: File, vararg fragments:
 
 val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRefreshTaskName) {
     group = "verification"
-    description = "Refreshes assets-app/template.apk from the inrtRelease universal APK and verifies Embedded Node freshness."
+    description = "Refreshes the slim assets-app/template.apk from the inrtRelease universal APK without Embedded Node native libraries."
 
     dependsOn("packageInrtRelease")
     outputs.file(projectDir.resolve("src/main/assets-app/template.apk"))
@@ -1482,7 +1538,7 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
             reportFile.writeText(
                 buildString {
                     appendLine("Embedded Node.js inrt template refresh report")
-                    appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+                    appendLine("Generated at: ${ZonedDateTime.now()}")
                     appendLine()
                     appendLine("Source:")
                     appendLine("  APK: ${embeddedNodePackagingFormatFile(sourceApk)}")
@@ -1500,11 +1556,13 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
         }
 
         val sourceFreshness = embeddedNodePackagingTemplateFreshness(tools, sourceApk)
-        if (!sourceFreshness.ready) {
+        val sourceSlimReady = embeddedNodePackagingSlimTemplateReady(sourceFreshness)
+        val sourceSlimMissing = embeddedNodePackagingSlimTemplateMissing(sourceFreshness)
+        if (!sourceSlimReady) {
             reportFile.writeText(
                 buildString {
                     appendLine("Embedded Node.js inrt template refresh report")
-                    appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+                    appendLine("Generated at: ${ZonedDateTime.now()}")
                     appendLine()
                     appendLine("Source:")
                     appendLine("  APK: ${embeddedNodePackagingFormatFile(sourceApk)}")
@@ -1513,12 +1571,144 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
                     appendLine()
                     appendLine("Status:")
                     appendLine("  template.refresh.ready=false")
+                    appendLine("  template.refresh.policy=slim-template-no-node-native-libs")
+                    appendLine("  template.refresh.error=source inrtRelease APK is stale or violates slim template policy")
+                    appendLine("  template.refresh.missing=${if (sourceSlimMissing.isEmpty()) "unknown" else sourceSlimMissing.joinToString()}")
+                }
+            )
+            throw GradleException(
+                "Refusing to refresh slim template.apk from an inrtRelease APK that violates template policy. " +
+                        "Missing: ${if (sourceSlimMissing.isEmpty()) "unknown" else sourceSlimMissing.joinToString()}. " +
+                        "See ${reportFile.absolutePath}"
+            )
+        }
+
+        targetApk.parentFile.mkdirs()
+        sourceApk.copyTo(targetApk, overwrite = true)
+
+        val targetFreshness = embeddedNodePackagingTemplateFreshness(tools, targetApk)
+        val targetSlimReady = embeddedNodePackagingSlimTemplateReady(targetFreshness)
+        val targetSlimMissing = embeddedNodePackagingSlimTemplateMissing(targetFreshness)
+        val sourceSha256 = embeddedNodePackagingSha256(sourceApk)
+        val targetSha256 = embeddedNodePackagingSha256(targetApk)
+        val report = buildString {
+            appendLine("Embedded Node.js inrt template refresh report")
+            appendLine("Generated at: ${ZonedDateTime.now()}")
+            appendLine()
+            appendLine("Refresh task:")
+            appendLine("  task: :app:$embeddedNodePackagingRefreshTaskName")
+            appendLine("  release package task dependency: packageInrtRelease")
+            appendLine("  avoids known lint task: lintVitalAnalyzeInrtRelease")
+            appendLine("  template policy: slim-template-no-node-native-libs")
+            appendLine()
+            appendLine("Source:")
+            appendLine("  APK: ${embeddedNodePackagingFormatFile(sourceApk)}")
+            appendLine("  SHA-256: ${sourceSha256 ?: "unavailable"}")
+            appendEmbeddedNodePackagingTemplateFreshness("source", sourceFreshness)
+            appendLine("  source slim template policy ready: $sourceSlimReady")
+            appendLine("  source slim template policy missing: ${if (sourceSlimMissing.isEmpty()) "none" else sourceSlimMissing.joinToString()}")
+            appendLine()
+            appendLine("Target:")
+            appendLine("  template.apk: ${embeddedNodePackagingFormatFile(targetApk)}")
+            appendLine("  SHA-256: ${targetSha256 ?: "unavailable"}")
+            appendEmbeddedNodePackagingTemplateFreshness("target", targetFreshness)
+            appendLine("  target slim template policy ready: $targetSlimReady")
+            appendLine("  target slim template policy missing: ${if (targetSlimMissing.isEmpty()) "none" else targetSlimMissing.joinToString()}")
+            appendLine()
+            appendLine("Summary:")
+            appendLine("  template.refresh.source=${sourceApk.absolutePath}")
+            appendLine("  template.refresh.target=${targetApk.absolutePath}")
+            appendLine("  template.refresh.sha256.source=${sourceSha256 ?: "unavailable"}")
+            appendLine("  template.refresh.sha256.target=${targetSha256 ?: "unavailable"}")
+            appendLine("  template.refresh.dex.legacy_with_modules=${targetFreshness.dexContainsLifecycleWithModulesMethod}")
+            appendLine("  template.refresh.dex.with_modules=${targetFreshness.dexContainsCurrentLifecycleWithModulesMethod}")
+            appendLine("  template.refresh.native.legacy_with_modules=${targetFreshness.bridgeLibContainsLifecycleWithModulesSymbol}")
+            appendLine("  template.refresh.native.with_modules=${targetFreshness.bridgeLibContainsCurrentLifecycleWithModulesSymbol}")
+            appendLine("  template.refresh.ready=$targetSlimReady")
+            appendLine("  template.refresh.missing=${if (targetSlimMissing.isEmpty()) "none" else targetSlimMissing.joinToString()}")
+            appendLine()
+            appendLine("Fallback command if this task cannot be used:")
+            appendLine("  .\\gradlew.bat --console=plain :app:assembleInrtRelease -x :app:lintVitalAnalyzeInrtRelease")
+        }
+        reportFile.writeText(report)
+        logger.lifecycle("Embedded Node.js inrt template refreshed: ${targetApk.absolutePath}")
+        logger.lifecycle("Embedded Node.js inrt template SHA-256: ${targetSha256 ?: "unavailable"}")
+        logger.lifecycle("Embedded Node.js slim inrt template ready: $targetSlimReady")
+        if (!targetSlimReady) {
+            throw GradleException(
+                "Refreshed slim template.apk is stale or violates slim template policy. " +
+                        "Missing: ${if (targetSlimMissing.isEmpty()) "unknown" else targetSlimMissing.joinToString()}. " +
+                        "See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
+val embeddedNodeRefreshFullInrtTemplateApk = tasks.register(embeddedNodePackagingFullRefreshTaskName) {
+    group = "verification"
+    description = "Builds and copies a full Embedded Node.js inrt template APK for runtime testing without updating assets-app/template.apk."
+
+    dependsOn("packageInrtRelease")
+    outputs.file(layout.buildDirectory.file("outputs/apk/inrt/full-node-template/template-node-full.apk"))
+    outputs.file(layout.buildDirectory.file("reports/embedded-node/inrt-full-node-template-refresh.txt"))
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val tools = findEmbeddedNodePackagingTools(rootProject.projectDir)
+        val sourceApk = embeddedNodePackagingInrtReleaseUniversalApk(projectDir, rootProject.projectDir)
+        val targetApk = layout.buildDirectory
+            .file("outputs/apk/inrt/full-node-template/template-node-full.apk")
+            .get()
+            .asFile
+        val reportFile = layout.buildDirectory
+            .file("reports/embedded-node/inrt-full-node-template-refresh.txt")
+            .get()
+            .asFile
+        reportFile.parentFile.mkdirs()
+
+        if (!sourceApk.isFile) {
+            val message = "inrtRelease universal APK is missing: ${sourceApk.absolutePath}"
+            reportFile.writeText(
+                buildString {
+                    appendLine("Embedded Node.js full inrt template refresh report")
+                    appendLine("Generated at: ${ZonedDateTime.now()}")
+                    appendLine()
+                    appendLine("Source:")
+                    appendLine("  APK: ${embeddedNodePackagingFormatFile(sourceApk)}")
+                    appendLine("  expected task dependency: packageInrtRelease")
+                    appendLine()
+                    appendLine("Status:")
+                    appendLine("  template.refresh.ready=false")
+                    appendLine("  template.refresh.error=$message")
+                    appendLine()
+                    appendLine("Fallback command if Gradle task graph changes:")
+                    appendLine("  .\\gradlew.bat --console=plain :app:assembleInrtFullNodeRelease")
+                }
+            )
+            throw GradleException("$message. See ${reportFile.absolutePath}")
+        }
+
+        val sourceFreshness = embeddedNodePackagingTemplateFreshness(tools, sourceApk)
+        if (!sourceFreshness.ready) {
+            reportFile.writeText(
+                buildString {
+                    appendLine("Embedded Node.js full inrt template refresh report")
+                    appendLine("Generated at: ${ZonedDateTime.now()}")
+                    appendLine()
+                    appendLine("Source:")
+                    appendLine("  APK: ${embeddedNodePackagingFormatFile(sourceApk)}")
+                    appendLine("  SHA-256: ${embeddedNodePackagingSha256(sourceApk) ?: "unavailable"}")
+                    appendEmbeddedNodePackagingTemplateFreshness("source", sourceFreshness)
+                    appendLine()
+                    appendLine("Status:")
+                    appendLine("  template.refresh.ready=false")
+                    appendLine("  template.refresh.policy=full-template-with-node-native-libs")
                     appendLine("  template.refresh.error=source inrtRelease APK is stale or incomplete")
                     appendLine("  template.refresh.missing=${if (sourceFreshness.missing.isEmpty()) "unknown" else sourceFreshness.missing.joinToString()}")
                 }
             )
             throw GradleException(
-                "Refusing to refresh template.apk from a stale inrtRelease APK. " +
+                "Refusing to refresh full Node template APK from a stale inrtRelease APK. " +
                         "Missing: ${if (sourceFreshness.missing.isEmpty()) "unknown" else sourceFreshness.missing.joinToString()}. " +
                         "See ${reportFile.absolutePath}"
             )
@@ -1531,13 +1721,14 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
         val sourceSha256 = embeddedNodePackagingSha256(sourceApk)
         val targetSha256 = embeddedNodePackagingSha256(targetApk)
         val report = buildString {
-            appendLine("Embedded Node.js inrt template refresh report")
-            appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+            appendLine("Embedded Node.js full inrt template refresh report")
+            appendLine("Generated at: ${ZonedDateTime.now()}")
             appendLine()
             appendLine("Refresh task:")
-            appendLine("  task: :app:$embeddedNodePackagingRefreshTaskName")
+            appendLine("  task: :app:$embeddedNodePackagingFullRefreshTaskName")
             appendLine("  release package task dependency: packageInrtRelease")
-            appendLine("  avoids known lint task: lintVitalAnalyzeInrtRelease")
+            appendLine("  updates assets-app/template.apk=false")
+            appendLine("  template policy: full-template-with-node-native-libs")
             appendLine()
             appendLine("Source:")
             appendLine("  APK: ${embeddedNodePackagingFormatFile(sourceApk)}")
@@ -1545,7 +1736,7 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
             appendEmbeddedNodePackagingTemplateFreshness("source", sourceFreshness)
             appendLine()
             appendLine("Target:")
-            appendLine("  template.apk: ${embeddedNodePackagingFormatFile(targetApk)}")
+            appendLine("  APK: ${embeddedNodePackagingFormatFile(targetApk)}")
             appendLine("  SHA-256: ${targetSha256 ?: "unavailable"}")
             appendEmbeddedNodePackagingTemplateFreshness("target", targetFreshness)
             appendLine()
@@ -1554,23 +1745,16 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
             appendLine("  template.refresh.target=${targetApk.absolutePath}")
             appendLine("  template.refresh.sha256.source=${sourceSha256 ?: "unavailable"}")
             appendLine("  template.refresh.sha256.target=${targetSha256 ?: "unavailable"}")
-            appendLine("  template.refresh.dex.legacy_with_modules=${targetFreshness.dexContainsLifecycleWithModulesMethod}")
-            appendLine("  template.refresh.dex.with_modules=${targetFreshness.dexContainsCurrentLifecycleWithModulesMethod}")
-            appendLine("  template.refresh.native.legacy_with_modules=${targetFreshness.bridgeLibContainsLifecycleWithModulesSymbol}")
-            appendLine("  template.refresh.native.with_modules=${targetFreshness.bridgeLibContainsCurrentLifecycleWithModulesSymbol}")
             appendLine("  template.refresh.ready=${targetFreshness.ready}")
             appendLine("  template.refresh.missing=${if (targetFreshness.missing.isEmpty()) "none" else targetFreshness.missing.joinToString()}")
-            appendLine()
-            appendLine("Fallback command if this task cannot be used:")
-            appendLine("  .\\gradlew.bat --console=plain :app:assembleInrtRelease -x :app:lintVitalAnalyzeInrtRelease")
         }
         reportFile.writeText(report)
-        logger.lifecycle("Embedded Node.js inrt template refreshed: ${targetApk.absolutePath}")
-        logger.lifecycle("Embedded Node.js inrt template SHA-256: ${targetSha256 ?: "unavailable"}")
-        logger.lifecycle("Embedded Node.js inrt template freshness ready: ${targetFreshness.ready}")
+        logger.lifecycle("Embedded Node.js full inrt template APK refreshed: ${targetApk.absolutePath}")
+        logger.lifecycle("Embedded Node.js full inrt template SHA-256: ${targetSha256 ?: "unavailable"}")
+        logger.lifecycle("Embedded Node.js full inrt template freshness ready: ${targetFreshness.ready}")
         if (!targetFreshness.ready) {
             throw GradleException(
-                "Refreshed template.apk is stale or incomplete. " +
+                "Refreshed full Node template APK is stale or incomplete. " +
                         "Missing: ${if (targetFreshness.missing.isEmpty()) "unknown" else targetFreshness.missing.joinToString()}. " +
                         "See ${reportFile.absolutePath}"
             )
@@ -1580,7 +1764,7 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
 
 val verifyNodeTemplateReproducibility = tasks.register("verifyNodeTemplateReproducibility") {
     group = "verification"
-    description = "Verifies current inrt template freshness, deterministic manifest summary, and native lib injection policy."
+    description = "Verifies current slim inrt template freshness, deterministic manifest summary, and on-demand native lib injection policy."
 
     val templateApk = projectDir.resolve("src/main/assets-app/template.apk")
     val reportFile = layout.buildDirectory
@@ -1594,6 +1778,8 @@ val verifyNodeTemplateReproducibility = tasks.register("verifyNodeTemplateReprod
     doLast {
         val tools = findEmbeddedNodePackagingTools(rootProject.projectDir)
         val freshness = embeddedNodePackagingTemplateFreshness(tools, templateApk)
+        val slimTemplateReady = embeddedNodePackagingSlimTemplateReady(freshness)
+        val slimTemplateMissing = embeddedNodePackagingSlimTemplateMissing(freshness)
         val templateSha256 = embeddedNodePackagingSha256(templateApk)
         val normalizedManifest = embeddedNodePackagingNormalizedManifestText(freshness.manifest)
         val normalizedManifestSha256 = embeddedNodePackagingSha256Text(normalizedManifest)
@@ -1601,10 +1787,10 @@ val verifyNodeTemplateReproducibility = tasks.register("verifyNodeTemplateReprod
         val manifestPatchDeterministic = manifestHashReady &&
                 freshness.manifestServiceReady &&
                 freshness.manifestPermissionsReady
-        val nativeLibInjectionPolicy = "template-arm64-runtime-seed; packaged-output-injects-selected-abis-from-host-provider; x86-denied"
-        val nativeLibInjectionPolicyReady = freshness.nativeLibsReady && !freshness.x86NodeRuntimePresent
+        val nativeLibInjectionPolicy = "slim-template-no-node-native-libs; packaged-output-injects-selected-abis-from-host-provider; x86-denied"
+        val nativeLibInjectionPolicyReady = embeddedNodePackagingTemplateSlimNativePolicyReady(freshness)
         val missing = buildList {
-            addAll(freshness.missing)
+            addAll(slimTemplateMissing)
             if (templateSha256.isNullOrBlank()) {
                 add("template APK SHA-256")
             }
@@ -1618,7 +1804,7 @@ val verifyNodeTemplateReproducibility = tasks.register("verifyNodeTemplateReprod
                 add("native lib injection policy")
             }
         }.distinct()
-        val ready = freshness.ready &&
+        val ready = slimTemplateReady &&
                 !templateSha256.isNullOrBlank() &&
                 manifestPatchDeterministic &&
                 nativeLibInjectionPolicyReady
@@ -1627,12 +1813,14 @@ val verifyNodeTemplateReproducibility = tasks.register("verifyNodeTemplateReprod
         reportFile.writeText(
             buildString {
                 appendLine("Embedded Node.js template reproducibility report")
-                appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+                appendLine("Generated at: ${ZonedDateTime.now()}")
                 appendLine()
                 appendLine("Template:")
                 appendLine("  APK: ${embeddedNodePackagingFormatFile(templateApk)}")
                 appendLine("  SHA-256: ${templateSha256 ?: "unavailable"}")
                 appendEmbeddedNodePackagingTemplateFreshness("template", freshness)
+                appendLine("  slim template ready: $slimTemplateReady")
+                appendLine("  slim template missing: ${if (slimTemplateMissing.isEmpty()) "none" else slimTemplateMissing.joinToString()}")
                 appendLine()
                 appendLine("Manifest reproducibility:")
                 appendLine("  normalized manifest SHA-256: $normalizedManifestSha256")
@@ -1646,14 +1834,17 @@ val verifyNodeTemplateReproducibility = tasks.register("verifyNodeTemplateReprod
                 appendLine("Native lib injection policy:")
                 appendLine("  policy: $nativeLibInjectionPolicy")
                 appendLine("  policy ready: $nativeLibInjectionPolicyReady")
-                appendLine("  arm64 template seed ready: ${freshness.arm64HasLibnode && freshness.arm64HasBridge && freshness.arm64HasLibcxx}")
+                appendLine("  template has libnode.so: ${freshness.hasLibnode}")
+                appendLine("  template has libautojs6-node.so: ${freshness.hasBridge}")
+                appendLine("  template has libc++_shared.so: ${freshness.hasLibcxx}")
+                appendLine("  slim template native libs absent: ${embeddedNodePackagingTemplateSlimNativePolicyReady(freshness)}")
                 appendLine("  x86 runtime absent: ${!freshness.x86NodeRuntimePresent}")
                 appendLine()
                 appendLine("Summary:")
                 appendLine("  template.reproducibility.ready=$ready")
                 appendLine("  template.reproducibility.missing=${if (missing.isEmpty()) "none" else missing.joinToString()}")
-                appendLine("  template.refresh.ready=${freshness.ready}")
-                appendLine("  template.refresh.missing=${if (freshness.missing.isEmpty()) "none" else freshness.missing.joinToString()}")
+                appendLine("  template.refresh.ready=$slimTemplateReady")
+                appendLine("  template.refresh.missing=${if (slimTemplateMissing.isEmpty()) "none" else slimTemplateMissing.joinToString()}")
                 appendLine("  template.apk.sha256=${templateSha256 ?: "unavailable"}")
                 appendLine("  template.manifest.normalized.sha256=$normalizedManifestSha256")
                 appendLine("  template.manifest.patch.deterministic=$manifestPatchDeterministic")
@@ -1706,7 +1897,7 @@ val embeddedNodePullPackagedSmokeApks = tasks.register(embeddedNodePackagedSmoke
 
         val report = StringBuilder()
         report.appendLine("Embedded Node.js packaged smoke APK pull report")
-        report.appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+        report.appendLine("Generated at: ${ZonedDateTime.now()}")
         report.appendLine()
         report.appendLine("Inputs:")
         report.appendLine("  adb: ${adb?.absolutePath ?: "unavailable"}")
@@ -1975,6 +2166,7 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
         val templateInrtNodeProjectStableFailureDiagnosticsReady =
             templateFreshness.inrtNodeProjectStableFailureDiagnosticsReady
         val templateNativeLibsReady = templateFreshness.nativeLibsReady
+        val templateSlimNativePolicyReady = embeddedNodePackagingTemplateSlimNativePolicyReady(templateFreshness)
         val hostAppReady = appDebugUniversalHasLibnode &&
                 appDebugUniversalHasBridge &&
                 appDebugUniversalHasLibcxx &&
@@ -1985,12 +2177,12 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
                 appDebugUniversalManifest.declaresForegroundServicePermission &&
                 appDebugUniversalManifest.declaresForegroundServiceSpecialUsePermission &&
                 appDebugUniversalDexDefinesScriptService
-        val packagedTemplateReady = templateFreshness.ready
-        val packagedTemplateMissing = templateFreshness.missing
+        val packagedTemplateReady = embeddedNodePackagingSlimTemplateReady(templateFreshness)
+        val packagedTemplateMissing = embeddedNodePackagingSlimTemplateMissing(templateFreshness)
 
         val report = buildString {
             appendLine("Embedded Node.js packaging preflight report: $embeddedNodePackagingReportVariant")
-            appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+            appendLine("Generated at: ${ZonedDateTime.now()}")
             appendLine()
 
             appendLine("Build gate and backend:")
@@ -2128,6 +2320,7 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
                 appendLine("  template libautojs6-node.so contains legacy JNI symbol: $templateBridgeLibContainsLegacyLifecycleSymbol")
                 appendLine("  template libautojs6-node.so contains legacy WithModules JNI symbol: $templateBridgeLibContainsLifecycleWithModulesSymbol")
                 appendLine("  template libautojs6-node.so contains current WithModules JNI symbol: $templateBridgeLibContainsCurrentLifecycleWithModulesSymbol")
+                appendLine("  template slim native-lib policy ready: $templateSlimNativePolicyReady")
             } else {
                 appendLine("  template inspection skipped because template.apk is missing.")
                 appendLine("  Generate it with the existing inrt assemble/template copy flow before validating packaged-app embedded Node distribution.")
@@ -2150,7 +2343,8 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
                 appendLine("  template dex contains inrt node project failure marker $marker: $present")
             }
             appendLine("  template inrt node project stable failure diagnostics ready: $templateInrtNodeProjectStableFailureDiagnosticsReady")
-            appendLine("  template native libs ready: $templateNativeLibsReady")
+            appendLine("  template native libs complete for full-node template: $templateNativeLibsReady")
+            appendLine("  template slim native-lib policy ready: $templateSlimNativePolicyReady")
             appendLine("  template bridge JNI symbols report-only:")
             appendLine("    legacy $embeddedNodePackagingLegacyLifecycleMethodName: $templateBridgeLibContainsLegacyLifecycleSymbol")
             appendLine("    legacy $embeddedNodePackagingLifecycleWithModulesMethodName: $templateBridgeLibContainsLifecycleWithModulesSymbol")
@@ -2204,6 +2398,8 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
             appendLine("  embedded.node.packaged.template.inrt.node_project_stable_request_diagnostics.ready=$templateInrtNodeProjectStableRequestDiagnosticsReady")
             appendLine("  embedded.node.packaged.template.inrt.node_project_stable_failure_diagnostics.ready=$templateInrtNodeProjectStableFailureDiagnosticsReady")
             appendLine("  embedded.node.packaged.template.native_libs.ready=$templateNativeLibsReady")
+            appendLine("  embedded.node.packaged.template.native_libs.full_node_ready=$templateNativeLibsReady")
+            appendLine("  embedded.node.packaged.template.slim_native_libs_absent=$templateSlimNativePolicyReady")
             appendLine("  embedded.node.packaged.template.native_symbols.legacy_lifecycle.present=$templateBridgeLibContainsLegacyLifecycleSymbol")
             appendLine("  embedded.node.packaged.template.native_symbols.legacy_with_modules_lifecycle.present=$templateBridgeLibContainsLifecycleWithModulesSymbol")
             appendLine("  embedded.node.packaged.template.native_symbols.with_modules_lifecycle.present=$templateBridgeLibContainsCurrentLifecycleWithModulesSymbol")
@@ -2385,8 +2581,7 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
                 mainManifestDeclaresEmbeddedNodeFgsPermissions &&
                 inrtTemplateCopyFlowPresent &&
                 appDebugUniversalDexDefinesScriptService
-        val currentTemplateReadyForEmbedded = templateReadyAbis.containsAll(embeddedNodePackagingRequiredNodeAbis) &&
-                templateManifest.declaresEmbeddedScriptService &&
+        val currentTemplateReadyForEmbedded = templateManifest.declaresEmbeddedScriptService &&
                 templateManifest.embeddedScriptServiceUsesNodeProcess &&
                 templateManifest.embeddedScriptServiceUsesSpecialUseFgs &&
                 templateManifest.embeddedScriptServiceDeclaresSpecialUseSubtypeProperty &&
@@ -2476,7 +2671,7 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
 
         val report = buildString {
             appendLine("Embedded Node.js packaged-app template integration dry-run report: $embeddedNodePackagingReportVariant")
-            appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+            appendLine("Generated at: ${ZonedDateTime.now()}")
             appendLine()
 
             appendLine("Scope:")
@@ -2892,7 +3087,7 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
 
     val report = buildString {
         appendLine("Embedded Node.js packaged APK output verification report")
-        appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+        appendLine("Generated at: ${ZonedDateTime.now()}")
         appendLine()
 
         appendLine("Inputs:")
@@ -3364,15 +3559,17 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
         val tools = findEmbeddedNodePackagingTools(rootProject.projectDir)
         val templateApk = projectDir.resolve("src/main/assets-app/template.apk")
         val templateFreshness = embeddedNodePackagingTemplateFreshness(tools, templateApk)
+        val slimTemplateReady = embeddedNodePackagingSlimTemplateReady(templateFreshness)
+        val slimTemplateMissing = embeddedNodePackagingSlimTemplateMissing(templateFreshness)
         val aggregateReady = pullReady &&
                 successVerification.ready &&
                 diagnosticsVerification.ready &&
-                templateFreshness.ready &&
+                slimTemplateReady &&
                 successVerification.moduleSourcesReady
 
         val report = buildString {
             appendLine("Embedded Node.js packaged smoke aggregate verification report")
-            appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+            appendLine("Generated at: ${ZonedDateTime.now()}")
             appendLine()
 
             appendLine("Inputs:")
@@ -3398,6 +3595,8 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
 
             appendLine("Template freshness:")
             appendEmbeddedNodePackagingTemplateFreshness("template", templateFreshness)
+            appendLine("  slim template ready: $slimTemplateReady")
+            appendLine("  slim template missing: ${if (slimTemplateMissing.isEmpty()) "none" else slimTemplateMissing.joinToString()}")
             appendLine()
 
             appendLine("Summary:")
@@ -3410,8 +3609,8 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
             appendLine("  embedded.node.packaged.smoke.pull.missing=${if (missingPulledFiles.isEmpty()) "none" else missingPulledFiles.joinToString()}")
             appendLine("  embedded.node.packaged.smoke.success.output.ready=${successVerification.ready}")
             appendLine("  embedded.node.packaged.smoke.diagnostics.output.ready=${diagnosticsVerification.ready}")
-            appendLine("  embedded.node.packaged.smoke.template.ready=${templateFreshness.ready}")
-            appendLine("  embedded.node.packaged.smoke.template.missing=${if (templateFreshness.missing.isEmpty()) "none" else templateFreshness.missing.joinToString()}")
+            appendLine("  embedded.node.packaged.smoke.template.ready=$slimTemplateReady")
+            appendLine("  embedded.node.packaged.smoke.template.missing=${if (slimTemplateMissing.isEmpty()) "none" else slimTemplateMissing.joinToString()}")
             appendLine("  embedded.node.packaged.smoke.module_sources.ready=${successVerification.moduleSourcesReady}")
             appendLine("  embedded.node.packaged.smoke.aggregate.ready=$aggregateReady")
             appendLine()
