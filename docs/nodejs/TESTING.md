@@ -3644,6 +3644,7 @@ Phase 16 starts from the Phase 15 summary handoff on
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodePhase16Baseline
 .\gradlew.bat --console=plain :app:verifyNodePhase16SurfaceManifest
+.\gradlew.bat --console=plain :app:verifyNodePhase16PromotionContracts
 ```
 
 `verifyNodePhase16Baseline` writes `phase16-baseline-verification.json` plus
@@ -3654,3 +3655,9 @@ or release-blocking report state no longer match the v1.4 start contract.
 `P16-00` through `P16-27` map exactly once with owner surface, profile, risk,
 evidence class, gate, and rollback hook metadata. It also verifies that every
 imported Phase 15 backlog task is owned.
+`verifyNodePhase16PromotionContracts` writes
+`phase16-promotion-contracts.json` plus `.md` and verifies the v1.4
+`promoted`, `provider_poc`, `future_only`, `stable_denied`, and `rejected`
+vocabulary. It fails if any provider can become opt-in promoted without
+implementation, connected device, packaged APK, disclosure, rollback, security,
+TypeScript, release docs, Safe downgrade, and raw-object denial evidence.

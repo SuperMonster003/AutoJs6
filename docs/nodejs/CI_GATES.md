@@ -1568,6 +1568,7 @@ The release gate still relies on packaged smoke APK artifacts being current when
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodePhase16Baseline
 .\gradlew.bat --console=plain :app:verifyNodePhase16SurfaceManifest
+.\gradlew.bat --console=plain :app:verifyNodePhase16PromotionContracts
 ```
 
 The `:app:verifyNodePhase16Baseline` gate writes
@@ -1578,6 +1579,10 @@ The `:app:verifyNodePhase16SurfaceManifest` gate writes
 `phase16-surface-manifest-verification.json` plus `.md` and verifies that every
 `P16-00` through `P16-27` task has one owner surface, source backlog metadata,
 profile, risk, evidence class, gate, and rollback hook.
+The `:app:verifyNodePhase16PromotionContracts` gate writes
+`phase16-promotion-contracts.json` plus `.md` and verifies that no v1.4
+provider can become opt-in promoted without device, packaged, disclosure,
+rollback, security, docs, type, Safe downgrade, and raw-object denial evidence.
 
 ## Manual Heavy Checks
 

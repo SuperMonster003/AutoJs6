@@ -385,6 +385,23 @@ They record the v1.4 baseline and surface manifest through
   aggregate evidence, raw-object denial, and unchanged runtime-authority
   boundaries remain in force.
 
+## P16-02 v1.4 promotion contracts
+
+P16-02 does not add new error codes or promote runtime authority. It records
+the v1.4 provider promotion bars through `:app:verifyNodePhase16PromotionContracts`:
+
+- Missing v1.4 implementation, connected-device, packaged APK, disclosure,
+  rollback, security, TypeScript, release-doc, Safe-downgrade, or raw-object
+  denial evidence keeps providers at `provider_poc`, `future_only`,
+  `stable_denied`, or `rejected`.
+- Missing capability metadata still rejects before provider dispatch with
+  `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+- Unpromoted provider requests still use `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
+  or existing provider-specific stable denials.
+- `mediastore_playback` remains `stable_denied` until a later scoped provider
+  boundary proves permission, privacy, packaged, rollback, Safe downgrade, and
+  raw-object denial evidence.
+
 ## P14-28 worker native availability decision
 
 P14-28 does not add a new error code. It refreshes the v1.2 worker native

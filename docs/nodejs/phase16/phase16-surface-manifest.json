@@ -189,7 +189,7 @@
       "evidenceClass": "promotion_contract",
       "rollbackHook": "block_v1_4_promotion_until_contracts_pass",
       "gate": ":app:verifyNodePhase16PromotionContracts",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "task": "P16-03",

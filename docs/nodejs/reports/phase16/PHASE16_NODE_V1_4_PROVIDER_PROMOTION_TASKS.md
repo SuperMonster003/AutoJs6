@@ -92,10 +92,17 @@ A Phase 16 task can be marked complete only when all applicable items are true:
     - `build/reports/nodejs/phase16-surface-manifest-verification.json`
     - `build/reports/nodejs/phase16-surface-manifest-verification.md`
 
-- [ ] P16-02: Refresh v1.4 opt-in promotion bars.
-  - Gate: proposed `:app:verifyNodePhase16PromotionContracts`.
+- [x] P16-02: Refresh v1.4 opt-in promotion bars.
+  - Gate: `:app:verifyNodePhase16PromotionContracts`.
   - Acceptance: no provider can become opt-in promoted without device,
     packaged, disclosure, rollback, security, docs, and type evidence.
+  - Landed:
+    - `docs/nodejs/phase16/node-v1-4-promotion-contracts.json`
+    - `docs/nodejs/phase16/PHASE16_NODE_V1_4_PROMOTION_CONTRACTS.md`
+    - `tools/nodejs/phase16/verify-node-phase16-promotion-contracts.js`
+    - `docs/nodejs/reports/phase16/P16_02_PROMOTION_CONTRACTS.md`
+    - `build/reports/nodejs/phase16-promotion-contracts.json`
+    - `build/reports/nodejs/phase16-promotion-contracts.md`
 
 - [ ] P16-03: Add v1.4 disclosure and rollback audit gate.
   - Gate: proposed `:app:verifyNodePhase16DisclosureRollbackAudit`.
