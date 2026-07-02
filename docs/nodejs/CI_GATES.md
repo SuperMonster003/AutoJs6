@@ -1301,6 +1301,27 @@ future backlog export, next branch handoff, and final blocker registry closeout
 marker, and confirms `feature/nodejs-runtime-v1.3` can start from the documented
 backlog without reopening final blockers.
 
+Phase 15 v1.3 foundation gates:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase15Baseline
+.\gradlew.bat --console=plain :app:verifyNodePhase15SurfaceManifest
+.\gradlew.bat --console=plain :app:verifyNodePhase15PromotionContracts
+```
+
+The `:app:verifyNodePhase15Baseline` gate writes
+`phase15-baseline-verification.json` plus `.md`, requires the Phase 14 closeout
+handoff to remain ready, verifies `feature/nodejs-runtime-v1.3`, and imports
+the 19 v1.3 future-promotion backlog tasks without reopening final blockers.
+The `:app:verifyNodePhase15SurfaceManifest` gate writes
+`phase15-surface-manifest-verification.json` plus `.md` and verifies that
+every `P15-00` through `P15-27` task has one owner surface, source backlog
+metadata, profile, risk, evidence class, gate, and rollback hook.
+The `:app:verifyNodePhase15PromotionContracts` gate writes
+`phase15-promotion-contracts.json` plus `.md` and verifies that no provider can
+become opt-in promoted without device, packaged, disclosure, rollback,
+security, docs, type, Safe downgrade, and raw-object denial evidence.
+
 `collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
 evidence automation. It verifies the runtime marker store, next-launch
 collector, embedded/native process marker writers, required crash marker

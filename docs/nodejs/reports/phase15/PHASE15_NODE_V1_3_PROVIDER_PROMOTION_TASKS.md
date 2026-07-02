@@ -110,12 +110,18 @@ A Phase 15 task can be marked complete only when all applicable items are true:
     - `build/reports/nodejs/phase15-surface-manifest-verification.json`
     - `build/reports/nodejs/phase15-surface-manifest-verification.md`
 
-- [ ] P15-02: Refresh v1.3 opt-in promotion bars.
+- [x] P15-02: Refresh v1.3 opt-in promotion bars.
   - Scope: promoted, provider POC, future-only, stable-denied, and rejected
     vocabulary for v1.3.
-  - Gate: proposed `:app:verifyNodePhase15PromotionContracts`.
+  - Gate: `:app:verifyNodePhase15PromotionContracts`.
   - Acceptance: no provider can become opt-in promoted without device,
     packaged, disclosure, rollback, security, docs, and type evidence.
+  - Landed:
+    - `docs/nodejs/phase15/node-v1-3-promotion-contracts.json`
+    - `docs/nodejs/phase15/PHASE15_NODE_V1_3_PROMOTION_CONTRACTS.md`
+    - `tools/nodejs/phase15/verify-node-phase15-promotion-contracts.js`
+    - `build/reports/nodejs/phase15-promotion-contracts.json`
+    - `build/reports/nodejs/phase15-promotion-contracts.md`
 
 - [ ] P15-03: Add v1.3 disclosure and rollback audit gate.
   - Scope: high-privilege prompts, foreground notifications, stop actions,

@@ -3401,3 +3401,29 @@ doctor reports.
 `-Pautojs.embeddedNode.packagedApk=<apk>` it also runs the standalone output verifier and gated diagnostic report for that
 APK; otherwise it uses the packaged smoke host aggregate reports produced from device-exported APKs.
 Focused instrumentation classes still use the explicit `connectedAppDebugAndroidTest` commands above when a device gate is required.
+
+## Phase 15 v1.3 Foundation Gates
+
+Phase 15 starts from the Phase 14 closeout handoff on
+`feature/nodejs-runtime-v1.3`:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase15Baseline
+.\gradlew.bat --console=plain :app:verifyNodePhase15SurfaceManifest
+.\gradlew.bat --console=plain :app:verifyNodePhase15PromotionContracts
+```
+
+`verifyNodePhase15Baseline` writes `phase15-baseline-verification.json` plus
+`.md` and fails if the Phase 14 closeout handoff, branch, imported future
+backlog, or final blocker registry no longer match the v1.3 start contract.
+`verifyNodePhase15SurfaceManifest` writes
+`phase15-surface-manifest-verification.json` plus `.md` and verifies that
+`P15-00` through `P15-27` map exactly once with owner surface, profile, risk,
+evidence class, gate, and rollback hook metadata. It also verifies that every
+imported Phase 14 backlog task is owned.
+`verifyNodePhase15PromotionContracts` writes
+`phase15-promotion-contracts.json` plus `.md` and verifies the v1.3
+`promoted`, `provider_poc`, `future_only`, `stable_denied`, and `rejected`
+vocabulary. It fails if any provider is marked promoted before implementation,
+connected device, packaged APK, disclosure, rollback, security, TypeScript,
+docs, Safe downgrade, and raw-object denial evidence bars are all present.

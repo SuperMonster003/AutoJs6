@@ -69,3 +69,36 @@ tasks.register<Exec>("verifyNodePhase15SurfaceManifest") {
         nodePhase15ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase15PromotionContracts") {
+    group = "verification"
+    description = "Verifies the Phase 15 Node v1.3 promotion contracts."
+
+    dependsOn("verifyNodePhase15SurfaceManifest")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase15/verify-node-phase15-promotion-contracts.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/node-v1-3-promotion-contracts.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/PHASE15_NODE_V1_3_PROMOTION_CONTRACTS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase15/phase15-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/PHASE15_NODE_V1_3_PROVIDER_PROMOTION_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase15/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase15-gate.gradle.kts"))
+    inputs.file(nodePhase15ReportDir.map { it.file("phase15-surface-manifest-verification.json") })
+    outputs.files(
+        nodePhase15ReportDir.map { it.file("phase15-promotion-contracts.json") },
+        nodePhase15ReportDir.map { it.file("phase15-promotion-contracts.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase15ReportDir.get().asFile.absolutePath,
+    )
+}
