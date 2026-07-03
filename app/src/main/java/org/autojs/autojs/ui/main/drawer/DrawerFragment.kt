@@ -547,10 +547,12 @@ open class DrawerFragment : Fragment() {
                     when (/* isTurningOn */ !isActive) {
                         true -> {
                             ViewUtils.setDefaultNightMode(MODE.NIGHT)
+                            ViewUtils.isNightModeEnabled = true
                             Pref.putString(R.string.key_night_mode, MODE.NIGHT.key)
                         }
                         else -> {
                             ViewUtils.setDefaultNightMode(MODE.DAY)
+                            ViewUtils.isNightModeEnabled = false
                             Pref.putString(R.string.key_night_mode, MODE.DAY.key)
                         }
                     }
