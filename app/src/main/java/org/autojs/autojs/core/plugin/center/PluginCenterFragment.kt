@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.View
@@ -121,7 +120,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         _binding = FragmentPluginCenterBinding.bind(view)
 
         val context = requireContext().also { contextRef = it }
-        lastNightModeEnabled = isNightModeEnabled(context)
+        lastNightModeEnabled = isNightModeEnabled()
 
         currentSort = loadPersistedSort(context)
         currentFilterState = PluginFilterStore.getFilterState(context)
@@ -860,7 +859,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private suspend fun probeAidlPlugin(item: PluginCenterItem) {
-        if (item.engine in OCR_SERVICE_ENGINES) {
+        if (item.isOcrService || item.engine in OCR_SERVICE_ENGINES) {
             OcrPluginHost.probe(contextRef, item.packageName)
         } else {
             PluginInfoServiceHost.probe(contextRef, item.packageName)
@@ -882,6 +881,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     else -> false
                 }
                 if (!canAutoEnable || item.isEnabled) return@launch
+                if (item.isAwaitingFreshInstallProbe()) {
+                    vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope)
+                    return@repeat
+                }
                 val requiresHostVersion = item.requiresHostVersion
                 val hostVersion = item.hostVersionCode ?: BuildConfig.VERSION_CODE.toLong()
                 if (requiresHostVersion != null && hostVersion < requiresHostVersion) return@launch
@@ -893,6 +896,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 return@launch
             }
         }
+    }
+
+    private fun PluginCenterItem.isAwaitingFreshInstallProbe(): Boolean {
+        val error = lastError ?: return false
+        return error.code in AUTO_ENABLE_RETRYABLE_ERROR_CODES
     }
 
     override fun onStart() {
@@ -983,7 +991,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         super.onResume()
         var shouldReloadForNightMode = false
         if (::contextRef.isInitialized) {
-            val currentNightModeEnabled = isNightModeEnabled(contextRef)
+            val currentNightModeEnabled = isNightModeEnabled()
             val hasNightModeChanged = lastNightModeEnabled != null && lastNightModeEnabled != currentNightModeEnabled
             if (hasNightModeChanged) {
                 shouldReloadForNightMode = true
@@ -993,14 +1001,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         // Refresh once when returning to page, to cover state after installation/uninstallation.
         // zh-CN: 回到页面时刷新一次, 覆盖安装/卸载后的状态.
         if ((shouldReloadForNightMode || !isFirstEnter) && ::contextRef.isInitialized) {
-            vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope)
+            vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope, forceRender = shouldReloadForNightMode)
         }
     }
 
-    private fun isNightModeEnabled(context: Context): Boolean {
-        val mode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return mode == Configuration.UI_MODE_NIGHT_YES
-    }
+    private fun isNightModeEnabled(): Boolean = ViewUtils.isNightModeEnabled
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -1067,6 +1072,12 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         private const val ARG_SOURCE_SCOPE = "arg_source_scope"
         private const val FIRST_LIST_REVEAL_TIMEOUT_MS = 1000L
         private val OCR_SERVICE_ENGINES = setOf("paddle-ocr", "rapid-ocr")
+        private val AUTO_ENABLE_RETRYABLE_ERROR_CODES = setOf(
+            PluginErrorCode.SERVICE_NOT_FOUND,
+            PluginErrorCode.BIND_FAILED,
+            PluginErrorCode.HANDSHAKE_TIMEOUT,
+            PluginErrorCode.DEAD_OBJECT,
+        )
         private val DATE_PATTERNS = arrayOf(
             "yyyy-MM-dd",
             "yyyy/MM/dd",

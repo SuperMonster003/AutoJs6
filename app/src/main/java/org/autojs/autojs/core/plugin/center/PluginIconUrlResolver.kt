@@ -9,9 +9,9 @@ import org.autojs.autojs.util.ViewUtils
  */
 object PluginIconUrlResolver {
 
-    fun resolveForCurrentMode(context: Context, remoteIconUrl: String?): String? {
+    fun resolveForCurrentMode(@Suppress("UNUSED_PARAMETER") context: Context, remoteIconUrl: String?): String? {
         val source = remoteIconUrl?.trim()?.takeIf { it.isNotBlank() } ?: return null
-        return if (ViewUtils.isNightModeYes(context)) {
+        return if (ViewUtils.isNightModeEnabled) {
             toNightVariant(source)
         } else {
             toDayVariant(source)
@@ -29,4 +29,3 @@ object PluginIconUrlResolver {
         .replace("/res/mipmap-night/", "/res/mipmap/")
         .replace("/res/drawable-night/", "/res/drawable/")
 }
-

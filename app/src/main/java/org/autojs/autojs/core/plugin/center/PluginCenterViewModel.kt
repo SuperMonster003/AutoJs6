@@ -57,6 +57,8 @@ class PluginCenterViewModel : ViewModel() {
     private val _fatalError = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val fatalError: SharedFlow<String> = _fatalError
 
+    private var loadGeneration: Long = 0L
+
     /**
      * Load plugin list.
      *
@@ -74,9 +76,18 @@ class PluginCenterViewModel : ViewModel() {
         context: Context,
         forceRefreshIndex: Boolean = false,
         sourceScope: PluginIndexSource? = null,
+        forceRender: Boolean = false,
     ) {
         Log.d(TAG, "load: forceRefreshIndex = $forceRefreshIndex, sourceScope = $sourceScope")
+        val generation = ++loadGeneration
         viewModelScope.launch {
+            fun isLatestLoad() = generation == loadGeneration
+            fun updateLatestItems(next: List<PluginCenterItem>) {
+                if (isLatestLoad()) {
+                    updateItemsIfChanged(next, force = forceRender)
+                }
+            }
+
             _indexLoaded.value = false
             val autoCheckUpdatesEnabled = PluginOnlineSettingsStore.isAutoCheckUpdatesEnabled()
             val enabledSources = sourceScope?.let { setOf(it) } ?: PluginOnlineSettingsStore.selectedSources()
@@ -92,6 +103,7 @@ class PluginCenterViewModel : ViewModel() {
             val installed = runCatching {
                 installedRepo.discoverInstalled(context)
             }.onFailure { e ->
+                if (!isLatestLoad()) return@onFailure
                 // Treat "local discovery" failure as a serious exception.
                 // zh-CN: 将 "本地发现" 失败视为严重异常.
                 val message = context.getString(
@@ -102,10 +114,12 @@ class PluginCenterViewModel : ViewModel() {
             }.getOrNull() ?: run {
                 // Do not continue subsequent logic when unable to obtain local list.
                 // zh-CN: 无法获取本地列表时不再继续后续逻辑.
-                updateItemsIfChanged(emptyList())
+                if (!isLatestLoad()) return@launch
+                updateLatestItems(emptyList())
                 _indexLoaded.value = true
                 return@launch
             }
+            if (!isLatestLoad()) return@launch
 
             val legacyInstalled = runCatching {
                 legacyRepo.discoverInstalled(context)
@@ -203,13 +217,11 @@ class PluginCenterViewModel : ViewModel() {
                 Log.w(TAG, "getCachedIndex failed: ${it.message}")
             }.getOrElse { emptyList() }
 
-            val hasCachedItems = _items.value.isNotEmpty()
-            if (!hasCachedItems) {
-                when {
-                    cachedIndexEntries.isNotEmpty() -> updateItemsIfChanged(buildMergedItems(cachedIndexEntries))
-                    sourceScope == null -> updateItemsIfChanged(onlyLocalItems)
-                }
+            when {
+                cachedIndexEntries.isNotEmpty() -> updateLatestItems(buildMergedItems(cachedIndexEntries))
+                sourceScope == null -> updateLatestItems(onlyLocalItems)
             }
+            if (!isLatestLoad()) return@launch
 
             // Asynchronously load index and merge.
             val indexEntries = runCatching {
@@ -222,8 +234,9 @@ class PluginCenterViewModel : ViewModel() {
                 // Index fetch exception is not fatal, just log it.
                 Log.w(TAG, "fetchOnlineIndex failed: ${it.message}")
             }.getOrElse { cachedIndexEntries }
+            if (!isLatestLoad()) return@launch
 
-            updateItemsIfChanged(buildMergedItems(indexEntries))
+            updateLatestItems(buildMergedItems(indexEntries))
             _indexLoaded.value = true
 
             // When returning to the page, refresh if the details dialog is being displayed.
@@ -251,8 +264,8 @@ class PluginCenterViewModel : ViewModel() {
         PluginInfoDialogManager.refreshIfShowing(context, _items.value)
     }
 
-    private fun updateItemsIfChanged(next: List<PluginCenterItem>) {
-        if (!isSemanticallySameList(_items.value, next)) {
+    private fun updateItemsIfChanged(next: List<PluginCenterItem>, force: Boolean = false) {
+        if (force || !isSemanticallySameList(_items.value, next)) {
             _items.value = next
         }
     }
@@ -306,6 +319,7 @@ class PluginCenterViewModel : ViewModel() {
             engine = item.engine,
             variant = item.variant,
             engineId = item.engineId,
+            isOcrService = item.isOcrService,
             requiresHostVersion = item.requiresHostVersion,
             hostVersionCode = item.hostVersionCode,
         )
@@ -392,9 +406,10 @@ class PluginCenterViewModel : ViewModel() {
         val collaborators = index?.collaborators ?: emptyList()
         val source = index?.source ?: PluginIndexSource.OFFICIAL
         val supportedAbis = local?.supportedAbis ?: index?.supportedAbis
-        val engine = local?.pluginInfo?.engine
-        val variant = local?.pluginInfo?.variant
-        val engineId = local?.pluginInfo?.id
+        val engine = local?.pluginInfo?.engine ?: index?.engine
+        val variant = local?.pluginInfo?.variant ?: index?.variant
+        val engineId = local?.pluginInfo?.id ?: index?.engineId
+        val isOcrService = local?.isOcrService == true || engine in OCR_SERVICE_ENGINES
         val requiresHostVersion = local?.requiresHostVersion ?: index?.requiresHostVersion
         val hostVersionCode = currentHostVersionCode()
 
@@ -520,6 +535,7 @@ class PluginCenterViewModel : ViewModel() {
             engine = engine,
             variant = variant,
             engineId = engineId,
+            isOcrService = isOcrService,
             mechanism = mechanism,
             authorizedState = trustInfo.authorizedState,
             activatedState = activatedState,
@@ -720,11 +736,13 @@ class PluginCenterViewModel : ViewModel() {
         val engine: String?,
         val variant: String?,
         val engineId: String?,
+        val isOcrService: Boolean,
         val requiresHostVersion: Long?,
         val hostVersionCode: Long?,
     )
 
     companion object {
         private const val TAG = "PluginCenterViewModel"
+        private val OCR_SERVICE_ENGINES = setOf("paddle-ocr", "rapid-ocr")
     }
 }

@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.util.DisplayMetrics
+import org.autojs.autojs.util.ViewUtils
 
 object PluginInstalledIconResolver {
 
@@ -19,7 +20,11 @@ object PluginInstalledIconResolver {
         }.getOrNull() ?: return runCatching { appInfo.loadIcon(pm) }.getOrNull()
 
         val packageConfig = Configuration(packageContext.resources.configuration)
-        val hostNightMode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val hostNightMode = if (ViewUtils.isNightModeEnabled) {
+            Configuration.UI_MODE_NIGHT_YES
+        } else {
+            Configuration.UI_MODE_NIGHT_NO
+        }
         packageConfig.uiMode = (packageConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or hostNightMode
 
         val themedPackageContext = packageContext.createConfigurationContext(packageConfig)

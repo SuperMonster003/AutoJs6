@@ -56,6 +56,7 @@ data class PluginCenterItem(
     val engine: String? = null,
     val variant: String? = null,
     val engineId: String? = null,
+    val isOcrService: Boolean = false,
     val mechanism: PluginMechanism = PluginMechanism.AIDL,
     var authorizedState: PluginAuthorizedState = PluginAuthorizedState.OFFICIAL,
     var activatedState: PluginActivatedState = PluginActivatedState.NOT_SUPPORTED,

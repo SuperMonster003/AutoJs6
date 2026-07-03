@@ -1,7 +1,6 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
-import android.content.res.Configuration
 import android.util.Log
 import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
@@ -9,6 +8,7 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.util.AndroidUtils
 import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.json.JSONArray
@@ -729,7 +729,7 @@ class PluginIndexRepository {
         val names = listOf("ic_launcher", "ic_launcher_round", "plugin_icon")
         val exts = listOf("png", "webp", "jpg", "jpeg")
 
-        if (isNightModeEnabled(context)) {
+        if (isNightModeEnabled()) {
             val nightDirs = listOf(
                 "$packageName/res/mipmap-night",
                 "$packageName/res/drawable-night",
@@ -772,10 +772,7 @@ class PluginIndexRepository {
         }
     }
 
-    private fun isNightModeEnabled(context: Context): Boolean {
-        val mode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return mode == Configuration.UI_MODE_NIGHT_YES
-    }
+    private fun isNightModeEnabled(): Boolean = ViewUtils.isNightModeEnabled
 
     private fun parseReleaseAssets(array: JSONArray?): List<ReleaseAsset> {
         if (array == null) return emptyList()
