@@ -63,7 +63,7 @@ class InstalledPluginRepository {
             val packageName = serviceInfo.packageName
             val appInfo = runCatching { pm.getApplicationInfo(packageName, 0) }.getOrNull()
             val appLabel = appInfo?.loadLabel(pm)?.toString()
-            val icon = appInfo?.loadIcon(pm)
+            val icon = appInfo?.let { PluginInstalledIconResolver.load(context, it) }
             val isStopped = appInfo != null && (appInfo.flags and ApplicationInfo.FLAG_STOPPED) != 0
 
             val pkgInfo = runCatching { pm.getPackageInfo(packageName, 0) }.getOrNull()

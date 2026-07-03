@@ -981,17 +981,18 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     override fun onResume() {
         super.onResume()
+        var shouldReloadForNightMode = false
         if (::contextRef.isInitialized) {
             val currentNightModeEnabled = isNightModeEnabled(contextRef)
             val hasNightModeChanged = lastNightModeEnabled != null && lastNightModeEnabled != currentNightModeEnabled
             if (hasNightModeChanged) {
-                adapter.notifyDataSetChanged()
+                shouldReloadForNightMode = true
             }
             lastNightModeEnabled = currentNightModeEnabled
         }
         // Refresh once when returning to page, to cover state after installation/uninstallation.
         // zh-CN: 回到页面时刷新一次, 覆盖安装/卸载后的状态.
-        if (!isFirstEnter && ::contextRef.isInitialized) {
+        if ((shouldReloadForNightMode || !isFirstEnter) && ::contextRef.isInitialized) {
             vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope)
         }
     }

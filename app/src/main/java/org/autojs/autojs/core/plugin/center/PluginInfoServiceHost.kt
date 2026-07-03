@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.RemoteException
 import android.os.SystemClock
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.autojs.plugin.common.api.IPluginInfoProvider
 import org.autojs.plugin.common.api.PluginActions
@@ -22,6 +23,7 @@ import kotlin.coroutines.resumeWithException
 object PluginInfoServiceHost {
 
     private const val DEFAULT_BIND_TIMEOUT_MS = 10_000L
+    private val SERVICE_QUERY_RETRY_DELAYS_MS = longArrayOf(150L, 300L, 600L, 1000L, 1500L)
     private val handler = Handler(Looper.getMainLooper())
 
     data class Discovered(
@@ -47,9 +49,18 @@ object PluginInfoServiceHost {
         if (!PluginTrustManager.isAuthorized(context, packageName)) {
             error("Plugin not authorized: $packageName")
         }
-        val serviceInfo = queryInfoServices(context, packageName).firstOrNull()
+        val serviceInfo = queryFirstInfoServiceWithRetry(context, packageName)
             ?: error("No plugin info service found for package: $packageName")
         return withInfoService(context, serviceInfo) { it.info }
+    }
+
+    private suspend fun queryFirstInfoServiceWithRetry(context: Context, packageName: String): ServiceInfo? {
+        queryInfoServices(context, packageName).firstOrNull()?.let { return it }
+        SERVICE_QUERY_RETRY_DELAYS_MS.forEach { delayMs ->
+            delay(delayMs)
+            queryInfoServices(context, packageName).firstOrNull()?.let { return it }
+        }
+        return null
     }
 
     private fun queryInfoServices(context: Context, packageName: String?): List<ServiceInfo> {

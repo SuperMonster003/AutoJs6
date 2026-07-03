@@ -67,6 +67,7 @@ object OcrPluginHost {
     private const val IDLE_UNBIND_MS = 30_000L
     private const val RETRY_WAKE_DELAY_MS = 300L
     private const val MODULE_LABEL_OCR_PLUGIN = "OCR plugin"
+    private val SERVICE_QUERY_RETRY_DELAYS_MS = longArrayOf(150L, 300L, 600L, 1000L, 1500L)
 
     private val externalServiceFlag = runCatching { ServiceInfo::class.java.getField("FLAG_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
     private val bindExternalServiceFlag = runCatching { Context::class.java.getField("BIND_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
@@ -99,9 +100,18 @@ object OcrPluginHost {
         if (!PluginTrustManager.isAuthorized(context, packageName)) {
             error("Plugin not authorized: $packageName")
         }
-        val serviceInfo = queryOcrServices(context, packageName).firstOrNull()
+        val serviceInfo = queryFirstOcrServiceWithRetry(context, packageName)
             ?: error("No OCR service found for package: $packageName")
         return withService(context, serviceInfo, DEFAULT_BIND_TIMEOUT_MS) { it.getInfo() }
+    }
+
+    private suspend fun queryFirstOcrServiceWithRetry(context: Context, packageName: String): ServiceInfo? {
+        queryOcrServices(context, packageName).firstOrNull()?.let { return it }
+        SERVICE_QUERY_RETRY_DELAYS_MS.forEach { delayMs ->
+            delay(delayMs)
+            queryOcrServices(context, packageName).firstOrNull()?.let { return it }
+        }
+        return null
     }
 
     suspend fun recognizeText(

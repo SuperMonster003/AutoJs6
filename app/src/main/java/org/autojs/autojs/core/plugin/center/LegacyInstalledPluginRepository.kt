@@ -56,7 +56,7 @@ class LegacyInstalledPluginRepository {
 
             val packageName = appInfo.packageName
             val label = appInfo.loadLabel(pm).takeUnless { it.isBlank() }?.toString()
-            val icon = if (forceIgnoreLocalIcon) null else appInfo.loadIcon(pm).takeUnless {
+            val icon = if (forceIgnoreLocalIcon) null else PluginInstalledIconResolver.load(context, appInfo).takeUnless {
                 isDefaultAndroidAppIcon(pm, appInfo, it)
             }
             val isStopped = (appInfo.flags and ApplicationInfo.FLAG_STOPPED) != 0
