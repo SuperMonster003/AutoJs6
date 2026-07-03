@@ -43,6 +43,15 @@ object PluginInfoServiceHost {
         }
     }
 
+    suspend fun probe(context: Context, packageName: String): PluginInfo {
+        if (!PluginTrustManager.isAuthorized(context, packageName)) {
+            error("Plugin not authorized: $packageName")
+        }
+        val serviceInfo = queryInfoServices(context, packageName).firstOrNull()
+            ?: error("No plugin info service found for package: $packageName")
+        return withInfoService(context, serviceInfo) { it.info }
+    }
+
     private fun queryInfoServices(context: Context, packageName: String?): List<ServiceInfo> {
         val pm = context.packageManager
         val intent = Intent(PluginActions.INFO).apply {

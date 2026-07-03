@@ -690,7 +690,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
         viewLifecycleOwner.lifecycleScope.launch {
             val error = runCatching {
-                PaddleOcrPluginHost.probe(contextRef, item.packageName)
+                probeAidlPlugin(item)
             }.exceptionOrNull()
             if (error != null && error !is CancellationException) {
                 val mapped = PluginErrorMapper.fromThrowable(error)
@@ -840,7 +840,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             for (delayMs in delays) {
                 delay(delayMs)
                 val error = runCatching {
-                    PaddleOcrPluginHost.probe(contextRef, item.packageName)
+                    probeAidlPlugin(item)
                 }.exceptionOrNull()
                 if (error == null) {
                     if (isAdded && _binding != null) {
@@ -856,6 +856,14 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     return@launch
                 }
             }
+        }
+    }
+
+    private suspend fun probeAidlPlugin(item: PluginCenterItem) {
+        if (item.engine == ENGINE_PADDLE_OCR) {
+            PaddleOcrPluginHost.probe(contextRef, item.packageName)
+        } else {
+            PluginInfoServiceHost.probe(contextRef, item.packageName)
         }
     }
 
@@ -1057,6 +1065,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     companion object {
         private const val ARG_SOURCE_SCOPE = "arg_source_scope"
         private const val FIRST_LIST_REVEAL_TIMEOUT_MS = 1000L
+        private const val ENGINE_PADDLE_OCR = "paddle-ocr"
         private val DATE_PATTERNS = arrayOf(
             "yyyy-MM-dd",
             "yyyy/MM/dd",

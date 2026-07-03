@@ -14,6 +14,7 @@ object PluginErrorMapper {
             t is DeadObjectException -> PluginErrorCode.DEAD_OBJECT
             t is RemoteException -> PluginErrorCode.DEAD_OBJECT
             message.contains("No OCR service found", ignoreCase = true) -> PluginErrorCode.SERVICE_NOT_FOUND
+            message.contains("No plugin info service found", ignoreCase = true) -> PluginErrorCode.SERVICE_NOT_FOUND
             message.contains("bindService SecurityException", ignoreCase = true) -> PluginErrorCode.BIND_SECURITY_EXCEPTION
             message.contains("bindService failed", ignoreCase = true) -> PluginErrorCode.BIND_FAILED
             message.contains("bindService timeout", ignoreCase = true) -> PluginErrorCode.HANDSHAKE_TIMEOUT
