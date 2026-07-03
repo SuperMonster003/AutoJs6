@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.main.plugin
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Activity
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +16,10 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity
 import org.autojs.autojs.core.plugin.center.PluginCenterFragment
 import org.autojs.autojs.core.plugin.center.PluginIndexSource
@@ -45,6 +49,20 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
 
     private var mFloatingActionMenu: PluginFloatingActionMenu? = null
     private var mIsCurrentPagePlugins = false
+    private var mNightModeRefreshJob: Job? = null
+
+    private val mNightModePrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (!isAdded || view == null) return@OnSharedPreferenceChangeListener
+        val context = requireContext()
+        val nightModeKeys = setOf(
+            context.getString(R.string.key_night_mode),
+            context.getString(R.string.key_night_mode_enabled),
+            context.getString(R.string.key_auto_night_mode_enabled),
+        )
+        if (key in nightModeKeys) {
+            schedulePluginCenterNightModeRefresh()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,6 +144,7 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
     override fun onPageShow() {
         super.onPageShow()
         mIsCurrentPagePlugins = true
+        schedulePluginCenterNightModeRefresh()
     }
 
     override fun onPageHide() {
@@ -156,6 +175,28 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
         child.setQuery(event.query)
     }
 
+    override fun onStart() {
+        super.onStart()
+        Pref.registerOnSharedPreferenceChangeListener(mNightModePrefListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Pref.get().unregisterOnSharedPreferenceChangeListener(mNightModePrefListener)
+        mNightModeRefreshJob?.cancel()
+        mNightModeRefreshJob = null
+    }
+
+    private fun schedulePluginCenterNightModeRefresh() {
+        if (!isAdded || view == null) return
+        mNightModeRefreshJob?.cancel()
+        mNightModeRefreshJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(PLUGIN_CENTER_NIGHT_MODE_REFRESH_DELAY_MS)
+            val child = childFragmentManager.findFragmentByTag(TAG_PLUGIN_CENTER) as? PluginCenterFragment ?: return@launch
+            child.refreshPluginIconsForNightModeChange(force = true)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
@@ -163,6 +204,8 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mNightModeRefreshJob?.cancel()
+        mNightModeRefreshJob = null
         mFloatingActionMenu = null
     }
 
@@ -192,6 +235,7 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
 
     companion object {
         private const val TAG_PLUGIN_CENTER = "plugin_center"
+        private const val PLUGIN_CENTER_NIGHT_MODE_REFRESH_DELAY_MS = 180L
     }
 
 }

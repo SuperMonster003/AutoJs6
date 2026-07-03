@@ -279,6 +279,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         renderList()
     }
 
+    fun refreshPluginIconsForNightModeChange(force: Boolean = true) {
+        scheduleNightModeIconRefresh(force)
+    }
+
     /**
      * Update sort strategy for current list rendering.
      * zh-CN: 更新当前列表渲染的排序策略.
@@ -1024,13 +1028,13 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
-    private fun scheduleNightModeIconRefresh() {
+    private fun scheduleNightModeIconRefresh(force: Boolean = false) {
         nightModeRefreshJob?.cancel()
         nightModeRefreshJob = viewLifecycleOwner.lifecycleScope.launch {
             delay(NIGHT_MODE_ICON_REFRESH_DELAY_MS)
             if (!isAdded || _binding == null || !::contextRef.isInitialized) return@launch
             val currentNightModeEnabled = isNightModeEnabled()
-            if (lastNightModeEnabled == currentNightModeEnabled) return@launch
+            if (!force && lastNightModeEnabled == currentNightModeEnabled) return@launch
             lastNightModeEnabled = currentNightModeEnabled
             vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope, forceRender = true)
         }
