@@ -7,7 +7,7 @@ import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.core.image.ImageWrapper
-import org.autojs.autojs.core.plugin.ocr.PaddleOcrPluginHost
+import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -62,12 +62,12 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             }
             val ocrOptions = getOcrOptions(options)
             return runBlocking(scriptRuntime.coroutineContext) {
-                val target = PaddleOcrPluginHost.selectOrThrow(
+                val target = OcrPluginHost.selectOrThrow(
                     context = globalContext,
                     engine = ENGINE_RAPID_OCR,
                     moduleLabel = MODULE_LABEL_RAPID_OCR,
                 )
-                PaddleOcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
+                OcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
             }
         }
 
@@ -78,12 +78,12 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             }
             val ocrOptions = getOcrOptions(options)
             return runBlocking(scriptRuntime.coroutineContext) {
-                val target = PaddleOcrPluginHost.selectOrThrow(
+                val target = OcrPluginHost.selectOrThrow(
                     context = globalContext,
                     engine = ENGINE_RAPID_OCR,
                     moduleLabel = MODULE_LABEL_RAPID_OCR,
                 )
-                PaddleOcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
+                OcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
             }.map { OcrResult(it.text, it.confidence, it.bounds) }
         }
 

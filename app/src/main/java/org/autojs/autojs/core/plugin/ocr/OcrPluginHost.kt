@@ -47,20 +47,26 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 /**
+ * Host for OCR AIDL plugins.
+ *
+ * The action string and AIDL API package still use their original Paddle OCR names for compatibility
+ * with installed Paddle/Rapid OCR plugins. Engine selection is done through [PluginInfo.engine].
+ *
  * Modified by JetBrains AI Assistant (GPT-5.2-Codex (xhigh)) as of Feb 13, 2026.
  * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 26, 2026.
  */
-object PaddleOcrPluginHost {
+object OcrPluginHost {
 
-    private const val TAG = "PaddleOcrPluginHost"
+    private const val TAG = "OcrPluginHost"
 
+    // Legacy action shared by OCR plugins. Keep the string stable for installed Paddle/Rapid plugins.
     const val ACTION_OCR = "org.autojs.plugin.PADDLE_OCR"
 
     private const val DEFAULT_BIND_TIMEOUT_MS = 60_000L
     private const val DEFAULT_CALL_TIMEOUT_MS = 60_000L
     private const val IDLE_UNBIND_MS = 30_000L
     private const val RETRY_WAKE_DELAY_MS = 300L
-    private const val MODULE_LABEL_PADDLE_OCR = "Paddle OCR"
+    private const val MODULE_LABEL_OCR_PLUGIN = "OCR plugin"
 
     private val externalServiceFlag = runCatching { ServiceInfo::class.java.getField("FLAG_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
     private val bindExternalServiceFlag = runCatching { Context::class.java.getField("BIND_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
@@ -140,9 +146,9 @@ object PaddleOcrPluginHost {
 
     suspend fun select(
         context: Context,
-        // e.g. "paddle-ocr-pp-ocrv5"
+        // e.g. "paddle-ocr-pp-ocrv5" or "rapid-ocr"
         engineId: String? = null,
-        // e.g. "paddle-ocr"
+        // e.g. "paddle-ocr" or "rapid-ocr"
         engine: String? = null,
         // e.g. "v5"
         variant: String? = null,
@@ -152,13 +158,13 @@ object PaddleOcrPluginHost {
 
     suspend fun selectOrThrow(
         context: Context,
-        // e.g. "paddle-ocr-pp-ocrv5"
+        // e.g. "paddle-ocr-pp-ocrv5" or "rapid-ocr"
         engineId: String? = null,
-        // e.g. "paddle-ocr"
+        // e.g. "paddle-ocr" or "rapid-ocr"
         engine: String? = null,
         // e.g. "v5"
         variant: String? = null,
-        moduleLabel: String = MODULE_LABEL_PADDLE_OCR,
+        moduleLabel: String = MODULE_LABEL_OCR_PLUGIN,
     ): Discovered {
         val result = selectDetailed(context, engineId, engine, variant)
         return result.selected ?: throw buildSelectionFailure(context, result.discovered, engineId, engine, variant, moduleLabel)

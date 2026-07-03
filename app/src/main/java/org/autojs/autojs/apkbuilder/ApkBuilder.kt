@@ -22,6 +22,7 @@ import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
+import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
@@ -1695,7 +1696,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             libsToInclude = emptyList(),
             assetDirsToInclude = emptyList(),
             plugin = PluginLib(
-                action = "org.autojs.plugin.PADDLE_OCR",
+                // Legacy shared OCR AIDL action. Keep stable for existing Paddle OCR plugins.
+                action = OcrPluginHost.ACTION_OCR,
                 onServiceConnected = { binder: IBinder ->
                     IOcrPlugin.Stub.asInterface(binder).info
                 },

@@ -22,7 +22,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.autojs.autojs.core.plugin.ocr.PaddleOcrPluginHost
+import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
@@ -861,7 +861,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     private suspend fun probeAidlPlugin(item: PluginCenterItem) {
         if (item.engine in OCR_SERVICE_ENGINES) {
-            PaddleOcrPluginHost.probe(contextRef, item.packageName)
+            OcrPluginHost.probe(contextRef, item.packageName)
         } else {
             PluginInfoServiceHost.probe(contextRef, item.packageName)
         }

@@ -6,16 +6,16 @@ import android.graphics.drawable.Drawable
 import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.core.plugin.ocr.PaddleOcrPluginHost
+import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginInfo
 import java.io.File
 
 /**
- * Local installed plugin discovery (based on existing PaddleOcrPluginHost.discover).
+ * Local installed plugin discovery.
  *
- * zh-CN: 本地已安装插件发现 (基于现有的 PaddleOcrPluginHost.discover).
+ * zh-CN: 本地已安装插件发现.
  *
  * Modified by JetBrains AI Assistant (GPT-5.2-Codex (xhigh)) as of Feb 13, 2026.
  * Modified by SuperMonster003 as of Feb 13, 2026.
@@ -53,7 +53,7 @@ class InstalledPluginRepository {
         val discovered = (
                 PluginInfoServiceHost.discover(context).map {
                     Discovery(it.serviceInfo, it.pluginInfo, it.error)
-                } + PaddleOcrPluginHost.discover(context).map {
+                } + OcrPluginHost.discover(context).map {
                     Discovery(it.serviceInfo, it.pluginInfo, it.error)
                 }
                 ).distinctBy { it.serviceInfo.packageName }

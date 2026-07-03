@@ -9,6 +9,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
+import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
@@ -646,7 +647,7 @@ object NodeBridgeProviderRegistry {
             "mlkitAvailable" to mlKitOcrAvailable().toString(),
             "paddleEmbeddedVariant" to paddleVariant,
             "paddleEmbeddedAssets" to (paddleVariant != "none").toString(),
-            "paddlePluginServiceCount" to queryPaddleOcrPluginServiceCount(appContext).toString(),
+            "ocrPluginServiceCount" to queryOcrPluginServiceCount(appContext).toString(),
             "liveMethods" to "recognize,recognizeText,detectTextBounds",
             "inputModes" to "providerImageHandle,compatPathViaTemporaryImageHandle,compatCaptureExistingPermission",
             "capability" to NodeBridgePermissionManifest.OCR,
@@ -693,8 +694,8 @@ object NodeBridgeProviderRegistry {
         return runCatching { context.assets.open(path).use { true } }.getOrDefault(false)
     }
 
-    private fun queryPaddleOcrPluginServiceCount(context: Context): Int {
-        val intent = Intent("org.autojs.plugin.PADDLE_OCR")
+    private fun queryOcrPluginServiceCount(context: Context): Int {
+        val intent = Intent(OcrPluginHost.ACTION_OCR)
         val pm = context.packageManager
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             pm.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0)).size
