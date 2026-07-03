@@ -8,7 +8,6 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.util.AndroidUtils
 import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
-import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.json.JSONArray
@@ -373,7 +372,16 @@ class PluginIndexRepository {
                 iconRef = iconRef,
             )
             ?: resolveOfficialFallbackIconPath(repoTreePaths)
+        val nightIconPath = resolveNightIconPath(iconRef, repoTreePaths)
         val iconUrl = iconPath?.let {
+            rawGithubUrl(
+                owner = plugin.owner,
+                repo = plugin.repo,
+                branch = plugin.branch,
+                path = it,
+            ).toUri()
+        }
+        val nightIconUrl = nightIconPath?.let {
             rawGithubUrl(
                 owner = plugin.owner,
                 repo = plugin.repo,
@@ -426,6 +434,7 @@ class PluginIndexRepository {
         return PluginIndexEntry(
             packageName = packageName,
             iconUrl = iconUrl,
+            nightIconUrl = nightIconUrl,
             title = title,
             description = description,
             author = author,
@@ -497,7 +506,15 @@ class PluginIndexRepository {
                 versionCode = apk.versionCode,
                 treePaths = treePaths,
             )
-            val iconUrl = resolveGarageIconPath(context, apk.packageName, treePaths)?.let { path ->
+            val iconUrl = resolveGarageDefaultIconPath(apk.packageName, treePaths)?.let { path ->
+                rawGithubUrl(
+                    owner = THIRD_PARTY_OWNER,
+                    repo = THIRD_PARTY_REPO,
+                    branch = THIRD_PARTY_BRANCH,
+                    path = path,
+                ).toUri()
+            }
+            val nightIconUrl = resolveGarageNightIconPath(apk.packageName, treePaths)?.let { path ->
                 rawGithubUrl(
                     owner = THIRD_PARTY_OWNER,
                     repo = THIRD_PARTY_REPO,
@@ -528,6 +545,7 @@ class PluginIndexRepository {
             PluginIndexEntry(
                 packageName = apk.packageName,
                 iconUrl = iconUrl,
+                nightIconUrl = nightIconUrl,
                 forceIgnoreLocalIcon = indexConfig.forceIgnoreLocalIcon,
                 title = indexConfig.name?.takeIf { it.isNotBlank() } ?: apk.originalName,
                 description = description,
@@ -721,30 +739,12 @@ class PluginIndexRepository {
         return null
     }
 
-    private fun resolveGarageIconPath(
-        context: Context,
+    private fun resolveGarageDefaultIconPath(
         packageName: String,
         treePaths: Set<String>,
     ): String? {
         val names = listOf("ic_launcher", "ic_launcher_round", "plugin_icon")
         val exts = listOf("png", "webp", "jpg", "jpeg")
-
-        if (isNightModeEnabled()) {
-            val nightDirs = listOf(
-                "$packageName/res/mipmap-night",
-                "$packageName/res/drawable-night",
-            )
-            nightDirs.forEach { dir ->
-                names.forEach { name ->
-                    exts.forEach { ext ->
-                        val candidate = "$dir/$name.$ext"
-                        if (candidate in treePaths) {
-                            return candidate
-                        }
-                    }
-                }
-            }
-        }
 
         val dirs = listOf(
             "$packageName/res/mipmap",
@@ -772,7 +772,25 @@ class PluginIndexRepository {
         }
     }
 
-    private fun isNightModeEnabled(): Boolean = ViewUtils.isNightModeEnabled
+    private fun resolveGarageNightIconPath(
+        packageName: String,
+        treePaths: Set<String>,
+    ): String? {
+        val names = listOf("ic_launcher", "ic_launcher_round", "plugin_icon")
+        val exts = listOf("png", "webp", "jpg", "jpeg")
+        val nightDirs = listOf(
+            "$packageName/res/mipmap-night",
+            "$packageName/res/drawable-night",
+        )
+        return nightDirs.firstNotNullOfOrNull { dir ->
+            names.firstNotNullOfOrNull { name ->
+                exts.firstNotNullOfOrNull { ext ->
+                    val candidate = "$dir/$name.$ext"
+                    candidate.takeIf { it in treePaths }
+                }
+            }
+        }
+    }
 
     private fun parseReleaseAssets(array: JSONArray?): List<ReleaseAsset> {
         if (array == null) return emptyList()
@@ -856,6 +874,12 @@ class PluginIndexRepository {
         return candidates.firstOrNull { it in treePaths }
     }
 
+    private fun resolveNightIconPath(iconRef: String?, treePaths: Set<String>): String? {
+        val candidates = buildNightIconCandidates(iconRef)
+        if (candidates.isEmpty() || treePaths.isEmpty()) return null
+        return candidates.firstOrNull { it in treePaths }
+    }
+
     private fun resolveIconPathWithoutTreeProbe(
         context: Context,
         owner: String,
@@ -891,6 +915,19 @@ class PluginIndexRepository {
             "app/src/main/res/drawable-xhdpi",
             "app/src/main/res/drawable-hdpi",
             "app/src/main/res/drawable-mdpi",
+        )
+        val exts = listOf("png", "webp", "jpg", "jpeg")
+        return dirs.flatMap { dir -> exts.map { ext -> "$dir/$name.$ext" } }
+    }
+
+    private fun buildNightIconCandidates(iconRef: String?): List<String> {
+        if (iconRef.isNullOrBlank() || !iconRef.startsWith("@")) return emptyList()
+        val type = iconRef.substringAfter("@").substringBefore("/")
+        val name = iconRef.substringAfter("/").ifBlank { return emptyList() }
+
+        val dirs = linkedSetOf(
+            "app/src/main/res/$type-night",
+            "app/src/main/res/drawable-night",
         )
         val exts = listOf("png", "webp", "jpg", "jpeg")
         return dirs.flatMap { dir -> exts.map { ext -> "$dir/$name.$ext" } }
@@ -1205,6 +1242,7 @@ class PluginIndexRepository {
                 val obj = JSONObject()
                 obj.put("packageName", entry.packageName)
                 obj.put("iconUrl", entry.iconUrl?.toString())
+                obj.put("nightIconUrl", entry.nightIconUrl?.toString())
                 obj.put("forceIgnoreLocalIcon", entry.forceIgnoreLocalIcon)
                 obj.put("title", entry.title)
                 obj.put("description", entry.description)
@@ -1269,6 +1307,7 @@ class PluginIndexRepository {
             val instructionMarkdownUrl = obj.optString("instructionMarkdownUrl").takeIf { it.isNotBlank() && !it.equals("null", true) }
             val author = obj.optString("author").takeIf { it.isNotBlank() && !it.equals("null", true) }
             val iconUrl = obj.optString("iconUrl").takeIf { it.isNotBlank() }?.toUri()
+            val nightIconUrl = obj.optString("nightIconUrl").takeIf { it.isNotBlank() }?.toUri()
             val forceIgnoreLocalIcon = obj.optBoolean("forceIgnoreLocalIcon", false)
             val requiresHostVersion = obj.optLong("requiresHostVersion", -1L).takeIf { it > 0 }
             val source = obj.optString("source")
@@ -1311,6 +1350,7 @@ class PluginIndexRepository {
             list += PluginIndexEntry(
                 packageName = packageName,
                 iconUrl = iconUrl,
+                nightIconUrl = nightIconUrl,
                 forceIgnoreLocalIcon = forceIgnoreLocalIcon,
                 title = title,
                 description = description,

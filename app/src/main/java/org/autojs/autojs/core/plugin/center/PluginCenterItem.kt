@@ -44,6 +44,7 @@ data class PluginCenterItem(
     val installableApkSizeBytes: Long? = null,
     val supportedAbis: List<String>? = null,
     val remoteIconUrl: String? = null,
+    val remoteNightIconUrl: String? = null,
     val forceIgnoreLocalIcon: Boolean = false,
 
     val icon: Drawable? = null,

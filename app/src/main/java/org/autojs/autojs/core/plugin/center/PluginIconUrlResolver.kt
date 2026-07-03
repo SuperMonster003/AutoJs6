@@ -9,20 +9,17 @@ import org.autojs.autojs.util.ViewUtils
  */
 object PluginIconUrlResolver {
 
-    fun resolveForCurrentMode(@Suppress("UNUSED_PARAMETER") context: Context, remoteIconUrl: String?): String? {
+    fun resolveForCurrentMode(
+        @Suppress("UNUSED_PARAMETER") context: Context,
+        remoteIconUrl: String?,
+        remoteNightIconUrl: String? = null,
+    ): String? {
         val source = remoteIconUrl?.trim()?.takeIf { it.isNotBlank() } ?: return null
         return if (ViewUtils.isNightModeEnabled) {
-            toNightVariant(source)
+            remoteNightIconUrl?.trim()?.takeIf { it.isNotBlank() } ?: source
         } else {
             toDayVariant(source)
         }
-    }
-
-    private fun toNightVariant(url: String): String = when {
-        "/res/mipmap-night/" in url || "/res/drawable-night/" in url -> url
-        "/res/mipmap/" in url -> url.replace("/res/mipmap/", "/res/mipmap-night/")
-        "/res/drawable/" in url -> url.replace("/res/drawable/", "/res/drawable-night/")
-        else -> url
     }
 
     private fun toDayVariant(url: String): String = url

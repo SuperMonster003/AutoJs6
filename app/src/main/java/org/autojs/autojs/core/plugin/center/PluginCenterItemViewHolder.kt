@@ -77,8 +77,9 @@ class PluginCenterItemViewHolder(
             Glide.with(iconView).clear(iconView)
             iconView.setImageDrawable(if (item.remoteIconUrl.isNullOrBlank()) cachedPackageIcon ?: it else it)
         } ?: item.remoteIconUrl?.takeIf { it.isNotBlank() }?.let { url ->
-            val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, url) ?: url
-            val fallbackUrl = url.takeIf { it != preferredUrl }
+            val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, url, item.remoteNightIconUrl) ?: url
+            val fallbackUrl = listOfNotNull(url, item.remoteNightIconUrl)
+                .firstOrNull { it.isNotBlank() && it != preferredUrl }
             val fallback = getCachedRemoteIcon(preferredUrl)
                 ?: cachedPackageIcon
                 ?: fallbackUrl?.let(::getCachedRemoteIcon)

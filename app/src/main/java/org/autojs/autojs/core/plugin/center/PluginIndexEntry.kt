@@ -10,6 +10,7 @@ enum class PluginIndexSource {
 data class PluginIndexEntry(
     val packageName: String,
     val iconUrl: Uri? = null,
+    val nightIconUrl: Uri? = null,
     val forceIgnoreLocalIcon: Boolean = false,
 
     val title: String,

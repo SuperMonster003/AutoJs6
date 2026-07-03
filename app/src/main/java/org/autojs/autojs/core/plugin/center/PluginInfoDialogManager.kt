@@ -221,7 +221,7 @@ object PluginInfoDialogManager {
     private fun resolveInitialDialogIcon(context: Context, info: PluginInfoBase): Drawable {
         info.icon?.let { return toDialogCircularIcon(context, it) }
         val remoteUrl = info.remoteIconUrl?.takeIf { it.isNotBlank() }
-        val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, remoteUrl) ?: remoteUrl
+        val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, remoteUrl, info.remoteNightIconUrl) ?: remoteUrl
         preferredUrl
             ?.let { url -> getCachedRemoteDialogIcon(context, url) }
             ?.let { return it }
@@ -243,8 +243,9 @@ object PluginInfoDialogManager {
         dialog.iconView.colorFilterWithDesaturateOrNull(info.isEnabled, 0.5F)
         if (info.icon != null) return
         val remoteUrl = info.remoteIconUrl?.takeIf { it.isNotBlank() } ?: return
-        val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, remoteUrl) ?: remoteUrl
-        val fallbackUrl = remoteUrl.takeIf { it != preferredUrl }
+        val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, remoteUrl, info.remoteNightIconUrl) ?: remoteUrl
+        val fallbackUrl = listOfNotNull(remoteUrl, info.remoteNightIconUrl)
+            .firstOrNull { it.isNotBlank() && it != preferredUrl }
 
         getCachedRemoteDialogIcon(context, preferredUrl)?.let { cached ->
             dialog.setIcon(cached)
@@ -598,6 +599,7 @@ object PluginInfoDialogManager {
         val version: String? get() = item.versionSummary
         val versionCode: Long? get() = item.versionCode
         val remoteIconUrl: String? get() = item.remoteIconUrl
+        val remoteNightIconUrl: String? get() = item.remoteNightIconUrl
         val author: String? get() = item.author
         val collaborators: List<String> get() = item.collaborators
         val description: String? get() = item.description
