@@ -161,7 +161,7 @@ object PaddleOcrPluginHost {
         moduleLabel: String = MODULE_LABEL_PADDLE_OCR,
     ): Discovered {
         val result = selectDetailed(context, engineId, engine, variant)
-        return result.selected ?: throw buildSelectionFailure(context, result.discovered, moduleLabel)
+        return result.selected ?: throw buildSelectionFailure(context, result.discovered, engineId, engine, variant, moduleLabel)
     }
 
     private suspend fun selectDetailed(
@@ -277,13 +277,23 @@ object PaddleOcrPluginHost {
         return families.singleOrNull()
     }
 
-    private fun buildSelectionFailure(context: Context, discovered: List<Discovered>, moduleLabel: String): IllegalStateException {
+    private fun buildSelectionFailure(
+        context: Context,
+        discovered: List<Discovered>,
+        engineId: String?,
+        engine: String?,
+        variant: String?,
+        moduleLabel: String,
+    ): IllegalStateException {
         if (discovered.isEmpty()) {
             return IllegalStateException(
                 context.getString(R.string.error_missing_required_plugin_for_module_label, moduleLabel)
             )
         }
-        val variantList = discovered
+        val scopedInfoItems = discovered.filter { item ->
+            item.pluginInfo?.let { matchesSelectionCriteria(it, engineId, engine, variant) } == true
+        }
+        val variantList = scopedInfoItems
             .mapNotNull { item ->
                 item.pluginInfo?.let { info ->
                     info.variant?.takeIf { it.isNotBlank() }
@@ -300,7 +310,7 @@ object PaddleOcrPluginHost {
             variantList,
         )
 
-        val infoItems = discovered.filter { it.pluginInfo != null }
+        val infoItems = scopedInfoItems
         if (infoItems.isEmpty()) {
             val failure = discovered.firstNotNullOfOrNull { item ->
                 item.error?.let { item to it }
@@ -345,6 +355,18 @@ object PaddleOcrPluginHost {
         }
 
         return IllegalStateException(fallback)
+    }
+
+    private fun matchesSelectionCriteria(
+        pluginInfo: PluginInfo,
+        engineId: String?,
+        engine: String?,
+        variant: String?,
+    ): Boolean {
+        if (engineId != null && pluginInfo.id != engineId) return false
+        if (engine != null && pluginInfo.engine != engine) return false
+        if (variant != null && pluginInfo.variant != variant) return false
+        return true
     }
 
     private fun isHostVersionCompatible(pluginInfo: PluginInfo?): Boolean {
