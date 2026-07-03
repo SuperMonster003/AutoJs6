@@ -25,6 +25,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.colorFilterWithDesaturateOrNull
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.PluginCenterRecyclerViewItemBinding
@@ -70,24 +71,42 @@ class PluginCenterItemViewHolder(
         val previousPackageName = lastBoundPackageName
         lastBoundPackageName = item.packageName
 
+        val cachedPackageIcon = getCachedRemotePackageIcon(item.packageName)
+            ?: getCachedRemotePackageIcon(item.packageName, isNightModeEnabled = !ViewUtils.isNightModeEnabled)
         item.icon?.let {
             Glide.with(iconView).clear(iconView)
-            iconView.setImageDrawable(it)
-            cacheRemoteItemIcon(item.packageName, it)
+            iconView.setImageDrawable(if (item.remoteIconUrl.isNullOrBlank()) cachedPackageIcon ?: it else it)
         } ?: item.remoteIconUrl?.takeIf { it.isNotBlank() }?.let { url ->
-            val fallback = getCachedRemoteItemIcon(item.packageName)
-                ?: iconView.drawable?.takeIf { previousPackageName == item.packageName }
-                ?: buildFallbackIconDrawable()
             val preferredUrl = PluginIconUrlResolver.resolveForCurrentMode(context, url) ?: url
             val fallbackUrl = url.takeIf { it != preferredUrl }
-            var request = buildRemoteIconRequest(preferredUrl, fallback, item.packageName)
+            val fallback = getCachedRemoteIcon(preferredUrl)
+                ?: cachedPackageIcon
+                ?: fallbackUrl?.let(::getCachedRemoteIcon)
+                ?: iconView.drawable?.takeIf { previousPackageName == item.packageName }
+                ?: buildFallbackIconDrawable()
+            val packageCacheKey = packageIconCacheKey(item.packageName)
+            var request = buildRemoteIconRequest(
+                url = preferredUrl,
+                fallback = fallback,
+                cacheKeys = listOf(remoteIconCacheKey(preferredUrl), packageCacheKey),
+            )
             if (fallbackUrl != null) {
-                request = request.error(buildRemoteIconRequest(fallbackUrl, fallback, item.packageName))
+                request = request.error(
+                    buildRemoteIconRequest(
+                        url = fallbackUrl,
+                        fallback = fallback,
+                        cacheKeys = listOf(remoteIconCacheKey(fallbackUrl), packageCacheKey),
+                    )
+                )
             }
             request.into(iconView)
         } ?: run {
             Glide.with(iconView).clear(iconView)
-            iconView.setImageDrawable(buildFallbackIconDrawable())
+            iconView.setImageDrawable(
+                cachedPackageIcon
+                    ?: iconView.drawable?.takeIf { previousPackageName == item.packageName }
+                    ?: buildFallbackIconDrawable()
+            )
         }
 
         iconView.setOnClickListener {
@@ -238,7 +257,7 @@ class PluginCenterItemViewHolder(
     private fun buildRemoteIconRequest(
         url: String,
         fallback: Drawable?,
-        packageName: String,
+        cacheKeys: List<String>,
     ): RequestBuilder<Drawable> =
         Glide.with(iconView)
             .load(url)
@@ -262,25 +281,50 @@ class PluginCenterItemViewHolder(
                         dataSource: com.bumptech.glide.load.DataSource,
                         isFirstResource: Boolean,
                     ): Boolean {
-                        cacheRemoteItemIcon(packageName, resource)
+                        cacheRemoteItemIcon(cacheKeys, resource)
                         return false
                     }
                 },
             )
 
-    private fun getCachedRemoteItemIcon(packageName: String): Drawable? =
-        remoteItemIconCache.get(packageName)?.let { bitmap ->
+    private fun getCachedRemoteIcon(url: String): Drawable? =
+        getCachedRemoteItemIcon(remoteIconCacheKey(url))
+
+    private fun getCachedRemotePackageIcon(
+        packageName: String,
+        isNightModeEnabled: Boolean = ViewUtils.isNightModeEnabled,
+    ): Drawable? =
+        getCachedRemoteItemIcon(packageIconCacheKey(packageName, isNightModeEnabled))
+
+    private fun getCachedRemoteItemIcon(cacheKey: String): Drawable? =
+        remoteItemIconCache.get(cacheKey)?.let { bitmap ->
             BitmapDrawable(context.resources, bitmap).mutate()
         }
 
-    private fun cacheRemoteItemIcon(packageName: String, drawable: Drawable) {
-        val bitmap = runCatching { drawable.toBitmap() }.getOrNull() ?: return
-        remoteItemIconCache.put(packageName, bitmap)
+    private fun cacheRemoteItemIcon(cacheKeys: List<String>, drawable: Drawable) {
+        val size = iconCacheSizePx()
+        val bitmap = runCatching { drawable.toBitmap(size, size) }.getOrNull() ?: return
+        cacheKeys.distinct().forEach { cacheKey ->
+            remoteItemIconCache.put(cacheKey, bitmap)
+        }
     }
 
+    private fun iconCacheSizePx(): Int =
+        iconView.width.takeIf { it > 0 }
+            ?: context.resources.getDimensionPixelSize(R.dimen.plugin_center_item_side_length)
+
+    private fun remoteIconCacheKey(url: String) = "url:$url"
+
+    private fun packageIconCacheKey(
+        packageName: String,
+        isNightModeEnabled: Boolean = ViewUtils.isNightModeEnabled,
+    ) = "package:${if (isNightModeEnabled) "night" else "day"}:$packageName"
+
     companion object {
-        private val remoteItemIconCache = object : android.util.LruCache<String, Bitmap>(8 * 1024) {
-            override fun sizeOf(key: String, value: Bitmap): Int = value.byteCount / 1024
+        private const val REMOTE_ICON_CACHE_SIZE_KB = 32 * 1024
+
+        private val remoteItemIconCache = object : android.util.LruCache<String, Bitmap>(REMOTE_ICON_CACHE_SIZE_KB) {
+            override fun sizeOf(key: String, value: Bitmap): Int = (value.byteCount / 1024).coerceAtLeast(1)
         }
     }
 
