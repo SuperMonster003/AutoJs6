@@ -27,15 +27,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.core.plugin.center.PluginVariantPriorityStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
+import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
+import org.autojs.plugin.paddle.ocr.api.PaddleOcrPluginCapabilityKeys
 import java.io.FileDescriptor
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -54,13 +58,6 @@ object PaddleOcrPluginHost {
 
     private const val DEFAULT_BIND_TIMEOUT_MS = 60_000L
     private const val DEFAULT_CALL_TIMEOUT_MS = 60_000L
-    private const val EXTRA_IMAGE_FORMAT = "imageFormat"
-    private const val EXTRA_IMAGE_QUALITY = "imageQuality"
-    private const val EXTRA_RAW_IMAGE = "rawImage"
-    private const val EXTRA_RAW_WIDTH = "rawWidth"
-    private const val EXTRA_RAW_HEIGHT = "rawHeight"
-    private const val EXTRA_RAW_STRIDE = "rawStride"
-    private const val EXTRA_RAW_CONFIG = "rawConfig"
     private const val IDLE_UNBIND_MS = 30_000L
     private const val RETRY_WAKE_DELAY_MS = 300L
     private const val MODULE_LABEL_PADDLE_OCR = "Paddle OCR"
@@ -111,6 +108,7 @@ object PaddleOcrPluginHost {
         if (!PluginTrustManager.isAuthorized(context, target.serviceInfo.packageName)) {
             error("Plugin not authorized: ${target.serviceInfo.packageName}")
         }
+        ensureHostVersionCompatible(context, target)
         ensureRawSupport(target, options)
         val start = uptimeMillis()
         return withImagePfdService(context, target.serviceInfo, bitmap, options, callTimeoutMs, start) { proxy, pfd ->
@@ -130,6 +128,7 @@ object PaddleOcrPluginHost {
         if (!PluginTrustManager.isAuthorized(context, target.serviceInfo.packageName)) {
             error("Plugin not authorized: ${target.serviceInfo.packageName}")
         }
+        ensureHostVersionCompatible(context, target)
         ensureRawSupport(target, options)
         val start = uptimeMillis()
         return withImagePfdService(context, target.serviceInfo, bitmap, options, callTimeoutMs, start) { proxy, pfd ->
@@ -191,6 +190,7 @@ object PaddleOcrPluginHost {
             .filter { it.pluginInfo != null }
             .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, true) }
             .filter { PluginTrustManager.isAuthorized(context, it.serviceInfo.packageName) }
+            .filter { isHostVersionCompatible(it.pluginInfo) }
         if (list.isEmpty()) return null
         if (engineId != null) {
             list.firstOrNull { d -> d.pluginInfo?.id == engineId }?.let { return it }
@@ -328,7 +328,41 @@ object PaddleOcrPluginHost {
             )
         }
 
+        val compatibleItems = enabledItems.filter { isHostVersionCompatible(it.pluginInfo) }
+        if (compatibleItems.isEmpty()) {
+            val requiredVersion = enabledItems
+                .mapNotNull { PluginCapabilityResolver.resolveRequiresHostVersion(it.pluginInfo?.capabilities) }
+                .maxOrNull()
+                ?: 0L
+            return IllegalStateException(
+                context.getString(
+                    R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
+                    requiredVersion,
+                    BuildConfig.VERSION_CODE.toLong(),
+                )
+            )
+        }
+
         return IllegalStateException(fallback)
+    }
+
+    private fun isHostVersionCompatible(pluginInfo: PluginInfo?): Boolean {
+        val requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo?.capabilities)
+        return PluginCapabilityResolver.isHostVersionCompatible(BuildConfig.VERSION_CODE.toLong(), requiresHostVersion)
+    }
+
+    private fun ensureHostVersionCompatible(context: Context, target: Discovered) {
+        val requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(target.pluginInfo?.capabilities)
+        if (PluginCapabilityResolver.isHostVersionCompatible(BuildConfig.VERSION_CODE.toLong(), requiresHostVersion)) {
+            return
+        }
+        throw IllegalStateException(
+            context.getString(
+                R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
+                requiresHostVersion ?: 0L,
+                BuildConfig.VERSION_CODE.toLong(),
+            )
+        )
     }
 
     private suspend fun recoverFailedDiscoveries(context: Context, discovered: List<Discovered>) {
@@ -387,7 +421,7 @@ object PaddleOcrPluginHost {
     // Convert temporary file to read-only FD.
     // zh-CN: 临时文件转换为只读 FD.
     private fun createTempPfd(bmp: Bitmap, options: OcrOptions): ParcelFileDescriptor {
-        val useRaw = options.extras?.getBoolean(EXTRA_RAW_IMAGE, false) == true
+        val useRaw = options.extras?.getBoolean(PaddleOcrOptionExtraKeys.RAW_IMAGE, false) == true
         if (useRaw && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             return runCatching { createRawPfd(bmp, options) }
                 .getOrElse {
@@ -428,11 +462,11 @@ object PaddleOcrPluginHost {
         val size = rowBytes * src.height
 
         val extras = options.extras ?: Bundle().also { options.extras = it }
-        extras.putBoolean(EXTRA_RAW_IMAGE, true)
-        extras.putInt(EXTRA_RAW_WIDTH, src.width)
-        extras.putInt(EXTRA_RAW_HEIGHT, src.height)
-        extras.putInt(EXTRA_RAW_STRIDE, rowBytes)
-        extras.putString(EXTRA_RAW_CONFIG, Bitmap.Config.ARGB_8888.name)
+        extras.putBoolean(PaddleOcrOptionExtraKeys.RAW_IMAGE, true)
+        extras.putInt(PaddleOcrOptionExtraKeys.RAW_WIDTH, src.width)
+        extras.putInt(PaddleOcrOptionExtraKeys.RAW_HEIGHT, src.height)
+        extras.putInt(PaddleOcrOptionExtraKeys.RAW_STRIDE, rowBytes)
+        extras.putString(PaddleOcrOptionExtraKeys.RAW_CONFIG, Bitmap.Config.ARGB_8888.name)
 
         runCatching {
             val shm = SharedMemory.create("ocr_ipc_raw", size)
@@ -498,8 +532,8 @@ object PaddleOcrPluginHost {
 
     private fun resolveEncodeOptions(bmp: Bitmap, options: OcrOptions): Pair<CompressFormat, Int> {
         val extras = options.extras
-        val formatName = extras?.getString(EXTRA_IMAGE_FORMAT)?.trim()?.lowercase().orEmpty()
-        val quality = extras?.getInt(EXTRA_IMAGE_QUALITY, 100) ?: 100
+        val formatName = extras?.getString(PaddleOcrOptionExtraKeys.IMAGE_FORMAT)?.trim()?.lowercase().orEmpty()
+        val quality = extras?.getInt(PaddleOcrOptionExtraKeys.IMAGE_QUALITY, 100) ?: 100
         val resolvedQuality = quality.coerceIn(1, 100)
         val resolvedFormat = when (formatName) {
             "png" -> CompressFormat.PNG
@@ -513,17 +547,17 @@ object PaddleOcrPluginHost {
 
     private fun disableRawExtras(options: OcrOptions) {
         val extras = options.extras ?: return
-        extras.remove(EXTRA_RAW_IMAGE)
-        extras.remove(EXTRA_RAW_WIDTH)
-        extras.remove(EXTRA_RAW_HEIGHT)
-        extras.remove(EXTRA_RAW_STRIDE)
-        extras.remove(EXTRA_RAW_CONFIG)
+        extras.remove(PaddleOcrOptionExtraKeys.RAW_IMAGE)
+        extras.remove(PaddleOcrOptionExtraKeys.RAW_WIDTH)
+        extras.remove(PaddleOcrOptionExtraKeys.RAW_HEIGHT)
+        extras.remove(PaddleOcrOptionExtraKeys.RAW_STRIDE)
+        extras.remove(PaddleOcrOptionExtraKeys.RAW_CONFIG)
     }
 
     private fun ensureRawSupport(target: Discovered, options: OcrOptions) {
         val extras = options.extras ?: return
-        if (!extras.getBoolean(EXTRA_RAW_IMAGE, false)) return
-        val supportsRaw = target.pluginInfo?.capabilities?.getBoolean("supportsRawImage", false) == true
+        if (!extras.getBoolean(PaddleOcrOptionExtraKeys.RAW_IMAGE, false)) return
+        val supportsRaw = target.pluginInfo?.capabilities?.getBoolean(PaddleOcrPluginCapabilityKeys.SUPPORTS_RAW_IMAGE, false) == true
         if (!supportsRaw) {
             disableRawExtras(options)
         }

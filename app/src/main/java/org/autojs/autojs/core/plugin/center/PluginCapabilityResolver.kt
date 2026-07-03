@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.os.Bundle
+import org.autojs.plugin.common.api.PluginCapabilityKeys
 import org.json.JSONObject
 
 /**
@@ -8,12 +9,10 @@ import org.json.JSONObject
  */
 object PluginCapabilityResolver {
 
-    private const val KEY_REQUIRES_HOST_VERSION = "requiresHostVersion"
-
     fun resolveRequiresHostVersion(capabilities: Bundle?): Long? {
         if (capabilities == null) return null
         @Suppress("DEPRECATION")
-        val value = capabilities.get(KEY_REQUIRES_HOST_VERSION) ?: return null
+        val value = capabilities.get(PluginCapabilityKeys.REQUIRES_HOST_VERSION) ?: return null
         return when (value) {
             is Long -> value
             is Int -> value.toLong()
@@ -27,8 +26,8 @@ object PluginCapabilityResolver {
     }
 
     fun resolveRequiresHostVersion(capabilities: JSONObject?): Long? {
-        if (capabilities == null || !capabilities.has(KEY_REQUIRES_HOST_VERSION)) return null
-        val value = capabilities.opt(KEY_REQUIRES_HOST_VERSION) ?: return null
+        if (capabilities == null || !capabilities.has(PluginCapabilityKeys.REQUIRES_HOST_VERSION)) return null
+        val value = capabilities.opt(PluginCapabilityKeys.REQUIRES_HOST_VERSION) ?: return null
         return when (value) {
             is Long -> value
             is Int -> value.toLong()
@@ -39,5 +38,10 @@ object PluginCapabilityResolver {
             is String -> value.toLongOrNull()
             else -> null
         }?.takeIf { it > 0 }
+    }
+
+    fun isHostVersionCompatible(hostVersionCode: Long, requiresHostVersion: Long?): Boolean {
+        if (requiresHostVersion == null || requiresHostVersion <= 0L) return true
+        return hostVersionCode >= requiresHostVersion
     }
 }

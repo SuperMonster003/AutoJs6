@@ -661,8 +661,7 @@ class PluginCenterViewModel : ViewModel() {
     private fun currentHostVersionCode(): Long = BuildConfig.VERSION_CODE.toLong()
 
     private fun isHostVersionCompatible(hostVersionCode: Long, requiresHostVersion: Long?): Boolean {
-        if (requiresHostVersion == null || requiresHostVersion <= 0L) return true
-        return hostVersionCode >= requiresHostVersion
+        return PluginCapabilityResolver.isHostVersionCompatible(hostVersionCode, requiresHostVersion)
     }
 
     private fun resolveVersionDateFromIndex(

@@ -21,6 +21,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
+import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import kotlin.math.abs
@@ -51,8 +52,6 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
 
         private const val DEFAULT_USE_OPENCL = false
         private const val DEFAULT_MERGE_LINE = false
-
-        private const val EXTRA_RAW_IMAGE = "rawImage"
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -133,13 +132,13 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
 
             val extras = Bundle()
             if (useRaw && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                extras.putBoolean(EXTRA_RAW_IMAGE, true)
+                extras.putBoolean(PaddleOcrOptionExtraKeys.RAW_IMAGE, true)
             }
             if (imageQuality > 0) {
-                extras.putInt("imageQuality", imageQuality)
+                extras.putInt(PaddleOcrOptionExtraKeys.IMAGE_QUALITY, imageQuality)
             }
             if (imageFormat.isNotBlank()) {
-                extras.putString("imageFormat", imageFormat)
+                extras.putString(PaddleOcrOptionExtraKeys.IMAGE_FORMAT, imageFormat)
             }
 
             return ParsedOptions(
