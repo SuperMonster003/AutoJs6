@@ -21,6 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -57,6 +58,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     private var lastNightModeEnabled: Boolean? = null
     private var firstListRenderStartedAt: Long = 0L
     private var firstListRevealJob: Job? = null
+    private var nightModeRefreshJob: Job? = null
 
     // Latest full list from ViewModel (unfiltered).
     // zh-CN: 来自 ViewModel 的最新完整列表 (未过滤).
@@ -858,6 +860,19 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
+    private val nightModePrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (!isAdded || _binding == null) return@OnSharedPreferenceChangeListener
+        val ctx = contextRef
+        val nightModeKeys = setOf(
+            ctx.getString(R.string.key_night_mode),
+            ctx.getString(R.string.key_night_mode_enabled),
+            ctx.getString(R.string.key_auto_night_mode_enabled),
+        )
+        if (key in nightModeKeys) {
+            scheduleNightModeIconRefresh()
+        }
+    }
+
     private suspend fun probeAidlPlugin(item: PluginCenterItem) {
         if (item.isOcrService || item.engine in OCR_SERVICE_ENGINES) {
             OcrPluginHost.probe(contextRef, item.packageName)
@@ -909,6 +924,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             registerSortPrefListener(contextRef)
             PluginFilterStore.registerOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
             PluginOnlineSettingsStore.registerOnSharedPreferenceChangeListener(onlinePrefListener)
+            Pref.registerOnSharedPreferenceChangeListener(nightModePrefListener)
 
             // Sync with latest persisted state (e.g., changed while fragment was stopped).
             // zh-CN: 同步最新的持久化状态 (如在 Fragment 停止期间被修改).
@@ -980,9 +996,12 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             unregisterSortPrefListener(contextRef)
             PluginFilterStore.unregisterOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
             PluginOnlineSettingsStore.unregisterOnSharedPreferenceChangeListener(onlinePrefListener)
+            Pref.get().unregisterOnSharedPreferenceChangeListener(nightModePrefListener)
         }
         pkgChangeRefreshJob?.cancel()
         pkgChangeRefreshJob = null
+        nightModeRefreshJob?.cancel()
+        nightModeRefreshJob = null
         pkgReceiver?.let { runCatching { requireContext().unregisterReceiver(it) } }
         pkgReceiver = null
     }
@@ -1005,6 +1024,18 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         }
     }
 
+    private fun scheduleNightModeIconRefresh() {
+        nightModeRefreshJob?.cancel()
+        nightModeRefreshJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(NIGHT_MODE_ICON_REFRESH_DELAY_MS)
+            if (!isAdded || _binding == null || !::contextRef.isInitialized) return@launch
+            val currentNightModeEnabled = isNightModeEnabled()
+            if (lastNightModeEnabled == currentNightModeEnabled) return@launch
+            lastNightModeEnabled = currentNightModeEnabled
+            vm.load(contextRef, forceRefreshIndex = false, sourceScope = sourceScope, forceRender = true)
+        }
+    }
+
     private fun isNightModeEnabled(): Boolean = ViewUtils.isNightModeEnabled
 
     override fun onDestroyView() {
@@ -1013,6 +1044,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         emptyHintJob = null
         pkgChangeRefreshJob?.cancel()
         pkgChangeRefreshJob = null
+        nightModeRefreshJob?.cancel()
+        nightModeRefreshJob = null
         firstListRevealJob?.cancel()
         firstListRevealJob = null
         isFirstListRevealed = false
@@ -1071,6 +1104,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     companion object {
         private const val ARG_SOURCE_SCOPE = "arg_source_scope"
         private const val FIRST_LIST_REVEAL_TIMEOUT_MS = 1000L
+        private const val NIGHT_MODE_ICON_REFRESH_DELAY_MS = 120L
         private val OCR_SERVICE_ENGINES = setOf("paddle-ocr", "rapid-ocr")
         private val AUTO_ENABLE_RETRYABLE_ERROR_CODES = setOf(
             PluginErrorCode.SERVICE_NOT_FOUND,
