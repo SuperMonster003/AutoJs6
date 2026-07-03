@@ -1825,9 +1825,6 @@ dependencies /* Unclassified */ {
     // OpenCV
     implementation(project(":libs:org-opencv-4_8_0"))
 
-    // RapidOCR
-    implementation(project(":libs:rapidocr"))
-
     // Image Quantization
     implementation(project(":libs:imagequant"))
 
@@ -2752,6 +2749,10 @@ tasks {
             doLast { println("Destination: ${file(dst)}") }
         }
     }
+}
+
+dependencies /* Rapid OCR for packaged apps */ {
+    add("${flavorNameInrt}Implementation", project(":libs:rapidocr"))
 }
 
 extra {

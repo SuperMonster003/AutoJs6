@@ -47,6 +47,8 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
 
         private const val DEFAULT_CPU_THREAD_NUM = 4
 
+        private const val ENGINE_PADDLE_OCR = "paddle-ocr"
+
         private const val DEFAULT_USE_SLIM = true
         private const val DEFAULT_USE_RAW = true
 
@@ -79,7 +81,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             }
             return if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
-                    val target = PaddleOcrPluginHost.selectOrThrow(globalContext)
+                    val target = PaddleOcrPluginHost.selectOrThrow(globalContext, engine = ENGINE_PADDLE_OCR)
                     PaddleOcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
                 }
             } else {
@@ -103,7 +105,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             }
             val results = if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
-                    val target = PaddleOcrPluginHost.selectOrThrow(globalContext)
+                    val target = PaddleOcrPluginHost.selectOrThrow(globalContext, engine = ENGINE_PADDLE_OCR)
                     PaddleOcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
                 }.map { OcrResult(it.text, it.confidence, it.bounds) }
             } else {

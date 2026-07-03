@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.view.WindowManager
-import com.benjaminwan.ocrlibrary.OcrEngine
 import org.autojs.autojs.app.SimpleActivityLifecycleCallbacks
 import org.autojs.autojs.core.accessibility.AccessibilityBridgeImpl
 import org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver
@@ -50,8 +49,6 @@ abstract class AbstractAutoJs protected constructor(val application: Application
     val applicationContext: Context = application.applicationContext
     val appUtils by lazy { createAppUtils(applicationContext) }
     val globalConsole by lazy { createGlobalConsole() }
-
-    val rapidOcrEngine by lazy { OcrEngine(applicationContext) }
 
     val layoutInspector = LayoutInspector(applicationContext)
     val uiHandler = UiHandler(applicationContext)

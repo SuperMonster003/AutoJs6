@@ -158,9 +158,10 @@ object PaddleOcrPluginHost {
         engine: String? = null,
         // e.g. "v5"
         variant: String? = null,
+        moduleLabel: String = MODULE_LABEL_PADDLE_OCR,
     ): Discovered {
         val result = selectDetailed(context, engineId, engine, variant)
-        return result.selected ?: throw buildSelectionFailure(context, result.discovered)
+        return result.selected ?: throw buildSelectionFailure(context, result.discovered, moduleLabel)
     }
 
     private suspend fun selectDetailed(
@@ -276,10 +277,10 @@ object PaddleOcrPluginHost {
         return families.singleOrNull()
     }
 
-    private fun buildSelectionFailure(context: Context, discovered: List<Discovered>): IllegalStateException {
+    private fun buildSelectionFailure(context: Context, discovered: List<Discovered>, moduleLabel: String): IllegalStateException {
         if (discovered.isEmpty()) {
             return IllegalStateException(
-                context.getString(R.string.error_missing_required_plugin_for_module_label, MODULE_LABEL_PADDLE_OCR)
+                context.getString(R.string.error_missing_required_plugin_for_module_label, moduleLabel)
             )
         }
         val variantList = discovered
@@ -295,7 +296,7 @@ object PaddleOcrPluginHost {
             .ifBlank { "*" }
         val fallback = context.getString(
             R.string.error_no_available_enabled_plugin_variants_found,
-            MODULE_LABEL_PADDLE_OCR,
+            moduleLabel,
             variantList,
         )
 

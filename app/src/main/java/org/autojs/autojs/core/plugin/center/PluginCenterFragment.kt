@@ -860,7 +860,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private suspend fun probeAidlPlugin(item: PluginCenterItem) {
-        if (item.engine == ENGINE_PADDLE_OCR) {
+        if (item.engine in OCR_SERVICE_ENGINES) {
             PaddleOcrPluginHost.probe(contextRef, item.packageName)
         } else {
             PluginInfoServiceHost.probe(contextRef, item.packageName)
@@ -1065,7 +1065,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     companion object {
         private const val ARG_SOURCE_SCOPE = "arg_source_scope"
         private const val FIRST_LIST_REVEAL_TIMEOUT_MS = 1000L
-        private const val ENGINE_PADDLE_OCR = "paddle-ocr"
+        private val OCR_SERVICE_ENGINES = setOf("paddle-ocr", "rapid-ocr")
         private val DATE_PATTERNS = arrayOf(
             "yyyy-MM-dd",
             "yyyy/MM/dd",

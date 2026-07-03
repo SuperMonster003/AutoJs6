@@ -1,69 +1,136 @@
 package org.autojs.autojs.runtime.api
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.core.graphics.createBitmap
-import com.benjaminwan.ocrlibrary.TextBlock
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.image.ImageWrapper
-import com.benjaminwan.ocrlibrary.OcrResult as RapidOcrResult
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
 
 class OcrRapid {
 
-    private val mEmptyOcrResult by lazy {
-        RapidOcrResult(
-            dbNetTime = 0.0,
-            textBlocks = ArrayList(),
-            boxImg = newEmptyOutputBitmap(),
-            detectTime = 0.0,
-            strRes = "",
-        )
+    fun detect(image: ImageWrapper?): List<OcrResult> {
+        return RapidOcrEmbeddedEngine.detect(AutoJs.instance.applicationContext, image)
     }
 
-    // TODO by SuperMonster003 on Sep 29, 2024.
-    //  ! Internal logic of this method pending verification.
-    //  ! zh-CN: 方法内部逻辑待验证.
-    fun detect(image: ImageWrapper?): List<OcrResult> {
-        // 获取原始检测的文本块
-        val blocks: ArrayList<TextBlock> = detectRaw(image).textBlocks
+    fun recognizeText(image: ImageWrapper?): List<String> {
+        return detect(image).map { it.text }
+    }
 
-        // 转换 TextBlock 列表为 OcrResult 列表
-        return blocks.map { block ->
-            // 假设 boxPoint 是按照 (top-left, top-right, bottom-right, bottom-left) 顺序排列
-            val topLeft = block.boxPoint[0]
-            val bottomRight = block.boxPoint[2]
-            val rect = Rect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
+}
 
-            // 创建 OcrResult 对象
+private object RapidOcrEmbeddedEngine {
+
+    private const val DEFAULT_MAX_SIDE_LEN = 1024
+    private const val DEFAULT_PADDING = 50
+    private const val DEFAULT_BOX_SCORE_THRESH = 0.5f
+    private const val DEFAULT_BOX_THRESH = 0.3f
+    private const val DEFAULT_UNCLIP_RATIO = 2.0f
+    private const val DEFAULT_DO_ANGLE = false
+    private const val DEFAULT_MOST_ANGLE = false
+
+    private val lock = Any()
+    private var engine: Any? = null
+    private var detectMethod: Method? = null
+
+    fun detect(context: Context, image: ImageWrapper?): List<OcrResult> {
+        image ?: return emptyList()
+        val bitmap = image.bitmap
+        if (bitmap.isRecycled) return emptyList()
+
+        val output = newEmptyOutputBitmap()
+        return try {
+            val rawResult = synchronized(lock) {
+                getDetectMethod(context).invoke(
+                    getEngine(context),
+                    bitmap,
+                    output,
+                    DEFAULT_PADDING,
+                    DEFAULT_MAX_SIDE_LEN,
+                    DEFAULT_BOX_SCORE_THRESH,
+                    DEFAULT_BOX_THRESH,
+                    DEFAULT_UNCLIP_RATIO,
+                    DEFAULT_DO_ANGLE,
+                    DEFAULT_MOST_ANGLE,
+                )
+            }
+            convertResult(rawResult)
+        } catch (e: ReflectiveOperationException) {
+            throw wrapFailure(e)
+        } finally {
+            output.recycle()
+        }
+    }
+
+    private fun getEngine(context: Context): Any {
+        engine?.let { return it }
+        val engineClass = Class.forName("com.benjaminwan.ocrlibrary.OcrEngine")
+        return engineClass.getConstructor(Context::class.java)
+            .newInstance(context.applicationContext)
+            .also { engine = it }
+    }
+
+    private fun getDetectMethod(context: Context): Method {
+        detectMethod?.let { return it }
+        return getEngine(context).javaClass.getMethod(
+            "detect",
+            Bitmap::class.java,
+            Bitmap::class.java,
+            java.lang.Integer.TYPE,
+            java.lang.Integer.TYPE,
+            java.lang.Float.TYPE,
+            java.lang.Float.TYPE,
+            java.lang.Float.TYPE,
+            java.lang.Boolean.TYPE,
+            java.lang.Boolean.TYPE,
+        ).also { detectMethod = it }
+    }
+
+    private fun convertResult(rawResult: Any?): List<OcrResult> {
+        rawResult ?: return emptyList()
+        val blocks = rawResult.javaClass.getMethod("getTextBlocks").invoke(rawResult) as? Iterable<*>
+            ?: return emptyList()
+        return blocks.mapNotNull { block ->
+            block ?: return@mapNotNull null
+            val blockClass = block.javaClass
+            val text = blockClass.getMethod("getText").invoke(block) as? String ?: ""
+            val confidence = (blockClass.getMethod("getBoxScore").invoke(block) as? Number)?.toFloat() ?: 0f
+            val points = blockClass.getMethod("getBoxPoint").invoke(block) as? Iterable<*>
             OcrResult(
-                text = block.text,
-                confidence = block.boxScore,
-                bounds = rect,
+                text = text,
+                confidence = confidence,
+                bounds = boundsOf(points),
             )
         }
     }
 
-    fun recognizeText(image: ImageWrapper?): List<String> {
-        return detectRaw(image).textBlocks.map { it.text }
+    private fun boundsOf(points: Iterable<*>?): Rect {
+        val coordinates = points
+            ?.mapNotNull { point ->
+                point ?: return@mapNotNull null
+                pointInt(point, "getX") to pointInt(point, "getY")
+            }
+            .orEmpty()
+        if (coordinates.isEmpty()) return Rect()
+
+        val left = coordinates.minOf { it.first }
+        val top = coordinates.minOf { it.second }
+        val right = coordinates.maxOf { it.first }
+        val bottom = coordinates.maxOf { it.second }
+        return Rect(left, top, right, bottom)
     }
 
-    private fun detectRaw(image: ImageWrapper?): RapidOcrResult {
-        image ?: return mEmptyOcrResult
-        val bitmap = image.bitmap
-        if (bitmap.isRecycled) {
-            return mEmptyOcrResult
-        }
-        val emptyOutputBitmap = newEmptyOutputBitmap()
-        return AutoJs.instance.rapidOcrEngine.detect(
-            input = bitmap,
-            output = emptyOutputBitmap,
-            maxSideLen = 1024,
-            padding = 50,
-            boxScoreThresh = 0.5f,
-            boxThresh = 0.3f,
-            unClipRatio = 2.0f,
-            doAngle = false,
-            mostAngle = false,
-        )
+    private fun pointInt(point: Any, methodName: String): Int {
+        return (point.javaClass.getMethod(methodName).invoke(point) as? Number)?.toInt() ?: 0
+    }
+
+    private fun wrapFailure(error: ReflectiveOperationException): RuntimeException {
+        val cause = (error as? InvocationTargetException)?.targetException ?: error
+        if (cause is RuntimeException) return cause
+        if (cause is Error) throw cause
+        return IllegalStateException("Rapid OCR embedded engine failed", cause)
     }
 
     private fun newEmptyOutputBitmap() = createBitmap(1, 1)
