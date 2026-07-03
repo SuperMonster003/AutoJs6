@@ -1,0 +1,30 @@
+plugins {
+    id("org.autojs.build.versions")
+    id("org.autojs.build.jvm-convention")
+    id("com.android.library")
+}
+
+android {
+    namespace = "org.autojs.plugin.nodejs.api"
+
+    compileSdk = versions.sdkVersionCompile
+
+    defaultConfig {
+        minSdk = versions.sdkVersionMin
+        consumerProguardFiles("consumer-rules.pro")
+    }
+
+    lint {
+        targetSdk = versions.sdkVersionTarget
+        abortOnError = false
+    }
+
+    buildFeatures {
+        aidl = false
+        buildConfig = false
+    }
+}
+
+dependencies {
+    api(project(":plugin-api:common-plugin-api"))
+}

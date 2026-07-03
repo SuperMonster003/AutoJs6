@@ -42,9 +42,21 @@ class InstalledPluginRepository {
         val isStopped: Boolean,
     )
 
+    private data class Discovery(
+        val serviceInfo: android.content.pm.ServiceInfo,
+        val pluginInfo: PluginInfo?,
+        val error: Throwable?,
+    )
+
     suspend fun discoverInstalled(context: Context): List<InstalledPlugin> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
-        val discovered = PaddleOcrPluginHost.discover(context)
+        val discovered = (
+                PluginInfoServiceHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error)
+                } + PaddleOcrPluginHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error)
+                }
+                ).distinctBy { it.serviceInfo.packageName }
 
         discovered.map { d ->
             val serviceInfo = d.serviceInfo

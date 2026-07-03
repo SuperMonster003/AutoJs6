@@ -13,21 +13,16 @@ object PluginCapabilityResolver {
         if (capabilities == null) return null
         @Suppress("DEPRECATION")
         val value = capabilities.get(PluginCapabilityKeys.REQUIRES_HOST_VERSION) ?: return null
-        return when (value) {
-            is Long -> value
-            is Int -> value.toLong()
-            is Short -> value.toLong()
-            is Byte -> value.toLong()
-            is Double -> value.toLong()
-            is Float -> value.toLong()
-            is String -> value.toLongOrNull()
-            else -> null
-        }?.takeIf { it > 0 }
+        return coerceLong(value)
     }
 
     fun resolveRequiresHostVersion(capabilities: JSONObject?): Long? {
         if (capabilities == null || !capabilities.has(PluginCapabilityKeys.REQUIRES_HOST_VERSION)) return null
         val value = capabilities.opt(PluginCapabilityKeys.REQUIRES_HOST_VERSION) ?: return null
+        return coerceLong(value)
+    }
+
+    fun coerceLong(value: Any?): Long? {
         return when (value) {
             is Long -> value
             is Int -> value.toLong()

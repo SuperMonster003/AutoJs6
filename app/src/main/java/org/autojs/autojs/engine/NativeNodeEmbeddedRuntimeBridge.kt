@@ -471,7 +471,11 @@ object NativeNodeEmbeddedRuntimeBridge {
         val nativeLibraryDir = context.applicationContext.applicationInfo.nativeLibraryDir
             ?.takeIf(String::isNotBlank)
             ?: return null
-        val library = File(nativeLibraryDir, libraryFileName).takeIf(File::isFile) ?: return null
+        val library = if (libraryFileName == nativeLibrarySoFileName(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME)) {
+            NodeJsPluginRuntimeLoader.resolveNodeLibraryFile(context)
+        } else {
+            File(nativeLibraryDir, libraryFileName).takeIf(File::isFile)
+        } ?: return null
         return runCatching { library.sha256Hex() }.getOrNull()
     }
 
@@ -2027,7 +2031,7 @@ object NativeNodeEmbeddedRuntimeBridge {
             pid = pid,
             deviceSupportedAbis = Build.SUPPORTED_ABIS.toList(),
             currentAbi = nativeValues["current.abi"] ?: Build.SUPPORTED_ABIS.firstOrNull().orEmpty(),
-            nativeLibraryDir = appContext.applicationInfo.nativeLibraryDir,
+            nativeLibraryDir = NodeJsPluginRuntimeLoader.resolveNodeLibraryDir(appContext),
             libnodeSha256 = nativeLibrarySha256(appContext, nativeLibrarySoFileName(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME)),
             bridgeSha256 = nativeLibrarySha256(appContext, nativeLibrarySoFileName(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)),
             libcxxLoaded = libcxxLoad.loaded,
@@ -14898,7 +14902,7 @@ object NativeNodeEmbeddedRuntimeBridge {
             pid = pid,
             deviceSupportedAbis = Build.SUPPORTED_ABIS.toList(),
             currentAbi = Build.SUPPORTED_ABIS.firstOrNull().orEmpty(),
-            nativeLibraryDir = context.applicationContext.applicationInfo.nativeLibraryDir,
+            nativeLibraryDir = NodeJsPluginRuntimeLoader.resolveNodeLibraryDir(context),
             libnodeSha256 = nativeLibrarySha256(context, nativeLibrarySoFileName(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME)),
             bridgeSha256 = nativeLibrarySha256(context, nativeLibrarySoFileName(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)),
             libcxxLoaded = false,
@@ -15895,7 +15899,11 @@ object NativeNodeEmbeddedRuntimeBridge {
     }
 
     private fun loadLibrary(name: String): LibraryLoad = try {
-        System.loadLibrary(name)
+        if (name == NativeNodeRuntimeBridge.NODE_LIBRARY_NAME) {
+            NodeJsPluginRuntimeLoader.loadNodeOrSystem()
+        } else {
+            System.loadLibrary(name)
+        }
         LibraryLoad(name = name, loaded = true, attempted = true)
     } catch (e: UnsatisfiedLinkError) {
         LibraryLoad(name = name, loaded = false, attempted = true, error = e)
@@ -16203,7 +16211,7 @@ object NativeNodeEmbeddedRuntimeBridge {
             pid = pid,
             deviceSupportedAbis = Build.SUPPORTED_ABIS.toList(),
             currentAbi = Build.SUPPORTED_ABIS.firstOrNull().orEmpty(),
-            nativeLibraryDir = context.applicationContext.applicationInfo.nativeLibraryDir,
+            nativeLibraryDir = NodeJsPluginRuntimeLoader.resolveNodeLibraryDir(context),
             libnodeSha256 = nativeLibrarySha256(context, nativeLibrarySoFileName(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME)),
             bridgeSha256 = nativeLibrarySha256(context, nativeLibrarySoFileName(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)),
             libcxxLoaded = false,

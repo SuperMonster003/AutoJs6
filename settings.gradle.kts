@@ -42,6 +42,7 @@ private val libs = listOf(
 
 private val pluginApi = listOf(
     "common-plugin-api",
+    "nodejs-api",
     "paddle-ocr-api",
     "paddle-ocr-engine",
 )

@@ -1,0 +1,7 @@
+package org.autojs.plugin.nodejs.api
+
+object NodeJsPluginCapabilityKeys {
+    const val NODE_VERSION = "nodeVersion"
+    const val RUNTIME_SLOT = "runtimeSlot"
+    const val NATIVE_LIBRARY_NAME = "nativeLibraryName"
+}

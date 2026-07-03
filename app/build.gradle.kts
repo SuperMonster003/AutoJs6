@@ -97,10 +97,11 @@ val nodeJsConfiguredReleaseFlavor = providers.gradleProperty("autojs.nodejs.rele
         when (requested.lowercase()) {
             "nodefull", "node-full", "full" -> "nodeFull"
             "nodemini", "node-mini", "mini" -> "nodeMini"
+            "nodeplugin", "node-plugin", "plugin" -> "nodePlugin"
             "rhinoonly", "rhino-only", "rhino" -> "rhinoOnly"
             else -> throw GradleException(
                 "Unsupported Embedded Node release flavor '$requested'. " +
-                        "Use nodeFull, nodeMini, or rhinoOnly."
+                        "Use nodeFull, nodeMini, nodePlugin, or rhinoOnly."
             )
         }
     }
@@ -187,9 +188,16 @@ if (nodeJsReleaseFlavor == "nodeFull" && nodeJsReleaseRequestedAbis.isNotEmpty()
 val nodeJsReleaseExpectedAbis = when (nodeJsReleaseFlavor) {
     "nodeFull" -> nodeJsReleaseSupportedAbis
     "nodeMini" -> nodeJsReleaseRequestedAbis.ifEmpty { listOf("arm64-v8a") }
+    "nodePlugin" -> emptyList()
     else -> emptyList()
 }
-val nodeJsReleaseUnsupportedAbis = nodeJsReleaseExpectedAbis.filter { it !in nodeJsReleaseSupportedAbis }
+val nodeJsBridgeExpectedAbis = when (nodeJsReleaseFlavor) {
+    "nodePlugin" -> nodeJsReleaseRequestedAbis.ifEmpty { nodeJsReleaseSupportedAbis }
+    else -> nodeJsReleaseExpectedAbis
+}
+val nodeJsReleaseUnsupportedAbis = (nodeJsReleaseExpectedAbis + nodeJsBridgeExpectedAbis)
+    .distinct()
+    .filter { it !in nodeJsReleaseSupportedAbis }
 if (nodeJsReleaseUnsupportedAbis.isNotEmpty()) {
     throw GradleException(
         "Unsupported Embedded Node release ABI(s) for $nodeJsReleaseFlavor: " +
@@ -1615,14 +1623,32 @@ val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").or
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val isNodeJsNativeRuntimeRequested = effectiveNodeJsRuntimeBackend in setOf("native", "embedded", "auto")
+val isNodeJsRuntimePackagedInHost = isNodeJsNativeRuntimeRequested && nodeJsReleaseFlavor != "nodePlugin"
 val nodeJsAvailableNativeRuntimeAbis = nodeJsReleaseKnownAbis
     .filter { nodeJsRuntimeSlotJniLibsSourceDir.resolve("$it/libnode.so").isFile }
-val nodeJsNativeRuntimeAbis = if (isNodeJsNativeRuntimeRequested) {
+val nodeJsBridgeNativeRuntimeAbis = if (isNodeJsNativeRuntimeRequested) {
+    nodeJsBridgeExpectedAbis.filter { it in nodeJsAvailableNativeRuntimeAbis }
+} else {
+    emptyList()
+}
+val nodeJsNativeRuntimeAbis = if (isNodeJsRuntimePackagedInHost) {
     nodeJsReleaseExpectedAbis.filter { it in nodeJsAvailableNativeRuntimeAbis }
 } else {
     emptyList()
 }
-val nodeJsMissingReleaseAbis = if (isNodeJsNativeRuntimeRequested) {
+val nodeJsMissingBridgeAbis = if (isNodeJsNativeRuntimeRequested) {
+    nodeJsBridgeExpectedAbis.filterNot { it in nodeJsAvailableNativeRuntimeAbis }
+} else {
+    emptyList()
+}
+if (nodeJsMissingBridgeAbis.isNotEmpty()) {
+    throw GradleException(
+        "Embedded Node $nodeJsReleaseFlavor requires bridge build ABI(s) not present in app/src/main/jniLibs: " +
+                nodeJsMissingBridgeAbis.joinToString() +
+                ". Adjust -Pautojs.nodejs.releaseAbis or provide libnode.so for link-time validation."
+    )
+}
+val nodeJsMissingReleaseAbis = if (isNodeJsRuntimePackagedInHost) {
     nodeJsReleaseExpectedAbis.filterNot { it in nodeJsAvailableNativeRuntimeAbis }
 } else {
     emptyList()
@@ -1647,8 +1673,10 @@ val prepareNodeJsRuntimeSlotJniLibs = tasks.register(
     from(file("src/main/jniLibs")) {
         exclude("*/libnode.so")
     }
-    from(nodeJsRuntimeSlotJniLibsSourceDir) {
-        include("*/libnode.so")
+    if (isNodeJsRuntimePackagedInHost) {
+        from(nodeJsRuntimeSlotJniLibsSourceDir) {
+            include("*/libnode.so")
+        }
     }
     into(outputDirProvider)
     outputs.dir(outputDirProvider)
@@ -1887,6 +1915,9 @@ dependencies /* Unclassified */ {
 
     // Plugin API: Common API
     implementation(project(":plugin-api:common-plugin-api"))
+
+    // Plugin API: Node.js API
+    implementation(project(":plugin-api:nodejs-api"))
 
     // Plugin API: Paddle OCR API
     implementation(project(":plugin-api:paddle-ocr-api"))
@@ -2135,11 +2166,11 @@ android {
 
         multiDexEnabled = true
 
-        if (isNodeJsNativeRuntimeRequested && nodeJsNativeRuntimeAbis.isNotEmpty()) {
-            ndk.abiFilters += nodeJsNativeRuntimeAbis
+        if (isNodeJsNativeRuntimeRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty()) {
+            ndk.abiFilters += nodeJsBridgeNativeRuntimeAbis
             externalNativeBuild {
                 cmake {
-                    abiFilters += nodeJsNativeRuntimeAbis
+                    abiFilters += nodeJsBridgeNativeRuntimeAbis
                     arguments += "-DAUTOJS6_NODE_ENABLE_EMBEDDED_LIFECYCLE_PROBE=${if (nodeJsEmbeddedProbeLifecycleEnabled) "ON" else "OFF"}"
                     arguments += "-DAUTOJS6_NODE_ENABLE_EMBEDDED_SCRIPT_EXECUTION=${if (nodeJsEmbeddedScriptEnabled) "ON" else "OFF"}"
                     arguments += "-DAUTOJS6_NODE_RUNTIME_SLOT=$nodeJsRuntimeSlot"
@@ -2364,7 +2395,7 @@ android {
                     listOf("lib/$abi/**", "**/$abi/**")
                 }
             } else {
-                val unsupportedNodeJsAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") - nodeJsNativeRuntimeAbis.toSet()
+                val unsupportedNodeJsAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") - nodeJsBridgeNativeRuntimeAbis.toSet()
                 excludes += unsupportedNodeJsAbis.flatMap { abi ->
                     listOf("lib/$abi/**", "**/$abi/**")
                 }
@@ -2428,7 +2459,7 @@ android {
         //  # }
     }
 
-    if (isNodeJsNativeRuntimeRequested && nodeJsNativeRuntimeAbis.isNotEmpty()) {
+    if (isNodeJsNativeRuntimeRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty()) {
         externalNativeBuild {
             cmake {
                 path = file("src/main/cpp/CMakeLists.txt")
@@ -2447,7 +2478,7 @@ android {
             reset()
             // Specifies a list of ABIs that Gradle should create APKs for.
             val splitAbis = when {
-                isNodeJsNativeRuntimeRequested && nodeJsNativeRuntimeAbis.isNotEmpty() -> nodeJsNativeRuntimeAbis
+                isNodeJsNativeRuntimeRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty() -> nodeJsBridgeNativeRuntimeAbis
                 else -> listOf("arm64-v8a", "x86_64", "armeabi-v7a", "x86", "armeabi")
             }
             include(*splitAbis.toTypedArray())
