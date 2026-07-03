@@ -1687,8 +1687,8 @@ val prepareNodeJsRuntimeSlotJniLibs = tasks.register(
 tasks.matching { task ->
     task.name != "prepareNodeJsRuntimeSlotJniLibs" && (
             task.name == "preBuild" ||
-            task.name.contains("JniLib", ignoreCase = true) ||
-            task.name.contains("NativeLib", ignoreCase = true)
+                    task.name.contains("JniLib", ignoreCase = true) ||
+                    task.name.contains("NativeLib", ignoreCase = true)
             )
 }.configureEach {
     dependsOn(prepareNodeJsRuntimeSlotJniLibs)
@@ -1779,14 +1779,14 @@ dependencies /* Unclassified */ {
     //  !
     //  ! zh-CN:
     //  !
-    //  ! 渚濊禆锟?log4j (绗竴鐗堟湰) 鏄槗鍙楁敾鍑荤殑 (锟?5 椤规紡锟?:
-    //  ! - CVE-2022-23307, 璇勫垎: 8.8
-    //  ! - CVE-2022-23305, 璇勫垎: 9.8
-    //  ! - CVE-2022-23302, 璇勫垎: 8.8
-    //  ! - CVE-2021-4104, 璇勫垎: 7.5
-    //  ! - CVE-2019-17571, 璇勫垎: 9.8
-    //  ! 锟?log4j 绗簩鐗堟湰瑕佹眰瀹夊崜 API 绾у埆涓嶄綆锟?26,
-    //  ! 涓庢渶锟?API 绾у埆锟?24 鐨勫綋鍓嶉」鐩棤娉曞吋锟?
+    //  ! 依赖库 log4j (第一版本) 是易受攻击的 (含 5 项漏洞):
+    //  ! - CVE-2022-23307, 评分: 8.8
+    //  ! - CVE-2022-23305, 评分: 9.8
+    //  ! - CVE-2022-23302, 评分: 8.8
+    //  ! - CVE-2021-4104, 评分: 7.5
+    //  ! - CVE-2019-17571, 评分: 9.8
+    //  ! 但 log4j 第二版本要求安卓 API 级别不低于 26,
+    //  ! 与最低 API 级别为 24 的当前项目无法兼容.
     // Log4j
     implementation(libs.log4j)
 
@@ -1872,7 +1872,7 @@ dependencies /* Unclassified */ {
     // Pinyin4j
     implementation(libs.pinyin4j)
 
-    // Jieba Analysis (zh-CN: 缁撳反鍒嗚瘝)
+    // Jieba Analysis (zh-CN: 结巴分词)
     // implementation("com.huaban:jieba-analysis:1.0.2")
     implementation(project(":modules:jieba-analysis"))
 
@@ -1926,7 +1926,7 @@ dependencies /* Unclassified */ {
 dependencies /* MIME */ {
     // @Hint by SuperMonster003 on Oct 5, 2023.
     //  ! Only for Android API 26 (8.0) [O] and above.
-    //  ! zh-CN: 浠呴€傜敤浜庡畨锟?API 绾у埆 26 (8.0) [O] 鍙婁互锟?
+    //  ! zh-CN: 仅适用于安卓 API 级别 26 (8.0) [O] 及以上.
     // Apache Tika Core
     // implementation("org.apache.tika:tika-core:2.9.2")
 
@@ -1959,8 +1959,8 @@ dependencies /* AppCompat */ {
     //  ! To check the releases for Appcompat library,
     //  ! visit https://developer.android.com/jetpack/androidx/releases/appcompat.
     //  ! zh-CN:
-    //  ! 鏌ョ湅 Appcompat 搴撶殑鍙戣鐗堟湰,
-    //  ! 鍙锟?https://developer.android.com/jetpack/androidx/releases/appcompat.
+    //  ! 查看 Appcompat 库的发行版本,
+    //  ! 可访问 https://developer.android.com/jetpack/androidx/releases/appcompat.
     implementation(libs.appcompat)
 
     // AppCompat for legacy views (such as JsTextViewLegacy)
@@ -1972,7 +1972,7 @@ dependencies /* AppCompat */ {
 dependencies /* Material Dialogs */ {
     // TODO by SuperMonster003 on Feb 5, 2022.
     //  ! Upgrade to 3.3.0 (more difficult than expected).
-    //  ! zh-CN: 鍗囩骇锟?3.3.0 (瀹為檯闅惧害瓒呭嚭棰勬湡杈冨).
+    //  ! zh-CN: 升级至 3.3.0 (实际难度超出预期较多).
     //  # val configuration: (ExternalModuleDependency).() -> Unit = {
     //  #     version {
     //  #         prefer("0.9.6.0")
@@ -2079,21 +2079,21 @@ dependencies /* Archived */ {
     //  ! The dependency is added by default.
     //  ! See https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
     //  ! zh-CN:
-    //  ! 宸叉棤闇€锟?Kotlin Gradle 椤圭洰涓樉寮忓０鏄庢爣鍑嗗簱 (stdlib).
-    //  ! 鐩稿叧渚濊禆宸查粯璁よ娣诲姞.
-    //  ! 鍙傞槄 https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
+    //  ! 已无需在 Kotlin Gradle 项目中显式声明标准库 (stdlib).
+    //  ! 相关依赖已默认被添加.
+    //  ! 参阅 https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
     // Kotlin
     // implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.21")
 
     // @Comment by SuperMonster003 on Jun 1, 2022.
     //  ! Not necessary for current project but worth keeping the trace.
-    //  ! zh-CN: 浜庡綋鍓嶉」鐩凡涓嶅啀闇€锟? 浣嗕緷鐒跺€煎緱鐣欏瓨鍏惰釜锟?(浠ュ涓嶆椂涔嬮渶).
+    //  ! zh-CN: 于当前项目已不再需要, 但依然值得留存其踪迹 (以备不时之需).
     // Google Guava
     // implementation("com.google.guava:guava:31.1-jre")
 
     // @Comment by SuperMonster003 on Apr 9, 2024.
     //  ! It was ever imported and used for MediaType constants.
-    //  ! zh-CN: 鏇剧敤锟?MediaType 甯搁噺鐨勫鍏ュ強浣跨敤.
+    //  ! zh-CN: 曾用于 MediaType 常量的导入及使用.
     // Javax WS RS API (Java API for RESTful Web Services)
     // implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
 
@@ -2102,9 +2102,9 @@ dependencies /* Archived */ {
     //  ! replaced by LiveData and SharedFlow.
     //  ! It is only retained for dependencies of certain libraries (such as MQTT).
     //  ! zh-CN:
-    //  ! AutoJs6 鏍稿績椤圭洰宸插純锟?Local Broadcast Manager 锟?
-    //  ! 锟?LiveData 锟?SharedFlow 鏇夸唬.
-    //  ! 浠呯敤浜庢煇浜涘簱 (锟?MQTT) 鐨勪緷璧栬€屼繚锟?
+    //  ! AutoJs6 核心项目已弃用 Local Broadcast Manager 库,
+    //  ! 由 LiveData 及 SharedFlow 替代.
+    //  ! 仅用于某些库 (如 MQTT) 的依赖而保留.
     // Local Broadcast Manager
     implementation(libs.localbroadcastmanager)
 }
@@ -2284,8 +2284,8 @@ android {
                 //  ! Runtime assets will be copied from flavor "app"
                 //  ! while building an apk on org.autojs.autojs.ui.project.BuildActivity.
                 //  ! zh-CN:
-                //  ! 锟?org.autojs.autojs.ui.project.BuildActivity 鏋勫缓 APK 锟?
-                //  ! 杩愯鏃惰祫浜ф枃锟?(runtime assets) 灏嗙敱鍚嶄负 "app" 锟?Gradle flavor 浣滀负婧愬湴鍧€杩涜澶嶅埗.
+                //  ! 类 org.autojs.autojs.ui.project.BuildActivity 构建 APK 时,
+                //  ! 运行时资产文件 (runtime assets) 将由名为 "app" 的 Gradle flavor 作为源地址进行复制.
                 ignoreAssetsPatterns.addAll(emptyList())
             }
         }
@@ -2298,12 +2298,12 @@ android {
         //  ! The assets file is divided into three directories according to different flavors.
         //  ! But the files are not actually moved to avoid conflicts with the latest modifications.
         //  ! zh-CN (translated by SuperMonster003 on Jul 26, 2024):
-        //  ! 璧勪骇鏂囦欢鏍规嵁涓嶅悓锟?Gradle flavor 琚殧绂讳负涓変釜涓嶅悓鐨勭洰锟?
-        //  ! 涓嶈繃鐪熷疄鏂囦欢骞舵病鏈夎繘琛岀Щ锟? 浠ラ伩鍏嶄笌鏈€鏂扮殑椤圭洰淇敼鍙戠敓鍐茬獊.
+        //  ! 资产文件根据不同的 Gradle flavor 被隔离为三个不同的目录.
+        //  ! 不过真实文件并没有进行移动, 以避免与最新的项目修改发生冲突.
         //  !
         // @Hint by SuperMonster003 on Nov 16, 2023.
         //  ! The assets division idea was accepted, and it wouldn't hurt to try. :)
-        //  ! zh-CN: 璧勪骇闅旂鐨勬兂娉曞彲浠ヨ鎺ュ彈, 姣曠珶璇曚竴涓嬩篃鏃犲Θ. [绗戣劯绗﹀彿]
+        //  ! zh-CN: 资产隔离的想法可以被接受, 毕竟试一下也无妨. [笑脸符号]
 
         // @Archived by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) on Mar 7, 2026.
         //  # getByName("main") {
@@ -2378,8 +2378,8 @@ android {
 
         if (isInrtTaskRequested) {
             listOf(
-                "**/prob_emit.txt", // Jieba Analysis (zh-CN: 缁撳反鍒嗚瘝)
-                "**/dict-chinese-*.db.gzip", // Jieba Analysis (zh-CN: 缁撳反鍒嗚瘝)
+                "**/prob_emit.txt", // Jieba Analysis (zh-CN: 结巴分词)
+                "**/dict-chinese-*.db.gzip", // Jieba Analysis (zh-CN: 结巴分词)
             ).let { resources.excludes.addAll(it) }
         }
 
@@ -2444,7 +2444,7 @@ android {
 
         // @Hint by SuperMonster003 on Aug 14, 2023.
         //  ! Substitution of "android.defaults.buildfeatures.buildconfig=true"
-        //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 鐨勬浛浠ｆ柟锟?
+        //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 的替代方案
         buildConfig = true
         resValues = true
 
@@ -2724,7 +2724,7 @@ tasks {
 
         // @Hint by SuperMonster003 on May 18, 2022.
         //  ! Comment or remove this option if you are tired of plenty of warnings. :)
-        //  ! zh-CN: 娉ㄩ噴鎴栫Щ闄ゆ閫夐」鍙伩鍏嶈繃澶氳鍛婃秷鎭€犳垚鐨勫洶锟? [绗戣劯绗﹀彿]
+        //  ! zh-CN: 注释或移除此选项可避免过多警告消息造成的困扰. [笑脸符号]
         // options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
     }
 
