@@ -2466,22 +2466,32 @@ androidComponents {
 
         tasks.matching { it.name == mergeAssetsTaskName }.configureEach {
             doLast {
-                val outputDir = when (val dir = javaClass.methods.firstOrNull {
+                val reflectedOutputDir = when (val dir = javaClass.methods.firstOrNull {
                     it.name == "getOutputDir" && it.parameterTypes.isEmpty()
                 }?.invoke(this)) {
                     is File -> dir
                     is Directory -> dir.asFile
                     else -> null
-                } ?: return@doLast
+                }
 
                 val includes = when (isInrtVariant) {
                     true -> listOf(
+                        "doc/**/*",
+                        "docs/**/*",
+                        "editor/**/*",
+                        "fonts/**/*",
+                        "indices/**/*",
+                        "js-beautify/**/*",
                         "mlkit-google-ocr-models/**/*",
                         "mlkit_barcode_models/**/*",
                         "models/**/*",
+                        "modules/**/*.d.ts",
+                        "modules/**/*.md",
                         "modules/obsolete/**/*",
                         "openccdata/**/*",
                         "project/**/*",
+                        "sample/**/*",
+                        "stored-locales/**/*",
                         "android-devices.db",
                         "autojs.keystore",
                         "**/prob_emit.txt", // Jieba Analysis
@@ -2494,14 +2504,23 @@ androidComponents {
                     )
                 }
 
-                delete(
-                    fileTree(
-                        mapOf(
-                            "dir" to outputDir,
-                            "includes" to includes,
-                        )
-                    )
+                listOfNotNull(
+                    reflectedOutputDir,
+                    layout.buildDirectory.dir("intermediates/assets/$variantName/$mergeAssetsTaskName").get().asFile,
                 )
+                    .map { it.absoluteFile.normalize() }
+                    .distinctBy { it.path }
+                    .filter { it.isDirectory }
+                    .forEach { outputDir ->
+                        delete(
+                            fileTree(
+                                mapOf(
+                                    "dir" to outputDir,
+                                    "includes" to includes,
+                                )
+                            )
+                        )
+                    }
             }
         }
 

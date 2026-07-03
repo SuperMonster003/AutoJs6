@@ -1744,7 +1744,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 "libonnxruntime.so",
             ),
             assetDirsToInclude = listOf(
-                "assets/labels",
+                "assets/models",
             ),
         ),
 
@@ -1793,8 +1793,6 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             label = "Image Quantization",
             aliases = listOf("imagequant", "image-quant", "image-quantization", "image_quant", "image_quantization"),
             libsToInclude = listOf(
-                "libpng.so",
-                "libpng16d.so",
                 "libpngquant_bridge.so",
             ),
         ),
