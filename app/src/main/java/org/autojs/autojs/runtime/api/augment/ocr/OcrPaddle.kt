@@ -84,7 +84,9 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
                 runBlocking(scriptRuntime.coroutineContext) {
                     val target = OcrPluginHost.selectOrThrow(
                         context = globalContext,
-                        engine = ENGINE_PADDLE_OCR,
+                        engineId = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
+                        engine = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_PADDLE_OCR,
+                        variant = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
                         moduleLabel = MODULE_LABEL_PADDLE_OCR,
                     )
                     OcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
@@ -112,7 +114,9 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
                 runBlocking(scriptRuntime.coroutineContext) {
                     val target = OcrPluginHost.selectOrThrow(
                         context = globalContext,
-                        engine = ENGINE_PADDLE_OCR,
+                        engineId = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
+                        engine = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_PADDLE_OCR,
+                        variant = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
                         moduleLabel = MODULE_LABEL_PADDLE_OCR,
                     )
                     OcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
@@ -140,8 +144,20 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
                     options.inquire("raw", ::coerceBoolean, false)
             val imageQuality = options.inquire("imageQuality", ::coerceIntNumber, -1)
             val imageFormat = options.inquire("imageFormat", ::coerceString, "")
+            val engineId = options.inquire(PaddleOcrOptionExtraKeys.ENGINE_ID, ::coerceString, "")
+            val engine = options.inquire(PaddleOcrOptionExtraKeys.ENGINE, ::coerceString, "")
+            val variant = options.inquire(PaddleOcrOptionExtraKeys.VARIANT, ::coerceString, "")
+            val profile = options.inquire(PaddleOcrOptionExtraKeys.PROFILE, ::coerceString, "")
+            val detLimitSideLen = options.inquire(PaddleOcrOptionExtraKeys.DET_LIMIT_SIDE_LEN, ::coerceIntNumber, 0)
 
             val extras = Bundle()
+            engineId.takeIf { it.isNotBlank() }?.let { extras.putString(PaddleOcrOptionExtraKeys.ENGINE_ID, it) }
+            engine.takeIf { it.isNotBlank() }?.let { extras.putString(PaddleOcrOptionExtraKeys.ENGINE, it) }
+            variant.takeIf { it.isNotBlank() }?.let { extras.putString(PaddleOcrOptionExtraKeys.VARIANT, it) }
+            profile.takeIf { it.isNotBlank() }?.let { extras.putString(PaddleOcrOptionExtraKeys.PROFILE, it) }
+            if (detLimitSideLen > 0) {
+                extras.putInt(PaddleOcrOptionExtraKeys.DET_LIMIT_SIDE_LEN, detLimitSideLen)
+            }
             if (useRaw && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 extras.putBoolean(PaddleOcrOptionExtraKeys.RAW_IMAGE, true)
             }
@@ -161,6 +177,10 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
                 mergeLine = mergeLine && !splitWords && !useWordSegmentation,
                 extras = extras.takeIf { !it.isEmpty } ?: Bundle(),
             )
+        }
+
+        private fun Bundle.getNonBlankString(key: String): String? {
+            return getString(key)?.takeIf { it.isNotBlank() }
         }
 
         private data class ParsedOptions(
