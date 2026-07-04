@@ -139,13 +139,28 @@ val nodeJsPatchCandidateHeadersDir = providers.gradleProperty("autojs.nodejs.pat
     ?.trim()
     ?.takeIf(String::isNotEmpty)
     ?.let { normalizeNodeJsHeaderDir(file(it)) }
+val nodeJsConfiguredRuntimeJniLibsDir = providers.gradleProperty("autojs.nodejs.runtimeJniLibs").orNull
+    ?.trim()
+    ?.takeIf(String::isNotEmpty)
+    ?.let(::file)
+val nodeJsPluginProjectDir = providers.gradleProperty("autojs.nodejs.pluginProjectDir").orNull
+    ?.trim()
+    ?.takeIf(String::isNotEmpty)
+    ?.let(::file)
+    ?: rootProject.projectDir.parentFile?.resolve("autojs6-plugin-nodejs")
+val nodeJsPluginRuntimeJniLibsDir = nodeJsPluginProjectDir
+    ?.resolve("app/src/main/jniLibs")
+    ?.takeIf(File::isDirectory)
+val nodeJsDefaultRuntimeJniLibsDir = nodeJsConfiguredRuntimeJniLibsDir
+    ?: nodeJsPluginRuntimeJniLibsDir
+    ?: file("src/main/jniLibs")
 val nodeJsRuntimeSlotJniLibsSourceDir = when (nodeJsRuntimeSlot) {
     "node24_current" -> nodeJsPatchCandidateJniLibsDir
         ?: throw GradleException(
             "autojs.nodejs.runtimeSlot=node24_current requires " +
                     "-Pautojs.nodejs.patchCandidateJniLibs=<dir>."
         )
-    else -> file("src/main/jniLibs")
+    else -> nodeJsDefaultRuntimeJniLibsDir
 }
 val nodeJsRuntimeSlotHeaderDir = when (nodeJsRuntimeSlot) {
     "node24_current" -> nodeJsPatchCandidateHeadersDir
@@ -212,6 +227,11 @@ if (nodeJsRuntimeSlotJniLibsSourceDir.resolve("x86/libnode.so").isFile) {
     )
 }
 val effectiveNodeJsRuntimeBackend = if (nodeJsReleaseFlavor == "rhinoOnly") "rhino" else nodeJsRuntimeBackend
+val isNodeJsHostBridgeEnabled = providers.gradleProperty("autojs.nodejs.hostBridge.enabled")
+    .orElse(if (nodeJsReleaseFlavor == "nodePlugin") "false" else "true")
+    .get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val nodeJsEmbeddedProbeLevel = providers.gradleProperty("autojs.nodejs.embedded.probe.level").orElse("0").get()
     .trim()
     .toIntOrNull()
@@ -1623,10 +1643,11 @@ val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").or
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val isNodeJsNativeRuntimeRequested = effectiveNodeJsRuntimeBackend in setOf("native", "embedded", "auto")
+val isNodeJsHostBridgeBuildRequested = isNodeJsNativeRuntimeRequested && isNodeJsHostBridgeEnabled
 val isNodeJsRuntimePackagedInHost = isNodeJsNativeRuntimeRequested && nodeJsReleaseFlavor != "nodePlugin"
 val nodeJsAvailableNativeRuntimeAbis = nodeJsReleaseKnownAbis
     .filter { nodeJsRuntimeSlotJniLibsSourceDir.resolve("$it/libnode.so").isFile }
-val nodeJsBridgeNativeRuntimeAbis = if (isNodeJsNativeRuntimeRequested) {
+val nodeJsBridgeNativeRuntimeAbis = if (isNodeJsHostBridgeBuildRequested) {
     nodeJsBridgeExpectedAbis.filter { it in nodeJsAvailableNativeRuntimeAbis }
 } else {
     emptyList()
@@ -1636,14 +1657,14 @@ val nodeJsNativeRuntimeAbis = if (isNodeJsRuntimePackagedInHost) {
 } else {
     emptyList()
 }
-val nodeJsMissingBridgeAbis = if (isNodeJsNativeRuntimeRequested) {
+val nodeJsMissingBridgeAbis = if (isNodeJsHostBridgeBuildRequested) {
     nodeJsBridgeExpectedAbis.filterNot { it in nodeJsAvailableNativeRuntimeAbis }
 } else {
     emptyList()
 }
 if (nodeJsMissingBridgeAbis.isNotEmpty()) {
     throw GradleException(
-        "Embedded Node $nodeJsReleaseFlavor requires bridge build ABI(s) not present in app/src/main/jniLibs: " +
+        "Embedded Node $nodeJsReleaseFlavor requires bridge build ABI(s) not present in ${nodeJsRuntimeSlotJniLibsSourceDir.absolutePath}: " +
                 nodeJsMissingBridgeAbis.joinToString() +
                 ". Adjust -Pautojs.nodejs.releaseAbis or provide libnode.so for link-time validation."
     )
@@ -1655,7 +1676,7 @@ val nodeJsMissingReleaseAbis = if (isNodeJsRuntimePackagedInHost) {
 }
 if (nodeJsMissingReleaseAbis.isNotEmpty()) {
     throw GradleException(
-        "Embedded Node $nodeJsReleaseFlavor requires native runtime ABI(s) not present in app/src/main/jniLibs: " +
+        "Embedded Node $nodeJsReleaseFlavor requires native runtime ABI(s) not present in ${nodeJsRuntimeSlotJniLibsSourceDir.absolutePath}: " +
                 nodeJsMissingReleaseAbis.joinToString() +
                 ". Adjust -Pautojs.nodejs.releaseAbis or provide libnode.so for the selected ABI set."
     )
@@ -2163,7 +2184,7 @@ android {
 
         multiDexEnabled = true
 
-        if (isNodeJsNativeRuntimeRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty()) {
+        if (isNodeJsHostBridgeBuildRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty()) {
             ndk.abiFilters += nodeJsBridgeNativeRuntimeAbis
             externalNativeBuild {
                 cmake {
@@ -2391,7 +2412,7 @@ android {
                 excludes += allNativeLibAbis.flatMap { abi ->
                     listOf("lib/$abi/**", "**/$abi/**")
                 }
-            } else {
+            } else if (isNodeJsHostBridgeBuildRequested) {
                 val unsupportedNodeJsAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") - nodeJsBridgeNativeRuntimeAbis.toSet()
                 excludes += unsupportedNodeJsAbis.flatMap { abi ->
                     listOf("lib/$abi/**", "**/$abi/**")
@@ -2456,7 +2477,7 @@ android {
         //  # }
     }
 
-    if (isNodeJsNativeRuntimeRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty()) {
+    if (isNodeJsHostBridgeBuildRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty()) {
         externalNativeBuild {
             cmake {
                 path = file("src/main/cpp/CMakeLists.txt")
@@ -2475,7 +2496,7 @@ android {
             reset()
             // Specifies a list of ABIs that Gradle should create APKs for.
             val splitAbis = when {
-                isNodeJsNativeRuntimeRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty() -> nodeJsBridgeNativeRuntimeAbis
+                isNodeJsHostBridgeBuildRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty() -> nodeJsBridgeNativeRuntimeAbis
                 else -> listOf("arm64-v8a", "x86_64", "armeabi-v7a", "x86", "armeabi")
             }
             include(*splitAbis.toTypedArray())
@@ -2583,10 +2604,10 @@ tasks.register(taskNameAssembleInrtFullNodeRelease) {
     outputs.upToDateWhen { false }
 
     doFirst {
-        if (nodeJsReleaseFlavor == "rhinoOnly" || !isNodeJsNativeRuntimeRequested) {
+        if (nodeJsReleaseFlavor == "rhinoOnly" || !isNodeJsNativeRuntimeRequested || !isNodeJsHostBridgeBuildRequested) {
             throw GradleException(
                 "$taskNameAssembleInrtFullNodeRelease requires Embedded Node native runtime packaging. " +
-                        "Do not pass -Pautojs.nodejs.releaseFlavor=rhinoOnly."
+                        "Do not pass -Pautojs.nodejs.releaseFlavor=rhinoOnly or -Pautojs.nodejs.hostBridge.enabled=false."
             )
         }
     }
@@ -2627,6 +2648,7 @@ tasks.register(taskNameAssembleInrtFullNodeRelease) {
                 appendLine("  autojs.nodejs.releaseAbis=${if (nodeJsReleaseExpectedAbis.isEmpty()) "none" else nodeJsReleaseExpectedAbis.joinToString()}")
                 appendLine("  autojs.nodejs.backend=$effectiveNodeJsRuntimeBackend")
                 appendLine("  native runtime requested=$isNodeJsNativeRuntimeRequested")
+                appendLine("  host bridge build requested=$isNodeJsHostBridgeBuildRequested")
                 appendLine("  updates assets-app/template.apk=false")
             }
         )

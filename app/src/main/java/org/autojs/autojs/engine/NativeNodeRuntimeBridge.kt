@@ -80,10 +80,10 @@ object NativeNodeRuntimeBridge {
     }
 
     private fun loadLibrary(name: String): LoadResult = try {
-        if (name == NODE_LIBRARY_NAME) {
-            NodeJsPluginRuntimeLoader.loadNodeOrSystem()
-        } else {
-            System.loadLibrary(name)
+        when (name) {
+            NODE_LIBRARY_NAME -> NodeJsPluginRuntimeLoader.loadNodeOrSystem()
+            BRIDGE_LIBRARY_NAME -> NodeJsPluginRuntimeLoader.loadBridgeOrSystem()
+            else -> System.loadLibrary(name)
         }
         LoadResult.Loaded
     } catch (e: UnsatisfiedLinkError) {

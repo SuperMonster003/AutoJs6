@@ -22,20 +22,38 @@ object NodeJsPluginRuntimeLoader {
 
     private const val NODE_LIBRARY_NAME = "node"
     private const val NODE_LIBRARY_FILE = "libnode.so"
+    private const val BRIDGE_LIBRARY_NAME = "autojs6-node"
+    private const val BRIDGE_LIBRARY_FILE = "libautojs6-node.so"
 
     fun loadNodeOrSystem(context: Context? = null) {
         runCatching { System.loadLibrary("c++_shared") }
+        loadPluginOrSystem(NODE_LIBRARY_NAME, NODE_LIBRARY_FILE, context)
+    }
+
+    fun loadBridgeOrSystem(context: Context? = null) {
+        loadPluginOrSystem(BRIDGE_LIBRARY_NAME, BRIDGE_LIBRARY_FILE, context)
+    }
+
+    private fun loadPluginOrSystem(libraryName: String, libraryFileName: String, context: Context?) {
         val appContext = context ?: runCatching { GlobalAppContext.get() }.getOrNull()
-        val pluginLibrary = appContext?.let { findPluginNodeLibrary(it) }
+        val pluginLibrary = appContext?.let { findPluginNativeLibrary(it, libraryFileName) }
         if (pluginLibrary != null) {
             System.load(pluginLibrary.absolutePath)
             return
         }
-        System.loadLibrary(NODE_LIBRARY_NAME)
+        System.loadLibrary(libraryName)
     }
 
     fun resolveNodeLibraryFile(context: Context): File? {
-        return findPluginNodeLibrary(context) ?: hostLibraryFile(context, NODE_LIBRARY_FILE)
+        return resolveNativeLibraryFile(context, NODE_LIBRARY_FILE)
+    }
+
+    fun resolveBridgeLibraryFile(context: Context): File? {
+        return resolveNativeLibraryFile(context, BRIDGE_LIBRARY_FILE)
+    }
+
+    private fun resolveNativeLibraryFile(context: Context, libraryFileName: String): File? {
+        return findPluginNativeLibrary(context, libraryFileName) ?: hostLibraryFile(context, libraryFileName)
     }
 
     fun resolveNodeLibraryDir(context: Context): String? {
@@ -43,7 +61,7 @@ object NodeJsPluginRuntimeLoader {
             ?: context.applicationContext.applicationInfo.nativeLibraryDir
     }
 
-    private fun findPluginNodeLibrary(context: Context): File? {
+    private fun findPluginNativeLibrary(context: Context, libraryFileName: String): File? {
         val appContext = context.applicationContext
         return queryNodePluginCandidates(appContext)
             .asSequence()
@@ -54,7 +72,7 @@ object NodeJsPluginRuntimeLoader {
                 candidate.applicationInfo.nativeLibraryDir
                     ?.takeIf(String::isNotBlank)
                     ?.let(::File)
-                    ?.resolve(NODE_LIBRARY_FILE)
+                    ?.resolve(libraryFileName)
                     ?.takeIf(File::isFile)
                     ?.let { file -> candidate to file }
             }

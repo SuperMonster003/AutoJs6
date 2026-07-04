@@ -471,10 +471,12 @@ object NativeNodeEmbeddedRuntimeBridge {
         val nativeLibraryDir = context.applicationContext.applicationInfo.nativeLibraryDir
             ?.takeIf(String::isNotBlank)
             ?: return null
-        val library = if (libraryFileName == nativeLibrarySoFileName(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME)) {
-            NodeJsPluginRuntimeLoader.resolveNodeLibraryFile(context)
-        } else {
-            File(nativeLibraryDir, libraryFileName).takeIf(File::isFile)
+        val library = when (libraryFileName) {
+            nativeLibrarySoFileName(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME) ->
+                NodeJsPluginRuntimeLoader.resolveNodeLibraryFile(context)
+            nativeLibrarySoFileName(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME) ->
+                NodeJsPluginRuntimeLoader.resolveBridgeLibraryFile(context)
+            else -> File(nativeLibraryDir, libraryFileName).takeIf(File::isFile)
         } ?: return null
         return runCatching { library.sha256Hex() }.getOrNull()
     }
@@ -15899,10 +15901,10 @@ object NativeNodeEmbeddedRuntimeBridge {
     }
 
     private fun loadLibrary(name: String): LibraryLoad = try {
-        if (name == NativeNodeRuntimeBridge.NODE_LIBRARY_NAME) {
-            NodeJsPluginRuntimeLoader.loadNodeOrSystem()
-        } else {
-            System.loadLibrary(name)
+        when (name) {
+            NativeNodeRuntimeBridge.NODE_LIBRARY_NAME -> NodeJsPluginRuntimeLoader.loadNodeOrSystem()
+            NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME -> NodeJsPluginRuntimeLoader.loadBridgeOrSystem()
+            else -> System.loadLibrary(name)
         }
         LibraryLoad(name = name, loaded = true, attempted = true)
     } catch (e: UnsatisfiedLinkError) {
