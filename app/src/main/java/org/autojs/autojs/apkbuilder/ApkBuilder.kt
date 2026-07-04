@@ -22,6 +22,7 @@ import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
+import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
@@ -38,6 +39,7 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.IPluginInfoProvider
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.mlkit.barcode.api.IBarcodePlugin
 import org.autojs.plugin.nodejs.api.NodeJsPluginActions
 import org.autojs.plugin.nodejs.api.NodeJsPluginIds
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
@@ -1823,11 +1825,24 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         MLKIT_BARCODE(
             label = "MLKit Barcode",
             aliases = listOf("barcode", "mlkit-barcode", "mlkit_barcode"),
-            libsToInclude = listOf(
-                "libbarhopper_v3.so",
-            ),
-            assetDirsToInclude = listOf(
-                "assets/mlkit_barcode_models",
+            libsToInclude = emptyList(),
+            assetDirsToInclude = emptyList(),
+            plugin = PluginLib(
+                action = BarcodePluginHost.ACTION_BARCODE,
+                onServiceConnected = { binder: IBinder ->
+                    IBarcodePlugin.Stub.asInterface(binder).info
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = "default",
+                        assetsToInclude = listOf(
+                            "assets/mlkit_barcode_models",
+                        ) to emptyList(),
+                        libsToInclude = listOf(
+                            "libbarhopper_v3.so",
+                        ),
+                    ),
+                ),
             ),
         ),
 

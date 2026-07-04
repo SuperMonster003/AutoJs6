@@ -17,7 +17,7 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeObject
-import com.google.mlkit.vision.barcode.common.Barcode as GoogleBarcode
+import org.autojs.plugin.mlkit.barcode.api.BarcodeFormats
 import org.autojs.autojs.runtime.api.augment.images.Images as AugmentableImages
 
 class QrCode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
@@ -100,7 +100,7 @@ class QrCode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                     val img = arg0
                     val opt = arg1 as? NativeObject ?: newNativeObject()
 
-                    val formats = listOf(GoogleBarcode.FORMAT_QR_CODE).toIntArray()
+                    val formats = listOf(BarcodeFormats.FORMAT_QR_CODE).toIntArray()
                     val enableAllPotentialBarcodes = opt.inquire("enableAllPotentialQrCodes") { coerceBoolean(it, false) }
                         ?: opt.inquire("enableAllPotentialBarcodes", ::coerceBoolean, false)
 

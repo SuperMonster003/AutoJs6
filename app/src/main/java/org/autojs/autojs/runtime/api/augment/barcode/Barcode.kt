@@ -16,7 +16,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
-import com.google.mlkit.vision.barcode.common.Barcode as GoogleBarcode
+import org.autojs.plugin.mlkit.barcode.api.BarcodeFormats
 import org.autojs.autojs.runtime.api.augment.images.Images as AugmentableImages
 
 class Barcode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
@@ -126,7 +126,8 @@ class Barcode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
                                             else -> "$FORMAT_PREFIX$transformed"
                                         }
                                     }.let { transformer[it] ?: it }
-                                    coerceIntNumber(GoogleBarcode::class.java.declaredFields.find { it.name == tmp && it.type == Int::class.java }?.get(null))
+                                    BarcodeFormats.BY_NAME[tmp.removePrefix(FORMAT_PREFIX)]
+                                        ?: throw WrappedIllegalArgumentException("Unknown format ${format.jsBrief()} for barcode")
                                 }
                                 else -> throw WrappedIllegalArgumentException("Unknown format ${format.jsBrief()} for barcode")
                             }
@@ -144,13 +145,13 @@ class Barcode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
             val (img, formats, enableAllPotentialBarcodes, options) = parser.invoke(scriptRuntime, argList)
             val isAll = options.inquire("isAll") { coerceBoolean(it, false) } ?: false
             return when {
-                isAll -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, false).mapNotNull { it.rawValue }
-                else -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, true).firstOrNull()?.rawValue
+                isAll -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, false).mapNotNull { it.getRawValue() }
+                else -> scriptRuntime.barcode.detect(img, formats, enableAllPotentialBarcodes, true).firstOrNull()?.getRawValue()
             }
         }
 
         fun recognizeTextsInternal(scriptRuntime: ScriptRuntime, argList: Array<Any?>, parser: (ScriptRuntime, Array<out Any?>) -> BarcodeDetectData): List<String> {
-            return detectAll(scriptRuntime, argList).mapNotNull { it.rawValue }
+            return detectAll(scriptRuntime, argList).mapNotNull { it.getRawValue() }
         }
 
         fun detectInternal(scriptRuntime: ScriptRuntime, argList: Array<Any?>, parser: (ScriptRuntime, Array<out Any?>) -> BarcodeDetectData): Any? {

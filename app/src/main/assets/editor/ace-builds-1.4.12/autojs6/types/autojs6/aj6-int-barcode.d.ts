@@ -14,7 +14,6 @@
 declare namespace Internal {
 
     import DetectOptions = Internal.Barcode.DetectOptions;
-    import MLKitBarcode = com.google.mlkit.vision.barcode.common.Barcode;
 
     interface Barcode {
 
@@ -62,7 +61,7 @@ declare namespace Internal {
             /**
              * @default 0
              * @example
-             * com.google.mlkit.vision.barcode.common.Barcode.FORMAT_QR_CODE;
+             * org.autojs.plugin.mlkit.barcode.api.BarcodeFormats.FORMAT_QR_CODE;
              * "qr-code";
              * "QR_CODE";
              * "qrcode"; // specially adaptation
@@ -74,25 +73,25 @@ declare namespace Internal {
         class Result extends org.autojs.autojs.runtime.api.WrappedBarcode {
 
             boundingBox: Android.Rect | null;
-            calendarEvent: MLKitBarcode.CalendarEvent | null;
-            contactInfo: MLKitBarcode.ContactInfo | null;
+            calendarEvent: org.json.JSONObject | null;
+            contactInfo: org.json.JSONObject | null;
             cornerPoints: android.graphics.Point[] | null;
             displayValue: string | null;
-            driverLicense: MLKitBarcode.DriverLicense | null;
-            email: MLKitBarcode.Email | null;
+            driverLicense: org.json.JSONObject | null;
+            email: org.json.JSONObject | null;
             format: number;
             formatName: string;
-            geoPoint: MLKitBarcode.GeoPoint | null;
-            phone: MLKitBarcode.Phone | null;
+            geoPoint: org.json.JSONObject | null;
+            phone: org.json.JSONObject | null;
             rawBytes: number[] | null;
             rawValue: string | null;
-            sms: MLKitBarcode.Sms | null;
+            sms: org.json.JSONObject | null;
             type: number;
             typeName: string;
-            url: MLKitBarcode.UrlBookmark | null;
+            url: org.json.JSONObject | null;
             valueType: number;
             valueTypeName: string;
-            wifi: MLKitBarcode.WiFi | null;
+            wifi: org.json.JSONObject | null;
 
         }
 

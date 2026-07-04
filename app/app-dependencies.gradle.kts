@@ -260,6 +260,9 @@ dependencies /* Unclassified */ {
     // Plugin API: Node.js API
     implementation(project(":plugin-api:nodejs-api"))
 
+    // Plugin API: ML Kit Barcode API
+    implementation(project(":plugin-api:mlkit-barcode-api"))
+
     // Plugin API: Paddle OCR API
     implementation(project(":plugin-api:paddle-ocr-api"))
 
@@ -378,9 +381,6 @@ dependencies /* GitHub API */ {
 dependencies /* MLKit */ {
     // OCR
     implementation(libs.text.recognition.chinese)
-
-    // Barcode
-    implementation(libs.barcode.scanning)
 }
 
 dependencies /* OpenCC */ {

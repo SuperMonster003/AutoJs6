@@ -70,7 +70,6 @@ val inrtMergedAssetPruneIncludes = listOf(
     "indices/**/*",
     "js-beautify/**/*",
     "mlkit-google-ocr-models/**/*",
-    "mlkit_barcode_models/**/*",
     "models/**/*",
     "modules/**/*.d.ts",
     "modules/**/*.md",

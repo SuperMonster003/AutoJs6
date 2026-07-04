@@ -1,72 +1,62 @@
 package org.autojs.autojs.runtime.api
 
 import android.util.Log
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.common.InputImage
+import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.image.ImageWrapper
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import com.google.mlkit.vision.barcode.common.Barcode as MLKitBarcode
+import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.plugin.mlkit.barcode.api.BarcodeFormats
+import org.autojs.plugin.mlkit.barcode.api.BarcodeOptions
+import org.autojs.plugin.mlkit.barcode.api.BarcodeValueTypes
 
 /**
  * Created by SuperMonster003 on Oct 10, 2023.
  */
 class Barcode {
 
-    fun detect(image: ImageWrapper?, formats: IntArray = intArrayOf(), enableAllPotentialBarcodes: Boolean = false, onlyOneResult: Boolean = false): List<WrappedBarcode> {
-
+    fun detect(
+        image: ImageWrapper?,
+        formats: IntArray = intArrayOf(),
+        enableAllPotentialBarcodes: Boolean = false,
+        onlyOneResult: Boolean = false,
+    ): List<WrappedBarcode> {
         image?.takeUnless { image.isRecycled } ?: return emptyList()
 
-        val options = BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(MLKitBarcode.FORMAT_ALL_FORMATS, *formats)
-            .apply { if (enableAllPotentialBarcodes) enableAllPotentialBarcodes() }
-            .build()
-
-        val scanner = BarcodeScanning.getClient(options)
-        val inputImage = InputImage.fromBitmap(image.bitmap, 0)
-        val scanCompletedSignal = CountDownLatch(1)
-
-        var results: List<WrappedBarcode>? = null
-
-        val resultScan = scanner.process(inputImage)
-            .addOnSuccessListener { barcodes: MutableList<MLKitBarcode> ->
-                when {
-                    onlyOneResult -> barcodes.firstOrNull()?.let { results = listOf(WrappedBarcode(it)) }
-                    else -> results = barcodes.map { WrappedBarcode(it) }
-                }
-                scanCompletedSignal.countDown()
-            }
-            .addOnFailureListener { e ->
-                e.printStackTrace()
-                scanCompletedSignal.countDown()
-            }
-            .addOnCanceledListener { scanCompletedSignal.countDown() }
-            .addOnCompleteListener { scanCompletedSignal.countDown() }
-
-        while (!resultScan.isComplete) {
-            try {
-                scanCompletedSignal.await(50, TimeUnit.MILLISECONDS)
-            } catch (_: InterruptedException) {
-                /* Ignored. */
-            }
+        val context = AutoJs.instance.applicationContext
+        val options = BarcodeOptions().apply {
+            this.formats = formats
+            this.enableAllPotentialBarcodes = enableAllPotentialBarcodes
+            this.maxResults = if (onlyOneResult) 1 else MAX_RESULTS
         }
 
-        image.shoot()
-
-        if (!resultScan.isSuccessful) {
-            Log.w(TAG, "Barcode scanning is not successful")
+        return try {
+            val target = runBlocking {
+                BarcodePluginHost.selectOrThrow(
+                    context = context,
+                    engine = ENGINE_MLKIT_BARCODE,
+                )
+            }
+            runBlocking {
+                BarcodePluginHost.detect(context, target, image.bitmap, options)
+            }
+                .let { if (onlyOneResult) it.take(1) else it }
+                .map { WrappedBarcode(it) }
+        } catch (e: Throwable) {
+            Log.w(TAG, "Barcode plugin scanning failed: ${e.message}")
+            throw e
+        } finally {
+            image.shoot()
         }
-        return results ?: emptyList()
     }
 
     companion object {
 
         private val TAG: String = Companion::class.java.simpleName
 
-        const val TYPE_NAME_UNKNOWN = "TYPE_NAME_UNKNOWN"
-        const val FORMAT_NAME_UNKNOWN = "FORMAT_NAME_UNKNOWN"
+        private const val MAX_RESULTS = 128
+        private const val ENGINE_MLKIT_BARCODE = "mlkit-barcode"
 
+        const val TYPE_NAME_UNKNOWN = BarcodeValueTypes.TYPE_NAME_UNKNOWN
+        const val FORMAT_NAME_UNKNOWN = BarcodeFormats.FORMAT_NAME_UNKNOWN
     }
-
 }

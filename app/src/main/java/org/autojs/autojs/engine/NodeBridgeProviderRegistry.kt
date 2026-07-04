@@ -9,6 +9,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
+import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
@@ -363,7 +364,7 @@ object NodeBridgeProviderRegistry {
             NodeBridgeProviderStatus.UNAVAILABLE
         }
         OCR_PROVIDER -> if (mlKitOcrAvailable()) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
-        BARCODE_PROVIDER -> if (mlKitBarcodeAvailable()) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
+        BARCODE_PROVIDER -> if (BarcodePluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         STORAGE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         DATABASE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         MEDIA_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
@@ -669,25 +670,19 @@ object NodeBridgeProviderRegistry {
     }
 
     private fun barcodeDetails(context: Context): Map<String, String> {
+        val pluginServiceCount = BarcodePluginHost.queryServiceCount(context)
         return linkedMapOf(
             "defaultEngine" to "mlkit-barcode",
-            "mlkitAvailable" to mlKitBarcodeAvailable().toString(),
+            "mlkitAvailable" to (pluginServiceCount > 0).toString(),
+            "barcodePluginServiceCount" to pluginServiceCount.toString(),
             "liveMethods" to "detect,detectAll,recognizeText,recognizeTexts",
             "inputModes" to "providerImageHandle,pathViaTemporaryImageHandle,captureExistingPermission",
             "capability" to NodeBridgePermissionManifest.BARCODE,
             "imageCapability" to NodeBridgePermissionManifest.IMAGE,
             "captureCapability" to NodeBridgePermissionManifest.SCREEN_CAPTURE,
             "qrcodePolicy" to "P12-29 compat.qrcode must force QR_CODE over this provider",
-            "statusReason" to "ML Kit barcode provider is exposed through JSON-only snapshots and provider-owned image handles",
+            "statusReason" to "ML Kit barcode provider is supplied by the official Barcode plugin through JSON-only snapshots and provider-owned image handles",
         )
-    }
-
-    private fun mlKitBarcodeAvailable(): Boolean {
-        return runCatching {
-            Class.forName("com.google.mlkit.vision.barcode.BarcodeScanning")
-            Class.forName("com.google.mlkit.vision.barcode.BarcodeScannerOptions")
-            Class.forName("com.google.mlkit.vision.barcode.common.Barcode")
-        }.isSuccess
     }
 
     private fun hasAsset(context: Context, path: String): Boolean {
