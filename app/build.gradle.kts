@@ -147,11 +147,37 @@ val nodeJsConfiguredRuntimeJniLibsDir = providers.gradleProperty("autojs.nodejs.
     ?.trim()
     ?.takeIf(String::isNotEmpty)
     ?.let(::file)
-val nodeJsPluginProjectDir = providers.gradleProperty("autojs.nodejs.pluginProjectDir").orNull
+val nodeJsPluginProjectDirOverride = providers.gradleProperty("autojs.nodejs.pluginProjectDir")
+    .orElse(providers.gradleProperty("autojs.nodejs.plugin.root"))
+val nodeJsPluginProjectDir = nodeJsPluginProjectDirOverride.orNull
     ?.trim()
     ?.takeIf(String::isNotEmpty)
-    ?.let(::file)
+    ?.let(rootProject::file)
     ?: rootProject.projectDir.parentFile?.resolve("autojs6-plugin-nodejs")
+val nodeJsExamplesSource = providers.gradleProperty("autojs.nodejs.examplesSource").orElse("host").get()
+    .trim()
+    .lowercase()
+val nodeJsConfiguredExamplesRootDir = providers.gradleProperty("autojs.nodejs.examplesRoot").orNull
+    ?.trim()
+    ?.takeIf(String::isNotEmpty)
+    ?.let(rootProject::file)
+val nodeJsHostExamplesRootDir = rootProject.projectDir.resolve("sample/nodejs")
+val nodeJsPluginExamplesRootDir = nodeJsPluginProjectDir?.resolve("sample/nodejs")
+val nodeJsAndroidTestExamplesRootDir = nodeJsConfiguredExamplesRootDir ?: when (nodeJsExamplesSource) {
+    "host", "main", "app" -> nodeJsHostExamplesRootDir
+    "plugin", "node-plugin", "nodejs-plugin" -> nodeJsPluginExamplesRootDir
+        ?: throw GradleException("Node.js plugin project directory is unavailable for autojs.nodejs.examplesSource=plugin.")
+    else -> throw GradleException(
+        "Unsupported Node example source '$nodeJsExamplesSource'. Use host or plugin, " +
+                "or set -Pautojs.nodejs.examplesRoot=<dir>."
+    )
+}
+if (!nodeJsAndroidTestExamplesRootDir.isDirectory) {
+    throw GradleException(
+        "Missing Node example assets directory: ${nodeJsAndroidTestExamplesRootDir.absolutePath}. " +
+                "Use -Pautojs.nodejs.examplesRoot=<dir> or -Pautojs.nodejs.pluginProjectDir=<dir>."
+    )
+}
 val nodeJsPluginCppDir = nodeJsPluginProjectDir
     ?.resolve("app/src/main/cpp")
     ?.takeIf(File::isDirectory)
@@ -2383,7 +2409,7 @@ android {
             assets.directories.add("src/main/assets-$flavorNameInrt")
         }
         getByName("androidTest") {
-            assets.directories.add("$rootDir/sample/nodejs")
+            assets.directories.add(nodeJsAndroidTestExamplesRootDir.absolutePath)
         }
 
     }

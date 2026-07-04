@@ -134,9 +134,29 @@ private fun nodeExamplePluginProjectRoot(overridePath: String?): File {
     val candidate = overridePath
         ?.trim()
         ?.takeIf(String::isNotEmpty)
-        ?.let(::File)
+        ?.let(rootProject::file)
         ?: rootProject.projectDir.parentFile.resolve("autojs6-plugin-nodejs")
     return candidate.canonicalFile
+}
+
+private fun nodeExampleRoot(
+    source: String?,
+    explicitRoot: String?,
+    pluginRoot: File,
+): File {
+    explicitRoot
+        ?.trim()
+        ?.takeIf(String::isNotEmpty)
+        ?.let(rootProject::file)
+        ?.let { return it.canonicalFile }
+    return when (val normalized = source.orEmpty().trim().lowercase()) {
+        "", "host", "main", "app" -> rootProject.projectDir.resolve("sample/nodejs").canonicalFile
+        "plugin", "node-plugin", "nodejs-plugin" -> pluginRoot.resolve("sample/nodejs").canonicalFile
+        else -> throw GradleException(
+            "Unsupported Node example source '$normalized'. Use host or plugin, " +
+                    "or set -Pautojs.nodejs.examplesRoot=<dir>."
+        )
+    }
 }
 
 private fun nodeExampleSha256(file: File): String {
@@ -195,19 +215,26 @@ private fun nodeExampleEntryFile(dir: File, name: String, projectJson: Map<*, *>
 
 val verifyNodeExamples = tasks.register("verifyNodeExamples") {
     group = "verification"
-    description = "Verifies checked-in sample/nodejs examples, metadata, expected outputs, and smoke classifications."
+    description = "Verifies Node sample examples, metadata, expected outputs, and smoke classifications."
 
+    val pluginRootOverride = providers.gradleProperty("autojs.nodejs.pluginProjectDir")
+        .orElse(providers.gradleProperty("autojs.nodejs.plugin.root"))
+    val examplesRoot = nodeExampleRoot(
+        providers.gradleProperty("autojs.nodejs.examplesSource").orElse("host").get(),
+        providers.gradleProperty("autojs.nodejs.examplesRoot").orNull,
+        nodeExamplePluginProjectRoot(pluginRootOverride.orNull),
+    )
     val jsonReport = layout.buildDirectory.file("reports/nodejs/examples.json")
     val markdownReport = layout.buildDirectory.file("reports/nodejs/examples.md")
 
+    inputs.dir(examplesRoot)
     outputs.file(jsonReport)
     outputs.file(markdownReport)
 
     doLast {
-        val examplesRoot = rootProject.projectDir.resolve("sample/nodejs")
         val manifestFile = examplesRoot.resolve("examples.json")
         if (!manifestFile.isFile) {
-            throw GradleException("Missing Node example manifest: ${manifestFile.relativeTo(rootProject.projectDir)}")
+            throw GradleException("Missing Node example manifest: ${nodeExampleDisplayPath(manifestFile)}")
         }
         val manifest = nodeExampleReadJsonObject(manifestFile)
         if (manifest["schema"] != "autojs6-node-examples-v1") {
@@ -320,7 +347,8 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
 
         val report = linkedMapOf<String, Any?>(
             "schema" to "autojs6-node-examples-report-v1",
-            "manifest" to manifestFile.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
+            "manifest" to nodeExampleDisplayPath(manifestFile),
+            "examplesRoot" to nodeExampleDisplayPath(examplesRoot),
             "exampleCount" to rows.size,
             "mainAppSmoke" to rows.filter { it["mainAppSmoke"] == true }.map { it["name"] },
             "packagedCompatible" to rows.filter { it["packagedCompatible"] == true }.map { it["name"] },
@@ -347,7 +375,7 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
                 }
             )
         }
-        logger.lifecycle("Verified ${rows.size} Node examples from ${manifestFile.relativeTo(rootProject.projectDir)}.")
+        logger.lifecycle("Verified ${rows.size} Node examples from ${nodeExampleDisplayPath(manifestFile)}.")
         logger.lifecycle("Node examples report written to ${jsonReport.get().asFile.absolutePath}")
     }
 }
@@ -358,7 +386,8 @@ tasks.register("verifyNodePluginExampleMirror") {
 
     dependsOn(verifyNodeExamples)
 
-    val pluginRootOverride = providers.gradleProperty("autojs.nodejs.plugin.root")
+    val pluginRootOverride = providers.gradleProperty("autojs.nodejs.pluginProjectDir")
+        .orElse(providers.gradleProperty("autojs.nodejs.plugin.root"))
     val pluginRoot = nodeExamplePluginProjectRoot(pluginRootOverride.orNull)
     val pluginExamplesRoot = pluginRoot.resolve("sample/nodejs")
     val pluginVerifier = pluginRoot.resolve("node-plugin-examples.gradle.kts")
