@@ -6,7 +6,6 @@ import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.runBlocking
-import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 
 object NodeJsRuntimePluginBridge {
@@ -94,8 +93,6 @@ object NodeJsRuntimePluginBridge {
             brokerId = hostCapabilityBroker.id,
             launchSurface = launchSurface,
         )
-        val enrichedRuntimeModuleSources = enrichedRuntimeModuleSourcesForPlugin(
-        )
         return Bundle().apply {
             putInt(NodeJsRuntimeContract.KEY_CONTRACT_VERSION, NodeJsRuntimeContract.CONTRACT_VERSION)
             putString(NodeJsRuntimeContract.KEY_EXECUTION_ID, executionId)
@@ -115,7 +112,7 @@ object NodeJsRuntimePluginBridge {
             putStringMap(
                 NodeJsRuntimeContract.KEY_RUNTIME_MODULE_SOURCE_NAMES,
                 NodeJsRuntimeContract.KEY_RUNTIME_MODULE_SOURCES,
-                enrichedRuntimeModuleSources,
+                runtimeModuleSources,
             )
             putBoolean(NodeJsRuntimeContract.KEY_ESM_EXPERIMENTAL_ENABLED, esmExperimentalEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, dynamicImportExperimentalEnabled)
@@ -150,33 +147,6 @@ object NodeJsRuntimePluginBridge {
                 pid = Process.myPid(),
             )
             .copy(backend = "plugin")
-    }
-
-    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.enrichedRuntimeModuleSourcesForPlugin(): Map<String, String> {
-        return runtimeModuleSources
-            .withPluginBridgePermissionManifest(
-                workingDirectory = workingDirectory,
-                sandboxRoot = sandboxRoot,
-            )
-    }
-
-    private fun Map<String, String>.withPluginBridgePermissionManifest(
-        workingDirectory: String?,
-        sandboxRoot: String?,
-    ): Map<String, String> {
-        return linkedMapOf<String, String>().apply {
-            putAll(this@withPluginBridgePermissionManifest)
-            if (!containsKey(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME)) {
-                put(
-                    NodeBridgePermissionManifest.RUNTIME_MODULE_NAME,
-                    NodeBridgePermissionManifest.runtimeModuleSourceForWorkingDirectory(
-                        workingDirectory,
-                        sandboxRoot,
-                        includeBuildNetworkPolicy = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
-                    ),
-                )
-            }
-        }
     }
 
     private fun NodeJsRuntimePluginHost.ScriptRunResult.toEmbeddedScriptResult(

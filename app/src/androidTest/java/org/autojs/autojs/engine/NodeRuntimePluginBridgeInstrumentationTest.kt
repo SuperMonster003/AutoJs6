@@ -43,11 +43,19 @@ class NodeRuntimePluginBridgeInstrumentationTest {
             NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE in capabilities,
         )
 
-        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("device"))
         val workDir = File(context.cacheDir, "node-runtime-plugin-live-device").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create Node plugin live bridge working directory: $absolutePath" }
         }
+        File(workDir, "project.json").writeText(
+            """
+            {
+              "node": {
+                "permissions": ["device"]
+              }
+            }
+            """.trimIndent(),
+        )
         val result = NodeJsRuntimePluginBridge.runScript(
             context,
             NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
@@ -64,7 +72,6 @@ class NodeRuntimePluginBridgeInstrumentationTest {
                 workingDirectory = workDir.absolutePath,
                 sandboxRoot = workDir.absolutePath,
                 timeoutMs = 10_000L,
-                runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
             ),
         )
 
@@ -79,6 +86,8 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         assertEquals("bridge_engine_info", result.nativeValues["embedded_script.runtime_plugin.runtime_module.host_app_info_source"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.device_info_present"])
         assertEquals("plugin_context", result.nativeValues["embedded_script.runtime_plugin.runtime_module.device_info_source"])
+        assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.bridge_permissions_present"])
+        assertEquals("working_directory", result.nativeValues["embedded_script.runtime_plugin.runtime_module.bridge_permissions_source"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.bridge_limits_present"])
         assertEquals("working_directory", result.nativeValues["embedded_script.runtime_plugin.runtime_module.bridge_limits_source"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.lifecycle_config_present"])
