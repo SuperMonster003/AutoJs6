@@ -2752,7 +2752,9 @@ tasks {
 }
 
 dependencies /* Rapid OCR for packaged apps */ {
-    add("${flavorNameInrt}Implementation", project(":libs:rapidocr"))
+    findProject(":libs:rapidocr")?.let { rapidOcrProject ->
+        add("${flavorNameInrt}Implementation", rapidOcrProject)
+    }
 }
 
 extra {

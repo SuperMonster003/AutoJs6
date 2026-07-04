@@ -18,12 +18,27 @@ private val modules = listOf(
     "recyclerview-flexibledivider",
 )
 
+private val requestedTaskNames = gradle.startParameter.taskNames
+
+private fun isProjectPropertyEnabled(name: String): Boolean =
+    gradle.startParameter.projectProperties[name]
+        ?.trim()
+        ?.lowercase()
+        ?.let { it in setOf("true", "1", "yes", "y", "on") }
+        ?: false
+
+private val isRapidOcrProjectRequested =
+    isProjectPropertyEnabled("autojs.rapidocr.embedded") ||
+            requestedTaskNames.any { task ->
+                task.contains("rapidocr", ignoreCase = true) ||
+                        task.contains("inrt", ignoreCase = true)
+            }
+
 private val libs = listOf(
     "android-job-simplified-1_4_3",
     "androidx-appcompat-1_0_2",
     "apk-parser-1_0_2",
     "org-opencv-4_8_0",
-    "rapidocr",
     "imagequant",
 
     "jackpal-androidterm-1_0_70",
@@ -38,7 +53,7 @@ private val libs = listOf(
     "markwon-syntax-highlight-4_6_2",
 
     "root-shell-1_6",
-)
+) + if (isRapidOcrProjectRequested) listOf("rapidocr") else emptyList()
 
 private val pluginApi = listOf(
     "common-plugin-api",
