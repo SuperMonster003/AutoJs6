@@ -188,24 +188,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         descriptorNativeValues: Map<String, String> = emptyMap(),
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        val result = if (NodeJsRuntimePluginBridge.isRequested()) {
-            val pluginResult = NodeJsRuntimePluginBridge.runScript(androidContext, request)
-            if (
-                pluginResult.errorCode == NodeJsRuntimePluginBridge.ERROR_PLUGIN_UNAVAILABLE &&
-                !NodeJsRuntimePluginBridge.isRequired()
-            ) {
-                Log.w(
-                    TAG,
-                    "Node.js runtime plugin failed; falling back to embedded service " +
-                            "sourceName=${request.sourceName} errorCode=${pluginResult.errorCode.orEmpty()}",
-                )
-                NativeNodeEmbeddedScriptService.runScript(androidContext, request)
-            } else {
-                pluginResult
-            }
-        } else {
-            NativeNodeEmbeddedScriptService.runScript(androidContext, request)
-        }
+        val result = NodeJsRuntimePluginBridge.runScriptWithEmbeddedFallback(androidContext, request)
         return if (descriptorNativeValues.isEmpty()) {
             result
         } else {

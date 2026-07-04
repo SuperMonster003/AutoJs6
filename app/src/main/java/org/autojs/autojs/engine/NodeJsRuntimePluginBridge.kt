@@ -4,11 +4,13 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Process
 import android.os.SystemClock
+import android.util.Log
 import kotlinx.coroutines.runBlocking
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 
 object NodeJsRuntimePluginBridge {
 
+    private const val TAG = "NodeJsRuntimePlugin"
     private const val PLUGIN_RUNTIME_ENABLED_PROPERTY = "autojs.nodejs.runtime.plugin.enabled"
     private const val PLUGIN_RUNTIME_REQUIRED_PROPERTY = "autojs.nodejs.runtime.plugin.required"
     const val ERROR_PLUGIN_UNAVAILABLE = "ERR_AUTOJS6_NODE_PLUGIN_UNAVAILABLE"
@@ -21,6 +23,29 @@ object NodeJsRuntimePluginBridge {
     fun isRequired(): Boolean {
         return NodeRuntimeBackend.current() == NodeRuntimeBackend.PLUGIN ||
                 booleanSystemProperty(PLUGIN_RUNTIME_REQUIRED_PROPERTY)
+    }
+
+    fun runScriptWithEmbeddedFallback(
+        context: Context,
+        request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        if (!isRequested()) {
+            return NativeNodeEmbeddedScriptService.runScript(context, request, launchSurface)
+        }
+        val pluginResult = runScript(context, request)
+        if (
+            pluginResult.errorCode == ERROR_PLUGIN_UNAVAILABLE &&
+            !isRequired()
+        ) {
+            Log.w(
+                TAG,
+                "Node.js runtime plugin failed; falling back to embedded service " +
+                        "sourceName=${request.sourceName} errorCode=${pluginResult.errorCode.orEmpty()}",
+            )
+            return NativeNodeEmbeddedScriptService.runScript(context, request, launchSurface)
+        }
+        return pluginResult.withLaunchSurfaceNativeValue(launchSurface)
     }
 
     fun runScript(
@@ -44,6 +69,17 @@ object NodeJsRuntimePluginBridge {
                 NodeJsRuntimePluginHost.cancelScript(context, executionId)
             }
         }.getOrDefault(false)
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withLaunchSurfaceNativeValue(
+        launchSurface: String,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        if (launchSurface.isBlank()) {
+            return this
+        }
+        return copy(
+            nativeValues = nativeValues + ("embedded_script.execution_mode_launch_surface" to launchSurface),
+        )
     }
 
     private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.toPluginBundle(): Bundle {
