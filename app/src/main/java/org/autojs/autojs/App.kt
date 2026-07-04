@@ -14,7 +14,6 @@ import androidx.multidex.MultiDexApplication
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomViewTarget
 import com.bumptech.glide.request.transition.Transition
-import com.google.mlkit.common.sdkinternal.MlKitContext
 import com.hjq.toast.Toaster
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.app.GlobalAppContext
@@ -85,7 +84,6 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
                 setupDrawableImageLoader()
                 TimedTaskScheduler.init(this)
                 initDynamicBroadcastReceivers()
-                initMlKitContext()
                 Toaster.init(this)
 
                 ThemeColorManager.init()
@@ -174,10 +172,6 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
                 }
             }, { it.printStackTrace() })
 
-    }
-
-    private fun initMlKitContext() {
-        MlKitContext.initializeIfNeeded(this)
     }
 
     private fun setupDrawableImageLoader() {

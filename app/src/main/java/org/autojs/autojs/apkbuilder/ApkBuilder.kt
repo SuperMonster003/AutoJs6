@@ -1702,11 +1702,25 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         MLKIT_OCR(
             label = "MLKit OCR",
             aliases = listOf("mlkit", "mlkitocr", "mlkit-ocr", "mlkit_ocr"),
-            libsToInclude = listOf(
-                "libmlkit_google_ocr_pipeline.so",
-            ),
-            assetDirsToInclude = listOf(
-                "assets/mlkit-google-ocr-models",
+            libsToInclude = emptyList(),
+            assetDirsToInclude = emptyList(),
+            plugin = PluginLib(
+                // Shared OCR AIDL action. ML Kit OCR plugins are selected by PluginInfo.engine/variant.
+                action = OcrPluginHost.ACTION_OCR,
+                onServiceConnected = { binder: IBinder ->
+                    IOcrPlugin.Stub.asInterface(binder).info
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = "chinese",
+                        assetsToInclude = listOf(
+                            "assets/mlkit-google-ocr-models/",
+                        ) to emptyList(),
+                        libsToInclude = listOf(
+                            "libmlkit_google_ocr_pipeline.so",
+                        ),
+                    ),
+                ),
             ),
         ),
 

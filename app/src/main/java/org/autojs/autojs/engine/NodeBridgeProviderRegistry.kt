@@ -161,7 +161,7 @@ object NodeBridgeProviderRegistry {
             modules = listOf(NodeBridgeModules.OCR),
             capabilities = listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
             packagedSupport = packagedProviderDependent(
-                "P13-20 partial ML Kit OCR provider; packaged promotion requires model/fallback policy, image-handle assets, and capture/input evidence",
+                "P13-20 OCR provider; ML Kit OCR is supplied by the external OCR plugin service",
             ),
         ),
         provider(
@@ -363,7 +363,11 @@ object NodeBridgeProviderRegistry {
         } else {
             NodeBridgeProviderStatus.UNAVAILABLE
         }
-        OCR_PROVIDER -> if (mlKitOcrAvailable()) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
+        OCR_PROVIDER -> if (queryOcrPluginServiceCount(context.applicationContext, "mlkit-ocr") > 0) {
+            NodeBridgeProviderStatus.AVAILABLE
+        } else {
+            NodeBridgeProviderStatus.UNAVAILABLE
+        }
         BARCODE_PROVIDER -> if (BarcodePluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         STORAGE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         DATABASE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
@@ -644,8 +648,8 @@ object NodeBridgeProviderRegistry {
             else -> "none"
         }
         return linkedMapOf(
-            "defaultEngine" to "mlkit-chinese",
-            "mlkitAvailable" to mlKitOcrAvailable().toString(),
+            "defaultEngine" to "mlkit-ocr",
+            "mlkitPluginServiceCount" to queryOcrPluginServiceCount(appContext, "mlkit-ocr").toString(),
             "paddleEmbeddedVariant" to paddleVariant,
             "paddleEmbeddedAssets" to (paddleVariant != "none").toString(),
             "ocrPluginServiceCount" to queryOcrPluginServiceCount(appContext).toString(),
@@ -654,19 +658,12 @@ object NodeBridgeProviderRegistry {
             "capability" to NodeBridgePermissionManifest.OCR,
             "imageCapability" to NodeBridgePermissionManifest.IMAGE,
             "phase13Promotion" to "P13-20 partial screenshot/image/OCR promotion evidence gate",
-            "modelSelection" to "options.lang/model accepted by API; live provider currently routes to MLKit Chinese recognizer",
+            "modelSelection" to "options.lang/model accepted by API and forwarded to the selected ML Kit OCR plugin",
             "fallbackPromotion" to "blocked_until_Paddle_Rapid_plugin_model_selection_and_packaged_asset_policy_evidence",
             "cleanupPolicy" to "OCR consumes provider-owned image handles; unknown or recycled handles reject and active OCR/image resources return to zero",
-            "rawObjectPolicy" to "no raw TextRecognizer, OCR engine, ML Kit Text, Paddle/Rapid model, Bitmap, Mat, ImageWrapper, or Java object crosses the bridge",
-            "statusReason" to "P13-20 partial gate: ML Kit OCR over provider-owned image handles is live; packaged model/fallback/capture ownership remains blocked",
+            "rawObjectPolicy" to "no raw OCR engine, model, Bitmap, Mat, ImageWrapper, Binder, or Java object crosses the bridge",
+            "statusReason" to "ML Kit OCR is provided by an external OCR plugin over provider-owned image handles",
         )
-    }
-
-    private fun mlKitOcrAvailable(): Boolean {
-        return runCatching {
-            Class.forName("com.google.mlkit.vision.text.TextRecognition")
-            Class.forName("com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions")
-        }.isSuccess
     }
 
     private fun barcodeDetails(context: Context): Map<String, String> {
@@ -689,8 +686,11 @@ object NodeBridgeProviderRegistry {
         return runCatching { context.assets.open(path).use { true } }.getOrDefault(false)
     }
 
-    private fun queryOcrPluginServiceCount(context: Context): Int {
+    private fun queryOcrPluginServiceCount(context: Context, category: String? = null): Int {
         val intent = Intent(OcrPluginHost.ACTION_OCR)
+        if (!category.isNullOrBlank()) {
+            intent.addCategory(category)
+        }
         val pm = context.packageManager
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             pm.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0)).size

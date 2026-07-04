@@ -150,7 +150,6 @@ import org.autojs.autojs.runtime.api.Media as ApiMedia
 import org.autojs.autojs.runtime.api.Mime as ApiMime
 import org.autojs.autojs.runtime.api.Notice as ApiNotice
 import org.autojs.autojs.runtime.api.Ocr as ApiOcr
-import org.autojs.autojs.runtime.api.OcrMLKit as ApiOcrMLKit
 import org.autojs.autojs.runtime.api.OcrRapid as ApiOcrRapid
 import org.autojs.autojs.runtime.api.Plugins as ApiPlugins
 import org.autojs.autojs.runtime.api.Recorder as ApiRecorder
@@ -341,10 +340,6 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     @JvmField
     @ScriptVariable
-    val ocrMLKit: ApiOcrMLKit
-
-    @JvmField
-    @ScriptVariable
     val ocrRapid: ApiOcrRapid
 
     @JvmField
@@ -477,7 +472,6 @@ class ScriptRuntime private constructor(builder: Builder) {
         sqlite = ApiSQLite(mUiHandlerAppContext, this)
 
         http = ApiHttp()
-        ocrMLKit = ApiOcrMLKit()
         ocrRapid = ApiOcrRapid()
         barcode = ApiBarcode()
 
@@ -648,7 +642,6 @@ class ScriptRuntime private constructor(builder: Builder) {
         ignoresException { recycleShell() }
         ignoresException { images.releaseScreenCapturer() }
         ignoresException { images.stopScreenCapturerForegroundService() }
-        ignoresException { ocrMLKit.release() }
         if (::sensors.isInitialized) ignoresException { sensors.unregisterAll() }
         if (::timers.isInitialized) ignoresException { timers.recycle() }
         ignoresException { ui.recycle() }

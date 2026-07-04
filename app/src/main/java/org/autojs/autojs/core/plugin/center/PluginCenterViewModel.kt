@@ -749,6 +749,6 @@ class PluginCenterViewModel : ViewModel() {
 
     companion object {
         private const val TAG = "PluginCenterViewModel"
-        private val OCR_SERVICE_ENGINES = setOf("paddle-ocr", "rapid-ocr")
+        private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
     }
 }

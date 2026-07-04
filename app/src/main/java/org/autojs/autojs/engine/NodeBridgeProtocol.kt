@@ -49,15 +49,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.Text
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizer
-import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -68,10 +64,14 @@ import okhttp3.WebSocketListener
 import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.accessibility.OnKeyListener
+import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.autojs.plugin.paddle.ocr.api.OcrOptions
+import org.autojs.plugin.paddle.ocr.api.OcrResult as PluginOcrResult
+import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -772,10 +772,6 @@ class AndroidNodeBridgeCapabilityProvider(
     private val ocrDiagnostics = ControlledOcrDiagnostics()
     private val barcodeOperations = ConcurrentHashMap<String, ControlledBarcodeOperation>()
     private val barcodeDiagnostics = ControlledBarcodeDiagnostics()
-    private val ocrRecognizerDelegate = lazy {
-        TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build())
-    }
-    private val ocrRecognizer: TextRecognizer by ocrRecognizerDelegate
     private val bridgePermissionManifest by lazy {
         NodeBridgePermissionManifest.fromWorkingDirectory(engineInfo.cwd)
     }
@@ -932,11 +928,6 @@ class AndroidNodeBridgeCapabilityProvider(
         websocketSessions.clear()
         imageHandles.clear()
         databaseHandles.clear()
-        runCatching {
-            if (ocrRecognizerDelegate.isInitialized()) {
-                ocrRecognizer.close()
-            }
-        }
         workManagerTasks.clear()
         javaHandles.clear()
         notificationHandles.clear()
@@ -1932,73 +1923,78 @@ class AndroidNodeBridgeCapabilityProvider(
         operation.timeoutRunnable = timeoutRunnable
         mainHandler.postDelayed(timeoutRunnable, timeoutMs)
 
-        val task = runCatching { ocrRecognizer.process(InputImage.fromBitmap(ocrInput.bitmap, 0)) }
-            .getOrElse { error ->
-                if (operation.finish()) {
-                    mainHandler.removeCallbacks(timeoutRunnable)
-                    ocrOperations.remove(request.id)
-                    operation.resource.close("failed")
-                    ocrDiagnostics.recordFailure()
-                    callback(
-                        NodeBridgeResponse.failure(
-                            request.id,
-                            NodeBridgeError.providerFailed(
-                                message = error.message ?: error.javaClass.name,
-                                module = request.module,
-                                method = request.method,
-                                stack = error.stackTraceToString(),
-                            ),
-                        ),
+        thread(name = "AutoJs6NodeOcr-${request.id}", isDaemon = true) {
+            val response = runCatching {
+                val ocrOptions = buildMlKitOcrPluginOptions(options)
+                val results = runBlocking {
+                    val target = OcrPluginHost.selectOrThrow(
+                        context = appContext,
+                        engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
+                        engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: MLKIT_OCR_ENGINE,
+                        variant = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
+                        moduleLabel = MLKIT_OCR_MODULE_LABEL,
                     )
+                    OcrPluginHost.detect(appContext, target, ocrInput.bitmap, ocrOptions, callTimeoutMs = timeoutMs)
                 }
-                return
+                NodeBridgeResponse.success(request.id, results.toOcrResultsJson(ocrInput.offsetX, ocrInput.offsetY))
+            }.getOrElse { error ->
+                ocrDiagnostics.recordFailure()
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.providerFailed(
+                        message = error.message ?: error.javaClass.name,
+                        module = request.module,
+                        method = request.method,
+                        stack = error.stackTraceToString(),
+                        code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                    ),
+                )
             }
-        task
-            .addOnSuccessListener { text ->
-                if (operation.finish()) {
-                    mainHandler.removeCallbacks(timeoutRunnable)
-                    ocrOperations.remove(request.id)
-                    operation.resource.close("success")
-                    callback(NodeBridgeResponse.success(request.id, text.toOcrResultsJson(ocrInput.offsetX, ocrInput.offsetY)))
-                }
+
+            if (operation.finish()) {
+                mainHandler.removeCallbacks(timeoutRunnable)
+                ocrOperations.remove(request.id)
+                operation.resource.close(if (response.ok) "success" else "failed")
+                callback(response)
             }
-            .addOnCanceledListener {
-                if (operation.finish()) {
-                    mainHandler.removeCallbacks(timeoutRunnable)
-                    ocrOperations.remove(request.id)
-                    operation.resource.close("cancelled")
-                    ocrDiagnostics.recordFailure()
-                    callback(
-                        NodeBridgeResponse.failure(
-                            request.id,
-                            NodeBridgeError.providerFailed(
-                                message = "AutoJs6 OCR provider cancelled the recognition task.",
-                                module = request.module,
-                                method = request.method,
-                            ),
-                        ),
-                    )
-                }
-            }
-            .addOnFailureListener { error ->
-                if (operation.finish()) {
-                    mainHandler.removeCallbacks(timeoutRunnable)
-                    ocrOperations.remove(request.id)
-                    operation.resource.close("failed")
-                    ocrDiagnostics.recordFailure()
-                    callback(
-                        NodeBridgeResponse.failure(
-                            request.id,
-                            NodeBridgeError.providerFailed(
-                                message = error.message ?: error.javaClass.name,
-                                module = request.module,
-                                method = request.method,
-                                stack = error.stackTraceToString(),
-                            ),
-                        ),
-                    )
-                }
-            }
+        }
+    }
+
+    private fun buildMlKitOcrPluginOptions(options: JSONObject): OcrOptions {
+        val extras = Bundle()
+        options.optNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID)?.let {
+            extras.putString(PaddleOcrOptionExtraKeys.ENGINE_ID, it)
+        }
+        options.optNonBlankString(PaddleOcrOptionExtraKeys.ENGINE)?.let {
+            extras.putString(PaddleOcrOptionExtraKeys.ENGINE, it)
+        }
+        options.optNonBlankString(PaddleOcrOptionExtraKeys.VARIANT)?.let {
+            extras.putString(PaddleOcrOptionExtraKeys.VARIANT, it)
+        }
+        val profile = options.optNonBlankString(PaddleOcrOptionExtraKeys.PROFILE)
+            ?: options.optNonBlankString("lang")
+            ?: options.optNonBlankString("model")
+        profile?.let {
+            extras.putString(PaddleOcrOptionExtraKeys.PROFILE, it)
+        }
+        if ((options.optBoolean("useRaw", true) || options.optBoolean("raw", false)) &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1
+        ) {
+            extras.putBoolean(PaddleOcrOptionExtraKeys.RAW_IMAGE, true)
+        }
+        options.optInt("imageQuality", -1).takeIf { it > 0 }?.let {
+            extras.putInt(PaddleOcrOptionExtraKeys.IMAGE_QUALITY, it)
+        }
+        options.optNonBlankString("imageFormat")?.let {
+            extras.putString(PaddleOcrOptionExtraKeys.IMAGE_FORMAT, it)
+        }
+        return OcrOptions().apply {
+            this.extras = extras.takeIf { !it.isEmpty } ?: Bundle()
+        }
+    }
+
+    private fun Bundle.getNonBlankString(key: String): String? {
+        return getString(key)?.takeIf { it.isNotBlank() }
     }
 
     private fun dispatchBarcode(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -5111,6 +5107,8 @@ class AndroidNodeBridgeCapabilityProvider(
         const val SHELL_STREAM_JOIN_MS = 500L
         const val MAX_ACTIVE_UI_SESSIONS = 4
         const val MAX_ACTIVE_OVERLAY_SESSIONS = 4
+        const val MLKIT_OCR_ENGINE = "mlkit-ocr"
+        const val MLKIT_OCR_MODULE_LABEL = "ML Kit OCR"
     }
 }
 
@@ -6890,26 +6888,24 @@ private class ControlledOcrDiagnostics {
     )
 }
 
-private fun Text.toOcrResultsJson(offsetX: Int, offsetY: Int): String {
+private fun List<PluginOcrResult>.toOcrResultsJson(offsetX: Int, offsetY: Int): String {
     val results = JSONArray()
-    textBlocks.forEach { block ->
-        block.lines.forEach { line ->
-            val bounds = line.boundingBox
-            val item = JSONObject()
-                .put("text", line.text.orEmpty())
-                .put("confidence", line.confidence.takeIf { it.isFinite() }?.toDouble() ?: JSONObject.NULL)
-            if (bounds != null) {
-                item.put(
-                    "bounds",
-                    JSONObject()
-                        .put("left", bounds.left + offsetX)
-                        .put("top", bounds.top + offsetY)
-                        .put("right", bounds.right + offsetX)
-                        .put("bottom", bounds.bottom + offsetY),
-                )
-            }
-            results.put(item)
+    forEach { result ->
+        val bounds = result.bounds
+        val item = JSONObject()
+            .put("text", result.text.orEmpty())
+            .put("confidence", result.confidence.takeIf { it.isFinite() }?.toDouble() ?: JSONObject.NULL)
+        if (bounds != null) {
+            item.put(
+                "bounds",
+                JSONObject()
+                    .put("left", bounds.left + offsetX)
+                    .put("top", bounds.top + offsetY)
+                    .put("right", bounds.right + offsetX)
+                    .put("bottom", bounds.bottom + offsetY),
+            )
         }
+        results.put(item)
     }
     return results.toString()
 }

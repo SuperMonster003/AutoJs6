@@ -378,11 +378,6 @@ dependencies /* GitHub API */ {
     coreLibraryDesugaring(libs.desugar)
 }
 
-dependencies /* MLKit */ {
-    // OCR
-    implementation(libs.text.recognition.chinese)
-}
-
 dependencies /* OpenCC */ {
     // OpenCC
     // implementation("com.github.qichuan:android-opencc:1.2.0")

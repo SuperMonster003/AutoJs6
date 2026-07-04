@@ -7,6 +7,20 @@ import org.junit.Test
 class ApkBuilderLibPolicyTest {
 
     @Test
+    fun mlKitOcrUsesPluginVariantForPackaging() {
+        val mlKitOcr = ApkBuilder.Lib.MLKIT_OCR
+        assertTrue(mlKitOcr.isPlugin)
+        assertTrue(mlKitOcr.libsToInclude.isEmpty())
+        assertTrue(mlKitOcr.assetDirsToInclude.isEmpty())
+
+        val variants = mlKitOcr.toPluginPair().second.variants
+        assertEquals(listOf("chinese"), variants.map { it.variant })
+        assertEquals(listOf("libmlkit_google_ocr_pipeline.so"), variants.single().libsToInclude)
+        assertEquals(listOf("assets/mlkit-google-ocr-models/"), variants.single().assetsToInclude.first)
+        assertTrue(variants.single().assetsToInclude.second.isEmpty())
+    }
+
+    @Test
     fun rapidOcrUsesPluginVariantsForPackaging() {
         val rapidOcr = ApkBuilder.Lib.RAPID_OCR
         assertTrue(rapidOcr.isPlugin)

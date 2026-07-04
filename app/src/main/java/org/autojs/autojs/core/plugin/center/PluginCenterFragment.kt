@@ -1109,7 +1109,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         private const val ARG_SOURCE_SCOPE = "arg_source_scope"
         private const val FIRST_LIST_REVEAL_TIMEOUT_MS = 1000L
         private const val NIGHT_MODE_ICON_REFRESH_DELAY_MS = 120L
-        private val OCR_SERVICE_ENGINES = setOf("paddle-ocr", "rapid-ocr")
+        private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
         private val AUTO_ENABLE_RETRYABLE_ERROR_CODES = setOf(
             PluginErrorCode.SERVICE_NOT_FOUND,
             PluginErrorCode.BIND_FAILED,
