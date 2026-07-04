@@ -1,6 +1,9 @@
 ﻿@file:Suppress("SpellCheckingInspection")
 
 import com.android.build.api.variant.FilterConfiguration
+import org.gradle.api.file.Directory
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 plugins {
@@ -13,6 +16,101 @@ plugins {
     id("idea")
 }
 
+val globalApplicationId = "org.autojs.autojs6"
+
+val flavorDimension = "channel"
+val flavorNameApp = "app"
+val flavorNameInrt = "inrt"
+val buildTypeDebug = "debug"
+val buildTypeRelease = "release"
+val buildActionAssemble = "assemble"
+val buildConfigFieldNameIsInrt = "is${flavorNameInrt.uppercaseFirstChar()}"
+val buildTypeNames = listOf(buildTypeDebug, buildTypeRelease)
+val releaseFlavorNames = listOf(flavorNameApp, flavorNameInrt)
+val apkFileExtension = utils.FILE_EXTENSION_APK
+
+val resourcePickFirstPatterns = listOf(
+    "META-INF/DEPENDENCIES",
+    "META-INF/LICENSE",
+    "META-INF/LICENSE.*",
+    "META-INF/LICENSE-notice.*",
+    "META-INF/license.*",
+    "META-INF/NOTICE",
+    "META-INF/NOTICE.*",
+    "META-INF/notice.*",
+    "META-INF/ASL2.0",
+    "META-INF/*.kotlin_module",
+    "lib/x86/libc++_shared.so",
+    "lib/x86_64/libc++_shared.so",
+    "lib/armeabi-v7a/libc++_shared.so",
+    "lib/arm64-v8a/libc++_shared.so",
+    "lib/armeabi/libc++_shared.so",
+)
+
+val resourceExcludePatterns = listOf(
+    "com/**/*",
+    "frameworks/**/*",
+    "junit/**/*",
+    "LICENSE-junit.txt",
+    "spec.txt",
+    "EmojiReference.txt",
+)
+
+val appMergedAssetPruneIncludes = listOf(
+    "declarations/**/*",
+    "sample/declarations/**/*",
+    "modules/obsolete/**/*",
+)
+
+val inrtMergedAssetPruneIncludes = listOf(
+    "doc/**/*",
+    "docs/**/*",
+    "editor/**/*",
+    "fonts/**/*",
+    "indices/**/*",
+    "js-beautify/**/*",
+    "mlkit-google-ocr-models/**/*",
+    "mlkit_barcode_models/**/*",
+    "models/**/*",
+    "modules/**/*.d.ts",
+    "modules/**/*.md",
+    "modules/obsolete/**/*",
+    "openccdata/**/*",
+    "project/**/*",
+    "sample/**/*",
+    "stored-locales/**/*",
+    "android-devices.db",
+    "autojs.keystore",
+    "**/prob_emit.txt", // Jieba Analysis
+    "**/dict-chinese-*.db.gzip", // Jieba Analysis
+)
+
+private fun String.asGradleTaskNamePart(): String =
+    replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+
+private fun Any.reflectedNoArgMethod(name: String): Any? =
+    javaClass.methods.firstOrNull { it.name == name && it.parameterTypes.isEmpty() }?.invoke(this)
+
+private fun Any.reflectedOutputDir(): File? =
+    when (val dir = reflectedNoArgMethod("getOutputDir")) {
+        is File -> dir
+        is Directory -> dir.asFile
+        else -> null
+    }
+
+@Suppress("UNCHECKED_CAST")
+private fun Any.reflectedOutputFileNameProperty(): Property<String>? =
+    reflectedNoArgMethod("getOutputFileName") as? Property<String>
+
+extra.apply {
+    set("nodeJsRuntimeConfig.globalApplicationId", globalApplicationId)
+    set("nodeJsRuntimeConfig.flavorNameApp", flavorNameApp)
+    set("nodeJsRuntimeConfig.flavorNameInrt", flavorNameInrt)
+    set("nodeJsRuntimeConfig.buildActionAssemble", buildActionAssemble)
+}
+
+apply(from = "node-runtime-config.gradle.kts")
+
 idea {
     module {
         excludeDirs.addAll(
@@ -24,23 +122,6 @@ idea {
         )
     }
 }
-
-val globalApplicationId = "org.autojs.autojs6"
-
-val flavorDimension = "channel"
-val flavorNameApp = "app"
-val flavorNameInrt = "inrt"
-val buildTypeDebug = "debug"
-val buildTypeRelease = "release"
-val buildActionAssemble = "assemble"
-extra.apply {
-    set("nodeJsRuntimeConfig.globalApplicationId", globalApplicationId)
-    set("nodeJsRuntimeConfig.flavorNameApp", flavorNameApp)
-    set("nodeJsRuntimeConfig.flavorNameInrt", flavorNameInrt)
-    set("nodeJsRuntimeConfig.buildActionAssemble", buildActionAssemble)
-}
-
-apply(from = "node-runtime-config.gradle.kts")
 
 utils.registerTemplateApkCopy(project)
 
@@ -66,7 +147,7 @@ android {
 
         buildConfigField("String", "VERSION_DATE", "\"${utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
         buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
-        buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
+        buildConfigField("boolean", buildConfigFieldNameIsInrt, "false")
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -87,7 +168,7 @@ android {
             versionCode = versions.appVersionCode
             versionName = versions.appVersionName
             buildConfigField("String", "CHANNEL", "\"$flavorNameApp\"")
-            buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
+            buildConfigField("boolean", buildConfigFieldNameIsInrt, "false")
             manifestPlaceholders.putAll(
                 mapOf(
                     "CHANNEL" to flavorNameApp,
@@ -110,7 +191,7 @@ android {
             versionName = versions.appVersionName
 
             buildConfigField("String", "CHANNEL", "\"$flavorNameInrt\"")
-            buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "true")
+            buildConfigField("boolean", buildConfigFieldNameIsInrt, "true")
 
             manifestPlaceholders.putAll(
                 mapOf(
@@ -175,45 +256,26 @@ android {
 
     }
 
+    buildFeatures {
+        aidl = true
+        viewBinding = true
+
+        // @Hint by SuperMonster003 on Aug 14, 2023.
+        //  ! Substitution of "android.defaults.buildfeatures.buildconfig=true"
+        //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 的替代方案
+        buildConfig = true
+        resValues = true
+
+        // @Archived by SuperMonster003 on Sep 23, 2024.
+        //  ! Jetpack Compose
+        //  # compose = true
+        //  # composeOptions {
+        //  #     kotlinCompilerExtensionVersion = "1.5.12"
+        //  # }
+    }
+
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-    }
-
-    packaging {
-        listOf(
-            "META-INF/DEPENDENCIES",
-            "META-INF/LICENSE",
-            "META-INF/LICENSE.*",
-            "META-INF/LICENSE-notice.*",
-            "META-INF/license.*",
-            "META-INF/NOTICE",
-            "META-INF/NOTICE.*",
-            "META-INF/notice.*",
-            "META-INF/ASL2.0",
-            "META-INF/*.kotlin_module",
-            "lib/x86/libc++_shared.so",
-            "lib/x86_64/libc++_shared.so",
-            "lib/armeabi-v7a/libc++_shared.so",
-            "lib/arm64-v8a/libc++_shared.so",
-            "lib/armeabi/libc++_shared.so",
-        ).let { resources.pickFirsts.addAll(it) }
-
-        listOf(
-            "com/**/*",
-            "frameworks/**/*",
-            "junit/**/*",
-            "LICENSE-junit.txt",
-            "spec.txt",
-            "EmojiReference.txt",
-        ).let { resources.excludes.addAll(it) }
-
-        jniLibs {
-            useLegacyPackaging = true
-        }
-    }
-
-    lint {
-        abortOnError = false
     }
 
     signingConfigs {
@@ -234,37 +296,32 @@ android {
             getDefaultProguardFile("proguard-android-optimize.txt"),
             "proguard-rules.pro",
         )
-        val niceSigningConfig = takeIf { signs.isValid }?.let {
-            signingConfigs.getByName(buildTypeRelease)
-        }
-        debug {
-            isMinifyEnabled = getByName(buildTypeRelease).isMinifyEnabled
-            proguardFiles(*proguardFiles)
-            niceSigningConfig?.let { signingConfig = it }
-        }
+        val niceSigningConfig = if (signs.isValid) signingConfigs.getByName(buildTypeRelease) else null
+
         release {
             isMinifyEnabled = false
             proguardFiles(*proguardFiles)
             niceSigningConfig?.let { signingConfig = it }
         }
+
+        debug {
+            isMinifyEnabled = getByName(buildTypeRelease).isMinifyEnabled
+            proguardFiles(*proguardFiles)
+            niceSigningConfig?.let { signingConfig = it }
+        }
     }
 
-    buildFeatures {
-        aidl = true
-        viewBinding = true
+    packaging {
+        resources.pickFirsts.addAll(resourcePickFirstPatterns)
+        resources.excludes.addAll(resourceExcludePatterns)
 
-        // @Hint by SuperMonster003 on Aug 14, 2023.
-        //  ! Substitution of "android.defaults.buildfeatures.buildconfig=true"
-        //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 的替代方案
-        buildConfig = true
-        resValues = true
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 
-        // @Archived by SuperMonster003 on Sep 23, 2024.
-        //  ! Jetpack Compose
-        //  # compose = true
-        //  # composeOptions {
-        //  #     kotlinCompilerExtensionVersion = "1.5.12"
-        //  # }
+    lint {
+        abortOnError = false
     }
 
 }
@@ -274,51 +331,19 @@ apply(from = "node-android-config.gradle.kts")
 androidComponents {
     onVariants { variant ->
         val variantName = variant.name
-        val mergeAssetsTaskName = "merge${variantName.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }}Assets"
+        val mergeAssetsTaskName = "merge${variantName.asGradleTaskNamePart()}Assets"
         val isInrtVariant = variantName.startsWith(flavorNameInrt, ignoreCase = true)
 
         tasks.matching { it.name == mergeAssetsTaskName }.configureEach {
             doLast {
-                val reflectedOutputDir = when (val dir = javaClass.methods.firstOrNull {
-                    it.name == "getOutputDir" && it.parameterTypes.isEmpty()
-                }?.invoke(this)) {
-                    is File -> dir
-                    is Directory -> dir.asFile
-                    else -> null
-                }
-
-                val includes = when (isInrtVariant) {
-                    true -> listOf(
-                        "doc/**/*",
-                        "docs/**/*",
-                        "editor/**/*",
-                        "fonts/**/*",
-                        "indices/**/*",
-                        "js-beautify/**/*",
-                        "mlkit-google-ocr-models/**/*",
-                        "mlkit_barcode_models/**/*",
-                        "models/**/*",
-                        "modules/**/*.d.ts",
-                        "modules/**/*.md",
-                        "modules/obsolete/**/*",
-                        "openccdata/**/*",
-                        "project/**/*",
-                        "sample/**/*",
-                        "stored-locales/**/*",
-                        "android-devices.db",
-                        "autojs.keystore",
-                        "**/prob_emit.txt", // Jieba Analysis
-                        "**/dict-chinese-*.db.gzip", // Jieba Analysis
-                    )
-                    else -> listOf(
-                        "declarations/**/*",
-                        "sample/declarations/**/*",
-                        "modules/obsolete/**/*",
-                    )
+                val includes = if (isInrtVariant) {
+                    inrtMergedAssetPruneIncludes
+                } else {
+                    appMergedAssetPruneIncludes
                 }
 
                 listOfNotNull(
-                    reflectedOutputDir,
+                    reflectedOutputDir(),
                     layout.buildDirectory.dir("intermediates/assets/$variantName/$mergeAssetsTaskName").get().asFile,
                 )
                     .map { it.absoluteFile.normalize() }
@@ -341,17 +366,12 @@ androidComponents {
             val architecture = output.filters.find {
                 it.filterType == FilterConfiguration.FilterType.ABI
             }?.identifier ?: "universal"
-            val outputFileNameProperty = output.javaClass.methods.firstOrNull {
-                it.name == "getOutputFileName" && it.parameterTypes.isEmpty()
-            }?.invoke(output) as? Property<*>
 
-            @Suppress("UNCHECKED_CAST")
-            (outputFileNameProperty as? Property<String>)?.set(
+            output.reflectedOutputFileNameProperty()?.set(
                 variant.applicationId.zip(output.versionName) { appId, versionName ->
                     val autojs = appId.substringAfterLast('.')
                     val version = versionName.replace("\\s".toRegex(), "-")
-                    val extension = utils.FILE_EXTENSION_APK
-                    "$autojs-v$version-$architecture.$extension".lowercase()
+                    "$autojs-v$version-$architecture.$apkFileExtension".lowercase()
                 }
             )
         }
@@ -373,20 +393,19 @@ tasks {
     }
 
     register<Copy>("appendDigestToReleasedFiles") {
-        listOf(flavorNameApp, flavorNameInrt).forEach { flavorName ->
+        releaseFlavorNames.forEach { flavorName ->
             val src = "$flavorName/$buildTypeRelease"
             val dst = "${src}s"
-            val ext = utils.FILE_EXTENSION_APK
 
             if (!file(src).isDirectory) {
                 return@forEach
             }
 
-            from(src); into(dst); include("*.$ext")
+            from(src); into(dst); include("*.$apkFileExtension")
 
             rename { name ->
                 utils.digestCRC32(file("${src}/$name")).let { digest ->
-                    name.replace(Regex("^(.+?)(\\.$ext)$"), "$1-$digest$2")
+                    name.replace(Regex("^(.+?)(\\.$apkFileExtension)$"), "$1-$digest$2")
                 }
             }
 
@@ -395,6 +414,4 @@ tasks {
     }
 }
 
-extra {
-    versions.handleIfNeeded(project, flavorNameApp, listOf(buildTypeDebug, buildTypeRelease))
-}
+versions.handleIfNeeded(project, flavorNameApp, buildTypeNames)
