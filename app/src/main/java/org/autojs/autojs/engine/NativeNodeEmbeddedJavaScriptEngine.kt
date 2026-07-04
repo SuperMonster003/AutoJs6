@@ -76,14 +76,18 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         val request = buildEmbeddedScriptRequest(source)
             .copy(executionId = executionId)
         val result = withActiveEmbeddedExecutionId(executionId) {
-            NativeNodeEmbeddedScriptService.runScript(androidContext, request)
+            runEmbeddedScriptRequest(request)
         }
         return finishEmbeddedScriptExecution(request, result)
     }
 
     override fun forceStop() {
         activeEmbeddedExecutionId?.let { executionId ->
-            NativeNodeEmbeddedScriptService.cancelRunningScript(androidContext, executionId)
+            if (NodeJsRuntimePluginBridge.isRequested()) {
+                NodeJsRuntimePluginBridge.cancelScript(androidContext, executionId)
+            } else {
+                NativeNodeEmbeddedScriptService.cancelRunningScript(androidContext, executionId)
+            }
         }
         super.forceStop()
     }
@@ -158,16 +162,55 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                     "runtimeFirst=${preparation.runtimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
         lastCommonJsPreloadDiagnostics = preparation.preload.diagnostics
-        lastNodeProjectRunnerDescriptor = NativeNodeEmbeddedProjectRunner.describe(plan)
+        val descriptor = NativeNodeEmbeddedProjectRunner.describe(plan)
+        lastNodeProjectRunnerDescriptor = descriptor
         val executionId = newEmbeddedExecutionId()
         val result = withActiveEmbeddedExecutionId(executionId) {
-            NativeNodeEmbeddedProjectRunner.runResolvedProjectLaunchPlan(androidContext, plan, executionId)
+            if (NodeJsRuntimePluginBridge.isRequested()) {
+                runEmbeddedScriptRequest(
+                    NativeNodeEmbeddedProjectRunner
+                        .buildResolvedProjectLaunchRequest(plan)
+                        .copy(executionId = executionId, spawnDepth = currentSpawnDepth()),
+                    descriptorNativeValues = descriptor.toNativeValues(),
+                )
+            } else {
+                NativeNodeEmbeddedProjectRunner.runResolvedProjectLaunchPlan(androidContext, plan, executionId)
+            }
         }
         return finishEmbeddedScriptExecution(
             preparation.toBridgeRequest(plan.timeoutMs, currentSpawnDepth(), plan.executionMode)
                 .copy(executionId = executionId),
             result,
         )
+    }
+
+    private fun runEmbeddedScriptRequest(
+        request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        descriptorNativeValues: Map<String, String> = emptyMap(),
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        val result = if (NodeJsRuntimePluginBridge.isRequested()) {
+            val pluginResult = NodeJsRuntimePluginBridge.runScript(androidContext, request)
+            if (
+                pluginResult.errorCode == NodeJsRuntimePluginBridge.ERROR_PLUGIN_UNAVAILABLE &&
+                !NodeJsRuntimePluginBridge.isRequired()
+            ) {
+                Log.w(
+                    TAG,
+                    "Node.js runtime plugin failed; falling back to embedded service " +
+                            "sourceName=${request.sourceName} errorCode=${pluginResult.errorCode.orEmpty()}",
+                )
+                NativeNodeEmbeddedScriptService.runScript(androidContext, request)
+            } else {
+                pluginResult
+            }
+        } else {
+            NativeNodeEmbeddedScriptService.runScript(androidContext, request)
+        }
+        return if (descriptorNativeValues.isEmpty()) {
+            result
+        } else {
+            result.copy(nativeValues = result.nativeValues + descriptorNativeValues)
+        }
     }
 
     private fun tryRunNodeProjectFile(source: JavaScriptSource): Any? {

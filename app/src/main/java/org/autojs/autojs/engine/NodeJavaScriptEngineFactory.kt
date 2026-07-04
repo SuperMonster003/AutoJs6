@@ -20,6 +20,7 @@ object NodeJavaScriptEngineFactory {
             NodeRuntimeBackend.RHINO -> NodeJavaScriptEngine(context)
             NodeRuntimeBackend.NATIVE -> NativeNodeJavaScriptEngine(context)
             NodeRuntimeBackend.EMBEDDED -> NativeNodeEmbeddedJavaScriptEngine(context)
+            NodeRuntimeBackend.PLUGIN -> NativeNodeEmbeddedJavaScriptEngine(context)
             NodeRuntimeBackend.AUTO -> when {
                 NativeNodeRuntimeBridge.isAvailable -> NativeNodeJavaScriptEngine(context)
                 else -> {
@@ -67,6 +68,7 @@ enum class NodeRuntimeBackend {
     RHINO,
     NATIVE,
     EMBEDDED,
+    PLUGIN,
     AUTO,
     ;
 
@@ -84,6 +86,7 @@ enum class NodeRuntimeBackend {
         private fun from(value: String?): NodeRuntimeBackend = when (value?.trim()?.lowercase(Locale.ROOT)) {
             "native", "v8", "node", "nodejs" -> NATIVE
             "embedded", "embed" -> EMBEDDED
+            "plugin", "node-plugin", "nodejs-plugin" -> PLUGIN
             "auto" -> AUTO
             else -> RHINO
         }

@@ -257,7 +257,8 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
                     .onFailure { Log.w(TAG, "Failed to prewarm native Node.js process.", it) }
             }
             NodeRuntimeBackend.RHINO,
-            NodeRuntimeBackend.EMBEDDED -> Unit
+            NodeRuntimeBackend.EMBEDDED,
+            NodeRuntimeBackend.PLUGIN -> Unit
         }
     }
 
