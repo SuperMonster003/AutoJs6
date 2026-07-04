@@ -35,6 +35,12 @@ object NodeJsRuntimePluginHost {
         val packageVersionCode: Long?,
     )
 
+    data class ScriptRunResult(
+        val result: Bundle,
+        val runtimeInfo: Bundle,
+        val candidate: Candidate,
+    )
+
     suspend fun discover(context: Context): List<Candidate> {
         val appContext = context.applicationContext
         return queryRuntimeServices(appContext)
@@ -65,10 +71,23 @@ object NodeJsRuntimePluginHost {
         request: Bundle,
         callback: INodeJsRuntimeCallback? = null,
     ): Bundle {
+        return runScriptWithInfo(context, request, callback).result
+    }
+
+    suspend fun runScriptWithInfo(
+        context: Context,
+        request: Bundle,
+        callback: INodeJsRuntimeCallback? = null,
+    ): ScriptRunResult {
         val candidate = discover(context).firstOrNull()
             ?: throw NodeRuntimePluginUnavailableException("No enabled trusted Node.js runtime plugin service found.")
         return withRuntimeService(context, candidate.serviceInfo) { runtime ->
-            runtime.runScript(request, callback)
+            val runtimeInfo = runtime.runtimeInfo ?: Bundle.EMPTY
+            ScriptRunResult(
+                result = runtime.runScript(request, callback),
+                runtimeInfo = runtimeInfo,
+                candidate = candidate,
+            )
         }
     }
 

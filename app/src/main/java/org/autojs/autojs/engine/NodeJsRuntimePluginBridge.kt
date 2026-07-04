@@ -62,10 +62,10 @@ object NodeJsRuntimePluginBridge {
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val startedAt = SystemClock.elapsedRealtime()
         return runCatching {
-            val result = runBlocking {
-                NodeJsRuntimePluginHost.runScript(context, request.toPluginBundle(context, launchSurface))
+            val runResult = runBlocking {
+                NodeJsRuntimePluginHost.runScriptWithInfo(context, request.toPluginBundle(context, launchSurface))
             }
-            result.toEmbeddedScriptResult(request, startedAt)
+            runResult.toEmbeddedScriptResult(request, startedAt)
         }.getOrElse { error ->
             pluginFailureResult(request, startedAt, error)
         }
@@ -271,16 +271,45 @@ object NodeJsRuntimePluginBridge {
         }
     }
 
-    private fun Bundle.toEmbeddedScriptResult(
+    private fun NodeJsRuntimePluginHost.ScriptRunResult.toEmbeddedScriptResult(
         request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         startedAt: Long,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return result.toEmbeddedScriptResult(
+            request = request,
+            startedAt = startedAt,
+            runtimeInfo = runtimeInfo,
+            candidate = candidate,
+        )
+    }
+
+    private fun Bundle.toEmbeddedScriptResult(
+        request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        startedAt: Long,
+        runtimeInfo: Bundle,
+        candidate: NodeJsRuntimePluginHost.Candidate,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        val capabilities = runtimeInfo.getStringArray(NodeJsRuntimeContract.KEY_CAPABILITIES).orEmpty()
         val nativeValues = getStringArray(NodeJsRuntimeContract.KEY_NATIVE_PAYLOAD)
             .parseNativePayload()
             .toMutableMap()
             .apply {
                 put("embedded_script.runtime_plugin.enabled", "true")
                 put("embedded_script.runtime_plugin.contract_version", NodeJsRuntimeContract.CONTRACT_VERSION.toString())
+                put("embedded_script.runtime_plugin.package_name", candidate.serviceInfo.packageName)
+                put("embedded_script.runtime_plugin.service_name", candidate.serviceInfo.name)
+                put("embedded_script.runtime_plugin.package_version_code", candidate.packageVersionCode?.toString().orEmpty())
+                put("embedded_script.runtime_plugin.runtime_slot", runtimeInfo.getString(NodeJsRuntimeContract.KEY_RUNTIME_SLOT).orEmpty())
+                put("embedded_script.runtime_plugin.node_version", runtimeInfo.getString(NodeJsRuntimeContract.KEY_NODE_VERSION).orEmpty())
+                put("embedded_script.runtime_plugin.capability_count", capabilities.size.toString())
+                put(
+                    "embedded_script.runtime_plugin.capability_host_broker",
+                    (NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_BROKER in capabilities).toString(),
+                )
+                put(
+                    "embedded_script.runtime_plugin.capability_live_bridge",
+                    (NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE in capabilities).toString(),
+                )
                 put("embedded_script.runtime_plugin.host_broker.attached", "true")
                 put(
                     "embedded_script.runtime_plugin.host_broker.contract_version",
