@@ -1,18 +1,25 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
+import org.json.JSONObject
 
 object NodeJsRuntimePluginBridge {
 
     private const val TAG = "NodeJsRuntimePlugin"
     private const val PLUGIN_RUNTIME_ENABLED_PROPERTY = "autojs.nodejs.runtime.plugin.enabled"
     private const val PLUGIN_RUNTIME_REQUIRED_PROPERTY = "autojs.nodejs.runtime.plugin.required"
+    private const val HOST_APP_INFO_RUNTIME_MODULE_NAME = "autojs6:host-app-info"
+    private const val DEVICE_INFO_RUNTIME_MODULE_NAME = "autojs6:device-info"
+    private const val ENGINE_INFO_RUNTIME_MODULE_NAME = "autojs6:engine-info"
     const val ERROR_PLUGIN_UNAVAILABLE = "ERR_AUTOJS6_NODE_PLUGIN_UNAVAILABLE"
 
     fun isRequested(): Boolean {
@@ -88,6 +95,11 @@ object NodeJsRuntimePluginBridge {
         launchSurface: String,
     ): Bundle {
         val hostCapabilityBroker = NodeJsHostCapabilityBroker(context, this, launchSurface)
+        val enrichedRuntimeModuleSources = enrichedRuntimeModuleSourcesForPlugin(
+            context = context,
+            launchSurface = launchSurface,
+            brokerId = hostCapabilityBroker.id,
+        )
         return Bundle().apply {
             putInt(NodeJsRuntimeContract.KEY_CONTRACT_VERSION, NodeJsRuntimeContract.CONTRACT_VERSION)
             putString(NodeJsRuntimeContract.KEY_EXECUTION_ID, executionId)
@@ -107,7 +119,7 @@ object NodeJsRuntimePluginBridge {
             putStringMap(
                 NodeJsRuntimeContract.KEY_RUNTIME_MODULE_SOURCE_NAMES,
                 NodeJsRuntimeContract.KEY_RUNTIME_MODULE_SOURCES,
-                runtimeModuleSources,
+                enrichedRuntimeModuleSources,
             )
             putBoolean(NodeJsRuntimeContract.KEY_ESM_EXPERIMENTAL_ENABLED, esmExperimentalEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, dynamicImportExperimentalEnabled)
@@ -121,6 +133,141 @@ object NodeJsRuntimePluginBridge {
                 NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER_VERSION,
                 NodeJsRuntimeContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION,
             )
+        }
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.enrichedRuntimeModuleSourcesForPlugin(
+        context: Context,
+        launchSurface: String,
+        brokerId: String,
+    ): Map<String, String> {
+        val appContext = context.applicationContext
+        val bridgeLimits = NodeBridgeLimits.fromRuntimeModuleOrWorkingDirectory(
+            runtimeModuleSources[NodeBridgeLimits.RUNTIME_MODULE_NAME],
+            workingDirectory,
+        )
+        val engineInfo = NodeBridgeEngineInfo
+            .fromContext(
+                context = appContext,
+                id = brokerId,
+                sourceName = sourceName,
+                cwd = workingDirectory.orEmpty(),
+                executionMode = executionMode,
+                launchSurface = launchSurface,
+                spawnDepth = spawnDepth,
+                pid = Process.myPid(),
+            )
+            .copy(backend = "plugin")
+        return runtimeModuleSources
+            .withPluginHostAppInfo(appContext)
+            .withPluginDeviceInfo(appContext)
+            .withPluginEngineInfo(engineInfo.toJson())
+            .withPluginBridgePermissionManifest(
+                workingDirectory = workingDirectory,
+                sandboxRoot = sandboxRoot,
+            )
+            .withPluginBridgeLimitPolicy(bridgeLimits)
+            .withPluginLifecycleConfig(
+                NodeLifecycleCheckpointStore.runtimeModuleSource(
+                    context = appContext,
+                    engineInfo = engineInfo,
+                    executionMode = executionMode,
+                    launchSurface = launchSurface,
+                    stopRequestFile = null,
+                ),
+            )
+    }
+
+    private fun Map<String, String>.withPluginHostAppInfo(context: Context): Map<String, String> {
+        return linkedMapOf<String, String>().apply {
+            putAll(this@withPluginHostAppInfo)
+            put(HOST_APP_INFO_RUNTIME_MODULE_NAME, context.hostAppInfoJson())
+        }
+    }
+
+    private fun Context.hostAppInfoJson(): String {
+        val hostPackageName = packageName
+        val packageInfo = runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageInfo(hostPackageName, PackageManager.PackageInfoFlags.of(0))
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getPackageInfo(hostPackageName, 0)
+            }
+        }.getOrNull()
+        val versionCode = packageInfo?.let { info ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                info.longVersionCode
+            } else {
+                @Suppress("DEPRECATION")
+                info.versionCode.toLong()
+            }
+        } ?: 0L
+        return JSONObject().apply {
+            put("packageName", hostPackageName)
+            put("versionName", packageInfo?.versionName.orEmpty())
+            put("versionCode", versionCode)
+        }.toString()
+    }
+
+    private fun Map<String, String>.withPluginDeviceInfo(context: Context): Map<String, String> {
+        return linkedMapOf<String, String>().apply {
+            putAll(this@withPluginDeviceInfo)
+            put(DEVICE_INFO_RUNTIME_MODULE_NAME, context.deviceInfoJson())
+        }
+    }
+
+    private fun Context.deviceInfoJson(): String {
+        val metrics = resources.displayMetrics
+        return JSONObject().apply {
+            put("sdkInt", Build.VERSION.SDK_INT)
+            put("width", metrics.widthPixels.coerceAtLeast(0))
+            put("height", metrics.heightPixels.coerceAtLeast(0))
+            put("density", metrics.density.toDouble().takeIf { it.isFinite() && it > 0.0 } ?: 1.0)
+        }.toString()
+    }
+
+    private fun Map<String, String>.withPluginEngineInfo(engineInfoJson: String): Map<String, String> {
+        return linkedMapOf<String, String>().apply {
+            putAll(this@withPluginEngineInfo)
+            put(ENGINE_INFO_RUNTIME_MODULE_NAME, engineInfoJson)
+        }
+    }
+
+    private fun Map<String, String>.withPluginBridgePermissionManifest(
+        workingDirectory: String?,
+        sandboxRoot: String?,
+    ): Map<String, String> {
+        return linkedMapOf<String, String>().apply {
+            putAll(this@withPluginBridgePermissionManifest)
+            if (!containsKey(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME)) {
+                put(
+                    NodeBridgePermissionManifest.RUNTIME_MODULE_NAME,
+                    NodeBridgePermissionManifest.runtimeModuleSourceForWorkingDirectory(
+                        workingDirectory,
+                        sandboxRoot,
+                        includeBuildNetworkPolicy = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+                    ),
+                )
+            }
+        }
+    }
+
+    private fun Map<String, String>.withPluginBridgeLimitPolicy(
+        bridgeLimits: NodeBridgeLimits.Policy,
+    ): Map<String, String> {
+        return linkedMapOf<String, String>().apply {
+            putAll(this@withPluginBridgeLimitPolicy)
+            if (!containsKey(NodeBridgeLimits.RUNTIME_MODULE_NAME)) {
+                put(NodeBridgeLimits.RUNTIME_MODULE_NAME, bridgeLimits.toJson())
+            }
+        }
+    }
+
+    private fun Map<String, String>.withPluginLifecycleConfig(configJson: String): Map<String, String> {
+        return linkedMapOf<String, String>().apply {
+            putAll(this@withPluginLifecycleConfig)
+            put(NodeLifecycleCheckpointStore.RUNTIME_MODULE_NAME, configJson)
         }
     }
 
