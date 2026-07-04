@@ -88,11 +88,6 @@ object NodeJsRuntimePluginBridge {
         launchSurface: String,
     ): Bundle {
         val hostCapabilityBroker = NodeJsHostCapabilityBroker(context, this, launchSurface)
-        val engineInfo = pluginEngineInfo(
-            context = context.applicationContext,
-            brokerId = hostCapabilityBroker.id,
-            launchSurface = launchSurface,
-        )
         return Bundle().apply {
             putInt(NodeJsRuntimeContract.KEY_CONTRACT_VERSION, NodeJsRuntimeContract.CONTRACT_VERSION)
             putString(NodeJsRuntimeContract.KEY_EXECUTION_ID, executionId)
@@ -122,31 +117,11 @@ object NodeJsRuntimePluginBridge {
             putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_EXPERIMENTAL_ENABLED, javaInteropExperimentalEnabled)
             putBinder(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER, hostCapabilityBroker)
             putString(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER_ID, hostCapabilityBroker.id)
-            putString(NodeJsRuntimeContract.KEY_BRIDGE_ENGINE_INFO, engineInfo.toJson())
             putInt(
                 NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER_VERSION,
                 NodeJsRuntimeContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION,
             )
         }
-    }
-
-    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.pluginEngineInfo(
-        context: Context,
-        brokerId: String,
-        launchSurface: String,
-    ): NodeBridgeEngineInfo {
-        return NodeBridgeEngineInfo
-            .fromContext(
-                context = context,
-                id = brokerId,
-                sourceName = sourceName,
-                cwd = workingDirectory.orEmpty(),
-                executionMode = executionMode,
-                launchSurface = launchSurface,
-                spawnDepth = spawnDepth,
-                pid = Process.myPid(),
-            )
-            .copy(backend = "plugin")
     }
 
     private fun NodeJsRuntimePluginHost.ScriptRunResult.toEmbeddedScriptResult(
