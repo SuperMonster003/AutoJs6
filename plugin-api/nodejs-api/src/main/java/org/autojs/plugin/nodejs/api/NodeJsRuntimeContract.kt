@@ -72,4 +72,5 @@ object NodeJsRuntimeContract {
     const val CAPABILITY_BUNDLE_TRANSPORT = "bundleTransport"
     const val CAPABILITY_NATIVE_EMBEDDED_RUNTIME = "nativeEmbeddedRuntime"
     const val CAPABILITY_HOST_CAPABILITY_BROKER = "hostCapabilityBroker"
+    const val CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE = "hostCapabilityLiveBridge"
 }
