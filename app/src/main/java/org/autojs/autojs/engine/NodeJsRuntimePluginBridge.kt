@@ -1,8 +1,6 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.os.SystemClock
@@ -10,15 +8,12 @@ import android.util.Log
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
-import org.json.JSONObject
 
 object NodeJsRuntimePluginBridge {
 
     private const val TAG = "NodeJsRuntimePlugin"
     private const val PLUGIN_RUNTIME_ENABLED_PROPERTY = "autojs.nodejs.runtime.plugin.enabled"
     private const val PLUGIN_RUNTIME_REQUIRED_PROPERTY = "autojs.nodejs.runtime.plugin.required"
-    private const val HOST_APP_INFO_RUNTIME_MODULE_NAME = "autojs6:host-app-info"
-    private const val DEVICE_INFO_RUNTIME_MODULE_NAME = "autojs6:device-info"
     const val ERROR_PLUGIN_UNAVAILABLE = "ERR_AUTOJS6_NODE_PLUGIN_UNAVAILABLE"
 
     fun isRequested(): Boolean {
@@ -171,8 +166,6 @@ object NodeJsRuntimePluginBridge {
             workingDirectory,
         )
         return runtimeModuleSources
-            .withPluginHostAppInfo(appContext)
-            .withPluginDeviceInfo(appContext)
             .withPluginBridgePermissionManifest(
                 workingDirectory = workingDirectory,
                 sandboxRoot = sandboxRoot,
@@ -187,55 +180,6 @@ object NodeJsRuntimePluginBridge {
                     stopRequestFile = null,
                 ),
             )
-    }
-
-    private fun Map<String, String>.withPluginHostAppInfo(context: Context): Map<String, String> {
-        return linkedMapOf<String, String>().apply {
-            putAll(this@withPluginHostAppInfo)
-            put(HOST_APP_INFO_RUNTIME_MODULE_NAME, context.hostAppInfoJson())
-        }
-    }
-
-    private fun Context.hostAppInfoJson(): String {
-        val hostPackageName = packageName
-        val packageInfo = runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                packageManager.getPackageInfo(hostPackageName, PackageManager.PackageInfoFlags.of(0))
-            } else {
-                @Suppress("DEPRECATION")
-                packageManager.getPackageInfo(hostPackageName, 0)
-            }
-        }.getOrNull()
-        val versionCode = packageInfo?.let { info ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                info.longVersionCode
-            } else {
-                @Suppress("DEPRECATION")
-                info.versionCode.toLong()
-            }
-        } ?: 0L
-        return JSONObject().apply {
-            put("packageName", hostPackageName)
-            put("versionName", packageInfo?.versionName.orEmpty())
-            put("versionCode", versionCode)
-        }.toString()
-    }
-
-    private fun Map<String, String>.withPluginDeviceInfo(context: Context): Map<String, String> {
-        return linkedMapOf<String, String>().apply {
-            putAll(this@withPluginDeviceInfo)
-            put(DEVICE_INFO_RUNTIME_MODULE_NAME, context.deviceInfoJson())
-        }
-    }
-
-    private fun Context.deviceInfoJson(): String {
-        val metrics = resources.displayMetrics
-        return JSONObject().apply {
-            put("sdkInt", Build.VERSION.SDK_INT)
-            put("width", metrics.widthPixels.coerceAtLeast(0))
-            put("height", metrics.heightPixels.coerceAtLeast(0))
-            put("density", metrics.density.toDouble().takeIf { it.isFinite() && it > 0.0 } ?: 1.0)
-        }.toString()
     }
 
     private fun Map<String, String>.withPluginBridgePermissionManifest(
