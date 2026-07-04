@@ -73,6 +73,8 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.enabled"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.capability_live_bridge"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.host_broker.attached"])
+        assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.engine_info_present"])
+        assertEquals("request", result.nativeValues["embedded_script.runtime_plugin.runtime_module.engine_info_source"])
         assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
         assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
         assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])

@@ -19,7 +19,6 @@ object NodeJsRuntimePluginBridge {
     private const val PLUGIN_RUNTIME_REQUIRED_PROPERTY = "autojs.nodejs.runtime.plugin.required"
     private const val HOST_APP_INFO_RUNTIME_MODULE_NAME = "autojs6:host-app-info"
     private const val DEVICE_INFO_RUNTIME_MODULE_NAME = "autojs6:device-info"
-    private const val ENGINE_INFO_RUNTIME_MODULE_NAME = "autojs6:engine-info"
     const val ERROR_PLUGIN_UNAVAILABLE = "ERR_AUTOJS6_NODE_PLUGIN_UNAVAILABLE"
 
     fun isRequested(): Boolean {
@@ -95,10 +94,15 @@ object NodeJsRuntimePluginBridge {
         launchSurface: String,
     ): Bundle {
         val hostCapabilityBroker = NodeJsHostCapabilityBroker(context, this, launchSurface)
+        val engineInfo = pluginEngineInfo(
+            context = context.applicationContext,
+            brokerId = hostCapabilityBroker.id,
+            launchSurface = launchSurface,
+        )
         val enrichedRuntimeModuleSources = enrichedRuntimeModuleSourcesForPlugin(
             context = context,
             launchSurface = launchSurface,
-            brokerId = hostCapabilityBroker.id,
+            engineInfo = engineInfo,
         )
         return Bundle().apply {
             putInt(NodeJsRuntimeContract.KEY_CONTRACT_VERSION, NodeJsRuntimeContract.CONTRACT_VERSION)
@@ -129,6 +133,7 @@ object NodeJsRuntimePluginBridge {
             putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_EXPERIMENTAL_ENABLED, javaInteropExperimentalEnabled)
             putBinder(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER, hostCapabilityBroker)
             putString(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER_ID, hostCapabilityBroker.id)
+            putString(NodeJsRuntimeContract.KEY_BRIDGE_ENGINE_INFO, engineInfo.toJson())
             putInt(
                 NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER_VERSION,
                 NodeJsRuntimeContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION,
@@ -136,19 +141,14 @@ object NodeJsRuntimePluginBridge {
         }
     }
 
-    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.enrichedRuntimeModuleSourcesForPlugin(
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.pluginEngineInfo(
         context: Context,
-        launchSurface: String,
         brokerId: String,
-    ): Map<String, String> {
-        val appContext = context.applicationContext
-        val bridgeLimits = NodeBridgeLimits.fromRuntimeModuleOrWorkingDirectory(
-            runtimeModuleSources[NodeBridgeLimits.RUNTIME_MODULE_NAME],
-            workingDirectory,
-        )
-        val engineInfo = NodeBridgeEngineInfo
+        launchSurface: String,
+    ): NodeBridgeEngineInfo {
+        return NodeBridgeEngineInfo
             .fromContext(
-                context = appContext,
+                context = context,
                 id = brokerId,
                 sourceName = sourceName,
                 cwd = workingDirectory.orEmpty(),
@@ -158,10 +158,21 @@ object NodeJsRuntimePluginBridge {
                 pid = Process.myPid(),
             )
             .copy(backend = "plugin")
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.enrichedRuntimeModuleSourcesForPlugin(
+        context: Context,
+        launchSurface: String,
+        engineInfo: NodeBridgeEngineInfo,
+    ): Map<String, String> {
+        val appContext = context.applicationContext
+        val bridgeLimits = NodeBridgeLimits.fromRuntimeModuleOrWorkingDirectory(
+            runtimeModuleSources[NodeBridgeLimits.RUNTIME_MODULE_NAME],
+            workingDirectory,
+        )
         return runtimeModuleSources
             .withPluginHostAppInfo(appContext)
             .withPluginDeviceInfo(appContext)
-            .withPluginEngineInfo(engineInfo.toJson())
             .withPluginBridgePermissionManifest(
                 workingDirectory = workingDirectory,
                 sandboxRoot = sandboxRoot,
@@ -225,13 +236,6 @@ object NodeJsRuntimePluginBridge {
             put("height", metrics.heightPixels.coerceAtLeast(0))
             put("density", metrics.density.toDouble().takeIf { it.isFinite() && it > 0.0 } ?: 1.0)
         }.toString()
-    }
-
-    private fun Map<String, String>.withPluginEngineInfo(engineInfoJson: String): Map<String, String> {
-        return linkedMapOf<String, String>().apply {
-            putAll(this@withPluginEngineInfo)
-            put(ENGINE_INFO_RUNTIME_MODULE_NAME, engineInfoJson)
-        }
     }
 
     private fun Map<String, String>.withPluginBridgePermissionManifest(
