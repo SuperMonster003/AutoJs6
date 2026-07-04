@@ -322,6 +322,7 @@ class PluginCenterViewModel : ViewModel() {
             variant = item.variant,
             engineId = item.engineId,
             isOcrService = item.isOcrService,
+            isBarcodeService = item.isBarcodeService,
             requiresHostVersion = item.requiresHostVersion,
             hostVersionCode = item.hostVersionCode,
         )
@@ -412,6 +413,7 @@ class PluginCenterViewModel : ViewModel() {
         val variant = local?.pluginInfo?.variant ?: index?.variant
         val engineId = local?.pluginInfo?.id ?: index?.engineId
         val isOcrService = local?.isOcrService == true || engine in OCR_SERVICE_ENGINES
+        val isBarcodeService = local?.isBarcodeService == true || engine in BARCODE_SERVICE_ENGINES
         val requiresHostVersion = local?.requiresHostVersion ?: index?.requiresHostVersion
         val hostVersionCode = currentHostVersionCode()
 
@@ -539,6 +541,7 @@ class PluginCenterViewModel : ViewModel() {
             variant = variant,
             engineId = engineId,
             isOcrService = isOcrService,
+            isBarcodeService = isBarcodeService,
             mechanism = mechanism,
             authorizedState = trustInfo.authorizedState,
             activatedState = activatedState,
@@ -743,6 +746,7 @@ class PluginCenterViewModel : ViewModel() {
         val variant: String?,
         val engineId: String?,
         val isOcrService: Boolean,
+        val isBarcodeService: Boolean,
         val requiresHostVersion: Long?,
         val hostVersionCode: Long?,
     )
@@ -750,5 +754,6 @@ class PluginCenterViewModel : ViewModel() {
     companion object {
         private const val TAG = "PluginCenterViewModel"
         private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
+        private val BARCODE_SERVICE_ENGINES = setOf("mlkit-barcode")
     }
 }

@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -878,10 +879,16 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private suspend fun probeAidlPlugin(item: PluginCenterItem) {
-        if (item.isOcrService || item.engine in OCR_SERVICE_ENGINES) {
-            OcrPluginHost.probe(contextRef, item.packageName)
-        } else {
-            PluginInfoServiceHost.probe(contextRef, item.packageName)
+        when {
+            item.isOcrService || item.engine in OCR_SERVICE_ENGINES -> {
+                OcrPluginHost.probe(contextRef, item.packageName)
+            }
+            item.isBarcodeService || item.engine in BARCODE_SERVICE_ENGINES -> {
+                BarcodePluginHost.probe(contextRef, item.packageName)
+            }
+            else -> {
+                PluginInfoServiceHost.probe(contextRef, item.packageName)
+            }
         }
     }
 
@@ -1110,6 +1117,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         private const val FIRST_LIST_REVEAL_TIMEOUT_MS = 1000L
         private const val NIGHT_MODE_ICON_REFRESH_DELAY_MS = 120L
         private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
+        private val BARCODE_SERVICE_ENGINES = setOf("mlkit-barcode")
         private val AUTO_ENABLE_RETRYABLE_ERROR_CODES = setOf(
             PluginErrorCode.SERVICE_NOT_FOUND,
             PluginErrorCode.BIND_FAILED,

@@ -8,6 +8,7 @@ import android.os.Build
 import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
@@ -42,6 +43,7 @@ class InstalledPluginRepository {
         val pluginInfo: PluginInfo?,
         val bindError: Throwable?,
         val isOcrService: Boolean,
+        val isBarcodeService: Boolean,
         val isStopped: Boolean,
     )
 
@@ -50,15 +52,18 @@ class InstalledPluginRepository {
         val pluginInfo: PluginInfo?,
         val error: Throwable?,
         val isOcrService: Boolean,
+        val isBarcodeService: Boolean,
     )
 
     suspend fun discoverInstalled(context: Context): List<InstalledPlugin> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
         val discovered = (
                 PluginInfoServiceHost.discover(context).map {
-                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false)
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false)
                 } + OcrPluginHost.discover(context).map {
-                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = true)
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = true, isBarcodeService = false)
+                } + BarcodePluginHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = true)
                 }
                 ).mergeByPackage()
 
@@ -113,6 +118,7 @@ class InstalledPluginRepository {
                 pluginInfo = d.pluginInfo,
                 bindError = d.error,
                 isOcrService = d.isOcrService,
+                isBarcodeService = d.isBarcodeService,
                 isStopped = isStopped,
             )
         }
@@ -121,7 +127,10 @@ class InstalledPluginRepository {
     private fun List<Discovery>.mergeByPackage(): List<Discovery> {
         return groupBy { it.serviceInfo.packageName }.values.map { discoveries ->
             val preferred = discoveries.firstOrNull { it.pluginInfo != null } ?: discoveries.first()
-            preferred.copy(isOcrService = discoveries.any { it.isOcrService })
+            preferred.copy(
+                isOcrService = discoveries.any { it.isOcrService },
+                isBarcodeService = discoveries.any { it.isBarcodeService },
+            )
         }
     }
 

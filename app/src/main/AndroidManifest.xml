@@ -874,15 +874,6 @@
             android:name="moe.shizuku.client.V3_SUPPORT"
             android:value="true" />
 
-        <!-- @Hint by SuperMonster003 on Jul 25, 2025. -->
-        <!--  ! -->
-        <!--  ! This provider is explicitly excluded and manually initialized in org.autojs.autojs.App. -->
-        <!--  ! zh-CN: 此 provider 被显式排除, 并在 org.autojs.autojs.App 手动初始化. -->
-        <provider
-            android:name="com.google.mlkit.common.internal.MlKitInitProvider"
-            android:authorities="${applicationId}.mlkitinitprovider"
-            tools:node="remove" />
-
         <provider
             android:name="org.autojs.autojs.deviceid.DeviceIdProvider"
             android:authorities="${applicationId}.deviceid.provider"
