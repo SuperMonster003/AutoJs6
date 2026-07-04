@@ -84,6 +84,11 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         assertEquals("plugin", result.nativeValues["embedded_script.runtime_plugin.host_broker.diagnostics_source"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.host_broker.enabled"])
         assertEquals("false", result.nativeValues["embedded_script.runtime_plugin.host_broker.destroyed"])
+        assertTrue(result.nativeValues["embedded_script.runtime_plugin.host_broker.id"].orEmpty().isNotBlank())
+        assertEquals(
+            NodeJsRuntimeContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION.toString(),
+            result.nativeValues["embedded_script.runtime_plugin.host_broker.contract_version"],
+        )
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.engine_info_present"])
         assertEquals("host_broker", result.nativeValues["embedded_script.runtime_plugin.runtime_module.engine_info_source"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.host_app_info_present"])

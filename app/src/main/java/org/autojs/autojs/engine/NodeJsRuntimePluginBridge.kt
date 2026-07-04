@@ -116,11 +116,6 @@ object NodeJsRuntimePluginBridge {
             putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_EXPERIMENTAL_ENABLED, childProcessExperimentalEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_EXPERIMENTAL_ENABLED, javaInteropExperimentalEnabled)
             putBinder(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER, hostCapabilityBroker)
-            putString(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER_ID, hostCapabilityBroker.id)
-            putInt(
-                NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER_VERSION,
-                NodeJsRuntimeContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION,
-            )
         }
     }
 
