@@ -490,9 +490,10 @@ private fun embeddedNodePackagingNormalizeReleaseFlavor(rawFlavor: String): Stri
     when (rawFlavor.trim().lowercase()) {
         "nodefull", "node-full", "full" -> "nodeFull"
         "nodemini", "node-mini", "mini" -> "nodeMini"
+        "nodeplugin", "node-plugin", "plugin" -> "nodePlugin"
         "rhinoonly", "rhino-only", "rhino" -> "rhinoOnly"
         else -> throw GradleException(
-            "Unsupported Embedded Node release flavor '$rawFlavor'. Use nodeFull, nodeMini, or rhinoOnly."
+            "Unsupported Embedded Node release flavor '$rawFlavor'. Use nodeFull, nodeMini, nodePlugin, or rhinoOnly."
         )
     }
 
@@ -533,6 +534,7 @@ private fun embeddedNodePackagingReleaseFlavorPolicy(
         expectedAbis = when (flavor) {
             "nodeFull" -> embeddedNodePackagingRequiredNodeAbis
             "nodeMini" -> releaseAbis.ifEmpty { listOf("arm64-v8a") }
+            "nodePlugin" -> emptyList()
             else -> emptyList()
         },
         expectedAbisSource = if (releaseAbis.isEmpty()) {
