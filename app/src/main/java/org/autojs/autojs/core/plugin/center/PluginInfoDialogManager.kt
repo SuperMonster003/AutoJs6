@@ -209,7 +209,8 @@ object PluginInfoDialogManager {
             !info.item.installableApkUrl.isNullOrBlank() ||
                     !info.item.updatableApkUrl.isNullOrBlank() ||
                     !info.item.remoteIconUrl.isNullOrBlank() ||
-                    !info.item.instructionMarkdownUrl.isNullOrBlank()
+                    !info.item.instructionMarkdownUrl.isNullOrBlank() ||
+                    info.item.isOfficialVerified
         }
         return when (source) {
             PluginIndexSource.OFFICIAL -> context.getString(R.string.text_plugin_official)
