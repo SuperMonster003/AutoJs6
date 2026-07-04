@@ -1,5 +1,6 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 import java.time.ZonedDateTime
 
@@ -42,6 +43,69 @@ private fun nodeResolveNormalizeMode(value: String): String {
         throw GradleException("Unsupported autojs.nodejs.resolve.mode='$value'. Expected compact, verbose, or json.")
     }
     return mode
+}
+
+private fun nodeResolveDisplayPath(file: File): String =
+    runCatching { file.relativeTo(rootProject.projectDir).invariantSeparatorsPath }
+        .getOrElse { file.absolutePath }
+
+private fun nodeResolvePluginProjectRoot(overridePath: String?): File {
+    val candidate = overridePath
+        ?.trim()
+        ?.takeIf(String::isNotEmpty)
+        ?.let(rootProject::file)
+        ?: rootProject.projectDir.parentFile.resolve("autojs6-plugin-nodejs")
+    return candidate.canonicalFile
+}
+
+private fun nodeResolveToolsRoot(
+    source: String?,
+    explicitRoot: String?,
+    pluginRoot: File,
+): File {
+    explicitRoot
+        ?.trim()
+        ?.takeIf(String::isNotEmpty)
+        ?.let(rootProject::file)
+        ?.let { return it.canonicalFile }
+    return when (val normalized = source.orEmpty().trim().lowercase()) {
+        "", "host", "main", "app" -> rootProject.projectDir.resolve("tools/nodejs").canonicalFile
+        "plugin", "node-plugin", "nodejs-plugin" -> pluginRoot.resolve("tools/nodejs").canonicalFile
+        else -> throw GradleException(
+            "Unsupported Node tools source '$normalized'. Use host or plugin, " +
+                    "or set -Pautojs.nodejs.toolsRoot=<dir>."
+        )
+    }
+}
+
+private fun nodeResolveConfiguredToolsRoot(): File {
+    val pluginRootOverride = providers.gradleProperty("autojs.nodejs.pluginProjectDir")
+        .orElse(providers.gradleProperty("autojs.nodejs.plugin.root"))
+    return nodeResolveToolsRoot(
+        providers.gradleProperty("autojs.nodejs.toolsSource").orElse("host").get(),
+        providers.gradleProperty("autojs.nodejs.toolsRoot").orNull,
+        nodeResolvePluginProjectRoot(pluginRootOverride.orNull),
+    )
+}
+
+private fun nodeResolveReadJsonObject(text: String): Map<*, *> =
+    JsonSlurper().parseText(text) as? Map<*, *>
+        ?: throw GradleException("Expected JSON object from Node resolver visualizer output.")
+
+private fun nodeResolveRunTool(
+    tool: File,
+    args: List<String>,
+): String {
+    val process = ProcessBuilder(listOf("node", tool.absolutePath) + args)
+        .directory(rootProject.projectDir)
+        .redirectErrorStream(true)
+        .start()
+    val text = process.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+    val exitCode = process.waitFor()
+    if (exitCode != 0) {
+        throw GradleException("Node resolver visualizer command failed: ${args.joinToString(" ")}\n$text")
+    }
+    return text
 }
 
 private fun nodeResolveParseTraceLine(line: String): NodeResolveTraceEvent? {
@@ -275,6 +339,11 @@ tasks.register("explainNodeResolve") {
     group = "help"
     description = "Formats Embedded Node [resolve] trace output into an actionable resolver explanation report."
 
+    val toolsRoot = nodeResolveConfiguredToolsRoot()
+    val toolFile = toolsRoot.resolve("resolver/explain-node-resolve.js")
+
+    inputs.file(toolFile).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.property("toolsRoot", toolsRoot.absolutePath)
     outputs.file(layout.buildDirectory.file("reports/nodejs/resolver/resolve-explanation.json"))
     outputs.file(layout.buildDirectory.file("reports/nodejs/resolver/resolve-explanation.txt"))
     outputs.upToDateWhen { false }
@@ -285,19 +354,29 @@ tasks.register("explainNodeResolve") {
         val traceFileValue = providers.gradleProperty("autojs.nodejs.resolve.traceFile").orNull.orEmpty()
         val mode = nodeResolveNormalizeMode(providers.gradleProperty("autojs.nodejs.resolve.mode").orNull.orEmpty())
         val traceFile = traceFileValue.takeIf(String::isNotBlank)?.let { rootProject.file(it) }
-        val traceText = traceFile?.takeIf(File::isFile)?.readText()
-        val report = nodeResolveExplainGroups(requestValue, fromValue, traceFile, traceText)
-        val text = when (mode) {
-            "compact" -> report.compactText
-            "json" -> report.jsonText
-            else -> report.verboseText
+        val tool = toolFile
+        if (!tool.isFile) {
+            throw GradleException(
+                "Missing Node resolver visualizer tool: ${nodeResolveDisplayPath(tool)}. " +
+                        "Use -Pautojs.nodejs.toolsRoot=<dir> or -Pautojs.nodejs.toolsSource=plugin."
+            )
         }
         val outputDir = layout.buildDirectory.dir("reports/nodejs/resolver").get().asFile
         outputDir.mkdirs()
         val jsonFile = outputDir.resolve("resolve-explanation.json")
         val textFile = outputDir.resolve("resolve-explanation.txt")
-        jsonFile.writeText(nodeResolveJson(report.json) + "\n")
-        textFile.writeText(text)
+        val args = mutableListOf(
+            "--request", requestValue,
+            "--from", fromValue,
+            "--mode", mode,
+            "--report-dir", outputDir.absolutePath,
+        )
+        traceFile?.let { args.addAll(listOf("--trace-file", it.absolutePath)) }
+        nodeResolveRunTool(tool, args)
+        if (!jsonFile.isFile || !textFile.isFile) {
+            throw GradleException("Node resolver visualizer did not write expected reports under ${outputDir.absolutePath}")
+        }
+        logger.lifecycle("Node resolver visualizer tool: ${nodeResolveDisplayPath(tool)}")
         logger.lifecycle("Node resolver explanation JSON written to ${jsonFile.absolutePath}")
         logger.lifecycle("Node resolver explanation text written to ${textFile.absolutePath}")
     }
@@ -307,9 +386,24 @@ val verifyNodeResolverVisualizerFixtures = tasks.register("verifyNodeResolverVis
     group = "verification"
     description = "Verifies the Node resolver visualizer parses request, search paths, package fields, null blocking, and final errors."
 
+    val toolsRoot = nodeResolveConfiguredToolsRoot()
+    val toolFile = toolsRoot.resolve("resolver/explain-node-resolve.js")
+
+    inputs.file(toolFile).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.property("toolsRoot", toolsRoot.absolutePath)
+
     doLast {
+        val tool = toolFile
+        if (!tool.isFile) {
+            throw GradleException(
+                "Missing Node resolver visualizer tool: ${nodeResolveDisplayPath(tool)}. " +
+                        "Use -Pautojs.nodejs.toolsRoot=<dir> or -Pautojs.nodejs.toolsSource=plugin."
+            )
+        }
         val fixtureDir = layout.buildDirectory.dir("tmp/nodejs/resolver-visualizer").get().asFile
         fixtureDir.mkdirs()
+        val cliReportDir = fixtureDir.resolve("cli")
+        cliReportDir.deleteRecursively()
         data class ResolverFixture(
             val name: String,
             val request: String,
@@ -387,7 +481,30 @@ val verifyNodeResolverVisualizerFixtures = tasks.register("verifyNodeResolverVis
                     "Resolver visualizer report for ${fixture.name} missing '$needle':\n$verbose"
                 }
             }
+            val cliOutputDir = cliReportDir.resolve(fixture.name)
+            val cliReport = nodeResolveReadJsonObject(
+                nodeResolveRunTool(
+                    tool,
+                    listOf(
+                        "--mode", "json",
+                        "--request", fixture.request,
+                        "--from", fixture.from,
+                        "--trace-file", traceFile.absolutePath,
+                        "--report-dir", cliOutputDir.absolutePath,
+                    ),
+                ),
+            )
+            check(cliReport["schema"] == "autojs6-node-resolver-visualizer-v1") {
+                "Resolver CLI schema mismatch for ${fixture.name}: ${cliReport["schema"]}"
+            }
+            check(cliReport["diagnosis"] == fixture.diagnosis) {
+                "Resolver CLI diagnosis mismatch for ${fixture.name}: expected ${fixture.diagnosis}, got ${cliReport["diagnosis"]}"
+            }
+            check(cliOutputDir.resolve("resolve-explanation.json").isFile) {
+                "Resolver CLI report missing for ${fixture.name}: ${cliOutputDir.absolutePath}"
+            }
         }
+        logger.lifecycle("Node resolver visualizer tool: ${nodeResolveDisplayPath(tool)}")
         logger.lifecycle("Node resolver visualizer fixtures parsed exports, imports, disabled builtin, and scoped path failures.")
     }
 }
