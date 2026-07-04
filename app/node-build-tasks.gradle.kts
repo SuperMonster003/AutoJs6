@@ -1,7 +1,8 @@
 import java.time.ZonedDateTime
 
-private fun nodeBuildExtraName(name: String): String = "nodeJsBuild.$name"
+private fun nodeBuildExtraName(name: String): String = "nodeJsRuntimeConfig.$name"
 
+@Suppress("UNCHECKED_CAST")
 private fun <T> nodeBuildExtra(name: String): T =
     extensions.extraProperties.get(nodeBuildExtraName(name)) as T
 
@@ -18,7 +19,7 @@ private val nodeJsFuzzerSeedFile = nodeBuildExtra<String?>("nodeJsFuzzerSeedFile
 private val nodeJsFuzzerReplayRunnerClass = nodeBuildExtra<String?>("nodeJsFuzzerReplayRunnerClass")
 private val nodeJsFuzzerReplaySeed = nodeBuildExtra<String?>("nodeJsFuzzerReplaySeed")
 private val nodeJsTestDeviceProfileClasses = nodeBuildExtra<List<String>>("nodeJsTestDeviceProfileClasses")
-private val nodeJsApkFileExtension = nodeBuildExtra<String>("apkFileExtension")
+private val nodeJsApkFileExtension = "apk"
 
 tasks.register(taskNameAssembleInrtFullNodeRelease) {
     group = "build"

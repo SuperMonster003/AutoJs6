@@ -46,53 +46,6 @@ apply(from = "node-runtime-config.gradle.kts")
 fun <T> nodeJsRuntimeConfigExtra(name: String): T =
     extensions.extraProperties.get("nodeJsRuntimeConfig.$name") as T
 
-val taskNameAssembleInrtFullNodeRelease = nodeJsRuntimeConfigExtra<String>("taskNameAssembleInrtFullNodeRelease")
-val isNodeFuzzerSeedReplayRequested = nodeJsRuntimeConfigExtra<Boolean>("isNodeFuzzerSeedReplayRequested")
-val isAppAssembleTaskRequested = nodeJsRuntimeConfigExtra<Boolean>("isAppAssembleTaskRequested")
-val isInrtAssembleTaskRequested = nodeJsRuntimeConfigExtra<Boolean>("isInrtAssembleTaskRequested")
-val isInrtTaskRequested = nodeJsRuntimeConfigExtra<Boolean>("isInrtTaskRequested")
-val nodeJsIdentityProfile = nodeJsRuntimeConfigExtra<String>("nodeJsIdentityProfile")
-val nodeJsApplicationIdSuffix = nodeJsRuntimeConfigExtra<String>("nodeJsApplicationIdSuffix")
-val nodeJsEffectiveApplicationId = nodeJsRuntimeConfigExtra<String>("nodeJsEffectiveApplicationId")
-val nodeJsAppLabel = nodeJsRuntimeConfigExtra<String>("nodeJsAppLabel")
-val nodeJsReleaseFlavor = nodeJsRuntimeConfigExtra<String>("nodeJsReleaseFlavor")
-val nodeJsReleaseExpectedAbis = nodeJsRuntimeConfigExtra<List<String>>("nodeJsReleaseExpectedAbis")
-val effectiveNodeJsRuntimeBackend = nodeJsRuntimeConfigExtra<String>("effectiveNodeJsRuntimeBackend")
-val isNodeJsNativeRuntimeRequested = nodeJsRuntimeConfigExtra<Boolean>("isNodeJsNativeRuntimeRequested")
-val isNodeJsHostBridgeBuildRequested = nodeJsRuntimeConfigExtra<Boolean>("isNodeJsHostBridgeBuildRequested")
-val nodeJsBridgeNativeRuntimeAbis = nodeJsRuntimeConfigExtra<List<String>>("nodeJsBridgeNativeRuntimeAbis")
-val nodeJsRuntimeSlot = nodeJsRuntimeConfigExtra<String>("nodeJsRuntimeSlot")
-val nodeJsRuntimeSlotTargetVersion = nodeJsRuntimeConfigExtra<String>("nodeJsRuntimeSlotTargetVersion")
-val nodeJsRuntimeSlotGeneratedJniLibsDir = nodeJsRuntimeConfigExtra<Provider<Directory>>("nodeJsRuntimeSlotGeneratedJniLibsDir")
-val nodeJsRuntimeSlotHeaderDir = nodeJsRuntimeConfigExtra<File>("nodeJsRuntimeSlotHeaderDir")
-val nodeJsRuntimeSlotJniLibsSourceDir = nodeJsRuntimeConfigExtra<File>("nodeJsRuntimeSlotJniLibsSourceDir")
-val nodeJsAndroidTestExamplesRootDir = nodeJsRuntimeConfigExtra<File>("nodeJsAndroidTestExamplesRootDir")
-val nodeJsEmbeddedProbeLevel = nodeJsRuntimeConfigExtra<Int>("nodeJsEmbeddedProbeLevel")
-val nodeJsEmbeddedProbeTimeoutMs = nodeJsRuntimeConfigExtra<Long>("nodeJsEmbeddedProbeTimeoutMs")
-val nodeJsEmbeddedProbeLifecycleEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsEmbeddedProbeLifecycleEnabled")
-val nodeJsEmbeddedScriptEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsEmbeddedScriptEnabled")
-val nodeJsEsmExperimentalEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsEsmExperimentalEnabled")
-val nodeJsDynamicImportLocalEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsDynamicImportLocalEnabled")
-val nodeJsDynamicImportEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsDynamicImportEnabled")
-val nodeJsNetworkExperimentalEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsNetworkExperimentalEnabled")
-val nodeJsRawNetworkModulesExperimentalEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsRawNetworkModulesExperimentalEnabled")
-val nodeJsWorkerThreadsExperimentalEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsWorkerThreadsExperimentalEnabled")
-val nodeJsChildProcessExperimentalEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsChildProcessExperimentalEnabled")
-val nodeJsJavaInteropExperimentalEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsJavaInteropExperimentalEnabled")
-val nodeJsProfileProEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsProfileProEnabled")
-val nodeJsProfileDesktopEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsProfileDesktopEnabled")
-val nodeJsProfileDebugUnsafeLabEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsProfileDebugUnsafeLabEnabled")
-val nodeJsRelaxedCapabilitiesEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsRelaxedCapabilitiesEnabled")
-val nodeJsTimelineTraceEnabled = nodeJsRuntimeConfigExtra<Boolean>("nodeJsTimelineTraceEnabled")
-val nodeJsTestDeviceProfile = nodeJsRuntimeConfigExtra<String?>("nodeJsTestDeviceProfile")
-val nodeJsFuzzerSeedFile = nodeJsRuntimeConfigExtra<String?>("nodeJsFuzzerSeedFile")
-val nodeJsFuzzerBudget = nodeJsRuntimeConfigExtra<String>("nodeJsFuzzerBudget")
-val nodeJsFuzzerReplayRunnerClass = nodeJsRuntimeConfigExtra<String?>("nodeJsFuzzerReplayRunnerClass")
-val nodeJsFuzzerReplaySeed = nodeJsRuntimeConfigExtra<String?>("nodeJsFuzzerReplaySeed")
-val nodeJsBridgeCmakeFile = nodeJsRuntimeConfigExtra<File?>("nodeJsBridgeCmakeFile")
-val nodeJsRequestedFocusedGate = nodeJsRuntimeConfigExtra<String?>("nodeJsRequestedFocusedGate")
-val nodeJsFocusedGateInstrumentationClassArgument = nodeJsRuntimeConfigExtra<String?>("nodeJsFocusedGateInstrumentationClassArgument")
-val nodeJsTestDeviceProfileClasses = nodeJsRuntimeConfigExtra<List<String>>("nodeJsTestDeviceProfileClasses")
 val leakCanaryEnabled = nodeJsRuntimeConfigExtra<Boolean>("leakCanaryEnabled")
 utils.registerTemplateApkCopy(project)
 
@@ -531,86 +484,12 @@ android {
         versionName = versions.appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        val explicitInstrumentationClass =
-            providers.gradleProperty("android.testInstrumentationRunnerArguments.class").orNull.isNullOrBlank().not()
-        if (nodeJsFocusedGateInstrumentationClassArgument != null && !explicitInstrumentationClass) {
-            testInstrumentationRunnerArguments["class"] = nodeJsFocusedGateInstrumentationClassArgument
-            testInstrumentationRunnerArguments["autojs.nodejs.test.deviceProfile"] = "sony"
-            if (nodeJsRequestedFocusedGate == "verifyNodeLiveAccessibilityImageGate") {
-                testInstrumentationRunnerArguments["autojs.nodejs.accessibilitySmoke"] = "true"
-            }
-        } else if (nodeJsFuzzerReplayRunnerClass != null && !explicitInstrumentationClass) {
-            testInstrumentationRunnerArguments["class"] = nodeJsFuzzerReplayRunnerClass
-        } else if (nodeJsTestDeviceProfile != null && !explicitInstrumentationClass) {
-            testInstrumentationRunnerArguments["class"] = nodeJsTestDeviceProfileClasses.joinToString(",")
-            testInstrumentationRunnerArguments["autojs.nodejs.test.deviceProfile"] = nodeJsTestDeviceProfile
-        }
-        if (nodeJsTestDeviceProfile in setOf("v1_1_alpha", "v1_1_beta")) {
-            fun alphaStressArgument(name: String, defaultValue: String): String =
-                providers.gradleProperty(name).orElse(defaultValue).get()
-            val defaultLeakIterations = if (nodeJsTestDeviceProfile == "v1_1_beta") "20" else "12"
-            val defaultImageIterations = if (nodeJsTestDeviceProfile == "v1_1_beta") "8" else "6"
-            val defaultFaultIterations = if (nodeJsTestDeviceProfile == "v1_1_beta") "5" else "3"
-            val defaultBridgeStressIterations = if (nodeJsTestDeviceProfile == "v1_1_beta") "12" else "8"
-            testInstrumentationRunnerArguments["autojs.nodejs.leak.iterations"] =
-                alphaStressArgument("autojs.nodejs.leak.iterations", defaultLeakIterations)
-            testInstrumentationRunnerArguments["autojs.nodejs.leak.imageIterations"] =
-                alphaStressArgument("autojs.nodejs.leak.imageIterations", defaultImageIterations)
-            testInstrumentationRunnerArguments["autojs.nodejs.leak.faultIterations"] =
-                alphaStressArgument("autojs.nodejs.leak.faultIterations", defaultFaultIterations)
-            testInstrumentationRunnerArguments["autojs.nodejs.bridgeStress.iterations"] =
-                alphaStressArgument("autojs.nodejs.bridgeStress.iterations", defaultBridgeStressIterations)
-        }
-        testInstrumentationRunnerArguments["autojs.nodejs.fuzzerBudget"] = nodeJsFuzzerBudget
-        nodeJsFuzzerReplaySeed?.let { testInstrumentationRunnerArguments["autojs.nodejs.fuzzerSeed"] = it }
 
         multiDexEnabled = true
 
-        if (isNodeJsHostBridgeBuildRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty()) {
-            ndk.abiFilters += nodeJsBridgeNativeRuntimeAbis
-            externalNativeBuild {
-                cmake {
-                    abiFilters += nodeJsBridgeNativeRuntimeAbis
-                    arguments += "-DAUTOJS6_NODE_ENABLE_EMBEDDED_LIFECYCLE_PROBE=${if (nodeJsEmbeddedProbeLifecycleEnabled) "ON" else "OFF"}"
-                    arguments += "-DAUTOJS6_NODE_ENABLE_EMBEDDED_SCRIPT_EXECUTION=${if (nodeJsEmbeddedScriptEnabled) "ON" else "OFF"}"
-                    arguments += "-DAUTOJS6_NODE_RUNTIME_SLOT=$nodeJsRuntimeSlot"
-                    arguments += "-DAUTOJS6_NODE_INCLUDE_DIR=${nodeJsRuntimeSlotHeaderDir.absolutePath.replace('\\', '/')}"
-                    arguments += "-DAUTOJS6_NODE_LIBRARY_ROOT=${nodeJsRuntimeSlotJniLibsSourceDir.absolutePath.replace('\\', '/')}"
-                    cppFlags += "-std=c++20"
-                }
-            }
-        }
-
         buildConfigField("String", "VERSION_DATE", "\"${utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
         buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
-        buildConfigField("String", "NODEJS_IDENTITY_PROFILE", "\"$nodeJsIdentityProfile\"")
-        buildConfigField("String", "NODEJS_APPLICATION_ID_SUFFIX", "\"$nodeJsApplicationIdSuffix\"")
-        buildConfigField("String", "NODEJS_RUNTIME_BACKEND", "\"$effectiveNodeJsRuntimeBackend\"")
-        buildConfigField("String", "NODEJS_RUNTIME_SLOT", "\"$nodeJsRuntimeSlot\"")
-        buildConfigField("String", "NODEJS_RUNTIME_SLOT_TARGET_VERSION", "\"$nodeJsRuntimeSlotTargetVersion\"")
-        buildConfigField("boolean", "NODEJS_RUNTIME_SLOT_BUILD_ONLY", "true")
-        buildConfigField("boolean", "NODEJS_RUNTIME_SLOT_USER_SELECTABLE", "false")
-        buildConfigField("String", "NODEJS_RELEASE_FLAVOR", "\"$nodeJsReleaseFlavor\"")
-        buildConfigField("int", "NODEJS_EMBEDDED_PROBE_LEVEL", "$nodeJsEmbeddedProbeLevel")
-        buildConfigField("long", "NODEJS_EMBEDDED_PROBE_TIMEOUT_MS", "${nodeJsEmbeddedProbeTimeoutMs}L")
-        buildConfigField("boolean", "NODEJS_EMBEDDED_PROBE_LIFECYCLE_BUILD_ENABLED", "$nodeJsEmbeddedProbeLifecycleEnabled")
-        buildConfigField("boolean", "NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED", "$nodeJsEmbeddedScriptEnabled")
-        buildConfigField("boolean", "NODEJS_ESM_EXPERIMENTAL_ENABLED", "$nodeJsEsmExperimentalEnabled")
-        buildConfigField("boolean", "NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED", "$nodeJsDynamicImportLocalEnabled")
-        buildConfigField("boolean", "NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED", "$nodeJsDynamicImportEnabled")
-        buildConfigField("boolean", "NODEJS_NETWORK_EXPERIMENTAL_ENABLED", "$nodeJsNetworkExperimentalEnabled")
-        buildConfigField("boolean", "NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED", "$nodeJsRawNetworkModulesExperimentalEnabled")
-        buildConfigField("boolean", "NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED", "$nodeJsWorkerThreadsExperimentalEnabled")
-        buildConfigField("boolean", "NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED", "$nodeJsChildProcessExperimentalEnabled")
-        buildConfigField("boolean", "NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED", "$nodeJsJavaInteropExperimentalEnabled")
-        buildConfigField("boolean", "NODEJS_PROFILE_PRO_ENABLED", "$nodeJsProfileProEnabled")
-        buildConfigField("boolean", "NODEJS_PROFILE_DESKTOP_ENABLED", "$nodeJsProfileDesktopEnabled")
-        buildConfigField("boolean", "NODEJS_PROFILE_DEBUG_UNSAFE_LAB_ENABLED", "$nodeJsProfileDebugUnsafeLabEnabled")
-        buildConfigField("boolean", "NODEJS_RELAXED_CAPABILITIES_ENABLED", "$nodeJsRelaxedCapabilitiesEnabled")
-        buildConfigField("boolean", "NODEJS_TIMELINE_TRACE_ENABLED", "$nodeJsTimelineTraceEnabled")
         buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
-        resValue("string", "node_identity_application_id", nodeJsEffectiveApplicationId)
-        resValue("string", "node_identity_app_label", nodeJsAppLabel)
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -628,9 +507,6 @@ android {
 
         create(flavorNameApp) {
             dimension = flavorDimension
-            if (nodeJsApplicationIdSuffix.isNotEmpty()) {
-                applicationIdSuffix = nodeJsApplicationIdSuffix
-            }
             versionCode = versions.appVersionCode
             versionName = versions.appVersionName
             buildConfigField("String", "CHANNEL", "\"$flavorNameApp\"")
@@ -638,7 +514,7 @@ android {
             manifestPlaceholders.putAll(
                 mapOf(
                     "CHANNEL" to flavorNameApp,
-                    "appName" to "@string/node_identity_app_label",
+                    "appName" to "@string/app_name",
                     "intentCategory" to "android.intent.category.LAUNCHER",
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
                     "authorities" to "org.autojs.autojs6.fileprovider",
@@ -649,7 +525,7 @@ android {
 
         create(flavorNameInrt) {
             dimension = flavorDimension
-            applicationIdSuffix = "$nodeJsApplicationIdSuffix.$flavorNameInrt"
+            applicationIdSuffix = ".$flavorNameInrt"
             minSdk = versions.sdkVersionMin
             targetSdk = versions.sdkVersionTargetInrt
             compileSdk = versions.sdkVersionCompile
@@ -670,27 +546,6 @@ android {
                 )
             )
 
-            // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
-            //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L93
-            // noinspection ChromeOsAbiSupport
-            if (!isNodeJsNativeRuntimeRequested) {
-                ndk.abiFilters += ""
-            }
-        }
-
-        androidResources {
-            if (isAppAssembleTaskRequested) {
-                ignoreAssetsPatterns.addAll(listOf(".idea", "declarations", "sample/declarations"))
-            }
-            if (isInrtAssembleTaskRequested) {
-                // @Hint by SuperMonster003 on Oct 16, 2023.
-                //  ! Runtime assets will be copied from flavor "app"
-                //  ! while building an apk on org.autojs.autojs.ui.project.BuildActivity.
-                //  ! zh-CN:
-                //  ! 绫?org.autojs.autojs.ui.project.BuildActivity 鏋勫缓 APK 鏃?
-                //  ! 杩愯鏃惰祫浜ф枃浠?(runtime assets) 灏嗙敱鍚嶄负 "app" 鐨?Gradle flavor 浣滀负婧愬湴鍧€杩涜澶嶅埗.
-                ignoreAssetsPatterns.addAll(emptyList())
-            }
         }
 
     }
@@ -727,7 +582,6 @@ android {
         //  !
         getByName("main") {
             assets.directories.add("src/main/assets")
-            jniLibs.setSrcDirs(listOf(nodeJsRuntimeSlotGeneratedJniLibsDir.get().asFile))
         }
         getByName("release") {
             java.directories.add("src/release/java")
@@ -740,9 +594,6 @@ android {
         }
         getByName(flavorNameInrt) {
             assets.directories.add("src/main/assets-$flavorNameInrt")
-        }
-        getByName("androidTest") {
-            assets.directories.add(nodeJsAndroidTestExamplesRootDir.absolutePath)
         }
 
     }
@@ -779,27 +630,7 @@ android {
             "EmojiReference.txt",
         ).let { resources.excludes.addAll(it) }
 
-        if (isInrtTaskRequested) {
-            listOf(
-                "**/prob_emit.txt", // Jieba Analysis (zh-CN: 缁撳反鍒嗚瘝)
-                "**/dict-chinese-*.db.gzip", // Jieba Analysis (zh-CN: 缁撳反鍒嗚瘝)
-            ).let { resources.excludes.addAll(it) }
-        }
-
         jniLibs {
-            // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
-            //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L91
-            if (!isNodeJsNativeRuntimeRequested) {
-                val allNativeLibAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86", "armeabi")
-                excludes += allNativeLibAbis.flatMap { abi ->
-                    listOf("lib/$abi/**", "**/$abi/**")
-                }
-            } else if (isNodeJsHostBridgeBuildRequested) {
-                val unsupportedNodeJsAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") - nodeJsBridgeNativeRuntimeAbis.toSet()
-                excludes += unsupportedNodeJsAbis.flatMap { abi ->
-                    listOf("lib/$abi/**", "**/$abi/**")
-                }
-            }
             useLegacyPackaging = true
         }
     }
@@ -859,35 +690,9 @@ android {
         //  # }
     }
 
-    if (isNodeJsHostBridgeBuildRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty()) {
-        externalNativeBuild {
-            cmake {
-                path = nodeJsBridgeCmakeFile ?: file("src/main/cpp/CMakeLists.txt")
-            }
-        }
-    }
-
-    splits {
-        // Configures multiple APKs based on ABI.
-        abi {
-            // Enables building multiple APKs per ABI.
-            isEnable = !isInrtAssembleTaskRequested
-            // By default, all ABIs are included, so use reset() and include to specify that we only
-            // want APKs for x86 and x86_64.
-            // Resets the list of ABIs that Gradle should create APKs for to none.
-            reset()
-            // Specifies a list of ABIs that Gradle should create APKs for.
-            val splitAbis = when {
-                isNodeJsHostBridgeBuildRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty() -> nodeJsBridgeNativeRuntimeAbis
-                else -> listOf("arm64-v8a", "x86_64", "armeabi-v7a", "x86", "armeabi")
-            }
-            include(*splitAbis.toTypedArray())
-            // Specifies that we do not want to also generate a universal APK that includes all ABIs.
-            isUniversalApk = true
-        }
-    }
-
 }
+
+apply(from = "node-android-config.gradle.kts")
 
 androidComponents {
     onVariants { variant ->
@@ -976,30 +781,7 @@ androidComponents {
     }
 }
 
-extra.apply {
-    set("nodeJsBuild.taskNameAssembleInrtFullNodeRelease", taskNameAssembleInrtFullNodeRelease)
-    set("nodeJsBuild.isNodeFuzzerSeedReplayRequested", isNodeFuzzerSeedReplayRequested)
-    set("nodeJsBuild.nodeJsReleaseFlavor", nodeJsReleaseFlavor)
-    set("nodeJsBuild.nodeJsReleaseExpectedAbis", nodeJsReleaseExpectedAbis)
-    set("nodeJsBuild.effectiveNodeJsRuntimeBackend", effectiveNodeJsRuntimeBackend)
-    set("nodeJsBuild.isNodeJsNativeRuntimeRequested", isNodeJsNativeRuntimeRequested)
-    set("nodeJsBuild.isNodeJsHostBridgeBuildRequested", isNodeJsHostBridgeBuildRequested)
-    set("nodeJsBuild.nodeJsTestDeviceProfile", nodeJsTestDeviceProfile)
-    set("nodeJsBuild.nodeJsFuzzerBudget", nodeJsFuzzerBudget)
-    set("nodeJsBuild.nodeJsFuzzerSeedFile", nodeJsFuzzerSeedFile)
-    set("nodeJsBuild.nodeJsFuzzerReplayRunnerClass", nodeJsFuzzerReplayRunnerClass)
-    set("nodeJsBuild.nodeJsFuzzerReplaySeed", nodeJsFuzzerReplaySeed)
-    set("nodeJsBuild.nodeJsTestDeviceProfileClasses", nodeJsTestDeviceProfileClasses)
-    set("nodeJsBuild.apkFileExtension", utils.FILE_EXTENSION_APK)
-}
-
 apply(from = "node-build-tasks.gradle.kts")
-
-if (isInrtAssembleTaskRequested) {
-    tasks.matching { it.name == "lintVitalAnalyzeInrtRelease" }.configureEach {
-        enabled = false
-    }
-}
 
 apply(from = "node-gradle-scripts.gradle.kts")
 
