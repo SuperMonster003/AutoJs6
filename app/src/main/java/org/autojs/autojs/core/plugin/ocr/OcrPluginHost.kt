@@ -209,21 +209,21 @@ object OcrPluginHost {
             .filter { PluginTrustManager.isAuthorized(context, it.serviceInfo.packageName) }
             .filter { isHostVersionCompatible(it.pluginInfo) }
         if (list.isEmpty()) return null
-        if (engineId != null) {
-            list.firstOrNull { d -> d.pluginInfo?.id == engineId }?.let { return it }
-        }
-        if (engine != null && variant != null) {
-            list.firstOrNull { d -> d.pluginInfo?.engine == engine && d.pluginInfo.variant == variant }?.let { return it }
-        }
-        if (engine != null) {
-            val candidates = list.filter { d -> d.pluginInfo?.engine == engine }
-            selectByPriorityWithKeys(
+        if (hasExplicitSelectionCriteria(engineId, engine, variant)) {
+            val candidates = list.filter { d ->
+                d.pluginInfo?.let { matchesSelectionCriteria(it, engineId, engine, variant) } == true
+            }
+            if (candidates.isEmpty()) return null
+            return selectByPriorityWithKeys(
                 candidates = candidates,
                 keys = PluginVariantPriorityStore.buildPriorityKeys(
-                    engine = engine,
+                    engine = engine ?: candidates.mapNotNull { it.pluginInfo?.engine }.distinct().singleOrNull(),
                     engineId = engineId ?: inferCommonEngineFamily(candidates),
                 ),
-            )?.let { return it }
+            ) ?: candidates.maxBy {
+                val candidateVariant = it.pluginInfo?.variant ?: return@maxBy 0
+                candidateVariant.replace(Regex("\\D"), "").toIntOrNull() ?: 0
+            }
         }
         val singleEngine = list.mapNotNull { it.pluginInfo?.engine }.distinct().singleOrNull()
         if (!singleEngine.isNullOrBlank()) {
@@ -309,6 +309,11 @@ object OcrPluginHost {
         val scopedInfoItems = discovered.filter { item ->
             item.pluginInfo?.let { matchesSelectionCriteria(it, engineId, engine, variant) } == true
         }
+        if (scopedInfoItems.isEmpty() && hasExplicitSelectionCriteria(engineId, engine, variant)) {
+            return IllegalStateException(
+                context.getString(R.string.error_missing_required_plugin_for_module_label, moduleLabel)
+            )
+        }
         val variantList = scopedInfoItems
             .mapNotNull { item ->
                 item.pluginInfo?.let { info ->
@@ -383,6 +388,14 @@ object OcrPluginHost {
         if (engine != null && pluginInfo.engine != engine) return false
         if (variant != null && pluginInfo.variant != variant) return false
         return true
+    }
+
+    private fun hasExplicitSelectionCriteria(
+        engineId: String?,
+        engine: String?,
+        variant: String?,
+    ): Boolean {
+        return engineId != null || engine != null || variant != null
     }
 
     private fun isHostVersionCompatible(pluginInfo: PluginInfo?): Boolean {
