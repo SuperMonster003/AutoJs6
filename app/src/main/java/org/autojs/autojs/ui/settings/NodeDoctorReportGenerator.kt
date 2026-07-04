@@ -5,14 +5,18 @@ import android.os.Build
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
+import org.autojs.autojs.engine.NodeJsRuntimePluginBridge
+import org.autojs.autojs.engine.NodeJsRuntimePluginHost
 import org.autojs.autojs.engine.NodePrivacyDisclosurePolicy
 import org.autojs.autojs.engine.NodeProfileRollbackPolicy
 import org.autojs.autojs.engine.NodeProfileSelectionDiagnostics
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
+import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.time.ZonedDateTime
 
@@ -59,6 +63,7 @@ object NodeDoctorReportGenerator {
             put("privacy", privacyJson())
             put("app", appJson(context))
             put("runtime", runtimeJson(probeResult))
+            put("runtimePlugin", runtimePluginJson(context))
             put("compileCache", compileCacheJson(context))
             put("featureFlags", featureFlagsJson())
             put("profileSelection", profileSelectionJson(projectRoot))
@@ -114,6 +119,62 @@ object NodeDoctorReportGenerator {
         put("androidSdk", Build.VERSION.SDK_INT)
         put("device", listOf(Build.MANUFACTURER, Build.MODEL).filter { it.isNotBlank() }.joinToString(" "))
         put("compatibilityDescriptor", NodeProjectRuntimeCompatibilityDescriptor.currentJson())
+    }
+
+    private fun runtimePluginJson(context: Context) = JSONObject().apply {
+        put("requested", NodeJsRuntimePluginBridge.isRequested())
+        put("required", NodeJsRuntimePluginBridge.isRequired())
+        val candidates = runCatching {
+            runBlocking { NodeJsRuntimePluginHost.discover(context) }
+        }
+        val candidateList = candidates.getOrNull().orEmpty()
+        put("discoverStatus", if (candidates.isSuccess) "succeeded" else "failed")
+        put("candidateCount", candidateList.size)
+        put(
+            "candidates",
+            JSONArray().apply {
+                candidateList.forEach { candidate ->
+                    put(
+                        JSONObject().apply {
+                            put("packageName", candidate.serviceInfo.packageName)
+                            put("serviceName", candidate.serviceInfo.name)
+                            put("packageVersionCode", candidate.packageVersionCode ?: JSONObject.NULL)
+                            put("exported", candidate.serviceInfo.exported)
+                            put("permission", candidate.serviceInfo.permission ?: JSONObject.NULL)
+                        },
+                    )
+                }
+            },
+        )
+        candidates.exceptionOrNull()?.let { error ->
+            put("discoverError", error.message ?: error.javaClass.name)
+        }
+        val probe = runCatching {
+            runBlocking { NodeJsRuntimePluginHost.probe(context) }
+        }
+        val runtimeInfo = probe.getOrNull()
+        put("probeStatus", if (probe.isSuccess) "succeeded" else "failed")
+        put("probeError", probe.exceptionOrNull()?.let { it.message ?: it.javaClass.name } ?: JSONObject.NULL)
+        put("runtimeInfo", runtimeInfo?.let(::runtimePluginInfoJson) ?: JSONObject.NULL)
+    }
+
+    private fun runtimePluginInfoJson(runtimeInfo: android.os.Bundle) = JSONObject().apply {
+        val capabilities = runtimeInfo.getStringArray(NodeJsRuntimeContract.KEY_CAPABILITIES).orEmpty()
+        put("contractVersion", runtimeInfo.getInt(NodeJsRuntimeContract.KEY_CONTRACT_VERSION, 0))
+        put("runtimeSlot", runtimeInfo.getString(NodeJsRuntimeContract.KEY_RUNTIME_SLOT).orEmpty())
+        put("nodeVersion", runtimeInfo.getString(NodeJsRuntimeContract.KEY_NODE_VERSION).orEmpty())
+        put("nativeLibraryName", runtimeInfo.getString(NodeJsRuntimeContract.KEY_NATIVE_LIBRARY_NAME).orEmpty())
+        put("bridgeLibraryName", runtimeInfo.getString(NodeJsRuntimeContract.KEY_BRIDGE_LIBRARY_NAME).orEmpty())
+        put("capabilities", JSONArray(capabilities.toList()))
+        put("capabilityCount", capabilities.size)
+        put(
+            "supportsHostBroker",
+            NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_BROKER in capabilities,
+        )
+        put(
+            "supportsLiveBridge",
+            NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE in capabilities,
+        )
     }
 
     private fun compileCacheJson(context: Context) = JSONObject().apply {
@@ -266,6 +327,7 @@ object NodeDoctorReportGenerator {
 
     private fun buildText(context: Context, generatedAt: String, json: JSONObject): String {
         val runtime = json.getJSONObject("runtime")
+        val runtimePlugin = json.getJSONObject("runtimePlugin")
         val compileCache = json.getJSONObject("compileCache")
         val profileSelection = json.getJSONObject("profileSelection")
         val profileRollbackPolicy = json.getJSONObject("profileRollbackPolicy")
@@ -301,6 +363,22 @@ object NodeDoctorReportGenerator {
             appendLine("  observed Node: ${runtime.getString("nodeObservedVersion")}")
             appendLine("  selected ABI: ${runtime.getString("selectedAbi")}")
             appendLine("  supported ABIs: ${runtime.getJSONArray("deviceSupportedAbis").join(", ")}")
+            appendLine()
+            appendLine("Runtime Plugin:")
+            appendLine("  requested: ${runtimePlugin.getBoolean("requested")}")
+            appendLine("  required: ${runtimePlugin.getBoolean("required")}")
+            appendLine("  discover: ${runtimePlugin.getString("discoverStatus")} candidates=${runtimePlugin.getInt("candidateCount")}")
+            appendLine("  probe: ${runtimePlugin.getString("probeStatus")}")
+            runtimePlugin.optString("probeError").takeIf { it.isNotBlank() && it != "null" }?.let { error ->
+                appendLine("  probe error: $error")
+            }
+            runtimePlugin.optJSONObject("runtimeInfo")?.let { info ->
+                appendLine("  slot: ${info.getString("runtimeSlot")}")
+                appendLine("  node: ${info.getString("nodeVersion")}")
+                appendLine("  capabilities: ${info.getInt("capabilityCount")}")
+                appendLine("  host broker: ${info.getBoolean("supportsHostBroker")}")
+                appendLine("  live bridge: ${info.getBoolean("supportsLiveBridge")}")
+            }
             val compatibilityDescriptor = runtime.getJSONObject("compatibilityDescriptor")
             val runtimeVersions = compatibilityDescriptor.getJSONObject("versions")
             appendLine()
