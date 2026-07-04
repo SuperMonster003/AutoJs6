@@ -111,7 +111,7 @@ object NodeDeveloperRepl {
                 workingDirectory,
                 ".autojs6-node-repl-eval-$evalIndex.js",
             ).absolutePath
-            return NativeNodeEmbeddedScriptService.runScript(
+            return NodeJsRuntimePluginBridge.runScriptWithEmbeddedFallback(
                 context,
                 NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
                     source = wrapEvalSource(source),
