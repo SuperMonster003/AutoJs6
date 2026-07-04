@@ -95,9 +95,6 @@ object NodeJsRuntimePluginBridge {
             launchSurface = launchSurface,
         )
         val enrichedRuntimeModuleSources = enrichedRuntimeModuleSourcesForPlugin(
-            context = context,
-            launchSurface = launchSurface,
-            engineInfo = engineInfo,
         )
         return Bundle().apply {
             putInt(NodeJsRuntimeContract.KEY_CONTRACT_VERSION, NodeJsRuntimeContract.CONTRACT_VERSION)
@@ -155,25 +152,11 @@ object NodeJsRuntimePluginBridge {
             .copy(backend = "plugin")
     }
 
-    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.enrichedRuntimeModuleSourcesForPlugin(
-        context: Context,
-        launchSurface: String,
-        engineInfo: NodeBridgeEngineInfo,
-    ): Map<String, String> {
-        val appContext = context.applicationContext
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.enrichedRuntimeModuleSourcesForPlugin(): Map<String, String> {
         return runtimeModuleSources
             .withPluginBridgePermissionManifest(
                 workingDirectory = workingDirectory,
                 sandboxRoot = sandboxRoot,
-            )
-            .withPluginLifecycleConfig(
-                NodeLifecycleCheckpointStore.runtimeModuleSource(
-                    context = appContext,
-                    engineInfo = engineInfo,
-                    executionMode = executionMode,
-                    launchSurface = launchSurface,
-                    stopRequestFile = null,
-                ),
             )
     }
 
@@ -193,13 +176,6 @@ object NodeJsRuntimePluginBridge {
                     ),
                 )
             }
-        }
-    }
-
-    private fun Map<String, String>.withPluginLifecycleConfig(configJson: String): Map<String, String> {
-        return linkedMapOf<String, String>().apply {
-            putAll(this@withPluginLifecycleConfig)
-            put(NodeLifecycleCheckpointStore.RUNTIME_MODULE_NAME, configJson)
         }
     }
 

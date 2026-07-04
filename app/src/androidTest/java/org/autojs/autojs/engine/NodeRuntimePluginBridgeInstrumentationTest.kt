@@ -81,6 +81,8 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         assertEquals("plugin_context", result.nativeValues["embedded_script.runtime_plugin.runtime_module.device_info_source"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.bridge_limits_present"])
         assertEquals("working_directory", result.nativeValues["embedded_script.runtime_plugin.runtime_module.bridge_limits_source"])
+        assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.lifecycle_config_present"])
+        assertEquals("bridge_engine_info", result.nativeValues["embedded_script.runtime_plugin.runtime_module.lifecycle_config_source"])
         assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
         assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
         assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
