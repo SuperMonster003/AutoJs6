@@ -360,6 +360,17 @@ object NativeNodeEmbeddedProjectRunner {
         return runNormalized(context, normalizedRequest, describe(normalizedRequest), executionId)
     }
 
+    fun buildResolvedEntryRequest(
+        request: Request,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
+        val normalizedRequest = normalizeRequest(request)
+        return buildEmbeddedScriptRequest(normalizedRequest, describe(normalizedRequest))
+    }
+
+    fun describeResolvedEntryRequest(request: Request): Descriptor {
+        return describe(normalizeRequest(request))
+    }
+
     private fun runNormalized(
         context: Context,
         request: Request,

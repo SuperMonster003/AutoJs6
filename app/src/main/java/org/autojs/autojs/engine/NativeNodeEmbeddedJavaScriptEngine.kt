@@ -240,10 +240,20 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             runtimeModuleSources = preparation.runtimeModuleSources,
             entrySource = preparation.entrySource,
         )
-        lastNodeProjectRunnerDescriptor = NativeNodeEmbeddedProjectRunner.describe(request)
+        val descriptor = NativeNodeEmbeddedProjectRunner.describeResolvedEntryRequest(request)
+        lastNodeProjectRunnerDescriptor = descriptor
         val executionId = newEmbeddedExecutionId()
         val result = withActiveEmbeddedExecutionId(executionId) {
-            NativeNodeEmbeddedProjectRunner.run(androidContext, request, executionId)
+            if (NodeJsRuntimePluginBridge.isRequested()) {
+                runEmbeddedScriptRequest(
+                    NativeNodeEmbeddedProjectRunner
+                        .buildResolvedEntryRequest(request)
+                        .copy(executionId = executionId, spawnDepth = currentSpawnDepth()),
+                    descriptorNativeValues = descriptor.toNativeValues(),
+                )
+            } else {
+                NativeNodeEmbeddedProjectRunner.run(androidContext, request, executionId)
+            }
         }
         return finishEmbeddedScriptExecution(
             preparation.toBridgeRequest(request.timeoutMs, currentSpawnDepth())
