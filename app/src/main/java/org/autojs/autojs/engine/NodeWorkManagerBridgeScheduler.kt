@@ -152,7 +152,7 @@ object NodeWorkManagerBridgeScheduler {
             return androidx.work.ListenableWorker.Result.failure()
         }
 
-        val result = NativeNodeEmbeddedScriptService.runScript(
+        val result = NodeJsRuntimePluginBridge.runScriptWithEmbeddedFallback(
             appContext,
             NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
                 source = entry.source,
