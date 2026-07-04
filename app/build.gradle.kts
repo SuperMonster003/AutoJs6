@@ -91,7 +91,11 @@ val nodeJsRuntimeBackend = providers.gradleProperty("autojs.nodejs.backend").orE
     .trim()
     .lowercase()
     .let { if (it in setOf("rhino", "native", "embedded", "auto")) it else "embedded" }
-val nodeJsConfiguredReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
+val nodeJsDefaultReleaseFlavor = when {
+    isFullNodeInrtTemplateTaskRequested -> "nodeFull"
+    else -> "nodePlugin"
+}
+val nodeJsConfiguredReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse(nodeJsDefaultReleaseFlavor).get()
     .trim()
     .let { requested ->
         when (requested.lowercase()) {
@@ -148,6 +152,13 @@ val nodeJsPluginProjectDir = providers.gradleProperty("autojs.nodejs.pluginProje
     ?.takeIf(String::isNotEmpty)
     ?.let(::file)
     ?: rootProject.projectDir.parentFile?.resolve("autojs6-plugin-nodejs")
+val nodeJsPluginCppDir = nodeJsPluginProjectDir
+    ?.resolve("app/src/main/cpp")
+    ?.takeIf(File::isDirectory)
+val nodeJsBridgeCmakeFile = listOfNotNull(
+    nodeJsPluginCppDir?.resolve("CMakeLists.txt"),
+    file("src/main/cpp/CMakeLists.txt"),
+).firstOrNull(File::isFile)
 val nodeJsPluginRuntimeJniLibsDir = nodeJsPluginProjectDir
     ?.resolve("app/src/main/jniLibs")
     ?.takeIf(File::isDirectory)
@@ -168,7 +179,10 @@ val nodeJsRuntimeSlotHeaderDir = when (nodeJsRuntimeSlot) {
             "autojs.nodejs.runtimeSlot=node24_current requires " +
                     "-Pautojs.nodejs.patchCandidateHeaders=<dir>."
         )
-    else -> file("src/main/cpp/node-v24.5.0/include/node")
+    else -> nodeJsPluginCppDir
+        ?.resolve("node-v24.5.0/include/node")
+        ?.takeIf { it.resolve("node.h").isFile }
+        ?: file("src/main/cpp/node-v24.5.0/include/node")
 }
 if (nodeJsRuntimeSlot == "node24_current") {
     val missingCandidateAbis = nodeJsReleaseSupportedAbis
@@ -1681,6 +1695,12 @@ if (nodeJsMissingReleaseAbis.isNotEmpty()) {
                 ". Adjust -Pautojs.nodejs.releaseAbis or provide libnode.so for the selected ABI set."
     )
 }
+if (isNodeJsHostBridgeBuildRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty() && nodeJsBridgeCmakeFile == null) {
+    throw GradleException(
+        "Embedded Node host bridge build requires Node bridge CMake sources. " +
+                "Set -Pautojs.nodejs.pluginProjectDir=<autojs6-plugin-nodejs dir> or restore app/src/main/cpp."
+    )
+}
 val nodeJsRuntimeSlotGeneratedJniLibsDir = layout.buildDirectory
     .dir("generated/nodejs/runtime-slot/$nodeJsRuntimeSlot/jniLibs")
 val prepareNodeJsRuntimeSlotJniLibs = tasks.register(
@@ -2483,7 +2503,7 @@ android {
     if (isNodeJsHostBridgeBuildRequested && nodeJsBridgeNativeRuntimeAbis.isNotEmpty()) {
         externalNativeBuild {
             cmake {
-                path = file("src/main/cpp/CMakeLists.txt")
+                path = nodeJsBridgeCmakeFile ?: file("src/main/cpp/CMakeLists.txt")
             }
         }
     }

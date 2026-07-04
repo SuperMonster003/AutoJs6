@@ -36,7 +36,10 @@ import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.util.MD5Utils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.autojs.plugin.common.api.IPluginInfoProvider
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.nodejs.api.NodeJsPluginActions
+import org.autojs.plugin.nodejs.api.NodeJsPluginIds
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
 import pxb.android.StringItem
 import pxb.android.axml.AxmlWriter
@@ -1048,6 +1051,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         "Rebuild AutoJs6 with -Pautojs.nodejs.embedded.script.enabled=true before selecting Embedded Node.js."
             )
         }
+        if (Lib.EMBEDDED_NODE_JS.isPlugin) {
+            return
+        }
 
         val missingPairs = mutableListOf<Pair<String, String>>() // (abi, soName)
         config.abis.forEach { abiCanonicalName ->
@@ -1663,10 +1669,22 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         EMBEDDED_NODE_JS(
             label = "Embedded Node.js",
             aliases = listOf("node", "nodejs", "node.js", "embedded-node", "embedded-nodejs", "embedded_nodejs"),
-            libsToInclude = listOf(
-                "libnode.so",
-                "libautojs6-node.so",
-                "libc++_shared.so",
+            libsToInclude = emptyList(),
+            plugin = PluginLib(
+                action = NodeJsPluginActions.INFO,
+                onServiceConnected = { binder: IBinder ->
+                    IPluginInfoProvider.Stub.asInterface(binder).info
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = NodeJsPluginIds.VARIANT_NODE_24_5,
+                        libsToInclude = listOf(
+                            "libnode.so",
+                            "libautojs6-node.so",
+                            "libc++_shared.so",
+                        ),
+                    ),
+                ),
             ),
         ),
 
