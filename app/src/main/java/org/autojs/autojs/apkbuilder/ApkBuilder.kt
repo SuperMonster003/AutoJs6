@@ -1741,12 +1741,42 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         RAPID_OCR(
             label = "Rapid OCR",
             aliases = listOf("rapid", "rapidocr", "rapid-ocr", "rapid_ocr"),
-            libsToInclude = listOf(
-                "libRapidOcr.so",
-                "libonnxruntime.so",
-            ),
-            assetDirsToInclude = listOf(
-                "assets/models",
+            libsToInclude = emptyList(),
+            assetDirsToInclude = emptyList(),
+            plugin = PluginLib(
+                // Shared OCR AIDL action. Rapid OCR plugins are selected by PluginInfo.engine/variant.
+                action = OcrPluginHost.ACTION_OCR,
+                onServiceConnected = { binder: IBinder ->
+                    IOcrPlugin.Stub.asInterface(binder).info
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = "pp-ocrv3",
+                        assetsToInclude = listOf(
+                            "assets/models/ch_PP-OCRv3_det_infer.onnx",
+                            "assets/models/ch_ppocr_mobile_v2.0_cls_infer.onnx",
+                            "assets/models/ch_PP-OCRv3_rec_infer.onnx",
+                            "assets/models/ppocr_keys_v1.txt",
+                        ) to emptyList(),
+                        libsToInclude = listOf(
+                            "libRapidOcr.so",
+                            "libonnxruntime.so",
+                        ),
+                    ),
+                    PluginLibVariant(
+                        variant = "pp-ocrv6",
+                        assetsToInclude = listOf(
+                            "assets/models/PP-OCRv6_det_small.onnx",
+                            "assets/models/ch_ppocr_mobile_v2.0_cls_mobile.onnx",
+                            "assets/models/PP-OCRv6_rec_small.onnx",
+                            "assets/models/ppocrv6_dict.txt",
+                        ) to emptyList(),
+                        libsToInclude = listOf(
+                            "libRapidOcr.so",
+                            "libonnxruntime.so",
+                        ),
+                    ),
+                ),
             ),
         ),
 

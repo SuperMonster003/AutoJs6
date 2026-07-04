@@ -1942,6 +1942,9 @@ dependencies /* Unclassified */ {
 
     // Plugin API: Paddle OCR Engine
     implementation(project(":plugin-api:paddle-ocr-engine"))
+
+    // Plugin API: Rapid OCR Engine
+    implementation(project(":plugin-api:rapid-ocr-engine"))
 }
 
 dependencies /* MIME */ {
@@ -2770,12 +2773,6 @@ tasks {
 
             doLast { println("Destination: ${file(dst)}") }
         }
-    }
-}
-
-dependencies /* Rapid OCR for packaged apps */ {
-    findProject(":libs:rapidocr")?.let { rapidOcrProject ->
-        add("${flavorNameInrt}Implementation", rapidOcrProject)
     }
 }
 

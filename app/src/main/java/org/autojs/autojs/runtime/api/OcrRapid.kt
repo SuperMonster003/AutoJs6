@@ -1,13 +1,11 @@
 package org.autojs.autojs.runtime.api
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Rect
 import androidx.core.graphics.createBitmap
+import com.benjaminwan.ocrlibrary.RapidOcrEngine
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.image.ImageWrapper
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
+import java.io.File
 
 class OcrRapid {
 
@@ -31,20 +29,24 @@ private object RapidOcrEmbeddedEngine {
     private const val DEFAULT_DO_ANGLE = false
     private const val DEFAULT_MOST_ANGLE = false
 
+    private val requiredNativeLibraries = listOf(
+        "libRapidOcr.so",
+        "libonnxruntime.so",
+    )
+
     private val lock = Any()
-    private var engine: Any? = null
-    private var detectMethod: Method? = null
+    private var engine: RapidOcrEngine? = null
 
     fun detect(context: Context, image: ImageWrapper?): List<OcrResult> {
         image ?: return emptyList()
         val bitmap = image.bitmap
         if (bitmap.isRecycled) return emptyList()
 
+        ensureNativeLibrariesAvailable(context)
         val output = newEmptyOutputBitmap()
         return try {
             val rawResult = synchronized(lock) {
-                getDetectMethod(context).invoke(
-                    getEngine(context),
+                getEngine(context).detect(
                     bitmap,
                     output,
                     DEFAULT_PADDING,
@@ -57,77 +59,40 @@ private object RapidOcrEmbeddedEngine {
                 )
             }
             convertResult(rawResult)
-        } catch (e: ReflectiveOperationException) {
+        } catch (e: Throwable) {
             throw wrapFailure(e)
         } finally {
             output.recycle()
         }
     }
 
-    private fun getEngine(context: Context): Any {
+    private fun getEngine(context: Context): RapidOcrEngine {
         engine?.let { return it }
-        val engineClass = Class.forName("com.benjaminwan.ocrlibrary.OcrEngine")
-        return engineClass.getConstructor(Context::class.java)
-            .newInstance(context.applicationContext)
+        return RapidOcrEngine(context.applicationContext)
             .also { engine = it }
     }
 
-    private fun getDetectMethod(context: Context): Method {
-        detectMethod?.let { return it }
-        return getEngine(context).javaClass.getMethod(
-            "detect",
-            Bitmap::class.java,
-            Bitmap::class.java,
-            java.lang.Integer.TYPE,
-            java.lang.Integer.TYPE,
-            java.lang.Float.TYPE,
-            java.lang.Float.TYPE,
-            java.lang.Float.TYPE,
-            java.lang.Boolean.TYPE,
-            java.lang.Boolean.TYPE,
-        ).also { detectMethod = it }
-    }
-
-    private fun convertResult(rawResult: Any?): List<OcrResult> {
+    private fun convertResult(rawResult: RapidOcrEngine.Result?): List<OcrResult> {
         rawResult ?: return emptyList()
-        val blocks = rawResult.javaClass.getMethod("getTextBlocks").invoke(rawResult) as? Iterable<*>
-            ?: return emptyList()
-        return blocks.mapNotNull { block ->
-            block ?: return@mapNotNull null
-            val blockClass = block.javaClass
-            val text = blockClass.getMethod("getText").invoke(block) as? String ?: ""
-            val confidence = (blockClass.getMethod("getBoxScore").invoke(block) as? Number)?.toFloat() ?: 0f
-            val points = blockClass.getMethod("getBoxPoint").invoke(block) as? Iterable<*>
+        return rawResult.textBlocks.map { block ->
             OcrResult(
-                text = text,
-                confidence = confidence,
-                bounds = boundsOf(points),
+                text = block.text,
+                confidence = block.confidence,
+                bounds = block.bounds,
             )
         }
     }
 
-    private fun boundsOf(points: Iterable<*>?): Rect {
-        val coordinates = points
-            ?.mapNotNull { point ->
-                point ?: return@mapNotNull null
-                pointInt(point, "getX") to pointInt(point, "getY")
-            }
-            .orEmpty()
-        if (coordinates.isEmpty()) return Rect()
-
-        val left = coordinates.minOf { it.first }
-        val top = coordinates.minOf { it.second }
-        val right = coordinates.maxOf { it.first }
-        val bottom = coordinates.maxOf { it.second }
-        return Rect(left, top, right, bottom)
+    private fun ensureNativeLibrariesAvailable(context: Context) {
+        val nativeLibraryDir = File(context.applicationInfo.nativeLibraryDir)
+        val libraries = nativeLibraryDir.list()?.toSet().orEmpty()
+        val missing = requiredNativeLibraries.filterNot { it in libraries }
+        if (missing.isNotEmpty()) {
+            throw IllegalStateException("Rapid OCR embedded native libraries are unavailable: ${missing.joinToString()}")
+        }
     }
 
-    private fun pointInt(point: Any, methodName: String): Int {
-        return (point.javaClass.getMethod(methodName).invoke(point) as? Number)?.toInt() ?: 0
-    }
-
-    private fun wrapFailure(error: ReflectiveOperationException): RuntimeException {
-        val cause = (error as? InvocationTargetException)?.targetException ?: error
+    private fun wrapFailure(cause: Throwable): RuntimeException {
         if (cause is RuntimeException) return cause
         if (cause is Error) throw cause
         return IllegalStateException("Rapid OCR embedded engine failed", cause)

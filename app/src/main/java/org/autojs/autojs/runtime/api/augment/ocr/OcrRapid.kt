@@ -5,7 +5,6 @@ import android.os.Bundle
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
-import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.rhino.ArgumentGuards
@@ -56,7 +55,6 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         }
 
         fun recognizeTextImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<String> {
-            ApkBuilder.Lib.RAPID_OCR.ensureLibFiles(OcrMode.RAPID.value)
             if (isInrt) {
                 return scriptRuntime.ocrRapid.recognizeText(image)
             }
@@ -72,7 +70,6 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         }
 
         fun detectImpl(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<OcrResult> {
-            ApkBuilder.Lib.RAPID_OCR.ensureLibFiles(OcrMode.RAPID.value)
             if (isInrt) {
                 return scriptRuntime.ocrRapid.detect(image)
             }

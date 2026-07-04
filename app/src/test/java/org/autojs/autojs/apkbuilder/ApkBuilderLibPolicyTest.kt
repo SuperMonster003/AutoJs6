@@ -1,16 +1,25 @@
 package org.autojs.autojs.apkbuilder
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ApkBuilderLibPolicyTest {
 
     @Test
-    fun rapidOcrIncludesRuntimeModelAssets() {
-        assertTrue(ApkBuilder.Lib.RAPID_OCR.assetDirsToInclude.contains("assets/models"))
-        assertFalse(ApkBuilder.Lib.RAPID_OCR.assetDirsToInclude.contains("assets/labels"))
+    fun rapidOcrUsesPluginVariantsForPackaging() {
+        val rapidOcr = ApkBuilder.Lib.RAPID_OCR
+        assertTrue(rapidOcr.isPlugin)
+        assertTrue(rapidOcr.libsToInclude.isEmpty())
+        assertTrue(rapidOcr.assetDirsToInclude.isEmpty())
+
+        val variants = rapidOcr.toPluginPair().second.variants
+        assertEquals(listOf("pp-ocrv3", "pp-ocrv6"), variants.map { it.variant })
+        variants.forEach { variant ->
+            assertEquals(listOf("libRapidOcr.so", "libonnxruntime.so"), variant.libsToInclude)
+            assertTrue(variant.assetsToInclude.first.all { it.startsWith("assets/models/") })
+            assertTrue(variant.assetsToInclude.second.isEmpty())
+        }
     }
 
     @Test
