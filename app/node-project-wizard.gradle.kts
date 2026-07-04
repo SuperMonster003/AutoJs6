@@ -31,6 +31,49 @@ private val nodeProjectWizardExpectedEntryFormats = mapOf(
     "compiled-tsx" to "cjs",
 )
 
+private fun nodeProjectWizardDisplayPath(file: File): String =
+    runCatching { file.relativeTo(rootProject.projectDir).invariantSeparatorsPath }
+        .getOrElse { file.absolutePath }
+
+private fun nodeProjectWizardPluginProjectRoot(overridePath: String?): File {
+    val candidate = overridePath
+        ?.trim()
+        ?.takeIf(String::isNotEmpty)
+        ?.let(rootProject::file)
+        ?: rootProject.projectDir.parentFile.resolve("autojs6-plugin-nodejs")
+    return candidate.canonicalFile
+}
+
+private fun nodeProjectWizardToolsRoot(
+    source: String?,
+    explicitRoot: String?,
+    pluginRoot: File,
+): File {
+    explicitRoot
+        ?.trim()
+        ?.takeIf(String::isNotEmpty)
+        ?.let(rootProject::file)
+        ?.let { return it.canonicalFile }
+    return when (val normalized = source.orEmpty().trim().lowercase()) {
+        "", "host", "main", "app" -> rootProject.projectDir.resolve("tools/nodejs").canonicalFile
+        "plugin", "node-plugin", "nodejs-plugin" -> pluginRoot.resolve("tools/nodejs").canonicalFile
+        else -> throw GradleException(
+            "Unsupported Node tools source '$normalized'. Use host or plugin, " +
+                    "or set -Pautojs.nodejs.toolsRoot=<dir>."
+        )
+    }
+}
+
+private fun nodeProjectWizardConfiguredToolsRoot(): File {
+    val pluginRootOverride = providers.gradleProperty("autojs.nodejs.pluginProjectDir")
+        .orElse(providers.gradleProperty("autojs.nodejs.plugin.root"))
+    return nodeProjectWizardToolsRoot(
+        providers.gradleProperty("autojs.nodejs.toolsSource").orElse("host").get(),
+        providers.gradleProperty("autojs.nodejs.toolsRoot").orNull,
+        nodeProjectWizardPluginProjectRoot(pluginRootOverride.orNull),
+    )
+}
+
 private fun nodeProjectWizardReadJsonObject(text: String): Map<*, *> =
     JsonSlurper().parseText(text) as? Map<*, *>
         ?: throw GradleException("Expected JSON object from Node project wizard output.")
@@ -89,19 +132,24 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
     group = "verification"
     description = "Verifies AutoJs6 Node project wizard templates and validator diagnostics."
 
-    val toolFile = rootProject.layout.projectDirectory.file("tools/nodejs/project/autojs6-node-project.js")
+    val toolsRoot = nodeProjectWizardConfiguredToolsRoot()
+    val toolFile = toolsRoot.resolve("project/autojs6-node-project.js")
     val jsonReport = layout.buildDirectory.file("reports/nodejs/project-wizard.json")
     val markdownReport = layout.buildDirectory.file("reports/nodejs/project-wizard.md")
 
     inputs.file(toolFile).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.property("toolsRoot", toolsRoot.absolutePath)
     inputs.property("templates", nodeProjectWizardTemplates)
     outputs.file(jsonReport)
     outputs.file(markdownReport)
 
     doLast {
-        val tool = toolFile.asFile
+        val tool = toolFile
         if (!tool.isFile) {
-            throw GradleException("Missing Node project wizard tool: ${tool.relativeTo(rootProject.projectDir)}")
+            throw GradleException(
+                "Missing Node project wizard tool: ${nodeProjectWizardDisplayPath(tool)}. " +
+                        "Use -Pautojs.nodejs.toolsRoot=<dir> or -Pautojs.nodejs.toolsSource=plugin."
+            )
         }
         val workRoot = layout.buildDirectory.dir("node-project-wizard").get().asFile
         workRoot.deleteRecursively()
@@ -335,7 +383,8 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
 
         val report = linkedMapOf<String, Any?>(
             "schema" to "autojs6-node-project-wizard-report-v1",
-            "tool" to tool.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
+            "tool" to nodeProjectWizardDisplayPath(tool),
+            "toolsRoot" to nodeProjectWizardDisplayPath(toolsRoot),
             "templateCount" to rows.size,
             "templates" to rows,
             "invalidFixtures" to listOf(
