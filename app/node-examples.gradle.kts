@@ -2,6 +2,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.api.tasks.Exec
 import java.io.File
+import java.security.MessageDigest
 
 private val nodeExampleKnownStatuses = setOf("stable", "partial", "experimental")
 private val nodeExampleIgnoredDirectories = setOf("npm-ci-pure-js", "autojs6-pm-fixture")
@@ -122,8 +123,44 @@ private fun nodeExampleReadJsonObject(file: File): Map<*, *> =
     JsonSlurper().parse(file) as? Map<*, *>
         ?: throw GradleException("Expected JSON object in ${file.absolutePath}")
 
+private fun nodeExampleDisplayPath(file: File): String =
+    runCatching { file.relativeTo(rootProject.projectDir).invariantSeparatorsPath }
+        .getOrElse { file.absolutePath }
+
 private fun nodeExampleList(value: Any?): List<String> =
     (value as? List<*>).orEmpty().map { it.toString() }
+
+private fun nodeExamplePluginProjectRoot(overridePath: String?): File {
+    val candidate = overridePath
+        ?.trim()
+        ?.takeIf(String::isNotEmpty)
+        ?.let(::File)
+        ?: rootProject.projectDir.parentFile.resolve("autojs6-plugin-nodejs")
+    return candidate.canonicalFile
+}
+
+private fun nodeExampleSha256(file: File): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    file.inputStream().use { input ->
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) break
+            digest.update(buffer, 0, read)
+        }
+    }
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
+
+private fun nodeExampleFileInventory(root: File): Map<String, String> {
+    if (!root.isDirectory) {
+        throw GradleException("Missing Node example directory: ${root.absolutePath}")
+    }
+    return root.walkTopDown()
+        .filter(File::isFile)
+        .associate { file -> file.relativeTo(root).invariantSeparatorsPath to nodeExampleSha256(file) }
+        .toSortedMap()
+}
 
 private fun nodeExampleMainHasNodeDirective(file: File): Boolean {
     val firstMeaningful = file.readLines()
@@ -312,6 +349,100 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
         }
         logger.lifecycle("Verified ${rows.size} Node examples from ${manifestFile.relativeTo(rootProject.projectDir)}.")
         logger.lifecycle("Node examples report written to ${jsonReport.get().asFile.absolutePath}")
+    }
+}
+
+tasks.register("verifyNodePluginExampleMirror") {
+    group = "verification"
+    description = "Verifies the Node.js plugin owns a synchronized mirror of sample/nodejs before the host copy is removed."
+
+    dependsOn(verifyNodeExamples)
+
+    val pluginRootOverride = providers.gradleProperty("autojs.nodejs.plugin.root")
+    val pluginRoot = nodeExamplePluginProjectRoot(pluginRootOverride.orNull)
+    val pluginExamplesRoot = pluginRoot.resolve("sample/nodejs")
+    val pluginVerifier = pluginRoot.resolve("node-plugin-examples.gradle.kts")
+    val jsonReport = layout.buildDirectory.file("reports/nodejs/plugin-example-mirror.json")
+    val markdownReport = layout.buildDirectory.file("reports/nodejs/plugin-example-mirror.md")
+
+    inputs.dir(rootProject.layout.projectDirectory.dir("sample/nodejs"))
+    inputs.dir(pluginExamplesRoot)
+    inputs.file(pluginVerifier)
+    outputs.file(jsonReport)
+    outputs.file(markdownReport)
+
+    doLast {
+        val hostExamplesRoot = rootProject.projectDir.resolve("sample/nodejs").canonicalFile
+        val hostInventory = nodeExampleFileInventory(hostExamplesRoot)
+
+        if (!pluginExamplesRoot.resolve("examples.json").isFile) {
+            throw GradleException(
+                "Missing Node plugin example catalog: ${pluginExamplesRoot.resolve("examples.json").absolutePath}. " +
+                        "Use -Pautojs.nodejs.plugin.root=<path> if the plugin repo is not a sibling of this repo."
+            )
+        }
+        if (!pluginVerifier.isFile) {
+            throw GradleException("Missing Node plugin example verifier: ${pluginVerifier.absolutePath}")
+        }
+
+        val pluginInventory = nodeExampleFileInventory(pluginExamplesRoot.canonicalFile)
+        val hostFiles = hostInventory.keys
+        val pluginFiles = pluginInventory.keys
+        val missingFromPlugin = (hostFiles - pluginFiles).sorted()
+        val extraInPlugin = (pluginFiles - hostFiles).sorted()
+        val contentMismatches = hostFiles.intersect(pluginFiles)
+            .filter { relativePath -> hostInventory[relativePath] != pluginInventory[relativePath] }
+            .sorted()
+        val matches = missingFromPlugin.isEmpty() && extraInPlugin.isEmpty() && contentMismatches.isEmpty()
+
+        val report = linkedMapOf<String, Any?>(
+            "schema" to "autojs6-node-plugin-example-mirror-report-v1",
+            "hostExamplesRoot" to nodeExampleDisplayPath(hostExamplesRoot),
+            "pluginRoot" to pluginRoot.absolutePath,
+            "pluginExamplesRoot" to pluginExamplesRoot.absolutePath,
+            "pluginVerifier" to pluginVerifier.absolutePath,
+            "hostFileCount" to hostInventory.size,
+            "pluginFileCount" to pluginInventory.size,
+            "matches" to matches,
+            "missingFromPlugin" to missingFromPlugin,
+            "extraInPlugin" to extraInPlugin,
+            "contentMismatches" to contentMismatches,
+        )
+        jsonReport.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(JsonOutput.prettyPrint(JsonOutput.toJson(report)) + "\n")
+        }
+        markdownReport.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(
+                buildString {
+                    appendLine("# AutoJs6 Node Plugin Example Mirror")
+                    appendLine()
+                    appendLine("- Host examples: `${nodeExampleDisplayPath(hostExamplesRoot)}`")
+                    appendLine("- Plugin examples: `${pluginExamplesRoot.absolutePath}`")
+                    appendLine("- Host files: `${hostInventory.size}`")
+                    appendLine("- Plugin files: `${pluginInventory.size}`")
+                    appendLine("- Matches: `$matches`")
+                    appendLine()
+                    if (!matches) {
+                        appendLine("## Differences")
+                        appendLine()
+                        appendLine("- Missing from plugin: `${missingFromPlugin.size}`")
+                        appendLine("- Extra in plugin: `${extraInPlugin.size}`")
+                        appendLine("- Content mismatches: `${contentMismatches.size}`")
+                    }
+                }
+            )
+        }
+
+        if (!matches) {
+            throw GradleException(
+                "Node plugin sample mirror is out of sync: " +
+                        "missing=${missingFromPlugin.size}, extra=${extraInPlugin.size}, mismatched=${contentMismatches.size}. " +
+                        "See ${nodeExampleDisplayPath(jsonReport.get().asFile)}."
+            )
+        }
+        logger.lifecycle("Verified Node plugin example mirror with ${pluginInventory.size} files from ${pluginExamplesRoot.absolutePath}.")
     }
 }
 
