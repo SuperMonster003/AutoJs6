@@ -131,13 +131,7 @@ internal class NodeJsHostCapabilityBroker(
     }
 
     private fun nativeDiagnostics(): Map<String, String> {
-        return provider.nativeDiagnostics() + mapOf(
-            "embedded_script.runtime_plugin.host_broker.enabled" to "true",
-            "embedded_script.runtime_plugin.host_broker.id" to id,
-            "embedded_script.runtime_plugin.host_broker.destroyed" to destroyed.get().toString(),
-            "embedded_script.runtime_plugin.host_broker.contract_version" to
-                    NodeJsRuntimeContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION.toString(),
-        )
+        return provider.nativeDiagnostics()
     }
 
     private fun sendResponse(
