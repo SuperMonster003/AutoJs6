@@ -133,12 +133,12 @@ android {
         //  ! The assets file is divided into three directories according to different flavors.
         //  ! But the files are not actually moved to avoid conflicts with the latest modifications.
         //  ! zh-CN (translated by SuperMonster003 on Jul 26, 2024):
-        //  ! 璧勪骇鏂囦欢鏍规嵁涓嶅悓鐨?Gradle flavor 琚殧绂讳负涓変釜涓嶅悓鐨勭洰褰?
-        //  ! 涓嶈繃鐪熷疄鏂囦欢骞舵病鏈夎繘琛岀Щ鍔? 浠ラ伩鍏嶄笌鏈€鏂扮殑椤圭洰淇敼鍙戠敓鍐茬獊.
+        //  ! 资产文件根据不同的 Gradle flavor 被隔离为三个不同的目录.
+        //  ! 不过真实文件并没有进行移动, 以避免与最新的项目修改发生冲突.
         //  !
         // @Hint by SuperMonster003 on Nov 16, 2023.
         //  ! The assets division idea was accepted, and it wouldn't hurt to try. :)
-        //  ! zh-CN: 璧勪骇闅旂鐨勬兂娉曞彲浠ヨ鎺ュ彈, 姣曠珶璇曚竴涓嬩篃鏃犲Θ. [绗戣劯绗﹀彿]
+        //  ! zh-CN: 资产隔离的想法可以被接受, 毕竟试一下也无妨. [笑脸符号]
 
         // @Archived by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) on Mar 7, 2026.
         //  # getByName("main") {
@@ -255,7 +255,7 @@ android {
 
         // @Hint by SuperMonster003 on Aug 14, 2023.
         //  ! Substitution of "android.defaults.buildfeatures.buildconfig=true"
-        //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 鐨勬浛浠ｆ柟妗?
+        //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 的替代方案
         buildConfig = true
         resValues = true
 
@@ -368,7 +368,7 @@ tasks {
 
         // @Hint by SuperMonster003 on May 18, 2022.
         //  ! Comment or remove this option if you are tired of plenty of warnings. :)
-        //  ! zh-CN: 娉ㄩ噴鎴栫Щ闄ゆ閫夐」鍙伩鍏嶈繃澶氳鍛婃秷鎭€犳垚鐨勫洶鎵? [绗戣劯绗﹀彿]
+        //  ! zh-CN: 注释或移除此选项可避免过多警告消息造成的困扰. [笑脸符号]
         // options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
     }
 

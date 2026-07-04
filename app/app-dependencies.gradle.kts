@@ -123,14 +123,14 @@ dependencies /* Unclassified */ {
     //  !
     //  ! zh-CN:
     //  !
-    //  ! 渚濊禆搴?log4j (绗竴鐗堟湰) 鏄槗鍙楁敾鍑荤殑 (鍚?5 椤规紡娲?:
-    //  ! - CVE-2022-23307, 璇勫垎: 8.8
-    //  ! - CVE-2022-23305, 璇勫垎: 9.8
-    //  ! - CVE-2022-23302, 璇勫垎: 8.8
-    //  ! - CVE-2021-4104, 璇勫垎: 7.5
-    //  ! - CVE-2019-17571, 璇勫垎: 9.8
-    //  ! 浣?log4j 绗簩鐗堟湰瑕佹眰瀹夊崜 API 绾у埆涓嶄綆浜?26,
-    //  ! 涓庢渶浣?API 绾у埆涓?24 鐨勫綋鍓嶉」鐩棤娉曞吋瀹?
+    //  ! 依赖库 log4j (第一版本) 是易受攻击的 (含 5 项漏洞):
+    //  ! - CVE-2022-23307, 评分: 8.8
+    //  ! - CVE-2022-23305, 评分: 9.8
+    //  ! - CVE-2022-23302, 评分: 8.8
+    //  ! - CVE-2021-4104, 评分: 7.5
+    //  ! - CVE-2019-17571, 评分: 9.8
+    //  ! 但 log4j 第二版本要求安卓 API 级别不低于 26,
+    //  ! 与最低 API 级别为 24 的当前项目无法兼容.
     // Log4j
     implementation(libs.log4j)
 
@@ -216,7 +216,7 @@ dependencies /* Unclassified */ {
     // Pinyin4j
     implementation(libs.pinyin4j)
 
-    // Jieba Analysis (zh-CN: 缁撳反鍒嗚瘝)
+    // Jieba Analysis (zh-CN: 结巴分词)
     // implementation("com.huaban:jieba-analysis:1.0.2")
     implementation(project(":modules:jieba-analysis"))
 
@@ -273,7 +273,7 @@ dependencies /* Unclassified */ {
 dependencies /* MIME */ {
     // @Hint by SuperMonster003 on Oct 5, 2023.
     //  ! Only for Android API 26 (8.0) [O] and above.
-    //  ! zh-CN: 浠呴€傜敤浜庡畨鍗?API 绾у埆 26 (8.0) [O] 鍙婁互涓?
+    //  ! zh-CN: 仅适用于安卓 API 级别 26 (8.0) [O] 及以上
     // Apache Tika Core
     // implementation("org.apache.tika:tika-core:2.9.2")
 
@@ -306,8 +306,8 @@ dependencies /* AppCompat */ {
     //  ! To check the releases for Appcompat library,
     //  ! visit https://developer.android.com/jetpack/androidx/releases/appcompat.
     //  ! zh-CN:
-    //  ! 鏌ョ湅 Appcompat 搴撶殑鍙戣鐗堟湰,
-    //  ! 鍙闂?https://developer.android.com/jetpack/androidx/releases/appcompat.
+    //  ! 查看 Appcompat 库的发行版本,
+    //  ! 可访问 https://developer.android.com/jetpack/androidx/releases/appcompat.
     implementation(libs.appcompat)
 
     // AppCompat for legacy views (such as JsTextViewLegacy)
@@ -319,7 +319,7 @@ dependencies /* AppCompat */ {
 dependencies /* Material Dialogs */ {
     // TODO by SuperMonster003 on Feb 5, 2022.
     //  ! Upgrade to 3.3.0 (more difficult than expected).
-    //  ! zh-CN: 鍗囩骇鑷?3.3.0 (瀹為檯闅惧害瓒呭嚭棰勬湡杈冨).
+    //  ! zh-CN: 升级至 3.3.0 (实际难度超出预期较多).
     //  # val configuration: (ExternalModuleDependency).() -> Unit = {
     //  #     version {
     //  #         prefer("0.9.6.0")
@@ -426,21 +426,21 @@ dependencies /* Archived */ {
     //  ! The dependency is added by default.
     //  ! See https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
     //  ! zh-CN:
-    //  ! 宸叉棤闇€鍦?Kotlin Gradle 椤圭洰涓樉寮忓０鏄庢爣鍑嗗簱 (stdlib).
-    //  ! 鐩稿叧渚濊禆宸查粯璁よ娣诲姞.
-    //  ! 鍙傞槄 https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
+    //  ! 已无需在 Kotlin Gradle 项目中显式声明标准库 (stdlib).
+    //  ! 相关依赖已默认被添加.
+    //  ! 参阅 https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
     // Kotlin
     // implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.21")
 
     // @Comment by SuperMonster003 on Jun 1, 2022.
     //  ! Not necessary for current project but worth keeping the trace.
-    //  ! zh-CN: 浜庡綋鍓嶉」鐩凡涓嶅啀闇€瑕? 浣嗕緷鐒跺€煎緱鐣欏瓨鍏惰釜杩?(浠ュ涓嶆椂涔嬮渶).
+    //  ! zh-CN: 于当前项目已不再需要, 但依然值得留存其踪迹 (以备不时之需).
     // Google Guava
     // implementation("com.google.guava:guava:31.1-jre")
 
     // @Comment by SuperMonster003 on Apr 9, 2024.
     //  ! It was ever imported and used for MediaType constants.
-    //  ! zh-CN: 鏇剧敤浜?MediaType 甯搁噺鐨勫鍏ュ強浣跨敤.
+    //  ! zh-CN: 曾用于 MediaType 常量的导入及使用.
     // Javax WS RS API (Java API for RESTful Web Services)
     // implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
 
@@ -449,9 +449,9 @@ dependencies /* Archived */ {
     //  ! replaced by LiveData and SharedFlow.
     //  ! It is only retained for dependencies of certain libraries (such as MQTT).
     //  ! zh-CN:
-    //  ! AutoJs6 鏍稿績椤圭洰宸插純鐢?Local Broadcast Manager 搴?
-    //  ! 鐢?LiveData 鍙?SharedFlow 鏇夸唬.
-    //  ! 浠呯敤浜庢煇浜涘簱 (濡?MQTT) 鐨勪緷璧栬€屼繚鐣?
+    //  ! AutoJs6 核心项目已弃用 Local Broadcast Manager 库,
+    //  ! 由 LiveData 及 SharedFlow 替代.
+    //  ! 仅用于某些库 (如 MQTT) 的依赖而保留.
     // Local Broadcast Manager
     implementation(libs.localbroadcastmanager)
 }
