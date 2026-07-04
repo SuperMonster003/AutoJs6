@@ -161,16 +161,11 @@ object NodeJsRuntimePluginBridge {
         engineInfo: NodeBridgeEngineInfo,
     ): Map<String, String> {
         val appContext = context.applicationContext
-        val bridgeLimits = NodeBridgeLimits.fromRuntimeModuleOrWorkingDirectory(
-            runtimeModuleSources[NodeBridgeLimits.RUNTIME_MODULE_NAME],
-            workingDirectory,
-        )
         return runtimeModuleSources
             .withPluginBridgePermissionManifest(
                 workingDirectory = workingDirectory,
                 sandboxRoot = sandboxRoot,
             )
-            .withPluginBridgeLimitPolicy(bridgeLimits)
             .withPluginLifecycleConfig(
                 NodeLifecycleCheckpointStore.runtimeModuleSource(
                     context = appContext,
@@ -197,17 +192,6 @@ object NodeJsRuntimePluginBridge {
                         includeBuildNetworkPolicy = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
                     ),
                 )
-            }
-        }
-    }
-
-    private fun Map<String, String>.withPluginBridgeLimitPolicy(
-        bridgeLimits: NodeBridgeLimits.Policy,
-    ): Map<String, String> {
-        return linkedMapOf<String, String>().apply {
-            putAll(this@withPluginBridgeLimitPolicy)
-            if (!containsKey(NodeBridgeLimits.RUNTIME_MODULE_NAME)) {
-                put(NodeBridgeLimits.RUNTIME_MODULE_NAME, bridgeLimits.toJson())
             }
         }
     }
