@@ -172,24 +172,24 @@ object NodeJsRuntimePluginBridge {
             .parseNativePayload()
             .toMutableMap()
             .apply {
-                put("embedded_script.runtime_plugin.enabled", "true")
-                put("embedded_script.runtime_plugin.contract_version", NodeJsRuntimeContract.CONTRACT_VERSION.toString())
-                put("embedded_script.runtime_plugin.package_name", candidate.serviceInfo.packageName)
-                put("embedded_script.runtime_plugin.service_name", candidate.serviceInfo.name)
-                put("embedded_script.runtime_plugin.package_version_code", candidate.packageVersionCode?.toString().orEmpty())
-                put("embedded_script.runtime_plugin.runtime_slot", runtimeInfo.getString(NodeJsRuntimeContract.KEY_RUNTIME_SLOT).orEmpty())
-                put("embedded_script.runtime_plugin.node_version", runtimeInfo.getString(NodeJsRuntimeContract.KEY_NODE_VERSION).orEmpty())
-                put("embedded_script.runtime_plugin.capability_count", capabilities.size.toString())
-                put(
+                putFallback("embedded_script.runtime_plugin.enabled", "true")
+                putFallback("embedded_script.runtime_plugin.contract_version", NodeJsRuntimeContract.CONTRACT_VERSION.toString())
+                putFallback("embedded_script.runtime_plugin.package_name", candidate.serviceInfo.packageName)
+                putFallback("embedded_script.runtime_plugin.service_name", candidate.serviceInfo.name)
+                putFallback("embedded_script.runtime_plugin.package_version_code", candidate.packageVersionCode?.toString().orEmpty())
+                putFallback("embedded_script.runtime_plugin.runtime_slot", runtimeInfo.getString(NodeJsRuntimeContract.KEY_RUNTIME_SLOT).orEmpty())
+                putFallback("embedded_script.runtime_plugin.node_version", runtimeInfo.getString(NodeJsRuntimeContract.KEY_NODE_VERSION).orEmpty())
+                putFallback("embedded_script.runtime_plugin.capability_count", capabilities.size.toString())
+                putFallback(
                     "embedded_script.runtime_plugin.capability_host_broker",
                     (NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_BROKER in capabilities).toString(),
                 )
-                put(
+                putFallback(
                     "embedded_script.runtime_plugin.capability_live_bridge",
                     (NodeJsRuntimeContract.CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE in capabilities).toString(),
                 )
-                put("embedded_script.runtime_plugin.host_broker.attached", "true")
-                put(
+                putFallback("embedded_script.runtime_plugin.host_broker.attached", "true")
+                putFallback(
                     "embedded_script.runtime_plugin.host_broker.contract_version",
                     NodeJsRuntimeContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION.toString(),
                 )
@@ -257,6 +257,12 @@ object NodeJsRuntimePluginBridge {
             }
             ?.toMap()
             .orEmpty()
+    }
+
+    private fun MutableMap<String, String>.putFallback(key: String, value: String) {
+        if (!containsKey(key)) {
+            put(key, value)
+        }
     }
 
     private fun Bundle.optionalInt(key: String): Int? {

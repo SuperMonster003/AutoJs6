@@ -78,6 +78,7 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         NodeEmbeddedTestHarness.assertSucceeded("Node runtime plugin live bridge device smoke", result)
         assertTrue(result.stdout.contains("plugin.live.device.screenOnType=boolean"))
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.enabled"])
+        assertEquals("plugin", result.nativeValues["embedded_script.runtime_plugin.diagnostics_source"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.capability_live_bridge"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.host_broker.attached"])
         assertEquals("true", result.nativeValues["embedded_script.runtime_plugin.runtime_module.engine_info_present"])
