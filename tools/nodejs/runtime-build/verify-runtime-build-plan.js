@@ -11,7 +11,8 @@ const REQUIRED_ABIS = ["arm64-v8a", "armeabi-v7a", "x86_64"];
 function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
-  const lockFile = path.resolve(options.lockFile || path.join(repoRoot, "tools/nodejs/runtime-build/runtime-build.lock.json"));
+  const runtimeBuildDir = path.resolve(options.runtimeBuildDir || path.join(repoRoot, "tools/nodejs/runtime-build"));
+  const lockFile = path.resolve(options.lockFile || path.join(runtimeBuildDir, "runtime-build.lock.json"));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
   const issues = [];
   const warnings = [];
@@ -122,13 +123,14 @@ function main() {
     warnings.push("local Android fork path is not available on this machine: " + lock.androidFork.localPath);
   }
   const requiredScripts = [
-    "tools/nodejs/runtime-build/build-node-runtime.ps1",
-    "tools/nodejs/runtime-build/build-node-runtime.sh",
-    "tools/nodejs/runtime-build/container/Dockerfile",
+    "build-node-runtime.ps1",
+    "build-node-runtime.sh",
+    "container/Dockerfile",
   ];
   for (const script of requiredScripts) {
-    if (!fs.existsSync(path.join(repoRoot, script))) {
-      issues.push("missing runtime build script: " + script);
+    const scriptPath = path.join(runtimeBuildDir, script);
+    if (!fs.existsSync(scriptPath)) {
+      issues.push("missing runtime build script: " + relativePath(repoRoot, scriptPath));
     }
   }
   const decision = {
@@ -140,6 +142,7 @@ function main() {
     schema: "autojs6-node-runtime-build-plan-check-v1",
     generatedAt: new Date().toISOString(),
     task: "S9-04 Reproducible Android Node Build Environment",
+    runtimeBuildDir: relativePath(repoRoot, runtimeBuildDir),
     lockFile: relativePath(repoRoot, lockFile),
     requiredAbis: REQUIRED_ABIS,
     lockSummary: {
@@ -181,7 +184,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node tools/nodejs/runtime-build/verify-runtime-build-plan.js [--repo-root dir] [--lock-file file] [--report-dir dir]");
+      console.log("Usage: node tools/nodejs/runtime-build/verify-runtime-build-plan.js [--repo-root dir] [--runtime-build-dir dir] [--lock-file file] [--report-dir dir]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

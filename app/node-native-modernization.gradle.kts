@@ -1,4 +1,6 @@
 import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.PathSensitivity
+import java.io.File
 
 val nodeNativeModernizationReportDir = rootProject.layout.buildDirectory.dir("reports/nodejs")
 val nodeNativeSymbolUsageJson = nodeNativeModernizationReportDir.map { it.file("native-symbol-usage.json") }
@@ -35,6 +37,49 @@ val nodePhase9ChaosSecurityPolicyJson = nodeNativeModernizationReportDir.map { i
 val nodePhase9ChaosSecurityPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-chaos-security-policy.md") }
 val nodePhase9SummaryJson = nodeNativeModernizationReportDir.map { it.file("phase9-summary.json") }
 val nodePhase9SummaryMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-summary.md") }
+
+private fun nodeNativeModernizationDisplayPath(file: File): String =
+    runCatching { file.relativeTo(rootProject.projectDir).invariantSeparatorsPath }
+        .getOrElse { file.absolutePath }
+
+private fun nodeNativeModernizationPluginProjectRoot(overridePath: String?): File {
+    val candidate = overridePath
+        ?.trim()
+        ?.takeIf(String::isNotEmpty)
+        ?.let(rootProject::file)
+        ?: rootProject.projectDir.parentFile.resolve("autojs6-plugin-nodejs")
+    return candidate.canonicalFile
+}
+
+private fun nodeNativeModernizationToolsRoot(
+    source: String?,
+    explicitRoot: String?,
+    pluginRoot: File,
+): File {
+    explicitRoot
+        ?.trim()
+        ?.takeIf(String::isNotEmpty)
+        ?.let(rootProject::file)
+        ?.let { return it.canonicalFile }
+    return when (val normalized = source.orEmpty().trim().lowercase()) {
+        "", "host", "main", "app" -> rootProject.projectDir.resolve("tools/nodejs").canonicalFile
+        "plugin", "node-plugin", "nodejs-plugin" -> pluginRoot.resolve("tools/nodejs").canonicalFile
+        else -> throw GradleException(
+            "Unsupported Node tools source '$normalized'. Use host or plugin, " +
+                    "or set -Pautojs.nodejs.toolsRoot=<dir>."
+        )
+    }
+}
+
+private fun nodeNativeModernizationConfiguredToolsRoot(): File {
+    val pluginRootOverride = providers.gradleProperty("autojs.nodejs.pluginProjectDir")
+        .orElse(providers.gradleProperty("autojs.nodejs.plugin.root"))
+    return nodeNativeModernizationToolsRoot(
+        providers.gradleProperty("autojs.nodejs.toolsSource").orElse("host").get(),
+        providers.gradleProperty("autojs.nodejs.toolsRoot").orNull,
+        nodeNativeModernizationPluginProjectRoot(pluginRootOverride.orNull),
+    )
+}
 
 tasks.register<Exec>("generateNodeNativeSymbolUsageReport") {
     group = "verification"
@@ -84,24 +129,42 @@ tasks.register<Exec>("verifyNodeRuntimeBuildPlan") {
     group = "verification"
     description = "Verifies the Phase 9 reproducible Android Node runtime build plan."
 
-    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/runtime-build/verify-runtime-build-plan.js")
-    val lockFile = rootProject.layout.projectDirectory.file("tools/nodejs/runtime-build/runtime-build.lock.json")
-    val windowsBuildScript = rootProject.layout.projectDirectory.file("tools/nodejs/runtime-build/build-node-runtime.ps1")
-    val unixBuildScript = rootProject.layout.projectDirectory.file("tools/nodejs/runtime-build/build-node-runtime.sh")
-    inputs.file(scriptFile)
-    inputs.file(lockFile)
-    inputs.file(windowsBuildScript)
-    inputs.file(unixBuildScript)
+    val toolsRoot = nodeNativeModernizationConfiguredToolsRoot()
+    val runtimeBuildDir = toolsRoot.resolve("runtime-build")
+    val scriptFile = runtimeBuildDir.resolve("verify-runtime-build-plan.js")
+    val lockFile = runtimeBuildDir.resolve("runtime-build.lock.json")
+    val windowsBuildScript = runtimeBuildDir.resolve("build-node-runtime.ps1")
+    val unixBuildScript = runtimeBuildDir.resolve("build-node-runtime.sh")
+    val dockerFile = runtimeBuildDir.resolve("container/Dockerfile")
+    inputs.file(scriptFile).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file(lockFile).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file(windowsBuildScript).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file(unixBuildScript).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file(dockerFile).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.property("toolsRoot", toolsRoot.absolutePath)
     outputs.files(nodeRuntimeBuildPlanJson, nodeRuntimeBuildPlanMarkdown)
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir
+    doFirst {
+        listOf(scriptFile, lockFile, windowsBuildScript, unixBuildScript, dockerFile).forEach { file ->
+            if (!file.isFile) {
+                throw GradleException(
+                    "Missing Node runtime build asset: ${nodeNativeModernizationDisplayPath(file)}. " +
+                            "Use -Pautojs.nodejs.toolsRoot=<dir> or -Pautojs.nodejs.toolsSource=plugin."
+                )
+            }
+        }
+        logger.lifecycle("Node runtime build tool root: ${nodeNativeModernizationDisplayPath(toolsRoot)}")
+    }
     commandLine(
         "node",
-        scriptFile.asFile.absolutePath,
+        scriptFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--runtime-build-dir",
+        runtimeBuildDir.absolutePath,
         "--lock-file",
-        lockFile.asFile.absolutePath,
+        lockFile.absolutePath,
         "--report-dir",
         nodeNativeModernizationReportDir.get().asFile.absolutePath,
     )
