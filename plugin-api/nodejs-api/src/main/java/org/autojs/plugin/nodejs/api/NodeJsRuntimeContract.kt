@@ -3,6 +3,7 @@ package org.autojs.plugin.nodejs.api
 object NodeJsRuntimeContract {
 
     const val CONTRACT_VERSION = 1
+    const val HOST_CAPABILITY_BROKER_CONTRACT_VERSION = 1
 
     const val KEY_CONTRACT_VERSION = "contractVersion"
     const val KEY_RUNTIME_SLOT = "runtimeSlot"
@@ -48,6 +49,15 @@ object NodeJsRuntimeContract {
     const val KEY_PID = "pid"
     const val KEY_TIMED_OUT = "timedOut"
     const val KEY_NATIVE_PAYLOAD = "nativePayload"
+    const val KEY_HOST_CAPABILITY_BROKER = "hostCapabilityBroker"
+    const val KEY_HOST_CAPABILITY_BROKER_ID = "hostCapabilityBrokerId"
+    const val KEY_HOST_CAPABILITY_BROKER_VERSION = "hostCapabilityBrokerVersion"
+    const val KEY_HOST_CAPABILITY_MODULES = "hostCapabilityModules"
+    const val KEY_BRIDGE_ENGINE_INFO = "bridgeEngineInfo"
+    const val KEY_BRIDGE_REQUEST_JSON = "bridgeRequestJson"
+    const val KEY_BRIDGE_RESPONSE_JSON = "bridgeResponseJson"
+    const val KEY_BRIDGE_RESPONSE_OK = "bridgeResponseOk"
+    const val KEY_BRIDGE_ERROR_MESSAGE = "bridgeErrorMessage"
 
     const val KEY_EVENT_TYPE = "eventType"
     const val KEY_EVENT_LEVEL = "level"
@@ -61,4 +71,5 @@ object NodeJsRuntimeContract {
     const val CAPABILITY_SYNC_SCRIPT_EXECUTION = "syncScriptExecution"
     const val CAPABILITY_BUNDLE_TRANSPORT = "bundleTransport"
     const val CAPABILITY_NATIVE_EMBEDDED_RUNTIME = "nativeEmbeddedRuntime"
+    const val CAPABILITY_HOST_CAPABILITY_BROKER = "hostCapabilityBroker"
 }

@@ -33,7 +33,7 @@ object NodeJsRuntimePluginBridge {
         if (!isRequested()) {
             return NativeNodeEmbeddedScriptService.runScript(context, request, launchSurface)
         }
-        val pluginResult = runScript(context, request)
+        val pluginResult = runScript(context, request, launchSurface)
         if (
             pluginResult.errorCode == ERROR_PLUGIN_UNAVAILABLE &&
             !isRequired()
@@ -51,11 +51,12 @@ object NodeJsRuntimePluginBridge {
     fun runScript(
         context: Context,
         request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val startedAt = SystemClock.elapsedRealtime()
         return runCatching {
             val result = runBlocking {
-                NodeJsRuntimePluginHost.runScript(context, request.toPluginBundle())
+                NodeJsRuntimePluginHost.runScript(context, request.toPluginBundle(context, launchSurface))
             }
             result.toEmbeddedScriptResult(request, startedAt)
         }.getOrElse { error ->
@@ -82,7 +83,11 @@ object NodeJsRuntimePluginBridge {
         )
     }
 
-    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.toPluginBundle(): Bundle {
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.toPluginBundle(
+        context: Context,
+        launchSurface: String,
+    ): Bundle {
+        val hostCapabilityBroker = NodeJsHostCapabilityBroker(context, this, launchSurface)
         return Bundle().apply {
             putInt(NodeJsRuntimeContract.KEY_CONTRACT_VERSION, NodeJsRuntimeContract.CONTRACT_VERSION)
             putString(NodeJsRuntimeContract.KEY_EXECUTION_ID, executionId)
@@ -110,6 +115,12 @@ object NodeJsRuntimePluginBridge {
             putBoolean(NodeJsRuntimeContract.KEY_WORKER_THREADS_EXPERIMENTAL_ENABLED, workerThreadsExperimentalEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_EXPERIMENTAL_ENABLED, childProcessExperimentalEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_EXPERIMENTAL_ENABLED, javaInteropExperimentalEnabled)
+            putBinder(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER, hostCapabilityBroker)
+            putString(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER_ID, hostCapabilityBroker.id)
+            putInt(
+                NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER_VERSION,
+                NodeJsRuntimeContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION,
+            )
         }
     }
 
@@ -123,6 +134,11 @@ object NodeJsRuntimePluginBridge {
             .apply {
                 put("embedded_script.runtime_plugin.enabled", "true")
                 put("embedded_script.runtime_plugin.contract_version", NodeJsRuntimeContract.CONTRACT_VERSION.toString())
+                put("embedded_script.runtime_plugin.host_broker.attached", "true")
+                put(
+                    "embedded_script.runtime_plugin.host_broker.contract_version",
+                    NodeJsRuntimeContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION.toString(),
+                )
             }
         return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
             succeeded = getBoolean(NodeJsRuntimeContract.KEY_SUCCEEDED, false),
