@@ -1,1 +1,2 @@
-
+-keep class org.autojs.plugin.nodejs.api.** { *; }
+-dontwarn org.autojs.plugin.nodejs.api.**
