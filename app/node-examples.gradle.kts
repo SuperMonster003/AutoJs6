@@ -159,6 +159,16 @@ private fun nodeExampleRoot(
     }
 }
 
+private fun nodeExampleConfiguredRoot(): File {
+    val pluginRootOverride = providers.gradleProperty("autojs.nodejs.pluginProjectDir")
+        .orElse(providers.gradleProperty("autojs.nodejs.plugin.root"))
+    return nodeExampleRoot(
+        providers.gradleProperty("autojs.nodejs.examplesSource").orElse("host").get(),
+        providers.gradleProperty("autojs.nodejs.examplesRoot").orNull,
+        nodeExamplePluginProjectRoot(pluginRootOverride.orNull),
+    )
+}
+
 private fun nodeExampleSha256(file: File): String {
     val digest = MessageDigest.getInstance("SHA-256")
     file.inputStream().use { input ->
@@ -217,13 +227,7 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
     group = "verification"
     description = "Verifies Node sample examples, metadata, expected outputs, and smoke classifications."
 
-    val pluginRootOverride = providers.gradleProperty("autojs.nodejs.pluginProjectDir")
-        .orElse(providers.gradleProperty("autojs.nodejs.plugin.root"))
-    val examplesRoot = nodeExampleRoot(
-        providers.gradleProperty("autojs.nodejs.examplesSource").orElse("host").get(),
-        providers.gradleProperty("autojs.nodejs.examplesRoot").orNull,
-        nodeExamplePluginProjectRoot(pluginRootOverride.orNull),
-    )
+    val examplesRoot = nodeExampleConfiguredRoot()
     val jsonReport = layout.buildDirectory.file("reports/nodejs/examples.json")
     val markdownReport = layout.buildDirectory.file("reports/nodejs/examples.md")
 
@@ -479,15 +483,20 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
     group = "verification"
     description = "Verifies AutoJs6 Node TypeScript declarations and the checked-in TypeScript smoke sample."
 
+    val examplesRoot = nodeExampleConfiguredRoot()
+    val typesRoot = rootProject.projectDir.resolve("docs/nodejs/types/autojs6-node")
+    val sampleRoot = examplesRoot.resolve("typescript-smoke")
+    val examplesManifestFile = examplesRoot.resolve("examples.json")
     val jsonReport = layout.buildDirectory.file("reports/nodejs/typescript-declarations.json")
     val markdownReport = layout.buildDirectory.file("reports/nodejs/typescript-declarations.md")
 
+    inputs.dir(typesRoot)
+    inputs.dir(sampleRoot)
+    inputs.file(examplesManifestFile)
     outputs.file(jsonReport)
     outputs.file(markdownReport)
 
     doLast {
-        val typesRoot = rootProject.projectDir.resolve("docs/nodejs/types/autojs6-node")
-        val sampleRoot = rootProject.projectDir.resolve("sample/nodejs/typescript-smoke")
         val indexFile = typesRoot.resolve("index.d.ts")
         val commonFile = typesRoot.resolve("common.d.ts")
         val profileCapabilitiesFile = typesRoot.resolve("profile_capabilities.d.ts")
@@ -496,7 +505,7 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
 
         val missingRequired = listOf(indexFile, commonFile, profileCapabilitiesFile, sampleTsConfig, sampleSource)
             .filterNot(File::isFile)
-            .map { it.relativeTo(rootProject.projectDir).invariantSeparatorsPath }
+            .map(::nodeExampleDisplayPath)
         if (missingRequired.isNotEmpty()) {
             throw GradleException("Missing AutoJs6 Node TypeScript required file(s): ${missingRequired.joinToString()}")
         }
@@ -550,12 +559,12 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
             throw GradleException("typescript-smoke sample must cover Safe/Pro/Desktop profile declaration differences.")
         }
 
-        val examplesManifest = nodeExampleReadJsonObject(rootProject.projectDir.resolve("sample/nodejs/examples.json"))
+        val examplesManifest = nodeExampleReadJsonObject(examplesManifestFile)
         val examples = (examplesManifest["examples"] as? List<*>).orEmpty().map {
             it as? Map<*, *> ?: throw GradleException("Each Node example manifest entry must be an object.")
         }
         val typeSmoke = examples.singleOrNull { it["name"] == "typescript-smoke" }
-            ?: throw GradleException("sample/nodejs/examples.json must include the typescript-smoke example.")
+            ?: throw GradleException("${nodeExampleDisplayPath(examplesManifestFile)} must include the typescript-smoke example.")
         if ("typescript" !in nodeExampleList(typeSmoke["tags"])) {
             throw GradleException("typescript-smoke example must carry the 'typescript' tag.")
         }
@@ -563,7 +572,8 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
         val report = linkedMapOf<String, Any?>(
             "schema" to "autojs6-node-types-report-v1",
             "typesRoot" to typesRoot.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
-            "sample" to sampleRoot.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
+            "sample" to nodeExampleDisplayPath(sampleRoot),
+            "examplesManifest" to nodeExampleDisplayPath(examplesManifestFile),
             "moduleCount" to rows.size,
             "modules" to rows,
         )
@@ -590,18 +600,56 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
     }
 }
 
+val generateNodeTypescriptSmokeTsconfig = tasks.register("generateNodeTypescriptSmokeTsconfig") {
+    group = "verification"
+    description = "Generates a host-owned tsconfig for the selected Node TypeScript smoke sample source."
+
+    val examplesRoot = nodeExampleConfiguredRoot()
+    val sampleRoot = examplesRoot.resolve("typescript-smoke")
+    val typesRoot = rootProject.projectDir.resolve("docs/nodejs/types/autojs6-node")
+    val generatedTsconfig = layout.buildDirectory.file("generated/nodejs/typescript-smoke/tsconfig.json")
+
+    inputs.file(sampleRoot.resolve("tsconfig.json"))
+    inputs.dir(sampleRoot.resolve("src"))
+    inputs.dir(typesRoot)
+    outputs.file(generatedTsconfig)
+
+    doLast {
+        val sourceInclude = sampleRoot.resolve("src").absolutePath.replace('\\', '/') + "/**/*.ts"
+        val typesInclude = typesRoot.absolutePath.replace('\\', '/') + "/**/*.d.ts"
+        val tsconfig = linkedMapOf<String, Any?>(
+            "compilerOptions" to linkedMapOf(
+                "target" to "ES2020",
+                "module" to "CommonJS",
+                "moduleResolution" to "node",
+                "strict" to true,
+                "noEmit" to true,
+                "skipLibCheck" to false,
+                "lib" to listOf("ES2020"),
+                "types" to emptyList<String>(),
+            ),
+            "include" to listOf(sourceInclude, typesInclude),
+        )
+        generatedTsconfig.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(JsonOutput.prettyPrint(JsonOutput.toJson(tsconfig)) + "\n")
+        }
+    }
+}
+
 tasks.register<Exec>("typeCheckNodeTypescriptSmoke") {
     group = "verification"
-    description = "Runs tsc against sample/nodejs/typescript-smoke using the checked-in AutoJs6 Node declarations."
+    description = "Runs tsc against the selected Node TypeScript smoke sample using the checked-in AutoJs6 Node declarations."
 
     dependsOn(verifyAutoJs6NodeTypeDeclarations)
+    dependsOn(generateNodeTypescriptSmokeTsconfig)
 
     val isWindows = System.getProperty("os.name").startsWith("Windows", ignoreCase = true)
-    val tsconfig = rootProject.projectDir.resolve("sample/nodejs/typescript-smoke/tsconfig.json")
+    val tsconfig = layout.buildDirectory.file("generated/nodejs/typescript-smoke/tsconfig.json")
     if (isWindows) {
-        commandLine("cmd", "/c", "tsc", "-p", tsconfig.absolutePath, "--pretty", "false")
+        commandLine("cmd", "/c", "tsc", "-p", tsconfig.get().asFile.absolutePath, "--pretty", "false")
     } else {
-        commandLine("tsc", "-p", tsconfig.absolutePath, "--pretty", "false")
+        commandLine("tsc", "-p", tsconfig.get().asFile.absolutePath, "--pretty", "false")
     }
 }
 
