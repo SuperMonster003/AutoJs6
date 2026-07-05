@@ -10,11 +10,13 @@ import org.autojs.autojs.util.AndroidUtils
 import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import kotlin.math.max
 
@@ -26,10 +28,13 @@ class PluginIndexRepository {
         private const val CACHE_FILE_NAME = "autojs6_plugin_index_v5.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
+        private const val AUTOJS6_REPO = "AutoJs6"
         private const val OFFICIAL_REPO_PREFIX = "AutoJs6-Plugin-"
         private const val THIRD_PARTY_OWNER = "SuperMonster002"
         private const val THIRD_PARTY_REPO = "Auto.js-SDK-Plugins-Garage"
         private const val THIRD_PARTY_BRANCH = "main"
+        private const val APK_BUILDER_TEMPLATE_PACKAGE = "org.autojs.plugin.apkbuilder.template"
+        private const val APK_BUILDER_TEMPLATE_ASSET_PREFIX = "autojs6-apk-builder-template"
 
         @Volatile
         private var apiRateLimitCooldownUntilMs: Long = 0L
@@ -64,8 +69,11 @@ class PluginIndexRepository {
                 memoryFetchedSources = parsed.fetchedSources
                 memoryLanguageTag = parsed.languageTag
             }
-        } ?: return@withContext emptyList()
-        return@withContext filterBySource(cacheSnapshot.entries, enabledSources)
+        } ?: return@withContext filterBySource(buildBuiltInOfficialEntries(context), enabledSources)
+        return@withContext filterBySource(
+            appendBuiltInOfficialEntries(context, cacheSnapshot.entries),
+            enabledSources,
+        )
     }
 
     suspend fun fetchOnlineIndex(
@@ -98,11 +106,11 @@ class PluginIndexRepository {
                 val missingSources = enabledSources - cachedFetchedSources
                 val hasOfficialAbiGaps = hasOfficialAbiGaps(it, enabledSources)
                 if (missingSources.isEmpty() && !hasOfficialAbiGaps && !hasLanguageMismatch) {
-                    return@withContext filterBySource(it, enabledSources)
+                    return@withContext filterBySource(appendBuiltInOfficialEntries(context, it), enabledSources)
                 }
                 if (missingSources.isEmpty() && hasOfficialAbiGaps && !hasLanguageMismatch && now - lastNetworkFetchAttemptMs < 60_000L) {
                     Log.i(TAG, "Cache has official ABI gaps, but refresh attempted recently. Use cache.")
-                    return@withContext filterBySource(it, enabledSources)
+                    return@withContext filterBySource(appendBuiltInOfficialEntries(context, it), enabledSources)
                 }
                 Log.i(TAG, "Cache missing sources $missingSources, try online fetch once.")
                 if (missingSources.isEmpty() && hasOfficialAbiGaps) {
@@ -116,7 +124,7 @@ class PluginIndexRepository {
 
         if (forceRefresh && cachedAll != null && now - lastNetworkFetchAttemptMs < 15_000L) {
             Log.i(TAG, "Skip too-frequent force refresh (<15s), use cache.")
-            return@withContext filterBySource(cachedAll, enabledSources)
+            return@withContext filterBySource(appendBuiltInOfficialEntries(context, cachedAll), enabledSources)
         }
 
         if (enabledSources.isEmpty()) {
@@ -142,7 +150,7 @@ class PluginIndexRepository {
             val entries = stabilizeEntriesWithCache(
                 fresh = entriesFresh,
                 cached = cachedBySource[PluginIndexSource.OFFICIAL].orEmpty(),
-            )
+            ).let { appendBuiltInOfficialEntries(context, it, resolveRemoteRelease = true) }
             freshBySource[PluginIndexSource.OFFICIAL] = entries
         }
 
@@ -167,8 +175,7 @@ class PluginIndexRepository {
         val untouched = cachedAll.orEmpty().filterNot { it.source in enabledSources }
         val finalAll = (resultForSelected + untouched).distinctBy { "${it.source}:${it.packageName}" }
         val fetchedThisRound = enabledSources.filterTo(linkedSetOf()) { source ->
-            val entries = freshBySource[source].orEmpty()
-            entries.isNotEmpty() || source in cachedFetchedSources
+            fetchedFromNetworkBySource[source] == true || source in cachedFetchedSources
         }
         val finalFetchedSources = cachedFetchedSources + fetchedThisRound
         val allEnabledSourcesFetchedFromNetwork = enabledSources.all { fetchedFromNetworkBySource[it] == true }
@@ -184,7 +191,130 @@ class PluginIndexRepository {
         writeCache(cacheFile, finalAll, finalFetchedSources, finalLanguageTag)
 
         val fallback = memoryCache ?: cachedAll.orEmpty()
-        return@withContext filterBySource(fallback, enabledSources)
+        return@withContext filterBySource(appendBuiltInOfficialEntries(context, fallback), enabledSources)
+    }
+
+    private fun appendBuiltInOfficialEntries(
+        context: Context,
+        entries: List<PluginIndexEntry>,
+        resolveRemoteRelease: Boolean = false,
+    ): List<PluginIndexEntry> {
+        val builtInEntries = buildBuiltInOfficialEntries(context, resolveRemoteRelease)
+        if (builtInEntries.isEmpty()) return entries
+
+        val builtInPackages = builtInEntries.mapTo(linkedSetOf()) { it.packageName }
+        return builtInEntries + entries.filterNot {
+            it.source == PluginIndexSource.OFFICIAL && it.packageName in builtInPackages
+        }
+    }
+
+    private fun buildBuiltInOfficialEntries(
+        context: Context,
+        resolveRemoteRelease: Boolean = false,
+    ): List<PluginIndexEntry> {
+        return listOf(buildApkBuilderTemplateIndexEntry(context, resolveRemoteRelease))
+    }
+
+    private fun buildApkBuilderTemplateIndexEntry(
+        context: Context,
+        resolveRemoteRelease: Boolean,
+    ): PluginIndexEntry {
+        val release = if (resolveRemoteRelease) {
+            resolveApkBuilderTemplateReleaseFromGitHub(context) ?: buildFallbackApkBuilderTemplateRelease()
+        } else {
+            buildFallbackApkBuilderTemplateRelease()
+        }
+        return PluginIndexEntry(
+            packageName = APK_BUILDER_TEMPLATE_PACKAGE,
+            title = "${context.getString(R.string.app_name)} APK Builder Template",
+            description = "Provides the template APK used by AutoJs6 APK Builder.",
+            instructionHardCoded = "Install and enable this plugin when AutoJs6 is built without a built-in template.apk.",
+            author = "AutoJs6",
+            engine = ApkBuilderTemplatePluginIds.ENGINE,
+            variant = ApkBuilderTemplatePluginIds.VARIANT_INRT_UNIVERSAL,
+            engineId = ApkBuilderTemplatePluginIds.ID,
+            releases = listOf(release),
+            supportedAbis = emptyList(),
+            tags = listOf("official", "apk-builder", "template"),
+            requiresHostVersion = BuildConfig.VERSION_CODE.toLong(),
+            source = PluginIndexSource.OFFICIAL,
+        )
+    }
+
+    private fun resolveApkBuilderTemplateReleaseFromGitHub(context: Context): PluginIndexRelease? {
+        val exact = runCatching {
+            getJsonObject(
+                context = context,
+                url = "https://api.github.com/repos/$OFFICIAL_OWNER/$AUTOJS6_REPO/releases/tags/${encodeUrlPathSegment("v${BuildConfig.VERSION_NAME}")}",
+            )
+        }.getOrNull()
+
+        val releaseJson = exact ?: runCatching {
+            getJsonObject(
+                context = context,
+                url = "https://api.github.com/repos/$OFFICIAL_OWNER/$AUTOJS6_REPO/releases/latest",
+            )
+        }.getOrNull()?.takeIf(::isCurrentHostReleaseJson)
+
+        releaseJson ?: return null
+
+        val assetName = apkBuilderTemplateReleaseAssetName(BuildConfig.VERSION_NAME)
+        val assets = parseReleaseAssets(releaseJson.optJSONArray("assets"))
+        val selectedAsset = assets.firstOrNull { it.name.equals(assetName, ignoreCase = true) }
+            ?: assets.firstOrNull {
+                it.name.startsWith(APK_BUILDER_TEMPLATE_ASSET_PREFIX, ignoreCase = true) &&
+                        it.name.endsWith(".apk", ignoreCase = true)
+            }
+        val publishedDate = releaseJson.optString("published_at").takeIf { it.length >= 10 }?.substring(0, 10)
+        val releaseBody = releaseJson.optString("body").takeIf { it.isNotBlank() }
+
+        return PluginIndexRelease(
+            versionName = BuildConfig.VERSION_NAME,
+            versionCode = BuildConfig.VERSION_CODE.toLong(),
+            versionDate = publishedDate,
+            apkUrl = selectedAsset?.downloadUrl ?: fallbackApkBuilderTemplateReleaseUrl(),
+            apkSha256 = selectedAsset?.sha256,
+            apkSizeBytes = selectedAsset?.size,
+            changelogUrl = null,
+            changelogText = releaseBody,
+        )
+    }
+
+    private fun buildFallbackApkBuilderTemplateRelease(): PluginIndexRelease {
+        return PluginIndexRelease(
+            versionName = BuildConfig.VERSION_NAME,
+            versionCode = BuildConfig.VERSION_CODE.toLong(),
+            apkUrl = fallbackApkBuilderTemplateReleaseUrl(),
+            changelogText = "APK Builder template plugin for AutoJs6 ${BuildConfig.VERSION_NAME}.",
+        )
+    }
+
+    private fun fallbackApkBuilderTemplateReleaseUrl(): String {
+        return "https://github.com/$OFFICIAL_OWNER/$AUTOJS6_REPO/releases/download/" +
+                "${encodeUrlPathSegment("v${BuildConfig.VERSION_NAME}")}/" +
+                apkBuilderTemplateReleaseAssetName(BuildConfig.VERSION_NAME)
+    }
+
+    private fun apkBuilderTemplateReleaseAssetName(versionName: String): String {
+        val version = versionName.replace("\\s".toRegex(), "-").lowercase()
+        return "$APK_BUILDER_TEMPLATE_ASSET_PREFIX-v$version-universal.apk"
+    }
+
+    private fun isCurrentHostReleaseJson(json: JSONObject): Boolean {
+        val current = BuildConfig.VERSION_NAME.trim()
+        val tagVersion = json.optString("tag_name")
+            .removePrefix("v")
+            .trim()
+        val nameVersion = json.optString("name")
+            .substringBefore(" @")
+            .removePrefix("v")
+            .trim()
+        return tagVersion.equals(current, ignoreCase = true) ||
+                nameVersion.equals(current, ignoreCase = true)
+    }
+
+    private fun encodeUrlPathSegment(value: String): String {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8.name()).replace("+", "%20")
     }
 
     private fun filterBySource(
