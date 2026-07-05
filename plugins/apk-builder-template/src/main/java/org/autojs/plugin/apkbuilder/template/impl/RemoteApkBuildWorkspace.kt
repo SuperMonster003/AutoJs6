@@ -3,6 +3,7 @@ package org.autojs.plugin.apkbuilder.template.impl
 import android.content.Context
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequestExtraKeys
 import java.io.Closeable
@@ -10,7 +11,9 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.SyncFailedException
 import java.security.MessageDigest
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
@@ -24,8 +27,13 @@ class RemoteApkBuildWorkspace private constructor(
     val keyStoreFile: File?,
 ) : Closeable {
 
+    private val closed = AtomicBoolean(false)
+
     override fun close() {
-        root.deleteRecursively()
+        if (!closed.compareAndSet(false, true)) {
+            return
+        }
+        deleteRecursivelyBestEffort(root)
     }
 
     fun toExtras(): Bundle {
@@ -41,6 +49,7 @@ class RemoteApkBuildWorkspace private constructor(
     companion object {
         private const val BUFFER_SIZE = 256 * 1024
         private const val EXPECTED_ARCHIVE_FORMAT_VERSION = 1
+        private const val TAG = "RemoteApkWorkspace"
 
         fun prepare(context: Context, request: ApkBuildRequest): RemoteApkBuildWorkspace {
             val root = File(context.cacheDir, "remote-apk-build/session-${System.nanoTime()}").apply {
@@ -117,7 +126,7 @@ class RemoteApkBuildWorkspace private constructor(
                     keyStoreFile = keyStoreFile,
                 )
             } catch (t: Throwable) {
-                root.deleteRecursively()
+                deleteRecursivelyBestEffort(root)
                 throw t
             }
         }
@@ -127,8 +136,36 @@ class RemoteApkBuildWorkspace private constructor(
                 FileOutputStream(file, false).use { output ->
                     input.copyTo(output, BUFFER_SIZE)
                     output.flush()
-                    output.fd.sync()
+                    syncBestEffort(output)
                 }
+            }
+        }
+
+        private fun syncBestEffort(output: FileOutputStream) {
+            try {
+                output.fd.sync()
+            } catch (e: SyncFailedException) {
+                Log.w(TAG, "File descriptor sync failed after copying remote build input; continuing.", e)
+            }
+        }
+
+        private fun deleteRecursivelyBestEffort(file: File) {
+            runCatching {
+                deleteRecursively(file)
+            }.onFailure {
+                Log.w(TAG, "Failed to clean remote build workspace: ${file.path}", it)
+            }
+        }
+
+        private fun deleteRecursively(file: File) {
+            if (!file.exists()) {
+                return
+            }
+            if (file.isDirectory) {
+                file.listFiles()?.forEach(::deleteRecursively)
+            }
+            if (file.exists() && !file.delete()) {
+                Log.w(TAG, "Failed to delete remote build workspace file: ${file.path}")
             }
         }
 
