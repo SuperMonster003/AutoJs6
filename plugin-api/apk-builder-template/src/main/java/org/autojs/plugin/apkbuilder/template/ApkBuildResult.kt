@@ -12,6 +12,7 @@ data class ApkBuildResult(
     var outputFileName: String? = null,
     var outputSizeBytes: Long = 0L,
     var outputSha256: String? = null,
+    var updatedProjectConfigJson: String? = null,
     var compatibilityLevel: Int = ApkBuilderTemplateResult.LEVEL_OK,
     var warnings: ArrayList<String> = arrayListOf(),
     var errors: ArrayList<String> = arrayListOf(),
