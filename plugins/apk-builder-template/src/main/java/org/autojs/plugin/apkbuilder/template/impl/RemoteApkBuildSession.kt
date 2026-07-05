@@ -93,10 +93,25 @@ class RemoteApkBuildSession(
                 )
             )
         }.onFailure { error ->
+            val unsupported = error.findUnsupportedCause()
+            val status = when {
+                cancelled.get() -> ApkBuildResult.STATUS_CANCELLED
+                unsupported != null -> ApkBuildResult.STATUS_UNSUPPORTED
+                else -> ApkBuildResult.STATUS_FAILED
+            }
             val result = ApkBuildResult(
-                status = if (cancelled.get()) ApkBuildResult.STATUS_CANCELLED else ApkBuildResult.STATUS_FAILED,
-                compatibilityLevel = ApkBuilderTemplateResult.LEVEL_BLOCK,
-                errors = arrayListOf(error.message ?: error.toString()),
+                status = status,
+                compatibilityLevel = if (unsupported != null) {
+                    ApkBuilderTemplateResult.LEVEL_WARN
+                } else {
+                    ApkBuilderTemplateResult.LEVEL_BLOCK
+                },
+                warnings = unsupported?.message?.let { arrayListOf(it) } ?: arrayListOf(),
+                errors = if (unsupported == null && !cancelled.get()) {
+                    arrayListOf(error.message ?: error.toString())
+                } else {
+                    arrayListOf()
+                },
             )
             if (cancelled.get()) {
                 callback?.onCancelled(result)
@@ -113,6 +128,17 @@ class RemoteApkBuildSession(
                 progress = updateProgress(ApkBuildProgress.STEP_FINISH, "Remote build session finished", null)
             }
         }
+    }
+
+    private fun Throwable.findUnsupportedCause(): RemoteApkBuildUnsupportedException? {
+        var current: Throwable? = this
+        while (current != null) {
+            if (current is RemoteApkBuildUnsupportedException) {
+                return current
+            }
+            current = current.cause
+        }
+        return null
     }
 
     private fun validateHostRequest() {

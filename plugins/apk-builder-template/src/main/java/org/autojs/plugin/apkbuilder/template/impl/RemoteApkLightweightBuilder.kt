@@ -54,6 +54,11 @@ class RemoteApkLightweightBuilder(
         unzipTemplate(buildDir)
 
         ensureActive()
+        ensureSupportedLibraries(projectConfig)
+        progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Copying host native libraries", null))
+        copyHostNativeLibraries(buildDir, projectConfig)
+
+        ensureActive()
         progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Configuring AndroidManifest.xml", projectConfig.packageName))
         configureManifest(buildDir, projectConfig)
 
@@ -87,7 +92,6 @@ class RemoteApkLightweightBuilder(
             updatedProjectConfigJson = updatedProjectConfigJson,
             warnings = arrayListOf(
                 "Remote APK build currently uses a lightweight plugin-side builder.",
-                "Native/plugin library injection is not implemented yet.",
             ),
             extras = Bundle().apply {
                 putString("builder", "lightweight")
@@ -112,6 +116,7 @@ class RemoteApkLightweightBuilder(
             ?: throw IOException("Project versionCode is missing.")
         val mainScript = json.optString(KEY_MAIN).takeIf { it.isNotBlank() } ?: DEFAULT_MAIN_SCRIPT
         val abis = parseStringArray(json, KEY_ABIS)
+        val libs = parseStringArray(json, KEY_LIBS).orEmpty()
         val permissions = parseStringArray(json, KEY_PERMISSIONS)
         val signatureScheme = json.optString(KEY_SIGNATURE_SCHEME).takeIf { it.isNotBlank() } ?: DEFAULT_SIGNATURE_SCHEME
 
@@ -127,6 +132,7 @@ class RemoteApkLightweightBuilder(
             versionCode = versionCode,
             mainScript = mainScript,
             abis = abis,
+            libs = libs,
             permissions = permissions,
             signatureScheme = signatureScheme,
         )
@@ -158,6 +164,89 @@ class RemoteApkLightweightBuilder(
                 extractZipEntry(zip, entry, canonicalRoot)
                 zip.closeEntry()
             }
+        }
+    }
+
+    private fun ensureSupportedLibraries(projectConfig: RemoteProjectConfig) {
+        val unsupported = projectConfig.libs.filter { it in PLUGIN_LIBRARY_LABELS }.distinct()
+        if (unsupported.isEmpty()) {
+            return
+        }
+        throw RemoteApkBuildUnsupportedException(
+            "Remote APK build does not yet support plugin-provided libraries: ${unsupported.joinToString(", ")}"
+        )
+    }
+
+    private fun copyHostNativeLibraries(buildDir: File, projectConfig: RemoteProjectConfig) {
+        val requiredLibs = resolveRequiredHostNativeLibraries(projectConfig)
+        val abis = projectConfig.abis.orEmpty().distinct()
+        if (requiredLibs.isEmpty() || abis.isEmpty()) {
+            return
+        }
+
+        val archiveFile = workspace.nativeLibrariesArchiveFile ?: throw RemoteApkBuildUnsupportedException(
+            "Remote APK build requires host native libraries, but the host did not provide a native library archive."
+        )
+        unzipNativeLibrariesArchive(archiveFile, buildDir)
+
+        val missing = buildList {
+            abis.forEach { abi ->
+                requiredLibs.forEach { soName ->
+                    if (!File(buildDir, "lib/$abi/$soName").isFile) {
+                        add("$abi/$soName")
+                    }
+                }
+            }
+        }
+        if (missing.isNotEmpty()) {
+            throw RemoteApkBuildUnsupportedException(
+                "Remote APK build cannot find required host native libraries: ${missing.joinToString(", ")}"
+            )
+        }
+    }
+
+    private fun resolveRequiredHostNativeLibraries(projectConfig: RemoteProjectConfig): List<String> {
+        val selectedLibs = projectConfig.libs.toSet()
+        return (DEFAULT_NATIVE_LIBRARIES + selectedLibs.flatMap { BUILTIN_NATIVE_LIBRARIES_BY_LABEL[it].orEmpty() })
+            .distinct()
+    }
+
+    private fun unzipNativeLibrariesArchive(zipFile: File, buildDir: File) {
+        val canonicalRoot = buildDir.canonicalFile
+        ZipInputStream(FileInputStream(zipFile).buffered(BUFFER_SIZE)).use { zip ->
+            while (true) {
+                val entry = zip.nextEntry ?: break
+                extractNativeLibraryEntry(zip, entry, canonicalRoot)
+                zip.closeEntry()
+            }
+        }
+    }
+
+    private fun extractNativeLibraryEntry(zip: ZipInputStream, entry: ZipEntry, root: File) {
+        ensureActive()
+        val name = entry.name.replace('\\', '/')
+        if (name.isBlank() || name.startsWith('/') || name.split('/').any { it == ".." }) {
+            throw IOException("Unsafe native library archive entry: ${entry.name}")
+        }
+        if (entry.isDirectory) {
+            return
+        }
+        val segments = name.split('/')
+        if (segments.size != 3 || segments[0] != "lib" || !segments[2].endsWith(".so")) {
+            throw IOException("Unexpected native library archive entry: ${entry.name}")
+        }
+        val out = File(root, name).canonicalFile
+        if (!out.path.startsWith(root.path + File.separator) && out.path != root.path) {
+            throw IOException("Native library archive entry escapes build directory: ${entry.name}")
+        }
+        out.parentFile?.let { parent ->
+            if (!parent.exists() && !parent.mkdirs()) {
+                throw IOException("Failed to create native library parent directory: ${parent.path}")
+            }
+        }
+        FileOutputStream(out, false).use { output ->
+            zip.copyTo(output, BUFFER_SIZE)
+            output.flush()
         }
     }
 
@@ -446,6 +535,7 @@ class RemoteApkLightweightBuilder(
         val versionCode: Int,
         val mainScript: String,
         val abis: List<String>?,
+        val libs: List<String>,
         val permissions: List<String>?,
         val signatureScheme: String,
     )
@@ -478,6 +568,7 @@ class RemoteApkLightweightBuilder(
         private const val KEY_VERSION_CODE = "versionCode"
         private const val KEY_MAIN = "main"
         private const val KEY_ABIS = "abis"
+        private const val KEY_LIBS = "libs"
         private const val KEY_PERMISSIONS = "permissions"
         private const val KEY_SIGNATURE_SCHEME = "signatureScheme"
         private const val KEY_BUILD = "build"
@@ -486,5 +577,29 @@ class RemoteApkLightweightBuilder(
         private const val KEY_BUILD_TIME = "time"
 
         private val PACKAGE_NAME_PATTERN = Regex("[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+")
+        private val DEFAULT_NATIVE_LIBRARIES = listOf(
+            "libjackpal-androidterm5.so",
+            "libjackpal-termexec2.so",
+        )
+        private val BUILTIN_NATIVE_LIBRARIES_BY_LABEL = mapOf(
+            "OpenCV" to listOf(
+                "libc++_shared.so",
+                "libopencv_java4.so",
+            ),
+            "Image Quantization" to listOf(
+                "libpngquant_bridge.so",
+            ),
+        )
+        private val PLUGIN_LIBRARY_LABELS = setOf(
+            "Embedded Node.js",
+            "MLKit OCR",
+            "Paddle OCR",
+            "Rapid OCR",
+            "OpenCC",
+            "Pinyin",
+            "Pinyin4j",
+            "MLKit Barcode",
+            "MediaInfo",
+        )
     }
 }

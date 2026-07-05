@@ -2,8 +2,12 @@ package org.autojs.autojs.apkbuilder.template
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
@@ -18,6 +22,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
 object RemoteApkBuildRequestPreparer {
@@ -30,9 +35,11 @@ object RemoteApkBuildRequestPreparer {
     data class Prepared(
         val request: ApkBuildRequest,
         val archiveFile: File,
+        val nativeLibrariesArchiveFile: File?,
     ) : Closeable {
         override fun close() {
             runCatching { request.projectArchiveFd?.close() }
+            runCatching { request.nativeLibrariesArchiveFd?.close() }
             runCatching { request.keyStoreFd?.close() }
         }
 
@@ -41,6 +48,7 @@ object RemoteApkBuildRequestPreparer {
             if (archiveFile.exists()) {
                 archiveFile.delete()
             }
+            nativeLibrariesArchiveFile?.takeIf { it.exists() }?.delete()
         }
     }
 
@@ -64,6 +72,11 @@ object RemoteApkBuildRequestPreparer {
         val archiveFile = File(cacheDir, "project-${System.nanoTime()}.zip")
         val remoteConfig = cloneForRemoteRequest(projectConfig)
         val sourcePathInArchive = writeProjectArchive(archiveFile, source, projectConfig, remoteConfig)
+        val nativeLibrariesArchiveFile = writeNativeLibrariesArchive(
+            context = appContext,
+            cacheDir = cacheDir,
+            projectConfig = projectConfig,
+        )
 
         val keyStore = projectConfig.keyStore
         val keyStoreFile = keyStore?.absolutePath
@@ -81,6 +94,11 @@ object RemoteApkBuildRequestPreparer {
             projectArchiveFd = ParcelFileDescriptor.open(archiveFile, ParcelFileDescriptor.MODE_READ_ONLY),
             projectArchiveSizeBytes = archiveFile.length(),
             projectArchiveSha256 = sha256(archiveFile),
+            nativeLibrariesArchiveFd = nativeLibrariesArchiveFile?.let {
+                ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY)
+            },
+            nativeLibrariesArchiveSizeBytes = nativeLibrariesArchiveFile?.length() ?: 0L,
+            nativeLibrariesArchiveSha256 = nativeLibrariesArchiveFile?.let(::sha256),
             projectConfigJson = remoteConfig.toJson(false),
             keyStoreFd = keyStoreFile?.let { ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY) },
             keyStoreSizeBytes = keyStoreFile?.length() ?: 0L,
@@ -109,7 +127,7 @@ object RemoteApkBuildRequestPreparer {
             },
         )
 
-        return Prepared(request, archiveFile)
+        return Prepared(request, archiveFile, nativeLibrariesArchiveFile)
     }
 
     private fun cloneForRemoteRequest(projectConfig: ProjectConfig): ProjectConfig {
@@ -184,6 +202,114 @@ object RemoteApkBuildRequestPreparer {
         return true
     }
 
+    private fun writeNativeLibrariesArchive(
+        context: Context,
+        cacheDir: File,
+        projectConfig: ProjectConfig,
+    ): File? {
+        val requiredLibs = resolveHostNativeLibraries(projectConfig)
+        val targetAbis = projectConfig.abis.distinct()
+        if (requiredLibs.isEmpty() || targetAbis.isEmpty()) {
+            return null
+        }
+
+        val appInfo = getApplicationInfoCompat(context.packageManager, context.packageName)
+        val apkPaths = buildList {
+            add(appInfo.sourceDir)
+            appInfo.splitSourceDirs?.forEach { add(it) }
+        }.distinct()
+        val nativeLibraryDir = File(appInfo.nativeLibraryDir.orEmpty()).takeIf { it.isDirectory }
+        val archiveFile = File(cacheDir, "native-libraries-${System.nanoTime()}.zip")
+        var wroteAny = false
+
+        FileOutputStream(archiveFile, false).use { fileOutput ->
+            ZipOutputStream(fileOutput.buffered(BUFFER_SIZE)).use { zip ->
+                targetAbis.forEach { abi ->
+                    val abiCandidates = abiCandidates(abi)
+                    requiredLibs.forEach { soName ->
+                        val entryName = "lib/$abi/$soName"
+                        if (copyFirstMatchedSoToZip(zip, entryName, apkPaths, nativeLibraryDir, abiCandidates, soName)) {
+                            wroteAny = true
+                        }
+                    }
+                }
+            }
+            fileOutput.fd.sync()
+        }
+
+        return archiveFile.takeIf { wroteAny && it.length() > 0L } ?: run {
+            archiveFile.delete()
+            null
+        }
+    }
+
+    private fun resolveHostNativeLibraries(projectConfig: ProjectConfig): List<String> {
+        val selectedLibs = projectConfig.libs.toSet()
+        return ApkBuilder.Lib.entries
+            .filter { lib -> lib == ApkBuilder.Lib.TERMINAL_EMULATOR || (!lib.isPlugin && lib.label in selectedLibs) }
+            .flatMap { it.libsToInclude }
+            .distinct()
+    }
+
+    private fun copyFirstMatchedSoToZip(
+        zip: ZipOutputStream,
+        entryName: String,
+        apkPaths: List<String>,
+        nativeLibraryDir: File?,
+        abiCandidates: List<String>,
+        soName: String,
+    ): Boolean {
+        apkPaths.forEach { apkPath ->
+            val copied = runCatching {
+                ZipFile(apkPath).use { apk ->
+                    abiCandidates.firstNotNullOfOrNull { abi ->
+                        apk.getEntry("lib/$abi/$soName")
+                    }?.let { entry ->
+                        zip.putNextEntry(ZipEntry(entryName))
+                        apk.getInputStream(entry).use { input -> input.copyTo(zip, BUFFER_SIZE) }
+                        zip.closeEntry()
+                        true
+                    } ?: false
+                }
+            }.getOrDefault(false)
+            if (copied) {
+                return true
+            }
+        }
+
+        val nativeFile = nativeLibraryDir
+            ?.takeIf { nativeDirMatchesAbi(it, abiCandidates) }
+            ?.resolve(soName)
+            ?.takeIf { it.isFile }
+            ?: return false
+
+        zip.putNextEntry(ZipEntry(entryName))
+        FileInputStream(nativeFile).use { input -> input.copyTo(zip, BUFFER_SIZE) }
+        zip.closeEntry()
+        return true
+    }
+
+    private fun nativeDirMatchesAbi(nativeLibraryDir: File, abiCandidates: List<String>): Boolean {
+        val path = nativeLibraryDir.path.replace('\\', '/')
+        return abiCandidates.any { abi -> path.endsWith("/$abi") }
+    }
+
+    private fun abiCandidates(abi: String): List<String> {
+        return buildList {
+            add(abi)
+            ABI_ALIASES[abi]?.let(::add)
+        }.distinct()
+    }
+
+    private fun getApplicationInfoCompat(pm: PackageManager, packageName: String): ApplicationInfo {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            pm.getApplicationInfo(packageName, 0)
+        }
+    }
+
     private fun addDirectoryEntry(zip: ZipOutputStream, entryName: String) {
         val safeName = sanitizeEntryPath(entryName).let { if (it.endsWith('/')) it else "$it/" }
         zip.putNextEntry(ZipEntry(safeName))
@@ -240,4 +366,9 @@ object RemoteApkBuildRequestPreparer {
         }
         return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
     }
+
+    private val ABI_ALIASES = mapOf(
+        "arm64-v8a" to "arm64",
+        "armeabi-v7a" to "arm",
+    )
 }

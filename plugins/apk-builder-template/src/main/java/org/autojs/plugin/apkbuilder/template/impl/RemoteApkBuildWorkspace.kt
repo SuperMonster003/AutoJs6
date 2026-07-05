@@ -17,6 +17,7 @@ import java.util.zip.ZipInputStream
 class RemoteApkBuildWorkspace private constructor(
     val root: File,
     val archiveFile: File,
+    val nativeLibrariesArchiveFile: File?,
     val projectRoot: File,
     val sourcePath: File,
     val sourceKind: String,
@@ -32,6 +33,7 @@ class RemoteApkBuildWorkspace private constructor(
             putString(ApkBuildRequestExtraKeys.SOURCE_KIND, sourceKind)
             putString(ApkBuildRequestExtraKeys.SOURCE_ROOT_PATH, projectRoot.path)
             putString(ApkBuildRequestExtraKeys.SOURCE_PATH, sourcePath.path)
+            nativeLibrariesArchiveFile?.let { putString("nativeLibrariesArchivePath", it.path) }
             keyStoreFile?.let { putString("keyStorePath", it.path) }
         }
     }
@@ -53,6 +55,18 @@ class RemoteApkBuildWorkspace private constructor(
 
                 val projectRoot = File(root, "unpacked")
                 unzipSafely(archiveFile, projectRoot)
+
+                val nativeLibrariesArchiveFile = request.nativeLibrariesArchiveFd?.let { fd ->
+                    File(root, "native-libraries.zip").also { file ->
+                        copyFdToFile(fd, file)
+                        verifyFile(
+                            file = file,
+                            expectedSize = request.nativeLibrariesArchiveSizeBytes,
+                            expectedSha256 = request.nativeLibrariesArchiveSha256,
+                            label = "native libraries archive",
+                        )
+                    }
+                }
 
                 val extras = request.extras ?: throw IOException("Remote build request extras are missing.")
                 val archiveVersion = extras.getInt(ApkBuildRequestExtraKeys.ARCHIVE_FORMAT_VERSION, 0)
@@ -96,6 +110,7 @@ class RemoteApkBuildWorkspace private constructor(
                 return RemoteApkBuildWorkspace(
                     root = root,
                     archiveFile = archiveFile,
+                    nativeLibrariesArchiveFile = nativeLibrariesArchiveFile,
                     projectRoot = projectRoot,
                     sourcePath = sourcePath,
                     sourceKind = sourceKind,
