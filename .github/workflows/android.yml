@@ -45,8 +45,8 @@ jobs:
       - name: Build with Gradle (assembleInrtRelease)
         run: ./gradlew assembleInrtRelease
 
-      - name: Build with Gradle (assembleAppRelease)
-        run: ./gradlew assembleAppRelease
+      - name: Build with Gradle (assembleApkBuilderTemplateDistribution)
+        run: ./gradlew assembleApkBuilderTemplateDistribution
 
       - name: Upload arm64 artifacts
         id: upload-arm64-apk
@@ -70,4 +70,12 @@ jobs:
         with:
           name: release-universal-apk
           path: app/build/outputs/apk/app/release/*-universal.apk
+        continue-on-error: true
+
+      - name: Upload APK builder template plugin artifacts
+        id: upload-apk-builder-template-plugin-apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-builder-template-plugin-apk
+          path: plugins/apk-builder-template/build/outputs/apk/release/*.apk
         continue-on-error: true

@@ -1,4 +1,5 @@
 import java.security.MessageDigest
+import org.gradle.api.provider.Property
 
 plugins {
     id("org.autojs.build.versions")
@@ -8,6 +9,14 @@ plugins {
 }
 
 val buildTypeRelease = "release"
+val apkFileExtension = "apk"
+
+private fun Any.reflectedNoArgMethod(name: String): Any? =
+    javaClass.methods.firstOrNull { it.name == name && it.parameterTypes.isEmpty() }?.invoke(this)
+
+@Suppress("UNCHECKED_CAST")
+private fun Any.reflectedOutputFileNameProperty(): Property<String>? =
+    reflectedNoArgMethod("getOutputFileName") as? Property<String>
 
 fun resolveSigningStoreFile(path: String): File {
     val candidate = File(path)
@@ -76,6 +85,19 @@ android {
     }
 }
 
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            output.reflectedOutputFileNameProperty()?.set(
+                output.versionName.map { versionName ->
+                    val version = versionName.replace("\\s".toRegex(), "-").lowercase()
+                    "autojs6-apk-builder-template-v$version-universal.$apkFileExtension"
+                }
+            )
+        }
+    }
+}
+
 dependencies {
     implementation(project(":plugin-api:apk-builder-template"))
     implementation(project(":plugin-api:common-plugin-api"))
@@ -96,12 +118,21 @@ fun File.sha256String(): String {
 
 val generatedTemplateAssetsDir = layout.buildDirectory.dir("generated/assets/apkBuilderTemplate")
 val sourceTemplateApk = rootProject.layout.projectDirectory.file("app/src/main/assets-app/template.apk")
+val refreshTemplateBeforePackagingProperty = "autojs.apkBuilder.templatePlugin.refreshTemplate"
+val refreshTemplateBeforePackaging = providers.gradleProperty(refreshTemplateBeforePackagingProperty)
+    .map { value ->
+        value.trim().lowercase().let { it in setOf("true", "1", "yes", "on") }
+    }
+    .orElse(false)
 
 val prepareApkBuilderTemplateAssets = tasks.register("prepareApkBuilderTemplateAssets") {
     group = "build"
     description = "Copies the current AutoJs6 inrt template APK into the APK builder template plugin assets."
 
-    dependsOn(":app:embeddedNodeRefreshInrtTemplateApk")
+    if (refreshTemplateBeforePackaging.get()) {
+        dependsOn(":app:embeddedNodeRefreshInrtTemplateApk")
+    }
+    inputs.property(refreshTemplateBeforePackagingProperty, refreshTemplateBeforePackaging)
     inputs.file(sourceTemplateApk)
     outputs.dir(generatedTemplateAssetsDir)
 
