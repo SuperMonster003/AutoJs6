@@ -9,6 +9,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
+import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.text.OpenccPluginHost
+import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
+import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -323,6 +329,7 @@ class PluginCenterViewModel : ViewModel() {
             engineId = item.engineId,
             isOcrService = item.isOcrService,
             isBarcodeService = item.isBarcodeService,
+            serviceAction = item.serviceAction,
             requiresHostVersion = item.requiresHostVersion,
             hostVersionCode = item.hostVersionCode,
         )
@@ -414,6 +421,7 @@ class PluginCenterViewModel : ViewModel() {
         val engineId = local?.pluginInfo?.id ?: index?.engineId
         val isOcrService = local?.isOcrService == true || engine in OCR_SERVICE_ENGINES
         val isBarcodeService = local?.isBarcodeService == true || engine in BARCODE_SERVICE_ENGINES
+        val serviceAction = local?.serviceAction ?: serviceActionFromEngine(engine)
         val requiresHostVersion = local?.requiresHostVersion ?: index?.requiresHostVersion
         val hostVersionCode = currentHostVersionCode()
 
@@ -542,6 +550,7 @@ class PluginCenterViewModel : ViewModel() {
             engineId = engineId,
             isOcrService = isOcrService,
             isBarcodeService = isBarcodeService,
+            serviceAction = serviceAction,
             mechanism = mechanism,
             authorizedState = trustInfo.authorizedState,
             activatedState = activatedState,
@@ -747,6 +756,7 @@ class PluginCenterViewModel : ViewModel() {
         val engineId: String?,
         val isOcrService: Boolean,
         val isBarcodeService: Boolean,
+        val serviceAction: String?,
         val requiresHostVersion: Long?,
         val hostVersionCode: Long?,
     )
@@ -755,5 +765,19 @@ class PluginCenterViewModel : ViewModel() {
         private const val TAG = "PluginCenterViewModel"
         private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
         private val BARCODE_SERVICE_ENGINES = setOf("mlkit-barcode")
+        private val SERVICE_ACTION_BY_ENGINE = mapOf(
+            "mlkit-ocr" to OcrPluginHost.ACTION_OCR,
+            "paddle-ocr" to OcrPluginHost.ACTION_OCR,
+            "rapid-ocr" to OcrPluginHost.ACTION_OCR,
+            "mlkit-barcode" to BarcodePluginHost.ACTION_BARCODE,
+            "opencc" to OpenccPluginHost.ACTION_OPENCC,
+            "pinyin" to PinyinPluginHost.ACTION_PINYIN,
+            "pinyin4j" to Pinyin4jPluginHost.ACTION_PINYIN4J,
+            "mediainfo" to MediainfoPluginHost.ACTION_MEDIAINFO,
+        )
+
+        fun serviceActionFromEngine(engine: String?): String? {
+            return engine?.trim()?.lowercase(Locale.ROOT)?.let(SERVICE_ACTION_BY_ENGINE::get)
+        }
     }
 }

@@ -23,7 +23,11 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.text.OpenccPluginHost
+import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
+import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
@@ -39,10 +43,18 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.IPluginInfoProvider
 import org.autojs.plugin.common.api.PluginInfo
+import org.autojs.plugin.mediainfo.api.IMediainfoPlugin
+import org.autojs.plugin.mediainfo.api.MediainfoPluginIds
 import org.autojs.plugin.mlkit.barcode.api.IBarcodePlugin
 import org.autojs.plugin.nodejs.api.NodeJsPluginActions
 import org.autojs.plugin.nodejs.api.NodeJsPluginIds
+import org.autojs.plugin.opencc.api.IOpenccPlugin
+import org.autojs.plugin.opencc.api.OpenccPluginIds
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
+import org.autojs.plugin.pinyin.api.IPinyinPlugin
+import org.autojs.plugin.pinyin.api.PinyinPluginIds
+import org.autojs.plugin.pinyin4j.api.IPinyin4jPlugin
+import org.autojs.plugin.pinyin4j.api.Pinyin4jPluginIds
 import pxb.android.StringItem
 import pxb.android.axml.AxmlWriter
 import zhao.arsceditor.ResDecoder.ARSCDecoder
@@ -1817,22 +1829,60 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         OPENCC(
             label = "OpenCC",
             aliases = listOf("cc"),
-            libsToInclude = listOf(
-                "libChineseConverter.so",
-            ),
-            assetDirsToInclude = listOf(
-                "assets/openccdata",
+            plugin = PluginLib(
+                action = OpenccPluginHost.ACTION_OPENCC,
+                onServiceConnected = { binder: IBinder ->
+                    IOpenccPlugin.Stub.asInterface(binder).info
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = OpenccPluginIds.VARIANT_DEFAULT,
+                        assetsToInclude = listOf(
+                            "assets/openccdata/",
+                        ) to emptyList(),
+                        libsToInclude = listOf(
+                            "libChineseConverter.so",
+                        ),
+                    ),
+                ),
             ),
         ),
 
         PINYIN(
             label = "Pinyin",
             aliases = listOf("pin"),
-            assetFilesToInclude = listOf(
-                "assets/dict-chinese-words.db.gzip",
-                "assets/dict-chinese-phrases.db.gzip",
-                "assets/dict-chinese-chars.db.gzip",
-                "assets/prob_emit.txt",
+            plugin = PluginLib(
+                action = PinyinPluginHost.ACTION_PINYIN,
+                onServiceConnected = { binder: IBinder ->
+                    IPinyinPlugin.Stub.asInterface(binder).info
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = PinyinPluginIds.VARIANT_DEFAULT,
+                        assetsToInclude = listOf(
+                            "assets/dict-chinese-words.db.gzip",
+                            "assets/dict-chinese-phrases.db.gzip",
+                            "assets/dict-chinese-chars.db.gzip",
+                            "assets/prob_emit.txt",
+                        ) to emptyList(),
+                    ),
+                ),
+            ),
+        ),
+
+        PINYIN4J(
+            label = "Pinyin4j",
+            aliases = listOf("pinyin4j", "pinyin-4j", "pinyin_4j"),
+            plugin = PluginLib(
+                action = Pinyin4jPluginHost.ACTION_PINYIN4J,
+                onServiceConnected = { binder: IBinder ->
+                    IPinyin4jPlugin.Stub.asInterface(binder).info
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = Pinyin4jPluginIds.VARIANT_DEFAULT,
+                    ),
+                ),
             ),
         ),
 
@@ -1863,8 +1913,20 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         MEDIA_INFO(
             label = "MediaInfo",
             aliases = listOf("mediainfo", "media-info", "media_info"),
-            libsToInclude = listOf(
-                "libmediainfo.so",
+            plugin = PluginLib(
+                action = MediainfoPluginHost.ACTION_MEDIAINFO,
+                onServiceConnected = { binder: IBinder ->
+                    IMediainfoPlugin.Stub.asInterface(binder).info
+                },
+                variants = listOf(
+                    PluginLibVariant(
+                        variant = MediainfoPluginIds.VARIANT_DEFAULT,
+                        libsToInclude = listOf(
+                            "libc++_shared.so",
+                            "libmediainfo.so",
+                        ),
+                    ),
+                ),
             ),
         ),
 

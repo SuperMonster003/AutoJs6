@@ -2,6 +2,8 @@ package org.autojs.autojs.runtime.api.augment.mediainfo
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
+import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
@@ -16,11 +18,11 @@ import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
-import org.mediainfo.android.MediaInfo
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
+import java.io.File
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class MediainfoNativeObject(
@@ -50,13 +52,18 @@ class MediainfoNativeObject(
     }
 
     private fun initProperties() {
-        val inform = scriptRuntime.mediaInfo.getMI(path)
+        val file = File(path)
+        val inform = runBlocking {
+            MediainfoPluginHost.inform(ScriptRuntime.applicationContext, file)
+        }
         defineProperty("inform", inform, READONLY or PERMANENT)
-        MediaInfo.StreamKind.entries.forEach { streamKind ->
-            val funcName = streamKind.name.lowercase()
+        STREAM_KINDS.forEach { streamKind ->
+            val funcName = streamKind.lowercase()
             defineProperty(funcName, newBaseFunction(funcName, { argList ->
                 val parameter = argList.takeUnless { it.isEmpty() }?.get(0)?.let { coerceString(it) } ?: ""
-                scriptRuntime.mediaInfo.get(path, streamKind, 0, parameter)
+                runBlocking {
+                    MediainfoPluginHost.get(ScriptRuntime.applicationContext, file, streamKind, 0, parameter)
+                }
             }, NOT_CONSTRUCTABLE), READONLY or PERMANENT)
         }
         applyInform(inform)
@@ -100,6 +107,17 @@ class MediainfoNativeObject(
     override fun toStringReadable() = toStringRhino(this)
 
     companion object : ArgumentGuards() {
+
+        private val STREAM_KINDS = listOf(
+            "GENERAL",
+            "VIDEO",
+            "AUDIO",
+            "TEXT",
+            "OTHER",
+            "IMAGE",
+            "MENU",
+            "MAX",
+        )
 
         @JvmStatic
         @RhinoStandardFunctionInterface

@@ -114,7 +114,6 @@ import org.autojs.autojs.util.SdkVersionUtils
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
-import org.mediainfo.android.MediaInfo
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.RhinoException
@@ -375,10 +374,6 @@ class ScriptRuntime private constructor(builder: Builder) {
             mRootShell = it
         }
     }
-
-    @JvmField
-    @ScriptInterface
-    val mediaInfo = MediaInfo()
 
     var isJavaPrimitiveWrap
         get() = bridges.isJavaPrimitiveWrap()

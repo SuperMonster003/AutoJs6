@@ -59,6 +59,7 @@ data class PluginCenterItem(
     val engineId: String? = null,
     val isOcrService: Boolean = false,
     val isBarcodeService: Boolean = false,
+    val serviceAction: String? = null,
     val mechanism: PluginMechanism = PluginMechanism.AIDL,
     var authorizedState: PluginAuthorizedState = PluginAuthorizedState.OFFICIAL,
     var activatedState: PluginActivatedState = PluginActivatedState.NOT_SUPPORTED,

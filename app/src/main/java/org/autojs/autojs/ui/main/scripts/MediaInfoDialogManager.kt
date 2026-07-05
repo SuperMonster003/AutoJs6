@@ -17,6 +17,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.DialogUtils.makeTextCopyable
 import org.autojs.autojs.util.DialogUtils.setCopyableText
@@ -24,14 +25,14 @@ import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.MediaFileInfoDialogItemsBinding
-import org.mediainfo.android.MediaInfo
-import org.mediainfo.android.MediaInfo.StreamKind.AUDIO
-import org.mediainfo.android.MediaInfo.StreamKind.GENERAL
-import org.mediainfo.android.MediaInfo.StreamKind.VIDEO
+import java.io.File
 
 object MediaInfoDialogManager {
 
     private const val MEDIA_INFO_ERROR_OPENING_FILE = "Error opening file..."
+    private const val STREAM_AUDIO = "AUDIO"
+    private const val STREAM_GENERAL = "GENERAL"
+    private const val STREAM_VIDEO = "VIDEO"
 
     @JvmStatic
     @JvmOverloads
@@ -80,29 +81,30 @@ object MediaInfoDialogManager {
             .showAdaptive()
 
         scope.launch {
-            val mediaInfo = MediaInfo()
             val filePath = explorerItem.path
 
-            val videoFormatDeferred = async(Dispatchers.IO) { mediaInfo(filePath, VIDEO, "Format") }
-            val audioFormatDeferred = async(Dispatchers.IO) { mediaInfo(filePath, AUDIO, "Format") }
-            val containerFormatDeferred = async(Dispatchers.IO) { mediaInfo(filePath, GENERAL, "Format") }
-            val mediaInfoTrimmedDeferred = async(Dispatchers.IO) { mediaInfo.getMediaInfoTrimmed(explorerItem.path) }
+            val videoFormatDeferred = async(Dispatchers.IO) { mediaInfo(context, filePath, STREAM_VIDEO, "Format") }
+            val audioFormatDeferred = async(Dispatchers.IO) { mediaInfo(context, filePath, STREAM_AUDIO, "Format") }
+            val containerFormatDeferred = async(Dispatchers.IO) { mediaInfo(context, filePath, STREAM_GENERAL, "Format") }
+            val mediaInfoTrimmedDeferred = async(Dispatchers.IO) {
+                MediainfoPluginHost.trimInform(MediainfoPluginHost.inform(context, File(explorerItem.path)))
+            }
 
             launch(Dispatchers.IO) {
-                mediaInfo(filePath, GENERAL, "FileSize/String").let { binding.fileSizeValue.bindWith(dialog, it) }
-                mediaInfo(filePath, GENERAL, "Duration/String").let { binding.durationValue.bindWith(dialog, it) }
-                mediaInfo(filePath, AUDIO, "BitRate/String").let { binding.bitRateForAudioValue.bindWith(dialog, it) }
-                mediaInfo(filePath, VIDEO, "BitRate/String").let { binding.bitRateForVideoValue.bindWith(dialog, it) }
-                mediaInfo(filePath, GENERAL, "Track").let { binding.trackNameValue.bindWith(dialog, it) }
-                mediaInfo(filePath, GENERAL, "Performer").let { binding.performerValue.bindWith(dialog, it) }
-                mediaInfo(filePath, GENERAL, "Album").let { binding.albumValue.bindWith(dialog, it) }
+                mediaInfo(context, filePath, STREAM_GENERAL, "FileSize/String").let { binding.fileSizeValue.bindWith(dialog, it) }
+                mediaInfo(context, filePath, STREAM_GENERAL, "Duration/String").let { binding.durationValue.bindWith(dialog, it) }
+                mediaInfo(context, filePath, STREAM_AUDIO, "BitRate/String").let { binding.bitRateForAudioValue.bindWith(dialog, it) }
+                mediaInfo(context, filePath, STREAM_VIDEO, "BitRate/String").let { binding.bitRateForVideoValue.bindWith(dialog, it) }
+                mediaInfo(context, filePath, STREAM_GENERAL, "Track").let { binding.trackNameValue.bindWith(dialog, it) }
+                mediaInfo(context, filePath, STREAM_GENERAL, "Performer").let { binding.performerValue.bindWith(dialog, it) }
+                mediaInfo(context, filePath, STREAM_GENERAL, "Album").let { binding.albumValue.bindWith(dialog, it) }
                 run {
-                    val width = mediaInfo(filePath, VIDEO, "Width")
-                    val height = mediaInfo(filePath, VIDEO, "Height")
+                    val width = mediaInfo(context, filePath, STREAM_VIDEO, "Width")
+                    val height = mediaInfo(context, filePath, STREAM_VIDEO, "Height")
                     binding.resolutionValue.bindWith(dialog, if (width.isNotEmpty() && height.isNotEmpty()) "$width × $height" else "")
                 }
-                mediaInfo(filePath, VIDEO, "DisplayAspectRatio/String").let { binding.aspectRatioValue.bindWith(dialog, it) }
-                mediaInfo(filePath, VIDEO, "FrameRate").let { binding.frameRateValue.bindWith(dialog, it) }
+                mediaInfo(context, filePath, STREAM_VIDEO, "DisplayAspectRatio/String").let { binding.aspectRatioValue.bindWith(dialog, it) }
+                mediaInfo(context, filePath, STREAM_VIDEO, "FrameRate").let { binding.frameRateValue.bindWith(dialog, it) }
             }
 
             when {
@@ -267,8 +269,8 @@ object MediaInfoDialogManager {
         }
     }
 
-    private operator fun MediaInfo.invoke(filePath: String, streamKind: MediaInfo.StreamKind, parameter: String): String {
-        return this.get(filePath, streamKind, 0, parameter)
+    private suspend fun mediaInfo(context: Context, filePath: String, streamKind: String, parameter: String): String {
+        return MediainfoPluginHost.get(context, File(filePath), streamKind, 0, parameter)
     }
 
 }

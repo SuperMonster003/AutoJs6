@@ -1,0 +1,701 @@
+package org.autojs.autojs.core.plugin
+
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
+import android.os.Build
+import android.os.Handler
+import android.os.IBinder
+import android.os.IInterface
+import android.os.Looper
+import android.os.RemoteException
+import android.os.SystemClock.uptimeMillis
+import android.util.Log
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
+import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.plugin.center.PluginTrustManager
+import org.autojs.autojs.core.plugin.center.PluginVariantPriorityStore
+import org.autojs.autojs.core.plugin.center.PluginWakeManager
+import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
+import org.autojs.plugin.common.api.PluginInfo
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+
+class AidlPluginHost<I : IInterface>(
+    val action: String,
+    private val tag: String,
+    private val moduleLabel: String,
+    private val proxyFactory: (IBinder) -> I,
+    private val infoReader: (I) -> PluginInfo,
+) {
+
+    private val defaultBindTimeoutMs = 60_000L
+    private val idleUnbindMs = 30_000L
+    private val retryWakeDelayMs = 300L
+    private val serviceQueryRetryDelaysMs = longArrayOf(150L, 300L, 600L, 1000L, 1500L)
+
+    private val externalServiceFlag = runCatching { ServiceInfo::class.java.getField("FLAG_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
+    private val bindExternalServiceFlag = runCatching { Context::class.java.getField("BIND_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
+    private val poolHandler = Handler(Looper.getMainLooper())
+    private val poolLock = Any()
+    private val connectionPool = LinkedHashMap<ComponentName, PooledConnection>()
+
+    data class Discovered(
+        val serviceInfo: ServiceInfo,
+        val pluginInfo: PluginInfo?,
+        val error: Throwable?,
+    )
+
+    suspend fun discover(context: Context): List<Discovered> {
+        val services = queryServices(context)
+        Log.i(tag, "discover: services=${services.size}")
+        return services.map { service ->
+            Log.i(tag, "discover: ${service.packageName}/${service.name}")
+            val result = runCatching { withService(context, service, defaultBindTimeoutMs) { infoReader(it) } }
+            result.exceptionOrNull()?.let { Log.w(tag, "getInfo failed: ${it.message}") }
+            Discovered(service, result.getOrNull(), result.exceptionOrNull())
+        }
+    }
+
+    suspend fun probe(context: Context, packageName: String): PluginInfo {
+        if (!PluginTrustManager.isAuthorized(context, packageName)) {
+            error("Plugin not authorized: $packageName")
+        }
+        val serviceInfo = queryFirstServiceWithRetry(context, packageName)
+            ?: error("No plugin service found for action $action and package: $packageName")
+        return withService(context, serviceInfo, defaultBindTimeoutMs) { infoReader(it) }
+    }
+
+    fun queryServiceCount(context: Context): Int = queryServices(context).size
+
+    suspend fun select(
+        context: Context,
+        engineId: String? = null,
+        engine: String? = null,
+        variant: String? = null,
+    ): Discovered? {
+        return selectDetailed(context, engineId, engine, variant).selected
+    }
+
+    suspend fun selectOrThrow(
+        context: Context,
+        engineId: String? = null,
+        engine: String? = null,
+        variant: String? = null,
+        label: String = moduleLabel,
+    ): Discovered {
+        val result = selectDetailed(context, engineId, engine, variant)
+        return result.selected ?: throw buildSelectionFailure(context, result.discovered, engineId, engine, variant, label)
+    }
+
+    suspend fun <T> call(
+        context: Context,
+        target: Discovered,
+        block: (I) -> T,
+    ): T {
+        if (!PluginTrustManager.isAuthorized(context, target.serviceInfo.packageName)) {
+            error("Plugin not authorized: ${target.serviceInfo.packageName}")
+        }
+        ensureHostVersionCompatible(context, target)
+        return withService(context, target.serviceInfo, defaultBindTimeoutMs, block = block)
+    }
+
+    private suspend fun queryFirstServiceWithRetry(context: Context, packageName: String): ServiceInfo? {
+        queryServices(context, packageName).firstOrNull()?.let { return it }
+        serviceQueryRetryDelaysMs.forEach { delayMs ->
+            delay(delayMs)
+            queryServices(context, packageName).firstOrNull()?.let { return it }
+        }
+        return null
+    }
+
+    private suspend fun selectDetailed(
+        context: Context,
+        engineId: String?,
+        engine: String?,
+        variant: String?,
+    ): SelectionResult {
+        var discovered = discover(context)
+        selectFrom(discovered, context, engineId, engine, variant)?.let { return SelectionResult(it, discovered) }
+        if (discovered.any { it.error != null }) {
+            recoverFailedDiscoveries(context, discovered)
+            discovered = discover(context)
+            selectFrom(discovered, context, engineId, engine, variant)?.let { return SelectionResult(it, discovered) }
+        }
+        return SelectionResult(null, discovered)
+    }
+
+    private fun selectFrom(
+        discovered: List<Discovered>,
+        context: Context,
+        engineId: String?,
+        engine: String?,
+        variant: String?,
+    ): Discovered? {
+        val list = discovered
+            .filter { it.pluginInfo != null }
+            .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, true) }
+            .filter { PluginTrustManager.isAuthorized(context, it.serviceInfo.packageName) }
+            .filter { isHostVersionCompatible(it.pluginInfo) }
+        if (list.isEmpty()) return null
+        if (hasExplicitSelectionCriteria(engineId, engine, variant)) {
+            val candidates = list.filter { item ->
+                item.pluginInfo?.let { matchesSelectionCriteria(it, engineId, engine, variant) } == true
+            }
+            if (candidates.isEmpty()) return null
+            return selectByPriorityWithKeys(
+                candidates = candidates,
+                keys = PluginVariantPriorityStore.buildPriorityKeys(
+                    engine = engine ?: candidates.mapNotNull { it.pluginInfo?.engine }.distinct().singleOrNull(),
+                    engineId = engineId ?: inferCommonEngineFamily(candidates),
+                ),
+            ) ?: candidates.first()
+        }
+        val singleEngine = list.mapNotNull { it.pluginInfo?.engine }.distinct().singleOrNull()
+        if (!singleEngine.isNullOrBlank()) {
+            selectByPriorityWithKeys(
+                candidates = list,
+                keys = PluginVariantPriorityStore.buildPriorityKeys(
+                    engine = singleEngine,
+                    engineId = inferCommonEngineFamily(list),
+                ),
+            )?.let { return it }
+        }
+        inferCommonEngineFamily(list)?.let { family ->
+            selectByPriorityWithKeys(
+                candidates = list,
+                keys = PluginVariantPriorityStore.buildPriorityKeys(
+                    engine = family,
+                    engineId = family,
+                ),
+            )?.let { return it }
+        }
+        return list.first()
+    }
+
+    private fun selectByPriorityWithKeys(
+        candidates: List<Discovered>,
+        keys: List<String>,
+    ): Discovered? {
+        if (candidates.isEmpty()) return null
+        val byPackage = candidates.associateBy { it.serviceInfo.packageName }
+        val fallbackOrder = PluginVariantPriorityStore.getBestOrderForPackages(byPackage.keys)
+        if (fallbackOrder.isNotEmpty()) {
+            fallbackOrder.firstNotNullOfOrNull { byPackage[it] }?.let { return it }
+        }
+        keys.forEach { key ->
+            PluginVariantPriorityStore.selectByPriority(
+                engine = key,
+                candidates = candidates,
+                packageNameOf = { it.serviceInfo.packageName },
+                variantOf = { it.pluginInfo?.variant },
+            )?.let { selected ->
+                if (PluginVariantPriorityStore.getOrder(key).isNotEmpty()) {
+                    return selected
+                }
+            }
+        }
+        return PluginVariantPriorityStore.selectByPriority(
+            engine = keys.firstOrNull(),
+            candidates = candidates,
+            packageNameOf = { it.serviceInfo.packageName },
+            variantOf = { it.pluginInfo?.variant },
+        )
+    }
+
+    private fun inferCommonEngineFamily(candidates: List<Discovered>): String? {
+        if (candidates.isEmpty()) return null
+        val families = candidates.mapNotNull { candidate ->
+            PluginVariantPriorityStore.normalizeFamilyKey(candidate.pluginInfo?.id)
+                ?: PluginVariantPriorityStore.normalizeFamilyKey(candidate.pluginInfo?.engine)
+        }.distinct()
+        return families.singleOrNull()
+    }
+
+    private fun buildSelectionFailure(
+        context: Context,
+        discovered: List<Discovered>,
+        engineId: String?,
+        engine: String?,
+        variant: String?,
+        label: String,
+    ): IllegalStateException {
+        if (discovered.isEmpty()) {
+            return IllegalStateException(context.getString(R.string.error_missing_required_plugin_for_module_label, label))
+        }
+        val scopedInfoItems = discovered.filter { item ->
+            item.pluginInfo?.let { matchesSelectionCriteria(it, engineId, engine, variant) } == true
+        }
+        if (scopedInfoItems.isEmpty() && hasExplicitSelectionCriteria(engineId, engine, variant)) {
+            return IllegalStateException(context.getString(R.string.error_missing_required_plugin_for_module_label, label))
+        }
+        val variantList = scopedInfoItems
+            .mapNotNull { item ->
+                item.pluginInfo?.let { info ->
+                    info.variant?.takeIf { it.isNotBlank() }
+                        ?: info.id?.takeIf { it.isNotBlank() }
+                        ?: info.engine?.takeIf { it.isNotBlank() }
+                }
+            }
+            .distinct()
+            .joinToString("/")
+            .ifBlank { "*" }
+        val fallback = context.getString(R.string.error_no_available_enabled_plugin_variants_found, label, variantList)
+
+        if (scopedInfoItems.isEmpty()) {
+            val failure = discovered.firstNotNullOfOrNull { item -> item.error?.let { item to it } }
+            if (failure != null) {
+                val (item, error) = failure
+                return IllegalStateException("${fallback}: ${item.serviceInfo.packageName}/${item.serviceInfo.name}: ${error.message ?: error}", error)
+            }
+            return IllegalStateException(fallback)
+        }
+
+        val authorizedItems = scopedInfoItems.filter { PluginTrustManager.isAuthorized(context, it.serviceInfo.packageName) }
+        if (authorizedItems.isEmpty()) {
+            return IllegalStateException(context.getString(R.string.error_plugin_is_not_authorized_in_plugin_center, scopedInfoItems.first().serviceInfo.packageName))
+        }
+
+        val enabledItems = authorizedItems.filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, true) }
+        if (enabledItems.isEmpty()) {
+            return IllegalStateException(context.getString(R.string.error_plugin_is_not_enabled_in_plugin_center, authorizedItems.first().serviceInfo.packageName))
+        }
+
+        val compatibleItems = enabledItems.filter { isHostVersionCompatible(it.pluginInfo) }
+        if (compatibleItems.isEmpty()) {
+            val requiredVersion = enabledItems
+                .mapNotNull { PluginCapabilityResolver.resolveRequiresHostVersion(it.pluginInfo?.capabilities) }
+                .maxOrNull()
+                ?: 0L
+            return IllegalStateException(
+                context.getString(
+                    R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
+                    requiredVersion,
+                    BuildConfig.VERSION_CODE.toLong(),
+                )
+            )
+        }
+
+        return IllegalStateException(fallback)
+    }
+
+    private fun matchesSelectionCriteria(
+        pluginInfo: PluginInfo,
+        engineId: String?,
+        engine: String?,
+        variant: String?,
+    ): Boolean {
+        if (engineId != null && pluginInfo.id != engineId) return false
+        if (engine != null && pluginInfo.engine != engine) return false
+        if (variant != null && pluginInfo.variant != variant) return false
+        return true
+    }
+
+    private fun hasExplicitSelectionCriteria(engineId: String?, engine: String?, variant: String?): Boolean {
+        return engineId != null || engine != null || variant != null
+    }
+
+    private fun isHostVersionCompatible(pluginInfo: PluginInfo?): Boolean {
+        val requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo?.capabilities)
+        return PluginCapabilityResolver.isHostVersionCompatible(BuildConfig.VERSION_CODE.toLong(), requiresHostVersion)
+    }
+
+    private fun ensureHostVersionCompatible(context: Context, target: Discovered) {
+        val requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(target.pluginInfo?.capabilities)
+        if (PluginCapabilityResolver.isHostVersionCompatible(BuildConfig.VERSION_CODE.toLong(), requiresHostVersion)) {
+            return
+        }
+        throw IllegalStateException(
+            context.getString(
+                R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
+                requiresHostVersion ?: 0L,
+                BuildConfig.VERSION_CODE.toLong(),
+            )
+        )
+    }
+
+    private suspend fun recoverFailedDiscoveries(context: Context, discovered: List<Discovered>) {
+        var didWake = false
+        discovered
+            .filter { it.error != null }
+            .forEach { item ->
+                invalidateService(item.serviceInfo, item.error!!)
+                didWake = PluginWakeManager.tryAutoWakeIfNeeded(context, item.serviceInfo.packageName) || didWake
+            }
+        if (didWake) {
+            delay(retryWakeDelayMs)
+        }
+    }
+
+    private fun queryServices(context: Context, packageName: String? = null): List<ServiceInfo> {
+        val intent = Intent(action).apply {
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            if (!packageName.isNullOrBlank()) {
+                setPackage(packageName)
+            }
+        }
+        val resolveList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.packageManager.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0))
+        } else {
+            context.packageManager.queryIntentServices(intent, 0)
+        }
+        return resolveList.mapNotNull { it.serviceInfo }
+    }
+
+    private fun buildBindFlags(serviceInfo: ServiceInfo): Int {
+        var flags = Context.BIND_AUTO_CREATE
+        if (externalServiceFlag != 0 && bindExternalServiceFlag != 0 && (serviceInfo.flags and externalServiceFlag) != 0) {
+            flags = flags or bindExternalServiceFlag
+        }
+        return flags
+    }
+
+    private fun buildBindFailureMessage(context: Context, serviceInfo: ServiceInfo, component: ComponentName, reason: String? = null): String {
+        val permission = serviceInfo.permission
+        val hasPermission = permission.isNullOrBlank() || context.packageManager.checkPermission(permission, context.packageName) == PackageManager.PERMISSION_GRANTED
+        val appInfo = serviceInfo.applicationInfo
+        val appStopped = (appInfo.flags and ApplicationInfo.FLAG_STOPPED) != 0
+        val isExternal = externalServiceFlag != 0 && (serviceInfo.flags and externalServiceFlag) != 0
+        val reasonText = reason?.let { " | reason=$it" } ?: ""
+        return "bindService failed: $component. exported=${serviceInfo.exported} enabled=${serviceInfo.enabled} appEnabled=${appInfo.enabled} stopped=$appStopped perm=$permission hasPerm=$hasPermission external=$isExternal flags=0x${Integer.toHexString(serviceInfo.flags)}$reasonText"
+    }
+
+    private suspend fun <T> withService(
+        context: Context,
+        serviceInfo: ServiceInfo,
+        bindTimeoutMs: Long = defaultBindTimeoutMs,
+        retryOnRemoteException: Boolean = true,
+        block: (I) -> T,
+    ): T {
+        val appContext = context.applicationContext
+        val entry = getOrCreateEntry(appContext, serviceInfo)
+        val proxy = awaitProxy(entry, bindTimeoutMs)
+        return try {
+            block(proxy)
+        } catch (e: RemoteException) {
+            if (retryOnRemoteException) {
+                retryAfterBinderFailure(entry, bindTimeoutMs, e, block)
+            } else {
+                throw e
+            }
+        } finally {
+            touch(entry)
+        }
+    }
+
+    private fun invalidateService(serviceInfo: ServiceInfo, error: Throwable) {
+        val component = ComponentName(serviceInfo.packageName, serviceInfo.name)
+        val entry = synchronized(poolLock) { connectionPool[component] }
+        if (entry != null) {
+            invalidateEntry(entry, error)
+        }
+    }
+
+    private suspend fun <T> retryAfterBinderFailure(
+        entry: PooledConnection,
+        bindTimeoutMs: Long,
+        error: RemoteException,
+        block: (I) -> T,
+    ): T {
+        invalidateEntry(entry, error)
+        val proxy = awaitProxy(entry, bindTimeoutMs)
+        return try {
+            block(proxy)
+        } catch (retryError: RemoteException) {
+            invalidateEntry(entry, retryError)
+            throw retryError
+        }
+    }
+
+    private fun touch(entry: PooledConnection) {
+        synchronized(entry.lock) {
+            entry.lastUsed = uptimeMillis()
+        }
+        scheduleIdleUnbind(entry)
+    }
+
+    private suspend fun awaitProxy(entry: PooledConnection, bindTimeoutMs: Long): I =
+        suspendCancellableCoroutine { cont ->
+            var shouldBind = false
+            synchronized(entry.lock) {
+                entry.lastUsed = uptimeMillis()
+                cancelIdleUnbindLocked(entry)
+                val existing = entry.proxy
+                if (existing != null && entry.bound && entry.isBinderAliveLocked()) {
+                    cont.resume(existing)
+                    return@suspendCancellableCoroutine
+                }
+                if (existing != null) {
+                    entry.clearConnectionLocked()
+                }
+                entry.waiters.add(cont)
+                if (!entry.connecting) {
+                    entry.connecting = true
+                    shouldBind = true
+                }
+            }
+            if (shouldBind) {
+                startBind(entry, bindTimeoutMs)
+            }
+            cont.invokeOnCancellation {
+                synchronized(entry.lock) {
+                    entry.waiters.remove(cont)
+                }
+            }
+        }
+
+    private fun startBind(entry: PooledConnection, bindTimeoutMs: Long) {
+        val intent = Intent().setComponent(entry.component)
+        val bindFlags = buildBindFlags(entry.serviceInfo)
+        var bound = try {
+            Log.i(tag, "bindService: ${entry.component}")
+            entry.appContext.bindService(intent, entry.connection, bindFlags)
+        } catch (e: SecurityException) {
+            failWaiters(
+                entry,
+                IllegalStateException(
+                    "bindService SecurityException: ${entry.component}. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.",
+                    e,
+                ),
+            )
+            return
+        }
+        if (!bound && bindFlags != Context.BIND_AUTO_CREATE) {
+            bound = try {
+                entry.appContext.bindService(intent, entry.connection, Context.BIND_AUTO_CREATE)
+            } catch (e: SecurityException) {
+                failWaiters(
+                    entry,
+                    IllegalStateException(
+                        "bindService SecurityException: ${entry.component}. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.",
+                        e,
+                    ),
+                )
+                return
+            }
+        }
+        if (!bound) {
+            val message = buildBindFailureMessage(entry.appContext, entry.serviceInfo, entry.component)
+            Log.e(tag, message)
+            failWaiters(entry, IllegalStateException(message))
+            return
+        }
+
+        val timeout = Runnable {
+            val pending = synchronized(entry.lock) {
+                entry.connecting = false
+                val list = entry.waiters.toList()
+                entry.waiters.clear()
+                entry.bindTimeoutRunnable = null
+                list
+            }
+            if (pending.isNotEmpty()) {
+                Log.e(tag, "bindService timeout: ${entry.component}")
+                pending.forEach { waiter ->
+                    if (!waiter.isCompleted) {
+                        waiter.resumeWithException(TimeoutException("bindService timeout: ${entry.component}"))
+                    }
+                }
+                runCatching { entry.appContext.unbindService(entry.connection) }
+            }
+        }
+        synchronized(entry.lock) {
+            entry.bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+            entry.bindTimeoutRunnable = timeout
+        }
+        poolHandler.postDelayed(timeout, bindTimeoutMs)
+    }
+
+    private fun invalidateEntry(entry: PooledConnection, error: Throwable) {
+        synchronized(entry.lock) {
+            entry.clearConnectionLocked()
+            entry.connecting = false
+            entry.bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+            entry.bindTimeoutRunnable = null
+            entry.idleRunnable?.let { poolHandler.removeCallbacks(it) }
+            entry.idleRunnable = null
+        }
+        poolHandler.post {
+            runCatching { entry.appContext.unbindService(entry.connection) }
+            Log.w(tag, "invalidateEntry: ${entry.component} | ${error.message}")
+        }
+    }
+
+    private fun failWaiters(entry: PooledConnection, error: Throwable) {
+        val pending = synchronized(entry.lock) {
+            entry.connecting = false
+            entry.bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+            entry.bindTimeoutRunnable = null
+            val list = entry.waiters.toList()
+            entry.waiters.clear()
+            list
+        }
+        pending.forEach { waiter ->
+            if (!waiter.isCompleted) {
+                waiter.resumeWithException(error)
+            }
+        }
+    }
+
+    private fun scheduleIdleUnbind(entry: PooledConnection) {
+        val runnable = Runnable {
+            val shouldUnbind = synchronized(entry.lock) {
+                val idleEnough = uptimeMillis() - entry.lastUsed >= idleUnbindMs
+                idleEnough && entry.bound && entry.proxy != null && !entry.connecting
+            }
+            if (shouldUnbind) {
+                runCatching { entry.appContext.unbindService(entry.connection) }
+                synchronized(entry.lock) {
+                    entry.clearConnectionLocked()
+                }
+            }
+        }
+        synchronized(entry.lock) {
+            entry.idleRunnable?.let { poolHandler.removeCallbacks(it) }
+            entry.idleRunnable = runnable
+        }
+        poolHandler.postDelayed(runnable, idleUnbindMs)
+    }
+
+    private fun cancelIdleUnbindLocked(entry: PooledConnection) {
+        entry.idleRunnable?.let { poolHandler.removeCallbacks(it) }
+        entry.idleRunnable = null
+    }
+
+    private fun getOrCreateEntry(appContext: Context, serviceInfo: ServiceInfo): PooledConnection {
+        val component = ComponentName(serviceInfo.packageName, serviceInfo.name)
+        synchronized(poolLock) {
+            return connectionPool.getOrPut(component) {
+                PooledConnection(appContext, serviceInfo)
+            }
+        }
+    }
+
+    private inner class PooledConnection(
+        val appContext: Context,
+        val serviceInfo: ServiceInfo,
+    ) {
+        val component: ComponentName = ComponentName(serviceInfo.packageName, serviceInfo.name)
+        val lock = Any()
+        val waiters = ArrayList<CancellableContinuation<I>>()
+        var proxy: I? = null
+        var binder: IBinder? = null
+        var deathRecipient: IBinder.DeathRecipient? = null
+        var bound = false
+        var connecting = false
+        var lastUsed = 0L
+        var idleRunnable: Runnable? = null
+        var bindTimeoutRunnable: Runnable? = null
+
+        fun isBinderAliveLocked(): Boolean {
+            val activeBinder = binder ?: proxy?.asBinder()
+            return activeBinder?.isBinderAlive == true
+        }
+
+        fun clearConnectionLocked() {
+            val currentBinder = binder
+            val currentDeathRecipient = deathRecipient
+            if (currentBinder != null && currentDeathRecipient != null) {
+                runCatching { currentBinder.unlinkToDeath(currentDeathRecipient, 0) }
+            }
+            binder = null
+            deathRecipient = null
+            proxy = null
+            bound = false
+        }
+
+        val connection = object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName, service: IBinder) {
+                Log.i(tag, "onServiceConnected: $name")
+                val nextProxy = proxyFactory(service)
+                val nextDeathRecipient = IBinder.DeathRecipient {
+                    Log.w(tag, "binderDied: $name")
+                    handleDisconnect(name, "binderDied", shouldUnbind = true)
+                }
+                try {
+                    service.linkToDeath(nextDeathRecipient, 0)
+                } catch (e: RemoteException) {
+                    Log.w(tag, "linkToDeath failed: $name", e)
+                    handleDisconnect(name, "linkToDeath", shouldUnbind = true)
+                    return
+                }
+                val pending = synchronized(lock) {
+                    clearConnectionLocked()
+                    binder = service
+                    deathRecipient = nextDeathRecipient
+                    proxy = nextProxy
+                    bound = true
+                    connecting = false
+                    lastUsed = uptimeMillis()
+                    bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+                    bindTimeoutRunnable = null
+                    val list = waiters.toList()
+                    waiters.clear()
+                    list
+                }
+                pending.forEach { waiter ->
+                    if (!waiter.isCompleted) {
+                        waiter.resume(nextProxy)
+                    }
+                }
+            }
+
+            override fun onServiceDisconnected(name: ComponentName) {
+                Log.w(tag, "onServiceDisconnected: $name")
+                handleDisconnect(name, "onServiceDisconnected", shouldUnbind = true)
+            }
+
+            override fun onBindingDied(name: ComponentName) {
+                Log.w(tag, "onBindingDied: $name")
+                handleDisconnect(name, "onBindingDied", shouldUnbind = true)
+            }
+
+            override fun onNullBinding(name: ComponentName) {
+                Log.w(tag, "onNullBinding: $name")
+                handleDisconnect(name, "onNullBinding", shouldUnbind = true)
+            }
+        }
+
+        private fun handleDisconnect(name: ComponentName, reason: String, shouldUnbind: Boolean = false) {
+            val pending = synchronized(lock) {
+                clearConnectionLocked()
+                connecting = false
+                bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
+                bindTimeoutRunnable = null
+                idleRunnable?.let { poolHandler.removeCallbacks(it) }
+                idleRunnable = null
+                val list = waiters.toList()
+                waiters.clear()
+                list
+            }
+            if (pending.isNotEmpty()) {
+                val error = IllegalStateException("$reason: $name")
+                pending.forEach { waiter ->
+                    if (!waiter.isCompleted) {
+                        waiter.resumeWithException(error)
+                    }
+                }
+            }
+            if (shouldUnbind) {
+                poolHandler.post {
+                    runCatching { appContext.unbindService(connection) }
+                }
+            }
+        }
+    }
+
+    private data class SelectionResult(
+        val selected: Discovered?,
+        val discovered: List<Discovered>,
+    )
+
+    private class TimeoutException(message: String) : RuntimeException(message)
+}

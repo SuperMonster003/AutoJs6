@@ -74,14 +74,11 @@ val inrtMergedAssetPruneIncludes = listOf(
     "modules/**/*.d.ts",
     "modules/**/*.md",
     "modules/obsolete/**/*",
-    "openccdata/**/*",
     "project/**/*",
     "sample/**/*",
     "stored-locales/**/*",
     "android-devices.db",
     "autojs.keystore",
-    "**/prob_emit.txt", // Jieba Analysis
-    "**/dict-chinese-*.db.gzip", // Jieba Analysis
 )
 
 private fun String.asGradleTaskNamePart(): String =

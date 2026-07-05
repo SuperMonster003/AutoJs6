@@ -213,13 +213,6 @@ dependencies /* Unclassified */ {
     implementation(libs.toaster)
     implementation(libs.easywindow)
 
-    // Pinyin4j
-    implementation(libs.pinyin4j)
-
-    // Jieba Analysis (zh-CN: 结巴分词)
-    // implementation("com.huaban:jieba-analysis:1.0.2")
-    implementation(project(":modules:jieba-analysis"))
-
     // Tiny Sign
     implementation(files("$rootDir/libs/tiny-sign-0_9.jar"))
 
@@ -259,6 +252,18 @@ dependencies /* Unclassified */ {
 
     // Plugin API: Node.js API
     implementation(project(":plugin-api:nodejs-api"))
+
+    // Plugin API: OpenCC API
+    implementation(project(":plugin-api:opencc-api"))
+
+    // Plugin API: Pinyin API
+    implementation(project(":plugin-api:pinyin-api"))
+
+    // Plugin API: Pinyin4j API
+    implementation(project(":plugin-api:pinyin4j-api"))
+
+    // Plugin API: MediaInfo API
+    implementation(project(":plugin-api:mediainfo-api"))
 
     // Plugin API: ML Kit Barcode API
     implementation(project(":plugin-api:mlkit-barcode-api"))
@@ -376,12 +381,6 @@ dependencies /* GitHub API */ {
 
     // Desugar
     coreLibraryDesugaring(libs.desugar)
-}
-
-dependencies /* OpenCC */ {
-    // OpenCC
-    // implementation("com.github.qichuan:android-opencc:1.2.0")
-    implementation(libs.opencc)
 }
 
 dependencies /* Auto.js Extensions */ {

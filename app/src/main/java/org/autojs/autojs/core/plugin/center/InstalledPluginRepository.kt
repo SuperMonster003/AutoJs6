@@ -9,7 +9,11 @@ import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.text.OpenccPluginHost
+import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
+import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginInfo
@@ -44,6 +48,7 @@ class InstalledPluginRepository {
         val bindError: Throwable?,
         val isOcrService: Boolean,
         val isBarcodeService: Boolean,
+        val serviceAction: String?,
         val isStopped: Boolean,
     )
 
@@ -53,17 +58,26 @@ class InstalledPluginRepository {
         val error: Throwable?,
         val isOcrService: Boolean,
         val isBarcodeService: Boolean,
+        val serviceAction: String?,
     )
 
     suspend fun discoverInstalled(context: Context): List<InstalledPlugin> = withContext(Dispatchers.IO) {
         val pm = context.packageManager
         val discovered = (
                 PluginInfoServiceHost.discover(context).map {
-                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false)
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = null)
                 } + OcrPluginHost.discover(context).map {
-                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = true, isBarcodeService = false)
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = true, isBarcodeService = false, serviceAction = OcrPluginHost.ACTION_OCR)
                 } + BarcodePluginHost.discover(context).map {
-                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = true)
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = true, serviceAction = BarcodePluginHost.ACTION_BARCODE)
+                } + OpenccPluginHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = OpenccPluginHost.ACTION_OPENCC)
+                } + PinyinPluginHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = PinyinPluginHost.ACTION_PINYIN)
+                } + Pinyin4jPluginHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = Pinyin4jPluginHost.ACTION_PINYIN4J)
+                } + MediainfoPluginHost.discover(context).map {
+                    Discovery(it.serviceInfo, it.pluginInfo, it.error, isOcrService = false, isBarcodeService = false, serviceAction = MediainfoPluginHost.ACTION_MEDIAINFO)
                 }
                 ).mergeByPackage()
 
@@ -119,6 +133,7 @@ class InstalledPluginRepository {
                 bindError = d.error,
                 isOcrService = d.isOcrService,
                 isBarcodeService = d.isBarcodeService,
+                serviceAction = d.serviceAction,
                 isStopped = isStopped,
             )
         }
@@ -130,6 +145,7 @@ class InstalledPluginRepository {
             preferred.copy(
                 isOcrService = discoveries.any { it.isOcrService },
                 isBarcodeService = discoveries.any { it.isBarcodeService },
+                serviceAction = preferred.serviceAction ?: discoveries.firstNotNullOfOrNull { it.serviceAction },
             )
         }
     }

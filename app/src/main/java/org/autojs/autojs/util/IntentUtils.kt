@@ -23,9 +23,6 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.Snackbar
-import com.huaban.analysis.jieba.CharsDictionaryDatabase
-import com.huaban.analysis.jieba.PhrasesDictionaryDatabase
-import com.huaban.analysis.jieba.WordDictionaryDatabase
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.ReservedForCompatibility
 import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService
@@ -449,10 +446,6 @@ object IntentUtils {
             AutoJs.instance.clear()
 
             org.autojs.autojs.App.app.clear()
-
-            WordDictionaryDatabase.getInstance(context.applicationContext).close()
-            CharsDictionaryDatabase.getInstance(context.applicationContext).close()
-            PhrasesDictionaryDatabase.getInstance(context.applicationContext).close()
 
             WrappedShizuku.onDestroy()
 

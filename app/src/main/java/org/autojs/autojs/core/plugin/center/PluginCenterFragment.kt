@@ -23,7 +23,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
+import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.plugin.text.OpenccPluginHost
+import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
+import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs.util.ViewUtils
@@ -879,15 +883,23 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     }
 
     private suspend fun probeAidlPlugin(item: PluginCenterItem) {
-        when {
-            item.isOcrService || item.engine in OCR_SERVICE_ENGINES -> {
+        when (val action = item.serviceAction ?: PluginCenterViewModel.serviceActionFromEngine(item.engine)) {
+            OcrPluginHost.ACTION_OCR -> {
                 OcrPluginHost.probe(contextRef, item.packageName)
             }
-            item.isBarcodeService || item.engine in BARCODE_SERVICE_ENGINES -> {
+            BarcodePluginHost.ACTION_BARCODE -> {
                 BarcodePluginHost.probe(contextRef, item.packageName)
             }
+            OpenccPluginHost.ACTION_OPENCC -> OpenccPluginHost.probe(contextRef, item.packageName)
+            PinyinPluginHost.ACTION_PINYIN -> PinyinPluginHost.probe(contextRef, item.packageName)
+            Pinyin4jPluginHost.ACTION_PINYIN4J -> Pinyin4jPluginHost.probe(contextRef, item.packageName)
+            MediainfoPluginHost.ACTION_MEDIAINFO -> MediainfoPluginHost.probe(contextRef, item.packageName)
             else -> {
-                PluginInfoServiceHost.probe(contextRef, item.packageName)
+                when {
+                    item.isOcrService || item.engine in OCR_SERVICE_ENGINES -> OcrPluginHost.probe(contextRef, item.packageName)
+                    item.isBarcodeService || item.engine in BARCODE_SERVICE_ENGINES -> BarcodePluginHost.probe(contextRef, item.packageName)
+                    else -> PluginInfoServiceHost.probe(contextRef, item.packageName)
+                }
             }
         }
     }

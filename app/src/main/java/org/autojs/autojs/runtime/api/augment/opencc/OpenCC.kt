@@ -1,15 +1,14 @@
 package org.autojs.autojs.runtime.api.augment.opencc
 
-import com.zqc.opencc.android.lib.ChineseConverter
-import com.zqc.opencc.android.lib.ConversionType
+import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
+import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceString
-import org.mozilla.javascript.Context
 
 @Suppress("unused")
 object OpenCC : Augmentable(), Invokable {
@@ -64,13 +63,7 @@ object OpenCC : Augmentable(), Invokable {
     @JvmStatic
     @RhinoFunctionBody
     fun convertRhino(s: Any?, type: Any?): String = when (type) {
-        is String -> runCatching {
-            Context.toString(javaClass.getMethod("${type.lowercase()}Rhino", Any::class.java).invoke(this@OpenCC, s))
-        }.getOrElse {
-            it.printStackTrace()
-            throw WrappedIllegalArgumentException("Unknown type \"$type\" for opencc")
-        }
-        is ConversionType -> ChineseConverter.convert(coerceString(s), type, globalContext)
+        is String -> cvt(s, type)
         else -> throw WrappedIllegalArgumentException("Argument \"type\" ${type.jsBrief()} for opencc.convert is invalid")
     }
 
@@ -82,7 +75,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun hk2sRhino(s: Any?) = cvt(s, ConversionType.HK2S)
+    fun hk2sRhino(s: Any?) = cvt(s, "HK2S")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -90,7 +83,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun hk2tRhino(s: Any?) = cvt(s, ConversionType.HK2T)
+    fun hk2tRhino(s: Any?) = cvt(s, "HK2T")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -98,7 +91,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun jp2tRhino(s: Any?) = cvt(s, ConversionType.JP2T)
+    fun jp2tRhino(s: Any?) = cvt(s, "JP2T")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -106,7 +99,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2hkRhino(s: Any?) = cvt(s, ConversionType.S2HK)
+    fun s2hkRhino(s: Any?) = cvt(s, "S2HK")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -114,7 +107,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2tRhino(s: Any?) = cvt(s, ConversionType.S2T)
+    fun s2tRhino(s: Any?) = cvt(s, "S2T")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -122,7 +115,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2twRhino(s: Any?) = cvt(s, ConversionType.S2TW)
+    fun s2twRhino(s: Any?) = cvt(s, "S2TW")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -130,7 +123,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2twpRhino(s: Any?) = cvt(s, ConversionType.S2TWP)
+    fun s2twpRhino(s: Any?) = cvt(s, "S2TWP")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -138,7 +131,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun t2hkRhino(s: Any?) = cvt(s, ConversionType.T2HK)
+    fun t2hkRhino(s: Any?) = cvt(s, "T2HK")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -146,7 +139,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun t2sRhino(s: Any?) = cvt(s, ConversionType.T2S)
+    fun t2sRhino(s: Any?) = cvt(s, "T2S")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -154,7 +147,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun t2twRhino(s: Any?) = cvt(s, ConversionType.T2TW)
+    fun t2twRhino(s: Any?) = cvt(s, "T2TW")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -162,7 +155,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun t2jpRhino(s: Any?) = cvt(s, ConversionType.T2JP)
+    fun t2jpRhino(s: Any?) = cvt(s, "T2JP")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -170,7 +163,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun tw2sRhino(s: Any?) = cvt(s, ConversionType.TW2S)
+    fun tw2sRhino(s: Any?) = cvt(s, "TW2S")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -178,7 +171,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun tw2tRhino(s: Any?) = cvt(s, ConversionType.TW2T)
+    fun tw2tRhino(s: Any?) = cvt(s, "TW2T")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -186,7 +179,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun tw2spRhino(s: Any?) = cvt(s, ConversionType.TW2SP)
+    fun tw2spRhino(s: Any?) = cvt(s, "TW2SP")
 
     /* Encapsulated conversion. */
 
@@ -196,7 +189,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun s2twiRhino(s: Any?) = cvt(s, ConversionType.S2TWP)
+    fun s2twiRhino(s: Any?) = cvt(s, "S2TWP")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -204,7 +197,7 @@ object OpenCC : Augmentable(), Invokable {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun twi2sRhino(s: Any?) = cvt(s, ConversionType.TW2SP)
+    fun twi2sRhino(s: Any?) = cvt(s, "TW2SP")
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -336,6 +329,8 @@ object OpenCC : Augmentable(), Invokable {
 
     /* Private methods. */
 
-    private fun cvt(s: Any?, type: ConversionType): String = ChineseConverter.convert(coerceString(s), type, globalContext)
+    private fun cvt(s: Any?, type: String): String = runBlocking {
+        OpenccPluginHost.convert(globalContext, coerceString(s), type.uppercase())
+    }
 
 }

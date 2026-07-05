@@ -64,6 +64,7 @@ import okhttp3.WebSocketListener
 import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.accessibility.OnKeyListener
+import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.util.IntentUtils
@@ -75,7 +76,6 @@ import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
-import org.mediainfo.android.MediaInfo
 import okio.ByteString.Companion.decodeBase64
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.plugin.mlkit.barcode.api.BarcodeFormats
@@ -2199,7 +2199,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "get" -> {
                     val streamKind = mediaInfoStreamKind(args.optString(1, "general"))
                     val parameter = args.optString(2, "")
-                    val value = MediaInfo().get(file.absolutePath, streamKind, 0, parameter)
+                    val value = runBlocking { MediainfoPluginHost.get(appContext, file, streamKind, 0, parameter) }
                     callback(NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(value)))
                 }
                 else -> callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method)))
@@ -2273,7 +2273,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun mediainfoSnapshot(requestedPath: String, file: File, options: JSONObject): JSONObject {
         val includeInform = options.optBoolean("includeInform", true)
         val includeSections = options.optBoolean("includeSections", true)
-        val inform = MediaInfo().getMI(file.absolutePath).orEmpty()
+        val inform = runBlocking { MediainfoPluginHost.inform(appContext, file) }.orEmpty()
         return JSONObject()
             .put("schema", "autojs6-node-mediainfo-snapshot-v1")
             .put("path", requestedPath)
@@ -2314,11 +2314,13 @@ class AndroidNodeBridgeCapabilityProvider(
             part.lowercase(Locale.US).replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         }.replaceFirstChar { it.lowercase() }
 
-    private fun mediaInfoStreamKind(raw: String): MediaInfo.StreamKind {
+    private fun mediaInfoStreamKind(raw: String): String {
         val normalized = raw.trim().uppercase(Locale.US)
-        return MediaInfo.StreamKind.entries.firstOrNull { it.name == normalized }
+        return MEDIAINFO_STREAM_KINDS.firstOrNull { it == normalized }
             ?: throw IllegalArgumentException("Unsupported mediainfo stream kind: $raw")
     }
+
+    private val MEDIAINFO_STREAM_KINDS = setOf("GENERAL", "VIDEO", "AUDIO", "TEXT", "OTHER", "IMAGE", "MENU", "MAX")
 
     private fun recorderStatus(): JSONObject {
         val microphoneGranted = appContext.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED

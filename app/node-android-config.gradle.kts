@@ -175,13 +175,6 @@ extensions.configure<ApplicationExtension>("android") {
     }
 
     packaging {
-        if (isInrtTaskRequested) {
-            listOf(
-                "**/prob_emit.txt",
-                "**/dict-chinese-*.db.gzip",
-            ).let { resources.excludes.addAll(it) }
-        }
-
         jniLibs {
             if (!isNodeJsNativeRuntimeRequested) {
                 val allNativeLibAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86", "armeabi")
