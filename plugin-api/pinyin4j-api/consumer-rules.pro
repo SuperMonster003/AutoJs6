@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.pinyin4j.api.** { *; }
+-dontwarn org.autojs.plugin.pinyin4j.api.**

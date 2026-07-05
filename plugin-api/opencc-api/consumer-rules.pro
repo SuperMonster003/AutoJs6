@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.opencc.api.** { *; }
+-dontwarn org.autojs.plugin.opencc.api.**

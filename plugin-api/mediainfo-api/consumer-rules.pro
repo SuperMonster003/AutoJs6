@@ -1,0 +1,2 @@
+-keep class org.autojs.plugin.mediainfo.api.** { *; }
+-dontwarn org.autojs.plugin.mediainfo.api.**
