@@ -1303,11 +1303,13 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     .onPositive((dialog, which) -> {
                         saveCurrentBuildProfile(onProceed);
                     })
-                    .onNeutral((dialog, which) -> onProceed.run())
-                    .onNegative((dialog, which) -> {
+                    .onNeutral((dialog, which) -> {
                         if (onCancel != null) {
                             onCancel.run();
                         }
+                    })
+                    .onNegative((dialog, which) -> {
+                        onProceed.run();
                     });
             DialogUtils.widgetThemeColor(builder);
             return builder.build();
