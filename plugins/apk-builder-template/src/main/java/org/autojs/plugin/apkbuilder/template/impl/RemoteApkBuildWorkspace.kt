@@ -15,7 +15,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class RemoteApkBuildWorkspace private constructor(
-    private val root: File,
+    val root: File,
     val archiveFile: File,
     val projectRoot: File,
     val sourcePath: File,

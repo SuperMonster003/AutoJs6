@@ -2,6 +2,7 @@ package org.autojs.plugin.apkbuilder.template.impl
 
 import android.content.Context
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuildResult
@@ -51,6 +52,7 @@ class RemoteApkBuildSession(
     override fun getProgress(): ApkBuildProgress = progress
 
     private fun runSession() {
+        var keepWorkspaceForResult = false
         callback?.onStarted(updateProgress(ApkBuildProgress.STEP_PREPARE, "Preparing remote build workspace", null))
         runCatching {
             ensureActive()
@@ -62,15 +64,31 @@ class RemoteApkBuildSession(
             callback?.onProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Remote build request validated", preparedWorkspace.sourcePath.path))
 
             ensureActive()
-            callback?.onProgress(updateProgress(ApkBuildProgress.STEP_BUILD, "Remote APK build is not implemented", null))
-            callback?.onFailed(
+            val output = RemoteApkLightweightBuilder(
+                context = appContext,
+                request = request,
+                workspace = preparedWorkspace,
+                cancelSignal = cancelled,
+                progress = { progress ->
+                    this.progress = progress
+                    callback?.onProgress(progress)
+                },
+            ).build()
+            val outputFd = ParcelFileDescriptor.open(output.apkFile, ParcelFileDescriptor.MODE_READ_ONLY)
+            keepWorkspaceForResult = true
+            callback?.onCompleted(
                 ApkBuildResult(
-                    status = ApkBuildResult.STATUS_UNSUPPORTED,
-                    compatibilityLevel = ApkBuilderTemplateResult.LEVEL_BLOCK,
-                    warnings = arrayListOf("Remote build request was accepted and staged successfully."),
-                    errors = arrayListOf("Remote APK build execution is not implemented by this plugin version."),
+                    status = ApkBuildResult.STATUS_OK,
+                    outputApkFd = outputFd,
+                    outputFileName = output.outputFileName,
+                    outputSizeBytes = output.apkFile.length(),
+                    outputSha256 = output.sha256,
+                    updatedProjectConfigJson = output.updatedProjectConfigJson,
+                    compatibilityLevel = ApkBuilderTemplateResult.LEVEL_WARN,
+                    warnings = output.warnings,
                     extras = Bundle().apply {
                         putAll(preparedWorkspace.toExtras())
+                        putAll(output.extras)
                     },
                 )
             )
@@ -86,9 +104,11 @@ class RemoteApkBuildSession(
                 callback?.onFailed(result)
             }
         }.also {
-            callback?.onProgress(updateProgress(ApkBuildProgress.STEP_CLEAN, "Cleaning remote build workspace", null))
-            workspace?.close()
-            workspace = null
+            if (!keepWorkspaceForResult) {
+                callback?.onProgress(updateProgress(ApkBuildProgress.STEP_CLEAN, "Cleaning remote build workspace", null))
+                workspace?.close()
+                workspace = null
+            }
             if (!closed.get()) {
                 progress = updateProgress(ApkBuildProgress.STEP_FINISH, "Remote build session finished", null)
             }
