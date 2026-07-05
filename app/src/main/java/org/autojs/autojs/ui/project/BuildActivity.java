@@ -45,6 +45,7 @@ import net.dongliu.apk.parser.bean.ApkMeta;
 import org.autojs.autojs.apkbuilder.ApkBuilder;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.apkbuilder.template.TemplateApkResolver;
+import org.autojs.autojs.core.plugin.center.PluginCenterActivity;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
@@ -2256,6 +2257,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .content(getString(R.string.text_apk_template_unavailable_prompt) + "\n\n" + formatTemplateDecisionDetails(decision))
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_default)
+                .neutralText(R.string.text_plugin_center)
+                .neutralColorRes(R.color.dialog_button_attraction)
+                .onNeutral((dialog, which) -> PluginCenterActivity.Companion.launch(this, null))
                 .show();
     }
 
