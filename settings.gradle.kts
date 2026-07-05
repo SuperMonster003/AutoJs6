@@ -9,6 +9,7 @@ includeBuild("build-logic")
 private val modules = listOf(
     "apk-signer",
     "apk-parser",
+    "android-axml",
     "color-picker",
     "material-dialogs",
     "material-date-time-picker",
