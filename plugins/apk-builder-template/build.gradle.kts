@@ -2,8 +2,23 @@ import java.security.MessageDigest
 
 plugins {
     id("org.autojs.build.versions")
+    id("org.autojs.build.signs")
     id("org.autojs.build.jvm-convention")
     id("com.android.application")
+}
+
+val buildTypeRelease = "release"
+
+fun resolveSigningStoreFile(path: String): File {
+    val candidate = File(path)
+    if (candidate.isAbsolute) {
+        return candidate
+    }
+    return listOf(
+        file(path),
+        rootProject.file(path),
+        rootProject.file("app/$path"),
+    ).firstOrNull { it.exists() } ?: file(path)
 }
 
 android {
@@ -31,9 +46,23 @@ android {
         }
     }
 
+    signingConfigs {
+        if (signs.isValid) {
+            create(buildTypeRelease) {
+                storeFile = signs.properties["storeFile"]?.let { resolveSigningStoreFile(it as String) }
+                keyPassword = signs.properties["keyPassword"] as String
+                keyAlias = signs.properties["keyAlias"] as String
+                storePassword = signs.properties["storePassword"] as String
+            }
+        }
+    }
+
     buildTypes {
+        val releaseSigningConfig = if (signs.isValid) signingConfigs.getByName(buildTypeRelease) else null
+
         release {
             isMinifyEnabled = false
+            releaseSigningConfig?.let { signingConfig = it }
         }
     }
 
@@ -86,6 +115,9 @@ val prepareApkBuilderTemplateAssets = tasks.register("prepareApkBuilderTemplateA
     }
 }
 
-tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }.configureEach {
+tasks.matching {
+    val taskName = it.name
+    taskName.contains("lint", ignoreCase = true) || (taskName.startsWith("merge") && taskName.endsWith("Assets"))
+}.configureEach {
     dependsOn(prepareApkBuilderTemplateAssets)
 }
