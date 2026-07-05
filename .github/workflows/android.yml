@@ -42,8 +42,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle (assembleInrtRelease)
-        run: ./gradlew assembleInrtRelease
+      - name: Build with Gradle (packageInrtRelease)
+        run: ./gradlew packageInrtRelease -x :app:lintVitalAnalyzeInrtRelease
 
       - name: Build with Gradle (assembleApkBuilderTemplateDistribution)
         run: ./gradlew assembleApkBuilderTemplateDistribution

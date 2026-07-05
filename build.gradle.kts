@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.GradleBuild
-
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 // @Hint by SuperMonster003 on Aug 16, 2023.
@@ -20,20 +18,18 @@ allprojects {
     }
 }
 
-val apkBuilderIncludeBuiltInTemplateProperty = "autojs.apkBuilder.includeBuiltInTemplate"
-
 tasks {
     register<Delete>("clean").configure {
         // @Legacy delete(rootProject.buildDir)
         delete(rootProject.layout.buildDirectory)
     }
 
-    register<GradleBuild>("assembleApkBuilderTemplateDistribution").configure {
+    register("assembleApkBuilderTemplateDistribution").configure {
         group = "build"
         description = "Builds app release without built-in APK builder template and matching APK builder template plugin release."
-        tasks = listOf(":app:assembleAppRelease", ":plugins:apk-builder-template:assembleRelease")
-        startParameter.projectProperties = gradle.startParameter.projectProperties + mapOf(
-            apkBuilderIncludeBuiltInTemplateProperty to "false",
+        dependsOn(
+            ":app:packageAppRelease",
+            ":plugins:apk-builder-template:packageRelease",
         )
     }
 }

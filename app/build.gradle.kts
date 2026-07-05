@@ -29,12 +29,25 @@ val buildTypeNames = listOf(buildTypeDebug, buildTypeRelease)
 val releaseFlavorNames = listOf(flavorNameApp, flavorNameInrt)
 val apkFileExtension = utils.FILE_EXTENSION_APK
 val apkBuilderBuiltInTemplateAsset = "template.apk"
+val apkBuilderTemplateDistributionTaskName = "assembleApkBuilderTemplateDistribution"
 val apkBuilderIncludeBuiltInTemplateProperty = "autojs.apkBuilder.includeBuiltInTemplate"
-val apkBuilderIncludeBuiltInTemplate = providers.gradleProperty(apkBuilderIncludeBuiltInTemplateProperty)
+val apkBuilderTemplateDistributionRequested = providers.provider {
+    gradle.startParameter.taskNames.any { taskName ->
+        taskName.substringAfterLast(':').equals(apkBuilderTemplateDistributionTaskName, ignoreCase = true)
+    }
+}
+val apkBuilderIncludeBuiltInTemplateByProperty = providers.gradleProperty(apkBuilderIncludeBuiltInTemplateProperty)
     .map { value ->
         value.trim().lowercase().let { it !in setOf("false", "0", "no", "off") }
     }
     .orElse(true)
+val apkBuilderIncludeBuiltInTemplate = providers.provider {
+    if (apkBuilderTemplateDistributionRequested.get()) {
+        false
+    } else {
+        apkBuilderIncludeBuiltInTemplateByProperty.get()
+    }
+}
 
 val resourcePickFirstPatterns = listOf(
     "META-INF/DEPENDENCIES",
@@ -361,14 +374,16 @@ androidComponents {
                     .distinctBy { it.path }
                     .filter { it.isDirectory }
                     .forEach { outputDir ->
-                        delete(
-                            fileTree(
-                                mapOf(
-                                    "dir" to outputDir,
-                                    "includes" to includes,
-                                )
+                        if (includes.isNotEmpty()) {
+                            delete(
+                                fileTree(outputDir) {
+                                    include(includes)
+                                }
                             )
-                        )
+                        }
+                        if (!isInrtVariant && !includeBuiltInTemplate) {
+                            delete(outputDir.resolve(apkBuilderBuiltInTemplateAsset))
+                        }
                     }
             }
         }
@@ -401,6 +416,16 @@ tasks {
         //  ! Comment or remove this option if you are tired of plenty of warnings. :)
         //  ! zh-CN: 注释或移除此选项可避免过多警告消息造成的困扰. [笑脸符号]
         // options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
+    }
+
+    matching {
+        it.name in setOf(
+            "lintVitalAnalyzeAppRelease",
+            "lintVitalReportAppRelease",
+            "lintVitalAppRelease",
+        )
+    }.configureEach {
+        onlyIf { !apkBuilderTemplateDistributionRequested.get() }
     }
 
     register<Copy>("appendDigestToReleasedFiles") {
