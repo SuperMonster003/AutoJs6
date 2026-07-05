@@ -1246,6 +1246,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     private fun resolvePluginVariant(plugin: PluginLib, info: PluginInfo, serviceInfo: ServiceInfo): PluginLibVariant? {
+        if (!isPluginFamilyMatch(plugin, info, serviceInfo)) {
+            return null
+        }
         val hints = listOfNotNull(
             info.variant,
             info.id,
@@ -1257,6 +1260,22 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         return plugin.variants.firstOrNull { variant ->
             val expected = variant.variant ?: return@firstOrNull false
             hints.any { hint -> isPluginVariantMatch(hint, expected) }
+        }
+    }
+
+    private fun isPluginFamilyMatch(plugin: PluginLib, info: PluginInfo, serviceInfo: ServiceInfo): Boolean {
+        val expectedEngine = plugin.engine ?: return true
+        if (info.engine == expectedEngine) {
+            return true
+        }
+        val expected = normalizePluginVariantHint(expectedEngine)
+        return listOfNotNull(
+            info.id,
+            info.name,
+            serviceInfo.packageName,
+            serviceInfo.name,
+        ).any { hint ->
+            normalizePluginVariantHint(hint).contains(expected)
         }
     }
 
@@ -1759,6 +1778,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             plugin = PluginLib(
                 // Legacy shared OCR AIDL action. Keep stable for existing Paddle OCR plugins.
                 action = OcrPluginHost.ACTION_OCR,
+                engine = "paddle-ocr",
                 onServiceConnected = { binder: IBinder ->
                     IOcrPlugin.Stub.asInterface(binder).info
                 },
@@ -1807,6 +1827,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             plugin = PluginLib(
                 // Shared OCR AIDL action. Rapid OCR plugins are selected by PluginInfo.engine/variant.
                 action = OcrPluginHost.ACTION_OCR,
+                engine = "rapid-ocr",
                 onServiceConnected = { binder: IBinder ->
                     IOcrPlugin.Stub.asInterface(binder).info
                 },
@@ -2002,6 +2023,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     data class PluginLib(
         val action: String,
+        val engine: String? = null,
         val onServiceConnected: (IBinder) -> PluginInfo?,
         val variants: List<PluginLibVariant>,
     )
