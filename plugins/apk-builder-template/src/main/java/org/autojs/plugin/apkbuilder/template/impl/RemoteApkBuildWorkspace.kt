@@ -1,0 +1,201 @@
+package org.autojs.plugin.apkbuilder.template.impl
+
+import android.content.Context
+import android.os.Bundle
+import android.os.ParcelFileDescriptor
+import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
+import org.autojs.plugin.apkbuilder.template.ApkBuildRequestExtraKeys
+import java.io.Closeable
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.security.MessageDigest
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+
+class RemoteApkBuildWorkspace private constructor(
+    private val root: File,
+    val archiveFile: File,
+    val projectRoot: File,
+    val sourcePath: File,
+    val sourceKind: String,
+    val keyStoreFile: File?,
+) : Closeable {
+
+    override fun close() {
+        root.deleteRecursively()
+    }
+
+    fun toExtras(): Bundle {
+        return Bundle().apply {
+            putString(ApkBuildRequestExtraKeys.SOURCE_KIND, sourceKind)
+            putString(ApkBuildRequestExtraKeys.SOURCE_ROOT_PATH, projectRoot.path)
+            putString(ApkBuildRequestExtraKeys.SOURCE_PATH, sourcePath.path)
+            keyStoreFile?.let { putString("keyStorePath", it.path) }
+        }
+    }
+
+    companion object {
+        private const val BUFFER_SIZE = 256 * 1024
+        private const val EXPECTED_ARCHIVE_FORMAT_VERSION = 1
+
+        fun prepare(context: Context, request: ApkBuildRequest): RemoteApkBuildWorkspace {
+            val root = File(context.cacheDir, "remote-apk-build/session-${System.nanoTime()}").apply {
+                if (!mkdirs()) {
+                    throw IOException("Failed to create remote build workspace: $path")
+                }
+            }
+            try {
+                val archiveFile = File(root, "project.zip")
+                copyFdToFile(request.projectArchiveFd ?: throw IOException("Project archive fd is missing."), archiveFile)
+                verifyFile(archiveFile, request.projectArchiveSizeBytes, request.projectArchiveSha256, "project archive")
+
+                val projectRoot = File(root, "unpacked")
+                unzipSafely(archiveFile, projectRoot)
+
+                val extras = request.extras ?: throw IOException("Remote build request extras are missing.")
+                val archiveVersion = extras.getInt(ApkBuildRequestExtraKeys.ARCHIVE_FORMAT_VERSION, 0)
+                if (archiveVersion != EXPECTED_ARCHIVE_FORMAT_VERSION) {
+                    throw IOException("Unsupported project archive format version: $archiveVersion")
+                }
+
+                val sourceKind = extras.getString(ApkBuildRequestExtraKeys.SOURCE_KIND)
+                    ?: throw IOException("Project source kind is missing.")
+                if (sourceKind !in setOf(
+                        ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY,
+                        ApkBuildRequestExtraKeys.SOURCE_KIND_FILE,
+                    )
+                ) {
+                    throw IOException("Unsupported project source kind: $sourceKind")
+                }
+
+                val sourcePathValue = extras.getString(ApkBuildRequestExtraKeys.SOURCE_PATH)
+                    ?: throw IOException("Project source path is missing.")
+                val sourcePath = resolveInside(projectRoot, sourcePathValue)
+                when (sourceKind) {
+                    ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY -> {
+                        if (!sourcePath.isDirectory) {
+                            throw IOException("Project source directory does not exist in archive: $sourcePathValue")
+                        }
+                    }
+                    ApkBuildRequestExtraKeys.SOURCE_KIND_FILE -> {
+                        if (!sourcePath.isFile) {
+                            throw IOException("Project source file does not exist in archive: $sourcePathValue")
+                        }
+                    }
+                }
+
+                val keyStoreFile = request.keyStoreFd?.let { fd ->
+                    File(root, "keystore.bin").also { file ->
+                        copyFdToFile(fd, file)
+                        verifyFile(file, request.keyStoreSizeBytes, request.keyStoreSha256, "keystore")
+                    }
+                }
+
+                return RemoteApkBuildWorkspace(
+                    root = root,
+                    archiveFile = archiveFile,
+                    projectRoot = projectRoot,
+                    sourcePath = sourcePath,
+                    sourceKind = sourceKind,
+                    keyStoreFile = keyStoreFile,
+                )
+            } catch (t: Throwable) {
+                root.deleteRecursively()
+                throw t
+            }
+        }
+
+        private fun copyFdToFile(fd: ParcelFileDescriptor, file: File) {
+            ParcelFileDescriptor.AutoCloseInputStream(fd).use { input ->
+                FileOutputStream(file, false).use { output ->
+                    input.copyTo(output, BUFFER_SIZE)
+                    output.flush()
+                    output.fd.sync()
+                }
+            }
+        }
+
+        private fun verifyFile(file: File, expectedSize: Long, expectedSha256: String?, label: String) {
+            if (!file.isFile || file.length() <= 0L) {
+                throw IOException("Remote build $label is empty.")
+            }
+            if (expectedSize > 0L && file.length() != expectedSize) {
+                throw IOException("Remote build $label size mismatch: expected=$expectedSize actual=${file.length()}")
+            }
+            if (!expectedSha256.isNullOrBlank()) {
+                val actual = sha256(file)
+                if (!expectedSha256.equals(actual, ignoreCase = true)) {
+                    throw IOException("Remote build $label SHA-256 mismatch: expected=$expectedSha256 actual=$actual")
+                }
+            }
+        }
+
+        private fun unzipSafely(zipFile: File, targetDir: File) {
+            if (!targetDir.mkdirs()) {
+                throw IOException("Failed to create project archive target dir: ${targetDir.path}")
+            }
+            val canonicalRoot = targetDir.canonicalFile
+            ZipInputStream(FileInputStream(zipFile).buffered(BUFFER_SIZE)).use { zip ->
+                while (true) {
+                    val entry = zip.nextEntry ?: break
+                    extractEntry(zip, entry, canonicalRoot)
+                    zip.closeEntry()
+                }
+            }
+        }
+
+        private fun extractEntry(zip: ZipInputStream, entry: ZipEntry, root: File) {
+            val name = entry.name.replace('\\', '/')
+            if (name.isBlank() || name.startsWith('/') || name.split('/').any { it == ".." }) {
+                throw IOException("Unsafe project archive entry: ${entry.name}")
+            }
+            val out = File(root, name).canonicalFile
+            if (!out.path.startsWith(root.path + File.separator) && out.path != root.path) {
+                throw IOException("Project archive entry escapes target dir: ${entry.name}")
+            }
+            if (entry.isDirectory) {
+                if (!out.exists() && !out.mkdirs()) {
+                    throw IOException("Failed to create archive directory: ${out.path}")
+                }
+                return
+            }
+            out.parentFile?.let { parent ->
+                if (!parent.exists() && !parent.mkdirs()) {
+                    throw IOException("Failed to create archive parent directory: ${parent.path}")
+                }
+            }
+            FileOutputStream(out, false).use { output ->
+                zip.copyTo(output, BUFFER_SIZE)
+                output.flush()
+            }
+        }
+
+        private fun resolveInside(root: File, relativePath: String): File {
+            val normalized = relativePath.replace('\\', '/')
+            if (normalized.isBlank() || normalized.startsWith('/') || normalized.split('/').any { it == ".." }) {
+                throw IOException("Unsafe project source path: $relativePath")
+            }
+            val canonicalRoot = root.canonicalFile
+            val resolved = File(canonicalRoot, normalized).canonicalFile
+            if (!resolved.path.startsWith(canonicalRoot.path + File.separator) && resolved.path != canonicalRoot.path) {
+                throw IOException("Project source path escapes workspace: $relativePath")
+            }
+            return resolved
+        }
+
+        private fun sha256(file: File): String {
+            val digest = MessageDigest.getInstance("SHA-256")
+            FileInputStream(file).use { input ->
+                val buffer = ByteArray(BUFFER_SIZE)
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    digest.update(buffer, 0, read)
+                }
+            }
+            return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+        }
+    }
+}
