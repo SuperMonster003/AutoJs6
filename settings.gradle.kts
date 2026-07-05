@@ -10,6 +10,7 @@ private val modules = listOf(
     "apk-signer",
     "apk-parser",
     "android-axml",
+    "android-arsc-editor",
     "color-picker",
     "material-dialogs",
     "material-date-time-picker",
