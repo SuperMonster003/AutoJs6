@@ -9,6 +9,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 class RemoteApkManifestEditor {
 
@@ -18,6 +21,7 @@ class RemoteApkManifestEditor {
     private String mVersionName;
     private String mAppName;
     private String mPackageName;
+    private Set<String> mPermissions;
     private byte[] mManifestData;
 
     RemoteApkManifestEditor(InputStream manifestInputStream) {
@@ -41,6 +45,11 @@ class RemoteApkManifestEditor {
 
     RemoteApkManifestEditor setPackageName(String packageName) {
         mPackageName = packageName;
+        return this;
+    }
+
+    RemoteApkManifestEditor setPermissions(Collection<String> permissions) {
+        mPermissions = permissions == null ? null : new HashSet<>(permissions);
         return this;
     }
 
@@ -111,6 +120,10 @@ class RemoteApkManifestEditor {
                 || "org.autojs.autojs.external.tile.LayoutHierarchyTile".equals(componentClassName);
     }
 
+    private boolean isPermissionRequired(String permissionName) {
+        return mPermissions == null || mPermissions.contains(permissionName);
+    }
+
     private class MutableAxmlWriter extends AxmlWriter {
         private class MutableNodeImpl extends AxmlWriter.NodeImpl {
 
@@ -141,6 +154,15 @@ class RemoteApkManifestEditor {
                     }
                     if ("org.autojs.permission.PLUGIN".equals(permissionName)) {
                         this.ignore = true;
+                        return;
+                    }
+                }
+                if ("uses-permission".equals(this.name.data)
+                        && "name".equals(attr.name.data)
+                        && attr.value instanceof StringItem
+                ) {
+                    this.ignore = !isPermissionRequired(((StringItem) attr.value).data);
+                    if (this.ignore) {
                         return;
                     }
                 }

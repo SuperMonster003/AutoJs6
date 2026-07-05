@@ -106,6 +106,7 @@ class RemoteApkLightweightBuilder(
         val versionCode = json.optInt(KEY_VERSION_CODE, -1).takeIf { it > 0 }
             ?: throw IOException("Project versionCode is missing.")
         val mainScript = json.optString(KEY_MAIN).takeIf { it.isNotBlank() } ?: DEFAULT_MAIN_SCRIPT
+        val permissions = parseStringArray(json, KEY_PERMISSIONS)
 
         if (!PACKAGE_NAME_PATTERN.matches(packageName)) {
             throw IOException("Invalid project packageName: $packageName")
@@ -118,7 +119,20 @@ class RemoteApkLightweightBuilder(
             versionName = versionName,
             versionCode = versionCode,
             mainScript = mainScript,
+            permissions = permissions,
         )
+    }
+
+    private fun parseStringArray(json: JSONObject, key: String): List<String>? {
+        if (!json.has(key) || json.isNull(key)) {
+            return null
+        }
+        val array = json.optJSONArray(key) ?: return null
+        return buildList {
+            for (index in 0 until array.length()) {
+                array.optString(index).takeIf { it.isNotBlank() }?.let(::add)
+            }
+        }
     }
 
     private fun unzipTemplate(targetDir: File) {
@@ -172,6 +186,7 @@ class RemoteApkLightweightBuilder(
             .setPackageName(projectConfig.packageName)
             .setVersionName(projectConfig.versionName)
             .setVersionCode(projectConfig.versionCode)
+            .setPermissions(projectConfig.permissions)
             .commit()
             .writeTo(FileOutputStream(manifestFile, false))
     }
@@ -355,6 +370,7 @@ class RemoteApkLightweightBuilder(
         val versionName: String,
         val versionCode: Int,
         val mainScript: String,
+        val permissions: List<String>?,
     )
 
     companion object {
@@ -372,6 +388,7 @@ class RemoteApkLightweightBuilder(
         private const val KEY_VERSION_NAME = "versionName"
         private const val KEY_VERSION_CODE = "versionCode"
         private const val KEY_MAIN = "main"
+        private const val KEY_PERMISSIONS = "permissions"
         private const val KEY_BUILD = "build"
         private const val KEY_BUILD_ID = "id"
         private const val KEY_BUILD_NUMBER = "number"
