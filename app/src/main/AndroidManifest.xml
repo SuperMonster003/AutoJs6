@@ -33,6 +33,15 @@
 
     <uses-permission android:name="org.autojs.permission.PLUGIN" />
 
+    <queries>
+        <intent>
+            <action android:name="org.autojs.plugin.INFO" />
+        </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.APK_BUILDER" />
+        </intent>
+    </queries>
+
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
