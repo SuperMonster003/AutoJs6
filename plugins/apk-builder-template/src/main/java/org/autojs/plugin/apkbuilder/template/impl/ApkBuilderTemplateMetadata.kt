@@ -5,6 +5,7 @@ import android.os.Bundle
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCapabilityKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateInfo
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
+import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateProtocol
 import org.autojs.plugin.common.api.PluginCapabilityKeys
 import org.autojs.plugin.common.api.PluginInfo
 
@@ -58,7 +59,10 @@ object ApkBuilderTemplateMetadata {
                 putString(ApkBuilderTemplateCapabilityKeys.TEMPLATE_PACKAGE_NAME, BuildConfig.TEMPLATE_PACKAGE_NAME)
                 putString(ApkBuilderTemplateCapabilityKeys.TEMPLATE_SHA256, templateSha256)
                 putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_TEMPLATE_APK, true)
-                putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD, false)
+                putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD, BuildConfig.ENABLE_REMOTE_BUILD)
+                putInt(ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_PROTOCOL_VERSION, BuildConfig.REMOTE_BUILD_PROTOCOL_VERSION)
+                putString("remoteBuildStatus", if (BuildConfig.ENABLE_REMOTE_BUILD) "experimental" else "disabled")
+                putInt("remoteBuildApiVersion", ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION)
             },
         )
     }
