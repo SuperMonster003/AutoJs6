@@ -57,6 +57,10 @@ class RemoteApkLightweightBuilder(
         configureManifest(buildDir, projectConfig)
 
         ensureActive()
+        progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Pruning native libraries", null))
+        pruneNativeLibrariesByAbiPolicy(buildDir, projectConfig.abis)
+
+        ensureActive()
         progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Copying project files", workspace.sourcePath.path))
         val updatedProjectConfigJson = updateProjectBuildInfo(projectConfig)
         copyProjectAssets(buildDir, updatedProjectConfigJson)
@@ -106,6 +110,7 @@ class RemoteApkLightweightBuilder(
         val versionCode = json.optInt(KEY_VERSION_CODE, -1).takeIf { it > 0 }
             ?: throw IOException("Project versionCode is missing.")
         val mainScript = json.optString(KEY_MAIN).takeIf { it.isNotBlank() } ?: DEFAULT_MAIN_SCRIPT
+        val abis = parseStringArray(json, KEY_ABIS)
         val permissions = parseStringArray(json, KEY_PERMISSIONS)
 
         if (!PACKAGE_NAME_PATTERN.matches(packageName)) {
@@ -119,6 +124,7 @@ class RemoteApkLightweightBuilder(
             versionName = versionName,
             versionCode = versionCode,
             mainScript = mainScript,
+            abis = abis,
             permissions = permissions,
         )
     }
@@ -221,6 +227,26 @@ class RemoteApkLightweightBuilder(
         }
 
         File(projectAssetsDir, CONFIG_FILE_NAME).writeText(projectConfigJson, Charsets.UTF_8)
+    }
+
+    private fun pruneNativeLibrariesByAbiPolicy(buildDir: File, abis: List<String>?) {
+        if (abis.isNullOrEmpty()) {
+            return
+        }
+        val libRoot = File(buildDir, "lib")
+        if (!libRoot.isDirectory) {
+            return
+        }
+        val allowedAbis = abis.toSet()
+        libRoot.listFiles()?.forEach { abiDir ->
+            ensureActive()
+            if (!abiDir.isDirectory || abiDir.name in allowedAbis) {
+                return@forEach
+            }
+            if (!abiDir.deleteRecursively()) {
+                throw IOException("Failed to delete unused ABI directory: ${abiDir.path}")
+            }
+        }
     }
 
     private fun replaceAppIconIfProvided(buildDir: File) {
@@ -370,6 +396,7 @@ class RemoteApkLightweightBuilder(
         val versionName: String,
         val versionCode: Int,
         val mainScript: String,
+        val abis: List<String>?,
         val permissions: List<String>?,
     )
 
@@ -388,6 +415,7 @@ class RemoteApkLightweightBuilder(
         private const val KEY_VERSION_NAME = "versionName"
         private const val KEY_VERSION_CODE = "versionCode"
         private const val KEY_MAIN = "main"
+        private const val KEY_ABIS = "abis"
         private const val KEY_PERMISSIONS = "permissions"
         private const val KEY_BUILD = "build"
         private const val KEY_BUILD_ID = "id"
