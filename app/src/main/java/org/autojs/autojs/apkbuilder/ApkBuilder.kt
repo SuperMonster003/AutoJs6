@@ -67,6 +67,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.io.SyncFailedException
 import java.util.concurrent.CancellationException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -771,7 +772,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             GlobalAppContext.get().assets.open("default_key_store.bks").use { input ->
                 FileOutputStream(defaultKeyStoreFile, false).use { output ->
                     copyStreamWithCancel(input, output)
-                    output.fd.sync()
+                    syncBestEffort(output)
                 }
             }
         }
@@ -1441,7 +1442,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         zip.getInputStream(entry).use { input ->
                             FileOutputStream(outFile, false).use { output ->
                                 copyStreamWithCancel(input, output)
-                                output.fd.sync()
+                                syncBestEffort(output)
                             }
                         }
 
@@ -1528,8 +1529,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 ZipFile(apkPath).use { zip ->
                     abiCandidates.forEach { abiInApk ->
                         ensureNotCancelled()
-                        val entryName = "lib/$abiInApk/$soName"
-                        val entry = zip.getEntry(entryName) ?: return@forEach
+                        val (entryName, entry) = findNativeLibraryEntry(zip, abiInApk, soName) ?: return@forEach
                         val outFile = File(buildPath, "lib/$abiDestName/$soName").apply {
                             parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
                         }
@@ -1541,7 +1541,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         zip.getInputStream(entry).use { input ->
                             FileOutputStream(outFile, false).use { output ->
                                 copyStreamWithCancel(input, output)
-                                output.fd.sync()
+                                syncBestEffort(output)
                             }
                         }
                         Log.i(TAG, "Extracted so from plugin apk: $apkPath!/$entryName -> ${outFile.path}")
@@ -1632,8 +1632,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 ZipFile(apkPath).use { zip ->
                     abiCandidates.forEach { abiInApk ->
                         ensureNotCancelled()
-                        val entryName = "lib/$abiInApk/$soName"
-                        val entry = zip.getEntry(entryName) ?: return@forEach
+                        val (entryName, entry) = findNativeLibraryEntry(zip, abiInApk, soName) ?: return@forEach
                         val outFile = File(buildPath, "lib/$abiDestName/$soName").apply {
                             parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
                         }
@@ -1645,7 +1644,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         zip.getInputStream(entry).use { input ->
                             FileOutputStream(outFile, false).use { output ->
                                 copyStreamWithCancel(input, output)
-                                output.fd.sync()
+                                syncBestEffort(output)
                             }
                         }
                         Log.i(TAG, "Extracted so from host apk: $apkPath!/$entryName -> ${outFile.path}")
@@ -1657,6 +1656,22 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             }
         }
         return false
+    }
+
+    private fun findNativeLibraryEntry(zip: ZipFile, abi: String, soName: String): Pair<String, ZipEntry>? {
+        NATIVE_LIBRARY_ENTRY_ROOTS.forEach { root ->
+            val entryName = "$root/$abi/$soName"
+            zip.getEntry(entryName)?.let { return entryName to it }
+        }
+        return null
+    }
+
+    private fun syncBestEffort(output: FileOutputStream) {
+        try {
+            output.fd.sync()
+        } catch (e: SyncFailedException) {
+            Log.w(TAG, "File descriptor sync failed after writing APK build artifact; continuing.", e)
+        }
     }
 
     @Suppress("SpellCheckingInspection")
@@ -2007,6 +2022,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         const val TEMPLATE_APK_NAME = "template.apk"
         const val INRT_APP_ID = "org.autojs.autojs6.inrt"
 
+        private val NATIVE_LIBRARY_ENTRY_ROOTS = listOf("lib", "libs")
         private val PLUGIN_WAKE_RETRY_DELAYS_MS = longArrayOf(300L, 800L, 1500L)
         private const val PLUGIN_INFO_QUERY_TIMEOUT_SECONDS = 60L
 
