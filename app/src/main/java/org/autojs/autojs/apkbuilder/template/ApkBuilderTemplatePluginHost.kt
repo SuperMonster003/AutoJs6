@@ -6,6 +6,7 @@ import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCapabilityKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginActions
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
@@ -53,6 +54,46 @@ object ApkBuilderTemplatePluginHost {
             proxy.openTemplate(request)
         }
         return OpenedTemplate(target, result, warnings)
+    }
+
+    suspend fun unavailableWarnings(context: Context): List<String> {
+        val appContext = context.applicationContext
+        val discovered = discover(appContext)
+            .filter { it.pluginInfo == null || matchesTemplatePlugin(it.pluginInfo) }
+        if (discovered.isEmpty()) {
+            return emptyList()
+        }
+
+        val infoErrors = discovered
+            .mapNotNull { item ->
+                item.error?.let { error ->
+                    "${item.serviceInfo.packageName}/${item.serviceInfo.name}: ${error.message ?: error}"
+                }
+            }
+        val infoItems = discovered.filter { it.pluginInfo != null }
+        val unauthorizedItems = infoItems.filterNot { PluginTrustManager.isAuthorized(appContext, it.serviceInfo.packageName) }
+        if (unauthorizedItems.isNotEmpty()) {
+            return (
+                    infoErrors +
+                            appContext.getString(
+                                R.string.error_plugin_is_not_authorized_in_plugin_center,
+                                unauthorizedItems.first().serviceInfo.packageName,
+                            )
+                    ).filter { it.isNotBlank() }.distinct()
+        }
+
+        val disabledItems = infoItems.filterNot { PluginEnableStore.isEnabled(appContext, it.serviceInfo.packageName, true) }
+        if (disabledItems.isNotEmpty()) {
+            return (
+                    infoErrors +
+                            appContext.getString(
+                                R.string.error_plugin_is_not_enabled_in_plugin_center,
+                                disabledItems.first().serviceInfo.packageName,
+                            )
+                    ).filter { it.isNotBlank() }.distinct()
+        }
+
+        return infoErrors.filter { it.isNotBlank() }.distinct()
     }
 
     private fun matchesTemplatePlugin(pluginInfo: PluginInfo?): Boolean {

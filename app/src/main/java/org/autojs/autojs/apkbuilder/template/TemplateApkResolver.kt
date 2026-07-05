@@ -78,11 +78,16 @@ object TemplateApkResolver {
 
     suspend fun resolve(context: Context): Decision {
         val appContext = context.applicationContext
-        val opened = runCatching {
+        val openResult = runCatching {
             ApkBuilderTemplatePluginHost.openTemplate(appContext, buildRequest(appContext))
         }.onFailure {
             Log.w(TAG, "template plugin open failed, fallback to bundled template if available", it)
-        }.getOrNull() ?: return builtInDecision(appContext)
+        }
+        val opened = openResult.getOrNull() ?: return builtInDecision(
+            context = appContext,
+            warnings = pluginUnavailableWarnings(appContext, openResult.exceptionOrNull()),
+            errors = listOfNotNull(openResult.exceptionOrNull()?.message),
+        )
 
         val result = opened.result
         val templateFd = result.templateFd ?: return builtInDecision(
@@ -255,6 +260,17 @@ object TemplateApkResolver {
         }
 
         return TemplateValidation(warnings, fatalErrors)
+    }
+
+    private suspend fun pluginUnavailableWarnings(context: Context, error: Throwable?): List<String> {
+        val hostWarnings = runCatching {
+            ApkBuilderTemplatePluginHost.unavailableWarnings(context)
+        }.onFailure {
+            Log.w(TAG, "template plugin availability diagnostics failed", it)
+        }.getOrDefault(emptyList())
+        return (hostWarnings + listOfNotNull(error?.message))
+            .filter { it.isNotBlank() }
+            .distinct()
     }
 
     private fun sha256(file: File): String {
