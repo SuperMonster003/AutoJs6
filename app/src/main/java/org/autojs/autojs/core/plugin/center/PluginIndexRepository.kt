@@ -1250,6 +1250,9 @@ class PluginIndexRepository {
                 obj.put("instructionMarkdownUrl", entry.instructionMarkdownUrl)
                 obj.put("author", entry.author)
                 obj.put("collaborators", JSONArray(entry.collaborators))
+                obj.put("engine", entry.engine)
+                obj.put("variant", entry.variant)
+                obj.put("engineId", entry.engineId)
                 if (entry.supportedAbis == null) {
                     obj.put("supportedAbis", JSONObject.NULL)
                 } else {
@@ -1309,6 +1312,9 @@ class PluginIndexRepository {
             val iconUrl = obj.optString("iconUrl").takeIf { it.isNotBlank() }?.toUri()
             val nightIconUrl = obj.optString("nightIconUrl").takeIf { it.isNotBlank() }?.toUri()
             val forceIgnoreLocalIcon = obj.optBoolean("forceIgnoreLocalIcon", false)
+            val engine = obj.optString("engine").takeIf { it.isNotBlank() && !it.equals("null", true) }
+            val variant = obj.optString("variant").takeIf { it.isNotBlank() && !it.equals("null", true) }
+            val engineId = obj.optString("engineId").takeIf { it.isNotBlank() && !it.equals("null", true) }
             val requiresHostVersion = obj.optLong("requiresHostVersion", -1L).takeIf { it > 0 }
             val source = obj.optString("source")
                 .takeIf { it.isNotBlank() }
@@ -1358,6 +1364,9 @@ class PluginIndexRepository {
                 instructionMarkdownUrl = instructionMarkdownUrl,
                 author = author,
                 collaborators = collaborators,
+                engine = engine,
+                variant = variant,
+                engineId = engineId,
                 releases = releases,
                 supportedAbis = supportedAbis,
                 tags = tags,
