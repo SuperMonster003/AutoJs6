@@ -87,6 +87,7 @@ object TemplateApkResolver {
             context = appContext,
             warnings = pluginUnavailableWarnings(appContext, openResult.exceptionOrNull()),
             errors = listOfNotNull(openResult.exceptionOrNull()?.message),
+            remoteBuildAvailable = hasRemoteBuildPlugin(appContext),
         )
 
         val result = opened.result
@@ -94,6 +95,7 @@ object TemplateApkResolver {
             context = appContext,
             warnings = opened.hostCompatibilityWarnings + result.warnings + result.errors,
             errors = result.errors,
+            remoteBuildAvailable = hasRemoteBuildPlugin(appContext),
         )
 
         val cacheFile = runCatching {
@@ -104,6 +106,7 @@ object TemplateApkResolver {
             context = appContext,
             warnings = opened.hostCompatibilityWarnings + result.warnings + result.errors,
             errors = result.errors,
+            remoteBuildAvailable = hasRemoteBuildPlugin(appContext),
         )
 
         val validation = validateTemplateFile(cacheFile, result)
@@ -113,6 +116,7 @@ object TemplateApkResolver {
                 context = appContext,
                 warnings = opened.hostCompatibilityWarnings + result.warnings + result.errors + validation.fatalErrors,
                 errors = result.errors + validation.fatalErrors,
+                remoteBuildAvailable = hasRemoteBuildPlugin(appContext),
             )
         }
 
@@ -150,6 +154,7 @@ object TemplateApkResolver {
         context: Context,
         warnings: List<String> = emptyList(),
         errors: List<String> = emptyList(),
+        remoteBuildAvailable: Boolean = false,
     ): Decision {
         val cleanWarnings = warnings.filter { it.isNotBlank() }.distinct()
         val cleanErrors = errors.filter { it.isNotBlank() }.distinct()
@@ -157,6 +162,16 @@ object TemplateApkResolver {
             val message = "APK builder template is unavailable: no readable plugin template was opened and built-in template.apk is not bundled."
             val allWarnings = (cleanWarnings + message).distinct()
             val allErrors = (cleanErrors + message).distinct()
+            if (remoteBuildAvailable) {
+                return Decision(
+                    source = Source.Unavailable(message, allWarnings),
+                    requiresUserConfirmation = false,
+                    warnings = allWarnings,
+                    errors = cleanErrors,
+                    canBuild = true,
+                    builtInTemplateAvailable = false,
+                )
+            }
             return Decision(
                 source = Source.Unavailable(message, allWarnings),
                 requiresUserConfirmation = false,
@@ -271,6 +286,14 @@ object TemplateApkResolver {
         return (hostWarnings + listOfNotNull(error?.message))
             .filter { it.isNotBlank() }
             .distinct()
+    }
+
+    private suspend fun hasRemoteBuildPlugin(context: Context): Boolean {
+        return runCatching {
+            ApkBuilderTemplatePluginHost.hasRemoteBuildPlugin(context)
+        }.onFailure {
+            Log.w(TAG, "remote build plugin availability check failed", it)
+        }.getOrDefault(false)
     }
 
     private fun sha256(file: File): String {

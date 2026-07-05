@@ -44,6 +44,7 @@ import net.dongliu.apk.parser.ApkFile;
 import net.dongliu.apk.parser.bean.ApkMeta;
 import org.autojs.autojs.apkbuilder.ApkBuilder;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
+import org.autojs.autojs.apkbuilder.template.RemoteApkBuildClient;
 import org.autojs.autojs.apkbuilder.template.TemplateApkResolver;
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity;
 import org.autojs.autojs.core.pref.Language;
@@ -82,6 +83,8 @@ import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityBuildBinding;
 import org.autojs.autojs6.databinding.DialogBuildProgressBinding;
 import org.autojs.autojs6.databinding.FragmentSymbolsToolbarBinding;
+import org.autojs.plugin.apkbuilder.template.ApkBuildProgress;
+import org.autojs.plugin.apkbuilder.template.ApkBuildResult;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -2435,19 +2438,19 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         Observable.fromCallable(() -> {
                     mBuildThread = Thread.currentThread();
                     try {
-                        return callApkBuilder(buildPath, outApk, projectConfig);
+                        return callApkBuild(buildPath, outApk, projectConfig);
                     } finally {
                         mBuildThread = null;
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(apkBuilder -> {
+                .subscribe(buildSucceeded -> {
                     if (mBuildCancelled.get()) {
                         handleBuildAborted();
                         return;
                     }
-                    if (apkBuilder != null) {
+                    if (buildSucceeded) {
                         onBuildSuccessful(outApk);
                     } else {
                         onBuildFailed(new FileNotFoundException(TEMPLATE_APK_NAME));
@@ -2602,6 +2605,55 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         return result;
     }
 
+    private boolean callApkBuild(File buildPath, File outApk, ProjectConfig projectConfig) throws Exception {
+        RemoteApkBuildClient.BuildOutcome remoteOutcome = RemoteApkBuildClient.buildBlocking(
+                this,
+                projectConfig,
+                outApk,
+                mBuildCancelled,
+                this::onRemoteBuildProgress
+        );
+        if (remoteOutcome.getStatus() == RemoteApkBuildClient.STATUS_NOT_AVAILABLE
+                || remoteOutcome.getStatus() == ApkBuildResult.STATUS_UNSUPPORTED) {
+            callApkBuilder(buildPath, outApk, projectConfig);
+            return true;
+        }
+        if (remoteOutcome.getStatus() == ApkBuildResult.STATUS_CANCELLED) {
+            mBuildCancelled.set(true);
+            return false;
+        }
+        if (remoteOutcome.isSuccess()) {
+            commitRemoteProjectConfigIfNeeded(projectConfig, remoteOutcome.getUpdatedProjectConfigJson());
+            runOnUiThread(() -> updateProgressDialog(BuildStep.FINISHED));
+            return true;
+        }
+        throw new IOException(formatRemoteBuildFailure(remoteOutcome));
+    }
+
+    private void commitRemoteProjectConfigIfNeeded(@NonNull ProjectConfig projectConfig, @Nullable String updatedProjectConfigJson) {
+        if (TextUtils.isEmpty(updatedProjectConfigJson)) {
+            return;
+        }
+        String sourcePath = projectConfig.getSourcePath();
+        if (TextUtils.isEmpty(sourcePath) || !PFiles.isDir(sourcePath)) {
+            return;
+        }
+        PFiles.write(ProjectConfig.configFileOfDir(sourcePath), updatedProjectConfigJson);
+    }
+
+    private String formatRemoteBuildFailure(@NonNull RemoteApkBuildClient.BuildOutcome outcome) {
+        ArrayList<String> details = new ArrayList<>(outcome.getErrors());
+        details.addAll(outcome.getWarnings());
+        String message = details.stream()
+                .filter(s -> s != null && !s.isBlank())
+                .distinct()
+                .collect(Collectors.joining("\n\n"));
+        if (!message.isBlank()) {
+            return message;
+        }
+        return "Remote APK build failed with status: " + outcome.getStatus();
+    }
+
     private ApkBuilder callApkBuilder(File buildPath, File outApk, ProjectConfig projectConfig) throws Exception {
         TemplateApkResolver.Source source = mTemplateApkSource != null
                 ? mTemplateApkSource
@@ -2617,6 +2669,24 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .commitProjectConfigIfNeeded(BuildActivity.this)
                 .cleanWorkspace(BuildActivity.this)
                 .finish();
+    }
+
+    private void onRemoteBuildProgress(@NonNull ApkBuildProgress progress) {
+        runOnUiThread(() -> {
+            switch (progress.getStep()) {
+                case ApkBuildProgress.STEP_PREPARE -> updateProgressDialog(BuildStep.PREPARE);
+                case ApkBuildProgress.STEP_BUILD -> updateProgressDialog(BuildStep.BUILD);
+                case ApkBuildProgress.STEP_SIGN -> updateProgressDialog(BuildStep.SIGN);
+                case ApkBuildProgress.STEP_CLEAN -> updateProgressDialog(BuildStep.CLEAN);
+                case ApkBuildProgress.STEP_FINISH -> updateProgressDialog(BuildStep.FINISHED);
+            }
+            if (!TextUtils.isEmpty(progress.getTitle()) && mStateTitleText != null) {
+                mStateTitleText.setText(getString(R.string.text_property_colon, progress.getTitle()));
+            }
+            if (!TextUtils.isEmpty(progress.getDetail()) && mStateContentText != null) {
+                mStateContentText.setText(progress.getDetail());
+            }
+        });
     }
 
     private enum BuildStep {

@@ -22,6 +22,7 @@ object RemoteApkBuildClient {
     private const val TAG = "RemoteApkBuildClient"
     private const val WAIT_SLICE_MILLIS = 250L
     private const val BUFFER_SIZE = 256 * 1024
+    const val STATUS_NOT_AVAILABLE = 100
 
     fun interface ProgressListener {
         fun onProgress(progress: ApkBuildProgress)
@@ -35,10 +36,6 @@ object RemoteApkBuildClient {
     ) {
         val isSuccess: Boolean
             get() = status == ApkBuildResult.STATUS_OK
-
-        companion object {
-            const val STATUS_NOT_AVAILABLE = 100
-        }
     }
 
     @JvmStatic
@@ -56,7 +53,7 @@ object RemoteApkBuildClient {
         }
         if (!hasRemoteBuildPlugin) {
             return BuildOutcome(
-                status = BuildOutcome.STATUS_NOT_AVAILABLE,
+                status = STATUS_NOT_AVAILABLE,
                 warnings = unavailableWarningsBlocking(appContext),
             )
         }
@@ -71,7 +68,7 @@ object RemoteApkBuildClient {
             val opened = runBlocking(Dispatchers.IO) {
                 ApkBuilderTemplatePluginHost.openBuildSession(appContext, prepared.request, callback)
             } ?: return BuildOutcome(
-                status = BuildOutcome.STATUS_NOT_AVAILABLE,
+                status = STATUS_NOT_AVAILABLE,
                 warnings = unavailableWarningsBlocking(appContext),
             )
 
