@@ -6,6 +6,9 @@ import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequestExtraKeys
 import pxb.android.tinysign.TinySign
+import zhao.arsceditor.ResDecoder.ARSCDecoder
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -56,6 +59,10 @@ class RemoteApkLightweightBuilder(
         copyProjectAssets(buildDir, updatedProjectConfigJson)
 
         ensureActive()
+        progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Rewriting resources.arsc", projectConfig.packageName))
+        rewriteResourcesArsc(buildDir, projectConfig.packageName)
+
+        ensureActive()
         progress(ApkBuildProgress(ApkBuildProgress.STEP_SIGN, "Creating remote APK", outputApk.path))
         repackage(buildDir, outputApk)
 
@@ -68,7 +75,7 @@ class RemoteApkLightweightBuilder(
             updatedProjectConfigJson = updatedProjectConfigJson,
             warnings = arrayListOf(
                 "Remote APK build currently uses a lightweight plugin-side builder.",
-                "Icon resource replacement, resources.arsc package renaming, native/plugin library injection, and custom signing schemes are not implemented yet.",
+                "Icon resource replacement, native/plugin library injection, and custom signing schemes are not implemented yet.",
             ),
             extras = Bundle().apply {
                 putString("builder", "lightweight")
@@ -219,6 +226,25 @@ class RemoteApkLightweightBuilder(
             FileOutputStream(target, false).use { output ->
                 input.copyTo(output, BUFFER_SIZE)
                 output.flush()
+            }
+        }
+    }
+
+    private fun rewriteResourcesArsc(buildDir: File, packageName: String) {
+        val oldArsc = File(buildDir, "resources.arsc")
+        val newArsc = File(buildDir, "resources.arsc.new")
+        BufferedInputStream(FileInputStream(oldArsc), BUFFER_SIZE).use { input ->
+            BufferedOutputStream(FileOutputStream(newArsc, false), BUFFER_SIZE).use { output ->
+                ARSCDecoder(input, null, false).CloneArsc(output, packageName, true)
+            }
+        }
+        if (!oldArsc.delete()) {
+            throw IOException("Failed to replace resources.arsc: ${oldArsc.path}")
+        }
+        if (!newArsc.renameTo(oldArsc)) {
+            copyFile(newArsc, oldArsc)
+            if (!newArsc.delete()) {
+                throw IOException("Failed to delete temporary resources.arsc: ${newArsc.path}")
             }
         }
     }

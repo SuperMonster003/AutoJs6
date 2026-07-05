@@ -110,6 +110,7 @@ dependencies {
     implementation(project(":plugin-api:apk-builder-template"))
     implementation(project(":plugin-api:common-plugin-api"))
     implementation(project(":modules:android-axml"))
+    implementation(project(":modules:android-arsc-editor"))
     implementation(files("$rootDir/libs/tiny-sign-0_9.jar"))
 }
 
