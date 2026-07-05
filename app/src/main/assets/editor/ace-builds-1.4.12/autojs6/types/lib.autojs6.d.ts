@@ -4010,7 +4010,7 @@ declare namespace AutoJs6 {
     }
 
     interface Opencc {
-        convert(s: string, type: OpenCC.ConversionTypeName | ConversionType): string;
+        convert(s: string, type: OpenCC.ConversionTypeName): string;
         hk2s(s: string): string;
         hk2t(s: string): string;
         jp2t(s: string): string;

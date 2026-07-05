@@ -10,7 +10,7 @@
 /**
  * @Source %AutoJs6%/app/src/main/java/org/autojs/autojs/runtime/api/augment/mediainfo/Mediainfo.kt
  * @Source %AutoJs6%/app/src/main/java/org/autojs/autojs/runtime/api/augment/mediainfo/MediainfoNativeObject.kt
- * @Source %AutoJs6%/app/src/main/java/org/mediainfo/android/MediaInfo.kt
+ * @Source %AutoJs6%/app/src/main/java/org/autojs/autojs/core/plugin/mediainfo/MediainfoPluginHost.kt
  */
 
 declare namespace Internal {

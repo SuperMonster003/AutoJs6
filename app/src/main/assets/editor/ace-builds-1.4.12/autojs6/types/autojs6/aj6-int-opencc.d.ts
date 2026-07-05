@@ -13,13 +13,11 @@
 
 declare namespace Internal {
 
-    import ConversionType = com.zqc.opencc.android.lib.ConversionType;
-
     interface OpenCC {
 
-        (s: string, type: OpenCC.ConversionTypeName | ConversionType): string;
+        (s: string, type: OpenCC.ConversionTypeName): string;
 
-        convert(s: string, type: OpenCC.ConversionTypeName | ConversionType): string;
+        convert(s: string, type: OpenCC.ConversionTypeName): string;
 
         /**
          * ### HK2S

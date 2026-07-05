@@ -25437,8 +25437,8 @@
                 {
                     "name": "convert",
                     "type": "function",
-                    "doc": "convert(s: string, type: OpenCC.ConversionTypeName | ConversionType): string;",
-                    "signature": "convert(s: string, type: OpenCC.ConversionTypeName | ConversionType): string;"
+                    "doc": "convert(s: string, type: OpenCC.ConversionTypeName): string;",
+                    "signature": "convert(s: string, type: OpenCC.ConversionTypeName): string;"
                 },
                 {
                     "name": "hk2s",
