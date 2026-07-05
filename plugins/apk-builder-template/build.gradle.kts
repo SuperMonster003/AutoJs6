@@ -111,6 +111,7 @@ dependencies {
     implementation(project(":plugin-api:common-plugin-api"))
     implementation(project(":modules:android-axml"))
     implementation(project(":modules:android-arsc-editor"))
+    implementation(project(":modules:apk-signer"))
     implementation(libs.arsclib)
     implementation(files("$rootDir/libs/tiny-sign-0_9.jar"))
 }
@@ -130,6 +131,7 @@ fun File.sha256String(): String {
 
 val generatedTemplateAssetsDir = layout.buildDirectory.dir("generated/assets/apkBuilderTemplate")
 val sourceTemplateApk = rootProject.layout.projectDirectory.file("app/src/main/assets-app/template.apk")
+val sourceDefaultKeyStore = rootProject.layout.projectDirectory.file("app/src/main/assets/default_key_store.bks")
 val refreshTemplateBeforePackagingProperty = "autojs.apkBuilder.templatePlugin.refreshTemplate"
 val refreshTemplateBeforePackaging = providers.gradleProperty(refreshTemplateBeforePackagingProperty)
     .map { value ->
@@ -146,6 +148,7 @@ val prepareApkBuilderTemplateAssets = tasks.register("prepareApkBuilderTemplateA
     }
     inputs.property(refreshTemplateBeforePackagingProperty, refreshTemplateBeforePackaging)
     inputs.file(sourceTemplateApk)
+    inputs.file(sourceDefaultKeyStore)
     outputs.dir(generatedTemplateAssetsDir)
 
     doLast {
@@ -155,6 +158,7 @@ val prepareApkBuilderTemplateAssets = tasks.register("prepareApkBuilderTemplateA
         val targetApk = templateDir.resolve("template.apk")
         sourceTemplateApk.asFile.copyTo(targetApk, overwrite = true)
         templateDir.resolve("template.sha256").writeText(targetApk.sha256String() + "\n", Charsets.UTF_8)
+        sourceDefaultKeyStore.asFile.copyTo(generatedTemplateAssetsDir.get().asFile.resolve("default_key_store.bks"), overwrite = true)
     }
 }
 

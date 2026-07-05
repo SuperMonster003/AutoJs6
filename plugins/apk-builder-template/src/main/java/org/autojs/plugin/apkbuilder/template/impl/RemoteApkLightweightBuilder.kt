@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import com.reandroid.arsc.chunk.TableBlock
+import com.mcal.apksigner.ApkSigner
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequestExtraKeys
@@ -75,7 +76,7 @@ class RemoteApkLightweightBuilder(
 
         ensureActive()
         progress(ApkBuildProgress(ApkBuildProgress.STEP_SIGN, "Creating remote APK", outputApk.path))
-        repackage(buildDir, outputApk)
+        repackageAndSign(buildDir, outputApk, projectConfig)
 
         ensureActive()
         val outputSha256 = sha256(outputApk)
@@ -86,7 +87,7 @@ class RemoteApkLightweightBuilder(
             updatedProjectConfigJson = updatedProjectConfigJson,
             warnings = arrayListOf(
                 "Remote APK build currently uses a lightweight plugin-side builder.",
-                "Native/plugin library injection and custom signing schemes are not implemented yet.",
+                "Native/plugin library injection is not implemented yet.",
             ),
             extras = Bundle().apply {
                 putString("builder", "lightweight")
@@ -112,6 +113,7 @@ class RemoteApkLightweightBuilder(
         val mainScript = json.optString(KEY_MAIN).takeIf { it.isNotBlank() } ?: DEFAULT_MAIN_SCRIPT
         val abis = parseStringArray(json, KEY_ABIS)
         val permissions = parseStringArray(json, KEY_PERMISSIONS)
+        val signatureScheme = json.optString(KEY_SIGNATURE_SCHEME).takeIf { it.isNotBlank() } ?: DEFAULT_SIGNATURE_SCHEME
 
         if (!PACKAGE_NAME_PATTERN.matches(packageName)) {
             throw IOException("Invalid project packageName: $packageName")
@@ -126,6 +128,7 @@ class RemoteApkLightweightBuilder(
             mainScript = mainScript,
             abis = abis,
             permissions = permissions,
+            signatureScheme = signatureScheme,
         )
     }
 
@@ -345,14 +348,60 @@ class RemoteApkLightweightBuilder(
         }
     }
 
-    private fun repackage(buildDir: File, outputApk: File) {
+    private fun repackageAndSign(buildDir: File, outputApk: File, projectConfig: RemoteProjectConfig) {
+        val unsignedApk = File(workspace.root, "${outputApk.name}.unsigned.apk")
+        if (unsignedApk.exists()) {
+            unsignedApk.delete()
+        }
         if (outputApk.exists()) {
             outputApk.delete()
         }
-        FileOutputStream(outputApk, false).use { output ->
+        FileOutputStream(unsignedApk, false).use { output ->
             TinySign.sign(buildDir, output)
             output.flush()
         }
+        signApk(unsignedApk, outputApk, projectConfig)
+        unsignedApk.delete()
+    }
+
+    private fun signApk(unsignedApk: File, outputApk: File, projectConfig: RemoteProjectConfig) {
+        val signing = resolveSigningConfig()
+        val signer = ApkSigner(unsignedApk, outputApk).apply {
+            useDefaultSignatureVersion = false
+            v1SigningEnabled = "V1" in projectConfig.signatureScheme
+            v2SigningEnabled = "V2" in projectConfig.signatureScheme
+            v3SigningEnabled = "V3" in projectConfig.signatureScheme
+            v4SigningEnabled = "V4" in projectConfig.signatureScheme
+        }
+        if (!signer.signRelease(signing.keyStoreFile, signing.password, signing.alias, signing.aliasPassword)) {
+            throw IOException("Failed to sign remote APK with scheme: ${projectConfig.signatureScheme}")
+        }
+    }
+
+    private fun resolveSigningConfig(): SigningConfig {
+        val customKeyStore = workspace.keyStoreFile
+        if (customKeyStore != null) {
+            return SigningConfig(
+                keyStoreFile = customKeyStore,
+                password = request.keyStorePassword ?: throw IOException("Remote build keystore password is missing."),
+                alias = request.keyAlias ?: throw IOException("Remote build keystore alias is missing."),
+                aliasPassword = request.keyAliasPassword ?: request.keyStorePassword
+                ?: throw IOException("Remote build key alias password is missing."),
+            )
+        }
+        val defaultKeyStore = File(workspace.root, "default_key_store.bks")
+        appContext.assets.open(DEFAULT_KEY_STORE_ASSET).use { input ->
+            FileOutputStream(defaultKeyStore, false).use { output ->
+                input.copyTo(output, BUFFER_SIZE)
+                output.flush()
+            }
+        }
+        return SigningConfig(
+            keyStoreFile = defaultKeyStore,
+            password = DEFAULT_KEY_STORE_PASSWORD,
+            alias = DEFAULT_KEY_ALIAS,
+            aliasPassword = DEFAULT_KEY_ALIAS_PASSWORD,
+        )
     }
 
     private fun ensureActive() {
@@ -398,14 +447,27 @@ class RemoteApkLightweightBuilder(
         val mainScript: String,
         val abis: List<String>?,
         val permissions: List<String>?,
+        val signatureScheme: String,
+    )
+
+    private data class SigningConfig(
+        val keyStoreFile: File,
+        val password: String,
+        val alias: String,
+        val aliasPassword: String,
     )
 
     companion object {
         private const val BUFFER_SIZE = 256 * 1024
         private const val TEMPLATE_APK_ASSET = "template/template.apk"
+        private const val DEFAULT_KEY_STORE_ASSET = "default_key_store.bks"
         private const val CONFIG_FILE_NAME = "project.json"
         private const val DEFAULT_MAIN_SCRIPT = "main.js"
         private const val DEFAULT_OUTPUT_APK = "remote-build.apk"
+        private const val DEFAULT_SIGNATURE_SCHEME = "V1 + V2"
+        private const val DEFAULT_KEY_STORE_PASSWORD = "AutoJs6"
+        private const val DEFAULT_KEY_ALIAS = "AutoJs6"
+        private const val DEFAULT_KEY_ALIAS_PASSWORD = "AutoJs6"
         private const val ICON_RES_DIR = "mipmap"
         private const val ICON_NAME = "ic_launcher"
         private const val TAG = "RemoteApkBuilder"
@@ -417,6 +479,7 @@ class RemoteApkLightweightBuilder(
         private const val KEY_MAIN = "main"
         private const val KEY_ABIS = "abis"
         private const val KEY_PERMISSIONS = "permissions"
+        private const val KEY_SIGNATURE_SCHEME = "signatureScheme"
         private const val KEY_BUILD = "build"
         private const val KEY_BUILD_ID = "id"
         private const val KEY_BUILD_NUMBER = "number"
