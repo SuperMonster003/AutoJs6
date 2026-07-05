@@ -60,6 +60,10 @@ val isNodeFuzzerSeedReplayRequested = taskNames.any { it.contains("replayNodeFuz
 val isAppAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble", IGNORE_CASE)) }
 val isInrtAssembleTaskRequested = taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE)) }
 val isInrtTaskRequested = taskNames.any { it.contains(flavorNameInrt, true) }
+val isApkBuilderTemplatePluginRefreshRequested = providers.gradleProperty("autojs.apkBuilder.templatePlugin.refreshTemplate")
+    .map { it.trim().lowercase() in setOf("true", "1", "yes", "on") }
+    .orElse(false)
+    .get()
 val nodeJsRuntimeBackend = providers.gradleProperty("autojs.nodejs.backend").orElse("embedded").get()
     .trim()
     .lowercase()
@@ -82,7 +86,7 @@ val nodeJsConfiguredReleaseFlavor = providers.gradleProperty("autojs.nodejs.rele
             )
         }
     }
-val nodeJsReleaseFlavor = if (isInrtTaskRequested && !isFullNodeInrtTemplateTaskRequested) {
+val nodeJsReleaseFlavor = if ((isInrtTaskRequested || isApkBuilderTemplatePluginRefreshRequested) && !isFullNodeInrtTemplateTaskRequested) {
     "rhinoOnly"
 } else {
     nodeJsConfiguredReleaseFlavor
