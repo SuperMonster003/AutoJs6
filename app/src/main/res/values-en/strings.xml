@@ -551,6 +551,7 @@
     <string name="text_android_release_version">Android release version</string>
     <string name="text_android_sdk_version">Android SDK version</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder is unavailable</string>
+    <string name="text_apk_template_plugin_risk_prompt">The installed APK Builder template plugin is not fully compatible with the current AutoJs6 version. Continuing may cause the packaged app to fail to start, use mismatched APIs, or miss some modules.</string>
     <string name="text_app_and_device_info">App and device info</string>
     <string name="text_app_crashed">AutoJs6 crashed</string>
     <string name="text_app_language">Language</string>
@@ -845,6 +846,7 @@
     <string name="text_extracting_plugin_asset">Extracting plugin asset</string>
     <string name="text_extracting_plugin_so">Extracting plugin so</string>
     <string name="text_extracting_template_apk">Extracting template APK</string>
+    <string name="text_continue_with_plugin_template">Continue with plugin template</string>
     <string name="text_failed">Failed</string>
     <string name="text_failed_to_build">Failed to build</string>
     <string name="text_failed_to_create_key_store">Failed to create signature key</string>
@@ -1463,6 +1465,7 @@
     <string name="text_type_file">File</string>
     <string name="text_type_folder">Folder</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">The selected ABI \"%s\" cannot be used to create a packaged application, because the current version of AutoJs6 does not include the above ABI.</string>
+    <string name="text_use_builtin_template">Use built-in template</string>
     <string name="text_unavailable">Unavailable</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" is unavailable</string>
     <string name="text_under_development">Under development</string>

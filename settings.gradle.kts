@@ -41,6 +41,7 @@ private val libs = listOf(
 private val pluginApi = listOf(
     "common-plugin-api",
     "nodejs-api",
+    "apk-builder-template",
     "opencc-api",
     "pinyin-api",
     "pinyin4j-api",
@@ -51,11 +52,16 @@ private val pluginApi = listOf(
     "rapid-ocr-engine",
 )
 
+private val plugins = listOf(
+    "apk-builder-template",
+)
+
 include(
     ":app",
     *modules.map { ":modules:$it" }.toTypedArray(),
     *libs.map { ":libs:$it" }.toTypedArray(),
     *pluginApi.map { ":plugin-api:$it" }.toTypedArray(),
+    *plugins.map { ":plugins:$it" }.toTypedArray(),
 )
 
 modules.forEach {
@@ -64,6 +70,10 @@ modules.forEach {
 
 pluginApi.forEach {
     project(":plugin-api:$it").projectDir = File("plugin-api", it)
+}
+
+plugins.forEach {
+    project(":plugins:$it").projectDir = File("plugins", it)
 }
 
 pluginManagement {

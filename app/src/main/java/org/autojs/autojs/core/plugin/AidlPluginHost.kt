@@ -99,12 +99,15 @@ class AidlPluginHost<I : IInterface>(
     suspend fun <T> call(
         context: Context,
         target: Discovered,
+        enforceHostVersionCompatibility: Boolean = true,
         block: (I) -> T,
     ): T {
         if (!PluginTrustManager.isAuthorized(context, target.serviceInfo.packageName)) {
             error("Plugin not authorized: ${target.serviceInfo.packageName}")
         }
-        ensureHostVersionCompatible(context, target)
+        if (enforceHostVersionCompatibility) {
+            ensureHostVersionCompatible(context, target)
+        }
         return withService(context, target.serviceInfo, defaultBindTimeoutMs, block = block)
     }
 

@@ -253,6 +253,9 @@ dependencies /* Unclassified */ {
     // Plugin API: Node.js API
     implementation(project(":plugin-api:nodejs-api"))
 
+    // Plugin API: APK Builder Template API
+    implementation(project(":plugin-api:apk-builder-template"))
+
     // Plugin API: OpenCC API
     implementation(project(":plugin-api:opencc-api"))
 

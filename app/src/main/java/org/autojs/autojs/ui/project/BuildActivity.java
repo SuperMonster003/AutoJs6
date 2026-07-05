@@ -44,6 +44,7 @@ import net.dongliu.apk.parser.ApkFile;
 import net.dongliu.apk.parser.bean.ApkMeta;
 import org.autojs.autojs.apkbuilder.ApkBuilder;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
+import org.autojs.autojs.apkbuilder.template.TemplateApkResolver;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
@@ -260,6 +261,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     @Nullable
     private ProjectConfig mProjectConfig;
+    @Nullable
+    private TemplateApkResolver.Source mTemplateApkSource;
 
     private MaterialDialog mProgressDialog;
     private ImageView mProgressPrepareIcon;
@@ -2196,7 +2199,52 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return;
         }
         saveCurrentBuildProfileSilently();
-        doBuildingApk();
+        mTemplateApkSource = null;
+        resolveTemplateAndMaybeBuild();
+    }
+
+    @SuppressLint("CheckResult")
+    private void resolveTemplateAndMaybeBuild() {
+        Observable.fromCallable(() -> TemplateApkResolver.resolveBlocking(this))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(decision -> {
+                    if (!decision.getRequiresUserConfirmation()) {
+                        mTemplateApkSource = decision.getSource();
+                        doBuildingApk();
+                        return;
+                    }
+                    showTemplateRiskDialog(decision);
+                }, throwable -> {
+                    Log.w(LOG_TAG, "Failed to resolve template APK source, fallback to built-in template", throwable);
+                    mTemplateApkSource = new TemplateApkResolver.Source.BuiltIn(Collections.singletonList(String.valueOf(throwable.getMessage())));
+                    doBuildingApk();
+                });
+    }
+
+    private void showTemplateRiskDialog(@NonNull TemplateApkResolver.Decision decision) {
+        String details = decision.getWarnings().isEmpty()
+                ? getString(R.string.error_unknown)
+                : String.join("\n\n", decision.getWarnings());
+
+        new MaterialDialog.Builder(this)
+                .title(R.string.text_prompt)
+                .content(getString(R.string.text_apk_template_plugin_risk_prompt) + "\n\n" + details)
+                .positiveText(R.string.text_continue_with_plugin_template)
+                .positiveColorRes(R.color.dialog_button_warn)
+                .neutralText(R.string.text_use_builtin_template)
+                .neutralColorRes(R.color.dialog_button_default)
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_caution)
+                .onPositive((dialog, which) -> {
+                    mTemplateApkSource = decision.getSource();
+                    doBuildingApk();
+                })
+                .onNeutral((dialog, which) -> {
+                    mTemplateApkSource = new TemplateApkResolver.Source.BuiltIn(decision.getWarnings());
+                    doBuildingApk();
+                })
+                .show();
     }
 
     private boolean checkInputs() {
@@ -2529,7 +2577,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private ApkBuilder callApkBuilder(File buildPath, File outApk, ProjectConfig projectConfig) throws Exception {
-        InputStream templateApk = getAssets().open(TEMPLATE_APK_NAME);
+        TemplateApkResolver.Source source = mTemplateApkSource != null
+                ? mTemplateApkSource
+                : new TemplateApkResolver.Source.BuiltIn(Collections.emptyList());
+        InputStream templateApk = source.open(this);
         return new ApkBuilder(templateApk, outApk, buildPath.getPath())
                 .setProgressCallback(BuildActivity.this)
                 .setCancelSignal(mBuildCancelled)

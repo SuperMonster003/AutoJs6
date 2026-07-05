@@ -550,6 +550,7 @@
     <string name="text_android_release_version">安卓发行版本</string>
     <string name="text_android_sdk_version">安卓 SDK 版本</string>
     <string name="text_apk_builder_plugin_unavailable">打包插件不可用</string>
+    <string name="text_apk_template_plugin_risk_prompt">检测到打包应用模板插件与当前 AutoJs6 版本不完全匹配. 继续使用可能导致打包后的应用启动失败、API 不一致或部分模块不可用.</string>
     <string name="text_app_and_device_info">应用及设备信息</string>
     <string name="text_app_crashed">AutoJs6 应用崩溃</string>
     <string name="text_app_language">语言</string>
@@ -864,6 +865,7 @@
     <string name="text_extracting_plugin_asset">正在提取插件资源</string>
     <string name="text_extracting_plugin_so">正在提取插件 so 文件</string>
     <string name="text_extracting_template_apk">正在提取模板 APK</string>
+    <string name="text_continue_with_plugin_template">继续使用插件模板</string>
     <string name="text_failed">失败</string>
     <string name="text_failed_to_build">打包失败</string>
     <string name="text_failed_to_create_key_store">生成签名密钥失败</string>
@@ -1484,6 +1486,7 @@
     <string name="text_type_file">文件</string>
     <string name="text_type_folder">文件夹</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">选择的 ABI 架构 \"%s\" 无法用于创建打包应用, 因当前 AutoJs6 版本未包含上述 ABI 架构.</string>
+    <string name="text_use_builtin_template">改用内置模板</string>
     <string name="text_unavailable">不可用</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" 不可用</string>
     <string name="text_under_development">开发中</string>
