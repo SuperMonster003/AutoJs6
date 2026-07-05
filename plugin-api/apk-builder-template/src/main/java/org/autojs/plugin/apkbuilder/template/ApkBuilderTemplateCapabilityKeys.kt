@@ -9,4 +9,5 @@ object ApkBuilderTemplateCapabilityKeys {
     const val TEMPLATE_SHA256 = "apkBuilderTemplateSha256"
     const val SUPPORTS_TEMPLATE_APK = "supportsTemplateApk"
     const val SUPPORTS_REMOTE_BUILD = "supportsRemoteBuild"
+    const val REMOTE_BUILD_PROTOCOL_VERSION = "apkBuilderRemoteBuildProtocolVersion"
 }

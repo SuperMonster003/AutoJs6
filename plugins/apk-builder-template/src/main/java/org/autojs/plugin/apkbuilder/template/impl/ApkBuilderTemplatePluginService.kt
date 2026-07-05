@@ -5,8 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
+import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
+import org.autojs.plugin.apkbuilder.template.ApkBuildResult
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateResult
+import org.autojs.plugin.apkbuilder.template.IApkBuildCallback
+import org.autojs.plugin.apkbuilder.template.IApkBuildSession
 import org.autojs.plugin.apkbuilder.template.IApkBuilderTemplatePlugin
 import java.util.concurrent.Executors
 
@@ -97,6 +101,20 @@ class ApkBuilderTemplatePluginService : Service() {
                     putString("templateAsset", ApkBuilderTemplateMetadata.TEMPLATE_APK_ASSET)
                 },
             )
+        }
+
+        override fun openBuildSession(
+            request: ApkBuildRequest,
+            callback: IApkBuildCallback?,
+        ): IApkBuildSession? {
+            callback?.onFailed(
+                ApkBuildResult(
+                    status = ApkBuildResult.STATUS_UNSUPPORTED,
+                    compatibilityLevel = ApkBuilderTemplateResult.LEVEL_BLOCK,
+                    errors = arrayListOf("Remote APK build is not supported by this template plugin."),
+                )
+            )
+            return null
         }
     }
 }
