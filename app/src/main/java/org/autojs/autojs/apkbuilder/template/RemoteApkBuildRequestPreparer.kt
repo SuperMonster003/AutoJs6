@@ -20,6 +20,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.SyncFailedException
 import java.security.MessageDigest
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -144,24 +145,21 @@ object RemoteApkBuildRequestPreparer {
         remoteConfig: ProjectConfig,
     ): String {
         var sourcePathInArchive = SOURCE_ROOT_ENTRY
-        FileOutputStream(archiveFile, false).use { fileOutput ->
-            ZipOutputStream(fileOutput.buffered(BUFFER_SIZE)).use { zip ->
-                if (source.isDirectory) {
-                    addDirectoryTree(
-                        zip = zip,
-                        root = source.canonicalFile,
-                        entryRoot = SOURCE_ROOT_ENTRY,
-                        excludedDirs = projectConfig.excludedDirs.mapNotNull { runCatching { it.canonicalFile }.getOrNull() },
-                    )
-                } else {
-                    sourcePathInArchive = "$SOURCE_ROOT_ENTRY/${sanitizeEntrySegment(source.name)}"
-                    addFile(zip, source, sourcePathInArchive)
-                }
-                if (writeIconEntryIfAvailable(zip, projectConfig)) {
-                    remoteConfig.setIconPath(REMOTE_ICON_ENTRY)
-                }
+        writeZipFile(archiveFile) { zip ->
+            if (source.isDirectory) {
+                addDirectoryTree(
+                    zip = zip,
+                    root = source.canonicalFile,
+                    entryRoot = SOURCE_ROOT_ENTRY,
+                    excludedDirs = projectConfig.excludedDirs.mapNotNull { runCatching { it.canonicalFile }.getOrNull() },
+                )
+            } else {
+                sourcePathInArchive = "$SOURCE_ROOT_ENTRY/${sanitizeEntrySegment(source.name)}"
+                addFile(zip, source, sourcePathInArchive)
             }
-            fileOutput.fd.sync()
+            if (writeIconEntryIfAvailable(zip, projectConfig)) {
+                remoteConfig.setIconPath(REMOTE_ICON_ENTRY)
+            }
         }
         return sourcePathInArchive
     }
@@ -222,19 +220,16 @@ object RemoteApkBuildRequestPreparer {
         val archiveFile = File(cacheDir, "native-libraries-${System.nanoTime()}.zip")
         var wroteAny = false
 
-        FileOutputStream(archiveFile, false).use { fileOutput ->
-            ZipOutputStream(fileOutput.buffered(BUFFER_SIZE)).use { zip ->
-                targetAbis.forEach { abi ->
-                    val abiCandidates = abiCandidates(abi)
-                    requiredLibs.forEach { soName ->
-                        val entryName = "lib/$abi/$soName"
-                        if (copyFirstMatchedSoToZip(zip, entryName, apkPaths, nativeLibraryDir, abiCandidates, soName)) {
-                            wroteAny = true
-                        }
+        writeZipFile(archiveFile) { zip ->
+            targetAbis.forEach { abi ->
+                val abiCandidates = abiCandidates(abi)
+                requiredLibs.forEach { soName ->
+                    val entryName = "lib/$abi/$soName"
+                    if (copyFirstMatchedSoToZip(zip, entryName, apkPaths, nativeLibraryDir, abiCandidates, soName)) {
+                        wroteAny = true
                     }
                 }
             }
-            fileOutput.fd.sync()
         }
 
         return archiveFile.takeIf { wroteAny && it.length() > 0L } ?: run {
@@ -287,6 +282,27 @@ object RemoteApkBuildRequestPreparer {
         FileInputStream(nativeFile).use { input -> input.copyTo(zip, BUFFER_SIZE) }
         zip.closeEntry()
         return true
+    }
+
+    private fun writeZipFile(file: File, writer: (ZipOutputStream) -> Unit) {
+        FileOutputStream(file, false).use { fileOutput ->
+            val bufferedOutput = fileOutput.buffered(BUFFER_SIZE)
+            ZipOutputStream(bufferedOutput).use { zip ->
+                writer(zip)
+                zip.finish()
+                zip.flush()
+                bufferedOutput.flush()
+                syncBestEffort(fileOutput)
+            }
+        }
+    }
+
+    private fun syncBestEffort(fileOutput: FileOutputStream) {
+        try {
+            fileOutput.fd.sync()
+        } catch (_: SyncFailedException) {
+            // The archive is a local temp file and is read/hashed immediately after close.
+        }
     }
 
     private fun nativeDirMatchesAbi(nativeLibraryDir: File, abiCandidates: List<String>): Boolean {
