@@ -2209,6 +2209,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(decision -> {
+                    if (!decision.getCanBuild()) {
+                        showTemplateUnavailableDialog(decision);
+                        return;
+                    }
                     if (!decision.getRequiresUserConfirmation()) {
                         mTemplateApkSource = decision.getSource();
                         doBuildingApk();
@@ -2216,35 +2220,53 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     }
                     showTemplateRiskDialog(decision);
                 }, throwable -> {
-                    Log.w(LOG_TAG, "Failed to resolve template APK source, fallback to built-in template", throwable);
-                    mTemplateApkSource = new TemplateApkResolver.Source.BuiltIn(Collections.singletonList(String.valueOf(throwable.getMessage())));
-                    doBuildingApk();
+                    Log.w(LOG_TAG, "Failed to resolve template APK source", throwable);
+                    ErrorDialogActivity.showErrorDialog(this, R.string.text_apk_template_unavailable, String.valueOf(throwable.getMessage()));
                 });
     }
 
     private void showTemplateRiskDialog(@NonNull TemplateApkResolver.Decision decision) {
-        String details = decision.getWarnings().isEmpty()
-                ? getString(R.string.error_unknown)
-                : String.join("\n\n", decision.getWarnings());
-
-        new MaterialDialog.Builder(this)
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
                 .title(R.string.text_prompt)
-                .content(getString(R.string.text_apk_template_plugin_risk_prompt) + "\n\n" + details)
+                .content(getString(R.string.text_apk_template_plugin_risk_prompt) + "\n\n" + formatTemplateDecisionDetails(decision))
                 .positiveText(R.string.text_continue_with_plugin_template)
                 .positiveColorRes(R.color.dialog_button_warn)
-                .neutralText(R.string.text_use_builtin_template)
-                .neutralColorRes(R.color.dialog_button_default)
                 .negativeText(R.string.dialog_button_cancel)
                 .negativeColorRes(R.color.dialog_button_caution)
                 .onPositive((dialog, which) -> {
                     mTemplateApkSource = decision.getSource();
                     doBuildingApk();
-                })
-                .onNeutral((dialog, which) -> {
-                    mTemplateApkSource = new TemplateApkResolver.Source.BuiltIn(decision.getWarnings());
-                    doBuildingApk();
-                })
+                });
+
+        if (decision.getBuiltInTemplateAvailable()) {
+            builder.neutralText(R.string.text_use_builtin_template)
+                    .neutralColorRes(R.color.dialog_button_default)
+                    .onNeutral((dialog, which) -> {
+                        mTemplateApkSource = new TemplateApkResolver.Source.BuiltIn(decision.getWarnings());
+                        doBuildingApk();
+                    });
+        }
+
+        builder.show();
+    }
+
+    private void showTemplateUnavailableDialog(@NonNull TemplateApkResolver.Decision decision) {
+        new MaterialDialog.Builder(this)
+                .title(R.string.text_apk_template_unavailable)
+                .content(getString(R.string.text_apk_template_unavailable_prompt) + "\n\n" + formatTemplateDecisionDetails(decision))
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_default)
                 .show();
+    }
+
+    private String formatTemplateDecisionDetails(@NonNull TemplateApkResolver.Decision decision) {
+        ArrayList<String> details = new ArrayList<>(decision.getErrors());
+        details.addAll(decision.getWarnings());
+        String result = details.stream()
+                .filter(s -> s != null && !s.isBlank())
+                .distinct()
+                .collect(Collectors.joining("\n\n"));
+        return result.isBlank() ? getString(R.string.error_unknown) : result;
     }
 
     private boolean checkInputs() {

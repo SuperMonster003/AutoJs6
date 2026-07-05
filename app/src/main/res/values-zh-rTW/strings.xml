@@ -550,6 +550,9 @@
     <string name="text_android_release_version">安卓發行版本</string>
     <string name="text_android_sdk_version">安卓 SDK 版本</string>
     <string name="text_apk_builder_plugin_unavailable">打包外掛不可用</string>
+    <string name="text_apk_template_unavailable">打包應用程式範本不可用</string>
+    <string name="text_apk_template_unavailable_prompt">找不到可用的打包應用程式範本. 目前 AutoJs6 建置未內建 template.apk, 且沒有可讀取的打包應用程式範本外掛. 請安裝並啟用相符版本的範本外掛後重試.</string>
+    <string name="text_apk_template_plugin_risk_prompt">偵測到打包應用程式範本外掛與目前 AutoJs6 版本不完全相容. 繼續使用可能導致打包後的應用程式啟動失敗、API 不一致或部分模組不可用.</string>
     <string name="text_app_and_device_info">應用及裝置資訊</string>
     <string name="text_app_crashed">AutoJs6 應用崩潰</string>
     <string name="text_app_language">語言</string>
@@ -850,6 +853,7 @@
     <string name="text_extracting_plugin_asset">正在提取外掛資源</string>
     <string name="text_extracting_plugin_so">正在提取外掛 so 檔案</string>
     <string name="text_extracting_template_apk">正在提取模板 APK</string>
+    <string name="text_continue_with_plugin_template">繼續使用外掛範本</string>
     <string name="text_failed">失敗</string>
     <string name="text_failed_to_build">打包失敗</string>
     <string name="text_failed_to_create_key_store">生成簽名密鑰失敗</string>
@@ -1492,6 +1496,7 @@
     <string name="text_updating_project_config">正在更新專案配置</string>
     <string name="text_usage_stats_permission">檢視使用情況許可權</string>
     <string name="text_use_android_n_shortcut">使用安卓 7.0 快捷方式</string>
+    <string name="text_use_builtin_template">改用內建範本</string>
     <string name="text_use_default_icon">使用預設圖示</string>
     <string name="text_use_volume_control_record">使用 \"音量減\" 鍵控制錄製</string>
     <string name="text_use_volume_key_to_control_script_running">使用 \"音量加\" 鍵控制指令碼執行</string>

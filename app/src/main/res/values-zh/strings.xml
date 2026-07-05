@@ -550,6 +550,8 @@
     <string name="text_android_release_version">安卓发行版本</string>
     <string name="text_android_sdk_version">安卓 SDK 版本</string>
     <string name="text_apk_builder_plugin_unavailable">打包插件不可用</string>
+    <string name="text_apk_template_unavailable">打包应用模板不可用</string>
+    <string name="text_apk_template_unavailable_prompt">未找到可用的打包应用模板. 当前 AutoJs6 构建未内置 template.apk, 且没有可读取的打包应用模板插件. 请安装并启用匹配版本的模板插件后重试.</string>
     <string name="text_apk_template_plugin_risk_prompt">检测到打包应用模板插件与当前 AutoJs6 版本不完全匹配. 继续使用可能导致打包后的应用启动失败、API 不一致或部分模块不可用.</string>
     <string name="text_app_and_device_info">应用及设备信息</string>
     <string name="text_app_crashed">AutoJs6 应用崩溃</string>

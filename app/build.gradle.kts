@@ -28,6 +28,13 @@ val buildConfigFieldNameIsInrt = "is${flavorNameInrt.uppercaseFirstChar()}"
 val buildTypeNames = listOf(buildTypeDebug, buildTypeRelease)
 val releaseFlavorNames = listOf(flavorNameApp, flavorNameInrt)
 val apkFileExtension = utils.FILE_EXTENSION_APK
+val apkBuilderBuiltInTemplateAsset = "template.apk"
+val apkBuilderIncludeBuiltInTemplateProperty = "autojs.apkBuilder.includeBuiltInTemplate"
+val apkBuilderIncludeBuiltInTemplate = providers.gradleProperty(apkBuilderIncludeBuiltInTemplateProperty)
+    .map { value ->
+        value.trim().lowercase().let { it !in setOf("false", "0", "no", "off") }
+    }
+    .orElse(true)
 
 val resourcePickFirstPatterns = listOf(
     "META-INF/DEPENDENCIES",
@@ -143,6 +150,7 @@ android {
 
         buildConfigField("String", "VERSION_DATE", "\"${utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
         buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
+        buildConfigField("boolean", "APK_BUILDER_BUILT_IN_TEMPLATE_INCLUDED", apkBuilderIncludeBuiltInTemplate.get().toString())
         buildConfigField("boolean", buildConfigFieldNameIsInrt, "false")
 
         javaCompileOptions {
@@ -331,11 +339,18 @@ androidComponents {
         val isInrtVariant = variantName.startsWith(flavorNameInrt, ignoreCase = true)
 
         tasks.matching { it.name == mergeAssetsTaskName }.configureEach {
+            val includeBuiltInTemplate = apkBuilderIncludeBuiltInTemplate.get()
+            inputs.property(apkBuilderIncludeBuiltInTemplateProperty, includeBuiltInTemplate)
+
             doLast {
                 val includes = if (isInrtVariant) {
                     inrtMergedAssetPruneIncludes
                 } else {
-                    appMergedAssetPruneIncludes
+                    appMergedAssetPruneIncludes + if (includeBuiltInTemplate) {
+                        emptyList()
+                    } else {
+                        listOf(apkBuilderBuiltInTemplateAsset)
+                    }
                 }
 
                 listOfNotNull(
