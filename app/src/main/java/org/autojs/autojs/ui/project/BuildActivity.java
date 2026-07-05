@@ -1309,11 +1309,17 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                         }
                     })
                     .onNegative((dialog, which) -> {
+                        discardCurrentBuildProfileChangesForProceed();
                         onProceed.run();
                     });
             DialogUtils.widgetThemeColor(builder);
             return builder.build();
         });
+    }
+
+    private void discardCurrentBuildProfileChangesForProceed() {
+        mBuildConfigSaveSticky = false;
+        updateBuildProfileActionButtons();
     }
 
     @SuppressWarnings("deprecation")
