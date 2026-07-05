@@ -1,7 +1,10 @@
 package org.autojs.plugin.apkbuilder.template.impl
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
+import com.reandroid.arsc.chunk.TableBlock
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequestExtraKeys
@@ -59,6 +62,10 @@ class RemoteApkLightweightBuilder(
         copyProjectAssets(buildDir, updatedProjectConfigJson)
 
         ensureActive()
+        progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Replacing app icon", null))
+        replaceAppIconIfProvided(buildDir)
+
+        ensureActive()
         progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Rewriting resources.arsc", projectConfig.packageName))
         rewriteResourcesArsc(buildDir, projectConfig.packageName)
 
@@ -75,7 +82,7 @@ class RemoteApkLightweightBuilder(
             updatedProjectConfigJson = updatedProjectConfigJson,
             warnings = arrayListOf(
                 "Remote APK build currently uses a lightweight plugin-side builder.",
-                "Icon resource replacement, native/plugin library injection, and custom signing schemes are not implemented yet.",
+                "Native/plugin library injection and custom signing schemes are not implemented yet.",
             ),
             extras = Bundle().apply {
                 putString("builder", "lightweight")
@@ -201,6 +208,54 @@ class RemoteApkLightweightBuilder(
         File(projectAssetsDir, CONFIG_FILE_NAME).writeText(projectConfigJson, Charsets.UTF_8)
     }
 
+    private fun replaceAppIconIfProvided(buildDir: File) {
+        val iconFile = request.extras
+            ?.getString(ApkBuildRequestExtraKeys.ICON_PATH)
+            ?.takeIf { it.isNotBlank() }
+            ?.let(::resolveProjectArchiveEntry)
+            ?.takeIf { it.isFile }
+            ?: return
+
+        val resourcesArsc = File(buildDir, "resources.arsc")
+        val tableBlock = TableBlock.load(resourcesArsc)
+        val packageBlock = tableBlock.getOrCreatePackage(0x7f, BuildConfig.TEMPLATE_PACKAGE_NAME).also {
+            tableBlock.currentPackage = it
+        }
+        val iconPath = packageBlock
+            .getOrCreate("", ICON_RES_DIR, ICON_NAME)
+            .resValue
+            .decodeValue()
+        val targetIconFile = File(buildDir, iconPath).also { file ->
+            file.parentFile?.let { parent ->
+                if (!parent.exists() && !parent.mkdirs()) {
+                    throw IOException("Failed to create icon parent directory: ${parent.path}")
+                }
+            }
+        }
+        val bitmap = BitmapFactory.decodeFile(iconFile.path)
+            ?: throw IOException("Failed to decode remote project icon: ${iconFile.path}")
+        FileOutputStream(targetIconFile, false).use { output ->
+            if (!bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)) {
+                throw IOException("Failed to write remote app icon: ${targetIconFile.path}")
+            }
+            output.flush()
+        }
+        Log.d(TAG, "Remote APK icon replaced: ${iconFile.path} -> ${targetIconFile.path}")
+    }
+
+    private fun resolveProjectArchiveEntry(relativePath: String): File {
+        val normalized = relativePath.replace('\\', '/')
+        if (normalized.isBlank() || normalized.startsWith('/') || normalized.split('/').any { it == ".." }) {
+            throw IOException("Unsafe project archive path: $relativePath")
+        }
+        val canonicalRoot = workspace.projectRoot.canonicalFile
+        val resolved = File(canonicalRoot, normalized).canonicalFile
+        if (!resolved.path.startsWith(canonicalRoot.path + File.separator) && resolved.path != canonicalRoot.path) {
+            throw IOException("Project archive path escapes workspace: $relativePath")
+        }
+        return resolved
+    }
+
     private fun copyDirectoryContents(sourceDir: File, targetDir: File) {
         sourceDir.listFiles()?.forEach { child ->
             val target = File(targetDir, child.name)
@@ -308,6 +363,9 @@ class RemoteApkLightweightBuilder(
         private const val CONFIG_FILE_NAME = "project.json"
         private const val DEFAULT_MAIN_SCRIPT = "main.js"
         private const val DEFAULT_OUTPUT_APK = "remote-build.apk"
+        private const val ICON_RES_DIR = "mipmap"
+        private const val ICON_NAME = "ic_launcher"
+        private const val TAG = "RemoteApkBuilder"
 
         private const val KEY_NAME = "name"
         private const val KEY_PACKAGE_NAME = "packageName"

@@ -111,6 +111,7 @@ dependencies {
     implementation(project(":plugin-api:common-plugin-api"))
     implementation(project(":modules:android-axml"))
     implementation(project(":modules:android-arsc-editor"))
+    implementation(libs.arsclib)
     implementation(files("$rootDir/libs/tiny-sign-0_9.jar"))
 }
 
