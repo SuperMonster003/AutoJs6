@@ -1,10 +1,14 @@
 import groovy.json.JsonSlurper
+import java.io.BufferedOutputStream
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.ZonedDateTime
 import java.util.Properties
+import java.util.zip.CRC32
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 private val embeddedNodePackagingReportVariant = "appDebug"
 private val embeddedNodePackagingReportVariantTaskSuffix = "AppDebug"
@@ -372,17 +376,14 @@ private val embeddedNodePackagingSmokeVerifierReadyApkNames = setOf(
 )
 private val embeddedNodePackagingSmokeHostDirName = "embedded-node-packaged-smoke"
 
-private fun embeddedNodePackagingTaskRequested(taskName: String): Boolean =
-    gradle.startParameter.taskNames.any { requested ->
-        requested == taskName || requested == ":app:$taskName" || requested.endsWith(":$taskName")
-    }
+private fun embeddedNodePackagingTaskGraphHasTask(taskName: String): Boolean =
+    gradle.taskGraph.hasTask(":app:$taskName") ||
+            gradle.taskGraph.allTasks.any { task -> task.project == project && task.name == taskName }
 
-if (
-    embeddedNodePackagingTaskRequested(embeddedNodePackagingRefreshTaskName) ||
-    embeddedNodePackagingTaskRequested(embeddedNodePackagingFullRefreshTaskName)
-) {
-    tasks.matching { it.name == "lintVitalAnalyzeInrtRelease" }.configureEach {
-        enabled = false
+tasks.matching { it.name == "lintVitalAnalyzeInrtRelease" }.configureEach {
+    onlyIf {
+        !embeddedNodePackagingTaskGraphHasTask(embeddedNodePackagingRefreshTaskName) &&
+                !embeddedNodePackagingTaskGraphHasTask(embeddedNodePackagingFullRefreshTaskName)
     }
 }
 
@@ -1496,6 +1497,79 @@ private fun embeddedNodePackagingSlimTemplateMissing(freshness: EmbeddedNodePack
         if (freshness.x86NodeRuntimePresent) add("x86 Node runtime should be absent")
     }.distinct()
 
+private fun embeddedNodePackagingSlimNativePolicyIssue(issue: String): Boolean =
+    issue.startsWith("slim template must not include ") ||
+            issue == "x86 Node runtime should be absent"
+
+private fun embeddedNodePackagingSlimTemplateConvertibleMissing(
+    freshness: EmbeddedNodePackagingTemplateFreshness,
+): List<String> =
+    embeddedNodePackagingSlimTemplateMissing(freshness)
+        .filterNot(::embeddedNodePackagingSlimNativePolicyIssue)
+
+private fun embeddedNodePackagingSlimTemplateExcludedApkEntry(entryName: String): Boolean {
+    val parts = entryName.split('/')
+    return parts.size == 3 &&
+            parts[0] == "lib" &&
+            parts[2] in embeddedNodePackagingNativeLibs
+}
+
+private fun embeddedNodePackagingCopyApkAsSlimTemplate(sourceApk: File, targetApk: File): List<String> {
+    targetApk.parentFile.mkdirs()
+
+    val tempApk = targetApk.parentFile.resolve("${targetApk.name}.tmp")
+    val strippedEntries = mutableListOf<String>()
+
+    try {
+        ZipFile(sourceApk).use { zip ->
+            ZipOutputStream(BufferedOutputStream(tempApk.outputStream())).use { output ->
+                zip.entries().asSequence().forEach { sourceEntry ->
+                    val entryName = sourceEntry.name
+                    if (embeddedNodePackagingSlimTemplateExcludedApkEntry(entryName)) {
+                        strippedEntries += entryName
+                        return@forEach
+                    }
+
+                    val bytes = if (sourceEntry.isDirectory) {
+                        ByteArray(0)
+                    } else {
+                        zip.getInputStream(sourceEntry).use { input -> input.readBytes() }
+                    }
+                    val targetEntry = ZipEntry(entryName).apply {
+                        time = sourceEntry.time
+                        comment = sourceEntry.comment
+                        extra = sourceEntry.extra
+                        method = if (sourceEntry.method == ZipEntry.STORED) {
+                            val crc = CRC32().apply { update(bytes) }.value
+                            size = bytes.size.toLong()
+                            compressedSize = bytes.size.toLong()
+                            this.crc = crc
+                            ZipEntry.STORED
+                        } else {
+                            ZipEntry.DEFLATED
+                        }
+                    }
+
+                    output.putNextEntry(targetEntry)
+                    if (!sourceEntry.isDirectory) {
+                        output.write(bytes)
+                    }
+                    output.closeEntry()
+                }
+            }
+        }
+
+        tempApk.copyTo(targetApk, overwrite = true)
+    } catch (t: Throwable) {
+        tempApk.delete()
+        throw t
+    } finally {
+        tempApk.delete()
+    }
+
+    return strippedEntries.sorted()
+}
+
 private fun embeddedNodePackagingAllNativeLibsInSource(sourceJniLibsRoot: File, abi: String): Boolean =
     embeddedNodePackagingNativeLibs.all { libName -> sourceJniLibsRoot.resolve("$abi/$libName").isFile }
 
@@ -1560,7 +1634,8 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
         val sourceFreshness = embeddedNodePackagingTemplateFreshness(tools, sourceApk)
         val sourceSlimReady = embeddedNodePackagingSlimTemplateReady(sourceFreshness)
         val sourceSlimMissing = embeddedNodePackagingSlimTemplateMissing(sourceFreshness)
-        if (!sourceSlimReady) {
+        val sourceConvertibleMissing = embeddedNodePackagingSlimTemplateConvertibleMissing(sourceFreshness)
+        if (sourceConvertibleMissing.isNotEmpty()) {
             reportFile.writeText(
                 buildString {
                     appendLine("Embedded Node.js inrt template refresh report")
@@ -1574,19 +1649,20 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
                     appendLine("Status:")
                     appendLine("  template.refresh.ready=false")
                     appendLine("  template.refresh.policy=slim-template-no-node-native-libs")
-                    appendLine("  template.refresh.error=source inrtRelease APK is stale or violates slim template policy")
-                    appendLine("  template.refresh.missing=${if (sourceSlimMissing.isEmpty()) "unknown" else sourceSlimMissing.joinToString()}")
+                    appendLine("  template.refresh.error=source inrtRelease APK is stale and cannot be converted to a slim template")
+                    appendLine("  template.refresh.missing=${sourceConvertibleMissing.joinToString()}")
+                    appendLine("  source slim template policy ready before stripping: $sourceSlimReady")
+                    appendLine("  source slim template policy missing before stripping: ${if (sourceSlimMissing.isEmpty()) "none" else sourceSlimMissing.joinToString()}")
                 }
             )
             throw GradleException(
-                "Refusing to refresh slim template.apk from an inrtRelease APK that violates template policy. " +
-                        "Missing: ${if (sourceSlimMissing.isEmpty()) "unknown" else sourceSlimMissing.joinToString()}. " +
+                "Refusing to refresh slim template.apk from a stale inrtRelease APK. " +
+                        "Missing: ${sourceConvertibleMissing.joinToString()}. " +
                         "See ${reportFile.absolutePath}"
             )
         }
 
-        targetApk.parentFile.mkdirs()
-        sourceApk.copyTo(targetApk, overwrite = true)
+        val strippedEntries = embeddedNodePackagingCopyApkAsSlimTemplate(sourceApk, targetApk)
 
         val targetFreshness = embeddedNodePackagingTemplateFreshness(tools, targetApk)
         val targetSlimReady = embeddedNodePackagingSlimTemplateReady(targetFreshness)
@@ -1609,6 +1685,10 @@ val embeddedNodeRefreshInrtTemplateApk = tasks.register(embeddedNodePackagingRef
             appendEmbeddedNodePackagingTemplateFreshness("source", sourceFreshness)
             appendLine("  source slim template policy ready: $sourceSlimReady")
             appendLine("  source slim template policy missing: ${if (sourceSlimMissing.isEmpty()) "none" else sourceSlimMissing.joinToString()}")
+            appendLine("  stripped native entries: ${strippedEntries.size}")
+            if (strippedEntries.isNotEmpty()) {
+                strippedEntries.forEach { entry -> appendLine("    $entry") }
+            }
             appendLine()
             appendLine("Target:")
             appendLine("  template.apk: ${embeddedNodePackagingFormatFile(targetApk)}")
