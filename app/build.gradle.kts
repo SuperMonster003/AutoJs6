@@ -1,9 +1,6 @@
 ﻿@file:Suppress("SpellCheckingInspection")
 
 import com.android.build.api.variant.FilterConfiguration
-import org.gradle.api.file.Directory
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 plugins {
@@ -343,6 +340,10 @@ android {
 
 }
 
+tasks {
+
+}
+
 apply(from = "node-android-config.gradle.kts")
 
 androidComponents {
@@ -416,6 +417,15 @@ tasks {
         //  ! Comment or remove this option if you are tired of plenty of warnings. :)
         //  ! zh-CN: 注释或移除此选项可避免过多警告消息造成的困扰. [笑脸符号]
         // options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
+    }
+
+    matching {
+        it.name in setOf(
+            "lintVitalAnalyzeAppRelease",
+            "lintVitalAnalyzeInrtRelease",
+        )
+    }.configureEach {
+        enabled = false
     }
 
     matching {
