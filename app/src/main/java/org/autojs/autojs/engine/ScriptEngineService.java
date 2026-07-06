@@ -231,8 +231,12 @@ public class ScriptEngineService {
     private void emitEngineEvent(String eventName, ScriptEngine<? extends ScriptSource> engine, Object... args) {
         for (ScriptEngine<?> scriptEngine : getEngines()) {
             if (scriptEngine instanceof JavaScriptEngine jsEngine) {
-                ScriptRuntime runtime = jsEngine.getRuntime();
-                Engines.emit(runtime, eventName, engine, args);
+                try {
+                    ScriptRuntime runtime = jsEngine.getRuntime();
+                    Engines.emit(runtime, eventName, engine, args);
+                } catch (Exception e) {
+                    Log.w(TAG, "Failed to emit engine event: " + eventName + ", engine=" + scriptEngine, e);
+                }
             }
         }
     }
