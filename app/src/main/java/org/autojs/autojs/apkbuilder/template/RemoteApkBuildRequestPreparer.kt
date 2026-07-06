@@ -18,6 +18,7 @@ import org.autojs.autojs.apkbuilder.ApkBuilder
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
@@ -92,6 +93,7 @@ object RemoteApkBuildRequestPreparer {
         }
         val archiveFile = File(cacheDir, "project-${System.nanoTime()}.zip")
         val remoteConfig = cloneForRemoteRequest(projectConfig)
+        applyHostSideConfigAdjustments(source, projectConfig, remoteConfig)
         val sourcePathInArchive = writeProjectArchive(archiveFile, source, projectConfig, remoteConfig)
         val nativeLibrariesArchiveFile = writeBuildInputsArchive(
             context = appContext,
@@ -156,6 +158,31 @@ object RemoteApkBuildRequestPreparer {
         return ProjectConfig.fromJson(json)
             ?.setIconPath(null)
             ?: throw IOException("Failed to clone project config for remote build request.")
+    }
+
+    private fun applyHostSideConfigAdjustments(
+        source: File,
+        projectConfig: ProjectConfig,
+        remoteConfig: ProjectConfig,
+    ) {
+        applyNodeBridgeAndroidManifestPermissions(source, projectConfig, remoteConfig)
+    }
+
+    private fun applyNodeBridgeAndroidManifestPermissions(
+        source: File,
+        projectConfig: ProjectConfig,
+        remoteConfig: ProjectConfig,
+    ) {
+        if (!source.isDirectory || !projectConfig.libs.contains(ApkBuilder.Lib.EMBEDDED_NODE_JS.label)) {
+            return
+        }
+        val requiredPermissions = NodeBridgePermissionManifest.androidPermissionsForWorkingDirectory(source.path)
+        if (requiredPermissions.isEmpty()) {
+            return
+        }
+        val mergedPermissions = LinkedHashSet(remoteConfig.permissions)
+        mergedPermissions.addAll(requiredPermissions)
+        remoteConfig.setPermissions(ArrayList(mergedPermissions))
     }
 
     private fun writeProjectArchive(
