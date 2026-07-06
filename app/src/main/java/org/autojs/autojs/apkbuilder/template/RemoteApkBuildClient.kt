@@ -58,6 +58,13 @@ object RemoteApkBuildClient {
             )
         }
 
+        progressListener?.onProgress(
+            ApkBuildProgress(
+                step = ApkBuildProgress.STEP_PREPARE,
+                title = context.getString(org.autojs.autojs6.R.string.text_preparing_workspace),
+                detail = projectConfig.sourcePath,
+            )
+        )
         val prepared = RemoteApkBuildRequestPreparer.prepare(
             context = appContext,
             projectConfig = projectConfig,
@@ -86,8 +93,17 @@ object RemoteApkBuildClient {
                     status = ApkBuildResult.STATUS_FAILED,
                     errors = listOf("Remote APK build finished without a result."),
                 )
-                return handleResult(result, outApk)
+                return handleResult(context, result, outApk, progressListener)
             } finally {
+                callback.result?.takeIf { it.status == ApkBuildResult.STATUS_OK }?.let {
+                    progressListener?.onProgress(
+                        ApkBuildProgress(
+                            step = ApkBuildProgress.STEP_CLEAN,
+                            title = context.getString(org.autojs.autojs6.R.string.text_cleaning_workspace),
+                            detail = null,
+                        )
+                    )
+                }
                 runCatching { session.close() }
             }
         } finally {
@@ -95,7 +111,12 @@ object RemoteApkBuildClient {
         }
     }
 
-    private fun handleResult(result: ApkBuildResult, outApk: File): BuildOutcome {
+    private fun handleResult(
+        context: Context,
+        result: ApkBuildResult,
+        outApk: File,
+        progressListener: ProgressListener?,
+    ): BuildOutcome {
         if (result.status != ApkBuildResult.STATUS_OK) {
             return BuildOutcome(
                 status = result.status,
@@ -117,6 +138,13 @@ object RemoteApkBuildClient {
                 parent.mkdirs()
             }
         }
+        progressListener?.onProgress(
+            ApkBuildProgress(
+                step = ApkBuildProgress.STEP_SIGN,
+                title = context.getString(org.autojs.autojs6.R.string.text_writing_signed_apk),
+                detail = outApk.path,
+            )
+        )
         copyOutput(outputFd, outApk)
 
         val expectedSha256 = result.outputSha256
@@ -132,6 +160,13 @@ object RemoteApkBuildClient {
                 )
             }
         }
+        progressListener?.onProgress(
+            ApkBuildProgress(
+                step = ApkBuildProgress.STEP_SIGN,
+                title = context.getString(org.autojs.autojs6.R.string.text_sign_completed),
+                detail = outApk.path,
+            )
+        )
 
         return BuildOutcome(
             status = ApkBuildResult.STATUS_OK,

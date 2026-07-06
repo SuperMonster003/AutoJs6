@@ -113,7 +113,6 @@ dependencies {
     implementation(project(":modules:android-arsc-editor"))
     implementation(project(":modules:apk-signer"))
     implementation(libs.arsclib)
-    implementation(files("$rootDir/libs/tiny-sign-0_9.jar"))
 }
 
 fun File.sha256String(): String {

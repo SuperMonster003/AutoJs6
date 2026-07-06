@@ -2703,12 +2703,39 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 return;
             }
             if (!TextUtils.isEmpty(progress.getTitle()) && mStateTitleText != null) {
-                mStateTitleText.setText(getString(R.string.text_property_colon, progress.getTitle()));
+                mStateTitleText.setText(getString(R.string.text_property_colon, localizeRemoteBuildProgressText(progress.getTitle())));
             }
             if (!TextUtils.isEmpty(progress.getDetail()) && mStateContentText != null) {
-                mStateContentText.setText(progress.getDetail());
+                mStateContentText.setText(localizeRemoteBuildProgressText(progress.getDetail()));
             }
         });
+    }
+
+    @NonNull
+    private String localizeRemoteBuildProgressText(@NonNull String text) {
+        return switch (text) {
+            case "Preparing remote build workspace",
+                 "Reading remote build request",
+                 "Remote build request validated",
+                 "Extracting template APK" -> getString(R.string.text_preparing_workspace);
+            case "Copying remote build inputs",
+                 "Configuring AndroidManifest.xml",
+                 "Pruning native libraries",
+                 "Copying project files",
+                 "Replacing app icon",
+                 "Rewriting resources.arsc" -> getString(R.string.text_processing);
+            case "Creating unsigned APK" -> getString(R.string.text_creating_unsigned_apk);
+            case "Unsigned APK created" -> getString(R.string.text_unsigned_apk_created);
+            case "Preparing keystore" -> getString(R.string.text_preparing_keystore);
+            case "Using keystore" -> getString(R.string.text_using_keystore);
+            case "Processing" -> getString(R.string.text_processing);
+            case "Re-signing APK" -> getString(R.string.text_re_signing_apk);
+            case "Writing signed APK" -> getString(R.string.text_writing_signed_apk);
+            case "Sign completed" -> getString(R.string.text_sign_completed);
+            case "Cleaning remote build workspace" -> getString(R.string.text_cleaning_workspace);
+            case "Remote build session finished" -> getString(R.string.text_build_completed);
+            default -> text;
+        };
     }
 
     @Nullable
