@@ -37,6 +37,44 @@ class ApkBuilderLibPolicyTest {
     }
 
     @Test
+    fun paddleOcrUsesPluginVariantsForPackaging() {
+        val paddleOcr = ApkBuilder.Lib.PADDLE_OCR
+        assertTrue(paddleOcr.isPlugin)
+        assertTrue(paddleOcr.libsToInclude.isEmpty())
+        assertTrue(paddleOcr.assetDirsToInclude.isEmpty())
+
+        val variants = paddleOcr.toPluginPair().second.variants
+        assertEquals(listOf("v3", "v4", "v5", "v6"), variants.map { it.variant })
+
+        val v3 = variants.first { it.variant == "v3" }
+        assertEquals(
+            listOf(
+                "libc++_shared.so",
+                "libpaddle_light_api_shared.so",
+                "libNative.so",
+                "libopencv_java4.so",
+            ),
+            v3.libsToInclude,
+        )
+        assertEquals(listOf("assets/labels/ppocr_keys_v1.txt", "assets/models/ocr_v3_for_cpu/"), v3.assetsToInclude.first)
+        assertEquals(listOf("assets/models/ocr_v3_for_cpu(slim)/"), v3.assetsToInclude.second)
+
+        variants.filter { it.variant in setOf("v4", "v5", "v6") }.forEach { variant ->
+            assertEquals(
+                listOf(
+                    "libc++_shared.so",
+                    "libonnxruntime.so",
+                    "libonnxruntime4j_jni.so",
+                    "libopencv_java4.so",
+                ),
+                variant.libsToInclude,
+            )
+            assertEquals(listOf("assets/models/"), variant.assetsToInclude.first)
+            assertTrue(variant.assetsToInclude.second.isEmpty())
+        }
+    }
+
+    @Test
     fun imageQuantIncludesOnlyRuntimeBridgeLibrary() {
         assertEquals(
             listOf("libpngquant_bridge.so"),

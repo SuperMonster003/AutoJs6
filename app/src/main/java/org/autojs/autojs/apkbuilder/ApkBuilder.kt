@@ -1492,6 +1492,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             add(appInfo.sourceDir)
             appInfo.splitSourceDirs?.forEach { add(it) }
         }.distinct()
+        val nativeLibraryDir = appInfo.nativeLibraryDir
+            ?.let(::File)
+            ?.takeIf { it.isDirectory }
 
         val missingPairs = mutableListOf<Pair<String, String>>() // (abi, soName)
 
@@ -1507,10 +1510,19 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 val ok = extractFirstMatchedSoFromApks(
                     context = context,
                     apkPaths = apkPaths,
+                    nativeLibraryDir = nativeLibraryDir,
                     abiCandidates = abiCandidates,
                     soName = soName,
                     abiDestName = abiCanonicalName,
-                )
+                ) || (
+                    soName in PLUGIN_HOST_FALLBACK_NATIVE_LIB_NAMES &&
+                            extractFirstMatchedSoFromHostNativeSources(
+                                context = context,
+                                abiCandidates = abiCandidates,
+                                soName = soName,
+                                abiDestName = abiCanonicalName,
+                            )
+                    )
                 if (!ok) missingPairs += abiCanonicalName to soName
             }
         }
@@ -1537,6 +1549,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private fun extractFirstMatchedSoFromApks(
         context: Context,
         apkPaths: List<String>,
+        nativeLibraryDir: File? = null,
         abiCandidates: List<String>,
         soName: String,
         abiDestName: String,
@@ -1573,12 +1586,75 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 it.printStackTrace()
             }
         }
-        return false
+        return extractFirstMatchedSoFromNativeLibraryDir(
+            context = context,
+            nativeLibraryDir = nativeLibraryDir,
+            abiCandidates = abiCandidates,
+            soName = soName,
+            abiDestName = abiDestName,
+            progressText = context.getString(R.string.text_extracting_plugin_so),
+        )
+    }
+
+    private fun extractFirstMatchedSoFromNativeLibraryDir(
+        context: Context,
+        nativeLibraryDir: File?,
+        abiCandidates: List<String>,
+        soName: String,
+        abiDestName: String,
+        progressText: String,
+    ): Boolean {
+        val sourceFile = findFirstNativeLibraryFile(nativeLibraryDir, abiCandidates, soName) ?: return false
+        val outFile = File(buildPath, "lib/$abiDestName/$soName").apply {
+            parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
+        }
+        notifyStepProgress(
+            ProgressStep.BUILD,
+            progressText,
+            "${sourceFile.path} -> ${outFile.path}",
+        )
+        FileInputStream(sourceFile).use { input ->
+            FileOutputStream(outFile, false).use { output ->
+                copyStreamWithCancel(input, output)
+                syncBestEffort(output)
+            }
+        }
+        Log.i(TAG, "Extracted so from native library dir: ${sourceFile.path} -> ${outFile.path}")
+        return true
+    }
+
+    private fun findFirstNativeLibraryFile(
+        nativeLibraryDir: File?,
+        abiCandidates: List<String>,
+        soName: String,
+    ): File? {
+        if (nativeLibraryDir == null || !nativeLibraryDir.exists()) {
+            return null
+        }
+        return buildList {
+            add(nativeLibraryDir.resolve(soName))
+            abiCandidates.forEach { abi ->
+                add(nativeLibraryDir.resolve("$abi/$soName"))
+            }
+            nativeLibraryDir.parentFile?.let { parent ->
+                abiCandidates.forEach { abi ->
+                    add(parent.resolve("$abi/$soName"))
+                }
+            }
+        }.distinctBy { it.absolutePath }
+            .firstOrNull { it.isFile }
     }
 
     private fun hasHostNativeLibrary(abiCandidates: List<String>, soName: String): Boolean {
+        val appInfo = getApplicationInfoCompat(globalContext.packageManager, globalContext.packageName)
+        val nativeLibraryDir = appInfo.nativeLibraryDir
+            ?.let(::File)
+            ?.takeIf { it.exists() }
+        if (findFirstNativeLibraryFile(nativeLibraryDir, abiCandidates, soName) != null) {
+            return true
+        }
         val srcLibDir = File(appApkFile.parent, LIBRARY_DIR)
-        if (abiCandidates.any { abi -> srcLibDir.resolve("$abi/$soName").isFile }) {
+        if (findFirstNativeLibraryFile(srcLibDir, abiCandidates, soName) != null) {
             return true
         }
         return getAppApkPaths().any { apkPath ->
@@ -1629,7 +1705,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                     it.copyTo(destFile, overwrite = true)
                     return@forEach
                 }
-                extractFirstMatchedSoFromHostApks(
+                extractFirstMatchedSoFromHostNativeSources(
                     context = context,
                     abiCandidates = listOf(abiSrcName),
                     soName = libName,
@@ -1637,6 +1713,50 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 )
             }.onFailure { it.printStackTrace() }
         }
+    }
+
+    private fun extractFirstMatchedSoFromHostNativeSources(
+        context: Context,
+        abiCandidates: List<String>,
+        soName: String,
+        abiDestName: String,
+    ): Boolean {
+        val appInfo = getApplicationInfoCompat(globalContext.packageManager, globalContext.packageName)
+        val nativeLibraryDir = appInfo.nativeLibraryDir
+            ?.let(::File)
+            ?.takeIf { it.exists() }
+        if (extractFirstMatchedSoFromNativeLibraryDir(
+                context = context,
+                nativeLibraryDir = nativeLibraryDir,
+                abiCandidates = abiCandidates,
+                soName = soName,
+                abiDestName = abiDestName,
+                progressText = context.getString(R.string.text_copying_library),
+            )
+        ) {
+            return true
+        }
+
+        val srcLibDir = File(appApkFile.parent, LIBRARY_DIR)
+            .takeIf { it.exists() }
+        if (extractFirstMatchedSoFromNativeLibraryDir(
+                context = context,
+                nativeLibraryDir = srcLibDir,
+                abiCandidates = abiCandidates,
+                soName = soName,
+                abiDestName = abiDestName,
+                progressText = context.getString(R.string.text_copying_library),
+            )
+        ) {
+            return true
+        }
+
+        return extractFirstMatchedSoFromHostApks(
+            context = context,
+            abiCandidates = abiCandidates,
+            soName = soName,
+            abiDestName = abiDestName,
+        )
     }
 
     private fun extractFirstMatchedSoFromHostApks(
@@ -1799,20 +1919,39 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                         ),
                     ),
                     PluginLibVariant(
-                        variant = "v5",
+                        variant = "v4",
                         assetsToInclude = listOf(
-                            "assets/labels/ppocr_keys_ocrv5.txt",
-                            "assets/models/pp-ocrv5-arm/",
-                            "assets/models/pp-ocrv5-arm-int8/",
-                            "assets/models/pp-ocrv5-arm-opencl/",
-                            "assets/models/pp-ocrv5-arm-opencl-int8/",
+                            "assets/models/",
                         ) to emptyList(),
                         libsToInclude = listOf(
                             "libc++_shared.so",
-                            "libpaddle_light_api_shared.so",
-                            "libNative.so",
+                            "libonnxruntime.so",
+                            "libonnxruntime4j_jni.so",
                             "libopencv_java4.so",
-                            "libopencl_probe.so",
+                        ),
+                    ),
+                    PluginLibVariant(
+                        variant = "v5",
+                        assetsToInclude = listOf(
+                            "assets/models/",
+                        ) to emptyList(),
+                        libsToInclude = listOf(
+                            "libc++_shared.so",
+                            "libonnxruntime.so",
+                            "libonnxruntime4j_jni.so",
+                            "libopencv_java4.so",
+                        ),
+                    ),
+                    PluginLibVariant(
+                        variant = "v6",
+                        assetsToInclude = listOf(
+                            "assets/models/",
+                        ) to emptyList(),
+                        libsToInclude = listOf(
+                            "libc++_shared.so",
+                            "libonnxruntime.so",
+                            "libonnxruntime4j_jni.so",
+                            "libopencv_java4.so",
                         ),
                     ),
                 ),
@@ -2045,6 +2184,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         const val INRT_APP_ID = "org.autojs.autojs6.inrt"
 
         private val NATIVE_LIBRARY_ENTRY_ROOTS = listOf("lib", "libs")
+        private val PLUGIN_HOST_FALLBACK_NATIVE_LIB_NAMES = setOf("libc++_shared.so")
         private val PLUGIN_WAKE_RETRY_DELAYS_MS = longArrayOf(300L, 800L, 1500L)
         private const val PLUGIN_INFO_QUERY_TIMEOUT_SECONDS = 60L
 
