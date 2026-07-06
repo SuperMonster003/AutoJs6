@@ -471,7 +471,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return true;
         });
         binding.textLibs.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxLibsView));
+
+        var adjustedContrastColor = ColorUtils.adjustColorForContrast(getColor(R.color.window_background), ThemeColorManager.getColorPrimary(), 2.3);
         binding.manageKeyStore.setOnClickListener(v -> ManageKeyStoreActivity.Companion.startActivity(this));
+        binding.manageKeyStore.setTextColor(adjustedContrastColor);
+
         binding.textPermissions.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxPermissionsView));
 
         mActionBuildUndo.setOnClickListener(v -> performBuildConfigUndo());
