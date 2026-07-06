@@ -59,7 +59,7 @@ class RemoteApkBuildSession(
             validateHostRequest()
             callback?.onProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Reading remote build request", request.outputFileName))
 
-            val preparedWorkspace = RemoteApkBuildWorkspace.prepare(appContext, request)
+            val preparedWorkspace = RemoteApkBuildWorkspace.prepare(appContext, request, cancelled)
             workspace = preparedWorkspace
             callback?.onProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Remote build request validated", preparedWorkspace.sourcePath.path))
 

@@ -11,8 +11,11 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import java.io.SyncFailedException
 import java.security.MessageDigest
+import java.util.concurrent.CancellationException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -51,31 +54,40 @@ class RemoteApkBuildWorkspace private constructor(
         private const val EXPECTED_ARCHIVE_FORMAT_VERSION = 1
         private const val TAG = "RemoteApkWorkspace"
 
-        fun prepare(context: Context, request: ApkBuildRequest): RemoteApkBuildWorkspace {
+        fun prepare(
+            context: Context,
+            request: ApkBuildRequest,
+            cancelSignal: AtomicBoolean? = null,
+        ): RemoteApkBuildWorkspace {
             val root = File(context.cacheDir, "remote-apk-build/session-${System.nanoTime()}").apply {
                 if (!mkdirs()) {
                     throw IOException("Failed to create remote build workspace: $path")
                 }
             }
             try {
+                ensureActive(cancelSignal)
                 val archiveFile = File(root, "project.zip")
-                copyFdToFile(request.projectArchiveFd ?: throw IOException("Project archive fd is missing."), archiveFile)
-                verifyFile(archiveFile, request.projectArchiveSizeBytes, request.projectArchiveSha256, "project archive")
+                copyFdToFile(request.projectArchiveFd ?: throw IOException("Project archive fd is missing."), archiveFile, cancelSignal)
+                verifyFile(archiveFile, request.projectArchiveSizeBytes, request.projectArchiveSha256, "project archive", cancelSignal)
+                ensureActive(cancelSignal)
 
                 val projectRoot = File(root, "unpacked")
-                unzipSafely(archiveFile, projectRoot)
+                unzipSafely(archiveFile, projectRoot, cancelSignal)
+                ensureActive(cancelSignal)
 
                 val nativeLibrariesArchiveFile = request.nativeLibrariesArchiveFd?.let { fd ->
                     File(root, "native-libraries.zip").also { file ->
-                        copyFdToFile(fd, file)
+                        copyFdToFile(fd, file, cancelSignal)
                         verifyFile(
                             file = file,
                             expectedSize = request.nativeLibrariesArchiveSizeBytes,
                             expectedSha256 = request.nativeLibrariesArchiveSha256,
                             label = "native libraries archive",
+                            cancelSignal = cancelSignal,
                         )
                     }
                 }
+                ensureActive(cancelSignal)
 
                 val extras = request.extras ?: throw IOException("Remote build request extras are missing.")
                 val archiveVersion = extras.getInt(ApkBuildRequestExtraKeys.ARCHIVE_FORMAT_VERSION, 0)
@@ -111,8 +123,8 @@ class RemoteApkBuildWorkspace private constructor(
 
                 val keyStoreFile = request.keyStoreFd?.let { fd ->
                     File(root, "keystore.bin").also { file ->
-                        copyFdToFile(fd, file)
-                        verifyFile(file, request.keyStoreSizeBytes, request.keyStoreSha256, "keystore")
+                        copyFdToFile(fd, file, cancelSignal)
+                        verifyFile(file, request.keyStoreSizeBytes, request.keyStoreSha256, "keystore", cancelSignal)
                     }
                 }
 
@@ -131,10 +143,14 @@ class RemoteApkBuildWorkspace private constructor(
             }
         }
 
-        private fun copyFdToFile(fd: ParcelFileDescriptor, file: File) {
+        private fun copyFdToFile(
+            fd: ParcelFileDescriptor,
+            file: File,
+            cancelSignal: AtomicBoolean?,
+        ) {
             ParcelFileDescriptor.AutoCloseInputStream(fd).use { input ->
                 FileOutputStream(file, false).use { output ->
-                    input.copyTo(output, BUFFER_SIZE)
+                    copyStreamWithCancel(input, output, cancelSignal)
                     output.flush()
                     syncBestEffort(output)
                 }
@@ -169,7 +185,14 @@ class RemoteApkBuildWorkspace private constructor(
             }
         }
 
-        private fun verifyFile(file: File, expectedSize: Long, expectedSha256: String?, label: String) {
+        private fun verifyFile(
+            file: File,
+            expectedSize: Long,
+            expectedSha256: String?,
+            label: String,
+            cancelSignal: AtomicBoolean?,
+        ) {
+            ensureActive(cancelSignal)
             if (!file.isFile || file.length() <= 0L) {
                 throw IOException("Remote build $label is empty.")
             }
@@ -177,28 +200,39 @@ class RemoteApkBuildWorkspace private constructor(
                 throw IOException("Remote build $label size mismatch: expected=$expectedSize actual=${file.length()}")
             }
             if (!expectedSha256.isNullOrBlank()) {
-                val actual = sha256(file)
+                val actual = sha256(file, cancelSignal)
                 if (!expectedSha256.equals(actual, ignoreCase = true)) {
                     throw IOException("Remote build $label SHA-256 mismatch: expected=$expectedSha256 actual=$actual")
                 }
             }
         }
 
-        private fun unzipSafely(zipFile: File, targetDir: File) {
+        private fun unzipSafely(
+            zipFile: File,
+            targetDir: File,
+            cancelSignal: AtomicBoolean?,
+        ) {
             if (!targetDir.mkdirs()) {
                 throw IOException("Failed to create project archive target dir: ${targetDir.path}")
             }
             val canonicalRoot = targetDir.canonicalFile
             ZipInputStream(FileInputStream(zipFile).buffered(BUFFER_SIZE)).use { zip ->
                 while (true) {
+                    ensureActive(cancelSignal)
                     val entry = zip.nextEntry ?: break
-                    extractEntry(zip, entry, canonicalRoot)
+                    extractEntry(zip, entry, canonicalRoot, cancelSignal)
                     zip.closeEntry()
                 }
             }
         }
 
-        private fun extractEntry(zip: ZipInputStream, entry: ZipEntry, root: File) {
+        private fun extractEntry(
+            zip: ZipInputStream,
+            entry: ZipEntry,
+            root: File,
+            cancelSignal: AtomicBoolean?,
+        ) {
+            ensureActive(cancelSignal)
             val name = entry.name.replace('\\', '/')
             if (name.isBlank() || name.startsWith('/') || name.split('/').any { it == ".." }) {
                 throw IOException("Unsafe project archive entry: ${entry.name}")
@@ -219,7 +253,7 @@ class RemoteApkBuildWorkspace private constructor(
                 }
             }
             FileOutputStream(out, false).use { output ->
-                zip.copyTo(output, BUFFER_SIZE)
+                copyStreamWithCancel(zip, output, cancelSignal)
                 output.flush()
             }
         }
@@ -237,17 +271,43 @@ class RemoteApkBuildWorkspace private constructor(
             return resolved
         }
 
-        private fun sha256(file: File): String {
+        private fun sha256(
+            file: File,
+            cancelSignal: AtomicBoolean?,
+        ): String {
             val digest = MessageDigest.getInstance("SHA-256")
             FileInputStream(file).use { input ->
                 val buffer = ByteArray(BUFFER_SIZE)
                 while (true) {
+                    ensureActive(cancelSignal)
                     val read = input.read(buffer)
                     if (read < 0) break
                     digest.update(buffer, 0, read)
                 }
             }
             return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+        }
+
+        private fun copyStreamWithCancel(
+            input: InputStream,
+            output: OutputStream,
+            cancelSignal: AtomicBoolean?,
+        ) {
+            val buffer = ByteArray(BUFFER_SIZE)
+            while (true) {
+                ensureActive(cancelSignal)
+                val read = input.read(buffer)
+                if (read < 0) {
+                    break
+                }
+                output.write(buffer, 0, read)
+            }
+        }
+
+        private fun ensureActive(cancelSignal: AtomicBoolean?) {
+            if (cancelSignal?.get() == true || Thread.currentThread().isInterrupted) {
+                throw CancellationException("Remote APK build session was cancelled.")
+            }
         }
     }
 }
