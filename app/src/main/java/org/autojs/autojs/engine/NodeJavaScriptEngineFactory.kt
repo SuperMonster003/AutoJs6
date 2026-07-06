@@ -60,7 +60,13 @@ class NodeDisabledJavaScriptEngine(
     override fun forceStop() = Unit
 
     override fun doExecution(scriptSource: org.autojs.autojs.script.JavaScriptSource): Any? {
-        throw NodeRuntimeDisabledException(message)
+        val error = NodeRuntimeDisabledException(message)
+        if (BuildConfig.isInrt) {
+            runCatching {
+                runtime.console.error(error)
+            }
+        }
+        throw error
     }
 
     override fun toString(): String {

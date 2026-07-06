@@ -99,6 +99,9 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             if (source.executionMode and JavaScriptSource.EXECUTION_MODE_UI != 0) {
                 config.intentFlags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME
             } else {
+                if (source.engineName == JavaScriptSource.ENGINE_NODEJS) {
+                    InrtToastVisibilityGuard.holdForPotentialNodeBridgeToast()
+                }
                 finishHostActivity(activity)
             }
             mScriptExecution = AutoJs.instance.scriptEngineService.execute(source, config)
