@@ -954,6 +954,7 @@ object NativeNodeEmbeddedRuntimeBridge {
     fun validateEmbeddedScriptRequestBeforeServiceStart(
         request: EmbeddedScriptRequest,
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+        context: Context? = null,
     ): EmbeddedScriptResult? {
         val startedAt = SystemClock.elapsedRealtime()
         val processName = currentProcessName()
@@ -1005,6 +1006,13 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
         }
         validateEmbeddedScriptModuleSources(preparedRequest, processName, pid, startedAt)?.let { return it }
+        validateEmbeddedRuntimeNativeLibraries(
+            context = context,
+            request = preparedRequest,
+            processName = processName,
+            pid = pid,
+            startedAt = startedAt,
+        )?.let { return it }
         return null
     }
 
@@ -1393,6 +1401,64 @@ object NativeNodeEmbeddedRuntimeBridge {
     private fun embeddedScriptSourceTooLargeMessage(sourceName: String, sourceBytes: Int): String {
         return "Embedded script source is too large for $sourceName: " +
                 "$sourceBytes bytes > $EMBEDDED_SCRIPT_SOURCE_MAX_BYTES bytes."
+    }
+
+    private fun validateEmbeddedRuntimeNativeLibraries(
+        context: Context?,
+        request: EmbeddedScriptRequest,
+        processName: String,
+        pid: Int,
+        startedAt: Long,
+    ): EmbeddedScriptResult? {
+        val appContext = context?.applicationContext ?: return null
+        val nodeLibrary = NodeJsPluginRuntimeLoader.resolveNodeLibraryFile(appContext)
+        val bridgeLibrary = NodeJsPluginRuntimeLoader.resolveBridgeLibraryFile(appContext)
+        if (nodeLibrary?.isFile == true && bridgeLibrary?.isFile == true) {
+            return null
+        }
+
+        val missing = buildList {
+            if (nodeLibrary?.isFile != true) add(nativeLibrarySoFileName(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME))
+            if (bridgeLibrary?.isFile != true) add(nativeLibrarySoFileName(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME))
+        }
+        val nativeValues = mapOf(
+            "embedded_script.native_runtime.preflight" to "failed",
+            "embedded_script.native_runtime.available" to "false",
+            "embedded_script.native_runtime.release_flavor" to BuildConfig.NODEJS_RELEASE_FLAVOR,
+            "embedded_script.native_runtime.backend" to BuildConfig.NODEJS_RUNTIME_BACKEND,
+            "embedded_script.native_runtime.missing_libraries" to missing.joinToString(","),
+            "embedded_script.native_runtime.libnode.present" to (nodeLibrary?.isFile == true).toString(),
+            "embedded_script.native_runtime.bridge.present" to (bridgeLibrary?.isFile == true).toString(),
+            "embedded_script.native_runtime.libnode.path" to nodeLibrary?.absolutePath.orEmpty(),
+            "embedded_script.native_runtime.bridge.path" to bridgeLibrary?.absolutePath.orEmpty(),
+            "embedded_script.error_code" to NodeRuntimeErrorCodes.NODE_RUNTIME_UNAVAILABLE,
+        )
+        return failureEmbeddedScriptResult(
+            request = request,
+            processName = processName,
+            pid = pid,
+            startedAt = startedAt,
+            message = embeddedRuntimeNativeLibrariesUnavailableMessage(missing),
+            nativeValues = nativeValues,
+            errorCode = NodeRuntimeErrorCodes.NODE_RUNTIME_UNAVAILABLE,
+        )
+    }
+
+    private fun embeddedRuntimeNativeLibrariesUnavailableMessage(missingLibraries: List<String>): String {
+        return buildString {
+            append("Embedded Node.js runtime native libraries are unavailable.")
+            append(" Missing: ")
+            append(missingLibraries.joinToString())
+            append(".")
+            append(" releaseFlavor=")
+            append(BuildConfig.NODEJS_RELEASE_FLAVOR)
+            append(" backend=")
+            append(BuildConfig.NODEJS_RUNTIME_BACKEND)
+            append(".")
+            if (BuildConfig.NODEJS_RELEASE_FLAVOR == "nodePlugin") {
+                append(" This build expects the Node.js runtime plugin to provide native libraries; enable/install an authorized Node.js runtime plugin or build with nodeFull/nodeMini.")
+            }
+        }
     }
 
     fun probeEmbeddedRuntime(context: Context): ProbeResult {

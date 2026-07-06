@@ -69,6 +69,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     override fun doExecution(source: JavaScriptSource): Any? {
         lastNodeProjectRunnerDescriptor = null
         lastEmbeddedScriptResultNativeValues = emptyMap()
+        failFastIfEmbeddedRuntimeUnavailable(source)?.let { return it }
         tryRunNodeProjectLaunch(source)?.let { return it }
         tryRunNodeProjectFile(source)?.let { return it }
 
@@ -79,6 +80,21 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             runEmbeddedScriptRequest(request)
         }
         return finishEmbeddedScriptExecution(request, result)
+    }
+
+    private fun failFastIfEmbeddedRuntimeUnavailable(source: JavaScriptSource): Any? {
+        if (
+            BuildConfig.NODEJS_RELEASE_FLAVOR != NODE_PLUGIN_RELEASE_FLAVOR ||
+            NodeJsRuntimePluginBridge.isRequested()
+        ) {
+            return null
+        }
+        val request = buildRuntimePreflightRequest(source)
+        val failure = NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(
+            request = request,
+            context = androidContext,
+        ) ?: return null
+        return finishEmbeddedScriptExecution(request, failure)
     }
 
     override fun forceStop() {
@@ -461,6 +477,17 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             sandboxRoot = requestSandboxRoot,
             moduleSources = preload.moduleSources,
             runtimeModuleSources = runtimeModuleSources,
+            spawnDepth = currentSpawnDepth(),
+        )
+    }
+
+    private fun buildRuntimePreflightRequest(source: JavaScriptSource): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
+        val requestWorkingDirectory = workingDirectory(source)
+        return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+            source = "",
+            sourceName = sourceName(source),
+            workingDirectory = requestWorkingDirectory,
+            sandboxRoot = sandboxRoot(requestWorkingDirectory),
             spawnDepth = currentSpawnDepth(),
         )
     }
@@ -1275,6 +1302,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         const val CTS_EXTENSION = "cts"
         const val MTS_EXTENSION = "mts"
         const val JSON_EXTENSION = "json"
+        const val NODE_PLUGIN_RELEASE_FLAVOR = "nodePlugin"
         const val PACKAGE_JSON = "package.json"
         const val PACKAGE_JSON_NAME = "name"
         const val PACKAGE_JSON_MAIN = "main"

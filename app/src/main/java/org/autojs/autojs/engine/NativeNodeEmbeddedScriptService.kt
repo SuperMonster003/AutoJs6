@@ -279,7 +279,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
         val launchSurface = intent.getStringExtra(EXTRA_LAUNCH_SURFACE)
             ?.takeIf { it.isNotBlank() }
             ?: NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT
-        NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(preparedServiceRequest, launchSurface)?.let { failure ->
+        NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(
+            request = preparedServiceRequest,
+            launchSurface = launchSurface,
+            context = this,
+        )?.let { failure ->
             receiver?.send(RESULT_SCRIPT, failure.withPrewarmLease(prewarmLease).toBundle())
             stopServiceIfQueueIdle(startId)
             return
@@ -2075,6 +2079,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
             launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            val appContext = context.applicationContext
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
             val requestWithExecutionId = request.copy(executionId = executionId)
             val requestForService = try {
@@ -2084,10 +2089,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     .embeddedScriptRequestPreparationFailure(requestWithExecutionId, error)
                     .withLifecycle(preflightFailureLifecycle(executionId, requestWithExecutionId))
             }
-            NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(requestForService, launchSurface)?.let {
+            NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(
+                request = requestForService,
+                launchSurface = launchSurface,
+                context = appContext,
+            )?.let {
                 return it.withLifecycle(preflightFailureLifecycle(executionId, request))
             }
-            val appContext = context.applicationContext
             val requestQueueMode = NodeExecutionQueuePolicy.normalizeMode(requestForService.queueMode)
             val defaultSchedulerEligible = requestForService.processPoolSlot.isNullOrBlank() &&
                     NodeEmbeddedProcessPoolPolicy.defaultSchedulerEligible(
@@ -2334,8 +2342,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 )
             }
             NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(
-                requestForService,
-                launchSurface,
+                request = requestForService,
+                launchSurface = launchSurface,
+                context = appContext,
             )?.let { failure ->
                 val status = NodeInteractiveLongRunningStatusStore.write(
                     context = appContext,
