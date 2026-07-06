@@ -94,7 +94,7 @@ object RemoteApkBuildClient {
                     status = ApkBuildResult.STATUS_FAILED,
                     errors = listOf("Remote APK build finished without a result."),
                 )
-                return handleResult(context, result, outApk, progressListener)
+                return handleResult(context, result, outApk, progressListener, opened.hostCompatibilityWarnings)
             } finally {
                 callback.result?.takeIf { it.status == ApkBuildResult.STATUS_OK }?.let {
                     progressListener?.onProgress(
@@ -117,11 +117,13 @@ object RemoteApkBuildClient {
         result: ApkBuildResult,
         outApk: File,
         progressListener: ProgressListener?,
+        hostCompatibilityWarnings: List<String>,
     ): BuildOutcome {
+        val warnings = (hostCompatibilityWarnings + result.warnings).filter { it.isNotBlank() }.distinct()
         if (result.status != ApkBuildResult.STATUS_OK) {
             return BuildOutcome(
                 status = result.status,
-                warnings = result.warnings,
+                warnings = warnings,
                 errors = result.errors,
                 updatedProjectConfigJson = result.updatedProjectConfigJson,
             )
@@ -129,7 +131,7 @@ object RemoteApkBuildClient {
 
         val outputFd = result.outputApkFd ?: return BuildOutcome(
             status = ApkBuildResult.STATUS_FAILED,
-            warnings = result.warnings,
+            warnings = warnings,
             errors = result.errors + "Remote APK build completed without an output APK.",
             updatedProjectConfigJson = result.updatedProjectConfigJson,
         )
@@ -155,7 +157,7 @@ object RemoteApkBuildClient {
                 outApk.delete()
                 return BuildOutcome(
                     status = ApkBuildResult.STATUS_FAILED,
-                    warnings = result.warnings,
+                    warnings = warnings,
                     errors = result.errors + "Remote output APK SHA-256 mismatch: expected=$expectedSha256 actual=$actualSha256",
                     updatedProjectConfigJson = result.updatedProjectConfigJson,
                 )
@@ -171,7 +173,7 @@ object RemoteApkBuildClient {
 
         return BuildOutcome(
             status = ApkBuildResult.STATUS_OK,
-            warnings = result.warnings,
+            warnings = warnings,
             errors = result.errors,
             updatedProjectConfigJson = result.updatedProjectConfigJson,
         )

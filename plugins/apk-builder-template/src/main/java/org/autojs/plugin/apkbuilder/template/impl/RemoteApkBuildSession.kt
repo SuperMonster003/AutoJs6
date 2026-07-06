@@ -53,10 +53,11 @@ class RemoteApkBuildSession(
 
     private fun runSession() {
         var keepWorkspaceForResult = false
+        val requestWarnings = arrayListOf<String>()
         callback?.onStarted(updateProgress(ApkBuildProgress.STEP_PREPARE, "Preparing remote build workspace", null))
         runCatching {
             ensureActive()
-            validateHostRequest()
+            requestWarnings += validateHostRequest()
             callback?.onProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Reading remote build request", request.outputFileName))
 
             val preparedWorkspace = RemoteApkBuildWorkspace.prepare(appContext, request, cancelled)
@@ -76,6 +77,7 @@ class RemoteApkBuildSession(
             ).build()
             val outputFd = ParcelFileDescriptor.open(output.apkFile, ParcelFileDescriptor.MODE_READ_ONLY)
             keepWorkspaceForResult = true
+            val warnings = (requestWarnings + output.warnings).filter { it.isNotBlank() }.distinct()
             callback?.onCompleted(
                 ApkBuildResult(
                     status = ApkBuildResult.STATUS_OK,
@@ -84,8 +86,12 @@ class RemoteApkBuildSession(
                     outputSizeBytes = output.apkFile.length(),
                     outputSha256 = output.sha256,
                     updatedProjectConfigJson = output.updatedProjectConfigJson,
-                    compatibilityLevel = ApkBuilderTemplateResult.LEVEL_WARN,
-                    warnings = output.warnings,
+                    compatibilityLevel = if (warnings.isEmpty()) {
+                        ApkBuilderTemplateResult.LEVEL_OK
+                    } else {
+                        ApkBuilderTemplateResult.LEVEL_WARN
+                    },
+                    warnings = ArrayList(warnings),
                     extras = Bundle().apply {
                         putAll(preparedWorkspace.toExtras())
                         putAll(output.extras)
@@ -106,7 +112,11 @@ class RemoteApkBuildSession(
                 } else {
                     ApkBuilderTemplateResult.LEVEL_BLOCK
                 },
-                warnings = unsupported?.message?.let { arrayListOf(it) } ?: arrayListOf(),
+                warnings = ArrayList(
+                    (requestWarnings + listOfNotNull(unsupported?.message))
+                        .filter { it.isNotBlank() }
+                        .distinct(),
+                ),
                 errors = if (unsupported == null && !cancelled.get()) {
                     arrayListOf(error.message ?: error.toString())
                 } else {
@@ -141,21 +151,30 @@ class RemoteApkBuildSession(
         return null
     }
 
-    private fun validateHostRequest() {
+    private fun validateHostRequest(): List<String> {
+        val warnings = arrayListOf<String>()
         if (request.requiredProtocolVersion > ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION) {
             throw IllegalStateException(
                 "Host requires newer remote build protocol: host=${request.requiredProtocolVersion}, plugin=${ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION}"
             )
         }
         if (request.hostPackageName.isNotBlank() && request.hostPackageName != BuildConfig.HOST_PACKAGE_NAME) {
-            throw IllegalStateException("Host package mismatch: plugin targets ${BuildConfig.HOST_PACKAGE_NAME}, host=${request.hostPackageName}")
+            warnings += handleRiskyHostMismatch("Host package mismatch: plugin targets ${BuildConfig.HOST_PACKAGE_NAME}, host=${request.hostPackageName}")
         }
         if (request.hostVersionName.isNotBlank() && request.hostVersionName != BuildConfig.HOST_VERSION_NAME) {
-            throw IllegalStateException("Host versionName mismatch: plugin=${BuildConfig.HOST_VERSION_NAME}, host=${request.hostVersionName}")
+            warnings += handleRiskyHostMismatch("Host versionName mismatch: plugin=${BuildConfig.HOST_VERSION_NAME}, host=${request.hostVersionName}")
         }
         if (request.hostVersionCode > 0L && request.hostVersionCode != BuildConfig.HOST_VERSION_CODE) {
-            throw IllegalStateException("Host versionCode mismatch: plugin=${BuildConfig.HOST_VERSION_CODE}, host=${request.hostVersionCode}")
+            warnings += handleRiskyHostMismatch("Host versionCode mismatch: plugin=${BuildConfig.HOST_VERSION_CODE}, host=${request.hostVersionCode}")
         }
+        return warnings
+    }
+
+    private fun handleRiskyHostMismatch(message: String): String {
+        if (!request.allowRiskyBuild) {
+            throw IllegalStateException(message)
+        }
+        return message
     }
 
     private fun ensureActive() {
