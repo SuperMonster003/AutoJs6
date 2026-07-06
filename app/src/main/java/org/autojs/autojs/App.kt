@@ -25,6 +25,7 @@ import org.autojs.autojs.engine.NodeCrashEvidenceStore
 import org.autojs.autojs.engine.NodeRuntimeBackend
 import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
+import org.autojs.autojs.inrt.InrtNodeRuntimeOverride
 import org.autojs.autojs.inrt.InrtShortcuts
 import org.autojs.autojs.ipc.InAppEventBus
 import org.autojs.autojs.leakcanary.LeakCanarySetup
@@ -71,6 +72,7 @@ class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
             }
             else /* Main process. */ -> {
                 if (AbstractAutoJs.isInrt) {
+                    InrtNodeRuntimeOverride.apply(this)
                     InrtPref.syncLaunchConfigWithBuild()
                     InrtShortcuts.syncToExplicitIntents()
                 }

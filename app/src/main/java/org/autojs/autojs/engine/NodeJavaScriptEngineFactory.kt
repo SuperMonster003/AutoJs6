@@ -8,7 +8,8 @@ import java.util.Locale
 object NodeJavaScriptEngineFactory {
 
     fun create(context: Context): JavaScriptEngine {
-        if (BuildConfig.NODEJS_RELEASE_FLAVOR == RHINO_ONLY_RELEASE_FLAVOR) {
+        val backend = NodeRuntimeBackend.current()
+        if (BuildConfig.NODEJS_RELEASE_FLAVOR == RHINO_ONLY_RELEASE_FLAVOR && backend != NodeRuntimeBackend.EMBEDDED) {
             return NodeDisabledJavaScriptEngine(
                 message = "Node.js scripts are disabled for the rhinoOnly release flavor. " +
                         "Use nodeFull/nodeMini for Node Profile v1 scripts, or explicitly run a legacy " +
@@ -16,7 +17,7 @@ object NodeJavaScriptEngineFactory {
                         "code=${NodeRuntimeErrorCodes.NODE_DISABLED}",
             )
         }
-        return when (NodeRuntimeBackend.current()) {
+        return when (backend) {
             NodeRuntimeBackend.RHINO -> NodeJavaScriptEngine(context)
             NodeRuntimeBackend.NATIVE -> NativeNodeJavaScriptEngine(context)
             NodeRuntimeBackend.EMBEDDED -> NativeNodeEmbeddedJavaScriptEngine(context)
