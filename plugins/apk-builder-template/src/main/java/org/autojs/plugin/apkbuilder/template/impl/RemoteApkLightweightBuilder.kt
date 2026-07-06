@@ -68,7 +68,7 @@ class RemoteApkLightweightBuilder(
         ensureActive()
         progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Copying project files", workspace.sourcePath.path))
         val updatedProjectConfigJson = updateProjectBuildInfo(projectConfig)
-        copyProjectAssets(buildDir, updatedProjectConfigJson)
+        copyProjectAssets(buildDir, projectConfig, updatedProjectConfigJson)
 
         ensureActive()
         progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Replacing app icon", null))
@@ -345,7 +345,11 @@ class RemoteApkLightweightBuilder(
         return projectConfig.json.toString(2)
     }
 
-    private fun copyProjectAssets(buildDir: File, projectConfigJson: String) {
+    private fun copyProjectAssets(
+        buildDir: File,
+        projectConfig: RemoteProjectConfig,
+        projectConfigJson: String,
+    ) {
         val projectAssetsDir = File(buildDir, "assets/project")
         if (projectAssetsDir.exists()) {
             projectAssetsDir.deleteRecursively()
@@ -353,14 +357,30 @@ class RemoteApkLightweightBuilder(
         if (!projectAssetsDir.mkdirs()) {
             throw IOException("Failed to create project assets directory: ${projectAssetsDir.path}")
         }
+        val scriptEncryptor = createScriptEncryptor(projectConfig)
 
         when (workspace.sourceKind) {
-            ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY -> copyDirectoryContents(workspace.sourcePath, projectAssetsDir)
-            ApkBuildRequestExtraKeys.SOURCE_KIND_FILE -> copyFile(workspace.sourcePath, File(projectAssetsDir, DEFAULT_MAIN_SCRIPT))
+            ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY -> copyDirectoryContents(workspace.sourcePath, projectAssetsDir, scriptEncryptor)
+            ApkBuildRequestExtraKeys.SOURCE_KIND_FILE -> copyProjectFile(
+                workspace.sourcePath,
+                File(projectAssetsDir, DEFAULT_MAIN_SCRIPT),
+                scriptEncryptor,
+            )
             else -> throw IOException("Unsupported project source kind: ${workspace.sourceKind}")
         }
 
         File(projectAssetsDir, CONFIG_FILE_NAME).writeText(projectConfigJson, Charsets.UTF_8)
+    }
+
+    private fun createScriptEncryptor(projectConfig: RemoteProjectConfig): RemoteScriptEncryptor {
+        val buildId = projectConfig.json
+            .optJSONObject(KEY_BUILD)
+            ?.optString(KEY_BUILD_ID)
+            ?.takeIf { it.isNotBlank() }
+            ?: throw IOException("Project build id is missing.")
+        val key = md5(projectConfig.packageName + projectConfig.versionName + projectConfig.mainScript)
+        val initVector = md5(buildId + projectConfig.name).take(16)
+        return RemoteScriptEncryptor(key, initVector)
     }
 
     private fun pruneNativeLibrariesByAbiPolicy(buildDir: File, abis: List<String>?) {
@@ -431,17 +451,34 @@ class RemoteApkLightweightBuilder(
         return resolved
     }
 
-    private fun copyDirectoryContents(sourceDir: File, targetDir: File) {
+    private fun copyDirectoryContents(
+        sourceDir: File,
+        targetDir: File,
+        scriptEncryptor: RemoteScriptEncryptor,
+    ) {
         sourceDir.listFiles()?.forEach { child ->
             val target = File(targetDir, child.name)
             if (child.isDirectory) {
                 if (!target.mkdirs() && !target.isDirectory) {
                     throw IOException("Failed to create project assets directory: ${target.path}")
                 }
-                copyDirectoryContents(child, target)
+                copyDirectoryContents(child, target, scriptEncryptor)
             } else if (child.isFile) {
-                copyFile(child, target)
+                copyProjectFile(child, target, scriptEncryptor)
             }
+        }
+    }
+
+    private fun copyProjectFile(
+        source: File,
+        target: File,
+        scriptEncryptor: RemoteScriptEncryptor,
+    ) {
+        ensureActive()
+        if (scriptEncryptor.isJavaScriptFileName(target.name)) {
+            scriptEncryptor.encryptFile(source, target)
+        } else {
+            copyFile(source, target)
         }
     }
 
@@ -602,6 +639,12 @@ class RemoteApkLightweightBuilder(
                 digest.update(buffer, 0, read)
             }
         }
+        return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+    }
+
+    private fun md5(value: String): String {
+        val digest = MessageDigest.getInstance("MD5")
+        digest.update(value.toByteArray())
         return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
     }
 
