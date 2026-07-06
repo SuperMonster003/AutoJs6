@@ -286,6 +286,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private final EnumMap<BuildStep, Long> mStepDurationMs = new EnumMap<>(BuildStep.class);
     @Nullable
     private BuildStep mCurrentTimingStep;
+    @Nullable
+    private BuildStep mLatestProgressStep;
     private long mCurrentTimingStepStartedAtMs;
     // Track cancellation state for cooperative build abort.
     // zh-CN: 跟踪取消状态, 用于协作式中止构建.
@@ -2681,12 +2683,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private void onRemoteBuildProgress(@NonNull ApkBuildProgress progress) {
         runOnUiThread(() -> {
-            switch (progress.getStep()) {
-                case ApkBuildProgress.STEP_PREPARE -> updateProgressDialog(BuildStep.PREPARE);
-                case ApkBuildProgress.STEP_BUILD -> updateProgressDialog(BuildStep.BUILD);
-                case ApkBuildProgress.STEP_SIGN -> updateProgressDialog(BuildStep.SIGN);
-                case ApkBuildProgress.STEP_CLEAN -> updateProgressDialog(BuildStep.CLEAN);
-                case ApkBuildProgress.STEP_FINISH -> updateProgressDialog(BuildStep.FINISHED);
+            BuildStep step = toBuildStep(progress.getStep());
+            if (step != null && !updateProgressDialog(step)) {
+                return;
             }
             if (!TextUtils.isEmpty(progress.getTitle()) && mStateTitleText != null) {
                 mStateTitleText.setText(getString(R.string.text_property_colon, progress.getTitle()));
@@ -2695,6 +2694,18 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 mStateContentText.setText(progress.getDetail());
             }
         });
+    }
+
+    @Nullable
+    private BuildStep toBuildStep(int step) {
+        return switch (step) {
+            case ApkBuildProgress.STEP_PREPARE -> BuildStep.PREPARE;
+            case ApkBuildProgress.STEP_BUILD -> BuildStep.BUILD;
+            case ApkBuildProgress.STEP_SIGN -> BuildStep.SIGN;
+            case ApkBuildProgress.STEP_CLEAN -> BuildStep.CLEAN;
+            case ApkBuildProgress.STEP_FINISH -> BuildStep.FINISHED;
+            default -> null;
+        };
     }
 
     private enum BuildStep {
@@ -2747,23 +2758,34 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         }
     }
 
-    private void updateProgressDialog(BuildStep currentStep) {
+    private boolean updateProgressDialog(BuildStep currentStep) {
         if (mProgressDialog == null) {
-            return;
+            return false;
         }
+        if (isStaleProgressStep(currentStep)) {
+            return false;
+        }
+        long now = SystemClock.elapsedRealtime();
         recordStepDuration(currentStep);
-        setProgressStep(mProgressPrepareIcon, mProgressPrepareText, mProgressPrepareDurationText, BuildStep.PREPARE, currentStep);
-        setProgressStep(mProgressBuildIcon, mProgressBuildText, mProgressBuildDurationText, BuildStep.BUILD, currentStep);
-        setProgressStep(mProgressSignIcon, mProgressSignText, mProgressSignDurationText, BuildStep.SIGN, currentStep);
-        setProgressStep(mProgressCleanIcon, mProgressCleanText, mProgressCleanDurationText, BuildStep.CLEAN, currentStep);
+        fillMissingCompletedStepDurations(currentStep);
+        mLatestProgressStep = currentStep;
+        setProgressStep(mProgressPrepareIcon, mProgressPrepareText, mProgressPrepareDurationText, BuildStep.PREPARE, currentStep, now);
+        setProgressStep(mProgressBuildIcon, mProgressBuildText, mProgressBuildDurationText, BuildStep.BUILD, currentStep, now);
+        setProgressStep(mProgressSignIcon, mProgressSignText, mProgressSignDurationText, BuildStep.SIGN, currentStep, now);
+        setProgressStep(mProgressCleanIcon, mProgressCleanText, mProgressCleanDurationText, BuildStep.CLEAN, currentStep, now);
+        return true;
     }
 
-    private void setProgressStep(@Nullable ImageView iconView, @Nullable TextView stateView, @Nullable TextView durationView, BuildStep step, BuildStep currentStep) {
+    private boolean isStaleProgressStep(@NonNull BuildStep currentStep) {
+        return mLatestProgressStep != null && currentStep.ordinal() < mLatestProgressStep.ordinal();
+    }
+
+    private void setProgressStep(@Nullable ImageView iconView, @Nullable TextView stateView, @Nullable TextView durationView, BuildStep step, BuildStep currentStep, long now) {
         if (step.ordinal() < currentStep.ordinal()) {
             if (iconView != null) iconView.setImageResource(R.drawable.ic_check_mark);
             if (stateView != null) stateView.setText(ensureTextEndsWithDot(stateView.getText()));
-            if (durationView != null && currentStep.ordinal() - step.ordinal() == 1) {
-                updateStepDurationText(durationView, step, SystemClock.elapsedRealtime());
+            if (durationView != null) {
+                updateStepDurationText(durationView, step, now);
             }
         } else if (step == currentStep) {
             if (iconView != null) iconView.setImageResource(R.drawable.ic_right_arrow);
@@ -2777,6 +2799,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private void resetStepDurations() {
         mStepDurationMs.clear();
         mCurrentTimingStep = null;
+        mLatestProgressStep = null;
         mCurrentTimingStepStartedAtMs = 0L;
     }
 
@@ -2793,6 +2816,14 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         } else if (!isTrackedStep(currentStep)) {
             mCurrentTimingStep = null;
             mCurrentTimingStepStartedAtMs = 0L;
+        }
+    }
+
+    private void fillMissingCompletedStepDurations(@NonNull BuildStep currentStep) {
+        for (BuildStep step : BuildStep.values()) {
+            if (isTrackedStep(step) && step.ordinal() < currentStep.ordinal() && !mStepDurationMs.containsKey(step)) {
+                mStepDurationMs.put(step, 0L);
+            }
         }
     }
 
@@ -2976,6 +3007,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         Explorers.workspace().refreshAll();
         // dismissProgressDialog();
         if (mProgressDialog != null) {
+            updateProgressDialog(BuildStep.FINISHED);
             mProgressDialog.setTitle(R.string.text_build_succeeded);
             mStateTitleText.setText(getString(R.string.text_property_colon, getString(R.string.text_built_apk_file_path)));
             mStateContentText.setText(outApk.getPath());
@@ -3032,6 +3064,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     @Override
     public void onStepProgress(@NonNull ApkBuilder builder, @NonNull String title, @Nullable String detail) {
+        if (mLatestProgressStep == BuildStep.FINISHED) {
+            return;
+        }
         if (mStateTitleText != null) {
             mStateTitleText.setText(getString(R.string.text_property_colon, title));
         }
