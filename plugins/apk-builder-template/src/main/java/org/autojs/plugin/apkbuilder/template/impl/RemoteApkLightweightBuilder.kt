@@ -116,6 +116,8 @@ class RemoteApkLightweightBuilder(
         val libs = parseStringArray(json, KEY_LIBS).orEmpty()
         val permissions = parseStringArray(json, KEY_PERMISSIONS)
         val signatureScheme = json.optString(KEY_SIGNATURE_SCHEME).takeIf { it.isNotBlank() } ?: DEFAULT_SIGNATURE_SCHEME
+        val launchConfig = json.optJSONObject(KEY_LAUNCH_CONFIG)
+        val splashVisible = launchConfig?.optBoolean(KEY_SPLASH_VISIBLE, true) ?: true
 
         if (!PACKAGE_NAME_PATTERN.matches(packageName)) {
             throw IOException("Invalid project packageName: $packageName")
@@ -132,6 +134,7 @@ class RemoteApkLightweightBuilder(
             libs = libs,
             permissions = permissions,
             signatureScheme = signatureScheme,
+            splashVisible = splashVisible,
         )
     }
 
@@ -289,14 +292,43 @@ class RemoteApkLightweightBuilder(
 
     private fun configureManifest(buildDir: File, projectConfig: RemoteProjectConfig) {
         val manifestFile = File(buildDir, "AndroidManifest.xml")
-        RemoteApkManifestEditor(FileInputStream(manifestFile))
+        val editor = RemoteApkManifestEditor(FileInputStream(manifestFile))
             .setAppName(projectConfig.name)
             .setPackageName(projectConfig.packageName)
             .setVersionName(projectConfig.versionName)
             .setVersionCode(projectConfig.versionCode)
             .setPermissions(projectConfig.permissions)
-            .commit()
-            .writeTo(FileOutputStream(manifestFile, false))
+
+        if (!projectConfig.splashVisible) {
+            resolveSplashThemeReplacement(buildDir)?.let { (splashThemeId, noSplashThemeId) ->
+                editor.setSplashThemeReplacement(splashThemeId, noSplashThemeId)
+            }
+        }
+        if (projectConfig.libs.contains(LIB_EMBEDDED_NODE_JS)) {
+            editor
+                .addEmbeddedNodeScriptServiceIfMissing()
+                .addEmbeddedNodeForegroundServicePermissionsIfMissing()
+        }
+
+        editor.commit().writeTo(FileOutputStream(manifestFile, false))
+    }
+
+    private fun resolveSplashThemeReplacement(buildDir: File): Pair<Int, Int>? {
+        return runCatching {
+            val tableBlock = TableBlock.load(File(buildDir, "resources.arsc"))
+            val packageBlock = tableBlock.getOrCreatePackage(0x7f, BuildConfig.TEMPLATE_PACKAGE_NAME).also {
+                tableBlock.currentPackage = it
+            }
+            val splashThemeId = packageBlock.getEntry("", "style", "AppTheme.Splash")?.resourceId ?: 0
+            val noSplashThemeId = packageBlock.getEntry("", "style", "AppTheme.SevereTransparent")?.resourceId ?: 0
+            if (splashThemeId != 0 && noSplashThemeId != 0) {
+                splashThemeId to noSplashThemeId
+            } else {
+                null
+            }
+        }.onFailure {
+            Log.w(TAG, "Failed to resolve remote splash theme replacement.", it)
+        }.getOrNull()
     }
 
     private fun updateProjectBuildInfo(projectConfig: RemoteProjectConfig): String {
@@ -596,6 +628,7 @@ class RemoteApkLightweightBuilder(
         val libs: List<String>,
         val permissions: List<String>?,
         val signatureScheme: String,
+        val splashVisible: Boolean,
     )
 
     private data class SigningConfig(
@@ -629,10 +662,13 @@ class RemoteApkLightweightBuilder(
         private const val KEY_LIBS = "libs"
         private const val KEY_PERMISSIONS = "permissions"
         private const val KEY_SIGNATURE_SCHEME = "signatureScheme"
+        private const val KEY_LAUNCH_CONFIG = "launchConfig"
+        private const val KEY_SPLASH_VISIBLE = "splashVisible"
         private const val KEY_BUILD = "build"
         private const val KEY_BUILD_ID = "id"
         private const val KEY_BUILD_NUMBER = "number"
         private const val KEY_BUILD_TIME = "time"
+        private const val LIB_EMBEDDED_NODE_JS = "Embedded Node.js"
 
         private val PACKAGE_NAME_PATTERN = Regex("[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+")
         private val DEFAULT_NATIVE_LIBRARIES = listOf(
