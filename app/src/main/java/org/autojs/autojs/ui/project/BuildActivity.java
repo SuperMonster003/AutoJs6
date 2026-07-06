@@ -2719,9 +2719,36 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 mStateTitleText.setText(getString(R.string.text_property_colon, localizeRemoteBuildProgressText(progress.getTitle())));
             }
             if (mStateContentText != null) {
-                mStateContentText.setText(TextUtils.isEmpty(progress.getDetail()) ? "" : localizeRemoteBuildProgressText(progress.getDetail()));
+                String content = resolveRemoteBuildProgressContent(progress);
+                if (!TextUtils.isEmpty(content)) {
+                    mStateContentText.setText(content);
+                }
             }
         });
+    }
+
+    @NonNull
+    private String resolveRemoteBuildProgressContent(@NonNull ApkBuildProgress progress) {
+        if (!TextUtils.isEmpty(progress.getDetail())) {
+            return localizeRemoteBuildProgressText(progress.getDetail());
+        }
+        if (!TextUtils.isEmpty(progress.getTitle())) {
+            return localizeRemoteBuildProgressContentFallback(progress.getTitle());
+        }
+        return "";
+    }
+
+    @NonNull
+    private String localizeRemoteBuildProgressContentFallback(@NonNull String text) {
+        return switch (text) {
+            case "Copying remote build inputs" -> getString(R.string.text_copying_remote_build_inputs);
+            case "Configuring AndroidManifest.xml" -> getString(R.string.text_configuring_manifest);
+            case "Pruning native libraries" -> getString(R.string.text_pruning_native_libraries);
+            case "Copying project files" -> getString(R.string.text_copying_project_directory);
+            case "Replacing app icon" -> getString(R.string.text_writing_app_icon);
+            case "Rewriting resources.arsc" -> getString(R.string.text_writing_resources_arsc);
+            default -> localizeRemoteBuildProgressText(text);
+        };
     }
 
     @NonNull

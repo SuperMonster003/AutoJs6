@@ -1094,6 +1094,7 @@
     <string name="text_copying_library">Copying library</string>
     <string name="text_copying_native_libraries">Copying native libraries</string>
     <string name="text_copying_project_directory">Copying project directory</string>
+    <string name="text_copying_remote_build_inputs">Copying remote build inputs</string>
     <string name="text_copying_script_file">Copying script file</string>
     <string name="text_country_code">Country Code (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
@@ -1698,6 +1699,7 @@
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_pruning">Pruning</string>
+    <string name="text_pruning_native_libraries">Pruning native libraries</string>
     <string name="text_quit">Quit</string>
     <string name="text_re_signing_apk">Re-signing APK</string>
     <string name="text_reading_splash_resources">Reading splash resources</string>

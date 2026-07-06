@@ -730,6 +730,7 @@
     <string name="text_copying_library">正在复制库文件</string>
     <string name="text_copying_native_libraries">正在复制原生库</string>
     <string name="text_copying_project_directory">正在复制项目目录</string>
+    <string name="text_copying_remote_build_inputs">正在复制远程构建输入</string>
     <string name="text_copying_script_file">正在复制脚本文件</string>
     <string name="text_country_code">国家代码 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国家代码必须为两个大写字母</string>
@@ -1288,6 +1289,7 @@
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_pruning">正在修剪</string>
+    <string name="text_pruning_native_libraries">正在修剪原生库</string>
     <string name="text_quit">放弃</string>
     <string name="text_re_signing_apk">正在重新签名 APK</string>
     <string name="text_reading_splash_resources">正在读取启动页资源</string>
