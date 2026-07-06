@@ -2616,6 +2616,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private boolean callApkBuild(File buildPath, File outApk, ProjectConfig projectConfig) throws Exception {
+        if (!shouldAttemptRemoteApkBuild()) {
+            callApkBuilder(buildPath, outApk, projectConfig);
+            return true;
+        }
+
         RemoteApkBuildClient.BuildOutcome remoteOutcome = RemoteApkBuildClient.buildBlocking(
                 this,
                 projectConfig,
@@ -2639,6 +2644,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return true;
         }
         throw new IOException(formatRemoteBuildFailure(remoteOutcome));
+    }
+
+    private boolean shouldAttemptRemoteApkBuild() {
+        return mTemplateApkSource instanceof TemplateApkResolver.Source.Plugin;
     }
 
     private void commitRemoteProjectConfigIfNeeded(@NonNull ProjectConfig projectConfig, @Nullable String updatedProjectConfigJson) {
