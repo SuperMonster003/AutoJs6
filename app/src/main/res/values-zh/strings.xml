@@ -895,6 +895,7 @@
     <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
     <string name="text_failed_to_update">更新失败</string>
     <string name="text_failed_to_write_file">文件写入失败</string>
+    <string name="text_falling_back_to_local_build">正在回退本地构建</string>
     <string name="text_file">文件</string>
     <string name="text_file_colon_value">文件: %1$s</string>
     <string name="text_file_details">文件详情</string>

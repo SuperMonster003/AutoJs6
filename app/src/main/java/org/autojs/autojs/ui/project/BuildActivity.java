@@ -2625,18 +2625,33 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return true;
         }
 
-        RemoteApkBuildClient.BuildOutcome remoteOutcome = RemoteApkBuildClient.buildBlocking(
-                this,
-                projectConfig,
-                outApk,
-                mBuildCancelled,
-                this::onRemoteBuildProgress
-        );
+        RemoteApkBuildClient.BuildOutcome remoteOutcome;
+        try {
+            remoteOutcome = RemoteApkBuildClient.buildBlocking(
+                    this,
+                    projectConfig,
+                    outApk,
+                    mBuildCancelled,
+                    this::onRemoteBuildProgress
+            );
+        } catch (CancellationException e) {
+            mBuildCancelled.set(true);
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            mBuildCancelled.set(true);
+            return false;
+        } catch (Exception e) {
+            if (mBuildCancelled.get() || Thread.currentThread().isInterrupted()) {
+                mBuildCancelled.set(true);
+                return false;
+            }
+            Log.w(LOG_TAG, "Remote APK build threw before completion; falling back to local build", e);
+            return fallbackToLocalApkBuild(buildPath, outApk, projectConfig, e.getMessage());
+        }
         if (remoteOutcome.getStatus() == RemoteApkBuildClient.STATUS_NOT_AVAILABLE
                 || remoteOutcome.getStatus() == ApkBuildResult.STATUS_UNSUPPORTED) {
-            runOnUiThread(this::restartProgressDialogForLocalBuild);
-            callApkBuilder(buildPath, outApk, projectConfig);
-            return true;
+            return fallbackToLocalApkBuild(buildPath, outApk, projectConfig, formatRemoteBuildFailure(remoteOutcome));
         }
         if (remoteOutcome.getStatus() == ApkBuildResult.STATUS_CANCELLED) {
             mBuildCancelled.set(true);
@@ -2647,11 +2662,33 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             runOnUiThread(() -> updateProgressDialog(BuildStep.FINISHED));
             return true;
         }
-        throw new IOException(formatRemoteBuildFailure(remoteOutcome));
+        Log.w(LOG_TAG, "Remote APK build failed; falling back to local build: " + formatRemoteBuildFailure(remoteOutcome));
+        return fallbackToLocalApkBuild(buildPath, outApk, projectConfig, formatRemoteBuildFailure(remoteOutcome));
     }
 
     private boolean shouldAttemptRemoteApkBuild() {
         return mTemplateApkSource instanceof TemplateApkResolver.Source.Plugin;
+    }
+
+    private boolean fallbackToLocalApkBuild(
+            File buildPath,
+            File outApk,
+            ProjectConfig projectConfig,
+            @Nullable String reason
+    ) throws Exception {
+        if (mBuildCancelled.get() || Thread.currentThread().isInterrupted()) {
+            mBuildCancelled.set(true);
+            return false;
+        }
+        if (outApk.exists() && !outApk.delete()) {
+            Log.w(LOG_TAG, "Failed to delete remote build output before local fallback: " + outApk.getPath());
+        }
+        if (!TextUtils.isEmpty(reason)) {
+            Log.w(LOG_TAG, "Remote APK build fallback reason: " + reason);
+        }
+        runOnUiThread(() -> restartProgressDialogForLocalBuild(getString(R.string.text_falling_back_to_local_build)));
+        callApkBuilder(buildPath, outApk, projectConfig);
+        return true;
     }
 
     private void commitRemoteProjectConfigIfNeeded(@NonNull ProjectConfig projectConfig, @Nullable String updatedProjectConfigJson) {
@@ -2696,6 +2733,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void restartProgressDialogForLocalBuild() {
+        restartProgressDialogForLocalBuild(null);
+    }
+
+    private void restartProgressDialogForLocalBuild(@Nullable String content) {
         if (mProgressDialog == null) {
             return;
         }
@@ -2705,7 +2746,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             mStateTitleText.setText(getString(R.string.text_property_colon, getString(R.string.text_processing)));
         }
         if (mStateContentText != null) {
-            mStateContentText.setText("");
+            mStateContentText.setText(TextUtils.isEmpty(content) ? "" : content);
         }
     }
 

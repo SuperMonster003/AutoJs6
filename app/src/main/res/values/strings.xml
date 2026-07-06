@@ -1295,6 +1295,7 @@
     <string name="text_failed_to_send_log_entries">Failed to send log entries</string>
     <string name="text_failed_to_update">Failed to update</string>
     <string name="text_failed_to_write_file">Failed to write file</string>
+    <string name="text_falling_back_to_local_build">Falling back to local build</string>
     <string name="text_file">File</string>
     <string name="text_file_colon_value">File: %1$s</string>
     <string name="text_file_details">File details</string>
