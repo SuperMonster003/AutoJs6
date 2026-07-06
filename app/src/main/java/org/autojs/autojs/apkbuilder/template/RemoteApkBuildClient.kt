@@ -171,6 +171,7 @@ object RemoteApkBuildClient {
     ) : IApkBuildCallback.Stub() {
 
         private val latch = CountDownLatch(1)
+        private val completed = AtomicBoolean(false)
 
         @Volatile
         var result: ApkBuildResult? = null
@@ -179,34 +180,44 @@ object RemoteApkBuildClient {
         fun await(timeoutMillis: Long): Boolean = latch.await(timeoutMillis, TimeUnit.MILLISECONDS)
 
         override fun onStarted(progress: ApkBuildProgress) {
-            progressListener?.onProgress(progress)
+            notifyProgress(progress)
         }
 
         override fun onProgress(progress: ApkBuildProgress) {
-            progressListener?.onProgress(progress)
+            notifyProgress(progress)
         }
 
         override fun onCompleted(result: ApkBuildResult) {
-            this.result = result
-            latch.countDown()
+            complete(result)
         }
 
         override fun onFailed(result: ApkBuildResult) {
-            this.result = result.apply {
+            complete(result.apply {
                 if (status == ApkBuildResult.STATUS_OK) {
                     status = ApkBuildResult.STATUS_FAILED
                 }
-            }
-            latch.countDown()
+            })
         }
 
         override fun onCancelled(result: ApkBuildResult) {
-            this.result = result.apply {
+            complete(result.apply {
                 if (status == ApkBuildResult.STATUS_OK) {
                     status = ApkBuildResult.STATUS_CANCELLED
                 }
+            })
+        }
+
+        private fun notifyProgress(progress: ApkBuildProgress) {
+            if (!completed.get()) {
+                progressListener?.onProgress(progress)
             }
-            latch.countDown()
+        }
+
+        private fun complete(result: ApkBuildResult) {
+            if (completed.compareAndSet(false, true)) {
+                this.result = result
+                latch.countDown()
+            }
         }
     }
 

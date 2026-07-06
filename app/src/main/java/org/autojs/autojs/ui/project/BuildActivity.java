@@ -2625,6 +2625,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         );
         if (remoteOutcome.getStatus() == RemoteApkBuildClient.STATUS_NOT_AVAILABLE
                 || remoteOutcome.getStatus() == ApkBuildResult.STATUS_UNSUPPORTED) {
+            runOnUiThread(this::restartProgressDialogForLocalBuild);
             callApkBuilder(buildPath, outApk, projectConfig);
             return true;
         }
@@ -2679,6 +2680,20 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .commitProjectConfigIfNeeded(BuildActivity.this)
                 .cleanWorkspace(BuildActivity.this)
                 .finish();
+    }
+
+    private void restartProgressDialogForLocalBuild() {
+        if (mProgressDialog == null) {
+            return;
+        }
+        resetStepDurations();
+        updateProgressDialog(BuildStep.PREPARE);
+        if (mStateTitleText != null) {
+            mStateTitleText.setText(getString(R.string.text_property_colon, getString(R.string.text_processing)));
+        }
+        if (mStateContentText != null) {
+            mStateContentText.setText("");
+        }
     }
 
     private void onRemoteBuildProgress(@NonNull ApkBuildProgress progress) {
@@ -2790,9 +2805,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         } else if (step == currentStep) {
             if (iconView != null) iconView.setImageResource(R.drawable.ic_right_arrow);
             if (stateView != null) stateView.setText(ensureTextEndsWithHalfEllipsis(stateView.getText()));
+            if (durationView != null) durationView.setText("");
         } else {
             if (iconView != null) iconView.setImageResource(R.drawable.transparent);
             if (stateView != null) stateView.setText(ensureTextEndsWithoutDot(stateView.getText()));
+            if (durationView != null) durationView.setText("");
         }
     }
 
@@ -2820,6 +2837,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void fillMissingCompletedStepDurations(@NonNull BuildStep currentStep) {
+        if (currentStep != BuildStep.FINISHED) {
+            return;
+        }
         for (BuildStep step : BuildStep.values()) {
             if (isTrackedStep(step) && step.ordinal() < currentStep.ordinal() && !mStepDurationMs.containsKey(step)) {
                 mStepDurationMs.put(step, 0L);
