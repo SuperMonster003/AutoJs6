@@ -16,6 +16,7 @@ import org.autojs.autojs.engine.NodeExecutionModePolicy
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.inrt.LogActivity
+import org.autojs.autojs.inrt.InrtToastVisibilityGuard
 import org.autojs.autojs.inrt.Pref
 import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.pio.PFiles
@@ -114,17 +115,26 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             return
         }
         mHandler.postDelayed({
-            if (host.isFinishing || host.isDestroyed) {
-                return@postDelayed
-            }
-            host.finish()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                host.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, 0, 0)
-            } else {
-                @Suppress("DEPRECATION")
-                host.overridePendingTransition(0, 0)
-            }
+            finishHostActivityWhenReady(host)
         }, finishDelay)
+    }
+
+    private fun finishHostActivityWhenReady(host: Activity) {
+        if (host.isFinishing || host.isDestroyed) {
+            return
+        }
+        val remainingToastHoldMs = InrtToastVisibilityGuard.remainingHoldMs()
+        if (remainingToastHoldMs > 0L) {
+            mHandler.postDelayed({ finishHostActivityWhenReady(host) }, remainingToastHoldMs)
+            return
+        }
+        host.finish()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            host.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, 0, 0)
+        } else {
+            @Suppress("DEPRECATION")
+            host.overridePendingTransition(0, 0)
+        }
     }
 
     private fun prepare() {

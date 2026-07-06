@@ -11,10 +11,7 @@ object NodeJavaScriptEngineFactory {
         val backend = NodeRuntimeBackend.current()
         if (BuildConfig.NODEJS_RELEASE_FLAVOR == RHINO_ONLY_RELEASE_FLAVOR && backend != NodeRuntimeBackend.EMBEDDED) {
             return NodeDisabledJavaScriptEngine(
-                message = "Node.js scripts are disabled for the rhinoOnly release flavor. " +
-                        "Use nodeFull/nodeMini for Node Profile v1 scripts, or explicitly run a legacy " +
-                        "Rhino-backed Node compatibility diagnostic outside rhinoOnly. " +
-                        "code=${NodeRuntimeErrorCodes.NODE_DISABLED}",
+                message = buildRhinoOnlyDisabledMessage(),
             )
         }
         return when (backend) {
@@ -34,6 +31,18 @@ object NodeJavaScriptEngineFactory {
 
     private const val TAG = "NodeJavaScriptEngineFactory"
     private const val RHINO_ONLY_RELEASE_FLAVOR = "rhinoOnly"
+
+    private fun buildRhinoOnlyDisabledMessage(): String {
+        if (BuildConfig.isInrt) {
+            return "This packaged app does not include the Embedded Node.js runtime. " +
+                    "Select Embedded Node.js when packaging the app to run \"nodejs\" scripts. " +
+                    "code=${NodeRuntimeErrorCodes.NODE_DISABLED}"
+        }
+        return "Node.js scripts are disabled for the rhinoOnly release flavor. " +
+                "Use nodeFull/nodeMini for Node Profile v1 scripts, or explicitly run a legacy " +
+                "Rhino-backed Node compatibility diagnostic outside rhinoOnly. " +
+                "code=${NodeRuntimeErrorCodes.NODE_DISABLED}"
+    }
 
 }
 

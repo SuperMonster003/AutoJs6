@@ -46,7 +46,6 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.CoroutineScope
@@ -67,6 +66,8 @@ import org.autojs.autojs.core.accessibility.OnKeyListener
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.external.fileprovider.AppFileProvider
+import org.autojs.autojs.inrt.InrtToastVisibilityGuard
+import org.autojs.autojs.runtime.api.ScriptToast
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -4505,7 +4506,8 @@ class AndroidNodeBridgeCapabilityProvider(
             if (shouldLog) {
                 Log.i(TAG, "toast.showToast message=$message duration=${if (isLong) "long" else "short"}")
             }
-            Toast.makeText(appContext, message, if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
+            InrtToastVisibilityGuard.holdForToast(isLong)
+            ScriptToast.enqueueToast(appContext, "nodejs@${engineInfo.id}", message, isLong)
             NodeBridgeResponse.success(request.id, "null")
         }
     }

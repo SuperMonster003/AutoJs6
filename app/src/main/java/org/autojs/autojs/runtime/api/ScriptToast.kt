@@ -49,8 +49,12 @@ object ScriptToast {
 
     @JvmStatic
     fun enqueueToast(context: Context, scriptRuntime: ScriptRuntime, message: String, isLong: Boolean = false) {
+        enqueueToast(context, scriptRuntime.ownerId, message, isLong)
+    }
+
+    @JvmStatic
+    fun enqueueToast(context: Context, ownerId: String, message: String, isLong: Boolean = false) {
         val duration = if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
-        val ownerId = scriptRuntime.ownerId
 
         // Must be called on the main thread.
         // zh-CN: 必须在主线程调用.
@@ -59,7 +63,7 @@ object ScriptToast {
             val latch = CountDownLatch(1)
             mainHandler.postAtFrontOfQueue {
                 try {
-                    enqueueToast(appContext, scriptRuntime, message, isLong)
+                    enqueueToast(appContext, ownerId, message, isLong)
                 } finally {
                     latch.countDown()
                 }

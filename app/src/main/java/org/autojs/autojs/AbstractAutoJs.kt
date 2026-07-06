@@ -16,7 +16,6 @@ import org.autojs.autojs.core.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.core.record.accessibility.AccessibilityActionRecorder
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
 import org.autojs.autojs.engine.NodeJavaScriptEngineFactory
-import org.autojs.autojs.engine.NodeRuntimeBackend
 import org.autojs.autojs.engine.RootAutomatorEngine
 import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
@@ -64,12 +63,7 @@ abstract class AbstractAutoJs protected constructor(val application: Application
         }
         scriptEngineManager.registerEngine(JavaScriptSource.ENGINE_NODEJS) {
             val rt = createRuntime()
-            when {
-                isInrt && NodeRuntimeBackend.current() != NodeRuntimeBackend.EMBEDDED -> {
-                    LoopBasedJavaScriptEngineWithDecryption(applicationContext)
-                }
-                else -> NodeJavaScriptEngineFactory.create(applicationContext)
-            }.also { it.runtime = rt }
+            NodeJavaScriptEngineFactory.create(applicationContext).also { it.runtime = rt }
         }
         initContextFactory()
         scriptEngineManager.registerEngine(AutoFileSource.ENGINE) { RootAutomatorEngine(applicationContext) }
