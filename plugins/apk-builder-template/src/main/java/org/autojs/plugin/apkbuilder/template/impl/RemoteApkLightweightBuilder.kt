@@ -54,9 +54,8 @@ class RemoteApkLightweightBuilder(
         unzipTemplate(buildDir)
 
         ensureActive()
-        ensureSupportedLibraries(projectConfig)
-        progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Copying host native libraries", null))
-        copyHostNativeLibraries(buildDir, projectConfig)
+        progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Copying remote build inputs", null))
+        copyRemoteBuildInputs(buildDir, projectConfig)
 
         ensureActive()
         progress(ApkBuildProgress(ApkBuildProgress.STEP_BUILD, "Configuring AndroidManifest.xml", projectConfig.packageName))
@@ -167,27 +166,24 @@ class RemoteApkLightweightBuilder(
         }
     }
 
-    private fun ensureSupportedLibraries(projectConfig: RemoteProjectConfig) {
-        val unsupported = projectConfig.libs.filter { it in PLUGIN_LIBRARY_LABELS }.distinct()
-        if (unsupported.isEmpty()) {
-            return
-        }
-        throw RemoteApkBuildUnsupportedException(
-            "Remote APK build does not yet support plugin-provided libraries: ${unsupported.joinToString(", ")}"
-        )
-    }
-
-    private fun copyHostNativeLibraries(buildDir: File, projectConfig: RemoteProjectConfig) {
+    private fun copyRemoteBuildInputs(buildDir: File, projectConfig: RemoteProjectConfig) {
         val requiredLibs = resolveRequiredHostNativeLibraries(projectConfig)
         val abis = projectConfig.abis.orEmpty().distinct()
+        val archiveFile = workspace.nativeLibrariesArchiveFile
+
+        if (archiveFile != null) {
+            unzipBuildInputsArchive(archiveFile, buildDir)
+        }
+
         if (requiredLibs.isEmpty() || abis.isEmpty()) {
             return
         }
 
-        val archiveFile = workspace.nativeLibrariesArchiveFile ?: throw RemoteApkBuildUnsupportedException(
-            "Remote APK build requires host native libraries, but the host did not provide a native library archive."
-        )
-        unzipNativeLibrariesArchive(archiveFile, buildDir)
+        if (archiveFile == null) {
+            throw RemoteApkBuildUnsupportedException(
+                "Remote APK build requires native libraries, but the host did not provide a build input archive."
+            )
+        }
 
         val missing = buildList {
             abis.forEach { abi ->
@@ -211,42 +207,58 @@ class RemoteApkLightweightBuilder(
             .distinct()
     }
 
-    private fun unzipNativeLibrariesArchive(zipFile: File, buildDir: File) {
+    private fun unzipBuildInputsArchive(zipFile: File, buildDir: File) {
         val canonicalRoot = buildDir.canonicalFile
         ZipInputStream(FileInputStream(zipFile).buffered(BUFFER_SIZE)).use { zip ->
             while (true) {
                 val entry = zip.nextEntry ?: break
-                extractNativeLibraryEntry(zip, entry, canonicalRoot)
+                extractBuildInputEntry(zip, entry, canonicalRoot)
                 zip.closeEntry()
             }
         }
     }
 
-    private fun extractNativeLibraryEntry(zip: ZipInputStream, entry: ZipEntry, root: File) {
+    private fun extractBuildInputEntry(zip: ZipInputStream, entry: ZipEntry, root: File) {
         ensureActive()
         val name = entry.name.replace('\\', '/')
         if (name.isBlank() || name.startsWith('/') || name.split('/').any { it == ".." }) {
-            throw IOException("Unsafe native library archive entry: ${entry.name}")
+            throw IOException("Unsafe remote build input archive entry: ${entry.name}")
         }
-        if (entry.isDirectory) {
-            return
-        }
-        val segments = name.split('/')
-        if (segments.size != 3 || segments[0] != "lib" || !segments[2].endsWith(".so")) {
-            throw IOException("Unexpected native library archive entry: ${entry.name}")
-        }
+        validateBuildInputEntry(name, entry)
         val out = File(root, name).canonicalFile
         if (!out.path.startsWith(root.path + File.separator) && out.path != root.path) {
-            throw IOException("Native library archive entry escapes build directory: ${entry.name}")
+            throw IOException("Remote build input archive entry escapes build directory: ${entry.name}")
+        }
+        if (entry.isDirectory) {
+            if (!out.exists() && !out.mkdirs()) {
+                throw IOException("Failed to create remote build input directory: ${out.path}")
+            }
+            return
         }
         out.parentFile?.let { parent ->
             if (!parent.exists() && !parent.mkdirs()) {
-                throw IOException("Failed to create native library parent directory: ${parent.path}")
+                throw IOException("Failed to create remote build input parent directory: ${parent.path}")
             }
         }
         FileOutputStream(out, false).use { output ->
             zip.copyTo(output, BUFFER_SIZE)
             output.flush()
+        }
+    }
+
+    private fun validateBuildInputEntry(name: String, entry: ZipEntry) {
+        val segments = name.split('/')
+        when (segments.firstOrNull()) {
+            "lib" -> {
+                if (entry.isDirectory) {
+                    return
+                }
+                if (segments.size != 3 || !segments[2].endsWith(".so")) {
+                    throw IOException("Unexpected native library archive entry: ${entry.name}")
+                }
+            }
+            "assets" -> Unit
+            else -> throw IOException("Unexpected remote build input archive entry: ${entry.name}")
         }
     }
 
@@ -589,17 +601,6 @@ class RemoteApkLightweightBuilder(
             "Image Quantization" to listOf(
                 "libpngquant_bridge.so",
             ),
-        )
-        private val PLUGIN_LIBRARY_LABELS = setOf(
-            "Embedded Node.js",
-            "MLKit OCR",
-            "Paddle OCR",
-            "Rapid OCR",
-            "OpenCC",
-            "Pinyin",
-            "Pinyin4j",
-            "MLKit Barcode",
-            "MediaInfo",
         )
     }
 }
