@@ -3,6 +3,7 @@ package org.autojs.plugin.apkbuilder.template.impl
 import android.content.Context
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuildResult
@@ -54,15 +55,15 @@ class RemoteApkBuildSession(
     private fun runSession() {
         var keepWorkspaceForResult = false
         val requestWarnings = arrayListOf<String>()
-        callback?.onStarted(updateProgress(ApkBuildProgress.STEP_PREPARE, "Preparing remote build workspace", null))
+        notifyStarted(updateProgress(ApkBuildProgress.STEP_PREPARE, "Preparing remote build workspace", null))
         runCatching {
             ensureActive()
             requestWarnings += validateHostRequest()
-            callback?.onProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Reading remote build request", request.outputFileName))
+            notifyProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Reading remote build request", request.outputFileName))
 
             val preparedWorkspace = RemoteApkBuildWorkspace.prepare(appContext, request, cancelled)
             workspace = preparedWorkspace
-            callback?.onProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Remote build request validated", preparedWorkspace.sourcePath.path))
+            notifyProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Remote build request validated", preparedWorkspace.sourcePath.path))
 
             ensureActive()
             val output = RemoteApkLightweightBuilder(
@@ -72,32 +73,31 @@ class RemoteApkBuildSession(
                 cancelSignal = cancelled,
                 progress = { progress ->
                     this.progress = progress
-                    callback?.onProgress(progress)
+                    notifyProgress(progress)
                 },
             ).build()
             val outputFd = ParcelFileDescriptor.open(output.apkFile, ParcelFileDescriptor.MODE_READ_ONLY)
-            keepWorkspaceForResult = true
             val warnings = (requestWarnings + output.warnings).filter { it.isNotBlank() }.distinct()
-            callback?.onCompleted(
-                ApkBuildResult(
-                    status = ApkBuildResult.STATUS_OK,
-                    outputApkFd = outputFd,
-                    outputFileName = output.outputFileName,
-                    outputSizeBytes = output.apkFile.length(),
-                    outputSha256 = output.sha256,
-                    updatedProjectConfigJson = output.updatedProjectConfigJson,
-                    compatibilityLevel = if (warnings.isEmpty()) {
-                        ApkBuilderTemplateResult.LEVEL_OK
-                    } else {
-                        ApkBuilderTemplateResult.LEVEL_WARN
-                    },
-                    warnings = ArrayList(warnings),
-                    extras = Bundle().apply {
-                        putAll(preparedWorkspace.toExtras())
-                        putAll(output.extras)
-                    },
-                )
+            val result = ApkBuildResult(
+                status = ApkBuildResult.STATUS_OK,
+                outputApkFd = outputFd,
+                outputFileName = output.outputFileName,
+                outputSizeBytes = output.apkFile.length(),
+                outputSha256 = output.sha256,
+                updatedProjectConfigJson = output.updatedProjectConfigJson,
+                compatibilityLevel = if (warnings.isEmpty()) {
+                    ApkBuilderTemplateResult.LEVEL_OK
+                } else {
+                    ApkBuilderTemplateResult.LEVEL_WARN
+                },
+                warnings = ArrayList(warnings),
+                extras = Bundle().apply {
+                    putAll(preparedWorkspace.toExtras())
+                    putAll(output.extras)
+                },
             )
+            keepWorkspaceForResult = notifyCompleted(result)
+            closeOutputFd(outputFd)
         }.onFailure { error ->
             val unsupported = error.findUnsupportedCause()
             val status = when {
@@ -124,19 +124,65 @@ class RemoteApkBuildSession(
                 },
             )
             if (cancelled.get()) {
-                callback?.onCancelled(result)
+                notifyCancelled(result)
             } else {
-                callback?.onFailed(result)
+                notifyFailed(result)
             }
         }.also {
             if (!keepWorkspaceForResult) {
-                callback?.onProgress(updateProgress(ApkBuildProgress.STEP_CLEAN, "Cleaning remote build workspace", null))
+                notifyProgress(updateProgress(ApkBuildProgress.STEP_CLEAN, "Cleaning remote build workspace", null))
                 workspace?.close()
                 workspace = null
             }
             if (!closed.get()) {
                 progress = updateProgress(ApkBuildProgress.STEP_FINISH, "Remote build session finished", null)
             }
+        }
+    }
+
+    private fun notifyStarted(progress: ApkBuildProgress) {
+        notifyCallback("started") { callback?.onStarted(progress) }
+    }
+
+    private fun notifyProgress(progress: ApkBuildProgress) {
+        notifyCallback("progress") { callback?.onProgress(progress) }
+    }
+
+    private fun notifyCompleted(result: ApkBuildResult): Boolean {
+        return notifyTerminalCallback("completed") { callback!!.onCompleted(result) }
+    }
+
+    private fun notifyFailed(result: ApkBuildResult): Boolean {
+        return notifyTerminalCallback("failed") { callback!!.onFailed(result) }
+    }
+
+    private fun notifyCancelled(result: ApkBuildResult): Boolean {
+        return notifyTerminalCallback("cancelled") { callback!!.onCancelled(result) }
+    }
+
+    private fun notifyTerminalCallback(event: String, block: () -> Unit): Boolean {
+        if (callback == null) {
+            Log.w(TAG, "Remote build $event callback is missing.")
+            return false
+        }
+        return notifyCallback(event, block)
+    }
+
+    private fun notifyCallback(event: String, block: () -> Unit): Boolean {
+        return runCatching {
+            block()
+            true
+        }.getOrElse { error ->
+            Log.w(TAG, "Failed to send remote build $event callback.", error)
+            false
+        }
+    }
+
+    private fun closeOutputFd(outputFd: ParcelFileDescriptor) {
+        runCatching {
+            outputFd.close()
+        }.onFailure {
+            Log.w(TAG, "Failed to close remote build output fd.", it)
         }
     }
 
@@ -189,5 +235,9 @@ class RemoteApkBuildSession(
             title = title,
             detail = detail,
         ).also { progress = it }
+    }
+
+    companion object {
+        private const val TAG = "RemoteApkBuildSession"
     }
 }
