@@ -21,6 +21,7 @@ import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequestExtraKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateProtocol
@@ -38,6 +39,7 @@ import java.util.concurrent.CancellationException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.zip.Deflater
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
@@ -85,6 +87,7 @@ object RemoteApkBuildRequestPreparer {
         projectConfig: ProjectConfig,
         outputFileName: String,
         cancelSignal: AtomicBoolean? = null,
+        progressListener: ((ApkBuildProgress) -> Unit)? = null,
     ): Prepared {
         val appContext = context.applicationContext
         val source = File(projectConfig.sourcePath ?: throw IOException("Project source path is not set."))
@@ -93,21 +96,26 @@ object RemoteApkBuildRequestPreparer {
         }
         ensureNotCancelled(cancelSignal)
 
+        notifyProgress(progressListener, "Preparing remote build workspace", source.path)
         val cacheDir = File(appContext.cacheDir, "apk-remote-build-input").apply {
             mkdirs()
             listFiles()?.forEach { PFiles.deleteRecursively(it) }
         }
         ensureNotCancelled(cancelSignal)
+        notifyProgress(progressListener, "Preparing remote build config", projectConfig.packageName)
         val archiveFile = File(cacheDir, "project-${System.nanoTime()}.zip")
         val remoteConfig = cloneForRemoteRequest(projectConfig)
         applyHostSideConfigAdjustments(source, projectConfig, remoteConfig)
+        notifyProgress(progressListener, "Archiving project files", source.path)
         val sourcePathInArchive = writeProjectArchive(archiveFile, source, projectConfig, remoteConfig, cancelSignal)
         ensureNotCancelled(cancelSignal)
+        notifyProgress(progressListener, "Preparing remote build inputs", projectConfig.libs.joinToString(", "))
         val nativeLibrariesArchiveFile = writeBuildInputsArchive(
             context = appContext,
             cacheDir = cacheDir,
             projectConfig = projectConfig,
             cancelSignal = cancelSignal,
+            progressListener = progressListener,
         )
         ensureNotCancelled(cancelSignal)
 
@@ -119,6 +127,16 @@ object RemoteApkBuildRequestPreparer {
             throw IOException("KeyStore file does not exist: ${keyStoreFile.path}")
         }
 
+        notifyProgress(progressListener, "Verifying project archive", archiveFile.name)
+        val projectArchiveSha256 = sha256(archiveFile)
+        notifyProgress(progressListener, "Verifying remote build inputs", nativeLibrariesArchiveFile?.name)
+        val nativeLibrariesArchiveSha256 = nativeLibrariesArchiveFile?.let(::sha256)
+        val keyStoreSha256 = keyStoreFile?.let { file ->
+            notifyProgress(progressListener, "Preparing keystore", file.path)
+            sha256(file)
+        }
+        notifyProgress(progressListener, "Opening remote build request", outputFileName)
+
         val request = ApkBuildRequest(
             hostPackageName = appContext.packageName,
             hostVersionName = BuildConfig.VERSION_NAME,
@@ -126,16 +144,16 @@ object RemoteApkBuildRequestPreparer {
             requiredProtocolVersion = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
             projectArchiveFd = ParcelFileDescriptor.open(archiveFile, ParcelFileDescriptor.MODE_READ_ONLY),
             projectArchiveSizeBytes = archiveFile.length(),
-            projectArchiveSha256 = sha256(archiveFile),
+            projectArchiveSha256 = projectArchiveSha256,
             nativeLibrariesArchiveFd = nativeLibrariesArchiveFile?.let {
                 ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY)
             },
             nativeLibrariesArchiveSizeBytes = nativeLibrariesArchiveFile?.length() ?: 0L,
-            nativeLibrariesArchiveSha256 = nativeLibrariesArchiveFile?.let(::sha256),
+            nativeLibrariesArchiveSha256 = nativeLibrariesArchiveSha256,
             projectConfigJson = remoteConfig.toJson(false),
             keyStoreFd = keyStoreFile?.let { ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY) },
             keyStoreSizeBytes = keyStoreFile?.length() ?: 0L,
-            keyStoreSha256 = keyStoreFile?.let(::sha256),
+            keyStoreSha256 = keyStoreSha256,
             keyStorePassword = keyStore?.password?.takeIf { it.isNotBlank() }?.let(AESUtils::decrypt),
             keyAlias = keyStore?.alias,
             keyAliasPassword = keyStore?.aliasPassword?.takeIf { it.isNotBlank() }?.let(AESUtils::decrypt),
@@ -203,7 +221,7 @@ object RemoteApkBuildRequestPreparer {
         cancelSignal: AtomicBoolean?,
     ): String {
         var sourcePathInArchive = SOURCE_ROOT_ENTRY
-        writeZipFile(archiveFile) { zip ->
+        writeZipFile(archiveFile, Deflater.BEST_SPEED) { zip ->
             ensureNotCancelled(cancelSignal)
             if (source.isDirectory) {
                 addDirectoryTree(
@@ -268,11 +286,14 @@ object RemoteApkBuildRequestPreparer {
         cacheDir: File,
         projectConfig: ProjectConfig,
         cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
     ): File? {
         ensureNotCancelled(cancelSignal)
+        notifyProgress(progressListener, "Resolving native libraries", projectConfig.abis.joinToString(", "))
         val requiredLibs = resolveHostNativeLibraries(projectConfig)
         val targetAbis = projectConfig.abis.distinct()
-        val pluginArtifacts = resolveSelectedPluginArtifacts(context, projectConfig, cancelSignal)
+        notifyProgress(progressListener, "Resolving plugin artifacts", projectConfig.libs.joinToString(", "))
+        val pluginArtifacts = resolveSelectedPluginArtifacts(context, projectConfig, cancelSignal, progressListener)
         if ((requiredLibs.isEmpty() && pluginArtifacts.isEmpty()) || targetAbis.isEmpty()) {
             return null
         }
@@ -287,21 +308,21 @@ object RemoteApkBuildRequestPreparer {
         var wroteAny = false
         val writtenEntries = linkedSetOf<String>()
 
-        writeZipFile(archiveFile) { zip ->
+        writeZipFile(archiveFile, Deflater.BEST_SPEED) { zip ->
             targetAbis.forEach { abi ->
                 ensureNotCancelled(cancelSignal)
                 val abiCandidates = abiCandidates(abi)
                 requiredLibs.forEach { soName ->
                     ensureNotCancelled(cancelSignal)
                     val entryName = "lib/$abi/$soName"
-                    if (copyFirstMatchedSoToZip(zip, writtenEntries, entryName, apkPaths, nativeLibraryDir, abiCandidates, soName, cancelSignal)) {
+                    if (copyFirstMatchedSoToZip(zip, writtenEntries, entryName, apkPaths, nativeLibraryDir, abiCandidates, soName, cancelSignal, progressListener)) {
                         wroteAny = true
                     }
                 }
             }
             pluginArtifacts.forEach { artifact ->
                 ensureNotCancelled(cancelSignal)
-                if (copyPluginArtifactToZip(zip, writtenEntries, context, targetAbis, apkPaths, nativeLibraryDir, artifact, cancelSignal)) {
+                if (copyPluginArtifactToZip(zip, writtenEntries, context, targetAbis, apkPaths, nativeLibraryDir, artifact, cancelSignal, progressListener)) {
                     wroteAny = true
                 }
             }
@@ -330,6 +351,7 @@ object RemoteApkBuildRequestPreparer {
         abiCandidates: List<String>,
         soName: String,
         cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
     ): Boolean {
         if (entryName in writtenEntries) {
             return true
@@ -342,6 +364,7 @@ object RemoteApkBuildRequestPreparer {
                         ensureNotCancelled(cancelSignal)
                         findNativeLibraryEntry(apk, abi, soName)
                     }?.let { entry ->
+                        notifyProgress(progressListener, "Copying native libraries", entryName)
                         zip.putNextEntry(ZipEntry(entryName))
                         apk.getInputStream(entry).use { input -> copyStreamWithCancel(input, zip, cancelSignal) }
                         zip.closeEntry()
@@ -365,6 +388,7 @@ object RemoteApkBuildRequestPreparer {
             ?.takeIf { it.isFile }
             ?: return false
 
+        notifyProgress(progressListener, "Copying native libraries", entryName)
         zip.putNextEntry(ZipEntry(entryName))
         FileInputStream(nativeFile).use { input -> copyStreamWithCancel(input, zip, cancelSignal) }
         zip.closeEntry()
@@ -381,6 +405,7 @@ object RemoteApkBuildRequestPreparer {
         hostNativeLibraryDir: File?,
         artifact: SelectedPluginArtifact,
         cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
     ): Boolean {
         val appInfo = getApplicationInfoCompat(context.packageManager, artifact.serviceInfo.packageName)
         val pluginApkPaths = buildList {
@@ -406,6 +431,7 @@ object RemoteApkBuildRequestPreparer {
                     abiCandidates = abiCandidates,
                     soName = soName,
                     cancelSignal = cancelSignal,
+                    progressListener = progressListener,
                 ) || (
                     soName in PLUGIN_HOST_FALLBACK_NATIVE_LIB_NAMES &&
                         copyFirstMatchedSoToZip(
@@ -417,6 +443,7 @@ object RemoteApkBuildRequestPreparer {
                             abiCandidates = abiCandidates,
                             soName = soName,
                             cancelSignal = cancelSignal,
+                            progressListener = progressListener,
                         )
                     )
                 if (copied) {
@@ -436,7 +463,7 @@ object RemoteApkBuildRequestPreparer {
         val missingRequiredAssets = mutableListOf<String>()
         requiredAssets.forEach { prefix ->
             ensureNotCancelled(cancelSignal)
-            if (copyPluginAssetsByPrefixToZip(zip, writtenEntries, pluginApkPaths, prefix, cancelSignal)) {
+            if (copyPluginAssetsByPrefixToZip(zip, writtenEntries, pluginApkPaths, prefix, cancelSignal, progressListener)) {
                 wroteAny = true
             } else {
                 missingRequiredAssets += prefix
@@ -454,7 +481,7 @@ object RemoteApkBuildRequestPreparer {
 
         optionalAssets.forEach { prefix ->
             ensureNotCancelled(cancelSignal)
-            if (copyPluginAssetsByPrefixToZip(zip, writtenEntries, pluginApkPaths, prefix, cancelSignal)) {
+            if (copyPluginAssetsByPrefixToZip(zip, writtenEntries, pluginApkPaths, prefix, cancelSignal, progressListener)) {
                 wroteAny = true
             }
         }
@@ -468,9 +495,11 @@ object RemoteApkBuildRequestPreparer {
         apkPaths: List<String>,
         assetPrefix: String,
         cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
     ): Boolean {
         val zipPrefix = toAssetZipPrefix(assetPrefix)
         var copiedAny = false
+        notifyProgress(progressListener, "Copying plugin assets", zipPrefix)
         apkPaths.forEach { apkPath ->
             ensureNotCancelled(cancelSignal)
             try {
@@ -507,6 +536,7 @@ object RemoteApkBuildRequestPreparer {
         context: Context,
         projectConfig: ProjectConfig,
         cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
     ): List<SelectedPluginArtifact> {
         val selectedLabels = projectConfig.libs.toSet()
         return ApkBuilder.Lib.entries.mapNotNull { lib ->
@@ -514,7 +544,9 @@ object RemoteApkBuildRequestPreparer {
             if (!lib.isPlugin || lib.label !in selectedLabels) {
                 return@mapNotNull null
             }
-            val (serviceInfo, variant) = selectPluginServiceOrThrow(context, lib, lib.toPluginPair().second, cancelSignal)
+            notifyProgress(progressListener, "Resolving plugin artifacts", lib.label)
+            val (serviceInfo, variant) = selectPluginServiceOrThrow(context, lib, lib.toPluginPair().second, cancelSignal, progressListener)
+            notifyProgress(progressListener, "Selected plugin", "${lib.label}: ${serviceInfo.packageName} (${variant.variant.orEmpty()})")
             SelectedPluginArtifact(serviceInfo, variant)
         }
     }
@@ -524,6 +556,7 @@ object RemoteApkBuildRequestPreparer {
         lib: ApkBuilder.Lib,
         plugin: ApkBuilder.PluginLib,
         cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
     ): Pair<ServiceInfo, ApkBuilder.PluginLibVariant> {
         ensureNotCancelled(cancelSignal)
         val enabledServices = queryServices(context, plugin.action)
@@ -533,7 +566,7 @@ object RemoteApkBuildRequestPreparer {
             throw IOException(context.getString(R.string.error_no_enabled_plugin_for_module_label, lib.label))
         }
 
-        selectPluginVariant(context, enabledServices, plugin, cancelSignal)?.let { return it }
+        selectPluginVariant(context, enabledServices, plugin, cancelSignal, progressListener)?.let { return it }
 
         if (tryWakePluginServices(context, enabledServices, cancelSignal)) {
             PLUGIN_WAKE_RETRY_DELAYS_MS.forEach { delayMs ->
@@ -542,7 +575,7 @@ object RemoteApkBuildRequestPreparer {
                 ensureNotCancelled(cancelSignal)
                 val retryServices = queryServices(context, plugin.action)
                     .filter { service -> PluginEnableStore.isEnabled(context, service.packageName, defaultEnabled = true) }
-                selectPluginVariant(context, retryServices, plugin, cancelSignal)?.let { return it }
+                selectPluginVariant(context, retryServices, plugin, cancelSignal, progressListener)?.let { return it }
             }
         }
 
@@ -555,9 +588,11 @@ object RemoteApkBuildRequestPreparer {
         services: List<ServiceInfo>,
         plugin: ApkBuilder.PluginLib,
         cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
     ): Pair<ServiceInfo, ApkBuilder.PluginLibVariant>? {
         val candidates = services.mapNotNull { service ->
             ensureNotCancelled(cancelSignal)
+            notifyProgress(progressListener, "Querying plugin info", service.packageName)
             val info = try {
                 queryPluginInfoBlocking(context, service, plugin, cancelSignal)
             } catch (e: CancellationException) {
@@ -704,9 +739,18 @@ object RemoteApkBuildRequestPreparer {
     }
 
     private fun writeZipFile(file: File, writer: (ZipOutputStream) -> Unit) {
+        writeZipFile(file, Deflater.DEFAULT_COMPRESSION, writer)
+    }
+
+    private fun writeZipFile(
+        file: File,
+        compressionLevel: Int,
+        writer: (ZipOutputStream) -> Unit,
+    ) {
         FileOutputStream(file, false).use { fileOutput ->
             val bufferedOutput = fileOutput.buffered(BUFFER_SIZE)
             ZipOutputStream(bufferedOutput).use { zip ->
+                zip.setLevel(compressionLevel)
                 writer(zip)
                 zip.finish()
                 zip.flush()
@@ -714,6 +758,20 @@ object RemoteApkBuildRequestPreparer {
                 syncBestEffort(fileOutput)
             }
         }
+    }
+
+    private fun notifyProgress(
+        progressListener: ((ApkBuildProgress) -> Unit)?,
+        title: String,
+        detail: String?,
+    ) {
+        progressListener?.invoke(
+            ApkBuildProgress(
+                step = ApkBuildProgress.STEP_PREPARE,
+                title = title,
+                detail = detail,
+            )
+        )
     }
 
     private fun syncBestEffort(fileOutput: FileOutputStream) {

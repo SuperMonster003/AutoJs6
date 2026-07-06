@@ -70,6 +70,9 @@ object RemoteApkBuildClient {
             projectConfig = projectConfig,
             outputFileName = outApk.name,
             cancelSignal = cancelSignal,
+            progressListener = progressListener?.let { listener ->
+                { progress: ApkBuildProgress -> listener.onProgress(progress) }
+            },
         )
         try {
             val callback = Callback(progressListener)

@@ -2714,8 +2714,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             if (!TextUtils.isEmpty(progress.getTitle()) && mStateTitleText != null) {
                 mStateTitleText.setText(getString(R.string.text_property_colon, localizeRemoteBuildProgressText(progress.getTitle())));
             }
-            if (!TextUtils.isEmpty(progress.getDetail()) && mStateContentText != null) {
-                mStateContentText.setText(localizeRemoteBuildProgressText(progress.getDetail()));
+            if (mStateContentText != null) {
+                mStateContentText.setText(TextUtils.isEmpty(progress.getDetail()) ? "" : localizeRemoteBuildProgressText(progress.getDetail()));
             }
         });
     }
@@ -2727,12 +2727,23 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                  "Reading remote build request",
                  "Remote build request validated",
                  "Extracting template APK" -> getString(R.string.text_preparing_workspace);
+            case "Preparing remote build config" -> getString(R.string.text_preparing_build_config);
+            case "Archiving project files" -> getString(R.string.text_archiving_project_files);
+            case "Preparing remote build inputs" -> getString(R.string.text_preparing_remote_build_inputs);
+            case "Resolving native libraries" -> getString(R.string.text_resolving_plugin_native_libraries);
+            case "Resolving plugin artifacts" -> getString(R.string.text_resolving_plugin_artifacts);
+            case "Querying plugin info" -> getString(R.string.text_querying_plugin_info);
+            case "Verifying project archive" -> getString(R.string.text_verifying_project_archive);
+            case "Verifying remote build inputs" -> getString(R.string.text_verifying_build_inputs);
+            case "Opening remote build request" -> getString(R.string.text_processing);
             case "Copying remote build inputs",
                  "Configuring AndroidManifest.xml",
                  "Pruning native libraries",
                  "Copying project files",
                  "Replacing app icon",
                  "Rewriting resources.arsc" -> getString(R.string.text_processing);
+            case "Copying native libraries" -> getString(R.string.text_copying_native_libraries);
+            case "Copying plugin assets" -> getString(R.string.text_extracting_plugin_asset);
             case "Creating unsigned APK" -> getString(R.string.text_creating_unsigned_apk);
             case "Unsigned APK created" -> getString(R.string.text_unsigned_apk_created);
             case "Preparing keystore" -> getString(R.string.text_preparing_keystore);

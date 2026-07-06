@@ -916,6 +916,7 @@
     <string name="text_apk_template_unavailable">APK Builder template is unavailable</string>
     <string name="text_apk_template_unavailable_prompt">No usable APK Builder template was found. This AutoJs6 build does not include built-in template.apk, and no readable APK Builder template plugin is available. Install and enable a matching template plugin, then try again.</string>
     <string name="text_apk_template_plugin_risk_prompt">The installed APK Builder template plugin is not fully compatible with the current AutoJs6 version. Continuing may cause the packaged app to fail to start, use mismatched APIs, or miss some modules.</string>
+    <string name="text_archiving_project_files">Archiving project files</string>
     <string name="text_app_and_device_info">App and device info</string>
     <string name="text_app_crashed">AutoJs6 crashed</string>
     <string name="text_app_language">Language</string>
@@ -1677,6 +1678,7 @@
     <string name="text_preparing_assets_dir">Preparing assets dir</string>
     <string name="text_preparing_build_config">Preparing build config</string>
     <string name="text_preparing_keystore">Preparing keystore</string>
+    <string name="text_preparing_remote_build_inputs">Preparing remote build inputs</string>
     <string name="text_preparing_workspace">Preparing workspace</string>
     <string name="text_preset_dialog_content">Preset dialog content</string>
     <string name="text_preset_dialog_title">Preset dialog title</string>
@@ -1733,6 +1735,7 @@
     <string name="text_reset_succeed">Reset succeeded</string>
     <string name="text_reset_to_initial_content">Reset initially</string>
     <string name="text_reset_to_initial_content_only_for_assets">Reset is only for samples</string>
+    <string name="text_resolving_plugin_artifacts">Resolving plugin artifacts</string>
     <string name="text_resolving_plugin_native_libraries">Resolving plugin native libraries</string>
     <string name="text_restart">Restart</string>
     <string name="text_restart_strategy">Restart strategy</string>
@@ -1743,6 +1746,9 @@
     <string name="text_result">Result</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Retrieving changelog...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Retrieving plugin list data...</string>
+    <string name="text_querying_plugin_info">Querying plugin info</string>
+    <string name="text_verifying_build_inputs">Verifying build inputs</string>
+    <string name="text_verifying_project_archive">Verifying project archive</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Retrieving release notes...</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
     <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
