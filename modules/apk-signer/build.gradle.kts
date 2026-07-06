@@ -41,6 +41,7 @@ dependencies {
     //  ! |         \--- junit:junit:4.12 (*)
     //  # implementation("com.madgag.spongycastle:core:1.58.0.0")
     implementation(libs.prov)
+    implementation(libs.commons.codec)
     implementation(libs.commons.io)
 
     testImplementation(libs.junit)
