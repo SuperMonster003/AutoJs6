@@ -164,22 +164,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:lines="1"
             android:maxLines="1"
             android:ellipsize="middle"
             android:textSize="@dimen/build_progress_icon_text_size"
             tools:text="@string/text_title" />
 
-        <TextView
+        <org.autojs.autojs.ui.widget.ThreeLineStateTextView
             android:id="@+id/text_state_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginVertical="8dp"
-            android:gravity="top"
-            android:lines="2"
-            android:maxLines="2"
+            android:maxLines="3"
             android:lineSpacingMultiplier="1.2"
-            android:ellipsize="end"
+            android:ellipsize="middle"
             android:textSize="@dimen/build_progress_icon_text_size"
             tools:text="@string/text_content" />
     </LinearLayout>
