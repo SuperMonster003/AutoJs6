@@ -13,7 +13,6 @@ import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateRequest
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateResult
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.security.MessageDigest
@@ -25,23 +24,6 @@ object TemplateApkResolver {
 
     sealed class Source(open val warnings: List<String>) {
         abstract fun open(context: Context): InputStream
-
-        class BuiltIn(
-            override val warnings: List<String> = emptyList(),
-        ) : Source(warnings) {
-            override fun open(context: Context): InputStream {
-                return context.assets.open(ApkBuilder.TEMPLATE_APK_NAME)
-            }
-        }
-
-        class Unavailable(
-            val message: String,
-            override val warnings: List<String> = emptyList(),
-        ) : Source(warnings) {
-            override fun open(context: Context): InputStream {
-                throw FileNotFoundException(message)
-            }
-        }
 
         class Plugin(
             val pluginPackageName: String,
@@ -55,21 +37,20 @@ object TemplateApkResolver {
     }
 
     data class Decision(
-        val source: Source,
+        val source: Source.Plugin?,
         val requiresUserConfirmation: Boolean,
         val warnings: List<String>,
         val errors: List<String> = emptyList(),
-        val canBuild: Boolean = true,
-        val builtInTemplateAvailable: Boolean = true,
-    )
+    ) {
+        val canBuild: Boolean get() = source != null && errors.isEmpty()
+    }
 
     @JvmStatic
     fun resolveBlocking(context: Context): Decision = runBlocking(Dispatchers.IO) {
         runCatching { resolve(context) }
-            .onFailure { Log.w(TAG, "resolve failed, fallback to bundled template if available", it) }
+            .onFailure { Log.w(TAG, "resolve failed", it) }
             .getOrElse { error ->
-                builtInDecision(
-                    context = context.applicationContext,
+                unavailableDecision(
                     warnings = listOfNotNull(error.message),
                     errors = listOfNotNull(error.message),
                 )
@@ -81,42 +62,41 @@ object TemplateApkResolver {
         val openResult = runCatching {
             ApkBuilderTemplatePluginHost.openTemplate(appContext, buildRequest(appContext))
         }.onFailure {
-            Log.w(TAG, "template plugin open failed, fallback to bundled template if available", it)
+            Log.w(TAG, "template plugin open failed", it)
         }
-        val opened = openResult.getOrNull() ?: return builtInDecision(
-            context = appContext,
+        val opened = openResult.getOrNull() ?: return unavailableDecision(
             warnings = pluginUnavailableWarnings(appContext, openResult.exceptionOrNull()),
             errors = listOfNotNull(openResult.exceptionOrNull()?.message),
-            remoteBuildAvailable = hasRemoteBuildPlugin(appContext),
         )
 
         val result = opened.result
-        val templateFd = result.templateFd ?: return builtInDecision(
-            context = appContext,
+        if (result.compatibilityLevel == ApkBuilderTemplateResult.LEVEL_BLOCK) {
+            return unavailableDecision(
+                warnings = opened.hostCompatibilityWarnings + result.warnings + result.errors,
+                errors = result.errors.ifEmpty { listOf("APK Builder template plugin blocked template use.") },
+            )
+        }
+
+        val templateFd = result.templateFd ?: return unavailableDecision(
             warnings = opened.hostCompatibilityWarnings + result.warnings + result.errors,
-            errors = result.errors,
-            remoteBuildAvailable = hasRemoteBuildPlugin(appContext),
+            errors = result.errors.ifEmpty { listOf("APK Builder template plugin did not return template.apk.") },
         )
 
         val cacheFile = runCatching {
             copyTemplateToCache(appContext, opened.target.serviceInfo.packageName, templateFd)
         }.onFailure {
-            Log.w(TAG, "copy plugin template failed, fallback to bundled template if available", it)
-        }.getOrNull() ?: return builtInDecision(
-            context = appContext,
+            Log.w(TAG, "copy plugin template failed", it)
+        }.getOrNull() ?: return unavailableDecision(
             warnings = opened.hostCompatibilityWarnings + result.warnings + result.errors,
-            errors = result.errors,
-            remoteBuildAvailable = hasRemoteBuildPlugin(appContext),
+            errors = result.errors.ifEmpty { listOf("Failed to copy template.apk from APK Builder template plugin.") },
         )
 
         val validation = validateTemplateFile(cacheFile, result)
         if (validation.fatalErrors.isNotEmpty()) {
             cacheFile.delete()
-            return builtInDecision(
-                context = appContext,
+            return unavailableDecision(
                 warnings = opened.hostCompatibilityWarnings + result.warnings + result.errors + validation.fatalErrors,
                 errors = result.errors + validation.fatalErrors,
-                remoteBuildAvailable = hasRemoteBuildPlugin(appContext),
             )
         }
 
@@ -136,7 +116,6 @@ object TemplateApkResolver {
             requiresUserConfirmation = result.compatibilityLevel != ApkBuilderTemplateResult.LEVEL_OK || warnings.isNotEmpty(),
             warnings = warnings,
             errors = result.errors,
-            builtInTemplateAvailable = hasBuiltInTemplate(appContext),
         )
     }
 
@@ -150,51 +129,19 @@ object TemplateApkResolver {
         )
     }
 
-    private fun builtInDecision(
-        context: Context,
+    private fun unavailableDecision(
         warnings: List<String> = emptyList(),
         errors: List<String> = emptyList(),
-        remoteBuildAvailable: Boolean = false,
     ): Decision {
         val cleanWarnings = warnings.filter { it.isNotBlank() }.distinct()
         val cleanErrors = errors.filter { it.isNotBlank() }.distinct()
-        if (!hasBuiltInTemplate(context)) {
-            val message = "APK builder template is unavailable: no readable plugin template was opened and built-in template.apk is not bundled."
-            val allWarnings = (cleanWarnings + message).distinct()
-            val allErrors = (cleanErrors + message).distinct()
-            if (remoteBuildAvailable) {
-                return Decision(
-                    source = Source.Unavailable(message, allWarnings),
-                    requiresUserConfirmation = false,
-                    warnings = allWarnings,
-                    errors = cleanErrors,
-                    canBuild = true,
-                    builtInTemplateAvailable = false,
-                )
-            }
-            return Decision(
-                source = Source.Unavailable(message, allWarnings),
-                requiresUserConfirmation = false,
-                warnings = allWarnings,
-                errors = allErrors,
-                canBuild = false,
-                builtInTemplateAvailable = false,
-            )
-        }
-
+        val message = "APK builder template is unavailable: no readable APK Builder template plugin returned template.apk."
         return Decision(
-            source = Source.BuiltIn(cleanWarnings),
+            source = null,
             requiresUserConfirmation = false,
-            warnings = cleanWarnings,
-            errors = cleanErrors,
-            builtInTemplateAvailable = true,
+            warnings = (cleanWarnings + message).distinct(),
+            errors = (cleanErrors + message).distinct(),
         )
-    }
-
-    private fun hasBuiltInTemplate(context: Context): Boolean {
-        return runCatching {
-            context.assets.open(ApkBuilder.TEMPLATE_APK_NAME).use { }
-        }.isSuccess
     }
 
     private fun copyTemplateToCache(
@@ -253,17 +200,17 @@ object TemplateApkResolver {
         if (!declaredSha.isNullOrBlank()) {
             val actualSha = sha256(file)
             if (!declaredSha.equals(actualSha, ignoreCase = true)) {
-                warnings += "Template SHA-256 mismatch: declared=$declaredSha actual=$actualSha"
+                fatalErrors += "Template SHA-256 mismatch: declared=$declaredSha actual=$actualSha"
             }
         } else {
-            warnings += "Template plugin did not provide SHA-256 metadata."
+            fatalErrors += "Template plugin did not provide SHA-256 metadata."
         }
 
         runCatching {
             ApkFile(file).use { apk ->
                 val meta = apk.apkMeta
                 if (meta.packageName != ApkBuilder.INRT_APP_ID) {
-                    warnings += "Template packageName mismatch: expected=${ApkBuilder.INRT_APP_ID}, actual=${meta.packageName}"
+                    fatalErrors += "Template packageName mismatch: expected=${ApkBuilder.INRT_APP_ID}, actual=${meta.packageName}"
                 }
                 val expectedVersionName = result.info?.hostVersionName
                 if (!expectedVersionName.isNullOrBlank() && meta.versionName != expectedVersionName) {
@@ -286,14 +233,6 @@ object TemplateApkResolver {
         return (hostWarnings + listOfNotNull(error?.message))
             .filter { it.isNotBlank() }
             .distinct()
-    }
-
-    private suspend fun hasRemoteBuildPlugin(context: Context): Boolean {
-        return runCatching {
-            ApkBuilderTemplatePluginHost.hasRemoteBuildPlugin(context)
-        }.onFailure {
-            Log.w(TAG, "remote build plugin availability check failed", it)
-        }.getOrDefault(false)
     }
 
     private fun sha256(file: File): String {

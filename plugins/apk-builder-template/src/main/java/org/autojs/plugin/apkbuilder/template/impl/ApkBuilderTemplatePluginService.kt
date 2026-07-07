@@ -35,17 +35,17 @@ class ApkBuilderTemplatePluginService : Service() {
             val warnings = arrayListOf<String>()
             val errors = arrayListOf<String>()
 
-            if (request.requiredProtocolVersion > BuildConfig.PROTOCOL_VERSION) {
-                warnings += "Plugin protocol is older than host requirement: plugin=${BuildConfig.PROTOCOL_VERSION}, host=${request.requiredProtocolVersion}"
+            if (request.requiredProtocolVersion > info.protocolVersion) {
+                warnings += "Plugin protocol is older than host requirement: plugin=${info.protocolVersion}, host=${request.requiredProtocolVersion}"
             }
-            if (request.hostPackageName.isNotBlank() && request.hostPackageName != BuildConfig.HOST_PACKAGE_NAME) {
-                warnings += "Host package mismatch: plugin targets ${BuildConfig.HOST_PACKAGE_NAME}, host=${request.hostPackageName}"
+            if (request.hostPackageName.isNotBlank() && request.hostPackageName != info.hostPackageName) {
+                warnings += "Host package mismatch: plugin targets ${info.hostPackageName}, host=${request.hostPackageName}"
             }
-            if (request.hostVersionName.isNotBlank() && request.hostVersionName != BuildConfig.HOST_VERSION_NAME) {
-                warnings += "Host versionName mismatch: plugin=${BuildConfig.HOST_VERSION_NAME}, host=${request.hostVersionName}"
+            if (request.hostVersionName.isNotBlank() && request.hostVersionName != info.hostVersionName) {
+                warnings += "Host versionName mismatch: plugin=${info.hostVersionName}, host=${request.hostVersionName}"
             }
-            if (request.hostVersionCode > 0L && request.hostVersionCode != BuildConfig.HOST_VERSION_CODE) {
-                warnings += "Host versionCode mismatch: plugin=${BuildConfig.HOST_VERSION_CODE}, host=${request.hostVersionCode}"
+            if (request.hostVersionCode > 0L && request.hostVersionCode != info.hostVersionCode) {
+                warnings += "Host versionCode mismatch: plugin=${info.hostVersionCode}, host=${request.hostVersionCode}"
             }
 
             val assetReadable = runCatching {
@@ -98,6 +98,7 @@ class ApkBuilderTemplatePluginService : Service() {
                 errors = errors,
                 extras = Bundle().apply {
                     putString("templateAsset", ApkBuilderTemplateMetadata.TEMPLATE_APK_ASSET)
+                    putString("runtimeKitAsset", ApkBuilderTemplateMetadata.RUNTIME_KIT_JSON_ASSET)
                 },
             )
         }

@@ -683,8 +683,8 @@ class RemoteApkLightweightBuilder(
 
     companion object {
         private const val BUFFER_SIZE = 256 * 1024
-        private const val TEMPLATE_APK_ASSET = "template/template.apk"
-        private const val DEFAULT_KEY_STORE_ASSET = "default_key_store.bks"
+        private const val TEMPLATE_APK_ASSET = ApkBuilderTemplateMetadata.TEMPLATE_APK_ASSET
+        private const val DEFAULT_KEY_STORE_ASSET = ApkBuilderTemplateMetadata.DEFAULT_KEY_STORE_ASSET
         private const val CONFIG_FILE_NAME = "project.json"
         private const val DEFAULT_MAIN_SCRIPT = "main.js"
         private const val DEFAULT_OUTPUT_APK = "remote-build.apk"

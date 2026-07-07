@@ -2256,15 +2256,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     doBuildingApk();
                 });
 
-        if (decision.getBuiltInTemplateAvailable()) {
-            builder.neutralText(R.string.text_use_builtin_template)
-                    .neutralColorRes(R.color.dialog_button_default)
-                    .onNeutral((dialog, which) -> {
-                        mTemplateApkSource = new TemplateApkResolver.Source.BuiltIn(decision.getWarnings());
-                        doBuildingApk();
-                    });
-        }
-
         builder.show();
     }
 
@@ -2716,9 +2707,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private ApkBuilder callApkBuilder(File buildPath, File outApk, ProjectConfig projectConfig) throws Exception {
-        TemplateApkResolver.Source source = mTemplateApkSource != null
-                ? mTemplateApkSource
-                : new TemplateApkResolver.Source.BuiltIn(Collections.emptyList());
+        TemplateApkResolver.Source source = mTemplateApkSource;
+        if (source == null) {
+            throw new FileNotFoundException("APK Builder template plugin is unavailable");
+        }
         InputStream templateApk = source.open(this);
         return new ApkBuilder(templateApk, outApk, buildPath.getPath())
                 .setProgressCallback(BuildActivity.this)

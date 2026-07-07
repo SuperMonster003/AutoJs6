@@ -1,4 +1,6 @@
+import groovy.json.JsonSlurper
 import java.security.MessageDigest
+import java.util.zip.ZipFile
 import org.gradle.api.provider.Property
 
 plugins {
@@ -11,6 +13,7 @@ plugins {
 val buildTypeRelease = "release"
 val apkFileExtension = "apk"
 val enableRemoteBuildProperty = "autojs.apkBuilder.templatePlugin.enableRemoteBuild"
+val runtimeKitDirProperty = "autojs.apkBuilder.templatePlugin.runtimeKitDir"
 val enableRemoteBuild = providers.gradleProperty(enableRemoteBuildProperty)
     .map { value ->
         value.trim().lowercase().let { it in setOf("true", "1", "yes", "on") }
@@ -128,9 +131,79 @@ fun File.sha256String(): String {
     return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
 }
 
+fun normalizeRuntimeKitVersion(value: String): String =
+    value.replace("\\s+".toRegex(), "-").lowercase()
+
+fun resolveRuntimeKitRoot(candidate: File): File {
+    if (candidate.resolve("runtime-kit.json").isFile) {
+        return candidate
+    }
+    val nested = candidate.listFiles()
+        ?.filter { it.isDirectory && it.resolve("runtime-kit.json").isFile }
+        ?.sortedBy { it.name }
+        ?.firstOrNull()
+    return nested ?: candidate
+}
+
+fun copyDirectoryContents(source: File, target: File) {
+    source.walkTopDown()
+        .filter { it.isFile }
+        .forEach { file ->
+            val dest = target.resolve(file.relativeTo(source).path)
+            dest.parentFile?.mkdirs()
+            file.copyTo(dest, overwrite = true)
+        }
+}
+
+@Suppress("UNCHECKED_CAST")
+fun verifyRuntimeKit(runtimeKitDir: File) {
+    val kitJson = runtimeKitDir.resolve("runtime-kit.json")
+    val templateApk = runtimeKitDir.resolve("template.apk")
+    val templateShaFile = runtimeKitDir.resolve("template.apk.sha256")
+    val defaultKeyStore = runtimeKitDir.resolve("default_key_store.bks")
+    val defaultKeyStoreShaFile = runtimeKitDir.resolve("default_key_store.bks.sha256")
+
+    require(kitJson.isFile) { "Missing Runtime Kit metadata: $kitJson" }
+    require(templateApk.isFile) { "Missing Runtime Kit template APK: $templateApk" }
+    require(templateShaFile.isFile) { "Missing Runtime Kit template SHA-256 file: $templateShaFile" }
+    require(defaultKeyStore.isFile) { "Missing Runtime Kit default keystore: $defaultKeyStore" }
+    require(defaultKeyStoreShaFile.isFile) { "Missing Runtime Kit default keystore SHA-256 file: $defaultKeyStoreShaFile" }
+
+    val meta = JsonSlurper().parse(kitJson) as Map<String, Any?>
+    val template = meta["template"] as? Map<String, Any?> ?: emptyMap()
+    val defaultKeyStoreMeta = meta["defaultKeyStore"] as? Map<String, Any?> ?: emptyMap()
+
+    val expectedTemplateSha = template["sha256"]?.toString()?.trim()?.lowercase().orEmpty()
+    val actualTemplateSha = templateApk.sha256String().lowercase()
+    val fileTemplateSha = templateShaFile.readText(Charsets.UTF_8).trim().lowercase()
+    require(expectedTemplateSha.isNotEmpty()) { "Runtime Kit metadata does not declare template.sha256" }
+    require(expectedTemplateSha == actualTemplateSha) {
+        "Runtime Kit template SHA-256 mismatch: json=$expectedTemplateSha actual=$actualTemplateSha"
+    }
+    require(fileTemplateSha == actualTemplateSha) {
+        "Runtime Kit template.apk.sha256 mismatch: file=$fileTemplateSha actual=$actualTemplateSha"
+    }
+    ZipFile(templateApk).use { zip ->
+        listOf("AndroidManifest.xml", "resources.arsc", "classes.dex", "assets/init.js").forEach { entryName ->
+            require(zip.getEntry(entryName) != null) {
+                "Runtime Kit template APK is missing required entry: $entryName"
+            }
+        }
+    }
+
+    val expectedKeyStoreSha = defaultKeyStoreMeta["sha256"]?.toString()?.trim()?.lowercase().orEmpty()
+    val actualKeyStoreSha = defaultKeyStore.sha256String().lowercase()
+    val fileKeyStoreSha = defaultKeyStoreShaFile.readText(Charsets.UTF_8).trim().lowercase()
+    require(expectedKeyStoreSha.isNotEmpty()) { "Runtime Kit metadata does not declare defaultKeyStore.sha256" }
+    require(expectedKeyStoreSha == actualKeyStoreSha) {
+        "Runtime Kit default keystore SHA-256 mismatch: json=$expectedKeyStoreSha actual=$actualKeyStoreSha"
+    }
+    require(fileKeyStoreSha == actualKeyStoreSha) {
+        "Runtime Kit default_key_store.bks.sha256 mismatch: file=$fileKeyStoreSha actual=$actualKeyStoreSha"
+    }
+}
+
 val generatedTemplateAssetsDir = layout.buildDirectory.dir("generated/assets/apkBuilderTemplate")
-val sourceTemplateApk = rootProject.layout.projectDirectory.file("app/src/main/assets-app/template.apk")
-val sourceDefaultKeyStore = rootProject.layout.projectDirectory.file("app/src/main/assets/default_key_store.bks")
 val refreshTemplateBeforePackagingProperty = "autojs.apkBuilder.templatePlugin.refreshTemplate"
 val refreshTemplateBeforePackaging = providers.gradleProperty(refreshTemplateBeforePackagingProperty)
     .map { value ->
@@ -140,24 +213,35 @@ val refreshTemplateBeforePackaging = providers.gradleProperty(refreshTemplateBef
 
 val prepareApkBuilderTemplateAssets = tasks.register("prepareApkBuilderTemplateAssets") {
     group = "build"
-    description = "Copies the current AutoJs6 inrt template APK into the APK builder template plugin assets."
+    description = "Copies a verified AutoJs6 Runtime Kit into the APK builder template plugin assets."
 
-    if (refreshTemplateBeforePackaging.get()) {
-        dependsOn(":app:embeddedNodeRefreshInrtTemplateApk")
+    val defaultRuntimeKitDir = rootProject.file(
+        "app/build/runtime-kit/autojs6-runtime-kit-v${normalizeRuntimeKitVersion(versions.appVersionName)}+${versions.appVersionCode}"
+    )
+    val configuredRuntimeKitDir = providers.gradleProperty(runtimeKitDirProperty).orNull?.let { path ->
+        File(path).takeIf { it.isAbsolute } ?: rootProject.file(path)
+    }
+    val monorepoAppProject = rootProject.findProject(":app")
+
+    if (configuredRuntimeKitDir == null && monorepoAppProject != null) {
+        dependsOn(":app:generateRuntimeKit")
     }
     inputs.property(refreshTemplateBeforePackagingProperty, refreshTemplateBeforePackaging)
-    inputs.file(sourceTemplateApk)
-    inputs.file(sourceDefaultKeyStore)
+    inputs.property(runtimeKitDirProperty, configuredRuntimeKitDir?.path ?: "")
+    inputs.dir(configuredRuntimeKitDir ?: defaultRuntimeKitDir)
     outputs.dir(generatedTemplateAssetsDir)
 
     doLast {
-        val templateDir = generatedTemplateAssetsDir.get().asFile.resolve("template").apply {
-            mkdirs()
+        val runtimeKitDir = resolveRuntimeKitRoot(configuredRuntimeKitDir ?: defaultRuntimeKitDir)
+        require(runtimeKitDir.isDirectory) {
+            "Runtime Kit directory does not exist. Run :app:generateRuntimeKit or pass -P$runtimeKitDirProperty=<dir>: $runtimeKitDir"
         }
-        val targetApk = templateDir.resolve("template.apk")
-        sourceTemplateApk.asFile.copyTo(targetApk, overwrite = true)
-        templateDir.resolve("template.sha256").writeText(targetApk.sha256String() + "\n", Charsets.UTF_8)
-        sourceDefaultKeyStore.asFile.copyTo(generatedTemplateAssetsDir.get().asFile.resolve("default_key_store.bks"), overwrite = true)
+        verifyRuntimeKit(runtimeKitDir)
+
+        val assetsRoot = generatedTemplateAssetsDir.get().asFile
+        project.delete(assetsRoot)
+        val targetRuntimeKitDir = assetsRoot.resolve("runtime-kit").apply { mkdirs() }
+        copyDirectoryContents(runtimeKitDir, targetRuntimeKitDir)
     }
 }
 

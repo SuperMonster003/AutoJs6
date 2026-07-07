@@ -1,0 +1,84 @@
+name: Release Runtime Kit
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: AutoJs6 release tag, for example v6.7.1
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build-runtime-kit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout AutoJs6
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Install CMake 3.10.2
+        run: |
+          wget https://cmake.org/files/v3.10/cmake-3.10.2-Linux-x86_64.sh
+          chmod +x cmake-3.10.2-Linux-x86_64.sh
+          sudo ./cmake-3.10.2-Linux-x86_64.sh --skip-license --prefix=/usr/local
+
+      - name: Install Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Generate Runtime Kit
+        run: ./gradlew :app:generateRuntimeKit -x :app:lintVitalAnalyzeInrtRelease
+
+      - name: Upload Runtime Kit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: autojs6-runtime-kit
+          path: app/build/runtime-kit/autojs6-runtime-kit-*.zip
+
+      - name: Upload Runtime Kit release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          tag="$TARGET_TAG"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "$tag" --notes "AutoJs6 Runtime Kit $tag"
+          gh release upload "$tag" app/build/runtime-kit/autojs6-runtime-kit-*.zip --clobber
+
+      - name: Trigger APK Builder plugin repository
+        env:
+          GH_TOKEN: ${{ secrets.AUTOJS6_PLUGIN_REPO_TOKEN }}
+          PLUGIN_REPO: SuperMonster003/AutoJs6-Plugin-APK-Builder
+          TARGET_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "AUTOJS6_PLUGIN_REPO_TOKEN is not configured; skipping repository_dispatch."
+            exit 0
+          fi
+          tag="$TARGET_TAG"
+          gh api \
+            "repos/$PLUGIN_REPO/dispatches" \
+            -f event_type=autojs6_runtime_kit_released \
+            -f client_payload[tag]="$tag" \
+            -f client_payload[source_repo]="$GITHUB_REPOSITORY"

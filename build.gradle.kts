@@ -28,6 +28,7 @@ tasks {
         group = "build"
         description = "Builds app release without built-in APK builder template and matching APK builder template plugin release."
         dependsOn(
+            ":app:generateRuntimeKit",
             ":app:packageAppRelease",
             ":plugins:apk-builder-template:packageRelease",
         )

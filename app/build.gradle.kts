@@ -2,6 +2,10 @@
 
 import com.android.build.api.variant.FilterConfiguration
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
+import java.security.MessageDigest
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 plugins {
     id("org.autojs.build.utils")
@@ -37,7 +41,7 @@ val apkBuilderIncludeBuiltInTemplateByProperty = providers.gradleProperty(apkBui
     .map { value ->
         value.trim().lowercase().let { it !in setOf("false", "0", "no", "off") }
     }
-    .orElse(true)
+    .orElse(false)
 val apkBuilderIncludeBuiltInTemplate = providers.provider {
     if (apkBuilderTemplateDistributionRequested.get()) {
         false
@@ -115,6 +119,158 @@ private fun Any.reflectedOutputDir(): File? =
 private fun Any.reflectedOutputFileNameProperty(): Property<String>? =
     reflectedNoArgMethod("getOutputFileName") as? Property<String>
 
+private data class RuntimeKitDigestEntry(
+    val path: String,
+    val sizeBytes: Long,
+    val sha256: String,
+)
+
+private fun normalizeRuntimeKitVersion(value: String): String =
+    value.replace("\\s+".toRegex(), "-").lowercase()
+
+private fun String.toJsonLiteral(): String = buildString {
+    append('"')
+    this@toJsonLiteral.forEach { ch ->
+        when (ch) {
+            '\\' -> append("\\\\")
+            '"' -> append("\\\"")
+            '\b' -> append("\\b")
+            '\u000C' -> append("\\f")
+            '\n' -> append("\\n")
+            '\r' -> append("\\r")
+            '\t' -> append("\\t")
+            else -> {
+                if (ch.code < 0x20) {
+                    append("\\u%04x".format(ch.code))
+                } else {
+                    append(ch)
+                }
+            }
+        }
+    }
+    append('"')
+}
+
+private fun File.sha256String(bufferSize: Int = 256 * 1024): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    inputStream().use { input ->
+        val buffer = ByteArray(bufferSize)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) break
+            digest.update(buffer, 0, read)
+        }
+    }
+    return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+}
+
+private fun zipEntrySha256(zipFile: ZipFile, entry: ZipEntry): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    zipFile.getInputStream(entry).use { input ->
+        val buffer = ByteArray(256 * 1024)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) break
+            digest.update(buffer, 0, read)
+        }
+    }
+    return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+}
+
+private fun collectSourceDigestEntries(rootDir: File, relativePaths: List<String>): List<RuntimeKitDigestEntry> {
+    return relativePaths
+        .flatMap { relativePath ->
+            val source = rootDir.resolve(relativePath)
+            when {
+                source.isFile -> listOf(source)
+                source.isDirectory -> source.walkTopDown().filter { it.isFile }.toList()
+                else -> emptyList()
+            }
+        }
+        .filterNot { it.name.endsWith(".apk", ignoreCase = true) }
+        .map { file ->
+            RuntimeKitDigestEntry(
+                path = file.relativeTo(rootDir).invariantSeparatorsPath,
+                sizeBytes = file.length(),
+                sha256 = file.sha256String(),
+            )
+        }
+        .sortedBy { it.path }
+}
+
+private fun collectZipDigestEntries(apkFile: File, accept: (String) -> Boolean): List<RuntimeKitDigestEntry> {
+    return ZipFile(apkFile).use { zip ->
+        zip.entries().asSequence()
+            .filterNot { it.isDirectory }
+            .filter { accept(it.name) }
+            .map { entry ->
+                RuntimeKitDigestEntry(
+                    path = entry.name,
+                    sizeBytes = entry.size,
+                    sha256 = zipEntrySha256(zip, entry),
+                )
+            }
+            .sortedBy { it.path }
+            .toList()
+    }
+}
+
+private fun combinedDigest(entries: List<RuntimeKitDigestEntry>): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    entries.forEach { entry ->
+        digest.update(entry.path.toByteArray(Charsets.UTF_8))
+        digest.update(0.toByte())
+        digest.update(entry.sizeBytes.toString().toByteArray(Charsets.UTF_8))
+        digest.update(0.toByte())
+        digest.update(entry.sha256.toByteArray(Charsets.UTF_8))
+        digest.update('\n'.code.toByte())
+    }
+    return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+}
+
+private fun writeDigestManifestJson(
+    output: File,
+    kind: String,
+    entries: List<RuntimeKitDigestEntry>,
+) {
+    output.writeText(
+        buildString {
+            appendLine("{")
+            appendLine("  \"schemaVersion\": 1,")
+            appendLine("  \"kind\": ${kind.toJsonLiteral()},")
+            appendLine("  \"hash\": ${combinedDigest(entries).toJsonLiteral()},")
+            appendLine("  \"entries\": [")
+            entries.forEachIndexed { index, entry ->
+                append("    {")
+                append("\"path\": ${entry.path.toJsonLiteral()}, ")
+                append("\"sizeBytes\": ${entry.sizeBytes}, ")
+                append("\"sha256\": ${entry.sha256.toJsonLiteral()}")
+                append("}")
+                if (index != entries.lastIndex) append(",")
+                appendLine()
+            }
+            appendLine("  ]")
+            appendLine("}")
+        },
+        Charsets.UTF_8,
+    )
+}
+
+private fun writePublicApiText(output: File, entries: List<RuntimeKitDigestEntry>) {
+    output.writeText(
+        buildString {
+            appendLine("AutoJs6 Runtime Kit public API manifest")
+            appendLine("schemaVersion=1")
+            appendLine("hash=${combinedDigest(entries)}")
+            appendLine()
+            entries.forEach { entry ->
+                appendLine("${entry.sha256}  ${entry.sizeBytes}  ${entry.path}")
+            }
+        },
+        Charsets.UTF_8,
+    )
+}
+
 extra.apply {
     set("nodeJsRuntimeConfig.globalApplicationId", globalApplicationId)
     set("nodeJsRuntimeConfig.flavorNameApp", flavorNameApp)
@@ -136,7 +292,9 @@ idea {
     }
 }
 
-utils.registerTemplateApkCopy(project)
+if (apkBuilderIncludeBuiltInTemplate.get()) {
+    utils.registerTemplateApkCopy(project)
+}
 
 apply(from = "app-dependencies.gradle.kts")
 
@@ -402,6 +560,187 @@ androidComponents {
                 }
             )
         }
+    }
+}
+
+tasks.register("generateRuntimeKit") {
+    group = "build"
+    description = "Builds the AutoJs6 Runtime Kit consumed by the standalone APK Builder template plugin."
+    dependsOn("assembleInrtRelease")
+
+    val runtimeKitOutputDir = layout.buildDirectory.dir("runtime-kit")
+    outputs.dir(runtimeKitOutputDir)
+    inputs.file(projectDir.resolve("src/main/assets/default_key_store.bks"))
+
+    doLast {
+        val versionName = versions.appVersionName
+        val versionCode = versions.appVersionCode
+        val normalizedVersion = normalizeRuntimeKitVersion(versionName)
+        val gitSha = providers.gradleProperty("autojs.git.sha").orNull
+            ?: System.getenv("GITHUB_SHA")
+            ?: "local"
+
+        val templateApk = layout.buildDirectory
+            .file("outputs/apk/inrt/release/inrt-v$normalizedVersion-universal.apk")
+            .get()
+            .asFile
+        require(templateApk.isFile) {
+            "Missing INRT universal APK: $templateApk"
+        }
+
+        val defaultKeyStore = projectDir.resolve("src/main/assets/default_key_store.bks")
+        require(defaultKeyStore.isFile) {
+            "Missing default key store: $defaultKeyStore"
+        }
+
+        val outputRoot = runtimeKitOutputDir.get().asFile
+        val kitDir = outputRoot.resolve("autojs6-runtime-kit-v$normalizedVersion+$versionCode")
+        project.delete(kitDir)
+        kitDir.mkdirs()
+
+        val templateOut = kitDir.resolve("template.apk")
+        templateApk.copyTo(templateOut, overwrite = true)
+        val templateSha256 = templateOut.sha256String()
+        kitDir.resolve("template.apk.sha256").writeText("$templateSha256\n", Charsets.UTF_8)
+
+        val defaultKeyStoreOut = kitDir.resolve("default_key_store.bks")
+        defaultKeyStore.copyTo(defaultKeyStoreOut, overwrite = true)
+        val defaultKeyStoreSha256 = defaultKeyStoreOut.sha256String()
+        kitDir.resolve("default_key_store.bks.sha256").writeText("$defaultKeyStoreSha256\n", Charsets.UTF_8)
+
+        val runtimeApiEntries = collectSourceDigestEntries(
+            rootDir = rootDir,
+            relativePaths = listOf(
+                "app/src/main/assets/declarations",
+                "app/src/main/assets/modules",
+                "app/src/main/java/org/autojs/autojs/runtime/api",
+                "app/src/main/java/org/autojs/autojs/runtime/api/augment",
+                "plugin-api/apk-builder-template/src/main",
+                "plugin-api/common-plugin-api/src/main",
+            ),
+        )
+        val runtimeApiHash = combinedDigest(runtimeApiEntries)
+        writePublicApiText(kitDir.resolve("public-api.txt"), runtimeApiEntries)
+
+        val scriptEngineEntries = collectZipDigestEntries(templateOut) { name ->
+            name.matches(Regex("classes\\d*\\.dex")) ||
+                    name == "assets/init.js" ||
+                    name.startsWith("assets/modules/") ||
+                    name.startsWith("assets/declarations/")
+        }
+        val scriptEngineHash = combinedDigest(scriptEngineEntries)
+
+        val resourceContractEntries = collectZipDigestEntries(templateOut) { name ->
+            name == "AndroidManifest.xml" ||
+                    name == "resources.arsc" ||
+                    name == "assets/init.js" ||
+                    name.startsWith("res/")
+        }
+        val resourcesContractHash = combinedDigest(resourceContractEntries)
+
+        val assetEntries = collectZipDigestEntries(templateOut) { name ->
+            name.startsWith("assets/")
+        }
+        writeDigestManifestJson(kitDir.resolve("assets-manifest.json"), "template-assets", assetEntries)
+
+        val nativeLibEntries = collectZipDigestEntries(templateOut) { name ->
+            name.startsWith("lib/") && name.endsWith(".so")
+        }
+        val nativeLibManifestHash = combinedDigest(nativeLibEntries)
+        writeDigestManifestJson(kitDir.resolve("native-libs.json"), "template-native-libs", nativeLibEntries)
+
+        val apkBuilderProtocolVersion = 1
+        val remoteBuildProtocolVersion = 2
+        val runtimeKitId = "autojs6-runtime-v$versionName+$versionCode-$gitSha"
+
+        kitDir.resolve("build-contract.json").writeText(
+            buildString {
+                appendLine("{")
+                appendLine("  \"schemaVersion\": 1,")
+                appendLine("  \"apkBuilderProtocolVersion\": $apkBuilderProtocolVersion,")
+                appendLine("  \"remoteBuildProtocolVersion\": $remoteBuildProtocolVersion,")
+                appendLine("  \"runtimeApiLevel\": $versionCode,")
+                appendLine("  \"runtimeApiHash\": ${runtimeApiHash.toJsonLiteral()},")
+                appendLine("  \"scriptEngineHash\": ${scriptEngineHash.toJsonLiteral()},")
+                appendLine("  \"resourcesContractHash\": ${resourcesContractHash.toJsonLiteral()},")
+                appendLine("  \"nativeLibManifestHash\": ${nativeLibManifestHash.toJsonLiteral()}")
+                appendLine("}")
+            },
+            Charsets.UTF_8,
+        )
+
+        kitDir.resolve("runtime-kit.json").writeText(
+            buildString {
+                appendLine("{")
+                appendLine("  \"schemaVersion\": 1,")
+                appendLine("  \"runtimeKitId\": ${runtimeKitId.toJsonLiteral()},")
+                appendLine("  \"host\": {")
+                appendLine("    \"packageName\": ${globalApplicationId.toJsonLiteral()},")
+                appendLine("    \"versionName\": ${versionName.toJsonLiteral()},")
+                appendLine("    \"versionCode\": $versionCode,")
+                appendLine("    \"gitSha\": ${gitSha.toJsonLiteral()}")
+                appendLine("  },")
+                appendLine("  \"template\": {")
+                appendLine("    \"fileName\": \"template.apk\",")
+                appendLine("    \"packageName\": ${(globalApplicationId + ".$flavorNameInrt").toJsonLiteral()},")
+                appendLine("    \"sha256\": ${templateSha256.toJsonLiteral()},")
+                appendLine("    \"sizeBytes\": ${templateOut.length()}")
+                appendLine("  },")
+                appendLine("  \"defaultKeyStore\": {")
+                appendLine("    \"fileName\": \"default_key_store.bks\",")
+                appendLine("    \"sha256\": ${defaultKeyStoreSha256.toJsonLiteral()},")
+                appendLine("    \"sizeBytes\": ${defaultKeyStoreOut.length()}")
+                appendLine("  },")
+                appendLine("  \"contract\": {")
+                appendLine("    \"apkBuilderProtocolVersion\": $apkBuilderProtocolVersion,")
+                appendLine("    \"remoteBuildProtocolVersion\": $remoteBuildProtocolVersion,")
+                appendLine("    \"runtimeApiLevel\": $versionCode,")
+                appendLine("    \"runtimeApiHash\": ${runtimeApiHash.toJsonLiteral()},")
+                appendLine("    \"scriptEngineHash\": ${scriptEngineHash.toJsonLiteral()},")
+                appendLine("    \"resourcesContractHash\": ${resourcesContractHash.toJsonLiteral()},")
+                appendLine("    \"nativeLibManifestHash\": ${nativeLibManifestHash.toJsonLiteral()}")
+                appendLine("  },")
+                appendLine("  \"compatibility\": {")
+                appendLine("    \"minHostVersionCode\": $versionCode,")
+                appendLine("    \"maxHostVersionCode\": $versionCode,")
+                appendLine("    \"allowPatchVersionMismatch\": false")
+                appendLine("  }")
+                appendLine("}")
+            },
+            Charsets.UTF_8,
+        )
+
+        kitDir.resolve("provenance.json").writeText(
+            buildString {
+                appendLine("{")
+                appendLine("  \"schemaVersion\": 1,")
+                appendLine("  \"sourceRepository\": ${(System.getenv("GITHUB_REPOSITORY") ?: "local").toJsonLiteral()},")
+                appendLine("  \"gitSha\": ${gitSha.toJsonLiteral()},")
+                appendLine("  \"githubRunId\": ${(System.getenv("GITHUB_RUN_ID") ?: "").toJsonLiteral()},")
+                appendLine("  \"templateApkSource\": ${templateApk.relativeTo(projectDir).invariantSeparatorsPath.toJsonLiteral()}")
+                appendLine("}")
+            },
+            Charsets.UTF_8,
+        )
+
+        val zipFile = outputRoot.resolve("autojs6-runtime-kit-v$normalizedVersion+$versionCode.zip")
+        if (zipFile.exists()) {
+            zipFile.delete()
+        }
+        ZipOutputStream(zipFile.outputStream().buffered()).use { zip ->
+            kitDir.walkTopDown()
+                .filter { it.isFile }
+                .sortedBy { it.relativeTo(kitDir).invariantSeparatorsPath }
+                .forEach { file ->
+                    val entryName = file.relativeTo(kitDir).invariantSeparatorsPath
+                    zip.putNextEntry(ZipEntry(entryName))
+                    file.inputStream().use { input -> input.copyTo(zip) }
+                    zip.closeEntry()
+                }
+        }
+
+        println("Runtime Kit directory: $kitDir")
+        println("Runtime Kit archive: $zipFile")
     }
 }
 

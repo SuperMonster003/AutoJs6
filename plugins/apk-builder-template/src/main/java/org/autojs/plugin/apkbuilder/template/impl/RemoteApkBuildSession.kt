@@ -199,19 +199,20 @@ class RemoteApkBuildSession(
 
     private fun validateHostRequest(): List<String> {
         val warnings = arrayListOf<String>()
+        val info = ApkBuilderTemplateMetadata.templateInfo(appContext)
         if (request.requiredProtocolVersion > ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION) {
             throw IllegalStateException(
                 "Host requires newer remote build protocol: host=${request.requiredProtocolVersion}, plugin=${ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION}"
             )
         }
-        if (request.hostPackageName.isNotBlank() && request.hostPackageName != BuildConfig.HOST_PACKAGE_NAME) {
-            warnings += handleRiskyHostMismatch("Host package mismatch: plugin targets ${BuildConfig.HOST_PACKAGE_NAME}, host=${request.hostPackageName}")
+        if (request.hostPackageName.isNotBlank() && request.hostPackageName != info.hostPackageName) {
+            warnings += handleRiskyHostMismatch("Host package mismatch: plugin targets ${info.hostPackageName}, host=${request.hostPackageName}")
         }
-        if (request.hostVersionName.isNotBlank() && request.hostVersionName != BuildConfig.HOST_VERSION_NAME) {
-            warnings += handleRiskyHostMismatch("Host versionName mismatch: plugin=${BuildConfig.HOST_VERSION_NAME}, host=${request.hostVersionName}")
+        if (request.hostVersionName.isNotBlank() && request.hostVersionName != info.hostVersionName) {
+            warnings += handleRiskyHostMismatch("Host versionName mismatch: plugin=${info.hostVersionName}, host=${request.hostVersionName}")
         }
-        if (request.hostVersionCode > 0L && request.hostVersionCode != BuildConfig.HOST_VERSION_CODE) {
-            warnings += handleRiskyHostMismatch("Host versionCode mismatch: plugin=${BuildConfig.HOST_VERSION_CODE}, host=${request.hostVersionCode}")
+        if (request.hostVersionCode > 0L && request.hostVersionCode != info.hostVersionCode) {
+            warnings += handleRiskyHostMismatch("Host versionCode mismatch: plugin=${info.hostVersionCode}, host=${request.hostVersionCode}")
         }
         return warnings
     }

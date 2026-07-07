@@ -28,7 +28,7 @@ class PluginIndexRepository {
         private const val CACHE_FILE_NAME = "autojs6_plugin_index_v5.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
-        private const val AUTOJS6_REPO = "AutoJs6"
+        private const val APK_BUILDER_TEMPLATE_REPO = "AutoJs6-Plugin-APK-Builder"
         private const val OFFICIAL_REPO_PREFIX = "AutoJs6-Plugin-"
         private const val THIRD_PARTY_OWNER = "SuperMonster002"
         private const val THIRD_PARTY_REPO = "Auto.js-SDK-Plugins-Garage"
@@ -245,14 +245,14 @@ class PluginIndexRepository {
         val exact = runCatching {
             getJsonObject(
                 context = context,
-                url = "https://api.github.com/repos/$OFFICIAL_OWNER/$AUTOJS6_REPO/releases/tags/${encodeUrlPathSegment("v${BuildConfig.VERSION_NAME}")}",
+                url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/tags/${encodeUrlPathSegment("v${BuildConfig.VERSION_NAME}")}",
             )
         }.getOrNull()
 
         val releaseJson = exact ?: runCatching {
             getJsonObject(
                 context = context,
-                url = "https://api.github.com/repos/$OFFICIAL_OWNER/$AUTOJS6_REPO/releases/latest",
+                url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/latest",
             )
         }.getOrNull()?.takeIf(::isCurrentHostReleaseJson)
 
@@ -290,7 +290,7 @@ class PluginIndexRepository {
     }
 
     private fun fallbackApkBuilderTemplateReleaseUrl(): String {
-        return "https://github.com/$OFFICIAL_OWNER/$AUTOJS6_REPO/releases/download/" +
+        return "https://github.com/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/download/" +
                 "${encodeUrlPathSegment("v${BuildConfig.VERSION_NAME}")}/" +
                 apkBuilderTemplateReleaseAssetName(BuildConfig.VERSION_NAME)
     }

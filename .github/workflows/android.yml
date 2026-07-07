@@ -48,6 +48,14 @@ jobs:
       - name: Build with Gradle (assembleApkBuilderTemplateDistribution)
         run: ./gradlew assembleApkBuilderTemplateDistribution
 
+      - name: Upload Runtime Kit artifacts
+        id: upload-runtime-kit
+        uses: actions/upload-artifact@v4
+        with:
+          name: autojs6-runtime-kit
+          path: app/build/runtime-kit/autojs6-runtime-kit-*.zip
+        continue-on-error: true
+
       - name: Upload arm64 artifacts
         id: upload-arm64-apk
         uses: actions/upload-artifact@v4
