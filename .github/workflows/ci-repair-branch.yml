@@ -127,6 +127,7 @@ jobs:
         with:
           name: ace-gate-logs
           path: .ci-logs
+          include-hidden-files: true
           if-no-files-found: error
 
       - name: Enforce ACE diagnostics
