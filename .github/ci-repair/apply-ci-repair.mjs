@@ -111,8 +111,14 @@ patchFile('settings.gradle.kts', (original) => {
 
     content = replaceOnce(
         content,
-        `            val version: String = when {\n`,
-        `            val candidateVersion: String = when {\n`,
+        `        val classpath = config.libs.filterIsInstance<Classpath>().map { lib ->
+            var suffix = ""
+            val version: String = when {
+`,
+        `        val classpath = config.libs.filterIsInstance<Classpath>().map { lib ->
+            var suffix = ""
+            val candidateVersion: String = when {
+`,
         'name the initially selected classpath version',
     );
 
