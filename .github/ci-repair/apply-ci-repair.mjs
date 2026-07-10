@@ -142,9 +142,19 @@ patchFile('settings.gradle.kts', (original) => {
     return content;
 });
 
-patchFile('tools/editor-refactor/check-editor-boundaries.mjs', (content) => replaceOnce(
-    content,
-    'assertIncludes(runScriptTextProvider, "TmpScriptFiles.create(context)");',
-    'assertIncludes(runScriptTextProvider, "TmpScriptFiles.create(context, extensionWithDotProvider())");',
-    'align temp-script boundary check with extension-aware API',
-));
+patchFile('tools/editor-refactor/check-editor-boundaries.mjs', (original) => {
+    let content = original;
+    content = replaceOnce(
+        content,
+        'assertIncludes(runScriptTextProvider, "TmpScriptFiles.create(context)");',
+        'assertIncludes(runScriptTextProvider, "TmpScriptFiles.create(context, extensionWithDotProvider())");',
+        'align temp-script boundary check with extension-aware API',
+    );
+    content = replaceOnce(
+        content,
+        'assertIncludes(themeFontService, "Themes.setCurrent(theme.name)");',
+        'assertIncludes(themeFontService, "Themes.setCurrent(context, theme.name)");',
+        'align theme boundary check with context-aware API',
+    );
+    return content;
+});
