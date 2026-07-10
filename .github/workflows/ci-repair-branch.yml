@@ -33,8 +33,12 @@ jobs:
         run: node .github/ci-repair/apply-ci-repair.mjs
 
       - name: Refresh KSP and AGP compatibility data
+        id: ksp-compat
+        continue-on-error: true
         working-directory: .utils
-        run: node scrape-and-inject-ksp-agp-compatibility-map.mjs
+        run: |
+          set -o pipefail
+          node scrape-and-inject-ksp-agp-compatibility-map.mjs 2>&1 | tee ../.github/ci-repair/ksp-scraper.log
 
       - name: Refresh ACE generated artifacts
         run: |
@@ -51,15 +55,15 @@ jobs:
       - name: Run ACE editor gate diagnostics
         run: node tools/ace-ci/check-ace-editor-gate.mjs
 
-      - name: Commit generated repair
+      - name: Commit generated repair and diagnostics
         run: |
-          if git diff --quiet && git diff --cached --quiet; then
+          if git diff --quiet && git diff --cached --quiet && [ ! -f .github/ci-repair/ksp-scraper.log ]; then
             echo "No repair changes to commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add settings.gradle.kts .utils/run-scrapers.mjs gradle/data/ksp-agp-compat.properties app/src/main/assets tools/ace-completion
+          git add settings.gradle.kts .utils/run-scrapers.mjs gradle/data/ksp-agp-compat.properties app/src/main/assets tools/ace-completion .github/ci-repair/ksp-scraper.log
           git commit -m "fix: align generated build and ACE compatibility data"
           git push origin HEAD:fix/dynamic-ksp-agp-and-ace-ci
 
@@ -73,3 +77,7 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew help
+
+      - name: Enforce KSP compatibility scraper success
+        if: steps.ksp-compat.outcome != 'success'
+        run: exit 1
