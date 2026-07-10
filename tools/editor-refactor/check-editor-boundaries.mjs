@@ -346,7 +346,7 @@ assertIncludes(editorTextProvider, "currentEditor().getTextForSaving");
 assertNotIncludes(editorTextProvider, "CodeEditText");
 
 assertIncludes(runScriptTextProvider, "class RunScriptTextProvider(");
-assertIncludes(runScriptTextProvider, "TmpScriptFiles.create(context)");
+assertIncludes(runScriptTextProvider, "TmpScriptFiles.create(context, extensionWithDotProvider())");
 assertIncludes(runScriptTextProvider, "write(tmpFile, latestText)");
 assertNotIncludes(runScriptTextProvider, "CodeEditText");
 
@@ -355,7 +355,7 @@ assertIncludes(themeFontService, "var currentTheme: Theme? = null");
 assertIncludes(themeFontService, "fun applyTheme(theme: Theme?): Theme?");
 assertIncludes(themeFontService, "fun applyEditorPreferences()");
 assertIncludes(themeFontService, "AceEditorFontPreferences.set(font)");
-assertIncludes(themeFontService, "Themes.setCurrent(theme.name)");
+assertIncludes(themeFontService, "Themes.setCurrent(context, theme.name)");
 assertIncludes(themeFontService, "ThemeColorManager.colorPrimary");
 assertNotIncludes(themeFontService, "CodeEditText");
 
