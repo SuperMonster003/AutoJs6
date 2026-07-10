@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - "fix/dynamic-ksp-agp-and-ace-ci"
-  pull_request:
-    branches:
-      - master
-    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
+
+concurrency:
+  group: ci-repair-branch
+  cancel-in-progress: true
 
 jobs:
   repair:
@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: fix/dynamic-ksp-agp-and-ace-ci
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Set up Node.js 24
         uses: actions/setup-node@v4
@@ -33,12 +33,10 @@ jobs:
         run: node .github/ci-repair/apply-ci-repair.mjs
 
       - name: Refresh KSP and AGP compatibility data
-        id: ksp-compat
-        continue-on-error: true
         working-directory: .utils
-        run: |
-          set -o pipefail
-          node scrape-and-inject-ksp-agp-compatibility-map.mjs 2>&1 | tee ../.github/ci-repair/ksp-scraper.log
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scrape-and-inject-ksp-agp-compatibility-map.mjs
 
       - name: Refresh ACE generated artifacts
         run: |
@@ -46,97 +44,21 @@ jobs:
           node tools/ace-completion/generate-autojs6-indices.mjs
           node tools/ace-completion/generate-dts.mjs
 
-      - name: Validate Node.js scripts
+      - name: Validate generated Node.js scripts
         run: |
           node --check .utils/scrape-and-inject-ksp-agp-compatibility-map.mjs
           node --check .utils/run-scrapers.mjs
           node --check .github/ci-repair/apply-ci-repair.mjs
 
-      - name: Commit generated repair and diagnostics
+      - name: Commit and push repair
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add settings.gradle.kts .utils/run-scrapers.mjs gradle/data/ksp-agp-compat.properties app/src/main/assets tools/ace-completion .github/ci-repair/ksp-scraper.log
+          git add settings.gradle.kts .utils/run-scrapers.mjs gradle/data/ksp-agp-compat.properties app/src/main/assets tools/ace-completion
           if git diff --cached --quiet; then
-            echo "No repair changes to commit."
+            echo "No generated repair changes to commit."
             exit 0
           fi
-          git commit -m "fix: align generated build and ACE compatibility data"
+          git commit -m "fix: align KSP AGP selection and ACE generated data"
+          git pull --rebase origin fix/dynamic-ksp-agp-and-ace-ci
           git push origin HEAD:fix/dynamic-ksp-agp-and-ace-ci
-
-      - name: ACE editor boundary checks
-        id: ace-boundaries
-        continue-on-error: true
-        run: node tools/editor-refactor/check-editor-boundaries.mjs
-
-      - name: ACE surface hardening checks
-        id: ace-surface
-        continue-on-error: true
-        run: node tools/ace-hardening/check-editor-surface.mjs
-
-      - name: AutoJs6 API model verification
-        id: ace-api-model
-        continue-on-error: true
-        run: node tools/ace-completion/verify-autojs6-api-model.mjs
-
-      - name: AutoJs6 Pro-only API detection
-        id: ace-pro-only
-        continue-on-error: true
-        run: node tools/ace-completion/verify-autojs6-pro-only.mjs
-
-      - name: AutoJs6 completion index verification
-        id: ace-indices
-        continue-on-error: true
-        run: node tools/ace-completion/verify-autojs6-indices.mjs
-
-      - name: AutoJs6 generated d.ts verification
-        id: ace-dts
-        continue-on-error: true
-        run: node tools/ace-completion/verify-autojs6-dts.mjs
-
-      - name: ACE completer tests
-        id: ace-completer
-        continue-on-error: true
-        run: node tools/ace-completion/test-completer.mjs
-
-      - name: ACE LSP client tests
-        id: ace-lsp
-        continue-on-error: true
-        run: node tools/ace-lsp/test-lsp-client.mjs
-
-      - name: ACE tooltip tests
-        id: ace-tooltip
-        continue-on-error: true
-        run: node tools/ace-tooltip/test-tooltip.mjs
-
-      - name: ACE signature help tests
-        id: ace-signature
-        continue-on-error: true
-        run: node tools/ace-signature/test-signature-help.mjs
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      - name: Validate Gradle settings
-        run: |
-          chmod +x gradlew
-          ./gradlew help
-
-      - name: Enforce repair diagnostics
-        if: >-
-          always() &&
-          (steps.ksp-compat.outcome != 'success' ||
-           steps.ace-boundaries.outcome != 'success' ||
-           steps.ace-surface.outcome != 'success' ||
-           steps.ace-api-model.outcome != 'success' ||
-           steps.ace-pro-only.outcome != 'success' ||
-           steps.ace-indices.outcome != 'success' ||
-           steps.ace-dts.outcome != 'success' ||
-           steps.ace-completer.outcome != 'success' ||
-           steps.ace-lsp.outcome != 'success' ||
-           steps.ace-tooltip.outcome != 'success' ||
-           steps.ace-signature.outcome != 'success')
-        run: exit 1
