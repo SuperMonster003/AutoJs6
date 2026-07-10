@@ -7,15 +7,14 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ci-repair-branch
   cancel-in-progress: true
 
 jobs:
-  repair:
-    if: github.actor != 'github-actions[bot]'
+  diagnose-ace-boundaries:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,90 +22,31 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: fix/dynamic-ksp-agp-and-ace-ci
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Set up Node.js 24
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
-          cache-dependency-path: .utils/package-lock.json
-
-      - name: Install scraper dependencies
-        working-directory: .utils
-        env:
-          PUPPETEER_SKIP_DOWNLOAD: 'true'
-        run: npm ci
 
       - name: Apply source patches
         run: node .github/ci-repair/apply-ci-repair.mjs
 
-      - name: Refresh KSP and AGP compatibility data
-        working-directory: .utils
-        run: node scrape-and-inject-ksp-agp-compatibility-map.mjs
-
-      - name: Refresh ACE generated artifacts
+      - name: Run ACE editor boundary checks
+        id: boundaries
+        continue-on-error: true
         run: |
-          node tools/ace-completion/generate-autojs6-indices-from-dts.mjs
-          node tools/ace-completion/generate-autojs6-indices.mjs
-          node tools/ace-completion/generate-dts.mjs
+          set -o pipefail
+          node tools/editor-refactor/check-editor-boundaries.mjs 2>&1 | tee ace-boundaries.log
 
-      - name: Validate generated Node.js scripts
-        run: |
-          node --check .utils/scrape-and-inject-ksp-agp-compatibility-map.mjs
-          node --check .utils/run-scrapers.mjs
-          node --check .github/ci-repair/apply-ci-repair.mjs
-
-      - name: ACE editor boundary checks
-        run: node tools/editor-refactor/check-editor-boundaries.mjs
-
-      - name: ACE surface hardening checks
-        run: node tools/ace-hardening/check-editor-surface.mjs
-
-      - name: AutoJs6 API model verification
-        run: node tools/ace-completion/verify-autojs6-api-model.mjs
-
-      - name: AutoJs6 Pro-only API detection
-        run: node tools/ace-completion/verify-autojs6-pro-only.mjs
-
-      - name: AutoJs6 completion index verification
-        run: node tools/ace-completion/verify-autojs6-indices.mjs
-
-      - name: AutoJs6 generated d.ts verification
-        run: node tools/ace-completion/verify-autojs6-dts.mjs
-
-      - name: ACE completer tests
-        run: node tools/ace-completion/test-completer.mjs
-
-      - name: ACE LSP client tests
-        run: node tools/ace-lsp/test-lsp-client.mjs
-
-      - name: ACE tooltip tests
-        run: node tools/ace-tooltip/test-tooltip.mjs
-
-      - name: ACE signature help tests
-        run: node tools/ace-signature/test-signature-help.mjs
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Upload complete boundary log
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          distribution: temurin
-          java-version: '21'
+          name: ace-boundaries-log
+          path: ace-boundaries.log
+          if-no-files-found: error
 
-      - name: Validate Gradle settings
-        run: |
-          chmod +x gradlew
-          ./gradlew help
-
-      - name: Commit and push repair
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add settings.gradle.kts .utils/run-scrapers.mjs gradle/data/ksp-agp-compat.properties app/src/main/assets tools/ace-completion tools/editor-refactor/check-editor-boundaries.mjs
-          if git diff --cached --quiet; then
-            echo "No generated repair changes to commit."
-            exit 0
-          fi
-          git commit -m "fix: align KSP AGP selection and ACE generated data"
-          git pull --rebase origin fix/dynamic-ksp-agp-and-ace-ci
-          git push origin HEAD:fix/dynamic-ksp-agp-and-ace-ci
+      - name: Enforce boundary result
+        if: steps.boundaries.outcome != 'success'
+        run: exit 1
