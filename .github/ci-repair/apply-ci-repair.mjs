@@ -1,0 +1,145 @@
+#!/usr/bin/env node
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+function replaceOnce(content, before, after, label) {
+    const first = content.indexOf(before);
+    if (first < 0) throw new Error(`Missing patch anchor: ${label}`);
+    if (content.indexOf(before, first + before.length) >= 0) {
+        throw new Error(`Patch anchor is not unique: ${label}`);
+    }
+    return content.slice(0, first) + after + content.slice(first + before.length);
+}
+
+function patchFile(relativePath, transform) {
+    const filePath = path.join(root, relativePath);
+    const before = fs.readFileSync(filePath, 'utf8');
+    const after = transform(before);
+    if (after === before) {
+        console.log(`unchanged: ${relativePath}`);
+        return;
+    }
+    fs.writeFileSync(filePath, after, 'utf8');
+    console.log(`updated: ${relativePath}`);
+}
+
+patchFile('.utils/run-scrapers.mjs', (content) => replaceOnce(
+    content,
+    "    'scrape-and-inject-ksp-releases-map.mjs',\n",
+    "    'scrape-and-inject-ksp-releases-map.mjs',\n    'scrape-and-inject-ksp-agp-compatibility-map.mjs',\n",
+    'register KSP/AGP compatibility scraper',
+));
+
+patchFile('settings.gradle.kts', (original) => {
+    let content = original;
+
+    content = replaceOnce(
+        content,
+        String.raw`    val kspReleaseProps by lazy { gradleDataProps("ksp-releases") }
+`,
+        String.raw`    val kspReleaseProps by lazy { gradleDataProps("ksp-releases") }
+    val kspAgpCompatProps by lazy { gradleDataProps("ksp-agp-compat") }
+`,
+        'load generated KSP/AGP compatibility data',
+    );
+
+    content = replaceOnce(
+        content,
+        String.raw`        private val toml: Map<String, String> = run {
+`,
+        String.raw`        private fun expectedKspPluginVersion(): String? {
+            val kspPlugin = config.libs.filterIsInstance<Plugin>().find {
+                it.id == "com.google.devtools.ksp"
+            } ?: return null
+
+            if (!kspPlugin.version.startsWith("${identifier.auto}:")) {
+                return kspPlugin.version
+            }
+            return pluginVersionAutomatorMap.getValue("ksp")
+                .invoke(kspReleaseProps)["version"]
+        }
+
+        private fun minimumAgpVersionForKsp(kspVersion: String): String? =
+            kspAgpCompatProps[kspVersion]
+
+        private fun canUseAgpWithCurrentGradle(agpVersion: String): Boolean {
+            val minimumGradleVersion = Version(agpGradleCompatProps, agpVersion).bestMatchingValue
+                ?: return false
+            return gradle.gradleVersion.toGradleVersion() >= minimumGradleVersion.toGradleVersion()
+        }
+
+        private fun getAgpReleasedVersionAtLeast(minimumAgpVersion: String): String? {
+            return agpReleases
+                .asSequence()
+                .filterNot { it.contains("-") }
+                .filter { utils.compareVersionStrings(it, minimumAgpVersion) >= 0 }
+                .sortedWith(utils::compareVersionStrings)
+                .firstOrNull(::canUseAgpWithCurrentGradle)
+        }
+
+        private fun refineAgpVersionForKsp(
+            agpVersion: String,
+            isUserSpecified: Boolean,
+        ): Pair<String, String> {
+            val kspVersion = expectedKspPluginVersion() ?: return agpVersion to ""
+            val minimumAgpVersion = minimumAgpVersionForKsp(kspVersion) ?: return agpVersion to ""
+            if (utils.compareVersionStrings(agpVersion, minimumAgpVersion) >= 0) {
+                return agpVersion to ""
+            }
+
+            if (isUserSpecified) {
+                throw Exception(
+                    "User specified AGP version $agpVersion is incompatible with KSP $kspVersion. " +
+                            "KSP $kspVersion requires AGP $minimumAgpVersion or higher."
+                )
+            }
+
+            val upgradedAgpVersion = getAgpReleasedVersionAtLeast(minimumAgpVersion)
+                ?: throw Exception(
+                    "Failed to determine an AGP version compatible with KSP $kspVersion. " +
+                            "KSP $kspVersion requires AGP $minimumAgpVersion or higher, " +
+                            "but current Gradle ${gradle.gradleVersion} cannot use any known compatible stable AGP release."
+                )
+
+            return upgradedAgpVersion to identifier.upgradedSuffix
+        }
+
+        private val toml: Map<String, String> = run {
+`,
+        'insert KSP/AGP compatibility refinement',
+    );
+
+    content = replaceOnce(
+        content,
+        String.raw`            val version: String = when {
+`,
+        String.raw`            val candidateVersion: String = when {
+`,
+        'name the initially selected classpath version',
+    );
+
+    content = replaceOnce(
+        content,
+        String.raw`            }
+            if (lib.id == "com.android.tools.build:gradle") {
+`,
+        String.raw`            }
+            val (version, compatibilitySuffix) = when (lib.id) {
+                "com.android.tools.build:gradle" -> refineAgpVersionForKsp(
+                    candidateVersion,
+                    isUserSpecified = !lib.version.startsWith("${identifier.auto}:"),
+                )
+                else -> candidateVersion to ""
+            }
+            suffix += compatibilitySuffix
+            if (lib.id == "com.android.tools.build:gradle") {
+`,
+        'refine selected AGP against the resolved KSP version',
+    );
+
+    return content;
+});
