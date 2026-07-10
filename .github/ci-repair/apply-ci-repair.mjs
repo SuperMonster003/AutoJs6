@@ -39,24 +39,20 @@ patchFile('settings.gradle.kts', (original) => {
 
     content = replaceOnce(
         content,
-        String.raw`    val kspReleaseProps by lazy { gradleDataProps("ksp-releases") }
-`,
-        String.raw`    val kspReleaseProps by lazy { gradleDataProps("ksp-releases") }
-    val kspAgpCompatProps by lazy { gradleDataProps("ksp-agp-compat") }
-`,
+        `    val kspReleaseProps by lazy { gradleDataProps("ksp-releases") }\n`,
+        `    val kspReleaseProps by lazy { gradleDataProps("ksp-releases") }\n    val kspAgpCompatProps by lazy { gradleDataProps("ksp-agp-compat") }\n`,
         'load generated KSP/AGP compatibility data',
     );
 
     content = replaceOnce(
         content,
-        String.raw`        private val toml: Map<String, String> = run {
-`,
-        String.raw`        private fun expectedKspPluginVersion(): String? {
+        `        private val toml: Map<String, String> = run {\n`,
+        `        private fun expectedKspPluginVersion(): String? {
             val kspPlugin = config.libs.filterIsInstance<Plugin>().find {
                 it.id == "com.google.devtools.ksp"
             } ?: return null
 
-            if (!kspPlugin.version.startsWith("${identifier.auto}:")) {
+            if (!kspPlugin.version.startsWith("\${identifier.auto}:")) {
                 return kspPlugin.version
             }
             return pluginVersionAutomatorMap.getValue("ksp")
@@ -102,7 +98,7 @@ patchFile('settings.gradle.kts', (original) => {
                 ?: throw Exception(
                     "Failed to determine an AGP version compatible with KSP $kspVersion. " +
                             "KSP $kspVersion requires AGP $minimumAgpVersion or higher, " +
-                            "but current Gradle ${gradle.gradleVersion} cannot use any known compatible stable AGP release."
+                            "but current Gradle \${gradle.gradleVersion} cannot use any known compatible stable AGP release."
                 )
 
             return upgradedAgpVersion to identifier.upgradedSuffix
@@ -115,23 +111,19 @@ patchFile('settings.gradle.kts', (original) => {
 
     content = replaceOnce(
         content,
-        String.raw`            val version: String = when {
-`,
-        String.raw`            val candidateVersion: String = when {
-`,
+        `            val version: String = when {\n`,
+        `            val candidateVersion: String = when {\n`,
         'name the initially selected classpath version',
     );
 
     content = replaceOnce(
         content,
-        String.raw`            }
-            if (lib.id == "com.android.tools.build:gradle") {
-`,
-        String.raw`            }
+        `            }\n            if (lib.id == "com.android.tools.build:gradle") {\n`,
+        `            }
             val (version, compatibilitySuffix) = when (lib.id) {
                 "com.android.tools.build:gradle" -> refineAgpVersionForKsp(
                     candidateVersion,
-                    isUserSpecified = !lib.version.startsWith("${identifier.auto}:"),
+                    isUserSpecified = !lib.version.startsWith("\${identifier.auto}:"),
                 )
                 else -> candidateVersion to ""
             }
