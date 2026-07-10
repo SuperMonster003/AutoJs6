@@ -66,6 +66,7 @@ jobs:
           bash .github/scripts/run-gradle-ci.sh \
             ./gradlew assembleApkBuilderTemplateDistribution \
             -x :app:lintVitalAnalyzeInrtRelease \
+            --no-daemon \
             --build-cache \
             --console=plain \
             --stacktrace
