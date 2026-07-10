@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  repair:
+  materialize:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: fix/dynamic-ksp-agp-and-ace-ci
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Set up Node.js 24
         uses: actions/setup-node@v4
@@ -38,41 +38,31 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
         run: npm ci
 
-      - name: Apply source patches
-        run: node .github/ci-repair/apply-ci-repair.mjs
-
-      - name: Refresh KSP and AGP compatibility data
-        working-directory: .utils
-        run: node scrape-and-inject-ksp-agp-compatibility-map.mjs
-
-      - name: Refresh ACE generated artifacts
+      - name: Materialize source changes
         run: |
+          node .github/ci-repair/apply-ci-repair.mjs
+          cd .utils
+          node scrape-and-inject-ksp-agp-compatibility-map.mjs
+          cd ..
           node tools/ace-completion/generate-autojs6-indices-from-dts.mjs
           node tools/ace-completion/generate-autojs6-indices.mjs
           node tools/ace-completion/generate-dts.mjs
+          node tools/ace-ci/check-ace-editor-gate.mjs
 
-      - name: Run complete ACE editor gate
-        run: node tools/ace-ci/check-ace-editor-gate.mjs
-
-      - name: Validate generated Node.js scripts
+      - name: Capture materialized diff
         run: |
-          node --check .utils/scrape-and-inject-ksp-agp-compatibility-map.mjs
-          node --check .utils/run-scrapers.mjs
-          node --check .github/ci-repair/apply-ci-repair.mjs
+          git status --short
+          git diff --binary > materialized-repair.patch
+          test -s materialized-repair.patch
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Upload materialized diff
+        uses: actions/upload-artifact@v4
         with:
-          distribution: temurin
-          java-version: '21'
-          cache: gradle
+          name: materialized-repair-patch
+          path: materialized-repair.patch
+          if-no-files-found: error
 
-      - name: Validate Runtime Kit Gradle configuration
-        run: |
-          chmod +x gradlew
-          ./gradlew :app:generateRuntimeKit -x :app:lintVitalAnalyzeInrtRelease --dry-run
-
-      - name: Commit and push repair
+      - name: Create repair commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -84,10 +74,10 @@ jobs:
             tools/ace-completion \
             tools/editor-refactor/check-editor-boundaries.mjs \
             tools/ace-hardening/check-editor-surface.mjs
-          if git diff --cached --quiet; then
-            echo "No generated repair changes to commit."
-            exit 0
-          fi
           git commit -m "fix: align KSP AGP selection and ACE generated data"
-          git pull --rebase origin fix/dynamic-ksp-agp-and-ace-ci
+
+      - name: Push repair commit
+        run: |
+          git status --short
+          git log -1 --oneline
           git push origin HEAD:fix/dynamic-ksp-agp-and-ace-ci
