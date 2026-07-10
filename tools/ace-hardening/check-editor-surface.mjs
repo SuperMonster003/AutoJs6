@@ -906,7 +906,8 @@ assertIncludes(functionsKeyboardHelper, "showSoftInput && wasVisible", "function
 
 assertIncludes(codeCompletion, "val iconResId", "code completion optional icon model");
 assertIncludes(codeCompletionBar, "getIconResId(position)", "code completion optional icon lookup");
-assertIncludes(codeCompletionBar, "setCompoundDrawables(wrappedIcon, null, null, null)", "completion bar icon rendering");
+assertIncludes(codeCompletionBar, "setForeground(new FixedSizeDrawable(wrappedIcon, iconSize))", "completion bar icon rendering");
+assertIncludes(codeCompletionBar, "setForegroundGravity(Gravity.CENTER)", "completion bar centered icon rendering");
 assertIncludes(codeCompletionBar, "DrawableCompat.setTint", "completion bar themed icon tint");
 assertIncludes(codeCompletionBar, "useFlowLayout()", "completion bar flow layout mode");
 assertIncludes(codeCompletionBar, "setFixedItemSizeDp", "completion bar fixed item size mode");

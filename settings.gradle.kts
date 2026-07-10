@@ -117,6 +117,8 @@ pluginManagement {
     val javaGradleCompatProps by lazy { gradleDataProps("java-gradle-compat") }
     val agpGradleCompatProps by lazy { gradleDataProps("agp-gradle-compat") }
     val kspReleaseProps by lazy { gradleDataProps("ksp-releases") }
+    val kspAgpCompatProps by lazy { gradleDataProps("ksp-agp-compat") }
+    val kotlinR8CompatProps by lazy { gradleDataProps("kotlin-r8-compat") }
 
     val androidStudioAgpCompatProps by lazy { gradleDataProps("android-studio-agp-compat") }
     val androidStudioBuildVersionProps by lazy { gradleDataProps("android-studio-build-version") }
@@ -429,6 +431,7 @@ pluginManagement {
         val libs = listOf(
             Classpath(id = "com.android.tools.build:gradle", version = overriddenAgpVersion ?: "auto:agp"),
             Classpath(id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = overriddenKotlinVersion ?: "auto:kotlin"),
+            Classpath(id = "com.android.tools:r8", version = "auto:r8"),
             Classpath(id = "org.apache.commons:commons-compress", version = "toml:commons-compress"),
             Classpath(id = "org.tukaani:xz", version = "toml:xz"),
             Plugin(id = "com.google.devtools.ksp", version = overriddenKspVersion ?: "auto:ksp", share = true),
@@ -602,6 +605,18 @@ pluginManagement {
                 }
             }
 
+            private val kotlinVersionForR8 = overriddenKotlinVersion ?: kotlin.bestMatchingValue
+            private val kotlinCompatibilityLineForR8 = kotlinVersionForR8
+                ?.substringBefore("-")
+                ?.split('.')
+                ?.take(2)
+                ?.joinToString(".")
+
+            val r8 = object : Version(
+                kotlinR8CompatProps.filterKeys { it == kotlinCompatibilityLineForR8 },
+                kotlinCompatibilityLineForR8 ?: consts.DEFAULT_VERSION,
+            ) {}
+
         }
 
         private val pluginVersionAutomatorMap: Map<String, (Map<String, String>) -> Map<String, String?>> = mapOf(
@@ -644,6 +659,63 @@ pluginManagement {
             },
         )
 
+        private fun expectedKspPluginVersion(): String? {
+            val kspPlugin = config.libs.filterIsInstance<Plugin>().find {
+                it.id == "com.google.devtools.ksp"
+            } ?: return null
+
+            if (!kspPlugin.version.startsWith("${identifier.auto}:")) {
+                return kspPlugin.version
+            }
+            return pluginVersionAutomatorMap.getValue("ksp")
+                .invoke(kspReleaseProps)["version"]
+        }
+
+        private fun minimumAgpVersionForKsp(kspVersion: String): String? =
+            kspAgpCompatProps[kspVersion]
+
+        private fun canUseAgpWithCurrentGradle(agpVersion: String): Boolean {
+            val minimumGradleVersion = Version(agpGradleCompatProps, agpVersion).bestMatchingValue
+                ?: return false
+            return gradle.gradleVersion.toGradleVersion() >= minimumGradleVersion.toGradleVersion()
+        }
+
+        private fun getAgpReleasedVersionAtLeast(minimumAgpVersion: String): String? {
+            return agpReleases
+                .asSequence()
+                .filterNot { it.contains("-") }
+                .filter { utils.compareVersionStrings(it, minimumAgpVersion) >= 0 }
+                .sortedWith(utils::compareVersionStrings)
+                .firstOrNull(::canUseAgpWithCurrentGradle)
+        }
+
+        private fun refineAgpVersionForKsp(
+            agpVersion: String,
+            isUserSpecified: Boolean,
+        ): Pair<String, String> {
+            val kspVersion = expectedKspPluginVersion() ?: return agpVersion to ""
+            val minimumAgpVersion = minimumAgpVersionForKsp(kspVersion) ?: return agpVersion to ""
+            if (utils.compareVersionStrings(agpVersion, minimumAgpVersion) >= 0) {
+                return agpVersion to ""
+            }
+
+            if (isUserSpecified) {
+                throw Exception(
+                    "User specified AGP version $agpVersion is incompatible with KSP $kspVersion. " +
+                            "KSP $kspVersion requires AGP $minimumAgpVersion or higher."
+                )
+            }
+
+            val upgradedAgpVersion = getAgpReleasedVersionAtLeast(minimumAgpVersion)
+                ?: throw Exception(
+                    "Failed to determine an AGP version compatible with KSP $kspVersion. " +
+                            "KSP $kspVersion requires AGP $minimumAgpVersion or higher, " +
+                            "but current Gradle ${gradle.gradleVersion} cannot use any known compatible stable AGP release."
+                )
+
+            return upgradedAgpVersion to identifier.upgradedSuffix
+        }
+
         private val toml: Map<String, String> = run {
             val lines = file("gradle/libs.versions.toml").also {
                 require(it.isFile) { "File $it doesn't exist" }
@@ -669,12 +741,13 @@ pluginManagement {
 
         val classpath = config.libs.filterIsInstance<Classpath>().map { lib ->
             var suffix = ""
-            val version: String = when {
+            val candidateVersion: String = when {
                 lib.version.startsWith("${identifier.auto}:") -> {
                     val mapType = lib.version.removePrefix("${identifier.auto}:")
                     val ver = when (mapType) {
                         "agp" -> versions.agp
                         "kotlin" -> versions.kotlin
+                        "r8" -> versions.r8
                         else -> throw Exception("Unknown version ${lib.version} for classpath ${lib.id}")
                     }
                     ver.bestMatchingValue?.also {
@@ -692,6 +765,14 @@ pluginManagement {
                     suffix += identifier.userSpecifiedSuffix
                 }
             }
+            val (version, compatibilitySuffix) = when (lib.id) {
+                "com.android.tools.build:gradle" -> refineAgpVersionForKsp(
+                    candidateVersion,
+                    isUserSpecified = !lib.version.startsWith("${identifier.auto}:"),
+                )
+                else -> candidateVersion to ""
+            }
+            suffix += compatibilitySuffix
             if (lib.id == "com.android.tools.build:gradle") {
                 System.setProperty("gradle.java.version.coerced.by.gradle", "${getMaxSupportedJavaVersion(version)}")
                 System.setProperty("gradle.java.version.overridden.by.user", "$overriddenJavaVersion")
@@ -808,10 +889,19 @@ pluginManagement {
         google()
     }
 
+    val selectedR8Version = notations.classpath
+        .firstOrNull { it.startsWith("com.android.tools:r8:") }
+        ?.substringAfter("com.android.tools:r8:")
+
     buildscript {
         repositories {
             mavenCentral()
             google()
+        }
+        configurations.configureEach {
+            selectedR8Version?.let { requiredVersion ->
+                resolutionStrategy.force("com.android.tools:r8:" + requiredVersion)
+            }
         }
         dependencies {
             notations.classpath.forEach { classpath(it) }
