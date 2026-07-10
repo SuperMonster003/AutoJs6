@@ -4,6 +4,10 @@
 //  ! Blocks "buildscript" and "plugins" have been moved to "settings.gradle.kts".
 //  ! zh-CN: 代码块 "buildscript" 以及 "plugins" 已迁移至 "settings.gradle.kts".
 
+val skipCiLintVital = providers.gradleProperty("autojs.ci.skipLintVital")
+    .map { value -> value.trim().lowercase() in setOf("true", "1", "yes", "on") }
+    .orElse(false)
+
 allprojects {
     repositories {
         mavenCentral()
@@ -15,6 +19,12 @@ allprojects {
         maven("https://maven.aliyun.com/repository/gradle-plugin")
         maven("https://maven.aliyun.com/repository/jcenter")
         maven("https://maven.aliyun.com/repository/public")
+    }
+
+    tasks.configureEach {
+        if (skipCiLintVital.get() && name.contains("lintVital", ignoreCase = true)) {
+            enabled = false
+        }
     }
 }
 
