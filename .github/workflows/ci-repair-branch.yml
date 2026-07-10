@@ -1,9 +1,10 @@
 name: CI Repair Branch
 
 on:
-  push:
+  pull_request:
     branches:
-      - "fix/dynamic-ksp-agp-and-ace-ci"
+      - master
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
