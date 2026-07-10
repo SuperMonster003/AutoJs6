@@ -29,55 +29,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
-          cache-dependency-path: .utils/package-lock.json
 
-      - name: Install scraper dependencies
-        working-directory: .utils
-        env:
-          PUPPETEER_SKIP_DOWNLOAD: 'true'
-        run: npm ci
-
-      - name: Materialize source changes
+      - name: Materialize validated source changes
         run: |
           node .github/ci-repair/apply-ci-repair.mjs
-          cd .utils
-          node scrape-and-inject-ksp-agp-compatibility-map.mjs
-          cd ..
           node tools/ace-completion/generate-autojs6-indices-from-dts.mjs
           node tools/ace-completion/generate-autojs6-indices.mjs
           node tools/ace-completion/generate-dts.mjs
           node tools/ace-ci/check-ace-editor-gate.mjs
 
-      - name: Capture materialized diff
-        run: |
-          git status --short
-          git diff --binary > materialized-repair.patch
-          test -s materialized-repair.patch
-
-      - name: Upload materialized diff
-        uses: actions/upload-artifact@v4
-        with:
-          name: materialized-repair-patch
-          path: materialized-repair.patch
-          if-no-files-found: error
-
       - name: Create repair commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            settings.gradle.kts \
-            .utils/run-scrapers.mjs \
-            gradle/data/ksp-agp-compat.properties \
-            app/src/main/assets \
-            tools/ace-completion \
-            tools/editor-refactor/check-editor-boundaries.mjs \
-            tools/ace-hardening/check-editor-surface.mjs
-          git commit -m "fix: align KSP AGP selection and ACE generated data"
+          git add -u
+          git diff --cached --stat
+          test -n "$(git diff --cached --name-only)"
+          git -c commit.gpgsign=false commit --no-verify -m "fix: align KSP AGP selection and ACE generated data"
 
       - name: Push repair commit
         run: |
-          git status --short
           git log -1 --oneline
           git push origin HEAD:fix/dynamic-ksp-agp-and-ace-ci
