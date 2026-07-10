@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - "fix/dynamic-ksp-agp-and-ace-ci"
+  pull_request:
+    branches:
+      - master
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
