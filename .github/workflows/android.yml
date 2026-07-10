@@ -20,7 +20,6 @@ jobs:
     env:
       GRADLE_CI_TIMEOUT_SECONDS: '3600'
       GRADLE_CI_MAX_LOG_BYTES: '33554432'
-      GRADLE_CI_LOG_FILE: ${{ runner.temp }}/android-gradle-build.log
 
     steps:
       - name: Checkout sources
