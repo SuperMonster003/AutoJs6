@@ -118,6 +118,7 @@ pluginManagement {
     val agpGradleCompatProps by lazy { gradleDataProps("agp-gradle-compat") }
     val kspReleaseProps by lazy { gradleDataProps("ksp-releases") }
     val kspAgpCompatProps by lazy { gradleDataProps("ksp-agp-compat") }
+    val kotlinR8CompatProps by lazy { gradleDataProps("kotlin-r8-compat") }
 
     val androidStudioAgpCompatProps by lazy { gradleDataProps("android-studio-agp-compat") }
     val androidStudioBuildVersionProps by lazy { gradleDataProps("android-studio-build-version") }
@@ -430,6 +431,7 @@ pluginManagement {
         val libs = listOf(
             Classpath(id = "com.android.tools.build:gradle", version = overriddenAgpVersion ?: "auto:agp"),
             Classpath(id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = overriddenKotlinVersion ?: "auto:kotlin"),
+            Classpath(id = "com.android.tools:r8", version = "auto:r8"),
             Classpath(id = "org.apache.commons:commons-compress", version = "toml:commons-compress"),
             Classpath(id = "org.tukaani:xz", version = "toml:xz"),
             Plugin(id = "com.google.devtools.ksp", version = overriddenKspVersion ?: "auto:ksp", share = true),
@@ -603,6 +605,18 @@ pluginManagement {
                 }
             }
 
+            private val kotlinVersionForR8 = overriddenKotlinVersion ?: kotlin.bestMatchingValue
+            private val kotlinCompatibilityLineForR8 = kotlinVersionForR8
+                ?.substringBefore("-")
+                ?.split('.')
+                ?.take(2)
+                ?.joinToString(".")
+
+            val r8 = object : Version(
+                kotlinR8CompatProps.filterKeys { it == kotlinCompatibilityLineForR8 },
+                kotlinCompatibilityLineForR8 ?: consts.DEFAULT_VERSION,
+            ) {}
+
         }
 
         private val pluginVersionAutomatorMap: Map<String, (Map<String, String>) -> Map<String, String?>> = mapOf(
@@ -733,6 +747,7 @@ pluginManagement {
                     val ver = when (mapType) {
                         "agp" -> versions.agp
                         "kotlin" -> versions.kotlin
+                        "r8" -> versions.r8
                         else -> throw Exception("Unknown version ${lib.version} for classpath ${lib.id}")
                     }
                     ver.bestMatchingValue?.also {
@@ -874,10 +889,19 @@ pluginManagement {
         google()
     }
 
+    val selectedR8Version = notations.classpath
+        .firstOrNull { it.startsWith("com.android.tools:r8:") }
+        ?.substringAfter("com.android.tools:r8:")
+
     buildscript {
         repositories {
             mavenCentral()
             google()
+        }
+        configurations.configureEach {
+            selectedR8Version?.let { requiredVersion ->
+                resolutionStrategy.force("com.android.tools:r8:" + requiredVersion)
+            }
         }
         dependencies {
             notations.classpath.forEach { classpath(it) }

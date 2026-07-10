@@ -13,6 +13,7 @@ const SCRIPT_LIST = [
     'scrape-and-inject-rhino-engine-data.mjs',
     'scrape-and-inject-latest-gradle-wrapper.mjs',
     'scrape-and-inject-gradle-kotlin-compatibility-map.mjs',
+    'scrape-and-inject-kotlin-r8-compatibility-map.mjs',
     'scrape-and-inject-android-studio-codename-maps.mjs',
     'scrape-and-inject-android-studio-agp-version-map.mjs',
     'scrape-and-inject-java-gradle-compatibility-map.mjs',
