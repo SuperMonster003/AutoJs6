@@ -158,3 +158,10 @@ patchFile('tools/editor-refactor/check-editor-boundaries.mjs', (original) => {
     );
     return content;
 });
+
+patchFile('tools/ace-hardening/check-editor-surface.mjs', (content) => replaceOnce(
+    content,
+    'assertIncludes(codeCompletionBar, "setCompoundDrawables(wrappedIcon, null, null, null)", "completion bar icon rendering");',
+    'assertIncludes(codeCompletionBar, "setForeground(new FixedSizeDrawable(wrappedIcon, iconSize))", "completion bar icon rendering");\nassertIncludes(codeCompletionBar, "setForegroundGravity(Gravity.CENTER)", "completion bar centered icon rendering");',
+    'align completion icon surface check with centered foreground rendering',
+));
