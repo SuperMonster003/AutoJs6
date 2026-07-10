@@ -6,84 +6,115 @@ on:
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: android-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 70
+    env:
+      GRADLE_CI_TIMEOUT_SECONDS: '3600'
+      GRADLE_CI_MAX_LOG_BYTES: '33554432'
+      GRADLE_CI_LOG_FILE: ${{ runner.temp }}/android-gradle-build.log
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout sources
+        uses: actions/checkout@v6
 
       - name: Set up Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
+          package-manager-cache: false
 
       - name: Run ACE editor gate
         run: node tools/ace-ci/check-ace-editor-gate.mjs
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: gradle
 
-      - name: Install CMake 3.10.2 manually
+      - name: Set up Gradle caching
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+          cache-read-only: false
+
+      - name: Install CMake 3.10.2
         run: |
-          wget https://cmake.org/files/v3.10/cmake-3.10.2-Linux-x86_64.sh
-          chmod +x cmake-3.10.2-Linux-x86_64.sh
-          sudo ./cmake-3.10.2-Linux-x86_64.sh --skip-license --prefix=/usr/local
-          
-      - name: Install Ninja
+          set -euo pipefail
+          installer="$RUNNER_TEMP/cmake-3.10.2-Linux-x86_64.sh"
+          wget -q https://cmake.org/files/v3.10/cmake-3.10.2-Linux-x86_64.sh -O "$installer"
+          chmod +x "$installer"
+          sudo "$installer" --skip-license --prefix=/usr/local >/dev/null
+          cmake --version
+
+      - name: Verify preinstalled Ninja
+        run: ninja --version
+
+      - name: Build Runtime Kit, app and APK Builder plugin
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build
+          set -euo pipefail
+          chmod +x gradlew
+          bash .github/scripts/run-gradle-ci.sh \
+            ./gradlew assembleApkBuilderTemplateDistribution \
+            -x :app:lintVitalAnalyzeInrtRelease \
+            --build-cache \
+            --console=plain \
+            --stacktrace
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build with Gradle (packageInrtRelease)
-        run: ./gradlew packageInrtRelease -x :app:lintVitalAnalyzeInrtRelease
-
-      - name: Build with Gradle (assembleApkBuilderTemplateDistribution)
-        run: ./gradlew assembleApkBuilderTemplateDistribution
+      - name: Upload Gradle failure log
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-gradle-failure-log
+          path: ${{ runner.temp }}/android-gradle-build.log
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload Runtime Kit artifacts
-        id: upload-runtime-kit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: autojs6-runtime-kit
           path: app/build/runtime-kit/autojs6-runtime-kit-*.zip
-        continue-on-error: true
+          if-no-files-found: error
+          compression-level: 0
 
       - name: Upload arm64 artifacts
-        id: upload-arm64-apk
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-arm64-apk
           path: app/build/outputs/apk/app/release/*-arm64-v8a.apk
-        continue-on-error: true
+          if-no-files-found: error
+          compression-level: 0
 
       - name: Upload armv7 artifacts
-        id: upload-armv7-apk
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-armv7-apk
           path: app/build/outputs/apk/app/release/*-v7a.apk
-        continue-on-error: true
+          if-no-files-found: error
+          compression-level: 0
 
       - name: Upload universal artifacts
-        id: upload-universal-apk
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-universal-apk
           path: app/build/outputs/apk/app/release/*-universal.apk
-        continue-on-error: true
+          if-no-files-found: error
+          compression-level: 0
 
-      - name: Upload APK builder template plugin artifacts
-        id: upload-apk-builder-template-plugin-apk
-        uses: actions/upload-artifact@v4
+      - name: Upload APK Builder template plugin artifacts
+        uses: actions/upload-artifact@v7
         with:
           name: release-apk-builder-template-plugin-apk
           path: plugins/apk-builder-template/build/outputs/apk/release/*.apk
-        continue-on-error: true
+          if-no-files-found: error
+          compression-level: 0
