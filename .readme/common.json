@@ -14,5 +14,5 @@
   "latest_rhino_engine_name_with_github_lineno_address": "[v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3)",
   "var_date_rhino_engine_latest_committed": "2025/12/25",
   "var_date_jdk_max_supported": "%CURRENT_DATE%",
-  "var_date_active_maintenance_phase_statistics_since_when": "%CURRENT_DATE%"
+  "var_date_introduction_related_autojs_table_data_updated": "%CURRENT_DATE%"
 }
