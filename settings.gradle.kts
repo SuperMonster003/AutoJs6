@@ -513,6 +513,7 @@ pluginManagement {
         val autoSpecifiedSuffix = " [$auto-$specified]"
         val userSpecifiedSuffix = " [user-$specified]"
         val tomlSpecifiedSuffix = " [toml-$specified]"
+        val agpBundledSuffix = " [using AGP-bundled R8]"
 
     }
 
@@ -716,6 +717,20 @@ pluginManagement {
             return upgradedAgpVersion to identifier.upgradedSuffix
         }
 
+        private fun shouldUseExternalR8ForKotlin(
+            agpVersion: String,
+            minimumR8Version: String,
+        ): Boolean {
+            val agpVersionLine = utils.toVersionParts(agpVersion).first.take(2)
+            val r8VersionLine = utils.toVersionParts(minimumR8Version).first.take(2)
+            val versionLineComparison = utils.compareVersionParts(agpVersionLine, r8VersionLine)
+            return when {
+                versionLineComparison < 0 -> true
+                versionLineComparison > 0 -> false
+                else -> utils.compareVersionStrings(agpVersion, minimumR8Version) < 0
+            }
+        }
+
         private val toml: Map<String, String> = run {
             val lines = file("gradle/libs.versions.toml").also {
                 require(it.isFile) { "File $it doesn't exist" }
@@ -739,46 +754,62 @@ pluginManagement {
             return@run versions
         }
 
-        val classpath = config.libs.filterIsInstance<Classpath>().map { lib ->
-            var suffix = ""
-            val candidateVersion: String = when {
-                lib.version.startsWith("${identifier.auto}:") -> {
-                    val mapType = lib.version.removePrefix("${identifier.auto}:")
-                    val ver = when (mapType) {
-                        "agp" -> versions.agp
-                        "kotlin" -> versions.kotlin
-                        "r8" -> versions.r8
-                        else -> throw Exception("Unknown version ${lib.version} for classpath ${lib.id}")
+        val classpath = run {
+            var selectedAgpVersion: String? = null
+
+            config.libs.filterIsInstance<Classpath>().mapNotNull { lib ->
+                var suffix = ""
+                val candidateVersion: String = when {
+                    lib.version.startsWith("${identifier.auto}:") -> {
+                        val mapType = lib.version.removePrefix("${identifier.auto}:")
+                        val ver = when (mapType) {
+                            "agp" -> versions.agp
+                            "kotlin" -> versions.kotlin
+                            "r8" -> versions.r8
+                            else -> throw Exception("Unknown version ${lib.version} for classpath ${lib.id}")
+                        }
+                        ver.bestMatchingValue?.also {
+                            suffix += ver.bestMatchingOperationHintSuffix
+                        } ?: ver.map.values.minWithOrNull(utils::compareVersionStrings)?.also {
+                            suffix += identifier.fallbackSuffix
+                        } ?: throw Exception("Failed to determine version for classpath \"${lib.id}\"")
                     }
-                    ver.bestMatchingValue?.also {
-                        suffix += ver.bestMatchingOperationHintSuffix
-                    } ?: ver.map.values.minWithOrNull(utils::compareVersionStrings)?.also {
-                        suffix += identifier.fallbackSuffix
-                    } ?: throw Exception("Failed to determine version for classpath \"${lib.id}\"")
-                }
-                lib.version.startsWith("${identifier.toml}:") -> {
-                    toml.getValue(lib.version.removePrefix("${identifier.toml}:")).also {
-                        suffix += identifier.tomlSpecifiedSuffix
+                    lib.version.startsWith("${identifier.toml}:") -> {
+                        toml.getValue(lib.version.removePrefix("${identifier.toml}:")).also {
+                            suffix += identifier.tomlSpecifiedSuffix
+                        }
+                    }
+                    else -> lib.version.also {
+                        suffix += identifier.userSpecifiedSuffix
                     }
                 }
-                else -> lib.version.also {
-                    suffix += identifier.userSpecifiedSuffix
+                val (version, compatibilitySuffix) = when (lib.id) {
+                    "com.android.tools.build:gradle" -> refineAgpVersionForKsp(
+                        candidateVersion,
+                        isUserSpecified = !lib.version.startsWith("${identifier.auto}:"),
+                    )
+                    else -> candidateVersion to ""
                 }
-            }
-            val (version, compatibilitySuffix) = when (lib.id) {
-                "com.android.tools.build:gradle" -> refineAgpVersionForKsp(
-                    candidateVersion,
-                    isUserSpecified = !lib.version.startsWith("${identifier.auto}:"),
-                )
-                else -> candidateVersion to ""
-            }
-            suffix += compatibilitySuffix
-            if (lib.id == "com.android.tools.build:gradle") {
-                System.setProperty("gradle.java.version.coerced.by.gradle", "${getMaxSupportedJavaVersion(version)}")
-                System.setProperty("gradle.java.version.overridden.by.user", "$overriddenJavaVersion")
-            }
-            "${lib.id}:$version".also { notation ->
-                console.versionInfo += "Classpath: \"$notation\"${if (config.isHideConsoleInfoHintSuffix) "" else suffix}"
+                suffix += compatibilitySuffix
+                if (lib.id == "com.android.tools.build:gradle") {
+                    selectedAgpVersion = version
+                    System.setProperty("gradle.java.version.coerced.by.gradle", "${getMaxSupportedJavaVersion(version)}")
+                    System.setProperty("gradle.java.version.overridden.by.user", "$overriddenJavaVersion")
+                }
+
+                if (lib.id == "com.android.tools:r8" && lib.version == "${identifier.auto}:r8") {
+                    val agpVersion = selectedAgpVersion
+                        ?: throw Exception("Failed to determine Android Gradle Plugin version before resolving R8")
+                    if (!shouldUseExternalR8ForKotlin(agpVersion, version)) {
+                        console.versionInfo += "Classpath: \"${lib.id}:$version\"" +
+                                if (config.isHideConsoleInfoHintSuffix) "" else suffix + identifier.agpBundledSuffix
+                        return@mapNotNull null
+                    }
+                }
+
+                "${lib.id}:$version".also { notation ->
+                    console.versionInfo += "Classpath: \"$notation\"${if (config.isHideConsoleInfoHintSuffix) "" else suffix}"
+                }
             }
         }
 

@@ -19,9 +19,9 @@ The resolver applies these constraints together:
    - Data: `gradle/data/kotlin-r8-compat.properties`
    - Source: the official Android Kotlin/D8/R8 compatibility table.
 
-The selected AGP must satisfy both KSP and Gradle. The selected R8 must satisfy the resolved Kotlin family even when the selected AGP embeds an older R8 release.
+The selected AGP must satisfy both KSP and Gradle. The selected R8 must satisfy the resolved Kotlin family when the selected AGP embeds an older R8 release. When the selected AGP version line is already newer than the Kotlin-required R8 line, the build uses AGP's bundled R8 instead of adding an external `com.android.tools:r8` classpath entry.
 
-For example, Kotlin `2.3.x` requires R8 `8.13.19` or newer. Selecting AGP `8.10.x` only because it satisfies KSP is insufficient because that AGP line embeds an older R8 version. The buildscript therefore forces the generated Kotlin-compatible R8 version.
+For example, Kotlin `2.3.x` requires R8 `8.13.19` or newer. Selecting AGP `8.10.x` only because it satisfies KSP is insufficient because that AGP line embeds an older R8 version, so the buildscript injects the generated Kotlin-compatible R8 version. Selecting AGP `9.0.x` or newer already provides a newer bundled R8 line, so the external R8 classpath entry is omitted to avoid downgrading AGP's D8/R8 APIs.
 
 ## Updating the data
 
