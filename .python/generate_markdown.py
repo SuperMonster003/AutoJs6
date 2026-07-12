@@ -16,7 +16,7 @@ import json
 import re
 from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 language_codes = ["zh-Hans", "zh-Hant-HK", "zh-Hant-TW", "en", "fr", "es", "ja", "ko", "ru", "ar"]
@@ -48,48 +48,69 @@ RELATED_AUTOJS_PROJECT_DATES_END_MARKER = "# END RELATED_AUTOJS_PROJECT_DATES"
 # BEGIN RELATED_AUTOJS_PROJECT_DATES
 RELATED_AUTOJS_PROJECT_DATES = {'hyb1996_auto_js': {'repo': 'https://github.com/hyb1996/Auto.js',
                      'created': '2017/01/27',
-                     'recent_active': '2020/03/13'},
+                     'created_commit_url': 'https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39',
+                     'recent_active': '2020/03/13',
+                     'recent_active_commit_url': 'https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0'},
  'auto_js_pro_7': {'created': '2019/03/13', 'recent_active': '2019/07/08'},
  'auto_js_pro_8': {'created': '2019/10/13', 'recent_active': '2021/07/24'},
  'tonyjiangwj_auto_js': {'repo': 'https://github.com/TonyJiangWJ/Auto.js',
                          'created': '2019/11/21',
-                         'recent_active_cached': '2025/08/22'},
+                         'recent_active_cached': '2025/08/22',
+                         'created_commit_cached': 'dbd71b8c0ab0737b2666f2cc1dc5ecd3c82f83fd',
+                         'recent_active_commit_cached': '2fd2cd000e5d9dff2f584ecbb3bf6980bbcba64b'},
  'kkevsekk1_autox': {'repo': 'https://github.com/kkevsekk1/AutoX',
                      'created': '2020/07/24',
-                     'recent_active': '2025/01/07',
+                     'created_commit_url': 'https://github.com/aiselp/AutoX/commit/3f99d7a3457aaa7eb733a30a0c8ba487d352ebf1',
+                     'recent_active': '2024/11/14',
+                     'recent_active_commit_url': 'https://github.com/aiselp/AutoX/commit/e71906d87e33f7ae932bb81622bbce84d6372b7a',
                      'recent_active_status': 'inaccessible'},
  'auto_js_pro_9': {'created': '2021/03/28', 'recent_active': '2023/02/09'},
  'supermonster003_autojs6': {'repo': 'https://github.com/SuperMonster003/AutoJs6',
                              'created': '2021/12/01',
-                             'recent_active_cached': '2026/03/16'},
+                             'recent_active_cached': '2026/03/16',
+                             'created_commit_cached': '99a1d8490fac5b6d55f6f183db59ad833a2064ed',
+                             'recent_active_commit_cached': 'ed3eb10e88db5a8425fd94bdddefa4176e5e1c94'},
  'blackcd318_autojs4': {'repo': 'https://github.com/blackcd318/autojs4',
                         'created': '2021/12/15',
-                        'recent_active': '2023/07/31'},
+                        'recent_active': '2023/07/31',
+                        'created_commit_cached': '64828428dac44f66360b107be177e177b7e449fa',
+                        'recent_active_commit_cached': 'fabfb0bab6c95166afabe9ed56cf7912b34b3a68'},
  'kkevsekk1_autox_v6': {'repo': 'https://github.com/kkevsekk1/AutoX',
                         'created': '2022/05/26',
-                        'recent_active': '2025/01/07',
+                        'created_commit_url': 'https://github.com/aiselp/AutoX/commit/a8c3ebf26d1c5bf0f912b10889efce24261c52ac',
+                        'recent_active': '2024/06/27',
+                        'recent_active_commit_url': 'https://github.com/aiselp/AutoX/commit/015f4f3278ebcb7da6604b41ec0dc69505423e75',
                         'recent_active_status': 'inaccessible'},
  'openautojs_openautojs': {'repo': 'https://github.com/openautojs/openautojs',
                            'created': '2023/02/17',
-                           'recent_active': '2023/04/16'},
+                           'recent_active': '2023/04/16',
+                           'created_commit_cached': '29adb5d1953a56c825decff30fc20de831092f38',
+                           'recent_active_commit_cached': 'f23289d25edbcb1b1b73248006a46462d437f826'},
  'supermonster003_autojs4': {'repo': 'https://github.com/SuperMonster003/AutoJs4',
                              'created': '2023/04/11',
-                             'recent_active_cached': '2026/03/15'},
+                             'recent_active_cached': '2026/03/15',
+                             'created_commit_cached': '8de11699b608be1c1f49f0f10e2e2826f8c77978',
+                             'recent_active_commit_cached': '3fb08269198ebd49a880ab3ca2621383eaa10443'},
  'aiselp_autox': {'repo': 'https://github.com/aiselp/AutoX',
                   'created': '2024/04/21',
-                  'recent_active_cached': '2026/06/13'},
+                  'recent_active_cached': '2026/06/13',
+                  'created_commit_cached': 'c76e80b0d049947b0f3ac49ada2d16d0b10c2800',
+                  'recent_active_commit_cached': 'd4c24eb348b49117b057ee8642e906768c037d94'},
  'ozobiozobi_autoxjs_v6_ozobi': {'repo': 'https://github.com/ozobiozobi/Autoxjs_v6_ozobi',
                                  'created': '2024/10/01',
-                                 'recent_active_cached': '2026/04/16'},
+                                 'recent_active_cached': '2026/04/16',
+                                 'recent_active_commit_cached': 'e8563000af8068f07f821a4a8b23d4457167c1ab'},
  'autox_community_autox': {'repo': 'https://github.com/autox-community/AutoX',
                            'created': '2025/03/30',
-                           'recent_active_cached': '2025/11/29'}}
+                           'recent_active_cached': '2025/11/29',
+                           'created_commit_cached': '696181012293d6fc6c6d6333b80bc5be6c2b442d',
+                           'recent_active_commit_cached': '4dca21b4af5e17e3f6c372d8b74d9700a3c8fa5a'}}
 # END RELATED_AUTOJS_PROJECT_DATES
 
 RELATED_AUTOJS_PROJECT_TABLE_ENTRIES = {
     'hyb1996_auto_js': {
         'project': '[Auto.js](https://github.com/hyb1996/Auto.js)',
-        'app_name': '[Auto.js](https://github.com/TonyJiangWJ/Auto.js/commit/268ec8895bbfa28fc7715154eb15b1c1eaaefd14#diff-5e01f7d37a66e4ca03deefc205d8e7008661cdd0284a05aaba1858e6b7bf9103R2)',
+        'app_name': '[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)',
         'main_developers': '[hyb1996](https://github.com/hyb1996)',
     },
     'auto_js_pro_7': {
@@ -104,12 +125,12 @@ RELATED_AUTOJS_PROJECT_TABLE_ENTRIES = {
     },
     'tonyjiangwj_auto_js': {
         'project': '[Auto.js](https://github.com/TonyJiangWJ/Auto.js)',
-        'app_name': '[Auto.js&#160;M](https://github.com/TonyJiangWJ/Auto.js/commit/268ec8895bbfa28fc7715154eb15b1c1eaaefd14#diff-5e01f7d37a66e4ca03deefc205d8e7008661cdd0284a05aaba1858e6b7bf9103R2)',
+        'app_name': '[Auto.js&#160;M](https://github.com/TonyJiangWJ/Auto.js/blob/268ec8895bbfa28fc7715154eb15b1c1eaaefd14/app/src/main/res/values/strings.xml#L2)',
         'main_developers': '[TonyJiangWJ](https://github.com/TonyJiangWJ)',
     },
     'kkevsekk1_autox': {
         'project': '[AutoX](https://github.com/kkevsekk1/AutoX)',
-        'app_name': '[Autox.js](https://github.com/kkevsekk1/AutoX/commit/8143e4ed893d4af05d22aa791b83a962f9959873#diff-5e01f7d37a66e4ca03deefc205d8e7008661cdd0284a05aaba1858e6b7bf9103R2)',
+        'app_name': '[Autox.js](https://github.com/kkevsekk1/AutoX/blob/8143e4ed893d4af05d22aa791b83a962f9959873/app/src/main/res/values/strings.xml#L2)',
         'app_name_style': 'white-space:pre',
         'main_developers': '[kkevsekk1](https://github.com/kkevsekk1)',
     },
@@ -120,7 +141,7 @@ RELATED_AUTOJS_PROJECT_TABLE_ENTRIES = {
     },
     'supermonster003_autojs6': {
         'project': '[AutoJs6](https://github.com/SuperMonster003/AutoJs6)',
-        'app_name': '[AutoJs6](https://github.com/SuperMonster003/AutoJs6/commit/a8ce1b9acb541e9736c33134be3194c3148a15a3#diff-833a46a97033e77558372a2dce103fd6fee29aaaa899f610022a7aece592ee7bR27)',
+        'app_name': '[AutoJs6](https://github.com/SuperMonster003/AutoJs6/blob/a8ce1b9acb541e9736c33134be3194c3148a15a3/common/src/main/res/values/strings.xml#L27)',
         'main_developers': '[SuperMonster003](https://github.com/SuperMonster003)',
     },
     'blackcd318_autojs4': {
@@ -130,24 +151,24 @@ RELATED_AUTOJS_PROJECT_TABLE_ENTRIES = {
     },
     'kkevsekk1_autox_v6': {
         'project': '[AutoX](https://github.com/kkevsekk1/AutoX)',
-        'app_name': '[Autox.js&#160;v6](https://github.com/kkevsekk1/AutoX/commit/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3#diff-51a0b488f963eb0be6c6599bf5df497313877cf5bdff3950807373912ac1cdc9R130)',
+        'app_name': '[Autox.js&#160;v6](https://github.com/kkevsekk1/AutoX/blob/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3/app/build.gradle#L130)',
         'app_name_style': 'white-space:pre',
         'main_developers': '[wilinz](https://github.com/wilinz) / [aiselp](https://github.com/aiselp)',
     },
     'openautojs_openautojs': {
         'project': '[openautojs](https://github.com/openautojs/openautojs)',
-        'app_name': '[OpenAuto.js](https://github.com/openautojs/openautojs/commit/a11feaad025154de9b453ba70b49e94a6ca8b48a#diff-7d757295fcec3b37c258337e048644c258233d79259152e77baa6d36bb0ec418R2)',
+        'app_name': '[OpenAuto.js](https://github.com/openautojs/openautojs/blob/a11feaad025154de9b453ba70b49e94a6ca8b48a/app/src/main/res-i18n/values/strings.xml#L2)',
         'app_name_style': 'white-space:pre',
         'main_developers': '[openautojs](https://github.com/openautojs)',
     },
     'supermonster003_autojs4': {
         'project': '[AutoJs4](https://github.com/SuperMonster003/AutoJs4)',
-        'app_name': '[AutoJs4](https://github.com/SuperMonster003/AutoJs4/commit/8de11699b608be1c1f49f0f10e2e2826f8c77978)',
+        'app_name': '[AutoJs4](https://github.com/SuperMonster003/AutoJs4/blob/a6b952704b8305aed1bb6265f40acb3598ac80df/app/src/main/res/values/strings.xml#L2)',
         'main_developers': '[SuperMonster003](https://github.com/SuperMonster003)',
     },
     'aiselp_autox': {
         'project': '[AutoX](https://github.com/aiselp/AutoX)',
-        'app_name': '[Autox.js&#160;v7](https://github.com/aiselp/AutoX/commit/484491fd5fe12b8203d0b09c181eb0f471c0ea9f#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R120)',
+        'app_name': '[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)',
         'app_name_style': 'white-space:pre',
         'main_developers': '[aiselp](https://github.com/aiselp)',
     },
@@ -159,7 +180,7 @@ RELATED_AUTOJS_PROJECT_TABLE_ENTRIES = {
     },
     'autox_community_autox': {
         'project': '[AutoX](https://github.com/autox-community/AutoX)',
-        'app_name': '[Autox.js&#160;v6](https://github.com/autox-community/AutoX/commit/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3#diff-51a0b488f963eb0be6c6599bf5df497313877cf5bdff3950807373912ac1cdc9R130)',
+        'app_name': '[Autox.js&#160;v6](https://github.com/autox-community/AutoX/blob/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3/app/build.gradle#L130)',
         'app_name_style': 'white-space:pre',
         'main_developers': '[autox-community](https://github.com/autox-community)',
     },
@@ -351,37 +372,80 @@ def parse_link_header(link_header: str) -> dict:
     return links
 
 
-def github_commit_item_to_date(commit_item) -> str:
+def github_commit_item_to_data(commit_item) -> dict:
     commit = (commit_item or {}).get('commit') or {}
     commit_date = ((commit.get('committer') or {}).get('date')
                    or (commit.get('author') or {}).get('date'))
     if not commit_date:
-        return ''
+        return {}
     try:
-        return datetime.fromisoformat(commit_date.replace('Z', '+00:00')).astimezone(timezone.utc).strftime('%Y/%m/%d')
+        date = datetime.fromisoformat(commit_date.replace('Z', '+00:00')).astimezone(timezone.utc).strftime('%Y/%m/%d')
     except ValueError:
-        return ''
+        return {}
+    return {
+        'date': date,
+        'sha': (commit_item or {}).get('sha', ''),
+    }
 
 
-def fetch_github_commit_date(repo_url: str, oldest: bool = False) -> str:
+def format_github_api_date(date_str: str) -> str:
+    return date_str.replace('/', '-')
+
+
+def fetch_github_commit(repo_url: str, oldest: bool = False, since_date: str = '', until_date: str = '') -> dict:
     repo_path = parse_github_repo_path(repo_url)
     if not repo_path:
-        return ''
+        return {}
 
     owner, repo = repo_path
-    base_url = f"https://api.github.com/repos/{quote(owner, safe='')}/{quote(repo, safe='')}/commits?per_page=1"
+    query = {'per_page': '1'}
+    if since_date:
+        query['since'] = f'{format_github_api_date(since_date)}T00:00:00Z'
+    if until_date:
+        query['until'] = f'{format_github_api_date(until_date)}T23:59:59Z'
+    base_url = f"https://api.github.com/repos/{quote(owner, safe='')}/{quote(repo, safe='')}/commits?{urlencode(query)}"
     data, headers = request_github_json(base_url)
     if not isinstance(data, list) or not data:
-        return ''
+        return {}
 
     if oldest:
         last_url = parse_link_header(headers.get('Link', '')).get('last')
         if last_url:
             oldest_data, _ = request_github_json(last_url)
             if isinstance(oldest_data, list) and oldest_data:
-                return github_commit_item_to_date(oldest_data[0])
+                return github_commit_item_to_data(oldest_data[0])
 
-    return github_commit_item_to_date(data[0])
+    return github_commit_item_to_data(data[0])
+
+
+def fetch_github_commit_by_sha(repo_url: str, commit_sha: str):
+    repo_path = parse_github_repo_path(repo_url)
+    if not repo_path or not commit_sha:
+        return {}
+
+    owner, repo = repo_path
+    url = f"https://api.github.com/repos/{quote(owner, safe='')}/{quote(repo, safe='')}/commits/{quote(commit_sha, safe='')}"
+    data, _ = request_github_json(url)
+    if data is None:
+        return None
+    if not isinstance(data, dict):
+        return {}
+    return github_commit_item_to_data(data)
+
+
+def resolve_cached_commit_for_date(date_data: dict, cache_key: str, repo_url: str, date_str: str) -> tuple[str, bool]:
+    commit_sha = date_data.get(cache_key, '')
+    if not commit_sha or not repo_url or not date_str:
+        return commit_sha, False
+
+    commit_data = fetch_github_commit_by_sha(repo_url, commit_sha)
+    if commit_data is None:
+        return commit_sha, False
+    if commit_data.get('date') == date_str:
+        return commit_sha, False
+
+    date_data.pop(cache_key, None)
+    return '', True
 
 
 def persist_related_autojs_project_dates():
@@ -415,10 +479,18 @@ def persist_related_autojs_project_dates():
         print(f'[warn] Failed to write {source_path}: {e}')
 
 
-def format_table_date(date_str: str) -> str:
+def build_github_commit_url(repo_url: str, commit_sha: str) -> str:
+    if not repo_url or not commit_sha:
+        return ''
+    return f"{repo_url.rstrip('/').removesuffix('.git')}/commit/{commit_sha}"
+
+
+def format_table_date(date_str: str, repo_url: str = '', commit_sha: str = '', commit_url: str = '') -> str:
     if not date_str:
         return '-'
-    return f'`{date_str}`'
+    value = f'`{date_str}`'
+    resolved_commit_url = commit_url or build_github_commit_url(repo_url, commit_sha)
+    return f'[{value}]({resolved_commit_url})' if resolved_commit_url else value
 
 
 def calc_years_between(start_date_str: str, end_date_str: str) -> str:
@@ -447,8 +519,18 @@ def build_related_autojs_project_table_row(record: dict) -> str:
         related_autojs_table_cell(table_entry['project']),
         related_autojs_table_cell(table_entry['app_name'], table_entry.get('app_name_style', 'word-break:keep-all;white-space:nowrap')),
         related_autojs_table_cell(table_entry['main_developers']),
-        related_autojs_table_cell(format_table_date(record['created_date'])),
-        related_autojs_table_cell(format_table_date(record['recent_active_date'])),
+        related_autojs_table_cell(format_table_date(
+            record['created_date'],
+            record['repo_url'],
+            record['created_commit'],
+            record['created_commit_url'],
+        )),
+        related_autojs_table_cell(format_table_date(
+            record['recent_active_date'],
+            record['repo_url'],
+            record['recent_active_commit'],
+            record['recent_active_commit_url'],
+        )),
         related_autojs_table_cell(calc_years_between(record['created_date'], record['recent_active_date'])),
     ]
     return f"| {' | '.join(cells)} |"
@@ -463,33 +545,77 @@ def build_related_autojs_project_data() -> dict:
     for project_key, date_data in RELATED_AUTOJS_PROJECT_DATES.items():
         repo_url = date_data.get('repo', '')
         created_date = date_data.get('created', '')
+        created_commit = date_data.get('created_commit', '')
+        created_commit_url = date_data.get('created_commit_url', '')
+        if not created_commit and not created_commit_url:
+            created_commit, cache_changed = resolve_cached_commit_for_date(date_data, 'created_commit_cached', repo_url, created_date)
+            changed = changed or cache_changed
         if not created_date:
-            created_date = fetch_github_commit_date(repo_url, oldest=True)
-            if created_date:
-                date_data['created'] = created_date
+            commit_data = fetch_github_commit(repo_url, oldest=True)
+            if commit_data:
+                created_date = commit_data.get('date', '')
+                created_commit = commit_data.get('sha', '')
+                if created_date:
+                    date_data['created'] = created_date
+                if created_commit:
+                    date_data['created_commit_cached'] = created_commit
+                changed = True
+        elif repo_url and not created_commit and not created_commit_url:
+            commit_data = fetch_github_commit(repo_url, oldest=True, since_date=created_date, until_date=created_date)
+            created_commit = commit_data.get('sha', '') if commit_data.get('date') == created_date else ''
+            if created_commit:
+                date_data['created_commit_cached'] = created_commit
                 changed = True
 
         fixed_recent_active_date = date_data.get('recent_active', '')
+        recent_active_commit = date_data.get('recent_active_commit', '')
+        recent_active_commit_url = date_data.get('recent_active_commit_url', '')
         if fixed_recent_active_date:
             recent_active_date = fixed_recent_active_date
+            if not recent_active_commit and not recent_active_commit_url:
+                recent_active_commit, cache_changed = resolve_cached_commit_for_date(date_data, 'recent_active_commit_cached', repo_url, recent_active_date)
+                changed = changed or cache_changed
+            if repo_url and not recent_active_commit and not recent_active_commit_url:
+                commit_data = fetch_github_commit(repo_url, since_date=recent_active_date, until_date=recent_active_date)
+                recent_active_commit = commit_data.get('sha', '') if commit_data.get('date') == recent_active_date else ''
+                if recent_active_commit:
+                    date_data['recent_active_commit_cached'] = recent_active_commit
+                    changed = True
         else:
-            fetched_recent_active_date = fetch_github_commit_date(repo_url)
-            if fetched_recent_active_date:
-                recent_active_date = fetched_recent_active_date
-                if date_data.get('recent_active_cached') != fetched_recent_active_date:
-                    date_data['recent_active_cached'] = fetched_recent_active_date
+            commit_data = fetch_github_commit(repo_url)
+            if commit_data:
+                recent_active_date = commit_data.get('date', '')
+                recent_active_commit = commit_data.get('sha', '')
+                if date_data.get('recent_active_cached') != recent_active_date:
+                    date_data['recent_active_cached'] = recent_active_date
+                    changed = True
+                if recent_active_commit and date_data.get('recent_active_commit_cached') != recent_active_commit:
+                    date_data['recent_active_commit_cached'] = recent_active_commit
                     changed = True
             else:
                 recent_active_date = date_data.get('recent_active_cached') or current_date
+                if not recent_active_commit:
+                    recent_active_commit, cache_changed = resolve_cached_commit_for_date(
+                        date_data,
+                        'recent_active_commit_cached',
+                        repo_url,
+                        recent_active_date,
+                    )
+                    changed = changed or cache_changed
 
         prefix = f'data_related_autojs_project_{project_key}'
-        rendered_data[f'{prefix}_created_on'] = format_table_date(created_date)
-        rendered_data[f'{prefix}_recent_active_on'] = format_table_date(recent_active_date)
+        rendered_data[f'{prefix}_created_on'] = format_table_date(created_date, repo_url, created_commit, created_commit_url)
+        rendered_data[f'{prefix}_recent_active_on'] = format_table_date(recent_active_date, repo_url, recent_active_commit, recent_active_commit_url)
         rendered_data[f'{prefix}_active_maintenance_phase'] = calc_years_between(created_date, recent_active_date)
         table_records.append({
             'project_key': project_key,
+            'repo_url': repo_url,
             'created_date': created_date,
+            'created_commit': created_commit,
+            'created_commit_url': created_commit_url,
             'recent_active_date': recent_active_date,
+            'recent_active_commit': recent_active_commit,
+            'recent_active_commit_url': recent_active_commit_url,
         })
 
     if changed:
