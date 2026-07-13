@@ -1,86 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:orientation="vertical"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <org.autojs.autojs.ui.explorer.ExplorerProjectToolbar
-            android:id="@+id/project_toolbar"
+    <LinearLayout
+            android:id="@+id/explorer_content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="2dp"
-            android:foreground="?selectableItemBackground"
-            app:cardElevation="0.97dp"
-            app:cardUseCompatPadding="true" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        <org.autojs.autojs.ui.explorer.ExplorerProjectToolbar
+                android:id="@+id/project_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:foreground="?selectableItemBackground"
+                app:cardElevation="0.97dp"
+                app:cardUseCompatPadding="true" />
+
+        <androidx.recyclerview.widget.ThemeColorRecyclerView
+                android:id="@+id/explorer_item_list"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:clipToPadding="false" />
+
+    </LinearLayout>
 
     <LinearLayout
             android:id="@+id/selection_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="?android:itemBackground"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:visibility="gone">
-
-        <ImageButton
-                android:id="@+id/selection_close"
-                android:layout_width="44dp"
-                android:layout_height="match_parent"
-                android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="@string/text_clear_file_selection"
-                android:padding="10dp"
-                android:src="@drawable/ic_close_gray600_48dp"
-                app:tint="@color/project_toolbar_button" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:clickable="true"
+            android:elevation="8dp"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
 
         <TextView
                 android:id="@+id/selection_count"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
                 android:ellipsize="end"
-                android:gravity="center_vertical"
+                android:gravity="center"
                 android:maxLines="1"
-                android:textColor="?android:textColorPrimary"
-                android:textSize="16sp" />
+                android:paddingHorizontal="16dp"
+                android:textSize="13sp"
+                tools:text="3 selected" />
 
-        <ImageButton
-                android:id="@+id/selection_copy"
-                android:layout_width="44dp"
-                android:layout_height="match_parent"
-                android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="@string/text_copy_to"
-                android:padding="10dp"
-                android:src="@drawable/ic_content_copy_black_48dp"
-                app:tint="@color/project_toolbar_button" />
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/day_night_alpha_20" />
 
-        <ImageButton
-                android:id="@+id/selection_move"
-                android:layout_width="44dp"
-                android:layout_height="match_parent"
-                android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="@string/text_move_to"
-                android:padding="10dp"
-                android:src="@drawable/ic_drive_file_move_black_24dp"
-                app:tint="@color/project_toolbar_button" />
+        <LinearLayout
+                android:id="@+id/selection_actions"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
 
-        <ImageButton
-                android:id="@+id/selection_delete"
-                android:layout_width="44dp"
-                android:layout_height="match_parent"
-                android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="@string/text_delete"
-                android:padding="10dp"
-                android:src="@drawable/ic_key_store_delete"
-                app:tint="@color/project_toolbar_button" />
+            <LinearLayout
+                    android:id="@+id/selection_close"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?selectableItemBackground"
+                    android:contentDescription="@string/text_clear_file_selection"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="2dp">
+
+                <ImageView
+                        android:id="@+id/selection_close_icon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_close_black_24dp"
+                        tools:ignore="ContentDescription" />
+
+                <TextView
+                        android:id="@+id/selection_close_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/text_exit"
+                        android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/selection_copy"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?selectableItemBackground"
+                    android:contentDescription="@string/text_copy_to"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="2dp">
+
+                <ImageView
+                        android:id="@+id/selection_copy_icon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_content_copy_black_24dp"
+                        tools:ignore="ContentDescription" />
+
+                <TextView
+                        android:id="@+id/selection_copy_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/text_copy_to"
+                        android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/selection_move"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?selectableItemBackground"
+                    android:contentDescription="@string/text_move_to"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="2dp">
+
+                <ImageView
+                        android:id="@+id/selection_move_icon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_drive_file_move_black_24dp"
+                        tools:ignore="ContentDescription" />
+
+                <TextView
+                        android:id="@+id/selection_move_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/text_move_to"
+                        android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/selection_delete"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="?selectableItemBackground"
+                    android:contentDescription="@string/text_delete"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="2dp">
+
+                <ImageView
+                        android:id="@+id/selection_delete_icon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_delete_black_24dp"
+                        tools:ignore="ContentDescription" />
+
+                <TextView
+                        android:id="@+id/selection_delete_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/text_delete"
+                        android:textSize="14sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.ThemeColorRecyclerView
-            android:id="@+id/explorer_item_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-</LinearLayout>
+</FrameLayout>

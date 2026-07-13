@@ -1,18 +1,28 @@
 package org.autojs.autojs.ui.explorer
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -48,7 +58,9 @@ import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.storage.history.VersionHistoryController
+import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorHelper
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorManagerCompat
 import org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
 import org.autojs.autojs.ui.common.ScriptLoopDialog
@@ -66,8 +78,10 @@ import org.autojs.autojs.ui.widget.BindableViewHolder
 import org.autojs.autojs.ui.widget.FirstCharView
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.EnvironmentUtils.externalStoragePath
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.setForceShowIconCompat
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.WorkingDirectoryUtils
@@ -84,6 +98,7 @@ import java.util.LinkedList
 import java.util.Objects
 import java.util.Stack
 import java.util.concurrent.Callable
+import kotlin.math.roundToInt
 
 /**
  * Created by Stardust on Aug 21, 2017.
@@ -133,6 +148,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private val mExplorerAdapter = ExplorerAdapter()
     private var mFilter: ((ExplorerItem) -> Boolean)? = null
     private val mSelectedItems = LinkedHashMap<String, ExplorerItem>()
+    private var mSelectionToolbarShown = false
+    private var mSelectionNavigationBarApplied = false
+    private var mBlockListScrollUntilTouchRelease = false
+    private var mNavigationBarInsetBottom = 0
+    private var mExtraListPaddingBottom = 0
+    private var mListClipToPadding = false
 
     private var mOnItemOperateListener: OnItemOperateListener? = null
 
@@ -185,6 +206,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 this.explorerItemListView = it
                 it.adapter = mExplorerAdapter
                 it.setHasFixedSize(true)
+                setupSelectionTouchBlocker(it)
                 it.layoutManager = GridLayoutManager(this.context, 2).also { manager ->
                     manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                         override fun getSpanSize(position: Int) = when {
@@ -200,6 +222,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 mProjectToolbar = it
             }
             setupSelectionToolbar(binding)
+            applySelectionToolbarTheme(ThemeColorManager.currentThemeColor)
         }
         restoreSortConfig()
         setOnRefreshListener(this)
@@ -210,6 +233,178 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         binding.selectionCopy.setOnClickListener { copySelectedItems() }
         binding.selectionMove.setOnClickListener { moveSelectedItems() }
         binding.selectionDelete.setOnClickListener { deleteSelectedItems() }
+    }
+
+    fun excludeListPaddingFromBottomNavigationBar(extraPaddingBottomDp: Float = 0F, clipToPadding: Boolean = false) {
+        val recyclerView = explorerItemListView ?: return
+        mExtraListPaddingBottom = DisplayUtils.dpToPx(extraPaddingBottomDp).roundToInt()
+        mListClipToPadding = clipToPadding
+        recyclerView.clipToPadding = clipToPadding
+        ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { _, insets ->
+            mNavigationBarInsetBottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            recyclerView.clipToPadding = mListClipToPadding
+            updateSelectionToolbarBottomInset()
+            updateExplorerListBottomPadding()
+            insets
+        }
+        ViewCompat.requestApplyInsets(recyclerView)
+        recyclerView.post { ViewCompat.requestApplyInsets(recyclerView) }
+    }
+
+    private fun setupSelectionTouchBlocker(recyclerView: RecyclerView) {
+        recyclerView.addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                if (!mBlockListScrollUntilTouchRelease) {
+                    return false
+                }
+                if (e.actionMasked == MotionEvent.ACTION_UP || e.actionMasked == MotionEvent.ACTION_CANCEL) {
+                    unblockListScrollAfterLongPress()
+                }
+                return true
+            }
+
+            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
+                if (e.actionMasked == MotionEvent.ACTION_UP || e.actionMasked == MotionEvent.ACTION_CANCEL) {
+                    unblockListScrollAfterLongPress()
+                }
+            }
+        })
+    }
+
+    private fun blockListScrollUntilTouchRelease() {
+        mBlockListScrollUntilTouchRelease = true
+        isEnabled = false
+        explorerItemListView?.let {
+            it.stopScroll()
+            it.parent?.requestDisallowInterceptTouchEvent(true)
+        }
+    }
+
+    private fun unblockListScrollAfterLongPress() {
+        if (!mBlockListScrollUntilTouchRelease) {
+            return
+        }
+        mBlockListScrollUntilTouchRelease = false
+        isEnabled = true
+        explorerItemListView?.parent?.requestDisallowInterceptTouchEvent(false)
+    }
+
+    override fun setThemeColor(themeColor: ThemeColor) {
+        super.setThemeColor(themeColor)
+        applySelectionToolbarTheme(themeColor)
+        if (mSelectionToolbarShown) {
+            applySelectionNavigationBarColor(themeColor)
+        }
+    }
+
+    private fun applySelectionToolbarTheme(themeColor: ThemeColor = ThemeColorManager.currentThemeColor) {
+        val backgroundColor = themeColor.colorPrimary
+        val foregroundColor = ViewUtils.getDayOrNightColorByLuminance(context, backgroundColor)
+        val foregroundTint = ColorStateList.valueOf(foregroundColor)
+        binding?.let { binding ->
+            binding.selectionToolbar.setBackgroundColor(backgroundColor)
+            listOf(
+                binding.selectionCount,
+                binding.selectionCloseText,
+                binding.selectionCopyText,
+                binding.selectionMoveText,
+                binding.selectionDeleteText,
+            ).forEach { it.setTextColor(foregroundColor) }
+            listOf<ImageView>(
+                binding.selectionCloseIcon,
+                binding.selectionCopyIcon,
+                binding.selectionMoveIcon,
+                binding.selectionDeleteIcon,
+            ).forEach { ImageViewCompat.setImageTintList(it, foregroundTint) }
+        }
+    }
+
+    private fun setSelectionToolbarShown(shown: Boolean) {
+        val toolbar = binding?.selectionToolbar ?: return
+        toolbar.animate().cancel()
+        if (shown) {
+            applySelectionToolbarTheme()
+            applySelectionNavigationBarColor()
+            if (mSelectionToolbarShown && toolbar.isVisible) {
+                toolbar.translationY = 0F
+                updateExplorerListBottomPadding()
+                return
+            }
+            mSelectionToolbarShown = true
+            toolbar.isVisible = true
+            toolbar.translationY = selectionToolbarHeight().toFloat()
+            toolbar.animate()
+                .translationY(0F)
+                .setDuration(SELECTION_TOOLBAR_SHOW_DURATION)
+                .setInterpolator(DecelerateInterpolator())
+                .withEndAction { updateExplorerListBottomPadding() }
+                .start()
+            updateExplorerListBottomPadding()
+            toolbar.post { updateExplorerListBottomPadding() }
+            return
+        }
+        if (!mSelectionToolbarShown && !toolbar.isVisible) {
+            restoreSelectionNavigationBarColor()
+            updateExplorerListBottomPadding()
+            return
+        }
+        mSelectionToolbarShown = false
+        toolbar.animate()
+            .translationY(selectionToolbarHeight().toFloat())
+            .setDuration(SELECTION_TOOLBAR_HIDE_DURATION)
+            .setInterpolator(AccelerateInterpolator())
+            .withEndAction {
+                if (!isInSelectionMode) {
+                    toolbar.isVisible = false
+                    toolbar.translationY = 0F
+                    restoreSelectionNavigationBarColor()
+                    updateExplorerListBottomPadding()
+                }
+            }
+            .start()
+    }
+
+    private fun updateSelectionToolbarBottomInset() {
+        binding?.selectionToolbar?.updatePadding(bottom = mNavigationBarInsetBottom)
+    }
+
+    private fun updateExplorerListBottomPadding() {
+        val recyclerView = explorerItemListView ?: return
+        val bottomPadding = when {
+            isInSelectionMode || mSelectionToolbarShown -> selectionToolbarHeight()
+            else -> mNavigationBarInsetBottom
+        }
+        recyclerView.updatePadding(bottom = mExtraListPaddingBottom + bottomPadding)
+    }
+
+    private fun selectionToolbarHeight(): Int {
+        val toolbar = binding?.selectionToolbar
+        val fallbackHeight = DisplayUtils.dpToPx(SELECTION_TOOLBAR_CONTENT_HEIGHT_DP).roundToInt() + mNavigationBarInsetBottom
+        return toolbar?.height?.takeIf { it > 0 } ?: fallbackHeight
+    }
+
+    private fun applySelectionNavigationBarColor(themeColor: ThemeColor = ThemeColorManager.currentThemeColor) {
+        val activity = context.findActivity() ?: return
+        ViewUtils.setNavigationBarBackgroundColor(activity, themeColor.colorPrimary)
+        ViewUtils.setNavigationBarIconLightByColorLuminance(activity, themeColor.colorPrimary)
+        mSelectionNavigationBarApplied = true
+    }
+
+    private fun restoreSelectionNavigationBarColor() {
+        if (!mSelectionNavigationBarApplied) {
+            return
+        }
+        context.findActivity()?.let { activity ->
+            ViewUtils.setNavigationBarBackgroundColor(activity, Color.TRANSPARENT)
+            ViewUtils.setNavigationBarIconLight(activity, ViewUtils.isNightModeEnabled)
+        }
+        mSelectionNavigationBarApplied = false
+    }
+
+    private tailrec fun Context.findActivity(): Activity? = when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
     }
 
     @Subscribe
@@ -266,6 +461,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         super.onDetachedFromWindow()
         mExplorer?.unregisterChangeListener(this)
         mPageStateHistory.clear()
+        unblockListScrollAfterLongPress()
+        restoreSelectionNavigationBarColor()
         binding = null
 
         // Cancel pending refresh to avoid late UI updates and concurrent iterations.
@@ -417,11 +614,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         mExplorerAdapter.notifyDataSetChanged()
     }
 
-    private fun enterSelectionMode(item: ExplorerItem) {
-        if (!isItemSelectable(item)) return
+    private fun enterSelectionMode(item: ExplorerItem): Boolean {
+        if (!isItemSelectable(item)) return false
         mSelectedItems[item.path] = item
         updateSelectionToolbar()
         notifyDataSetChanged()
+        return true
     }
 
     private fun toggleItemSelection(item: ExplorerItem) {
@@ -453,13 +651,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private fun updateSelectionToolbar() {
         binding?.let { binding ->
             val selectedCount = mSelectedItems.size
-            binding.selectionToolbar.isVisible = selectedCount > 0
             binding.selectionCount.text = context.getString(R.string.text_selected_items, selectedCount)
 
             val selectedItems = mSelectedItems.values
             updateSelectionActionState(binding.selectionCopy, selectedItems.all { it.canCopy() })
             updateSelectionActionState(binding.selectionMove, selectedItems.all { it.canMove() })
             updateSelectionActionState(binding.selectionDelete, selectedItems.all { it.canDelete() })
+            setSelectionToolbarShown(selectedCount > 0)
         }
         mProjectToolbar.updateVisibility()
     }
@@ -929,7 +1127,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
             mItem.setOnClickListener { withItemSelected { onItemClick() } }
             mItem.setOnLongClickListener {
-                withItemSelected { enterSelectionMode(mExplorerItem) }
+                if (withItemSelected { enterSelectionMode(mExplorerItem) }) {
+                    blockListScrollUntilTouchRelease()
+                }
                 true
             }
         }
@@ -959,13 +1159,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { list ->
+                    val (shouldEditShow, shouldRunShow, shouldInstallShow, shouldInfoShow) = list
+                    val hasActionIcons = shouldEditShow || shouldRunShow || shouldInstallShow || shouldInfoShow
                     if (isInSelectionMode) {
-                        setVisibilityIf(mActionIconContainer, false)
-                        setVisibilityIf(mOptions, false)
+                        setVisibilityIf(mActionIconContainer, if (hasActionIcons) INVISIBLE else GONE)
+                        setVisibilityIf(mOptions, INVISIBLE)
                         return@subscribe
                     }
-                    val (shouldEditShow, shouldRunShow, shouldInstallShow, shouldInfoShow) = list
-                    if (shouldEditShow || shouldRunShow || shouldInstallShow || shouldInfoShow) {
+                    if (hasActionIcons) {
                         setVisibilityIf(mEdit, shouldEditShow)
                         setVisibilityIf(mRun, shouldRunShow)
                         setVisibilityIf(mInstall, shouldInstallShow)
@@ -1073,9 +1274,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
         private fun bindSelectionState(item: ExplorerItem) {
             mItem.setBackgroundColor(context.getColor(if (isItemSelected(item)) R.color.window_background_selected else R.color.item_background_dark))
-            setVisibilityIf(mOptions, !isInSelectionMode)
+            setVisibilityIf(mOptions, if (isInSelectionMode) INVISIBLE else VISIBLE)
             if (isInSelectionMode) {
-                setVisibilityIf(mActionIconContainer, false)
+                if (mActionIconContainer.isVisible) {
+                    setVisibilityIf(mActionIconContainer, INVISIBLE)
+                }
             }
         }
 
@@ -1197,8 +1400,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private val binding = ExplorerDirectoryBinding.bind(itemView).also {
             it.item.setOnClickListener { withItemSelected { onItemClick() } }
             it.item.setOnLongClickListener {
-                withItemSelected {
+                val enteredSelectionMode = withItemSelected {
                     mExplorerPage?.let { page -> enterSelectionMode(page) }
+                } == true
+                if (enteredSelectionMode) {
+                    blockListScrollUntilTouchRelease()
                 }
                 true
             }
@@ -1225,7 +1431,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mDirDate.text = PFile.getFullDateString(data.lastModified())
             mIcon.setImageResource(ExplorerViewHelper.getIconRes(data))
             binding.item.setCardBackgroundColor(context.getColor(if (isItemSelected(data)) R.color.window_background_selected else R.color.item_background))
-            mOptions.visibility = if (isInSelectionMode || data is ExplorerSamplePage) GONE else VISIBLE
+            mOptions.visibility = when {
+                data is ExplorerSamplePage -> GONE
+                isInSelectionMode -> INVISIBLE
+                else -> VISIBLE
+            }
             mExplorerPage = data
         }
 
@@ -1450,6 +1660,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     companion object {
         private const val LOG_TAG = "ExplorerView"
+        private const val SELECTION_TOOLBAR_CONTENT_HEIGHT_DP = 81F
+        private const val SELECTION_TOOLBAR_SHOW_DURATION = 120L
+        private const val SELECTION_TOOLBAR_HIDE_DURATION = 90L
 
         @Suppress("ConstPropertyName")
         private const val positionOfCategoryDir = 0
@@ -1473,13 +1686,15 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     private fun ExplorerProjectToolbar.updateVisibility() {
-        if (isInSelectionMode) {
+        if (!isProjectRecognitionEnabled || !ProjectConfig.isProject(currentPage)) {
             visibility = GONE
-        } else if (isProjectRecognitionEnabled && ProjectConfig.isProject(currentPage)) {
-            visibility = VISIBLE
-            setProject(currentPage.toScriptFile())
+            return
+        }
+        setProject(currentPage.toScriptFile())
+        visibility = if (isInSelectionMode) {
+            INVISIBLE
         } else {
-            visibility = GONE
+            VISIBLE
         }
     }
 
