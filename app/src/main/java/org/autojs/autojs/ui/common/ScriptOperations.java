@@ -982,6 +982,7 @@ public class ScriptOperations {
 
     private void moveToTrashWithProgress(final ScriptFile scriptFile) {
         boolean isDir = scriptFile.isDirectory();
+        boolean isProject = ProjectConfig.isProject(scriptFile);
         int titleRes = isDir ? R.string.text_move_folder_to_trash : R.string.text_move_file_to_trash;
 
         Observable.fromCallable(() -> {
@@ -1036,14 +1037,7 @@ public class ScriptOperations {
                     switch (result) {
                         case 1 -> {
                             showMessage(R.string.text_moved_to_trash);
-
-                            // Refresh explorer reliably for both file and directory.
-                            // zh-CN: 对文件与目录均使用更可靠的刷新方式.
-                            notifyChildrenChangedAtItsParent(scriptFile);
-
-                            // Keep existing item removed notification as best-effort.
-                            // zh-CN: 保留原有的 itemRemoved 通知, 作为尽力而为的补充.
-                            notifyFileRemoved(ProjectConfig.isProject(scriptFile), scriptFile.isDirectory(), scriptFile);
+                            notifyFileRemoved(isProject, isDir, scriptFile);
                         }
                         case -1 -> showMessage(R.string.text_operation_aborted);
                         default -> showMessage(R.string.text_failed_to_delete);
