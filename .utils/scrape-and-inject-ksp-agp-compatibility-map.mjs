@@ -5,6 +5,8 @@ import { httpFetch } from './utils/fetch.mjs';
 import { toUpdatedStamp } from './utils/date.mjs';
 import { updateGradleLinesData } from './utils/update-helper.mjs';
 import { compareVersionStringsDescending } from './utils/versioning.mjs';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const RELEASES_URL = 'https://api.github.com/repos/google/ksp/releases';
 const SOURCE_PATH = 'gradle-plugin/src/main/kotlin/com/google/devtools/ksp/gradle/utils/agpUtils.kt';
@@ -17,6 +19,9 @@ const HEADERS = {
     'user-agent': 'autojs6-ksp-agp-compat-scraper',
     ...(GITHUB_TOKEN ? { 'authorization': `Bearer ${GITHUB_TOKEN}` } : {}),
 };
+
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+process.chdir(SCRIPT_DIR);
 
 /**
  * @param {number} milliseconds
@@ -31,9 +36,9 @@ function delay(milliseconds) {
  * failures such as authentication, rate-limit, and missing-source responses.
  *
  * @param {string} url
- * @param {FetchOptions} options
+ * @param {import("./utils/fetch.mjs").HttpFetchOptions} options
  * @param {string} label
- * @returns {Promise<unknown>}
+ * @returns {Promise<ReleasesData>}
  */
 async function fetchWithRetry(url, options, label) {
     let lastError;
@@ -64,7 +69,7 @@ async function fetchWithRetry(url, options, label) {
  * @returns {boolean}
  */
 function isStandaloneKspTag(tag) {
-    return /^\d+\.\d+\.\d+(?:\.\d+)?(?:-[A-Za-z][A-Za-z0-9.-]*)?$/.test(tag);
+    return /^\d+\.\d+\.\d+(?:\.\d+)?(?:-[A-Za-z][A-Za-z0-9.]*)?$/.test(tag);
 }
 
 /**

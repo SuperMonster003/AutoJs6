@@ -104,11 +104,16 @@ export async function getLatestCommitDate(owner, repo) {
 }
 
 /**
+ * @typedef {Object} HttpFetchOptions
+ * @property {Object<string, any>} [query={}] - Query parameters to append to the URL
+ * @property {import('http').OutgoingHttpHeaders} [headers={}] - HTTP headers
+ * @property {number} [timeout=15000] - Request timeout in milliseconds
+ * @property {'GET'|'POST'|'PUT'|'DELETE'|'HEAD'|'PATCH'} [method='GET'] - HTTP method
+ */
+
+/**
  * @param {string} url
- * @param {Object} [options={}]
- * @param {Object<string, any>} [options.query={}]
- * @param {import('http').OutgoingHttpHeaders} [options.headers={}]
- * @param {number} [options.timeout=15000]
+ * @param {HttpFetchOptions} [options={}]
  * @returns {Promise<*>}
  */
 export function httpFetch(url, options = {}) {

@@ -2,14 +2,20 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { fetchStatistics } from './fetch-and-parse-autojs6-merged-pr-commits-statistics.mjs';
 import { objectToLines } from './utils/format.mjs';
 import { printLinesDiffs } from './utils/print.mjs';
 import { toYYYYMMDD } from './utils/date.mjs';
 
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = path.resolve(SCRIPT_DIR, '..');
+const README_TEMPLATE_PATH = path.join(PROJECT_ROOT, '.readme', 'template_readme.md');
+const COMMON_JSON_PATH = path.join(PROJECT_ROOT, '.readme', 'common.json');
+const CONTRIBUTION_TABLE_REGEX = /(\{\{\s*p_contribution_table_thank_all_contributors\s*\}\}\.\r?\n\r?\n)(\|[^\r\n]*table_header_contribution_contributors[^\r\n]*\r?\n)(\|[\s|:\-]+\r?\n)((?:\|[^\r\n]*\r?\n)+)(\r?\n\{\{\s*p_contribution_table_data_updated_on\s*\}\}\.)/i;
+
 const updateCommonJsonFile = () => {
-    const commonJsonPath = path.resolve(process.cwd(), '../.readme/common.json');
-    const commonRaw = fs.readFileSync(commonJsonPath, 'utf8');
+    const commonRaw = fs.readFileSync(COMMON_JSON_PATH, 'utf8');
     const commonObj = JSON.parse(commonRaw);
 
     const updatedCommon = {
@@ -20,7 +26,7 @@ const updateCommonJsonFile = () => {
     const from = JSON.stringify(commonObj);
     const to = JSON.stringify(updatedCommon);
     if (from !== to) {
-        fs.writeFileSync(commonJsonPath, JSON.stringify(updatedCommon, null, 2), 'utf8');
+        fs.writeFileSync(COMMON_JSON_PATH, JSON.stringify(updatedCommon, null, 2), 'utf8');
         console.log('[common.json] Updated (contribution statistics date)');
         printLinesDiffs(objectToLines(commonObj), objectToLines(updatedCommon), { regexForKeyMatching: /"\w+"(?=:)/ });
     }
@@ -59,27 +65,31 @@ const markdownToLines = (md) => {
 };
 
 (async function main() {
-    const filePath = '../.readme/template_readme.md';
-    const filename = path.basename(filePath);
+    const filename = path.basename(README_TEMPLATE_PATH);
 
     const stats = await fetchStatistics();
-    const newMarkdown = stats.map(stat => `| ${stat.contributorMarkdown} | ${stat.commitsCountMarkdown} | ${stat.latestCommitMarkdown} |`).join('\n');
+    const newMarkdownRows = stats.map(stat => `| ${stat.contributorMarkdown} | ${stat.commitsCountMarkdown} | ${stat.latestCommitMarkdown} |`);
     let oldMarkdown = null;
+    let matchedContributionTable = false;
 
-    const raw = fs.readFileSync(filePath, { encoding: 'utf-8' });
-    const contributionSectionRegex = /(table_header_contribution_\w+.+\r?\n)([\s|:\-]+\r?\n)((?:\|\s*<span style=".+(\r?\n)+)+)/i;
-    const updated = raw.replace(contributionSectionRegex, (_, headerLine, separatorLine, markdown, eol) => {
-        oldMarkdown = markdown
-        return `${headerLine}${separatorLine}${newMarkdown}${eol}`;
+    const raw = fs.readFileSync(README_TEMPLATE_PATH, { encoding: 'utf-8' });
+    const updated = raw.replace(CONTRIBUTION_TABLE_REGEX, (_, leadingText, headerLine, separatorLine, markdown, trailingText) => {
+        matchedContributionTable = true;
+        oldMarkdown = markdown;
+        const eol = headerLine.includes('\r\n') ? '\r\n' : '\n';
+        return `${leadingText}${headerLine}${separatorLine}${newMarkdownRows.join(eol)}${eol}${trailingText}`;
     });
+    if (!matchedContributionTable) {
+        throw new Error(`Failed to locate contribution table in ${README_TEMPLATE_PATH}`);
+    }
 
     const from = raw.replace(/\s+/g, '');
     const to = updated.replace(/\s+/g, '');
     if (from !== to) {
-        fs.writeFileSync(filePath, updated, { encoding: 'utf-8' });
+        fs.writeFileSync(README_TEMPLATE_PATH, updated, { encoding: 'utf-8' });
         console.log(`[${filename}] Updated (contribution statistics list)`);
         if (oldMarkdown) {
-            printLinesDiffs(markdownToLines(oldMarkdown), markdownToLines(newMarkdown));
+            printLinesDiffs(markdownToLines(oldMarkdown), markdownToLines(newMarkdownRows.join('\n')));
         }
         updateCommonJsonFile();
     } else {
