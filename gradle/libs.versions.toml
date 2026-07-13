@@ -79,7 +79,6 @@ leakcanary = "2.14"
 licensesdialog = "2.2.0"
 material = "1.13.0"
 materialprogressbar = "1.6.1"
-multidex = "2.0.1"
 opencc = "1.2.2"
 paho-android-service = "1.1.1"
 paho-client-mqttv3 = "1.2.5"
@@ -157,7 +156,6 @@ localbroadcastmanager = { module = "androidx.localbroadcastmanager:localbroadcas
 log4j = { module = "log4j:log4j", version.ref = "log4j" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 materialprogressbar = { module = "me.zhanghai.android.materialprogressbar:library", version.ref = "materialprogressbar" }
-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 opencc = { module = "com.github.brooklet:android-opencc", version.ref = "opencc" }
 paho-android-service = { module = "org.eclipse.paho:org.eclipse.paho.android.service", version.ref = "paho-android-service" }
