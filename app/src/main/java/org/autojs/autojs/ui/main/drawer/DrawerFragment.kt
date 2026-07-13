@@ -633,7 +633,7 @@ open class DrawerFragment : Fragment() {
             title = R.string.text_about_app_and_developer,
         ).apply {
             setAction { AboutActivity.launch(mContext) }
-            subtitle = BuildConfig.VERSION_NAME
+            subtitle = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
         }
     }
 
