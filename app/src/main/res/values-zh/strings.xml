@@ -656,6 +656,7 @@
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">正在检查更新...</string>
     <string name="text_choose_delete_strategy">选择删除策略</string>
     <string name="text_choose_restore_path">选择恢复路径</string>
+    <string name="text_confirm_overwrite_selected_items">部分目标项目已存在, 是否覆盖</string>
     <string name="text_city_or_locality">城市或区域</string>
     <string name="text_class_or_package_name">类/包名</string>
     <string name="text_clean">清理</string>
@@ -761,6 +762,7 @@
     <string name="text_delete_all">删除全部</string>
     <string name="text_delete_file">删除文件</string>
     <string name="text_delete_folder">删除文件夹</string>
+    <string name="text_delete_items">删除项目</string>
     <string name="text_delete_line">删除行</string>
     <string name="text_delete_revision_confirm">是否永久删除此版本记录</string>
     <string name="text_deleting">正在删除</string>
@@ -1053,6 +1055,7 @@
     <string name="text_move_file_to_trash">将文件移入回收站</string>
     <string name="text_move_folder">移动文件夹</string>
     <string name="text_move_folder_to_trash">将文件夹移入回收站</string>
+    <string name="text_move_items_to_trash">将项目移入回收站</string>
     <string name="text_move_to">移动到</string>
     <string name="text_move_to_trash_failed">移入回收站失败</string>
     <string name="text_moved_to_trash">已移入回收站</string>
@@ -1395,6 +1398,7 @@
     <string name="text_select_file_to_upload">选择要上传的文件</string>
     <string name="text_select_icon">选择图标</string>
     <string name="text_select_image">选择图片</string>
+    <string name="text_selected_items" formatted="true">已选择 %1$d 项</string>
     <string name="text_selected_plugin">已选择插件</string>
     <string name="text_send">发送</string>
     <string name="text_send_shortcut">创建快捷方式</string>

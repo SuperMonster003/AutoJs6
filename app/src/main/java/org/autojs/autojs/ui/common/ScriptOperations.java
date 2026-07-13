@@ -391,8 +391,16 @@ public class ScriptOperations {
         return copyOrMoveInternal(source, false);
     }
 
+    public Observable<List<ScriptFile>> copy(@NonNull List<ScriptFile> sources) {
+        return copyOrMoveInternal(sources, false);
+    }
+
     public Observable<ScriptFile> move(@NonNull ScriptFile source) {
         return copyOrMoveInternal(source, true);
+    }
+
+    public Observable<List<ScriptFile>> move(@NonNull List<ScriptFile> sources) {
+        return copyOrMoveInternal(sources, true);
     }
 
     private Observable<ScriptFile> copyOrMoveInternal(@NonNull ScriptFile source, boolean isMove) {
@@ -487,6 +495,194 @@ public class ScriptOperations {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .flatMap(path -> path.isEmpty() ? Observable.empty() : Observable.just(new ScriptFile(path))));
+    }
+
+    private Observable<List<ScriptFile>> copyOrMoveInternal(@NonNull List<ScriptFile> sources, boolean isMove) {
+        if (sources.isEmpty()) {
+            return Observable.just(Collections.emptyList());
+        }
+        int titleRes = isMove ? R.string.text_move_to : R.string.text_copy_to;
+        String currentDir = sources.stream().anyMatch(source -> isInSampleDir(source))
+                ? WorkingDirectoryUtils.getPath()
+                : getCurrentDirectoryPath();
+        return new FileChooserDialogBuilder(mContext)
+                .title(titleRes)
+                .dir(currentDir)
+                .chooseDir()
+                .singleChoice()
+                .map(destDir -> new File(destDir.getPath()))
+                .flatMap(destDir -> prepareCopyMovePlans(sources, destDir, isMove))
+                .flatMap(plans -> plans.isEmpty() ? Observable.empty() : executeCopyMovePlans(plans, isMove));
+    }
+
+    private Observable<List<CopyMovePlan>> prepareCopyMovePlans(@NonNull List<ScriptFile> sources, @NonNull File destDir, boolean isMove) {
+        return Observable.fromCallable(() -> {
+                    List<CopyMovePlan> plans = new ArrayList<>();
+                    boolean hasSamePathMove = false;
+                    boolean hasConflict = false;
+
+                    for (ScriptFile source : sources) {
+                        File dest = new File(destDir, source.getName());
+                        boolean samePath = FileUtils.areSamePath(new File(source.getPath()), dest);
+                        if (samePath) {
+                            if (isMove) {
+                                hasSamePathMove = true;
+                                break;
+                            }
+                            dest = new File(destDir, generateNextIndexedName(destDir, source.getName(), source.isDirectory()));
+                        }
+
+                        boolean overwrite = dest.exists() && !samePath;
+                        hasConflict = hasConflict || overwrite;
+                        plans.add(new CopyMovePlan(
+                                source,
+                                dest,
+                                ProjectConfig.isProject(source),
+                                source.isDirectory(),
+                                computeTotalBytes(source),
+                                overwrite
+                        ));
+                    }
+                    return new CopyMovePlanResult(plans, hasSamePathMove, hasConflict);
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap(result -> {
+                    if (result.hasSamePathMove) {
+                        DialogUtils.showAdaptive(new MaterialDialog.Builder(mContext)
+                                .title(R.string.text_prompt)
+                                .content(R.string.text_move_aborted_same_path)
+                                .positiveText(R.string.dialog_button_dismiss)
+                                .build());
+                        return Observable.empty();
+                    }
+                    if (result.hasConflict) {
+                        return RxDialogs.confirm(mContext, R.string.text_confirm_overwrite_selected_items, R.color.dialog_button_caution)
+                                .flatMap(yes -> yes ? Observable.just(result.plans) : Observable.empty());
+                    }
+                    return Observable.just(result.plans);
+                });
+    }
+
+    private Observable<List<ScriptFile>> executeCopyMovePlans(@NonNull List<CopyMovePlan> plans, boolean isMove) {
+        return Observable.fromCallable(() -> {
+                    OperationController controller = new OperationController();
+                    ProgressDialogSession session = new ProgressDialogSession(controller);
+                    List<ScriptFile> resultFiles = new ArrayList<>();
+                    List<ScriptFile> touchedDestinations = new ArrayList<>();
+                    long totalBytes = 0L;
+                    for (CopyMovePlan plan : plans) {
+                        totalBytes += plan.totalBytes;
+                    }
+                    final long totalBytesFinal = totalBytes;
+
+                    try {
+                        MaterialDialog.Builder progressBuilder = buildBatchCopyProgressDialogBuilder(totalBytesFinal, isMove, controller);
+                        session.scheduleShow(progressBuilder);
+
+                        long[] processedBase = new long[]{0L};
+                        for (CopyMovePlan plan : plans) {
+                            controller.throwIfCancelled();
+                            touchedDestinations.add(new ScriptFile(plan.dest.getPath()));
+                            if (plan.overwrite) {
+                                deleteDestinationIfExists(plan.dest);
+                            }
+
+                            if (isMove) {
+                                moveFileOrDirWithProgress(
+                                        plan.source,
+                                        plan.dest,
+                                        plan.totalBytes,
+                                        (copied, total) -> {
+                                            controller.throwIfCancelled();
+                                            session.setProgressThrottled(processedBase[0] + copied, totalBytesFinal);
+                                        },
+                                        (currentFile) -> {
+                                            controller.throwIfCancelled();
+                                            session.setContentThrottled(toContentList(plan.source, plan.dest, currentFile));
+                                        },
+                                        controller
+                                );
+                                notifyFileRemovedAtItsParent(plan.sourceIsProject, plan.sourceIsDir, plan.source);
+                            } else {
+                                copyFileOrDirWithProgress(
+                                        plan.source,
+                                        plan.dest,
+                                        plan.totalBytes,
+                                        (copied, total) -> {
+                                            controller.throwIfCancelled();
+                                            session.setProgressThrottled(processedBase[0] + copied, totalBytesFinal);
+                                        },
+                                        (currentFile) -> {
+                                            controller.throwIfCancelled();
+                                            session.setContentThrottled(toContentList(plan.source, plan.dest, currentFile));
+                                        },
+                                        controller
+                                );
+                            }
+
+                            processedBase[0] += plan.totalBytes;
+                            if (totalBytesFinal > 0) {
+                                session.setProgressThrottled(processedBase[0], totalBytesFinal);
+                            }
+
+                            ScriptFile newFile = new ScriptFile(plan.dest.getPath());
+                            notifyFileCreatedAtItsParent(ProjectConfig.isProject(newFile), newFile.isDirectory(), newFile);
+                            resultFiles.add(newFile);
+                        }
+
+                        GlobalAppContext.post(() -> ViewUtils.showSnack(mView, R.string.text_operation_completed));
+                        return resultFiles;
+                    } catch (OperationAbortedException aborted) {
+                        for (ScriptFile dest : touchedDestinations) {
+                            notifyChildrenChangedAtItsParent(dest);
+                        }
+                        if (isMove) {
+                            for (CopyMovePlan plan : plans) {
+                                notifyChildrenChangedAtItsParent(plan.source);
+                            }
+                        }
+                        GlobalAppContext.post(() -> ViewUtils.showSnack(mView, R.string.text_operation_aborted));
+                        return Collections.<ScriptFile>emptyList();
+                    } finally {
+                        session.dismissSafely();
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap(files -> files.isEmpty() ? Observable.empty() : Observable.just(files));
+    }
+
+    private MaterialDialog.Builder buildBatchCopyProgressDialogBuilder(long totalBytes, boolean isMove, @NonNull OperationController controller) {
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
+                .title(isMove ? R.string.text_move_to : R.string.text_copy_to)
+                .content(isMove ? R.string.text_moving : R.string.text_copying)
+                .negativeText(R.string.dialog_button_abort)
+                .negativeColorRes(R.color.dialog_button_caution)
+                .onNegative((dialog, which) -> {
+                    controller.cancel();
+                })
+                .cancelable(false)
+                .canceledOnTouchOutside(false);
+
+        if (totalBytes > 0 && totalBytes <= Integer.MAX_VALUE) {
+            builder.progress(false, (int) totalBytes, true);
+        } else if (totalBytes > 0) {
+            builder.progress(false, DialogUtils.PROGRESS_MAX_LARGE, true);
+        } else {
+            builder.progress(true, 0);
+        }
+        return builder;
+    }
+
+    private void deleteDestinationIfExists(@NonNull File dest) throws IOException {
+        if (!dest.exists()) {
+            return;
+        }
+        boolean deleted = dest.isDirectory() ? PFiles.deleteRecursively(dest) : dest.delete();
+        if (!deleted && dest.exists()) {
+            throw new IOException("Delete failed: " + dest);
+        }
     }
 
     // Notify Explorer that a directory's children may have changed, using the item's real parent.
@@ -960,6 +1156,37 @@ public class ScriptOperations {
         });
     }
 
+    public void delete(@NonNull final List<ScriptFile> scriptFiles) {
+        if (scriptFiles.isEmpty()) {
+            return;
+        }
+        DialogUtils.buildAndShowAdaptive(() -> {
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
+                    .title(R.string.text_choose_delete_strategy)
+                    .content(mContext.getString(R.string.text_selected_items, scriptFiles.size()))
+                    .items(
+                            mContext.getString(R.string.item_move_to_trash),
+                            mContext.getString(R.string.item_delete_permanently)
+                    )
+                    .itemsCallbackSingleChoice(0, (dialog, itemView, which, text) -> {
+                        dialog.dismiss();
+
+                        if (which == 0) {
+                            moveToTrashWithProgress(scriptFiles);
+                        } else if (which == 1) {
+                            deleteWithoutConfirm(scriptFiles);
+                        }
+
+                        return true;
+                    })
+                    .negativeText(R.string.dialog_button_cancel)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_caution);
+            DialogUtils.choiceWidgetThemeColor(builder);
+            return builder.build();
+        });
+    }
+
     public void setAsWorkingDir(final ScriptFile scriptFile) {
         String oldPath = WorkingDirectoryUtils.getRelativePath();
         String newPath = WorkingDirectoryUtils.toRelativePath(scriptFile.getPath());
@@ -1059,6 +1286,93 @@ public class ScriptOperations {
                 });
     }
 
+    private void moveToTrashWithProgress(final List<ScriptFile> scriptFiles) {
+        Observable.fromCallable(() -> {
+                    OperationController controller = new OperationController();
+                    ProgressDialogSession session = new ProgressDialogSession(controller);
+                    List<DeleteTarget> targets = buildDeleteTargets(scriptFiles);
+                    long totalBytes = 0L;
+                    for (DeleteTarget target : targets) {
+                        totalBytes += target.totalBytes;
+                    }
+                    final long totalBytesFinal = totalBytes;
+
+                    try {
+                        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
+                                .title(R.string.text_move_items_to_trash)
+                                .content(R.string.text_moving_to_trash)
+                                .negativeText(R.string.dialog_button_abort)
+                                .negativeColorRes(R.color.dialog_button_caution)
+                                .onNegative((dialog, which) -> {
+                                    controller.cancel();
+                                })
+                                .cancelable(false)
+                                .canceledOnTouchOutside(false);
+
+                        if (totalBytesFinal > 0 && totalBytesFinal <= Integer.MAX_VALUE) {
+                            builder.progress(false, (int) totalBytesFinal, true);
+                        } else if (totalBytesFinal > 0) {
+                            builder.progress(false, DialogUtils.PROGRESS_MAX_LARGE, true);
+                        } else {
+                            builder.progress(true, 0);
+                        }
+
+                        session.scheduleShow(builder);
+
+                        long[] processedBase = new long[]{0L};
+                        TrashRepository repository = new TrashRepository(mContext.getApplicationContext());
+                        for (DeleteTarget target : targets) {
+                            controller.throwIfCancelled();
+                            repository.moveToTrashWithProgress(
+                                    target.file.getPath(),
+                                    (processed, total) -> {
+                                        controller.throwIfCancelled();
+                                        if (totalBytesFinal > 0) {
+                                            session.setProgressThrottled(processedBase[0] + processed, totalBytesFinal);
+                                        }
+                                    },
+                                    (currentFile) -> {
+                                        controller.throwIfCancelled();
+                                        session.setContentThrottled(toContentList(target.file, currentFile));
+                                    },
+                                    controller
+                            );
+                            processedBase[0] += target.totalBytes;
+                            notifyFileRemoved(target.isProject, target.isDir, target.file);
+                        }
+
+                        return 1;
+                    } catch (OperationAbortedException aborted) {
+                        return -1;
+                    } finally {
+                        session.dismissSafely();
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    switch (result) {
+                        case 1 -> showMessage(R.string.text_moved_to_trash);
+                        case -1 -> showMessage(R.string.text_operation_aborted);
+                        default -> showMessage(R.string.text_failed_to_delete);
+                    }
+                }, e -> {
+                    e.printStackTrace();
+                    showMessage(R.string.text_failed_to_delete);
+
+                    String msg = e.getClass().getSimpleName();
+                    if (e.getMessage() != null && !e.getMessage().isBlank()) {
+                        msg = msg + ": " + e.getMessage();
+                    }
+                    DialogUtils.buildAndShowAdaptive(new MaterialDialog.Builder(mContext)
+                            .title(R.string.text_move_to_trash_failed)
+                            .content(msg)
+                            .positiveText(R.string.dialog_button_dismiss)
+                            .positiveColorRes(R.color.dialog_button_default)
+                            .cancelable(false)::build);
+                });
+    }
+
     public void deleteWithoutConfirm(final ScriptFile scriptFile) {
         boolean isDir = scriptFile.isDirectory();
         boolean isProject = ProjectConfig.isProject(scriptFile);
@@ -1107,25 +1421,83 @@ public class ScriptOperations {
                         case 1 -> {
                             showMessage(R.string.text_already_deleted);
                             notifyFileRemoved(isProject, isDir, scriptFile);
-
-                            if (HistoryPrefs.deletePermanentlyAlsoClearHistory()) {
-                                var scriptFilePath = scriptFile.getPath();
-                                if (scriptFilePath.startsWith(INTERNAL_STORAGE_ROOT)) {
-                                    Schedulers.io().scheduleDirect(() -> {
-                                        try {
-                                            new HistoryRepository(mContext.getApplicationContext())
-                                                    .clearHistoryForPath(scriptFilePath);
-                                        } catch (Throwable ignored) {
-                                            /* Ignored. */
-                                        }
-                                    });
-                                }
-                            }
+                            clearHistoryAfterPermanentDelete(scriptFile);
                         }
                         case 0 -> showMessage(R.string.text_failed_to_delete);
                         case -1 -> showMessage(R.string.text_operation_aborted);
                     }
                 });
+    }
+
+    public void deleteWithoutConfirm(final List<ScriptFile> scriptFiles) {
+        Observable.fromCallable(() -> {
+                    OperationController controller = new OperationController();
+                    ProgressDialogSession session = new ProgressDialogSession(controller);
+                    List<DeleteTarget> targets = buildDeleteTargets(scriptFiles);
+
+                    try {
+                        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
+                                .title(R.string.text_delete_items)
+                                .content(mContext.getString(R.string.text_deleting) + mContext.getString(R.string.text_half_ellipsis))
+                                .negativeText(R.string.dialog_button_abort)
+                                .negativeColorRes(R.color.dialog_button_caution)
+                                .onNegative((dialog, which) -> {
+                                    controller.cancel();
+                                })
+                                .progress(true, 0)
+                                .progressIndeterminateStyle(true)
+                                .cancelable(false)
+                                .canceledOnTouchOutside(false);
+
+                        session.scheduleShow(builder);
+
+                        for (DeleteTarget target : targets) {
+                            boolean deleted = deleteRecursivelyWithProgress(
+                                    target.file,
+                                    currentFile -> session.setContentThrottled(toContentList(target.file, currentFile)),
+                                    controller
+                            );
+                            if (!deleted) {
+                                return 0;
+                            }
+                            notifyFileRemoved(target.isProject, target.isDir, target.file);
+                            clearHistoryAfterPermanentDelete(target.file);
+                        }
+
+                        return 1;
+                    } catch (OperationAbortedException aborted) {
+                        return -1;
+                    } finally {
+                        session.dismissSafely();
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(deleted -> {
+                    switch (deleted) {
+                        case 1 -> showMessage(R.string.text_already_deleted);
+                        case 0 -> showMessage(R.string.text_failed_to_delete);
+                        case -1 -> showMessage(R.string.text_operation_aborted);
+                    }
+                });
+    }
+
+    private void clearHistoryAfterPermanentDelete(@NonNull ScriptFile scriptFile) {
+        if (!HistoryPrefs.deletePermanentlyAlsoClearHistory()) {
+            return;
+        }
+        String scriptFilePath = scriptFile.getPath();
+        if (!scriptFilePath.startsWith(INTERNAL_STORAGE_ROOT)) {
+            return;
+        }
+        Schedulers.io().scheduleDirect(() -> {
+            try {
+                new HistoryRepository(mContext.getApplicationContext())
+                        .clearHistoryForPath(scriptFilePath);
+            } catch (Throwable ignored) {
+                /* Ignored. */
+            }
+        });
     }
 
     public void setAsWorkingDirNow(final ScriptFile scriptFile) {
@@ -1247,6 +1619,63 @@ public class ScriptOperations {
         String p = absPath;
         while (p.length() > 1 && p.endsWith("/")) p = p.substring(0, p.length() - 1);
         return INTERNAL_STORAGE_ROOT.equals(p);
+    }
+
+    private List<DeleteTarget> buildDeleteTargets(@NonNull List<ScriptFile> scriptFiles) {
+        List<DeleteTarget> targets = new ArrayList<>(scriptFiles.size());
+        for (ScriptFile file : scriptFiles) {
+            targets.add(new DeleteTarget(
+                    file,
+                    ProjectConfig.isProject(file),
+                    file.isDirectory(),
+                    computeTotalBytes(file)
+            ));
+        }
+        return targets;
+    }
+
+    private static class CopyMovePlan {
+        final ScriptFile source;
+        final File dest;
+        final boolean sourceIsProject;
+        final boolean sourceIsDir;
+        final long totalBytes;
+        final boolean overwrite;
+
+        CopyMovePlan(ScriptFile source, File dest, boolean sourceIsProject, boolean sourceIsDir, long totalBytes, boolean overwrite) {
+            this.source = source;
+            this.dest = dest;
+            this.sourceIsProject = sourceIsProject;
+            this.sourceIsDir = sourceIsDir;
+            this.totalBytes = totalBytes;
+            this.overwrite = overwrite;
+        }
+    }
+
+    private static class CopyMovePlanResult {
+        final List<CopyMovePlan> plans;
+        final boolean hasSamePathMove;
+        final boolean hasConflict;
+
+        CopyMovePlanResult(List<CopyMovePlan> plans, boolean hasSamePathMove, boolean hasConflict) {
+            this.plans = plans;
+            this.hasSamePathMove = hasSamePathMove;
+            this.hasConflict = hasConflict;
+        }
+    }
+
+    private static class DeleteTarget {
+        final ScriptFile file;
+        final boolean isProject;
+        final boolean isDir;
+        final long totalBytes;
+
+        DeleteTarget(ScriptFile file, boolean isProject, boolean isDir, long totalBytes) {
+            this.file = file;
+            this.isProject = isProject;
+            this.isDir = isDir;
+            this.totalBytes = totalBytes;
+        }
     }
 
     private class InputCallback implements MaterialDialog.InputCallback {

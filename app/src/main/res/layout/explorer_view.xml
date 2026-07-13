@@ -14,6 +14,70 @@
             app:cardElevation="0.97dp"
             app:cardUseCompatPadding="true" />
 
+    <LinearLayout
+            android:id="@+id/selection_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?android:itemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:visibility="gone">
+
+        <ImageButton
+                android:id="@+id/selection_close"
+                android:layout_width="44dp"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_clear_file_selection"
+                android:padding="10dp"
+                android:src="@drawable/ic_close_gray600_48dp"
+                app:tint="@color/project_toolbar_button" />
+
+        <TextView
+                android:id="@+id/selection_count"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="16sp" />
+
+        <ImageButton
+                android:id="@+id/selection_copy"
+                android:layout_width="44dp"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_copy_to"
+                android:padding="10dp"
+                android:src="@drawable/ic_content_copy_black_48dp"
+                app:tint="@color/project_toolbar_button" />
+
+        <ImageButton
+                android:id="@+id/selection_move"
+                android:layout_width="44dp"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_move_to"
+                android:padding="10dp"
+                android:src="@drawable/ic_drive_file_move_black_24dp"
+                app:tint="@color/project_toolbar_button" />
+
+        <ImageButton
+                android:id="@+id/selection_delete"
+                android:layout_width="44dp"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_delete"
+                android:padding="10dp"
+                android:src="@drawable/ic_key_store_delete"
+                app:tint="@color/project_toolbar_button" />
+
+    </LinearLayout>
+
     <androidx.recyclerview.widget.ThemeColorRecyclerView
             android:id="@+id/explorer_item_list"
             android:layout_width="match_parent"

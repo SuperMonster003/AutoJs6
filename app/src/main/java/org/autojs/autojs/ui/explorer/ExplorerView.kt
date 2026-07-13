@@ -120,6 +120,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     val currentDirectory: ScriptFile
         get() = currentPage.toScriptFile()
 
+    private val isInSelectionMode: Boolean
+        get() = mSelectedItems.isNotEmpty()
+
     var explorerItemListView: RecyclerView? = null
         private set
 
@@ -129,6 +132,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     private val mExplorerAdapter = ExplorerAdapter()
     private var mFilter: ((ExplorerItem) -> Boolean)? = null
+    private val mSelectedItems = LinkedHashMap<String, ExplorerItem>()
 
     private var mOnItemOperateListener: OnItemOperateListener? = null
 
@@ -195,9 +199,17 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             binding.projectToolbar.also {
                 mProjectToolbar = it
             }
+            setupSelectionToolbar(binding)
         }
         restoreSortConfig()
         setOnRefreshListener(this)
+    }
+
+    private fun setupSelectionToolbar(binding: ExplorerViewBinding) {
+        binding.selectionClose.setOnClickListener { clearSelection() }
+        binding.selectionCopy.setOnClickListener { copySelectedItems() }
+        binding.selectionMove.setOnClickListener { moveSelectedItems() }
+        binding.selectionDelete.setOnClickListener { deleteSelectedItems() }
     }
 
     @Subscribe
@@ -232,6 +244,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 }
                 ExplorerChangeEvent.REMOVE -> {
                     i = explorerItemManager.remove(item)
+                    if (item != null && mSelectedItems.remove(item.path) != null) {
+                        updateSelectionToolbar()
+                    }
                     if (i >= 0) {
                         mExplorerAdapter.notifyItemRemoved(item, i)
                         mExplorerAdapter.notifyItemChanged(positionOfCategoryDir)
@@ -402,11 +417,88 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         mExplorerAdapter.notifyDataSetChanged()
     }
 
+    private fun enterSelectionMode(item: ExplorerItem) {
+        if (!isItemSelectable(item)) return
+        mSelectedItems[item.path] = item
+        updateSelectionToolbar()
+        notifyDataSetChanged()
+    }
+
+    private fun toggleItemSelection(item: ExplorerItem) {
+        if (!isItemSelectable(item)) return
+        if (mSelectedItems.containsKey(item.path)) {
+            mSelectedItems.remove(item.path)
+        } else {
+            mSelectedItems[item.path] = item
+        }
+        updateSelectionToolbar()
+        notifyDataSetChanged()
+    }
+
+    private fun clearSelection(notify: Boolean = true) {
+        if (mSelectedItems.isEmpty()) return
+        mSelectedItems.clear()
+        updateSelectionToolbar()
+        if (notify) {
+            notifyDataSetChanged()
+        }
+    }
+
+    private fun isItemSelectable(item: ExplorerItem) = item.canCopy() || item.canMove() || item.canDelete()
+
+    private fun isItemSelected(item: ExplorerItem) = mSelectedItems.containsKey(item.path)
+
+    private fun selectedScriptFiles() = mSelectedItems.values.map { it.toScriptFile() }
+
+    private fun updateSelectionToolbar() {
+        binding?.let { binding ->
+            val selectedCount = mSelectedItems.size
+            binding.selectionToolbar.isVisible = selectedCount > 0
+            binding.selectionCount.text = context.getString(R.string.text_selected_items, selectedCount)
+
+            val selectedItems = mSelectedItems.values
+            updateSelectionActionState(binding.selectionCopy, selectedItems.all { it.canCopy() })
+            updateSelectionActionState(binding.selectionMove, selectedItems.all { it.canMove() })
+            updateSelectionActionState(binding.selectionDelete, selectedItems.all { it.canDelete() })
+        }
+        mProjectToolbar.updateVisibility()
+    }
+
+    private fun updateSelectionActionState(view: View, enabled: Boolean) {
+        view.isEnabled = enabled
+        view.alpha = if (enabled) 1.0f else 0.38f
+    }
+
+    private fun copySelectedItems() {
+        val selectedFiles = selectedScriptFiles()
+        if (selectedFiles.isEmpty()) return
+        ScriptOperations(context, this@ExplorerView, currentPage)
+            .copy(selectedFiles)
+            .subscribe({ clearSelection() }, { showErrorDialog(it, R.string.error_failed_to_copy) })
+    }
+
+    private fun moveSelectedItems() {
+        val selectedFiles = selectedScriptFiles()
+        if (selectedFiles.isEmpty()) return
+        ScriptOperations(context, this@ExplorerView, currentPage)
+            .move(selectedFiles)
+            .subscribe({ clearSelection() }, { showErrorDialog(it, R.string.error_failed_to_move) })
+    }
+
+    private fun deleteSelectedItems() {
+        val selectedFiles = selectedScriptFiles()
+        if (selectedFiles.isEmpty()) return
+        ScriptOperations(context, this@ExplorerView, currentPage)
+            .delete(selectedFiles)
+        clearSelection()
+    }
+
     fun setProjectToolbarRunnableOnly(b: Boolean) {
         mProjectToolbar.setRunnableOnly(b)
     }
 
     fun enterDirectChildPage(childItemGroup: ExplorerPage) {
+        clearSelection()
         val layoutManager = explorerItemListView!!.layoutManager as LinearLayoutManager?
         if (layoutManager != null) {
             // @Overwrite by SuperMonster003 on Apr 3, 2023.
@@ -446,6 +538,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     private fun setRootPage(page: ExplorerPage) {
+        clearSelection()
         setCurrentPageState(ExplorerPageState(page))
         refreshCurrentPage()
     }
@@ -459,6 +552,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     private fun enterChildPage(childPage: ExplorerPage) {
+        clearSelection()
         setCurrentPageState(ExplorerPageState(childPage))
         refreshCurrentPage()
     }
@@ -476,10 +570,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     fun canGoBack(): Boolean {
-        return !mPageStateHistory.empty()
+        return isInSelectionMode || !mPageStateHistory.empty()
     }
 
     fun goBack() {
+        if (isInSelectionMode) {
+            clearSelection()
+            return
+        }
         setCurrentPageState(mPageStateHistory.pop())
         refreshCurrentPage()
     }
@@ -581,6 +679,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     fun goUp() {
+        clearSelection()
         saveCurrentPageIntoHistory()
         val currentPagePath = currentPage.path
         val nextPagePath = if (Explorers.Providers.workspace().isCurrentSampleDir(currentDirectory)) {
@@ -601,11 +700,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     fun setFilter(filter: ((ExplorerItem) -> Boolean)?) {
+        clearSelection()
         mFilter = filter
         reload()
     }
 
     fun reload() {
+        clearSelection()
         refreshCurrentPage()
     }
 
@@ -797,6 +898,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private val mEdit: View
         private val mInfo: View
 
+        private val mItem: View
         private val mOptions: View
 
         private lateinit var mExplorerItem: ExplorerItem
@@ -813,6 +915,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
             mActionIconContainer = explorerFileBinding.actionIconContainer
 
+            mItem = explorerFileBinding.item
             mRun = explorerFileBinding.run.apply { setOnClickListener { withItemSelected { run() } } }
             mEdit = explorerFileBinding.edit.apply { setOnClickListener { withItemSelected { edit() } } }
             mInfo = explorerFileBinding.info.apply { setOnClickListener { withItemSelected { showInfo() } } }
@@ -824,7 +927,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 ImageViewCompat.setImageTintList(view, mActionIconTint)
             }
 
-            explorerFileBinding.item.setOnClickListener { withItemSelected { onItemClick() } }
+            mItem.setOnClickListener { withItemSelected { onItemClick() } }
+            mItem.setOnLongClickListener {
+                withItemSelected { enterSelectionMode(mExplorerItem) }
+                true
+            }
         }
 
         @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
@@ -837,6 +944,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             setTextWith(mName) { ExplorerViewHelper.getDisplayName(context, item) }
             setTextWith(mFileDate) { PFile.getFullDateString(item.lastModified()) }
             setTextWith(mFileSize) { PFiles.formatSizeWithUnit(item.size) }
+            bindSelectionState(item)
 
             Observable.fromCallable {
                 val shouldEditShow = item.isTextEditable || item.isExternalEditable
@@ -851,6 +959,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { list ->
+                    if (isInSelectionMode) {
+                        setVisibilityIf(mActionIconContainer, false)
+                        setVisibilityIf(mOptions, false)
+                        return@subscribe
+                    }
                     val (shouldEditShow, shouldRunShow, shouldInstallShow, shouldInfoShow) = list
                     if (shouldEditShow || shouldRunShow || shouldInstallShow || shouldInfoShow) {
                         setVisibilityIf(mEdit, shouldEditShow)
@@ -941,14 +1054,28 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mName.text = null
             mFileDate.text = null
             mFileSize.text = null
+            mItem.setBackgroundColor(context.getColor(R.color.item_background_dark))
             setVisibilityIf(mFirstChar, INVISIBLE)
             setVisibilityIf(mActionIconContainer, false)
+            setVisibilityIf(mOptions, true)
         }
 
         private fun onItemClick() {
+            if (isInSelectionMode) {
+                toggleItemSelection(mExplorerItem)
+                return
+            }
             onItemClickListener?.let {
                 it.onItemClick(itemView, mExplorerItem)
                 notifyItemOperated()
+            }
+        }
+
+        private fun bindSelectionState(item: ExplorerItem) {
+            mItem.setBackgroundColor(context.getColor(if (isItemSelected(item)) R.color.window_background_selected else R.color.item_background_dark))
+            setVisibilityIf(mOptions, !isInSelectionMode)
+            if (isInSelectionMode) {
+                setVisibilityIf(mActionIconContainer, false)
             }
         }
 
@@ -1069,6 +1196,12 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
         private val binding = ExplorerDirectoryBinding.bind(itemView).also {
             it.item.setOnClickListener { withItemSelected { onItemClick() } }
+            it.item.setOnLongClickListener {
+                withItemSelected {
+                    mExplorerPage?.let { page -> enterSelectionMode(page) }
+                }
+                true
+            }
         }
 
         private var mName = binding.name
@@ -1091,11 +1224,18 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mName.text = ExplorerViewHelper.getDisplayName(context, data)
             mDirDate.text = PFile.getFullDateString(data.lastModified())
             mIcon.setImageResource(ExplorerViewHelper.getIconRes(data))
-            mOptions.visibility = if (data is ExplorerSamplePage) GONE else VISIBLE
+            binding.item.setCardBackgroundColor(context.getColor(if (isItemSelected(data)) R.color.window_background_selected else R.color.item_background))
+            mOptions.visibility = if (isInSelectionMode || data is ExplorerSamplePage) GONE else VISIBLE
             mExplorerPage = data
         }
 
         private fun onItemClick() {
+            mExplorerPage?.let {
+                if (isInSelectionMode) {
+                    toggleItemSelection(it)
+                    return
+                }
+            }
             mExplorerPage?.let { enterDirectChildPage(it) }
         }
 
@@ -1333,7 +1473,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     private fun ExplorerProjectToolbar.updateVisibility() {
-        if (isProjectRecognitionEnabled && ProjectConfig.isProject(currentPage)) {
+        if (isInSelectionMode) {
+            visibility = GONE
+        } else if (isProjectRecognitionEnabled && ProjectConfig.isProject(currentPage)) {
             visibility = VISIBLE
             setProject(currentPage.toScriptFile())
         } else {
