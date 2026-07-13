@@ -10,6 +10,7 @@ import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.Context
@@ -93,7 +94,7 @@ object VersionCodes : Augmentable() {
             it.defineProperty("internalCodename", internalCodename, READONLY or PERMANENT)
             it.defineProperty("releaseDate", releaseDate, READONLY or PERMANENT)
             it.defineProperty("releaseTimestamp", releaseTimestampLong, READONLY or PERMANENT)
-            it.defineFunctionProperties(arrayOf("valueOf"), javaClass, READONLY or DONTENUM or PERMANENT)
+            RhinoUtils.defineFunctionProperties(it, arrayOf("valueOf"), javaClass, READONLY or DONTENUM or PERMANENT)
         }
 
         private fun parseTimestamp(s: String): Long {

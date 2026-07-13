@@ -19,6 +19,8 @@ import org.autojs.autojs.runtime.api.augment.pinyin.PinyinCore.parseStyle
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
+import org.autojs.autojs.util.RhinoUtils.newNativeJavaMethod
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.autojs.plugin.pinyin.api.PinyinOptionKeys
@@ -26,7 +28,6 @@ import org.json.JSONArray
 import org.mozilla.javascript.BoundFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
-import org.mozilla.javascript.NativeJavaMethod
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject.DONTENUM
@@ -71,11 +72,16 @@ object Pinyin : Augmentable(), Invokable {
         convertRhino(hans, opt).map { it.toNativeArray() }.toNativeArray().also { result ->
             val funcName = "compact"
             withRhinoContext { cx ->
+                val scope = getDeclarationScope(result)
                 val thisObj = Context.javaToJS(Util, result) as Scriptable
                 val boundFunction = BoundFunction(
                     /* cx = */ cx,
-                    /* scope = */ result,
-                    /* targetFunction = */ NativeJavaMethod(Util::class.java.methods.find { it.name == funcName }, funcName),
+                    /* scope = */ scope,
+                    /* targetFunction = */ newNativeJavaMethod(
+                        scope,
+                        Util::class.java.methods.first { it.name == funcName },
+                        funcName,
+                    ),
                     /* boundThis = */ thisObj,
                     /* boundArgs = */ arrayOf(result),
                 )

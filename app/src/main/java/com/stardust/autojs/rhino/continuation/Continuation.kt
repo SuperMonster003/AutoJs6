@@ -8,8 +8,9 @@ import com.stardust.autojs.runtime.ScriptRuntime
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContinuationPending
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.VarScope
 
-class Continuation(val context: AutoJsContext, val scope: Scriptable, private val mTimer: Timer) {
+class Continuation(val context: AutoJsContext, val scope: VarScope, private val mTimer: Timer) {
     var pending: ContinuationPending? = null
         private set
     private val mThread: Thread = Thread.currentThread()
@@ -51,9 +52,11 @@ class Continuation(val context: AutoJsContext, val scope: Scriptable, private va
 
     companion object {
 
-        fun create(runtime: ScriptRuntime, scope: Scriptable): Continuation {
+        fun create(runtime: ScriptRuntime, scope: VarScope): Continuation {
             val context = Context.getCurrentContext() as AutoJsContext
             return Continuation(context, scope, runtime.timers.timerForCurrentThread)
         }
+
+        fun create(runtime: ScriptRuntime, scope: Scriptable): Continuation = create(runtime, scope.parentScope)
     }
 }

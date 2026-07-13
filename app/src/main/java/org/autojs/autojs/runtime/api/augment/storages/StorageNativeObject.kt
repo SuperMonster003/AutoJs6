@@ -39,7 +39,7 @@ class StorageNativeObject(@JvmField val name: String) : NativeObject(), StringRe
         RhinoUtils.initNativeObjectPrototype(this)
         defineProperty("name", name, PERMANENT)
         defineProperty("size", { storage.size() }, null, PERMANENT)
-        defineFunctionProperties(mFunctionNames, Getter::class.java, PERMANENT)
+        RhinoUtils.defineFunctionProperties(this, mFunctionNames, Getter::class.java, PERMANENT)
     }
 
     override fun toStringReadable() = "Storage { name: $name, size: ${storage.size()} }"

@@ -100,7 +100,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                             throw e
                         }
                     }, NOT_CONSTRUCTABLE)
-                }, NOT_CONSTRUCTABLE).call(cx, global, global, arrayOf(methodName)))
+                }, NOT_CONSTRUCTABLE).call(cx, global, global.globalThis, arrayOf(methodName)))
             }
         }
     }

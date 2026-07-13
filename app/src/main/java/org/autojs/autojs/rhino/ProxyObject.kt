@@ -8,7 +8,9 @@ import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 
 /**
  * Created by Stardust on May 17, 2017.
@@ -30,6 +32,8 @@ open class ProxyObject() : NativeObject() {
         }
     }
 
+    constructor(scope: VarScope, proxyObject: NativeObject) : this(ScriptableObject.getTopLevelScope(scope).globalThis, proxyObject)
+
     constructor(
         scope: Scriptable,
         getter: ((Array<out Any?>) -> Any?)? = null,
@@ -38,6 +42,12 @@ open class ProxyObject() : NativeObject() {
         o.defineProp(PROXY_GETTER_KEY, newBaseFunction(PROXY_GETTER_KEY, getter, NOT_CONSTRUCTABLE))
         o.defineProp(PROXY_SETTER_KEY, newBaseFunction(PROXY_SETTER_KEY, setter, NOT_CONSTRUCTABLE))
     })
+
+    constructor(
+        scope: VarScope,
+        getter: ((Array<out Any?>) -> Any?)? = null,
+        setter: ((Array<out Any?>) -> Undefined)? = null,
+    ) : this(ScriptableObject.getTopLevelScope(scope).globalThis, getter, setter)
 
     override fun put(key: String, start: Scriptable, value: Any?) {
         when {

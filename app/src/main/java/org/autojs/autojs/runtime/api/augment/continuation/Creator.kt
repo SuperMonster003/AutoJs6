@@ -9,7 +9,7 @@ import org.mozilla.javascript.Scriptable
 
 class Creator(scriptRuntime: ScriptRuntime, scope: Scriptable? = null) {
 
-    private val mContinuation = scriptRuntime.createContinuation(scope ?: scriptRuntime.topLevelScope)
+    private val mContinuation = scope?.let { scriptRuntime.createContinuation(it) } ?: scriptRuntime.createContinuation()
 
     fun await(): Any? {
         /**

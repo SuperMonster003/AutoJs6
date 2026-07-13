@@ -7,12 +7,13 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 
 class CrashHandlerTestFunction : BaseFunction() {
 
     override fun call(
         cx: Context?,
-        scope: Scriptable?,
+        scope: VarScope?,
         thisObj: Scriptable?,
         args: Array<out Any>?,
     ): Undefined {

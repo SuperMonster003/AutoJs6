@@ -33,6 +33,7 @@ import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeDate
 import org.mozilla.javascript.NativeJSON
+import org.mozilla.javascript.NativeJavaMethod
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptRuntime.emptyArgs
 import org.mozilla.javascript.ScriptRuntime.setBuiltinProtoAndParent
@@ -49,6 +50,7 @@ import org.mozilla.javascript.ScriptableObject.ensureScriptableObject
 import org.mozilla.javascript.Symbol
 import org.mozilla.javascript.TopLevel
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.Wrapper
 import org.mozilla.javascript.json.JsonParser
 import java.io.Serializable
@@ -102,10 +104,10 @@ object RhinoUtils {
     val UNDEFINED = Undefined.instance as Undefined
 
     @JvmStatic
-    fun Context.getOrCreateStandardObjects(): ScriptableObject {
+    fun Context.getOrCreateStandardObjects(): TopLevel {
         // Cache standard objects per Context to avoid repeated initStandardObjects().
         // zh-CN: 按 Context 缓存标准对象, 避免重复调用 initStandardObjects().
-        val cached = this.getThreadLocal(STANDARD_OBJECTS_KEY) as? ScriptableObject
+        val cached = this.getThreadLocal(STANDARD_OBJECTS_KEY) as? TopLevel
         if (cached != null) return cached
         return this.initStandardObjects().also { created ->
             this.putThreadLocal(STANDARD_OBJECTS_KEY, created)
@@ -113,7 +115,7 @@ object RhinoUtils {
     }
 
     @JvmStatic
-    val standardObjects: ScriptableObject by lazy {
+    val standardObjects: TopLevel by lazy {
         // Create a global singleton standard objects as a low-fidelity fallback.
         // zh-CN: 创建全局单例标准对象, 用作低保真兜底.
         try {
@@ -135,10 +137,26 @@ object RhinoUtils {
 
     @JvmStatic
     val functionPrototype: Scriptable by lazy {
-        standardObjects["Function"].let {
+        standardObjects.prop("Function").let {
             if (it is Scriptable) it["prototype"] as? Scriptable else null
         } ?: throw IllegalStateException("Failed to get object: Function.prototype")
     }
+
+    @JvmStatic
+    fun getTopLevelScope(scope: Scriptable): TopLevel =
+        ScriptableObject.getTopLevelScope(getDeclarationScope(scope))
+
+    @JvmStatic
+    fun getObjectPrototype(scope: Scriptable): Scriptable =
+        ScriptableObject.getObjectPrototype(getDeclarationScope(scope))
+
+    @JvmStatic
+    fun getArrayPrototype(scope: Scriptable): Scriptable =
+        ScriptableObject.getArrayPrototype(getDeclarationScope(scope))
+
+    @JvmStatic
+    fun getFunctionPrototype(scope: Scriptable): Scriptable =
+        ScriptableObject.getFunctionPrototype(getDeclarationScope(scope))
 
     @JvmStatic
     fun callToStringFunction(o: Scriptable): String =
@@ -168,31 +186,57 @@ object RhinoUtils {
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
+    fun callFunction(scriptRuntime: ScriptRuntime, scope: VarScope, name: String, paramsToFunction: Array<Any?>): Any? {
+        val obj = ScriptableObject.getTopLevelScope(scope).globalThis
+        return callFunction(scriptRuntime, obj, name, paramsToFunction)
+    }
+
+    @JvmStatic
+    @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
     fun callFunction(func: BaseFunction, paramsToFunction: Array<Any?>): Any? =
-        callFunction(func, null, paramsToFunction)
+        callFunction(func, null as VarScope?, paramsToFunction)
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
     fun callFunction(scriptRuntime: ScriptRuntime, func: BaseFunction, paramsToFunction: Array<Any?>): Any? =
-        callFunction(scriptRuntime, func, null, paramsToFunction)
+        callFunction(scriptRuntime, func, null as VarScope?, paramsToFunction)
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
     fun callFunction(func: BaseFunction, scope: Scriptable?, args: Array<Any?>): Any? =
-        callFunction(func, scope, scope, args)
+        callFunction(func, scope?.let { getDeclarationScope(it) }, scope, args)
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
     fun callFunction(scriptRuntime: ScriptRuntime, func: BaseFunction, scope: Scriptable?, args: Array<Any?>): Any? =
-        callFunction(scriptRuntime, func, scope, scope, args)
+        callFunction(scriptRuntime, func, scope?.let { getDeclarationScope(it) }, scope, args)
+
+    @JvmStatic
+    @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
+    fun callFunction(func: BaseFunction, scope: VarScope?, args: Array<Any?>): Any? =
+        callFunction(func, scope, Undefined.SCRIPTABLE_UNDEFINED, args)
+
+    @JvmStatic
+    @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
+    fun callFunction(scriptRuntime: ScriptRuntime, func: BaseFunction, scope: VarScope?, args: Array<Any?>): Any? =
+        callFunction(scriptRuntime, func, scope, Undefined.SCRIPTABLE_UNDEFINED, args)
 
     @JvmStatic
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
     fun callFunction(func: BaseFunction, scope: Scriptable?, thisObj: Scriptable?, args: Array<Any?>): Any? =
+        callFunction(null, func, scope?.let { getDeclarationScope(it) }, thisObj, args)
+
+    @JvmStatic
+    @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
+    fun callFunction(func: BaseFunction, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? =
         callFunction(null, func, scope, thisObj, args)
 
     @JvmStatic
-    fun callFunction(scriptRuntime: ScriptRuntime?, func: BaseFunction, scope: Scriptable?, thisObj: Scriptable?, args: Array<Any?>): Any? = withRhinoContext(scriptRuntime) { cx ->
+    fun callFunction(scriptRuntime: ScriptRuntime?, func: BaseFunction, scope: Scriptable?, thisObj: Scriptable?, args: Array<Any?>): Any? =
+        callFunction(scriptRuntime, func, scope?.let { getDeclarationScope(it) }, thisObj, args)
+
+    @JvmStatic
+    fun callFunction(scriptRuntime: ScriptRuntime?, func: BaseFunction, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? = withRhinoContext(scriptRuntime) { cx ->
         try {
             // Prefer an existing scope to avoid repeatedly creating standard objects.
             // zh-CN: 优先使用已有的作用域, 避免反复创建标准对象.
@@ -202,9 +246,10 @@ object RhinoUtils {
                 scriptRuntime != null -> scriptRuntime.topLevelScope
                 else -> ImporterTopLevel(cx)
             }
+            val niceThisObj = thisObj ?: Undefined.SCRIPTABLE_UNDEFINED
             when {
-                RhinoScriptRuntime.hasTopCall(cx) -> func.call(cx, niceScope, thisObj, args)
-                else -> RhinoScriptRuntime.doTopCall(func, cx, niceScope, thisObj, args, false)
+                RhinoScriptRuntime.hasTopCall(cx) -> func.call(cx, niceScope, niceThisObj, args)
+                else -> RhinoScriptRuntime.doTopCall(func, cx, niceScope, niceThisObj, args, false)
             }
         } catch (e: InterruptedException) {
             throw ScriptInterruptedException(e)
@@ -243,11 +288,11 @@ object RhinoUtils {
             checkFlagsConflict(callFunc, constructFunc)
         }
 
-        override fun call(cx: Context?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any?>): Any {
+        override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
             return super.callFlag(callFunc, cx, scope, thisObj, args)
         }
 
-        override fun construct(cx: Context?, scope: Scriptable?, args: Array<out Any?>): Scriptable {
+        override fun construct(cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
             return super.constructFlag(constructFunc, cx, scope, args)
         }
 
@@ -260,11 +305,11 @@ object RhinoUtils {
         constructFunc: ((args: Array<out Any?>) -> Any?)?,
     ) = object : InternalBaseFunction(funcName) {
 
-        override fun call(cx: Context?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any?>): Any {
+        override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
             return super.callFlag(callFunc, cx, scope, thisObj, args)
         }
 
-        override fun construct(cx: Context?, scope: Scriptable?, args: Array<out Any?>): Scriptable {
+        override fun construct(cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
             return super.constructFunc(constructFunc, cx, scope, args)
         }
 
@@ -277,11 +322,11 @@ object RhinoUtils {
         constructFunc: Int,
     ) = object : InternalBaseFunction(funcName) {
 
-        override fun call(cx: Context?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
+        override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
             return super.callFunc(callFunc, cx, scope, thisObj, args)
         }
 
-        override fun construct(cx: Context?, scope: Scriptable?, args: Array<out Any?>): Scriptable {
+        override fun construct(cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
             return super.constructFlag(constructFunc, cx, scope, args)
         }
 
@@ -294,20 +339,64 @@ object RhinoUtils {
         constructFunc: ((args: Array<out Any?>) -> Any?)?,
     ) = object : InternalBaseFunction(funcName) {
 
-        override fun call(cx: Context?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
+        override fun call(cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
             return super.callFunc(callFunc, cx, scope, thisObj, args)
         }
 
-        override fun construct(cx: Context?, scope: Scriptable?, args: Array<out Any?>): Scriptable {
+        override fun construct(cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
             return super.constructFunc(constructFunc, cx, scope, args)
         }
 
     }.apply { init() }
 
     @JvmStatic
-    fun newObject(scope: Scriptable) = newNativeObject().also {
+    fun newObject(scope: VarScope) = newNativeObject().also {
         setBuiltinProtoAndParent(it, scope, TopLevel.Builtins.Object)
     }
+
+    @JvmStatic
+    fun newObject(scope: Scriptable): NativeObject {
+        return newObject(getDeclarationScope(scope))
+    }
+
+    @JvmStatic
+    fun getDeclarationScope(scope: Scriptable): VarScope {
+        var candidate: Scriptable? = scope
+        while (candidate != null) {
+            if (candidate is VarScope) {
+                return candidate
+            }
+            candidate.parentScope?.let { return it }
+            candidate = candidate.prototype
+        }
+        return standardObjects
+    }
+
+    @JvmStatic
+    fun defineFunctionProperties(
+        target: ScriptableObject,
+        names: Array<String>,
+        clazz: Class<*>,
+        attributes: Int,
+    ) {
+        defineFunctionProperties(getDeclarationScope(target), target, names, clazz, attributes)
+    }
+
+    @JvmStatic
+    fun defineFunctionProperties(
+        scope: VarScope,
+        target: ScriptableObject,
+        names: Array<String>,
+        clazz: Class<*>,
+        attributes: Int,
+    ) {
+        target.defineFunctionProperties(scope, names, clazz, attributes)
+    }
+
+    @JvmStatic
+    @Suppress("DEPRECATION")
+    fun newNativeJavaMethod(scope: VarScope, method: Method, name: String): NativeJavaMethod =
+        NativeJavaMethod(scope, method, name)
 
     @JvmStatic
     fun wrap(o: Any?): Any = withRhinoContext { cx ->
@@ -550,25 +639,25 @@ object RhinoUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun callPrototypeFunction(builtins: TopLevel.Builtins, funcName: String, thisObj: Scriptable, scope: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
+    fun callPrototypeFunction(builtins: TopLevel.Builtins, funcName: String, thisObj: Scriptable, scope: VarScope, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
         val prototypeFunction = getPrototypeFunction(scope, builtins, funcName)
         prototypeFunction.call(cx, scope, thisObj, args)
     }
 
     @JvmStatic
     @JvmOverloads
-    fun callPrototypeFunction(className: String, funcName: String, thisObj: Scriptable, scope: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
+    fun callPrototypeFunction(className: String, funcName: String, thisObj: Scriptable, scope: VarScope, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
         val prototypeFunction = getPrototypeFunction(scope, className, funcName)
         prototypeFunction.call(cx, scope, thisObj, args)
     }
 
     @JvmStatic
-    fun getPrototypeFunction(scope: Scriptable, builtins: TopLevel.Builtins, funcName: String) = TopLevel.getBuiltinPrototype(
+    fun getPrototypeFunction(scope: VarScope, builtins: TopLevel.Builtins, funcName: String) = TopLevel.getBuiltinPrototype(
         ScriptableObject.getTopLevelScope(scope), builtins
     ).prop(funcName) as BaseFunction
 
     @JvmStatic
-    fun getPrototypeFunction(scope: Scriptable, className: String, funcName: String) = ScriptableObject.getClassPrototype(
+    fun getPrototypeFunction(scope: VarScope, className: String, funcName: String) = ScriptableObject.getClassPrototype(
         scope, className
     ).prop(funcName) as BaseFunction
 
@@ -734,12 +823,12 @@ object RhinoUtils {
     fun js_object_getOwnPropertyDescriptor(value: ScriptableObject, key: Any): ScriptableObject = withRhinoContext { cx ->
         val topLevel = ImporterTopLevel(cx)
         val obj = ensureScriptableObject(toObject(cx, topLevel, value))
-        obj.getOwnPropertyDescriptor(cx, key).toScriptableObject(topLevel)
+        obj.getOwnPropertyDescriptor(cx, key).toScriptableObject(topLevel.globalThis)
     }
 
     @JvmStatic
     fun js_function_bind(scope: Scriptable? = null, targetFunction: Callable, vararg args: Scriptable): BoundFunction = withRhinoContext { cx ->
-        val topLevel = scope ?: ImporterTopLevel(cx)
+        val topLevel = scope?.let { getDeclarationScope(it) } ?: ImporterTopLevel(cx)
         val argc: Int = args.size
         val boundThis: Scriptable?
         val boundArgs: Array<Any?>
@@ -785,8 +874,14 @@ object RhinoUtils {
 
     @JvmStatic
     fun js_eval(scope: Scriptable, s: String): Any? = withRhinoContext { cx ->
+        val global = getTopLevelScope(scope)
+        RhinoScriptRuntime.evalSpecial(cx, global, global.globalThis, arrayOf(s), "eval code", 1)
+    }
+
+    @JvmStatic
+    fun js_eval(scope: VarScope, s: String): Any? = withRhinoContext { cx ->
         val global = ScriptableObject.getTopLevelScope(scope)
-        RhinoScriptRuntime.evalSpecial(cx, global, global, arrayOf(s), "eval code", 1)
+        RhinoScriptRuntime.evalSpecial(cx, global, global.globalThis, arrayOf(s), "eval code", 1)
     }
 
     @JvmStatic
@@ -980,14 +1075,14 @@ object RhinoUtils {
 
         internal fun init() = initNewBaseFunction(this)
 
-        internal fun callFunc(callFunc: ((args: Array<out Any?>) -> Any?)?, cx: Context?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
+        internal fun callFunc(callFunc: ((args: Array<out Any?>) -> Any?)?, cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
             return when (callFunc) {
                 null -> super.call(cx, scope ?: ImporterTopLevel(cx), thisObj, args)
                 else -> callFunc.invoke(args)
             }
         }
 
-        internal fun constructFunc(constructFunc: ((args: Array<out Any?>) -> Any?)?, cx: Context?, scope: Scriptable?, args: Array<out Any?>): Scriptable {
+        internal fun constructFunc(constructFunc: ((args: Array<out Any?>) -> Any?)?, cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
             return when (constructFunc) {
                 null -> super.construct(cx, scope ?: ImporterTopLevel(cx), args)
                 else -> when (val result = constructFunc.invoke(args)) {
@@ -999,13 +1094,13 @@ object RhinoUtils {
             }.also { it.prototype = prototype }
         }
 
-        internal fun callFlag(flag: Int, cx: Context?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any?>) = when (flag) {
+        internal fun callFlag(flag: Int, cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? = when (flag) {
             DEFAULT_CALLER -> super.call(cx, scope ?: ImporterTopLevel(cx), thisObj, args)
             NOT_CALLABLE -> throw RuntimeException("Function ${funcName ?: "anonymous"} is unable to be invoked as a function")
             else -> throw IllegalArgumentException("Unknown flag $flag for argument callFunc of RhinoUtils.newBaseFunction")
         }
 
-        internal fun constructFlag(flag: Int, cx: Context?, scope: Scriptable?, args: Array<out Any?>) = when (flag) {
+        internal fun constructFlag(flag: Int, cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable = when (flag) {
             DEFAULT_CONSTRUCTOR -> super.construct(cx, scope ?: ImporterTopLevel(cx), args)
             NOT_CONSTRUCTABLE -> throw RuntimeException("Function ${funcName ?: "anonymous"} is unable to be invoked with \"new\" operator")
             else -> throw IllegalArgumentException("Unknown flag $flag for argument constructFunc of RhinoUtils.newBaseFunction")

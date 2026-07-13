@@ -40,7 +40,6 @@ import org.autojs.autojs.util.RhinoUtils.js_object_keys
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.MemberBox
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeDate
 import org.mozilla.javascript.NativeError
@@ -53,7 +52,9 @@ import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.TopLevel
 import org.mozilla.javascript.TopLevel.Builtins
 import org.mozilla.javascript.Undefined.isUndefined
+import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.Wrapper
+import org.mozilla.javascript.lc.member.ExecutableBox
 import org.mozilla.javascript.regexp.NativeRegExp
 import java.util.*
 import java.util.function.Supplier
@@ -283,13 +284,13 @@ object Inspect : Augmentable(), Invokable {
             value = unwrapped
         }
 
-        if (value is TopLevel) return "[object ${value.className}]"
+        if (value is TopLevel) return "[object ${value.globalThis.className}]"
 
         if (value is StringReadable) return value.toStringReadable()
 
         if (value is Scriptable && value !is NativeJavaPackage) runCatching {
             (value.prop(StringReadable.KEY) as? BaseFunction)?.let { f ->
-                val value = Context.toString(callFunction(f, null, value, arrayOf()))
+                val value = Context.toString(callFunction(f, null as VarScope?, value, arrayOf()))
                 return formatValue(ctx, value, recurseTimes)
             }
         }
@@ -304,7 +305,7 @@ object Inspect : Augmentable(), Invokable {
         if (ctx.customInspect && value is Scriptable && value.isJsNonNullObject()) {
             val inspectFunc = value.prop("inspect")
             if (inspectFunc is BaseFunction) {
-                val ret = callFunction(inspectFunc, null, value, arrayOf(recurseTimes, ctx))
+                val ret = callFunction(inspectFunc, null as VarScope?, value, arrayOf(recurseTimes, ctx))
                 return when {
                     isStringRhino(ret) -> formatValue(ctx, Context.toString(ret), recurseTimes)
                     else -> formatValue(ctx, ret, recurseTimes)
@@ -350,9 +351,9 @@ object Inspect : Augmentable(), Invokable {
         //  ! zh-CN: 检查对象是否有自定义的 toString() 覆写方法.
         if (isReferenceRhino(value)) {
             var cur: Scriptable = value
-            val objProtoForJs: Scriptable? = ScriptableObject.getObjectPrototype(cur)
-            val arrProtoForJs: Scriptable? = ScriptableObject.getArrayPrototype(cur)
-            val funcProtoForJs: Scriptable? = ScriptableObject.getFunctionPrototype(cur)
+            val objProtoForJs: Scriptable? = RhinoUtils.getObjectPrototype(cur)
+            val arrProtoForJs: Scriptable? = RhinoUtils.getArrayPrototype(cur)
+            val funcProtoForJs: Scriptable? = RhinoUtils.getFunctionPrototype(cur)
             val objProtoForAugmentable: Scriptable = RhinoUtils.objectPrototype
             val arrProtoForAugmentable: Scriptable = RhinoUtils.arrayPrototype
             val funcProtoForAugmentable: Scriptable = RhinoUtils.functionPrototype
@@ -515,9 +516,9 @@ object Inspect : Augmentable(), Invokable {
 
     private fun isJavaObjectToString(fn: Any?): Boolean {
         if (fn !is NativeJavaMethod) return false
-        val methods: Array<out MemberBox> = fn.methods
+        val methods: Array<out ExecutableBox> = fn.methods
         return methods.any { mb ->
-            val m = mb.method()
+            val m = mb.asMethod()
             m.name == "toString" &&
                     m.parameterCount == 0 &&
                     m.returnType == String::class.java &&

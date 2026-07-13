@@ -48,7 +48,7 @@ class Autojs(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
     private val mCachedR = mutableMapOf<String, NativeObject>()
 
     private val mResourceGetter = Supplier<Any?> {
-        val scope = scriptRuntime.topLevelScope
+        val scope = scriptRuntime.topLevelScope.globalThis
         val getter = newBaseFunction(PROXY_GETTER_KEY, { argList ->
             ensureArgumentsOnlyOne(argList) { type ->
                 val niceType = coerceString(type).replace("strings", "string", true)

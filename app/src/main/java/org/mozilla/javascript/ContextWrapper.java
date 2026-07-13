@@ -34,6 +34,10 @@ public class ContextWrapper extends Context {
     }
 
     public static Object call(ContextFactory factory, Callable callable, Scriptable scope, Scriptable thisObj, Object[] args) {
+        return Context.call(factory, callable, scope.getParentScope(), thisObj, args);
+    }
+
+    public static Object call(ContextFactory factory, Callable callable, VarScope scope, Scriptable thisObj, Object[] args) {
         return Context.call(factory, callable, scope, thisObj, args);
     }
 
@@ -89,12 +93,12 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public ScriptableObject initStandardObjects(ScriptableObject scope, boolean sealed) {
+    public TopLevel initStandardObjects(TopLevel scope, boolean sealed) {
         return mContext.initStandardObjects(scope, sealed);
     }
 
     @Override
-    public ScriptableObject initSafeStandardObjects(ScriptableObject scope, boolean sealed) {
+    public TopLevel initSafeStandardObjects(TopLevel scope, boolean sealed) {
         return mContext.initSafeStandardObjects(scope, sealed);
     }
 
@@ -108,7 +112,7 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public Object callFunctionWithContinuations(Callable function, Scriptable scope, Object[] args) throws ContinuationPending {
+    public Object callFunctionWithContinuations(Callable function, VarScope scope, Object[] args) throws ContinuationPending {
         return mContext.callFunctionWithContinuations(function, scope, args);
     }
 

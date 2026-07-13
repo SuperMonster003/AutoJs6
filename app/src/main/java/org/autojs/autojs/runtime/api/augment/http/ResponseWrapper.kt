@@ -4,6 +4,7 @@ import okhttp3.Response
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
@@ -39,7 +40,7 @@ class ResponseWrapper(
         val resBody = res.body!!
 
         return ResponseBodyNativeObject(scriptRuntime, resBody, this, cacheBody, cacheThresholdBytes).also {
-            it.defineFunctionProperties(arrayOf("string", "bytes", "json", "stream", "saveToFile", "close"), it.javaClass, READONLY or PERMANENT)
+            RhinoUtils.defineFunctionProperties(scriptRuntime.topLevelScope, it, arrayOf("string", "bytes", "json", "stream", "saveToFile", "close"), it.javaClass, READONLY or PERMANENT)
             it.defineProperty(Http.KEY_CONTENT_TYPE, { resBody.contentType() }, null, READONLY or PERMANENT)
         }
     }

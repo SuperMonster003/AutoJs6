@@ -11,7 +11,7 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceString
-import org.autojs.autojs.util.RhinoUtils.newNativeObject
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
 import org.mozilla.javascript.BaseFunction
@@ -91,7 +91,7 @@ open class AugmentableProxy(private val scriptRuntime: ScriptRuntime) : Augmenta
     }
 
     fun proxying(target: Scriptable, proto: Any, withDollarPrefix: Boolean): ProxyObject {
-        val augmented = augment(newNativeObject(), proto, false)
+        val augmented = augment(RhinoUtils.newObject(scriptRuntime.topLevelScope), proto, false)
 
         val proxyObject = ProxyObject(
             scriptRuntime.topLevelScope,

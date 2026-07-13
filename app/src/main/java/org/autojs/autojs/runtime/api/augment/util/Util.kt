@@ -42,18 +42,17 @@ import org.autojs.autojs.util.RhinoUtils.js_json_stringify
 import org.autojs.autojs.util.RhinoUtils.js_object_create
 import org.autojs.autojs.util.RhinoUtils.js_object_setPrototypeOf
 import org.autojs.autojs.util.RhinoUtils.js_typeof
-import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
-import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
+import org.mozilla.javascript.VarScope
 import java.time.LocalDateTime.now
 import java.time.format.DateTimeFormatter.ofPattern
 import java.util.*
@@ -281,13 +280,9 @@ object Util : Augmentable() {
 
         val bPrototype: Scriptable? = when {
             niceB == null -> js_object_create(null)
-            else -> withRhinoContext { cx ->
-                val tmp = object : BaseFunction() {
-                    override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable?, args: Array<out Any?>) = newNativeObject().also {
-                        it.defineProperty("constructor", d, READONLY or DONTENUM or PERMANENT)
-                    }
-                }
-                tmp.construct(cx, ImporterTopLevel(cx), arrayOf()).also { instance ->
+            else -> RhinoUtils.newObject(d).also { instance ->
+                instance.defineProperty("constructor", d, READONLY or DONTENUM or PERMANENT)
+                instance.prototype = niceB.prop("prototype") as? Scriptable
                     // FIXME by SuperMonster003 on Jul 13, 2024.
                     //  ! I'm not sure if there is a better way
                     //  ! to implement JavaScript snippet `tmp.prototype = b.prototype;`,
@@ -295,8 +290,7 @@ object Util : Augmentable() {
                     //  ! zh-CN:
                     //  ! 我不确定是否有更好的方法实现 JavaScript 片段 `tmp.prototype = b.prototype;`,
                     //  ! 因为原型设置不应该出现在实例构造之后.
-                    instance.prototype = niceB.prop("prototype") as? Scriptable
-                }
+                // Prototype is set above.
             }
         }
         val dPrototype = d.prop("prototype")
@@ -764,7 +758,8 @@ object Util : Augmentable() {
                 func
             }
             else -> RegularFunction(func).also {
-                it.defineFunctionProperties(
+                RhinoUtils.defineFunctionProperties(
+                    it,
                     arrayOf("toString"),
                     RegularFunction::class.java,
                     READONLY or DONTENUM or PERMANENT,
@@ -811,7 +806,7 @@ object Util : Augmentable() {
 
     internal class RegularFunction(private val func: BaseFunction) : BaseFunction() {
 
-        override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable?, args: Array<out Any?>): Any {
+        override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any?>): Any {
             return func.call(cx, scope, null, args)
         }
 

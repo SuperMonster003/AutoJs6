@@ -119,7 +119,7 @@ class ZipNativeObject(
 
     init {
         RhinoUtils.initNativeObjectPrototype(this)
-        defineFunctionProperties(mFunctionNames, javaClass, PERMANENT)
+        RhinoUtils.defineFunctionProperties(scriptRuntime.topLevelScope, this, mFunctionNames, javaClass, PERMANENT)
         defineProperty(StringReadable.KEY, newBaseFunction(StringReadable.KEY, { toStringReadable() }, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
         mPropertyNames.forEach { pair ->
             val (propertyName, value) = pair

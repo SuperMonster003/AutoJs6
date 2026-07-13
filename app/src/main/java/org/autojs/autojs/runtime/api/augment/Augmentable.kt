@@ -32,6 +32,7 @@ import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.ScriptableObject.UNINITIALIZED_CONST
+import org.mozilla.javascript.VarScope
 import java.lang.reflect.InvocationTargetException
 import java.util.function.Consumer
 import java.util.function.Supplier
@@ -216,7 +217,8 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
      */
     fun assign(target: ScriptableObject, proto: Any? = null, specifiedRuntime: ScriptRuntime? = null) {
 
-        val global: ScriptableObject = (specifiedRuntime ?: scriptRuntime)?.topLevelScope ?: ScriptableObject.getTopLevelScope(target) as ScriptableObject
+        val globalScope = (specifiedRuntime ?: scriptRuntime)?.topLevelScope ?: RhinoUtils.getTopLevelScope(target)
+        val global: ScriptableObject = globalScope.globalThis
 
         val protos = when (proto) {
             null -> emptyList()
@@ -228,7 +230,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
         augmentProperties(target, global)
         augmentFunctions(target, global)
         augmentGettersAndSetters(target, global)
-        augmentJavaClasses(target, global)
+        augmentJavaClasses(target, globalScope, global)
     }
 
     fun put(o: Scriptable, name: String, value: Any?) {
@@ -532,14 +534,14 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
         }
     }
 
-    private fun augmentJavaClasses(target: ScriptableObject, global: ScriptableObject) {
+    private fun augmentJavaClasses(target: ScriptableObject, globalScope: VarScope, global: ScriptableObject) {
         selfAssignmentJavaClasses.forEach { pair ->
             val (name, clazz) = pair
-            target.defineWith(name, NativeJavaClass(global, clazz.java), PERMANENT)
+            target.defineWith(name, NativeJavaClass(globalScope, clazz.java), PERMANENT)
         }
         globalAssignmentJavaClasses.forEach { pair ->
             val (name, clazz) = pair
-            global.defineWith(name, NativeJavaClass(global, clazz.java), PERMANENT)
+            global.defineWith(name, NativeJavaClass(globalScope, clazz.java), PERMANENT)
         }
     }
 

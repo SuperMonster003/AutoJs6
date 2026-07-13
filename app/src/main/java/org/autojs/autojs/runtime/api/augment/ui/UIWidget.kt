@@ -11,6 +11,7 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
+import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
@@ -31,7 +32,7 @@ object UIWidget : ArgumentGuards() {
     @RhinoStandardFunctionInterface
     fun renderInternal(cx: Context, thisObj: Scriptable, args: Array<Any?>, funObj: Function): Any = ensureArgumentsIsEmpty(args) {
         when (val renderFunc = thisObj.prop("render")) {
-            is BaseFunction -> renderFunc.call(cx, thisObj.parentScope ?: thisObj, thisObj, arrayOf(*args))
+            is BaseFunction -> callFunction(renderFunc, thisObj, thisObj, arrayOf(*args))
                 ?: throw WrappedIllegalArgumentException("Function render must return a non-null value")
             else -> "< />"
         }
@@ -65,7 +66,7 @@ object UIWidget : ArgumentGuards() {
                 "setter", { setterArgList ->
                     val (_, _, value, _) = setterArgList
                     thisObj.defineProp(attrAlias, value)
-                    if (applier is BaseFunction) applier.call(cx, thisObj, thisObj, setterArgList)
+                    if (applier is BaseFunction) callFunction(applier, thisObj, thisObj, arrayOf(*setterArgList))
                 }, NOT_CONSTRUCTABLE,
             )
         }
@@ -98,7 +99,7 @@ object UIWidget : ArgumentGuards() {
         require(setterFunc is BaseFunction) {
             "Property ui.Widget#__attrs__[\"${attrName}\"][\"setter\"] must be a JavaScript Function instead of ${setterFunc.jsBrief()}"
         }
-        setterFunc.call(cx, attrsObject, attrValue, arrayOf(view, attrName, value, setter))
+        callFunction(setterFunc, attrsObject, attrValue, arrayOf(view, attrName, value, setter))
         UNDEFINED
     }
 
@@ -116,7 +117,7 @@ object UIWidget : ArgumentGuards() {
         require(getterFunc is BaseFunction) {
             "Property ui.Widget#__attrs__[\"${attrName}\"][\"getter\"] must be a JavaScript Function instead of ${getterFunc.jsBrief()}"
         }
-        getterFunc.call(cx, attrsObject, attrValue, arrayOf(view, attrName, getter))
+        callFunction(getterFunc, attrsObject, attrValue, arrayOf(view, attrName, getter))
     }
 
     @JvmStatic
@@ -127,7 +128,7 @@ object UIWidget : ArgumentGuards() {
         }
         val onViewCreatedFunc = thisObj.prop("onViewCreated")
         if (onViewCreatedFunc is BaseFunction) {
-            onViewCreatedFunc.call(cx, thisObj, thisObj, arrayOf(view))
+            callFunction(onViewCreatedFunc, thisObj, thisObj, arrayOf(view))
         }
         UNDEFINED
     }
@@ -140,7 +141,7 @@ object UIWidget : ArgumentGuards() {
         }
         val onFinishInflationFunc = thisObj.prop("onFinishInflation")
         if (onFinishInflationFunc is BaseFunction) {
-            onFinishInflationFunc.call(cx, thisObj, thisObj, arrayOf(view))
+            callFunction(onFinishInflationFunc, thisObj, thisObj, arrayOf(view))
         }
         UNDEFINED
     }

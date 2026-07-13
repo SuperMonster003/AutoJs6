@@ -8,8 +8,9 @@ import org.autojs.autojs6.R
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContinuationPending
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.VarScope
 
-class Continuation(val context: AutoJsContext, val scope: Scriptable, private val mTimer: Timer) {
+class Continuation(val context: AutoJsContext, val scope: VarScope, private val mTimer: Timer) {
 
     private val mThread: Thread = Thread.currentThread()
 
@@ -76,11 +77,13 @@ class Continuation(val context: AutoJsContext, val scope: Scriptable, private va
 
     companion object {
 
-        fun create(runtime: ScriptRuntime, scope: Scriptable): Continuation {
+        fun create(runtime: ScriptRuntime, scope: VarScope): Continuation {
             val context = Context.getCurrentContext() as AutoJsContext
             val timers = runtime.timers
             return Continuation(context, scope, timers.timerForCurrentThread ?: timers.mainTimer)
         }
+
+        fun create(runtime: ScriptRuntime, scope: Scriptable): Continuation = create(runtime, scope.parentScope)
 
     }
 

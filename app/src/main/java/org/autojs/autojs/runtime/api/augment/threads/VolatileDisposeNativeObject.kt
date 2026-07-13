@@ -13,12 +13,13 @@ import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.Volatile
 
 @Suppress("unused")
-class VolatileDisposeNativeObject : NativeObject() {
+class VolatileDisposeNativeObject(private val declarationScope: VarScope? = null) : NativeObject() {
 
     @Volatile
     private var value: Any? = null
@@ -34,7 +35,9 @@ class VolatileDisposeNativeObject : NativeObject() {
 
     init {
         RhinoUtils.initNativeObjectPrototype(this)
-        defineFunctionProperties(mFunctionNames, javaClass, PERMANENT)
+        declarationScope?.let {
+            RhinoUtils.defineFunctionProperties(it, this, mFunctionNames, javaClass, PERMANENT)
+        } ?: RhinoUtils.defineFunctionProperties(this, mFunctionNames, javaClass, PERMANENT)
     }
 
     private inline fun <T> withLock(block: () -> T): T {

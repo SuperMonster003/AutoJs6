@@ -27,6 +27,7 @@ import org.mozilla.javascript.RhinoException
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.Wrapper
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -284,7 +285,7 @@ class NodeBridgeRhinoExecutionService : Service() {
             parseJsonValue(json)
             json
         } finally {
-            ScriptableObject.deleteProperty(scope, RESULT_PROPERTY)
+            scope.delete(RESULT_PROPERTY)
         }
     }
 
@@ -511,7 +512,7 @@ class NodeBridgeRhinoExecutionService : Service() {
         var destroyed: Boolean = false
             private set
 
-        fun install(cx: RhinoContext, scope: Scriptable) {
+        fun install(cx: RhinoContext, scope: VarScope) {
             val console = NativeObject().apply {
                 parentScope = scope
                 prototype = ScriptableObject.getObjectPrototype(scope)
@@ -538,14 +539,14 @@ class NodeBridgeRhinoExecutionService : Service() {
             }
         }
 
-        private fun function(cx: RhinoContext, scope: Scriptable, level: String): BaseFunction {
+        private fun function(cx: RhinoContext, scope: VarScope, level: String): BaseFunction {
             return object : BaseFunction() {
                 init {
                     parentScope = scope
                     prototype = ScriptableObject.getFunctionPrototype(scope)
                 }
 
-                override fun call(cx: RhinoContext?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any?>?): Any {
+                override fun call(cx: RhinoContext?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>?): Any {
                     record(level, args.orEmpty())
                     return Undefined.instance
                 }

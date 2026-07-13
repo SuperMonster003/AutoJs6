@@ -4,7 +4,7 @@ import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.ContinuationPending
-import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.VarScope
 
 class AutoJsContext(factory: ContextFactory?) : Context(factory) {
 
@@ -18,7 +18,7 @@ class AutoJsContext(factory: ContextFactory?) : Context(factory) {
         return continuationPending
     }
 
-    override fun resumeContinuation(continuation: Any, scope: Scriptable?, functionResult: Any?): Any {
+    override fun resumeContinuation(continuation: Any, scope: VarScope?, functionResult: Any?): Any {
         continuations.remove(continuation)
         return super.resumeContinuation(continuation, scope, functionResult)
     }

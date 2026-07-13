@@ -25,7 +25,7 @@ class HttpSaveResult @JvmOverloads constructor(
         defineProperty("bytesCopied", { bytesCopied }, null, READONLY or PERMANENT)
         defineProperty("success", { resultCode == RESULT_OK }, null, READONLY or PERMANENT)
         defineProperty("error", { error }, null, READONLY or PERMANENT)
-        defineFunctionProperties(arrayOf("isSuccess"), javaClass, READONLY or PERMANENT)
+        RhinoUtils.defineFunctionProperties(this, arrayOf("isSuccess"), javaClass, READONLY or PERMANENT)
     }
 
     override fun toStringReadable(): String = listOf(

@@ -488,18 +488,18 @@ class ScriptRuntime private constructor(builder: Builder) {
             engine = engines.myEngine().source?.engineName ?: JavaScriptSource.ENGINE,
         ).let { ApiPlugins(mUiHandlerAppContext, it) }
 
-        augment(topLevelScope)
-        applyInternalModules(topLevelScope)
+        augment(topLevelScope.globalThis)
+        applyInternalModules(topLevelScope.globalThis)
     }
 
     fun initEpilogue() {
         // @OrderMatters by SuperMonster003 on Jul 24, 2024.
         //  ! "object observe" must be ahead of "array observe".
         //  ! zh-CN: "object observe" 需要先于 "array observe".
-        callFunction(this, js_object_observe_lite_min, topLevelScope, topLevelScope, arrayOf(topLevelScope))
-        callFunction(this, js_array_observe_min, topLevelScope, topLevelScope, arrayOf(topLevelScope))
+        callFunction(this, js_object_observe_lite_min, topLevelScope, topLevelScope.globalThis, arrayOf(topLevelScope.globalThis))
+        callFunction(this, js_array_observe_min, topLevelScope, topLevelScope.globalThis, arrayOf(topLevelScope.globalThis))
 
-        callFunction(this, js_structured_clone, topLevelScope, topLevelScope, arrayOf(topLevelScope))
+        callFunction(this, js_structured_clone, topLevelScope, topLevelScope.globalThis, arrayOf(topLevelScope.globalThis))
 
         if (Pref.isExtendingJsBuildInObjectsEnabled) Jsox.extendAllRhinoWithRuntime(this)
 
@@ -849,7 +849,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     }
 
     private fun rhinoRequire(id: String): Any? {
-        return callFunction(this, rhinoRequireFunction, topLevelScope, topLevelScope, arrayOf(id))
+        return callFunction(this, rhinoRequireFunction, topLevelScope, topLevelScope.globalThis, arrayOf(id))
     }
 
     class Builder {

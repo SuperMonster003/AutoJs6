@@ -42,12 +42,12 @@ class NodeJavaScriptEngine(context: Context) : LoopBasedJavaScriptEngine(context
         val filename = file?.absolutePath ?: source.fullPath
         val dirname = file?.parent ?: cwd().orEmpty()
         val argv = context.newArray(scriptable, arrayOf<Any?>("autojs6", filename))
-        callFunction(runtime, setter, scriptable, scriptable, arrayOf(filename, dirname, argv, execArgv))
+        callFunction(runtime, setter, scriptable, scriptable.globalThis, arrayOf(filename, dirname, argv, execArgv))
     }
 
     private fun requireModule(id: String): Any? {
         val require = scriptable.prop("require") as BaseFunction
-        return callFunction(runtime, require, scriptable, scriptable, arrayOf(id))
+        return callFunction(runtime, require, scriptable, scriptable.globalThis, arrayOf(id))
     }
 
     private companion object {

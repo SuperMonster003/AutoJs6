@@ -44,7 +44,7 @@ class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         else -> Context.toString(url)
                     }
                     val contextForWebView = androidContext.jsUnwrapped() as? AndroidContext ?: globalContext
-                    InjectableWebView(contextForWebView, cx, scriptRuntime.topLevelScope, niceUrl)
+                    InjectableWebView(contextForWebView, cx, scriptRuntime.topLevelScope.globalThis, niceUrl)
                 }
                 1 -> when {
                     args[0] is String -> {
@@ -60,7 +60,7 @@ class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun newInjectableWebClient(scriptRuntime: ScriptRuntime, args: Array<out Any?>): InjectableWebClient = ensureArgumentsIsEmpty(args) {
-            withRhinoContext(scriptRuntime) { cx -> InjectableWebClient(cx, scriptRuntime.topLevelScope) }
+            withRhinoContext(scriptRuntime) { cx -> InjectableWebClient(cx, scriptRuntime.topLevelScope.globalThis) }
         }
 
         @JvmStatic

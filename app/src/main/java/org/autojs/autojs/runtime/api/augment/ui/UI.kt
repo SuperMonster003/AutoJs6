@@ -72,6 +72,7 @@ import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.xmlimpl.XML
 import org.w3c.dom.Document
 import org.w3c.dom.Node
@@ -94,11 +95,11 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         override fun getFunctionName() = WIDGET_KEY
 
-        override fun construct(cx: Context?, scope: Scriptable, args: Array<out Any?>) = createObject(cx, scope).also {
+        override fun construct(cx: Context?, scope: VarScope, args: Array<out Any?>) = createObject(cx, scope).also {
             require(it is NativeObject) {
                 "Bad implementation of call as constructor, name=${getFunctionName()} in ${javaClass.name}"
             }
-            assignWidgetProperties(it)
+            assignWidgetProperties(scope, it)
         }
     }.apply { initNewBaseFunction(this) }
 
@@ -169,8 +170,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
     )
 
     init {
-        bind(scriptRuntime.ui, scriptRuntime.topLevelScope)
-        initWidgetConstructor(mWidgetConstructor)
+        bind(scriptRuntime.ui, scriptRuntime.topLevelScope.globalThis)
+        initWidgetConstructor(scriptRuntime.topLevelScope, mWidgetConstructor)
     }
 
     override fun get(augmented: ScriptableObject, key: String): Any? {
@@ -689,7 +690,12 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun finish(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
-            ensureActivity(scriptRuntime) { activity ->
+            val activity = getScriptExecuteActivity(scriptRuntime)
+            if (activity == null) {
+                require(scriptRuntime.isExiting) { globalContext.getString(R.string.error_activity_is_required_for_ui_exec_mode) }
+                return@ensureArgumentsIsEmpty UNDEFINED
+            }
+            if (!activity.isFinishing && !activity.isDestroyed) {
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
                     activity.finish()
                 }, NOT_CONSTRUCTABLE))
@@ -748,15 +754,16 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             ViewUtils.getNavigationBarHeight(globalContext, withComputed, withDimen, ignoreVisibility = false)
         }
 
-        private fun initWidgetConstructor(ctor: BaseFunction) {
+        private fun initWidgetConstructor(scope: VarScope, ctor: BaseFunction) {
             val prototype = ctor.prop("prototype") as? ScriptableObject ?: newNativeObject()
-            assignWidgetProperties(prototype)
+            assignWidgetProperties(scope, prototype)
             ctor.defineProp("prototype", prototype, DONTENUM or PERMANENT)
         }
 
-        private fun assignWidgetProperties(o: ScriptableObject) {
+        private fun assignWidgetProperties(scope: VarScope, o: ScriptableObject) {
             o.defineProperty("__attrs__", newNativeObject(), DONTENUM or PERMANENT)
             o.defineFunctionProperties(
+                scope,
                 arrayOf(
                     "renderInternal",
                     "defineAttr",
@@ -769,10 +776,12 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             )
         }
 
-        @Suppress("EmptyRange")
         private fun bindValueForApplyingAttribute(scriptRuntime: ScriptRuntime, value: String): String {
             val ctx = scriptRuntime.ui.bindingContext ?: return value
-            val niceCtx = Context.toObject(ctx, ctx as? Scriptable ?: scriptRuntime.topLevelScope)
+            val niceCtx = when (ctx) {
+                is Scriptable -> Context.toObject(ctx, ctx)
+                else -> Context.toObject(ctx, scriptRuntime.topLevelScope)
+            }
             var tmp = value
             var i = -1
             while (tmp.indexOf("{{", i + 1).also { i = it } >= 0) {
@@ -824,7 +833,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
          */
         private fun evalInContext(expression: String, ctx: Scriptable): Any? {
             val iife = object : BaseFunction() {
-                override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable, args: Array<out Any?>): Any? {
+                override fun call(cx: Context, scope: VarScope, thisObj: Scriptable, args: Array<out Any?>): Any? {
                     return cx.evaluateString(scope, expression, "<eval>", 1, null)
                 }
             }
@@ -903,7 +912,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     else -> withRhinoContext(scriptRuntime) { cx ->
                         val scope = scriptRuntime.topLevelScope
                         val exitIfErrorFunc = scope.prop("__exitIfError__") as BaseFunction
-                        exitIfErrorFunc.call(cx, scope, scope, arrayOf(newBaseFunction("action", {
+                        exitIfErrorFunc.call(cx, scope, scope.globalThis, arrayOf(newBaseFunction("action", {
                             callFunction(scriptRuntime, action, arrayOf())
                         }, NOT_CONSTRUCTABLE)))
                     }
@@ -917,10 +926,18 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             return scriptRuntime.topLevelScope.prop("activity").jsUnwrapped()
         }
 
-        private fun <R> ensureActivity(scriptRuntime: ScriptRuntime, func: (activity: ScriptExecuteActivity) -> R): R {
+        private fun getScriptExecuteActivity(scriptRuntime: ScriptRuntime): ScriptExecuteActivity? {
             val activity = getActivity(scriptRuntime)
-            require(!activity.isJsNullish()) { globalContext.getString(org.autojs.autojs6.R.string.error_activity_is_required_for_ui_exec_mode) }
+            if (activity.isJsNullish()) {
+                return null
+            }
             require(activity is ScriptExecuteActivity) { "Global activity ${activity.jsBrief()} must be a ScriptExecuteActivity" }
+            return activity
+        }
+
+        private fun <R> ensureActivity(scriptRuntime: ScriptRuntime, func: (activity: ScriptExecuteActivity) -> R): R {
+            val activity = getScriptExecuteActivity(scriptRuntime)
+            require(activity != null) { globalContext.getString(R.string.error_activity_is_required_for_ui_exec_mode) }
             return func.invoke(activity)
         }
 

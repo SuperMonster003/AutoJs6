@@ -34,8 +34,8 @@ class Plugins(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
                 asPackageName -> {
                     val plugin = scriptRuntime.plugins.load(name)
                     val moduleExportedFunc = js_require(scriptRuntime, plugin.mainScriptPath) as BaseFunction
-                    val global = scriptRuntime.topLevelScope
-                    val scope = moduleExportedFunc.parentScope ?: global
+                    val global = scriptRuntime.topLevelScope.globalThis
+                    val scope = moduleExportedFunc.parentScope ?: global.parentScope
                     callFunction(scriptRuntime, moduleExportedFunc, scope, global, arrayOf(plugin.unwrap()))
                 }
                 scriptRuntime.files.isDir("./plugins") -> {

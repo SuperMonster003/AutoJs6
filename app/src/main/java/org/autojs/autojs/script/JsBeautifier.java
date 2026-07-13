@@ -38,6 +38,7 @@ public class JsBeautifier {
     private final Context mContext;
     private Function mJsBeautifyFunction;
     private org.mozilla.javascript.Context mScriptContext;
+    private ImporterTopLevel mTopLevel;
     private Scriptable mScriptable;
 
     private View mView;
@@ -77,9 +78,9 @@ public class JsBeautifier {
         mScriptContext.setLanguageVersion(org.mozilla.javascript.Context.VERSION_1_8);
         mScriptContext.setOptimizationLevel(-1);
         if (mScriptable == null) {
-            ImporterTopLevel importerTopLevel = new ImporterTopLevel();
-            importerTopLevel.initStandardObjects(mScriptContext, false);
-            mScriptable = importerTopLevel;
+            mTopLevel = new ImporterTopLevel();
+            mTopLevel.initStandardObjects(mScriptContext, false);
+            mScriptable = mTopLevel.getGlobalThis();
         }
         AssetAndUrlModuleSourceProvider provider = new AssetAndUrlModuleSourceProvider(
                 mContext,
@@ -89,8 +90,8 @@ public class JsBeautifier {
         new RequireBuilder()
                 .setModuleScriptProvider(new SoftCachingModuleScriptProvider(provider))
                 .setSandboxed(false)
-                .createRequire(mScriptContext, mScriptable)
-                .install(mScriptable);
+                .createRequire(mScriptContext, mTopLevel)
+                .install(mTopLevel);
     }
 
     public void prepare() {

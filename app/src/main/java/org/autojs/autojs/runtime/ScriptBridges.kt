@@ -4,13 +4,13 @@ import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.util.RhinoUtils.callFunction
+import org.autojs.autojs.util.RhinoUtils.newNativeJavaMethod
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.NativeArray
-import org.mozilla.javascript.NativeJavaMethod
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 
@@ -60,11 +60,12 @@ class ScriptBridges : IScriptBridges {
         }
         if (listLike is UiObjectCollection) {
             val arr = toArray(listLike.nodes)
-            val boundThis = Context.javaToJS(listLike, arr) as Scriptable
+            val scope = arr.parentScope ?: engine?.runtime?.topLevelScope ?: cx.initStandardObjects()
+            val boundThis = Context.javaToJS(listLike, scope) as Scriptable
             listLike::class.java.methods.forEach {
                 val name = it.name
-                val method = NativeJavaMethod(it, name)
-                val bound = BoundFunction(cx, arr, method, boundThis, emptyArray())
+                val method = newNativeJavaMethod(scope, it, name)
+                val bound = BoundFunction(cx, scope, method, boundThis, emptyArray())
                 arr.put(name, arr, bound)
             }
             return@useJsContext arr

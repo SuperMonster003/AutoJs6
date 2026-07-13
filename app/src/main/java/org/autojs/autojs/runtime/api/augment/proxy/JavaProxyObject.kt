@@ -5,6 +5,7 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.Wrapper
 import java.util.concurrent.ConcurrentHashMap
 
@@ -36,7 +37,7 @@ open class JavaProxyObject<T : Any>(
     private val functionMap: ConcurrentHashMap<String, Function> = ConcurrentHashMap()
 
     init {
-        parentScope = scope
+        parentScope = scope.parentScope
     }
 
     override fun getClassName(): String = "JavaProxyObject"
@@ -127,7 +128,7 @@ open class JavaProxyObject<T : Any>(
         // zh-CN: 绑定函数, 让 this 始终为底层 Java wrapper.
         if (v !is Function) return v
         return object : BaseFunction() {
-            override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable, args: Array<out Any?>): Any? {
+            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable, args: Array<out Any?>): Any? {
                 return v.call(cx, scope, base, args)
             }
         }

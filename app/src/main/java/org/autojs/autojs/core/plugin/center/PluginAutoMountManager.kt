@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.center
 
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.plugins.Plugins
+import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
@@ -44,12 +45,12 @@ object PluginAutoMountManager {
     }
 
     private fun mount(
-        root: ScriptableObject,
+        root: TopLevelScope,
         mountPoint: String?,
         objectName: String,
         value: Any?,
     ) {
-        var parent: Scriptable = root
+        var parent: Scriptable = root.globalThis
         mountPoint
             ?.split('.')
             ?.map { it.trim() }

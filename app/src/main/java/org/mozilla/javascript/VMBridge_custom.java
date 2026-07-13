@@ -26,7 +26,7 @@ public class VMBridge_custom extends VMBridge_jdk18 {
     }
 
     @Override
-    protected Object newInterfaceProxy(Object proxyHelper, ContextFactory cf, InterfaceAdapter adapter, Object target, Scriptable topScope) {
+    protected Object newInterfaceProxy(Object proxyHelper, ContextFactory cf, InterfaceAdapter adapter, Object target, VarScope topScope) {
         Context context = Context.getCurrentContext();
         InterfaceAdapterWrapper adapterWrapper = new InterfaceAdapterWrapper(adapter, context);
         // --- The following code is copied from super class --
@@ -136,7 +136,7 @@ public class VMBridge_custom extends VMBridge_jdk18 {
             mCallerContext = callerContext;
         }
 
-        public Object invoke(ContextFactory cf, Object target, Scriptable topScope, Object thisObject, Method method, Object[] args) {
+        public Object invoke(ContextFactory cf, Object target, VarScope topScope, Object thisObject, Method method, Object[] args) {
             ContextAction<Object> action = cx -> invokeImpl(cx, target, topScope, thisObject, method, args);
             return call(cf, action);
         }
@@ -152,7 +152,7 @@ public class VMBridge_custom extends VMBridge_jdk18 {
             }
         }
 
-        public Object invokeImpl(Context cx, Object target, Scriptable topScope, Object thisObject, Method method, Object[] args) {
+        public Object invokeImpl(Context cx, Object target, VarScope topScope, Object thisObject, Method method, Object[] args) {
             cx.isContinuationsTopCall = true;
             return mInterfaceAdapter.invokeImpl(cx, target, topScope, thisObject, method, args);
         }

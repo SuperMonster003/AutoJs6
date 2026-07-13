@@ -11,6 +11,8 @@ import org.autojs.autojs.core.ui.nativeview.NativeView;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs6.R;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.VarScope;
 
 public class ViewExtras {
 
@@ -50,6 +52,10 @@ public class ViewExtras {
             extras.setNativeView(nativeView);
         }
         return nativeView;
+    }
+
+    public static NativeView getNativeView(VarScope scope, View view, Class<?> staticType, ScriptRuntime runtime) {
+        return getNativeView(ScriptableObject.getTopLevelScope(scope).getGlobalThis(), view, staticType, runtime);
     }
 
     public static NativeView getNativeView(@NonNull View view) {

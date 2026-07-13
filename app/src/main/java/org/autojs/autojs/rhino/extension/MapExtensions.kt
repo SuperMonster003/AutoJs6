@@ -2,6 +2,7 @@ package org.autojs.autojs.rhino.extension
 
 import org.autojs.autojs.rhino.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.Context
@@ -11,6 +12,7 @@ import org.mozilla.javascript.Wrapper
 object MapExtensions {
 
     fun <K, V> Map<K, V>.toNativeObject(): NativeObject = newNativeObject().also { o ->
+        val scope = o.parentScope ?: RhinoUtils.standardObjects
         forEach { entry: Map.Entry<K, V> ->
             val key = Context.toString(entry.key)
             when (val value = entry.value) {
@@ -25,7 +27,7 @@ object MapExtensions {
                 is Pair<*, *> -> o.put(key, o, newNativeObject().also { newObj ->
                     newObj.put(Context.toString(value.first), o, value.second)
                 })
-                else -> o.put(key, o, Context.javaToJS(value, o))
+                else -> o.put(key, o, Context.javaToJS(value, scope))
             }
         }
     }

@@ -83,7 +83,7 @@ class Threads(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun disposable(scriptRuntime: ScriptRuntime, args: Array<out Any?>): VolatileDisposeNativeObject = ensureArgumentsIsEmpty(args) {
-            VolatileDisposeNativeObject()
+            VolatileDisposeNativeObject(scriptRuntime.topLevelScope)
         }
 
     }

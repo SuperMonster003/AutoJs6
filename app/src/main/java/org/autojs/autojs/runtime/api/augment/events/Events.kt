@@ -15,9 +15,9 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
+import org.autojs.autojs.util.RhinoUtils.newNativeJavaMethod
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.NativeJavaMethod
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.ScriptableObject.DONTENUM
@@ -54,7 +54,7 @@ class Events(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }.forEach { method ->
                 obj.defineProp(method.name, newBaseFunction(method.name, { argList ->
                     val thisObj = Context.javaToJS(emitter, scope) as Scriptable
-                    callFunction(scriptRuntime, NativeJavaMethod(method, method.name), scope, thisObj, arrayOf(*argList))
+                    callFunction(scriptRuntime, newNativeJavaMethod(scope, method, method.name), scope, thisObj, arrayOf(*argList))
                 }, NOT_CONSTRUCTABLE))
             }
             obj

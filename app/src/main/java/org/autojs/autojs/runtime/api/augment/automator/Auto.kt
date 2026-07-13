@@ -31,6 +31,7 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.VarScope
 import java.util.function.Supplier
 
 @Suppress("unused", "UNUSED_PARAMETER")
@@ -297,7 +298,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
                 filter is Boolean -> accessibilityBridge.setWindowFilter { filter }
                 filter is WindowFilter -> accessibilityBridge.setWindowFilter(filter)
                 filter is BaseFunction -> accessibilityBridge.setWindowFilter { info ->
-                    Context.toBoolean(callFunction(scriptRuntime, filter, null, scriptRuntime.topLevelScope, arrayOf(info)))
+                    Context.toBoolean(callFunction(scriptRuntime, filter, null as VarScope?, scriptRuntime.topLevelScope.globalThis, arrayOf(info)))
                 }
                 else -> throw WrappedIllegalArgumentException("Argument filter ($filter) is invalid for auto.setWindowFilter")
             }

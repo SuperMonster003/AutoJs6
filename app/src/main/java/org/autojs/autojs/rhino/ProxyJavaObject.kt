@@ -8,6 +8,8 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.VarScope
 
 /**
  * Created by Stardust on Dec 6, 2017.
@@ -23,6 +25,9 @@ class ProxyJavaObject : NativeJavaObject {
     constructor(scope: Scriptable, javaObject: Any, staticType: Class<*>, isAdapter: Boolean = false) : super(scope, javaObject, staticType, isAdapter)
 
     @JvmOverloads
+    constructor(scope: VarScope, javaObject: Any, staticType: Class<*>, isAdapter: Boolean = false) : super(scope, javaObject, staticType, isAdapter)
+
+    @JvmOverloads
     constructor(scope: Scriptable, javaObject: Any, staticType: Class<*>, proxyObject: Any, isAdapter: Boolean = false) : super(scope, javaObject, staticType, isAdapter) {
         val proxy = proxyObject as NativeObject
         val getter = proxy[PROXY_GETTER_KEY, scope]
@@ -36,10 +41,25 @@ class ProxyJavaObject : NativeJavaObject {
     }
 
     @JvmOverloads
+    constructor(scope: VarScope, javaObject: Any, staticType: Class<*>, proxyObject: Any, isAdapter: Boolean = false) : this(
+        ScriptableObject.getTopLevelScope(scope).globalThis,
+        javaObject,
+        staticType,
+        proxyObject,
+        isAdapter,
+    )
+
+    @JvmOverloads
     constructor(scope: Scriptable, javaObject: Any, isAdapter: Boolean = false) : this(scope, javaObject, javaObject.javaClass, isAdapter)
 
     @JvmOverloads
+    constructor(scope: VarScope, javaObject: Any, isAdapter: Boolean = false) : this(scope, javaObject, javaObject.javaClass, isAdapter)
+
+    @JvmOverloads
     constructor(scope: Scriptable, javaObject: Any, proxyObject: Any, isAdapter: Boolean = false) : this(scope, javaObject, javaObject.javaClass, proxyObject, isAdapter)
+
+    @JvmOverloads
+    constructor(scope: VarScope, javaObject: Any, proxyObject: Any, isAdapter: Boolean = false) : this(scope, javaObject, javaObject.javaClass, proxyObject, isAdapter)
 
     override fun put(key: String, start: Scriptable, value: Any) {
         when {

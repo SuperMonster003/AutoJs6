@@ -6,6 +6,7 @@ import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.VarScope
 
 internal class SetIntervalExt(
     private val scriptRuntime: ScriptRuntime,
@@ -23,7 +24,7 @@ internal class SetIntervalExt(
     var timeout: Double = if (timeout > 0) timeout else DEFAULT_TIMEOUT
 
     fun execute(): Double = scriptRuntime.timers.setTimeout(object : BaseFunction() {
-        override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable?, args: Array<out Any?>): Any {
+        override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any?>): Any {
             val that = Context.javaToJS(this@SetIntervalExt, scope) as Scriptable
             listener.call(cx, scope, that, arrayOf())
             when {
@@ -34,9 +35,9 @@ internal class SetIntervalExt(
         }
     }, interval.toLong())
 
-    private fun isTimedOut(scope: Scriptable): Boolean {
+    private fun isTimedOut(scope: VarScope): Boolean {
         val f = timeoutCondition ?: object : BaseFunction() {
-            override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable?, args: Array<out Any?>): Boolean {
+            override fun call(cx: Context, scope: VarScope, thisObj: Scriptable?, args: Array<out Any?>): Boolean {
                 return System.currentTimeMillis() - initTimestamp > timeout
             }
         }

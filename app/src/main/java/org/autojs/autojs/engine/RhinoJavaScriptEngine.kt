@@ -31,9 +31,11 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
+import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.commonjs.module.RequireBuilder
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
 import org.mozilla.javascript.lc.type.TypeInfo
@@ -83,7 +85,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
             return if (hasFeature(ScriptConfig.FEATURE_CONTINUATION)) {
                 context.executeScriptWithContinuations(script, scriptable)
             } else {
-                script.exec(context, scriptable, scriptable)
+                script.exec(context, scriptable, scriptable.globalThis)
             }
         } catch (e: IOException) {
             throw UncheckedIOException(e)
@@ -115,7 +117,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
             it.initPrologue()
         }
 
-        scriptable.defineProp("global", scriptable, PERMANENT)
+        scriptable.defineProp("global", scriptable.globalThis, PERMANENT)
         scriptable.defineProp("__engine__", this, READONLY or DONTENUM or PERMANENT)
         scriptable.defineProp("Promise", runtime.js_Promise, READONLY or PERMANENT)
         scriptable.defineProp("ResultAdapter", runtime.js_ResultAdapter, READONLY or PERMANENT)
@@ -125,11 +127,11 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
                 context.executeScriptWithContinuations(initScript, scriptable)
             }.getOrElse { e ->
                 if (e.message?.contains("Script argument was not a script or was not created by interpreted mode") == true) {
-                    initScript.exec(context, scriptable, scriptable)
+                    initScript.exec(context, scriptable, scriptable.globalThis)
                 } else throw e
             }.let { export ->
                 when (export) {
-                    is BaseFunction -> export.call(context, scriptable, scriptable, arrayOf(runtime, scriptable))
+                    is BaseFunction -> export.call(context, scriptable, scriptable.globalThis, arrayOf(runtime, scriptable))
                     is NativeArray -> export.map { coerceString(it) }.distinct().forEach { bindModule(it) }
                     is NativeObject -> export.entries.forEach { entry -> bindModule(coerceString(entry.key), coerceString(entry.value)) }
                     is String -> when {
@@ -156,7 +158,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
             js_require(runtime, "__${niceFileName}__")
         }.getOrElse { js_require(runtime, niceFileName) }
         val exported: Any? = when (exportedRaw) {
-            is BaseFunction -> exportedRaw.call(context, scriptable, scriptable, arrayOf(runtime, scriptable))
+            is BaseFunction -> exportedRaw.call(context, scriptable, scriptable.globalThis, arrayOf(runtime, scriptable))
             else -> exportedRaw
         }
         if (exported.isJsNullish()) {
@@ -176,7 +178,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         js_object_assign(globalObject, exported)
     }
 
-    private fun initRequireBuilder(context: Context, scope: Scriptable) {
+    private fun initRequireBuilder(context: Context, scope: TopLevelScope) {
         val provider = AssetAndUrlModuleSourceProvider(
             androidContext, MODULES_ROOT_PATH, listOf<URI>(File(File.separator).toURI())
         )
@@ -214,14 +216,15 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
 
     private inner class WrapFactory : AndroidContextFactory.WrapFactory() {
 
-        override fun wrapAsJavaObject(cx: Context?, scope: Scriptable, javaObject: Any?, staticType: TypeInfo): Scriptable? {
+        override fun wrapAsJavaObject(cx: Context?, scope: VarScope, javaObject: Any?, staticType: TypeInfo): Scriptable? {
+            val globalThis = ScriptableObject.getTopLevelScope(scope).globalThis
             return when {
-                javaObject is View -> ViewExtras.getNativeView(scope, /* view = */ javaObject, staticType.asClass(), runtime)
+                javaObject is View -> ViewExtras.getNativeView(globalThis, /* view = */ javaObject, staticType.asClass(), runtime)
                 javaObject is Paint && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
                     // Use composition-based proxy to preserve Paint identity and intercept setColor only.
                     // zh-CN: 使用组合式代理以保持 Paint 身份一致性, 且仅拦截 setColor.
                     val base = super.wrapAsJavaObject(cx, scope, javaObject, staticType) ?: return null
-                    PaintProxyObject(scope, base, javaObject)
+                    PaintProxyObject(globalThis, base, javaObject)
                 }
                 else -> super.wrapAsJavaObject(cx, scope, javaObject, staticType)
             }

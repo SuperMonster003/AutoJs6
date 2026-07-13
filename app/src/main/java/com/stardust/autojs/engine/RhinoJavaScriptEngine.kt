@@ -15,6 +15,7 @@ import com.stardust.pio.UncheckedIOException
 import org.mozilla.javascript.*
 import org.mozilla.javascript.commonjs.module.RequireBuilder
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
+import org.mozilla.javascript.lc.type.TypeInfo
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
@@ -49,7 +50,7 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
         }
 
     val scriptable: Scriptable
-        get() = mScriptable
+        get() = mScriptable.globalThis
 
     init {
         this.context = enterContext()
@@ -73,7 +74,7 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
             return if (hasFeature(ScriptConfig.FEATURE_CONTINUATION)) {
                 context.executeScriptWithContinuations(script, mScriptable)
             } else {
-                script.exec(context, mScriptable, mScriptable)
+                script.exec(context, mScriptable, mScriptable.globalThis)
             }
         } catch (e: IOException) {
             throw UncheckedIOException(e)
@@ -113,14 +114,14 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
             context.executeScriptWithContinuations(initScript, mScriptable)
         } catch (e: IllegalArgumentException) {
             if ("Script argument was not a script or was not created by interpreted mode " == e.message) {
-                initScript.exec(context, mScriptable, mScriptable)
+                initScript.exec(context, mScriptable, mScriptable.globalThis)
             } else {
                 throw e
             }
         }
     }
 
-    internal fun initRequireBuilder(context: Context, scope: Scriptable) {
+    internal fun initRequireBuilder(context: Context, scope: TopLevelScope) {
         val provider = AssetAndUrlModuleSourceProvider(mAndroidContext, MODULES_PATH,
                 listOf<URI>(File("/").toURI()))
         RequireBuilder()
@@ -154,18 +155,18 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
 
     private inner class WrapFactory : org.mozilla.javascript.WrapFactory() {
 
-        override fun wrap(cx: Context, scope: Scriptable, obj: Any?, staticType: Class<*>?): Any? {
+        override fun wrap(cx: Context, scope: VarScope, obj: Any?, staticType: TypeInfo): Any? {
             return when {
                 obj is String -> runtime.bridges.toString(obj)
-                staticType == UiObjectCollection::class.java -> runtime.bridges.asArray(obj)
+                staticType.asClass() == UiObjectCollection::class.java -> runtime.bridges.asArray(obj)
                 else -> super.wrap(cx, scope, obj, staticType)
             }
         }
 
-        override fun wrapAsJavaObject(cx: Context?, scope: Scriptable, javaObject: Any?, staticType: Class<*>?): Scriptable? {
+        override fun wrapAsJavaObject(cx: Context?, scope: VarScope, javaObject: Any?, staticType: TypeInfo): Scriptable? {
             //Log.d(LOG_TAG, "wrapAsJavaObject: java = " + javaObject + ", result = " + result + ", scope = " + scope);
             return if (javaObject is View) {
-                ViewExtras.getNativeView(scope, javaObject, staticType, runtime)
+                ViewExtras.getNativeView(ScriptableObject.getTopLevelScope(scope).globalThis, javaObject, staticType.asClass(), runtime)
             } else {
                 super.wrapAsJavaObject(cx, scope, javaObject, staticType)
             }

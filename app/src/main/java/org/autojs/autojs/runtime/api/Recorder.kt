@@ -10,6 +10,7 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.VarScope
 import java.lang.System.currentTimeMillis
 
 class Recorder(private val scriptRuntime: ScriptRuntime) {
@@ -68,7 +69,7 @@ class Recorder(private val scriptRuntime: ScriptRuntime) {
                     "instead of ${ts.jsBrief()} if provided"
                 ).joinToString(" ").let { throw IllegalArgumentException(it) }
             }
-            callFunction(scriptRuntime, key, null, thisObj, arrayOf())
+            callFunction(scriptRuntime, key, null as VarScope?, thisObj, arrayOf())
             load(tmpKey).also { remove(tmpKey) }
         }
         else -> coerceString(key).let { k ->

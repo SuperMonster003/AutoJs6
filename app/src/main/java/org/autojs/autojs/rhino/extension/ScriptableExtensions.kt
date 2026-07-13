@@ -3,6 +3,7 @@ package org.autojs.autojs.rhino.extension
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.Wrapper
 
 /**
@@ -22,6 +23,10 @@ object ScriptableExtensions {
         if (it is Wrapper) it.unwrap() else it
     }
 
+    fun VarScope.getProp(key: String): Any? = ScriptableObject.getProperty(this, key).let {
+        if (it is Wrapper) it.unwrap() else it
+    }
+
     /**
      * This method is a clone of [Scriptable.getProp].
      *
@@ -33,6 +38,8 @@ object ScriptableExtensions {
      */
     fun Scriptable.prop(key: String): Any? = this.getProp(key)
 
+    fun VarScope.prop(key: String): Any? = this.getProp(key)
+
     /**
      * Returns whether a named property is defined in this object or any object in its prototype chain.
      *
@@ -42,6 +49,8 @@ object ScriptableExtensions {
      * @return Whether property was found or not
      */
     fun Scriptable.hasProp(key: String): Boolean = ScriptableObject.hasProperty(this, key)
+
+    fun VarScope.hasProp(key: String): Boolean = ScriptableObject.hasProperty(this, key)
 
     /**
      * Utility method to add properties to this Scriptable object.
@@ -54,6 +63,8 @@ object ScriptableExtensions {
      * @param attributes The attributes of the JavaScript property
      */
     fun Scriptable.defineProp(key: String, value: Any?, attributes: Int = ScriptableObject.EMPTY) = RhinoUtils.undefined { ScriptableObject.defineProperty(this, key, value, attributes) }
+
+    fun VarScope.defineProp(key: String, value: Any?, attributes: Int = ScriptableObject.EMPTY) = RhinoUtils.undefined { ScriptableObject.defineProperty(this, key, value, attributes) }
 
     /**
      * Puts a named property in this object or in an object in its prototype chain.
@@ -68,6 +79,8 @@ object ScriptableExtensions {
      */
     fun Scriptable.putProp(key: String, value: Any?) = RhinoUtils.undefined { ScriptableObject.putProperty(this, key, value) }
 
+    fun VarScope.putProp(key: String, value: Any?) = RhinoUtils.undefined { ScriptableObject.putProperty(this, key, value) }
+
     /**
      * Removes the property from this object or its prototype chain.
      *
@@ -78,5 +91,10 @@ object ScriptableExtensions {
      * @return If the property doesn't exist or was successfully removed
      */
     fun Scriptable.deleteProp(key: String): Boolean = ScriptableObject.deleteProperty(this, key)
+
+    fun VarScope.deleteProp(key: String): Boolean {
+        delete(key)
+        return !has(key, this)
+    }
 
 }

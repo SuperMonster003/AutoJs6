@@ -9,7 +9,7 @@ import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.autojs.autojs6.R
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
-import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.lc.type.TypeInfo
 import java.io.File
 import java.util.*
@@ -77,7 +77,7 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
             isJavaPrimitiveWrap = Pref.getBoolean(R.string.key_rhino_java_primitive_wrap, R.bool.pref_rhino_java_primitive_wrap)
         }
 
-        override fun wrap(cx: Context, scope: Scriptable, obj: Any?, staticType: TypeInfo): Any? = when {
+        override fun wrap(cx: Context, scope: VarScope, obj: Any?, staticType: TypeInfo): Any? = when {
             obj is String -> bridges.toString(obj)
             staticType.asClass() == UiObjectCollection::class.java -> (obj as? UiObjectCollection)?.let { bridges.asArray(it) } ?: UiObjectCollection.EMPTY
             else -> super.wrap(cx, scope, obj, staticType)

@@ -23,6 +23,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.SecurityUtilities;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.VarScope;
 import org.mozilla.javascript.debug.DebugFrame;
 import org.mozilla.javascript.debug.DebuggableObject;
 import org.mozilla.javascript.debug.DebuggableScript;
@@ -715,7 +716,7 @@ public class Dim {
         }
 
         Scriptable proto = scriptable.getPrototype();
-        Scriptable parent = scriptable.getParentScope();
+        VarScope parent = scriptable.getParentScope();
         int extra = 0;
         if (proto != null) {
             ++extra;
@@ -985,7 +986,7 @@ public class Dim {
                     break;
 
                 case IPROXY_EVAL_SCRIPT: {
-                    Scriptable scope = null;
+                    VarScope scope = null;
                     if (scopeProvider != null) {
                         scope = scopeProvider.getScope();
                     }
