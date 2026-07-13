@@ -43,6 +43,14 @@ class RhinoUtilsScopeCompatTest {
     }
 
     @Test
+    fun cachedStandardObjectsUsesAutoJsTopLevelScope() {
+        val cached = with(RhinoUtils) { cx.getOrCreateStandardObjects() }
+
+        assertSame(cached, cached.globalThis.parentScope)
+        assertSame(RhinoUtils.standardObjects, RhinoUtils.standardObjects.globalThis.parentScope)
+    }
+
+    @Test
     fun declarationScopeFallsBackForFullyDetachedNativeObject() {
         val detached = RhinoUtils.newNativeObject()
 
@@ -51,6 +59,14 @@ class RhinoUtilsScopeCompatTest {
         assertSame(RhinoUtils.objectPrototype, RhinoUtils.getObjectPrototype(detached))
         assertSame(RhinoUtils.arrayPrototype, RhinoUtils.getArrayPrototype(detached))
         assertSame(RhinoUtils.functionPrototype, RhinoUtils.getFunctionPrototype(detached))
+    }
+
+    @Test
+    fun declarationScopeOrDefaultUsesCurrentContextFallback() {
+        val cached = with(RhinoUtils) { cx.getOrCreateStandardObjects() }
+
+        assertSame(cached, with(RhinoUtils) { cx.getDeclarationScopeOrDefault(null) })
+        assertSame(RhinoUtils.standardObjects, RhinoUtils.getDeclarationScopeOrDefault(null))
     }
 
     @Test
@@ -85,6 +101,30 @@ class RhinoUtilsScopeCompatTest {
 
         assertEquals(91, descriptor.get("value", descriptor))
         assertSame(RhinoUtils.standardObjects, descriptor.parentScope)
+    }
+
+    @Test
+    fun objectHelpersUseDetachedObjectDeclarationScope() {
+        val topLevel = with(RhinoUtils) { cx.getOrCreateStandardObjects() }
+        val prototypeWithScope = NativeObject().apply {
+            parentScope = topLevel
+        }
+        val detached = NativeObject().apply {
+            prototype = prototypeWithScope
+            defineProperty("lines", 91, ScriptableObject.EMPTY)
+        }
+
+        val keys = RhinoUtils.js_object_keys(detached)
+        val values = RhinoUtils.js_object_values(detached)
+        val names = RhinoUtils.js_object_getOwnPropertyNames(detached)
+        val created = RhinoUtils.js_object_create(detached)
+
+        assertSame(topLevel, keys.parentScope)
+        assertSame(topLevel, values.parentScope)
+        assertSame(topLevel, names.parentScope)
+        assertSame(topLevel, created.parentScope)
+        assertSame(detached, created.prototype)
+        assertSame(detached, RhinoUtils.js_object_getPrototypeOf(created))
     }
 
     @Test

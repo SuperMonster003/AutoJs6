@@ -4,12 +4,12 @@ import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.util.RhinoUtils.callFunction
+import org.autojs.autojs.util.RhinoUtils.getOrCreateStandardObjects
 import org.autojs.autojs.util.RhinoUtils.newNativeJavaMethod
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
@@ -42,7 +42,7 @@ class ScriptBridges : IScriptBridges {
 
     override fun call(func: BaseFunction, target: Any?, args: Array<*>) = useJsContext { cx ->
         val scope = func.parentScope
-        val niceScope = scope ?: ImporterTopLevel(cx)
+        val niceScope = scope ?: engine?.runtime?.topLevelScope ?: cx.getOrCreateStandardObjects()
         val niceArgs = args.map { Context.javaToJS(it, niceScope) }.toTypedArray()
         val thisObj = Context.javaToJS(target, niceScope) as? Scriptable ?: Undefined.SCRIPTABLE_UNDEFINED
 
@@ -50,7 +50,7 @@ class ScriptBridges : IScriptBridges {
     }
 
     override fun toArray(o: Iterable<*>?): NativeArray = useJsContext { cx ->
-        val scope = engine?.runtime?.topLevelScope ?: cx.initStandardObjects()
+        val scope = engine?.runtime?.topLevelScope ?: cx.getOrCreateStandardObjects()
         cx.newArray(scope, o?.map { Context.javaToJS(it, scope) }?.toTypedArray()) as NativeArray
     }
 
@@ -60,7 +60,7 @@ class ScriptBridges : IScriptBridges {
         }
         if (listLike is UiObjectCollection) {
             val arr = toArray(listLike.nodes)
-            val scope = arr.parentScope ?: engine?.runtime?.topLevelScope ?: cx.initStandardObjects()
+            val scope = arr.parentScope ?: engine?.runtime?.topLevelScope ?: cx.getOrCreateStandardObjects()
             val boundThis = Context.javaToJS(listLike, scope) as Scriptable
             listLike::class.java.methods.forEach {
                 val name = it.name
@@ -77,7 +77,7 @@ class ScriptBridges : IScriptBridges {
         Context.toString(obj)
 
     override fun toPrimitive(obj: Any?): Any? = useJsContext { cx ->
-        val scope = engine?.runtime?.topLevelScope ?: cx.initStandardObjects()
+        val scope = engine?.runtime?.topLevelScope ?: cx.getOrCreateStandardObjects()
         Context.javaToJS(obj, scope)
     }
 

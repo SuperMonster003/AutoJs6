@@ -226,7 +226,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
             else -> listOf(proto)
         }
 
-        augmentPrototypes(target, global, protos)
+        augmentPrototypes(target, globalScope, global, protos)
         augmentProperties(target, global)
         augmentFunctions(target, global)
         augmentGettersAndSetters(target, global)
@@ -249,13 +249,13 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
         if (o.prop(item.first).isJsNullish()) put(o, item)
     }
 
-    private fun augmentPrototypes(newObj: ScriptableObject, global: ScriptableObject, protos: List<Any?>) {
+    private fun augmentPrototypes(newObj: ScriptableObject, globalScope: VarScope, global: ScriptableObject, protos: List<Any?>) {
         val scopeProtoList = mutableListOf<Scriptable>()
         val objProtoList = mutableListOf<Scriptable>()
 
         protos.forEach { protoObj ->
             objProtoList += when (protoObj) {
-                is SimpleGetterProxy -> ProxyObject(global, runCatching {
+                is SimpleGetterProxy -> ProxyObject(globalScope, runCatching {
                     fun(args: Array<out Any?>): Any? {
                         val (keyArg) = args
                         return protoObj::class.java.getDeclaredMethod(PROXY_GETTER_KEY, Scriptable::class.java, String::class.java)
@@ -263,7 +263,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
                     }
                 }.getOrNull(), null)
                 is Scriptable -> protoObj
-                else -> RhinoScriptRuntime.toObject(global, protoObj)
+                else -> RhinoScriptRuntime.toObject(globalScope, protoObj)
             }
         }
 

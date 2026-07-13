@@ -29,7 +29,6 @@ import org.mozilla.javascript.Callable
 import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContinuationPending
-import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeDate
 import org.mozilla.javascript.NativeJSON
@@ -109,7 +108,8 @@ object RhinoUtils {
         // zh-CN: 按 Context 缓存标准对象, 避免重复调用 initStandardObjects().
         val cached = this.getThreadLocal(STANDARD_OBJECTS_KEY) as? TopLevel
         if (cached != null) return cached
-        return this.initStandardObjects().also { created ->
+        return TopLevelScope().also { created ->
+            created.initStandardObjects(this, false)
             this.putThreadLocal(STANDARD_OBJECTS_KEY, created)
         }
     }
@@ -244,7 +244,7 @@ object RhinoUtils {
                 scope != null -> scope
                 func.parentScope != null -> func.parentScope
                 scriptRuntime != null -> scriptRuntime.topLevelScope
-                else -> ImporterTopLevel(cx)
+                else -> cx.getOrCreateStandardObjects()
             }
             val niceThisObj = thisObj ?: Undefined.SCRIPTABLE_UNDEFINED
             when {
@@ -373,6 +373,22 @@ object RhinoUtils {
     }
 
     @JvmStatic
+    fun getDeclarationScopeOrDefault(vararg scopes: Scriptable?): VarScope {
+        scopes.forEach { scope ->
+            if (scope != null) return getDeclarationScope(scope)
+        }
+        return standardObjects
+    }
+
+    @JvmStatic
+    fun Context.getDeclarationScopeOrDefault(vararg scopes: Scriptable?): VarScope {
+        scopes.forEach { scope ->
+            if (scope != null) return getDeclarationScope(scope)
+        }
+        return getOrCreateStandardObjects()
+    }
+
+    @JvmStatic
     fun defineFunctionProperties(
         target: ScriptableObject,
         names: Array<String>,
@@ -400,7 +416,8 @@ object RhinoUtils {
 
     @JvmStatic
     fun wrap(o: Any?): Any = withRhinoContext { cx ->
-        cx.wrapFactory.wrap(cx, ImporterTopLevel(cx), o, o?.let { it::class.java })
+        val scope = cx.getOrCreateStandardObjects()
+        cx.wrapFactory.wrap(cx, scope, o, o?.let { it::class.java })
     }
 
     @JvmStatic
@@ -628,13 +645,13 @@ object RhinoUtils {
     @JvmStatic
     @JvmOverloads
     fun callPrototypeFunction(builtins: TopLevel.Builtins, funcName: String, thisObj: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
-        callPrototypeFunction(builtins, funcName, thisObj, ImporterTopLevel(cx), args)
+        callPrototypeFunction(builtins, funcName, thisObj, cx.getDeclarationScopeOrDefault(thisObj), args)
     }
 
     @JvmStatic
     @JvmOverloads
     fun callPrototypeFunction(className: String, funcName: String, thisObj: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
-        callPrototypeFunction(className, funcName, thisObj, ImporterTopLevel(cx), args)
+        callPrototypeFunction(className, funcName, thisObj, cx.getDeclarationScopeOrDefault(thisObj), args)
     }
 
     @JvmStatic
@@ -687,7 +704,7 @@ object RhinoUtils {
     @Suppress("UnnecessaryVariable")
     @JvmStatic
     fun js_object_assign(tar: Scriptable?, src: Scriptable?): Scriptable = withRhinoContext { cx ->
-        val topLevelScope = ImporterTopLevel(cx)
+        val topLevelScope = cx.getDeclarationScopeOrDefault(tar, src)
         val targetObj = when (tar != null) {
             true -> toObject(cx, topLevelScope, tar)
             else -> toObject(cx, topLevelScope, UNDEFINED)
@@ -717,7 +734,7 @@ object RhinoUtils {
 
     @JvmStatic
     fun js_object_keys(arg: ScriptableObject): NativeArray = withRhinoContext { cx ->
-        val topLevel = ImporterTopLevel(cx)
+        val topLevel = getDeclarationScope(arg)
         val obj = toObject(cx, topLevel, arg)
         val ids = obj.ids
         ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
@@ -726,7 +743,7 @@ object RhinoUtils {
 
     @JvmStatic
     fun js_object_values(arg: ScriptableObject): NativeArray = withRhinoContext { cx ->
-        val topLevel = ImporterTopLevel(cx)
+        val topLevel = getDeclarationScope(arg)
         val obj = toObject(cx, topLevel, arg)
         var ids = obj.ids
         var j = 0
@@ -753,7 +770,7 @@ object RhinoUtils {
     @JvmStatic
     @JvmOverloads
     fun js_object_create(o: Scriptable? = null, properties: ScriptableObject? = null): NativeObject = withRhinoContext { cx ->
-        val topLevel = ImporterTopLevel(cx)
+        val topLevel = cx.getDeclarationScopeOrDefault(o, properties)
         newNativeObject().also {
             it.parentScope = topLevel
             it.prototype = when (o) {
@@ -768,7 +785,7 @@ object RhinoUtils {
 
     @JvmStatic
     fun js_object_getPrototypeOf(o: Scriptable?): Scriptable? = withRhinoContext { cx ->
-        val topLevel = ImporterTopLevel(cx)
+        val topLevel = cx.getDeclarationScopeOrDefault(o)
         NativeObject.getCompatibleObject(cx, topLevel, o).prototype
     }
 
@@ -804,7 +821,7 @@ object RhinoUtils {
 
     @JvmStatic
     fun js_object_getOwnPropertyNames(o: Scriptable): NativeArray = withRhinoContext { cx ->
-        val topLevel = ImporterTopLevel(cx)
+        val topLevel = getDeclarationScope(o)
         val obj = ensureScriptableObject(toObject(cx, topLevel, o))
         // val ids = obj.getIds(true, false)
         // ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
@@ -828,7 +845,7 @@ object RhinoUtils {
 
     @JvmStatic
     fun js_function_bind(scope: Scriptable? = null, targetFunction: Callable, vararg args: Scriptable): BoundFunction = withRhinoContext { cx ->
-        val topLevel = scope?.let { getDeclarationScope(it) } ?: ImporterTopLevel(cx)
+        val topLevel = cx.getDeclarationScopeOrDefault(scope)
         val argc: Int = args.size
         val boundThis: Scriptable?
         val boundArgs: Array<Any?>
@@ -848,14 +865,14 @@ object RhinoUtils {
 
     @JvmStatic
     fun js_json_parse(text: String): Any? = withRhinoContext { cx ->
-        val topLevel = ImporterTopLevel(cx)
+        val topLevel = cx.getOrCreateStandardObjects()
         JsonParser(cx, topLevel).parseValue(text)
     }
 
     @JvmStatic
     @JvmOverloads
     fun js_json_stringify(value: Any?, replacer: Any? = null, space: Any? = null): Any = withRhinoContext { cx ->
-        val topLevel = ImporterTopLevel(cx)
+        val topLevel = cx.getOrCreateStandardObjects()
         NativeJSON.stringify(cx, topLevel, value, replacer, space)
     }
 
@@ -1077,14 +1094,14 @@ object RhinoUtils {
 
         internal fun callFunc(callFunc: ((args: Array<out Any?>) -> Any?)?, cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? {
             return when (callFunc) {
-                null -> super.call(cx, scope ?: ImporterTopLevel(cx), thisObj, args)
+                null -> super.call(cx, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, thisObj, args)
                 else -> callFunc.invoke(args)
             }
         }
 
         internal fun constructFunc(constructFunc: ((args: Array<out Any?>) -> Any?)?, cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable {
             return when (constructFunc) {
-                null -> super.construct(cx, scope ?: ImporterTopLevel(cx), args)
+                null -> super.construct(cx, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, args)
                 else -> when (val result = constructFunc.invoke(args)) {
                     is Int -> constructFlag(result, cx, scope, args)
                     else -> result.also {
@@ -1095,13 +1112,13 @@ object RhinoUtils {
         }
 
         internal fun callFlag(flag: Int, cx: Context?, scope: VarScope?, thisObj: Scriptable?, args: Array<out Any?>): Any? = when (flag) {
-            DEFAULT_CALLER -> super.call(cx, scope ?: ImporterTopLevel(cx), thisObj, args)
+            DEFAULT_CALLER -> super.call(cx, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, thisObj, args)
             NOT_CALLABLE -> throw RuntimeException("Function ${funcName ?: "anonymous"} is unable to be invoked as a function")
             else -> throw IllegalArgumentException("Unknown flag $flag for argument callFunc of RhinoUtils.newBaseFunction")
         }
 
         internal fun constructFlag(flag: Int, cx: Context?, scope: VarScope?, args: Array<out Any?>): Scriptable = when (flag) {
-            DEFAULT_CONSTRUCTOR -> super.construct(cx, scope ?: ImporterTopLevel(cx), args)
+            DEFAULT_CONSTRUCTOR -> super.construct(cx, scope ?: cx?.getOrCreateStandardObjects() ?: standardObjects, args)
             NOT_CONSTRUCTABLE -> throw RuntimeException("Function ${funcName ?: "anonymous"} is unable to be invoked with \"new\" operator")
             else -> throw IllegalArgumentException("Unknown flag $flag for argument constructFunc of RhinoUtils.newBaseFunction")
         }

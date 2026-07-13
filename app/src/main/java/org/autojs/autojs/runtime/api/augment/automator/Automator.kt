@@ -27,13 +27,11 @@ import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
-import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.autojs.autojs.util.SdkVersionUtils
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.NativeObject
 import android.graphics.Point as AndroidPoint
@@ -675,26 +673,18 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             return object : AccessibilityService.GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription) {
                     when (callback) {
-                        is BaseFunction -> withRhinoContext(scriptRuntime) { cx ->
-                            callback.call(cx, ImporterTopLevel(cx), callback, arrayOf(true))
-                        }
+                        is BaseFunction -> RhinoUtils.callFunction(scriptRuntime, callback, callback, callback, arrayOf(true))
                         is NativeObject -> callback.prop("onCompleted")?.let {
-                            if (it is BaseFunction) withRhinoContext(scriptRuntime) { cx ->
-                                it.call(cx, ImporterTopLevel(cx), callback, arrayOf(gestureDescription))
-                            }
+                            if (it is BaseFunction) RhinoUtils.callFunction(scriptRuntime, it, callback, callback, arrayOf(gestureDescription))
                         }
                     }
                 }
 
                 override fun onCancelled(gestureDescription: GestureDescription) {
                     when (callback) {
-                        is BaseFunction -> withRhinoContext(scriptRuntime) { cx ->
-                            callback.call(cx, ImporterTopLevel(cx), callback, arrayOf(false))
-                        }
+                        is BaseFunction -> RhinoUtils.callFunction(scriptRuntime, callback, callback, callback, arrayOf(false))
                         is NativeObject -> callback.prop("onCancelled")?.let {
-                            if (it is BaseFunction) withRhinoContext(scriptRuntime) { cx ->
-                                it.call(cx, ImporterTopLevel(cx), callback, arrayOf(gestureDescription))
-                            }
+                            if (it is BaseFunction) RhinoUtils.callFunction(scriptRuntime, it, callback, callback, arrayOf(gestureDescription))
                         }
                     }
                 }
