@@ -25,10 +25,10 @@ class PluginIndexRepository {
 
     companion object {
         private const val TAG = "PluginIndexRepository"
-        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v5.json"
+        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v6.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
-        private const val APK_BUILDER_TEMPLATE_REPO = "AutoJs6-Plugin-APK-Builder"
+        private const val APK_BUILDER_TEMPLATE_REPO = "AutoJs6-Plugin-APK-Builder-Template"
         private const val OFFICIAL_REPO_PREFIX = "AutoJs6-Plugin-"
         private const val THIRD_PARTY_OWNER = "SuperMonster002"
         private const val THIRD_PARTY_REPO = "Auto.js-SDK-Plugins-Garage"
@@ -69,7 +69,7 @@ class PluginIndexRepository {
                 memoryFetchedSources = parsed.fetchedSources
                 memoryLanguageTag = parsed.languageTag
             }
-        } ?: return@withContext filterBySource(buildBuiltInOfficialEntries(context), enabledSources)
+        } ?: return@withContext filterBySource(buildBuiltInOfficialEntries(), enabledSources)
         return@withContext filterBySource(
             appendBuiltInOfficialEntries(context, cacheSnapshot.entries),
             enabledSources,
@@ -199,41 +199,55 @@ class PluginIndexRepository {
         entries: List<PluginIndexEntry>,
         resolveRemoteRelease: Boolean = false,
     ): List<PluginIndexEntry> {
-        val builtInEntries = buildBuiltInOfficialEntries(context, resolveRemoteRelease)
+        val apkBuilderTemplateReleaseResolution = if (resolveRemoteRelease) {
+            resolveApkBuilderTemplateReleaseFromGitHub(context)
+        } else {
+            null
+        }
+        val builtInEntries = buildBuiltInOfficialEntries(apkBuilderTemplateReleaseResolution)
         if (builtInEntries.isEmpty()) return entries
 
+        val existingByPackage = entries
+            .filter { it.source == PluginIndexSource.OFFICIAL }
+            .associateBy { it.packageName }
+        val mergedBuiltInEntries = builtInEntries.map { entry ->
+            val existing = existingByPackage[entry.packageName]
+            entry.copy(
+                iconUrl = entry.iconUrl ?: existing?.iconUrl,
+                nightIconUrl = entry.nightIconUrl ?: existing?.nightIconUrl,
+                releases = resolveBuiltInReleases(
+                    entry = entry,
+                    existing = existing,
+                    apkBuilderTemplateReleaseResolution = apkBuilderTemplateReleaseResolution,
+                ),
+            )
+        }
         val builtInPackages = builtInEntries.mapTo(linkedSetOf()) { it.packageName }
-        return builtInEntries + entries.filterNot {
+        return mergedBuiltInEntries + entries.filterNot {
             it.source == PluginIndexSource.OFFICIAL && it.packageName in builtInPackages
         }
     }
 
     private fun buildBuiltInOfficialEntries(
-        context: Context,
-        resolveRemoteRelease: Boolean = false,
+        apkBuilderTemplateReleaseResolution: ApkBuilderTemplateReleaseResolution? = null,
     ): List<PluginIndexEntry> {
-        return listOf(buildApkBuilderTemplateIndexEntry(context, resolveRemoteRelease))
+        val apkBuilderTemplateRelease = (apkBuilderTemplateReleaseResolution as? ApkBuilderTemplateReleaseResolution.Found)?.release
+        return listOf(buildApkBuilderTemplateIndexEntry(apkBuilderTemplateRelease))
     }
 
     private fun buildApkBuilderTemplateIndexEntry(
-        context: Context,
-        resolveRemoteRelease: Boolean,
+        release: PluginIndexRelease? = null,
     ): PluginIndexEntry {
-        val release = if (resolveRemoteRelease) {
-            resolveApkBuilderTemplateReleaseFromGitHub(context) ?: buildFallbackApkBuilderTemplateRelease()
-        } else {
-            buildFallbackApkBuilderTemplateRelease()
-        }
         return PluginIndexEntry(
             packageName = APK_BUILDER_TEMPLATE_PACKAGE,
-            title = "${context.getString(R.string.app_name)} APK Builder Template",
+            title = "APK Builder Template",
             description = "Provides the template APK used by AutoJs6 APK Builder.",
             instructionHardCoded = "Install and enable this plugin when AutoJs6 is built without a built-in template.apk.",
-            author = "AutoJs6",
+            author = "SuperMonster003",
             engine = ApkBuilderTemplatePluginIds.ENGINE,
             variant = ApkBuilderTemplatePluginIds.VARIANT_INRT_UNIVERSAL,
             engineId = ApkBuilderTemplatePluginIds.ID,
-            releases = listOf(release),
+            releases = listOfNotNull(release),
             supportedAbis = emptyList(),
             tags = listOf("official", "apk-builder", "template"),
             requiresHostVersion = BuildConfig.VERSION_CODE.toLong(),
@@ -241,23 +255,55 @@ class PluginIndexRepository {
         )
     }
 
-    private fun resolveApkBuilderTemplateReleaseFromGitHub(context: Context): PluginIndexRelease? {
-        val exact = runCatching {
-            getJsonObject(
-                context = context,
-                url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/tags/${encodeUrlPathSegment("v${BuildConfig.VERSION_NAME}")}",
-            )
-        }.getOrNull()
+    private fun resolveBuiltInReleases(
+        entry: PluginIndexEntry,
+        existing: PluginIndexEntry?,
+        apkBuilderTemplateReleaseResolution: ApkBuilderTemplateReleaseResolution?,
+    ): List<PluginIndexRelease> {
+        if (entry.packageName != APK_BUILDER_TEMPLATE_PACKAGE) {
+            return entry.releases.ifEmpty { existing?.releases.orEmpty() }
+        }
+        return when (apkBuilderTemplateReleaseResolution) {
+            is ApkBuilderTemplateReleaseResolution.Found -> listOf(apkBuilderTemplateReleaseResolution.release)
+            ApkBuilderTemplateReleaseResolution.NoAvailableRelease -> emptyList()
+            ApkBuilderTemplateReleaseResolution.Unavailable, null -> existing?.releases.orEmpty()
+        }
+    }
 
-        val releaseJson = exact ?: runCatching {
-            getJsonObject(
-                context = context,
-                url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/latest",
-            )
-        }.getOrNull()?.takeIf(::isCurrentHostReleaseJson)
+    private fun resolveApkBuilderTemplateReleaseFromGitHub(context: Context): ApkBuilderTemplateReleaseResolution {
+        val exact = getGitHubReleaseJson(
+            context = context,
+            url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/tags/${encodeUrlPathSegment("v${BuildConfig.VERSION_NAME}")}",
+        )
 
-        releaseJson ?: return null
+        if (exact is GitHubReleaseJsonResult.Found) {
+            return buildApkBuilderTemplateReleaseFromJson(exact.json)
+        }
 
+        val latest = getGitHubReleaseJson(
+            context = context,
+            url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/latest",
+        )
+
+        if (latest is GitHubReleaseJsonResult.Found) {
+            if (isCurrentHostReleaseJson(latest.json)) {
+                return buildApkBuilderTemplateReleaseFromJson(latest.json)
+            }
+            return when (exact) {
+                GitHubReleaseJsonResult.NotFound -> ApkBuilderTemplateReleaseResolution.NoAvailableRelease
+                GitHubReleaseJsonResult.Unavailable -> ApkBuilderTemplateReleaseResolution.Unavailable
+                is GitHubReleaseJsonResult.Found -> ApkBuilderTemplateReleaseResolution.Unavailable
+            }
+        }
+
+        return when {
+            exact == GitHubReleaseJsonResult.NotFound && latest == GitHubReleaseJsonResult.NotFound ->
+                ApkBuilderTemplateReleaseResolution.NoAvailableRelease
+            else -> ApkBuilderTemplateReleaseResolution.Unavailable
+        }
+    }
+
+    private fun buildApkBuilderTemplateReleaseFromJson(releaseJson: JSONObject): ApkBuilderTemplateReleaseResolution {
         val assetName = apkBuilderTemplateReleaseAssetName(BuildConfig.VERSION_NAME)
         val assets = parseReleaseAssets(releaseJson.optJSONArray("assets"))
         val selectedAsset = assets.firstOrNull { it.name.equals(assetName, ignoreCase = true) }
@@ -265,34 +311,22 @@ class PluginIndexRepository {
                 it.name.startsWith(APK_BUILDER_TEMPLATE_ASSET_PREFIX, ignoreCase = true) &&
                         it.name.endsWith(".apk", ignoreCase = true)
             }
+            ?: return ApkBuilderTemplateReleaseResolution.NoAvailableRelease
         val publishedDate = releaseJson.optString("published_at").takeIf { it.length >= 10 }?.substring(0, 10)
         val releaseBody = releaseJson.optString("body").takeIf { it.isNotBlank() }
 
-        return PluginIndexRelease(
-            versionName = BuildConfig.VERSION_NAME,
-            versionCode = BuildConfig.VERSION_CODE.toLong(),
-            versionDate = publishedDate,
-            apkUrl = selectedAsset?.downloadUrl ?: fallbackApkBuilderTemplateReleaseUrl(),
-            apkSha256 = selectedAsset?.sha256,
-            apkSizeBytes = selectedAsset?.size,
-            changelogUrl = null,
-            changelogText = releaseBody,
+        return ApkBuilderTemplateReleaseResolution.Found(
+            PluginIndexRelease(
+                versionName = BuildConfig.VERSION_NAME,
+                versionCode = BuildConfig.VERSION_CODE.toLong(),
+                versionDate = publishedDate,
+                apkUrl = selectedAsset.downloadUrl,
+                apkSha256 = selectedAsset.sha256,
+                apkSizeBytes = selectedAsset.size,
+                changelogUrl = null,
+                changelogText = releaseBody,
+            ),
         )
-    }
-
-    private fun buildFallbackApkBuilderTemplateRelease(): PluginIndexRelease {
-        return PluginIndexRelease(
-            versionName = BuildConfig.VERSION_NAME,
-            versionCode = BuildConfig.VERSION_CODE.toLong(),
-            apkUrl = fallbackApkBuilderTemplateReleaseUrl(),
-            changelogText = "APK Builder template plugin for AutoJs6 ${BuildConfig.VERSION_NAME}.",
-        )
-    }
-
-    private fun fallbackApkBuilderTemplateReleaseUrl(): String {
-        return "https://github.com/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/download/" +
-                "${encodeUrlPathSegment("v${BuildConfig.VERSION_NAME}")}/" +
-                apkBuilderTemplateReleaseAssetName(BuildConfig.VERSION_NAME)
     }
 
     private fun apkBuilderTemplateReleaseAssetName(versionName: String): String {
@@ -1279,6 +1313,19 @@ class PluginIndexRepository {
     private fun getJsonArray(context: Context, url: String): JSONArray =
         JSONArray(getText(context, url, "application/json"))
 
+    private fun getGitHubReleaseJson(context: Context, url: String): GitHubReleaseJsonResult {
+        return try {
+            GitHubReleaseJsonResult.Found(getJsonObject(context, url))
+        } catch (e: HttpStatusException) {
+            when (e.code) {
+                HttpURLConnection.HTTP_NOT_FOUND -> GitHubReleaseJsonResult.NotFound
+                else -> GitHubReleaseJsonResult.Unavailable
+            }
+        } catch (_: Throwable) {
+            GitHubReleaseJsonResult.Unavailable
+        }
+    }
+
     private fun resolveCacheFile(context: Context): File {
         val persistentDir = File(context.filesDir, "plugin_center").apply { mkdirs() }
         val persistentFile = File(persistentDir, CACHE_FILE_NAME)
@@ -1328,8 +1375,10 @@ class PluginIndexRepository {
             if (code !in 200..299) {
                 val err = conn.errorStream?.bufferedReader(StandardCharsets.UTF_8)?.use { it.readText() }?.trim().orEmpty()
                 val shortErr = err.take(220)
-                throw IllegalStateException(
-                    if (shortErr.isBlank()) "HTTP $code for $url" else "HTTP $code for $url: $shortErr",
+                throw HttpStatusException(
+                    code = code,
+                    url = url,
+                    message = if (shortErr.isBlank()) "HTTP $code for $url" else "HTTP $code for $url: $shortErr",
                 )
             }
             conn.inputStream.bufferedReader(StandardCharsets.UTF_8).use { it.readText() }
@@ -1547,6 +1596,24 @@ class PluginIndexRepository {
         val size: Long,
         val sha256: String?,
     )
+
+    private sealed class ApkBuilderTemplateReleaseResolution {
+        data class Found(val release: PluginIndexRelease) : ApkBuilderTemplateReleaseResolution()
+        object NoAvailableRelease : ApkBuilderTemplateReleaseResolution()
+        object Unavailable : ApkBuilderTemplateReleaseResolution()
+    }
+
+    private sealed class GitHubReleaseJsonResult {
+        data class Found(val json: JSONObject) : GitHubReleaseJsonResult()
+        object NotFound : GitHubReleaseJsonResult()
+        object Unavailable : GitHubReleaseJsonResult()
+    }
+
+    private class HttpStatusException(
+        val code: Int,
+        val url: String,
+        message: String,
+    ) : IllegalStateException(message)
 
     private data class GarageParsedName(
         val originalName: String,
