@@ -69,7 +69,7 @@ jobs:
       - name: Trigger APK Builder plugin repository
         env:
           GH_TOKEN: ${{ secrets.AUTOJS6_PLUGIN_REPO_TOKEN }}
-          PLUGIN_REPO: SuperMonster003/AutoJs6-Plugin-APK-Builder
+          PLUGIN_REPO: SuperMonster003/AutoJs6-Plugin-APK-Builder-Template
           TARGET_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
           if [ -z "$GH_TOKEN" ]; then

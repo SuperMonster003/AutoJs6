@@ -58,7 +58,7 @@ It does the following:
 1. Builds `:app:generateRuntimeKit`.
 2. Uploads `autojs6-runtime-kit-*.zip` as a workflow artifact.
 3. Uploads the same zip to the AutoJs6 GitHub Release.
-4. Sends `repository_dispatch` to `SuperMonster003/AutoJs6-Plugin-APK-Builder`.
+4. Sends `repository_dispatch` to `SuperMonster003/AutoJs6-Plugin-APK-Builder-Template`.
 
 Required secret in the main repository:
 
@@ -66,7 +66,7 @@ Required secret in the main repository:
 AUTOJS6_PLUGIN_REPO_TOKEN
 ```
 
-The token must have `Contents: write` permission on `SuperMonster003/AutoJs6-Plugin-APK-Builder`, which is required by GitHub's repository dispatch endpoint.
+The token must have `Contents: write` permission on `SuperMonster003/AutoJs6-Plugin-APK-Builder-Template`, which is required by GitHub's repository dispatch endpoint.
 
 ## Plugin Repository Build
 

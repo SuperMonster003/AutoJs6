@@ -7,9 +7,9 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class ApkBuilderTemplateInfo(
     var id: String = ApkBuilderTemplatePluginIds.ID,
-    var name: String = "AutoJs6 APK Builder Template",
+    var name: String = "APK Builder Template",
     var description: String? = null,
-    var author: String = "AutoJs6",
+    var author: String = "SuperMonster003",
     var versionName: String = "",
     var versionCode: Long = 0L,
     var versionDate: String? = null,
