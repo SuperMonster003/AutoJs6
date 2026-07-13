@@ -55,118 +55,25 @@
             app:layout_constraintStart_toEndOf="@id/state_label"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/state_value_container" />
+            app:layout_constraintEnd_toStartOf="@id/state_value" />
 
-        <LinearLayout
-            android:id="@+id/state_value_container"
+        <TextView
+            android:id="@+id/state_value"
+            tools:text="Authorized | Enabled | Updatable"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:maxLines="5"
+            android:ellipsize="end"
+            android:paddingBottom="0dp"
+            android:paddingTop="0dp"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
             app:layout_constraintStart_toEndOf="@id/state_colon"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <TextView
-                android:id="@+id/state_value_first"
-                android:visibility="gone"
-                tools:visibility="visible"
-                tools:text="@string/text_plugin_authorization_required"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|start"
-                android:textAlignment="viewStart"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:paddingBottom="0dp"
-                android:paddingTop="0dp"
-                android:lineSpacingExtra="2dp"
-                android:textSize="@dimen/ref_md_listitem_textsize"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/state_spliter_first_second" />
-
-            <TextView
-                android:id="@+id/state_spliter_first_second"
-                android:visibility="gone"
-                tools:visibility="visible"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|start"
-                android:textAlignment="viewStart"
-                android:layout_marginHorizontal="8sp"
-                android:text="@string/symbol_pipe"
-                android:textSize="@dimen/ref_md_listitem_textsize"
-                android:textColor="@color/text_color_secondary"
-                app:layout_constraintStart_toEndOf="@id/state_value_first"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/state_value_second" />
-
-            <TextView
-                android:id="@+id/state_value_second"
-                android:visibility="gone"
-                tools:visibility="visible"
-                tools:text="@string/text_disabled"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|start"
-                android:textAlignment="viewStart"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:paddingBottom="0dp"
-                android:paddingTop="0dp"
-                android:lineSpacingExtra="2dp"
-                android:textSize="@dimen/ref_md_listitem_textsize"
-                app:layout_constraintStart_toEndOf="@id/state_spliter_first_second"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/state_spliter_second_third" />
-
-            <TextView
-                android:id="@+id/state_spliter_second_third"
-                android:visibility="gone"
-                tools:visibility="visible"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|start"
-                android:textAlignment="viewStart"
-                android:layout_marginHorizontal="8sp"
-                android:text="@string/symbol_pipe"
-                android:textSize="@dimen/ref_md_listitem_textsize"
-                android:textColor="@color/text_color_secondary"
-                app:layout_constraintStart_toEndOf="@id/state_value_second"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/state_value_third" />
-
-            <TextView
-                android:id="@+id/state_value_third"
-                android:visibility="gone"
-                tools:visibility="visible"
-                tools:text="@string/text_updatable"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|start"
-                android:textAlignment="viewStart"
-                android:maxLines="3"
-                android:ellipsize="end"
-                android:paddingBottom="0dp"
-                android:paddingTop="0dp"
-                android:lineSpacingExtra="2dp"
-                android:textSize="@dimen/ref_md_listitem_textsize"
-                app:layout_constraintStart_toEndOf="@id/state_spliter_second_third"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-        </LinearLayout>
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

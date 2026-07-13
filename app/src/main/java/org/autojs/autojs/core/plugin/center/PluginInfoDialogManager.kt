@@ -139,34 +139,10 @@ object PluginInfoDialogManager {
         restoreEssentialViews(binding, context, info)
         updateGuidelines(binding)
 
-        when (info.states.size) {
-            0 -> {
-                binding.stateParent.isVisible = false
-            }
-            1 -> {
-                binding.stateValueFirst.text = info.states[0]
-
-                binding.stateValueFirst.isVisible = true
-            }
-            2 -> {
-                binding.stateValueFirst.text = info.states[0]
-                binding.stateValueSecond.text = info.states[1]
-
-                binding.stateValueFirst.isVisible = true
-                binding.stateSpliterFirstSecond.isVisible = true
-                binding.stateValueSecond.isVisible = true
-            }
-            else -> {
-                binding.stateValueFirst.text = info.states[0]
-                binding.stateValueSecond.text = info.states[1]
-                binding.stateValueThird.text = info.states[2]
-
-                binding.stateValueFirst.isVisible = true
-                binding.stateSpliterFirstSecond.isVisible = true
-                binding.stateValueSecond.isVisible = true
-                binding.stateSpliterSecondThird.isVisible = true
-                binding.stateValueThird.isVisible = true
-            }
+        if (info.states.isEmpty()) {
+            binding.stateParent.isVisible = false
+        } else {
+            binding.stateValue.text = info.states.joinToString(" ${context.getString(R.string.symbol_pipe)} ")
         }
 
         dialog.setCopyableTextIfAbsent(binding.packageNameValue, info.packageName)
