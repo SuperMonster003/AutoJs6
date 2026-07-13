@@ -156,6 +156,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     private var mListClipToPadding = false
 
     private var mOnItemOperateListener: OnItemOperateListener? = null
+    private var mOnSelectionToolbarStateChangeListener: OnSelectionToolbarStateChangeListener? = null
 
     private val mPageStateHistory = Stack<ExplorerPageState>()
     private var mDirectorySpanSize = 2
@@ -233,6 +234,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         binding.selectionCopy.setOnClickListener { copySelectedItems() }
         binding.selectionMove.setOnClickListener { moveSelectedItems() }
         binding.selectionDelete.setOnClickListener { deleteSelectedItems() }
+    }
+
+    fun setOnSelectionToolbarStateChangeListener(listener: OnSelectionToolbarStateChangeListener?) {
+        mOnSelectionToolbarStateChangeListener = listener
     }
 
     fun excludeListPaddingFromBottomNavigationBar(extraPaddingBottomDp: Float = 0F, clipToPadding: Boolean = false) {
@@ -328,11 +333,13 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             if (mSelectionToolbarShown && toolbar.isVisible) {
                 toolbar.translationY = 0F
                 updateExplorerListBottomPadding()
+                notifySelectionToolbarStateChanged(true)
                 return
             }
             mSelectionToolbarShown = true
             toolbar.isVisible = true
             toolbar.translationY = selectionToolbarHeight().toFloat()
+            notifySelectionToolbarStateChanged(true)
             toolbar.animate()
                 .translationY(0F)
                 .setDuration(SELECTION_TOOLBAR_SHOW_DURATION)
@@ -340,7 +347,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 .withEndAction { updateExplorerListBottomPadding() }
                 .start()
             updateExplorerListBottomPadding()
-            toolbar.post { updateExplorerListBottomPadding() }
+            toolbar.post {
+                updateExplorerListBottomPadding()
+                notifySelectionToolbarStateChanged(true)
+            }
             return
         }
         if (!mSelectionToolbarShown && !toolbar.isVisible) {
@@ -359,6 +369,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     toolbar.translationY = 0F
                     restoreSelectionNavigationBarColor()
                     updateExplorerListBottomPadding()
+                    notifySelectionToolbarStateChanged(false)
                 }
             }
             .start()
@@ -366,6 +377,9 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     private fun updateSelectionToolbarBottomInset() {
         binding?.selectionToolbar?.updatePadding(bottom = mNavigationBarInsetBottom)
+        if (mSelectionToolbarShown) {
+            notifySelectionToolbarStateChanged(true)
+        }
     }
 
     private fun updateExplorerListBottomPadding() {
@@ -381,6 +395,14 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         val toolbar = binding?.selectionToolbar
         val fallbackHeight = DisplayUtils.dpToPx(SELECTION_TOOLBAR_CONTENT_HEIGHT_DP).roundToInt() + mNavigationBarInsetBottom
         return toolbar?.height?.takeIf { it > 0 } ?: fallbackHeight
+    }
+
+    private fun selectionToolbarFabOffset(): Int {
+        return (selectionToolbarHeight() - mNavigationBarInsetBottom).coerceAtLeast(0)
+    }
+
+    private fun notifySelectionToolbarStateChanged(shown: Boolean) {
+        mOnSelectionToolbarStateChangeListener?.onSelectionToolbarStateChanged(shown, if (shown) selectionToolbarFabOffset() else 0)
     }
 
     private fun applySelectionNavigationBarColor(themeColor: ThemeColor = ThemeColorManager.currentThemeColor) {
@@ -1656,6 +1678,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     interface OnItemOperateListener {
         fun onItemOperated(item: ExplorerItem)
+    }
+
+    interface OnSelectionToolbarStateChangeListener {
+        fun onSelectionToolbarStateChanged(shown: Boolean, fabOffset: Int)
     }
 
     companion object {
