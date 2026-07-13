@@ -34,6 +34,7 @@ class PluginIndexRepository {
         private const val THIRD_PARTY_REPO = "Auto.js-SDK-Plugins-Garage"
         private const val THIRD_PARTY_BRANCH = "main"
         private const val APK_BUILDER_TEMPLATE_PACKAGE = "org.autojs.plugin.apkbuilder.template"
+        private const val APK_BUILDER_TEMPLATE_IMPLEMENTATION_PACKAGE = "org.autojs.plugin.apkbuilder.template.impl"
         private const val APK_BUILDER_TEMPLATE_ASSET_PREFIX = "autojs6-apk-builder-template"
 
         @Volatile
@@ -224,7 +225,7 @@ class PluginIndexRepository {
         }
         val builtInPackages = builtInEntries.mapTo(linkedSetOf()) { it.packageName }
         return mergedBuiltInEntries + entries.filterNot {
-            it.source == PluginIndexSource.OFFICIAL && it.packageName in builtInPackages
+            it.source == PluginIndexSource.OFFICIAL && isBuiltInOfficialEntryDuplicate(it, builtInPackages)
         }
     }
 
@@ -273,7 +274,8 @@ class PluginIndexRepository {
     private fun resolveApkBuilderTemplateReleaseFromGitHub(context: Context): ApkBuilderTemplateReleaseResolution {
         val exact = getGitHubReleaseJson(
             context = context,
-            url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/tags/${encodeUrlPathSegment("v${BuildConfig.VERSION_NAME}")}",
+            url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/tags/" +
+                    encodeUrlPathSegment(apkBuilderTemplateReleaseTagName(BuildConfig.VERSION_NAME)),
         )
 
         if (exact is GitHubReleaseJsonResult.Found) {
@@ -330,21 +332,62 @@ class PluginIndexRepository {
     }
 
     private fun apkBuilderTemplateReleaseAssetName(versionName: String): String {
-        val version = versionName.replace("\\s".toRegex(), "-").lowercase()
+        val version = normalizeApkBuilderTemplateVersionToken(versionName)
         return "$APK_BUILDER_TEMPLATE_ASSET_PREFIX-v$version-universal.apk"
     }
 
+    private fun apkBuilderTemplateReleaseTagName(versionName: String): String {
+        return "v${normalizeApkBuilderTemplateVersionToken(versionName)}"
+    }
+
+    private fun normalizeApkBuilderTemplateVersionToken(value: String): String {
+        return value
+            .trim()
+            .removePrefix("v")
+            .removePrefix("V")
+            .replace(Regex("""[\s_]+"""), "-")
+            .lowercase()
+    }
+
     private fun isCurrentHostReleaseJson(json: JSONObject): Boolean {
-        val current = BuildConfig.VERSION_NAME.trim()
-        val tagVersion = json.optString("tag_name")
-            .removePrefix("v")
-            .trim()
-        val nameVersion = json.optString("name")
-            .substringBefore(" @")
-            .removePrefix("v")
-            .trim()
-        return tagVersion.equals(current, ignoreCase = true) ||
-                nameVersion.equals(current, ignoreCase = true)
+        val current = normalizeApkBuilderTemplateVersionToken(BuildConfig.VERSION_NAME)
+        val tagVersion = extractVersionToken(json.optString("tag_name"))
+            ?.let(::normalizeApkBuilderTemplateVersionToken)
+        val nameVersion = extractVersionToken(json.optString("name").substringBefore(" @"))
+            ?.let(::normalizeApkBuilderTemplateVersionToken)
+        return tagVersion == current || nameVersion == current
+    }
+
+    private fun extractVersionToken(value: String): String? {
+        return Regex("""[vV]?\d+(?:\.\d+){1,4}(?:[-+._\s][A-Za-z0-9]+)*""")
+            .find(value)
+            ?.value
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+    }
+
+    private fun isBuiltInOfficialEntryDuplicate(
+        entry: PluginIndexEntry,
+        builtInPackages: Set<String>,
+    ): Boolean {
+        if (entry.packageName in builtInPackages) return true
+        return isApkBuilderTemplateAutoScannedEntry(entry)
+    }
+
+    private fun isApkBuilderTemplateAutoScannedEntry(entry: PluginIndexEntry): Boolean {
+        if (entry.packageName == APK_BUILDER_TEMPLATE_IMPLEMENTATION_PACKAGE) return true
+        if (entry.packageName == "unknown.${APK_BUILDER_TEMPLATE_REPO.lowercase()}") return true
+
+        val repoMarker = "$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO"
+        val entryUrls = buildList {
+            entry.iconUrl?.toString()?.let(::add)
+            entry.nightIconUrl?.toString()?.let(::add)
+            entry.releases.forEach { release ->
+                release.apkUrl?.let(::add)
+                release.changelogUrl?.let(::add)
+            }
+        }
+        return entryUrls.any { it.contains(repoMarker, ignoreCase = true) }
     }
 
     private fun encodeUrlPathSegment(value: String): String {
@@ -437,6 +480,7 @@ class PluginIndexRepository {
 
             val name = repo.optString("name").trim()
             if (!name.startsWith(OFFICIAL_REPO_PREFIX)) continue
+            if (name == APK_BUILDER_TEMPLATE_REPO) continue
 
             val branch = repo.optString("default_branch").takeIf { it.isNotBlank() } ?: "main"
             val owner = repo.optJSONObject("owner")?.optString("login")?.takeIf { it.isNotBlank() } ?: OFFICIAL_OWNER
@@ -520,7 +564,16 @@ class PluginIndexRepository {
             ?: parseApplicationIdFromBuildGradle(buildGradleText)
             ?: "unknown.${plugin.repo.lowercase().replace(Regex("[^a-z0-9._-]"), "-")}"
 
-        val title = parseManifestApplicationLabel(manifestText)
+        val manifestLabel = parseManifestApplicationLabel(manifestText)
+        val title = resolveStringResourceReference(
+            context = context,
+            owner = plugin.owner,
+            repo = plugin.repo,
+            branch = plugin.branch,
+            languageTag = languageTag,
+            treePaths = repoTreePaths,
+            value = manifestLabel,
+        ) ?: manifestLabel?.takeIf { !it.startsWith("@") }
             ?: plugin.repo.removePrefix(OFFICIAL_REPO_PREFIX).takeIf { it.isNotBlank() }
             ?: releaseName.takeIf { it.isNotBlank() && !isLikelyVersionLike(it) }
             ?: releaseName.takeIf { it.isNotBlank() }
@@ -1025,6 +1078,13 @@ class PluginIndexRepository {
             ?.trim()
         if (!byGlobal.isNullOrBlank()) return byGlobal
 
+        val byApplicationId = Regex("""\bapplicationId\s*=\s*"([^"]+)"""")
+            .find(buildGradle)
+            ?.groupValues
+            ?.getOrNull(1)
+            ?.trim()
+        if (!byApplicationId.isNullOrBlank()) return byApplicationId
+
         return Regex("""\bnamespace\s*=\s*"([^"]+)"""")
             .find(buildGradle)
             ?.groupValues
@@ -1171,6 +1231,43 @@ class PluginIndexRepository {
             }.getOrNull() ?: return@forEach
 
             parseStringResource(text, "plugin_description")?.let { return it }
+        }
+        return null
+    }
+
+    private fun resolveStringResourceReference(
+        context: Context,
+        owner: String,
+        repo: String,
+        branch: String,
+        languageTag: String,
+        treePaths: Set<String>,
+        value: String?,
+    ): String? {
+        val rawValue = value
+            ?.trim()
+            ?.takeIf { it.startsWith("@string/") }
+            ?: return null
+        val resourceName = rawValue
+            .removePrefix("@string/")
+            .takeIf { it.isNotBlank() }
+            ?: return null
+
+        languageTagToAndroidResourceDirs(languageTag).forEach { dir ->
+            val path = "app/src/main/res/$dir/strings.xml"
+            if (treePaths.isNotEmpty() && path !in treePaths) return@forEach
+            val text = runCatching {
+                getText(
+                    context = context,
+                    url = rawGithubUrl(
+                        owner = owner,
+                        repo = repo,
+                        branch = branch,
+                        path = path,
+                    ),
+                )
+            }.getOrNull() ?: return@forEach
+            parseStringResource(text, resourceName)?.let { return it }
         }
         return null
     }
