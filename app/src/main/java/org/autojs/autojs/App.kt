@@ -1,6 +1,7 @@
 package org.autojs.autojs
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -10,7 +11,6 @@ import android.os.Build
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import androidx.multidex.MultiDexApplication
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomViewTarget
 import com.bumptech.glide.request.transition.Transition
@@ -51,7 +51,7 @@ import org.autojs.autojs.inrt.Pref as InrtPref
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Feb 7, 2026.
  * Modified by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) as of Mar 9, 2026.
  */
-class App : MultiDexApplication(), WorkManagerConfiguration.Provider {
+class App : Application(), WorkManagerConfiguration.Provider {
 
     lateinit var dynamicBroadcastReceivers: DynamicBroadcastReceivers
         private set
