@@ -821,9 +821,9 @@ object RhinoUtils {
 
     @JvmStatic
     fun js_object_getOwnPropertyDescriptor(value: ScriptableObject, key: Any): ScriptableObject = withRhinoContext { cx ->
-        val topLevel = ImporterTopLevel(cx)
-        val obj = ensureScriptableObject(toObject(cx, topLevel, value))
-        obj.getOwnPropertyDescriptor(cx, key).toScriptableObject(topLevel.globalThis)
+        val scope = getDeclarationScope(value)
+        val obj = ensureScriptableObject(toObject(cx, scope, value))
+        obj.getOwnPropertyDescriptor(cx, key).toScriptableObject(scope)
     }
 
     @JvmStatic

@@ -1,6 +1,7 @@
 package org.autojs.autojs.util
 
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -73,6 +74,17 @@ class RhinoUtilsScopeCompatTest {
         )
 
         assertTrue(detached.get("ping", detached) is BaseFunction)
+    }
+
+    @Test
+    fun getOwnPropertyDescriptorCanUseDetachedObject() {
+        val detached = RhinoUtils.newNativeObject()
+        detached.defineProperty("lines", 91, ScriptableObject.EMPTY)
+
+        val descriptor = RhinoUtils.js_object_getOwnPropertyDescriptor(detached, "lines")
+
+        assertEquals(91, descriptor.get("value", descriptor))
+        assertSame(RhinoUtils.standardObjects, descriptor.parentScope)
     }
 
     @Test
