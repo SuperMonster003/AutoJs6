@@ -20,6 +20,7 @@ public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
 
     private static final TimeInterpolator INTERPOLATOR = new FastOutSlowInInterpolator();
     private boolean mHidden = false;
+    private boolean mScrollAware = true;
 
     public static final long DURATION = 200;
 
@@ -33,11 +34,14 @@ public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
 
     @Override
     public boolean onStartNestedScroll(@NonNull CoordinatorLayout coordinatorLayout, @NonNull FloatingActionButton child, @NonNull View directTargetChild, @NonNull View target, int nestedScrollAxes) {
-        return true;
+        return mScrollAware;
     }
 
     @Override
     public void onNestedScroll(@NonNull CoordinatorLayout coordinatorLayout, @NonNull FloatingActionButton child, @NonNull View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
+        if (!mScrollAware) {
+            return;
+        }
         super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed);
         if (dyConsumed > 0) {
             onScrollDown(coordinatorLayout, child);
@@ -89,6 +93,10 @@ public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
 
     public void setHidden(boolean b) {
         mHidden = b;
+    }
+
+    public void setScrollAware(boolean scrollAware) {
+        mScrollAware = scrollAware;
     }
 
 }

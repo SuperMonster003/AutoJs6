@@ -51,8 +51,9 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     private var mFloatingActionMenu: FloatingActionMenu? = null
     private var mIsCurrentPageFiles = false
     private var mSelectionToolbarShown = false
-    private var mSelectionToolbarFabOffset = 0
-    private var mFabHiddenBySelectionToolbar = false
+    private var mFabVisibilityBeforeSelectionToolbar = View.VISIBLE
+    private var mFabTranslationYBeforeSelectionToolbar = 0f
+    private var mFabStateSavedForSelectionToolbar = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,8 +79,8 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
             })
             explorerView.excludeListPaddingFromBottomNavigationBar()
             explorerView.setOnSelectionToolbarStateChangeListener(object : ExplorerView.OnSelectionToolbarStateChangeListener {
-                override fun onSelectionToolbarStateChanged(shown: Boolean, fabOffset: Int) {
-                    handleSelectionToolbarStateChanged(shown, fabOffset)
+                override fun onSelectionToolbarStateChanged(shown: Boolean) {
+                    handleSelectionToolbarStateChanged(shown)
                 }
             })
         }
@@ -92,19 +93,20 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     }
 
     private fun setTabViewClickListeners(tabView: TabLayout.TabView) {
-        tabView.setOnLongClickListener { if (mIsCurrentPageFiles) true.also { toggleFabVisibility() } else false }
+        tabView.setOnLongClickListener {
+            when {
+                !mIsCurrentPageFiles -> false
+                mSelectionToolbarShown -> true
+                else -> true.also { toggleFabVisibility() }
+            }
+        }
     }
 
     private fun toggleFabVisibility() {
         val behavior = (fab.layoutParams as? CoordinatorLayout.LayoutParams)?.behavior as? ScrollAwareFABBehavior
 
         if (mSelectionToolbarShown) {
-            if (fab.isShown && fab.translationY <= 0f) {
-                mFloatingActionMenu?.let { if (it.isExpanded) it.collapse() }
-                fab.hide()
-            } else {
-                showFabAboveSelectionToolbar(behavior)
-            }
+            hideFabForSelectionToolbar()
             return
         }
 
@@ -124,97 +126,54 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
         }
     }
 
-    private fun handleSelectionToolbarStateChanged(shown: Boolean, fabOffset: Int) {
+    private fun handleSelectionToolbarStateChanged(shown: Boolean) {
         val wasShown = mSelectionToolbarShown
         mSelectionToolbarShown = shown
-        mSelectionToolbarFabOffset = fabOffset
 
         if (shown) {
-            mFloatingActionMenu?.let { if (it.isExpanded) it.collapse() }
-            when {
-                !wasShown && isFabVisiblyShown() -> {
-                    mFabHiddenBySelectionToolbar = true
-                    fab.hide()
-                }
-                !mFabHiddenBySelectionToolbar && fab.isShown && fab.translationY <= 0f -> {
-                    applySelectionToolbarFabPosition()
-                }
-            }
+            if (!wasShown) saveFabStateForSelectionToolbarIfNeeded()
+            hideFabForSelectionToolbar()
             return
         }
 
         restoreFabAfterSelectionToolbar()
     }
 
-    private fun showFabAboveSelectionToolbar(behavior: ScrollAwareFABBehavior?) {
-        mFabHiddenBySelectionToolbar = false
-        fab.animate().cancel()
-        fab.translationY = selectionToolbarFabTranslationY()
-        behavior?.setHidden(false)
-        applyFloatingActionMenuSelectionTranslation()
-        if (!fab.isShown || fab.visibility != View.VISIBLE) {
-            fab.show()
+    private fun saveFabStateForSelectionToolbarIfNeeded() {
+        if (mFabStateSavedForSelectionToolbar) {
+            return
         }
+        mFabVisibilityBeforeSelectionToolbar = fab.visibility
+        mFabTranslationYBeforeSelectionToolbar = fab.translationY
+        mFabStateSavedForSelectionToolbar = true
     }
 
-    private fun applySelectionToolbarFabPosition() {
-        fab.animate()
-            .translationY(selectionToolbarFabTranslationY())
-            .setDuration(ScrollAwareFABBehavior.DURATION)
-            .setListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    mFloatingActionMenu?.let { updateFloatingActionMenuToggleFabLocation(it) }
-                }
-            })
-            .start()
-        applyFloatingActionMenuSelectionTranslation()
+    private fun hideFabForSelectionToolbar() {
+        mFloatingActionMenu?.let { if (it.isExpanded) it.collapse() }
+        val behavior = (fab.layoutParams as? CoordinatorLayout.LayoutParams)?.behavior as? ScrollAwareFABBehavior
+        behavior?.setScrollAware(false)
+        fab.animate().cancel()
+        mFloatingActionMenu?.translationY = 0f
+        if (fab.visibility == View.VISIBLE || fab.isShown) {
+            fab.hide()
+        }
     }
 
     private fun restoreFabAfterSelectionToolbar() {
-        mFloatingActionMenu?.let { menu ->
-            menu.translationY = 0f
-        }
-        val behavior = (fab.layoutParams as? CoordinatorLayout.LayoutParams)?.behavior as? ScrollAwareFABBehavior
-        if (mFabHiddenBySelectionToolbar) {
-            mFabHiddenBySelectionToolbar = false
-            fab.animate().cancel()
-            fab.translationY = 0f
-            behavior?.setHidden(false)
-            mFloatingActionMenu?.let { updateFloatingActionMenuToggleFabLocation(it) }
-            fab.show()
+        if (!mFabStateSavedForSelectionToolbar) {
             return
         }
-        if (fab.isShown && fab.translationY < 0f) {
-            fab.animate()
-                .translationY(0f)
-                .setDuration(ScrollAwareFABBehavior.DURATION)
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        behavior?.setHidden(false)
-                        mFloatingActionMenu?.let { updateFloatingActionMenuToggleFabLocation(it) }
-                    }
-                })
-                .start()
+        mFabStateSavedForSelectionToolbar = false
+        mFloatingActionMenu?.translationY = 0f
+        val behavior = (fab.layoutParams as? CoordinatorLayout.LayoutParams)?.behavior as? ScrollAwareFABBehavior
+        behavior?.setScrollAware(true)
+        fab.animate().cancel()
+        fab.translationY = mFabTranslationYBeforeSelectionToolbar
+        if (mFabVisibilityBeforeSelectionToolbar == View.VISIBLE) {
+            fab.show()
+        } else {
+            fab.hide()
         }
-    }
-
-    private fun applyFloatingActionMenuSelectionTranslation() {
-        mFloatingActionMenu?.let { menu ->
-            menu.translationY = selectionToolbarFabTranslationY()
-            updateFloatingActionMenuToggleFabLocation(menu)
-        }
-    }
-
-    private fun updateFloatingActionMenuToggleFabLocation(menu: FloatingActionMenu) {
-        val locFab = IntArray(2)
-        fab.getLocationOnScreen(locFab)
-        menu.setToggleFab(fab, locFab)
-    }
-
-    private fun selectionToolbarFabTranslationY() = -mSelectionToolbarFabOffset.toFloat()
-
-    private fun isFabVisiblyShown(): Boolean {
-        return fab.isShown && fab.visibility == View.VISIBLE && fab.translationY <= 0f
     }
 
     private fun viewFile(item: ExplorerItem): Boolean {
@@ -252,9 +211,6 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
                 javaClass.getField("bottomMargin").setInt(this, fab.marginBottom)
             }
             menu.setToggleFab(fab, locFab)
-            if (mSelectionToolbarShown) {
-                menu.translationY = selectionToolbarFabTranslationY()
-            }
             mFloatingActionMenu = menu
         }
     }
@@ -278,15 +234,18 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     override fun onPageShow() {
         super.onPageShow()
         mIsCurrentPageFiles = true
-        if (mSelectionToolbarShown && isFabVisiblyShown()) {
-            mFabHiddenBySelectionToolbar = true
-            fab.hide()
+        if (mSelectionToolbarShown) {
+            saveFabStateForSelectionToolbarIfNeeded()
+            hideFabForSelectionToolbar()
         }
     }
 
     override fun onPageHide() {
         super.onPageHide()
         mFloatingActionMenu?.let { if (it.isExpanded) it.collapse() }
+        if (mSelectionToolbarShown) {
+            restoreFabAfterSelectionToolbar()
+        }
         mIsCurrentPageFiles = false
     }
 

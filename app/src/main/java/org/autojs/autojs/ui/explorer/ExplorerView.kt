@@ -397,12 +397,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         return toolbar?.height?.takeIf { it > 0 } ?: fallbackHeight
     }
 
-    private fun selectionToolbarFabOffset(): Int {
-        return (selectionToolbarHeight() - mNavigationBarInsetBottom).coerceAtLeast(0)
-    }
-
     private fun notifySelectionToolbarStateChanged(shown: Boolean) {
-        mOnSelectionToolbarStateChangeListener?.onSelectionToolbarStateChanged(shown, if (shown) selectionToolbarFabOffset() else 0)
+        mOnSelectionToolbarStateChangeListener?.onSelectionToolbarStateChanged(shown)
     }
 
     private fun applySelectionNavigationBarColor(themeColor: ThemeColor = ThemeColorManager.currentThemeColor) {
@@ -1681,7 +1677,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     interface OnSelectionToolbarStateChangeListener {
-        fun onSelectionToolbarStateChanged(shown: Boolean, fabOffset: Int)
+        fun onSelectionToolbarStateChanged(shown: Boolean)
     }
 
     companion object {
