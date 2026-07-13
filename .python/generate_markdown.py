@@ -19,6 +19,11 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
+
+def log(message: str):
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {message}", flush=True)
+
+
 language_codes = ["zh-Hans", "zh-Hant-HK", "zh-Hant-TW", "en", "fr", "es", "ja", "ko", "ru", "ar"]
 language_code_default = "zh-Hans"
 
@@ -41,6 +46,8 @@ project_root_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 changelog_files_source_dir = os.path.join(project_root_dir, 'app', 'src', 'main', 'assets-app', 'doc')
 changelog_root_dir = os.path.join(project_root_dir, '.changelog')
 readme_root_dir = os.path.join(project_root_dir, '.readme')
+
+log(f'Starting markdown generation in {project_root_dir}')
 
 RELATED_AUTOJS_PROJECT_DATES_START_MARKER = "# BEGIN RELATED_AUTOJS_PROJECT_DATES"
 RELATED_AUTOJS_PROJECT_DATES_END_MARKER = "# END RELATED_AUTOJS_PROJECT_DATES"
@@ -214,9 +221,9 @@ def _load_version_properties(props_path: str) -> dict:
                 val = line[sep + 1 :].strip()
                 props[key] = val
     except FileNotFoundError:
-        print(f'[warn] version.properties not found at {props_path}, skip injecting JDK constraints')
+        log(f'[warn] version.properties not found at {props_path}, skip injecting JDK constraints')
     except Exception as e:
-        print(f'[warn] Failed to read version.properties: {e}')
+        log(f'[warn] Failed to read version.properties: {e}')
     return props
 
 _version_props_path = os.path.join(project_root_dir, 'version.properties')
@@ -241,10 +248,10 @@ def update_readme_badge_versions():
         with open(template_path, 'r', encoding='utf-8') as f:
             data = f.read()
     except FileNotFoundError:
-        print(f'[warn] template_readme.md not found at {template_path}, skip badge update')
+        log(f'[warn] template_readme.md not found at {template_path}, skip badge update')
         return
     except Exception as e:
-        print(f'[warn] Failed to read template_readme.md: {e}')
+        log(f'[warn] Failed to read template_readme.md: {e}')
         return
 
     # 与原逻辑等价的正则片段
@@ -281,9 +288,9 @@ def update_readme_badge_versions():
     try:
         with open(template_path, 'w', encoding='utf-8') as f:
             f.write(data)
-            print(f'Updated badge(s) in {template_path}')
+            log(f'Updated badge(s) in {template_path}')
     except Exception as e:
-        print(f'[warn] Failed to write template_readme.md: {e}')
+        log(f'[warn] Failed to write template_readme.md: {e}')
 
 # 执行模板内徽标版本更新, 并清空 Jinja2 缓存后再获取模板
 update_readme_badge_versions()
@@ -301,6 +308,7 @@ changelog_content_map = {}
 changelog_data_map = defaultdict(dict)
 
 # 读取共用 JSON 文件
+log('Loading common README data')
 with open(os.path.join(readme_root_dir, 'common.json'), 'r', encoding='utf-8') as common_json_file:
     common_data = json.load(common_json_file)
 
@@ -333,7 +341,7 @@ def format_date(date_str, lang_code):
 
             return formatted_date_no_leading_zeros
         except ValueError as e:
-            print(f"Date format error: {e}")
+            log(f"Date format error: {e}")
     return date_str
 
 
@@ -346,7 +354,10 @@ def parse_github_repo_path(repo_url: str):
     return owner, repo
 
 
-def request_github_json(url: str):
+def request_github_json(url: str, description: str = ''):
+    request_label = description or url
+    started_at = datetime.now()
+    log(f"Fetching GitHub data: {request_label}")
     request = Request(
         url,
         headers={
@@ -357,9 +368,12 @@ def request_github_json(url: str):
     try:
         with urlopen(request, timeout=15) as response:
             data = json.loads(response.read().decode('utf-8'))
+            elapsed = (datetime.now() - started_at).total_seconds()
+            log(f"Fetched GitHub data: {request_label} ({elapsed:.1f}s)")
             return data, response.headers
     except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError) as e:
-        print(f'[warn] Failed to fetch GitHub data from {url}: {e}')
+        elapsed = (datetime.now() - started_at).total_seconds()
+        log(f'[warn] Failed to fetch GitHub data: {request_label} ({elapsed:.1f}s), url={url}, error={e}')
         return None, {}
 
 
@@ -392,26 +406,39 @@ def format_github_api_date(date_str: str) -> str:
     return date_str.replace('/', '-')
 
 
+def describe_github_commit_lookup(owner: str, repo: str, oldest: bool = False, since_date: str = '', until_date: str = '') -> str:
+    repo_label = f'{owner}/{repo}'
+    if since_date and until_date and since_date == until_date:
+        return f'{repo_label} commit on {since_date}'
+    if oldest:
+        return f'{repo_label} oldest commit'
+    if since_date or until_date:
+        return f'{repo_label} commits from {since_date or "-"} to {until_date or "-"}'
+    return f'{repo_label} latest commit'
+
+
 def fetch_github_commit(repo_url: str, oldest: bool = False, since_date: str = '', until_date: str = '') -> dict:
     repo_path = parse_github_repo_path(repo_url)
     if not repo_path:
         return {}
 
     owner, repo = repo_path
+    request_label = describe_github_commit_lookup(owner, repo, oldest, since_date, until_date)
     query = {'per_page': '1'}
     if since_date:
         query['since'] = f'{format_github_api_date(since_date)}T00:00:00Z'
     if until_date:
         query['until'] = f'{format_github_api_date(until_date)}T23:59:59Z'
     base_url = f"https://api.github.com/repos/{quote(owner, safe='')}/{quote(repo, safe='')}/commits?{urlencode(query)}"
-    data, headers = request_github_json(base_url)
+    data, headers = request_github_json(base_url, request_label)
     if not isinstance(data, list) or not data:
+        log(f'No GitHub commit data returned for {request_label}')
         return {}
 
     if oldest:
         last_url = parse_link_header(headers.get('Link', '')).get('last')
         if last_url:
-            oldest_data, _ = request_github_json(last_url)
+            oldest_data, _ = request_github_json(last_url, f'{owner}/{repo} oldest commit page')
             if isinstance(oldest_data, list) and oldest_data:
                 return github_commit_item_to_data(oldest_data[0])
 
@@ -425,7 +452,7 @@ def fetch_github_commit_by_sha(repo_url: str, commit_sha: str):
 
     owner, repo = repo_path
     url = f"https://api.github.com/repos/{quote(owner, safe='')}/{quote(repo, safe='')}/commits/{quote(commit_sha, safe='')}"
-    data, _ = request_github_json(url)
+    data, _ = request_github_json(url, f'{owner}/{repo} commit {commit_sha[:12]}')
     if data is None:
         return None
     if not isinstance(data, dict):
@@ -454,7 +481,7 @@ def persist_related_autojs_project_dates():
         with open(source_path, 'r', encoding='utf-8') as f:
             source = f.read()
     except OSError as e:
-        print(f'[warn] Failed to read {source_path}: {e}')
+        log(f'[warn] Failed to read {source_path}: {e}')
         return
 
     replacement = (
@@ -474,9 +501,9 @@ def persist_related_autojs_project_dates():
     try:
         with open(source_path, 'w', encoding='utf-8') as f:
             f.write(updated_source)
-        print(f'Updated related Auto.js project date cache in {source_path}')
+        log(f'Updated related Auto.js project date cache in {source_path}')
     except OSError as e:
-        print(f'[warn] Failed to write {source_path}: {e}')
+        log(f'[warn] Failed to write {source_path}: {e}')
 
 
 def build_github_commit_url(repo_url: str, commit_sha: str) -> str:
@@ -536,19 +563,33 @@ def build_related_autojs_project_table_row(record: dict) -> str:
     return f"| {' | '.join(cells)} |"
 
 
+def describe_related_project(project_key: str, repo_url: str) -> str:
+    repo_path = parse_github_repo_path(repo_url)
+    if repo_path:
+        owner, repo = repo_path
+        return f'{project_key} ({owner}/{repo})'
+    return f'{project_key} (static data)'
+
+
 def build_related_autojs_project_data() -> dict:
     changed = False
     current_date = datetime.now().strftime('%Y/%m/%d')
     rendered_data = {}
     table_records = []
+    total_projects = len(RELATED_AUTOJS_PROJECT_DATES)
 
-    for project_key, date_data in RELATED_AUTOJS_PROJECT_DATES.items():
+    log(f'Building related Auto.js project data ({total_projects} projects)')
+    for project_index, (project_key, date_data) in enumerate(RELATED_AUTOJS_PROJECT_DATES.items(), start=1):
         repo_url = date_data.get('repo', '')
+        project_label = describe_related_project(project_key, repo_url)
+        log(f'[{project_index}/{total_projects}] Resolving related project: {project_label}')
         created_date = date_data.get('created', '')
         created_commit = date_data.get('created_commit', '')
         created_commit_url = date_data.get('created_commit_url', '')
         if not created_commit and not created_commit_url:
             created_commit, cache_changed = resolve_cached_commit_for_date(date_data, 'created_commit_cached', repo_url, created_date)
+            if cache_changed:
+                log(f'Cached created commit is stale: {project_key}')
             changed = changed or cache_changed
         if not created_date:
             commit_data = fetch_github_commit(repo_url, oldest=True)
@@ -574,6 +615,8 @@ def build_related_autojs_project_data() -> dict:
             recent_active_date = fixed_recent_active_date
             if not recent_active_commit and not recent_active_commit_url:
                 recent_active_commit, cache_changed = resolve_cached_commit_for_date(date_data, 'recent_active_commit_cached', repo_url, recent_active_date)
+                if cache_changed:
+                    log(f'Cached recent active commit is stale: {project_key}')
                 changed = changed or cache_changed
             if repo_url and not recent_active_commit and not recent_active_commit_url:
                 commit_data = fetch_github_commit(repo_url, since_date=recent_active_date, until_date=recent_active_date)
@@ -594,6 +637,7 @@ def build_related_autojs_project_data() -> dict:
                     changed = True
             else:
                 recent_active_date = date_data.get('recent_active_cached') or current_date
+                log(f'Using cached recent active date for {project_key}: {recent_active_date}')
                 if not recent_active_commit:
                     recent_active_commit, cache_changed = resolve_cached_commit_for_date(
                         date_data,
@@ -601,6 +645,8 @@ def build_related_autojs_project_data() -> dict:
                         repo_url,
                         recent_active_date,
                     )
+                    if cache_changed:
+                        log(f'Cached recent active commit is stale: {project_key}')
                     changed = changed or cache_changed
 
         prefix = f'data_related_autojs_project_{project_key}'
@@ -617,8 +663,10 @@ def build_related_autojs_project_data() -> dict:
             'recent_active_commit': recent_active_commit,
             'recent_active_commit_url': recent_active_commit_url,
         })
+        log(f'[{project_index}/{total_projects}] Resolved {project_key}: created={created_date or "-"}, recent_active={recent_active_date or "-"}')
 
     if changed:
+        log('Related Auto.js project date cache changed; writing updated cache')
         persist_related_autojs_project_dates()
 
     sorted_records = sorted(
@@ -629,6 +677,7 @@ def build_related_autojs_project_data() -> dict:
     rendered_data['placeholder_related_autojs_table_rows'] = '\n'.join(
         build_related_autojs_project_table_row(record) for record in sorted_records
     )
+    log('Related Auto.js project data ready')
 
     return rendered_data
 
@@ -640,7 +689,10 @@ def init_languages():
     if language_code_default not in language_codes:
         raise ValueError(f"Default language code \"{language_code_default}\" is not in the language codes list")
 
-    for language_code in language_codes:
+    total_languages = len(language_codes)
+    log(f'Initializing language data ({total_languages} languages)')
+    for language_index, language_code in enumerate(language_codes, start=1):
+        log(f'[{language_index}/{total_languages}] Loading language data: {language_code}')
         with open(os.path.join(readme_root_dir, f'lang_{language_code}.json'), 'r', encoding='utf-8') as language_json_file:
             raw_data = json.load(language_json_file)
             prefix = "$var_"
@@ -680,6 +732,8 @@ def init_languages():
             # 渲染动态字符串
             changelog_content_map[language_code] = render_dynamic_strings(changelog_content, changelog_content)
             changelog_data_map[language_code] = render_dynamic_strings(changelog_data, changelog_content)
+        log(f'[{language_index}/{total_languages}] Language data ready: {language_code}')
+    log('Language data initialization complete')
 
 
 def extract_latest_versions(lang_code, lang_content, num_versions=3):
@@ -775,6 +829,7 @@ def render_dynamic_strings(data, placeholder_map):
 
 
 def generate_changelog_files():
+    log(f'Generating changelog files ({len(changelog_content_map)} languages)')
     for lang_code, content in changelog_content_map.items():
         handle_changelog_placeholder(lang_code, content)
         output = template_changelog.render(**content)
@@ -783,17 +838,19 @@ def generate_changelog_files():
 
         with open(output_path, 'w', encoding='utf-8') as file:
             file.write(output)
-            print(f'Generated {output_file} at {output_path}')
+            log(f'Generated {output_file} at {output_path}')
 
         if lang_code == language_code_default:
             default_output_file = 'CHANGELOG.md'
             default_output_path = os.path.join(changelog_files_source_dir, default_output_file)
             with open(default_output_path, 'w', encoding='utf-8') as file:
                 file.write(output)
-                print(f'Generated {default_output_file} at {default_output_path}')
+                log(f'Generated {default_output_file} at {default_output_path}')
+    log('Changelog files generated')
 
 
 def generate_readme_files():
+    log(f'Generating README files ({len(language_content_map)} languages)')
     for lang_code, content in language_content_map.items():
         handle_readme_placeholder(lang_code, content)
         output = template_readme.render(**content)
@@ -802,16 +859,18 @@ def generate_readme_files():
 
         with open(output_path, 'w', encoding='utf-8') as file:
             file.write(output)
-            print(f'Generated {output_file} at {output_path}')
+            log(f'Generated {output_file} at {output_path}')
 
         if lang_code == language_code_default:
             default_output_file = 'README.md'
             default_output_path = os.path.join(project_root_dir, default_output_file)
             with open(default_output_path, 'w', encoding='utf-8') as file:
                 file.write(output)
-                print(f'Generated {default_output_file} at {default_output_path}')
+                log(f'Generated {default_output_file} at {default_output_path}')
+    log('README files generated')
 
 
 init_languages()
 generate_changelog_files()
 generate_readme_files()
+log('Markdown generation complete')

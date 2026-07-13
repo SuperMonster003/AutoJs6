@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 12 July 2026.
+تم تحديث البيانات في 13 July 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -134,7 +134,7 @@
 * تكييف ألوان الموضوع [ التجميع / الموقع / البحث / السجل / التكييف التلقائي للسطوع والتباين / ... ]
 * دعم وضع الليل [ صفحة الإعدادات / صفحة الوثائق / صفحة تحليل التخطيط / النافذة العائمة / ... ]
 * دعم الاتصال بـ [المكون الإضافي لـ VSCode](http://vscext-project.autojs6.com) بطرق الاتصال عبر الشبكة المحلية (LAN) و ADB
-* تم ترقية محرك [Rhino](https://github.com/mozilla/rhino/) من [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) إلى [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (تم التحديث في 25 December 2025)
+* تم ترقية محرك [Rhino](https://github.com/mozilla/rhino/) من [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) إلى [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (تم التحديث في 13 July 2026)
     * دعم هروب نقطة الرمز Unicode [للأحرف متعددة المستويات](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2)
        ```js
        '\u{1D160}'; /* تمثل "𝅘𝅥𝅮", طريقة تقليدية: '\uD834\uDD60'. */
@@ -504,7 +504,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 12 July 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 13 July 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

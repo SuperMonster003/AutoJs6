@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 7 月 12 日 に更新されました.
+データは 2026 年 7 月 13 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -134,7 +134,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * テーマカラーの適応 [ グループ化 / ロケーション / 検索 / 履歴 / 明るさとコントラストの自動適応 / ... ]
 * ナイトモード対応 [ 設定ページ / ドキュメントページ / レイアウト分析ページ / 浮動ウィンドウ / ... ]
 * [VSCodeプラグイン](http://vscext-project.autojs6.com)がクライアント (LAN)とサーバ (LAN/ADB) 接続方法をサポート
-* [Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (2025 年 12 月 25 日 更新) にアップグレードされました
+* [Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (2026 年 7 月 13 日 更新) にアップグレードされました
     * Unicode [コードポイント](https://developer.mozilla.org/ja/docs/Glossary/Code_point)エスケープのサポート [補助平面](https://ja.wikipedia.org/wiki/多言語面#補助平面) 文字
        ```js
        '\u{1D160}'; /* を表します "𝅘𝅥𝅮", 従来の方法: '\uD834\uDD60'. */
@@ -504,7 +504,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 7 月 12 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 7 月 13 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

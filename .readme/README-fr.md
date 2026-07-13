@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 12 July 2026.
+Données mises à jour le 13 July 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -134,7 +134,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * Adaptación del color del tema [ Agrupación / Ubicación / Búsqueda / Historial / Adaptación automática de brillo y contraste / ... ]
 * Adaptation du mode nuit [ Paramètres / Documentation / Analyse de la disposition / Fenêtre flottante / ... ]
 * Prise en charge de l'extension [VSCode](http://vscext-project.autojs6.com) pour la connexion client (LAN) et serveur (LAN/ADB)
-* Le moteur [Rhino](https://github.com/mozilla/rhino/) a été mis à niveau de [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) à [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (mis à jour le 25 December 2025)
+* Le moteur [Rhino](https://github.com/mozilla/rhino/) a été mis à niveau de [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) à [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (mis à jour le 13 July 2026)
     * [Échappements](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) pour les points de code Unicode supportent les caractères du [plan complémentaire](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2)
        ```js
        '\u{1D160}'; /* signifie "𝅘𝅥𝅮", méthode traditionnelle: '\uD834\uDD60'. */
@@ -504,7 +504,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 12 July 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 13 July 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 
