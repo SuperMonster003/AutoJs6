@@ -409,6 +409,26 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="org.autojs.autojs.core.pref.fleet.FleetProfileActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay"
+            tools:ignore="ExportedActivity">
+
+            <intent-filter>
+                <action android:name="org.autojs.autojs6.action.APPLY_FLEET_PROFILE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/json" />
+            </intent-filter>
+        </activity>
+
         <service android:name="org.autojs.autojs.ui.enhancedfloaty.FloatyService" />
 
         <service

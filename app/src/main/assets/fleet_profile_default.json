@@ -1,0 +1,31 @@
+{
+  "_meta": {
+    "name": "AutoJs6 fleet/headless default profile",
+    "description": "Recommended defaults for unattended watchdog deployments (Termux + Shizuku + wireless ADB).",
+    "version": 1,
+    "clear_existing": false
+  },
+  "foreground_service": true,
+  "floating_menu_shown": false,
+  "enable_a11y_service_with_secure_settings": true,
+  "enable_a11y_service_with_root_access": false,
+  "stable_mode": true,
+  "guard_mode": true,
+  "use_volume_control_running": false,
+  "use_volume_control_record": false,
+  "record_toast": true,
+  "extending_js_build_in_objects": false,
+  "rhino_java_primitive_wrap": false,
+  "auto_check_for_updates": false,
+  "restart_strategy": "quick",
+  "scheduled_restart_backend": "alarm_manager",
+  "timed_task_backend": "alarm",
+  "night_mode": "follow_system",
+  "file_extensions": "show_all",
+  "hidden_files": "show",
+  "keep_screen_on_when_in_foreground": "off",
+  "display_over_other_apps": false,
+  "post_notifications_permission": true,
+  "all_files_access": false,
+  "root_mode": "force_non_root"
+}
