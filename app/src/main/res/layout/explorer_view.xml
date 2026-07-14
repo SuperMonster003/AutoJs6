@@ -1,198 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
-            android:id="@+id/explorer_content"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+        android:id="@+id/explorer_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <org.autojs.autojs.ui.explorer.ExplorerProjectToolbar
-                android:id="@+id/project_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="2dp"
-                android:foreground="?selectableItemBackground"
-                app:cardElevation="0.97dp"
-                app:cardUseCompatPadding="true" />
+            android:id="@+id/project_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="2dp"
+            android:foreground="?selectableItemBackground"
+            app:cardElevation="0.97dp"
+            app:cardUseCompatPadding="true" />
 
         <androidx.recyclerview.widget.ThemeColorRecyclerView
-                android:id="@+id/explorer_item_list"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:clipToPadding="false" />
+            android:id="@+id/explorer_item_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false" />
 
     </LinearLayout>
 
     <LinearLayout
-            android:id="@+id/selection_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:clickable="true"
-            android:elevation="8dp"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:visibility="gone"
-            tools:visibility="visible">
+        android:id="@+id/selection_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:clickable="true"
+        android:elevation="8dp"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <TextView
-                android:id="@+id/selection_count"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:maxLines="1"
-                android:paddingHorizontal="16dp"
-                android:textSize="13sp"
-                tools:text="3 selected" />
+            android:id="@+id/selection_count"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingHorizontal="16dp"
+            android:textSize="13sp"
+            tools:text="3 selected" />
 
         <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/day_night_alpha_20" />
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/day_night_alpha_20" />
 
         <LinearLayout
-                android:id="@+id/selection_actions"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
+            android:id="@+id/selection_actions"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
 
             <LinearLayout
-                    android:id="@+id/selection_close"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="?selectableItemBackground"
-                    android:contentDescription="@string/text_clear_file_selection"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="2dp">
+                android:id="@+id/selection_close"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?selectableItemBackground"
+                android:contentDescription="@string/text_clear_file_selection"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="2dp">
 
                 <ImageView
-                        android:id="@+id/selection_close_icon"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="8dp"
-                        android:src="@drawable/ic_close_black_24dp"
-                        tools:ignore="ContentDescription" />
+                    android:id="@+id/selection_close_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:translationY="0.5dp"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_close_black_24dp"
+                    tools:ignore="ContentDescription" />
 
                 <TextView
-                        android:id="@+id/selection_close_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="@string/text_exit"
-                        android:textSize="14sp" />
+                    android:id="@+id/selection_close_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="@string/text_exit"
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/selection_copy"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="?selectableItemBackground"
-                    android:contentDescription="@string/text_copy_to"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="2dp">
+                android:id="@+id/selection_copy"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?selectableItemBackground"
+                android:contentDescription="@string/text_copy_to"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="2dp">
 
                 <ImageView
-                        android:id="@+id/selection_copy_icon"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="8dp"
-                        android:src="@drawable/ic_content_copy_black_24dp"
-                        tools:ignore="ContentDescription" />
+                    android:id="@+id/selection_copy_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:translationY="0.5dp"
+                    android:layout_gravity="center"
+                    android:padding="1dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_content_copy_black_24dp"
+                    tools:ignore="ContentDescription" />
 
                 <TextView
-                        android:id="@+id/selection_copy_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="@string/text_copy_to"
-                        android:textSize="14sp" />
+                    android:id="@+id/selection_copy_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="@string/text_copy_to"
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/selection_move"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="?selectableItemBackground"
-                    android:contentDescription="@string/text_move_to"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="2dp">
+                android:id="@+id/selection_move"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?selectableItemBackground"
+                android:contentDescription="@string/text_move_to"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="2dp">
 
                 <ImageView
-                        android:id="@+id/selection_move_icon"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="8dp"
-                        android:src="@drawable/ic_drive_file_move_black_24dp"
-                        tools:ignore="ContentDescription" />
+                    android:id="@+id/selection_move_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:translationY="0.5dp"
+                    android:padding="1.5dp"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_move_to"
+                    tools:ignore="ContentDescription" />
 
                 <TextView
-                        android:id="@+id/selection_move_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="@string/text_move_to"
-                        android:textSize="14sp" />
+                    android:id="@+id/selection_move_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="@string/text_move_to"
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/selection_delete"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="?selectableItemBackground"
-                    android:contentDescription="@string/text_delete"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="2dp">
+                android:id="@+id/selection_delete"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?selectableItemBackground"
+                android:contentDescription="@string/text_delete"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="2dp">
 
                 <ImageView
-                        android:id="@+id/selection_delete_icon"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="8dp"
-                        android:src="@drawable/ic_delete_black_24dp"
-                        tools:ignore="ContentDescription" />
+                    android:id="@+id/selection_delete_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:translationY="0.5dp"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_delete_black_24dp"
+                    tools:ignore="ContentDescription" />
 
                 <TextView
-                        android:id="@+id/selection_delete_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="@string/text_delete"
-                        android:textSize="14sp" />
+                    android:id="@+id/selection_delete_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="@string/text_delete"
+                    android:textSize="14sp" />
 
             </LinearLayout>
 

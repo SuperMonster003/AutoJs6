@@ -15,8 +15,7 @@
             app:itemDefaultKey="@string/default_key_app_language"
             app:neutralText="@string/dialog_button_system_settings"
             app:neutralTextShort="@string/dialog_button_system_settings_simplified"
-            app:longClickPrompt="@string/description_app_language_preference"
-            app:onConfirmPrompt="@string/prompt_restart_may_be_needed_for_language_switch" />
+            app:longClickPrompt="@string/description_app_language_preference" />
 
         <org.autojs.autojs.ui.settings.NightModePreference
             app:layout="@layout/preference_custom"

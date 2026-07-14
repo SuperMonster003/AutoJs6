@@ -23,7 +23,7 @@
             android:layout_gravity="center"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:translationY="0.5dp"
+            android:translationY="0.4dp"
             tools:src="@drawable/ic_service_green"
             app:tint="@color/drawer_menu_group_text_color" />
 

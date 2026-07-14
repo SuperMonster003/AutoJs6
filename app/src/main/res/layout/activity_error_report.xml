@@ -68,6 +68,7 @@
                 <ImageView
                     android:layout_width="16dp"
                     android:layout_height="16dp"
+                    android:translationY="0.4dp"
                     android:layout_gravity="center"
                     android:layout_marginEnd="10dp"
                     android:src="@drawable/ic_content_copy_small_black_48dp"
@@ -97,6 +98,7 @@
                 <ImageView
                     android:layout_width="16dp"
                     android:layout_height="16dp"
+                    android:translationY="0.4dp"
                     android:layout_gravity="center"
                     android:layout_marginEnd="10dp"
                     android:src="@drawable/ic_refresh_white_24dp"
@@ -127,6 +129,7 @@
                 <ImageView
                     android:layout_width="16dp"
                     android:layout_height="16dp"
+                    android:translationY="0.4dp"
                     android:layout_gravity="center"
                     android:layout_marginEnd="10dp"
                     android:src="@drawable/ic_ali_exit"
