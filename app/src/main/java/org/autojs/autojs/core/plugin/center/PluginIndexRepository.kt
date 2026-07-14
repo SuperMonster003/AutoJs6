@@ -272,14 +272,17 @@ class PluginIndexRepository {
     }
 
     private fun resolveApkBuilderTemplateReleaseFromGitHub(context: Context): ApkBuilderTemplateReleaseResolution {
+        val versionInfo = resolveApkBuilderTemplateVersionInfo(context)
+            ?: return ApkBuilderTemplateReleaseResolution.Unavailable
+
         val exact = getGitHubReleaseJson(
             context = context,
             url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/tags/" +
-                    encodeUrlPathSegment(apkBuilderTemplateReleaseTagName(BuildConfig.VERSION_NAME)),
+                    encodeUrlPathSegment(apkBuilderTemplateReleaseTagName(versionInfo.versionName)),
         )
 
         if (exact is GitHubReleaseJsonResult.Found) {
-            return buildApkBuilderTemplateReleaseFromJson(exact.json)
+            return buildApkBuilderTemplateReleaseFromJson(exact.json, versionInfo)
         }
 
         val latest = getGitHubReleaseJson(
@@ -288,8 +291,8 @@ class PluginIndexRepository {
         )
 
         if (latest is GitHubReleaseJsonResult.Found) {
-            if (isCurrentHostReleaseJson(latest.json)) {
-                return buildApkBuilderTemplateReleaseFromJson(latest.json)
+            if (isReleaseJsonForVersion(latest.json, versionInfo.versionName)) {
+                return buildApkBuilderTemplateReleaseFromJson(latest.json, versionInfo)
             }
             return when (exact) {
                 GitHubReleaseJsonResult.NotFound -> ApkBuilderTemplateReleaseResolution.NoAvailableRelease
@@ -305,10 +308,53 @@ class PluginIndexRepository {
         }
     }
 
-    private fun buildApkBuilderTemplateReleaseFromJson(releaseJson: JSONObject): ApkBuilderTemplateReleaseResolution {
-        val assetName = apkBuilderTemplateReleaseAssetName(BuildConfig.VERSION_NAME)
+    private fun resolveApkBuilderTemplateVersionInfo(context: Context): ApkBuilderTemplateVersionInfo? {
+        val defaultBranch = runCatching {
+            getJsonObject(
+                context = context,
+                url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO",
+            ).optString("default_branch").takeIf { it.isNotBlank() }
+        }.getOrNull()
+
+        val branchCandidates = listOfNotNull(defaultBranch, "master", "main").distinct()
+        branchCandidates.forEach { branch ->
+            val content = runCatching {
+                getText(
+                    context = context,
+                    url = rawGithubUrl(
+                        owner = OFFICIAL_OWNER,
+                        repo = APK_BUILDER_TEMPLATE_REPO,
+                        branch = branch,
+                        path = "version.properties",
+                    ),
+                )
+            }.getOrNull()
+            parseApkBuilderTemplateVersionInfo(content)?.let { return it }
+        }
+        return null
+    }
+
+    private fun parseApkBuilderTemplateVersionInfo(content: String?): ApkBuilderTemplateVersionInfo? {
+        val versionMap = parseProperties(content.orEmpty())
+        val versionName = versionMap["VERSION_NAME"]?.takeIf { it.isNotBlank() } ?: return null
+        val versionCode = parseVersionCode(versionMap)?.takeIf { it > 0L } ?: return null
+        return ApkBuilderTemplateVersionInfo(
+            versionName = versionName,
+            versionCode = versionCode,
+        )
+    }
+
+    private fun buildApkBuilderTemplateReleaseFromJson(
+        releaseJson: JSONObject,
+        versionInfo: ApkBuilderTemplateVersionInfo,
+    ): ApkBuilderTemplateReleaseResolution {
+        val assetNames = listOf(versionInfo.versionName, BuildConfig.VERSION_NAME)
+            .distinct()
+            .map(::apkBuilderTemplateReleaseAssetName)
         val assets = parseReleaseAssets(releaseJson.optJSONArray("assets"))
-        val selectedAsset = assets.firstOrNull { it.name.equals(assetName, ignoreCase = true) }
+        val selectedAsset = assets.firstOrNull { asset ->
+            assetNames.any { expected -> asset.name.equals(expected, ignoreCase = true) }
+        }
             ?: assets.firstOrNull {
                 it.name.startsWith(APK_BUILDER_TEMPLATE_ASSET_PREFIX, ignoreCase = true) &&
                         it.name.endsWith(".apk", ignoreCase = true)
@@ -319,8 +365,8 @@ class PluginIndexRepository {
 
         return ApkBuilderTemplateReleaseResolution.Found(
             PluginIndexRelease(
-                versionName = BuildConfig.VERSION_NAME,
-                versionCode = BuildConfig.VERSION_CODE.toLong(),
+                versionName = versionInfo.versionName,
+                versionCode = versionInfo.versionCode,
                 versionDate = publishedDate,
                 apkUrl = selectedAsset.downloadUrl,
                 apkSha256 = selectedAsset.sha256,
@@ -349,13 +395,13 @@ class PluginIndexRepository {
             .lowercase()
     }
 
-    private fun isCurrentHostReleaseJson(json: JSONObject): Boolean {
-        val current = normalizeApkBuilderTemplateVersionToken(BuildConfig.VERSION_NAME)
+    private fun isReleaseJsonForVersion(json: JSONObject, versionName: String): Boolean {
+        val expected = normalizeApkBuilderTemplateVersionToken(versionName)
         val tagVersion = extractVersionToken(json.optString("tag_name"))
             ?.let(::normalizeApkBuilderTemplateVersionToken)
         val nameVersion = extractVersionToken(json.optString("name").substringBefore(" @"))
             ?.let(::normalizeApkBuilderTemplateVersionToken)
-        return tagVersion == current || nameVersion == current
+        return tagVersion == expected || nameVersion == expected
     }
 
     private fun extractVersionToken(value: String): String? {
@@ -624,7 +670,7 @@ class PluginIndexRepository {
             ?: releaseJson.optString("tag_name").removePrefix("v").takeIf { it.isNotBlank() }
             ?: context.getString(R.string.text_unknown)
 
-        val versionCode = versionMap["VERSION_BUILD"]?.toLongOrNull()
+        val versionCode = parseVersionCode(versionMap)
             ?: 0L
 
         val changelogPath = resolveOfficialChangelogPath(languageTag, repoTreePaths)
@@ -1370,6 +1416,11 @@ class PluginIndexRepository {
             }
     }
 
+    private fun parseVersionCode(properties: Map<String, String>): Long? {
+        return properties["VERSION_CODE"]?.toLongOrNull()
+            ?: properties["VERSION_BUILD"]?.toLongOrNull()
+    }
+
     private fun isLikelyVersionLike(value: String): Boolean {
         val text = value.trim()
         if (text.isBlank()) return false
@@ -1692,6 +1743,11 @@ class PluginIndexRepository {
         val downloadUrl: String,
         val size: Long,
         val sha256: String?,
+    )
+
+    private data class ApkBuilderTemplateVersionInfo(
+        val versionName: String,
+        val versionCode: Long,
     )
 
     private sealed class ApkBuilderTemplateReleaseResolution {

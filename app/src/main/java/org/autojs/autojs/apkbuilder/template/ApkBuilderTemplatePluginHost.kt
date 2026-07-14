@@ -48,6 +48,7 @@ object ApkBuilderTemplatePluginHost {
     suspend fun openTemplate(context: Context, request: ApkBuilderTemplateRequest): OpenedTemplate? {
         val appContext = context.applicationContext
         val candidates = discover(appContext)
+            .asSequence()
             .filter { it.pluginInfo != null }
             .filter { matchesTemplatePlugin(it.pluginInfo) }
             .filter { PluginEnableStore.isEnabled(appContext, it.serviceInfo.packageName, true) }
@@ -57,6 +58,7 @@ object ApkBuilderTemplatePluginHost {
                     .thenByDescending { it.pluginInfo?.versionCode ?: 0L }
                     .thenBy { it.serviceInfo.packageName }
             )
+            .toList()
 
         val target = candidates.firstOrNull() ?: return null
         val warnings = hostCompatibilityWarnings(appContext, target.pluginInfo)
@@ -90,6 +92,7 @@ object ApkBuilderTemplatePluginHost {
         val requiredProtocolVersion = request.requiredProtocolVersion.takeIf { it > 0 }
             ?: ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION
         val candidates = discover(appContext)
+            .asSequence()
             .filter { it.pluginInfo != null }
             .filter { matchesTemplatePlugin(it.pluginInfo) }
             .filter { PluginEnableStore.isEnabled(appContext, it.serviceInfo.packageName, true) }
@@ -101,6 +104,7 @@ object ApkBuilderTemplatePluginHost {
                     .thenByDescending { it.pluginInfo?.versionCode ?: 0L }
                     .thenBy { it.serviceInfo.packageName }
             )
+            .toList()
 
         val target = candidates.firstOrNull() ?: return null
         val warnings = hostCompatibilityWarnings(appContext, target.pluginInfo)
@@ -185,6 +189,7 @@ object ApkBuilderTemplatePluginHost {
 
     private fun isExactHostVersionMatch(pluginInfo: PluginInfo?): Boolean {
         val capabilities = pluginInfo?.capabilities ?: return false
+
         @Suppress("DEPRECATION")
         val builtForHostVersionCode = PluginCapabilityResolver.coerceLong(
             capabilities.get(ApkBuilderTemplateCapabilityKeys.BUILT_FOR_HOST_VERSION_CODE)
@@ -199,7 +204,7 @@ object ApkBuilderTemplatePluginHost {
         val requiresHostVersion = PluginCapabilityResolver.resolveRequiresHostVersion(pluginInfo?.capabilities)
         if (!PluginCapabilityResolver.isHostVersionCompatible(BuildConfig.VERSION_CODE.toLong(), requiresHostVersion)) {
             warnings += context.getString(
-                org.autojs.autojs6.R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
+                R.string.hint_plugin_requires_higher_host_version_with_required_and_current,
                 requiresHostVersion ?: 0L,
                 BuildConfig.VERSION_CODE.toLong(),
             )
