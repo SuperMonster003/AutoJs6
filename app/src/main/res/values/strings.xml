@@ -173,6 +173,7 @@
     <string name="key_floating_menu_shown" translatable="false">key_$_floating_menu_shown</string>
     <string name="key_foreground_service" translatable="false">key_$_foreground_service</string>
     <string name="key_gesture_observing" translatable="false">key_$_gesture_observing</string>
+    <string name="key_github_token" translatable="false">key_$_github_token</string>
     <string name="key_guard_mode" translatable="false">key_$_guard_mode</string>
     <string name="key_hidden_files" translatable="false">key_$_hidden_files</string>
     <string name="key_hidden_files_not_show" translatable="false">key_$_hidden_files_not_show</string>
@@ -1336,7 +1337,13 @@
     <string name="text_generate">Generate</string>
     <string name="text_generate_code">Generate code</string>
     <string name="text_generated_code">Generated code</string>
+    <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">Backup URL has been used</string>
+    <string name="text_github_token">GitHub Token</string>
+    <string name="hint_github_token">Paste a GitHub personal access token</string>
+    <string name="summary_github_token_not_set">Not set. GitHub API requests are anonymous.</string>
+    <string name="summary_github_token_set">Set. Hidden for privacy; ending in %1$s.</string>
+    <string name="description_github_token_preference">Used only for GitHub API requests to reduce rate limits. The token is stored locally and hidden in this UI.</string>
     <string name="text_global_settings">Global settings</string>
     <string name="text_go_to_settings">Go to \"Settings\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Grant AutoJs6 access in Shizuku app</string>

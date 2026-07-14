@@ -392,7 +392,7 @@ public class UpdateChecker {
         mUpdateDialog.show();
 
         mGitHubExecutor.execute(() -> {
-            GitHub github = GitHubRepoUtils.getConnection();
+            GitHub github = GitHubRepoUtils.getConnection(context);
             if (github == null) {
                 Dialog.setDialogContent(mUpdateDialog, R.string.error_cannot_connect_to_github);
                 return;
@@ -881,19 +881,23 @@ public class UpdateChecker {
     private static class GitHubRepoUtils {
 
         private static GitHub mGitHubConnection;
+        private static String mGitHubConnectionTokenKey;
 
         @Nullable
         @Lazy
-        private static GitHub getConnection() {
+        private static GitHub getConnection(Context context) {
             try {
-                if (mGitHubConnection == null) {
+                String token = GitHubTokenStore.getToken(context);
+                String tokenKey = token == null ? "anonymous" : token.length() + ":" + token.hashCode();
+                if (mGitHubConnection == null || !Objects.equals(mGitHubConnectionTokenKey, tokenKey)) {
                     // FIXME by SuperMonster003 on May 31, 2022.
                     //  ! Given that java.time package was added only in Android O (API 26),
                     //  ! API 24 and 25 will throw an java.lang.NoClassDefFoundError here.
                     //  ! zh-CN:
                     //  ! 鉴于安卓 O (API 26) 才开始引入 java.time 包,
                     //  ! API 24 以及 25 在此处将抛出一个 java.lang.NoClassDefFoundError 异常.
-                    mGitHubConnection = GitHub.connectAnonymously();
+                    mGitHubConnection = token == null ? GitHub.connectAnonymously() : GitHub.connectUsingOAuth(token);
+                    mGitHubConnectionTokenKey = tokenKey;
                 }
                 return mGitHubConnection;
             } catch (Exception e) {

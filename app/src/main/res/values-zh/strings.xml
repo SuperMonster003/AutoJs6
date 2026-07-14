@@ -936,7 +936,13 @@
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成代码</string>
     <string name="text_generated_code">已生成代码</string>
+    <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">备用 URL 已使用</string>
+    <string name="text_github_token">GitHub Token</string>
+    <string name="hint_github_token">粘贴 GitHub Personal Access Token</string>
+    <string name="summary_github_token_not_set">未设置. GitHub API 请求将匿名发起.</string>
+    <string name="summary_github_token_set">已设置. 已在界面隐藏, 末尾为 %1$s.</string>
+    <string name="description_github_token_preference">仅用于 GitHub API 请求以降低触发速率限制的概率. Token 将保存在本地, 并在此界面隐藏.</string>
     <string name="text_global_settings">全局设置</string>
     <string name="text_go_to_settings">打开 \"设置\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">在 Shizuku 应用中授予 AutoJs6 权限</string>

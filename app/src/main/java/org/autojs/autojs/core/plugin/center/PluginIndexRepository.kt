@@ -6,6 +6,7 @@ import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.network.GitHubTokenStore
 import org.autojs.autojs.util.AndroidUtils
 import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.BuildConfig
@@ -33,6 +34,9 @@ class PluginIndexRepository {
 
         @Volatile
         private var apiRateLimitCooldownUntilMs: Long = 0L
+
+        @Volatile
+        private var apiRateLimitCooldownKey: String? = null
 
         @Volatile
         private var lastNetworkFetchAttemptMs: Long = 0L
@@ -1302,7 +1306,13 @@ class PluginIndexRepository {
         accept: String = "*/*",
     ): String {
         val isGitHubApi = url.startsWith("https://api.github.com/")
+        val githubToken = if (isGitHubApi) GitHubTokenStore.getToken(context) else null
+        val githubAuthKey = githubToken?.let { "${it.length}:${it.hashCode()}" } ?: "anonymous"
         if (isGitHubApi) {
+            if (apiRateLimitCooldownKey != githubAuthKey) {
+                apiRateLimitCooldownKey = githubAuthKey
+                apiRateLimitCooldownUntilMs = 0L
+            }
             val now = System.currentTimeMillis()
             if (now < apiRateLimitCooldownUntilMs) {
                 val remainMs = apiRateLimitCooldownUntilMs - now
@@ -1318,6 +1328,7 @@ class PluginIndexRepository {
             setRequestProperty("User-Agent", "${context.getString(R.string.app_name)}/${BuildConfig.VERSION_NAME} (PluginCenter)")
             if (isGitHubApi) {
                 setRequestProperty("X-GitHub-Api-Version", "2022-11-28")
+                githubToken?.let { setRequestProperty("Authorization", "Bearer $it") }
             }
         }
         return try {

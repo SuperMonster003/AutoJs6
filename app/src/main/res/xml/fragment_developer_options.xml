@@ -33,6 +33,19 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
+        app:title="@string/text_github">
+
+        <org.autojs.autojs.ui.settings.GitHubTokenPreference
+            app:key="@string/key_github_token"
+            app:layout="@layout/preference_custom"
+            app:summary="@string/summary_github_token_not_set"
+            app:title="@string/text_github_token"
+            app:longClickPrompt="@string/description_github_token_preference" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
         app:title="@string/text_nodejs">
 
         <org.autojs.autojs.ui.settings.NodeDoctorReportPreference
