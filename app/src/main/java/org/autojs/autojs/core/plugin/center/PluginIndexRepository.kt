@@ -670,7 +670,16 @@ class PluginIndexRepository {
             treePaths = repoTreePaths,
         ) ?: unknown
 
-        val author = parseManifestAuthor(manifestText)
+        val manifestAuthor = parseManifestAuthor(manifestText)
+        val author = resolveStringResourceReference(
+            context = context,
+            owner = plugin.owner,
+            repo = plugin.repo,
+            branch = plugin.branch,
+            languageTag = languageTag,
+            treePaths = repoTreePaths,
+            value = manifestAuthor,
+        ) ?: manifestAuthor?.takeIf { !it.startsWith("@") }
             ?: releaseAuthor
             ?: unknown
 

@@ -12,6 +12,8 @@ import java.util.Locale
 @SuppressLint("DiscouragedApi")
 object PluginResourceResolver {
 
+    private val STRING_RESOURCE_REFERENCE = Regex("""^@(?:([A-Za-z0-9_.]+):)?string/([A-Za-z0-9_.]+)$""")
+
     fun resolve(
         context: Context,
         packageName: String,
@@ -26,9 +28,37 @@ object PluginResourceResolver {
         } ?: fallback
     }
 
+    fun resolveStringValue(
+        context: Context,
+        packageName: String,
+        value: Any?,
+        fallback: String? = null,
+    ): String? {
+        val locale = Language.getPrefLanguage().locale
+        return when (value) {
+            is Number -> fetchLocalizedStringResource(context, packageName, locale, value.toInt()) ?: fallback
+            is CharSequence -> {
+                val text = value.toString().trim().takeIf { it.isNotBlank() } ?: return fallback
+                resolveStringResourceReference(context, packageName, locale, text) ?: text
+            }
+            else -> fallback
+        }
+    }
+
+    private fun resolveStringResourceReference(context: Context, packageName: String, locale: Locale, value: String): String? {
+        val match = STRING_RESOURCE_REFERENCE.matchEntire(value.trim()) ?: return null
+        val targetPackage = match.groupValues.getOrNull(1)?.takeIf { it.isNotBlank() } ?: packageName
+        val resName = match.groupValues.getOrNull(2)?.takeIf { it.isNotBlank() } ?: return null
+        return fetchLocalizedStringResource(context, targetPackage, locale, resName)
+    }
+
     private fun fetchLocalizedStringResource(context: Context, packageName: String, locale: Locale, resName: String): String? {
         val res = runCatching { context.packageManager.getResourcesForApplication(packageName) }.getOrNull() ?: return null
         val resId = res.getIdentifier(resName, ResType.STRING.typeName, packageName).takeIf { it != 0 } ?: return null
+        return fetchLocalizedStringResource(context, packageName, locale, resId)
+    }
+
+    private fun fetchLocalizedStringResource(context: Context, packageName: String, locale: Locale, resId: Int): String? {
         return runCatching {
             val pkgCtx = context.createPackageContext(packageName, Context.CONTEXT_IGNORE_SECURITY)
             val config = Configuration(pkgCtx.resources.configuration).apply { setLocale(locale) }

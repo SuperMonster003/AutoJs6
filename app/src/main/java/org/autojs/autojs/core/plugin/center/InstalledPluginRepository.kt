@@ -88,7 +88,11 @@ class InstalledPluginRepository {
             val appLabel = appInfo?.loadLabel(pm)?.toString()
             val icon = appInfo?.let { PluginInstalledIconResolver.load(context, it) }
             val isStopped = appInfo != null && (appInfo.flags and ApplicationInfo.FLAG_STOPPED) != 0
-            val manifestAuthor = appInfo?.metaData?.getString(KEY_AUTHOR)
+            val pluginName = PluginResourceResolver.resolveStringValue(context, packageName, d.pluginInfo?.name)
+            val pluginDescription = PluginResourceResolver.resolveStringValue(context, packageName, d.pluginInfo?.description)
+            val pluginInstruction = PluginResourceResolver.resolveStringValue(context, packageName, d.pluginInfo?.instruction)
+            val pluginAuthor = PluginResourceResolver.resolveStringValue(context, packageName, d.pluginInfo?.author)
+            val manifestAuthor = PluginResourceResolver.resolveStringValue(context, packageName, appInfo?.metaData?.get(KEY_AUTHOR))
 
             val pkgInfo = runCatching { pm.getPackageInfo(packageName, 0) }.getOrNull()
             val versionName = pkgInfo?.versionName ?: d.pluginInfo?.versionName ?: context.getString(R.string.text_unknown)
@@ -109,15 +113,15 @@ class InstalledPluginRepository {
 
             InstalledPlugin(
                 packageName = packageName,
-                title = d.pluginInfo?.name ?: appLabel ?: packageName,
+                title = pluginName ?: appLabel ?: packageName,
                 description = PluginResourceResolver.resolve(
                     context,
                     packageName,
                     "plugin_description" to PluginResourceResolver.ResType.STRING,
-                    d.pluginInfo?.description,
+                    pluginDescription,
                 ),
-                instructionHardCoded = d.pluginInfo?.instruction?.truncateForSafeBinder(),
-                author = d.pluginInfo?.author ?: manifestAuthor,
+                instructionHardCoded = pluginInstruction?.truncateForSafeBinder(),
+                author = pluginAuthor ?: manifestAuthor,
                 versionName = versionName,
                 versionCode = versionCode,
                 versionDate = versionDate,

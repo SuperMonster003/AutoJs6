@@ -45,16 +45,17 @@ class LegacyInstalledPluginRepository {
             pm.getInstalledApplications(flags)
         }
         apps.mapNotNull { appInfo ->
+            val packageName = appInfo.packageName
             val meta = appInfo.metaData ?: return@mapNotNull null
             val registry = meta.getString(KEY_REGISTRY) ?: return@mapNotNull null
-            val description = meta.getString(KEY_DESCRIPTION)
-            val versionDate = meta.getString(KEY_VERSION_DATE)
-            val pluginName = meta.getString(KEY_NAME)
-            val author = meta.getString(KEY_AUTHOR)
-            val instructionHardCoded = meta.getString(KEY_INSTRUCTION)?.truncateForSafeBinder()
+            val description = PluginResourceResolver.resolveStringValue(context, packageName, meta.get(KEY_DESCRIPTION))
+            val versionDate = PluginResourceResolver.resolveStringValue(context, packageName, meta.get(KEY_VERSION_DATE))
+            val pluginName = PluginResourceResolver.resolveStringValue(context, packageName, meta.get(KEY_NAME))
+            val author = PluginResourceResolver.resolveStringValue(context, packageName, meta.get(KEY_AUTHOR))
+            val instructionHardCoded = PluginResourceResolver.resolveStringValue(context, packageName, meta.get(KEY_INSTRUCTION))
+                ?.truncateForSafeBinder()
             val forceIgnoreLocalIcon = meta.getBoolean(KEY_FORCE_IGNORE_LOCAL_ICON, false)
 
-            val packageName = appInfo.packageName
             val label = appInfo.loadLabel(pm).takeUnless { it.isBlank() }?.toString()
             val icon = if (forceIgnoreLocalIcon) null else PluginInstalledIconResolver.load(context, appInfo).takeUnless {
                 isDefaultAndroidAppIcon(pm, appInfo, it)
