@@ -32,6 +32,11 @@ class PluginIndexRepository {
         private const val THIRD_PARTY_REPO = "Auto.js-SDK-Plugins-Garage"
         private const val THIRD_PARTY_BRANCH = "main"
 
+        private const val OFFICIAL_ABI_GAP_RETRY_INTERVAL_MS = 60_000L
+        private const val AUTHENTICATED_OFFICIAL_ABI_GAP_RETRY_INTERVAL_MS = 15_000L
+        private const val FORCE_REFRESH_MIN_INTERVAL_MS = 15_000L
+        private const val AUTHENTICATED_FORCE_REFRESH_MIN_INTERVAL_MS = 3_000L
+
         @Volatile
         private var apiRateLimitCooldownUntilMs: Long = 0L
 
@@ -40,6 +45,14 @@ class PluginIndexRepository {
 
         @Volatile
         private var lastNetworkFetchAttemptMs: Long = 0L
+
+        @Volatile
+        private var lastNetworkFetchAttemptKey: String? = null
+
+        @Volatile
+        private var validatedGitHubApiAuthKey: String? = null
+
+        private fun githubAuthKeyOf(token: String?): String = token?.let { "${it.length}:${it.hashCode()}" } ?: "anonymous"
     }
 
     @Volatile
@@ -96,6 +109,23 @@ class PluginIndexRepository {
         val cachedLanguageTag = cacheSnapshot?.languageTag ?: memoryLanguageTag
         val hasLanguageMismatch = cachedAll != null && !isSameLanguageTag(cachedLanguageTag, currentLanguageTag)
         val now = System.currentTimeMillis()
+        val githubAuthKey = githubAuthKeyOf(GitHubTokenStore.getToken(context))
+        val hasValidatedGitHubToken = githubAuthKey != "anonymous" && validatedGitHubApiAuthKey == githubAuthKey
+        val officialAbiGapRetryIntervalMs = if (hasValidatedGitHubToken) {
+            AUTHENTICATED_OFFICIAL_ABI_GAP_RETRY_INTERVAL_MS
+        } else {
+            OFFICIAL_ABI_GAP_RETRY_INTERVAL_MS
+        }
+        val forceRefreshMinIntervalMs = if (hasValidatedGitHubToken) {
+            AUTHENTICATED_FORCE_REFRESH_MIN_INTERVAL_MS
+        } else {
+            FORCE_REFRESH_MIN_INTERVAL_MS
+        }
+
+        if (lastNetworkFetchAttemptKey != githubAuthKey) {
+            lastNetworkFetchAttemptKey = githubAuthKey
+            lastNetworkFetchAttemptMs = 0L
+        }
 
         if (!forceRefresh) {
             cachedAll?.let {
@@ -104,7 +134,7 @@ class PluginIndexRepository {
                 if (missingSources.isEmpty() && !hasOfficialAbiGaps && !hasLanguageMismatch) {
                     return@withContext filterBySource(it, enabledSources)
                 }
-                if (missingSources.isEmpty() && hasOfficialAbiGaps && !hasLanguageMismatch && now - lastNetworkFetchAttemptMs < 60_000L) {
+                if (missingSources.isEmpty() && hasOfficialAbiGaps && !hasLanguageMismatch && now - lastNetworkFetchAttemptMs < officialAbiGapRetryIntervalMs) {
                     Log.i(TAG, "Cache has official ABI gaps, but refresh attempted recently. Use cache.")
                     return@withContext filterBySource(it, enabledSources)
                 }
@@ -118,8 +148,8 @@ class PluginIndexRepository {
             }
         }
 
-        if (forceRefresh && cachedAll != null && now - lastNetworkFetchAttemptMs < 15_000L) {
-            Log.i(TAG, "Skip too-frequent force refresh (<15s), use cache.")
+        if (forceRefresh && cachedAll != null && now - lastNetworkFetchAttemptMs < forceRefreshMinIntervalMs) {
+            Log.i(TAG, "Skip too-frequent force refresh (<${forceRefreshMinIntervalMs / 1000}s), use cache.")
             return@withContext filterBySource(cachedAll, enabledSources)
         }
 
@@ -1307,7 +1337,7 @@ class PluginIndexRepository {
     ): String {
         val isGitHubApi = url.startsWith("https://api.github.com/")
         val githubToken = if (isGitHubApi) GitHubTokenStore.getToken(context) else null
-        val githubAuthKey = githubToken?.let { "${it.length}:${it.hashCode()}" } ?: "anonymous"
+        val githubAuthKey = githubAuthKeyOf(githubToken)
         if (isGitHubApi) {
             if (apiRateLimitCooldownKey != githubAuthKey) {
                 apiRateLimitCooldownKey = githubAuthKey
@@ -1336,6 +1366,7 @@ class PluginIndexRepository {
             val code = conn.responseCode
             if (isGitHubApi) {
                 updateGitHubApiRateLimitCooldown(conn, code)
+                updateGitHubApiTokenValidation(githubToken, githubAuthKey, code)
             }
             if (code !in 200..299) {
                 val err = conn.errorStream?.bufferedReader(StandardCharsets.UTF_8)?.use { it.readText() }?.trim().orEmpty()
@@ -1362,6 +1393,18 @@ class PluginIndexRepository {
         if (until > apiRateLimitCooldownUntilMs) {
             apiRateLimitCooldownUntilMs = until
             Log.w(TAG, "GitHub API rate limit cooldown until $apiRateLimitCooldownUntilMs")
+        }
+    }
+
+    private fun updateGitHubApiTokenValidation(token: String?, authKey: String, code: Int) {
+        if (token == null) return
+        when (code) {
+            in 200..299 -> validatedGitHubApiAuthKey = authKey
+            HttpURLConnection.HTTP_UNAUTHORIZED -> {
+                if (validatedGitHubApiAuthKey == authKey) {
+                    validatedGitHubApiAuthKey = null
+                }
+            }
         }
     }
 

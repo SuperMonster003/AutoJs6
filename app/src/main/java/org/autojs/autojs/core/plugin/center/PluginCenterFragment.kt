@@ -249,7 +249,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         viewLifecycleOwner.lifecycleScope.launch {
             vm.indexLoaded.collectLatest { loaded ->
                 latestIndexLoaded = loaded
-                binding.pluginCenterSwipeRefresh.isRefreshing = false
+                if (loaded) {
+                    binding.pluginCenterSwipeRefresh.isRefreshing = false
+                }
                 updateEmptyHint(
                     filteredItems = adapter.items(),
                     indexLoaded = loaded,

@@ -259,6 +259,11 @@ class PluginCenterViewModel : ViewModel() {
             // zh-CN: 返回页面时, 若详情对话框正在显示则刷新.
             PluginInfoDialogManager.refreshIfShowing(context, _items.value)
         }
+        loadJob?.invokeOnCompletion {
+            if (generation == loadGeneration && !_indexLoaded.value) {
+                _indexLoaded.value = true
+            }
+        }
     }
 
     override fun onCleared() {
