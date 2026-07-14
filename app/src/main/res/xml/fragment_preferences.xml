@@ -55,7 +55,6 @@
             app:itemKeys="@array/keys_documentation_source"
             app:itemValues="@array/values_documentation_source"
             app:itemDefaultKey="@string/default_key_documentation_source"
-            app:onConfirmPrompt="@string/prompt_restart_is_needed_for_docs_source_switch"
             app:longClickPrompt="@string/description_documentation_source_preference"
             app:longClickPromptMore="@string/description_documentation_source_preference_more" />
 

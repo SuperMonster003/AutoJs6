@@ -124,7 +124,9 @@ import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
+import org.autojs.autojs.util.DocsUtils.INDEX_URL_SUFFIX
 import org.autojs.autojs.util.DocsUtils.getUrl
+import org.autojs.autojs.util.DocsUtils.getUrlByCurrentSource
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs.util.Observers
@@ -564,6 +566,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             key(R.string.key_ace_lsp_enabled),
             key(R.string.key_ace_lsp_file_types),
                 -> post { (editor as? AceScriptEditorEngine)?.refreshLsp() }
+            key(R.string.key_documentation_source) -> post { reloadDocsWebViewByCurrentDocumentationSource() }
         }
     }
 
@@ -584,7 +587,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         setMenuItemStatus(R.id.save, false)
         mDocsWebView.apply {
             webView.settings.displayZoomControls = true
-            webView.loadUrl(getUrl("index.html"))
+            webView.loadUrl(getUrl(INDEX_URL_SUFFIX))
         }
         themeFontService.loadCurrentTheme()
             .observeOn(AndroidSchedulers.mainThread())
@@ -3844,6 +3847,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 mDrawerLayout.openDrawer(GravityCompat.START)
             }
             .show()
+    }
+
+    private fun reloadDocsWebViewByCurrentDocumentationSource() {
+        mDocsWebView.webView.also { webView ->
+            webView.stopLoading()
+            webView.clearHistory()
+            webView.loadUrl(getUrlByCurrentSource(webView.url))
+        }
     }
 
     override fun onModuleLongClick(module: Module) {

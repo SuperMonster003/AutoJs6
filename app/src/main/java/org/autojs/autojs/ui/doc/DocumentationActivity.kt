@@ -1,11 +1,16 @@
 package org.autojs.autojs.ui.doc
 
 import android.os.Bundle
+import android.content.SharedPreferences
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.event.BackPressedHandler
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.util.DocsUtils.INDEX_URL_SUFFIX
 import org.autojs.autojs.util.DocsUtils.getUrl
+import org.autojs.autojs.util.DocsUtils.getUrlByCurrentSource
+import org.autojs.autojs.util.DocsUtils.isDocumentationSourcePreferenceKey
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WebViewUtils
 import org.autojs.autojs6.R
@@ -51,6 +56,12 @@ class DocumentationActivity : BaseActivity() {
 
     private lateinit var mWebView: WebView
 
+    private val mDocumentationSourceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+        if (isDocumentationSourcePreferenceKey(changedKey)) {
+            mWebView.post { reloadByCurrentDocumentationSource() }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -67,12 +78,25 @@ class DocumentationActivity : BaseActivity() {
                     WebViewUtils.excludeWebViewFromStatusBarAndNavigationBar(ewebView, webView) {
                         generateInjectCodeForBottomInsets(it)
                     }
-                    webView.loadUrl(intent.getStringExtra(EXTRA_URL) ?: getUrl("index.html"))
+                    webView.loadUrl(intent.getStringExtra(EXTRA_URL) ?: getUrl(INDEX_URL_SUFFIX))
                 }
             }
         }
 
+        Pref.get().registerOnSharedPreferenceChangeListener(mDocumentationSourceChangeListener)
         handleBackPressedHandlerAndCallback()
+    }
+
+    override fun onDestroy() {
+        Pref.get().unregisterOnSharedPreferenceChangeListener(mDocumentationSourceChangeListener)
+        super.onDestroy()
+    }
+
+    private fun reloadByCurrentDocumentationSource() {
+        val url = getUrlByCurrentSource(mWebView.url)
+        mWebView.stopLoading()
+        mWebView.clearHistory()
+        mWebView.loadUrl(url)
     }
 
     private fun handleBackPressedHandlerAndCallback() {
