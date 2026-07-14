@@ -36,6 +36,8 @@ class PluginIndexRepository {
         private const val APK_BUILDER_TEMPLATE_PACKAGE = "org.autojs.plugin.apkbuilder.template"
         private const val APK_BUILDER_TEMPLATE_IMPLEMENTATION_PACKAGE = "org.autojs.plugin.apkbuilder.template.impl"
         private const val APK_BUILDER_TEMPLATE_ASSET_PREFIX = "autojs6-apk-builder-template"
+        private const val APK_BUILDER_TEMPLATE_BRANCH = "master"
+        private const val APK_BUILDER_TEMPLATE_ICON_PATH = "app/src/main/res/mipmap/ic_launcher.png"
 
         @Volatile
         private var apiRateLimitCooldownUntilMs: Long = 0L
@@ -241,6 +243,12 @@ class PluginIndexRepository {
     ): PluginIndexEntry {
         return PluginIndexEntry(
             packageName = APK_BUILDER_TEMPLATE_PACKAGE,
+            iconUrl = rawGithubUrl(
+                owner = OFFICIAL_OWNER,
+                repo = APK_BUILDER_TEMPLATE_REPO,
+                branch = APK_BUILDER_TEMPLATE_BRANCH,
+                path = APK_BUILDER_TEMPLATE_ICON_PATH,
+            ).toUri(),
             title = "APK Builder Template",
             description = "Provides the template APK used by AutoJs6 APK Builder.",
             instructionHardCoded = "Install and enable this plugin when AutoJs6 is built without a built-in template.apk.",
