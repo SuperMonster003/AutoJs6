@@ -9,6 +9,7 @@ import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.script.SequenceScriptSource
 import org.autojs.autojs.script.StringScriptSource
+import org.autojs.autojs.util.EnvironmentUtils
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.json.JSONException
 import org.json.JSONObject
@@ -33,7 +34,7 @@ object ScriptIntents {
 
     @JvmStatic
     fun handleIntent(context: Context?, intent: Intent) {
-        var path = getPath(intent)
+        var path = EnvironmentUtils.normalizePath(getPath(intent))
         var script = intent.getStringExtra(EXTRA_KEY_PRE_EXECUTE_SCRIPT)
 
         if (intent.hasExtra(EXTRA_KEY_JSON)) {
