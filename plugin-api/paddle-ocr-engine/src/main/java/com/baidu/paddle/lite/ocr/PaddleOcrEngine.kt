@@ -121,8 +121,7 @@ data class ModelProfile(
     val variantName: String,
     val labelAssetPath: String,
 
-    // v5 uses Predictor's internal default dirs; v3 uses explicit dir.
-    // zh-CN: v5 由 Predictor 内部默认目录决定, v3 使用显式目录.
+    // Null means Predictor should use its internal default directories.
     val modelDir: String?,
 
     val useSlim: Boolean,
@@ -135,12 +134,12 @@ data class ModelProfile(
 )
 
 /**
- * Engine variant specification (v3/v5).
- * zh-CN: 引擎变体规范 (v3/v5).
+ * Engine variant specification for the embedded Paddle Lite runtime.
  */
 data class VariantSpec(
     val name: String,
     val supportsOpenCL: Boolean,
+    val usesPredictorDefaultDirs: Boolean = false,
     val labelAssetPath: String,
 
     // Explicit model directories.
@@ -162,24 +161,18 @@ data class VariantSpec(
         val useSlim = options.useSlim
         val useOpenCLRequested = options.useOpenCL && supportsOpenCL
 
-        val resolvedDir: String? = if (name == NAME_V5) {
-            // v5: let Predictor decide between CPU/OpenCL + fallback internally.
-            // zh-CN: v5: 让 Predictor 内部决定 CPU/OpenCL 并自动回退.
+        val resolvedDir: String? = if (usesPredictorDefaultDirs) {
+            // Let Predictor decide between CPU/OpenCL + fallback internally.
             null
         } else {
-            // v3: choose deterministic dir here (OpenCL ignored).
-            // zh-CN: v3: 在此确定性选择目录 (OpenCL 被忽略).
+            // Choose deterministic dir here.
             if (useSlim) (modelDirCpuSlim ?: modelDirCpu) else modelDirCpu
         }
 
         // Assets to check:
         // - Always check label file.
-        // - For v3: check the resolved model dir files.
-        // - For v5: check CPU + slim dirs always, and additionally OpenCL dirs if requested.
-        // zh-CN:
-        // - 总是检查 label 文件.
-        // - v3: 检查解析出的模型目录及其文件.
-        // - v5: 总是检查 CPU/INT8 目录, 若用户请求 OpenCL 再额外检查 OpenCL 目录.
+        // - Explicit-dir variants check only the resolved model dir files.
+        // - Predictor-default variants check CPU + slim dirs always, and additionally OpenCL dirs if requested.
         val assets = buildList {
             add(labelAssetPath)
 
@@ -207,9 +200,8 @@ data class VariantSpec(
                 }
             }
 
-            // v3 deterministic dir check (override list to minimal set).
-            // zh-CN: v3 确定性目录检查 (覆盖为最小集合).
-            if (name != NAME_V5) {
+            // Explicit-dir variant check (override list to minimal set).
+            if (!usesPredictorDefaultDirs) {
                 clear()
                 add(labelAssetPath)
                 val dir = requireNotNull(resolvedDir)
@@ -251,6 +243,7 @@ data class VariantSpec(
         fun v5(): VariantSpec = VariantSpec(
             name = NAME_V5,
             supportsOpenCL = true,
+            usesPredictorDefaultDirs = true,
             labelAssetPath = "labels/ppocr_keys_ocrv5.txt",
 
             modelDirCpu = "models/pp-ocrv5-arm",

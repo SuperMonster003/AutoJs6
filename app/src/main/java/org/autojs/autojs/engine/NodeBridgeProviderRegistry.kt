@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.runtime.api.augment.ocr.PaddleOcrEmbeddedEngine
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
@@ -640,13 +641,7 @@ object NodeBridgeProviderRegistry {
 
     private fun ocrDetails(context: Context): Map<String, String> {
         val appContext = context.applicationContext
-        val paddleVariant = when {
-            hasAsset(appContext, "labels/ppocr_keys_ocrv5.txt") &&
-                    hasAsset(appContext, "models/pp-ocrv5-arm/PP-OCRv5_mobile_det.nb") -> "v5"
-            hasAsset(appContext, "labels/ppocr_keys_v1.txt") &&
-                    hasAsset(appContext, "models/ocr_v3_for_cpu/det_opt.nb") -> "v3"
-            else -> "none"
-        }
+        val paddleVariant = PaddleOcrEmbeddedEngine.resolveVariantName(appContext) ?: "none"
         return linkedMapOf(
             "defaultEngine" to "mlkit-ocr",
             "mlkitPluginServiceCount" to queryOcrPluginServiceCount(appContext, "mlkit-ocr").toString(),
@@ -680,10 +675,6 @@ object NodeBridgeProviderRegistry {
             "qrcodePolicy" to "P12-29 compat.qrcode must force QR_CODE over this provider",
             "statusReason" to "ML Kit barcode provider is supplied by the official Barcode plugin through JSON-only snapshots and provider-owned image handles",
         )
-    }
-
-    private fun hasAsset(context: Context, path: String): Boolean {
-        return runCatching { context.assets.open(path).use { true } }.getOrDefault(false)
     }
 
     private fun queryOcrPluginServiceCount(context: Context, category: String? = null): Int {

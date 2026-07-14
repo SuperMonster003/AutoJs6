@@ -76,28 +76,23 @@ class PredictorNativeBridge : NativeBridge {
             predictor.cpuThreadNum = profile.cpuThreadNum
         }
 
-        // Apply per-variant model file names (both v3/v5).
-        // zh-CN: 应用按变体区分的模型文件名 (同时覆盖 v3/v5).
+        // Apply per-variant model file names.
         predictor.detModelFilename = profile.detModelFile
         predictor.recModelFilename = profile.recModelFile
         predictor.clsModelFilename = profile.clsModelFile
 
-        return if (profile.variantName == VariantSpec.NAME_V5) {
-            // Use v5 built-in OpenCLGuard + fallback logic.
-            // zh-CN: 使用 v5 内置的 OpenCLGuard + fallback 逻辑.
+        return if (profile.modelDir == null) {
+            // Use Predictor's built-in OpenCLGuard + fallback logic.
             predictor.init(
                 context.applicationContext,
                 profile.useSlim,
                 profile.useOpenCL,
             )
         } else {
-            // v3: OpenCL is ignored at variant level; init by resolved modelDir/labelPath.
-            // zh-CN: v3: OpenCL 在变体层被忽略; 按解析后的 modelDir/labelPath 初始化.
+            // Init by resolved modelDir/labelPath.
             predictor.init(
                 context.applicationContext,
-                requireNotNull(profile.modelDir) {
-                    context.getString(R.string.error_missing_modeldir_for_variant, profile.variantName)
-                },
+                profile.modelDir,
                 profile.labelAssetPath,
             )
         }

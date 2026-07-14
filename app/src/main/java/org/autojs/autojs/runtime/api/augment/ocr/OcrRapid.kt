@@ -62,7 +62,9 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             return runBlocking(scriptRuntime.coroutineContext) {
                 val target = OcrPluginHost.selectOrThrow(
                     context = globalContext,
-                    engine = ENGINE_RAPID_OCR,
+                    engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
+                    engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_RAPID_OCR,
+                    variant = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
                     moduleLabel = MODULE_LABEL_RAPID_OCR,
                 )
                 OcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
@@ -77,7 +79,9 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             return runBlocking(scriptRuntime.coroutineContext) {
                 val target = OcrPluginHost.selectOrThrow(
                     context = globalContext,
-                    engine = ENGINE_RAPID_OCR,
+                    engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
+                    engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_RAPID_OCR,
+                    variant = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
                     moduleLabel = MODULE_LABEL_RAPID_OCR,
                 )
                 OcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
@@ -93,8 +97,17 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                     options.inquire("raw", ::coerceBoolean, false)
             val imageQuality = options.inquire("imageQuality", ::coerceIntNumber, -1)
             val imageFormat = options.inquire("imageFormat", ::coerceString, "")
+            val engineId = options.inquire(PaddleOcrOptionExtraKeys.ENGINE_ID, ::coerceString, "")
+            val engine = options.inquire(PaddleOcrOptionExtraKeys.ENGINE, ::coerceString, "")
+            val variant = options.inquire(PaddleOcrOptionExtraKeys.VARIANT, ::coerceString, "")
+            val normalizedVariant = normalizeRapidVariant(engineId, engine, variant)
+            val profile = options.inquire(PaddleOcrOptionExtraKeys.PROFILE, ::coerceString, "")
 
             val extras = Bundle()
+            engineId.takeIf { it.isNotBlank() }?.let { extras.putString(PaddleOcrOptionExtraKeys.ENGINE_ID, it) }
+            engine.takeIf { it.isNotBlank() }?.let { extras.putString(PaddleOcrOptionExtraKeys.ENGINE, it) }
+            normalizedVariant.takeIf { it.isNotBlank() }?.let { extras.putString(PaddleOcrOptionExtraKeys.VARIANT, it) }
+            profile.takeIf { it.isNotBlank() }?.let { extras.putString(PaddleOcrOptionExtraKeys.PROFILE, it) }
             if (useRaw && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 extras.putBoolean(PaddleOcrOptionExtraKeys.RAW_IMAGE, true)
             }
@@ -110,6 +123,23 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                 this.scoreThreshold = scoreThreshold
                 this.extras = extras.takeIf { !it.isEmpty } ?: Bundle()
             }
+        }
+
+        private fun normalizeRapidVariant(engineId: String, engine: String, variant: String): String {
+            if (variant.isBlank()) return variant
+            val isRapidEngine = engineId.isBlank() && engine.isBlank() ||
+                    engineId.startsWith(ENGINE_RAPID_OCR) ||
+                    engine == ENGINE_RAPID_OCR
+            if (!isRapidEngine) return variant
+            return when (variant) {
+                "v3" -> "pp-ocrv3"
+                "v6" -> "pp-ocrv6"
+                else -> variant
+            }
+        }
+
+        private fun Bundle.getNonBlankString(key: String): String? {
+            return getString(key)?.takeIf { it.isNotBlank() }
         }
 
     }

@@ -17,6 +17,11 @@ internal object PaddleOcrEmbeddedEngine {
     @Volatile
     private var resolvedVariant: VariantSpec? = null
 
+    fun resolveVariantName(context: Context): String? {
+        return resolvedVariant?.name
+            ?: resolveVariant(context.applicationContext.assets)?.name
+    }
+
     private fun getEngine(context: Context): PaddleOcrEngine {
         // Lazily initialize embedded engine.
         // zh-CN: 懒初始化内置引擎.
@@ -35,28 +40,16 @@ internal object PaddleOcrEmbeddedEngine {
     }
 
     private fun resolveVariantOrThrow(context: Context, assets: AssetManager): VariantSpec {
-        // Mirror the packaging-time selection rule:
-        // - If neither exists -> throw.
-        // - If both exist -> v5 first.
-        // - If only one exists -> choose it.
-        // zh-CN:
-        // 复刻打包阶段的选择规则:
-        // - 两者都不存在 -> 抛异常.
-        // - 两者都存在 -> v5 优先.
-        // - 仅存在一个 -> 选择唯一项.
-        val hasV5 = assets.hasAsset("labels/ppocr_keys_ocrv5.txt") &&
-                assets.hasAsset("models/pp-ocrv5-arm/PP-OCRv5_mobile_det.nb")
+        // Resolve the first embedded Paddle Lite variant whose required assets are packaged.
+        return resolveVariant(assets) ?: throw IllegalStateException(
+            context.getString(R.string.error_no_embedded_paddle_ocr_assets_found)
+        )
+    }
 
-        val hasV3 = assets.hasAsset("labels/ppocr_keys_v1.txt") &&
-                assets.hasAsset("models/ocr_v3_for_cpu/det_opt.nb")
-
-        return when {
-            hasV5 -> VariantSpec.v5()
-            hasV3 -> VariantSpec.v3()
-            else -> throw IllegalStateException(
-                context.getString(R.string.error_no_embedded_paddle_ocr_assets_found)
-            )
-        }
+    private fun resolveVariant(assets: AssetManager): VariantSpec? {
+        return embeddedVariantCandidates.firstOrNull { candidate ->
+            candidate.requiredAssets.all { path -> assets.hasAsset(path) }
+        }?.spec
     }
 
     private fun AssetManager.hasAsset(path: String): Boolean {
@@ -78,5 +71,29 @@ internal object PaddleOcrEmbeddedEngine {
         // zh-CN: 使用内置引擎执行 OCR 检测.
         return getEngine(context).detect(bitmap, options)
     }
+
+    private data class EmbeddedVariantCandidate(
+        val spec: VariantSpec,
+        val requiredAssets: List<String>,
+    )
+
+    private val embeddedVariantCandidates = listOf(
+        // Embedded Paddle still uses the legacy Paddle Lite .nb runtime. Newer Paddle OCR
+        // plugin variants v4/v5/v6 use ONNX runtime and are selected through OcrPluginHost.
+        EmbeddedVariantCandidate(
+            spec = VariantSpec.v5(),
+            requiredAssets = listOf(
+                "labels/ppocr_keys_ocrv5.txt",
+                "models/pp-ocrv5-arm/PP-OCRv5_mobile_det.nb",
+            ),
+        ),
+        EmbeddedVariantCandidate(
+            spec = VariantSpec.v3(),
+            requiredAssets = listOf(
+                "labels/ppocr_keys_v1.txt",
+                "models/ocr_v3_for_cpu/det_opt.nb",
+            ),
+        ),
+    )
 
 }

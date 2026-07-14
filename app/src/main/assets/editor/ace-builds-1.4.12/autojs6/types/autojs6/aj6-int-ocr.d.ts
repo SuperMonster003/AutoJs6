@@ -127,11 +127,91 @@ declare namespace Internal {
             /* Empty body. */
         }
 
-        interface DetectOptionsRapid extends DetectOptions {
-            /* Reserved body. */
+        interface DetectOptionsPlugin extends DetectOptions {
+
+            /**
+             * Explicit plugin engine id, for example "paddle-ocr-pp-ocrv6-small".
+             */
+            engineId?: string;
+
+            /**
+             * Plugin engine family.
+             */
+            engine?: 'mlkit-ocr' | 'paddle-ocr' | 'rapid-ocr' | string;
+
+            /**
+             * Plugin model variant.
+             */
+            variant?: 'v3' | 'v4' | 'v5' | 'v6' | 'pp-ocrv3' | 'pp-ocrv6' | string;
+
+            /**
+             * Plugin-specific model profile.
+             */
+            profile?: string;
+
         }
 
-        interface DetectOptionsPaddle extends DetectOptions {
+        interface DetectOptionsRapid extends DetectOptionsPlugin {
+
+            /**
+             * Rapid OCR plugin variant. "v3" and "v6" are accepted aliases for
+             * "pp-ocrv3" and "pp-ocrv6".
+             */
+            variant?: 'v3' | 'v6' | 'pp-ocrv3' | 'pp-ocrv6' | string;
+
+            /**
+             * Detection max side size.
+             * @default 1024
+             */
+            maxSideLen?: number;
+
+            /**
+             * Compatibility alias for maxSideLen.
+             * @default 0
+             */
+            detLongSize?: number;
+
+            /**
+             * Box score threshold.
+             * @default 0.5
+             */
+            boxScoreThresh?: number;
+
+            /**
+             * Compatibility alias for boxScoreThresh.
+             * @default 0.5
+             */
+            scoreThreshold?: number;
+
+            /**
+             * Pass the raw bitmap to the official plugin when supported.
+             * @default true
+             */
+            useRaw?: boolean;
+
+            /** Compatibility alias for useRaw. */
+            raw?: boolean;
+
+            /**
+             * Encoded image quality passed through plugin extras when positive.
+             * @default -1
+             */
+            imageQuality?: number;
+
+            /**
+             * Encoded image format passed through plugin extras when non-empty.
+             * @default ''
+             */
+            imageFormat?: Images.Format | string;
+
+        }
+
+        interface DetectOptionsPaddle extends DetectOptionsPlugin {
+
+            /**
+             * Paddle OCR plugin variant.
+             */
+            variant?: 'v3' | 'v4' | 'v5' | 'v6' | string;
 
             /**
              * 是否使用轻量化模型.
