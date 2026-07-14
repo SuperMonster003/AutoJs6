@@ -586,8 +586,13 @@ open class DrawerFragment : Fragment() {
                 override fun refreshSubtitle(aimState: Boolean) {
                     val oldSubtitle = mKeepScreenOnWhenInForegroundItem.subtitle
                     val aimSubtitle = if (ViewUtils.isKeepScreenOnWhenInForegroundDisabled) null else {
-                        val i = resources.getStringArray(R.array.keys_keep_screen_on_when_in_foreground).indexOf(Pref.keyKeepScreenOnWhenInForeground)
-                        resources.getStringArray(R.array.values_keep_screen_on_when_in_foreground)[i]
+                        val keys = resources.getStringArray(R.array.keys_keep_screen_on_when_in_foreground)
+                        val i = keys.indexOf(Pref.keyKeepScreenOnWhenInForeground)
+                        if (i in keys.indices) {
+                            resources.getStringArray(R.array.values_keep_screen_on_when_in_foreground)[i]
+                        } else {
+                            null
+                        }
                     }
                     if (mKeepScreenOnWhenInForegroundItem.subtitle != aimSubtitle) {
                         mKeepScreenOnWhenInForegroundItem.subtitle = aimSubtitle
