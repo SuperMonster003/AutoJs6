@@ -10,13 +10,11 @@ import org.autojs.autojs.util.AndroidUtils
 import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
-import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import kotlin.math.max
 
@@ -25,19 +23,13 @@ class PluginIndexRepository {
 
     companion object {
         private const val TAG = "PluginIndexRepository"
-        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v6.json"
+        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v7.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
-        private const val APK_BUILDER_TEMPLATE_REPO = "AutoJs6-Plugin-APK-Builder-Template"
         private const val OFFICIAL_REPO_PREFIX = "AutoJs6-Plugin-"
         private const val THIRD_PARTY_OWNER = "SuperMonster002"
         private const val THIRD_PARTY_REPO = "Auto.js-SDK-Plugins-Garage"
         private const val THIRD_PARTY_BRANCH = "main"
-        private const val APK_BUILDER_TEMPLATE_PACKAGE = "org.autojs.plugin.apkbuilder.template"
-        private const val APK_BUILDER_TEMPLATE_IMPLEMENTATION_PACKAGE = "org.autojs.plugin.apkbuilder.template.impl"
-        private const val APK_BUILDER_TEMPLATE_ASSET_PREFIX = "autojs6-apk-builder-template"
-        private const val APK_BUILDER_TEMPLATE_BRANCH = "master"
-        private const val APK_BUILDER_TEMPLATE_ICON_PATH = "app/src/main/res/mipmap/ic_launcher.png"
 
         @Volatile
         private var apiRateLimitCooldownUntilMs: Long = 0L
@@ -72,11 +64,8 @@ class PluginIndexRepository {
                 memoryFetchedSources = parsed.fetchedSources
                 memoryLanguageTag = parsed.languageTag
             }
-        } ?: return@withContext filterBySource(buildBuiltInOfficialEntries(), enabledSources)
-        return@withContext filterBySource(
-            appendBuiltInOfficialEntries(context, cacheSnapshot.entries),
-            enabledSources,
-        )
+        } ?: return@withContext emptyList()
+        return@withContext filterBySource(cacheSnapshot.entries, enabledSources)
     }
 
     suspend fun fetchOnlineIndex(
@@ -109,11 +98,11 @@ class PluginIndexRepository {
                 val missingSources = enabledSources - cachedFetchedSources
                 val hasOfficialAbiGaps = hasOfficialAbiGaps(it, enabledSources)
                 if (missingSources.isEmpty() && !hasOfficialAbiGaps && !hasLanguageMismatch) {
-                    return@withContext filterBySource(appendBuiltInOfficialEntries(context, it), enabledSources)
+                    return@withContext filterBySource(it, enabledSources)
                 }
                 if (missingSources.isEmpty() && hasOfficialAbiGaps && !hasLanguageMismatch && now - lastNetworkFetchAttemptMs < 60_000L) {
                     Log.i(TAG, "Cache has official ABI gaps, but refresh attempted recently. Use cache.")
-                    return@withContext filterBySource(appendBuiltInOfficialEntries(context, it), enabledSources)
+                    return@withContext filterBySource(it, enabledSources)
                 }
                 Log.i(TAG, "Cache missing sources $missingSources, try online fetch once.")
                 if (missingSources.isEmpty() && hasOfficialAbiGaps) {
@@ -127,7 +116,7 @@ class PluginIndexRepository {
 
         if (forceRefresh && cachedAll != null && now - lastNetworkFetchAttemptMs < 15_000L) {
             Log.i(TAG, "Skip too-frequent force refresh (<15s), use cache.")
-            return@withContext filterBySource(appendBuiltInOfficialEntries(context, cachedAll), enabledSources)
+            return@withContext filterBySource(cachedAll, enabledSources)
         }
 
         if (enabledSources.isEmpty()) {
@@ -153,7 +142,7 @@ class PluginIndexRepository {
             val entries = stabilizeEntriesWithCache(
                 fresh = entriesFresh,
                 cached = cachedBySource[PluginIndexSource.OFFICIAL].orEmpty(),
-            ).let { appendBuiltInOfficialEntries(context, it, resolveRemoteRelease = true) }
+            )
             freshBySource[PluginIndexSource.OFFICIAL] = entries
         }
 
@@ -194,258 +183,7 @@ class PluginIndexRepository {
         writeCache(cacheFile, finalAll, finalFetchedSources, finalLanguageTag)
 
         val fallback = memoryCache ?: cachedAll.orEmpty()
-        return@withContext filterBySource(appendBuiltInOfficialEntries(context, fallback), enabledSources)
-    }
-
-    private fun appendBuiltInOfficialEntries(
-        context: Context,
-        entries: List<PluginIndexEntry>,
-        resolveRemoteRelease: Boolean = false,
-    ): List<PluginIndexEntry> {
-        val apkBuilderTemplateReleaseResolution = if (resolveRemoteRelease) {
-            resolveApkBuilderTemplateReleaseFromGitHub(context)
-        } else {
-            null
-        }
-        val builtInEntries = buildBuiltInOfficialEntries(apkBuilderTemplateReleaseResolution)
-        if (builtInEntries.isEmpty()) return entries
-
-        val existingByPackage = entries
-            .filter { it.source == PluginIndexSource.OFFICIAL }
-            .associateBy { it.packageName }
-        val mergedBuiltInEntries = builtInEntries.map { entry ->
-            val existing = existingByPackage[entry.packageName]
-            entry.copy(
-                iconUrl = entry.iconUrl ?: existing?.iconUrl,
-                nightIconUrl = entry.nightIconUrl ?: existing?.nightIconUrl,
-                releases = resolveBuiltInReleases(
-                    entry = entry,
-                    existing = existing,
-                    apkBuilderTemplateReleaseResolution = apkBuilderTemplateReleaseResolution,
-                ),
-            )
-        }
-        val builtInPackages = builtInEntries.mapTo(linkedSetOf()) { it.packageName }
-        return mergedBuiltInEntries + entries.filterNot {
-            it.source == PluginIndexSource.OFFICIAL && isBuiltInOfficialEntryDuplicate(it, builtInPackages)
-        }
-    }
-
-    private fun buildBuiltInOfficialEntries(
-        apkBuilderTemplateReleaseResolution: ApkBuilderTemplateReleaseResolution? = null,
-    ): List<PluginIndexEntry> {
-        val apkBuilderTemplateRelease = (apkBuilderTemplateReleaseResolution as? ApkBuilderTemplateReleaseResolution.Found)?.release
-        return listOf(buildApkBuilderTemplateIndexEntry(apkBuilderTemplateRelease))
-    }
-
-    private fun buildApkBuilderTemplateIndexEntry(
-        release: PluginIndexRelease? = null,
-    ): PluginIndexEntry {
-        return PluginIndexEntry(
-            packageName = APK_BUILDER_TEMPLATE_PACKAGE,
-            iconUrl = rawGithubUrl(
-                owner = OFFICIAL_OWNER,
-                repo = APK_BUILDER_TEMPLATE_REPO,
-                branch = APK_BUILDER_TEMPLATE_BRANCH,
-                path = APK_BUILDER_TEMPLATE_ICON_PATH,
-            ).toUri(),
-            title = "APK Builder Template",
-            description = "Provides the template APK used by AutoJs6 APK Builder.",
-            instructionHardCoded = "Install and enable this plugin when AutoJs6 is built without a built-in template.apk.",
-            author = "SuperMonster003",
-            engine = ApkBuilderTemplatePluginIds.ENGINE,
-            variant = ApkBuilderTemplatePluginIds.VARIANT_INRT_UNIVERSAL,
-            engineId = ApkBuilderTemplatePluginIds.ID,
-            releases = listOfNotNull(release),
-            supportedAbis = emptyList(),
-            tags = listOf("official", "apk-builder", "template"),
-            requiresHostVersion = BuildConfig.VERSION_CODE.toLong(),
-            source = PluginIndexSource.OFFICIAL,
-        )
-    }
-
-    private fun resolveBuiltInReleases(
-        entry: PluginIndexEntry,
-        existing: PluginIndexEntry?,
-        apkBuilderTemplateReleaseResolution: ApkBuilderTemplateReleaseResolution?,
-    ): List<PluginIndexRelease> {
-        if (entry.packageName != APK_BUILDER_TEMPLATE_PACKAGE) {
-            return entry.releases.ifEmpty { existing?.releases.orEmpty() }
-        }
-        return when (apkBuilderTemplateReleaseResolution) {
-            is ApkBuilderTemplateReleaseResolution.Found -> listOf(apkBuilderTemplateReleaseResolution.release)
-            ApkBuilderTemplateReleaseResolution.NoAvailableRelease -> emptyList()
-            ApkBuilderTemplateReleaseResolution.Unavailable, null -> existing?.releases.orEmpty()
-        }
-    }
-
-    private fun resolveApkBuilderTemplateReleaseFromGitHub(context: Context): ApkBuilderTemplateReleaseResolution {
-        val versionInfo = resolveApkBuilderTemplateVersionInfo(context)
-            ?: return ApkBuilderTemplateReleaseResolution.Unavailable
-
-        val exact = getGitHubReleaseJson(
-            context = context,
-            url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/tags/" +
-                    encodeUrlPathSegment(apkBuilderTemplateReleaseTagName(versionInfo.versionName)),
-        )
-
-        if (exact is GitHubReleaseJsonResult.Found) {
-            return buildApkBuilderTemplateReleaseFromJson(exact.json, versionInfo)
-        }
-
-        val latest = getGitHubReleaseJson(
-            context = context,
-            url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO/releases/latest",
-        )
-
-        if (latest is GitHubReleaseJsonResult.Found) {
-            if (isReleaseJsonForVersion(latest.json, versionInfo.versionName)) {
-                return buildApkBuilderTemplateReleaseFromJson(latest.json, versionInfo)
-            }
-            return when (exact) {
-                GitHubReleaseJsonResult.NotFound -> ApkBuilderTemplateReleaseResolution.NoAvailableRelease
-                GitHubReleaseJsonResult.Unavailable -> ApkBuilderTemplateReleaseResolution.Unavailable
-                is GitHubReleaseJsonResult.Found -> ApkBuilderTemplateReleaseResolution.Unavailable
-            }
-        }
-
-        return when {
-            exact == GitHubReleaseJsonResult.NotFound && latest == GitHubReleaseJsonResult.NotFound ->
-                ApkBuilderTemplateReleaseResolution.NoAvailableRelease
-            else -> ApkBuilderTemplateReleaseResolution.Unavailable
-        }
-    }
-
-    private fun resolveApkBuilderTemplateVersionInfo(context: Context): ApkBuilderTemplateVersionInfo? {
-        val defaultBranch = runCatching {
-            getJsonObject(
-                context = context,
-                url = "https://api.github.com/repos/$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO",
-            ).optString("default_branch").takeIf { it.isNotBlank() }
-        }.getOrNull()
-
-        val branchCandidates = listOfNotNull(defaultBranch, "master", "main").distinct()
-        branchCandidates.forEach { branch ->
-            val content = runCatching {
-                getText(
-                    context = context,
-                    url = rawGithubUrl(
-                        owner = OFFICIAL_OWNER,
-                        repo = APK_BUILDER_TEMPLATE_REPO,
-                        branch = branch,
-                        path = "version.properties",
-                    ),
-                )
-            }.getOrNull()
-            parseApkBuilderTemplateVersionInfo(content)?.let { return it }
-        }
-        return null
-    }
-
-    private fun parseApkBuilderTemplateVersionInfo(content: String?): ApkBuilderTemplateVersionInfo? {
-        val versionMap = parseProperties(content.orEmpty())
-        val versionName = versionMap["VERSION_NAME"]?.takeIf { it.isNotBlank() } ?: return null
-        val versionCode = parseVersionCode(versionMap)?.takeIf { it > 0L } ?: return null
-        return ApkBuilderTemplateVersionInfo(
-            versionName = versionName,
-            versionCode = versionCode,
-        )
-    }
-
-    private fun buildApkBuilderTemplateReleaseFromJson(
-        releaseJson: JSONObject,
-        versionInfo: ApkBuilderTemplateVersionInfo,
-    ): ApkBuilderTemplateReleaseResolution {
-        val assetNames = listOf(versionInfo.versionName, BuildConfig.VERSION_NAME)
-            .distinct()
-            .map(::apkBuilderTemplateReleaseAssetName)
-        val assets = parseReleaseAssets(releaseJson.optJSONArray("assets"))
-        val selectedAsset = assets.firstOrNull { asset ->
-            assetNames.any { expected -> asset.name.equals(expected, ignoreCase = true) }
-        }
-            ?: assets.firstOrNull {
-                it.name.startsWith(APK_BUILDER_TEMPLATE_ASSET_PREFIX, ignoreCase = true) &&
-                        it.name.endsWith(".apk", ignoreCase = true)
-            }
-            ?: return ApkBuilderTemplateReleaseResolution.NoAvailableRelease
-        val publishedDate = releaseJson.optString("published_at").takeIf { it.length >= 10 }?.substring(0, 10)
-        val releaseBody = releaseJson.optString("body").takeIf { it.isNotBlank() }
-
-        return ApkBuilderTemplateReleaseResolution.Found(
-            PluginIndexRelease(
-                versionName = versionInfo.versionName,
-                versionCode = versionInfo.versionCode,
-                versionDate = publishedDate,
-                apkUrl = selectedAsset.downloadUrl,
-                apkSha256 = selectedAsset.sha256,
-                apkSizeBytes = selectedAsset.size,
-                changelogUrl = null,
-                changelogText = releaseBody,
-            ),
-        )
-    }
-
-    private fun apkBuilderTemplateReleaseAssetName(versionName: String): String {
-        val version = normalizeApkBuilderTemplateVersionToken(versionName)
-        return "$APK_BUILDER_TEMPLATE_ASSET_PREFIX-v$version-universal.apk"
-    }
-
-    private fun apkBuilderTemplateReleaseTagName(versionName: String): String {
-        return "v${normalizeApkBuilderTemplateVersionToken(versionName)}"
-    }
-
-    private fun normalizeApkBuilderTemplateVersionToken(value: String): String {
-        return value
-            .trim()
-            .removePrefix("v")
-            .removePrefix("V")
-            .replace(Regex("""[\s_]+"""), "-")
-            .lowercase()
-    }
-
-    private fun isReleaseJsonForVersion(json: JSONObject, versionName: String): Boolean {
-        val expected = normalizeApkBuilderTemplateVersionToken(versionName)
-        val tagVersion = extractVersionToken(json.optString("tag_name"))
-            ?.let(::normalizeApkBuilderTemplateVersionToken)
-        val nameVersion = extractVersionToken(json.optString("name").substringBefore(" @"))
-            ?.let(::normalizeApkBuilderTemplateVersionToken)
-        return tagVersion == expected || nameVersion == expected
-    }
-
-    private fun extractVersionToken(value: String): String? {
-        return Regex("""[vV]?\d+(?:\.\d+){1,4}(?:[-+._\s][A-Za-z0-9]+)*""")
-            .find(value)
-            ?.value
-            ?.trim()
-            ?.takeIf { it.isNotBlank() }
-    }
-
-    private fun isBuiltInOfficialEntryDuplicate(
-        entry: PluginIndexEntry,
-        builtInPackages: Set<String>,
-    ): Boolean {
-        if (entry.packageName in builtInPackages) return true
-        return isApkBuilderTemplateAutoScannedEntry(entry)
-    }
-
-    private fun isApkBuilderTemplateAutoScannedEntry(entry: PluginIndexEntry): Boolean {
-        if (entry.packageName == APK_BUILDER_TEMPLATE_IMPLEMENTATION_PACKAGE) return true
-        if (entry.packageName == "unknown.${APK_BUILDER_TEMPLATE_REPO.lowercase()}") return true
-
-        val repoMarker = "$OFFICIAL_OWNER/$APK_BUILDER_TEMPLATE_REPO"
-        val entryUrls = buildList {
-            entry.iconUrl?.toString()?.let(::add)
-            entry.nightIconUrl?.toString()?.let(::add)
-            entry.releases.forEach { release ->
-                release.apkUrl?.let(::add)
-                release.changelogUrl?.let(::add)
-            }
-        }
-        return entryUrls.any { it.contains(repoMarker, ignoreCase = true) }
-    }
-
-    private fun encodeUrlPathSegment(value: String): String {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8.name()).replace("+", "%20")
+        return@withContext filterBySource(fallback, enabledSources)
     }
 
     private fun filterBySource(
@@ -534,7 +272,6 @@ class PluginIndexRepository {
 
             val name = repo.optString("name").trim()
             if (!name.startsWith(OFFICIAL_REPO_PREFIX)) continue
-            if (name == APK_BUILDER_TEMPLATE_REPO) continue
 
             val branch = repo.optString("default_branch").takeIf { it.isNotBlank() } ?: "main"
             val owner = repo.optJSONObject("owner")?.optString("login")?.takeIf { it.isNotBlank() } ?: OFFICIAL_OWNER
@@ -670,6 +407,24 @@ class PluginIndexRepository {
             treePaths = repoTreePaths,
         ) ?: unknown
 
+        val instructionHardCoded = resolveOfficialInstructionHardCoded(
+            context = context,
+            owner = plugin.owner,
+            repo = plugin.repo,
+            branch = plugin.branch,
+            languageTag = languageTag,
+            treePaths = repoTreePaths,
+        )?.truncateForSafeBinder()
+        val instructionMarkdownPath = resolveOfficialInstructionMarkdownPath(languageTag, repoTreePaths)
+        val instructionMarkdownUrl = instructionMarkdownPath?.let {
+            rawGithubUrl(
+                owner = plugin.owner,
+                repo = plugin.repo,
+                branch = plugin.branch,
+                path = it,
+            )
+        }
+
         val manifestAuthor = parseManifestAuthor(manifestText)
         val author = resolveStringResourceReference(
             context = context,
@@ -717,6 +472,8 @@ class PluginIndexRepository {
             nightIconUrl = nightIconUrl,
             title = title,
             description = description,
+            instructionHardCoded = instructionHardCoded,
+            instructionMarkdownUrl = instructionMarkdownUrl,
             author = author,
             collaborators = emptyList(),
             releases = listOf(release),
@@ -1298,6 +1055,51 @@ class PluginIndexRepository {
         return null
     }
 
+    private fun resolveOfficialInstructionHardCoded(
+        context: Context,
+        owner: String,
+        repo: String,
+        branch: String,
+        languageTag: String,
+        treePaths: Set<String>,
+    ): String? {
+        val languageDirs = languageTagToAndroidResourceDirs(languageTag)
+        val candidatePaths = languageDirs.map { "app/src/main/res/$it/strings.xml" }
+
+        candidatePaths.forEach { path ->
+            if (treePaths.isNotEmpty() && path !in treePaths) return@forEach
+            val text = runCatching {
+                getText(
+                    context = context,
+                    url = rawGithubUrl(
+                        owner = owner,
+                        repo = repo,
+                        branch = branch,
+                        path = path,
+                    ),
+                )
+            }.getOrNull() ?: return@forEach
+
+            parseStringResource(text, "plugin_instruction")?.let { return it }
+        }
+        return null
+    }
+
+    private fun resolveOfficialInstructionMarkdownPath(
+        languageTag: String,
+        treePaths: Set<String>,
+    ): String? {
+        val rawDirs = languageTagToAndroidResourceDirs(languageTag)
+            .map { it.replaceFirst("values", "raw") }
+            .toMutableList()
+            .apply { add("raw") }
+            .distinct()
+        return rawDirs.firstNotNullOfOrNull { dir ->
+            val path = "app/src/main/res/$dir/plugin_instruction.md"
+            path.takeIf { it in treePaths }
+        }
+    }
+
     private fun resolveStringResourceReference(
         context: Context,
         owner: String,
@@ -1477,19 +1279,6 @@ class PluginIndexRepository {
 
     private fun getJsonArray(context: Context, url: String): JSONArray =
         JSONArray(getText(context, url, "application/json"))
-
-    private fun getGitHubReleaseJson(context: Context, url: String): GitHubReleaseJsonResult {
-        return try {
-            GitHubReleaseJsonResult.Found(getJsonObject(context, url))
-        } catch (e: HttpStatusException) {
-            when (e.code) {
-                HttpURLConnection.HTTP_NOT_FOUND -> GitHubReleaseJsonResult.NotFound
-                else -> GitHubReleaseJsonResult.Unavailable
-            }
-        } catch (_: Throwable) {
-            GitHubReleaseJsonResult.Unavailable
-        }
-    }
 
     private fun resolveCacheFile(context: Context): File {
         val persistentDir = File(context.filesDir, "plugin_center").apply { mkdirs() }
@@ -1761,23 +1550,6 @@ class PluginIndexRepository {
         val size: Long,
         val sha256: String?,
     )
-
-    private data class ApkBuilderTemplateVersionInfo(
-        val versionName: String,
-        val versionCode: Long,
-    )
-
-    private sealed class ApkBuilderTemplateReleaseResolution {
-        data class Found(val release: PluginIndexRelease) : ApkBuilderTemplateReleaseResolution()
-        object NoAvailableRelease : ApkBuilderTemplateReleaseResolution()
-        object Unavailable : ApkBuilderTemplateReleaseResolution()
-    }
-
-    private sealed class GitHubReleaseJsonResult {
-        data class Found(val json: JSONObject) : GitHubReleaseJsonResult()
-        object NotFound : GitHubReleaseJsonResult()
-        object Unavailable : GitHubReleaseJsonResult()
-    }
 
     private class HttpStatusException(
         val code: Int,

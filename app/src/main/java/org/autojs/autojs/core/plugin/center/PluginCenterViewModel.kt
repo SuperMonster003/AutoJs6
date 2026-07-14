@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.autojs.autojs.apkbuilder.template.ApkBuilderTemplatePluginHost
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
@@ -20,6 +21,7 @@ import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
 import java.util.Locale
 
 /**
@@ -787,6 +789,7 @@ class PluginCenterViewModel : ViewModel() {
             "pinyin" to PinyinPluginHost.ACTION_PINYIN,
             "pinyin4j" to Pinyin4jPluginHost.ACTION_PINYIN4J,
             "mediainfo" to MediainfoPluginHost.ACTION_MEDIAINFO,
+            ApkBuilderTemplatePluginIds.ENGINE to ApkBuilderTemplatePluginHost.ACTION_APK_BUILDER,
         )
 
         fun serviceActionFromEngine(engine: String?): String? {
