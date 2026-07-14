@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -64,6 +66,7 @@ class PluginCenterViewModel : ViewModel() {
     val fatalError: SharedFlow<String> = _fatalError
 
     private var loadGeneration: Long = 0L
+    private var loadJob: Job? = null
 
     /**
      * Load plugin list.
@@ -86,7 +89,8 @@ class PluginCenterViewModel : ViewModel() {
     ) {
         Log.d(TAG, "load: forceRefreshIndex = $forceRefreshIndex, sourceScope = $sourceScope")
         val generation = ++loadGeneration
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             fun isLatestLoad() = generation == loadGeneration
             fun updateLatestItems(next: List<PluginCenterItem>) {
                 if (isLatestLoad()) {
@@ -109,6 +113,7 @@ class PluginCenterViewModel : ViewModel() {
             val installed = runCatching {
                 installedRepo.discoverInstalled(context)
             }.onFailure { e ->
+                if (e is CancellationException) throw e
                 if (!isLatestLoad()) return@onFailure
                 // Treat "local discovery" failure as a serious exception.
                 // zh-CN: 将 "本地发现" 失败视为严重异常.
@@ -130,6 +135,7 @@ class PluginCenterViewModel : ViewModel() {
             val legacyInstalled = runCatching {
                 legacyRepo.discoverInstalled(context)
             }.onFailure { e ->
+                if (e is CancellationException) throw e
                 Log.w(TAG, "legacy discovery failed: ${e.message}")
             }.getOrElse { emptyList() }
             // Render list using "local only".
@@ -220,6 +226,7 @@ class PluginCenterViewModel : ViewModel() {
                     enabledSources = enabledSources,
                 )
             }.onFailure {
+                if (it is CancellationException) throw it
                 Log.w(TAG, "getCachedIndex failed: ${it.message}")
             }.getOrElse { emptyList() }
 
@@ -237,6 +244,7 @@ class PluginCenterViewModel : ViewModel() {
                     enabledSources = enabledSources,
                 )
             }.onFailure {
+                if (it is CancellationException) throw it
                 // Index fetch exception is not fatal, just log it.
                 Log.w(TAG, "fetchOnlineIndex failed: ${it.message}")
             }.getOrElse { cachedIndexEntries }
@@ -249,6 +257,11 @@ class PluginCenterViewModel : ViewModel() {
             // zh-CN: 返回页面时, 若详情对话框正在显示则刷新.
             PluginInfoDialogManager.refreshIfShowing(context, _items.value)
         }
+    }
+
+    override fun onCleared() {
+        loadJob?.cancel()
+        super.onCleared()
     }
 
     fun setEnabled(context: Context, packageName: String, enabled: Boolean, error: PluginError? = null) {

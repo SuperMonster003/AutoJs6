@@ -283,6 +283,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
                     viewPagerFragment.fab = mFab
                     if (pos == mViewPager.currentItem) {
                         viewPagerFragment.onPageShow()
+                        viewPagerFragment.onPageSettled()
                     }
                 }
             }
@@ -299,6 +300,11 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
                     if (mSearchViewItem?.isExpanded == true) {
                         mSearchViewItem?.collapse()
                     }
+                }
+
+                override fun onPageScrollStateChanged(state: Int) {
+                    if (state != ViewPager.SCROLL_STATE_IDLE) return
+                    (mPagerAdapter.getStoredFragment(mViewPager.currentItem) as? ViewPagerFragment)?.onPageSettled()
                 }
             })
         }

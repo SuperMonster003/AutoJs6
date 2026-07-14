@@ -49,6 +49,8 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
 
     private var mFloatingActionMenu: PluginFloatingActionMenu? = null
     private var mIsCurrentPagePlugins = false
+    private var mPluginCenterInitJob: Job? = null
+    private var mPluginCenterCreationRequested = false
     private var mNightModeRefreshJob: Job? = null
 
     private val mNightModePrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -76,16 +78,14 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (childFragmentManager.findFragmentByTag(TAG_PLUGIN_CENTER) == null) {
-            childFragmentManager.commit {
-                replace(R.id.plugin_center_container, PluginCenterFragment(), TAG_PLUGIN_CENTER)
-            }
-        }
-
         (activity as? MainActivity)?.apply {
             val tabLayout: TabLayout = findViewById(R.id.tab)
             val pluginsTag = tabLayout.getTabAt(pluginsIndex)
             pluginsTag?.view?.let { setTabViewClickListeners(it) }
+        }
+
+        if (mIsCurrentPagePlugins) {
+            schedulePluginCenterInitialization()
         }
     }
 
@@ -144,13 +144,21 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
     override fun onPageShow() {
         super.onPageShow()
         mIsCurrentPagePlugins = true
-        schedulePluginCenterNightModeRefresh()
     }
 
     override fun onPageHide() {
         super.onPageHide()
         mFloatingActionMenu?.let { if (it.isExpanded) it.collapse() }
         mIsCurrentPagePlugins = false
+        cancelPluginCenterInitialization()
+        cancelPluginCenterNightModeRefresh()
+    }
+
+    override fun onPageSettled() {
+        super.onPageSettled()
+        if (mIsCurrentPagePlugins) {
+            schedulePluginCenterInitialization()
+        }
     }
 
     @Subscribe
@@ -183,18 +191,63 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
     override fun onStop() {
         super.onStop()
         Pref.get().unregisterOnSharedPreferenceChangeListener(mNightModePrefListener)
-        mNightModeRefreshJob?.cancel()
-        mNightModeRefreshJob = null
+        cancelPluginCenterInitialization()
+        cancelPluginCenterNightModeRefresh()
+    }
+
+    private fun schedulePluginCenterInitialization() {
+        if (!mIsCurrentPagePlugins || !isAdded || view == null) return
+        mPluginCenterInitJob?.cancel()
+        mPluginCenterInitJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(PLUGIN_CENTER_INIT_DELAY_MS)
+            if (!mIsCurrentPagePlugins || !isAdded || view == null) return@launch
+            when (ensurePluginCenterFragment()) {
+                PluginCenterEnsureResult.EXISTS -> schedulePluginCenterNightModeRefresh()
+                PluginCenterEnsureResult.CREATED,
+                PluginCenterEnsureResult.PENDING,
+                    -> Unit
+            }
+        }
+    }
+
+    private fun ensurePluginCenterFragment(): PluginCenterEnsureResult {
+        if (findPluginCenterFragment() != null) return PluginCenterEnsureResult.EXISTS
+        if (mPluginCenterCreationRequested) return PluginCenterEnsureResult.PENDING
+
+        mPluginCenterCreationRequested = true
+        childFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.plugin_center_container, PluginCenterFragment(), TAG_PLUGIN_CENTER)
+            runOnCommit {
+                mPluginCenterCreationRequested = false
+            }
+        }
+        return PluginCenterEnsureResult.CREATED
+    }
+
+    private fun findPluginCenterFragment(): PluginCenterFragment? {
+        return childFragmentManager.findFragmentByTag(TAG_PLUGIN_CENTER) as? PluginCenterFragment
+    }
+
+    private fun cancelPluginCenterInitialization() {
+        mPluginCenterInitJob?.cancel()
+        mPluginCenterInitJob = null
     }
 
     private fun schedulePluginCenterNightModeRefresh() {
-        if (!isAdded || view == null) return
+        if (!mIsCurrentPagePlugins || !isAdded || view == null) return
         mNightModeRefreshJob?.cancel()
         mNightModeRefreshJob = viewLifecycleOwner.lifecycleScope.launch {
             delay(PLUGIN_CENTER_NIGHT_MODE_REFRESH_DELAY_MS)
-            val child = childFragmentManager.findFragmentByTag(TAG_PLUGIN_CENTER) as? PluginCenterFragment ?: return@launch
-            child.refreshPluginIconsForNightModeChange(force = true)
+            if (!mIsCurrentPagePlugins || !isAdded || view == null) return@launch
+            val child = findPluginCenterFragment() ?: return@launch
+            child.refreshPluginIconsForNightModeChange(force = false)
         }
+    }
+
+    private fun cancelPluginCenterNightModeRefresh() {
+        mNightModeRefreshJob?.cancel()
+        mNightModeRefreshJob = null
     }
 
     override fun onDestroy() {
@@ -204,8 +257,8 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mNightModeRefreshJob?.cancel()
-        mNightModeRefreshJob = null
+        cancelPluginCenterInitialization()
+        cancelPluginCenterNightModeRefresh()
         mFloatingActionMenu = null
     }
 
@@ -235,7 +288,14 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
 
     companion object {
         private const val TAG_PLUGIN_CENTER = "plugin_center"
+        private const val PLUGIN_CENTER_INIT_DELAY_MS = 80L
         private const val PLUGIN_CENTER_NIGHT_MODE_REFRESH_DELAY_MS = 180L
+    }
+
+    private enum class PluginCenterEnsureResult {
+        CREATED,
+        EXISTS,
+        PENDING,
     }
 
 }

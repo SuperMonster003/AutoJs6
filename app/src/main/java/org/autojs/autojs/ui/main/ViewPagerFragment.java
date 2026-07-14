@@ -64,6 +64,10 @@ public abstract class ViewPagerFragment extends Fragment implements BackPressedH
         mShown = false;
     }
 
+    public void onPageSettled() {
+        /* For subclasses that need to defer heavy work until ViewPager scrolling is idle. */
+    }
+
     public boolean isShown() {
         return mShown;
     }

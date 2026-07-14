@@ -284,7 +284,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         renderList()
     }
 
-    fun refreshPluginIconsForNightModeChange(force: Boolean = true) {
+    fun refreshPluginIconsForNightModeChange(force: Boolean = false) {
         scheduleNightModeIconRefresh(force)
     }
 
