@@ -64,6 +64,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     private var firstListRenderStartedAt: Long = 0L
     private var firstListRevealJob: Job? = null
     private var nightModeRefreshJob: Job? = null
+    private var swipeRefreshIndicatorJob: Job? = null
 
     // Latest full list from ViewModel (unfiltered).
     // zh-CN: 来自 ViewModel 的最新完整列表 (未过滤).
@@ -228,6 +229,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         // Pull-to-refresh: force refresh index every time (still respects backoff window).
         // zh-CN: 下拉刷新: 每次都强制刷新索引 (仍遵守退避窗口).
         binding.pluginCenterSwipeRefresh.setOnRefreshListener {
+            scheduleSwipeRefreshIndicatorTimeout()
             vm.load(contextRef, forceRefreshIndex = true, sourceScope = sourceScope)
         }
 
@@ -241,6 +243,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             vm.items.collectLatest { list ->
                 latestFullItems = list
                 renderList()
+                if (list.isNotEmpty() && binding.pluginCenterSwipeRefresh.isRefreshing) {
+                    stopSwipeRefreshIndicator()
+                }
             }
         }
 
@@ -250,7 +255,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             vm.indexLoaded.collectLatest { loaded ->
                 latestIndexLoaded = loaded
                 if (loaded) {
-                    binding.pluginCenterSwipeRefresh.isRefreshing = false
+                    stopSwipeRefreshIndicator()
                 }
                 updateEmptyHint(
                     filteredItems = adapter.items(),
@@ -512,6 +517,25 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                 .alpha(1f)
                 .setDuration(120L)
                 .start()
+        }
+    }
+
+    private fun scheduleSwipeRefreshIndicatorTimeout() {
+        binding.pluginCenterSwipeRefresh.isRefreshing = true
+        swipeRefreshIndicatorJob?.cancel()
+        swipeRefreshIndicatorJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(SWIPE_REFRESH_MAX_VISIBLE_MS)
+            if (!isAdded || _binding == null) return@launch
+            binding.pluginCenterSwipeRefresh.isRefreshing = false
+            swipeRefreshIndicatorJob = null
+        }
+    }
+
+    private fun stopSwipeRefreshIndicator() {
+        swipeRefreshIndicatorJob?.cancel()
+        swipeRefreshIndicatorJob = null
+        if (_binding != null) {
+            binding.pluginCenterSwipeRefresh.isRefreshing = false
         }
     }
 
@@ -1027,6 +1051,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         pkgChangeRefreshJob = null
         nightModeRefreshJob?.cancel()
         nightModeRefreshJob = null
+        stopSwipeRefreshIndicator()
         pkgReceiver?.let { runCatching { requireContext().unregisterReceiver(it) } }
         pkgReceiver = null
     }
@@ -1073,6 +1098,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         nightModeRefreshJob = null
         firstListRevealJob?.cancel()
         firstListRevealJob = null
+        swipeRefreshIndicatorJob?.cancel()
+        swipeRefreshIndicatorJob = null
         isFirstListRevealed = false
         latestIndexLoaded = false
         firstListRenderStartedAt = 0L
@@ -1130,6 +1157,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         private const val ARG_SOURCE_SCOPE = "arg_source_scope"
         private const val FIRST_LIST_REVEAL_TIMEOUT_MS = 1000L
         private const val NIGHT_MODE_ICON_REFRESH_DELAY_MS = 120L
+        private const val SWIPE_REFRESH_MAX_VISIBLE_MS = 8_000L
         private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
         private val BARCODE_SERVICE_ENGINES = setOf("mlkit-barcode")
         private val AUTO_ENABLE_RETRYABLE_ERROR_CODES = setOf(
