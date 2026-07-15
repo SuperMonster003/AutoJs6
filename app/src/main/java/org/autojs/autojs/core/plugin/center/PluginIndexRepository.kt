@@ -24,7 +24,7 @@ class PluginIndexRepository {
 
     companion object {
         private const val TAG = "PluginIndexRepository"
-        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v7.json"
+        private const val CACHE_FILE_NAME = "autojs6_plugin_index_v8.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
         private const val OFFICIAL_REPO_PREFIX = "AutoJs6-Plugin-"
@@ -69,6 +69,7 @@ class PluginIndexRepository {
         if (enabledSources.isEmpty()) {
             return@withContext emptyList()
         }
+        val currentLanguageTag = normalizeLanguageTag(Language.getPrefLanguage().getLocalCompatibleLanguageTag()) ?: "en"
         val cacheFile = resolveCacheFile(context)
         val cacheSnapshot = when {
             memoryCache != null && memoryFetchedSources != null -> CacheSnapshot(
@@ -82,6 +83,10 @@ class PluginIndexRepository {
                 memoryLanguageTag = parsed.languageTag
             }
         } ?: return@withContext emptyList()
+        if (!isSameLanguageTag(cacheSnapshot.languageTag, currentLanguageTag)) {
+            Log.i(TAG, "Plugin index cache language changed: ${cacheSnapshot.languageTag} -> $currentLanguageTag, skip cached index.")
+            return@withContext emptyList()
+        }
         return@withContext filterBySource(cacheSnapshot.entries, enabledSources)
     }
 
@@ -335,6 +340,7 @@ class PluginIndexRepository {
         val publishedDate = releaseJson.optString("published_at").takeIf { it.length >= 10 }?.substring(0, 10)
         val releaseAuthor = releaseJson.optJSONObject("author")?.optString("login")?.takeIf { it.isNotBlank() }
         val releaseName = releaseJson.optString("name").substringBefore(" @").trim()
+        val releaseTag = releaseJson.optString("tag_name").takeIf { it.isNotBlank() }
 
         val versionProperties = runCatching {
             getText(
@@ -473,21 +479,37 @@ class PluginIndexRepository {
             ?: unknown
 
         val versionName = versionMap["VERSION_NAME"]?.takeIf { it.isNotBlank() }
-            ?: releaseJson.optString("tag_name").removePrefix("v").takeIf { it.isNotBlank() }
+            ?: releaseTag?.removePrefix("v")?.takeIf { it.isNotBlank() }
             ?: context.getString(R.string.text_unknown)
 
         val versionCode = parseVersionCode(versionMap)
             ?: 0L
 
-        val changelogPath = resolveOfficialChangelogPath(languageTag, repoTreePaths)
-        val changelogUrl = changelogPath?.let {
-            rawGithubUrl(
+        val releaseNotesPath = resolveOfficialReleaseNotesPath(languageTag, repoTreePaths)
+        val releaseHistoryPath = resolveOfficialReleaseHistoryPath(languageTag, repoTreePaths) ?: releaseNotesPath
+        val changelogUrl = releaseHistoryPath?.let {
+            githubBlobUrl(
                 owner = plugin.owner,
                 repo = plugin.repo,
                 branch = plugin.branch,
                 path = it,
+                anchor = githubMarkdownAnchorForVersion(versionName, releaseTag),
             )
         }
+        val changelogText = resolveOfficialReleaseNotesText(
+            context = context,
+            owner = plugin.owner,
+            repo = plugin.repo,
+            branch = plugin.branch,
+            releaseNotesPath = releaseNotesPath,
+            releaseHistoryPath = releaseHistoryPath,
+            versionName = versionName,
+            releaseTag = releaseTag,
+        ) ?: extractReleaseNotesFromMarkdown(
+            markdown = releaseBody,
+            versionName = versionName,
+            releaseTag = releaseTag,
+        ) ?: releaseBody
 
         val release = PluginIndexRelease(
             versionName = versionName,
@@ -497,7 +519,7 @@ class PluginIndexRepository {
             apkSha256 = selectedAsset?.sha256,
             apkSizeBytes = selectedAsset?.size,
             changelogUrl = changelogUrl,
-            changelogText = releaseBody,
+            changelogText = changelogText,
         )
 
         return PluginIndexEntry(
@@ -1171,18 +1193,184 @@ class PluginIndexRepository {
         return null
     }
 
-    private fun resolveOfficialChangelogPath(
+    private fun resolveOfficialReleaseNotesPath(
         languageTag: String,
         treePaths: Set<String>,
     ): String? {
-        val tagCandidates = languageTagToChangelogTags(languageTag)
+        val candidates = languageTagToAndroidChangelogTags(languageTag)
+            .map { "app/src/main/assets/doc/CHANGELOG-$it.md" } +
+                "app/src/main/assets/doc/CHANGELOG.md"
+        return selectFirstExistingPath(candidates, treePaths)
+    }
+
+    private fun resolveOfficialReleaseHistoryPath(
+        languageTag: String,
+        treePaths: Set<String>,
+    ): String? {
+        val historyTags = languageTagToRepositoryChangelogTags(languageTag)
+        val androidTags = languageTagToAndroidChangelogTags(languageTag)
+        val candidates = buildList {
+            historyTags.forEach { add(".changelog/CHANGELOG-$it.md") }
+            add(".changelog/CHANGELOG.md")
+            historyTags.forEach { add("CHANGELOG-$it.md") }
+            add("CHANGELOG.md")
+            androidTags.forEach { add("app/src/main/assets/doc/CHANGELOG-$it.md") }
+            add("app/src/main/assets/doc/CHANGELOG.md")
+        }
+        return selectFirstExistingPath(candidates, treePaths)
+    }
+
+    private fun selectFirstExistingPath(
+        candidates: List<String>,
+        treePaths: Set<String>,
+    ): String? {
+        val distinctCandidates = candidates.distinct()
         if (treePaths.isEmpty()) {
-            return tagCandidates.firstOrNull()?.let { "app/src/main/assets/doc/CHANGELOG-$it.md" }
+            return distinctCandidates.firstOrNull()
         }
-        return tagCandidates.firstNotNullOfOrNull { tag ->
-            val path = "app/src/main/assets/doc/CHANGELOG-$tag.md"
-            path.takeIf { it in treePaths }
+        return distinctCandidates.firstOrNull { it in treePaths }
+    }
+
+    private fun resolveOfficialReleaseNotesText(
+        context: Context,
+        owner: String,
+        repo: String,
+        branch: String,
+        releaseNotesPath: String?,
+        releaseHistoryPath: String?,
+        versionName: String,
+        releaseTag: String?,
+    ): String? {
+        val paths = listOfNotNull(releaseNotesPath, releaseHistoryPath).distinct()
+        paths.forEach { path ->
+            val markdown = runCatching {
+                getText(
+                    context = context,
+                    url = rawGithubUrl(
+                        owner = owner,
+                        repo = repo,
+                        branch = branch,
+                        path = path,
+                    ),
+                    accept = "text/markdown, text/plain, */*",
+                )
+            }.getOrNull() ?: return@forEach
+
+            extractReleaseNotesFromMarkdown(
+                markdown = markdown,
+                versionName = versionName,
+                releaseTag = releaseTag,
+            )?.let { return it }
         }
+        return null
+    }
+
+    private fun extractReleaseNotesFromMarkdown(
+        markdown: String?,
+        versionName: String,
+        releaseTag: String?,
+    ): String? {
+        val text = markdown
+            ?.replace("\r\n", "\n")
+            ?.replace('\r', '\n')
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?: return null
+        val targetVersions = releaseVersionCandidates(versionName, releaseTag).toSet()
+        val lines = text.lines()
+        val sectionLines = mutableListOf<String>()
+        var inTargetSection = false
+        var foundTargetSection = false
+        var foundAnyVersionHeading = false
+
+        for (line in lines) {
+            val headingVersion = parseMarkdownVersionHeading(line)
+            if (headingVersion != null) {
+                foundAnyVersionHeading = true
+                if (inTargetSection) {
+                    break
+                }
+                if (headingVersion in targetVersions) {
+                    inTargetSection = true
+                    foundTargetSection = true
+                }
+                continue
+            }
+            if (inTargetSection) {
+                sectionLines += line
+            }
+        }
+
+        val sourceLines = when {
+            foundTargetSection -> sectionLines
+            !foundAnyVersionHeading -> lines
+            else -> emptyList()
+        }
+        val bulletLines = sourceLines
+            .map { it.trim() }
+            .filter(::isReleaseNoteBulletLine)
+        if (bulletLines.isNotEmpty()) {
+            return bulletLines.joinToString("\n")
+        }
+        if (foundTargetSection) {
+            return sectionLines
+                .joinToString("\n")
+                .trim()
+                .takeIf { it.isNotBlank() }
+        }
+        return null
+    }
+
+    private fun parseMarkdownVersionHeading(line: String): String? {
+        val rawHeading = Regex("""^#{1,6}\s+([vV]?\d+(?:\.\d+){1,4}(?:[-+._][A-Za-z0-9]+)?)\s*#*\s*$""")
+            .find(line.trim())
+            ?.groupValues
+            ?.getOrNull(1)
+            ?: return null
+        return normalizeReleaseVersion(rawHeading)
+    }
+
+    private fun releaseVersionCandidates(
+        versionName: String,
+        releaseTag: String?,
+    ): List<String> = listOfNotNull(
+        versionName,
+        versionName.takeIf { it.isNotBlank() }?.let { "v$it" },
+        releaseTag,
+    )
+        .mapNotNull(::normalizeReleaseVersion)
+        .distinct()
+
+    private fun normalizeReleaseVersion(value: String?): String? = value
+        ?.trim()
+        ?.removePrefix("v")
+        ?.removePrefix("V")
+        ?.lowercase()
+        ?.takeIf { it.isNotBlank() }
+
+    private fun isReleaseNoteBulletLine(line: String): Boolean {
+        if (line.matches(Regex("""^[*-]{3,}$"""))) return false
+        return line.matches(Regex("""^(?:[-*+]\s+|\d+\.\s+).+"""))
+    }
+
+    private fun githubMarkdownAnchorForVersion(
+        versionName: String,
+        releaseTag: String?,
+    ): String? {
+        val heading = releaseTag
+            ?.trim()
+            ?.takeIf { it.startsWith("v", ignoreCase = true) }
+            ?: versionName
+                .trim()
+                .takeIf { it.isNotBlank() }
+                ?.let { if (it.startsWith("v", ignoreCase = true)) it else "v$it" }
+            ?: return null
+        return heading
+            .lowercase()
+            .replace(Regex("""[^\p{L}\p{N}\s_-]"""), "")
+            .trim()
+            .replace(Regex("""\s+"""), "-")
+            .takeIf { it.isNotBlank() }
     }
 
     private fun languageTagToAndroidResourceDirs(languageTag: String): List<String> {
@@ -1215,31 +1403,77 @@ class PluginIndexRepository {
         return dirs.toList()
     }
 
-    private fun languageTagToChangelogTags(languageTag: String): List<String> {
+    private fun languageTagToAndroidChangelogTags(languageTag: String): List<String> {
         val normalized = languageTag.trim()
         val primary = normalized.substringBefore('-').lowercase()
         val tags = linkedSetOf<String>()
         when {
             normalized.equals("zh-Hant-HK", ignoreCase = true) -> {
                 tags += "zh-rHK"
+                tags += "zh-Hant-HK"
                 tags += "zh-rTW"
+                tags += "zh-Hant-TW"
                 tags += "zh"
+                tags += "zh-Hans"
             }
             normalized.equals("zh-Hant-TW", ignoreCase = true) -> {
                 tags += "zh-rTW"
+                tags += "zh-Hant-TW"
                 tags += "zh-rHK"
+                tags += "zh-Hant-HK"
                 tags += "zh"
+                tags += "zh-Hans"
             }
             primary == "zh" -> {
                 tags += "zh"
+                tags += "zh-Hans"
                 tags += "zh-rHK"
+                tags += "zh-Hant-HK"
                 tags += "zh-rTW"
+                tags += "zh-Hant-TW"
             }
             else -> {
                 tags += primary
             }
         }
         tags += "en"
+        tags += "zh-Hans"
+        tags += "zh"
+        return tags.toList()
+    }
+
+    private fun languageTagToRepositoryChangelogTags(languageTag: String): List<String> {
+        val normalized = languageTag.trim()
+        val primary = normalized.substringBefore('-').lowercase()
+        val tags = linkedSetOf<String>()
+        when {
+            normalized.equals("zh-Hant-HK", ignoreCase = true) -> {
+                tags += "zh-Hant-HK"
+                tags += "zh-rHK"
+                tags += "zh-Hant-TW"
+                tags += "zh-Hans"
+                tags += "zh"
+            }
+            normalized.equals("zh-Hant-TW", ignoreCase = true) -> {
+                tags += "zh-Hant-TW"
+                tags += "zh-rTW"
+                tags += "zh-Hant-HK"
+                tags += "zh-Hans"
+                tags += "zh"
+            }
+            primary == "zh" -> {
+                tags += "zh-Hans"
+                tags += "zh"
+                tags += "zh-Hant-HK"
+                tags += "zh-Hant-TW"
+            }
+            else -> {
+                tags += primary
+            }
+        }
+        tags += "en"
+        tags += "zh-Hans"
+        tags += "zh"
         return tags.toList()
     }
 
@@ -1306,6 +1540,21 @@ class PluginIndexRepository {
     ): String {
         val safePath = path.trimStart('/')
         return "https://raw.githubusercontent.com/$owner/$repo/refs/heads/$branch/$safePath"
+    }
+
+    private fun githubBlobUrl(
+        owner: String,
+        repo: String,
+        branch: String,
+        path: String,
+        anchor: String? = null,
+    ): String {
+        val safePath = path.trimStart('/')
+        val baseUrl = "https://github.com/$owner/$repo/blob/$branch/$safePath"
+        return anchor
+            ?.takeIf { it.isNotBlank() }
+            ?.let { "$baseUrl#$it" }
+            ?: baseUrl
     }
 
     private fun getJsonObject(context: Context, url: String): JSONObject =

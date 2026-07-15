@@ -349,18 +349,9 @@ object PluginInfoDialogManager {
                 .showAdaptive()
         }
 
-        val releaseHistoryOption = MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_release_history)) { d ->
-            val changelogUrl = info.changelogUrl
-            if (changelogUrl.isNullOrBlank()) {
-                ViewUtils.showSnack(d.view, R.string.text_unavailable, false)
-            } else {
-                IntentUtils.browse(context, changelogUrl, IntentUtils.SnackExceptionHolder(d.view))
-            }
-        }
-
         val dialog = MaterialDialog.Builder(context)
             .title(info.version ?: info.title)
-            .options(listOf(ignoreUpdateOption, releaseHistoryOption))
+            .options(listOf(ignoreUpdateOption))
             .content(R.string.text_retrieving_release_notes)
             .neutralText(R.string.dialog_button_release_history)
             .neutralColor(
@@ -390,13 +381,16 @@ object PluginInfoDialogManager {
                 }
             }
             .autoDismiss(false)
-            .cancelable(false)
             .showAdaptive()
 
         CoroutineScope(Dispatchers.Main).launch {
             val releaseNotes = withContext(Dispatchers.IO) {
-                val fallback = info.changelogText?.takeIf { it.isNotBlank() } ?: context.getString(R.string.text_no_release_notes)
-                val changelogUrl = info.changelogUrl?.takeIf { it.isNotBlank() } ?: return@withContext fallback
+                info.changelogText?.takeIf { it.isNotBlank() }?.let { return@withContext it }
+                val fallback = context.getString(R.string.text_no_release_notes)
+                val changelogUrl = info.changelogUrl
+                    ?.takeIf { it.isNotBlank() }
+                    ?.takeIf(::isPlainTextChangelogUrl)
+                    ?: return@withContext fallback
                 runCatching {
                     fetchReleaseNotesText(changelogUrl)
                 }.getOrNull()?.takeIf { it.isNotBlank() } ?: fallback
@@ -563,6 +557,14 @@ object PluginInfoDialogManager {
         } finally {
             conn.disconnect()
         }
+    }
+
+    private fun isPlainTextChangelogUrl(url: String): Boolean {
+        val lowerUrl = url.lowercase()
+        return "raw.githubusercontent.com" in lowerUrl ||
+                "raw=true" in lowerUrl ||
+                "plain=1" in lowerUrl ||
+                ("github.com/" !in lowerUrl && lowerUrl.substringBefore('#').endsWith(".md"))
     }
 
     private sealed interface PluginInfoBase {
