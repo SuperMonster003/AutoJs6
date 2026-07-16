@@ -37,6 +37,7 @@ desktop.ini
 /release/
 /releases/
 /tools/*
+!/tools/generate_official_plugin_index.py
 !/tools/nodejs/
 !/tools/nodejs/**
 

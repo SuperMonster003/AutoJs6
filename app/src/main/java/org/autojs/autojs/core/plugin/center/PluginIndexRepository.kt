@@ -28,9 +28,13 @@ class PluginIndexRepository {
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
         private const val OFFICIAL_REPO_PREFIX = "AutoJs6-Plugin-"
+        private const val OFFICIAL_INDEX_REPO = "AutoJs6"
+        private const val OFFICIAL_INDEX_BRANCH = "master"
+        private const val OFFICIAL_GENERATED_INDEX_PATH = "plugins.official.generated.json"
         private const val THIRD_PARTY_OWNER = "SuperMonster002"
         private const val THIRD_PARTY_REPO = "Auto.js-SDK-Plugins-Garage"
         private const val THIRD_PARTY_BRANCH = "main"
+        private const val THIRD_PARTY_GENERATED_INDEX_PATH = "plugins.generated.json"
 
         private const val OFFICIAL_ABI_GAP_RETRY_INTERVAL_MS = 60_000L
         private const val AUTHENTICATED_OFFICIAL_ABI_GAP_RETRY_INTERVAL_MS = 15_000L
@@ -283,6 +287,8 @@ class PluginIndexRepository {
         context: Context,
         languageTag: String,
     ): List<PluginIndexEntry> {
+        fetchOfficialGeneratedEntries(context, languageTag)?.let { return it }
+
         val repos = fetchOfficialRepoConfigs(context)
         if (repos.isEmpty()) {
             Log.w(TAG, "No official plugin repository found with prefix: $OFFICIAL_REPO_PREFIX")
@@ -296,6 +302,42 @@ class PluginIndexRepository {
                 Log.w(TAG, "Failed to fetch official plugin ${plugin.repo}: ${it.message}")
             }.getOrNull()
         }
+    }
+
+    private fun fetchOfficialGeneratedEntries(
+        context: Context,
+        languageTag: String,
+    ): List<PluginIndexEntry>? {
+        val indexUrl = rawGithubUrl(
+            owner = OFFICIAL_OWNER,
+            repo = OFFICIAL_INDEX_REPO,
+            branch = OFFICIAL_INDEX_BRANCH,
+            path = OFFICIAL_GENERATED_INDEX_PATH,
+        )
+        val content = runCatching {
+            getText(
+                context = context,
+                url = indexUrl,
+                accept = "application/json",
+            )
+        }.onFailure {
+            Log.i(TAG, "Official generated plugin index unavailable, fall back to repository scan: ${it.message}")
+        }.getOrNull() ?: return null
+
+        return runCatching {
+            parseIndexEntriesJson(
+                json = content,
+                defaultSource = PluginIndexSource.OFFICIAL,
+                languageTag = languageTag,
+            ).map { entry ->
+                entry.copy(
+                    source = PluginIndexSource.OFFICIAL,
+                    tags = entry.tags.ifEmpty { listOf("official") },
+                )
+            }.takeIf { it.isNotEmpty() }
+        }.onFailure {
+            Log.w(TAG, "Failed to parse official generated plugin index, fall back to repository scan: ${it.message}")
+        }.getOrNull()
     }
 
     private fun fetchOfficialRepoConfigs(context: Context): List<OfficialPluginConfig> {
@@ -540,6 +582,50 @@ class PluginIndexRepository {
     }
 
     private fun fetchThirdPartyEntries(
+        context: Context,
+        languageTag: String,
+    ): List<PluginIndexEntry> {
+        fetchThirdPartyGeneratedEntries(context, languageTag)?.let { return it }
+        return fetchThirdPartyEntriesFromTree(context, languageTag)
+    }
+
+    private fun fetchThirdPartyGeneratedEntries(
+        context: Context,
+        languageTag: String,
+    ): List<PluginIndexEntry>? {
+        val indexUrl = rawGithubUrl(
+            owner = THIRD_PARTY_OWNER,
+            repo = THIRD_PARTY_REPO,
+            branch = THIRD_PARTY_BRANCH,
+            path = THIRD_PARTY_GENERATED_INDEX_PATH,
+        )
+        val content = runCatching {
+            getText(
+                context = context,
+                url = indexUrl,
+                accept = "application/json",
+            )
+        }.onFailure {
+            Log.i(TAG, "Third-party generated plugin index unavailable, fall back to tree scan: ${it.message}")
+        }.getOrNull() ?: return null
+
+        return runCatching {
+            parseIndexEntriesJson(
+                json = content,
+                defaultSource = PluginIndexSource.THIRD_PARTY,
+                languageTag = languageTag,
+            ).map { entry ->
+                entry.copy(
+                    source = PluginIndexSource.THIRD_PARTY,
+                    tags = entry.tags.ifEmpty { listOf("third-party") },
+                )
+            }
+        }.onFailure {
+            Log.w(TAG, "Failed to parse third-party generated plugin index, fall back to tree scan: ${it.message}")
+        }.getOrNull()
+    }
+
+    private fun fetchThirdPartyEntriesFromTree(
         context: Context,
         languageTag: String,
     ): List<PluginIndexEntry> {
@@ -892,12 +978,20 @@ class PluginIndexRepository {
             val obj = array.optJSONObject(i) ?: continue
             val name = obj.optString("name").takeIf { it.isNotBlank() } ?: continue
             if (!name.endsWith(".apk", ignoreCase = true)) continue
-            val url = obj.optString("browser_download_url").takeIf { it.isNotBlank() } ?: continue
+            val url = obj.optString("browser_download_url").takeIf { it.isNotBlank() }
+                ?: obj.optString("downloadUrl").takeIf { it.isNotBlank() }
+                ?: obj.optString("apkUrl").takeIf { it.isNotBlank() }
+                ?: continue
             val size = obj.optLong("size", 0L).takeIf { it > 0 } ?: 0L
             val sha256 = obj.optString("digest")
-                .substringAfter("sha256:", missingDelimiterValue = "")
+                .takeIf { it.isNotBlank() }
+                ?.substringAfter("sha256:", missingDelimiterValue = "")
+                ?: obj.optString("sha256").takeIf { it.isNotBlank() }
+                ?: obj.optString("apkSha256").takeIf { it.isNotBlank() }
+                ?: ""
+            val normalizedSha256 = sha256
                 .ifBlank { null }
-            list += ReleaseAsset(name = name, downloadUrl = url, size = size, sha256 = sha256)
+            list += ReleaseAsset(name = name, downloadUrl = url, size = size, sha256 = normalizedSha256)
         }
         return list
     }
@@ -1734,6 +1828,47 @@ class PluginIndexRepository {
         val languageTag = root.optString("languageTag")
             .takeIf { it.isNotBlank() && !it.equals("null", true) }
             ?.let(::normalizeLanguageTag)
+        val list = parseIndexEntries(
+            root = root,
+            defaultSource = PluginIndexSource.OFFICIAL,
+            languageTag = null,
+        )
+        val fetchedSources = root.optJSONArray("fetchedSources")
+            ?.let { ja ->
+                buildSet {
+                    for (i in 0 until ja.length()) {
+                        val name = ja.optString(i).takeIf { it.isNotBlank() } ?: continue
+                        PluginIndexSource.entries.firstOrNull { it.name == name }?.let(::add)
+                    }
+                }
+            }
+            ?.takeIf { it.isNotEmpty() }
+            ?: list.mapTo(linkedSetOf()) { it.source }
+
+        return CacheSnapshot(
+            entries = list,
+            fetchedSources = fetchedSources,
+            languageTag = languageTag,
+        )
+    }
+
+    private fun parseIndexEntriesJson(
+        json: String,
+        defaultSource: PluginIndexSource,
+        languageTag: String? = null,
+    ): List<PluginIndexEntry> {
+        return parseIndexEntries(
+            root = JSONObject(json),
+            defaultSource = defaultSource,
+            languageTag = languageTag,
+        )
+    }
+
+    private fun parseIndexEntries(
+        root: JSONObject,
+        defaultSource: PluginIndexSource,
+        languageTag: String?,
+    ): List<PluginIndexEntry> {
         val arr = root.optJSONArray("items") ?: root.optJSONArray("plugins") ?: JSONArray()
         val list = mutableListOf<PluginIndexEntry>()
 
@@ -1741,9 +1876,30 @@ class PluginIndexRepository {
             val obj = arr.optJSONObject(i) ?: continue
             val packageName = obj.optString("packageName").takeIf { it.isNotBlank() } ?: continue
             val title = obj.optString("title").takeIf { it.isNotBlank() } ?: packageName
-            val description = obj.optString("description").takeIf { it.isNotBlank() && !it.equals("null", true) }
-            val instructionHardCoded = obj.optString("instructionHardCoded").takeIf { it.isNotBlank() && !it.equals("null", true) }
-            val instructionMarkdownUrl = obj.optString("instructionMarkdownUrl").takeIf { it.isNotBlank() && !it.equals("null", true) }
+            val description = selectLocalizedString(
+                obj = obj,
+                scalarKey = "description",
+                localizedKey = "localizedDescriptions",
+                languageTag = languageTag,
+                keyCandidates = languageTag?.let(::languageTagToAndroidResourceDirs).orEmpty(),
+            )
+            val instructionHardCoded = selectLocalizedString(
+                obj = obj,
+                scalarKey = "instructionHardCoded",
+                localizedKey = "localizedInstructionHardCoded",
+                languageTag = languageTag,
+                keyCandidates = languageTag?.let(::languageTagToAndroidResourceDirs).orEmpty(),
+            )
+            val instructionMarkdownUrl = selectLocalizedString(
+                obj = obj,
+                scalarKey = "instructionMarkdownUrl",
+                localizedKey = "localizedInstructionMarkdownUrls",
+                languageTag = languageTag,
+                keyCandidates = languageTag
+                    ?.let(::languageTagToAndroidResourceDirs)
+                    ?.map { it.replaceFirst("values", "raw") }
+                    .orEmpty(),
+            )
             val author = obj.optString("author").takeIf { it.isNotBlank() && !it.equals("null", true) }
             val iconUrl = obj.optString("iconUrl").takeIf { it.isNotBlank() }?.toUri()
             val nightIconUrl = obj.optString("nightIconUrl").takeIf { it.isNotBlank() }?.toUri()
@@ -1756,31 +1912,35 @@ class PluginIndexRepository {
                 .takeIf { it.isNotBlank() }
                 ?.runCatching { PluginIndexSource.valueOf(this) }
                 ?.getOrNull()
-                ?: PluginIndexSource.OFFICIAL
+                ?: defaultSource
 
             val collaborators = obj.optJSONArray("collaborators")?.let { ja ->
                 List(ja.length()) { idx -> ja.optString(idx) }.filter { it.isNotBlank() }
             } ?: emptyList()
+            val releaseArray = obj.optJSONArray("releases")
+            val supportedAbisFromAssets = releaseArray?.firstReleaseAssetsOrNull()
+                ?.let(::parseSupportedAbisFromReleaseAssets)
             val supportedAbis = when {
                 !obj.has("supportedAbis") || obj.isNull("supportedAbis") -> null
                 else -> PluginAbiUtils.resolveSupportedAbisFromValue(obj.opt("supportedAbis"))
-            }
+            } ?: supportedAbisFromAssets
             val tags = obj.optJSONArray("tags")?.let { ja ->
                 List(ja.length()) { idx -> ja.optString(idx) }.filter { it.isNotBlank() }
             } ?: emptyList()
 
-            val releases = obj.optJSONArray("releases")?.let { ja ->
+            val releases = releaseArray?.let { ja ->
                 buildList {
                     for (j in 0 until ja.length()) {
                         val rel = ja.optJSONObject(j) ?: continue
+                        val selectedAsset = pickAssetByAbiOrFallback(parseReleaseAssets(rel.optJSONArray("assets")))
                         add(
                             PluginIndexRelease(
                                 versionName = rel.optString("versionName", "0.0.0"),
                                 versionCode = rel.optLong("versionCode", 0L),
                                 versionDate = rel.optString("versionDate").takeIf { it.isNotBlank() },
-                                apkUrl = rel.optString("apkUrl").takeIf { it.isNotBlank() },
-                                apkSha256 = rel.optString("apkSha256").takeIf { it.isNotBlank() },
-                                apkSizeBytes = rel.optLong("apkSizeBytes", -1L).takeIf { it > 0 },
+                                apkUrl = selectedAsset?.downloadUrl ?: rel.optString("apkUrl").takeIf { it.isNotBlank() },
+                                apkSha256 = selectedAsset?.sha256 ?: rel.optString("apkSha256").takeIf { it.isNotBlank() },
+                                apkSizeBytes = selectedAsset?.size ?: rel.optLong("apkSizeBytes", -1L).takeIf { it > 0 },
                                 changelogUrl = rel.optString("changelogUrl").takeIf { it.isNotBlank() },
                                 changelogText = rel.optString("changelogText").takeIf { it.isNotBlank() },
                             ),
@@ -1810,23 +1970,57 @@ class PluginIndexRepository {
                 source = source,
             )
         }
-        val fetchedSources = root.optJSONArray("fetchedSources")
-            ?.let { ja ->
-                buildSet {
-                    for (i in 0 until ja.length()) {
-                        val name = ja.optString(i).takeIf { it.isNotBlank() } ?: continue
-                        PluginIndexSource.entries.firstOrNull { it.name == name }?.let(::add)
-                    }
-                }
-            }
-            ?.takeIf { it.isNotEmpty() }
-            ?: list.mapTo(linkedSetOf()) { it.source }
+        return list
+    }
 
-        return CacheSnapshot(
-            entries = list,
-            fetchedSources = fetchedSources,
-            languageTag = languageTag,
-        )
+    private fun selectLocalizedString(
+        obj: JSONObject,
+        scalarKey: String,
+        localizedKey: String,
+        languageTag: String?,
+        keyCandidates: List<String>,
+    ): String? {
+        val candidates = if (languageTag == null) {
+            emptyList()
+        } else {
+            (keyCandidates + normalizeLanguageTag(languageTag).orEmpty()).filter { it.isNotBlank() }.distinct()
+        }
+
+        obj.optJSONObject(localizedKey)
+            ?.let { localized -> selectStringFromObject(localized, candidates) }
+            ?.let { return it }
+
+        return when (val raw = obj.opt(scalarKey)) {
+            is JSONObject -> selectStringFromObject(raw, candidates)
+            else -> raw.asJsonStringOrNull()
+        }
+    }
+
+    private fun selectStringFromObject(
+        obj: JSONObject,
+        candidates: List<String>,
+    ): String? {
+        candidates.forEach { key ->
+            obj.opt(key).asJsonStringOrNull()?.let { return it }
+        }
+        return obj.opt("default").asJsonStringOrNull()
+            ?: obj.opt("values").asJsonStringOrNull()
+            ?: obj.opt("en").asJsonStringOrNull()
+    }
+
+    private fun Any?.asJsonStringOrNull(): String? {
+        if (this == null || this == JSONObject.NULL) return null
+        return toString()
+            .trim()
+            .takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) }
+    }
+
+    private fun JSONArray.firstReleaseAssetsOrNull(): JSONArray? {
+        for (i in 0 until length()) {
+            val assets = optJSONObject(i)?.optJSONArray("assets") ?: continue
+            if (assets.length() > 0) return assets
+        }
+        return null
     }
 
     private fun normalizeLanguageTag(tag: String?): String? {
