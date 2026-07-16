@@ -1,6 +1,6 @@
 {
   "$data": {
-    "v6.7.1": {
+    "v6.8.0": {
       "released_date": "2026/05/29",
       "feature": [
         "runtime.loadAar 方法, 用于动态加载 aar 文件",

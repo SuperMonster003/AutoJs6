@@ -144,12 +144,18 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
     override fun onPageShow() {
         super.onPageShow()
         mIsCurrentPagePlugins = true
+        fab.setOnLongClickListener {
+            mFloatingActionMenu?.let { menu -> if (menu.isExpanded) menu.collapse() }
+            PluginCenterActivity.launch(requireContext())
+            true
+        }
         schedulePluginCenterInitialization()
     }
 
     override fun onPageHide() {
         super.onPageHide()
         mFloatingActionMenu?.let { if (it.isExpanded) it.collapse() }
+        fab.setOnLongClickListener(null)
         mIsCurrentPagePlugins = false
         cancelPluginCenterInitialization()
         cancelPluginCenterNightModeRefresh()
