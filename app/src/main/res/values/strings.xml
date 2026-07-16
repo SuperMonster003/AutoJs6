@@ -630,6 +630,8 @@
     <string name="error_failed_to_launch_manager">Failed to launcher manager</string>
     <string name="error_failed_to_launch_system_settings">Failed to launch system settings</string>
     <string name="error_failed_to_load_plugins_with_reason">Failed to load plugins.\nReason: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_failed_to_move">Failed to move</string>
     <string name="error_failed_to_rename">Failed to rename</string>
     <string name="error_failed_to_render_content">Failed to render content</string>

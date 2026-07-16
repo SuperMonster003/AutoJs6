@@ -273,6 +273,8 @@
     <string name="error_failed_to_launch_manager">تعذّر تشغيل المدير</string>
     <string name="error_failed_to_launch_system_settings">تعذّر فتح إعدادات النظام</string>
     <string name="error_failed_to_load_plugins_with_reason">فشل تحميل المكونات الإضافية.\nالسبب: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_failed_to_move">فشل النقل</string>
     <string name="error_failed_to_rename">فشل في إعادة تسمية</string>
     <string name="error_failed_to_render_content">فشل في عرض المحتوى</string>

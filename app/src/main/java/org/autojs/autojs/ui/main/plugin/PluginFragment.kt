@@ -144,6 +144,7 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
     override fun onPageShow() {
         super.onPageShow()
         mIsCurrentPagePlugins = true
+        schedulePluginCenterInitialization()
     }
 
     override fun onPageHide() {
@@ -199,7 +200,6 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
         if (!mIsCurrentPagePlugins || !isAdded || view == null) return
         mPluginCenterInitJob?.cancel()
         mPluginCenterInitJob = viewLifecycleOwner.lifecycleScope.launch {
-            delay(PLUGIN_CENTER_INIT_DELAY_MS)
             if (!mIsCurrentPagePlugins || !isAdded || view == null) return@launch
             when (ensurePluginCenterFragment()) {
                 PluginCenterEnsureResult.EXISTS -> schedulePluginCenterNightModeRefresh()
@@ -288,7 +288,6 @@ class PluginFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener
 
     companion object {
         private const val TAG_PLUGIN_CENTER = "plugin_center"
-        private const val PLUGIN_CENTER_INIT_DELAY_MS = 80L
         private const val PLUGIN_CENTER_NIGHT_MODE_REFRESH_DELAY_MS = 180L
     }
 

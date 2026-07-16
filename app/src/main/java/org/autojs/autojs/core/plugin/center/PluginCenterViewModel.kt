@@ -67,6 +67,9 @@ class PluginCenterViewModel : ViewModel() {
     private val _fatalError = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val fatalError: SharedFlow<String> = _fatalError
 
+    private val _toastMessage = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    val toastMessage: SharedFlow<String> = _toastMessage
+
     private var loadGeneration: Long = 0L
     private var loadJob: Job? = null
 
@@ -88,8 +91,10 @@ class PluginCenterViewModel : ViewModel() {
         forceRefreshIndex: Boolean = false,
         sourceScope: PluginIndexSource? = null,
         forceRender: Boolean = false,
+        showRefreshErrors: Boolean = false,
     ) {
         Log.d(TAG, "load: forceRefreshIndex = $forceRefreshIndex, sourceScope = $sourceScope")
+        PluginCenterProcessLogger.i("Start plugin center load: forceRefreshIndex=$forceRefreshIndex, sourceScope=${sourceScope?.name ?: "ALL"}.")
         val generation = ++loadGeneration
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
@@ -97,6 +102,11 @@ class PluginCenterViewModel : ViewModel() {
             fun updateLatestItems(next: List<PluginCenterItem>) {
                 if (isLatestLoad()) {
                     updateItemsIfChanged(next, force = forceRender)
+                }
+            }
+            fun emitRefreshError(message: String) {
+                if (showRefreshErrors && isLatestLoad()) {
+                    _toastMessage.tryEmit(message)
                 }
             }
 
@@ -112,6 +122,7 @@ class PluginCenterViewModel : ViewModel() {
 
             // First load local plugins (local priority).
             // zh-CN: 先加载本地插件 (本地优先).
+            PluginCenterProcessLogger.i("Discover installed AIDL plugins.")
             val installed = runCatching {
                 installedRepo.discoverInstalled(context)
             }.onFailure { e ->
@@ -123,6 +134,8 @@ class PluginCenterViewModel : ViewModel() {
                     R.string.error_failed_to_load_plugins_with_reason,
                     e.message ?: e.toString(),
                 )
+                PluginCenterProcessLogger.i("Failed to discover installed AIDL plugins: ${e.message ?: e.javaClass.simpleName}.")
+                emitRefreshError(message)
                 _fatalError.tryEmit(message)
             }.getOrNull() ?: run {
                 // Do not continue subsequent logic when unable to obtain local list.
@@ -133,13 +146,19 @@ class PluginCenterViewModel : ViewModel() {
                 return@launch
             }
             if (!isLatestLoad()) return@launch
+            PluginCenterProcessLogger.i("Installed AIDL plugins discovered: count=${installed.size}.")
 
+            PluginCenterProcessLogger.i("Discover installed legacy SDK plugins.")
             val legacyInstalled = runCatching {
                 legacyRepo.discoverInstalled(context)
             }.onFailure { e ->
                 if (e is CancellationException) throw e
                 Log.w(TAG, "legacy discovery failed: ${e.message}")
+                val message = e.message ?: e.toString()
+                PluginCenterProcessLogger.i("Failed to discover installed legacy SDK plugins: $message.")
+                emitRefreshError(message)
             }.getOrElse { emptyList() }
+            PluginCenterProcessLogger.i("Installed legacy SDK plugins discovered: count=${legacyInstalled.size}.")
             // Render list using "local only".
             // zh-CN: 使用 "仅本地" 渲染列表.
             val localAidlItems = installed.mapNotNull { local ->
@@ -230,7 +249,11 @@ class PluginCenterViewModel : ViewModel() {
             }.onFailure {
                 if (it is CancellationException) throw it
                 Log.w(TAG, "getCachedIndex failed: ${it.message}")
+                val message = it.message ?: it.toString()
+                PluginCenterProcessLogger.i("Failed to read cached plugin index: $message.")
+                emitRefreshError(message)
             }.getOrElse { emptyList() }
+            PluginCenterProcessLogger.i("Cached plugin index entries loaded: count=${cachedIndexEntries.size}.")
 
             when {
                 cachedIndexEntries.isNotEmpty() -> updateLatestItems(buildMergedItems(cachedIndexEntries))
@@ -244,15 +267,33 @@ class PluginCenterViewModel : ViewModel() {
                     context = context,
                     forceRefresh = shouldForceFetchIndex,
                     enabledSources = enabledSources,
+                    onIssue = { issue ->
+                        emitRefreshError(
+                            context.getString(
+                                R.string.error_plugin_index_source_fetch_failed_with_reason,
+                                issue.source.labelForMessage(context),
+                                issue.message,
+                            ),
+                        )
+                    },
                 )
             }.onFailure {
                 if (it is CancellationException) throw it
                 // Index fetch exception is not fatal, just log it.
                 Log.w(TAG, "fetchOnlineIndex failed: ${it.message}")
+                val message = it.message ?: it.toString()
+                PluginCenterProcessLogger.i("Failed to fetch online plugin index: $message.")
+                emitRefreshError(
+                    context.getString(
+                        R.string.error_plugin_index_fetch_failed_with_reason,
+                        message,
+                    ),
+                )
             }.getOrElse { cachedIndexEntries }
             if (!isLatestLoad()) return@launch
 
             updateLatestItems(buildMergedItems(indexEntries))
+            PluginCenterProcessLogger.i("Plugin center load finished: visible entries=${_items.value.size}.")
             _indexLoaded.value = true
 
             // When returning to the page, refresh if the details dialog is being displayed.
@@ -294,6 +335,11 @@ class PluginCenterViewModel : ViewModel() {
         if (force || !isSemanticallySameList(_items.value, next)) {
             _items.value = next
         }
+    }
+
+    private fun PluginIndexSource.labelForMessage(context: Context): String = when (this) {
+        PluginIndexSource.OFFICIAL -> context.getString(R.string.text_plugin_official)
+        PluginIndexSource.THIRD_PARTY -> context.getString(R.string.text_plugin_third_party)
     }
 
     private fun filterHidden(context: Context, items: List<PluginCenterItem>): List<PluginCenterItem> {

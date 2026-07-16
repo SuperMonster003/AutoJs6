@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.View
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
@@ -58,11 +57,8 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     private var pkgChangeRefreshJob: Job? = null
 
     private var isFirstEnter: Boolean = true
-    private var isFirstListRevealed: Boolean = false
     private var latestIndexLoaded: Boolean = false
     private var lastNightModeEnabled: Boolean? = null
-    private var firstListRenderStartedAt: Long = 0L
-    private var firstListRevealJob: Job? = null
     private var nightModeRefreshJob: Job? = null
     private var swipeRefreshIndicatorJob: Job? = null
 
@@ -133,8 +129,6 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         currentSort = loadPersistedSort(context)
         currentFilterState = PluginFilterStore.getFilterState(context)
         latestIndexLoaded = false
-        isFirstListRevealed = false
-        firstListRenderStartedAt = SystemClock.elapsedRealtime()
 
         adapter = PluginCenterItemAdapter(object : PluginCenterItemAdapter.Listener {
             override fun onInstall(item: PluginCenterItem) {
@@ -222,7 +216,6 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             addItemDecoration(DividerItemDecoration(context, VERTICAL))
             itemAnimator = null
             setHasFixedSize(true)
-            alpha = 0f
             excludePaddingClippableViewFromBottomNavigationBar()
         }
 
@@ -230,7 +223,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         // zh-CN: 下拉刷新: 每次都强制刷新索引 (仍遵守退避窗口).
         binding.pluginCenterSwipeRefresh.setOnRefreshListener {
             scheduleSwipeRefreshIndicatorTimeout()
-            vm.load(contextRef, forceRefreshIndex = true, sourceScope = sourceScope)
+            vm.load(contextRef, forceRefreshIndex = true, sourceScope = sourceScope, showRefreshErrors = true)
         }
 
         // First entry: local priority + index async.
@@ -263,7 +256,6 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     fullItems = latestFullItems,
                     query = currentQuery,
                 )
-                scheduleFirstListRevealIfNeeded(adapter.items().isNotEmpty())
             }
         }
 
@@ -278,6 +270,14 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
                     .onPositive { _, _ -> requireActivity().finish() }
                     .cancelable(false)
                     .show()
+            }
+        }
+
+        // Subscribe to recoverable loading exceptions for user-initiated pull-to-refresh.
+        // zh-CN: 订阅用户手动下拉刷新时的可恢复加载异常.
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.toastMessage.collectLatest { msg ->
+                ViewUtils.showToast(contextRef, msg, true)
             }
         }
     }
@@ -485,39 +485,12 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         val sorted = filtered.sortedWith(buildSortComparator())
 
         adapter.updateData(sorted)
-        scheduleFirstListRevealIfNeeded(sorted.isNotEmpty())
         updateEmptyHint(
             filteredItems = sorted,
             indexLoaded = vm.indexLoaded.value,
             fullItems = visibleItems,
             query = currentQuery,
         )
-    }
-
-    private fun scheduleFirstListRevealIfNeeded(hasItems: Boolean) {
-        if (!hasItems || isFirstListRevealed || _binding == null || !isAdded) {
-            return
-        }
-        firstListRevealJob?.cancel()
-        firstListRevealJob = viewLifecycleOwner.lifecycleScope.launch {
-            val elapsed = SystemClock.elapsedRealtime() - firstListRenderStartedAt
-            val revealDelay = when {
-                latestIndexLoaded -> 90L
-                elapsed >= FIRST_LIST_REVEAL_TIMEOUT_MS -> 0L
-                else -> FIRST_LIST_REVEAL_TIMEOUT_MS - elapsed
-            }
-            if (revealDelay > 0L) {
-                delay(revealDelay)
-            }
-            if (_binding == null || !isAdded || isFirstListRevealed || adapter.items().isEmpty()) {
-                return@launch
-            }
-            isFirstListRevealed = true
-            binding.pluginCenterRecyclerView.animate()
-                .alpha(1f)
-                .setDuration(120L)
-                .start()
-        }
     }
 
     private fun scheduleSwipeRefreshIndicatorTimeout() {
@@ -1096,13 +1069,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         pkgChangeRefreshJob = null
         nightModeRefreshJob?.cancel()
         nightModeRefreshJob = null
-        firstListRevealJob?.cancel()
-        firstListRevealJob = null
         swipeRefreshIndicatorJob?.cancel()
         swipeRefreshIndicatorJob = null
-        isFirstListRevealed = false
         latestIndexLoaded = false
-        firstListRenderStartedAt = 0L
         _binding = null
     }
 
@@ -1155,7 +1124,6 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     // zh-CN: 用于渲染列表的筛选策略.
     companion object {
         private const val ARG_SOURCE_SCOPE = "arg_source_scope"
-        private const val FIRST_LIST_REVEAL_TIMEOUT_MS = 1000L
         private const val NIGHT_MODE_ICON_REFRESH_DELAY_MS = 120L
         private const val SWIPE_REFRESH_MAX_VISIBLE_MS = 8_000L
         private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")

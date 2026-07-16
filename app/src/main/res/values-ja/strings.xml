@@ -272,6 +272,8 @@
     <string name="error_failed_to_launch_manager">マネージャーを起動できませんでした</string>
     <string name="error_failed_to_launch_system_settings">システム設定を起動できませんでした</string>
     <string name="error_failed_to_load_plugins_with_reason">プラグインの読み込みに失敗しました.\n理由: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_failed_to_move">移動に失敗しました</string>
     <string name="error_failed_to_rename">名前の変更に失敗しました</string>
     <string name="error_failed_to_render_content">コンテンツの表示に失敗しました</string>

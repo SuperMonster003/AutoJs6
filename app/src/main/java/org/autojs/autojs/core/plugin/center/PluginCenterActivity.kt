@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.util.Linkify
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
@@ -12,13 +13,17 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.RadioButton
+import android.widget.ScrollView
 import android.widget.Space
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.afollestad.materialdialogs.MaterialDialog
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.ui.BaseActivity
@@ -115,6 +120,10 @@ class PluginCenterActivity : BaseActivity() {
             }
             R.id.action_filter -> {
                 showFilterDialog(center)
+                true
+            }
+            R.id.action_show_logs -> {
+                showProcessLogs()
                 true
             }
             R.id.action_global_settings -> {
@@ -735,6 +744,41 @@ class PluginCenterActivity : BaseActivity() {
                 center.setFilterState(selectedState)
             }
             .show()
+    }
+
+    private fun showProcessLogs() {
+        val dialog = MaterialDialog.Builder(this)
+            .title(R.string.text_process_log)
+            .content(PluginCenterProcessLogger.dump().ifBlank { getString(R.string.text_no_data) })
+            .positiveText(R.string.dialog_button_dismiss)
+            .positiveColorRes(R.color.dialog_button_default)
+            .show()
+
+        val tv = dialog.contentView?.apply {
+            autoLinkMask = Linkify.WEB_URLS
+            text = text
+        } ?: return
+
+        val job = lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                PluginCenterProcessLogger.flow.collect { newLine ->
+                    if (!dialog.isShowing) {
+                        this@repeatOnLifecycle.cancel()
+                        return@collect
+                    }
+                    if (tv.text.toString() == getString(R.string.text_no_data)) {
+                        tv.text = newLine
+                    } else {
+                        tv.append("\n$newLine")
+                    }
+
+                    (tv.parent as? ScrollView)?.post {
+                        (tv.parent as ScrollView).fullScroll(View.FOCUS_DOWN)
+                    }
+                }
+            }
+        }
+        dialog.setOnDismissListener { job.cancel() }
     }
 
     private fun setUpToolbarColors() {

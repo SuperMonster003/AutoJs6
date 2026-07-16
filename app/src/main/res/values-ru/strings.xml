@@ -271,6 +271,8 @@
     <string name="error_failed_to_launch_manager">Не удалось запустить менеджер</string>
     <string name="error_failed_to_launch_system_settings">Не удалось открыть системные настройки</string>
     <string name="error_failed_to_load_plugins_with_reason">Не удалось загрузить плагины.\nПричина: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_failed_to_move">Не удалось переместить</string>
     <string name="error_failed_to_rename">Не удалось переименовать</string>
     <string name="error_failed_to_render_content">Не удалось отобразить содержимое</string>

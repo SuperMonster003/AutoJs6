@@ -67,6 +67,7 @@ class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandl
         binding.ewebView.also { ewebView ->
             ewebView.webView.also { webView ->
                 mWebView = webView
+                webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
                 webView.settings.setSupportMultipleWindows(true)
                 if (ViewUtils.isNightModeYes(requireContext())) {
                     WebViewUtils.adaptDarkMode(webView)
@@ -74,6 +75,7 @@ class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandl
                 WebViewUtils.excludeWebViewFromNavigationBar(ewebView, webView) {
                     generateInjectCodeForBottomInsets(it)
                 }
+                webView.post { webView.invalidate() }
             }
         }
         restoreViewStates()

@@ -289,6 +289,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             }
         mViewPager.let {
             it.adapter = mPagerAdapter
+            it.offscreenPageLimit = (mPagerAdapter.count - 1).coerceAtLeast(1)
             binding.tab.setupWithViewPager(it)
             it.addOnPageChangeListener(object : SimpleOnPageChangeListener() {
                 private var mPreviousFragment: ViewPagerFragment? = null

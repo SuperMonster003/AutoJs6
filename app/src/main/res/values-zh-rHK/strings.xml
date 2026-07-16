@@ -267,6 +267,8 @@
     <string name="error_failed_to_launch_manager">管理器啓動失敗</string>
     <string name="error_failed_to_launch_system_settings">系統設置啓動失敗</string>
     <string name="error_failed_to_load_plugins_with_reason">插件讀取失敗.\n原因: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">取得外掛索引失敗: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">取得 %1$s 外掛索引失敗: %2$s</string>
     <string name="error_failed_to_move">移動失敗</string>
     <string name="error_failed_to_rename">重命名失敗</string>
     <string name="error_failed_to_render_content">內容渲染失敗</string>

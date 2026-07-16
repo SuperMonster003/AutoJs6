@@ -271,6 +271,8 @@
     <string name="error_failed_to_launch_manager">No se pudo iniciar el administrador</string>
     <string name="error_failed_to_launch_system_settings">No se pudieron abrir los ajustes del sistema</string>
     <string name="error_failed_to_load_plugins_with_reason">Error al cargar los complementos.\nMotivo: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_failed_to_move">No se pudo mover</string>
     <string name="error_failed_to_rename">Fallo en el cambio de nombre</string>
     <string name="error_failed_to_render_content">Error al renderizar el contenido</string>

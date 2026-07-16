@@ -52,6 +52,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_show_logs"
+        android:title="@string/text_process_log"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_global_settings"
         android:title="@string/text_global_settings"
         app:showAsAction="never" />
