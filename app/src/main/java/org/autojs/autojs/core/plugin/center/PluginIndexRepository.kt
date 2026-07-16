@@ -30,10 +30,10 @@ class PluginIndexRepository {
         private const val CACHE_FILE_NAME = "autojs6_plugin_index_v8.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
-        private const val OFFICIAL_INDEX_REPO = "AutoJs6"
-        private const val OFFICIAL_INDEX_BRANCH = "master"
+        private const val OFFICIAL_INDEX_REPO = "AutoJs6-Official-Plugins-Index"
+        private const val OFFICIAL_INDEX_BRANCH = "main"
         private const val OFFICIAL_GENERATED_INDEX_PATH = "plugins.official.generated.json"
-        private const val THIRD_PARTY_OWNER = "SuperMonster002"
+        private const val THIRD_PARTY_OWNER = "SuperMonster003"
         private const val THIRD_PARTY_REPO = "Auto.js-SDK-Plugins-Garage"
         private const val THIRD_PARTY_BRANCH = "main"
         private const val THIRD_PARTY_GENERATED_INDEX_PATH = "plugins.generated.json"
