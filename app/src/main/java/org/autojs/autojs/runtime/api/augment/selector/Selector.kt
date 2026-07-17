@@ -11,6 +11,7 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.hasProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
+import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
@@ -21,6 +22,8 @@ import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
+import java.lang.reflect.Array as JavaArray
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -61,40 +64,26 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                     val methodKey = coerceString(argList[0])
                     newBaseFunction(methodKey, { arguments ->
                         runCatching {
-                            var result: Any? = null
                             val availableMethods = selectorObj.javaClass.methods.filter { method -> method.name == methodName }
                             require(availableMethods.isNotEmpty()) { "Method $methodKey doesn't exist on global selector" }
-                            val validArgSizes = mutableListOf<Int>()
-                            for ((index, m) in availableMethods.withIndex()) {
-                                try {
-                                    // @Caution by SuperMonster003 on Oct 28, 2024.
-                                    //  ! Do NOT use `selectorObj` as a new global selector
-                                    //  ! will APPEND on the old one (e.g., text('a') -> text('a').desc('b')).
-                                    //  ! zh-CN:
-                                    //  ! 不要使用 `selectorObj`, 因为新的全局选择器将附加到旧选择器之上
-                                    //  ! (例如 text('a') -> text('a').desc('b')).
-                                    result = m.invoke(scriptRuntime.selector(), *convertArgumentsIfNeeded(m, arguments))
-                                    break
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                    if (index == availableMethods.lastIndex) throw e
-                                    validArgSizes.add(m.parameterCount)
-                                }
+                            val resolved = SelectorMethodResolver.resolve(availableMethods, arguments)
+                                ?: throw WrappedIllegalArgumentException(
+                                    "Invalid arguments (${arguments.size}) for method UiSelector$$methodKey",
+                                )
+
+                            // @Caution by SuperMonster003 on Oct 28, 2024.
+                            //  ! Do NOT use `selectorObj` as a new global selector
+                            //  ! will APPEND on the old one (e.g., text('a') -> text('a').desc('b')).
+                            //  ! zh-CN:
+                            //  ! 不要使用 `selectorObj`, 因为新的全局选择器将附加到旧选择器之上
+                            //  ! (例如 text('a') -> text('a').desc('b')).
+                            try {
+                                resolved.method.invoke(scriptRuntime.selector(), *resolved.arguments)
+                            } catch (e: InvocationTargetException) {
+                                throw e.targetException
                             }
-                            if (availableMethods.size != validArgSizes.size) {
-                                return@runCatching result
-                            }
-                            listOf(
-                                "Invalid arguments length (${arguments.size})",
-                                "for method UiSelector$$methodKey,",
-                                "acceptable length is ${
-                                    when (validArgSizes.size) {
-                                        1 -> "${validArgSizes[0]}"
-                                        else -> "[ ${validArgSizes.joinToString(", ")} ]"
-                                    }
-                                }",
-                            ).joinToString(" ").let { s -> throw WrappedIllegalArgumentException(s) }
                         }.getOrElse { e ->
+                            if (ScriptInterruptedException.causedByInterrupt(e)) throw e
                             scriptRuntime.console.warn("${e.message}\n${e.stackTraceToString()}")
                             scriptRuntime.console.warn("method: ${methodKey}, arguments: [${arguments.joinToString(",") { coerceString(it) }}]")
                             throw e
@@ -107,22 +96,6 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
 
     override fun invoke(vararg args: Any?): Scriptable = ensureArgumentsIsEmpty(args) {
         Context.javaToJS(scriptRuntime.selector(), scriptRuntime.topLevelScope) as Scriptable
-    }
-
-    private fun convertArgumentsIfNeeded(method: Method, args: Array<out Any?>): Array<Any?> {
-        return method.parameterTypes.mapIndexed { index, paramType ->
-            val arg = args[index].jsUnwrapped()
-            when {
-                arg !is Double -> arg
-                paramType == Double::class.java || paramType == java.lang.Double.TYPE -> arg
-                paramType == Float::class.java || paramType == java.lang.Float.TYPE -> arg.toFloat()
-                paramType == Long::class.java || paramType == java.lang.Long.TYPE -> arg.roundToLong()
-                paramType == Int::class.java || paramType == Integer.TYPE -> arg.roundToInt()
-                paramType == Short::class.java || paramType == java.lang.Short.TYPE -> arg.toInt().toShort()
-                paramType == Byte::class.java || paramType == java.lang.Byte.TYPE -> arg.toInt().toByte()
-                else -> arg
-            }
-        }.toTypedArray()
     }
 
     private fun isGlobalAugmentTarget(key: String): Boolean {
@@ -486,5 +459,84 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         }
 
     }
+
+}
+
+internal object SelectorMethodResolver {
+
+    data class Resolution(
+        val method: Method,
+        val arguments: Array<Any?>,
+    )
+
+    fun resolve(methods: List<Method>, args: Array<out Any?>): Resolution? {
+        val unwrappedArgs = Array<Any?>(args.size) { index -> args[index].jsUnwrapped() }
+        return methods.asSequence()
+            .sortedBy { method -> if (method.isVarArgs) 1 else 0 }
+            .mapNotNull { method ->
+                convertArguments(method, unwrappedArgs)?.let { converted -> Resolution(method, converted) }
+            }
+            .firstOrNull()
+    }
+
+    private fun convertArguments(method: Method, args: Array<Any?>): Array<Any?>? {
+        val parameterTypes = method.parameterTypes
+        if (!method.isVarArgs) {
+            if (parameterTypes.size != args.size) return null
+            return Array(parameterTypes.size) { index ->
+                val argument = convertArgument(parameterTypes[index], args[index]) ?: return null
+                argument.value
+            }
+        }
+
+        val fixedParameterCount = parameterTypes.size - 1
+        if (args.size < fixedParameterCount) return null
+        val converted = arrayOfNulls<Any?>(parameterTypes.size)
+        repeat(fixedParameterCount) { index ->
+            val argument = convertArgument(parameterTypes[index], args[index]) ?: return null
+            converted[index] = argument.value
+        }
+
+        val componentType = requireNotNull(parameterTypes.last().componentType)
+        val varargCount = args.size - fixedParameterCount
+        val varargs = JavaArray.newInstance(componentType, varargCount)
+        repeat(varargCount) { index ->
+            val argument = convertArgument(componentType, args[fixedParameterCount + index]) ?: return null
+            JavaArray.set(varargs, index, argument.value)
+        }
+        converted[parameterTypes.lastIndex] = varargs
+        return converted
+    }
+
+    private fun convertArgument(parameterType: Class<*>, arg: Any?): ConvertedArgument? {
+        val converted = when {
+            arg !is Double -> arg
+            parameterType == Double::class.java || parameterType == Double::class.javaObjectType -> arg
+            parameterType == Float::class.java || parameterType == Float::class.javaObjectType -> arg.toFloat()
+            parameterType == Long::class.java || parameterType == Long::class.javaObjectType -> arg.roundToLong()
+            parameterType == Int::class.java || parameterType == Int::class.javaObjectType -> arg.roundToInt()
+            parameterType == Short::class.java || parameterType == Short::class.javaObjectType -> arg.toInt().toShort()
+            parameterType == Byte::class.java || parameterType == Byte::class.javaObjectType -> arg.toInt().toByte()
+            else -> arg
+        }
+        if (converted == null) {
+            return if (parameterType.isPrimitive) null else ConvertedArgument(null)
+        }
+        return converted.takeIf(boxedType(parameterType)::isInstance)?.let(::ConvertedArgument)
+    }
+
+    private fun boxedType(type: Class<*>): Class<*> = when (type) {
+        Boolean::class.java -> Boolean::class.javaObjectType
+        Byte::class.java -> Byte::class.javaObjectType
+        Char::class.java -> Char::class.javaObjectType
+        Double::class.java -> Double::class.javaObjectType
+        Float::class.java -> Float::class.javaObjectType
+        Int::class.java -> Int::class.javaObjectType
+        Long::class.java -> Long::class.javaObjectType
+        Short::class.java -> Short::class.javaObjectType
+        else -> type
+    }
+
+    private data class ConvertedArgument(val value: Any?)
 
 }
