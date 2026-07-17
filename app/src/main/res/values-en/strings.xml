@@ -1224,6 +1224,7 @@
     <string name="text_plugin_jump_to_launch_page">Jump to launch page</string>
     <string name="text_plugin_library_official">Official plugin library</string>
     <string name="text_plugin_library_third_party">Third-party plugin library</string>
+    <string name="text_plugin_additional_variants">Other plugin variants</string>
     <string name="text_plugin_mount_object_name">Mount object name</string>
     <string name="text_plugin_mount_point">Mount point</string>
     <string name="text_plugin_mount_point_global_display">global</string>

@@ -52,6 +52,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_additional_plugin_variants"
+        android:title="@string/text_plugin_additional_variants"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_show_logs"
         android:title="@string/text_process_log"
         app:showAsAction="never" />

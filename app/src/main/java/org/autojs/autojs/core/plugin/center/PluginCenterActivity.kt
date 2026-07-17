@@ -45,6 +45,7 @@ class PluginCenterActivity : BaseActivity() {
 
     private var searchViewItem: SearchViewItem? = null
     private var sourceScope: PluginIndexSource? = null
+    private var variantDisplayMode: PluginVariantDisplayMode = PluginVariantDisplayMode.STANDARD
 
     private val pickApkLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@registerForActivityResult
@@ -56,9 +57,16 @@ class PluginCenterActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        variantDisplayMode = intent.getStringExtra(EXTRA_VARIANT_DISPLAY_MODE)
+            ?.runCatching { PluginVariantDisplayMode.valueOf(this) }
+            ?.getOrNull()
+            ?: PluginVariantDisplayMode.STANDARD
         sourceScope = intent.getStringExtra(EXTRA_SOURCE_SCOPE)
             ?.runCatching { PluginIndexSource.valueOf(this) }
             ?.getOrNull()
+        if (variantDisplayMode == PluginVariantDisplayMode.ADDITIONAL_ONLY) {
+            sourceScope = PluginIndexSource.OFFICIAL
+        }
 
         binding = ActivityPluginCenterBinding.inflate(layoutInflater).also {
             setContentView(it.root)
@@ -66,13 +74,17 @@ class PluginCenterActivity : BaseActivity() {
 
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.fragment_plugin_center, PluginCenterFragment.newInstance(sourceScope))
+            .replace(
+                R.id.fragment_plugin_center,
+                PluginCenterFragment.newInstance(sourceScope, variantDisplayMode),
+            )
             .commit()
 
-        val titleRes = when (sourceScope) {
-            PluginIndexSource.OFFICIAL -> R.string.text_plugin_library_official
-            PluginIndexSource.THIRD_PARTY -> R.string.text_plugin_library_third_party
-            null -> R.string.text_plugin_center
+        val titleRes = when {
+            variantDisplayMode == PluginVariantDisplayMode.ADDITIONAL_ONLY -> R.string.text_plugin_additional_variants
+            sourceScope == PluginIndexSource.OFFICIAL -> R.string.text_plugin_library_official
+            sourceScope == PluginIndexSource.THIRD_PARTY -> R.string.text_plugin_library_third_party
+            else -> R.string.text_plugin_center
         }
 
         setToolbarAsBack(titleRes)
@@ -84,6 +96,9 @@ class PluginCenterActivity : BaseActivity() {
         menu?.findItem(R.id.action_add)?.isVisible = !scopedMode
         menu?.findItem(R.id.action_filter)?.isVisible = !scopedMode
         menu?.findItem(R.id.action_global_settings)?.isVisible = !scopedMode
+        menu?.findItem(R.id.action_additional_plugin_variants)?.isVisible =
+            variantDisplayMode != PluginVariantDisplayMode.ADDITIONAL_ONLY &&
+                    sourceScope != PluginIndexSource.THIRD_PARTY
         setUpSearchMenuItem(menu)
         setUpToolbarColors()
         return true
@@ -120,6 +135,10 @@ class PluginCenterActivity : BaseActivity() {
             }
             R.id.action_filter -> {
                 showFilterDialog(center)
+                true
+            }
+            R.id.action_additional_plugin_variants -> {
+                launchAdditionalVariants(this)
                 true
             }
             R.id.action_show_logs -> {
@@ -795,6 +814,7 @@ class PluginCenterActivity : BaseActivity() {
 
     companion object {
         private const val EXTRA_SOURCE_SCOPE = "extra_source_scope"
+        private const val EXTRA_VARIANT_DISPLAY_MODE = "extra_variant_display_mode"
 
         fun launch(context: Context, sourceScope: PluginIndexSource? = null) {
             Intent(context, PluginCenterActivity::class.java).apply {
@@ -802,6 +822,13 @@ class PluginCenterActivity : BaseActivity() {
                     putExtra(EXTRA_SOURCE_SCOPE, sourceScope.name)
                 }
             }.startSafely(context)
+        }
+
+        fun launchAdditionalVariants(context: Context) {
+            Intent(context, PluginCenterActivity::class.java)
+                .putExtra(EXTRA_SOURCE_SCOPE, PluginIndexSource.OFFICIAL.name)
+                .putExtra(EXTRA_VARIANT_DISPLAY_MODE, PluginVariantDisplayMode.ADDITIONAL_ONLY.name)
+                .startSafely(context)
         }
     }
 }

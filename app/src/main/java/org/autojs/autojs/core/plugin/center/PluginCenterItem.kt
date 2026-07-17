@@ -54,6 +54,7 @@ data class PluginCenterItem(
     val lastUpdateTime: Long? = null,
     val settings: PluginCenterItemSettings? = null,
     val source: PluginIndexSource = PluginIndexSource.OFFICIAL,
+    val isFeatured: Boolean = true,
     val engine: String? = null,
     val variant: String? = null,
     val engineId: String? = null,

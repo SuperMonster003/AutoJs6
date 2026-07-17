@@ -1229,6 +1229,7 @@
     <string name="text_plugin_jump_to_launch_page">跳轉到啟動頁</string>
     <string name="text_plugin_library_official">官方外掛庫</string>
     <string name="text_plugin_library_third_party">第三方外掛庫</string>
+    <string name="text_plugin_additional_variants">其他外掛變體</string>
     <string name="text_plugin_mount_object_name">掛載物件名稱</string>
     <string name="text_plugin_mount_point">掛載點</string>
     <string name="text_plugin_mount_point_global_display">global (全域性)</string>

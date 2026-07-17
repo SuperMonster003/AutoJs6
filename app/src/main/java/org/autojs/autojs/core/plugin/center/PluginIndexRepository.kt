@@ -591,6 +591,7 @@ class PluginIndexRepository {
                 obj.put("engine", entry.engine)
                 obj.put("variant", entry.variant)
                 obj.put("engineId", entry.engineId)
+                obj.put("featured", entry.isFeatured)
                 if (entry.supportedAbis == null) {
                     obj.put("supportedAbis", JSONObject.NULL)
                 } else {
@@ -715,6 +716,11 @@ class PluginIndexRepository {
             val engine = obj.optString("engine").takeIf { it.isNotBlank() && !it.equals("null", true) }
             val variant = obj.optString("variant").takeIf { it.isNotBlank() && !it.equals("null", true) }
             val engineId = obj.optString("engineId").takeIf { it.isNotBlank() && !it.equals("null", true) }
+            val isFeatured = when {
+                obj.has("featured") -> obj.optBoolean("featured", true)
+                obj.has("isFeatured") -> obj.optBoolean("isFeatured", true)
+                else -> true
+            }
             val requiresHostVersion = obj.optLong("requiresHostVersion", -1L).takeIf { it > 0 }
             val source = obj.optString("source")
                 .takeIf { it.isNotBlank() }
@@ -771,6 +777,7 @@ class PluginIndexRepository {
                 engine = engine,
                 variant = variant,
                 engineId = engineId,
+                isFeatured = isFeatured,
                 releases = releases,
                 supportedAbis = supportedAbis,
                 tags = tags,

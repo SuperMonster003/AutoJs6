@@ -1229,6 +1229,7 @@
     <string name="text_plugin_jump_to_launch_page">跳轉到啓動頁</string>
     <string name="text_plugin_library_official">官方插件庫</string>
     <string name="text_plugin_library_third_party">第三方插件庫</string>
+    <string name="text_plugin_additional_variants">其他插件變體</string>
     <string name="text_plugin_mount_object_name">掛載對象名稱</string>
     <string name="text_plugin_mount_point">掛載點</string>
     <string name="text_plugin_mount_point_global_display">global (全局)</string>

@@ -212,6 +212,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Tasker could not invoke and run scripts correctly _[`issue #501`](http://issues.autojs6.com/501)_
 * `Fix` Multiple Ace editor interaction issues involving IME input/text selection/code folding/pinch zoom/stack navigation and related scenarios
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
+* `Fix` Plugin Center could install an APK from the wrong distribution variant when a plugin release contained multiple variants
 * `Fix` APK Builder Template plugins could appear twice or incorrectly report updates
 * `Fix` File manager list scroll position was reset after deleting files from the Recycle Bin
 * `Fix` Switch views in home drawer settings had an excessively small effective touch area
@@ -228,6 +229,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Bottom log panel supports jumping to source code by clicking stack frames on the standalone log page
 * `Improvement` Switching the project documentation source takes effect immediately
 * `Improvement` Improved the style and functionality of the Plugin Center "Sort" and "Filter" dialogs
+* `Improvement` Plugin Center lists common distribution variants by default and provides a separate page for other variants
 * `Improvement` Improved multilingual changelogs/language caching/official verification/index loading and other Plugin Center features
 * `Improvement` Build system supports dynamic Kotlin/KSP/AGP/R8 compatibility matching and reduces Gradle startup memory pressure
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_

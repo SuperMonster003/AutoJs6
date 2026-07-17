@@ -1223,6 +1223,7 @@
     <string name="text_plugin_jump_to_launch_page">Aller a la page de lancement</string>
     <string name="text_plugin_library_official">Bibliotheque officielle de plugins</string>
     <string name="text_plugin_library_third_party">Bibliotheque de plugins tierce</string>
+    <string name="text_plugin_additional_variants">Autres variantes de plugins</string>
     <string name="text_plugin_mount_object_name">Nom de l\'objet monte</string>
     <string name="text_plugin_mount_point">Point de montage</string>
     <string name="text_plugin_mount_point_global_display">global</string>

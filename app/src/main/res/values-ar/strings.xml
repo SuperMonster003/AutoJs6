@@ -1225,6 +1225,7 @@
     <string name="text_plugin_jump_to_launch_page">الانتقال الى صفحة التشغيل</string>
     <string name="text_plugin_library_official">مكتبة الاضافات الرسمية</string>
     <string name="text_plugin_library_third_party">مكتبة اضافات الطرف الثالث</string>
+    <string name="text_plugin_additional_variants">متغيرات الاضافات الاخرى</string>
     <string name="text_plugin_mount_object_name">اسم كائن الربط</string>
     <string name="text_plugin_mount_point">نقطة الربط</string>
     <string name="text_plugin_mount_point_global_display">global</string>

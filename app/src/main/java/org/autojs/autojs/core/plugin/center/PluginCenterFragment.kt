@@ -71,6 +71,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     private var currentQuery: String? = null
 
     private var sourceScope: PluginIndexSource? = null
+    private var variantDisplayMode: PluginVariantDisplayMode = PluginVariantDisplayMode.STANDARD
     private val isScopedLibraryMode: Boolean
         get() = sourceScope != null
 
@@ -117,6 +118,10 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         sourceScope = arguments?.getString(ARG_SOURCE_SCOPE)
             ?.runCatching { PluginIndexSource.valueOf(this) }
             ?.getOrNull()
+        variantDisplayMode = arguments?.getString(ARG_VARIANT_DISPLAY_MODE)
+            ?.runCatching { PluginVariantDisplayMode.valueOf(this) }
+            ?.getOrNull()
+            ?: PluginVariantDisplayMode.STANDARD
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -127,7 +132,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         lastNightModeEnabled = isNightModeEnabled()
 
         currentSort = loadPersistedSort(context)
-        currentFilterState = PluginFilterStore.getFilterState(context)
+        currentFilterState = loadFilterState(context)
         latestIndexLoaded = false
 
         adapter = PluginCenterItemAdapter(object : PluginCenterItemAdapter.Listener {
@@ -313,6 +318,11 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         renderList()
     }
 
+    private fun loadFilterState(context: Context): PluginFilterStore.FilterState = when {
+        isScopedLibraryMode -> PluginFilterStore.defaultFilterState()
+        else -> PluginFilterStore.getFilterState(context)
+    }
+
     private fun loadPersistedSort(context: Context): Sort = when (sourceScope) {
         PluginIndexSource.OFFICIAL -> PluginSortStoreOfficial.getSort(context)
         PluginIndexSource.THIRD_PARTY -> PluginSortStoreThirdParty.getSort(context)
@@ -465,7 +475,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
 
     private fun renderList() {
         val q = currentQuery
-        val visibleItems = latestFullItems.filterNot { PluginVisibilityStore.isHidden(contextRef, it.packageName) }
+        val visibleItems = latestFullItems
+            .filterNot { PluginVisibilityStore.isHidden(contextRef, it.packageName) }
+            .let { PluginVariantDisplayPolicy.apply(it, variantDisplayMode) }
 
         val filteredByQuery = if (q.isNullOrBlank()) {
             visibleItems
@@ -944,14 +956,16 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         super.onStart()
         if (::contextRef.isInitialized) {
             registerSortPrefListener(contextRef)
-            PluginFilterStore.registerOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
+            if (!isScopedLibraryMode) {
+                PluginFilterStore.registerOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
+            }
             PluginOnlineSettingsStore.registerOnSharedPreferenceChangeListener(onlinePrefListener)
             Pref.registerOnSharedPreferenceChangeListener(nightModePrefListener)
 
             // Sync with latest persisted state (e.g., changed while fragment was stopped).
             // zh-CN: 同步最新的持久化状态 (如在 Fragment 停止期间被修改).
             setSort(loadPersistedSort(contextRef))
-            setFilterState(PluginFilterStore.getFilterState(contextRef))
+            setFilterState(loadFilterState(contextRef))
         }
 
         pkgReceiver ?: run registerPackageReceiver@{
@@ -1016,7 +1030,9 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
         super.onStop()
         if (::contextRef.isInitialized) {
             unregisterSortPrefListener(contextRef)
-            PluginFilterStore.unregisterOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
+            if (!isScopedLibraryMode) {
+                PluginFilterStore.unregisterOnSharedPreferenceChangeListener(contextRef, filterPrefListener)
+            }
             PluginOnlineSettingsStore.unregisterOnSharedPreferenceChangeListener(onlinePrefListener)
             Pref.get().unregisterOnSharedPreferenceChangeListener(nightModePrefListener)
         }
@@ -1124,6 +1140,7 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
     // zh-CN: 用于渲染列表的筛选策略.
     companion object {
         private const val ARG_SOURCE_SCOPE = "arg_source_scope"
+        private const val ARG_VARIANT_DISPLAY_MODE = "arg_variant_display_mode"
         private const val NIGHT_MODE_ICON_REFRESH_DELAY_MS = 120L
         private const val SWIPE_REFRESH_MAX_VISIBLE_MS = 8_000L
         private val OCR_SERVICE_ENGINES = setOf("mlkit-ocr", "paddle-ocr", "rapid-ocr")
@@ -1156,12 +1173,16 @@ class PluginCenterFragment : Fragment(R.layout.fragment_plugin_center) {
             Sort.PACKAGE_NAME_ASC,
         )
 
-        fun newInstance(sourceScope: PluginIndexSource?): PluginCenterFragment {
+        fun newInstance(
+            sourceScope: PluginIndexSource?,
+            variantDisplayMode: PluginVariantDisplayMode = PluginVariantDisplayMode.STANDARD,
+        ): PluginCenterFragment {
             return PluginCenterFragment().apply {
                 arguments = Bundle().apply {
                     if (sourceScope != null) {
                         putString(ARG_SOURCE_SCOPE, sourceScope.name)
                     }
+                    putString(ARG_VARIANT_DISPLAY_MODE, variantDisplayMode.name)
                 }
             }
         }

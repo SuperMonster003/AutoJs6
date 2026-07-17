@@ -28,6 +28,9 @@ data class PluginIndexEntry(
     /** @sample "paddle-ocr-pp-ocrv5" */
     val engineId: String? = null,
 
+    /** Whether this distribution variant belongs in the default Plugin Center list. */
+    val isFeatured: Boolean = true,
+
     val releases: List<PluginIndexRelease> = emptyList(),
     val supportedAbis: List<String>? = null,
 

@@ -1225,6 +1225,7 @@
     <string name="text_plugin_jump_to_launch_page">시작 페이지로 이동</string>
     <string name="text_plugin_library_official">공식 플러그인 라이브러리</string>
     <string name="text_plugin_library_third_party">서드파티 플러그인 라이브러리</string>
+    <string name="text_plugin_additional_variants">기타 플러그인 변형</string>
     <string name="text_plugin_mount_object_name">마운트 객체 이름</string>
     <string name="text_plugin_mount_point">마운트 지점</string>
     <string name="text_plugin_mount_point_global_display">global</string>

@@ -1223,6 +1223,7 @@
     <string name="text_plugin_jump_to_launch_page">Перейти на страницу запуска</string>
     <string name="text_plugin_library_official">Официальная библиотека плагинов</string>
     <string name="text_plugin_library_third_party">Сторонняя библиотека плагинов</string>
+    <string name="text_plugin_additional_variants">Другие варианты плагинов</string>
     <string name="text_plugin_mount_object_name">Имя объекта монтирования</string>
     <string name="text_plugin_mount_point">Точка монтирования</string>
     <string name="text_plugin_mount_point_global_display">global</string>

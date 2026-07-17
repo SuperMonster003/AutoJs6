@@ -49,6 +49,7 @@
         "Tasker ne pouvait pas invoquer et exécuter correctement les scripts _[`issue #501`](http://issues.autojs6.com/501)_",
         "Plusieurs problèmes d'interaction de l'éditeur Ace concernant l'IME/la sélection de texte/le pliage du code/le zoom par pincement/la navigation dans la pile et d'autres scénarios",
         "Le cache des icônes et l'état d'actualisation par glissement du Centre des plugins pouvaient devenir incohérents dans certains cas",
+        "Le Centre des plugins pouvait installer l'APK d'une mauvaise variante lorsqu'une version de plugin en contenait plusieurs",
         "Les plugins APK Builder Template pouvaient apparaître en double ou signaler des mises à jour incorrectement",
         "La position de défilement de la liste du gestionnaire de fichiers était réinitialisée après la suppression de fichiers de la Corbeille",
         "La zone tactile effective des interrupteurs du tiroir d'accueil était trop petite",
@@ -67,6 +68,7 @@
         "Le panneau de journal inférieur permet d'accéder au code source en cliquant sur les cadres de pile de la page de journal indépendante",
         "Les changements de source de la documentation du projet prennent effet immédiatement",
         "Amélioration du style et des fonctions des boîtes de dialogue \"Trier\" et \"Filtrer\" du Centre des plugins",
+        "Le Centre des plugins affiche les variantes courantes par défaut et fournit une page distincte pour les autres variantes",
         "Amélioration des journaux des modifications multilingues/du cache des langues/de la vérification officielle/du chargement des index et d'autres fonctions du Centre des plugins",
         "Le système de compilation sélectionne dynamiquement les versions compatibles de Kotlin/KSP/AGP/R8 et réduit la pression mémoire au démarrage de Gradle"
       ],
