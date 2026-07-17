@@ -6,7 +6,10 @@ import android.os.Build
 import android.util.Log
 import android.view.View
 import org.autojs.autojs.core.ui.ViewExtras
+import org.autojs.autojs.engine.module.AndroidRhinoAssetLoader
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
+import org.autojs.autojs.engine.module.ProcessWideAssetModuleScriptProvider
+import org.autojs.autojs.engine.module.ProcessWideRhinoAssetCache
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.project.ScriptConfig
@@ -37,11 +40,11 @@ import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.commonjs.module.RequireBuilder
+import org.mozilla.javascript.commonjs.module.provider.MultiModuleScriptProvider
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
 import org.mozilla.javascript.lc.type.TypeInfo
 import java.io.File
 import java.io.IOException
-import java.io.InputStreamReader
 import java.io.Reader
 import java.net.URI
 import java.util.Locale
@@ -53,20 +56,24 @@ import java.util.Locale
 open class RhinoJavaScriptEngine(private val androidContext: android.content.Context) : JavaScriptEngine() {
 
     private val mWrapFactory = WrapFactory()
+    private val mAssetLoader = AndroidRhinoAssetLoader(androidContext)
     val context: Context = enterContext()
     val scriptable: TopLevelScope = createScope(context)
 
     lateinit var thread: Thread
         private set
 
-    private val mInitScript: Script by lazy {
-        try {
-            val reader = InputStreamReader(androidContext.assets.open(SOURCE_FILE_INIT))
-            context.compileReader(reader, SOURCE_NAME_INIT, 1, null)
+    private val mInitScript: Script
+        get() = try {
+            ProcessWideRhinoAssetCache.getBootstrapScript(
+                context,
+                mAssetLoader,
+                SOURCE_FILE_INIT,
+                SOURCE_NAME_INIT,
+            )
         } catch (e: IOException) {
             throw UncheckedIOException(e)
         }
-    }
 
     override fun put(name: String, value: Any?) {
         scriptable.defineProp(name, Context.javaToJS(value, scriptable))
@@ -122,7 +129,10 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         scriptable.defineProp("Promise", runtime.js_Promise, READONLY or PERMANENT)
         scriptable.defineProp("ResultAdapter", runtime.js_ResultAdapter, READONLY or PERMANENT)
 
-        mInitScript.withTimeConsuming("script-init") { initScript ->
+        this.withTimeConsuming("script-init") {
+            // Resolve the cached script inside the timed block so a cold asset read/compile is
+            // attributed to script-init instead of being hidden by receiver evaluation.
+            val initScript = mInitScript
             runCatching {
                 context.executeScriptWithContinuations(initScript, scriptable)
             }.getOrElse { e ->
@@ -182,8 +192,14 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         val provider = AssetAndUrlModuleSourceProvider(
             androidContext, MODULES_ROOT_PATH, listOf<URI>(File(File.separator).toURI())
         )
+        val moduleScriptProvider = MultiModuleScriptProvider(
+            listOf(
+                ProcessWideAssetModuleScriptProvider(androidContext, MODULES_ROOT_PATH),
+                SoftCachingModuleScriptProvider(provider),
+            )
+        )
         RequireBuilder()
-            .setModuleScriptProvider(SoftCachingModuleScriptProvider(provider))
+            .setModuleScriptProvider(moduleScriptProvider)
             .setSandboxed(true)
             .createRequire(context, scope)
             .install(scope)
