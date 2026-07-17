@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 7 月 13 日 に更新されました.
+データは 2026 年 7 月 17 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -163,6 +163,74 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 ### リリース履歴
 
 ******
+
+# v6.8.0
+
+###### 2026/07/17
+
+* `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
+* `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
+* `新機能` Node.js ランタイムが制御された AutoJs6 ブリッジモジュールに対応し Safe Node Profile セキュリティポリシーを採用
+* `新機能` アプリのパッケージ化機能が Node.js スクリプトプロジェクトに対応し必要なランタイムライブラリを自動的に同梱
+* `新機能` プラグインシステムが Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/テキスト変換/メディア情報などの拡張 API に対応
+* `新機能` プラグインセンターがグローバル設定ページと使用説明ページを提供
+* `新機能` プラグインセンターが SDK プラグインの自動マウント機能に対応
+* `新機能` プラグインセンターが複数バリアントの優先順位付けに対応
+* `新機能` プラグインセンターがプラグインのオンラインインストール/オンライン更新に対応
+* `新機能` プラグインセンターがプラグイン起動ページへの移動/プラグインの非表示に対応
+* `新機能` プラグインセンターが利用可能な ABI の共通部分の検出と案内に対応
+* `新機能` プラグインセンターが APK Builder Template プラグインに対応, アプリのパッケージ化に必要なテンプレートを必要に応じてインストール/更新可能
+* `新機能` ホームのプラグインタブにあるフローティングボタンの長押しでプラグインセンターを開く機能に対応
+* `新機能` runtime.loadAar メソッド, AAR ファイルの動的ロード用
+* `新機能` device.getMarketName メソッド, デバイスの "市場名" 取得用 _[`issue #513`](http://issues.autojs6.com/513)_
+* `新機能` タイマータスクが月次/年次/カウントダウンタスクと繰り返し終了条件に対応 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
+* `新機能` ファイルマネージャーが複数選択と一括コピー/移動/削除操作に対応
+* `新機能` コードエディタが Ace エディタエンジンに対応, 設定でネイティブエディタとの切り替えが可能
+* `新機能` Ace エディタが AutoJs6 API コード補完/シグネチャヘルプ/ホバー情報/LSP プレビューに対応
+* `新機能` Ace エディタがショートカットパネル/操作履歴/操作のお気に入り/モバイルテキスト選択/ピンチズームなどに対応
+* `新機能` コードエディタが下部ログパネルの表示に対応 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `新機能` コードエディタの下部ログパネルがスタックフレームからコードへの移動に対応 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `新機能` コードエディタの下部ログパネルが "実行/停止" ボタンを提供, スクリプトをすばやく開始/停止可能
+* `新機能` コードエディタが専用設定ページとエディタ内設定ダイアログに対応, テーマプレビュー/ライトモードとダークモードの個別設定/フォント/ガター/折り返しなどの表示オプションを提供
+* `新機能` 設定ページが "実行後に下部ログパネルを自動表示" や "コードハイライトしきい値" などのコードエディタ設定を提供
+* `新機能` パッケージ化アプリの設定で "ログ" と "設定" のランチャーショートカットの表示/非表示に対応 _[`issue #550`](http://issues.autojs6.com/550)_
+* `新機能` アプリのパッケージ化が APK Builder Template プラグインを使用したリモートビルドに対応
+* `新機能` 開発者向けオプションが GitHub アクセストークン設定に対応, 更新確認とプラグインインデックスのリクエスト上限を拡張可能
+* `修正` runtime.loadJar がより新しい Java バージョン向けにコンパイルされた class ファイルを正常に動的ロードできない問題
+* `修正` app.isInstalled/kill などのメソッドでパッケージ名引数を正常に使用できない問題 _[`issue #495`](http://issues.autojs6.com/495)_
+* `修正` Root 権限のないデバイスで shell 関連メソッドを呼び出すと応答しなくなる可能性がある問題
+* `修正` dialogs.multiChoice メソッドが返す複数選択結果が誤って文字列に変換される問題 _[`issue #518`](http://issues.autojs6.com/518)_
+* `修正` selector モジュールがリフレクションでオーバーロードメソッドを呼び出す際に誤ったメソッドシグネチャを選択する可能性がある問題
+* `修正` Rhino エンジン更新後のスコープ API 互換性リグレッションにより一部のランタイム補助機能が正常に動作しない問題
+* `修正` Android 14+ で画面キャプチャ権限を要求するとメディアプロジェクションのフォアグラウンドサービス起動異常によりアプリがクラッシュする可能性がある問題 _[`issue #516`](http://issues.autojs6.com/516)_
+* `修正` 複数スレッドまたは複数ファイルから OCR を繰り返し呼び出すと画面キャプチャ権限を何度も要求する可能性がある問題 _[`issue #551`](http://issues.autojs6.com/551)_
+* `修正` Paddle OCR プラグインサービスが長時間の実行後に切断され自動復旧できない可能性がある問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
+* `修正` Paddle OCR プラグインが実行中でないと自動起動できず機能呼び出しやプロジェクトのパッケージ化に失敗する問題 _[`issue #517`](http://issues.autojs6.com/517)_
+* `修正` アクセシビリティサービスが back などの操作を連続実行すると予期せず中断する可能性がある問題 _[`issue #527`](http://issues.autojs6.com/527)_
+* `修正` スクリプトを繰り返し実行するとメモリ使用量が増え続ける可能性がある問題 (修正試行) _[`issue #548`](http://issues.autojs6.com/548)_
+* `修正` 外部 URI またはバックグラウンドからスクリプトを実行すると元のパスが保持されず相対パスの解決に失敗する可能性がある問題 _[`issue #545`](http://issues.autojs6.com/545)_
+* `修正` Tasker がスクリプトを正常に呼び出して実行できない問題 _[`issue #501`](http://issues.autojs6.com/501)_
+* `修正` Ace エディタの IME 入力/テキスト選択/コード折りたたみ/ピンチズーム/スタック移動などに関する複数の操作問題
+* `修正` 一部の状況でプラグインセンターのアイコンキャッシュとスワイプ更新状態が不整合になる可能性がある問題
+* `修正` APK Builder Template プラグインが重複表示されるか誤って更新を通知する可能性がある問題
+* `修正` ファイルマネージャーでゴミ箱からファイルを削除するとリストのスクロール位置がリセットされる問題
+* `修正` ホームドロワーのスイッチ操作領域が狭すぎる問題
+* `修正` フローティングボタンメニューに表示される最近のアプリのパッケージ名と Activity 情報が正しくない問題 _[`issue #529`](http://issues.autojs6.com/529)_
+* `修正` フローティングボタンの "スクリプトを実行" ダイアログが最小化後に復元できない可能性がある問題 (修正試行) _[`issue #500`](http://issues.autojs6.com/500)_
+* `修正` 起動画面の背景がノッチ画面の短辺カットアウト領域まで拡張されない問題
+* `改善` KeyCode メソッドの引数互換性を向上 _[`issue #492`](http://issues.autojs6.com/492)_
+* `改善` KeyCode メソッドが Shizuku 権限によるキーコードコマンド送信に対応
+* `改善` 重要でないコンポーネントの初期化を遅延しアプリの起動性能を向上
+* `改善` Rhino 内蔵リソースのコンパイル結果とランタイム拡張関数のメタデータをキャッシュしスクリプトの初期化性能を向上
+* `改善` ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo 関連機能をプラグイン化
+* `改善` コードエディタの "実行" ボタンをタップ後に "停止" ボタンへ切り替え, スクリプトをすばやく停止可能
+* `改善` コードエディタのテーマ/フォント/ツールバー/読み取り専用モード/折りたたみ/選択メニューなどの操作性を改善
+* `改善` 下部ログパネルが独立したログページのスタックフレームからソースコードへの移動に対応
+* `改善` プロジェクトドキュメントのソース切り替えを即時反映
+* `改善` プラグインセンターの "並べ替え" と "フィルター" ダイアログのスタイルと機能を改善
+* `改善` プラグインセンターの多言語更新履歴/言語キャッシュ/公式認証/インデックス読み込みなどを改善
+* `改善` ビルドシステムが Kotlin/KSP/AGP/R8 の互換バージョン動的選択に対応し Gradle 起動時のメモリ負荷を削減
+* `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
 
@@ -370,67 +438,6 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` README.md のビルド節に複数の方法を追加してターゲット設定ページの特定を容易化 _[`issue #404`](http://issues.autojs6.com/404)_
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v664)_
 
-# v6.6.3
-
-###### 2025/05/27
-
-* `新機能` リリース履歴機能: 多言語の変更履歴と統計を表示
-* `新機能` timers.keepAlive メソッド (グローバルへ昇格) によりスクリプトの活動を維持
-* `新機能` engines.on('start/stop/error', callback) などのイベントリスナーでエンジンのグローバルイベントを受信
-* `新機能` images.detectMultiColors メソッドで複数点のカラーを検査 _[`issue #374`](http://issues.autojs6.com/374)_
-* `新機能` images.matchFeatures/detectAndComputeFeatures メソッド: フル解像度画像検索 (参照 [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
-* `新機能` images.compressToBytes メソッドで画像を圧縮してバイト配列を取得
-* `新機能` images.downsample メソッドで解像度を下げて新しい ImageWrapper を生成
-* `新機能` ui.keepScreenOn メソッドで UI ページがフォーカス中は画面を点灯したまま維持
-* `新機能` ui.root プロパティ (getter) で UI レイアウト内の [ウィンドウコンテンツのルートコンテナ] ノードを取得
-* `新機能` webview 要素が JsBridge ベースのウェブページレイアウトをサポート (参照 [Auto.js Pro](https://g.pro.autojs.org/)) [例: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
-* `新機能` レイアウトインスペクターが要素の非表示をサポート (寄稿 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
-* `修正` Docs タブおよび Docs アクティビティのオンラインドキュメントがシステムナビゲーションバーと重なる場合がある問題を修正
-* `修正` 一部ページで Toolbar ボタンをタップすると誤ってタイトルのクリックイベントが発火する問題を修正
-* `修正` 一部端末でコードエディタの空行が□表示になる問題 (暫定修正)
-* `修正` テーマカラー設定のカラーピッカーダイアログが無限に重なる問題を修正
-* `修正` アクセシビリティサービスが無効のときに音量アップキーが全スクリプトを停止しない問題を修正
-* `修正` スケジュールタスクでユーザー定義ブロードキャストメッセージを編集する際に IME が入力エリアを覆う問題を修正
-* `修正` webview 内のコントロールがソフトキーボードを正常に呼び出せない問題を修正
-* `修正` APK 情報ダイアログがアプリ名や SDK 情報を取得できない場合がある問題を修正
-* `修正` ファイルマネージャーのサンプルでプロジェクトディレクトリに入る際にサブフォルダーの内容が読み込まれない問題を修正
-* `修正` Android 15 の UI モードでステータスバーが上部コンテンツを覆う問題を修正
-* `修正` Android 15 の一部ページでステータスバー背景色がテーマカラーと同期しない問題を修正
-* `修正` dialogs モジュールが customView プロパティをサポートしていない問題を修正 _[`issue #364`](http://issues.autojs6.com/364)_
-* `修正` dialogs.input の expression パラメータが実行結果を返さない問題を修正
-* `修正` JavaAdapter 使用時に ClassLoader スタックオーバーフローが発生する問題を修正 _[`issue #376`](http://issues.autojs6.com/376)_
-* `修正` console.setContentTextColor がデフォルト文字色をリセットしてしまう問題を修正 _[`issue #346`](http://issues.autojs6.com/346)_
-* `修正` console.setContentBackgroundColor がカラー名を受け付けない問題を修正 _[`issue #384`](http://issues.autojs6.com/384)_
-* `修正` images.compress 実装を修正: ダウンサンプリングではなくエンコード品質を変更
-* `修正` images.resize メソッドが正しく動作しない問題を修正
-* `修正` engines.all が ConcurrentModificationException を投げる場合がある問題を修正 _[`issue #394`](http://issues.autojs6.com/394)_
-* `修正` README.md の一部言語で日付フォーマットが誤っていた問題を修正
-* `修正` Gradle ビルドがライブラリアーカイブのサイズ不正で失敗する問題を修正 _[`issue #389`](http://issues.autojs6.com/389)_
-* `改善` レイアウトインスペクターのメニューに機能グループ化用のグラデーション区切りを追加
-* `改善` project.json がスクリプトプロジェクト用 permissions オプションをサポート (寄稿 [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
-* `改善` 単一ファイルをパッケージングする際, インストール済みアプリの宣言パーミッションを自動読み取り・選択 _[`issue #362`](http://issues.autojs6.com/362)_
-* `改善` テーマカラーの適用範囲を拡大, より多くのウィジェットをサポート
-* `改善` メインページのドロワー幅がランドスケープおよび超ワイド画面に適応
-* `改善` 『アプリについて』と『開発者について』ページに横向きとコンパクトレイアウトを追加
-* `改善` 設定ダイアログに [デフォルト値を使用] メニューを追加
-* `改善` ファイルマネージャーの FAB が外部タップ時に自動で隠れるように
-* `改善` コードフォーマッターが `??`, `?.`, `??=` 演算子をサポート
-* `改善` コードエディタが GB18030 / UTF-16 (LE/BE) / Shift_JIS などのエンコーディングでのファイル読み書きに対応
-* `改善` コードエディタがファイルの詳細情報 (パス/エンコーディング/改行コード/総バイト数・文字数 など) の表示に対応 _[`issue #395`](http://issues.autojs6.com/395)_
-* `改善` Intent 操作 (編集/閲覧/インストール/送信/再生など) にエラーメッセージを追加
-* `改善` webview 要素の url 属性が相対パスをサポート
-* `改善` ImageWrapper#saveTo の path パラメータが相対パスをサポート
-* `改善` images.save が PNG 圧縮を quality パラメータでサポート _[`issue #367`](http://issues.autojs6.com/367)_
-* `改善` 無視した更新リストとクライアントモードアドレスをクリア可能に
-* `改善` バージョンアップデート情報を UI 言語に合わせて表示
-* `改善` 非同期ロードでファイルマネージャーリストのスクロールがよりスムーズに
-* `改善` コンソールでのスクリプト例外メッセージの内容とフォーマットを改善
-* `改善` サンプルコードをフォルダーの初期内容にリセット可能
-* `改善` APK 署名検証を高速化
-* `改善` APK/メディアファイル情報ダイアログを速度と表示ロジック面で最適化
-* `改善` Gradle ビルドスクリプトが新しいバージョンに柔軟に対応 _[`discussion #369`](http://discussions.autojs6.com/369)_
-* `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
-
 ##### より詳細なリリース履歴については, こちらを参照してください
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ja.md)
@@ -447,13 +454,13 @@ AutoJs6 オープンソース プロジェクトのデバッグや開発が必�
 
 #### Android Studioの準備
 
-`Android Studio Quail 1 | 2026.1.1 Patch 2` バージョンをダウンロードしてください (いずれかを選択):
+`Android Studio Quail 2 | 2026.1.2` バージョンをダウンロードしてください (いずれかを選択):
 
-- [android-studio-quail1-patch2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.1.10/android-studio-quail1-patch2-windows.exe) (1.38 GiB)
-- [android-studio-quail1-patch2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.1.10/android-studio-quail1-patch2-windows.zip) (1.38 GiB)
-- [android-studio-quail1-patch2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.1.10/android-studio-quail1-patch2-linux.tar.gz) (1.42 GiB)
+- [android-studio-quail2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.2.10/android-studio-quail2-windows.exe) (1.39 GiB)
+- [android-studio-quail2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-windows.zip) (1.40 GiB)
+- [android-studio-quail2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-linux.tar.gz) (1.44 GiB)
 
-> 注: 上述バージョンのリリース日は 2026 年 6 月 16 日 です. その他のバージョンをダウンロードするか, 上記のリンクが失効している場合は, [Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください.
+> 注: 上述バージョンのリリース日は 2026 年 7 月 14 日 です. その他のバージョンをダウンロードするか, 上記のリンクが失効している場合は, [Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください.
 
 上記のファイルをインストールまたは解凍し, Android Studio ソフトウェアを実行します (例: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -504,7 +511,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 7 月 13 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 7 月 17 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

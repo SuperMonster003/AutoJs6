@@ -4,6 +4,83 @@
 
 ******
 
+# v6.8.0
+
+###### 2026/07/17
+
+* `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
+* `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
+* `Nuevo` El entorno de ejecución Node.js admite módulos puente controlados de AutoJs6 y adopta la política de seguridad Safe Node Profile
+* `Nuevo` La función de empaquetado admite proyectos de scripts Node.js e incluye automáticamente las bibliotecas de ejecución necesarias
+* `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/conversión de texto/información multimedia y más
+* `Nuevo` El Centro de plugins ofrece una página de configuración global y una página de instrucciones
+* `Nuevo` El Centro de plugins admite el montaje automático de plugins SDK
+* `Nuevo` El Centro de plugins admite la ordenación por prioridad de múltiples variantes
+* `Nuevo` El Centro de plugins permite instalar y actualizar plugins en línea
+* `Nuevo` El Centro de plugins permite abrir la página de inicio de un plugin y ocultar plugins
+* `Nuevo` El Centro de plugins permite detectar la intersección de ABI disponibles y mostrar avisos
+* `Nuevo` El Centro de plugins admite plugins APK Builder Template, permitiendo instalar y actualizar bajo demanda las plantillas necesarias para empaquetar aplicaciones
+* `Nuevo` Una pulsación prolongada del botón flotante de la pestaña Plugins de la página de inicio abre el Centro de plugins
+* `Nuevo` Método runtime.loadAar, para cargar archivos AAR dinámicamente
+* `Nuevo` Método device.getMarketName, para obtener el "nombre comercial" del dispositivo _[`issue #513`](http://issues.autojs6.com/513)_
+* `Nuevo` Las tareas programadas admiten tareas mensuales/anuales/con cuenta atrás y condiciones para finalizar la repetición _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
+* `Nuevo` El administrador de archivos admite selección múltiple y operaciones por lotes de copia/movimiento/eliminación
+* `Nuevo` El editor de código admite el motor Ace, intercambiable con el editor nativo desde Configuración
+* `Nuevo` El editor Ace admite completado de código de la API AutoJs6/ayuda de firmas/información al pasar el cursor/vista previa LSP
+* `Nuevo` El editor Ace admite un panel de accesos directos/historial de acciones/acciones favoritas/selección de texto en dispositivos móviles/zoom con pellizco y más
+* `Nuevo` El editor de código admite un panel de registro inferior (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `Nuevo` El panel de registro inferior del editor de código permite saltar desde marcos de pila al código fuente (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `Nuevo` El panel de registro inferior del editor de código ofrece un botón "Ejecutar/Detener" para iniciar y detener scripts rápidamente
+* `Nuevo` El editor de código admite una página de configuración dedicada y un diálogo dentro del editor, con vista previa de temas/configuraciones independientes para los modos claro y oscuro/fuentes/margen de números de línea/ajuste automático de línea y otras opciones de visualización
+* `Nuevo` La página Configuración ofrece opciones del editor de código como "Mostrar automáticamente el panel inferior de registros tras ejecutar" y "Umbral de resaltado de código"
+* `Nuevo` La configuración de aplicaciones empaquetadas permite mostrar u ocultar los accesos directos del iniciador "Registro" y "Configuración" _[`issue #550`](http://issues.autojs6.com/550)_
+* `Nuevo` El empaquetado de aplicaciones admite compilaciones remotas mediante plugins APK Builder Template
+* `Nuevo` Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins
+* `Corrección` runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java
+* `Corrección` app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_
+* `Corrección` Los métodos relacionados con shell podían dejar de responder en dispositivos sin acceso Root
+* `Corrección` Los resultados de selección múltiple devueltos por dialogs.multiChoice se convertían incorrectamente en cadenas _[`issue #518`](http://issues.autojs6.com/518)_
+* `Corrección` El módulo selector podía elegir una firma de método incorrecta al invocar métodos sobrecargados mediante reflexión
+* `Corrección` Una regresión de compatibilidad de la API de ámbitos tras actualizar el motor Rhino provocaba fallos en algunas funciones auxiliares del entorno de ejecución
+* `Corrección` La aplicación podía cerrarse inesperadamente al solicitar permiso de captura de pantalla en Android 14+ debido a un inicio anómalo del servicio en primer plano de proyección multimedia _[`issue #516`](http://issues.autojs6.com/516)_
+* `Corrección` Las llamadas repetidas a OCR desde varios hilos o archivos podían solicitar repetidamente permiso de captura de pantalla _[`issue #551`](http://issues.autojs6.com/551)_
+* `Corrección` El servicio del plugin Paddle OCR podía desconectarse tras ejecutarse durante mucho tiempo y no recuperarse automáticamente _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
+* `Corrección` El plugin Paddle OCR no podía activarse automáticamente cuando no estaba en ejecución, lo que hacía fallar llamadas a funciones o el empaquetado de proyectos _[`issue #517`](http://issues.autojs6.com/517)_
+* `Corrección` El servicio de accesibilidad podía interrumpirse inesperadamente al ejecutar operaciones consecutivas como back _[`issue #527`](http://issues.autojs6.com/527)_
+* `Corrección` El uso de memoria podía seguir aumentando tras ejecutar scripts repetidamente (intento de corrección) _[`issue #548`](http://issues.autojs6.com/548)_
+* `Corrección` La ruta original podía no conservarse al ejecutar scripts mediante URI externos o en segundo plano, lo que provocaba una resolución incorrecta de rutas relativas _[`issue #545`](http://issues.autojs6.com/545)_
+* `Corrección` Tasker no podía invocar y ejecutar scripts correctamente _[`issue #501`](http://issues.autojs6.com/501)_
+* `Corrección` Diversos problemas de interacción del editor Ace relacionados con IME/selección de texto/plegado de código/zoom con pellizco/navegación de pila y otros escenarios
+* `Corrección` La caché de iconos y el estado de actualización por deslizamiento del Centro de plugins podían ser incoherentes en algunos casos
+* `Corrección` Los plugins APK Builder Template podían aparecer duplicados o notificar actualizaciones incorrectamente
+* `Corrección` La posición de desplazamiento de la lista del administrador de archivos se restablecía tras eliminar archivos de la Papelera
+* `Corrección` El área táctil efectiva de los interruptores del cajón de inicio era demasiado pequeña
+* `Corrección` Los nombres de paquete y la información de Activity de las aplicaciones recientes mostrados en el menú del botón flotante eran incorrectos _[`issue #529`](http://issues.autojs6.com/529)_
+* `Corrección` El diálogo "Ejecutar script" del botón flotante podía no restaurarse tras minimizarlo (intento de corrección) _[`issue #500`](http://issues.autojs6.com/500)_
+* `Corrección` El fondo de la pantalla de inicio no se extendía al área de recorte del borde corto
+* `Mejora` Mejorada la compatibilidad de argumentos de los métodos KeyCode _[`issue #492`](http://issues.autojs6.com/492)_
+* `Mejora` Los métodos KeyCode permiten enviar comandos de código de tecla con permiso Shizuku
+* `Mejora` Aplazada la inicialización de componentes no críticos para mejorar el rendimiento de inicio de la aplicación
+* `Mejora` Almacenados en caché los resultados de compilación de los recursos Rhino integrados y los metadatos de las funciones de extensión del entorno de ejecución para mejorar el rendimiento de inicialización de scripts
+* `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
+* `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
+* `Mejora` Mejoradas las interacciones del editor de código para temas/fuentes/barras de herramientas/modo de solo lectura/plegado/menús de selección y más
+* `Mejora` El panel de registro inferior permite saltar al código fuente pulsando marcos de pila en la página de registro independiente
+* `Mejora` El cambio de la fuente de documentación del proyecto surte efecto inmediatamente
+* `Mejora` Mejorados el estilo y las funciones de los diálogos "Ordenar" y "Filtrar" del Centro de plugins
+* `Mejora` Mejorados los registros de cambios multilingües/caché de idiomas/verificación oficial/carga de índices y otras funciones del Centro de plugins
+* `Mejora` El sistema de compilación permite seleccionar dinámicamente versiones compatibles de Kotlin/KSP/AGP/R8 y reduce la presión de memoria al iniciar Gradle
+* `Dependencia` Android AXML modularizado
+* `Dependencia` Android ARSC Editor modularizado
+* `Dependencia` Se agrega Apache Commons Codec version 1.15
+* `Dependencia` Se elimina AndroidX MultiDex version 2.0.1
+* `Dependencia` Se elimina MLKit Barcode Scanning version 17.3.0
+* `Dependencia` Se elimina MLKit Text Recognition Chinese version 16.0.1
+* `Dependencia` Se elimina OpenCC version 1.2.2
+* `Dependencia` Se elimina Pinyin4j version 2.5.1
+* `Dependencia` Se elimina Jieba Analysis version 1.0.3-SNAPSHOT (modificada)
+* `Dependencia` Se elimina la biblioteca local Rapid OCR
+
 # v6.7.0
 
 ###### 2026/03/14

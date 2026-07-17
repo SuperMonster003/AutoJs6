@@ -71,7 +71,7 @@ The table below lists some Auto.js-related projects:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Data updated on Jul 13, 2026.
+Data updated on Jul 17, 2026.
 
 Data entries sorted in descending order by `last active`.
 
@@ -163,6 +163,74 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 ### Release History
 
 ******
+
+# v6.8.0
+
+###### 2026/07/17
+
+* `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
+* `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
+* `Feature` Node.js runtime supports controlled AutoJs6 bridge modules and adopts the Safe Node Profile security policy
+* `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
+* `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/text conversion/media information and more
+* `Feature` Plugin Center provides a global settings page and a user guide page
+* `Feature` Plugin Center supports automatic SDK plugin mounting
+* `Feature` Plugin Center supports multi-variant priority sorting
+* `Feature` Plugin Center supports online plugin installation and updates
+* `Feature` Plugin Center supports opening plugin launch pages and hiding plugins
+* `Feature` Plugin Center supports available ABI intersection detection and prompts
+* `Feature` Plugin Center supports APK Builder Template plugins, allowing on-demand installation and updates of templates required for app packaging
+* `Feature` Long-pressing the floating button on the Home Plugins tab opens the Plugin Center
+* `Feature` runtime.loadAar method, for dynamically loading AAR files
+* `Feature` device.getMarketName method, for obtaining the device's "market name" _[`issue #513`](http://issues.autojs6.com/513)_
+* `Feature` Timed tasks support monthly/yearly/countdown tasks and repeat termination conditions _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
+* `Feature` File manager supports multi-selection and batch copy/move/delete operations
+* `Feature` Code editor supports the Ace editor engine, switchable with the native editor in Settings
+* `Feature` Ace editor supports AutoJs6 API code completion/signature help/hover information and LSP preview
+* `Feature` Ace editor supports a shortcut panel/action history/action favorites/mobile text selection/pinch zoom and more
+* `Feature` Code editor supports a bottom log panel (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `Feature` Code editor bottom log panel supports jumping from stack frames to source code (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `Feature` Code editor bottom log panel provides a "Run/Stop" button for quickly starting and stopping scripts
+* `Feature` Code editor supports a dedicated settings page and an in-editor settings dialog, providing theme previews/separate light and dark mode configurations/fonts/gutter/word wrap and other display options
+* `Feature` Settings page provides code editor options such as "Auto show bottom log panel after running" and "Code highlight threshold"
+* `Feature` Packaged app configuration supports showing or hiding the "Log" and "Settings" launcher shortcuts _[`issue #550`](http://issues.autojs6.com/550)_
+* `Feature` App packaging supports remote builds using APK Builder Template plugins
+* `Feature` Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes
+* `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly
+* `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
+* `Fix` Shell-related methods could become unresponsive on devices without Root access
+* `Fix` Multiple-choice results returned by dialogs.multiChoice were incorrectly converted to strings _[`issue #518`](http://issues.autojs6.com/518)_
+* `Fix` Selector module could choose the wrong method signature when invoking overloaded methods through reflection
+* `Fix` A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction
+* `Fix` The app could crash when requesting screen capture permission on Android 14+ due to abnormal media projection foreground service startup _[`issue #516`](http://issues.autojs6.com/516)_
+* `Fix` Repeated OCR calls across multiple threads or files could repeatedly request screen capture permission _[`issue #551`](http://issues.autojs6.com/551)_
+* `Fix` Paddle OCR plugin service could disconnect after running for a long time and fail to recover automatically _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
+* `Fix` Paddle OCR plugin could not be woken automatically when not running, causing feature calls or project packaging to fail _[`issue #517`](http://issues.autojs6.com/517)_
+* `Fix` Accessibility service could stop unexpectedly while performing consecutive operations such as back _[`issue #527`](http://issues.autojs6.com/527)_
+* `Fix` Memory usage could continue to increase after repeatedly running scripts (attempted fix) _[`issue #548`](http://issues.autojs6.com/548)_
+* `Fix` The original path might not be preserved when running scripts through external URIs or in the background, causing relative paths to resolve incorrectly _[`issue #545`](http://issues.autojs6.com/545)_
+* `Fix` Tasker could not invoke and run scripts correctly _[`issue #501`](http://issues.autojs6.com/501)_
+* `Fix` Multiple Ace editor interaction issues involving IME input/text selection/code folding/pinch zoom/stack navigation and related scenarios
+* `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
+* `Fix` APK Builder Template plugins could appear twice or incorrectly report updates
+* `Fix` File manager list scroll position was reset after deleting files from the Recycle Bin
+* `Fix` Switch views in home drawer settings had an excessively small effective touch area
+* `Fix` Recent app package names and Activity information displayed in the floating button menu were incorrect _[`issue #529`](http://issues.autojs6.com/529)_
+* `Fix` The floating button "Run script" dialog could fail to restore after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
+* `Fix` Splash screen background did not extend into the short-edge display cutout area
+* `Improvement` Improved argument compatibility for KeyCode methods _[`issue #492`](http://issues.autojs6.com/492)_
+* `Improvement` KeyCode methods support sending key code commands with Shizuku permission
+* `Improvement` Deferred initialization of non-critical components to improve app startup performance
+* `Improvement` Cached compilation results for bundled Rhino resources and metadata for runtime enhancement functions to improve script initialization performance
+* `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
+* `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
+* `Improvement` Improved code editor interactions for themes/fonts/toolbars/read-only mode/folding/selection menus and more
+* `Improvement` Bottom log panel supports jumping to source code by clicking stack frames on the standalone log page
+* `Improvement` Switching the project documentation source takes effect immediately
+* `Improvement` Improved the style and functionality of the Plugin Center "Sort" and "Filter" dialogs
+* `Improvement` Improved multilingual changelogs/language caching/official verification/index loading and other Plugin Center features
+* `Improvement` Build system supports dynamic Kotlin/KSP/AGP/R8 compatibility matching and reduces Gradle startup memory pressure
+* `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
 
@@ -370,67 +438,6 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` README.md build section added multiple methods to help locate the target settings page _[`issue #404`](http://issues.autojs6.com/404)_
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v664)_
 
-# v6.6.3
-
-###### 2025/05/27
-
-* `Feature` Release history feature: view multi-language release changelogs and statistics
-* `Feature` timers.keepAlive method (now global) for keeping the script alive
-* `Feature` Event listeners such as engines.on('start/stop/error', callback) for global engine events
-* `Feature` images.detectMultiColors method for multi-point color verification _[`issue #374`](http://issues.autojs6.com/374)_
-* `Feature` images.matchFeatures / detectAndComputeFeatures methods: full-resolution image matching (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
-* `Feature` images.compressToBytes method to compress an image and generate a byte array
-* `Feature` images.downsample method for pixel down-sampling and creating a new ImageWrapper
-* `Feature` ui.keepScreenOn method to keep the device screen on while a UI page is focused
-* `Feature` ui.root property (getter) to obtain the "window content root container" node of the UI layout
-* `Feature` webview element now supports JsBridge-based web page layouts (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [see Sample Code > Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
-* `Feature` Layout Inspector supports hiding controls (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
-* `Fix` Online docs in the Home > Docs tab and Docs activity may be covered by the system navigation bar
-* `Fix` Clicking Toolbar buttons on some pages could accidentally trigger the title click event
-* `Fix` Blank lines in the code editor showed box glyphs on some devices (tentative fix)
-* `Fix` Color-picker dialog in the theme-color settings page could stack infinitely
-* `Fix` Volume-up key failed to stop all scripts when the accessibility service was disabled
-* `Fix` IME overlay issue when editing custom broadcast content in the Scheduled Tasks page
-* `Fix` Controls inside webview elements could not activate the soft keyboard properly
-* `Fix` APK file info dialog might fail to obtain app name and SDK info
-* `Fix` File-manager sample code might fail to auto-load child directory contents when entering a project folder
-* `Fix` Top content of UI mode on Android 15 was covered by the status bar
-* `Fix` Status-bar background color on some Android 15 pages could not follow the theme color dynamically
-* `Fix` dialogs module could not use the customView property _[`issue #364`](http://issues.autojs6.com/364)_
-* `Fix` Expression parameter of dialogs.input might not return the execution result
-* `Fix` Using JavaAdapter led to a ClassLoader stack overflow _[`issue #376`](http://issues.autojs6.com/376)_
-* `Fix` console.setContentTextColor caused log text color to lose its default value _[`issue #346`](http://issues.autojs6.com/346)_
-* `Fix` console.setContentBackgroundColor could not accept color-name arguments _[`issue #384`](http://issues.autojs6.com/384)_
-* `Fix` images.compress implementation corrected: now changes encoding quality instead of pixel down-sampling
-* `Fix` images.resize method did not work properly
-* `Fix` engines.all could trigger ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
-* `Fix` Incorrect date formats in some languages within README.md
-* `Fix` Gradle build could fail due to invalid library archive length _[`issue #389`](http://issues.autojs6.com/389)_
-* `Improvement` Added gradient separators to the Layout Inspector menu for lightweight grouping
-* `Improvement` project.json now supports a permissions option for script projects (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
-* `Improvement` Automatically read and check declared permissions of installed apps when packaging a single file _[`issue #362`](http://issues.autojs6.com/362)_
-* `Improvement` Expanded theme-color adaptation scope; supports more widget types
-* `Improvement` Adaptive drawer width on the Home page for landscape / ultra-wide screens
-* `Improvement` Added horizontal and small-screen layouts for About App & Developer pages
-* `Improvement` Settings-page dialogs now offer a "Use default value" menu option
-* `Improvement` Floating Action Button in File Manager auto-hides when tapping elsewhere
-* `Improvement` Code formatter now supports operators such as `??`, `?.`, `??=`
-* `Improvement` Code editor supports reading and writing files encoded in GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc
-* `Improvement` Code editor supports displaying detailed file information (path/encoding/line break format/total bytes and characters, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
-* `Improvement` Added operation-error prompts for intent actions (edit / view / install / send / play, etc.)
-* `Improvement` webview element's url attribute supports relative paths
-* `Improvement` ImageWrapper#saveTo path parameter supports relative paths
-* `Improvement` images.save supports PNG file-size compression when using the quality parameter _[`issue #367`](http://issues.autojs6.com/367)_
-* `Improvement` Clearing ignored update records and client-mode connection addresses is now supported
-* `Improvement` Version-update information supports multi-language display (in sync with current UI language)
-* `Improvement` Asynchronous loading significantly improves File Manager list scrolling smoothness
-* `Improvement` Improved content and formatting of script exception messages in the console
-* `Improvement` Sample code now supports resetting a folder to its initial contents
-* `Improvement` Increased efficiency when checking APK signature information
-* `Improvement` Optimized dialog display efficiency and information presentation for APK/media file type info
-* `Improvement` Gradle build script now better adapts to newer versions _[`discussion #369`](http://discussions.autojs6.com/369)_
-* `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
-
 ##### For more release history, refer to
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-en.md)
@@ -447,13 +454,13 @@ This section introduces the compilation and build methods of the AutoJs6 open-so
 
 #### Android Studio Preparation
 
-Download `Android Studio Quail 1 | 2026.1.1 Patch 2` version (choose one as needed):
+Download `Android Studio Quail 2 | 2026.1.2` version (choose one as needed):
 
-- [android-studio-quail1-patch2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.1.10/android-studio-quail1-patch2-windows.exe) (1.38 GiB)
-- [android-studio-quail1-patch2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.1.10/android-studio-quail1-patch2-windows.zip) (1.38 GiB)
-- [android-studio-quail1-patch2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.1.10/android-studio-quail1-patch2-linux.tar.gz) (1.42 GiB)
+- [android-studio-quail2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.2.10/android-studio-quail2-windows.exe) (1.39 GiB)
+- [android-studio-quail2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-windows.zip) (1.40 GiB)
+- [android-studio-quail2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-linux.tar.gz) (1.44 GiB)
 
-> Note: The release date for the above version is Jun 16, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Jul 14, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -504,7 +511,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `21` or higher is recommended.
 
-As of Jul 13, 2026, AutoJs6 supports up to version `26` of the JDK.
+As of Jul 17, 2026, AutoJs6 supports up to version `26` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

@@ -71,7 +71,7 @@ Le tableau suivant énumère certains projets liés à Auto.js:
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Données mises à jour le 13 July 2026.
+Données mises à jour le 17 July 2026.
 
 Les entrées de données sont triées par `dernière activité` en ordre décroissant.
 
@@ -163,6 +163,74 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 ### Historique des Versions
 
 ******
+
+# v6.8.0
+
+###### 2026/07/17
+
+* `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
+* `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
+* `Fonctionnalité` L'environnement d'exécution Node.js prend en charge des modules de liaison AutoJs6 contrôlés et adopte la politique de sécurité Safe Node Profile
+* `Fonctionnalité` La fonction d'empaquetage prend en charge les projets de scripts Node.js et inclut automatiquement les bibliothèques d'exécution requises
+* `Fonctionnalité` Le système de plugins prend en charge des interfaces d'extension pour Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/conversion de texte/informations multimédias et plus encore
+* `Fonctionnalité` Le Centre des plugins propose une page de paramètres globaux et une page d'instructions
+* `Fonctionnalité` Le Centre des plugins prend en charge le montage automatique des plugins SDK
+* `Fonctionnalité` Le Centre des plugins prend en charge le tri par priorité de plusieurs variantes
+* `Fonctionnalité` Le Centre des plugins permet d'installer et de mettre à jour des plugins en ligne
+* `Fonctionnalité` Le Centre des plugins permet d'ouvrir la page de lancement d'un plugin et de masquer des plugins
+* `Fonctionnalité` Le Centre des plugins permet de détecter l'intersection des ABI disponibles et d'afficher des indications
+* `Fonctionnalité` Le Centre des plugins prend en charge les plugins APK Builder Template, permettant d'installer et de mettre à jour à la demande les modèles nécessaires à l'empaquetage
+* `Fonctionnalité` Un appui long sur le bouton flottant de l'onglet Plugins de la page d'accueil ouvre le Centre des plugins
+* `Fonctionnalité` Méthode runtime.loadAar, pour charger dynamiquement des fichiers AAR
+* `Fonctionnalité` Méthode device.getMarketName, pour obtenir le "nom commercial" de l'appareil _[`issue #513`](http://issues.autojs6.com/513)_
+* `Fonctionnalité` Les tâches planifiées prennent en charge les tâches mensuelles/annuelles/avec compte à rebours et les conditions de fin de répétition _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
+* `Fonctionnalité` Le gestionnaire de fichiers prend en charge la sélection multiple et les opérations groupées de copie/déplacement/suppression
+* `Fonctionnalité` L'éditeur de code prend en charge le moteur Ace, interchangeable avec l'éditeur natif dans les paramètres
+* `Fonctionnalité` L'éditeur Ace prend en charge la complétion de code pour l'API AutoJs6/l'aide aux signatures/les informations au survol/l'aperçu LSP
+* `Fonctionnalité` L'éditeur Ace prend en charge un panneau de raccourcis/l'historique des actions/les actions favorites/la sélection de texte sur mobile/le zoom par pincement et plus encore
+* `Fonctionnalité` L'éditeur de code prend en charge un panneau de journal inférieur (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `Fonctionnalité` Le panneau de journal inférieur de l'éditeur de code permet d'accéder au code source depuis les cadres de pile (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `Fonctionnalité` Le panneau de journal inférieur de l'éditeur de code propose un bouton "Exécuter/Arrêter" pour démarrer et arrêter rapidement les scripts
+* `Fonctionnalité` L'éditeur de code prend en charge une page de paramètres dédiée et une boîte de dialogue dans l'éditeur, avec aperçu des thèmes/configurations indépendantes des modes clair et sombre/polices/gouttière des numéros de ligne/retour automatique à la ligne et d'autres options d'affichage
+* `Fonctionnalité` La page Paramètres propose des options d'éditeur comme "Afficher automatiquement le panneau de logs inférieur après l'exécution" et "Seuil de surlignage du code"
+* `Fonctionnalité` La configuration des applications empaquetées permet d'afficher ou de masquer les raccourcis de lanceur "Journal" et "Paramètres" _[`issue #550`](http://issues.autojs6.com/550)_
+* `Fonctionnalité` L'empaquetage d'applications prend en charge les compilations distantes à l'aide de plugins APK Builder Template
+* `Fonctionnalité` Les options pour développeurs permettent de configurer un jeton d'accès GitHub afin d'augmenter les limites de requêtes de vérification des mises à jour et d'index des plugins
+* `Correction` runtime.loadJar ne pouvait pas charger dynamiquement des fichiers de classe Java compilés pour une version plus récente
+* `Correction` app.isInstalled/kill et les méthodes associées ne pouvaient pas utiliser correctement les arguments de nom de paquet _[`issue #495`](http://issues.autojs6.com/495)_
+* `Correction` Les méthodes liées au shell pouvaient ne plus répondre sur les appareils sans accès Root
+* `Correction` Les résultats de sélection multiple renvoyés par dialogs.multiChoice étaient convertis à tort en chaînes _[`issue #518`](http://issues.autojs6.com/518)_
+* `Correction` Le module selector pouvait choisir une mauvaise signature lors de l'invocation de méthodes surchargées par réflexion
+* `Correction` Une régression de compatibilité de l'API de portée après la mise à jour du moteur Rhino provoquait le dysfonctionnement de certaines fonctions auxiliaires d'exécution
+* `Correction` L'application pouvait planter lors de la demande d'autorisation de capture d'écran sur Android 14+ en raison d'un démarrage anormal du service de premier plan de projection multimédia _[`issue #516`](http://issues.autojs6.com/516)_
+* `Correction` Les appels OCR répétés depuis plusieurs threads ou fichiers pouvaient demander plusieurs fois l'autorisation de capture d'écran _[`issue #551`](http://issues.autojs6.com/551)_
+* `Correction` Le service du plugin Paddle OCR pouvait se déconnecter après une longue exécution sans pouvoir se rétablir automatiquement _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
+* `Correction` Le plugin Paddle OCR ne pouvait pas être réveillé automatiquement lorsqu'il n'était pas en cours d'exécution, entraînant l'échec des appels de fonctions ou de l'empaquetage de projets _[`issue #517`](http://issues.autojs6.com/517)_
+* `Correction` Le service d'accessibilité pouvait s'interrompre de manière inattendue lors d'opérations consécutives telles que back _[`issue #527`](http://issues.autojs6.com/527)_
+* `Correction` L'utilisation de la mémoire pouvait continuer à augmenter après l'exécution répétée de scripts (tentative de correction) _[`issue #548`](http://issues.autojs6.com/548)_
+* `Correction` Le chemin d'origine pouvait ne pas être conservé lors de l'exécution de scripts via des URI externes ou en arrière-plan, entraînant une résolution incorrecte des chemins relatifs _[`issue #545`](http://issues.autojs6.com/545)_
+* `Correction` Tasker ne pouvait pas invoquer et exécuter correctement les scripts _[`issue #501`](http://issues.autojs6.com/501)_
+* `Correction` Plusieurs problèmes d'interaction de l'éditeur Ace concernant l'IME/la sélection de texte/le pliage du code/le zoom par pincement/la navigation dans la pile et d'autres scénarios
+* `Correction` Le cache des icônes et l'état d'actualisation par glissement du Centre des plugins pouvaient devenir incohérents dans certains cas
+* `Correction` Les plugins APK Builder Template pouvaient apparaître en double ou signaler des mises à jour incorrectement
+* `Correction` La position de défilement de la liste du gestionnaire de fichiers était réinitialisée après la suppression de fichiers de la Corbeille
+* `Correction` La zone tactile effective des interrupteurs du tiroir d'accueil était trop petite
+* `Correction` Les noms de paquet et les informations d'Activity des applications récentes affichés dans le menu du bouton flottant étaient incorrects _[`issue #529`](http://issues.autojs6.com/529)_
+* `Correction` La boîte de dialogue "Exécuter le script" du bouton flottant pouvait ne pas être restaurée après sa réduction (tentative de correction) _[`issue #500`](http://issues.autojs6.com/500)_
+* `Correction` L'arrière-plan de l'écran de démarrage ne s'étendait pas dans la zone de découpe du bord court
+* `Amélioration` Amélioration de la compatibilité des arguments des méthodes KeyCode _[`issue #492`](http://issues.autojs6.com/492)_
+* `Amélioration` Les méthodes KeyCode permettent d'envoyer des commandes de touche avec l'autorisation Shizuku
+* `Amélioration` Initialisation différée des composants non critiques pour améliorer les performances de démarrage de l'application
+* `Amélioration` Mise en cache des résultats de compilation des ressources Rhino intégrées et des métadonnées des fonctions d'extension de l'environnement d'exécution pour améliorer les performances d'initialisation des scripts
+* `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
+* `Amélioration` Le bouton "Exécuter" de l'éditeur de code devient "Arrêter" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts
+* `Amélioration` Amélioration des interactions de l'éditeur de code pour les thèmes/polices/barres d'outils/mode lecture seule/pliage/menus de sélection et plus encore
+* `Amélioration` Le panneau de journal inférieur permet d'accéder au code source en cliquant sur les cadres de pile de la page de journal indépendante
+* `Amélioration` Les changements de source de la documentation du projet prennent effet immédiatement
+* `Amélioration` Amélioration du style et des fonctions des boîtes de dialogue "Trier" et "Filtrer" du Centre des plugins
+* `Amélioration` Amélioration des journaux des modifications multilingues/du cache des langues/de la vérification officielle/du chargement des index et d'autres fonctions du Centre des plugins
+* `Amélioration` Le système de compilation sélectionne dynamiquement les versions compatibles de Kotlin/KSP/AGP/R8 et réduit la pression mémoire au démarrage de Gradle
+* `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
 
@@ -370,67 +438,6 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Dans README.md, section Build, ajout de plusieurs méthodes pour faciliter la localisation de la page de configuration de la cible _[`issue #404`](http://issues.autojs6.com/404)_
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v664)_
 
-# v6.6.3
-
-###### 2025/05/27
-
-* `Fonctionnalité` Fonction d'historique des versions : consulter le journal des changements multilingue et les statistiques
-* `Fonctionnalité` Méthode timers.keepAlive (désormais globale) pour maintenir le script actif
-* `Fonctionnalité` Méthodes d'écoute d'événements telles que engines.on('start/stop/error', callback) pour les événements globaux du moteur
-* `Fonctionnalité` Méthode images.detectMultiColors pour la vérification de couleurs multipoints _[`issue #374`](http://issues.autojs6.com/374)_
-* `Fonctionnalité` Méthodes images.matchFeatures/detectAndComputeFeatures : recherche d'image en pleine résolution (Réf. [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
-* `Fonctionnalité` Méthode images.compressToBytes pour compresser une image et générer un tableau d'octets
-* `Fonctionnalité` Méthode images.downsample pour l'échantillonnage de pixels et la création d'un nouveau ImageWrapper
-* `Fonctionnalité` Méthode ui.keepScreenOn pour garder l'écran allumé lorsque la page UI a le focus
-* `Fonctionnalité` Propriété ui.root (getter) pour obtenir le nœud « conteneur racine du contenu de fenêtre » du layout UI
-* `Fonctionnalité` L'élément webview prend en charge les layouts de pages Web basés sur JsBridge (Réf. [Auto.js Pro](https://g.pro.autojs.org/)) [voir Code d'exemple > Layout > HTML interactif / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
-* `Fonctionnalité` L'inspecteur de layout permet de masquer des contrôles (par [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
-* `Correction` Le contenu de la documentation en ligne dans l'onglet Docs et l'activité Docs pouvait être recouvert par la barre de navigation système
-* `Correction` Sur certaines pages, cliquer sur les boutons de la Toolbar pouvait déclencher par erreur l'événement de clic sur le titre
-* `Correction` Sur certains appareils, les lignes vides de l'editeur de code affichaient des caracteres en forme de carre; correction tentative
-* `Correction` La boîte de dialogue du sélecteur de couleurs dans les paramètres de couleur du thème pouvait se superposer indéfiniment
-* `Correction` La touche volume + ne stoppait pas tous les scripts lorsque le service d'accessibilité était désactivé
-* `Correction` Chevauchement du clavier IME lors de l'édition d'un contenu de diffusion personnalisé dans la page des tâches planifiées
-* `Correction` Les contrôles dans les éléments webview ne pouvaient pas activer correctement le clavier virtuel
-* `Correction` La boîte de dialogue d'information APK pouvait ne pas récupérer le nom de l'application ni les informations SDK
-* `Correction` Le code d'exemple du gestionnaire de fichiers pouvait ne pas charger automatiquement le contenu des sous-dossiers à l'entrée d'un répertoire de projet
-* `Correction` Le contenu supérieur du mode UI sous Android 15 était recouvert par la barre d'état
-* `Correction` La couleur d'arrière-plan de la barre d'état sur certaines pages Android 15 ne suivait pas dynamiquement la couleur du thème
-* `Correction` Le module dialogs ne pouvait pas utiliser la propriété customView _[`issue #364`](http://issues.autojs6.com/364)_
-* `Correction` Le paramètre d'expression de dialogs.input pouvait ne pas retourner le résultat d'exécution
-* `Correction` L'utilisation de JavaAdapter provoquait un débordement de pile ClassLoader _[`issue #376`](http://issues.autojs6.com/376)_
-* `Correction` console.setContentTextColor entraînait la perte de la couleur de texte par défaut _[`issue #346`](http://issues.autojs6.com/346)_
-* `Correction` console.setContentBackgroundColor n'acceptait pas les noms de couleur _[`issue #384`](http://issues.autojs6.com/384)_
-* `Correction` images.compress ajuste désormais la qualité d'encodage au lieu de réduire les pixels
-* `Correction` La méthode images.resize ne fonctionnait pas correctement
-* `Correction` engines.all pouvait déclencher ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
-* `Correction` Formats de date incorrects dans certaines langues du README.md
-* `Correction` La compilation Gradle pouvait échouer à cause d'une longueur invalide d'archive de bibliothèque _[`issue #389`](http://issues.autojs6.com/389)_
-* `Amélioration` Ajout de séparateurs dégradés dans le menu de l'inspecteur de layout pour regrouper les fonctions
-* `Amélioration` project.json prend désormais en charge l'option permissions pour les projets de script (par [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
-* `Amélioration` Lors de l'empaquetage d'un fichier unique, les permissions déclarées par l'application installée sont lues et cochées automatiquement _[`issue #362`](http://issues.autojs6.com/362)_
-* `Amélioration` Portée d'adaptation de la couleur de thème élargie et prise en charge de plus de types de widgets
-* `Amélioration` Largeur du tiroir d'accueil adaptée aux écrans paysage ou ultra-larges
-* `Amélioration` Ajout de layouts horizontaux et petit écran pour les pages À propos de l'application et Développeur
-* `Amélioration` Les boîtes de dialogue de la page Paramètres proposent l'option « Utiliser la valeur par défaut »
-* `Amélioration` Le bouton flottant du gestionnaire de fichiers se masque automatiquement lorsqu'on touche en dehors
-* `Amélioration` Le formateur de code prend désormais en charge les opérateurs `??`, `?.`, `??=`
-* `Amélioration` L'éditeur de code prend en charge la lecture et l'écriture de fichiers aux encodages GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc
-* `Amélioration` L'éditeur de code prend en charge l'affichage des informations détaillées du fichier (chemin/encodage/retour à la ligne/nombre total d'octets et de caractères, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
-* `Amélioration` Ajout de messages d'erreur pour les actions d'intent (éditer / voir / installer / envoyer / lire, etc.)
-* `Amélioration` L'attribut url de webview prend en charge les chemins relatifs
-* `Amélioration` Le paramètre path de ImageWrapper#saveTo prend en charge les chemins relatifs
-* `Amélioration` images.save permet la compression de fichiers PNG lors de l'utilisation du paramètre quality _[`issue #367`](http://issues.autojs6.com/367)_
-* `Amélioration` Possibilité de vider les enregistrements de mises à jour ignorées et les adresses de connexion en mode client
-* `Amélioration` Les informations de mise à jour de version sont affichées dans la langue de l'interface
-* `Amélioration` Le chargement asynchrone améliore la fluidité de défilement du gestionnaire de fichiers
-* `Amélioration` Contenu et format des messages d'exception de script améliorés dans la console
-* `Amélioration` Le code d'exemple permet de réinitialiser un dossier à son contenu initial
-* `Amélioration` Efficacité accrue lors de la vérification des informations de signature APK
-* `Amélioration` Optimisation de l'efficacité d'affichage et de présentation des informations pour les fichiers APK/médias
-* `Amélioration` Le script de build Gradle améliore sa capacité d'adaptation aux nouvelles versions _[`discussion #369`](http://discussions.autojs6.com/369)_
-* `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
-
 ##### Pour plus d'historique des versions, consultez
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-fr.md)
@@ -447,13 +454,13 @@ Cette section présente la méthode de compilation et de construction du projet 
 
 #### Préparation de Android Studio
 
-Téléchargez la version `Android Studio Quail 1 | 2026.1.1 Patch 2` (choisissez-en une selon vos besoins):
+Téléchargez la version `Android Studio Quail 2 | 2026.1.2` (choisissez-en une selon vos besoins):
 
-- [android-studio-quail1-patch2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.1.10/android-studio-quail1-patch2-windows.exe) (1.38 GiB)
-- [android-studio-quail1-patch2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.1.10/android-studio-quail1-patch2-windows.zip) (1.38 GiB)
-- [android-studio-quail1-patch2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.1.10/android-studio-quail1-patch2-linux.tar.gz) (1.42 GiB)
+- [android-studio-quail2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.2.10/android-studio-quail2-windows.exe) (1.39 GiB)
+- [android-studio-quail2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-windows.zip) (1.40 GiB)
+- [android-studio-quail2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-linux.tar.gz) (1.44 GiB)
 
-> Note : La version mentionnée ci-dessus a été publiée le 16 June 2026. Pour télécharger d'autres versions ou si le lien ci-dessus n'est plus valide, visitez la page [archive des versions de Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Note : La version mentionnée ci-dessus a été publiée le 14 July 2026. Pour télécharger d'autres versions ou si le lien ci-dessus n'est plus valide, visitez la page [archive des versions de Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Installez ou extrayez le fichier ci-dessus, exécutez Android Studio (par exemple `"D:\android-studio\bin\studio64.exe"`).
 
@@ -504,7 +511,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `21`.
 
-À partir du 13 July 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
+À partir du 17 July 2026, AutoJs6 prend en charge la version maximale de JDK `26`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

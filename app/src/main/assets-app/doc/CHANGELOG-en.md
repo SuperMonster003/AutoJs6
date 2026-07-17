@@ -4,6 +4,83 @@
 
 ******
 
+# v6.8.0
+
+###### 2026/07/17
+
+* `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
+* `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
+* `Feature` Node.js runtime supports controlled AutoJs6 bridge modules and adopts the Safe Node Profile security policy
+* `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
+* `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/text conversion/media information and more
+* `Feature` Plugin Center provides a global settings page and a user guide page
+* `Feature` Plugin Center supports automatic SDK plugin mounting
+* `Feature` Plugin Center supports multi-variant priority sorting
+* `Feature` Plugin Center supports online plugin installation and updates
+* `Feature` Plugin Center supports opening plugin launch pages and hiding plugins
+* `Feature` Plugin Center supports available ABI intersection detection and prompts
+* `Feature` Plugin Center supports APK Builder Template plugins, allowing on-demand installation and updates of templates required for app packaging
+* `Feature` Long-pressing the floating button on the Home Plugins tab opens the Plugin Center
+* `Feature` runtime.loadAar method, for dynamically loading AAR files
+* `Feature` device.getMarketName method, for obtaining the device's "market name" _[`issue #513`](http://issues.autojs6.com/513)_
+* `Feature` Timed tasks support monthly/yearly/countdown tasks and repeat termination conditions _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
+* `Feature` File manager supports multi-selection and batch copy/move/delete operations
+* `Feature` Code editor supports the Ace editor engine, switchable with the native editor in Settings
+* `Feature` Ace editor supports AutoJs6 API code completion/signature help/hover information and LSP preview
+* `Feature` Ace editor supports a shortcut panel/action history/action favorites/mobile text selection/pinch zoom and more
+* `Feature` Code editor supports a bottom log panel (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `Feature` Code editor bottom log panel supports jumping from stack frames to source code (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `Feature` Code editor bottom log panel provides a "Run/Stop" button for quickly starting and stopping scripts
+* `Feature` Code editor supports a dedicated settings page and an in-editor settings dialog, providing theme previews/separate light and dark mode configurations/fonts/gutter/word wrap and other display options
+* `Feature` Settings page provides code editor options such as "Auto show bottom log panel after running" and "Code highlight threshold"
+* `Feature` Packaged app configuration supports showing or hiding the "Log" and "Settings" launcher shortcuts _[`issue #550`](http://issues.autojs6.com/550)_
+* `Feature` App packaging supports remote builds using APK Builder Template plugins
+* `Feature` Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes
+* `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly
+* `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
+* `Fix` Shell-related methods could become unresponsive on devices without Root access
+* `Fix` Multiple-choice results returned by dialogs.multiChoice were incorrectly converted to strings _[`issue #518`](http://issues.autojs6.com/518)_
+* `Fix` Selector module could choose the wrong method signature when invoking overloaded methods through reflection
+* `Fix` A scope API compatibility regression after the Rhino engine update caused some runtime helpers to malfunction
+* `Fix` The app could crash when requesting screen capture permission on Android 14+ due to abnormal media projection foreground service startup _[`issue #516`](http://issues.autojs6.com/516)_
+* `Fix` Repeated OCR calls across multiple threads or files could repeatedly request screen capture permission _[`issue #551`](http://issues.autojs6.com/551)_
+* `Fix` Paddle OCR plugin service could disconnect after running for a long time and fail to recover automatically _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
+* `Fix` Paddle OCR plugin could not be woken automatically when not running, causing feature calls or project packaging to fail _[`issue #517`](http://issues.autojs6.com/517)_
+* `Fix` Accessibility service could stop unexpectedly while performing consecutive operations such as back _[`issue #527`](http://issues.autojs6.com/527)_
+* `Fix` Memory usage could continue to increase after repeatedly running scripts (attempted fix) _[`issue #548`](http://issues.autojs6.com/548)_
+* `Fix` The original path might not be preserved when running scripts through external URIs or in the background, causing relative paths to resolve incorrectly _[`issue #545`](http://issues.autojs6.com/545)_
+* `Fix` Tasker could not invoke and run scripts correctly _[`issue #501`](http://issues.autojs6.com/501)_
+* `Fix` Multiple Ace editor interaction issues involving IME input/text selection/code folding/pinch zoom/stack navigation and related scenarios
+* `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
+* `Fix` APK Builder Template plugins could appear twice or incorrectly report updates
+* `Fix` File manager list scroll position was reset after deleting files from the Recycle Bin
+* `Fix` Switch views in home drawer settings had an excessively small effective touch area
+* `Fix` Recent app package names and Activity information displayed in the floating button menu were incorrect _[`issue #529`](http://issues.autojs6.com/529)_
+* `Fix` The floating button "Run script" dialog could fail to restore after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
+* `Fix` Splash screen background did not extend into the short-edge display cutout area
+* `Improvement` Improved argument compatibility for KeyCode methods _[`issue #492`](http://issues.autojs6.com/492)_
+* `Improvement` KeyCode methods support sending key code commands with Shizuku permission
+* `Improvement` Deferred initialization of non-critical components to improve app startup performance
+* `Improvement` Cached compilation results for bundled Rhino resources and metadata for runtime enhancement functions to improve script initialization performance
+* `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
+* `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
+* `Improvement` Improved code editor interactions for themes/fonts/toolbars/read-only mode/folding/selection menus and more
+* `Improvement` Bottom log panel supports jumping to source code by clicking stack frames on the standalone log page
+* `Improvement` Switching the project documentation source takes effect immediately
+* `Improvement` Improved the style and functionality of the Plugin Center "Sort" and "Filter" dialogs
+* `Improvement` Improved multilingual changelogs/language caching/official verification/index loading and other Plugin Center features
+* `Improvement` Build system supports dynamic Kotlin/KSP/AGP/R8 compatibility matching and reduces Gradle startup memory pressure
+* `Dependency` Modularized Android AXML
+* `Dependency` Modularized Android ARSC Editor
+* `Dependency` Added Apache Commons Codec version 1.15
+* `Dependency` Removed AndroidX MultiDex version 2.0.1
+* `Dependency` Removed MLKit Barcode Scanning version 17.3.0
+* `Dependency` Removed MLKit Text Recognition Chinese version 16.0.1
+* `Dependency` Removed OpenCC version 1.2.2
+* `Dependency` Removed Pinyin4j version 2.5.1
+* `Dependency` Removed Jieba Analysis version 1.0.3-SNAPSHOT (modified)
+* `Dependency` Removed local Rapid OCR library
+
 # v6.7.0
 
 ###### 2026/03/14

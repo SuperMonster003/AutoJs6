@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-資料更新於 2026 年 7 月 13 日.
+資料更新於 2026 年 7 月 17 日.
 
 資料條目按 `最近活躍` 降序排序.
 
@@ -163,6 +163,74 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 ### 發行歷史
 
 ******
+
+# v6.8.0
+
+###### 2026/07/17
+
+* `新增` Node.js 24.5.0 腳本執行環境, 支援透過 "nodejs" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本
+* `新增` Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼
+* `新增` Node.js 執行環境支援受控 AutoJs6 橋接模組, 並採用 Safe Node Profile 安全策略
+* `新增` 打包功能支援 Node.js 腳本專案, 並自動包含所需執行階段程式庫
+* `新增` 外掛系統支援 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/文字轉換/媒體資訊等擴充介面
+* `新增` 外掛中心支援全域設定頁面及使用說明頁面
+* `新增` 外掛中心支援 SDK 外掛自動掛載功能
+* `新增` 外掛中心支援多變體優先順序排序功能
+* `新增` 外掛中心支援線上安裝外掛/線上更新外掛
+* `新增` 外掛中心支援外掛啟動頁跳轉/隱藏外掛
+* `新增` 外掛中心支援可用 ABI 交集檢測及提示
+* `新增` 外掛中心支援 APK Builder Template 外掛, 可按需安裝及更新打包應用所需範本
+* `新增` 主頁外掛標籤頁浮動按鈕支援長按進入外掛中心
+* `新增` runtime.loadAar 方法, 用於動態載入 AAR 檔案
+* `新增` device.getMarketName 方法, 用於獲取裝置的 "市場名稱" _[`issue #513`](http://issues.autojs6.com/513)_
+* `新增` 定時任務支援按月/按年/倒數任務及重複結束條件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
+* `新增` 檔案管理器支援多選檔案及批次複製/移動/刪除操作
+* `新增` 程式碼編輯器支援 Ace 編輯器引擎, 可在設定中與原生編輯器切換
+* `新增` Ace 編輯器支援 AutoJs6 API 程式碼補全/簽名說明/懸浮提示及 LSP 預覽
+* `新增` Ace 編輯器支援快速鍵面板/操作歷史/操作收藏/行動端文字選取/雙指縮放等功能
+* `新增` 程式碼編輯器支援底部日誌面板顯示 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `新增` 程式碼編輯器底部日誌面板支援從堆疊幀跳轉至原始碼 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
+* `新增` 程式碼編輯器底部日誌面板提供 "執行/停止" 按鈕, 可便捷啟停腳本
+* `新增` 程式碼編輯器支援專屬設定頁面及編輯器內設定對話框, 提供主題預覽/亮暗模式獨立設定/字型/行號槽/自動換行等顯示選項
+* `新增` 設定頁面提供 "執行後自動顯示底部日誌面板", "程式碼高亮閾值" 等程式碼編輯器設定選項
+* `新增` 打包應用設定支援顯示或隱藏 "日誌" 及 "設定" 啟動器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
+* `新增` 打包應用支援使用 APK Builder Template 外掛進行遠端建置
+* `新增` 開發者選項支援 GitHub 存取權杖設定, 用於提升更新檢查及外掛索引請求限額
+* `修復` runtime.loadJar 無法正常動態載入由較高 Java 版本編譯的 class 檔案的問題
+* `修復` app.isInstalled/kill 等方法無法正常使用套件名稱引數的問題 _[`issue #495`](http://issues.autojs6.com/495)_
+* `修復` 無 Root 權限裝置呼叫 shell 相關方法時可能出現假死的問題
+* `修復` dialogs.multiChoice 方法傳回的多選結果被錯誤轉換為字串的問題 _[`issue #518`](http://issues.autojs6.com/518)_
+* `修復` selector 模組反射呼叫多載方法時可能選擇錯誤方法簽名的問題
+* `修復` Rhino 引擎更新後作用域 API 相容性回歸導致部分執行環境輔助功能異常的問題
+* `修復` Android 14+ 申請螢幕擷取權限時可能因媒體投影前景服務啟動異常導致應用程式當機的問題 _[`issue #516`](http://issues.autojs6.com/516)_
+* `修復` 多執行緒或跨檔案重複呼叫 OCR 時可能反覆申請螢幕擷取權限的問題 _[`issue #551`](http://issues.autojs6.com/551)_
+* `修復` Paddle OCR 外掛服務長時間執行後可能中斷連線且無法自動復原的問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
+* `修復` Paddle OCR 外掛未處於執行狀態時無法被自動喚醒, 導致功能呼叫或專案打包失敗的問題 _[`issue #517`](http://issues.autojs6.com/517)_
+* `修復` 無障礙服務在連續執行 back 等操作時可能意外中斷的問題 _[`issue #527`](http://issues.autojs6.com/527)_
+* `修復` 腳本反覆執行後記憶體占用可能持續增加的問題 (試修) _[`issue #548`](http://issues.autojs6.com/548)_
+* `修復` 透過外部 URI 或背景執行腳本時可能無法保留原始路徑, 導致相對路徑解析異常的問題 _[`issue #545`](http://issues.autojs6.com/545)_
+* `修復` Tasker 無法正常呼叫並執行腳本的問題 _[`issue #501`](http://issues.autojs6.com/501)_
+* `修復` Ace 編輯器在輸入法互動/文字選取/程式碼折疊/雙指縮放/堆疊跳轉等場景下的多項互動問題
+* `修復` 外掛中心圖示快取及下拉重新整理狀態在部分場景下可能異常的問題
+* `修復` APK Builder Template 外掛可能重複顯示或錯誤提示更新的問題
+* `修復` 檔案管理器在資源回收筒刪除檔案後清單捲動位置被重設的問題
+* `修復` 主頁抽屜開關項的開關檢視有效點選區域過小的問題
+* `修復` 浮動按鈕選單顯示的最近應用程式套件名稱及 Activity 資訊異常的問題 _[`issue #529`](http://issues.autojs6.com/529)_
+* `修復` 浮動按鈕 "執行腳本" 對話框最小化後可能無法還原的問題 (試修) _[`issue #500`](http://issues.autojs6.com/500)_
+* `修復` 啟動頁背景未延伸到瀏海螢幕的短邊切口區域的問題
+* `最佳化` KeyCode 方法提升引數相容性 _[`issue #492`](http://issues.autojs6.com/492)_
+* `最佳化` KeyCode 方法支援使用 Shizuku 權限傳送鍵碼指令
+* `最佳化` 延遲初始化非關鍵元件, 提升應用程式啟動效能
+* `最佳化` 快取 Rhino 內建資源編譯結果及執行環境增強函式中繼資料, 提升腳本初始化效能
+* `最佳化` 外掛化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
+* `最佳化` 程式碼編輯器 "執行" 按鈕點選後變換為 "停止" 按鈕, 可便捷停止腳本
+* `最佳化` 程式碼編輯器完善主題/字型/工具列/唯讀模式/折疊/選取選單等互動體驗
+* `最佳化` 底部日誌面板支援在獨立日誌頁面點選堆疊幀跳轉至原始碼
+* `最佳化` 專案文件來源切換支援即時生效
+* `最佳化` 外掛中心完善 "排序" 及 "篩選" 對話框的樣式及功能
+* `最佳化` 外掛中心完善多語言更新日誌/語言快取/官方認證/索引載入等功能
+* `最佳化` 建置系統支援動態匹配 Kotlin/KSP/AGP/R8 相容版本並降低 Gradle 啟動記憶體壓力
+* `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
 
@@ -370,67 +438,6 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` README.md 專案編譯構建小節新增多種方式便於定位目標設定頁面 _[`issue #404`](http://issues.autojs6.com/404)_
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v664)_
 
-# v6.6.3
-
-###### 2025/05/27
-
-* `新增` 發行歷史功能, 可檢視發行版本的發行歷史記錄 (多語言) 與統計資料
-* `新增` timers.keepAlive 方法 (已全域性化), 用於保持指令碼活躍狀態
-* `新增` engines.on('start/stop/error', callback) 等事件監聽方法, 用於監聽指令碼引擎全域性事件
-* `新增` images.detectMultiColors 方法, 用於多點顏色校驗 _[`issue #374`](http://issues.autojs6.com/374)_
-* `新增` images.matchFeatures/detectAndComputeFeatures 方法, 支援全解析度找圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
-* `新增` images.compressToBytes 方法, 用於壓縮影象並生成位元組陣列
-* `新增` images.downsample 方法, 用於畫素降取樣並生成新的 ImageWrapper
-* `新增` ui.keepScreenOn 方法, 用於 UI 頁面獲取焦點時保持裝置螢幕常亮
-* `新增` ui.root 屬性 (getter), 用於獲取 UI 頁面佈局的 "視窗內容根容器" 節點
-* `新增` webview 元素支援基於 JsBridge 的 Web 頁面佈局 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [參閱 示例程式碼 > 佈局 > 可互動 HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
-* `新增` 佈局分析支援控制元件隱藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
-* `修復` 主頁文件標籤及文件活動頁面顯示線上文件時部分內容被系統導航欄遮擋的問題
-* `修復` 部分頁面 Toolbar 點選按鈕時可能導致標題點選事件誤觸發的問題
-* `修復` 部分裝置程式碼編輯器空行顯示方框字元的問題 (試修)
-* `修復` 主題色設定頁面調色盤對話方塊可能無限疊加的問題
-* `修復` 無障礙服務關閉時音量加鍵停止所有指令碼功能失效的問題
-* `修復` 定時任務頁面編輯自定義廣播內容時出現的輸入法遮擋問題
-* `修復` webview 元素中的控制元件無法正常啟用輸入法軟鍵盤的問題
-* `修復` APK 檔案型別資訊對話方塊可能無法獲取應用名稱及 SDK 資訊的問題
-* `修復` 檔案管理器示例程式碼進入專案目錄時可能無法自動載入子目錄檔案內容的問題
-* `修復` Android 15 UI 模式頂部內容被狀態列覆蓋的問題
-* `修復` Android 15 部分頁面狀態列背景顏色可能無法動態跟隨主題色的問題
-* `修復` dialogs 模組無法正常使用 customView 屬性的問題 _[`issue #364`](http://issues.autojs6.com/364)_
-* `修復` dialogs.input 方法的表示式引數可能無法獲得執行結果的問題
-* `修復` 使用 JavaAdapter 時導致 ClassLoader 呼叫棧溢位的問題 _[`issue #376`](http://issues.autojs6.com/376)_
-* `修復` console.setContentTextColor 方法導致日誌字型顏色丟失預設值的問題 _[`issue #346`](http://issues.autojs6.com/346)_
-* `修復` console.setContentBackgroundColor 方法無法接受顏色名稱引數的問題 _[`issue #384`](http://issues.autojs6.com/384)_
-* `修復` images.compress 方法實現原理由畫素降取樣修正為編碼質量變化
-* `修復` images.resize 方法無法正常使用的問題
-* `修復` engines.all 方法可能觸發 ConcurrentModificationException 的問題 _[`issue #394`](http://issues.autojs6.com/394)_
-* `修復` README.md 中部分語言日期格式不正確的問題
-* `修復` Gradle 構建指令碼可能因獲取到無效庫檔案檔案長度而導致構建失敗的問題 _[`issue #389`](http://issues.autojs6.com/389)_
-* `最佳化` 佈局分析選單新增漸變分隔線實現一定程度的功能分組
-* `最佳化` 指令碼專案配置檔案 project.json 支援 permissions 選項 (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
-* `最佳化` 打包單檔案時自動讀取並勾選已安裝應用的宣告許可權 _[`issue #362`](http://issues.autojs6.com/362)_
-* `最佳化` 主題色擴充適配範圍並支援更多控制元件型別
-* `最佳化` 主頁抽屜在橫向螢幕或超寬螢幕的寬度適應性
-* `最佳化` 關於應用與開發者頁面增加水平佈局及小屏佈局適配
-* `最佳化` 設定頁面對話方塊相關設定支援 "使用預設值" 選單選項
-* `最佳化` 檔案管理器浮動按鈕展開後點擊其他區域可自動隱藏
-* `最佳化` 程式碼編輯器格式化程式碼支援 `??`, `?.`, `??=` 等運算子
-* `最佳化` 程式碼編輯器支援 GB18030 / UTF-16 (LE/BE) / Shift_JIS 等編碼的檔案讀寫
-* `最佳化` 程式碼編輯器支援顯示檔案詳細資訊 (路徑/編碼/換行符/位元組及字元總數等) _[`issue #395`](http://issues.autojs6.com/395)_
-* `最佳化` 意圖相關操作 (編輯/檢視/安裝/傳送/播放等) 增加操作異常提示
-* `最佳化` webview 元素的 url 屬性支援相對路徑
-* `最佳化` ImageWrapper#saveTo 方法的路徑引數支援相對路徑
-* `最佳化` images.save 方法使用 quality 引數時支援 png 格式的檔案體積壓縮 _[`issue #367`](http://issues.autojs6.com/367)_
-* `最佳化` 已忽略更新記錄及客戶端模式連線地址記錄支援清空操作
-* `最佳化` 版本更新資訊支援多語言顯示 (與當前顯示語言同步)
-* `最佳化` 使用非同步載入方式一定程度提升檔案管理器列表滑動流暢性
-* `最佳化` 指令碼異常訊息在控制檯的顯示內容與格式
-* `最佳化` 示例程式碼支援將資料夾重置為初始內容
-* `最佳化` APK 檔案簽名信息提升檢測效率
-* `最佳化` APK 檔案型別資訊及媒體檔案型別資訊最佳化對話方塊顯示效率及資訊展示邏輯
-* `最佳化` Gradle 構建指令碼提升版本自適應能力 _[`discussion #369`](http://discussions.autojs6.com/369)_
-* `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
-
 ##### 更多發行歷史可參閱
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-zh-Hant-TW.md)
@@ -447,13 +454,13 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 #### Android Studio 準備
 
-下載 `Android Studio Quail 1 | 2026.1.1 Patch 2` 版本 (按需選擇其一):
+下載 `Android Studio Quail 2 | 2026.1.2` 版本 (按需選擇其一):
 
-- [android-studio-quail1-patch2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.1.10/android-studio-quail1-patch2-windows.exe) (1.38 GiB)
-- [android-studio-quail1-patch2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.1.10/android-studio-quail1-patch2-windows.zip) (1.38 GiB)
-- [android-studio-quail1-patch2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.1.10/android-studio-quail1-patch2-linux.tar.gz) (1.42 GiB)
+- [android-studio-quail2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.2.10/android-studio-quail2-windows.exe) (1.39 GiB)
+- [android-studio-quail2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-windows.zip) (1.40 GiB)
+- [android-studio-quail2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-linux.tar.gz) (1.44 GiB)
 
-> 注: 上述版本釋出時間為 2026 年 6 月 16 日. 如需下載其他版本, 或上述連結已失效, 可訪問 [Android Studio 發行版本歸檔](https://developer.android.com/studio/archive?hl=en) 頁面.
+> 注: 上述版本釋出時間為 2026 年 7 月 14 日. 如需下載其他版本, 或上述連結已失效, 可訪問 [Android Studio 發行版本歸檔](https://developer.android.com/studio/archive?hl=en) 頁面.
 
 安裝或解壓上述檔案, 執行 Android Studio 軟體 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -504,7 +511,7 @@ File (文件) | Settings (設置) | Appearance & Behavior (外觀與行為) | Sy
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `21`.
 
-截至 2026 年 7 月 13 日, AutoJs6 可支援 JDK 最高版本為 `26`.
+截至 2026 年 7 月 17 日, AutoJs6 可支援 JDK 最高版本為 `26`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

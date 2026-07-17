@@ -71,7 +71,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-数据更新于 2026 年 7 月 13 日.
+数据更新于 2026 年 7 月 17 日.
 
 数据条目按 `最近活跃` 降序排序.
 
@@ -164,33 +164,73 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 ******
 
-# v6.7.1
+# v6.8.0
 
-###### 2026/05/29
+###### 2026/07/17
 
-* `新增` runtime.loadAar 方法, 用于动态加载 aar 文件
-* `新增` device.getMarketName 方法, 用于获取设备的 "市场名称" _[`issue #513`](http://issues.autojs6.com/513)_
-* `新增` 插件中心增加全局设置页面/使用说明页面
-* `新增` 插件中心增加 SDK 插件自动挂载功能
-* `新增` 插件中心增加多变体优先级排序功能
+* `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
+* `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
+* `新增` Node.js 运行时支持受控 AutoJs6 桥接模块, 并采用 Safe Node Profile 安全策略
+* `新增` 打包功能支持 Node.js 脚本项目, 并自动包含所需运行库
+* `新增` 插件系统支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/文本转换/媒体信息等扩展接口
+* `新增` 插件中心支持全局设置页面及使用说明页面
+* `新增` 插件中心支持 SDK 插件自动挂载功能
+* `新增` 插件中心支持多变体优先级排序功能
 * `新增` 插件中心支持在线安装插件/在线更新插件
 * `新增` 插件中心支持插件启动页跳转/隐藏插件
 * `新增` 插件中心支持可用 ABI 交集检测及提示
+* `新增` 插件中心支持 APK Builder Template 插件, 可按需安装及更新打包应用所需模板
+* `新增` 主页插件标签页浮动按钮支持长按进入插件中心
+* `新增` runtime.loadAar 方法, 用于动态加载 AAR 文件
+* `新增` device.getMarketName 方法, 用于获取设备的 "市场名称" _[`issue #513`](http://issues.autojs6.com/513)_
+* `新增` 定时任务支持按月/按年/倒计时任务及重复结束条件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
+* `新增` 文件管理器支持多选文件及批量复制/移动/删除操作
+* `新增` 代码编辑器支持 Ace 编辑器引擎, 可在设置中与原生编辑器切换
+* `新增` Ace 编辑器支持 AutoJs6 API 代码补全/签名帮助/悬浮提示及 LSP 预览
+* `新增` Ace 编辑器支持快捷键面板/操作历史/操作收藏/移动端文本选择/双指缩放等功能
 * `新增` 代码编辑器支持底部日志面板显示 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `新增` 代码编辑器底部日志面板支持堆栈帧代码跳转 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
-* `新增` 代码编辑器底部日志面板添加 "运行/停止" 按钮, 可便捷启停脚本
-* `新增` 设置页面增加 "运行后自动显示底部日志面板", "代码高亮阈值" 等代码编辑器设置选项
-* `修复` runtime.loadJar 无法正常动态加载高版本 class 的问题
+* `新增` 代码编辑器底部日志面板提供 "运行/停止" 按钮, 可便捷启停脚本
+* `新增` 代码编辑器支持专属设置页面及编辑器内设置对话框, 提供主题预览/亮暗模式独立配置/字体/行号槽/自动换行等显示选项
+* `新增` 设置页面提供 "运行后自动显示底部日志面板", "代码高亮阈值" 等代码编辑器设置选项
+* `新增` 打包应用配置支持显示或隐藏 "日志" 及 "设置" 启动器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
+* `新增` 打包应用支持使用 APK Builder Template 插件进行远程构建
+* `新增` 开发者选项支持 GitHub 访问令牌设置, 用于提升更新检查及插件索引请求限额
+* `修复` runtime.loadJar 无法正常动态加载由较高 Java 版本编译的 class 文件的问题
 * `修复` app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_
 * `修复` 无 Root 权限设备调用 shell 相关方法时可能出现假死的问题
+* `修复` dialogs.multiChoice 方法返回的多选结果被错误转换为字符串的问题 _[`issue #518`](http://issues.autojs6.com/518)_
+* `修复` selector 模块反射调用重载方法时可能选择错误方法签名的问题
+* `修复` Rhino 引擎更新后作用域 API 兼容性回归导致部分运行时辅助功能异常的问题
+* `修复` Android 14+ 申请屏幕捕获权限时可能因媒体投影前台服务启动异常导致应用崩溃的问题 _[`issue #516`](http://issues.autojs6.com/516)_
+* `修复` 多线程或跨文件重复调用 OCR 时可能反复申请屏幕捕获权限的问题 _[`issue #551`](http://issues.autojs6.com/551)_
+* `修复` Paddle OCR 插件服务长时间运行后可能断开且无法自动恢复的问题 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_
+* `修复` Paddle OCR 插件未处于运行状态时无法被自动唤醒, 导致功能调用或项目打包失败的问题 _[`issue #517`](http://issues.autojs6.com/517)_
+* `修复` 无障碍服务在连续执行 back 等操作时可能意外中断的问题 _[`issue #527`](http://issues.autojs6.com/527)_
+* `修复` 脚本反复运行后内存占用可能持续增长的问题 (试修) _[`issue #548`](http://issues.autojs6.com/548)_
+* `修复` 通过外部 URI 或后台运行脚本时可能无法保留原始路径, 导致相对路径解析异常的问题 _[`issue #545`](http://issues.autojs6.com/545)_
 * `修复` Tasker 无法正常调用并运行脚本的问题 _[`issue #501`](http://issues.autojs6.com/501)_
+* `修复` Ace 编辑器在输入法交互/文本选择/代码折叠/双指缩放/堆栈跳转等场景下的多项交互问题
+* `修复` 插件中心图标缓存及下拉刷新状态在部分场景下可能异常的问题
+* `修复` APK Builder Template 插件可能重复显示或错误提示更新的问题
+* `修复` 文件管理器在回收站删除文件后列表滚动位置被重置的问题
 * `修复` 主页抽屉开关项的开关视图有效点击区域过小的问题
+* `修复` 浮动按钮菜单显示的最近应用包名及 Activity 信息异常的问题 _[`issue #529`](http://issues.autojs6.com/529)_
 * `修复` 浮动按钮 "运行脚本" 对话框最小化后可能无法还原的问题 (试修) _[`issue #500`](http://issues.autojs6.com/500)_
 * `修复` 启动页背景未延伸到刘海屏的短边切口区域的问题
-* `优化` 代码编辑器 "运行" 按钮点击后变换为 "停止" 按钮, 可便捷停止脚本
-* `优化` 插件中心完善 "排序" 及 "筛选" 对话框的样式及功能
 * `优化` KeyCode 方法提升参数兼容性 _[`issue #492`](http://issues.autojs6.com/492)_
 * `优化` KeyCode 方法支持使用 Shizuku 权限发送键码指令
+* `优化` 延迟初始化非关键组件, 提升应用启动性能
+* `优化` 缓存 Rhino 内置资源编译结果及运行时增强函数元数据, 提升脚本初始化性能
+* `优化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo 相关功能
+* `优化` 代码编辑器 "运行" 按钮点击后变换为 "停止" 按钮, 可便捷停止脚本
+* `优化` 代码编辑器完善主题/字体/工具栏/只读模式/折叠/选择菜单等交互体验
+* `优化` 底部日志面板支持在独立日志页面点击堆栈帧跳转至源码
+* `优化` 项目文档来源切换支持即时生效
+* `优化` 插件中心完善 "排序" 及 "筛选" 对话框的样式及功能
+* `优化` 插件中心完善多语言更新日志/语言缓存/官方认证/索引加载等功能
+* `优化` 构建系统支持动态匹配 Kotlin/KSP/AGP/R8 兼容版本并降低 Gradle 启动内存压力
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 
 # v6.7.0
 
@@ -414,13 +454,13 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 #### Android Studio 准备
 
-下载 `Android Studio Quail 1 | 2026.1.1 Patch 2` 版本 (按需选择其一):
+下载 `Android Studio Quail 2 | 2026.1.2` 版本 (按需选择其一):
 
-- [android-studio-quail1-patch2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.1.10/android-studio-quail1-patch2-windows.exe) (1.38 GiB)
-- [android-studio-quail1-patch2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.1.10/android-studio-quail1-patch2-windows.zip) (1.38 GiB)
-- [android-studio-quail1-patch2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.1.10/android-studio-quail1-patch2-linux.tar.gz) (1.42 GiB)
+- [android-studio-quail2-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.2.10/android-studio-quail2-windows.exe) (1.39 GiB)
+- [android-studio-quail2-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-windows.zip) (1.40 GiB)
+- [android-studio-quail2-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.2.10/android-studio-quail2-linux.tar.gz) (1.44 GiB)
 
-> 注: 上述版本发布时间为 2026 年 6 月 16 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2026 年 7 月 14 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -471,7 +511,7 @@ File (文件) | Settings (设置) | Appearance & Behavior (外观与行为) | Sy
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `21`.
 
-截至 2026 年 7 月 13 日, AutoJs6 可支持 JDK 最高版本为 `26`.
+截至 2026 年 7 月 17 日, AutoJs6 可支持 JDK 最高版本为 `26`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 
