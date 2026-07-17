@@ -71,6 +71,7 @@
 * `Improvement` Improved the style and functionality of the Plugin Center "Sort" and "Filter" dialogs
 * `Improvement` Plugin Center lists common distribution variants by default and provides a separate page for other variants
 * `Improvement` Improved multilingual changelogs/language caching/official verification/index loading and other Plugin Center features
+* `Improvement` Standardized multilingual translation coverage/file organization/name ordering/ASCII punctuation for project string resources
 * `Improvement` Build system supports dynamic Kotlin/KSP/AGP/R8 compatibility matching and reduces Gradle startup memory pressure
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor

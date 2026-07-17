@@ -68,9 +68,19 @@
     <string name="description_about_app_and_developer_preference">AutoJs6 是 Android 平臺支援無障礙服務的 JavaScript 自動化工具, 克隆 (clone) 自 \"hyb1996/Auto.js\" 且保持開源.\n\n如需獲取幫助或提交反饋, 可瀏覽專案的 GitHub 議題 (issues) 板塊, 或加入騰訊 (Tencent) QQ 群組 690946137.</string>
     <string name="description_about_app_tips_preference">1. 在 \"關於應用與開發者\" 頁面長按應用圖示可跳轉至 AutoJs6 開發者選項頁面</string>
     <string name="description_accessibility_service">無障礙服務是 AutoJs6 實現自動化操作的核心能力, 用於讀取螢幕控制元件資訊並模擬 [ 點選 / 滑動 / 輸入 ] 等互動.\n\n自動化相關的大部分功能函式以及佈局分析工具等, 均需要啟用無障礙服務才能正常工作.</string>
+    <string name="description_ace_action_favorites">動作收藏會記錄常用的編輯器動作, 例如執行/儲存/格式化/選單動作/長按動作及編輯器設定動作. 點選星號按鈕可開啟此清單, 點選項目可再次執行相應動作, 長按星號按鈕可重複最近一次動作, 拖曳項目可調整順序, 向右滑動可釘選或取消釘選, 向左滑動可刪除.</string>
+    <string name="description_ace_editor_font_preference">選擇 Ace 編輯器字型. 清單包含 Android 系統預設等寬字型, 以及附有作者/開發者資訊的開放原始碼程式字型; 系統等寬字型的實際字形由 Android 系統和裝置製造商決定.</string>
+    <string name="description_ace_font_ligatures_enabled_preference">為支援連字的字型啟用 OpenType 連字功能. ===, !==, =&gt; 和 &lt;= 等運算子可能顯示為連寫字形. 此設定只會改變程式碼的顯示方式.</string>
+    <string name="description_ace_font_styles_enabled_preference">允許 Ace 主題和語法醒目提示使用粗體, 斜體等字型樣式. 關閉後, 程式碼文字會強制使用一般樣式, 不會改變色彩或程式碼內容.</string>
+    <string name="description_ace_indent_guides_enabled_preference">顯示或隱藏程式碼區域中的縮排參考線. 此設定只會改變程式碼的顯示方式.</string>
+    <string name="description_ace_line_numbers_enabled_preference">顯示或隱藏編輯器邊欄行號. 程式碼摺疊, 中斷點和邊欄版面配置仍然可用.</string>
+    <string name="description_ace_lsp_enabled_preference">LSP 預覽支援預設為關閉. 啟用後, 編輯器會使用本機 TypeScript 語言服務提供補全, 暫留提示, 簽章提示和診斷, 並保留靜態補全作為後備方案.</string>
+    <string name="description_ace_lsp_file_types_preference">LSP 只會針對檔名符合所選副檔名的檔案啟動. 使用預設值會還原 JavaScript, TypeScript, JSON, Auto.js 和 Node.js 相關副檔名.</string>
+    <string name="description_ace_print_margin_enabled_preference">顯示或隱藏 Ace 編輯器右側的列印邊界參考線. 此設定只會改變程式碼的顯示方式.</string>
+    <string name="description_ace_word_wrap_enabled_preference">為長行啟用編輯器自動換行模式. 此設定不會修改檔案內容.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"管理所有檔案\" (或 \"所有檔案訪問\") 許可權允許 AutoJs6 在共享儲存空間中透過常規檔案路徑直接 [ 建立 / 讀取 / 修改 / 刪除 ] 檔案, 使指令碼可以訪問 \"內部儲存 (Internal Storage)\", 使檔案管理器可以正常顯示及管理檔案.\n\n在 Android 11+ 裝置上, 這是實現全盤檔案讀寫能力的主要方式.</string>
     <string name="description_app_language_preference">設定選項用於修改 AutoJs6 應用的文字內容顯示語言, 同時包括指令碼執行產生的錯誤訊息等.\n\n注: 部分內容可能需要重啟應用才能完成語言切換.</string>
-    <string name="description_auto_night_mode">自動夜間模式開啟後, AutoJs6 將根據系統設定自動切換夜間模式.\n\注: 自動夜間模式開關與夜間模式開關互相關聯且互相影響.</string>
+    <string name="description_auto_night_mode">自動夜間模式開啟後, AutoJs6 將根據系統設定自動切換夜間模式.\n\n注: 自動夜間模式開關與夜間模式開關互相關聯且互相影響.</string>
     <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">\"後臺彈出介面\" (也稱 \"後臺啟動介面\" 或 \"後臺彈出頁面\") 許可權允許 AutoJs6 在應用位於後臺或未顯示介面時, 仍可主動啟動介面 (Activity) 或開啟特定設定頁, 適合 [ 定時任務觸發時開啟 UI / 在鎖屏或待機後恢復互動 / 由通知或快捷方式喚起指令碼配置頁 ] 等場景.\n\n注: 在 Xiaomi (MIUI/HyperOS), Vivo (OriginOS/Funtouch OS) 等系統上, 該許可權可能預設關閉. 未授予時, 指令碼嘗試從後臺開啟頁面可能會被系統攔截, 表現為 [ 無響應 / 僅後臺執行但不顯示介面 / 跳轉失敗 ].\n\n授予後仍可能受到系統其他策略影響, 如 [ 電池最佳化 / 自啟動限制 / 後臺凍結 / 應用待機 ] 等, 可結合相關許可權或白名單設定一起調整.</string>
     <string name="description_change_working_dir_preference">更改包含指令碼的資料夾路徑</string>
     <string name="description_check_for_updates_preference">AutoJs6 從 GitHub 獲取並下載更新.</string>
@@ -78,12 +88,20 @@
     <string name="description_display_over_other_app">\"顯示在其他應用上層\" 許可權允許 AutoJs6 在其他應用介面之上展示懸浮窗或浮動按鈕, 以便在任意介面快速執行操作或檢視資訊.\n\n注: 未授予該許可權時, 懸浮窗及浮動按鈕可能會無法顯示或正常使用.</string>
     <string name="description_documentation_source_preference">本地文件: AutoJs6 內建檔案作為文件來源, 無需網路連線, 隨 AutoJs6 應用更新而發生內容變動.\n線上文件: 使用 GitHub 網頁作為文件來源, 需網路連線, 可隨時保持文件內容為最新.\n\n注: 為最大化線上文件的閱讀體驗, 建議使用桌面顯示器等寬屏顯示裝置閱讀.\n注: 截至 6.2.0 版本, 文件尚處於初步編寫階段, 大部分內容尚未完成編寫或更新.</string>
     <string name="description_documentation_source_preference_more">文件頁面的深色主題支援需要滿足以下條件:\n1. AutoJs6 開啟夜間模式\n2. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P] 及以下: 版本不低於 105</string>
+    <string name="description_editor_breakpoint_markers_enabled_preference">顯示或隱藏編輯器邊欄中的中斷點標記. 中斷點資料和偵錯選單動作仍然可用.</string>
     <string name="description_editor_code_highlight_threshold">根據檔案大小決定是否啟用語法高亮功能.\n對於大檔案, 停用語法高亮功能可一定程度提升檔案載入效率.</string>
+    <string name="description_editor_engine_preference">Ace 是預設編輯器引擎. JsDroidEditor 仍可作為後備編輯器使用, 也可以手動選擇.</string>
+    <string name="description_editor_fold_markers_enabled_preference">顯示或隱藏編輯器邊欄中的程式碼摺疊標記. JsDroidEditor 沒有摺疊標記顯示區域.</string>
+    <string name="description_editor_gutter_width_mode_preference">動態寬度會隨目前可見行號的位數變化. 固定寬度會預留穩定的最小寬度, 並且只在出現位數更多的行號時增大.</string>
     <string name="description_editor_large_file_mode_threshold">根據檔案大小決定是否使用大檔案模式載入檔案.\n大檔案模式可一定程度提升檔案載入效率及穩定性, 但 \"撤銷\" 及 \"重做\" 功能在大檔案模式下將被停用.</string>
     <string name="description_editor_log_button_behavior_preference">控制程式碼編輯器選單中 \"日誌\" 按鈕開啟日誌的方式.\n\n底部日誌面板: 彈出底部日誌面板, 點選 \"最大化\" 按鈕或向上拖動手柄至接近頂部均可進入全屏日誌頁面.\n全屏日誌頁面: 直接進入全屏日誌頁面.</string>
+    <string name="description_editor_theme_mode_preference">選擇程式碼編輯器是否在 AutoJs6 淺色模式和深色模式下分別記錄主題, 或在兩種模式下使用同一主題.</string>
+    <string name="description_editor_word_wrap_indent_style_preference">接續縮排會讓自動換行後的視覺接續行與原行縮排對齊. 頂格接續會讓視覺接續行從檢視區邊緣開始.</string>
     <string name="description_extending_js_build_in_objects">擴充套件 JavaScript 內建物件可以增加程式碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啟後所有指令碼均預設啟用內建擴充套件.\n內建擴充套件往往是不安全的, 除非明確瞭解內建擴充套件的原理及風險, 否則不建議啟用.\n選項關閉後, 仍然可以透過 plugins 全域性物件啟用內建擴充套件, 詳見專案文件.</string>
+    <string name="description_file_extensions_preference">設定是否在 AutoJs6 檔案管理器中顯示副檔名.</string>
     <string name="description_floating_button">浮動按鈕用於在螢幕邊緣顯示一個可拖動的快捷功能入口, 可用於 [ 啟動或停止指令碼 / 佈局分析 / 檢視最近包名或活動名稱 / 顯示指標位置 ] 等.\n\n注: 該功能通常需要授予 \"顯示在其他應用上層\" 許可權.</string>
     <string name="description_foreground_service">前臺服務用於在後臺更穩定地保持 AutoJs6 執行, 適合 [ 長時間執行指令碼 / 保持連線 / 持續監聽 ] 等場景.\n\n啟用後, 系統會顯示一條 \"前臺服務通知\" 用於告知使用者 AutoJs6 正在持續執行, 該通知通常會保持顯示直到服務停止.\n\n將通知設定為 \"靜音 (Silent)\" 或 \"最小化 (Minimize)\" 只會降低提示強度, 一般不會影響前臺服務功能.\n\n如果關閉通知渠道或禁止 AutoJs6 傳送通知, 可能影響前臺服務的正常啟動及穩定性.</string>
+    <string name="description_github_token_preference">僅用於 GitHub API 請求以降低觸發速率限制的機率. Token 將儲存在本機, 並在此介面隱藏.</string>
     <string name="description_hidden_files_preference">用於設定是否在 AutoJs6 檔案管理器中顯示隱藏檔案和資料夾 (通常以 \".\" 開頭).</string>
     <string name="description_ignore_battery_optimizations">忽略電池最佳化可降低系統對 AutoJs6 的後臺限制, 有助於定時任務或長時間指令碼在待機時相對更加穩定地執行.\n\n注: 不同廠商系統可能仍會有額外的省電策略, 如自啟動限制或後臺凍結等.</string>
     <string name="description_keep_screen_on_when_in_foreground">用於控制 AutoJs6 位於前臺時是否保持螢幕常亮.</string>
@@ -92,8 +110,9 @@
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中執行特定操作, 使用者可以在啟動器中顯示這些快捷方式, 並快速開始某些任務或啟動某個活動, 如閲讀 AutoJs6 應用文件, 啟動 AutoJs6 設定頁面等.</string>
     <string name="description_manage_ignored_updates_preference">點選可檢視或管理列表項.\n長按可移除列表項.</string>
     <string name="description_night_mode">用於控制並反映 AutoJs6 夜間模式策略.\n\n注: 夜間模式開關與自動夜間模式開關互相關聯且互相影響.</string>
-    <string name="description_night_mode_preference">夜間模式, 亦稱 [ 暗黑模式 / 深色主題 ] 等.\n夜間模式應用於安卓系統 UI (如通知欄和導航欄) 及 AutoJs6 應用頁面.\n夜間模式可提升裝置在低光環境下的易用性, 同時有助於提升弱視或光敏感使用者的視覺體驗.\n\n跟隨系統: AutoJs6 與安卓作業系統的夜間模式設定一致\n總是開啟: AutoJs6 保持開啟夜間模式 (忽略作業系統設定)\n總是關閉: AutoJs6 保持關閉夜間模式 (忽略作業系統設定)\n\n注: 跟隨系統功能僅支援安卓 API 級別 28 (安卓 9) [P] 及以上作業系統.</string>
+    <string name="description_night_mode_preference">夜間模式, 亦稱 [ 暗黑模式 / 深色主題 ] 等. 夜間模式應用於安卓系統 UI (如通知欄和導航欄) 及 AutoJs6 應用頁面. 夜間模式可提升裝置在低光環境下的易用性, 同時有助於提升弱視或光敏感使用者的視覺體驗.\n\n跟隨系統: AutoJs6 與安卓作業系統的夜間模式設定一致\n總是開啟: AutoJs6 保持開啟夜間模式 (忽略作業系統設定)\n總是關閉: AutoJs6 保持關閉夜間模式 (忽略作業系統設定)\n\n注: 跟隨系統功能僅支援安卓 API 級別 28 (安卓 9) [P] 及以上作業系統.</string>
     <string name="description_night_mode_preference_more">啟用安卓系統的夜間模式:\n- API 級別 29 (安卓 10) [Q] 及以上: 透過 [ 設定 -> 顯示 -> 主題 ] 開啟.\n- API 級別 28 (安卓 9) [P]: 透過 [ 開發者選項 -> 夜間模式 ] 開啟.\n\n對於基於 WebView 元件的內容 (如 AutoJs6 的文件頁面), 夜間模式支援需要滿足以下條件:\n1. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P]: 版本不低於 105\n2. WebView 元件頁面內容可適配夜間模式 (透過 CSS 或 安卓 XML 資源等方式實現)</string>
+    <string name="description_nodejs_doctor_report_preference">匯出後端類型, Node 版本, ABI, 功能旗標, 原生程式庫雜湊值, 功能設定檔, 最近錯誤狀態和打包範本狀態. 不包含使用者指令碼內容及敏感環境變數值.</string>
     <string name="description_notification_access">\"通知使用權\" (或 \"通知讀取許可權\") 允許 AutoJs6 讀取系統通知內容, 使指令碼可以監聽通知或獲取通知文字等.</string>
     <string name="description_pointer_location">\"指標位置\" 是安卓開發者選項中的除錯功能.\n開啟後, 系統會在螢幕上顯示觸控點的 [座標/移動軌跡/數量/大小/移動速度/壓力] 等資訊, 便於相關指令碼的 [編寫/除錯/校對] 等.</string>
     <string name="description_post_notifications">\"傳送通知\" 許可權允許 AutoJs6 向系統釋出通知, 使指令碼可以在通知欄釋出並管理自定義通知等.\n\n注: 在 Android 13+ 裝置上未授予該許可權時, 部分通知可能無法顯示, 並可能影響前臺服務的啟動與穩定性.</string>
@@ -111,7 +130,7 @@
     <string name="description_timed_task_backend">控制指令碼定時觸發的底層機制.\n\nAlarmManager: 透過申請 \"允許設定鬧鐘和提醒\" 許可權, 可使定時任務的觸發更接近準時.\nWorkManager: 系統友好, 適合可接受一定延遲的非關鍵定時任務.\nJobScheduler: 舊實現, 僅用作相容保留, 定時任務出現延遲的機率較大.</string>
     <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">使用場景與差異說明: \n\n1. AlarmManager\n適用於準時性敏感的定時任務, 如 [提醒/嚴格定時指令碼/...].\n在 Android 12+ 裝置上獲取 \"允許設定鬧鐘和提醒\" 許可權後, 在息屏或待機狀態時能夠較準時地執行定時任務.\n在未授予 \"允許設定鬧鐘和提醒\" 許可權時, 系統可能降級為不準時或延後執行任務.\n\n2. WorkManager\n適用於不要求嚴格準時執行的定時任務, 如 [非關鍵性同步/清理/統計/...].\n根據系統 [ 電量/網路/充電情況/待機策略/... ] 進行排程, 息屏或待機狀態時可能推遲任務執行.\n雖無法保證時間精確性, 但在 [ 可靠完成/失敗重試/鏈式執行/唯一任務去重 ] 等方面擁有獨特優勢.\n\n3. Job\n歷史實現, 為相容保留.\n在高版本安卓系統中定時任務可能存在較大的延遲執行問題.\n除非出於相容需要, 一般不推薦使用.</string>
     <string name="description_usage_stats_access">\"檢視使用情況\" 許可權可獲取本裝置過去使用應用的情況, 從而使 \"獲取當前應用\" (currentPackage) 結果更準確</string>
-    <string name="description_write_secure_settings">安全設定包含應用程式可讀但不可寫入的設定選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設定許可權\" 後, 普通應用可直接修改上述安全設定 (例如無障礙服務).</string>
+    <string name="description_write_secure_settings">安全系統設定包含應用程式可讀但不可寫入的系統偏好設定.\n這些設定必須由使用者透過系統應用程式的 UI 明確修改.\n取得安全系統設定權限後, 一般應用程式可直接修改安全設定 (如無障礙服務).</string>
     <string name="description_write_system_settings">\"修改系統設定\" 許可權允許 AutoJs6 修改部分系統設定項, 使指令碼可以修改 [ 螢幕亮度 / 自動旋轉 / 螢幕超時 ] 等系統設定引數.</string>
     <string name="dialog_button_abandon">放棄</string>
     <string name="dialog_button_abort">中止</string>
@@ -161,14 +180,14 @@
     <string name="dialog_button_save_and_continue">儲存並繼續</string>
     <string name="dialog_button_save_as">另存為</string>
     <string name="dialog_button_system_settings">系統設定</string>
-    <string name="dialog_button_system_settings_simplified">@string/dialog_button_system_settings</string>
+    <string name="dialog_button_system_settings_simplified">系統</string>
     <string name="dialog_button_update_now">立即更新</string>
     <string name="dialog_button_use_default">使用預設值</string>
     <string name="dialog_button_use_palette">使用調色盤</string>
     <string name="dialog_button_view_file">檢視檔案</string>
     <string name="dialog_button_view_shortcuts">檢視快捷方式</string>
     <string name="dialog_button_view_update">檢視更新</string>
-    <string name="dialog_button_view_with_browser">瀏覽器檢視</string>
+    <string name="dialog_button_view_with_browser">@string/dialog_button_download_with_browser</string>
     <string name="dialog_title_color_details">顏色詳情</string>
     <string name="dialog_title_color_palette">調色盤</string>
     <string name="dialog_title_theme_color_details">主題色詳情</string>
@@ -181,14 +200,23 @@
     <string name="editable_file_info_file_size_label">大小</string>
     <string name="editable_file_info_line_break_label">換行</string>
     <string name="editable_file_info_line_count_label">總行數</string>
+    <string name="entry_ace_editor_font_system_monospace">Android 系統預設等寬字型</string>
     <string name="entry_app_language_auto">跟隨系統</string>
     <string name="entry_documentation_source_local">本地文件</string>
     <string name="entry_documentation_source_online">線上文件</string>
+    <string name="entry_editor_engine_ace">Ace</string>
+    <string name="entry_editor_engine_native">JsDroidEditor</string>
+    <string name="entry_editor_gutter_width_mode_dynamic">動態</string>
+    <string name="entry_editor_gutter_width_mode_fixed">固定</string>
     <string name="entry_editor_log_button_behavior_bottom_sheet">底部日誌面板</string>
     <string name="entry_editor_log_button_behavior_fullscreen_page">全屏日誌頁面</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">更改字型大小</string>
     <string name="entry_editor_pinch_to_zoom_disable">禁用</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">縮放檢視</string>
+    <string name="entry_editor_theme_mode_separate">淺色與深色主題分開</string>
+    <string name="entry_editor_theme_mode_unified">淺色與深色主題共用</string>
+    <string name="entry_editor_word_wrap_indent_style_classic">頂格接續</string>
+    <string name="entry_editor_word_wrap_indent_style_continuation">接續縮排</string>
     <string name="entry_file_extensions_not_show">隱藏所有副檔名</string>
     <string name="entry_file_extensions_show_all">顯示所有副檔名</string>
     <string name="entry_file_extensions_show_all_but_executable">顯示副檔名 (*.js / *.auto 除外)</string>
@@ -211,6 +239,7 @@
     <string name="entry_root_record_out_file_type_js">JavaScript 檔案 (可編輯)</string>
     <string name="error_a_runtime_has_been_set">執行時已存在</string>
     <string name="error_abandoned_method">方法 %s 已被廢棄, 應避免使用</string>
+    <string name="error_ace_editor_unavailable">Ace 編輯器無法使用; JsDroidEditor 仍在執行</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">無法完成 \"%1$s\" 操作, 因為引數中包含負數座標值 (%2$d,%3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">缺少必要的 activity 物件, 可透過 \"ui\" 執行模式來提供</string>
     <string name="error_an_error_occurred">發生錯誤</string>
@@ -267,8 +296,6 @@
     <string name="error_failed_to_launch_manager">管理器啟動失敗</string>
     <string name="error_failed_to_launch_system_settings">系統設定啟動失敗</string>
     <string name="error_failed_to_load_plugins_with_reason">外掛讀取失敗.\n原因: %1$s.</string>
-    <string name="error_plugin_index_fetch_failed_with_reason">取得外掛索引失敗: %1$s</string>
-    <string name="error_plugin_index_source_fetch_failed_with_reason">取得 %1$s 外掛索引失敗: %2$s</string>
     <string name="error_failed_to_move">移動失敗</string>
     <string name="error_failed_to_rename">重新命名失敗</string>
     <string name="error_failed_to_render_content">內容渲染失敗</string>
@@ -341,6 +368,8 @@
     <string name="error_pattern_syntax">正則表示式句法錯誤</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">外掛 APK 不包含變體 \"%1$s\" 所需的資原始檔: %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">外掛 APK 不包含所需的 native 庫檔案: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">取得外掛索引失敗: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">取得 %1$s 外掛索引失敗: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">外掛 \"%1$s\" 未在外掛中心獲得授權</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">外掛 \"%1$s\" 未在外掛中心啟用</string>
     <string name="error_plugin_not_found_in_installed_apps">已安裝應用中未找到外掛 \"%1$s\"</string>
@@ -393,12 +422,13 @@
     <string name="foreground_notification_channel_name">%1$s 前臺服務</string>
     <string name="foreground_notification_text">點選返回 %1$s 主介面</string>
     <string name="foreground_notification_title">%1$s 前臺服務</string>
-    <string name="format_build_succeeded">構建成功.\n檔案路徑: %s</string>
+    <string name="format_build_succeeded" formatted="true">構建成功.\n檔案路徑: %s</string>
     <string name="format_debug_bar_title"><![CDATA[除錯 [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">字元數: %d\n行數: %d\n大小: %s</string>
-    <string name="format_file_downloaded">檔案已下載至 %s</string>
+    <string name="format_file_downloaded" formatted="true">檔案已下載至 %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[開啟] 系統設定 -> 無障礙服務 -> AutoJs6 [啟用]]]></string>
     <string name="hint_find_with_regex">支援正則表示式搜尋, 可使用 \"$1\" - \"$9\" 表示分組捕獲</string>
+    <string name="hint_github_token">貼上 GitHub Personal Access Token</string>
     <string name="hint_long_click_run_to_debug">長按 \"執行\" 圖示可啟動除錯</string>
     <string name="hint_loop_delay">開始迴圈前的延遲</string>
     <string name="hint_loop_times">0 表示無限迴圈</string>
@@ -470,16 +500,35 @@
     <string name="screen_capturer_foreground_notification_text">此通知用於捕獲螢幕截圖</string>
     <string name="screen_capturer_foreground_notification_title">螢幕捕獲器前臺服務</string>
     <string name="summary_about_app_tips">更佳的使用者使用體驗</string>
+    <string name="summary_ace_font_ligatures_enabled">將支援的運算子組合顯示為程式字型連字</string>
+    <string name="summary_ace_font_styles_enabled">允許程式碼顯示粗體, 斜體等字型樣式</string>
+    <string name="summary_ace_indent_guides_enabled">顯示程式碼縮排位置的垂直參考線</string>
+    <string name="summary_ace_line_numbers_enabled">在編輯器邊欄中顯示行號</string>
+    <string name="summary_ace_lsp_enabled">啟用 LSP 驅動的編輯輔助預覽</string>
+    <string name="summary_ace_lsp_file_types">選擇可啟用 LSP 功能的檔案類型</string>
+    <string name="summary_ace_print_margin_enabled">顯示編輯器右側的欄數限制參考線</string>
+    <string name="summary_ace_word_wrap_enabled">在編輯器檢視區內對長行自動換行</string>
     <string name="summary_all_files_access">允許 AutoJs6 訪問所有檔案, 包括外部儲存</string>
     <string name="summary_all_files_access_inrt">允許應用訪問所有檔案, 包括外部儲存</string>
+    <string name="summary_code_editor_settings">開啟完整的程式碼編輯器設定頁面</string>
     <string name="summary_display_over_other_apps">允許 AutoJs6 在其他應用之上顯示內容</string>
     <string name="summary_display_over_other_apps_inrt">允許應用在其他應用之上顯示內容</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">編輯器執行按鈕啟動指令碼後自動開啟底部日誌面板</string>
+    <string name="summary_editor_breakpoint_markers_enabled">在編輯器邊欄中顯示中斷點標記</string>
+    <string name="summary_editor_fold_markers_enabled">在編輯器邊欄中顯示程式碼摺疊標記</string>
+    <string name="summary_editor_gutter_width_mode">選擇邊欄隨可見行號位數變化, 或在目前工作階段中保持穩定寬度</string>
+    <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">使用手勢縮放調整編輯器文字大小</string>
+    <string name="summary_editor_setting_unavailable_for_current_engine">不適用於目前的編輯器引擎</string>
+    <string name="summary_editor_shortcut_input_bar">設定兩個編輯器引擎共用的快速輸入符號</string>
+    <string name="summary_editor_word_wrap_indent_style">選擇自動換行後的視覺接續行縮排方式</string>
     <string name="summary_enable_a11y_service_with_root_access">自動嘗試使用 root 許可權啟用無障礙服務</string>
     <string name="summary_enable_a11y_service_with_secure_settings">自動嘗試使用修改安全設定許可權啟用無障礙服務</string>
     <string name="summary_extending_js_build_in_objects">擴充套件 JavaScript 內建物件以增加程式碼靈活性</string>
     <string name="summary_foreground_service_inrt">前臺服務用於在後臺更穩定地保持應用及指令碼執行</string>
+    <string name="summary_github_token_not_set">尚未設定. GitHub API 請求將匿名發出.</string>
+    <string name="summary_github_token_set">已設定. 已在介面隱藏, 結尾為 %1$s.</string>
     <string name="summary_guard_mode">當 AutoJs6 前置時禁用自動化行為以避免誤操作</string>
+    <string name="summary_nodejs_doctor_report">產生已隱去隱私資訊的 Node 執行階段診斷報告, 用於提交錯誤報告</string>
     <string name="summary_not_showing_main_activity">啟動應用後直接執行指令碼</string>
     <string name="summary_plugin_auto_check_updates">每小時自動檢查一次外掛更新 (下拉重新整理立即檢查)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">全域性 \"自動檢查外掛更新\" 已停用, 此項不可用</string>
@@ -523,6 +572,41 @@
     <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">檢查更新</string>
     <string name="text_access_has_been_granted">授權成功</string>
+    <string name="text_ace_action_clear_confirm">是否清除全部編輯器動作記錄?</string>
+    <string name="text_ace_action_delete_confirm" formatted="true">是否從編輯器動作記錄中刪除 "%1$s"?</string>
+    <string name="text_ace_action_favorites">動作收藏</string>
+    <string name="text_ace_action_history_empty">暫無編輯器動作記錄</string>
+    <string name="text_ace_action_pin">釘選</string>
+    <string name="text_ace_action_pinned">已釘選</string>
+    <string name="text_ace_action_unpin">取消釘選</string>
+    <string name="text_ace_diagnostics_copied">Ace 診斷資訊已複製到剪貼簿</string>
+    <string name="text_ace_editor_debug">Ace 編輯器偵錯</string>
+    <string name="text_ace_editor_debug_description">開啟獨立的 Ace WebView 編輯器測試頁面</string>
+    <string name="text_ace_editor_debug_status">%1$s | 行 %2$d | 游標 %3$d:%4$d | 中斷點 %5$d | 已修改 %6$s</string>
+    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">正在載入 Ace 編輯器...</string>
+    <string name="text_ace_editor_debug_text_length">Ace 文字長度: %1$d</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">Ace 編輯器失敗 (%1$s); 已切換至 JsDroidEditor. 可在更多選單中複製 Ace 診斷資訊.</string>
+    <string name="text_ace_editor_font">編輯器字型</string>
+    <string name="text_ace_editor_font_changed" formatted="true">編輯器字型已切換為 %s</string>
+    <string name="text_ace_font_ligatures_enabled">字型連字</string>
+    <string name="text_ace_font_styles_enabled">特殊字型樣式</string>
+    <string name="text_ace_get_text">取得文字</string>
+    <string name="text_ace_ime_stress">IME 壓力測試</string>
+    <string name="text_ace_ime_stress_done">IME 壓力測試完成: %1$d 輪</string>
+    <string name="text_ace_ime_stress_running">IME 壓力測試: %1$d/%2$d</string>
+    <string name="text_ace_indent_guides_enabled">縮排參考線</string>
+    <string name="text_ace_insert">插入</string>
+    <string name="text_ace_large_file_uses_native_editor">目前的後備原則已將 Ace 編輯器切換至 JsDroidEditor</string>
+    <string name="text_ace_line_numbers_enabled">行號</string>
+    <string name="text_ace_lsp_enabled">LSP 智慧補全 (預覽)</string>
+    <string name="text_ace_lsp_file_types">LSP 檔案類型</string>
+    <string name="text_ace_no_last_action">暫無最近一次編輯器動作</string>
+    <string name="text_ace_print_margin_enabled">列印邊界</string>
+    <string name="text_ace_read_only_mode">唯讀模式</string>
+    <string name="text_ace_read_only_mode_disabled">唯讀模式已關閉</string>
+    <string name="text_ace_read_only_mode_enabled">唯讀模式已啟用</string>
+    <string name="text_ace_set_sample">設定範例</string>
+    <string name="text_ace_word_wrap_enabled">自動換行</string>
     <string name="text_act_by_click">點選 (click)</string>
     <string name="text_act_by_long_click">長按 (longClick)</string>
     <string name="text_act_by_scroll_backward">向後/上/左滑動 (scrollBackward)</string>
@@ -542,6 +626,7 @@
     <string name="text_all_files_access_is_needed">需要授予 \"所有檔案管理許可權\" 才能正常讀寫指令碼檔案</string>
     <string name="text_all_history_entries">全部歷史記錄</string>
     <string name="text_all_items_cleared">全部記錄已清空</string>
+    <string name="text_all_settings">全部設定</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">建議授予 \"允許設定鬧鐘和提醒\" 許可權以確保定時任務在息屏或待機狀態時儘可能準時執行</string>
     <string name="text_already_copied_to_clip">已複製到剪貼簿</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">已複製到剪貼簿 (僅最新的 %d 個條目)</string>
@@ -552,9 +637,9 @@
     <string name="text_android_release_version">安卓發行版本</string>
     <string name="text_android_sdk_version">安卓 SDK 版本</string>
     <string name="text_apk_builder_plugin_unavailable">打包外掛不可用</string>
+    <string name="text_apk_template_plugin_risk_prompt">偵測到打包應用程式範本外掛與目前 AutoJs6 版本不完全相容. 繼續使用可能導致打包後的應用程式啟動失敗, API 不一致或部分模組不可用.</string>
     <string name="text_apk_template_unavailable">打包應用程式範本不可用</string>
     <string name="text_apk_template_unavailable_prompt">找不到可用的打包應用程式範本. 目前 AutoJs6 建置未內建 template.apk, 且沒有可讀取的打包應用程式範本外掛. 請安裝並啟用相符版本的範本外掛後重試.</string>
-    <string name="text_apk_template_plugin_risk_prompt">偵測到打包應用程式範本外掛與目前 AutoJs6 版本不完全相容. 繼續使用可能導致打包後的應用程式啟動失敗、API 不一致或部分模組不可用.</string>
     <string name="text_app_and_device_info">應用及裝置資訊</string>
     <string name="text_app_crashed">AutoJs6 應用崩潰</string>
     <string name="text_app_language">語言</string>
@@ -593,6 +678,7 @@
     <string name="text_app_version_name">應用版本名</string>
     <string name="text_appearance">外觀</string>
     <string name="text_applying_binary_resources">正在應用二進位制資源</string>
+    <string name="text_archiving_project_files">正在封存專案檔案</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[姓名, 組織名稱, 組織單位, 國家代碼, 州或省份, 城市或區域, 街道] 至少填寫一個</string>
     <string name="text_attribute">屬性</string>
     <string name="text_authorize_plugin">授權外掛</string>
@@ -681,6 +767,7 @@
     <string name="text_code">程式碼</string>
     <string name="text_code_beautify">格式化程式碼</string>
     <string name="text_code_editor">程式碼編輯器</string>
+    <string name="text_code_editor_settings">程式碼編輯器設定</string>
     <string name="text_collapse_all">收起全部</string>
     <string name="text_color_library">顏色庫</string>
     <string name="text_color_palette">調色盤</string>
@@ -691,6 +778,7 @@
     <string name="text_config">配置</string>
     <string name="text_configuring_manifest">正在配置清單檔案</string>
     <string name="text_configuring_package_name">正在配置包名</string>
+    <string name="text_confirm_overwrite_selected_items">部分目標項目已存在, 是否覆寫?</string>
     <string name="text_confirm_to_clear_all_items">是否確定清空全部記錄</string>
     <string name="text_confirm_to_clear_the_history">是否確定清空歷史記錄</string>
     <string name="text_confirm_to_clear_the_history_of">以下歷史記錄將被清空\n\n[ %1$s ]\n\n是否確定清空</string>
@@ -708,7 +796,9 @@
     <string name="text_console">控制檯</string>
     <string name="text_content">內容</string>
     <string name="text_continue">繼續</string>
+    <string name="text_continue_with_plugin_template">繼續使用外掛範本</string>
     <string name="text_copy">複製</string>
+    <string name="text_copy_ace_diagnostics">複製 Ace 診斷資訊</string>
     <string name="text_copy_all">複製全部</string>
     <string name="text_copy_all_files_to_new_directory">複製原目錄檔案到新目錄</string>
     <string name="text_copy_command">複製指令</string>
@@ -729,7 +819,14 @@
     <string name="text_copying_library">正在複製庫檔案</string>
     <string name="text_copying_native_libraries">正在複製原生庫</string>
     <string name="text_copying_project_directory">正在複製專案目錄</string>
+    <string name="text_copying_remote_build_inputs">正在複製遠端建置輸入</string>
     <string name="text_copying_script_file">正在複製指令碼檔案</string>
+    <string name="text_countdown_duration_must_be_positive">倒數計時長度需大於 0</string>
+    <string name="text_countdown_duration_should_be_valid">倒數計時長度無效</string>
+    <string name="text_countdown_hours">小時</string>
+    <string name="text_countdown_minutes">分鐘</string>
+    <string name="text_countdown_minutes_should_be_less_than_60">分鐘須介於 0 到 59 之間</string>
+    <string name="text_countdown_task">倒數計時任務</string>
     <string name="text_country_code">國家代碼 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">國家代碼必須是兩個大寫字母</string>
     <string name="text_creating_unsigned_apk">正在建立未簽名 APK</string>
@@ -759,6 +856,7 @@
     <string name="text_delete_all">刪除全部</string>
     <string name="text_delete_file">刪除檔案</string>
     <string name="text_delete_folder">刪除資料夾</string>
+    <string name="text_delete_items">刪除項目</string>
     <string name="text_delete_line">刪除行</string>
     <string name="text_delete_revision_confirm">是否永久刪除此版本記錄</string>
     <string name="text_deleting">正在刪除</string>
@@ -766,7 +864,7 @@
     <string name="text_deselect_all">取消全選</string>
     <string name="text_destination">目標</string>
     <string name="text_details">詳情</string>
-    <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"開發者詳情\" 正在開發中...</string>
+    <string name="text_developer_details_under_development">\"開發者詳情\" 正在開發中</string>
     <string name="text_developer_options">開發者選項</string>
     <string name="text_device_brand">裝置品牌</string>
     <string name="text_device_hardware_name">裝置硬體名稱</string>
@@ -781,12 +879,6 @@
     <string name="text_disabled">已禁用</string>
     <string name="text_display_over_other_app">顯示在其他應用上層</string>
     <string name="text_display_over_other_app_is_recommended">建議授予 \"顯示在其他應用上層\" 許可權以確保應用視窗元件正常顯示</string>
-    <string name="text_countdown_task">倒數計時任務</string>
-    <string name="text_countdown_hours">小時</string>
-    <string name="text_countdown_minutes">分鐘</string>
-    <string name="text_countdown_duration_must_be_positive">倒數計時長度需大於 0</string>
-    <string name="text_countdown_duration_should_be_valid">倒數計時長度無效</string>
-    <string name="text_countdown_minutes_should_be_less_than_60">分鐘須介於 0 到 59 之間</string>
     <string name="text_disposable_task">一次性任務</string>
     <string name="text_disposable_task_time_before_now">任務時間小於當前時間</string>
     <string name="text_do_not_ask_again_for_this_version">此版本不再提示</string>
@@ -809,17 +901,31 @@
     <string name="text_edit">編輯</string>
     <string name="text_edit_prepare_script">編輯預執行指令碼</string>
     <string name="text_edit_script">編輯指令碼</string>
+    <string name="text_editor_assistance">輔助</string>
     <string name="text_editor_auto_show_log_bottom_sheet_on_run">執行後自動顯示底部日誌面板</string>
+    <string name="text_editor_breakpoint_markers_enabled">中斷點標記</string>
     <string name="text_editor_code_highlight_always_disabled">總是停用程式碼高亮</string>
     <string name="text_editor_code_highlight_always_enabled">總是啟用程式碼高亮</string>
     <string name="text_editor_code_highlight_threshold">程式碼高亮閾值</string>
     <string name="text_editor_code_highlight_threshold_enabled_for_smaller_files">僅對不大於 %1$s 的檔案啟用程式碼高亮</string>
+    <string name="text_editor_engine">編輯器引擎</string>
+    <string name="text_editor_engine_switched" formatted="true">編輯器引擎已切換為 %s</string>
+    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">編輯器引擎已切換為 %s. 不同編輯器引擎之間不會保留復原/重做記錄.</string>
+    <string name="text_editor_fold_markers_enabled">程式碼摺疊標記</string>
+    <string name="text_editor_gestures">操作手勢</string>
+    <string name="text_editor_gutter_markers">邊欄標記</string>
+    <string name="text_editor_gutter_width_mode">邊欄寬度</string>
     <string name="text_editor_large_file_mode_always_disabled">總是停用大檔案模式</string>
     <string name="text_editor_large_file_mode_always_enabled">總是啟用大檔案模式</string>
     <string name="text_editor_large_file_mode_threshold">大檔案模式閾值</string>
     <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">僅對大於 %1$s 的檔案啟用大檔案模式</string>
     <string name="text_editor_log_button_behavior">編輯器日誌按鈕行為</string>
+    <string name="text_editor_performance">效能</string>
+    <string name="text_editor_pinch_to_zoom_change_text_size_enabled">手勢縮放更改文字大小</string>
+    <string name="text_editor_shortcut_input_bar">快速符號設定</string>
     <string name="text_editor_theme">編輯器主題</string>
+    <string name="text_editor_theme_mode">編輯器主題使用方式</string>
+    <string name="text_editor_word_wrap_indent_style">換行縮排</string>
     <string name="text_email">郵箱</string>
     <string name="text_email_cannot_be_empty">郵箱不能為空</string>
     <string name="text_email_format_error">郵箱格式錯誤</string>
@@ -834,7 +940,7 @@
     <string name="text_enabled">已啟用</string>
     <string name="text_encrypting_script">正在加密指令碼</string>
     <string name="text_error">錯誤</string>
-    <string name="text_error_copy_file">檔案複製失敗: %s</string>
+    <string name="text_error_copy_file" formatted="true">檔案複製失敗: %s</string>
     <string name="text_error_report">錯誤報告</string>
     <string name="text_estimated">預估</string>
     <string name="text_exception_info">異常資訊</string>
@@ -855,7 +961,6 @@
     <string name="text_extracting_plugin_asset">正在提取外掛資源</string>
     <string name="text_extracting_plugin_so">正在提取外掛 so 檔案</string>
     <string name="text_extracting_template_apk">正在提取模板 APK</string>
-    <string name="text_continue_with_plugin_template">繼續使用外掛範本</string>
     <string name="text_failed">失敗</string>
     <string name="text_failed_to_build">打包失敗</string>
     <string name="text_failed_to_create_key_store">生成簽名密鑰失敗</string>
@@ -881,6 +986,7 @@
     <string name="text_failed_to_send_log_entries">日誌條目傳送失敗</string>
     <string name="text_failed_to_update">更新失敗</string>
     <string name="text_failed_to_write_file">檔案寫入失敗</string>
+    <string name="text_falling_back_to_local_build">正在改用本機建置</string>
     <string name="text_file">檔案</string>
     <string name="text_file_colon_value">檔案: %1$s</string>
     <string name="text_file_details">檔案詳情</string>
@@ -916,10 +1022,13 @@
     <string name="text_formatting_completed">格式化已完成</string>
     <string name="text_function">函式</string>
     <string name="text_fx_keyboard">多功能鍵盤</string>
+    <string name="text_general">一般</string>
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成程式碼</string>
     <string name="text_generated_code">已生成程式碼</string>
+    <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">備用 URL 已使用</string>
+    <string name="text_github_token">GitHub Token</string>
     <string name="text_global_settings">全域性設定</string>
     <string name="text_go_to_settings">開啟 \"設定\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">在 Shizuku 應用中授予 AutoJs6 許可權</string>
@@ -978,6 +1087,7 @@
     <string name="text_jump_to_line">跳轉到行</string>
     <string name="text_jump_to_line_end">跳轉到行尾</string>
     <string name="text_jump_to_line_start">跳轉到行首</string>
+    <string name="text_jump_to_previous_cursor">跳至上一個游標位置</string>
     <string name="text_jump_to_start">跳轉到檔案開始</string>
     <string name="text_keep_screen_on_when_in_foreground">前臺時保持螢幕常亮</string>
     <string name="text_key_alias">別名</string>
@@ -994,8 +1104,10 @@
     <string name="text_launch_config">執行配置</string>
     <string name="text_launch_debugger">啟動除錯</string>
     <string name="text_launch_launcher_visible">在啟動器中顯示應用圖示</string>
+    <string name="text_launch_log_shortcut_visible">在啟動器捷徑中顯示日誌</string>
     <string name="text_launch_logs_visible">啟動時顯示日誌</string>
     <string name="text_launch_run_on_boot">開機時執行指令碼</string>
+    <string name="text_launch_settings_shortcut_visible">在啟動器捷徑中顯示設定</string>
     <string name="text_launch_slug">啟動頁標語文字</string>
     <string name="text_launch_splash_visible">啟動時顯示啟動頁</string>
     <string name="text_launcher_icon_title">啟動器圖示</string>
@@ -1026,6 +1138,7 @@
     <string name="text_min_version">最低版本</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 外掛最低版本</string>
     <string name="text_mobile_qq_not_installed">未安裝 \"手機QQ\"</string>
+    <string name="text_monthly_task">每月任務</string>
     <string name="text_more">更多</string>
     <string name="text_more_details">瞭解詳情</string>
     <string name="text_mount">掛載</string>
@@ -1037,6 +1150,7 @@
     <string name="text_move_file_to_trash">將檔案移入回收站</string>
     <string name="text_move_folder">移動資料夾</string>
     <string name="text_move_folder_to_trash">將資料夾移入回收站</string>
+    <string name="text_move_items_to_trash">將項目移至垃圾桶</string>
     <string name="text_move_to">移動到</string>
     <string name="text_move_to_trash_failed">移入回收站失敗</string>
     <string name="text_moved_to_trash">已移入回收站</string>
@@ -1078,6 +1192,12 @@
     <string name="text_no_search_results_for_keyword">未找到匹配項:\n\n%1$s</string>
     <string name="text_no_symbols_hint">當前配置為空.\n點選此處可新建符號.</string>
     <string name="text_no_version_history">無版本歷史</string>
+    <string name="text_nodejs">Node.js</string>
+    <string name="text_nodejs_doctor">Node.js Doctor</string>
+    <string name="text_nodejs_doctor_export_json">JSON 報告</string>
+    <string name="text_nodejs_doctor_export_text">文字報告</string>
+    <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">正在產生 Node.js Doctor 報告...</string>
+    <string name="text_nodejs_doctor_generation_failed">無法產生 Node.js Doctor 報告</string>
     <string name="text_none">無</string>
     <string name="text_not_granted">未授予</string>
     <string name="text_not_installed">未安裝</string>
@@ -1211,6 +1331,7 @@
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">請稍後再嘗試此操作...</string>
     <string name="text_plugin_activated">已啟用</string>
     <string name="text_plugin_activation_recommended">建議啟用</string>
+    <string name="text_plugin_additional_variants">其他外掛變體</string>
     <string name="text_plugin_authorization_denied">授權拒絕</string>
     <string name="text_plugin_authorization_required">需要授權</string>
     <string name="text_plugin_authorized">已授權</string>
@@ -1229,7 +1350,6 @@
     <string name="text_plugin_jump_to_launch_page">跳轉到啟動頁</string>
     <string name="text_plugin_library_official">官方外掛庫</string>
     <string name="text_plugin_library_third_party">第三方外掛庫</string>
-    <string name="text_plugin_additional_variants">其他外掛變體</string>
     <string name="text_plugin_mount_object_name">掛載物件名稱</string>
     <string name="text_plugin_mount_point">掛載點</string>
     <string name="text_plugin_mount_point_global_display">global (全域性)</string>
@@ -1254,6 +1374,7 @@
     <string name="text_preparing_assets_dir">正在準備資源目錄</string>
     <string name="text_preparing_build_config">正在準備構建配置</string>
     <string name="text_preparing_keystore">正在準備金鑰庫</string>
+    <string name="text_preparing_remote_build_inputs">正在準備遠端建置輸入</string>
     <string name="text_preparing_workspace">正在準備工作區</string>
     <string name="text_preset_dialog_content">預設對話方塊內容</string>
     <string name="text_preset_dialog_title">預設對話方塊標題</string>
@@ -1273,6 +1394,8 @@
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_pruning">正在修剪</string>
+    <string name="text_pruning_native_libraries">正在移除不需要的原生程式庫</string>
+    <string name="text_querying_plugin_info">正在查詢外掛資訊</string>
     <string name="text_quit">放棄</string>
     <string name="text_re_signing_apk">正在重新簽名 APK</string>
     <string name="text_reading_splash_resources">正在讀取啟動頁資源</string>
@@ -1298,6 +1421,13 @@
     <string name="text_remove_from_trash">從回收站移除</string>
     <string name="text_remove_from_trash_confirm">是否永久刪除此專案</string>
     <string name="text_rename">重新命名</string>
+    <string name="text_repeat_count_must_be_positive">次數必須大於 0</string>
+    <string name="text_repeat_count_times">次數</string>
+    <string name="text_repeat_end">結束條件</string>
+    <string name="text_repeat_for_number_of_events">達到指定次數</string>
+    <string name="text_repeat_forever">永不結束</string>
+    <string name="text_repeat_until_date">截至指定日期</string>
+    <string name="text_repeat_until_date_before_now">結束日期不得早於今天</string>
     <string name="text_replace">替換</string>
     <string name="text_replace_all">全部替換</string>
     <string name="text_replace_simplified">替換</string>
@@ -1310,6 +1440,7 @@
     <string name="text_reset_succeed">重置成功</string>
     <string name="text_reset_to_initial_content">重置為初始內容</string>
     <string name="text_reset_to_initial_content_only_for_assets">只能重置示例程式碼檔案</string>
+    <string name="text_resolving_plugin_artifacts">正在解析外掛建置資源</string>
     <string name="text_resolving_plugin_native_libraries">正在解析外掛原生庫</string>
     <string name="text_restart">重啟</string>
     <string name="text_restart_strategy">重啟策略</string>
@@ -1373,6 +1504,7 @@
     <string name="text_select_file_to_upload">選擇要上傳的檔案</string>
     <string name="text_select_icon">選擇圖示</string>
     <string name="text_select_image">選擇圖片</string>
+    <string name="text_selected_items" formatted="true">已選取 %1$d 項</string>
     <string name="text_selected_plugin">已選擇外掛</string>
     <string name="text_send">傳送</string>
     <string name="text_send_shortcut">建立快捷方式</string>
@@ -1382,6 +1514,7 @@
     <string name="text_set_a_name_for_the_new_configuration">為新配置設定一個名稱</string>
     <string name="text_set_as_working_dir">用作工作路徑</string>
     <string name="text_set_breakpoint">設定斷點</string>
+    <string name="text_set_editor_setting_action" formatted="true">設定 %1$s</string>
     <string name="text_settings">設定</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 驗證不一致.\n\n期望值: %1$s\n實際值: %2$s</string>
     <string name="text_shizuku_access">Shizuku 許可權</string>
@@ -1456,9 +1589,20 @@
     <string name="text_tailor_made_developer">二次開發者</string>
     <string name="text_task">任務</string>
     <string name="text_text_size">字型大小</string>
-    <string name="text_text_size_current_value">字型大小: %d</string>
+    <string name="text_text_size_current_value" formatted="true">字型大小: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">可參考以下解決方案</string>
     <string name="text_theme_color">主題色</string>
+    <string name="text_theme_preview_exit">離開</string>
+    <string name="text_theme_preview_filter_all">全部</string>
+    <string name="text_theme_preview_filter_dark">深色</string>
+    <string name="text_theme_preview_filter_light">淺色</string>
+    <string name="text_theme_preview_list">清單</string>
+    <string name="text_theme_preview_next">下一個</string>
+    <string name="text_theme_preview_no_available_theme">目前篩選範圍內沒有可用主題</string>
+    <string name="text_theme_preview_previous">上一個</string>
+    <string name="text_theme_preview_unavailable_for_filter">不在目前篩選範圍內</string>
+    <string name="text_theme_preview_use">使用</string>
+    <string name="text_theme_previewer">主題預覽器</string>
     <string name="text_time">時間</string>
     <string name="text_timed_task">定時任務</string>
     <string name="text_timed_task_backend_title">定時任務排程引擎</string>
@@ -1497,6 +1641,7 @@
     <string name="text_updates_snack_bar_act_later">稍後提示</string>
     <string name="text_updates_snack_bar_act_view">檢視更新</string>
     <string name="text_updating_project_config">正在更新專案配置</string>
+    <string name="text_usage_instructions">使用說明</string>
     <string name="text_usage_stats_permission">檢視使用情況許可權</string>
     <string name="text_use_android_n_shortcut">使用安卓 7.0 快捷方式</string>
     <string name="text_use_builtin_template">改用內建範本</string>
@@ -1519,6 +1664,8 @@
     <string name="text_verify_failed">驗證失敗</string>
     <string name="text_verify_key_store">驗證簽名密鑰</string>
     <string name="text_verify_success">驗證成功</string>
+    <string name="text_verifying_build_inputs">正在驗證建置輸入</string>
+    <string name="text_verifying_project_archive">正在驗證專案封存檔</string>
     <string name="text_version">版本</string>
     <string name="text_version_code">版本號</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">版本號 (計算中...)</string>
@@ -1545,7 +1692,7 @@
     <string name="text_writing_resources_arsc">正在寫入 resources.arsc</string>
     <string name="text_writing_signed_apk">正在寫入已簽名 APK</string>
     <string name="text_xiaomi_background_popup_permission">後臺彈出介面</string>
+    <string name="text_yearly_task">每年任務</string>
     <string name="warn_continue_operation_without_saving_settings">設定尚未儲存, 確定要繼續操作嗎</string>
     <string name="warn_exit_without_saving_settings">設定尚未儲存, 確定要退出嗎</string>
-    <string name="text_editor_performance">效能</string>
 </resources>

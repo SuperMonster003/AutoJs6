@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plugin_description">提供 AutoJs6 打包獨立應用程式時使用的 APK 模板.</string>
+    <string name="plugin_instruction">安裝與 AutoJs6 版本相同的此插件, 讓 APK Builder 使用外部 APK 模板.</string>
+</resources>

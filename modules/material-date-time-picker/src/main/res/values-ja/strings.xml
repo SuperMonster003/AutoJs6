@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
-     Copyright (C) 2013 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,21 +12,29 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
- -->
-
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mdtp_done_label" msgid="7007948707597430919">"完了"</string>
-    <string name="mdtp_hour_picker_description" msgid="7586639618712934060">"円形スライダー (時)"</string>
-    <string name="mdtp_minute_picker_description" msgid="6024811202872705251">"円形スライダー (分)"</string>
-    <string name="mdtp_select_hours" msgid="7651068754188418859">"時間を選択"</string>
-    <string name="mdtp_select_minutes" msgid="8327182090226828481">"分を選択"</string>
-    <string name="mdtp_day_picker_description" msgid="3968620852217927702">"日グリッド (月別)"</string>
-    <string name="mdtp_year_picker_description" msgid="6963340404644587098">"年リスト"</string>
-    <string name="mdtp_select_day" msgid="3973338219107019769">"月と日を選択"</string>
-    <string name="mdtp_select_year" msgid="2603330600102539372">"年を選択"</string>
-    <string name="mdtp_item_is_selected" msgid="2674929164900463786">"<xliff:g id="ITEM">%1$s</xliff:g>を選択しました"</string>
-    <string name="mdtp_deleted_key" msgid="6908431551612331381">"<xliff:g id="KEY">%1$s</xliff:g>を削除しました"</string>
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="mdtp_am">午前</string>
+    <string name="mdtp_cancel">@android:string/cancel</string>
+    <string name="mdtp_date">日付</string>
     <string name="mdtp_date_v1_monthyear">yyyy年M月</string>
     <string name="mdtp_date_v2_daymonthyear">M月dd日(EEE)</string>
+    <string name="mdtp_day_picker_description">日グリッド (月別)</string>
+    <string name="mdtp_deleted_key"><xliff:g id="key" example="4">%1$s</xliff:g>を削除しました</string>
+    <string name="mdtp_done_label">完了</string>
+    <string name="mdtp_hour_picker_description">円形スライダー (時)</string>
+    <string name="mdtp_item_is_selected"><xliff:g id="item" example="2013">%1$s</xliff:g>を選択しました</string>
+    <string name="mdtp_minute_picker_description">円形スライダー (分)</string>
+    <string name="mdtp_next_month_arrow_description">翌月</string>
+    <string name="mdtp_ok">@android:string/ok</string>
+    <string name="mdtp_pm">午後</string>
+    <string name="mdtp_previous_month_arrow_description">前月</string>
+    <string name="mdtp_second_picker_description">円形スライダー (秒)</string>
+    <string name="mdtp_select_day">月と日を選択</string>
+    <string name="mdtp_select_hours">時間を選択</string>
+    <string name="mdtp_select_minutes">分を選択</string>
+    <string name="mdtp_select_seconds">秒を選択</string>
+    <string name="mdtp_select_year">年を選択</string>
+    <string name="mdtp_time">時刻</string>
+    <string name="mdtp_year_picker_description">年リスト</string>
 </resources>

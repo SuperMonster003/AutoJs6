@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="md_back_label">Atrás</string>
+    <string name="md_cancel_label">Cancelar</string>
+    <string name="md_choose_label">Elegir</string>
+    <string name="md_custom_label">Personalizado</string>
+    <string name="md_done_label">Listo</string>
+    <string name="md_error_label">Error</string>
+    <string name="md_presets_label">Preajustes</string>
+    <string name="md_storage_perm_error">No se ha concedido a tu aplicación el permiso READ_EXTERNAL_STORAGE.</string>
+    <string name="new_folder">Nueva carpeta</string>
+</resources>

@@ -231,6 +231,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Amélioration du style et des fonctions des boîtes de dialogue "Trier" et "Filtrer" du Centre des plugins
 * `Amélioration` Le Centre des plugins affiche les variantes courantes par défaut et fournit une page distincte pour les autres variantes
 * `Amélioration` Amélioration des journaux des modifications multilingues/du cache des langues/de la vérification officielle/du chargement des index et d'autres fonctions du Centre des plugins
+* `Amélioration` Normalisation des ressources de chaînes du projet: traductions multilingues complètes/classement par fichier/tri par nom/ponctuation ASCII
 * `Amélioration` Le système de compilation sélectionne dynamiquement les versions compatibles de Kotlin/KSP/AGP/R8 et réduit la pression mémoire au démarrage de Gradle
 * `Amélioration` Certaines dépendances ou versions de bibliothèques locales ont été ajustées _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 

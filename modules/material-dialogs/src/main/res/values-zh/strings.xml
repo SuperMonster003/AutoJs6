@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="md_back_label">返回</string>
+    <string name="md_cancel_label">取消</string>
+    <string name="md_choose_label">选择</string>
+    <string name="md_custom_label">自定义</string>
+    <string name="md_done_label">完成</string>
+    <string name="md_error_label">错误</string>
+    <string name="md_presets_label">预设</string>
+    <string name="md_storage_perm_error">您的应用尚未获得 READ_EXTERNAL_STORAGE 权限.</string>
+    <string name="new_folder">新建文件夹</string>
+</resources>

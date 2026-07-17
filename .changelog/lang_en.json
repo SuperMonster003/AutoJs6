@@ -70,6 +70,7 @@
         "Improved the style and functionality of the Plugin Center \"Sort\" and \"Filter\" dialogs",
         "Plugin Center lists common distribution variants by default and provides a separate page for other variants",
         "Improved multilingual changelogs/language caching/official verification/index loading and other Plugin Center features",
+        "Standardized multilingual translation coverage/file organization/name ordering/ASCII punctuation for project string resources",
         "Build system supports dynamic Kotlin/KSP/AGP/R8 compatibility matching and reduces Gradle startup memory pressure"
       ],
       "dependency": [

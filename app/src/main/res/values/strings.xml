@@ -1,349 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!DOCTYPE resources [
-
-    <!ENTITY url_github_autojs6 "http://project.autojs6.com">
-
-    <!ENTITY url_github_autojs6_vscode_extension "http://vscext-project.autojs6.com">
-
-    ]>
-
 <resources xmlns:tools="http://schemas.android.com/tools">
-
-    <!-- Forcibly use LeakCanary to detect memory leaks. -->
-    <string name="leak_canary_test_class_name" translatable="false">assertk.Assert</string>
-
-    <string name="app_name" translatable="false">AutoJs6</string>
-    <string name="app_name_qq" translatable="false">QQ</string>
-    <string name="text_ace_editor_debug">Ace editor debug</string>
-    <string name="text_ace_editor_debug_description">Open an isolated Ace WebView editor test page</string>
-    <string name="text_ace_editor_debug_status">%1$s | lines %2$d | cursor %3$d:%4$d | breakpoints %5$d | dirty %6$s</string>
-    <string name="text_ace_editor_debug_status_loading">Loading Ace editor...</string>
-    <string name="text_ace_editor_debug_text_length">Ace text length: %1$d</string>
-    <string name="text_ace_diagnostics_copied">Ace diagnostics copied to clipboard</string>
-    <string name="text_ace_get_text">Get text</string>
-    <string name="text_ace_ime_stress">IME stress</string>
-    <string name="text_ace_ime_stress_done">IME stress finished: %1$d cycles</string>
-    <string name="text_ace_ime_stress_running">IME stress: %1$d/%2$d</string>
-    <string name="text_ace_insert">Insert</string>
-    <string name="text_ace_set_sample">Set sample</string>
-    <string name="color_library_identifier_android_colors" translatable="false">Android</string>
-    <string name="color_library_identifier_css_colors" translatable="false">CSS</string>
-    <string name="color_library_identifier_web_colors" translatable="false">WEB</string>
-    <string name="com_twofortyfouram_log_tag" tools:ignore="ResourceName" translatable="false" />
-    <string name="default_build_apk_version_code" translatable="false">1</string>
-    <string name="default_build_apk_version_name" translatable="false">1.0.0</string>
-    <string name="default_key_ace_editor_font" translatable="false">@string/key_ace_editor_font_jetbrains_mono</string>
-    <string name="default_key_app_language" translatable="false">@string/key_app_language_auto</string>
-    <string name="default_key_documentation_source" translatable="false">@string/key_documentation_source_local</string>
-    <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_ace</string>
-    <string name="default_key_editor_gutter_width_mode" translatable="false">@string/key_editor_gutter_width_mode_dynamic</string>
-    <string name="default_key_editor_log_button_behavior" translatable="false">@string/key_editor_log_button_behavior_bottom_sheet</string>
-    <string name="default_key_editor_pinch_to_zoom_strategy" translatable="false">@string/key_editor_pinch_to_zoom_change_text_size</string>
-    <string name="default_key_editor_theme_mode" translatable="false">@string/key_editor_theme_mode_separate</string>
-    <string name="default_key_editor_word_wrap_indent_style" translatable="false">@string/key_editor_word_wrap_indent_style_continuation</string>
-    <string name="default_key_file_extensions" translatable="false">@string/key_file_extensions_show_all_but_executable</string>
-    <string name="default_key_hidden_files" translatable="false">@string/key_hidden_files_not_show</string>
-    <string name="default_key_keep_screen_on_when_in_foreground" translatable="false">@string/key_keep_screen_on_when_in_foreground_disabled</string>
-    <string name="default_key_launcher_icon" translatable="false">@string/key_launcher_icon_adaptive</string>
-    <string name="default_key_night_mode" translatable="false">@string/key_night_mode_follow_system</string>
-    <string name="default_key_restart_strategy" translatable="false">@string/key_restart_strategy_quick</string>
-    <string name="default_key_root_mode" translatable="false">@string/key_root_mode_auto_detect</string>
-    <string name="default_key_root_record_out_file_type" translatable="false">@string/key_root_record_out_file_type_binary</string>
-    <string name="default_key_scheduled_restart_backend" translatable="false">@string/key_scheduled_restart_backend_work_manager</string>
-    <string name="default_key_timed_task_backend" translatable="false">@string/key_timed_task_backend_alarm</string>
-    <string name="default_main_file_name" translatable="false">main.js</string>
-    <string name="developer_full_name" translatable="false">SuperMonster003</string>
-    <string name="developer_nickname" translatable="false">SuperMonster003</string>
-    <string name="ellipsis_six" translatable="false" tools:ignore="TypographyEllipsis">... ...</string>
-    <string name="ellipsis_three" translatable="false" tools:ignore="TypographyEllipsis">...</string>
-    <string name="email" translatable="false">hybbbb1996@gmail.com</string>
-    <string name="entry_app_language_ar" translatable="false">العربية</string>
-    <string name="entry_app_language_en" translatable="false">English</string>
-    <string name="entry_app_language_es" translatable="false">Español</string>
-    <string name="entry_app_language_fr" translatable="false">Français</string>
-    <string name="entry_app_language_ja" translatable="false">日本語</string>
-    <string name="entry_app_language_ko" translatable="false">한국어</string>
-    <string name="entry_app_language_ru" translatable="false">Русский</string>
-    <string name="entry_app_language_zh_hans" translatable="false">简体中文</string>
-    <string name="entry_app_language_zh_hant_hk" translatable="false">繁體中文 (香港)</string>
-    <string name="entry_app_language_zh_hant_tw" translatable="false">繁體中文 (台灣)</string>
-    <string name="format_default_package_name" formatted="true" translatable="false">org.autojs.autojs6.%s</string>
-    <string name="format_dialog_progress_number_format_kilo_bytes" translatable="false">%.1fKiB/%.1fKiB</string>
-    <string name="format_dialog_progress_number_format_mega_bytes" translatable="false">%.2fMiB/%.2fMiB</string>
-    <string name="id_launcher_shortcut_docs" translatable="false">shortcut_$_docs</string>
-    <string name="id_launcher_shortcut_log" translatable="false">shortcut_$_log</string>
-    <string name="id_launcher_shortcut_plugin_center" translatable="false">shortcut_$_plugin_center</string>
-    <string name="id_launcher_shortcut_settings" translatable="false">shortcut_$_settings</string>
-    <string name="key_a11y_service" translatable="false">key_$_a11y_service</string>
-    <string name="key_ace_editor_font" translatable="false">key_$_ace_editor_font</string>
-    <string name="key_ace_editor_font_system_monospace" translatable="false">system_monospace</string>
-    <string name="key_ace_editor_font_iosevka" translatable="false">iosevka</string>
-    <string name="key_ace_editor_font_iosevka_slab" translatable="false">iosevka_slab</string>
-    <string name="key_ace_editor_font_jetbrains_mono" translatable="false">jetbrains_mono</string>
-    <string name="key_ace_editor_font_fira_code" translatable="false">fira_code</string>
-    <string name="key_ace_editor_font_cascadia_code" translatable="false">cascadia_code</string>
-    <string name="key_ace_editor_font_intel_one_mono" translatable="false">intel_one_mono</string>
-    <string name="key_ace_editor_font_ibm_plex_mono" translatable="false">ibm_plex_mono</string>
-    <string name="key_ace_editor_font_hack" translatable="false">hack</string>
-    <string name="key_ace_editor_font_source_code_pro" translatable="false">source_code_pro</string>
-    <string name="key_ace_font_ligatures_enabled" translatable="false">key_$_ace_font_ligatures_enabled</string>
-    <string name="key_ace_font_styles_enabled" translatable="false">key_$_ace_font_styles_enabled</string>
-    <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
-    <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
-    <string name="key_ace_lsp_file_types" translatable="false">key_$_ace_lsp_file_types</string>
-    <string name="key_ace_print_margin_enabled" translatable="false">key_$_ace_print_margin_enabled</string>
-    <string name="key_ace_indent_guides_enabled" translatable="false">key_$_ace_indent_guides_enabled</string>
-    <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
-    <string name="key_editor_breakpoint_markers_enabled" translatable="false">key_$_editor_breakpoint_markers_enabled</string>
-    <string name="key_editor_fold_markers_enabled" translatable="false">key_$_editor_fold_markers_enabled</string>
-    <string name="key_editor_word_wrap_indent_style" translatable="false">key_$_editor_word_wrap_indent_style</string>
-    <string name="key_editor_word_wrap_indent_style_classic" translatable="false">classic</string>
-    <string name="key_editor_word_wrap_indent_style_continuation" translatable="false">continuation</string>
-    <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
-    <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
-    <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
-    <string name="key_app_language" translatable="false">key_$_app_language</string>
-    <string name="key_app_language_ar" translatable="false">key_$_app_language_ar</string>
-    <string name="key_app_language_auto" translatable="false">key_$_app_language_auto</string>
-    <string name="key_app_language_en" translatable="false">key_$_app_language_en</string>
-    <string name="key_app_language_es" translatable="false">key_$_app_language_es</string>
-    <string name="key_app_language_fr" translatable="false">key_$_app_language_fr</string>
-    <string name="key_app_language_ja" translatable="false">key_$_app_language_ja</string>
-    <string name="key_app_language_ko" translatable="false">key_$_app_language_ko</string>
-    <string name="key_app_language_ru" translatable="false">key_$_app_language_ru</string>
-    <string name="key_app_language_zh_hans" translatable="false">key_$_app_language_zh</string>
-    <string name="key_app_language_zh_hant_hk" translatable="false">key_$_app_language_zh_hk</string>
-    <string name="key_app_language_zh_hant_tw" translatable="false">key_$_app_language_zh_tw</string>
-    <string name="key_auto_check_for_updates" translatable="false">key_$_auto_check_for_updates</string>
-    <string name="key_auto_night_mode_enabled" translatable="false">key_$_auto_night_mode_enabled</string>
-    <string name="key_change_working_dir" translatable="false">key_$_change_working_dir</string>
-    <string name="key_check_for_updates" translatable="false">key_$_check_for_updates</string>
-    <string name="key_check_for_updates_while_ignoring_the_local_version" translatable="false">key_$_check_for_updates_while_ignoring_the_local_version</string>
-    <string name="key_client_socket_normally_closed" translatable="false">key_$_client_socket_normally_closed</string>
-    <string name="key_color_select_activity_legacy_layout" translatable="false">key_$_color_select_activity_legacy_layout</string>
-    <string name="key_delete_permanently_also_clear_history" translatable="false">key_$_delete_permanently_also_clear_history</string>
-    <string name="key_dialog_check_display_over_other_apps" translatable="false">key_$_dialog_check_display_over_other_apps</string>
-    <string name="key_dialog_foreground_svc" translatable="false">key_$_dialog_foreground_svc</string>
-    <string name="key_dialog_log_entries_exported" translatable="false">key_$_dialog_log_entries_exported</string>
-    <string name="key_dialog_manage_all_files_permission" translatable="false">key_$_dialog_manage_all_files_permission</string>
-    <string name="key_dialog_num_of_log_entries_exceeds_limit_for_sending" translatable="false">key_$_num_of_log_entries_exceeds_limit_for_sending</string>
-    <string name="key_dialog_selected_abi_is_unavailable" translatable="false">key_$_dialog_selected_abi_is_unavailable</string>
-    <string name="key_dialog_transparent_background_launcher_icon" translatable="false">key_$_dialog_transparent_background_launcher_icon</string>
-    <string name="key_display_over_other_apps" translatable="false">key_$_display_over_other_apps</string>
-    <string name="key_documentation_source" translatable="false">key_$_documentation_source</string>
-    <string name="key_documentation_source_local" translatable="false">key_$_documentation_source_local</string>
-    <string name="key_documentation_source_online" translatable="false">key_$_documentation_source_online</string>
-    <string name="key_drafts_max_days" translatable="false">key_$_drafts_max_days</string>
-    <string name="key_drafts_max_total_bytes" translatable="false">key_$_drafts_max_total_bytes</string>
-    <string name="key_editor_auto_show_log_bottom_sheet_on_run" translatable="false">key_$_editor_auto_show_log_bottom_sheet_on_run</string>
-    <string name="key_editor_code_highlight_threshold_bytes" translatable="false">key_$_editor_code_highlight_threshold_bytes</string>
-    <string name="key_editor_large_file_mode_threshold_bytes" translatable="false">key_$_editor_large_file_mode_threshold_bytes</string>
-    <string name="key_editor_log_button_behavior" translatable="false">key_$_editor_log_button_behavior</string>
-    <string name="key_editor_log_button_behavior_bottom_sheet" translatable="false">key_$_editor_log_button_behavior_bottom_sheet</string>
-    <string name="key_editor_log_button_behavior_fullscreen_page" translatable="false">key_$_editor_log_button_behavior_fullscreen_page</string>
-    <string name="key_editor_pinch_to_zoom_change_text_size_enabled" translatable="false">key_$_editor_pinch_to_zoom_change_text_size_enabled</string>
-    <string name="key_editor_pinch_to_zoom_change_text_size" translatable="false">key_$_editor_pinch_to_zoom_change_text_size</string>
-    <string name="key_editor_pinch_to_zoom_disable" translatable="false">key_$_editor_pinch_to_zoom_disable</string>
-    <string name="key_editor_pinch_to_zoom_scale_view" translatable="false">key_$_editor_pinch_to_zoom_scale_view</string>
-    <string name="key_editor_pinch_to_zoom_strategy" translatable="false">key_$_editor_pinch_to_zoom_strategy</string>
-    <string name="key_editor_engine" translatable="false">key_$_editor_engine</string>
-    <string name="key_editor_engine_ace" translatable="false">ace</string>
-    <string name="key_editor_engine_native" translatable="false">native</string>
-    <string name="key_editor_gutter_width_mode" translatable="false">key_$_editor_gutter_width_mode</string>
-    <string name="key_editor_gutter_width_mode_dynamic" translatable="false">dynamic</string>
-    <string name="key_editor_gutter_width_mode_fixed" translatable="false">fixed</string>
-    <string name="key_editor_shortcut_input_bar" translatable="false">key_$_editor_shortcut_input_bar</string>
-    <string name="key_editor_text_size" translatable="false">key_$_editor_text_size</string>
-    <string name="key_editor_theme" translatable="false">key_$_editor_theme</string>
-    <string name="key_editor_theme_dark" translatable="false">key_$_editor_theme_dark</string>
-    <string name="key_editor_theme_light" translatable="false">key_$_editor_theme_light</string>
-    <string name="key_editor_theme_mode" translatable="false">key_$_editor_theme_mode</string>
-    <string name="key_editor_theme_mode_separate" translatable="false">separate_light_dark</string>
-    <string name="key_editor_theme_mode_unified" translatable="false">unified_light_dark</string>
-    <string name="key_enable_a11y_service_with_root_access" translatable="false">key_$_enable_a11y_service_with_root_access</string>
-    <string name="key_enable_a11y_service_with_secure_settings" translatable="false">key_$_enable_a11y_service_with_secure_settings</string>
-    <string name="key_enable_observe_key" translatable="false">key_$_enable_observe_key</string>
-    <string name="key_explorer_file_default_prefix" translatable="false">key_$_explorer_file_default_prefix</string>
-    <string name="key_extending_js_build_in_objects" translatable="false">key_$_extending_js_build_in_objects</string>
-    <string name="key_file_extensions" translatable="false">key_$_file_extensions</string>
-    <string name="key_file_extensions_not_show" translatable="false">key_$_file_extensions_not_show</string>
-    <string name="key_file_extensions_show_all" translatable="false">key_$_file_extensions_show_all</string>
-    <string name="key_file_extensions_show_all_but_executable" translatable="false">key_$_file_extensions_show_all_but_executable</string>
-    <string name="key_floating_menu_shown" translatable="false">key_$_floating_menu_shown</string>
-    <string name="key_foreground_service" translatable="false">key_$_foreground_service</string>
-    <string name="key_gesture_observing" translatable="false">key_$_gesture_observing</string>
-    <string name="key_github_token" translatable="false">key_$_github_token</string>
-    <string name="key_guard_mode" translatable="false">key_$_guard_mode</string>
-    <string name="key_hidden_files" translatable="false">key_$_hidden_files</string>
-    <string name="key_hidden_files_not_show" translatable="false">key_$_hidden_files_not_show</string>
-    <string name="key_hidden_files_show" translatable="false">key_$_hidden_files_show</string>
-    <string name="key_history_max_days" translatable="false">key_$_history_max_days</string>
-    <string name="key_history_max_file_size_to_track_bytes" translatable="false">key_$_history_max_file_size_to_track_bytes</string>
-    <string name="key_history_max_total_bytes" translatable="false">key_$_history_max_total_bytes</string>
-    <string name="key_history_max_total_bytes_per_file" translatable="false">key_$_history_max_total_bytes_per_file</string>
-    <string name="key_history_max_versions" translatable="false">key_$_history_max_versions</string>
-    <string name="key_ignored_updates" translatable="false">key_$_ignored_updates</string>
-    <string name="key_keep_screen_on_when_in_foreground" translatable="false">key_$_keep_screen_on_when_in_foreground</string>
-    <string name="key_keep_screen_on_when_in_foreground_all_pages" translatable="false">key_$_keep_screen_on_when_in_foreground_all_pages</string>
-    <string name="key_keep_screen_on_when_in_foreground_disabled" translatable="false">key_$_keep_screen_on_when_in_foreground_disabled</string>
-    <string name="key_keep_screen_on_when_in_foreground_enabled" translatable="false">key_$_keep_screen_on_when_in_foreground_enabled</string>
-    <string name="key_keep_screen_on_when_in_foreground_homepage_only" translatable="false">key_$_keep_screen_on_when_in_foreground_homepage_only</string>
-    <string name="key_keep_screen_on_when_in_foreground_last_enabled" translatable="false">key_$_keep_screen_on_when_in_foreground_last_enabled</string>
-    <string name="key_last_no_newer_updates" translatable="false">key_$_last_no_newer_updates</string>
-    <string name="key_last_updates_auto_checked" translatable="false">key_$_last_updates_auto_checked</string>
-    <string name="key_last_updates_checked" translatable="false">key_$_last_updates_checked</string>
-    <string name="key_last_updates_postponed" translatable="false">key_$_last_updates_postponed</string>
-    <string name="key_launcher_icon" translatable="false">key_$_launcher_icon</string>
-    <string name="key_launcher_icon_adaptive" translatable="false">key_$_launcher_icon_adaptive</string>
-    <string name="key_launcher_icon_transparent_background" translatable="false">key_$_launcher_icon_transparent_background</string>
-    <string name="key_launcher_shortcuts" translatable="false">key_$_launcher_shortcuts</string>
-    <string name="key_manage_ignored_updates" translatable="false">key_$_manage_ignored_updates</string>
-    <string name="key_plugin_center_show_official_plugins" translatable="false">key_$_plugin_center_show_official_plugins</string>
-    <string name="key_plugin_center_show_third_party_plugins" translatable="false">key_$_plugin_center_show_third_party_plugins</string>
-    <string name="key_plugin_center_auto_check_updates" translatable="false">key_$_plugin_center_auto_check_updates</string>
-    <string name="key_plugin_center_last_online_check_ts" translatable="false">key_$_plugin_center_last_online_check_ts</string>
-    <string name="key_night_mode" translatable="false">key_$_night_mode</string>
-    <string name="key_night_mode_always_off" translatable="false">key_$_night_mode_always_off</string>
-    <string name="key_night_mode_always_on" translatable="false">key_$_night_mode_always_on</string>
-    <string name="key_night_mode_enabled" translatable="false">key_$_night_mode_enabled</string>
-    <string name="key_night_mode_follow_system" translatable="false">key_$_night_mode_follow_system</string>
-    <string name="key_night_mode_null" translatable="false">key_$_night_mode_null</string>
-    <string name="key_nodejs_doctor_report" translatable="false">key_$_nodejs_doctor_report</string>
-    <string name="key_not_showing_main_activity" translatable="false">key_$_not_showing_main_activity</string>
-    <string name="key_pc_server_address_history" translatable="false">key_$_pc_server_address_histories</string>
-    <string name="key_post_notifications_permission" translatable="false">key_$_post_notifications_permission</string>
-    <string name="key_post_notifications_permission_auto_request_done" translatable="false">key_$_post_notifications_permission_auto_request_done</string>
-    <string name="key_post_notifications_permission_request_attempted" translatable="false">key_$_post_notifications_permission_request_attempted</string>
-    <string name="key_pref_bundle_default_item" translatable="false">key_$_pref_bundle_default_item</string>
-    <string name="key_pref_bundle_disabled_items" translatable="false">key_$_pref_bundle_disabled_items</string>
-    <string name="key_record_toast" translatable="false">key_$_record_toast</string>
-    <string name="key_release_history" translatable="false">key_$_release_history</string>
-    <string name="key_restart_strategy" translatable="false">key_$_restart_strategy</string>
-    <string name="key_restart_strategy_quick" translatable="false">key_$_restart_strategy_quick</string>
-    <string name="key_restart_strategy_scheduled" translatable="false">key_$_restart_strategy_scheduled</string>
-    <string name="key_rhino_java_primitive_wrap" translatable="false">key_$_rhino_java_primitive_wrap</string>
-    <string name="key_root_mode" translatable="false">key_$_root_mode</string>
-    <string name="key_root_mode_auto_detect" translatable="false">key_$_root_mode_auto_detect</string>
-    <string name="key_root_mode_force_non_root" translatable="false">key_$_root_mode_force_non_root</string>
-    <string name="key_root_mode_force_root" translatable="false">key_$_root_mode_force_root</string>
-    <string name="key_root_record_out_file_type" translatable="false">key_$_root_record_out_file_type</string>
-    <string name="key_root_record_out_file_type_binary" translatable="false">key_$_root_record_out_file_type_binary</string>
-    <string name="key_root_record_out_file_type_js" translatable="false">key_$_root_record_out_file_type_js</string>
-    <string name="key_run_on_boot_inrt" translatable="false">key_$_run_on_boot_inrt</string>
-    <string name="key_scheduled_restart_backend" translatable="false">key_$_scheduled_restart_backend</string>
-    <string name="key_scheduled_restart_backend_alarm_manager" translatable="false">key_$_scheduled_restart_backend_alarm_manager</string>
-    <string name="key_scheduled_restart_backend_work_manager" translatable="false">key_$_scheduled_restart_backend_work_manager</string>
-    <string name="key_scheduled_restart_delay" translatable="false">key_$_scheduled_restart_delay</string>
-    <string name="key_screen_capture_request_delay" translatable="false">key_$_screen_capture_request_delay_ms</string>
-    <string name="key_scripts_after_app_restart" translatable="false">key_$_scripts_after_app_restart</string>
-    <string name="key_server_address" translatable="false">key_$_server_address</string>
-    <string name="key_server_socket_normally_closed" translatable="false">key_$_server_socket_normally_closed</string>
-    <string name="key_stable_mode" translatable="false">key_$_stable_mode</string>
-    <string name="key_theme_color" translatable="false">key_$_theme_color</string>
-    <string name="key_theme_color_accent" translatable="false">key_$_theme_color_accent</string>
-    <string name="key_theme_color_primary" translatable="false">key_$_theme_color_primary</string>
-    <string name="key_theme_color_primary_dark" translatable="false">key_$_theme_color_primary_dark</string>
-    <string name="key_timed_task_backend" translatable="false">key_$_timed_task_backend</string>
-    <string name="key_timed_task_backend_alarm" translatable="false">key_$_timed_task_backend_alarm</string>
-    <string name="key_timed_task_backend_job" translatable="false">key_$_timed_task_backend_job</string>
-    <string name="key_timed_task_backend_work" translatable="false">key_$_timed_task_backend_work</string>
-    <string name="key_trash_max_days" translatable="false">key_$_trash_max_days</string>
-    <string name="key_trash_max_total_bytes" translatable="false">key_$_trash_max_total_bytes</string>
-    <string name="key_updates_checked_states_cleared" translatable="false">key_$_updates_checked_states_cleared</string>
-    <string name="key_use_volume_control_record" translatable="false">key_$_use_volume_control_record</string>
-    <string name="key_use_volume_control_running" translatable="false">key_$_use_volume_control_running</string>
-    <string name="key_version_history_restore_does_not_auto_save_to_disk" translatable="false">key_$_version_history_restore_does_not_auto_save_to_disk</string>
-    <string name="key_working_directory" translatable="false">key_$_working_directory</string>
-    <string name="key_working_directory_history" translatable="false">key_$_working_directory_histories</string>
-    <string name="key_working_directory_initialized" translatable="false">key_$_working_directory_initialized</string>
-    <string name="literal_color_int" translatable="false">ColorInt</string>
-    <string name="literal_hex_uppercase" translatable="false">HEX</string>
-    <string name="literal_hsl_uppercase" translatable="false">HSL</string>
-    <string name="literal_hsv_uppercase" translatable="false">HSV</string>
-    <string name="literal_rgb_uppercase" translatable="false">RGB</string>
-    <string name="num_zero" translatable="false">0</string>
-    <string name="original_developer_full_name" translatable="false">Stardust</string>
-    <string name="original_developer_nickname" translatable="false">hyb1996</string>
-    <string name="property_key_app_version_code" translatable="false">VERSION_BUILD</string>
-    <string name="property_key_app_version_name" translatable="false">VERSION_NAME</string>
-    <string name="symbol_colon" translatable="false">:</string>
-    <string name="symbol_pipe" translatable="false">|</string>
-    <string name="symbol_question_mark" translatable="false">\?</string>
-    <string name="text_abis" translatable="false">ABIs</string>
-    <string name="text_app_name_accuweather" translatable="false">AccuWeather</string>
-    <string name="text_app_name_adm" translatable="false">ADM</string>
-    <string name="text_app_name_appops" translatable="false">App Ops</string>
-    <string name="text_app_name_aquamail" translatable="false">Aqua Mail</string>
-    <string name="text_app_name_autojs" translatable="false">Auto.js</string>
-    <string name="text_app_name_autojs6" translatable="false">@string/app_name</string>
-    <string name="text_app_name_autojspro" translatable="false">AutoJsPro</string>
-    <string name="text_app_name_chrome" translatable="false">Chrome</string>
-    <string name="text_app_name_digical" translatable="false">DigiCal</string>
-    <string name="text_app_name_excel" translatable="false">Excel</string>
-    <string name="text_app_name_firefox" translatable="false">Firefox</string>
-    <string name="text_app_name_fx" translatable="false">FX</string>
-    <string name="text_app_name_httpcanary" translatable="false">HttpCanary</string>
-    <string name="text_app_name_idlefish" translatable="false">闲鱼</string>
-    <string name="text_app_name_idmplus" translatable="false">IDM+</string>
-    <string name="text_app_name_jd" translatable="false">京东</string>
-    <string name="text_app_name_keep" translatable="false">Keep</string>
-    <string name="text_app_name_magisk" translatable="false">Magisk</string>
-    <string name="text_app_name_onedrive" translatable="false">OneDrive</string>
-    <string name="text_app_name_packet_capture" translatable="false">Packet Capture</string>
-    <string name="text_app_name_powerpoint" translatable="false">PowerPoint</string>
-    <string name="text_app_name_pulsar_plus" translatable="false">Pulsar+</string>
-    <string name="text_app_name_pure_weather" translatable="false">Pure天气</string>
-    <string name="text_app_name_qq" translatable="false">QQ</string>
-    <string name="text_app_name_sdmaid" translatable="false">SD Maid</string>
-    <string name="text_app_name_shizuku" translatable="false">Shizuku</string>
-    <string name="text_app_name_stopapp" translatable="false">小黑屋</string>
-    <string name="text_app_name_taobao" translatable="false">淘宝</string>
-    <string name="text_app_name_trainnote" translatable="false">训记</string>
-    <string name="text_app_name_twitter" translatable="false">Twitter</string>
-    <string name="text_app_name_unionpay" translatable="false">云闪付</string>
-    <string name="text_app_name_via" translatable="false">Via</string>
-    <string name="text_app_name_vysor" translatable="false">Vysor</string>
-    <string name="text_app_name_word" translatable="false">Word</string>
-    <string name="text_app_name_zhihu" translatable="false">知乎</string>
-    <string name="text_bks" translatable="false">BKS</string>
-    <string name="text_broadcast_action_prefix" translatable="false">android.intent.action.</string>
-    <string name="text_clear_updates_checked_states_description" translatable="false">NoNewer, Postponed, Check, AutoCheck</string>
-    <string name="text_copyright_dynamic" translatable="false">Copyright © 2017-%d All Rights Reserved</string>
-    <string name="text_copyright_sample" translatable="false">Copyright © 2017-2022 All Rights Reserved</string>
-    <string name="text_default_alias" translatable="false">key0</string>
-    <string name="text_default_country_code" translatable="false">CN</string>
-    <string name="text_default_validity_years" translatable="false">25</string>
-    <string name="text_device_imei" translatable="false">IMEI</string>
-    <string name="text_en_import" translatable="false">import</string>
-    <string name="text_full_version_info" translatable="false">%1$s (%2$d)</string>
-    <string name="text_half_ellipsis" translatable="false" formatted="true">...</string>
-    <string name="text_jks" translatable="false">JKS</string>
-    <string name="text_plugin_mechanism_aidl" translatable="false">AIDL / IPC</string>
-    <string name="text_plugin_mechanism_sdk" translatable="false">SDK / In-Process</string>
-    <string name="text_powered_by_autojs" translatable="false">Powered by AutoJs6</string>
-    <string name="text_root" translatable="false">Root</string>
-    <string name="text_sample_button" translatable="false">Hello</string>
-    <string name="text_sample_file_date" translatable="false">2023-04-02 22:54</string>
-    <string name="text_sample_file_path" translatable="false">/Scripts/My_First_Project/main.js</string>
-    <string name="text_sample_file_size" translatable="false">18 KB</string>
-    <string name="text_sample_string" translatable="false">Sample string</string>
-    <string name="text_share_app" translatable="false">AutoJs6:\n&url_github_autojs6;</string>
-    <string name="text_should_never_happen" translatable="false">Should never happen</string>
-    <string name="text_str_colon_space_str_formatter" translatable="false">%s: %s</string>
-    <string name="uri_autojs6_download_link" translatable="false">http://download.autojs6.com</string>
-    <string name="url_github_autojs6" translatable="false">&url_github_autojs6;</string>
-    <string name="url_github_autojs6_issues" translatable="false">&url_github_autojs6;/issues</string>
-    <string name="url_github_autojs6_vscode_extension_repo" translatable="false">&url_github_autojs6_vscode_extension;</string>
-    <string name="url_github_autojs6_vscode_extension_usage" translatable="false">&url_github_autojs6_vscode_extension;/#%E4%BD%BF%E7%94%A8-usage</string>
-    <string name="value_app_language_default" translatable="false">@string/value_app_language_follow_system</string>
-    <string name="value_app_language_english" translatable="false">EN</string>
-    <string name="value_app_language_follow_system" translatable="false">Auto</string>
-    <string name="value_app_language_simplified_chinese" translatable="false">ZH_CN</string>
-
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <!-- Dividing line between translatable and non-translatable -->
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <string name="apk_builder_build">Building</string>
     <string name="apk_builder_clean">Cleaning</string>
@@ -409,6 +66,16 @@
     <string name="description_about_app_and_developer_preference">AutoJs6 is a JavaScript automated tool for android, which is open-source and cloned from \"hyb1996/Auto.js\".\n\nTo ask for help or feedback, go to GitHub issues or join Tencent QQ group 690946137.</string>
     <string name="description_about_app_tips_preference">1. Press and hold the app icon on the \"About app and developer\" page to jump to AutoJs6 developer options page</string>
     <string name="description_accessibility_service">The accessibility service is AutoJs6\'s core capability for automation. It is used to read on-screen widget information and simulate interactions such as [ click / swipe / input ].\n\nMost automation-related functions, as well as tools like layout analysis, require the accessibility service to be enabled to work properly.</string>
+    <string name="description_ace_action_favorites">Action favorites records editor actions you use often, such as run, save, formatting, menu actions, long-press actions, and editor setting actions. Tap the star button to open this list, tap an item to repeat the action, long-press the star button to repeat the most recent action, drag items to reorder them, swipe right to pin or unpin, and swipe left to delete.</string>
+    <string name="description_ace_editor_font_preference">Choose the Ace editor font. The list includes Android system monospace and open-source code fonts with author/developer information; the actual system monospace face is decided by Android and the device vendor.</string>
+    <string name="description_ace_font_ligatures_enabled_preference">Enable OpenType font ligatures for fonts that support them. Operators such as ===, !==, =&gt;, and &lt;= may be drawn as joined glyphs. This only changes how code is displayed.</string>
+    <string name="description_ace_font_styles_enabled_preference">Allow Ace themes and syntax highlighting to use bold, italic, and other font styles. When disabled, code text is forced to the regular normal style without changing colors or content.</string>
+    <string name="description_ace_indent_guides_enabled_preference">Show or hide vertical indentation guides in the code area. This only changes how code is displayed.</string>
+    <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
+    <string name="description_ace_lsp_enabled_preference">Preview LSP support is off by default. When enabled, the editor uses a local TypeScript language service for completion, hover, signature help, and diagnostics, with static completion kept as a fallback.</string>
+    <string name="description_ace_lsp_file_types_preference">LSP is only started for files whose names end with one of the selected suffixes. Use default restores the JavaScript, TypeScript, JSON, Auto.js, and Node.js suffix set.</string>
+    <string name="description_ace_print_margin_enabled_preference">Show or hide the Ace editor print margin guide. This is the right-side column limit line and only changes how code is displayed.</string>
+    <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">The \"manage all files\" (or \"all files access\") permission allows AutoJs6 to directly [ create / read / modify / delete ] files in shared storage via normal file paths, allowing scripts to access \"Internal Storage\" and enabling the file manager to display and manage files properly.\n\nOn Android 11+ devices, this is the primary way to achieve full file read/write access.</string>
     <string name="description_app_language_preference">Preference for changing the display language of AutoJs6, including exception messages from running scripts.\n\nNote: an app restart may be needed to make language applied as expected.</string>
     <string name="description_auto_night_mode">When auto night mode is enabled, AutoJs6 will automatically switch night mode based on system settings.\n\nNote: the auto night mode toggle and the night mode toggle are linked and affect each other.</string>
@@ -419,13 +86,20 @@
     <string name="description_display_over_other_app">The \"display over other apps\" permission allows AutoJs6 to show floating windows or a floating button above other apps, enabling quick actions or information viewing on any screen.\n\nNote: without this permission, floating windows and the floating button may not be shown or may not work properly.</string>
     <string name="description_documentation_source_preference">Local docs: Using AutoJs6 build-in files as documentation sources, no network connection required. The content changes as AutoJs6 is updated.\nOnline docs: Using GitHub pages as documentation sources, requiring network connection. The content is always up to date.\n\nNote: To maximize the reading experience of online documents, it is recommended to use a widescreen display device such as a desktop monitor.\nNote: As of version 6.2.0, the documentation is still in the preliminary stages of development, and most of the content has not yet been written or updated.</string>
     <string name="description_documentation_source_preference_more">The following conditions must be met for dark theme support on document pages:\n1. AutoJs6 has night mode enabled\n2. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P] and below: version >= 105</string>
+    <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
     <string name="description_editor_code_highlight_threshold">Determines whether syntax highlighting is enabled based on file size.\nFor large files, disabling syntax highlighting can improve file loading efficiency to some extent.</string>
+    <string name="description_editor_engine_preference">Ace is the default editor engine. JsDroidEditor remains available as a fallback and can be selected explicitly.</string>
+    <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>
+    <string name="description_editor_gutter_width_mode_preference">Dynamic width follows currently visible line-number digits. Fixed width preallocates a stable minimum and grows only when larger visible line numbers require it.</string>
     <string name="description_editor_large_file_mode_threshold">Determines whether large file mode is used to load files based on file size.\nLarge file mode can improve file loading efficiency and stability to some extent, but the \"Undo\" and \"Redo\" features will be disabled in large file mode.</string>
     <string name="description_editor_log_button_behavior_preference">Controls how the \"Logs\" button in the code editor menu opens logs.\n\nBottom log panel: Opens the bottom log panel. You can enter the fullscreen log page by tapping the \"Maximize\" button or dragging the handle upward near the top.\nFullscreen log page: Opens the fullscreen log page directly.</string>
+    <string name="description_editor_theme_mode_preference">Choose whether the editor remembers separate themes for AutoJs6 light and dark modes, or uses one shared theme in both modes.</string>
+    <string name="description_editor_word_wrap_indent_style_preference">Continuation indent keeps wrapped visual lines aligned with the original indentation. Flush continuation starts wrapped visual lines at the viewport edge.</string>
     <string name="description_extending_js_build_in_objects">Extending JavaScript built-in objects can increase code flexibility and enable richer functionality, but can cause conflicts and even breakage.\nAll scripts have built-in extensions enabled by default when the option is turned on.\nBuilt-in extensions are often insecure, and are not recommended unless the principles and risks of built-in extensions are clearly understood.\nWhen the option is turned off, built-in extensions can still be enabled through the plugins global object, as described in the project documentation.</string>
     <string name="description_file_extensions_preference">Used to set whether to show file extensions in AutoJs6 file explorer.</string>
     <string name="description_floating_button">The floating button shows a draggable quick-entry on the screen edge, and can be used for [ starting or stopping scripts / layout analysis / viewing recent package name or activity name / showing pointer location ].\n\nNote: this feature typically requires the \"display over other apps\" permission.</string>
     <string name="description_foreground_service">Foreground service is used to keep AutoJs6 running more stably in the background, suitable for scenarios like [ long-running scripts / keeping connections / continuous listening ].\n\nAfter enabling it, the system will display a \"foreground service notification\" to inform the user that AutoJs6 is continuously running. This notification typically stays visible until the service stops.\n\nSetting the notification to \"Silent\" or \"Minimize\" only reduces the prominence and generally does not affect foreground service functionality.\n\nIf the notification channel is disabled or AutoJs6 is prevented from posting notifications, it may affect foreground service startup and stability.</string>
+    <string name="description_github_token_preference">Used only for GitHub API requests to reduce rate limits. The token is stored locally and hidden in this UI.</string>
     <string name="description_hidden_files_preference">Used to set whether to show hidden files and folders (usually starting with \".\") in AutoJs6 file explorer.</string>
     <string name="description_ignore_battery_optimizations">Ignoring battery optimizations can reduce system background restrictions on AutoJs6, helping scheduled tasks or long-running scripts run relatively more stably while the device is idle.\n\nNote: different OEM systems may still apply additional power-saving policies, such as auto-start restrictions or background freezing.</string>
     <string name="description_keep_screen_on_when_in_foreground">Used to control whether the screen stays on while AutoJs6 is in the foreground.</string>
@@ -436,13 +110,14 @@
     <string name="description_night_mode">Used to control and reflect AutoJs6\'s night mode strategy.\n\nNote: the night mode toggle and the auto night mode toggle are linked and affect each other.</string>
     <string name="description_night_mode_preference">Night mode (also known as Dark theme) applies to both the Android system UI and apps running on the device, which improves visibility for users with low vision and those who are sensitive to bright light, and makes it easier for anyone to use a device in a low-light environment.\n\nFollow system: AutoJs6 has Night mode settings same as Android system\nAlways on: AutoJs6 keeps Night mode on (regardless of Android system settings)\nAlways off: AutoJs6 keeps Night mode off (regardless of Android system settings)\n\nNote: Follow system option is only for Android API Level 28 (Android 9) [P] and above.</string>
     <string name="description_night_mode_preference_more">To enable Night mode in Android system:\n- Android API Level 29 (Android 10) [Q] and above: Settings -> Display -> Theme.\n- Android API Level 28 (Android 9) [P]: Developer options -> Night mode.\n\nThe following conditions must to met for applying a Night mode (Dark theme) to web-based content using a WebView component (like AutoJs6 documentation page):\n1. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P]: version >= 105\n2. Web-based content in WebView component is adapted to Dark theme (by CSS or Android XML resources and so forth)</string>
+    <string name="description_nodejs_doctor_report_preference">Exports backend, Node version, ABI, feature flags, native library hashes, capability profile, last-error status, and packaged template status. User script contents and sensitive environment values are not included.</string>
     <string name="description_notification_access">The \"notification access\" (or \"notification reading\") permission allows AutoJs6 to read system notification content, so scripts can listen for notifications or retrieve notification text, etc.</string>
     <string name="description_pointer_location">\"Pointer location\" is a debugging feature in Android Developer options.\nWhen enabled, the system will display information about touch point(s) on the screen, such as [coordinates/movement trajectory/count/size/movement speed/pressure], which helps with [writing/debugging/verification] of related scripts.</string>
     <string name="description_post_notifications">The \"post notifications\" permission allows AutoJs6 to publish notifications to the system, so scripts can post and manage custom notifications in the notification shade.\n\nNote: on Android 13+ devices, if this permission is not granted, some notifications may not show, and it may affect foreground service startup and stability.</string>
     <string name="description_project_media_access">With project media access, security warning for screen recording will not prompt.</string>
     <string name="description_release_history_preference">View the release history and key category statistics of AutoJs6 on GitHub.</string>
     <string name="description_restart_strategy">The restart strategy only affects the restart button in the home page drawer.\n\nQuick restart: Quickly restarts the app. If the restart fails or unexpected situations occur, try switching to \"Scheduled restart\".\nScheduled restart: Sets up a short-timed task in advance. After the app stops, it will start again on schedule to achieve app restart.</string>
-    <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one‑character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
+    <string name="description_rhino_java_primitive_wrap">Switch ON (default): results of Java methods that are instances of Number/Boolean/Character are wrapped as Java objects and exposed to scripts (String excluded). typeof is \"object\", species is \"JavaObject\"; Java methods remain accessible, which helps retain precise Java type traits and overload resolution.\n\nSwitch OFF: the above types are no longer wrapped and are exposed directly as JavaScript primitives (number/boolean/one-character string). typeof is the corresponding JavaScript type, aligning better with JavaScript semantics and ecosystem. You can still explicitly create a Java wrapper via new, e.g. new java.lang.Boolean(true).\n\nSee: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">If you have exotic root or abnormal state for root access, you can force set root to root or non-root.</string>
     <string name="description_root_record_out_file_type_preference">Binary type: non-editable, with the file extension \"auto\"\nJavaScript type: can be edited or copied directly, with the file extension \"js\"</string>
     <string name="description_screen_capture_request_delay">When requesting screen capture permission, the permission request window may include a fade-out animation when it disappears. If `images.captureScreen` is called immediately, the captured screenshot may contain the permission request window content and be obstructed.\n\nThe current option value adds a delay (in milliseconds) before capturing the screen immediately after permission is granted, which can be used to avoid the obstruction issue described above.\n\nThis option only applies to the first screenshot after screen capture permission is granted; subsequent screenshots are not affected by this value.</string>
@@ -523,32 +198,23 @@
     <string name="editable_file_info_file_size_label">Size</string>
     <string name="editable_file_info_line_break_label">EOL</string>
     <string name="editable_file_info_line_count_label">Lines</string>
+    <string name="entry_ace_editor_font_system_monospace">Android system monospace</string>
     <string name="entry_app_language_auto">Follow system</string>
     <string name="entry_documentation_source_local">Local docs</string>
     <string name="entry_documentation_source_online">Online docs</string>
+    <string name="entry_editor_engine_ace">Ace</string>
+    <string name="entry_editor_engine_native">JsDroidEditor</string>
+    <string name="entry_editor_gutter_width_mode_dynamic">Dynamic</string>
+    <string name="entry_editor_gutter_width_mode_fixed">Fixed</string>
     <string name="entry_editor_log_button_behavior_bottom_sheet">Bottom log panel</string>
     <string name="entry_editor_log_button_behavior_fullscreen_page">Fullscreen log page</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">Change text size</string>
     <string name="entry_editor_pinch_to_zoom_disable">Disable</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">Scale view</string>
-    <string name="entry_editor_engine_ace">Ace</string>
-    <string name="entry_editor_engine_native">JsDroidEditor</string>
     <string name="entry_editor_theme_mode_separate">Separate light and dark themes</string>
     <string name="entry_editor_theme_mode_unified">Use one theme for both modes</string>
-    <string name="entry_editor_gutter_width_mode_dynamic">Dynamic</string>
-    <string name="entry_editor_gutter_width_mode_fixed">Fixed</string>
     <string name="entry_editor_word_wrap_indent_style_classic">Flush continuation</string>
     <string name="entry_editor_word_wrap_indent_style_continuation">Continuation indent</string>
-    <string name="entry_ace_editor_font_jetbrains_mono" translatable="false">JetBrains Mono</string>
-    <string name="entry_ace_editor_font_iosevka" translatable="false">Iosevka</string>
-    <string name="entry_ace_editor_font_iosevka_slab" translatable="false">Iosevka Slab</string>
-    <string name="entry_ace_editor_font_fira_code" translatable="false">Fira Code</string>
-    <string name="entry_ace_editor_font_cascadia_code" translatable="false">Cascadia Code</string>
-    <string name="entry_ace_editor_font_intel_one_mono" translatable="false">Intel One Mono</string>
-    <string name="entry_ace_editor_font_ibm_plex_mono" translatable="false">IBM Plex Mono</string>
-    <string name="entry_ace_editor_font_hack" translatable="false">Hack</string>
-    <string name="entry_ace_editor_font_source_code_pro" translatable="false">Source Code Pro</string>
-    <string name="entry_ace_editor_font_system_monospace">Android system monospace</string>
     <string name="entry_file_extensions_not_show">Hide all file extensions</string>
     <string name="entry_file_extensions_show_all">Show all file extensions</string>
     <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
@@ -569,11 +235,9 @@
     <string name="entry_root_mode_force_root">Force set root mode</string>
     <string name="entry_root_record_out_file_type_binary">Binary type (non-editable)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript type (editable)</string>
-    <string name="entry_timed_task_backend_alarm" translatable="false">AlarmManager</string>
-    <string name="entry_timed_task_backend_job" translatable="false">JobScheduler</string>
-    <string name="entry_timed_task_backend_work" translatable="false">WorkManager</string>
     <string name="error_a_runtime_has_been_set">A runtime has been set</string>
     <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
+    <string name="error_ace_editor_unavailable">Ace editor is unavailable; JsDroidEditor is still active</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">The \"%1$s\" operation cannot be completed because the parameter contains negative coordinate values (%2$d, %3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">An activity is required, which could be provided by running in \"ui\" execution mode</string>
     <string name="error_an_error_occurred">An error occurred</string>
@@ -630,8 +294,6 @@
     <string name="error_failed_to_launch_manager">Failed to launcher manager</string>
     <string name="error_failed_to_launch_system_settings">Failed to launch system settings</string>
     <string name="error_failed_to_load_plugins_with_reason">Failed to load plugins.\nReason: %1$s.</string>
-    <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>
-    <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_failed_to_move">Failed to move</string>
     <string name="error_failed_to_rename">Failed to rename</string>
     <string name="error_failed_to_render_content">Failed to render content</string>
@@ -704,6 +366,8 @@
     <string name="error_pattern_syntax">Invalid pattern syntax</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">Plugin APK does not contain required assets for variant=\"%1$s\": %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">Plugin APK does not contain required native libraries: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">Plugin \"%1$s\" is not authorized in Plugin Center</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">Plugin \"%1$s\" is not enabled in Plugin Center</string>
     <string name="error_plugin_not_found_in_installed_apps">Plugin \"%1$s\" not found in installed apps</string>
@@ -732,7 +396,6 @@
     <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Current file path is unknown, unable to display file details</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Current file path is unknown, unable to display version history</string>
-    <string name="error_ace_editor_unavailable">Ace editor is unavailable; JsDroidEditor is still active</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Current file path is unknown, unable to open with other apps</string>
     <string name="error_unable_to_package_application_as_current_file_path_is_unknown">Current file path is unknown, unable to package application</string>
     <string name="error_unable_to_save_file_as_current_file_path_is_unknown">Current file path is unknown, unable to save file</string>
@@ -763,6 +426,7 @@
     <string name="format_file_downloaded" formatted="true">File downloaded to %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Go to] Settings -> Accessibility Services -> AutoJs6 [Enable]]]></string>
     <string name="hint_find_with_regex">Regex is supported. Use \"$1\" - \"$9\" for captured groups.</string>
+    <string name="hint_github_token">Paste a GitHub personal access token</string>
     <string name="hint_long_click_run_to_debug">Long click \"Run\" button to debug</string>
     <string name="hint_loop_delay">Delay before loop</string>
     <string name="hint_loop_times">0 for infinite loop</string>
@@ -834,16 +498,35 @@
     <string name="screen_capturer_foreground_notification_text">This notification is being displayed for capturing screen</string>
     <string name="screen_capturer_foreground_notification_title">Screen capturer foreground service</string>
     <string name="summary_about_app_tips">Better user experience</string>
+    <string name="summary_ace_font_ligatures_enabled">Render supported operator combinations as code-font ligatures</string>
+    <string name="summary_ace_font_styles_enabled">Allow bold, italic, and other code-font styles</string>
+    <string name="summary_ace_indent_guides_enabled">Show vertical guides for code indentation</string>
+    <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter</string>
+    <string name="summary_ace_lsp_enabled">Enable LSP-powered editor assistance preview</string>
+    <string name="summary_ace_lsp_file_types">Choose file types that can use LSP features</string>
+    <string name="summary_ace_print_margin_enabled">Show the right-side column limit guide</string>
+    <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
     <string name="summary_all_files_access">Allows AutoJs6 to access all files, including those in external storage</string>
     <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
+    <string name="summary_code_editor_settings">Open the full code editor settings page</string>
     <string name="summary_display_over_other_apps">Allows AutoJs6 to display content over other apps</string>
     <string name="summary_display_over_other_apps_inrt">Allow the application to display content over other apps</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
+    <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter</string>
+    <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter</string>
+    <string name="summary_editor_gutter_width_mode">Choose whether the gutter follows visible line digits or keeps a stable session width</string>
+    <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">Change editor text size with pinch gestures</string>
+    <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine</string>
+    <string name="summary_editor_shortcut_input_bar">Configure shortcut input symbols shared by editor engines</string>
+    <string name="summary_editor_word_wrap_indent_style">Choose how wrapped visual continuation lines are indented</string>
     <string name="summary_enable_a11y_service_with_root_access">Enable accessibility service with root access automatically when needed</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Enable accessibility service with secure settings automatically when needed</string>
     <string name="summary_extending_js_build_in_objects">Increase code flexibility and enable richer functionality by extending JavaScript built-in objects</string>
     <string name="summary_foreground_service_inrt">The foreground service helps keep the app and scripts running more reliably in the background</string>
+    <string name="summary_github_token_not_set">Not set. GitHub API requests are anonymous.</string>
+    <string name="summary_github_token_set">Set. Hidden for privacy; ending in %1$s.</string>
     <string name="summary_guard_mode">Prevent automation actions from scripts when AutoJs6 is in the foreground</string>
+    <string name="summary_nodejs_doctor_report">Generate a privacy-redacted Node runtime diagnostic report for bug reports</string>
     <string name="summary_not_showing_main_activity">Run script directly without showing main activity</string>
     <string name="summary_plugin_auto_check_updates">Automatically check plugin updates every 1 hour (pull-to-refresh checks immediately)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">Global \"Auto check plugin updates\" is disabled, this option is unavailable</string>
@@ -887,6 +570,41 @@
     <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">Update</string>
     <string name="text_access_has_been_granted">Access has been granted</string>
+    <string name="text_ace_action_clear_confirm">Clear all editor action history?</string>
+    <string name="text_ace_action_delete_confirm" formatted="true">Delete \"%1$s\" from editor action history?</string>
+    <string name="text_ace_action_favorites">Action favorites</string>
+    <string name="text_ace_action_history_empty">No editor action history</string>
+    <string name="text_ace_action_pin">Pin</string>
+    <string name="text_ace_action_pinned">Pinned</string>
+    <string name="text_ace_action_unpin">Unpin</string>
+    <string name="text_ace_diagnostics_copied">Ace diagnostics copied to clipboard</string>
+    <string name="text_ace_editor_debug">Ace editor debug</string>
+    <string name="text_ace_editor_debug_description">Open an isolated Ace WebView editor test page</string>
+    <string name="text_ace_editor_debug_status">%1$s | lines %2$d | cursor %3$d:%4$d | breakpoints %5$d | dirty %6$s</string>
+    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">Loading Ace editor...</string>
+    <string name="text_ace_editor_debug_text_length">Ace text length: %1$d</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">Ace editor failed (%1$s); switched to JsDroidEditor. Copy Ace diagnostics from the More menu for details</string>
+    <string name="text_ace_editor_font">Editor font</string>
+    <string name="text_ace_editor_font_changed" formatted="true">Editor font switched to %s</string>
+    <string name="text_ace_font_ligatures_enabled">Font ligatures</string>
+    <string name="text_ace_font_styles_enabled">Font styles</string>
+    <string name="text_ace_get_text">Get text</string>
+    <string name="text_ace_ime_stress">IME stress</string>
+    <string name="text_ace_ime_stress_done">IME stress finished: %1$d cycles</string>
+    <string name="text_ace_ime_stress_running">IME stress: %1$d/%2$d</string>
+    <string name="text_ace_indent_guides_enabled">Indent guides</string>
+    <string name="text_ace_insert">Insert</string>
+    <string name="text_ace_large_file_uses_native_editor">Ace editor is routed to JsDroidEditor by the active fallback policy</string>
+    <string name="text_ace_line_numbers_enabled">Line numbers</string>
+    <string name="text_ace_lsp_enabled">LSP smart completion (preview)</string>
+    <string name="text_ace_lsp_file_types">LSP file types</string>
+    <string name="text_ace_no_last_action">No last editor action</string>
+    <string name="text_ace_print_margin_enabled">Print margin</string>
+    <string name="text_ace_read_only_mode">Read-only mode</string>
+    <string name="text_ace_read_only_mode_disabled">Read-only mode disabled</string>
+    <string name="text_ace_read_only_mode_enabled">Read-only mode enabled</string>
+    <string name="text_ace_set_sample">Set sample</string>
+    <string name="text_ace_word_wrap_enabled">Word wrap</string>
     <string name="text_act_by_click">Click (click)</string>
     <string name="text_act_by_long_click">Long click (longClick)</string>
     <string name="text_act_by_scroll_backward">Scroll backward (scrollBackward)</string>
@@ -906,6 +624,7 @@
     <string name="text_all_files_access_is_needed">\"All files access\" is needed to access script files on the phone</string>
     <string name="text_all_history_entries">All history entries</string>
     <string name="text_all_items_cleared">All items have been cleared</string>
+    <string name="text_all_settings">All settings</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">Granting the \"Allow setting alarms and reminders\" permission is recommended to help tasks run as punctually as possible even when the screen is off or the device is idle</string>
     <string name="text_already_copied_to_clip">Copied to clipboard</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">Already copied to clipboard (only latest %d items)</string>
@@ -916,10 +635,9 @@
     <string name="text_android_release_version">Android release version</string>
     <string name="text_android_sdk_version">Android SDK version</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder is unavailable</string>
+    <string name="text_apk_template_plugin_risk_prompt">The installed APK Builder template plugin is not fully compatible with the current AutoJs6 version. Continuing may cause the packaged app to fail to start, use mismatched APIs, or miss some modules.</string>
     <string name="text_apk_template_unavailable">APK Builder template is unavailable</string>
     <string name="text_apk_template_unavailable_prompt">No usable APK Builder template was found. This AutoJs6 build does not include built-in template.apk, and no readable APK Builder template plugin is available. Install and enable a matching template plugin, then try again.</string>
-    <string name="text_apk_template_plugin_risk_prompt">The installed APK Builder template plugin is not fully compatible with the current AutoJs6 version. Continuing may cause the packaged app to fail to start, use mismatched APIs, or miss some modules.</string>
-    <string name="text_archiving_project_files">Archiving project files</string>
     <string name="text_app_and_device_info">App and device info</string>
     <string name="text_app_crashed">AutoJs6 crashed</string>
     <string name="text_app_language">Language</string>
@@ -957,9 +675,8 @@
     <string name="text_app_version_code">App version code</string>
     <string name="text_app_version_name">App version name</string>
     <string name="text_appearance">Appearance</string>
-    <string name="text_general">General</string>
-    <string name="text_all_settings">All settings</string>
     <string name="text_applying_binary_resources">Applying binary resources</string>
+    <string name="text_archiving_project_files">Archiving project files</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">At least one field from [Full Name, Organization Name, Organizational Unit, Country Code, State or Province, City or Locality, Street] must be filled</string>
     <string name="text_attribute">Attribute</string>
     <string name="text_authorize_plugin">Authorize Plugin</string>
@@ -1022,7 +739,6 @@
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Checking for updates...</string>
     <string name="text_choose_delete_strategy">Choose delete strategy</string>
     <string name="text_choose_restore_path">Choose restore path</string>
-    <string name="text_confirm_overwrite_selected_items">Some target items already exist. Overwrite them?</string>
     <string name="text_city_or_locality">City or Locality</string>
     <string name="text_class_or_package_name">Class / Package name</string>
     <string name="text_clean">Clean</string>
@@ -1049,6 +765,7 @@
     <string name="text_code">Code</string>
     <string name="text_code_beautify">Beautify code</string>
     <string name="text_code_editor">Code editor</string>
+    <string name="text_code_editor_settings">Code editor settings</string>
     <string name="text_collapse_all">Collapse all</string>
     <string name="text_color_library">Color library</string>
     <string name="text_color_palette">Color palette</string>
@@ -1059,6 +776,7 @@
     <string name="text_config">Config</string>
     <string name="text_configuring_manifest">Configuring manifest</string>
     <string name="text_configuring_package_name">Configuring package name</string>
+    <string name="text_confirm_overwrite_selected_items">Some target items already exist. Overwrite them?</string>
     <string name="text_confirm_to_clear_all_items">Are you sure to clear all items?</string>
     <string name="text_confirm_to_clear_the_history">Are you sure to clear the history?</string>
     <string name="text_confirm_to_clear_the_history_of">The history below will be cleared\n\n[ %1$s ]\n\nAre you sure to clear?</string>
@@ -1076,6 +794,7 @@
     <string name="text_console">Console</string>
     <string name="text_content">Content</string>
     <string name="text_continue">Continue</string>
+    <string name="text_continue_with_plugin_template">Continue with plugin template</string>
     <string name="text_copy">Copy</string>
     <string name="text_copy_ace_diagnostics">Copy Ace diagnostics</string>
     <string name="text_copy_all">Copy all</string>
@@ -1100,6 +819,12 @@
     <string name="text_copying_project_directory">Copying project directory</string>
     <string name="text_copying_remote_build_inputs">Copying remote build inputs</string>
     <string name="text_copying_script_file">Copying script file</string>
+    <string name="text_countdown_duration_must_be_positive">Countdown duration must be greater than 0</string>
+    <string name="text_countdown_duration_should_be_valid">Countdown duration is invalid</string>
+    <string name="text_countdown_hours">Hours</string>
+    <string name="text_countdown_minutes">Minutes</string>
+    <string name="text_countdown_minutes_should_be_less_than_60">Minutes must be between 0 and 59</string>
+    <string name="text_countdown_task">Countdown task</string>
     <string name="text_country_code">Country Code (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
     <string name="text_creating_unsigned_apk">Creating unsigned APK</string>
@@ -1152,12 +877,6 @@
     <string name="text_disabled">Disabled</string>
     <string name="text_display_over_other_app">Display over other apps</string>
     <string name="text_display_over_other_app_is_recommended">\"Display over other apps\" permission is recommended to make all widgets displayed properly</string>
-    <string name="text_countdown_task">Countdown task</string>
-    <string name="text_countdown_hours">Hours</string>
-    <string name="text_countdown_minutes">Minutes</string>
-    <string name="text_countdown_duration_must_be_positive">Countdown duration must be greater than 0</string>
-    <string name="text_countdown_duration_should_be_valid">Countdown duration is invalid</string>
-    <string name="text_countdown_minutes_should_be_less_than_60">Minutes must be between 0 and 59</string>
     <string name="text_disposable_task">Disposable task</string>
     <string name="text_disposable_task_time_before_now">Time should be later than now</string>
     <string name="text_do_not_ask_again_for_this_version">Don\'t ask again for this version</string>
@@ -1180,65 +899,31 @@
     <string name="text_edit">Edit</string>
     <string name="text_edit_prepare_script">Edit pre-execute script</string>
     <string name="text_edit_script">Edit script</string>
+    <string name="text_editor_assistance">Assistance</string>
     <string name="text_editor_auto_show_log_bottom_sheet_on_run">Auto show bottom log panel after running</string>
+    <string name="text_editor_breakpoint_markers_enabled">Breakpoint markers</string>
     <string name="text_editor_code_highlight_always_disabled">Always disable code highlighting</string>
     <string name="text_editor_code_highlight_always_enabled">Always enable code highlighting</string>
     <string name="text_editor_code_highlight_threshold">Code highlight threshold</string>
     <string name="text_editor_code_highlight_threshold_enabled_for_smaller_files">Enable code highlighting only for files not larger than %1$s</string>
+    <string name="text_editor_engine">Editor engine</string>
+    <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
+    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
+    <string name="text_editor_fold_markers_enabled">Code folding markers</string>
+    <string name="text_editor_gestures">Gestures</string>
+    <string name="text_editor_gutter_markers">Gutter markers</string>
+    <string name="text_editor_gutter_width_mode">Gutter width</string>
     <string name="text_editor_large_file_mode_always_disabled">Always disable large file mode</string>
     <string name="text_editor_large_file_mode_always_enabled">Always enable large file mode</string>
     <string name="text_editor_large_file_mode_threshold">Large file mode threshold</string>
     <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">Enable large file mode only for files larger than %1$s</string>
     <string name="text_editor_log_button_behavior">Editor log button behavior</string>
+    <string name="text_editor_performance">Performance</string>
+    <string name="text_editor_pinch_to_zoom_change_text_size_enabled">Pinch changes text size</string>
+    <string name="text_editor_shortcut_input_bar">Shortcut symbol settings</string>
     <string name="text_editor_theme">Editor theme</string>
-    <string name="text_theme_previewer">Theme previewer</string>
-    <string name="text_theme_preview_previous">Prev</string>
-    <string name="text_theme_preview_next">Next</string>
-    <string name="text_theme_preview_list">List</string>
-    <string name="text_theme_preview_use">Use</string>
-    <string name="text_theme_preview_exit">Exit</string>
-    <string name="text_theme_preview_filter_all">All</string>
-    <string name="text_theme_preview_filter_dark">Dark</string>
-    <string name="text_theme_preview_filter_light">Light</string>
-    <string name="text_theme_preview_unavailable_for_filter">Unavailable for current filter</string>
-    <string name="text_theme_preview_no_available_theme">No theme is available for current filter</string>
     <string name="text_editor_theme_mode">Editor theme mode</string>
-    <string name="text_ace_editor_font">Editor font</string>
-    <string name="text_ace_editor_font_changed" formatted="true">Editor font switched to %s</string>
-    <string name="text_ace_read_only_mode">Read-only mode</string>
-    <string name="text_ace_read_only_mode_enabled">Read-only mode enabled</string>
-    <string name="text_ace_read_only_mode_disabled">Read-only mode disabled</string>
-    <string name="text_ace_line_numbers_enabled">Line numbers</string>
-    <string name="text_ace_print_margin_enabled">Print margin</string>
-    <string name="text_ace_indent_guides_enabled">Indent guides</string>
-    <string name="text_editor_breakpoint_markers_enabled">Breakpoint markers</string>
-    <string name="text_editor_fold_markers_enabled">Code folding markers</string>
-    <string name="text_ace_action_favorites">Action favorites</string>
-    <string name="text_usage_instructions">Usage</string>
-    <string name="description_ace_action_favorites">Action favorites records editor actions you use often, such as run, save, formatting, menu actions, long-press actions, and editor setting actions. Tap the star button to open this list, tap an item to repeat the action, long-press the star button to repeat the most recent action, drag items to reorder them, swipe right to pin or unpin, and swipe left to delete.</string>
-    <string name="text_ace_action_history_empty">No editor action history</string>
-    <string name="text_ace_action_pin">Pin</string>
-    <string name="text_ace_action_pinned">Pinned</string>
-    <string name="text_ace_action_unpin">Unpin</string>
-    <string name="text_ace_action_clear_confirm">Clear all editor action history?</string>
-    <string name="text_ace_action_delete_confirm" formatted="true">Delete \"%1$s\" from editor action history?</string>
-    <string name="text_ace_no_last_action">No last editor action</string>
-    <string name="text_set_editor_setting_action" formatted="true">Set %1$s</string>
-    <string name="text_editor_engine">Editor engine</string>
-    <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
-    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
-    <string name="text_ace_editor_fallback_native" formatted="true">Ace editor failed (%1$s); switched to JsDroidEditor. Copy Ace diagnostics from the More menu for details</string>
-    <string name="text_ace_large_file_uses_native_editor">Ace editor is routed to JsDroidEditor by the active fallback policy</string>
-    <string name="text_ace_font_ligatures_enabled">Font ligatures</string>
-    <string name="text_ace_font_styles_enabled">Font styles</string>
-    <string name="text_ace_word_wrap_enabled">Word wrap</string>
-    <string name="text_editor_gutter_width_mode">Gutter width</string>
     <string name="text_editor_word_wrap_indent_style">Wrap indentation</string>
-
-    <plurals name="text_ace_action_used_times">
-        <item quantity="one">Used %1$d time</item>
-        <item quantity="other">Used %1$d times</item>
-    </plurals>
     <string name="text_email">E-mail</string>
     <string name="text_email_cannot_be_empty">E-mail cannot be empty</string>
     <string name="text_email_format_error">Invalid e-mail format</string>
@@ -1274,7 +959,6 @@
     <string name="text_extracting_plugin_asset">Extracting plugin asset</string>
     <string name="text_extracting_plugin_so">Extracting plugin so</string>
     <string name="text_extracting_template_apk">Extracting template APK</string>
-    <string name="text_continue_with_plugin_template">Continue with plugin template</string>
     <string name="text_failed">Failed</string>
     <string name="text_failed_to_build">Failed to build</string>
     <string name="text_failed_to_create_key_store">Failed to create signature key</string>
@@ -1336,16 +1020,13 @@
     <string name="text_formatting_completed">Formatting completed</string>
     <string name="text_function">Function</string>
     <string name="text_fx_keyboard">Fx keyboard</string>
+    <string name="text_general">General</string>
     <string name="text_generate">Generate</string>
     <string name="text_generate_code">Generate code</string>
     <string name="text_generated_code">Generated code</string>
     <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">Backup URL has been used</string>
     <string name="text_github_token">GitHub Token</string>
-    <string name="hint_github_token">Paste a GitHub personal access token</string>
-    <string name="summary_github_token_not_set">Not set. GitHub API requests are anonymous.</string>
-    <string name="summary_github_token_set">Set. Hidden for privacy; ending in %1$s.</string>
-    <string name="description_github_token_preference">Used only for GitHub API requests to reduce rate limits. The token is stored locally and hidden in this UI.</string>
     <string name="text_global_settings">Global settings</string>
     <string name="text_go_to_settings">Go to \"Settings\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Grant AutoJs6 access in Shizuku app</string>
@@ -1455,6 +1136,7 @@
     <string name="text_min_version">Minimum version</string>
     <string name="text_min_version_of_vscode_vsc_ext">Minimum version of VSCode extension</string>
     <string name="text_mobile_qq_not_installed">\"Mobile QQ\" not installed</string>
+    <string name="text_monthly_task">Monthly task</string>
     <string name="text_more">More</string>
     <string name="text_more_details">Details</string>
     <string name="text_mount">Mount</string>
@@ -1480,14 +1162,6 @@
     <string name="text_new_intelligent_color_library">New intelligent color library</string>
     <string name="text_new_key_store">New Key Store</string>
     <string name="text_new_path">New path</string>
-    <string name="text_nodejs">Node.js</string>
-    <string name="text_nodejs_doctor">Node.js Doctor</string>
-    <string name="text_nodejs_doctor_export_json">JSON report</string>
-    <string name="text_nodejs_doctor_export_text">Text report</string>
-    <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Generating Node.js Doctor report...</string>
-    <string name="text_nodejs_doctor_generation_failed">Failed to generate Node.js Doctor report</string>
-    <string name="summary_nodejs_doctor_report">Generate a privacy-redacted Node runtime diagnostic report for bug reports</string>
-    <string name="description_nodejs_doctor_report_preference">Exports backend, Node version, ABI, feature flags, native library hashes, capability profile, last-error status, and packaged template status. User script contents and sensitive environment values are not included.</string>
     <string name="text_new_path_is_same_as_old_path">New path is same as old path</string>
     <string name="text_new_project">New project</string>
     <string name="text_new_version_found">New version found</string>
@@ -1516,6 +1190,12 @@
     <string name="text_no_search_results_for_keyword">No results found for:\n\n%1$s</string>
     <string name="text_no_symbols_hint">Current configuration is empty.\nTap here to create a symbol.</string>
     <string name="text_no_version_history">No version history</string>
+    <string name="text_nodejs">Node.js</string>
+    <string name="text_nodejs_doctor">Node.js Doctor</string>
+    <string name="text_nodejs_doctor_export_json">JSON report</string>
+    <string name="text_nodejs_doctor_export_text">Text report</string>
+    <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Generating Node.js Doctor report...</string>
+    <string name="text_nodejs_doctor_generation_failed">Failed to generate Node.js Doctor report</string>
     <string name="text_none">None</string>
     <string name="text_not_granted">Not granted</string>
     <string name="text_not_installed">Not installed</string>
@@ -1640,7 +1320,6 @@
     <string name="text_permissions">Permissions</string>
     <string name="text_permissions_list">Permissions</string>
     <string name="text_pin_shortcut_not_unsupported">Pinning shortcuts to launcher is not supported</string>
-    <string name="text_editor_pinch_to_zoom_change_text_size_enabled">Pinch changes text size</string>
     <string name="text_pinch_to_zoom">Pinch to zoom</string>
     <string name="text_play">Play</string>
     <string name="text_please_choose">Please choose</string>
@@ -1650,6 +1329,7 @@
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Please wait a moment before trying again...</string>
     <string name="text_plugin_activated">Activated</string>
     <string name="text_plugin_activation_recommended">Activation recommended</string>
+    <string name="text_plugin_additional_variants">Other plugin variants</string>
     <string name="text_plugin_authorization_denied">Authorization denied</string>
     <string name="text_plugin_authorization_required">Authorization required</string>
     <string name="text_plugin_authorized">Authorized</string>
@@ -1668,7 +1348,6 @@
     <string name="text_plugin_jump_to_launch_page">Jump to launch page</string>
     <string name="text_plugin_library_official">Official plugin library</string>
     <string name="text_plugin_library_third_party">Third-party plugin library</string>
-    <string name="text_plugin_additional_variants">Other plugin variants</string>
     <string name="text_plugin_mount_object_name">Mount object name</string>
     <string name="text_plugin_mount_point">Mount point</string>
     <string name="text_plugin_mount_point_global_display">global</string>
@@ -1714,6 +1393,7 @@
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_pruning">Pruning</string>
     <string name="text_pruning_native_libraries">Pruning native libraries</string>
+    <string name="text_querying_plugin_info">Querying plugin info</string>
     <string name="text_quit">Quit</string>
     <string name="text_re_signing_apk">Re-signing APK</string>
     <string name="text_reading_splash_resources">Reading splash resources</string>
@@ -1739,6 +1419,13 @@
     <string name="text_remove_from_trash">Remove from trash</string>
     <string name="text_remove_from_trash_confirm">Remove this item from trash permanently?</string>
     <string name="text_rename">Rename</string>
+    <string name="text_repeat_count_must_be_positive">Times must be greater than 0</string>
+    <string name="text_repeat_count_times">Times</string>
+    <string name="text_repeat_end">Ends</string>
+    <string name="text_repeat_for_number_of_events">For a number of events</string>
+    <string name="text_repeat_forever">Forever</string>
+    <string name="text_repeat_until_date">Until a date</string>
+    <string name="text_repeat_until_date_before_now">End date should not be earlier than today</string>
     <string name="text_replace">Replace</string>
     <string name="text_replace_all">Replace all</string>
     <string name="text_replace_simplified">Replace</string>
@@ -1762,9 +1449,6 @@
     <string name="text_result">Result</string>
     <string name="text_retrieving_changelog" tools:ignore="TypographyEllipsis">Retrieving changelog...</string>
     <string name="text_retrieving_plugin_list_data" tools:ignore="TypographyEllipsis">Retrieving plugin list data...</string>
-    <string name="text_querying_plugin_info">Querying plugin info</string>
-    <string name="text_verifying_build_inputs">Verifying build inputs</string>
-    <string name="text_verifying_project_archive">Verifying project archive</string>
     <string name="text_retrieving_release_notes" tools:ignore="TypographyEllipsis">Retrieving release notes...</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
     <string name="text_rhino_java_primitive_wrap">Java primitive wrapping</string>
@@ -1828,6 +1512,7 @@
     <string name="text_set_a_name_for_the_new_configuration">Set a name for the new configuration</string>
     <string name="text_set_as_working_dir">Set as working dir</string>
     <string name="text_set_breakpoint">Set a breakpoint</string>
+    <string name="text_set_editor_setting_action" formatted="true">Set %1$s</string>
     <string name="text_settings">Settings</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 mismatch.\n\nExpected: %1$s\nActual: %2$s</string>
     <string name="text_shizuku_access">Shizuku access</string>
@@ -1905,6 +1590,17 @@
     <string name="text_text_size_current_value" formatted="true">Text size: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">The following solutions can be referred to</string>
     <string name="text_theme_color">Theme color</string>
+    <string name="text_theme_preview_exit">Exit</string>
+    <string name="text_theme_preview_filter_all">All</string>
+    <string name="text_theme_preview_filter_dark">Dark</string>
+    <string name="text_theme_preview_filter_light">Light</string>
+    <string name="text_theme_preview_list">List</string>
+    <string name="text_theme_preview_next">Next</string>
+    <string name="text_theme_preview_no_available_theme">No theme is available for current filter</string>
+    <string name="text_theme_preview_previous">Prev</string>
+    <string name="text_theme_preview_unavailable_for_filter">Unavailable for current filter</string>
+    <string name="text_theme_preview_use">Use</string>
+    <string name="text_theme_previewer">Theme previewer</string>
     <string name="text_time">Time</string>
     <string name="text_timed_task">Timed task</string>
     <string name="text_timed_task_backend_title">Timed task scheduling engine</string>
@@ -1921,7 +1617,6 @@
     <string name="text_type_file">File</string>
     <string name="text_type_folder">Folder</string>
     <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">The selected ABI \"%s\" cannot be used to create a packaged application, because the current version of AutoJs6 does not include the above ABI.</string>
-    <string name="text_use_builtin_template">Use built-in template</string>
     <string name="text_unavailable">Unavailable</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" is unavailable</string>
     <string name="text_under_development">Under development</string>
@@ -1944,8 +1639,10 @@
     <string name="text_updates_snack_bar_act_later">Later</string>
     <string name="text_updates_snack_bar_act_view">View</string>
     <string name="text_updating_project_config">Updating project config</string>
+    <string name="text_usage_instructions">Usage</string>
     <string name="text_usage_stats_permission">Usage stats access</string>
     <string name="text_use_android_n_shortcut">Use Android 7.0 shortcut</string>
+    <string name="text_use_builtin_template">Use built-in template</string>
     <string name="text_use_default_icon">Use default icon</string>
     <string name="text_use_volume_control_record">Use \"Volume Down\" key to control recording</string>
     <string name="text_use_volume_key_to_control_script_running">Use \"Volume Up\" key to control the script running</string>
@@ -1965,6 +1662,8 @@
     <string name="text_verify_failed">Verification failed</string>
     <string name="text_verify_key_store">Verify Keystore</string>
     <string name="text_verify_success">Verification successful</string>
+    <string name="text_verifying_build_inputs">Verifying build inputs</string>
+    <string name="text_verifying_project_archive">Verifying project archive</string>
     <string name="text_version">Version</string>
     <string name="text_version_code">Version code</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Version code (computing...)</string>
@@ -1981,15 +1680,6 @@
     <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Waiting for all data processing to complete...</string>
     <string name="text_weekly_task">Weekly task</string>
-    <string name="text_monthly_task">Monthly task</string>
-    <string name="text_yearly_task">Yearly task</string>
-    <string name="text_repeat_end">Ends</string>
-    <string name="text_repeat_forever">Forever</string>
-    <string name="text_repeat_until_date">Until a date</string>
-    <string name="text_repeat_for_number_of_events">For a number of events</string>
-    <string name="text_repeat_count_times">Times</string>
-    <string name="text_repeat_count_must_be_positive">Times must be greater than 0</string>
-    <string name="text_repeat_until_date_before_now">End date should not be earlier than today</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
     <string name="text_working_dir_path">Working directory path</string>
     <string name="text_write_secure_settings">Write security settings</string>
@@ -2000,45 +1690,8 @@
     <string name="text_writing_resources_arsc">Writing resources.arsc</string>
     <string name="text_writing_signed_apk">Writing signed APK</string>
     <string name="text_xiaomi_background_popup_permission">Display pop-up windows while running in the background</string>
+    <string name="text_yearly_task">Yearly task</string>
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
-    <string name="text_code_editor_settings">Code editor settings</string>
-    <string name="text_editor_assistance">Assistance</string>
-    <string name="text_editor_gestures">Gestures</string>
-    <string name="text_editor_gutter_markers">Gutter markers</string>
-    <string name="text_editor_performance">Performance</string>
-    <string name="text_editor_shortcut_input_bar">Shortcut symbol settings</string>
-    <string name="summary_code_editor_settings">Open the full code editor settings page</string>
-    <string name="summary_editor_shortcut_input_bar">Configure shortcut input symbols shared by editor engines</string>
-    <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter</string>
-    <string name="summary_ace_print_margin_enabled">Show the right-side column limit guide</string>
-    <string name="summary_ace_indent_guides_enabled">Show vertical guides for code indentation</string>
-    <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter</string>
-    <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter</string>
-    <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine</string>
-    <string name="summary_ace_font_ligatures_enabled">Render supported operator combinations as code-font ligatures</string>
-    <string name="summary_ace_font_styles_enabled">Allow bold, italic, and other code-font styles</string>
-    <string name="summary_ace_lsp_enabled">Enable LSP-powered editor assistance preview</string>
-    <string name="summary_ace_lsp_file_types">Choose file types that can use LSP features</string>
-    <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
-    <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">Change editor text size with pinch gestures</string>
-    <string name="summary_editor_gutter_width_mode">Choose whether the gutter follows visible line digits or keeps a stable session width</string>
-    <string name="summary_editor_word_wrap_indent_style">Choose how wrapped visual continuation lines are indented</string>
-    <string name="text_ace_lsp_enabled">LSP smart completion (preview)</string>
-    <string name="text_ace_lsp_file_types">LSP file types</string>
-    <string name="description_editor_engine_preference">Ace is the default editor engine. JsDroidEditor remains available as a fallback and can be selected explicitly.</string>
-    <string name="description_editor_theme_mode_preference">Choose whether the editor remembers separate themes for AutoJs6 light and dark modes, or uses one shared theme in both modes.</string>
-    <string name="description_ace_editor_font_preference">Choose the Ace editor font. The list includes Android system monospace and open-source code fonts with author/developer information; the actual system monospace face is decided by Android and the device vendor.</string>
-    <string name="description_ace_font_ligatures_enabled_preference">Enable OpenType font ligatures for fonts that support them. Operators such as ===, !==, =&gt;, and &lt;= may be drawn as joined glyphs. This only changes how code is displayed.</string>
-    <string name="description_ace_font_styles_enabled_preference">Allow Ace themes and syntax highlighting to use bold, italic, and other font styles. When disabled, code text is forced to the regular normal style without changing colors or content.</string>
-    <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
-    <string name="description_ace_print_margin_enabled_preference">Show or hide the Ace editor print margin guide. This is the right-side column limit line and only changes how code is displayed.</string>
-    <string name="description_ace_indent_guides_enabled_preference">Show or hide vertical indentation guides in the code area. This only changes how code is displayed.</string>
-    <string name="description_ace_lsp_file_types_preference">LSP is only started for files whose names end with one of the selected suffixes. Use default restores the JavaScript, TypeScript, JSON, Auto.js, and Node.js suffix set.</string>
-    <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
-    <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>
-    <string name="description_ace_lsp_enabled_preference">Preview LSP support is off by default. When enabled, the editor uses a local TypeScript language service for completion, hover, signature help, and diagnostics, with static completion kept as a fallback.</string>
-    <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
-    <string name="description_editor_gutter_width_mode_preference">Dynamic width follows currently visible line-number digits. Fixed width preallocates a stable minimum and grows only when larger visible line numbers require it.</string>
-    <string name="description_editor_word_wrap_indent_style_preference">Continuation indent keeps wrapped visual lines aligned with the original indentation. Flush continuation starts wrapped visual lines at the viewport edge.</string>
+
 </resources>

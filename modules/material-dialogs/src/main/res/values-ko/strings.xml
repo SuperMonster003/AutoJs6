@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="md_back_label">뒤로</string>
+    <string name="md_cancel_label">취소</string>
+    <string name="md_choose_label">선택</string>
+    <string name="md_custom_label">사용자 지정</string>
+    <string name="md_done_label">완료</string>
+    <string name="md_error_label">오류</string>
+    <string name="md_presets_label">사전 설정</string>
+    <string name="md_storage_perm_error">앱에 READ_EXTERNAL_STORAGE 권한이 부여되지 않았습니다.</string>
+    <string name="new_folder">새 폴더</string>
+</resources>

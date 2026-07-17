@@ -13,12 +13,12 @@
      limitations under the License.
 -->
 <resources>
+    <string name="cpv_custom">Пользовательский</string>
     <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
     <string name="cpv_default_title">Выберите цвет</string>
+    <string name="cpv_menu_item_history">История</string>
+    <string name="cpv_menu_item_reset_color_palette">Сбросить палитру</string>
     <string name="cpv_presets">Предустановки</string>
-    <string name="cpv_custom">Особый</string>
     <string name="cpv_select">Выбрать</string>
     <string name="cpv_transparency">Прозрачность</string>
-    <string name="cpv_menu_item_history">Истории</string>
-    <string name="cpv_menu_item_reset_color_palette">Сбросить палитру</string>
 </resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plugin_description">AutoJs6 がスタンドアロンアプリをパッケージ化するときに使用するテンプレート APK を提供します.</string>
+    <string name="plugin_instruction">APK Builder で外部テンプレート APK を使用できるように, AutoJs6 と同じバージョンのプラグインをインストールしてください.</string>
+</resources>

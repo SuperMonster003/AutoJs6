@@ -73,36 +73,54 @@
     <string name="description_about_app_and_developer_preference">AutoJs6 هي أداة آلية لجافا سكريبت لنظام أندرويد ، وهي مفتوحة المصدر ومستنسخة من \"hyb1996 / Auto.js\".\n\nلطلب المساعدة أو التعليقات ، انتقل إلى مشكلات GitHub أو انضم إلى مجموعة Tencent QQ 690946137.</string>
     <string name="description_about_app_tips_preference">1. اضغط مع الاستمرار على رمز التطبيق في صفحة \"حول التطبيق والمطور\" للانتقال إلى صفحة خيارات مطور AutoJs6</string>
     <string name="description_accessibility_service">تُعد خدمة تسهيل الاستخدام القدرة الأساسية في AutoJs6 لتنفيذ الأتمتة. تُستخدم لقراءة معلومات عناصر الواجهة على الشاشة ومحاكاة تفاعلات مثل [ النقر / السحب / الإدخال ].\n\nتتطلب معظم دوال الأتمتة وكذلك أدوات مثل تحليل التخطيط تمكين خدمة تسهيل الاستخدام لكي تعمل بشكل صحيح.</string>
+    <string name="description_ace_action_favorites">تسجل مفضلة الإجراءات إجراءات المحرر التي تستخدمها كثيرا, مثل التشغيل والحفظ والتنسيق وإجراءات القائمة وإجراءات الضغط المطول وإجراءات إعدادات المحرر. اضغط زر النجمة لفتح القائمة, واضغط عنصرا لتكرار الإجراء, واضغط زر النجمة مطولا لتكرار أحدث إجراء, واسحب العناصر لإعادة ترتيبها, واسحب يمينا للتثبيت أو إلغاء التثبيت, واسحب يسارا للحذف.</string>
+    <string name="description_ace_editor_font_preference">اختر خط محرر Ace. تشمل القائمة خط Android أحادي المسافة وخطوط برمجية مفتوحة المصدر مع معلومات المؤلف/المطور; ويحدد Android ومورد الجهاز الشكل الفعلي لخط النظام أحادي المسافة.</string>
+    <string name="description_ace_font_ligatures_enabled_preference">فعّل أربطة خطوط OpenType للخطوط التي تدعمها. قد تعرض عوامل التشغيل مثل === و !== و =&gt; و &lt;= كرموز متصلة. يغير هذا طريقة عرض الشفرة فقط.</string>
+    <string name="description_ace_font_styles_enabled_preference">اسمح لسمات Ace وتمييز بناء الجملة باستخدام الخط العريض والمائل وأنماط خطوط أخرى. عند التعطيل, يفرض النمط العادي المنتظم على نص الشفرة من دون تغيير الألوان أو المحتوى.</string>
+    <string name="description_ace_indent_guides_enabled_preference">أظهر أدلة المسافة البادئة العمودية في منطقة الشفرة أو أخفها. يغير هذا طريقة عرض الشفرة فقط.</string>
+    <string name="description_ace_line_numbers_enabled_preference">أظهر أرقام الأسطر في هامش المحرر أو أخفها. يظل الطي ونقاط التوقف وتخطيط الهامش متاحة.</string>
+    <string name="description_ace_lsp_enabled_preference">دعم LSP التجريبي معطل افتراضيا. عند تمكينه, يستخدم المحرر خدمة لغة TypeScript محلية للإكمال ومعلومات التحويم ومساعدة التوقيع والتشخيصات, مع إبقاء الإكمال الثابت خيارا احتياطيا.</string>
+    <string name="description_ace_lsp_file_types_preference">لا يبدأ LSP إلا للملفات التي تنتهي أسماؤها بإحدى اللواحق المحددة. يعيد خيار \"استخدام الافتراضي\" مجموعة لواحق JavaScript و TypeScript و JSON و Auto.js و Node.js.</string>
+    <string name="description_ace_print_margin_enabled_preference">أظهر دليل هامش الطباعة في محرر Ace أو أخفه. هذا هو خط حد العمود على الجانب الأيمن, وهو يغير طريقة عرض الشفرة فقط.</string>
+    <string name="description_ace_word_wrap_enabled_preference">فعّل التفاف الأسطر الطويلة في المحرر. لا يؤدي هذا إلى تعديل محتويات الملف.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">يسمح إذن \"إدارة جميع الملفات\" (أو \"الوصول إلى جميع الملفات\") لـ AutoJs6 بـ [ إنشاء / قراءة / تعديل / حذف ] الملفات مباشرةً عبر مسارات الملفات العادية ضمن مساحة التخزين المشتركة، مما يتيح للسكربتات الوصول إلى \"Internal Storage\" ويُمكّن مدير الملفات من عرض الملفات وإدارتها بشكل صحيح.\n\nعلى أجهزة Android 11+، تُعد هذه الطريقة الأساسية لتحقيق قدرة القراءة والكتابة على كامل التخزين.</string>
     <string name="description_app_language_preference">هذا التفضيل لتغيير لغة العرض لـ AutoJs6 ، بما في ذلك رسائل الاستثناء من تشغيل البرامج النصية.\n\nملاحظة: قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة تطبيقها كما هو متوقع.</string>
-    <string name="description_auto_night_mode">عند تفعيل الوضع الليلي التلقائي، سيقوم AutoJs6 بالتبديل تلقائيًا إلى الوضع الليلي وفقًا لإعدادات النظام.\n\nNote: مفتاح الوضع الليلي التلقائي ومفتاح الوضع الليلي مرتبطان ويؤثر كل منهما في الآخر.</string>
-    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">يتيح إذن \"النوافذ المنبثقة في الخلفية\" (ويُسمّى أيضًا \"تشغيل الواجهة من الخلفية\" أو \"إظهار الواجهة في الخلفية\") لـ AutoJs6، حتى عندما يكون التطبيق في الخلفية أو دون واجهة مرئية، تشغيل Activity أو فتح صفحة إعدادات محددة. وهو مناسب لسيناريوهات مثل [ فتح واجهة المستخدم عند تشغيل مهمة مجدولة / استئناف التفاعل بعد قفل الشاشة أو وضع السكون / فتح صفحة إعدادات السكربت عبر إشعار أو اختصار ].\n\nNote: على أنظمة مثل Xiaomi (MIUI/HyperOS) و Vivo (OriginOS/Funtouch OS)، قد يكون هذا الإذن مُعطّلًا افتراضيًا. عند عدم منحه، قد يمنع النظام محاولات السكربت لفتح صفحات من الخلفية، وقد يظهر ذلك على شكل [ عدم استجابة / تنفيذ في الخلفية دون إظهار واجهة / فشل الانتقال ].\n\nحتى بعد منحه، قد تظل هناك سياسات أخرى للنظام تؤثر عليه مثل [ تحسين البطارية / قيود التشغيل التلقائي / تجميد الخلفية / وضع الاستعداد للتطبيق ]. يُنصح بضبطه مع الأذونات ذات الصلة أو إعدادات القائمة البيضاء.</string>
+    <string name="description_auto_night_mode">عند تفعيل الوضع الليلي التلقائي، سيقوم AutoJs6 بالتبديل تلقائيًا إلى الوضع الليلي وفقًا لإعدادات النظام.\n\nملاحظة: مفتاح الوضع الليلي التلقائي ومفتاح الوضع الليلي مرتبطان ويؤثر كل منهما في الآخر.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">يتيح إذن \"النوافذ المنبثقة في الخلفية\" (ويُسمّى أيضًا \"تشغيل الواجهة من الخلفية\" أو \"إظهار الواجهة في الخلفية\") لـ AutoJs6، حتى عندما يكون التطبيق في الخلفية أو دون واجهة مرئية، تشغيل Activity أو فتح صفحة إعدادات محددة. وهو مناسب لسيناريوهات مثل [ فتح واجهة المستخدم عند تشغيل مهمة مجدولة / استئناف التفاعل بعد قفل الشاشة أو وضع السكون / فتح صفحة إعدادات السكربت عبر إشعار أو اختصار ].\n\nملاحظة: على أنظمة مثل Xiaomi (MIUI/HyperOS) و Vivo (OriginOS/Funtouch OS)، قد يكون هذا الإذن مُعطّلًا افتراضيًا. عند عدم منحه، قد يمنع النظام محاولات السكربت لفتح صفحات من الخلفية، وقد يظهر ذلك على شكل [ عدم استجابة / تنفيذ في الخلفية دون إظهار واجهة / فشل الانتقال ].\n\nحتى بعد منحه، قد تظل هناك سياسات أخرى للنظام تؤثر عليه مثل [ تحسين البطارية / قيود التشغيل التلقائي / تجميد الخلفية / وضع الاستعداد للتطبيق ]. يُنصح بضبطه مع الأذونات ذات الصلة أو إعدادات القائمة البيضاء.</string>
     <string name="description_change_working_dir_preference">قم بتغيير مسار الدليل الذي يحتوي على البرامج النصية</string>
     <string name="description_check_for_updates_preference">يحصل AutoJs6 على التحديثات وتنزيلها من GitHub.</string>
     <string name="description_client_mode">يُستخدم وضع العميل لتمكين AutoJs6 من الاتصال بشكل نشط بخادم بعيد لتنفيذ [ نقل السكربتات / طباعة السجلات / التحكم عن بُعد ].\n\nعادةً ما يلزم أن يكون الجهاز والخادم ضمن نفس الشبكة المحلية (LAN) أو ضمن بيئة شبكة يمكنهما الوصول فيها إلى بعضهما البعض.</string>
-    <string name="description_display_over_other_app">يسمح إذن \"العرض فوق التطبيقات الأخرى\" لـ AutoJs6 بعرض نوافذ عائمة أو زر عائم فوق واجهات التطبيقات الأخرى، وذلك لتنفيذ الإجراءات بسرعة أو عرض المعلومات على أي شاشة.\n\nNote: عند عدم منح هذا الإذن، قد لا تظهر النوافذ العائمة والزر العائم أو قد لا يعملان بشكل صحيح.</string>
+    <string name="description_display_over_other_app">يسمح إذن \"العرض فوق التطبيقات الأخرى\" لـ AutoJs6 بعرض نوافذ عائمة أو زر عائم فوق واجهات التطبيقات الأخرى، وذلك لتنفيذ الإجراءات بسرعة أو عرض المعلومات على أي شاشة.\n\nملاحظة: عند عدم منح هذا الإذن، قد لا تظهر النوافذ العائمة والزر العائم أو قد لا يعملان بشكل صحيح.</string>
     <string name="description_documentation_source_preference">المستندات المحلية: باستخدام ملفات AutoJs6 المضمنة كمصادر توثيق ، لا يلزم الاتصال بالشبكة. يتغير المحتوى مع تحديث AutoJs6.\nالمستندات عبر الإنترنت: استخدام صفحات GitHub كمصادر توثيق تتطلب اتصالاً بالشبكة. المحتوى دائما محدث.\n\nملاحظة: لزيادة تجربة قراءة المستندات عبر الإنترنت إلى الحد الأقصى ، يوصى باستخدام جهاز عرض بشاشة عريضة مثل شاشة سطح المكتب.\nملاحظة: اعتبارًا من الإصدار 6.2.0 ، لا تزال الوثائق في المراحل الأولية من التطوير ، ومعظم المحتوى لم تتم كتابته أو تحديثه بعد.</string>
     <string name="description_documentation_source_preference_more">يجب استيفاء الشروط التالية لدعم النسق الداكن على صفحات المستند:\n1. تم تمكين الوضع الليلي AutoJs6\n2.عرض ويب نظام Android (أو متصفحات مثل Google Chrome):\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإصدار> = 76\n- مستوى واجهة برمجة تطبيقات Android 28 (Android 9) [P] وما دون: الإصدار> = 105</string>
+    <string name="description_editor_breakpoint_markers_enabled_preference">أظهر علامات نقاط التوقف في هامش المحرر أو أخفها. تظل بيانات نقاط التوقف وإجراءات قائمة التصحيح متاحة.</string>
     <string name="description_editor_code_highlight_threshold">يحدد ما اذا كان سيتم تفعيل تمييز الصياغة بناء على حجم الملف.\nبالنسبة للملفات الكبيرة, فان تعطيل تمييز الصياغة يمكن ان يحسن كفاءة تحميل الملف الى حد ما.</string>
+    <string name="description_editor_engine_preference">Ace هو محرك المحرر الافتراضي. يظل JsDroidEditor متاحا كخيار احتياطي ويمكن تحديده صراحة.</string>
+    <string name="description_editor_fold_markers_enabled_preference">أظهر علامات طي الشفرة في هامش المحرر أو أخفها. لا يوفر JsDroidEditor واجهة لعلامات الطي.</string>
+    <string name="description_editor_gutter_width_mode_preference">يتبع العرض الديناميكي عدد خانات أرقام الأسطر المرئية حاليا. يحجز العرض الثابت حدا أدنى مستقرا ولا يتسع إلا عندما تتطلب أرقام الأسطر المرئية الأكبر ذلك.</string>
     <string name="description_editor_large_file_mode_threshold">يحدد ما اذا كان سيتم استخدام وضع الملفات الكبيرة لتحميل الملفات بناء على حجم الملف.\nيمكن لوضع الملفات الكبيرة ان يحسن كفاءة التحميل والاستقرار الى حد ما, لكن ميزتي \"تراجع\" و \"اعادة\" سيتم تعطيلهما في هذا الوضع.</string>
     <string name="description_editor_log_button_behavior_preference">يتحكم في الطريقة التي يفتح بها زر \"السجلات\" في قائمة محرر الشفرة السجلات.\n\nلوحة السجلات السفلية: تفتح لوحة السجلات السفلية. يمكنك الدخول الى صفحة السجلات بملء الشاشة عبر الضغط على زر \"تكبير\" او سحب المقبض الى الاعلى حتى يقترب من الاعلى.\nصفحة السجلات بملء الشاشة: تفتح صفحة السجلات بملء الشاشة مباشرة.</string>
+    <string name="description_editor_theme_mode_preference">اختر ما إذا كان المحرر يتذكر سمتين منفصلتين لوضعي AutoJs6 الفاتح والداكن أو يستخدم سمة مشتركة في كلا الوضعين.</string>
+    <string name="description_editor_word_wrap_indent_style_preference">تحافظ المسافة البادئة للاستمرار على محاذاة الأسطر المرئية الملتفة مع المسافة البادئة الأصلية. تبدأ المتابعة بمحاذاة الحافة من حافة إطار العرض.</string>
     <string name="description_extending_js_build_in_objects">يمكن أن يؤدي توسيع كائنات JavaScript المضمنة إلى زيادة مرونة التعليمات البرمجية وتمكين وظائف أكثر ثراءً ، ولكن يمكن أن يتسبب في حدوث تعارضات وحتى حدوث تعطل.\nتحتوي جميع البرامج النصية على امتدادات مضمنة يتم تمكينها افتراضيًا عند تشغيل الخيار.\nغالبًا ما تكون الامتدادات المضمنة غير آمنة ، ولا يوصى بها ما لم يتم فهم مبادئ ومخاطر الإضافات المضمنة بوضوح.\nعند إيقاف تشغيل الخيار ، لا يزال من الممكن تمكين الامتدادات المضمنة من خلال الكائن العام للمكونات الإضافية ، كما هو موضح في وثائق المشروع.</string>
     <string name="description_file_extensions_preference">يُستخدم لتحديد ما إذا كان يجب عرض امتدادات الملف في مستكشف ملفات AutoJs6.</string>
-    <string name="description_floating_button">يُستخدم الزر العائم لعرض مدخل سريع قابل للسحب على حافة الشاشة، ويمكن استخدامه لـ [ بدء أو إيقاف السكربتات / تحليل التخطيط / عرض اسم الحزمة أو اسم النشاط الأخير / إظهار موقع المؤشر ].\n\nNote: تتطلب هذه الميزة عادةً إذن \"العرض فوق التطبيقات الأخرى\".</string>
+    <string name="description_floating_button">يُستخدم الزر العائم لعرض مدخل سريع قابل للسحب على حافة الشاشة، ويمكن استخدامه لـ [ بدء أو إيقاف السكربتات / تحليل التخطيط / عرض اسم الحزمة أو اسم النشاط الأخير / إظهار موقع المؤشر ].\n\nملاحظة: تتطلب هذه الميزة عادةً إذن \"العرض فوق التطبيقات الأخرى\".</string>
     <string name="description_foreground_service">تُستخدم خدمة المقدمة للحفاظ على تشغيل AutoJs6 بشكل أكثر استقرارًا في الخلفية، وهي مناسبة لسيناريوهات مثل [ تشغيل السكربتات لفترات طويلة / الحفاظ على الاتصال / الاستماع المستمر ].\n\nبعد تفعيلها، سيعرض النظام \"إشعار خدمة مقدمة\" لإعلام المستخدم بأن AutoJs6 يعمل باستمرار. عادةً ما يبقى هذا الإشعار ظاهرًا حتى تتوقف الخدمة.\n\nتعيين الإشعار إلى \"Silent\" أو \"Minimize\" يقلل فقط من شدة التنبيه، وعادةً لا يؤثر على وظيفة خدمة المقدمة.\n\nإذا تم تعطيل قناة الإشعارات أو تم منع AutoJs6 من إرسال الإشعارات، فقد يؤثر ذلك على بدء خدمة المقدمة بشكل طبيعي وعلى استقرارها.</string>
+    <string name="description_github_token_preference">يستخدم فقط لطلبات GitHub API لتقليل قيود المعدل. يخزن الرمز محليا ويخفى في هذه الواجهة.</string>
     <string name="description_hidden_files_preference">تُستخدم لتعيين إظهار الملفات والمجلدات المخفية (تبدأ عادةً بـ \".\") في مستكشف الملفات AutoJs6 أم لا.</string>
-    <string name="description_ignore_battery_optimizations">قد يؤدي تجاهل تحسين البطارية إلى تقليل قيود النظام على AutoJs6 في الخلفية، مما يساعد المهام المجدولة أو السكربتات طويلة التشغيل على العمل بشكل أكثر استقرارًا نسبيًا أثناء وضع الاستعداد.\n\nNote: قد تظل بعض أنظمة الشركات المصنِّعة تطبق سياسات إضافية لتوفير الطاقة، مثل تقييد التشغيل التلقائي أو تجميد التطبيقات في الخلفية.</string>
+    <string name="description_ignore_battery_optimizations">قد يؤدي تجاهل تحسين البطارية إلى تقليل قيود النظام على AutoJs6 في الخلفية، مما يساعد المهام المجدولة أو السكربتات طويلة التشغيل على العمل بشكل أكثر استقرارًا نسبيًا أثناء وضع الاستعداد.\n\nملاحظة: قد تظل بعض أنظمة الشركات المصنِّعة تطبق سياسات إضافية لتوفير الطاقة، مثل تقييد التشغيل التلقائي أو تجميد التطبيقات في الخلفية.</string>
     <string name="description_keep_screen_on_when_in_foreground">يُستخدم للتحكم فيما إذا كانت الشاشة ستبقى مضاءة عندما يكون AutoJs6 في المقدمة.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">تفضيل إبقاء شاشة الجهاز قيد التشغيل وساطعة عندما يكون AutoJs6 في المقدمة.\nلتحقيق ذلك فقط على الصفحة الرئيسية بين جميع صفحات تطبيق AutoJs6 ، اختر خيار \"الصفحة الرئيسية فقط\".</string>
     <string name="description_launcher_icon_preference">يدعم رمز المشغّل وضعي عرض: الرمز المتكيّف أو الرمز التقليدي بخلفية شفافة. قد يختلف تأثير العرض الفعلي عبر أنظمة أندرويد المختلفة. قد يستغرق الأمر بضع ثوانٍ ليصبح التغيير ساريًا بعد تبديل وضع العرض.</string>
     <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
     <string name="description_manage_ignored_updates_preference">انقر لعرض أو إدارة عناصر القائمة.\nاضغط لفترة طويلة لإزالة عنصر القائمة.</string>
-    <string name="description_night_mode">يُستخدم للتحكم في استراتيجية الوضع الليلي في AutoJs6 وعكسها.\n\nNote: مفتاح الوضع الليلي ومفتاح الوضع الليلي التلقائي مرتبطان ويؤثر كل منهما في الآخر.</string>
+    <string name="description_night_mode">يُستخدم للتحكم في استراتيجية الوضع الليلي في AutoJs6 وعكسها.\n\nملاحظة: مفتاح الوضع الليلي ومفتاح الوضع الليلي التلقائي مرتبطان ويؤثر كل منهما في الآخر.</string>
     <string name="description_night_mode_preference">ينطبق الوضع الليلي (المعروف أيضًا باسم Dark theme) على كل من واجهة مستخدم نظام Android والتطبيقات التي تعمل على الجهاز ، مما يحسن الرؤية للمستخدمين ضعاف البصر وأولئك الذين لديهم حساسية للضوء الساطع ، ويسهل على أي شخص استخدام الجهاز. في بيئة الإضاءة المنخفضة.\n\nنظام المتابعة: يحتوي AutoJs6 على إعدادات الوضع الليلي مثل نظام Android\nيعمل دائمًا: يحافظ AutoJs6 على تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\nإيقاف التشغيل دائمًا: يقوم AutoJs6 بإيقاف تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\n\nملاحظة: خيار متابعة النظام متاح فقط لـ Android API Level 28 (Android 9) [P] وما فوق.</string>
     <string name="description_night_mode_preference_more">لتمكين الوضع الليلي في نظام Android:\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإعدادات -> العرض -> المظهر.\n- Android API المستوى 28 (Android 9) [P]: خيارات المطور -> الوضع الليلي.\n\nيجب استيفاء الشروط التالية لتطبيق الوضع الليلي (المظهر الداكن) على المحتوى المستند إلى الويب باستخدام مكون WebView (مثل صفحة وثائق AutoJs6):\n1.عرض ويب نظام Android (أو متصفحات مثل Google Chrome):\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإصدار> = 76\n- مستوى واجهة برمجة تطبيقات Android 28 (Android 9) [P]: الإصدار> = 105\n2. تم تكييف المحتوى المستند إلى الويب في مكون WebView مع المظهر الداكن (عن طريق موارد CSS أو Android XML وما إلى ذلك)</string>
+    <string name="description_nodejs_doctor_report_preference">يصدر الواجهة الخلفية وإصدار Node و ABI وأعلام الميزات وتجزئات المكتبات الأصلية وملف القدرات وحالة آخر خطأ وحالة قالب الحزمة. لا يتضمن محتويات سكربتات المستخدم أو قيم البيئة الحساسة.</string>
     <string name="description_notification_access">يسمح إذن \"الوصول إلى الإشعارات\" (أو \"إذن قراءة الإشعارات\") لـ AutoJs6 بقراءة محتوى إشعارات النظام، مما يتيح للسكربتات الاستماع إلى الإشعارات أو الحصول على نص الإشعار وما إلى ذلك.</string>
     <string name="description_pointer_location">\"موقع المؤشر\" هي ميزة تصحيح أخطاء ضمن خيارات المطوّر في Android.\nعند تفعيلها، يعرض النظام على الشاشة معلومات نقاط اللمس مثل [الإحداثيات/مسار الحركة/العدد/الحجم/سرعة الحركة/الضغط]، مما يسهل [كتابة/تصحيح/التحقق من] السكربتات ذات الصلة.</string>
-    <string name="description_post_notifications">يسمح إذن \"إرسال الإشعارات\" لـ AutoJs6 بنشر الإشعارات على النظام، مما يتيح للسكربتات نشر وإدارة إشعارات مخصّصة في شريط الإشعارات.\n\nNote: على أجهزة Android 13+، إذا لم يتم منح هذا الإذن فقد لا تظهر بعض الإشعارات، وقد يؤثر ذلك على تشغيل خدمات المقدمة واستقرارها.</string>
+    <string name="description_post_notifications">يسمح إذن \"إرسال الإشعارات\" لـ AutoJs6 بنشر الإشعارات على النظام، مما يتيح للسكربتات نشر وإدارة إشعارات مخصّصة في شريط الإشعارات.\n\nملاحظة: على أجهزة Android 13+، إذا لم يتم منح هذا الإذن فقد لا تظهر بعض الإشعارات، وقد يؤثر ذلك على تشغيل خدمات المقدمة واستقرارها.</string>
     <string name="description_project_media_access">مع الوصول إلى وسائط المشروع ، لن يطلب منك التحذير الأمني لتسجيل الشاشة.</string>
     <string name="description_release_history_preference">عرض سجل إصدارات AutoJs6 على GitHub وإحصاءات الفئات الرئيسية.</string>
     <string name="description_restart_strategy">تؤثر استراتيجية إعادة التشغيل فقط في زر إعادة التشغيل في درج الصفحة الرئيسية.\n\nإعادة تشغيل سريعة: تعيد تشغيل التطبيق بسرعة. إذا فشلت عملية إعادة التشغيل أو حدثت حالات غير متوقعة، جرّب التبديل إلى \"إعادة تشغيل مجدولة\".\nإعادة تشغيل مجدولة: تُعدّ مسبقًا مهمة مؤقتة قصيرة. بعد إيقاف التطبيق، سيبدأ مرة أخرى وفق الجدول لتنفيذ إعادة التشغيل.</string>
@@ -187,14 +205,23 @@
     <string name="editable_file_info_file_size_label">حجم</string>
     <string name="editable_file_info_line_break_label">سطر</string>
     <string name="editable_file_info_line_count_label">أسطر</string>
+    <string name="entry_ace_editor_font_system_monospace">خط Android أحادي المسافة</string>
     <string name="entry_app_language_auto">اتبع النظام</string>
     <string name="entry_documentation_source_local">مستندات محلية</string>
     <string name="entry_documentation_source_online">مستندات عبر الإنترنت</string>
+    <string name="entry_editor_engine_ace">Ace</string>
+    <string name="entry_editor_engine_native">JsDroidEditor</string>
+    <string name="entry_editor_gutter_width_mode_dynamic">ديناميكي</string>
+    <string name="entry_editor_gutter_width_mode_fixed">ثابت</string>
     <string name="entry_editor_log_button_behavior_bottom_sheet">لوحة السجلات السفلية</string>
     <string name="entry_editor_log_button_behavior_fullscreen_page">صفحة السجلات بملء الشاشة</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">تغيير حجم النص</string>
     <string name="entry_editor_pinch_to_zoom_disable">تعطيل</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">عرض مقياس</string>
+    <string name="entry_editor_theme_mode_separate">سمات منفصلة للوضعين الفاتح والداكن</string>
+    <string name="entry_editor_theme_mode_unified">استخدام سمة واحدة لكلا الوضعين</string>
+    <string name="entry_editor_word_wrap_indent_style_classic">متابعة بمحاذاة الحافة</string>
+    <string name="entry_editor_word_wrap_indent_style_continuation">مسافة بادئة للاستمرار</string>
     <string name="entry_file_extensions_not_show">إخفاء جميع امتدادات الملف</string>
     <string name="entry_file_extensions_show_all">عرض جميع امتدادات الملف</string>
     <string name="entry_file_extensions_show_all_but_executable">عرض امتدادات الملف (باستثناء *.js / *.auto)</string>
@@ -217,6 +244,7 @@
     <string name="entry_root_record_out_file_type_js">نوع JavaScript (قابل للتحرير)</string>
     <string name="error_a_runtime_has_been_set">تم تعيين وقت التشغيل</string>
     <string name="error_abandoned_method">تم التخلي عن الأسلوب %s ويجب عدم استخدامه</string>
+    <string name="error_ace_editor_unavailable">محرر Ace غير متاح; لا يزال JsDroidEditor نشطا</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">يتعذر إكمال العملية \"%1$s\" لأن المعلمة تحتوي على قيم إحداثيات سالبة (%2$d, %3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">تتطلب عملية تنفيذ واجهة المستخدم نشاطًا يمكن توفيره من خلال وضع التنفيذ \"ui\"</string>
     <string name="error_an_error_occurred">حدث خطأ</string>
@@ -273,8 +301,6 @@
     <string name="error_failed_to_launch_manager">تعذّر تشغيل المدير</string>
     <string name="error_failed_to_launch_system_settings">تعذّر فتح إعدادات النظام</string>
     <string name="error_failed_to_load_plugins_with_reason">فشل تحميل المكونات الإضافية.\nالسبب: %1$s.</string>
-    <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>
-    <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_failed_to_move">فشل النقل</string>
     <string name="error_failed_to_rename">فشل في إعادة تسمية</string>
     <string name="error_failed_to_render_content">فشل في عرض المحتوى</string>
@@ -312,7 +338,7 @@
     <string name="error_invalid_selector_map_element" formatted="false">عنصر خريطة محدد غير صالح: {%s: %s (%s)}</string>
     <string name="error_ip_address_should_not_be_empty">لا يمكن أن يكون عنوان IP فارغًا</string>
     <string name="error_ipv6_port_requires_brackets">يجب تحديد منفذ IPv6 بصيغة \"[ipv6]:port\".</string>
-    <string name="error_max_listeners_exceeded">تم تجاوز مستمعي أقصى: %s</string>
+    <string name="error_max_listeners_exceeded">تم تجاوز الحد الأقصى لعدد المستمعين: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">قد لا يكون لدى AutoJs6 ملف الجذر لتشغيل ملف \"auto\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() دعا مع الوسيطة الفارغة: %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">تقبل الطريقة عددًا من الوسائط في النطاق [%1$d..%2$d]</string>
@@ -347,6 +373,8 @@
     <string name="error_pattern_syntax">بناء جملة نمط غير صالح</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">ملف APK للمكوّن الإضافي لا يحتوي على الموارد المطلوبة لـ variant=\"%1$s\": %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">ملف APK للمكوّن الإضافي لا يحتوي على مكتبات native المطلوبة: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">تعذر جلب فهرس الإضافات: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">تعذر جلب فهرس إضافات %1$s: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">الاضافة \"%1$s\" غير مُفوّضة في مركز الاضافات</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">الاضافة \"%1$s\" غير مُمكّنة في مركز الاضافات</string>
     <string name="error_plugin_not_found_in_installed_apps">لم يتم العثور على الاضافة \"%1$s\" ضمن التطبيقات المثبتة</string>
@@ -401,10 +429,11 @@
     <string name="foreground_notification_title">خدمة مقدمة %1$s</string>
     <string name="format_build_succeeded" formatted="true">نجح بناء.\nمسار الملف: %s</string>
     <string name="format_debug_bar_title"><![CDATA[تصحيح [ %s ]]]></string>
-    <string name="format_editor_info" formatted="false">chars: %s\nالخطوط: %s\nبحجم: %s</string>
+    <string name="format_editor_info" formatted="false">الأحرف: %d\nالأسطر: %d\nالحجم: %s</string>
     <string name="format_file_downloaded" formatted="true">تم تنزيل الملف إلى %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[إعدادات -> خدمات إمكانية الوصول -> AutoJs6 (يُمكَِن)]]></string>
     <string name="hint_find_with_regex">Regex مدعوم. استخدم \"$1\" - \"$9\" للمجموعات التي تم التقاطها.</string>
+    <string name="hint_github_token">ألصق رمز وصول شخصي إلى GitHub</string>
     <string name="hint_long_click_run_to_debug">انقر الطويل على زر \"تشغيل\" لتصحيح الأخطاء</string>
     <string name="hint_loop_delay">تأخير قبل الحلقة</string>
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
@@ -476,16 +505,35 @@
     <string name="screen_capturer_foreground_notification_text">يتم عرض هذا الإشعار لالتقاط الشاشة</string>
     <string name="screen_capturer_foreground_notification_title">شاشة كابتوري فريجرونيد خدمة</string>
     <string name="summary_about_app_tips">تجربة مستخدم أفضل</string>
+    <string name="summary_ace_font_ligatures_enabled">عرض مجموعات عوامل التشغيل المدعومة كأربطة خطوط برمجية</string>
+    <string name="summary_ace_font_styles_enabled">السماح بالخط العريض والمائل وأنماط الخطوط البرمجية الأخرى</string>
+    <string name="summary_ace_indent_guides_enabled">إظهار أدلة عمودية للمسافة البادئة للشفرة</string>
+    <string name="summary_ace_line_numbers_enabled">إظهار أرقام الأسطر في هامش المحرر</string>
+    <string name="summary_ace_lsp_enabled">تمكين المعاينة التجريبية لمساعدة المحرر المدعومة من LSP</string>
+    <string name="summary_ace_lsp_file_types">اختيار أنواع الملفات التي يمكنها استخدام ميزات LSP</string>
+    <string name="summary_ace_print_margin_enabled">إظهار دليل حد العمود على الجانب الأيمن</string>
+    <string name="summary_ace_word_wrap_enabled">التفاف الأسطر الطويلة داخل إطار عرض المحرر</string>
     <string name="summary_all_files_access">يسمح لـ AutoJs6 بالوصول إلى جميع الملفات، بما في ذلك الملفات الموجودة على التخزين الخارجي</string>
     <string name="summary_all_files_access_inrt">السماح للتطبيق بالوصول إلى جميع الملفات، بما في ذلك التخزين الخارجي</string>
+    <string name="summary_code_editor_settings">فتح صفحة إعدادات محرر الشفرة الكاملة</string>
     <string name="summary_display_over_other_apps">يسمح لـ AutoJs6 بعرض المحتوى فوق التطبيقات الأخرى</string>
     <string name="summary_display_over_other_apps_inrt">السماح للتطبيق بعرض المحتوى فوق التطبيقات الأخرى</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">فتح لوحة السجلات السفلية تلقائيا بعد ان يقوم زر التشغيل في المحرر بتشغيل سكربت</string>
+    <string name="summary_editor_breakpoint_markers_enabled">إظهار علامات نقاط التوقف في هامش المحرر</string>
+    <string name="summary_editor_fold_markers_enabled">إظهار علامات طي الشفرة في هامش المحرر</string>
+    <string name="summary_editor_gutter_width_mode">اختيار ما إذا كان الهامش يتبع خانات الأسطر المرئية أو يحتفظ بعرض ثابت للجلسة</string>
+    <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">تغيير حجم نص المحرر بإيماءات القرص</string>
+    <string name="summary_editor_setting_unavailable_for_current_engine">غير متاح لمحرك المحرر الحالي</string>
+    <string name="summary_editor_shortcut_input_bar">تكوين رموز الإدخال السريع المشتركة بين محركات المحرر</string>
+    <string name="summary_editor_word_wrap_indent_style">اختيار طريقة إزاحة أسطر الاستمرار المرئية الملتفة</string>
     <string name="summary_enable_a11y_service_with_root_access">تمكين خدمة إمكانية الوصول مع الوصول إلى الجذر تلقائيًا عند الحاجة</string>
     <string name="summary_enable_a11y_service_with_secure_settings">تمكين خدمة إمكانية الوصول مع إعدادات آمنة تلقائيًا عند الحاجة</string>
     <string name="summary_extending_js_build_in_objects">قم بزيادة مرونة التعليمات البرمجية وتمكين وظائف أكثر ثراءً من خلال توسيع كائنات JavaScript المضمنة</string>
     <string name="summary_foreground_service_inrt">تتيح خدمة المقدمة الحفاظ على تشغيل التطبيق والبرامج النصية بشكل أكثر استقرارًا في الخلفية</string>
+    <string name="summary_github_token_not_set">غير معين. طلبات GitHub API مجهولة.</string>
+    <string name="summary_github_token_set">معين. مخفي للخصوصية; ينتهي بـ %1$s.</string>
     <string name="summary_guard_mode">منع إجراءات الأتمتة من البرامج النصية عندما يكون AutoJs6 في المقدمة</string>
+    <string name="summary_nodejs_doctor_report">إنشاء تقرير تشخيصي لوقت تشغيل Node منقح للخصوصية لاستخدامه في تقارير الأخطاء</string>
     <string name="summary_not_showing_main_activity">قم بتشغيل البرنامج النصي مباشرة دون إظهار النشاط الرئيسي</string>
     <string name="summary_plugin_auto_check_updates">التحقق تلقائيا من تحديثات الاضافات كل 1 ساعة (السحب للتحديث يتحقق فورا)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">تم تعطيل خيار \"التحقق التلقائي من تحديثات الاضافات\" على المستوى العام، وهذا الخيار غير متاح</string>
@@ -529,6 +577,41 @@
     <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">تحديث</string>
     <string name="text_access_has_been_granted">وقد تم منح الوصول</string>
+    <string name="text_ace_action_clear_confirm">هل تريد مسح سجل إجراءات المحرر بالكامل?</string>
+    <string name="text_ace_action_delete_confirm" formatted="true">هل تريد حذف \"%1$s\" من سجل إجراءات المحرر?</string>
+    <string name="text_ace_action_favorites">مفضلة الإجراءات</string>
+    <string name="text_ace_action_history_empty">لا يوجد سجل لإجراءات المحرر</string>
+    <string name="text_ace_action_pin">تثبيت</string>
+    <string name="text_ace_action_pinned">مثبت</string>
+    <string name="text_ace_action_unpin">إلغاء التثبيت</string>
+    <string name="text_ace_diagnostics_copied">نسخت تشخيصات Ace إلى الحافظة</string>
+    <string name="text_ace_editor_debug">تصحيح محرر Ace</string>
+    <string name="text_ace_editor_debug_description">فتح صفحة اختبار معزولة لمحرر Ace WebView</string>
+    <string name="text_ace_editor_debug_status">%1$s | الأسطر %2$d | المؤشر %3$d:%4$d | نقاط التوقف %5$d | معدل %6$s</string>
+    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">جار تحميل محرر Ace...</string>
+    <string name="text_ace_editor_debug_text_length">طول نص Ace: %1$d</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">فشل محرر Ace (%1$s); تم التبديل إلى JsDroidEditor. انسخ تشخيصات Ace من قائمة المزيد للاطلاع على التفاصيل</string>
+    <string name="text_ace_editor_font">خط المحرر</string>
+    <string name="text_ace_editor_font_changed" formatted="true">تم تبديل خط المحرر إلى %s</string>
+    <string name="text_ace_font_ligatures_enabled">أربطة الخط</string>
+    <string name="text_ace_font_styles_enabled">أنماط الخط</string>
+    <string name="text_ace_get_text">الحصول على النص</string>
+    <string name="text_ace_ime_stress">اختبار إجهاد IME</string>
+    <string name="text_ace_ime_stress_done">اكتمل اختبار إجهاد IME: %1$d دورة</string>
+    <string name="text_ace_ime_stress_running">اختبار إجهاد IME: %1$d/%2$d</string>
+    <string name="text_ace_indent_guides_enabled">أدلة المسافة البادئة</string>
+    <string name="text_ace_insert">إدراج</string>
+    <string name="text_ace_large_file_uses_native_editor">توجه سياسة الخيار الاحتياطي النشطة محرر Ace إلى JsDroidEditor</string>
+    <string name="text_ace_line_numbers_enabled">أرقام الأسطر</string>
+    <string name="text_ace_lsp_enabled">إكمال LSP الذكي (تجريبي)</string>
+    <string name="text_ace_lsp_file_types">أنواع ملفات LSP</string>
+    <string name="text_ace_no_last_action">لا يوجد إجراء محرر أخير</string>
+    <string name="text_ace_print_margin_enabled">هامش الطباعة</string>
+    <string name="text_ace_read_only_mode">وضع القراءة فقط</string>
+    <string name="text_ace_read_only_mode_disabled">تم تعطيل وضع القراءة فقط</string>
+    <string name="text_ace_read_only_mode_enabled">تم تمكين وضع القراءة فقط</string>
+    <string name="text_ace_set_sample">تعيين نموذج</string>
+    <string name="text_ace_word_wrap_enabled">التفاف الكلمات</string>
     <string name="text_act_by_click">صوت نقر)</string>
     <string name="text_act_by_long_click">انقر طويل (Longclick)</string>
     <string name="text_act_by_scroll_backward">التمرير للخلف (Scrollbackward)</string>
@@ -548,6 +631,7 @@
     <string name="text_all_files_access_is_needed">هناك حاجة إلى \"All Files Access\" للوصول إلى ملفات البرنامج النصي على الهاتف</string>
     <string name="text_all_history_entries">كل ادخالات السجل</string>
     <string name="text_all_items_cleared">تم مسح جميع العناصر</string>
+    <string name="text_all_settings">جميع الإعدادات</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">يُوصى بمنح إذن \"السماح بتعيين المنبّهات والتذكيرات\" لضمان تنفيذ المهام المجدولة بأكبر قدر ممكن من الدقة حتى عند إيقاف الشاشة أو في وضع السكون</string>
     <string name="text_already_copied_to_clip">نسخ إلى الحافظة</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">تم النسخ بالفعل إلى الحافظة (فقط أحدث %d عنصر)</string>
@@ -558,6 +642,9 @@
     <string name="text_android_release_version">نسخة إصدار أندرويد</string>
     <string name="text_android_sdk_version">إصدار Android SDK</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder غير متوفر</string>
+    <string name="text_apk_template_plugin_risk_prompt">المكون الإضافي لقالب APK Builder المثبت غير متوافق تماما مع إصدار AutoJs6 الحالي. قد تؤدي المتابعة إلى فشل تشغيل التطبيق المحزم أو استخدام API غير متطابقة أو فقدان بعض الوحدات.</string>
+    <string name="text_apk_template_unavailable">قالب APK Builder غير متاح</string>
+    <string name="text_apk_template_unavailable_prompt">لم يعثر على قالب APK Builder صالح للاستخدام. لا يتضمن إصدار AutoJs6 هذا ملف template.apk مضمنا, ولا يتوفر مكون إضافي قابل للقراءة لقالب APK Builder. ثبت مكونا إضافيا مطابقا للقالب ومكنه, ثم حاول مرة أخرى.</string>
     <string name="text_app_and_device_info">معلومات التطبيق والجهاز</string>
     <string name="text_app_crashed">تحطمت AutoJs6</string>
     <string name="text_app_language">لغة</string>
@@ -596,6 +683,7 @@
     <string name="text_app_version_name">اسم إصدار التطبيق</string>
     <string name="text_appearance">مظهر</string>
     <string name="text_applying_binary_resources">جارٍ تطبيق الموارد الثنائية</string>
+    <string name="text_archiving_project_files">جار أرشفة ملفات المشروع</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">يجب ملء حقل واحد على الأقل من [الاسم، اسم المنظمة، وحدة التنظيم، رمز الدولة، الولاية أو المقاطعة، المدينة أو المنطقة، الشارع]</string>
     <string name="text_attribute">ينسب</string>
     <string name="text_authorize_plugin">تفويض الاضافة</string>
@@ -684,6 +772,7 @@
     <string name="text_code">شفرة</string>
     <string name="text_code_beautify">رمز تجميل</string>
     <string name="text_code_editor">محرر الشفرة</string>
+    <string name="text_code_editor_settings">إعدادات محرر الشفرة</string>
     <string name="text_collapse_all">طيّ الكل</string>
     <string name="text_color_library">مكتبة الألوان</string>
     <string name="text_color_palette">لوحة الألوان</string>
@@ -694,6 +783,7 @@
     <string name="text_config">تكوين</string>
     <string name="text_configuring_manifest">جارٍ ضبط manifest</string>
     <string name="text_configuring_package_name">جارٍ ضبط اسم الحزمة</string>
+    <string name="text_confirm_overwrite_selected_items">بعض العناصر الهدف موجودة بالفعل. هل تريد استبدالها?</string>
     <string name="text_confirm_to_clear_all_items">هل أنت متأكد من مسح جميع العناصر؟</string>
     <string name="text_confirm_to_clear_the_history">هل تريد مسح السجل?</string>
     <string name="text_confirm_to_clear_the_history_of">سيتم مسح السجل ادناه\n\n[ %1$s ]\n\nهل تريد المتابعة?</string>
@@ -711,7 +801,9 @@
     <string name="text_console">وحدة التحكم</string>
     <string name="text_content">المحتوى</string>
     <string name="text_continue">يكمل</string>
+    <string name="text_continue_with_plugin_template">المتابعة باستخدام قالب المكون الإضافي</string>
     <string name="text_copy">ينسخ</string>
+    <string name="text_copy_ace_diagnostics">نسخ تشخيصات Ace</string>
     <string name="text_copy_all">نسخ جميع</string>
     <string name="text_copy_all_files_to_new_directory">انسخ جميع الملفات إلى دليل جديد</string>
     <string name="text_copy_command">نسخ CMD</string>
@@ -732,7 +824,14 @@
     <string name="text_copying_library">جارٍ نسخ المكتبة</string>
     <string name="text_copying_native_libraries">جارٍ نسخ المكتبات الاصلية</string>
     <string name="text_copying_project_directory">جارٍ نسخ مجلد المشروع</string>
+    <string name="text_copying_remote_build_inputs">جار نسخ مدخلات البناء عن بعد</string>
     <string name="text_copying_script_file">جارٍ نسخ ملف السكربت</string>
+    <string name="text_countdown_duration_must_be_positive">يجب أن تكون مدة العد التنازلي أكبر من 0</string>
+    <string name="text_countdown_duration_should_be_valid">مدة العد التنازلي غير صالحة</string>
+    <string name="text_countdown_hours">الساعات</string>
+    <string name="text_countdown_minutes">الدقائق</string>
+    <string name="text_countdown_minutes_should_be_less_than_60">يجب أن تكون الدقائق بين 0 و 59</string>
+    <string name="text_countdown_task">مهمة عد تنازلي</string>
     <string name="text_country_code">رمز الدولة (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">رمز الدولة يجب أن يكون حرفين كبيرين</string>
     <string name="text_creating_unsigned_apk">جارٍ انشاء APK غير موقّع</string>
@@ -762,6 +861,7 @@
     <string name="text_delete_all">حذف الكل</string>
     <string name="text_delete_file">حذف الملف</string>
     <string name="text_delete_folder">حذف المجلد</string>
+    <string name="text_delete_items">حذف العناصر</string>
     <string name="text_delete_line">حذف الخط</string>
     <string name="text_delete_revision_confirm">هل تريد حذف هذه المراجعة نهائيا?</string>
     <string name="text_deleting">جارٍ الحذف</string>
@@ -806,17 +906,31 @@
     <string name="text_edit">يحرر</string>
     <string name="text_edit_prepare_script">تحرير البرنامج النصي قبل التنفيذ</string>
     <string name="text_edit_script">تحرير البرنامج النصي</string>
+    <string name="text_editor_assistance">المساعدة</string>
     <string name="text_editor_auto_show_log_bottom_sheet_on_run">اظهار لوحة السجلات السفلية تلقائيا بعد التشغيل</string>
+    <string name="text_editor_breakpoint_markers_enabled">علامات نقاط التوقف</string>
     <string name="text_editor_code_highlight_always_disabled">تعطيل تمييز الشفرة دائما</string>
     <string name="text_editor_code_highlight_always_enabled">تفعيل تمييز الشفرة دائما</string>
     <string name="text_editor_code_highlight_threshold">حد تمييز الشفرة</string>
     <string name="text_editor_code_highlight_threshold_enabled_for_smaller_files">تفعيل تمييز الشفرة فقط للملفات التي لا يزيد حجمها عن %1$s</string>
+    <string name="text_editor_engine">محرك المحرر</string>
+    <string name="text_editor_engine_switched" formatted="true">تم تبديل محرك المحرر إلى %s</string>
+    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">تم تبديل محرك المحرر إلى %s. لا يحتفظ بسجل التراجع/الإعادة بين محركات المحرر</string>
+    <string name="text_editor_fold_markers_enabled">علامات طي الشفرة</string>
+    <string name="text_editor_gestures">الإيماءات</string>
+    <string name="text_editor_gutter_markers">علامات هامش المحرر</string>
+    <string name="text_editor_gutter_width_mode">عرض هامش المحرر</string>
     <string name="text_editor_large_file_mode_always_disabled">تعطيل وضع الملفات الكبيرة دائما</string>
     <string name="text_editor_large_file_mode_always_enabled">تفعيل وضع الملفات الكبيرة دائما</string>
     <string name="text_editor_large_file_mode_threshold">حد وضع الملفات الكبيرة</string>
     <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">تفعيل وضع الملفات الكبيرة فقط للملفات التي يزيد حجمها عن %1$s</string>
     <string name="text_editor_log_button_behavior">سلوك زر السجلات في المحرر</string>
+    <string name="text_editor_performance">الأداء</string>
+    <string name="text_editor_pinch_to_zoom_change_text_size_enabled">القرص يغير حجم النص</string>
+    <string name="text_editor_shortcut_input_bar">إعدادات رموز الاختصار</string>
     <string name="text_editor_theme">موضوع المحرر</string>
+    <string name="text_editor_theme_mode">وضع سمة المحرر</string>
+    <string name="text_editor_word_wrap_indent_style">المسافة البادئة للالتفاف</string>
     <string name="text_email">البريد الإلكتروني</string>
     <string name="text_email_cannot_be_empty">البريد الإلكتروني لا يمكن أن يكون فارغًا</string>
     <string name="text_email_format_error">تنسيق البريد الإلكتروني غير صالح</string>
@@ -877,6 +991,7 @@
     <string name="text_failed_to_send_log_entries">فشل في إرسال إدخالات السجل</string>
     <string name="text_failed_to_update">فشل التحديث</string>
     <string name="text_failed_to_write_file">فشل في كتابة الملف</string>
+    <string name="text_falling_back_to_local_build">جار الرجوع إلى البناء المحلي</string>
     <string name="text_file">ملف</string>
     <string name="text_file_colon_value">الملف: %1$s</string>
     <string name="text_file_details">تفاصيل الملف</string>
@@ -912,10 +1027,13 @@
     <string name="text_formatting_completed">اكتمل التنسيق</string>
     <string name="text_function">وظيفة</string>
     <string name="text_fx_keyboard">لوحة مفاتيح Fx</string>
+    <string name="text_general">عام</string>
     <string name="text_generate">يولد</string>
     <string name="text_generate_code">إنشاء التعليمات البرمجية</string>
     <string name="text_generated_code">رمز تم إنشاؤه</string>
+    <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">تم استخدام عنوان URL للنسخ الاحتياطي</string>
+    <string name="text_github_token">رمز GitHub</string>
     <string name="text_global_settings">إعدادات عامة</string>
     <string name="text_go_to_settings">اذهب للاعدادات\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">منح الوصول إلى AutoJs6 في تطبيق Shizuku</string>
@@ -974,6 +1092,7 @@
     <string name="text_jump_to_line">القفز إلى الخط</string>
     <string name="text_jump_to_line_end">القفز إلى نهاية الخط</string>
     <string name="text_jump_to_line_start">قفز إلى خط البداية</string>
+    <string name="text_jump_to_previous_cursor">الانتقال إلى موضع المؤشر السابق</string>
     <string name="text_jump_to_start">القفز للبدء</string>
     <string name="text_keep_screen_on_when_in_foreground">حافظ على الشاشة قيد التشغيل عندما تكون في المقدمة</string>
     <string name="text_key_alias">الاسم المستعار</string>
@@ -990,8 +1109,10 @@
     <string name="text_launch_config">إطلاق التكوين</string>
     <string name="text_launch_debugger">إطلاق الأخطاء</string>
     <string name="text_launch_launcher_visible">اظهار ايقونة التطبيق في المشغل</string>
+    <string name="text_launch_log_shortcut_visible">إظهار السجل في اختصارات المشغل</string>
     <string name="text_launch_logs_visible">اظهار السجلات عند التشغيل</string>
     <string name="text_launch_run_on_boot">تشغيل السكربت عند الاقلاع</string>
+    <string name="text_launch_settings_shortcut_visible">إظهار الإعدادات في اختصارات المشغل</string>
     <string name="text_launch_slug">نص شعار شاشة البداية</string>
     <string name="text_launch_splash_visible">اظهار شاشة البداية عند التشغيل</string>
     <string name="text_launcher_icon_title">رمز المشغّل</string>
@@ -1022,6 +1143,7 @@
     <string name="text_min_version">الإصدار الأدنى</string>
     <string name="text_min_version_of_vscode_vsc_ext">أدنى إصدار من امتداد VSCode</string>
     <string name="text_mobile_qq_not_installed">لم يتم تثبيت \"Mobile QQ\"</string>
+    <string name="text_monthly_task">مهمة شهرية</string>
     <string name="text_more">أكثر</string>
     <string name="text_more_details">تفاصيل</string>
     <string name="text_mount">ربط</string>
@@ -1033,6 +1155,7 @@
     <string name="text_move_file_to_trash">نقل الملف الى سلة المحذوفات</string>
     <string name="text_move_folder">نقل المجلد</string>
     <string name="text_move_folder_to_trash">نقل المجلد الى سلة المحذوفات</string>
+    <string name="text_move_items_to_trash">نقل العناصر إلى سلة المحذوفات</string>
     <string name="text_move_to">نقل إلى</string>
     <string name="text_move_to_trash_failed">فشل النقل الى سلة المحذوفات</string>
     <string name="text_moved_to_trash">تم النقل الى سلة المحذوفات</string>
@@ -1074,6 +1197,12 @@
     <string name="text_no_search_results_for_keyword">لم يتم العثور على نتائج لـ:\n\n%1$s</string>
     <string name="text_no_symbols_hint">الاعدادات الحالية فارغة.\nاضغط هنا لانشاء رمز.</string>
     <string name="text_no_version_history">لا يوجد سجل للاصدارات</string>
+    <string name="text_nodejs">Node.js</string>
+    <string name="text_nodejs_doctor">تشخيص Node.js</string>
+    <string name="text_nodejs_doctor_export_json">تقرير JSON</string>
+    <string name="text_nodejs_doctor_export_text">تقرير نصي</string>
+    <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">جار إنشاء تقرير تشخيص Node.js...</string>
+    <string name="text_nodejs_doctor_generation_failed">فشل إنشاء تقرير تشخيص Node.js</string>
     <string name="text_none">لا يوجد</string>
     <string name="text_not_granted">لم تمنح</string>
     <string name="text_not_installed">غير مثبّت</string>
@@ -1207,6 +1336,7 @@
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">يرجى المحاولة مرة أخرى لاحقًا...</string>
     <string name="text_plugin_activated">مفعّل</string>
     <string name="text_plugin_activation_recommended">يوصى بالتفعيل</string>
+    <string name="text_plugin_additional_variants">متغيرات الاضافات الاخرى</string>
     <string name="text_plugin_authorization_denied">تم رفض التفويض</string>
     <string name="text_plugin_authorization_required">يتطلب تفويضا</string>
     <string name="text_plugin_authorized">مفوّض</string>
@@ -1225,7 +1355,6 @@
     <string name="text_plugin_jump_to_launch_page">الانتقال الى صفحة التشغيل</string>
     <string name="text_plugin_library_official">مكتبة الاضافات الرسمية</string>
     <string name="text_plugin_library_third_party">مكتبة اضافات الطرف الثالث</string>
-    <string name="text_plugin_additional_variants">متغيرات الاضافات الاخرى</string>
     <string name="text_plugin_mount_object_name">اسم كائن الربط</string>
     <string name="text_plugin_mount_point">نقطة الربط</string>
     <string name="text_plugin_mount_point_global_display">global</string>
@@ -1250,6 +1379,7 @@
     <string name="text_preparing_assets_dir">جارٍ تحضير مجلد assets</string>
     <string name="text_preparing_build_config">جارٍ تحضير اعدادات البناء</string>
     <string name="text_preparing_keystore">جارٍ تحضير keystore</string>
+    <string name="text_preparing_remote_build_inputs">جار إعداد مدخلات البناء عن بعد</string>
     <string name="text_preparing_workspace">جارٍ تحضير مساحة العمل</string>
     <string name="text_preset_dialog_content">محتوى مربع الحوار المعين مسبقاً</string>
     <string name="text_preset_dialog_title">عنوان مربع الحوار المعين مسبقاً</string>
@@ -1269,6 +1399,8 @@
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_pruning">جارٍ التقليم</string>
+    <string name="text_pruning_native_libraries">جار استبعاد المكتبات الأصلية</string>
+    <string name="text_querying_plugin_info">جار الاستعلام عن معلومات المكون الإضافي</string>
     <string name="text_quit">يترك</string>
     <string name="text_re_signing_apk">جارٍ اعادة توقيع APK</string>
     <string name="text_reading_splash_resources">جارٍ قراءة موارد شاشة البدء</string>
@@ -1294,6 +1426,13 @@
     <string name="text_remove_from_trash">ازالة من سلة المحذوفات</string>
     <string name="text_remove_from_trash_confirm">هل تريد حذف هذا العنصر من سلة المحذوفات نهائيا?</string>
     <string name="text_rename">إعادة تسمية</string>
+    <string name="text_repeat_count_must_be_positive">يجب أن يكون عدد المرات أكبر من 0</string>
+    <string name="text_repeat_count_times">مرات</string>
+    <string name="text_repeat_end">ينتهي</string>
+    <string name="text_repeat_for_number_of_events">لعدد محدد من الأحداث</string>
+    <string name="text_repeat_forever">إلى الأبد</string>
+    <string name="text_repeat_until_date">حتى تاريخ محدد</string>
+    <string name="text_repeat_until_date_before_now">يجب ألا يكون تاريخ الانتهاء أسبق من اليوم</string>
     <string name="text_replace">يحل محل</string>
     <string name="text_replace_all">استبدل كل شيء</string>
     <string name="text_replace_simplified">يستبدل</string>
@@ -1306,6 +1445,7 @@
     <string name="text_reset_succeed">نجحت إعادة تعيين</string>
     <string name="text_reset_to_initial_content">إعادة تعيين في البداية</string>
     <string name="text_reset_to_initial_content_only_for_assets">إعادة التعيين هي فقط للعينات</string>
+    <string name="text_resolving_plugin_artifacts">جار تحليل عناصر المكون الإضافي</string>
     <string name="text_resolving_plugin_native_libraries">جارٍ تحليل مكتبات الاضافة الاصلية</string>
     <string name="text_restart">إعادة بدء</string>
     <string name="text_restart_strategy">استراتيجية إعادة التشغيل</string>
@@ -1369,6 +1509,7 @@
     <string name="text_select_file_to_upload">حدد ملف للتحميل</string>
     <string name="text_select_icon">حدد أيقونة</string>
     <string name="text_select_image">حدد صورة</string>
+    <string name="text_selected_items" formatted="true">تم تحديد %1$d</string>
     <string name="text_selected_plugin">الاضافة المحددة</string>
     <string name="text_send">إرسال</string>
     <string name="text_send_shortcut">انشاء اختصار</string>
@@ -1378,6 +1519,7 @@
     <string name="text_set_a_name_for_the_new_configuration">اختر اسما للاعدادات الجديدة</string>
     <string name="text_set_as_working_dir">تعيين كدليل العمل</string>
     <string name="text_set_breakpoint">ضبط نقطة توقف</string>
+    <string name="text_set_editor_setting_action" formatted="true">تعيين %1$s</string>
     <string name="text_settings">إعدادات</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">عدم تطابق SHA-256.\n\nالمتوقّع: %1$s\nالفعلي: %2$s</string>
     <string name="text_shizuku_access">وصول Shizuku</string>
@@ -1455,6 +1597,17 @@
     <string name="text_text_size_current_value" formatted="true">حجم النص: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">ويمكن الرجوع إلى الحلول التالية</string>
     <string name="text_theme_color">لون الموضوع</string>
+    <string name="text_theme_preview_exit">خروج</string>
+    <string name="text_theme_preview_filter_all">الكل</string>
+    <string name="text_theme_preview_filter_dark">داكن</string>
+    <string name="text_theme_preview_filter_light">فاتح</string>
+    <string name="text_theme_preview_list">قائمة</string>
+    <string name="text_theme_preview_next">التالي</string>
+    <string name="text_theme_preview_no_available_theme">لا تتوفر سمة لعامل التصفية الحالي</string>
+    <string name="text_theme_preview_previous">السابق</string>
+    <string name="text_theme_preview_unavailable_for_filter">غير متاح لعامل التصفية الحالي</string>
+    <string name="text_theme_preview_use">استخدام</string>
+    <string name="text_theme_previewer">معاينة السمات</string>
     <string name="text_time">زمن</string>
     <string name="text_timed_task">مهمة توقيت</string>
     <string name="text_timed_task_backend_title">محرك جدولة المهام المؤقتة</string>
@@ -1493,8 +1646,10 @@
     <string name="text_updates_snack_bar_act_later">في وقت لاحق</string>
     <string name="text_updates_snack_bar_act_view">رأي</string>
     <string name="text_updating_project_config">جارٍ تحديث اعدادات المشروع</string>
+    <string name="text_usage_instructions">الاستخدام</string>
     <string name="text_usage_stats_permission">الاستخدام الإحصائيات الوصول</string>
     <string name="text_use_android_n_shortcut">استخدم اختصار Android 7.0</string>
+    <string name="text_use_builtin_template">استخدام القالب المضمن</string>
     <string name="text_use_default_icon">استخدام الرمز الافتراضي</string>
     <string name="text_use_volume_control_record">استخدم مفتاح خفض مستوى الصوت للتحكم في التسجيل</string>
     <string name="text_use_volume_key_to_control_script_running">استخدم مفتاح \"رفع الصوت\" للتحكم في تشغيل البرنامج النصي</string>
@@ -1514,6 +1669,8 @@
     <string name="text_verify_failed">فشل التحقق</string>
     <string name="text_verify_key_store">التحقق من مخزن المفاتيح</string>
     <string name="text_verify_success">تم التحقق بنجاح</string>
+    <string name="text_verifying_build_inputs">جار التحقق من مدخلات البناء</string>
+    <string name="text_verifying_project_archive">جار التحقق من أرشيف المشروع</string>
     <string name="text_version">إصدار</string>
     <string name="text_version_code">رمز الإصدار</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">رمز الإصدار (جارٍ الحساب...)</string>
@@ -1540,6 +1697,7 @@
     <string name="text_writing_resources_arsc">جارٍ كتابة resources.arsc</string>
     <string name="text_writing_signed_apk">جارٍ كتابة APK الموقّع</string>
     <string name="text_xiaomi_background_popup_permission">النوافذ المنبثقة في الخلفية</string>
+    <string name="text_yearly_task">مهمة سنوية</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
 </resources>

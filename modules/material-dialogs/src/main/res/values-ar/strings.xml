@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="md_back_label">رجوع</string>
+    <string name="md_cancel_label">إلغاء</string>
+    <string name="md_choose_label">اختيار</string>
+    <string name="md_custom_label">مخصص</string>
+    <string name="md_done_label">تم</string>
+    <string name="md_error_label">خطأ</string>
+    <string name="md_presets_label">إعدادات مسبقة</string>
+    <string name="md_storage_perm_error">لم يتم منح تطبيقك إذن READ_EXTERNAL_STORAGE.</string>
+    <string name="new_folder">مجلد جديد</string>
+</resources>

@@ -13,12 +13,12 @@
      limitations under the License.
 -->
 <resources>
+    <string name="cpv_custom">커스텀</string>
     <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
     <string name="cpv_default_title">색상 선택</string>
+    <string name="cpv_menu_item_history">기록</string>
+    <string name="cpv_menu_item_reset_color_palette">팔레트 초기화</string>
     <string name="cpv_presets">프리셋</string>
-    <string name="cpv_custom">커스텀</string>
     <string name="cpv_select">선택</string>
     <string name="cpv_transparency">투명도</string>
-    <string name="cpv_menu_item_history">역사</string>
-    <string name="cpv_menu_item_reset_color_palette">팔레트 초기화</string>
 </resources>

@@ -71,6 +71,7 @@
 * `Amélioration` Amélioration du style et des fonctions des boîtes de dialogue "Trier" et "Filtrer" du Centre des plugins
 * `Amélioration` Le Centre des plugins affiche les variantes courantes par défaut et fournit une page distincte pour les autres variantes
 * `Amélioration` Amélioration des journaux des modifications multilingues/du cache des langues/de la vérification officielle/du chargement des index et d'autres fonctions du Centre des plugins
+* `Amélioration` Normalisation des ressources de chaînes du projet: traductions multilingues complètes/classement par fichier/tri par nom/ponctuation ASCII
 * `Amélioration` Le système de compilation sélectionne dynamiquement les versions compatibles de Kotlin/KSP/AGP/R8 et réduit la pression mémoire au démarrage de Gradle
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise

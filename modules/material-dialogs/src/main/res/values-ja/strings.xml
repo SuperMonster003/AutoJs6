@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="md_back_label">戻る</string>
+    <string name="md_cancel_label">キャンセル</string>
+    <string name="md_choose_label">選択</string>
+    <string name="md_custom_label">カスタム</string>
+    <string name="md_done_label">完了</string>
+    <string name="md_error_label">エラー</string>
+    <string name="md_presets_label">プリセット</string>
+    <string name="md_storage_perm_error">アプリに READ_EXTERNAL_STORAGE 権限が付与されていません.</string>
+    <string name="new_folder">新しいフォルダー</string>
+</resources>

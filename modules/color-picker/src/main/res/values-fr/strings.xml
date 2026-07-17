@@ -10,12 +10,12 @@
      limitations under the License.
 -->
 <resources>
+    <string name="cpv_custom">Personnalisée</string>
     <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
     <string name="cpv_default_title">Sélectionner une couleur</string>
+    <string name="cpv_menu_item_history">Historique</string>
+    <string name="cpv_menu_item_reset_color_palette">Réinitialiser la palette</string>
     <string name="cpv_presets">Présélections</string>
-    <string name="cpv_custom">Personnalisée</string>
     <string name="cpv_select">Valider</string>
     <string name="cpv_transparency">Transparence</string>
-    <string name="cpv_menu_item_history">Historique</string>
-    <string name="cpv_menu_item_reset_color_palette">Réinitialiser palette</string>
 </resources>

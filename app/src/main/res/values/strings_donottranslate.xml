@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE resources [
+
+    <!ENTITY url_github_autojs6 "http://project.autojs6.com">
+
+    <!ENTITY url_github_autojs6_vscode_extension "http://vscext-project.autojs6.com">
+
+    ]>
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="app_name" translatable="false">AutoJs6</string>
+    <string name="app_name_qq" translatable="false">QQ</string>
+    <string name="color_library_identifier_android_colors" translatable="false">Android</string>
+    <string name="color_library_identifier_css_colors" translatable="false">CSS</string>
+    <string name="color_library_identifier_web_colors" translatable="false">WEB</string>
+    <string name="com_twofortyfouram_log_tag" tools:ignore="ResourceName" translatable="false" />
+    <string name="default_build_apk_version_code" translatable="false">1</string>
+    <string name="default_build_apk_version_name" translatable="false">1.0.0</string>
+    <string name="default_key_ace_editor_font" translatable="false">@string/key_ace_editor_font_jetbrains_mono</string>
+    <string name="default_key_app_language" translatable="false">@string/key_app_language_auto</string>
+    <string name="default_key_documentation_source" translatable="false">@string/key_documentation_source_local</string>
+    <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_ace</string>
+    <string name="default_key_editor_gutter_width_mode" translatable="false">@string/key_editor_gutter_width_mode_dynamic</string>
+    <string name="default_key_editor_log_button_behavior" translatable="false">@string/key_editor_log_button_behavior_bottom_sheet</string>
+    <string name="default_key_editor_pinch_to_zoom_strategy" translatable="false">@string/key_editor_pinch_to_zoom_change_text_size</string>
+    <string name="default_key_editor_theme_mode" translatable="false">@string/key_editor_theme_mode_separate</string>
+    <string name="default_key_editor_word_wrap_indent_style" translatable="false">@string/key_editor_word_wrap_indent_style_continuation</string>
+    <string name="default_key_file_extensions" translatable="false">@string/key_file_extensions_show_all_but_executable</string>
+    <string name="default_key_hidden_files" translatable="false">@string/key_hidden_files_not_show</string>
+    <string name="default_key_keep_screen_on_when_in_foreground" translatable="false">@string/key_keep_screen_on_when_in_foreground_disabled</string>
+    <string name="default_key_launcher_icon" translatable="false">@string/key_launcher_icon_adaptive</string>
+    <string name="default_key_night_mode" translatable="false">@string/key_night_mode_follow_system</string>
+    <string name="default_key_restart_strategy" translatable="false">@string/key_restart_strategy_quick</string>
+    <string name="default_key_root_mode" translatable="false">@string/key_root_mode_auto_detect</string>
+    <string name="default_key_root_record_out_file_type" translatable="false">@string/key_root_record_out_file_type_binary</string>
+    <string name="default_key_scheduled_restart_backend" translatable="false">@string/key_scheduled_restart_backend_work_manager</string>
+    <string name="default_key_timed_task_backend" translatable="false">@string/key_timed_task_backend_alarm</string>
+    <string name="default_main_file_name" translatable="false">main.js</string>
+    <string name="developer_full_name" translatable="false">SuperMonster003</string>
+    <string name="developer_nickname" translatable="false">SuperMonster003</string>
+    <string name="ellipsis_six" translatable="false" tools:ignore="TypographyEllipsis">... ...</string>
+    <string name="ellipsis_three" translatable="false" tools:ignore="TypographyEllipsis">...</string>
+    <string name="email" translatable="false">hybbbb1996@gmail.com</string>
+    <string name="entry_ace_editor_font_cascadia_code" translatable="false">Cascadia Code</string>
+    <string name="entry_ace_editor_font_fira_code" translatable="false">Fira Code</string>
+    <string name="entry_ace_editor_font_hack" translatable="false">Hack</string>
+    <string name="entry_ace_editor_font_ibm_plex_mono" translatable="false">IBM Plex Mono</string>
+    <string name="entry_ace_editor_font_intel_one_mono" translatable="false">Intel One Mono</string>
+    <string name="entry_ace_editor_font_iosevka" translatable="false">Iosevka</string>
+    <string name="entry_ace_editor_font_iosevka_slab" translatable="false">Iosevka Slab</string>
+    <string name="entry_ace_editor_font_jetbrains_mono" translatable="false">JetBrains Mono</string>
+    <string name="entry_ace_editor_font_source_code_pro" translatable="false">Source Code Pro</string>
+    <string name="entry_app_language_ar" translatable="false">العربية</string>
+    <string name="entry_app_language_en" translatable="false">English</string>
+    <string name="entry_app_language_es" translatable="false">Español</string>
+    <string name="entry_app_language_fr" translatable="false">Français</string>
+    <string name="entry_app_language_ja" translatable="false">日本語</string>
+    <string name="entry_app_language_ko" translatable="false">한국어</string>
+    <string name="entry_app_language_ru" translatable="false">Русский</string>
+    <string name="entry_app_language_zh_hans" translatable="false">简体中文</string>
+    <string name="entry_app_language_zh_hant_hk" translatable="false">繁體中文 (香港)</string>
+    <string name="entry_app_language_zh_hant_tw" translatable="false">繁體中文 (台灣)</string>
+    <string name="entry_timed_task_backend_alarm" translatable="false">AlarmManager</string>
+    <string name="entry_timed_task_backend_job" translatable="false">JobScheduler</string>
+    <string name="entry_timed_task_backend_work" translatable="false">WorkManager</string>
+    <string name="format_default_package_name" formatted="true" translatable="false">org.autojs.autojs6.%s</string>
+    <string name="format_dialog_progress_number_format_kilo_bytes" translatable="false">%.1fKiB/%.1fKiB</string>
+    <string name="format_dialog_progress_number_format_mega_bytes" translatable="false">%.2fMiB/%.2fMiB</string>
+    <string name="id_launcher_shortcut_docs" translatable="false">shortcut_$_docs</string>
+    <string name="id_launcher_shortcut_log" translatable="false">shortcut_$_log</string>
+    <string name="id_launcher_shortcut_plugin_center" translatable="false">shortcut_$_plugin_center</string>
+    <string name="id_launcher_shortcut_settings" translatable="false">shortcut_$_settings</string>
+    <string name="key_a11y_service" translatable="false">key_$_a11y_service</string>
+    <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
+    <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
+    <string name="key_ace_editor_font" translatable="false">key_$_ace_editor_font</string>
+    <string name="key_ace_editor_font_cascadia_code" translatable="false">cascadia_code</string>
+    <string name="key_ace_editor_font_fira_code" translatable="false">fira_code</string>
+    <string name="key_ace_editor_font_hack" translatable="false">hack</string>
+    <string name="key_ace_editor_font_ibm_plex_mono" translatable="false">ibm_plex_mono</string>
+    <string name="key_ace_editor_font_intel_one_mono" translatable="false">intel_one_mono</string>
+    <string name="key_ace_editor_font_iosevka" translatable="false">iosevka</string>
+    <string name="key_ace_editor_font_iosevka_slab" translatable="false">iosevka_slab</string>
+    <string name="key_ace_editor_font_jetbrains_mono" translatable="false">jetbrains_mono</string>
+    <string name="key_ace_editor_font_source_code_pro" translatable="false">source_code_pro</string>
+    <string name="key_ace_editor_font_system_monospace" translatable="false">system_monospace</string>
+    <string name="key_ace_font_ligatures_enabled" translatable="false">key_$_ace_font_ligatures_enabled</string>
+    <string name="key_ace_font_styles_enabled" translatable="false">key_$_ace_font_styles_enabled</string>
+    <string name="key_ace_indent_guides_enabled" translatable="false">key_$_ace_indent_guides_enabled</string>
+    <string name="key_ace_line_numbers_enabled" translatable="false">key_$_ace_line_numbers_enabled</string>
+    <string name="key_ace_lsp_enabled" translatable="false">key_$_ace_lsp_enabled</string>
+    <string name="key_ace_lsp_file_types" translatable="false">key_$_ace_lsp_file_types</string>
+    <string name="key_ace_print_margin_enabled" translatable="false">key_$_ace_print_margin_enabled</string>
+    <string name="key_ace_word_wrap_enabled" translatable="false">key_$_ace_word_wrap_enabled</string>
+    <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
+    <string name="key_app_language" translatable="false">key_$_app_language</string>
+    <string name="key_app_language_ar" translatable="false">key_$_app_language_ar</string>
+    <string name="key_app_language_auto" translatable="false">key_$_app_language_auto</string>
+    <string name="key_app_language_en" translatable="false">key_$_app_language_en</string>
+    <string name="key_app_language_es" translatable="false">key_$_app_language_es</string>
+    <string name="key_app_language_fr" translatable="false">key_$_app_language_fr</string>
+    <string name="key_app_language_ja" translatable="false">key_$_app_language_ja</string>
+    <string name="key_app_language_ko" translatable="false">key_$_app_language_ko</string>
+    <string name="key_app_language_ru" translatable="false">key_$_app_language_ru</string>
+    <string name="key_app_language_zh_hans" translatable="false">key_$_app_language_zh</string>
+    <string name="key_app_language_zh_hant_hk" translatable="false">key_$_app_language_zh_hk</string>
+    <string name="key_app_language_zh_hant_tw" translatable="false">key_$_app_language_zh_tw</string>
+    <string name="key_auto_check_for_updates" translatable="false">key_$_auto_check_for_updates</string>
+    <string name="key_auto_night_mode_enabled" translatable="false">key_$_auto_night_mode_enabled</string>
+    <string name="key_change_working_dir" translatable="false">key_$_change_working_dir</string>
+    <string name="key_check_for_updates" translatable="false">key_$_check_for_updates</string>
+    <string name="key_check_for_updates_while_ignoring_the_local_version" translatable="false">key_$_check_for_updates_while_ignoring_the_local_version</string>
+    <string name="key_client_socket_normally_closed" translatable="false">key_$_client_socket_normally_closed</string>
+    <string name="key_color_select_activity_legacy_layout" translatable="false">key_$_color_select_activity_legacy_layout</string>
+    <string name="key_delete_permanently_also_clear_history" translatable="false">key_$_delete_permanently_also_clear_history</string>
+    <string name="key_dialog_check_display_over_other_apps" translatable="false">key_$_dialog_check_display_over_other_apps</string>
+    <string name="key_dialog_foreground_svc" translatable="false">key_$_dialog_foreground_svc</string>
+    <string name="key_dialog_log_entries_exported" translatable="false">key_$_dialog_log_entries_exported</string>
+    <string name="key_dialog_manage_all_files_permission" translatable="false">key_$_dialog_manage_all_files_permission</string>
+    <string name="key_dialog_num_of_log_entries_exceeds_limit_for_sending" translatable="false">key_$_num_of_log_entries_exceeds_limit_for_sending</string>
+    <string name="key_dialog_selected_abi_is_unavailable" translatable="false">key_$_dialog_selected_abi_is_unavailable</string>
+    <string name="key_dialog_transparent_background_launcher_icon" translatable="false">key_$_dialog_transparent_background_launcher_icon</string>
+    <string name="key_display_over_other_apps" translatable="false">key_$_display_over_other_apps</string>
+    <string name="key_documentation_source" translatable="false">key_$_documentation_source</string>
+    <string name="key_documentation_source_local" translatable="false">key_$_documentation_source_local</string>
+    <string name="key_documentation_source_online" translatable="false">key_$_documentation_source_online</string>
+    <string name="key_drafts_max_days" translatable="false">key_$_drafts_max_days</string>
+    <string name="key_drafts_max_total_bytes" translatable="false">key_$_drafts_max_total_bytes</string>
+    <string name="key_editor_auto_show_log_bottom_sheet_on_run" translatable="false">key_$_editor_auto_show_log_bottom_sheet_on_run</string>
+    <string name="key_editor_breakpoint_markers_enabled" translatable="false">key_$_editor_breakpoint_markers_enabled</string>
+    <string name="key_editor_code_highlight_threshold_bytes" translatable="false">key_$_editor_code_highlight_threshold_bytes</string>
+    <string name="key_editor_engine" translatable="false">key_$_editor_engine</string>
+    <string name="key_editor_engine_ace" translatable="false">ace</string>
+    <string name="key_editor_engine_native" translatable="false">native</string>
+    <string name="key_editor_fold_markers_enabled" translatable="false">key_$_editor_fold_markers_enabled</string>
+    <string name="key_editor_gutter_width_mode" translatable="false">key_$_editor_gutter_width_mode</string>
+    <string name="key_editor_gutter_width_mode_dynamic" translatable="false">dynamic</string>
+    <string name="key_editor_gutter_width_mode_fixed" translatable="false">fixed</string>
+    <string name="key_editor_large_file_mode_threshold_bytes" translatable="false">key_$_editor_large_file_mode_threshold_bytes</string>
+    <string name="key_editor_log_button_behavior" translatable="false">key_$_editor_log_button_behavior</string>
+    <string name="key_editor_log_button_behavior_bottom_sheet" translatable="false">key_$_editor_log_button_behavior_bottom_sheet</string>
+    <string name="key_editor_log_button_behavior_fullscreen_page" translatable="false">key_$_editor_log_button_behavior_fullscreen_page</string>
+    <string name="key_editor_pinch_to_zoom_change_text_size" translatable="false">key_$_editor_pinch_to_zoom_change_text_size</string>
+    <string name="key_editor_pinch_to_zoom_change_text_size_enabled" translatable="false">key_$_editor_pinch_to_zoom_change_text_size_enabled</string>
+    <string name="key_editor_pinch_to_zoom_disable" translatable="false">key_$_editor_pinch_to_zoom_disable</string>
+    <string name="key_editor_pinch_to_zoom_scale_view" translatable="false">key_$_editor_pinch_to_zoom_scale_view</string>
+    <string name="key_editor_pinch_to_zoom_strategy" translatable="false">key_$_editor_pinch_to_zoom_strategy</string>
+    <string name="key_editor_shortcut_input_bar" translatable="false">key_$_editor_shortcut_input_bar</string>
+    <string name="key_editor_text_size" translatable="false">key_$_editor_text_size</string>
+    <string name="key_editor_theme" translatable="false">key_$_editor_theme</string>
+    <string name="key_editor_theme_dark" translatable="false">key_$_editor_theme_dark</string>
+    <string name="key_editor_theme_light" translatable="false">key_$_editor_theme_light</string>
+    <string name="key_editor_theme_mode" translatable="false">key_$_editor_theme_mode</string>
+    <string name="key_editor_theme_mode_separate" translatable="false">separate_light_dark</string>
+    <string name="key_editor_theme_mode_unified" translatable="false">unified_light_dark</string>
+    <string name="key_editor_word_wrap_indent_style" translatable="false">key_$_editor_word_wrap_indent_style</string>
+    <string name="key_editor_word_wrap_indent_style_classic" translatable="false">classic</string>
+    <string name="key_editor_word_wrap_indent_style_continuation" translatable="false">continuation</string>
+    <string name="key_enable_a11y_service_with_root_access" translatable="false">key_$_enable_a11y_service_with_root_access</string>
+    <string name="key_enable_a11y_service_with_secure_settings" translatable="false">key_$_enable_a11y_service_with_secure_settings</string>
+    <string name="key_enable_observe_key" translatable="false">key_$_enable_observe_key</string>
+    <string name="key_explorer_file_default_prefix" translatable="false">key_$_explorer_file_default_prefix</string>
+    <string name="key_extending_js_build_in_objects" translatable="false">key_$_extending_js_build_in_objects</string>
+    <string name="key_file_extensions" translatable="false">key_$_file_extensions</string>
+    <string name="key_file_extensions_not_show" translatable="false">key_$_file_extensions_not_show</string>
+    <string name="key_file_extensions_show_all" translatable="false">key_$_file_extensions_show_all</string>
+    <string name="key_file_extensions_show_all_but_executable" translatable="false">key_$_file_extensions_show_all_but_executable</string>
+    <string name="key_floating_menu_shown" translatable="false">key_$_floating_menu_shown</string>
+    <string name="key_foreground_service" translatable="false">key_$_foreground_service</string>
+    <string name="key_gesture_observing" translatable="false">key_$_gesture_observing</string>
+    <string name="key_github_token" translatable="false">key_$_github_token</string>
+    <string name="key_guard_mode" translatable="false">key_$_guard_mode</string>
+    <string name="key_hidden_files" translatable="false">key_$_hidden_files</string>
+    <string name="key_hidden_files_not_show" translatable="false">key_$_hidden_files_not_show</string>
+    <string name="key_hidden_files_show" translatable="false">key_$_hidden_files_show</string>
+    <string name="key_history_max_days" translatable="false">key_$_history_max_days</string>
+    <string name="key_history_max_file_size_to_track_bytes" translatable="false">key_$_history_max_file_size_to_track_bytes</string>
+    <string name="key_history_max_total_bytes" translatable="false">key_$_history_max_total_bytes</string>
+    <string name="key_history_max_total_bytes_per_file" translatable="false">key_$_history_max_total_bytes_per_file</string>
+    <string name="key_history_max_versions" translatable="false">key_$_history_max_versions</string>
+    <string name="key_ignored_updates" translatable="false">key_$_ignored_updates</string>
+    <string name="key_keep_screen_on_when_in_foreground" translatable="false">key_$_keep_screen_on_when_in_foreground</string>
+    <string name="key_keep_screen_on_when_in_foreground_all_pages" translatable="false">key_$_keep_screen_on_when_in_foreground_all_pages</string>
+    <string name="key_keep_screen_on_when_in_foreground_disabled" translatable="false">key_$_keep_screen_on_when_in_foreground_disabled</string>
+    <string name="key_keep_screen_on_when_in_foreground_enabled" translatable="false">key_$_keep_screen_on_when_in_foreground_enabled</string>
+    <string name="key_keep_screen_on_when_in_foreground_homepage_only" translatable="false">key_$_keep_screen_on_when_in_foreground_homepage_only</string>
+    <string name="key_keep_screen_on_when_in_foreground_last_enabled" translatable="false">key_$_keep_screen_on_when_in_foreground_last_enabled</string>
+    <string name="key_last_no_newer_updates" translatable="false">key_$_last_no_newer_updates</string>
+    <string name="key_last_updates_auto_checked" translatable="false">key_$_last_updates_auto_checked</string>
+    <string name="key_last_updates_checked" translatable="false">key_$_last_updates_checked</string>
+    <string name="key_last_updates_postponed" translatable="false">key_$_last_updates_postponed</string>
+    <string name="key_launcher_icon" translatable="false">key_$_launcher_icon</string>
+    <string name="key_launcher_icon_adaptive" translatable="false">key_$_launcher_icon_adaptive</string>
+    <string name="key_launcher_icon_transparent_background" translatable="false">key_$_launcher_icon_transparent_background</string>
+    <string name="key_launcher_shortcuts" translatable="false">key_$_launcher_shortcuts</string>
+    <string name="key_manage_ignored_updates" translatable="false">key_$_manage_ignored_updates</string>
+    <string name="key_night_mode" translatable="false">key_$_night_mode</string>
+    <string name="key_night_mode_always_off" translatable="false">key_$_night_mode_always_off</string>
+    <string name="key_night_mode_always_on" translatable="false">key_$_night_mode_always_on</string>
+    <string name="key_night_mode_enabled" translatable="false">key_$_night_mode_enabled</string>
+    <string name="key_night_mode_follow_system" translatable="false">key_$_night_mode_follow_system</string>
+    <string name="key_night_mode_null" translatable="false">key_$_night_mode_null</string>
+    <string name="key_nodejs_doctor_report" translatable="false">key_$_nodejs_doctor_report</string>
+    <string name="key_not_showing_main_activity" translatable="false">key_$_not_showing_main_activity</string>
+    <string name="key_pc_server_address_history" translatable="false">key_$_pc_server_address_histories</string>
+    <string name="key_plugin_center_auto_check_updates" translatable="false">key_$_plugin_center_auto_check_updates</string>
+    <string name="key_plugin_center_last_online_check_ts" translatable="false">key_$_plugin_center_last_online_check_ts</string>
+    <string name="key_plugin_center_show_official_plugins" translatable="false">key_$_plugin_center_show_official_plugins</string>
+    <string name="key_plugin_center_show_third_party_plugins" translatable="false">key_$_plugin_center_show_third_party_plugins</string>
+    <string name="key_post_notifications_permission" translatable="false">key_$_post_notifications_permission</string>
+    <string name="key_post_notifications_permission_auto_request_done" translatable="false">key_$_post_notifications_permission_auto_request_done</string>
+    <string name="key_post_notifications_permission_request_attempted" translatable="false">key_$_post_notifications_permission_request_attempted</string>
+    <string name="key_pref_bundle_default_item" translatable="false">key_$_pref_bundle_default_item</string>
+    <string name="key_pref_bundle_disabled_items" translatable="false">key_$_pref_bundle_disabled_items</string>
+    <string name="key_record_toast" translatable="false">key_$_record_toast</string>
+    <string name="key_release_history" translatable="false">key_$_release_history</string>
+    <string name="key_restart_strategy" translatable="false">key_$_restart_strategy</string>
+    <string name="key_restart_strategy_quick" translatable="false">key_$_restart_strategy_quick</string>
+    <string name="key_restart_strategy_scheduled" translatable="false">key_$_restart_strategy_scheduled</string>
+    <string name="key_rhino_java_primitive_wrap" translatable="false">key_$_rhino_java_primitive_wrap</string>
+    <string name="key_root_mode" translatable="false">key_$_root_mode</string>
+    <string name="key_root_mode_auto_detect" translatable="false">key_$_root_mode_auto_detect</string>
+    <string name="key_root_mode_force_non_root" translatable="false">key_$_root_mode_force_non_root</string>
+    <string name="key_root_mode_force_root" translatable="false">key_$_root_mode_force_root</string>
+    <string name="key_root_record_out_file_type" translatable="false">key_$_root_record_out_file_type</string>
+    <string name="key_root_record_out_file_type_binary" translatable="false">key_$_root_record_out_file_type_binary</string>
+    <string name="key_root_record_out_file_type_js" translatable="false">key_$_root_record_out_file_type_js</string>
+    <string name="key_run_on_boot_inrt" translatable="false">key_$_run_on_boot_inrt</string>
+    <string name="key_scheduled_restart_backend" translatable="false">key_$_scheduled_restart_backend</string>
+    <string name="key_scheduled_restart_backend_alarm_manager" translatable="false">key_$_scheduled_restart_backend_alarm_manager</string>
+    <string name="key_scheduled_restart_backend_work_manager" translatable="false">key_$_scheduled_restart_backend_work_manager</string>
+    <string name="key_scheduled_restart_delay" translatable="false">key_$_scheduled_restart_delay</string>
+    <string name="key_screen_capture_request_delay" translatable="false">key_$_screen_capture_request_delay_ms</string>
+    <string name="key_scripts_after_app_restart" translatable="false">key_$_scripts_after_app_restart</string>
+    <string name="key_server_address" translatable="false">key_$_server_address</string>
+    <string name="key_server_socket_normally_closed" translatable="false">key_$_server_socket_normally_closed</string>
+    <string name="key_stable_mode" translatable="false">key_$_stable_mode</string>
+    <string name="key_theme_color" translatable="false">key_$_theme_color</string>
+    <string name="key_theme_color_accent" translatable="false">key_$_theme_color_accent</string>
+    <string name="key_theme_color_primary" translatable="false">key_$_theme_color_primary</string>
+    <string name="key_theme_color_primary_dark" translatable="false">key_$_theme_color_primary_dark</string>
+    <string name="key_timed_task_backend" translatable="false">key_$_timed_task_backend</string>
+    <string name="key_timed_task_backend_alarm" translatable="false">key_$_timed_task_backend_alarm</string>
+    <string name="key_timed_task_backend_job" translatable="false">key_$_timed_task_backend_job</string>
+    <string name="key_timed_task_backend_work" translatable="false">key_$_timed_task_backend_work</string>
+    <string name="key_trash_max_days" translatable="false">key_$_trash_max_days</string>
+    <string name="key_trash_max_total_bytes" translatable="false">key_$_trash_max_total_bytes</string>
+    <string name="key_updates_checked_states_cleared" translatable="false">key_$_updates_checked_states_cleared</string>
+    <string name="key_use_volume_control_record" translatable="false">key_$_use_volume_control_record</string>
+    <string name="key_use_volume_control_running" translatable="false">key_$_use_volume_control_running</string>
+    <string name="key_version_history_restore_does_not_auto_save_to_disk" translatable="false">key_$_version_history_restore_does_not_auto_save_to_disk</string>
+    <string name="key_working_directory" translatable="false">key_$_working_directory</string>
+    <string name="key_working_directory_history" translatable="false">key_$_working_directory_histories</string>
+    <string name="key_working_directory_initialized" translatable="false">key_$_working_directory_initialized</string>
+    <!-- Forcibly use LeakCanary to detect memory leaks. -->
+    <string name="leak_canary_test_class_name" translatable="false">assertk.Assert</string>
+    <string name="literal_color_int" translatable="false">ColorInt</string>
+    <string name="literal_hex_uppercase" translatable="false">HEX</string>
+    <string name="literal_hsl_uppercase" translatable="false">HSL</string>
+    <string name="literal_hsv_uppercase" translatable="false">HSV</string>
+    <string name="literal_rgb_uppercase" translatable="false">RGB</string>
+    <string name="num_zero" translatable="false">0</string>
+    <string name="original_developer_full_name" translatable="false">Stardust</string>
+    <string name="original_developer_nickname" translatable="false">hyb1996</string>
+    <string name="property_key_app_version_code" translatable="false">VERSION_BUILD</string>
+    <string name="property_key_app_version_name" translatable="false">VERSION_NAME</string>
+    <string name="symbol_colon" translatable="false">:</string>
+    <string name="symbol_pipe" translatable="false">|</string>
+    <string name="symbol_question_mark" translatable="false">\?</string>
+    <string name="text_abis" translatable="false">ABIs</string>
+    <string name="text_app_name_accuweather" translatable="false">AccuWeather</string>
+    <string name="text_app_name_adm" translatable="false">ADM</string>
+    <string name="text_app_name_appops" translatable="false">App Ops</string>
+    <string name="text_app_name_aquamail" translatable="false">Aqua Mail</string>
+    <string name="text_app_name_autojs" translatable="false">Auto.js</string>
+    <string name="text_app_name_autojs6" translatable="false">@string/app_name</string>
+    <string name="text_app_name_autojspro" translatable="false">AutoJsPro</string>
+    <string name="text_app_name_chrome" translatable="false">Chrome</string>
+    <string name="text_app_name_digical" translatable="false">DigiCal</string>
+    <string name="text_app_name_excel" translatable="false">Excel</string>
+    <string name="text_app_name_firefox" translatable="false">Firefox</string>
+    <string name="text_app_name_fx" translatable="false">FX</string>
+    <string name="text_app_name_httpcanary" translatable="false">HttpCanary</string>
+    <string name="text_app_name_idlefish" translatable="false">闲鱼</string>
+    <string name="text_app_name_idmplus" translatable="false">IDM+</string>
+    <string name="text_app_name_jd" translatable="false">京东</string>
+    <string name="text_app_name_keep" translatable="false">Keep</string>
+    <string name="text_app_name_magisk" translatable="false">Magisk</string>
+    <string name="text_app_name_onedrive" translatable="false">OneDrive</string>
+    <string name="text_app_name_packet_capture" translatable="false">Packet Capture</string>
+    <string name="text_app_name_powerpoint" translatable="false">PowerPoint</string>
+    <string name="text_app_name_pulsar_plus" translatable="false">Pulsar+</string>
+    <string name="text_app_name_pure_weather" translatable="false">Pure天气</string>
+    <string name="text_app_name_qq" translatable="false">QQ</string>
+    <string name="text_app_name_sdmaid" translatable="false">SD Maid</string>
+    <string name="text_app_name_shizuku" translatable="false">Shizuku</string>
+    <string name="text_app_name_stopapp" translatable="false">小黑屋</string>
+    <string name="text_app_name_taobao" translatable="false">淘宝</string>
+    <string name="text_app_name_trainnote" translatable="false">训记</string>
+    <string name="text_app_name_twitter" translatable="false">Twitter</string>
+    <string name="text_app_name_unionpay" translatable="false">云闪付</string>
+    <string name="text_app_name_via" translatable="false">Via</string>
+    <string name="text_app_name_vysor" translatable="false">Vysor</string>
+    <string name="text_app_name_word" translatable="false">Word</string>
+    <string name="text_app_name_zhihu" translatable="false">知乎</string>
+    <string name="text_bks" translatable="false">BKS</string>
+    <string name="text_broadcast_action_prefix" translatable="false">android.intent.action.</string>
+    <string name="text_clear_updates_checked_states_description" translatable="false">NoNewer, Postponed, Check, AutoCheck</string>
+    <string name="text_copyright_dynamic" translatable="false">Copyright © 2017-%d All Rights Reserved</string>
+    <string name="text_copyright_sample" translatable="false">Copyright © 2017-2022 All Rights Reserved</string>
+    <string name="text_default_alias" translatable="false">key0</string>
+    <string name="text_default_country_code" translatable="false">CN</string>
+    <string name="text_default_validity_years" translatable="false">25</string>
+    <string name="text_device_imei" translatable="false">IMEI</string>
+    <string name="text_en_import" translatable="false">import</string>
+    <string name="text_full_version_info" translatable="false">%1$s (%2$d)</string>
+    <string name="text_half_ellipsis" translatable="false" formatted="true" tools:ignore="TypographyEllipsis">...</string>
+    <string name="text_jks" translatable="false">JKS</string>
+    <string name="text_plugin_mechanism_aidl" translatable="false">AIDL / IPC</string>
+    <string name="text_plugin_mechanism_sdk" translatable="false">SDK / In-Process</string>
+    <string name="text_powered_by_autojs" translatable="false">Powered by AutoJs6</string>
+    <string name="text_root" translatable="false">Root</string>
+    <string name="text_sample_button" translatable="false">Hello</string>
+    <string name="text_sample_file_date" translatable="false">2023-04-02 22:54</string>
+    <string name="text_sample_file_path" translatable="false">/Scripts/My_First_Project/main.js</string>
+    <string name="text_sample_file_size" translatable="false">18 KB</string>
+    <string name="text_sample_string" translatable="false">Sample string</string>
+    <string name="text_share_app" translatable="false">AutoJs6:\n&url_github_autojs6;</string>
+    <string name="text_should_never_happen" translatable="false">Should never happen</string>
+    <string name="text_str_colon_space_str_formatter" translatable="false">%s: %s</string>
+    <string name="uri_autojs6_download_link" translatable="false">http://download.autojs6.com</string>
+    <string name="url_github_autojs6" translatable="false">&url_github_autojs6;</string>
+    <string name="url_github_autojs6_issues" translatable="false">&url_github_autojs6;/issues</string>
+    <string name="url_github_autojs6_vscode_extension_repo" translatable="false">&url_github_autojs6_vscode_extension;</string>
+    <string name="url_github_autojs6_vscode_extension_usage" translatable="false">&url_github_autojs6_vscode_extension;/#%E4%BD%BF%E7%94%A8-usage</string>
+    <string name="value_app_language_default" translatable="false">@string/value_app_language_follow_system</string>
+    <string name="value_app_language_english" translatable="false">EN</string>
+    <string name="value_app_language_follow_system" translatable="false">Auto</string>
+    <string name="value_app_language_simplified_chinese" translatable="false">ZH_CN</string>
+
+</resources>

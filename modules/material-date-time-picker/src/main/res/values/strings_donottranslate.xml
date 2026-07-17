@@ -13,8 +13,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- DO NOT TRANSLATE -->
-    <string name="mdtp_day_of_week_label_typeface" translatable="false">sans-serif-light</string>
+<resources>
+    <string name="mdtp_day_of_week_label_typeface" translatable="false">sans-serif</string>
+    <string name="mdtp_radial_numbers_typeface" translatable="false">sans-serif</string>
+    <string name="mdtp_sans_serif" translatable="false">sans-serif</string>
+    <string name="mdtp_time_placeholder" translatable="false">00</string>
+    <string name="mdtp_time_separator" translatable="false">:</string>
 </resources>

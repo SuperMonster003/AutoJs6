@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="md_back_label">Назад</string>
+    <string name="md_cancel_label">Отмена</string>
+    <string name="md_choose_label">Выбрать</string>
+    <string name="md_custom_label">Настроить</string>
+    <string name="md_done_label">Готово</string>
+    <string name="md_error_label">Ошибка</string>
+    <string name="md_presets_label">Предустановки</string>
+    <string name="md_storage_perm_error">Вашему приложению не предоставлено разрешение READ_EXTERNAL_STORAGE.</string>
+    <string name="new_folder">Новая папка</string>
+</resources>

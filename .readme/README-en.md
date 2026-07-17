@@ -231,6 +231,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Improved the style and functionality of the Plugin Center "Sort" and "Filter" dialogs
 * `Improvement` Plugin Center lists common distribution variants by default and provides a separate page for other variants
 * `Improvement` Improved multilingual changelogs/language caching/official verification/index loading and other Plugin Center features
+* `Improvement` Standardized multilingual translation coverage/file organization/name ordering/ASCII punctuation for project string resources
 * `Improvement` Build system supports dynamic Kotlin/KSP/AGP/R8 compatibility matching and reduces Gradle startup memory pressure
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 

@@ -71,40 +71,58 @@
     <string name="description_about_app_and_developer_preference">AutoJs6 - это автоматизированный инструмент JavaScript для android, который является открытым исходным кодом и клонирован из \"hyb1996/Auto.js\".\n\nЧтобы попросить о помощи или обратной связи, посетите GitHub issues или присоединитесь к группе Tencent QQ 690946137.</string>
     <string name="description_about_app_tips_preference">1. Нажмите и удерживайте значок приложения на странице \"О приложении и разработчике\", чтобы перейти на страницу параметров разработчика AutoJs6.</string>
     <string name="description_accessibility_service">Служба доступности - ключевая возможность AutoJs6 для автоматизации. Она используется для чтения информации об элементах интерфейса на экране и для имитации взаимодействий, таких как [ нажатие / свайп / ввод ].\n\nБольшинство функций, связанных с автоматизацией, а также инструменты вроде анализа макета, требуют включения службы доступности для корректной работы.</string>
+    <string name="description_ace_action_favorites">Избранные действия сохраняют часто используемые действия редактора, такие как запуск, сохранение, форматирование, действия меню, действия по долгому нажатию и изменение настроек редактора. Нажмите кнопку со звездой, чтобы открыть список; нажмите элемент, чтобы повторить действие; удерживайте кнопку со звездой, чтобы повторить последнее действие; перетаскивайте элементы, чтобы изменить порядок; проведите вправо, чтобы закрепить или открепить; проведите влево, чтобы удалить.</string>
+    <string name="description_ace_editor_font_preference">Выберите шрифт редактора Ace. В список входят системный моноширинный шрифт Android и шрифты с открытым исходным кодом для программирования с информацией об авторах и разработчиках; фактический системный моноширинный шрифт определяется Android и производителем устройства.</string>
+    <string name="description_ace_font_ligatures_enabled_preference">Включает лигатуры OpenType для поддерживающих их шрифтов. Операторы ===, !==, =&gt; и &lt;= могут отображаться объединёнными символами. Изменяется только отображение кода.</string>
+    <string name="description_ace_font_styles_enabled_preference">Разрешает темам Ace и подсветке синтаксиса использовать полужирное, курсивное и другое начертание. Если параметр отключён, для текста кода принудительно используется обычное начертание без изменения цветов или содержимого.</string>
+    <string name="description_ace_indent_guides_enabled_preference">Показывает или скрывает вертикальные направляющие отступов в области кода. Изменяется только отображение кода.</string>
+    <string name="description_ace_line_numbers_enabled_preference">Показывает или скрывает номера строк в поле редактора. Сворачивание кода, точки останова и разметка поля остаются доступными.</string>
+    <string name="description_ace_lsp_enabled_preference">Предварительная поддержка LSP по умолчанию отключена. После включения редактор использует локальную языковую службу TypeScript для автодополнения, всплывающих подсказок, сведений о сигнатурах и диагностики, сохраняя статическое автодополнение в качестве резервного варианта.</string>
+    <string name="description_ace_lsp_file_types_preference">LSP запускается только для файлов, имена которых заканчиваются одним из выбранных суффиксов. Значение по умолчанию восстанавливает набор суффиксов JavaScript, TypeScript, JSON, Auto.js и Node.js.</string>
+    <string name="description_ace_print_margin_enabled_preference">Показывает или скрывает линию границы печати в правой части редактора Ace. Изменяется только отображение кода.</string>
+    <string name="description_ace_word_wrap_enabled_preference">Включает перенос длинных строк в редакторе. Содержимое файла не изменяется.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">Разрешение \"управление всеми файлами\" (или \"доступ ко всем файлам\") позволяет AutoJs6 напрямую [ создавать / читать / изменять / удалять ] файлы в общем хранилище через обычные пути файлов, чтобы скрипты могли получать доступ к \"Internal Storage\", а файловый менеджер мог корректно отображать и управлять файлами.\n\nНа устройствах Android 11+ это основной способ обеспечить полный доступ к чтению/записи файлов.</string>
     <string name="description_app_language_preference">Это предпочтение для изменения языка отображения AutoJs6, включая сообщения исключений от запущенных скриптов.\n\nПримечание: может потребоваться перезапуск приложения, чтобы язык был применен так, как ожидается.</string>
-    <string name="description_auto_night_mode">После включения автоматического ночного режима AutoJs6 будет автоматически переключать ночной режим в соответствии с настройками системы.\n\nNote: переключатель автоматического ночного режима и переключатель ночного режима связаны и взаимно влияют друг на друга.</string>
-    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">Разрешение \"всплывающие окна в фоне\" (также известное как \"запуск интерфейса из фона\" или \"показ интерфейса в фоне\") позволяет AutoJs6, даже когда приложение находится в фоне или без видимого интерфейса, запускать Activity или открывать определённую страницу настроек. Подходит для сценариев [ открывать UI при срабатывании запланированной задачи / восстанавливать взаимодействие после блокировки экрана или режима ожидания / открывать страницу настройки скрипта из уведомления или ярлыка ].\n\nNote: на системах Xiaomi (MIUI/HyperOS), Vivo (OriginOS/Funtouch OS) и т. п. это разрешение может быть отключено по умолчанию. Если оно не выдано, система может блокировать попытки скрипта открыть страницу из фона, что может проявляться как [ нет реакции / выполнение только в фоне без интерфейса / неудачный переход ].\n\nДаже после выдачи разрешения на поведение могут влиять другие политики системы, такие как [ оптимизация батареи / ограничения автозапуска / заморозка в фоне / режим ожидания приложения ]. Рекомендуется настраивать совместно с связанными разрешениями или белыми списками.</string>
+    <string name="description_auto_night_mode">После включения автоматического ночного режима AutoJs6 будет автоматически переключать ночной режим в соответствии с настройками системы.\n\nПримечание: переключатель автоматического ночного режима и переключатель ночного режима связаны и взаимно влияют друг на друга.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">Разрешение \"всплывающие окна в фоне\" (также известное как \"запуск интерфейса из фона\" или \"показ интерфейса в фоне\") позволяет AutoJs6, даже когда приложение находится в фоне или без видимого интерфейса, запускать Activity или открывать определённую страницу настроек. Подходит для сценариев [ открывать UI при срабатывании запланированной задачи / восстанавливать взаимодействие после блокировки экрана или режима ожидания / открывать страницу настройки скрипта из уведомления или ярлыка ].\n\nПримечание: на системах Xiaomi (MIUI/HyperOS), Vivo (OriginOS/Funtouch OS) и т. п. это разрешение может быть отключено по умолчанию. Если оно не выдано, система может блокировать попытки скрипта открыть страницу из фона, что может проявляться как [ нет реакции / выполнение только в фоне без интерфейса / неудачный переход ].\n\nДаже после выдачи разрешения на поведение могут влиять другие политики системы, такие как [ оптимизация батареи / ограничения автозапуска / заморозка в фоне / режим ожидания приложения ]. Рекомендуется настраивать совместно с связанными разрешениями или белыми списками.</string>
     <string name="description_change_working_dir_preference">Измените путь к директории, содержащей скрипты</string>
     <string name="description_check_for_updates_preference">AutoJs6 получает и загружает обновления с GitHub.</string>
     <string name="description_client_mode">Клиентский режим позволяет AutoJs6 активно подключаться к удалённому серверу для выполнения [ передачи скриптов / вывода логов / удалённого управления ].\n\nОбычно устройство и сервер должны находиться в одной локальной сети (LAN) или в сетевой среде, где они могут обращаться друг к другу.</string>
-    <string name="description_display_over_other_app">Разрешение \"показ поверх других приложений\" позволяет AutoJs6 отображать плавающие окна или плавающую кнопку поверх интерфейса других приложений, чтобы быстро выполнять действия или просматривать информацию на любом экране.\n\nNote: если разрешение не выдано, плавающие окна и плавающая кнопка могут не отображаться или работать некорректно.</string>
+    <string name="description_display_over_other_app">Разрешение \"показ поверх других приложений\" позволяет AutoJs6 отображать плавающие окна или плавающую кнопку поверх интерфейса других приложений, чтобы быстро выполнять действия или просматривать информацию на любом экране.\n\nПримечание: если разрешение не выдано, плавающие окна и плавающая кнопка могут не отображаться или работать некорректно.</string>
     <string name="description_documentation_source_preference">Локальная документация: Использование встроенных файлов AutoJs6 в качестве источников документации, подключение к сети не требуется. Содержание меняется по мере обновления AutoJs6.\nОнлайн-документы: Использование страниц GitHub в качестве источников документации, требуется подключение к сети. Содержимое всегда обновляется.\n\nПримечание: Чтобы максимально улучшить качество чтения онлайн-документов, рекомендуется использовать широкоформатное устройство отображения, например настольный монитор.\nПримечание: Начиная с версии 6.2.0, документация находится на предварительной стадии разработки, и большая часть содержимого еще не была написана или обновлена.</string>
     <string name="description_documentation_source_preference_more">Для поддержки темной темы на страницах документов должны быть выполнены следующие условия:\n1. В AutoJs6 включен ночной режим\n2. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P] и ниже: версия >= 105</string>
+    <string name="description_editor_breakpoint_markers_enabled_preference">Показывает или скрывает маркеры точек останова в поле редактора. Данные точек останова и действия меню отладки остаются доступными.</string>
     <string name="description_editor_code_highlight_threshold">Определяет, включать ли подсветку синтаксиса в зависимости от размера файла.\nДля больших файлов отключение подсветки синтаксиса может в некоторой степени повысить эффективность загрузки файла.</string>
+    <string name="description_editor_engine_preference">Ace является движком редактора по умолчанию. JsDroidEditor остаётся доступным как резервный вариант и может быть выбран вручную.</string>
+    <string name="description_editor_fold_markers_enabled_preference">Показывает или скрывает маркеры сворачивания кода в поле редактора. В JsDroidEditor маркеры сворачивания не отображаются.</string>
+    <string name="description_editor_gutter_width_mode_preference">Динамическая ширина соответствует количеству цифр в видимых номерах строк. Фиксированная ширина резервирует стабильное минимальное пространство и увеличивается только при появлении более длинных видимых номеров.</string>
     <string name="description_editor_large_file_mode_threshold">Определяет, использовать ли режим больших файлов для загрузки файлов в зависимости от размера файла.\nРежим больших файлов может в некоторой степени повысить эффективность и стабильность загрузки, но функции \"Отменить\" и \"Повторить\" будут отключены в этом режиме.</string>
     <string name="description_editor_log_button_behavior_preference">Управляет тем, как кнопка \"Логи\" в меню редактора кода открывает журналы.\n\nНижняя панель логов: Открывает нижнюю панель логов. Перейти на полноэкранную страницу логов можно, нажав кнопку \"Развернуть\" или перетащив ручку вверх почти до верхнего края.\nПолноэкранная страница логов: Сразу открывает полноэкранную страницу логов.</string>
+    <string name="description_editor_theme_mode_preference">Выберите, будет ли редактор запоминать отдельные темы для светлого и тёмного режимов AutoJs6 или использовать одну тему в обоих режимах.</string>
+    <string name="description_editor_word_wrap_indent_style_preference">Продолжающий отступ выравнивает перенесённые визуальные строки по исходному отступу. Перенос без отступа начинает визуальные строки у края области просмотра.</string>
     <string name="description_extending_js_build_in_objects">Расширение встроенных объектов JavaScript может повысить гибкость кода и обеспечить более богатую функциональность, но может привести к конфликтам и даже поломкам.\nВсе сценарии имеют встроенные расширения, включенные по умолчанию, когда опция включена.\nВстроенные расширения часто небезопасны, и их не рекомендуется использовать, пока принципы и риски встроенных расширений не будут четко поняты.\nКогда опция выключена, встроенные расширения все еще можно включить через глобальный объект plugins, как описано в документации проекта.</string>
     <string name="description_file_extensions_preference">Используется для настройки отображения расширений файлов в файловом менеджере AutoJs6.</string>
-    <string name="description_floating_button">Плавающая кнопка показывает перетаскиваемую точку быстрого доступа у края экрана и может использоваться для [ запуска или остановки скриптов / анализа макета / просмотра последнего имени пакета или имени Activity / отображения положения указателя ].\n\nNote: для этой функции обычно требуется разрешение \"показ поверх других приложений\".</string>
+    <string name="description_floating_button">Плавающая кнопка показывает перетаскиваемую точку быстрого доступа у края экрана и может использоваться для [ запуска или остановки скриптов / анализа макета / просмотра последнего имени пакета или имени Activity / отображения положения указателя ].\n\nПримечание: для этой функции обычно требуется разрешение \"показ поверх других приложений\".</string>
     <string name="description_foreground_service">Служба на переднем плане используется для более стабильного удержания AutoJs6 в работе в фоне и подходит для сценариев [ длительное выполнение скриптов / поддержание соединения / непрерывное прослушивание ].\n\nПосле включения система покажет \"уведомление службы на переднем плане\", чтобы сообщить пользователю, что AutoJs6 продолжает работать. Обычно это уведомление остаётся видимым до остановки службы.\n\nУстановка уведомления в режим \"Silent\" или \"Minimize\" лишь снижает заметность и, как правило, не влияет на работу службы на переднем плане.\n\nЕсли отключить канал уведомлений или запретить AutoJs6 отправлять уведомления, это может повлиять на нормальный запуск и стабильность службы на переднем плане.</string>
+    <string name="description_github_token_preference">Используется только для запросов к GitHub API, чтобы реже достигать ограничения частоты. Токен хранится локально и скрыт в этом интерфейсе.</string>
     <string name="description_hidden_files_preference">Используется для установки того, показывать или нет скрытые файлы и папки (обычно начинающиеся с \".\") в файловом проводнике AutoJs6.</string>
-    <string name="description_ignore_battery_optimizations">Игнорирование оптимизации батареи может снизить фоновые ограничения системы для AutoJs6, что помогает запланированным задачам или длительным скриптам работать относительно стабильнее в режиме ожидания.\n\nNote: системы разных производителей могут применять дополнительные политики энергосбережения, например ограничения автозапуска или заморозку в фоне.</string>
+    <string name="description_ignore_battery_optimizations">Игнорирование оптимизации батареи может снизить фоновые ограничения системы для AutoJs6, что помогает запланированным задачам или длительным скриптам работать относительно стабильнее в режиме ожидания.\n\nПримечание: системы разных производителей могут применять дополнительные политики энергосбережения, например ограничения автозапуска или заморозку в фоне.</string>
     <string name="description_keep_screen_on_when_in_foreground">Позволяет управлять тем, следует ли удерживать экран включённым, когда AutoJs6 находится на переднем плане.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">Предпочтение для сохранения экрана устройства включенным и ярким, когда AutoJs6 находится на переднем плане.\nЧтобы это происходило только на главной странице среди всех страниц приложения AutoJs6, выберите опцию \"Только главная страница\".</string>
     <string name="description_launcher_icon_preference">Значок запуска поддерживает режимы отображения адаптивного значка или наследуемого значка с прозрачным фоном. Фактический вид может различаться на разных версиях Android. После переключения режима отображения может пройти несколько секунд, прежде чем изменения вступят в силу.</string>
     <string name="description_launcher_shortcuts">Ярлыки позволяют выполнять определенные действия в AutoJs6. Пользователи могут отображать эти ярлыки в поддерживаемой программе запуска и быстро запускать некоторые задачи или действия, например, читать документацию по приложению AutoJs6, запускать страницу настроек AutoJs6 и т.д.</string>
     <string name="description_manage_ignored_updates_preference">Нажмите для просмотра или управления элементами списка.\nДлинное нажатие для удаления элемента списка.</string>
-    <string name="description_night_mode">Позволяет управлять и отражать стратегию ночного режима AutoJs6.\n\nNote: переключатель ночного режима и переключатель автоматического ночного режима связаны и взаимно влияют друг на друга.</string>
+    <string name="description_night_mode">Позволяет управлять и отражать стратегию ночного режима AutoJs6.\n\nПримечание: переключатель ночного режима и переключатель автоматического ночного режима связаны и взаимно влияют друг на друга.</string>
     <string name="description_night_mode_preference">Ночной режим (также известный как темная тема) применяется как к системному пользовательскому интерфейсу Android, так и к приложениям, запущенным на устройстве, что улучшает видимость для пользователей со слабым зрением и тех, кто чувствителен к яркому свету, а также облегчает любому человеку использование устройства в условиях недостаточной освещенности.\n\nСистема слежения: AutoJs6 имеет настройки ночного режима, такие же, как и система Android\nВсегда включен: AutoJs6 держит Ночной режим включенным (независимо от настроек системы Android)\nВсегда выключен: AutoJs6 отключает ночной режим (независимо от настроек системы Android)\n\nПримечание: Опция \"Следовать за системой\" доступна только для Android API Level 28 (Android 9) [P] и выше.</string>
     <string name="description_night_mode_preference_more">Чтобы включить Ночной режим в системе Android:\n- Android API Level 29 (Android 10) [Q] и выше: Настройки -> Дисплей -> Тема.\n- Android API Уровень 28 (Android 9) [P]: Параметры разработчика -> Ночной режим.\n\nДля применения ночного режима (темной темы) к веб-контенту с помощью компонента WebView (например, страницы документации AutoJs6) должны быть выполнены следующие условия:\n1. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P]: версия >= 105\n2. Веб-содержимое в компоненте WebView адаптировано к теме Dark (с помощью CSS или ресурсов Android XML и т.д.).</string>
+    <string name="description_nodejs_doctor_report_preference">Экспортирует сведения о бэкенде, версии Node, ABI, флагах функций, хешах нативных библиотек, профиле возможностей, последней ошибке и состоянии шаблона упаковки. Содержимое пользовательских скриптов и конфиденциальные значения среды не включаются.</string>
     <string name="description_notification_access">Разрешение \"доступ к уведомлениям\" (или \"разрешение на чтение уведомлений\") позволяет AutoJs6 читать содержимое системных уведомлений, чтобы скрипты могли отслеживать уведомления или получать их текст и т. п.</string>
     <string name="description_pointer_location">\"Положение указателя\" - это отладочная функция в параметрах разработчика Android.\nПосле включения система будет отображать на экране сведения о точке(ах) касания, такие как [координаты/траектория движения/количество/размер/скорость движения/давление], что упрощает [написание/отладку/проверку] соответствующих скриптов.</string>
-    <string name="description_post_notifications">Разрешение \"отправка уведомлений\" позволяет AutoJs6 публиковать уведомления в системе, чтобы скрипты могли создавать и управлять пользовательскими уведомлениями в шторке уведомлений.\n\nNote: на устройствах Android 13+ без этого разрешения некоторые уведомления могут не отображаться, а также это может повлиять на запуск и стабильность служб на переднем плане.</string>
+    <string name="description_post_notifications">Разрешение \"отправка уведомлений\" позволяет AutoJs6 публиковать уведомления в системе, чтобы скрипты могли создавать и управлять пользовательскими уведомлениями в шторке уведомлений.\n\nПримечание: на устройствах Android 13+ без этого разрешения некоторые уведомления могут не отображаться, а также это может повлиять на запуск и стабильность служб на переднем плане.</string>
     <string name="description_project_media_access">При наличии доступа к медиафайлам проекта предупреждение о безопасности при записи экрана не выдается.</string>
     <string name="description_release_history_preference">Просмотреть историю выпусков AutoJs6 на GitHub и статистику по основным категориям.</string>
     <string name="description_restart_strategy">Стратегия перезагрузки влияет только на кнопку перезапуска в выдвижном меню главной страницы.\n\nБыстрая перезагрузка: быстро перезапускает приложение. Если перезапуск не удался или возникли непредвиденные ситуации, попробуйте переключиться на \"Запланированную перезагрузку\".\nЗапланированная перезагрузка: заранее настраивает краткосрочную задачу. После остановки приложение будет запущено по расписанию для выполнения перезапуска.</string>
-    <string name="description_rhino_java_primitive_wrap">Переключатель включён (по умолчанию): значения, возвращаемые методами Java типов Number/Boolean/Character, оборачиваются в объекты Java и доступны в скрипте (String исключается). typeof = \"object\", species = \"JavaObject\"; доступны методы Java, что помогает сохранять точные типовые характеристики Java и корректную резолюцию перегрузок.\n\nПереключатель выключен: перечисленные типы больше не оборачиваются и передаются напрямую как примитивы JavaScript (number/boolean/строка из одного символа). typeof соответствует соответствующему типу JavaScript, что ближе к семантике/экосистеме JavaScript. При необходимости можно явно создать Java‑обёртку через new, например new java.lang.Boolean(true).\n\nСм.: http://issues.autojs6.com/435</string>
+    <string name="description_rhino_java_primitive_wrap">Переключатель включён (по умолчанию): значения, возвращаемые методами Java типов Number/Boolean/Character, оборачиваются в объекты Java и доступны в скрипте (String исключается). typeof = \"object\", species = \"JavaObject\"; доступны методы Java, что помогает сохранять точные типовые характеристики Java и корректную резолюцию перегрузок.\n\nПереключатель выключен: перечисленные типы больше не оборачиваются и передаются напрямую как примитивы JavaScript (number/boolean/строка из одного символа). typeof соответствует соответствующему типу JavaScript, что ближе к семантике/экосистеме JavaScript. При необходимости можно явно создать Java-обёртку через new, например new java.lang.Boolean(true).\n\nСм.: http://issues.autojs6.com/435</string>
     <string name="description_root_mode_preference">Если у вас есть экзотический root или аномальное состояние для root-доступа, вы можете принудительно установить root на root или non-root.</string>
     <string name="description_root_record_out_file_type_preference">Бинарный тип: не редактируемый, с расширением файла \"auto\"\nТип JavaScript: может быть отредактирован или скопирован напрямую, с расширением файла \"js\".</string>
     <string name="description_screen_capture_request_delay">При запросе разрешения на захват экрана отображаемое окно запроса может иметь анимацию затухания при исчезновении. Если сразу вызвать `images.captureScreen`, полученный снимок может содержать содержимое этого окна и быть частично перекрыт.\n\nЗначение этой опции добавляет задержку (в миллисекундах) перед выполнением снимка экрана сразу после получения разрешения, что позволяет избежать описанной выше проблемы перекрытия.\n\nЭта опция применяется только к первому снимку после получения разрешения; последующие снимки не будут зависеть от этого значения.</string>
@@ -185,14 +203,23 @@
     <string name="editable_file_info_file_size_label">Размер</string>
     <string name="editable_file_info_line_break_label">Перенос</string>
     <string name="editable_file_info_line_count_label">Строки</string>
+    <string name="entry_ace_editor_font_system_monospace">Системный моноширинный шрифт Android</string>
     <string name="entry_app_language_auto">Следовать за системой</string>
     <string name="entry_documentation_source_local">Локальные документы</string>
     <string name="entry_documentation_source_online">Онлайн-документы</string>
+    <string name="entry_editor_engine_ace">Ace</string>
+    <string name="entry_editor_engine_native">JsDroidEditor</string>
+    <string name="entry_editor_gutter_width_mode_dynamic">Динамическая</string>
+    <string name="entry_editor_gutter_width_mode_fixed">Фиксированная</string>
     <string name="entry_editor_log_button_behavior_bottom_sheet">Нижняя панель логов</string>
     <string name="entry_editor_log_button_behavior_fullscreen_page">Полноэкранная страница логов</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">размер текста</string>
     <string name="entry_editor_pinch_to_zoom_disable">Отключить</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">Масштабировать вид</string>
+    <string name="entry_editor_theme_mode_separate">Отдельные светлая и тёмная темы</string>
+    <string name="entry_editor_theme_mode_unified">Одна тема для обоих режимов</string>
+    <string name="entry_editor_word_wrap_indent_style_classic">Перенос без отступа</string>
+    <string name="entry_editor_word_wrap_indent_style_continuation">Продолжающий отступ</string>
     <string name="entry_file_extensions_not_show">Скрыть все расширения файлов</string>
     <string name="entry_file_extensions_show_all">Показать все расширения файлов</string>
     <string name="entry_file_extensions_show_all_but_executable">Показать расширения файлов (исключая *.js / *.auto)</string>
@@ -215,6 +242,7 @@
     <string name="entry_root_record_out_file_type_js">Тип JavaScript (редактируемый)</string>
     <string name="error_a_runtime_has_been_set">Установлено время выполнения</string>
     <string name="error_abandoned_method">Метод %s был отменен и не должен использоваться</string>
+    <string name="error_ace_editor_unavailable">Редактор Ace недоступен; JsDroidEditor остаётся активным</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">Операция \"%1$s\" не может быть завершена, так как параметр содержит отрицательные значения координат (%2$d, %3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">Требуется активность, которую можно предоставить, выполняя в режиме выполнения \"ui\"</string>
     <string name="error_an_error_occurred">Произошла ошибка</string>
@@ -271,8 +299,6 @@
     <string name="error_failed_to_launch_manager">Не удалось запустить менеджер</string>
     <string name="error_failed_to_launch_system_settings">Не удалось открыть системные настройки</string>
     <string name="error_failed_to_load_plugins_with_reason">Не удалось загрузить плагины.\nПричина: %1$s.</string>
-    <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>
-    <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_failed_to_move">Не удалось переместить</string>
     <string name="error_failed_to_rename">Не удалось переименовать</string>
     <string name="error_failed_to_render_content">Не удалось отобразить содержимое</string>
@@ -345,6 +371,8 @@
     <string name="error_pattern_syntax">Неверный синтаксис шаблона</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">APK плагина не содержит требуемые ресурсы для variant=\"%1$s\": %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">APK плагина не содержит требуемые native-библиотеки: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">Не удалось получить индекс плагинов: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">Не удалось получить индекс плагинов из источника %1$s: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">Плагин \"%1$s\" не авторизован в Центре плагинов</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">Плагин \"%1$s\" не включен в Центре плагинов</string>
     <string name="error_plugin_not_found_in_installed_apps">Плагин \"%1$s\" не найден среди установленных приложений</string>
@@ -403,6 +431,7 @@
     <string name="format_file_downloaded" formatted="true">Файл загружен на %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Перейти к] Настройки -> Службы доступности -> AutoJs6 [Включить]]]></string>
     <string name="hint_find_with_regex">Поддерживается регекс. Используйте \"$1\" - \"$9\" для захваченных групп.</string>
+    <string name="hint_github_token">Вставьте персональный токен доступа GitHub</string>
     <string name="hint_long_click_run_to_debug">Длительное нажатие кнопки \"Выполнить\" для отладки</string>
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
@@ -474,16 +503,35 @@
     <string name="screen_capturer_foreground_notification_text">Это уведомление отображается для захвата экрана</string>
     <string name="screen_capturer_foreground_notification_title">Служба захвата экрана на переднем плане</string>
     <string name="summary_about_app_tips">Лучший пользовательский опыт</string>
+    <string name="summary_ace_font_ligatures_enabled">Отображать поддерживаемые комбинации операторов как лигатуры шрифта</string>
+    <string name="summary_ace_font_styles_enabled">Разрешить полужирное, курсивное и другое начертание шрифта кода</string>
+    <string name="summary_ace_indent_guides_enabled">Показывать вертикальные направляющие отступов кода</string>
+    <string name="summary_ace_line_numbers_enabled">Показывать номера строк в поле редактора</string>
+    <string name="summary_ace_lsp_enabled">Включить предварительную интеллектуальную помощь редактора на основе LSP</string>
+    <string name="summary_ace_lsp_file_types">Выбрать типы файлов, для которых доступны функции LSP</string>
+    <string name="summary_ace_print_margin_enabled">Показывать справа линию ограничения ширины строки</string>
+    <string name="summary_ace_word_wrap_enabled">Переносить длинные строки в пределах области редактора</string>
     <string name="summary_all_files_access">Позволяет AutoJs6 получать доступ ко всем файлам, включая файлы на внешнем хранилище</string>
     <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
+    <string name="summary_code_editor_settings">Открыть полную страницу настроек редактора кода</string>
     <string name="summary_display_over_other_apps">Позволяет AutoJs6 отображать контент поверх других приложений</string>
     <string name="summary_display_over_other_apps_inrt">Разрешить приложению отображать контент поверх других приложений</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Автоматически открывать нижнюю панель логов после запуска скрипта кнопкой Запуск в редакторе</string>
+    <string name="summary_editor_breakpoint_markers_enabled">Показывать маркеры точек останова в поле редактора</string>
+    <string name="summary_editor_fold_markers_enabled">Показывать маркеры сворачивания кода в поле редактора</string>
+    <string name="summary_editor_gutter_width_mode">Выбрать динамическую ширину по видимым номерам строк или стабильную ширину в течение сеанса</string>
+    <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">Изменять размер текста редактора жестом масштабирования</string>
+    <string name="summary_editor_setting_unavailable_for_current_engine">Недоступно для текущего движка редактора</string>
+    <string name="summary_editor_shortcut_input_bar">Настроить символы быстрого ввода, общие для обоих редакторов</string>
+    <string name="summary_editor_word_wrap_indent_style">Выбрать отступ для визуального продолжения перенесённых строк</string>
     <string name="summary_enable_a11y_service_with_root_access">Автоматическое включение службы доступности с корневым доступом при необходимости</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Автоматическое включение службы доступности с безопасными настройками при необходимости</string>
     <string name="summary_extending_js_build_in_objects">Повысить гибкость кода и обеспечить более богатую функциональность за счет расширения встроенных объектов JavaScript</string>
     <string name="summary_foreground_service_inrt">Служба на переднем плане позволяет более стабильно поддерживать работу приложения и скриптов в фоновом режиме</string>
+    <string name="summary_github_token_not_set">Не задан. Запросы к GitHub API выполняются анонимно.</string>
+    <string name="summary_github_token_set">Задан. Скрыт для конфиденциальности; оканчивается на %1$s.</string>
     <string name="summary_guard_mode">Предотвращение действий автоматизации из скриптов, когда AutoJs6 находится на переднем плане</string>
+    <string name="summary_nodejs_doctor_report">Создать диагностический отчёт среды Node со скрытыми конфиденциальными данными для сообщения об ошибке</string>
     <string name="summary_not_showing_main_activity">Выполнять скрипт напрямую, не показывая основную активность</string>
     <string name="summary_plugin_auto_check_updates">Автоматически проверять обновления плагинов каждые 1 час (потянуть для обновления - проверить немедленно)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">Глобальная опция \"Автоматически проверять обновления плагинов\" отключена, этот параметр недоступен</string>
@@ -527,6 +575,41 @@
     <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">Обновить</string>
     <string name="text_access_has_been_granted">Доступ был предоставлен</string>
+    <string name="text_ace_action_clear_confirm">Очистить всю историю действий редактора?</string>
+    <string name="text_ace_action_delete_confirm" formatted="true">Удалить \"%1$s\" из истории действий редактора?</string>
+    <string name="text_ace_action_favorites">Избранные действия</string>
+    <string name="text_ace_action_history_empty">История действий редактора пуста</string>
+    <string name="text_ace_action_pin">Закрепить</string>
+    <string name="text_ace_action_pinned">Закреплено</string>
+    <string name="text_ace_action_unpin">Открепить</string>
+    <string name="text_ace_diagnostics_copied">Диагностические данные Ace скопированы в буфер обмена</string>
+    <string name="text_ace_editor_debug">Отладка редактора Ace</string>
+    <string name="text_ace_editor_debug_description">Открыть изолированную тестовую страницу редактора Ace WebView</string>
+    <string name="text_ace_editor_debug_status">%1$s | строк: %2$d | курсор: %3$d:%4$d | точек останова: %5$d | изменён: %6$s</string>
+    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">Загрузка редактора Ace...</string>
+    <string name="text_ace_editor_debug_text_length">Длина текста Ace: %1$d</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">Сбой редактора Ace (%1$s); выполнено переключение на JsDroidEditor. Подробные сведения можно получить, скопировав диагностические данные Ace через меню дополнительных действий</string>
+    <string name="text_ace_editor_font">Шрифт редактора</string>
+    <string name="text_ace_editor_font_changed" formatted="true">Шрифт редактора изменён на %s</string>
+    <string name="text_ace_font_ligatures_enabled">Лигатуры шрифта</string>
+    <string name="text_ace_font_styles_enabled">Начертания шрифта</string>
+    <string name="text_ace_get_text">Получить текст</string>
+    <string name="text_ace_ime_stress">Стресс-тест IME</string>
+    <string name="text_ace_ime_stress_done">Стресс-тест IME завершён. Количество циклов: %1$d</string>
+    <string name="text_ace_ime_stress_running">Стресс-тест IME: %1$d/%2$d</string>
+    <string name="text_ace_indent_guides_enabled">Направляющие отступов</string>
+    <string name="text_ace_insert">Вставить</string>
+    <string name="text_ace_large_file_uses_native_editor">Текущая политика резервирования переключила редактор Ace на JsDroidEditor</string>
+    <string name="text_ace_line_numbers_enabled">Номера строк</string>
+    <string name="text_ace_lsp_enabled">Интеллектуальное автодополнение LSP (предварительная версия)</string>
+    <string name="text_ace_lsp_file_types">Типы файлов LSP</string>
+    <string name="text_ace_no_last_action">Последнее действие редактора отсутствует</string>
+    <string name="text_ace_print_margin_enabled">Граница печати</string>
+    <string name="text_ace_read_only_mode">Режим только для чтения</string>
+    <string name="text_ace_read_only_mode_disabled">Режим только для чтения отключён</string>
+    <string name="text_ace_read_only_mode_enabled">Режим только для чтения включён</string>
+    <string name="text_ace_set_sample">Установить пример</string>
+    <string name="text_ace_word_wrap_enabled">Перенос строк</string>
     <string name="text_act_by_click">Щелчок (click)</string>
     <string name="text_act_by_long_click">Длинный щелчок (longClick)</string>
     <string name="text_act_by_scroll_backward">Прокрутка назад (scrollBackward)</string>
@@ -546,6 +629,7 @@
     <string name="text_all_files_access_is_needed">\"Доступ ко всем файлам\" необходим для доступа к файлам сценариев на телефоне</string>
     <string name="text_all_history_entries">Все записи истории</string>
     <string name="text_all_items_cleared">Все элементы удалены</string>
+    <string name="text_all_settings">Все настройки</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">Рекомендуется выдать разрешение \"Разрешить настройку будильников и напоминаний\", чтобы обеспечить максимально точный запуск задач даже при выключенном экране или в режиме ожидания</string>
     <string name="text_already_copied_to_clip">Скопировано в буфер обмена</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">Уже скопировано в буфер обмена (только последние %d элементов)</string>
@@ -556,6 +640,9 @@
     <string name="text_android_release_version">Версия релиза Android</string>
     <string name="text_android_sdk_version">Версия SDK для Android</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder недоступен</string>
+    <string name="text_apk_template_plugin_risk_prompt">Установленный плагин шаблона APK Builder не полностью совместим с текущей версией AutoJs6. Продолжение может привести к тому, что упакованное приложение не запустится, будет использовать несовместимые API или не будет содержать некоторые модули.</string>
+    <string name="text_apk_template_unavailable">Шаблон APK Builder недоступен</string>
+    <string name="text_apk_template_unavailable_prompt">Подходящий шаблон APK Builder не найден. Эта сборка AutoJs6 не содержит встроенный template.apk, и доступный для чтения плагин шаблона APK Builder отсутствует. Установите и включите совместимый плагин шаблона, затем повторите попытку.</string>
     <string name="text_app_and_device_info">Информация о приложении и устройстве</string>
     <string name="text_app_crashed">AutoJs6 поврежден</string>
     <string name="text_app_language">Язык</string>
@@ -594,6 +681,7 @@
     <string name="text_app_version_name">Название версии приложения</string>
     <string name="text_appearance">Внешний вид</string>
     <string name="text_applying_binary_resources">Применение бинарных ресурсов</string>
+    <string name="text_archiving_project_files">Архивация файлов проекта</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">Необходимо заполнить хотя бы одно поле из: [Полное имя, Название организации, Организационная единица, Код страны, Штат или провинция, Город или населенный пункт, Улица]</string>
     <string name="text_attribute">Атрибут</string>
     <string name="text_authorize_plugin">Авторизовать плагин</string>
@@ -682,6 +770,7 @@
     <string name="text_code">Код</string>
     <string name="text_code_beautify">Улучшить код</string>
     <string name="text_code_editor">Редактор кода</string>
+    <string name="text_code_editor_settings">Настройки редактора кода</string>
     <string name="text_collapse_all">Свернуть всё</string>
     <string name="text_color_library">Цветовая библиотека</string>
     <string name="text_color_palette">Цветовая палитра</string>
@@ -692,6 +781,7 @@
     <string name="text_config">Конфигурация</string>
     <string name="text_configuring_manifest">Настройка manifest</string>
     <string name="text_configuring_package_name">Настройка имени пакета</string>
+    <string name="text_confirm_overwrite_selected_items">Некоторые целевые элементы уже существуют. Перезаписать их?</string>
     <string name="text_confirm_to_clear_all_items">Вы уверены, что хотите удалить все элементы?</string>
     <string name="text_confirm_to_clear_the_history">Очистить историю?</string>
     <string name="text_confirm_to_clear_the_history_of">Следующая история будет очищена\n\n[ %1$s ]\n\nОчистить?</string>
@@ -702,14 +792,16 @@
     <string name="text_connect_to_pc">Подключитесь к ПК</string>
     <string name="text_connected">Подключено</string>
     <string name="text_connected_count_with_colon">Подключено: %1$d</string>
-    <string name="text_connecting">Подключение...</string>
+    <string name="text_connecting" tools:ignore="TypographyEllipsis">Подключение...</string>
     <string name="text_connecting_to_host" tools:ignore="TypographyEllipsis">Подключение к \"%1$s\"...</string>
     <string name="text_connection_cannot_be_established">Соединение не может быть установлено</string>
     <string name="text_connection_failed">Не удалось подключиться</string>
     <string name="text_console">Консоль</string>
     <string name="text_content">Содержимое</string>
     <string name="text_continue">Продолжить</string>
+    <string name="text_continue_with_plugin_template">Продолжить с шаблоном плагина</string>
     <string name="text_copy">Скопировать</string>
+    <string name="text_copy_ace_diagnostics">Копировать диагностические данные Ace</string>
     <string name="text_copy_all">Скопировать все</string>
     <string name="text_copy_all_files_to_new_directory">Скопировать все файлы в новый каталог</string>
     <string name="text_copy_command">Копировать cmd</string>
@@ -730,7 +822,14 @@
     <string name="text_copying_library">Копирование библиотеки</string>
     <string name="text_copying_native_libraries">Копирование нативных библиотек</string>
     <string name="text_copying_project_directory">Копирование каталога проекта</string>
+    <string name="text_copying_remote_build_inputs">Копирование входных данных удалённой сборки</string>
     <string name="text_copying_script_file">Копирование файла скрипта</string>
+    <string name="text_countdown_duration_must_be_positive">Продолжительность обратного отсчёта должна быть больше 0</string>
+    <string name="text_countdown_duration_should_be_valid">Недопустимая продолжительность обратного отсчёта</string>
+    <string name="text_countdown_hours">Часы</string>
+    <string name="text_countdown_minutes">Минуты</string>
+    <string name="text_countdown_minutes_should_be_less_than_60">Количество минут должно быть от 0 до 59</string>
+    <string name="text_countdown_task">Задача с обратным отсчётом</string>
     <string name="text_country_code">Код страны (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Код страны должен состоять из двух заглавных букв</string>
     <string name="text_creating_unsigned_apk">Создание неподписанного APK</string>
@@ -760,6 +859,7 @@
     <string name="text_delete_all">Удалить все</string>
     <string name="text_delete_file">Удалить файл</string>
     <string name="text_delete_folder">Удалить папку</string>
+    <string name="text_delete_items">Удалить элементы</string>
     <string name="text_delete_line">Удалить строку</string>
     <string name="text_delete_revision_confirm">Удалить эту ревизию навсегда?</string>
     <string name="text_deleting">Удаление</string>
@@ -804,17 +904,31 @@
     <string name="text_edit">Редактировать</string>
     <string name="text_edit_prepare_script">Редактирование сценария перед выполнением</string>
     <string name="text_edit_script">Редактирование скрипта</string>
+    <string name="text_editor_assistance">Помощь</string>
     <string name="text_editor_auto_show_log_bottom_sheet_on_run">Автоматически показывать нижнюю панель логов после запуска</string>
+    <string name="text_editor_breakpoint_markers_enabled">Маркеры точек останова</string>
     <string name="text_editor_code_highlight_always_disabled">Всегда отключать подсветку кода</string>
     <string name="text_editor_code_highlight_always_enabled">Всегда включать подсветку кода</string>
     <string name="text_editor_code_highlight_threshold">Порог подсветки кода</string>
     <string name="text_editor_code_highlight_threshold_enabled_for_smaller_files">Включать подсветку кода только для файлов не больше %1$s</string>
+    <string name="text_editor_engine">Движок редактора</string>
+    <string name="text_editor_engine_switched" formatted="true">Движок редактора переключён на %s</string>
+    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Движок редактора переключён на %s. История отмены и повтора не сохраняется между движками редактора</string>
+    <string name="text_editor_fold_markers_enabled">Маркеры сворачивания кода</string>
+    <string name="text_editor_gestures">Жесты</string>
+    <string name="text_editor_gutter_markers">Маркеры поля</string>
+    <string name="text_editor_gutter_width_mode">Ширина поля</string>
     <string name="text_editor_large_file_mode_always_disabled">Всегда отключать режим больших файлов</string>
     <string name="text_editor_large_file_mode_always_enabled">Всегда включать режим больших файлов</string>
     <string name="text_editor_large_file_mode_threshold">Порог режима больших файлов</string>
     <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">Включать режим больших файлов только для файлов больше %1$s</string>
     <string name="text_editor_log_button_behavior">Поведение кнопки логов редактора</string>
+    <string name="text_editor_performance">Производительность</string>
+    <string name="text_editor_pinch_to_zoom_change_text_size_enabled">Масштабирование изменяет размер текста</string>
+    <string name="text_editor_shortcut_input_bar">Настройки быстрых символов</string>
     <string name="text_editor_theme">Тема редактора</string>
+    <string name="text_editor_theme_mode">Режим темы редактора</string>
+    <string name="text_editor_word_wrap_indent_style">Отступ переноса</string>
     <string name="text_email">Электронная почта</string>
     <string name="text_email_cannot_be_empty">Электронная почта не может быть пустой</string>
     <string name="text_email_format_error">Неверный формат электронной почты</string>
@@ -875,6 +989,7 @@
     <string name="text_failed_to_send_log_entries">Не удалось отправить записи журнала</string>
     <string name="text_failed_to_update">Не удалось обновить</string>
     <string name="text_failed_to_write_file">Не удалось записать файл</string>
+    <string name="text_falling_back_to_local_build">Переход к локальной сборке</string>
     <string name="text_file">Файл</string>
     <string name="text_file_colon_value">Файл: %1$s</string>
     <string name="text_file_details">Сведения о файле</string>
@@ -910,10 +1025,13 @@
     <string name="text_formatting_completed">Форматирование завершено</string>
     <string name="text_function">Функция</string>
     <string name="text_fx_keyboard">Fx клавиатура</string>
+    <string name="text_general">Общие</string>
     <string name="text_generate">Сгенерировать</string>
     <string name="text_generate_code">Сгенерировать код</string>
     <string name="text_generated_code">Сгенерированный код</string>
+    <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">Использован URL-адрес резервной копии</string>
+    <string name="text_github_token">Токен GitHub</string>
     <string name="text_global_settings">Глобальные настройки</string>
     <string name="text_go_to_settings">Перейдите в \"Настройки\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Предоставление привилегий AutoJs6 в приложении Shizuku</string>
@@ -972,6 +1090,7 @@
     <string name="text_jump_to_line">Перейти к строке</string>
     <string name="text_jump_to_line_end">Перейти к концу строки</string>
     <string name="text_jump_to_line_start">Перейти к началу строки</string>
+    <string name="text_jump_to_previous_cursor">Перейти к предыдущей позиции курсора</string>
     <string name="text_jump_to_start">Перейти к началу</string>
     <string name="text_keep_screen_on_when_in_foreground">Не выключать экран, когда он находится на переднем плане</string>
     <string name="text_key_alias">Псевдоним</string>
@@ -988,8 +1107,10 @@
     <string name="text_launch_config">Запуск конфигурации</string>
     <string name="text_launch_debugger">Запуск отладчика</string>
     <string name="text_launch_launcher_visible">Показывать значок приложения в лаунчере</string>
+    <string name="text_launch_log_shortcut_visible">Показывать Журнал в ярлыках запуска</string>
     <string name="text_launch_logs_visible">Показывать логи при запуске</string>
     <string name="text_launch_run_on_boot">Запускать скрипт при загрузке</string>
+    <string name="text_launch_settings_shortcut_visible">Показывать Настройки в ярлыках запуска</string>
     <string name="text_launch_slug">Текст слогана заставки</string>
     <string name="text_launch_splash_visible">Показывать заставку при запуске</string>
     <string name="text_launcher_icon_title">Значок запуска</string>
@@ -1020,6 +1141,7 @@
     <string name="text_min_version">Минимальная версия</string>
     <string name="text_min_version_of_vscode_vsc_ext">Минимальная версия расширения VSCode</string>
     <string name="text_mobile_qq_not_installed">\"Мобильный QQ\" не установлен</string>
+    <string name="text_monthly_task">Ежемесячная задача</string>
     <string name="text_more">Больше</string>
     <string name="text_more_details">Подробнее</string>
     <string name="text_mount">Монтировать</string>
@@ -1031,6 +1153,7 @@
     <string name="text_move_file_to_trash">Переместить файл в корзину</string>
     <string name="text_move_folder">Переместить папку</string>
     <string name="text_move_folder_to_trash">Переместить папку в корзину</string>
+    <string name="text_move_items_to_trash">Переместить элементы в корзину</string>
     <string name="text_move_to">Переместить в</string>
     <string name="text_move_to_trash_failed">Не удалось переместить в корзину</string>
     <string name="text_moved_to_trash">Перемещено в корзину</string>
@@ -1072,6 +1195,12 @@
     <string name="text_no_search_results_for_keyword">Ничего не найдено по запросу:\n\n%1$s</string>
     <string name="text_no_symbols_hint">Текущая конфигурация пуста.\nНажмите здесь, чтобы создать символ.</string>
     <string name="text_no_version_history">Нет истории версий</string>
+    <string name="text_nodejs">Node.js</string>
+    <string name="text_nodejs_doctor">Диагностика Node.js</string>
+    <string name="text_nodejs_doctor_export_json">Отчёт JSON</string>
+    <string name="text_nodejs_doctor_export_text">Текстовый отчёт</string>
+    <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Создание диагностического отчёта Node.js...</string>
+    <string name="text_nodejs_doctor_generation_failed">Не удалось создать диагностический отчёт Node.js</string>
     <string name="text_none">Нет</string>
     <string name="text_not_granted">Не предоставляется</string>
     <string name="text_not_installed">Не установлено</string>
@@ -1205,6 +1334,7 @@
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Пожалуйста, повторите попытку позже...</string>
     <string name="text_plugin_activated">Активирован</string>
     <string name="text_plugin_activation_recommended">Рекомендуется активация</string>
+    <string name="text_plugin_additional_variants">Другие варианты плагинов</string>
     <string name="text_plugin_authorization_denied">Авторизация отклонена</string>
     <string name="text_plugin_authorization_required">Требуется авторизация</string>
     <string name="text_plugin_authorized">Авторизован</string>
@@ -1223,7 +1353,6 @@
     <string name="text_plugin_jump_to_launch_page">Перейти на страницу запуска</string>
     <string name="text_plugin_library_official">Официальная библиотека плагинов</string>
     <string name="text_plugin_library_third_party">Сторонняя библиотека плагинов</string>
-    <string name="text_plugin_additional_variants">Другие варианты плагинов</string>
     <string name="text_plugin_mount_object_name">Имя объекта монтирования</string>
     <string name="text_plugin_mount_point">Точка монтирования</string>
     <string name="text_plugin_mount_point_global_display">global</string>
@@ -1248,6 +1377,7 @@
     <string name="text_preparing_assets_dir">Подготовка каталога assets</string>
     <string name="text_preparing_build_config">Подготовка конфигурации сборки</string>
     <string name="text_preparing_keystore">Подготовка keystore</string>
+    <string name="text_preparing_remote_build_inputs">Подготовка входных данных удалённой сборки</string>
     <string name="text_preparing_workspace">Подготовка рабочей области</string>
     <string name="text_preset_dialog_content">Содержимое предустановленного диалога</string>
     <string name="text_preset_dialog_title">Предустановленный заголовок диалога</string>
@@ -1267,6 +1397,8 @@
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_pruning">Обрезка</string>
+    <string name="text_pruning_native_libraries">Удаление ненужных нативных библиотек</string>
+    <string name="text_querying_plugin_info">Запрос сведений о плагине</string>
     <string name="text_quit">Выйти</string>
     <string name="text_re_signing_apk">Повторная подпись APK</string>
     <string name="text_reading_splash_resources">Чтение ресурсов заставки</string>
@@ -1292,6 +1424,13 @@
     <string name="text_remove_from_trash">Убрать из корзины</string>
     <string name="text_remove_from_trash_confirm">Удалить этот элемент из корзины навсегда?</string>
     <string name="text_rename">Переименовать</string>
+    <string name="text_repeat_count_must_be_positive">Количество повторений должно быть больше 0</string>
+    <string name="text_repeat_count_times">Количество повторений</string>
+    <string name="text_repeat_end">Завершение</string>
+    <string name="text_repeat_for_number_of_events">После заданного числа событий</string>
+    <string name="text_repeat_forever">Никогда</string>
+    <string name="text_repeat_until_date">До указанной даты</string>
+    <string name="text_repeat_until_date_before_now">Дата окончания не должна быть раньше сегодняшней</string>
     <string name="text_replace">Заменить</string>
     <string name="text_replace_all">Заменить все</string>
     <string name="text_replace_simplified">Замен</string>
@@ -1304,6 +1443,7 @@
     <string name="text_reset_succeed">Сброс выполнен успешно</string>
     <string name="text_reset_to_initial_content">Сброс первоначально</string>
     <string name="text_reset_to_initial_content_only_for_assets">Сброс выполняется только для образцов</string>
+    <string name="text_resolving_plugin_artifacts">Разбор артефактов плагина</string>
     <string name="text_resolving_plugin_native_libraries">Разбор нативных библиотек плагина</string>
     <string name="text_restart">Перезапустить</string>
     <string name="text_restart_strategy">Стратегия перезагрузки</string>
@@ -1367,6 +1507,7 @@
     <string name="text_select_file_to_upload">Выберите файл для загрузки</string>
     <string name="text_select_icon">Выбрать значок</string>
     <string name="text_select_image">Выбрать изображение</string>
+    <string name="text_selected_items" formatted="true">Выбрано: %1$d</string>
     <string name="text_selected_plugin">Выбранный плагин</string>
     <string name="text_send">Отправить</string>
     <string name="text_send_shortcut">Создать ярлык</string>
@@ -1376,6 +1517,7 @@
     <string name="text_set_a_name_for_the_new_configuration">Задайте имя для новой конфигурации</string>
     <string name="text_set_as_working_dir">Как рабочий каталог</string>
     <string name="text_set_breakpoint">Установить точку останова</string>
+    <string name="text_set_editor_setting_action" formatted="true">Установить %1$s</string>
     <string name="text_settings">Настройки</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">Несовпадение SHA-256.\n\nОжидалось: %1$s\nФактически: %2$s</string>
     <string name="text_shizuku_access">Разрешения Shizuku</string>
@@ -1453,6 +1595,17 @@
     <string name="text_text_size_current_value" formatted="true">Размер текста: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">Можно воспользоваться следующими решениями</string>
     <string name="text_theme_color">Цвет темы</string>
+    <string name="text_theme_preview_exit">Выйти</string>
+    <string name="text_theme_preview_filter_all">Все</string>
+    <string name="text_theme_preview_filter_dark">Тёмные</string>
+    <string name="text_theme_preview_filter_light">Светлые</string>
+    <string name="text_theme_preview_list">Список</string>
+    <string name="text_theme_preview_next">Следующая</string>
+    <string name="text_theme_preview_no_available_theme">Для текущего фильтра нет доступных тем</string>
+    <string name="text_theme_preview_previous">Предыдущая</string>
+    <string name="text_theme_preview_unavailable_for_filter">Недоступно для текущего фильтра</string>
+    <string name="text_theme_preview_use">Использовать</string>
+    <string name="text_theme_previewer">Предпросмотр тем</string>
     <string name="text_time">Время</string>
     <string name="text_timed_task">Задание по времени</string>
     <string name="text_timed_task_backend_title">Движок планирования таймерных задач</string>
@@ -1491,8 +1644,10 @@
     <string name="text_updates_snack_bar_act_later">Позже</string>
     <string name="text_updates_snack_bar_act_view">Просмотр</string>
     <string name="text_updating_project_config">Обновление конфигурации проекта</string>
+    <string name="text_usage_instructions">Использование</string>
     <string name="text_usage_stats_permission">Доступ к статистике использования</string>
     <string name="text_use_android_n_shortcut">Использовать ярлык Android 7.0</string>
+    <string name="text_use_builtin_template">Использовать встроенный шаблон</string>
     <string name="text_use_default_icon">Использовать значок по умолчанию</string>
     <string name="text_use_volume_control_record">Используйте клавишу уменьшения громкости для управления записью</string>
     <string name="text_use_volume_key_to_control_script_running">Используйте клавишу \"Громкость вверх\" для управления запуском скрипта</string>
@@ -1512,6 +1667,8 @@
     <string name="text_verify_failed">Ошибка проверки</string>
     <string name="text_verify_key_store">Проверить хранилище ключей</string>
     <string name="text_verify_success">Проверка успешна</string>
+    <string name="text_verifying_build_inputs">Проверка входных данных сборки</string>
+    <string name="text_verifying_project_archive">Проверка архива проекта</string>
     <string name="text_version">Версия</string>
     <string name="text_version_code">Код версии</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Код версии (Вычисление...)</string>
@@ -1538,6 +1695,7 @@
     <string name="text_writing_resources_arsc">Запись resources.arsc</string>
     <string name="text_writing_signed_apk">Запись подписанного APK</string>
     <string name="text_xiaomi_background_popup_permission">Всплывающие окна в фоне</string>
+    <string name="text_yearly_task">Ежегодная задача</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
 </resources>

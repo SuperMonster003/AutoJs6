@@ -72,37 +72,55 @@
     <string name="default_value_working_directory">/스크립트</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 은 오픈 소스이며 \"hyb1996/Auto.js\" 에서 복제된 Android 용 JavaScript 자동화 도구입니다.\n\n도움이나 피드백을 요청하려면 GitHub 문제로 이동하거나 Tencent QQ 그룹 690946137 에 가입하세요.</string>
     <string name="description_about_app_tips_preference">1. \"앱 및 개발자 정보\" 페이지에서 앱 아이콘을 길게 눌러 AutoJs6 개발자 옵션 페이지로 이동합니다.</string>
-    <string name="description_accessibility_service">접근성 서비스는 AutoJs6 가 자동화를 구현하는 핵심 기능입니다. 화면의 UI 컨트롤 정보를 읽고 [ 탭 / 스와이프 / 입력 ] 등의 상호작용을 시뮬레이션하는 데 사용됩니다.\n\n 자동화 관련 대부분의 기능과 레이아웃 분석 도구 등은 접근성 서비스를 활성화해야 정상적으로 동작합니다.</string>
+    <string name="description_accessibility_service">접근성 서비스는 AutoJs6 가 자동화를 구현하는 핵심 기능입니다. 화면의 UI 컨트롤 정보를 읽고 [ 탭 / 스와이프 / 입력 ] 등의 상호작용을 시뮬레이션하는 데 사용됩니다.\n\n자동화 관련 대부분의 기능과 레이아웃 분석 도구 등은 접근성 서비스를 활성화해야 정상적으로 동작합니다.</string>
+    <string name="description_ace_action_favorites">작업 즐겨찾기는 실행, 저장, 서식 지정, 메뉴 작업, 길게 누르기 작업, 편집기 설정 작업처럼 자주 사용하는 편집기 작업을 기록합니다. 별표 버튼을 탭하면 목록이 열리고, 항목을 탭하면 작업을 반복합니다. 별표 버튼을 길게 누르면 가장 최근 작업을 반복하고, 항목을 끌면 순서를 바꾸며, 오른쪽으로 밀면 고정하거나 고정을 해제하고, 왼쪽으로 밀면 삭제합니다.</string>
+    <string name="description_ace_editor_font_preference">Ace 편집기 글꼴을 선택합니다. 목록에는 Android 시스템 고정폭 글꼴과 작성자/개발자 정보가 포함된 오픈 소스 코드 글꼴이 표시됩니다. 실제 시스템 고정폭 글꼴은 Android와 기기 공급업체가 결정합니다.</string>
+    <string name="description_ace_font_ligatures_enabled_preference">지원하는 글꼴에서 OpenType 글꼴 합자를 사용합니다. ===, !==, =&gt;, &lt;= 같은 연산자가 결합된 글리프로 표시될 수 있습니다. 코드 표시 방식만 변경됩니다.</string>
+    <string name="description_ace_font_styles_enabled_preference">Ace 테마와 구문 강조에서 굵게, 기울임꼴 및 다른 글꼴 스타일을 사용할 수 있도록 합니다. 사용하지 않으면 색상이나 내용을 변경하지 않고 코드 텍스트를 일반 스타일로 고정합니다.</string>
+    <string name="description_ace_indent_guides_enabled_preference">코드 영역에서 세로 들여쓰기 안내선을 표시하거나 숨깁니다. 코드 표시 방식만 변경됩니다.</string>
+    <string name="description_ace_line_numbers_enabled_preference">편집기 거터의 줄 번호를 표시하거나 숨깁니다. 코드 접기, 중단점 및 거터 레이아웃은 계속 사용할 수 있습니다.</string>
+    <string name="description_ace_lsp_enabled_preference">미리 보기 LSP 지원은 기본적으로 꺼져 있습니다. 사용하면 편집기가 로컬 TypeScript 언어 서비스를 통해 자동 완성, 마우스 오버 정보, 시그니처 도움말 및 진단을 제공하며, 정적 자동 완성을 대체 수단으로 유지합니다.</string>
+    <string name="description_ace_lsp_file_types_preference">LSP는 파일 이름이 선택한 접미사 중 하나로 끝날 때만 시작됩니다. \"기본값 사용\"을 선택하면 JavaScript, TypeScript, JSON, Auto.js 및 Node.js 접미사 모음으로 복원됩니다.</string>
+    <string name="description_ace_print_margin_enabled_preference">Ace 편집기의 인쇄 여백 안내선을 표시하거나 숨깁니다. 오른쪽 열 제한선이며 코드 표시 방식만 변경됩니다.</string>
+    <string name="description_ace_word_wrap_enabled_preference">긴 줄에 대한 편집기 줄 바꿈 모드를 사용합니다. 파일 내용은 변경되지 않습니다.</string>
     <string name="description_all_files_access" tools:ignore="TypographyEllipsis">\"모든 파일 관리\" (또는 \"모든 파일 접근\") 권한은 AutoJs6 가 공유 저장소에서 일반적인 파일 경로를 통해 직접 [ 생성 / 읽기 / 수정 / 삭제 ] 를 수행할 수 있게 하여, 스크립트가 \"Internal Storage\"에 접근할 수 있도록 하고 파일 관리자가 파일을 정상적으로 표시 및 관리할 수 있도록 합니다.\n\nAndroid 11+ 기기에서는 전체 저장소 파일 읽기/쓰기 기능을 구현하는 주요 방식입니다.</string>
     <string name="description_app_language_preference">실행 스크립트의 예외 메시지를 포함하여 AutoJs6 의 디스플레이 언어를 변경하는이 선호도.\n\n참고: 예상대로 언어를 적용하려면 앱 재시작이 필요할 수 있습니다.</string>
-    <string name="description_auto_night_mode">자동 야간 모드를 켜면 AutoJs6 가 시스템 설정에 따라 자동으로 야간 모드를 전환합니다.\n\nNote: 자동 야간 모드 스위치와 야간 모드 스위치는 서로 연동되며 상호 영향을 줍니다.</string>
-    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">\"백그라운드 팝업\" (또는 \"백그라운드에서 화면 시작\" / \"백그라운드에서 화면 표시\") 권한은 앱이 백그라운드에 있거나 화면이 표시되지 않는 상태에서도 AutoJs6 가 Activity 를 시작하거나 특정 설정 페이지를 열 수 있도록 합니다. [ 예약 작업 트리거 시 UI 열기 / 잠금 화면 또는 대기 후 상호작용 복원 / 알림 또는 바로가기에서 스크립트 설정 페이지 호출 ] 같은 시나리오에 적합합니다.\n\nNote: Xiaomi (MIUI/HyperOS), Vivo (OriginOS/Funtouch OS) 등의 시스템에서는 이 권한이 기본적으로 꺼져 있을 수 있습니다. 권한이 없으면 스크립트가 백그라운드에서 페이지를 열려고 할 때 시스템이 차단하여 [ 무반응 / 백그라운드에서만 실행되고 화면이 표시되지 않음 / 이동 실패 ] 로 보일 수 있습니다.\n\n 권한을 부여한 후에도 [ 배터리 최적화 / 자동 시작 제한 / 백그라운드 동결 / 앱 대기 ] 등 다른 시스템 정책의 영향을 받을 수 있으므로, 관련 권한이나 화이트리스트 설정과 함께 조정하는 것을 권장합니다.</string>
+    <string name="description_auto_night_mode">자동 야간 모드를 켜면 AutoJs6 가 시스템 설정에 따라 자동으로 야간 모드를 전환합니다.\n\n참고: 자동 야간 모드 스위치와 야간 모드 스위치는 서로 연동되며 상호 영향을 줍니다.</string>
+    <string name="description_background_popup_permission" tools:ignore="TypographyEllipsis">\"백그라운드 팝업\" (또는 \"백그라운드에서 화면 시작\" / \"백그라운드에서 화면 표시\") 권한은 앱이 백그라운드에 있거나 화면이 표시되지 않는 상태에서도 AutoJs6 가 Activity 를 시작하거나 특정 설정 페이지를 열 수 있도록 합니다. [ 예약 작업 트리거 시 UI 열기 / 잠금 화면 또는 대기 후 상호작용 복원 / 알림 또는 바로가기에서 스크립트 설정 페이지 호출 ] 같은 시나리오에 적합합니다.\n\n참고: Xiaomi (MIUI/HyperOS), Vivo (OriginOS/Funtouch OS) 등의 시스템에서는 이 권한이 기본적으로 꺼져 있을 수 있습니다. 권한이 없으면 스크립트가 백그라운드에서 페이지를 열려고 할 때 시스템이 차단하여 [ 무반응 / 백그라운드에서만 실행되고 화면이 표시되지 않음 / 이동 실패 ] 로 보일 수 있습니다.\n\n권한을 부여한 후에도 [ 배터리 최적화 / 자동 시작 제한 / 백그라운드 동결 / 앱 대기 ] 등 다른 시스템 정책의 영향을 받을 수 있으므로, 관련 권한이나 화이트리스트 설정과 함께 조정하는 것을 권장합니다.</string>
     <string name="description_change_working_dir_preference">스크립트가 포함 된 디렉토리의 경로를 변경하십시오</string>
     <string name="description_check_for_updates_preference">AutoJs6 은 GitHub 에서 업데이트를 가져오고 다운로드합니다.</string>
-    <string name="description_client_mode">클라이언트 모드는 AutoJs6 가 원격 서버에 능동적으로 연결하여 [ 스크립트 전송 / 로그 출력 / 원격 제어 ] 등을 수행할 수 있도록 합니다.\n\n 일반적으로 기기와 서버는 동일한 LAN 또는 서로 접근 가능한 네트워크 환경에 있어야 합니다.</string>
-    <string name="description_display_over_other_app">\"다른 앱 위에 표시\" 권한은 AutoJs6 가 다른 앱 화면 위에 플로팅 창 또는 플로팅 버튼을 표시할 수 있게 하여, 어떤 화면에서도 빠르게 작업을 실행하거나 정보를 확인할 수 있도록 합니다.\n\nNote: 이 권한이 부여되지 않으면 플로팅 창 및 플로팅 버튼이 표시되지 않거나 정상적으로 사용할 수 없을 수 있습니다.</string>
+    <string name="description_client_mode">클라이언트 모드는 AutoJs6 가 원격 서버에 능동적으로 연결하여 [ 스크립트 전송 / 로그 출력 / 원격 제어 ] 등을 수행할 수 있도록 합니다.\n\n일반적으로 기기와 서버는 동일한 LAN 또는 서로 접근 가능한 네트워크 환경에 있어야 합니다.</string>
+    <string name="description_display_over_other_app">\"다른 앱 위에 표시\" 권한은 AutoJs6 가 다른 앱 화면 위에 플로팅 창 또는 플로팅 버튼을 표시할 수 있게 하여, 어떤 화면에서도 빠르게 작업을 실행하거나 정보를 확인할 수 있도록 합니다.\n\n참고: 이 권한이 부여되지 않으면 플로팅 창 및 플로팅 버튼이 표시되지 않거나 정상적으로 사용할 수 없을 수 있습니다.</string>
     <string name="description_documentation_source_preference">로컬 문서: AutoJs6 내장 파일을 문서 소스로 사용, 네트워크 연결이 필요하지 않습니다. 내용은 AutoJs6 이 업데이트됨에 따라 변경됩니다.\n온라인 문서: GitHub 페이지를 문서 소스로 사용, 네트워크 연결 필요. 콘텐츠는 항상 최신 상태입니다.\n\n참고: 온라인 문서의 읽기 환경을 최대화하려면 데스크탑 모니터와 같은 와이드 스크린 디스플레이 장치를 사용하는 것이 좋습니다.\n참고: 버전 6.2.0 현재 문서는 아직 개발 초기 단계이며 대부분의 콘텐츠가 아직 작성되거나 업데이트되지 않았습니다.</string>
     <string name="description_documentation_source_preference_more">문서 페이지에서 어두운 테마를 지원하려면 다음 조건이 충족되어야 합니다.\n1. AutoJs6 에는 야간 모드가 활성화되어 있습니다.\n2. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P] 이하: 버전 >= 105</string>
+    <string name="description_editor_breakpoint_markers_enabled_preference">편집기 거터에서 중단점 마커를 표시하거나 숨깁니다. 중단점 데이터와 디버그 메뉴 작업은 계속 사용할 수 있습니다.</string>
     <string name="description_editor_code_highlight_threshold">파일 크기에 따라 구문 하이라이트 기능을 활성화할지 결정합니다.\n대용량 파일에서는 구문 하이라이트를 비활성화하면 파일 로딩 효율을 어느 정도 높일 수 있습니다.</string>
+    <string name="description_editor_engine_preference">Ace는 기본 편집기 엔진입니다. JsDroidEditor는 대체 수단으로 계속 사용할 수 있으며 명시적으로 선택할 수도 있습니다.</string>
+    <string name="description_editor_fold_markers_enabled_preference">편집기 거터에서 코드 접기 마커를 표시하거나 숨깁니다. JsDroidEditor에는 접기 마커 영역이 없습니다.</string>
+    <string name="description_editor_gutter_width_mode_preference">동적 너비는 현재 보이는 줄 번호의 자릿수를 따릅니다. 고정 너비는 안정적인 최소 너비를 미리 확보하고 더 큰 줄 번호를 표시할 때만 확장됩니다.</string>
     <string name="description_editor_large_file_mode_threshold">파일 크기에 따라 대용량 파일 모드로 파일을 로드할지 결정합니다.\n대용량 파일 모드는 파일 로딩 효율과 안정성을 어느 정도 높일 수 있지만, 이 모드에서는 \"실행 취소\" 및 \"다시 실행\" 기능이 비활성화됩니다.</string>
     <string name="description_editor_log_button_behavior_preference">코드 편집기 메뉴의 \"로그\" 버튼이 로그를 여는 방식을 제어합니다.\n\n하단 로그 패널: 하단 로그 패널을 엽니다. \"최대화\" 버튼을 누르거나 핸들을 위쪽으로 상단 가까이 끌어올리면 전체 화면 로그 페이지로 들어갈 수 있습니다.\n전체 화면 로그 페이지: 전체 화면 로그 페이지로 바로 들어갑니다.</string>
+    <string name="description_editor_theme_mode_preference">편집기가 AutoJs6 밝은 모드와 어두운 모드의 테마를 따로 기억할지, 두 모드에서 하나의 공통 테마를 사용할지 선택합니다.</string>
+    <string name="description_editor_word_wrap_indent_style_preference">연속 줄 들여쓰기는 줄 바꿈된 표시 줄을 원래 들여쓰기에 맞춥니다. 가장자리에서 시작을 선택하면 줄 바꿈된 표시 줄이 뷰포트 가장자리에서 시작됩니다.</string>
     <string name="description_extending_js_build_in_objects">JavaScript 내장 개체를 확장하면 코드 유연성이 향상되고 더 풍부한 기능을 사용할 수 있지만 충돌이 발생하고 파손될 수도 있습니다.\n옵션이 켜져 있을 때 모든 스크립트에는 기본적으로 활성화된 내장 확장이 있습니다.\n기본 제공 확장은 종종 안전하지 않으며 기본 제공 확장의 원칙과 위험을 명확하게 이해하지 않는 한 권장되지 않습니다.\n옵션이 꺼져 있어도 프로젝트 문서에 설명된 대로 플러그인 전역 개체를 통해 내장 확장을 계속 활성화할 수 있습니다.</string>
     <string name="description_file_extensions_preference">AutoJs6 파일 탐색기에서 파일 확장자 표시 여부를 설정하는 데 사용됩니다.</string>
-    <string name="description_floating_button">플로팅 버튼은 화면 가장자리에 드래그 가능한 빠른 기능 진입점을 표시하며, [ 스크립트 시작/중지 / 레이아웃 분석 / 최근 패키지명 또는 액티비티명 보기 / 포인터 위치 표시 ] 등에 사용할 수 있습니다.\n\nNote: 이 기능은 일반적으로 \"다른 앱 위에 표시\" 권한이 필요합니다.</string>
-    <string name="description_foreground_service">포그라운드 서비스는 AutoJs6 가 백그라운드에서 더 안정적으로 실행되도록 유지하는 데 사용되며, [ 장시간 스크립트 실행 / 연결 유지 / 지속적 감시 ] 등의 시나리오에 적합합니다.\n\n 활성화하면 시스템은 AutoJs6 가 계속 실행 중임을 알리기 위해 \"포그라운드 서비스 알림\"을 표시합니다. 이 알림은 일반적으로 서비스가 중지될 때까지 표시됩니다.\n\n 알림을 \"Silent\" 또는 \"Minimize\"로 설정하면 알림 강도만 낮아지며, 일반적으로 포그라운드 서비스 기능에는 영향을 주지 않습니다.\n\n 알림 채널을 끄거나 AutoJs6 의 알림 전송을 금지하면 포그라운드 서비스의 정상적인 시작 및 안정성에 영향을 줄 수 있습니다.</string>
+    <string name="description_floating_button">플로팅 버튼은 화면 가장자리에 드래그 가능한 빠른 기능 진입점을 표시하며, [ 스크립트 시작/중지 / 레이아웃 분석 / 최근 패키지명 또는 액티비티명 보기 / 포인터 위치 표시 ] 등에 사용할 수 있습니다.\n\n참고: 이 기능은 일반적으로 \"다른 앱 위에 표시\" 권한이 필요합니다.</string>
+    <string name="description_foreground_service">포그라운드 서비스는 AutoJs6 가 백그라운드에서 더 안정적으로 실행되도록 유지하는 데 사용되며, [ 장시간 스크립트 실행 / 연결 유지 / 지속적 감시 ] 등의 시나리오에 적합합니다.\n\n활성화하면 시스템은 AutoJs6 가 계속 실행 중임을 알리기 위해 \"포그라운드 서비스 알림\"을 표시합니다. 이 알림은 일반적으로 서비스가 중지될 때까지 표시됩니다.\n\n알림을 \"Silent\" 또는 \"Minimize\"로 설정하면 알림 강도만 낮아지며, 일반적으로 포그라운드 서비스 기능에는 영향을 주지 않습니다.\n\n알림 채널을 끄거나 AutoJs6 의 알림 전송을 금지하면 포그라운드 서비스의 정상적인 시작 및 안정성에 영향을 줄 수 있습니다.</string>
+    <string name="description_github_token_preference">GitHub API 요청의 속도 제한을 줄이는 데만 사용됩니다. 토큰은 로컬에 저장되며 이 화면에서는 숨겨집니다.</string>
     <string name="description_hidden_files_preference">AutoJs6 파일 탐색기에서 숨겨진 파일 및 폴더(보통 \".\" 로 시작)를 표시할지 여부를 설정하는 데 사용됩니다.</string>
-    <string name="description_ignore_battery_optimizations">배터리 최적화를 무시하면 시스템의 백그라운드 제한을 완화하여, 예약 작업이나 장시간 스크립트가 대기 상태에서도 비교적 더 안정적으로 실행되는 데 도움이 됩니다.\n\nNote: 제조사에 따라 자동 시작 제한이나 백그라운드 동결과 같은 추가 절전 정책이 있을 수 있습니다.</string>
+    <string name="description_ignore_battery_optimizations">배터리 최적화를 무시하면 시스템의 백그라운드 제한을 완화하여, 예약 작업이나 장시간 스크립트가 대기 상태에서도 비교적 더 안정적으로 실행되는 데 도움이 됩니다.\n\n참고: 제조사에 따라 자동 시작 제한이나 백그라운드 동결과 같은 추가 절전 정책이 있을 수 있습니다.</string>
     <string name="description_keep_screen_on_when_in_foreground">AutoJs6 가 포그라운드에 있을 때 화면을 항상 켜둘지 여부를 제어합니다.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">AutoJs6 이 포그라운드에 있을 때 장치의 화면을 켜고 밝게 유지하기 위한 기본 설정입니다.\nAutoJs6 애플리케이션의 모든 페이지 중 홈페이지에서만 발생하도록 하려면 \"홈페이지만\" 옵션을 선택합니다.</string>
     <string name="description_launcher_icon_preference">런처 아이콘은 어댑티브 아이콘과 기존 투명 배경 아이콘 두 가지 표시 모드를 지원합니다. 실제 표시 효과는 안드로이드 시스템별로 다를 수 있습니다. 표시 모드를 전환한 후 적용되기까지 몇 초가 걸릴 수 있습니다.</string>
     <string name="description_launcher_shortcuts">바로가기는 AutoJs6 에서 특정 작업을 수행할 수 있습니다. 사용자는 지원되는 런처에 이러한 바로가기를 표시하고 AutoJs6 애플리케이션 문서 읽기, AutoJs6 설정 페이지 실행 등과 같은 일부 작업을 빠르게 시작하거나 활동을 실행할 수 있습니다.</string>
     <string name="description_manage_ignored_updates_preference">목록 항목을 보거나 관리하려면 클릭하세요.\n목록 항목을 제거하려면 길게 누릅니다.</string>
-    <string name="description_night_mode">AutoJs6 의 야간 모드 전략을 제어하고 그 상태를 반영합니다.\n\nNote: 야간 모드 스위치와 자동 야간 모드 스위치는 서로 연동되며 상호 영향을 줍니다.</string>
+    <string name="description_night_mode">AutoJs6 의 야간 모드 전략을 제어하고 그 상태를 반영합니다.\n\n참고: 야간 모드 스위치와 자동 야간 모드 스위치는 서로 연동되며 상호 영향을 줍니다.</string>
     <string name="description_night_mode_preference">야간 모드 (다크 테마라고도 함) 는 Android 시스템 UI 와 장치에서 실행되는 앱 모두에 적용되어 저시력 사용자와 밝은 빛에 민감한 사용자의 가시성을 향상시키고 누구나 쉽게 장치를 사용할 수 있습니다. 저조도 환경에서.\n\n시스템 따르기: AutoJs6 에는 Android 시스템과 동일한 야간 모드 설정이 있습니다.\n항상 켜짐: AutoJs6 은 Android 시스템 설정에 관계없이 야간 모드를 유지합니다.\n항상 끄기: AutoJs6 은 야간 모드를 끈 상태로 유지합니다(Android 시스템 설정에 관계없이).\n\n참고: 팔로우 시스템 옵션은 Android API 레벨 28 (Android 9) [P] 이상에만 적용됩니다.</string>
     <string name="description_night_mode_preference_more">Android 시스템에서 야간 모드를 활성화하려면:\n- Android API 레벨 29 (Android 10) [Q] 이상: 설정 -> 디스플레이 -> 테마.\n- Android API 레벨 28 (Android 9) [P]: 개발자 옵션 -> 야간 모드.\n\nWebView 구성 요소(예: AutoJs6 설명서 페이지)를 사용하여 웹 기반 콘텐츠에 야간 모드 (어두운 테마) 를 적용하려면 다음 조건을 충족해야 합니다.\n1. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P]: 버전 >= 105\n2. WebView 구성 요소의 웹 기반 콘텐츠는 Dark 테마에 맞게 조정됩니다 (CSS 또는 Android XML 리소스 등).</string>
+    <string name="description_nodejs_doctor_report_preference">백엔드, Node 버전, ABI, 기능 플래그, 네이티브 라이브러리 해시, 기능 프로필, 마지막 오류 상태 및 패키징된 템플릿 상태를 내보냅니다. 사용자 스크립트 내용과 민감한 환경 값은 포함되지 않습니다.</string>
     <string name="description_notification_access">\"알림 접근\" (또는 \"알림 읽기 권한\") 은 AutoJs6 가 시스템 알림 내용을 읽을 수 있게 하여, 스크립트가 알림을 감지하거나 알림 텍스트를 가져올 수 있도록 합니다.</string>
     <string name="description_pointer_location">\"포인터 위치\" 는 Android 개발자 옵션에 있는 디버깅 기능입니다.\n활성화하면 시스템이 화면에 터치 지점의 [좌표/이동 궤적/개수/크기/이동 속도/압력] 등의 정보를 표시하여 관련 스크립트의 [작성/디버깅/검증] 에 도움이 됩니다.</string>
-    <string name="description_post_notifications">\"알림 전송\" 권한은 AutoJs6 가 시스템에 알림을 게시할 수 있게 하여, 스크립트가 알림 영역에서 사용자 지정 알림을 게시하고 관리할 수 있도록 합니다.\n\nNote: Android 13+ 기기에서 이 권한이 부여되지 않으면 일부 알림이 표시되지 않을 수 있으며, 포그라운드 서비스의 시작 및 안정성에 영향을 줄 수 있습니다.</string>
+    <string name="description_post_notifications">\"알림 전송\" 권한은 AutoJs6 가 시스템에 알림을 게시할 수 있게 하여, 스크립트가 알림 영역에서 사용자 지정 알림을 게시하고 관리할 수 있도록 합니다.\n\n참고: Android 13+ 기기에서 이 권한이 부여되지 않으면 일부 알림이 표시되지 않을 수 있으며, 포그라운드 서비스의 시작 및 안정성에 영향을 줄 수 있습니다.</string>
     <string name="description_project_media_access">프로젝트 미디어 액세스를 사용하면 화면 기록에 대한 보안 경고가 중요하지 않습니다.</string>
     <string name="description_release_history_preference">GitHub 에서 AutoJs6 릴리스 버전의 변경 기록과 주요 분류 통계 데이터를 확인하기.</string>
     <string name="description_restart_strategy">재시작 전략은 홈 페이지 드로어의 재시작 버튼에만 적용됩니다.\n\n빠른 재시작: 앱을 빠르게 다시 시작합니다. 재시작이 실패하거나 예기치 않은 상황이 발생하면 \"예약 재시작\"으로 전환해 보세요.\n예약 재시작: 미리 짧은 시간의 예약 작업을 설정합니다. 앱이 중지된 후 예약에 따라 다시 시작하여 앱 재시작을 수행합니다.</string>
@@ -115,7 +133,7 @@
     <string name="description_stable_mode">안정 모드는 레이아웃 경계를 얻을 때 더 안정적이지만 일부 결과는 무시할 수 있습니다.\n접근성 서비스의 재시작이 필요합니다.</string>
     <string name="description_theme_color_preference">테마 색상은 다음을 포함하되 이에 국한되지 않는 위젯에 적용됩니다.\n상태 표시 줄\n앱바\n파일 아이콘\n작업 항목 아이콘\n팹\n설정 카테고리 제목\n스위치 버튼\n\n참고: AutoJs6 버전 6.2.0 현재 기본 색상, 기본 어두운 색상 및 강조 색상 사이에는 아직 차이가 없습니다.</string>
     <string name="description_timed_task_backend">스크립트를 정해진 시간에 실행하는 기본 메커니즘을 제어합니다.\n\nAlarmManager: 시스템의 \"알람 및 알림 설정 허용\" 권한을 부여하면 보다 정확한 시각에 가깝게 실행됩니다.\nWorkManager: 시스템 친화적이며, 일정 지연을 허용할 수 있는 비중요 작업에 적합합니다.\nJobScheduler: 호환성 유지를 위해 남겨둔 구방식으로, 지연 발생 가능성이 큽니다.</string>
-    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">사용 시나리오 및 차이점:\n\n1. AlarmManager\n[리마인더/엄격한 정시 스크립트/...] 등 시간 정확도가 중요한 작업에 적합합니다.\nAndroid 12+ 에서 \"알람 및 알림 설정 허용\" 권한이 있으면, 화면 꺼짐/대기 중에도 비교적 정확하게 실행됩니다.\n 권한이 없으면 시스템이 정확도를 낮추거나 실행을 지연할 수 있습니다.\n\n2. WorkManager\n[비중요 동기화/정리/통계/...] 등 엄격한 정시성이 필요 없는 작업에 적합합니다.\n[배터리/네트워크/충전 상태/대기 정책/...] 에 따라 스케줄링되며, 화면 꺼짐/대기 중에는 지연될 수 있습니다.\n 시간 정확도는 보장되지 않지만, [신뢰성 있는 완료/실패 재시도/체이닝/단일 작업 중복 방지] 에 장점이 있습니다.\n\n3. JobScheduler\n 호환성 유지를 위한 기존 구현입니다.\n 신형 Android 에서는 지연이 더 커질 수 있습니다.\n 특별한 호환성 목적이 아니라면 일반적으로 권장하지 않습니다.</string>
+    <string name="description_timed_task_backend_more" tools:ignore="TypographyEllipsis">사용 시나리오 및 차이점:\n\n1. AlarmManager\n[리마인더/엄격한 정시 스크립트/...] 등 시간 정확도가 중요한 작업에 적합합니다.\nAndroid 12+ 에서 \"알람 및 알림 설정 허용\" 권한이 있으면, 화면 꺼짐/대기 중에도 비교적 정확하게 실행됩니다.\n권한이 없으면 시스템이 정확도를 낮추거나 실행을 지연할 수 있습니다.\n\n2. WorkManager\n[비중요 동기화/정리/통계/...] 등 엄격한 정시성이 필요 없는 작업에 적합합니다.\n[배터리/네트워크/충전 상태/대기 정책/...] 에 따라 스케줄링되며, 화면 꺼짐/대기 중에는 지연될 수 있습니다.\n시간 정확도는 보장되지 않지만, [신뢰성 있는 완료/실패 재시도/체이닝/단일 작업 중복 방지] 에 장점이 있습니다.\n\n3. JobScheduler\n호환성 유지를 위한 기존 구현입니다.\n신형 Android 에서는 지연이 더 커질 수 있습니다.\n특별한 호환성 목적이 아니라면 일반적으로 권장하지 않습니다.</string>
     <string name="description_usage_stats_access">장치 사용 기록 및 통계에 대한 액세스를 제공하여 CurrentPackage ()보다 정확한 결과를 초래합니다.</string>
     <string name="description_write_secure_settings">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI 를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="description_write_system_settings">\"시스템 설정 수정\" 권한은 AutoJs6 가 일부 시스템 설정을 변경할 수 있게 하여, 스크립트가 [ 화면 밝기 / 자동 회전 / 화면 시간 제한 ] 등의 설정을 변경할 수 있도록 합니다.</string>
@@ -187,14 +205,23 @@
     <string name="editable_file_info_file_size_label">크기</string>
     <string name="editable_file_info_line_break_label">줄바꿈</string>
     <string name="editable_file_info_line_count_label">줄수</string>
+    <string name="entry_ace_editor_font_system_monospace">Android 시스템 고정폭 글꼴</string>
     <string name="entry_app_language_auto">시스템을 따르십시오</string>
     <string name="entry_documentation_source_local">현지 문서</string>
     <string name="entry_documentation_source_online">온라인 문서</string>
+    <string name="entry_editor_engine_ace">Ace</string>
+    <string name="entry_editor_engine_native">JsDroidEditor</string>
+    <string name="entry_editor_gutter_width_mode_dynamic">동적</string>
+    <string name="entry_editor_gutter_width_mode_fixed">고정</string>
     <string name="entry_editor_log_button_behavior_bottom_sheet">하단 로그 패널</string>
     <string name="entry_editor_log_button_behavior_fullscreen_page">전체 화면 로그 페이지</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">텍스트 크기 변경</string>
     <string name="entry_editor_pinch_to_zoom_disable">장애를 입히다</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">스케일 보기</string>
+    <string name="entry_editor_theme_mode_separate">밝은 테마와 어두운 테마 분리</string>
+    <string name="entry_editor_theme_mode_unified">두 모드에서 하나의 테마 사용</string>
+    <string name="entry_editor_word_wrap_indent_style_classic">가장자리에서 시작</string>
+    <string name="entry_editor_word_wrap_indent_style_continuation">연속 줄 들여쓰기</string>
     <string name="entry_file_extensions_not_show">모든 파일 확장자 숨기기</string>
     <string name="entry_file_extensions_show_all">모든 파일 확장자 표시</string>
     <string name="entry_file_extensions_show_all_but_executable">실행 파일 (*.js / *.auto 제외) 파일 확장자 표시</string>
@@ -217,6 +244,7 @@
     <string name="entry_root_record_out_file_type_js">자바 스크립트 유형 (편집 가능)</string>
     <string name="error_a_runtime_has_been_set">런타임이 설정되었습니다</string>
     <string name="error_abandoned_method">%s 메서드는 중단되었으며 사용해서는 안 됩니다</string>
+    <string name="error_ace_editor_unavailable">Ace 편집기를 사용할 수 없어 JsDroidEditor가 계속 활성화됩니다</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">매개 변수에 음수 좌표 값 (%2$d, %3$d)이 포함되어 있으므로 \"%1$s\" 작업을 완료할 수 없습니다</string>
     <string name="error_activity_is_required_for_ui_exec_mode">UI 실행 모드를 위한 활동이 필요합니다</string>
     <string name="error_an_error_occurred">오류가 발생했습니다</string>
@@ -273,8 +301,6 @@
     <string name="error_failed_to_launch_manager">관리자를 실행하지 못했습니다</string>
     <string name="error_failed_to_launch_system_settings">시스템 설정을 실행하지 못했습니다</string>
     <string name="error_failed_to_load_plugins_with_reason">플러그인을 불러오지 못했습니다.\n사유: %1$s.</string>
-    <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>
-    <string name="error_plugin_index_source_fetch_failed_with_reason">Failed to fetch %1$s plugin index: %2$s</string>
     <string name="error_failed_to_move">이동에 실패했습니다</string>
     <string name="error_failed_to_rename">이름을 바꾸지 못했습니다</string>
     <string name="error_failed_to_render_content">콘텐츠 렌더링에 실패했습니다</string>
@@ -347,6 +373,8 @@
     <string name="error_pattern_syntax">잘못된 패턴 구문</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">플러그인 APK에 variant=\"%1$s\"에 필요한 assets가 포함되어 있지 않습니다: %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">플러그인 APK에 필요한 native 라이브러리가 포함되어 있지 않습니다: %1$s.</string>
+    <string name="error_plugin_index_fetch_failed_with_reason">플러그인 인덱스를 가져오지 못했습니다: %1$s</string>
+    <string name="error_plugin_index_source_fetch_failed_with_reason">%1$s 플러그인 인덱스를 가져오지 못했습니다: %2$s</string>
     <string name="error_plugin_is_not_authorized_in_plugin_center">플러그인 \"%1$s\" 이 (가) 플러그인 센터에서 권한이 부여되지 않았습니다</string>
     <string name="error_plugin_is_not_enabled_in_plugin_center">플러그인 \"%1$s\" 이(가) 플러그인 센터에서 활성화되어 있지 않습니다</string>
     <string name="error_plugin_not_found_in_installed_apps">설치된 앱에서 플러그인 \"%1$s\" 을 (를) 찾을 수 없습니다</string>
@@ -405,6 +433,7 @@
     <string name="format_file_downloaded" formatted="true">파일은 %s 로 다운로드했습니다</string>
     <string name="go_to_accessibility_settings"><![CDATA[설정 -> 접근성 서비스 -> AutoJs6 [할 수 있게 하다]]></string>
     <string name="hint_find_with_regex">Regex 가 지원됩니다. 캡처 된 그룹에는 \"$1\" - \"$9\" 를 사용하십시오.</string>
+    <string name="hint_github_token">GitHub 개인용 액세스 토큰을 붙여넣으세요</string>
     <string name="hint_long_click_run_to_debug">\"실행\" 버튼을 긴 클릭하여 디버그를 클릭하십시오</string>
     <string name="hint_loop_delay">루프 전 지연</string>
     <string name="hint_loop_times">무한 루프의 경우 0</string>
@@ -476,16 +505,35 @@
     <string name="screen_capturer_foreground_notification_text">이 알림은 화면 캡처를 위해 표시됩니다</string>
     <string name="screen_capturer_foreground_notification_title">스크린 캡처 전경 서비스</string>
     <string name="summary_about_app_tips">더 나은 사용자 경험</string>
+    <string name="summary_ace_font_ligatures_enabled">지원되는 연산자 조합을 코드 글꼴 합자로 표시</string>
+    <string name="summary_ace_font_styles_enabled">굵게, 기울임꼴 및 다른 코드 글꼴 스타일 허용</string>
+    <string name="summary_ace_indent_guides_enabled">코드 들여쓰기를 위한 세로 안내선 표시</string>
+    <string name="summary_ace_line_numbers_enabled">편집기 거터에 줄 번호 표시</string>
+    <string name="summary_ace_lsp_enabled">LSP 기반 편집기 지원 미리 보기 사용</string>
+    <string name="summary_ace_lsp_file_types">LSP 기능을 사용할 수 있는 파일 형식 선택</string>
+    <string name="summary_ace_print_margin_enabled">오른쪽 열 제한 안내선 표시</string>
+    <string name="summary_ace_word_wrap_enabled">편집기 뷰포트 안에서 긴 줄 바꿈</string>
     <string name="summary_all_files_access">AutoJs6 가 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
     <string name="summary_all_files_access_inrt">앱이 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
+    <string name="summary_code_editor_settings">전체 코드 편집기 설정 페이지 열기</string>
     <string name="summary_display_over_other_apps">AutoJs6 가 다른 애플리케이션 위에 콘텐츠를 표시할 수 있도록 허용합니다</string>
     <string name="summary_display_over_other_apps_inrt">앱이 다른 애플리케이션 위에 콘텐츠를 표시할 수 있도록 허용합니다</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">편집기의 실행 버튼으로 스크립트를 시작한 뒤 하단 로그 패널을 자동으로 엽니다</string>
+    <string name="summary_editor_breakpoint_markers_enabled">편집기 거터에 중단점 표시</string>
+    <string name="summary_editor_fold_markers_enabled">편집기 거터에 코드 접기 표시</string>
+    <string name="summary_editor_gutter_width_mode">거터가 표시된 줄 번호의 자릿수를 따를지 세션 동안 안정적인 너비를 유지할지 선택</string>
+    <string name="summary_editor_pinch_to_zoom_change_text_size_enabled">손가락 모으기/벌리기 동작으로 편집기 글자 크기 변경</string>
+    <string name="summary_editor_setting_unavailable_for_current_engine">현재 편집기 엔진에서는 사용할 수 없음</string>
+    <string name="summary_editor_shortcut_input_bar">편집기 엔진에서 공유하는 바로 가기 입력 기호 설정</string>
+    <string name="summary_editor_word_wrap_indent_style">줄 바꿈된 연속 표시 줄의 들여쓰기 방식 선택</string>
     <string name="summary_enable_a11y_service_with_root_access">필요할 때 루트 액세스로 접근성 서비스를 자동으로 활성화하십시오</string>
     <string name="summary_enable_a11y_service_with_secure_settings">필요할 때 안전한 설정으로 접근성 서비스를 활성화하십시오</string>
     <string name="summary_extending_js_build_in_objects">JavaScript 내장 개체를 확장하여 코드 유연성을 높이고 더 풍부한 기능을 활성화합니다.</string>
     <string name="summary_foreground_service_inrt">포그라운드 서비스는 백그라운드에서 앱과 스크립트 실행을 더 안정적으로 유지합니다</string>
+    <string name="summary_github_token_not_set">설정되지 않았습니다. GitHub API 요청은 익명으로 전송됩니다.</string>
+    <string name="summary_github_token_set">설정되었습니다. 개인정보 보호를 위해 숨겨지며 끝 문자는 %1$s입니다.</string>
     <string name="summary_guard_mode">AutoJs6 이 전경에있을 때 스크립트의 자동화 조치 방지</string>
+    <string name="summary_nodejs_doctor_report">버그 보고용으로 개인정보가 제거된 Node 런타임 진단 보고서 생성</string>
     <string name="summary_not_showing_main_activity">주요 활동을 표시하지 않고 직접 스크립트를 실행하십시오</string>
     <string name="summary_plugin_auto_check_updates">1시간마다 플러그인 업데이트를 자동으로 확인합니다 (당겨서 새로고침하면 즉시 확인)</string>
     <string name="summary_plugin_auto_check_updates_disabled_by_global">전역 \"플러그인 업데이트 자동 확인\" 이 비활성화되어 있어 이 옵션을 사용할 수 없습니다</string>
@@ -529,6 +577,41 @@
     <string name="text_about_functions_release_history">@string/text_release_history</string>
     <string name="text_about_functions_update">업데이트</string>
     <string name="text_access_has_been_granted">액세스가 승인되었습니다</string>
+    <string name="text_ace_action_clear_confirm">편집기 작업 기록을 모두 지우시겠습니까?</string>
+    <string name="text_ace_action_delete_confirm" formatted="true">편집기 작업 기록에서 \"%1$s\"을(를) 삭제하시겠습니까?</string>
+    <string name="text_ace_action_favorites">작업 즐겨찾기</string>
+    <string name="text_ace_action_history_empty">편집기 작업 기록 없음</string>
+    <string name="text_ace_action_pin">고정</string>
+    <string name="text_ace_action_pinned">고정됨</string>
+    <string name="text_ace_action_unpin">고정 해제</string>
+    <string name="text_ace_diagnostics_copied">Ace 진단 정보를 클립보드에 복사했습니다</string>
+    <string name="text_ace_editor_debug">Ace 편집기 디버그</string>
+    <string name="text_ace_editor_debug_description">격리된 Ace WebView 편집기 테스트 페이지 열기</string>
+    <string name="text_ace_editor_debug_status">%1$s | 줄 %2$d | 커서 %3$d:%4$d | 중단점 %5$d | 수정됨 %6$s</string>
+    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">Ace 편집기 로드 중...</string>
+    <string name="text_ace_editor_debug_text_length">Ace 텍스트 길이: %1$d</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">Ace 편집기에 오류가 발생하여 (%1$s) JsDroidEditor로 전환했습니다. 자세한 내용은 더보기 메뉴에서 Ace 진단 정보를 복사하세요</string>
+    <string name="text_ace_editor_font">편집기 글꼴</string>
+    <string name="text_ace_editor_font_changed" formatted="true">편집기 글꼴을 %s(으)로 전환했습니다</string>
+    <string name="text_ace_font_ligatures_enabled">글꼴 합자</string>
+    <string name="text_ace_font_styles_enabled">글꼴 스타일</string>
+    <string name="text_ace_get_text">텍스트 가져오기</string>
+    <string name="text_ace_ime_stress">IME 스트레스 테스트</string>
+    <string name="text_ace_ime_stress_done">IME 스트레스 테스트 완료: %1$d회</string>
+    <string name="text_ace_ime_stress_running">IME 스트레스 테스트: %1$d/%2$d</string>
+    <string name="text_ace_indent_guides_enabled">들여쓰기 안내선</string>
+    <string name="text_ace_insert">삽입</string>
+    <string name="text_ace_large_file_uses_native_editor">활성 대체 정책에 따라 Ace 편집기에서 JsDroidEditor를 사용합니다</string>
+    <string name="text_ace_line_numbers_enabled">줄 번호</string>
+    <string name="text_ace_lsp_enabled">LSP 스마트 자동 완성 (미리 보기)</string>
+    <string name="text_ace_lsp_file_types">LSP 파일 형식</string>
+    <string name="text_ace_no_last_action">마지막 편집기 작업 없음</string>
+    <string name="text_ace_print_margin_enabled">인쇄 여백</string>
+    <string name="text_ace_read_only_mode">읽기 전용 모드</string>
+    <string name="text_ace_read_only_mode_disabled">읽기 전용 모드를 사용 중지했습니다</string>
+    <string name="text_ace_read_only_mode_enabled">읽기 전용 모드를 사용 설정했습니다</string>
+    <string name="text_ace_set_sample">샘플 설정</string>
+    <string name="text_ace_word_wrap_enabled">줄 바꿈</string>
     <string name="text_act_by_click">클릭 (click)</string>
     <string name="text_act_by_long_click">긴 클릭 (longClick)</string>
     <string name="text_act_by_scroll_backward">뒤로 스크롤 (scrollBackward)</string>
@@ -548,6 +631,7 @@
     <string name="text_all_files_access_is_needed">\"모든 파일 액세스\"는 전화기의 스크립트 파일에 액세스하려면 필요합니다.</string>
     <string name="text_all_history_entries">모든 기록 항목</string>
     <string name="text_all_items_cleared">모든 항목이 삭제되었습니다</string>
+    <string name="text_all_settings">모든 설정</string>
     <string name="text_allow_setting_alarms_and_reminders_is_recommended">화면이 꺼져 있거나 대기 상태에서도 최대한 정시에 실행되도록, \"알람 및 알림 설정 허용\" 권한 부여를 권장합니다</string>
     <string name="text_already_copied_to_clip">클립 보드에 복사</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">클립보드에 이미 복사되었습니다(최신 %d 항목만)</string>
@@ -558,6 +642,9 @@
     <string name="text_android_release_version">안드로이드 출시 버전</string>
     <string name="text_android_sdk_version">안드로이드 SDK 버전</string>
     <string name="text_apk_builder_plugin_unavailable">APK 빌더는 사용할 수 없습니다</string>
+    <string name="text_apk_template_plugin_risk_prompt">설치된 APK Builder 템플릿 플러그인이 현재 AutoJs6 버전과 완전히 호환되지 않습니다. 계속하면 패키징된 앱이 시작되지 않거나, 일치하지 않는 API를 사용하거나, 일부 모듈이 누락될 수 있습니다.</string>
+    <string name="text_apk_template_unavailable">APK Builder 템플릿을 사용할 수 없음</string>
+    <string name="text_apk_template_unavailable_prompt">사용 가능한 APK Builder 템플릿을 찾지 못했습니다. 이 AutoJs6 빌드에는 기본 제공 template.apk가 없으며 읽을 수 있는 APK Builder 템플릿 플러그인도 없습니다. 버전이 일치하는 템플릿 플러그인을 설치하고 사용 설정한 다음 다시 시도하세요.</string>
     <string name="text_app_and_device_info">앱 및 장치 정보</string>
     <string name="text_app_crashed">AutoJs6 가 추락했습니다</string>
     <string name="text_app_language">언어</string>
@@ -596,6 +683,7 @@
     <string name="text_app_version_name">앱 버전 이름</string>
     <string name="text_appearance">모습</string>
     <string name="text_applying_binary_resources">바이너리 리소스 적용 중</string>
+    <string name="text_archiving_project_files">프로젝트 파일 보관 중</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[성명, 조직명, 조직 단위, 국가 코드, 주 또는 도, 시 또는 지역, 거리] 중 하나 이상을 입력해야 합니다</string>
     <string name="text_attribute">기인하다</string>
     <string name="text_authorize_plugin">플러그인 권한 부여</string>
@@ -684,6 +772,7 @@
     <string name="text_code">암호</string>
     <string name="text_code_beautify">코드를 아름답게하십시오</string>
     <string name="text_code_editor">코드 편집기</string>
+    <string name="text_code_editor_settings">코드 편집기 설정</string>
     <string name="text_collapse_all">모두 접기</string>
     <string name="text_color_library">색상 라이브러리</string>
     <string name="text_color_palette">색상 팔레트</string>
@@ -694,6 +783,7 @@
     <string name="text_config">구성</string>
     <string name="text_configuring_manifest">manifest 설정 중</string>
     <string name="text_configuring_package_name">패키지 이름 설정 중</string>
+    <string name="text_confirm_overwrite_selected_items">대상에 이미 존재하는 항목이 있습니다. 덮어쓰시겠습니까?</string>
     <string name="text_confirm_to_clear_all_items">모든 항목을 삭제하시겠습니까?</string>
     <string name="text_confirm_to_clear_the_history">기록을 삭제하시겠습니까?</string>
     <string name="text_confirm_to_clear_the_history_of">아래 기록이 삭제됩니다\n\n[ %1$s ]\n\n삭제하시겠습니까?</string>
@@ -711,7 +801,9 @@
     <string name="text_console">콘솔</string>
     <string name="text_content">내용</string>
     <string name="text_continue">계속하다</string>
+    <string name="text_continue_with_plugin_template">플러그인 템플릿으로 계속</string>
     <string name="text_copy">복사</string>
+    <string name="text_copy_ace_diagnostics">Ace 진단 정보 복사</string>
     <string name="text_copy_all">모두 복사하십시오</string>
     <string name="text_copy_all_files_to_new_directory">모든 파일을 새 디렉토리로 복사하십시오</string>
     <string name="text_copy_command">CMD 를 복사하십시오</string>
@@ -732,7 +824,14 @@
     <string name="text_copying_library">라이브러리 복사 중</string>
     <string name="text_copying_native_libraries">네이티브 라이브러리 복사 중</string>
     <string name="text_copying_project_directory">프로젝트 디렉터리 복사 중</string>
+    <string name="text_copying_remote_build_inputs">원격 빌드 입력 복사 중</string>
     <string name="text_copying_script_file">스크립트 파일 복사 중</string>
+    <string name="text_countdown_duration_must_be_positive">카운트다운 시간은 0보다 커야 합니다</string>
+    <string name="text_countdown_duration_should_be_valid">카운트다운 시간이 올바르지 않습니다</string>
+    <string name="text_countdown_hours">시간</string>
+    <string name="text_countdown_minutes">분</string>
+    <string name="text_countdown_minutes_should_be_less_than_60">분은 0에서 59 사이여야 합니다</string>
+    <string name="text_countdown_task">카운트다운 작업</string>
     <string name="text_country_code">국가 코드 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">국가 코드는 두 개의 대문자로 입력해야 합니다</string>
     <string name="text_creating_unsigned_apk">서명되지 않은 APK 생성 중</string>
@@ -762,6 +861,7 @@
     <string name="text_delete_all">모두 삭제</string>
     <string name="text_delete_file">파일 삭제</string>
     <string name="text_delete_folder">폴더 삭제</string>
+    <string name="text_delete_items">항목 삭제</string>
     <string name="text_delete_line">라인 삭제</string>
     <string name="text_delete_revision_confirm">이 버전을 영구 삭제할까요?</string>
     <string name="text_deleting">삭제 중</string>
@@ -806,17 +906,31 @@
     <string name="text_edit">편집하다</string>
     <string name="text_edit_prepare_script">사전 사전 자연 스크립트를 편집하십시오</string>
     <string name="text_edit_script">스크립트 편집</string>
+    <string name="text_editor_assistance">지원 기능</string>
     <string name="text_editor_auto_show_log_bottom_sheet_on_run">실행 후 하단 로그 패널 자동 표시</string>
+    <string name="text_editor_breakpoint_markers_enabled">중단점 표시</string>
     <string name="text_editor_code_highlight_always_disabled">코드 하이라이트 항상 비활성화</string>
     <string name="text_editor_code_highlight_always_enabled">코드 하이라이트 항상 활성화</string>
     <string name="text_editor_code_highlight_threshold">코드 하이라이트 임계값</string>
     <string name="text_editor_code_highlight_threshold_enabled_for_smaller_files">%1$s 이하 파일에서만 코드 하이라이트 활성화</string>
+    <string name="text_editor_engine">편집기 엔진</string>
+    <string name="text_editor_engine_switched" formatted="true">편집기 엔진을 %s(으)로 전환했습니다</string>
+    <string name="text_editor_engine_switched_with_undo_notice" formatted="true">편집기 엔진을 %s(으)로 전환했습니다. 실행 취소/다시 실행 기록은 편집기 엔진 간에 유지되지 않습니다</string>
+    <string name="text_editor_fold_markers_enabled">코드 접기 표시</string>
+    <string name="text_editor_gestures">제스처</string>
+    <string name="text_editor_gutter_markers">거터 표시</string>
+    <string name="text_editor_gutter_width_mode">거터 너비</string>
     <string name="text_editor_large_file_mode_always_disabled">대용량 파일 모드 항상 비활성화</string>
     <string name="text_editor_large_file_mode_always_enabled">대용량 파일 모드 항상 활성화</string>
     <string name="text_editor_large_file_mode_threshold">대용량 파일 모드 임계값</string>
     <string name="text_editor_large_file_mode_threshold_enabled_for_larger_files">%1$s 초과 파일에서만 대용량 파일 모드 활성화</string>
     <string name="text_editor_log_button_behavior">편집기 로그 버튼 동작</string>
+    <string name="text_editor_performance">성능</string>
+    <string name="text_editor_pinch_to_zoom_change_text_size_enabled">손가락 모으기/벌리기로 글자 크기 변경</string>
+    <string name="text_editor_shortcut_input_bar">바로 가기 기호 설정</string>
     <string name="text_editor_theme">편집기 테마</string>
+    <string name="text_editor_theme_mode">편집기 테마 모드</string>
+    <string name="text_editor_word_wrap_indent_style">줄 바꿈 들여쓰기</string>
     <string name="text_email">이메일</string>
     <string name="text_email_cannot_be_empty">이메일이 비어질 수 없다</string>
     <string name="text_email_format_error">잘못된 이메일 형식</string>
@@ -877,6 +991,7 @@
     <string name="text_failed_to_send_log_entries">로그 항목을 보내지 못했습니다</string>
     <string name="text_failed_to_update">업데이트 실패</string>
     <string name="text_failed_to_write_file">파일을 쓰지 못했습니다</string>
+    <string name="text_falling_back_to_local_build">로컬 빌드로 전환 중</string>
     <string name="text_file">파일</string>
     <string name="text_file_colon_value">파일: %1$s</string>
     <string name="text_file_details">파일 세부정보</string>
@@ -912,10 +1027,13 @@
     <string name="text_formatting_completed">포맷 완료</string>
     <string name="text_function">기능</string>
     <string name="text_fx_keyboard">Fx 건반</string>
+    <string name="text_general">일반</string>
     <string name="text_generate">생성하다</string>
     <string name="text_generate_code">코드를 생성합니다</string>
     <string name="text_generated_code">생성 된 코드</string>
+    <string name="text_github">GitHub</string>
     <string name="text_github_backup_url_used">백업 URL 이 사용되었습니다</string>
+    <string name="text_github_token">GitHub 토큰</string>
     <string name="text_global_settings">전역 설정</string>
     <string name="text_go_to_settings">설정으로 바로 가기\"</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 부여하기</string>
@@ -974,6 +1092,7 @@
     <string name="text_jump_to_line">라인으로 점프하십시오</string>
     <string name="text_jump_to_line_end">라인 끝으로 점프하십시오</string>
     <string name="text_jump_to_line_start">라인 시작으로 이동하십시오</string>
+    <string name="text_jump_to_previous_cursor">이전 커서 위치로 이동</string>
     <string name="text_jump_to_start">시작으로 점프하십시오</string>
     <string name="text_keep_screen_on_when_in_foreground">포그라운드에 있을 때 화면을 켜두세요</string>
     <string name="text_key_alias">별칭</string>
@@ -990,8 +1109,10 @@
     <string name="text_launch_config">구성을 시작하십시오</string>
     <string name="text_launch_debugger">디버거를 시작하십시오</string>
     <string name="text_launch_launcher_visible">런처에 앱 아이콘 표시</string>
+    <string name="text_launch_log_shortcut_visible">런처 바로 가기에 로그 표시</string>
     <string name="text_launch_logs_visible">실행 시 로그 표시</string>
     <string name="text_launch_run_on_boot">부팅 시 스크립트 실행</string>
+    <string name="text_launch_settings_shortcut_visible">런처 바로 가기에 설정 표시</string>
     <string name="text_launch_slug">시작 화면 슬로건 텍스트</string>
     <string name="text_launch_splash_visible">실행 시 시작 화면 표시</string>
     <string name="text_launcher_icon_title">런처 아이콘</string>
@@ -1022,6 +1143,7 @@
     <string name="text_min_version">최소 버전</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 확장의 최소 버전</string>
     <string name="text_mobile_qq_not_installed">\"모바일 QQ\" 가 설치되지 않았습니다</string>
+    <string name="text_monthly_task">월간 작업</string>
     <string name="text_more">더</string>
     <string name="text_more_details">세부</string>
     <string name="text_mount">마운트</string>
@@ -1033,6 +1155,7 @@
     <string name="text_move_file_to_trash">파일을 휴지통으로 이동</string>
     <string name="text_move_folder">폴더 이동</string>
     <string name="text_move_folder_to_trash">폴더를 휴지통으로 이동</string>
+    <string name="text_move_items_to_trash">항목을 휴지통으로 이동</string>
     <string name="text_move_to">이동 위치</string>
     <string name="text_move_to_trash_failed">휴지통으로 이동하지 못했습니다</string>
     <string name="text_moved_to_trash">휴지통으로 이동했습니다</string>
@@ -1074,6 +1197,12 @@
     <string name="text_no_search_results_for_keyword">일치하는 항목이 없습니다:\n\n%1$s</string>
     <string name="text_no_symbols_hint">현재 설정이 비어 있습니다.\n여기를 눌러 기호를 만드세요.</string>
     <string name="text_no_version_history">버전 기록 없음</string>
+    <string name="text_nodejs">Node.js</string>
+    <string name="text_nodejs_doctor">Node.js Doctor</string>
+    <string name="text_nodejs_doctor_export_json">JSON 보고서</string>
+    <string name="text_nodejs_doctor_export_text">텍스트 보고서</string>
+    <string name="text_nodejs_doctor_generating" tools:ignore="TypographyEllipsis">Node.js Doctor 보고서 생성 중...</string>
+    <string name="text_nodejs_doctor_generation_failed">Node.js Doctor 보고서를 생성하지 못했습니다</string>
     <string name="text_none">없음</string>
     <string name="text_not_granted">부여되지 않았습니다</string>
     <string name="text_not_installed">설치되지 않음</string>
@@ -1207,6 +1336,7 @@
     <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">잠시 후 다시 시도해 주세요...</string>
     <string name="text_plugin_activated">활성화됨</string>
     <string name="text_plugin_activation_recommended">활성화 권장</string>
+    <string name="text_plugin_additional_variants">기타 플러그인 변형</string>
     <string name="text_plugin_authorization_denied">권한 거부됨</string>
     <string name="text_plugin_authorization_required">권한 필요</string>
     <string name="text_plugin_authorized">권한 부여됨</string>
@@ -1225,7 +1355,6 @@
     <string name="text_plugin_jump_to_launch_page">시작 페이지로 이동</string>
     <string name="text_plugin_library_official">공식 플러그인 라이브러리</string>
     <string name="text_plugin_library_third_party">서드파티 플러그인 라이브러리</string>
-    <string name="text_plugin_additional_variants">기타 플러그인 변형</string>
     <string name="text_plugin_mount_object_name">마운트 객체 이름</string>
     <string name="text_plugin_mount_point">마운트 지점</string>
     <string name="text_plugin_mount_point_global_display">global</string>
@@ -1250,6 +1379,7 @@
     <string name="text_preparing_assets_dir">assets 디렉터리 준비 중</string>
     <string name="text_preparing_build_config">빌드 설정 준비 중</string>
     <string name="text_preparing_keystore">keystore 준비 중</string>
+    <string name="text_preparing_remote_build_inputs">원격 빌드 입력 준비 중</string>
     <string name="text_preparing_workspace">작업 공간 준비 중</string>
     <string name="text_preset_dialog_content">사전 설정 대화 상자 내용</string>
     <string name="text_preset_dialog_title">사전 설정 대화 상자 제목</string>
@@ -1269,6 +1399,8 @@
     <string name="text_property_colon_value_nbsp_unit">%1$s: %2$d %3$s</string>
     <string name="text_property_colon_value_unit">%1$s: %2$d%3$s</string>
     <string name="text_pruning">가지치기 중</string>
+    <string name="text_pruning_native_libraries">네이티브 라이브러리 정리 중</string>
+    <string name="text_querying_plugin_info">플러그인 정보 조회 중</string>
     <string name="text_quit">그만두다</string>
     <string name="text_re_signing_apk">APK 재서명 중</string>
     <string name="text_reading_splash_resources">스플래시 리소스 읽는 중</string>
@@ -1294,6 +1426,13 @@
     <string name="text_remove_from_trash">휴지통에서 제거</string>
     <string name="text_remove_from_trash_confirm">이 항목을 휴지통에서 영구 삭제할까요?</string>
     <string name="text_rename">이름 바꾸기</string>
+    <string name="text_repeat_count_must_be_positive">횟수는 0보다 커야 합니다</string>
+    <string name="text_repeat_count_times">회</string>
+    <string name="text_repeat_end">종료 조건</string>
+    <string name="text_repeat_for_number_of_events">지정된 이벤트 횟수 후</string>
+    <string name="text_repeat_forever">계속 반복</string>
+    <string name="text_repeat_until_date">지정 날짜까지</string>
+    <string name="text_repeat_until_date_before_now">종료 날짜는 오늘보다 이전일 수 없습니다</string>
     <string name="text_replace">바꾸다</string>
     <string name="text_replace_all">모두 다 바꿔</string>
     <string name="text_replace_simplified">교체</string>
@@ -1306,6 +1445,7 @@
     <string name="text_reset_succeed">재설정이 성공했습니다</string>
     <string name="text_reset_to_initial_content">처음에 재설정하십시오</string>
     <string name="text_reset_to_initial_content_only_for_assets">재설정은 샘플에만 해당됩니다</string>
+    <string name="text_resolving_plugin_artifacts">플러그인 산출물 확인 중</string>
     <string name="text_resolving_plugin_native_libraries">플러그인 네이티브 라이브러리 확인 중</string>
     <string name="text_restart">재시작</string>
     <string name="text_restart_strategy">재시작 전략</string>
@@ -1369,6 +1509,7 @@
     <string name="text_select_file_to_upload">업로드 할 파일을 선택하십시오</string>
     <string name="text_select_icon">아이콘을 선택하십시오</string>
     <string name="text_select_image">이미지를 선택하십시오</string>
+    <string name="text_selected_items" formatted="true">%1$d개 선택됨</string>
     <string name="text_selected_plugin">선택된 플러그인</string>
     <string name="text_send">보내다</string>
     <string name="text_send_shortcut">바로 가기를 만듭니다</string>
@@ -1378,6 +1519,7 @@
     <string name="text_set_a_name_for_the_new_configuration">새 설정 이름 지정</string>
     <string name="text_set_as_working_dir">작업 디렉토리로</string>
     <string name="text_set_breakpoint">중단 점을 설정하십시오</string>
+    <string name="text_set_editor_setting_action" formatted="true">%1$s 설정</string>
     <string name="text_settings">설정</string>
     <string name="text_sha256_mismatch_multiline_expected_actual">SHA-256 값이 일치하지 않습니다.\n\n예상: %1$s\n실제: %2$s</string>
     <string name="text_shizuku_access">Shizuku 권한</string>
@@ -1455,6 +1597,17 @@
     <string name="text_text_size_current_value" formatted="true">텍스트 크기: %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">다음 해결 방법을 참조할 수 있습니다</string>
     <string name="text_theme_color">테마 색상</string>
+    <string name="text_theme_preview_exit">종료</string>
+    <string name="text_theme_preview_filter_all">전체</string>
+    <string name="text_theme_preview_filter_dark">어두움</string>
+    <string name="text_theme_preview_filter_light">밝음</string>
+    <string name="text_theme_preview_list">목록</string>
+    <string name="text_theme_preview_next">다음</string>
+    <string name="text_theme_preview_no_available_theme">현재 필터에 사용할 수 있는 테마가 없습니다</string>
+    <string name="text_theme_preview_previous">이전</string>
+    <string name="text_theme_preview_unavailable_for_filter">현재 필터에서 사용할 수 없음</string>
+    <string name="text_theme_preview_use">사용</string>
+    <string name="text_theme_previewer">테마 미리 보기</string>
     <string name="text_time">시간</string>
     <string name="text_timed_task">시간이 정한 작업</string>
     <string name="text_timed_task_backend_title">정시 작업 스케줄링 엔진</string>
@@ -1493,8 +1646,10 @@
     <string name="text_updates_snack_bar_act_later">나중</string>
     <string name="text_updates_snack_bar_act_view">보다</string>
     <string name="text_updating_project_config">프로젝트 설정 업데이트 중</string>
+    <string name="text_usage_instructions">사용 방법</string>
     <string name="text_usage_stats_permission">사용 통계 액세스</string>
     <string name="text_use_android_n_shortcut">Android 7.0 바로 가기를 사용하십시오</string>
+    <string name="text_use_builtin_template">기본 제공 템플릿 사용</string>
     <string name="text_use_default_icon">기본 아이콘 사용</string>
     <string name="text_use_volume_control_record">레코드를 제어하려면 볼륨 다운 키를 사용하십시오</string>
     <string name="text_use_volume_key_to_control_script_running">실행 중인 스크립트를 제어하려면 \"볼륨 크게\" 키를 사용하십시오.</string>
@@ -1514,6 +1669,8 @@
     <string name="text_verify_failed">확인 실패</string>
     <string name="text_verify_key_store">키 저장소 확인</string>
     <string name="text_verify_success">확인 성공</string>
+    <string name="text_verifying_build_inputs">빌드 입력 확인 중</string>
+    <string name="text_verifying_project_archive">프로젝트 보관 파일 확인 중</string>
     <string name="text_version">버전</string>
     <string name="text_version_code">버전 코드</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">버전 코드 (계산 중...)</string>
@@ -1540,6 +1697,7 @@
     <string name="text_writing_resources_arsc">resources.arsc 기록 중</string>
     <string name="text_writing_signed_apk">서명된 APK 기록 중</string>
     <string name="text_xiaomi_background_popup_permission">백그라운드 팝업</string>
+    <string name="text_yearly_task">연간 작업</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
 </resources>

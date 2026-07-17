@@ -71,6 +71,7 @@
 * `Mejora` Mejorados el estilo y las funciones de los diálogos "Ordenar" y "Filtrar" del Centro de plugins
 * `Mejora` El Centro de plugins muestra las variantes comunes de forma predeterminada y ofrece una página independiente para las demás variantes
 * `Mejora` Mejorados los registros de cambios multilingües/caché de idiomas/verificación oficial/carga de índices y otras funciones del Centro de plugins
+* `Mejora` Normalizados los recursos de cadenas del proyecto con traducciones multilingües completas/clasificación por archivos/orden por nombre/puntuación ASCII
 * `Mejora` El sistema de compilación permite seleccionar dinámicamente versiones compatibles de Kotlin/KSP/AGP/R8 y reduce la presión de memoria al iniciar Gradle
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado

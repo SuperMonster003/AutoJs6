@@ -70,6 +70,7 @@
         "Mejorados el estilo y las funciones de los diálogos \"Ordenar\" y \"Filtrar\" del Centro de plugins",
         "El Centro de plugins muestra las variantes comunes de forma predeterminada y ofrece una página independiente para las demás variantes",
         "Mejorados los registros de cambios multilingües/caché de idiomas/verificación oficial/carga de índices y otras funciones del Centro de plugins",
+        "Normalizados los recursos de cadenas del proyecto con traducciones multilingües completas/clasificación por archivos/orden por nombre/puntuación ASCII",
         "El sistema de compilación permite seleccionar dinámicamente versiones compatibles de Kotlin/KSP/AGP/R8 y reduce la presión de memoria al iniciar Gradle"
       ],
       "dependency": [

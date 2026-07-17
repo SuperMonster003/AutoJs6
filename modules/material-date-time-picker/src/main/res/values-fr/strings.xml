@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
-     Copyright (C) 2013 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,23 +12,29 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
- -->
-
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mdtp_done_label" msgid="7007948707597430919">"OK"</string>
-    <string name="mdtp_hour_picker_description" msgid="7586639618712934060">"Curseur circulaire des heures"</string>
-    <string name="mdtp_minute_picker_description" msgid="6024811202872705251">"Curseur circulaire des minutes"</string>
-    <string name="mdtp_select_hours" msgid="7651068754188418859">"Sélectionner les heures"</string>
-    <string name="mdtp_select_minutes" msgid="8327182090226828481">"Sélectionner les minutes"</string>
-    <string name="mdtp_day_picker_description" msgid="3968620852217927702">"Calendrier mensuel sous forme de grille"</string>
-    <string name="mdtp_year_picker_description" msgid="6963340404644587098">"Liste des années"</string>
-    <string name="mdtp_select_day" msgid="3973338219107019769">"Sélectionnez un mois et un jour"</string>
-    <string name="mdtp_select_year" msgid="2603330600102539372">"Sélectionnez une année"</string>
-    <string name="mdtp_item_is_selected" msgid="2674929164900463786">"<xliff:g id="ITEM">%1$s</xliff:g> sélectionné"</string>
-    <string name="mdtp_deleted_key" msgid="6908431551612331381">"\"<xliff:g id="KEY">%1$s</xliff:g>\" supprimé"</string>
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="mdtp_am">AM</string>
+    <string name="mdtp_cancel">@android:string/cancel</string>
+    <string name="mdtp_date">Date</string>
     <string name="mdtp_date_v1_monthyear">MMMM yyyy</string>
     <string name="mdtp_date_v2_daymonthyear">EEE dd MMM</string>
-    <string name="mdtp_next_month_arrow_description">Mois Suivant</string>
-    <string name="mdtp_previous_month_arrow_description">Mois Précédent</string>
+    <string name="mdtp_day_picker_description">Calendrier mensuel sous forme de grille</string>
+    <string name="mdtp_deleted_key"><xliff:g id="key" example="4">%1$s</xliff:g> supprimé</string>
+    <string name="mdtp_done_label">OK</string>
+    <string name="mdtp_hour_picker_description">Curseur circulaire des heures</string>
+    <string name="mdtp_item_is_selected"><xliff:g id="item" example="2013">%1$s</xliff:g> sélectionné</string>
+    <string name="mdtp_minute_picker_description">Curseur circulaire des minutes</string>
+    <string name="mdtp_next_month_arrow_description">Mois suivant</string>
+    <string name="mdtp_ok">@android:string/ok</string>
+    <string name="mdtp_pm">PM</string>
+    <string name="mdtp_previous_month_arrow_description">Mois précédent</string>
+    <string name="mdtp_second_picker_description">Curseur circulaire des secondes</string>
+    <string name="mdtp_select_day">Sélectionner un mois et un jour</string>
+    <string name="mdtp_select_hours">Sélectionner les heures</string>
+    <string name="mdtp_select_minutes">Sélectionner les minutes</string>
+    <string name="mdtp_select_seconds">Sélectionner les secondes</string>
+    <string name="mdtp_select_year">Sélectionner une année</string>
+    <string name="mdtp_time">Heure</string>
+    <string name="mdtp_year_picker_description">Liste des années</string>
 </resources>

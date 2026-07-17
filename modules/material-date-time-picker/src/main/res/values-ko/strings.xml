@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
-     Copyright (C) 2013 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,21 +12,29 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
- -->
-
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mdtp_done_label" msgid="7007948707597430919">"완료"</string>
-    <string name="mdtp_hour_picker_description" msgid="7586639618712934060">"시간 원형 슬라이더"</string>
-    <string name="mdtp_minute_picker_description" msgid="6024811202872705251">"분 원형 슬라이더"</string>
-    <string name="mdtp_select_hours" msgid="7651068754188418859">"시간 선택"</string>
-    <string name="mdtp_select_minutes" msgid="8327182090226828481">"분 선택"</string>
-    <string name="mdtp_day_picker_description" msgid="3968620852217927702">"월별 바둑판식 날짜 표시"</string>
-    <string name="mdtp_year_picker_description" msgid="6963340404644587098">"년"</string>
-    <string name="mdtp_select_day" msgid="3973338219107019769">"월/일 선택"</string>
-    <string name="mdtp_select_year" msgid="2603330600102539372">"연도 선택"</string>
-    <string name="mdtp_item_is_selected" msgid="2674929164900463786">"<xliff:g id="ITEM">%1$s</xliff:g>이(가) 선택됨"</string>
-    <string name="mdtp_deleted_key" msgid="6908431551612331381">"<xliff:g id="KEY">%1$s</xliff:g> 삭제됨"</string>
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="mdtp_am">오전</string>
+    <string name="mdtp_cancel">@android:string/cancel</string>
+    <string name="mdtp_date">날짜</string>
     <string name="mdtp_date_v1_monthyear">yyyy년 MMMM</string>
     <string name="mdtp_date_v2_daymonthyear">MMM dd일 (EEE)</string>
+    <string name="mdtp_day_picker_description">월별 바둑판식 날짜 표시</string>
+    <string name="mdtp_deleted_key"><xliff:g id="key" example="4">%1$s</xliff:g> 삭제됨</string>
+    <string name="mdtp_done_label">완료</string>
+    <string name="mdtp_hour_picker_description">시간 원형 슬라이더</string>
+    <string name="mdtp_item_is_selected"><xliff:g id="item" example="2013">%1$s</xliff:g>이(가) 선택됨</string>
+    <string name="mdtp_minute_picker_description">분 원형 슬라이더</string>
+    <string name="mdtp_next_month_arrow_description">다음 달</string>
+    <string name="mdtp_ok">@android:string/ok</string>
+    <string name="mdtp_pm">오후</string>
+    <string name="mdtp_previous_month_arrow_description">이전 달</string>
+    <string name="mdtp_second_picker_description">초 원형 슬라이더</string>
+    <string name="mdtp_select_day">월/일 선택</string>
+    <string name="mdtp_select_hours">시간 선택</string>
+    <string name="mdtp_select_minutes">분 선택</string>
+    <string name="mdtp_select_seconds">초 선택</string>
+    <string name="mdtp_select_year">연도 선택</string>
+    <string name="mdtp_time">시간</string>
+    <string name="mdtp_year_picker_description">연도 목록</string>
 </resources>

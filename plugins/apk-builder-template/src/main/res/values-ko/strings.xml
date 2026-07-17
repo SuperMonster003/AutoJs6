@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plugin_description">AutoJs6가 독립 실행형 애플리케이션을 패키징할 때 사용하는 템플릿 APK를 제공합니다.</string>
+    <string name="plugin_instruction">APK Builder가 외부 템플릿 APK를 사용할 수 있도록 AutoJs6와 같은 버전의 플러그인을 설치하세요.</string>
+</resources>

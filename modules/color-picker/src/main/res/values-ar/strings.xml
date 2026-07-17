@@ -13,13 +13,12 @@
      limitations under the License.
 -->
 <resources>
+    <string name="cpv_custom">ألوان مخصصة</string>
     <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
     <string name="cpv_default_title">اختر لونًا</string>
+    <string name="cpv_menu_item_history">السجل</string>
+    <string name="cpv_menu_item_reset_color_palette">إعادة تعيين لوحة الألوان</string>
     <string name="cpv_presets">ألوان جاهزة</string>
-    <string name="cpv_custom">ألوان معدلة</string>
     <string name="cpv_select">اختر</string>
     <string name="cpv_transparency">الشفافية</string>
-    <string name="cpv_menu_item_history">التاريخ</string>
-    <string name="cpv_menu_item_reset_color_palette">إعادة تعيين لوحة</string>
-
 </resources>

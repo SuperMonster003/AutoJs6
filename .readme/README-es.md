@@ -231,6 +231,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Mejorados el estilo y las funciones de los diálogos "Ordenar" y "Filtrar" del Centro de plugins
 * `Mejora` El Centro de plugins muestra las variantes comunes de forma predeterminada y ofrece una página independiente para las demás variantes
 * `Mejora` Mejorados los registros de cambios multilingües/caché de idiomas/verificación oficial/carga de índices y otras funciones del Centro de plugins
+* `Mejora` Normalizados los recursos de cadenas del proyecto con traducciones multilingües completas/clasificación por archivos/orden por nombre/puntuación ASCII
 * `Mejora` El sistema de compilación permite seleccionar dinámicamente versiones compatibles de Kotlin/KSP/AGP/R8 y reduce la presión de memoria al iniciar Gradle
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v680)_
 

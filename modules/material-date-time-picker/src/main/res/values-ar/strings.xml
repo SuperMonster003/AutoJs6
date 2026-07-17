@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
-     Copyright (C) 2013 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,21 +12,29 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
- -->
-
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mdtp_done_label" msgid="7007948707597430919">"تم"</string>
-    <string name="mdtp_hour_picker_description" msgid="7586639618712934060">"شريط التمرير الدائري للساعات"</string>
-    <string name="mdtp_minute_picker_description" msgid="6024811202872705251">"شريط التمرير الدائري للدقائق"</string>
-    <string name="mdtp_select_hours" msgid="7651068754188418859">"تحديد الساعات"</string>
-    <string name="mdtp_select_minutes" msgid="8327182090226828481">"تحديد الدقائق"</string>
-    <string name="mdtp_day_picker_description" msgid="3968620852217927702">"شبكة الشهر مكونة من الأيام"</string>
-    <string name="mdtp_year_picker_description" msgid="6963340404644587098">"قائمة الأعوام"</string>
-    <string name="mdtp_select_day" msgid="3973338219107019769">"تحديد الشهر واليوم"</string>
-    <string name="mdtp_select_year" msgid="2603330600102539372">"تحديد العام"</string>
-    <string name="mdtp_item_is_selected" msgid="2674929164900463786">"تم تحديد <xliff:g id="ITEM">%1$s</xliff:g>"</string>
-    <string name="mdtp_deleted_key" msgid="6908431551612331381">"تم حذف <xliff:g id="KEY">%1$s</xliff:g>"</string>
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="mdtp_am">ص</string>
+    <string name="mdtp_cancel">@android:string/cancel</string>
+    <string name="mdtp_date">التاريخ</string>
     <string name="mdtp_date_v1_monthyear">MMMM yyyy</string>
-    <string name="mdtp_date_v2_daymonthyear">EEE، dd MMM</string>
+    <string name="mdtp_date_v2_daymonthyear">EEE, dd MMM</string>
+    <string name="mdtp_day_picker_description">شبكة الشهر مكونة من الأيام</string>
+    <string name="mdtp_deleted_key">تم حذف <xliff:g id="key" example="4">%1$s</xliff:g></string>
+    <string name="mdtp_done_label">تم</string>
+    <string name="mdtp_hour_picker_description">شريط التمرير الدائري للساعات</string>
+    <string name="mdtp_item_is_selected">تم تحديد <xliff:g id="item" example="2013">%1$s</xliff:g></string>
+    <string name="mdtp_minute_picker_description">شريط التمرير الدائري للدقائق</string>
+    <string name="mdtp_next_month_arrow_description">الشهر التالي</string>
+    <string name="mdtp_ok">@android:string/ok</string>
+    <string name="mdtp_pm">م</string>
+    <string name="mdtp_previous_month_arrow_description">الشهر السابق</string>
+    <string name="mdtp_second_picker_description">شريط التمرير الدائري للثواني</string>
+    <string name="mdtp_select_day">تحديد الشهر واليوم</string>
+    <string name="mdtp_select_hours">تحديد الساعات</string>
+    <string name="mdtp_select_minutes">تحديد الدقائق</string>
+    <string name="mdtp_select_seconds">تحديد الثواني</string>
+    <string name="mdtp_select_year">تحديد العام</string>
+    <string name="mdtp_time">الوقت</string>
+    <string name="mdtp_year_picker_description">قائمة الأعوام</string>
 </resources>
