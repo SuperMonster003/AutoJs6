@@ -49,6 +49,7 @@
         "Tasker no podía invocar y ejecutar scripts correctamente _[`issue #501`](http://issues.autojs6.com/501)_",
         "Diversos problemas de interacción del editor Ace relacionados con IME/selección de texto/plegado de código/zoom con pellizco/navegación de pila y otros escenarios",
         "La caché de iconos y el estado de actualización por deslizamiento del Centro de plugins podían ser incoherentes en algunos casos",
+        "Los iconos de los plugins instalados en la pestaña Plugins de la página de inicio no cambiaban dinámicamente al alternar el modo nocturno",
         "El Centro de plugins podía instalar el APK de una variante incorrecta cuando una versión del plugin contenía varias variantes",
         "Los plugins APK Builder Template podían aparecer duplicados o notificar actualizaciones incorrectamente",
         "La posición de desplazamiento de la lista del administrador de archivos se restablecía tras eliminar archivos de la Papelera",

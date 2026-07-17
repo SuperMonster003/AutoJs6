@@ -52,6 +52,7 @@
 * `Fix` Tasker could not invoke and run scripts correctly _[`issue #501`](http://issues.autojs6.com/501)_
 * `Fix` Multiple Ace editor interaction issues involving IME input/text selection/code folding/pinch zoom/stack navigation and related scenarios
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
+* `Fix` Installed plugin icons on the Home Plugins tab did not switch dynamically when night mode changed
 * `Fix` Plugin Center could install an APK from the wrong distribution variant when a plugin release contained multiple variants
 * `Fix` APK Builder Template plugins could appear twice or incorrectly report updates
 * `Fix` File manager list scroll position was reset after deleting files from the Recycle Bin

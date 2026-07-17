@@ -19,6 +19,7 @@ import org.autojs.autojs.core.plugin.text.OpenccPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.network.UpdateIgnoreStore
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplatePluginIds
@@ -53,6 +54,7 @@ class PluginCenterViewModel : ViewModel() {
     private val installedRepo = InstalledPluginRepository()
     private val legacyRepo = LegacyInstalledPluginRepository()
     private val enableStore = PluginEnableStore
+    private val iconRenderModeTracker = PluginIconRenderModeTracker()
 
     private val _items = MutableStateFlow<List<PluginCenterItem>>(emptyList())
     val items: StateFlow<List<PluginCenterItem>> = _items
@@ -95,13 +97,20 @@ class PluginCenterViewModel : ViewModel() {
     ) {
         Log.d(TAG, "load: forceRefreshIndex = $forceRefreshIndex, sourceScope = $sourceScope")
         PluginCenterProcessLogger.i("Start plugin center load: forceRefreshIndex=$forceRefreshIndex, sourceScope=${sourceScope?.name ?: "ALL"}.")
+        val iconNightModeEnabled = ViewUtils.isNightModeEnabled
         val generation = ++loadGeneration
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             fun isLatestLoad() = generation == loadGeneration
             fun updateLatestItems(next: List<PluginCenterItem>) {
                 if (isLatestLoad()) {
-                    updateItemsIfChanged(next, force = forceRender)
+                    val updated = updateItemsIfChanged(
+                        next = next,
+                        force = forceRender || iconRenderModeTracker.shouldForceRender(iconNightModeEnabled),
+                    )
+                    if (updated) {
+                        iconRenderModeTracker.markRendered(iconNightModeEnabled)
+                    }
                 }
             }
             fun emitRefreshError(message: String) {
@@ -331,10 +340,12 @@ class PluginCenterViewModel : ViewModel() {
         PluginInfoDialogManager.refreshIfShowing(context, _items.value)
     }
 
-    private fun updateItemsIfChanged(next: List<PluginCenterItem>, force: Boolean = false) {
-        if (force || !isSemanticallySameList(_items.value, next)) {
+    private fun updateItemsIfChanged(next: List<PluginCenterItem>, force: Boolean = false): Boolean {
+        val shouldUpdate = force || !isSemanticallySameList(_items.value, next)
+        if (shouldUpdate) {
             _items.value = next
         }
+        return shouldUpdate
     }
 
     private fun PluginIndexSource.labelForMessage(context: Context): String = when (this) {
