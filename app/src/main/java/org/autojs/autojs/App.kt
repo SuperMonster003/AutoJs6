@@ -8,6 +8,8 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -42,6 +44,7 @@ import org.autojs.autojs6.R
 import org.greenrobot.eventbus.EventBus
 import java.lang.ref.WeakReference
 import java.lang.reflect.Method
+import java.util.concurrent.atomic.AtomicBoolean
 import androidx.work.Configuration as WorkManagerConfiguration
 import org.autojs.autojs.inrt.Pref as InrtPref
 
@@ -55,6 +58,22 @@ class App : Application(), WorkManagerConfiguration.Provider {
 
     lateinit var dynamicBroadcastReceivers: DynamicBroadcastReceivers
         private set
+
+    private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
+    private val deferredNativeNodePrewarmScheduled = AtomicBoolean(false)
+    private val deferredMaintenanceScheduled = AtomicBoolean(false)
+
+    private val deferredNativeNodePrewarm = Runnable {
+        if (deferredNativeNodePrewarmScheduled.compareAndSet(true, false)) {
+            prewarmNativeNodeIfNeeded()
+        }
+    }
+
+    private val deferredMaintenance = Runnable {
+        if (deferredMaintenanceScheduled.compareAndSet(true, false)) {
+            Thread(::scheduleMaintenanceWork, "AutoJs6-startup-maintenance").start()
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -79,7 +98,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 setUpDebugEnvironment()
                 setUpLeakCanary()
                 collectPendingNodeCrashEvidence()
-                prewarmNativeNodeIfNeeded()
+                scheduleNativeNodePrewarmIfNeeded()
 
                 AutoJs.initInstance(this)
                 GlobalKeyObserver.initIfNeeded(applicationContext)
@@ -91,10 +110,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 ThemeColorManager.init()
                 setUpDefaultNightMode()
 
-                HistoryCleanupScheduler.scheduleStartupCleanup(this)
-                HistoryCleanupScheduler.schedulePeriodicCleanup(this)
-                TmpScriptFilesCleanupScheduler.scheduleStartupCleanup(this)
-                TmpScriptFilesCleanupScheduler.schedulePeriodicCleanup(this)
+                scheduleDeferredMaintenance()
             }
         }
     }
@@ -258,6 +274,47 @@ class App : Application(), WorkManagerConfiguration.Provider {
         }
     }
 
+    private fun scheduleNativeNodePrewarmIfNeeded() {
+        when (NodeRuntimeBackend.current()) {
+            NodeRuntimeBackend.NATIVE,
+            NodeRuntimeBackend.AUTO -> {
+                if (deferredNativeNodePrewarmScheduled.compareAndSet(false, true)) {
+                    mainHandler.postDelayed(deferredNativeNodePrewarm, NATIVE_NODE_PREWARM_DELAY_MILLIS)
+                }
+            }
+            NodeRuntimeBackend.RHINO,
+            NodeRuntimeBackend.EMBEDDED,
+            NodeRuntimeBackend.PLUGIN -> Unit
+        }
+    }
+
+    /**
+     * Cancels only an application-startup prewarm that has not begun yet. A real Node request
+     * must take precedence so that the delayed task cannot start competing service processes.
+     */
+    internal fun cancelDeferredNativeNodePrewarm() {
+        if (deferredNativeNodePrewarmScheduled.compareAndSet(true, false)) {
+            mainHandler.removeCallbacks(deferredNativeNodePrewarm)
+        }
+    }
+
+    private fun scheduleDeferredMaintenance() {
+        if (deferredMaintenanceScheduled.compareAndSet(false, true)) {
+            mainHandler.postDelayed(deferredMaintenance, MAINTENANCE_SCHEDULING_DELAY_MILLIS)
+        }
+    }
+
+    private fun scheduleMaintenanceWork() {
+        runCatching { HistoryCleanupScheduler.scheduleStartupCleanup(this) }
+            .onFailure { Log.w(TAG, "Failed to schedule startup history cleanup.", it) }
+        runCatching { HistoryCleanupScheduler.schedulePeriodicCleanup(this) }
+            .onFailure { Log.w(TAG, "Failed to schedule periodic history cleanup.", it) }
+        runCatching { TmpScriptFilesCleanupScheduler.scheduleStartupCleanup(this) }
+            .onFailure { Log.w(TAG, "Failed to schedule startup temporary script cleanup.", it) }
+        runCatching { TmpScriptFilesCleanupScheduler.schedulePeriodicCleanup(this) }
+            .onFailure { Log.w(TAG, "Failed to schedule periodic temporary script cleanup.", it) }
+    }
+
     private fun collectPendingNodeCrashEvidence() {
         runCatching {
             NodeCrashEvidenceStore.collectPending(this, "app.onCreate")
@@ -278,6 +335,10 @@ class App : Application(), WorkManagerConfiguration.Provider {
     }
 
     fun clear() {
+        cancelDeferredNativeNodePrewarm()
+        if (deferredMaintenanceScheduled.compareAndSet(true, false)) {
+            mainHandler.removeCallbacks(deferredMaintenance)
+        }
         dynamicBroadcastReceivers.unregisterAll()
         InAppEventBus.clear()
     }
@@ -285,6 +346,8 @@ class App : Application(), WorkManagerConfiguration.Provider {
     companion object {
 
         private const val TAG = "App"
+        private const val NATIVE_NODE_PREWARM_DELAY_MILLIS = 1_800L
+        private const val MAINTENANCE_SCHEDULING_DELAY_MILLIS = 2_500L
 
         private lateinit var instance: WeakReference<App>
 

@@ -10,6 +10,7 @@ import android.os.Looper
 import android.os.ResultReceiver
 import android.os.SystemClock
 import android.util.Log
+import org.autojs.autojs.App
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Semaphore
@@ -231,6 +232,7 @@ open class NativeNodeProcessService : Service() {
 
         fun prewarm(context: Context) {
             val appContext = context.applicationContext
+            (appContext as? App)?.cancelDeferredNativeNodePrewarm()
             SERVICE_COMPONENTS.indices.forEach { slotIndex ->
                 prewarm(appContext, slotIndex)
             }
@@ -243,6 +245,7 @@ open class NativeNodeProcessService : Service() {
             outputSink: NativeNodeRuntimeBridge.OutputSink?,
         ): Int {
             val appContext = context.applicationContext
+            (appContext as? App)?.cancelDeferredNativeNodePrewarm()
             val slotIndex = try {
                 acquireSlot()
             } catch (e: InterruptedException) {

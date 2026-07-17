@@ -22,6 +22,7 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
 
     private static final EventDispatcher.Event<OnVolumeDownListener> VOLUME_DOWN_EVENT = OnVolumeDownListener::onVolumeDown;
     private static final String LOG_TAG = "GlobalKeyObserver";
+    private static final long SHELL_OBSERVER_START_DELAY_MILLIS = 1_200L;
     private static GlobalKeyObserver sSingleton;
     private final EventDispatcher<OnVolumeDownListener> mVolumeDownEventDispatcher;
     private boolean mVolumeDownFromShell, mVolumeDownFromAccessibility;
@@ -34,9 +35,14 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
         observer.setKeyListener(this);
         InputEventObserver io = InputEventObserver.getGlobal(applicationContext);
         io.addListener(observer);
-        // Starts getevent asynchronously with a delay to avoid blocking the first frame.
-        // zh-CN: 将底层 getevent 的启动改为异步, 并稍作延迟, 避免阻塞首帧.
-        new Handler(applicationContext.getMainLooper()).postDelayed(io::ensureObservedAsync, 240);
+        // Accessibility key events are observed immediately above. Delay only the shell fallback
+        // until after the cold Rhino bootstrap so getevent/root probing cannot compete with it.
+        // zh-CN: 上方已立即监听无障碍按键事件. 仅将 shell 兜底监听延迟到 Rhino 冷启动之后,
+        // 避免 getevent/Root 探测与脚本引擎初始化争抢资源.
+        new Handler(applicationContext.getMainLooper()).postDelayed(
+                io::ensureObservedAsync,
+                SHELL_OBSERVER_START_DELAY_MILLIS
+        );
     }
 
     public static void initIfNeeded(Context applicationContext) {
