@@ -171,6 +171,8 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원
 * `추가` Node.js 런타임에서 제어된 AutoJs6 브리지 모듈을 지원하고 Safe Node Profile 보안 정책을 적용
+* `추가` Node.js 런타임에서 상주 서비스 프로세스 및 프로세스 범위 Node/V8 플랫폼 재사용을 지원하고 각 스크립트 실행마다 새로운 isolate와 Environment 생성
+* `추가` Node.js 상주 런타임에서 유휴 상태 또는 메모리 압박 시 회수/명시적 종료/비정상 프로세스 격리 및 재구축 지원
 * `추가` 앱 패키징 기능은 Node.js 스크립트 프로젝트를 지원하고 필요한 런타임 라이브러리를 자동 포함
 * `추가` 플러그인 시스템에서 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/텍스트 변환/미디어 정보 등의 확장 API 지원
 * `추가` 플러그인 센터에서 전역 설정 페이지 및 사용 설명 페이지 지원
@@ -225,6 +227,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` KeyCode 메서드에서 Shizuku 권한으로 키 코드 명령 전송 지원
 * `개선` 중요하지 않은 구성 요소의 초기화를 지연하여 앱 시작 성능 향상
 * `개선` Rhino 내장 리소스 컴파일 결과 및 런타임 확장 함수 메타데이터를 캐시하여 스크립트 초기화 성능 향상
+* `개선` Node.js 상주 프로세스 및 프로세스 범위 런타임을 재사용하여 스크립트 웜 스타트 성능 향상
 * `개선` ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo 관련 기능 플러그인화
 * `개선` 코드 편집기 "실행" 버튼을 누른 후 "중지" 버튼으로 전환하여 스크립트를 빠르게 중지 가능
 * `개선` 코드 편집기의 테마/글꼴/도구 모음/읽기 전용 모드/접기/선택 메뉴 등의 상호 작용 개선

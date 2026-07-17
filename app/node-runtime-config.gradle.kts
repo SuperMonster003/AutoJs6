@@ -265,6 +265,9 @@ val nodeJsEmbeddedProbeLifecycleEnabled = providers.gradleProperty("autojs.nodej
 val nodeJsEmbeddedScriptEnabled = providers.gradleProperty("autojs.nodejs.embedded.script.enabled").orElse("true").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsEmbeddedPersistentRuntimeEnabled = providers.gradleProperty("autojs.nodejs.embedded.persistentRuntime").orElse("true").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val nodeJsEsmExperimentalEnabled = providers.gradleProperty("autojs.nodejs.esm.experimental").orElse("true").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
@@ -516,6 +519,7 @@ listOf(
     "nodeJsEmbeddedProbeTimeoutMs" to nodeJsEmbeddedProbeTimeoutMs,
     "nodeJsEmbeddedProbeLifecycleEnabled" to nodeJsEmbeddedProbeLifecycleEnabled,
     "nodeJsEmbeddedScriptEnabled" to nodeJsEmbeddedScriptEnabled,
+    "nodeJsEmbeddedPersistentRuntimeEnabled" to nodeJsEmbeddedPersistentRuntimeEnabled,
     "nodeJsEsmExperimentalEnabled" to nodeJsEsmExperimentalEnabled,
     "nodeJsDynamicImportLocalEnabled" to nodeJsDynamicImportLocalEnabled,
     "nodeJsDynamicImportEnabled" to nodeJsDynamicImportEnabled,

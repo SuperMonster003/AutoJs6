@@ -231,7 +231,7 @@ object NativeNodeEmbeddedRuntimeBridge {
     private const val EMBEDDED_MVP_GO_NO_GO_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.embeddedmvpgonogo"
     private const val PROBE_LEVEL_PROPERTY = "autojs.nodejs.embedded.probe.level"
     private const val PROBE_TIMEOUT_MS_PROPERTY = "autojs.nodejs.embedded.probe.timeout.ms"
-    private const val EMBEDDED_PROBE_PROCESS_SUFFIX = ":nodejs_embedded"
+    private const val EMBEDDED_PROBE_PROCESS_SUFFIX = ":nodejs_probe"
     private const val PROBE_LEVEL_MIN = 0
     private const val PROBE_LEVEL_MAX = 209
     private const val EMBEDDED_SCRIPT_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_SCRIPT_SOURCE_MAX_BYTES
@@ -582,6 +582,80 @@ object NativeNodeEmbeddedRuntimeBridge {
         }
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
+
+    fun ensureProcessRuntimeReady(context: Context): Map<String, String> =
+        callProcessRuntime(context) { nativeEnsureProcessRuntimeReady() }
+
+    fun processRuntimeDiagnostics(context: Context): Map<String, String> =
+        callProcessRuntime(context) { nativeProcessRuntimeDiagnostics() }
+
+    fun shutdownProcessRuntime(context: Context, reason: String): Map<String, String> =
+        callProcessRuntime(context) { nativeShutdownProcessRuntime(reason) }
+
+    fun setProcessRuntimePersistentEnabled(
+        context: Context,
+        enabled: Boolean,
+    ): Map<String, String> = callProcessRuntime(context) {
+        nativeSetProcessRuntimePersistentEnabled(enabled)
+    }
+
+    private fun callProcessRuntime(
+        context: Context,
+        nativeCall: () -> Array<String>?,
+    ): Map<String, String> {
+        val loadStartedAt = SystemClock.elapsedRealtime()
+        val libcxxLoad = loadLibrary("c++_shared", context)
+        val nodeLoad = if (libcxxLoad.loaded) {
+            loadLibrary(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME, context)
+        } else {
+            LibraryLoad.skipped(NativeNodeRuntimeBridge.NODE_LIBRARY_NAME)
+        }
+        val bridgeLoad = if (nodeLoad.loaded) {
+            loadLibrary(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME, context)
+        } else {
+            LibraryLoad.skipped(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)
+        }
+        val loadDurationMs = SystemClock.elapsedRealtime() - loadStartedAt
+        val loadError = when {
+            libcxxLoad.attempted && !libcxxLoad.loaded ->
+                "libc++_shared.so failed to load: ${libcxxLoad.error.toLoadErrorMessage().orEmpty()}"
+            nodeLoad.attempted && !nodeLoad.loaded ->
+                "libnode.so failed to load: ${nodeLoad.error.toLoadErrorMessage().orEmpty()}"
+            bridgeLoad.attempted && !bridgeLoad.loaded ->
+                "libautojs6-node.so failed to load: ${bridgeLoad.error.toLoadErrorMessage().orEmpty()}"
+            else -> null
+        }
+        if (loadError != null) {
+            return processRuntimeFailure(loadError, loadDurationMs)
+        }
+        return runCatching { parseNativePayload(nativeCall() ?: emptyArray()) }
+            .fold(
+                onSuccess = { values ->
+                    values.toMutableMap().apply {
+                        this["process_runtime.library_load_ms"] = loadDurationMs.toString()
+                    }
+                },
+                onFailure = { error ->
+                    processRuntimeFailure(
+                        error.message ?: error.javaClass.name,
+                        loadDurationMs,
+                    )
+                },
+            )
+    }
+
+    private fun processRuntimeFailure(
+        reason: String,
+        loadDurationMs: Long,
+    ): Map<String, String> = linkedMapOf(
+        "process_runtime.state" to "unavailable",
+        "process_runtime.healthy" to "false",
+        "process_runtime.poisoned" to "true",
+        "process_runtime.poison" to "true",
+        "process_runtime.teardown_clean" to "false",
+        "process_runtime.poison_reason" to reason,
+        "process_runtime.library_load_ms" to loadDurationMs.toString(),
+    )
 
     fun runEmbeddedScriptInCurrentProcess(
         context: Context,
@@ -15029,6 +15103,14 @@ object NativeNodeEmbeddedRuntimeBridge {
         )
     }
 
+    private external fun nativeEnsureProcessRuntimeReady(): Array<String>?
+
+    private external fun nativeProcessRuntimeDiagnostics(): Array<String>?
+
+    private external fun nativeShutdownProcessRuntime(reason: String): Array<String>?
+
+    private external fun nativeSetProcessRuntimePersistentEnabled(enabled: Boolean): Array<String>?
+
     private external fun nativeEmbeddedProbePing(): Array<String>?
 
     private external fun nativeEmbeddedProbeLibnodeHandle(): Array<String>?
@@ -15966,10 +16048,10 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
     }
 
-    private fun loadLibrary(name: String): LibraryLoad = try {
+    private fun loadLibrary(name: String, context: Context? = null): LibraryLoad = try {
         when (name) {
-            NativeNodeRuntimeBridge.NODE_LIBRARY_NAME -> NodeJsPluginRuntimeLoader.loadNodeOrSystem()
-            NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME -> NodeJsPluginRuntimeLoader.loadBridgeOrSystem()
+            NativeNodeRuntimeBridge.NODE_LIBRARY_NAME -> NodeJsPluginRuntimeLoader.loadNodeOrSystem(context)
+            NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME -> NodeJsPluginRuntimeLoader.loadBridgeOrSystem(context)
             else -> System.loadLibrary(name)
         }
         LibraryLoad(name = name, loaded = true, attempted = true)

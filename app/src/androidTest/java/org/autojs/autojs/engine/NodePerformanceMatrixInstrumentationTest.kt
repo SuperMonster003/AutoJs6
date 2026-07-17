@@ -66,8 +66,27 @@ class NodePerformanceMatrixInstrumentationTest {
             ))
             .put(compileCacheWithPrewarm.toJson())
 
-        assertEquals("not_requested", compileCacheOnly.result.nativeValues["embedded_script.prewarm_pool.status"])
-        assertEquals("consumed", compileCacheWithPrewarm.result.nativeValues["embedded_script.prewarm_pool.status"])
+        if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+            assertEquals("prewarmed process should execute the measured script", compileCacheWithPrewarm.prewarm?.pid, compileCacheWithPrewarm.result.pid)
+            assertEquals("1", compileCacheWithPrewarm.result.nativeValues["process_runtime.init_count"])
+            assertEquals("true", compileCacheWithPrewarm.result.nativeValues["process_runtime.reused"])
+        } else {
+            assertEquals("false", compileCacheOnly.result.nativeValues["embedded_script.process_session.enabled"])
+            assertEquals("one_shot_rollback", compileCacheOnly.result.nativeValues["embedded_script.process_session.status"])
+            assertEquals("false", compileCacheOnly.result.nativeValues["process_runtime.persistent_enabled"])
+            assertEquals("true", compileCacheOnly.result.nativeValues["embedded_script.client.process_settle_deferred"])
+            assertEquals("not_requested", compileCacheOnly.result.nativeValues["embedded_script.prewarm_pool.status"])
+            if (compileCacheWithPrewarm.result.nativeValues["embedded_script.client.legacy_retirement_retry"] == "true") {
+                assertEquals("not_requested", compileCacheWithPrewarm.result.nativeValues["embedded_script.prewarm_pool.status"])
+                assertTrue(
+                    compileCacheWithPrewarm.result.nativeValues["embedded_script.client.legacy_retirement_reason"]
+                        .orEmpty()
+                        .startsWith("trim_memory_"),
+                )
+            } else {
+                assertEquals("consumed", compileCacheWithPrewarm.result.nativeValues["embedded_script.prewarm_pool.status"])
+            }
+        }
         assertCompileCacheEnabled(compileCacheOnly.result)
         assertCompileCacheEnabled(compileCacheWithPrewarm.result)
 
@@ -99,8 +118,13 @@ class NodePerformanceMatrixInstrumentationTest {
             if (prewarm != null) {
                 assertTrue("prewarm=$prewarm", prewarm.started)
                 assertEquals("ready", prewarm.status)
-                assertTrue("prewarm should be process-only", prewarm.processOnly)
-                assertTrue("prewarm must not load Node runtime", !prewarm.runtimeLoaded)
+                if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+                    assertTrue("prewarm must initialize more than the service process", !prewarm.processOnly)
+                    assertTrue("prewarm must load the process-global Node runtime", prewarm.runtimeLoaded)
+                } else {
+                    assertTrue("legacy prewarm should be process-only", prewarm.processOnly)
+                    assertTrue("legacy prewarm must not load the Node runtime", !prewarm.runtimeLoaded)
+                }
             }
             val prewarmService = prewarm?.let { processSnapshot("$modeId.prewarm.service", it.pid) }
             val startedAt = SystemClock.elapsedRealtimeNanos()
@@ -126,7 +150,10 @@ class NodePerformanceMatrixInstrumentationTest {
             assertTrue("first module metric missing for $modeId\n${result.stdout}", nodePayload!!.optLong("firstModuleMs", -1L) >= 0L)
             assertTrue("first bridge metric missing for $modeId\n${result.stdout}", nodePayload.optLong("firstBridgeCallMs", -1L) >= 0L)
             assertTrue("fake bridge call failed for $modeId\n${result.stdout}", nodePayload.optBoolean("bridgeCallOk", false))
-            if (prewarm != null) {
+            if (
+                prewarm != null &&
+                result.nativeValues["embedded_script.client.legacy_retirement_retry"] != "true"
+            ) {
                 assertEquals("prewarmed process should run the consumed script", prewarm.pid, result.pid)
             }
 
@@ -137,6 +164,7 @@ class NodePerformanceMatrixInstrumentationTest {
                 result = result,
                 nodePayload = nodePayload,
                 prewarm = prewarm,
+                persistentRuntimeEnabled = NodeEmbeddedProcessSessionManager.isEnabled(),
                 cacheBefore = cacheBefore,
                 cacheAfter = cacheAfter,
                 snapshots = listOfNotNull(beforeApp, prewarmService, afterApp, afterService),
@@ -435,14 +463,27 @@ class NodePerformanceMatrixInstrumentationTest {
         val result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
         val nodePayload: JSONObject,
         val prewarm: NativeNodeEmbeddedScriptService.Companion.PrewarmRuntimeResult?,
+        val persistentRuntimeEnabled: Boolean,
         val cacheBefore: CompileCacheSnapshot,
         val cacheAfter: CompileCacheSnapshot,
         val snapshots: List<ProcessSnapshot>,
     ) {
+        private val legacyRetirementRecovery: Boolean
+            get() = result.nativeValues["embedded_script.client.legacy_retirement_retry"] == "true"
+
         fun toJson(): JSONObject =
             JSONObject()
                 .put("modeId", modeId)
-                .put("supported", true)
+                .put("supported", !legacyRetirementRecovery)
+                .put("sampleValid", !legacyRetirementRecovery)
+                .put(
+                    "unavailableReason",
+                    if (legacyRetirementRecovery) {
+                        "Process-only prewarm was retired by memory pressure before execution; the recovered cold execution is not a valid prewarm sample."
+                    } else {
+                        JSONObject.NULL
+                    },
+                )
                 .put("cache", "compile-cache")
                 .put("startupSnapshot", "disabled")
                 .put("processPrewarm", prewarmJson())
@@ -483,24 +524,54 @@ class NodePerformanceMatrixInstrumentationTest {
                 .put("nativeValues", JSONObject(result.nativeValues.toSortedMap()))
 
         private fun prewarmJson(): JSONObject =
-            if (!processPrewarm) {
+            if (!processPrewarm && !persistentRuntimeEnabled) {
                 JSONObject()
                     .put("requested", false)
                     .put("status", result.nativeValues["embedded_script.prewarm_pool.status"].orEmpty())
                     .put("consumed", result.nativeValues["embedded_script.prewarm_pool.consumed"] == "true")
-            } else {
+            } else if (!processPrewarm) {
+                JSONObject()
+                    .put("requested", false)
+                    .put("lifecycleMode", "persistent-process-fresh-isolate")
+                    .put("runtimeGeneration", result.nativeValues["process_runtime.generation"].orEmpty())
+                    .put("runtimeInitCount", result.nativeValues["process_runtime.init_count"].orEmpty())
+                    .put("runtimeExecutionSequence", result.nativeValues["process_runtime.execution_sequence"].orEmpty())
+            } else if (persistentRuntimeEnabled) {
                 JSONObject()
                     .put("requested", true)
+                    .put("lifecycleMode", "persistent-process-fresh-isolate")
                     .put("prewarmStarted", prewarm?.started ?: false)
                     .put("prewarmStatus", prewarm?.status.orEmpty())
                     .put("prewarmReason", prewarm?.reason.orEmpty())
                     .put("prewarmPid", prewarm?.pid ?: JSONObject.NULL)
                     .put("processOnly", prewarm?.processOnly ?: false)
                     .put("runtimeLoadedBeforeExecution", prewarm?.runtimeLoaded ?: true)
+                    .put("sameProcess", prewarm?.pid == result.pid)
+                    .put("runtimeGeneration", result.nativeValues["process_runtime.generation"].orEmpty())
+                    .put("runtimeInitCount", result.nativeValues["process_runtime.init_count"].orEmpty())
+                    .put("runtimeExecutionSequence", result.nativeValues["process_runtime.execution_sequence"].orEmpty())
+                    .put("runtimeReused", result.nativeValues["process_runtime.reused"] == "true")
+                    .put("executionPid", result.pid)
+            } else {
+                JSONObject()
+                    .put("requested", true)
+                    .put("lifecycleMode", "one-shot-process")
+                    .put("prewarmStarted", prewarm?.started ?: false)
+                    .put("prewarmStatus", prewarm?.status.orEmpty())
+                    .put("prewarmReason", prewarm?.reason.orEmpty())
+                    .put("prewarmPid", prewarm?.pid ?: JSONObject.NULL)
+                    .put("processOnly", prewarm?.processOnly ?: true)
+                    .put("runtimeLoadedBeforeExecution", prewarm?.runtimeLoaded ?: false)
                     .put("consumed", result.nativeValues["embedded_script.prewarm_pool.consumed"] == "true")
                     .put("executionStatus", result.nativeValues["embedded_script.prewarm_pool.status"].orEmpty())
-                    .put("executionPid", result.pid)
+                    .put("sampleValid", !legacyRetirementRecovery)
+                    .put("retirementRecovered", legacyRetirementRecovery)
+                    .put(
+                        "retirementReason",
+                        result.nativeValues["embedded_script.client.legacy_retirement_reason"].orEmpty(),
+                    )
                     .putNullable("ageMs", result.nativeValues["embedded_script.prewarm_pool.age_ms"]?.toLongOrNull())
+                    .put("executionPid", result.pid)
             }
     }
 

@@ -33,7 +33,9 @@ import java.io.File
 import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -82,16 +84,71 @@ open class NativeNodeEmbeddedScriptService : Service() {
     private var prewarmStartedAtElapsedMs = 0L
     @Volatile
     private var prewarmStartId = 0
+    @Volatile
+    private var foregroundActive = false
+    @Volatile
+    private var retireAfterExecutionReason: String? = null
     private var foregroundServiceCreator: ForegroundServiceCreator? = null
     private val mainHandler = Handler(Looper.getMainLooper())
     private var prewarmStopRunnable: Runnable? = null
+    private val runtimeExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "AutoJs6-Node-Runtime-${javaClass.simpleName}").apply { isDaemon = true }
+    }
+    private val runtimeControlValues = AtomicReference<Map<String, String>>(emptyMap())
+    private val terminalShutdownStarted = AtomicBoolean(false)
+    private val serviceExecutionLock = Object()
+    private var activeServiceExecutionRequests = 0
+    private var terminalShutdownFuture: Future<*>? = null
+    @Volatile
+    private var pendingInteractiveExitRunnable: Runnable? = null
+    @Volatile
+    private var interactiveStopRequestedExecutionId: String? = null
+
+    private val processControlBinder = object : INodeEmbeddedProcessControl.Stub() {
+        override fun ensureRuntimeReady(persistentEnabled: Boolean): Bundle {
+            retireAfterExecutionReason?.takeIf(String::isNotBlank)?.let { reason ->
+                return runtimeStatusBundle(
+                    runtimeControlValues.get() + mapOf(
+                        "process_runtime.state" to "draining",
+                        "process_runtime.healthy" to "false",
+                        "process_runtime.ensure.status" to "rejected",
+                        "process_runtime.ensure.detail" to "service retirement requested: $reason",
+                    ),
+                )
+            }
+            return runRuntimeControl("ensure_runtime_ready") {
+                val enabled = persistentEnabled && NodeEmbeddedProcessSessionManager.isEnabled()
+                val values = linkedMapOf<String, String>().apply {
+                    putAll(NativeNodeEmbeddedRuntimeBridge.setProcessRuntimePersistentEnabled(this@NativeNodeEmbeddedScriptService, enabled))
+                    if (enabled) {
+                        putAll(NativeNodeEmbeddedRuntimeBridge.ensureProcessRuntimeReady(this@NativeNodeEmbeddedScriptService))
+                    } else {
+                        putAll(NativeNodeEmbeddedRuntimeBridge.processRuntimeDiagnostics(this@NativeNodeEmbeddedScriptService))
+                    }
+                }
+                runtimeControlValues.set(values)
+                runtimeStatusBundle(values)
+            }
+        }
+
+        override fun getRuntimeStatus(): Bundle = runtimeStatusBundle(runtimeControlValues.get())
+
+        override fun requestShutdown(reason: String?) {
+            requestPersistentShutdown(
+                reason = reason.orEmpty().ifBlank { "binder_request" },
+                awaitTerminalShutdown = true,
+            )
+        }
+    }
 
     private val foregroundServiceType = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> FOREGROUND_SERVICE_TYPE_SPECIAL_USE
         else -> FOREGROUND_SERVICE_TYPE_UNKNOWN
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onBind(intent: Intent?): IBinder? {
+        return processControlBinder.takeIf { NodeEmbeddedProcessSessionManager.isEnabled() }
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -161,23 +218,37 @@ open class NativeNodeEmbeddedScriptService : Service() {
         activeLifecycle = null
         clearActiveInteractiveSession(interactiveExecutionId)
         foregroundServiceCreator?.stopForeground(STOP_FOREGROUND_REMOVE)
+        foregroundActive = false
         foregroundServiceCreator = null
+        pendingInteractiveExitRunnable?.let(mainHandler::removeCallbacks)
+        pendingInteractiveExitRunnable = null
+        interactiveStopRequestedExecutionId = null
+        runtimeExecutor.shutdownNow()
         scheduleProcessExit(0)
         super.onDestroy()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        ensureScriptForeground()
         return when (intent?.action) {
             ACTION_PREWARM_RUNTIME -> {
-                handlePrewarmRuntime(intent, startId)
+                runtimeExecutor.execute { handlePrewarmRuntime(intent, startId) }
                 START_NOT_STICKY
             }
             ACTION_RUN_SCRIPT -> {
-                Thread {
-                    runScript(intent, startId)
-                }.apply {
-                    name = "NativeNodeEmbeddedScriptService-$startId"
-                    start()
+                if (!beginServiceExecutionRequest()) {
+                    rejectRetiringScriptRequest(intent, startId)
+                } else {
+                    Thread {
+                        try {
+                            runScript(intent, startId)
+                        } finally {
+                            finishServiceExecutionRequest()
+                        }
+                    }.apply {
+                        name = "NativeNodeEmbeddedScriptService-$startId"
+                        start()
+                    }
                 }
                 START_NOT_STICKY
             }
@@ -242,9 +313,86 @@ open class NativeNodeEmbeddedScriptService : Service() {
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
-            expirePrewarm("low_memory_$level", prewarmStartId)
+            // In persistent mode the main-process session manager receives the same
+            // memory-pressure signal and owns the binding/stop/exit handshake. If
+            // this remote service retires itself independently, the manager can race
+            // a new acquire against a still-draining process and quarantine a healthy
+            // slot. Legacy one-shot/prewarm mode has no manager, so keep its local
+            // cleanup behavior.
+            if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+                return
+            }
+            clearPrewarmState("low_memory_$level")
+            requestPersistentShutdown("trim_memory_$level")
         }
     }
+
+    private fun beginServiceExecutionRequest(): Boolean = synchronized(serviceExecutionLock) {
+        if (!retireAfterExecutionReason.isNullOrBlank()) {
+            false
+        } else {
+            activeServiceExecutionRequests += 1
+            true
+        }
+    }
+
+    private fun finishServiceExecutionRequest() {
+        val retirementReason = synchronized(serviceExecutionLock) {
+            activeServiceExecutionRequests = (activeServiceExecutionRequests - 1).coerceAtLeast(0)
+            serviceExecutionLock.notifyAll()
+            retireAfterExecutionReason?.takeIf { activeServiceExecutionRequests == 0 && it.isNotBlank() }
+        }
+        retirementReason?.let { reason ->
+            if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+                ensureTerminalShutdownQueued(reason)
+            } else {
+                mainHandler.post {
+                    stopSelf()
+                    scheduleProcessExit(0)
+                }
+            }
+        }
+    }
+
+    private fun rejectRetiringScriptRequest(intent: Intent, startId: Int) {
+        val reason = retireAfterExecutionReason.orEmpty().ifBlank { "service_retiring" }
+        val receiver = intent.resultReceiverExtra(EXTRA_RESULT_RECEIVER)
+        val startedAt = android.os.SystemClock.elapsedRealtime()
+        receiver?.send(
+            RESULT_SCRIPT,
+            requestTransportFailureResult(
+                intent = intent,
+                throwable = IllegalStateException("Embedded Node service is retiring: $reason"),
+                startedAt = startedAt,
+            ).let { failure ->
+                failure.copy(
+                    nativeValues = linkedMapOf<String, String>().apply {
+                        putAll(failure.nativeValues)
+                        put("embedded_script.native_execution_entered", "false")
+                        put("embedded_script.service.retirement_requested", "true")
+                        put("embedded_script.service.retirement_reason", reason)
+                    },
+                )
+            }.toBundle(),
+        )
+        finishStartedServiceWhenIdle(startId, "retiring_request_rejected")
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withoutNativeExecution():
+        NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult =
+        copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(runtimeControlValues.get())
+                putAll(nativeValues)
+                put("embedded_script.native_execution_entered", "false")
+                put("embedded_script.service.cleanup_clean", "true")
+                put("embedded_script.service.cleanup_errors", "")
+                put("embedded_script.service.result_delivery_phase", "pre_native_rejection")
+                put("embedded_script.service.execution_slot_released", "true")
+                put("embedded_script.service.queue_idle_after_release", queueStatusSnapshot().idle.toString())
+                put("embedded_script.service.retirement_requested", "false")
+            },
+        )
 
     private fun runScript(intent: Intent, startId: Int) {
         val prewarmLease = consumePrewarmForExecution()
@@ -260,7 +408,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     intent = intent,
                     throwable = e,
                     startedAt = startedAt,
-                ).withPrewarmLease(prewarmLease).toBundle(),
+                ).withPrewarmLease(prewarmLease).withoutNativeExecution().toBundle(),
             )
             stopServiceIfQueueIdle(startId)
             return
@@ -273,6 +421,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 NativeNodeEmbeddedRuntimeBridge
                     .embeddedScriptRequestPreparationFailure(serviceRequest, e, startedAt)
                     .withPrewarmLease(prewarmLease)
+                    .withoutNativeExecution()
                     .toBundle(),
             )
             stopServiceIfQueueIdle(startId)
@@ -286,7 +435,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
             launchSurface = launchSurface,
             context = this,
         )?.let { failure ->
-            receiver?.send(RESULT_SCRIPT, failure.withPrewarmLease(prewarmLease).toBundle())
+            receiver?.send(
+                RESULT_SCRIPT,
+                failure.withPrewarmLease(prewarmLease).withoutNativeExecution().toBundle(),
+            )
             stopServiceIfQueueIdle(startId)
             return
         }
@@ -389,8 +541,15 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     startedAt = startedAt,
                     processName = processName,
                     pid = pid,
-                ).withProcessPoolPlan(processPoolPlan).withPrewarmLease(prewarmLease).toBundle(),
+                )
+                    .withProcessPoolPlan(processPoolPlan)
+                    .withPrewarmLease(prewarmLease)
+                    .withoutNativeExecution()
+                    .toBundle(),
             )
+            if (interactiveSession) {
+                clearActiveInteractiveSession(executionId)
+            }
             stopServiceIfQueueIdle(startId)
             return
         }
@@ -531,7 +690,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     "runtimeBudget=${runtimeBudget.toJsonObject()} " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
-        var terminalCrashEvidenceMarked = false
+        var deliveryResult: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null
+        var nativeExecutionEntered = false
         try {
             timeline?.mark("bridge_transport_start", mapOf("transport" to "file"))
             bridgeSession.start()
@@ -570,10 +730,26 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 )
             }
             timeline?.mark("native_enter")
-            val nativeResult = NativeNodeEmbeddedRuntimeBridge.runEmbeddedScriptInCurrentProcess(
-                context = this,
-                request = request,
-            )
+            nativeExecutionEntered = true
+            val nativeResult = runtimeExecutor.submit<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult> {
+                val processRuntimeValues = ensureServiceRuntimeReady()
+                val executionResult = NativeNodeEmbeddedRuntimeBridge.runEmbeddedScriptInCurrentProcess(
+                    context = this,
+                    request = request,
+                )
+                val finalRuntimeValues = NativeNodeEmbeddedRuntimeBridge.processRuntimeDiagnostics(
+                    this@NativeNodeEmbeddedScriptService,
+                )
+                runtimeControlValues.set(finalRuntimeValues)
+                executionResult.copy(
+                    nativeValues = linkedMapOf<String, String>().apply {
+                        putAll(processRuntimeValues)
+                        putAll(executionResult.nativeValues)
+                        putAll(finalRuntimeValues)
+                        put("embedded_script.native_execution_entered", "true")
+                    },
+                )
+            }.get()
             timeline?.recordNativeResult(nativeResult)
             val result = dispatchQueuedBridgeRequests(bridgeSession.appendNativeValues(nativeResult))
                 .withExecutionMode(executionMode, launchSurface)
@@ -627,9 +803,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 .withPrewarmLease(prewarmLease)
                 .withCrashEvidence(crashMarker)
                 .withTimeline(timeline)
-            NodeCrashEvidenceStore.markEmbeddedResult(this, crashMarker, evidenceResult)
-            terminalCrashEvidenceMarked = true
-            receiver?.send(RESULT_SCRIPT, evidenceResult.toBundle())
+            deliveryResult = evidenceResult
         } catch (e: Throwable) {
             timeline?.mark(
                 "stop_requested",
@@ -656,6 +830,26 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     nativeValues = lifecycle.nativeValues(),
                 )
             }
+            val failureRuntimeValues = if (nativeExecutionEntered) {
+                runCatching {
+                    runtimeExecutor.submit<Map<String, String>> {
+                        NativeNodeEmbeddedRuntimeBridge.processRuntimeDiagnostics(
+                            this@NativeNodeEmbeddedScriptService,
+                        )
+                    }.get(RUNTIME_CONTROL_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+                }.getOrElse { diagnosticsError ->
+                    mapOf(
+                        "process_runtime.state" to "unavailable",
+                        "process_runtime.healthy" to "false",
+                        "process_runtime.poisoned" to "true",
+                        "process_runtime.teardown_clean" to "false",
+                        "process_runtime.diagnostics_error" to
+                                (diagnosticsError.message ?: diagnosticsError.javaClass.name),
+                    )
+                }
+            } else {
+                emptyMap()
+            }
             val failureResult = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
                 succeeded = false,
                 exitCode = 1,
@@ -669,7 +863,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 processName = processName,
                 pid = pid,
                 sourceName = sourceName,
-                nativeValues = emptyMap(),
+                nativeValues = failureRuntimeValues + mapOf(
+                    "embedded_script.native_execution_entered" to nativeExecutionEntered.toString(),
+                ),
             )
                 .withLifecycle(lifecycle)
                 .withQueueLease(slotLease)
@@ -677,34 +873,61 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 .withRuntimeBudget(runtimeBudget)
                 .withCrashEvidence(crashMarker)
                 .withTimeline(timeline)
-            NodeCrashEvidenceStore.markEmbeddedResult(this, crashMarker, failureResult)
-            terminalCrashEvidenceMarked = true
-            receiver?.send(RESULT_SCRIPT, failureResult.toBundle())
+            deliveryResult = failureResult
         } finally {
-            File(File(cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId)).deleteRecursivelyIfExists()
-            activeHeartbeatMonitor?.stop("script.finally")
+            val cleanupErrors = mutableListOf<String>()
+            fun cleanup(name: String, block: () -> Unit) {
+                runCatching(block).onFailure { error ->
+                    cleanupErrors += "$name:${error.javaClass.simpleName}"
+                    Log.e(TAG, "script.cleanup.failed executionId=$executionId step=$name", error)
+                }
+            }
+            cleanup("request_spool") {
+                File(File(cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId)).deleteRecursivelyIfExists()
+            }
+            cleanup("heartbeat") { activeHeartbeatMonitor?.stop("script.finally") }
             activeHeartbeatMonitor = null
-            lifecycleStopRequestFile?.parentFile?.deleteRecursivelyIfExists()
-            bridgeSession.stop()
+            cleanup("lifecycle_stop_request") { lifecycleStopRequestFile?.parentFile?.deleteRecursivelyIfExists() }
+            cleanup("bridge_session") { bridgeSession.stop() }
             val queueStatus = releaseExecutionSlot(executionId)
             val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
-            if (!terminalCrashEvidenceMarked) {
+            val interactiveStopCompleted = interactiveSession &&
+                    interactiveStopRequestedExecutionId == executionId
+            val serviceRetirementRequested = !retireAfterExecutionReason.isNullOrBlank() ||
+                    interactiveStopCompleted
+            val postCleanupResult = deliveryResult?.let { result ->
+                val cleanedResult = bridgeSession.appendNativeValues(result)
+                cleanedResult.copy(
+                    nativeValues = linkedMapOf<String, String>().apply {
+                        putAll(cleanedResult.nativeValues)
+                        put("embedded_script.service.cleanup_clean", cleanupErrors.isEmpty().toString())
+                        put("embedded_script.service.cleanup_errors", cleanupErrors.joinToString(","))
+                        put("embedded_script.service.result_delivery_phase", "post_execution_cleanup")
+                        put("embedded_script.service.execution_slot_released", "true")
+                        put("embedded_script.service.queue_idle_after_release", queueStatus.idle.toString())
+                        put("embedded_script.service.retirement_requested", serviceRetirementRequested.toString())
+                    },
+                )
+            }
+            if (postCleanupResult == null) {
                 NodeCrashEvidenceStore.markServiceDestroy(
                     context = this,
                     marker = crashMarker,
                     reason = "embedded_script_service.finally",
                     nativeValues = lifecycle.nativeValues(),
                 )
+            } else {
+                NodeCrashEvidenceStore.markEmbeddedResult(this, crashMarker, postCleanupResult)
             }
             activeCrashMarker = null
+            activeLifecycle = null
             Log.i(
                 TAG,
                 "script.exit executionId=$executionId processName=$processName pid=$pid " +
                         "sourceName=$sourceName state=${lifecycle.state.name} elapsed=${elapsed}ms",
             )
             if (queueStatus.idle) {
-                stopSelf(startId)
-                scheduleProcessExit(0)
+                finishStartedServiceWhenIdle(startId, "execution_complete")
             } else {
                 Log.i(
                     TAG,
@@ -712,8 +935,23 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     "queued=${queueStatus.queuedCount}",
                 )
             }
+            if (interactiveStopCompleted) {
+                pendingInteractiveExitRunnable?.let(mainHandler::removeCallbacks)
+                pendingInteractiveExitRunnable = null
+                interactiveStopRequestedExecutionId = null
+            }
             if (interactiveSession) {
                 clearActiveInteractiveSession(executionId)
+            }
+            postCleanupResult?.let { result ->
+                runCatching { receiver?.send(RESULT_SCRIPT, result.toBundle()) }
+                    .onFailure { error ->
+                        Log.w(TAG, "script.result_delivery.failed executionId=$executionId", error)
+                        requestPersistentShutdown("result_delivery_failed")
+                    }
+            }
+            if (interactiveStopCompleted) {
+                requestPersistentShutdown("interactive_stop_completed")
             }
         }
     }
@@ -735,12 +973,28 @@ open class NativeNodeEmbeddedScriptService : Service() {
             )
             return
         }
+        if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+            val ready = runCatching { ensureServiceRuntimeReady() }
+            if (ready.isFailure) {
+                receiver?.send(
+                    RESULT_PREWARM,
+                    prewarmResultBundle(
+                        started = false,
+                        status = "failed",
+                        ttlMs = ttlMs,
+                        reason = ready.exceptionOrNull()?.message.orEmpty().ifBlank { "runtime_initialization_failed" },
+                    ),
+                )
+                finishStartedServiceWhenIdle(startId, "prewarm_failed")
+                return
+            }
+        }
         prewarmStopRunnable?.let(mainHandler::removeCallbacks)
         prewarmActive = true
         prewarmStartedAtElapsedMs = android.os.SystemClock.elapsedRealtime()
         prewarmStartId = startId
         val runnable = Runnable {
-            expirePrewarm("ttl_expired", startId)
+            expirePrewarm("ttl_expired")
         }
         prewarmStopRunnable = runnable
         mainHandler.postDelayed(runnable, ttlMs)
@@ -781,17 +1035,14 @@ open class NativeNodeEmbeddedScriptService : Service() {
     }
 
     @Synchronized
-    private fun expirePrewarm(reason: String, startId: Int) {
+    private fun expirePrewarm(reason: String) {
         if (!prewarmActive) {
             return
         }
         val ageMs = (android.os.SystemClock.elapsedRealtime() - prewarmStartedAtElapsedMs).coerceAtLeast(0L)
         clearPrewarmState(reason)
         Log.i(TAG, "prewarm.expired reason=$reason processName=${currentProcessName()} pid=${Process.myPid()} ageMs=$ageMs")
-        if (queueStatusSnapshot().idle) {
-            stopSelf(startId)
-            scheduleProcessExit(0)
-        }
+        requestPersistentShutdown(reason)
     }
 
     @Synchronized
@@ -812,6 +1063,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
         ttlMs: Long,
         reason: String,
     ): Bundle {
+        val runtimeValues = runtimeControlValues.get()
+        val runtimeLoaded = runtimeValues["process_runtime.state"] == "ready" &&
+                runtimeValues["process_runtime.healthy"]?.toBooleanStrictOrNull() == true
         return Bundle().apply {
             putBoolean(EXTRA_PREWARM_STARTED, started)
             putString(EXTRA_PREWARM_STATUS, status)
@@ -820,17 +1074,17 @@ open class NativeNodeEmbeddedScriptService : Service() {
             putLong(EXTRA_PREWARM_STARTED_AT_ELAPSED_MS, prewarmStartedAtElapsedMs)
             putString(EXTRA_PREWARM_PROCESS_NAME, currentProcessName())
             putInt(EXTRA_PREWARM_PID, Process.myPid())
-            putBoolean(EXTRA_PREWARM_PROCESS_ONLY, true)
-            putBoolean(EXTRA_PREWARM_RUNTIME_LOADED, false)
+            putBoolean(EXTRA_PREWARM_PROCESS_ONLY, !runtimeLoaded)
+            putBoolean(EXTRA_PREWARM_RUNTIME_LOADED, runtimeLoaded)
             putStringArray(
                 EXTRA_PREWARM_NATIVE_PAYLOAD,
-                prewarmNativeValues(
+                (prewarmNativeValues(
                     started = started,
                     status = status,
                     ttlMs = ttlMs,
                     reason = reason,
                     ageMs = 0L,
-                ).map { (key, value) -> "$key=$value" }.toTypedArray(),
+                ) + runtimeValues).map { (key, value) -> "$key=$value" }.toTypedArray(),
             )
         }
     }
@@ -861,13 +1115,14 @@ open class NativeNodeEmbeddedScriptService : Service() {
         reason: String,
         ageMs: Long,
     ): Map<String, String> {
+        val runtimeLoaded = runtimeControlValues.get()["process_runtime.state"] == "ready"
         return linkedMapOf(
             "embedded_script.prewarm_pool.enabled" to "true",
             "embedded_script.prewarm_pool.status" to status,
             "embedded_script.prewarm_pool.started" to started.toString(),
             "embedded_script.prewarm_pool.consumed" to (status == "consumed").toString(),
-            "embedded_script.prewarm_pool.process_only" to "true",
-            "embedded_script.prewarm_pool.runtime_loaded_before_execution" to "false",
+            "embedded_script.prewarm_pool.process_only" to (!runtimeLoaded).toString(),
+            "embedded_script.prewarm_pool.runtime_loaded_before_execution" to runtimeLoaded.toString(),
             "embedded_script.prewarm_pool.capabilities_granted" to "false",
             "embedded_script.prewarm_pool.user_modules_loaded" to "false",
             "embedded_script.prewarm_pool.ttl_ms" to ttlMs.toString(),
@@ -920,8 +1175,25 @@ open class NativeNodeEmbeddedScriptService : Service() {
 
     private fun stopServiceIfQueueIdle(startId: Int) {
         if (queueStatusSnapshot().idle) {
-            stopSelf(startId)
-            scheduleProcessExit(0)
+            finishStartedServiceWhenIdle(startId, "request_rejected")
+        }
+    }
+
+    private fun finishStartedServiceWhenIdle(startId: Int, reason: String) {
+        mainHandler.post {
+            if (!queueStatusSnapshot().idle || !stopSelfResult(startId)) {
+                return@post
+            }
+            foregroundServiceCreator?.stopForeground(STOP_FOREGROUND_REMOVE)
+            foregroundActive = false
+            if (!NodeEmbeddedProcessSessionManager.isEnabled()) {
+                scheduleProcessExit(0)
+            } else {
+                Log.i(
+                    TAG,
+                    "session.idle processName=${currentProcessName()} pid=${Process.myPid()} reason=$reason",
+                )
+            }
         }
     }
 
@@ -965,6 +1237,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
             latch.await(BRIDGE_DISPATCH_WAIT_MS, TimeUnit.MILLISECONDS)
         }
         val pending = latch.count.toInt().coerceAtLeast(0)
+        val providerCleanup = runCatching {
+            provider.destroy(NodeBridgeError.processDead("per_execution_bridge_dispatch_complete"))
+        }
         val nativeValues = linkedMapOf<String, String>().apply {
             putAll(result.nativeValues)
             put("embedded_script.bridge_dispatch_count", completed.get().toString())
@@ -975,6 +1250,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 "embedded_script.bridge_dispatch_status",
                 if (pending == 0) "done" else "pending",
             )
+            put("embedded_script.bridge_dispatch_provider_cleanup_clean", providerCleanup.isSuccess.toString())
+            putAll(provider.nativeDiagnostics())
         }
         return result.copy(nativeValues = nativeValues)
     }
@@ -1302,6 +1579,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private val seen = mutableSetOf<String>()
         private val responsesLock = Any()
         private val responses = mutableListOf<NodeBridgeResponse>()
+        private val destroyed = AtomicBoolean(false)
         private val thread = Thread {
             loop()
         }.apply {
@@ -1337,7 +1615,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     thread.join(BRIDGE_LIVE_STOP_JOIN_MS)
                 }
             }
-            provider.destroy()
+            if (destroyed.compareAndSet(false, true)) {
+                provider.destroy()
+            }
             requestDir.parentFile?.deleteRecursivelyIfExists()
         }
 
@@ -1513,17 +1793,193 @@ open class NativeNodeEmbeddedScriptService : Service() {
         }, PROCESS_EXIT_DELAY_MS)
     }
 
+    private fun runRuntimeControl(operation: String, block: () -> Bundle): Bundle {
+        return runCatching {
+            runtimeExecutor.submit<Bundle> { block() }
+                .get(RUNTIME_CONTROL_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        }.getOrElse { error ->
+            Log.e(TAG, "runtime.control.failed operation=$operation", error)
+            runtimeStatusBundle(
+                mapOf(
+                    "process_runtime.state" to "failed",
+                    "process_runtime.healthy" to "false",
+                    "process_runtime.poisoned" to "true",
+                    "process_runtime.control_operation" to operation,
+                    "process_runtime.control_error" to (error.message ?: error.javaClass.name),
+                ),
+            )
+        }
+    }
+
+    private fun runtimeStatusBundle(values: Map<String, String>): Bundle {
+        return Bundle().apply {
+            values.forEach { (key, value) -> putString(key, value) }
+            putString("process_runtime.process_name", currentProcessName())
+            putString("process_runtime.pid", Process.myPid().toString())
+            putString("process_runtime.service_class", this@NativeNodeEmbeddedScriptService.javaClass.name)
+            putString("process_runtime.service_queue_idle", queueStatusSnapshot().idle.toString())
+            putString("process_runtime.service_retire_requested", (!retireAfterExecutionReason.isNullOrBlank()).toString())
+            if (!values.containsKey("process_runtime.persistent_enabled")) {
+                putString(
+                    "process_runtime.persistent_enabled",
+                    NodeEmbeddedProcessSessionManager.isEnabled().toString(),
+                )
+            }
+        }
+    }
+
+    private fun ensureServiceRuntimeReady(): Map<String, String> {
+        val persistent = NodeEmbeddedProcessSessionManager.isEnabled()
+        val values = linkedMapOf<String, String>().apply {
+            putAll(NativeNodeEmbeddedRuntimeBridge.setProcessRuntimePersistentEnabled(this@NativeNodeEmbeddedScriptService, persistent))
+            if (persistent) {
+                putAll(NativeNodeEmbeddedRuntimeBridge.ensureProcessRuntimeReady(this@NativeNodeEmbeddedScriptService))
+            }
+        }
+        runtimeControlValues.set(values)
+        if (persistent) {
+            val state = values["process_runtime.state"].orEmpty()
+            val healthy = values["process_runtime.healthy"]?.toBooleanStrictOrNull()
+            if (state != "ready" || healthy != true) {
+                throw IllegalStateException(
+                    values["process_runtime.ensure.detail"]
+                        .orEmpty()
+                        .ifBlank { "Embedded Node process runtime did not become ready; state=$state." },
+                )
+            }
+        }
+        return values
+    }
+
+    private fun requestPersistentShutdown(
+        reason: String,
+        awaitTerminalShutdown: Boolean = false,
+    ) {
+        val normalizedReason = reason.ifBlank { "unspecified" }
+        val deadline = android.os.SystemClock.elapsedRealtime() + RUNTIME_CONTROL_TIMEOUT_MS
+        val readyToShutdown = synchronized(serviceExecutionLock) {
+            if (retireAfterExecutionReason.isNullOrBlank()) {
+                retireAfterExecutionReason = normalizedReason
+            }
+            serviceExecutionLock.notifyAll()
+            activeServiceExecutionRequests == 0
+        }
+        if (!NodeEmbeddedProcessSessionManager.isEnabled()) {
+            if (readyToShutdown) {
+                mainHandler.post {
+                    stopSelf()
+                    scheduleProcessExit(0)
+                }
+            }
+            return
+        }
+        if (readyToShutdown) {
+            ensureTerminalShutdownQueued(normalizedReason)
+        }
+        if (!awaitTerminalShutdown) {
+            return
+        }
+        runCatching {
+            synchronized(serviceExecutionLock) {
+                while (activeServiceExecutionRequests > 0) {
+                    val remaining = deadline - android.os.SystemClock.elapsedRealtime()
+                    if (remaining <= 0L) {
+                        throw IllegalStateException(
+                            "Timed out waiting for $activeServiceExecutionRequests embedded Node execution cleanup(s).",
+                        )
+                    }
+                    serviceExecutionLock.wait(remaining.coerceAtMost(250L))
+                }
+            }
+            val shutdownFuture = ensureTerminalShutdownQueued(normalizedReason)
+                ?: throw IllegalStateException("Embedded Node runtime executor is unavailable during shutdown.")
+            val remaining = deadline - android.os.SystemClock.elapsedRealtime()
+            if (remaining <= 0L) {
+                throw IllegalStateException("Embedded Node runtime shutdown deadline expired.")
+            }
+            shutdownFuture.get(remaining, TimeUnit.MILLISECONDS)
+        }.onFailure { error ->
+            Log.w(TAG, "Embedded Node runtime shutdown barrier failed; exiting the service process.", error)
+            mainHandler.post {
+                stopSelf()
+                scheduleProcessExit(0)
+            }
+        }
+    }
+
+    private fun ensureTerminalShutdownQueued(reason: String): Future<*>? = synchronized(serviceExecutionLock) {
+        terminalShutdownFuture?.let { return@synchronized it }
+        if (runtimeExecutor.isShutdown) {
+            return@synchronized null
+        }
+        runCatching {
+            runtimeExecutor.submit {
+                shutdownPersistentRuntime(reason)
+                mainHandler.post {
+                    foregroundServiceCreator?.stopForeground(STOP_FOREGROUND_REMOVE)
+                    foregroundActive = false
+                    stopSelf()
+                }
+            }.also { future -> terminalShutdownFuture = future }
+        }.getOrElse { error ->
+            Log.w(TAG, "Failed to enqueue embedded Node terminal shutdown.", error)
+            null
+        }
+    }
+
+    private fun shutdownPersistentRuntime(reason: String) {
+        if (!NodeEmbeddedProcessSessionManager.isEnabled() ||
+            !terminalShutdownStarted.compareAndSet(false, true)
+        ) {
+            return
+        }
+        val values = runCatching {
+            NativeNodeEmbeddedRuntimeBridge.shutdownProcessRuntime(this, reason)
+        }.getOrElse { error ->
+            mapOf(
+                "process_runtime.state" to "terminal",
+                "process_runtime.healthy" to "false",
+                "process_runtime.shutdown_error" to (error.message ?: error.javaClass.name),
+            )
+        }
+        runtimeControlValues.set(values)
+        Log.i(
+            TAG,
+            "runtime.shutdown processName=${currentProcessName()} pid=${Process.myPid()} " +
+                    "reason=$reason state=${values["process_runtime.state"].orEmpty()}",
+        )
+    }
+
     private fun startScriptForeground() {
         foregroundServiceCreator = ForegroundServiceCreator.Builder(this)
             .setClassName(NativeNodeEmbeddedScriptService::class.java)
             .setIntent(Intent(this, MainActivity::class.java))
-            .setNotificationId(NOTIFICATION_ID)
+            .setNotificationId(serviceNotificationId())
             .setServiceName("AutoJs6 embedded Node script")
             .setServiceDescription("Runs isolated embedded Node scripts")
             .setNotificationTitle("AutoJs6 embedded Node script")
             .setNotificationContent("Running isolated embedded Node script")
             .create()
             .apply { startForeground(foregroundServiceType) }
+        foregroundActive = true
+    }
+
+    private fun ensureScriptForeground() {
+        if (foregroundActive) {
+            return
+        }
+        val creator = foregroundServiceCreator
+        if (creator == null) {
+            startScriptForeground()
+        } else {
+            creator.startForeground(foregroundServiceType)
+            foregroundActive = true
+        }
+    }
+
+    private fun serviceNotificationId(): Int {
+        val slotIndex = NodeEmbeddedProcessPoolPolicy.slotForServiceClassName(javaClass.name)?.index ?: 0
+        return NOTIFICATION_ID + slotIndex
     }
 
     private fun currentProcessName(): String = runCatching { App.getProcessNameCompat() }
@@ -1650,7 +2106,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
         val sourceName = activeSourceName
         val workingDirectory = activeWorkingDirectory
         val startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L }
-        Handler(Looper.getMainLooper()).postDelayed({
+        pendingInteractiveExitRunnable?.let(mainHandler::removeCallbacks)
+        interactiveStopRequestedExecutionId = executionId
+        val exitRunnable = Runnable {
+            if (interactiveStopRequestedExecutionId != executionId || activeExecutionId != executionId) {
+                return@Runnable
+            }
+            pendingInteractiveExitRunnable = null
             NodeCrashEvidenceStore.markNativeProcessExit(
                 context = this,
                 marker = activeCrashMarker,
@@ -1679,7 +2141,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 stopSelf()
             }
             scheduleProcessExit(0)
-        }, NodeLifecycleCheckpointStore.STOP_GRACE_MS)
+        }
+        pendingInteractiveExitRunnable = exitRunnable
+        mainHandler.postDelayed(exitRunnable, NodeLifecycleCheckpointStore.STOP_GRACE_MS)
         return true
     }
 
@@ -1767,10 +2231,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
         val stopIntent = Intent(this, NativeNodeEmbeddedInteractiveStopReceiver::class.java).apply {
             action = ACTION_STOP_INTERACTIVE
             putExtra(EXTRA_EXECUTION_ID, executionId)
+            putExtra(EXTRA_STOP_SERVICE_CLASS, this@NativeNodeEmbeddedScriptService.javaClass.name)
         }
         val stopPendingIntent = PendingIntent.getBroadcast(
             this,
-            INTERACTIVE_STOP_REQUEST_CODE,
+            INTERACTIVE_STOP_REQUEST_CODE xor executionId.hashCode(),
             stopIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
@@ -1827,6 +2292,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private val DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS = linkedSetOf<String>()
         private val DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS = linkedMapOf<String, Long>()
         private val CLIENT_RUNNING_SCRIPT_COMPONENTS = ConcurrentHashMap<String, ComponentName>()
+        private val CLIENT_RUNNING_SCRIPT_SESSION_LEASES =
+            ConcurrentHashMap<String, NodeEmbeddedProcessSessionManager.SessionLease>()
         private const val ACTION_PREWARM_RUNTIME = "org.autojs.autojs.engine.action.PREWARM_NATIVE_NODE_RUNTIME"
         private const val ACTION_RUN_SCRIPT = "org.autojs.autojs.engine.action.RUN_NATIVE_NODE_EMBEDDED_SCRIPT"
         private const val ACTION_STOP_INTERACTIVE = NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME
@@ -1852,6 +2319,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_PROCESS_POOL_SLOT = "process_pool_slot"
         private const val EXTRA_PROCESS_POOL_SLOT_SOURCE = "process_pool_slot_source"
         private const val EXTRA_EXECUTION_ID = "execution_id"
+        private const val EXTRA_STOP_SERVICE_CLASS = "stop_service_class"
         private const val EXTRA_FOREGROUND_SERVICE_TYPE = "foreground_service_type"
         private const val EXTRA_PREWARM_TTL_MS = "prewarm_ttl_ms"
         private const val EXTRA_ENV_NAMES = "env_names"
@@ -1874,10 +2342,12 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val INTERACTIVE_CONTENT_REQUEST_CODE = 0xA6E5
         private const val INTERACTIVE_STOP_REQUEST_CODE = 0xA6E6
         private const val PROCESS_EXIT_DELAY_MS = 250L
+        private const val RUNTIME_CONTROL_TIMEOUT_MS = 15_000L
         private const val DEFAULT_PREWARM_TTL_MS = 5_000L
         private const val MAX_PREWARM_TTL_MS = 30_000L
         private const val DEFAULT_INTERACTIVE_TIMEOUT_MS = 3_600_000L
         private const val CLIENT_PROCESS_SETTLE_MS = 650L
+        private const val LEGACY_RETIREMENT_RETRY_DELAY_MS = CLIENT_PROCESS_SETTLE_MS + 100L
         private const val BRIDGE_DISPATCH_WAIT_MS = 1000L
         private const val BRIDGE_LIVE_POLL_INTERVAL_MS = 10L
         private const val BRIDGE_LIVE_STOP_JOIN_MS = 1000L
@@ -1907,6 +2377,35 @@ open class NativeNodeEmbeddedScriptService : Service() {
             "stderr_capture.text.hex",
         )
         private val RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS = listOf(
+            "process_runtime.state",
+            "process_runtime.persistent_enabled",
+            "process_runtime.healthy",
+            "process_runtime.poisoned",
+            "process_runtime.poison_reason",
+            "process_runtime.teardown_clean",
+            "process_runtime.generation",
+            "process_runtime.init_count",
+            "process_runtime.execution_sequence",
+            "execution.teardown_clean",
+            "execution.teardown_poison_reason",
+            "embedded_script.process_session.enabled",
+            "embedded_script.process_session.status",
+            "embedded_script.process_session.state",
+            "embedded_script.process_session.slot_id",
+            "embedded_script.process_session.generation",
+            "embedded_script.process_session.manager_epoch",
+            "embedded_script.process_session.quarantined",
+            "embedded_script.process_session.process_exit_confirmed",
+            "embedded_script.prewarm_pool.status",
+            "embedded_script.prewarm_pool.consumed",
+            "embedded_script.prewarm_pool.process_only",
+            "embedded_script.prewarm_pool.runtime_loaded_before_execution",
+            "embedded_script.compile_cache.requested",
+            "embedded_script.compile_cache.enabled",
+            "embedded_script.compile_cache.status",
+            "embedded_script.compile_cache.schema",
+            "embedded_script.compile_cache.directory",
+            "embedded_script.native_execution_entered",
             "embedded_script.runtime_state",
             "embedded_script.lifecycle_transitions",
             "embedded_script.source_name",
@@ -1921,6 +2420,20 @@ open class NativeNodeEmbeddedScriptService : Service() {
             "embedded_script.console_events_json",
             "embedded_script.console_event_count",
             "embedded_script.console_events_truncated",
+            "embedded_script.bridge_resource.active_count",
+            "embedded_script.bridge_live_dispatch_pending_count",
+            "embedded_script.service.cleanup_clean",
+            "embedded_script.service.cleanup_errors",
+            "embedded_script.service.result_delivery_phase",
+            "embedded_script.service.execution_slot_released",
+            "embedded_script.service.queue_idle_after_release",
+            "embedded_script.service.retirement_requested",
+            "embedded_script.service.retirement_reason",
+            "embedded_script.execution_id",
+            "embedded_script.crash_evidence.marker_schema",
+            "embedded_script.crash_evidence.marker_id",
+            "embedded_script.crash_evidence.marker_path",
+            "embedded_script.crash_evidence.automatic_collection",
         )
         private const val EXTRA_PREWARM_STARTED = "prewarm_started"
         private const val EXTRA_PREWARM_STATUS = "prewarm_status"
@@ -1976,8 +2489,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     launchSurface,
                 ).withClientQueueLease(slotLease)
             } finally {
-                processSettleDeferred = deferProcessSettle {
+                processSettleDeferred = if (NodeEmbeddedProcessSessionManager.isEnabled()) {
                     releaseExecutionSlot(executionId)
+                    false
+                } else {
+                    deferProcessSettle {
+                        releaseExecutionSlot(executionId)
+                    }
                 }
             }
             return scriptResult.withDeferredProcessSettle(processSettleDeferred)
@@ -2016,6 +2534,32 @@ open class NativeNodeEmbeddedScriptService : Service() {
             timeoutMs: Long = NodeExecutionQueuePolicy.CONTROL_TIMEOUT_MS,
         ): PrewarmRuntimeResult {
             val appContext = context.applicationContext
+            if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+                val prewarm = NodeEmbeddedProcessSessionManager.prewarm(
+                    context = appContext,
+                    ttlMs = normalizedPrewarmTtlMs(ttlMs),
+                    timeoutMs = timeoutMs,
+                )
+                return PrewarmRuntimeResult(
+                    started = prewarm.started,
+                    status = prewarm.status,
+                    reason = prewarm.reason,
+                    ttlMs = normalizedPrewarmTtlMs(ttlMs),
+                    processName = prewarm.processName,
+                    pid = prewarm.pid,
+                    processOnly = false,
+                    runtimeLoaded = prewarm.started,
+                    nativeValues = linkedMapOf<String, String>().apply {
+                        putAll(prewarm.nativeValues)
+                        put("embedded_script.prewarm_pool.enabled", "true")
+                        put("embedded_script.prewarm_pool.status", prewarm.status)
+                        put("embedded_script.prewarm_pool.reason", prewarm.reason)
+                        put("embedded_script.prewarm_pool.process_only", "false")
+                        put("embedded_script.prewarm_pool.runtime_loaded_before_execution", prewarm.started.toString())
+                        put("embedded_script.prewarm_pool.ttl_ms", normalizedPrewarmTtlMs(ttlMs).toString())
+                    },
+                )
+            }
             val completion = CountDownLatch(1)
             val result = AtomicReference<PrewarmRuntimeResult>()
             val receiver = object : ResultReceiver(null) {
@@ -2089,7 +2633,61 @@ open class NativeNodeEmbeddedScriptService : Service() {
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
             launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            val stableRequest = if (request.executionId.isNullOrBlank()) {
+                request.copy(executionId = newExecutionId())
+            } else {
+                request
+            }
+            val first = runScriptAttempt(context, stableRequest, launchSurface)
+            if (!shouldRetryLegacyRetirement(first)) {
+                return first
+            }
+            try {
+                Thread.sleep(LEGACY_RETIREMENT_RETRY_DELAY_MS)
+            } catch (interrupted: InterruptedException) {
+                Thread.currentThread().interrupt()
+                return first
+            }
+            val retried = runScriptAttempt(context, stableRequest, launchSurface)
+            return retried.copy(
+                nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(retried.nativeValues)
+                    put("embedded_script.client.legacy_retirement_retry", "true")
+                    put(
+                        "embedded_script.client.legacy_retirement_reason",
+                        first.nativeValues["embedded_script.service.retirement_reason"].orEmpty(),
+                    )
+                },
+            )
+        }
+
+        private fun shouldRetryLegacyRetirement(
+            result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        ): Boolean {
+            if (NodeEmbeddedProcessSessionManager.isEnabled() || result.succeeded) {
+                return false
+            }
+            val values = result.nativeValues
+            if (values["embedded_script.client.legacy_retirement_retry"] == "true") {
+                return false
+            }
+            val reason = values["embedded_script.service.retirement_reason"].orEmpty()
+            return values["embedded_script.native_execution_entered"] == "false" &&
+                    values["embedded_script.service.retirement_requested"] == "true" &&
+                    (
+                        reason == "ttl_expired" ||
+                            reason.startsWith("trim_memory_") ||
+                            reason.startsWith("low_memory_")
+                    )
+        }
+
+        private fun runScriptAttempt(
+            context: Context,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            launchSurface: String,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
             val appContext = context.applicationContext
+            (appContext as? App)?.cancelDeferredNativeNodePrewarm()
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
             val requestWithExecutionId = request.copy(executionId = executionId)
             val requestForService = try {
@@ -2203,46 +2801,120 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 slotSelectionSource = scheduledRequestForService.processPoolSlotSource,
                 defaultSchedulerEnabled = defaultSlotLease != null,
             )
+            val processDeathReason = AtomicReference<String?>(null)
+            val sessionAcquire = if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+                NodeEmbeddedProcessSessionManager.acquire(
+                    context = appContext,
+                    slot = processPoolPlan.selectedSlot,
+                )
+            } else {
+                null
+            }
+            val processSessionLease = sessionAcquire?.lease
+            if (sessionAcquire != null && processSessionLease == null) {
+                clientFailureResult = processCrashedOrTimedOut(
+                    request = scheduledRequestForService,
+                    message = sessionAcquire.errorMessage.orEmpty().ifBlank {
+                        "Failed to acquire persistent embedded Node process session."
+                    },
+                    startedAt = startedAt,
+                    executionId = executionId,
+                    lifecycleValues = sessionAcquire.nativeValues,
+                )
+            }
             var component: android.content.ComponentName? = null
             var processSettleDeferred = false
-            try {
-                requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, scheduledRequestForService)
-                intent.putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
-                val startOutcome = startEmbeddedScriptService(
-                    appContext,
-                    intent,
-                    serviceClass = processPoolPlan.selectedSlot.serviceClass,
-                )
-                component = startOutcome.component
-                if (component == null) {
-                    clientFailureResult = serviceStartFailureResult(
-                        request = request,
-                        message = "Failed to start embedded script service.",
+            if (clientFailureResult == null && processSessionLease != null) {
+                val registered = NodeEmbeddedProcessSessionManager.registerExecution(
+                    processSessionLease,
+                    executionId,
+                ) {
+                    processDeathReason.compareAndSet(null, "persistent_process_binder_died")
+                    completion.countDown()
+                }
+                if (!registered) {
+                    processDeathReason.compareAndSet(null, "persistent_process_lease_invalidated")
+                    clientFailureResult = processCrashedOrTimedOut(
+                        request = scheduledRequestForService,
+                        message = "Persistent embedded Node process lease was invalidated before execution registration.",
                         startedAt = startedAt,
                         executionId = executionId,
-                        startOutcome = startOutcome,
+                        lifecycleValues = processSessionLease.nativeValues("registration_failed"),
                     )
-                } else {
-                    CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] = component
-                    val completed = completion.await(
-                        clientAwaitTimeoutMs(
-                            request = scheduledRequestForService,
-                            includeQueueTimeout = defaultSlotLease == null,
-                        ),
-                        TimeUnit.MILLISECONDS,
-                    )
-                    if (!completed) {
-                        coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.timeout")
-                        appContext.stopService(Intent().setComponent(component))
-                        val lifecycle = timeoutLifecycle(executionId, scheduledRequestForService)
+                }
+            }
+            try {
+                if (clientFailureResult == null) {
+                    requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, scheduledRequestForService)
+                    intent.putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
+                    val startOutcome = if (processSessionLease != null) {
+                        NodeEmbeddedProcessSessionManager.startRegisteredExecution(
+                            processSessionLease,
+                            executionId,
+                        ) {
+                            startEmbeddedScriptService(
+                                appContext,
+                                intent,
+                                serviceClass = processPoolPlan.selectedSlot.serviceClass,
+                            )
+                        }
+                    } else {
+                        startEmbeddedScriptService(
+                            appContext,
+                            intent,
+                            serviceClass = processPoolPlan.selectedSlot.serviceClass,
+                        )
+                    }
+                    if (startOutcome == null) {
+                        processDeathReason.compareAndSet(null, "persistent_process_lease_invalidated_before_start")
                         clientFailureResult = processCrashedOrTimedOut(
                             request = scheduledRequestForService,
-                            message = "Embedded script process crashed or timed out.",
+                            message = "Persistent embedded Node process lease was invalidated before service start.",
                             startedAt = startedAt,
-                            timedOut = true,
                             executionId = executionId,
-                            lifecycleValues = lifecycle.nativeValues(),
+                            lifecycleValues = processSessionLease?.nativeValues("start_invalidated").orEmpty(),
                         )
+                    } else {
+                    component = startOutcome.component
+                    if (component == null) {
+                        clientFailureResult = serviceStartFailureResult(
+                            request = request,
+                            message = "Failed to start embedded script service.",
+                            startedAt = startedAt,
+                            executionId = executionId,
+                            startOutcome = startOutcome,
+                        )
+                    } else {
+                        CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] = component
+                        processSessionLease?.let { CLIENT_RUNNING_SCRIPT_SESSION_LEASES[executionId] = it }
+                        val completed = completion.await(
+                            clientAwaitTimeoutMs(
+                                request = scheduledRequestForService,
+                                includeQueueTimeout = defaultSlotLease == null,
+                            ),
+                            TimeUnit.MILLISECONDS,
+                        )
+                        if (!completed || processDeathReason.get() != null) {
+                            coolDownDefaultProcessPoolSlot(
+                                defaultSlotLease,
+                                processDeathReason.get() ?: "client.timeout",
+                            )
+                            appContext.stopService(Intent().setComponent(component))
+                            val lifecycle = timeoutLifecycle(executionId, scheduledRequestForService)
+                            clientFailureResult = processCrashedOrTimedOut(
+                                request = scheduledRequestForService,
+                                message = if (processDeathReason.get() != null) {
+                                    "Embedded script process Binder died during execution."
+                                } else {
+                                    "Embedded script process crashed or timed out."
+                                },
+                                startedAt = startedAt,
+                                timedOut = processDeathReason.get() == null,
+                                executionId = executionId,
+                                lifecycleValues = lifecycle.nativeValues(),
+                            )
+                        }
+                    }
                     }
                 }
             } catch (e: InterruptedException) {
@@ -2262,8 +2934,19 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 )
             } finally {
                 component?.let { CLIENT_RUNNING_SCRIPT_COMPONENTS.remove(executionId, it) }
+                CLIENT_RUNNING_SCRIPT_SESSION_LEASES.remove(executionId)
+                NodeEmbeddedProcessSessionManager.unregisterExecution(processSessionLease, executionId)
                 requestSpoolFile?.parentFile?.deleteRecursivelyIfExists()
-                if (defaultSlotLease != null && component != null) {
+                val receivedResult = clientFailureResult ?: result.get()
+                val sessionHealthy = processDeathReason.get() == null &&
+                        receivedResult?.let { NodeEmbeddedProcessSessionManager.resultIsReusable(it.nativeValues) } != false
+                NodeEmbeddedProcessSessionManager.release(
+                    context = appContext,
+                    lease = processSessionLease,
+                    healthy = sessionHealthy,
+                    reason = processDeathReason.get() ?: if (sessionHealthy) "execution_complete" else "execution_teardown_unhealthy",
+                )
+                if (!NodeEmbeddedProcessSessionManager.isEnabled() && defaultSlotLease != null && component != null) {
                     processSettleDeferred = deferProcessSettle {
                         releaseDefaultProcessPoolSlot(defaultSlotLease)
                     }
@@ -2280,12 +2963,21 @@ open class NativeNodeEmbeddedScriptService : Service() {
             return scriptResult
                 .withProcessPoolPlan(processPoolPlan)
                 .withDefaultProcessPoolLease(defaultSlotLease)
+                .withProcessSessionLease(processSessionLease)
                 .withClientResultReturnTiming(resultReceivedAtElapsedMs.get())
                 .withDeferredProcessSettle(processSettleDeferred)
         }
 
         fun cancelRunningScript(context: Context, executionId: String): Boolean {
             val component = CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] ?: return false
+            CLIENT_RUNNING_SCRIPT_SESSION_LEASES[executionId]?.let { lease ->
+                NodeEmbeddedProcessSessionManager.release(
+                    context = context,
+                    lease = lease,
+                    healthy = false,
+                    reason = "client_cancelled_active_execution",
+                )
+            }
             return runCatching {
                 context.applicationContext.stopService(Intent().setComponent(component))
             }.onSuccess {
@@ -2331,6 +3023,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         ): InteractiveLongRunningSession {
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
             val appContext = context.applicationContext
+            (appContext as? App)?.cancelDeferredNativeNodePrewarm()
             val startedAt = android.os.SystemClock.elapsedRealtime()
             val requestWithExecutionId = request.copy(
                 executionId = executionId,
@@ -2387,6 +3080,103 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     error = failure.withLifecycle(preflightFailureLifecycle(executionId, requestForService)),
                 )
             }
+            val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
+                context = appContext,
+                executionMode = requestForService.executionMode,
+                launchSurface = launchSurface,
+                requestedSlotId = requestForService.processPoolSlot,
+                slotSelectionSource = requestForService.processPoolSlotSource,
+            )
+            val sessionAcquire = if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+                NodeEmbeddedProcessSessionManager.acquire(appContext, processPoolPlan.selectedSlot)
+            } else {
+                null
+            }
+            val processSessionLease = sessionAcquire?.lease
+            if (sessionAcquire != null && processSessionLease == null) {
+                val failure = processCrashedOrTimedOut(
+                    request = requestForService,
+                    message = sessionAcquire.errorMessage.orEmpty().ifBlank {
+                        "Failed to acquire persistent embedded Node process session."
+                    },
+                    startedAt = startedAt,
+                    executionId = executionId,
+                    lifecycleValues = sessionAcquire.nativeValues,
+                )
+                val status = NodeInteractiveLongRunningStatusStore.write(
+                    context = appContext,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = requestForService.sourceName,
+                    workingDirectory = requestForService.workingDirectory,
+                    launchSurface = launchSurface,
+                    message = failure.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("session_acquire_failed"),
+                    nativeValues = failure.nativeValues,
+                )
+                return InteractiveLongRunningSession(executionId, false, status, failure)
+            }
+            val sessionReleased = AtomicBoolean(false)
+            fun releaseSession(result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?, reason: String) {
+                if (processSessionLease == null || !sessionReleased.compareAndSet(false, true)) {
+                    return
+                }
+                CLIENT_RUNNING_SCRIPT_COMPONENTS.remove(executionId)
+                CLIENT_RUNNING_SCRIPT_SESSION_LEASES.remove(executionId)
+                NodeEmbeddedProcessSessionManager.unregisterExecution(processSessionLease, executionId)
+                NodeEmbeddedProcessSessionManager.release(
+                    context = appContext,
+                    lease = processSessionLease,
+                    healthy = result?.let { NodeEmbeddedProcessSessionManager.resultIsReusable(it.nativeValues) } ?: false,
+                    reason = reason,
+                )
+            }
+            val completionReceiver = object : ResultReceiver(null) {
+                override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                    if (resultCode != RESULT_SCRIPT) {
+                        return
+                    }
+                    val completed = resultData.toEmbeddedScriptResult()
+                    releaseSession(completed, "long_running_complete")
+                }
+            }
+            val sessionRegistered = processSessionLease?.let { lease ->
+                NodeEmbeddedProcessSessionManager.registerExecution(lease, executionId) {
+                    releaseSession(null, "long_running_binder_died")
+                    NodeInteractiveLongRunningStatusStore.write(
+                        context = appContext,
+                        executionId = executionId,
+                        state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                        sourceName = requestForService.sourceName,
+                        workingDirectory = requestForService.workingDirectory,
+                        launchSurface = launchSurface,
+                        message = "Persistent embedded Node process Binder died.",
+                        activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("binder_died"),
+                    )
+                }
+            } ?: true
+            if (!sessionRegistered) {
+                val failure = processCrashedOrTimedOut(
+                    request = requestForService,
+                    message = "Persistent embedded Node process lease was invalidated before long-running execution registration.",
+                    startedAt = startedAt,
+                    executionId = executionId,
+                    lifecycleValues = processSessionLease.nativeValues("registration_failed"),
+                )
+                val status = NodeInteractiveLongRunningStatusStore.write(
+                    context = appContext,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = requestForService.sourceName,
+                    workingDirectory = requestForService.workingDirectory,
+                    launchSurface = launchSurface,
+                    message = failure.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("registration_failed"),
+                    nativeValues = failure.nativeValues,
+                )
+                releaseSession(null, "long_running_registration_failed")
+                return InteractiveLongRunningSession(executionId, false, status, failure)
+            }
             NodeInteractiveLongRunningStatusStore.write(
                 context = appContext,
                 executionId = executionId,
@@ -2401,6 +3191,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, requestForService)
                 val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
                     action = ACTION_RUN_SCRIPT
+                    putExtra(EXTRA_RESULT_RECEIVER, completionReceiver)
                     putExtra(EXTRA_SOURCE_NAME, requestForService.sourceName)
                     putExtra(EXTRA_WORKING_DIRECTORY, requestForService.workingDirectory)
                     putExtra(EXTRA_SANDBOX_ROOT, requestForService.sandboxRoot)
@@ -2426,7 +3217,47 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     putExtra(EXTRA_EXECUTION_ID, executionId)
                     putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
                 }
-                val startOutcome = startEmbeddedScriptService(appContext, intent)
+                val startOutcome = if (processSessionLease != null) {
+                    NodeEmbeddedProcessSessionManager.startRegisteredExecution(
+                        processSessionLease,
+                        executionId,
+                    ) {
+                        startEmbeddedScriptService(
+                            appContext,
+                            intent,
+                            serviceClass = processPoolPlan.selectedSlot.serviceClass,
+                        )
+                    }
+                } else {
+                    startEmbeddedScriptService(
+                        appContext,
+                        intent,
+                        serviceClass = processPoolPlan.selectedSlot.serviceClass,
+                    )
+                }
+                if (startOutcome == null) {
+                    val failure = processCrashedOrTimedOut(
+                        request = requestForService,
+                        message = "Persistent embedded Node process lease was invalidated before long-running service start.",
+                        startedAt = startedAt,
+                        executionId = executionId,
+                        lifecycleValues = processSessionLease?.nativeValues("start_invalidated").orEmpty(),
+                    )
+                    val status = NodeInteractiveLongRunningStatusStore.write(
+                        context = appContext,
+                        executionId = executionId,
+                        state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                        sourceName = requestForService.sourceName,
+                        workingDirectory = requestForService.workingDirectory,
+                        launchSurface = launchSurface,
+                        message = failure.errorMessage,
+                        activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("start_invalidated"),
+                        nativeValues = failure.nativeValues,
+                    )
+                    releaseSession(null, "long_running_start_invalidated")
+                    requestSpoolFile.parentFile?.deleteRecursivelyIfExists()
+                    return InteractiveLongRunningSession(executionId, false, status, failure)
+                }
                 if (startOutcome.component == null) {
                     val failure = serviceStartFailureResult(
                         request = requestForService,
@@ -2446,9 +3277,12 @@ open class NativeNodeEmbeddedScriptService : Service() {
                         activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("service_start_failed"),
                         nativeValues = failure.nativeValues,
                     )
+                    releaseSession(failure, "long_running_start_failed")
                     requestSpoolFile.parentFile?.deleteRecursivelyIfExists()
                     return InteractiveLongRunningSession(executionId, false, status, failure)
                 }
+                CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] = startOutcome.component
+                processSessionLease?.let { CLIENT_RUNNING_SCRIPT_SESSION_LEASES[executionId] = it }
                 return InteractiveLongRunningSession(
                     executionId = executionId,
                     started = true,
@@ -2474,12 +3308,26 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("service_start_exception"),
                     nativeValues = failure.nativeValues,
                 )
+                releaseSession(failure, "long_running_start_exception")
                 return InteractiveLongRunningSession(executionId, false, status, failure)
             }
         }
 
         fun stopInteractiveLongRunning(context: Context, executionId: String): Boolean {
             val appContext = context.applicationContext
+            val runningServiceClass = CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId]
+                ?.className
+                ?.let(NodeEmbeddedProcessPoolPolicy::slotForServiceClassName)
+                ?.serviceClass
+                ?: NativeNodeEmbeddedScriptService::class.java
+            return stopInteractiveLongRunning(appContext, executionId, runningServiceClass)
+        }
+
+        private fun stopInteractiveLongRunning(
+            appContext: Context,
+            executionId: String,
+            runningServiceClass: Class<out NativeNodeEmbeddedScriptService>,
+        ): Boolean {
             val current = NodeInteractiveLongRunningStatusStore.read(appContext, executionId)
             NodeInteractiveLongRunningStatusStore.write(
                 context = appContext,
@@ -2496,7 +3344,12 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 action = ACTION_STOP_INTERACTIVE
                 putExtra(EXTRA_EXECUTION_ID, executionId)
             }
-            val startOutcome = startEmbeddedScriptService(appContext, intent, foreground = false)
+            val startOutcome = startEmbeddedScriptService(
+                appContext,
+                intent,
+                serviceClass = runningServiceClass,
+                foreground = false,
+            )
             if (startOutcome.component == null) {
                 NodeInteractiveLongRunningStatusStore.write(
                     context = appContext,
@@ -2522,7 +3375,14 @@ open class NativeNodeEmbeddedScriptService : Service() {
             }
             val executionId = intent.getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() }
                 ?: return false
-            return stopInteractiveLongRunning(context, executionId)
+            val targetServiceClass = intent.getStringExtra(EXTRA_STOP_SERVICE_CLASS)
+                ?.let(NodeEmbeddedProcessPoolPolicy::slotForServiceClassName)
+                ?.serviceClass
+            return if (targetServiceClass != null) {
+                stopInteractiveLongRunning(context.applicationContext, executionId, targetServiceClass)
+            } else {
+                stopInteractiveLongRunning(context, executionId)
+            }
         }
 
         fun interactiveLongRunningStatus(context: Context, executionId: String): JSONObject? {
@@ -3219,6 +4079,30 @@ open class NativeNodeEmbeddedScriptService : Service() {
                         if (lease.queued) "dequeued" else "not_queued",
                     )
                     put("embedded_script.process_pool.queue_wait_ms", lease.queueWaitMs.toString())
+                },
+            )
+        }
+
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withProcessSessionLease(
+            lease: NodeEmbeddedProcessSessionManager.SessionLease?,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            val sessionValues = lease?.nativeValues("execution_complete")
+                ?.filterKeys { key -> key.startsWith("embedded_script.process_session.") }
+                ?: if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+                    mapOf(
+                        "embedded_script.process_session.enabled" to "true",
+                        "embedded_script.process_session.status" to "acquire_failed",
+                    )
+                } else {
+                    mapOf(
+                        "embedded_script.process_session.enabled" to "false",
+                        "embedded_script.process_session.status" to "one_shot_rollback",
+                    )
+                }
+            return copy(
+                nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(nativeValues)
+                    putAll(sessionValues)
                 },
             )
         }

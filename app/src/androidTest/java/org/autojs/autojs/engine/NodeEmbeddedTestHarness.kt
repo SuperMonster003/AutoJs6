@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
+import org.autojs.autojs.App
 import org.autojs.autojs6.BuildConfig
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
@@ -24,11 +25,31 @@ internal object NodeEmbeddedTestHarness {
         )
     }
 
+    fun assumePersistentRuntimeEnabled(label: String = "persistent embedded Node instrumentation") {
+        assumeTrue(
+            "Build with -Pautojs.nodejs.embedded.persistentRuntime=true on Android 10 or newer to run $label.",
+            NodeEmbeddedProcessSessionManager.isEnabled(),
+        )
+    }
+
     fun settleEmbeddedScriptServiceProcess() {
+        (targetContext.applicationContext as? App)?.cancelDeferredNativeNodePrewarm()
+        if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+            check(
+                NodeEmbeddedProcessSessionManager.shutdownAllAndAwait(
+                    context = targetContext,
+                    reason = "instrumentation_test_settle",
+                ),
+            ) { "Timed out while shutting down persistent embedded Node process sessions." }
+            NodeEmbeddedProcessSessionManager.reopenForUse()
+            check(!NodeEmbeddedProcessSessionManager.isClosing()) {
+                "Persistent embedded Node process session manager did not reopen after test settlement."
+            }
+            return
+        }
         NodeEmbeddedProcessPoolPolicy.declaredSlots.forEach { slot ->
             targetContext.stopService(Intent(targetContext, slot.serviceClass))
         }
-        // Client scheduling slots remain reserved for a 650 ms process-settle window after result delivery.
         SystemClock.sleep(750L)
     }
 

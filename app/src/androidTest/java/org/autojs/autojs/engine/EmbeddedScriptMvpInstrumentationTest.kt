@@ -1751,7 +1751,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(first.stdout.contains("first.count=1"))
             assertTrue(first.stdout.contains("first.cache=true"))
 
-            settleEmbeddedScriptServiceProcess()
+            val persistentRuntimeEnabled = NodeEmbeddedProcessSessionManager.isEnabled()
+            if (!persistentRuntimeEnabled) {
+                settleEmbeddedScriptServiceProcess()
+            }
 
             val second = runEmbeddedScript(
                 """
@@ -1775,6 +1778,20 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(second.stdout.contains("second.cache.before=false"))
             assertTrue(second.stdout.contains("second.count=0"))
             assertTrue(second.stdout.contains("second.cache.after=true"))
+            if (persistentRuntimeEnabled) {
+                assertEquals("isolated executions should reuse the service process", first.pid, second.pid)
+                assertEquals(
+                    "isolated executions should reuse one process runtime generation",
+                    first.nativeValues["process_runtime.generation"],
+                    second.nativeValues["process_runtime.generation"],
+                )
+                assertEquals("1", first.nativeValues["process_runtime.init_count"])
+                assertEquals("1", second.nativeValues["process_runtime.init_count"])
+                val firstSequence = first.nativeValues["process_runtime.execution_sequence"]?.toLongOrNull()
+                val secondSequence = second.nativeValues["process_runtime.execution_sequence"]?.toLongOrNull()
+                assertTrue("first execution sequence is missing: ${first.nativeValues}", firstSequence != null)
+                assertEquals(firstSequence!! + 1L, secondSequence)
+            }
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -33824,7 +33841,6 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     private fun settleEmbeddedScriptServiceProcess() {
-        context.stopService(Intent(context, NativeNodeEmbeddedScriptService::class.java))
-        Thread.sleep(600L)
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
     }
 }

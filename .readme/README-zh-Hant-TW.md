@@ -171,6 +171,8 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` Node.js 24.5.0 腳本執行環境, 支援透過 "nodejs" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本
 * `新增` Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼
 * `新增` Node.js 執行環境支援受控 AutoJs6 橋接模組, 並採用 Safe Node Profile 安全策略
+* `新增` Node.js 執行環境支援常駐服務處理程序及處理程序層級的 Node/V8 平台重複使用, 同時為每次腳本執行建立獨立 isolate 及 Environment
+* `新增` Node.js 常駐執行環境支援閒置或記憶體壓力下的回收, 明確關閉及異常處理程序隔離重建
 * `新增` 打包功能支援 Node.js 腳本專案, 並自動包含所需執行階段程式庫
 * `新增` 外掛系統支援 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/文字轉換/媒體資訊等擴充介面
 * `新增` 外掛中心支援全域設定頁面及使用說明頁面
@@ -225,6 +227,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` KeyCode 方法支援使用 Shizuku 權限傳送鍵碼指令
 * `最佳化` 延遲初始化非關鍵元件, 提升應用程式啟動效能
 * `最佳化` 快取 Rhino 內建資源編譯結果及執行環境增強函式中繼資料, 提升腳本初始化效能
+* `最佳化` 重複使用 Node.js 常駐處理程序及處理程序層級執行環境, 提升腳本連續執行時的啟動效能
 * `最佳化` 外掛化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
 * `最佳化` 程式碼編輯器 "執行" 按鈕點選後變換為 "停止" 按鈕, 可便捷停止腳本
 * `最佳化` 程式碼編輯器完善主題/字型/工具列/唯讀模式/折疊/選取選單等互動體驗

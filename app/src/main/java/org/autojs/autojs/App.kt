@@ -23,7 +23,9 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.engine.NativeNodeProcessService
+import org.autojs.autojs.engine.NativeNodeEmbeddedScriptService
 import org.autojs.autojs.engine.NodeCrashEvidenceStore
+import org.autojs.autojs.engine.NodeEmbeddedProcessSessionManager
 import org.autojs.autojs.engine.NodeRuntimeBackend
 import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
@@ -44,6 +46,8 @@ import org.autojs.autojs6.R
 import org.greenrobot.eventbus.EventBus
 import java.lang.ref.WeakReference
 import java.lang.reflect.Method
+import java.util.concurrent.Future
+import java.util.concurrent.FutureTask
 import java.util.concurrent.atomic.AtomicBoolean
 import androidx.work.Configuration as WorkManagerConfiguration
 import org.autojs.autojs.inrt.Pref as InrtPref
@@ -65,7 +69,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
 
     private val deferredNativeNodePrewarm = Runnable {
         if (deferredNativeNodePrewarmScheduled.compareAndSet(true, false)) {
-            prewarmNativeNodeIfNeeded()
+            Thread(::prewarmNativeNodeIfNeeded, "AutoJs6-Node-StartupPrewarm").start()
         }
     }
 
@@ -98,7 +102,14 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 setUpDebugEnvironment()
                 setUpLeakCanary()
                 collectPendingNodeCrashEvidence()
-                scheduleNativeNodePrewarmIfNeeded()
+                // The fallback branch also serves auxiliary app processes such as
+                // :background. Only the package's main process may own persistent
+                // Node service bindings; otherwise independent managers can keep the
+                // same slot alive and make retirement appear to time out.
+                if (getProcessNameCompat() == applicationInfo.processName) {
+                    NodeEmbeddedProcessSessionManager.reopenForUse()
+                    scheduleNativeNodePrewarmIfNeeded()
+                }
 
                 AutoJs.initInstance(this)
                 GlobalKeyObserver.initIfNeeded(applicationContext)
@@ -268,8 +279,11 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 runCatching { NativeNodeProcessService.prewarm(this) }
                     .onFailure { Log.w(TAG, "Failed to prewarm native Node.js process.", it) }
             }
+            NodeRuntimeBackend.EMBEDDED -> {
+                runCatching { NativeNodeEmbeddedScriptService.prewarmRuntime(this) }
+                    .onFailure { Log.w(TAG, "Failed to prewarm embedded Node.js process runtime.", it) }
+            }
             NodeRuntimeBackend.RHINO,
-            NodeRuntimeBackend.EMBEDDED,
             NodeRuntimeBackend.PLUGIN -> Unit
         }
     }
@@ -277,13 +291,13 @@ class App : Application(), WorkManagerConfiguration.Provider {
     private fun scheduleNativeNodePrewarmIfNeeded() {
         when (NodeRuntimeBackend.current()) {
             NodeRuntimeBackend.NATIVE,
-            NodeRuntimeBackend.AUTO -> {
+            NodeRuntimeBackend.AUTO,
+            NodeRuntimeBackend.EMBEDDED -> {
                 if (deferredNativeNodePrewarmScheduled.compareAndSet(false, true)) {
                     mainHandler.postDelayed(deferredNativeNodePrewarm, NATIVE_NODE_PREWARM_DELAY_MILLIS)
                 }
             }
             NodeRuntimeBackend.RHINO,
-            NodeRuntimeBackend.EMBEDDED,
             NodeRuntimeBackend.PLUGIN -> Unit
         }
     }
@@ -335,12 +349,43 @@ class App : Application(), WorkManagerConfiguration.Provider {
     }
 
     fun clear() {
+        clearAsync()
+    }
+
+    /**
+     * Starts the same non-blocking cleanup as [clear] and exposes its Node shutdown task so the
+     * real app-exit path can wait for it without starting a duplicate shutdown operation.
+     */
+    fun clearForExit(): Future<Boolean> = clearAsync()
+
+    private fun clearAsync(): Future<Boolean> {
         cancelDeferredNativeNodePrewarm()
+        val closingEpoch = NodeEmbeddedProcessSessionManager.beginClosing()
+        val nodeShutdownTask = FutureTask {
+            runCatching {
+                NodeEmbeddedProcessSessionManager.shutdownAllAndAwait(
+                    context = this,
+                    reason = "app.clear",
+                    expectedClosingEpoch = closingEpoch,
+                )
+            }.onFailure {
+                Log.w(TAG, "Failed to shut down embedded Node.js process sessions.", it)
+            }.getOrDefault(false)
+        }
+        Thread(nodeShutdownTask, "AutoJs6-Node-AppShutdown").start()
         if (deferredMaintenanceScheduled.compareAndSet(true, false)) {
             mainHandler.removeCallbacks(deferredMaintenance)
         }
         dynamicBroadcastReceivers.unregisterAll()
         InAppEventBus.clear()
+        return nodeShutdownTask
+    }
+
+    override fun onTrimMemory(level: Int) {
+        if (getProcessNameCompat() == applicationInfo.processName) {
+            NodeEmbeddedProcessSessionManager.onTrimMemory(this, level)
+        }
+        super.onTrimMemory(level)
     }
 
     companion object {

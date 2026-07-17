@@ -3,11 +3,13 @@ package org.autojs.autojs.engine
 import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 
 object NodeEmbeddedProcessPoolPolicy {
 
     const val SCHEMA = "autojs6-node-embedded-process-pool-v1"
-    const val VERSION = 1
+    const val VERSION = 2
     const val STATUS_DESIGN_GATED = "design_gated"
     const val STATUS_EXPLICIT_SLOT_ENABLED = "explicit_slot_enabled"
     const val STATUS_DEFAULT_SCHEDULER_ENABLED = "default_scheduler_enabled"
@@ -23,6 +25,8 @@ object NodeEmbeddedProcessPoolPolicy {
     const val SLOT_SELECTION_CURRENT_SERVICE = "current_service"
     const val SLOT_CRASH_FALLBACK_MODE_NO_RESTART = "no_restart_collect_marker"
     const val SLOT_CRASH_QUARANTINE_POLICY_NONE = "no_quarantine_until_pool_coordinator"
+    const val SLOT_CRASH_FALLBACK_MODE_REBUILD_AFFECTED_SLOT = "quarantine_then_rebuild_affected_slot"
+    const val SLOT_CRASH_QUARANTINE_POLICY_BINDER_OR_TEARDOWN = "binder_death_or_unclean_teardown"
     const val SLOT_CRASH_SURVIVOR_POLICY_ALLOW_OTHER_SLOTS = "allow_other_slots_after_marker_collection"
     const val DEFAULT_EFFECTIVE_MAX_ACTIVE_SLOTS = 1
     const val EXPLICIT_EFFECTIVE_MAX_ACTIVE_SLOTS = 2
@@ -175,14 +179,18 @@ object NodeEmbeddedProcessPoolPolicy {
         slotSelectionSource: String? = null,
         defaultSchedulerEnabled: Boolean = false,
     ): ProcessPoolPlan {
+        val availableSlots = availableSlots(context)
         val memoryProfile = deviceMemoryProfile(context)
         val normalizedMode = NodeExecutionModePolicy.normalize(executionMode)
         val currentSlot = slotForServiceClassName(currentServiceClassName)
+            ?.takeIf { candidate -> availableSlots.any { it.id == candidate.id } }
         val normalizedRequestedSlotId = requestedSlotId?.trim().orEmpty()
         val normalizedSlotSelectionSource = slotSelectionSource?.trim().orEmpty()
         val defaultSchedulerSlot = explicitSelectableSlot(normalizedRequestedSlotId)
+            ?.takeIf { candidate -> availableSlots.any { it.id == candidate.id } }
             ?.takeIf { normalizedSlotSelectionSource == SLOT_SELECTION_DEFAULT_SCHEDULER }
         val requestedSlot = explicitSelectableSlot(normalizedRequestedSlotId)
+            ?.takeIf { candidate -> availableSlots.any { it.id == candidate.id } }
             ?.takeIf { defaultSchedulerSlot == null }
         val explicitSlotRequested = normalizedRequestedSlotId.isNotBlank() && defaultSchedulerSlot == null
         val selectedSlot = currentSlot ?: defaultSchedulerSlot ?: requestedSlot ?: primarySlot
@@ -236,7 +244,7 @@ object NodeEmbeddedProcessPoolPolicy {
                 else -> MODE_PRIMARY_ONLY
             },
             multiProcessEnabled = multiProcessEnabled,
-            declaredSlots = declaredSlots,
+            declaredSlots = availableSlots,
             requestedSlotId = normalizedRequestedSlotId,
             selectedSlot = selectedSlot,
             slotSelectionSource = resolvedSelectionSource,
@@ -245,11 +253,11 @@ object NodeEmbeddedProcessPoolPolicy {
             longRunningDedicatedSlotId = longRunningSlot.id,
             longRunningDedicatedSlotEnabled = false,
             defaultSchedulerEnabled = selectedByDefaultScheduler,
-            defaultSchedulerSlotIds = defaultSchedulerSlotIds(),
-            defaultSchedulerFallbackEnabled = false,
-            slotCrashFallbackMode = SLOT_CRASH_FALLBACK_MODE_NO_RESTART,
-            failedSlotReplacementEnabled = false,
-            failedSlotQuarantinePolicy = SLOT_CRASH_QUARANTINE_POLICY_NONE,
+            defaultSchedulerSlotIds = defaultSchedulerSlotIds(context),
+            defaultSchedulerFallbackEnabled = true,
+            slotCrashFallbackMode = SLOT_CRASH_FALLBACK_MODE_REBUILD_AFFECTED_SLOT,
+            failedSlotReplacementEnabled = true,
+            failedSlotQuarantinePolicy = SLOT_CRASH_QUARANTINE_POLICY_BINDER_OR_TEARDOWN,
             survivingSlotExecutionPolicy = SLOT_CRASH_SURVIVOR_POLICY_ALLOW_OTHER_SLOTS,
             queueWhenPoolFullEnabled = selectedByDefaultScheduler,
             queuePolicy = if (selectedByDefaultScheduler) {
@@ -267,12 +275,16 @@ object NodeEmbeddedProcessPoolPolicy {
 
     fun defaultSchedulerSlotIds(): List<String> = listOf(PRIMARY_SLOT_ID, OVERFLOW_SLOT_ID)
 
+    fun defaultSchedulerSlotIds(context: Context): List<String> = availableSlots(context)
+        .filter { it.id in setOf(PRIMARY_SLOT_ID, OVERFLOW_SLOT_ID) }
+        .map { it.id }
+
     fun defaultSchedulerEligible(
         context: Context,
         executionMode: String? = NodeExecutionModePolicy.MODE_ONE_SHOT,
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
     ): Boolean {
-        return defaultSchedulerEligible(
+        return defaultSchedulerSlotIds(context).size >= DEFAULT_SCHEDULER_EFFECTIVE_MAX_ACTIVE_SLOTS && defaultSchedulerEligible(
             memoryProfile = deviceMemoryProfile(context),
             executionMode = executionMode,
             launchSurface = launchSurface,
@@ -295,10 +307,28 @@ object NodeEmbeddedProcessPoolPolicy {
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
     ): List<ProcessSlot> {
         return if (defaultSchedulerEligible(context, executionMode, launchSurface)) {
-            listOf(primarySlot, overflowSlot)
+            availableSlots(context).filter { it.id in setOf(PRIMARY_SLOT_ID, OVERFLOW_SLOT_ID) }
         } else {
-            listOf(primarySlot)
+            availableSlots(context).filter { it.id == PRIMARY_SLOT_ID }.ifEmpty { listOf(primarySlot) }
         }
+    }
+
+    fun availableSlots(context: Context): List<ProcessSlot> {
+        val appContext = context.applicationContext
+        return declaredSlots.filter { slot ->
+            runCatching {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    appContext.packageManager.getServiceInfo(
+                        slot.componentName(appContext),
+                        PackageManager.ComponentInfoFlags.of(0L),
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    appContext.packageManager.getServiceInfo(slot.componentName(appContext), 0)
+                }
+                true
+            }.getOrDefault(false)
+        }.ifEmpty { listOf(primarySlot) }
     }
 
     private fun explicitSelectableSlot(requestedSlotId: String): ProcessSlot? {

@@ -171,6 +171,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
 * `Feature` Node.js runtime supports controlled AutoJs6 bridge modules and adopts the Safe Node Profile security policy
+* `Feature` Node.js runtime supports a persistent service process and process-scoped Node/V8 platform reuse, while creating a fresh isolate and Environment for each script execution
+* `Feature` Persistent Node.js runtime supports idle or memory-pressure retirement, explicit shutdown, and isolation and rebuilding of unhealthy processes
 * `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
 * `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/text conversion/media information and more
 * `Feature` Plugin Center provides a global settings page and a user guide page
@@ -225,6 +227,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` KeyCode methods support sending key code commands with Shizuku permission
 * `Improvement` Deferred initialization of non-critical components to improve app startup performance
 * `Improvement` Cached compilation results for bundled Rhino resources and metadata for runtime enhancement functions to improve script initialization performance
+* `Improvement` Reused the persistent Node.js process and process-scoped runtime to improve warm script startup performance
 * `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
 * `Improvement` Improved code editor interactions for themes/fonts/toolbars/read-only mode/folding/selection menus and more

@@ -925,6 +925,11 @@ class AndroidNodeBridgeCapabilityProvider(
         databaseExecutor.shutdownNow()
         resourceRegistry.closeAll(destroyReason)
         networkCalls.values.forEach { call -> runCatching { call.cancel() } }
+        networkClient.dispatcher.cancelAll()
+        networkClient.dispatcher.executorService.shutdownNow()
+        networkClient.connectionPool.evictAll()
+        runCatching { networkClient.cache?.close() }
+        runCatching { databaseExecutor.awaitTermination(250L, TimeUnit.MILLISECONDS) }
         networkCalls.clear()
         websocketSessions.clear()
         imageHandles.clear()

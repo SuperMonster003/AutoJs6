@@ -666,7 +666,7 @@ class NativeNodeEmbeddedProbeService : Service() {
         private const val EMBEDDED_MVP_GO_NO_GO_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.embeddedmvpgonogo"
         private const val RESULT_PROBE = 1
         private const val NOTIFICATION_ID = 0xA6E3
-        private const val EMBEDDED_PROBE_PROCESS_SUFFIX = ":nodejs_embedded"
+        private const val EMBEDDED_PROBE_PROCESS_SUFFIX = ":nodejs_probe"
         private const val PROBE_LEVEL_FATAL_CRASH_EVIDENCE = 54
         private const val FATAL_CRASH_EVIDENCE_TIMEOUT_MS = 3000L
         private const val PROCESS_EXIT_DELAY_MS = 250L

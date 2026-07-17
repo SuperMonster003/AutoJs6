@@ -1422,8 +1422,7 @@ class NodeAutoJsBridgeInstrumentationTest {
     }
 
     private fun settleEmbeddedScriptServiceProcess() {
-        context.stopService(Intent(context, NativeNodeEmbeddedScriptService::class.java))
-        SystemClock.sleep(600L)
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
     }
 
     private fun newLiveBridgeSession(name: String, provider: NodeBridgeCapabilityProvider): LiveBridgeSessionFixture {

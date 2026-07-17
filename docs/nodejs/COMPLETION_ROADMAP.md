@@ -35,6 +35,9 @@ production Inspector are intentional boundaries rather than unfinished work.
   process that is still settling.
 - [x] The 2026-07-18 Sony XQ-DQ72 focused device run passed the performance
   test and both queue regressions.
+- [x] R2 focused acceptance on the same device passed persistent runtime,
+  runtime-ready prewarm, process-pool recovery, 30-cycle latency, and
+  100-execution resource-growth gates.
 - [ ] Re-run the final aggregate gates before declaring Core completion. The
   blocker registry is closed, but some narrative status documents still
   describe older blocked states.
@@ -49,8 +52,26 @@ The focused performance reports on XQ-DQ72 recorded:
 Each row is one cold/warm sample, not a percentile claim. The benchmark now
 waits beyond the asynchronous settle window and requires cold and app-side
 warm runs to use the same process-pool slot.
-The current "warm" sample still launches a fresh service process and fresh
-Node runtime; it is only warm with respect to app and filesystem caches.
+The R1 "warm" sample still launched a fresh service process and fresh Node
+runtime; it was only warm with respect to app and filesystem caches.
+
+The R2 acceptance run on the same device recorded nearest-rank percentiles:
+
+| R2 metric | Samples | p50 | p95 | Maximum |
+| --- | ---: | ---: | ---: | ---: |
+| Cold wall | 30 | 612 ms | 633 ms | 676 ms |
+| Runtime-warm wall | 30 | 161 ms | 196 ms | 210 ms |
+| Cold result callback to client return | 30 | 2 ms | 3 ms | 3 ms |
+| Runtime-warm result callback to client return | 30 | 2 ms | 3 ms | 3 ms |
+
+The 100-execution resource gate reused PID 28916 and process-runtime
+generation 1 with execution sequence 1 through 100. Eleven snapshots showed
+no monotonic growth: thread count changed from 24 to 20, fd count from 107 to
+105, Node heap used from 7304 KiB to 7280 KiB, libuv handles stayed at 2, and
+active bridge resources stayed at 0.
+
+The focused manager/prewarm/process-pool suites passed 21 tests, and the full
+persistent lifecycle stress class passed 16 tests in one final run.
 
 ## R1 - Close The One-Shot Result-Delivery Regression
 
@@ -64,7 +85,7 @@ Node runtime; it is only warm with respect to app and filesystem caches.
   `queuedExecutionRunsAfterActiveExecution` on the primary Sony device.
 - [ ] Run at least 30 simple-script samples and publish p50/p95 for cold and
   app-side warm one-shot execution.
-- [ ] Run the complete lifecycle stress and process-pool policy classes before
+- [x] Run the complete lifecycle stress and process-pool policy classes before
   release, including success, error, timeout, cancellation, service death,
   primary/overflow concurrency, queue full, and queue timeout.
 
@@ -100,32 +121,69 @@ exit $LASTEXITCODE
 This is the prerequisite for approaching Auto.js Pro warm-start latency. Pro
 keeps its script process and service connection alive and initializes the
 process-global Node platform once, while still creating and destroying the
-per-script V8 runtime. AutoJs6 currently exits its one-shot service process and
-tears down the process-global Node platform after every script.
+per-script V8 runtime. Before R2, AutoJs6 exited its one-shot service process
+and tore down the process-global Node platform after every script.
 
-- [ ] Add a persistent service/session manager with explicit idle TTL,
-  trim-memory, force-stop, app-upgrade, and shutdown behavior.
-- [ ] Initialize `libnode`, `MultiIsolatePlatform`, and other process-global
+R2 focused implementation and acceptance are complete. Packaged APK, multi-
+device, and long-soak evidence remain release gates in R5 rather than blockers
+for the R2 architecture.
+
+- [x] Add a persistent service/session manager with explicit idle TTL,
+  trim-memory, and app shutdown behavior. Force-stop and app upgrade are hard
+  process boundaries: no teardown callback is assumed, no session state is
+  persisted, and the next app process creates a new manager epoch and runtime.
+- [x] Initialize `libnode`, `MultiIsolatePlatform`, and other process-global
   Node/V8/libuv state once per service-process lifetime.
-- [ ] Keep a fresh isolate, context, Node Environment, cwd/env, capabilities,
+- [x] Keep a fresh isolate, context, Node Environment, cwd/env, capabilities,
   module cache, ResourceRegistry, and bridge handles for every execution.
-- [ ] Never reuse user globals, mutable user module state, pending callbacks,
+- [x] Never reuse user globals, mutable user module state, pending callbacks,
   timers, or provider-owned resources across scripts.
-- [ ] Give the primary and overflow slots independent process-global runtimes.
-- [ ] Quarantine and rebuild a slot after native crash, failed teardown,
+- [x] Give the primary and overflow slots independent process-global runtimes.
+- [x] Quarantine and rebuild a slot after native crash, failed teardown,
   heartbeat loss, or Binder death.
-- [ ] Upgrade process-only prewarm to runtime-ready prewarm, with the current
+- [x] Upgrade process-only prewarm to runtime-ready prewarm, with the current
   one-shot path retained as a rollback fallback.
-- [ ] Repeat isolation, lifecycle, crash, packaged APK, and soak evidence after
-  the lifecycle model changes.
+- [x] Repeat focused isolation, lifecycle, service-death, process-pool, and
+  resource-growth evidence after the lifecycle model changes.
 
-Provisional performance SLO for 30 executions on the primary device:
+R2 focused verification tracker:
+
+- [x] Compile the app and Android instrumentation sources with the persistent
+  runtime/session-manager implementation enabled.
+- [x] Make the performance instrumentation compare a cold execution with a
+  runtime-warm execution in the same PID and session/runtime generation, with
+  one process initialization and a monotonically increasing execution
+  sequence.
+- [x] Add focused sequential-execution coverage for fresh globals, mutable
+  CommonJS state, request environment, timers, bridge request state, and zero
+  retained bridge resources while reusing the process-global runtime.
+- [x] Add focused runtime-ready prewarm, idle-TTL retirement, explicit
+  shutdown, and trim-memory retirement coverage, and make instrumentation
+  teardown use `shutdownAllAndAwait` for persistent sessions.
+- [x] Pass `NodeEmbeddedPerformanceInstrumentationTest`,
+  `NodeEmbeddedPersistentRuntimeInstrumentationTest`, and
+  `NodeRuntimePrewarmPoolInstrumentationTest` on the primary device.
+- [x] Pass focused process-pool, Binder-death, timeout/recovery, and leak
+  checks under the persistent lifecycle.
+- [x] Collect 30-run cold/runtime-warm percentiles and the 100-execution
+  resource-growth report before accepting the provisional SLO.
+
+Provisional performance SLO for 30 samples per mode on the primary device
+(30 cold cycles and 60 executions total):
 
 - Cold p50 `<= 1000 ms`.
 - Runtime-ready warm p50 `<= 250 ms` and p95 `<= 400 ms`.
-- Native result available to engine-finished p95 `<= 50 ms`.
-- 100 sequential executions show no monotonic RSS, native heap, Java heap,
+- Result callback to client return p95 `<= 50 ms`.
+- 100 sequential executions show no monotonic RSS, Java/native PSS,
   thread, fd, libuv handle, or bridge-resource growth.
+
+All provisional SLOs passed on the 2026-07-18 XQ-DQ72 run. The reproducible
+commands and report schema are documented in `R2_ACCEPTANCE_SAMPLING.md`.
+
+Release follow-ups that do not reopen R2:
+
+- [ ] Re-run packaged APK and multi-device gates under R5.
+- [ ] Re-run the 8-hour and 24-hour leak/soak gates under R5.
 
 ## R3 - Measure And Optimize The Remaining Startup Chain
 
@@ -137,7 +195,7 @@ temporary one-shot lifecycle.
   result marshalling, and teardown separately.
 - [ ] Rename the existing second one-shot sample to `appSideWarm`; reserve
   `runtimeWarm` for reuse of the same process-global runtime.
-- [ ] Add configurable sample count plus p50/p95 output to the performance
+- [x] Add configurable sample count plus p50/p95 output to the performance
   instrumentation report.
 - [ ] Cache only immutable descriptor, dependency, and bootstrap inputs with
   explicit version and capability keys.

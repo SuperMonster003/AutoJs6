@@ -34,40 +34,58 @@ class NodeEmbeddedPerformanceInstrumentationTest {
     @Test
     fun embeddedStartupAndMemoryReportIsWritten() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("embedded Node performance benchmark")
+        NodeEmbeddedTestHarness.assumePersistentRuntimeEnabled("embedded Node persistent-runtime performance benchmark")
 
-        val beforeScript = processSnapshot("beforeScript", Process.myPid())
-        val cold = runMeasured("cold")
-        NodeEmbeddedTestHarness.assertSucceeded("cold performance run", cold.result)
-        assertClientResultDeliveryIsNonBlocking(cold)
-        val afterFirstScript = processSnapshot("afterFirstScript", Process.myPid())
-        val afterFirstScriptService = processSnapshot("afterFirstScriptService", cold.result.pid)
+        val samplePlan = performanceSamplePlan()
+        val cycles = mutableListOf<PerformanceCycle>()
+        val snapshots = mutableListOf<ProcessSnapshot>()
+        val beforeScript = processSnapshot("beforeScript", Process.myPid()).also(snapshots::add)
+
+        repeat(samplePlan.coldCycles) { cycleIndex ->
+            if (cycleIndex > 0) {
+                NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+            }
+            snapshots += processSnapshot("cycle${cycleIndex + 1}.beforeCold.app", Process.myPid())
+
+            val cold = runMeasured("cold-${cycleIndex + 1}")
+            NodeEmbeddedTestHarness.assertSucceeded("cold performance run ${cycleIndex + 1}", cold.result)
+            assertClientResultDeliveryIsNonBlocking(cold)
+            snapshots += processSnapshot("cycle${cycleIndex + 1}.afterCold.app", Process.myPid())
+            snapshots += processSnapshot("cycle${cycleIndex + 1}.afterCold.service", cold.result.pid)
+
+            val warmRuns = mutableListOf<MeasuredRun>()
+            var previous = cold
+            repeat(samplePlan.runtimeWarmSamplesPerCold) { warmIndex ->
+                val warm = runMeasured("runtime-warm-${cycleIndex + 1}-${warmIndex + 1}")
+                NodeEmbeddedTestHarness.assertSucceeded(
+                    "runtime-warm performance run ${cycleIndex + 1}.${warmIndex + 1}",
+                    warm.result,
+                )
+                assertClientResultDeliveryIsNonBlocking(warm)
+                assertSameProcessPoolSlot(cold, warm)
+                assertRuntimeWarmReuse(cold, previous, warm)
+                warmRuns += warm
+                previous = warm
+            }
+            val lastWarm = warmRuns.last()
+            snapshots += processSnapshot("cycle${cycleIndex + 1}.afterWarm.app", Process.myPid())
+            snapshots += processSnapshot("cycle${cycleIndex + 1}.afterWarm.service", lastWarm.result.pid)
+            cycles += PerformanceCycle(cycleIndex + 1, cold, warmRuns)
+        }
+
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
-        val afterFirstDestroy = processSnapshot("afterFirstDestroy", Process.myPid())
+        val afterDestroy = processSnapshot("afterDestroy", Process.myPid()).also(snapshots::add)
 
-        val beforeWarmScript = processSnapshot("beforeWarmScript", Process.myPid())
-        val warm = runMeasured("warm")
-        NodeEmbeddedTestHarness.assertSucceeded("warm performance run", warm.result)
-        assertClientResultDeliveryIsNonBlocking(warm)
-        assertSameProcessPoolSlot(cold, warm)
-        val afterWarmScript = processSnapshot("afterWarmScript", Process.myPid())
-        val afterWarmScriptService = processSnapshot("afterWarmScriptService", warm.result.pid)
-        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
-        val afterDestroy = processSnapshot("afterDestroy", Process.myPid())
-
-        assertTrue("cold run did not print perf payload\n${cold.result.stdout}", cold.nodePayload != null)
-        assertTrue("warm run did not print perf payload\n${warm.result.stdout}", warm.nodePayload != null)
+        cycles.flatMap { it.runs }.forEach { run ->
+            assertTrue("${run.label} did not print perf payload\n${run.result.stdout}", run.nodePayload != null)
+        }
 
         val report = buildReport(
             beforeScript = beforeScript,
-            cold = cold,
-            afterFirstScript = afterFirstScript,
-            afterFirstScriptService = afterFirstScriptService,
-            afterFirstDestroy = afterFirstDestroy,
-            beforeWarmScript = beforeWarmScript,
-            warm = warm,
-            afterWarmScript = afterWarmScript,
-            afterWarmScriptService = afterWarmScriptService,
             afterDestroy = afterDestroy,
+            samplePlan = samplePlan,
+            cycles = cycles,
+            snapshots = snapshots,
         )
         val reportFile = writeReports(report)
 
@@ -96,16 +114,16 @@ class NodeEmbeddedPerformanceInstrumentationTest {
 
     private fun buildReport(
         beforeScript: ProcessSnapshot,
-        cold: MeasuredRun,
-        afterFirstScript: ProcessSnapshot,
-        afterFirstScriptService: ProcessSnapshot,
-        afterFirstDestroy: ProcessSnapshot,
-        beforeWarmScript: ProcessSnapshot,
-        warm: MeasuredRun,
-        afterWarmScript: ProcessSnapshot,
-        afterWarmScriptService: ProcessSnapshot,
         afterDestroy: ProcessSnapshot,
+        samplePlan: PerformanceSamplePlan,
+        cycles: List<PerformanceCycle>,
+        snapshots: List<ProcessSnapshot>,
     ): JSONObject {
+        val coldRuns = cycles.map { it.cold }
+        val warmRuns = cycles.flatMap { it.runtimeWarm }
+        val cold = coldRuns.first()
+        val warm = warmRuns.first()
+        val afterFirstScript = snapshots.first { it.label == "cycle1.afterCold.app" }
         val coldLoadMs = cold.result.nativeValues["load.duration.ms"]?.toLongOrNull()
         val warmLoadMs = warm.result.nativeValues["load.duration.ms"]?.toLongOrNull()
         val appRssDeltaAfterFirstScript = afterFirstScript.rssKb?.minusOrNull(beforeScript.rssKb)
@@ -114,11 +132,12 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         val appFdDeltaAfterDestroy = afterDestroy.fdCount?.minusOrNull(beforeScript.fdCount)
 
         return JSONObject()
-            .put("schema", "autojs6-node-performance-v1")
+            .put("schema", "autojs6-node-performance-v3")
             .put("generatedAtEpochMs", System.currentTimeMillis())
             .put("packageName", context.packageName)
             .put("device", deviceJson())
             .put("reportPull", reportPullJson())
+            .put("samplePlan", samplePlan.toJson())
             .put(
                 "metrics",
                 JSONObject()
@@ -128,34 +147,66 @@ class NodeEmbeddedPerformanceInstrumentationTest {
                     .put("libnodeLoadWarmMs", warmLoadMs ?: JSONObject.NULL)
                     .put("libnodeLoadMeasurable", coldLoadMs != null || warmLoadMs != null)
                     .put("firstScriptExecutionWallMs", cold.result.elapsedMs)
-                    .put("warmScriptExecutionWallMs", warm.result.elapsedMs)
+                    .put("runtimeWarmScriptExecutionWallMs", warm.result.elapsedMs)
                     .put("coldRunWallMs", cold.wallMs)
+                    .put("runtimeWarmRunWallMs", warm.wallMs)
                     .put("warmRunWallMs", warm.wallMs)
                     .put("appRssDeltaAfterFirstScriptKb", appRssDeltaAfterFirstScript ?: JSONObject.NULL)
                     .put("appRssDeltaAfterDestroyKb", appRssDeltaAfterDestroy ?: JSONObject.NULL)
                     .put("appThreadDeltaAfterDestroy", appThreadDeltaAfterDestroy ?: JSONObject.NULL)
                     .put("appFdDeltaAfterDestroy", appFdDeltaAfterDestroy ?: JSONObject.NULL),
             )
-            .put("snapshots", JSONArray(listOf(
-                beforeScript.toJson(),
-                afterFirstScript.toJson(),
-                afterFirstScriptService.toJson(),
-                afterFirstDestroy.toJson(),
-                beforeWarmScript.toJson(),
-                afterWarmScript.toJson(),
-                afterWarmScriptService.toJson(),
-                afterDestroy.toJson(),
-            )))
-            .put("runs", JSONArray(listOf(cold.toJson(), warm.toJson())))
+            .put("percentiles", percentileReport(coldRuns, warmRuns))
+            .put("snapshots", JSONArray(snapshots.map { it.toJson() }))
+            .put("cycles", JSONArray(cycles.map { it.toJson() }))
+            .put("runs", JSONArray(cycles.flatMap { it.runs }.map { it.toJson() }))
             .put(
                 "thresholds",
                 JSONObject()
                     .put("enabled", instrumentationBoolean(ARG_FAIL_ON_THRESHOLD, false))
                     .put("maxColdWallMs", instrumentationLong(ARG_MAX_COLD_WALL_MS))
                     .put("maxWarmWallMs", instrumentationLong(ARG_MAX_WARM_WALL_MS))
+                    .put("maxColdP50Ms", instrumentationLong(ARG_MAX_COLD_P50_MS))
+                    .put("maxRuntimeWarmP50Ms", instrumentationLong(ARG_MAX_RUNTIME_WARM_P50_MS))
+                    .put("maxRuntimeWarmP95Ms", instrumentationLong(ARG_MAX_RUNTIME_WARM_P95_MS))
+                    .put("maxResultToReturnP95Ms", instrumentationLong(ARG_MAX_RESULT_TO_RETURN_P95_MS))
                     .put("maxAppRssDeltaAfterDestroyKb", instrumentationLong(ARG_MAX_APP_RSS_DELTA_AFTER_DESTROY_KB))
                     .put("maxServiceRssKb", instrumentationLong(ARG_MAX_SERVICE_RSS_KB)),
             )
+    }
+
+    private fun percentileReport(coldRuns: List<MeasuredRun>, warmRuns: List<MeasuredRun>): JSONObject =
+        JSONObject()
+            .put("method", "nearest-rank")
+            .put("cold", runDistributionJson(coldRuns))
+            .put("runtimeWarm", runDistributionJson(warmRuns))
+
+    private fun runDistributionJson(runs: List<MeasuredRun>): JSONObject =
+        JSONObject()
+            .put("sampleCount", runs.size)
+            .put("wallMs", distributionJson(runs.map { it.wallMs }))
+            .put("resultElapsedMs", distributionJson(runs.map { it.result.elapsedMs }))
+            .put(
+                "resultToReturnMs",
+                distributionJson(runs.mapNotNull { it.result.nativeValues[CLIENT_RESULT_TO_RETURN_KEY]?.toLongOrNull() }),
+            )
+
+    private fun distributionJson(values: List<Long>): JSONObject {
+        val sorted = values.sorted()
+        return JSONObject()
+            .put("count", sorted.size)
+            .put("min", sorted.firstOrNull() ?: JSONObject.NULL)
+            .put("p50", nearestRank(sorted, 50) ?: JSONObject.NULL)
+            .put("p95", nearestRank(sorted, 95) ?: JSONObject.NULL)
+            .put("max", sorted.lastOrNull() ?: JSONObject.NULL)
+            .put("mean", if (sorted.isEmpty()) JSONObject.NULL else sorted.average())
+            .put("samples", JSONArray(values))
+    }
+
+    private fun nearestRank(sorted: List<Long>, percentile: Int): Long? {
+        if (sorted.isEmpty()) return null
+        val rank = ((sorted.size * percentile + 99) / 100).coerceIn(1, sorted.size)
+        return sorted[rank - 1]
     }
 
     private fun writeReports(report: JSONObject): File {
@@ -205,6 +256,34 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         val metrics = report.getJSONObject("metrics")
         assertBelow("cold run wall time", metrics.optNullableLong("coldRunWallMs"), instrumentationLong(ARG_MAX_COLD_WALL_MS))
         assertBelow("warm run wall time", metrics.optNullableLong("warmRunWallMs"), instrumentationLong(ARG_MAX_WARM_WALL_MS))
+        val percentiles = report.getJSONObject("percentiles")
+        val cold = percentiles.getJSONObject("cold")
+        val runtimeWarm = percentiles.getJSONObject("runtimeWarm")
+        assertBelow(
+            "cold wall p50",
+            cold.getJSONObject("wallMs").optNullableLong("p50"),
+            instrumentationLong(ARG_MAX_COLD_P50_MS),
+        )
+        assertBelow(
+            "runtime-warm wall p50",
+            runtimeWarm.getJSONObject("wallMs").optNullableLong("p50"),
+            instrumentationLong(ARG_MAX_RUNTIME_WARM_P50_MS),
+        )
+        assertBelow(
+            "runtime-warm wall p95",
+            runtimeWarm.getJSONObject("wallMs").optNullableLong("p95"),
+            instrumentationLong(ARG_MAX_RUNTIME_WARM_P95_MS),
+        )
+        assertBelow(
+            "cold result-to-return p95",
+            cold.getJSONObject("resultToReturnMs").optNullableLong("p95"),
+            instrumentationLong(ARG_MAX_RESULT_TO_RETURN_P95_MS),
+        )
+        assertBelow(
+            "runtime-warm result-to-return p95",
+            runtimeWarm.getJSONObject("resultToReturnMs").optNullableLong("p95"),
+            instrumentationLong(ARG_MAX_RESULT_TO_RETURN_P95_MS),
+        )
         assertBelow(
             "app RSS delta after destroy",
             metrics.optNullableLong("appRssDeltaAfterDestroyKb"),
@@ -215,7 +294,7 @@ class NodeEmbeddedPerformanceInstrumentationTest {
             val snapshots = report.getJSONArray("snapshots")
             for (index in 0 until snapshots.length()) {
                 val snapshot = snapshots.getJSONObject(index)
-                if (snapshot.optString("label").contains("Service")) {
+                if (snapshot.optString("label").contains("service", ignoreCase = true)) {
                     assertBelow(
                         "${snapshot.optString("label")} RSS",
                         snapshot.optNullableLong("rssKb"),
@@ -245,8 +324,8 @@ class NodeEmbeddedPerformanceInstrumentationTest {
             resultToReturnMs!! <= MAX_CLIENT_RESULT_TO_RETURN_MS,
         )
         assertTrue(
-            "${run.label} process-settle safety window was not deferred: ${run.result.nativeValues}",
-            processSettleDeferred == true,
+            "${run.label} still uses the one-shot process-settle safety window: ${run.result.nativeValues}",
+            processSettleDeferred == false,
         )
     }
 
@@ -256,6 +335,49 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         assertTrue("cold process-pool slot is missing: ${cold.result.nativeValues}", !coldSlot.isNullOrBlank())
         assertTrue("warm process-pool slot is missing: ${warm.result.nativeValues}", !warmSlot.isNullOrBlank())
         assertTrue("cold/warm runs used different process-pool slots: cold=$coldSlot warm=$warmSlot", coldSlot == warmSlot)
+    }
+
+    private fun assertRuntimeWarmReuse(cold: MeasuredRun, previous: MeasuredRun, warm: MeasuredRun) {
+        val coldValues = cold.result.nativeValues
+        val previousValues = previous.result.nativeValues
+        val warmValues = warm.result.nativeValues
+        assertTrue("cold/runtime-warm runs used different service pids: cold=${cold.result.pid} warm=${warm.result.pid}", cold.result.pid == warm.result.pid)
+
+        val coldSessionGeneration = coldValues[PROCESS_SESSION_GENERATION_KEY]?.toLongOrNull()
+        val warmSessionGeneration = warmValues[PROCESS_SESSION_GENERATION_KEY]?.toLongOrNull()
+        assertTrue("cold session generation is missing: $coldValues", coldSessionGeneration != null)
+        assertTrue("runtime-warm session generation is missing: $warmValues", warmSessionGeneration != null)
+        assertTrue(
+            "cold/runtime-warm session generations differ: cold=$coldSessionGeneration warm=$warmSessionGeneration",
+            coldSessionGeneration == warmSessionGeneration,
+        )
+
+        val coldRuntimeGeneration = coldValues[PROCESS_RUNTIME_GENERATION_KEY]?.toLongOrNull()
+        val warmRuntimeGeneration = warmValues[PROCESS_RUNTIME_GENERATION_KEY]?.toLongOrNull()
+        assertTrue("cold process runtime generation is missing: $coldValues", coldRuntimeGeneration != null)
+        assertTrue("runtime-warm process runtime generation is missing: $warmValues", warmRuntimeGeneration != null)
+        assertTrue(
+            "cold/runtime-warm process runtime generations differ: cold=$coldRuntimeGeneration warm=$warmRuntimeGeneration",
+            coldRuntimeGeneration == warmRuntimeGeneration,
+        )
+
+        val coldInitCount = coldValues[PROCESS_RUNTIME_INIT_COUNT_KEY]?.toLongOrNull()
+        val warmInitCount = warmValues[PROCESS_RUNTIME_INIT_COUNT_KEY]?.toLongOrNull()
+        assertTrue("cold process runtime init count is missing: $coldValues", coldInitCount != null)
+        assertTrue("runtime-warm process runtime init count is missing: $warmValues", warmInitCount != null)
+        assertTrue("process runtime initialized more than once: cold=$coldInitCount warm=$warmInitCount", coldInitCount == 1L && warmInitCount == coldInitCount)
+
+        val previousSequence = previousValues[PROCESS_RUNTIME_EXECUTION_SEQUENCE_KEY]?.toLongOrNull()
+        val warmSequence = warmValues[PROCESS_RUNTIME_EXECUTION_SEQUENCE_KEY]?.toLongOrNull()
+        assertTrue("previous process runtime execution sequence is missing: $previousValues", previousSequence != null)
+        assertTrue("runtime-warm process runtime execution sequence is missing: $warmValues", warmSequence != null)
+        assertTrue(
+            "process runtime execution sequence did not advance once: previous=$previousSequence warm=$warmSequence",
+            previousSequence != null && warmSequence == previousSequence + 1L,
+        )
+        assertTrue("runtime-warm execution did not reuse the process runtime: $warmValues", warmValues[PROCESS_RUNTIME_REUSED_KEY] == "true")
+        assertTrue("previous execution teardown was not clean: $previousValues", previousValues[PROCESS_RUNTIME_TEARDOWN_CLEAN_KEY] == "true")
+        assertTrue("runtime-warm execution teardown was not clean: $warmValues", warmValues[PROCESS_RUNTIME_TEARDOWN_CLEAN_KEY] == "true")
     }
 
     private fun performanceScript(label: String): String = """
@@ -346,6 +468,23 @@ class NodeEmbeddedPerformanceInstrumentationTest {
             .put("gradleTask", ":app:pullNodeEmbeddedPerformanceReports")
             .put("overrideProperty", "autojs.nodejs.perf.deviceDir")
 
+    private fun performanceSamplePlan(): PerformanceSamplePlan {
+        val arguments = InstrumentationRegistry.getArguments()
+        val coldCycles = arguments.getString(ARG_COLD_CYCLES)
+            ?.toIntOrNull()
+            ?: DEFAULT_COLD_CYCLES
+        val warmSamplesPerCold = arguments.getString(ARG_RUNTIME_WARM_SAMPLES_PER_COLD)
+            ?.toIntOrNull()
+            ?: if (coldCycles == 1) DEFAULT_RUNTIME_WARM_SAMPLES else 1
+        require(coldCycles in 1..MAX_COLD_CYCLES) {
+            "$ARG_COLD_CYCLES must be in 1..$MAX_COLD_CYCLES, actual=$coldCycles"
+        }
+        require(warmSamplesPerCold in 1..MAX_RUNTIME_WARM_SAMPLES_PER_COLD) {
+            "$ARG_RUNTIME_WARM_SAMPLES_PER_COLD must be in 1..$MAX_RUNTIME_WARM_SAMPLES_PER_COLD, actual=$warmSamplesPerCold"
+        }
+        return PerformanceSamplePlan(coldCycles, warmSamplesPerCold)
+    }
+
     private fun instrumentationBoolean(name: String, defaultValue: Boolean): Boolean =
         InstrumentationRegistry.getArguments()
             .getString(name)
@@ -363,6 +502,46 @@ class NodeEmbeddedPerformanceInstrumentationTest {
 
     private fun Int.minusOrNull(other: Int?): Int? =
         other?.let { this - it }
+
+    private data class PerformanceSamplePlan(
+        val coldCycles: Int,
+        val runtimeWarmSamplesPerCold: Int,
+    ) {
+        val totalExecutions: Int
+            get() = coldCycles * (runtimeWarmSamplesPerCold + 1)
+
+        fun toJson(): JSONObject =
+            JSONObject()
+                .put("coldCycles", coldCycles)
+                .put("runtimeWarmSamplesPerCold", runtimeWarmSamplesPerCold)
+                .put("coldSampleCount", coldCycles)
+                .put("runtimeWarmSampleCount", coldCycles * runtimeWarmSamplesPerCold)
+                .put("totalExecutions", totalExecutions)
+                .put("defaultPlan", coldCycles == DEFAULT_COLD_CYCLES && runtimeWarmSamplesPerCold == DEFAULT_RUNTIME_WARM_SAMPLES)
+                .put(
+                    "coldPercentileNote",
+                    if (coldCycles == 1) {
+                        "Single cold sample; set $ARG_COLD_CYCLES to 30 for an acceptance-grade cold percentile."
+                    } else {
+                        "Each cold sample starts after explicit persistent-session retirement."
+                    },
+                )
+    }
+
+    private data class PerformanceCycle(
+        val index: Int,
+        val cold: MeasuredRun,
+        val runtimeWarm: List<MeasuredRun>,
+    ) {
+        val runs: List<MeasuredRun>
+            get() = listOf(cold) + runtimeWarm
+
+        fun toJson(): JSONObject =
+            JSONObject()
+                .put("index", index)
+                .put("cold", cold.toJson())
+                .put("runtimeWarm", JSONArray(runtimeWarm.map { it.toJson() }))
+    }
 
     private data class MeasuredRun(
         val label: String,
@@ -420,6 +599,12 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         private const val CLIENT_RESULT_TO_RETURN_KEY = "embedded_script.client.result_to_return_ms"
         private const val CLIENT_PROCESS_SETTLE_DEFERRED_KEY = "embedded_script.client.process_settle_deferred"
         private const val PROCESS_POOL_SELECTED_SLOT_KEY = "embedded_script.process_pool.selected_slot_id"
+        private const val PROCESS_SESSION_GENERATION_KEY = "embedded_script.process_session.generation"
+        private const val PROCESS_RUNTIME_GENERATION_KEY = "process_runtime.generation"
+        private const val PROCESS_RUNTIME_INIT_COUNT_KEY = "process_runtime.init_count"
+        private const val PROCESS_RUNTIME_EXECUTION_SEQUENCE_KEY = "process_runtime.execution_sequence"
+        private const val PROCESS_RUNTIME_REUSED_KEY = "process_runtime.reused"
+        private const val PROCESS_RUNTIME_TEARDOWN_CLEAN_KEY = "process_runtime.teardown_clean"
         private const val MAX_CLIENT_RESULT_TO_RETURN_MS = 250L
         private const val SCRIPT_TIMEOUT_MS = 10_000L
         private const val DEVICE_REPORT_DIR = "/sdcard/Download/AutoJs6/nodejs/perf"
@@ -427,7 +612,17 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         private const val ARG_FAIL_ON_THRESHOLD = "autojs.nodejs.perf.failOnThreshold"
         private const val ARG_MAX_COLD_WALL_MS = "autojs.nodejs.perf.maxColdWallMs"
         private const val ARG_MAX_WARM_WALL_MS = "autojs.nodejs.perf.maxWarmWallMs"
+        private const val ARG_MAX_COLD_P50_MS = "autojs.nodejs.perf.maxColdP50Ms"
+        private const val ARG_MAX_RUNTIME_WARM_P50_MS = "autojs.nodejs.perf.maxRuntimeWarmP50Ms"
+        private const val ARG_MAX_RUNTIME_WARM_P95_MS = "autojs.nodejs.perf.maxRuntimeWarmP95Ms"
+        private const val ARG_MAX_RESULT_TO_RETURN_P95_MS = "autojs.nodejs.perf.maxResultToReturnP95Ms"
         private const val ARG_MAX_APP_RSS_DELTA_AFTER_DESTROY_KB = "autojs.nodejs.perf.maxAppRssDeltaAfterDestroyKb"
         private const val ARG_MAX_SERVICE_RSS_KB = "autojs.nodejs.perf.maxServiceRssKb"
+        private const val ARG_COLD_CYCLES = "autojs.nodejs.perf.coldCycles"
+        private const val ARG_RUNTIME_WARM_SAMPLES_PER_COLD = "autojs.nodejs.perf.runtimeWarmSamplesPerCold"
+        private const val DEFAULT_COLD_CYCLES = 1
+        private const val DEFAULT_RUNTIME_WARM_SAMPLES = 29
+        private const val MAX_COLD_CYCLES = 50
+        private const val MAX_RUNTIME_WARM_SAMPLES_PER_COLD = 100
     }
 }

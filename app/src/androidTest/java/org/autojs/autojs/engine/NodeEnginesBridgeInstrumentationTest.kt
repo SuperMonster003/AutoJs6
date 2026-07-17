@@ -247,8 +247,7 @@ class NodeEnginesBridgeInstrumentationTest {
     }
 
     private fun settleEmbeddedScriptServiceProcess() {
-        context.stopService(Intent(context, NativeNodeEmbeddedScriptService::class.java))
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
         context.stopService(Intent(context, NodeBridgeEngineDispatchService::class.java))
-        SystemClock.sleep(600L)
     }
 }

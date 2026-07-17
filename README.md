@@ -171,6 +171,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` Node.js 24.5.0 脚本运行时, 支持通过 "nodejs" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本
 * `新增` Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码
 * `新增` Node.js 运行时支持受控 AutoJs6 桥接模块, 并采用 Safe Node Profile 安全策略
+* `新增` Node.js 运行时支持常驻服务进程及进程级 Node/V8 平台复用, 同时为每次脚本执行创建独立 isolate 及 Environment
+* `新增` Node.js 常驻运行时支持空闲或内存压力下的回收, 显式关闭及异常进程隔离重建
 * `新增` 打包功能支持 Node.js 脚本项目, 并自动包含所需运行库
 * `新增` 插件系统支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/文本转换/媒体信息等扩展接口
 * `新增` 插件中心支持全局设置页面及使用说明页面
@@ -225,6 +227,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` KeyCode 方法支持使用 Shizuku 权限发送键码指令
 * `优化` 延迟初始化非关键组件, 提升应用启动性能
 * `优化` 缓存 Rhino 内置资源编译结果及运行时增强函数元数据, 提升脚本初始化性能
+* `优化` 复用 Node.js 常驻进程及进程级运行时, 提升脚本连续运行时的启动性能
 * `优化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo 相关功能
 * `优化` 代码编辑器 "运行" 按钮点击后变换为 "停止" 按钮, 可便捷停止脚本
 * `优化` 代码编辑器完善主题/字体/工具栏/只读模式/折叠/选择菜单等交互体验

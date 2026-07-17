@@ -36,9 +36,9 @@ object NodeJsPluginRuntimeLoader {
 
     private fun loadPluginOrSystem(libraryName: String, libraryFileName: String, context: Context?) {
         val appContext = context ?: runCatching { GlobalAppContext.get() }.getOrNull()
-        val pluginLibrary = appContext?.let { findPluginNativeLibrary(it, libraryFileName) }
-        if (pluginLibrary != null) {
-            System.load(pluginLibrary.absolutePath)
+        val selectedLibrary = appContext?.let { resolveNativeLibraryFile(it, libraryFileName) }
+        if (selectedLibrary != null) {
+            System.load(selectedLibrary.absolutePath)
             return
         }
         System.loadLibrary(libraryName)
@@ -53,8 +53,17 @@ object NodeJsPluginRuntimeLoader {
     }
 
     private fun resolveNativeLibraryFile(context: Context, libraryFileName: String): File? {
-        return findPluginNativeLibrary(context, libraryFileName) ?: hostLibraryFile(context, libraryFileName)
+        val hostLibrary = hostLibraryFile(context, libraryFileName)
+        val pluginLibrary = findPluginNativeLibrary(context, libraryFileName)
+        return if (usesPackagedHostRuntime()) {
+            hostLibrary ?: pluginLibrary
+        } else {
+            pluginLibrary ?: hostLibrary
+        }
     }
+
+    private fun usesPackagedHostRuntime(): Boolean =
+        BuildConfig.NODEJS_RELEASE_FLAVOR in setOf("nodeFull", "nodeMini")
 
     fun resolveNodeLibraryDir(context: Context): String? {
         return resolveNodeLibraryFile(context)?.parent

@@ -106,7 +106,7 @@ class NodeCrashEvidenceStoreInstrumentationTest {
             assertEquals("native_fatal_chaos_injection", marker.getString("scenario"))
             assertEquals("native_process", marker.getString("executionMode"))
             assertEquals("embedded_probe_service", marker.getString("launchSurface"))
-            assertEquals(":nodejs_embedded", marker.getString("runtimeSlotId"))
+            assertEquals(":nodejs_probe", marker.getString("runtimeSlotId"))
             assertTrue(marker.getString("sourceName").contains("sigkill"))
             val bundle = JSONObject(nextLaunchBundle.readText(Charsets.UTF_8))
             assertEquals(NodeCrashEvidenceStore.NEXT_LAUNCH_BUNDLE_SCHEMA, bundle.getString("schema"))

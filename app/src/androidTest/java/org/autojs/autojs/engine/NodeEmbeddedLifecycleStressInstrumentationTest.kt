@@ -1,10 +1,16 @@
 package org.autojs.autojs.engine
 
+import android.app.ActivityManager
+import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
+import android.os.Build
+import android.os.Environment
 import android.os.SystemClock
+import android.provider.MediaStore
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs6.BuildConfig
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -32,28 +38,384 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     @Test
     fun runSimpleScript100Times() {
         assumeEmbeddedScriptExecutionEnabled()
+        NodeEmbeddedTestHarness.assumePersistentRuntimeEnabled("R2 persistent-runtime resource-growth stress")
 
-        repeat(STRESS_ITERATIONS) { index ->
-            val result = runEmbeddedScript(
-                source = """
-                    "nodejs";
-                    console.log("stress.simple.$index=" + process.version);
-                """.trimIndent(),
-                sourceName = "<lifecycle-stress-simple-$index.js>",
-                timeoutMs = SIMPLE_TIMEOUT_MS,
+        val iterations = instrumentationInt(ARG_RESOURCE_ITERATIONS, STRESS_ITERATIONS, 2..MAX_STRESS_ITERATIONS)
+        val sampleEvery = instrumentationInt(ARG_RESOURCE_SAMPLE_EVERY, DEFAULT_RESOURCE_SAMPLE_EVERY, 1..iterations)
+        val runs = JSONArray()
+        val samples = JSONArray()
+        val report = JSONObject()
+            .put("schema", "autojs6-node-r2-persistent-resource-growth-v1")
+            .put("generatedAtEpochMs", System.currentTimeMillis())
+            .put("packageName", context.packageName)
+            .put("device", deviceJson())
+            .put(
+                "configuration",
+                JSONObject()
+                    .put("iterations", iterations)
+                    .put("sampleEvery", sampleEvery)
+                    .put("sameProcessRequired", true)
+                    .put("settleBetweenExecutions", false)
+                    .put("failOnGrowth", instrumentationBoolean(ARG_RESOURCE_FAIL_ON_GROWTH, false)),
             )
+            .put("runs", runs)
+            .put("samples", samples)
 
-            assertSucceeded("simple iteration $index", result)
-            assertFalse("simple iteration $index timed out", result.timedOut)
-            assertTrue(result.stdout, result.stdout.contains("stress.simple.$index=v24.5.0"))
-            assertEquals("STOPPED", result.nativeValues["embedded_script.runtime_state"])
+        var firstResult: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null
+        var previousResult: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null
+        var completed = 0
+        var thrown: Throwable? = null
+        var reportFile: File? = null
+        try {
+            repeat(iterations) { zeroBasedIndex ->
+                val iteration = zeroBasedIndex + 1
+                val startedAt = SystemClock.elapsedRealtimeNanos()
+                val result = runEmbeddedScript(
+                    source = persistentResourceScript(iteration),
+                    sourceName = "<lifecycle-stress-simple-$iteration.js>",
+                    timeoutMs = SIMPLE_TIMEOUT_MS,
+                )
+                val wallMs = ((SystemClock.elapsedRealtimeNanos() - startedAt) / 1_000_000L).coerceAtLeast(0L)
+                val nodePayload = parsePersistentResourcePayload(result.stdout)
+
+                assertSucceeded("simple iteration $iteration", result)
+                assertFalse("simple iteration $iteration timed out", result.timedOut)
+                assertTrue(result.stdout, result.stdout.contains("stress.simple.$iteration=v24.5.0"))
+                assertTrue("simple iteration $iteration missing resource payload\n${result.stdout}", nodePayload != null)
+                val payload = checkNotNull(nodePayload)
+                assertEquals("STOPPED", result.nativeValues["embedded_script.runtime_state"])
+                assertTrue(
+                    "simple iteration $iteration missing execution id",
+                    result.nativeValues["embedded_script.execution_id"].orEmpty().isNotBlank(),
+                )
+
+                val first = firstResult
+                if (first == null) {
+                    firstResult = result
+                    assertEquals("first persistent execution must initialize once", "1", result.nativeValues[PROCESS_RUNTIME_INIT_COUNT_KEY])
+                    assertTrue("first persistent execution PID is invalid: ${result.pid}", result.pid > 0)
+                    assertEquals("first persistent execution sequence must be 1", "1", result.nativeValues[PROCESS_RUNTIME_EXECUTION_SEQUENCE_KEY])
+                    listOf(
+                        PROCESS_POOL_SELECTED_SLOT_KEY,
+                        PROCESS_SESSION_GENERATION_KEY,
+                        PROCESS_RUNTIME_GENERATION_KEY,
+                    ).forEach { key ->
+                        assertTrue("first persistent execution is missing $key: ${result.nativeValues}", !result.nativeValues[key].isNullOrBlank())
+                    }
+                } else {
+                    assertPersistentExecutionIdentity(iteration, first, checkNotNull(previousResult), result)
+                }
+                assertCleanPersistentExecution(iteration, result)
+
+                runs.put(compactRunJson(iteration, wallMs, result, payload))
+                if (iteration == 1 || iteration % sampleEvery == 0 || iteration == iterations) {
+                    samples.put(persistentResourceSnapshot(iteration, wallMs, result, payload).toJson())
+                }
+                previousResult = result
+                completed = iteration
+            }
+        } catch (error: Throwable) {
+            thrown = error
+            report.put(
+                "failure",
+                JSONObject()
+                    .put("completedIterations", completed)
+                    .put("type", error.javaClass.name)
+                    .put("message", error.message ?: JSONObject.NULL),
+            )
+        } finally {
+            val growth = analyzePersistentResourceGrowth(samples)
+            report
+                .put("completedIterations", completed)
+                .put("growth", growth)
+            val writtenReport = writePersistentResourceReports(report)
+            reportFile = writtenReport
+            println("node.r2.resource.report=${writtenReport.absolutePath}")
+            println("node.r2.resource.pull=adb pull $DEVICE_REPORT_DIR/. app/build/reports/nodejs/perf")
+        }
+
+        thrown?.let { throw it }
+        val writtenReport = checkNotNull(reportFile)
+        assertTrue("persistent resource report was not written: ${writtenReport.absolutePath}", writtenReport.isFile && writtenReport.length() > 0L)
+        assertEquals("not all persistent resource iterations completed", iterations, completed)
+        if (instrumentationBoolean(ARG_RESOURCE_FAIL_ON_GROWTH, false)) {
+            val growth = report.getJSONObject("growth")
             assertTrue(
-                "simple iteration $index missing execution id",
-                result.nativeValues["embedded_script.execution_id"].orEmpty().isNotBlank(),
+                "persistent resource metrics were unavailable; report=${writtenReport.absolutePath}\n${growth.toString(2)}",
+                growth.getBoolean("requiredMetricsAvailable"),
             )
-            settleEmbeddedScriptServiceProcess()
+            assertFalse(
+                "persistent resource growth exceeded thresholds; report=${writtenReport.absolutePath}\n${growth.toString(2)}",
+                growth.getBoolean("monotonicGrowthDetected"),
+            )
         }
     }
+
+    private fun persistentResourceScript(iteration: Int): String = """
+        "nodejs";
+        function activeHandleCount() {
+          try {
+            return typeof process._getActiveHandles === "function" ? process._getActiveHandles().length : null;
+          } catch (error) {
+            return null;
+          }
+        }
+        console.log("stress.simple.$iteration=" + process.version);
+        setImmediate(() => {
+          const memory = process.memoryUsage();
+          console.log("$RESOURCE_PAYLOAD_PREFIX" + JSON.stringify({
+            iteration: $iteration,
+            memory: {
+              rss: memory.rss,
+              heapTotal: memory.heapTotal,
+              heapUsed: memory.heapUsed,
+              external: memory.external,
+              arrayBuffers: memory.arrayBuffers
+            },
+            libuvHandleCount: activeHandleCount()
+          }));
+        });
+    """.trimIndent()
+
+    private fun parsePersistentResourcePayload(stdout: String): JSONObject? =
+        stdout.lineSequence()
+            .mapNotNull { line ->
+                val markerIndex = line.indexOf(RESOURCE_PAYLOAD_PREFIX)
+                if (markerIndex < 0) null else line.substring(markerIndex + RESOURCE_PAYLOAD_PREFIX.length).trim()
+            }
+            .firstOrNull()
+            ?.let(::JSONObject)
+
+    private fun assertPersistentExecutionIdentity(
+        iteration: Int,
+        first: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        previous: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        current: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+    ) {
+        assertEquals("iteration $iteration changed service PID", first.pid, current.pid)
+        listOf(
+            PROCESS_POOL_SELECTED_SLOT_KEY,
+            PROCESS_SESSION_GENERATION_KEY,
+            PROCESS_RUNTIME_GENERATION_KEY,
+        ).forEach { key ->
+            assertTrue("first execution is missing $key: ${first.nativeValues}", !first.nativeValues[key].isNullOrBlank())
+            assertEquals("iteration $iteration changed $key", first.nativeValues[key], current.nativeValues[key])
+        }
+        assertEquals("iteration $iteration reinitialized process runtime", "1", current.nativeValues[PROCESS_RUNTIME_INIT_COUNT_KEY])
+        assertEquals("iteration $iteration did not reuse process runtime", "true", current.nativeValues[PROCESS_RUNTIME_REUSED_KEY])
+        val previousSequence = previous.nativeValues[PROCESS_RUNTIME_EXECUTION_SEQUENCE_KEY]?.toLongOrNull()
+        val currentSequence = current.nativeValues[PROCESS_RUNTIME_EXECUTION_SEQUENCE_KEY]?.toLongOrNull()
+        assertTrue("iteration $iteration missing previous execution sequence", previousSequence != null)
+        assertEquals("iteration $iteration execution sequence did not advance once", previousSequence?.plus(1L), currentSequence)
+    }
+
+    private fun assertCleanPersistentExecution(
+        iteration: Int,
+        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+    ) {
+        val values = result.nativeValues
+        assertEquals("iteration $iteration process runtime is not healthy", "true", values[PROCESS_RUNTIME_HEALTHY_KEY])
+        assertEquals("iteration $iteration process runtime is poisoned", "false", values[PROCESS_RUNTIME_POISONED_KEY])
+        assertEquals("iteration $iteration native teardown was not clean", "true", values[PROCESS_RUNTIME_TEARDOWN_CLEAN_KEY])
+        assertEquals("iteration $iteration execution teardown was not clean", "true", values[EXECUTION_TEARDOWN_CLEAN_KEY])
+        assertEquals("iteration $iteration service cleanup was not clean", "true", values[SERVICE_CLEANUP_CLEAN_KEY])
+        assertEquals("iteration $iteration retained bridge resources", "0", values[BRIDGE_ACTIVE_COUNT_KEY])
+        assertEquals("iteration $iteration retained the one-shot settle path", "false", values[CLIENT_PROCESS_SETTLE_DEFERRED_KEY])
+        val resultToReturnMs = values[CLIENT_RESULT_TO_RETURN_KEY]?.toLongOrNull()
+        assertTrue("iteration $iteration result-to-return timing is missing: $values", resultToReturnMs != null)
+        assertTrue(
+            "iteration $iteration result delivery blocked for ${resultToReturnMs}ms",
+            resultToReturnMs != null && resultToReturnMs <= MAX_CLIENT_RESULT_TO_RETURN_MS,
+        )
+    }
+
+    private fun compactRunJson(
+        iteration: Int,
+        wallMs: Long,
+        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        nodePayload: JSONObject,
+    ): JSONObject =
+        JSONObject()
+            .put("iteration", iteration)
+            .put("wallMs", wallMs)
+            .put("resultElapsedMs", result.elapsedMs)
+            .put("resultToReturnMs", result.nativeValues[CLIENT_RESULT_TO_RETURN_KEY]?.toLongOrNull() ?: JSONObject.NULL)
+            .put("pid", result.pid)
+            .put("sessionGeneration", result.nativeValues[PROCESS_SESSION_GENERATION_KEY].orEmpty())
+            .put("runtimeGeneration", result.nativeValues[PROCESS_RUNTIME_GENERATION_KEY].orEmpty())
+            .put("runtimeExecutionSequence", result.nativeValues[PROCESS_RUNTIME_EXECUTION_SEQUENCE_KEY]?.toLongOrNull() ?: JSONObject.NULL)
+            .put("runtimeReused", result.nativeValues[PROCESS_RUNTIME_REUSED_KEY] == "true")
+            .put("node", nodePayload)
+
+    private fun persistentResourceSnapshot(
+        iteration: Int,
+        wallMs: Long,
+        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        nodePayload: JSONObject,
+    ): PersistentResourceSample {
+        val memoryInfo = processMemoryInfo(result.pid)
+        val nodeMemory = nodePayload.getJSONObject("memory")
+        return PersistentResourceSample(
+            iteration = iteration,
+            pid = result.pid,
+            wallMs = wallMs,
+            resultElapsedMs = result.elapsedMs,
+            resultToReturnMs = result.nativeValues[CLIENT_RESULT_TO_RETURN_KEY]?.toLongOrNull(),
+            rssKb = readStatusLongKb(result.pid, "VmRSS:"),
+            vmSizeKb = readStatusLongKb(result.pid, "VmSize:"),
+            totalPssKb = memoryInfo?.totalPss,
+            javaPssKb = memoryInfo?.dalvikPss,
+            nativePssKb = memoryInfo?.nativePss,
+            otherPssKb = memoryInfo?.otherPss,
+            threadCount = File("/proc/${result.pid}/task").safeCountChildren(),
+            fdCount = File("/proc/${result.pid}/fd").safeCountChildren(),
+            nodeRssKb = nodeMemory.optLong("rss").bytesToKb(),
+            nodeHeapTotalKb = nodeMemory.optLong("heapTotal").bytesToKb(),
+            nodeHeapUsedKb = nodeMemory.optLong("heapUsed").bytesToKb(),
+            nodeExternalKb = nodeMemory.optLong("external").bytesToKb(),
+            nodeArrayBuffersKb = nodeMemory.optLong("arrayBuffers").bytesToKb(),
+            libuvHandleCount = nodePayload.optNullableLong("libuvHandleCount"),
+            bridgeActiveCount = result.nativeValues[BRIDGE_ACTIVE_COUNT_KEY]?.toLongOrNull(),
+            runtimeExecutionSequence = result.nativeValues[PROCESS_RUNTIME_EXECUTION_SEQUENCE_KEY]?.toLongOrNull(),
+        )
+    }
+
+    @Suppress("DEPRECATION")
+    private fun processMemoryInfo(pid: Int): android.os.Debug.MemoryInfo? =
+        runCatching {
+            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            activityManager.getProcessMemoryInfo(intArrayOf(pid)).firstOrNull()
+        }.getOrNull()
+
+    private fun readStatusLongKb(pid: Int, prefix: String): Long? =
+        runCatching {
+            File("/proc/$pid/status")
+                .readLines()
+                .firstOrNull { it.startsWith(prefix) }
+                ?.split(Regex("""\s+"""))
+                ?.firstOrNull { it.toLongOrNull() != null }
+                ?.toLongOrNull()
+        }.getOrNull()
+
+    private fun File.safeCountChildren(): Int? =
+        runCatching { listFiles()?.size }.getOrNull()
+
+    private fun Long.bytesToKb(): Long = this / 1024L
+
+    private fun analyzePersistentResourceGrowth(samples: JSONArray): JSONObject {
+        var growthDetected = false
+        var requiredMetricsAvailable = true
+        val metrics = JSONArray()
+        PERSISTENT_GROWTH_METRICS.forEach { metric ->
+            val values = (0 until samples.length())
+                .mapNotNull { index -> samples.getJSONObject(index).optNullableLong(metric.name) }
+            val threshold = instrumentationLong(metric.thresholdArgument) ?: metric.defaultThreshold
+            val delta = values.lastOrNull()?.minus(values.firstOrNull() ?: 0L)
+            val available = values.size >= MIN_GROWTH_SAMPLES
+            requiredMetricsAvailable = requiredMetricsAvailable && available
+            val monotonic = available && looksMonotonicRunaway(values)
+            val detected = delta != null && delta > threshold && monotonic
+            growthDetected = growthDetected || detected
+            metrics.put(
+                JSONObject()
+                    .put("name", metric.name)
+                    .put("sampleCount", values.size)
+                    .put("available", available)
+                    .put("baseline", values.firstOrNull() ?: JSONObject.NULL)
+                    .put("final", values.lastOrNull() ?: JSONObject.NULL)
+                    .put("min", values.minOrNull() ?: JSONObject.NULL)
+                    .put("max", values.maxOrNull() ?: JSONObject.NULL)
+                    .put("delta", delta ?: JSONObject.NULL)
+                    .put("threshold", threshold)
+                    .put("monotonic", monotonic)
+                    .put("growthDetected", detected)
+                    .put("values", JSONArray(values)),
+            )
+        }
+        return JSONObject()
+            .put("analysis", "thresholded-monotonic-growth")
+            .put("minimumSamples", MIN_GROWTH_SAMPLES)
+            .put("requiredMetricsAvailable", requiredMetricsAvailable)
+            .put("monotonicGrowthDetected", growthDetected)
+            .put("metrics", metrics)
+    }
+
+    private fun looksMonotonicRunaway(values: List<Long>): Boolean {
+        val increases = values.zipWithNext().count { (previous, current) -> current > previous }
+        val recent = values.takeLast(minOf(values.size, RECENT_GROWTH_SAMPLE_WINDOW))
+        val recentNonDecreases = recent.zipWithNext().count { (previous, current) -> current >= previous }
+        return values.last() == values.maxOrNull() &&
+                increases >= values.size - 2 &&
+                recentNonDecreases == recent.size - 1
+    }
+
+    private fun writePersistentResourceReports(report: JSONObject): File {
+        val reportDir = File(context.getExternalFilesDir(null) ?: context.filesDir, "nodejs/perf").apply { mkdirs() }
+        val reportFile = File(reportDir, "embedded-node-r2-resource-growth-${System.currentTimeMillis()}.json")
+        report
+            .put("devicePrivateReportPath", reportFile.absolutePath)
+            .put("devicePublicReportPath", "$DEVICE_REPORT_DIR/${reportFile.name}")
+        val reportText = report.toString(2)
+        reportFile.writeText(reportText)
+        writePublicResourceReport(reportFile.name, reportText)
+        return reportFile
+    }
+
+    private fun writePublicResourceReport(fileName: String, reportText: String): Boolean =
+        runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val values = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "application/json")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/AutoJs6/nodejs/perf")
+                    put(MediaStore.MediaColumns.IS_PENDING, 1)
+                }
+                val resolver = context.contentResolver
+                val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return false
+                resolver.openOutputStream(uri)?.use { output ->
+                    output.write(reportText.toByteArray(Charsets.UTF_8))
+                } ?: return false
+                values.clear()
+                values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                resolver.update(uri, values, null, null)
+                true
+            } else {
+                val reportDir = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    "AutoJs6/nodejs/perf",
+                ).apply { mkdirs() }
+                File(reportDir, fileName).writeText(reportText)
+                true
+            }
+        }.getOrDefault(false)
+
+    private fun deviceJson(): JSONObject =
+        JSONObject()
+            .put("manufacturer", Build.MANUFACTURER)
+            .put("model", Build.MODEL)
+            .put("device", Build.DEVICE)
+            .put("brand", Build.BRAND)
+            .put("sdkInt", Build.VERSION.SDK_INT)
+            .put("release", Build.VERSION.RELEASE)
+            .put("supportedAbis", JSONArray(Build.SUPPORTED_ABIS.toList()))
+            .put("primaryAbi", Build.SUPPORTED_ABIS.firstOrNull() ?: JSONObject.NULL)
+
+    private fun instrumentationBoolean(name: String, defaultValue: Boolean): Boolean =
+        InstrumentationRegistry.getArguments().getString(name)
+            ?.let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+            ?: defaultValue
+
+    private fun instrumentationLong(name: String): Long? =
+        InstrumentationRegistry.getArguments().getString(name)?.toLongOrNull()
+
+    private fun instrumentationInt(name: String, defaultValue: Int, range: IntRange): Int {
+        val value = InstrumentationRegistry.getArguments().getString(name)?.toIntOrNull() ?: defaultValue
+        require(value in range) { "$name must be in $range, actual=$value" }
+        return value
+    }
+
+    private fun JSONObject.optNullableLong(name: String): Long? =
+        if (!has(name) || isNull(name)) null else optLong(name)
 
     @Test
     fun timeoutDoesNotPoisonNextRun() {
@@ -821,8 +1183,12 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         val firstStarted = File(scriptDir, "first-started.txt")
         val firstId = "queue-full-first-${System.nanoTime()}"
         val firstResult = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
-        val secondId = "queue-full-second-${System.nanoTime()}"
-        val secondResult = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+        val queuedIds = List(NodeExecutionQueuePolicy.DEFAULT_MAX_QUEUED_EXECUTIONS) { index ->
+            "queue-full-waiting-$index-${System.nanoTime()}"
+        }
+        val queuedResults = queuedIds.map {
+            AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+        }
 
         val firstThread = Thread {
             firstResult.set(
@@ -831,7 +1197,7 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
                         "nodejs";
                         const fs = require("fs");
                         fs.writeFileSync("./first-started.txt", "started");
-                        return new Promise((resolve) => setTimeout(resolve, 2500));
+                        return new Promise((resolve) => setTimeout(resolve, 8000));
                     """.trimIndent(),
                     sourceName = "<lifecycle-stress-queue-full-first.js>",
                     workingDirectory = scriptDir.absolutePath,
@@ -844,22 +1210,24 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
             name = "AutoJs6NodeQueueFullFirst"
             start()
         }
-        val secondThread = Thread {
-            secondResult.set(
-                enqueueEmbeddedScript(
-                    source = """
-                        "nodejs";
-                        console.log("stress.queue.full.second");
-                    """.trimIndent(),
-                    sourceName = "<lifecycle-stress-queue-full-second.js>",
-                    workingDirectory = scriptDir.absolutePath,
-                    timeoutMs = SIMPLE_TIMEOUT_MS,
-                    executionId = secondId,
-                    queueTimeoutMs = QUEUE_TEST_TIMEOUT_MS,
-                ),
-            )
-        }.apply {
-            name = "AutoJs6NodeQueueFullSecond"
+        val queuedThreads = queuedIds.mapIndexed { index, queuedId ->
+            Thread {
+                queuedResults[index].set(
+                    enqueueEmbeddedScript(
+                        source = """
+                            "nodejs";
+                            console.log("stress.queue.full.waiting.$index");
+                        """.trimIndent(),
+                        sourceName = "<lifecycle-stress-queue-full-waiting-$index.js>",
+                        workingDirectory = scriptDir.absolutePath,
+                        timeoutMs = SIMPLE_TIMEOUT_MS,
+                        executionId = queuedId,
+                        queueTimeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                    ),
+                )
+            }.apply {
+                name = "AutoJs6NodeQueueFullWaiting$index"
+            }
         }
 
         try {
@@ -867,11 +1235,12 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
                 "First queue-full run did not enter user script before timeout.",
                 waitUntil(5000L) { firstStarted.isFile },
             )
-            secondThread.start()
+            queuedThreads.forEach(Thread::start)
             assertTrue(
-                "Second execution was not queued before queue-full check.",
+                "Queue did not reach its configured capacity before queue-full check.",
                 waitUntil(5000L) {
-                    NativeNodeEmbeddedScriptService.queueStatus(context).queuedExecutionIds.contains(secondId)
+                    val queued = NativeNodeEmbeddedScriptService.queueStatus(context).queuedExecutionIds
+                    queuedIds.all(queued::contains)
                 },
             )
 
@@ -895,17 +1264,35 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
                 third.nativeValues["embedded_script.queue_max_queued_executions"],
             )
 
-            assertTrue("Queued second execution cancellation returned false.", NativeNodeEmbeddedScriptService.cancelQueuedExecution(context, secondId))
-            secondThread.join(QUEUE_TEST_TIMEOUT_MS + 3000L)
-            val second = secondResult.get()
-            assertTrue("Second queue-full run did not produce a result.", second != null)
-            assertEquals(NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED, second!!.errorCode)
+            queuedIds.forEach { queuedId ->
+                assertTrue(
+                    "Queued execution cancellation returned false for $queuedId.",
+                    NativeNodeEmbeddedScriptService.cancelQueuedExecution(context, queuedId),
+                )
+            }
+            queuedThreads.forEach { thread -> thread.join(QUEUE_TEST_TIMEOUT_MS + 3000L) }
+            queuedResults.forEachIndexed { index, queuedResult ->
+                val cancelled = queuedResult.get()
+                assertTrue("Queued run $index did not produce a result.", cancelled != null)
+                assertEquals(NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED, cancelled!!.errorCode)
+            }
 
             firstThread.join(QUEUE_TEST_TIMEOUT_MS + 3000L)
             val first = firstResult.get()
             assertTrue("First queue-full run did not produce a result.", first != null)
             assertSucceeded("queue full first", first!!)
         } finally {
+            queuedIds.forEach { queuedId ->
+                NativeNodeEmbeddedScriptService.cancelQueuedExecution(context, queuedId)
+            }
+            queuedThreads.forEach { thread ->
+                if (thread.isAlive) {
+                    thread.join(QUEUE_TEST_TIMEOUT_MS + 3000L)
+                }
+            }
+            if (firstThread.isAlive) {
+                firstThread.join(QUEUE_TEST_TIMEOUT_MS + 3000L)
+            }
             scriptDir.deleteRecursively()
         }
     }
@@ -1013,8 +1400,7 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     }
 
     private fun settleEmbeddedScriptServiceProcess() {
-        context.stopService(Intent(context, NativeNodeEmbeddedScriptService::class.java))
-        SystemClock.sleep(600L)
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
     }
 
     private fun waitUntil(timeoutMs: Long, condition: () -> Boolean): Boolean {
@@ -1028,12 +1414,112 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         return condition()
     }
 
+    private data class PersistentResourceSample(
+        val iteration: Int,
+        val pid: Int,
+        val wallMs: Long,
+        val resultElapsedMs: Long,
+        val resultToReturnMs: Long?,
+        val rssKb: Long?,
+        val vmSizeKb: Long?,
+        val totalPssKb: Int?,
+        val javaPssKb: Int?,
+        val nativePssKb: Int?,
+        val otherPssKb: Int?,
+        val threadCount: Int?,
+        val fdCount: Int?,
+        val nodeRssKb: Long,
+        val nodeHeapTotalKb: Long,
+        val nodeHeapUsedKb: Long,
+        val nodeExternalKb: Long,
+        val nodeArrayBuffersKb: Long,
+        val libuvHandleCount: Long?,
+        val bridgeActiveCount: Long?,
+        val runtimeExecutionSequence: Long?,
+    ) {
+        fun toJson(): JSONObject =
+            JSONObject()
+                .put("iteration", iteration)
+                .put("pid", pid)
+                .put("wallMs", wallMs)
+                .put("resultElapsedMs", resultElapsedMs)
+                .putNullable("resultToReturnMs", resultToReturnMs)
+                .putNullable("rssKb", rssKb)
+                .putNullable("vmSizeKb", vmSizeKb)
+                .putNullable("totalPssKb", totalPssKb)
+                .putNullable("javaPssKb", javaPssKb)
+                .putNullable("nativePssKb", nativePssKb)
+                .putNullable("otherPssKb", otherPssKb)
+                .putNullable("threadCount", threadCount)
+                .putNullable("fdCount", fdCount)
+                .put("nodeRssKb", nodeRssKb)
+                .put("nodeHeapTotalKb", nodeHeapTotalKb)
+                .put("nodeHeapUsedKb", nodeHeapUsedKb)
+                .put("nodeExternalKb", nodeExternalKb)
+                .put("nodeArrayBuffersKb", nodeArrayBuffersKb)
+                .putNullable("libuvHandleCount", libuvHandleCount)
+                .putNullable("bridgeActiveCount", bridgeActiveCount)
+                .putNullable("runtimeExecutionSequence", runtimeExecutionSequence)
+
+        private fun JSONObject.putNullable(name: String, value: Any?): JSONObject =
+            put(name, value ?: JSONObject.NULL)
+    }
+
+    private data class PersistentGrowthMetric(
+        val name: String,
+        val thresholdArgument: String,
+        val defaultThreshold: Long,
+    )
+
     private companion object {
         private const val STRESS_ITERATIONS = 100
+        private const val MAX_STRESS_ITERATIONS = 1000
+        private const val DEFAULT_RESOURCE_SAMPLE_EVERY = 10
+        private const val MIN_GROWTH_SAMPLES = 5
+        private const val RECENT_GROWTH_SAMPLE_WINDOW = 4
+        private const val MAX_CLIENT_RESULT_TO_RETURN_MS = 250L
         private const val SIMPLE_TIMEOUT_MS = 5000L
         private const val FAULT_TIMEOUT_MS = 900L
         private const val CONCURRENT_TIMEOUT_MS = 10000L
         private const val QUEUE_TEST_TIMEOUT_MS = 10000L
         private const val QUEUE_SHORT_TIMEOUT_MS = 500L
+        private const val DEVICE_REPORT_DIR = "/sdcard/Download/AutoJs6/nodejs/perf"
+        private const val RESOURCE_PAYLOAD_PREFIX = "stress.resource="
+        private const val PROCESS_POOL_SELECTED_SLOT_KEY = "embedded_script.process_pool.selected_slot_id"
+        private const val PROCESS_SESSION_GENERATION_KEY = "embedded_script.process_session.generation"
+        private const val PROCESS_RUNTIME_GENERATION_KEY = "process_runtime.generation"
+        private const val PROCESS_RUNTIME_INIT_COUNT_KEY = "process_runtime.init_count"
+        private const val PROCESS_RUNTIME_EXECUTION_SEQUENCE_KEY = "process_runtime.execution_sequence"
+        private const val PROCESS_RUNTIME_REUSED_KEY = "process_runtime.reused"
+        private const val PROCESS_RUNTIME_HEALTHY_KEY = "process_runtime.healthy"
+        private const val PROCESS_RUNTIME_POISONED_KEY = "process_runtime.poisoned"
+        private const val PROCESS_RUNTIME_TEARDOWN_CLEAN_KEY = "process_runtime.teardown_clean"
+        private const val EXECUTION_TEARDOWN_CLEAN_KEY = "execution.teardown_clean"
+        private const val SERVICE_CLEANUP_CLEAN_KEY = "embedded_script.service.cleanup_clean"
+        private const val BRIDGE_ACTIVE_COUNT_KEY = "embedded_script.bridge_resource.active_count"
+        private const val CLIENT_RESULT_TO_RETURN_KEY = "embedded_script.client.result_to_return_ms"
+        private const val CLIENT_PROCESS_SETTLE_DEFERRED_KEY = "embedded_script.client.process_settle_deferred"
+        private const val ARG_RESOURCE_ITERATIONS = "autojs.nodejs.r2.resource.iterations"
+        private const val ARG_RESOURCE_SAMPLE_EVERY = "autojs.nodejs.r2.resource.sampleEvery"
+        private const val ARG_RESOURCE_FAIL_ON_GROWTH = "autojs.nodejs.r2.resource.failOnGrowth"
+        private const val ARG_MAX_RSS_DELTA_KB = "autojs.nodejs.r2.resource.maxRssDeltaKb"
+        private const val ARG_MAX_JAVA_PSS_DELTA_KB = "autojs.nodejs.r2.resource.maxJavaPssDeltaKb"
+        private const val ARG_MAX_NATIVE_PSS_DELTA_KB = "autojs.nodejs.r2.resource.maxNativePssDeltaKb"
+        private const val ARG_MAX_THREAD_DELTA = "autojs.nodejs.r2.resource.maxThreadDelta"
+        private const val ARG_MAX_FD_DELTA = "autojs.nodejs.r2.resource.maxFdDelta"
+        private const val ARG_MAX_NODE_HEAP_DELTA_KB = "autojs.nodejs.r2.resource.maxNodeHeapDeltaKb"
+        private const val ARG_MAX_LIBUV_HANDLE_DELTA = "autojs.nodejs.r2.resource.maxLibuvHandleDelta"
+        private const val ARG_MAX_BRIDGE_ACTIVE_DELTA = "autojs.nodejs.r2.resource.maxBridgeActiveDelta"
+
+        private val PERSISTENT_GROWTH_METRICS = listOf(
+            PersistentGrowthMetric("rssKb", ARG_MAX_RSS_DELTA_KB, 32_768L),
+            PersistentGrowthMetric("javaPssKb", ARG_MAX_JAVA_PSS_DELTA_KB, 8_192L),
+            PersistentGrowthMetric("nativePssKb", ARG_MAX_NATIVE_PSS_DELTA_KB, 32_768L),
+            PersistentGrowthMetric("threadCount", ARG_MAX_THREAD_DELTA, 4L),
+            PersistentGrowthMetric("fdCount", ARG_MAX_FD_DELTA, 8L),
+            PersistentGrowthMetric("nodeHeapUsedKb", ARG_MAX_NODE_HEAP_DELTA_KB, 8_192L),
+            PersistentGrowthMetric("libuvHandleCount", ARG_MAX_LIBUV_HANDLE_DELTA, 0L),
+            PersistentGrowthMetric("bridgeActiveCount", ARG_MAX_BRIDGE_ACTIVE_DELTA, 0L),
+        )
     }
 }

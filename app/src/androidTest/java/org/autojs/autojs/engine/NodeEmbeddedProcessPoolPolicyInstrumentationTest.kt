@@ -51,9 +51,9 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
         assertFalse(plan.queueWhenPoolFullEnabled)
         assertTrue(plan.oneActiveEnvironmentPerSlot)
         assertFalse(plan.sharedV8EnvironmentAllowed)
-        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_FALLBACK_MODE_NO_RESTART, plan.slotCrashFallbackMode)
-        assertFalse(plan.failedSlotReplacementEnabled)
-        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_QUARANTINE_POLICY_NONE, plan.failedSlotQuarantinePolicy)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_FALLBACK_MODE_REBUILD_AFFECTED_SLOT, plan.slotCrashFallbackMode)
+        assertTrue(plan.failedSlotReplacementEnabled)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_QUARANTINE_POLICY_BINDER_OR_TEARDOWN, plan.failedSlotQuarantinePolicy)
         assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_SURVIVOR_POLICY_ALLOW_OTHER_SLOTS, plan.survivingSlotExecutionPolicy)
     }
 
@@ -132,14 +132,14 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
         assertEquals(NodeEmbeddedProcessPoolPolicy.DEFAULT_SCHEDULER_EFFECTIVE_MAX_ACTIVE_SLOTS, plan.effectiveMaxActiveSlots)
         assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER, plan.slotSelectionSource)
         assertEquals(NodeEmbeddedProcessPoolPolicy.defaultSchedulerSlotIds(), plan.defaultSchedulerSlotIds)
-        assertFalse(plan.defaultSchedulerFallbackEnabled)
+        assertTrue(plan.defaultSchedulerFallbackEnabled)
         assertTrue(plan.queueWhenPoolFullEnabled)
         assertEquals("bounded_wait_for_available_process_slot", plan.queuePolicy)
         assertTrue(plan.reason.contains("default_scheduler_selected"))
     }
 
     @Test
-    fun slotCrashNoRestartFallbackCollectsOverflowMarkerAndPrimarySurvives() {
+    fun slotCrashQuarantinesAffectedSlotAndPrimarySurvives() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("embedded process pool slot crash fallback")
 
         val plan = NodeEmbeddedProcessPoolPolicy.plan(
@@ -147,10 +147,10 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
             requestedSlotId = NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
         )
         assertEquals(NodeEmbeddedProcessPoolPolicy.overflowSlot, plan.selectedSlot)
-        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_FALLBACK_MODE_NO_RESTART, plan.slotCrashFallbackMode)
-        assertFalse(plan.defaultSchedulerFallbackEnabled)
-        assertFalse(plan.failedSlotReplacementEnabled)
-        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_QUARANTINE_POLICY_NONE, plan.failedSlotQuarantinePolicy)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_FALLBACK_MODE_REBUILD_AFFECTED_SLOT, plan.slotCrashFallbackMode)
+        assertTrue(plan.defaultSchedulerFallbackEnabled)
+        assertTrue(plan.failedSlotReplacementEnabled)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_QUARANTINE_POLICY_BINDER_OR_TEARDOWN, plan.failedSlotQuarantinePolicy)
         assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_SURVIVOR_POLICY_ALLOW_OTHER_SLOTS, plan.survivingSlotExecutionPolicy)
 
         val executionId = "p13-slot-crash-fallback-${System.nanoTime()}"
@@ -296,6 +296,31 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
         assertTrue(primaryResult.processName.endsWith(":nodejs_embedded"))
         assertTrue(overflowResult.processName.endsWith(":nodejs_embedded_2"))
         assertTrue("expected different service processes", primaryResult.pid != overflowResult.pid)
+        if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+            assertEquals("primary process initialized Node more than once", "1", primaryResult.nativeValues["process_runtime.init_count"])
+            assertEquals("overflow process initialized Node more than once", "1", overflowResult.nativeValues["process_runtime.init_count"])
+            assertEquals("primary runtime did not start at sequence 1", "1", primaryResult.nativeValues["process_runtime.execution_sequence"])
+            assertEquals("overflow runtime did not start at sequence 1", "1", overflowResult.nativeValues["process_runtime.execution_sequence"])
+
+            val primaryFollowUp = runSlotScript("primary-follow-up", NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID)
+            val overflowFollowUp = runSlotScript("overflow-follow-up", NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID)
+            NodeEmbeddedTestHarness.assertSucceeded("primary follow-up slot", primaryFollowUp)
+            NodeEmbeddedTestHarness.assertSucceeded("overflow follow-up slot", overflowFollowUp)
+            assertEquals("primary slot did not retain its own process", primaryResult.pid, primaryFollowUp.pid)
+            assertEquals("overflow slot did not retain its own process", overflowResult.pid, overflowFollowUp.pid)
+            assertEquals("primary runtime sequence did not advance independently", "2", primaryFollowUp.nativeValues["process_runtime.execution_sequence"])
+            assertEquals("overflow runtime sequence did not advance independently", "2", overflowFollowUp.nativeValues["process_runtime.execution_sequence"])
+            assertEquals(
+                "primary runtime generation changed unexpectedly",
+                primaryResult.nativeValues["process_runtime.generation"],
+                primaryFollowUp.nativeValues["process_runtime.generation"],
+            )
+            assertEquals(
+                "overflow runtime generation changed unexpectedly",
+                overflowResult.nativeValues["process_runtime.generation"],
+                overflowFollowUp.nativeValues["process_runtime.generation"],
+            )
+        }
     }
 
     @Test

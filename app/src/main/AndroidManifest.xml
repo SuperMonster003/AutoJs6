@@ -473,7 +473,7 @@
             android:name="org.autojs.autojs.engine.NativeNodeEmbeddedProbeService"
             android:exported="false"
             android:foregroundServiceType="specialUse"
-            android:process=":nodejs_embedded">
+            android:process=":nodejs_probe">
 
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
