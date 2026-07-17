@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/17",
+      "released_date": "2026/07/18",
       "feature": [
         "Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva \"nodejs\" o extensiones como .node.js/.cjs/.mjs",
         "El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)",
@@ -33,6 +33,7 @@
         "Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins"
       ],
       "fix": [
+        "La devolución de resultados de scripts Node.js se retrasaba por la espera de estabilización del proceso de ejecución",
         "runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java",
         "app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_",
         "Los métodos relacionados con shell podían dejar de responder en dispositivos sin acceso Root",

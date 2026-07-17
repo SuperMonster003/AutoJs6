@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/17
+###### 2026/07/18
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
@@ -36,6 +36,7 @@
 * `新增` 打包應用配置支持顯示或隱藏 "日誌" 及 "設置" 啟動器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
 * `新增` 打包應用支持使用 APK Builder Template 插件進行遠程構建
 * `新增` 開發者選項支持 GitHub 訪問令牌設置, 用於提升更新檢查及插件索引請求限額
+* `修復` Node.js 腳本執行結果因運行時進程穩定等待而延遲返回的問題
 * `修復` runtime.loadJar 無法正常動態加載由較高 Java 版本編譯的 class 文件的問題
 * `修復` app.isInstalled/kill 等方法無法正常使用包名參數的問題 _[`issue #495`](http://issues.autojs6.com/495)_
 * `修復` 無 Root 權限設備調用 shell 相關方法時可能出現假死的問題

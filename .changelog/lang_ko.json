@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/17",
+      "released_date": "2026/07/18",
       "feature": [
         "Node.js 24.5.0 스크립트 런타임, \"nodejs\" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원",
         "Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원",
@@ -33,6 +33,7 @@
         "개발자 옵션에서 GitHub 액세스 토큰 설정 지원, 업데이트 확인 및 플러그인 인덱스 요청 한도 확장용"
       ],
       "fix": [
+        "런타임 프로세스 안정화 대기로 인해 Node.js 스크립트 실행 결과 반환이 지연되는 문제",
         "runtime.loadJar에서 더 높은 Java 버전을 대상으로 컴파일된 class 파일을 정상적으로 동적 로드하지 못하는 문제",
         "app.isInstalled/kill 등의 메서드에서 패키지 이름 인수를 정상적으로 사용하지 못하는 문제 _[`issue #495`](http://issues.autojs6.com/495)_",
         "Root 권한이 없는 기기에서 shell 관련 메서드를 호출할 때 응답하지 않을 수 있는 문제",

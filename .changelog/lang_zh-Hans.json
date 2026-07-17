@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/17",
+      "released_date": "2026/07/18",
       "feature": [
         "Node.js 24.5.0 脚本运行时, 支持通过 \"nodejs\" 指令或 .node.js/.cjs/.mjs 等扩展名运行脚本",
         "Node.js 运行时支持 CommonJS/部分 ESM/仅限本地的动态 import()/轻量 TypeScript (.ts/.mts/.cts) 源码",
@@ -33,6 +33,7 @@
         "开发者选项支持 GitHub 访问令牌设置, 用于提升更新检查及插件索引请求限额"
       ],
       "fix": [
+        "Node.js 脚本执行结果因运行时进程稳定等待而延迟返回的问题",
         "runtime.loadJar 无法正常动态加载由较高 Java 版本编译的 class 文件的问题",
         "app.isInstalled/kill 等方法无法正常使用包名参数的问题 _[`issue #495`](http://issues.autojs6.com/495)_",
         "无 Root 权限设备调用 shell 相关方法时可能出现假死的问题",

@@ -94,7 +94,8 @@ Explicit enqueue API:
 enqueue request
   -> caller-side queue slot already owned
   -> enter bounded caller-side execution queue
-  -> previous service execution exits and process settles
+  -> previous result returns while its scheduling slot remains reserved
+  -> previous service process settles asynchronously
   -> start a normal one-shot service execution
   -> return queue diagnostics in nativeValues
 ```

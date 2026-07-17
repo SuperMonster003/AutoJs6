@@ -38,6 +38,7 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         val beforeScript = processSnapshot("beforeScript", Process.myPid())
         val cold = runMeasured("cold")
         NodeEmbeddedTestHarness.assertSucceeded("cold performance run", cold.result)
+        assertClientResultDeliveryIsNonBlocking(cold)
         val afterFirstScript = processSnapshot("afterFirstScript", Process.myPid())
         val afterFirstScriptService = processSnapshot("afterFirstScriptService", cold.result.pid)
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
@@ -46,6 +47,8 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         val beforeWarmScript = processSnapshot("beforeWarmScript", Process.myPid())
         val warm = runMeasured("warm")
         NodeEmbeddedTestHarness.assertSucceeded("warm performance run", warm.result)
+        assertClientResultDeliveryIsNonBlocking(warm)
+        assertSameProcessPoolSlot(cold, warm)
         val afterWarmScript = processSnapshot("afterWarmScript", Process.myPid())
         val afterWarmScriptService = processSnapshot("afterWarmScriptService", warm.result.pid)
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
@@ -230,6 +233,31 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         assertTrue("$label exceeded threshold: actual=$actual threshold=$threshold", actual <= threshold)
     }
 
+    private fun assertClientResultDeliveryIsNonBlocking(run: MeasuredRun) {
+        val resultToReturnMs = run.result.nativeValues[CLIENT_RESULT_TO_RETURN_KEY]?.toLongOrNull()
+        val processSettleDeferred = run.result.nativeValues[CLIENT_PROCESS_SETTLE_DEFERRED_KEY]?.toBooleanStrictOrNull()
+        assertTrue(
+            "${run.label} result-to-return timing is missing: ${run.result.nativeValues}",
+            resultToReturnMs != null,
+        )
+        assertTrue(
+            "${run.label} result delivery blocked for process settling: ${resultToReturnMs}ms",
+            resultToReturnMs!! <= MAX_CLIENT_RESULT_TO_RETURN_MS,
+        )
+        assertTrue(
+            "${run.label} process-settle safety window was not deferred: ${run.result.nativeValues}",
+            processSettleDeferred == true,
+        )
+    }
+
+    private fun assertSameProcessPoolSlot(cold: MeasuredRun, warm: MeasuredRun) {
+        val coldSlot = cold.result.nativeValues[PROCESS_POOL_SELECTED_SLOT_KEY]
+        val warmSlot = warm.result.nativeValues[PROCESS_POOL_SELECTED_SLOT_KEY]
+        assertTrue("cold process-pool slot is missing: ${cold.result.nativeValues}", !coldSlot.isNullOrBlank())
+        assertTrue("warm process-pool slot is missing: ${warm.result.nativeValues}", !warmSlot.isNullOrBlank())
+        assertTrue("cold/warm runs used different process-pool slots: cold=$coldSlot warm=$warmSlot", coldSlot == warmSlot)
+    }
+
     private fun performanceScript(label: String): String = """
         "nodejs";
         const memory = process.memoryUsage();
@@ -389,6 +417,10 @@ class NodeEmbeddedPerformanceInstrumentationTest {
     }
 
     private companion object {
+        private const val CLIENT_RESULT_TO_RETURN_KEY = "embedded_script.client.result_to_return_ms"
+        private const val CLIENT_PROCESS_SETTLE_DEFERRED_KEY = "embedded_script.client.process_settle_deferred"
+        private const val PROCESS_POOL_SELECTED_SLOT_KEY = "embedded_script.process_pool.selected_slot_id"
+        private const val MAX_CLIENT_RESULT_TO_RETURN_MS = 250L
         private const val SCRIPT_TIMEOUT_MS = 10_000L
         private const val DEVICE_REPORT_DIR = "/sdcard/Download/AutoJs6/nodejs/perf"
         private const val NODE_PAYLOAD_PREFIX = "perf.node="

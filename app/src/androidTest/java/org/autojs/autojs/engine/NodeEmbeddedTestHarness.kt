@@ -28,7 +28,8 @@ internal object NodeEmbeddedTestHarness {
         NodeEmbeddedProcessPoolPolicy.declaredSlots.forEach { slot ->
             targetContext.stopService(Intent(targetContext, slot.serviceClass))
         }
-        SystemClock.sleep(600L)
+        // Client scheduling slots remain reserved for a 650 ms process-settle window after result delivery.
+        SystemClock.sleep(750L)
     }
 
     fun runEmbeddedScript(

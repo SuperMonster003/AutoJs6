@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/17",
+      "released_date": "2026/07/18",
       "feature": [
         "Node.js 24.5.0 script runtime, supporting scripts launched with the \"nodejs\" directive or extensions such as .node.js/.cjs/.mjs",
         "Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code",
@@ -33,6 +33,7 @@
         "Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes"
       ],
       "fix": [
+        "Node.js script results were returned late because runtime process-settle waiting blocked result delivery",
         "runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly",
         "app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_",
         "Shell-related methods could become unresponsive on devices without Root access",

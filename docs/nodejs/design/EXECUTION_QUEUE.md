@@ -18,7 +18,7 @@ ERR_AUTOJS6_NODE_ENGINE_BUSY
 
 Callers that need the old fail-fast behavior can explicitly request `reject_when_busy`. That mode still returns `ERR_AUTOJS6_NODE_ENGINE_BUSY` when another execution owns the target process slot.
 
-The queue does not reuse a completed embedded Node instance. Each dequeued item starts a normal one-shot `NativeNodeEmbeddedScriptService` run, then waits briefly for the `:nodejs_embedded` process to settle before releasing the next queued execution. This avoids a second `libnode`/V8/libuv startup inside the same service process.
+The queue does not reuse a completed embedded Node instance. Each dequeued item starts a normal one-shot `NativeNodeEmbeddedScriptService` run. After the result arrives, the caller returns it immediately while retaining the scheduling slot for a short asynchronous process-settle window. The next queued execution is released only after that window. This avoids a second `libnode`/V8/libuv startup inside the same service process without adding the settle delay to the completed script's user-visible runtime.
 
 ## Queue Limits
 
@@ -79,7 +79,7 @@ The explicit busy path also preserves:
 
 ## Lifecycle
 
-When an enqueued execution exits, the caller-side queue waits for the service process to settle, releases the queue slot, and wakes the next queued request. The next request starts a fresh normal embedded service execution.
+When an enqueued execution exits, the result is returned immediately. The caller-side queue retains the scheduling slot asynchronously until the service process has had time to settle, then releases the slot and wakes the next queued request. The next request starts a fresh normal embedded service execution.
 
 Queued cancellation, queue full, and queue timeout failures are returned before a service execution starts. They do not stop or mutate the active embedded service process.
 

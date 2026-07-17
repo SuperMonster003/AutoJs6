@@ -33,6 +33,8 @@ import java.io.File
 import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -1810,6 +1812,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
     companion object {
 
         private const val TAG = "NativeNodeEmbeddedScriptService"
+        private val CLIENT_PROCESS_SETTLE_EXECUTOR: ScheduledExecutorService by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+            Executors.newSingleThreadScheduledExecutor { runnable ->
+                Thread(runnable, "AutoJs6-Node-ProcessSettle").apply { isDaemon = true }
+            }
+        }
         private val ACTIVE_EXECUTION_ID = AtomicReference<String?>(null)
         @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
         private val EXECUTION_QUEUE_LOCK = Object()
@@ -1870,7 +1877,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val DEFAULT_PREWARM_TTL_MS = 5_000L
         private const val MAX_PREWARM_TTL_MS = 30_000L
         private const val DEFAULT_INTERACTIVE_TIMEOUT_MS = 3_600_000L
-        private const val CLIENT_QUEUE_PROCESS_SETTLE_MS = 650L
+        private const val CLIENT_PROCESS_SETTLE_MS = 650L
         private const val BRIDGE_DISPATCH_WAIT_MS = 1000L
         private const val BRIDGE_LIVE_POLL_INTERVAL_MS = 10L
         private const val BRIDGE_LIVE_STOP_JOIN_MS = 1000L
@@ -1957,8 +1964,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 )
             }
             val slotLease = (slotDecision as ExecutionSlotDecision.Acquired).lease
-            try {
-                return runScript(
+            var processSettleDeferred = false
+            val scriptResult = try {
+                runScript(
                     context,
                     request.copy(
                         executionId = executionId,
@@ -1968,9 +1976,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     launchSurface,
                 ).withClientQueueLease(slotLease)
             } finally {
-                settleBetweenQueuedExecutions()
-                releaseExecutionSlot(executionId)
+                processSettleDeferred = deferProcessSettle {
+                    releaseExecutionSlot(executionId)
+                }
             }
+            return scriptResult.withDeferredProcessSettle(processSettleDeferred)
         }
 
         fun queueStatus(
@@ -2145,16 +2155,19 @@ open class NativeNodeEmbeddedScriptService : Service() {
             )
             val completion = CountDownLatch(1)
             val result = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
+            val resultReceivedAtElapsedMs = AtomicLong(0L)
             val receiver = object : ResultReceiver(null) {
                 override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
                     if (resultCode != RESULT_SCRIPT) {
                         return
                     }
+                    resultReceivedAtElapsedMs.compareAndSet(0L, android.os.SystemClock.elapsedRealtime())
                     result.set(resultData.toEmbeddedScriptResult())
                     completion.countDown()
                 }
             }
             var requestSpoolFile: File? = null
+            var clientFailureResult: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null
             val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
                 action = ACTION_RUN_SCRIPT
                 putExtra(EXTRA_RESULT_RECEIVER, receiver)
@@ -2191,6 +2204,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 defaultSchedulerEnabled = defaultSlotLease != null,
             )
             var component: android.content.ComponentName? = null
+            var processSettleDeferred = false
             try {
                 requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, scheduledRequestForService)
                 intent.putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
@@ -2199,33 +2213,37 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     intent,
                     serviceClass = processPoolPlan.selectedSlot.serviceClass,
                 )
-                component = startOutcome.component ?: return serviceStartFailureResult(
-                    request = request,
-                    message = "Failed to start embedded script service.",
-                    startedAt = startedAt,
-                    executionId = executionId,
-                    startOutcome = startOutcome,
-                )
-                CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] = component
-                val completed = completion.await(
-                    clientAwaitTimeoutMs(
-                        request = scheduledRequestForService,
-                        includeQueueTimeout = defaultSlotLease == null,
-                    ),
-                    TimeUnit.MILLISECONDS,
-                )
-                if (!completed) {
-                    coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.timeout")
-                    appContext.stopService(Intent().setComponent(component))
-                    val lifecycle = timeoutLifecycle(executionId, scheduledRequestForService)
-                    return processCrashedOrTimedOut(
-                        request = scheduledRequestForService,
-                        message = "Embedded script process crashed or timed out.",
+                component = startOutcome.component
+                if (component == null) {
+                    clientFailureResult = serviceStartFailureResult(
+                        request = request,
+                        message = "Failed to start embedded script service.",
                         startedAt = startedAt,
-                        timedOut = true,
                         executionId = executionId,
-                        lifecycleValues = lifecycle.nativeValues(),
+                        startOutcome = startOutcome,
                     )
+                } else {
+                    CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] = component
+                    val completed = completion.await(
+                        clientAwaitTimeoutMs(
+                            request = scheduledRequestForService,
+                            includeQueueTimeout = defaultSlotLease == null,
+                        ),
+                        TimeUnit.MILLISECONDS,
+                    )
+                    if (!completed) {
+                        coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.timeout")
+                        appContext.stopService(Intent().setComponent(component))
+                        val lifecycle = timeoutLifecycle(executionId, scheduledRequestForService)
+                        clientFailureResult = processCrashedOrTimedOut(
+                            request = scheduledRequestForService,
+                            message = "Embedded script process crashed or timed out.",
+                            startedAt = startedAt,
+                            timedOut = true,
+                            executionId = executionId,
+                            lifecycleValues = lifecycle.nativeValues(),
+                        )
+                    }
                 }
             } catch (e: InterruptedException) {
                 coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.interrupted")
@@ -2235,7 +2253,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             } catch (e: Throwable) {
                 coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.throwable")
                 component?.let { appContext.stopService(Intent().setComponent(it)) }
-                return processCrashedOrTimedOut(
+                clientFailureResult = processCrashedOrTimedOut(
                     scheduledRequestForService,
                     "Embedded script process crashed or timed out.\n${e.message ?: e.javaClass.name}",
                     e,
@@ -2246,11 +2264,14 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 component?.let { CLIENT_RUNNING_SCRIPT_COMPONENTS.remove(executionId, it) }
                 requestSpoolFile?.parentFile?.deleteRecursivelyIfExists()
                 if (defaultSlotLease != null && component != null) {
-                    settleBetweenQueuedExecutions()
+                    processSettleDeferred = deferProcessSettle {
+                        releaseDefaultProcessPoolSlot(defaultSlotLease)
+                    }
+                } else {
+                    releaseDefaultProcessPoolSlot(defaultSlotLease)
                 }
-                releaseDefaultProcessPoolSlot(defaultSlotLease)
             }
-            val scriptResult = result.get() ?: processCrashedOrTimedOut(
+            val scriptResult = clientFailureResult ?: result.get() ?: processCrashedOrTimedOut(
                 request = scheduledRequestForService,
                 message = "Embedded script process crashed or timed out.",
                 startedAt = startedAt,
@@ -2259,6 +2280,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
             return scriptResult
                 .withProcessPoolPlan(processPoolPlan)
                 .withDefaultProcessPoolLease(defaultSlotLease)
+                .withClientResultReturnTiming(resultReceivedAtElapsedMs.get())
+                .withDeferredProcessSettle(processSettleDeferred)
         }
 
         fun cancelRunningScript(context: Context, executionId: String): Boolean {
@@ -3200,14 +3223,52 @@ open class NativeNodeEmbeddedScriptService : Service() {
             )
         }
 
-        private fun settleBetweenQueuedExecutions() {
-            runCatching {
-                Thread.sleep(CLIENT_QUEUE_PROCESS_SETTLE_MS)
+        private fun deferProcessSettle(releaseSlot: () -> Unit): Boolean {
+            val releaseRunnable = Runnable { releaseSlot() }
+            val scheduled = runCatching {
+                CLIENT_PROCESS_SETTLE_EXECUTOR.schedule(
+                    releaseRunnable,
+                    CLIENT_PROCESS_SETTLE_MS,
+                    TimeUnit.MILLISECONDS,
+                )
+                true
             }.onFailure { error ->
-                if (error is InterruptedException) {
-                    Thread.currentThread().interrupt()
-                }
+                Log.w(TAG, "Failed to schedule client process-settle window; releasing the slot immediately.", error)
+            }.getOrDefault(false)
+            if (!scheduled) {
+                releaseRunnable.run()
             }
+            return scheduled
+        }
+
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withClientResultReturnTiming(
+            resultReceivedAtElapsedMs: Long,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            if (resultReceivedAtElapsedMs <= 0L) {
+                return this
+            }
+            val resultToReturnMs = (android.os.SystemClock.elapsedRealtime() - resultReceivedAtElapsedMs).coerceAtLeast(0L)
+            return copy(
+                nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(nativeValues)
+                    put("embedded_script.client.result_to_return_ms", resultToReturnMs.toString())
+                },
+            )
+        }
+
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withDeferredProcessSettle(
+            deferred: Boolean,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            return copy(
+                nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(nativeValues)
+                    put("embedded_script.client.process_settle_deferred", deferred.toString())
+                    put(
+                        "embedded_script.client.process_settle_delay_ms",
+                        if (deferred) CLIENT_PROCESS_SETTLE_MS.toString() else "0",
+                    )
+                },
+            )
         }
 
         private fun processCrashedOrTimedOut(

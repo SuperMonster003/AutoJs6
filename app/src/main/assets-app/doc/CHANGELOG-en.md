@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/17
+###### 2026/07/18
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -36,6 +36,7 @@
 * `Feature` Packaged app configuration supports showing or hiding the "Log" and "Settings" launcher shortcuts _[`issue #550`](http://issues.autojs6.com/550)_
 * `Feature` App packaging supports remote builds using APK Builder Template plugins
 * `Feature` Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes
+* `Fix` Node.js script results were returned late because runtime process-settle waiting blocked result delivery
 * `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly
 * `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
 * `Fix` Shell-related methods could become unresponsive on devices without Root access

@@ -4,6 +4,9 @@ This document is the engineering map for the AutoJs6 Node runtime. It records
 the current Safe Node Profile boundary and the staged expansion path toward
 Auto.js Pro compatibility plus broader desktop Node.js compatibility.
 
+For the remaining checkable work and completion criteria, see
+[COMPLETION_ROADMAP.md](COMPLETION_ROADMAP.md).
+
 ## Product Goal
 
 AutoJs6 currently embeds Node.js as a controlled Android script runtime:
@@ -54,6 +57,7 @@ Supported values:
 
 - `embedded`: default; runs scripts through the embedded Node service.
 - `native`: keeps the native one-shot backend available as a regression oracle.
+- `plugin`: runs through an authorized external Node runtime plugin service.
 - `rhino`: routes Node-capable launches back to Rhino where explicitly requested.
 - `auto`: reserved switch for backend selection policy.
 
