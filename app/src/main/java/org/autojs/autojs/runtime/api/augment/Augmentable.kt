@@ -34,6 +34,8 @@ import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.ScriptableObject.UNINITIALIZED_CONST
 import org.mozilla.javascript.VarScope
 import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
+import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Consumer
 import java.util.function.Supplier
 import kotlin.reflect.KClass
@@ -343,11 +345,43 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
     }
 
     private fun augmentFunctions(target: ScriptableObject, global: ScriptableObject) {
-        val targetFunctions = mutableListOf<Pair<Pair<String, String>, Int>>()
-        val globalFunctions = mutableListOf<Pair<Pair<String, String>, Int>>()
-        selfAssignmentFunctions.forEach { item ->
+        val assignments = getFunctionAssignments()
+        installFunctions(target, assignments.target)
+        installFunctions(global, assignments.global)
+    }
+
+    private fun getFunctionAssignments(): FunctionAssignments {
+        val selfDeclarations = selfAssignmentFunctions
+        val globalDeclarations = globalAssignmentFunctions
+        FUNCTION_ASSIGNMENT_CACHE[javaClass]?.let { cached ->
+            if (cached.matches(selfDeclarations, globalDeclarations)) {
+                return cached.assignments
+            }
+        }
+
+        val assignments = normalizeFunctionAssignments(javaClass, selfDeclarations, globalDeclarations)
+        val selfSnapshot = snapshotDeclarations(selfDeclarations)
+        val globalSnapshot = snapshotDeclarations(globalDeclarations)
+        if (selfSnapshot != null && globalSnapshot != null) {
+            FUNCTION_ASSIGNMENT_CACHE[javaClass] = FunctionAssignmentCacheEntry(selfSnapshot, globalSnapshot, assignments)
+        }
+        return assignments
+    }
+
+    private fun normalizeFunctionAssignments(
+        owner: Class<*>,
+        selfDeclarations: List<Any>,
+        globalDeclarations: List<Any>,
+    ): FunctionAssignments {
+        val targetFunctions = mutableListOf<FunctionAssignment>()
+        val globalFunctions = mutableListOf<FunctionAssignment>()
+        fun MutableCollection<FunctionAssignment>.addAssignment(funcName: String, alias: String, attributes: Int) {
+            add(FunctionAssignment(funcName, alias, attributes, getCachedFunctionMethod(owner, funcName)))
+        }
+
+        selfDeclarations.forEach { item ->
             when (item) {
-                is String -> targetFunctions += item to item to PERMANENT
+                is String -> targetFunctions.addAssignment(item, item, PERMANENT)
                 is Pair<*, *> -> {
                     val first = item.first
                     val second = item.second
@@ -377,22 +411,26 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
                     if (aliasList.isEmpty()) aliasList += name
                     aliasList.forEach { alias ->
                         if (flag and AS_IGNORED == 0) {
-                            targetFunctions += name to alias to (PERMANENT or refineAttributes(flag))
+                            targetFunctions.addAssignment(name, alias, PERMANENT or refineAttributes(flag))
                         }
                         if (flag and AS_GLOBAL != 0) {
-                            globalFunctions += name to alias to (PERMANENT or refineAttributes(flag))
+                            globalFunctions.addAssignment(name, alias, PERMANENT or refineAttributes(flag))
                         }
                         if (flag and AS_FUNCTIONAL_TO_STRING != 0) {
-                            targetFunctions += AUGMENTED_CUSTOM_TO_STRING_KEY to AUGMENTED_CUSTOM_TO_STRING_KEY to (DONTENUM or PERMANENT or refineAttributes(flag))
+                            targetFunctions.addAssignment(
+                                AUGMENTED_CUSTOM_TO_STRING_KEY,
+                                AUGMENTED_CUSTOM_TO_STRING_KEY,
+                                DONTENUM or PERMANENT or refineAttributes(flag),
+                            )
                         }
                     }
                 }
                 else -> throw WrappedIllegalArgumentException("Unknown function element ${item.jsBrief()} for selfAssignmentFunctions")
             }
         }
-        globalAssignmentFunctions.forEach { item ->
+        globalDeclarations.forEach { item ->
             when (item) {
-                is String -> globalFunctions += item to item to PERMANENT
+                is String -> globalFunctions.addAssignment(item, item, PERMANENT)
                 is Pair<*, *> -> {
                     val (first, second) = item
                     val name: String
@@ -421,7 +459,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
                     if (aliasList.isEmpty()) aliasList += name
                     aliasList.forEach { alias ->
                         if (flag and AS_IGNORED == 0) {
-                            globalFunctions += name to alias to (PERMANENT or refineAttributes(flag))
+                            globalFunctions.addAssignment(name, alias, PERMANENT or refineAttributes(flag))
                         }
                         if (flag and AS_GLOBAL != 0) {
                             throw WrappedIllegalArgumentException("Flag \"AS_GLOBAL\" is unnecessary for global assignment")
@@ -431,24 +469,22 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
                 else -> throw WrappedIllegalArgumentException("Unknown function element ${item.jsBrief()} for Augmentable#putFunctions")
             }
         }
-        augmentFunctionsBy(target, targetFunctions)
-        augmentFunctionsBy(global, globalFunctions)
+        return FunctionAssignments(targetFunctions, globalFunctions)
     }
 
     internal fun augmentFunctionsBy(destination: ScriptableObject, functions: MutableCollection<Pair<Pair<String, String>, Int>>) {
-        functions.forEach { pair ->
-            val (funcNamePair, attributes) = pair
+        installFunctions(destination, functions.map { (funcNamePair, attributes) ->
             val (funcName, funcNameAlias) = funcNamePair
+            FunctionAssignment(funcName, funcNameAlias, attributes, getCachedFunctionMethod(javaClass, funcName))
+        })
+    }
+
+    private fun installFunctions(destination: ScriptableObject, functions: Collection<FunctionAssignment>) {
+        functions.forEach { assignment ->
+            val (funcName, funcNameAlias, attributes, method) = assignment
             val f = newBaseFunction(funcName, { args ->
                 try {
-                    when (scriptRuntime) {
-                        null -> javaClass
-                            .getMethod(funcName, Array<Any>::class.java)
-                            .invoke(this, args)
-                        else -> javaClass
-                            .getMethod(funcName, ScriptRuntime::class.java, Array<Any>::class.java)
-                            .invoke(this, scriptRuntime, args)
-                    }
+                    method.invoke(this, scriptRuntime, args)
                 } catch (t: Throwable) {
 
                     // @Hint by SuperMonster003 on Sep 27, 2024.
@@ -552,6 +588,134 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : A
     }.getOrNull()
 
     companion object : ArgumentGuards() {
+
+        private data class FunctionAssignment(
+            val funcName: String,
+            val alias: String,
+            val attributes: Int,
+            val method: CachedFunctionMethod,
+        )
+
+        private data class FunctionAssignments(
+            val target: List<FunctionAssignment>,
+            val global: List<FunctionAssignment>,
+        )
+
+        private data class FunctionAssignmentCacheEntry(
+            val selfDeclarations: List<DeclarationSnapshot>,
+            val globalDeclarations: List<DeclarationSnapshot>,
+            val assignments: FunctionAssignments,
+        ) {
+            fun matches(self: List<Any>, global: List<Any>): Boolean {
+                return selfDeclarations.matches(self) && globalDeclarations.matches(global)
+            }
+        }
+
+        private sealed class DeclarationSnapshot {
+            abstract fun matches(value: Any?): Boolean
+
+            object NullValue : DeclarationSnapshot() {
+                override fun matches(value: Any?) = value == null
+            }
+
+            data class StringValue(val value: String) : DeclarationSnapshot() {
+                override fun matches(value: Any?) = value is String && this.value == value
+            }
+
+            data class IntValue(val value: Int) : DeclarationSnapshot() {
+                override fun matches(value: Any?) = value is Int && this.value == value
+            }
+
+            data class PairValue(val first: DeclarationSnapshot, val second: DeclarationSnapshot) : DeclarationSnapshot() {
+                override fun matches(value: Any?): Boolean {
+                    return value is Pair<*, *> && first.matches(value.first) && second.matches(value.second)
+                }
+            }
+
+            data class ListValue(val values: List<DeclarationSnapshot>) : DeclarationSnapshot() {
+                override fun matches(value: Any?): Boolean {
+                    return value is List<*> && values.matches(value)
+                }
+            }
+        }
+
+        private class CachedFunctionMethod(private val owner: Class<*>, private val name: String) {
+
+            @Volatile
+            private var methodWithoutRuntime: Method? = null
+
+            @Volatile
+            private var methodWithRuntime: Method? = null
+
+            fun invoke(receiver: Augmentable, runtime: ScriptRuntime?, args: Array<out Any?>): Any? {
+                return when (runtime) {
+                    null -> resolve(withRuntime = false).invoke(receiver, args)
+                    else -> resolve(withRuntime = true).invoke(receiver, runtime, args)
+                }
+            }
+
+            private fun resolve(withRuntime: Boolean): Method {
+                val cached = when (withRuntime) {
+                    true -> methodWithRuntime
+                    false -> methodWithoutRuntime
+                }
+                if (cached != null) return cached
+
+                return synchronized(this) {
+                    val resolved = when (withRuntime) {
+                        true -> methodWithRuntime ?: owner.getMethod(name, ScriptRuntime::class.java, Array<Any>::class.java)
+                        false -> methodWithoutRuntime ?: owner.getMethod(name, Array<Any>::class.java)
+                    }
+                    when (withRuntime) {
+                        true -> methodWithRuntime = resolved
+                        false -> methodWithoutRuntime = resolved
+                    }
+                    resolved
+                }
+            }
+        }
+
+        private val FUNCTION_ASSIGNMENT_CACHE = ConcurrentHashMap<Class<*>, FunctionAssignmentCacheEntry>()
+        private val FUNCTION_METHOD_CACHE = ConcurrentHashMap<Pair<Class<*>, String>, CachedFunctionMethod>()
+
+        private fun getCachedFunctionMethod(owner: Class<*>, name: String): CachedFunctionMethod {
+            val key = owner to name
+            return FUNCTION_METHOD_CACHE[key] ?: CachedFunctionMethod(owner, name).let { created ->
+                FUNCTION_METHOD_CACHE.putIfAbsent(key, created) ?: created
+            }
+        }
+
+        private fun snapshotDeclarations(declarations: List<Any>): List<DeclarationSnapshot>? {
+            return buildList {
+                declarations.forEach { declaration ->
+                    add(snapshotDeclaration(declaration) ?: return null)
+                }
+            }
+        }
+
+        private fun snapshotDeclaration(value: Any?): DeclarationSnapshot? {
+            return when (value) {
+                null -> DeclarationSnapshot.NullValue
+                is String -> DeclarationSnapshot.StringValue(value)
+                is Int -> DeclarationSnapshot.IntValue(value)
+                is Pair<*, *> -> {
+                    val first = snapshotDeclaration(value.first) ?: return null
+                    val second = snapshotDeclaration(value.second) ?: return null
+                    DeclarationSnapshot.PairValue(first, second)
+                }
+                is List<*> -> {
+                    val values = buildList {
+                        value.forEach { item -> add(snapshotDeclaration(item) ?: return null) }
+                    }
+                    DeclarationSnapshot.ListValue(values)
+                }
+                else -> null
+            }
+        }
+
+        private fun List<DeclarationSnapshot>.matches(values: List<*>): Boolean {
+            return size == values.size && indices.all { index -> this[index].matches(values[index]) }
+        }
 
         // @Caution by SuperMonster003 on Oct 5, 2025.
         //  ! These constants are "bit flags", each value is a power of 2, with only one bit being 1 in binary.
