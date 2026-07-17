@@ -83,7 +83,9 @@ class PluginCenterItemViewHolder(
             val fallback = getCachedRemoteIcon(preferredUrl)
                 ?: cachedPackageIcon
                 ?: fallbackUrl?.let(::getCachedRemoteIcon)
-                ?: iconView.drawable?.takeIf { previousPackageName == item.packageName }
+                ?: iconView.drawable
+                    ?.takeIf { previousPackageName == item.packageName }
+                    ?.let(::copyDrawableForIconCache)
                 ?: buildFallbackIconDrawable()
             val packageCacheKey = packageIconCacheKey(item.packageName)
             var request = buildRemoteIconRequest(
@@ -298,16 +300,37 @@ class PluginCenterItemViewHolder(
         getCachedRemoteItemIcon(packageIconCacheKey(packageName, isNightModeEnabled))
 
     private fun getCachedRemoteItemIcon(cacheKey: String): Drawable? =
-        remoteItemIconCache.get(cacheKey)?.let { bitmap ->
+        remoteItemIconCache.get(cacheKey)?.takeUnless { bitmap ->
+            bitmap.isRecycled.also { isRecycled ->
+                if (isRecycled) {
+                    remoteItemIconCache.remove(cacheKey)
+                }
+            }
+        }?.let { bitmap ->
             BitmapDrawable(context.resources, bitmap).mutate()
         }
 
     private fun cacheRemoteItemIcon(cacheKeys: List<String>, drawable: Drawable) {
-        val size = iconCacheSizePx()
-        val bitmap = runCatching { drawable.toBitmap(size, size) }.getOrNull() ?: return
+        val bitmap = copyBitmapForIconCache(drawable) ?: return
         cacheKeys.distinct().forEach { cacheKey ->
             remoteItemIconCache.put(cacheKey, bitmap)
         }
+    }
+
+    private fun copyDrawableForIconCache(drawable: Drawable): Drawable? =
+        copyBitmapForIconCache(drawable)?.let { bitmap ->
+            BitmapDrawable(context.resources, bitmap).mutate()
+        }
+
+    private fun copyBitmapForIconCache(drawable: Drawable): Bitmap? {
+        val size = iconCacheSizePx()
+        val source = runCatching { drawable.toBitmap(size, size) }.getOrNull()
+            ?.takeUnless { it.isRecycled }
+            ?: return null
+        return runCatching {
+            source.copy(Bitmap.Config.ARGB_8888, false)
+        }.getOrNull()
+            ?.takeUnless { it.isRecycled }
     }
 
     private fun iconCacheSizePx(): Int =
@@ -325,7 +348,8 @@ class PluginCenterItemViewHolder(
         private const val REMOTE_ICON_CACHE_SIZE_KB = 32 * 1024
 
         private val remoteItemIconCache = object : android.util.LruCache<String, Bitmap>(REMOTE_ICON_CACHE_SIZE_KB) {
-            override fun sizeOf(key: String, value: Bitmap): Int = (value.byteCount / 1024).coerceAtLeast(1)
+            override fun sizeOf(key: String, value: Bitmap): Int =
+                if (value.isRecycled) 1 else (value.byteCount / 1024).coerceAtLeast(1)
         }
     }
 
