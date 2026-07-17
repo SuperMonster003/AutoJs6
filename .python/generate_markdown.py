@@ -24,6 +24,32 @@ def log(message: str):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {message}", flush=True)
 
 
+def load_dotenv_value(env_path: str, key: str) -> str:
+    """Read one value from a dotenv file without adding a runtime dependency."""
+    try:
+        with open(env_path, 'r', encoding='utf-8-sig') as env_file:
+            for raw_line in env_file:
+                line = raw_line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                if line.startswith('export '):
+                    line = line[len('export '):].lstrip()
+
+                name, separator, value = line.partition('=')
+                if not separator or name.strip() != key:
+                    continue
+
+                value = value.strip()
+                if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+                    return value[1:-1]
+                return value.split(' #', 1)[0].rstrip()
+    except FileNotFoundError:
+        return ''
+    except OSError as e:
+        log(f'[warn] Failed to read dotenv file at {env_path}: {e}')
+    return ''
+
+
 language_codes = ["zh-Hans", "zh-Hant-HK", "zh-Hant-TW", "en", "fr", "es", "ja", "ko", "ru", "ar"]
 language_code_default = "zh-Hans"
 
@@ -46,8 +72,16 @@ project_root_dir = os.path.abspath(os.path.join(script_dir, os.pardir))
 changelog_files_source_dir = os.path.join(project_root_dir, 'app', 'src', 'main', 'assets-app', 'doc')
 changelog_root_dir = os.path.join(project_root_dir, '.changelog')
 readme_root_dir = os.path.join(project_root_dir, '.readme')
+utils_env_path = os.path.join(project_root_dir, '.utils', '.env')
+
+# Prefer the repository-local token, then fall back to the process environment (for example, in CI).
+github_token_from_dotenv = load_dotenv_value(utils_env_path, 'GITHUB_TOKEN')
+github_token = github_token_from_dotenv or os.environ.get('GITHUB_TOKEN', '').strip()
 
 log(f'Starting markdown generation in {project_root_dir}')
+if github_token:
+    github_token_source = utils_env_path if github_token_from_dotenv else 'process environment'
+    log(f'Using GITHUB_TOKEN from {github_token_source}')
 
 RELATED_AUTOJS_PROJECT_DATES_START_MARKER = "# BEGIN RELATED_AUTOJS_PROJECT_DATES"
 RELATED_AUTOJS_PROJECT_DATES_END_MARKER = "# END RELATED_AUTOJS_PROJECT_DATES"
@@ -358,12 +392,15 @@ def request_github_json(url: str, description: str = ''):
     request_label = description or url
     started_at = datetime.now()
     log(f"Fetching GitHub data: {request_label}")
+    headers = {
+        'Accept': 'application/vnd.github+json',
+        'User-Agent': 'AutoJs6-readme-generator',
+    }
+    if github_token:
+        headers['Authorization'] = f'Bearer {github_token}'
     request = Request(
         url,
-        headers={
-            'Accept': 'application/vnd.github+json',
-            'User-Agent': 'AutoJs6-readme-generator',
-        },
+        headers=headers,
     )
     try:
         with urlopen(request, timeout=15) as response:
