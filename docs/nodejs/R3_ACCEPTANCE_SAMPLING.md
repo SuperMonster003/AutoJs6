@@ -235,9 +235,10 @@ Acceptance evidence:
   (`SHA-256 F12CC0C421A924D1D899DB03310093B9500099C2AC1E19055444DFB0C0998666`).
 - APK: `autojs6-v6.8.0-alpha7-arm64-v8a.apk`, version code 5219
   (`SHA-256 A14AEC58EE392108D11989234682C1DFFC1679871964694E6DD40BE36F43E426`).
-- Runtime: packaged `nodeMini`, arm64-v8a, from the sibling runtime R3 working
-  tree based on R2 commit `d5159a2`.
-- App implementation: R3 working tree based on R2 commit `c5e5e978`.
+- Runtime: packaged `nodeMini`, arm64-v8a, commit
+  `8d209ee16d6dddf9583bc17a6e202d7eda9975e1`.
+- App implementation: commit
+  `5eaeec462587ec2a72dcf0f8ebf21a6ca21eab85`.
 - Device: Sony XQ-AT72, serial `QV710AF65F`, Android 12 / API 31,
   arm64-v8a. No external Node.js Runtime plugin was installed.
 - Device state: battery 100 percent and 34.2 degrees Celsius before and after
