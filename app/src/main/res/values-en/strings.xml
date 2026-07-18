@@ -887,6 +887,7 @@
     <string name="text_documentation_source">Documentation source</string>
     <string name="text_done">Done</string>
     <string name="text_download">Download</string>
+    <string name="text_download_all">Download all</string>
     <string name="text_download_and_install_autojs6_including_above_abi">Download and install the version of AutoJs6 that includes the above ABI (the file name contains \"%s\")</string>
     <string name="text_download_and_install_autojs6_including_all_abis">Download and install the version of AutoJs6 that includes all ABIs (the file name contains \"universal\")</string>
     <string name="text_download_cancelled">Download cancelled</string>

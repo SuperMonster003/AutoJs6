@@ -1,0 +1,360 @@
+{
+  "catalogVersion": 1,
+  "fonts": [
+    {
+      "artifact": {
+        "fileName": "autojs6-ace-font-iosevka_slab-v1-4e317adc.woff2",
+        "format": "woff2",
+        "mimeType": "font/woff2",
+        "sha256": "4e317adc0a6d556dd5cf361966cb2dd3487a3aa4a9e477770306ea68dd477e13",
+        "size": 1659064,
+        "style": "normal",
+        "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-iosevka_slab-v1-4e317adc.woff2",
+        "urls": [
+          "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-iosevka_slab-v1-4e317adc.woff2"
+        ],
+        "version": 1,
+        "weight": 400
+      },
+      "author": "Renzhi Li (be5invis) / Iosevka Project",
+      "displayName": "Iosevka Slab",
+      "family": "Iosevka Slab",
+      "id": "iosevka_slab",
+      "license": {
+        "files": [
+          {
+            "fileName": "autojs6-ace-font-iosevka_slab-v1-LICENSE.md",
+            "originalName": "LICENSE.md",
+            "sha256": "4ba53c7c1cb39279aae5f8d7d22054c485c71169920e5a36ed098b115e2e3c5d",
+            "size": 4493,
+            "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-iosevka_slab-v1-LICENSE.md"
+          }
+        ],
+        "name": "SIL Open Font License 1.1",
+        "spdx": "OFL-1.1"
+      },
+      "order": 10,
+      "source": {
+        "autoJs6Snapshot": {
+          "commit": "bbac850fe6bcf4005cea25d68039e9e50bdd8228",
+          "path": "app/src/main/assets/editor/ace-builds-1.4.12/fonts/iosevka-slab/IosevkaSlab-Regular.woff2",
+          "versionCode": 5221
+        },
+        "repository": "https://github.com/be5invis/Iosevka",
+        "upstreamVersion": null
+      }
+    },
+    {
+      "artifact": {
+        "fileName": "autojs6-ace-font-jetbrains_mono-v1-a9cb1cd8.woff2",
+        "format": "woff2",
+        "mimeType": "font/woff2",
+        "sha256": "a9cb1cd82332b23a47e3a1239d25d13c86d16c4220695e34b243effa999f45f2",
+        "size": 92164,
+        "style": "normal",
+        "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-jetbrains_mono-v1-a9cb1cd8.woff2",
+        "urls": [
+          "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-jetbrains_mono-v1-a9cb1cd8.woff2"
+        ],
+        "version": 1,
+        "weight": 400
+      },
+      "author": "JetBrains; Philipp Nurullin / Konstantin Bulenkov",
+      "displayName": "JetBrains Mono",
+      "family": "JetBrains Mono",
+      "id": "jetbrains_mono",
+      "license": {
+        "files": [
+          {
+            "fileName": "autojs6-ace-font-jetbrains_mono-v1-OFL.txt",
+            "originalName": "OFL.txt",
+            "sha256": "30f0c136e3c88e422d0791acd97238870f9054a9729bc34cf2ff0d4ed8cac4ad",
+            "size": 4399,
+            "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-jetbrains_mono-v1-OFL.txt"
+          },
+          {
+            "fileName": "autojs6-ace-font-jetbrains_mono-v1-AUTHORS.txt",
+            "originalName": "AUTHORS.txt",
+            "sha256": "33f99c94ef0a0909d7584a5d4bde1fb9b1630daa620f5a788c28c43327e79412",
+            "size": 350,
+            "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-jetbrains_mono-v1-AUTHORS.txt"
+          }
+        ],
+        "name": "SIL Open Font License 1.1",
+        "spdx": "OFL-1.1"
+      },
+      "order": 20,
+      "source": {
+        "autoJs6Snapshot": {
+          "commit": "acf5c10e01af66b9ae5c70d302bd0b8c58104cef",
+          "path": "app/src/main/assets/editor/ace-builds-1.4.12/fonts/jetbrains-mono/JetBrainsMono-Regular.woff2",
+          "versionCode": 5221
+        },
+        "repository": "https://github.com/JetBrains/JetBrainsMono",
+        "upstreamVersion": "2.304"
+      }
+    },
+    {
+      "artifact": {
+        "fileName": "autojs6-ace-font-fira_code-v1-a6ce5952.woff2",
+        "format": "woff2",
+        "mimeType": "font/woff2",
+        "sha256": "a6ce59520b90e15d7062ffef214f94c8add5a4085c0bbb1683602ef227a4d1fe",
+        "size": 103240,
+        "style": "normal",
+        "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-fira_code-v1-a6ce5952.woff2",
+        "urls": [
+          "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-fira_code-v1-a6ce5952.woff2"
+        ],
+        "version": 1,
+        "weight": 400
+      },
+      "author": "Nikita Prokopov; based on Fira Mono",
+      "displayName": "Fira Code",
+      "family": "Fira Code",
+      "id": "fira_code",
+      "license": {
+        "files": [
+          {
+            "fileName": "autojs6-ace-font-fira_code-v1-LICENSE",
+            "originalName": "LICENSE",
+            "sha256": "1d41e10031ab125302780a05ec4c91d218e47db0c7e37cf315cce5e608cdc25c",
+            "size": 4389,
+            "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-fira_code-v1-LICENSE"
+          }
+        ],
+        "name": "SIL Open Font License 1.1",
+        "spdx": "OFL-1.1"
+      },
+      "order": 30,
+      "source": {
+        "autoJs6Snapshot": {
+          "commit": "bbac850fe6bcf4005cea25d68039e9e50bdd8228",
+          "path": "app/src/main/assets/editor/ace-builds-1.4.12/fonts/fira-code/FiraCode-Regular.woff2",
+          "versionCode": 5221
+        },
+        "repository": "https://github.com/tonsky/FiraCode",
+        "upstreamVersion": null
+      }
+    },
+    {
+      "artifact": {
+        "fileName": "autojs6-ace-font-cascadia_code-v1-55e460d6.woff2",
+        "format": "woff2",
+        "mimeType": "font/woff2",
+        "sha256": "55e460d6c9345a4769ed28fc9f01ecc2160a10e95080523f3d340a0d208288c8",
+        "size": 152352,
+        "style": "normal",
+        "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-cascadia_code-v1-55e460d6.woff2",
+        "urls": [
+          "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-cascadia_code-v1-55e460d6.woff2"
+        ],
+        "version": 1,
+        "weight": 400
+      },
+      "author": "Microsoft; Aaron Bell / Saja Typeworks",
+      "displayName": "Cascadia Code",
+      "family": "Cascadia Code",
+      "id": "cascadia_code",
+      "license": {
+        "files": [
+          {
+            "fileName": "autojs6-ace-font-cascadia_code-v1-LICENSE",
+            "originalName": "LICENSE",
+            "sha256": "82c05d6c53dfa0c9025985c19e371810020b74ed2c61d51d370f2a8ab2506d52",
+            "size": 4395,
+            "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-cascadia_code-v1-LICENSE"
+          }
+        ],
+        "name": "SIL Open Font License 1.1",
+        "spdx": "OFL-1.1"
+      },
+      "order": 40,
+      "source": {
+        "autoJs6Snapshot": {
+          "commit": "bbac850fe6bcf4005cea25d68039e9e50bdd8228",
+          "path": "app/src/main/assets/editor/ace-builds-1.4.12/fonts/cascadia-code/CascadiaCode-Regular.woff2",
+          "versionCode": 5221
+        },
+        "repository": "https://github.com/microsoft/cascadia-code",
+        "upstreamVersion": null
+      }
+    },
+    {
+      "artifact": {
+        "fileName": "autojs6-ace-font-intel_one_mono-v1-cf33e6d7.woff2",
+        "format": "woff2",
+        "mimeType": "font/woff2",
+        "sha256": "cf33e6d7cc78ea0f159a311bf7f5cc9d0a64b324c28b6a8919986d748d86e458",
+        "size": 47268,
+        "style": "normal",
+        "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-intel_one_mono-v1-cf33e6d7.woff2",
+        "urls": [
+          "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-intel_one_mono-v1-cf33e6d7.woff2"
+        ],
+        "version": 1,
+        "weight": 400
+      },
+      "author": "Intel; Frere-Jones Type with Intel Brand Team and VMLY&R",
+      "displayName": "Intel One Mono",
+      "family": "Intel One Mono",
+      "id": "intel_one_mono",
+      "license": {
+        "files": [
+          {
+            "fileName": "autojs6-ace-font-intel_one_mono-v1-OFL.txt",
+            "originalName": "OFL.txt",
+            "sha256": "1b2e40cca73713395e95e3a1fce0c742550ff07f3c65cc2c4fc75404bfb45c22",
+            "size": 4434,
+            "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-intel_one_mono-v1-OFL.txt"
+          }
+        ],
+        "name": "SIL Open Font License 1.1",
+        "spdx": "OFL-1.1"
+      },
+      "order": 50,
+      "source": {
+        "autoJs6Snapshot": {
+          "commit": "bbac850fe6bcf4005cea25d68039e9e50bdd8228",
+          "path": "app/src/main/assets/editor/ace-builds-1.4.12/fonts/intel-one-mono/IntelOneMono-Regular.woff2",
+          "versionCode": 5221
+        },
+        "repository": "https://github.com/intel/intel-one-mono",
+        "upstreamVersion": null
+      }
+    },
+    {
+      "artifact": {
+        "fileName": "autojs6-ace-font-ibm_plex_mono-v1-ba204497.woff2",
+        "format": "woff2",
+        "mimeType": "font/woff2",
+        "sha256": "ba204497f16b6d334cee9d1e963a831b73e3a56e1d6300a8489d18df7214b350",
+        "size": 49248,
+        "style": "normal",
+        "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-ibm_plex_mono-v1-ba204497.woff2",
+        "urls": [
+          "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-ibm_plex_mono-v1-ba204497.woff2"
+        ],
+        "version": 1,
+        "weight": 400
+      },
+      "author": "IBM BX&D / Mike Abbink / Bold Monday",
+      "displayName": "IBM Plex Mono",
+      "family": "IBM Plex Mono",
+      "id": "ibm_plex_mono",
+      "license": {
+        "files": [
+          {
+            "fileName": "autojs6-ace-font-ibm_plex_mono-v1-LICENSE.txt",
+            "originalName": "LICENSE.txt",
+            "sha256": "37784b44044a4ffd9256702b7c0982c37e5c8887ba90c6dca0479aea93dc898d",
+            "size": 4363,
+            "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-ibm_plex_mono-v1-LICENSE.txt"
+          }
+        ],
+        "name": "SIL Open Font License 1.1",
+        "spdx": "OFL-1.1"
+      },
+      "order": 60,
+      "source": {
+        "autoJs6Snapshot": {
+          "commit": "bbac850fe6bcf4005cea25d68039e9e50bdd8228",
+          "path": "app/src/main/assets/editor/ace-builds-1.4.12/fonts/ibm-plex-mono/IBMPlexMono-Regular.woff2",
+          "versionCode": 5221
+        },
+        "repository": "https://github.com/IBM/plex",
+        "upstreamVersion": null
+      }
+    },
+    {
+      "artifact": {
+        "fileName": "autojs6-ace-font-hack-v1-0b0ef254.woff2",
+        "format": "woff2",
+        "mimeType": "font/woff2",
+        "sha256": "0b0ef254dfc7afc172528e3166eace813989e1cf77f576ddae5f5e8fb2897c06",
+        "size": 106236,
+        "style": "normal",
+        "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-hack-v1-0b0ef254.woff2",
+        "urls": [
+          "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-hack-v1-0b0ef254.woff2"
+        ],
+        "version": 1,
+        "weight": 400
+      },
+      "author": "Source Foundry Authors; Chris Simpkins / David van Gemeren",
+      "displayName": "Hack",
+      "family": "Hack",
+      "id": "hack",
+      "license": {
+        "files": [
+          {
+            "fileName": "autojs6-ace-font-hack-v1-LICENSE.md",
+            "originalName": "LICENSE.md",
+            "sha256": "1f61bb7c790c59b4b0ecdf304628b94e42ae4c8020094a8c3da73381ab212623",
+            "size": 3744,
+            "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-hack-v1-LICENSE.md"
+          }
+        ],
+        "name": "MIT + upstream Bitstream Vera / DejaVu notices",
+        "spdx": "LicenseRef-Hack-MIT-Bitstream-Vera-DejaVu"
+      },
+      "order": 70,
+      "source": {
+        "autoJs6Snapshot": {
+          "commit": "bbac850fe6bcf4005cea25d68039e9e50bdd8228",
+          "path": "app/src/main/assets/editor/ace-builds-1.4.12/fonts/hack/Hack-Regular.woff2",
+          "versionCode": 5221
+        },
+        "repository": "https://github.com/source-foundry/Hack",
+        "upstreamVersion": null
+      }
+    },
+    {
+      "artifact": {
+        "fileName": "autojs6-ace-font-source_code_pro-v1-714eee29.woff2",
+        "format": "woff2",
+        "mimeType": "font/woff2",
+        "sha256": "714eee29b70d191f5bf4b3a06b68f2c50522b1303d31c7d44dcefdcc5f9defd0",
+        "size": 74052,
+        "style": "normal",
+        "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-source_code_pro-v1-714eee29.woff2",
+        "urls": [
+          "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-source_code_pro-v1-714eee29.woff2"
+        ],
+        "version": 1,
+        "weight": 400
+      },
+      "author": "Adobe Originals; Paul D. Hunt / Teo Tuominen",
+      "displayName": "Source Code Pro",
+      "family": "Source Code Pro",
+      "id": "source_code_pro",
+      "license": {
+        "files": [
+          {
+            "fileName": "autojs6-ace-font-source_code_pro-v1-LICENSE.md",
+            "originalName": "LICENSE.md",
+            "sha256": "0b2c3168605cb4f3ba54cf3cf2003f67ff894c66484c75702007f23eda92c353",
+            "size": 4473,
+            "url": "https://github.com/SuperMonster003/AutoJs6-Shared-Assets/releases/download/ace-fonts-v1/autojs6-ace-font-source_code_pro-v1-LICENSE.md"
+          }
+        ],
+        "name": "SIL Open Font License 1.1",
+        "spdx": "OFL-1.1"
+      },
+      "order": 80,
+      "source": {
+        "autoJs6Snapshot": {
+          "commit": "39d445bef23d1951f8174e995969761ab09aa32f",
+          "path": "app/src/main/assets/editor/ace-builds-1.4.12/fonts/source-code-pro/SourceCodePro-Regular.woff2",
+          "versionCode": 5221
+        },
+        "repository": "https://github.com/adobe-fonts/source-code-pro",
+        "upstreamVersion": "2.042R-u_1.062R-i_1.026Rvf"
+      }
+    }
+  ],
+  "minHostVersionCode": 5221,
+  "releaseTag": "ace-fonts-v1",
+  "repository": "SuperMonster003/AutoJs6-Shared-Assets",
+  "schemaVersion": 1
+}

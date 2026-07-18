@@ -892,6 +892,7 @@
     <string name="text_documentation_source">문서 소스</string>
     <string name="text_done">완료</string>
     <string name="text_download">다운로드</string>
+    <string name="text_download_all">모두 다운로드</string>
     <string name="text_download_and_install_autojs6_including_above_abi">위의 ABI 가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"%s\" 포함)</string>
     <string name="text_download_and_install_autojs6_including_all_abis">모든 ABI 가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"universal\" 포함)</string>
     <string name="text_download_cancelled">다운로드 취소</string>

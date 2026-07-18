@@ -890,6 +890,7 @@
     <string name="text_documentation_source">Источник документации</string>
     <string name="text_done">Готово</string>
     <string name="text_download">Скачать</string>
+    <string name="text_download_all">Скачать все</string>
     <string name="text_download_and_install_autojs6_including_above_abi">Загрузите и установите версию AutoJs6, включающую вышеуказанный ABI (в имени файла содержится \"%s\")</string>
     <string name="text_download_and_install_autojs6_including_all_abis">Загрузить и установить версию AutoJs6, включающую все ABI (имя файла содержит \"universal\")</string>
     <string name="text_download_cancelled">Загрузка отменена</string>

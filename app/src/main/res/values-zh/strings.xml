@@ -587,6 +587,20 @@
     <string name="text_ace_editor_fallback_native" formatted="true">Ace 编辑器失败 (%1$s); 已切换到 JsDroidEditor. 可在更多菜单中复制 Ace 诊断信息.</string>
     <string name="text_ace_editor_font">编辑器字体</string>
     <string name="text_ace_editor_font_changed" formatted="true">编辑器字体已切换为 %s</string>
+    <string name="text_ace_editor_font_built_in">内置</string>
+    <string name="text_ace_editor_font_delete_confirmation" formatted="true">删除已下载的字体 %1$s?</string>
+    <string name="text_ace_editor_font_download_all_completed" formatted="true">已下载 %1$d 款字体</string>
+    <string name="text_ace_editor_font_download_all_confirmation" formatted="true">下载 %1$d 款可用字体 (%2$s)? 包含可用更新.</string>
+    <string name="text_ace_editor_font_download_all_empty">所有可用字体均已安装或正在下载</string>
+    <string name="text_ace_editor_font_download_all_result" formatted="true">字体下载完成: %1$d 个成功, %2$d 个失败或已取消</string>
+    <string name="text_ace_editor_font_download_all_running">下载全部任务已在进行中</string>
+    <string name="text_ace_editor_font_download_confirmation" formatted="true">下载 %1$s (%2$s)?</string>
+    <string name="text_ace_editor_font_download_failed" formatted="true">字体下载失败: %1$s</string>
+    <string name="text_ace_editor_font_download_to_use">下载后即可使用此字体</string>
+    <string name="text_ace_editor_font_integrity_failed">下载的字体未通过完整性校验</string>
+    <string name="text_ace_editor_font_license">许可证</string>
+    <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
+    <string name="text_download_all">下载全部</string>
     <string name="text_ace_font_ligatures_enabled">字体连字</string>
     <string name="text_ace_font_styles_enabled">特殊字体样式</string>
     <string name="text_ace_get_text">获取文本</string>

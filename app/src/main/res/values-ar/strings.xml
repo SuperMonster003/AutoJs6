@@ -892,6 +892,7 @@
     <string name="text_documentation_source">مصدر الوثائق</string>
     <string name="text_done">فعله</string>
     <string name="text_download">تحميل</string>
+    <string name="text_download_all">تنزيل الكل</string>
     <string name="text_download_and_install_autojs6_including_above_abi">قم بتنزيل وتثبيت إصدار AutoJs6 الذي يتضمن ABI أعلاه (يحتوي اسم الملف على \"%s\")</string>
     <string name="text_download_and_install_autojs6_including_all_abis">قم بتنزيل وتثبيت إصدار AutoJs6 الذي يتضمن كافة واجهات برمجة التطبيقات (يحتوي اسم الملف على \"universal\")</string>
     <string name="text_download_cancelled">تنزيل إلغاء</string>

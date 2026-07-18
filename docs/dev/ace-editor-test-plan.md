@@ -114,7 +114,7 @@ Run this checklist on at least one gesture-navigation device and one 3-button-na
 Setup:
 - ACE editor is selected in settings.
 - Open `ace-basic.js` with at least 80 lines so the top, middle, and bottom viewport areas can be tested.
-- Use JetBrains Mono first, then repeat a quick pass with Source Code Pro.
+- Use the bundled ordinary Iosevka first, then download Iosevka Slab and repeat a quick pass with it.
 - Test with the default Latin keyboard and one CJK IME when available.
 
 Checklist:
@@ -426,8 +426,15 @@ Steps:
 Expected:
 - ACE theme follows app theme.
 - Font size is restored after engine switch.
-- ACE text uses JetBrains Mono by default.
-- `More -> ACE editor font` can switch to Source Code Pro and system monospace.
+- ACE text uses the bundled ordinary Iosevka by default, including when the network and remote catalog are unavailable.
+- `More -> ACE editor font` can download and switch to Iosevka Slab, delete it, and switch to system monospace; ordinary Iosevka never offers a download or delete action.
+- Missing fonts use the same download icon as Plugin Center rather than a localized text-width-dependent button.
+- `Editor font -> More -> Download all` confirms the font count and total size once, downloads every missing or outdated authorized font with at most two concurrent transfers, leaves the current selection unchanged, and reports one aggregate result.
+- Running `Download all` again while its batch is active does not enqueue duplicates. Revoked, current, and already-downloading fonts are skipped.
+- A cancelled, truncated, oversized, malformed, or SHA-256-mismatched download is not installed or selectable, and interrupted `.part` files do not accumulate across launches.
+- If a signed catalog refresh revokes the font used by an already open editor, that editor switches to bundled Iosevka without requiring a restart or manual font change.
+- Closing or rotating the font dialog does not cancel an active transfer; reopening the dialog reattaches its progress, while the row-level cancel action stops it.
+- Reopening during a background batch does not emit one success Toast per completed font.
 - The settings page persists the ACE editor font for future ACE sessions.
 - Text remains readable and markers stay visible.
 

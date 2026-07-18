@@ -5,16 +5,28 @@ import org.autojs.autojs.core.pref.Pref
 object AceEditorFontPreferences {
 
     const val KEY_ACE_EDITOR_FONT = "key_\$_ace_editor_font"
+    private val VALID_FONT_ID = Regex("^[a-z0-9][a-z0-9_]{0,63}$")
+
+    @JvmStatic
+    fun getId(): String {
+        return Pref.getString(KEY_ACE_EDITOR_FONT, AceEditorFont.IOSEVKA.preferenceValue)
+            .takeIf(VALID_FONT_ID::matches)
+            ?: AceEditorFont.IOSEVKA.preferenceValue
+    }
 
     @JvmStatic
     fun get(): AceEditorFont {
-        return AceEditorFont.fromPreferenceValue(
-            Pref.getString(KEY_ACE_EDITOR_FONT, AceEditorFont.IOSEVKA.preferenceValue),
-        )
+        return AceEditorFont.fromPreferenceValue(getId())
     }
 
     @JvmStatic
     fun set(font: AceEditorFont) {
-        Pref.putString(KEY_ACE_EDITOR_FONT, font.preferenceValue)
+        setId(font.preferenceValue)
+    }
+
+    @JvmStatic
+    fun setId(fontId: String) {
+        require(VALID_FONT_ID.matches(fontId)) { "Invalid ACE editor font id: $fontId" }
+        Pref.putString(KEY_ACE_EDITOR_FONT, fontId)
     }
 }

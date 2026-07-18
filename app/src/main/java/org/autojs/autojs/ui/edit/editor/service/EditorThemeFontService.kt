@@ -12,7 +12,7 @@ import org.autojs.autojs.core.pref.Pref.getEditorTextSize
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorFont
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontPreferences
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
@@ -32,6 +32,8 @@ class EditorThemeFontService(
     private val showFunctionsButtons: List<ImageView>,
     private val invalidateHost: () -> Unit,
 ) {
+
+    private val aceFontManager = AceEditorFontManager.get(context)
 
     var currentTheme: Theme? = null
         private set
@@ -119,23 +121,23 @@ class EditorThemeFontService(
         return hsv[1] >= CHROMATIC_SATURATION_THRESHOLD
     }
 
-    fun currentAceFont(): AceEditorFont = AceEditorFontPreferences.get()
+    fun currentAceFont(): String = AceEditorFontPreferences.getId()
 
     fun applyPreferredAceFont() {
         applyAceFont(currentAceFont(), persist = false)
     }
 
-    fun persistAndApplyAceFont(font: AceEditorFont) {
-        applyAceFont(font, persist = true)
+    fun persistAndApplyAceFont(fontId: String) {
+        applyAceFont(fontId, persist = true)
     }
 
-    fun aceEditorFontLabel(font: AceEditorFont): String = font.displayName(context)
+    fun aceEditorFontLabel(fontId: String): String = aceFontManager.displayName(fontId, context)
 
-    private fun applyAceFont(font: AceEditorFont, persist: Boolean) {
+    private fun applyAceFont(fontId: String, persist: Boolean) {
         if (persist) {
-            AceEditorFontPreferences.set(font)
+            AceEditorFontPreferences.setId(fontId)
         }
-        (currentEditor() as? AceScriptEditorEngine)?.setAceEditorFont(font)
+        (currentEditor() as? AceScriptEditorEngine)?.setAceEditorFont(fontId)
     }
 
     private companion object {

@@ -87,7 +87,7 @@ class EditorThemePreference : MaterialPreference {
             if (themePreviewHandler != null) {
                 builder
                     .neutralText(R.string.dialog_button_preview)
-                    .neutralColorRes(R.color.dialog_button_default)
+                    .neutralColorRes(R.color.dialog_button_hint)
                     .onNeutral { dialog, _ -> previewFromDialog(dialog) }
             }
 

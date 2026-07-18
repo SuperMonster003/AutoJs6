@@ -891,6 +891,7 @@
     <string name="text_documentation_source">ドキュメントのソース</string>
     <string name="text_done">完了</string>
     <string name="text_download">ダウンロード</string>
+    <string name="text_download_all">すべてダウンロード</string>
     <string name="text_download_and_install_autojs6_including_above_abi">上記の ABI を含むバージョンの AutoJs6 をダウンロードしてインストールします (ファイル名に \"%s\" が含まれています)</string>
     <string name="text_download_and_install_autojs6_including_all_abis">すべての ABI を含むバージョンの AutoJs6 をダウンロードしてインストールする (ファイル名に \"universal\" が含まれている)</string>
     <string name="text_download_cancelled">ダウンロード中止</string>

@@ -6,7 +6,7 @@ import android.view.View
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.ace.AceCodeEditor
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorFont
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontPreferences
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
@@ -23,6 +23,7 @@ class AceScriptEditorEngine(
 
     private val cursorCallbacks = LinkedHashSet<EditorCursorChangeListener>()
     private val textChangeCallbacks = LinkedHashSet<EditorTextChangeListener>()
+    private val fontManager = AceEditorFontManager.get(context)
 
     private var breakpointChangeListener: EditorBreakpointChangeListener? = null
     private var readOnly = false
@@ -30,7 +31,7 @@ class AceScriptEditorEngine(
     private var loadingText = false
     private var debuggingLine = -1
     private var fontSizeSp = DEFAULT_TEXT_SIZE_SP
-    private var editorFont = AceEditorFontPreferences.get()
+    private var editorFontId = AceEditorFontPreferences.getId()
     private var themeKey: String? = null
     private var searchQuery: String? = null
     private var searchOptions: EditorSearchOptions? = null
@@ -126,12 +127,15 @@ class AceScriptEditorEngine(
             }
         }
         aceCodeEditor.setTextSizeSp(fontSizeSp)
-        aceCodeEditor.setFontFamily(editorFont.cssFontFamily)
+        val descriptor = fontManager.descriptor(editorFontId)
+        editorFontId = descriptor.id
+        aceCodeEditor.setFontDescriptor(descriptor)
     }
 
-    fun setAceEditorFont(font: AceEditorFont) {
-        editorFont = font
-        aceCodeEditor.setFontFamily(font.cssFontFamily)
+    fun setAceEditorFont(fontId: String) {
+        val descriptor = fontManager.descriptor(fontId)
+        editorFontId = descriptor.id
+        aceCodeEditor.setFontDescriptor(descriptor)
     }
 
     override fun setInitialText(text: String?) {

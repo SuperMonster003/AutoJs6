@@ -52,6 +52,45 @@ const ACE_CODE_EDITOR_PATH = path.join(
   "ace",
   "AceCodeEditor.kt",
 );
+const ACE_FONT_MANAGER_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "ace",
+  "AceEditorFontManager.kt",
+);
+const ACE_FONT_DIALOG_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "ace",
+  "AceEditorFontDialog.kt",
+);
+const ACE_FONT_DIALOG_ITEM_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "res",
+  "layout",
+  "dialog_ace_editor_font_item.xml",
+);
 const ACE_LSP_PREFERENCES_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -434,6 +473,9 @@ const tooltip = read(TOOLTIP_PATH);
 const signatureHelp = read(SIGNATURE_HELP_PATH);
 const aceBridgeKt = read(ACE_BRIDGE_KT_PATH);
 const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
+const aceFontManager = read(ACE_FONT_MANAGER_PATH);
+const aceFontDialog = read(ACE_FONT_DIALOG_PATH);
+const aceFontDialogItem = read(ACE_FONT_DIALOG_ITEM_PATH);
 const aceLspPreferences = read(ACE_LSP_PREFERENCES_PATH);
 const aceLspServerManager = read(ACE_LSP_SERVER_MANAGER_PATH);
 const aceScriptEditorEngine = read(ACE_SCRIPT_EDITOR_ENGINE_PATH);
@@ -486,7 +528,11 @@ assertMatch(css, /#editor\s*\{[\s\S]*visibility:\s*hidden/, "hidden editor befor
 assertMatch(css, /body\.ace-ready #editor\s*\{[\s\S]*visibility:\s*visible/, "visible editor after first paint");
 assertMatch(css, /html\s*\{[\s\S]*background:\s*#f7f8fa/, "light first-paint background");
 assertMatch(css, /html\.ace-theme-dark,\s*body\.ace-theme-dark,\s*body\.ace-theme-dark #editor\s*\{[\s\S]*background:\s*#1e1e1e/, "dark first-paint background");
-assertIncludes(css, '--autojs6-editor-font-family: "Iosevka", "JetBrains Mono", "Source Code Pro", monospace;', "stable ACE font stack variable");
+assertIncludes(css, '--autojs6-editor-font-family: "Iosevka", monospace;', "stable bundled ACE font stack variable");
+assertIncludes(css, 'src: url("../fonts/iosevka/Iosevka-Regular.woff2") format("woff2");', "bundled Iosevka font source");
+if ((css.match(/@font-face\s*\{/g) || []).length !== 1) {
+  throw new Error("Only the bundled Iosevka font may have a static ACE @font-face declaration");
+}
 assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*font-family:\s*var\(--autojs6-editor-font-family\)/, "stable ACE font stack usage");
 assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*-webkit-user-select:\s*text/, "ACE text selection enabled");
 assertMatch(css, /\.ace_gutter-cell\.ace_breakpoint\s*\{[\s\S]*radial-gradient/, "breakpoint gutter marker");
@@ -517,6 +563,33 @@ if (/^\.ace_mobile-menu\s*\{[^}]*display:\s*none/m.test(css)) {
 }
 
 assertIncludes(bridge, "var firstPaintNotified = false;", "first-paint idempotency flag");
+assertIncludes(bridge, 'var INSTALLED_FONT_URL_PREFIX = "file:///android_asset/editor/ace-builds-1.4.12/autojs6-fonts/";', "installed font virtual URL boundary");
+assertIncludes(bridge, "if (!/^[a-f0-9]{64}$/.test(normalized.sha256))", "installed font requires a SHA-256 identity");
+assertIncludes(bridge, "if (normalized.url !== expectedUrl)", "installed font URL must match id and SHA-256");
+assertIncludes(bridge, "var FONT_LOAD_TIMEOUT_MS = 10000;", "installed FontFace load timeout");
+assertIncludes(bridge, "Promise.resolve(document.fonts.ready)", "font metrics refresh after bundled font readiness");
+assertIncludes(bridge, 'reject(new Error("Timed out while loading installed font"))', "installed FontFace timeout rejection");
+assertIncludes(bridge, "!pendingFontDescriptorLoad;", "first paint waits for the selected installed font");
+assertIncludes(bridge, "fallbackWhilePendingFontLoadsForFirstPaint();", "first-paint deadline falls back without cancelling a pending font load");
+assertIncludes(bridge, "hasInitialFontDescriptor ? DEFAULT_FONT_FAMILY", "invalid initial descriptor falls back to bundled Iosevka");
+assertIncludes(bridge, "if (requestSerial !== fontDescriptorRequestSerial)", "stale installed font request guard");
+assertIncludes(bridge, "wrapped.autojs6InvalidateInstalledFontCache = true;", "only a definitive FontFace rejection invalidates the installed cache");
+assertIncludes(bridge, "invalidateInstalledCache: !!(", "font load errors carry an explicit cache invalidation recommendation");
+assertIncludes(bridge, "sha256: descriptor && descriptor.sha256", "font load errors identify the exact rejected digest");
+assertIncludes(bridge, "setFontDescriptor: setFontDescriptor", "dynamic font descriptor public API");
+assertIncludes(bridge, 'applyFontFamilyAndRefresh(BUNDLED_FONT_FAMILY, "font_load_fallback")', "dynamic font load bundled fallback");
+assertIncludes(aceCodeEditor, 'payload.optBoolean("invalidateInstalledCache", false)', "native cache deletion requires an explicit JS invalidation signal");
+assertIncludes(aceCodeEditor, "fontManager.invalidateInstalled(fontId, sha256)", "native cache invalidation is digest-bound");
+assertIncludes(aceFontManager, "fun observeCatalogChanges(", "accepted font catalog observer API");
+assertIncludes(aceCodeEditor, "fontManager.observeCatalogChanges", "active editor catalog revocation observer");
+assertIncludes(aceFontDialog, ".options(", "font dialog title overflow menu");
+assertIncludes(aceFontDialog, "R.string.text_download_all", "font dialog download-all menu item");
+assertIncludes(aceFontDialog, "selectOnSuccess = false", "bulk font downloads never change selection");
+assertIncludes(aceFontDialog, "notifyOnSuccess = false", "background and bulk downloads suppress per-font toast storms");
+assertIncludes(aceFontDialog, "FontInstallationStatus.UPDATE_AVAILABLE", "download all includes available font updates");
+assertIncludes(aceFontDialog, "bulk.pendingIds.remove(fontId)", "bulk font completion is counted exactly once");
+assertIncludes(aceFontDialogItem, 'android:src="@drawable/ic_download_thicker"', "plugin-center download icon reuse");
+assertIncludes(aceFontDialogItem, 'android:contentDescription="@string/text_download"', "font download icon accessibility label");
 assertIncludes(bridge, "function callBridgeBoolean(name, defaultValue)", "bridge boolean option helper");
 assertIncludes(bridge, "var STATE_NOTIFY_THROTTLE_MS = 100;", "state event throttle");
 assertIncludes(bridge, "var TEXT_NOTIFY_THROTTLE_MS = 100;", "text event throttle");

@@ -586,6 +586,20 @@
     <string name="text_ace_editor_fallback_native" formatted="true">Ace editor failed (%1$s); switched to JsDroidEditor. Copy Ace diagnostics from the More menu for details</string>
     <string name="text_ace_editor_font">Editor font</string>
     <string name="text_ace_editor_font_changed" formatted="true">Editor font switched to %s</string>
+    <string name="text_ace_editor_font_built_in">Built in</string>
+    <string name="text_ace_editor_font_delete_confirmation" formatted="true">Delete the downloaded font %1$s?</string>
+    <string name="text_ace_editor_font_download_all_completed" formatted="true">Font downloads completed: %1$d succeeded</string>
+    <string name="text_ace_editor_font_download_all_confirmation" formatted="true">Available fonts to download: %1$d (%2$s). Download them now? Updates are included.</string>
+    <string name="text_ace_editor_font_download_all_empty">All available fonts are already installed or downloading</string>
+    <string name="text_ace_editor_font_download_all_result" formatted="true">Font downloads finished: %1$d succeeded, %2$d failed or cancelled</string>
+    <string name="text_ace_editor_font_download_all_running">Download all is already in progress</string>
+    <string name="text_ace_editor_font_download_confirmation" formatted="true">Download %1$s (%2$s)?</string>
+    <string name="text_ace_editor_font_download_failed" formatted="true">Font download failed: %1$s</string>
+    <string name="text_ace_editor_font_download_to_use">Download to use this font</string>
+    <string name="text_ace_editor_font_integrity_failed">The downloaded font failed integrity verification</string>
+    <string name="text_ace_editor_font_license">License</string>
+    <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
+    <string name="text_download_all">Download all</string>
     <string name="text_ace_font_ligatures_enabled">Font ligatures</string>
     <string name="text_ace_font_styles_enabled">Font styles</string>
     <string name="text_ace_get_text">Get text</string>

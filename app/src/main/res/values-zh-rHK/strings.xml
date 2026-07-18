@@ -887,6 +887,7 @@
     <string name="text_documentation_source">文檔源</string>
     <string name="text_done">完成</string>
     <string name="text_download">下載</string>
+    <string name="text_download_all">下載全部</string>
     <string name="text_download_and_install_autojs6_including_above_abi">下載安裝包含上述 ABI 架構的 AutoJs6 版本 (文件名包含 \"%s\" 字樣)</string>
     <string name="text_download_and_install_autojs6_including_all_abis">下載安裝包含全部 ABI 架構的 AutoJs6 版本 (文件名包含 \"universal\" 字樣)</string>
     <string name="text_download_cancelled">下載已取消</string>
