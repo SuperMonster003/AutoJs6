@@ -42,8 +42,8 @@ production Inspector are intentional boundaries rather than unfinished work.
   runtime-module scan for the strictly proven trivial module-free path, and added
   non-additive phase distributions for the client, service, native runtime,
   engine request preparation, and host preparation boundaries.
-- [ ] R4 must remove project-wide encrypted-module scanning from the normal
-  execution path for arbitrary Node.js source before Core completion.
+- [x] R4 removes project-wide encrypted-module scanning from the normal
+  execution path through request-scoped, on-demand module resolution.
 - [ ] Re-run the final aggregate gates before declaring Core completion. The
   blocker registry is closed, but some narrative status documents still
   describe older blocked states.
@@ -252,34 +252,40 @@ to every warm request. The scan preserves compatibility with encrypted modules
 whose paths may be computed at runtime, but a source-shape whitelist and a
 project-wide walk cannot remain the normal execution model.
 
-- [ ] Make module preparation depend on actual module resolution and encryption
+R4 implementation and primary-device acceptance are complete. The normal path
+now declares an on-demand source provider, keeps exact static preloading as an
+optional optimization, and reports the legacy directory scan as skipped. The
+native script path also omits unrequested probe placeholders before payload
+construction so the provider diagnostics do not consume the warm-start budget.
+
+- [x] Make module preparation depend on actual module resolution and encryption
   requirements rather than whether the entry source matches a small list of
   accepted script shapes. Ordinary business logic must never trigger a
   project-wide walk merely because it is non-trivial.
-- [ ] For statically resolvable CommonJS and ESM graphs, resolve only the actual
+- [x] For statically resolvable CommonJS and ESM graphs, resolve only the actual
   dependency closure. Probe and decrypt only the resolved candidate files;
   unrelated JavaScript files in the working directory must not be enumerated.
-- [ ] Add a request-scoped, on-demand encrypted module source provider. After
+- [x] Add a request-scoped, on-demand encrypted module source provider. After
   the runtime resolves a dynamic `require()` or `import()` candidate, the host
   must canonicalize and authorize that exact path, reject escapes and symlink
   drift, probe its encrypted header, and return either decrypted source or an
   explicit not-encrypted/not-found result.
-- [ ] Define the provider contract so embedded and external-plugin transports
+- [x] Define the provider contract so embedded and external-plugin transports
   share the same path, size, count, cancellation, timeout, and error semantics;
   R5 may change connection lifecycle without restoring directory scanning.
-- [ ] Keep plaintext modules on the runtime's scoped filesystem path and keep
+- [x] Keep plaintext modules on the runtime's scoped filesystem path and keep
   static preloading only as an optional measured optimization, not a
   correctness requirement for arbitrary scripts.
-- [ ] Remove the bounded full-directory scan from the default request critical
+- [x] Remove the bounded full-directory scan from the default request critical
   path. If a legacy encrypted-project fallback remains temporarily necessary,
   require an explicit compatibility signal and expose its use in diagnostics;
   never infer it merely from arbitrary executable source.
-- [ ] Preserve source-size and aggregate budgets, sandbox containment, root and
+- [x] Preserve source-size and aggregate budgets, sandbox containment, root and
   file identity checks, symlink-escape denial, error identity, and fresh
   per-execution module state for both preloaded and on-demand sources.
-- [ ] Export module-provider request count, resolved/decrypted source count,
+- [x] Export module-provider request count, resolved/decrypted source count,
   bytes, elapsed time, denial reason, and whether a legacy directory scan ran.
-- [ ] Add a corpus covering module-free business logic, expressions and
+- [x] Add a corpus covering module-free business logic, expressions and
   multiple statements, static CommonJS, ESM, dynamic `require()`/`import()`,
   computed loaders, plain modules, encrypted modules, missing modules, package
   resolution, cancellation, and provider failure.
@@ -297,6 +303,25 @@ R4 acceptance criteria on the primary Sony device:
 - No source-pattern allowlist is required for acceptable performance: at
   minimum `const`/`let`, expressions, functions, timers, multiple console
   calls, and non-loading async scripts pass the same zero-scan gate.
+
+The final Sony XQ-AT72 run used one primer and 30 qualified runtime-warm
+samples for each paired scenario. All 186 executions succeeded, all scan
+counters remained zero, and the same primary process slot and runtime
+generation advanced execution sequence 1 through 186.
+
+| Fixture | Entry | Preparation p50 / p95 | Warm wall p50 / p95 / max |
+| --- | --- | ---: | ---: |
+| Baseline | Module-free | 3 / 6 ms | 325 / 371 / 373 ms |
+| 4000 unrelated files | Module-free | 3 / 5 ms | 320 / 340 / 345 ms |
+| Baseline | Static CommonJS | 6 / 8 ms | 310 / 333 / 343 ms |
+| 4000 unrelated files | Static CommonJS | 5 / 7 ms | 305 / 322 / 329 ms |
+| Baseline | Static ESM | 4 / 5 ms | 338 / 362 / 369 ms |
+| 4000 unrelated files | Static ESM | 3 / 4 ms | 324 / 341 / 349 ms |
+
+The paired preparation-p95 delta was 1 ms for every entry type. The full
+commands, immutable build identities, report hashes, correctness corpus, and
+reviewed acceptance checklist are maintained in
+`R4_ACCEPTANCE_SAMPLING.md`.
 
 ## R5 - Align The External Runtime Plugin Backend
 
