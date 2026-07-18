@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.os.SystemClock
 import android.util.Log
 import org.autojs.autojs6.BuildConfig
+import org.json.JSONObject
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
@@ -35,6 +36,93 @@ object NodeEmbeddedProcessSessionManager {
 
     const val DEFAULT_IDLE_TTL_MS = 30_000L
     const val PREWARM_IDLE_TTL_MS = 10_000L
+
+    internal const val CLIENT_PHASE_TIMING_SCHEMA = "autojs6-node-client-service-phase-timing-v2"
+    internal const val CLIENT_PHASE_TIMING_SCHEMA_KEY = "embedded_script.client_phase_timing.schema"
+    internal const val CLIENT_PHASE_TIMING_JSON_KEY = "embedded_script.client_phase_timing.json"
+    internal const val PROCESS_RUNTIME_INITIALIZED_DURING_ACQUIRE_KEY =
+        "embedded_script.process_session.runtime_initialized_during_acquire"
+    internal const val PROCESS_RUNTIME_INITIALIZE_TIMING_KEY = "timing.process_runtime_initialize.ms"
+    internal const val PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY = "process_runtime.library_load_ms"
+    internal val PROCESS_RUNTIME_INITIALIZATION_PHASE_KEYS = listOf(
+        PROCESS_RUNTIME_INITIALIZE_TIMING_KEY,
+        PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY,
+        "timing.initialize.ms",
+        "initialize.status",
+        "timing.platform_create.ms",
+        "platform.create.status",
+        "timing.v8_initialize_platform.ms",
+        "v8.initialize_platform.status",
+        "timing.v8_initialize.ms",
+        "v8.initialize.status",
+    )
+
+    internal object PhaseTiming {
+        const val SESSION_DISCOVER = "sessionDiscover"
+        const val SESSION_DECLARED = "sessionDeclared"
+        const val SESSION_BIND = "sessionBind"
+        const val SESSION_PROCESS_READY = "sessionProcessReady"
+        const val SESSION_RUNTIME_READY = "sessionRuntimeReady"
+        const val SESSION_ACQUIRE = "sessionAcquire"
+        const val CLIENT_ATTEMPT_TOTAL = "clientAttemptTotal"
+        const val REQUEST_SPOOL = "requestSpool"
+        const val QUEUE = "queue"
+        const val SERVICE = "service"
+        const val NATIVE = "native"
+        const val RESULT_PAYLOAD_ENCODE = "resultPayloadEncode"
+        const val RESULT_PAYLOAD_DECODE = "resultPayloadDecode"
+        const val CALLBACK_TO_RETURN = "callbackToReturn"
+        const val CLEANUP = "cleanup"
+
+        /** End-to-end totals overlap their child phases and must never be summed with them. */
+        val totalNames = listOf(
+            CLIENT_ATTEMPT_TOTAL,
+            SESSION_ACQUIRE,
+            CALLBACK_TO_RETURN,
+        )
+
+        /**
+         * These values aggregate work performed on both sides of the Binder boundary. They are
+         * useful distributions, but they are not contiguous or mutually exclusive wall-clock
+         * segments.
+         */
+        val boundaryAggregateNames = listOf(
+            REQUEST_SPOOL,
+            QUEUE,
+            CLEANUP,
+        )
+
+        /** Contiguous local segments, excluding the overlapping totals and boundary aggregates. */
+        val segmentNames = listOf(
+            SESSION_DISCOVER,
+            SESSION_DECLARED,
+            SESSION_BIND,
+            SESSION_PROCESS_READY,
+            SESSION_RUNTIME_READY,
+            SERVICE,
+            NATIVE,
+            RESULT_PAYLOAD_ENCODE,
+            RESULT_PAYLOAD_DECODE,
+        )
+
+        val orderedNames = listOf(
+            SESSION_DISCOVER,
+            SESSION_DECLARED,
+            SESSION_BIND,
+            SESSION_PROCESS_READY,
+            SESSION_RUNTIME_READY,
+            SESSION_ACQUIRE,
+            CLIENT_ATTEMPT_TOTAL,
+            REQUEST_SPOOL,
+            QUEUE,
+            SERVICE,
+            NATIVE,
+            RESULT_PAYLOAD_ENCODE,
+            RESULT_PAYLOAD_DECODE,
+            CALLBACK_TO_RETURN,
+            CLEANUP,
+        )
+    }
 
     private const val TAG = "NodeEmbeddedProcessSession"
     private const val BIND_TIMEOUT_MS = 15_000L
@@ -175,6 +263,72 @@ object NodeEmbeddedProcessSessionManager {
     fun isEnabled(): Boolean = BuildConfig.NODEJS_EMBEDDED_PERSISTENT_RUNTIME_ENABLED &&
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
+    /**
+     * Android's trim levels are split into foreground and background ranges rather than one
+     * monotonically increasing pressure scale. In particular, UI_HIDDEN (20) is greater than
+     * RUNNING_LOW (10), but only reports a lifecycle transition. Treating it as pressure retires
+     * the embedded process every time the short-lived file launcher Activity closes.
+     */
+    @Suppress("DEPRECATION")
+    internal fun isMemoryPressureTrimLevel(level: Int): Boolean =
+        level in ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW..ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL ||
+                level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
+
+    internal fun elapsedPhaseMs(startedAtNanos: Long): Long =
+        TimeUnit.NANOSECONDS.toMillis(SystemClock.elapsedRealtimeNanos() - startedAtNanos)
+            .coerceAtLeast(0L)
+
+    internal fun clientPhaseTimings(nativeValues: Map<String, String>): Map<String, Long> {
+        val encoded = nativeValues[CLIENT_PHASE_TIMING_JSON_KEY]?.takeIf(String::isNotBlank)
+            ?: return emptyMap()
+        return runCatching {
+            val json = JSONObject(encoded)
+            linkedMapOf<String, Long>().apply {
+                json.keys().forEach { name ->
+                    val value = when (val raw = json.opt(name)) {
+                        is Number -> raw.toLong()
+                        is String -> raw.toLongOrNull()
+                        else -> null
+                    }
+                    if (value != null && value >= 0L) {
+                        put(name, value)
+                    }
+                }
+            }
+        }.getOrDefault(emptyMap())
+    }
+
+    internal fun mergeClientPhaseTimings(
+        nativeValues: Map<String, String>,
+        additions: Map<String, Long>,
+    ): Map<String, String> {
+        val merged = linkedMapOf<String, Long>().apply {
+            putAll(clientPhaseTimings(nativeValues))
+            additions.forEach { (name, durationMs) ->
+                if (durationMs >= 0L) {
+                    val existing = get(name) ?: 0L
+                    put(name, if (Long.MAX_VALUE - existing < durationMs) Long.MAX_VALUE else existing + durationMs)
+                }
+            }
+        }
+        if (merged.isEmpty()) {
+            return nativeValues
+        }
+        val compactJson = JSONObject().apply {
+            PhaseTiming.orderedNames.forEach { name -> merged[name]?.let { put(name, it) } }
+            merged.forEach { (name, durationMs) ->
+                if (name !in PhaseTiming.orderedNames) {
+                    put(name, durationMs)
+                }
+            }
+        }.toString()
+        return linkedMapOf<String, String>().apply {
+            putAll(nativeValues)
+            put(CLIENT_PHASE_TIMING_SCHEMA_KEY, CLIENT_PHASE_TIMING_SCHEMA)
+            put(CLIENT_PHASE_TIMING_JSON_KEY, compactJson)
+        }
+    }
+
     fun isClosing(): Boolean = closing
 
     /**
@@ -220,6 +374,7 @@ object NodeEmbeddedProcessSessionManager {
         slot: NodeEmbeddedProcessPoolPolicy.ProcessSlot,
         timeoutMs: Long = BIND_TIMEOUT_MS,
     ): AcquireResult {
+        val acquireStartedAtNanos = SystemClock.elapsedRealtimeNanos()
         if (!isEnabled()) {
             return AcquireResult(
                 lease = null,
@@ -227,10 +382,33 @@ object NodeEmbeddedProcessSessionManager {
                 nativeValues = disabledNativeValues(),
             )
         }
+        val phaseTimings = linkedMapOf<String, Long>()
+        val discoverStartedAtNanos = SystemClock.elapsedRealtimeNanos()
         val contextRef = context.applicationContext
-        if (!isServiceDeclared(contextRef, slot.componentName(contextRef))) {
+        val serviceComponent = slot.componentName(contextRef)
+        phaseTimings[PhaseTiming.SESSION_DISCOVER] = elapsedPhaseMs(discoverStartedAtNanos)
+        val declaredStartedAtNanos = SystemClock.elapsedRealtimeNanos()
+        val serviceDeclared = isServiceDeclared(contextRef, serviceComponent)
+        phaseTimings[PhaseTiming.SESSION_DECLARED] = elapsedPhaseMs(declaredStartedAtNanos)
+        phaseTimings[PhaseTiming.SESSION_BIND] = 0L
+        phaseTimings[PhaseTiming.SESSION_PROCESS_READY] = 0L
+        phaseTimings[PhaseTiming.SESSION_RUNTIME_READY] = 0L
+        fun acquireFailure(
+            errorMessage: String,
+            nativeValues: Map<String, String>,
+        ): AcquireResult {
+            val completedTimings = linkedMapOf<String, Long>().apply {
+                putAll(phaseTimings)
+                put(PhaseTiming.SESSION_ACQUIRE, elapsedPhaseMs(acquireStartedAtNanos))
+            }
             return AcquireResult(
                 lease = null,
+                errorMessage = errorMessage,
+                nativeValues = mergeClientPhaseTimings(nativeValues, completedTimings),
+            )
+        }
+        if (!serviceDeclared) {
+            return acquireFailure(
                 errorMessage = "Embedded Node process slot ${slot.id} is not declared in this APK.",
                 nativeValues = mapOf(
                     "embedded_script.process_session.enabled" to "true",
@@ -243,8 +421,7 @@ object NodeEmbeddedProcessSessionManager {
         val session: SlotSession
         synchronized(managerLifecycleLock) {
             if (closing) {
-                return AcquireResult(
-                    lease = null,
+                return acquireFailure(
                     errorMessage = "Embedded Node process session manager is closing.",
                     nativeValues = closingNativeValues(slot),
                 )
@@ -259,8 +436,7 @@ object NodeEmbeddedProcessSessionManager {
         var bindingIdToBind = -1L
         var preBindQuarantineWork: RetirementWork? = null
         if (!resetQuarantineAfterConfirmedExit(contextRef, session)) {
-            return AcquireResult(
-                lease = null,
+            return acquireFailure(
                 errorMessage = "Embedded Node process slot ${slot.id} is quarantined: ${sessionSnapshot(session, "quarantined")["embedded_script.process_session.last_failure"].orEmpty()}",
                 nativeValues = sessionSnapshot(session, "quarantined"),
             )
@@ -268,16 +444,14 @@ object NodeEmbeddedProcessSessionManager {
         synchronized(session.lock) {
             while (session.state == State.DRAINING) {
                 if (!managerOpenAt(acquisitionManagerEpoch)) {
-                    return AcquireResult(
-                        lease = null,
+                    return acquireFailure(
                         errorMessage = "Embedded Node process session manager began closing while slot ${slot.id} retired.",
                         nativeValues = sessionNativeValuesLocked(session, "closing"),
                     )
                 }
                 val remaining = deadline - SystemClock.elapsedRealtime()
                 if (remaining <= 0L) {
-                    return AcquireResult(
-                        lease = null,
+                    return acquireFailure(
                         errorMessage = "Timed out while the previous embedded Node process session for slot ${slot.id} retired.",
                         nativeValues = sessionNativeValuesLocked(session, "retire_timeout"),
                     )
@@ -286,8 +460,7 @@ object NodeEmbeddedProcessSessionManager {
                     session.lock.wait(remaining.coerceAtMost(100L))
                 } catch (interrupted: InterruptedException) {
                     Thread.currentThread().interrupt()
-                    return AcquireResult(
-                        lease = null,
+                    return acquireFailure(
                         errorMessage = "Interrupted while the previous embedded Node process session retired.",
                         nativeValues = sessionNativeValuesLocked(session, "retire_interrupted"),
                     )
@@ -296,15 +469,13 @@ object NodeEmbeddedProcessSessionManager {
             session.idleFuture?.cancel(false)
             session.idleFuture = null
             if (!managerOpenAt(acquisitionManagerEpoch)) {
-                return AcquireResult(
-                    lease = null,
+                return acquireFailure(
                     errorMessage = "Embedded Node process session manager is closing.",
                     nativeValues = sessionNativeValuesLocked(session, "closing"),
                 )
             }
             if (session.state == State.QUARANTINED) {
-                return AcquireResult(
-                    lease = null,
+                return acquireFailure(
                     errorMessage = "Embedded Node process slot ${slot.id} remains quarantined: ${session.lastFailure}",
                     nativeValues = sessionNativeValuesLocked(session, "quarantined"),
                 )
@@ -337,8 +508,7 @@ object NodeEmbeddedProcessSessionManager {
         }
         preBindQuarantineWork?.let { work ->
             dispatchRetirementWork(contextRef, session, work)
-            return AcquireResult(
-                lease = null,
+            return acquireFailure(
                 errorMessage = "Embedded Node process session for slot ${slot.id} lost its Binder and was quarantined.",
                 nativeValues = sessionSnapshot(session, "binder_unavailable"),
             )
@@ -351,14 +521,14 @@ object NodeEmbeddedProcessSessionManager {
                         managerOpenAt(acquisitionManagerEpoch)
             }
             if (!bindStillClaimed) {
-                return AcquireResult(
-                    lease = null,
+                return acquireFailure(
                     errorMessage = "Embedded Node process binding for slot ${slot.id} was invalidated before it started.",
                     nativeValues = sessionSnapshot(session, if (closing) "closing" else "binding_invalidated"),
                 )
             }
+            val bindStartedAtNanos = SystemClock.elapsedRealtimeNanos()
             val bound = runCatching {
-                val bindIntent = Intent().setComponent(slot.componentName(contextRef))
+                val bindIntent = Intent().setComponent(serviceComponent)
                 contextRef.bindService(
                     bindIntent,
                     Context.BIND_AUTO_CREATE,
@@ -368,6 +538,7 @@ object NodeEmbeddedProcessSessionManager {
             }.onFailure { error ->
                 Log.w(TAG, "session.bind failed slot=${slot.id}", error)
             }.getOrDefault(false)
+            phaseTimings[PhaseTiming.SESSION_BIND] = elapsedPhaseMs(bindStartedAtNanos)
             val bindRemainsCurrent = synchronized(session.lock) {
                 session.epoch == bindingEpoch &&
                         session.bindingId == bindingIdToBind &&
@@ -375,8 +546,7 @@ object NodeEmbeddedProcessSessionManager {
             }
             if (bound && !bindRemainsCurrent) {
                 runCatching { contextRef.unbindService(connectionToBind!!) }
-                return AcquireResult(
-                    lease = null,
+                return acquireFailure(
                     errorMessage = "Embedded Node process binding for slot ${slot.id} was invalidated while bindService was in flight.",
                     nativeValues = sessionSnapshot(session, if (closing) "closing" else "binding_invalidated"),
                 )
@@ -395,6 +565,7 @@ object NodeEmbeddedProcessSessionManager {
         var unavailableEpoch = -1L
         var unavailableBindingId = -1L
         var bindingInterrupted = false
+        val processReadyStartedAtNanos = SystemClock.elapsedRealtimeNanos()
         synchronized(session.lock) {
             while (session.control == null && session.state == State.BINDING) {
                 if (!managerOpenAt(acquisitionManagerEpoch)) {
@@ -423,6 +594,7 @@ object NodeEmbeddedProcessSessionManager {
                 unavailableBindingId = session.bindingId
             }
         }
+        phaseTimings[PhaseTiming.SESSION_PROCESS_READY] = elapsedPhaseMs(processReadyStartedAtNanos)
         unavailableReason?.let { reason ->
             quarantine(
                 contextRef,
@@ -431,13 +603,13 @@ object NodeEmbeddedProcessSessionManager {
                 expectedBindingId = unavailableBindingId,
                 expectedEpoch = unavailableEpoch,
             )
-            return AcquireResult(
-                lease = null,
+            return acquireFailure(
                 errorMessage = "Unable to establish embedded Node process session for slot ${slot.id}: $reason.",
                 nativeValues = sessionSnapshot(session, "unavailable"),
             )
         }
 
+        val runtimeReadyStartedAtNanos = SystemClock.elapsedRealtimeNanos()
         val leaseId = leaseToken.incrementAndGet()
         val sessionEpoch: Long
         val bindingId: Long
@@ -449,16 +621,14 @@ object NodeEmbeddedProcessSessionManager {
         synchronized(session.lock) {
             while (session.state == State.BUSY && !runtimeHealthy(session.lastRuntimeValues)) {
                 if (!managerOpenAt(acquisitionManagerEpoch)) {
-                    return AcquireResult(
-                        lease = null,
+                    return acquireFailure(
                         errorMessage = "Embedded Node process session manager began closing during runtime initialization.",
                         nativeValues = sessionNativeValuesLocked(session, "closing"),
                     )
                 }
                 val remaining = deadline - SystemClock.elapsedRealtime()
                 if (remaining <= 0L) {
-                    return AcquireResult(
-                        lease = null,
+                    return acquireFailure(
                         errorMessage = "Timed out waiting for embedded Node process runtime initialization for slot ${slot.id}.",
                         nativeValues = sessionNativeValuesLocked(session, "runtime_initialization_wait_timeout"),
                     )
@@ -468,8 +638,7 @@ object NodeEmbeddedProcessSessionManager {
                     session.lock.wait(remaining.coerceAtMost(100L))
                 } catch (interrupted: InterruptedException) {
                     Thread.currentThread().interrupt()
-                    return AcquireResult(
-                        lease = null,
+                    return acquireFailure(
                         errorMessage = "Interrupted while waiting for embedded Node process runtime initialization for slot ${slot.id}.",
                         nativeValues = sessionNativeValuesLocked(session, "runtime_initialization_wait_interrupted"),
                     )
@@ -482,8 +651,7 @@ object NodeEmbeddedProcessSessionManager {
                 currentBinder?.isBinderAlive != true ||
                 currentControl == null
             ) {
-                return AcquireResult(
-                    lease = null,
+                return acquireFailure(
                     errorMessage = "Embedded Node process session for slot ${slot.id} was invalidated before runtime initialization.",
                     nativeValues = sessionNativeValuesLocked(session, if (closing) "closing" else "invalidated"),
                 )
@@ -514,8 +682,7 @@ object NodeEmbeddedProcessSessionManager {
                     "runtime_ready_executor_rejected",
                     emptyMap(),
                 )
-                return AcquireResult(
-                    lease = null,
+                return acquireFailure(
                     errorMessage = "Embedded Node process runtime-ready executor rejected slot ${slot.id}.",
                     nativeValues = sessionSnapshot(session, "runtime_ready_executor_rejected"),
                 )
@@ -545,8 +712,7 @@ object NodeEmbeddedProcessSessionManager {
                     failure,
                     emptyMap(),
                 )
-                return AcquireResult(
-                    lease = null,
+                return acquireFailure(
                     errorMessage = "Embedded Node process runtime initialization failed: ${error.message ?: error.javaClass.name}",
                     nativeValues = sessionSnapshot(session, failure),
                 )
@@ -564,8 +730,7 @@ object NodeEmbeddedProcessSessionManager {
                 "runtime_not_healthy",
                 runtimeValues,
             )
-            return AcquireResult(
-                lease = null,
+            return acquireFailure(
                 errorMessage = "Embedded Node process runtime for slot ${slot.id} did not become healthy.",
                 nativeValues = runtimeValues + sessionSnapshot(session, "runtime_not_healthy"),
             )
@@ -580,12 +745,12 @@ object NodeEmbeddedProcessSessionManager {
                 "runtime_ready_binder_died",
                 runtimeValues,
             )
-            return AcquireResult(
-                lease = null,
+            return acquireFailure(
                 errorMessage = "Embedded Node process Binder died after runtime initialization for slot ${slot.id}.",
                 nativeValues = sessionSnapshot(session, "runtime_ready_binder_died"),
             )
         }
+        phaseTimings[PhaseTiming.SESSION_RUNTIME_READY] = elapsedPhaseMs(runtimeReadyStartedAtNanos)
         synchronized(session.lock) {
             if (!managerOpenAt(acquisitionManagerEpoch) ||
                 session.epoch != sessionEpoch ||
@@ -601,8 +766,7 @@ object NodeEmbeddedProcessSessionManager {
                 if (session.state == State.BUSY && session.activeLeaseIds.isEmpty() && session.control != null) {
                     session.state = State.READY
                 }
-                return AcquireResult(
-                    lease = null,
+                return acquireFailure(
                     errorMessage = "Embedded Node process session for slot ${slot.id} changed while the runtime-ready RPC was in flight.",
                     nativeValues = sessionNativeValuesLocked(session, if (closing) "closing" else "runtime_ready_stale"),
                 )
@@ -610,16 +774,34 @@ object NodeEmbeddedProcessSessionManager {
             session.lastRuntimeValues = runtimeValues
             session.lock.notifyAll()
             scheduleHeartbeatLocked(contextRef, session)
+            val acquiredAtElapsedMs = SystemClock.elapsedRealtime()
+            phaseTimings[PhaseTiming.SESSION_ACQUIRE] = elapsedPhaseMs(acquireStartedAtNanos)
+            val runtimeInitializedDuringAcquire = runtimeReadyRequired &&
+                    runtimeValues[PROCESS_RUNTIME_INITIALIZE_TIMING_KEY]
+                        ?.toLongOrNull()
+                        ?.let { it >= 0L } == true
+            val acquireRuntimeValues = linkedMapOf<String, String>().apply {
+                putAll(runtimeValues)
+                put(PROCESS_RUNTIME_INITIALIZED_DURING_ACQUIRE_KEY, runtimeInitializedDuringAcquire.toString())
+                if (!runtimeInitializedDuringAcquire) {
+                    remove(PROCESS_RUNTIME_INITIALIZE_TIMING_KEY)
+                    remove(PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY)
+                }
+            }
+            val leaseNativeValues = mergeClientPhaseTimings(
+                acquireRuntimeValues + sessionNativeValuesLocked(session, "ready"),
+                phaseTimings,
+            )
             return AcquireResult(
                 lease = SessionLease(
                     slot = slot,
                     generation = generation,
-                    acquiredAtElapsedMs = SystemClock.elapsedRealtime(),
+                    acquiredAtElapsedMs = acquiredAtElapsedMs,
                     bindingId = bindingId,
                     sessionEpoch = sessionEpoch,
                     managerEpoch = acquisitionManagerEpoch,
                     leaseId = leaseId,
-                    runtimeValues = runtimeValues + sessionNativeValuesLocked(session, "ready"),
+                    runtimeValues = leaseNativeValues,
                 ),
             )
         }
@@ -749,7 +931,7 @@ object NodeEmbeddedProcessSessionManager {
     }
 
     fun onTrimMemory(context: Context, level: Int) {
-        if (!isEnabled() || level < ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+        if (!isEnabled() || !isMemoryPressureTrimLevel(level)) {
             return
         }
         val contextRef = context.applicationContext

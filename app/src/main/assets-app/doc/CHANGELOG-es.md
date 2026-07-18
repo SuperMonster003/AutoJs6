@@ -38,6 +38,8 @@
 * `Nuevo` La configuración de aplicaciones empaquetadas permite mostrar u ocultar los accesos directos del iniciador "Registro" y "Configuración" _[`issue #550`](http://issues.autojs6.com/550)_
 * `Nuevo` El empaquetado de aplicaciones admite compilaciones remotas mediante plugins APK Builder Template
 * `Nuevo` Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins
+* `Corrección` Los scripts simples de Node.js se iniciaban lentamente en directorios de trabajo con muchos archivos porque el escaneo innecesario de módulos leía por completo los archivos candidatos
+* `Corrección` El proceso persistente de Node.js se retiraba incorrectamente cuando se ocultaba la interfaz temporal del iniciador de scripts
 * `Corrección` La devolución de resultados de scripts Node.js se retrasaba por la espera de estabilización del proceso de ejecución
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java
 * `Corrección` app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_
@@ -68,6 +70,8 @@
 * `Mejora` Aplazada la inicialización de componentes no críticos para mejorar el rendimiento de inicio de la aplicación
 * `Mejora` Almacenados en caché los resultados de compilación de los recursos Rhino integrados y los metadatos de las funciones de extensión del entorno de ejecución para mejorar el rendimiento de inicialización de scripts
 * `Mejora` Reutilizados el proceso persistente de Node.js y el entorno de ejecución en el ámbito del proceso para mejorar el rendimiento del arranque en caliente de scripts
+* `Mejora` Incorporados tiempos por fase para el inicio de Node.js e informes fiables de rendimiento en frío y con el runtime caliente
+* `Mejora` Almacenada en caché la resolución de bibliotecas nativas integradas de Node.js para evitar el descubrimiento repetido de plugins
 * `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
 * `Mejora` Mejoradas las interacciones del editor de código para temas/fuentes/barras de herramientas/modo de solo lectura/plegado/menús de selección y más

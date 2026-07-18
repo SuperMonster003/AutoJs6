@@ -709,7 +709,9 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
         }
         validateEmbeddedScriptModuleSources(preparedRequest, processName, pid, startedAt)?.let { return it }
-        preparedRequest = withCompileCacheEnv(context, preparedRequest)
+        val compileCachePreparation = withCompileCacheEnv(context, preparedRequest)
+        preparedRequest = compileCachePreparation.request
+        val compileCacheNativeValues = compileCachePreparation.toNativeValues()
 
         val loadStartedAt = SystemClock.elapsedRealtime()
         val libcxxLoad = loadLibrary("c++_shared")
@@ -737,7 +739,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                 pid = pid,
                 startedAt = startedAt,
                 message = loadError,
-                nativeValues = mapOf("load.duration.ms" to loadDurationMs.toString()),
+                nativeValues = compileCacheNativeValues + ("load.duration.ms" to loadDurationMs.toString()),
             )
         }
 
@@ -809,11 +811,14 @@ object NativeNodeEmbeddedRuntimeBridge {
                 startedAt = startedAt,
                 message = "Embedded script native runner failed: ${throwable.message ?: throwable.javaClass.name}",
                 nativeError = throwable,
-                nativeValues = runtimeAdapterSelection.toNativeValues() + ("load.duration.ms" to loadDurationMs.toString()),
+                nativeValues = runtimeAdapterSelection.toNativeValues() +
+                        compileCacheNativeValues +
+                        ("load.duration.ms" to loadDurationMs.toString()),
             )
         }
         val nativeValues = parseNativePayload(nativePayload).toMutableMap()
         nativeValues.putAll(runtimeAdapterSelection.toNativeValues())
+        nativeValues.putAll(compileCacheNativeValues)
         nativeValues["load.duration.ms"] = loadDurationMs.toString()
         return parseEmbeddedScriptResult(
             request = preparedRequest,
@@ -1138,7 +1143,8 @@ object NativeNodeEmbeddedRuntimeBridge {
     private fun withCompileCacheEnv(
         context: Context,
         request: EmbeddedScriptRequest,
-    ): EmbeddedScriptRequest {
+    ): CompileCachePreparation {
+        val startedAt = SystemClock.elapsedRealtime()
         val env = LinkedHashMap<String, String>(request.env)
         val runtimeKey = compileCacheRuntimeKey(request)
         val projectKey = compileCacheProjectKey(request)
@@ -1148,13 +1154,27 @@ object NativeNodeEmbeddedRuntimeBridge {
         env[COMPILE_CACHE_ENV_PROJECT_KEY] = projectKey
         env[COMPILE_CACHE_ENV_KEY] = compileCacheContentKey(request, runtimeKey, projectKey)
         env[COMPILE_CACHE_ENV_LOADER] = compileCacheLoaderVersion()
+        var pruneResult = CompileCachePruneResult(status = "not_started", durationMs = null)
         val directory = runCatching {
             val root = compileCacheBaseDir(context)
             val cacheDir = File(File(root, runtimeKey), projectKey)
             if (!cacheDir.isDirectory && !cacheDir.mkdirs() && !cacheDir.isDirectory) {
                 error("Failed to create compile cache directory: ${cacheDir.absolutePath}")
             }
-            pruneCompileCacheDirectory(root)
+            val pruneStartedAt = SystemClock.elapsedRealtime()
+            try {
+                pruneCompileCacheDirectory(root)
+                pruneResult = CompileCachePruneResult(
+                    status = "executed",
+                    durationMs = SystemClock.elapsedRealtime() - pruneStartedAt,
+                )
+            } catch (error: Throwable) {
+                pruneResult = CompileCachePruneResult(
+                    status = "failed",
+                    durationMs = SystemClock.elapsedRealtime() - pruneStartedAt,
+                )
+                throw error
+            }
             cacheDir
         }.getOrElse { error ->
             env[COMPILE_CACHE_ENV_ENABLED] = "0"
@@ -1162,7 +1182,12 @@ object NativeNodeEmbeddedRuntimeBridge {
             null
         }
         env[COMPILE_CACHE_ENV_DIR] = directory?.absolutePath.orEmpty()
-        return request.copy(env = env)
+        return CompileCachePreparation(
+            request = request.copy(env = env),
+            prepareDurationMs = SystemClock.elapsedRealtime() - startedAt,
+            pruneResult = pruneResult,
+            enabled = directory != null,
+        )
     }
 
     private fun compileCacheRuntimeKey(request: EmbeddedScriptRequest): String = sha256Hex {
@@ -1285,6 +1310,25 @@ object NativeNodeEmbeddedRuntimeBridge {
         update(bytes)
         update(0.toByte())
     }
+
+    private data class CompileCachePreparation(
+        val request: EmbeddedScriptRequest,
+        val prepareDurationMs: Long,
+        val pruneResult: CompileCachePruneResult,
+        val enabled: Boolean,
+    ) {
+        fun toNativeValues(): Map<String, String> = linkedMapOf<String, String>().apply {
+            put("embedded_script.compile_cache.prepare_status", if (enabled) "ready" else "failed")
+            put("embedded_script.compile_cache.prune_status", pruneResult.status)
+            put("timing.compile_cache_prepare.ms", prepareDurationMs.toString())
+            pruneResult.durationMs?.let { put("timing.compile_cache_prune.ms", it.toString()) }
+        }
+    }
+
+    private data class CompileCachePruneResult(
+        val status: String,
+        val durationMs: Long?,
+    )
 
     fun embeddedScriptRequestPreparationFailure(
         request: EmbeddedScriptRequest,

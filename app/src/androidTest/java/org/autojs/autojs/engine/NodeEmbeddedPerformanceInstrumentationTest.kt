@@ -53,24 +53,24 @@ class NodeEmbeddedPerformanceInstrumentationTest {
             snapshots += processSnapshot("cycle${cycleIndex + 1}.afterCold.app", Process.myPid())
             snapshots += processSnapshot("cycle${cycleIndex + 1}.afterCold.service", cold.result.pid)
 
-            val warmRuns = mutableListOf<MeasuredRun>()
+            val runtimeWarmRuns = mutableListOf<MeasuredRun>()
             var previous = cold
             repeat(samplePlan.runtimeWarmSamplesPerCold) { warmIndex ->
-                val warm = runMeasured("runtime-warm-${cycleIndex + 1}-${warmIndex + 1}")
+                val runtimeWarm = runMeasured("runtime-warm-${cycleIndex + 1}-${warmIndex + 1}")
                 NodeEmbeddedTestHarness.assertSucceeded(
                     "runtime-warm performance run ${cycleIndex + 1}.${warmIndex + 1}",
-                    warm.result,
+                    runtimeWarm.result,
                 )
-                assertClientResultDeliveryIsNonBlocking(warm)
-                assertSameProcessPoolSlot(cold, warm)
-                assertRuntimeWarmReuse(cold, previous, warm)
-                warmRuns += warm
-                previous = warm
+                assertClientResultDeliveryIsNonBlocking(runtimeWarm)
+                assertSameProcessPoolSlot(cold, runtimeWarm)
+                assertRuntimeWarmReuse(cold, previous, runtimeWarm)
+                runtimeWarmRuns += runtimeWarm
+                previous = runtimeWarm
             }
-            val lastWarm = warmRuns.last()
-            snapshots += processSnapshot("cycle${cycleIndex + 1}.afterWarm.app", Process.myPid())
-            snapshots += processSnapshot("cycle${cycleIndex + 1}.afterWarm.service", lastWarm.result.pid)
-            cycles += PerformanceCycle(cycleIndex + 1, cold, warmRuns)
+            val lastRuntimeWarm = runtimeWarmRuns.last()
+            snapshots += processSnapshot("cycle${cycleIndex + 1}.afterRuntimeWarm.app", Process.myPid())
+            snapshots += processSnapshot("cycle${cycleIndex + 1}.afterRuntimeWarm.service", lastRuntimeWarm.result.pid)
+            cycles += PerformanceCycle(cycleIndex + 1, cold, runtimeWarmRuns)
         }
 
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
@@ -78,6 +78,7 @@ class NodeEmbeddedPerformanceInstrumentationTest {
 
         cycles.flatMap { it.runs }.forEach { run ->
             assertTrue("${run.label} did not print perf payload\n${run.result.stdout}", run.nodePayload != null)
+            assertPhaseTimings(run)
         }
 
         val report = buildReport(
@@ -109,6 +110,9 @@ class NodeEmbeddedPerformanceInstrumentationTest {
             wallMs = wallMs,
             result = result,
             nodePayload = parseNodePayload(result.stdout),
+            clientServicePhaseTimings = NodeEmbeddedProcessSessionManager.clientPhaseTimings(
+                result.nativeValues,
+            ),
         )
     }
 
@@ -120,19 +124,25 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         snapshots: List<ProcessSnapshot>,
     ): JSONObject {
         val coldRuns = cycles.map { it.cold }
-        val warmRuns = cycles.flatMap { it.runtimeWarm }
+        val runtimeWarmRuns = cycles.flatMap { it.runtimeWarm }
         val cold = coldRuns.first()
-        val warm = warmRuns.first()
+        val runtimeWarm = runtimeWarmRuns.first()
         val afterFirstScript = snapshots.first { it.label == "cycle1.afterCold.app" }
-        val coldLoadMs = cold.result.nativeValues["load.duration.ms"]?.toLongOrNull()
-        val warmLoadMs = warm.result.nativeValues["load.duration.ms"]?.toLongOrNull()
+        val coldLoadMs = actualRuntimeReadyTiming(
+            cold,
+            NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY,
+        )
+        val runtimeWarmLoadMs = actualRuntimeReadyTiming(
+            runtimeWarm,
+            NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY,
+        )
         val appRssDeltaAfterFirstScript = afterFirstScript.rssKb?.minusOrNull(beforeScript.rssKb)
         val appRssDeltaAfterDestroy = afterDestroy.rssKb?.minusOrNull(beforeScript.rssKb)
         val appThreadDeltaAfterDestroy = afterDestroy.threadCount?.minusOrNull(beforeScript.threadCount)
         val appFdDeltaAfterDestroy = afterDestroy.fdCount?.minusOrNull(beforeScript.fdCount)
 
         return JSONObject()
-            .put("schema", "autojs6-node-performance-v3")
+            .put("schema", "autojs6-node-performance-v4")
             .put("generatedAtEpochMs", System.currentTimeMillis())
             .put("packageName", context.packageName)
             .put("device", deviceJson())
@@ -144,19 +154,19 @@ class NodeEmbeddedPerformanceInstrumentationTest {
                     .put("serviceProcessStartTimeMs", cold.wallMs)
                     .put("serviceProcessStartTimeNote", "Measured as cold runScript wall time, including service start, bind, native load, script execution, and result return.")
                     .put("libnodeLoadMs", coldLoadMs ?: JSONObject.NULL)
-                    .put("libnodeLoadWarmMs", warmLoadMs ?: JSONObject.NULL)
-                    .put("libnodeLoadMeasurable", coldLoadMs != null || warmLoadMs != null)
+                    .put("libnodeLoadRuntimeWarmMs", runtimeWarmLoadMs ?: JSONObject.NULL)
+                    .put("libnodeLoadMeasurable", coldLoadMs != null || runtimeWarmLoadMs != null)
                     .put("firstScriptExecutionWallMs", cold.result.elapsedMs)
-                    .put("runtimeWarmScriptExecutionWallMs", warm.result.elapsedMs)
+                    .put("runtimeWarmScriptExecutionWallMs", runtimeWarm.result.elapsedMs)
                     .put("coldRunWallMs", cold.wallMs)
-                    .put("runtimeWarmRunWallMs", warm.wallMs)
-                    .put("warmRunWallMs", warm.wallMs)
+                    .put("runtimeWarmRunWallMs", runtimeWarm.wallMs)
                     .put("appRssDeltaAfterFirstScriptKb", appRssDeltaAfterFirstScript ?: JSONObject.NULL)
                     .put("appRssDeltaAfterDestroyKb", appRssDeltaAfterDestroy ?: JSONObject.NULL)
                     .put("appThreadDeltaAfterDestroy", appThreadDeltaAfterDestroy ?: JSONObject.NULL)
                     .put("appFdDeltaAfterDestroy", appFdDeltaAfterDestroy ?: JSONObject.NULL),
             )
-            .put("percentiles", percentileReport(coldRuns, warmRuns))
+            .put("percentiles", percentileReport(coldRuns, runtimeWarmRuns))
+            .put("phaseTimings", phaseTimingReport(coldRuns, runtimeWarmRuns))
             .put("snapshots", JSONArray(snapshots.map { it.toJson() }))
             .put("cycles", JSONArray(cycles.map { it.toJson() }))
             .put("runs", JSONArray(cycles.flatMap { it.runs }.map { it.toJson() }))
@@ -165,7 +175,7 @@ class NodeEmbeddedPerformanceInstrumentationTest {
                 JSONObject()
                     .put("enabled", instrumentationBoolean(ARG_FAIL_ON_THRESHOLD, false))
                     .put("maxColdWallMs", instrumentationLong(ARG_MAX_COLD_WALL_MS))
-                    .put("maxWarmWallMs", instrumentationLong(ARG_MAX_WARM_WALL_MS))
+                    .put("maxRuntimeWarmWallMs", runtimeWarmWallThreshold())
                     .put("maxColdP50Ms", instrumentationLong(ARG_MAX_COLD_P50_MS))
                     .put("maxRuntimeWarmP50Ms", instrumentationLong(ARG_MAX_RUNTIME_WARM_P50_MS))
                     .put("maxRuntimeWarmP95Ms", instrumentationLong(ARG_MAX_RUNTIME_WARM_P95_MS))
@@ -175,11 +185,292 @@ class NodeEmbeddedPerformanceInstrumentationTest {
             )
     }
 
-    private fun percentileReport(coldRuns: List<MeasuredRun>, warmRuns: List<MeasuredRun>): JSONObject =
+    private fun percentileReport(coldRuns: List<MeasuredRun>, runtimeWarmRuns: List<MeasuredRun>): JSONObject =
         JSONObject()
             .put("method", "nearest-rank")
             .put("cold", runDistributionJson(coldRuns))
-            .put("runtimeWarm", runDistributionJson(warmRuns))
+            .put("runtimeWarm", runDistributionJson(runtimeWarmRuns))
+
+    private fun phaseTimingReport(
+        coldRuns: List<MeasuredRun>,
+        runtimeWarmRuns: List<MeasuredRun>,
+    ): JSONObject = JSONObject()
+        .put("schema", "autojs6-node-performance-phase-distributions-v2")
+        .put("method", "nearest-rank")
+        .put("additive", false)
+        .put(
+            "interpretation",
+            "Totals, boundary aggregates, host segments and nested native metrics overlap. " +
+                "Never sum phase distributions to reconstruct wall time.",
+        )
+        .put(
+            "clientService",
+            JSONObject()
+                .put("schema", NodeEmbeddedProcessSessionManager.CLIENT_PHASE_TIMING_SCHEMA)
+                .put("transportSchemaKey", NodeEmbeddedProcessSessionManager.CLIENT_PHASE_TIMING_SCHEMA_KEY)
+                .put("transportJsonKey", NodeEmbeddedProcessSessionManager.CLIENT_PHASE_TIMING_JSON_KEY)
+                .put(
+                    "scope",
+                    "Client/session/service work measured from direct embedded-service request acquisition through callback return.",
+                )
+                .put("additive", false)
+                .put("totals", JSONArray(NodeEmbeddedProcessSessionManager.PhaseTiming.totalNames))
+                .put("segments", JSONArray(NodeEmbeddedProcessSessionManager.PhaseTiming.segmentNames))
+                .put(
+                    "boundaryAggregates",
+                    JSONArray(NodeEmbeddedProcessSessionManager.PhaseTiming.boundaryAggregateNames),
+                )
+                .put(
+                    "overlap",
+                    JSONObject()
+                        .put(
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.CLIENT_ATTEMPT_TOTAL,
+                            "End-to-end runScriptAttempt total containing session acquisition, request transport, service/native execution, callback handling and client cleanup.",
+                        )
+                        .put(
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.SESSION_ACQUIRE,
+                            JSONArray(
+                                listOf(
+                                    NodeEmbeddedProcessSessionManager.PhaseTiming.SESSION_DISCOVER,
+                                    NodeEmbeddedProcessSessionManager.PhaseTiming.SESSION_DECLARED,
+                                    NodeEmbeddedProcessSessionManager.PhaseTiming.SESSION_BIND,
+                                    NodeEmbeddedProcessSessionManager.PhaseTiming.SESSION_PROCESS_READY,
+                                    NodeEmbeddedProcessSessionManager.PhaseTiming.SESSION_RUNTIME_READY,
+                                ),
+                            ),
+                        )
+                        .put(
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.CALLBACK_TO_RETURN,
+                            JSONArray(
+                                listOf(
+                                    NodeEmbeddedProcessSessionManager.PhaseTiming.RESULT_PAYLOAD_DECODE,
+                                    NodeEmbeddedProcessSessionManager.PhaseTiming.CLEANUP,
+                                ),
+                            ),
+                        )
+                        .put(
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.NATIVE,
+                            "Host wait around runtime-executor work; nativeLifecycle metrics below are nested inside it.",
+                        ),
+                )
+                .put(
+                    "payloadTiming",
+                    JSONObject()
+                        .put(
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.RESULT_PAYLOAD_ENCODE,
+                            "Service-local Bundle field population, native-value filtering/truncation and String-array construction. Android parcel serialization and Binder transfer are excluded.",
+                        )
+                        .put(
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.RESULT_PAYLOAD_DECODE,
+                            "Client work from result-callback entry through Bundle field parsing and EmbeddedScriptResult construction. Binder transfer is excluded; lazy Bundle unparceling triggered in the callback may be included.",
+                        ),
+                )
+                .put("cold", clientServicePhaseModeReport(coldRuns))
+                .put("runtimeWarm", clientServicePhaseModeReport(runtimeWarmRuns)),
+        )
+        .put(
+            "nativeLifecycle",
+            JSONObject()
+                .put("schema", NATIVE_PHASE_TIMING_SCHEMA)
+                .put("transportSchemaKey", NATIVE_PHASE_TIMING_SCHEMA_KEY)
+                .put(
+                    "scope",
+                    "Nested native adapter lifecycle timings. Missing, skipped and not-applicable values are never synthesized as zero or included as samples.",
+                )
+                .put("additive", false)
+                .put(
+                    "nesting",
+                    JSONArray()
+                        .put(
+                            JSONObject()
+                                .put("parent", "timing.load_environment.ms")
+                                .put(
+                                    "children",
+                                    JSONArray(
+                                        listOf(
+                                            "timing.bootstrap.ms",
+                                            "timing.module_preload.ms",
+                                        ),
+                                    ),
+                                )
+                                .put(
+                                    "meaning",
+                                    "Measured bootstrap and eager module-preload work execute inside Node LoadEnvironment; these child values must not be added to LoadEnvironment.",
+                                ),
+                        )
+                        .put(
+                            JSONObject()
+                                .put("startsWithin", "timing.load_environment.ms")
+                                .put("interval", "timing.script_execution.ms")
+                                .put("mayOverlap", "timing.spin_event_loop.ms")
+                                .put(
+                                    "meaning",
+                                    "Entry-to-terminal scriptExecution starts during LoadEnvironment and may remain active across SpinEventLoop for asynchronous scripts. LoadEnvironment, scriptExecution and SpinEventLoop can overlap and must not be added together.",
+                                ),
+                        )
+                        .put(
+                            JSONObject()
+                                .put("parent", "timing.total.ms")
+                                .put("meaning", "Native lifecycle total overlaps setup, LoadEnvironment, SpinEventLoop and teardown metrics."),
+                        ),
+                )
+                .put("statusKeys", nativePhaseStatusKeyReport())
+                .put("cold", nativePhaseModeReport(coldRuns))
+                .put("runtimeWarm", nativePhaseModeReport(runtimeWarmRuns)),
+        )
+        .put(
+            "engine",
+            JSONObject()
+                .put("schema", "autojs6-node-engine-phase-timing-v1")
+                .put(
+                    "scope",
+                    "AutoJs6 JavaScript-engine request preparation before the embedded service call.",
+                )
+                .put("harness", "direct_embedded_service")
+                .put(
+                    "coverageNote",
+                    "This benchmark bypasses the JavaScript engine. Engine phases are reported only when supplied by the caller; unavailable samples are missing, not zero.",
+                )
+                .put("cold", enginePhaseModeReport(coldRuns))
+                .put("runtimeWarm", enginePhaseModeReport(runtimeWarmRuns)),
+        )
+        .put(
+            "hostPreparation",
+            JSONObject()
+                .put("schema", "autojs6-node-host-preparation-phase-timing-v1")
+                .put(
+                    "scope",
+                    "Android host-side preparation, including compile-cache setup/pruning and native library load only for the acquire that actually initializes the process runtime.",
+                )
+                .put(
+                    "coverageNote",
+                    "Missing samples remain missing and are never synthesized as zero.",
+                )
+                .put("cold", hostPreparationPhaseModeReport(coldRuns))
+                .put("runtimeWarm", hostPreparationPhaseModeReport(runtimeWarmRuns)),
+        )
+
+    private fun clientServicePhaseModeReport(runs: List<MeasuredRun>): JSONObject = JSONObject()
+        .put(
+            "totals",
+            phaseModeReport(runs, NodeEmbeddedProcessSessionManager.PhaseTiming.totalNames) { run, name ->
+                run.clientServicePhaseTimings[name]
+            },
+        )
+        .put(
+            "segments",
+            phaseModeReport(runs, NodeEmbeddedProcessSessionManager.PhaseTiming.segmentNames) { run, name ->
+                run.clientServicePhaseTimings[name]
+            },
+        )
+        .put(
+            "boundaryAggregates",
+            phaseModeReport(
+                runs,
+                NodeEmbeddedProcessSessionManager.PhaseTiming.boundaryAggregateNames,
+            ) { run, name -> run.clientServicePhaseTimings[name] },
+        )
+        .put(
+            "harnessOutsideClientAttempt",
+            distributionJson(
+                runs.mapNotNull { run ->
+                    run.clientServicePhaseTimings[
+                        NodeEmbeddedProcessSessionManager.PhaseTiming.CLIENT_ATTEMPT_TOTAL
+                    ]?.let { totalMs -> (run.wallMs - totalMs).coerceAtLeast(0L) }
+                },
+                includeSamples = false,
+            ).put(
+                "meaning",
+                "Benchmark wall time minus clientAttemptTotal. This is the only reported unaccounted gap; nested child phases are deliberately not subtracted from one another.",
+            ),
+        )
+
+    private fun nativePhaseModeReport(runs: List<MeasuredRun>): JSONObject = JSONObject().apply {
+        NATIVE_PHASE_METRICS.forEach { metric ->
+            val samples = runs.mapNotNull { run -> nativeTimingSample(run, metric) }
+            val statusExcluded = runs.count { run -> nativeTimingStatusExcluded(run, metric) }
+            val missing = (runs.size - samples.size - statusExcluded).coerceAtLeast(0)
+            put(
+                metric.key,
+                distributionJson(samples, includeSamples = false)
+                    .put("missing", missing)
+                    .put("statusExcluded", statusExcluded),
+            )
+        }
+    }
+
+    private fun nativePhaseStatusKeyReport(): JSONObject = JSONObject().apply {
+        NATIVE_PHASE_METRICS.forEach { metric ->
+            metric.statusKey?.let { statusKey ->
+                put(
+                    metric.key,
+                    JSONObject()
+                        .put("key", statusKey)
+                        .put("measuredStatuses", JSONArray(metric.measuredStatuses.sorted())),
+                )
+            }
+        }
+    }
+
+    private fun nativeTimingSample(run: MeasuredRun, metric: NativePhaseMetric): Long? {
+        return metric.sample(run.result.nativeValues)
+    }
+
+    private fun nativeTimingStatusExcluded(run: MeasuredRun, metric: NativePhaseMetric): Boolean {
+        return metric.statusExcluded(run.result.nativeValues)
+    }
+
+    private fun enginePhaseModeReport(runs: List<MeasuredRun>): JSONObject =
+        phaseModeReport(runs, ENGINE_PHASE_TIMING_KEYS) { run, name ->
+            run.result.nativeValues[name]?.toLongOrNull()?.takeIf { it >= 0L }
+        }
+
+    private fun hostPreparationPhaseModeReport(runs: List<MeasuredRun>): JSONObject =
+        phaseModeReport(runs, HOST_PREPARATION_PHASE_TIMING_KEYS) { run, name ->
+            when (name) {
+                NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY ->
+                    actualRuntimeReadyTiming(run, name)
+                "timing.compile_cache_prepare.ms" -> run.result.nativeValues[name]
+                    ?.toLongOrNull()
+                    ?.takeIf {
+                        it >= 0L &&
+                            run.result.nativeValues["embedded_script.compile_cache.prepare_status"] == "ready"
+                    }
+                "timing.compile_cache_prune.ms" -> run.result.nativeValues[name]
+                    ?.toLongOrNull()
+                    ?.takeIf {
+                        it >= 0L &&
+                            run.result.nativeValues["embedded_script.compile_cache.prune_status"] == "executed"
+                    }
+                else -> null
+            }
+        }
+
+    private fun actualRuntimeReadyTiming(run: MeasuredRun, key: String): Long? {
+        if (
+            run.result.nativeValues[
+                NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_INITIALIZED_DURING_ACQUIRE_KEY
+            ] != "true"
+        ) {
+            return null
+        }
+        return run.result.nativeValues[key]?.toLongOrNull()?.takeIf { it >= 0L }
+    }
+
+    private fun phaseModeReport(
+        runs: List<MeasuredRun>,
+        names: List<String>,
+        value: (MeasuredRun, String) -> Long?,
+    ): JSONObject = JSONObject().apply {
+        names.forEach { name ->
+            val values = runs.mapNotNull { run -> value(run, name) }
+            put(
+                name,
+                distributionJson(values, includeSamples = false)
+                    .put("missing", (runs.size - values.size).coerceAtLeast(0)),
+            )
+        }
+    }
 
     private fun runDistributionJson(runs: List<MeasuredRun>): JSONObject =
         JSONObject()
@@ -191,7 +482,7 @@ class NodeEmbeddedPerformanceInstrumentationTest {
                 distributionJson(runs.mapNotNull { it.result.nativeValues[CLIENT_RESULT_TO_RETURN_KEY]?.toLongOrNull() }),
             )
 
-    private fun distributionJson(values: List<Long>): JSONObject {
+    private fun distributionJson(values: List<Long>, includeSamples: Boolean = true): JSONObject {
         val sorted = values.sorted()
         return JSONObject()
             .put("count", sorted.size)
@@ -200,13 +491,96 @@ class NodeEmbeddedPerformanceInstrumentationTest {
             .put("p95", nearestRank(sorted, 95) ?: JSONObject.NULL)
             .put("max", sorted.lastOrNull() ?: JSONObject.NULL)
             .put("mean", if (sorted.isEmpty()) JSONObject.NULL else sorted.average())
-            .put("samples", JSONArray(values))
+            .apply {
+                if (includeSamples) {
+                    put("samples", JSONArray(values))
+                }
+            }
     }
 
     private fun nearestRank(sorted: List<Long>, percentile: Int): Long? {
         if (sorted.isEmpty()) return null
         val rank = ((sorted.size * percentile + 99) / 100).coerceIn(1, sorted.size)
         return sorted[rank - 1]
+    }
+
+    private fun assertPhaseTimings(run: MeasuredRun) {
+        val values = run.result.nativeValues
+        assertTrue(
+            "${run.label} phase timing schema is missing or unsupported: $values",
+            values[NodeEmbeddedProcessSessionManager.CLIENT_PHASE_TIMING_SCHEMA_KEY] ==
+                NodeEmbeddedProcessSessionManager.CLIENT_PHASE_TIMING_SCHEMA,
+        )
+        assertTrue(
+            "${run.label} compact phase timing JSON is missing: $values",
+            !values[NodeEmbeddedProcessSessionManager.CLIENT_PHASE_TIMING_JSON_KEY].isNullOrBlank(),
+        )
+        NodeEmbeddedProcessSessionManager.PhaseTiming.orderedNames.forEach { phase ->
+            val durationMs = run.clientServicePhaseTimings[phase]
+            assertTrue(
+                "${run.label} phase timing is missing or negative: " +
+                    "phase=$phase timings=${run.clientServicePhaseTimings}",
+                durationMs != null && durationMs >= 0L,
+            )
+        }
+        val callbackToReturnMs = run.clientServicePhaseTimings[
+            NodeEmbeddedProcessSessionManager.PhaseTiming.CALLBACK_TO_RETURN
+        ]
+        val legacyResultToReturnMs = values[CLIENT_RESULT_TO_RETURN_KEY]?.toLongOrNull()
+        assertTrue(
+            "${run.label} callback-to-return phase disagrees with the compatibility metric: " +
+                "phase=$callbackToReturnMs legacy=$legacyResultToReturnMs",
+            callbackToReturnMs == legacyResultToReturnMs,
+        )
+        assertTrue(
+            "${run.label} native lifecycle timing schema is missing or unsupported: $values",
+            values[NATIVE_PHASE_TIMING_SCHEMA_KEY] == NATIVE_PHASE_TIMING_SCHEMA,
+        )
+        assertTrue(
+            "${run.label} native lifecycle timings are unavailable: $values",
+            values[NATIVE_PHASE_TIMING_STATUS_KEY] == "available",
+        )
+        val requiredMetrics = REQUIRED_NATIVE_PHASE_KEYS + if (run.label.startsWith("cold-")) {
+            REQUIRED_COLD_NATIVE_PHASE_KEYS
+        } else {
+            emptySet()
+        }
+        requiredMetrics.forEach { key ->
+            val metric = NATIVE_PHASE_METRICS_BY_KEY.getValue(key)
+            val durationMs = nativeTimingSample(run, metric)
+            val status = metric.statusKey?.let(values::get)
+            assertTrue(
+                "${run.label} required native phase is missing, skipped or not applicable: " +
+                    "phase=$key statusKey=${metric.statusKey} status=$status values=$values",
+                durationMs != null,
+            )
+        }
+        val runtimeInitializedDuringAcquire = values[
+            NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_INITIALIZED_DURING_ACQUIRE_KEY
+        ] == "true"
+        if (run.label.startsWith("cold-")) {
+            assertTrue(
+                "${run.label} did not record actual process-runtime initialization: $values",
+                runtimeInitializedDuringAcquire,
+            )
+            assertTrue(
+                "${run.label} actual runtime initialization did not retain native load timing: $values",
+                actualRuntimeReadyTiming(
+                    run,
+                    NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY,
+                ) != null,
+            )
+        } else {
+            assertTrue(
+                "${run.label} replayed process-runtime initialization state: $values",
+                !runtimeInitializedDuringAcquire,
+            )
+            assertTrue(
+                "${run.label} replayed cold process-runtime/native-load timing: $values",
+                values[NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_INITIALIZE_TIMING_KEY] == null &&
+                    values[NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY] == null,
+            )
+        }
     }
 
     private fun writeReports(report: JSONObject): File {
@@ -255,7 +629,11 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         }
         val metrics = report.getJSONObject("metrics")
         assertBelow("cold run wall time", metrics.optNullableLong("coldRunWallMs"), instrumentationLong(ARG_MAX_COLD_WALL_MS))
-        assertBelow("warm run wall time", metrics.optNullableLong("warmRunWallMs"), instrumentationLong(ARG_MAX_WARM_WALL_MS))
+        assertBelow(
+            "runtime-warm run wall time",
+            metrics.optNullableLong("runtimeWarmRunWallMs"),
+            runtimeWarmWallThreshold(),
+        )
         val percentiles = report.getJSONObject("percentiles")
         val cold = percentiles.getJSONObject("cold")
         val runtimeWarm = percentiles.getJSONObject("runtimeWarm")
@@ -494,6 +872,10 @@ class NodeEmbeddedPerformanceInstrumentationTest {
     private fun instrumentationLong(name: String): Long? =
         InstrumentationRegistry.getArguments().getString(name)?.toLongOrNull()
 
+    private fun runtimeWarmWallThreshold(): Long? =
+        instrumentationLong(ARG_MAX_RUNTIME_WARM_WALL_MS)
+            ?: instrumentationLong(ARG_LEGACY_MAX_WARM_WALL_MS)
+
     private fun JSONObject.optNullableLong(name: String): Long? =
         if (!has(name) || isNull(name)) null else optLong(name)
 
@@ -543,11 +925,33 @@ class NodeEmbeddedPerformanceInstrumentationTest {
                 .put("runtimeWarm", JSONArray(runtimeWarm.map { it.toJson() }))
     }
 
+    private data class NativePhaseMetric(
+        val key: String,
+        val statusKey: String? = null,
+        val measuredStatuses: Set<String> = emptySet(),
+    ) {
+        fun sample(nativeValues: Map<String, String>): Long? {
+            val durationMs = nativeValues[key]?.toLongOrNull()?.takeIf { it >= 0L } ?: return null
+            val requiredStatusKey = statusKey ?: return durationMs
+            val status = nativeValues[requiredStatusKey]?.lowercase()?.takeIf(String::isNotBlank)
+                ?: return null
+            return durationMs.takeIf { status in measuredStatuses }
+        }
+
+        fun statusExcluded(nativeValues: Map<String, String>): Boolean {
+            val requiredStatusKey = statusKey ?: return false
+            val status = nativeValues[requiredStatusKey]?.lowercase()?.takeIf(String::isNotBlank)
+                ?: return false
+            return status !in measuredStatuses
+        }
+    }
+
     private data class MeasuredRun(
         val label: String,
         val wallMs: Long,
         val result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
         val nodePayload: JSONObject?,
+        val clientServicePhaseTimings: Map<String, Long>,
     ) {
         fun toJson(): JSONObject =
             JSONObject()
@@ -564,7 +968,27 @@ class NodeEmbeddedPerformanceInstrumentationTest {
                 .put("errorName", result.errorName ?: JSONObject.NULL)
                 .put("errorMessage", result.errorMessage ?: JSONObject.NULL)
                 .put("node", nodePayload ?: JSONObject.NULL)
+                .put(
+                    "phaseTimings",
+                    JSONObject()
+                        .put("clientService", JSONObject(clientServicePhaseTimings))
+                        .put("nativeLifecycle", presentNativeTimings())
+                        .put("engine", presentTimings(ENGINE_PHASE_TIMING_KEYS))
+                        .put("hostPreparation", presentTimings(HOST_PREPARATION_PHASE_TIMING_KEYS)),
+                )
                 .put("nativeValues", JSONObject(result.nativeValues.toSortedMap()))
+
+        private fun presentTimings(names: List<String>): JSONObject = JSONObject().apply {
+            names.forEach { name ->
+                result.nativeValues[name]?.toLongOrNull()?.takeIf { it >= 0L }?.let { put(name, it) }
+            }
+        }
+
+        private fun presentNativeTimings(): JSONObject = JSONObject().apply {
+            NATIVE_PHASE_METRICS.forEach { metric ->
+                metric.sample(result.nativeValues)?.let { put(metric.key, it) }
+            }
+        }
     }
 
     private data class ProcessSnapshot(
@@ -605,13 +1029,106 @@ class NodeEmbeddedPerformanceInstrumentationTest {
         private const val PROCESS_RUNTIME_EXECUTION_SEQUENCE_KEY = "process_runtime.execution_sequence"
         private const val PROCESS_RUNTIME_REUSED_KEY = "process_runtime.reused"
         private const val PROCESS_RUNTIME_TEARDOWN_CLEAN_KEY = "process_runtime.teardown_clean"
+        private const val NATIVE_PHASE_TIMING_SCHEMA = "autojs6-node-native-lifecycle-timing-v1"
+        private const val NATIVE_PHASE_TIMING_SCHEMA_KEY = "embedded_script.phase_timing.schema"
+        private const val NATIVE_PHASE_TIMING_STATUS_KEY = "embedded_script.phase_timing.status"
+        private val NATIVE_PHASE_METRICS = listOf(
+            NativePhaseMetric("timing.execution_source_build.ms"),
+            NativePhaseMetric(
+                NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_INITIALIZE_TIMING_KEY,
+                NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_INITIALIZED_DURING_ACQUIRE_KEY,
+                setOf("true"),
+            ),
+            NativePhaseMetric("timing.load.ms"),
+            NativePhaseMetric("timing.symbols.ms"),
+            NativePhaseMetric("timing.initialize.ms", "initialize.status", setOf("done")),
+            NativePhaseMetric("timing.platform_create.ms", "platform.create.status", setOf("done")),
+            NativePhaseMetric(
+                "timing.v8_initialize_platform.ms",
+                "v8.initialize_platform.status",
+                setOf("done"),
+            ),
+            NativePhaseMetric("timing.v8_initialize.ms", "v8.initialize.status", setOf("done")),
+            NativePhaseMetric("timing.uv_loop_init.ms", "uv.loop.init.status", setOf("done")),
+            NativePhaseMetric("timing.allocator_create.ms", "allocator.create.status", setOf("done")),
+            NativePhaseMetric("timing.isolate_create.ms", "isolate.create.status", setOf("done")),
+            NativePhaseMetric("timing.isolate_data_create.ms", "isolate_data.create.status", setOf("done")),
+            NativePhaseMetric("timing.environment_create.ms", "environment.create.status", setOf("done")),
+            NativePhaseMetric("timing.load_environment.ms", "load_environment.status", setOf("done")),
+            NativePhaseMetric("timing.bootstrap_script.ms", "bootstrap_script.status", setOf("done", "completed")),
+            NativePhaseMetric(
+                "timing.bootstrap.ms",
+                "embedded_script.phase.bootstrap.status",
+                setOf("completed"),
+            ),
+            NativePhaseMetric(
+                "timing.module_preload.ms",
+                "embedded_script.phase.module_preload.status",
+                setOf("done", "completed"),
+            ),
+            NativePhaseMetric(
+                "timing.script_execution.ms",
+                "embedded_script.phase.script_execution.status",
+                setOf("completed"),
+            ),
+            NativePhaseMetric("timing.spin_event_loop.ms", "spin_event_loop.status", setOf("done")),
+            NativePhaseMetric("timing.completion_drain.ms", "completion_drain.status", setOf("done")),
+            NativePhaseMetric("timing.embedded_script_result.ms", "embedded_script.status", setOf("done")),
+            NativePhaseMetric("timing.js_result.ms", "js_result.status", setOf("done")),
+            NativePhaseMetric("timing.output_envelope.ms", "output_envelope.status", setOf("done")),
+            NativePhaseMetric("timing.stdout_capture.ms", "stdout_capture.status", setOf("done")),
+            NativePhaseMetric("timing.environment_free.ms", "environment.free.status", setOf("done")),
+            NativePhaseMetric("timing.isolate_data_free.ms", "isolate_data.free.status", setOf("done")),
+            NativePhaseMetric("timing.isolate_unregister.ms", "isolate.unregister.status", setOf("done")),
+            NativePhaseMetric("timing.isolate_dispose.ms", "isolate.dispose.status", setOf("done")),
+            NativePhaseMetric("timing.uv_run.ms", "uv.run.status", setOf("done")),
+            NativePhaseMetric("timing.uv_close.ms", "uv.close.status", setOf("done")),
+            NativePhaseMetric("timing.uv_loop_close.ms", "uv.loop.close.status", setOf("done")),
+            NativePhaseMetric("timing.teardown.ms", "teardown.status", setOf("done")),
+            NativePhaseMetric(
+                "timing.process_runtime_shutdown.ms",
+                "process_runtime.shutdown.status",
+                setOf("done"),
+            ),
+            NativePhaseMetric("timing.total.ms"),
+        )
+        private val NATIVE_PHASE_METRICS_BY_KEY = NATIVE_PHASE_METRICS.associateBy(NativePhaseMetric::key)
+        private val REQUIRED_NATIVE_PHASE_KEYS = setOf(
+            "timing.execution_source_build.ms",
+            "timing.uv_loop_init.ms",
+            "timing.isolate_create.ms",
+            "timing.environment_create.ms",
+            "timing.load_environment.ms",
+            "timing.bootstrap.ms",
+            "timing.script_execution.ms",
+            "timing.spin_event_loop.ms",
+            "timing.embedded_script_result.ms",
+            "timing.environment_free.ms",
+            "timing.isolate_dispose.ms",
+            "timing.uv_loop_close.ms",
+            "timing.total.ms",
+        )
+        private val REQUIRED_COLD_NATIVE_PHASE_KEYS = setOf(
+            NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_INITIALIZE_TIMING_KEY,
+        )
+        private val ENGINE_PHASE_TIMING_KEYS = listOf(
+            "timing.engine_request_preparation.ms",
+            "timing.engine_commonjs_preload.ms",
+            "timing.engine_encrypted_runtime_scan.ms",
+        )
+        private val HOST_PREPARATION_PHASE_TIMING_KEYS = listOf(
+            NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY,
+            "timing.compile_cache_prepare.ms",
+            "timing.compile_cache_prune.ms",
+        )
         private const val MAX_CLIENT_RESULT_TO_RETURN_MS = 250L
         private const val SCRIPT_TIMEOUT_MS = 10_000L
         private const val DEVICE_REPORT_DIR = "/sdcard/Download/AutoJs6/nodejs/perf"
         private const val NODE_PAYLOAD_PREFIX = "perf.node="
         private const val ARG_FAIL_ON_THRESHOLD = "autojs.nodejs.perf.failOnThreshold"
         private const val ARG_MAX_COLD_WALL_MS = "autojs.nodejs.perf.maxColdWallMs"
-        private const val ARG_MAX_WARM_WALL_MS = "autojs.nodejs.perf.maxWarmWallMs"
+        private const val ARG_MAX_RUNTIME_WARM_WALL_MS = "autojs.nodejs.perf.maxRuntimeWarmWallMs"
+        private const val ARG_LEGACY_MAX_WARM_WALL_MS = "autojs.nodejs.perf.maxWarmWallMs"
         private const val ARG_MAX_COLD_P50_MS = "autojs.nodejs.perf.maxColdP50Ms"
         private const val ARG_MAX_RUNTIME_WARM_P50_MS = "autojs.nodejs.perf.maxRuntimeWarmP50Ms"
         private const val ARG_MAX_RUNTIME_WARM_P95_MS = "autojs.nodejs.perf.maxRuntimeWarmP95Ms"

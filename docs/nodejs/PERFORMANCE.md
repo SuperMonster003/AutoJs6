@@ -1,13 +1,47 @@
 # AutoJs6 Embedded Node Performance
 
-This page documents the optional local benchmark for Embedded Node startup and memory diagnostics. It is not a default release gate because device load, thermal state, ABI, and background services can make raw timings noisy.
+This page documents the optional local benchmark for Embedded Node startup and
+memory diagnostics. It is not a default release gate because device load,
+thermal state, ABI, and background services can make raw timings noisy.
 
 ## Instrumentation Benchmark
 
-Run the focused benchmark on a connected device:
+Run the focused benchmark against the sibling Node runtime artifacts on a
+connected arm64 device. The default sample plan is one cold execution followed
+by 29 runtime-warm executions in the same persistent process runtime:
 
 ```powershell
-.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedPerformanceInstrumentationTest"
+$nodeRuntimeProject = (Resolve-Path ..\AutoJs6-Plugin-NodeJs-Runtime).Path
+$gradleArgs = @(
+    ':app:connectedAppDebugAndroidTest'
+    '-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedPerformanceInstrumentationTest#embeddedStartupAndMemoryReportIsWritten'
+    '-Pautojs.nodejs.releaseFlavor=nodeMini'
+    '-Pautojs.nodejs.releaseAbis=arm64-v8a'
+    "-Pautojs.nodejs.pluginProjectDir=$nodeRuntimeProject"
+    "-Pautojs.nodejs.runtimeJniLibs=$nodeRuntimeProject\app\src\main\jniLibs"
+    '-Pksp.incremental=false'
+    '--console=plain'
+)
+
+& .\gradlew.bat @gradleArgs
+exit $LASTEXITCODE
+```
+
+Use `autojs.nodejs.perf.coldCycles` and
+`autojs.nodejs.perf.runtimeWarmSamplesPerCold` to change the sample plan. Set
+the former to `30` and the latter to `1` when independent cold and
+runtime-warm 30-sample distributions are required.
+
+The performance class calls the embedded service directly. That makes native
+lifecycle measurements repeatable, but deliberately bypasses the
+JavaScript-engine request-preparation path used by a real script file. Run the
+engine-path regression class whenever working-directory traversal or module
+preloading changes:
+
+```powershell
+$gradleArgs[1] = '-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedEngineRequestPreparationInstrumentationTest'
+& .\gradlew.bat @gradleArgs
+exit $LASTEXITCODE
 ```
 
 The benchmark writes a JSON report on the device under:
@@ -36,23 +70,50 @@ If a device or test environment uses a different report directory, pass:
 
 ## Report Schema
 
-Reports use schema `autojs6-node-performance-v1` and include:
+Reports use schema `autojs6-node-performance-v4`. They include device and ABI
+metadata, the exact sample plan, nearest-rank distributions, raw run records,
+process snapshots, Node memory/resource payloads, and pull instructions.
 
-- ABI and device metadata
-- cold run wall time
-- warm run wall time
-- embedded result `elapsedMs`
-- `load.duration.ms` when the current runtime exposes it
-- app process RSS, PSS, thread count, and fd count before and after script execution
-- embedded service process RSS, thread count, and fd count when `/proc/<pid>` is readable
-- Node payload from `process.memoryUsage()`, `process.resourceUsage()`, `process.version`, and `process.versions`
-- pull instructions for host collection
+The `phaseTimings` object separates four scopes:
 
-`serviceProcessStartTimeMs` is currently measured as cold `runScript` wall time. It includes service start/bind overhead, native load, script execution, and result return. Treat it as a stable trend metric, not a pure Android service-start timestamp.
+- `clientService` contains an end-to-end client attempt total, host segments,
+  and callback boundary aggregates. Session acquisition contains discovery,
+  declaration checks, bind, process-ready, and runtime-ready work. Result
+  payload encoding ends before Android parcel serialization and Binder
+  transfer. Client decoding starts at the result callback, excludes Binder
+  transfer, and can include lazy Bundle unparceling plus field parsing.
+- `nativeLifecycle` contains process-runtime initialization, per-execution
+  isolate and Environment setup, Node bootstrap, module preload, user-script
+  execution, event-loop work, result creation, and teardown. Bootstrap and
+  script intervals are nested in other native intervals, so they must not be
+  summed.
+- `engine` contains JavaScript-engine request preparation, CommonJS preload,
+  and encrypted runtime-module scan timings. These values are normally missing
+  in the direct-service benchmark and are never synthesized as zero.
+- `hostPreparation` contains native-library load and compile-cache
+  prepare/prune timings when the corresponding operation runs.
+
+The report marks all timing scopes as non-additive. Totals, boundary
+aggregates, host segments, and nested native intervals overlap. Status values
+such as `skipped`, `not_applicable`, or a missing value are excluded from
+duration distributions instead of being counted as zero.
+
+`cold` means the first execution after explicit persistent-session retirement.
+`runtimeWarm` requires the same PID, pool slot, session generation, and
+process-runtime generation, with a monotonically increasing execution
+sequence. The old R1 one-shot `appSideWarm` concept is not a current mode.
+
+`serviceProcessStartTimeMs` remains a compatibility trend metric measured as
+cold `runScript` wall time. It includes service start, bind, native load,
+script execution, and result return; it is not a pure Android process-start
+timestamp.
 
 ## Threshold Mode
 
-Threshold checks are off by default. Enable them only for controlled local regression runs. For the current GA gate, pin the device to Sony XQ-AT72 `QV710AF65F` and use the failure thresholds from the `sony-xq-at72-arm64-ga` profile:
+Threshold checks are off by default. Enable them only for controlled local
+regression runs. For the current GA gate, pin the device to Sony XQ-AT72
+`QV710AF65F` and use the severe-regression limits from the
+`sony-xq-at72-arm64-ga` profile:
 
 ```powershell
 $env:ANDROID_SERIAL = "QV710AF65F"
@@ -60,7 +121,7 @@ $env:ANDROID_SERIAL = "QV710AF65F"
   "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedPerformanceInstrumentationTest" `
   "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.failOnThreshold=true" `
   "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxColdWallMs=6000" `
-  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxWarmWallMs=4000" `
+  "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxRuntimeWarmWallMs=4000" `
   "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxAppRssDeltaAfterDestroyKb=131072" `
   "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.perf.maxServiceRssKb=393216"
 ```
@@ -69,15 +130,26 @@ Available arguments:
 
 - `autojs.nodejs.perf.failOnThreshold`
 - `autojs.nodejs.perf.maxColdWallMs`
-- `autojs.nodejs.perf.maxWarmWallMs`
+- `autojs.nodejs.perf.maxRuntimeWarmWallMs`
+- `autojs.nodejs.perf.maxColdP50Ms`
+- `autojs.nodejs.perf.maxRuntimeWarmP50Ms`
+- `autojs.nodejs.perf.maxRuntimeWarmP95Ms`
+- `autojs.nodejs.perf.maxResultToReturnP95Ms`
 - `autojs.nodejs.perf.maxAppRssDeltaAfterDestroyKb`
 - `autojs.nodejs.perf.maxServiceRssKb`
 
-Use threshold mode for severe regression detection only. Do not use one device's raw numbers as a universal release policy.
+`autojs.nodejs.perf.maxWarmWallMs` remains a legacy alias for the runtime-warm
+single-sample limit. Use threshold mode for severe regression detection only.
+Do not use one device's raw numbers as a universal release policy.
 
 ## Release Threshold Profiles
 
-Warning thresholds are advisory review lines for mild regressions. Failure thresholds are the severe-regression lines that should fail a release gate when the corresponding instrumentation argument exists.
+Warning thresholds are advisory review lines for mild regressions. Failure
+thresholds are severe-regression lines that should fail a release gate when
+the corresponding instrumentation argument exists. The timing evidence in
+this section predates R2 persistent-runtime semantics and remains as historical
+GA guardrail evidence; use `R3_ACCEPTANCE_SAMPLING.md` for current latency
+acceptance.
 
 Current evidence:
 
@@ -92,7 +164,7 @@ Use this as the primary Node Profile v1 GA release gate profile.
 | Metric | Report field or source | Warning | Failure | Enforcement |
 | --- | --- | ---: | ---: | --- |
 | Cold embedded startup | `metrics.coldRunWallMs` | `3000 ms` | `6000 ms` | `autojs.nodejs.perf.maxColdWallMs` |
-| Warm script startup | `metrics.warmRunWallMs` | `2500 ms` | `4000 ms` | `autojs.nodejs.perf.maxWarmWallMs` |
+| Runtime-warm startup | `metrics.runtimeWarmRunWallMs` | `2500 ms` | `4000 ms` | `autojs.nodejs.perf.maxRuntimeWarmWallMs` |
 | Packaged startup | launch-to-success diagnostic marker, excluding build/install | `30000 ms` | `60000 ms` | release review until packaged smoke exports a startup metric |
 | App RSS after simple script | `metrics.appRssDeltaAfterDestroyKb` | `65536 KB` | `131072 KB` | `autojs.nodejs.perf.maxAppRssDeltaAfterDestroyKb` |
 | Embedded service RSS after simple script | max service snapshot `rssKb` | `307200 KB` | `393216 KB` | `autojs.nodejs.perf.maxServiceRssKb` |
@@ -127,13 +199,15 @@ Packaged startup is currently a release-review threshold, not a separate machine
 
 ## Reading Results
 
-Use cold and warm timings comparatively:
+Use cold and runtime-warm timings comparatively:
 
-- cold run: first benchmark execution after service settle
-- warm run: second execution after the app process has already exercised the embedded path
+- cold run: first execution after explicit persistent-session retirement
+- runtime-warm run: execution in the same PID, slot, session generation, and
+  process-runtime generation as its cold execution
 - app RSS after destroy: checks whether the app process keeps unexpected memory after service stop
 - service RSS: useful when the service process is still readable after result return
-- `load.duration.ms`: current native bridge load measurement when present
+- `process_runtime.library_load_ms`: actual process-runtime native-library load
+  measured only on the acquire that initialized the persistent runtime
 
 Recommended comparison method:
 
@@ -146,11 +220,25 @@ Recommended comparison method:
 
 S8-33 enables the module compile cache as an internal fail-soft optimization.
 It may improve repeated module compilation without changing isolate, context,
-or environment creation.
+or environment creation. R3 reports compile-cache preparation and pruning
+separately. Pruning runs with the existing bounded policy; a time-based
+in-process throttle was rejected because primary and overflow service
+processes share the cache root and cannot safely coordinate such a throttle.
+
+R3 measured immutable execution-source construction at about 0-1 ms on the
+focused Sony run, so the wrapper is not process-cached. Mutable project
+descriptors, dependency graphs, and source maps also remain request-scoped.
+Packaged host native-library resolution is the only new R3 process cache, and
+its key includes the package/version, install paths, release flavor, backend,
+runtime slot/target, ABI set, and library name.
 
 S8-34 keeps bootstrap startup snapshots disabled behind a design gate. The
 current runtime does not generate, package, load, or request a snapshot blob;
 normal bootstrap remains the active path and the required fallback path.
+
+R3 did not change this decision. The measured startup chain did not justify
+introducing snapshot generation, versioning, capability invalidation, and
+rollback risk while normal persistent-runtime bootstrap remains available.
 
 S8-35 adds an explicit process-only prewarm. It may reduce Android service
 process cold-start cost, but it does not preload Node/V8 or user modules and

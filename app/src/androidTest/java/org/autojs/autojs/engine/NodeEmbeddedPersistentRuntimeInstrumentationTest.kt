@@ -316,6 +316,27 @@ class NodeEmbeddedPersistentRuntimeInstrumentationTest {
     }
 
     @Test
+    fun uiHiddenTrimKeepsIdleSessionForNextExecution() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("persistent Node UI-hidden trim gate")
+        NodeEmbeddedTestHarness.assumePersistentRuntimeEnabled("persistent Node UI-hidden trim gate")
+
+        val first = runLifecycleProbe("before-ui-hidden-trim")
+        val firstGeneration = requireSessionGeneration("before UI-hidden trim", first)
+        NodeEmbeddedProcessSessionManager.onTrimMemory(context, ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+
+        val second = runLifecycleProbe("after-ui-hidden-trim")
+        val secondGeneration = requireSessionGeneration("after UI-hidden trim", second)
+        assertEquals(
+            "UI-hidden trim unexpectedly retired the reusable process session",
+            firstGeneration,
+            secondGeneration,
+        )
+        assertEquals("UI-hidden trim changed the reusable process", first.pid, second.pid)
+        assertEquals("existing process runtime should be reused", "true", second.nativeValues["process_runtime.reused"])
+        assertEquals("second execution should advance the process sequence", "2", second.nativeValues["process_runtime.execution_sequence"])
+    }
+
+    @Test
     fun managerClosingRejectsPrewarmUntilShutdownCompletesAndManagerReopens() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("persistent Node manager-closing lifecycle gate")
         NodeEmbeddedTestHarness.assumePersistentRuntimeEnabled("persistent Node manager-closing lifecycle gate")

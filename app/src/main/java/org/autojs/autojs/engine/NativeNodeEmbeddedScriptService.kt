@@ -4,7 +4,6 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
-import android.content.ComponentCallbacks2
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -118,14 +117,16 @@ open class NativeNodeEmbeddedScriptService : Service() {
             }
             return runRuntimeControl("ensure_runtime_ready") {
                 val enabled = persistentEnabled && NodeEmbeddedProcessSessionManager.isEnabled()
-                val values = linkedMapOf<String, String>().apply {
-                    putAll(NativeNodeEmbeddedRuntimeBridge.setProcessRuntimePersistentEnabled(this@NativeNodeEmbeddedScriptService, enabled))
-                    if (enabled) {
-                        putAll(NativeNodeEmbeddedRuntimeBridge.ensureProcessRuntimeReady(this@NativeNodeEmbeddedScriptService))
-                    } else {
-                        putAll(NativeNodeEmbeddedRuntimeBridge.processRuntimeDiagnostics(this@NativeNodeEmbeddedScriptService))
-                    }
+                val persistentValues = NativeNodeEmbeddedRuntimeBridge.setProcessRuntimePersistentEnabled(
+                    this@NativeNodeEmbeddedScriptService,
+                    enabled,
+                )
+                val readyValues = if (enabled) {
+                    NativeNodeEmbeddedRuntimeBridge.ensureProcessRuntimeReady(this@NativeNodeEmbeddedScriptService)
+                } else {
+                    NativeNodeEmbeddedRuntimeBridge.processRuntimeDiagnostics(this@NativeNodeEmbeddedScriptService)
                 }
+                val values = mergeProcessRuntimeControlValues(persistentValues, readyValues)
                 runtimeControlValues.set(values)
                 runtimeStatusBundle(values)
             }
@@ -312,7 +313,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
     @Suppress("DEPRECATION")
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+        if (NodeEmbeddedProcessSessionManager.isMemoryPressureTrimLevel(level)) {
             // In persistent mode the main-process session manager receives the same
             // memory-pressure signal and owns the binding/stop/exit handshake. If
             // this remote service retires itself independently, the manager can race
@@ -398,6 +399,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         val prewarmLease = consumePrewarmForExecution()
         val receiver = intent.resultReceiverExtra(EXTRA_RESULT_RECEIVER)
         val startedAt = android.os.SystemClock.elapsedRealtime()
+        val requestSpoolStartedAtNanos = android.os.SystemClock.elapsedRealtimeNanos()
         val serviceRequest = try {
             intent.embeddedScriptRequestExtra(this)
         } catch (e: Throwable) {
@@ -413,6 +415,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
             stopServiceIfQueueIdle(startId)
             return
         }
+        val requestSpoolPhaseMs = NodeEmbeddedProcessSessionManager.elapsedPhaseMs(requestSpoolStartedAtNanos)
+        val servicePreparationStartedAtNanos = android.os.SystemClock.elapsedRealtimeNanos()
         val preparedServiceRequest = try {
             NativeNodeEmbeddedRuntimeBridge.prepareEmbeddedScriptRequest(serviceRequest)
         } catch (e: Throwable) {
@@ -692,6 +696,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
         )
         var deliveryResult: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null
         var nativeExecutionEntered = false
+        var servicePhaseMs = 0L
+        var nativePhaseMs = 0L
         try {
             timeline?.mark("bridge_transport_start", mapOf("transport" to "file"))
             bridgeSession.start()
@@ -731,25 +737,34 @@ open class NativeNodeEmbeddedScriptService : Service() {
             }
             timeline?.mark("native_enter")
             nativeExecutionEntered = true
-            val nativeResult = runtimeExecutor.submit<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult> {
-                val processRuntimeValues = ensureServiceRuntimeReady()
-                val executionResult = NativeNodeEmbeddedRuntimeBridge.runEmbeddedScriptInCurrentProcess(
-                    context = this,
-                    request = request,
-                )
-                val finalRuntimeValues = NativeNodeEmbeddedRuntimeBridge.processRuntimeDiagnostics(
-                    this@NativeNodeEmbeddedScriptService,
-                )
-                runtimeControlValues.set(finalRuntimeValues)
-                executionResult.copy(
-                    nativeValues = linkedMapOf<String, String>().apply {
-                        putAll(processRuntimeValues)
-                        putAll(executionResult.nativeValues)
-                        putAll(finalRuntimeValues)
-                        put("embedded_script.native_execution_entered", "true")
-                    },
-                )
-            }.get()
+            servicePhaseMs = (
+                NodeEmbeddedProcessSessionManager.elapsedPhaseMs(servicePreparationStartedAtNanos) -
+                    slotLease.queueWaitMs
+                ).coerceAtLeast(0L)
+            val nativeStartedAtNanos = android.os.SystemClock.elapsedRealtimeNanos()
+            val nativeResult = try {
+                runtimeExecutor.submit<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult> {
+                    val processRuntimeValues = ensureServiceRuntimeReady()
+                    val executionResult = NativeNodeEmbeddedRuntimeBridge.runEmbeddedScriptInCurrentProcess(
+                        context = this,
+                        request = request,
+                    )
+                    val finalRuntimeValues = NativeNodeEmbeddedRuntimeBridge.processRuntimeDiagnostics(
+                        this@NativeNodeEmbeddedScriptService,
+                    )
+                    runtimeControlValues.set(finalRuntimeValues)
+                    executionResult.copy(
+                        nativeValues = linkedMapOf<String, String>().apply {
+                            putAll(processRuntimeValues)
+                            putAll(executionResult.nativeValues)
+                            putAll(finalRuntimeValues)
+                            put("embedded_script.native_execution_entered", "true")
+                        },
+                    )
+                }.get()
+            } finally {
+                nativePhaseMs = NodeEmbeddedProcessSessionManager.elapsedPhaseMs(nativeStartedAtNanos)
+            }
             timeline?.recordNativeResult(nativeResult)
             val result = dispatchQueuedBridgeRequests(bridgeSession.appendNativeValues(nativeResult))
                 .withExecutionMode(executionMode, launchSurface)
@@ -875,6 +890,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 .withTimeline(timeline)
             deliveryResult = failureResult
         } finally {
+            val cleanupStartedAtNanos = android.os.SystemClock.elapsedRealtimeNanos()
             val cleanupErrors = mutableListOf<String>()
             fun cleanup(name: String, block: () -> Unit) {
                 runCatching(block).onFailure { error ->
@@ -897,8 +913,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     interactiveStopCompleted
             val postCleanupResult = deliveryResult?.let { result ->
                 val cleanedResult = bridgeSession.appendNativeValues(result)
-                cleanedResult.copy(
-                    nativeValues = linkedMapOf<String, String>().apply {
+                val cleanupPhaseMs = NodeEmbeddedProcessSessionManager.elapsedPhaseMs(cleanupStartedAtNanos)
+                val cleanupValues = linkedMapOf<String, String>().apply {
                         putAll(cleanedResult.nativeValues)
                         put("embedded_script.service.cleanup_clean", cleanupErrors.isEmpty().toString())
                         put("embedded_script.service.cleanup_errors", cleanupErrors.joinToString(","))
@@ -906,7 +922,18 @@ open class NativeNodeEmbeddedScriptService : Service() {
                         put("embedded_script.service.execution_slot_released", "true")
                         put("embedded_script.service.queue_idle_after_release", queueStatus.idle.toString())
                         put("embedded_script.service.retirement_requested", serviceRetirementRequested.toString())
-                    },
+                }
+                cleanedResult.copy(
+                    nativeValues = NodeEmbeddedProcessSessionManager.mergeClientPhaseTimings(
+                        cleanupValues,
+                        linkedMapOf(
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.REQUEST_SPOOL to requestSpoolPhaseMs,
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.QUEUE to slotLease.queueWaitMs,
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.SERVICE to servicePhaseMs,
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.NATIVE to nativePhaseMs,
+                            NodeEmbeddedProcessSessionManager.PhaseTiming.CLEANUP to cleanupPhaseMs,
+                        ),
+                    ),
                 )
             }
             if (postCleanupResult == null) {
@@ -1830,11 +1857,17 @@ open class NativeNodeEmbeddedScriptService : Service() {
 
     private fun ensureServiceRuntimeReady(): Map<String, String> {
         val persistent = NodeEmbeddedProcessSessionManager.isEnabled()
-        val values = linkedMapOf<String, String>().apply {
-            putAll(NativeNodeEmbeddedRuntimeBridge.setProcessRuntimePersistentEnabled(this@NativeNodeEmbeddedScriptService, persistent))
-            if (persistent) {
-                putAll(NativeNodeEmbeddedRuntimeBridge.ensureProcessRuntimeReady(this@NativeNodeEmbeddedScriptService))
-            }
+        val persistentValues = NativeNodeEmbeddedRuntimeBridge.setProcessRuntimePersistentEnabled(
+            this@NativeNodeEmbeddedScriptService,
+            persistent,
+        )
+        val values = if (persistent) {
+            mergeProcessRuntimeControlValues(
+                persistentValues,
+                NativeNodeEmbeddedRuntimeBridge.ensureProcessRuntimeReady(this@NativeNodeEmbeddedScriptService),
+            )
+        } else {
+            persistentValues
         }
         runtimeControlValues.set(values)
         if (persistent) {
@@ -1849,6 +1882,30 @@ open class NativeNodeEmbeddedScriptService : Service() {
             }
         }
         return values
+    }
+
+    private fun mergeProcessRuntimeControlValues(
+        vararg valueSets: Map<String, String>,
+    ): Map<String, String> {
+        val loadKey = NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY
+        var loadDurationMs = 0L
+        var loadDurationPresent = false
+        return linkedMapOf<String, String>().apply {
+            valueSets.forEach { values ->
+                values[loadKey]?.toLongOrNull()?.takeIf { it >= 0L }?.let { durationMs ->
+                    loadDurationPresent = true
+                    loadDurationMs = if (Long.MAX_VALUE - loadDurationMs < durationMs) {
+                        Long.MAX_VALUE
+                    } else {
+                        loadDurationMs + durationMs
+                    }
+                }
+                putAll(values)
+            }
+            if (loadDurationPresent) {
+                put(loadKey, loadDurationMs.toString())
+            }
+        }
     }
 
     private fun requestPersistentShutdown(
@@ -2356,6 +2413,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val RESULT_TRANSPORT_STRING_MAX_CHARS = 32_768
         private const val RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS = 65_536
         private const val RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES = 512
+        private const val RESULT_TRANSPORT_METADATA_RESERVED_CHARS = 8_192
+        private const val RESULT_TRANSPORT_METADATA_RESERVED_ENTRIES = 24
         private const val RESULT_TRANSPORT_OMITTED_KEYS_MAX_CHARS = 4_096
         private const val CLIENT_SERVICE_START_GRACE_MS = 10_000L
         private const val DEFAULT_PROCESS_POOL_STOP_COOLDOWN_MS = 10_000L
@@ -2377,6 +2436,87 @@ open class NativeNodeEmbeddedScriptService : Service() {
             "stderr_capture.text.hex",
         )
         private val RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS = listOf(
+            NodeEmbeddedProcessSessionManager.CLIENT_PHASE_TIMING_SCHEMA_KEY,
+            NodeEmbeddedProcessSessionManager.CLIENT_PHASE_TIMING_JSON_KEY,
+            "embedded_script.phase_timing.schema",
+            "embedded_script.phase_timing.status",
+            "embedded_script.phase_timing.count",
+            "embedded_script.phase_timing.source",
+            "embedded_script.phase_timing.adapter_transferred_count",
+            "embedded_script.execution_source.bytes",
+            "embedded_script.dynamic_require_fallback_loaded_count",
+            "embedded_script.dynamic_require_fallback_source_bytes",
+            "embedded_script.dynamic_require_fallback_denied_count",
+            "embedded_script.dynamic_require_fallback_last_request",
+            "embedded_script.dynamic_require_fallback_last_referrer",
+            "embedded_script.dynamic_require_fallback_last_candidate",
+            "embedded_script.dynamic_require_fallback_last_denied_reason",
+            "process_runtime.ensure.status",
+            "symbol.count",
+            "initialize.status",
+            "platform.create.status",
+            "v8.initialize_platform.status",
+            "v8.initialize.status",
+            "uv.loop.init.status",
+            "allocator.create.status",
+            "isolate.create.status",
+            "isolate_data.create.status",
+            "environment.create.status",
+            "load_environment.status",
+            "embedded_script.phase.bootstrap.status",
+            "embedded_script.phase.module_preload.status",
+            "embedded_script.phase.script_execution.status",
+            "bootstrap_script.status",
+            "spin_event_loop.status",
+            "completion_drain.status",
+            "embedded_script.status",
+            "js_result.status",
+            "output_envelope.status",
+            "stdout_capture.status",
+            "environment.free.status",
+            "isolate_data.free.status",
+            "isolate.unregister.status",
+            "isolate.dispose.status",
+            "uv.run.status",
+            "uv.close.status",
+            "uv.loop.close.status",
+            "teardown.status",
+            "process_runtime.shutdown.status",
+            "timing.execution_source_build.ms",
+            "timing.process_runtime_initialize.ms",
+            "load.duration.ms",
+            "timing.load.ms",
+            "timing.symbols.ms",
+            "timing.initialize.ms",
+            "timing.platform_create.ms",
+            "timing.v8_initialize_platform.ms",
+            "timing.v8_initialize.ms",
+            "timing.uv_loop_init.ms",
+            "timing.allocator_create.ms",
+            "timing.isolate_create.ms",
+            "timing.isolate_data_create.ms",
+            "timing.environment_create.ms",
+            "timing.load_environment.ms",
+            "timing.bootstrap_script.ms",
+            "timing.bootstrap.ms",
+            "timing.module_preload.ms",
+            "timing.script_execution.ms",
+            "timing.spin_event_loop.ms",
+            "timing.completion_drain.ms",
+            "timing.embedded_script_result.ms",
+            "timing.js_result.ms",
+            "timing.output_envelope.ms",
+            "timing.stdout_capture.ms",
+            "timing.environment_free.ms",
+            "timing.isolate_data_free.ms",
+            "timing.isolate_unregister.ms",
+            "timing.isolate_dispose.ms",
+            "timing.uv_run.ms",
+            "timing.uv_close.ms",
+            "timing.uv_loop_close.ms",
+            "timing.teardown.ms",
+            "timing.process_runtime_shutdown.ms",
+            "timing.total.ms",
             "process_runtime.state",
             "process_runtime.persistent_enabled",
             "process_runtime.healthy",
@@ -2396,6 +2536,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             "embedded_script.process_session.manager_epoch",
             "embedded_script.process_session.quarantined",
             "embedded_script.process_session.process_exit_confirmed",
+            NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_INITIALIZED_DURING_ACQUIRE_KEY,
             "embedded_script.prewarm_pool.status",
             "embedded_script.prewarm_pool.consumed",
             "embedded_script.prewarm_pool.process_only",
@@ -2403,8 +2544,12 @@ open class NativeNodeEmbeddedScriptService : Service() {
             "embedded_script.compile_cache.requested",
             "embedded_script.compile_cache.enabled",
             "embedded_script.compile_cache.status",
+            "embedded_script.compile_cache.prepare_status",
+            "embedded_script.compile_cache.prune_status",
             "embedded_script.compile_cache.schema",
             "embedded_script.compile_cache.directory",
+            "timing.compile_cache_prepare.ms",
+            "timing.compile_cache_prune.ms",
             "embedded_script.native_execution_entered",
             "embedded_script.runtime_state",
             "embedded_script.lifecycle_transitions",
@@ -2686,6 +2831,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
             launchSurface: String,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            val clientAttemptStartedAtNanos = android.os.SystemClock.elapsedRealtimeNanos()
             val appContext = context.applicationContext
             (appContext as? App)?.cancelDeferredNativeNodePrewarm()
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
@@ -2759,12 +2905,26 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     if (resultCode != RESULT_SCRIPT) {
                         return
                     }
+                    val resultPayloadDecodeStartedAtNanos = android.os.SystemClock.elapsedRealtimeNanos()
                     resultReceivedAtElapsedMs.compareAndSet(0L, android.os.SystemClock.elapsedRealtime())
-                    result.set(resultData.toEmbeddedScriptResult())
+                    val decodedResult = resultData.toEmbeddedScriptResult()
+                    val resultPayloadDecodeMs = NodeEmbeddedProcessSessionManager.elapsedPhaseMs(
+                        resultPayloadDecodeStartedAtNanos,
+                    )
+                    result.set(
+                        decodedResult.withClientPhaseTimings(
+                            mapOf(
+                                NodeEmbeddedProcessSessionManager.PhaseTiming.RESULT_PAYLOAD_DECODE to
+                                    resultPayloadDecodeMs,
+                            ),
+                        ),
+                    )
                     completion.countDown()
                 }
             }
             var requestSpoolFile: File? = null
+            var requestSpoolPhaseMs = 0L
+            var clientCleanupPhaseMs = 0L
             var clientFailureResult: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null
             val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
                 action = ACTION_RUN_SCRIPT
@@ -2845,7 +3005,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
             }
             try {
                 if (clientFailureResult == null) {
+                    val requestSpoolStartedAtNanos = android.os.SystemClock.elapsedRealtimeNanos()
                     requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, scheduledRequestForService)
+                    requestSpoolPhaseMs = NodeEmbeddedProcessSessionManager.elapsedPhaseMs(requestSpoolStartedAtNanos)
                     intent.putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
                     val startOutcome = if (processSessionLease != null) {
                         NodeEmbeddedProcessSessionManager.startRegisteredExecution(
@@ -2933,6 +3095,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     executionId = executionId,
                 )
             } finally {
+                val cleanupStartedAtNanos = android.os.SystemClock.elapsedRealtimeNanos()
                 component?.let { CLIENT_RUNNING_SCRIPT_COMPONENTS.remove(executionId, it) }
                 CLIENT_RUNNING_SCRIPT_SESSION_LEASES.remove(executionId)
                 NodeEmbeddedProcessSessionManager.unregisterExecution(processSessionLease, executionId)
@@ -2953,6 +3116,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 } else {
                     releaseDefaultProcessPoolSlot(defaultSlotLease)
                 }
+                clientCleanupPhaseMs = NodeEmbeddedProcessSessionManager.elapsedPhaseMs(cleanupStartedAtNanos)
             }
             val scriptResult = clientFailureResult ?: result.get() ?: processCrashedOrTimedOut(
                 request = scheduledRequestForService,
@@ -2961,11 +3125,25 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 executionId = executionId,
             )
             return scriptResult
+                .withClientPhaseTimings(
+                    linkedMapOf(
+                        NodeEmbeddedProcessSessionManager.PhaseTiming.REQUEST_SPOOL to requestSpoolPhaseMs,
+                        NodeEmbeddedProcessSessionManager.PhaseTiming.QUEUE to
+                            (defaultSlotLease?.queueWaitMs ?: 0L),
+                        NodeEmbeddedProcessSessionManager.PhaseTiming.CLEANUP to clientCleanupPhaseMs,
+                    ),
+                )
                 .withProcessPoolPlan(processPoolPlan)
                 .withDefaultProcessPoolLease(defaultSlotLease)
                 .withProcessSessionLease(processSessionLease)
                 .withClientResultReturnTiming(resultReceivedAtElapsedMs.get())
                 .withDeferredProcessSettle(processSettleDeferred)
+                .withClientPhaseTimings(
+                    mapOf(
+                        NodeEmbeddedProcessSessionManager.PhaseTiming.CLIENT_ATTEMPT_TOTAL to
+                            NodeEmbeddedProcessSessionManager.elapsedPhaseMs(clientAttemptStartedAtNanos),
+                    ),
+                )
         }
 
         fun cancelRunningScript(context: Context, executionId: String): Boolean {
@@ -4083,12 +4261,21 @@ open class NativeNodeEmbeddedScriptService : Service() {
             )
         }
 
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withClientPhaseTimings(
+            phaseTimings: Map<String, Long>,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult = copy(
+            nativeValues = NodeEmbeddedProcessSessionManager.mergeClientPhaseTimings(nativeValues, phaseTimings),
+        )
+
         private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withProcessSessionLease(
             lease: NodeEmbeddedProcessSessionManager.SessionLease?,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-            val sessionValues = lease?.nativeValues("execution_complete")
-                ?.filterKeys { key -> key.startsWith("embedded_script.process_session.") }
-                ?: if (NodeEmbeddedProcessSessionManager.isEnabled()) {
+            val leaseValues = lease?.nativeValues("execution_complete").orEmpty()
+            val runtimeInitializedDuringAcquire =
+                leaseValues[NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_INITIALIZED_DURING_ACQUIRE_KEY] == "true"
+            val sessionValues = if (lease != null) {
+                leaseValues.filterKeys { key -> key.startsWith("embedded_script.process_session.") }
+            } else if (NodeEmbeddedProcessSessionManager.isEnabled()) {
                     mapOf(
                         "embedded_script.process_session.enabled" to "true",
                         "embedded_script.process_session.status" to "acquire_failed",
@@ -4100,10 +4287,21 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     )
                 }
             return copy(
-                nativeValues = linkedMapOf<String, String>().apply {
-                    putAll(nativeValues)
-                    putAll(sessionValues)
-                },
+                nativeValues = NodeEmbeddedProcessSessionManager.mergeClientPhaseTimings(
+                    linkedMapOf<String, String>().apply {
+                        putAll(nativeValues)
+                        if (lease != null) {
+                            remove(NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_INITIALIZE_TIMING_KEY)
+                            remove(NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_NATIVE_LOAD_TIMING_KEY)
+                            if (runtimeInitializedDuringAcquire) {
+                                NodeEmbeddedProcessSessionManager.PROCESS_RUNTIME_INITIALIZATION_PHASE_KEYS
+                                    .forEach { key -> leaseValues[key]?.let { put(key, it) } }
+                            }
+                        }
+                        putAll(sessionValues)
+                    },
+                    NodeEmbeddedProcessSessionManager.clientPhaseTimings(leaseValues),
+                ),
             )
         }
 
@@ -4133,10 +4331,15 @@ open class NativeNodeEmbeddedScriptService : Service() {
             }
             val resultToReturnMs = (android.os.SystemClock.elapsedRealtime() - resultReceivedAtElapsedMs).coerceAtLeast(0L)
             return copy(
-                nativeValues = linkedMapOf<String, String>().apply {
-                    putAll(nativeValues)
-                    put("embedded_script.client.result_to_return_ms", resultToReturnMs.toString())
-                },
+                nativeValues = NodeEmbeddedProcessSessionManager.mergeClientPhaseTimings(
+                    linkedMapOf<String, String>().apply {
+                        putAll(nativeValues)
+                        put("embedded_script.client.result_to_return_ms", resultToReturnMs.toString())
+                    },
+                    mapOf(
+                        NodeEmbeddedProcessSessionManager.PhaseTiming.CALLBACK_TO_RETURN to resultToReturnMs,
+                    ),
+                ),
             )
         }
 
@@ -4631,51 +4834,73 @@ open class NativeNodeEmbeddedScriptService : Service() {
             return names.indices.associate { index -> names[index] to sources[index] }
         }
 
-        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.toBundle(): Bundle = Bundle().apply {
-            val truncations = linkedMapOf<String, Int>()
-            putBoolean(EXTRA_RESULT_SUCCEEDED, succeeded)
-            exitCode?.let { putInt(EXTRA_RESULT_EXIT_CODE, it) }
-            putString(EXTRA_RESULT_TEXT, resultText?.limitResultTransportString(EXTRA_RESULT_TEXT, truncations))
-            putString(EXTRA_RESULT_STDOUT, stdout.limitResultTransportString(EXTRA_RESULT_STDOUT, truncations))
-            putString(EXTRA_RESULT_STDERR, stderr.limitResultTransportString(EXTRA_RESULT_STDERR, truncations))
-            putString(EXTRA_RESULT_ERROR_NAME, errorName)
-            putString(EXTRA_RESULT_ERROR_MESSAGE, errorMessage?.limitResultTransportString(EXTRA_RESULT_ERROR_MESSAGE, truncations))
-            putString(EXTRA_RESULT_ERROR_STACK, errorStack?.limitResultTransportString(EXTRA_RESULT_ERROR_STACK, truncations))
-            putString(EXTRA_RESULT_ERROR_CODE, errorCode)
-            putLong(EXTRA_RESULT_ELAPSED_MS, elapsedMs)
-            putString(EXTRA_RESULT_PROCESS_NAME, processName)
-            putInt(EXTRA_RESULT_PID, pid)
-            putString(EXTRA_RESULT_SOURCE_NAME, sourceName)
-            putBoolean(EXTRA_RESULT_TIMED_OUT, timedOut)
-            timeoutMs?.let { putLong(EXTRA_RESULT_TIMEOUT_MS, it) }
-            putString(EXTRA_RESULT_WORKING_DIRECTORY, workingDirectory)
-            pendingTimers?.let { putBoolean(EXTRA_RESULT_PENDING_TIMERS, it) }
-            pendingTimerCount?.let { putInt(EXTRA_RESULT_PENDING_TIMER_COUNT, it) }
-            pendingTimeoutCount?.let { putInt(EXTRA_RESULT_PENDING_TIMEOUT_COUNT, it) }
-            pendingIntervalCount?.let { putInt(EXTRA_RESULT_PENDING_INTERVAL_COUNT, it) }
-            pendingImmediateCount?.let { putInt(EXTRA_RESULT_PENDING_IMMEDIATE_COUNT, it) }
-            pendingScopedFsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS, it) }
-            pendingScopedFsStreams?.let { putBoolean(EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS, it) }
-            pendingScopedFsStreamCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT, it) }
-            pendingScopedFsWatchCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_COUNT, it) }
-            pendingScopedFsWatchFileCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_FILE_COUNT, it) }
-            pendingCryptoCallbacks?.let { putInt(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS, it) }
-            pendingDnsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_DNS_CALLBACKS, it) }
-            pendingZlibCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS, it) }
-            pendingNodeTestCallbacks?.let { putInt(EXTRA_RESULT_PENDING_NODE_TEST_CALLBACKS, it) }
-            pendingZlibStreams?.let { putBoolean(EXTRA_RESULT_PENDING_ZLIB_STREAMS, it) }
-            pendingZlibStreamCount?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT, it) }
-            pendingAsyncCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS, it) }
-            pendingCallbacks?.let { putBoolean(EXTRA_RESULT_PENDING_CALLBACKS, it) }
-            val transportNativeValues = nativeValues.toTransportNativeValues(truncations)
-            if (truncations.isNotEmpty()) {
-                transportNativeValues["embedded_script.result_transport.truncated"] = "true"
-                transportNativeValues["embedded_script.result_transport.truncated_fields"] = truncations.keys.joinToString(",")
-                truncations.forEach { (key, originalChars) ->
-                    transportNativeValues["embedded_script.result_transport.original_chars.$key"] = originalChars.toString()
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.toBundle(): Bundle {
+            val resultPayloadEncodeStartedAtNanos = android.os.SystemClock.elapsedRealtimeNanos()
+            return Bundle().apply {
+                val truncations = linkedMapOf<String, Int>()
+                putBoolean(EXTRA_RESULT_SUCCEEDED, succeeded)
+                exitCode?.let { putInt(EXTRA_RESULT_EXIT_CODE, it) }
+                putString(EXTRA_RESULT_TEXT, resultText?.limitResultTransportString(EXTRA_RESULT_TEXT, truncations))
+                putString(EXTRA_RESULT_STDOUT, stdout.limitResultTransportString(EXTRA_RESULT_STDOUT, truncations))
+                putString(EXTRA_RESULT_STDERR, stderr.limitResultTransportString(EXTRA_RESULT_STDERR, truncations))
+                putString(EXTRA_RESULT_ERROR_NAME, errorName)
+                putString(EXTRA_RESULT_ERROR_MESSAGE, errorMessage?.limitResultTransportString(EXTRA_RESULT_ERROR_MESSAGE, truncations))
+                putString(EXTRA_RESULT_ERROR_STACK, errorStack?.limitResultTransportString(EXTRA_RESULT_ERROR_STACK, truncations))
+                putString(EXTRA_RESULT_ERROR_CODE, errorCode)
+                putLong(EXTRA_RESULT_ELAPSED_MS, elapsedMs)
+                putString(EXTRA_RESULT_PROCESS_NAME, processName)
+                putInt(EXTRA_RESULT_PID, pid)
+                putString(EXTRA_RESULT_SOURCE_NAME, sourceName)
+                putBoolean(EXTRA_RESULT_TIMED_OUT, timedOut)
+                timeoutMs?.let { putLong(EXTRA_RESULT_TIMEOUT_MS, it) }
+                putString(EXTRA_RESULT_WORKING_DIRECTORY, workingDirectory)
+                pendingTimers?.let { putBoolean(EXTRA_RESULT_PENDING_TIMERS, it) }
+                pendingTimerCount?.let { putInt(EXTRA_RESULT_PENDING_TIMER_COUNT, it) }
+                pendingTimeoutCount?.let { putInt(EXTRA_RESULT_PENDING_TIMEOUT_COUNT, it) }
+                pendingIntervalCount?.let { putInt(EXTRA_RESULT_PENDING_INTERVAL_COUNT, it) }
+                pendingImmediateCount?.let { putInt(EXTRA_RESULT_PENDING_IMMEDIATE_COUNT, it) }
+                pendingScopedFsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS, it) }
+                pendingScopedFsStreams?.let { putBoolean(EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS, it) }
+                pendingScopedFsStreamCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT, it) }
+                pendingScopedFsWatchCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_COUNT, it) }
+                pendingScopedFsWatchFileCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_WATCH_FILE_COUNT, it) }
+                pendingCryptoCallbacks?.let { putInt(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS, it) }
+                pendingDnsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_DNS_CALLBACKS, it) }
+                pendingZlibCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS, it) }
+                pendingNodeTestCallbacks?.let { putInt(EXTRA_RESULT_PENDING_NODE_TEST_CALLBACKS, it) }
+                pendingZlibStreams?.let { putBoolean(EXTRA_RESULT_PENDING_ZLIB_STREAMS, it) }
+                pendingZlibStreamCount?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT, it) }
+                pendingAsyncCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS, it) }
+                pendingCallbacks?.let { putBoolean(EXTRA_RESULT_PENDING_CALLBACKS, it) }
+                val transportNativeValues = nativeValues.toTransportNativeValues(truncations)
+                if (truncations.isNotEmpty()) {
+                    transportNativeValues.appendBoundedTransportEntry(
+                        "embedded_script.result_transport.truncated",
+                        "true",
+                    )
+                    transportNativeValues.appendBoundedTransportEntry(
+                        "embedded_script.result_transport.truncated_fields",
+                        truncations.keys.joinToString(",").limitOmittedKeysList(),
+                    )
+                    truncations.forEach { (key, originalChars) ->
+                        transportNativeValues.appendBoundedTransportEntry(
+                            "embedded_script.result_transport.original_chars.$key",
+                            originalChars.toString(),
+                        )
+                    }
                 }
+                putStringArray(
+                    EXTRA_RESULT_NATIVE_PAYLOAD,
+                    transportNativeValues.map { (key, value) -> "$key=$value" }.toTypedArray(),
+                )
+                // Covers local Bundle field population, native-value filtering/truncation and
+                // String-array construction. Android parcel serialization and Binder transfer
+                // happen after this method returns and are intentionally excluded.
+                putLong(
+                    EXTRA_RESULT_PAYLOAD_ENCODE_MS,
+                    NodeEmbeddedProcessSessionManager.elapsedPhaseMs(resultPayloadEncodeStartedAtNanos),
+                )
             }
-            putStringArray(EXTRA_RESULT_NATIVE_PAYLOAD, transportNativeValues.map { (key, value) -> "$key=$value" }.toTypedArray())
         }
 
         private fun Map<String, String>.toTransportNativeValues(
@@ -4683,26 +4908,37 @@ open class NativeNodeEmbeddedScriptService : Service() {
         ): MutableMap<String, String> {
             val transport = linkedMapOf<String, String>()
             val omittedKeys = mutableListOf<String>()
-            var originalChars = entries.sumOf { (key, value) -> key.length + 1 + value.length }
-            var sentChars = 0
-            var omittedChars = 0
-            val priorityKeys = RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS.toSet()
+            val originalChars = entries.sumOf { (key, value) ->
+                (key.length + 1 + value.length).toLong()
+            }
+            var sentChars = 0L
+            var omittedChars = 0L
+            val priorityKeys = linkedSetOf<String>().apply {
+                this@toTransportNativeValues.keys
+                    .filter(::isCompileCacheTransportPriorityKey)
+                    .sorted()
+                    .forEach(::add)
+                addAll(RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS)
+            }
+            val payloadMaxEntries = (
+                RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES -
+                    RESULT_TRANSPORT_METADATA_RESERVED_ENTRIES
+                ).coerceAtLeast(0)
+            val payloadMaxChars = (
+                RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS -
+                    RESULT_TRANSPORT_METADATA_RESERVED_CHARS
+                ).coerceAtLeast(0)
 
-            fun appendTransportEntry(key: String, value: String, priority: Boolean) {
-                val originalEntryChars = key.length + 1 + value.length
+            fun appendTransportEntry(key: String, value: String) {
+                val originalEntryChars = (key.length + 1 + value.length).toLong()
                 if (key in RESULT_TRANSPORT_NATIVE_PAYLOAD_DEDICATED_KEYS) {
                     omittedKeys += key
                     omittedChars += originalEntryChars
                     return
                 }
                 val limitedValue = value.limitResultTransportString("native:$key", truncations)
-                val transportEntryChars = key.length + 1 + limitedValue.length
-                if (
-                    !priority && (
-                        transport.size >= RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES ||
-                            sentChars + transportEntryChars > RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS
-                    )
-                ) {
+                val transportEntryChars = (key.length + 1 + limitedValue.length).toLong()
+                if (transport.size >= payloadMaxEntries || sentChars + transportEntryChars > payloadMaxChars) {
                     omittedKeys += key
                     omittedChars += originalEntryChars
                     return
@@ -4711,32 +4947,72 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 sentChars += transportEntryChars
             }
 
-            RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS.forEach { key ->
-                this[key]?.let { appendTransportEntry(key, it, priority = true) }
+            priorityKeys.forEach { key ->
+                this[key]?.let { appendTransportEntry(key, it) }
             }
             for ((key, value) in this) {
                 if (key in priorityKeys) {
                     continue
                 }
-                appendTransportEntry(key, value, priority = false)
+                appendTransportEntry(key, value)
             }
             val omittedCount = omittedKeys.size
             if (omittedCount > 0) {
-                transport["embedded_script.result_transport.native_payload_limited"] = "true"
-                transport["embedded_script.result_transport.native_payload_original_entries"] = size.toString()
-                transport["embedded_script.result_transport.native_payload_sent_entries"] = transport.size.toString()
-                transport["embedded_script.result_transport.native_payload_omitted_entries"] = omittedCount.toString()
-                transport["embedded_script.result_transport.native_payload_original_chars"] = originalChars.toString()
-                transport["embedded_script.result_transport.native_payload_sent_chars"] = sentChars.toString()
-                transport["embedded_script.result_transport.native_payload_omitted_chars"] = omittedChars.toString()
-                transport["embedded_script.result_transport.native_payload_max_entries"] =
-                    RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES.toString()
-                transport["embedded_script.result_transport.native_payload_max_chars"] =
-                    RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS.toString()
-                transport["embedded_script.result_transport.native_payload_omitted_keys"] =
-                    omittedKeys.joinToString(",").limitOmittedKeysList()
+                val sentEntries = transport.size
+                transport.appendBoundedTransportEntry("embedded_script.result_transport.native_payload_limited", "true")
+                transport.appendBoundedTransportEntry("embedded_script.result_transport.native_payload_hard_cap", "true")
+                transport.appendBoundedTransportEntry("embedded_script.result_transport.native_payload_original_entries", size.toString())
+                transport.appendBoundedTransportEntry("embedded_script.result_transport.native_payload_sent_entries", sentEntries.toString())
+                transport.appendBoundedTransportEntry("embedded_script.result_transport.native_payload_omitted_entries", omittedCount.toString())
+                transport.appendBoundedTransportEntry("embedded_script.result_transport.native_payload_original_chars", originalChars.toString())
+                transport.appendBoundedTransportEntry("embedded_script.result_transport.native_payload_sent_chars", sentChars.toString())
+                transport.appendBoundedTransportEntry("embedded_script.result_transport.native_payload_omitted_chars", omittedChars.toString())
+                transport.appendBoundedTransportEntry(
+                    "embedded_script.result_transport.native_payload_max_entries",
+                    RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES.toString(),
+                )
+                transport.appendBoundedTransportEntry(
+                    "embedded_script.result_transport.native_payload_max_chars",
+                    RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS.toString(),
+                )
+                transport.appendBoundedTransportEntry(
+                    "embedded_script.result_transport.native_payload_metadata_reserved_entries",
+                    RESULT_TRANSPORT_METADATA_RESERVED_ENTRIES.toString(),
+                )
+                transport.appendBoundedTransportEntry(
+                    "embedded_script.result_transport.native_payload_metadata_reserved_chars",
+                    RESULT_TRANSPORT_METADATA_RESERVED_CHARS.toString(),
+                )
+                transport.appendBoundedTransportEntry(
+                    "embedded_script.result_transport.native_payload_omitted_keys",
+                    omittedKeys.joinToString(",").limitOmittedKeysList(),
+                )
             }
             return transport
+        }
+
+        private fun isCompileCacheTransportPriorityKey(key: String): Boolean =
+            key.startsWith("embedded_script.compile_cache.") ||
+                key.startsWith("timing.compile_cache_")
+
+        private fun MutableMap<String, String>.appendBoundedTransportEntry(
+            key: String,
+            value: String,
+        ): Boolean {
+            val previous = this[key]
+            val previousChars = previous?.let { (key.length + 1 + it.length).toLong() } ?: 0L
+            val projectedEntries = size + if (previous == null) 1 else 0
+            val projectedChars = entries.sumOf { (existingKey, existingValue) ->
+                (existingKey.length + 1 + existingValue.length).toLong()
+            } - previousChars + (key.length + 1 + value.length).toLong()
+            if (
+                projectedEntries > RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES ||
+                projectedChars > RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS
+            ) {
+                return false
+            }
+            put(key, value)
+            return true
         }
 
         private fun String.limitOmittedKeysList(): String {
@@ -4768,7 +5044,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 }
                 ?.toMap()
                 .orEmpty()
-            return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+            val decodedResult = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
                 succeeded = this?.getBoolean(EXTRA_RESULT_SUCCEEDED) ?: false,
                 exitCode = this?.takeIf { it.containsKey(EXTRA_RESULT_EXIT_CODE) }?.getInt(EXTRA_RESULT_EXIT_CODE),
                 resultText = this?.getString(EXTRA_RESULT_TEXT),
@@ -4823,6 +5099,19 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 pendingCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_CALLBACKS) }
                     ?.getBoolean(EXTRA_RESULT_PENDING_CALLBACKS),
             )
+            val resultPayloadEncodeMs = this
+                ?.takeIf { it.containsKey(EXTRA_RESULT_PAYLOAD_ENCODE_MS) }
+                ?.getLong(EXTRA_RESULT_PAYLOAD_ENCODE_MS)
+            return if (resultPayloadEncodeMs == null || resultPayloadEncodeMs < 0L) {
+                decodedResult
+            } else {
+                decodedResult.withClientPhaseTimings(
+                    mapOf(
+                        NodeEmbeddedProcessSessionManager.PhaseTiming.RESULT_PAYLOAD_ENCODE to
+                            resultPayloadEncodeMs,
+                    ),
+                )
+            }
         }
 
         private const val EXTRA_RESULT_SUCCEEDED = "result_succeeded"
@@ -4835,6 +5124,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_RESULT_ERROR_STACK = "result_error_stack"
         private const val EXTRA_RESULT_ERROR_CODE = "result_error_code"
         private const val EXTRA_RESULT_ELAPSED_MS = "result_elapsed_ms"
+        private const val EXTRA_RESULT_PAYLOAD_ENCODE_MS = "result_payload_encode_ms"
         private const val EXTRA_RESULT_PROCESS_NAME = "result_process_name"
         private const val EXTRA_RESULT_PID = "result_pid"
         private const val EXTRA_RESULT_SOURCE_NAME = "result_source_name"

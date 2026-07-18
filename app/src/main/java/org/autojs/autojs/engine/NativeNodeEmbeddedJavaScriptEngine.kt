@@ -1,19 +1,28 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
+import android.os.Build
+import android.system.Os
+import android.system.OsConstants
+import android.system.StructStat
 import android.util.Log
 import org.autojs.autojs.core.console.GlobalConsole
 import org.json.JSONArray
 import org.json.JSONObject
 import org.autojs.autojs.engine.encryption.ScriptEncryption
-import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.NodeProjectLaunchSource
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.BuildConfig
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.nio.file.DirectoryIteratorException
+import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.util.UUID
 
 internal fun nodeEmbeddedConsoleOutputLines(text: String): Sequence<String> {
@@ -56,6 +65,10 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         private set
 
     @Volatile
+    var lastRequestPreparationDiagnostics: RequestPreparationDiagnostics = RequestPreparationDiagnostics.empty()
+        private set
+
+    @Volatile
     var lastNodeProjectRunnerDescriptor: NativeNodeEmbeddedProjectRunner.Descriptor? = null
         private set
 
@@ -66,9 +79,13 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     @Volatile
     private var activeEmbeddedExecutionId: String? = null
 
+    @Volatile
+    internal var encryptedRuntimeScanBeforeFinalRootIdentityCheckForTest: (() -> Unit)? = null
+
     override fun doExecution(source: JavaScriptSource): Any? {
         lastNodeProjectRunnerDescriptor = null
         lastEmbeddedScriptResultNativeValues = emptyMap()
+        lastRequestPreparationDiagnostics = RequestPreparationDiagnostics.empty()
         failFastIfEmbeddedRuntimeUnavailable(source)?.let { return it }
         tryRunNodeProjectLaunch(source)?.let { return it }
         tryRunNodeProjectFile(source)?.let { return it }
@@ -266,29 +283,46 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         projectRoot: File,
         entryFile: File,
     ): NodeProjectRunPreparation {
+        val startedAt = android.os.SystemClock.elapsedRealtime()
         val normalizedProjectRoot = projectRoot.normalizedCanonicalFile()
         val normalizedEntryFile = entryFile.normalizedCanonicalFile()
         val entrySource = normalizeEmbeddedSource(sourceText(normalizedEntryFile))
         val sourceName = normalizedEntryFile.normalizedAbsolutePath()
         val workingDirectory = normalizedProjectRoot.normalizedAbsolutePath()
+        val rootLoaderAnalysis = analyzeCommonJsSourceLoaders(entrySource)
+        val isEsmEntry = isEsmSourceName(sourceName, workingDirectory) ||
+                rootLoaderAnalysis.sourceLevelEsmSyntaxCount > 0
         val preload = collectCommonJsModuleSources(
             source = entrySource,
             sourceName = sourceName,
             workingDirectory = workingDirectory,
+            isEsmEntry = isEsmEntry,
+            rootLoaderAnalysis = rootLoaderAnalysis,
         )
-        val runtimeModuleSources = collectEncryptedRuntimeModuleSources(
+        val encryptedScan = collectEncryptedRuntimeModuleSources(
             source = fileSource,
             sourceName = sourceName,
             workingDirectory = workingDirectory,
             moduleSources = preload.moduleSources,
             sourceFileOverride = normalizedEntryFile,
+            decision = encryptedRuntimeModuleScanDecision(isEsmEntry, preload.diagnostics),
         )
+        val diagnostics = RequestPreparationDiagnostics(
+            sourceName = sourceName,
+            workingDirectory = workingDirectory,
+            isEsmEntry = isEsmEntry,
+            elapsedMs = elapsedSince(startedAt),
+            commonJs = preload.diagnostics,
+            encryptedRuntimeModuleScan = encryptedScan.diagnostics,
+        )
+        lastRequestPreparationDiagnostics = diagnostics
         return NodeProjectRunPreparation(
             entrySource = entrySource,
             sourceName = sourceName,
             workingDirectory = workingDirectory,
             preload = preload,
-            runtimeModuleSources = runtimeModuleSources,
+            runtimeModuleSources = encryptedScan.moduleSources,
+            diagnostics = diagnostics,
         )
     }
 
@@ -303,8 +337,9 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                     "sourceName=${request.sourceName} exitCode=${result.exitCode ?: 1} " +
                     "succeeded=${result.succeeded} elapsed=${result.elapsedMs}ms",
         )
-        lastEmbeddedScriptResultNativeValues = result.nativeValues
-        if (!printStructuredConsoleOutput(result.nativeValues)) {
+        val resultNativeValues = result.nativeValues + lastRequestPreparationDiagnostics.toNativeValues()
+        lastEmbeddedScriptResultNativeValues = resultNativeValues
+        if (!printStructuredConsoleOutput(resultNativeValues)) {
             printScriptOutput(Log.DEBUG, result.stdout)
             printScriptOutput(Log.ERROR, result.stderr)
         }
@@ -447,27 +482,48 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     }
 
     private fun buildEmbeddedScriptRequest(source: JavaScriptSource): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
+        val startedAt = android.os.SystemClock.elapsedRealtime()
         val requestSource = normalizeEmbeddedSource(sourceText(source))
         val requestSourceName = sourceName(source)
         val requestWorkingDirectory = workingDirectory(source)
         val requestSandboxRoot = sandboxRoot(requestWorkingDirectory)
+        val rootLoaderAnalysis = analyzeCommonJsSourceLoaders(requestSource)
+        val isEsmEntry = isEsmSourceName(requestSourceName, requestWorkingDirectory) ||
+                rootLoaderAnalysis.sourceLevelEsmSyntaxCount > 0
         val preload = collectCommonJsModuleSources(
             source = requestSource,
             sourceName = requestSourceName,
             workingDirectory = requestWorkingDirectory,
+            isEsmEntry = isEsmEntry,
+            rootLoaderAnalysis = rootLoaderAnalysis,
         )
-        val runtimeModuleSources = collectEncryptedRuntimeModuleSources(
+        val encryptedScan = collectEncryptedRuntimeModuleSources(
             source = source,
             sourceName = requestSourceName,
             workingDirectory = requestWorkingDirectory,
             moduleSources = preload.moduleSources,
+            decision = encryptedRuntimeModuleScanDecision(isEsmEntry, preload.diagnostics),
         )
+        val diagnostics = RequestPreparationDiagnostics(
+            sourceName = requestSourceName,
+            workingDirectory = requestWorkingDirectory,
+            isEsmEntry = isEsmEntry,
+            elapsedMs = elapsedSince(startedAt),
+            commonJs = preload.diagnostics,
+            encryptedRuntimeModuleScan = encryptedScan.diagnostics,
+        )
+        lastRequestPreparationDiagnostics = diagnostics
         Log.i(
             TAG,
             "embedded request prepared sourceName=$requestSourceName " +
                     "moduleSources=${preload.moduleSources.size} " +
-                    "runtimeModuleSources=${runtimeModuleSources.size} " +
-                    "runtimeFirst=${runtimeModuleSources.keys.firstOrNull().orEmpty()}",
+                    "runtimeModuleSources=${encryptedScan.moduleSources.size} " +
+                    "runtimeFirst=${encryptedScan.moduleSources.keys.firstOrNull().orEmpty()} " +
+                    "requestPreparationMs=${diagnostics.elapsedMs} " +
+                    "commonJsMs=${preload.diagnostics.elapsedMs} " +
+                    "encryptedScan=${encryptedScan.diagnostics.decision} " +
+                    "encryptedScanMs=${encryptedScan.diagnostics.elapsedMs} " +
+                    "encryptedCandidates=${encryptedScan.diagnostics.candidateFileCount}",
         )
         lastCommonJsPreloadDiagnostics = preload.diagnostics
         return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
@@ -476,7 +532,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             workingDirectory = requestWorkingDirectory,
             sandboxRoot = requestSandboxRoot,
             moduleSources = preload.moduleSources,
-            runtimeModuleSources = runtimeModuleSources,
+            runtimeModuleSources = encryptedScan.moduleSources,
             spawnDepth = currentSpawnDepth(),
         )
     }
@@ -520,33 +576,270 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
 
     private fun sourceText(source: JavaScriptSource): String {
         val file = (source as? JavaScriptFileSource)?.file ?: return source.script
-        return sourceText(file).ifEmpty { source.script }
+        return sourceText(file)
     }
 
     private fun sourceText(file: File): String {
-        val bytes = runCatching { PFiles.readBytes(file.path) }.getOrNull() ?: return ""
-        if (bytes.size < EncryptedScriptFileHeader.BLOCK_SIZE || !EncryptedScriptFileHeader.isValidFile(bytes)) {
-            return bytes.toString(Charsets.UTF_8)
-        }
-        return String(ScriptEncryption.decrypt(bytes, EncryptedScriptFileHeader.BLOCK_SIZE), Charsets.UTF_8)
+        return sourceTextOrNull(file, RUNTIME_MODULE_SOURCE_MAX_BYTES)
+            ?: throw IOException("Unable to read JavaScript source file: ${file.absolutePath}")
     }
 
-    private fun File.encryptedScriptSourceText(): String? {
-        val bytes = runCatching { PFiles.readBytes(path) }.getOrNull() ?: return null
+    private fun sourceTextOrNull(file: File, maximumCleartextBytes: Int): String? {
+        return when (val result = readSourceTextBounded(file, maximumCleartextBytes)) {
+            is BoundedSourceReadResult.Success -> result.source
+            BoundedSourceReadResult.SizeLimitExceeded,
+            BoundedSourceReadResult.Failure,
+            -> null
+        }
+    }
+
+    private fun readSourceTextBounded(file: File, maximumCleartextBytes: Int): BoundedSourceReadResult {
+        val maximumStoredBytes = maximumCleartextBytes.toLong() +
+                EncryptedScriptFileHeader.BLOCK_SIZE +
+                ENCRYPTED_SOURCE_CIPHER_BLOCK_SIZE_BYTES
+        val canonicalFile = file.strictCanonicalFileOrNull()
+            ?: return BoundedSourceReadResult.Failure
+        val canonicalPath = canonicalFile.absolutePath
+        val identity = canonicalFile.fileIdentityOrNull(noFollow = true)
+            ?: return BoundedSourceReadResult.Failure
+        val bytes = when (val result = readFileBytesBounded(
+            file = canonicalFile,
+            expectedCanonicalPath = canonicalPath,
+            expectedIdentity = identity,
+            maximumBytes = maximumStoredBytes,
+        )) {
+            is BoundedFileReadResult.Success -> result.bytes
+            BoundedFileReadResult.SizeLimitExceeded -> return BoundedSourceReadResult.SizeLimitExceeded
+            BoundedFileReadResult.Failure -> return BoundedSourceReadResult.Failure
+        }
         if (bytes.size < EncryptedScriptFileHeader.BLOCK_SIZE || !EncryptedScriptFileHeader.isValidFile(bytes)) {
+            return if (bytes.size <= maximumCleartextBytes) {
+                BoundedSourceReadResult.Success(bytes.toString(Charsets.UTF_8))
+            } else {
+                BoundedSourceReadResult.SizeLimitExceeded
+            }
+        }
+        val cleartext = runCatching {
+            ScriptEncryption.decrypt(bytes, EncryptedScriptFileHeader.BLOCK_SIZE)
+        }.getOrNull() ?: return BoundedSourceReadResult.Failure
+        return if (cleartext.size <= maximumCleartextBytes) {
+            BoundedSourceReadResult.Success(cleartext.toString(Charsets.UTF_8))
+        } else {
+            BoundedSourceReadResult.SizeLimitExceeded
+        }
+    }
+
+    private fun readFileBytesBounded(
+        file: File,
+        expectedCanonicalPath: String,
+        expectedIdentity: FileIdentity,
+        maximumBytes: Long,
+    ): BoundedFileReadResult {
+        if (maximumBytes < 0L || maximumBytes > Int.MAX_VALUE) {
+            return BoundedFileReadResult.Failure
+        }
+        val currentCanonicalFile = file.strictCanonicalFileOrNull() ?: return BoundedFileReadResult.Failure
+        if (currentCanonicalFile.absolutePath != expectedCanonicalPath) {
+            return BoundedFileReadResult.Failure
+        }
+        return try {
+            val descriptor = Os.open(
+                expectedCanonicalPath,
+                OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                0,
+            )
+            val openedStat = try {
+                Os.fstat(descriptor)
+            } catch (error: Exception) {
+                runCatching { Os.close(descriptor) }
+                throw error
+            }
+            if (!expectedIdentity.matches(openedStat) || !OsConstants.S_ISREG(openedStat.st_mode)) {
+                runCatching { Os.close(descriptor) }
+                return BoundedFileReadResult.Failure
+            }
+            if (openedStat.st_size > maximumBytes) {
+                runCatching { Os.close(descriptor) }
+                return BoundedFileReadResult.SizeLimitExceeded
+            }
+            val inputStream = try {
+                FileInputStream(descriptor)
+            } catch (error: Exception) {
+                runCatching { Os.close(descriptor) }
+                throw error
+            }
+            inputStream.buffered().use { input ->
+                val output = ByteArrayOutputStream(
+                    openedStat.st_size.coerceAtMost(ENCRYPTED_SOURCE_READ_BUFFER_SIZE.toLong()).toInt(),
+                )
+                val buffer = ByteArray(ENCRYPTED_SOURCE_READ_BUFFER_SIZE)
+                var total = 0L
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) {
+                        break
+                    }
+                    if (count == 0) {
+                        continue
+                    }
+                    total += count
+                    if (total > maximumBytes) {
+                        return BoundedFileReadResult.SizeLimitExceeded
+                    }
+                    output.write(buffer, 0, count)
+                }
+                BoundedFileReadResult.Success(output.toByteArray())
+            }
+        } catch (_: Exception) {
+            BoundedFileReadResult.Failure
+        }
+    }
+
+    private fun EncryptedRuntimeModuleCandidate.encryptedScriptSourceText(
+        scanRoot: EncryptedRuntimeScanRoot,
+        stats: EncryptedRuntimeModuleScanStats,
+        maximumCleartextBytes: Int,
+    ): String? {
+        val canonicalFile = file.strictCanonicalFileOrNull()
+        if (
+            canonicalFile == null ||
+            canonicalFile.absolutePath != moduleKey ||
+            !scanRoot.containsCanonicalPath(canonicalFile.absolutePath)
+        ) {
+            stats.identityMismatchCount += 1
             return null
         }
-        return String(ScriptEncryption.decrypt(bytes, EncryptedScriptFileHeader.BLOCK_SIZE), Charsets.UTF_8)
+        stats.headerProbeCount += 1
+        val header = ByteArray(EncryptedScriptFileHeader.BLOCK_SIZE)
+        var headerBytesRead = 0
+        val encryptedPayload = try {
+            val descriptor = Os.open(
+                moduleKey,
+                OsConstants.O_RDONLY or OsConstants.O_CLOEXEC or OsConstants.O_NOFOLLOW,
+                0,
+            )
+            val openedStat = try {
+                Os.fstat(descriptor)
+            } catch (error: Exception) {
+                runCatching { Os.close(descriptor) }
+                throw error
+            }
+            if (!identity.matches(openedStat)) {
+                stats.identityMismatchCount += 1
+                runCatching { Os.close(descriptor) }
+                return null
+            }
+            val inputStream = try {
+                FileInputStream(descriptor)
+            } catch (error: Exception) {
+                runCatching { Os.close(descriptor) }
+                throw error
+            }
+            inputStream.buffered().use { input ->
+                var offset = 0
+                while (offset < header.size) {
+                    val count = input.read(header, offset, header.size - offset)
+                    if (count <= 0) {
+                        break
+                    }
+                    offset += count
+                }
+                headerBytesRead = offset
+                stats.headerBytesRead += offset.toLong()
+                if (
+                    offset < EncryptedScriptFileHeader.BLOCK_SIZE ||
+                    !EncryptedScriptFileHeader.isValidFile(header)
+                ) {
+                    return null
+                }
+
+                val maximumEncryptedPayloadBytes = maximumCleartextBytes.toLong() +
+                        ENCRYPTED_SOURCE_CIPHER_BLOCK_SIZE_BYTES
+                val knownPayloadBytes = (openedStat.st_size - EncryptedScriptFileHeader.BLOCK_SIZE)
+                    .coerceAtLeast(0L)
+                if (knownPayloadBytes > maximumEncryptedPayloadBytes) {
+                    stats.oversizedCiphertextCount += 1
+                    stats.encryptedModuleBudgetRejectedCount += 1
+                    if (maximumCleartextBytes < RUNTIME_MODULE_SOURCE_MAX_BYTES) {
+                        stats.outputBytesBudgetExhausted = true
+                    }
+                    return null
+                }
+                val initialCapacity = knownPayloadBytes
+                    .coerceAtMost(ENCRYPTED_SOURCE_READ_BUFFER_SIZE.toLong())
+                    .toInt()
+                val output = ByteArrayOutputStream(initialCapacity)
+                val buffer = ByteArray(ENCRYPTED_SOURCE_READ_BUFFER_SIZE)
+                var payloadBytesRead = 0L
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) {
+                        break
+                    }
+                    if (count == 0) {
+                        continue
+                    }
+                    payloadBytesRead += count
+                    if (payloadBytesRead > maximumEncryptedPayloadBytes) {
+                        stats.oversizedCiphertextCount += 1
+                        stats.encryptedModuleBudgetRejectedCount += 1
+                        if (maximumCleartextBytes < RUNTIME_MODULE_SOURCE_MAX_BYTES) {
+                            stats.outputBytesBudgetExhausted = true
+                        }
+                        return null
+                    }
+                    output.write(buffer, 0, count)
+                }
+                stats.fullFileReadCount += 1
+                stats.fullFileBytesRead += header.size.toLong() + payloadBytesRead
+                output.toByteArray()
+            }
+        } catch (_: Exception) {
+            if (headerBytesRead < EncryptedScriptFileHeader.BLOCK_SIZE) {
+                stats.headerReadFailureCount += 1
+            } else {
+                stats.fullFileReadFailureCount += 1
+            }
+            return null
+        }
+        return try {
+            val cleartext = ScriptEncryption.decrypt(encryptedPayload)
+            if (encryptedRuntimeModuleCleartextBudgetStatus(cleartext.size, maximumCleartextBytes) != null) {
+                stats.cleartextSizeLimitRejectedCount += 1
+                stats.encryptedModuleBudgetRejectedCount += 1
+                if (maximumCleartextBytes < RUNTIME_MODULE_SOURCE_MAX_BYTES) {
+                    stats.outputBytesBudgetExhausted = true
+                }
+                return null
+            }
+            String(cleartext, Charsets.UTF_8)
+        } catch (_: Exception) {
+            stats.decryptFailureCount += 1
+            null
+        }
+    }
+
+    internal fun encryptedRuntimeModuleCleartextBudgetStatus(
+        cleartextBytes: Int,
+        maximumCleartextBytes: Int,
+    ): String? = if (cleartextBytes > maximumCleartextBytes) {
+        ENCRYPTED_SCAN_STATUS_INCOMPLETE_MODULE_SIZE_BUDGET
+    } else {
+        null
     }
 
     private fun collectCommonJsModuleSources(
         source: String,
         sourceName: String,
         workingDirectory: String?,
+        isEsmEntry: Boolean = isEsmSourceName(sourceName, workingDirectory),
+        rootLoaderAnalysis: CommonJsSourceLoaderAnalysis = analyzeCommonJsSourceLoaders(source),
     ): CommonJsPreloadResult {
         val startedAt = android.os.SystemClock.elapsedRealtime()
         val stats = CommonJsPreloadStats(source.toByteArray(Charsets.UTF_8).size)
-        if (isEsmSourceName(sourceName, workingDirectory)) {
+        stats.trivialModuleFreeEntry = rootLoaderAnalysis.trivialModuleFreeEntry
+        stats.recordLoaderAnalysis(rootLoaderAnalysis)
+        if (isEsmEntry) {
             return CommonJsPreloadResult(
                 moduleSources = emptyMap(),
                 diagnostics = stats.toDiagnostics(sourceName, workingDirectory, emptyList(), startedAt),
@@ -554,11 +847,20 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
         val root = workingDirectory
             ?.takeIf { it.isNotBlank() }
-            ?.let { File(it).normalizedCanonicalFile() }
+            ?.let { File(it).strictCanonicalFileOrNull() }
+            ?.takeIf { it.isDirectory }
             ?: return CommonJsPreloadResult(
                 moduleSources = emptyMap(),
                 diagnostics = stats.toDiagnostics(sourceName, workingDirectory, emptyList(), startedAt),
             )
+        val preloadRoot = EncryptedRuntimeScanRoot.capture(root)
+        if (preloadRoot == null || !preloadRoot.validateCurrentIdentity(stats)) {
+            stats.markIncomplete(COMMON_JS_PRELOAD_INCOMPLETE_ROOT_IDENTITY_FAILURE)
+            return CommonJsPreloadResult(
+                moduleSources = emptyMap(),
+                diagnostics = stats.toDiagnostics(sourceName, workingDirectory, emptyList(), startedAt),
+            )
+        }
         val parentDir = File(sourceName)
             .takeIf { it.isAbsolute }
             ?.normalizedCanonicalFile()
@@ -569,11 +871,17 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             source = source,
             parentDirectory = parentDir,
             rootDirectory = root,
+            preloadRoot = preloadRoot,
             moduleSources = moduleSources,
             visited = linkedSetOf(),
             stats = stats,
             depth = 1,
+            loaderAnalysis = rootLoaderAnalysis,
         )
+        if (!preloadRoot.validateCurrentIdentity(stats)) {
+            moduleSources.clear()
+            stats.markIncomplete(COMMON_JS_PRELOAD_INCOMPLETE_ROOT_IDENTITY_FAILURE)
+        }
         return CommonJsPreloadResult(
             moduleSources = moduleSources,
             diagnostics = stats.toDiagnostics(
@@ -585,71 +893,379 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         )
     }
 
+    private fun encryptedRuntimeModuleScanDecision(
+        isEsmEntry: Boolean,
+        commonJsDiagnostics: CommonJsPreloadDiagnostics,
+    ): EncryptedRuntimeModuleScanDecision {
+        return when {
+            isEsmEntry -> EncryptedRuntimeModuleScanDecision(
+                required = true,
+                reason = ENCRYPTED_SCAN_REASON_ESM_ENTRY,
+            )
+            commonJsDiagnostics.sourceLevelEsmSyntaxCount > 0 -> EncryptedRuntimeModuleScanDecision(
+                required = true,
+                reason = ENCRYPTED_SCAN_REASON_SOURCE_LEVEL_ESM_GRAPH,
+            )
+            commonJsDiagnostics.dynamicImportCount > 0 -> EncryptedRuntimeModuleScanDecision(
+                required = true,
+                reason = ENCRYPTED_SCAN_REASON_DYNAMIC_IMPORT,
+            )
+            commonJsDiagnostics.createRequireReferenceCount > 0 -> EncryptedRuntimeModuleScanDecision(
+                required = true,
+                reason = ENCRYPTED_SCAN_REASON_CREATE_REQUIRE,
+            )
+            commonJsDiagnostics.unclassifiedLoaderReferenceCount > 0 -> EncryptedRuntimeModuleScanDecision(
+                required = true,
+                reason = ENCRYPTED_SCAN_REASON_UNCLASSIFIED_LOADER,
+            )
+            commonJsDiagnostics.dynamicRequireIgnoredCount > 0 -> EncryptedRuntimeModuleScanDecision(
+                required = true,
+                reason = ENCRYPTED_SCAN_REASON_DYNAMIC_REQUIRE,
+            )
+            commonJsDiagnostics.dynamicCodeReferenceCount > 0 -> EncryptedRuntimeModuleScanDecision(
+                required = true,
+                reason = ENCRYPTED_SCAN_REASON_DYNAMIC_CODE,
+            )
+            commonJsDiagnostics.unresolvedStaticRequireCount > 0 -> EncryptedRuntimeModuleScanDecision(
+                required = true,
+                reason = ENCRYPTED_SCAN_REASON_UNRESOLVED_STATIC_REQUIRE,
+            )
+            !commonJsDiagnostics.complete -> EncryptedRuntimeModuleScanDecision(
+                required = true,
+                reason = ENCRYPTED_SCAN_REASON_COMMON_JS_PRELOAD_INCOMPLETE,
+            )
+            commonJsDiagnostics.trivialModuleFreeEntry -> EncryptedRuntimeModuleScanDecision(
+                required = false,
+                reason = ENCRYPTED_SCAN_REASON_TRIVIAL_MODULE_FREE,
+            )
+            else -> EncryptedRuntimeModuleScanDecision(
+                required = true,
+                reason = ENCRYPTED_SCAN_REASON_CONSERVATIVE_SOURCE,
+            )
+        }
+    }
+
     private fun collectEncryptedRuntimeModuleSources(
         source: JavaScriptSource,
         sourceName: String,
         workingDirectory: String?,
         moduleSources: Map<String, String>,
         sourceFileOverride: File? = null,
-    ): Map<String, String> {
-        val root = workingDirectory
+        decision: EncryptedRuntimeModuleScanDecision,
+    ): EncryptedRuntimeModuleSourcesResult {
+        val stats = EncryptedRuntimeModuleScanStats(decision)
+        if (!decision.required) {
+            return stats.result(emptyMap(), ENCRYPTED_SCAN_STATUS_SKIPPED)
+        }
+        val rootFile = workingDirectory
             ?.takeIf { it.isNotBlank() }
-            ?.let { File(it).normalizedCanonicalFile() }
-            ?: return emptyMap()
+            ?.let { File(it).strictCanonicalFileOrNull() }
+            ?.takeIf { it.isDirectory }
+            ?: return stats.result(emptyMap(), ENCRYPTED_SCAN_STATUS_WORKING_DIRECTORY_UNAVAILABLE)
+        val scanRoot = EncryptedRuntimeScanRoot.capture(rootFile)
+            ?: return stats.apply { identityReadFailureCount += 1 }
+                .result(emptyMap(), ENCRYPTED_SCAN_STATUS_INCOMPLETE_IDENTITY_FAILURE)
+        if (!scanRoot.validateCurrentIdentity(stats)) {
+            return stats.result(emptyMap(), ENCRYPTED_SCAN_STATUS_INCOMPLETE_IDENTITY_FAILURE)
+        }
         val sourceFile = sourceFileOverride
-            ?.normalizedCanonicalFile()
-            ?.takeIf { it.isFile && it.isInsideOrSame(root) }
+            ?.strictCanonicalFileOrNull()
+            ?.takeIf { it.isFile && scanRoot.containsCanonicalPath(it.absolutePath) }
             ?: (source as? JavaScriptFileSource)?.file
-                ?.normalizedCanonicalFile()
-                ?.takeIf { it.isFile && it.isInsideOrSame(root) }
-            ?: File(sourceName).takeIf { it.isAbsolute && it.isFile && it.isInsideOrSame(root) }
-            ?: return emptyMap()
+                ?.strictCanonicalFileOrNull()
+                ?.takeIf { it.isFile && scanRoot.containsCanonicalPath(it.absolutePath) }
+            ?: File(sourceName)
+                .takeIf { it.isAbsolute }
+                ?.strictCanonicalFileOrNull()
+                ?.takeIf { it.isFile && scanRoot.containsCanonicalPath(it.absolutePath) }
+            ?: return stats.result(emptyMap(), ENCRYPTED_SCAN_STATUS_SOURCE_FILE_UNAVAILABLE)
         val excluded = moduleSources.keys.toMutableSet()
-        excluded += sourceFile.normalizedAbsolutePath()
+        excluded += sourceFile.absolutePath
+        val existingModuleSourceBytes = moduleSources.values.sumOf {
+            it.toByteArray(Charsets.UTF_8).size.toLong()
+        }
+        encryptedRuntimeModuleOutputBudgetStatus(moduleSources.size, existingModuleSourceBytes)?.let { status ->
+            if (status == ENCRYPTED_SCAN_STATUS_INCOMPLETE_OUTPUT_COUNT_BUDGET) {
+                stats.outputCountBudgetExhausted = true
+            } else {
+                stats.outputBytesBudgetExhausted = true
+            }
+            return stats.result(emptyMap(), status)
+        }
         var remainingCount = (RUNTIME_MODULE_SOURCE_MAX_COUNT - moduleSources.size).coerceAtLeast(0)
-        if (remainingCount <= 0) {
-            return emptyMap()
-        }
-        var remainingBytes = RUNTIME_MODULE_SOURCES_MAX_BYTES - moduleSources.values.sumOf {
-            it.toByteArray(Charsets.UTF_8).size
-        }
-        if (remainingBytes <= 0) {
-            return emptyMap()
-        }
+        var remainingBytes = (RUNTIME_MODULE_SOURCES_MAX_BYTES.toLong() - existingModuleSourceBytes).toInt()
         val runtimeSources = linkedMapOf<String, String>()
-        root.walkTopDown()
-            .filter { file ->
-                file.isFile &&
-                    file.extension.lowercase() in RUNTIME_MODULE_SOURCE_EXTENSIONS &&
-                    !NodeTypeScriptStripper.isTypeScriptDeclarationSourceName(file.name)
-            }
-            .map { file -> file to file.relativePathInside(root) }
-            .sortedWith(
-                compareBy<Pair<File, String>>(
-                    { (_, relativePath) -> relativePath.split('/').contains(NODE_MODULES) },
-                    { (_, relativePath) -> relativePath.count { it == '/' } },
-                    { (_, relativePath) -> relativePath },
-                )
-            )
-            .forEach { (file, _) ->
+        stats.performed = true
+        val candidates = collectEncryptedRuntimeModuleCandidates(scanRoot, stats)
+        for (candidate in candidates) {
             if (remainingCount <= 0 || remainingBytes <= 0) {
-                return@forEach
+                if (remainingCount <= 0) {
+                    stats.outputCountBudgetExhausted = true
+                }
+                if (remainingBytes <= 0) {
+                    stats.outputBytesBudgetExhausted = true
+                }
+                break
             }
-            val moduleKey = file.normalizedAbsolutePath()
-            if (moduleKey in excluded || !file.isInsideOrSame(root)) {
-                return@forEach
+            if (candidate.moduleKey in excluded) {
+                continue
             }
-            val clearSource = file.encryptedScriptSourceText() ?: return@forEach
+            val maximumCleartextBytes = minOf(RUNTIME_MODULE_SOURCE_MAX_BYTES, remainingBytes)
+            val clearSource = candidate.encryptedScriptSourceText(
+                scanRoot = scanRoot,
+                stats = stats,
+                maximumCleartextBytes = maximumCleartextBytes,
+            ) ?: continue
             val moduleSource = normalizeEmbeddedSource(clearSource)
             val moduleBytes = moduleSource.toByteArray(Charsets.UTF_8).size
             if (moduleBytes > RUNTIME_MODULE_SOURCE_MAX_BYTES || moduleBytes > remainingBytes) {
-                return@forEach
+                stats.encryptedModuleBudgetRejectedCount += 1
+                if (moduleBytes > RUNTIME_MODULE_SOURCE_MAX_BYTES) {
+                    stats.cleartextSizeLimitRejectedCount += 1
+                }
+                if (moduleBytes > remainingBytes) {
+                    stats.outputBytesBudgetExhausted = true
+                }
+                continue
             }
-            runtimeSources[moduleKey] = moduleSource
+            runtimeSources[candidate.moduleKey] = moduleSource
+            stats.encryptedModuleCount += 1
+            stats.encryptedModuleSourceBytes += moduleBytes.toLong()
             remainingCount -= 1
             remainingBytes -= moduleBytes
         }
-        return runtimeSources
+        val hookSucceeded = runCatching { encryptedRuntimeScanBeforeFinalRootIdentityCheckForTest?.invoke() }
+            .onFailure { stats.identityReadFailureCount += 1 }
+            .isSuccess
+        if (!hookSucceeded || !scanRoot.validateCurrentIdentity(stats)) {
+            runtimeSources.clear()
+        }
+        return stats.result(runtimeSources, stats.completionStatus())
+    }
+
+    internal fun encryptedRuntimeModuleOutputBudgetStatus(
+        existingModuleSourceCount: Int,
+        existingModuleSourceBytes: Long,
+    ): String? {
+        return when {
+            existingModuleSourceCount >= RUNTIME_MODULE_SOURCE_MAX_COUNT ->
+                ENCRYPTED_SCAN_STATUS_INCOMPLETE_OUTPUT_COUNT_BUDGET
+            existingModuleSourceBytes >= RUNTIME_MODULE_SOURCES_MAX_BYTES.toLong() ->
+                ENCRYPTED_SCAN_STATUS_INCOMPLETE_OUTPUT_BYTES_BUDGET
+            else -> null
+        }
+    }
+
+    private fun collectEncryptedRuntimeModuleCandidates(
+        scanRoot: EncryptedRuntimeScanRoot,
+        stats: EncryptedRuntimeModuleScanStats,
+    ): List<EncryptedRuntimeModuleCandidate> {
+        val candidates = mutableListOf<EncryptedRuntimeModuleCandidate>()
+        val visitedCanonicalDirectories = linkedSetOf<String>()
+        val visitedCanonicalFiles = linkedSetOf<String>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            collectEncryptedRuntimeModuleCandidatesStreaming(
+                scanRoot = scanRoot,
+                stats = stats,
+                candidates = candidates,
+                visitedCanonicalDirectories = visitedCanonicalDirectories,
+                visitedCanonicalFiles = visitedCanonicalFiles,
+            )
+        } else {
+            collectEncryptedRuntimeModuleCandidatesLegacy(
+                scanRoot = scanRoot,
+                stats = stats,
+                candidates = candidates,
+                visitedCanonicalDirectories = visitedCanonicalDirectories,
+                visitedCanonicalFiles = visitedCanonicalFiles,
+            )
+        }
+        candidates.sortWith(
+            compareBy<EncryptedRuntimeModuleCandidate>(
+                { candidate -> candidate.relativePath.split('/').contains(NODE_MODULES) },
+                { candidate -> candidate.relativePath.count { it == '/' } },
+                { candidate -> candidate.relativePath },
+            )
+        )
+        return candidates
+    }
+
+    @androidx.annotation.RequiresApi(Build.VERSION_CODES.O)
+    private fun collectEncryptedRuntimeModuleCandidatesStreaming(
+        scanRoot: EncryptedRuntimeScanRoot,
+        stats: EncryptedRuntimeModuleScanStats,
+        candidates: MutableList<EncryptedRuntimeModuleCandidate>,
+        visitedCanonicalDirectories: MutableSet<String>,
+        visitedCanonicalFiles: MutableSet<String>,
+    ) {
+        val pendingDirectories = java.util.ArrayDeque<File>()
+        pendingDirectories.add(scanRoot.canonicalFile)
+        var stop = false
+        while (pendingDirectories.isNotEmpty() && !stop) {
+            val directory = pendingDirectories.removeLast()
+            val canonicalDirectory = directory.strictCanonicalFileOrNull()
+            val directoryKey = canonicalDirectory?.absolutePath
+            if (
+                canonicalDirectory == null ||
+                !canonicalDirectory.isDirectory ||
+                !scanRoot.containsCanonicalPath(canonicalDirectory.absolutePath) ||
+                directoryKey == null ||
+                !visitedCanonicalDirectories.add(directoryKey)
+            ) {
+                stats.prunedDirectoryCount += 1
+                if (canonicalDirectory == null || !canonicalDirectory.isDirectory) {
+                    stats.walkFailureCount += 1
+                }
+                continue
+            }
+            try {
+                Files.newDirectoryStream(canonicalDirectory.toPath()).use { entries ->
+                    for (path in entries) {
+                        if (stats.examinedPathCount >= ENCRYPTED_SCAN_MAX_EXAMINED_PATHS) {
+                            stats.traversalLimitReached = true
+                            stop = true
+                            break
+                        }
+                        stats.examinedPathCount += 1
+                        val walkedFile = path.toFile()
+                        if (Files.isSymbolicLink(path)) {
+                            val symbolicTarget = walkedFile.strictCanonicalFileOrNull()
+                            if (symbolicTarget == null) {
+                                stats.walkFailureCount += 1
+                            } else if (symbolicTarget.isDirectory) {
+                                stats.prunedDirectoryCount += 1
+                            } else {
+                                stats.outsidePathRejectedCount += 1
+                            }
+                            continue
+                        }
+                        if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+                            pendingDirectories.add(walkedFile)
+                            continue
+                        }
+                        if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+                            continue
+                        }
+                        if (!recordEncryptedRuntimeModuleCandidate(
+                                walkedFile,
+                                scanRoot,
+                                stats,
+                                candidates,
+                                visitedCanonicalFiles,
+                            )) {
+                            stop = true
+                            break
+                        }
+                    }
+                }
+            } catch (_: IOException) {
+                stats.walkFailureCount += 1
+            } catch (_: DirectoryIteratorException) {
+                stats.walkFailureCount += 1
+            } catch (_: SecurityException) {
+                stats.walkFailureCount += 1
+            }
+        }
+    }
+
+    private fun collectEncryptedRuntimeModuleCandidatesLegacy(
+        scanRoot: EncryptedRuntimeScanRoot,
+        stats: EncryptedRuntimeModuleScanStats,
+        candidates: MutableList<EncryptedRuntimeModuleCandidate>,
+        visitedCanonicalDirectories: MutableSet<String>,
+        visitedCanonicalFiles: MutableSet<String>,
+    ) {
+        try {
+            scanRoot.canonicalFile.walkTopDown()
+                .onEnter { directory ->
+                    if (stats.examinedPathCount >= ENCRYPTED_SCAN_MAX_EXAMINED_PATHS) {
+                        stats.traversalLimitReached = true
+                        throw EncryptedScanTraversalStoppedException()
+                    }
+                    stats.examinedPathCount += 1
+                    val canonicalDirectory = directory.strictCanonicalFileOrNull()
+                    val accepted = canonicalDirectory != null &&
+                            canonicalDirectory.isDirectory &&
+                            scanRoot.containsCanonicalPath(canonicalDirectory.absolutePath) &&
+                            visitedCanonicalDirectories.add(canonicalDirectory.absolutePath)
+                    if (!accepted) {
+                        stats.prunedDirectoryCount += 1
+                        if (canonicalDirectory == null || !canonicalDirectory.isDirectory) {
+                            stats.walkFailureCount += 1
+                        }
+                    }
+                    accepted
+                }
+                .onFail { _, _ -> stats.walkFailureCount += 1 }
+                .forEach { walkedFile ->
+                    if (walkedFile.isDirectory) {
+                        return@forEach
+                    }
+                    if (stats.examinedPathCount >= ENCRYPTED_SCAN_MAX_EXAMINED_PATHS) {
+                        stats.traversalLimitReached = true
+                        throw EncryptedScanTraversalStoppedException()
+                    }
+                    stats.examinedPathCount += 1
+                    if (!recordEncryptedRuntimeModuleCandidate(
+                            walkedFile,
+                            scanRoot,
+                            stats,
+                            candidates,
+                            visitedCanonicalFiles,
+                        )) {
+                        throw EncryptedScanTraversalStoppedException()
+                    }
+                }
+        } catch (_: EncryptedScanTraversalStoppedException) {
+            // The explicit limit status is reported by the caller.
+        }
+    }
+
+    private fun recordEncryptedRuntimeModuleCandidate(
+        walkedFile: File,
+        scanRoot: EncryptedRuntimeScanRoot,
+        stats: EncryptedRuntimeModuleScanStats,
+        candidates: MutableList<EncryptedRuntimeModuleCandidate>,
+        visitedCanonicalFiles: MutableSet<String>,
+    ): Boolean {
+        val file = walkedFile.strictCanonicalFileOrNull()
+        if (file == null || !file.isFile) {
+            stats.identityReadFailureCount += 1
+            return true
+        }
+        if (!scanRoot.containsCanonicalPath(file.absolutePath)) {
+            stats.outsidePathRejectedCount += 1
+            return true
+        }
+        stats.walkedFileCount += 1
+        if (
+            file.extension.lowercase() !in RUNTIME_MODULE_SOURCE_EXTENSIONS ||
+            NodeTypeScriptStripper.isTypeScriptDeclarationSourceName(file.name)
+        ) {
+            return true
+        }
+        val moduleKey = file.absolutePath
+        if (!visitedCanonicalFiles.add(moduleKey)) {
+            stats.duplicateCanonicalFileCount += 1
+            return true
+        }
+        if (candidates.size >= ENCRYPTED_SCAN_MAX_CANDIDATES) {
+            stats.candidateLimitReached = true
+            return false
+        }
+        val identity = file.fileIdentityOrNull(noFollow = true)
+        if (identity == null) {
+            stats.identityReadFailureCount += 1
+            return true
+        }
+        candidates += EncryptedRuntimeModuleCandidate(
+            file = file,
+            moduleKey = moduleKey,
+            relativePath = scanRoot.relativePath(file.absolutePath),
+            identity = identity,
+        )
+        stats.candidateFileCount += 1
+        return true
     }
 
     private fun isEsmSourceName(sourceName: String, workingDirectory: String?): Boolean {
@@ -692,49 +1308,119 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         source: String,
         parentDirectory: File,
         rootDirectory: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
         moduleSources: MutableMap<String, String>,
         visited: MutableSet<String>,
         stats: CommonJsPreloadStats,
         depth: Int,
+        loaderAnalysis: CommonJsSourceLoaderAnalysis = analyzeCommonJsSourceLoaders(source),
     ) {
-        val requireReferences = commonJsRequireReferences(source)
-        stats.recordRequireScan(
-            staticCount = requireReferences.count { it.moduleName != null },
-            requireCallCount = requireReferences.size,
+        val pending = java.util.ArrayDeque<CommonJsPreloadFrame>()
+        pending.add(
+            CommonJsPreloadFrame(
+                parentDirectory = parentDirectory,
+                depth = depth,
+                loaderAnalysis = loaderAnalysis,
+                recordLoaderAnalysis = depth > 1,
+            )
         )
-        requireReferences
-            .mapNotNull { it.moduleName }
-            .forEach { moduleName ->
-                val moduleFiles = resolveCommonJsModuleFiles(parentDirectory, rootDirectory, moduleName)
-                if (moduleFiles.isEmpty()) {
-                    stats.unresolvedStaticRequireCount += 1
-                    return@forEach
+        while (pending.isNotEmpty() && stats.complete) {
+            val frame = pending.peekLast() ?: break
+            if (!frame.started) {
+                frame.started = true
+                if (frame.depth > COMMON_JS_PRELOAD_MAX_DEPTH) {
+                    stats.depthLimitRejectedCount += 1
+                    stats.markIncomplete(COMMON_JS_PRELOAD_INCOMPLETE_DEPTH_LIMIT)
+                    break
                 }
-                moduleFiles.forEach { moduleFile ->
-                    val moduleKey = moduleFile.normalizedAbsolutePath()
-                    if (!visited.add(moduleKey)) {
-                        stats.duplicateSkippedCount += 1
-                        return@forEach
-                    }
-                    val moduleSource = normalizeEmbeddedSource(sourceText(moduleFile))
-                    moduleSources[moduleKey] = moduleSource
-                    stats.recordPreloadedModule(moduleFile, moduleSource, depth)
-                    if (
-                        moduleFile.extension.lowercase() in COMMON_JS_RECURSIVE_SOURCE_EXTENSIONS &&
-                        !NodeTypeScriptStripper.isTypeScriptDeclarationSourceName(moduleFile.name)
-                    ) {
-                        collectCommonJsModuleSources(
-                            source = moduleSource,
-                            parentDirectory = moduleFile.parentFile ?: rootDirectory,
-                            rootDirectory = rootDirectory,
-                            moduleSources = moduleSources,
-                            visited = visited,
-                            stats = stats,
-                            depth = depth + 1,
-                        )
-                    }
+                if (frame.recordLoaderAnalysis) {
+                    stats.recordLoaderAnalysis(frame.loaderAnalysis)
                 }
             }
+
+            if (frame.moduleFileIndex < frame.moduleFiles.size) {
+                val unresolvedModuleFile = frame.moduleFiles[frame.moduleFileIndex++]
+                val moduleFile = unresolvedModuleFile.strictCanonicalFileOrNull()
+                if (moduleFile == null || !preloadRoot.containsCanonicalPath(moduleFile.absolutePath)) {
+                    stats.sourceReadFailureCount += 1
+                    stats.markIncomplete(COMMON_JS_PRELOAD_INCOMPLETE_SOURCE_READ_FAILURE)
+                    break
+                }
+                val moduleKey = moduleFile.absolutePath
+                if (!visited.add(moduleKey)) {
+                    stats.duplicateSkippedCount += 1
+                    continue
+                }
+                if (moduleSources.size >= COMMON_JS_PRELOAD_HARD_MODULE_COUNT) {
+                    stats.moduleCountLimitRejectedCount += 1
+                    stats.markIncomplete(COMMON_JS_PRELOAD_INCOMPLETE_MODULE_COUNT_LIMIT)
+                    break
+                }
+                val rawModuleSource = when (
+                    val readResult = readSourceTextBounded(moduleFile, RUNTIME_MODULE_SOURCE_MAX_BYTES)
+                ) {
+                    is BoundedSourceReadResult.Success -> readResult.source
+                    BoundedSourceReadResult.SizeLimitExceeded -> {
+                        stats.sourceSizeLimitRejectedCount += 1
+                        stats.markIncomplete(COMMON_JS_PRELOAD_INCOMPLETE_SOURCE_SIZE_LIMIT)
+                        break
+                    }
+                    BoundedSourceReadResult.Failure -> {
+                        stats.sourceReadFailureCount += 1
+                        stats.markIncomplete(COMMON_JS_PRELOAD_INCOMPLETE_SOURCE_READ_FAILURE)
+                        break
+                    }
+                }
+                val moduleSource = normalizeEmbeddedSource(rawModuleSource)
+                val moduleBytes = moduleSource.toByteArray(Charsets.UTF_8).size
+                if (moduleBytes > RUNTIME_MODULE_SOURCE_MAX_BYTES) {
+                    stats.sourceSizeLimitRejectedCount += 1
+                    stats.markIncomplete(COMMON_JS_PRELOAD_INCOMPLETE_SOURCE_SIZE_LIMIT)
+                    break
+                }
+                if (stats.totalSourceBytes.toLong() + moduleBytes > RUNTIME_MODULE_SOURCES_MAX_BYTES) {
+                    stats.aggregateSizeLimitRejectedCount += 1
+                    stats.markIncomplete(COMMON_JS_PRELOAD_INCOMPLETE_AGGREGATE_SIZE_LIMIT)
+                    break
+                }
+                moduleSources[moduleKey] = moduleSource
+                stats.recordPreloadedModule(moduleFile, moduleSource, frame.depth)
+                if (moduleSources.size > RUNTIME_MODULE_SOURCE_MAX_COUNT) {
+                    stats.moduleCountLimitRejectedCount += 1
+                    stats.markIncomplete(COMMON_JS_PRELOAD_INCOMPLETE_MODULE_COUNT_LIMIT)
+                    break
+                }
+                if (
+                    moduleFile.extension.lowercase() in COMMON_JS_RECURSIVE_SOURCE_EXTENSIONS &&
+                    !NodeTypeScriptStripper.isTypeScriptDeclarationSourceName(moduleFile.name)
+                ) {
+                    pending.add(
+                        CommonJsPreloadFrame(
+                            parentDirectory = moduleFile.parentFile ?: rootDirectory,
+                            depth = frame.depth + 1,
+                            loaderAnalysis = analyzeCommonJsSourceLoaders(moduleSource),
+                            recordLoaderAnalysis = true,
+                        )
+                    )
+                }
+                continue
+            }
+
+            if (frame.referenceIndex >= frame.loaderAnalysis.requireReferences.size) {
+                pending.removeLast()
+                continue
+            }
+            val reference = frame.loaderAnalysis.requireReferences[frame.referenceIndex++]
+            val moduleName = reference.moduleName ?: continue
+            if (moduleName.isRuntimeProvidedCommonJsSpecifier()) {
+                continue
+            }
+            frame.moduleFiles = resolveCommonJsModuleFiles(frame.parentDirectory, rootDirectory, moduleName)
+            frame.moduleFileIndex = 0
+            if (frame.moduleFiles.isEmpty()) {
+                stats.unresolvedStaticRequireCount += 1
+            }
+        }
     }
 
     private fun resolveCommonJsModuleFiles(parentDirectory: File, rootDirectory: File, moduleName: String): List<File> {
@@ -1216,12 +1902,36 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         return "engine-$engineId-${UUID.randomUUID()}"
     }
 
+    private fun elapsedSince(startedAt: Long): Long {
+        return (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L)
+    }
+
     private fun File.normalizedAbsolutePath(): String {
         return runCatching { canonicalPath }.getOrElse { absolutePath }
     }
 
     private fun File.normalizedCanonicalFile(): File {
         return runCatching { canonicalFile }.getOrElse { absoluteFile }
+    }
+
+    private fun File.strictCanonicalFileOrNull(): File? {
+        return try {
+            canonicalFile
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun File.fileIdentityOrNull(noFollow: Boolean = false): FileIdentity? {
+        return try {
+            val stat = if (noFollow) Os.lstat(path) else Os.stat(path)
+            if (!OsConstants.S_ISREG(stat.st_mode) && !OsConstants.S_ISDIR(stat.st_mode)) {
+                return null
+            }
+            FileIdentity(device = stat.st_dev, inode = stat.st_ino)
+        } catch (_: Exception) {
+            null
+        }
     }
 
     private fun File.isInsideOrSame(root: File): Boolean {
@@ -1249,6 +1959,12 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
 
     private fun String.isCommonJsPackageImportSpecifier(): Boolean {
         return startsWith("#") && this != "#" && !startsWith("#/") && indexOf('\u0000') < 0
+    }
+
+    private fun String.isRuntimeProvidedCommonJsSpecifier(): Boolean {
+        return this in COMMON_JS_BUILTIN_MODULE_NAMES ||
+                startsWith("node:") ||
+                COMMON_JS_PROTOCOL_SPECIFIER_PATTERN.containsMatchIn(this)
     }
 
     private fun String.toCommonJsPackageSpecifier(): CommonJsPackageSpecifier? {
@@ -1309,49 +2025,241 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         const val PACKAGE_JSON_EXPORTS = "exports"
         const val PACKAGE_JSON_IMPORTS = "imports"
         const val NODE_MODULES = "node_modules"
+        const val ENCRYPTED_SCAN_REASON_ESM_ENTRY = "esm_entry"
+        const val ENCRYPTED_SCAN_REASON_SOURCE_LEVEL_ESM_GRAPH = "source_level_esm_graph"
+        const val ENCRYPTED_SCAN_REASON_DYNAMIC_IMPORT = "dynamic_import"
+        const val ENCRYPTED_SCAN_REASON_CREATE_REQUIRE = "create_require"
+        const val ENCRYPTED_SCAN_REASON_UNCLASSIFIED_LOADER = "unclassified_loader"
+        const val ENCRYPTED_SCAN_REASON_DYNAMIC_REQUIRE = "dynamic_require"
+        const val ENCRYPTED_SCAN_REASON_DYNAMIC_CODE = "dynamic_code"
+        const val ENCRYPTED_SCAN_REASON_UNRESOLVED_STATIC_REQUIRE = "unresolved_static_require"
+        const val ENCRYPTED_SCAN_REASON_COMMON_JS_PRELOAD_INCOMPLETE = "commonjs_preload_incomplete"
+        const val ENCRYPTED_SCAN_REASON_CONSERVATIVE_SOURCE = "conservative_source"
+        const val ENCRYPTED_SCAN_REASON_TRIVIAL_MODULE_FREE = "trivial_module_free"
+        const val ENCRYPTED_SCAN_STATUS_SKIPPED = "skipped"
+        const val ENCRYPTED_SCAN_STATUS_COMPLETED = "completed"
+        const val ENCRYPTED_SCAN_STATUS_WORKING_DIRECTORY_UNAVAILABLE = "working_directory_unavailable"
+        const val ENCRYPTED_SCAN_STATUS_SOURCE_FILE_UNAVAILABLE = "source_file_unavailable"
+        const val ENCRYPTED_SCAN_STATUS_INCOMPLETE_WALK_FAILURE = "incomplete_walk_failure"
+        const val ENCRYPTED_SCAN_STATUS_INCOMPLETE_TRAVERSAL_LIMIT = "incomplete_traversal_limit"
+        const val ENCRYPTED_SCAN_STATUS_INCOMPLETE_CANDIDATE_LIMIT = "incomplete_candidate_limit"
+        const val ENCRYPTED_SCAN_STATUS_INCOMPLETE_IDENTITY_FAILURE = "incomplete_identity_failure"
+        const val ENCRYPTED_SCAN_STATUS_INCOMPLETE_READ_FAILURE = "incomplete_read_failure"
+        const val ENCRYPTED_SCAN_STATUS_INCOMPLETE_DECRYPT_FAILURE = "incomplete_decrypt_failure"
+        const val ENCRYPTED_SCAN_STATUS_INCOMPLETE_MODULE_SIZE_BUDGET = "incomplete_module_size_budget"
+        const val ENCRYPTED_SCAN_STATUS_INCOMPLETE_OUTPUT_COUNT_BUDGET = "incomplete_output_count_budget"
+        const val ENCRYPTED_SCAN_STATUS_INCOMPLETE_OUTPUT_BYTES_BUDGET = "incomplete_output_bytes_budget"
         const val RUNTIME_MODULE_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
         const val RUNTIME_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
         const val RUNTIME_MODULE_SOURCE_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT
+        const val COMMON_JS_PRELOAD_MAX_DEPTH = RUNTIME_MODULE_SOURCE_MAX_COUNT + 1
+        const val COMMON_JS_PRELOAD_HARD_MODULE_COUNT = RUNTIME_MODULE_SOURCE_MAX_COUNT + 1
+        const val COMMON_JS_PRELOAD_INCOMPLETE_DEPTH_LIMIT = "depth_limit"
+        const val COMMON_JS_PRELOAD_INCOMPLETE_MODULE_COUNT_LIMIT = "module_count_limit"
+        const val COMMON_JS_PRELOAD_INCOMPLETE_SOURCE_SIZE_LIMIT = "source_size_limit"
+        const val COMMON_JS_PRELOAD_INCOMPLETE_AGGREGATE_SIZE_LIMIT = "aggregate_size_limit"
+        const val COMMON_JS_PRELOAD_INCOMPLETE_SOURCE_READ_FAILURE = "source_read_failure"
+        const val COMMON_JS_PRELOAD_INCOMPLETE_ROOT_IDENTITY_FAILURE = "root_identity_failure"
+        const val ENCRYPTED_SCAN_MAX_EXAMINED_PATHS = 16_384
+        const val ENCRYPTED_SCAN_MAX_CANDIDATES = 8_192
+        const val TRIVIAL_MODULE_FREE_ENTRY_MAX_CHARS = 4_096
+        const val ENCRYPTED_SOURCE_CIPHER_BLOCK_SIZE_BYTES = 16L
+        const val ENCRYPTED_SOURCE_READ_BUFFER_SIZE = 8 * 1024
         val COMMON_JS_MODULE_EXTENSIONS = NodeRuntimeCapabilities.commonJsModuleExtensions
         val RUNTIME_MODULE_SOURCE_EXTENSIONS = COMMON_JS_MODULE_EXTENSIONS + MJS_EXTENSION + MTS_EXTENSION
         val COMMON_JS_RECURSIVE_SOURCE_EXTENSIONS = NodeRuntimeCapabilities.commonJsRecursiveSourceExtensions
         val PACKAGE_JSON_EXPORT_CONDITIONS = NodeRuntimeCapabilities.packageJsonExportConditions
         val COMMON_JS_PROTOCOL_SPECIFIER_PATTERN = Regex("""^[A-Za-z][A-Za-z0-9+.-]*:""")
-        val COMMON_JS_BUILTIN_MODULE_NAMES = NodeRuntimeCapabilities.commonJsBuiltinModuleNames
+        val LOADER_AUTHORITY_MODULE_NAMES = setOf(
+            "module", "node:module", "vm", "node:vm", "process", "node:process",
+        )
+        val TRIVIAL_MODULE_FREE_ENTRY_PATTERN = Regex(
+            """^\s*(?:(?:[\"']nodejs[\"'])\s*;\s*)?console\s*\.\s*(?:log|debug|info|warn|error)\s*\(\s*(?:(?:-?(?:\d+(?:\.\d+)?|\.\d+)|true|false|null|undefined|[\"'](?:\\.|[^\"'\\\r\n])*[\"'])(?:\s*,\s*(?:-?(?:\d+(?:\.\d+)?|\.\d+)|true|false|null|undefined|[\"'](?:\\.|[^\"'\\\r\n])*[\"']))*)?\s*\)\s*;?\s*$""",
+        )
+        val COMMON_JS_BUILTIN_MODULE_NAMES = buildSet {
+            addAll(NodeRuntimeCapabilities.commonJsBuiltinModuleNames)
+            addAll(NodeRuntimeCapabilities.limitedBuiltinModuleNames)
+            addAll(NodeRuntimeCapabilities.disabledBuiltinModuleNames)
+            addAll(NodeRuntimeCapabilities.networkBuiltinModuleNames)
+        }
+        val SAFE_COMMON_JS_MODULE_PROPERTIES = setOf(
+            "exports",
+            "filename",
+            "id",
+            "loaded",
+        )
 
-        private fun commonJsRequireReferences(source: String): List<CommonJsRequireReference> {
+        private fun analyzeCommonJsSourceLoaders(source: String): CommonJsSourceLoaderAnalysis {
             if (source.isEmpty()) {
-                return emptyList()
+                return CommonJsSourceLoaderAnalysis.empty()
             }
             val references = mutableListOf<CommonJsRequireReference>()
+            var sourceLevelEsmSyntaxCount = 0
+            var dynamicImportCount = 0
+            var createRequireReferenceCount = 0
+            var unclassifiedLoaderReferenceCount = 0
+            var dynamicCodeReferenceCount = 0
             var index = 0
             while (index < source.length) {
                 val ch = source[index]
                 index = when {
-                    ch == '"' || ch == '\'' -> skipQuotedJavaScriptString(source, index)
-                    ch == '`' -> skipJavaScriptTemplateLiteral(source, index)
+                    ch == '"' || ch == '\'' -> {
+                        val literal = parseJavaScriptStringLiteral(source, index)
+                        when (literal?.value) {
+                            "constructor" -> dynamicCodeReferenceCount += 1
+                            "require", "createRequire", "eval", "Function", "mainModule", "getBuiltinModule" ->
+                                unclassifiedLoaderReferenceCount += 1
+                        }
+                        literal?.endIndex ?: skipQuotedJavaScriptString(source, index)
+                    }
+                    ch == '`' -> {
+                        val endIndex = skipJavaScriptTemplateLiteral(source, index)
+                        unclassifiedLoaderReferenceCount += 1
+                        endIndex
+                    }
                     ch == '/' && index + 1 < source.length && source[index + 1] == '/' -> skipJavaScriptLineComment(source, index)
                     ch == '/' && index + 1 < source.length && source[index + 1] == '*' -> skipJavaScriptBlockComment(source, index)
-                    ch == '/' && looksLikeJavaScriptRegexLiteral(source, index) -> skipJavaScriptRegexLiteral(source, index)
+                    ch == '/' && looksLikeJavaScriptRegexLiteral(source, index) -> {
+                        unclassifiedLoaderReferenceCount += 1
+                        skipJavaScriptRegexLiteral(source, index)
+                    }
                     ch.isJavaScriptIdentifierStart() -> {
                         val identifier = readJavaScriptIdentifier(source, index)
-                        val parsed = when {
-                            !isJavaScriptRequireBoundaryBefore(source, index) -> null
-                            identifier.name == "require" -> parseCommonJsRequireCall(source, identifier.endIndex)
-                            identifier.name == "module" -> parseCommonJsModuleRequireCall(source, identifier.endIndex)
-                            else -> null
-                        }
-                        if (parsed != null) {
-                            references += CommonJsRequireReference(parsed.moduleName)
-                            parsed.endIndex.coerceAtLeast(identifier.endIndex)
-                        } else {
-                            identifier.endIndex
+                        val hasBoundary = isJavaScriptRequireBoundaryBefore(source, index)
+                        when (identifier.name) {
+                            "require" -> {
+                                val parsed = if (hasBoundary) {
+                                    parseCommonJsRequireCall(source, identifier.endIndex)
+                                } else {
+                                    null
+                                }
+                                if (parsed != null) {
+                                    references += CommonJsRequireReference(parsed.moduleName)
+                                    if (parsed.moduleName in LOADER_AUTHORITY_MODULE_NAMES) {
+                                        unclassifiedLoaderReferenceCount += 1
+                                    }
+                                    parsed.endIndex.coerceAtLeast(identifier.endIndex)
+                                } else {
+                                    unclassifiedLoaderReferenceCount += 1
+                                    identifier.endIndex
+                                }
+                            }
+                            "module" -> {
+                                val parsed = if (hasBoundary) {
+                                    parseCommonJsModuleRequireCall(source, identifier.endIndex)
+                                } else {
+                                    null
+                                }
+                                if (parsed != null) {
+                                    references += CommonJsRequireReference(parsed.moduleName)
+                                    if (parsed.moduleName in LOADER_AUTHORITY_MODULE_NAMES) {
+                                        unclassifiedLoaderReferenceCount += 1
+                                    }
+                                    parsed.endIndex.coerceAtLeast(identifier.endIndex)
+                                } else {
+                                    if (hasBoundary && hasPotentialModuleLoaderAccess(source, identifier.endIndex)) {
+                                        unclassifiedLoaderReferenceCount += 1
+                                    }
+                                    identifier.endIndex
+                                }
+                            }
+                            "createRequire" -> {
+                                createRequireReferenceCount += 1
+                                identifier.endIndex
+                            }
+                            "import" -> {
+                                if (hasBoundary) {
+                                    val nextIndex = skipJavaScriptWhitespaceAndComments(source, identifier.endIndex)
+                                    when {
+                                        nextIndex < source.length && source[nextIndex] == '(' -> dynamicImportCount += 1
+                                        isSourceLevelEsmImport(source, nextIndex) -> sourceLevelEsmSyntaxCount += 1
+                                    }
+                                }
+                                identifier.endIndex
+                            }
+                            "export" -> {
+                                if (hasBoundary) {
+                                    val nextIndex = skipJavaScriptWhitespaceAndComments(source, identifier.endIndex)
+                                    if (isSourceLevelEsmExport(source, nextIndex)) {
+                                        sourceLevelEsmSyntaxCount += 1
+                                    }
+                                }
+                                identifier.endIndex
+                            }
+                            "eval", "Function" -> {
+                                dynamicCodeReferenceCount += 1
+                                identifier.endIndex
+                            }
+                            "constructor" -> {
+                                dynamicCodeReferenceCount += 1
+                                identifier.endIndex
+                            }
+                            "globalThis", "global", "Reflect", "this", "process", "mainModule", "getBuiltinModule" -> {
+                                unclassifiedLoaderReferenceCount += 1
+                                identifier.endIndex
+                            }
+                            "arguments" -> {
+                                if (hasBoundary) {
+                                    unclassifiedLoaderReferenceCount += 1
+                                }
+                                identifier.endIndex
+                            }
+                            else -> identifier.endIndex
                         }
                     }
                     else -> index + 1
                 }
             }
-            return references
+            return CommonJsSourceLoaderAnalysis(
+                requireReferences = references,
+                sourceLevelEsmSyntaxCount = sourceLevelEsmSyntaxCount,
+                dynamicImportCount = dynamicImportCount,
+                createRequireReferenceCount = createRequireReferenceCount,
+                unclassifiedLoaderReferenceCount = unclassifiedLoaderReferenceCount,
+                dynamicCodeReferenceCount = dynamicCodeReferenceCount,
+                trivialModuleFreeEntry = source.length <= TRIVIAL_MODULE_FREE_ENTRY_MAX_CHARS &&
+                        TRIVIAL_MODULE_FREE_ENTRY_PATTERN.matches(source),
+            )
+        }
+
+        private fun hasPotentialModuleLoaderAccess(source: String, moduleIdentifierEnd: Int): Boolean {
+            var index = skipJavaScriptWhitespaceAndComments(source, moduleIdentifierEnd)
+            if (index >= source.length) {
+                return true
+            }
+            if (source[index] == '.') {
+                index = skipJavaScriptWhitespaceAndComments(source, index + 1)
+                if (index >= source.length || !source[index].isJavaScriptIdentifierStart()) {
+                    return true
+                }
+                return readJavaScriptIdentifier(source, index).name !in SAFE_COMMON_JS_MODULE_PROPERTIES
+            }
+            return source[index] != ':'
+        }
+
+        private fun isSourceLevelEsmImport(source: String, nextIndex: Int): Boolean {
+            if (nextIndex >= source.length) {
+                return false
+            }
+            val next = source[nextIndex]
+            if (next == '"' || next == '\'' || next == '{' || next == '*') {
+                return true
+            }
+            if (next == '.') {
+                val afterDot = skipJavaScriptWhitespaceAndComments(source, nextIndex + 1)
+                return afterDot < source.length &&
+                        source.startsWith("meta", afterDot) &&
+                        (afterDot + 4 >= source.length || !source[afterDot + 4].isJavaScriptIdentifierPart())
+            }
+            return next.isJavaScriptIdentifierStart()
+        }
+
+        private fun isSourceLevelEsmExport(source: String, nextIndex: Int): Boolean {
+            if (nextIndex >= source.length) {
+                return false
+            }
+            val next = source[nextIndex]
+            return next == '{' || next == '*' || next.isJavaScriptIdentifierStart()
         }
 
         private fun parseCommonJsModuleRequireCall(source: String, moduleIdentifierEnd: Int): CommonJsRequireParseResult? {
@@ -1575,6 +2483,23 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         val staticRequireCount: Int,
         val dynamicRequireIgnoredCount: Int,
         val unresolvedStaticRequireCount: Int,
+        val sourceLevelEsmSyntaxCount: Int,
+        val dynamicImportCount: Int,
+        val createRequireReferenceCount: Int,
+        val unclassifiedLoaderReferenceCount: Int,
+        val dynamicCodeReferenceCount: Int,
+        val trivialModuleFreeEntry: Boolean,
+        val complete: Boolean,
+        val incompleteReason: String?,
+        val sourceReadFailureCount: Int,
+        val sourceSizeLimitRejectedCount: Int,
+        val aggregateSizeLimitRejectedCount: Int,
+        val moduleCountLimitRejectedCount: Int,
+        val depthLimitRejectedCount: Int,
+        val moduleCountLimit: Int,
+        val sourceBytesLimit: Int,
+        val aggregateSourceBytesLimit: Int,
+        val depthLimit: Int,
         val elapsedMs: Long,
         val moduleSourceNames: List<String>,
     ) {
@@ -1593,8 +2518,216 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                 staticRequireCount = 0,
                 dynamicRequireIgnoredCount = 0,
                 unresolvedStaticRequireCount = 0,
+                sourceLevelEsmSyntaxCount = 0,
+                dynamicImportCount = 0,
+                createRequireReferenceCount = 0,
+                unclassifiedLoaderReferenceCount = 0,
+                dynamicCodeReferenceCount = 0,
+                trivialModuleFreeEntry = false,
+                complete = true,
+                incompleteReason = null,
+                sourceReadFailureCount = 0,
+                sourceSizeLimitRejectedCount = 0,
+                aggregateSizeLimitRejectedCount = 0,
+                moduleCountLimitRejectedCount = 0,
+                depthLimitRejectedCount = 0,
+                moduleCountLimit = RUNTIME_MODULE_SOURCE_MAX_COUNT,
+                sourceBytesLimit = RUNTIME_MODULE_SOURCE_MAX_BYTES,
+                aggregateSourceBytesLimit = RUNTIME_MODULE_SOURCES_MAX_BYTES,
+                depthLimit = COMMON_JS_PRELOAD_MAX_DEPTH,
                 elapsedMs = 0L,
                 moduleSourceNames = emptyList(),
+            )
+        }
+    }
+
+    data class RequestPreparationDiagnostics(
+        val prepared: Boolean = true,
+        val sourceName: String,
+        val workingDirectory: String?,
+        val isEsmEntry: Boolean,
+        val elapsedMs: Long,
+        val commonJs: CommonJsPreloadDiagnostics,
+        val encryptedRuntimeModuleScan: EncryptedRuntimeModuleScanDiagnostics,
+    ) {
+
+        internal fun toNativeValues(): Map<String, String> = linkedMapOf(
+            "embedded_script.engine_request_preparation.prepared" to prepared.toString(),
+            "embedded_script.engine_request_preparation.source_name" to sourceName,
+            "embedded_script.engine_request_preparation.working_directory" to workingDirectory.orEmpty(),
+            "embedded_script.engine_request_preparation.esm_entry" to isEsmEntry.toString(),
+            "timing.engine_request_preparation.ms" to elapsedMs.toString(),
+            "timing.engine_commonjs_preload.ms" to commonJs.elapsedMs.toString(),
+            "embedded_script.engine_commonjs_preload.module_count" to commonJs.moduleCount.toString(),
+            "embedded_script.engine_commonjs_preload.static_require_count" to commonJs.staticRequireCount.toString(),
+            "embedded_script.engine_commonjs_preload.dynamic_require_count" to commonJs.dynamicRequireIgnoredCount.toString(),
+            "embedded_script.engine_commonjs_preload.unresolved_static_require_count" to
+                    commonJs.unresolvedStaticRequireCount.toString(),
+            "embedded_script.engine_commonjs_preload.source_level_esm_count" to
+                    commonJs.sourceLevelEsmSyntaxCount.toString(),
+            "embedded_script.engine_commonjs_preload.dynamic_import_count" to commonJs.dynamicImportCount.toString(),
+            "embedded_script.engine_commonjs_preload.create_require_count" to
+                    commonJs.createRequireReferenceCount.toString(),
+            "embedded_script.engine_commonjs_preload.unclassified_loader_count" to
+                    commonJs.unclassifiedLoaderReferenceCount.toString(),
+            "embedded_script.engine_commonjs_preload.dynamic_code_count" to
+                    commonJs.dynamicCodeReferenceCount.toString(),
+            "embedded_script.engine_commonjs_preload.trivial_module_free_entry" to
+                    commonJs.trivialModuleFreeEntry.toString(),
+            "embedded_script.engine_commonjs_preload.complete" to commonJs.complete.toString(),
+            "embedded_script.engine_commonjs_preload.incomplete_reason" to commonJs.incompleteReason.orEmpty(),
+            "embedded_script.engine_commonjs_preload.source_read_failure_count" to
+                    commonJs.sourceReadFailureCount.toString(),
+            "embedded_script.engine_commonjs_preload.source_size_limit_rejected_count" to
+                    commonJs.sourceSizeLimitRejectedCount.toString(),
+            "embedded_script.engine_commonjs_preload.aggregate_size_limit_rejected_count" to
+                    commonJs.aggregateSizeLimitRejectedCount.toString(),
+            "embedded_script.engine_commonjs_preload.module_count_limit_rejected_count" to
+                    commonJs.moduleCountLimitRejectedCount.toString(),
+            "embedded_script.engine_commonjs_preload.depth_limit_rejected_count" to
+                    commonJs.depthLimitRejectedCount.toString(),
+            "embedded_script.engine_commonjs_preload.module_count_limit" to commonJs.moduleCountLimit.toString(),
+            "embedded_script.engine_commonjs_preload.source_bytes_limit" to commonJs.sourceBytesLimit.toString(),
+            "embedded_script.engine_commonjs_preload.aggregate_source_bytes_limit" to
+                    commonJs.aggregateSourceBytesLimit.toString(),
+            "embedded_script.engine_commonjs_preload.depth_limit" to commonJs.depthLimit.toString(),
+        ) + encryptedRuntimeModuleScan.toNativeValues()
+
+        companion object {
+            fun empty(): RequestPreparationDiagnostics = RequestPreparationDiagnostics(
+                prepared = false,
+                sourceName = DEFAULT_SOURCE_NAME,
+                workingDirectory = null,
+                isEsmEntry = false,
+                elapsedMs = 0L,
+                commonJs = CommonJsPreloadDiagnostics.empty(),
+                encryptedRuntimeModuleScan = EncryptedRuntimeModuleScanDiagnostics.empty(),
+            )
+        }
+    }
+
+    data class EncryptedRuntimeModuleScanDiagnostics(
+        val required: Boolean,
+        val performed: Boolean,
+        val decision: String,
+        val status: String,
+        val elapsedMs: Long,
+        val examinedPathLimit: Int,
+        val candidateFileLimit: Int,
+        val examinedPathCount: Int,
+        val walkedFileCount: Int,
+        val candidateFileCount: Int,
+        val headerProbeCount: Int,
+        val headerBytesRead: Long,
+        val headerReadFailureCount: Int,
+        val fullFileReadCount: Int,
+        val fullFileBytesRead: Long,
+        val fullFileReadFailureCount: Int,
+        val prunedDirectoryCount: Int,
+        val outsidePathRejectedCount: Int,
+        val duplicateCanonicalFileCount: Int,
+        val walkFailureCount: Int,
+        val oversizedCiphertextCount: Int,
+        val cleartextSizeLimitRejectedCount: Int,
+        val decryptFailureCount: Int,
+        val encryptedModuleCount: Int,
+        val retainedEncryptedModuleCount: Int,
+        val encryptedModuleSourceBytes: Long,
+        val encryptedModuleBudgetRejectedCount: Int,
+        val traversalLimitReached: Boolean,
+        val candidateLimitReached: Boolean,
+        val identityReadFailureCount: Int,
+        val identityMismatchCount: Int,
+        val outputCountBudgetExhausted: Boolean,
+        val outputBytesBudgetExhausted: Boolean,
+    ) {
+
+        internal fun toNativeValues(): Map<String, String> = linkedMapOf(
+            "embedded_script.engine_encrypted_runtime_scan.required" to required.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.performed" to performed.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.decision" to decision,
+            "embedded_script.engine_encrypted_runtime_scan.status" to status,
+            "timing.engine_encrypted_runtime_scan.ms" to elapsedMs.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.examined_path_limit" to examinedPathLimit.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.candidate_file_limit" to candidateFileLimit.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.examined_path_count" to examinedPathCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.walked_file_count" to walkedFileCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.candidate_file_count" to candidateFileCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.header_probe_count" to headerProbeCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.header_bytes_read" to headerBytesRead.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.header_read_failure_count" to
+                    headerReadFailureCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.full_file_read_count" to fullFileReadCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.full_file_bytes_read" to fullFileBytesRead.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.full_file_read_failure_count" to
+                    fullFileReadFailureCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.pruned_directory_count" to prunedDirectoryCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.outside_path_rejected_count" to
+                    outsidePathRejectedCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.duplicate_canonical_file_count" to
+                    duplicateCanonicalFileCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.walk_failure_count" to walkFailureCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.oversized_ciphertext_count" to
+                    oversizedCiphertextCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.cleartext_size_limit_rejected_count" to
+                    cleartextSizeLimitRejectedCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.decrypt_failure_count" to decryptFailureCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.encrypted_module_count" to encryptedModuleCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.retained_encrypted_module_count" to
+                    retainedEncryptedModuleCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.encrypted_module_source_bytes" to
+                    encryptedModuleSourceBytes.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.budget_rejected_count" to
+                    encryptedModuleBudgetRejectedCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.traversal_limit_reached" to
+                    traversalLimitReached.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.candidate_limit_reached" to
+                    candidateLimitReached.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.identity_read_failure_count" to
+                    identityReadFailureCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.identity_mismatch_count" to
+                    identityMismatchCount.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.output_count_budget_exhausted" to
+                    outputCountBudgetExhausted.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.output_bytes_budget_exhausted" to
+                    outputBytesBudgetExhausted.toString(),
+        )
+
+        companion object {
+            fun empty(): EncryptedRuntimeModuleScanDiagnostics = EncryptedRuntimeModuleScanDiagnostics(
+                required = false,
+                performed = false,
+                decision = ENCRYPTED_SCAN_REASON_TRIVIAL_MODULE_FREE,
+                status = ENCRYPTED_SCAN_STATUS_SKIPPED,
+                elapsedMs = 0L,
+                examinedPathLimit = ENCRYPTED_SCAN_MAX_EXAMINED_PATHS,
+                candidateFileLimit = ENCRYPTED_SCAN_MAX_CANDIDATES,
+                examinedPathCount = 0,
+                walkedFileCount = 0,
+                candidateFileCount = 0,
+                headerProbeCount = 0,
+                headerBytesRead = 0L,
+                headerReadFailureCount = 0,
+                fullFileReadCount = 0,
+                fullFileBytesRead = 0L,
+                fullFileReadFailureCount = 0,
+                prunedDirectoryCount = 0,
+                outsidePathRejectedCount = 0,
+                duplicateCanonicalFileCount = 0,
+                walkFailureCount = 0,
+                oversizedCiphertextCount = 0,
+                cleartextSizeLimitRejectedCount = 0,
+                decryptFailureCount = 0,
+                encryptedModuleCount = 0,
+                retainedEncryptedModuleCount = 0,
+                encryptedModuleSourceBytes = 0L,
+                encryptedModuleBudgetRejectedCount = 0,
+                traversalLimitReached = false,
+                candidateLimitReached = false,
+                identityReadFailureCount = 0,
+                identityMismatchCount = 0,
+                outputCountBudgetExhausted = false,
+                outputBytesBudgetExhausted = false,
             )
         }
     }
@@ -1602,6 +2735,39 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     private data class CommonJsRequireReference(
         val moduleName: String?,
     )
+
+    private class CommonJsPreloadFrame(
+        val parentDirectory: File,
+        val depth: Int,
+        val loaderAnalysis: CommonJsSourceLoaderAnalysis,
+        val recordLoaderAnalysis: Boolean,
+        var started: Boolean = false,
+        var referenceIndex: Int = 0,
+        var moduleFiles: List<File> = emptyList(),
+        var moduleFileIndex: Int = 0,
+    )
+
+    private data class CommonJsSourceLoaderAnalysis(
+        val requireReferences: List<CommonJsRequireReference>,
+        val sourceLevelEsmSyntaxCount: Int,
+        val dynamicImportCount: Int,
+        val createRequireReferenceCount: Int,
+        val unclassifiedLoaderReferenceCount: Int,
+        val dynamicCodeReferenceCount: Int,
+        val trivialModuleFreeEntry: Boolean,
+    ) {
+        companion object {
+            fun empty(): CommonJsSourceLoaderAnalysis = CommonJsSourceLoaderAnalysis(
+                requireReferences = emptyList(),
+                sourceLevelEsmSyntaxCount = 0,
+                dynamicImportCount = 0,
+                createRequireReferenceCount = 0,
+                unclassifiedLoaderReferenceCount = 0,
+                dynamicCodeReferenceCount = 0,
+                trivialModuleFreeEntry = false,
+            )
+        }
+    }
 
     private data class CommonJsRequireParseResult(
         val moduleName: String?,
@@ -1627,12 +2793,134 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         val diagnostics: CommonJsPreloadDiagnostics,
     )
 
+    private data class EncryptedRuntimeModuleScanDecision(
+        val required: Boolean,
+        val reason: String,
+    )
+
+    private data class EncryptedRuntimeModuleSourcesResult(
+        val moduleSources: Map<String, String>,
+        val diagnostics: EncryptedRuntimeModuleScanDiagnostics,
+    )
+
+    private data class EncryptedRuntimeModuleCandidate(
+        val file: File,
+        val moduleKey: String,
+        val relativePath: String,
+        val identity: FileIdentity,
+    )
+
+    private data class EncryptedRuntimeScanRoot(
+        val canonicalFile: File,
+        val canonicalPath: String,
+        val identity: FileIdentity,
+    ) {
+        fun containsCanonicalPath(path: String): Boolean {
+            return path == canonicalPath || path.startsWith(canonicalPath + File.separator)
+        }
+
+        fun relativePath(path: String): String {
+            return when {
+                path == canonicalPath -> ""
+                path.startsWith(canonicalPath + File.separator) -> path.substring(canonicalPath.length + 1)
+                else -> File(path).name
+            }.replace(File.separatorChar, '/')
+        }
+
+        fun validateCurrentIdentity(stats: EncryptedRuntimeModuleScanStats): Boolean {
+            return when (currentIdentityStatus()) {
+                DirectoryIdentityStatus.MATCH -> true
+                DirectoryIdentityStatus.READ_FAILURE -> {
+                    stats.identityReadFailureCount += 1
+                    false
+                }
+                DirectoryIdentityStatus.MISMATCH -> {
+                    stats.identityMismatchCount += 1
+                    false
+                }
+            }
+        }
+
+        fun validateCurrentIdentity(stats: CommonJsPreloadStats): Boolean {
+            val matches = currentIdentityStatus() == DirectoryIdentityStatus.MATCH
+            if (!matches) {
+                stats.sourceReadFailureCount += 1
+            }
+            return matches
+        }
+
+        private fun currentIdentityStatus(): DirectoryIdentityStatus {
+            val current = try {
+                Os.lstat(canonicalPath)
+            } catch (_: Exception) {
+                return DirectoryIdentityStatus.READ_FAILURE
+            }
+            return if (OsConstants.S_ISDIR(current.st_mode) && identity.matches(current)) {
+                DirectoryIdentityStatus.MATCH
+            } else {
+                DirectoryIdentityStatus.MISMATCH
+            }
+        }
+
+        companion object {
+            fun capture(root: File): EncryptedRuntimeScanRoot? {
+                val canonicalFile = try {
+                    root.canonicalFile
+                } catch (_: Exception) {
+                    return null
+                }
+                val canonicalPath = canonicalFile.absolutePath
+                val stat = try {
+                    Os.lstat(canonicalPath)
+                } catch (_: Exception) {
+                    return null
+                }
+                if (!OsConstants.S_ISDIR(stat.st_mode)) {
+                    return null
+                }
+                return EncryptedRuntimeScanRoot(
+                    canonicalFile = canonicalFile,
+                    canonicalPath = canonicalPath,
+                    identity = FileIdentity(stat.st_dev, stat.st_ino),
+                )
+            }
+        }
+    }
+
+    private enum class DirectoryIdentityStatus {
+        MATCH,
+        READ_FAILURE,
+        MISMATCH,
+    }
+
+    private data class FileIdentity(
+        val device: Long,
+        val inode: Long,
+    ) {
+        fun matches(stat: StructStat): Boolean = device == stat.st_dev && inode == stat.st_ino
+    }
+
+    private sealed interface BoundedFileReadResult {
+        data class Success(val bytes: ByteArray) : BoundedFileReadResult
+        data object SizeLimitExceeded : BoundedFileReadResult
+        data object Failure : BoundedFileReadResult
+    }
+
+    private sealed interface BoundedSourceReadResult {
+        data class Success(val source: String) : BoundedSourceReadResult
+        data object SizeLimitExceeded : BoundedSourceReadResult
+        data object Failure : BoundedSourceReadResult
+    }
+
+    private class EncryptedScanTraversalStoppedException : RuntimeException()
+
     private data class NodeProjectRunPreparation(
         val entrySource: String,
         val sourceName: String,
         val workingDirectory: String,
         val preload: CommonJsPreloadResult,
         val runtimeModuleSources: Map<String, String>,
+        val diagnostics: RequestPreparationDiagnostics,
     ) {
         fun toBridgeRequest(
             timeoutMs: Long,
@@ -1663,10 +2951,36 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         var staticRequireCount = 0
         var dynamicRequireIgnoredCount = 0
         var unresolvedStaticRequireCount = 0
+        var sourceLevelEsmSyntaxCount = 0
+        var dynamicImportCount = 0
+        var createRequireReferenceCount = 0
+        var unclassifiedLoaderReferenceCount = 0
+        var dynamicCodeReferenceCount = 0
+        var trivialModuleFreeEntry = false
+        var complete = true
+        var incompleteReason: String? = null
+        var sourceReadFailureCount = 0
+        var sourceSizeLimitRejectedCount = 0
+        var aggregateSizeLimitRejectedCount = 0
+        var moduleCountLimitRejectedCount = 0
+        var depthLimitRejectedCount = 0
 
-        fun recordRequireScan(staticCount: Int, requireCallCount: Int) {
+        fun markIncomplete(reason: String) {
+            complete = false
+            if (incompleteReason == null) {
+                incompleteReason = reason
+            }
+        }
+
+        fun recordLoaderAnalysis(analysis: CommonJsSourceLoaderAnalysis) {
+            val staticCount = analysis.requireReferences.count { it.moduleName != null }
             staticRequireCount += staticCount
-            dynamicRequireIgnoredCount += (requireCallCount - staticCount).coerceAtLeast(0)
+            dynamicRequireIgnoredCount += (analysis.requireReferences.size - staticCount).coerceAtLeast(0)
+            sourceLevelEsmSyntaxCount += analysis.sourceLevelEsmSyntaxCount
+            dynamicImportCount += analysis.dynamicImportCount
+            createRequireReferenceCount += analysis.createRequireReferenceCount
+            unclassifiedLoaderReferenceCount += analysis.unclassifiedLoaderReferenceCount
+            dynamicCodeReferenceCount += analysis.dynamicCodeReferenceCount
         }
 
         fun recordPreloadedModule(moduleFile: File, moduleSource: String, depth: Int) {
@@ -1698,8 +3012,123 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                 staticRequireCount = staticRequireCount,
                 dynamicRequireIgnoredCount = dynamicRequireIgnoredCount,
                 unresolvedStaticRequireCount = unresolvedStaticRequireCount,
+                sourceLevelEsmSyntaxCount = sourceLevelEsmSyntaxCount,
+                dynamicImportCount = dynamicImportCount,
+                createRequireReferenceCount = createRequireReferenceCount,
+                unclassifiedLoaderReferenceCount = unclassifiedLoaderReferenceCount,
+                dynamicCodeReferenceCount = dynamicCodeReferenceCount,
+                trivialModuleFreeEntry = trivialModuleFreeEntry,
+                complete = complete,
+                incompleteReason = incompleteReason,
+                sourceReadFailureCount = sourceReadFailureCount,
+                sourceSizeLimitRejectedCount = sourceSizeLimitRejectedCount,
+                aggregateSizeLimitRejectedCount = aggregateSizeLimitRejectedCount,
+                moduleCountLimitRejectedCount = moduleCountLimitRejectedCount,
+                depthLimitRejectedCount = depthLimitRejectedCount,
+                moduleCountLimit = RUNTIME_MODULE_SOURCE_MAX_COUNT,
+                sourceBytesLimit = RUNTIME_MODULE_SOURCE_MAX_BYTES,
+                aggregateSourceBytesLimit = RUNTIME_MODULE_SOURCES_MAX_BYTES,
+                depthLimit = COMMON_JS_PRELOAD_MAX_DEPTH,
                 elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L),
                 moduleSourceNames = moduleSourceNames,
+            )
+        }
+    }
+
+    private class EncryptedRuntimeModuleScanStats(
+        private val decision: EncryptedRuntimeModuleScanDecision,
+    ) {
+
+        private val startedAt = android.os.SystemClock.elapsedRealtime()
+
+        var performed = false
+        var examinedPathCount = 0
+        var walkedFileCount = 0
+        var candidateFileCount = 0
+        var headerProbeCount = 0
+        var headerBytesRead = 0L
+        var headerReadFailureCount = 0
+        var fullFileReadCount = 0
+        var fullFileBytesRead = 0L
+        var fullFileReadFailureCount = 0
+        var prunedDirectoryCount = 0
+        var outsidePathRejectedCount = 0
+        var duplicateCanonicalFileCount = 0
+        var walkFailureCount = 0
+        var oversizedCiphertextCount = 0
+        var cleartextSizeLimitRejectedCount = 0
+        var decryptFailureCount = 0
+        var encryptedModuleCount = 0
+        var encryptedModuleSourceBytes = 0L
+        var encryptedModuleBudgetRejectedCount = 0
+        var traversalLimitReached = false
+        var candidateLimitReached = false
+        var identityReadFailureCount = 0
+        var identityMismatchCount = 0
+        var outputCountBudgetExhausted = false
+        var outputBytesBudgetExhausted = false
+
+        fun completionStatus(): String {
+            return when {
+                identityReadFailureCount > 0 || identityMismatchCount > 0 ->
+                    ENCRYPTED_SCAN_STATUS_INCOMPLETE_IDENTITY_FAILURE
+                traversalLimitReached -> ENCRYPTED_SCAN_STATUS_INCOMPLETE_TRAVERSAL_LIMIT
+                candidateLimitReached -> ENCRYPTED_SCAN_STATUS_INCOMPLETE_CANDIDATE_LIMIT
+                walkFailureCount > 0 -> ENCRYPTED_SCAN_STATUS_INCOMPLETE_WALK_FAILURE
+                headerReadFailureCount > 0 || fullFileReadFailureCount > 0 ->
+                    ENCRYPTED_SCAN_STATUS_INCOMPLETE_READ_FAILURE
+                decryptFailureCount > 0 -> ENCRYPTED_SCAN_STATUS_INCOMPLETE_DECRYPT_FAILURE
+                outputCountBudgetExhausted -> ENCRYPTED_SCAN_STATUS_INCOMPLETE_OUTPUT_COUNT_BUDGET
+                outputBytesBudgetExhausted -> ENCRYPTED_SCAN_STATUS_INCOMPLETE_OUTPUT_BYTES_BUDGET
+                oversizedCiphertextCount > 0 || cleartextSizeLimitRejectedCount > 0 ->
+                    ENCRYPTED_SCAN_STATUS_INCOMPLETE_MODULE_SIZE_BUDGET
+                else -> ENCRYPTED_SCAN_STATUS_COMPLETED
+            }
+        }
+
+        fun result(
+            moduleSources: Map<String, String>,
+            status: String,
+        ): EncryptedRuntimeModuleSourcesResult {
+            return EncryptedRuntimeModuleSourcesResult(
+                moduleSources = moduleSources,
+                diagnostics = EncryptedRuntimeModuleScanDiagnostics(
+                    required = decision.required,
+                    performed = performed,
+                    decision = decision.reason,
+                    status = status,
+                    elapsedMs = (
+                            android.os.SystemClock.elapsedRealtime() - startedAt
+                            ).coerceAtLeast(0L),
+                    examinedPathLimit = ENCRYPTED_SCAN_MAX_EXAMINED_PATHS,
+                    candidateFileLimit = ENCRYPTED_SCAN_MAX_CANDIDATES,
+                    examinedPathCount = examinedPathCount,
+                    walkedFileCount = walkedFileCount,
+                    candidateFileCount = candidateFileCount,
+                    headerProbeCount = headerProbeCount,
+                    headerBytesRead = headerBytesRead,
+                    headerReadFailureCount = headerReadFailureCount,
+                    fullFileReadCount = fullFileReadCount,
+                    fullFileBytesRead = fullFileBytesRead,
+                    fullFileReadFailureCount = fullFileReadFailureCount,
+                    prunedDirectoryCount = prunedDirectoryCount,
+                    outsidePathRejectedCount = outsidePathRejectedCount,
+                    duplicateCanonicalFileCount = duplicateCanonicalFileCount,
+                    walkFailureCount = walkFailureCount,
+                    oversizedCiphertextCount = oversizedCiphertextCount,
+                    cleartextSizeLimitRejectedCount = cleartextSizeLimitRejectedCount,
+                    decryptFailureCount = decryptFailureCount,
+                    encryptedModuleCount = encryptedModuleCount,
+                    retainedEncryptedModuleCount = moduleSources.size,
+                    encryptedModuleSourceBytes = encryptedModuleSourceBytes,
+                    encryptedModuleBudgetRejectedCount = encryptedModuleBudgetRejectedCount,
+                    traversalLimitReached = traversalLimitReached,
+                    candidateLimitReached = candidateLimitReached,
+                    identityReadFailureCount = identityReadFailureCount,
+                    identityMismatchCount = identityMismatchCount,
+                    outputCountBudgetExhausted = outputCountBudgetExhausted,
+                    outputBytesBudgetExhausted = outputBytesBudgetExhausted,
+                ),
             )
         }
     }

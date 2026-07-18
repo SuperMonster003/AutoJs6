@@ -38,6 +38,8 @@
 * `Feature` Packaged app configuration supports showing or hiding the "Log" and "Settings" launcher shortcuts _[`issue #550`](http://issues.autojs6.com/550)_
 * `Feature` App packaging supports remote builds using APK Builder Template plugins
 * `Feature` Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes
+* `Fix` Node.js simple scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full
+* `Fix` Persistent Node.js process was incorrectly retired when a short-lived script launcher UI became hidden
 * `Fix` Node.js script results were returned late because runtime process-settle waiting blocked result delivery
 * `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly
 * `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
@@ -68,6 +70,8 @@
 * `Improvement` Deferred initialization of non-critical components to improve app startup performance
 * `Improvement` Cached compilation results for bundled Rhino resources and metadata for runtime enhancement functions to improve script initialization performance
 * `Improvement` Reused the persistent Node.js process and process-scoped runtime to improve warm script startup performance
+* `Improvement` Added phase-by-phase Node.js startup timing and trustworthy cold/runtime-warm performance reporting
+* `Improvement` Cached built-in Node.js native library resolution to avoid repeated plugin discovery
 * `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
 * `Improvement` Improved code editor interactions for themes/fonts/toolbars/read-only mode/folding/selection menus and more

@@ -198,6 +198,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` La configuration des applications empaquetées permet d'afficher ou de masquer les raccourcis de lanceur "Journal" et "Paramètres" _[`issue #550`](http://issues.autojs6.com/550)_
 * `Fonctionnalité` L'empaquetage d'applications prend en charge les compilations distantes à l'aide de plugins APK Builder Template
 * `Fonctionnalité` Les options pour développeurs permettent de configurer un jeton d'accès GitHub afin d'augmenter les limites de requêtes de vérification des mises à jour et d'index des plugins
+* `Correction` Les scripts Node.js simples démarraient lentement dans les répertoires de travail contenant de nombreux fichiers, car l'analyse inutile des modules lisait intégralement les fichiers candidats
+* `Correction` Le processus Node.js persistant était arrêté à tort lorsque l'interface éphémère de lancement de script devenait masquée
 * `Correction` Le retour des résultats des scripts Node.js était retardé par l'attente de stabilisation du processus d'exécution
 * `Correction` runtime.loadJar ne pouvait pas charger dynamiquement des fichiers de classe Java compilés pour une version plus récente
 * `Correction` app.isInstalled/kill et les méthodes associées ne pouvaient pas utiliser correctement les arguments de nom de paquet _[`issue #495`](http://issues.autojs6.com/495)_
@@ -228,6 +230,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Initialisation différée des composants non critiques pour améliorer les performances de démarrage de l'application
 * `Amélioration` Mise en cache des résultats de compilation des ressources Rhino intégrées et des métadonnées des fonctions d'extension de l'environnement d'exécution pour améliorer les performances d'initialisation des scripts
 * `Amélioration` Réutilisation du processus Node.js persistant et de l'environnement d'exécution à l'échelle du processus pour améliorer les performances de démarrage à chaud des scripts
+* `Amélioration` Mesure par phase du démarrage de Node.js et rapports fiables sur les performances à froid et avec le runtime chaud
+* `Amélioration` Mise en cache de la résolution des bibliothèques natives intégrées de Node.js afin d'éviter la découverte répétée des plugins
 * `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Amélioration` Le bouton "Exécuter" de l'éditeur de code devient "Arrêter" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts
 * `Amélioration` Amélioration des interactions de l'éditeur de code pour les thèmes/polices/barres d'outils/mode lecture seule/pliage/menus de sélection et plus encore

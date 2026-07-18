@@ -38,6 +38,10 @@ production Inspector are intentional boundaries rather than unfinished work.
 - [x] R2 focused acceptance on the same device passed persistent runtime,
   runtime-ready prewarm, process-pool recovery, 30-cycle latency, and
   100-execution resource-growth gates.
+- [x] R3 traced the real JavaScript-engine path, fixed the repeated encrypted
+  runtime-module scan for the strictly proven trivial module-free path, and added
+  non-additive phase distributions for the client, service, native runtime,
+  engine request preparation, and host preparation boundaries.
 - [ ] Re-run the final aggregate gates before declaring Core completion. The
   blocker registry is closed, but some narrative status documents still
   describe older blocked states.
@@ -187,22 +191,51 @@ Release follow-ups that do not reopen R2:
 
 ## R3 - Measure And Optimize The Remaining Startup Chain
 
-Do this after R2 so effort targets the persistent architecture rather than the
-temporary one-shot lifecycle.
+R3 is complete for the focused embedded-runtime scope. The reported Sony
+XQ-AT72 regression primarily came from a real file execution spending about
+4082 ms preparing the request before its Binder call, while native execution
+itself took 144 ms. The working directory contained 4258 files, including 2036
+JavaScript files. The R2 direct-service harness bypassed this JavaScript-engine
+preparation path, so it could not expose the regression. Final normal-launcher
+validation also found that `TRIM_MEMORY_UI_HIDDEN` incorrectly retired the
+idle persistent process; R3 now distinguishes that lifecycle signal from
+actual memory pressure.
 
-- [ ] Report discover/bind, process ready, native load, platform init,
+- [x] Report discover/bind, process ready, native load, platform init,
   isolate/Environment creation, bootstrap, module preload, script execution,
-  result marshalling, and teardown separately.
-- [ ] Rename the existing second one-shot sample to `appSideWarm`; reserve
-  `runtimeWarm` for reuse of the same process-global runtime.
+  result payload encode/decode, callback delivery, client cleanup, and native
+  teardown separately. The report declares totals, boundary aggregates, and
+  nested native timings as non-additive.
+- [x] Reserve `runtimeWarm` for reuse of the same PID, process-pool slot,
+  session generation, and process-runtime generation. The planned
+  `appSideWarm` rename applied only to the retired R1 one-shot model and is now
+  superseded by the R2 persistent lifecycle; it is not emitted as a current
+  benchmark mode.
 - [x] Add configurable sample count plus p50/p95 output to the performance
   instrumentation report.
-- [ ] Cache only immutable descriptor, dependency, and bootstrap inputs with
-  explicit version and capability keys.
-- [ ] Eliminate repeated plugin discovery, descriptor parsing, module-source
-  scans, and immutable bootstrap construction when measurements justify it.
-- [ ] Evaluate compile cache or startup snapshots only after timeline evidence
-  identifies them as material, and keep a non-snapshot fallback.
+- [x] Cache only measured immutable inputs. Packaged host native-library
+  resolution is cached behind explicit schema, package/version, APK/native
+  directory, release flavor, backend, runtime slot/target, ABI, and library
+  keys. Mutable project descriptors and source graphs remain request-scoped.
+- [x] Eliminate repeated package-manager plugin discovery for packaged
+  `nodeFull`/`nodeMini` host libraries. The minimal module-free script grammar
+  now proves that no encrypted fallback scan is needed. Every other source,
+  including static CommonJS graphs, ESM, dynamic or unclassified loaders, and
+  unresolved dependencies, retains the conservative, bounded encrypted-header
+  scan.
+- [x] Preserve the persistent process when the short-lived file launcher UI
+  becomes hidden, while retaining idle-TTL and actual memory-pressure
+  retirement. Verify the next run keeps the PID and session generation.
+- [x] Evaluate compile cache and startup snapshots from the expanded timeline.
+  Compile-cache prepare and prune costs are reported, but no cross-process
+  prune throttle is used. Execution-source construction measured about
+  0-1 ms and is not cached. Startup snapshots remain disabled; normal
+  bootstrap is the required fallback.
+
+The root-cause record, acceptance commands, timing interpretation, and final
+Sony result table are maintained in `R3_ACCEPTANCE_SAMPLING.md`. On the final
+real-file gate, cold execution took 1577 ms and 30 runtime-warm executions had
+p50 316 ms / p95 347 ms, with request preparation p50 5 ms / p95 6 ms.
 
 ## R4 - Align The External Runtime Plugin Backend
 
@@ -280,7 +313,7 @@ This phase does not block Core / Safe Node completion.
 - [ ] Archive crash symbols, native hashes, performance percentiles, device
   reports, rollback evidence, and the error catalog for the release version.
 - [ ] Replace the broad severe-regression performance limits with reviewed
-  cold, app-side warm, and runtime-ready warm SLOs.
+  cold and runtime-ready warm SLOs.
 - [ ] Update version metadata, changelog, release notes, capability matrices,
   known issues, and migration guidance from the same verified gate state.
 

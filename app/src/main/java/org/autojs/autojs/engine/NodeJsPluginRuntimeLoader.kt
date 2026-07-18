@@ -17,6 +17,7 @@ import org.autojs.plugin.common.api.PluginActions
 import org.autojs.plugin.common.api.PluginCapabilityKeys
 import org.autojs.plugin.nodejs.api.NodeJsPluginIds
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 object NodeJsPluginRuntimeLoader {
 
@@ -24,6 +25,9 @@ object NodeJsPluginRuntimeLoader {
     private const val NODE_LIBRARY_FILE = "libnode.so"
     private const val BRIDGE_LIBRARY_NAME = "autojs6-node"
     private const val BRIDGE_LIBRARY_FILE = "libautojs6-node.so"
+    private const val HOST_LIBRARY_CACHE_SCHEMA = "host-native-library-v1"
+    private val packagedHostReleaseFlavors = setOf("nodeFull", "nodeMini")
+    private val hostLibraryCache = ConcurrentHashMap<HostLibraryCacheKey, CachedHostLibrary>()
 
     fun loadNodeOrSystem(context: Context? = null) {
         runCatching { System.loadLibrary("c++_shared") }
@@ -53,17 +57,16 @@ object NodeJsPluginRuntimeLoader {
     }
 
     private fun resolveNativeLibraryFile(context: Context, libraryFileName: String): File? {
-        val hostLibrary = hostLibraryFile(context, libraryFileName)
-        val pluginLibrary = findPluginNativeLibrary(context, libraryFileName)
-        return if (usesPackagedHostRuntime()) {
-            hostLibrary ?: pluginLibrary
-        } else {
-            pluginLibrary ?: hostLibrary
+        if (usesPackagedHostRuntime()) {
+            cachedHostLibraryFile(context, libraryFileName)?.let { return it }
+            return findPluginNativeLibrary(context, libraryFileName)
         }
+        return findPluginNativeLibrary(context, libraryFileName)
+            ?: cachedHostLibraryFile(context, libraryFileName)
     }
 
     private fun usesPackagedHostRuntime(): Boolean =
-        BuildConfig.NODEJS_RELEASE_FLAVOR in setOf("nodeFull", "nodeMini")
+        BuildConfig.NODEJS_RELEASE_FLAVOR in packagedHostReleaseFlavors
 
     fun resolveNodeLibraryDir(context: Context): String? {
         return resolveNodeLibraryFile(context)?.parent
@@ -138,6 +141,33 @@ object NodeJsPluginRuntimeLoader {
             ?.takeIf(File::isFile)
     }
 
+    /**
+     * Host native libraries are immutable for the lifetime of an installed APK. Keep their
+     * resolution behind an explicit build/capability key so the embedded flavors never repeat
+     * package-manager plugin discovery after resolving their packaged runtime.
+     */
+    private fun cachedHostLibraryFile(context: Context, libraryFileName: String): File? {
+        val appContext = context.applicationContext
+        val applicationInfo = appContext.applicationInfo
+        val key = HostLibraryCacheKey(
+            schema = HOST_LIBRARY_CACHE_SCHEMA,
+            packageName = appContext.packageName,
+            versionCode = BuildConfig.VERSION_CODE,
+            sourceDir = applicationInfo.sourceDir.orEmpty(),
+            nativeLibraryDir = applicationInfo.nativeLibraryDir.orEmpty(),
+            releaseFlavor = BuildConfig.NODEJS_RELEASE_FLAVOR,
+            runtimeBackend = BuildConfig.NODEJS_RUNTIME_BACKEND,
+            runtimeSlot = BuildConfig.NODEJS_RUNTIME_SLOT,
+            runtimeSlotTargetVersion = BuildConfig.NODEJS_RUNTIME_SLOT_TARGET_VERSION,
+            supportedAbis = Build.SUPPORTED_ABIS.joinToString(","),
+            libraryFileName = libraryFileName,
+        )
+        val cached = hostLibraryCache.computeIfAbsent(key) {
+            CachedHostLibrary(hostLibraryFile(appContext, libraryFileName)?.absolutePath)
+        }
+        return cached.absolutePath?.let(::File)?.takeIf(File::isFile)
+    }
+
     private fun getApplicationInfo(pm: PackageManager, packageName: String): ApplicationInfo {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong()))
@@ -158,5 +188,23 @@ object NodeJsPluginRuntimeLoader {
         val serviceInfo: ServiceInfo,
         val applicationInfo: ApplicationInfo,
         val versionCode: Long?,
+    )
+
+    private data class HostLibraryCacheKey(
+        val schema: String,
+        val packageName: String,
+        val versionCode: Int,
+        val sourceDir: String,
+        val nativeLibraryDir: String,
+        val releaseFlavor: String,
+        val runtimeBackend: String,
+        val runtimeSlot: String,
+        val runtimeSlotTargetVersion: String,
+        val supportedAbis: String,
+        val libraryFileName: String,
+    )
+
+    private data class CachedHostLibrary(
+        val absolutePath: String?,
     )
 }

@@ -35,6 +35,8 @@
         "Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins"
       ],
       "fix": [
+        "Los scripts simples de Node.js se iniciaban lentamente en directorios de trabajo con muchos archivos porque el escaneo innecesario de módulos leía por completo los archivos candidatos",
+        "El proceso persistente de Node.js se retiraba incorrectamente cuando se ocultaba la interfaz temporal del iniciador de scripts",
         "La devolución de resultados de scripts Node.js se retrasaba por la espera de estabilización del proceso de ejecución",
         "runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java",
         "app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_",
@@ -67,6 +69,8 @@
         "Aplazada la inicialización de componentes no críticos para mejorar el rendimiento de inicio de la aplicación",
         "Almacenados en caché los resultados de compilación de los recursos Rhino integrados y los metadatos de las funciones de extensión del entorno de ejecución para mejorar el rendimiento de inicialización de scripts",
         "Reutilizados el proceso persistente de Node.js y el entorno de ejecución en el ámbito del proceso para mejorar el rendimiento del arranque en caliente de scripts",
+        "Incorporados tiempos por fase para el inicio de Node.js e informes fiables de rendimiento en frío y con el runtime caliente",
+        "Almacenada en caché la resolución de bibliotecas nativas integradas de Node.js para evitar el descubrimiento repetido de plugins",
         "Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo",
         "El botón \"Ejecutar\" del editor de código cambia a \"Detener\" después de pulsarlo, permitiendo detener scripts rápidamente",
         "Mejoradas las interacciones del editor de código para temas/fuentes/barras de herramientas/modo de solo lectura/plegado/menús de selección y más",
