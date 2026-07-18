@@ -1093,6 +1093,12 @@ function apkInspectionSigner(inspection) {
   return SHA256_PATTERN.test(signer) ? signer : "";
 }
 
+function apkSignerCertificateSha256Digests(output) {
+  return [...stringValue(output).matchAll(
+    /^(?:Signer #\d+\s+|V\d+(?:\.\d+)? Signer:\s+)certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$/gim,
+  )].map((match) => match[1].toLowerCase());
+}
+
 let cachedAndroidBuildTools;
 const cachedApkInspections = new Map();
 
@@ -1123,10 +1129,8 @@ function inspectApkArtifact(file) {
   const signerCountMatch = /Number of signers:\s*([0-9]+)/i.exec(signature.stdout);
   const signerCount = signerCountMatch ? Number(signerCountMatch[1]) : 0;
   if (signerCount !== 1) blockers.push(`APK must have exactly one signer, got ${signerCount}`);
-  const signerDigestMatches = [...signature.stdout.matchAll(
-    /^Signer #\d+ certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$/gim,
-  )];
-  const signerSha256 = signerDigestMatches.length === 1 ? signerDigestMatches[0][1].toLowerCase() : "";
+  const signerDigests = apkSignerCertificateSha256Digests(signature.stdout);
+  const signerSha256 = signerDigests.length === 1 ? signerDigests[0] : "";
   if (!signerSha256) blockers.push("APK signer SHA-256 identity is missing or ambiguous");
   const inspection = {
     ready: blockers.length === 0,
@@ -1740,6 +1744,7 @@ module.exports = {
   REQUIRED_SOAK_METRICS,
   SOAK_REQUIREMENTS,
   SOAK_SCHEMA,
+  apkSignerCertificateSha256Digests,
   currentIdentity,
   evaluateDeviceReport,
   evaluateSoakReport,

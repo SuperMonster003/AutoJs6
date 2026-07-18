@@ -208,6 +208,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` Node.js 外部執行階段 Binder 回應遺失後自動回退可能導致同一腳本被重複執行的問題
 * `修復` Android 私有目錄 /data/user/0 與 /data/data 別名未正規化寫回外掛請求, 導致合法 Node.js workingDirectory 被誤判為超出 sandboxRoot 的問題
 * `修復` nodePlugin 在宿主不含 Node 執行階段時錯誤排除所有 ABI 的 JNI/AAR 程式庫, 導致 Rhino Shell 初始化因缺少 libjackpal-termexec2.so 而當機的問題
+* `修復` Node.js R6 證據收集及驗證因 apksigner 憑證摘要輸出格式變更而拒絕 Android Build Tools 37 回報的 APK 簽章身分的問題
 * `修復` runtime.loadJar 無法正常動態載入由較高 Java 版本編譯的 class 檔案的問題
 * `修復` app.isInstalled/kill 等方法無法正常使用套件名稱引數的問題 _[`issue #495`](http://issues.autojs6.com/495)_
 * `修復` 無 Root 權限裝置呼叫 shell 相關方法時可能出現假死的問題

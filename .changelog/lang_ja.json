@@ -45,6 +45,7 @@
         "Node.js 外部ランタイムの Binder 応答消失後に自動フォールバックすると同じスクリプトが二重実行される可能性がある問題",
         "Android プライベートディレクトリの /data/user/0 と /data/data のエイリアスが正規化されてプラグインリクエストに書き戻されず, 正当な Node.js workingDirectory が sandboxRoot を逸脱していると誤判定される問題",
         "ホストに Node ランタイムを含まない nodePlugin ビルドで全 ABI の JNI/AAR ライブラリが誤って除外され, libjackpal-termexec2.so の欠落により Rhino Shell の初期化時にクラッシュする問題",
+        "apksigner の証明書ダイジェスト出力形式の変更により, Node.js R6 の証拠収集と検証で Android Build Tools 37 が報告する APK 署名者 ID が拒否される問題",
         "runtime.loadJar がより新しい Java バージョン向けにコンパイルされた class ファイルを正常に動的ロードできない問題",
         "app.isInstalled/kill などのメソッドでパッケージ名引数を正常に使用できない問題 _[`issue #495`](http://issues.autojs6.com/495)_",
         "Root 権限のないデバイスで shell 関連メソッドを呼び出すと応答しなくなる可能性がある問題",

@@ -208,6 +208,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Automatic embedded fallback after a lost external runtime Binder response could execute the same script twice
 * `Fix` Android private-directory aliases /data/user/0 and /data/data were not normalized and written back into plugin requests, causing valid Node.js workingDirectory paths to be incorrectly rejected as escaping sandboxRoot
 * `Fix` nodePlugin builds without a host Node runtime incorrectly excluded JNI/AAR libraries for every ABI, causing Rhino Shell initialization to crash because libjackpal-termexec2.so was missing
+* `Fix` Node.js R6 evidence collection and verification rejected APK signer identities reported by Android Build Tools 37 because apksigner changed its certificate digest output format
 * `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly
 * `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
 * `Fix` Shell-related methods could become unresponsive on devices without Root access

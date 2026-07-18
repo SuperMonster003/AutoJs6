@@ -48,6 +48,7 @@
 * `Correction` Le repli automatique après la perte d'une réponse Binder de l'environnement d'exécution Node.js externe pouvait exécuter deux fois le même script
 * `Correction` Les alias /data/user/0 et /data/data des répertoires privés Android n'étaient pas normalisés puis réécrits dans les requêtes du plugin, ce qui faisait considérer à tort un workingDirectory Node.js valide comme sortant de sandboxRoot
 * `Correction` Les builds nodePlugin sans environnement d'exécution Node côté hôte excluaient à tort les bibliothèques JNI/AAR de toutes les ABI, entraînant un plantage lors de l'initialisation de Rhino Shell en raison de l'absence de libjackpal-termexec2.so
+* `Correction` La collecte et la vérification des preuves Node.js R6 rejetaient les identités de signature APK signalées par Android Build Tools 37 car apksigner avait modifié le format de sortie de l'empreinte du certificat
 * `Correction` runtime.loadJar ne pouvait pas charger dynamiquement des fichiers de classe Java compilés pour une version plus récente
 * `Correction` app.isInstalled/kill et les méthodes associées ne pouvaient pas utiliser correctement les arguments de nom de paquet _[`issue #495`](http://issues.autojs6.com/495)_
 * `Correction` Les méthodes liées au shell pouvaient ne plus répondre sur les appareils sans accès Root

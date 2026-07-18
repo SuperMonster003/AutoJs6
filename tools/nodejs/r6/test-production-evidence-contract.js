@@ -22,6 +22,7 @@ const {
   evaluateSoakReport,
 } = require("./verify-production-evidence");
 const {
+  parseApkSignerOutput,
   selectFreshJUnit,
   snapshotJUnitFiles: snapshotDeviceJUnitFiles,
 } = require("./run-device-evidence");
@@ -53,6 +54,7 @@ function main() {
   contractRoot = root;
   try {
     prepareContractApkTools();
+    assertApkSignerOutputContracts();
     for (const requirement of DEVICE_REQUIREMENTS) {
       writeJson(root, requirement.relative, validDeviceReport(requirement));
       const result = evaluateDeviceReport(root, requirement, identity, root);
@@ -632,9 +634,55 @@ function apkSignerSha256(file) {
     ["verify", "--verbose", "--print-certs", file],
     contractRoot,
   );
-  const match = /^Signer #\d+ certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$/im.exec(result.stdout);
-  assert(match, `apksigner did not report a SHA-256 signer digest for ${file}`);
-  return match[1].toLowerCase();
+  return parseApkSignerOutput(result.stdout, file).signerSha256;
+}
+
+function assertApkSignerOutputContracts() {
+  const digest = "a".repeat(64);
+  const verified = [
+    "Verified using v2 scheme (APK Signature Scheme v2): true",
+    "Number of signers: 1",
+  ];
+  assert.strictEqual(
+    parseApkSignerOutput([...verified, `Signer #1 certificate SHA-256 digest: ${digest}`].join("\n")).signerSha256,
+    digest,
+  );
+  assert.strictEqual(
+    parseApkSignerOutput([...verified, `V2 Signer: certificate SHA-256 digest: ${digest}`].join("\n")).signerSha256,
+    digest,
+  );
+  assert.strictEqual(
+    parseApkSignerOutput([...verified, `V3.1 Signer: certificate SHA-256 digest: ${digest}`].join("\n")).signerSha256,
+    digest,
+  );
+  assert.throws(
+    () => parseApkSignerOutput([...verified, `V2 Signer: public key SHA-256 digest: ${digest}`].join("\n")),
+    /exactly one SHA-256 signer/,
+  );
+  assert.throws(
+    () => parseApkSignerOutput([
+      verified[0],
+      "Number of signers: 2",
+      `V2 Signer: certificate SHA-256 digest: ${digest}`,
+    ].join("\n")),
+    /exactly one SHA-256 signer/,
+  );
+  assert.throws(
+    () => parseApkSignerOutput([
+      ...verified,
+      `V2 Signer: certificate SHA-256 digest: ${digest}`,
+      `V3 Signer: certificate SHA-256 digest: ${digest}`,
+    ].join("\n")),
+    /exactly one SHA-256 signer/,
+  );
+  assert.throws(
+    () => parseApkSignerOutput([
+      "Verified using v2 scheme (APK Signature Scheme v2): false",
+      verified[1],
+      `V2 Signer: certificate SHA-256 digest: ${digest}`,
+    ].join("\n")),
+    /did not verify with APK Signature Scheme v2/,
+  );
 }
 
 function readSdkDir(repoRoot) {

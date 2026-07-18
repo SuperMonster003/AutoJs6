@@ -12,6 +12,7 @@ const {
   LIFECYCLE_MODEL,
   REQUIRED_DEVICE_SELECTORS,
   REQUIRED_REGRESSIONS,
+  apkSignerCertificateSha256Digests,
   currentIdentity,
   evaluateDeviceReport,
 } = require("./verify-production-evidence.js");
@@ -907,13 +908,11 @@ function parseApkSignerOutput(output, label = "APK") {
   }
   const countMatch = output.match(/Number of signers:\s*([0-9]+)/i);
   const signerCount = countMatch ? Number(countMatch[1]) : 0;
-  const signerMatches = [...output.matchAll(
-    /^Signer #\d+ certificate SHA-256 digest:\s*([0-9a-f]{64})\s*$/gim,
-  )];
-  const signerDigests = [...new Set(signerMatches.map((match) => match[1].toLowerCase()))];
-  if (signerCount !== 1 || signerMatches.length !== 1 || signerDigests.length !== 1) {
+  const signerDigestMatches = apkSignerCertificateSha256Digests(output);
+  const signerDigests = [...new Set(signerDigestMatches)];
+  if (signerCount !== 1 || signerDigestMatches.length !== 1 || signerDigests.length !== 1) {
     throw new Error(
-      `${label} must expose exactly one SHA-256 signer (reported=${signerCount}, digests=${signerMatches.length}).`,
+      `${label} must expose exactly one SHA-256 signer (reported=${signerCount}, digests=${signerDigestMatches.length}).`,
     );
   }
   return {

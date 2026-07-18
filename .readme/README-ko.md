@@ -208,6 +208,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `수정` Node.js 외부 런타임 Binder 응답 유실 후 자동 폴백으로 동일한 스크립트가 중복 실행될 수 있는 문제
 * `수정` Android 프라이빗 디렉터리 /data/user/0 및 /data/data 별칭을 정규화하여 플러그인 요청에 다시 기록하지 않아, 올바른 Node.js workingDirectory가 sandboxRoot를 벗어난 것으로 잘못 판단되는 문제
 * `수정` 호스트에 Node 런타임이 없는 nodePlugin 빌드에서 모든 ABI의 JNI/AAR 라이브러리를 잘못 제외하여, libjackpal-termexec2.so 누락으로 Rhino Shell 초기화 중 앱이 충돌하는 문제
+* `수정` apksigner의 인증서 다이제스트 출력 형식 변경으로 인해 Node.js R6 증거 수집 및 검증에서 Android Build Tools 37이 보고한 APK 서명자 ID를 거부하는 문제
 * `수정` runtime.loadJar에서 더 높은 Java 버전을 대상으로 컴파일된 class 파일을 정상적으로 동적 로드하지 못하는 문제
 * `수정` app.isInstalled/kill 등의 메서드에서 패키지 이름 인수를 정상적으로 사용하지 못하는 문제 _[`issue #495`](http://issues.autojs6.com/495)_
 * `수정` Root 권한이 없는 기기에서 shell 관련 메서드를 호출할 때 응답하지 않을 수 있는 문제
