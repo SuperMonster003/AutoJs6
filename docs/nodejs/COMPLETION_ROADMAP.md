@@ -44,6 +44,10 @@ production Inspector are intentional boundaries rather than unfinished work.
   engine request preparation, and host preparation boundaries.
 - [x] R4 removes project-wide encrypted-module scanning from the normal
   execution path through request-scoped, on-demand module resolution.
+- [x] R5 makes `nodePlugin` plus the required `plugin` backend the default
+  main-app delivery, adds a persistent external runtime with fresh execution
+  state and zero-scan workspace archive transport v2, and passes the focused
+  live gate on `arm64-v8a`, `armeabi-v7a`, and `x86_64` with no skipped tests.
 - [ ] Re-run the final aggregate gates before declaring Core completion. The
   blocker registry is closed, but some narrative status documents still
   describe older blocked states.
@@ -325,21 +329,43 @@ reviewed acceptance checklist are maintained in
 
 ## R5 - Align The External Runtime Plugin Backend
 
-- [ ] Decide and document whether `plugin` is an optional backend, the default
-  distribution backend, or both through separate release flavors.
-- [ ] Cache authorized plugin candidates and package-version validation;
+- [x] Use `nodePlugin` plus required `plugin` as the default distribution
+  policy. Permit `pluginOptional` only for `nodeFull` and `nodeMini`, with one
+  embedded fallback only after a proven pre-dispatch failure.
+- [x] Cache authorized plugin candidates and package-version validation;
   invalidate on install, uninstall, upgrade, trust, or permission changes.
-- [ ] Maintain a Binder session instead of discover/bind/unbind for every
-  operation; reconnect atomically after Binder death.
-- [ ] Reuse process-global Node/V8 state in the plugin service while preserving
+- [x] Maintain a Binder session instead of discover/bind/unbind for every
+  operation; attribute in-flight Binder death to
+  `ERR_AUTOJS6_NODE_PLUGIN_EXECUTION_LOST` without replay or fallback, then
+  reconnect atomically for a later request.
+- [x] Reuse process-global Node/V8 state in the plugin service while preserving
   a fresh per-execution isolate and Environment.
-- [ ] Run the same corpus through `embedded` and `plugin`, comparing stdout,
-  stderr, error identity, cancellation, lifecycle, and native diagnostics.
-- [ ] Verify required-plugin failure, optional-plugin fallback, backpressure,
+- [x] Run the same corpus through `embedded` and `plugin`, comparing stdout,
+  stderr, error identity, active cancellation, lifecycle, and native
+  diagnostics. Active cancellation retires the old process and recovery uses a
+  new PID.
+- [x] Transport only explicitly named workspace inputs through archive contract
+  v2, execute from a plugin-private mirror, write outputs back with a final
+  deletion tombstone manifest, and keep host-sandbox scan count at zero.
+- [x] Verify required-plugin failure, optional-plugin fallback, backpressure,
   contract negotiation, trust/signature checks, crash attribution, and all
-  supported ABIs without skipped live tests on release devices.
-- [ ] Meet the R2 runtime-warm p50/p95 target and report discovery/bind overhead
+  supported ABIs without skipped live tests on the acceptance hardware/emulator
+  matrix.
+- [x] Meet the R2 runtime-warm p50/p95 target and report discovery/bind overhead
   separately.
+
+The final R5 live gate passed all eight ordered cases with zero skipped tests
+for every supported ABI. Each performance result uses 30 runtime-warm samples:
+
+| Plugin ABI | Acceptance device | Tests | Skipped | Warm wall p50 / p95 |
+| --- | --- | ---: | ---: | ---: |
+| `arm64-v8a` | Sony XQ-AT72 | 8 / 8 | 0 | 231 / 254 ms |
+| `armeabi-v7a` | Sony XQ-AT72 | 8 / 8 | 0 | 240 / 265 ms |
+| `x86_64` | Android AVD | 8 / 8 | 0 | 182 / 212 ms |
+
+Commands, immutable build identities, artifact and report hashes, diagnostics,
+and the semantic evidence matrix are maintained in
+[R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md).
 
 ## R6 - Reopen And Close Production Evidence For The New Lifecycle
 

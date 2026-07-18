@@ -2,7 +2,12 @@
 
 Status: v1 GA hardening baseline.
 
-Scope: AutoJs6 Safe Node Profile running in the main app and packaged APKs. This model covers the embedded Node runtime, CommonJS/npm subset, scoped filesystem, bridge RPC, experimental feature gates, dependency bundling, and packaged manifest patching. It does not promote any experimental capability to stable.
+Scope: AutoJs6 Safe Node Profile running through the default external runtime
+plugin, self-contained Embedded Node flavors, and packaged APKs. This model
+covers runtime delivery, CommonJS/npm, scoped filesystem and cross-UID
+workspace transport, bridge RPC, feature gates, dependency bundling, and
+packaged manifest patching. It does not promote any experimental capability to
+stable.
 
 ## Security Goals
 
@@ -18,6 +23,8 @@ Scope: AutoJs6 Safe Node Profile running in the main app and packaged APKs. This
 
 | Boundary | Trusted side | Untrusted side | Required control |
 | --- | --- | --- | --- |
+| Main app to external runtime service | Authorized AutoJs6 host and broker | Runtime package identity, Binder/process lifecycle, Node/V8/libuv execution | signature permission, enable/authorization/trust state, signer/UID/component identity, contract/capability/ABI negotiation, Binder death generation, no replay after dispatch |
+| Host workspace to plugin-private workspace | Host-scoped working directory and explicit request inputs | Cross-UID archive contents, plugin output, deletion requests | PFD ownership, zero host sandbox scan, path and size budgets, symlink/special-file denial, TOCTOU identity checks, verified final output and tombstone commit |
 | Main app to `:nodejs_embedded` | AutoJs6 app/services | Node/V8/libuv execution | process isolation, lifecycle stop/destroy, stable result channel |
 | Bridge provider to JavaScript | Capability providers | JS bridge client and npm code | JSON RPC validation, capability manifest, resource registry, timeout |
 | Filesystem root | Working directory/project root | Script paths, package targets, file URLs | lexical and canonical scoped checks |
@@ -33,6 +40,7 @@ Scope: AutoJs6 Safe Node Profile running in the main app and packaged APKs. This
 | Shell, Shizuku, root | Command execution and privilege escalation | `shell` bridge alternative, `child_process` denied, explicit `shell.root`, timeout and resource cleanup | `NodeShellBridgeInstrumentationTest`, `NodeSecurityRegressionInstrumentationTest`, `NodeBridgeResourceRegistryInstrumentationTest` |
 | Packaged app data | Leaking injected scripts/assets or wrong entry execution | scoped moduleSources, encrypted entry support, package verifier, native ABI checks | `EmbeddedNodePackagedApkSmokeTest`, `embeddedNodePackagedApkOutputVerify`, `embeddedNodePackagedDiagnosticReport` |
 | User files | Path traversal, symlink escape, source-map leakage | scoped fs for sync/callback/promises, realpath checks, source-map path policy | `NodeSecurityRegressionInstrumentationTest`, `NodeScopedFsFuzzerInstrumentationTest`, `NodeFsPromisesInstrumentationTest` |
+| Cross-UID workspace | Unrequested host-file disclosure, archive traversal, TOCTOU substitution, partial writeback, over-broad deletion, leaked descriptors | explicit-input archive v2, plugin-private extraction, zero host scan, `lstat`/`O_NOFOLLOW`/`fstat` identity checks, bounded archives, final tombstone allowlist, complete-commit validation, close on every exit | `NodeRuntimePluginR5InstrumentationTest` |
 | Android permissions | Manifest over-grant or missing permission at runtime | bridge permission manifest, packaged manifest patch verification, stable missing-capability errors | `NodeBridgePermissionManifestInstrumentationTest`, packaged diagnostic reports |
 | Bridge resources | Leaked image/screen/network/shell handles after stop | per-execution registry, idempotent close, destroy cleanup diagnostics | `NodeBridgeResourceRegistryInstrumentationTest`, `NodeBridgeConcurrencyLimitsInstrumentationTest` |
 
@@ -59,6 +67,38 @@ Mitigation: Scoped policy applies before and after canonicalization; file URL an
 Tests: `NodeSecurityRegressionInstrumentationTest`, `NodeScopedFsFuzzerInstrumentationTest`, `NodeFsPromisesInstrumentationTest`, source-map instrumentation, release checklist scoped fs negatives.
 
 Remaining risk: Platform-specific path semantics and filesystem permissions vary by Android version. Fuzzer seeds must be saved and replayed when a new edge case appears.
+
+### TM-External-Runtime-Workspace
+
+Risk: A replaced or unauthorized runtime service can impersonate the selected
+backend; a Binder failure can cause duplicate side effects; or cross-UID
+workspace transport can disclose unrequested host files, traverse archive
+paths, race path identity, apply a partial output, delete an unrelated host
+file, or leak a file descriptor.
+
+Mitigation: Discovery binds only an enabled, authorized, signature-permission
+service whose component/version/update-time/UID/signer identity and negotiated
+contract/capabilities/process ABI pass. Package, host state, trust, and Binder
+death invalidate the pooled session. The plugin process persists only while
+healthy; execution state is fresh, admission is single-active with no queue,
+and active cancellation restarts the process. `pluginOptional` falls back only
+before dispatch. After dispatch may have started, response loss is terminal and
+never replayed. Workspace v2 enumerates explicit inputs only, passes owned PFDs,
+extracts into plugin-private storage, enforces path/count/byte and
+symlink/special-file rules, verifies file identity before and after open, and
+applies output plus deletion tombstones only after a complete zero-scan commit.
+
+Tests: `NodeRuntimePluginR5InstrumentationTest`, including trust and contract
+rejection, persistent-process/fresh-execution checks, active cancellation and
+new-PID recovery, single-active busy rejection, pre-dispatch-only fallback,
+Binder-death/no-replay recovery, workspace writeback/deletion, and warm-cache
+sampling. The three-ABI 8/8, zero-skip record is archived in
+[`R5_ACCEPTANCE_SAMPLING.md`](../R5_ACCEPTANCE_SAMPLING.md).
+
+Remaining risk: Android package and filesystem behavior varies by platform.
+Future transport fields or deletion authority require new negative corpus and
+cross-UID device evidence; no caller-provided path may broaden the explicit
+input/tombstone allowlist.
 
 ### TM-Package-Exports-Imports
 
@@ -147,6 +187,7 @@ Remaining risk: Android platform policy changes can invalidate foreground-servic
 | `NodeSecurityRegressionInstrumentationTest` | TM-CJS-Resolver, TM-Scoped-FS, TM-Package-Exports-Imports, TM-Feature-Flags, TM-Controlled-Network |
 | `NodeResolverFuzzerInstrumentationTest` | TM-CJS-Resolver, TM-Package-Exports-Imports |
 | `NodeScopedFsFuzzerInstrumentationTest` | TM-Scoped-FS |
+| `NodeRuntimePluginR5InstrumentationTest` | TM-External-Runtime-Workspace, cross-UID workspace asset, user files asset |
 | `NodeBridgeRpcFuzzerInstrumentationTest` | TM-Bridge-RPC |
 | `NodeBridgePermissionManifestInstrumentationTest` | TM-Bridge-RPC, TM-Packaged-Manifest-Patch, Android permissions asset |
 | `NodeBridgeResourceRegistryInstrumentationTest` | Bridge resources asset, TM-Bridge-RPC, TM-Controlled-Network |
@@ -169,6 +210,9 @@ Remaining risk: Android platform policy changes can invalidate foreground-servic
 - Adding a stable capability requires a new row or update in this threat model.
 - Adding an experimental capability requires a design doc, feature flag, denied-by-default test, and remaining-risk entry.
 - Changing resolver, fs, bridge, bundler, or packaged manifest behavior requires a positive test and a negative/security test.
+- Changing external runtime discovery, dispatch, cancellation, replay, or
+  workspace transport requires the focused R5 gate on every supported runtime
+  ABI with no skipped tests.
 - Fuzzer failures must save seed JSON under `build/reports/nodejs/fuzz-seeds/` and be replayable with `:app:replayNodeFuzzerSeed`.
 - Release candidates must attach doctor, release manifest, nightly report, packaged diagnostic, and relevant device reports.
 
@@ -179,3 +223,6 @@ Remaining risk: Android platform policy changes can invalidate foreground-servic
 - Some bridge modules rely on fake or disabled providers in normal builds.
 - Experimental ESM, worker, Java interop, controlled network, and WebSocket remain feature-gated and must not be documented as stable.
 - Native addon support is not part of v1 and should remain disabled unless a separate developer-mode plugin model is designed.
+- External runtime replacement, signer/UID drift, Binder loss, and cross-UID
+  workspace changes remain security-sensitive even when JavaScript-visible
+  compatibility is unchanged.

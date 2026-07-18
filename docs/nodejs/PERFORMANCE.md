@@ -1,8 +1,8 @@
-# AutoJs6 Embedded Node Performance
+# AutoJs6 Node Runtime Performance
 
-This page documents the optional local benchmark for Embedded Node startup and
-memory diagnostics. It is not a default release gate because device load,
-thermal state, ABI, and background services can make raw timings noisy.
+This page documents the Embedded Node startup/memory benchmark and the R5
+external runtime plugin performance gate. Device load, thermal state, ABI, and
+background services still need to be controlled when recording results.
 
 ## Instrumentation Benchmark
 
@@ -103,7 +103,57 @@ results using [R4_ACCEPTANCE_SAMPLING.md](R4_ACCEPTANCE_SAMPLING.md). An
 unfilled template or a successful compile/instrumentation command is not
 device acceptance evidence.
 
-## Report Schema
+## R5 External Runtime Plugin Gate
+
+`NodeRuntimePluginR5InstrumentationTest` measures the external Binder backend
+through the real host bridge. It first runs a primer that includes discovery,
+contract negotiation, binding, and process startup as needed. It then records
+at least 30 runtime-warm executions that must keep the same plugin PID, process
+runtime generation, and host session generation while reusing both candidate
+and Binder caches.
+
+Run the focused gate with an installed, enabled, authorized, ABI-compatible
+runtime plugin:
+
+```powershell
+$nodeRuntimeProject = (Resolve-Path ..\AutoJs6-Plugin-NodeJs-Runtime).Path
+$gradleArgs = @(
+    ':app:verifyNodeR5RuntimePluginGate'
+    '-Pautojs.nodejs.test.deviceProfile=sony'
+    '-Pautojs.nodejs.releaseFlavor=nodeMini'
+    '-Pautojs.nodejs.backend=pluginOptional'
+    '-Pautojs.nodejs.embedded.script.enabled=true'
+    '-Pautojs.nodejs.embedded.persistentRuntime=true'
+    '-Pautojs.nodejs.releaseAbis=arm64-v8a'
+    "-Pautojs.nodejs.pluginProjectDir=$nodeRuntimeProject"
+    "-Pautojs.nodejs.runtimeJniLibs=$nodeRuntimeProject\app\src\main\jniLibs"
+    '-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.r5.pluginWarmSamples=30'
+    '-Pksp.incremental=false'
+    '--console=plain'
+)
+
+& .\gradlew.bat @gradleArgs
+exit $LASTEXITCODE
+```
+
+The instrumentation argument
+`autojs.nodejs.r5.pluginWarmSamples` defaults to and is clamped to at least
+`30`; the maximum is `200`. The gate requires runtime-warm wall-clock p50 at
+most `250 ms`, p95 at most `400 ms`, and every warm
+`embedded_script.runtime_plugin.bind_elapsed_ms` value to be `0`.
+
+The class prints JSON with schema
+`autojs6-node-runtime-plugin-r5-performance-v1`. It separates primer discovery
+and bind time from warm discovery and bind distributions and includes plugin
+package, PID, process runtime generation, and host session generation. A
+successful build or an unarchived single run is not Roadmap acceptance
+evidence; preserve the live device output and JSON through the R5 acceptance
+process. The completed `arm64-v8a`, `armeabi-v7a`, and `x86_64` matrix recorded
+8/8 tests with zero skips and at least 30 warm samples per ABI; archived
+commands, distributions, device identity, and artifact hashes are in
+[R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md).
+
+## Embedded Report Schema
 
 Reports use schema `autojs6-node-performance-v4`. They include device and ABI
 metadata, the exact sample plan, nearest-rank distributions, raw run records,

@@ -1054,6 +1054,50 @@ silently falls back to a project-wide directory scan.
 - How to fix: enable the Node runtime or use a build/flavor that includes embedded Node.
 - Related docs: [ROLLBACK_PLAYBOOK.md](ROLLBACK_PLAYBOOK.md), [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md).
 
+## ERR_AUTOJS6_NODE_RUNTIME_UNAVAILABLE
+
+- Meaning: an embedded/native backend was selected but its required native runtime libraries could not be resolved.
+- Common cause: missing `libnode.so` or `libautojs6-node.so`, an ABI mismatch, or a self-contained flavor built from an incomplete runtime artifact directory.
+- Example: starting `nodeMini` on arm64 when its selected runtime source contains no arm64 `libnode.so`.
+- How to fix: provide matching runtime artifacts, select a packaged Embedded Node flavor with the device ABI, or use the required external Binder backend instead.
+- Related docs: [design/RELEASE_FLAVORS.md](design/RELEASE_FLAVORS.md), [design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md).
+
+## ERR_AUTOJS6_NODE_PLUGIN_UNAVAILABLE
+
+- Meaning: the external Node runtime could not be selected or prepared before user-code dispatch.
+- Common cause: no installed enabled authorized service, signature-permission denial, incompatible host version, failed bind, pre-dispatch session loss, or failure to prepare the bounded explicit-input workspace archive/PFDs.
+- Example: a required `nodePlugin` release starts a Node script while the runtime plugin is disabled in host plugin state.
+- How to fix: install, enable, and authorize a compatible runtime plugin, then retry explicitly. `pluginOptional` may use its packaged embedded fallback exactly once when `fallback_safe=true`.
+- Related docs: [design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md), [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
+
+## ERR_AUTOJS6_NODE_PLUGIN_CONTRACT_MISMATCH
+
+- Meaning: an external runtime was discovered, but its negotiated contract, mandatory capabilities, lifecycle metadata, or process ABI did not satisfy the host.
+- Common cause: wrong contract version, blank runtime slot/Node version, missing host broker/live bridge/module-provider/workspace transport capability, unsupported `processAbi`, or non-R5 concurrency/cancellation metadata.
+- Example: a plugin reports `queueCapacity=1`, uses a cancellation mode other than `process_restart`, or reports a process ABI not present in both `supportedAbis` and the device ABI list.
+- How to fix: update the host and runtime plugin to compatible builds and install the correct ABI artifact. Do not bypass contract validation; `pluginOptional` may fall back only because this rejection occurs before dispatch.
+- Related docs: [design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_NODE_PLUGIN_EXECUTION_LOST
+
+- Meaning: the host lost the external runtime response after dispatch may already have started.
+- Common cause: Binder death, remote process crash, transaction failure while the plugin may be executing, or an incomplete/invalid workspace output commit after dispatch.
+- Example: the plugin process dies after a script writes a file but before its result Bundle reaches the host.
+- How to fix: inspect Binder-death, session-generation, package/service, crash,
+  and `embedded_script.runtime_plugin.workspace.*` diagnostics. AutoJs6 does
+  not apply an unverified output/tombstone archive, replay, or fall back; retry
+  only through an explicit user action after considering side effects that may
+  already have occurred.
+- Related docs: [design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md), [NATIVE_CRASH_DIAGNOSTICS.md](NATIVE_CRASH_DIAGNOSTICS.md).
+
+## ERR_AUTOJS6_NODE_PLUGIN_BUSY
+
+- Meaning: the external runtime rejected a concurrent execution under its single-active, zero-queue contract.
+- Common cause: another plugin execution is active when a new request reaches admission.
+- Example: four callers start scripts simultaneously; one is admitted and the others receive busy results with queue capacity `0`.
+- How to fix: wait for the active execution to finish and retry explicitly. The host does not place the request in the embedded queue and does not use optional fallback.
+- Related docs: [design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md), [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md).
+
 ## ERR_AUTOJS6_NODE_ENGINE_BUSY
 
 - Meaning: an embedded Node execution is already active in the service process.
@@ -1064,11 +1108,11 @@ silently falls back to a project-wide directory scan.
 
 ## ERR_AUTOJS6_NODE_QUEUE_CANCELLED
 
-- Meaning: a queued embedded Node execution was cancelled before it started.
-- Common cause: user stop, service destroy, or explicit queue cancellation by execution id.
-- Example: cancelling a queued script while another script is still active.
-- How to fix: treat it as a normal cancellation and resubmit only if the user requested it.
-- Related docs: [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md), [TESTING.md](TESTING.md).
+- Meaning: a Node request was cancelled by the client lifecycle; for embedded execution it may be a queued request, while the external plugin path may cancel before or after backend dispatch.
+- Common cause: user stop, service destroy, explicit queue cancellation, or an external runtime cancellation request by execution id.
+- Example: cancelling a queued embedded script, or cancelling a plugin request whose negotiated cancellation mode is `process_restart`.
+- How to fix: treat it as terminal and resubmit only if the user explicitly requests a new execution. Never replay the cancelled plugin request automatically.
+- Related docs: [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md), [design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md), [TESTING.md](TESTING.md).
 
 ## ERR_AUTOJS6_NODE_QUEUE_FULL
 

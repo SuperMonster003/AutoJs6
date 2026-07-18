@@ -1,6 +1,7 @@
-# AutoJs6 Embedded Node.js Testing
+# AutoJs6 Node.js Testing
 
-This document records the current test commands and the expected gates for future Embedded Node work.
+This document records the current test commands for the external runtime
+plugin, Embedded Node, and packaged Node work.
 
 ## Shared Deployment Context
 
@@ -97,6 +98,88 @@ This focused class is not 30-sample performance evidence. Use
 runtime-warm commands and acceptance record. Do not mark the device gate
 complete from compile success, a single instrumentation pass, or an unfilled
 report template.
+
+### R5 External Runtime Plugin Gate
+
+The focused R5 gate selects
+`org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest`:
+
+```powershell
+$nodeRuntimeProject = (Resolve-Path ..\AutoJs6-Plugin-NodeJs-Runtime).Path
+$gradleArgs = @(
+    ':app:verifyNodeR5RuntimePluginGate'
+    '-Pautojs.nodejs.test.deviceProfile=sony'
+    '-Pautojs.nodejs.releaseFlavor=nodeMini'
+    '-Pautojs.nodejs.backend=pluginOptional'
+    '-Pautojs.nodejs.embedded.script.enabled=true'
+    '-Pautojs.nodejs.embedded.persistentRuntime=true'
+    '-Pautojs.nodejs.releaseAbis=arm64-v8a'
+    "-Pautojs.nodejs.pluginProjectDir=$nodeRuntimeProject"
+    "-Pautojs.nodejs.runtimeJniLibs=$nodeRuntimeProject\app\src\main\jniLibs"
+    '-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.r5.pluginWarmSamples=30'
+    '-Pksp.incremental=false'
+    '--console=plain'
+)
+
+& .\gradlew.bat @gradleArgs
+exit $LASTEXITCODE
+```
+
+The production default remains `nodePlugin` plus required `plugin`. The focused
+gate deliberately uses `nodeMini` plus `pluginOptional` so it can prove the
+single pre-dispatch embedded fallback boundary; `pluginOptional` is not valid
+for `nodePlugin` or `rhinoOnly`.
+
+The device must already have an installed, enabled, authorized,
+host-version-compatible, and ABI-compatible Node runtime plugin. This is a live
+preflight requirement: the class has no `Assume` escape for a missing,
+disabled, untrusted, stale, or contract-incompatible service.
+
+Its eight ordered cases verify:
+
+- live discovery, signer/authorization identity, exact contract, mandatory
+  capabilities, process ABI, and R5 lifecycle metadata;
+- candidate-cache and Binder-session reuse, one persistent plugin process
+  runtime, fresh globals/environment/timer state for each execution, and
+  workspace archive v2 with explicit inputs, a plugin-private mirror, output
+  writeback, a final deletion tombstone manifest, and zero host-sandbox scans;
+- embedded/plugin stdout, stderr, exit, and typed-error identity parity plus
+  active cancellation that retires each active process and recovers with a new
+  PID;
+- single-active admission, zero queue, and
+  `ERR_AUTOJS6_NODE_PLUGIN_BUSY` for competing calls;
+- required-plugin unavailable failure and exactly one embedded fallback for a
+  proven pre-dispatch `pluginOptional` failure;
+- host rejection of wrong contract version and missing mandatory capabilities;
+- in-flight Binder-death attribution as
+  `ERR_AUTOJS6_NODE_PLUGIN_EXECUTION_LOST`, with no replay or fallback, followed
+  by one atomic reconnect shared by concurrent probes; and
+- a minimum 30-sample runtime-warm distribution with p50 at most `250 ms`, p95
+  at most `400 ms`, candidate/session cache reuse, and zero warm bind time.
+
+The active cancellation and Binder-death cases cross the dispatch boundary.
+They therefore also verify that `fallback_safe=false`, that
+`pluginOptional` does not use Embedded Node after dispatch, and that a later
+healthy execution uses the replacement process/session instead of replaying the
+lost execution.
+
+The performance case prints schema
+`autojs6-node-runtime-plugin-r5-performance-v1`. A passing command is not by
+itself an archived Roadmap acceptance result; preserve the actual live output
+through the R5 acceptance workflow.
+
+The 2026-07-18 acceptance run completed all eight cases with zero skipped tests
+for `arm64-v8a` and `armeabi-v7a` on the Sony XQ-AT72 and for `x86_64` on an
+Android AVD. Each ABI used 30 runtime-warm samples:
+
+| Plugin ABI | Warm wall p50 | Warm wall p95 | Result |
+| --- | ---: | ---: | --- |
+| `arm64-v8a` | 231 ms | 254 ms | 8 / 8, skipped 0 |
+| `armeabi-v7a` | 240 ms | 265 ms | 8 / 8, skipped 0 |
+| `x86_64` | 182 ms | 212 ms | 8 / 8, skipped 0 |
+
+See [R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md) for the exact
+commands, identities, hashes, and evidence record.
 
 Current lifecycle stress instrumentation:
 
@@ -2952,7 +3035,8 @@ Expected policy:
 
 Release packaging profiles:
 
-- `nodeFull`: default for main app builds and explicit full-node inrt test templates, requires all supported Node ABIs
+- `nodePlugin`: default for main app builds, requires the external Binder runtime and packages no host Embedded Node runtime
+- `nodeFull`: self-contained profile and explicit full-node inrt test template, requires all supported Node ABIs
 - `nodeMini`: supports a smaller explicit ABI set
 - `rhinoOnly`: default for ordinary production inrt template builds, must not package `libnode.so` or `libautojs6-node.so`
 
@@ -2968,7 +3052,7 @@ ABI size and distribution report:
 .\gradlew.bat --console=plain :app:nativeNodeAbiSizeReport
 ```
 
-This writes `app/build/reports/nodejs/abi-size-report.md` with APK artifact sizes, packaged template size, per-ABI native payload, APK native entry compression, and `nodeFull` / `nodeMini` / `rhinoOnly` payload comparison.
+This writes `app/build/reports/nodejs/abi-size-report.md` with APK artifact sizes, packaged template size, per-ABI native payload, APK native entry compression, and `nodePlugin` / `nodeFull` / `nodeMini` / `rhinoOnly` payload comparison.
 
 Node 24.x patch upgrade feasibility report:
 
@@ -3141,6 +3225,7 @@ Any Node-facing runtime behavior change must update:
 - `docs/nodejs/EXAMPLES.md` when adding or changing checked-in examples
 - `docs/nodejs/PERFORMANCE.md` when benchmark metrics, report schema, or threshold arguments change
 - `docs/nodejs/design/` design notes when changing broad surfaces such as fs, file URL, stream, zlib, scheduled/background tasks, ESM, network, workers, Java interop, multi-instance lifecycle, Rhino shims, or native addons
+- `docs/nodejs/design/RUNTIME_PLUGIN_BACKEND.md` when external runtime discovery, trust, contract, Binder session, fallback, cancellation, or distribution policy changes
 
 ## Aggregate Tasks
 
@@ -3148,6 +3233,7 @@ Use these aggregate tasks for local gates:
 
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodePrGate
+.\gradlew.bat --console=plain :app:verifyNodeR5RuntimePluginGate "-Pautojs.nodejs.releaseFlavor=nodeMini" "-Pautojs.nodejs.backend=pluginOptional" "-Pautojs.nodejs.releaseAbis=arm64-v8a"
 .\gradlew.bat --console=plain :app:verifyNodeV11AlphaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_alpha"
 .\gradlew.bat --console=plain :app:verifyNodeV11BetaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
 .\gradlew.bat --console=plain :app:verifyNodeV11RcReadiness "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"

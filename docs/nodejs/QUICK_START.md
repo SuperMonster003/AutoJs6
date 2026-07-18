@@ -6,6 +6,12 @@ This page is the short entry point for the AutoJs6 Safe Node Profile. For the co
 For the current v1.1 user-facing draft, read
 [NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md).
 
+The default main-app release is `nodePlugin` with the required external
+`plugin` backend. Install, enable, and authorize an ABI-compatible AutoJs6 Node
+runtime plugin before running Node entries. Self-contained `nodeFull` and
+`nodeMini` builds and exported packaged apps continue to use Embedded Node.
+There is no silent runtime change when the required plugin is unavailable.
+
 ## Minimal Script
 
 Use a Node directive at the top of the script:
@@ -55,12 +61,16 @@ Example `project.json`:
   "type": "node",
   "main": "main.cjs",
   "node": {
-    "backend": "embedded",
     "timeoutMs": 30000,
     "permissions": ["toast", "app"]
   }
 }
 ```
+
+Omitting `node.backend` inherits the release-flavor policy. Use an explicit
+backend only for a documented diagnostic or self-contained build; the default
+`nodePlugin` flavor requires `plugin`, while `pluginOptional` is valid only for
+`nodeFull`/`nodeMini` and can fall back only before plugin dispatch.
 
 When `node.permissions` is present, undeclared bridge capabilities reject before dispatch.
 
@@ -125,6 +135,14 @@ allowed only when they still resolve inside that scoped root. NUL bytes, `..`
 escapes, symlink escapes, realpath escapes, absolute paths outside the scoped
 root, and `/proc`, `/sys`, or `/dev` access are rejected.
 
+With the external backend, this scope is mirrored per request into a
+plugin-private workspace. Only request-prepared sources and explicitly mapped
+file inputs are archived; files merely present elsewhere in the host sandbox
+are not discovered by a recursive scan. A successful run writes verified
+outputs back and can delete only explicit input files named by the final
+tombstone manifest. A cancelled, lost, or invalid post-dispatch commit is never
+replayed automatically.
+
 ## What To Read Next
 
 - v1.1 feature draft: [NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md)
@@ -135,3 +153,4 @@ root, and `/proc`, `/sys`, or `/dev` access are rejected.
 - Known issues: [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md)
 - GA release notes draft: [releases/NODE_PROFILE_V1_GA.md](releases/NODE_PROFILE_V1_GA.md)
 - Testing and device gates: [TESTING.md](TESTING.md)
+- R5 three-ABI acceptance evidence: [R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md)

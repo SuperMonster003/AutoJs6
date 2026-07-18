@@ -1,4 +1,4 @@
-# Embedded Node Device Matrix
+# AutoJs6 Node.js Device Matrix
 
 This matrix defines which devices run which Node Profile v1 gates. It is intended to keep heavy stress work off unsuitable devices while preserving a reproducible release path.
 
@@ -37,7 +37,8 @@ Sony XQ-AT72 is the primary full-gate device for the current branch.
 - serial: `QV710AF65F`
 - profile: `sony`
 - Android: 12 / API 31
-- ABI: `arm64-v8a`
+- device ABI: `arm64-v8a`, with `armeabi-v7a` compatibility for the dedicated
+  32-bit runtime plugin process
 - use: release-candidate and GA verification, packaged APK smoke, lifecycle stress, reduced/full memory stress, bridge/security/corpus coverage
 - default package identity: `org.autojs.autojs6`
 - side-by-side test identity: `org.autojs.autojs6.nodejs` with `-Pautojs.nodejs.identity=nodejsTest`
@@ -65,7 +66,9 @@ preparation commands.
 The x86_64 emulator profile is for deterministic resolver and compatibility checks when a physical device is unavailable.
 
 - profile: `emulator`
-- use: embedded MVP, CommonJS compatibility corpus, fixed real npm corpus, resolver fuzzer, scoped fs fuzzer
+- use: embedded MVP, CommonJS compatibility corpus, fixed real npm corpus,
+  resolver fuzzer, scoped fs fuzzer; an x86_64 AVD may also use the explicit
+  `full` profile for the R5 external-runtime ABI acceptance gate
 - not for: packaged APK install smoke as the primary signal, memory leak stress, Android/OEM service policy decisions
 
 Recommended command:
@@ -73,6 +76,26 @@ Recommended command:
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=emulator"
 ```
+
+## R5 External Runtime ABI Matrix
+
+R5 external runtime acceptance covers the native process ABI rather than only
+the host APK/device primary ABI:
+
+| Runtime artifact | Device | Expected plugin process ABI | Result |
+| --- | --- | --- | --- |
+| `arm64-v8a` | Sony XQ-AT72, Android 12 | `arm64-v8a` | 8/8, skipped 0 |
+| `armeabi-v7a` | Sony XQ-AT72, Android 12 | `armeabi-v7a` | 8/8, skipped 0 |
+| `x86_64` | x86_64 emulator | `x86_64` | 8/8, skipped 0 |
+
+Each run must prove that reported `processAbi` belongs to both the plugin's
+`supportedAbis` and the device ABI list. The same eight-test gate also verifies
+trust/contract checks, persistent-process/fresh-execution behavior, explicit
+workspace v2 writeback/deletion with zero host scan, active-cancel process
+restart, single-active/zero-queue admission, pre-dispatch-only fallback,
+no-replay Binder death recovery, and 30 or more warm samples. See
+[R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md) for the exact AVD,
+commands, fingerprints, hashes, XML, and performance JSON.
 
 ## Smoke Device
 
@@ -157,6 +180,11 @@ OnePlus OPD2413 is excluded from current unattended Node Profile v1 gates becaus
 ## Selection Rules
 
 - Use Sony XQ-AT72 for release-candidate and GA publication evidence.
+- Use both the 64-bit and 32-bit runtime artifacts on Sony for the R5 physical
+  device ABI evidence; do not infer `armeabi-v7a` coverage from an arm64 run.
+- Use the x86_64 emulator as the R5 runtime ABI signal only for the focused
+  external plugin gate; it does not replace physical-device packaged or OEM
+  policy evidence.
 - Do not use OnePlus OPD2413 for unattended current-branch gates.
 - Use x86_64 emulator for resolver/corpus/policy feedback, not for final packaged APK confidence.
 - Use `smoke` profile for quick validation on optional secondary devices.

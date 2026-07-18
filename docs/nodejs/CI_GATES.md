@@ -1,4 +1,4 @@
-# Embedded Node CI Gates
+# AutoJs6 Node.js CI Gates
 
 This document separates fast host checks from heavy device and release checks for Node Profile v1.
 
@@ -43,6 +43,39 @@ Scope:
 - packaged toast bridge smoke
 
 Use explicit single-class or single-method commands for focused fixes. Passing `android.testInstrumentationRunnerArguments.class` overrides device profile class selection.
+
+## R5 External Runtime Plugin Gate
+
+Use `verifyNodeR5RuntimePluginGate` for changes to external discovery/trust,
+Binder pooling, runtime service lifecycle, cancellation, admission, fallback,
+workspace transport, ABI negotiation, or plugin performance. The runtime plugin
+must already be installed, enabled, authorized, and compatible with the target
+process ABI. The focused class contains eight ordered tests and intentionally
+has no `Assume` path for a missing or incompatible service.
+
+The gate uses `nodeMini` plus `pluginOptional` only so it can prove the one
+allowed pre-dispatch fallback. This is a focused test topology, not a change to
+the default `nodePlugin` plus required `plugin` release policy. Busy admission,
+active cancellation, Binder response loss, and workspace commit failure must
+remain terminal with no embedded fallback or automatic replay.
+
+Run the command documented in
+[design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md), changing
+the device profile, plugin ABI artifact, and embedded ABI only as required by
+the target:
+
+| Runtime ABI | Target | Gate profile | Required result |
+| --- | --- | --- | --- |
+| `arm64-v8a` | Sony XQ-AT72 | `sony` | 8/8, skipped 0 |
+| `armeabi-v7a` | Sony XQ-AT72 running the 32-bit plugin process | `sony` | 8/8, skipped 0 |
+| `x86_64` | x86_64 emulator | `full` | 8/8, skipped 0 |
+
+Every ABI also records at least 30 runtime-warm samples, persistent plugin PID
+and process-runtime generation, reused host session, zero warm bind time,
+workspace v2 zero-host-scan diagnostics, active-cancel new-PID recovery, and
+Binder-death attribution. The completed evidence, commands, artifact hashes,
+and measured distributions are in
+[R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md).
 
 ## Nightly Gate
 
@@ -1560,6 +1593,11 @@ Scope:
 - desktop Node differential harnesses for real npm and modern core probes
 - `verifyEmbeddedNodeReleaseCandidate`
 - connected device instrumentation selected by `sony` or `full`
+
+A `nodePlugin` release candidate additionally requires a current green R5
+three-ABI record. `pluginOptional` is not a release fallback for `nodePlugin`;
+it remains restricted to self-contained `nodeFull`/`nodeMini` gate or release
+builds and only before dispatch.
 
 The release gate still relies on packaged smoke APK artifacts being current when packaged host verification is part of the selected path. See [TESTING.md](TESTING.md) for packaged smoke artifact collection.
 

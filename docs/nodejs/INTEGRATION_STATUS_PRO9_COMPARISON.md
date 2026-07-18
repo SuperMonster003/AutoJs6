@@ -130,26 +130,30 @@ P12 surface 标为 provider gap：
 - Engine version：`autojs6-node-profile-v1.1`
 - Node header/runtime baseline：`v24.5.0`
 - 默认 runtime slot：`node24_5`
-- 默认构建后端：`embedded`
-- 默认发布形态：`nodeFull`
+- 默认构建后端：`plugin`
+- 默认发布形态：`nodePlugin`
 
 主要实现位置：
 
 - `app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt`
-- `app/src/main/cpp/node_runtime_api_v1.h`
-- `app/src/main/cpp/node_runtime_adapter_24_5.cpp`
-- `app/src/main/cpp/node_bridge_sources.cpp`
-- `app/src/main/jniLibs/arm64-v8a/libnode.so`
-- `app/src/main/jniLibs/armeabi-v7a/libnode.so`
-- `app/src/main/jniLibs/x86_64/libnode.so`
+- `app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt`
+- `app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginBridge.kt`
+- `../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/cpp/`
+- `../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/jniLibs/`
+
+默认发行路径通过授权的外部 Binder 服务执行 Node。`nodeFull`、`nodeMini`
+以及导出的 packaged APK 仍保留宿主自包含的 embedded 路径。旧的
+`NodeJsPluginRuntimeLoader` 会从插件 APK 解析 `.so` 并加载进 AutoJs6 自有
+进程，但它只是兼容/调试路径，不是 `nodePlugin` 的外部进程发行架构；
+`require("plugins")` 则是另一套纯 JS 本地插件系统。
 
 ABI 状态：
 
 | ABI | 当前状态 |
 | --- | --- |
-| `arm64-v8a` | 有 `libnode.so`，属于当前支持范围 |
-| `armeabi-v7a` | 有 `libnode.so`，属于当前支持范围 |
-| `x86_64` | 有 `libnode.so`，属于当前支持范围 |
+| `arm64-v8a` | 外部 runtime 工程有 `libnode.so`，属于当前支持范围 |
+| `armeabi-v7a` | 外部 runtime 工程有 `libnode.so`，属于当前支持范围 |
+| `x86_64` | 外部 runtime 工程有 `libnode.so`，属于当前支持范围 |
 | `x86` | 无 `libnode.so`，当前不是 Phase 11 必需 ABI |
 
 ### 脚本入口
@@ -179,16 +183,20 @@ CommonJS 用户入口。
 - `rhino`
 - `native`
 - `embedded`
+- `plugin`
+- `pluginOptional`
 - `auto`
 
-默认路径是 `embedded`。`rhinoOnly` 发布形态会强制回落到 Rhino，并通过
-`ERR_AUTOJS6_NODE_DISABLED` 等诊断说明失败原因，不会静默把 Node 脚本当作
-普通 Rhino 脚本执行。
+默认 `nodePlugin` 路径是必需的 `plugin`。`nodeFull` 和 `nodeMini` 默认
+使用 `embedded`，并允许 `pluginOptional` 仅在用户代码分发前的安全失败上
+回退一次；分发后不重放。`rhinoOnly` 发布形态使用 Rhino，并通过稳定诊断
+说明 Node 不可用的原因，不会静默把 Node 脚本当作普通 Rhino 脚本执行。
 
 ### Android 进程和服务
 
 当前 manifest 和代码中已经具备独立 Node 运行结构：
 
+- 授权外部 runtime plugin 的独立进程和持久 Binder session
 - `NativeNodeEmbeddedProbeService`
 - `NativeNodeEmbeddedScriptService`
 - `NativeNodeEmbeddedScriptServiceSlot1`
@@ -198,8 +206,9 @@ CommonJS 用户入口。
 - `NodeBridgeUiDispatchService`
 - `NodeBridgeUiActivity`
 
-这说明当前不是单纯复用 Rhino 执行器，而是已经有 Node 运行进程、桥接调度、
-UI 调度和预留 slot 的 Android 运行时结构。
+外部 runtime 采用 single-active、zero-queue、process-restart cancellation
+契约；Binder death 后由宿主原子重连。embedded 路径继续提供桥接调度、UI
+调度和预留 slot 的 Android 运行时结构。
 
 ### CommonJS、包解析和依赖
 
@@ -690,11 +699,11 @@ java.lang.StringBuilder;      // 当前不是默认 Node 能力
 ### 可认为已落地的基础能力
 
 - Node 路由入口。
-- 默认 embedded backend。
+- 默认外部 Binder plugin backend。
 - Rhino 默认兼容路径保留。
 - Node 24.5 native headers 和 `libnode.so`。
 - 三个支持 ABI 的 native runtime 资产。
-- 独立 Node embedded service 进程。
+- 外部 plugin 独立 Node 进程，以及自包含形态的 embedded service 进程。
 - manifest 中的 Node 服务和 UI dispatch 组件。
 - CommonJS。
 - scoped fs。

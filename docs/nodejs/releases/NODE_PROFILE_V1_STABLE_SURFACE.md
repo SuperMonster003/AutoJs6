@@ -2,6 +2,9 @@
 
 This document freezes the GA-facing capability surface for AutoJs6 Node Profile v1. It is a release contract for the
 Safe Node Profile, not a claim of full desktop Node.js compatibility.
+R5 changes the default main-app delivery to an external runtime process without
+expanding the JavaScript authority defined by this surface; self-contained and
+packaged deliveries retain the same profile.
 
 The detailed source of truth remains:
 
@@ -25,17 +28,26 @@ Changing a category requires tests, compatibility profile updates, release notes
 
 Runtime and routing:
 
-- embedded backend as the default Node backend
-- backend switches: `rhino`, `native`, `embedded`, `auto`
+- release-flavor-derived default: `nodePlugin` uses required `plugin`, while
+  `nodeFull`/`nodeMini` use Embedded Node
+- backend switches: `rhino`, `native`, `embedded`, `plugin`, `pluginOptional`,
+  and diagnostic `auto`; `pluginOptional` is limited to self-contained flavors
+  and pre-dispatch fallback
 - native one-shot backend retained as a regression oracle
-- isolated `:nodejs_embedded` script process
+- dedicated external runtime process with persistent process runtime and fresh
+  per-execution state; isolated `:nodejs_embedded` remains the self-contained
+  and packaged process
 - `"nodejs";` and `"node";` directives
 - `.node.js`, `.cjs`, and `.mjs` routing into the Node backend
 - `project.json` Node entries
 - packaged APK Node entries
 - encrypted Node script metadata
 - `require("autojs6:profile")` read-only diagnostics
-- explicit embedded execution queue behavior and `ERR_AUTOJS6_NODE_ENGINE_BUSY`
+- external single-active/zero-queue busy behavior and Embedded Node bounded
+  queue behavior
+- active external cancellation through process restart and clean new-process
+  recovery
+- no automatic replay or fallback after external dispatch may have started
 
 CommonJS and resolver:
 
@@ -60,6 +72,9 @@ Filesystem policy:
 - scoped file source loading from the working directory and project root
 - canonical denial for absolute paths, NUL bytes, `..`, `/proc`, `/sys`, `/dev`, realpath escape, and symlink escape
 - package target containment for `exports` and `imports`
+- external workspace archive transport v2 with explicit input mapping, zero
+  host sandbox scan, plugin-private execution, verified output writeback, and
+  deletion tombstones limited to explicit input files
 
 Stable low-risk builtins and globals:
 
@@ -83,7 +98,7 @@ Packaging and release:
 - packaged `NativeNodeEmbeddedScriptService` manifest verification
 - packaged diagnostic reports
 - packaged smoke host verifier
-- release flavor policy: `nodeFull`, `nodeMini`, `rhinoOnly`
+- release flavor policy: `nodePlugin`, `nodeFull`, `nodeMini`, `rhinoOnly`
 - native dependency report and symbol archive report
 - Node Doctor host reports
 
@@ -191,3 +206,5 @@ Before GA publication, the maintainer must verify:
 - [NODE_PROFILE_V1_KNOWN_ISSUES.md](NODE_PROFILE_V1_KNOWN_ISSUES.md) lists known limitations and workarounds
 - [../RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md) includes the stable surface and promotion-policy review
 - Sony XQ-AT72 release-gate result is recorded in the RC or GA report
+- [../R5_ACCEPTANCE_SAMPLING.md](../R5_ACCEPTANCE_SAMPLING.md) records 8/8,
+  zero-skip live results for `arm64-v8a`, `armeabi-v7a`, and `x86_64`

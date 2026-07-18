@@ -13,17 +13,25 @@ workarounds, see [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFIL
 
 - Profile name: `AutoJs6 Safe Node Profile`
 - Embedded Node baseline: Node.js `v24.5.0` artifacts are present in the current native tree.
-- Execution model: embedded `libnode.so` plus AutoJs6 bootstrap and CommonJS loader.
-- Process model: normal scripts run through the primary `:nodejs_embedded`
-  service process. S8-43 declares reserved process-pool slots, but the default
-  runtime remains primary-only.
-- Concurrency model: one active execution per embedded process; default concurrent starts reject, while explicit enqueue uses the bounded execution queue.
+- Delivery model: the default `nodePlugin` release runs through an authorized
+  external Binder service; `nodeFull`, `nodeMini`, and packaged apps retain the
+  self-contained Embedded Node path.
+- Execution model: the selected process runs `libnode.so` plus the AutoJs6
+  bootstrap and CommonJS loader. Backend delivery does not change Safe Node
+  Profile permissions or compatibility semantics.
+- Process model: the external backend uses the plugin's dedicated process.
+  Embedded execution uses the primary `:nodejs_embedded` service process; S8-43
+  declares reserved process-pool slots, but embedded default remains primary-only.
+- Concurrency model: the external backend is single-active with zero queue and
+  fails busy; an embedded process is single-active with bounded host queueing.
 - Service model: Phase 7 defines an execution-mode state machine, but only `one_shot` is executable; normal scripts remain timeout-controlled.
 - Project model: file entry, Node project entry, and packaged APK entry are all supported paths.
 - Kotlin capability registry: `NodeRuntimeCapabilities`
 - JavaScript profile module: `require("autojs6:profile")`
 
 Rhino migration guidance is documented in [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md). Behavior-oriented notes for Auto.js Pro 9 and AutoX.js v7 users are documented in [COMPATIBILITY_NOTES_PRO_AUTOX.md](COMPATIBILITY_NOTES_PRO_AUTOX.md).
+External runtime delivery is specified in
+[design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md).
 
 ## Generated Profile Reports
 
@@ -287,6 +295,10 @@ JS-only plugins with explicit `plugin.<id>` and declared bridge capabilities;
 it does not enable remote installs, native plugin archives, or Android provider
 plugin adapters.
 
+This JS-only manager is unrelated to the external Android Binder runtime
+backend described in
+[design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md).
+
 ## Execution Queue
 
 Embedded Node is not multi-instance inside a single `:nodejs_embedded` process. Ordinary starts now use bounded queueing when the target process slot is busy, so rapid repeated runs wait for the active execution to finish instead of failing with `ERR_AUTOJS6_NODE_ENGINE_BUSY`.
@@ -300,6 +312,10 @@ Stable queue errors:
 - `ERR_AUTOJS6_NODE_QUEUE_CANCELLED`
 
 See [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md).
+
+The external runtime plugin does not use this queue. Its R5 contract admits one
+execution with queue capacity `0`; competing calls fail immediately with
+`ERR_AUTOJS6_NODE_PLUGIN_BUSY` and are not sent to embedded fallback.
 
 ## Embedded Process Pool
 
@@ -513,6 +529,18 @@ Policy:
 - no realpath escape
 - no symlink escape
 - package exports/imports targets must remain inside their package root
+
+For the external backend, workspace archive transport v2 preserves this scoped
+filesystem contract across Android UIDs without handing the plugin a host path.
+The host archives only explicit request inputs and performs no recursive sandbox
+scan; the plugin executes in its private workspace and returns a bounded final
+output archive plus deletion tombstones. The host accepts only a complete
+`status=committed`, `legacy_directory_scan_ran=false`,
+`input_directory_scan_count=0` result, writes outputs back inside the original
+sandbox, and limits deletion to explicit input files. Path, symlink,
+special-file, archive-size/count, PFD ownership, and TOCTOU identity checks
+fail closed. An invalid or lost post-dispatch commit is terminal and is never
+replayed or sent to embedded fallback.
 
 ## Supported and Limited Builtins
 
@@ -1636,6 +1664,27 @@ If Embedded Node script execution is disabled at build time, embedded execution 
 
 The actionable message names `-Pautojs.nodejs.embedded.script.enabled=true`. This is a release fallback and diagnostic path, not a silent conversion of Node-marked scripts into ordinary Rhino scripts.
 
+The external runtime plugin keeps an application-scoped candidate cache and a
+persistent Binder session. Package add/remove/replace/change/data-clear events
+and host enable/authorization/trust changes invalidate the candidate and
+session; Binder death retires the session and the next caller reconnects
+atomically. The plugin process runtime may persist while every execution gets
+fresh globals, environment, timers, and execution-owned resources. The runtime
+is single-active with zero queue, and cancellation uses process restart.
+
+`pluginOptional` may enter the embedded path only for a proven pre-dispatch
+unavailable or contract failure. It never replays after dispatch may have
+started, including Binder response loss, because user side effects may already
+have occurred. See
+[design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md).
+
+The completed R5 live matrix verifies persistent-process/fresh-execution
+behavior, workspace v2 writeback/deletion, active cancellation with new-process
+recovery, zero-queue backpressure, fallback and no-replay boundaries, atomic
+Binder reconnect, and warm-cache performance. All eight tests passed with no
+skips for `arm64-v8a`, `armeabi-v7a`, and `x86_64`; see
+[R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md).
+
 ## Crypto Profile
 
 Supported or limited:
@@ -1695,7 +1744,9 @@ Packaged Node APKs require:
 
 Release packaging profile:
 
-- `nodeFull`: default Embedded Node profile; requires `arm64-v8a`, `armeabi-v7a`, and `x86_64`
+- `nodePlugin`: default main-app profile; requires the external Binder runtime
+  plugin and packages no host Embedded Node runtime
+- `nodeFull`: full Embedded Node profile; requires `arm64-v8a`, `armeabi-v7a`, and `x86_64`
 - `nodeMini`: Embedded Node profile with an explicit smaller ABI set, defaulting to `arm64-v8a`
 - `rhinoOnly`: no Embedded Node runtime native libraries are packaged
 
@@ -2412,3 +2463,7 @@ Examples:
 - bridge rate limit: `code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`
 - embedded Node disabled: `errorCode=ERR_AUTOJS6_NODE_DISABLED`
 - explicit fail-fast concurrent embedded execution: `errorCode=ERR_AUTOJS6_NODE_ENGINE_BUSY`
+- external runtime unavailable before dispatch: `errorCode=ERR_AUTOJS6_NODE_PLUGIN_UNAVAILABLE`
+- external runtime contract/capability/ABI mismatch: `errorCode=ERR_AUTOJS6_NODE_PLUGIN_CONTRACT_MISMATCH`
+- external runtime single-active admission rejection: `errorCode=ERR_AUTOJS6_NODE_PLUGIN_BUSY`
+- external runtime response lost after dispatch may have started: `errorCode=ERR_AUTOJS6_NODE_PLUGIN_EXECUTION_LOST`

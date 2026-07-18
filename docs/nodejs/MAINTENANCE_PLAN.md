@@ -15,10 +15,17 @@ authority surface by accident.
 
 ## Maintenance Invariants
 
-- Rhino fallback remains available.
-- `rhino`, `native`, `embedded`, and `auto` backend switches remain available.
+- Rhino remains an explicit compatibility/rollback backend, never a silent
+  fallback for Node-marked entries.
+- `rhino`, `native`, `embedded`, `plugin`, `pluginOptional`, and diagnostic
+  `auto` backend switches remain available. The default `nodePlugin` release
+  requires `plugin`; `pluginOptional` is limited to self-contained
+  `nodeFull`/`nodeMini` and pre-dispatch fallback.
 - Native one-shot remains a regression oracle.
 - Scoped fs policy is not loosened in patch releases.
+- External workspace v2 remains explicit-input and zero-host-scan. Output and
+  deletion tombstones are applied only after a complete commit, and no request
+  is replayed after plugin dispatch may have started.
 - Native addons, unrestricted `child_process`, raw network, inspector, unrestricted Java/Android interop, and unrestricted
   `worker_threads` remain default-off or disabled unless a documented promotion gate passes. Native `vm` is available after
   P13-36 but remains documented as a non-sandbox compatibility surface.
@@ -40,6 +47,11 @@ pass.
 
 See [POST_GA_SMOKE.md](POST_GA_SMOKE.md) for the full post-GA cadence.
 
+Changes to plugin discovery/trust, contract, Binder lifecycle, admission,
+cancellation, workspace transport, or native runtime artifacts must also run
+the three-ABI `verifyNodeR5RuntimePluginGate`. Each ABI must remain 8/8 with no
+skips; see [R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md).
+
 ## Nightly Extended Gate
 
 Run on prepared Sony XQ-AT72 `QV710AF65F` for active Node development and before release-candidate branches:
@@ -53,6 +65,9 @@ $env:ANDROID_SERIAL="QV710AF65F"
 Attach `build/reports/nodejs/nightly-report.md`, fuzzer seeds, packaged smoke reports, memory reports, and crash excerpts
 to the nightly record. If the final tag commit differs from the latest green nightly or GA candidate commit, rerun
 `:app:verifyNodeReleaseGate`.
+
+For a `nodePlugin` release candidate, attach the current R5 three-ABI XML and
+warm-sample JSON as well.
 
 ## Monthly Dependency And Bundler Audit
 
@@ -73,16 +88,20 @@ Review:
 
 No runtime `npm install`, lifecycle script execution, unchecked `.bin`, or native build step is allowed in v1.x.
 
-## Quarterly Libnode Upgrade Review
+## Quarterly Node Runtime Upgrade Review
 
-Review the embedded Node version quarterly, or sooner for security advisories:
+Review the external runtime plugin and Embedded Node artifact version
+quarterly, or sooner for security advisories:
 
 1. Compare the candidate Node version against current Android ABI support.
 2. Rebuild native libraries and regenerate native dependency, native symbol, ABI size, and release manifest reports.
 3. Refresh packaged template APK only through the documented reproducibility flow.
 4. Run desktop differential, full Sony release gate, memory stress, lifecycle stress, packaged smoke, and native crash
    symbol drill.
-5. Update `COMPATIBILITY_PROFILE.md`, `NODE_PROFILE_V1_STABLE_SURFACE.md`, known issues, and migration notes when behavior
+5. Run the external plugin gate on `arm64-v8a`, `armeabi-v7a`, and `x86_64`,
+   including active cancellation, Binder death, workspace v2, and at least 30
+   warm samples per ABI.
+6. Update `COMPATIBILITY_PROFILE.md`, `NODE_PROFILE_V1_STABLE_SURFACE.md`, known issues, and migration notes when behavior
    changes.
 
 Patch releases may upgrade libnode only when the compatibility, size, crash, and packaged evidence is attached.
@@ -125,6 +144,9 @@ Java interop review:
 For every Node crash, collect:
 
 - app version, profile flavor, backend, package identity, device model, API level, ABI, and serial;
+- for the external backend: runtime package/service/version, UID/signer,
+  authorization state, process ABI/PID/runtime generation, Binder session/death
+  generation, dispatch state, and workspace commit diagnostics;
 - script entry mode and whether it is packaged, without collecting user script contents;
 - Node Doctor JSON/text report;
 - release manifest, native symbol report, ABI size report, and packaged diagnostic report when applicable;
@@ -194,3 +216,6 @@ Bridge API compatibility:
 Keep release and nightly evidence under `docs/nodejs/reports/` when it explains a release decision. Large transient build
 outputs can stay under `build/` or `app/build/`, but the committed report must identify the command, commit, device,
 result, skipped gates, and artifact paths.
+Use [R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md) as the retention
+schema for the external runtime ABI matrix; a compile-only result or a run with
+skips is not acceptance evidence.

@@ -1,6 +1,7 @@
-# Embedded Node Release Checklist
+# Node Runtime Release Checklist
 
-Use this checklist for any release that includes the Embedded Node runtime or packaged Embedded Node support.
+Use this checklist for releases that use the external Node runtime plugin,
+include Embedded Node, or support packaged Embedded Node apps.
 
 ## Build
 
@@ -13,6 +14,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:verifyNodeResolverVisualizerFixtures`
 - [ ] `:app:generateNodeProfileReleaseManifest`
 - [ ] `:app:verifyNodePrGate`
+- [ ] release/gate configuration rejects flavor/backend pairs outside `nodePlugin/plugin`, `nodeFull|nodeMini/embedded|pluginOptional`, and `rhinoOnly/rhino`
+- [ ] `:app:verifyNodeR5RuntimePluginGate` on the live plugin acceptance device when the external runtime backend changes
 - [ ] v1.1 release candidates use `:app:verifyNodeV11RcReadiness` with `autojs.nodejs.test.deviceProfile=v1_1_beta`
 - [ ] release candidates use `:app:verifyNodeReleaseGate` with `autojs.nodejs.test.deviceProfile=sony` or `full`
 - [ ] `:app:generateNodeNightlyReport` output attached when publishing nightly or release-candidate results
@@ -56,6 +59,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeRuntimeBudgetPolicyInstrumentationTest`
 - [ ] `NodeBridgeRpcFuzzerInstrumentationTest`
 - [ ] `NodeExampleProjectInstrumentationTest`
+- [ ] `NodeRuntimePluginR5InstrumentationTest`
 - [ ] timeline trace smoke verifies default-off behavior and required `embedded_script.timeline_json` events when opted in
 - [ ] optional `NodeEmbeddedPerformanceInstrumentationTest` run recorded for lifecycle/native-load changes
 - [ ] extended `NodeEmbeddedMemoryLeakStressInstrumentationTest` run recorded before release candidates that change lifecycle, bridge, fs, or image-handle behavior
@@ -84,6 +88,33 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:verifyNodeExamples` passes and generated example report matches `sample/nodejs/examples.json`
 - [ ] `:app:verifyAutoJs6NodeTypeDeclarations` passes and `sample/nodejs/typescript-smoke` type-checks when `tsc` is available
 - [ ] checked-in main-app examples `hello-node`, `cjs-package`, `fs-scoped`, `fs-promises`, `npm-pure-js-cjs`, `toast-app`, `accessibility-click-text`, `screenshot-find-image`, and `disabled-features-demo` still run from `sample/nodejs`
+- [ ] R5 live preflight has no skip path: plugin is installed, enabled, authorized, host-version compatible, contract compatible, and ABI compatible for `arm64-v8a`, `armeabi-v7a`, and `x86_64`
+- [ ] R5 gate covers required failure and exactly one optional embedded fallback after a proven pre-dispatch failure; post-dispatch loss is never replayed or routed to fallback
+- [ ] R5 gate covers candidate/Binder cache reuse, in-flight Binder-death attribution as `ERR_AUTOJS6_NODE_PLUGIN_EXECUTION_LOST`, and one atomic reconnect shared by concurrent acquisitions
+- [ ] R5 gate covers persistent process reuse with fresh per-execution state, single-active/zero-queue busy rejection, and active process-restart cancellation followed by recovery with a new PID
+- [ ] R5 gate covers workspace archive transport v2: explicit inputs only, plugin-private mirror execution, output writeback, final deletion tombstone, and zero host-sandbox scans
+- [ ] R5 gate records at least 30 runtime-warm samples for every supported ABI with p50 at most `250 ms`, p95 at most `400 ms`, candidate/session cache reuse, and warm bind time `0`
+
+The completed 2026-07-18 R5 baseline is recorded in
+[R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md): all three ABI runs
+passed 8 / 8 cases with zero skipped tests. The 30-sample runtime-warm p50/p95
+values were 231 / 254 ms for `arm64-v8a`, 240 / 265 ms for `armeabi-v7a`, and
+182 / 212 ms for `x86_64`. A later release still reruns the unchecked items
+above against its own immutable artifacts.
+
+## External Runtime Plugin
+
+- [ ] default main-app release records `releaseFlavor=nodePlugin` and `backend=plugin`
+- [ ] `nodePlugin` APK contains no host `libnode.so` or `libautojs6-node.so`
+- [ ] external service uses `org.autojs.permission.PLUGIN` and reports package, service, UID, signer SHA-256, authorization state, runtime slot, Node version, and process ABI
+- [ ] negotiated runtime reports exact contract version, mandatory host capabilities including `scopedWorkspaceArchiveTransport`, dedicated persistent process, max concurrency `1`, queue capacity `0`, and cancellation mode `process_restart`
+- [ ] required `plugin` mode fails closed when discovery, trust, bind, contract, or ABI validation fails
+- [ ] `pluginOptional` is used only with `nodeFull` or `nodeMini` and falls back exactly once only when a pre-dispatch result has `fallback_safe=true`
+- [ ] Binder response loss after dispatch returns `ERR_AUTOJS6_NODE_PLUGIN_EXECUTION_LOST` with `fallback_safe=false`, without automatic replay or embedded fallback
+- [ ] concurrent admission rejection returns `ERR_AUTOJS6_NODE_PLUGIN_BUSY` without embedded fallback
+- [ ] package add/remove/replace/change/data-clear and host enable/authorization/trust changes invalidate candidate and Binder caches
+- [ ] Binder death retires the session; concurrent next acquisitions share one atomic reconnect and advance session generation once
+- [ ] workspace archive v2 maps only explicit request inputs into the plugin-private mirror, commits outputs back with a final deletion tombstone, rejects partial process-restart snapshots, and never scans the host sandbox
 
 ## Packaged APK
 
@@ -125,13 +156,14 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 
 ## Native Libraries
 
-- [ ] selected release flavor is recorded: `nodeFull`, `nodeMini`, or `rhinoOnly`
+- [ ] selected release flavor is recorded: `nodePlugin`, `nodeFull`, `nodeMini`, or `rhinoOnly`
+- [ ] `nodePlugin` uses no host Embedded Node ABI payload
 - [ ] `nodeFull` uses `arm64-v8a,armeabi-v7a,x86_64`
 - [ ] `nodeMini` records the exact `autojs.nodejs.releaseAbis` value
 - [ ] `rhinoOnly` APK contains no `libnode.so` or `libautojs6-node.so`
 - [ ] Node-marked scripts in Node-disabled builds fail clearly with `ERR_AUTOJS6_NODE_DISABLED` and are not silently treated as ordinary Rhino scripts
 - [ ] any explicit legacy Rhino-backed Node compatibility diagnostic run is recorded in the release notes
-- [ ] `nativeNodeAbiSizeReport` generated `app/build/reports/nodejs/abi-size-report.md` with APK size, packaged template size, per-ABI native payload, and `nodeFull` / `nodeMini` / `rhinoOnly` comparison
+- [ ] `nativeNodeAbiSizeReport` generated `app/build/reports/nodejs/abi-size-report.md` with APK size, packaged template size, per-ABI native payload, and `nodePlugin` / `nodeFull` / `nodeMini` / `rhinoOnly` comparison
 - [ ] `arm64-v8a/libnode.so`
 - [ ] `arm64-v8a/libautojs6-node.so`
 - [ ] `arm64-v8a/libc++_shared.so`
@@ -215,6 +247,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] interactive long-running mode remains explicit, foreground, user-stoppable, restart policy `never`, and unavailable to normal script/package launches unless their dedicated gates are implemented
 - [ ] scheduled execution mode remains unavailable to direct script/package launches and is accepted only for WorkManager-owned scheduled runner executions
 - [ ] embedded Node foreground-service start/type/timeout diagnostics are present, and Android timeout cleanup calls the immediate stop path
+- [ ] external plugin cancellation after dispatch follows process-restart semantics and later execution reconnects with a new PID instead of reusing the cancelled process/session
 - [ ] interactive status snapshots preserve runtime heartbeat/budget diagnostics, including stopped/timed-out terminal records
 - [ ] interactive lifecycle checkpoints are JSON-only, size-limited, project-scoped, atomically persisted, explicitly restored, and never enable automatic restart
 - [ ] long-running stress gate repeats interactive stop/checkpoint/recovery and provider destroy leaves no active resources, shell commands, WebSocket counters, or close errors
@@ -244,6 +277,9 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] resolver fuzzer failure diagnostics include base seed, case seed, request, result record, and generated package.json
 - [ ] runtime timeline trace is available only with `autojs.nodejs.timelineTrace=true` or `AUTOJS6_NODE_TIMELINE_TRACE=1`
 - [ ] execution queue diagnostics report queue mode, queue status, wait time, and max queued executions
+- [ ] plugin diagnostics report discovery/cache generation, bind/session reuse and generation, Binder death/reconnect counts, selected component identity, dispatch state, fallback safety, and admission state
+- [ ] plugin workspace diagnostics report archive contract version, mapped/commit status, `legacy_directory_scan_ran=false`, input directory scan count `0`, plugin-private output scan count, and deleted-input tombstone count
+- [ ] contract and ABI rejection use `ERR_AUTOJS6_NODE_PLUGIN_CONTRACT_MISMATCH`; unavailable, busy, and post-dispatch loss use their distinct cataloged codes
 - [ ] bridge live diagnostics are present for main-app bridge smoke
 - [ ] docs updated for any changed capability
 - [ ] `docs/nodejs/FLAKE_POLICY.md` reviewed; only infrastructure/adb setup failures may be retried, and security, leak, packaged script, and runtime assertions are not hidden behind retries
@@ -278,5 +314,6 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/design/JAVA_INTEROP.md` when Java/Android interop, Rhino compatibility shims, or Java allowlist policy changes
 - [ ] `docs/nodejs/design/RHINO_SHIM.md` when `require("rhino")`, old global API installation, or mixed Rhino/Node migration behavior changes
 - [ ] `docs/nodejs/design/EXECUTION_QUEUE.md` when embedded execution queue behavior changes
+- [ ] `docs/nodejs/design/RUNTIME_PLUGIN_BACKEND.md` when external runtime discovery, trust, contract, session, fallback, cancellation, or distribution behavior changes
 - [ ] `docs/nodejs/design/LONG_RUNNING_SERVICE.md` when long-running service behavior, foreground service policy, checkpoint/restore behavior, or restart policy changes
 - [ ] packaged APK user docs or examples if packaging behavior changed

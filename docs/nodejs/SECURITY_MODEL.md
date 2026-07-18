@@ -1,12 +1,21 @@
-# AutoJs6 Embedded Node.js Security Model
+# AutoJs6 Node.js Security Model
 
-The embedded Node runtime is an Android automation runtime, not a desktop shell. The security model is based on process isolation, scoped filesystem access, builtin restrictions, packaged APK verification, and explicit feature gates.
+The AutoJs6 Node runtime is an Android automation runtime, not a desktop shell.
+The default `nodePlugin` delivery runs in an authorized external runtime
+plugin, while self-contained flavors and packaged apps retain Embedded Node.
+Both deliveries use the same process isolation, scoped filesystem, builtin,
+bridge, and feature-gate policy.
 
 The release threat model for Node Profile v1 is tracked in [security/THREAT_MODEL_V1.md](security/THREAT_MODEL_V1.md). Keep that document updated when adding or promoting any resolver, filesystem, bridge, bundler, packaged APK, or experimental feature surface.
 
 ## Trust Boundary
 
-User scripts are untrusted relative to the AutoJs6 app process and Android privileged services.
+User scripts are untrusted relative to the AutoJs6 app process, the selected
+Node runtime process, and Android privileged services. An external runtime
+service is trusted only after host enablement, authorization, signature
+permission, version, signer, UID, service identity, contract, capability, and
+ABI checks pass; package or trust changes invalidate its cached identity and
+Binder session.
 
 The embedded runtime may execute user-provided JavaScript, npm-style CommonJS packages, and packaged APK assets. It must not receive raw access to:
 
@@ -24,7 +33,16 @@ Privileged actions must go through AutoJs6 capability providers.
 
 ## Process Isolation
 
-Embedded scripts run in `:nodejs_embedded`. This protects the main app process from common runtime failure modes:
+The default external backend runs scripts in the runtime plugin's dedicated
+process. Its Node process runtime can persist across successful calls, but each
+execution receives fresh JavaScript globals, environment state, timers, and
+execution-owned resources. It admits one active execution with no queue.
+Active cancellation restarts the runtime process, retires the Binder session,
+and requires a later execution to reconnect.
+
+Self-contained `nodeFull`/`nodeMini` builds and packaged apps run Embedded Node
+in `:nodejs_embedded`. Both process models protect the main app from common
+runtime failure modes:
 
 - V8 crash
 - libuv lifecycle bug
@@ -64,6 +82,19 @@ Required checks:
 - keep packaged module source extraction inside the package scope
 
 The policy applies equally to callback, sync, and promise filesystem APIs.
+
+The external backend does not receive a host sandbox path and must never scan
+the host sandbox across the UID boundary. Workspace transport v2 archives only
+request-named inputs, transfers archives through owned
+`ParcelFileDescriptor`s, and extracts into a plugin-private workspace. Both
+sides enforce path normalization, reserved-namespace denial, file/count/byte
+budgets, symlink and special-file denial, descriptor closure on every exit
+path, and identity checks using `lstat`, `O_NOFOLLOW`, `fstat`, device/inode,
+and the opened descriptor path. The plugin returns a final output archive plus
+a deletion tombstone manifest; the host applies it only after a complete,
+zero-host-scan commit, and tombstones may delete only explicit input files.
+Binder response loss or an invalid commit is terminal and is never replayed or
+routed to fallback.
 
 Source maps are diagnostics only and must not weaken scoped filesystem policy. Inline `sourceMappingURL=data:` maps are self-contained. External source maps must resolve inside the current working directory or come from already injected moduleSources; path escapes, NUL bytes, sensitive paths, and symlink/realpath escapes are denied and recorded as source-map diagnostics without replacing the original script error.
 
@@ -936,6 +967,8 @@ Node scheduled runs must launch through the same lifecycle and scoped filesystem
 ## Packaged APK Policy
 
 Packaged APKs are first-class targets. A feature is not release-ready if it works only inside the main AutoJs6 app.
+Exported apps remain self-contained and do not depend on the external runtime
+plugin or its cross-UID workspace transport.
 
 Verification must cover:
 
@@ -1154,6 +1187,19 @@ Every Node release candidate must verify:
 - zlib stream failures do not leave active stream resources
 - direct Java/Android interop, reflection, class loaders, native library loading, and raw Android objects remain unavailable
 - packaged APK verifier passes
+- external runtime discovery enforces service identity, signature permission,
+  host enablement/authorization, contract, lifecycle capability, and process ABI
+- external workspace transport archives explicit inputs only, performs zero
+  host sandbox scans, closes every PFD, and applies only a verified final
+  output/tombstone commit
+- active external cancellation retires the process/session, while a later run
+  recovers with a new process and fresh execution state
+- optional fallback occurs only before dispatch; busy, cancellation, Binder
+  response loss, and workspace-commit failure are never replayed
 - lifecycle timeout does not poison the next run
 - lifecycle checkpoints cannot trigger automatic restart or escape their
   project-scoped app-private store
+
+The R5 live security and lifecycle evidence is recorded in
+[R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md): all eight focused tests
+passed without skips for `arm64-v8a`, `armeabi-v7a`, and `x86_64`.

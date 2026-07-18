@@ -1,4 +1,4 @@
-# AutoJs6 Embedded Node.js Integration Plan
+# AutoJs6 Node.js Integration Plan
 
 This document is the engineering map for the AutoJs6 Node runtime. It records
 the current Safe Node Profile boundary and the staged expansion path toward
@@ -9,13 +9,15 @@ For the remaining checkable work and completion criteria, see
 
 ## Product Goal
 
-AutoJs6 currently embeds Node.js as a controlled Android script runtime:
+AutoJs6 provides Node.js as a controlled Android script runtime:
 
-- real Node/V8/libuv runtime through `libnode.so`
+- real Node/V8/libuv runtime through either the external runtime plugin or
+  host-packaged `libnode.so`
 - AutoJs6-owned bootstrap and CommonJS loader
 - scoped filesystem access
 - restricted builtin surface
-- isolated `:nodejs_embedded` service process
+- a dedicated external plugin process by default, with the isolated
+  `:nodejs_embedded` service retained for self-contained flavors and packaged apps
 - packaged APK support through native library injection and manifest synthesis
 - diagnostics and release gates
 - native crash diagnostics through native dependency and symbol archive reports
@@ -29,15 +31,16 @@ packaged evidence, and rollback gates before becoming user-facing.
 ## Current Runtime Chain
 
 ```text
-AutoJs6 app process
-  -> ScriptEngineManager
-  -> Node backend selector
+Default main app
+  -> ScriptEngineManager -> Node backend selector
+  -> NodeJsRuntimePluginBridge -> authorized external Binder service
+  -> dedicated plugin process -> Node/V8/libuv
+
+Self-contained nodeFull/nodeMini and packaged APKs
+  -> ScriptEngineManager -> Node backend selector
   -> NativeNodeEmbeddedJavaScriptEngine
   -> NativeNodeEmbeddedScriptService in :nodejs_embedded
-  -> NativeNodeEmbeddedRuntimeBridge
-  -> libautojs6-node.so
-  -> libnode.so
-  -> AutoJs6 bootstrap and CommonJS loader
+  -> NativeNodeEmbeddedRuntimeBridge -> libautojs6-node.so -> libnode.so
 ```
 
 Packaged APKs use the same runtime shape and must carry:
@@ -55,16 +58,20 @@ The Gradle property `autojs.nodejs.backend` selects the runtime backend.
 
 Supported values:
 
-- `embedded`: default; runs scripts through the embedded Node service.
+- `plugin`: required external Binder runtime; default for `nodePlugin`.
+- `pluginOptional`: external runtime first, with one embedded fallback only
+  when failure occurs before user-code dispatch; valid only for `nodeFull` and
+  `nodeMini`.
+- `embedded`: default for `nodeFull` and `nodeMini`; runs scripts through the
+  embedded Node service.
 - `native`: keeps the native one-shot backend available as a regression oracle.
-- `plugin`: runs through an authorized external Node runtime plugin service.
 - `rhino`: routes Node-capable launches back to Rhino where explicitly requested.
 - `auto`: reserved switch for backend selection policy.
 
 Related properties:
 
 - `autojs.nodejs.embedded.script.enabled=true`
-- `autojs.nodejs.releaseFlavor=nodeFull`
+- `autojs.nodejs.releaseFlavor=nodePlugin`
 - optional `autojs.nodejs.releaseAbis` for `nodeMini`
 - `autojs.nodejs.embedded.probe.level=0`
 - `autojs.nodejs.embedded.probe.timeout.ms=3000`
@@ -79,7 +86,10 @@ Related properties:
 - native crash symbol archive gate: `nativeNodeSymbolArchiveReport`
 - checked-in example project smoke: `NodeExampleProjectInstrumentationTest`
 
-Do not remove the non-embedded paths while embedded lifecycle stress coverage is still evolving.
+Release/gate tasks enforce the flavor/backend matrix in
+[design/RELEASE_FLAVORS.md](design/RELEASE_FLAVORS.md). The external service
+lifecycle, trust, contract, fallback, and no-replay rules are defined in
+[design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md).
 
 ## Example Projects
 
@@ -151,7 +161,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 
 - Aggregate local release verification tasks.
 - Keep device instrumentation and packaged smoke as first-class gates.
-- Keep `nodeFull`, `nodeMini`, and `rhinoOnly` release packaging policy explicit and verified. See `docs/nodejs/design/RELEASE_FLAVORS.md`.
+- Keep `nodePlugin`, `nodeFull`, `nodeMini`, and `rhinoOnly` release packaging policy explicit and verified. See `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Keep rollback steps explicit and auditable. See `docs/nodejs/ROLLBACK_PLAYBOOK.md`.
 - Keep PR, nightly, and release gates split so routine checks stay fast while release gates remain complete. See `docs/nodejs/CI_GATES.md`.
 - Keep optional startup/RSS benchmarks available for lifecycle and native-load changes without making noisy timing data a default release failure.
@@ -183,7 +193,9 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 ## Global Invariants
 
 1. Preserve Rhino compatibility.
-2. Keep `embedded` as the default backend while retaining `rhino`, `native`, and `auto` switches.
+2. Keep the release-flavor-derived backend policy: required `plugin` for
+   `nodePlugin`, `embedded` or `pluginOptional` for self-contained Node flavors,
+   and `rhino` for `rhinoOnly`; retain diagnostic switches in debug builds.
 3. Keep the native one-shot backend until embedded lifecycle stress coverage is mature.
 4. Support both the main app and packaged APKs.
 5. Treat the default exposed runtime as AutoJs6 Safe Node Profile while Pro and

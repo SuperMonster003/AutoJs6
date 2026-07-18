@@ -1,8 +1,12 @@
-# Embedded Node Rollback Playbook
+# AutoJs6 Node.js Rollback Playbook
 
 This playbook is for maintainers rolling back Node Profile v1 without breaking legacy Rhino scripts.
 
-Rollback is a release operation, not a silent runtime fallback. Node-marked scripts must fail clearly when Node is disabled or missing, while ordinary Rhino scripts continue to use the Rhino engine.
+Rollback is a release operation, not a silent runtime fallback. A default
+`nodePlugin` release must fail clearly when its required runtime service is
+disabled, unauthorized, incompatible, or missing. Node-marked scripts must not
+be reinterpreted as Rhino, while ordinary Rhino scripts continue to use the
+Rhino engine.
 
 ## Fast Triage
 
@@ -23,12 +27,36 @@ app/build/reports/embedded-node/
 
 Record the failing device, ABI, release flavor, app version, git commit, and whether the failure is in the main app, packaged APK, or both.
 
+For an external runtime incident, also retain package/service, version/update
+time, UID, signer, authorization, contract, process ABI, Binder
+death/reconnect/session generation, dispatch/fallback, admission, cancellation,
+and `workspace.*` diagnostics. Do not rerun a request automatically when
+`backend_dispatched=true`; user side effects may already have occurred.
+
+## External Runtime Plugin Rollback
+
+`nodePlugin` has no Embedded Node payload and therefore has no safe in-place
+runtime fallback. First disable the affected release channel or runtime plugin
+combination. Then choose one explicit recovery artifact:
+
+- a fixed `nodePlugin` host/runtime pair after the focused R5 gate passes;
+- a self-contained `nodeFull` or ABI-scoped `nodeMini` artifact using
+  `embedded`; or
+- `rhinoOnly` when Node support must be removed temporarily.
+
+`pluginOptional` is valid only in `nodeFull`/`nodeMini`. Even there it can use
+Embedded Node only for a proven pre-dispatch unavailable or contract failure.
+Busy rejection, active cancellation, Binder response loss, and invalid
+workspace commit are terminal and must not be replayed or routed to fallback.
+
 ## Disable Embedded Execution
 
 Use this when the native libraries can still be packaged but embedded script execution should be blocked while the issue is investigated:
 
 ```powershell
 .\gradlew.bat --console=plain :app:assembleAppDebug `
+  "-Pautojs.nodejs.releaseFlavor=nodeFull" `
+  "-Pautojs.nodejs.backend=embedded" `
   "-Pautojs.nodejs.embedded.script.enabled=false"
 ```
 
@@ -47,6 +75,7 @@ Use this only to compare embedded lifecycle behavior against the older native on
 
 ```powershell
 .\gradlew.bat --console=plain :app:assembleAppDebug `
+  "-Pautojs.nodejs.releaseFlavor=nodeFull" `
   "-Pautojs.nodejs.backend=native"
 ```
 
@@ -56,7 +85,9 @@ Expected behavior:
 - embedded lifecycle, bridge, and service-process behavior are bypassed
 - the run is recorded as diagnostic-only in release notes
 
-Do not promote a release based solely on native one-shot success. The embedded backend remains the product runtime for Node Profile v1.
+Do not promote a release based solely on native one-shot success. The
+release-flavor-selected `plugin` or `embedded` backend remains the product
+runtime for Node Profile v1.
 
 ## Publish Rhino-only Flavor
 
@@ -74,7 +105,8 @@ Expected behavior:
 - `embeddedNodePackagingPreflightAppDebug` reports `release flavor policy ready: true`
 - Node-marked scripts fail clearly instead of silently running as ordinary Rhino scripts
 
-Use `nodeFull` or `nodeMini` again before advertising Node Profile v1 support.
+Use a green `nodePlugin` host/runtime pair or `nodeFull`/`nodeMini` again before
+advertising Node Profile v1 support.
 
 ## Packaged Template Rollback
 
@@ -121,13 +153,17 @@ Before ending rollback:
 ```
 
 On the primary device, rerun the current release gate and store the output under `docs/nodejs/reports/phase4/`.
+For an external runtime rollback, also rerun `verifyNodeR5RuntimePluginGate` on
+all supported runtime ABIs and archive 8/8, zero-skip results in
+[R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md).
 
 ## Release Notes
 
 Every rollback must record:
 
 - rollback reason and first bad version
-- selected fallback path: disabled embedded execution, native one-shot diagnostic, or `rhinoOnly`
+- selected recovery path: fixed required plugin, self-contained `nodeFull` or
+  `nodeMini`, disabled Embedded Node, native one-shot diagnostic, or `rhinoOnly`
 - affected ABIs and devices
 - Node Doctor report path
 - packaged APK verifier path if packaged output was affected

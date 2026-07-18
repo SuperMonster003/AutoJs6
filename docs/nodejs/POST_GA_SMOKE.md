@@ -6,10 +6,15 @@ commands that can be copied into local runs, CI jobs, or nightly device jobs.
 
 ## Invariants
 
-- Keep Rhino fallback and the `rhino`, `native`, `embedded`, and `auto` backend
-  switches available.
+- Keep Rhino as an explicit rollback backend and keep `rhino`, `native`,
+  `embedded`, `plugin`, `pluginOptional`, and diagnostic `auto` switches
+  available. The default `nodePlugin` release requires `plugin`;
+  `pluginOptional` remains self-contained and pre-dispatch-only.
 - Keep native one-shot as a regression oracle.
 - Do not loosen scoped fs policy in v1.0.x.
+- Keep external workspace v2 explicit-input and zero-host-scan; never apply an
+  incomplete output/tombstone commit or replay a request after dispatch may
+  have started.
 - Do not default-enable native addons, unrestricted `child_process`, raw
   network, inspector, unrestricted Java/Android interop, unrestricted workers,
   or unrestricted `vm`.
@@ -32,12 +37,17 @@ Scope:
 - dependency bundler safe/unsafe fixtures.
 - packaging preflight and template reproducibility.
 
-Escalate to a device smoke when a change touches embedded lifecycle, bridge
-providers, scoped fs runtime behavior, packaged launch, or native libraries.
+Escalate to a device smoke when a change touches external or embedded
+lifecycle, plugin trust/contract/Binder behavior, bridge providers, scoped fs
+or workspace transport, packaged launch, or native libraries.
 
 ## Device Smoke
 
 Use Sony XQ-AT72 `QV710AF65F` for unattended device smoke:
+
+For a default `nodePlugin` build, first verify that the compatible runtime
+plugin is installed, enabled, and authorized. A missing service is a real
+failure, not a reason to skip Node tests.
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
@@ -50,6 +60,21 @@ $env:ANDROID_SERIAL="QV710AF65F"
 Record the test XML, device serial, package identity, commit, and any skipped
 tests. Do not retry scoped fs, security, bridge capability, packaged script, or
 resource leak failures to make a smoke pass.
+
+## Weekly External Runtime Gate
+
+Run after any external runtime host/plugin change and before a `nodePlugin`
+patch is handed to QA. Use the command and artifact preparation in
+[design/RUNTIME_PLUGIN_BACKEND.md](design/RUNTIME_PLUGIN_BACKEND.md) and repeat
+`verifyNodeR5RuntimePluginGate` for `arm64-v8a`, `armeabi-v7a`, and `x86_64`.
+
+Each run must report 8/8 tests, skipped 0, and at least 30 warm executions. It
+must cover persistent-process/fresh-execution state, workspace v2
+writeback/deletion and zero host scan, active-cancel new-PID recovery,
+single-active/zero-queue admission, pre-dispatch-only fallback, post-dispatch
+no replay, Binder-death atomic reconnect, and warm cache reuse. Record exact
+commits, devices, APK hashes, XML, and JSON using
+[R5_ACCEPTANCE_SAMPLING.md](R5_ACCEPTANCE_SAMPLING.md).
 
 ## Weekly Packaged APK Smoke
 
@@ -100,6 +125,7 @@ Attach:
 - packaged smoke reports
 - memory and performance reports
 - crash buffer excerpts
+- current R5 three-ABI XML and performance JSON for a `nodePlugin` candidate
 
 ## Monthly Extended Fuzzer Run
 
