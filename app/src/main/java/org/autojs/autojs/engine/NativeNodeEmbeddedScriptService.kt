@@ -3815,16 +3815,25 @@ open class NativeNodeEmbeddedScriptService : Service() {
             val sessionRegistered = processSessionLease?.let { lease ->
                 NodeEmbeddedProcessSessionManager.registerExecution(lease, executionId) {
                     releaseSession(null, "long_running_binder_died")
-                    NodeInteractiveLongRunningStatusStore.write(
-                        context = appContext,
-                        executionId = executionId,
-                        state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
-                        sourceName = requestForService.sourceName,
-                        workingDirectory = requestForService.workingDirectory,
-                        launchSurface = launchSurface,
-                        message = "Persistent embedded Node process Binder died.",
-                        activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("binder_died"),
-                    )
+                    val currentStatus = NodeInteractiveLongRunningStatusStore.read(appContext, executionId)
+                    if (shouldPreserveTerminalStatusAfterProcessDeath(currentStatus)) {
+                        Log.i(
+                            TAG,
+                            "long_running.binder_died_after_terminal_status executionId=$executionId " +
+                                    "state=${currentStatus?.optString("state").orEmpty()}",
+                        )
+                    } else {
+                        NodeInteractiveLongRunningStatusStore.write(
+                            context = appContext,
+                            executionId = executionId,
+                            state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                            sourceName = requestForService.sourceName,
+                            workingDirectory = requestForService.workingDirectory,
+                            launchSurface = launchSurface,
+                            message = "Persistent embedded Node process Binder died.",
+                            activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("binder_died"),
+                        )
+                    }
                 }
             } ?: true
             if (!sessionRegistered) {
@@ -4118,6 +4127,14 @@ open class NativeNodeEmbeddedScriptService : Service() {
 
         fun interactiveLongRunningStatus(context: Context, executionId: String): JSONObject? {
             return NodeInteractiveLongRunningStatusStore.read(context.applicationContext, executionId)
+        }
+
+        internal fun shouldPreserveTerminalStatusAfterProcessDeath(status: JSONObject?): Boolean {
+            return status?.optString("state") in setOf(
+                NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
+                NodeInteractiveLongRunningStatusStore.STATE_TIMED_OUT,
+                NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+            )
         }
 
         fun simulateForegroundServiceTimeoutForTest(

@@ -17,6 +17,12 @@ const DEFAULT_RUNTIME_SLOT = "node24_5";
 const DEFAULT_NODE_VERSION = "24.5.0";
 const RUNTIME_PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.nodejs";
 const RUNTIME_PLUGIN_SERVICE = `${RUNTIME_PLUGIN_PACKAGE}.NodeJsRuntimePluginService`;
+const PACKAGED_TEMPLATE_PACKAGE = "org.autojs.autojs6.inrt";
+const PACKAGED_TEMPLATE_TASK = ":app:packageInrtDebug";
+const PACKAGED_TEMPLATE_DEVICE_PATH_PREFIX = "/data/local/tmp/autojs6-r6-packaged-template-";
+const PACKAGED_TEMPLATE_OVERRIDE_ARGUMENT = "autojs.embeddedNode.packagedSmokeTemplateOverride";
+const PACKAGED_TEMPLATE_EXACT_PATH_ARGUMENT = "autojs.embeddedNode.packagedSmokeTemplateExactPath";
+const PACKAGED_TEMPLATE_TARGET_ABI_ARGUMENT = "autojs.embeddedNode.packagedSmokeTargetAbi";
 const R5_PLUGIN_PREFLIGHT_SELECTOR =
   "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_01_livePluginPreflightNegotiatesContractAndReportsTrustIdentity";
 const R6_PLUGIN_SOAK_SELECTOR =
@@ -130,6 +136,10 @@ const REQUIRED_ARTIFACT_HASHES = [
   "pluginApkSha256",
   "junitXmlSha256",
 ];
+const REQUIRED_DEVICE_ARTIFACT_HASHES = [
+  ...REQUIRED_ARTIFACT_HASHES,
+  "packagedTemplateApkSha256",
+];
 
 const REQUIRED_SOAK_METRICS = [
   "servicePid",
@@ -195,7 +205,8 @@ function main() {
       soaks: SOAK_REQUIREMENTS,
       deviceSelectors: REQUIRED_DEVICE_SELECTORS,
       regressions: REQUIRED_REGRESSIONS,
-      artifactHashes: REQUIRED_ARTIFACT_HASHES,
+      artifactHashes: REQUIRED_DEVICE_ARTIFACT_HASHES,
+      soakArtifactHashes: REQUIRED_ARTIFACT_HASHES,
       soakMetrics: REQUIRED_SOAK_METRICS,
     },
     devices: deviceReports,
@@ -246,6 +257,7 @@ function evaluateDeviceReport(evidenceRoot, requirement, identity, repoRoot = nu
   const plugin = json.plugin || {};
   const artifactFiles = validateArtifacts(json.artifacts, repoRoot, blockers, {
     reportType: "device",
+    runToken: stringValue(json.runToken),
     runtimeProcessAbi: requirement.runtimeProcessAbi,
     reportedPluginSignerSha256: stringValue(plugin.signerSha256),
   });
@@ -875,7 +887,10 @@ function validateTestCounts(rawValue, tests, blockers) {
 function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
   const artifacts = artifactsValue || {};
   const resolvedFiles = {};
-  REQUIRED_ARTIFACT_HASHES.forEach((key) => {
+  const requiredArtifactHashes = options.reportType === "device"
+    ? REQUIRED_DEVICE_ARTIFACT_HASHES
+    : REQUIRED_ARTIFACT_HASHES;
+  requiredArtifactHashes.forEach((key) => {
     if (!SHA256_PATTERN.test(stringValue(artifacts[key]))) {
       blockers.push(`artifact ${key} must be a SHA-256 digest`);
     }
@@ -886,6 +901,13 @@ function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
     ["pluginApkSha256", "pluginApkPath", "pluginApkBytes"],
     ["junitXmlSha256", "junitXmlPath", "junitXmlBytes"],
   ];
+  if (options.reportType === "device") {
+    fileBindings.push([
+      "packagedTemplateApkSha256",
+      "packagedTemplateApkPath",
+      "packagedTemplateApkBytes",
+    ]);
+  }
   fileBindings.forEach(([hashKey, pathKey, bytesKey]) => {
     const artifactPath = stringValue(artifacts[pathKey]);
     const expectedBytes = Number(artifacts[bytesKey]);
@@ -956,6 +978,49 @@ function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
       stringValue(artifacts.androidTestApkSha256) !== stringValue(artifacts.androidTestBuildApkSha256)) {
     blockers.push("installed Android test APK must match the fresh Android test build APK");
   }
+  if (options.reportType === "device") {
+    if (stringValue(artifacts.packagedTemplateSourceTask) !== PACKAGED_TEMPLATE_TASK) {
+      blockers.push(`packaged template source task must be ${PACKAGED_TEMPLATE_TASK}`);
+    }
+    const expectedDevicePath = packagedTemplatePathForRunToken(options.runToken);
+    if (!expectedDevicePath) {
+      blockers.push("packaged template device path cannot be bound without a valid run token");
+    } else if (stringValue(artifacts.packagedTemplateDevicePath) !== expectedDevicePath) {
+      blockers.push(`packaged template device path must be bound to the report run token: ${expectedDevicePath}`);
+    }
+    const templateApkSha256 = stringValue(artifacts.packagedTemplateApkSha256).toLowerCase();
+    const deviceSha256BeforeTest = stringValue(artifacts.packagedTemplateDeviceSha256BeforeTest).toLowerCase();
+    const deviceSha256AfterTest = stringValue(artifacts.packagedTemplateDeviceSha256AfterTest).toLowerCase();
+    if (!SHA256_PATTERN.test(deviceSha256BeforeTest)) {
+      blockers.push("packagedTemplateDeviceSha256BeforeTest must be a SHA-256 digest");
+    }
+    if (!SHA256_PATTERN.test(deviceSha256AfterTest)) {
+      blockers.push("packagedTemplateDeviceSha256AfterTest must be a SHA-256 digest");
+    }
+    if (artifacts.packagedTemplateDeviceMatchesFreshBuild !== true ||
+        deviceSha256BeforeTest !== templateApkSha256 ||
+        deviceSha256AfterTest !== templateApkSha256) {
+      blockers.push("device packaged template must match the fresh current-source template APK before and after testing");
+    }
+    if (artifacts.packagedTemplateDeviceRemovedAfterTest !== true) {
+      blockers.push("the run-owned packaged template device file must be removed after testing");
+    }
+    if (stringValue(artifacts.packagedTemplateTargetAbi) !== stringValue(options.runtimeProcessAbi)) {
+      blockers.push("packaged template target ABI must match the device runtime process ABI");
+    }
+    if (stringValue(artifacts.packagedTemplateOverrideArgument) !==
+        `${PACKAGED_TEMPLATE_OVERRIDE_ARGUMENT}=true`) {
+      blockers.push("packaged template override instrumentation argument is not bound to true");
+    }
+    if (expectedDevicePath && stringValue(artifacts.packagedTemplateExactPathArgument) !==
+        `${PACKAGED_TEMPLATE_EXACT_PATH_ARGUMENT}=${expectedDevicePath}`) {
+      blockers.push("packaged template exact-path instrumentation argument is not bound to the run-owned device path");
+    }
+    if (stringValue(artifacts.packagedTemplateTargetAbiArgument) !==
+        `${PACKAGED_TEMPLATE_TARGET_ABI_ARGUMENT}=${stringValue(options.runtimeProcessAbi)}`) {
+      blockers.push("packaged template target-ABI instrumentation argument is not bound to the device runtime process ABI");
+    }
+  }
   const hostApk = validateApkArtifact(
     resolvedFiles.hostApkPath,
     "host APK",
@@ -998,6 +1063,15 @@ function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
     "plugin",
     blockers,
   );
+  if (options.reportType === "device") {
+    validateApkArtifact(
+      resolvedFiles.packagedTemplateApkPath,
+      "packaged smoke template APK",
+      "",
+      "template",
+      blockers,
+    );
+  }
   validateApkSignerPair(hostApk, hostBuildApk, "installed host APK and fresh host build APK", blockers);
   validateApkSignerPair(
     androidTestApk,
@@ -1034,7 +1108,9 @@ function validateApkArtifact(file, label, runtimeProcessAbi, kind, blockers) {
   const inspection = inspectApkArtifact(file);
   const expectedPackage = kind === "plugin"
     ? RUNTIME_PLUGIN_PACKAGE
-    : kind === "test" ? "org.autojs.autojs6.test" : "org.autojs.autojs6";
+    : kind === "test"
+      ? "org.autojs.autojs6.test"
+      : kind === "template" ? PACKAGED_TEMPLATE_PACKAGE : "org.autojs.autojs6";
   if (!inspection.ready) {
     blockers.push(`${label} failed Android package/signature inspection: ${inspection.blockers.join("; ")}`);
   } else if (inspection.packageName !== expectedPackage) {
@@ -1054,6 +1130,12 @@ function validateApkArtifact(file, label, runtimeProcessAbi, kind, blockers) {
       if (!entries.includes(`lib/${abi}/${library}`)) {
         blockers.push(`${label} is missing baseline host JNI dependency lib/${abi}/${library}`);
       }
+    }
+    return inspection;
+  }
+  if (kind === "template") {
+    if (nodeRuntimeEntries.length !== 0) {
+      blockers.push(`${label} must be a slim template without prepackaged Node runtime JNI libraries`);
     }
     return inspection;
   }
@@ -1512,7 +1594,26 @@ function validateContractAnchors(repoRoot) {
   if (!deviceCollector.includes("autojs6-node-r6-device-evidence-runner-v1")) {
     violations.push("R6 production device evidence collector is missing");
   }
+  if (!deviceCollector.includes(PACKAGED_TEMPLATE_TASK) ||
+      !deviceCollector.includes("packagedSmokeTemplateOverride") ||
+      !deviceCollector.includes("packagedSmokeTemplateExactPath")) {
+    violations.push("R6 production device collector must prepare and enable a fresh packaged smoke template");
+  }
+  if (!deviceCollector.includes("packagedSmokeTargetAbi")) {
+    violations.push("R6 production device collector must bind packaged smoke to the target runtime ABI");
+  }
+  if (!deviceCollector.includes("packaged-template-device-sha256-after-test") ||
+      !deviceCollector.includes("packaged-template-device-cleanup")) {
+    violations.push("R6 production device collector must rehash and clean its run-owned packaged smoke template");
+  }
   return violations;
+}
+
+function packagedTemplatePathForRunToken(runToken) {
+  const value = stringValue(runToken);
+  return RUN_TOKEN_PATTERN.test(value)
+    ? `${PACKAGED_TEMPLATE_DEVICE_PATH_PREFIX}${value}.apk`
+    : "";
 }
 
 function currentIdentity(repoRoot, pluginRoot) {
@@ -1739,6 +1840,7 @@ module.exports = {
   DEVICE_SCHEMA,
   LIFECYCLE_MODEL,
   REQUIRED_ARTIFACT_HASHES,
+  REQUIRED_DEVICE_ARTIFACT_HASHES,
   REQUIRED_DEVICE_SELECTORS,
   REQUIRED_REGRESSIONS,
   REQUIRED_SOAK_METRICS,

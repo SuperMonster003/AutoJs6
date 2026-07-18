@@ -36,6 +36,12 @@ const XML_RESULT_ROOT = "app/build/outputs/androidTest-results";
 const FRESHNESS_TOLERANCE_MS = 10_000;
 const DEVICE_SOAK_REPORT_DIR = "/sdcard/Download/AutoJs6/nodejs/r6-soak";
 const SOAK_REPORT_SCHEMA = "autojs6-node-r6-persistent-plugin-soak-v1";
+const PACKAGED_TEMPLATE_TASK = ":app:packageInrtDebug";
+const PACKAGED_TEMPLATE_PACKAGE = "org.autojs.autojs6.inrt";
+const PACKAGED_TEMPLATE_DEVICE_PATH_PREFIX = "/data/local/tmp/autojs6-r6-packaged-template-";
+const PACKAGED_TEMPLATE_OVERRIDE_ARGUMENT = "autojs.embeddedNode.packagedSmokeTemplateOverride";
+const PACKAGED_TEMPLATE_EXACT_PATH_ARGUMENT = "autojs.embeddedNode.packagedSmokeTemplateExactPath";
+const PACKAGED_TEMPLATE_TARGET_ABI_ARGUMENT = "autojs.embeddedNode.packagedSmokeTargetAbi";
 const R5_PLUGIN_PREFLIGHT_SELECTOR =
   "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_01_livePluginPreflightNegotiatesContractAndReportsTrustIdentity";
 const R6_PLUGIN_SOAK_SELECTOR =
@@ -151,6 +157,7 @@ async function main() {
   const serial = String(options.serial).trim();
   const startedAtEpochMs = Date.now();
   const runToken = crypto.randomBytes(32).toString("hex");
+  const packagedTemplateDevicePath = packagedTemplatePathForRunToken(runToken);
   const runRoot = path.resolve(
     options.runDir || path.join(
       repoRoot,
@@ -196,6 +203,7 @@ async function main() {
     sourceIdentity: { before: null, after: null },
     device: null,
     plugin: null,
+    packagedTemplate: null,
     host: null,
     commands: [],
     junit: null,
@@ -213,6 +221,7 @@ async function main() {
   console.log(`- runtime ABI: ${requirement.runtimeProcessAbi}`);
   console.log(`- run directory: ${runRoot}`);
 
+  let packagedTemplateCleanupRequired = false;
   try {
     if (!fs.existsSync(pluginRoot)) throw new Error(`Runtime plugin project is missing: ${pluginRoot}`);
     const identityBefore = currentIdentity(repoRoot, pluginRoot);
@@ -287,18 +296,145 @@ async function main() {
     };
     writeSummary(runRoot, summary);
 
+    const packagedTemplateBuild = await runGradle({
+      root: repoRoot,
+      args: buildPackagedTemplateGradleArgs(),
+      timeoutMs: boundedNumber(options.gradleTimeoutMs, 14_400_000, 900_000, 43_200_000, "gradle-timeout-ms"),
+      context,
+      label: "packaged-template-build",
+    });
+    requireSuccessfulCommand(packagedTemplateBuild, "Packaged smoke template build");
+    assertSameCleanIdentity(
+      identityBefore,
+      currentIdentity(repoRoot, pluginRoot),
+      "after the packaged smoke template build",
+    );
+    const packagedTemplateApk = selectUniversalApk(
+      path.join(repoRoot, "app/build/outputs/apk/inrt/debug"),
+      "packaged smoke template",
+    );
+    assertFreshArtifact(packagedTemplateApk, packagedTemplateBuild.startedAt, "Packaged smoke template APK");
+    const packagedTemplateMetadata = inspectApk(packagedTemplateApk, repoRoot, context);
+    const packagedTemplateSignature = inspectApkSigner(
+      packagedTemplateApk,
+      repoRoot,
+      context,
+      "packaged-template-signature",
+    );
+    validatePackagedTemplateApk(packagedTemplateMetadata, packagedTemplateApk);
+    const packagedTemplateCopy = copyArtifact(
+      packagedTemplateApk,
+      artifactDir,
+      "packaged-smoke-template.apk",
+    );
+    const packagedTemplateArtifact = artifactRecord(packagedTemplateCopy, repoRoot);
+    if (await deviceFileExists(
+      serial,
+      packagedTemplateDevicePath,
+      context,
+      "packaged-template-device-preexisting-probe",
+    )) {
+      throw new Error(`Refusing to overwrite the run-owned packaged template path: ${packagedTemplateDevicePath}`);
+    }
+    packagedTemplateCleanupRequired = true;
+    const templatePush = await runCommand(
+      "adb",
+      ["-s", serial, "push", packagedTemplateCopy, packagedTemplateDevicePath],
+      {
+        cwd: repoRoot,
+        env: { ...process.env, ANDROID_SERIAL: serial },
+        timeoutMs: 600_000,
+        context,
+        label: "packaged-template-push",
+      },
+    );
+    requireSuccessfulCommand(templatePush, "Packaged smoke template push");
+    const packagedTemplateDeviceSha256 = await deviceFileSha256(
+      serial,
+      packagedTemplateDevicePath,
+      context,
+      "packaged-template-device-sha256",
+    );
+    if (packagedTemplateDeviceSha256 !== packagedTemplateArtifact.sha256) {
+      throw new Error(
+        "Packaged smoke template device hash does not match the fresh current-source build " +
+          `(${packagedTemplateDeviceSha256} != ${packagedTemplateArtifact.sha256}).`,
+      );
+    }
+    summary.packagedTemplate = {
+      sourceTask: PACKAGED_TEMPLATE_TASK,
+      source: relativePath(repoRoot, packagedTemplateApk),
+      artifact: packagedTemplateArtifact,
+      signature: packagedTemplateSignature,
+      devicePath: packagedTemplateDevicePath,
+      deviceSha256BeforeTest: packagedTemplateDeviceSha256,
+      deviceSha256AfterTest: null,
+      deviceMatchesFreshBuild: true,
+      deviceRemovedAfterTest: false,
+      targetAbi: requirement.runtimeProcessAbi,
+      overrideArgument: `${PACKAGED_TEMPLATE_OVERRIDE_ARGUMENT}=true`,
+      exactPathArgument: `${PACKAGED_TEMPLATE_EXACT_PATH_ARGUMENT}=${packagedTemplateDevicePath}`,
+      targetAbiArgument: `${PACKAGED_TEMPLATE_TARGET_ABI_ARGUMENT}=${requirement.runtimeProcessAbi}`,
+    };
+    writeSummary(runRoot, summary);
+
     const resultRoot = path.join(repoRoot, XML_RESULT_ROOT);
     const junitBefore = snapshotJUnitFiles(resultRoot);
     const instrumentationStartedAtEpochMs = Date.now();
-    const gradle = await runGradle({
-      root: repoRoot,
-      args: buildEvidenceGradleArgs(pluginRoot, profile, runToken),
-      timeoutMs: boundedNumber(options.gradleTimeoutMs, 14_400_000, 900_000, 43_200_000, "gradle-timeout-ms"),
-      context,
-      label: "device-evidence-gradle",
-      env: { ...process.env, ANDROID_SERIAL: serial },
-    });
-    requireSuccessfulCommand(gradle, "R6 connected device evidence gate");
+    let gradle;
+    let packagedTemplateDeviceSha256AfterTest = "";
+    let evidenceGateFailure = null;
+    try {
+      gradle = await runGradle({
+        root: repoRoot,
+        args: buildEvidenceGradleArgs(pluginRoot, profile, runToken, requirement.runtimeProcessAbi),
+        timeoutMs: boundedNumber(options.gradleTimeoutMs, 14_400_000, 900_000, 43_200_000, "gradle-timeout-ms"),
+        context,
+        label: "device-evidence-gradle",
+        env: { ...process.env, ANDROID_SERIAL: serial },
+      });
+      packagedTemplateDeviceSha256AfterTest = await deviceFileSha256(
+        serial,
+        packagedTemplateDevicePath,
+        context,
+        "packaged-template-device-sha256-after-test",
+      );
+      if (packagedTemplateDeviceSha256AfterTest !== packagedTemplateArtifact.sha256) {
+        throw new Error(
+          "Packaged smoke template device hash changed during the evidence gate " +
+          `(${packagedTemplateDeviceSha256AfterTest} != ${packagedTemplateArtifact.sha256}).`,
+        );
+      }
+      requireSuccessfulCommand(gradle, "R6 connected device evidence gate");
+    } catch (error) {
+      evidenceGateFailure = error;
+    }
+    summary.packagedTemplate.deviceSha256AfterTest = packagedTemplateDeviceSha256AfterTest || null;
+    let packagedTemplateCleanupFailure = null;
+    if (packagedTemplateCleanupRequired) {
+      try {
+        await removeDeviceFile(
+          serial,
+          packagedTemplateDevicePath,
+          context,
+          "packaged-template-device-cleanup",
+        );
+        packagedTemplateCleanupRequired = false;
+        summary.packagedTemplate.deviceRemovedAfterTest = true;
+      } catch (error) {
+        packagedTemplateCleanupFailure = error;
+      }
+    }
+    writeSummary(runRoot, summary);
+    if (evidenceGateFailure && packagedTemplateCleanupFailure) {
+      const gateMessage = evidenceGateFailure.message || String(evidenceGateFailure);
+      const cleanupMessage = packagedTemplateCleanupFailure.message || String(packagedTemplateCleanupFailure);
+      const combined = new Error(`${gateMessage} Packaged template cleanup also failed: ${cleanupMessage}`);
+      combined.cause = evidenceGateFailure;
+      throw combined;
+    }
+    if (evidenceGateFailure) throw evidenceGateFailure;
+    if (packagedTemplateCleanupFailure) throw packagedTemplateCleanupFailure;
 
     const freshJUnit = selectFreshJUnit(
       resultRoot,
@@ -404,6 +540,7 @@ async function main() {
       pluginApk: artifactRecord(installedPluginCopy, repoRoot),
       junitXml: artifactRecord(junitCopy, repoRoot),
       requestedPluginApk: pluginSourceArtifact,
+      packagedTemplateApk: packagedTemplateArtifact,
     };
     summary.artifacts = artifacts;
     summary.host = {
@@ -480,6 +617,21 @@ async function main() {
         requestedPluginApkSha256: artifacts.requestedPluginApk.sha256,
         requestedPluginApkBytes: artifacts.requestedPluginApk.sizeBytes,
         installedPluginMatchesRequested: true,
+        packagedTemplateApkPath: artifacts.packagedTemplateApk.path,
+        packagedTemplateApkSha256: artifacts.packagedTemplateApk.sha256,
+        packagedTemplateApkBytes: artifacts.packagedTemplateApk.sizeBytes,
+        packagedTemplateSourceTask: PACKAGED_TEMPLATE_TASK,
+        packagedTemplateDevicePath,
+        packagedTemplateDeviceSha256BeforeTest: packagedTemplateDeviceSha256,
+        packagedTemplateDeviceSha256AfterTest,
+        packagedTemplateDeviceMatchesFreshBuild: true,
+        packagedTemplateDeviceRemovedAfterTest: true,
+        packagedTemplateTargetAbi: requirement.runtimeProcessAbi,
+        packagedTemplateOverrideArgument: `${PACKAGED_TEMPLATE_OVERRIDE_ARGUMENT}=true`,
+        packagedTemplateExactPathArgument:
+          `${PACKAGED_TEMPLATE_EXACT_PATH_ARGUMENT}=${packagedTemplateDevicePath}`,
+        packagedTemplateTargetAbiArgument:
+          `${PACKAGED_TEMPLATE_TARGET_ABI_ARGUMENT}=${requirement.runtimeProcessAbi}`,
       },
       plugin: pluginProvenance,
       surfaces: derived.surfaces,
@@ -541,17 +693,48 @@ async function main() {
     console.log(`- archived: ${summary.decision.archived}`);
     console.log(`- summary: ${path.join(runRoot, "run.json")}`);
   } catch (error) {
-    const message = error && error.message ? error.message : String(error);
+    let failure = error;
+    if (packagedTemplateCleanupRequired) {
+      try {
+        await removeDeviceFile(
+          serial,
+          packagedTemplateDevicePath,
+          context,
+          "packaged-template-device-cleanup-after-failure",
+        );
+        packagedTemplateCleanupRequired = false;
+        if (summary.packagedTemplate) summary.packagedTemplate.deviceRemovedAfterTest = true;
+      } catch (cleanupError) {
+        const originalMessage = error && error.message ? error.message : String(error);
+        const cleanupMessage = cleanupError && cleanupError.message ? cleanupError.message : String(cleanupError);
+        failure = new Error(`${originalMessage} Packaged template cleanup also failed: ${cleanupMessage}`);
+        failure.cause = error;
+      }
+    }
+    const message = failure && failure.message ? failure.message : String(failure);
     summary.decision.status = "failed";
     summary.decision.failures = [...new Set([...summary.decision.failures, message])];
     summary.generatedAt = new Date().toISOString();
     writeSummary(runRoot, summary);
     logEvent(logFile, `Failed R6 device evidence run: ${message}`);
-    throw error;
+    throw failure;
   }
 }
 
-function buildEvidenceGradleArgs(pluginRoot, profile, runToken) {
+function buildPackagedTemplateGradleArgs() {
+  return [
+    "--console=plain",
+    "--rerun-tasks",
+    PACKAGED_TEMPLATE_TASK,
+    `-Pautojs.nodejs.runtimeSlot=${RUNTIME_SLOT}`,
+    "-Pautojs.nodejs.embedded.script.enabled=true",
+    "-Pautojs.gradle.build.number.auto.increment.enabled=false",
+    "-Pautojs.gradle.build.time.update.enabled=false",
+  ];
+}
+
+function buildEvidenceGradleArgs(pluginRoot, profile, runToken, runtimeProcessAbi) {
+  const packagedTemplateDevicePath = packagedTemplatePathForRunToken(runToken);
   return [
     "--console=plain",
     "--rerun-tasks",
@@ -565,6 +748,9 @@ function buildEvidenceGradleArgs(pluginRoot, profile, runToken) {
     "-Pautojs.gradle.build.number.auto.increment.enabled=false",
     "-Pautojs.gradle.build.time.update.enabled=false",
     "-Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true",
+    `-Pandroid.testInstrumentationRunnerArguments.${PACKAGED_TEMPLATE_OVERRIDE_ARGUMENT}=true`,
+    `-Pandroid.testInstrumentationRunnerArguments.${PACKAGED_TEMPLATE_EXACT_PATH_ARGUMENT}=${packagedTemplateDevicePath}`,
+    `-Pandroid.testInstrumentationRunnerArguments.${PACKAGED_TEMPLATE_TARGET_ABI_ARGUMENT}=${runtimeProcessAbi}`,
     `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.r5.pluginWarmSamples=${R5_WARM_SAMPLES}`,
     `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.r6.soak.kind=${SOAK_KIND}`,
     `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.r6.soak.runToken=${runToken}`,
@@ -933,6 +1119,15 @@ function validatePluginApk(metadata, apk, expectedAbi) {
   }
 }
 
+function validatePackagedTemplateApk(metadata, apk) {
+  if (metadata.packageName !== PACKAGED_TEMPLATE_PACKAGE) {
+    throw new Error(
+      `Packaged smoke template APK package must be ${PACKAGED_TEMPLATE_PACKAGE}, ` +
+        `got ${metadata.packageName || "missing"}: ${apk}`,
+    );
+  }
+}
+
 function selectAbiApk(root, abi, label) {
   const suffix = `-${abi}.apk`.toLowerCase();
   const matches = listFiles(root)
@@ -941,6 +1136,17 @@ function selectAbiApk(root, abi, label) {
   if (matches.length === 0) throw new Error(`No ${label} APK for ABI ${abi} was found under ${root}.`);
   if (matches.length > 1 && fs.statSync(matches[0]).mtimeMs === fs.statSync(matches[1]).mtimeMs) {
     throw new Error(`Multiple equally recent ${label} APKs for ABI ${abi} were found under ${root}.`);
+  }
+  return matches[0];
+}
+
+function selectUniversalApk(root, label) {
+  const matches = listFiles(root)
+    .filter((file) => path.basename(file).toLowerCase().endsWith("-universal.apk"))
+    .sort((left, right) => fs.statSync(right).mtimeMs - fs.statSync(left).mtimeMs);
+  if (matches.length === 0) throw new Error(`No universal ${label} APK was found under ${root}.`);
+  if (matches.length > 1 && fs.statSync(matches[0]).mtimeMs === fs.statSync(matches[1]).mtimeMs) {
+    throw new Error(`Multiple equally recent universal ${label} APKs were found under ${root}.`);
   }
   return matches[0];
 }
@@ -1173,6 +1379,44 @@ async function adbText(serial, args, context, label) {
   });
   requireSuccessfulCommand(result, `adb ${args.join(" ")}`);
   return result.stdout;
+}
+
+async function deviceFileSha256(serial, devicePath, context, label) {
+  const output = await adbText(serial, ["shell", "sha256sum", devicePath], context, label);
+  const match = output.match(/^([0-9a-f]{64})\s+/im);
+  if (!match) throw new Error(`Device did not report a SHA-256 digest for ${devicePath}.`);
+  return match[1].toLowerCase();
+}
+
+async function deviceFileExists(serial, devicePath, context, label) {
+  const command = `if [ -e ${devicePath} ]; then echo present; else echo absent; fi`;
+  const output = (await adbText(serial, ["shell", command], context, label)).trim();
+  if (output === "present") return true;
+  if (output === "absent") return false;
+  throw new Error(`Device path probe returned an unexpected result for ${devicePath}: ${output || "<empty>"}`);
+}
+
+async function removeDeviceFile(serial, devicePath, context, label) {
+  const result = await runCommand("adb", ["-s", serial, "shell", "rm", "-f", devicePath], {
+    cwd: context.repoRoot,
+    env: { ...process.env, ANDROID_SERIAL: serial },
+    timeoutMs: 60_000,
+    context,
+    label,
+    echo: false,
+  });
+  requireSuccessfulCommand(result, `adb shell rm -f ${devicePath}`);
+  if (await deviceFileExists(serial, devicePath, context, `${label}-probe`)) {
+    throw new Error(`Packaged template cleanup left the run-owned device file in place: ${devicePath}`);
+  }
+}
+
+function packagedTemplatePathForRunToken(runToken) {
+  const value = String(runToken || "");
+  if (!SHA256_PATTERN.test(value)) {
+    throw new Error("Packaged template device path requires a 64-character hexadecimal run token.");
+  }
+  return `${PACKAGED_TEMPLATE_DEVICE_PATH_PREFIX}${value}.apk`;
 }
 
 async function runGradle(config) {
@@ -1606,9 +1850,11 @@ Operational timeouts:
   --gradle-timeout-ms MS         Main connected gate timeout (15 minutes..12 hours).
   --plugin-build-timeout-ms MS   Plugin build timeout (5 minutes..4 hours).
 
-The runner fixes nodePlugin/plugin/node24_5, the target profile, 30 R5 warm samples,
-a 30-second smoke lifecycle run with 2-second samples, the exact verifier selectors,
-and a generated 64-character hexadecimal run token.
+The runner fixes nodePlugin/plugin/node24_5, the target profile and packaged-smoke ABI,
+builds and pushes a fresh slim Inrt template to a run-token-derived exact path, verifies
+its device hash before and after testing, cleans it up, runs 30 R5 warm samples and a
+30-second smoke lifecycle with 2-second samples, and fixes the exact verifier selectors
+plus a generated 64-character hexadecimal run token.
 It accepts no status, force, selector, profile, duration, or run-token override.
 `);
 }
@@ -1616,12 +1862,14 @@ It accepts no status, force, selector, profile, duration, or run-token override.
 module.exports = {
   SELECTOR_DERIVATION,
   buildEvidenceGradleArgs,
+  buildPackagedTemplateGradleArgs,
   derivePluginProvenance,
   deriveEvidence,
   parseArgs,
   parseApkSignerOutput,
   parseRequiredJUnit,
   parseRequiredJUnitXml,
+  packagedTemplatePathForRunToken,
   selectFreshJUnit,
   snapshotJUnitFiles,
 };

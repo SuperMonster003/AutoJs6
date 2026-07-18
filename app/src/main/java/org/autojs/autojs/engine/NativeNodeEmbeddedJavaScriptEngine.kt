@@ -933,13 +933,29 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         sourceName: String,
         workingDirectory: String,
     ): CommonJsPreloadDiagnostics {
-        return collectCommonJsModuleSources(
+        return prepareCommonJsPreloadForTest(
+            source = source,
+            sourceName = sourceName,
+            workingDirectory = workingDirectory,
+        ).diagnostics
+    }
+
+    internal fun prepareCommonJsPreloadForTest(
+        source: String,
+        sourceName: String,
+        workingDirectory: String,
+    ): CommonJsPreloadSnapshotForTest {
+        val preload = collectCommonJsModuleSources(
             source = source,
             sourceName = sourceName,
             workingDirectory = workingDirectory,
             isEsmEntry = false,
             rootLoaderAnalysis = analyzeCommonJsSourceLoaders(source),
-        ).diagnostics
+        )
+        return CommonJsPreloadSnapshotForTest(
+            moduleSources = preload.moduleSources.toMap(),
+            diagnostics = preload.diagnostics,
+        )
     }
 
     private fun collectCommonJsModuleSources(
@@ -2718,6 +2734,11 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             )
         }
     }
+
+    internal data class CommonJsPreloadSnapshotForTest(
+        val moduleSources: Map<String, String>,
+        val diagnostics: CommonJsPreloadDiagnostics,
+    )
 
     data class RequestPreparationDiagnostics(
         val prepared: Boolean = true,

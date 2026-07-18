@@ -43,12 +43,14 @@
 * `Fonctionnalité` Les options pour développeurs permettent de configurer un jeton d'accès GitHub afin d'augmenter les limites de requêtes de vérification des mises à jour et d'index des plugins
 * `Correction` Les scripts Node.js vides ou simples démarraient lentement dans les répertoires de travail contenant de nombreux fichiers, car l'analyse inutile des modules lisait intégralement les fichiers candidats
 * `Correction` Le processus Node.js persistant était arrêté à tort lorsque l'interface éphémère de lancement de script devenait masquée
+* `Correction` La notification attendue de déconnexion Binder du processus Node.js persistant après l'arrêt propre d'une tâche interactive de longue durée dans une application empaquetée pouvait remplacer l'état stopped par failed
 * `Correction` Le retour des résultats des scripts Node.js était retardé par l'attente de stabilisation du processus d'exécution
 * `Correction` L'annulation d'une exécution Node.js active pouvait supprimer l'enregistrement de l'exécution avant la mise en quarantaine du processus défaillant, bloquant les attentes de fin et retardant la récupération
 * `Correction` Le repli automatique après la perte d'une réponse Binder de l'environnement d'exécution Node.js externe pouvait exécuter deux fois le même script
 * `Correction` Les alias /data/user/0 et /data/data des répertoires privés Android n'étaient pas normalisés puis réécrits dans les requêtes du plugin, ce qui faisait considérer à tort un workingDirectory Node.js valide comme sortant de sandboxRoot
 * `Correction` Les builds nodePlugin sans environnement d'exécution Node côté hôte excluaient à tort les bibliothèques JNI/AAR de toutes les ABI, entraînant un plantage lors de l'initialisation de Rhino Shell en raison de l'absence de libjackpal-termexec2.so
 * `Correction` La collecte et la vérification des preuves Node.js R6 rejetaient les identités de signature APK signalées par Android Build Tools 37 car apksigner avait modifié le format de sortie de l'empreinte du certificat
+* `Correction` Les preuves d'APK empaqueté Node.js R6 étaient ignorées ou liées à arm64 car le collecteur ne préparait pas de modèle Inrt récent et ne transmettait pas l'ABI cible
 * `Correction` runtime.loadJar ne pouvait pas charger dynamiquement des fichiers de classe Java compilés pour une version plus récente
 * `Correction` app.isInstalled/kill et les méthodes associées ne pouvaient pas utiliser correctement les arguments de nom de paquet _[`issue #495`](http://issues.autojs6.com/495)_
 * `Correction` Les méthodes liées au shell pouvaient ne plus répondre sur les appareils sans accès Root

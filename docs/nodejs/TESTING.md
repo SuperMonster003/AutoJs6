@@ -3373,9 +3373,14 @@ node tools/nodejs/r6/run-device-evidence.js --target sony-arm64 --serial QV710AF
 
 The collector starts and ends on unchanged clean host and plugin commits,
 builds and installs a fresh signed target-ABI plugin APK, binds the installed
-plugin, host, and Android test APK bytes to fresh build artifacts, and captures
-a fresh JUnit XML from `verifyNodeR6DeviceEvidenceGate`. That JUnit result must
-contain exactly the fixed 13 selectors with zero failures, errors, or skips.
+plugin, host, and Android test APK bytes to fresh build artifacts, builds and
+hash-binds a fresh slim Inrt template, and pushes it to a unique packaged-smoke
+override path derived from the run token. It binds that exact path and the same
+target ABI to the packaged fixtures, verifies the device hash before and after
+the gate, and removes the run-owned template before staging evidence. It
+then captures a fresh JUnit XML from `verifyNodeR6DeviceEvidenceGate`. That
+JUnit result must contain exactly the fixed 13 selectors with zero failures,
+errors, or skips.
 The collector also verifies the target manufacturer/device type and runtime
 ABI before archiving `build/reports/nodejs/r6-evidence/device/<target>.json`.
 Use `--no-archive` for staged validation only.

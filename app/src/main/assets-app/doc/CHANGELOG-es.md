@@ -43,12 +43,14 @@
 * `Nuevo` Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins
 * `Corrección` Los scripts vacíos y simples de Node.js se iniciaban lentamente en directorios de trabajo con muchos archivos porque el escaneo innecesario de módulos leía por completo los archivos candidatos
 * `Corrección` El proceso persistente de Node.js se retiraba incorrectamente cuando se ocultaba la interfaz temporal del iniciador de scripts
+* `Corrección` La notificación esperada de desconexión Binder del proceso persistente de Node.js tras detener correctamente una tarea interactiva de larga duración en una aplicación empaquetada podía sobrescribir el estado stopped con failed
 * `Corrección` La devolución de resultados de scripts Node.js se retrasaba por la espera de estabilización del proceso de ejecución
 * `Corrección` La cancelación de una ejecución Node.js activa podía eliminar el registro de ejecución antes de poner en cuarentena el proceso en mal estado, bloqueando la espera de finalización y retrasando la recuperación
 * `Corrección` El fallback automático tras perder una respuesta Binder del runtime Node.js externo podía ejecutar dos veces el mismo script
 * `Corrección` Los alias /data/user/0 y /data/data de los directorios privados de Android no se normalizaban ni se volvían a escribir en las solicitudes del plugin, lo que hacía que un workingDirectory válido de Node.js se rechazara incorrectamente por exceder sandboxRoot
 * `Corrección` Las compilaciones nodePlugin sin un runtime Node en el host excluían incorrectamente las bibliotecas JNI/AAR de todas las ABI, lo que provocaba un cierre inesperado al inicializar Rhino Shell por la ausencia de libjackpal-termexec2.so
 * `Corrección` La recopilación y verificación de evidencias de Node.js R6 rechazaban las identidades de firma de APK informadas por Android Build Tools 37 porque apksigner cambió el formato de salida del resumen del certificado
+* `Corrección` La evidencia de APK empaquetado de Node.js R6 se omitía o quedaba vinculada a arm64 porque el recopilador no preparaba una plantilla Inrt nueva ni pasaba la ABI de destino
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java
 * `Corrección` app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_
 * `Corrección` Los métodos relacionados con shell podían dejar de responder en dispositivos sin acceso Root

@@ -13,6 +13,7 @@ const {
   DEVICE_SCHEMA,
   LIFECYCLE_MODEL,
   REQUIRED_ARTIFACT_HASHES,
+  REQUIRED_DEVICE_ARTIFACT_HASHES,
   REQUIRED_DEVICE_SELECTORS,
   REQUIRED_REGRESSIONS,
   REQUIRED_SOAK_METRICS,
@@ -22,6 +23,9 @@ const {
   evaluateSoakReport,
 } = require("./verify-production-evidence");
 const {
+  buildEvidenceGradleArgs,
+  buildPackagedTemplateGradleArgs,
+  packagedTemplatePathForRunToken,
   parseApkSignerOutput,
   selectFreshJUnit,
   snapshotJUnitFiles: snapshotDeviceJUnitFiles,
@@ -55,6 +59,8 @@ function main() {
   try {
     prepareContractApkTools();
     assertApkSignerOutputContracts();
+    assertDeviceRunnerGradleContracts();
+    assertPackagedTemplateSourceContract();
     for (const requirement of DEVICE_REQUIREMENTS) {
       writeJson(root, requirement.relative, validDeviceReport(requirement));
       const result = evaluateDeviceReport(root, requirement, identity, root);
@@ -156,6 +162,32 @@ function main() {
     const fakeHashResult = evaluateDeviceReport(root, fakeHashRequirement, identity, root);
     assert.strictEqual(fakeHashResult.ready, false);
     assert(fakeHashResult.blockers.some((message) => message.includes("hostApkSha256 does not match")));
+
+    const fakeTemplateRequirement = DEVICE_REQUIREMENTS[0];
+    const fakeTemplate = validDeviceReport(fakeTemplateRequirement);
+    fakeTemplate.artifacts.packagedTemplateDeviceSha256AfterTest = "f".repeat(64);
+    writeJson(root, fakeTemplateRequirement.relative, fakeTemplate);
+    const fakeTemplateResult = evaluateDeviceReport(root, fakeTemplateRequirement, identity, root);
+    assert.strictEqual(fakeTemplateResult.ready, false);
+    assert(fakeTemplateResult.blockers.some((message) => message.includes("device packaged template must match")));
+
+    const templateBindingMutations = [
+      ["packagedTemplateDevicePath", "/data/local/tmp/autojs6-r6-packaged-template-" + "b".repeat(64) + ".apk", "report run token"],
+      ["packagedTemplateExactPathArgument", "autojs.embeddedNode.packagedSmokeTemplateExactPath=/data/local/tmp/wrong.apk", "exact-path"],
+      ["packagedTemplateOverrideArgument", "autojs.embeddedNode.packagedSmokeTemplateOverride=false", "override instrumentation"],
+      ["packagedTemplateTargetAbi", "x86", "target ABI"],
+      ["packagedTemplateTargetAbiArgument", "autojs.embeddedNode.packagedSmokeTargetAbi=x86", "target-ABI instrumentation"],
+      ["packagedTemplateDeviceSha256BeforeTest", "e".repeat(64), "before and after testing"],
+      ["packagedTemplateDeviceRemovedAfterTest", false, "must be removed"],
+    ];
+    templateBindingMutations.forEach(([field, value, blockerText]) => {
+      const report = validDeviceReport(fakeTemplateRequirement);
+      report.artifacts[field] = value;
+      writeJson(root, fakeTemplateRequirement.relative, report);
+      const result = evaluateDeviceReport(root, fakeTemplateRequirement, identity, root);
+      assert.strictEqual(result.ready, false, `${field} mutation must fail`);
+      assert(result.blockers.some((message) => message.includes(blockerText)), `${field}: ${result.blockers.join("; ")}`);
+    });
 
     const invalidMetricsRequirement = SOAK_REQUIREMENTS[0];
     const invalidMetrics = validSoakReport(invalidMetricsRequirement);
@@ -306,8 +338,8 @@ function main() {
 
 function validDeviceReport(requirement) {
   const manufacturer = requirement.manufacturerNot ? "google" : (requirement.manufacturer || "sony");
-  const runToken = "A".repeat(64);
-  const artifacts = artifactHashes(`device-${requirement.id}`, requirement.runtimeProcessAbi, "device");
+  const runToken = "a".repeat(64);
+  const artifacts = artifactHashes(`device-${requirement.id}`, requirement.runtimeProcessAbi, "device", runToken);
   const signerSha256 = apkSignerSha256(path.join(contractRoot, artifacts.pluginApkPath));
   const preflightArtifact = writeFixtureArtifact(
     `artifacts/device-${requirement.id}-plugin-preflight.json`,
@@ -490,7 +522,7 @@ function capturedIdentity() {
   };
 }
 
-function artifactHashes(prefix, runtimeProcessAbi, junitKind) {
+function artifactHashes(prefix, runtimeProcessAbi, junitKind, runToken = "") {
   assert(contractRoot, "contract fixture root is unavailable");
   const bindings = [
     ["hostApkSha256", "hostApkPath", "hostApkBytes"],
@@ -501,12 +533,21 @@ function artifactHashes(prefix, runtimeProcessAbi, junitKind) {
     ["androidTestBuildApkSha256", "androidTestBuildApkPath", "androidTestBuildApkBytes"],
     ["requestedPluginApkSha256", "requestedPluginApkPath", "requestedPluginApkBytes"],
   ];
+  if (junitKind === "device") {
+    bindings.push([
+      "packagedTemplateApkSha256",
+      "packagedTemplateApkPath",
+      "packagedTemplateApkBytes",
+    ]);
+  }
   const result = {};
   bindings.forEach(([hashKey, pathKey, bytesKey]) => {
     const extension = hashKey === "junitXmlSha256" ? "xml" : "bin";
     const apkRole = hashKey.includes("Plugin") || hashKey.includes("plugin")
       ? "plugin"
-      : hashKey.toLowerCase().includes("androidtest") ? "test" : "host";
+      : hashKey.toLowerCase().includes("androidtest")
+        ? "test"
+        : hashKey.toLowerCase().includes("packagedtemplate") ? "template" : "host";
     const relative = `artifacts/${prefix}-${hashKey}.${extension === "xml" ? "xml" : "apk"}`;
     const file = path.join(contractRoot, relative);
     fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -525,6 +566,21 @@ function artifactHashes(prefix, runtimeProcessAbi, junitKind) {
   result.installedHostMatchesFreshBuild = true;
   result.installedAndroidTestMatchesFreshBuild = true;
   result.installedPluginMatchesRequested = true;
+  if (junitKind === "device") {
+    const devicePath = packagedTemplatePathForRunToken(runToken);
+    result.packagedTemplateSourceTask = ":app:packageInrtDebug";
+    result.packagedTemplateDevicePath = devicePath;
+    result.packagedTemplateDeviceSha256BeforeTest = result.packagedTemplateApkSha256;
+    result.packagedTemplateDeviceSha256AfterTest = result.packagedTemplateApkSha256;
+    result.packagedTemplateDeviceMatchesFreshBuild = true;
+    result.packagedTemplateDeviceRemovedAfterTest = true;
+    result.packagedTemplateTargetAbi = runtimeProcessAbi;
+    result.packagedTemplateOverrideArgument = "autojs.embeddedNode.packagedSmokeTemplateOverride=true";
+    result.packagedTemplateExactPathArgument =
+      `autojs.embeddedNode.packagedSmokeTemplateExactPath=${devicePath}`;
+    result.packagedTemplateTargetAbiArgument =
+      `autojs.embeddedNode.packagedSmokeTargetAbi=${runtimeProcessAbi}`;
+  }
   assert.strictEqual(result.hostApkSha256, result.hostBuildApkSha256);
   assert.strictEqual(result.androidTestApkSha256, result.androidTestBuildApkSha256);
   assert.strictEqual(result.pluginApkSha256, result.requestedPluginApkSha256);
@@ -539,7 +595,9 @@ function contractApk(role, runtimeProcessAbi) {
   fs.mkdirSync(directory, { recursive: true });
   const packageName = role === "plugin"
     ? "io.github.supermonster003.autojs6.plugin.nodejs"
-    : role === "test" ? "org.autojs.autojs6.test" : "org.autojs.autojs6";
+    : role === "test"
+      ? "org.autojs.autojs6.test"
+      : role === "template" ? "org.autojs.autojs6.inrt" : "org.autojs.autojs6";
   const manifest = path.join(directory, "AndroidManifest.xml");
   fs.writeFileSync(
     manifest,
@@ -683,6 +741,57 @@ function assertApkSignerOutputContracts() {
     ].join("\n")),
     /did not verify with APK Signature Scheme v2/,
   );
+}
+
+function assertDeviceRunnerGradleContracts() {
+  const devicePaths = new Set();
+  DEVICE_REQUIREMENTS.forEach((requirement, index) => {
+    const runToken = (index + 1).toString(16).repeat(64);
+    const devicePath = packagedTemplatePathForRunToken(runToken);
+    const evidenceArgs = buildEvidenceGradleArgs(
+      "runtime-plugin",
+      requirement.manufacturer === "sony" ? "sony" : "full",
+      runToken,
+      requirement.runtimeProcessAbi,
+    );
+    assert(evidenceArgs.includes(
+      "-Pandroid.testInstrumentationRunnerArguments.autojs.embeddedNode.packagedSmokeTemplateOverride=true",
+    ));
+    assert(evidenceArgs.includes(
+      `-Pandroid.testInstrumentationRunnerArguments.autojs.embeddedNode.packagedSmokeTemplateExactPath=${devicePath}`,
+    ));
+    assert(evidenceArgs.includes(
+      `-Pandroid.testInstrumentationRunnerArguments.autojs.embeddedNode.packagedSmokeTargetAbi=${requirement.runtimeProcessAbi}`,
+    ));
+    devicePaths.add(devicePath);
+  });
+  assert.strictEqual(devicePaths.size, DEVICE_REQUIREMENTS.length);
+  const templateArgs = buildPackagedTemplateGradleArgs();
+  assert(templateArgs.includes(":app:packageInrtDebug"));
+  assert(templateArgs.includes("-Pautojs.nodejs.embedded.script.enabled=true"));
+  assert(!templateArgs.some((value) => value.startsWith("-Pautojs.nodejs.releaseFlavor=")));
+  assert(REQUIRED_DEVICE_ARTIFACT_HASHES.includes("packagedTemplateApkSha256"));
+  assert(!REQUIRED_ARTIFACT_HASHES.includes("packagedTemplateApkSha256"));
+}
+
+function assertPackagedTemplateSourceContract() {
+  const source = fs.readFileSync(
+    path.resolve(__dirname, "../../../app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"),
+    "utf8",
+  );
+  const selectionStart = source.indexOf("private fun packagedSmokeTemplateSource(");
+  const selectionEnd = source.indexOf("private fun isPackagedSmokeAssetsTemplateAvailable", selectionStart);
+  assert(selectionStart >= 0 && selectionEnd > selectionStart);
+  const selection = source.slice(selectionStart, selectionEnd);
+  assert(selection.indexOf("packagedSmokeTemplateExactPath()") < selection.indexOf("packagedSmokeTemplateOverride()"));
+  assert(selection.includes("check(isShellPackagedSmokeTemplateAvailable(exactPath))"));
+  assert(source.includes("autojs.embeddedNode.packagedSmokeTemplateExactPath"));
+  assert(source.includes("shell(\"stat -c %s $path\")"));
+  assert(!source.includes("shell(\"if [ -s $path ]"));
+  assert(source.includes("update(\"runtime.targetAbi\", packagedSmokeTargetAbi())"));
+  assert(!source.includes("\"abis\": [\"arm64-v8a\"]"));
+  assert(!source.includes("assertEquals(listOf(\"arm64-v8a\"), bundledConfig.abis)"));
+  assert(source.includes("\"lib/$targetAbi/$libName\" in entries"));
 }
 
 function readSdkDir(repoRoot) {

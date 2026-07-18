@@ -43,12 +43,14 @@
 * `新增` 開發者選項支援 GitHub 存取權杖設定, 用於提升更新檢查及外掛索引請求限額
 * `修復` Node.js 空白腳本及簡單腳本在包含大量檔案的工作目錄中因不必要的模組掃描及完整讀取候選檔案而啟動緩慢的問題
 * `修復` 短生命週期腳本啟動介面隱藏時錯誤回收 Node.js 常駐處理程序的問題
+* `修復` 打包應用的 Node.js 互動式長時間執行工作正常停止後, 預期的常駐處理程序 Binder 中斷連線回呼可能將 stopped 狀態覆寫為 failed 的問題
 * `修復` Node.js 腳本執行結果因執行階段處理程序穩定等待而延遲傳回的問題
 * `修復` Node.js 活動執行取消時可能在異常處理程序隔離前過早移除執行登錄, 導致完成等待者阻塞及復原延遲的問題
 * `修復` Node.js 外部執行階段 Binder 回應遺失後自動回退可能導致同一腳本被重複執行的問題
 * `修復` Android 私有目錄 /data/user/0 與 /data/data 別名未正規化寫回外掛請求, 導致合法 Node.js workingDirectory 被誤判為超出 sandboxRoot 的問題
 * `修復` nodePlugin 在宿主不含 Node 執行階段時錯誤排除所有 ABI 的 JNI/AAR 程式庫, 導致 Rhino Shell 初始化因缺少 libjackpal-termexec2.so 而當機的問題
 * `修復` Node.js R6 證據收集及驗證因 apksigner 憑證摘要輸出格式變更而拒絕 Android Build Tools 37 回報的 APK 簽章身分的問題
+* `修復` Node.js R6 打包 APK 證據因收集器未準備目前 Inrt 範本或傳入目標 ABI 而遭跳過或錯誤綁定 arm64 的問題
 * `修復` runtime.loadJar 無法正常動態載入由較高 Java 版本編譯的 class 檔案的問題
 * `修復` app.isInstalled/kill 等方法無法正常使用套件名稱引數的問題 _[`issue #495`](http://issues.autojs6.com/495)_
 * `修復` 無 Root 權限裝置呼叫 shell 相關方法時可能出現假死的問題

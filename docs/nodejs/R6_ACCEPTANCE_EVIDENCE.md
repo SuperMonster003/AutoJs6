@@ -50,6 +50,12 @@ and refuses selector, profile, duration, status, force, and run-token overrides.
 Each production run must start and end with clean, unchanged host and plugin
 source commits. The collector builds a fresh signed ABI-specific plugin APK,
 installs it, and pulls the installed APK back to prove byte-for-byte identity.
+It also builds a fresh slim `packageInrtDebug` universal APK from the same host
+commit, verifies its package/signature and absence of prepackaged Node JNI,
+archives its SHA-256, and pushes the exact bytes to a unique packaged-smoke
+override path derived from the run token. The collector binds that exact path
+and the target runtime ABI to instrumentation, verifies the device SHA-256 both
+before and after testing, and removes the run-owned device file before staging.
 It also binds the installed host and Android test APKs to fresh build artifacts,
 records their paths, sizes, and SHA-256 hashes, and attests a fresh JUnit XML
 from that invocation. APK inspection requires the host to exclude Node-owned
@@ -72,6 +78,8 @@ hash fields are otherwise well formed.
 The target constraints are fail-closed: the two Sony entries must use the
 required 64-bit and 32-bit runtime ABIs, the second-OEM entry must be a
 non-Sony physical arm64 device, and the x86_64 entry must be an emulator.
+The packaged APK selectors use that same target ABI; an arm64-only packaged
+fixture cannot satisfy the v7a or x86_64 matrix entries.
 
 ## Fixed 13-Selector Contract
 

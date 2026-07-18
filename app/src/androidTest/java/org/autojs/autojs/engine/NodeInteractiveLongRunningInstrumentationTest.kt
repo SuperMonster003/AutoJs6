@@ -35,6 +35,27 @@ class NodeInteractiveLongRunningInstrumentationTest {
     }
 
     @Test
+    fun persistentProcessDeathPreservesTerminalStatusOnly() {
+        val stopped = JSONObject()
+            .put("state", NodeInteractiveLongRunningStatusStore.STATE_STOPPED)
+            .put("stopRequested", true)
+        val timedOut = JSONObject()
+            .put("state", NodeInteractiveLongRunningStatusStore.STATE_TIMED_OUT)
+            .put("stopRequested", true)
+        val failed = JSONObject()
+            .put("state", NodeInteractiveLongRunningStatusStore.STATE_FAILED)
+        val stopping = JSONObject()
+            .put("state", NodeInteractiveLongRunningStatusStore.STATE_STOPPING)
+            .put("stopRequested", true)
+
+        assertTrue(NativeNodeEmbeddedScriptService.shouldPreserveTerminalStatusAfterProcessDeath(stopped))
+        assertTrue(NativeNodeEmbeddedScriptService.shouldPreserveTerminalStatusAfterProcessDeath(timedOut))
+        assertTrue(NativeNodeEmbeddedScriptService.shouldPreserveTerminalStatusAfterProcessDeath(failed))
+        assertFalse(NativeNodeEmbeddedScriptService.shouldPreserveTerminalStatusAfterProcessDeath(stopping))
+        assertFalse(NativeNodeEmbeddedScriptService.shouldPreserveTerminalStatusAfterProcessDeath(null))
+    }
+
+    @Test
     fun interactiveForegroundRuntimeReportsStatusAndStopsCleanly() {
         val workingDirectory = File(context.cacheDir, "node-interactive-long-running-${System.nanoTime()}").apply {
             deleteRecursively()

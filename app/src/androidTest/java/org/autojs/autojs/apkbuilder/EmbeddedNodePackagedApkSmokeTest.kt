@@ -8098,7 +8098,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               "packageName": "$SUCCESS_PACKAGE_NAME",
               "main": "$mainScriptName",
               "type": "node",
-              "abis": ["arm64-v8a"],
+              "abis": ["${packagedSmokeTargetAbi()}"],
               "libs": ["Embedded Node.js"],
               "permissions": [
                 "android.permission.WAKE_LOCK",
@@ -8125,7 +8125,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             .setPackageName(SUCCESS_PACKAGE_NAME)
             .setVersionName("1.0.0")
             .setVersionCode(1)
-            .setAbis(arrayListOf("arm64-v8a"))
+            .setAbis(arrayListOf(packagedSmokeTargetAbi()))
             .setLibs(arrayListOf(ApkBuilder.Lib.EMBEDDED_NODE_JS.label))
             .setPermissions(
                 arrayListOf(
@@ -8557,7 +8557,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               "packageName": "$SCRIPT_LAUNCH_PACKAGE_NAME",
               "main": "$mainScriptName",
               "type": "node",
-              "abis": ["arm64-v8a"],
+              "abis": ["${packagedSmokeTargetAbi()}"],
               "libs": ["Embedded Node.js"],
               "permissions": [
                 "android.permission.WAKE_LOCK",
@@ -8584,7 +8584,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             .setPackageName(SCRIPT_LAUNCH_PACKAGE_NAME)
             .setVersionName("1.0.0")
             .setVersionCode(1)
-            .setAbis(arrayListOf("arm64-v8a"))
+            .setAbis(arrayListOf(packagedSmokeTargetAbi()))
             .setLibs(arrayListOf(ApkBuilder.Lib.EMBEDDED_NODE_JS.label))
             .setPermissions(
                 arrayListOf(
@@ -8748,7 +8748,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               "packageName": "$BIN_LAUNCH_PACKAGE_NAME",
               "main": "$mainScriptName",
               "type": "node",
-              "abis": ["arm64-v8a"],
+              "abis": ["${packagedSmokeTargetAbi()}"],
               "libs": ["Embedded Node.js"],
               "permissions": [
                 "android.permission.WAKE_LOCK",
@@ -8775,7 +8775,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             .setPackageName(BIN_LAUNCH_PACKAGE_NAME)
             .setVersionName("1.0.0")
             .setVersionCode(1)
-            .setAbis(arrayListOf("arm64-v8a"))
+            .setAbis(arrayListOf(packagedSmokeTargetAbi()))
             .setLibs(arrayListOf(ApkBuilder.Lib.EMBEDDED_NODE_JS.label))
             .setPermissions(
                 arrayListOf(
@@ -8913,7 +8913,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               "packageName": "$BIN_STRING_SCRIPT_PACKAGE_NAME",
               "main": "$mainScriptName",
               "type": "node",
-              "abis": ["arm64-v8a"],
+              "abis": ["${packagedSmokeTargetAbi()}"],
               "libs": ["Embedded Node.js"],
               "permissions": [
                 "android.permission.WAKE_LOCK",
@@ -8940,7 +8940,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             .setPackageName(BIN_STRING_SCRIPT_PACKAGE_NAME)
             .setVersionName("1.0.0")
             .setVersionCode(1)
-            .setAbis(arrayListOf("arm64-v8a"))
+            .setAbis(arrayListOf(packagedSmokeTargetAbi()))
             .setLibs(arrayListOf(ApkBuilder.Lib.EMBEDDED_NODE_JS.label))
             .setPermissions(
                 arrayListOf(
@@ -9134,7 +9134,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               "versionCode": 1,
               "packageName": "$DIAGNOSTICS_PACKAGE_NAME",
               "main": "main.js",
-              "abis": ["arm64-v8a"],
+              "abis": ["${packagedSmokeTargetAbi()}"],
               "libs": ["Embedded Node.js"],
               "permissions": [
                 "android.permission.WAKE_LOCK",
@@ -9161,7 +9161,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             .setPackageName(DIAGNOSTICS_PACKAGE_NAME)
             .setVersionName("1.0.0")
             .setVersionCode(1)
-            .setAbis(arrayListOf("arm64-v8a"))
+            .setAbis(arrayListOf(packagedSmokeTargetAbi()))
             .setLibs(arrayListOf(ApkBuilder.Lib.EMBEDDED_NODE_JS.label))
             .setPermissions(
                 arrayListOf(
@@ -9786,6 +9786,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             dynamicImportLocal = true,
             workerThreads = false,
         )
+        runtimeDescriptor.remove("runtimeBackend")
         runtimeDescriptor.getJSONObject("versions")
             .put("esmLoader", "stale-autojs6-esm-loader-v0")
         return PackagedLaunchFailureCase(
@@ -11281,7 +11282,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               "packageName": "${failureCase.packageName}",
               "main": "${failureCase.projectConfigMainScriptName}",
               "type": "node",
-              "abis": ["arm64-v8a"],
+              "abis": ["${packagedSmokeTargetAbi()}"],
               "libs": ["Embedded Node.js"],
               "permissions": [
                 "android.permission.WAKE_LOCK",
@@ -11315,7 +11316,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             .setPackageName(failureCase.packageName)
             .setVersionName("1.0.0")
             .setVersionCode(1)
-            .setAbis(arrayListOf("arm64-v8a"))
+            .setAbis(arrayListOf(packagedSmokeTargetAbi()))
             .setLibs(arrayListOf(ApkBuilder.Lib.EMBEDDED_NODE_JS.label))
             .setPermissions(
                 arrayListOf(
@@ -13469,7 +13470,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               "packageName": "$packageName",
               "main": "$mainScriptName",
               "type": "node",
-              "abis": ["arm64-v8a"],
+              "abis": ["${packagedSmokeTargetAbi()}"],
               "libs": ["Embedded Node.js"],
               "permissions": [
 $permissionsJson
@@ -13501,7 +13502,7 @@ $nodeConfigJson
             .setPackageName(packageName)
             .setVersionName("1.0.0")
             .setVersionCode(1)
-            .setAbis(arrayListOf("arm64-v8a"))
+            .setAbis(arrayListOf(packagedSmokeTargetAbi()))
             .setLibs(arrayListOf(ApkBuilder.Lib.EMBEDDED_NODE_JS.label))
             .setPermissions(ArrayList(permissions))
         if (nodePermissions.isNotEmpty()) {
@@ -13636,30 +13637,14 @@ $nodeConfigJson
     ): PackagedPreloadCollection {
         val engine = NativeNodeEmbeddedJavaScriptEngine(context)
         return try {
-            val method = NativeNodeEmbeddedJavaScriptEngine::class.java.getDeclaredMethod(
-                "collectCommonJsModuleSources",
-                String::class.java,
-                String::class.java,
-                String::class.java,
+            val preload = engine.prepareCommonJsPreloadForTest(
+                source = mainScript.readText(StandardCharsets.UTF_8),
+                sourceName = mainScript.absolutePath,
+                workingDirectory = projectDir.absolutePath,
             )
-            method.isAccessible = true
-            val result = checkNotNull(
-                method.invoke(
-                    engine,
-                    mainScript.readText(StandardCharsets.UTF_8),
-                    mainScript.absolutePath,
-                    projectDir.absolutePath,
-                ),
-            ) { "CommonJS preload reflection returned null" }
-            val diagnosticsGetter = result.javaClass.getDeclaredMethod("getDiagnostics")
-            diagnosticsGetter.isAccessible = true
-            val moduleSourcesGetter = result.javaClass.getDeclaredMethod("getModuleSources")
-            moduleSourcesGetter.isAccessible = true
-            @Suppress("UNCHECKED_CAST")
-            val moduleSources = moduleSourcesGetter.invoke(result) as Map<String, String>
             PackagedPreloadCollection(
-                diagnostics = diagnosticsGetter.invoke(result) as NativeNodeEmbeddedJavaScriptEngine.CommonJsPreloadDiagnostics,
-                moduleSources = moduleSources,
+                diagnostics = preload.diagnostics,
+                moduleSources = preload.moduleSources,
             )
         } finally {
             runCatching { RhinoContext.exit() }
@@ -13724,7 +13709,7 @@ $nodeConfigJson
             assertEquals(SUCCESS_PACKAGE_NAME, bundledConfig.packageName)
             assertEquals(mainScriptName, bundledConfig.mainScriptFileName)
             assertEquals("node", bundledConfig.projectType)
-            assertEquals(listOf("arm64-v8a"), bundledConfig.abis)
+            assertEquals(listOf(packagedSmokeTargetAbi()), bundledConfig.abis)
             assertTrue(
                 "Bundled project config should keep Embedded Node.js lib selection",
                 ApkBuilder.Lib.EMBEDDED_NODE_JS.label in bundledConfig.libs,
@@ -13816,7 +13801,7 @@ $nodeConfigJson
             assertEquals(SCRIPT_LAUNCH_PACKAGE_NAME, bundledConfig.packageName)
             assertEquals(mainScriptName, bundledConfig.mainScriptFileName)
             assertEquals("node", bundledConfig.projectType)
-            assertEquals(listOf("arm64-v8a"), bundledConfig.abis)
+            assertEquals(listOf(packagedSmokeTargetAbi()), bundledConfig.abis)
             assertTrue(
                 "Bundled package script launch project config should keep Embedded Node.js lib selection",
                 ApkBuilder.Lib.EMBEDDED_NODE_JS.label in bundledConfig.libs,
@@ -13918,7 +13903,7 @@ $nodeConfigJson
             assertEquals(BIN_LAUNCH_PACKAGE_NAME, bundledConfig.packageName)
             assertEquals(mainScriptName, bundledConfig.mainScriptFileName)
             assertEquals("node", bundledConfig.projectType)
-            assertEquals(listOf("arm64-v8a"), bundledConfig.abis)
+            assertEquals(listOf(packagedSmokeTargetAbi()), bundledConfig.abis)
             assertTrue(
                 "Bundled package bin launch project config should keep Embedded Node.js lib selection",
                 ApkBuilder.Lib.EMBEDDED_NODE_JS.label in bundledConfig.libs,
@@ -14021,7 +14006,7 @@ $nodeConfigJson
             assertEquals(BIN_STRING_SCRIPT_PACKAGE_NAME, bundledConfig.packageName)
             assertEquals(mainScriptName, bundledConfig.mainScriptFileName)
             assertEquals("node", bundledConfig.projectType)
-            assertEquals(listOf("arm64-v8a"), bundledConfig.abis)
+            assertEquals(listOf(packagedSmokeTargetAbi()), bundledConfig.abis)
             assertTrue(
                 "Bundled package bin string script project config should keep Embedded Node.js lib selection",
                 ApkBuilder.Lib.EMBEDDED_NODE_JS.label in bundledConfig.libs,
@@ -14103,7 +14088,7 @@ $nodeConfigJson
             assertEquals(DIAGNOSTICS_PROJECT_NAME, bundledConfig.name)
             assertEquals(DIAGNOSTICS_PACKAGE_NAME, bundledConfig.packageName)
             assertEquals("main.js", bundledConfig.mainScriptFileName)
-            assertEquals(listOf("arm64-v8a"), bundledConfig.abis)
+            assertEquals(listOf(packagedSmokeTargetAbi()), bundledConfig.abis)
             assertTrue(
                 "Bundled diagnostics project config should keep Embedded Node.js lib selection",
                 ApkBuilder.Lib.EMBEDDED_NODE_JS.label in bundledConfig.libs,
@@ -14158,7 +14143,7 @@ $nodeConfigJson
             assertEquals(failureCase.packageName, bundledConfig.packageName)
             assertEquals(failureCase.projectConfigMainScriptName, bundledConfig.mainScriptFileName)
             assertEquals("node", bundledConfig.projectType)
-            assertEquals(listOf("arm64-v8a"), bundledConfig.abis)
+            assertEquals(listOf(packagedSmokeTargetAbi()), bundledConfig.abis)
             assertTrue(
                 "Bundled launch failure project config should keep Embedded Node.js lib selection",
                 ApkBuilder.Lib.EMBEDDED_NODE_JS.label in bundledConfig.libs,
@@ -14233,7 +14218,7 @@ $nodeConfigJson
             assertEquals(projectName, bundledConfig.name)
             assertEquals(packageName, bundledConfig.packageName)
             assertEquals(mainScriptName, bundledConfig.mainScriptFileName)
-            assertEquals(listOf("arm64-v8a"), bundledConfig.abis)
+            assertEquals(listOf(packagedSmokeTargetAbi()), bundledConfig.abis)
             assertTrue(
                 "Bundled gate diagnostics project config should keep Embedded Node.js lib selection",
                 ApkBuilder.Lib.EMBEDDED_NODE_JS.label in bundledConfig.libs,
@@ -14708,14 +14693,23 @@ $nodeConfigJson
     }
 
     private fun assertPackagedNodeNativeLibEntries(entries: Set<String>) {
+        val targetAbi = packagedSmokeTargetAbi()
         for (libName in listOf("libnode.so", "libautojs6-node.so", "libc++_shared.so")) {
             assertTrue(
-                "Packaged APK is missing arm64-v8a/$libName",
-                "lib/arm64-v8a/$libName" in entries,
+                "Packaged APK is missing $targetAbi/$libName",
+                "lib/$targetAbi/$libName" in entries,
             )
         }
-        assertFalse("Packaged APK should not include x86 libnode.so", "lib/x86/libnode.so" in entries)
-        assertFalse("Packaged APK should not include x86 libautojs6-node.so", "lib/x86/libautojs6-node.so" in entries)
+        (PACKAGED_SMOKE_SUPPORTED_TARGET_ABIS + "x86")
+            .filterNot { abi -> abi == targetAbi }
+            .forEach { abi ->
+                for (libName in listOf("libnode.so", "libautojs6-node.so")) {
+                    assertFalse(
+                        "Packaged APK should not include non-target $abi/$libName",
+                        "lib/$abi/$libName" in entries,
+                    )
+                }
+            }
     }
 
     private fun assertInstallAndRunPackagedSmoke(outputApk: File) {
@@ -15742,6 +15736,21 @@ $nodeConfigJson
         )
     }
 
+    private fun packagedSmokeTargetAbi(): String {
+        val requested = InstrumentationRegistry.getArguments()
+            .getString(PACKAGED_SMOKE_TARGET_ABI_ARGUMENT)
+            .orEmpty()
+            .trim()
+        if (requested.isEmpty()) {
+            return DEFAULT_PACKAGED_SMOKE_TARGET_ABI
+        }
+        require(requested in PACKAGED_SMOKE_SUPPORTED_TARGET_ABIS) {
+            "Unsupported packaged smoke target ABI '$requested'. " +
+                    "Expected one of ${PACKAGED_SMOKE_SUPPORTED_TARGET_ABIS.joinToString()}."
+        }
+        return requested
+    }
+
     private fun openPackagedSmokeTemplate(
         requiredDexMarkers: List<String> = emptyList(),
     ): InputStream {
@@ -15868,6 +15877,20 @@ $nodeConfigJson
         requiredDexMarkers: List<String> = emptyList(),
     ): PackagedSmokeTemplateSource? {
         val overrideEnabled = isPackagedSmokeTemplateOverrideEnabled()
+        val exactPath = packagedSmokeTemplateExactPath()
+        if (exactPath != null) {
+            require(overrideEnabled) {
+                "$PACKAGED_SMOKE_TEMPLATE_EXACT_PATH_ARGUMENT requires an enabled packaged smoke template override."
+            }
+            check(isShellPackagedSmokeTemplateAvailable(exactPath)) {
+                "The exact packaged smoke template is missing or empty: $exactPath"
+            }
+            return PackagedSmokeTemplateSource(
+                kind = PackagedSmokeTemplateSourceKind.SHELL_OVERRIDE,
+                summary = "exact shell override:$exactPath",
+                shellPath = exactPath,
+            )
+        }
         if (!overrideEnabled) {
             return if (isPackagedSmokeAssetsTemplateAvailable()) {
                 PackagedSmokeTemplateSource(
@@ -15895,7 +15918,7 @@ $nodeConfigJson
             }
         }
         val shellSources = SHELL_TEMPLATE_OVERRIDE_PATHS
-            .filter { path -> shell("ls -l $path").contains(path.substringAfterLast('/')) }
+            .filter(::isShellPackagedSmokeTemplateAvailable)
             .map { shellPath ->
                 PackagedSmokeTemplateSource(
                     kind = PackagedSmokeTemplateSourceKind.SHELL_OVERRIDE,
@@ -15940,6 +15963,21 @@ $nodeConfigJson
         }
     }
 
+    private fun packagedSmokeTemplateExactPath(): String? {
+        val requested = InstrumentationRegistry.getArguments()
+            .getString(PACKAGED_SMOKE_TEMPLATE_EXACT_PATH_ARGUMENT)
+            .orEmpty()
+            .trim()
+        if (requested.isEmpty()) {
+            return null
+        }
+        require(PACKAGED_SMOKE_TEMPLATE_EXACT_PATH_PATTERN.matches(requested)) {
+            "Unsupported exact packaged smoke template path '$requested'. " +
+                    "Expected ${PACKAGED_SMOKE_TEMPLATE_EXACT_PATH_PATTERN.pattern}."
+        }
+        return requested
+    }
+
     private fun packagedSmokeTemplateSupportsInvalidJsonSanitization(): Boolean {
         return packagedSmokeTemplateSource()?.containsInvalidJsonSanitizationMarker() == true
     }
@@ -15959,9 +15997,12 @@ $nodeConfigJson
     private fun packagedSmokeTemplateDiagnostics(): String {
         val override = packagedSmokeTemplateOverride()
         val overrideEnabled = isPackagedSmokeTemplateOverrideEnabled()
+        val exactPath = packagedSmokeTemplateExactPath()
         return buildString {
             appendLine("Template source policy:")
             appendLine("  override enabled: $overrideEnabled")
+            appendLine("  exact shell override path: ${exactPath ?: "<not-requested>"}")
+            appendLine("  exact shell override available: ${exactPath?.let(::isShellPackagedSmokeTemplateAvailable) == true}")
             appendLine("  default source: assets:${ApkBuilder.TEMPLATE_APK_NAME}")
             appendLine("  assets template available: ${isPackagedSmokeAssetsTemplateAvailable()}")
             appendLine("  assets template contains inrt node project runner marker: ${assetsTemplateContainsInrtNodeProjectRunnerMarker()}")
@@ -15984,6 +16025,7 @@ $nodeConfigJson
             }
             appendLine("Enable override explicitly with instrumentation argument:")
             appendLine("  -e ${PACKAGED_SMOKE_TEMPLATE_OVERRIDE_FLAGS.first()} true")
+            appendLine("  -e $PACKAGED_SMOKE_TEMPLATE_EXACT_PATH_ARGUMENT <run-owned-path>")
         }
     }
 
@@ -16047,6 +16089,16 @@ $nodeConfigJson
     private fun overrideTemplateContainsMarker(
         containsMarker: (PackagedSmokeTemplateSource) -> Boolean,
     ): Boolean {
+        packagedSmokeTemplateExactPath()?.let { exactPath ->
+            if (!isShellPackagedSmokeTemplateAvailable(exactPath)) {
+                return false
+            }
+            return containsMarker(PackagedSmokeTemplateSource(
+                kind = PackagedSmokeTemplateSourceKind.SHELL_OVERRIDE,
+                summary = "exact shell override:$exactPath",
+                shellPath = exactPath,
+            ))
+        }
         val override = packagedSmokeTemplateOverride()
         if (override?.isFile == true && override.length() > 0L) {
             return containsMarker(PackagedSmokeTemplateSource(
@@ -16070,15 +16122,18 @@ $nodeConfigJson
     }
 
     private fun shellPackagedSmokeTemplateOverridePath(): String? {
-        return SHELL_TEMPLATE_OVERRIDE_PATHS.firstOrNull { path ->
-            shell("ls -l $path").contains(path.substringAfterLast('/'))
-        }
+        return SHELL_TEMPLATE_OVERRIDE_PATHS.firstOrNull(::isShellPackagedSmokeTemplateAvailable)
     }
 
     private fun shellPackagedSmokeTemplateOverrideProbe(): String {
-        return SHELL_TEMPLATE_OVERRIDE_PATHS.joinToString(separator = "\n") { path ->
-            "$path => ${shell("ls -l $path").trim()}"
+        val paths = packagedSmokeTemplateExactPath()?.let(::listOf) ?: SHELL_TEMPLATE_OVERRIDE_PATHS
+        return paths.joinToString(separator = "\n") { path ->
+            "$path => ${if (isShellPackagedSmokeTemplateAvailable(path)) "present" else "absent"}"
         }
+    }
+
+    private fun isShellPackagedSmokeTemplateAvailable(path: String): Boolean {
+        return shell("stat -c %s $path").trim().toLongOrNull()?.let { size -> size > 0L } == true
     }
 
     private fun packagedSmokeTemplateOverride(): File? {
@@ -17157,6 +17212,18 @@ $nodeConfigJson
             "autojs.embeddedNode.packagedSmokeTemplateOverride",
             "autojs.embeddedNode.packagedSmoke.templateOverride",
         )
+        private const val PACKAGED_SMOKE_TEMPLATE_EXACT_PATH_ARGUMENT =
+            "autojs.embeddedNode.packagedSmokeTemplateExactPath"
+        private val PACKAGED_SMOKE_TEMPLATE_EXACT_PATH_PATTERN =
+            Regex("""^/data/local/tmp/autojs6-r6-packaged-template-[0-9a-fA-F]{64}\.apk$""")
+        private const val PACKAGED_SMOKE_TARGET_ABI_ARGUMENT =
+            "autojs.embeddedNode.packagedSmokeTargetAbi"
+        private const val DEFAULT_PACKAGED_SMOKE_TARGET_ABI = "arm64-v8a"
+        private val PACKAGED_SMOKE_SUPPORTED_TARGET_ABIS = setOf(
+            "arm64-v8a",
+            "armeabi-v7a",
+            "x86_64",
+        )
         private val STABLE_INRT_REQUEST_DIAGNOSTIC_DEX_MARKERS = listOf(
             "requestReady=",
             "requestLaunchKind=",
@@ -17227,6 +17294,7 @@ $nodeConfigJson
         update("build.versionName", BuildConfig.VERSION_NAME)
         update("runtime.backend", BuildConfig.NODEJS_RUNTIME_BACKEND)
         update("runtime.engine", NodeRuntimeCapabilities.ENGINE_VERSION)
+        update("runtime.targetAbi", packagedSmokeTargetAbi())
         update("runtime.descriptor", NodeProjectRuntimeCompatibilityDescriptor.currentJson().toString())
         requiredTemplateDexMarkers.sorted().forEachIndexed { index, marker ->
             update("requiredTemplateDexMarker.$index", marker)

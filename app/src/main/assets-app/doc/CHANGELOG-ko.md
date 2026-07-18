@@ -43,12 +43,14 @@
 * `추가` 개발자 옵션에서 GitHub 액세스 토큰 설정 지원, 업데이트 확인 및 플러그인 인덱스 요청 한도 확장용
 * `수정` 파일이 많은 작업 디렉터리에서 불필요한 모듈 스캔과 후보 파일 전체 읽기로 인해 비어 있거나 단순한 Node.js 스크립트 시작이 느려지는 문제
 * `수정` 일시적인 스크립트 실행기 UI가 숨겨질 때 상주 Node.js 프로세스가 잘못 회수되는 문제
+* `수정` 패키지 앱의 대화형 장기 실행 작업을 정상 중지한 후 예상되는 상주 Node.js 프로세스 Binder 연결 해제 콜백으로 stopped 상태가 failed로 덮어쓰이는 문제
 * `수정` 런타임 프로세스 안정화 대기로 인해 Node.js 스크립트 실행 결과 반환이 지연되는 문제
 * `수정` 활성 Node.js 실행 취소 시 비정상 프로세스 격리 전에 실행 등록이 제거되어 완료 대기가 차단되고 복구가 지연될 수 있는 문제
 * `수정` Node.js 외부 런타임 Binder 응답 유실 후 자동 폴백으로 동일한 스크립트가 중복 실행될 수 있는 문제
 * `수정` Android 프라이빗 디렉터리 /data/user/0 및 /data/data 별칭을 정규화하여 플러그인 요청에 다시 기록하지 않아, 올바른 Node.js workingDirectory가 sandboxRoot를 벗어난 것으로 잘못 판단되는 문제
 * `수정` 호스트에 Node 런타임이 없는 nodePlugin 빌드에서 모든 ABI의 JNI/AAR 라이브러리를 잘못 제외하여, libjackpal-termexec2.so 누락으로 Rhino Shell 초기화 중 앱이 충돌하는 문제
 * `수정` apksigner의 인증서 다이제스트 출력 형식 변경으로 인해 Node.js R6 증거 수집 및 검증에서 Android Build Tools 37이 보고한 APK 서명자 ID를 거부하는 문제
+* `수정` 수집기가 최신 Inrt 템플릿을 준비하거나 대상 ABI를 전달하지 않아 Node.js R6 패키지 APK 증거를 건너뛰거나 arm64에 고정하는 문제
 * `수정` runtime.loadJar에서 더 높은 Java 버전을 대상으로 컴파일된 class 파일을 정상적으로 동적 로드하지 못하는 문제
 * `수정` app.isInstalled/kill 등의 메서드에서 패키지 이름 인수를 정상적으로 사용하지 못하는 문제 _[`issue #495`](http://issues.autojs6.com/495)_
 * `수정` Root 권한이 없는 기기에서 shell 관련 메서드를 호출할 때 응답하지 않을 수 있는 문제

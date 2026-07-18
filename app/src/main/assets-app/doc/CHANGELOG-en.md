@@ -43,12 +43,14 @@
 * `Feature` Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes
 * `Fix` Empty and simple Node.js scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full
 * `Fix` Persistent Node.js process was incorrectly retired when a short-lived script launcher UI became hidden
+* `Fix` An expected Binder disconnection callback from the persistent Node.js process after cleanly stopping an interactive long-running task in a packaged app could overwrite the stopped state with failed
 * `Fix` Node.js script results were returned late because runtime process-settle waiting blocked result delivery
 * `Fix` Active Node.js cancellation could remove the execution registration before unhealthy-process quarantine, leaving completion waiters blocked and delaying recovery
 * `Fix` Automatic embedded fallback after a lost external runtime Binder response could execute the same script twice
 * `Fix` Android private-directory aliases /data/user/0 and /data/data were not normalized and written back into plugin requests, causing valid Node.js workingDirectory paths to be incorrectly rejected as escaping sandboxRoot
 * `Fix` nodePlugin builds without a host Node runtime incorrectly excluded JNI/AAR libraries for every ABI, causing Rhino Shell initialization to crash because libjackpal-termexec2.so was missing
 * `Fix` Node.js R6 evidence collection and verification rejected APK signer identities reported by Android Build Tools 37 because apksigner changed its certificate digest output format
+* `Fix` Node.js R6 packaged APK evidence was skipped or bound to arm64 because the collector did not stage a fresh Inrt template or pass the target ABI
 * `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly
 * `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
 * `Fix` Shell-related methods could become unresponsive on devices without Root access

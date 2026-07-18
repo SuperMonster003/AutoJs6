@@ -628,9 +628,12 @@ blocked. The strict task requires current reports for `sony-arm64`,
 8-hour quick soak and 24-hour final soak. Each device report is produced by
 `tools/nodejs/r6/run-device-evidence.js` and must attest a clean, unchanged host
 and plugin source identity, freshly built and installed signed APK bytes, a
-fresh JUnit XML, and exactly 13 fixed selectors with zero failures, errors, or
-skips. The production soak runner fixes the two durations; its `--smoke` mode
-is always non-archivable and cannot satisfy either production soak.
+fresh slim Inrt template whose run-token-derived exact device path and pre/post
+hashes match the archived current-source artifact, successful template cleanup,
+target-ABI packaged fixtures, a fresh JUnit XML, and exactly
+13 fixed selectors with zero failures, errors, or skips. The production soak
+runner fixes the two durations; its `--smoke` mode is always non-archivable and
+cannot satisfy either production soak.
 
 `generateNodeFinalIntegrationSummary` consumes the non-strict R6 status so it
 can explain a blocked decision. `verifyNodeFinalIntegrationGate` consumes it
