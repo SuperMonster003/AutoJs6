@@ -1,7 +1,7 @@
 {
   "schema": "autojs6-node-phase13-surface-manifest-v1",
   "phase": "Phase 13: Auto.js Pro And Desktop Node Parity Expansion",
-  "updatedAt": "2026-06-25",
+  "updatedAt": "2026-07-19",
   "profileVocabulary": [
     "safe_default",
     "pro_compat_opt_in",
@@ -29,11 +29,12 @@
         "P13-00",
         "P13-01"
       ],
-      "summary": "Phase 13 checklist and baseline verifier for Phase 12 completion, version.properties, open blockers, and Pro/Desktop profile planning.",
+      "summary": "Phase 13 checklist and immutable entry snapshot verifier, with separate non-regression checks for current version and blocker state.",
       "risk": "low",
       "runtimeSurface": [],
       "evidence": [
         "docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md",
+        "docs/nodejs/phase13/phase13-baseline-snapshot.json",
         "tools/nodejs/phase13/verify-node-phase13-baseline.js",
         ":app:verifyNodePhase13Baseline"
       ],

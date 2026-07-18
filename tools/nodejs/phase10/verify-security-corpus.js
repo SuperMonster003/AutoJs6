@@ -134,7 +134,8 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
-  const files = loadEvidence(repoRoot);
+  const nativeCppRoot = resolveNativeCppRoot(repoRoot, options.nativeCppRoot);
+  const files = loadEvidence(repoRoot, nativeCppRoot);
   const attacks = ATTACKS.map((attack) => evaluateAttack(attack, files));
   const policyViolations = [];
 
@@ -172,10 +173,10 @@ function main() {
   }
 }
 
-function loadEvidence(repoRoot) {
+function loadEvidence(repoRoot, nativeCppRoot) {
   return {
     packagedParity: read(repoRoot, "tools/nodejs/phase10/generate-packaged-parity-report.js"),
-    bridgeSources: read(repoRoot, "app/src/main/cpp/node_bridge_sources.cpp"),
+    bridgeSources: readFile(repoRoot, path.join(nativeCppRoot, "node_bridge_sources.cpp")),
     capabilityTruth: read(repoRoot, "tools/nodejs/phase10/generate-capability-truth.js"),
     autojs6Pm: read(repoRoot, "tools/nodejs/phase10/autojs6-pm.js"),
     realNpmTest: read(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeRealNpmCompatInstrumentationTest.kt"),
@@ -216,11 +217,23 @@ function evaluateAttack(attack, files) {
 }
 
 function read(repoRoot, relative) {
-  const file = path.join(repoRoot, relative);
+  return readFile(repoRoot, path.join(repoRoot, relative));
+}
+
+function readFile(repoRoot, file) {
   return {
-    path: relative,
+    path: path.relative(repoRoot, file).replace(/\\/g, "/"),
     text: fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "",
   };
+}
+
+function resolveNativeCppRoot(repoRoot, requested) {
+  const candidates = [
+    requested && path.resolve(requested),
+    path.resolve(repoRoot, "../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/cpp"),
+    path.join(repoRoot, "app/src/main/cpp"),
+  ].filter(Boolean);
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[candidates.length - 1];
 }
 
 function countBy(rows, field) {
@@ -261,7 +274,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node verify-security-corpus.js [--repo-root dir] [--report-dir dir]");
+      console.log("Usage: node verify-security-corpus.js [--repo-root dir] [--native-cpp-root dir] [--report-dir dir]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

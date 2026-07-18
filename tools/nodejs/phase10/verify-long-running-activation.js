@@ -102,11 +102,11 @@ const CHECKS = [
     id: "s10_36_long_running_multi_instance_stress",
     status: "partial_device_gate",
     required: [
-      ["buildGradle", "nodeJsLongRunningGateInstrumentationClasses"],
-      ["buildGradle", "NodeLongRunningStressInstrumentationTest"],
-      ["buildGradle", "NodeBridgeResourceLeakStressInstrumentationTest"],
-      ["buildGradle", "NodeEmbeddedMemoryLeakStressInstrumentationTest"],
-      ["buildGradle", "\"verifyNodeLongRunningGate\" to nodeJsLongRunningGateInstrumentationClasses"],
+      ["instrumentationGates", "nodeJsLongRunningGateInstrumentationClasses"],
+      ["instrumentationGates", "NodeLongRunningStressInstrumentationTest"],
+      ["instrumentationGates", "NodeBridgeResourceLeakStressInstrumentationTest"],
+      ["instrumentationGates", "NodeEmbeddedMemoryLeakStressInstrumentationTest"],
+      ["instrumentationGates", "\"verifyNodeLongRunningGate\" to nodeJsLongRunningGateInstrumentationClasses"],
       ["phase10Gate", "verifyNodePhase10LongRunningActivation"],
     ],
     blocker: "packaged long-running service mode and two active process slots are still blocked",
@@ -170,7 +170,7 @@ function evaluateCheck(check, files, policyViolations) {
 
 function loadFiles(repoRoot) {
   return {
-    buildGradle: read(repoRoot, "app/build.gradle.kts"),
+    instrumentationGates: read(repoRoot, "app/node-instrumentation-gates.gradle.kts"),
     phase10Gate: read(repoRoot, "app/node-phase10-gate.gradle.kts"),
     executionModePolicy: read(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"),
     runtimeBudgetPolicy: read(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeBudgetPolicy.kt"),

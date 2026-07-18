@@ -227,7 +227,8 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
-  const files = loadEvidenceFiles(repoRoot);
+  const nativeCppRoot = resolveNativeCppRoot(repoRoot, options.nativeCppRoot);
+  const files = loadEvidenceFiles(repoRoot, nativeCppRoot);
   const capabilities = CAPABILITIES.map((capability) => evaluateCapability(capability, files));
   const policyViolations = [];
 
@@ -277,22 +278,48 @@ function main() {
   }
 }
 
-function loadEvidenceFiles(repoRoot) {
+function loadEvidenceFiles(repoRoot, nativeCppRoot) {
   return {
     buildGradle: readEvidence(repoRoot, "app/build.gradle.kts"),
     packagedSmoke: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"),
     descriptor: readEvidence(repoRoot, "app/src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt"),
     capabilities: readEvidence(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"),
     providerRegistry: readEvidence(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"),
+    fetchProviderTests: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeFetchBridgeInstrumentationTest.kt"),
+    webSocketProviderTests: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeWebSocketBridgeInstrumentationTest.kt"),
+    ocrProviderTests: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeOcrBridgeInstrumentationTest.kt"),
+    storageProviderTests: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeStorageBridgeInstrumentationTest.kt"),
+    notificationsProviderTests: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeNotificationsBridgeInstrumentationTest.kt"),
+    sensorsProviderTests: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeSensorsBridgeInstrumentationTest.kt"),
+    accessibilityProviderTests: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeAccessibilityRealDeviceSmokeInstrumentationTest.kt"),
+    imageProviderTests: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeImageBridgeExpansionInstrumentationTest.kt"),
+    uiProviderTests: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeUiBridgeInstrumentationTest.kt"),
+    workManagerProviderTests: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkManagerBridgeInstrumentationTest.kt"),
     phase10Gate: readEvidence(repoRoot, "app/node-phase10-gate.gradle.kts"),
     autojs6Pm: readEvidence(repoRoot, "tools/nodejs/phase10/autojs6-pm.js"),
     longRunningActivation: readEvidence(repoRoot, "tools/nodejs/phase10/verify-long-running-activation.js"),
     workerWasiBoundary: readEvidence(repoRoot, "tools/nodejs/phase10/verify-worker-wasi-boundary.js"),
     developerExperience: readEvidence(repoRoot, "tools/nodejs/phase10/verify-developer-experience.js"),
     crashAdapterCutover: readEvidence(repoRoot, "tools/nodejs/phase10/verify-crash-adapter-cutover.js"),
-    runtimeAdapter245: readEvidence(repoRoot, "app/src/main/cpp/node_runtime_adapter_24_5.cpp"),
+    runtimeAdapter245: readEvidenceFile(repoRoot, path.join(nativeCppRoot, "node_runtime_adapter_24_5.cpp")),
     testingDoc: readEvidence(repoRoot, "docs/nodejs/TESTING.md"),
     ciGatesDoc: readEvidence(repoRoot, "docs/nodejs/CI_GATES.md"),
+  };
+}
+
+function resolveNativeCppRoot(repoRoot, requested) {
+  const candidates = [
+    requested && path.resolve(requested),
+    path.resolve(repoRoot, "../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/cpp"),
+    path.join(repoRoot, "app/src/main/cpp"),
+  ].filter(Boolean);
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[candidates.length - 1];
+}
+
+function readEvidenceFile(repoRoot, file) {
+  return {
+    path: path.relative(repoRoot, file).replace(/\\/g, "/"),
+    text: fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "",
   };
 }
 
@@ -362,7 +389,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node generate-capability-truth.js [--repo-root dir] [--report-dir dir]");
+      console.log("Usage: node generate-capability-truth.js [--repo-root dir] [--native-cpp-root dir] [--report-dir dir]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

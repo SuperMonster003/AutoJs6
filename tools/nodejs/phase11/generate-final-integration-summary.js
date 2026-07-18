@@ -7,17 +7,20 @@ const path = require("path");
 const REPORTS = [
   ["capability_truth", "final-capability-truth.json", true],
   ["focused_gate_topology", "final-focused-gate-topology.json", true],
-  ["adapter_gate", "final-adapter-gate.json", false],
-  ["crash_gate", "final-crash-gate.json", false],
-  ["package_manager_gate", "final-package-manager-gate.json", false],
-  ["long_running_gate", "final-long-running-gate.json", false],
-  ["multi_instance_gate", "final-multi-instance-gate.json", false],
-  ["worker_decision_gate", "final-worker-decision-gate.json", false],
-  ["soak_gate", "final-soak-gate.json", false],
-  ["provider_gate", "final-provider-gate.json", false],
-  ["abi_gate", "final-abi-gate.json", false],
-  ["security_gate", "final-security-gate.json", false],
+  ["adapter_gate", "final-adapter-gate.json", true],
+  ["crash_gate", "final-crash-gate.json", true],
+  ["package_manager_gate", "final-package-manager-gate.json", true],
+  ["long_running_gate", "final-long-running-gate.json", true],
+  ["multi_instance_gate", "final-multi-instance-gate.json", true],
+  ["worker_decision_gate", "final-worker-decision-gate.json", true],
+  ["soak_gate", "final-soak-gate.json", true],
+  ["provider_gate", "final-provider-gate.json", true],
+  ["abi_gate", "final-abi-gate.json", true],
+  ["security_gate", "final-security-gate.json", true],
+  ["r6_production_evidence", "r6-production-evidence-gate.json", true],
 ];
+
+const ACCEPTED_STATUSES = new Set(["ready", "completed", "ready_with_deferred_runtime_artifacts"]);
 
 const BLOCKER_ID_ALIASES = [
   [/^missing required soak evidence:/, "full_heavy_resource_stress"],
@@ -37,9 +40,14 @@ function main() {
   for (const report of reports) {
     if (report.required && !report.available) {
       policyViolations.push("missing required final report: " + report.id);
-    }
-    if (report.status === "failed") {
+    } else if (report.parseError) {
+      policyViolations.push(`${report.id} is not valid JSON: ${report.parseError}`);
+    } else if (report.status === "failed") {
       policyViolations.push(`${report.id} status is failed`);
+    } else if (report.status === "missing" || report.status === "unknown") {
+      policyViolations.push(`${report.id} status is ${report.status}`);
+    } else if (report.status !== "blocked" && !ACCEPTED_STATUSES.has(report.status)) {
+      policyViolations.push(`${report.id} has unsupported decision status: ${report.status}`);
     }
   }
   const blockers = [
@@ -92,13 +100,23 @@ function main() {
 function readReport(reportDir, id, file, required, repoRoot) {
   const absolute = path.join(reportDir, file);
   const available = fs.existsSync(absolute);
-  const json = available ? readJson(absolute) : null;
+  let json = null;
+  let parseError = null;
+  if (available) {
+    try {
+      json = readJson(absolute);
+    } catch (error) {
+      parseError = error instanceof Error ? error.message : String(error);
+    }
+  }
   return {
     id,
     path: relativePath(repoRoot, absolute),
     required,
     available,
     status: decisionStatus(json),
+    accepted: ACCEPTED_STATUSES.has(decisionStatus(json)),
+    parseError,
     policyViolationCount: Array.isArray(json && json.policyViolations) ? json.policyViolations.length : 0,
     blockerIds: blockerIds(json),
     json,

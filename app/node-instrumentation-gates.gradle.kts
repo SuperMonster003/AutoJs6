@@ -463,6 +463,24 @@ val nodeJsRealNpmGateInstrumentationClasses = listOf(
 val nodeJsR5RuntimePluginGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest",
 )
+val nodeJsR6EngineSwitchGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeR6EngineSwitchInstrumentationTest",
+)
+val nodeJsR6DeviceEvidenceGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeR6EngineSwitchInstrumentationTest#r6_01_requiredPluginNodeAndRhinoAlternateAcrossMultipleRounds",
+    "org.autojs.autojs.engine.NodeR6EngineSwitchInstrumentationTest#r6_02_pluginRhinoCompatibilityPluginSwitchExecutesAndRecovers",
+    "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_01_livePluginPreflightNegotiatesContractAndReportsTrustIdentity",
+    "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_02_candidateAndBinderCachesReusePersistentRuntimeWithFreshExecutionState",
+    "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_04_concurrentPluginCallsApplySingleActiveBackpressureWithoutQueueing",
+    "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_06_hostRejectsContractVersionAndMandatoryCapabilityMismatch",
+    "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_07_binderDeathReconnectsAtomicallyAndPreservesCrashAttribution",
+    "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest#r5_08_runtimeWarmSamplesMeetR2SloAndSeparateDiscoveryAndBindOverhead",
+    "org.autojs.autojs.engine.NodeR6RequiredPluginSecurityInstrumentationTest#requiredPluginPreservesPermanentSafeNodeDenials",
+    "org.autojs.autojs.engine.NodeR6PersistentPluginSoakInstrumentationTest#persistentRequiredPluginSoakProducesR6Evidence",
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunFullCompatibilityEmbeddedNodePackagedApk",
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunCrashEvidenceEmbeddedNodePackagedApk",
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk",
+)
 val nodeJsPluginUiGateInstrumentationClasses = (
         listOf(
             "org.autojs.autojs.engine.NodePluginSystemInstrumentationTest",
@@ -648,6 +666,8 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodeDeveloperExperienceGate" to nodeJsDeveloperExperienceGateInstrumentationClasses,
     "verifyNodeRealNpmGate" to nodeJsRealNpmGateInstrumentationClasses,
     "verifyNodeR5RuntimePluginGate" to nodeJsR5RuntimePluginGateInstrumentationClasses,
+    "verifyNodeR6EngineSwitchGate" to nodeJsR6EngineSwitchGateInstrumentationClasses,
+    "verifyNodeR6DeviceEvidenceGate" to nodeJsR6DeviceEvidenceGateInstrumentationClasses,
     "verifyNodePhase8SecurityStressGate" to nodeJsPhase8SecurityStressGateInstrumentationClasses,
     "verifyNodePhase8Gate" to nodeJsPhase8GateInstrumentationClasses,
     "verifyNodeWasmWasiGate" to nodeJsPhase9WasmWasiGateInstrumentationClasses,

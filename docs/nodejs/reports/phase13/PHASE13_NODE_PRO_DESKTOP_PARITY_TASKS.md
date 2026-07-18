@@ -476,13 +476,21 @@
 
 盘点日期：2026-06-24
 
-当前版本基线来自根目录 `version.properties`：
+Phase 13 启动时的历史版本基线冻结在
+`docs/nodejs/phase13/phase13-baseline-snapshot.json`。该快照记录了
+`8ed1634a51cd931a2fe32f6f1313bfab7724395a` 中的 `version.properties`：
 
 - `VERSION_NAME=6.7.1 Alpha4`
 - `VERSION_BUILD=3923`
 - `MIN_SDK_VERSION=24`
 - `TARGET_SDK_VERSION=36`
 - `COMPILE_SDK_VERSION=36`
+
+根目录 `version.properties` 和当前 Pro 9 comparison 文档可以随后续版本推进。
+`:app:verifyNodePhase13Baseline` 会保持上述历史快照不变，同时要求当前版本号、
+build number、target SDK 和 compile SDK 不低于快照，且 min SDK 保持兼容。
+快照中的 required blocker 是 Phase 13 入口状态；当前 registry 中的 closure 是
+独立的现状检查，不得回写快照。
 
 本文件是 Phase 12 之后的新阶段任务清单。Phase 12 已完成 Rhino
 compatibility runtime promotion 的第一轮推进：`events.keys`、`input_observer`、
@@ -622,9 +630,10 @@ P13 task 本身使用以下执行状态：
   - Evidence：本文件。
 
 - [x] P13-01: 建立 Phase 13 baseline verification gate。
-  - 范围：新增 Phase 13 专用 host verifier，锁定 Phase 12 completion 和当前
-    `version.properties` 基线。
+  - 范围：新增 Phase 13 专用 host verifier，锁定 Phase 12 completion 和
+    Phase 13 入口时的不可变 `version.properties` 快照，并单独检查当前版本未回退。
   - 建议产物：
+    - `docs/nodejs/phase13/phase13-baseline-snapshot.json`
     - `tools/nodejs/phase13/verify-node-phase13-baseline.js`
     - Gradle task：`:app:verifyNodePhase13Baseline`
     - `build/reports/nodejs/phase13-baseline-verification.json`
@@ -632,9 +641,13 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - P12-00 到 P12-35 状态正确。
     - Phase 12 promoted/deferred surface 计数与 summary 一致。
-    - `FINAL_BLOCKER_REGISTRY.json` 中 open blocker 被完整导入 P13。
-    - `version.properties` 的版本、SDK 和 build number 与报告一致。
+    - Phase 13 入口 required blocker 状态被冻结，当前 registry closure 被独立验证。
+    - 历史 snapshot 的版本、SDK、build number、入口 blocker 状态和 source
+      revision 与冻结的任务文档一致。
+    - 当前 `version.properties` 不早于历史 snapshot，当前 Pro 9 comparison
+      metadata 与 `version.properties` 一致。
   - Evidence：
+    - 历史快照：`docs/nodejs/phase13/phase13-baseline-snapshot.json`
     - Host verifier：`tools/nodejs/phase13/verify-node-phase13-baseline.js`
     - Gradle gate：`:app:verifyNodePhase13Baseline`
     - Gradle wiring：`app/node-phase13-gate.gradle.kts`、`app/build.gradle.kts`

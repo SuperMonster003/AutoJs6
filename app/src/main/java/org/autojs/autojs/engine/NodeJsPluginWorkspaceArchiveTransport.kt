@@ -38,6 +38,7 @@ import java.util.zip.ZipOutputStream
  */
 internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
     private val sandboxRoot: File,
+    private val workingDirectory: File,
     private val sandboxIdentity: DirectoryIdentity,
     private val transportDirectory: File,
     private val outputArchive: File,
@@ -52,19 +53,11 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
 
     fun attachTo(request: Bundle) {
         check(!closed.get()) { "Node.js plugin workspace transport is already closed." }
-        if (request.getString(NodeJsRuntimeContract.KEY_SANDBOX_ROOT).isNullOrBlank()) {
-            request.putString(NodeJsRuntimeContract.KEY_SANDBOX_ROOT, sandboxRoot.absolutePath)
-        }
-        if (request.getString(NodeJsRuntimeContract.KEY_WORKING_DIRECTORY).isNullOrBlank()) {
-            request.putString(
-                NodeJsRuntimeContract.KEY_WORKING_DIRECTORY,
-                if (relativeWorkingDirectory.isBlank()) {
-                    sandboxRoot.absolutePath
-                } else {
-                    File(sandboxRoot, relativeWorkingDirectory).absolutePath
-                },
-            )
-        }
+        // [create] has already canonicalized and containment-checked these paths. Always send
+        // those exact values across Binder so Android's /data/user/0 and /data/data aliases do
+        // not look like different trees to the plugin's lexical sandbox validation.
+        request.putString(NodeJsRuntimeContract.KEY_SANDBOX_ROOT, sandboxRoot.absolutePath)
+        request.putString(NodeJsRuntimeContract.KEY_WORKING_DIRECTORY, workingDirectory.absolutePath)
         request.putInt(
             NodeJsRuntimeContract.KEY_WORKSPACE_ARCHIVE_TRANSPORT_VERSION,
             NodeJsRuntimeContract.WORKSPACE_ARCHIVE_TRANSPORT_CONTRACT_VERSION,
@@ -204,6 +197,7 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
                 }
                 return NodeJsPluginWorkspaceArchiveTransport(
                     sandboxRoot = sandboxRoot,
+                    workingDirectory = workingDirectory,
                     sandboxIdentity = sandboxIdentity,
                     transportDirectory = transportDirectory,
                     outputArchive = outputArchive,
@@ -223,6 +217,13 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
          * execution path to remain free of legacy working-directory scans.
          * Only paths already named by the request are eligible input entries.
          */
+        private fun isAndroidCredentialDataAlias(lexical: File, canonical: File): Boolean {
+            fun normalized(path: String): String = path
+                .replace(Regex("^/data/user/0/([^/]+)(?=/|$)"), "/data/data/$1")
+                .trimEnd('/')
+            return normalized(lexical.absolutePath) == normalized(canonical.absolutePath)
+        }
+
         private fun writeExplicitInputArchive(
             root: File,
             workingDirectory: File,
@@ -237,12 +238,13 @@ internal class NodeJsPluginWorkspaceArchiveTransport private constructor(
                 if (value.isBlank() || value.startsWith("<") || '\u0000' in value) return null
                 val requested = File(value).let { if (it.isAbsolute) it else File(workingDirectory, value) }
                 val lexical = requested.absoluteFile.normalize()
-                if (!contains(root, lexical)) return null
                 val canonical = runCatching { requested.canonicalFile }.getOrNull() ?: return null
+                val acceptedAndroidAlias = isAndroidCredentialDataAlias(lexical, canonical)
+                if (!contains(root, lexical) && !acceptedAndroidAlias) return null
                 if (!contains(root, canonical)) {
                     throw IOException("Node.js plugin explicit workspace input escapes through a symbolic link.")
                 }
-                if (lexical.absolutePath != canonical.absolutePath) {
+                if (lexical.absolutePath != canonical.absolutePath && !acceptedAndroidAlias) {
                     throw IOException("Node.js plugin explicit workspace inputs may not traverse symbolic links.")
                 }
                 validateRealPathComponents(root, canonical, allowMissingLeaf = true)

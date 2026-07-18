@@ -29,9 +29,11 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
+  const jniLibsRoot = path.resolve(options.jniLibsRoot || path.join(repoRoot, "app/src/main/jniLibs"));
+  const cxxRoot = path.resolve(options.cxxRoot || path.join(repoRoot, "app/build/intermediates/cxx"));
   const mode = options.mode || "all";
   const tools = findAndroidTools(repoRoot);
-  const artifacts = collectArtifacts(repoRoot, tools);
+  const artifacts = collectArtifacts(repoRoot, jniLibsRoot, cxxRoot, tools);
   const reports = buildReports(artifacts, tools);
 
   fs.mkdirSync(reportDir, { recursive: true });
@@ -63,7 +65,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node tools/nodejs/native/verify-runtime-artifacts.js [--repo-root dir] [--report-dir dir] [--mode all|alignment|manifest|integrity]");
+      console.log("Usage: node tools/nodejs/native/verify-runtime-artifacts.js [--repo-root dir] [--jni-libs-root dir] [--cxx-root dir] [--report-dir dir] [--mode all|alignment|manifest|integrity]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {
@@ -91,14 +93,15 @@ function parseArgs(argv) {
   return options;
 }
 
-function collectArtifacts(repoRoot, tools) {
+function collectArtifacts(repoRoot, jniLibsRoot, cxxRoot, tools) {
   const artifacts = [];
   for (const abi of REQUIRED_ABIS) {
     for (const library of SOURCE_LIBRARIES) {
-      artifacts.push(inspectArtifact(repoRoot, tools, abi, library, sourceLibrary(repoRoot, abi, library.name)));
+      const file = sourceLibrary(jniLibsRoot, abi, library.name) || latestBuiltLibrary(cxxRoot, abi, library.name);
+      artifacts.push(inspectArtifact(repoRoot, tools, abi, library, file));
     }
     for (const library of BUILT_LIBRARIES) {
-      artifacts.push(inspectArtifact(repoRoot, tools, abi, library, latestBuiltLibrary(repoRoot, abi, library.name)));
+      artifacts.push(inspectArtifact(repoRoot, tools, abi, library, latestBuiltLibrary(cxxRoot, abi, library.name)));
     }
   }
   return artifacts;
@@ -245,17 +248,16 @@ function evaluate16KbAlignment(loadSegments) {
   };
 }
 
-function sourceLibrary(repoRoot, abi, name) {
-  const file = path.join(repoRoot, "app/src/main/jniLibs", abi, name);
+function sourceLibrary(jniLibsRoot, abi, name) {
+  const file = path.join(jniLibsRoot, abi, name);
   return fs.existsSync(file) ? file : null;
 }
 
-function latestBuiltLibrary(repoRoot, abi, name) {
-  const root = path.join(repoRoot, "app/build/intermediates/cxx");
-  if (!fs.existsSync(root)) {
+function latestBuiltLibrary(cxxRoot, abi, name) {
+  if (!fs.existsSync(cxxRoot)) {
     return null;
   }
-  return walkFiles(root)
+  return walkFiles(cxxRoot)
     .filter((file) => path.basename(file) === name && file.split(/[\\/]/).includes(abi))
     .map((file) => ({ file, mtime: fs.statSync(file).mtimeMs }))
     .sort((a, b) => b.mtime - a.mtime)

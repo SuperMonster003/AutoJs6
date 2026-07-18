@@ -21,8 +21,8 @@ const CHECKS = [
     required: [
       ["workerDesignTest", "workerThreadsRemainDesignGatedAndDisabledByDefault"],
       ["workerBootstrapTest", "defaultRequestDeniesWorkerThreadsBeforeShadowing"],
-      ["buildGradle", "autojs.nodejs.worker_threads.experimental"],
-      ["buildGradle", "NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED"],
+      ["runtimeConfig", "autojs.nodejs.worker_threads.experimental"],
+      ["androidConfig", "NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED"],
       ["compatibilityProfile", "`worker_threads` remains disabled by default"],
     ],
   },
@@ -129,7 +129,8 @@ function evaluateCheck(check, files, policyViolations) {
 
 function loadFiles(repoRoot) {
   return {
-    buildGradle: read(repoRoot, "app/build.gradle.kts"),
+    runtimeConfig: read(repoRoot, "app/node-runtime-config.gradle.kts"),
+    androidConfig: read(repoRoot, "app/node-android-config.gradle.kts"),
     workerSupport: read(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"),
     workerBootstrapTest: read(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsBootstrapInstrumentationTest.kt"),
     workerDesignTest: read(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"),

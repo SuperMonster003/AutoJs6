@@ -38,6 +38,7 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
+  const nativeCppRoot = resolveNativeCppRoot(repoRoot, options.nativeCppRoot);
   const workspace = path.join(repoRoot, "build/phase10-developer-experience-fixture");
   const policyViolations = [];
 
@@ -45,9 +46,9 @@ function main() {
   fs.mkdirSync(workspace, { recursive: true });
 
   const buildPipeline = verifyTypeScriptBuildPipeline(workspace, policyViolations);
-  const sourceMaps = verifySourceMapEvidence(repoRoot, buildPipeline, policyViolations);
-  const testRunner = verifyEmbeddedTestRunnerEvidence(repoRoot, policyViolations);
-  const hotReload = verifyHotReloadBoundary(repoRoot, buildPipeline, policyViolations);
+  const sourceMaps = verifySourceMapEvidence(repoRoot, nativeCppRoot, buildPipeline, policyViolations);
+  const testRunner = verifyEmbeddedTestRunnerEvidence(repoRoot, nativeCppRoot, policyViolations);
+  const hotReload = verifyHotReloadBoundary(repoRoot, nativeCppRoot, buildPipeline, policyViolations);
 
   const report = {
     schema: "autojs6-node-phase10-developer-experience-v1",
@@ -382,9 +383,9 @@ function verifyUnsafeTypeScriptProjectRejections(workspace) {
   return { rejections, policyViolations };
 }
 
-function verifySourceMapEvidence(repoRoot, buildPipeline, policyViolations) {
+function verifySourceMapEvidence(repoRoot, nativeCppRoot, buildPipeline, policyViolations) {
   const testFile = readText(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeSourceMapStackTraceInstrumentationTest.kt");
-  const runtimeCpp = readText(repoRoot, "app/src/main/cpp/node_bridge_sources.cpp");
+  const runtimeCpp = readFile(path.join(nativeCppRoot, "node_bridge_sources.cpp"));
   const requiredTokens = [
     "inlineSourceMapMapsFailureStack",
     "externalSourceMapInsideWorkingDirectoryMapsFailureStack",
@@ -409,9 +410,9 @@ function verifySourceMapEvidence(repoRoot, buildPipeline, policyViolations) {
   };
 }
 
-function verifyEmbeddedTestRunnerEvidence(repoRoot, policyViolations) {
+function verifyEmbeddedTestRunnerEvidence(repoRoot, nativeCppRoot, policyViolations) {
   const testFile = readText(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeCoreBuiltinCompatibilityInstrumentationTest.kt");
-  const runtimeCpp = readText(repoRoot, "app/src/main/cpp/node_bridge_sources.cpp");
+  const runtimeCpp = readFile(path.join(nativeCppRoot, "node_bridge_sources.cpp"));
   const requiredTokens = [
     "nodeTestEmbeddedSubsetRunsSingleRuntimeTap",
     "nodeTestEmbeddedSubsetReportsFailuresTimeoutsAndLateAsyncActivity",
@@ -435,9 +436,9 @@ function verifyEmbeddedTestRunnerEvidence(repoRoot, policyViolations) {
   };
 }
 
-function verifyHotReloadBoundary(repoRoot, buildPipeline, policyViolations) {
+function verifyHotReloadBoundary(repoRoot, nativeCppRoot, buildPipeline, policyViolations) {
   const pluginTest = readText(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodePluginSystemInstrumentationTest.kt");
-  const runtimeCpp = readText(repoRoot, "app/src/main/cpp/node_bridge_sources.cpp");
+  const runtimeCpp = readFile(path.join(nativeCppRoot, "node_bridge_sources.cpp"));
   const securityDoc = readText(repoRoot, "docs/nodejs/SECURITY_MODEL.md");
   const graph = {
     "src/cjs-main.cts": ["src/types.ts"],
@@ -572,8 +573,20 @@ function listFiles(root) {
 }
 
 function readText(repoRoot, relative) {
-  const file = path.join(repoRoot, relative);
+  return readFile(path.join(repoRoot, relative));
+}
+
+function readFile(file) {
   return fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+}
+
+function resolveNativeCppRoot(repoRoot, requested) {
+  const candidates = [
+    requested && path.resolve(requested),
+    path.resolve(repoRoot, "../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/cpp"),
+    path.join(repoRoot, "app/src/main/cpp"),
+  ].filter(Boolean);
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[candidates.length - 1];
 }
 
 function readJson(file, fallback) {
@@ -657,7 +670,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node verify-developer-experience.js [--repo-root dir] [--report-dir dir]");
+      console.log("Usage: node verify-developer-experience.js [--repo-root dir] [--native-cpp-root dir] [--report-dir dir]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

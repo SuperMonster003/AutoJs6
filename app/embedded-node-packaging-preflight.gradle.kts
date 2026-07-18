@@ -490,6 +490,13 @@ private fun String.toEmbeddedNodePackagingBoolean(): Boolean =
 private fun <T> embeddedNodePackagingRuntimeConfig(name: String): T =
     extensions.extraProperties.get("nodeJsRuntimeConfig.$name") as T
 
+private val embeddedNodePackagingUsesPluginNativeBuild =
+    embeddedNodePackagingRuntimeConfig<String>("effectiveNodeJsRuntimeBackend") == "plugin" &&
+            !embeddedNodePackagingRuntimeConfig<Boolean>("isNodeJsHostBridgeBuildRequested")
+private val embeddedNodePackagingNativeBuildDependency =
+    if (embeddedNodePackagingUsesPluginNativeBuild) "buildNodeRuntimePluginNativeDebug"
+    else "externalNativeBuild$embeddedNodePackagingReportVariantTaskSuffix"
+
 private fun embeddedNodePackagingNormalizeReleaseFlavor(rawFlavor: String): String =
     when (rawFlavor.trim().lowercase()) {
         "nodefull", "node-full", "full" -> "nodeFull"
@@ -3700,7 +3707,7 @@ val verifyEmbeddedNodeDebug = tasks.register("verifyEmbeddedNodeDebug") {
     dependsOn(
         "compileAppDebugKotlin",
         "compileAppDebugAndroidTestKotlin",
-        "externalNativeBuildAppDebug",
+        embeddedNodePackagingNativeBuildDependency,
         "nativeNodeDependencyReportAppDebug",
         "nativeNodeSymbolArchiveReport",
         embeddedNodePackagingPreflightAppDebug,
@@ -4197,6 +4204,32 @@ val verifyNodeR5RuntimePluginGate = tasks.register("verifyNodeR5RuntimePluginGat
     }
 }
 
+val verifyNodeR6EngineSwitchGate = tasks.register("verifyNodeR6EngineSwitchGate") {
+    group = "verification"
+    description = "Runs the focused R6 Rhino/Node engine and required-plugin backend-switch regression on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeR6DeviceEvidenceGate = tasks.register("verifyNodeR6DeviceEvidenceGate") {
+    group = "verification"
+    description = "Runs the fixed, non-skippable R6 required-plugin main-app, packaged, crash, memory-smoke, and Safe Node device evidence selectors."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
 val verifyNodeLiveProviderGate = tasks.register("verifyNodeLiveProviderGate") {
     group = "verification"
     description = "Runs the focused Node Phase 7 live-provider gate and writes build/reports/nodejs/live-provider-summary.json."
@@ -4487,7 +4520,9 @@ val verifyNodePhase9Gate = tasks.register("verifyNodePhase9Gate") {
 
 val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
     group = "verification"
-    description = "Runs the Embedded Node release gate with RC host checks, desktop differential, and explicit heavy device profile."
+    description = "Runs the Embedded Node release gate with the strict final integration decision, RC host checks, desktop differential, and explicit heavy device profile."
+
+    dependsOn("verifyNodeFinalIntegrationGate")
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
     if (deviceProfile in setOf("sony", "full")) {

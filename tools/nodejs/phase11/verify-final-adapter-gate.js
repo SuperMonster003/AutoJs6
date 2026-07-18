@@ -21,9 +21,10 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
-  const headerPath = path.join(repoRoot, "app/src/main/cpp/node_runtime_api_v1.h");
-  const adapterPath = path.join(repoRoot, "app/src/main/cpp/node_runtime_adapter_24_5.cpp");
-  const jniPath = path.join(repoRoot, "app/src/main/cpp/node_bridge_jni.cpp");
+  const nativeCppRoot = path.resolve(options.nativeCppRoot || path.join(repoRoot, "app/src/main/cpp"));
+  const headerPath = path.join(nativeCppRoot, "node_runtime_api_v1.h");
+  const adapterPath = path.join(nativeCppRoot, "node_runtime_adapter_24_5.cpp");
+  const jniPath = path.join(nativeCppRoot, "node_bridge_jni.cpp");
   const kotlinPath = path.join(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt");
   const abHarnessPath = path.join(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeRuntimeAdapterV1DifferentialInstrumentationTest.kt");
   const header = read(headerPath);
@@ -77,6 +78,7 @@ function main() {
     generatedAt: new Date().toISOString(),
     gate: "verifyNodeFinalAdapterGate",
     tasks: ["S11-05", "S11-06", "S11-07", "S11-08", "S11-09", "S11-10", "S11-11", "S11-12"],
+    nativeCppRoot: relativePath(repoRoot, nativeCppRoot),
     header: relativePath(repoRoot, headerPath),
     adapter: relativePath(repoRoot, adapterPath),
     kotlinBridge: relativePath(repoRoot, kotlinPath),
@@ -184,7 +186,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node verify-final-adapter-gate.js [--repo-root dir] [--report-dir dir] [--fail-on-blocked]");
+      console.log("Usage: node verify-final-adapter-gate.js [--repo-root dir] [--native-cpp-root dir] [--report-dir dir] [--fail-on-blocked]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

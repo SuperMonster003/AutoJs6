@@ -3,6 +3,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { resolvePhase13SourceFile } = require("./source-topology");
 
 const REPORT_BASENAME = "phase13-profile-rollback-playbook";
 
@@ -13,7 +14,8 @@ const FILES = {
   surfaceManifest: "docs/nodejs/phase13/phase13-surface-manifest.json",
   surfaceManifestDoc: "docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md",
   gradleProperties: "gradle.properties",
-  appBuildGradle: "app/build.gradle.kts",
+  runtimeConfig: "app/node-runtime-config.gradle.kts",
+  androidConfig: "app/node-android-config.gradle.kts",
   phase13GradleGate: "app/node-phase13-gate.gradle.kts",
   nodeBridgeSources: "app/src/main/cpp/node_bridge_sources.cpp",
   rollbackPolicy: "app/src/main/java/org/autojs/autojs/engine/NodeProfileRollbackPolicy.kt",
@@ -71,7 +73,7 @@ function main() {
 function loadFiles(repoRoot) {
   return Object.fromEntries(
     Object.entries(FILES).map(([key, relative]) => {
-      const file = path.join(repoRoot, relative);
+      const file = resolvePhase13SourceFile(repoRoot, relative);
       return [key, { relative, exists: fs.existsSync(file), text: read(file) }];
     }),
   );
@@ -81,17 +83,17 @@ function buildReport(files) {
   const surfaceEntry = surface(files.surfaceManifest.text, "security.rollback_privacy");
   const kotlinBlock = files.rollbackPolicy.text;
   const runtimeBlock = block(files.nodeBridgeSources.text, "function __autojs6_profile_rollback_policy_report", "  function __autojs6_bridge_normalize_capability");
-  const gradleBlock = files.appBuildGradle.text;
+  const buildConfigBlock = files.androidConfig.text;
   const scenarios = [
     scenario("gradle_property_switches", "Gradle and BuildConfig expose default-off profile and relaxed-capability rollback switches", [
       ...PROFILE_PROPERTIES.map((property) => token(files.gradleProperties, `${property}=false`)),
-      ...PROFILE_PROPERTIES.map((property) => token(files.appBuildGradle, `providers.gradleProperty("${property}")`)),
-      token(files.appBuildGradle, "NODEJS_PROFILE_PRO_ENABLED"),
-      token(files.appBuildGradle, "NODEJS_PROFILE_DESKTOP_ENABLED"),
-      token(files.appBuildGradle, "NODEJS_PROFILE_DEBUG_UNSAFE_LAB_ENABLED"),
-      token(files.appBuildGradle, "NODEJS_RELAXED_CAPABILITIES_ENABLED"),
-      token(files.appBuildGradle, "nodeJsReleaseForbiddenExperimentalFlags"),
-      token(files.appBuildGradle, "Release Node builds cannot enable experimental feature flag(s)"),
+      ...PROFILE_PROPERTIES.map((property) => token(files.runtimeConfig, `providers.gradleProperty("${property}")`)),
+      token(files.androidConfig, "NODEJS_PROFILE_PRO_ENABLED"),
+      token(files.androidConfig, "NODEJS_PROFILE_DESKTOP_ENABLED"),
+      token(files.androidConfig, "NODEJS_PROFILE_DEBUG_UNSAFE_LAB_ENABLED"),
+      token(files.androidConfig, "NODEJS_RELAXED_CAPABILITIES_ENABLED"),
+      token(files.runtimeConfig, "nodeJsReleaseForbiddenExperimentalFlags"),
+      token(files.runtimeConfig, "Release Node builds cannot enable experimental feature flag(s)"),
     ]),
     scenario("kotlin_policy", "NodeProfileRollbackPolicy records per-profile and per-capability rollback actions without granting authority", [
       token(files.rollbackPolicy, "object NodeProfileRollbackPolicy"),
@@ -193,7 +195,7 @@ function buildReport(files) {
     ),
     check(
       "buildconfig-switches",
-      ["NODEJS_PROFILE_PRO_ENABLED", "NODEJS_PROFILE_DESKTOP_ENABLED", "NODEJS_PROFILE_DEBUG_UNSAFE_LAB_ENABLED", "NODEJS_RELAXED_CAPABILITIES_ENABLED"].every((field) => gradleBlock.includes(field)),
+      ["NODEJS_PROFILE_PRO_ENABLED", "NODEJS_PROFILE_DESKTOP_ENABLED", "NODEJS_PROFILE_DEBUG_UNSAFE_LAB_ENABLED", "NODEJS_RELAXED_CAPABILITIES_ENABLED"].every((field) => buildConfigBlock.includes(field)),
       "BuildConfig must expose P13-51 rollback switch fields.",
     ),
     check(

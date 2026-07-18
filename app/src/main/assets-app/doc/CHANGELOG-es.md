@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/18
+###### 2026/07/19
 
 * `Nuevo` Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva "nodejs" o extensiones como .node.js/.cjs/.mjs
 * `Nuevo` El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)
@@ -46,6 +46,8 @@
 * `Corrección` La devolución de resultados de scripts Node.js se retrasaba por la espera de estabilización del proceso de ejecución
 * `Corrección` La cancelación de una ejecución Node.js activa podía eliminar el registro de ejecución antes de poner en cuarentena el proceso en mal estado, bloqueando la espera de finalización y retrasando la recuperación
 * `Corrección` El fallback automático tras perder una respuesta Binder del runtime Node.js externo podía ejecutar dos veces el mismo script
+* `Corrección` Los alias /data/user/0 y /data/data de los directorios privados de Android no se normalizaban ni se volvían a escribir en las solicitudes del plugin, lo que hacía que un workingDirectory válido de Node.js se rechazara incorrectamente por exceder sandboxRoot
+* `Corrección` Las compilaciones nodePlugin sin un runtime Node en el host excluían incorrectamente las bibliotecas JNI/AAR de todas las ABI, lo que provocaba un cierre inesperado al inicializar Rhino Shell por la ausencia de libjackpal-termexec2.so
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java
 * `Corrección` app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_
 * `Corrección` Los métodos relacionados con shell podían dejar de responder en dispositivos sin acceso Root
@@ -79,6 +81,10 @@
 * `Mejora` Almacenada en caché la resolución de bibliotecas nativas integradas de Node.js para evitar el descubrimiento repetido de plugins
 * `Mejora` Almacenados en caché los candidatos autorizados del runtime Node.js externo y las sesiones Binder persistentes, con invalidación de estado y reconexión atómica para reducir el coste de descubrimiento y enlace
 * `Mejora` Eliminado el escaneo de módulos cifrados de todo el proyecto de la ruta de ejecución predeterminada de Node.js para mejorar el rendimiento de inicio de scripts no triviales y proyectos grandes
+* `Mejora` Añadida una regresión real de cambio de motor Rhino/Node con varias rondas de ejecución, que cubre reutilización/recuperación/cierre limpio de la sesión persistente del plugin externo
+* `Mejora` Añadidas pruebas soak del runtime persistente del plugin externo y puertas de evidencia de producción de Node.js que cubren matriz de dispositivos/ABI, ciclo de vida del runtime, métricas de recursos y estabilidad de 8 h/24 h
+* `Mejora` La verificación nativa de Node.js ahora resuelve y valida las raíces de código fuente y compilación del plugin de runtime externo
+* `Mejora` Las puertas de integración final y lanzamiento de Node.js aplican fail-closed cuando faltan o están obsoletos los informes requeridos, las evidencias de las fuentes actuales o los artefactos de aceptación de producción
 * `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
 * `Mejora` Mejoradas las interacciones del editor de código para temas/fuentes/barras de herramientas/modo de solo lectura/plegado/menús de selección y más

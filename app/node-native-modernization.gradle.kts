@@ -38,6 +38,28 @@ val nodePhase9ChaosSecurityPolicyMarkdown = nodeNativeModernizationReportDir.map
 val nodePhase9SummaryJson = nodeNativeModernizationReportDir.map { it.file("phase9-summary.json") }
 val nodePhase9SummaryMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-summary.md") }
 
+@Suppress("UNCHECKED_CAST")
+private fun <T> nodeNativeModernizationRuntimeConfig(name: String): T =
+    extensions.extraProperties.get("nodeJsRuntimeConfig.$name") as T
+
+val nodeNativeModernizationPluginProjectDir =
+    nodeNativeModernizationRuntimeConfig<File?>("nodeJsPluginProjectDir")?.canonicalFile
+val nodeNativeModernizationCppRoot =
+    (nodeNativeModernizationRuntimeConfig<File?>("nodeJsPluginCppDir")
+        ?: project.layout.projectDirectory.dir("src/main/cpp").asFile).canonicalFile
+val nodeNativeModernizationJniLibsRoot =
+    nodeNativeModernizationRuntimeConfig<File>("nodeJsRuntimeSlotJniLibsSourceDir").canonicalFile
+val nodeNativeModernizationUsesPluginBuild =
+    nodeNativeModernizationRuntimeConfig<String>("effectiveNodeJsRuntimeBackend") == "plugin" &&
+            !nodeNativeModernizationRuntimeConfig<Boolean>("isNodeJsHostBridgeBuildRequested")
+val nodeNativeModernizationCxxRoot = if (nodeNativeModernizationUsesPluginBuild) {
+    requireNotNull(nodeNativeModernizationPluginProjectDir) {
+        "Node.js plugin project directory is required for the plugin native build."
+    }.resolve("app/build/intermediates/cxx/Debug").canonicalFile
+} else {
+    project.layout.buildDirectory.dir("intermediates/cxx/Debug").get().asFile.canonicalFile
+}
+
 private fun nodeNativeModernizationDisplayPath(file: File): String =
     runCatching { file.relativeTo(rootProject.projectDir).invariantSeparatorsPath }
         .getOrElse { file.absolutePath }
@@ -81,6 +103,58 @@ private fun nodeNativeModernizationConfiguredToolsRoot(): File {
     )
 }
 
+val buildNodeRuntimePluginNativeDebug = tasks.register<Exec>("buildNodeRuntimePluginNativeDebug") {
+    group = "verification"
+    description = "Builds the sibling Node.js runtime plugin debug native artifacts."
+
+    val pluginRoot = requireNotNull(nodeNativeModernizationPluginProjectDir) {
+        "Node.js plugin project directory is required for the plugin native build."
+    }
+    val wrapperFile = pluginRoot.resolve(
+        if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) "gradlew.bat" else "gradlew"
+    )
+    val pluginCppRoot = pluginRoot.resolve("app/src/main/cpp")
+    val pluginJniLibsRoot = pluginRoot.resolve("app/src/main/jniLibs")
+    inputs.file(wrapperFile)
+    inputs.dir(pluginCppRoot)
+    inputs.dir(pluginJniLibsRoot)
+    outputs.dir(nodeNativeModernizationCxxRoot)
+    outputs.upToDateWhen { false }
+    workingDir = pluginRoot
+    doFirst {
+        if (!pluginRoot.isDirectory) {
+            throw GradleException("Missing Node.js plugin project directory: ${pluginRoot.absolutePath}")
+        }
+        if (!wrapperFile.isFile) {
+            throw GradleException("Missing Node.js plugin Gradle wrapper: ${wrapperFile.absolutePath}")
+        }
+        if (!pluginCppRoot.isDirectory) {
+            throw GradleException("Missing Node.js plugin C++ source directory: ${pluginCppRoot.absolutePath}")
+        }
+        if (!pluginJniLibsRoot.isDirectory) {
+            throw GradleException("Missing Node.js plugin JNI library directory: ${pluginJniLibsRoot.absolutePath}")
+        }
+    }
+    if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) {
+        commandLine(
+            "cmd",
+            "/c",
+            wrapperFile.absolutePath,
+            ":app:externalNativeBuildDebug",
+            "--console=plain",
+        )
+    } else {
+        commandLine(
+            wrapperFile.absolutePath,
+            ":app:externalNativeBuildDebug",
+            "--console=plain",
+        )
+    }
+}
+
+val nodeNativeModernizationNativeBuildDependency: Any =
+    if (nodeNativeModernizationUsesPluginBuild) buildNodeRuntimePluginNativeDebug else "externalNativeBuildAppDebug"
+
 tasks.register<Exec>("generateNodeNativeSymbolUsageReport") {
     group = "verification"
     description = "Generates the Phase 9 native integration boundary map report."
@@ -107,9 +181,13 @@ tasks.register<Exec>("verifyNodeRuntimeAdapterAbi") {
     description = "Verifies the Phase 9 versioned C runtime adapter ABI contract."
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-adapter-abi.js")
-    val headerFile = project.layout.projectDirectory.file("src/main/cpp/node_runtime_api_v1.h")
+    val headerFile = nodeNativeModernizationCppRoot.resolve("node_runtime_api_v1.h")
+    val adapterSourceFile = nodeNativeModernizationCppRoot.resolve("node_runtime_adapter_24_5.cpp")
+    val cmakeFile = nodeNativeModernizationCppRoot.resolve("CMakeLists.txt")
     inputs.file(scriptFile)
     inputs.file(headerFile)
+    inputs.file(adapterSourceFile)
+    inputs.file(cmakeFile)
     outputs.files(nodeRuntimeAdapterAbiJson, nodeRuntimeAdapterAbiMarkdown)
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir
@@ -119,7 +197,11 @@ tasks.register<Exec>("verifyNodeRuntimeAdapterAbi") {
         "--repo-root",
         rootProject.projectDir.absolutePath,
         "--header",
-        headerFile.asFile.absolutePath,
+        headerFile.absolutePath,
+        "--adapter-source",
+        adapterSourceFile.absolutePath,
+        "--cmake",
+        cmakeFile.absolutePath,
         "--report-dir",
         nodeNativeModernizationReportDir.get().asFile.absolutePath,
     )
@@ -174,10 +256,10 @@ tasks.register<Exec>("verifyNodeRuntimeAdapterExport") {
     group = "verification"
     description = "Verifies the Phase 9 runtime adapter ABI export across built app debug native ABIs."
 
-    dependsOn("externalNativeBuildAppDebug")
+    dependsOn(nodeNativeModernizationNativeBuildDependency)
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-adapter-export.js")
     inputs.file(scriptFile)
-    inputs.dir(project.layout.buildDirectory.dir("intermediates/cxx"))
+    inputs.dir(nodeNativeModernizationCxxRoot)
     outputs.files(nodeRuntimeAdapterExportJson, nodeRuntimeAdapterExportMarkdown)
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir
@@ -186,6 +268,8 @@ tasks.register<Exec>("verifyNodeRuntimeAdapterExport") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--cxx-root",
+        nodeNativeModernizationCxxRoot.absolutePath,
         "--report-dir",
         nodeNativeModernizationReportDir.get().asFile.absolutePath,
     )
@@ -195,11 +279,11 @@ tasks.register<Exec>("verifyNode16KbNativeAlignment") {
     group = "verification"
     description = "Verifies Phase 9 16 KB ELF alignment for current Node runtime native artifacts."
 
-    dependsOn("externalNativeBuildAppDebug")
+    dependsOn(nodeNativeModernizationNativeBuildDependency)
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-artifacts.js")
     inputs.file(scriptFile)
-    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
-    inputs.dir(project.layout.buildDirectory.dir("intermediates/cxx"))
+    inputs.dir(nodeNativeModernizationJniLibsRoot)
+    inputs.dir(nodeNativeModernizationCxxRoot)
     outputs.files(nodeNative16KbAlignmentJson, nodeNative16KbAlignmentMarkdown)
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir
@@ -208,6 +292,10 @@ tasks.register<Exec>("verifyNode16KbNativeAlignment") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--jni-libs-root",
+        nodeNativeModernizationJniLibsRoot.absolutePath,
+        "--cxx-root",
+        nodeNativeModernizationCxxRoot.absolutePath,
         "--report-dir",
         nodeNativeModernizationReportDir.get().asFile.absolutePath,
         "--mode",
@@ -219,11 +307,11 @@ tasks.register<Exec>("generateNodeRuntimeArtifactManifest") {
     group = "verification"
     description = "Generates the Phase 9 runtime artifact manifest for current Node runtime native artifacts."
 
-    dependsOn("externalNativeBuildAppDebug")
+    dependsOn(nodeNativeModernizationNativeBuildDependency)
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-artifacts.js")
     inputs.file(scriptFile)
-    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
-    inputs.dir(project.layout.buildDirectory.dir("intermediates/cxx"))
+    inputs.dir(nodeNativeModernizationJniLibsRoot)
+    inputs.dir(nodeNativeModernizationCxxRoot)
     outputs.files(nodeRuntimeArtifactManifestJson, nodeRuntimeArtifactManifestMarkdown)
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir
@@ -232,6 +320,10 @@ tasks.register<Exec>("generateNodeRuntimeArtifactManifest") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--jni-libs-root",
+        nodeNativeModernizationJniLibsRoot.absolutePath,
+        "--cxx-root",
+        nodeNativeModernizationCxxRoot.absolutePath,
         "--report-dir",
         nodeNativeModernizationReportDir.get().asFile.absolutePath,
         "--mode",
@@ -243,11 +335,11 @@ tasks.register<Exec>("verifyNodeRuntimeArtifactIntegrity") {
     group = "verification"
     description = "Verifies Phase 9 runtime artifact integrity metadata for current Node runtime native artifacts."
 
-    dependsOn("externalNativeBuildAppDebug")
+    dependsOn(nodeNativeModernizationNativeBuildDependency)
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-artifacts.js")
     inputs.file(scriptFile)
-    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
-    inputs.dir(project.layout.buildDirectory.dir("intermediates/cxx"))
+    inputs.dir(nodeNativeModernizationJniLibsRoot)
+    inputs.dir(nodeNativeModernizationCxxRoot)
     outputs.files(nodeRuntimeArtifactIntegrityJson, nodeRuntimeArtifactIntegrityMarkdown)
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir
@@ -256,6 +348,10 @@ tasks.register<Exec>("verifyNodeRuntimeArtifactIntegrity") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--jni-libs-root",
+        nodeNativeModernizationJniLibsRoot.absolutePath,
+        "--cxx-root",
+        nodeNativeModernizationCxxRoot.absolutePath,
         "--report-dir",
         nodeNativeModernizationReportDir.get().asFile.absolutePath,
         "--mode",
@@ -267,9 +363,11 @@ tasks.register<Exec>("verifyNodeRuntimeDistributionPolicy") {
     group = "verification"
     description = "Verifies Phase 9 runtime distribution policy for current and planned runtime modes."
 
+    dependsOn(nodeNativeModernizationNativeBuildDependency)
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-distribution-policy.js")
     inputs.file(scriptFile)
-    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    inputs.dir(nodeNativeModernizationJniLibsRoot)
+    inputs.dir(nodeNativeModernizationCxxRoot)
     outputs.files(nodeRuntimeDistributionPolicyJson, nodeRuntimeDistributionPolicyMarkdown)
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir
@@ -278,6 +376,10 @@ tasks.register<Exec>("verifyNodeRuntimeDistributionPolicy") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--jni-libs-root",
+        nodeNativeModernizationJniLibsRoot.absolutePath,
+        "--cxx-root",
+        nodeNativeModernizationCxxRoot.absolutePath,
         "--report-dir",
         nodeNativeModernizationReportDir.get().asFile.absolutePath,
     )

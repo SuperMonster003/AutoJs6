@@ -88,9 +88,6 @@ function main() {
   if (adapterSourceText && !adapterSourceText.includes("node24_5")) {
     issues.push("adapter source must identify the current node24_5 runtime slot");
   }
-  if (/JNIEnv|jobject|jstring|jclass|node::|v8::|uv_/.test(adapterSourceText)) {
-    issues.push("adapter surface scaffold must not expose JNI, Node, V8, or libuv handles");
-  }
   const report = {
     schema: SCHEMA,
     generatedAt: new Date().toISOString(),

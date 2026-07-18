@@ -9,12 +9,13 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
+  const jniLibsRoot = resolveJniLibsRoot(repoRoot, options.jniLibsRoot);
   const lockPath = path.join(repoRoot, "tools/nodejs/phase10/runtime-freeze.lock.json");
   const lock = readJson(lockPath);
   const violations = [];
 
   const libnode = Object.entries(lock.libnode || {}).map(([abi, expected]) => {
-    const file = path.join(repoRoot, expected.path);
+    const file = path.join(jniLibsRoot, abi, path.basename(expected.path));
     const exists = fs.existsSync(file);
     const actual = exists ? sha256(file) : null;
     const matches = actual === expected.sha256;
@@ -25,7 +26,7 @@ function main() {
     }
     return {
       abi,
-      path: expected.path,
+      path: path.relative(repoRoot, file).replace(/\\/g, "/"),
       expectedSha256: expected.sha256,
       actualSha256: actual,
       matches,
@@ -70,6 +71,15 @@ function main() {
   if (violations.length > 0) {
     process.exitCode = 1;
   }
+}
+
+function resolveJniLibsRoot(repoRoot, requested) {
+  const candidates = [
+    requested && path.resolve(requested),
+    path.resolve(repoRoot, "../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/jniLibs"),
+    path.join(repoRoot, "app/src/main/jniLibs"),
+  ].filter(Boolean);
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[candidates.length - 1];
 }
 
 function verifyRuntimeBuildLock(runtimeBuildLock, lock, violations) {
@@ -179,7 +189,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node verify-runtime-freeze.js [--repo-root dir] [--report-dir dir]");
+      console.log("Usage: node verify-runtime-freeze.js [--repo-root dir] [--jni-libs-root dir] [--report-dir dir]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

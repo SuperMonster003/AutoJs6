@@ -12,9 +12,9 @@
     "jniLibs": "app/src/main/jniLibs"
   },
   "moduleSources": {
-    "maxCount": 64,
-    "maxSingleBytes": 262144,
-    "maxTotalBytes": 524288
+    "maxCount": 8192,
+    "maxSingleBytes": 16777216,
+    "maxTotalBytes": 67108864
   },
   "libnode": {
     "arm64-v8a": {

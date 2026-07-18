@@ -1892,10 +1892,14 @@ soak reports from `build/reports/nodejs/final-soak/quick-soak-8h.json` and
 `build/reports/nodejs`. The reports must expose duration plus comparable RSS,
 Java heap, native heap, thread count, fd count, and bridge diagnostics, and
 must not report monotonic leaks, orphan processes, or unrecoverable runtime
-failures. If either real device soak is absent or dirty, P13-08 remains partial
-and `full_heavy_resource_stress` remains open. The current Phase 13 closure
-archives clean Xiaomi 23046RP50C / Android 15 quick and final soaks at those
-canonical paths.
+failures. If either real device soak is absent or dirty, the current soak and
+final integration decisions remain blocked. The gate does not mutate
+`FINAL_BLOCKER_REGISTRY.json` or reopen the historical
+`full_heavy_resource_stress` capability closure. Phase 13 recorded clean Xiaomi
+23046RP50C / Android 15 quick and final soaks at those canonical paths when the
+blocker was closed. R6 requires new reports from the current persistent/plugin
+lifecycle; the historical Phase 13 closure alone does not satisfy R6 evidence
+freshness.
 
 The gate also runs contract fixtures from
 `tools/nodejs/phase13/fixtures/full-heavy-resource-stress/`. These fixtures
@@ -3254,7 +3258,16 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodeFinalFocusedGateTopology
 .\gradlew.bat --console=plain :app:generateNodeFinalAdapterStatus
 .\gradlew.bat --console=plain :app:generateNodeFinalCrashStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalPackageManagerStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalLongRunningStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalMultiInstanceStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalWorkerDecisionStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalSoakStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalProviderStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalAbiStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalSecurityStatus
 .\gradlew.bat --console=plain :app:generateNodeFinalIntegrationSummary
+.\gradlew.bat --console=plain :app:verifyNodeFinalIntegrationGate
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug
@@ -3316,8 +3329,11 @@ records crash bundle fields, resource/timeline snapshot requirements,
 `AutoJsNodeRuntimeApiV1` operation inventory, and adapter cutover blockers.
 `verifyNodeCrashAdapterCutoverGate` pairs that report with
 `verifyNodePhase9NativeCrashPipeline`, `verifyNodeRuntimeAdapterAbi`, and
-`verifyNodeRuntimeAdapterExport`. Current Node 24.5 adapter lifecycle remains
-`surface_only`, so the gate keeps `legacy_jni` as the default path.
+`verifyNodeRuntimeAdapterExport`. The historical Phase 10 report recorded the
+Node 24.5 adapter lifecycle as `surface_only`. The current registry records
+`adapter_v1_real_execution_path` as closed and the adapter is selectable for
+real execution; `legacy_jni` remains the selectable diagnostic fallback and
+the embedded default until separate promotion evidence changes that policy.
 `verifyNodePhase10SecurityCorpus` writes `phase10-security-corpus.json` and
 `.md` for S10-53. `generateNodePhase10Summary` writes
 `phase10-summary.json` and `.md` for S10-56, combining Phase 10 host reports,
@@ -3325,14 +3341,77 @@ the example catalog, real npm corpus manifest, and available focused device
 XML. The summary requires at least 55 examples and 50 real npm fixtures.
 Phase 11 final generation tasks write `final-capability-truth.json`,
 `final-focused-gate-topology.json`, `final-adapter-gate.json`,
-`final-crash-gate.json`, and `final-integration-summary.json` without failing
-on open blockers. Strict final tasks such as `verifyNodeFinalCapabilityTruth`,
+`final-crash-gate.json`, `final-package-manager-gate.json`,
+`final-long-running-gate.json`, `final-multi-instance-gate.json`,
+`final-worker-decision-gate.json`, `final-soak-gate.json`,
+`final-provider-gate.json`, `final-abi-gate.json`,
+`final-security-gate.json`, and `final-integration-summary.json`. Generation
+tasks record blocked evidence without treating the historical registry as
+open. Strict tasks such as `verifyNodeFinalCapabilityTruth`,
 `verifyNodeFinalAdapterGate`, `verifyNodeFinalCrashGate`, and
-`verifyNodeFinalIntegrationGate` are expected to fail until the required
-internal blockers in `docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` are
-closed. The final status vocabulary is only `completed` or `blocked`;
+`verifyNodeFinalIntegrationGate` fail closed when required current evidence is
+missing, stale, blocked, or failed.
+
+The registry currently records zero unresolved required internal blockers, and
+the Safe-profile conditional decisions are resolved. R6 remains independently
+blocked on production-evidence freshness after persistent process-global
+runtime reuse and the required external `plugin` lifecycle. Lifecycle, crash,
+memory, ABI, packaged, multi-device, and 8-hour/24-hour soak reports must be
+regenerated from the current build before Core completion can be declared. The
+final status vocabulary is only `completed` or `blocked`;
 `completed_with_recorded_blockers` is not valid for required internal Phase 11
 capabilities.
+
+R6 production evidence uses a fixed collector instead of accepting manually
+assembled JSON. Run it once for each of `sony-arm64`, `sony-armeabi-v7a`,
+`second-oem-arm64`, and `emulator-x86_64` with the matching explicit adb
+serial. For example:
+
+```powershell
+node tools/nodejs/r6/run-device-evidence.js --target sony-arm64 --serial QV710AF65F
+```
+
+The collector starts and ends on unchanged clean host and plugin commits,
+builds and installs a fresh signed target-ABI plugin APK, binds the installed
+plugin, host, and Android test APK bytes to fresh build artifacts, and captures
+a fresh JUnit XML from `verifyNodeR6DeviceEvidenceGate`. That JUnit result must
+contain exactly the fixed 13 selectors with zero failures, errors, or skips.
+The collector also verifies the target manufacturer/device type and runtime
+ABI before archiving `build/reports/nodejs/r6-evidence/device/<target>.json`.
+Use `--no-archive` for staged validation only.
+
+Run the two long soaks with their fixed production durations:
+
+```powershell
+node tools/nodejs/r6/run-production-soak.js --kind quick --serial QV710AF65F
+node tools/nodejs/r6/run-production-soak.js --kind final --serial QV710AF65F
+```
+
+The runner permits no production duration override or forced archive. The
+quick report must prove 8 hours and the final report 24 hours, with a fresh
+single-test JUnit attestation, stable persistent-plugin runtime identity,
+complete cleanup, and bounded resource growth. This focused command is only a
+development smoke and is always non-archivable:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeR6PersistentPluginSoakSmoke `
+  "-Pautojs.nodejs.r6.soak.serial=QV710AF65F"
+```
+
+Use the contract, non-strict status, and strict verification tasks as follows:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeR6ProductionEvidenceContract
+.\gradlew.bat --console=plain :app:generateNodeR6ProductionEvidenceStatus
+.\gradlew.bat --console=plain :app:verifyNodeR6ProductionEvidenceGate
+```
+
+`verifyNodeFinalIntegrationGate` consumes the non-strict R6 status through its
+own strict final-summary decision, and `verifyNodeReleaseGate` depends on that
+strict final gate. A blocked status report is diagnostic output, not release
+authority. The complete matrix, selector list, artifact attestation, canonical
+paths, and soak requirements are documented in
+[R6_ACCEPTANCE_EVIDENCE.md](R6_ACCEPTANCE_EVIDENCE.md).
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:

@@ -10,16 +10,18 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
+  const jniLibsRoot = path.resolve(options.jniLibsRoot || path.join(repoRoot, "app/src/main/jniLibs"));
+  const cxxRoot = path.resolve(options.cxxRoot || path.join(repoRoot, "app/build/intermediates/cxx"));
   const bundledCoverage = REQUIRED_ABIS.map((abi) => ({
     abi,
-    libnode: exists(repoRoot, `app/src/main/jniLibs/${abi}/libnode.so`),
-    libcxx: exists(repoRoot, `app/src/main/jniLibs/${abi}/libc++_shared.so`),
+    libnode: exists(jniLibsRoot, `${abi}/libnode.so`),
+    libcxx: exists(jniLibsRoot, `${abi}/libc++_shared.so`) || hasBuiltLibrary(cxxRoot, abi, "libc++_shared.so"),
   }));
   const modes = [
     {
       id: "bundled",
       status: bundledCoverage.every((entry) => entry.libnode && entry.libcxx) ? "available" : "blocked",
-      detail: "Runtime is packaged inside the base APK through app/src/main/jniLibs.",
+      detail: "Runtime is packaged inside the base APK from the configured JNI library root.",
     },
     {
       id: "split-by-abi",
@@ -54,6 +56,8 @@ function main() {
     generatedAt: new Date().toISOString(),
     task: "S9-13 Runtime Distribution Modes",
     requiredAbis: REQUIRED_ABIS,
+    jniLibsRoot: relativePath(repoRoot, jniLibsRoot),
+    cxxRoot: relativePath(repoRoot, cxxRoot),
     bundledCoverage,
     modes,
     decision: {
@@ -76,7 +80,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node tools/nodejs/native/verify-runtime-distribution-policy.js [--repo-root dir] [--report-dir dir]");
+      console.log("Usage: node tools/nodejs/native/verify-runtime-distribution-policy.js [--repo-root dir] [--jni-libs-root dir] [--cxx-root dir] [--report-dir dir]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {
@@ -101,8 +105,31 @@ function parseArgs(argv) {
   return options;
 }
 
-function exists(repoRoot, relativePath) {
-  return fs.existsSync(path.join(repoRoot, relativePath));
+function exists(root, relativePath) {
+  return fs.existsSync(path.join(root, relativePath));
+}
+
+function hasBuiltLibrary(root, abi, name) {
+  if (!fs.existsSync(root)) return false;
+  return walkFiles(root).some((file) => path.basename(file) === name && file.split(/[\\/]/).includes(abi));
+}
+
+function walkFiles(root) {
+  const result = [];
+  const stack = [root];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const fullPath = path.join(current, entry.name);
+      if (entry.isDirectory()) stack.push(fullPath);
+      else if (entry.isFile()) result.push(fullPath);
+    }
+  }
+  return result;
+}
+
+function relativePath(root, file) {
+  return path.relative(root, file).replace(/\\/g, "/");
 }
 
 function writeReport(reportDir, baseName, report, renderer) {

@@ -1,6 +1,6 @@
 # AutoJs6 Node.js Completion Roadmap
 
-Last updated: 2026-07-18
+Last updated: 2026-07-19
 
 This checklist separates two completion targets:
 
@@ -48,9 +48,10 @@ production Inspector are intentional boundaries rather than unfinished work.
   main-app delivery, adds a persistent external runtime with fresh execution
   state and zero-scan workspace archive transport v2, and passes the focused
   live gate on `arm64-v8a`, `armeabi-v7a`, and `x86_64` with no skipped tests.
-- [ ] Re-run the final aggregate gates before declaring Core completion. The
-  blocker registry is closed, but some narrative status documents still
-  describe older blocked states.
+- [x] Resolve the narrative status drift between the closed historical blocker
+  registry and the current R6 production-evidence requirement.
+- [ ] Complete the current R6 device, packaged, ABI, crash, memory, and soak
+  evidence before declaring Core completion.
 
 The focused performance reports on XQ-DQ72 recorded:
 
@@ -93,8 +94,9 @@ persistent lifecycle stress class passed 16 tests in one final run.
 - [x] Pass
   `defaultConcurrentExecutionQueuesInsteadOfEngineBusy` and
   `queuedExecutionRunsAfterActiveExecution` on the primary Sony device.
-- [ ] Run at least 30 simple-script samples and publish p50/p95 for cold and
-  app-side warm one-shot execution.
+- [x] Retire the planned R1 30-sample app-side-warm one-shot run after R2
+  replaced it with 30 cold/runtime-warm samples on the persistent lifecycle;
+  the single R1 row remains explicitly non-percentile evidence.
 - [x] Run the complete lifecycle stress and process-pool policy classes before
   release, including success, error, timeout, cancellation, service death,
   primary/overflow concurrency, queue full, and queue timeout.
@@ -369,18 +371,57 @@ and the semantic evidence matrix are maintained in
 
 ## R6 - Reopen And Close Production Evidence For The New Lifecycle
 
-- [ ] Re-run all Phase 11 final reports from current sources.
-- [ ] Resolve status drift among `FINAL_BLOCKER_REGISTRY`, `final/README.md`,
+- [x] Re-run all Phase 11 final reports from current sources.
+- [x] Resolve status drift among `FINAL_BLOCKER_REGISTRY`, `final/README.md`,
   `INTEGRATION_STATUS_PRO9_COMPARISON.md`, and this roadmap.
-- [ ] Reopen lifecycle, crash, memory, ABI, packaged, and soak evidence made
-  stale by persistent runtime reuse, then close it with new reports.
-- [ ] Pass Rhino/Node alternating execution and backend-switch regression.
-- [ ] Pass main app and packaged APK gates on Sony, a second OEM device, and an
-  x86_64 emulator.
+- [x] Reopen lifecycle, crash, memory, ABI, packaged, and soak evidence made
+  stale by persistent runtime reuse through a separate fail-closed R6 evidence
+  contract without rewriting the historical capability closures.
+- [ ] Close the reopened evidence requirement with current clean-source device
+  and soak reports.
+- [x] Pass Rhino/Node alternating execution and backend-switch regression.
+- [ ] Pass the fixed main app and packaged APK matrix: Sony `arm64-v8a`, Sony
+  `armeabi-v7a`, a second-OEM physical `arm64-v8a` device, and an x86_64
+  emulator.
 - [ ] Pass 8-hour quick soak and 24-hour final soak without monotonic leaks,
   orphan processes, or unrecoverable slots.
 - [ ] Make `verifyNodeFinalIntegrationGate` and `verifyNodeReleaseGate` pass
   from a clean checkout with zero release-blocking reports.
+
+The R6 implementation checkpoint now includes a real multi-round engine-switch
+instrumentation gate, a persistent required-plugin soak harness, an evidence
+schema/contract-fixture gate, external-plugin native source/artifact
+verification, and a final aggregate that requires the R6 production-evidence
+report. Missing hardware, skipped tests, stale host/plugin commits, dirty
+worktrees, short soaks, and missing resource metrics remain explicit blockers;
+contract fixtures and short smoke runs cannot satisfy production evidence.
+
+The complete non-strict Phase 11 report set was regenerated from the current
+sources on 2026-07-19 with zero required-internal blockers and zero policy
+violations. Package-manager, Worker/WASI, security, adapter, crash,
+multi-instance, and focused-topology reports are ready. Long-running, provider,
+legacy soak, and R6 production-evidence reports remain honestly blocked by
+their recorded runtime/device evidence requirements.
+
+The focused `verifyNodeR6EngineSwitchGate` run on Sony XQ-AT72 passed both
+selectors with zero failures, errors, or skips on 2026-07-18. This closes only
+the alternating/backend-switch regression above; it is not one of the four
+complete 13-selector device reports. The four current matrix reports, the real
+8-hour and 24-hour soaks, and the clean strict final/release result remain
+unchecked. Collection commands and the fail-closed evidence contract are
+documented in
+[R6_ACCEPTANCE_EVIDENCE.md](R6_ACCEPTANCE_EVIDENCE.md).
+
+The same engine-switch selectors were revalidated `2/2` against the fresh R6
+host/test/plugin installation on 2026-07-19, together with the required-plugin
+permanent Safe Node denial regression at `1/1`.
+
+The explicitly non-archivable 5-second persistent-plugin smoke on the same Sony
+device also passed on 2026-07-19 after a fresh plugin build and install: 6
+cycles, 6 resource samples, 3 liveness/recoverability checks, clean JUnit, and
+verified installed/fresh APK identity. This validates the collection path and
+the `/data/user/0` to `/data/data` workspace alias handling only; it does not
+close either production-soak checkbox.
 
 Core completion command:
 

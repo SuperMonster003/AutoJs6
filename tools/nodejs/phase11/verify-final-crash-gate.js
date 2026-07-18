@@ -9,6 +9,7 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
+  const jniLibsRoot = path.resolve(options.jniLibsRoot || path.join(repoRoot, "app/src/main/jniLibs"));
   const bundleDir = path.join(reportDir, "final-crash-evidence-bundle");
   const phase13CrashEvidence = phase13CrashEvidenceStatus(repoRoot, reportDir);
   const toolScripts = {
@@ -25,7 +26,7 @@ function main() {
   };
   const crashToolsImplemented = Object.values(tooling).every(Boolean);
   fs.mkdirSync(bundleDir, { recursive: true });
-  const nativeLibraryHashes = collectNativeLibraryHashes(repoRoot);
+  const nativeLibraryHashes = collectNativeLibraryHashes(repoRoot, jniLibsRoot);
   const existingBundle = readJsonIfExists(path.join(bundleDir, "manifest.json"));
   const bundle = applyPhase13CrashEvidence(
     buildCrashGateBundle(existingBundle, nativeLibraryHashes, crashToolsImplemented, tooling),
@@ -153,8 +154,8 @@ function applyPhase13CrashEvidence(bundle, phase13Evidence) {
   };
 }
 
-function collectNativeLibraryHashes(repoRoot) {
-  const root = path.join(repoRoot, "app/src/main/jniLibs");
+function collectNativeLibraryHashes(repoRoot, jniLibsRoot) {
+  const root = jniLibsRoot;
   if (!fs.existsSync(root)) return [];
   const entries = [];
   for (const abi of fs.readdirSync(root).sort()) {
@@ -364,7 +365,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node verify-final-crash-gate.js [--repo-root dir] [--report-dir dir] [--fail-on-blocked]");
+      console.log("Usage: node verify-final-crash-gate.js [--repo-root dir] [--jni-libs-root dir] [--report-dir dir] [--fail-on-blocked]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

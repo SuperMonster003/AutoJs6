@@ -178,17 +178,22 @@ extensions.configure<ApplicationExtension>("android") {
 
     packaging {
         jniLibs {
+            val nodeRuntimeOwnedNativeLibraries = listOf(
+                "libnode.so",
+                "libautojs6-node.so",
+            )
+            fun nodeRuntimeExcludes(abis: List<String>): List<String> = abis.flatMap { abi ->
+                nodeRuntimeOwnedNativeLibraries.flatMap { library ->
+                    listOf("lib/$abi/$library", "**/$abi/$library")
+                }
+            }
             if (!isNodeJsNativeRuntimeRequested) {
                 val allNativeLibAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86", "armeabi")
-                excludes += allNativeLibAbis.flatMap { abi ->
-                    listOf("lib/$abi/**", "**/$abi/**")
-                }
+                excludes += nodeRuntimeExcludes(allNativeLibAbis)
             } else if (isNodeJsHostBridgeBuildRequested) {
                 val unsupportedNodeJsAbis =
                     listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") - nodeJsBridgeNativeRuntimeAbis.toSet()
-                excludes += unsupportedNodeJsAbis.flatMap { abi ->
-                    listOf("lib/$abi/**", "**/$abi/**")
-                }
+                excludes += nodeRuntimeExcludes(unsupportedNodeJsAbis)
             }
         }
     }

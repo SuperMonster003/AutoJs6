@@ -5,12 +5,12 @@ v9 文档说明哪些能力已经具备、哪些能力尚需完成，以及 Rhin
 JavaScript API，尤其是 `org/autojs/autojs/runtime/api/augment` 中主要 API，
 在 Node.js 引擎中的迁移状态。
 
-盘点时间：2026-06-24。
+盘点时间：2026-07-18。
 
 当前版本基线来自根目录 `version.properties`：
 
-- `VERSION_NAME=6.7.1 Alpha4`
-- `VERSION_BUILD=3923`
+- `VERSION_NAME=6.8.0 Alpha7`
+- `VERSION_BUILD=5223`
 - `MIN_SDK_VERSION=24`
 - `TARGET_SDK_VERSION=36`
 - `COMPILE_SDK_VERSION=36`
@@ -460,7 +460,7 @@ TypeScript 声明还覆盖：
 | 线程 | Node event loop，`worker_threads` 方向受限 | `worker_threads` 默认关闭，Rhino `threads` 不作为 Node 兼容目标 |
 | UI 线程 | `"nodejs ui"` / `"ui-thread"` | P13-11 已补 `NodeEntryDirective` metadata、descriptor/project config 透传和 gate；P13-17 记录 direct `require("ui")` live Activity provider evidence、JSON layout/update/event drain/close 和 provider cleanup；Activity lifecycle、Back/Recents、orientation、live packaged UI、实际 UI-thread dispatch 仍未等价 |
 | 网络 | 文档列出 `http/https` 等 Node 能力 | raw network 默认拒绝，推荐受控 `fetch`/`axios`/`websocket` |
-| 打包 | Pro v9 自有打包体系 | AutoJs6 已有 packaged smoke、runtime libs、release flavor、ABI 策略，但 packaged long-running 仍未完成 |
+| 打包 | Pro v9 自有打包体系 | AutoJs6 已有 packaged smoke、runtime libs、release flavor、ABI 策略和 packaged long-running；R6 仍需用当前 persistent/plugin 生命周期重验 packaged 证据 |
 
 ## Rhino `augment` API 迁移现状
 
@@ -794,44 +794,62 @@ java.lang.StringBuilder;      // 当前不是默认 Node 能力
 
 ## 尚需完成的能力
 
-### Phase 11 required internal blockers
+### Phase 11 历史 blocker 与 R6 证据重验
 
-`docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` 中仍为 open 的 required internal
-blockers：
+`docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` 当前没有 open 的
+`required_internal` blocker。以下六项历史 capability blocker 均保持
+`closed`：
 
+- `adapter_v1_real_execution_path`
+- `crash_evidence_automation`
+- `android_side_package_installation`
 - `packaged_long_running`
+- `second_execution_slot`
 - `full_heavy_resource_stress`
 
-含义：
+这些 closure 记录的是 Phase 11/13 已完成的能力边界：adapter v1 可选择执行、
+crash marker 与 next-launch collection、本地 app-private package store、
+packaged long-running、two-slot 调度，以及当时生命周期下的 8 小时/24 小时
+soak。registry/download、npm CLI、signed/native payload 和 plugin/package
+distribution integration 仍是后续 gated promotion work，但不重新打开本地
+package-store blocker。
 
-- packaged APK long-running Node service mode 尚未完成。
-- P13-08 已补 `verifyNodePhase13FullHeavyResourceStress` 状态 gate、可比较
-  report contract、accepted/rejected 形状 fixtures 和归档前校验 helper；
-  fixtures 只验证 gate fail-closed 规则，真实 8 小时 quick soak 和 24 小时
-  final soak 证据仍未完成。
+R6 的 production-evidence freshness 是独立的 Core completion gate。当前默认
+交付已改为 required external `plugin`，embedded 路径也改为 persistent
+process-global runtime reuse，因此旧的 lifecycle、crash、memory、ABI、
+packaged、multi-device 和 soak closure 不能单独证明当前版本可发布。R6 仍需：
 
-已关闭但仍与后续 promotion 相关的 required internal blockers：
+- 从当前源码重新生成全部 Phase 11 final reports。
+- 用 production collector 取得 Sony `arm64-v8a`、Sony `armeabi-v7a`、
+  第二 OEM 物理 `arm64-v8a` 设备和 x86_64 emulator 的四份 current report。
+- 用当前 lifecycle 重新取得干净的 8 小时 quick soak 和 24 小时 final soak。
+- 让 final integration 和 release gate 在无 release-blocking report 的前提下
+  通过。
 
-- `crash_evidence_automation`：P13-05 已补 crash marker、next-launch
-  collection、packaged crash smoke、native SIGKILL chaos collection 和
-  signal-safe fixed-size marker 证据。
-- `second_execution_slot`：P13-06 已补默认 two-slot 调度、packaged
-  overflow-slot smoke、no-restart crash marker fallback 和 focused
-  primary/overflow shared-resource stress。长测 soak 继续由 P13-08 /
-  `full_heavy_resource_stress` 负责。
-- `android_side_package_installation`：P13-09/P13-42/P13-48 已关闭 v1.1
-  app-private local-store install/update/remove/list/verify/prune blocker；
-  registry/download、npm CLI、signed/native payload、plugin/package
-  distribution integration 仍是后续 gated promotion work。
+Rhino/Node alternating 与 backend-switch focused regression 已于 2026-07-18
+在 Sony XQ-AT72 上以 2/2、零失败、零 error、零 skip 通过。这个结果只关闭
+切换回归项，不等同于任一完整的 13-selector production device report。
+
+R6 collector 要求 host/plugin 两个 worktree 在运行前后保持 clean 且 commit
+不变，并把 freshly built signed APK、设备上实际安装的 APK、fresh JUnit XML、
+固定 13 个 selector 和 run token 绑定到同一份报告。8 小时/24 小时 runner
+不允许 production duration override 或 force archive；short smoke 永远不可
+归档。strict final integration 会 fail closed，release gate 又依赖该 strict
+final gate。完整命令和证据字段见
+[R6_ACCEPTANCE_EVIDENCE.md](R6_ACCEPTANCE_EVIDENCE.md)。
+
+在这些证据完成前，不应宣称 R6 或 Core completion 已通过；同时也不应把上述
+历史 capability blocker 重新描述为功能尚未实现。
 
 ### Conditional decisions
 
-仍需产品和技术决策：
+当前 Safe profile 的 conditional decisions 已解决：
 
-- `worker_threads`：实现受控 worker，或明确由 AutoJs6 process-worker/slot
-  模型替代。
-- `controlled_wasi`：仅支持纯 WebAssembly，还是实现受控 `autojs:wasi`。
-- `x86`：当前 optional，不是 Phase 11 必需 ABI。
+- `worker_threads`：`intentionally_unsupported`；默认保持拒绝，未来 promotion
+  需要重新打开 native、packaged、resource 和 security evidence gate。
+- `controlled_wasi`：`closed`；当前只支持纯 WebAssembly，raw/controlled
+  WASI API 保持拒绝，未来 `autojs6:wasi` 是独立 promotion work。
+- `x86`：`optional`，不是 Phase 11 必需 ABI。
 
 ### 与 Pro v9 的能力差距
 
@@ -933,11 +951,13 @@ const result = await rhino.run({
 
 ### P1：包管理与发布能力
 
-- Android-side pure-JS package manager。
-- 事务、锁、完整性校验、取消、无 lifecycle script。
-- 打包时依赖图锁定和诊断。
-- packaged long-running service。
-- 第二执行 slot 的默认调度和 stress promotion。
+- Android app-private pure-JS package store 的事务、锁、完整性校验、取消和
+  lifecycle-script denial 已完成；继续保持回归覆盖。
+- Android registry download、npm CLI、remote tarball、signed/native payload
+  和 packaged dependency distribution 仍需独立 authority 与 security gate。
+- 继续完善打包时依赖图锁定、诊断、披露和 rollback。
+- packaged long-running 与第二 execution slot 已完成历史 capability closure；
+  R6 只重验当前 persistent/plugin lifecycle 下的 production evidence。
 
 ### P2：低风险工具模块收尾
 
@@ -1409,13 +1429,11 @@ The v1.2 Pro comparison status is:
 `NodeProfileV12CapabilityCatalog` is metadata-only. It documents migration
 requirements without granting runtime authority; runtime authority remains
 unchanged.
-runtime authority remains unchanged.
 
 No v1.2 Pro comparison row should imply raw `Context`, raw `Activity`, raw
 `View`, raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`,
 raw `TimedTask`, raw `BroadcastReceiver`, raw `Notification`, or raw `WakeLock`
 object parity.
-No v1.2 Pro comparison row should imply raw `View` parity.
 
 ## Phase 15 v1.3 Migration And Pro Comparison
 
@@ -1455,7 +1473,6 @@ No v1.3 Pro comparison row grants raw `Context`, raw `Activity`, raw `View`,
 raw `Bitmap`, raw `Intent`, raw `MediaProjection`, raw `MediaRecorder`, raw
 `TimedTask`, raw `BroadcastReceiver`, raw `Notification`, raw `WakeLock`, raw
 `ContentResolver`, raw `MediaStore`, raw file descriptors, or Java objects.
-No v1.3 Pro comparison row grants raw `ContentResolver` authority.
 
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，

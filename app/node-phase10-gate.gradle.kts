@@ -1,4 +1,18 @@
 val nodePhase10ReportDir = rootProject.layout.buildDirectory.dir("reports/nodejs")
+val nodePhase10NativeCppDir = (
+        if (extensions.extraProperties.has("nodeJsRuntimeConfig.nodeJsPluginCppDir")) {
+            extensions.extraProperties.get("nodeJsRuntimeConfig.nodeJsPluginCppDir") as? File
+        } else {
+            null
+        }
+        ) ?: project.file("src/main/cpp")
+val nodePhase10RuntimeJniLibsDir = (
+        if (extensions.extraProperties.has("nodeJsRuntimeConfig.nodeJsPluginRuntimeJniLibsDir")) {
+            extensions.extraProperties.get("nodeJsRuntimeConfig.nodeJsPluginRuntimeJniLibsDir") as? File
+        } else {
+            null
+        }
+        ) ?: project.file("src/main/jniLibs")
 
 tasks.register<Exec>("verifyNodePhase10RuntimeFreeze") {
     group = "verification"
@@ -9,7 +23,7 @@ tasks.register<Exec>("verifyNodePhase10RuntimeFreeze") {
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/runtime-freeze.lock.json"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/runtime-build/runtime-build.lock.json"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    inputs.dir(nodePhase10RuntimeJniLibsDir)
     outputs.files(
         nodePhase10ReportDir.map { it.file("phase10-runtime-freeze.json") },
         nodePhase10ReportDir.map { it.file("phase10-runtime-freeze.md") },
@@ -21,6 +35,8 @@ tasks.register<Exec>("verifyNodePhase10RuntimeFreeze") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--jni-libs-root",
+        nodePhase10RuntimeJniLibsDir.absolutePath,
         "--report-dir",
         nodePhase10ReportDir.get().asFile.absolutePath,
     )
@@ -37,12 +53,23 @@ tasks.register<Exec>("generateNodePhase10CapabilityTruth") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeFetchBridgeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWebSocketBridgeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeOcrBridgeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeStorageBridgeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeNotificationsBridgeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeSensorsBridgeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeAccessibilityRealDeviceSmokeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeImageBridgeExpansionInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeUiBridgeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkManagerBridgeInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/autojs6-pm.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-worker-wasi-boundary.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-developer-experience.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-crash-adapter-cutover.js"))
+    inputs.file(nodePhase10NativeCppDir.resolve("node_runtime_adapter_24_5.cpp"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
     outputs.files(
@@ -56,6 +83,8 @@ tasks.register<Exec>("generateNodePhase10CapabilityTruth") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--native-cpp-root",
+        nodePhase10NativeCppDir.absolutePath,
         "--report-dir",
         nodePhase10ReportDir.get().asFile.absolutePath,
     )
@@ -121,7 +150,7 @@ tasks.register<Exec>("verifyNodePhase10PackagedParityHost") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/assets-app/template.apk"))
-    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    inputs.dir(nodePhase10RuntimeJniLibsDir)
     outputs.files(
         nodePhase10ReportDir.map { it.file("phase10-packaged-parity.json") },
         nodePhase10ReportDir.map { it.file("phase10-packaged-parity.md") },
@@ -133,6 +162,8 @@ tasks.register<Exec>("verifyNodePhase10PackagedParityHost") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--jni-libs-root",
+        nodePhase10RuntimeJniLibsDir.absolutePath,
         "--report-dir",
         nodePhase10ReportDir.get().asFile.absolutePath,
     )
@@ -202,7 +233,7 @@ tasks.register<Exec>("verifyNodePhase10LongRunningActivation") {
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js")
     inputs.file(scriptFile)
-    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-instrumentation-gates.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeBudgetPolicy.kt"))
@@ -257,7 +288,8 @@ tasks.register<Exec>("verifyNodePhase10WorkerWasiBoundary") {
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-worker-wasi-boundary.js")
     inputs.file(scriptFile)
-    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-runtime-config.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-android-config.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsBootstrapInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"))
@@ -307,7 +339,7 @@ tasks.register<Exec>("verifyNodePhase10DeveloperExperience") {
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeSourceMapStackTraceInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeCoreBuiltinCompatibilityInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePluginSystemInstrumentationTest.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase10NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
     outputs.files(
         nodePhase10ReportDir.map { it.file("phase10-developer-experience.json") },
@@ -320,6 +352,8 @@ tasks.register<Exec>("verifyNodePhase10DeveloperExperience") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--native-cpp-root",
+        nodePhase10NativeCppDir.absolutePath,
         "--report-dir",
         nodePhase10ReportDir.get().asFile.absolutePath,
     )
@@ -331,9 +365,9 @@ tasks.register<Exec>("verifyNodePhase10CrashAdapterCutover") {
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-crash-adapter-cutover.js")
     inputs.file(scriptFile)
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_api_v1.h"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_adapter_24_5.cpp"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase10NativeCppDir.resolve("node_runtime_api_v1.h"))
+    inputs.file(nodePhase10NativeCppDir.resolve("node_runtime_adapter_24_5.cpp"))
+    inputs.file(nodePhase10NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-adapter-abi.js"))
@@ -342,7 +376,7 @@ tasks.register<Exec>("verifyNodePhase10CrashAdapterCutover") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CRASH_INTAKE.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
-    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    inputs.dir(nodePhase10RuntimeJniLibsDir)
     outputs.files(
         nodePhase10ReportDir.map { it.file("phase10-crash-adapter-cutover.json") },
         nodePhase10ReportDir.map { it.file("phase10-crash-adapter-cutover.md") },
@@ -355,6 +389,10 @@ tasks.register<Exec>("verifyNodePhase10CrashAdapterCutover") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--native-cpp-root",
+        nodePhase10NativeCppDir.absolutePath,
+        "--jni-libs-root",
+        nodePhase10RuntimeJniLibsDir.absolutePath,
         "--report-dir",
         nodePhase10ReportDir.get().asFile.absolutePath,
     )
@@ -374,7 +412,7 @@ tasks.register<Exec>("verifyNodePhase10SecurityCorpus") {
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-crash-adapter-cutover.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-adapter-abi.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-adapter-export.js"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase10NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicy.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeRealNpmCompatInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicyInstrumentationTest.kt"))
@@ -394,6 +432,8 @@ tasks.register<Exec>("verifyNodePhase10SecurityCorpus") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--native-cpp-root",
+        nodePhase10NativeCppDir.absolutePath,
         "--report-dir",
         nodePhase10ReportDir.get().asFile.absolutePath,
     )

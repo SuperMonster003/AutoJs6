@@ -535,12 +535,16 @@ socket authority, DNS/TLS session APIs, broader packaged install/run network
 behavior, and proxy support remain blocked or scoped to later gates.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
-Interactive foreground long-running and the scheduled runner are active through
-focused gates; multi-instance remains primary-only and packaged long-running
-service mode remains blocked. `verifyNodePhase10WorkerWasiBoundary` records
-S10-37 through S10-42: pure WebAssembly stays usable, while `worker_threads`,
-raw WASI, controlled WASI, worker+WASM, and packaged WASM cache/asset promotion
-remain blocked or deferred. `verifyNodePhase10DeveloperExperience` records
+At Phase 10, interactive foreground long-running and the scheduled runner were
+active through focused gates, while multi-instance was primary-only and
+packaged long-running service mode was blocked. Phase 13 later closed the
+packaged long-running and second-slot capability blockers; R6 now revalidates
+their current persistent/plugin lifecycle evidence.
+`verifyNodePhase10WorkerWasiBoundary` records the historical S10-37 through
+S10-42 state. The final registry later resolved `worker_threads` as
+intentionally unsupported and `controlled_wasi` by supporting pure WebAssembly
+while keeping raw/controlled WASI APIs denied.
+`verifyNodePhase10DeveloperExperience` records
 S10-43 through S10-46 with a host/build-stage TypeScript transform fixture,
 incremental cache evidence, source-map evidence, embedded `node:test` coverage,
 and debug-only hot reload policy. `verifyNodeDeveloperExperienceGate` runs the
@@ -550,8 +554,11 @@ records S10-47 through S10-52: crash evidence bundle schema, resource/timeline
 snapshot requirements, adapter operation inventory, legacy-vs-adapter A/B
 blockers, and default-switch blockers. `verifyNodeCrashAdapterCutoverGate`
 pairs that report with the Phase 9 native crash pipeline and adapter ABI/export
-checks. The Node 24.5 adapter remains `surface_only`, so `legacy_jni` remains
-the default execution path. `verifyNodePhase10SecurityCorpus` records S10-53
+checks. The historical Phase 10 report recorded the Node 24.5 adapter as
+`surface_only`. The current registry records the real adapter v1 execution path
+as closed and selectable, while `legacy_jni` remains the embedded default and
+diagnostic fallback until separate default-promotion evidence changes that
+policy. `verifyNodePhase10SecurityCorpus` records S10-53
 attack-surface evidence and fails if any corpus entry loses its code or gate
 evidence. `generateNodePhase10Summary` records S10-56 and requires the final
 Phase 10 50-fixture real npm corpus and 55-example catalog before it can report
@@ -560,31 +567,86 @@ Phase 10 50-fixture real npm corpus and 55-example catalog before it can report
 
 ## Phase 11 Final Graduation Gates
 
-Phase 11 introduces the final graduation contract. Generation tasks are safe to
-run while required internal blockers are still open:
+Phase 11 introduces the final graduation contract. The machine-readable
+registry now records zero unresolved required internal blockers. Generation
+tasks remain non-strict: they write the current report state even when a
+required evidence report is blocked or R6 evidence freshness is incomplete.
 
 ```powershell
 .\gradlew.bat --console=plain :app:generateNodeFinalCapabilityTruth
 .\gradlew.bat --console=plain :app:verifyNodeFinalFocusedGateTopology
 .\gradlew.bat --console=plain :app:generateNodeFinalAdapterStatus
 .\gradlew.bat --console=plain :app:generateNodeFinalCrashStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalPackageManagerStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalLongRunningStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalMultiInstanceStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalWorkerDecisionStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalSoakStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalProviderStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalAbiStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalSecurityStatus
 .\gradlew.bat --console=plain :app:generateNodeFinalIntegrationSummary
 ```
 
-Strict final gates intentionally fail until the required internal blockers in
-`docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` are closed:
+Strict final gates fail closed when their required capability or production
+evidence is missing, blocked, stale, or failed:
 
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodeFinalCapabilityTruth
 .\gradlew.bat --console=plain :app:verifyNodeFinalAdapterGate
 .\gradlew.bat --console=plain :app:verifyNodeFinalCrashGate
+.\gradlew.bat --console=plain :app:verifyNodeFinalPackageManagerGate
+.\gradlew.bat --console=plain :app:verifyNodeFinalLongRunningGate
+.\gradlew.bat --console=plain :app:verifyNodeFinalMultiInstanceGate
+.\gradlew.bat --console=plain :app:verifyNodeFinalWorkerDecisionGate
+.\gradlew.bat --console=plain :app:verifyNodeFinalSoakGate
+.\gradlew.bat --console=plain :app:verifyNodeFinalProviderGate
+.\gradlew.bat --console=plain :app:verifyNodeFinalAbiGate
+.\gradlew.bat --console=plain :app:verifyNodeFinalSecurityGate
 .\gradlew.bat --console=plain :app:verifyNodeFinalIntegrationGate
 ```
 
+Historical Phase 11/13 capability closure is necessary but is not sufficient
+for R6. Persistent process-global runtime reuse and the required external
+`plugin` lifecycle independently require current lifecycle, crash, memory, ABI,
+packaged, multi-device, and soak evidence. Core completion remains pending until
+those reports are regenerated from the current build and pass. Do not reopen a
+historical capability blocker merely to represent evidence freshness.
+
+R6 has a separate contract, status, and strict gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeR6ProductionEvidenceContract
+.\gradlew.bat --console=plain :app:generateNodeR6ProductionEvidenceStatus
+.\gradlew.bat --console=plain :app:verifyNodeR6ProductionEvidenceGate
+```
+
+The status task is intentionally non-strict and writes
+`r6-production-evidence-gate.{json,md}` even while required evidence is
+blocked. The strict task requires current reports for `sony-arm64`,
+`sony-armeabi-v7a`, `second-oem-arm64`, and `emulator-x86_64`, plus the fixed
+8-hour quick soak and 24-hour final soak. Each device report is produced by
+`tools/nodejs/r6/run-device-evidence.js` and must attest a clean, unchanged host
+and plugin source identity, freshly built and installed signed APK bytes, a
+fresh JUnit XML, and exactly 13 fixed selectors with zero failures, errors, or
+skips. The production soak runner fixes the two durations; its `--smoke` mode
+is always non-archivable and cannot satisfy either production soak.
+
+`generateNodeFinalIntegrationSummary` consumes the non-strict R6 status so it
+can explain a blocked decision. `verifyNodeFinalIntegrationGate` consumes it
+strictly, and `verifyNodeReleaseGate` depends on that strict final gate. Missing,
+stale, dirty, under-duration, skipped, or mismatched R6 evidence therefore
+fails final and release closed. See
+[R6_ACCEPTANCE_EVIDENCE.md](R6_ACCEPTANCE_EVIDENCE.md) for the collector and
+soak commands, canonical report paths, and exact acceptance contract.
+
 The final status vocabulary is only `completed` or `blocked`;
 `completed_with_recorded_blockers` is not valid for required internal
-capabilities. Node 24.17 remains an external runtime maintenance lane, and
-`node24_5` remains the default runtime while Phase 11 work proceeds. See
+capabilities. The Safe-profile conditional decisions are resolved:
+`worker_threads` is intentionally unsupported, controlled WASI is closed with
+pure WebAssembly as the supported path, and `x86` is optional. Node 24.17
+remains a non-blocking external runtime maintenance lane, and `node24_5`
+remains the default runtime. See
 [final/README.md](final/README.md).
 
 ## Phase 7 Focused Gates
@@ -1077,12 +1139,16 @@ final 8 hour quick soak and 24 hour final soak. It consumes
 `build/reports/nodejs/final-soak/quick-soak-8h.json` and
 `build/reports/nodejs/final-soak/final-soak-24h.json`, checks comparable RSS,
 Java heap, native heap, thread count, fd count, and bridge diagnostics, and
-keeps the blocker open while either real device soak is missing or dirty.
+blocks the current final evidence decision while either real device soak is
+missing or dirty. It does not mutate the blocker registry or reopen the
+historical `full_heavy_resource_stress` capability closure.
 It also runs fixture-based contract checks from
 `tools/nodejs/phase13/fixtures/full-heavy-resource-stress/` to prove accepted
 report shapes and fail-closed under-duration, missing-metric, leak/orphan, and
 unrecoverable-runtime shapes. Those fixtures are CI contract tests only and do
-not satisfy the 8h/24h soak requirement.
+not satisfy the 8h/24h soak requirement. For R6, the real reports must be
+regenerated against the current persistent/plugin lifecycle; the historical
+Phase 13 reports alone do not satisfy R6 evidence freshness.
 Use `tools/nodejs/phase13/run-full-heavy-resource-soak.js` for the real device
 soaks:
 

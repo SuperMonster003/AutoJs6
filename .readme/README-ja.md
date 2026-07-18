@@ -71,7 +71,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-データは 2026 年 7 月 18 日 に更新されました.
+データは 2026 年 7 月 19 日 に更新されました.
 
 データ項目は `最終アクティブ` の降順で並べ替えられます.
 
@@ -166,7 +166,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.8.0
 
-###### 2026/07/18
+###### 2026/07/19
 
 * `新機能` Node.js 24.5.0 スクリプトランタイム, "nodejs" ディレクティブまたは .node.js/.cjs/.mjs などの拡張子によるスクリプト実行に対応
 * `新機能` Node.js ランタイムが CommonJS/部分的な ESM/ローカル限定の動的 import()/軽量 TypeScript ソース (.ts/.mts/.cts) に対応
@@ -206,6 +206,8 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` ランタイムプロセスの安定化待機により Node.js スクリプトの実行結果の返却が遅延する問題
 * `修正` Node.js のアクティブ実行をキャンセルすると異常プロセスの隔離前に実行登録が削除され, 完了待機がブロックされて復旧が遅延する可能性がある問題
 * `修正` Node.js 外部ランタイムの Binder 応答消失後に自動フォールバックすると同じスクリプトが二重実行される可能性がある問題
+* `修正` Android プライベートディレクトリの /data/user/0 と /data/data のエイリアスが正規化されてプラグインリクエストに書き戻されず, 正当な Node.js workingDirectory が sandboxRoot を逸脱していると誤判定される問題
+* `修正` ホストに Node ランタイムを含まない nodePlugin ビルドで全 ABI の JNI/AAR ライブラリが誤って除外され, libjackpal-termexec2.so の欠落により Rhino Shell の初期化時にクラッシュする問題
 * `修正` runtime.loadJar がより新しい Java バージョン向けにコンパイルされた class ファイルを正常に動的ロードできない問題
 * `修正` app.isInstalled/kill などのメソッドでパッケージ名引数を正常に使用できない問題 _[`issue #495`](http://issues.autojs6.com/495)_
 * `修正` Root 権限のないデバイスで shell 関連メソッドを呼び出すと応答しなくなる可能性がある問題
@@ -239,6 +241,10 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` Node.js 内蔵ネイティブライブラリの解決結果をキャッシュしプラグインの反復検出を削減
 * `改善` 認証済み Node.js 外部ランタイム候補と常駐 Binder セッションをキャッシュし, 状態変更時の無効化とアトミック再接続によりプラグイン検出とバインドのオーバーヘッドを削減
 * `改善` Node.js の既定の実行パスからプロジェクト全体の暗号化モジュール走査を削除し複雑なスクリプトと大規模プロジェクトの起動性能を向上
+* `改善` Node.js エンジン切り替えに実動する Rhino/Node の複数ラウンド実行回帰テストを追加し, 外部プラグインの常駐セッション再利用/復旧/完全な終了処理を網羅
+* `改善` Node.js 外部プラグイン常駐ランタイムに soak テストと本番エビデンスゲートを追加し, デバイス/ABI マトリクス/ランタイムライフサイクル/リソース指標/8 時間および 24 時間の安定性を検証
+* `改善` Node.js ネイティブ検証で外部ランタイムプラグインのソースおよびビルドルートを解決して検証
+* `改善` Node.js の最終統合およびリリースゲートは, 必須レポート/現在のソースに基づくエビデンス/本番受け入れ成果物が欠落または期限切れの場合に fail-closed で判定
 * `改善` ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo 関連機能をプラグイン化
 * `改善` コードエディタの "実行" ボタンをタップ後に "停止" ボタンへ切り替え, スクリプトをすばやく停止可能
 * `改善` コードエディタのテーマ/フォント/ツールバー/読み取り専用モード/折りたたみ/選択メニューなどの操作性を改善
@@ -530,7 +536,7 @@ File (ファイル) | Settings (設定) | Appearance & Behavior (外観と動作
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `21` の使用を推奨します.
 
-2026 年 7 月 18 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
+2026 年 7 月 19 日 現在, AutoJs6がサポートする最大のJDKバージョンは `26` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

@@ -3,6 +3,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { resolvePhase13SourceFile } = require("./source-topology");
 
 const REPORT_BASENAME = "phase13-stdlib-conformance-decision";
 const P13_MODULES = Object.freeze([
@@ -70,7 +71,7 @@ function main() {
 function loadFiles(repoRoot) {
   return Object.fromEntries(
     Object.entries(FILES).map(([key, relative]) => {
-      const file = path.join(repoRoot, relative);
+      const file = resolvePhase13SourceFile(repoRoot, relative);
       return [key, { relative, exists: fs.existsSync(file), text: read(file) }];
     }),
   );

@@ -15,6 +15,29 @@ private val nativeNodeReportNodeLibcxxSymbols = listOf(
     "_ZTVNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE",
 )
 
+@Suppress("UNCHECKED_CAST")
+private fun <T> nativeNodeReportRuntimeConfig(name: String): T =
+    extensions.extraProperties.get("nodeJsRuntimeConfig.$name") as T
+
+private val nativeNodeReportUsesPluginBuild =
+    nativeNodeReportRuntimeConfig<String>("effectiveNodeJsRuntimeBackend") == "plugin" &&
+            !nativeNodeReportRuntimeConfig<Boolean>("isNodeJsHostBridgeBuildRequested")
+private val nativeNodeReportPluginProjectDir =
+    nativeNodeReportRuntimeConfig<File?>("nodeJsPluginProjectDir")?.canonicalFile
+private val nativeNodeReportNativeOwnerProjectDir = if (nativeNodeReportUsesPluginBuild) {
+    requireNotNull(nativeNodeReportPluginProjectDir) {
+        "Node.js plugin project directory is required for the plugin native symbol report."
+    }.resolve("app").canonicalFile
+} else {
+    projectDir.canonicalFile
+}
+private val nativeNodeReportOwnerVariant = if (nativeNodeReportUsesPluginBuild) "debug" else nativeNodeReportVariant
+private val nativeNodeReportOwnerVariantTaskSuffix =
+    if (nativeNodeReportUsesPluginBuild) "Debug" else nativeNodeReportVariantTaskSuffix
+private val nativeNodeReportNativeBuildDependency =
+    if (nativeNodeReportUsesPluginBuild) "buildNodeRuntimePluginNativeDebug"
+    else "externalNativeBuild${nativeNodeReportVariantTaskSuffix}"
+
 private data class NativeNodeReportTools(
     val ndkDir: File,
     val readelf: File,
@@ -750,12 +773,12 @@ val nativeNodeDependencyReportAppDebug = tasks.register("nativeNodeDependencyRep
 
 val nativeNodeSymbolArchiveReport = tasks.register("nativeNodeSymbolArchiveReport") {
     group = "verification"
-    description = "Writes the appDebug native symbol archive report for Embedded Node crash diagnostics."
+    description = "Writes the effective runtime owner's debug native symbol archive report for Node crash diagnostics."
 
-    dependsOn(
-        "externalNativeBuild${nativeNodeReportVariantTaskSuffix}",
-        "merge${nativeNodeReportVariantTaskSuffix}NativeLibs",
-    )
+    dependsOn(nativeNodeReportNativeBuildDependency)
+    if (!nativeNodeReportUsesPluginBuild) {
+        dependsOn("merge${nativeNodeReportVariantTaskSuffix}NativeLibs")
+    }
     outputs.file(layout.buildDirectory.file("reports/native-node/native-symbol-archive-$nativeNodeReportVariant.txt"))
     outputs.upToDateWhen { false }
 
@@ -780,38 +803,49 @@ val nativeNodeSymbolArchiveReport = tasks.register("nativeNodeSymbolArchiveRepor
             return@doLast
         }
 
-        val sourceJniLibsRoot = projectDir.resolve("src/main/jniLibs")
-        val cxxNativeLibsRoot = layout.buildDirectory.dir("intermediates/cxx").get().asFile
-        val mergedNativeLibsRoot = layout.buildDirectory
-            .dir("intermediates/merged_native_libs/$nativeNodeReportVariant/merge${nativeNodeReportVariantTaskSuffix}NativeLibs/out/lib")
-            .get()
-            .asFile
-        val strippedNativeLibsRoot = layout.buildDirectory
-            .dir("intermediates/stripped_native_libs/$nativeNodeReportVariant/strip${nativeNodeReportVariantTaskSuffix}DebugSymbols/out/lib")
-            .get()
-            .asFile
+        val sourceJniLibsRoot = if (nativeNodeReportUsesPluginBuild) {
+            nativeNodeReportRuntimeConfig<File>("nodeJsRuntimeSlotJniLibsSourceDir").canonicalFile
+        } else {
+            projectDir.resolve("src/main/jniLibs").canonicalFile
+        }
+        val nativeOwnerBuildDir = nativeNodeReportNativeOwnerProjectDir.resolve("build")
+        val cxxNativeLibsRoot = nativeOwnerBuildDir.resolve(
+            "intermediates/cxx/$nativeNodeReportOwnerVariantTaskSuffix"
+        )
+        val mergedNativeLibsRoot = nativeOwnerBuildDir.resolve(
+            "intermediates/merged_native_libs/$nativeNodeReportOwnerVariant/" +
+                    "merge${nativeNodeReportOwnerVariantTaskSuffix}NativeLibs/out/lib"
+        )
+        val strippedNativeLibsRoot = nativeOwnerBuildDir.resolve(
+            "intermediates/stripped_native_libs/$nativeNodeReportOwnerVariant/" +
+                    "strip${nativeNodeReportOwnerVariantTaskSuffix}DebugSymbols/out/lib"
+        )
 
         val missingRequiredEntries = nativeNodeReportRequiredLibcxxAbis.flatMap { abi ->
-            listOfNotNull(
-                "src/main/jniLibs/$abi/$nativeNodeReportNodeLibraryName".takeUnless {
+            buildList {
+                "runtime jniLibs/$abi/$nativeNodeReportNodeLibraryName".takeUnless {
                     sourceJniLibsRoot.resolve("$abi/$nativeNodeReportNodeLibraryName").isFile
-                },
+                }?.let(::add)
                 "CMake output $abi/$nativeNodeReportBridgeLibraryName".takeUnless {
                     latestNativeNodeReportLibraryFile(cxxNativeLibsRoot, abi, nativeNodeReportBridgeLibraryName)?.isFile == true
-                },
-                "merged_native_libs/$abi/$nativeNodeReportNodeLibraryName".takeUnless {
-                    mergedNativeLibsRoot.resolve("$abi/$nativeNodeReportNodeLibraryName").isFile
-                },
-                "merged_native_libs/$abi/$nativeNodeReportBridgeLibraryName".takeUnless {
-                    mergedNativeLibsRoot.resolve("$abi/$nativeNodeReportBridgeLibraryName").isFile
-                },
-            )
+                }?.let(::add)
+                if (!nativeNodeReportUsesPluginBuild) {
+                    "merged_native_libs/$abi/$nativeNodeReportNodeLibraryName".takeUnless {
+                        mergedNativeLibsRoot.resolve("$abi/$nativeNodeReportNodeLibraryName").isFile
+                    }?.let(::add)
+                    "merged_native_libs/$abi/$nativeNodeReportBridgeLibraryName".takeUnless {
+                        mergedNativeLibsRoot.resolve("$abi/$nativeNodeReportBridgeLibraryName").isFile
+                    }?.let(::add)
+                }
+            }
         }
         val ready = missingRequiredEntries.isEmpty()
 
         val report = buildString {
             appendLine("Native Node symbol archive report: $nativeNodeReportVariant")
             appendLine("Generated at: ${java.time.ZonedDateTime.now()}")
+            appendLine("Runtime artifact owner: ${if (nativeNodeReportUsesPluginBuild) "plugin" else "host"}")
+            appendLine("Runtime owner project: ${nativeNodeReportNativeOwnerProjectDir.absolutePath}")
             appendLine()
 
             appendLine("Tools:")
@@ -821,7 +855,7 @@ val nativeNodeSymbolArchiveReport = tasks.register("nativeNodeSymbolArchiveRepor
             appendLine()
 
             appendLine("Scan roots:")
-            appendLine("  src/main/jniLibs: ${sourceJniLibsRoot.absolutePath}")
+            appendLine("  runtime jniLibs: ${sourceJniLibsRoot.absolutePath}")
             appendLine("  CMake outputs: ${cxxNativeLibsRoot.absolutePath}")
             appendLine("  merged native libs: ${mergedNativeLibsRoot.absolutePath}")
             appendLine("  stripped native libs: ${strippedNativeLibsRoot.absolutePath}")
@@ -832,7 +866,7 @@ val nativeNodeSymbolArchiveReport = tasks.register("nativeNodeSymbolArchiveRepor
                 appendLine("  $nativeNodeReportNodeLibraryName:")
                 appendNativeNodeSymbolArchiveEntry(
                     tools,
-                    "src/main/jniLibs",
+                    "runtime jniLibs",
                     sourceJniLibsRoot.resolve("$abi/$nativeNodeReportNodeLibraryName"),
                 )
                 appendNativeNodeSymbolArchiveEntry(
@@ -878,6 +912,9 @@ val nativeNodeSymbolArchiveReport = tasks.register("nativeNodeSymbolArchiveRepor
             appendLine("  Keep this report with the APK, git commit, logcat, and tombstone or bugreport for crash triage.")
             appendLine("  For bridge crashes, prefer the latest CMake output symbol_file path when it has .debug_* or .symtab sections.")
             appendLine("  For libnode crashes, use the Build ID and sha256 to match the exact prebuilt libnode.so artifact.")
+            if (nativeNodeReportUsesPluginBuild) {
+                appendLine("  Plugin mode requires the authoritative runtime jniLibs and CMake outputs; merged/stripped entries are supplemental when available.")
+            }
         }
 
         reportFile.writeText(report)

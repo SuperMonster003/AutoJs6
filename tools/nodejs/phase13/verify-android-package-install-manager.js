@@ -10,7 +10,6 @@ const FILES = {
   blockerRegistry: "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
   phase13Tasks: "docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md",
   p13Report: "docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md",
-  nodeBridgeSources: "app/src/main/cpp/node_bridge_sources.cpp",
   manager: "app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt",
   managerTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManagerInstrumentationTest.kt",
   p13PackageManagerTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodePackageManagerPhase13DecisionInstrumentationTest.kt",
@@ -26,8 +25,10 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
-  const files = loadFiles(repoRoot);
+  const nativeCppRoot = resolveNativeCppRoot(repoRoot, options.nativeCppRoot);
+  const files = loadFiles(repoRoot, nativeCppRoot);
   const report = buildReport(files);
+  report.nativeCppRoot = relativePath(repoRoot, nativeCppRoot);
   fs.mkdirSync(reportDir, { recursive: true });
   fs.writeFileSync(path.join(reportDir, `${REPORT_BASENAME}.json`), JSON.stringify(report, null, 2) + "\n");
   fs.writeFileSync(path.join(reportDir, `${REPORT_BASENAME}.md`), renderMarkdown(report));
@@ -39,13 +40,41 @@ function main() {
   }
 }
 
-function loadFiles(repoRoot) {
-  return Object.fromEntries(
+function loadFiles(repoRoot, nativeCppRoot) {
+  const files = Object.fromEntries(
     Object.entries(FILES).map(([key, relative]) => {
       const file = path.join(repoRoot, relative);
       return [key, { relative, exists: fs.existsSync(file), text: read(file) }];
     }),
   );
+  const nodeBridgeSources = path.join(nativeCppRoot, "node_bridge_sources.cpp");
+  files.nodeBridgeSources = {
+    relative: relativePath(repoRoot, nodeBridgeSources),
+    exists: fs.existsSync(nodeBridgeSources),
+    text: read(nodeBridgeSources),
+  };
+  return files;
+}
+
+function resolveNativeCppRoot(repoRoot, requested) {
+  if (requested) {
+    const requestedRoot = path.resolve(requested);
+    const nodeBridgeSources = path.join(requestedRoot, "node_bridge_sources.cpp");
+    if (!fs.existsSync(nodeBridgeSources)) {
+      throw new Error(`Explicit --native-cpp-root must contain node_bridge_sources.cpp: ${requestedRoot}`);
+    }
+    return requestedRoot;
+  }
+  const candidates = [
+    path.resolve(repoRoot, "../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/cpp"),
+    path.join(repoRoot, "app/src/main/cpp"),
+  ];
+  return candidates.find((candidate) => fs.existsSync(path.join(candidate, "node_bridge_sources.cpp")))
+    || candidates[candidates.length - 1];
+}
+
+function relativePath(repoRoot, file) {
+  return path.relative(repoRoot, file).replace(/\\/g, "/");
 }
 
 function buildReport(files) {
@@ -265,7 +294,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node verify-android-package-install-manager.js [--repo-root dir] [--report-dir dir] [--fail-on-blocked]");
+      console.log("Usage: node verify-android-package-install-manager.js [--repo-root dir] [--native-cpp-root dir] [--report-dir dir] [--fail-on-blocked]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

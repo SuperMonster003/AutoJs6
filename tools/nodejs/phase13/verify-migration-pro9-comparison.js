@@ -21,7 +21,7 @@ const FILES = {
   capabilityMatrix: "docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md",
   surfaceManifest: "docs/nodejs/phase13/phase13-surface-manifest.json",
   surfaceManifestDoc: "docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md",
-  phase13Summary: "docs/nodejs/reports/phase13/PHASE13_SUMMARY.md",
+  phase13SummaryGenerator: "tools/nodejs/phase13/generate-phase13-summary.js",
 };
 
 const REQUIRED_DOC_TOKENS = [
@@ -85,7 +85,7 @@ function buildReport(files) {
       token(files.proAutoxNotes, "runtime promotion gate"),
       token(files.proAutoxNotes, "native payloads"),
     ]),
-    scenario("evidence_chain", "P13-56 is wired into docs, gates, examples, types, surface manifest, and summary state", [
+    scenario("evidence_chain", "P13-56 is wired into docs, gates, examples, types, surface manifest, and the summary contract", [
       token(files.phase13Tasks, "P13-56 partial landing"),
       token(files.p13Report, "P13-56 records migration and Pro9 comparison docs as partial"),
       token(files.phase13GradleGate, "verifyNodePhase13MigrationPro9Comparison"),
@@ -100,15 +100,11 @@ function buildReport(files) {
       token(files.proParityManifest, "java-interop"),
       token(files.desktopParityManifest, "worker-threads"),
       token(files.desktopParityManifest, "raw-network"),
-      token(files.phase13Summary, "Status: P13-57 v1.1 closeout gate is ready."),
-      token(files.phase13Summary, "## Release Gate"),
-      token(files.phase13Summary, "- Completed blockers:"),
-      token(files.phase13Summary, "- Open blockers:"),
-      token(files.phase13Summary, "- Deferred blockers:"),
-      token(files.phase13Summary, "- Rejected blockers:"),
-      token(files.phase13Summary, "- Release-blocking reports:"),
-      token(files.phase13Summary, "- Future promotion reports with blockers:"),
-      token(files.phase13Summary, "| `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56`"),
+      token(files.phase13SummaryGenerator, '"phase13-migration-pro9-comparison"'),
+      token(files.phase13SummaryGenerator, '"canonical-report-set"'),
+      token(files.phase13SummaryGenerator, "releaseBlockingReports"),
+      token(files.phase13SummaryGenerator, "futurePromotionReports"),
+      token(files.phase13SummaryGenerator, "complete fresh canonical report set"),
     ]),
   ];
 
@@ -144,8 +140,9 @@ function buildReport(files) {
         [files.migrationDoc, files.proComparison, files.proAutoxNotes].every((file) =>
           file.text.includes("debug-only/provider POC is not formal availability") &&
             file.text.includes("runtime promotion gate")) &&
-        files.phase13Summary.text.includes("| `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56`"),
-      "P13-56 runtime parity claims must remain partial until promoted paths are executable and summary state stays linked.",
+        files.phase13SummaryGenerator.text.includes('"phase13-migration-pro9-comparison"') &&
+        files.phase13SummaryGenerator.text.includes('"canonical-report-set"'),
+      "P13-56 runtime parity claims must remain partial until promoted paths are executable and the fail-closed summary contract stays linked.",
     ),
     check(
       "surface-entry",

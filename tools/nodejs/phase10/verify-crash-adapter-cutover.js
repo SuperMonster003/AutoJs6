@@ -36,8 +36,20 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
-  const files = loadFiles(repoRoot);
-  const crashBundle = buildCrashEvidenceBundle(repoRoot, reportDir, files);
+  const nativeCppRoot = resolveExternalRoot(
+    repoRoot,
+    options.nativeCppRoot,
+    "../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/cpp",
+    "app/src/main/cpp",
+  );
+  const jniLibsRoot = resolveExternalRoot(
+    repoRoot,
+    options.jniLibsRoot,
+    "../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/jniLibs",
+    "app/src/main/jniLibs",
+  );
+  const files = loadFiles(repoRoot, nativeCppRoot);
+  const crashBundle = buildCrashEvidenceBundle(repoRoot, reportDir, files, jniLibsRoot);
   const resourceSnapshot = evaluateResourceSnapshot(files);
   const adapterInventory = evaluateAdapterInventory(files);
   const abGate = evaluateLegacyAdapterAbGate(files, adapterInventory);
@@ -86,10 +98,10 @@ function main() {
   }
 }
 
-function buildCrashEvidenceBundle(repoRoot, reportDir, files) {
+function buildCrashEvidenceBundle(repoRoot, reportDir, files, jniLibsRoot) {
   const bundleDir = path.join(reportDir, "phase10-crash-evidence-bundle");
   fs.mkdirSync(bundleDir, { recursive: true });
-  const nativeHashes = collectNativeLibraryHashes(repoRoot);
+  const nativeHashes = collectNativeLibraryHashes(repoRoot, jniLibsRoot);
   const descriptor = extractRuntimeDescriptor(files.adapterSource.text);
   const bundle = {
     schema: "autojs6-node-phase10-crash-evidence-bundle-v1",
@@ -143,8 +155,7 @@ function buildCrashEvidenceBundle(repoRoot, reportDir, files) {
   };
 }
 
-function collectNativeLibraryHashes(repoRoot) {
-  const root = path.join(repoRoot, "app/src/main/jniLibs");
+function collectNativeLibraryHashes(repoRoot, root) {
   if (!fs.existsSync(root)) {
     return [];
   }
@@ -286,29 +297,38 @@ function extractRuntimeDescriptor(source) {
   };
 }
 
-function loadFiles(repoRoot) {
+function loadFiles(repoRoot, nativeCppRoot) {
   const paths = {
-    phase9Crash: "docs/nodejs/reports/phase9/NATIVE_CRASH_PIPELINE.md",
-    crashIntake: "docs/nodejs/CRASH_INTAKE.md",
-    nativeCrashDiagnostics: "docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md",
-    testing: "docs/nodejs/TESTING.md",
-    capabilities: "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt",
-    bridgeSources: "app/src/main/cpp/node_bridge_sources.cpp",
-    resourceRegistry: "app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt",
-    adapterHeader: "app/src/main/cpp/node_runtime_api_v1.h",
-    adapterSource: "app/src/main/cpp/node_runtime_adapter_24_5.cpp",
-    adapterAbiScript: "tools/nodejs/native/verify-runtime-adapter-abi.js",
-    adapterExportScript: "tools/nodejs/native/verify-runtime-adapter-export.js",
+    phase9Crash: path.join(repoRoot, "docs/nodejs/reports/phase9/NATIVE_CRASH_PIPELINE.md"),
+    crashIntake: path.join(repoRoot, "docs/nodejs/CRASH_INTAKE.md"),
+    nativeCrashDiagnostics: path.join(repoRoot, "docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md"),
+    testing: path.join(repoRoot, "docs/nodejs/TESTING.md"),
+    capabilities: path.join(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"),
+    bridgeSources: path.join(nativeCppRoot, "node_bridge_sources.cpp"),
+    resourceRegistry: path.join(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt"),
+    adapterHeader: path.join(nativeCppRoot, "node_runtime_api_v1.h"),
+    adapterSource: path.join(nativeCppRoot, "node_runtime_adapter_24_5.cpp"),
+    adapterAbiScript: path.join(repoRoot, "tools/nodejs/native/verify-runtime-adapter-abi.js"),
+    adapterExportScript: path.join(repoRoot, "tools/nodejs/native/verify-runtime-adapter-export.js"),
   };
   return Object.fromEntries(
-    Object.entries(paths).map(([key, relative]) => [
+    Object.entries(paths).map(([key, file]) => [
       key,
       {
-        relative,
-        text: read(path.join(repoRoot, relative)),
+        relative: path.relative(repoRoot, file).replace(/\\/g, "/"),
+        text: read(file),
       },
     ]),
   );
+}
+
+function resolveExternalRoot(repoRoot, requested, siblingRelative, hostRelative) {
+  const candidates = [
+    requested && path.resolve(requested),
+    path.resolve(repoRoot, siblingRelative),
+    path.resolve(repoRoot, hostRelative),
+  ].filter(Boolean);
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[candidates.length - 1];
 }
 
 function tokenCheck(id, text, tokens) {
@@ -416,7 +436,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node verify-crash-adapter-cutover.js [--repo-root dir] [--report-dir dir]");
+      console.log("Usage: node verify-crash-adapter-cutover.js [--repo-root dir] [--native-cpp-root dir] [--jni-libs-root dir] [--report-dir dir]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

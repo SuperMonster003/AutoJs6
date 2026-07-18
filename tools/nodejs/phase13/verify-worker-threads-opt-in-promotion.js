@@ -3,6 +3,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { resolvePhase13SourceFile } = require("./source-topology");
 
 const REPORT_BASENAME = "phase13-worker-threads-opt-in-promotion";
 
@@ -14,7 +15,7 @@ const FILES = {
   desktopMatrix: "docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md",
   runtimeCapabilities: "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt",
   nodeBridgeSources: "app/src/main/cpp/node_bridge_sources.cpp",
-  buildGradle: "app/build.gradle.kts",
+  instrumentationGate: "app/node-instrumentation-gates.gradle.kts",
   phase13GradleGate: "app/node-phase13-gate.gradle.kts",
   p13WorkerTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsPhase13DecisionInstrumentationTest.kt",
   workerSupport: "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt",
@@ -59,7 +60,7 @@ function main() {
 function loadFiles(repoRoot) {
   return Object.fromEntries(
     Object.entries(FILES).map(([key, relative]) => {
-      const file = path.join(repoRoot, relative);
+      const file = resolvePhase13SourceFile(repoRoot, relative);
       return [key, { relative, exists: fs.existsSync(file), text: read(file) }];
     }),
   );
@@ -95,7 +96,7 @@ function buildReport(files) {
       token(files.workerStressTest, "worker.resource.sequence=0|1|100|100|0|0"),
       token(files.workerStressTest, "worker.resource.pool.shutdown=0|0|104|1|1|0"),
       token(files.packagedSmokeTest, "packaged.worker_threads.esm.ready=true"),
-      token(files.buildGradle, "installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk"),
+      token(files.instrumentationGate, "installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk"),
       token(files.workerDesignDoc, "Runnable coverage is skipped when the preflight reports native workers unavailable"),
       token(files.p13Report, "QV710AF65F / XQ-AT72 / Android 12"),
       token(files.p13Report, "tests=16, failures=0,"),

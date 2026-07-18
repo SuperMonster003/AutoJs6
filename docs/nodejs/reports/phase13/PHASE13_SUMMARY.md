@@ -1,20 +1,21 @@
 # Phase 13 Summary
 
-Status: P13-57 v1.1 closeout gate is ready.
+Status: P13-57 v1.1 closeout gate is `partial`.
 
 This summary is generated from the Phase 13 task checklist, Phase 13 surface manifest, final blocker registry, profile truth report, and generated Phase 13 conformance reports. Future promotion blockers remain visible as backlog and are not counted as release blockers.
 
 ## Release Gate
 
-- Status: `ready`
+- Status: `partial`
 - P13-57 task complete: true
 - Open final blockers: 0
 - Required internal blockers still open: 0
-- Release-blocking reports: 0
+- Release-blocking reports: 2
 - Future promotion reports with blockers: 9
 - Reports with policy violations: 0
 - Profile truth ready: true
 - Conformance reports ready: true
+- Canonical report set ready: true
 
 ## Task Checklist
 
@@ -104,7 +105,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 | Surface | Status | Risk | Tasks | Evidence | Summary |
 | --- | --- | --- | --- | --- | --- |
-| `phase13.baseline` | `default_promoted` | `low` | `P13-00`, `P13-01` | 3 item(s) | Phase 13 checklist and baseline verifier for Phase 12 completion, version.properties, open blockers, and Pro/Desktop profile planning. |
+| `phase13.baseline` | `default_promoted` | `low` | `P13-00`, `P13-01` | 4 item(s) | Phase 13 checklist and immutable entry snapshot verifier, with separate non-regression checks for current version and blocker state. |
 | `phase13.surface_manifest` | `default_promoted` | `low` | `P13-02` | 5 item(s) | Machine-readable manifest and verifier for Phase 13 task ownership, status, profile, risk, evidence, and rollback tracking. |
 
 ## Open Surfaces
@@ -170,13 +171,20 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Generated Phase 13 Reports
 
 - Total reports: 54
+- Canonical reports expected: 54
+- Canonical reports present: 54
+- Missing canonical reports: 0
+- Invalid canonical reports: 0
+- Stale canonical reports: 0
+- Unexpected canonical-shaped reports: 0
 - Reports with policy violations: 0
-- Reports with blockers: 9
-- Release-blocking reports: 0
+- Reports with blockers: 11
+- Release-blocking reports: 2
 - Future promotion reports with blockers: 9
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
+| `node-builtin-parity.json` | `generateNodeBuiltinDesktopParityMatrix` | `-` | `passed` | 0 | 0 |
 | `phase13-accessibility-selector-promotion.json` | `verifyNodePhase13AccessibilitySelectorPromotion` | `P13-19` | `partial` | 0 | 2 |
 | `phase13-android-package-install-manager.json` | `verifyNodePhase13AndroidPackageInstallManager` | `P13-09` | `ready` | 0 | 0 |
 | `phase13-app-intent-broadcast-parity.json` | `verifyNodePhase13AppIntentBroadcastParity` | `P13-23` | `ready` | 0 | 0 |
@@ -192,8 +200,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-esm-loader-parity-decision.json` | `verifyNodePhase13EsmLoaderParityDecision` | `P13-41` | `ready` | 0 | 0 |
 | `phase13-filesystem-advanced-apis.json` | `verifyNodePhase13FilesystemAdvancedApis` | `P13-33` | `ready` | 0 | 0 |
 | `phase13-filesystem-profile-decision.json` | `verifyNodePhase13FilesystemProfileDecision` | `P13-32` | `ready` | 0 | 0 |
-| `phase13-full-heavy-resource-stress-archive.json` | `-` | `-` | `archived` | 0 | 0 |
-| `phase13-full-heavy-resource-stress.json` | `verifyNodePhase13FullHeavyResourceStress` | `P13-08` | `ready` | 0 | 0 |
+| `phase13-full-heavy-resource-stress.json` | `verifyNodePhase13FullHeavyResourceStress` | `P13-08` | `partial` | 0 | 2 |
 | `phase13-http-https-client-parity.json` | `verifyNodePhase13HttpHttpsClientParity` | `P13-29` | `ready` | 0 | 0 |
 | `phase13-inspector-debug-profile-decision.json` | `verifyNodePhase13InspectorDebugProfileDecision` | `P13-37` | `ready` | 0 | 0 |
 | `phase13-intent-broadcast-provider.json` | `verifyNodePhase13IntentBroadcastProvider` | `P13-22` | `partial` | 0 | 1 |
@@ -221,8 +228,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-rhino-import-helpers-decision.json` | `verifyNodePhase13RhinoImportHelpersDecision` | `P13-15` | `ready` | 0 | 0 |
 | `phase13-rhino-install-java-proxy.json` | `verifyNodePhase13RhinoInstallJavaProxy` | `P13-14` | `ready` | 0 | 0 |
 | `phase13-rhino-java-adapter-decision.json` | `verifyNodePhase13RhinoJavaAdapterDecision` | `P13-16` | `ready` | 0 | 0 |
-| `phase13-screenshot-image-ocr-promotion.json` | `verifyNodePhase13ScreenshotImageOcrPromotion` | `P13-20` | `partial` | 0 | 3 |
-| `phase13-second-execution-slot-scheduler.json` | `verifyNodePhase13SecondExecutionSlotScheduler` | `P13-06` | `ready` | 0 | 0 |
+| `phase13-screenshot-image-ocr-promotion.json` | `verifyNodePhase13ScreenshotImageOcrPromotion` | `P13-20` | `partial` | 0 | 6 |
+| `phase13-second-execution-slot-scheduler.json` | `verifyNodePhase13SecondExecutionSlotScheduler` | `P13-06` | `partial` | 0 | 2 |
 | `phase13-shell-root-shizuku-capability.json` | `verifyNodePhase13ShellRootShizukuCapability` | `P13-24` | `ready` | 0 | 0 |
 | `phase13-stdlib-conformance-decision.json` | `verifyNodePhase13StdlibConformanceDecision` | `P13-43` | `ready` | 0 | 0 |
 | `phase13-surface-manifest-verification.json` | `verifyNodePhase13SurfaceManifest` | `-` | `passed` | 0 | 0 |
@@ -238,4 +245,4 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 - Gradle: `:app:generateNodePhase13Summary`
 - Reports: `build/reports/nodejs/phase13-summary.json` and `build/reports/nodejs/phase13-summary.md`
 - Canonical docs output: `docs/nodejs/reports/phase13/PHASE13_SUMMARY.md`
-- Final closeout requires zero open final blockers, zero policy violations, and zero release-blocking report blockers. Future promotion reports remain listed as backlog.
+- Final closeout requires the complete fresh canonical report set, zero open final blockers, zero policy violations, and zero release-blocking report blockers. Future promotion reports remain listed as backlog.

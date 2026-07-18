@@ -7,7 +7,7 @@ const path = require("path");
 const FILES = {
   phase10Report: "build/reports/nodejs/phase10-long-running-activation.json",
   phase10Tool: "tools/nodejs/phase10/verify-long-running-activation.js",
-  buildGradle: "app/build.gradle.kts",
+  instrumentationGates: "app/node-instrumentation-gates.gradle.kts",
   packagingPreflight: "app/embedded-node-packaging-preflight.gradle.kts",
   phase10Gate: "app/node-phase10-gate.gradle.kts",
   finalGate: "app/node-phase11-gate.gradle.kts",
@@ -28,7 +28,7 @@ const FILES = {
 const EVIDENCE_CHECKS = [
   ["phase10_tool", "phase10Tool", "s10_30_interactive_long_running_runtime"],
   ["phase10_gate", "phase10Gate", "\"verifyNodePhase10LongRunningActivation\""],
-  ["long_running_gate_mapping", "buildGradle", "\"verifyNodeLongRunningGate\" to nodeJsLongRunningGateInstrumentationClasses"],
+  ["long_running_gate_mapping", "instrumentationGates", "\"verifyNodeLongRunningGate\" to nodeJsLongRunningGateInstrumentationClasses"],
   ["long_running_gate_registration", "packagingPreflight", "val verifyNodeLongRunningGate = tasks.register"],
   ["final_gate_task", "finalGate", "\"verifyNodeFinalLongRunningGate\""],
   ["mode_policy", "executionModePolicy", "MODE_INTERACTIVE_LONG_RUNNING"],

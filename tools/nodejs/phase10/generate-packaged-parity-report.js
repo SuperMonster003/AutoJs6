@@ -27,10 +27,11 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
+  const jniLibsRoot = resolveJniLibsRoot(repoRoot, options.jniLibsRoot);
   const violations = [];
   const descriptor = inspectDescriptor(repoRoot, violations);
   const packagedTests = inspectPackagedTests(repoRoot, violations);
-  const cacheKey = buildFixtureCacheKey(repoRoot, violations);
+  const cacheKey = buildFixtureCacheKey(repoRoot, jniLibsRoot, violations);
 
   const report = {
     schema: "autojs6-node-phase10-packaged-parity-v1",
@@ -130,25 +131,25 @@ function inspectPackagedTests(repoRoot, violations) {
   };
 }
 
-function buildFixtureCacheKey(repoRoot, violations) {
+function buildFixtureCacheKey(repoRoot, jniLibsRoot, violations) {
   const inputs = [
-    "app/src/main/assets-app/template.apk",
-    "app/src/main/jniLibs",
-    "app/src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt",
-    "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt",
+    { input: "app/src/main/assets-app/template.apk", target: path.join(repoRoot, "app/src/main/assets-app/template.apk") },
+    { input: path.relative(repoRoot, jniLibsRoot).replace(/\\/g, "/"), target: jniLibsRoot, nativeLibraries: true },
+    { input: "app/src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt", target: path.join(repoRoot, "app/src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt") },
+    { input: "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt", target: path.join(repoRoot, "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt") },
   ];
   const parts = [];
   for (const input of inputs) {
-    const target = path.join(repoRoot, input);
+    const target = input.target;
     if (!fs.existsSync(target)) {
-      parts.push({ input, available: false, hash: null });
+      parts.push({ input: input.input, nativeLibraries: Boolean(input.nativeLibraries), available: false, hash: null });
       continue;
     }
     const hash = fs.statSync(target).isDirectory() ? hashDirectory(target) : sha256(target);
-    parts.push({ input, available: true, hash });
+    parts.push({ input: input.input, nativeLibraries: Boolean(input.nativeLibraries), available: true, hash });
   }
-  if (!parts.some((entry) => entry.input.endsWith("jniLibs") && entry.available)) {
-    violations.push("fixture cache key cannot include native library hashes because app/src/main/jniLibs is missing");
+  if (!parts.some((entry) => entry.nativeLibraries && entry.available)) {
+    violations.push("fixture cache key cannot include native library hashes because the configured jniLibs root is missing");
   }
   const keyHash = crypto.createHash("sha256")
     .update(JSON.stringify(parts))
@@ -173,6 +174,15 @@ function buildFixtureCacheKey(repoRoot, violations) {
     ],
     installLaunchStillRequired: true,
   };
+}
+
+function resolveJniLibsRoot(repoRoot, requested) {
+  const candidates = [
+    requested && path.resolve(requested),
+    path.resolve(repoRoot, "../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/jniLibs"),
+    path.join(repoRoot, "app/src/main/jniLibs"),
+  ].filter(Boolean);
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[candidates.length - 1];
 }
 
 function hashDirectory(dir) {
@@ -237,7 +247,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node generate-packaged-parity-report.js [--repo-root dir] [--report-dir dir]");
+      console.log("Usage: node generate-packaged-parity-report.js [--repo-root dir] [--jni-libs-root dir] [--report-dir dir]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

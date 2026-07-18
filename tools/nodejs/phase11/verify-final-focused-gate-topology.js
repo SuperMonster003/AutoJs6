@@ -52,6 +52,7 @@ function main() {
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
   const files = [
     "app/build.gradle.kts",
+    "app/node-gradle-scripts.gradle.kts",
     "app/node-phase11-gate.gradle.kts",
     "app/node-phase10-gate.gradle.kts",
     "app/node-native-modernization.gradle.kts",
@@ -71,14 +72,20 @@ function main() {
   const policyViolations = tasks
     .filter((entry) => !entry.registeredIn)
     .map((entry) => "missing final focused gate task: " + entry.task);
-  const phase11Applied = files.find((file) => file.relative === "app/build.gradle.kts").text.includes("node-phase11-gate.gradle.kts");
+  const appBuild = files.find((file) => file.relative === "app/build.gradle.kts");
+  const nodeGradleScripts = files.find((file) => file.relative === "app/node-gradle-scripts.gradle.kts");
+  const phase11AppliedDirectly = appBuild.text.includes("node-phase11-gate.gradle.kts");
+  const phase11AppliedIndirectly = appBuild.text.includes("node-gradle-scripts.gradle.kts") &&
+    nodeGradleScripts.text.includes("node-phase11-gate.gradle.kts");
+  const phase11Applied = phase11AppliedDirectly || phase11AppliedIndirectly;
   if (!phase11Applied) {
-    policyViolations.push("app/build.gradle.kts must apply node-phase11-gate.gradle.kts");
+    policyViolations.push("app/build.gradle.kts must apply node-phase11-gate.gradle.kts directly or through node-gradle-scripts.gradle.kts");
   }
   const report = {
     schema: "autojs6-node-final-focused-gate-topology-v1",
     generatedAt: new Date().toISOString(),
     gate: "verifyNodeFinalFocusedGateTopology",
+    phase11ApplyPath: phase11AppliedDirectly ? "direct" : phase11AppliedIndirectly ? "node-gradle-scripts" : "missing",
     tasks,
     policyViolations,
     decision: {

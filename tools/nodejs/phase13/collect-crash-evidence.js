@@ -7,6 +7,7 @@ const path = require("path");
 
 const REPORT_BASENAME = "phase13-crash-evidence-automation";
 const BUNDLE_DIRNAME = "phase13-crash-evidence-bundle";
+const REQUIRED_NATIVE_ABIS = ["arm64-v8a", "armeabi-v7a", "x86_64"];
 
 const FILES = {
   blockerRegistry: "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
@@ -20,7 +21,6 @@ const FILES = {
   embeddedProbeService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedProbeService.kt",
   nativeProcessService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeProcessService.kt",
   embeddedBridge: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt",
-  nativeBridgeJni: "app/src/main/cpp/node_bridge_jni.cpp",
   assetsLauncher: "app/src/main/java/org/autojs/autojs/inrt/launch/AssetsProjectLauncher.kt",
   launchDescriptor: "app/src/main/java/org/autojs/autojs/script/NodeProjectLaunchDescriptor.kt",
   crashEvidenceStoreTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt",
@@ -46,8 +46,10 @@ function main() {
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
   const bundleDir = path.join(reportDir, BUNDLE_DIRNAME);
-  const files = loadFiles(repoRoot);
-  const report = buildReport(repoRoot, files, bundleDir);
+  const nativeCppRoot = resolveNativeCppRoot(repoRoot, options.nativeCppRoot);
+  const nativeJniLibsRoot = resolveNativeJniLibsRoot(repoRoot, options.nativeJniLibsRoot);
+  const files = loadFiles(repoRoot, nativeCppRoot);
+  const report = buildReport(repoRoot, files, bundleDir, nativeCppRoot, nativeJniLibsRoot);
   fs.mkdirSync(bundleDir, { recursive: true });
   fs.writeFileSync(path.join(bundleDir, "manifest.json"), JSON.stringify(report.bundleManifest, null, 2) + "\n");
   fs.writeFileSync(path.join(bundleDir, "README.md"), renderBundleReadme(report));
@@ -62,19 +64,66 @@ function main() {
   }
 }
 
-function loadFiles(repoRoot) {
-  return Object.fromEntries(
+function loadFiles(repoRoot, nativeCppRoot) {
+  const files = Object.fromEntries(
     Object.entries(FILES).map(([key, relative]) => {
       const file = path.join(repoRoot, relative);
       return [key, { relative, exists: fs.existsSync(file), text: read(file) }];
     }),
   );
+  const nativeBridgeJni = path.join(nativeCppRoot, "node_bridge_jni.cpp");
+  files.nativeBridgeJni = {
+    relative: relativePath(repoRoot, nativeBridgeJni),
+    exists: fs.existsSync(nativeBridgeJni),
+    text: read(nativeBridgeJni),
+  };
+  return files;
 }
 
-function buildReport(repoRoot, files, bundleDir) {
+function resolveNativeCppRoot(repoRoot, requested) {
+  if (requested) {
+    const requestedRoot = path.resolve(requested);
+    if (!fs.existsSync(path.join(requestedRoot, "node_bridge_jni.cpp"))) {
+      throw new Error(`Explicit --native-cpp-root must contain node_bridge_jni.cpp: ${requestedRoot}`);
+    }
+    return requestedRoot;
+  }
+  const candidates = nativeRootCandidates(repoRoot, "cpp");
+  return candidates.find((candidate) => fs.existsSync(path.join(candidate, "node_bridge_jni.cpp")))
+    || candidates[candidates.length - 1];
+}
+
+function resolveNativeJniLibsRoot(repoRoot, requested) {
+  if (requested) {
+    const requestedRoot = path.resolve(requested);
+    const missingAbis = REQUIRED_NATIVE_ABIS.filter(
+      (abi) => !fs.existsSync(path.join(requestedRoot, abi, "libnode.so")),
+    );
+    if (missingAbis.length > 0) {
+      throw new Error(
+        `Explicit --native-jni-libs-root must contain libnode.so for ${missingAbis.join(", ")}: ${requestedRoot}`,
+      );
+    }
+    return requestedRoot;
+  }
+  const candidates = nativeRootCandidates(repoRoot, "jniLibs");
+  return candidates.find((candidate) => REQUIRED_NATIVE_ABIS.every(
+    (abi) => fs.existsSync(path.join(candidate, abi, "libnode.so")),
+  )) || candidates[candidates.length - 1];
+}
+
+function nativeRootCandidates(repoRoot, leaf) {
+  return [
+    path.resolve(repoRoot, `../AutoJs6-Plugin-NodeJs-Runtime/app/src/main/${leaf}`),
+    path.resolve(repoRoot, `../autojs6-plugin-nodejs/app/src/main/${leaf}`),
+    path.join(repoRoot, `app/src/main/${leaf}`),
+  ];
+}
+
+function buildReport(repoRoot, files, bundleDir, nativeCppRoot, nativeJniLibsRoot) {
   const markerAutomation = markerAutomationStatus(files);
   const scenarios = scenarioStatus(files);
-  const nativeLibraryHashes = collectNativeLibraryHashes(repoRoot);
+  const nativeLibraryHashes = collectNativeLibraryHashes(repoRoot, nativeJniLibsRoot);
   const featureFlags = parseFeatureFlags(files.capabilities.text);
   const symbolization = {
     implemented: files.phase11Collect.exists && files.phase11Verify.exists && files.phase11Symbolize.exists,
@@ -97,6 +146,8 @@ function buildReport(repoRoot, files, bundleDir) {
     generatedAt: new Date().toISOString(),
     gate: "collectNodePhase13CrashEvidence",
     task: "P13-05",
+    nativeCppRoot: relativePath(repoRoot, nativeCppRoot),
+    nativeJniLibsRoot: relativePath(repoRoot, nativeJniLibsRoot),
     files: Object.fromEntries(Object.entries(files).map(([key, file]) => [key, file.relative])),
     blockerRegistry: blockerEntry,
     markerAutomation,
@@ -128,6 +179,8 @@ function buildReport(repoRoot, files, bundleDir) {
       generatedAt: output.generatedAt,
       generatedBy: output.gate,
       decision: output.decision,
+      nativeCppRoot: output.nativeCppRoot,
+      nativeJniLibsRoot: output.nativeJniLibsRoot,
       runtimeDescriptor: {
         runtimeSlot: "node24_5",
         profile: "AutoJs6 Safe Node Profile",
@@ -373,12 +426,10 @@ function buildChecks(markerAutomation, scenarios, nativeLibraryHashes, symboliza
   ];
 }
 
-function collectNativeLibraryHashes(repoRoot) {
-  const root = path.join(repoRoot, "app/src/main/jniLibs");
-  if (!fs.existsSync(root)) return [];
+function collectNativeLibraryHashes(repoRoot, nativeJniLibsRoot) {
   const entries = [];
-  for (const abi of fs.readdirSync(root).sort()) {
-    const lib = path.join(root, abi, "libnode.so");
+  for (const abi of REQUIRED_NATIVE_ABIS) {
+    const lib = path.join(nativeJniLibsRoot, abi, "libnode.so");
     if (!fs.existsSync(lib)) continue;
     entries.push({
       abi,
@@ -516,7 +567,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node collect-crash-evidence.js [--repo-root dir] [--report-dir dir] [--fail-on-blocked]");
+      console.log("Usage: node collect-crash-evidence.js [--repo-root dir] [--native-cpp-root dir] [--native-jni-libs-root dir] [--report-dir dir] [--fail-on-blocked]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

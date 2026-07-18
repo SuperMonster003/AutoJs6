@@ -9,26 +9,45 @@ docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json
 The registry separates required internal blockers from conditional decisions,
 intentional Safe Node Profile non-goals, and external runtime maintenance.
 
-## Phase 14 closeout update
+## Current Registry And R6 Revalidation
+
+The machine-readable registry records zero unresolved required internal
+blockers. All six historical Phase 11/13 capability blockers remain `closed`,
+and the conditional decisions are resolved for the current Safe profile.
+
+R6 production-evidence revalidation is a separate Core completion gate. The
+persistent process-global runtime lifecycle and required external `plugin`
+delivery path were introduced after the historical closure evidence. Current
+lifecycle, crash, memory, ABI, packaged, multi-device, and 8-hour/24-hour soak
+reports must therefore be regenerated and pass before Core completion can be
+declared. This freshness requirement does not rewrite the historical blocker
+statuses or imply that R6 has already passed.
+
+## Historical Phase 14 Closeout Update
 
 Phase 14 did not reopen final blockers. P14-39 records
 `phase14_closeout_handoff_ready` with zero open final blockers, zero
 release-blocking reports, and a v1.3 future promotion backlog exported at
 `docs/nodejs/reports/phase14/PHASE14_FUTURE_BACKLOG.json`.
+This is a historical closeout record, not the current R6 evidence decision.
 
 ## Required Internal
 
-- `crash_evidence_automation`
-- `android_side_package_installation`
-- `packaged_long_running`
-- `second_execution_slot`
-- `full_heavy_resource_stress`
+- `adapter_v1_real_execution_path`: `closed`
+- `crash_evidence_automation`: `closed`
+- `android_side_package_installation`: `closed`
+- `packaged_long_running`: `closed`
+- `second_execution_slot`: `closed`
+- `full_heavy_resource_stress`: `closed`
 
-These must be resolved before Phase 11 can report `completed`.
+These historical capability items must all remain closed before Phase 11 can
+report `completed`. R6 additionally requires fresh production evidence as
+described above.
 
-Current crash evidence progress:
+Current crash evidence status:
 
-- `crash_evidence_automation`: Phase 11 crash bundle tooling can now import
+- `crash_evidence_automation`: closed by P13-05. Phase 11 crash bundle tooling
+  can import
   runtime resource snapshots and timeline tails as first-class evidence. Phase
   13 adds a runtime JSON marker store, next-launch collector, embedded script
   service marker writes, native process service marker writes, a host collector,
@@ -92,7 +111,7 @@ Current Android package installation progress:
   packaged dependency distribution remain future promotion gates requiring
   reviewed authority, rollback, disclosure, and packaged evidence.
 
-Resolved in Phase 11:
+Current adapter v1 status:
 
 - `adapter_v1_real_execution_path`: `AutoJsNodeRuntimeApiV1` is now a
   selectable execution path for Node 24.5 while `legacy_jni` remains the
@@ -101,11 +120,13 @@ Resolved in Phase 11:
 
 ## Conditional
 
-- `worker_threads`
-- `x86`
+- `worker_threads`: `intentionally_unsupported`
+- `controlled_wasi`: `closed`
+- `x86`: `optional`
 
-These require a final product decision, but they may resolve as implemented,
-intentionally unsupported, or optional.
+These decisions are resolved for the current Safe profile and do not block
+Core completion. A future capability promotion may reopen its own evidence
+gate without changing the current decision.
 
 Current controlled WASI decision:
 

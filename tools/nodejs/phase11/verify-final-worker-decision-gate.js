@@ -7,7 +7,7 @@ const path = require("path");
 const FILES = {
   phase10Report: "build/reports/nodejs/phase10-worker-wasi-boundary.json",
   phase10Tool: "tools/nodejs/phase10/verify-worker-wasi-boundary.js",
-  buildGradle: "app/build.gradle.kts",
+  runtimeConfig: "app/node-runtime-config.gradle.kts",
   phase10Gate: "app/node-phase10-gate.gradle.kts",
   finalGate: "app/node-phase11-gate.gradle.kts",
   workerSupport: "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt",
@@ -28,7 +28,7 @@ const EVIDENCE_CHECKS = [
   ["phase10_gate", "phase10Gate", "\"verifyNodePhase10WorkerWasiBoundary\""],
   ["worker_wasi_gate", "phase10Gate", "\"verifyNodeWorkerWasiGate\""],
   ["final_gate_task", "finalGate", "\"verifyNodeFinalWorkerDecisionGate\""],
-  ["worker_flag", "buildGradle", "autojs.nodejs.worker_threads.experimental"],
+  ["worker_flag", "runtimeConfig", "autojs.nodejs.worker_threads.experimental"],
   ["worker_native_preflight", "workerSupport", "probeNativeWorkerThreads"],
   ["worker_default_denial", "workerBootstrapTest", "defaultRequestDeniesWorkerThreadsBeforeShadowing"],
   ["worker_design_gate", "workerDesignTest", "workerThreadsRemainDesignGatedAndDisabledByDefault"],

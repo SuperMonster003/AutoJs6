@@ -3,6 +3,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { resolvePhase13SourceFile } = require("./source-topology");
 
 const REPORT_BASENAME = "phase13-net-tls-dns-staged-compatibility";
 
@@ -12,7 +13,7 @@ const FILES = {
   surfaceManifest: "docs/nodejs/phase13/phase13-surface-manifest.json",
   surfaceManifestDoc: "docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md",
   desktopMatrix: "docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md",
-  buildGradle: "app/build.gradle.kts",
+  runtimeConfig: "app/node-runtime-config.gradle.kts",
   runtimeCapabilities: "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt",
   runtimeBridge: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt",
   nodeBridgeSources: "app/src/main/cpp/node_bridge_sources.cpp",
@@ -56,7 +57,7 @@ function main() {
 function loadFiles(repoRoot) {
   return Object.fromEntries(
     Object.entries(FILES).map(([key, relative]) => {
-      const file = path.join(repoRoot, relative);
+      const file = resolvePhase13SourceFile(repoRoot, relative);
       return [key, { relative, exists: fs.existsSync(file), text: read(file) }];
     }),
   );
@@ -101,7 +102,7 @@ function buildReport(files) {
       token(files.compatibilityProfile, "keeps DNS privacy closed"),
     ], []),
     scenario("raw_network_modules_opt_in", "explicit debug-only raw network module opt-in can route selected builtins to native Node modules", [
-      token(files.buildGradle, "autojs.nodejs.rawNetworkModules.experimental"),
+      token(files.runtimeConfig, "autojs.nodejs.rawNetworkModules.experimental"),
       token(files.runtimeCapabilities, "RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY"),
       token(files.runtimeBridge, "rawNodeNetworkModulesExperimentalEnabled"),
       token(files.nodeBridgeSources, "__autojs6_raw_node_network_modules_experimental_enabled"),

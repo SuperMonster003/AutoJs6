@@ -17,6 +17,27 @@
       "build/reports/nodejs/phase14-closeout-handoff.json"
     ]
   },
+  "r6EvidenceRevalidation": {
+    "status": "required",
+    "blocksCoreCompletion": true,
+    "lifecycleModel": "persistent_process_global_runtime",
+    "distributionPolicy": "nodePlugin_required_plugin",
+    "gate": "verifyNodeR6ProductionEvidenceGate",
+    "report": "build/reports/nodejs/r6-production-evidence-gate.json",
+    "evidenceRoot": "build/reports/nodejs/r6-evidence",
+    "requiredAreas": [
+      "current_host_and_plugin_source_identity",
+      "rhino_node_alternating_execution",
+      "backend_switch_recovery",
+      "persistent_runtime_isolation_and_recovery",
+      "main_app_and_packaged_apk",
+      "sony_second_oem_and_x86_64_emulator",
+      "arm64_v8a_armeabi_v7a_and_x86_64",
+      "crash_and_memory_growth",
+      "quick_soak_8h",
+      "final_soak_24h"
+    ]
+  },
   "finalStatusVocabulary": [
     "completed",
     "blocked"

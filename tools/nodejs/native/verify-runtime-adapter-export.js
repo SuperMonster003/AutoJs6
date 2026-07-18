@@ -14,8 +14,9 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
+  const cxxRoot = path.resolve(options.cxxRoot || path.join(repoRoot, "app/build/intermediates/cxx"));
   const tools = findAndroidTools(repoRoot);
-  const artifacts = REQUIRED_ABIS.map((abi) => inspectAbi(repoRoot, tools, abi));
+  const artifacts = REQUIRED_ABIS.map((abi) => inspectAbi(repoRoot, cxxRoot, tools, abi));
   const issues = [];
   if (!tools) {
     issues.push("Android NDK llvm-nm/llvm-readelf tools were not found");
@@ -42,6 +43,7 @@ function main() {
     requiredAbis: REQUIRED_ABIS,
     libraryName: LIBRARY_NAME,
     exportSymbol: EXPORT_SYMBOL,
+    cxxRoot: relativePath(repoRoot, cxxRoot),
     artifacts,
     decision: {
       status: issues.length === 0 ? "ready" : "blocked",
@@ -66,7 +68,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node tools/nodejs/native/verify-runtime-adapter-export.js [--repo-root dir] [--report-dir dir]");
+      console.log("Usage: node tools/nodejs/native/verify-runtime-adapter-export.js [--repo-root dir] [--cxx-root dir] [--report-dir dir]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {
@@ -87,8 +89,8 @@ function parseArgs(argv) {
   return options;
 }
 
-function inspectAbi(repoRoot, tools, abi) {
-  const file = latestLibrary(repoRoot, abi);
+function inspectAbi(repoRoot, cxxRoot, tools, abi) {
+  const file = latestLibrary(cxxRoot, abi);
   const artifact = {
     abi,
     path: file ? relativePath(repoRoot, file) : null,
@@ -117,12 +119,11 @@ function inspectAbi(repoRoot, tools, abi) {
   return artifact;
 }
 
-function latestLibrary(repoRoot, abi) {
-  const root = path.join(repoRoot, "app/build/intermediates/cxx");
-  if (!fs.existsSync(root)) {
+function latestLibrary(cxxRoot, abi) {
+  if (!fs.existsSync(cxxRoot)) {
     return null;
   }
-  return walkFiles(root)
+  return walkFiles(cxxRoot)
     .filter((file) => path.basename(file) === LIBRARY_NAME && file.split(/[\\/]/).includes(abi))
     .map((file) => ({ file, mtime: fs.statSync(file).mtimeMs }))
     .sort((a, b) => b.mtime - a.mtime)

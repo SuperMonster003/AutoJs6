@@ -32,7 +32,7 @@ workstreams, target profiles, evidence, risk, and rollback policy.
 
 | Surface | Status | Profiles | Tasks | Risk | Summary |
 | --- | --- | --- | --- | --- | --- |
-| `phase13.baseline` | `default_promoted` | `safe_default` | `P13-00`, `P13-01` | `low` | Phase 13 checklist and baseline verifier. |
+| `phase13.baseline` | `default_promoted` | `safe_default` | `P13-00`, `P13-01` | `low` | Immutable Phase 13 entry snapshot plus separate current-version and blocker-state non-regression checks. |
 | `phase13.surface_manifest` | `default_promoted` | `safe_default` | `P13-02` | `low` | Machine-readable Phase 13 manifest and verifier. |
 | `profile.promotion_model` | `design_locked` | `safe_default`, `pro_compat_opt_in`, `desktop_compat_opt_in`, `debug_unsafe_lab` | `P13-03`, `P13-04`, `P13-10`, `P13-49` | `medium` | Shared profile vocabulary, relaxation rubric, truth reporting, and diagnostic-only profile selection UX with `phase13-profile-selection-diagnostics` evidence. |
 | `runtime.graduation_blockers` | `planned` | `safe_default` | `P13-05` to `P13-09` | `high` | Required internal blockers and runtime graduation. |

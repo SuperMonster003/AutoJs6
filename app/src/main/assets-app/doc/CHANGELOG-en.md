@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/18
+###### 2026/07/19
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -46,6 +46,8 @@
 * `Fix` Node.js script results were returned late because runtime process-settle waiting blocked result delivery
 * `Fix` Active Node.js cancellation could remove the execution registration before unhealthy-process quarantine, leaving completion waiters blocked and delaying recovery
 * `Fix` Automatic embedded fallback after a lost external runtime Binder response could execute the same script twice
+* `Fix` Android private-directory aliases /data/user/0 and /data/data were not normalized and written back into plugin requests, causing valid Node.js workingDirectory paths to be incorrectly rejected as escaping sandboxRoot
+* `Fix` nodePlugin builds without a host Node runtime incorrectly excluded JNI/AAR libraries for every ABI, causing Rhino Shell initialization to crash because libjackpal-termexec2.so was missing
 * `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly
 * `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
 * `Fix` Shell-related methods could become unresponsive on devices without Root access
@@ -79,6 +81,10 @@
 * `Improvement` Cached built-in Node.js native library resolution to avoid repeated plugin discovery
 * `Improvement` Cached authorized external Node.js runtime candidates and persistent Binder sessions with state invalidation and atomic reconnection to reduce discovery and bind overhead
 * `Improvement` Removed project-wide encrypted-module scans from the default Node.js execution path to improve startup performance for non-trivial scripts and large projects
+* `Improvement` Added real multi-round Rhino/Node engine-switch regression coverage for script execution, persistent external-plugin session reuse and recovery, and clean teardown
+* `Improvement` Added persistent external-plugin runtime soak testing and Node.js production-evidence gates covering device/ABI matrices, runtime lifecycle, resource metrics, and 8-hour/24-hour stability
+* `Improvement` Updated Node.js native verification to resolve and validate the external runtime plugin source and build roots
+* `Improvement` Made Node.js final integration and release gates fail closed when required reports, current-source evidence, or production acceptance artifacts are missing or stale
 * `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
 * `Improvement` Improved code editor interactions for themes/fonts/toolbars/read-only mode/folding/selection menus and more

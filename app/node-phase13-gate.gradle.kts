@@ -1,11 +1,58 @@
 val nodePhase13ReportDir = rootProject.layout.buildDirectory.dir("reports/nodejs")
+val nodePhase13SummaryRunMarker = rootProject.layout.buildDirectory.file("tmp/nodejs/phase13-summary-run.json")
+val nodePhase13NativeCppDir = (
+        if (extensions.extraProperties.has("nodeJsRuntimeConfig.nodeJsPluginCppDir")) {
+            extensions.extraProperties.get("nodeJsRuntimeConfig.nodeJsPluginCppDir") as? File
+        } else {
+            null
+        }
+        ) ?: project.file("src/main/cpp")
+val nodePhase13RuntimeJniLibsDir =
+    (extensions.extraProperties.get("nodeJsRuntimeConfig.nodeJsRuntimeSlotJniLibsSourceDir") as File).canonicalFile
+val nodePhase13SourceTopologyScript = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/source-topology.js")
+val nodePhase13CanonicalSummaryReportFiles = nodePhase13ReportDir.map { reportDirectory ->
+    reportDirectory.asFileTree.matching {
+        include("phase13-*.json", "node-builtin-parity.json")
+        exclude("phase13-summary.json", "phase13-full-heavy-resource-stress-archive.json")
+    }
+}
+
+tasks.withType<Exec>().configureEach {
+    if (name.contains("NodePhase13")) {
+        inputs.file(nodePhase13SourceTopologyScript)
+        environment("AUTOJS6_NODE_PHASE13_NATIVE_CPP_ROOT", nodePhase13NativeCppDir.absolutePath)
+    }
+}
+
+tasks.register("prepareNodePhase13SummaryRun") {
+    group = "verification"
+    description = "Creates the Phase 13 aggregate freshness marker."
+    outputs.file(nodePhase13SummaryRunMarker)
+    outputs.upToDateWhen { false }
+    doLast {
+        val startedAtMs = System.currentTimeMillis()
+        val markerFile = nodePhase13SummaryRunMarker.get().asFile
+        markerFile.parentFile.mkdirs()
+        markerFile.writeText(
+            """{
+  "schema": "autojs6-node-phase13-summary-run-v1",
+  "startedAt": "${java.time.Instant.ofEpochMilli(startedAtMs)}",
+  "startedAtMs": $startedAtMs
+}
+""",
+        )
+    }
+}
 
 tasks.register<Exec>("verifyNodePhase13Baseline") {
     group = "verification"
-    description = "Verifies the Phase 13 baseline inputs from Phase 12 and version.properties."
+    description = "Verifies the immutable Phase 13 entry snapshot and non-regressing current metadata."
+
+    dependsOn("prepareNodePhase13SummaryRun")
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-node-phase13-baseline.js")
     inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-baseline-snapshot.json"))
     inputs.file(rootProject.layout.projectDirectory.file("version.properties"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/PHASE12_SUMMARY.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
@@ -109,6 +156,8 @@ tasks.register<Exec>("collectNodePhase13CrashEvidence") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeProcessService.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_jni.cpp"))
+    inputs.dir(nodePhase13RuntimeJniLibsDir)
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeAndroidRuntimePolicyInstrumentationTest.kt"))
@@ -126,6 +175,10 @@ tasks.register<Exec>("collectNodePhase13CrashEvidence") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--native-cpp-root",
+        nodePhase13NativeCppDir.absolutePath,
+        "--native-jni-libs-root",
+        nodePhase13RuntimeJniLibsDir.absolutePath,
         "--report-dir",
         nodePhase13ReportDir.get().asFile.absolutePath,
     )
@@ -236,7 +289,7 @@ tasks.register<Exec>("verifyNodePhase13FullHeavyResourceStress") {
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-soak-gate.js"))
     inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
-    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-instrumentation-gates.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedMemoryLeakStressInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePhase7ResourceStressInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeResourceLeakStressInstrumentationTest.kt"))
@@ -272,14 +325,15 @@ tasks.register<Exec>("verifyNodePhase13AndroidPackageInstallManager") {
     group = "verification"
     description = "Verifies Phase 13 Android-side package install manager readiness."
 
-    dependsOn("verifyNodePhase13FullHeavyResourceStress")
+    dependsOn("prepareNodePhase13SummaryRun")
+    mustRunAfter("verifyNodePhase13FullHeavyResourceStress")
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-android-package-install-manager.js")
     inputs.file(scriptFile)
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManagerInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePackageManagerPhase13DecisionInstrumentationTest.kt"))
@@ -301,6 +355,8 @@ tasks.register<Exec>("verifyNodePhase13AndroidPackageInstallManager") {
         scriptFile.asFile.absolutePath,
         "--repo-root",
         rootProject.projectDir.absolutePath,
+        "--native-cpp-root",
+        nodePhase13NativeCppDir.absolutePath,
         "--report-dir",
         nodePhase13ReportDir.get().asFile.absolutePath,
     )
@@ -361,7 +417,7 @@ tasks.register<Exec>("verifyNodePhase13AutoJsGlobalV1") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_12_AUTOJS_GLOBAL_V1.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/EmbeddedScriptMvpInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/index.d.ts"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/autojs_global.d.ts"))
@@ -404,7 +460,7 @@ tasks.register<Exec>("verifyNodePhase13JavaInteropAllowlist") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/JAVA_INTEROP.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeJavaInteropBridgeInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/autojs_global.d.ts"))
@@ -448,7 +504,7 @@ tasks.register<Exec>("verifyNodePhase13RhinoInstallJavaProxy") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_SHIM.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/JAVA_INTEROP.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino.d.ts"))
@@ -492,7 +548,7 @@ tasks.register<Exec>("verifyNodePhase13RhinoImportHelpersDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_SHIM.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/JAVA_INTEROP.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino.d.ts"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
@@ -535,7 +591,7 @@ tasks.register<Exec>("verifyNodePhase13RhinoJavaAdapterDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_SHIM.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/JAVA_INTEROP.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeJavaInteropBridgeInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino.d.ts"))
@@ -636,7 +692,7 @@ tasks.register<Exec>("verifyNodePhase13OverlayProviderPromotion") {
     inputs.file(project.layout.projectDirectory.file("src/main/AndroidManifest.xml"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/project/ProjectConfig.java"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/apkbuilder/ApkBuilder.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeOverlayBridgeInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/ui_overlay.d.ts"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
@@ -686,7 +742,7 @@ tasks.register<Exec>("verifyNodePhase13AccessibilitySelectorPromotion") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeAccessibilitySelectorBridgeInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/accessibility.d.ts"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
@@ -734,7 +790,7 @@ tasks.register<Exec>("verifyNodePhase13ScreenshotImageOcrPromotion") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeAutoJsBridgeInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeImageBridgeExpansionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeOcrBridgeInstrumentationTest.kt"))
@@ -788,7 +844,7 @@ tasks.register<Exec>("verifyNodePhase13TaskDatabaseProvider") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkManagerBridgeInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeResourceRegistryInstrumentationTest.kt"))
@@ -843,7 +899,7 @@ tasks.register<Exec>("verifyNodePhase13IntentBroadcastProvider") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkManagerBridgeInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/runtime/api/augment/tasks/Tasks.kt"))
@@ -900,7 +956,7 @@ tasks.register<Exec>("verifyNodePhase13AppIntentBroadcastParity") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/runtime/api/augment/app/App.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/app.d.ts"))
@@ -950,7 +1006,7 @@ tasks.register<Exec>("verifyNodePhase13ShellRootShizukuCapability") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/shell.d.ts"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
@@ -996,7 +1052,7 @@ tasks.register<Exec>("verifyNodePhase13NotificationsSettingsPowerManager") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeNotificationsBridgeInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeDeviceBridgeInstrumentationTest.kt"))
@@ -1048,7 +1104,7 @@ tasks.register<Exec>("verifyNodePhase13MediaRecorderMediainfoProvider") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeMediaBridgeInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgePermissionManifestInstrumentationTest.kt"))
@@ -1097,7 +1153,7 @@ tasks.register<Exec>("verifyNodePhase13UtilityHeavyRhinoModules") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeUtilityBridgeInstrumentationTest.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/jsox.d.ts"))
@@ -1176,7 +1232,7 @@ tasks.register<Exec>("verifyNodePhase13HttpHttpsClientParity") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeHttpDesktopParityInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeHttpClientFacadeInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeHttpStreamSemanticsInstrumentationTest.kt"))
@@ -1226,7 +1282,8 @@ tasks.register<Exec>("verifyNodePhase13NetTlsDnsStagedCompatibility") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("node-runtime-config.gradle.kts"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeNetTlsDnsStagedParityInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeRawNetworkPolicyInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/EmbeddedScriptMvpInstrumentationTest.kt"))
@@ -1275,7 +1332,7 @@ tasks.register<Exec>("verifyNodePhase13DgramUdpDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeDgramUdpDecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeRawNetworkPolicyInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeCoreBuiltinCompatibilityInstrumentationTest.kt"))
@@ -1319,7 +1376,7 @@ tasks.register<Exec>("verifyNodePhase13FilesystemProfileDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeFilesystemProfileDecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeSecurityRegressionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeScopedFsFuzzerInstrumentationTest.kt"))
@@ -1366,7 +1423,7 @@ tasks.register<Exec>("verifyNodePhase13FilesystemAdvancedApis") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeFilesystemAdvancedDecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeFilesystemProfileDecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeFileHandleAdvancedInstrumentationTest.kt"))
@@ -1421,8 +1478,8 @@ tasks.register<Exec>("verifyNodePhase13WorkerThreadsOptInPromotion") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
-    inputs.file(rootProject.layout.projectDirectory.file("app/build.gradle.kts"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("node-instrumentation-gates.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
@@ -1476,7 +1533,7 @@ tasks.register<Exec>("verifyNodePhase13ProcessWorkerReplacementDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
@@ -1526,7 +1583,7 @@ tasks.register<Exec>("verifyNodePhase13VmModuleDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeVmPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeVmDesignGateInstrumentationTest.kt"))
@@ -1575,7 +1632,7 @@ tasks.register<Exec>("verifyNodePhase13InspectorDebugProfileDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeInspectorPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeInspectorDesignGateInstrumentationTest.kt"))
@@ -1626,7 +1683,7 @@ tasks.register<Exec>("verifyNodePhase13ControlledWasiProfileDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWasiPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWasmWasiInstrumentationTest.kt"))
@@ -1674,7 +1731,7 @@ tasks.register<Exec>("verifyNodePhase13NativeAddonLoadingDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeNativeAddonPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeNativeAddonPolicyInstrumentationTest.kt"))
@@ -1726,7 +1783,7 @@ tasks.register<Exec>("verifyNodePhase13ChildProcessScopedRunnerDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeChildProcessPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest.kt"))
@@ -1776,7 +1833,7 @@ tasks.register<Exec>("verifyNodePhase13EsmLoaderParityDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEsmLoaderPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEsmExperimentalInstrumentationTest.kt"))
@@ -1824,7 +1881,7 @@ tasks.register<Exec>("verifyNodePhase13PackageManagerAndroidDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManagerInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePackageManagerPhase13DecisionInstrumentationTest.kt"))
@@ -1877,7 +1934,7 @@ tasks.register<Exec>("verifyNodePhase13StdlibConformanceDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase13/generate-node-builtin-parity-matrix.js"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeStdlibPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeCoreBuiltinCompatibilityInstrumentationTest.kt"))
@@ -1926,7 +1983,7 @@ tasks.register<Exec>("verifyNodePhase13ProcessParityDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase13/generate-node-builtin-parity-matrix.js"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeProcessParityPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeProcessSweepInstrumentationTest.kt"))
@@ -1974,7 +2031,7 @@ tasks.register<Exec>("verifyNodePhase13PackagedCapabilityMetadataDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_45_PACKAGED_CAPABILITY_METADATA.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/script/NodeProjectLaunchDescriptor.kt"))
@@ -2022,7 +2079,7 @@ tasks.register<Exec>("verifyNodePhase13PluginSystemParityDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_46_PLUGIN_SYSTEM_PARITY.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePluginSystemParityPhase13DecisionInstrumentationTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePluginSystemInstrumentationTest.kt"))
@@ -2105,7 +2162,7 @@ tasks.register<Exec>("verifyNodePhase13PackageLockIntegrityPolicy") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_48_PACKAGE_LOCK_INTEGRITY_POLICY.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodePackageIntegrityPolicy.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManagerInstrumentationTest.kt"))
@@ -2155,7 +2212,7 @@ tasks.register<Exec>("verifyNodePhase13ProfileSelectionDiagnostics") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_49_PROFILE_SELECTION_DIAGNOSTICS.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeProfileSelectionDiagnostics.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/ui/settings/NodeDoctorReportGenerator.kt"))
@@ -2201,7 +2258,7 @@ tasks.register<Exec>("verifyNodePhase13RelaxedCapabilitySecurityCorpus") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeSecurityRegressionInstrumentationTest.kt"))
@@ -2254,9 +2311,10 @@ tasks.register<Exec>("verifyNodePhase13ProfileRollbackPlaybook") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("gradle.properties"))
-    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-runtime-config.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-android-config.gradle.kts"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeProfileRollbackPolicy.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/ui/settings/NodeDoctorReportGenerator.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/ui/settings/NodeDoctorReportGeneratorInstrumentationTest.kt"))
@@ -2301,7 +2359,7 @@ tasks.register<Exec>("verifyNodePhase13PrivacyDisclosurePolicy") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(nodePhase13NativeCppDir.resolve("node_bridge_sources.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodePrivacyDisclosurePolicy.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/ui/settings/NodeDoctorReportGenerator.kt"))
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/ui/settings/NodeDoctorReportGeneratorInstrumentationTest.kt"))
@@ -2471,6 +2529,7 @@ tasks.register<Exec>("verifyNodePhase13MigrationPro9Comparison") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase13/generate-phase13-summary.js"))
     outputs.files(
         nodePhase13ReportDir.map { it.file("phase13-migration-pro9-comparison.json") },
         nodePhase13ReportDir.map { it.file("phase13-migration-pro9-comparison.md") },
@@ -2491,7 +2550,13 @@ tasks.register<Exec>("generateNodePhase13Summary") {
     group = "verification"
     description = "Generates the Phase 13 summary and v1.1 closeout gate report."
 
-    dependsOn("verifyNodePhase13MigrationPro9Comparison")
+    dependsOn(
+        "verifyNodePhase13Baseline",
+        "verifyNodePhase13FullHeavyResourceStress",
+        "verifyNodePhase13AndroidPackageInstallManager",
+        "verifyNodePhase13UtilityHeavyRhinoModules",
+        "verifyNodePhase13MigrationPro9Comparison",
+    )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/generate-phase13-summary.js")
     inputs.file(scriptFile)
@@ -2504,9 +2569,8 @@ tasks.register<Exec>("generateNodePhase13Summary") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
     inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
-    inputs.file(nodePhase13ReportDir.map { it.file("phase13-capability-truth.json") })
-    inputs.file(nodePhase13ReportDir.map { it.file("phase13-stdlib-conformance-decision.json") })
-    inputs.file(nodePhase13ReportDir.map { it.file("phase13-migration-pro9-comparison.json") })
+    inputs.file(nodePhase13SummaryRunMarker)
+    inputs.files(nodePhase13CanonicalSummaryReportFiles)
     outputs.files(
         nodePhase13ReportDir.map { it.file("phase13-summary.json") },
         nodePhase13ReportDir.map { it.file("phase13-summary.md") },
@@ -2523,5 +2587,7 @@ tasks.register<Exec>("generateNodePhase13Summary") {
         nodePhase13ReportDir.get().asFile.absolutePath,
         "--docs-output",
         rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_SUMMARY.md").asFile.absolutePath,
+        "--report-run-marker",
+        nodePhase13SummaryRunMarker.get().asFile.absolutePath,
     )
 }

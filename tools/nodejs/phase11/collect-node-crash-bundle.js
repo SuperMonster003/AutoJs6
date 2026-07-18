@@ -11,6 +11,7 @@ function main() {
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
   const bundleDir = path.resolve(options.bundleDir || path.join(reportDir, "final-crash-evidence-bundle"));
+  const jniLibsRoot = path.resolve(options.jniLibsRoot || path.join(repoRoot, "app/src/main/jniLibs"));
   const attachmentsDir = path.join(bundleDir, "attachments");
   fs.mkdirSync(attachmentsDir, { recursive: true });
 
@@ -41,7 +42,7 @@ function main() {
     crashMarker,
     automaticCollection: parseBoolean(options.automaticCollection || "false"),
     attachments,
-    nativeLibraryHashes: collectNativeLibraryHashes(repoRoot),
+    nativeLibraryHashes: collectNativeLibraryHashes(repoRoot, jniLibsRoot),
     symbolArchiveReports: collectExistingReports(repoRoot, [
       "app/build/reports/native-node/native-symbol-archive-appDebug.txt",
       "app/build/reports/native-node/native-deps-appDebug.txt",
@@ -267,9 +268,9 @@ function normalizeTimelineTail(repoRoot, file, base) {
   };
 }
 
-function collectNativeLibraryHashes(repoRoot) {
+function collectNativeLibraryHashes(repoRoot, jniLibsRoot) {
   const roots = [
-    path.join(repoRoot, "app/src/main/jniLibs"),
+    jniLibsRoot,
     path.join(repoRoot, "app/build/intermediates/merged_native_libs"),
   ];
   const entries = [];
@@ -451,7 +452,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node collect-node-crash-bundle.js [--repo-root dir] [--report-dir dir] [--bundle-dir dir] [--logcat file] [--tombstone file] [--bugreport file] [--resource-snapshot file] [--timeline-tail file]");
+      console.log("Usage: node collect-node-crash-bundle.js [--repo-root dir] [--jni-libs-root dir] [--report-dir dir] [--bundle-dir dir] [--logcat file] [--tombstone file] [--bugreport file] [--resource-snapshot file] [--timeline-tail file]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

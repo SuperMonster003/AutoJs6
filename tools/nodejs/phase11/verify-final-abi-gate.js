@@ -40,23 +40,32 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
-  const files = Object.fromEntries(
-    Object.entries(FILES).map(([id, relative]) => [id, read(path.join(repoRoot, relative))]),
+  const nativeCppRoot = path.resolve(options.nativeCppRoot || path.join(repoRoot, "app/src/main/cpp"));
+  const jniLibsRoot = path.resolve(options.jniLibsRoot || path.join(repoRoot, "app/src/main/jniLibs"));
+  const cxxRoot = path.resolve(options.cxxRoot || path.join(repoRoot, "app/build/intermediates/cxx"));
+  const resolvedFilePaths = Object.fromEntries(
+    Object.entries(FILES).map(([id, relative]) => [id, path.join(repoRoot, relative)]),
   );
-  const adapterAbiReport = readJsonIfExists(path.join(repoRoot, FILES.adapterAbiReport));
-  const adapterExportReport = readJsonIfExists(path.join(repoRoot, FILES.adapterExportReport));
-  const artifactGateReport = readJsonIfExists(path.join(repoRoot, FILES.artifactGateReport));
-  const artifactManifestReport = readJsonIfExists(path.join(repoRoot, FILES.artifactManifestReport));
-  const distributionPolicyReport = readJsonIfExists(path.join(repoRoot, FILES.distributionPolicyReport));
-  const registry = readJsonIfExists(path.join(repoRoot, FILES.blockerRegistry)) || { blockers: [] };
+  resolvedFilePaths.adapterHeader = path.join(nativeCppRoot, "node_runtime_api_v1.h");
+  resolvedFilePaths.adapterSource = path.join(nativeCppRoot, "node_runtime_adapter_24_5.cpp");
+  resolvedFilePaths.jniBridge = path.join(nativeCppRoot, "node_bridge_jni.cpp");
+  const files = Object.fromEntries(
+    Object.entries(resolvedFilePaths).map(([id, absolute]) => [id, read(absolute)]),
+  );
+  const adapterAbiReport = readJsonIfExists(resolvedFilePaths.adapterAbiReport);
+  const adapterExportReport = readJsonIfExists(resolvedFilePaths.adapterExportReport);
+  const artifactGateReport = readJsonIfExists(resolvedFilePaths.artifactGateReport);
+  const artifactManifestReport = readJsonIfExists(resolvedFilePaths.artifactManifestReport);
+  const distributionPolicyReport = readJsonIfExists(resolvedFilePaths.distributionPolicyReport);
+  const registry = readJsonIfExists(resolvedFilePaths.blockerRegistry) || { blockers: [] };
   const sourceChecks = ABI_CHECKS.map(([id, fileId, token]) => ({
     id,
-    file: FILES[fileId],
+    file: relativePath(repoRoot, resolvedFilePaths[fileId]),
     token,
     present: files[fileId].includes(token),
   }));
-  const requiredLibraries = REQUIRED_ABIS.map((abi) => inspectAbiLibrary(repoRoot, abi, true));
-  const optionalLibraries = OPTIONAL_ABIS.map((abi) => inspectAbiLibrary(repoRoot, abi, false));
+  const requiredLibraries = REQUIRED_ABIS.map((abi) => inspectAbiLibrary(repoRoot, jniLibsRoot, cxxRoot, abi, true));
+  const optionalLibraries = OPTIONAL_ABIS.map((abi) => inspectAbiLibrary(repoRoot, jniLibsRoot, cxxRoot, abi, false));
   const adapterExportAbis = adapterExportReport && Array.isArray(adapterExportReport.artifacts)
     ? adapterExportReport.artifacts.map((entry) => ({
         abi: entry.abi,
@@ -108,7 +117,7 @@ function main() {
     gate: "verifyNodeFinalAbiGate",
     tasks: ["S11-36", "S11-37"],
     sources: Object.fromEntries(
-      Object.entries(FILES).map(([id, relative]) => [id, relativePath(repoRoot, path.join(repoRoot, relative))]),
+      Object.entries(resolvedFilePaths).map(([id, absolute]) => [id, relativePath(repoRoot, absolute)]),
     ),
     requiredAbis: REQUIRED_ABIS,
     optionalAbis: OPTIONAL_ABIS,
@@ -163,9 +172,13 @@ function main() {
   }
 }
 
-function inspectAbiLibrary(repoRoot, abi, required) {
-  const libnode = inspectFile(repoRoot, `app/src/main/jniLibs/${abi}/libnode.so`);
-  const libcxx = inspectFile(repoRoot, `app/src/main/jniLibs/${abi}/libc++_shared.so`);
+function inspectAbiLibrary(repoRoot, jniLibsRoot, cxxRoot, abi, required) {
+  const libnode = inspectFile(repoRoot, path.join(jniLibsRoot, abi, "libnode.so"));
+  const sourceLibcxx = path.join(jniLibsRoot, abi, "libc++_shared.so");
+  const libcxx = inspectFile(
+    repoRoot,
+    fs.existsSync(sourceLibcxx) ? sourceLibcxx : latestBuiltLibrary(cxxRoot, abi, "libc++_shared.so") || sourceLibcxx,
+  );
   return {
     abi,
     required,
@@ -174,8 +187,31 @@ function inspectAbiLibrary(repoRoot, abi, required) {
   };
 }
 
-function inspectFile(repoRoot, relative) {
-  const absolute = path.join(repoRoot, relative);
+function latestBuiltLibrary(root, abi, name) {
+  if (!fs.existsSync(root)) return null;
+  return walkFiles(root)
+    .filter((file) => path.basename(file) === name && file.split(/[\\/]/).includes(abi))
+    .map((file) => ({ file, mtime: fs.statSync(file).mtimeMs }))
+    .sort((a, b) => b.mtime - a.mtime)
+    .map((entry) => entry.file)[0] || null;
+}
+
+function walkFiles(root) {
+  const result = [];
+  const stack = [root];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const absolute = path.join(current, entry.name);
+      if (entry.isDirectory()) stack.push(absolute);
+      else if (entry.isFile()) result.push(absolute);
+    }
+  }
+  return result;
+}
+
+function inspectFile(repoRoot, absolute) {
+  const relative = relativePath(repoRoot, absolute);
   if (!fs.existsSync(absolute)) {
     return {
       path: relative,
@@ -320,7 +356,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node verify-final-abi-gate.js [--repo-root dir] [--report-dir dir] [--fail-on-blocked]");
+      console.log("Usage: node verify-final-abi-gate.js [--repo-root dir] [--native-cpp-root dir] [--jni-libs-root dir] [--cxx-root dir] [--report-dir dir] [--fail-on-blocked]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {
