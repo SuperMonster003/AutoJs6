@@ -260,6 +260,16 @@ All 30 runs completed successfully with zero encrypted-scan candidates and
 zero persistent-session retirements. Battery remained at 100 percent and the
 temperature moved from 35.0 to 35.5 degrees Celsius.
 
+Follow-up evidence:
+
+- APK: `autojs6-v6.8.0-alpha7-arm64-v8a.apk`, version code 5220
+  (`SHA-256 C6366D2C53FDADDC234C8FAB2CA8198223E8F3CFCAA9C421C62028CD2136DE79`).
+- App implementation: commit
+  `22cdde8546dac575c59640ea3d5c8d7014eacf90`.
+- Focused request-preparation instrumentation: 11/11 tests passed on the
+  acceptance device, including the exact editor placeholder and the
+  conservative executable-code counterexample.
+
 Acceptance evidence:
 
 - Direct report:
