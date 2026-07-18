@@ -916,11 +916,63 @@ P14-39 does not add a new error code. It records the v1.2 closeout handoff as
 
 ## ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED
 
-- Meaning: injected moduleSources exceeded the Safe Node Profile budget before native Node startup.
-- Common cause: too many preloaded modules, a single module over `16777216` UTF-8 bytes, or total moduleSources over `67108864` UTF-8 bytes.
-- Example: packaging a large CommonJS graph into encrypted moduleSources.
-- How to fix: reduce bundled dependencies, split unsupported packages out of the packaged graph, or keep the app on disk-backed scoped `fs` instead of injected moduleSources.
+- Meaning: preloaded, packaged, or on-demand module source exceeded the Safe Node Profile source budget.
+- Common cause: too many source records, a single module over `16777216` UTF-8 bytes, total supplied source over `67108864` UTF-8 bytes, or an on-demand response that would cross the request-scoped aggregate budget.
+- Example: resolving an encrypted CommonJS module whose decrypted UTF-8 source is larger than the per-module limit.
+- How to fix: reduce bundled dependencies or module size, split unsupported packages out of the packaged graph, or keep plaintext modules on scoped disk-backed loading.
 - Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_CANCELLED
+
+- Meaning: An in-flight request-scoped module source lookup was cancelled before it produced a source or plaintext result.
+- Common cause: script cancellation, service destruction, runtime teardown, or execution ownership ending while a provider request is active.
+- Example: cancelling an execution while a dynamically imported encrypted module is being read.
+- How to fix: treat cancellation as a terminal execution path, release local resources, and start a new execution if the operation is still required.
+- Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_DENIED
+
+- Meaning: The request-scoped module source provider rejected an exact resolved candidate at its path or authorization boundary.
+- Common cause: the candidate escapes the captured working/package root, crosses a symlink or realpath boundary, changes identity during validation, has an unsupported source kind, or otherwise violates provider policy.
+- Example: a package target resolves through an in-root symlink to an encrypted file outside the project root.
+- How to fix: keep the module and package target inside the project scope, remove unsafe symlinks, and retry from a stable project tree.
+- Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [design/ESM.md](design/ESM.md).
+
+## ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_FAILED
+
+- Meaning: The module source provider accepted the request but could not complete header probing, bounded reading, validation, or decryption safely.
+- Common cause: unreadable or corrupt encrypted source, file identity drift during reading, invalid ciphertext, or an internal provider/transport failure.
+- Example: an encrypted module has a valid AutoJs6 header but its ciphertext is truncated.
+- How to fix: restore or rebuild the encrypted module, verify the project is stable and readable, and inspect provider diagnostics without logging decrypted source.
+- Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_INVALID_REQUEST
+
+- Meaning: The runtime or external transport sent a malformed or mismatched request to the request-scoped module source provider.
+- Common cause: missing request id/path, contract-version mismatch, or malformed timeout/count metadata.
+- Example: an external runtime plugin sends a request with an unsupported provider contract version.
+- How to fix: update the runtime/plugin to the matching provider contract and do not construct provider requests from user script data.
+- Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_TIMEOUT
+
+- Meaning: A request-scoped module source lookup exceeded its provider deadline.
+- Common cause: stalled storage, a blocked external-plugin transport, or a provider that did not answer before the request timeout.
+- Example: the external runtime plugin stops responding during an encrypted dynamic import.
+- How to fix: retry only after the provider/runtime is healthy; do not enable directory scanning as a timeout fallback.
+- Related docs: [PERFORMANCE.md](PERFORMANCE.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## R4 module source provider result mapping
+
+`not_encrypted` is a provider result, not an error; resolution continues through
+the existing scoped plaintext filesystem loader. `not_found` preserves the
+existing `ERR_AUTOJS6_MODULE_NOT_FOUND` identity. Per-source, aggregate-byte,
+and source-count overages preserve
+`ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED`. Scoped path, realpath, and symlink
+violations retain the more specific filesystem error when resolution already
+classified one; otherwise the provider boundary uses
+`ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_DENIED`. No provider error enables or
+silently falls back to a project-wide directory scan.
 
 ## ERR_AUTOJS6_NATIVE_ADDON_DISABLED
 

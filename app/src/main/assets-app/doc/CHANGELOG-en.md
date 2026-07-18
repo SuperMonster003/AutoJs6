@@ -10,6 +10,7 @@
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
+* `Feature` Node.js runtime supports a per-execution on-demand encrypted-module source provider that probes and decrypts only candidates actually selected by the module resolver
 * `Feature` Node.js runtime supports controlled AutoJs6 bridge modules and adopts the Safe Node Profile security policy
 * `Feature` Node.js runtime supports a persistent service process and process-scoped Node/V8 platform reuse, while creating a fresh isolate and Environment for each script execution
 * `Feature` Persistent Node.js runtime supports idle or memory-pressure retirement, explicit shutdown, and isolation and rebuilding of unhealthy processes
@@ -72,6 +73,7 @@
 * `Improvement` Reused the persistent Node.js process and process-scoped runtime to improve warm script startup performance
 * `Improvement` Added phase-by-phase Node.js startup timing and trustworthy cold/runtime-warm performance reporting
 * `Improvement` Cached built-in Node.js native library resolution to avoid repeated plugin discovery
+* `Improvement` Removed project-wide encrypted-module scans from the default Node.js execution path to improve startup performance for non-trivial scripts and large projects
 * `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
 * `Improvement` Improved code editor interactions for themes/fonts/toolbars/read-only mode/folding/selection menus and more

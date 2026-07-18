@@ -6,7 +6,10 @@ import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.runBlocking
+import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 object NodeJsRuntimePluginBridge {
 
@@ -14,6 +17,12 @@ object NodeJsRuntimePluginBridge {
     private const val PLUGIN_RUNTIME_ENABLED_PROPERTY = "autojs.nodejs.runtime.plugin.enabled"
     private const val PLUGIN_RUNTIME_REQUIRED_PROPERTY = "autojs.nodejs.runtime.plugin.required"
     const val ERROR_PLUGIN_UNAVAILABLE = "ERR_AUTOJS6_NODE_PLUGIN_UNAVAILABLE"
+    private val activeModuleSourceProviders =
+        ConcurrentHashMap<String, INodeJsModuleSourceProvider>()
+    private val activeExecutionIds = ConcurrentHashMap.newKeySet<String>()
+    private val cancelledExecutionIds = ConcurrentHashMap.newKeySet<String>()
+    private val backendExecutionIds = ConcurrentHashMap.newKeySet<String>()
+    private val executionLifecycleLock = Any()
 
     fun isRequested(): Boolean {
         return NodeRuntimeBackend.current() == NodeRuntimeBackend.PLUGIN ||
@@ -30,10 +39,11 @@ object NodeJsRuntimePluginBridge {
         request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        val requestWithProvider = request.withHostModuleSourceProvider()
         if (!isRequested()) {
-            return NativeNodeEmbeddedScriptService.runScript(context, request, launchSurface)
+            return NativeNodeEmbeddedScriptService.runScript(context, requestWithProvider, launchSurface)
         }
-        val pluginResult = runScript(context, request, launchSurface)
+        val pluginResult = runScript(context, requestWithProvider, launchSurface)
         if (
             pluginResult.errorCode == ERROR_PLUGIN_UNAVAILABLE &&
             !isRequired()
@@ -43,7 +53,11 @@ object NodeJsRuntimePluginBridge {
                 "Node.js runtime plugin failed; falling back to embedded service " +
                         "sourceName=${request.sourceName} errorCode=${pluginResult.errorCode.orEmpty()}",
             )
-            return NativeNodeEmbeddedScriptService.runScript(context, request, launchSurface)
+            return NativeNodeEmbeddedScriptService.runScript(
+                context,
+                requestWithProvider.copy(moduleSourceProvider = null),
+                launchSurface,
+            )
         }
         return pluginResult.withLaunchSurfaceNativeValue(launchSurface)
     }
@@ -54,22 +68,141 @@ object NodeJsRuntimePluginBridge {
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val startedAt = SystemClock.elapsedRealtime()
-        return runCatching {
-            val runResult = runBlocking {
-                NodeJsRuntimePluginHost.runScriptWithInfo(context, request.toPluginBundle(context, launchSurface))
+        val requestWithProvider = if (request.executionId.isNullOrBlank()) {
+            request.copy(executionId = UUID.randomUUID().toString())
+        } else {
+            request
+        }.withHostModuleSourceProvider()
+        val provider = requestWithProvider.moduleSourceProvider
+        val executionId = requestWithProvider.executionId.orEmpty()
+        val lifecycleRegistered = synchronized(executionLifecycleLock) {
+            if (executionId.isBlank() || !activeExecutionIds.add(executionId)) {
+                false
+            } else {
+                cancelledExecutionIds.remove(executionId)
+                provider?.let { activeModuleSourceProviders[executionId] = it }
+                true
             }
-            runResult.toEmbeddedScriptResult(request, startedAt)
-        }.getOrElse { error ->
-            pluginFailureResult(request, startedAt, error)
+        }
+        if (!lifecycleRegistered) {
+            cancelModuleSourceProvider(provider, "Node.js runtime plugin request registration failed.")
+            return pluginCancellationResult(requestWithProvider, startedAt, "provider_registration")
+        }
+        return try {
+            if (executionId in cancelledExecutionIds) {
+                return pluginCancellationResult(
+                    requestWithProvider,
+                    startedAt,
+                    "after_provider_registration",
+                )
+            }
+            val backendDispatchRegistered = synchronized(executionLifecycleLock) {
+                if (executionId in cancelledExecutionIds) {
+                    false
+                } else {
+                    backendExecutionIds.add(executionId)
+                    true
+                }
+            }
+            if (!backendDispatchRegistered) {
+                return pluginCancellationResult(
+                    requestWithProvider,
+                    startedAt,
+                    "before_backend_dispatch",
+                )
+            }
+            runCatching {
+                val runResult = runBlocking {
+                    NodeJsRuntimePluginHost.runScriptWithInfo(
+                        context,
+                        requestWithProvider.toPluginBundle(context, launchSurface),
+                    )
+                }
+                runResult.toEmbeddedScriptResult(requestWithProvider, startedAt)
+            }.getOrElse { error ->
+                pluginFailureResult(requestWithProvider, startedAt, error)
+            }
+        } finally {
+            val registeredProvider = synchronized(executionLifecycleLock) {
+                backendExecutionIds.remove(executionId)
+                activeExecutionIds.remove(executionId)
+                cancelledExecutionIds.remove(executionId)
+                activeModuleSourceProviders.remove(executionId)
+            }
+            cancelModuleSourceProvider(registeredProvider, "Node.js runtime plugin request finished.")
+            if (registeredProvider !== provider) {
+                cancelModuleSourceProvider(provider, "Node.js runtime plugin request finished.")
+            }
         }
     }
 
     fun cancelScript(context: Context, executionId: String): Boolean {
-        return runCatching {
+        var provider: INodeJsModuleSourceProvider? = null
+        var backendActive = false
+        var lifecycleKnown = false
+        val acknowledgedBeforeDispatch = synchronized(executionLifecycleLock) {
+            if (executionId !in activeExecutionIds) {
+                false
+            } else {
+                lifecycleKnown = true
+                cancelledExecutionIds.add(executionId)
+                provider = activeModuleSourceProviders.remove(executionId)
+                backendActive = executionId in backendExecutionIds
+                !backendActive
+            }
+        }
+        cancelModuleSourceProvider(provider, "Node.js runtime plugin request was cancelled.")
+        if (!lifecycleKnown) {
+            return false
+        }
+        if (acknowledgedBeforeDispatch) {
+            return true
+        }
+        val pluginCancelled = runCatching {
             runBlocking {
                 NodeJsRuntimePluginHost.cancelScript(context, executionId)
             }
         }.getOrDefault(false)
+        return pluginCancelled
+    }
+
+    private fun pluginCancellationResult(
+        request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        startedAt: Long,
+        stage: String,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+            succeeded = false,
+            exitCode = 1,
+            resultText = null,
+            stdout = "",
+            stderr = "",
+            errorName = "NodeRuntimePluginExecutionCancelledError",
+            errorMessage = "Node.js runtime plugin execution was cancelled before backend dispatch.",
+            errorStack = null,
+            errorCode = NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED,
+            elapsedMs = (SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L),
+            processName = "",
+            pid = Process.myPid(),
+            sourceName = request.sourceName,
+            nativeValues = mapOf(
+                "embedded_script.runtime_plugin.enabled" to "true",
+                "embedded_script.runtime_plugin.backend_dispatched" to "false",
+                "embedded_script.client.cancelled" to "true",
+                "embedded_script.client.cancellation_stage" to stage,
+                "embedded_script.error_code" to NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED,
+            ),
+            workingDirectory = request.workingDirectory,
+        )
+    }
+
+    private fun cancelModuleSourceProvider(
+        provider: INodeJsModuleSourceProvider?,
+        reason: String,
+    ) {
+        provider ?: return
+        runCatching { provider.cancel(reason) }
+            .onFailure { error -> Log.w(TAG, "module_source_provider.cancel.failed", error) }
     }
 
     private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withLaunchSurfaceNativeValue(
@@ -116,6 +249,9 @@ object NodeJsRuntimePluginBridge {
             putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_EXPERIMENTAL_ENABLED, childProcessExperimentalEnabled)
             putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_EXPERIMENTAL_ENABLED, javaInteropExperimentalEnabled)
             putBinder(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER, hostCapabilityBroker)
+            moduleSourceProvider?.let { provider ->
+                putBinder(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER, provider.asBinder())
+            }
         }
     }
 

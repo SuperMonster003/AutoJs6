@@ -295,9 +295,21 @@ The resolver rejects package export/import targets that escape the package root,
 
 ## moduleSources And Encrypted Graphs
 
-Current `moduleSources` and encrypted `runtimeModuleSources` are source records
-with stable `sourceURL` metadata. Partial v1.1 allows `.mjs` records in the same
-budgeted path used by packaged encrypted CommonJS records.
+`moduleSources` remains a bounded, optional static-preload optimization with
+stable `sourceURL` metadata. R4 no longer builds encrypted
+`runtimeModuleSources` by walking the working directory. Partial ESM and
+CommonJS instead share a request-scoped source provider: after the managed
+runtime resolver has selected an exact local or package candidate, it asks the
+host whether that candidate is encrypted. Plaintext candidates continue on the
+runtime's scoped filesystem path; encrypted candidates receive a bounded
+decrypted source record for that exact canonical module id.
+
+Static ESM imports, dynamic `import()`, CommonJS-to-ESM loads, package
+`exports`/`imports`, and `createRequire()` must all reach the provider after the
+same scoped resolver decision. The provider does not accept a user-controlled
+directory, glob, or unresolved specifier and does not perform a second package
+search. Embedded and external-plugin transports use the same request limits,
+result vocabulary, cancellation, timeout, and error identity.
 
 Broader ESM graph support still requires metadata for each source:
 
@@ -308,8 +320,18 @@ Broader ESM graph support still requires metadata for each source:
 - encrypted entry id or module source id
 - dependency specifiers discovered at build time where possible
 
+Before reading a candidate, the host canonicalizes it under the captured
+working/package root, validates root and file identity, rejects symlink drift
+and escapes, and probes only the fixed encrypted header. A successful encrypted
+response counts against the existing per-source, aggregate-byte, and source
+count budgets. `not_encrypted` returns control to the scoped plaintext loader;
+`not_found` preserves the existing module-not-found identity. Provider denial,
+failure, cancellation, and timeout retain stable AutoJs6 errors.
+
 Packaged encrypted ESM cannot depend on arbitrary runtime filesystem discovery
-outside the scoped package graph.
+outside the scoped package graph. A legacy directory scan, if temporarily
+enabled by an explicit compatibility mode, must be diagnosed separately; R4
+normal execution reports `legacy_directory_scan_ran=false`.
 
 ## Packaged APK Preloading
 
@@ -355,6 +377,11 @@ The partial profile must keep tests for:
 - package `exports` condition selection for `import` vs `require`
 - scoped fs and package target escape denial in ESM graphs
 - moduleSources and encrypted packaged ESM graph smoke; partial v1.1 currently has a focused `.mjs` entry plus local `.mjs`/CommonJS import graph smoke gated by refreshed template support
+- static and dynamic encrypted ESM requests touch only resolved candidates and
+  report provider request/resolved/decrypted counts, bytes, elapsed time,
+  denial reason, and `legacy_directory_scan_ran=false`
+- at least 4000 unrelated files do not change the zero-walk/zero-candidate
+  contract for ESM entries
 - sourceName and stack trace shape
 - service destroy while module linking/evaluation is pending
 

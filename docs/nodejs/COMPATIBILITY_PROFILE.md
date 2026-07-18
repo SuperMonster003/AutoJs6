@@ -1039,6 +1039,39 @@ Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esm
 
 See `docs/nodejs/design/ESM.md` for package `type`, CJS/ESM interop, top-level await, dynamic import, `import.meta.url`, package condition, moduleSources, encrypted graph, packaged APK, and stack trace decisions.
 
+## On-Demand Module Source Provider
+
+R4 makes `on_demand_provider` the default encrypted-module preparation mode.
+Non-trivial module-free scripts, static and dynamic CommonJS, ESM, dynamic
+import, computed loaders, and package resolution no longer select a
+project-wide directory scan based on source syntax. Static plaintext preloading
+may still resolve the actual dependency closure as an optimization, but it is
+not required for correctness. Plaintext modules remain on the scoped runtime
+filesystem path.
+
+When the runtime resolves an exact candidate, the request-scoped provider may
+return decrypted CommonJS or ESM source, `not_encrypted`, `not_found`, or a
+stable denial/failure/cancellation/timeout result. Embedded and external-plugin
+backends share the same path, size, count, aggregate-byte, cancellation,
+timeout, and error semantics. Provider state is fresh per execution and cannot
+be used to share a module cache across otherwise isolated executions.
+
+The result diagnostics export these common fields:
+
+- `embedded_script.module_provider.request_count`
+- `embedded_script.module_provider.resolved_source_count`
+- `embedded_script.module_provider.decrypted_source_count`
+- `embedded_script.module_provider.source_bytes`
+- `embedded_script.module_provider.elapsed_ms`
+- `embedded_script.module_provider.denial_reason`
+- `embedded_script.module_provider.legacy_directory_scan_ran`
+
+Transport-specific fields may additionally identify embedded or plugin
+delivery, but do not change the common contract. Normal R4 execution reports
+`legacy_directory_scan_ran=false`; a future or temporary legacy fallback must
+require an explicit compatibility signal and expose `true` rather than being
+inferred from arbitrary executable source.
+
 ## moduleSources Budget
 
 Injected `moduleSources` are bounded before native runtime startup. The v1 limits are:
@@ -1047,7 +1080,13 @@ Injected `moduleSources` are bounded before native runtime startup. The v1 limit
 - per-module UTF-8 source bytes: `16777216`
 - total UTF-8 source bytes: `67108864`
 
-The limits apply to CommonJS preload records and encrypted packaged/runtime module source records, including partial ESM `.mjs` records. Over-budget requests fail with `ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED` before the embedded service starts native Node.
+The limits apply cumulatively to CommonJS preload records, packaged source
+records, and sources returned by the on-demand provider, including partial ESM
+`.mjs` records. The provider also enforces its request-count and elapsed-time
+limits. Preflight overages fail with
+`ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED` before native startup; an
+on-demand response that would cross the same budget fails with the same stable
+identity during resolution.
 
 Packaged APKs carry `assets/project/preload-budget.expected.txt` when full smoke moduleSources are requested. The packaged verifier checks the budget marker, count, total bytes, per-module maximum, and largest-module report before runtime smoke execution.
 

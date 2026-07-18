@@ -382,16 +382,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
     private fun initKey(projectConfig: ProjectConfig) {
         val key = MD5.md5(projectConfig.packageName + projectConfig.versionName + projectConfig.mainScriptFileName)
         val vec = MD5.md5(projectConfig.buildInfo.buildId + projectConfig.name).substring(0, 16)
-        try {
-            val fieldKey = ScriptEncryption::class.java.getDeclaredField("mKey")
-            fieldKey.isAccessible = true
-            fieldKey.set(null, key)
-            val fieldVector = ScriptEncryption::class.java.getDeclaredField("mInitVector")
-            fieldVector.isAccessible = true
-            fieldVector.set(null, vec)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        ScriptEncryption.configure(key, vec)
     }
 
     private companion object {

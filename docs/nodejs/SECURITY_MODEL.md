@@ -67,6 +67,41 @@ The policy applies equally to callback, sync, and promise filesystem APIs.
 
 Source maps are diagnostics only and must not weaken scoped filesystem policy. Inline `sourceMappingURL=data:` maps are self-contained. External source maps must resolve inside the current working directory or come from already injected moduleSources; path escapes, NUL bytes, sensitive paths, and symlink/realpath escapes are denied and recorded as source-map diagnostics without replacing the original script error.
 
+### On-Demand Encrypted Module Source Provider
+
+R4 removes project-wide encrypted-module discovery from normal execution. The
+runtime must first resolve a concrete CommonJS or ESM candidate through the
+scoped resolver. The request-scoped provider accepts that exact candidate only;
+it does not accept unresolved specifiers, directories, globs, or arbitrary
+search roots.
+
+For every provider request, the host must:
+
+- capture and revalidate the canonical working/package root;
+- canonicalize the exact candidate and verify it remains inside that root;
+- reject lexical, canonical, realpath, and symlink escapes plus root or file
+  identity drift;
+- enforce the supported extension and regular-file boundary;
+- probe the fixed encrypted header before any bounded payload read;
+- enforce per-source, aggregate-byte, source-count, request-count, timeout, and
+  cancellation limits before returning decrypted UTF-8 source;
+- retain stable source names without exposing decrypted source or private cache
+  paths in diagnostics.
+
+`not_encrypted` is not an authorization bypass: it returns control to the
+runtime's existing scoped plaintext loader. `not_found` preserves normal
+module-not-found identity. Policy denial, provider failure, cancellation, and
+timeout use the stable module-source-provider errors in
+[ERROR_CATALOG.md](ERROR_CATALOG.md). Embedded and external-plugin transports
+must apply the same validation, limits, result vocabulary, and error mapping.
+
+Source shape never grants provider authority and never enables directory
+enumeration. If a legacy encrypted-project scan remains for a temporary
+compatibility mode, it requires an explicit compatibility signal and must emit
+`legacy_directory_scan_ran=true`. The R4 default is
+`on_demand_provider` with zero walked files and candidates and
+`legacy_directory_scan_ran=false`.
+
 ## Builtin Policy
 
 Builtins fall into four categories:

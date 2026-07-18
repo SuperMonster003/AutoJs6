@@ -8,6 +8,7 @@ import android.util.Log
 import org.autojs.autojs.App
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
+import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
 import org.json.JSONObject
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -17923,6 +17924,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val runtimeAdapter: String? = null,
         val processPoolSlot: String? = null,
         val processPoolSlotSource: String? = null,
+        val moduleSourceProvider: INodeJsModuleSourceProvider? = null,
     )
 
     data class EmbeddedScriptResult(

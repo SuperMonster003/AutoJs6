@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import android.os.Build
+import android.os.ParcelFileDescriptor
 import android.system.Os
 import android.system.OsConstants
 import android.system.StructStat
@@ -77,14 +78,22 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         private set
 
     @Volatile
+    var lastEmbeddedScriptResultPid: Int = -1
+        private set
+
+    @Volatile
     private var activeEmbeddedExecutionId: String? = null
 
     @Volatile
     internal var encryptedRuntimeScanBeforeFinalRootIdentityCheckForTest: (() -> Unit)? = null
 
+    @Volatile
+    internal var commonJsPreloadAfterSourceAuthorizationForTest: (() -> Unit)? = null
+
     override fun doExecution(source: JavaScriptSource): Any? {
         lastNodeProjectRunnerDescriptor = null
         lastEmbeddedScriptResultNativeValues = emptyMap()
+        lastEmbeddedScriptResultPid = -1
         lastRequestPreparationDiagnostics = RequestPreparationDiagnostics.empty()
         failFastIfEmbeddedRuntimeUnavailable(source)?.let { return it }
         tryRunNodeProjectLaunch(source)?.let { return it }
@@ -305,7 +314,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             workingDirectory = workingDirectory,
             moduleSources = preload.moduleSources,
             sourceFileOverride = normalizedEntryFile,
-            decision = encryptedRuntimeModuleScanDecision(isEsmEntry, preload.diagnostics),
+            decision = encryptedRuntimeModuleScanDecision(),
         )
         val diagnostics = RequestPreparationDiagnostics(
             sourceName = sourceName,
@@ -337,8 +346,9 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                     "sourceName=${request.sourceName} exitCode=${result.exitCode ?: 1} " +
                     "succeeded=${result.succeeded} elapsed=${result.elapsedMs}ms",
         )
-        val resultNativeValues = result.nativeValues + lastRequestPreparationDiagnostics.toNativeValues()
+        val resultNativeValues = lastRequestPreparationDiagnostics.toNativeValues() + result.nativeValues
         lastEmbeddedScriptResultNativeValues = resultNativeValues
+        lastEmbeddedScriptResultPid = result.pid
         if (!printStructuredConsoleOutput(resultNativeValues)) {
             printScriptOutput(Log.DEBUG, result.stdout)
             printScriptOutput(Log.ERROR, result.stderr)
@@ -502,7 +512,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             sourceName = requestSourceName,
             workingDirectory = requestWorkingDirectory,
             moduleSources = preload.moduleSources,
-            decision = encryptedRuntimeModuleScanDecision(isEsmEntry, preload.diagnostics),
+            decision = encryptedRuntimeModuleScanDecision(),
         )
         val diagnostics = RequestPreparationDiagnostics(
             sourceName = requestSourceName,
@@ -584,8 +594,17 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             ?: throw IOException("Unable to read JavaScript source file: ${file.absolutePath}")
     }
 
-    private fun sourceTextOrNull(file: File, maximumCleartextBytes: Int): String? {
-        return when (val result = readSourceTextBounded(file, maximumCleartextBytes)) {
+    private fun sourceText(file: File, authorizedRoot: EncryptedRuntimeScanRoot): String {
+        return sourceTextOrNull(file, RUNTIME_MODULE_SOURCE_MAX_BYTES, authorizedRoot)
+            ?: throw IOException("Unable to read authorized JavaScript source file.")
+    }
+
+    private fun sourceTextOrNull(
+        file: File,
+        maximumCleartextBytes: Int,
+        authorizedRoot: EncryptedRuntimeScanRoot? = null,
+    ): String? {
+        return when (val result = readSourceTextBounded(file, maximumCleartextBytes, authorizedRoot)) {
             is BoundedSourceReadResult.Success -> result.source
             BoundedSourceReadResult.SizeLimitExceeded,
             BoundedSourceReadResult.Failure,
@@ -593,20 +612,34 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
     }
 
-    private fun readSourceTextBounded(file: File, maximumCleartextBytes: Int): BoundedSourceReadResult {
+    private fun readSourceTextBounded(
+        file: File,
+        maximumCleartextBytes: Int,
+        authorizedRoot: EncryptedRuntimeScanRoot? = null,
+    ): BoundedSourceReadResult {
         val maximumStoredBytes = maximumCleartextBytes.toLong() +
                 EncryptedScriptFileHeader.BLOCK_SIZE +
                 ENCRYPTED_SOURCE_CIPHER_BLOCK_SIZE_BYTES
         val canonicalFile = file.strictCanonicalFileOrNull()
             ?: return BoundedSourceReadResult.Failure
         val canonicalPath = canonicalFile.absolutePath
+        if (
+            authorizedRoot != null &&
+            (!authorizedRoot.containsCanonicalPath(canonicalPath) || !authorizedRoot.hasCurrentIdentity())
+        ) {
+            return BoundedSourceReadResult.Failure
+        }
         val identity = canonicalFile.fileIdentityOrNull(noFollow = true)
             ?: return BoundedSourceReadResult.Failure
+        if (authorizedRoot != null && !authorizedRoot.hasCurrentIdentity()) {
+            return BoundedSourceReadResult.Failure
+        }
         val bytes = when (val result = readFileBytesBounded(
             file = canonicalFile,
             expectedCanonicalPath = canonicalPath,
             expectedIdentity = identity,
             maximumBytes = maximumStoredBytes,
+            authorizedRoot = authorizedRoot,
         )) {
             is BoundedFileReadResult.Success -> result.bytes
             BoundedFileReadResult.SizeLimitExceeded -> return BoundedSourceReadResult.SizeLimitExceeded
@@ -634,13 +667,30 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         expectedCanonicalPath: String,
         expectedIdentity: FileIdentity,
         maximumBytes: Long,
+        authorizedRoot: EncryptedRuntimeScanRoot? = null,
     ): BoundedFileReadResult {
         if (maximumBytes < 0L || maximumBytes > Int.MAX_VALUE) {
+            return BoundedFileReadResult.Failure
+        }
+        if (
+            authorizedRoot != null &&
+            (!authorizedRoot.containsCanonicalPath(expectedCanonicalPath) || !authorizedRoot.hasCurrentIdentity())
+        ) {
             return BoundedFileReadResult.Failure
         }
         val currentCanonicalFile = file.strictCanonicalFileOrNull() ?: return BoundedFileReadResult.Failure
         if (currentCanonicalFile.absolutePath != expectedCanonicalPath) {
             return BoundedFileReadResult.Failure
+        }
+        if (authorizedRoot != null) {
+            if (!authorizedRoot.hasCurrentIdentity()) {
+                return BoundedFileReadResult.Failure
+            }
+            val hook = commonJsPreloadAfterSourceAuthorizationForTest
+            commonJsPreloadAfterSourceAuthorizationForTest = null
+            if (runCatching { hook?.invoke() }.isFailure) {
+                return BoundedFileReadResult.Failure
+            }
         }
         return try {
             val descriptor = Os.open(
@@ -658,6 +708,18 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                 runCatching { Os.close(descriptor) }
                 return BoundedFileReadResult.Failure
             }
+            if (authorizedRoot != null) {
+                val openedPath = openedDescriptorPath(descriptor)
+                if (
+                    openedPath == null ||
+                    openedPath != expectedCanonicalPath ||
+                    !authorizedRoot.containsCanonicalPath(openedPath) ||
+                    !authorizedRoot.hasCurrentIdentity()
+                ) {
+                    runCatching { Os.close(descriptor) }
+                    return BoundedFileReadResult.Failure
+                }
+            }
             if (openedStat.st_size > maximumBytes) {
                 runCatching { Os.close(descriptor) }
                 return BoundedFileReadResult.SizeLimitExceeded
@@ -674,6 +736,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                 )
                 val buffer = ByteArray(ENCRYPTED_SOURCE_READ_BUFFER_SIZE)
                 var total = 0L
+                var sizeLimitExceeded = false
                 while (true) {
                     val count = input.read(buffer)
                     if (count < 0) {
@@ -684,14 +747,51 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                     }
                     total += count
                     if (total > maximumBytes) {
-                        return BoundedFileReadResult.SizeLimitExceeded
+                        sizeLimitExceeded = true
+                        break
                     }
                     output.write(buffer, 0, count)
                 }
-                BoundedFileReadResult.Success(output.toByteArray())
+                val completedStat = runCatching { Os.fstat(descriptor) }.getOrNull()
+                    ?: return@use BoundedFileReadResult.Failure
+                if (
+                    !expectedIdentity.matches(completedStat) ||
+                    !OsConstants.S_ISREG(completedStat.st_mode) ||
+                    completedStat.st_size != openedStat.st_size
+                ) {
+                    return@use BoundedFileReadResult.Failure
+                }
+                if (authorizedRoot != null) {
+                    val completedPath = openedDescriptorPath(descriptor)
+                    if (
+                        completedPath == null ||
+                        completedPath != expectedCanonicalPath ||
+                        !authorizedRoot.containsCanonicalPath(completedPath) ||
+                        !authorizedRoot.hasCurrentIdentity()
+                    ) {
+                        return@use BoundedFileReadResult.Failure
+                    }
+                }
+                if (sizeLimitExceeded) {
+                    BoundedFileReadResult.SizeLimitExceeded
+                } else {
+                    BoundedFileReadResult.Success(output.toByteArray())
+                }
             }
         } catch (_: Exception) {
             BoundedFileReadResult.Failure
+        }
+    }
+
+    private fun openedDescriptorPath(descriptor: java.io.FileDescriptor): String? {
+        return try {
+            ParcelFileDescriptor.dup(descriptor).use { duplicate ->
+                Os.readlink("/proc/self/fd/${duplicate.fd}")
+                    .takeIf { it.startsWith(File.separator) && !it.endsWith(" (deleted)") }
+                    ?.let { File(it).absolutePath }
+            }
+        } catch (_: Exception) {
+            null
         }
     }
 
@@ -828,6 +928,20 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         null
     }
 
+    internal fun prepareCommonJsPreloadDiagnosticsForTest(
+        source: String,
+        sourceName: String,
+        workingDirectory: String,
+    ): CommonJsPreloadDiagnostics {
+        return collectCommonJsModuleSources(
+            source = source,
+            sourceName = sourceName,
+            workingDirectory = workingDirectory,
+            isEsmEntry = false,
+            rootLoaderAnalysis = analyzeCommonJsSourceLoaders(source),
+        ).diagnostics
+    }
+
     private fun collectCommonJsModuleSources(
         source: String,
         sourceName: String,
@@ -893,56 +1007,14 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         )
     }
 
-    private fun encryptedRuntimeModuleScanDecision(
-        isEsmEntry: Boolean,
-        commonJsDiagnostics: CommonJsPreloadDiagnostics,
-    ): EncryptedRuntimeModuleScanDecision {
-        return when {
-            isEsmEntry -> EncryptedRuntimeModuleScanDecision(
-                required = true,
-                reason = ENCRYPTED_SCAN_REASON_ESM_ENTRY,
-            )
-            commonJsDiagnostics.sourceLevelEsmSyntaxCount > 0 -> EncryptedRuntimeModuleScanDecision(
-                required = true,
-                reason = ENCRYPTED_SCAN_REASON_SOURCE_LEVEL_ESM_GRAPH,
-            )
-            commonJsDiagnostics.dynamicImportCount > 0 -> EncryptedRuntimeModuleScanDecision(
-                required = true,
-                reason = ENCRYPTED_SCAN_REASON_DYNAMIC_IMPORT,
-            )
-            commonJsDiagnostics.createRequireReferenceCount > 0 -> EncryptedRuntimeModuleScanDecision(
-                required = true,
-                reason = ENCRYPTED_SCAN_REASON_CREATE_REQUIRE,
-            )
-            commonJsDiagnostics.unclassifiedLoaderReferenceCount > 0 -> EncryptedRuntimeModuleScanDecision(
-                required = true,
-                reason = ENCRYPTED_SCAN_REASON_UNCLASSIFIED_LOADER,
-            )
-            commonJsDiagnostics.dynamicRequireIgnoredCount > 0 -> EncryptedRuntimeModuleScanDecision(
-                required = true,
-                reason = ENCRYPTED_SCAN_REASON_DYNAMIC_REQUIRE,
-            )
-            commonJsDiagnostics.dynamicCodeReferenceCount > 0 -> EncryptedRuntimeModuleScanDecision(
-                required = true,
-                reason = ENCRYPTED_SCAN_REASON_DYNAMIC_CODE,
-            )
-            commonJsDiagnostics.unresolvedStaticRequireCount > 0 -> EncryptedRuntimeModuleScanDecision(
-                required = true,
-                reason = ENCRYPTED_SCAN_REASON_UNRESOLVED_STATIC_REQUIRE,
-            )
-            !commonJsDiagnostics.complete -> EncryptedRuntimeModuleScanDecision(
-                required = true,
-                reason = ENCRYPTED_SCAN_REASON_COMMON_JS_PRELOAD_INCOMPLETE,
-            )
-            commonJsDiagnostics.trivialModuleFreeEntry -> EncryptedRuntimeModuleScanDecision(
-                required = false,
-                reason = ENCRYPTED_SCAN_REASON_TRIVIAL_MODULE_FREE,
-            )
-            else -> EncryptedRuntimeModuleScanDecision(
-                required = true,
-                reason = ENCRYPTED_SCAN_REASON_CONSERVATIVE_SOURCE,
-            )
-        }
+    private fun encryptedRuntimeModuleScanDecision(): EncryptedRuntimeModuleScanDecision {
+        // R4 resolves encrypted source only after the runtime has selected an
+        // exact module candidate. Source shape must never opt an otherwise
+        // ordinary request into a project-wide directory walk.
+        return EncryptedRuntimeModuleScanDecision(
+            required = false,
+            reason = ENCRYPTED_SCAN_REASON_ON_DEMAND_PROVIDER,
+        )
     }
 
     private fun collectEncryptedRuntimeModuleSources(
@@ -1281,19 +1353,21 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
         val root = workingDirectory
             ?.takeIf { it.isNotBlank() }
-            ?.let { File(it).normalizedCanonicalFile() }
+            ?.let { File(it).strictCanonicalFileOrNull() }
             ?: return false
-        val file = File(sourceName).takeIf { it.isAbsolute }?.normalizedCanonicalFile() ?: return false
-        return packageTypeModuleForFile(file, root)
+        val sourceRoot = EncryptedRuntimeScanRoot.capture(root) ?: return false
+        val file = File(sourceName).takeIf { it.isAbsolute }?.strictCanonicalFileOrNull() ?: return false
+        return packageTypeModuleForFile(file, sourceRoot)
     }
 
-    private fun packageTypeModuleForFile(file: File, root: File): Boolean {
+    private fun packageTypeModuleForFile(file: File, sourceRoot: EncryptedRuntimeScanRoot): Boolean {
+        val root = sourceRoot.canonicalFile
         var current = file.parentFile?.normalizedCanonicalFile() ?: root
         while (current.isInsideOrSame(root)) {
             val packageJson = File(current, PACKAGE_JSON).normalizedCanonicalFile()
             if (packageJson.isFile && packageJson.isInsideOrSame(root) && packageJson.isInsideOrSame(current)) {
                 return runCatching {
-                    JSONObject(sourceText(packageJson)).optString("type") == "module"
+                    JSONObject(sourceText(packageJson, sourceRoot)).optString("type") == "module"
                 }.getOrDefault(false)
             }
             if (current == root) {
@@ -1357,7 +1431,11 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                     break
                 }
                 val rawModuleSource = when (
-                    val readResult = readSourceTextBounded(moduleFile, RUNTIME_MODULE_SOURCE_MAX_BYTES)
+                    val readResult = readSourceTextBounded(
+                        moduleFile,
+                        RUNTIME_MODULE_SOURCE_MAX_BYTES,
+                        preloadRoot,
+                    )
                 ) {
                     is BoundedSourceReadResult.Success -> readResult.source
                     BoundedSourceReadResult.SizeLimitExceeded -> {
@@ -1415,7 +1493,12 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             if (moduleName.isRuntimeProvidedCommonJsSpecifier()) {
                 continue
             }
-            frame.moduleFiles = resolveCommonJsModuleFiles(frame.parentDirectory, rootDirectory, moduleName)
+            frame.moduleFiles = resolveCommonJsModuleFiles(
+                frame.parentDirectory,
+                rootDirectory,
+                preloadRoot,
+                moduleName,
+            )
             frame.moduleFileIndex = 0
             if (frame.moduleFiles.isEmpty()) {
                 stats.unresolvedStaticRequireCount += 1
@@ -1423,29 +1506,43 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
     }
 
-    private fun resolveCommonJsModuleFiles(parentDirectory: File, rootDirectory: File, moduleName: String): List<File> {
+    private fun resolveCommonJsModuleFiles(
+        parentDirectory: File,
+        rootDirectory: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
+        moduleName: String,
+    ): List<File> {
         if (moduleName.isRelativeCommonJsModuleName()) {
-            return resolveCommonJsLocalModuleFiles(parentDirectory, rootDirectory, moduleName)
+            return resolveCommonJsLocalModuleFiles(parentDirectory, rootDirectory, preloadRoot, moduleName)
         }
         if (moduleName.isCommonJsPackageImportSpecifier()) {
-            return resolveCommonJsPackageImportFiles(parentDirectory, rootDirectory, moduleName)
+            return resolveCommonJsPackageImportFiles(parentDirectory, rootDirectory, preloadRoot, moduleName)
         }
         val packageSpecifier = moduleName.toCommonJsPackageSpecifier() ?: return emptyList()
-        resolveCommonJsPackageSelfReferenceFiles(parentDirectory, rootDirectory, packageSpecifier)
+        resolveCommonJsPackageSelfReferenceFiles(parentDirectory, rootDirectory, preloadRoot, packageSpecifier)
             .takeIf { it.isNotEmpty() }
             ?.let { return it }
-        return resolveCommonJsNodeModulesFiles(parentDirectory, rootDirectory, packageSpecifier)
+        return resolveCommonJsNodeModulesFiles(parentDirectory, rootDirectory, preloadRoot, packageSpecifier)
     }
 
-    private fun resolveCommonJsLocalModuleFiles(parentDirectory: File, rootDirectory: File, moduleName: String): List<File> {
+    private fun resolveCommonJsLocalModuleFiles(
+        parentDirectory: File,
+        rootDirectory: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
+        moduleName: String,
+    ): List<File> {
         val base = File(parentDirectory, moduleName).normalizedCanonicalFile()
         if (!base.isInsideOrSame(rootDirectory)) {
             return emptyList()
         }
-        return resolveCommonJsFileOrDirectoryFiles(base, rootDirectory)
+        return resolveCommonJsFileOrDirectoryFiles(base, rootDirectory, preloadRoot)
     }
 
-    private fun resolveCommonJsFileOrDirectoryFiles(base: File, rootDirectory: File): List<File> {
+    private fun resolveCommonJsFileOrDirectoryFiles(
+        base: File,
+        rootDirectory: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
+    ): List<File> {
         val extension = base.extension.lowercase()
         if (extension in COMMON_JS_MODULE_EXTENSIONS) {
             return resolveFirstCommonJsModuleFile(listOf(base), rootDirectory)?.let { listOf(it) } ?: emptyList()
@@ -1459,21 +1556,25 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             rootDirectory,
         )?.let { return listOf(it) }
 
-        return resolveCommonJsPackageDirectoryFiles(base, rootDirectory)
+        return resolveCommonJsPackageDirectoryFiles(base, rootDirectory, preloadRoot)
     }
 
-    private fun resolveCommonJsPackageDirectoryFiles(packageDirectory: File, rootDirectory: File): List<File> {
+    private fun resolveCommonJsPackageDirectoryFiles(
+        packageDirectory: File,
+        rootDirectory: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
+    ): List<File> {
         val packageJson = File(packageDirectory, PACKAGE_JSON).normalizedCanonicalFile()
         if (packageJson.isFile && packageJson.isInsideOrSame(rootDirectory) && packageJson.isInsideOrSame(packageDirectory)) {
             val packageFiles = mutableListOf(packageJson)
-            val packageExports = packageJsonExportsTarget(packageJson, subpath = "")
+            val packageExports = packageJsonExportsTarget(packageJson, preloadRoot, subpath = "")
             if (packageExports.present) {
                 packageExports.value
                     ?.let { resolveCommonJsPackageExportsFile(packageDirectory, rootDirectory, it) }
                     ?.let { packageFiles += it }
                 return packageFiles
             }
-            val packageMain = packageJsonMain(packageJson)
+            val packageMain = packageJsonMain(packageJson, preloadRoot)
             if (packageMain.present) {
                 resolveCommonJsPackageMainFile(packageDirectory, rootDirectory, packageMain.value)
                     ?.let {
@@ -1492,6 +1593,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     private fun resolveCommonJsNodeModulesFiles(
         parentDirectory: File,
         rootDirectory: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
         packageSpecifier: CommonJsPackageSpecifier,
     ): List<File> {
         commonJsNodeModulesDirectories(parentDirectory, rootDirectory).forEach { nodeModulesDirectory ->
@@ -1504,9 +1606,14 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                 return@forEach
             }
             val files = if (packageSpecifier.subpath.isBlank()) {
-                resolveCommonJsPackageDirectoryFiles(packageDirectory, rootDirectory)
+                resolveCommonJsPackageDirectoryFiles(packageDirectory, rootDirectory, preloadRoot)
             } else {
-                resolveCommonJsPackageSubpathFiles(packageDirectory, rootDirectory, packageSpecifier.subpath)
+                resolveCommonJsPackageSubpathFiles(
+                    packageDirectory,
+                    rootDirectory,
+                    preloadRoot,
+                    packageSpecifier.subpath,
+                )
             }
             if (files.isNotEmpty()) {
                 return files
@@ -1538,6 +1645,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     private fun resolveCommonJsPackageSubpathFiles(
         packageDirectory: File,
         rootDirectory: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
         subpath: String,
     ): List<File> {
         if (subpath.indexOf('\u0000') >= 0 || File(subpath).isAbsolute) {
@@ -1545,7 +1653,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
         val packageJson = File(packageDirectory, PACKAGE_JSON).normalizedCanonicalFile()
         if (packageJson.isFile && packageJson.isInsideOrSame(rootDirectory) && packageJson.isInsideOrSame(packageDirectory)) {
-            val packageExports = packageJsonExportsTarget(packageJson, subpath)
+            val packageExports = packageJsonExportsTarget(packageJson, preloadRoot, subpath)
             if (packageExports.present) {
                 val packageFiles = mutableListOf(packageJson)
                 packageExports.value
@@ -1558,18 +1666,19 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         if (!base.isInsideOrSame(packageDirectory)) {
             return emptyList()
         }
-        return resolveCommonJsFileOrDirectoryFiles(base, rootDirectory)
+        return resolveCommonJsFileOrDirectoryFiles(base, rootDirectory, preloadRoot)
             .filter { it.isInsideOrSame(packageDirectory) }
     }
 
     private fun resolveCommonJsPackageImportFiles(
         parentDirectory: File,
         rootDirectory: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
         specifier: String,
     ): List<File> {
         val scope = commonJsPackageScope(parentDirectory, rootDirectory) ?: return emptyList()
         val packageFiles = mutableListOf(scope.packageJson)
-        val packageImport = packageJsonImportsTarget(scope.packageJson, specifier)
+        val packageImport = packageJsonImportsTarget(scope.packageJson, preloadRoot, specifier)
         if (packageImport.present) {
             packageImport.value
                 ?.let { resolveCommonJsPackageImportsFile(scope.packageDirectory, rootDirectory, it) }
@@ -1581,14 +1690,15 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     private fun resolveCommonJsPackageSelfReferenceFiles(
         parentDirectory: File,
         rootDirectory: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
         packageSpecifier: CommonJsPackageSpecifier,
     ): List<File> {
         val scope = commonJsPackageScope(parentDirectory, rootDirectory) ?: return emptyList()
-        val packageName = packageJsonName(scope.packageJson) ?: return emptyList()
+        val packageName = packageJsonName(scope.packageJson, preloadRoot) ?: return emptyList()
         if (packageName != packageSpecifier.packageName) {
             return emptyList()
         }
-        val packageExport = packageJsonExportsTarget(scope.packageJson, packageSpecifier.subpath)
+        val packageExport = packageJsonExportsTarget(scope.packageJson, preloadRoot, packageSpecifier.subpath)
         if (!packageExport.present) {
             return emptyList()
         }
@@ -1696,9 +1806,12 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             }
     }
 
-    private fun packageJsonMain(packageJson: File): PackageMain {
+    private fun packageJsonMain(
+        packageJson: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
+    ): PackageMain {
         return runCatching {
-            val packageData = JSONObject(sourceText(packageJson))
+            val packageData = JSONObject(sourceText(packageJson, preloadRoot))
             if (!packageData.has(PACKAGE_JSON_MAIN)) {
                 PackageMain(present = false, value = null)
             } else {
@@ -1709,16 +1822,23 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
     }
 
-    private fun packageJsonName(packageJson: File): String? {
+    private fun packageJsonName(
+        packageJson: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
+    ): String? {
         return runCatching {
-            (JSONObject(sourceText(packageJson)).opt(PACKAGE_JSON_NAME) as? String)
+            (JSONObject(sourceText(packageJson, preloadRoot)).opt(PACKAGE_JSON_NAME) as? String)
                 ?.takeIf { it.isNotBlank() }
         }.getOrNull()
     }
 
-    private fun packageJsonExportsTarget(packageJson: File, subpath: String): PackageExport {
+    private fun packageJsonExportsTarget(
+        packageJson: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
+        subpath: String,
+    ): PackageExport {
         return runCatching {
-            val packageData = JSONObject(sourceText(packageJson))
+            val packageData = JSONObject(sourceText(packageJson, preloadRoot))
             if (!packageData.has(PACKAGE_JSON_EXPORTS)) {
                 PackageExport(present = false, value = null)
             } else {
@@ -1732,9 +1852,13 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
     }
 
-    private fun packageJsonImportsTarget(packageJson: File, specifier: String): PackageImport {
+    private fun packageJsonImportsTarget(
+        packageJson: File,
+        preloadRoot: EncryptedRuntimeScanRoot,
+        specifier: String,
+    ): PackageImport {
         return runCatching {
-            val packageData = JSONObject(sourceText(packageJson))
+            val packageData = JSONObject(sourceText(packageJson, preloadRoot))
             if (!packageData.has(PACKAGE_JSON_IMPORTS)) {
                 PackageImport(present = false, value = null)
             } else {
@@ -2036,6 +2160,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         const val ENCRYPTED_SCAN_REASON_COMMON_JS_PRELOAD_INCOMPLETE = "commonjs_preload_incomplete"
         const val ENCRYPTED_SCAN_REASON_CONSERVATIVE_SOURCE = "conservative_source"
         const val ENCRYPTED_SCAN_REASON_TRIVIAL_MODULE_FREE = "trivial_module_free"
+        const val ENCRYPTED_SCAN_REASON_ON_DEMAND_PROVIDER = "on_demand_provider"
         const val ENCRYPTED_SCAN_STATUS_SKIPPED = "skipped"
         const val ENCRYPTED_SCAN_STATUS_COMPLETED = "completed"
         const val ENCRYPTED_SCAN_STATUS_WORKING_DIRECTORY_UNAVAILABLE = "working_directory_unavailable"
@@ -2644,6 +2769,8 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             "embedded_script.engine_commonjs_preload.aggregate_source_bytes_limit" to
                     commonJs.aggregateSourceBytesLimit.toString(),
             "embedded_script.engine_commonjs_preload.depth_limit" to commonJs.depthLimit.toString(),
+            "embedded_script.engine_encrypted_runtime_scan.legacy_directory_scan_ran" to
+                    encryptedRuntimeModuleScan.performed.toString(),
         ) + encryptedRuntimeModuleScan.toNativeValues()
 
         companion object {
@@ -2867,6 +2994,8 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                 else -> File(path).name
             }.replace(File.separatorChar, '/')
         }
+
+        fun hasCurrentIdentity(): Boolean = currentIdentityStatus() == DirectoryIdentityStatus.MATCH
 
         fun validateCurrentIdentity(stats: EncryptedRuntimeModuleScanStats): Boolean {
             return when (currentIdentityStatus()) {

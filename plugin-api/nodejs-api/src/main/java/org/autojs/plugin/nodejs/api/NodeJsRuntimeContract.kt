@@ -4,6 +4,7 @@ object NodeJsRuntimeContract {
 
     const val CONTRACT_VERSION = 1
     const val HOST_CAPABILITY_BROKER_CONTRACT_VERSION = 1
+    const val MODULE_SOURCE_PROVIDER_CONTRACT_VERSION = 1
 
     const val KEY_CONTRACT_VERSION = "contractVersion"
     const val KEY_RUNTIME_SLOT = "runtimeSlot"
@@ -59,6 +60,43 @@ object NodeJsRuntimeContract {
     const val KEY_BRIDGE_RESPONSE_OK = "bridgeResponseOk"
     const val KEY_BRIDGE_ERROR_MESSAGE = "bridgeErrorMessage"
 
+    const val KEY_MODULE_SOURCE_PROVIDER = "moduleSourceProvider"
+    const val KEY_MODULE_SOURCE_PROVIDER_VERSION = "moduleSourceProviderVersion"
+    const val KEY_MODULE_SOURCE_PROVIDER_ID = "moduleSourceProviderId"
+    const val KEY_MODULE_SOURCE_PROVIDER_PATH = "moduleSourceProviderPath"
+    const val KEY_MODULE_SOURCE_PROVIDER_REQUEST_ID = "moduleSourceProviderRequestId"
+    const val KEY_MODULE_SOURCE_PROVIDER_STATUS = "moduleSourceProviderStatus"
+    const val KEY_MODULE_SOURCE_PROVIDER_RESOLVED_PATH = "moduleSourceProviderResolvedPath"
+    const val KEY_MODULE_SOURCE_PROVIDER_SOURCE_FD = "moduleSourceProviderSourceFd"
+    const val KEY_MODULE_SOURCE_PROVIDER_SOURCE_BYTES = "moduleSourceProviderSourceBytes"
+    const val KEY_MODULE_SOURCE_PROVIDER_ELAPSED_MS = "moduleSourceProviderElapsedMs"
+    const val KEY_MODULE_SOURCE_PROVIDER_ROOT = "moduleSourceProviderRoot"
+    const val KEY_MODULE_SOURCE_PROVIDER_DENIAL_REASON = "moduleSourceProviderDenialReason"
+    const val KEY_MODULE_SOURCE_PROVIDER_SOURCE_MAX_BYTES = "moduleSourceProviderSourceMaxBytes"
+    const val KEY_MODULE_SOURCE_PROVIDER_TOTAL_MAX_BYTES = "moduleSourceProviderTotalMaxBytes"
+    const val KEY_MODULE_SOURCE_PROVIDER_MAX_COUNT = "moduleSourceProviderMaxCount"
+    const val KEY_MODULE_SOURCE_PROVIDER_REQUEST_MAX_COUNT = "moduleSourceProviderRequestMaxCount"
+
+    const val MODULE_SOURCE_PROVIDER_STATUS_DECRYPTED = "decrypted"
+    const val MODULE_SOURCE_PROVIDER_STATUS_NOT_ENCRYPTED = "not_encrypted"
+    const val MODULE_SOURCE_PROVIDER_STATUS_NOT_FOUND = "not_found"
+    const val MODULE_SOURCE_PROVIDER_STATUS_DENIED = "denied"
+    const val MODULE_SOURCE_PROVIDER_STATUS_CANCELLED = "cancelled"
+    const val MODULE_SOURCE_PROVIDER_STATUS_TIMED_OUT = "timed_out"
+    const val MODULE_SOURCE_PROVIDER_STATUS_FAILED = "failed"
+
+    const val ERROR_MODULE_SOURCE_PROVIDER_INVALID_REQUEST =
+        "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_INVALID_REQUEST"
+    const val ERROR_MODULE_SOURCE_PROVIDER_NOT_FOUND = "ERR_AUTOJS6_MODULE_NOT_FOUND"
+    const val ERROR_MODULE_SOURCE_PROVIDER_DENIED = "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_DENIED"
+    const val ERROR_MODULE_SOURCE_PROVIDER_CANCELLED = "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_CANCELLED"
+    const val ERROR_MODULE_SOURCE_PROVIDER_TIMED_OUT = "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_TIMEOUT"
+    const val ERROR_MODULE_SOURCE_PROVIDER_BUDGET_EXCEEDED =
+        "ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED"
+    const val ERROR_MODULE_SOURCE_PROVIDER_FAILED = "ERR_AUTOJS6_MODULE_SOURCE_PROVIDER_FAILED"
+
+    const val RUNTIME_MODULE_SOURCE_PROVIDER_NAME = "autojs6:module-source-provider"
+
     const val KEY_EVENT_TYPE = "eventType"
     const val KEY_EVENT_LEVEL = "level"
     const val KEY_EVENT_TEXT = "text"
@@ -73,4 +111,5 @@ object NodeJsRuntimeContract {
     const val CAPABILITY_NATIVE_EMBEDDED_RUNTIME = "nativeEmbeddedRuntime"
     const val CAPABILITY_HOST_CAPABILITY_BROKER = "hostCapabilityBroker"
     const val CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE = "hostCapabilityLiveBridge"
+    const val CAPABILITY_ON_DEMAND_MODULE_SOURCE_PROVIDER = "onDemandModuleSourceProvider"
 }

@@ -44,11 +44,11 @@ $gradleArgs[1] = '-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.
 exit $LASTEXITCODE
 ```
 
-The engine may skip the encrypted fallback scan only for its strict
-module-free proof: empty/trivia-only source, the editor's directive-only
-`"nodejs";` placeholder, or the primitive `console` probe. Comment text is
-parsed as trivia, but any executable token after the directive retains the
-conservative bounded scan.
+R4 makes the zero-scan path the default for every source shape. Request
+preparation may preload a statically resolved dependency closure as an
+optimization, but arbitrary business logic, dynamic `require()`, ESM, and
+dynamic `import()` do not opt into a working-directory walk. Encrypted source
+is requested only after the runtime resolves an exact module candidate.
 
 The benchmark writes a JSON report on the device under:
 
@@ -74,6 +74,35 @@ If a device or test environment uses a different report directory, pass:
 .\gradlew.bat --console=plain :app:pullNodeEmbeddedPerformanceReports -Pautojs.nodejs.perf.deviceDir=<device-dir>
 ```
 
+## R4 Request-Preparation Gate
+
+`NodeEmbeddedEngineRequestPreparationInstrumentationTest` runs through the
+real file engine path. Its R4 corpus places at least 4000 unrelated
+JavaScript-like files under the working root, then executes non-trivial
+module-free logic, static and dynamic CommonJS, package resolution, missing
+modules, partial ESM, and plain and encrypted module variants. Every case
+requires:
+
+- scan decision `on_demand_provider`;
+- zero examined paths, walked files, candidates, header probes, and full-file
+  reads in the legacy scan diagnostics;
+- `embedded_script.module_provider.legacy_directory_scan_ran=false`;
+- non-negative provider request, resolved-source, decrypted-source, byte, and
+  elapsed-time diagnostics;
+- encrypted cases to touch only the actual dependency closure: exact static
+  CommonJS preload may use zero provider requests, while on-demand cases report
+  only the candidates actually resolved.
+
+This focused class is a correctness and regression gate, not a replacement for
+30-sample device evidence. R4 acceptance uses runtime-warm real-file runs for
+representative module-free, static CommonJS, and ESM entries. Module-free and
+single-module request-preparation p95 must be at most 50 ms; adding the
+unrelated-file corpus may increase request-preparation p95 by at most 20 ms;
+runtime-warm end-to-end p95 must remain at most 400 ms. Record commands and
+results using [R4_ACCEPTANCE_SAMPLING.md](R4_ACCEPTANCE_SAMPLING.md). An
+unfilled template or a successful compile/instrumentation command is not
+device acceptance evidence.
+
 ## Report Schema
 
 Reports use schema `autojs6-node-performance-v4`. They include device and ABI
@@ -94,8 +123,11 @@ The `phaseTimings` object separates four scopes:
   script intervals are nested in other native intervals, so they must not be
   summed.
 - `engine` contains JavaScript-engine request preparation, CommonJS preload,
-  and encrypted runtime-module scan timings. These values are normally missing
-  in the direct-service benchmark and are never synthesized as zero.
+  and the legacy encrypted runtime-module scan timing. Under R4 the scan phase
+  is normally `skipped`, while on-demand provider diagnostics are reported
+  separately as request count, resolved/decrypted source count, source bytes,
+  elapsed time, denial reason, and legacy-scan use. Engine values are normally
+  missing in the direct-service benchmark and are never synthesized as zero.
 - `hostPreparation` contains native-library load and compile-cache
   prepare/prune timings when the corresponding operation runs.
 

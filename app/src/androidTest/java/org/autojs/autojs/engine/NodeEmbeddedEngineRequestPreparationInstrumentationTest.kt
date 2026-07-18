@@ -1,21 +1,24 @@
 package org.autojs.autojs.engine
 
+import android.os.Bundle
+import android.os.ParcelFileDescriptor
+import android.os.SystemClock
 import android.system.Os
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs6.BuildConfig
+import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assume.assumeTrue
 import org.mozilla.javascript.Context as RhinoContext
 import java.io.File
-import java.io.RandomAccessFile
 import java.nio.charset.StandardCharsets
 
 class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
@@ -35,614 +38,780 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
     }
 
     @Test
-    fun realFileEngineSkipsLargeCwdOnlyForStrictTrivialEntry() {
+    fun r4CorpusUsesOnDemandProviderWithoutProjectWideScans() {
         val fixture = createLargeWorkingDirectory()
         try {
-            val simple = File(fixture.root, "simple.js").apply {
-                writeText("\"nodejs\";\nconsole.log(1);", StandardCharsets.UTF_8)
-            }
-            val simpleRun = executeFile(fixture.root, simple, "simple")
-            assertSkippedStaticScan(
-                label = "simple",
-                run = simpleRun,
-                expectedStaticRequireCount = 0,
-                expectedModuleCount = 0,
+            assertEquals(
+                "R4 acceptance corpus must contain at least 4000 unrelated files",
+                FILLER_FILE_COUNT,
+                fixture.fillerFileCount,
             )
 
-            File(fixture.root, "static-child.js").writeText(
-                """exports.value = "static-ok";""",
-                StandardCharsets.UTF_8,
-            )
-            val staticEntry = File(fixture.root, "static-entry.js").apply {
+            val businessLogicEntry = File(fixture.root, "business-logic.cjs").apply {
                 writeText(
                     """
                     "nodejs";
-                    const child = require("./static-child");
-                    if (child.value !== "static-ok") throw new Error("static require failed");
+                    const values = [1, 2, 3];
+                    let total = 0;
+                    function add(value) { total += value; }
+                    values.forEach(add);
+                    const expression = total * 2;
+                    if (expression !== 12) throw new Error("business logic failed");
+                    console.log("r4.business.first=" + expression);
+                    console.log("r4.business.second=true");
+                    Promise.resolve().then(async () => {
+                      await Promise.resolve();
+                      if (total !== 6) throw new Error("async business logic failed");
+                    }).catch((error) => setImmediate(() => { throw error; }));
+                    setTimeout(() => {}, 0);
                     """.trimIndent(),
                     StandardCharsets.UTF_8,
                 )
             }
-            val staticRun = executeFile(fixture.root, staticEntry, "static require")
-            assertRetainedHeaderOnlyScan(
-                label = "static require",
-                run = staticRun,
-                expectedDecision = "conservative_source",
-                minimumCandidateCount = fixture.fillerFileCount,
+            val businessLogicRun = executeFile(fixture.root, businessLogicEntry, "non-trivial module-free business logic")
+            val businessProvider = assertOnDemandProviderWithoutDirectoryScan(
+                label = "non-trivial module-free business logic",
+                run = businessLogicRun,
             )
-            assertEquals(1, staticRun.diagnostics.commonJs.staticRequireCount)
-            assertEquals(1, staticRun.diagnostics.commonJs.moduleCount)
-            assertTrue(staticRun.diagnostics.commonJs.complete)
+            assertFalse(
+                "R4 performance must not depend on the old trivial-source allowlist",
+                businessLogicRun.diagnostics.commonJs.trivialModuleFreeEntry,
+            )
+            assertEquals(0L, businessProvider.requestCount)
+            assertEquals(0L, businessProvider.resolvedSourceCount)
+            assertEquals(0L, businessProvider.decryptedSourceCount)
 
-            File(fixture.root, "dynamic-child.js").writeText(
-                """exports.value = "dynamic-ok";""",
+            File(fixture.root, "plain-static-child.cjs").writeText(
+                """module.exports = { value: "plain-static-ok" };""",
                 StandardCharsets.UTF_8,
             )
-            val dynamicEntry = File(fixture.root, "dynamic-entry.js").apply {
+            val plainStaticEntry = File(fixture.root, "plain-static-entry.cjs").apply {
                 writeText(
                     """
                     "nodejs";
-                    const childName = "./dynamic-child";
+                    const child = require("./plain-static-child.cjs");
+                    if (child.value !== "plain-static-ok") throw new Error("plain static require failed");
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
+            }
+            val plainStaticRun = executeFile(fixture.root, plainStaticEntry, "plain static CommonJS")
+            assertOnDemandProviderWithoutDirectoryScan("plain static CommonJS", plainStaticRun)
+            assertEquals(1, plainStaticRun.diagnostics.commonJs.staticRequireCount)
+            assertEquals(1, plainStaticRun.diagnostics.commonJs.moduleCount)
+            assertTrue(plainStaticRun.diagnostics.commonJs.complete)
+
+            File(fixture.root, "plain-dynamic-child.cjs").writeText(
+                """module.exports = { value: "plain-dynamic-ok" };""",
+                StandardCharsets.UTF_8,
+            )
+            val plainDynamicEntry = File(fixture.root, "plain-dynamic-entry.cjs").apply {
+                writeText(
+                    """
+                    "nodejs";
+                    const childName = "./plain-dynamic-child.cjs";
                     const child = require(childName);
-                    if (child.value !== "dynamic-ok") throw new Error("dynamic require failed");
+                    if (child.value !== "plain-dynamic-ok") throw new Error("plain dynamic require failed");
                     """.trimIndent(),
                     StandardCharsets.UTF_8,
                 )
             }
-            val dynamicRun = executeFile(fixture.root, dynamicEntry, "dynamic require")
-            assertRetainedHeaderOnlyScan(
-                label = "dynamic require",
-                run = dynamicRun,
-                expectedDecision = "dynamic_require",
-                minimumCandidateCount = fixture.fillerFileCount,
+            val plainDynamicRun = executeFile(fixture.root, plainDynamicEntry, "plain dynamic CommonJS")
+            val plainDynamicProvider = assertOnDemandProviderWithoutDirectoryScan(
+                "plain dynamic CommonJS",
+                plainDynamicRun,
             )
-            assertEquals(1, dynamicRun.diagnostics.commonJs.dynamicRequireIgnoredCount)
-            assertFalse(dynamicRun.diagnostics.isEsmEntry)
+            assertEquals(1, plainDynamicRun.diagnostics.commonJs.dynamicRequireIgnoredCount)
+            assertEquals(0L, plainDynamicProvider.decryptedSourceCount)
+
+            writePackage(
+                root = fixture.root,
+                packageName = "r4-plain-package",
+                source = """module.exports = { value: "plain-package-ok" };""",
+                encrypted = false,
+            )
+            val plainPackageEntry = File(fixture.root, "plain-package-entry.cjs").apply {
+                writeText(
+                    """
+                    "nodejs";
+                    const pkg = require("r4-plain-package");
+                    if (pkg.value !== "plain-package-ok") throw new Error("plain package resolution failed");
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
+            }
+            assertOnDemandProviderWithoutDirectoryScan(
+                "plain package resolution",
+                executeFile(fixture.root, plainPackageEntry, "plain package resolution"),
+            )
+
+            val missingEntry = File(fixture.root, "missing-module-entry.cjs").apply {
+                writeText(
+                    """
+                    "nodejs";
+                    let missingRejected = false;
+                    try {
+                      require("./r4-intentionally-missing.cjs");
+                    } catch (error) {
+                      const code = String(error && (error.autojs6Code || error.code) || "");
+                      missingRejected = code === "ERR_AUTOJS6_MODULE_NOT_FOUND" || code === "MODULE_NOT_FOUND";
+                    }
+                    if (!missingRejected) throw new Error("missing module did not retain stable rejection");
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
+            }
+            assertOnDemandProviderWithoutDirectoryScan(
+                "missing CommonJS module",
+                executeFile(fixture.root, missingEntry, "missing CommonJS module"),
+            )
 
             if (BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED) {
-                File(fixture.root, "esm-child.mjs").writeText(
-                    """export const value = "esm-ok";""",
+                File(fixture.root, "plain-esm-child.mjs").writeText(
+                    """export const value = "plain-esm-ok";""",
                     StandardCharsets.UTF_8,
                 )
-                val esmEntry = File(fixture.root, "esm-entry.mjs").apply {
+                val plainEsmEntry = File(fixture.root, "plain-esm-entry.mjs").apply {
                     writeText(
                         """
-                        import { value } from "./esm-child.mjs";
-                        if (value !== "esm-ok") throw new Error("ESM import failed");
+                        import { value } from "./plain-esm-child.mjs";
+                        if (value !== "plain-esm-ok") throw new Error("plain ESM resolution failed");
                         """.trimIndent(),
                         StandardCharsets.UTF_8,
                     )
                 }
-                val esmRun = executeFile(fixture.root, esmEntry, "ESM")
-                assertRetainedHeaderOnlyScan(
-                    label = "ESM",
-                    run = esmRun,
-                    expectedDecision = "esm_entry",
-                    minimumCandidateCount = fixture.fillerFileCount,
-                )
-                assertTrue(esmRun.diagnostics.isEsmEntry)
-                assertEquals(0, esmRun.diagnostics.commonJs.moduleCount)
+                val plainEsmRun = executeFile(fixture.root, plainEsmEntry, "plain static ESM")
+                assertOnDemandProviderWithoutDirectoryScan("plain static ESM", plainEsmRun)
+                assertTrue(plainEsmRun.diagnostics.isEsmEntry)
             }
-        } finally {
-            fixture.root.deleteRecursively()
-        }
-    }
 
-    @Test
-    fun realFileEngineSkipsLargeCwdForDirectiveOnlyEditorPlaceholder() {
-        val fixture = createLargeWorkingDirectory()
-        try {
-            val editorPlaceholder = File(fixture.root, "editor-placeholder.js").apply {
-                writeText(
-                    "\"nodejs\";\n/* Nothing to do in this Node.js script. */",
-                    StandardCharsets.UTF_8,
-                )
-            }
-            assertSkippedStaticScan(
-                label = "directive-only editor placeholder",
-                run = executeFile(fixture.root, editorPlaceholder, "directive-only editor placeholder"),
-                expectedStaticRequireCount = 0,
-                expectedModuleCount = 0,
-            )
-
-            val triviaOnly = File(fixture.root, "trivia-only.cjs").apply {
-                writeText(
-                    "// require('ignored-in-comment')\n/* import('also-ignored') */\n",
-                    StandardCharsets.UTF_8,
-                )
-            }
-            assertSkippedStaticScan(
-                label = "trivia-only entry",
-                run = executeFile(fixture.root, triviaOnly, "trivia-only entry"),
-                expectedStaticRequireCount = 0,
-                expectedModuleCount = 0,
-            )
-
-            File(fixture.root, "placeholder-child.js").writeText(
-                "exports.value = 'still-loaded';",
-                StandardCharsets.UTF_8,
-            )
-            val executableAfterPlaceholder = File(fixture.root, "placeholder-with-code.js").apply {
-                writeText(
-                    """
-                    "nodejs";
-                    /* Nothing to do in this Node.js script. */
-                    const child = require("./placeholder-child");
-                    if (child.value !== "still-loaded") throw new Error("placeholder child failed");
-                    """.trimIndent(),
-                    StandardCharsets.UTF_8,
-                )
-            }
-            val executableRun = executeFile(
-                fixture.root,
-                executableAfterPlaceholder,
-                "executable code after placeholder",
-            )
-            assertRetainedHeaderOnlyScan(
-                label = "executable code after placeholder",
-                run = executableRun,
-                expectedDecision = "conservative_source",
-                minimumCandidateCount = fixture.fillerFileCount,
-            )
-            assertEquals(1, executableRun.diagnostics.commonJs.staticRequireCount)
-            assertFalse(executableRun.diagnostics.commonJs.trivialModuleFreeEntry)
-        } finally {
-            fixture.root.deleteRecursively()
-        }
-    }
-
-    @Test
-    fun encryptedRuntimeFallbackPreservesEsmShapes() {
-        assumeTrue(
-            "Build with Embedded Node ESM enabled for encrypted graph regression.",
-            BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
-        )
-        val root = File(context.cacheDir, "embedded-engine-encrypted-graph-${System.nanoTime()}").apply {
-            check(mkdirs()) { "Failed to create encrypted graph test dir: $absolutePath" }
-        }
-        try {
             withTestScriptEncryption {
                 writeEncryptedScript(
-                    File(root, "source-esm-target.mjs"),
-                    """export const value = "source-esm-ok";""",
+                    File(fixture.root, "encrypted-static-child.cjs"),
+                    """module.exports = { value: "encrypted-static-ok" };""",
                 )
-                writeEncryptedScript(
-                    File(root, "unresolved-target.mjs"),
-                    """export default "unresolved-ok";""",
-                )
-
-                val sourceEsmEntry = File(root, "source-esm-entry.js").apply {
+                val encryptedStaticEntry = File(fixture.root, "encrypted-static-entry.cjs").apply {
                     writeText(
                         """
                         "nodejs";
-                        import { value } from "./source-esm-target.mjs";
-                        if (value !== "source-esm-ok") throw new Error("source-level ESM encrypted target failed");
+                        const child = require("./encrypted-static-child.cjs");
+                        if (child.value !== "encrypted-static-ok") throw new Error("encrypted static require failed");
                         """.trimIndent(),
                         StandardCharsets.UTF_8,
                     )
                 }
-                val sourceEsmRun = executeFile(root, sourceEsmEntry, "source-level ESM encrypted target")
-                assertEncryptedFallback("source-level ESM", sourceEsmRun, "esm_entry")
-                assertTrue(sourceEsmRun.diagnostics.isEsmEntry)
-                assertTrue(sourceEsmRun.diagnostics.commonJs.sourceLevelEsmSyntaxCount > 0)
-
-                val unresolvedEntry = File(root, "unresolved-entry.cjs").apply {
-                    writeText(
-                        """
-                        "nodejs";
-                        const target = require("./unresolved-target.mjs");
-                        if (target.default !== "unresolved-ok") throw new Error("unresolved encrypted target failed");
-                        """.trimIndent(),
-                        StandardCharsets.UTF_8,
-                    )
-                }
-                val unresolvedRun = executeFile(root, unresolvedEntry, "unresolved encrypted target")
-                assertEncryptedFallback("unresolved static require", unresolvedRun, "unresolved_static_require")
-                assertTrue(unresolvedRun.diagnostics.commonJs.unresolvedStaticRequireCount > 0)
-            }
-        } finally {
-            root.deleteRecursively()
-        }
-    }
-
-    @Test
-    fun encryptedRuntimeFallbackSupportsCreateRequireWithoutEsmFlags() {
-        val root = File(context.cacheDir, "embedded-engine-encrypted-create-require-${System.nanoTime()}").apply {
-            check(mkdirs()) { "Failed to create encrypted createRequire test dir: $absolutePath" }
-        }
-        try {
-            withTestScriptEncryption {
-                writeEncryptedScript(
-                    File(root, "create-require-target.cjs"),
-                    """module.exports = { value: "create-require-ok" };""",
+                val encryptedStaticRun = executeFile(
+                    fixture.root,
+                    encryptedStaticEntry,
+                    "encrypted static CommonJS",
                 )
-                val createRequireEntry = File(root, "create-require-entry.cjs").apply {
-                    writeText(
-                        """
-                        "nodejs";
-                        const { createRequire } = require("module");
-                        const load = createRequire(__filename);
-                        const target = load("./create-require-target.cjs");
-                        if (target.value !== "create-require-ok") throw new Error("createRequire encrypted target failed");
-                        """.trimIndent(),
-                        StandardCharsets.UTF_8,
-                    )
-                }
-                val createRequireRun = executeFile(root, createRequireEntry, "createRequire encrypted target")
-                assertEncryptedFallback("createRequire", createRequireRun, "create_require")
-                assertTrue(createRequireRun.diagnostics.commonJs.createRequireReferenceCount > 0)
+                val encryptedStaticProvider = assertOnDemandProviderWithoutDirectoryScan(
+                    "encrypted static CommonJS",
+                    encryptedStaticRun,
+                )
                 assertEquals(
-                    "builtin module authority must not be counted as unresolved",
-                    0,
-                    createRequireRun.diagnostics.commonJs.unresolvedStaticRequireCount,
+                    "statically resolved encrypted CommonJS should use the exact preload closure",
+                    1,
+                    encryptedStaticRun.diagnostics.commonJs.moduleCount,
                 )
-            }
-        } finally {
-            root.deleteRecursively()
-        }
-    }
+                assertEquals(0L, encryptedStaticProvider.requestCount)
+                assertEquals(0L, encryptedStaticProvider.resolvedSourceCount)
+                assertEquals(0L, encryptedStaticProvider.decryptedSourceCount)
 
-    @Test
-    fun encryptedRuntimeFallbackSupportsDynamicImportWhenEnabled() {
-        assumeTrue(
-            "Build with Embedded Node ESM and local dynamic import enabled for this dynamic-import case.",
-            BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED &&
+                writeEncryptedScript(
+                    File(fixture.root, "encrypted-dynamic-child.cjs"),
+                    """module.exports = { value: "encrypted-dynamic-ok" };""",
+                )
+                val encryptedDynamicEntry = File(fixture.root, "encrypted-dynamic-entry.cjs").apply {
+                    writeText(
+                        """
+                        "nodejs";
+                        const childName = ["./encrypted", "dynamic-child.cjs"].join("-");
+                        const child = require(childName);
+                        if (child.value !== "encrypted-dynamic-ok") throw new Error("encrypted dynamic require failed");
+                        """.trimIndent(),
+                        StandardCharsets.UTF_8,
+                    )
+                }
+                val encryptedDynamicRun = executeFile(
+                    fixture.root,
+                    encryptedDynamicEntry,
+                    "encrypted dynamic CommonJS",
+                )
+                assertSingleOnDemandEncryptedCandidate("encrypted dynamic CommonJS", encryptedDynamicRun)
+                assertEquals(1, encryptedDynamicRun.diagnostics.commonJs.dynamicRequireIgnoredCount)
+
+                writePackage(
+                    root = fixture.root,
+                    packageName = "r4-encrypted-package",
+                    source = """module.exports = { value: "encrypted-package-ok" };""",
+                    encrypted = true,
+                )
+                val encryptedPackageEntry = File(fixture.root, "encrypted-package-entry.cjs").apply {
+                    writeText(
+                        """
+                        "nodejs";
+                        const packageName = ["r4", "encrypted", "package"].join("-");
+                        const pkg = require(packageName);
+                        if (pkg.value !== "encrypted-package-ok") throw new Error("encrypted package resolution failed");
+                        """.trimIndent(),
+                        StandardCharsets.UTF_8,
+                    )
+                }
+                val encryptedPackageRun = executeFile(
+                    fixture.root,
+                    encryptedPackageEntry,
+                    "encrypted package resolution",
+                )
+                val encryptedPackageProvider = assertOnDemandProviderWithoutDirectoryScan(
+                    "encrypted package resolution",
+                    encryptedPackageRun,
+                )
+                assertEquals(
+                    "computed package resolution should probe package.json and the resolved entry only",
+                    2L,
+                    encryptedPackageProvider.requestCount,
+                )
+                assertEquals(2L, encryptedPackageProvider.resolvedSourceCount)
+                assertEquals(1L, encryptedPackageProvider.decryptedSourceCount)
+                assertTrue(encryptedPackageProvider.sourceBytes > 0L)
+
+                if (BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED) {
+                    writeEncryptedScript(
+                        File(fixture.root, "encrypted-static-esm-child.mjs"),
+                        """export const value = "encrypted-static-esm-ok";""",
+                    )
+                    val encryptedStaticEsmEntry = File(fixture.root, "encrypted-static-esm-entry.mjs").apply {
+                        writeText(
+                            """
+                            import { value } from "./encrypted-static-esm-child.mjs";
+                            if (value !== "encrypted-static-esm-ok") throw new Error("encrypted static ESM failed");
+                            """.trimIndent(),
+                            StandardCharsets.UTF_8,
+                        )
+                    }
+                    val encryptedStaticEsmRun = executeFile(
+                        fixture.root,
+                        encryptedStaticEsmEntry,
+                        "encrypted static ESM",
+                    )
+                    assertSingleOnDemandEncryptedCandidate("encrypted static ESM", encryptedStaticEsmRun)
+                    assertTrue(encryptedStaticEsmRun.diagnostics.isEsmEntry)
+                }
+
+                if (
+                    BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED &&
                     BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED &&
-                    BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+                    BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED
+                ) {
+                    writeEncryptedScript(
+                        File(fixture.root, "encrypted-dynamic-import-child.mjs"),
+                        """export const value = "encrypted-dynamic-import-ok";""",
+                    )
+                    val encryptedDynamicImportEntry = File(fixture.root, "encrypted-dynamic-import-entry.cjs").apply {
+                        writeText(
+                            """
+                            "nodejs";
+                            (async () => {
+                              const loaded = await import("./encrypted-dynamic-import-child.mjs");
+                              if (loaded.value !== "encrypted-dynamic-import-ok") {
+                                throw new Error("encrypted dynamic import failed");
+                              }
+                            })().catch((error) => setImmediate(() => { throw error; }));
+                            """.trimIndent(),
+                            StandardCharsets.UTF_8,
+                        )
+                    }
+                    val encryptedDynamicImportRun = executeFile(
+                        fixture.root,
+                        encryptedDynamicImportEntry,
+                        "encrypted dynamic import",
+                    )
+                    assertSingleOnDemandEncryptedCandidate("encrypted dynamic import", encryptedDynamicImportRun)
+                    assertTrue(encryptedDynamicImportRun.diagnostics.commonJs.dynamicImportCount > 0)
+                }
+            }
+        } finally {
+            fixture.root.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun directiveOnlyEmptyAndCommentEntriesKeepTheSameR4ProviderContract() {
+        val root = File(context.cacheDir, "embedded-engine-r4-module-free-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create R4 module-free test dir: $absolutePath" }
+        }
+        try {
+            val sources = linkedMapOf(
+                "directive-only.js" to "\"nodejs\";\n/* Nothing to do in this Node.js script. */",
+                "empty.cjs" to "",
+                "trivia-only.cjs" to "// require('ignored-in-comment')\n/* import('also-ignored') */\n",
+            )
+            for ((name, source) in sources) {
+                val entry = File(root, name).apply { writeText(source, StandardCharsets.UTF_8) }
+                val run = executeFile(root, entry, name)
+                val provider = assertOnDemandProviderWithoutDirectoryScan(name, run)
+                assertTrue("$name should retain its module-free parser diagnostic", run.diagnostics.commonJs.trivialModuleFreeEntry)
+                assertEquals(0L, provider.requestCount)
+            }
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun staticCommonJsPackagePreloadRejectsSameInodeIntermediateSymlinkSwap() {
+        val root = File(context.cacheDir, "embedded-engine-r4-preload-root-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create static preload root: $absolutePath" }
+        }
+        val outsideRoot = File(context.cacheDir, "embedded-engine-r4-preload-outside-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create static preload outside root: $absolutePath" }
+        }
+        val packageDirectory = File(root, "package-dir").apply {
+            check(mkdirs()) { "Failed to create static preload package directory: $absolutePath" }
+        }
+        val movedPackageDirectory = File(outsideRoot, "moved-package-dir")
+        val entrySource = "require(\"./package-dir\");"
+        val entryFile = File(root, "entry.cjs").apply {
+            writeText(entrySource, StandardCharsets.UTF_8)
+        }
+        File(packageDirectory, "package.json").writeText(
+            """{"main":"./index.cjs"}""",
+            StandardCharsets.UTF_8,
         )
-        val root = File(context.cacheDir, "embedded-engine-encrypted-dynamic-${System.nanoTime()}").apply {
-            check(mkdirs()) { "Failed to create encrypted dynamic-import test dir: $absolutePath" }
-        }
-        try {
-            withTestScriptEncryption {
-                writeEncryptedScript(
-                    File(root, "dynamic-target.mjs"),
-                    """export const value = "dynamic-ok";""",
-                )
-                val dynamicMarker = File(root, "dynamic-import-ok.txt")
-                val dynamicEntry = File(root, "dynamic-import-entry.cjs").apply {
-                    writeText(
-                        """
-                        "nodejs";
-                        const fs = require("fs");
-                        (async () => {
-                          const loaded = await import("./dynamic-target.mjs");
-                          if (loaded.value !== "dynamic-ok") throw new Error("dynamic encrypted target failed");
-                          fs.writeFileSync("./${dynamicMarker.name}", "ok", "utf8");
-                        })().catch((error) => setImmediate(() => { throw error; }));
-                        """.trimIndent(),
-                        StandardCharsets.UTF_8,
-                    )
-                }
-                val dynamicRun = executeFile(root, dynamicEntry, "dynamic import encrypted target")
-                assertEncryptedFallback("dynamic import", dynamicRun, "dynamic_import")
-                assertTrue(dynamicRun.diagnostics.commonJs.dynamicImportCount > 0)
-                assertEquals("ok", dynamicMarker.readText(StandardCharsets.UTF_8))
-            }
-        } finally {
-            root.deleteRecursively()
-        }
-    }
+        File(packageDirectory, "index.cjs").writeText(
+            "module.exports = true;",
+            StandardCharsets.UTF_8,
+        )
 
-    @Test
-    fun computedAndDivisionLoadersActuallyLoadEncryptedModules() {
-        val root = File(context.cacheDir, "embedded-engine-encrypted-computed-${System.nanoTime()}").apply {
-            check(mkdirs()) { "Failed to create encrypted computed-loader test dir: $absolutePath" }
-        }
-        try {
-            withTestScriptEncryption {
-                writeEncryptedScript(
-                    File(root, "computed-target.cjs"),
-                    """module.exports = { value: "computed-ok" };""",
-                )
-                writeEncryptedScript(
-                    File(root, "division-target.cjs"),
-                    """module.exports = { value: "division-ok" };""",
-                )
-                val computedEntry = File(root, "computed-entry.cjs").apply {
-                    writeText(
-                        """
-                        "nodejs";
-                        if (false) {
-                          globalThis["require"]("./computed-target.cjs");
-                          Reflect.get(module, "require")("./computed-target.cjs");
-                          process.getBuiltinModule("module");
-                        }
-                        const target = module["require"]("./computed-target.cjs");
-                        if (target.value !== "computed-ok") throw new Error("computed encrypted target failed");
-                        """.trimIndent(),
-                        StandardCharsets.UTF_8,
-                    )
-                }
-                val computedRun = executeFile(root, computedEntry, "computed encrypted loader")
-                assertEncryptedFallback("computed encrypted loader", computedRun, "unclassified_loader")
-
-                val divisionEntry = File(root, "division-entry.cjs").apply {
-                    writeText(
-                        """
-                        "nodejs";
-                        const targetName = "./division-target.cjs";
-                        const quotient = 8 / 2;
-                        const target = require(targetName);
-                        if (quotient !== 4 || target.value !== "division-ok") {
-                          throw new Error("division/dynamic encrypted target failed");
-                        }
-                        """.trimIndent(),
-                        StandardCharsets.UTF_8,
-                    )
-                }
-                val divisionRun = executeFile(root, divisionEntry, "division and dynamic loader")
-                assertEncryptedFallback("division and dynamic loader", divisionRun, "dynamic_require")
-            }
-        } finally {
-            root.deleteRecursively()
-        }
-    }
-
-    @Test
-    fun nonTrivialCjsStaysConservativeWithoutMisclassifyingExportMethod() {
-        val root = File(context.cacheDir, "embedded-engine-conservative-cjs-${System.nanoTime()}").apply {
-            check(mkdirs()) { "Failed to create conservative CommonJS test dir: $absolutePath" }
-        }
-        try {
-            File(root, "child.js").writeText(
-                """module.exports = { value: "child-ok" };""",
-                StandardCharsets.UTF_8,
-            )
-            val exportMethodEntry = File(root, "export-method.cjs").apply {
-                writeText(
-                    """
-                    "nodejs";
-                    const helper = { export() { return "method-ok"; } };
-                    const fs = require("fs");
-                    const child = require("./child");
-                    if (helper.export() !== "method-ok" || child.value !== "child-ok" || !fs) {
-                      throw new Error("CommonJS export method failed");
-                    }
-                    """.trimIndent(),
-                    StandardCharsets.UTF_8,
-                )
-            }
-            val exportMethodRun = executeFile(root, exportMethodEntry, "CommonJS export method")
-            val exportDiagnostics = exportMethodRun.diagnostics
-            assertFalse("object export() must not classify the entry as ESM", exportDiagnostics.isEsmEntry)
-            assertEquals(0, exportDiagnostics.commonJs.sourceLevelEsmSyntaxCount)
-            assertEquals(2, exportDiagnostics.commonJs.staticRequireCount)
-            assertEquals("builtin require must not be unresolved", 0, exportDiagnostics.commonJs.unresolvedStaticRequireCount)
-            assertEquals(1, exportDiagnostics.commonJs.moduleCount)
-            assertEquals(
-                "conservative_source",
-                exportDiagnostics.encryptedRuntimeModuleScan.decision,
-            )
-            assertTrue(exportDiagnostics.encryptedRuntimeModuleScan.required)
-
-            val dynamicCodeEntry = File(root, "dynamic-code-dead-branch.cjs").apply {
-                writeText(
-                    """
-                    "nodejs";
-                    if (false) {
-                      const indirectEval = eval;
-                      const IndirectFunction = Function;
-                      const indirectConstructor = (() => {}).constructor;
-                    }
-                    console.log(1);
-                    """.trimIndent(),
-                    StandardCharsets.UTF_8,
-                )
-            }
-            val dynamicCodeRun = executeFile(root, dynamicCodeEntry, "dead-branch dynamic code")
-            assertTrue(dynamicCodeRun.diagnostics.commonJs.dynamicCodeReferenceCount >= 3)
-            assertTrue(dynamicCodeRun.diagnostics.encryptedRuntimeModuleScan.required)
-            assertEquals("dynamic_code", dynamicCodeRun.diagnostics.encryptedRuntimeModuleScan.decision)
-
-            val builtinSubpathEntry = File(root, "builtin-subpaths.cjs").apply {
-                writeText(
-                    """
-                    "nodejs";
-                    if (false) {
-                      require("assert/strict");
-                      require("path/posix");
-                      require("timers/promises");
-                      require("stream/consumers");
-                      require("stream/promises");
-                      require("stream/web");
-                    }
-                    console.log(1);
-                    """.trimIndent(),
-                    StandardCharsets.UTF_8,
-                )
-            }
-            val builtinSubpathRun = executeFile(root, builtinSubpathEntry, "builtin subpaths")
-            assertEquals(6, builtinSubpathRun.diagnostics.commonJs.staticRequireCount)
-            assertEquals(0, builtinSubpathRun.diagnostics.commonJs.unresolvedStaticRequireCount)
-            assertEquals(0, builtinSubpathRun.diagnostics.commonJs.moduleCount)
-        } finally {
-            root.deleteRecursively()
-        }
-    }
-
-    @Test
-    fun outputBudgetBoundariesHaveExplicitIncompleteStatuses() {
         val engine = NativeNodeEmbeddedJavaScriptEngine(context)
-        assertEquals(
-            null,
-            engine.encryptedRuntimeModuleOutputBudgetStatus(
-                NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT - 1,
-                NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES.toLong() - 1L,
-            ),
-        )
-        assertEquals(
-            "incomplete_output_count_budget",
-            engine.encryptedRuntimeModuleOutputBudgetStatus(
-                NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT,
-                0L,
-            ),
-        )
-        assertEquals(
-            "incomplete_output_bytes_budget",
-            engine.encryptedRuntimeModuleOutputBudgetStatus(
-                0,
-                NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES.toLong(),
-            ),
-        )
-        assertEquals(
-            null,
-            engine.encryptedRuntimeModuleCleartextBudgetStatus(
-                NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES,
-                NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES,
-            ),
-        )
-        assertEquals(
-            "incomplete_module_size_budget",
-            engine.encryptedRuntimeModuleCleartextBudgetStatus(
-                NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES + 1,
-                NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES,
-            ),
-        )
-    }
-
-    @Test
-    fun encryptedScanBoundsPayloadAndPrunesSymlinkTrees() {
-        val root = File(context.cacheDir, "embedded-engine-bounded-scan-${System.nanoTime()}").apply {
-            check(mkdirs()) { "Failed to create bounded scan test dir: $absolutePath" }
-        }
-        val outside = File(context.cacheDir, "embedded-engine-bounded-outside-${System.nanoTime()}").apply {
-            check(mkdirs()) { "Failed to create bounded scan outside dir: $absolutePath" }
-        }
-        val outsideLink = File(root, "outside-link")
-        val cycleLink = File(root, "cycle-link")
-        try {
-            File(outside, "must-not-be-walked.js").writeText("throw new Error('outside tree walked');")
-            Os.symlink(outside.canonicalPath, outsideLink.absolutePath)
-            Os.symlink(root.canonicalPath, cycleLink.absolutePath)
-            File(root, "plain-target.js").writeText("module.exports = { value: 'ok' };")
-            val oversized = File(root, "oversized-encrypted.js")
-            oversized.outputStream().use { output ->
-                EncryptedScriptFileHeader.writeHeader(output)
+        var swapped = false
+        engine.commonJsPreloadAfterSourceAuthorizationForTest = {
+            check(packageDirectory.renameTo(movedPackageDirectory)) {
+                "Failed to move the authorized package directory outside the preload root"
             }
-            RandomAccessFile(oversized, "rw").use { file ->
-                file.setLength(
-                    EncryptedScriptFileHeader.BLOCK_SIZE.toLong() +
-                            NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES +
-                            AES_CIPHER_BLOCK_BYTES + 1L,
-                )
-            }
-            val entry = File(root, "dynamic-entry.cjs").apply {
-                writeText(
-                    """
-                    "nodejs";
-                    const targetName = "./plain-target";
-                    const target = require(targetName);
-                    if (target.value !== "ok") throw new Error("bounded scan target failed");
-                    """.trimIndent(),
-                    StandardCharsets.UTF_8,
-                )
-            }
-
-            val run = executeFile(root, entry, "bounded encrypted scan")
-            val scan = run.diagnostics.encryptedRuntimeModuleScan
-            assertEquals("dynamic_require", scan.decision)
-            assertTrue(scan.performed)
-            assertEquals("incomplete_module_size_budget", scan.status)
-            assertTrue("outside and cyclic symlink directories should be pruned", scan.prunedDirectoryCount >= 2)
-            assertEquals(0, scan.outsidePathRejectedCount)
-            assertEquals(1, scan.oversizedCiphertextCount)
-            assertEquals(1, scan.encryptedModuleBudgetRejectedCount)
-            assertEquals(0, scan.fullFileReadCount)
-            assertEquals(0L, scan.fullFileBytesRead)
-            assertEquals(0, scan.decryptFailureCount)
-        } finally {
-            outsideLink.delete()
-            cycleLink.delete()
-            root.deleteRecursively()
-            outside.deleteRecursively()
-        }
-    }
-
-    @Test
-    fun encryptedScanRejectsRootIdentityDriftAndDropsCollectedSources() {
-        val root = File(context.cacheDir, "embedded-engine-root-identity-${System.nanoTime()}").apply {
-            check(mkdirs()) { "Failed to create root identity test dir: $absolutePath" }
-        }
-        val movedRoot = File(root.parentFile, root.name + "-moved")
-        try {
-            withTestScriptEncryption {
-                writeEncryptedScript(
-                    File(root, "identity-target.cjs"),
-                    """module.exports = { value: "must-not-survive-root-drift" };""",
-                )
-                val entry = File(root, "identity-entry.cjs").apply {
-                    writeText(
-                        """
-                        "nodejs";
-                        const targetName = "./identity-target.cjs";
-                        require(targetName);
-                        """.trimIndent(),
-                        StandardCharsets.UTF_8,
-                    )
-                }
-                val engine = NativeNodeEmbeddedJavaScriptEngine(context).apply {
-                    setTag(ScriptEngine.TAG_WORKING_DIRECTORY, root.canonicalPath)
-                    encryptedRuntimeScanBeforeFinalRootIdentityCheckForTest = {
-                        check(root.renameTo(movedRoot)) { "Failed to move scan root" }
-                        check(root.mkdirs()) { "Failed to replace scan root" }
-                    }
-                }
-                val failure = try {
-                    runCatching { engine.doExecution(JavaScriptFileSource(entry)) }.exceptionOrNull()
-                } finally {
-                    engine.encryptedRuntimeScanBeforeFinalRootIdentityCheckForTest = null
-                }
-                assertTrue("root drift must discard collected encrypted sources", failure != null)
-                val scan = engine.lastRequestPreparationDiagnostics.encryptedRuntimeModuleScan
-                assertEquals("incomplete_identity_failure", scan.status)
-                assertTrue(scan.identityMismatchCount > 0)
-                assertTrue("fixture must collect an encrypted source before drift", scan.encryptedModuleCount > 0)
-                assertEquals(
-                    "collected sources must be removed from the engine request after root drift",
-                    0,
-                    scan.retainedEncryptedModuleCount,
-                )
-            }
-        } finally {
-            root.deleteRecursively()
-            movedRoot.deleteRecursively()
-        }
-    }
-
-    @Test
-    fun entrySourceReadFailureIsExplicitWhileEmptyFileRemainsValid() {
-        val root = File(context.cacheDir, "embedded-engine-source-read-${System.nanoTime()}").apply {
-            check(mkdirs()) { "Failed to create source-read test dir: $absolutePath" }
+            Os.symlink(movedPackageDirectory.canonicalPath, packageDirectory.absolutePath)
+            swapped = true
         }
         try {
-            val emptyEntry = File(root, "empty.cjs").apply { writeBytes(ByteArray(0)) }
-            assertSkippedStaticScan(
-                label = "empty entry",
-                run = executeFile(root, emptyEntry, "empty entry"),
-                expectedStaticRequireCount = 0,
-                expectedModuleCount = 0,
+            val diagnostics = engine.prepareCommonJsPreloadDiagnosticsForTest(
+                source = entrySource,
+                sourceName = entryFile.canonicalPath,
+                workingDirectory = root.canonicalPath,
             )
 
-            val oversizedEntry = File(root, "oversized.cjs")
-            RandomAccessFile(oversizedEntry, "rw").use { file ->
-                file.setLength(
-                    NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES.toLong() +
-                            EncryptedScriptFileHeader.BLOCK_SIZE +
-                            AES_CIPHER_BLOCK_BYTES + 1L,
+            assertTrue("the controlled intermediate-directory swap must run", swapped)
+            assertFalse("a source opened through the escaped directory must not be preloaded", diagnostics.complete)
+            assertEquals("source_read_failure", diagnostics.incompleteReason)
+            assertEquals(0, diagnostics.moduleCount)
+            assertTrue(diagnostics.sourceReadFailureCount > 0)
+        } finally {
+            engine.commonJsPreloadAfterSourceAuthorizationForTest = null
+            if (swapped) {
+                runCatching { packageDirectory.delete() }
+                runCatching { movedPackageDirectory.renameTo(packageDirectory) }
+            }
+            root.deleteRecursively()
+            outsideRoot.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun directProviderReturnsPlainMissingAndScopedDenialResults() {
+        val root = File(context.cacheDir, "embedded-engine-r4-provider-scope-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create direct provider scope dir: $absolutePath" }
+        }
+        val outside = File(context.cacheDir, "embedded-engine-r4-provider-outside-${System.nanoTime()}.cjs")
+        val symlink = File(root, "outside-link.cjs")
+        try {
+            val plain = File(root, "plain.cjs").apply {
+                writeText("module.exports = 'plain';", StandardCharsets.UTF_8)
+            }
+            outside.writeText("module.exports = 'outside';", StandardCharsets.UTF_8)
+            Os.symlink(outside.canonicalPath, symlink.absolutePath)
+
+            withDirectProvider(root) { fixture ->
+                val plainResponse = fixture.provider.resolveModuleSource(
+                    providerRequest(fixture.executionId, plain.absolutePath, "plain"),
                 )
+                assertProviderResponse(
+                    response = plainResponse,
+                    requestId = "plain",
+                    status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_NOT_ENCRYPTED,
+                )
+                assertEquals(plain.canonicalPath, providerResolvedPath(plainResponse))
+                assertEquals(null, providerSourceDescriptor(plainResponse))
+
+                val missingResponse = fixture.provider.resolveModuleSource(
+                    providerRequest(
+                        fixture.executionId,
+                        File(root, "missing.cjs").absolutePath,
+                        "missing",
+                    ),
+                )
+                assertProviderResponse(
+                    response = missingResponse,
+                    requestId = "missing",
+                    status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_NOT_FOUND,
+                )
+                assertEquals("not_found", providerDenialReason(missingResponse))
+
+                val outsideResponse = fixture.provider.resolveModuleSource(
+                    providerRequest(fixture.executionId, outside.absolutePath, "outside"),
+                )
+                assertProviderDenied(outsideResponse, "outside", "canonical_path_escape")
+
+                val symlinkResponse = fixture.provider.resolveModuleSource(
+                    providerRequest(fixture.executionId, symlink.absolutePath, "symlink"),
+                )
+                assertProviderDenied(symlinkResponse, "symlink", "canonical_path_escape")
+
+                val diagnostics = fixture.provider.nativeDiagnostics
+                assertEquals("4", diagnostics.getString(MODULE_PROVIDER_REQUEST_COUNT_KEY))
+                assertEquals("1", diagnostics.getString("embedded_script.module_provider.not_encrypted_count"))
+                assertEquals("1", diagnostics.getString("embedded_script.module_provider.not_found_count"))
+                assertEquals("2", diagnostics.getString("embedded_script.module_provider.denied_count"))
+                assertEquals("0", diagnostics.getString("embedded_script.module_provider.decrypted_source_count"))
             }
-            val oversizedEngine = NativeNodeEmbeddedJavaScriptEngine(context).apply {
-                setTag(ScriptEngine.TAG_WORKING_DIRECTORY, root.canonicalPath)
+        } finally {
+            symlink.delete()
+            root.deleteRecursively()
+            outside.delete()
+        }
+    }
+
+    @Test
+    fun directProviderRejectsIntermediateSymlinkSwapAfterCanonicalization() {
+        val root = File(context.cacheDir, "embedded-engine-r4-provider-race-${System.nanoTime()}").apply {
+            check(mkdirs())
+        }
+        val insideDirectory = File(root, "branch").apply { check(mkdirs()) }
+        val insideBackup = File(root, "branch-safe")
+        val outsideDirectory = File(
+            context.cacheDir,
+            "embedded-engine-r4-provider-race-outside-${System.nanoTime()}",
+        ).apply { check(mkdirs()) }
+        val candidate = File(insideDirectory, "candidate.cjs").apply {
+            writeText("module.exports = 'inside';", StandardCharsets.UTF_8)
+        }
+        File(outsideDirectory, candidate.name).writeText(
+            "module.exports = 'outside';",
+            StandardCharsets.UTF_8,
+        )
+        try {
+            withDirectProvider(
+                root = root,
+                afterCanonicalizationForTest = {
+                    check(insideDirectory.renameTo(insideBackup))
+                    Os.symlink(outsideDirectory.canonicalPath, insideDirectory.absolutePath)
+                },
+                afterOpenForTest = {
+                    check(insideDirectory.delete())
+                    check(insideBackup.renameTo(insideDirectory))
+                },
+            ) { fixture ->
+                val response = fixture.provider.resolveModuleSource(
+                    providerRequest(fixture.executionId, candidate.absolutePath, "intermediate-swap"),
+                )
+                assertProviderDenied(response, "intermediate-swap", "opened_file_path_mismatch")
             }
-            val failure = runCatching {
-                oversizedEngine.doExecution(JavaScriptFileSource(oversizedEntry))
-            }.exceptionOrNull()
-            assertTrue("oversized entry must fail instead of running an empty script", failure != null)
-            assertTrue(failure?.message.orEmpty(), failure?.message.orEmpty().contains("Unable to read JavaScript source"))
+        } finally {
+            if (insideDirectory.isDirectory) {
+                insideDirectory.deleteRecursively()
+            } else {
+                insideDirectory.delete()
+            }
+            if (insideBackup.exists()) {
+                insideBackup.deleteRecursively()
+            }
+            root.deleteRecursively()
+            outsideDirectory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun directProviderReturnsDecryptedPfdAndValidatesRequestIdentity() {
+        val root = File(context.cacheDir, "embedded-engine-r4-provider-pfd-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create direct provider PFD dir: $absolutePath" }
+        }
+        try {
+            withTestScriptEncryption {
+                val expectedSource = "module.exports = { value: 'provider-pfd-ok' };"
+                val encrypted = File(root, "encrypted.cjs")
+                writeEncryptedScript(encrypted, expectedSource)
+                withDirectProvider(root) { fixture ->
+                    val response = fixture.provider.resolveModuleSource(
+                        providerRequest(fixture.executionId, encrypted.absolutePath, "encrypted-pfd"),
+                    )
+                    assertProviderResponse(
+                        response = response,
+                        requestId = "encrypted-pfd",
+                        status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_DECRYPTED,
+                    )
+                    assertEquals(encrypted.canonicalPath, providerResolvedPath(response))
+                    assertEquals(
+                        expectedSource.toByteArray(StandardCharsets.UTF_8).size.toLong(),
+                        response.getLong(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_SOURCE_BYTES),
+                    )
+                    val descriptor = providerSourceDescriptor(response)
+                    assertNotNull("decrypted provider response must use a PFD", descriptor)
+                    val actualSource = ParcelFileDescriptor.AutoCloseInputStream(checkNotNull(descriptor)).use { input ->
+                        String(input.readBytes(), StandardCharsets.UTF_8)
+                    }
+                    assertEquals(expectedSource, actualSource)
+
+                    val mismatchedIdentity = fixture.provider.resolveModuleSource(
+                        providerRequest("different-execution", encrypted.absolutePath, "identity-mismatch"),
+                    )
+                    assertProviderDenied(
+                        response = mismatchedIdentity,
+                        requestId = "identity-mismatch",
+                        denialReason = "execution_id_mismatch",
+                    )
+
+                    val versionMismatchRequest = providerRequest(
+                        fixture.executionId,
+                        encrypted.absolutePath,
+                        "version-mismatch",
+                    ).apply {
+                        putInt(
+                            NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_VERSION,
+                            NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION + 1,
+                        )
+                    }
+                    val versionMismatch = fixture.provider.resolveModuleSource(versionMismatchRequest)
+                    assertProviderError(
+                        response = versionMismatch,
+                        requestId = "version-mismatch",
+                        status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_FAILED,
+                        errorCode = NodeJsRuntimeContract.ERROR_MODULE_SOURCE_PROVIDER_INVALID_REQUEST,
+                        denialReason = "contract_version_mismatch",
+                    )
+
+                    val diagnostics = fixture.provider.nativeDiagnostics
+                    assertEquals("3", diagnostics.getString(MODULE_PROVIDER_REQUEST_COUNT_KEY))
+                    assertEquals("1", diagnostics.getString(MODULE_PROVIDER_DECRYPTED_SOURCE_COUNT_KEY))
+                    assertEquals("1", diagnostics.getString("embedded_script.module_provider.denied_count"))
+                    assertEquals("1", diagnostics.getString("embedded_script.module_provider.failed_count"))
+                    assertEquals(
+                        "0",
+                        awaitProviderDiagnostic(
+                            fixture.provider,
+                            "embedded_script.module_provider.active_pipe_count",
+                        ),
+                    )
+                }
+            }
         } finally {
             root.deleteRecursively()
         }
+    }
+
+    @Test
+    fun directProviderReturnsCancellationTimeoutFailureAndBudgetErrors() {
+        val root = File(context.cacheDir, "embedded-engine-r4-provider-errors-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create direct provider error dir: $absolutePath" }
+        }
+        try {
+            withTestScriptEncryption {
+                val encrypted = File(root, "encrypted.cjs")
+                writeEncryptedScript(encrypted, "module.exports = 'budget';")
+                val corrupt = File(root, "corrupt.cjs")
+                writeCorruptEncryptedScript(corrupt)
+
+                withDirectProvider(root) { fixture ->
+                    fixture.provider.cancel("direct provider cancellation")
+                    val cancelled = fixture.provider.resolveModuleSource(
+                        providerRequest(fixture.executionId, encrypted.absolutePath, "cancelled"),
+                    )
+                    assertProviderError(
+                        response = cancelled,
+                        requestId = "cancelled",
+                        status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_CANCELLED,
+                        errorCode = NodeJsRuntimeContract.ERROR_MODULE_SOURCE_PROVIDER_CANCELLED,
+                        denialReason = "cancelled",
+                    )
+                }
+
+                withDirectProvider(root, timeoutMs = 1L) { fixture ->
+                    SystemClock.sleep(5L)
+                    val timedOut = fixture.provider.resolveModuleSource(
+                        providerRequest(fixture.executionId, encrypted.absolutePath, "timed-out"),
+                    )
+                    assertProviderError(
+                        response = timedOut,
+                        requestId = "timed-out",
+                        status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_TIMED_OUT,
+                        errorCode = NodeJsRuntimeContract.ERROR_MODULE_SOURCE_PROVIDER_TIMED_OUT,
+                        denialReason = "timed_out",
+                    )
+                }
+
+                withDirectProvider(root) { fixture ->
+                    val failed = fixture.provider.resolveModuleSource(
+                        providerRequest(fixture.executionId, corrupt.absolutePath, "corrupt"),
+                    )
+                    assertProviderError(
+                        response = failed,
+                        requestId = "corrupt",
+                        status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_FAILED,
+                        errorCode = NodeJsRuntimeContract.ERROR_MODULE_SOURCE_PROVIDER_FAILED,
+                        denialReason = "decrypt_failed",
+                    )
+                    assertEquals(
+                        "1",
+                        fixture.provider.nativeDiagnostics.getString(
+                            "embedded_script.module_provider.failed_count",
+                        ),
+                    )
+                }
+
+                withDirectProvider(
+                    root = root,
+                    initialSourceCount = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT,
+                ) { fixture ->
+                    val budget = fixture.provider.resolveModuleSource(
+                        providerRequest(fixture.executionId, encrypted.absolutePath, "budget"),
+                    )
+                    assertProviderError(
+                        response = budget,
+                        requestId = "budget",
+                        status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_FAILED,
+                        errorCode = NodeJsRuntimeContract.ERROR_MODULE_SOURCE_PROVIDER_BUDGET_EXCEEDED,
+                        denialReason = "budget_exceeded",
+                    )
+                    assertEquals(
+                        "1",
+                        fixture.provider.nativeDiagnostics.getString(
+                            "embedded_script.module_provider.budget_rejected_count",
+                        ),
+                    )
+                }
+            }
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    private inline fun <T> withDirectProvider(
+        root: File,
+        timeoutMs: Long = DIRECT_PROVIDER_TIMEOUT_MS,
+        initialSourceCount: Int = 0,
+        initialSourceBytes: Long = 0L,
+        noinline afterCanonicalizationForTest: (() -> Unit)? = null,
+        noinline afterOpenForTest: (() -> Unit)? = null,
+        block: (DirectProviderFixture) -> T,
+    ): T {
+        val executionId = "r4-direct-provider-${System.nanoTime()}"
+        val provider = NodeJsEncryptedModuleSourceProvider(
+            rootDirectory = root,
+            executionId = executionId,
+            timeoutMs = timeoutMs,
+            initialSourceCount = initialSourceCount,
+            initialSourceBytes = initialSourceBytes,
+            afterCanonicalizationForTest = afterCanonicalizationForTest,
+            afterOpenForTest = afterOpenForTest,
+        )
+        return try {
+            block(DirectProviderFixture(executionId, provider))
+        } finally {
+            provider.cancel("direct provider test cleanup")
+        }
+    }
+
+    private fun providerRequest(
+        executionId: String,
+        path: String,
+        requestId: String,
+        timeoutMs: Long = DIRECT_PROVIDER_TIMEOUT_MS,
+    ): Bundle = Bundle().apply {
+        putInt(
+            NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_VERSION,
+            NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION,
+        )
+        putString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_REQUEST_ID, requestId)
+        putString(NodeJsRuntimeContract.KEY_EXECUTION_ID, executionId)
+        putString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_PATH, path)
+        putLong(NodeJsRuntimeContract.KEY_TIMEOUT_MS, timeoutMs)
+    }
+
+    private fun assertProviderResponse(
+        response: Bundle,
+        requestId: String,
+        status: String,
+    ) {
+        assertEquals(
+            NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_CONTRACT_VERSION,
+            response.getInt(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_VERSION),
+        )
+        assertEquals(
+            requestId,
+            response.getString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_REQUEST_ID),
+        )
+        assertEquals(status, response.getString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_STATUS))
+        assertTrue(
+            "provider response elapsed time must be non-negative",
+            response.getLong(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_ELAPSED_MS) >= 0L,
+        )
+    }
+
+    private fun assertProviderDenied(
+        response: Bundle,
+        requestId: String,
+        denialReason: String,
+    ) {
+        assertProviderError(
+            response = response,
+            requestId = requestId,
+            status = NodeJsRuntimeContract.MODULE_SOURCE_PROVIDER_STATUS_DENIED,
+            errorCode = NodeJsRuntimeContract.ERROR_MODULE_SOURCE_PROVIDER_DENIED,
+            denialReason = denialReason,
+        )
+    }
+
+    private fun assertProviderError(
+        response: Bundle,
+        requestId: String,
+        status: String,
+        errorCode: String,
+        denialReason: String,
+    ) {
+        assertProviderResponse(response, requestId, status)
+        assertEquals(errorCode, response.getString(NodeJsRuntimeContract.KEY_ERROR_CODE))
+        assertEquals(denialReason, providerDenialReason(response))
+        assertTrue(
+            "provider error response must include a message",
+            response.getString(NodeJsRuntimeContract.KEY_ERROR_MESSAGE).orEmpty().isNotBlank(),
+        )
+        assertEquals(null, providerSourceDescriptor(response))
+    }
+
+    private fun providerResolvedPath(response: Bundle): String =
+        response.getString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_RESOLVED_PATH).orEmpty()
+
+    private fun providerDenialReason(response: Bundle): String =
+        response.getString(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_DENIAL_REASON).orEmpty()
+
+    @Suppress("DEPRECATION")
+    private fun providerSourceDescriptor(response: Bundle): ParcelFileDescriptor? =
+        response.getParcelable(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_SOURCE_FD)
+                as? ParcelFileDescriptor
+
+    private fun awaitProviderDiagnostic(
+        provider: NodeJsEncryptedModuleSourceProvider,
+        key: String,
+        expected: String = "0",
+    ): String? {
+        val deadline = SystemClock.elapsedRealtime() + DIRECT_PROVIDER_DIAGNOSTIC_WAIT_MS
+        var actual: String?
+        do {
+            actual = provider.nativeDiagnostics.getString(key)
+            if (actual == expected) {
+                return actual
+            }
+            SystemClock.sleep(DIRECT_PROVIDER_DIAGNOSTIC_POLL_MS)
+        } while (SystemClock.elapsedRealtime() < deadline)
+        return actual
     }
 
     private fun executeFile(root: File, sourceFile: File, label: String): EngineRun {
@@ -656,131 +825,123 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
         )
     }
 
-    private fun assertSkippedStaticScan(
+    private fun assertOnDemandProviderWithoutDirectoryScan(
         label: String,
         run: EngineRun,
-        expectedStaticRequireCount: Int,
-        expectedModuleCount: Int,
-    ) {
+    ): ModuleProviderDiagnostics {
         val diagnostics = run.diagnostics
         val scan = diagnostics.encryptedRuntimeModuleScan
         assertTrue("$label request should be prepared", diagnostics.prepared)
-        assertFalse("$label should be CommonJS", diagnostics.isEsmEntry)
-        assertEquals(expectedStaticRequireCount, diagnostics.commonJs.staticRequireCount)
-        assertEquals(0, diagnostics.commonJs.dynamicRequireIgnoredCount)
-        assertEquals(0, diagnostics.commonJs.unresolvedStaticRequireCount)
-        assertEquals(0, diagnostics.commonJs.sourceLevelEsmSyntaxCount)
-        assertEquals(0, diagnostics.commonJs.dynamicImportCount)
-        assertEquals(0, diagnostics.commonJs.createRequireReferenceCount)
-        assertEquals(0, diagnostics.commonJs.unclassifiedLoaderReferenceCount)
-        assertEquals(0, diagnostics.commonJs.dynamicCodeReferenceCount)
-        assertTrue("$label should satisfy the strict trivial proof", diagnostics.commonJs.trivialModuleFreeEntry)
-        assertTrue(diagnostics.commonJs.complete)
-        assertEquals(expectedModuleCount, diagnostics.commonJs.moduleCount)
-        assertFalse("$label should not require an encrypted-runtime scan", scan.required)
-        assertFalse("$label should not walk the working directory", scan.performed)
-        assertEquals("trivial_module_free", scan.decision)
+        assertFalse("$label must not require a legacy directory scan", scan.required)
+        assertFalse("$label must not perform a legacy directory scan", scan.performed)
+        assertEquals("on_demand_provider", scan.decision)
         assertEquals("skipped", scan.status)
+        assertEquals(0, scan.examinedPathCount)
         assertEquals(0, scan.walkedFileCount)
         assertEquals(0, scan.candidateFileCount)
         assertEquals(0, scan.headerProbeCount)
+        assertEquals(0L, scan.headerBytesRead)
         assertEquals(0, scan.fullFileReadCount)
+        assertEquals(0L, scan.fullFileBytesRead)
         assertTrue(
             "$label request preparation regressed to ${diagnostics.elapsedMs}ms",
-            diagnostics.elapsedMs <= STATIC_REQUEST_PREPARATION_MAX_MS,
-        )
-        assertNativeDiagnostics(label, run)
-    }
-
-    private fun assertRetainedHeaderOnlyScan(
-        label: String,
-        run: EngineRun,
-        expectedDecision: String,
-        minimumCandidateCount: Int,
-    ) {
-        val diagnostics = run.diagnostics
-        val scan = diagnostics.encryptedRuntimeModuleScan
-        assertTrue("$label request should be prepared", diagnostics.prepared)
-        assertTrue("$label should retain encrypted-runtime fallback", scan.required)
-        assertTrue("$label should scan the working directory", scan.performed)
-        assertEquals(expectedDecision, scan.decision)
-        assertEquals("completed", scan.status)
-        assertTrue(
-            "$label should see the large cwd: candidates=${scan.candidateFileCount}",
-            scan.candidateFileCount >= minimumCandidateCount,
-        )
-        assertTrue(
-            "$label should probe the large cwd: probes=${scan.headerProbeCount}",
-            scan.headerProbeCount >= minimumCandidateCount,
-        )
-        assertEquals(0, scan.headerReadFailureCount)
-        assertEquals(
-            "$label should read only the fixed encrypted header from ordinary candidates",
-            scan.headerProbeCount.toLong() * ENCRYPTED_HEADER_SIZE_BYTES,
-            scan.headerBytesRead,
-        )
-        assertEquals("$label must not fully read ordinary candidates", 0, scan.fullFileReadCount)
-        assertEquals("$label must not fully read ordinary candidate bytes", 0L, scan.fullFileBytesRead)
-        assertEquals(0, scan.encryptedModuleCount)
-        assertTrue(
-            "$label header-only scan regressed to ${diagnostics.elapsedMs}ms",
-            diagnostics.elapsedMs <= FALLBACK_REQUEST_PREPARATION_MAX_MS,
-        )
-        assertNativeDiagnostics(label, run)
-    }
-
-    private fun assertNativeDiagnostics(label: String, run: EngineRun) {
-        val diagnostics = run.diagnostics
-        val scan = diagnostics.encryptedRuntimeModuleScan
-        assertEquals(
-            "$label request timing native value",
-            diagnostics.elapsedMs.toString(),
-            run.nativeValues["timing.engine_request_preparation.ms"],
+            diagnostics.elapsedMs <= REQUEST_PREPARATION_MAX_MS,
         )
         assertEquals(
-            "$label CommonJS timing native value",
-            diagnostics.commonJs.elapsedMs.toString(),
-            run.nativeValues["timing.engine_commonjs_preload.ms"],
-        )
-        assertEquals(
-            "$label encrypted scan decision native value",
-            scan.decision,
+            "on_demand_provider",
             run.nativeValues["embedded_script.engine_encrypted_runtime_scan.decision"],
         )
         assertEquals(
-            "$label encrypted scan timing native value",
-            scan.elapsedMs.toString(),
-            run.nativeValues["timing.engine_encrypted_runtime_scan.ms"],
+            "0",
+            run.nativeValues["embedded_script.engine_encrypted_runtime_scan.walked_file_count"],
         )
         assertEquals(
-            "$label encrypted scan full-read native value",
-            scan.fullFileReadCount.toString(),
-            run.nativeValues["embedded_script.engine_encrypted_runtime_scan.full_file_read_count"],
+            "0",
+            run.nativeValues["embedded_script.engine_encrypted_runtime_scan.candidate_file_count"],
+        )
+        assertEquals(
+            diagnostics.elapsedMs.toString(),
+            run.nativeValues["timing.engine_request_preparation.ms"],
+        )
+        return assertModuleProviderDiagnostics(label, run.nativeValues)
+    }
+
+    private fun assertSingleOnDemandEncryptedCandidate(label: String, run: EngineRun) {
+        val provider = assertOnDemandProviderWithoutDirectoryScan(label, run)
+        assertEquals("$label should request only the resolved candidate", 1L, provider.requestCount)
+        assertEquals("$label should resolve one provider source", 1L, provider.resolvedSourceCount)
+        assertEquals("$label should decrypt one provider source", 1L, provider.decryptedSourceCount)
+        assertTrue("$label should report decrypted UTF-8 bytes", provider.sourceBytes > 0L)
+        assertTrue("$label provider elapsed time must be non-negative", provider.elapsedMs >= 0L)
+        assertTrue("$label successful provider lookup must not report denial", provider.denialReason.isEmpty())
+    }
+
+    private fun assertModuleProviderDiagnostics(
+        label: String,
+        nativeValues: Map<String, String>,
+    ): ModuleProviderDiagnostics {
+        fun requiredLong(key: String): Long {
+            val raw = nativeValues[key]
+            assertNotNull("$label must export $key", raw)
+            return raw?.toLongOrNull()
+                ?: throw AssertionError("$label must export numeric $key, actual=$raw")
+        }
+
+        val requestCount = requiredLong(MODULE_PROVIDER_REQUEST_COUNT_KEY)
+        val resolvedSourceCount = requiredLong(MODULE_PROVIDER_RESOLVED_SOURCE_COUNT_KEY)
+        val decryptedSourceCount = requiredLong(MODULE_PROVIDER_DECRYPTED_SOURCE_COUNT_KEY)
+        val sourceBytes = requiredLong(MODULE_PROVIDER_SOURCE_BYTES_KEY)
+        val elapsedMs = requiredLong(MODULE_PROVIDER_ELAPSED_MS_KEY)
+        val denialReason = nativeValues[MODULE_PROVIDER_DENIAL_REASON_KEY]
+        assertNotNull("$label must export $MODULE_PROVIDER_DENIAL_REASON_KEY", denialReason)
+        assertEquals(
+            "$label must keep the legacy directory fallback disabled",
+            "false",
+            nativeValues[MODULE_PROVIDER_LEGACY_SCAN_KEY],
+        )
+        assertTrue("$label provider request count must be non-negative", requestCount >= 0L)
+        assertTrue("$label provider resolved count must be non-negative", resolvedSourceCount >= 0L)
+        assertTrue("$label provider decrypted count must be non-negative", decryptedSourceCount >= 0L)
+        assertTrue("$label provider bytes must be non-negative", sourceBytes >= 0L)
+        assertTrue("$label provider elapsed time must be non-negative", elapsedMs >= 0L)
+        assertTrue(
+            "$label cannot decrypt more sources than it resolves",
+            decryptedSourceCount <= resolvedSourceCount,
+        )
+        assertTrue(
+            "$label cannot resolve more sources than it requests",
+            resolvedSourceCount <= requestCount,
+        )
+        return ModuleProviderDiagnostics(
+            requestCount = requestCount,
+            resolvedSourceCount = resolvedSourceCount,
+            decryptedSourceCount = decryptedSourceCount,
+            sourceBytes = sourceBytes,
+            elapsedMs = elapsedMs,
+            denialReason = denialReason.orEmpty(),
         )
     }
 
-    private fun assertEncryptedFallback(
-        label: String,
-        run: EngineRun,
-        expectedDecision: String,
+    private fun writePackage(
+        root: File,
+        packageName: String,
+        source: String,
+        encrypted: Boolean,
     ) {
-        val scan = run.diagnostics.encryptedRuntimeModuleScan
-        assertTrue("$label should require the encrypted fallback", scan.required)
-        assertTrue("$label should perform the encrypted fallback", scan.performed)
-        assertEquals(expectedDecision, scan.decision)
-        assertEquals("completed", scan.status)
-        assertTrue("$label should decrypt at least one module", scan.encryptedModuleCount > 0)
-        assertEquals(
-            "$label should fully read only valid encrypted candidates",
-            scan.encryptedModuleCount,
-            scan.fullFileReadCount,
+        val packageRoot = File(root, "node_modules/$packageName").apply {
+            check(mkdirs() || isDirectory) { "Failed to create package dir: $absolutePath" }
+        }
+        File(packageRoot, "package.json").writeText(
+            """{"name":"$packageName","main":"./lib/index.cjs"}""",
+            StandardCharsets.UTF_8,
         )
-        assertTrue(scan.fullFileBytesRead > scan.fullFileReadCount * ENCRYPTED_HEADER_SIZE_BYTES)
-        assertEquals(0, scan.fullFileReadFailureCount)
-        assertEquals(0, scan.decryptFailureCount)
-        assertEquals(0, scan.oversizedCiphertextCount)
-        assertEquals(0, scan.encryptedModuleBudgetRejectedCount)
-        assertNativeDiagnostics(label, run)
+        val module = File(packageRoot, "lib/index.cjs")
+        if (encrypted) {
+            writeEncryptedScript(module, source)
+        } else {
+            module.parentFile?.let { parent -> check(parent.mkdirs() || parent.isDirectory) }
+            module.writeText(source, StandardCharsets.UTF_8)
+        }
     }
 
     private fun writeEncryptedScript(file: File, source: String) {
@@ -795,6 +956,17 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
                 EncryptedScriptFileHeader.FLAG_EXECUTION_MODE_NODEJS,
             )
             output.write(encrypted)
+        }
+    }
+
+    private fun writeCorruptEncryptedScript(file: File) {
+        file.parentFile?.let { parent -> check(parent.mkdirs() || parent.isDirectory) }
+        file.outputStream().use { output ->
+            EncryptedScriptFileHeader.writeHeader(
+                output,
+                EncryptedScriptFileHeader.FLAG_EXECUTION_MODE_NODEJS,
+            )
+            output.write(ByteArray(CORRUPT_CIPHERTEXT_BYTES) { index -> (index + 1).toByte() })
         }
     }
 
@@ -814,25 +986,19 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
     }
 
     private fun createLargeWorkingDirectory(): LargeWorkingDirectory {
-        val root = File(context.cacheDir, "embedded-engine-large-cwd-${System.nanoTime()}").apply {
-            check(mkdirs()) { "Failed to create engine request-preparation test dir: $absolutePath" }
-        }
-        val payload = buildString(FILLER_FILE_BYTES) {
-            append("// ordinary filler; encrypted header must not match\n")
-            while (length < FILLER_FILE_BYTES) {
-                append('x')
-            }
+        val root = File(context.cacheDir, "embedded-engine-r4-large-cwd-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create R4 request-preparation test dir: $absolutePath" }
         }
         repeat(FILLER_FILE_COUNT) { index ->
             val branch = if (index % 2 == 0) {
-                "node_modules/filler-${index % 24}/lib/shard-${index % 8}"
+                "node_modules/unrelated-${index % 64}/lib/shard-${index % 8}"
             } else {
-                "workspace/shard-${index % 24}/nested-${index % 8}"
+                "workspace/shard-${index % 64}/nested-${index % 8}"
             }
             val extension = FILLER_EXTENSIONS[index % FILLER_EXTENSIONS.size]
-            File(root, "$branch/filler-$index.$extension").apply {
+            File(root, "$branch/unrelated-$index.$extension").apply {
                 parentFile?.let { parent -> check(parent.mkdirs() || parent.isDirectory) }
-                writeText(payload, StandardCharsets.UTF_8)
+                writeText("// R4 unrelated module candidate $index\n", StandardCharsets.UTF_8)
             }
         }
         return LargeWorkingDirectory(root = root, fillerFileCount = FILLER_FILE_COUNT)
@@ -843,20 +1009,46 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
         val nativeValues: Map<String, String>,
     )
 
+    private data class DirectProviderFixture(
+        val executionId: String,
+        val provider: NodeJsEncryptedModuleSourceProvider,
+    )
+
+    private data class ModuleProviderDiagnostics(
+        val requestCount: Long,
+        val resolvedSourceCount: Long,
+        val decryptedSourceCount: Long,
+        val sourceBytes: Long,
+        val elapsedMs: Long,
+        val denialReason: String,
+    )
+
     private data class LargeWorkingDirectory(
         val root: File,
         val fillerFileCount: Int,
     )
 
     private companion object {
-        const val FILLER_FILE_COUNT = 768
-        const val FILLER_FILE_BYTES = 8 * 1024
-        const val ENCRYPTED_HEADER_SIZE_BYTES = 8L
-        const val AES_CIPHER_BLOCK_BYTES = 16L
-        const val STATIC_REQUEST_PREPARATION_MAX_MS = 250L
-        const val FALLBACK_REQUEST_PREPARATION_MAX_MS = 1_500L
+        const val FILLER_FILE_COUNT = 4_000
+        const val REQUEST_PREPARATION_MAX_MS = 250L
+        const val DIRECT_PROVIDER_TIMEOUT_MS = 5_000L
+        const val DIRECT_PROVIDER_DIAGNOSTIC_WAIT_MS = 1_000L
+        const val DIRECT_PROVIDER_DIAGNOSTIC_POLL_MS = 5L
+        const val CORRUPT_CIPHERTEXT_BYTES = 15
         const val TEST_ENCRYPTION_KEY = "0123456789abcdef0123456789abcdef"
         const val TEST_ENCRYPTION_VECTOR = "0123456789abcdef"
-        val FILLER_EXTENSIONS = listOf("js", "json", "ts", "mjs")
+
+        const val MODULE_PROVIDER_REQUEST_COUNT_KEY = "embedded_script.module_provider.request_count"
+        const val MODULE_PROVIDER_RESOLVED_SOURCE_COUNT_KEY =
+            "embedded_script.module_provider.resolved_source_count"
+        const val MODULE_PROVIDER_DECRYPTED_SOURCE_COUNT_KEY =
+            "embedded_script.module_provider.decrypted_source_count"
+        const val MODULE_PROVIDER_SOURCE_BYTES_KEY = "embedded_script.module_provider.source_bytes"
+        const val MODULE_PROVIDER_ELAPSED_MS_KEY = "embedded_script.module_provider.elapsed_ms"
+        const val MODULE_PROVIDER_DENIAL_REASON_KEY = "embedded_script.module_provider.denial_reason"
+        const val MODULE_PROVIDER_LEGACY_SCAN_KEY =
+            "embedded_script.module_provider.legacy_directory_scan_ran"
+
+        val FILLER_EXTENSIONS = listOf("js", "json", "ts", "mjs", "cjs")
     }
 }

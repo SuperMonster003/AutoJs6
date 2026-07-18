@@ -61,6 +61,43 @@ Current embedded runtime regression suite:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest"
 ```
 
+Focused R4 real-file request-preparation and module-provider gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedEngineRequestPreparationInstrumentationTest"
+```
+
+This class creates at least 4000 unrelated JavaScript-like files and exercises
+non-trivial module-free statements, expressions, functions, timers, multiple
+console calls, non-loading async work, static and dynamic CommonJS, partial
+ESM, missing modules, package resolution, and plain and encrypted candidates.
+Encrypted coverage includes static CommonJS, computed/dynamic CommonJS,
+package main resolution, static ESM, and local dynamic import when their
+release flags are enabled. Each successful request asserts default decision
+`on_demand_provider`, zero examined/walked/candidate/header/full-read counts in
+the legacy scan diagnostics, and
+`embedded_script.module_provider.legacy_directory_scan_ran=false`.
+
+The provider diagnostics contract also requires numeric request,
+resolved-source, decrypted-source, source-byte, and elapsed-time fields plus an
+explicit denial-reason field. On-demand direct-file encrypted cases assert that
+only one resolved candidate is requested and decrypted; plaintext and missing
+cases retain their scoped filesystem and stable module-not-found behavior.
+Direct provider cases additionally verify plaintext and missing results,
+canonical and symlink escape denial, request/execution identity, decrypted PFD
+contents, contract-version invalid-request mapping, cancellation, timeout,
+corrupt-ciphertext failure, source-count budget rejection, and pipe cleanup.
+Statically resolved encrypted CommonJS may
+use the exact preload closure with zero provider requests; computed encrypted
+package resolution probes only its plaintext `package.json` and encrypted
+entry candidate.
+
+This focused class is not 30-sample performance evidence. Use
+[R4_ACCEPTANCE_SAMPLING.md](R4_ACCEPTANCE_SAMPLING.md) for the primary Sony
+runtime-warm commands and acceptance record. Do not mark the device gate
+complete from compile success, a single instrumentation pass, or an unfilled
+report template.
+
 Current lifecycle stress instrumentation:
 
 ```powershell

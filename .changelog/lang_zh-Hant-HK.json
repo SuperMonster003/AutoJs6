@@ -5,6 +5,7 @@
       "feature": [
         "Node.js 24.5.0 腳本運行時, 支持通過 \"nodejs\" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本",
         "Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼",
+        "Node.js 運行時支持單次執行範圍的按需加密模塊源碼提供器, 僅探測及解密模塊解析器實際選定的候選文件",
         "Node.js 運行時支持受控 AutoJs6 橋接模塊, 並採用 Safe Node Profile 安全策略",
         "Node.js 運行時支持常駐服務進程及進程級 Node/V8 平台復用, 同時為每次腳本執行創建獨立 isolate 及 Environment",
         "Node.js 常駐運行時支持空閒或內存壓力下的回收, 顯式關閉及異常進程隔離重建",
@@ -71,6 +72,7 @@
         "復用 Node.js 常駐進程及進程級運行時, 提升腳本連續運行時的啟動性能",
         "Node.js 啟動支持分階段計時及可信的冷啟動/運行時熱啟動性能報告",
         "緩存 Node.js 內置原生庫解析結果, 避免重複發現插件",
+        "移除 Node.js 默認執行路徑中的項目全目錄加密模塊掃描, 提升複雜腳本及大型項目的啟動性能",
         "插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能",
         "代碼編輯器 \"運行\" 按鈕點擊後變換為 \"停止\" 按鈕, 可便捷停止腳本",
         "代碼編輯器完善主題/字體/工具欄/只讀模式/折疊/選擇菜單等交互體驗",
