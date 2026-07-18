@@ -16,7 +16,9 @@ object NodeJsRuntimePluginBridge {
     private const val TAG = "NodeJsRuntimePlugin"
     private const val PLUGIN_RUNTIME_ENABLED_PROPERTY = "autojs.nodejs.runtime.plugin.enabled"
     private const val PLUGIN_RUNTIME_REQUIRED_PROPERTY = "autojs.nodejs.runtime.plugin.required"
-    const val ERROR_PLUGIN_UNAVAILABLE = "ERR_AUTOJS6_NODE_PLUGIN_UNAVAILABLE"
+    const val ERROR_PLUGIN_UNAVAILABLE = NodeRuntimeErrorCodes.NODE_PLUGIN_UNAVAILABLE
+    const val ERROR_PLUGIN_CONTRACT_MISMATCH = NodeRuntimeErrorCodes.NODE_PLUGIN_CONTRACT_MISMATCH
+    const val ERROR_PLUGIN_EXECUTION_LOST = NodeRuntimeErrorCodes.NODE_PLUGIN_EXECUTION_LOST
     private val activeModuleSourceProviders =
         ConcurrentHashMap<String, INodeJsModuleSourceProvider>()
     private val activeExecutionIds = ConcurrentHashMap.newKeySet<String>()
@@ -25,7 +27,10 @@ object NodeJsRuntimePluginBridge {
     private val executionLifecycleLock = Any()
 
     fun isRequested(): Boolean {
-        return NodeRuntimeBackend.current() == NodeRuntimeBackend.PLUGIN ||
+        return NodeRuntimeBackend.current() in setOf(
+            NodeRuntimeBackend.PLUGIN,
+            NodeRuntimeBackend.PLUGIN_OPTIONAL,
+        ) ||
                 booleanSystemProperty(PLUGIN_RUNTIME_ENABLED_PROPERTY)
     }
 
@@ -44,19 +49,23 @@ object NodeJsRuntimePluginBridge {
             return NativeNodeEmbeddedScriptService.runScript(context, requestWithProvider, launchSurface)
         }
         val pluginResult = runScript(context, requestWithProvider, launchSurface)
-        if (
-            pluginResult.errorCode == ERROR_PLUGIN_UNAVAILABLE &&
-            !isRequired()
-        ) {
+        if (pluginResult.isSafeForEmbeddedFallback() && !isRequired()) {
             Log.w(
                 TAG,
                 "Node.js runtime plugin failed; falling back to embedded service " +
                         "sourceName=${request.sourceName} errorCode=${pluginResult.errorCode.orEmpty()}",
             )
-            return NativeNodeEmbeddedScriptService.runScript(
+            val fallbackResult = NativeNodeEmbeddedScriptService.runScript(
                 context,
                 requestWithProvider.copy(moduleSourceProvider = null),
                 launchSurface,
+            )
+            return fallbackResult.copy(
+                nativeValues = fallbackResult.nativeValues + mapOf(
+                    "embedded_script.runtime_plugin.optional_fallback_used" to "true",
+                    "embedded_script.runtime_plugin.optional_fallback_reason" to
+                            pluginResult.errorCode.orEmpty(),
+                ),
             )
         }
         return pluginResult.withLaunchSurfaceNativeValue(launchSurface)
@@ -88,6 +97,7 @@ object NodeJsRuntimePluginBridge {
             cancelModuleSourceProvider(provider, "Node.js runtime plugin request registration failed.")
             return pluginCancellationResult(requestWithProvider, startedAt, "provider_registration")
         }
+        var hostCapabilityBroker: NodeJsHostCapabilityBroker? = null
         return try {
             if (executionId in cancelledExecutionIds) {
                 return pluginCancellationResult(
@@ -96,33 +106,104 @@ object NodeJsRuntimePluginBridge {
                     "after_provider_registration",
                 )
             }
-            val backendDispatchRegistered = synchronized(executionLifecycleLock) {
-                if (executionId in cancelledExecutionIds) {
-                    false
-                } else {
-                    backendExecutionIds.add(executionId)
-                    true
-                }
-            }
-            if (!backendDispatchRegistered) {
-                return pluginCancellationResult(
-                    requestWithProvider,
-                    startedAt,
-                    "before_backend_dispatch",
-                )
-            }
             runCatching {
-                val runResult = runBlocking {
-                    NodeJsRuntimePluginHost.runScriptWithInfo(
-                        context,
-                        requestWithProvider.toPluginBundle(context, launchSurface),
+                val broker = NodeJsHostCapabilityBroker(
+                    context,
+                    requestWithProvider,
+                    launchSurface,
+                ).also { hostCapabilityBroker = it }
+                val workspaceTransport = try {
+                    NodeJsPluginWorkspaceArchiveTransport.create(context, requestWithProvider)
+                } catch (error: Throwable) {
+                    throw NodeRuntimePluginUnavailableException(
+                        "Unable to prepare the external Node.js runtime workspace.",
+                        error,
                     )
                 }
-                runResult.toEmbeddedScriptResult(requestWithProvider, startedAt)
+                var reservation: NodeRuntimePluginExecutionRegistry.Reservation? = null
+                try {
+                    val pluginRequest = requestWithProvider.toPluginBundle(broker).also {
+                        workspaceTransport.attachTo(it)
+                    }
+                    val backendDispatchRegistered = synchronized(executionLifecycleLock) {
+                        if (executionId in cancelledExecutionIds) {
+                            false
+                        } else {
+                            reservation = NodeJsRuntimePluginHost.reserveExecution(executionId)
+                                ?: throw NodeRuntimePluginUnavailableException(
+                                    "Unable to reserve Node.js runtime plugin execution '$executionId'.",
+                                )
+                            backendExecutionIds.add(executionId)
+                            true
+                        }
+                    }
+                    if (!backendDispatchRegistered) {
+                        return@runCatching pluginCancellationResult(
+                            requestWithProvider,
+                            startedAt,
+                            "before_backend_dispatch",
+                        )
+                    }
+                    val runResult = runBlocking {
+                        NodeJsRuntimePluginHost.runScriptWithInfo(
+                            context = context,
+                            request = pluginRequest,
+                            reservation = checkNotNull(reservation),
+                        )
+                    }
+                    // A lost Binder response is deliberately not recoverable: only a
+                    // normal RPC return proves the plugin finished its output archive.
+                    try {
+                        if (validateWorkspaceCommit(runResult.result)) {
+                            workspaceTransport.synchronizeBack()
+                        }
+                    } catch (error: Throwable) {
+                        Log.e(TAG, "Node.js runtime plugin workspace commit failed.", error)
+                        throw NodeRuntimePluginOperationException(
+                            message = "Node.js runtime plugin workspace commit could not be verified or applied: " +
+                                    (error.message ?: error.javaClass.name),
+                            cause = error,
+                            candidate = runResult.candidate,
+                            diagnostics = runResult.diagnostics,
+                            dispatchStarted = true,
+                        )
+                    }
+                    if (executionId in cancelledExecutionIds) {
+                        pluginCancellationResult(
+                            requestWithProvider,
+                            startedAt,
+                            "after_backend_result",
+                            backendDispatched = true,
+                        )
+                    } else {
+                        runResult.toEmbeddedScriptResult(requestWithProvider, startedAt)
+                    }
+                } finally {
+                    reservation?.let(NodeJsRuntimePluginHost::releaseExecution)
+                    workspaceTransport.close()
+                }
             }.getOrElse { error ->
-                pluginFailureResult(requestWithProvider, startedAt, error)
+                if (executionId in cancelledExecutionIds) {
+                    pluginCancellationResult(
+                        requestWithProvider,
+                        startedAt,
+                        "after_backend_dispatch",
+                        backendDispatched =
+                                (error as? NodeRuntimePluginOperationException)?.dispatchStarted == true,
+                    )
+                } else {
+                    pluginFailureResult(requestWithProvider, startedAt, error)
+                }
             }
         } finally {
+            hostCapabilityBroker?.destroy(
+                Bundle().apply {
+                    putString(
+                        NodeJsRuntimeContract.KEY_ERROR_MESSAGE,
+                        "Node.js runtime plugin host request finished.",
+                    )
+                },
+            )
             val registeredProvider = synchronized(executionLifecycleLock) {
                 backendExecutionIds.remove(executionId)
                 activeExecutionIds.remove(executionId)
@@ -170,6 +251,7 @@ object NodeJsRuntimePluginBridge {
         request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         startedAt: Long,
         stage: String,
+        backendDispatched: Boolean = false,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
             succeeded = false,
@@ -178,7 +260,7 @@ object NodeJsRuntimePluginBridge {
             stdout = "",
             stderr = "",
             errorName = "NodeRuntimePluginExecutionCancelledError",
-            errorMessage = "Node.js runtime plugin execution was cancelled before backend dispatch.",
+            errorMessage = "Node.js runtime plugin execution was cancelled.",
             errorStack = null,
             errorCode = NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED,
             elapsedMs = (SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L),
@@ -187,7 +269,8 @@ object NodeJsRuntimePluginBridge {
             sourceName = request.sourceName,
             nativeValues = mapOf(
                 "embedded_script.runtime_plugin.enabled" to "true",
-                "embedded_script.runtime_plugin.backend_dispatched" to "false",
+                "embedded_script.runtime_plugin.backend_dispatched" to backendDispatched.toString(),
+                "embedded_script.runtime_plugin.fallback_safe" to "false",
                 "embedded_script.client.cancelled" to "true",
                 "embedded_script.client.cancellation_stage" to stage,
                 "embedded_script.error_code" to NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED,
@@ -217,10 +300,8 @@ object NodeJsRuntimePluginBridge {
     }
 
     private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.toPluginBundle(
-        context: Context,
-        launchSurface: String,
+        hostCapabilityBroker: NodeJsHostCapabilityBroker,
     ): Bundle {
-        val hostCapabilityBroker = NodeJsHostCapabilityBroker(context, this, launchSurface)
         return Bundle().apply {
             putInt(NodeJsRuntimeContract.KEY_CONTRACT_VERSION, NodeJsRuntimeContract.CONTRACT_VERSION)
             putString(NodeJsRuntimeContract.KEY_EXECUTION_ID, executionId)
@@ -264,6 +345,7 @@ object NodeJsRuntimePluginBridge {
             startedAt = startedAt,
             runtimeInfo = runtimeInfo,
             candidate = candidate,
+            hostDiagnostics = diagnostics,
         )
     }
 
@@ -272,8 +354,11 @@ object NodeJsRuntimePluginBridge {
         startedAt: Long,
         runtimeInfo: Bundle,
         candidate: NodeJsRuntimePluginHost.Candidate,
+        hostDiagnostics: NodeJsRuntimePluginHost.OperationDiagnostics,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val capabilities = runtimeInfo.getStringArray(NodeJsRuntimeContract.KEY_CAPABILITIES).orEmpty()
+        val succeeded = getBoolean(NodeJsRuntimeContract.KEY_SUCCEEDED, false)
+        val timedOut = getBoolean(NodeJsRuntimeContract.KEY_TIMED_OUT, false)
         val nativeValues = getStringArray(NodeJsRuntimeContract.KEY_NATIVE_PAYLOAD)
             .parseNativePayload()
             .toMutableMap()
@@ -283,6 +368,10 @@ object NodeJsRuntimePluginBridge {
                 putFallback("embedded_script.runtime_plugin.package_name", candidate.serviceInfo.packageName)
                 putFallback("embedded_script.runtime_plugin.service_name", candidate.serviceInfo.name)
                 putFallback("embedded_script.runtime_plugin.package_version_code", candidate.packageVersionCode?.toString().orEmpty())
+                putFallback("embedded_script.runtime_plugin.package_last_update_time", candidate.packageLastUpdateTime.toString())
+                putFallback("embedded_script.runtime_plugin.package_uid", candidate.packageUid.toString())
+                putFallback("embedded_script.runtime_plugin.signer_sha256", candidate.signerSha256.orEmpty())
+                putFallback("embedded_script.runtime_plugin.authorization_state", candidate.authorizationState)
                 putFallback("embedded_script.runtime_plugin.runtime_slot", runtimeInfo.getString(NodeJsRuntimeContract.KEY_RUNTIME_SLOT).orEmpty())
                 putFallback("embedded_script.runtime_plugin.node_version", runtimeInfo.getString(NodeJsRuntimeContract.KEY_NODE_VERSION).orEmpty())
                 putFallback("embedded_script.runtime_plugin.capability_count", capabilities.size.toString())
@@ -299,9 +388,16 @@ object NodeJsRuntimePluginBridge {
                     "embedded_script.runtime_plugin.host_broker.contract_version",
                     NodeJsRuntimeContract.HOST_CAPABILITY_BROKER_CONTRACT_VERSION.toString(),
                 )
+                putFallback("embedded_script.runtime_plugin.fallback_safe", "false")
+                pluginLifecycleNativeValues(
+                    executionId = request.executionId.orEmpty(),
+                    succeeded = succeeded,
+                    timedOut = timedOut,
+                ).forEach { (key, value) -> putFallback(key, value) }
+                putAll(hostDiagnostics.toNativeValues())
             }
         return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
-            succeeded = getBoolean(NodeJsRuntimeContract.KEY_SUCCEEDED, false),
+            succeeded = succeeded,
             exitCode = optionalInt(NodeJsRuntimeContract.KEY_EXIT_CODE),
             resultText = getString(NodeJsRuntimeContract.KEY_RESULT_TEXT),
             stdout = getString(NodeJsRuntimeContract.KEY_STDOUT).orEmpty(),
@@ -316,7 +412,7 @@ object NodeJsRuntimePluginBridge {
             pid = optionalInt(NodeJsRuntimeContract.KEY_PID) ?: -1,
             sourceName = getString(NodeJsRuntimeContract.KEY_SOURCE_NAME).orEmpty().ifBlank { request.sourceName },
             nativeValues = nativeValues,
-            timedOut = getBoolean(NodeJsRuntimeContract.KEY_TIMED_OUT, false),
+            timedOut = timedOut,
             timeoutMs = optionalLong(NodeJsRuntimeContract.KEY_TIMEOUT_MS),
             workingDirectory = getString(NodeJsRuntimeContract.KEY_WORKING_DIRECTORY) ?: request.workingDirectory,
         )
@@ -327,6 +423,27 @@ object NodeJsRuntimePluginBridge {
         startedAt: Long,
         error: Throwable,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        val operationError = error as? NodeRuntimePluginOperationException
+        val fallbackSafe = when (error) {
+            is NodeRuntimePluginUnavailableException,
+            is NodeRuntimePluginContractException,
+            -> true
+            is NodeRuntimePluginOperationException -> !error.dispatchStarted
+            else -> false
+        }
+        val failureKind = when (error) {
+            is NodeRuntimePluginContractException -> "contract"
+            is NodeRuntimePluginUnavailableException -> "unavailable"
+            is NodeRuntimePluginOperationException -> if (error.dispatchStarted) "execution_lost" else "session"
+            else -> "unknown"
+        }
+        val errorCode = when (failureKind) {
+            "contract" -> ERROR_PLUGIN_CONTRACT_MISMATCH
+            "execution_lost" -> ERROR_PLUGIN_EXECUTION_LOST
+            else -> ERROR_PLUGIN_UNAVAILABLE
+        }
+        val candidate = operationError?.candidate
+        val diagnostics = operationError?.diagnostics?.toNativeValues().orEmpty()
         return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
             succeeded = false,
             exitCode = 1,
@@ -336,7 +453,7 @@ object NodeJsRuntimePluginBridge {
             errorName = error.javaClass.simpleName,
             errorMessage = error.message ?: error.javaClass.name,
             errorStack = error.stackTraceToString(),
-            errorCode = ERROR_PLUGIN_UNAVAILABLE,
+            errorCode = errorCode,
             elapsedMs = (SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L),
             processName = "",
             pid = Process.myPid(),
@@ -344,10 +461,22 @@ object NodeJsRuntimePluginBridge {
             nativeValues = mapOf(
                 "embedded_script.runtime_plugin.enabled" to "true",
                 "embedded_script.runtime_plugin.failure" to "true",
-                "embedded_script.error_code" to ERROR_PLUGIN_UNAVAILABLE,
-            ),
+                "embedded_script.runtime_plugin.failure_kind" to failureKind,
+                "embedded_script.runtime_plugin.backend_dispatched" to
+                        (operationError?.dispatchStarted == true).toString(),
+                "embedded_script.runtime_plugin.fallback_safe" to fallbackSafe.toString(),
+                "embedded_script.runtime_plugin.package_name" to
+                        candidate?.serviceInfo?.packageName.orEmpty(),
+                "embedded_script.runtime_plugin.service_name" to
+                        candidate?.serviceInfo?.name.orEmpty(),
+                "embedded_script.error_code" to errorCode,
+            ) + diagnostics,
             workingDirectory = request.workingDirectory,
         )
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.isSafeForEmbeddedFallback(): Boolean {
+        return nativeValues["embedded_script.runtime_plugin.fallback_safe"] == "true"
     }
 
     private fun Bundle.putStringMap(namesKey: String, valuesKey: String, map: Map<String, String>) {
@@ -363,6 +492,58 @@ object NodeJsRuntimePluginBridge {
             }
             ?.toMap()
             .orEmpty()
+    }
+
+    private fun validateWorkspaceCommit(result: Bundle): Boolean {
+        if (
+            result.getString(NodeJsRuntimeContract.KEY_ERROR_CODE) == NodeRuntimeErrorCodes.NODE_PLUGIN_BUSY ||
+            result.getBoolean(NodeJsRuntimeContract.KEY_TIMED_OUT, false)
+        ) {
+            return false
+        }
+        val nativeValues = result
+            .getStringArray(NodeJsRuntimeContract.KEY_NATIVE_PAYLOAD)
+            .parseNativePayload()
+        val status = nativeValues[WORKSPACE_STATUS_KEY]
+        val legacyScanRan = nativeValues[WORKSPACE_LEGACY_SCAN_KEY]
+        val inputScanCount = nativeValues[WORKSPACE_INPUT_SCAN_COUNT_KEY]
+        if (status != "committed" || legacyScanRan != "false" || inputScanCount != "0") {
+            throw NodeRuntimePluginContractException(
+                "Node.js runtime plugin did not return a complete zero-scan workspace commit: " +
+                        "status=${status ?: "<missing>"}, " +
+                        "legacyDirectoryScanRan=${legacyScanRan ?: "<missing>"}, " +
+                        "inputDirectoryScanCount=${inputScanCount ?: "<missing>"}, " +
+                        "pluginSucceeded=${result.getBoolean(NodeJsRuntimeContract.KEY_SUCCEEDED, false)}, " +
+                        "pluginErrorCode=${result.getString(NodeJsRuntimeContract.KEY_ERROR_CODE).orEmpty()}, " +
+                        "pluginErrorMessage=${result.getString(NodeJsRuntimeContract.KEY_ERROR_MESSAGE).orEmpty()}.",
+            )
+        }
+        return true
+    }
+
+    private fun pluginLifecycleNativeValues(
+        executionId: String,
+        succeeded: Boolean,
+        timedOut: Boolean,
+    ): Map<String, String> {
+        val terminalState: String
+        val transitions: String
+        if (succeeded) {
+            terminalState = NodeEmbeddedRuntimeState.STOPPED.name
+            transitions = "CREATED->STARTING|STARTING->RUNNING|RUNNING->DRAINING|DRAINING->STOPPED"
+        } else if (timedOut) {
+            terminalState = NodeEmbeddedRuntimeState.STOPPING.name
+            transitions = "CREATED->STARTING|STARTING->RUNNING|RUNNING->TIMED_OUT|TIMED_OUT->STOPPING"
+        } else {
+            terminalState = NodeEmbeddedRuntimeState.STOPPING.name
+            transitions = "CREATED->STARTING|STARTING->RUNNING|RUNNING->FAILED|FAILED->STOPPING"
+        }
+        return linkedMapOf(
+            "embedded_script.execution_id" to executionId,
+            "embedded_script.runtime_state" to terminalState,
+            "embedded_script.lifecycle_transitions" to transitions,
+            "embedded_script.lifecycle_transition_count" to "4",
+        )
     }
 
     private fun MutableMap<String, String>.putFallback(key: String, value: String) {
@@ -385,4 +566,11 @@ object NodeJsRuntimePluginBridge {
             else -> false
         }
     }
+
+    private const val WORKSPACE_STATUS_KEY =
+        "embedded_script.runtime_plugin.workspace.status"
+    private const val WORKSPACE_LEGACY_SCAN_KEY =
+        "embedded_script.runtime_plugin.workspace.legacy_directory_scan_ran"
+    private const val WORKSPACE_INPUT_SCAN_COUNT_KEY =
+        "embedded_script.runtime_plugin.workspace.input_directory_scan_count"
 }

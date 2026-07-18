@@ -174,6 +174,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` El entorno de ejecución Node.js admite módulos puente controlados de AutoJs6 y adopta la política de seguridad Safe Node Profile
 * `Nuevo` El entorno de ejecución Node.js admite un proceso de servicio persistente y la reutilización de la plataforma Node/V8 en el ámbito del proceso, y crea un isolate y un Environment nuevos para cada ejecución de script
 * `Nuevo` El entorno de ejecución persistente de Node.js admite la finalización por inactividad o presión de memoria, el cierre explícito y el aislamiento y reconstrucción de procesos en mal estado
+* `Nuevo` Backend de plugin de runtime Node.js externo con modo `plugin` obligatorio y modo `pluginOptional` con fallback, sesiones Binder persistentes y runtime de proceso, validación de confianza/contrato/ABI y contrapresión sin cola para una sola ejecución activa
+* `Nuevo` El backend del plugin de runtime Node.js externo admite el transporte de archivo de espacio de trabajo v2 por solicitud, con mapeo explícito de entradas, escritura de resultados y manifiesto tombstone de eliminación, sin escanear el sandbox del host
 * `Nuevo` La función de empaquetado admite proyectos de scripts Node.js e incluye automáticamente las bibliotecas de ejecución necesarias
 * `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/conversión de texto/información multimedia y más
 * `Nuevo` El Centro de plugins ofrece una página de configuración global y una página de instrucciones
@@ -202,6 +204,8 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Los scripts vacíos y simples de Node.js se iniciaban lentamente en directorios de trabajo con muchos archivos porque el escaneo innecesario de módulos leía por completo los archivos candidatos
 * `Corrección` El proceso persistente de Node.js se retiraba incorrectamente cuando se ocultaba la interfaz temporal del iniciador de scripts
 * `Corrección` La devolución de resultados de scripts Node.js se retrasaba por la espera de estabilización del proceso de ejecución
+* `Corrección` La cancelación de una ejecución Node.js activa podía eliminar el registro de ejecución antes de poner en cuarentena el proceso en mal estado, bloqueando la espera de finalización y retrasando la recuperación
+* `Corrección` El fallback automático tras perder una respuesta Binder del runtime Node.js externo podía ejecutar dos veces el mismo script
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java
 * `Corrección` app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_
 * `Corrección` Los métodos relacionados con shell podían dejar de responder en dispositivos sin acceso Root
@@ -233,6 +237,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Reutilizados el proceso persistente de Node.js y el entorno de ejecución en el ámbito del proceso para mejorar el rendimiento del arranque en caliente de scripts
 * `Mejora` Incorporados tiempos por fase para el inicio de Node.js e informes fiables de rendimiento en frío y con el runtime caliente
 * `Mejora` Almacenada en caché la resolución de bibliotecas nativas integradas de Node.js para evitar el descubrimiento repetido de plugins
+* `Mejora` Almacenados en caché los candidatos autorizados del runtime Node.js externo y las sesiones Binder persistentes, con invalidación de estado y reconexión atómica para reducir el coste de descubrimiento y enlace
 * `Mejora` Eliminado el escaneo de módulos cifrados de todo el proyecto de la ruta de ejecución predeterminada de Node.js para mejorar el rendimiento de inicio de scripts no triviales y proyectos grandes
 * `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente

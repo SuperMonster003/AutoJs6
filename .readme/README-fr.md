@@ -174,6 +174,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge des modules de liaison AutoJs6 contrôlés et adopte la politique de sécurité Safe Node Profile
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge un processus de service persistant et la réutilisation de la plateforme Node/V8 à l'échelle du processus, tout en créant un isolate et un Environment distincts pour chaque exécution de script
 * `Fonctionnalité` L'environnement d'exécution Node.js persistant prend en charge le recyclage en cas d'inactivité ou de pression mémoire, l'arrêt explicite, ainsi que l'isolement et la reconstruction des processus défaillants
+* `Fonctionnalité` Backend de plugin d'exécution Node.js externe avec mode `plugin` obligatoire et mode `pluginOptional` avec repli, sessions Binder persistantes et runtime à l'échelle du processus, validation de confiance/contrat/ABI et contre-pression sans file pour une seule exécution active
+* `Fonctionnalité` Le backend du plugin d'exécution Node.js externe prend en charge le transport d'archive d'espace de travail v2 limité à la requête, avec mappage explicite des entrées, réécriture des sorties et manifeste tombstone de suppression, sans analyser le sandbox hôte
 * `Fonctionnalité` La fonction d'empaquetage prend en charge les projets de scripts Node.js et inclut automatiquement les bibliothèques d'exécution requises
 * `Fonctionnalité` Le système de plugins prend en charge des interfaces d'extension pour Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/conversion de texte/informations multimédias et plus encore
 * `Fonctionnalité` Le Centre des plugins propose une page de paramètres globaux et une page d'instructions
@@ -202,6 +204,8 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Les scripts Node.js vides ou simples démarraient lentement dans les répertoires de travail contenant de nombreux fichiers, car l'analyse inutile des modules lisait intégralement les fichiers candidats
 * `Correction` Le processus Node.js persistant était arrêté à tort lorsque l'interface éphémère de lancement de script devenait masquée
 * `Correction` Le retour des résultats des scripts Node.js était retardé par l'attente de stabilisation du processus d'exécution
+* `Correction` L'annulation d'une exécution Node.js active pouvait supprimer l'enregistrement de l'exécution avant la mise en quarantaine du processus défaillant, bloquant les attentes de fin et retardant la récupération
+* `Correction` Le repli automatique après la perte d'une réponse Binder de l'environnement d'exécution Node.js externe pouvait exécuter deux fois le même script
 * `Correction` runtime.loadJar ne pouvait pas charger dynamiquement des fichiers de classe Java compilés pour une version plus récente
 * `Correction` app.isInstalled/kill et les méthodes associées ne pouvaient pas utiliser correctement les arguments de nom de paquet _[`issue #495`](http://issues.autojs6.com/495)_
 * `Correction` Les méthodes liées au shell pouvaient ne plus répondre sur les appareils sans accès Root
@@ -233,6 +237,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Amélioration` Réutilisation du processus Node.js persistant et de l'environnement d'exécution à l'échelle du processus pour améliorer les performances de démarrage à chaud des scripts
 * `Amélioration` Mesure par phase du démarrage de Node.js et rapports fiables sur les performances à froid et avec le runtime chaud
 * `Amélioration` Mise en cache de la résolution des bibliothèques natives intégrées de Node.js afin d'éviter la découverte répétée des plugins
+* `Amélioration` Mise en cache des candidats autorisés de l'environnement d'exécution Node.js externe et des sessions Binder persistantes, avec invalidation d'état et reconnexion atomique afin de réduire le coût de découverte et de liaison
 * `Amélioration` Suppression de l'analyse des modules chiffrés à l'échelle du projet dans le chemin d'exécution Node.js par défaut afin d'améliorer les performances de démarrage des scripts non triviaux et des grands projets
 * `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Amélioration` Le bouton "Exécuter" de l'éditeur de code devient "Arrêter" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts

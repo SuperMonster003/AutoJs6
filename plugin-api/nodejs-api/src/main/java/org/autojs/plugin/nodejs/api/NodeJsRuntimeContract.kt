@@ -5,6 +5,7 @@ object NodeJsRuntimeContract {
     const val CONTRACT_VERSION = 1
     const val HOST_CAPABILITY_BROKER_CONTRACT_VERSION = 1
     const val MODULE_SOURCE_PROVIDER_CONTRACT_VERSION = 1
+    const val WORKSPACE_ARCHIVE_TRANSPORT_CONTRACT_VERSION = 2
 
     const val KEY_CONTRACT_VERSION = "contractVersion"
     const val KEY_RUNTIME_SLOT = "runtimeSlot"
@@ -12,6 +13,9 @@ object NodeJsRuntimeContract {
     const val KEY_NATIVE_LIBRARY_NAME = "nativeLibraryName"
     const val KEY_BRIDGE_LIBRARY_NAME = "bridgeLibraryName"
     const val KEY_CAPABILITIES = "capabilities"
+    const val KEY_ACTIVE_EXECUTION_ID = "activeExecutionId"
+    const val KEY_ACTIVE_EXECUTION_FOR_MS = "activeExecutionForMs"
+    const val KEY_ACTIVE_EXECUTION_CANCELLATION_REQUESTED = "activeExecutionCancellationRequested"
 
     const val KEY_EXECUTION_ID = "executionId"
     const val KEY_SOURCE = "source"
@@ -21,6 +25,21 @@ object NodeJsRuntimeContract {
     const val KEY_TIMEOUT_MS = "timeoutMs"
     const val KEY_EXECUTION_MODE = "executionMode"
     const val KEY_RUNTIME_ADAPTER = "runtimeAdapter"
+
+    /**
+     * Request-scoped, seekable archive transport for a sandbox that lives in
+     * the host app's private storage. The host supplies an input snapshot and
+     * an empty output file descriptor. The plugin executes in its own private
+     * mirror and writes the final snapshot to the output descriptor. Contract
+     * v2 adds an explicit-input manifest plus a final tombstone manifest so
+     * only named input files can have deletions synchronized back.
+     */
+    const val KEY_WORKSPACE_ARCHIVE_TRANSPORT_VERSION = "workspaceArchiveTransportVersion"
+    const val KEY_WORKSPACE_ARCHIVE_INPUT_FD = "workspaceArchiveInputFd"
+    const val KEY_WORKSPACE_ARCHIVE_OUTPUT_FD = "workspaceArchiveOutputFd"
+    const val KEY_WORKSPACE_RELATIVE_WORKING_DIRECTORY = "workspaceRelativeWorkingDirectory"
+    const val KEY_WORKSPACE_ARCHIVE_MAX_FILES = "workspaceArchiveMaxFiles"
+    const val KEY_WORKSPACE_ARCHIVE_MAX_BYTES = "workspaceArchiveMaxBytes"
 
     const val KEY_ENV_NAMES = "envNames"
     const val KEY_ENV_VALUES = "envValues"
@@ -112,4 +131,5 @@ object NodeJsRuntimeContract {
     const val CAPABILITY_HOST_CAPABILITY_BROKER = "hostCapabilityBroker"
     const val CAPABILITY_HOST_CAPABILITY_LIVE_BRIDGE = "hostCapabilityLiveBridge"
     const val CAPABILITY_ON_DEMAND_MODULE_SOURCE_PROVIDER = "onDemandModuleSourceProvider"
+    const val CAPABILITY_SCOPED_WORKSPACE_ARCHIVE_TRANSPORT = "scopedWorkspaceArchiveTransport"
 }

@@ -14,7 +14,9 @@ object PluginEnableStore {
 
     fun setEnabled(context: Context, packageName: String, enabled: Boolean) {
         val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+        if (sp.getBoolean(key(packageName), true) == enabled) return
         sp.edit { putBoolean(key(packageName), enabled) }
+        PluginStateChangeRegistry.notifyChanged(packageName)
     }
 
     private fun key(packageName: String) = "key_\$_enabled_plugin_\$_$packageName"

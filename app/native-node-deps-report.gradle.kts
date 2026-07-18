@@ -481,8 +481,11 @@ private fun nativeNodeAbiSizeReleaseFlavor(rawFlavor: String): String =
     when (rawFlavor.trim().lowercase()) {
         "nodefull", "node-full", "full" -> "nodeFull"
         "nodemini", "node-mini", "mini" -> "nodeMini"
+        "nodeplugin", "node-plugin", "plugin" -> "nodePlugin"
         "rhinoonly", "rhino-only", "rhino" -> "rhinoOnly"
-        else -> rawFlavor.trim().ifBlank { "nodeFull" }
+        else -> throw GradleException(
+            "Unsupported Embedded Node release flavor '$rawFlavor'. Use nodeFull, nodeMini, nodePlugin, or rhinoOnly."
+        )
     }
 
 private fun nativeNodeAbiSizeCsvList(rawValue: String?): List<String> =
@@ -496,8 +499,8 @@ private fun nativeNodeAbiSizeFlavorAbis(flavor: String, requestedAbis: List<Stri
     when (flavor) {
         "nodeFull" -> nativeNodeReportRequiredLibcxxAbis
         "nodeMini" -> requestedAbis.ifEmpty { listOf("arm64-v8a") }
-        "rhinoOnly" -> emptyList()
-        else -> nativeNodeReportRequiredLibcxxAbis
+        "nodePlugin", "rhinoOnly" -> emptyList()
+        else -> throw GradleException("Unsupported Embedded Node release flavor '$flavor'.")
     }
 
 private fun Long.formatNativeNodeAbiSizeBytes(): String {
@@ -957,13 +960,14 @@ val nativeNodeAbiSizeReport = tasks.register("nativeNodeAbiSizeReport") {
         }
 
         val selectedReleaseFlavor = nativeNodeAbiSizeReleaseFlavor(
-            providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
+            project.extensions.extraProperties.get("nodeJsRuntimeConfig.nodeJsReleaseFlavor") as String
         )
         val requestedReleaseAbis = nativeNodeAbiSizeCsvList(providers.gradleProperty("autojs.nodejs.releaseAbis").orNull)
         val selectedReleaseAbis = nativeNodeAbiSizeFlavorAbis(selectedReleaseFlavor, requestedReleaseAbis)
         val flavorComparisons = listOf(
             flavor("nodeFull", nativeNodeReportRequiredLibcxxAbis),
             flavor("nodeMini", nativeNodeAbiSizeFlavorAbis("nodeMini", requestedReleaseAbis)),
+            NativeNodeAbiSizeFlavor("nodePlugin", emptyList(), 0L, emptyList()),
             NativeNodeAbiSizeFlavor("rhinoOnly", emptyList(), 0L, emptyList()),
         )
         val selectedFlavorReady = flavor(selectedReleaseFlavor, selectedReleaseAbis).ready

@@ -174,6 +174,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Node.js runtime supports controlled AutoJs6 bridge modules and adopts the Safe Node Profile security policy
 * `Feature` Node.js runtime supports a persistent service process and process-scoped Node/V8 platform reuse, while creating a fresh isolate and Environment for each script execution
 * `Feature` Persistent Node.js runtime supports idle or memory-pressure retirement, explicit shutdown, and isolation and rebuilding of unhealthy processes
+* `Feature` External Node.js runtime plugin backend with required `plugin` and fallback-capable `pluginOptional` modes, persistent Binder sessions and process runtimes, trust/contract/ABI validation, and single-active zero-queue backpressure
+* `Feature` External Node.js runtime plugin backend supports request-scoped workspace archive transport v2 with explicit input mapping, output writeback, and deletion tombstone manifests without scanning the host sandbox
 * `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
 * `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/text conversion/media information and more
 * `Feature` Plugin Center provides a global settings page and a user guide page
@@ -202,6 +204,8 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Empty and simple Node.js scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full
 * `Fix` Persistent Node.js process was incorrectly retired when a short-lived script launcher UI became hidden
 * `Fix` Node.js script results were returned late because runtime process-settle waiting blocked result delivery
+* `Fix` Active Node.js cancellation could remove the execution registration before unhealthy-process quarantine, leaving completion waiters blocked and delaying recovery
+* `Fix` Automatic embedded fallback after a lost external runtime Binder response could execute the same script twice
 * `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly
 * `Fix` app.isInstalled/kill and related methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
 * `Fix` Shell-related methods could become unresponsive on devices without Root access
@@ -233,6 +237,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Reused the persistent Node.js process and process-scoped runtime to improve warm script startup performance
 * `Improvement` Added phase-by-phase Node.js startup timing and trustworthy cold/runtime-warm performance reporting
 * `Improvement` Cached built-in Node.js native library resolution to avoid repeated plugin discovery
+* `Improvement` Cached authorized external Node.js runtime candidates and persistent Binder sessions with state invalidation and atomic reconnection to reduce discovery and bind overhead
 * `Improvement` Removed project-wide encrypted-module scans from the default Node.js execution path to improve startup performance for non-trivial scripts and large projects
 * `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly

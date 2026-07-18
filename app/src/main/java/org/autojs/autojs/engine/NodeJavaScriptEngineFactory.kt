@@ -18,7 +18,8 @@ object NodeJavaScriptEngineFactory {
             NodeRuntimeBackend.RHINO -> NodeJavaScriptEngine(context)
             NodeRuntimeBackend.NATIVE -> NativeNodeJavaScriptEngine(context)
             NodeRuntimeBackend.EMBEDDED -> NativeNodeEmbeddedJavaScriptEngine(context)
-            NodeRuntimeBackend.PLUGIN -> NativeNodeEmbeddedJavaScriptEngine(context)
+            NodeRuntimeBackend.PLUGIN,
+            NodeRuntimeBackend.PLUGIN_OPTIONAL -> NativeNodeEmbeddedJavaScriptEngine(context)
             NodeRuntimeBackend.AUTO -> when {
                 NativeNodeRuntimeBridge.isAvailable -> NativeNodeJavaScriptEngine(context)
                 else -> {
@@ -85,6 +86,7 @@ enum class NodeRuntimeBackend {
     NATIVE,
     EMBEDDED,
     PLUGIN,
+    PLUGIN_OPTIONAL,
     AUTO,
     ;
 
@@ -96,15 +98,30 @@ enum class NodeRuntimeBackend {
             val raw = System.getProperty(PROPERTY_NAME)
                 ?.takeIf { it.isNotBlank() }
                 ?: BuildConfig.NODEJS_RUNTIME_BACKEND
-            return from(raw)
+            return from(raw).also { backend ->
+                require(
+                    backend != PLUGIN_OPTIONAL ||
+                            BuildConfig.NODEJS_RELEASE_FLAVOR == "nodeFull" ||
+                            BuildConfig.NODEJS_RELEASE_FLAVOR == "nodeMini"
+                ) {
+                    "Node.js runtime backend pluginOptional requires release flavor nodeFull or nodeMini; " +
+                            "current release flavor is ${BuildConfig.NODEJS_RELEASE_FLAVOR}."
+                }
+            }
         }
 
-        private fun from(value: String?): NodeRuntimeBackend = when (value?.trim()?.lowercase(Locale.ROOT)) {
+        internal fun from(value: String?): NodeRuntimeBackend = when (value?.trim()?.lowercase(Locale.ROOT)) {
+            "rhino" -> RHINO
             "native", "v8", "node", "nodejs" -> NATIVE
             "embedded", "embed" -> EMBEDDED
             "plugin", "node-plugin", "nodejs-plugin" -> PLUGIN
+            "pluginoptional", "plugin-optional", "plugin_optional",
+            "optional-plugin", "node-plugin-optional", "nodejs-plugin-optional" -> PLUGIN_OPTIONAL
             "auto" -> AUTO
-            else -> RHINO
+            else -> throw IllegalArgumentException(
+                "Unsupported Node.js runtime backend '${value.orEmpty()}'. " +
+                        "Use rhino, native, embedded, plugin, pluginOptional, or auto."
+            )
         }
     }
 }

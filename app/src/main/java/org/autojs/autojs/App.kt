@@ -18,6 +18,7 @@ import com.bumptech.glide.request.target.CustomViewTarget
 import com.bumptech.glide.request.transition.Transition
 import com.hjq.toast.Toaster
 import io.reactivex.android.schedulers.AndroidSchedulers
+import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.ui.inflater.ImageLoader
@@ -26,6 +27,7 @@ import org.autojs.autojs.engine.NativeNodeProcessService
 import org.autojs.autojs.engine.NativeNodeEmbeddedScriptService
 import org.autojs.autojs.engine.NodeCrashEvidenceStore
 import org.autojs.autojs.engine.NodeEmbeddedProcessSessionManager
+import org.autojs.autojs.engine.NodeJsRuntimePluginHost
 import org.autojs.autojs.engine.NodeRuntimeBackend
 import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
@@ -283,8 +285,13 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 runCatching { NativeNodeEmbeddedScriptService.prewarmRuntime(this) }
                     .onFailure { Log.w(TAG, "Failed to prewarm embedded Node.js process runtime.", it) }
             }
-            NodeRuntimeBackend.RHINO,
-            NodeRuntimeBackend.PLUGIN -> Unit
+            NodeRuntimeBackend.PLUGIN,
+            NodeRuntimeBackend.PLUGIN_OPTIONAL -> {
+                runCatching {
+                    runBlocking { NodeJsRuntimePluginHost.prewarm(this@App) }
+                }.onFailure { Log.w(TAG, "Failed to prewarm external Node.js runtime plugin.", it) }
+            }
+            NodeRuntimeBackend.RHINO -> Unit
         }
     }
 
@@ -292,13 +299,14 @@ class App : Application(), WorkManagerConfiguration.Provider {
         when (NodeRuntimeBackend.current()) {
             NodeRuntimeBackend.NATIVE,
             NodeRuntimeBackend.AUTO,
-            NodeRuntimeBackend.EMBEDDED -> {
+            NodeRuntimeBackend.EMBEDDED,
+            NodeRuntimeBackend.PLUGIN,
+            NodeRuntimeBackend.PLUGIN_OPTIONAL -> {
                 if (deferredNativeNodePrewarmScheduled.compareAndSet(false, true)) {
                     mainHandler.postDelayed(deferredNativeNodePrewarm, NATIVE_NODE_PREWARM_DELAY_MILLIS)
                 }
             }
-            NodeRuntimeBackend.RHINO,
-            NodeRuntimeBackend.PLUGIN -> Unit
+            NodeRuntimeBackend.RHINO -> Unit
         }
     }
 

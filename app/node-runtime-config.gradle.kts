@@ -64,10 +64,6 @@ val isApkBuilderTemplatePluginRefreshRequested = providers.gradleProperty("autoj
     .map { it.trim().lowercase() in setOf("true", "1", "yes", "on") }
     .orElse(false)
     .get()
-val nodeJsRuntimeBackend = providers.gradleProperty("autojs.nodejs.backend").orElse("embedded").get()
-    .trim()
-    .lowercase()
-    .let { if (it in setOf("rhino", "native", "embedded", "auto")) it else "embedded" }
 val nodeJsDefaultReleaseFlavor = when {
     isFullNodeInrtTemplateTaskRequested -> "nodeFull"
     else -> "nodePlugin"
@@ -90,6 +86,58 @@ val nodeJsReleaseFlavor = if ((isInrtTaskRequested || isApkBuilderTemplatePlugin
     "rhinoOnly"
 } else {
     nodeJsConfiguredReleaseFlavor
+}
+val isNodeJsReleasePolicyEnforced = taskNames.any { requested ->
+    requested.substringAfterLast(':').let { taskName ->
+        taskName.contains("release", ignoreCase = true) ||
+                taskName.contains("gate", ignoreCase = true)
+    }
+}
+val nodeJsDefaultRuntimeBackend = when (nodeJsReleaseFlavor) {
+    "nodePlugin" -> "plugin"
+    "nodeFull", "nodeMini" -> "embedded"
+    "rhinoOnly" -> "rhino"
+    else -> throw GradleException("Unsupported Node.js release flavor '$nodeJsReleaseFlavor'.")
+}
+val nodeJsRuntimeBackend = providers.gradleProperty("autojs.nodejs.backend").orNull
+    ?.trim()
+    ?.takeIf(String::isNotEmpty)
+    ?.let { requested ->
+        when (requested.lowercase()) {
+            "rhino" -> "rhino"
+            "native", "v8", "node", "nodejs" -> "native"
+            "embedded", "embed" -> "embedded"
+            "plugin", "node-plugin", "nodejs-plugin" -> "plugin"
+            "pluginoptional", "plugin-optional", "plugin_optional",
+            "optional-plugin", "node-plugin-optional", "nodejs-plugin-optional" -> "pluginOptional"
+            "auto" -> "auto"
+            else -> throw GradleException(
+                "Unsupported Node.js runtime backend '$requested'. " +
+                        "Use rhino, native, embedded, plugin, pluginOptional, or auto."
+            )
+        }
+    }
+    ?: nodeJsDefaultRuntimeBackend
+if (nodeJsRuntimeBackend == "pluginOptional" && nodeJsReleaseFlavor !in setOf("nodeFull", "nodeMini")) {
+    throw GradleException(
+        "Node.js runtime backend pluginOptional requires release flavor nodeFull or nodeMini; " +
+                "current release flavor is $nodeJsReleaseFlavor."
+    )
+}
+if (isNodeJsReleasePolicyEnforced) {
+    val allowedReleaseBackends = when (nodeJsReleaseFlavor) {
+        "nodePlugin" -> setOf("plugin")
+        "nodeFull", "nodeMini" -> setOf("embedded", "pluginOptional")
+        "rhinoOnly" -> setOf("rhino")
+        else -> emptySet()
+    }
+    if (nodeJsRuntimeBackend !in allowedReleaseBackends) {
+        throw GradleException(
+            "Node.js release/gate task backend '$nodeJsRuntimeBackend' is incompatible with " +
+                    "release flavor $nodeJsReleaseFlavor. Allowed backend(s): " +
+                    allowedReleaseBackends.joinToString() + "."
+        )
+    }
 }
 val nodeJsReleaseSupportedAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
 val nodeJsReleaseKnownAbis = nodeJsReleaseSupportedAbis + "x86"
@@ -130,7 +178,13 @@ val nodeJsPluginProjectDir = nodeJsPluginProjectDirOverride.orNull
     ?.trim()
     ?.takeIf(String::isNotEmpty)
     ?.let(rootProject::file)
-    ?: rootProject.projectDir.parentFile?.resolve("autojs6-plugin-nodejs")
+    ?: rootProject.projectDir.parentFile?.let { workspaceDir ->
+        listOf(
+            workspaceDir.resolve("AutoJs6-Plugin-NodeJs-Runtime"),
+            workspaceDir.resolve("autojs6-plugin-nodejs"),
+        ).firstOrNull(File::isDirectory)
+            ?: workspaceDir.resolve("AutoJs6-Plugin-NodeJs-Runtime")
+    }
 val nodeJsExamplesSource = providers.gradleProperty("autojs.nodejs.examplesSource").orElse("host").get()
     .trim()
     .lowercase()
@@ -243,7 +297,7 @@ if (nodeJsRuntimeSlotJniLibsSourceDir.resolve("x86/libnode.so").isFile) {
                 "x86 must remain fail-fast until libnode.so, libautojs6-node.so, and device coverage are explicitly supported."
     )
 }
-val effectiveNodeJsRuntimeBackend = if (nodeJsReleaseFlavor == "rhinoOnly") "rhino" else nodeJsRuntimeBackend
+val effectiveNodeJsRuntimeBackend = nodeJsRuntimeBackend
 val isNodeJsHostBridgeEnabled = providers.gradleProperty("autojs.nodejs.hostBridge.enabled")
     .orElse(if (nodeJsReleaseFlavor == "nodePlugin") "false" else "true")
     .get()
@@ -412,7 +466,7 @@ val nodeJsTestDeviceProfileClasses = nodeJsInstrumentationExtra<List<String>>("t
 val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val isNodeJsNativeRuntimeRequested = effectiveNodeJsRuntimeBackend in setOf("native", "embedded", "auto")
+val isNodeJsNativeRuntimeRequested = effectiveNodeJsRuntimeBackend in setOf("native", "embedded", "pluginOptional", "auto")
 val isNodeJsHostBridgeBuildRequested = isNodeJsNativeRuntimeRequested && isNodeJsHostBridgeEnabled
 val isNodeJsRuntimePackagedInHost = isNodeJsNativeRuntimeRequested && nodeJsReleaseFlavor != "nodePlugin"
 val nodeJsAvailableNativeRuntimeAbis = nodeJsReleaseKnownAbis
@@ -505,7 +559,10 @@ listOf(
     "nodeJsAppLabel" to nodeJsAppLabel,
     "nodeJsReleaseFlavor" to nodeJsReleaseFlavor,
     "nodeJsReleaseExpectedAbis" to nodeJsReleaseExpectedAbis,
+    "nodeJsDefaultRuntimeBackend" to nodeJsDefaultRuntimeBackend,
+    "nodeJsRuntimeBackend" to nodeJsRuntimeBackend,
     "effectiveNodeJsRuntimeBackend" to effectiveNodeJsRuntimeBackend,
+    "isNodeJsReleasePolicyEnforced" to isNodeJsReleasePolicyEnforced,
     "isNodeJsNativeRuntimeRequested" to isNodeJsNativeRuntimeRequested,
     "isNodeJsHostBridgeBuildRequested" to isNodeJsHostBridgeBuildRequested,
     "nodeJsBridgeNativeRuntimeAbis" to nodeJsBridgeNativeRuntimeAbis,

@@ -229,21 +229,6 @@ private fun loadVersionProperties(rootDir: File): Properties {
     }
 }
 
-private fun normalizeNodeReleaseFlavor(value: String): String = when (value.trim().lowercase()) {
-    "nodefull", "node-full", "full" -> "nodeFull"
-    "nodemini", "node-mini", "mini" -> "nodeMini"
-    "rhinoonly", "rhino-only", "rhino" -> "rhinoOnly"
-    else -> value.trim()
-}
-
-private fun expectedReleaseAbis(flavor: String, supportedAbis: List<String>, requestedAbis: List<String>): List<String> =
-    when (flavor) {
-        "nodeFull" -> supportedAbis
-        "nodeMini" -> requestedAbis.ifEmpty { listOf("arm64-v8a") }
-        "rhinoOnly" -> emptyList()
-        else -> emptyList()
-    }
-
 private fun jsonText(value: Any?): String = JsonOutput.prettyPrint(JsonOutput.toJson(value))
 
 private fun tableRow(vararg values: Any?): String =
@@ -266,13 +251,21 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
     doLast {
         val runtimeCapabilitiesFile = projectDir.resolve("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt")
         val bridgeProtocolFile = projectDir.resolve("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt")
-        val bootstrapSourceFile = projectDir.resolve("src/main/cpp/node_bridge_sources.cpp")
-        val appBuildFile = projectDir.resolve("build.gradle.kts")
+        val configuredBridgeCmakeFile = project.extensions.extraProperties
+            .get("nodeJsRuntimeConfig.nodeJsBridgeCmakeFile") as File?
+        val bootstrapSourceFile = listOfNotNull(
+            projectDir.resolve("src/main/cpp/node_bridge_sources.cpp"),
+            configuredBridgeCmakeFile?.parentFile?.resolve("node_bridge_sources.cpp"),
+        ).firstOrNull(File::isFile)
+            ?: throw GradleException(
+                "Missing node_bridge_sources.cpp in the host or configured Node.js runtime plugin project."
+            )
+        val runtimeConfigFile = projectDir.resolve("node-runtime-config.gradle.kts")
         val compatibilityDocFile = rootProject.projectDir.resolve("docs/nodejs/COMPATIBILITY_PROFILE.md")
         val runtimeSource = runtimeCapabilitiesFile.readText()
         val bridgeSource = bridgeProtocolFile.readText()
         val bootstrapSource = bootstrapSourceFile.readText()
-        val appBuildSource = appBuildFile.readText()
+        val runtimeConfigSource = runtimeConfigFile.readText()
         val versionProperties = loadVersionProperties(rootProject.projectDir)
 
         val directBuiltinAliases = extractStringMap(runtimeSource, "directBuiltinAliases")
@@ -313,16 +306,14 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
             throw GradleException(registryMismatches.joinToString(separator = System.lineSeparator()))
         }
 
-        val supportedAbis = extractStringList(appBuildSource, "nodeJsReleaseSupportedAbis")
+        val supportedAbis = extractStringList(runtimeConfigSource, "nodeJsReleaseSupportedAbis")
         val knownAbis = supportedAbis + "x86"
-        val releaseFlavor = normalizeNodeReleaseFlavor(providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get())
-        val requestedReleaseAbis = providers.gradleProperty("autojs.nodejs.releaseAbis").orNull
-            ?.split(',')
-            ?.map(String::trim)
-            ?.filter(String::isNotEmpty)
-            .orEmpty()
-        val releaseExpectedAbis = expectedReleaseAbis(releaseFlavor, supportedAbis, requestedReleaseAbis)
-        val runtimeBackend = providers.gradleProperty("autojs.nodejs.backend").orElse("embedded").get().trim().lowercase()
+        val releaseFlavor = project.extensions.extraProperties
+            .get("nodeJsRuntimeConfig.nodeJsReleaseFlavor") as String
+        val releaseExpectedAbis = project.extensions.extraProperties
+            .get("nodeJsRuntimeConfig.nodeJsReleaseExpectedAbis") as List<*>
+        val runtimeBackend = project.extensions.extraProperties
+            .get("nodeJsRuntimeConfig.effectiveNodeJsRuntimeBackend") as String
         val now = ZonedDateTime.now().toString()
 
         val directCanonicalBuiltins = directBuiltinAliases.values.toSet()
@@ -374,7 +365,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
                 "runtimeCapabilities" to runtimeCapabilitiesFile.invariantSeparatorsPath,
                 "bridgeModules" to bridgeProtocolFile.invariantSeparatorsPath,
                 "bootstrap" to bootstrapSourceFile.invariantSeparatorsPath,
-                "gradleReleasePolicy" to appBuildFile.invariantSeparatorsPath,
+                "gradleReleasePolicy" to runtimeConfigFile.invariantSeparatorsPath,
                 "humanDocumentation" to compatibilityDocFile.invariantSeparatorsPath,
             ),
             "runtime" to linkedMapOf(

@@ -18,7 +18,6 @@ private val embeddedNodePackagingNativeLibs = listOf("libnode.so", "libc++_share
 private val embeddedNodePackagingReleaseFlavorProperty = "autojs.nodejs.releaseFlavor"
 private val embeddedNodePackagingReleaseAbisProperty = "autojs.nodejs.releaseAbis"
 private val embeddedNodePackagingTestDeviceProfileProperty = "autojs.nodejs.test.deviceProfile"
-private val embeddedNodePackagingDefaultReleaseFlavor = "nodeFull"
 private val embeddedNodePackagingScriptServiceClassName = "org.autojs.autojs.engine.NativeNodeEmbeddedScriptService"
 private val embeddedNodePackagingScriptServiceDexDescriptor =
     "L${embeddedNodePackagingScriptServiceClassName.replace('.', '/')};"
@@ -486,6 +485,10 @@ private data class EmbeddedNodeReleaseFlavorPolicy(
 
 private fun String.toEmbeddedNodePackagingBoolean(): Boolean =
     trim().let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+
+@Suppress("UNCHECKED_CAST")
+private fun <T> embeddedNodePackagingRuntimeConfig(name: String): T =
+    extensions.extraProperties.get("nodeJsRuntimeConfig.$name") as T
 
 private fun embeddedNodePackagingNormalizeReleaseFlavor(rawFlavor: String): String =
     when (rawFlavor.trim().lowercase()) {
@@ -2123,24 +2126,20 @@ val embeddedNodePackagingPreflightAppDebug = tasks.register("embeddedNodePackagi
             .asFile
         reportFile.parentFile.mkdirs()
 
-        val runtimeBackend = providers.gradleProperty("autojs.nodejs.backend").orElse("rhino").get()
-            .trim()
-            .lowercase()
-            .let { if (it in setOf("rhino", "native", "embedded", "auto")) it else "rhino" }
+        val runtimeBackend = embeddedNodePackagingRuntimeConfig<String>("effectiveNodeJsRuntimeBackend")
         val scriptExecutionEnabled = providers.gradleProperty("autojs.nodejs.embedded.script.enabled")
             .orElse("false")
             .get()
             .toEmbeddedNodePackagingBoolean()
         val releaseFlavorPolicy = embeddedNodePackagingReleaseFlavorPolicy(
-            rawFlavor = providers.gradleProperty(embeddedNodePackagingReleaseFlavorProperty)
-                .orElse(embeddedNodePackagingDefaultReleaseFlavor)
-                .get(),
+            rawFlavor = embeddedNodePackagingRuntimeConfig("nodeJsReleaseFlavor"),
             rawReleaseAbis = providers.gradleProperty(embeddedNodePackagingReleaseAbisProperty).orNull,
         )
         val releaseFlavor = releaseFlavorPolicy.flavor
         val releaseExpectedAbis = releaseFlavorPolicy.expectedAbis
         val releaseUnsupportedAbis = releaseExpectedAbis.filterNot { it in embeddedNodePackagingRequiredNodeAbis }
-        val nativeRuntimeRequested = releaseFlavor != "rhinoOnly" && runtimeBackend in setOf("native", "embedded", "auto")
+        val nativeRuntimeRequested = releaseFlavor != "rhinoOnly" &&
+                runtimeBackend in setOf("native", "embedded", "pluginOptional", "auto")
         val sourceJniLibsRoot = projectDir.resolve("src/main/jniLibs")
         val mergedNativeLibsRoot = layout.buildDirectory
             .dir("intermediates/merged_native_libs/$embeddedNodePackagingReportVariant/merge${embeddedNodePackagingReportVariantTaskSuffix}NativeLibs/out/lib")
@@ -2533,15 +2532,12 @@ val embeddedNodePackagedAppIntegrationDryRunAppDebug = tasks.register("embeddedN
             .asFile
         reportFile.parentFile.mkdirs()
 
-        val runtimeBackend = providers.gradleProperty("autojs.nodejs.backend").orElse("rhino").get()
-            .trim()
-            .lowercase()
-            .let { if (it in setOf("rhino", "native", "embedded", "auto")) it else "rhino" }
+        val runtimeBackend = embeddedNodePackagingRuntimeConfig<String>("effectiveNodeJsRuntimeBackend")
         val scriptExecutionEnabled = providers.gradleProperty("autojs.nodejs.embedded.script.enabled")
             .orElse("false")
             .get()
             .toEmbeddedNodePackagingBoolean()
-        val nativeRuntimeRequested = runtimeBackend in setOf("native", "embedded", "auto")
+        val nativeRuntimeRequested = runtimeBackend in setOf("native", "embedded", "pluginOptional", "auto")
         val sourceJniLibsRoot = projectDir.resolve("src/main/jniLibs")
         val mergedNativeLibsRoot = layout.buildDirectory
             .dir("intermediates/merged_native_libs/$embeddedNodePackagingReportVariant/merge${embeddedNodePackagingReportVariantTaskSuffix}NativeLibs/out/lib")
@@ -2890,7 +2886,7 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
     runtimeBackend: String,
     scriptExecutionEnabled: Boolean,
 ): EmbeddedNodePackagedOutputVerification {
-    val currentBuildRuntimeConfigReady = runtimeBackend == "embedded" && scriptExecutionEnabled
+    val currentBuildRuntimeConfigReady = runtimeBackend in setOf("embedded", "pluginOptional") && scriptExecutionEnabled
     val packagedApk = embeddedNodePackagingResolveFile(rootDir, packagedApkProperty)
     val packagedApkExists = packagedApk?.isFile == true
     val releaseFlavor = releaseFlavorPolicy.flavor
@@ -2960,7 +2956,7 @@ private fun embeddedNodePackagingVerifyPackagedApkOutput(
         nativeEntriesByLib.getValue("libnode.so").isNotEmpty() ||
                 nativeEntriesByLib.getValue("libautojs6-node.so").isNotEmpty()
     val releaseFlavorNativePolicyReady = when (releaseFlavor) {
-        "rhinoOnly" -> !nodeRuntimeNativeEntriesPresent && !x86NodeRuntimePresent
+        "nodePlugin", "rhinoOnly" -> !nodeRuntimeNativeEntriesPresent && !x86NodeRuntimePresent
         else -> nativeLibsReady && !x86NodeRuntimePresent
     }
     val manifestServiceReady = manifestInfo.declaresEmbeddedScriptService &&
@@ -3468,18 +3464,12 @@ val embeddedNodePackagedApkOutputVerify = tasks.register("embeddedNodePackagedAp
             }
         }
         val releaseFlavorPolicy = embeddedNodePackagingReleaseFlavorPolicy(
-            rawFlavor = providers.gradleProperty(embeddedNodePackagingReleaseFlavorProperty)
-                .orElse(embeddedNodePackagingDefaultReleaseFlavor)
-                .get(),
+            rawFlavor = embeddedNodePackagingRuntimeConfig("nodeJsReleaseFlavor"),
             rawReleaseAbis = providers.gradleProperty(embeddedNodePackagingReleaseAbisProperty).orNull,
             explicitExpectedAbis = embeddedNodePackagingCsvList(expectedAbiProperty),
         )
 
-        val runtimeBackend = providers.gradleProperty("autojs.nodejs.backend")
-            .orElse("embedded")
-            .get()
-            .trim()
-            .lowercase()
+        val runtimeBackend = embeddedNodePackagingRuntimeConfig<String>("effectiveNodeJsRuntimeBackend")
         val scriptExecutionEnabled = providers.gradleProperty("autojs.nodejs.embedded.script.enabled")
             .orElse("true")
             .get()
@@ -3528,18 +3518,12 @@ val embeddedNodePackagedDiagnosticReport = tasks.register("embeddedNodePackagedD
             }
         }
         val releaseFlavorPolicy = embeddedNodePackagingReleaseFlavorPolicy(
-            rawFlavor = providers.gradleProperty(embeddedNodePackagingReleaseFlavorProperty)
-                .orElse(embeddedNodePackagingDefaultReleaseFlavor)
-                .get(),
+            rawFlavor = embeddedNodePackagingRuntimeConfig("nodeJsReleaseFlavor"),
             rawReleaseAbis = providers.gradleProperty(embeddedNodePackagingReleaseAbisProperty).orNull,
             explicitExpectedAbis = embeddedNodePackagingCsvList(expectedAbiProperty),
         )
 
-        val runtimeBackend = providers.gradleProperty("autojs.nodejs.backend")
-            .orElse("embedded")
-            .get()
-            .trim()
-            .lowercase()
+        val runtimeBackend = embeddedNodePackagingRuntimeConfig<String>("effectiveNodeJsRuntimeBackend")
         val scriptExecutionEnabled = providers.gradleProperty("autojs.nodejs.embedded.script.enabled")
             .orElse("true")
             .get()
@@ -3599,11 +3583,7 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
         val successApk = hostDir.resolve("PackagedNodeSmoke_v1.0.0.apk")
         val diagnosticsApk = hostDir.resolve("PackagedNodeDiagnosticsSmoke_v1.0.0.apk")
 
-        val runtimeBackend = providers.gradleProperty("autojs.nodejs.backend")
-            .orElse("embedded")
-            .get()
-            .trim()
-            .lowercase()
+        val runtimeBackend = embeddedNodePackagingRuntimeConfig<String>("effectiveNodeJsRuntimeBackend")
         val scriptExecutionEnabled = providers.gradleProperty("autojs.nodejs.embedded.script.enabled")
             .orElse("true")
             .get()
@@ -3612,9 +3592,7 @@ val embeddedNodePackagedSmokeHostVerify = tasks.register(embeddedNodePackagedSmo
             .orElse("arm64-v8a")
             .get()
         val releaseFlavorPolicy = embeddedNodePackagingReleaseFlavorPolicy(
-            rawFlavor = providers.gradleProperty(embeddedNodePackagingReleaseFlavorProperty)
-                .orElse(embeddedNodePackagingDefaultReleaseFlavor)
-                .get(),
+            rawFlavor = embeddedNodePackagingRuntimeConfig("nodeJsReleaseFlavor"),
             rawReleaseAbis = providers.gradleProperty(embeddedNodePackagingReleaseAbisProperty).orNull,
             explicitExpectedAbis = embeddedNodePackagingCsvList(expectedAbiProperty),
         )
@@ -3757,9 +3735,7 @@ val verifyRhinoOnlyBuild = tasks.register("verifyRhinoOnlyBuild") {
     description = "Verifies the rhinoOnly rollback flavor does not package Embedded Node native libraries."
 
     val configuredReleaseFlavor = embeddedNodePackagingReleaseFlavorPolicy(
-        rawFlavor = providers.gradleProperty(embeddedNodePackagingReleaseFlavorProperty)
-            .orElse(embeddedNodePackagingDefaultReleaseFlavor)
-            .get(),
+        rawFlavor = embeddedNodePackagingRuntimeConfig("nodeJsReleaseFlavor"),
         rawReleaseAbis = providers.gradleProperty(embeddedNodePackagingReleaseAbisProperty).orNull,
     ).flavor
     val reportFile = layout.buildDirectory
@@ -4198,6 +4174,19 @@ val verifyNodeNightlyGate = tasks.register("verifyNodeNightlyGate") {
 val verifyNodePackagedEsmGate = tasks.register("verifyNodePackagedEsmGate") {
     group = "verification"
     description = "Runs the focused Node Profile v1.1 packaged ESM/dynamic import APK gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeR5RuntimePluginGate = tasks.register("verifyNodeR5RuntimePluginGate") {
+    group = "verification"
+    description = "Runs the focused Node.js runtime plugin R5 gate on a connected Sony/full device profile."
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
     if (deviceProfile in setOf("sony", "full")) {

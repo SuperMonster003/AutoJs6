@@ -342,12 +342,10 @@ val embeddedNodeDoctorReport = tasks.register("embeddedNodeDoctorReport") {
         val nativeHashEntries = nodeDoctorNativeHashEntries(nativeSymbolsText)
         val nativeDependencyHashLines = nodeDoctorHashLines(nativeDepsText)
         val packagedSummary = nodeDoctorPackageSummary(packagedText, packagedDiagnosticFile)
-        val backend = providers.gradleProperty("autojs.nodejs.backend").orElse(runtime.nodeDoctorString("defaultBackend").ifBlank { "embedded" }).get()
-            .trim()
-            .lowercase()
-        val releaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor")
-            .orElse(packagedProfile.nodeDoctorString("releaseFlavor").ifBlank { "nodeFull" })
-            .get()
+        val backend = project.extensions.extraProperties
+            .get("nodeJsRuntimeConfig.effectiveNodeJsRuntimeBackend") as String
+        val releaseFlavor = project.extensions.extraProperties
+            .get("nodeJsRuntimeConfig.nodeJsReleaseFlavor") as String
         val now = ZonedDateTime.now().toString()
 
         val report = linkedMapOf<String, Any?>(

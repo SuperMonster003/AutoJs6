@@ -2865,6 +2865,15 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     )
                 }
                 val first = runScriptAttempt(context, stableRequest, launchSurface)
+                if (isClientExecutionCancelled(executionId)) {
+                    return clientExecutionCancelledResult(
+                        stableRequest,
+                        startedAt,
+                        executionId,
+                        "after_backend_result",
+                        backendDispatched = true,
+                    )
+                }
                 if (!shouldRetryLegacyRetirement(first)) {
                     return first
                 }
@@ -2899,6 +2908,15 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     "Embedded Node legacy-retirement first attempt finished.",
                 )
                 val retried = runScriptAttempt(context, retryRequest, launchSurface)
+                if (isClientExecutionCancelled(executionId)) {
+                    return clientExecutionCancelledResult(
+                        retryRequest,
+                        startedAt,
+                        executionId,
+                        "after_legacy_retirement_retry",
+                        backendDispatched = true,
+                    )
+                }
                 retried.copy(
                     nativeValues = linkedMapOf<String, String>().apply {
                         putAll(retried.nativeValues)
@@ -3032,7 +3050,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 runCatching { releaseCallback.invoke(null, sessionReason) }
                 true
             } else if (lease != null) {
-                NodeEmbeddedProcessSessionManager.unregisterExecution(lease, executionId)
+                // release(healthy=false) must still see the execution registration so
+                // its quarantine work can invoke the process-death completion callback.
                 NodeEmbeddedProcessSessionManager.release(
                     context = context.applicationContext,
                     lease = lease,
@@ -3127,6 +3146,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             startedAt: Long,
             executionId: String,
             stage: String,
+            backendDispatched: Boolean = false,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
             return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
                 succeeded = false,
@@ -3135,7 +3155,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 stdout = "",
                 stderr = "",
                 errorName = "EmbeddedNodeExecutionCancelledError",
-                errorMessage = "Embedded Node.js execution was cancelled before starting.",
+                errorMessage = if (backendDispatched) {
+                    "Embedded Node.js execution was cancelled while running."
+                } else {
+                    "Embedded Node.js execution was cancelled before starting."
+                },
                 errorStack = null,
                 errorCode = NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED,
                 elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L),
@@ -3147,7 +3171,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     "embedded_script.client.cancelled" to "true",
                     "embedded_script.client.cancellation_stage" to stage,
                     "embedded_script.execution_id" to executionId,
-                    "embedded_script.native_execution_entered" to "false",
+                    "embedded_script.native_execution_entered" to backendDispatched.toString(),
                 ),
                 workingDirectory = request.workingDirectory,
             )

@@ -460,6 +460,9 @@ val nodeJsDeveloperExperienceGateInstrumentationClasses = listOf(
 val nodeJsRealNpmGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
 )
+val nodeJsR5RuntimePluginGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeRuntimePluginR5InstrumentationTest",
+)
 val nodeJsPluginUiGateInstrumentationClasses = (
         listOf(
             "org.autojs.autojs.engine.NodePluginSystemInstrumentationTest",
@@ -644,6 +647,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodeTypeScriptGate" to nodeJsTypeScriptGateInstrumentationClasses,
     "verifyNodeDeveloperExperienceGate" to nodeJsDeveloperExperienceGateInstrumentationClasses,
     "verifyNodeRealNpmGate" to nodeJsRealNpmGateInstrumentationClasses,
+    "verifyNodeR5RuntimePluginGate" to nodeJsR5RuntimePluginGateInstrumentationClasses,
     "verifyNodePhase8SecurityStressGate" to nodeJsPhase8SecurityStressGateInstrumentationClasses,
     "verifyNodePhase8Gate" to nodeJsPhase8GateInstrumentationClasses,
     "verifyNodeWasmWasiGate" to nodeJsPhase9WasmWasiGateInstrumentationClasses,

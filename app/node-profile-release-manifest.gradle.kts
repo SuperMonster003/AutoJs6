@@ -69,8 +69,11 @@ private fun nodeProfileReleaseManifestNormalizeFlavor(value: String): String =
     when (value.trim().lowercase()) {
         "nodefull", "node-full", "full" -> "nodeFull"
         "nodemini", "node-mini", "mini" -> "nodeMini"
+        "nodeplugin", "node-plugin", "plugin" -> "nodePlugin"
         "rhinoonly", "rhino-only", "rhino" -> "rhinoOnly"
-        else -> "nodeFull"
+        else -> throw GradleException(
+            "Unsupported Embedded Node release flavor '$value'. Use nodeFull, nodeMini, nodePlugin, or rhinoOnly."
+        )
     }
 
 private fun nodeProfileReleaseManifestNormalizeIdentity(value: String): String =
@@ -78,14 +81,6 @@ private fun nodeProfileReleaseManifestNormalizeIdentity(value: String): String =
         "production", "prod", "release" -> "production"
         "nodejstest", "nodejs-test", "nodejs_test", "test" -> "nodejsTest"
         else -> "production"
-    }
-
-private fun nodeProfileReleaseManifestExpectedAbis(releaseFlavor: String, requestedAbis: List<String>): List<String> =
-    when (releaseFlavor) {
-        "nodeFull" -> listOf("arm64-v8a", "armeabi-v7a", "x86_64")
-        "nodeMini" -> requestedAbis.ifEmpty { listOf("arm64-v8a") }
-        "rhinoOnly" -> emptyList()
-        else -> emptyList()
     }
 
 private fun nodeProfileReleaseManifestNativeLibHashes(
@@ -167,19 +162,13 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
             .trim()
             .ifBlank { defaultIdentityStatus }
         val releaseFlavor = nodeProfileReleaseManifestNormalizeFlavor(
-            providers.gradleProperty("autojs.nodejs.releaseFlavor").orElse("nodeFull").get()
+            project.extensions.extraProperties.get("nodeJsRuntimeConfig.nodeJsReleaseFlavor") as String
         )
-        val requestedAbis = providers.gradleProperty("autojs.nodejs.releaseAbis").orNull
-            ?.split(',')
-            ?.map(String::trim)
-            ?.filter(String::isNotEmpty)
-            .orEmpty()
-        val expectedAbis = nodeProfileReleaseManifestExpectedAbis(releaseFlavor, requestedAbis)
-        val effectiveBackend = if (releaseFlavor == "rhinoOnly") {
-            "rhino"
-        } else {
-            providers.gradleProperty("autojs.nodejs.backend").orElse("embedded").get().trim().lowercase()
-        }
+        val expectedAbis = (project.extensions.extraProperties
+            .get("nodeJsRuntimeConfig.nodeJsReleaseExpectedAbis") as List<*>)
+            .map(Any?::toString)
+        val effectiveBackend = project.extensions.extraProperties
+            .get("nodeJsRuntimeConfig.effectiveNodeJsRuntimeBackend") as String
         val mergedLibRoot = layout.buildDirectory
             .dir("intermediates/merged_native_libs/appDebug/mergeAppDebugNativeLibs/out/lib")
             .get()

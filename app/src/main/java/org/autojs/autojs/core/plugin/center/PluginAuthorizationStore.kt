@@ -16,13 +16,17 @@ object PluginAuthorizationStore {
     fun grant(context: Context, packageName: String, fingerprint: String?) {
         fingerprint ?: return
         val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+        if (sp.getBoolean(key(packageName, fingerprint), false)) return
         sp.edit { putBoolean(key(packageName, fingerprint), true) }
+        PluginStateChangeRegistry.notifyChanged(packageName)
     }
 
     fun revoke(context: Context, packageName: String, fingerprint: String?) {
         fingerprint ?: return
         val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+        if (!sp.contains(key(packageName, fingerprint))) return
         sp.edit { remove(key(packageName, fingerprint)) }
+        PluginStateChangeRegistry.notifyChanged(packageName)
     }
 
     private fun key(packageName: String, fingerprint: String) = "key_\$_plugin_auth_\$_$packageName\$_$fingerprint"
