@@ -36,8 +36,10 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
+import java.util.concurrent.FutureTask
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
@@ -777,10 +779,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 nativePhaseMs = NodeEmbeddedProcessSessionManager.elapsedPhaseMs(nativeStartedAtNanos)
             }
             timeline?.recordNativeResult(nativeResult)
-            val resultWithModuleProvider = moduleSourceSession?.let { session ->
-                nativeResult.copy(nativeValues = nativeResult.nativeValues + session.nativeValues())
-            } ?: nativeResult
-            val result = dispatchQueuedBridgeRequests(bridgeSession.appendNativeValues(resultWithModuleProvider))
+            // Provider diagnostics are collected once by the host after result delivery. The
+            // service adds only its final transport counters during cleanup, avoiding a reverse
+            // Binder round trip on the execution hot path.
+            val result = dispatchQueuedBridgeRequests(bridgeSession.appendNativeValues(nativeResult))
                 .withExecutionMode(executionMode, launchSurface)
                 .withRuntimeBudget(runtimeBudget)
                 .withProcessPoolPlan(processPoolPlan)
@@ -2448,6 +2450,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val BRIDGE_LIVE_STOP_JOIN_MS = 1000L
         private const val BRIDGE_LIVE_DRAIN_ITERATIONS = 25
         private const val HEARTBEAT_STOP_JOIN_MS = 250L
+        private const val MODULE_SOURCE_PROVIDER_DIAGNOSTICS_TIMEOUT_MS = 250L
+        private const val MODULE_SOURCE_PROVIDER_DESCRIPTOR =
+            "org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider"
+        private const val MODULE_SOURCE_PROVIDER_DIAGNOSTIC_PREFIX =
+            "embedded_script.module_provider."
         private const val RESULT_TRANSPORT_STRING_MAX_CHARS = 32_768
         private const val RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS = 65_536
         private const val RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES = 512
@@ -2481,6 +2488,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
             "embedded_script.phase_timing.count",
             "embedded_script.phase_timing.source",
             "embedded_script.phase_timing.adapter_transferred_count",
+            "embedded_script.native_payload_compaction.applied",
+            "embedded_script.native_payload_compaction.policy",
+            "embedded_script.native_payload_compaction.original_entry_count",
+            "embedded_script.native_payload_compaction.omitted_entry_count",
+            "embedded_script.native_payload_compaction.sent_entry_count",
+            "embedded_script.probe_payload_generation.mode",
+            "embedded_script.probe_payload_generation.omitted_optional_placeholders",
             "embedded_script.execution_source.bytes",
             "embedded_script.dynamic_require_fallback_loaded_count",
             "embedded_script.dynamic_require_fallback_source_bytes",
@@ -3049,6 +3063,65 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 .onFailure { error -> Log.w(TAG, "module_source_provider.cancel.failed", error) }
         }
 
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult
+                .withHostModuleSourceProviderDiagnostics(
+                    provider: INodeJsModuleSourceProvider?,
+                ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            provider ?: return this
+            return copy(
+                nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(nativeValues)
+                    putAll(hostModuleSourceProviderDiagnostics(provider))
+                },
+            )
+        }
+
+        private fun hostModuleSourceProviderDiagnostics(
+            provider: INodeJsModuleSourceProvider,
+        ): Map<String, String> {
+            val diagnostics = runCatching {
+                val localProvider = provider.asBinder()
+                    .queryLocalInterface(MODULE_SOURCE_PROVIDER_DESCRIPTOR) != null
+                if (localProvider) {
+                    provider.nativeDiagnostics
+                } else {
+                    val task = FutureTask { provider.nativeDiagnostics }
+                    Thread(task, "AutoJs6NodeModuleHostDiagnostics").apply {
+                        isDaemon = true
+                        start()
+                    }
+                    try {
+                        task.get(MODULE_SOURCE_PROVIDER_DIAGNOSTICS_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+                    } catch (error: TimeoutException) {
+                        task.cancel(true)
+                        throw error
+                    }
+                }
+            }
+            return diagnostics.fold(
+                onSuccess = { bundle ->
+                    bundle?.keySet()?.mapNotNull { key ->
+                        if (!key.startsWith(MODULE_SOURCE_PROVIDER_DIAGNOSTIC_PREFIX)) {
+                            return@mapNotNull null
+                        }
+                        (bundle.get(key) as? String)?.let { value -> key to value }
+                    }?.toMap().orEmpty()
+                },
+                onFailure = { error ->
+                    if (error is InterruptedException) {
+                        Thread.currentThread().interrupt()
+                    }
+                    mapOf(
+                        "embedded_script.module_provider.diagnostics_failure" to when (error) {
+                            is TimeoutException -> "timed_out"
+                            is InterruptedException -> "interrupted"
+                            else -> "failed"
+                        },
+                    )
+                },
+            )
+        }
+
         private fun clientExecutionCancelledResult(
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
             startedAt: Long,
@@ -3489,6 +3562,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 .withProcessSessionLease(processSessionLease)
                 .withClientResultReturnTiming(resultReceivedAtElapsedMs.get())
                 .withDeferredProcessSettle(processSettleDeferred)
+                .withHostModuleSourceProviderDiagnostics(scheduledRequestForService.moduleSourceProvider)
                 .withClientPhaseTimings(
                     mapOf(
                         NodeEmbeddedProcessSessionManager.PhaseTiming.CLIENT_ATTEMPT_TOTAL to

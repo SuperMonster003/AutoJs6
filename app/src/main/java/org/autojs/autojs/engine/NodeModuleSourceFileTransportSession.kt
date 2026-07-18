@@ -116,7 +116,6 @@ internal class NodeModuleSourceFileTransportSession(
         put("embedded_script.module_provider.transport_source_bytes", sourceBytes.get().toString())
         put("embedded_script.module_provider.transport_elapsed_ms", elapsedMs.get().toString())
         put("embedded_script.module_provider.transport_last_failure", lastFailure.get())
-        putAll(providerDiagnostics())
     }
 
     private fun loop() {
@@ -475,20 +474,6 @@ internal class NodeModuleSourceFileTransportSession(
         }
     }
 
-    private fun providerDiagnostics(): Map<String, String> = runCatching {
-        val task = FutureTask { provider.nativeDiagnostics }
-        Thread(task, "AutoJs6NodeModuleDiagnostics-${safeName(executionId)}").apply {
-            isDaemon = true
-            start()
-        }
-        task.get(DIAGNOSTICS_TIMEOUT_MS, TimeUnit.MILLISECONDS)?.toStringMap().orEmpty()
-    }.getOrElse { error ->
-        mapOf(
-            "embedded_script.module_provider.diagnostics_failure" to
-                    failureCategory(error),
-        )
-    }
-
     private fun failureCategory(error: Throwable): String = when (error) {
         is ProviderCallTimeoutException -> "timed_out"
         is DeniedTransportRequestException -> "denied"
@@ -515,16 +500,6 @@ internal class NodeModuleSourceFileTransportSession(
     private fun Bundle.sourceDescriptor(): ParcelFileDescriptor? =
         getParcelable(KEY_SOURCE_FD) as? ParcelFileDescriptor
 
-    private fun Bundle.toStringMap(): Map<String, String> = keySet().mapNotNull { key ->
-        if (!key.startsWith(MODULE_PROVIDER_DIAGNOSTIC_PREFIX)) {
-            return@mapNotNull null
-        }
-        when (val value = get(key)) {
-            is String -> key to value
-            else -> null
-        }
-    }.toMap()
-
     private companion object {
         const val CONTRACT_VERSION = 1
         const val TRANSPORT_ROOT = "embedded-node-module-source"
@@ -532,15 +507,12 @@ internal class NodeModuleSourceFileTransportSession(
         const val STOP_JOIN_MS = 1_000L
         const val MIN_TIMEOUT_MS = 1L
         const val MAX_TIMEOUT_MS = 30_000L
-        const val DIAGNOSTICS_TIMEOUT_MS = 250L
         const val MAX_REQUEST_JSON_BYTES = 64 * 1024
         const val REQUEST_COUNT_LIMIT = 1_024
         const val COPY_BUFFER_BYTES = 32 * 1024
         const val MAX_SOURCE_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
         const val MAX_TOTAL_SOURCE_BYTES =
             NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES.toLong()
-        const val MODULE_PROVIDER_DIAGNOSTIC_PREFIX = "embedded_script.module_provider."
-
         const val KEY_VERSION = "moduleSourceProviderVersion"
         const val KEY_REQUEST_ID = "moduleSourceProviderRequestId"
         const val KEY_EXECUTION_ID = "executionId"

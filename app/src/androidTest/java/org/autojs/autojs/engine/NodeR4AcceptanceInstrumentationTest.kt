@@ -103,10 +103,13 @@ class NodeR4AcceptanceInstrumentationTest {
     ): RawSample {
         val entry = File(root.directory, case.entryRelativePath)
         val startedAt = SystemClock.elapsedRealtimeNanos()
-        val engine = NativeNodeEmbeddedJavaScriptEngine(context).apply {
-            setTag(ScriptEngine.TAG_WORKING_DIRECTORY, root.directory.canonicalPath)
+        val engine = NativeNodeEmbeddedJavaScriptEngine(context)
+        val execution = try {
+            engine.setTag(ScriptEngine.TAG_WORKING_DIRECTORY, root.directory.canonicalPath)
+            runCatching { engine.doExecution(JavaScriptFileSource(entry)) }
+        } finally {
+            RhinoContext.exit()
         }
-        val execution = runCatching { engine.doExecution(JavaScriptFileSource(entry)) }
         val wallMs = TimeUnit.NANOSECONDS
             .toMillis(SystemClock.elapsedRealtimeNanos() - startedAt)
             .coerceAtLeast(0L)
@@ -128,6 +131,7 @@ class NodeR4AcceptanceInstrumentationTest {
                 ?: nativeValues[PROCESS_RUNTIME_PID_KEY]?.toIntOrNull()?.takeIf { it > 0 },
             diagnostics = diagnostics,
             nativeValues = nativeValues,
+            clientPhaseTimings = NodeEmbeddedProcessSessionManager.clientPhaseTimings(nativeValues),
         )
     }
 
@@ -507,6 +511,7 @@ class NodeR4AcceptanceInstrumentationTest {
         val pid: Int?,
         val diagnostics: NativeNodeEmbeddedJavaScriptEngine.RequestPreparationDiagnostics,
         val nativeValues: Map<String, String>,
+        val clientPhaseTimings: Map<String, Long>,
     ) {
         val hasOnDemandProviderDecision: Boolean
             get() = diagnostics.prepared &&
@@ -570,6 +575,13 @@ class NodeR4AcceptanceInstrumentationTest {
                 .put("executionExceptionClass", executionExceptionClass ?: JSONObject.NULL)
                 .put("onDemandProviderDecision", hasOnDemandProviderDecision)
                 .put("zeroLegacyDirectoryScan", hasZeroLegacyDirectoryScan)
+                .put("clientPhaseTimings", JSONObject(clientPhaseTimings))
+                .put(
+                    "wallMinusClientAttemptTotalMs",
+                    clientPhaseTimings[NodeEmbeddedProcessSessionManager.PhaseTiming.CLIENT_ATTEMPT_TOTAL]
+                        ?.let { (wallMs - it).coerceAtLeast(0L) }
+                        ?: JSONObject.NULL,
+                )
                 .put(
                     "requestPreparation",
                     JSONObject()
