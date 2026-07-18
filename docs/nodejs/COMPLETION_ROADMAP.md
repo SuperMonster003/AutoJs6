@@ -42,6 +42,8 @@ production Inspector are intentional boundaries rather than unfinished work.
   runtime-module scan for the strictly proven trivial module-free path, and added
   non-additive phase distributions for the client, service, native runtime,
   engine request preparation, and host preparation boundaries.
+- [ ] R4 must remove project-wide encrypted-module scanning from the normal
+  execution path for arbitrary Node.js source before Core completion.
 - [ ] Re-run the final aggregate gates before declaring Core completion. The
   blocker registry is closed, but some narrative status documents still
   describe older blocked states.
@@ -129,7 +131,7 @@ per-script V8 runtime. Before R2, AutoJs6 exited its one-shot service process
 and tore down the process-global Node platform after every script.
 
 R2 focused implementation and acceptance are complete. Packaged APK, multi-
-device, and long-soak evidence remain release gates in R5 rather than blockers
+device, and long-soak evidence remain release gates in R6 rather than blockers
 for the R2 architecture.
 
 - [x] Add a persistent service/session manager with explicit idle TTL,
@@ -186,8 +188,8 @@ commands and report schema are documented in `R2_ACCEPTANCE_SAMPLING.md`.
 
 Release follow-ups that do not reopen R2:
 
-- [ ] Re-run packaged APK and multi-device gates under R5.
-- [ ] Re-run the 8-hour and 24-hour leak/soak gates under R5.
+- [ ] Re-run packaged APK and multi-device gates under R6.
+- [ ] Re-run the 8-hour and 24-hour leak/soak gates under R6.
 
 ## R3 - Measure And Optimize The Remaining Startup Chain
 
@@ -240,7 +242,63 @@ p50 316 ms / p95 347 ms, with request preparation p50 5 ms / p95 6 ms.
 The directive-only editor placeholder follow-up recorded warm p50 302 ms / p95
 322 ms and request-preparation p50 5 ms / p95 7 ms over 30 runs.
 
-## R4 - Align The External Runtime Plugin Backend
+## R4 - Remove Project-Wide Module Scans From Normal Execution
+
+R3 added a fail-closed fast path for a deliberately small module-free grammar.
+Any other executable token still selects the `conservative_source` fallback,
+even when the script cannot load another module. On the XQ-AT72 acceptance
+directory, that fallback examined 2562 candidates and added about 2.2 seconds
+to every warm request. The scan preserves compatibility with encrypted modules
+whose paths may be computed at runtime, but a source-shape whitelist and a
+project-wide walk cannot remain the normal execution model.
+
+- [ ] Make module preparation depend on actual module resolution and encryption
+  requirements rather than whether the entry source matches a small list of
+  accepted script shapes. Ordinary business logic must never trigger a
+  project-wide walk merely because it is non-trivial.
+- [ ] For statically resolvable CommonJS and ESM graphs, resolve only the actual
+  dependency closure. Probe and decrypt only the resolved candidate files;
+  unrelated JavaScript files in the working directory must not be enumerated.
+- [ ] Add a request-scoped, on-demand encrypted module source provider. After
+  the runtime resolves a dynamic `require()` or `import()` candidate, the host
+  must canonicalize and authorize that exact path, reject escapes and symlink
+  drift, probe its encrypted header, and return either decrypted source or an
+  explicit not-encrypted/not-found result.
+- [ ] Define the provider contract so embedded and external-plugin transports
+  share the same path, size, count, cancellation, timeout, and error semantics;
+  R5 may change connection lifecycle without restoring directory scanning.
+- [ ] Keep plaintext modules on the runtime's scoped filesystem path and keep
+  static preloading only as an optional measured optimization, not a
+  correctness requirement for arbitrary scripts.
+- [ ] Remove the bounded full-directory scan from the default request critical
+  path. If a legacy encrypted-project fallback remains temporarily necessary,
+  require an explicit compatibility signal and expose its use in diagnostics;
+  never infer it merely from arbitrary executable source.
+- [ ] Preserve source-size and aggregate budgets, sandbox containment, root and
+  file identity checks, symlink-escape denial, error identity, and fresh
+  per-execution module state for both preloaded and on-demand sources.
+- [ ] Export module-provider request count, resolved/decrypted source count,
+  bytes, elapsed time, denial reason, and whether a legacy directory scan ran.
+- [ ] Add a corpus covering module-free business logic, expressions and
+  multiple statements, static CommonJS, ESM, dynamic `require()`/`import()`,
+  computed loaders, plain modules, encrypted modules, missing modules, package
+  resolution, cancellation, and provider failure.
+
+R4 acceptance criteria on the primary Sony device:
+
+- Thirty runtime-warm executions of representative module-free, static
+  CommonJS, and ESM entries in a directory with at least 4000 unrelated files
+  complete with zero project-wide scan candidates.
+- Module-free and single-module request-preparation p95 is `<= 50 ms`; adding
+  the unrelated-file corpus changes request-preparation p95 by no more than
+  20 ms, and runtime-warm end-to-end p95 remains `<= 400 ms`.
+- Static and dynamic encrypted-module cases touch only actually resolved
+  candidates and retain the existing compatibility and security corpus.
+- No source-pattern allowlist is required for acceptable performance: at
+  minimum `const`/`let`, expressions, functions, timers, multiple console
+  calls, and non-loading async scripts pass the same zero-scan gate.
+
+## R5 - Align The External Runtime Plugin Backend
 
 - [ ] Decide and document whether `plugin` is an optional backend, the default
   distribution backend, or both through separate release flavors.
@@ -258,7 +316,7 @@ The directive-only editor placeholder follow-up recorded warm p50 302 ms / p95
 - [ ] Meet the R2 runtime-warm p50/p95 target and report discovery/bind overhead
   separately.
 
-## R5 - Reopen And Close Production Evidence For The New Lifecycle
+## R6 - Reopen And Close Production Evidence For The New Lifecycle
 
 - [ ] Re-run all Phase 11 final reports from current sources.
 - [ ] Resolve status drift among `FINAL_BLOCKER_REGISTRY`, `final/README.md`,
@@ -292,7 +350,7 @@ Core completion is achieved only when the generated final decision is
 remain tested, and the published documentation matches the generated gate
 state.
 
-## R6 - Auto.js Pro Compatibility Providers
+## R7 - Auto.js Pro Compatibility Providers
 
 This phase does not block Core / Safe Node completion.
 
@@ -307,7 +365,7 @@ This phase does not block Core / Safe Node completion.
   downgrade behavior for every Pro-profile capability.
 - [ ] Complete the Phase 16 summary/handoff with zero v1.4 release blockers.
 
-## R7 - Release And Maintenance Handoff
+## R8 - Release And Maintenance Handoff
 
 - [ ] Verify native load, adapter exports, and packaged static policy for
   `arm64-v8a`, `armeabi-v7a`, and `x86_64`.
@@ -320,6 +378,6 @@ This phase does not block Core / Safe Node completion.
 - [ ] Update version metadata, changelog, release notes, capability matrices,
   known issues, and migration guidance from the same verified gate state.
 
-After R5, Core work moves to maintenance. R6 can continue as an independent
+After R6, Core work moves to maintenance. R7 can continue as an independent
 compatibility track without reopening Core completion unless it changes a
 stable Core contract or lifecycle invariant.

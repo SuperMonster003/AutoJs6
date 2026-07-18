@@ -9,7 +9,7 @@ The native bridge defaults to one-shot mode. The AutoJs6 embedded service must
 explicitly opt in through the `autojs.nodejs.embedded.persistentRuntime` build
 property; setting it to `false` retains process-only prewarm, one-shot process
 exit, and the asynchronous 650 ms slot-settle safety window. This avoids
-silently changing the external runtime plugin lifecycle before R4.
+silently changing the external runtime plugin lifecycle before R5.
 
 Idle TTL, main-process memory trim, and explicit app exit use the session
 manager's drain, native terminal-shutdown, unbind, and process-exit handshake.

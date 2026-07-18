@@ -78,7 +78,7 @@ Android 8.0 and newer use `DirectoryStream`, so directory enumeration itself
 is streamed under the path and candidate limits. Android 7.0/7.1 applies the
 same logical limits through the legacy file walker, whose per-directory
 `listFiles()` allocation is a known residual memory boundary. Keep API 24/25
-large-directory stress in the R5 multi-device gate; it does not affect the
+large-directory stress in the R6 multi-device gate; it does not affect the
 Android 12 acceptance device used here.
 
 The focused engine suite covers zero-scan empty/trivia-only, editor-placeholder
@@ -95,7 +95,7 @@ R3 caches only packaged host native-library resolution for embedded
 version, APK and native-library paths, release flavor, runtime backend, runtime
 slot and target, supported ABIs, and library name. This avoids repeated plugin
 candidate discovery without caching mutable project state. External plugin
-candidate/session caching remains R4 work.
+candidate/session caching remains R5 work.
 
 Compile-cache preparation and pruning are timed on every applicable request.
 A process-local time throttle was evaluated and rejected: primary and overflow
