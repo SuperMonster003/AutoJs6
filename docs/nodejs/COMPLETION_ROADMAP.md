@@ -219,10 +219,11 @@ actual memory pressure.
   keys. Mutable project descriptors and source graphs remain request-scoped.
 - [x] Eliminate repeated package-manager plugin discovery for packaged
   `nodeFull`/`nodeMini` host libraries. The minimal module-free script grammar
-  now proves that no encrypted fallback scan is needed. Every other source,
-  including static CommonJS graphs, ESM, dynamic or unclassified loaders, and
-  unresolved dependencies, retains the conservative, bounded encrypted-header
-  scan.
+  now proves that empty/trivia-only source, the editor's directive-only
+  placeholder, and the primitive-console probe need no encrypted fallback
+  scan. Every source containing another executable token, including static
+  CommonJS graphs, ESM, dynamic or unclassified loaders, and unresolved
+  dependencies, retains the conservative, bounded encrypted-header scan.
 - [x] Preserve the persistent process when the short-lived file launcher UI
   becomes hidden, while retaining idle-TTL and actual memory-pressure
   retirement. Verify the next run keeps the PID and session generation.
@@ -236,6 +237,8 @@ The root-cause record, acceptance commands, timing interpretation, and final
 Sony result table are maintained in `R3_ACCEPTANCE_SAMPLING.md`. On the final
 real-file gate, cold execution took 1577 ms and 30 runtime-warm executions had
 p50 316 ms / p95 347 ms, with request preparation p50 5 ms / p95 6 ms.
+The directive-only editor placeholder follow-up recorded warm p50 302 ms / p95
+322 ms and request-preparation p50 5 ms / p95 7 ms over 30 runs.
 
 ## R4 - Align The External Runtime Plugin Backend
 

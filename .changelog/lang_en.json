@@ -35,7 +35,7 @@
         "Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes"
       ],
       "fix": [
-        "Node.js simple scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full",
+        "Empty and simple Node.js scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full",
         "Persistent Node.js process was incorrectly retired when a short-lived script launcher UI became hidden",
         "Node.js script results were returned late because runtime process-settle waiting blocked result delivery",
         "runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly",

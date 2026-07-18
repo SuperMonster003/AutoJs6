@@ -198,7 +198,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Packaged app configuration supports showing or hiding the "Log" and "Settings" launcher shortcuts _[`issue #550`](http://issues.autojs6.com/550)_
 * `Feature` App packaging supports remote builds using APK Builder Template plugins
 * `Feature` Developer options support a GitHub access token setting to increase request limits for update checks and plugin indexes
-* `Fix` Node.js simple scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full
+* `Fix` Empty and simple Node.js scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full
 * `Fix` Persistent Node.js process was incorrectly retired when a short-lived script launcher UI became hidden
 * `Fix` Node.js script results were returned late because runtime process-settle waiting blocked result delivery
 * `Fix` runtime.loadJar could not dynamically load Java class files compiled for newer Java versions correctly

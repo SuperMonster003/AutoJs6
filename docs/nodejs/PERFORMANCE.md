@@ -44,6 +44,12 @@ $gradleArgs[1] = '-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.
 exit $LASTEXITCODE
 ```
 
+The engine may skip the encrypted fallback scan only for its strict
+module-free proof: empty/trivia-only source, the editor's directive-only
+`"nodejs";` placeholder, or the primitive `console` probe. Comment text is
+parsed as trivia, but any executable token after the directive retains the
+conservative bounded scan.
+
 The benchmark writes a JSON report on the device under:
 
 ```text

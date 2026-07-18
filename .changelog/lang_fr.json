@@ -35,7 +35,7 @@
         "Les options pour développeurs permettent de configurer un jeton d'accès GitHub afin d'augmenter les limites de requêtes de vérification des mises à jour et d'index des plugins"
       ],
       "fix": [
-        "Les scripts Node.js simples démarraient lentement dans les répertoires de travail contenant de nombreux fichiers, car l'analyse inutile des modules lisait intégralement les fichiers candidats",
+        "Les scripts Node.js vides ou simples démarraient lentement dans les répertoires de travail contenant de nombreux fichiers, car l'analyse inutile des modules lisait intégralement les fichiers candidats",
         "Le processus Node.js persistant était arrêté à tort lorsque l'interface éphémère de lancement de script devenait masquée",
         "Le retour des résultats des scripts Node.js était retardé par l'attente de stabilisation du processus d'exécution",
         "runtime.loadJar ne pouvait pas charger dynamiquement des fichiers de classe Java compilés pour une version plus récente",

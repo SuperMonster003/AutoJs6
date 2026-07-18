@@ -2090,9 +2090,6 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         )
 
         private fun analyzeCommonJsSourceLoaders(source: String): CommonJsSourceLoaderAnalysis {
-            if (source.isEmpty()) {
-                return CommonJsSourceLoaderAnalysis.empty()
-            }
             val references = mutableListOf<CommonJsRequireReference>()
             var sourceLevelEsmSyntaxCount = 0
             var dynamicImportCount = 0
@@ -2217,9 +2214,65 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                 createRequireReferenceCount = createRequireReferenceCount,
                 unclassifiedLoaderReferenceCount = unclassifiedLoaderReferenceCount,
                 dynamicCodeReferenceCount = dynamicCodeReferenceCount,
-                trivialModuleFreeEntry = source.length <= TRIVIAL_MODULE_FREE_ENTRY_MAX_CHARS &&
-                        TRIVIAL_MODULE_FREE_ENTRY_PATTERN.matches(source),
+                trivialModuleFreeEntry = isStrictTrivialModuleFreeEntry(source),
             )
+        }
+
+        /**
+         * Proves a deliberately small entry shape that cannot load another module. Besides the
+         * primitive console probe, accept a genuinely empty/trivia-only script and the editor's
+         * directive-only placeholder. Comments are consumed by a strict scanner so comment-like
+         * text inside a string or any executable token can never make the proof succeed.
+         */
+        private fun isStrictTrivialModuleFreeEntry(source: String): Boolean {
+            if (source.length > TRIVIAL_MODULE_FREE_ENTRY_MAX_CHARS) {
+                return false
+            }
+            if (TRIVIAL_MODULE_FREE_ENTRY_PATTERN.matches(source)) {
+                return true
+            }
+            var index = skipStrictJavaScriptTrivia(source, 0) ?: return false
+            if (index == source.length) {
+                return true
+            }
+            val directiveEnd = when {
+                source.startsWith("\"nodejs\"", index) -> index + "\"nodejs\"".length
+                source.startsWith("'nodejs'", index) -> index + "'nodejs'".length
+                else -> return false
+            }
+            index = skipStrictJavaScriptTrivia(source, directiveEnd) ?: return false
+            if (index >= source.length || source[index] != ';') {
+                return false
+            }
+            index = skipStrictJavaScriptTrivia(source, index + 1) ?: return false
+            return index == source.length
+        }
+
+        private fun skipStrictJavaScriptTrivia(source: String, startIndex: Int): Int? {
+            var index = startIndex
+            if (index == 0 && source.startsWith(BOM)) {
+                index += BOM.length
+            }
+            while (index < source.length) {
+                when {
+                    source[index].isWhitespace() -> index += 1
+                    source.startsWith("//", index) -> {
+                        index += 2
+                        while (index < source.length && source[index] != '\n' && source[index] != '\r') {
+                            index += 1
+                        }
+                    }
+                    source.startsWith("/*", index) -> {
+                        val closingIndex = source.indexOf("*/", startIndex = index + 2)
+                        if (closingIndex < 0) {
+                            return null
+                        }
+                        index = closingIndex + 2
+                    }
+                    else -> return index
+                }
+            }
+            return index
         }
 
         private fun hasPotentialModuleLoaderAccess(source: String, moduleIdentifierEnd: Int): Boolean {
@@ -2755,19 +2808,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         val unclassifiedLoaderReferenceCount: Int,
         val dynamicCodeReferenceCount: Int,
         val trivialModuleFreeEntry: Boolean,
-    ) {
-        companion object {
-            fun empty(): CommonJsSourceLoaderAnalysis = CommonJsSourceLoaderAnalysis(
-                requireReferences = emptyList(),
-                sourceLevelEsmSyntaxCount = 0,
-                dynamicImportCount = 0,
-                createRequireReferenceCount = 0,
-                unclassifiedLoaderReferenceCount = 0,
-                dynamicCodeReferenceCount = 0,
-                trivialModuleFreeEntry = false,
-            )
-        }
-    }
+    )
 
     private data class CommonJsRequireParseResult(
         val moduleName: String?,

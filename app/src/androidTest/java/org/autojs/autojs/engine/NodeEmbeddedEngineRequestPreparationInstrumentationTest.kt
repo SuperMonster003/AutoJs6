@@ -129,6 +129,69 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
     }
 
     @Test
+    fun realFileEngineSkipsLargeCwdForDirectiveOnlyEditorPlaceholder() {
+        val fixture = createLargeWorkingDirectory()
+        try {
+            val editorPlaceholder = File(fixture.root, "editor-placeholder.js").apply {
+                writeText(
+                    "\"nodejs\";\n/* Nothing to do in this Node.js script. */",
+                    StandardCharsets.UTF_8,
+                )
+            }
+            assertSkippedStaticScan(
+                label = "directive-only editor placeholder",
+                run = executeFile(fixture.root, editorPlaceholder, "directive-only editor placeholder"),
+                expectedStaticRequireCount = 0,
+                expectedModuleCount = 0,
+            )
+
+            val triviaOnly = File(fixture.root, "trivia-only.cjs").apply {
+                writeText(
+                    "// require('ignored-in-comment')\n/* import('also-ignored') */\n",
+                    StandardCharsets.UTF_8,
+                )
+            }
+            assertSkippedStaticScan(
+                label = "trivia-only entry",
+                run = executeFile(fixture.root, triviaOnly, "trivia-only entry"),
+                expectedStaticRequireCount = 0,
+                expectedModuleCount = 0,
+            )
+
+            File(fixture.root, "placeholder-child.js").writeText(
+                "exports.value = 'still-loaded';",
+                StandardCharsets.UTF_8,
+            )
+            val executableAfterPlaceholder = File(fixture.root, "placeholder-with-code.js").apply {
+                writeText(
+                    """
+                    "nodejs";
+                    /* Nothing to do in this Node.js script. */
+                    const child = require("./placeholder-child");
+                    if (child.value !== "still-loaded") throw new Error("placeholder child failed");
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
+            }
+            val executableRun = executeFile(
+                fixture.root,
+                executableAfterPlaceholder,
+                "executable code after placeholder",
+            )
+            assertRetainedHeaderOnlyScan(
+                label = "executable code after placeholder",
+                run = executableRun,
+                expectedDecision = "conservative_source",
+                minimumCandidateCount = fixture.fillerFileCount,
+            )
+            assertEquals(1, executableRun.diagnostics.commonJs.staticRequireCount)
+            assertFalse(executableRun.diagnostics.commonJs.trivialModuleFreeEntry)
+        } finally {
+            fixture.root.deleteRecursively()
+        }
+    }
+
+    @Test
     fun encryptedRuntimeFallbackPreservesEsmShapes() {
         assumeTrue(
             "Build with Embedded Node ESM enabled for encrypted graph regression.",
@@ -554,10 +617,12 @@ class NodeEmbeddedEngineRequestPreparationInstrumentationTest {
         }
         try {
             val emptyEntry = File(root, "empty.cjs").apply { writeBytes(ByteArray(0)) }
-            val emptyEngine = NativeNodeEmbeddedJavaScriptEngine(context).apply {
-                setTag(ScriptEngine.TAG_WORKING_DIRECTORY, root.canonicalPath)
-            }
-            assertEquals(0, emptyEngine.doExecution(JavaScriptFileSource(emptyEntry)))
+            assertSkippedStaticScan(
+                label = "empty entry",
+                run = executeFile(root, emptyEntry, "empty entry"),
+                expectedStaticRequireCount = 0,
+                expectedModuleCount = 0,
+            )
 
             val oversizedEntry = File(root, "oversized.cjs")
             RandomAccessFile(oversizedEntry, "rw").use { file ->

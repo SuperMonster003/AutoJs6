@@ -54,10 +54,13 @@ load are different.
 ## Request-Preparation Fix And Safety Boundary
 
 A script may skip the encrypted fallback scan only when its complete source
-matches the deliberately small module-free grammar used by the minimal
-`console` probe. This is a positive, fail-closed proof rather than a loader
-keyword blacklist. Every other source, including a static CommonJS graph, ESM,
-dynamic code, or an unresolved dependency, keeps the conservative scan.
+matches a deliberately small module-free grammar: empty/trivia-only source,
+an optional `"nodejs";` directive with only trailing trivia, or the minimal
+primitive `console` probe. Comments are consumed by a strict scanner; any
+executable token after the directive fails the proof. This is a positive,
+fail-closed proof rather than a loader keyword blacklist. Every other source,
+including a static CommonJS graph, ESM, dynamic code, or an unresolved
+dependency, keeps the conservative scan.
 
 When a scan is required, it remains bounded and conservative:
 
@@ -78,11 +81,12 @@ same logical limits through the legacy file walker, whose per-directory
 large-directory stress in the R5 multi-device gate; it does not affect the
 Android 12 acceptance device used here.
 
-The focused engine suite covers the zero-scan minimal path and retained
-fallback behavior for actual encrypted modules reached through computed or
-dynamic loaders. It also covers conservative handling of non-trivial static
-CommonJS, ESM, dynamic-code and ambiguous syntax, plus payload bounds,
-traversal budgets, and symlink-tree pruning.
+The focused engine suite covers zero-scan empty/trivia-only, editor-placeholder
+and primitive-console paths, while requiring executable code after a
+placeholder comment to retain the fallback scan. It also covers actual
+encrypted modules reached through computed or dynamic loaders, conservative
+handling of non-trivial static CommonJS, ESM, dynamic-code and ambiguous
+syntax, plus payload bounds, traversal budgets, and symlink-tree pruning.
 
 ## Cache And Snapshot Decisions
 
@@ -227,6 +231,34 @@ the nearest-rank method.
 | End-to-end minimal script | 4598 ms | cold 1577 ms; warm p50 316 ms / p95 347 ms |
 
 <!-- FINAL_SONY_RESULTS_END -->
+
+### Directive-Only Editor Placeholder Follow-Up
+
+The editor persists a directive-only Node script as:
+
+```javascript
+"nodejs";
+/* Nothing to do in this Node.js script. */
+```
+
+The first R3 grammar required a primitive `console` statement and therefore
+did not recognize this exact 53-byte source. On the same XQ-AT72 working
+directory, the affected build spent 2199-2257 ms preparing each warm request,
+classified the scan as `conservative_source`, examined 2562 candidates, and
+finished in 2567-2654 ms.
+
+After extending only the strict trivia/directive proof, one force-stopped cold
+run took 1623 ms with 19 ms request preparation. Thirty consecutive warm runs
+produced:
+
+| Directive-only real-file metric | Samples | Minimum | p50 | p95 | Maximum |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| End-to-end wall | 30 | 288 ms | 302 ms | 322 ms | 339 ms |
+| Engine request preparation | 30 | 3 ms | 5 ms | 7 ms | 8 ms |
+
+All 30 runs completed successfully with zero encrypted-scan candidates and
+zero persistent-session retirements. Battery remained at 100 percent and the
+temperature moved from 35.0 to 35.5 degrees Celsius.
 
 Acceptance evidence:
 

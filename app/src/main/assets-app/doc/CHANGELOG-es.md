@@ -38,7 +38,7 @@
 * `Nuevo` La configuración de aplicaciones empaquetadas permite mostrar u ocultar los accesos directos del iniciador "Registro" y "Configuración" _[`issue #550`](http://issues.autojs6.com/550)_
 * `Nuevo` El empaquetado de aplicaciones admite compilaciones remotas mediante plugins APK Builder Template
 * `Nuevo` Las opciones de desarrollador permiten configurar un token de acceso de GitHub para aumentar los límites de solicitudes de comprobación de actualizaciones e índices de plugins
-* `Corrección` Los scripts simples de Node.js se iniciaban lentamente en directorios de trabajo con muchos archivos porque el escaneo innecesario de módulos leía por completo los archivos candidatos
+* `Corrección` Los scripts vacíos y simples de Node.js se iniciaban lentamente en directorios de trabajo con muchos archivos porque el escaneo innecesario de módulos leía por completo los archivos candidatos
 * `Corrección` El proceso persistente de Node.js se retiraba incorrectamente cuando se ocultaba la interfaz temporal del iniciador de scripts
 * `Corrección` La devolución de resultados de scripts Node.js se retrasaba por la espera de estabilización del proceso de ejecución
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java
