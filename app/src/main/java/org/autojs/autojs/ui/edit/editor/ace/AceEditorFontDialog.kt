@@ -1,37 +1,58 @@
 package org.autojs.autojs.ui.edit.editor.ace
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.Rect
-import android.text.format.Formatter
-import android.view.TouchDelegate
 import android.view.LayoutInflater
+import android.view.TouchDelegate
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatRadioButton
-import androidx.core.widget.ImageViewCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.theme.ThemeColorHelper
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.edit.editor.ace.font.AceFontIds
 import org.autojs.autojs.ui.edit.editor.ace.font.FontDownloadEvent
 import org.autojs.autojs.ui.edit.editor.ace.font.FontDownloadSubscription
 import org.autojs.autojs.ui.edit.editor.ace.font.FontFileValidationException
 import org.autojs.autojs.ui.edit.editor.ace.font.FontInstallationState
 import org.autojs.autojs.ui.edit.editor.ace.font.FontInstallationStatus
+import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils
+import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import kotlin.math.roundToInt
 
 object AceEditorFontDialog {
 
     fun build(
         context: Context,
         currentFontId: String,
-        onConfirmed: (String) -> Unit,
+        onSelected: (String) -> Unit,
+    ): MaterialDialog = build(
+        context = context,
+        currentFontId = currentFontId,
+        onSelected = onSelected,
+        onPreviewRequested = null,
+    )
+
+    fun build(
+        context: Context,
+        currentFontId: String,
+        onSelected: (String) -> Unit,
+        onPreviewRequested: ((String) -> Unit)?,
     ): MaterialDialog {
         val manager = AceEditorFontManager.get(context)
         val adapter = Adapter(
@@ -39,15 +60,25 @@ object AceEditorFontDialog {
             manager = manager,
             fonts = manager.options(context),
             currentFontId = currentFontId,
-            onPersistedFontDeleted = onConfirmed,
+            onPersistedFontDeleted = onSelected,
         )
         var refreshSubscription: AceFontCatalogRefreshSubscription? = null
-        val dialog = MaterialDialog.Builder(context)
+        var swipeActionsAttached = false
+        val builder = MaterialDialog.Builder(context)
             .title(R.string.text_ace_editor_font)
             .options(
                 listOf(
+                    MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) {
+                        adapter.useDefault()
+                    },
+                    MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_sort)) {
+                        adapter.showSortDialog()
+                    },
                     MaterialDialog.OptionMenuItemSpec(context.getString(R.string.text_download_all)) {
                         adapter.confirmDownloadAll()
+                    },
+                    MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_details)) {
+                        showFontHelp(context)
                     },
                 ),
             )
@@ -56,8 +87,18 @@ object AceEditorFontDialog {
             .negativeColorRes(R.color.dialog_button_default)
             .positiveText(R.string.dialog_button_confirm)
             .positiveColorRes(R.color.dialog_button_attraction)
-            .onPositive { _, _ -> onConfirmed(adapter.selectedFontId) }
-            .build()
+            .onPositive { _, _ -> onSelected(adapter.selectedFontId) }
+        if (onPreviewRequested != null) {
+            builder
+                .neutralText(R.string.dialog_button_preview)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .onNeutral { dialog, _ ->
+                    val fontId = adapter.selectedFontId
+                    dialog.dismiss()
+                    onPreviewRequested(fontId)
+                }
+        }
+        val dialog = builder.build()
         dialog.optionsView?.contentDescription = context.getString(R.string.text_more)
         dialog.optionsView?.post {
             val options = dialog.optionsView ?: return@post
@@ -70,6 +111,12 @@ object AceEditorFontDialog {
             parent.touchDelegate = TouchDelegate(bounds, options)
         }
         dialog.setOnShowListener {
+            if (!swipeActionsAttached) {
+                dialog.recyclerView?.let { recyclerView ->
+                    attachTouchHelper(context, recyclerView, adapter)
+                    swipeActionsAttached = true
+                }
+            }
             refreshSubscription = manager.refreshAsync { result ->
                 if (!adapter.isDisposed) {
                     result.onSuccess { adapter.submit(manager.options(context)) }
@@ -83,6 +130,144 @@ object AceEditorFontDialog {
         return dialog
     }
 
+    private fun showFontHelp(context: Context) {
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_ace_editor_font)
+                .content(R.string.description_ace_editor_font_dialog)
+                .positiveText(R.string.dialog_button_dismiss)
+                .positiveColorRes(R.color.dialog_button_default)
+                .build()
+        }
+    }
+
+    private fun attachTouchHelper(
+        context: Context,
+        recyclerView: RecyclerView,
+        adapter: Adapter,
+    ) {
+        val helper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
+        ) {
+            private val swipePainter = SwipePainter(context)
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder,
+            ): Boolean = false
+
+            override fun getSwipeDirs(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+            ): Int = adapter.swipeDirections(viewHolder.bindingAdapterPosition)
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.bindingAdapterPosition
+                if (position == RecyclerView.NO_POSITION) return
+                adapter.notifyItemChanged(position)
+                adapter.performSwipeAction(position, direction)
+            }
+
+            override fun onChildDraw(
+                canvas: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean,
+            ) {
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    swipePainter.draw(canvas, viewHolder, dX)
+                }
+                super.onChildDraw(canvas, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            }
+        })
+        helper.attachToRecyclerView(recyclerView)
+    }
+
+    private class SwipePainter(
+        private val context: Context,
+    ) {
+        private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textSize = DisplayUtils.dpToPx(14f)
+        }
+        private val iconBounds = Rect()
+
+        fun draw(canvas: Canvas, viewHolder: RecyclerView.ViewHolder, dX: Float) {
+            val itemView = viewHolder.itemView
+            when {
+                dX > 0f -> drawAction(
+                    canvas = canvas,
+                    itemView = itemView,
+                    left = itemView.left,
+                    right = itemView.left + dX.toInt(),
+                    iconRes = R.drawable.ic_download_thicker,
+                    label = context.getString(R.string.text_download),
+                    color = Color.rgb(46, 125, 50),
+                    alignStart = true,
+                )
+                dX < 0f -> drawAction(
+                    canvas = canvas,
+                    itemView = itemView,
+                    left = itemView.right + dX.toInt(),
+                    right = itemView.right,
+                    iconRes = R.drawable.ic_key_store_delete,
+                    label = context.getString(R.string.text_delete),
+                    color = Color.rgb(198, 40, 40),
+                    alignStart = false,
+                )
+            }
+        }
+
+        private fun drawAction(
+            canvas: Canvas,
+            itemView: View,
+            left: Int,
+            right: Int,
+            iconRes: Int,
+            label: String,
+            color: Int,
+            alignStart: Boolean,
+        ) {
+            backgroundPaint.color = color
+            canvas.drawRect(
+                left.toFloat(),
+                itemView.top.toFloat(),
+                right.toFloat(),
+                itemView.bottom.toFloat(),
+                backgroundPaint,
+            )
+
+            val iconSize = DisplayUtils.dpToPx(22f).roundToInt()
+            val iconTop = itemView.top + (itemView.height - iconSize) / 2
+            val iconLeft = if (alignStart) {
+                itemView.left + DisplayUtils.dpToPx(20f).roundToInt()
+            } else {
+                itemView.right - DisplayUtils.dpToPx(20f).roundToInt() - iconSize
+            }
+            iconBounds.set(iconLeft, iconTop, iconLeft + iconSize, iconTop + iconSize)
+            context.getDrawable(iconRes)?.mutate()?.let { drawable ->
+                DrawableCompat.setTint(drawable, Color.WHITE)
+                drawable.bounds = iconBounds
+                drawable.draw(canvas)
+            }
+
+            val textY = itemView.top + itemView.height / 2f -
+                (textPaint.descent() + textPaint.ascent()) / 2f
+            val textX = if (alignStart) {
+                iconBounds.right + DisplayUtils.dpToPx(12f)
+            } else {
+                iconBounds.left - DisplayUtils.dpToPx(12f) - textPaint.measureText(label)
+            }
+            canvas.drawText(label, textX, textY, textPaint)
+        }
+    }
+
     private class Adapter(
         private val context: Context,
         private val manager: AceEditorFontManager,
@@ -92,8 +277,16 @@ object AceEditorFontDialog {
     ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
 
         private val choiceTint = ThemeColorHelper.getThemeColorStateList(context)
+        private val progressTint = ColorUtils.adjustColorForContrast(
+            context.getColor(R.color.dialog_progress_gray_background_tint),
+            ThemeColorManager.colorPrimary,
+            2.3,
+        ).let(ColorStateList::valueOf)
+        private val progressTrackTint = ColorStateList.valueOf(
+            ColorUtils.applyAlpha(progressTint.defaultColor, 0.2),
+        )
         private val downloads = linkedMapOf<String, DownloadUi>()
-        private var fonts: List<AceEditorFontOption> = fonts
+        private var fonts: List<AceEditorFontOption> = AceEditorFontUiPreferences.sortedOptions(context, fonts)
         private var selectedId: String = currentFontId
         private var disposed = false
         private var bulkDownload: BulkDownloadUi? = null
@@ -115,7 +308,7 @@ object AceEditorFontDialog {
 
         fun submit(newFonts: List<AceEditorFontOption>) {
             if (disposed) return
-            fonts = newFonts
+            fonts = AceEditorFontUiPreferences.sortedOptions(context, newFonts)
             if (fonts.none { it.id == selectedId }) {
                 selectedId = AceFontIds.BUNDLED_IOSEVKA
             }
@@ -150,7 +343,9 @@ object AceEditorFontDialog {
             holder.radioButton.isChecked = font.id == selectedId
             holder.progress.visibility = if (download == null) View.GONE else View.VISIBLE
             holder.progress.progress = download?.percent ?: 0
-            bindAction(holder.action, holder.downloadButton, font, state, download)
+            holder.progress.progressTintList = progressTint
+            holder.progress.progressBackgroundTintList = progressTrackTint
+            holder.itemView.alpha = if (selectable) 1f else UNAVAILABLE_ALPHA
             val itemClick = View.OnClickListener {
                 when {
                     selectable -> select(font.id)
@@ -174,50 +369,65 @@ object AceEditorFontDialog {
 
         override fun getItemCount(): Int = fonts.size
 
-        private fun bindAction(
-            action: TextView,
-            downloadButton: ImageButton,
-            font: AceEditorFontOption,
-            state: FontInstallationState?,
-            download: DownloadUi?,
-        ) {
-            val status = state?.status
-            val showDownloadButton = download == null &&
-                font.delivery == AceEditorFontOption.Delivery.DOWNLOADABLE &&
-                status == FontInstallationStatus.NOT_INSTALLED
-            val textRes = when {
-                download != null -> R.string.text_cancel
-                font.delivery != AceEditorFontOption.Delivery.DOWNLOADABLE -> null
-                status == FontInstallationStatus.UPDATE_AVAILABLE -> R.string.text_update
-                status == FontInstallationStatus.INSTALLED || status == FontInstallationStatus.REVOKED -> {
-                    if (state.installed != null) R.string.text_delete else null
-                }
-                else -> null
-            }
-            downloadButton.visibility = if (showDownloadButton) View.VISIBLE else View.GONE
-            ImageViewCompat.setImageTintList(downloadButton, choiceTint)
-            downloadButton.setOnClickListener(if (showDownloadButton) {
-                View.OnClickListener { confirmDownload(font) }
-            } else {
-                null
-            })
-            action.visibility = if (textRes == null) View.GONE else View.VISIBLE
-            if (textRes == null) {
-                action.setOnClickListener(null)
-                return
-            }
-            action.setText(textRes)
-            action.contentDescription = context.getString(textRes)
-            action.setTextColor(choiceTint.defaultColor)
-            action.setOnClickListener {
-                when {
-                    download != null -> {
-                        manager.cancelDownload(font.id)
+        fun useDefault() {
+            select(AceFontIds.BUNDLED_IOSEVKA)
+        }
+
+        fun showSortDialog() {
+            if (disposed) return
+            val modes = AceEditorFontSortMode.entries
+            val selected = AceEditorFontUiPreferences.getSortMode(context)
+            DialogUtils.buildAndShowAdaptive {
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_sort)
+                    .items(modes.map { context.getString(it.labelRes) })
+                    .choiceWidgetThemeColor()
+                    .options(
+                        listOf(
+                            MaterialDialog.OptionMenuItemSpec(
+                                context.getString(R.string.dialog_button_use_default),
+                            ) { dialog ->
+                                dialog.selectedIndex = modes.indexOf(AceEditorFontSortMode.DEFAULT)
+                            },
+                        ),
+                    )
+                    .itemsCallbackSingleChoice(modes.indexOf(selected)) { _, _, which, _ ->
+                        AceEditorFontUiPreferences.setSortMode(context, modes[which])
+                        submit(manager.options(context))
+                        true
                     }
-                    status == FontInstallationStatus.NOT_INSTALLED ||
-                        status == FontInstallationStatus.UPDATE_AVAILABLE -> confirmDownload(font)
-                    else -> confirmDelete(font)
-                }
+                    .negativeText(R.string.dialog_button_cancel)
+                    .negativeColorRes(R.color.dialog_button_default)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_attraction)
+                    .build()
+            }
+        }
+
+        fun swipeDirections(position: Int): Int {
+            val font = fonts.getOrNull(position) ?: return 0
+            if (downloads.containsKey(font.id) || manager.isDownloading(font.id)) return 0
+            if (font.delivery != AceEditorFontOption.Delivery.DOWNLOADABLE) return 0
+            val state = manager.installationState(font) ?: return 0
+            var directions = 0
+            if (font.remoteFont != null && state.status in setOf(
+                    FontInstallationStatus.NOT_INSTALLED,
+                    FontInstallationStatus.UPDATE_AVAILABLE,
+                )
+            ) {
+                directions = directions or ItemTouchHelper.RIGHT
+            }
+            if (state.installed != null) {
+                directions = directions or ItemTouchHelper.LEFT
+            }
+            return directions
+        }
+
+        fun performSwipeAction(position: Int, direction: Int) {
+            val font = fonts.getOrNull(position) ?: return
+            when (direction) {
+                ItemTouchHelper.RIGHT -> confirmDownload(font)
+                ItemTouchHelper.LEFT -> confirmDelete(font)
             }
         }
 
@@ -246,7 +456,7 @@ object AceEditorFontDialog {
                         context.getString(
                             R.string.text_ace_editor_font_download_all_confirmation,
                             candidates.size,
-                            Formatter.formatShortFileSize(context, totalBytes),
+                            PFiles.formatSizeWithUnit(totalBytes),
                         ),
                     )
                     .negativeText(R.string.dialog_button_cancel)
@@ -277,11 +487,21 @@ object AceEditorFontDialog {
             state: FontInstallationState?,
             download: DownloadUi?,
         ): String {
-            if (font.delivery != AceEditorFontOption.Delivery.DOWNLOADABLE) {
-                return context.getString(R.string.text_ace_editor_font_built_in)
-            }
             val size = font.remoteFont?.artifact?.sizeBytes
                 ?: state?.installed?.sizeBytes
+                ?: font.sizeBytes
+            if (font.delivery != AceEditorFontOption.Delivery.DOWNLOADABLE) {
+                val stateText = context.getString(R.string.text_ace_editor_font_built_in)
+                return if (font.delivery == AceEditorFontOption.Delivery.BUNDLED && size != null) {
+                    context.getString(
+                        R.string.text_ace_editor_font_status,
+                        stateText,
+                        PFiles.formatSizeWithUnit(size),
+                    )
+                } else {
+                    stateText
+                }
+            }
             if (download != null) {
                 return context.getString(R.string.text_downloading) + " ${download.percent}%"
             }
@@ -295,7 +515,7 @@ object AceEditorFontDialog {
                 context.getString(
                     R.string.text_ace_editor_font_status,
                     stateText,
-                    Formatter.formatShortFileSize(context, it),
+                    PFiles.formatSizeWithUnit(it),
                 )
             } ?: stateText
         }
@@ -326,7 +546,7 @@ object AceEditorFontDialog {
                         context.getString(
                             R.string.text_ace_editor_font_download_confirmation,
                             font.displayName,
-                            Formatter.formatShortFileSize(context, remote.artifact.sizeBytes),
+                            PFiles.formatSizeWithUnit(remote.artifact.sizeBytes),
                         ),
                     )
                     .negativeText(R.string.dialog_button_cancel)
@@ -539,8 +759,10 @@ object AceEditorFontDialog {
             val subtitle: TextView = itemView.findViewById(R.id.subtitle)
             val status: TextView = itemView.findViewById(R.id.status)
             val progress: ProgressBar = itemView.findViewById(R.id.progress)
-            val action: TextView = itemView.findViewById(R.id.action)
-            val downloadButton: ImageButton = itemView.findViewById(R.id.download_button)
+        }
+
+        private companion object {
+            const val UNAVAILABLE_ALPHA = 0.58f
         }
     }
 }

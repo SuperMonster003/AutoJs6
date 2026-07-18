@@ -113,6 +113,58 @@ class FontDownloaderTest {
     }
 
     @Test
+    fun activeObserverAtomicallyReplaysProgressAndDoesNotRetainTransfer() {
+        val directory = Files.createTempDirectory("font-download-observer-test").toFile()
+        val bytes = FontTestFixtures.validWoff2()
+        val font = FontTestFixtures.remoteFont(bytes)
+        val connection = BlockingConnection(bytes.size.toLong())
+        val downloader = FontDownloader(FontStore(directory), FontDownloadSource { connection })
+        try {
+            val owner = downloader.enqueue(font)
+            assertTrue(connection.readStarted.await(5, TimeUnit.SECONDS))
+
+            val events = Collections.synchronizedList(mutableListOf<FontDownloadEvent>())
+            val observer = downloader.observeActive(font.id) { events += it }
+            assertNotNull(observer)
+            assertEquals(FontDownloadEvent.Queued, events[0])
+            assertEquals(FontDownloadEvent.Progress(0L, bytes.size.toLong()), events[1])
+
+            assertTrue(observer!!.cancel())
+            assertTrue(observer.future.isCancelled)
+            assertFalse(connection.cancelled.await(100, TimeUnit.MILLISECONDS))
+            assertTrue(downloader.isDownloading(font.id))
+
+            assertTrue(downloader.cancel(font.id))
+            assertTrue(connection.cancelled.await(5, TimeUnit.SECONDS))
+            assertTrue(owner.future.isCancelled)
+        } finally {
+            connection.release.countDown()
+            downloader.close()
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun observingInactiveTransferReturnsNullWithoutOpeningSource() {
+        val directory = Files.createTempDirectory("font-download-inactive-observer-test").toFile()
+        val opens = AtomicInteger()
+        val downloader = FontDownloader(
+            FontStore(directory),
+            FontDownloadSource {
+                opens.incrementAndGet()
+                ByteArrayConnection(FontTestFixtures.validWoff2())
+            },
+        )
+        try {
+            assertNull(downloader.observeActive("test_font") { })
+            assertEquals(0, opens.get())
+        } finally {
+            downloader.close()
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
     fun rejectsDigestMismatchAndCleansPartialFile() {
         val directory = Files.createTempDirectory("font-download-invalid-test").toFile()
         val bytes = FontTestFixtures.validWoff2()

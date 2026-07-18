@@ -34,7 +34,7 @@ data class AceFontDescriptor(
         const val BUNDLED_FONT_ID = "iosevka"
         const val BUNDLED_FONT_FAMILY = "Iosevka"
         const val VIRTUAL_FONT_URL_PREFIX =
-            "file:///android_asset/editor/ace-builds-1.4.12/autojs6-fonts/"
+            "https://appassets.androidplatform.net/autojs6-fonts/"
 
         fun system(): AceFontDescriptor = AceFontDescriptor(
             source = Source.SYSTEM,

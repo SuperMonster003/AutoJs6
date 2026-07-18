@@ -102,7 +102,27 @@ class FontCatalogParser(
             license = license,
             source = source,
             artifact = artifact,
+            features = parseFeatures(obj, path),
         )
+    }
+
+    private fun parseFeatures(obj: JsonObject, path: String): Set<FontFeature> {
+        val values = obj.optionalArray("features", path) ?: return emptySet()
+        val parsed = linkedSetOf<FontFeature>()
+        values.forEachIndexed { index, element ->
+            val featurePath = "$path.features[$index]"
+            if (!element.isJsonPrimitive || !element.asJsonPrimitive.isString) {
+                throw FontCatalogParseException("$featurePath must be a string")
+            }
+            val value = element.asString.nonBlank(featurePath)
+            val feature = FontFeature.fromCatalogValue(value)
+                ?: throw FontCatalogParseException("$featurePath has unsupported value '$value'")
+            if (!parsed.add(feature)) {
+                throw FontCatalogParseException("$path.features contains duplicate value '$value'")
+            }
+        }
+        // Keep model iteration deterministic even if a producer emits a different wire order.
+        return FontFeature.entries.filterTo(linkedSetOf()) { it in parsed }
     }
 
     private fun parseLicense(element: JsonElement?, path: String): FontLicense {

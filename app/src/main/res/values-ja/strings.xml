@@ -1700,4 +1700,10 @@
     <string name="text_yearly_task">毎年のタスク</string>
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
+    <string name="text_sort_by_name_desc">名前 (Z-A)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (アイコングリフ)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (可変フォント)</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (簡体字中国語)</string>
+    <string name="description_ace_editor_font_dialog">Nerd/NF フォントには、プログラミング記号とアイコングリフが追加されています。Var は可変フォント、CN/SC は簡体字中国語のグリフを示します。\n\nインストール済みのフォントをタップすると選択できます。未インストールのフォントをタップするとダウンロード確認が開きます。右スワイプでダウンロードまたは更新、左スワイプで削除します。\n\nプレビューでは、一覧とフィルタでフォントを選び、前へと次へで移動します。終了で元のフォントに戻り、確定で現在のフォントを保持します。未インストールの場合、確定はダウンロードに変わり、ダウンロード中は停止に変わります。完了するとプレビューへすぐ反映されます。フィルタ設定は保存され、初期値に戻せます。</string>
+    <string name="description_editor_theme_dialog">エディタテーマは構文の配色と編集領域の外観を制御します。プレビューでは、一覧でテーマを選び、すべて/ダーク/ライトでフィルタを切り替え、前へと次へで移動します。終了で元のテーマに戻り、確定で現在のテーマを保持します。</string>
 </resources>

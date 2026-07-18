@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.edit.editor.ace
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.os.Handler
 import android.os.Looper
 import okhttp3.OkHttpClient
@@ -12,6 +13,7 @@ import org.autojs.autojs.ui.edit.editor.ace.font.FontDownloadEvent
 import org.autojs.autojs.ui.edit.editor.ace.font.FontDownloadListener
 import org.autojs.autojs.ui.edit.editor.ace.font.FontDownloadSubscription
 import org.autojs.autojs.ui.edit.editor.ace.font.FontDownloader
+import org.autojs.autojs.ui.edit.editor.ace.font.FontFeature
 import org.autojs.autojs.ui.edit.editor.ace.font.FontInstallationState
 import org.autojs.autojs.ui.edit.editor.ace.font.FontInstallationStatus
 import org.autojs.autojs.ui.edit.editor.ace.font.FontStore
@@ -32,6 +34,8 @@ data class AceEditorFontOption(
     val order: Int,
     val delivery: Delivery,
     val remoteFont: RemoteFont? = null,
+    val features: Set<FontFeature> = emptySet(),
+    val sizeBytes: Long? = null,
 ) {
     enum class Delivery {
         SYSTEM,
@@ -114,6 +118,7 @@ class AceEditorFontManager private constructor(context: Context) {
             licenseName = AceEditorFont.IOSEVKA.license,
             order = Int.MIN_VALUE + 1,
             delivery = AceEditorFontOption.Delivery.BUNDLED,
+            sizeBytes = bundledIosevkaSizeBytes,
         )
         val catalogOptions = catalog()?.fonts.orEmpty().map { font ->
             AceEditorFontOption(
@@ -125,6 +130,8 @@ class AceEditorFontManager private constructor(context: Context) {
                 order = font.order,
                 delivery = AceEditorFontOption.Delivery.DOWNLOADABLE,
                 remoteFont = font,
+                features = font.features,
+                sizeBytes = font.artifact.sizeBytes,
             )
         }
         val catalogIds = catalogOptions.asSequence().map { it.id }.toHashSet()
@@ -140,6 +147,7 @@ class AceEditorFontManager private constructor(context: Context) {
                     licenseName = known?.license.orEmpty(),
                     order = Int.MAX_VALUE - 1_000 + index,
                     delivery = AceEditorFontOption.Delivery.DOWNLOADABLE,
+                    sizeBytes = installed.sizeBytes,
                 )
             }
         return buildList {
@@ -232,6 +240,19 @@ class AceEditorFontManager private constructor(context: Context) {
 
     fun activeDownloadSha256(fontId: String): String? = synchronized(retainedDownloadLock) {
         retainedDownloads[fontId]?.sha256?.takeIf { downloader.isDownloading(fontId) }
+    }
+
+    /**
+     * Observes an already active transfer without creating or retaining a new transfer.
+     * The returned subscription receives Queued and the latest Progress atomically before
+     * subsequent events. Cancelling it only detaches this observer.
+     */
+    fun observeActiveDownload(
+        fontId: String,
+        listener: FontDownloadListener,
+    ): FontDownloadSubscription? = synchronized(retainedDownloadLock) {
+        retainedDownloads[fontId] ?: return@synchronized null
+        downloader.observeActive(fontId, listener)
     }
 
     /** Explicit user cancellation stops both the retained background job and its transfer. */
@@ -387,7 +408,28 @@ class AceEditorFontManager private constructor(context: Context) {
 
     private class RetainedDownload(val sha256: String)
 
+    private val bundledIosevkaSizeBytes: Long? by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        runCatching {
+            appContext.assets.openFd(BUNDLED_IOSEVKA_ASSET_PATH).use { descriptor ->
+                descriptor.length.takeIf { it >= 0L }
+            }
+        }.getOrNull() ?: runCatching {
+            appContext.assets.open(BUNDLED_IOSEVKA_ASSET_PATH, AssetManager.ACCESS_STREAMING).use { input ->
+                val buffer = ByteArray(64 * 1024)
+                var total = 0L
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    if (read > 0) total += read
+                }
+                total
+            }
+        }.getOrNull()
+    }
+
     companion object {
+        private const val BUNDLED_IOSEVKA_ASSET_PATH =
+            "editor/ace-builds-1.4.12/fonts/iosevka/Iosevka-Regular.woff2"
         private const val CATALOG_KEY_ID = "p256-fc433f8ba81333f7"
         private const val CATALOG_URL =
             "https://raw.githubusercontent.com/SuperMonster003/AutoJs6-Shared-Assets/main/ace-fonts/catalogs/catalog-v1.json"

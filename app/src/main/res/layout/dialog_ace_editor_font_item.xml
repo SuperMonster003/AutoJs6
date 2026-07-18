@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?selectableItemBackground"
-    android:descendantFocusability="afterDescendants"
+    android:descendantFocusability="blocksDescendants"
     android:focusable="true"
     android:gravity="center_vertical"
     android:minHeight="48dp"
@@ -78,38 +77,5 @@
             tools:visibility="visible" />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/action"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:background="?selectableItemBackgroundBorderless"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="sans-serif-medium"
-        android:gravity="center"
-        android:minWidth="48dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:textColor="@color/day_night_alpha_60"
-        android:textSize="12sp"
-        android:visibility="gone"
-        tools:text="Download"
-        tools:visibility="visible" />
-
-    <ImageButton
-        android:id="@+id/download_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:background="?selectableItemBackgroundBorderless"
-        android:contentDescription="@string/text_download"
-        android:padding="8dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_download_thicker"
-        android:visibility="gone"
-        app:tint="@color/day_night_alpha_60"
-        tools:visibility="visible" />
 
 </LinearLayout>

@@ -1701,4 +1701,10 @@
     <string name="text_yearly_task">연간 작업</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
+    <string name="text_sort_by_name_desc">이름 (Z-A)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (아이콘 글리프)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (가변 글꼴)</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (중국어 간체)</string>
+    <string name="description_ace_editor_font_dialog">Nerd/NF 글꼴에는 프로그래밍 기호와 아이콘 글리프가 추가되어 있습니다. Var는 가변 글꼴을, CN/SC는 중국어 간체 글리프를 의미합니다.\n\n설치된 글꼴을 탭하면 선택할 수 있습니다. 설치되지 않은 글꼴을 탭하면 다운로드 확인 창이 열립니다. 오른쪽으로 밀면 다운로드 또는 업데이트하고 왼쪽으로 밀면 삭제합니다.\n\n미리보기에서는 목록과 필터로 글꼴을 선택하고 이전과 다음으로 이동합니다. 종료는 원래 글꼴을 복원하고 확인은 현재 글꼴을 유지합니다. 설치되지 않은 글꼴에서는 확인이 다운로드로 바뀌며 다운로드 중에는 중지로 바뀝니다. 완료되면 미리보기에 즉시 적용됩니다. 필터 설정은 저장되며 기본값으로 복원할 수 있습니다.</string>
+    <string name="description_editor_theme_dialog">편집기 테마는 구문 색상과 편집 영역의 모양을 제어합니다. 미리보기에서는 목록으로 테마를 선택하고 전체/어두운/밝은 모드로 필터를 순환하며 이전과 다음으로 이동합니다. 종료는 원래 테마를 복원하고 확인은 현재 테마를 유지합니다.</string>
 </resources>

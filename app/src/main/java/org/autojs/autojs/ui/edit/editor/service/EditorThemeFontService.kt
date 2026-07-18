@@ -131,6 +131,10 @@ class EditorThemeFontService(
         applyAceFont(fontId, persist = true)
     }
 
+    fun previewAceFont(fontId: String) {
+        applyAceFont(fontId, persist = false)
+    }
+
     fun aceEditorFontLabel(fontId: String): String = aceFontManager.displayName(fontId, context)
 
     private fun applyAceFont(fontId: String, persist: Boolean) {

@@ -28,6 +28,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
 
     private var suppressedPreferenceActionKey: String? = null
     private var themePreviewHandler: ((Theme) -> Unit)? = null
+    private var fontPreviewHandler: ((String) -> Unit)? = null
     private var preferencesCreated = false
     private val unavailablePreferenceKeys = mutableSetOf<String>()
 
@@ -37,6 +38,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         preferencesCreated = true
         syncEditorEnginePreferenceAvailability()
         syncThemePreviewPreference()
+        syncFontPreviewPreference()
         suppressedPreferenceActionKey = initialPreferenceKey.takeIf { suppressInitialActionRecord }
     }
 
@@ -113,6 +115,11 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         syncThemePreviewPreference()
     }
 
+    fun setFontPreviewHandler(handler: ((String) -> Unit)?) {
+        fontPreviewHandler = handler
+        syncFontPreviewPreference()
+    }
+
     private fun openInitialPreferenceIfNeeded() {
         initialPreferenceKey?.let { openPreference(it, suppressInitialActionRecord) }
     }
@@ -168,6 +175,15 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         val handler = themePreviewHandler.takeIf { embeddedInDialog }
         findPreference<EditorThemePreference>(getString(R.string.key_editor_theme))
             ?.setThemePreviewHandler(handler)
+    }
+
+    private fun syncFontPreviewPreference() {
+        if (!preferencesCreated) {
+            return
+        }
+        val handler = fontPreviewHandler.takeIf { embeddedInDialog }
+        findPreference<AceEditorFontPreference>(getString(R.string.key_ace_editor_font))
+            ?.setFontPreviewHandler(handler)
     }
 
     private fun syncAceLspFileTypesPreferenceVisibility(aceSelected: Boolean) {

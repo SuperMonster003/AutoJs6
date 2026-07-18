@@ -563,10 +563,10 @@ if (/^\.ace_mobile-menu\s*\{[^}]*display:\s*none/m.test(css)) {
 }
 
 assertIncludes(bridge, "var firstPaintNotified = false;", "first-paint idempotency flag");
-assertIncludes(bridge, 'var INSTALLED_FONT_URL_PREFIX = "file:///android_asset/editor/ace-builds-1.4.12/autojs6-fonts/";', "installed font virtual URL boundary");
+assertIncludes(bridge, 'var INSTALLED_FONT_URL_PREFIX = "https://appassets.androidplatform.net/autojs6-fonts/";', "installed font virtual URL boundary");
 assertIncludes(bridge, "if (!/^[a-f0-9]{64}$/.test(normalized.sha256))", "installed font requires a SHA-256 identity");
 assertIncludes(bridge, "if (normalized.url !== expectedUrl)", "installed font URL must match id and SHA-256");
-assertIncludes(bridge, "var FONT_LOAD_TIMEOUT_MS = 10000;", "installed FontFace load timeout");
+assertIncludes(bridge, "var FONT_LOAD_TIMEOUT_MS = 30000;", "installed FontFace load timeout");
 assertIncludes(bridge, "Promise.resolve(document.fonts.ready)", "font metrics refresh after bundled font readiness");
 assertIncludes(bridge, 'reject(new Error("Timed out while loading installed font"))', "installed FontFace timeout rejection");
 assertIncludes(bridge, "!pendingFontDescriptorLoad;", "first paint waits for the selected installed font");
@@ -588,8 +588,8 @@ assertIncludes(aceFontDialog, "selectOnSuccess = false", "bulk font downloads ne
 assertIncludes(aceFontDialog, "notifyOnSuccess = false", "background and bulk downloads suppress per-font toast storms");
 assertIncludes(aceFontDialog, "FontInstallationStatus.UPDATE_AVAILABLE", "download all includes available font updates");
 assertIncludes(aceFontDialog, "bulk.pendingIds.remove(fontId)", "bulk font completion is counted exactly once");
-assertIncludes(aceFontDialogItem, 'android:src="@drawable/ic_download_thicker"', "plugin-center download icon reuse");
-assertIncludes(aceFontDialogItem, 'android:contentDescription="@string/text_download"', "font download icon accessibility label");
+assertIncludes(aceFontDialog, "iconRes = R.drawable.ic_download_thicker", "font swipe action reuses the plugin-center download icon");
+assertIncludes(aceFontDialog, "label = context.getString(R.string.text_download)", "font swipe action carries the download label");
 assertIncludes(bridge, "function callBridgeBoolean(name, defaultValue)", "bridge boolean option helper");
 assertIncludes(bridge, "var STATE_NOTIFY_THROTTLE_MS = 100;", "state event throttle");
 assertIncludes(bridge, "var TEXT_NOTIFY_THROTTLE_MS = 100;", "text event throttle");

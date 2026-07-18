@@ -1701,4 +1701,10 @@
     <string name="text_yearly_task">مهمة سنوية</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
+    <string name="text_sort_by_name_desc">الاسم (Z-A)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (رموز أيقونية)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (خط متغير)</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (الصينية المبسطة)</string>
+    <string name="description_ace_editor_font_dialog">تتضمن خطوط Nerd/NF رموز برمجة ورموزا أيقونية إضافية. تعني Var خطا متغيرا، وتشير CN/SC إلى دعم محارف الصينية المبسطة.\n\nاضغط على خط مثبت لتحديده. اضغط على خط غير مثبت لفتح تأكيد التنزيل. اسحب يمينا للتنزيل أو التحديث ويسارا للحذف.\n\nفي المعاينة، استخدم القائمة والتصفية لاختيار الخطوط، والسابق والتالي للتنقل، والخروج لاستعادة الخط الأصلي، واستخدام للاحتفاظ بالخط الحالي. إذا لم يكن الخط مثبتا يتحول استخدام إلى تنزيل، وأثناء التنزيل يتحول إلى إيقاف. تطبق المعاينة فور اكتمال التنزيل. تحفظ عوامل التصفية ويمكن استعادتها إلى الإعدادات الافتراضية.</string>
+    <string name="description_editor_theme_dialog">تتحكم سمات المحرر في ألوان بناء الجملة ومظهر منطقة التحرير. في المعاينة، استخدم القائمة لاختيار سمة، والكل/داكن/فاتح للتبديل بين عوامل التصفية، والسابق والتالي للتنقل، والخروج لاستعادة السمة الأصلية، واستخدام للاحتفاظ بالسمة الحالية.</string>
 </resources>

@@ -1699,4 +1699,10 @@
     <string name="text_yearly_task">Tarea anual</string>
     <string name="warn_continue_operation_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres continuar?</string>
     <string name="warn_exit_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres salir?</string>
+    <string name="text_sort_by_name_desc">Nombre (Z-A)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (glifos de iconos)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (fuente variable)</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (chino simplificado)</string>
+    <string name="description_ace_editor_font_dialog">Las fuentes Nerd/NF incluyen símbolos de programación y glifos de iconos adicionales. Var significa fuente variable. CN/SC indica compatibilidad con glifos de chino simplificado.\n\nToca una fuente instalada para seleccionarla. Toca una fuente no instalada para abrir la confirmación de descarga. Desliza a la derecha para descargar o actualizar y a la izquierda para eliminar.\n\nEn la vista previa, usa Lista y Filtro para elegir fuentes, Anterior y Siguiente para recorrerlas, Salir para restaurar la fuente original y Usar para conservar la actual. Si no está instalada, Usar cambia a Descargar; durante la descarga cambia a Detener. Al terminar, la vista previa se aplica de inmediato. Los filtros se guardan y se pueden restablecer.</string>
+    <string name="description_editor_theme_dialog">Los temas del editor controlan los colores de sintaxis y el aspecto del área de edición. En la vista previa, usa Lista para elegir un tema, Todo/Oscuro/Claro para alternar el filtro, Anterior y Siguiente para recorrerlos, Salir para restaurar el tema original y Usar para conservar el actual.</string>
 </resources>

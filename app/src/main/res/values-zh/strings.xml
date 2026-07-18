@@ -1708,4 +1708,10 @@
     <string name="text_yearly_task">每年任务</string>
     <string name="warn_continue_operation_without_saving_settings">设置尚未保存, 确定要继续操作吗</string>
     <string name="warn_exit_without_saving_settings">设置尚未保存, 确定要退出吗</string>
+    <string name="text_sort_by_name_desc">名称 (Z-A)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (图标字形)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (可变字体)</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (简体中文)</string>
+    <string name="description_ace_editor_font_dialog">Nerd/NF 字体额外包含编程符号和图标字形；Var 表示可变字体；CN/SC 表示包含简体中文字形。\n\n点击已安装字体可选中它；点击未安装字体可打开下载提示。向右滑动可下载或更新，向左滑动可删除。\n\n预览时可使用“列表”和“筛选”选择字体，使用“上一个”和“下一个”浏览，使用“退出”恢复原字体，使用“确定”保留当前字体。字体未安装时，“确定”会变为“下载”；下载期间会变为“停止”。下载完成后预览会立即生效。预览筛选条件会被记住，并可恢复默认值。</string>
+    <string name="description_editor_theme_dialog">编辑器主题用于控制语法配色和编辑区域的外观。预览时可使用“列表”选择主题，使用“全部/暗色/亮色”循环切换筛选条件，使用“上一个”和“下一个”浏览，使用“退出”恢复原主题，使用“确定”保留当前主题。</string>
 </resources>

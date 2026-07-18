@@ -40,6 +40,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import androidx.webkit.WebViewAssetLoader
 import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.EditorPinchToZoomPreferences
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
@@ -71,6 +72,11 @@ class AceCodeEditor @JvmOverloads constructor(
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val fontManager = AceEditorFontManager.get(context)
+    private var requestedFontId = AceEditorFontPreferences.getId()
+    private val assetLoader = WebViewAssetLoader.Builder()
+        .addPathHandler(APP_ASSET_PATH, WebViewAssetLoader.AssetsPathHandler(context))
+        .addPathHandler(VIRTUAL_FONT_PATH, WebViewAssetLoader.PathHandler(::virtualFontResponse))
+        .build()
     private var fontCatalogChangeSubscription: AceFontCatalogChangeSubscription? = null
     private val pendingScripts = ArrayDeque<PendingScript>()
     private val bridge = AceBridge(this)
@@ -271,7 +277,7 @@ class AceCodeEditor @JvmOverloads constructor(
             lspServerAvailable = lspSnapshot.serverAvailable,
             lspStartSupported = lspSnapshot.startSupported,
             lspSessionRevision = lspSnapshot.sessionRevision,
-            aceFont = AceEditorFontPreferences.getId(),
+            aceFont = requestedFontId,
             fileSizeBytes = fileSizeBytes,
             largeFilePolicy = largeFilePolicy,
             textMirrorRevision = textMirrorRevision,
@@ -330,12 +336,12 @@ class AceCodeEditor @JvmOverloads constructor(
         if (fontCatalogChangeSubscription == null) {
             fontCatalogChangeSubscription = fontManager.observeCatalogChanges {
                 if (!destroyed) {
-                    setFontDescriptor(fontManager.descriptor(AceEditorFontPreferences.getId()))
+                    applyRequestedFont()
                 }
             }
         }
         if (loaded && !destroyed) {
-            setFontDescriptor(fontManager.descriptor(AceEditorFontPreferences.getId()))
+            applyRequestedFont()
         }
         lspServerManager.attach()
         val lspSnapshot = lspServerManager.snapshot()
@@ -595,6 +601,15 @@ class AceCodeEditor @JvmOverloads constructor(
 
     fun setFontDescriptor(descriptor: AceFontDescriptor) {
         invokeAce("setFontDescriptor", quote(descriptor.toJson()))
+    }
+
+    fun setAceEditorFont(fontId: String) {
+        requestedFontId = fontId
+        applyRequestedFont()
+    }
+
+    private fun applyRequestedFont() {
+        setFontDescriptor(fontManager.descriptor(requestedFontId))
     }
 
     fun notifyDisplayPreferencesChanged() {
@@ -1122,6 +1137,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     /** A browser-decode failure invalidates only the downloaded cache; the requested preference is retained. */
     private fun handleFontLoadError(payloadJson: String?) {
+        eventHistory.record("font_load_error", payloadJson.orEmpty().take(FONT_ERROR_DIAGNOSTIC_LIMIT))
         val payload = runCatching { JSONObject(payloadJson.orEmpty()) }.getOrNull() ?: return
         if (payload.optString("source") != AceFontDescriptor.Source.INSTALLED.value) return
         if (!payload.optBoolean("invalidateInstalledCache", false)) return
@@ -1132,7 +1148,7 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     internal fun bridgeFontDescriptor(): String {
-        return fontManager.descriptor(AceEditorFontPreferences.getId()).toJson()
+        return fontManager.descriptor(requestedFontId).toJson()
     }
 
     internal fun bridgeFontLigaturesEnabled(): Boolean {
@@ -1873,7 +1889,7 @@ class AceCodeEditor @JvmOverloads constructor(
             javaScriptCanOpenWindowsAutomatically = false
             domStorageEnabled = false
             databaseEnabled = false
-            allowFileAccess = true
+            allowFileAccess = false
             allowContentAccess = false
             allowFileAccessFromFileURLs = false
             allowUniversalAccessFromFileURLs = false
@@ -2343,7 +2359,9 @@ class AceCodeEditor @JvmOverloads constructor(
         if (url.isNullOrBlank()) {
             return false
         }
-        return url == "about:blank" || url.startsWith(ASSET_URL_PREFIX)
+        return url == "about:blank" ||
+            url.startsWith(ASSET_URL_PREFIX) ||
+            url.startsWith(AceFontDescriptor.VIRTUAL_FONT_URL_PREFIX)
     }
 
     private fun emptyBlockedResponse(): WebResourceResponse {
@@ -2351,19 +2369,19 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     private fun interceptResource(url: String?): WebResourceResponse? {
-        if (url?.startsWith(AceFontDescriptor.VIRTUAL_FONT_URL_PREFIX) == true) {
-            return virtualFontResponse(url)
+        if (!isAllowedUrl(url)) {
+            return emptyBlockedResponse().also { reportBlockedUrl("resource", url) }
         }
-        return if (isAllowedUrl(url)) null else emptyBlockedResponse().also {
-            reportBlockedUrl("resource", url)
-        }
+        if (url == "about:blank") return null
+        return runCatching { assetLoader.shouldInterceptRequest(Uri.parse(url)) }
+            .getOrNull()
+            ?: emptyBlockedResponse()
     }
 
-    private fun virtualFontResponse(url: String): WebResourceResponse {
-        val route = url.removePrefix(AceFontDescriptor.VIRTUAL_FONT_URL_PREFIX)
-        val match = VIRTUAL_FONT_ROUTE.matchEntire(route)
-        val opened = match?.let {
-            fontManager.openInstalledFont(it.groupValues[1], it.groupValues[2])
+    private fun virtualFontResponse(route: String): WebResourceResponse {
+        val parsed = AceInstalledFontRoute.parse(route)
+        val opened = parsed?.let {
+            fontManager.openInstalledFont(it.fontId, it.sha256)
         }
         if (opened == null) {
             return WebResourceResponse(
@@ -2669,10 +2687,13 @@ class AceCodeEditor @JvmOverloads constructor(
 
     companion object {
         private const val JS_BRIDGE_NAME = "autojs"
-        private const val ASSET_URL_PREFIX = "file:///android_asset/editor/ace-builds-1.4.12/"
+        private const val APP_ASSET_PATH = "/assets/"
+        private const val VIRTUAL_FONT_PATH = "/autojs6-fonts/"
+        private const val APP_ASSET_ORIGIN = "https://appassets.androidplatform.net"
+        private const val ASSET_URL_PREFIX = "$APP_ASSET_ORIGIN${APP_ASSET_PATH}editor/ace-builds-1.4.12/"
         private const val EDITOR_URL = "${ASSET_URL_PREFIX}autojs6_editor.html"
-        private val VIRTUAL_FONT_ROUTE = Regex("([a-z0-9][a-z0-9_]{0,63})/([a-f0-9]{64})\\.woff2")
         private const val ACE_RUNTIME_REVISION = "ace-builds-1.4.12-autojs6"
+        private const val FONT_ERROR_DIAGNOSTIC_LIMIT = 1_024
         private const val TEXT_MIRROR_CALIBRATION_DELAY_MS = 500L
         private const val IME_REQUEST_COALESCE_MS = 150L
         private const val IME_TRANSITION_HEARTBEAT_SUSPEND_MS = 800L

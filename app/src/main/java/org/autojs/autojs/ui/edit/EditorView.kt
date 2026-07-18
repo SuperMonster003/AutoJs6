@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
@@ -26,6 +27,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -64,6 +66,7 @@ import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.JavaScriptFileSource
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
@@ -73,7 +76,15 @@ import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorAssets
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontDialog
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontOption
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontUiPreferences
+import org.autojs.autojs.ui.edit.editor.ace.AceFontCatalogRefreshSubscription
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorTestHooks
+import org.autojs.autojs.ui.edit.editor.ace.font.FontDownloadEvent
+import org.autojs.autojs.ui.edit.editor.ace.font.FontDownloadSubscription
+import org.autojs.autojs.ui.edit.editor.ace.font.FontFeature
+import org.autojs.autojs.ui.edit.editor.ace.font.FontInstallationStatus
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
@@ -121,6 +132,7 @@ import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.settings.EditorSettingActionRegistry
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
@@ -402,6 +414,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mThemePreviewNext: ImageView = binding.themePreviewNext
     private val mThemePreviewExit: ImageView = binding.themePreviewExit
     private val mThemePreviewUse: ImageView = binding.themePreviewUse
+    private val mFontPreviewProgress: ProgressBar = binding.fontPreviewProgress
 
     private var mCurrentCharsetConfidence: Int = 0
     private var mCurrentCharset: Charset = EditorFileService.DEFAULT_CHARSET_TO_WRITE_FILE
@@ -445,6 +458,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mThemePreviewCurrentTheme: Theme? = null
     private var mThemePreviewOriginalTheme: Theme? = null
     private var mThemePreviewFilterMode = ThemePreviewFilter.All
+    private var mPreviewMode = PreviewMode.None
+    private val mAceFontManager = AceEditorFontManager.get(context)
+    private var mFontPreviewActive = false
+    private var mFontPreviewReturnToFontDialog = false
+    private var mFontPreviewOptions: List<AceEditorFontOption> = emptyList()
+    private var mFontPreviewCurrentFontId: String? = null
+    private var mFontPreviewOriginalFontId: String? = null
+    private var mFontPreviewDownloadId: String? = null
+    private var mFontPreviewDownloadSubscription: FontDownloadSubscription? = null
+    private var mFontPreviewCatalogRefreshSubscription: AceFontCatalogRefreshSubscription? = null
 
     private val mUiHandler = Handler(Looper.getMainLooper())
 
@@ -582,7 +605,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         setUpEditor()
         setUpInputMethodEnhancedBar()
         setUpFunctionsKeyboard()
-        setUpThemePreviewer()
+        setUpEditorPreviewer()
         setUpImeInsetsHandling()
         setMenuItemStatus(R.id.save, false)
         mDocsWebView.apply {
@@ -1679,17 +1702,53 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
-    private fun setUpThemePreviewer() {
-        mThemePreviewFilter.setOnClickListener { cycleThemePreviewFilter() }
-        mThemePreviewPrevious.setOnClickListener { moveThemePreview(-1) }
-        mThemePreviewNext.setOnClickListener { moveThemePreview(1) }
-        mThemePreviewList.setOnClickListener { showThemePreviewList() }
-        mThemePreviewUse.setOnClickListener { finishThemePreview(useTheme = true) }
-        mThemePreviewExit.setOnClickListener { finishThemePreview(useTheme = false) }
+    private fun setUpEditorPreviewer() {
+        mThemePreviewFilter.setOnClickListener {
+            when (mPreviewMode) {
+                PreviewMode.Theme -> cycleThemePreviewFilter()
+                PreviewMode.Font -> showFontPreviewFilter()
+                PreviewMode.None -> Unit
+            }
+        }
+        mThemePreviewPrevious.setOnClickListener { moveEditorPreview(-1) }
+        mThemePreviewNext.setOnClickListener { moveEditorPreview(1) }
+        mThemePreviewList.setOnClickListener {
+            when (mPreviewMode) {
+                PreviewMode.Theme -> showThemePreviewList()
+                PreviewMode.Font -> showFontPreviewList()
+                PreviewMode.None -> Unit
+            }
+        }
+        mThemePreviewUse.setOnClickListener {
+            when (mPreviewMode) {
+                PreviewMode.Theme -> finishThemePreview(useTheme = true)
+                PreviewMode.Font -> useOrDownloadPreviewFont()
+                PreviewMode.None -> Unit
+            }
+        }
+        mThemePreviewExit.setOnClickListener {
+            when (mPreviewMode) {
+                PreviewMode.Theme -> finishThemePreview(useTheme = false)
+                PreviewMode.Font -> finishFontPreview(useFont = false)
+                PreviewMode.None -> Unit
+            }
+        }
+    }
+
+    private fun moveEditorPreview(delta: Int) {
+        when (mPreviewMode) {
+            PreviewMode.Theme -> moveThemePreview(delta)
+            PreviewMode.Font -> moveFontPreview(delta)
+            PreviewMode.None -> Unit
+        }
     }
 
     @SuppressLint("CheckResult")
     private fun openThemePreviewer(returnToThemeDialog: Boolean, initialTheme: Theme? = null) {
+        if (mFontPreviewActive) {
+            mFontPreviewReturnToFontDialog = false
+            finishFontPreview(useFont = false)
+        }
         if (mThemePreviewActive && mThemePreviewThemes.isNotEmpty()) {
             mThemePreviewReturnToThemeDialog = mThemePreviewReturnToThemeDialog || returnToThemeDialog
             mThemePreviewBar.isVisible = true
@@ -1726,6 +1785,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mThemePreviewThemes = themes
         mThemePreviewReturnToThemeDialog = mThemePreviewReturnToThemeDialog || returnToThemeDialog
         mThemePreviewActive = true
+        mPreviewMode = PreviewMode.Theme
+        mFontPreviewProgress.visibility = View.INVISIBLE
+        mThemePreviewUse.setImageResource(R.drawable.mt_ic_check_white_36dp)
+        mThemePreviewUse.contentDescription = context.getString(R.string.text_theme_preview_use)
+        mThemePreviewUse.isEnabled = true
+        mThemePreviewUse.alpha = 1f
         mThemePreviewBar.isVisible = true
 
         val previewTheme = initialTheme?.let { initial ->
@@ -1760,9 +1825,23 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mThemePreviewFilter.contentDescription = context.getString(mThemePreviewFilterMode.labelResId)
         val backgroundColor = themeFontService.inputMethodBarBackgroundColor(theme)
         val foregroundColor = themeFontService.inputMethodBarForegroundColor(theme)
+        applyEditorPreviewColors(backgroundColor, foregroundColor)
+    }
+
+    private fun applyEditorPreviewColors(backgroundColor: Int, foregroundColor: Int) {
         mThemePreviewBar.setBackgroundColor(backgroundColor)
         themePreviewTextViews().forEach { it.setTextColor(foregroundColor) }
         themePreviewImageViews().forEach { it.imageTintList = ColorStateList.valueOf(foregroundColor) }
+        val progressColor = ColorUtils.adjustColorForContrast(
+            backgroundColor,
+            ThemeColorManager.colorPrimary,
+            minimumContrast = 2.3,
+        )
+        mFontPreviewProgress.progressTintList = ColorStateList.valueOf(progressColor)
+        mFontPreviewProgress.indeterminateTintList = ColorStateList.valueOf(progressColor)
+        mFontPreviewProgress.progressBackgroundTintList = ColorStateList.valueOf(
+            ColorUtils.applyAlpha(progressColor, 0.20),
+        )
     }
 
     private fun formatThemePreviewIndex(theme: Theme): String {
@@ -1856,6 +1935,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val originalTheme = mThemePreviewOriginalTheme
 
         mThemePreviewActive = false
+        mPreviewMode = PreviewMode.None
         mThemePreviewReturnToThemeDialog = false
         mThemePreviewThemes = emptyList()
         mThemePreviewCurrentTheme = null
@@ -1872,6 +1952,330 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         if (returnToThemeDialog) {
             post { selectEditorTheme() }
+        }
+    }
+
+    private fun openFontPreviewer(returnToFontDialog: Boolean, initialFontId: String? = null) {
+        if (mFontPreviewActive && mFontPreviewOptions.isNotEmpty()) {
+            mFontPreviewReturnToFontDialog = mFontPreviewReturnToFontDialog || returnToFontDialog
+            mThemePreviewBar.isVisible = true
+            val targetId = initialFontId ?: mFontPreviewCurrentFontId
+            targetId?.let(::previewFont)
+            return
+        }
+        if (mThemePreviewActive) {
+            mThemePreviewReturnToThemeDialog = false
+            finishThemePreview(useTheme = false)
+        }
+        startFontPreviewer(
+            options = mAceFontManager.options(context),
+            returnToFontDialog = returnToFontDialog,
+            initialFontId = initialFontId,
+        )
+        mFontPreviewCatalogRefreshSubscription?.cancel()
+        mFontPreviewCatalogRefreshSubscription = mAceFontManager.refreshAsync { result ->
+            if (mFontPreviewActive && result.isSuccess) {
+                updateFontPreviewOptions(mAceFontManager.options(context))
+            }
+        }
+    }
+
+    private fun startFontPreviewer(
+        options: List<AceEditorFontOption>,
+        returnToFontDialog: Boolean,
+        initialFontId: String?,
+    ) {
+        if (options.isEmpty()) return
+        if (!mFontPreviewActive) {
+            mFontPreviewOriginalFontId = themeFontService.currentAceFont()
+        }
+        mFontPreviewOptions = options
+        mFontPreviewReturnToFontDialog = mFontPreviewReturnToFontDialog || returnToFontDialog
+        mFontPreviewActive = true
+        mPreviewMode = PreviewMode.Font
+        mThemePreviewBar.isVisible = true
+
+        val prepared = preparedFontPreviewOptions()
+        val target = prepared.firstOrNull { it.id == initialFontId }
+            ?: prepared.firstOrNull { it.id == mFontPreviewOriginalFontId }
+            ?: prepared.firstOrNull()
+            ?: options.first()
+        previewFont(target.id)
+    }
+
+    private fun updateFontPreviewOptions(options: List<AceEditorFontOption>) {
+        if (!mFontPreviewActive || options.isEmpty()) return
+        mFontPreviewOptions = options
+        val prepared = preparedFontPreviewOptions()
+        val currentId = mFontPreviewCurrentFontId
+        val next = prepared.firstOrNull { it.id == currentId }
+            ?: prepared.firstOrNull()
+            ?: options.first()
+        previewFont(next.id)
+    }
+
+    private fun preparedFontPreviewOptions(): List<AceEditorFontOption> {
+        return AceEditorFontUiPreferences.preparedPreviewOptions(context, mFontPreviewOptions)
+    }
+
+    private fun previewFont(fontId: String) {
+        val option = mFontPreviewOptions.firstOrNull { it.id == fontId } ?: return
+        detachFontPreviewDownloadObserver()
+        mFontPreviewCurrentFontId = option.id
+        if (isFontInstalledForPreview(option)) {
+            themeFontService.previewAceFont(option.id)
+        }
+        observeCurrentFontDownload(option)
+        refreshFontPreviewBar(option)
+    }
+
+    private fun moveFontPreview(delta: Int) {
+        val fonts = preparedFontPreviewOptions()
+        if (fonts.isEmpty()) return
+        val currentIndex = fonts.indexOfFirst { it.id == mFontPreviewCurrentFontId }
+        val base = currentIndex.takeIf { it >= 0 } ?: if (delta > 0) -1 else 0
+        val index = (base + delta + fonts.size) % fonts.size
+        previewFont(fonts[index].id)
+    }
+
+    private fun showFontPreviewList() {
+        val fonts = preparedFontPreviewOptions()
+        if (fonts.isEmpty()) return
+        val currentId = mFontPreviewCurrentFontId
+        val items = fonts.map { font ->
+            (if (font.id == currentId) "* " else "  ") + font.displayName
+        }
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_ace_editor_font)
+                .items(items)
+                .itemsCallback { dialog, _, which, _ ->
+                    fonts.getOrNull(which)?.let { previewFont(it.id) }
+                    dialog.dismiss()
+                }
+                .negativeText(R.string.dialog_button_dismiss)
+                .negativeColorRes(R.color.dialog_button_default)
+                .build()
+        }
+    }
+
+    private fun showFontPreviewFilter() {
+        val features = listOf(FontFeature.NERD, FontFeature.VARIABLE, FontFeature.CN)
+        val labels = listOf(
+            context.getString(R.string.text_ace_editor_font_feature_nerd),
+            context.getString(R.string.text_ace_editor_font_feature_variable),
+            context.getString(R.string.text_ace_editor_font_feature_cn),
+        )
+        val filter = AceEditorFontUiPreferences.getPreviewFilter(context)
+        val checked = features.indices
+            .filter { features[it] !in filter.excludedFeatures }
+            .toTypedArray()
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_filter)
+                .options(
+                    listOf(
+                        MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) { dialog ->
+                            dialog.setSelectedIndices(features.indices.toList().toTypedArray())
+                        },
+                    ),
+                )
+                .items(labels)
+                .itemsCallbackMultiChoice(checked) { _, which, _ ->
+                    val included = which.mapTo(mutableSetOf()) { features[it] }
+                    AceEditorFontUiPreferences.setExcludedFeatures(context, features.toSet() - included)
+                    val next = preparedFontPreviewOptions().firstOrNull { it.id == mFontPreviewCurrentFontId }
+                        ?: preparedFontPreviewOptions().firstOrNull()
+                    next?.let { previewFont(it.id) }
+                    true
+                }
+                .choiceWidgetThemeColor()
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .build()
+        }
+    }
+
+    private fun isFontInstalledForPreview(option: AceEditorFontOption): Boolean {
+        if (option.delivery != AceEditorFontOption.Delivery.DOWNLOADABLE) return true
+        return mAceFontManager.installationState(option)?.status in setOf(
+            FontInstallationStatus.INSTALLED,
+            FontInstallationStatus.UPDATE_AVAILABLE,
+        )
+    }
+
+    private fun observeCurrentFontDownload(option: AceEditorFontOption) {
+        if (option.delivery != AceEditorFontOption.Delivery.DOWNLOADABLE) return
+        val subscription = mAceFontManager.observeActiveDownload(option.id) { event ->
+            handleFontPreviewDownloadEvent(option.id, event)
+        } ?: return
+        mFontPreviewDownloadId = option.id
+        mFontPreviewDownloadSubscription = subscription
+    }
+
+    private fun startFontPreviewDownload(option: AceEditorFontOption) {
+        val remote = option.remoteFont ?: return
+        detachFontPreviewDownloadObserver()
+        mFontPreviewDownloadId = option.id
+        mFontPreviewDownloadSubscription = runCatching {
+            mAceFontManager.download(option.id, remote.artifact.sha256) { event ->
+                handleFontPreviewDownloadEvent(option.id, event)
+            }
+        }.getOrElse { error ->
+            mFontPreviewDownloadId = null
+            ViewUtils.showToast(
+                context,
+                context.getString(R.string.text_ace_editor_font_download_failed, error.message ?: error.toString()),
+                true,
+            )
+            null
+        }
+        refreshFontPreviewBar(option)
+    }
+
+    private fun handleFontPreviewDownloadEvent(fontId: String, event: FontDownloadEvent) {
+        if (!mFontPreviewActive || mFontPreviewCurrentFontId != fontId) return
+        when (event) {
+            FontDownloadEvent.Queued -> {
+                mFontPreviewProgress.isIndeterminate = true
+                mFontPreviewProgress.visibility = View.VISIBLE
+            }
+            is FontDownloadEvent.Progress -> {
+                mFontPreviewProgress.isIndeterminate = event.totalBytes <= 0L
+                if (event.totalBytes > 0L) {
+                    mFontPreviewProgress.progress = (
+                        event.bytesDownloaded.coerceIn(0L, event.totalBytes) * mFontPreviewProgress.max /
+                            event.totalBytes
+                        ).toInt()
+                }
+                mFontPreviewProgress.visibility = View.VISIBLE
+            }
+            is FontDownloadEvent.Success -> {
+                clearFinishedFontPreviewDownload()
+                themeFontService.previewAceFont(fontId)
+            }
+            is FontDownloadEvent.Failure -> {
+                clearFinishedFontPreviewDownload()
+                ViewUtils.showToast(
+                    context,
+                    context.getString(
+                        R.string.text_ace_editor_font_download_failed,
+                        event.error.message ?: event.error.toString(),
+                    ),
+                    true,
+                )
+            }
+            FontDownloadEvent.Cancelled -> clearFinishedFontPreviewDownload()
+        }
+        mFontPreviewOptions.firstOrNull { it.id == fontId }?.let(::refreshFontPreviewBar)
+    }
+
+    private fun clearFinishedFontPreviewDownload() {
+        mFontPreviewDownloadSubscription = null
+        mFontPreviewDownloadId = null
+        mFontPreviewProgress.isIndeterminate = false
+        mFontPreviewProgress.progress = 0
+        mFontPreviewProgress.visibility = View.INVISIBLE
+    }
+
+    private fun detachFontPreviewDownloadObserver() {
+        mFontPreviewDownloadSubscription?.cancel()
+        mFontPreviewDownloadSubscription = null
+        mFontPreviewDownloadId = null
+        mFontPreviewProgress.isIndeterminate = false
+        mFontPreviewProgress.progress = 0
+        mFontPreviewProgress.visibility = View.INVISIBLE
+    }
+
+    private fun useOrDownloadPreviewFont() {
+        val option = mFontPreviewOptions.firstOrNull { it.id == mFontPreviewCurrentFontId } ?: return
+        if (mFontPreviewDownloadId == option.id && mAceFontManager.isDownloading(option.id)) {
+            mAceFontManager.cancelDownload(option.id)
+            return
+        }
+        if (isFontInstalledForPreview(option)) {
+            finishFontPreview(useFont = true)
+        } else {
+            startFontPreviewDownload(option)
+        }
+    }
+
+    private fun refreshFontPreviewBar(option: AceEditorFontOption) {
+        if (!mFontPreviewActive) return
+        mThemePreviewTitle.text = option.displayName
+        val fonts = preparedFontPreviewOptions()
+        val width = fonts.size.toString().length.coerceAtLeast(2)
+        val index = fonts.indexOfFirst { it.id == option.id }.takeIf { it >= 0 }?.plus(1)
+        mThemePreviewIndex.text = "${index?.toString()?.padStart(width, '0') ?: "--"}/${fonts.size.toString().padStart(width, '0')}"
+        mThemePreviewFilter.setImageResource(R.drawable.ic_filter)
+        mThemePreviewFilter.contentDescription = context.getString(R.string.text_filter)
+
+        val downloading = mFontPreviewDownloadId == option.id && mAceFontManager.isDownloading(option.id)
+        val installed = isFontInstalledForPreview(option)
+        when {
+            downloading -> {
+                mThemePreviewUse.setImageResource(R.drawable.ic_stop_button_fill)
+                mThemePreviewUse.contentDescription = context.getString(R.string.text_stop)
+                mThemePreviewUse.isEnabled = true
+                mThemePreviewUse.alpha = 1f
+            }
+            installed -> {
+                mThemePreviewUse.setImageResource(R.drawable.mt_ic_check_white_36dp)
+                mThemePreviewUse.contentDescription = context.getString(R.string.text_theme_preview_use)
+                mThemePreviewUse.isEnabled = true
+                mThemePreviewUse.alpha = 1f
+            }
+            else -> {
+                mThemePreviewUse.setImageResource(R.drawable.ic_download_thicker)
+                mThemePreviewUse.contentDescription = context.getString(R.string.text_download)
+                val downloadable = option.remoteFont != null &&
+                    mAceFontManager.installationState(option)?.status != FontInstallationStatus.REVOKED
+                mThemePreviewUse.isEnabled = downloadable
+                mThemePreviewUse.alpha = if (downloadable) 1f else 0.38f
+            }
+        }
+        refreshFontPreviewColors()
+    }
+
+    private fun refreshFontPreviewColors() {
+        val theme = themeFontService.currentTheme
+        val backgroundColor = theme?.let(themeFontService::inputMethodBarBackgroundColor) ?: Color.WHITE
+        val foregroundColor = theme?.let(themeFontService::inputMethodBarForegroundColor)
+            ?: ColorUtils.adjustColorForContrast(backgroundColor, ThemeColorManager.colorPrimary, 3.0)
+        applyEditorPreviewColors(backgroundColor, foregroundColor)
+    }
+
+    private fun finishFontPreview(useFont: Boolean) {
+        if (!mFontPreviewActive) return
+        val returnToFontDialog = mFontPreviewReturnToFontDialog
+        val selectedId = mFontPreviewCurrentFontId
+        val originalId = mFontPreviewOriginalFontId
+
+        mFontPreviewActive = false
+        mFontPreviewReturnToFontDialog = false
+        mFontPreviewOptions = emptyList()
+        mFontPreviewCurrentFontId = null
+        mFontPreviewOriginalFontId = null
+        mPreviewMode = PreviewMode.None
+        mThemePreviewUse.isEnabled = true
+        mThemePreviewUse.alpha = 1f
+        mThemePreviewBar.isVisible = false
+        detachFontPreviewDownloadObserver()
+        mFontPreviewCatalogRefreshSubscription?.cancel()
+        mFontPreviewCatalogRefreshSubscription = null
+
+        if (useFont && selectedId != null) {
+            themeFontService.persistAndApplyAceFont(selectedId)
+        } else if (originalId != null) {
+            themeFontService.previewAceFont(originalId)
+        } else {
+            themeFontService.applyPreferredAceFont()
+        }
+
+        if (returnToFontDialog) {
+            post { selectAceEditorFont() }
         }
     }
 
@@ -2786,13 +3190,20 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun selectAceEditorFont() {
         DialogUtils.buildAndShowAdaptive {
-            AceEditorFontDialog.build(context, themeFontService.currentAceFont()) { font ->
-                themeFontService.persistAndApplyAceFont(font)
-                showToast(
-                    context,
-                    context.getString(R.string.text_ace_editor_font_changed, themeFontService.aceEditorFontLabel(font)),
-                )
-            }
+            AceEditorFontDialog.build(
+                context = context,
+                currentFontId = themeFontService.currentAceFont(),
+                onSelected = { font ->
+                    themeFontService.persistAndApplyAceFont(font)
+                    showToast(
+                        context,
+                        context.getString(R.string.text_ace_editor_font_changed, themeFontService.aceEditorFontLabel(font)),
+                    )
+                },
+                onPreviewRequested = { fontId ->
+                    openFontPreviewer(returnToFontDialog = true, initialFontId = fontId)
+                },
+            )
         }
     }
 
@@ -2818,6 +3229,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     listOf(
                         MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) { dialog ->
                             dialog.selectedIndex = defaultIndex
+                        },
+                        MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_details)) {
+                            DialogUtils.buildAndShowAdaptive {
+                                MaterialDialog.Builder(context)
+                                    .title(R.string.text_editor_theme)
+                                    .content(R.string.description_editor_theme_dialog)
+                                    .positiveText(R.string.dialog_button_dismiss)
+                                    .positiveColorRes(R.color.dialog_button_default)
+                                    .build()
+                            }
                         },
                     ),
                 )
@@ -3383,6 +3804,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 recordAceHistoryAction(themePreviewerHistoryAction())
                 openThemePreviewer(returnToThemeDialog = true, initialTheme = theme)
             },
+            fontPreviewHandler = { fontId ->
+                openFontPreviewer(returnToFontDialog = true, initialFontId = fontId)
+            },
         )
     }
 
@@ -3894,6 +4318,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 取消搜索统计任务.
         cancelSearchStats()
 
+        mFontPreviewDownloadSubscription?.cancel()
+        mFontPreviewDownloadSubscription = null
+        mFontPreviewCatalogRefreshSubscription?.cancel()
+        mFontPreviewCatalogRefreshSubscription = null
+
         editor.destroy()
         mAutoCompletion?.shutdown()
         if (mDebugging) {
@@ -3945,6 +4374,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             Dark -> Light
             Light -> All
         }
+    }
+
+    private enum class PreviewMode {
+        None,
+        Theme,
+        Font,
     }
 
     companion object {

@@ -22,9 +22,42 @@ class FontCatalogParserTest {
         assertEquals("https://example.test/LICENSE.txt", font.licenseUrl)
         assertEquals("LICENSE.txt", font.license.files.single().name)
         assertEquals("1", font.version)
+        assertTrue(font.features.isEmpty())
         assertEquals(font.artifact.urls.first(), font.artifact.url)
         assertEquals(font.artifact.sizeBytes, font.artifact.size)
         assertFalse(font.artifact.revoked)
+    }
+
+    @Test
+    fun parsesKnownFeaturesInCanonicalOrder() {
+        val json = FontTestFixtures.catalogJson().replace(
+            "\"author\": \"Test Author\"",
+            "\"features\": [\"cn\", \"nerd\", \"variable\"], \"author\": \"Test Author\"",
+        )
+
+        assertEquals(
+            listOf(FontFeature.NERD, FontFeature.VARIABLE, FontFeature.CN),
+            parser.parse(json).fonts.single().features.toList(),
+        )
+    }
+
+    @Test
+    fun rejectsUnknownDuplicateAndNonStringFeatures() {
+        val base = FontTestFixtures.catalogJson()
+        fun withFeatures(value: String) = base.replace(
+            "\"author\": \"Test Author\"",
+            "\"features\": $value, \"author\": \"Test Author\"",
+        )
+
+        assertThrows(FontCatalogParseException::class.java) {
+            parser.parse(withFeatures("[\"nerd\", \"future_feature\"]"))
+        }
+        assertThrows(FontCatalogParseException::class.java) {
+            parser.parse(withFeatures("[\"cn\", \"cn\"]"))
+        }
+        assertThrows(FontCatalogParseException::class.java) {
+            parser.parse(withFeatures("[\"variable\", 1]"))
+        }
     }
 
     @Test

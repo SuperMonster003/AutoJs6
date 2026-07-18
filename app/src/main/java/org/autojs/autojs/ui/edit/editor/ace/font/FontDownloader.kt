@@ -132,7 +132,8 @@ class FontMirrorsExhaustedException(fontId: String, failures: List<Throwable>) :
 
 /**
  * Streams WOFF2 files into [FontStore]. Requests for the same id and digest share one transfer;
- * cancellation is per subscriber and cancels the network call only after the last subscriber leaves.
+ * cancellation is per transfer-retaining subscriber and cancels the network call only after the
+ * last such subscriber leaves. Non-retaining observers can attach without changing task lifetime.
  */
 class FontDownloader(
     private val store: FontStore,
@@ -151,7 +152,12 @@ class FontDownloader(
     @JvmOverloads
     fun enqueue(font: RemoteFont, listener: FontDownloadListener? = null): FontDownloadSubscription {
         val future = ManagedFontFuture()
-        val subscriber = Subscriber(nextSubscriberId.incrementAndGet(), future, listener)
+        val subscriber = Subscriber(
+            id = nextSubscriberId.incrementAndGet(),
+            future = future,
+            listener = listener,
+            retainsTransfer = true,
+        )
         if (font.artifact.revoked) {
             val error = RevokedFontException(font.id)
             future.completeExceptionally(error)
@@ -191,10 +197,9 @@ class FontDownloader(
                 activeByFontId[font.id] = it
                 shouldStart = true
             }
-            task.subscribers[subscriber.id] = subscriber
+            future.cancellationHandler = { cancelSubscriber(task, subscriber.id) }
+            registerSubscriberLocked(task, subscriber, replayProgress = active != null)
         }
-        future.cancellationHandler = { cancelSubscriber(task, subscriber.id) }
-        dispatch(subscriber, FontDownloadEvent.Queued)
         if (shouldStart) {
             try {
                 workerExecutor.execute { runTask(task) }
@@ -202,6 +207,35 @@ class FontDownloader(
                 finishFailure(task, FontDownloadException("Font download worker rejected the task", e))
             }
         }
+        return FontDownloadSubscription(future) { future.cancel(false) }
+    }
+
+    /**
+     * Atomically attaches a non-retaining observer to an existing transfer.
+     *
+     * This method never creates a task. The observer receives [FontDownloadEvent.Queued] followed
+     * by the latest [FontDownloadEvent.Progress], if any, before later task events. Cancelling the
+     * returned subscription only detaches this observer and cannot stop the underlying transfer.
+     */
+    fun observeActive(
+        fontId: String,
+        listener: FontDownloadListener,
+    ): FontDownloadSubscription? {
+        val future = ManagedFontFuture()
+        val subscriber = Subscriber(
+            id = nextSubscriberId.incrementAndGet(),
+            future = future,
+            listener = listener,
+            retainsTransfer = false,
+        )
+        val task = synchronized(lock) {
+            val active = activeByFontId[fontId]
+                ?.takeIf { !it.cancelled && it.hasRetainingSubscribers() }
+                ?: return@synchronized null
+            future.cancellationHandler = { cancelSubscriber(active, subscriber.id) }
+            registerSubscriberLocked(active, subscriber, replayProgress = true)
+            active
+        } ?: return null
         return FontDownloadSubscription(future) { future.cancel(false) }
     }
 
@@ -225,7 +259,7 @@ class FontDownloader(
     }
 
     fun isDownloading(fontId: String): Boolean = synchronized(lock) {
-        activeByFontId[fontId]?.let { !it.cancelled && it.subscribers.isNotEmpty() } == true
+        activeByFontId[fontId]?.let { !it.cancelled && it.hasRetainingSubscribers() } == true
     }
 
     override fun close() {
@@ -295,7 +329,7 @@ class FontDownloader(
         val connection = source.open(url)
         synchronized(lock) {
             task.connection = connection
-            if (task.cancelled || task.subscribers.isEmpty()) connection.cancel()
+            if (task.cancelled || !task.hasRetainingSubscribers()) connection.cancel()
         }
         connection.use {
             checkNotCancelled(task)
@@ -353,9 +387,11 @@ class FontDownloader(
     private fun cancelSubscriber(task: SharedTask, subscriberId: Long): Boolean {
         val subscriber: Subscriber
         synchronized(lock) {
-            if (task.committing) return false
-            subscriber = task.subscribers.remove(subscriberId) ?: return false
-            if (task.subscribers.isEmpty()) {
+            val current = task.subscribers[subscriberId] ?: return false
+            if (task.committing && current.retainsTransfer) return false
+            task.subscribers.remove(subscriberId)
+            subscriber = current
+            if (subscriber.retainsTransfer && !task.hasRetainingSubscribers()) {
                 task.cancelled = true
                 task.connection?.cancel()
                 if (activeByFontId[task.font.id] === task) activeByFontId.remove(task.font.id)
@@ -396,8 +432,24 @@ class FontDownloader(
     }
 
     private fun notify(task: SharedTask, event: FontDownloadEvent) {
-        val subscribers = synchronized(lock) { task.subscribers.values.toList() }
+        val subscribers = synchronized(lock) {
+            if (event is FontDownloadEvent.Progress) task.lastProgress = event
+            task.subscribers.values.toList()
+        }
         subscribers.forEach { dispatch(it, event) }
+    }
+
+    /** Must be called with [lock] held so replay cannot race ahead of Queued. */
+    private fun registerSubscriberLocked(
+        task: SharedTask,
+        subscriber: Subscriber,
+        replayProgress: Boolean,
+    ) {
+        task.subscribers[subscriber.id] = subscriber
+        dispatch(subscriber, FontDownloadEvent.Queued)
+        if (replayProgress && task.subscribers.containsKey(subscriber.id)) {
+            task.lastProgress?.let { dispatch(subscriber, it) }
+        }
     }
 
     private fun dispatch(subscriber: Subscriber, event: FontDownloadEvent) {
@@ -415,7 +467,7 @@ class FontDownloader(
 
     private fun beginCommit(task: SharedTask) {
         synchronized(lock) {
-            if (task.cancelled || task.subscribers.isEmpty() || Thread.currentThread().isInterrupted) {
+            if (task.cancelled || !task.hasRetainingSubscribers() || Thread.currentThread().isInterrupted) {
                 throw CancellationException()
             }
             task.committing = true
@@ -423,7 +475,7 @@ class FontDownloader(
     }
 
     private fun isCancelled(task: SharedTask): Boolean = synchronized(lock) {
-        task.cancelled || task.subscribers.isEmpty()
+        task.cancelled || !task.hasRetainingSubscribers()
     }
 
     private class SharedTask(val font: RemoteFont) {
@@ -431,12 +483,16 @@ class FontDownloader(
         var connection: FontDownloadConnection? = null
         var cancelled: Boolean = false
         var committing: Boolean = false
+        var lastProgress: FontDownloadEvent.Progress? = null
+
+        fun hasRetainingSubscribers(): Boolean = subscribers.values.any { it.retainsTransfer }
     }
 
     private data class Subscriber(
         val id: Long,
         val future: ManagedFontFuture,
         val listener: FontDownloadListener?,
+        val retainsTransfer: Boolean,
     )
 
     private class ManagedFontFuture : CompletableFuture<InstalledFont>() {

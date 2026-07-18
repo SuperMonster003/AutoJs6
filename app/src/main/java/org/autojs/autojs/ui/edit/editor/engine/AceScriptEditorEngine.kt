@@ -6,7 +6,6 @@ import android.view.View
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.ace.AceCodeEditor
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontPreferences
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
@@ -23,8 +22,6 @@ class AceScriptEditorEngine(
 
     private val cursorCallbacks = LinkedHashSet<EditorCursorChangeListener>()
     private val textChangeCallbacks = LinkedHashSet<EditorTextChangeListener>()
-    private val fontManager = AceEditorFontManager.get(context)
-
     private var breakpointChangeListener: EditorBreakpointChangeListener? = null
     private var readOnly = false
     private var redoUndoEnabled = true
@@ -127,15 +124,12 @@ class AceScriptEditorEngine(
             }
         }
         aceCodeEditor.setTextSizeSp(fontSizeSp)
-        val descriptor = fontManager.descriptor(editorFontId)
-        editorFontId = descriptor.id
-        aceCodeEditor.setFontDescriptor(descriptor)
+        aceCodeEditor.setAceEditorFont(editorFontId)
     }
 
     fun setAceEditorFont(fontId: String) {
-        val descriptor = fontManager.descriptor(fontId)
-        editorFontId = descriptor.id
-        aceCodeEditor.setFontDescriptor(descriptor)
+        editorFontId = fontId
+        aceCodeEditor.setAceEditorFont(fontId)
     }
 
     override fun setInitialText(text: String?) {

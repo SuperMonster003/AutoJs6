@@ -1696,4 +1696,10 @@
     <string name="text_yearly_task">Yearly task</string>
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
+    <string name="text_sort_by_name_desc">Name (Z-A)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (icon glyphs)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (variable font)</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (Simplified Chinese)</string>
+    <string name="description_ace_editor_font_dialog">Nerd/NF fonts include extra programming and icon glyphs. Var means variable font. CN/SC indicates Simplified Chinese glyph coverage.\n\nTap an installed font to select it. Tap a font that is not installed to open its download prompt. Swipe right to download or update and swipe left to delete.\n\nIn preview, use List and Filter to choose fonts, Previous and Next to browse, Exit to restore the original font, and Use to keep the previewed font. For a font that is not installed, Use becomes Download; while downloading it becomes Stop. The preview is applied as soon as downloading finishes. Preview filters are remembered and can be reset to their defaults.</string>
+    <string name="description_editor_theme_dialog">Editor themes control syntax colors and the editing surface. In preview, use List to choose a theme, All/Dark/Light to cycle the theme filter, Previous and Next to browse, Exit to restore the original theme, and Use to keep the previewed theme.</string>
 </resources>

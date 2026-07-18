@@ -28,6 +28,20 @@ data class FontCatalog(
     fun find(fontId: String): RemoteFont? = fonts.firstOrNull { it.id == fontId }
 }
 
+/** Optional, catalog-owned capabilities used to filter downloadable font variants. */
+enum class FontFeature(val catalogValue: String) {
+    NERD("nerd"),
+    VARIABLE("variable"),
+    CN("cn"),
+    ;
+
+    companion object {
+        fun fromCatalogValue(value: String): FontFeature? = entries.firstOrNull {
+            it.catalogValue == value
+        }
+    }
+}
+
 data class RemoteFont(
     val id: String,
     val displayName: String,
@@ -37,6 +51,7 @@ data class RemoteFont(
     val license: FontLicense,
     val source: FontSource,
     val artifact: FontArtifact,
+    val features: Set<FontFeature> = emptySet(),
 ) {
     val licenseName: String get() = license.name
     val licenseUrl: String? get() = license.files.firstNotNullOfOrNull { it.url }

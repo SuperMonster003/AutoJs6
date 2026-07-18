@@ -1699,4 +1699,10 @@
     <string name="text_yearly_task">Tâche annuelle</string>
     <string name="warn_continue_operation_without_saving_settings">Les parametres ne sont pas enregistres. Continuer?</string>
     <string name="warn_exit_without_saving_settings">Les parametres ne sont pas enregistres. Quitter?</string>
+    <string name="text_sort_by_name_desc">Nom (Z-A)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (glyphes d’icônes)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (police variable)</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (chinois simplifié)</string>
+    <string name="description_ace_editor_font_dialog">Les polices Nerd/NF incluent des symboles de programmation et des glyphes d’icônes supplémentaires. Var désigne une police variable. CN/SC indique la prise en charge des glyphes chinois simplifiés.\n\nTouchez une police installée pour la sélectionner. Touchez une police non installée pour ouvrir la confirmation de téléchargement. Balayez vers la droite pour télécharger ou mettre à jour, et vers la gauche pour supprimer.\n\nDans l’aperçu, utilisez Liste et Filtre pour choisir les polices, Précédent et Suivant pour les parcourir, Quitter pour restaurer la police initiale et Utiliser pour conserver la police actuelle. Si elle n’est pas installée, Utiliser devient Télécharger ; pendant le téléchargement, il devient Arrêter. Une fois terminé, l’aperçu est appliqué immédiatement. Les filtres sont mémorisés et peuvent être réinitialisés.</string>
+    <string name="description_editor_theme_dialog">Les thèmes de l’éditeur contrôlent les couleurs de syntaxe et l’apparence de la zone d’édition. Dans l’aperçu, utilisez Liste pour choisir un thème, Tous/Sombre/Clair pour alterner le filtre, Précédent et Suivant pour les parcourir, Quitter pour restaurer le thème initial et Utiliser pour conserver le thème actuel.</string>
 </resources>

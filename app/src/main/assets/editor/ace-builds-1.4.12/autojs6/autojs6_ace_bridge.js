@@ -99,8 +99,8 @@
     var IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS = 800;
     var FIRST_PAINT_STABLE_FRAME_COUNT = 3;
     var FIRST_PAINT_MAX_WAIT_MS = 1800;
-    var FONT_LOAD_TIMEOUT_MS = 10000;
-    var INSTALLED_FONT_URL_PREFIX = "file:///android_asset/editor/ace-builds-1.4.12/autojs6-fonts/";
+    var FONT_LOAD_TIMEOUT_MS = 30000;
+    var INSTALLED_FONT_URL_PREFIX = "https://appassets.androidplatform.net/autojs6-fonts/";
     var PINCH_CURSOR_REVEAL_SUPPRESS_MS = 3000;
     var PINCH_IME_SUPPRESS_MS = 1800;
     var PINCH_POST_TOUCH_SUPPRESS_MS = 650;

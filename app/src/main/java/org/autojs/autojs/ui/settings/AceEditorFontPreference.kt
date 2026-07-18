@@ -10,6 +10,8 @@ import org.autojs.autojs.util.DialogUtils
 
 class AceEditorFontPreference : MaterialPreference {
 
+    private var fontPreviewHandler: ((String) -> Unit)? = null
+
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         init()
     }
@@ -52,11 +54,20 @@ class AceEditorFontPreference : MaterialPreference {
             return
         }
         DialogUtils.buildAndShowAdaptive {
-            AceEditorFontDialog.build(prefContext, currentFontId()) { fontId ->
-                AceEditorFontPreferences.setId(fontId)
-                notifyChanged()
-            }
+            AceEditorFontDialog.build(
+                context = prefContext,
+                currentFontId = currentFontId(),
+                onSelected = { fontId ->
+                    AceEditorFontPreferences.setId(fontId)
+                    notifyChanged()
+                },
+                onPreviewRequested = fontPreviewHandler,
+            )
         }
+    }
+
+    fun setFontPreviewHandler(handler: ((String) -> Unit)?) {
+        fontPreviewHandler = handler
     }
 
     private fun currentFontId(): String = AceEditorFontPreferences.getId()
