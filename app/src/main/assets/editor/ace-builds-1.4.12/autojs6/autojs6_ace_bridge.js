@@ -30,6 +30,9 @@
     var fontMetricsRefreshTimer = null;
     var fontMetricsRefreshFrameScheduled = false;
     var fontMetricsReadySerial = 0;
+    var bundledFontLoadPending = false;
+    var bundledFontLoadSettled = false;
+    var bundledFontLoadTimer = null;
     var lastActionModeSelectedText = "";
     var nativeActionModeActive = false;
     var selectionMenuSuppressed = false;
@@ -99,7 +102,9 @@
     var IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS = 800;
     var FIRST_PAINT_STABLE_FRAME_COUNT = 3;
     var FIRST_PAINT_MAX_WAIT_MS = 1800;
+    var BUNDLED_FONT_LOAD_TIMEOUT_MS = 5000;
     var FONT_LOAD_TIMEOUT_MS = 30000;
+    var BUNDLED_FONT_LOAD_PROBE = '14px "Iosevka"';
     var INSTALLED_FONT_URL_PREFIX = "https://appassets.androidplatform.net/autojs6-fonts/";
     var PINCH_CURSOR_REVEAL_SUPPRESS_MS = 3000;
     var PINCH_IME_SUPPRESS_MS = 1800;
@@ -412,6 +417,50 @@
         activeInstalledFontFace = nextFace || null;
     }
 
+    function ensureBundledFontLoaded() {
+        if (bundledFontLoadSettled || bundledFontLoadPending) {
+            return;
+        }
+        if (!document.fonts || typeof document.fonts.load !== "function") {
+            bundledFontLoadSettled = true;
+            return;
+        }
+
+        bundledFontLoadPending = true;
+        var completed = false;
+        var finish = function(error) {
+            if (completed) {
+                return;
+            }
+            completed = true;
+            bundledFontLoadPending = false;
+            bundledFontLoadSettled = true;
+            if (bundledFontLoadTimer !== null) {
+                global.clearTimeout(bundledFontLoadTimer);
+                bundledFontLoadTimer = null;
+            }
+            if (error) {
+                notifyRecoverableError("bundledFontLoad", error);
+                return;
+            }
+            scheduleFontMetricsRefresh("bundled_font_ready");
+        };
+
+        var loadResult;
+        try {
+            loadResult = document.fonts.load(BUNDLED_FONT_LOAD_PROBE);
+        } catch (error) {
+            finish(error);
+            return;
+        }
+        bundledFontLoadTimer = global.setTimeout(function() {
+            finish(new Error("Timed out while loading bundled Iosevka font"));
+        }, BUNDLED_FONT_LOAD_TIMEOUT_MS);
+        Promise.resolve(loadResult).then(function() {
+            finish(null);
+        }, finish);
+    }
+
     function applyFontFamilyAndRefresh(fontFamily, reason) {
         var resolved = applyFontFamily(fontFamily);
         if (editor && editor.setOption) {
@@ -461,6 +510,7 @@
             replaceActiveInstalledFontFace(null);
             cssFamily = SYSTEM_FONT_FAMILY;
         } else if (descriptor.source === "bundled") {
+            ensureBundledFontLoaded();
             replaceActiveInstalledFontFace(null);
             cssFamily = BUNDLED_FONT_FAMILY;
         } else {
@@ -480,6 +530,7 @@
 
     function applyFontLoadFallback(descriptor, error) {
         try {
+            ensureBundledFontLoaded();
             replaceActiveInstalledFontFace(null);
             applyFontFamilyAndRefresh(BUNDLED_FONT_FAMILY, "font_load_fallback");
             notifyStateChanged("fontFamilyFallback");
@@ -500,7 +551,12 @@
         if (!pendingFontDescriptorLoad) {
             return false;
         }
+        if (pendingFontDescriptorLoad.firstPaintFallbackApplied) {
+            return false;
+        }
+        pendingFontDescriptorLoad.firstPaintFallbackApplied = true;
         try {
+            ensureBundledFontLoaded();
             replaceActiveInstalledFontFace(null);
             applyFontFamilyAndRefresh(BUNDLED_FONT_FAMILY, "font_first_paint_fallback");
             notifyStateChanged("fontFamilyFirstPaintFallback");
@@ -696,7 +752,8 @@
             lineHeight > 0 &&
             characterWidth > 0 &&
             themeReady &&
-            !pendingFontDescriptorLoad;
+            !pendingFontDescriptorLoad &&
+            !bundledFontLoadPending;
         var containerStyle = computedStyleOf(container);
         var gutterStyle = computedStyleOf(gutter);
         return {
@@ -710,6 +767,7 @@
                 Math.round(lineHeight),
                 Math.round(characterWidth),
                 pendingFontDescriptorLoad ? "font-loading" : "font-ready",
+                bundledFontLoadPending ? "bundled-font-loading" : "bundled-font-ready",
                 container.className,
                 containerStyle && containerStyle.backgroundColor || "",
                 gutterStyle && gutterStyle.backgroundColor || ""
@@ -735,15 +793,17 @@
         }
         if (firstPaintRequestStartedAt > 0 && now - firstPaintRequestStartedAt >= FIRST_PAINT_MAX_WAIT_MS) {
             fallbackWhilePendingFontLoadsForFirstPaint();
-            callBridge("notifyEvent", [
-                "firstPaintForced",
-                JSON.stringify({
-                    reason: String(reason || ""),
-                    signature: String(snapshot.signature || "")
-                })
-            ]);
-            notifyFirstPaint();
-            return;
+            if (!bundledFontLoadPending) {
+                callBridge("notifyEvent", [
+                    "firstPaintForced",
+                    JSON.stringify({
+                        reason: String(reason || ""),
+                        signature: String(snapshot.signature || "")
+                    })
+                ]);
+                notifyFirstPaint();
+                return;
+            }
         }
         var raf = global.requestAnimationFrame || function(run) { return setTimeout(run, 16); };
         raf(function() {
@@ -2352,10 +2412,13 @@
     }
 
     function shouldSkipCursorReveal(reason) {
+        reason = String(reason || "").toLowerCase();
+        if (isFontFamilyMetricsRefreshReason(reason)) {
+            return true;
+        }
         if (!hasActiveSelection()) {
             return false;
         }
-        reason = String(reason || "").toLowerCase();
         if (isExplicitViewportRevealReason(reason)) {
             return false;
         }
@@ -2369,6 +2432,13 @@
             reason.indexOf("resize:") === 0 ||
             reason.indexOf("action_mode") >= 0 ||
             reason.indexOf("window_resize") >= 0;
+    }
+
+    function isFontFamilyMetricsRefreshReason(reason) {
+        return reason.indexOf("font_descriptor") >= 0 ||
+            reason.indexOf("font_family") >= 0 ||
+            reason.indexOf("font_load_fallback") >= 0 ||
+            reason.indexOf("font_first_paint_fallback") >= 0;
     }
 
     function isExplicitViewportRevealReason(reason) {

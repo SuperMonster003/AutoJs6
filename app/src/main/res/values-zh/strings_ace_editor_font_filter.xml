@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text_ace_editor_font_sort_type_locked">类型锁定</string>
+    <string name="text_ace_editor_font_filter_feature_item">字体特性 · %1$s</string>
+    <string name="text_ace_editor_font_filter_type_item">类型 · %1$s</string>
+    <string name="text_ace_editor_font_filter_feature_required">请至少选择一个字体特性筛选条件</string>
+    <string name="text_ace_editor_font_filter_type_required">请至少选择一个字体类型筛选条件</string>
+    <string name="text_ace_editor_font_filter_no_matches">没有符合当前筛选条件的字体</string>
+</resources>

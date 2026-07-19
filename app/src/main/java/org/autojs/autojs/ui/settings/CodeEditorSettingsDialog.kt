@@ -77,7 +77,9 @@ class CodeEditorSettingsDialog : DialogFragment() {
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 height,
-            )
+            ).apply {
+                setPadding(context.dp(8), 0, context.dp(8), 0)
+            }
         }
     }
 

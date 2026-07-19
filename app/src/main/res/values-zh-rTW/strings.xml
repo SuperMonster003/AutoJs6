@@ -588,6 +588,7 @@
     <string name="text_ace_editor_fallback_native" formatted="true">Ace 編輯器失敗 (%1$s); 已切換至 JsDroidEditor. 可在更多選單中複製 Ace 診斷資訊.</string>
     <string name="text_ace_editor_font">編輯器字型</string>
     <string name="text_ace_editor_font_changed" formatted="true">編輯器字型已切換為 %s</string>
+    <string name="text_ace_editor_font_built_in">內置</string>
     <string name="text_ace_font_ligatures_enabled">字型連字</string>
     <string name="text_ace_font_styles_enabled">特殊字型樣式</string>
     <string name="text_ace_get_text">取得文字</string>

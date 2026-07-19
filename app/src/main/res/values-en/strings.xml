@@ -588,6 +588,7 @@
     <string name="text_ace_editor_fallback_native" formatted="true">Ace editor failed (%1$s); switched to JsDroidEditor. Copy Ace diagnostics from the More menu for details</string>
     <string name="text_ace_editor_font">Editor font</string>
     <string name="text_ace_editor_font_changed" formatted="true">Editor font switched to %s</string>
+    <string name="text_ace_editor_font_built_in">Built in</string>
     <string name="text_ace_font_ligatures_enabled">Font ligatures</string>
     <string name="text_ace_font_styles_enabled">Font styles</string>
     <string name="text_ace_get_text">Get text</string>

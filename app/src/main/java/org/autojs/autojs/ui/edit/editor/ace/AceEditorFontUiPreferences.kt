@@ -6,13 +6,21 @@ import androidx.core.content.edit
 import org.autojs.autojs.ui.edit.editor.ace.font.FontFeature
 import org.autojs.autojs6.R
 
+enum class AceEditorFontSortField(
+    val typeLockedByDefault: Boolean,
+) {
+    NAME(typeLockedByDefault = true),
+    SIZE(typeLockedByDefault = false),
+}
+
 enum class AceEditorFontSortMode(
     @param:StringRes val labelRes: Int,
+    val field: AceEditorFontSortField,
 ) {
-    NAME_ASC(R.string.text_sort_by_name_asc),
-    NAME_DESC(R.string.text_sort_by_name_desc),
-    SIZE_ASC(R.string.text_sort_by_size_asc),
-    SIZE_DESC(R.string.text_sort_by_size_desc),
+    NAME_ASC(R.string.text_sort_by_name_asc, AceEditorFontSortField.NAME),
+    NAME_DESC(R.string.text_sort_by_name_desc, AceEditorFontSortField.NAME),
+    SIZE_ASC(R.string.text_sort_by_size_asc, AceEditorFontSortField.SIZE),
+    SIZE_DESC(R.string.text_sort_by_size_desc, AceEditorFontSortField.SIZE),
     ;
 
     companion object {
@@ -23,11 +31,40 @@ enum class AceEditorFontSortMode(
     }
 }
 
+enum class AceEditorFontType(
+    val storageValue: String,
+    internal val sortPriority: Int,
+) {
+    BUILT_IN("built_in", 0),
+    INSTALLED("installed", 1),
+    NOT_INSTALLED("not_installed", 2),
+    ;
+
+    companion object {
+        fun fromStorageValue(value: String): AceEditorFontType? = entries.firstOrNull {
+            it.storageValue == value
+        }
+    }
+}
+
 data class AceEditorFontPreviewFilter(
     val excludedFeatures: Set<FontFeature> = emptySet(),
+    val excludedTypes: Set<AceEditorFontType> = emptySet(),
 ) {
-    fun allows(option: AceEditorFontOption): Boolean =
-        option.features.none(excludedFeatures::contains)
+    val hasSelectedFeatures: Boolean
+        get() = excludedFeatures.size < FontFeature.entries.size
+
+    val hasSelectedTypes: Boolean
+        get() = excludedTypes.size < AceEditorFontType.entries.size
+
+    fun allows(option: AceEditorFontOption): Boolean {
+        if (!hasSelectedFeatures || !hasSelectedTypes || option.type in excludedTypes) return false
+
+        // Selecting every feature means no feature restriction, so fonts without optional
+        // catalog features remain visible by default. Once the user narrows the selection,
+        // an option must explicitly advertise at least one selected feature.
+        return excludedFeatures.isEmpty() || option.features.any { it !in excludedFeatures }
+    }
 
     companion object {
         val DEFAULT = AceEditorFontPreviewFilter()
@@ -39,7 +76,10 @@ object AceEditorFontUiPreferences {
 
     private const val SHARED_PREFERENCES_NAME = "ace_editor_font_ui_preferences"
     private const val KEY_SORT_MODE = "key_\$_ace_editor_font_sort_mode"
+    private const val KEY_NAME_SORT_TYPE_LOCKED = "key_\$_ace_editor_font_name_sort_type_locked"
+    private const val KEY_SIZE_SORT_TYPE_LOCKED = "key_\$_ace_editor_font_size_sort_type_locked"
     private const val KEY_EXCLUDED_PREVIEW_FEATURES = "key_\$_ace_editor_font_preview_excluded_features"
+    private const val KEY_EXCLUDED_PREVIEW_TYPES = "key_\$_ace_editor_font_preview_excluded_types"
 
     fun getSortMode(context: Context): AceEditorFontSortMode =
         AceEditorFontSortMode.fromStoredValue(preferences(context).getString(KEY_SORT_MODE, null))
@@ -58,10 +98,43 @@ object AceEditorFontUiPreferences {
         preferences(context).edit { remove(KEY_SORT_MODE) }
     }
 
+    fun getTypeLocked(context: Context, field: AceEditorFontSortField): Boolean =
+        preferences(context).getBoolean(typeLockedKey(field), field.typeLockedByDefault)
+
+    fun setTypeLocked(
+        context: Context,
+        field: AceEditorFontSortField,
+        typeLocked: Boolean,
+    ) {
+        preferences(context).edit {
+            if (typeLocked == field.typeLockedByDefault) {
+                remove(typeLockedKey(field))
+            } else {
+                putBoolean(typeLockedKey(field), typeLocked)
+            }
+        }
+    }
+
+    fun resetTypeLocks(context: Context) {
+        preferences(context).edit {
+            remove(KEY_NAME_SORT_TYPE_LOCKED)
+            remove(KEY_SIZE_SORT_TYPE_LOCKED)
+        }
+    }
+
     fun sortedOptions(
         context: Context,
         options: List<AceEditorFontOption>,
-    ): List<AceEditorFontOption> = options.sortedWith(comparator(getSortMode(context)))
+    ): List<AceEditorFontOption> {
+        val mode = getSortMode(context)
+        return sortedOptions(options, mode, getTypeLocked(context, mode.field))
+    }
+
+    internal fun sortedOptions(
+        options: List<AceEditorFontOption>,
+        mode: AceEditorFontSortMode,
+        typeLocked: Boolean,
+    ): List<AceEditorFontOption> = options.sortedWith(comparator(mode, typeLocked))
 
     fun getPreviewFilter(context: Context): AceEditorFontPreviewFilter {
         val byCatalogValue = FontFeature.entries.associateBy(FontFeature::catalogValue)
@@ -69,11 +142,17 @@ object AceEditorFontUiPreferences {
             .getStringSet(KEY_EXCLUDED_PREVIEW_FEATURES, emptySet())
             .orEmpty()
             .mapNotNullTo(linkedSetOf()) { byCatalogValue[it] }
-        return AceEditorFontPreviewFilter(excluded)
+        val byTypeValue = AceEditorFontType.entries.associateBy(AceEditorFontType::storageValue)
+        val excludedTypes = preferences(context)
+            .getStringSet(KEY_EXCLUDED_PREVIEW_TYPES, emptySet())
+            .orEmpty()
+            .mapNotNullTo(linkedSetOf()) { byTypeValue[it] }
+        return AceEditorFontPreviewFilter(excluded, excludedTypes)
     }
 
     fun setPreviewFilter(context: Context, filter: AceEditorFontPreviewFilter) {
         setExcludedFeatures(context, filter.excludedFeatures)
+        setExcludedTypes(context, filter.excludedTypes)
     }
 
     fun setExcludedFeatures(context: Context, features: Set<FontFeature>) {
@@ -89,8 +168,24 @@ object AceEditorFontUiPreferences {
         }
     }
 
+    fun setExcludedTypes(context: Context, types: Set<AceEditorFontType>) {
+        preferences(context).edit {
+            if (types.isEmpty()) {
+                remove(KEY_EXCLUDED_PREVIEW_TYPES)
+            } else {
+                putStringSet(
+                    KEY_EXCLUDED_PREVIEW_TYPES,
+                    types.mapTo(linkedSetOf(), AceEditorFontType::storageValue),
+                )
+            }
+        }
+    }
+
     fun resetPreviewFilter(context: Context) {
-        preferences(context).edit { remove(KEY_EXCLUDED_PREVIEW_FEATURES) }
+        preferences(context).edit {
+            remove(KEY_EXCLUDED_PREVIEW_FEATURES)
+            remove(KEY_EXCLUDED_PREVIEW_TYPES)
+        }
     }
 
     fun filteredPreviewOptions(
@@ -111,7 +206,15 @@ object AceEditorFontUiPreferences {
         Context.MODE_PRIVATE,
     )
 
-    private fun comparator(mode: AceEditorFontSortMode): Comparator<AceEditorFontOption> {
+    private fun typeLockedKey(field: AceEditorFontSortField): String = when (field) {
+        AceEditorFontSortField.NAME -> KEY_NAME_SORT_TYPE_LOCKED
+        AceEditorFontSortField.SIZE -> KEY_SIZE_SORT_TYPE_LOCKED
+    }
+
+    private fun comparator(
+        mode: AceEditorFontSortMode,
+        typeLocked: Boolean,
+    ): Comparator<AceEditorFontOption> {
         val nameAscending = Comparator<AceEditorFontOption> { left, right ->
             left.displayName.compareTo(right.displayName)
                 .takeIf { it != 0 }
@@ -133,11 +236,14 @@ object AceEditorFontUiPreferences {
                 else -> nameAscending.compare(left, right)
             }
         }
-        return when (mode) {
+        val fieldComparator = when (mode) {
             AceEditorFontSortMode.NAME_ASC -> nameAscending
             AceEditorFontSortMode.NAME_DESC -> nameDescending
             AceEditorFontSortMode.SIZE_ASC -> sizeComparator(descending = false)
             AceEditorFontSortMode.SIZE_DESC -> sizeComparator(descending = true)
         }
+        if (!typeLocked) return fieldComparator
+        return compareBy<AceEditorFontOption> { it.type.sortPriority }
+            .then(fieldComparator)
     }
 }

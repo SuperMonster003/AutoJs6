@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text_ace_editor_font_sort_type_locked">Закрепить тип</string>
+    <string name="text_ace_editor_font_filter_feature_item">Характеристика шрифта · %1$s</string>
+    <string name="text_ace_editor_font_filter_type_item">Тип · %1$s</string>
+    <string name="text_ace_editor_font_filter_feature_required">Выберите хотя бы одну характеристику шрифта</string>
+    <string name="text_ace_editor_font_filter_type_required">Выберите хотя бы один тип шрифта</string>
+    <string name="text_ace_editor_font_filter_no_matches">Нет шрифтов, соответствующих выбранным фильтрам</string>
+</resources>

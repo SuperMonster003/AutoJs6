@@ -593,6 +593,7 @@
     <string name="text_ace_editor_fallback_native" formatted="true">فشل محرر Ace (%1$s); تم التبديل إلى JsDroidEditor. انسخ تشخيصات Ace من قائمة المزيد للاطلاع على التفاصيل</string>
     <string name="text_ace_editor_font">خط المحرر</string>
     <string name="text_ace_editor_font_changed" formatted="true">تم تبديل خط المحرر إلى %s</string>
+    <string name="text_ace_editor_font_built_in">مدمج</string>
     <string name="text_ace_font_ligatures_enabled">أربطة الخط</string>
     <string name="text_ace_font_styles_enabled">أنماط الخط</string>
     <string name="text_ace_get_text">الحصول على النص</string>

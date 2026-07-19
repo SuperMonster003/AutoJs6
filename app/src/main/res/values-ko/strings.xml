@@ -593,6 +593,7 @@
     <string name="text_ace_editor_fallback_native" formatted="true">Ace 편집기에 오류가 발생하여 (%1$s) JsDroidEditor로 전환했습니다. 자세한 내용은 더보기 메뉴에서 Ace 진단 정보를 복사하세요</string>
     <string name="text_ace_editor_font">편집기 글꼴</string>
     <string name="text_ace_editor_font_changed" formatted="true">편집기 글꼴을 %s(으)로 전환했습니다</string>
+    <string name="text_ace_editor_font_built_in">내장</string>
     <string name="text_ace_font_ligatures_enabled">글꼴 합자</string>
     <string name="text_ace_font_styles_enabled">글꼴 스타일</string>
     <string name="text_ace_get_text">텍스트 가져오기</string>

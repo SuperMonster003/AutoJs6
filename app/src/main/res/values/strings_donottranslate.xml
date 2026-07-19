@@ -267,9 +267,11 @@
     <string name="property_key_app_version_code" translatable="false">VERSION_BUILD</string>
     <string name="property_key_app_version_name" translatable="false">VERSION_NAME</string>
     <string name="symbol_colon" translatable="false">:</string>
+    <string name="symbol_middle_dot" translatable="false">·</string>
     <string name="symbol_pipe" translatable="false">|</string>
     <string name="symbol_question_mark" translatable="false">\?</string>
     <string name="text_abis" translatable="false">ABIs</string>
+    <string name="text_ace_editor_font_unknown_size" translatable="false">-- KiB</string>
     <string name="text_app_name_accuweather" translatable="false">AccuWeather</string>
     <string name="text_app_name_adm" translatable="false">ADM</string>
     <string name="text_app_name_appops" translatable="false">App Ops</string>

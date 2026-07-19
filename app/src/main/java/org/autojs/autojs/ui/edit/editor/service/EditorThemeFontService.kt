@@ -41,10 +41,14 @@ class EditorThemeFontService(
     fun loadCurrentTheme(): Observable<Theme?> = Themes.getCurrent(context, currentEditor().engineType)
 
     fun applyEditorPreferences() {
+        applyPreferredTextSize()
+        currentEditor().notifyDisplayPreferencesChanged()
+        applyPreferredAceFont()
+    }
+
+    fun applyPreferredTextSize() {
         val editor = currentEditor()
         editor.setTextSizeSp(getEditorTextSize(editor.getTextSizeSp().toInt()).toFloat())
-        editor.notifyDisplayPreferencesChanged()
-        applyPreferredAceFont()
     }
 
     fun applyTheme(theme: Theme?): Theme? {

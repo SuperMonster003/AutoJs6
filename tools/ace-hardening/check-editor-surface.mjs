@@ -91,6 +91,15 @@ const ACE_FONT_DIALOG_ITEM_PATH = path.join(
   "layout",
   "dialog_ace_editor_font_item.xml",
 );
+const EDITOR_VIEW_LAYOUT_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "res",
+  "layout",
+  "editor_view.xml",
+);
 const ACE_LSP_PREFERENCES_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -476,6 +485,7 @@ const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
 const aceFontManager = read(ACE_FONT_MANAGER_PATH);
 const aceFontDialog = read(ACE_FONT_DIALOG_PATH);
 const aceFontDialogItem = read(ACE_FONT_DIALOG_ITEM_PATH);
+const editorViewLayout = read(EDITOR_VIEW_LAYOUT_PATH);
 const aceLspPreferences = read(ACE_LSP_PREFERENCES_PATH);
 const aceLspServerManager = read(ACE_LSP_SERVER_MANAGER_PATH);
 const aceScriptEditorEngine = read(ACE_SCRIPT_EDITOR_ENGINE_PATH);
@@ -569,7 +579,10 @@ assertIncludes(bridge, "if (normalized.url !== expectedUrl)", "installed font UR
 assertIncludes(bridge, "var FONT_LOAD_TIMEOUT_MS = 30000;", "installed FontFace load timeout");
 assertIncludes(bridge, "Promise.resolve(document.fonts.ready)", "font metrics refresh after bundled font readiness");
 assertIncludes(bridge, 'reject(new Error("Timed out while loading installed font"))', "installed FontFace timeout rejection");
-assertIncludes(bridge, "!pendingFontDescriptorLoad;", "first paint waits for the selected installed font");
+assertIncludes(bridge, "!pendingFontDescriptorLoad &&", "first paint waits for the selected installed font");
+assertIncludes(bridge, "!bundledFontLoadPending;", "first paint waits for bundled Iosevka decoding");
+assertIncludes(bridge, "document.fonts.load(BUNDLED_FONT_LOAD_PROBE)", "bundled Iosevka has an explicit first-paint load gate");
+assertIncludes(bridge, "isFontFamilyMetricsRefreshReason(reason)", "font-family refreshes preserve the browsed viewport");
 assertIncludes(bridge, "fallbackWhilePendingFontLoadsForFirstPaint();", "first-paint deadline falls back without cancelling a pending font load");
 assertIncludes(bridge, "hasInitialFontDescriptor ? DEFAULT_FONT_FAMILY", "invalid initial descriptor falls back to bundled Iosevka");
 assertIncludes(bridge, "if (requestSerial !== fontDescriptorRequestSerial)", "stale installed font request guard");
@@ -598,6 +611,28 @@ assertIncludes(aceFontDialog, "FontInstallationStatus.UPDATE_AVAILABLE", "downlo
 assertIncludes(aceFontDialog, "bulk.pendingIds.remove(fontId)", "bulk font completion is counted exactly once");
 assertIncludes(aceFontDialog, "iconRes = R.drawable.ic_download_thicker", "font swipe action reuses the plugin-center download icon");
 assertIncludes(aceFontDialog, "label = context.getString(R.string.text_download)", "font swipe action carries the download label");
+assertIncludes(editorViewLayout, "<me.zhanghai.android.materialprogressbar.MaterialProgressBar", "font preview uses the shared thin material progress bar");
+assertIncludes(editorViewLayout, 'app:mpb_setBothDrawables="true"', "font preview supplies matching determinate and indeterminate progress drawables");
+assertIncludes(editorViewLayout, 'app:mpb_useIntrinsicPadding="false"', "font preview progress line has no asymmetric intrinsic padding");
+assertOrder(
+  editorViewLayout,
+  [
+    'android:id="@+id/font_preview_info_type"',
+    'android:id="@+id/font_preview_info_separator"',
+    'android:id="@+id/font_preview_info_size"',
+  ],
+  "font preview metadata keeps its fixed center separator between equal side fields",
+);
+assertMatch(
+  editorViewLayout,
+  /font_preview_info_type[\s\S]*?android:layout_width="0dp"[\s\S]*?android:layout_weight="1"/,
+  "font preview metadata type occupies one equal half",
+);
+assertMatch(
+  editorViewLayout,
+  /font_preview_info_size[\s\S]*?android:layout_width="0dp"[\s\S]*?android:layout_weight="1"/,
+  "font preview metadata size occupies one equal half",
+);
 assertIncludes(bridge, "function callBridgeBoolean(name, defaultValue)", "bridge boolean option helper");
 assertIncludes(bridge, "var STATE_NOTIFY_THROTTLE_MS = 100;", "state event throttle");
 assertIncludes(bridge, "var TEXT_NOTIFY_THROTTLE_MS = 100;", "text event throttle");
@@ -927,7 +962,16 @@ assertIncludes(editorView, "key(R.string.key_editor_text_size)", "editor text-si
 assertIncludes(editorView, "key(R.string.key_editor_theme)", "editor theme preference changes apply to current editor");
 assertIncludes(editorView, "key(R.string.key_editor_engine)", "editor engine preference changes apply to current editor");
 assertIncludes(editorView, "key(R.string.key_ace_lsp_file_types)", "LSP file-type preference changes refresh current ACE editor");
-assertIncludes(editorView, "themeFontService.applyEditorPreferences()", "editor font/text-size live preference applier");
+assertMatch(
+  editorView,
+  /key\(R\.string\.key_editor_text_size\)\s*->\s*post\s*\{\s*themeFontService\.applyPreferredTextSize\(\)\s*\}/,
+  "text-size preference changes do not reapply the persisted font during preview",
+);
+assertMatch(
+  editorView,
+  /key\(R\.string\.key_ace_editor_font\)\s*->\s*post\s*\{\s*themeFontService\.applyPreferredAceFont\(\)\s*\}/,
+  "font preference changes apply the persisted font",
+);
 assertIncludes(editorView, "applyCurrentEditorThemePreference", "editor theme live preference applier");
 assertIncludes(editorView, "applyCurrentEditorEnginePreference", "editor engine live preference applier");
 assertIncludes(editorView, "switchEditorEngine(EditorEnginePreferences.get())", "editor engine live preference switcher");

@@ -29,6 +29,7 @@ import org.autojs.autojs.ui.edit.editor.ace.font.FontInstallationStatus
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.ViewUtils
@@ -376,25 +377,55 @@ object AceEditorFontDialog {
         fun showSortDialog() {
             if (disposed) return
             val modes = AceEditorFontSortMode.entries
-            val selected = AceEditorFontUiPreferences.getSortMode(context)
+            var selectedMode = AceEditorFontUiPreferences.getSortMode(context)
+            val typeLockedByField = AceEditorFontSortField.entries.associateWithTo(mutableMapOf()) {
+                AceEditorFontUiPreferences.getTypeLocked(context, it)
+            }
+            var syncingTypeLock = false
+
+            fun syncTypeLock(dialog: MaterialDialog) {
+                syncingTypeLock = true
+                dialog.setPromptCheckBoxChecked(typeLockedByField.getValue(selectedMode.field))
+                syncingTypeLock = false
+            }
+
             DialogUtils.buildAndShowAdaptive {
                 MaterialDialog.Builder(context)
                     .title(R.string.text_sort)
                     .items(modes.map { context.getString(it.labelRes) })
-                    .choiceWidgetThemeColor()
+                    .checkBoxPromptRes(
+                        R.string.text_ace_editor_font_sort_type_locked,
+                        typeLockedByField.getValue(selectedMode.field),
+                    ) { _, isChecked ->
+                        if (!syncingTypeLock) typeLockedByField[selectedMode.field] = isChecked
+                    }
                     .options(
                         listOf(
                             MaterialDialog.OptionMenuItemSpec(
                                 context.getString(R.string.dialog_button_use_default),
                             ) { dialog ->
+                                AceEditorFontSortField.entries.forEach { field ->
+                                    typeLockedByField[field] = field.typeLockedByDefault
+                                }
+                                selectedMode = AceEditorFontSortMode.DEFAULT
                                 dialog.selectedIndex = modes.indexOf(AceEditorFontSortMode.DEFAULT)
+                                syncTypeLock(dialog)
                             },
                         ),
                     )
-                    .itemsCallbackSingleChoice(modes.indexOf(selected)) { _, _, which, _ ->
-                        AceEditorFontUiPreferences.setSortMode(context, modes[which])
-                        submit(manager.options(context))
+                    .itemsCallbackSingleChoice(modes.indexOf(selectedMode)) { dialog, _, which, _ ->
+                        selectedMode = modes[which]
+                        syncTypeLock(dialog)
                         true
+                    }
+                    .widgetThemeColor()
+                    .alwaysCallSingleChoiceCallback()
+                    .onPositive { _, _ ->
+                        AceEditorFontUiPreferences.setSortMode(context, selectedMode)
+                        typeLockedByField.forEach { (field, typeLocked) ->
+                            AceEditorFontUiPreferences.setTypeLocked(context, field, typeLocked)
+                        }
+                        submit(manager.options(context))
                     }
                     .negativeText(R.string.dialog_button_cancel)
                     .negativeColorRes(R.color.dialog_button_default)

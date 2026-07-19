@@ -192,7 +192,7 @@
             <LinearLayout
                 android:id="@+id/theme_preview_bar"
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingStart="12dp"
                 android:paddingTop="4dp"
@@ -201,14 +201,17 @@
                 android:visibility="gone"
                 tools:visibility="visible">
 
-                <ProgressBar
+                <me.zhanghai.android.materialprogressbar.MaterialProgressBar
                     android:id="@+id/font_preview_progress"
-                    style="?android:attr/progressBarStyleHorizontal"
+                    style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal.NoPadding"
                     android:layout_width="match_parent"
-                    android:layout_height="4dp"
+                    android:layout_height="1.5dp"
                     android:indeterminate="false"
                     android:max="1000"
                     android:visibility="invisible"
+                    app:mpb_progressStyle="horizontal"
+                    app:mpb_setBothDrawables="true"
+                    app:mpb_useIntrinsicPadding="false"
                     tools:progress="580"
                     tools:visibility="visible" />
 
@@ -227,6 +230,56 @@
                         android:singleLine="true"
                         android:textSize="14sp"
                         tools:text="Crimson Editor" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/font_preview_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="18dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:gravity="center"
+                    android:importantForAccessibility="yes"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/font_preview_info_type"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:gravity="end|center_vertical"
+                        android:importantForAccessibility="no"
+                        android:paddingEnd="4dp"
+                        android:singleLine="true"
+                        android:textSize="12sp"
+                        tools:text="@string/text_ace_editor_font_built_in" />
+
+                    <TextView
+                        android:id="@+id/font_preview_info_separator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:singleLine="true"
+                        android:text="@string/symbol_middle_dot"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/font_preview_info_size"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:gravity="start|center_vertical"
+                        android:importantForAccessibility="no"
+                        android:paddingStart="4dp"
+                        android:singleLine="true"
+                        android:textSize="12sp"
+                        tools:text="1.53 MiB" />
 
                 </LinearLayout>
 

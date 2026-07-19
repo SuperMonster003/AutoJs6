@@ -63,6 +63,7 @@ import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_LINE_NUMBER
 import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE
 import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
+import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.JavaScriptFileSource
@@ -78,6 +79,8 @@ import org.autojs.autojs.ui.edit.editor.ace.AceEditorAssets
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontDialog
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontOption
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontPreviewFilter
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontType
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontUiPreferences
 import org.autojs.autojs.ui.edit.editor.ace.AceFontCatalogRefreshSubscription
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorTestHooks
@@ -414,6 +417,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mThemePreviewNext: ImageView = binding.themePreviewNext
     private val mThemePreviewExit: ImageView = binding.themePreviewExit
     private val mThemePreviewUse: ImageView = binding.themePreviewUse
+    private val mFontPreviewInfo: View = binding.fontPreviewInfo
+    private val mFontPreviewInfoType: TextView = binding.fontPreviewInfoType
+    private val mFontPreviewInfoSeparator: TextView = binding.fontPreviewInfoSeparator
+    private val mFontPreviewInfoSize: TextView = binding.fontPreviewInfoSize
     private val mFontPreviewProgress: ProgressBar = binding.fontPreviewProgress
 
     private var mCurrentCharsetConfidence: Int = 0
@@ -576,9 +583,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mEditorPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
         when (changedKey) {
             in mEditorDisplayPreferenceKeys -> post { editor.notifyDisplayPreferencesChanged() }
-            key(R.string.key_editor_text_size),
-            key(R.string.key_ace_editor_font),
-                -> post { themeFontService.applyEditorPreferences() }
+            key(R.string.key_editor_text_size) -> post { themeFontService.applyPreferredTextSize() }
+            key(R.string.key_ace_editor_font) -> post { themeFontService.applyPreferredAceFont() }
             key(R.string.key_editor_theme),
             key(R.string.key_editor_theme_light),
             key(R.string.key_editor_theme_dark),
@@ -1786,6 +1792,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mThemePreviewReturnToThemeDialog = mThemePreviewReturnToThemeDialog || returnToThemeDialog
         mThemePreviewActive = true
         mPreviewMode = PreviewMode.Theme
+        mFontPreviewInfo.isVisible = false
         mFontPreviewProgress.visibility = View.INVISIBLE
         mThemePreviewUse.setImageResource(R.drawable.mt_ic_check_white_36dp)
         mThemePreviewUse.contentDescription = context.getString(R.string.text_theme_preview_use)
@@ -1860,6 +1867,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun themePreviewTextViews(): List<TextView> = listOf(
         mThemePreviewTitle,
         mThemePreviewIndex,
+        mFontPreviewInfoType,
+        mFontPreviewInfoSeparator,
+        mFontPreviewInfoSize,
     )
 
     private fun themePreviewImageViews(): List<ImageView> = listOf(
@@ -1993,6 +2003,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mFontPreviewReturnToFontDialog = mFontPreviewReturnToFontDialog || returnToFontDialog
         mFontPreviewActive = true
         mPreviewMode = PreviewMode.Font
+        mFontPreviewInfo.isVisible = true
         mThemePreviewBar.isVisible = true
 
         val prepared = preparedFontPreviewOptions()
@@ -2060,38 +2071,104 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun showFontPreviewFilter() {
-        val features = listOf(FontFeature.NERD, FontFeature.VARIABLE, FontFeature.CN)
-        val labels = listOf(
-            context.getString(R.string.text_ace_editor_font_feature_nerd),
-            context.getString(R.string.text_ace_editor_font_feature_variable),
-            context.getString(R.string.text_ace_editor_font_feature_cn),
-        )
+        // Refresh the type snapshot so installed/uninstalled filters reflect downloads or deletes
+        // that completed while the previewer was already open.
+        mFontPreviewOptions = mAceFontManager.options(context)
+        val features = FontFeature.entries.toList()
+        val types = AceEditorFontType.entries.toList()
+        val featureLabels = features.map { feature ->
+            val labelRes = when (feature) {
+                FontFeature.NERD -> R.string.text_ace_editor_font_feature_nerd
+                FontFeature.VARIABLE -> R.string.text_ace_editor_font_feature_variable
+                FontFeature.CN -> R.string.text_ace_editor_font_feature_cn
+            }
+            context.getString(
+                R.string.text_ace_editor_font_filter_feature_item,
+                context.getString(labelRes),
+            )
+        }
+        val typeLabels = types.map { type ->
+            val labelRes = when (type) {
+                AceEditorFontType.BUILT_IN -> R.string.text_ace_editor_font_built_in
+                AceEditorFontType.INSTALLED -> R.string.text_installed
+                AceEditorFontType.NOT_INSTALLED -> R.string.text_not_installed
+            }
+            context.getString(
+                R.string.text_ace_editor_font_filter_type_item,
+                context.getString(labelRes),
+            )
+        }
+        val labels = featureLabels + typeLabels
         val filter = AceEditorFontUiPreferences.getPreviewFilter(context)
-        val checked = features.indices
-            .filter { features[it] !in filter.excludedFeatures }
-            .toTypedArray()
+        val checked = buildList {
+            features.forEachIndexed { index, feature ->
+                if (feature !in filter.excludedFeatures) add(index)
+            }
+            types.forEachIndexed { index, type ->
+                if (type !in filter.excludedTypes) add(features.size + index)
+            }
+        }.toTypedArray()
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
                 .title(R.string.text_filter)
                 .options(
                     listOf(
                         MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) { dialog ->
-                            dialog.setSelectedIndices(features.indices.toList().toTypedArray())
+                            dialog.setSelectedIndices(labels.indices.toList().toTypedArray())
                         },
                     ),
                 )
                 .items(labels)
-                .itemsCallbackMultiChoice(checked) { _, which, _ ->
-                    val included = which.mapTo(mutableSetOf()) { features[it] }
-                    AceEditorFontUiPreferences.setExcludedFeatures(context, features.toSet() - included)
-                    val next = preparedFontPreviewOptions().firstOrNull { it.id == mFontPreviewCurrentFontId }
-                        ?: preparedFontPreviewOptions().firstOrNull()
-                    next?.let { previewFont(it.id) }
+                .itemsCallbackMultiChoice(checked) { dialog, which, _ ->
+                    val selectedIndices = which.toSet()
+                    val includedFeatures = features.filterIndexedTo(linkedSetOf()) { index, _ ->
+                        index in selectedIndices
+                    }
+                    val includedTypes = types.filterIndexedTo(linkedSetOf()) { index, _ ->
+                        features.size + index in selectedIndices
+                    }
+                    val nextFilter = AceEditorFontPreviewFilter(
+                        excludedFeatures = features.toSet() - includedFeatures,
+                        excludedTypes = types.toSet() - includedTypes,
+                    )
+                    when {
+                        !nextFilter.hasSelectedFeatures -> {
+                            ViewUtils.showSnack(
+                                dialog.view,
+                                R.string.text_ace_editor_font_filter_feature_required,
+                                true,
+                            )
+                        }
+                        !nextFilter.hasSelectedTypes -> {
+                            ViewUtils.showSnack(
+                                dialog.view,
+                                R.string.text_ace_editor_font_filter_type_required,
+                                true,
+                            )
+                        }
+                        mFontPreviewOptions.none(nextFilter::allows) -> {
+                            ViewUtils.showSnack(
+                                dialog.view,
+                                R.string.text_ace_editor_font_filter_no_matches,
+                                true,
+                            )
+                        }
+                        else -> {
+                            AceEditorFontUiPreferences.setPreviewFilter(context, nextFilter)
+                            val prepared = preparedFontPreviewOptions()
+                            val next = prepared.firstOrNull { it.id == mFontPreviewCurrentFontId }
+                                ?: prepared.first()
+                            previewFont(next.id)
+                            dialog.dismiss()
+                        }
+                    }
                     true
                 }
                 .choiceWidgetThemeColor()
+                .autoDismiss(false)
                 .negativeText(R.string.dialog_button_cancel)
                 .negativeColorRes(R.color.dialog_button_default)
+                .onNegative { dialog, _ -> dialog.dismiss() }
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_attraction)
                 .build()
@@ -2154,6 +2231,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
             is FontDownloadEvent.Success -> {
                 clearFinishedFontPreviewDownload()
+                mFontPreviewOptions = mAceFontManager.options(context)
                 themeFontService.previewAceFont(fontId)
             }
             is FontDownloadEvent.Failure -> {
@@ -2205,6 +2283,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun refreshFontPreviewBar(option: AceEditorFontOption) {
         if (!mFontPreviewActive) return
         mThemePreviewTitle.text = option.displayName
+        refreshFontPreviewInfo(option)
         val fonts = preparedFontPreviewOptions()
         val width = fonts.size.toString().length.coerceAtLeast(2)
         val index = fonts.indexOfFirst { it.id == option.id }.takeIf { it >= 0 }?.plus(1)
@@ -2237,6 +2316,28 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
         }
         refreshFontPreviewColors()
+    }
+
+    private fun refreshFontPreviewInfo(option: AceEditorFontOption) {
+        val installation = mAceFontManager.installationState(option)
+        val typeText = context.getString(
+            when {
+                option.delivery != AceEditorFontOption.Delivery.DOWNLOADABLE -> {
+                    R.string.text_ace_editor_font_built_in
+                }
+                installation?.installed != null -> R.string.text_installed
+                else -> R.string.text_not_installed
+            },
+        )
+        val sizeText = option.sizeBytes?.let(PFiles::formatSizeWithUnit)
+            ?: context.getString(R.string.text_ace_editor_font_unknown_size)
+        mFontPreviewInfoType.text = typeText
+        mFontPreviewInfoSize.text = sizeText
+        mFontPreviewInfo.contentDescription = context.getString(
+            R.string.text_ace_editor_font_status,
+            typeText,
+            sizeText,
+        )
     }
 
     private fun refreshFontPreviewColors() {

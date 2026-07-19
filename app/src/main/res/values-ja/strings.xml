@@ -592,6 +592,7 @@
     <string name="text_ace_editor_fallback_native" formatted="true">Ace エディターでエラーが発生したため (%1$s), JsDroidEditor に切り替えました. 詳細を確認するには, その他メニューから Ace 診断情報をコピーしてください</string>
     <string name="text_ace_editor_font">エディターフォント</string>
     <string name="text_ace_editor_font_changed" formatted="true">エディターフォントを %s に切り替えました</string>
+    <string name="text_ace_editor_font_built_in">組み込み</string>
     <string name="text_ace_font_ligatures_enabled">フォントリガチャ</string>
     <string name="text_ace_font_styles_enabled">フォントスタイル</string>
     <string name="text_ace_get_text">テキストを取得</string>

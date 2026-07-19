@@ -591,6 +591,7 @@
     <string name="text_ace_editor_fallback_native" formatted="true">El editor Ace falló (%1$s); se cambió a JsDroidEditor. Copia el diagnóstico de Ace desde el menú Más para obtener detalles</string>
     <string name="text_ace_editor_font">Fuente del editor</string>
     <string name="text_ace_editor_font_changed" formatted="true">La fuente del editor cambió a %s</string>
+    <string name="text_ace_editor_font_built_in">Integrado</string>
     <string name="text_ace_font_ligatures_enabled">Ligaduras de fuente</string>
     <string name="text_ace_font_styles_enabled">Estilos de fuente</string>
     <string name="text_ace_get_text">Obtener texto</string>

@@ -591,6 +591,7 @@
     <string name="text_ace_editor_fallback_native" formatted="true">Échec de l\'éditeur Ace (%1$s); passage à JsDroidEditor. Copiez les diagnostics Ace depuis le menu Plus pour obtenir des détails</string>
     <string name="text_ace_editor_font">Police de l\'éditeur</string>
     <string name="text_ace_editor_font_changed" formatted="true">Police de l\'éditeur remplacée par %s</string>
+    <string name="text_ace_editor_font_built_in">Intégré</string>
     <string name="text_ace_font_ligatures_enabled">Ligatures de police</string>
     <string name="text_ace_font_styles_enabled">Styles de police</string>
     <string name="text_ace_get_text">Obtenir le texte</string>

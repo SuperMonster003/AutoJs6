@@ -591,6 +591,7 @@
     <string name="text_ace_editor_fallback_native" formatted="true">Сбой редактора Ace (%1$s); выполнено переключение на JsDroidEditor. Подробные сведения можно получить, скопировав диагностические данные Ace через меню дополнительных действий</string>
     <string name="text_ace_editor_font">Шрифт редактора</string>
     <string name="text_ace_editor_font_changed" formatted="true">Шрифт редактора изменён на %s</string>
+    <string name="text_ace_editor_font_built_in">Встроено</string>
     <string name="text_ace_font_ligatures_enabled">Лигатуры шрифта</string>
     <string name="text_ace_font_styles_enabled">Начертания шрифта</string>
     <string name="text_ace_get_text">Получить текст</string>
