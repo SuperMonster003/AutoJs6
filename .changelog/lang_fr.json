@@ -41,6 +41,7 @@
         "Les scripts Node.js vides ou simples démarraient lentement dans les répertoires de travail contenant de nombreux fichiers, car l'analyse inutile des modules lisait intégralement les fichiers candidats",
         "Le processus Node.js persistant était arrêté à tort lorsque l'interface éphémère de lancement de script devenait masquée",
         "La notification attendue de déconnexion Binder du processus Node.js persistant après l'arrêt propre d'une tâche interactive de longue durée dans une application empaquetée pouvait remplacer l'état stopped par failed",
+        "Node.js console.assert lançait à tort une exception AssertionError lors de l'échec d'une assertion au lieu d'écrire uniquement le message d'échec sur stderr",
         "Le retour des résultats des scripts Node.js était retardé par l'attente de stabilisation du processus d'exécution",
         "L'annulation d'une exécution Node.js active pouvait supprimer l'enregistrement de l'exécution avant la mise en quarantaine du processus défaillant, bloquant les attentes de fin et retardant la récupération",
         "Le repli automatique après la perte d'une réponse Binder de l'environnement d'exécution Node.js externe pouvait exécuter deux fois le même script",

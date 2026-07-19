@@ -2191,7 +2191,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                   stdoutCaptured.includes("module {\"value\":1}") &&
                   stdoutCaptured.includes("module debug") &&
                   stdoutCaptured.includes("{\"dir\":true}") &&
-                  stdoutCaptured.includes("[\"table\"]") &&
+                  stdoutCaptured.includes("(index)") &&
+                  stdoutCaptured.includes("Values") &&
+                  stdoutCaptured.includes("table") &&
                   stdoutCaptured.includes("grouped") &&
                   stdoutCaptured.includes("items: 1") &&
                   stdoutCaptured.includes("items: 2") &&
@@ -2232,8 +2234,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("console.shadow=false"))
             assertTrue(result.stdout.contains("console.frozen=true"))
             assertTrue(result.stdout.contains("console.prototype_frozen=true"))
-            assertTrue(result.stdout.contains("console.keys=Console,assert,clear,context,count,countReset,createTask,debug,dir,dirxml,error,group,groupCollapsed,groupEnd,info,log,profile,profileEnd,table,time,timeEnd,timeLog,timeStamp,trace,warn"))
-            assertTrue(result.stdout.contains("console.prototype=assert,clear,count,countReset,debug,dir,dirxml,error,group,groupCollapsed,groupEnd,info,log,table,time,timeEnd,timeLog,trace,warn"))
+            assertTrue(result.stdout.contains("console.keys=Console,assert,build,clear,clearConsole,collapse,context,count,countReset,createTask,debug,dir,dirxml,err,error,expand,group,groupCollapsed,groupEnd,hide,info,input,launch,launchConsole,log,openConsole,print,printAllStackTrace,profile,profileEnd,rawInput,reset,resetGlobalLogConfig,setBackgroundAlpha,setBackgroundColor,setBackgroundTint,setContentBackgroundAlpha,setContentBackgroundColor,setContentBackgroundTint,setContentTextColor,setContentTextColors,setContentTextSize,setExitOnClose,setGlobalLogConfig,setPosition,setSize,setTextColor,setTextSize,setTitle,setTitleBackgroundAlpha,setTitleBackgroundColor,setTitleBackgroundTint,setTitleIconsTint,setTitleTextColor,setTitleTextSize,setTouchable,show,showConsole,table,time,timeEnd,timeLog,timeStamp,trace,verbose,warn"))
+            assertTrue(result.stdout.contains("console.prototype=assert,clear,count,countReset,debug,dir,dirxml,error,group,groupCollapsed,groupEnd,info,log,printAllStackTrace,table,time,timeEnd,timeLog,trace,verbose,warn"))
             assertTrue(result.stdout.contains("console.helpers=function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function"))
             assertTrue(result.stdout.contains("console.hidden=undefined,undefined,undefined,undefined"))
             assertTrue(result.stdout.contains("console.stdout=true"))

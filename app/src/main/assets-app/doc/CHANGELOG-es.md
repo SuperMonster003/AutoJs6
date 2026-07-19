@@ -44,6 +44,7 @@
 * `Corrección` Los scripts vacíos y simples de Node.js se iniciaban lentamente en directorios de trabajo con muchos archivos porque el escaneo innecesario de módulos leía por completo los archivos candidatos
 * `Corrección` El proceso persistente de Node.js se retiraba incorrectamente cuando se ocultaba la interfaz temporal del iniciador de scripts
 * `Corrección` La notificación esperada de desconexión Binder del proceso persistente de Node.js tras detener correctamente una tarea interactiva de larga duración en una aplicación empaquetada podía sobrescribir el estado stopped con failed
+* `Corrección` Node.js console.assert lanzaba incorrectamente una excepción AssertionError cuando fallaba una aserción en lugar de limitarse a escribir el mensaje de fallo en stderr
 * `Corrección` La devolución de resultados de scripts Node.js se retrasaba por la espera de estabilización del proceso de ejecución
 * `Corrección` La cancelación de una ejecución Node.js activa podía eliminar el registro de ejecución antes de poner en cuarentena el proceso en mal estado, bloqueando la espera de finalización y retrasando la recuperación
 * `Corrección` El fallback automático tras perder una respuesta Binder del runtime Node.js externo podía ejecutar dos veces el mismo script

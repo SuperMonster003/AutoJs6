@@ -44,6 +44,7 @@
 * `Fix` Empty and simple Node.js scripts started slowly in working directories containing many files because unnecessary module scanning read candidate files in full
 * `Fix` Persistent Node.js process was incorrectly retired when a short-lived script launcher UI became hidden
 * `Fix` An expected Binder disconnection callback from the persistent Node.js process after cleanly stopping an interactive long-running task in a packaged app could overwrite the stopped state with failed
+* `Fix` Node.js console.assert incorrectly threw an AssertionError when an assertion failed instead of only writing the failure message to stderr
 * `Fix` Node.js script results were returned late because runtime process-settle waiting blocked result delivery
 * `Fix` Active Node.js cancellation could remove the execution registration before unhealthy-process quarantine, leaving completion waiters blocked and delaying recovery
 * `Fix` Automatic embedded fallback after a lost external runtime Binder response could execute the same script twice

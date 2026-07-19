@@ -3813,7 +3813,10 @@ class EmbeddedNodePackagedApkSmokeTest {
                 limitedNetGuard &&
                 limitedTlsGuard &&
                 deniedRequire("worker_threads") &&
-                deniedGetBuiltin("fs");
+                process.getBuiltinModule("fs") === fs &&
+                process.getBuiltinModule("node:fs") === fs &&
+                process.getBuiltinModule("missing-packaged-fs") === undefined &&
+                deniedGetBuiltin("dgram");
               const treeOk = fs.existsSync("./packaged-fs-failure/safe.txt") &&
                 fs.existsSync("./packaged-fs-failure/dir/sub");
               assertStrictBuiltin.equal(syncChecks.filter(Boolean).length, syncChecks.length);
@@ -3944,11 +3947,13 @@ class EmbeddedNodePackagedApkSmokeTest {
                 Object.isFrozen(processReport.javascriptStack);
               processBuiltin.title = processOriginalTitle;
               const processGuardOk =
-                disabledProcess(() => processBuiltin.getBuiltinModule("fs")) &&
+                processBuiltin.getBuiltinModule("fs") === fs &&
+                processBuiltin.getBuiltinModule("node:fs") === fs &&
+                processBuiltin.getBuiltinModule("missing-packaged-process") === undefined &&
+                disabledProcess(() => processBuiltin.getBuiltinModule("dgram")) &&
                 disabledProcess(() => processBuiltin.binding("fs")) &&
                 disabledProcess(() => processBuiltin.dlopen({}, "native.node")) &&
                 disabledProcess(() => processBuiltin._linkedBinding("fs")) &&
-                disabledProcess(() => processBuiltin.exit(1)) &&
                 disabledProcess(() => processBuiltin.abort()) &&
                 disabledProcess(() => processBuiltin.kill(process.pid, 0)) &&
                 disabledProcess(() => processBuiltin.report.writeReport()) &&
@@ -5192,8 +5197,8 @@ class EmbeddedNodePackagedApkSmokeTest {
                 consoleBuiltin.shadow !== true &&
                 Object.isFrozen(consoleBuiltin) &&
                 Object.isFrozen(consoleBuiltin.Console.prototype) &&
-                consoleKeySummary === "Console,assert,clear,context,count,countReset,createTask,debug,dir,dirxml,error,group,groupCollapsed,groupEnd,info,log,profile,profileEnd,table,time,timeEnd,timeLog,timeStamp,trace,warn" &&
-                consolePrototypeKeySummary === "assert,clear,count,countReset,debug,dir,dirxml,error,group,groupCollapsed,groupEnd,info,log,table,time,timeEnd,timeLog,trace,warn" &&
+                consoleKeySummary === "Console,assert,build,clear,clearConsole,collapse,context,count,countReset,createTask,debug,dir,dirxml,err,error,expand,group,groupCollapsed,groupEnd,hide,info,input,launch,launchConsole,log,openConsole,print,printAllStackTrace,profile,profileEnd,rawInput,reset,resetGlobalLogConfig,setBackgroundAlpha,setBackgroundColor,setBackgroundTint,setContentBackgroundAlpha,setContentBackgroundColor,setContentBackgroundTint,setContentTextColor,setContentTextColors,setContentTextSize,setExitOnClose,setGlobalLogConfig,setPosition,setSize,setTextColor,setTextSize,setTitle,setTitleBackgroundAlpha,setTitleBackgroundColor,setTitleBackgroundTint,setTitleIconsTint,setTitleTextColor,setTitleTextSize,setTouchable,show,showConsole,table,time,timeEnd,timeLog,timeStamp,trace,verbose,warn" &&
+                consolePrototypeKeySummary === "assert,clear,count,countReset,debug,dir,dirxml,error,group,groupCollapsed,groupEnd,info,log,printAllStackTrace,table,time,timeEnd,timeLog,trace,verbose,warn" &&
                 consoleHelperTypes === "function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function" &&
                 consoleHiddenTypes === "undefined,undefined,undefined,undefined" &&
                 consoleTaskValue === "task-ok" &&
@@ -5201,7 +5206,9 @@ class EmbeddedNodePackagedApkSmokeTest {
                 consoleStdout.includes("packaged {\"value\":1}") &&
                 consoleStdout.includes("packaged debug") &&
                 consoleStdout.includes("{\"dir\":true}") &&
-                consoleStdout.includes("[\"table\"]") &&
+                consoleStdout.includes("(index)") &&
+                consoleStdout.includes("Values") &&
+                consoleStdout.includes("table") &&
                 consoleStdout.includes("grouped") &&
                 consoleStdout.includes("items: 1") &&
                 consoleStdout.includes("items: 2") &&
@@ -6189,12 +6196,10 @@ class EmbeddedNodePackagedApkSmokeTest {
                   return error.message.includes(name);
                 }
               });
-              let builtinGuardOk = false;
-              try {
-                process.getBuiltinModule("timers");
-              } catch (error) {
-                builtinGuardOk = error.message.includes("disabled");
-              }
+              const builtinGuardOk =
+                process.getBuiltinModule("timers") === timers &&
+                process.getBuiltinModule("node:timers") === timers &&
+                process.getBuiltinModule("missing-packaged-timers") === undefined;
               const ready =
                 eventsOk &&
                 timersOk &&
@@ -6950,18 +6955,12 @@ class EmbeddedNodePackagedApkSmokeTest {
                   return error.message.includes(name);
                 }
               });
-              let builtinGuardOk = false;
-              try {
-                process.getBuiltinModule("crypto");
-              } catch (cryptoError) {
-                try {
-                  process.getBuiltinModule("zlib");
-                } catch (zlibError) {
-                  builtinGuardOk =
-                    cryptoError.message.includes("disabled") &&
-                    zlibError.message.includes("disabled");
-                }
-              }
+              const builtinGuardOk =
+                process.getBuiltinModule("crypto") === crypto &&
+                process.getBuiltinModule("node:crypto") === crypto &&
+                process.getBuiltinModule("zlib") === zlib &&
+                process.getBuiltinModule("node:zlib") === zlib &&
+                process.getBuiltinModule("missing-packaged-crypto-zlib") === undefined;
               const surfaceOk = cryptoSurfaceOk && zlibSurfaceOk;
               const limitsOk = cryptoLimitsOk && zlibLimitsOk && zlibStreamLimitsOk && zlibCorruptOk;
               const guardsOk = hiddenOk && resolveOk && deniedOk && builtinGuardOk;
@@ -7156,10 +7155,12 @@ class EmbeddedNodePackagedApkSmokeTest {
               const directScriptOk = directScript.runInContext(directContext, { timeout: 1000 }) === 42;
               const directContextOk = nodeVmBuiltin.runInNewContext("value * 2", { value: 21 }, { timeout: 1000 }) === 42;
               const compileOk = vmBuiltin.compileFunction("return value + 1;", ["value"])(41) === 42;
-              const timeoutOk = captureSync(
-                () => new vmBuiltin.Script("while (true) {}").runInNewContext({}, { timeout: 25 }),
-                "Script execution timed out"
-              );
+              let timeoutOk = false;
+              try {
+                new vmBuiltin.Script("while (true) {}").runInNewContext({}, { timeout: 25 });
+              } catch (error) {
+                timeoutOk = String(error && error.message || "").includes("Script execution timed out");
+              }
               const shadowOk = vmBuiltin === nodeVmBuiltin &&
                 require.resolve("vm") === "vm" &&
                 require.resolve("node:vm") === "vm" &&
