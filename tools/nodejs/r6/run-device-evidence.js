@@ -583,6 +583,7 @@ async function main() {
         model: device.model,
         apiLevel: device.apiLevel,
         supportedAbis: device.supportedAbis,
+        hostProcessAbi: installedHost.primaryCpuAbi,
         runtimeProcessAbi: installedAfter.primaryCpuAbi,
         isEmulator: device.isEmulator,
       },

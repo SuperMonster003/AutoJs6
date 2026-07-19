@@ -194,7 +194,7 @@ commands and report schema are documented in `R2_ACCEPTANCE_SAMPLING.md`.
 
 Release follow-ups that do not reopen R2:
 
-- [ ] Re-run packaged APK and multi-device gates under R6.
+- [x] Re-run packaged APK and multi-device gates under R6.
 - [ ] Re-run the 8-hour and 24-hour leak/soak gates under R6.
 
 ## R3 - Measure And Optimize The Remaining Startup Chain
@@ -380,7 +380,7 @@ and the semantic evidence matrix are maintained in
 - [ ] Close the reopened evidence requirement with current clean-source device
   and soak reports.
 - [x] Pass Rhino/Node alternating execution and backend-switch regression.
-- [ ] Pass the fixed main app and packaged APK matrix: Sony `arm64-v8a`, Sony
+- [x] Pass the fixed main app and packaged APK matrix: Sony `arm64-v8a`, Sony
   `armeabi-v7a`, a second-OEM physical `arm64-v8a` device, and an x86_64
   emulator.
 - [ ] Pass 8-hour quick soak and 24-hour final soak without monotonic leaks,
@@ -400,16 +400,18 @@ The complete non-strict Phase 11 report set was regenerated from the current
 sources on 2026-07-19 with zero required-internal blockers and zero policy
 violations. Package-manager, Worker/WASI, security, adapter, crash,
 multi-instance, and focused-topology reports are ready. Long-running, provider,
-legacy soak, and R6 production-evidence reports remain honestly blocked by
-their recorded runtime/device evidence requirements.
+legacy soak, and the R6 aggregate reports remain honestly blocked by their
+recorded long-duration evidence requirements.
 
 The focused `verifyNodeR6EngineSwitchGate` run on Sony XQ-AT72 passed both
 selectors with zero failures, errors, or skips on 2026-07-18. This closes only
 the alternating/backend-switch regression above; it is not one of the four
-complete 13-selector device reports. The four current matrix reports, the real
-8-hour and 24-hour soaks, and the clean strict final/release result remain
-unchecked. Collection commands and the fail-closed evidence contract are
-documented in
+complete 13-selector device reports. On 2026-07-19, the clean candidate source
+then passed all four canonical device targets at 13/13 with zero failures,
+errors, or skips: Sony XQ-AT72 `arm64-v8a` and `armeabi-v7a`, Xiaomi 23046RP50C
+`arm64-v8a`, and the API 37 AVD `x86_64`. The real 8-hour and 24-hour soaks and
+the clean strict final/release result remain unchecked. Collection commands and
+the fail-closed evidence contract are documented in
 [R6_ACCEPTANCE_EVIDENCE.md](R6_ACCEPTANCE_EVIDENCE.md).
 
 The same engine-switch selectors were revalidated `2/2` against the fresh R6

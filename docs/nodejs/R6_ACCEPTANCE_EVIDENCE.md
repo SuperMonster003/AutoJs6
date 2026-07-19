@@ -61,12 +61,14 @@ It also binds the installed host and Android test APKs to fresh build artifacts,
 records their paths, sizes, and SHA-256 hashes, and attests a fresh JUnit XML
 from that invocation. APK inspection requires the host to exclude Node-owned
 JNI libraries while retaining its baseline `libjackpal-termexec2.so` and
-`libc++_shared.so` dependencies for the target ABI; the plugin must carry the
-complete Node runtime triplet. A generated 64-character run token binds the run
-and the device-side smoke evidence. Archiving happens only after all identity,
-device, APK, JUnit, lifecycle, resource, and report-contract checks pass. Use
-`--no-archive` only when validating a staged run without replacing a canonical
-report.
+`libc++_shared.so` dependencies for the reported host-process ABI. The
+target-specific Inrt template must retain those baseline libraries for the
+target runtime ABI, while the plugin must carry the complete Node runtime
+triplet for that same target ABI. A generated 64-character run token binds the
+run and the device-side smoke evidence. Archiving happens only after all
+identity, device, APK, JUnit, lifecycle, resource, and report-contract checks
+pass. Use `--no-archive` only when validating a staged run without replacing a
+canonical report.
 
 Every installed/build APK pair is verified with Android `apksigner`, must expose
 exactly one SHA-256 signer, and must preserve signer identity. The plugin signer

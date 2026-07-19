@@ -77,6 +77,19 @@ function main() {
     assert.strictEqual(skippedResult.ready, false);
     assert(skippedResult.blockers.some((message) => message.includes("skipped tests must be zero")));
 
+    const missingHostProcessAbiRequirement = DEVICE_REQUIREMENTS[0];
+    const missingHostProcessAbi = validDeviceReport(missingHostProcessAbiRequirement);
+    delete missingHostProcessAbi.device.hostProcessAbi;
+    writeJson(root, missingHostProcessAbiRequirement.relative, missingHostProcessAbi);
+    const missingHostProcessAbiResult = evaluateDeviceReport(
+      root,
+      missingHostProcessAbiRequirement,
+      identity,
+      root,
+    );
+    assert.strictEqual(missingHostProcessAbiResult.ready, false);
+    assert(missingHostProcessAbiResult.blockers.some((message) => message.includes("host process ABI is missing")));
+
     for (const requirement of SOAK_REQUIREMENTS) {
       writeJson(root, requirement.relative, validSoakReport(requirement));
       const result = evaluateSoakReport(root, requirement, identity, root);
@@ -317,7 +330,7 @@ function main() {
 
     const incompleteHostRequirement = DEVICE_REQUIREMENTS[0];
     const incompleteHost = validDeviceReport(incompleteHostRequirement);
-    const incompleteHostApk = contractApk("host-incomplete", incompleteHostRequirement.runtimeProcessAbi);
+    const incompleteHostApk = contractApk("host-incomplete", incompleteHost.device.hostProcessAbi);
     for (const prefix of ["hostApk", "hostBuildApk"]) {
       const relative = `artifacts/incomplete-host-${prefix}.apk`;
       const target = path.join(root, relative);
@@ -341,7 +354,16 @@ function main() {
 function validDeviceReport(requirement) {
   const manufacturer = requirement.manufacturerNot ? "google" : (requirement.manufacturer || "sony");
   const runToken = "a".repeat(64);
-  const artifacts = artifactHashes(`device-${requirement.id}`, requirement.runtimeProcessAbi, "device", runToken);
+  const hostProcessAbi = requirement.runtimeProcessAbi === "armeabi-v7a"
+    ? "arm64-v8a"
+    : requirement.runtimeProcessAbi;
+  const artifacts = artifactHashes(
+    `device-${requirement.id}`,
+    requirement.runtimeProcessAbi,
+    "device",
+    runToken,
+    hostProcessAbi,
+  );
   const signerSha256 = apkSignerSha256(path.join(contractRoot, artifacts.pluginApkPath));
   const preflightArtifact = writeFixtureArtifact(
     `artifacts/device-${requirement.id}-plugin-preflight.json`,
@@ -373,8 +395,9 @@ function validDeviceReport(requirement) {
       model: `contract-${requirement.id}`,
       apiLevel: 36,
       isEmulator: requirement.emulator,
+      hostProcessAbi,
       runtimeProcessAbi: requirement.runtimeProcessAbi,
-      supportedAbis: [requirement.runtimeProcessAbi],
+      supportedAbis: [...new Set([hostProcessAbi, requirement.runtimeProcessAbi])],
     },
     artifacts,
     plugin: {
@@ -524,7 +547,7 @@ function capturedIdentity() {
   };
 }
 
-function artifactHashes(prefix, runtimeProcessAbi, junitKind, runToken = "") {
+function artifactHashes(prefix, runtimeProcessAbi, junitKind, runToken = "", hostProcessAbi = runtimeProcessAbi) {
   assert(contractRoot, "contract fixture root is unavailable");
   const bindings = [
     ["hostApkSha256", "hostApkPath", "hostApkBytes"],
@@ -557,7 +580,8 @@ function artifactHashes(prefix, runtimeProcessAbi, junitKind, runToken = "") {
       if (hashKey === "junitXmlSha256") {
         fs.writeFileSync(file, contractJUnit(junitKind));
       } else {
-        fs.copyFileSync(contractApk(apkRole, runtimeProcessAbi), file);
+        const artifactAbi = apkRole === "host" ? hostProcessAbi : runtimeProcessAbi;
+        fs.copyFileSync(contractApk(apkRole, artifactAbi), file);
       }
     }
     const content = fs.readFileSync(file);
@@ -615,7 +639,9 @@ function contractApk(role, runtimeProcessAbi) {
     ? ["libnode.so", "libautojs6-node.so", "libc++_shared.so"]
     : role === "host"
       ? ["libhost-contract.so", "libjackpal-termexec2.so", "libc++_shared.so"]
-      : role === "host-incomplete" ? ["libhost-contract.so"] : [];
+      : role === "template"
+        ? ["libjackpal-termexec2.so", "libc++_shared.so"]
+        : role === "host-incomplete" ? ["libhost-contract.so"] : [];
   const relativeLibraries = nativeLibraries.map((name) => `lib/${runtimeProcessAbi}/${name}`);
   relativeLibraries.forEach((relative) => {
     const file = path.join(directory, ...relative.split("/"));

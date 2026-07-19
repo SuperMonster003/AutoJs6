@@ -253,11 +253,13 @@ function evaluateDeviceReport(evidenceRoot, requirement, identity, repoRoot = nu
     blockers.push("runToken must be exactly 64 hexadecimal characters");
   }
   validateCapturedIdentity(json.identity, identity, blockers);
-  validateDevice(json.device, requirement, blockers);
+  const device = json.device || {};
+  validateDevice(device, requirement, blockers);
   const plugin = json.plugin || {};
   const artifactFiles = validateArtifacts(json.artifacts, repoRoot, blockers, {
     reportType: "device",
     runToken: stringValue(json.runToken),
+    hostProcessAbi: stringValue(device.hostProcessAbi),
     runtimeProcessAbi: requirement.runtimeProcessAbi,
     reportedPluginSignerSha256: stringValue(plugin.signerSha256),
   });
@@ -836,9 +838,14 @@ function validateDevice(deviceValue, requirement, blockers) {
   if (stringValue(device.runtimeProcessAbi) !== requirement.runtimeProcessAbi) {
     blockers.push(`runtime process ABI must be ${requirement.runtimeProcessAbi}`);
   }
+  const hostProcessAbi = stringValue(device.hostProcessAbi);
+  if (!hostProcessAbi) blockers.push("host process ABI is missing");
   const supportedAbis = Array.isArray(device.supportedAbis) ? device.supportedAbis.map(stringValue) : [];
   if (!supportedAbis.includes(requirement.runtimeProcessAbi)) {
     blockers.push(`device ABI list does not include ${requirement.runtimeProcessAbi}`);
+  }
+  if (hostProcessAbi && !supportedAbis.includes(hostProcessAbi)) {
+    blockers.push(`device ABI list does not include host process ABI ${hostProcessAbi}`);
   }
   const manufacturer = stringValue(device.manufacturer).toLowerCase();
   if (requirement.manufacturer && manufacturer !== requirement.manufacturer) {
@@ -1021,17 +1028,18 @@ function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
       blockers.push("packaged template target-ABI instrumentation argument is not bound to the device runtime process ABI");
     }
   }
+  const hostProcessAbi = stringValue(options.hostProcessAbi) || stringValue(options.runtimeProcessAbi);
   const hostApk = validateApkArtifact(
     resolvedFiles.hostApkPath,
     "host APK",
-    options.runtimeProcessAbi,
+    hostProcessAbi,
     "host",
     blockers,
   );
   const hostBuildApk = validateApkArtifact(
     resolvedFiles.hostBuildApkPath,
     "host build APK",
-    options.runtimeProcessAbi,
+    hostProcessAbi,
     "host",
     blockers,
   );
@@ -1067,7 +1075,7 @@ function validateArtifacts(artifactsValue, repoRoot, blockers, options = {}) {
     validateApkArtifact(
       resolvedFiles.packagedTemplateApkPath,
       "packaged smoke template APK",
-      "",
+      options.runtimeProcessAbi,
       "template",
       blockers,
     );
@@ -1136,6 +1144,20 @@ function validateApkArtifact(file, label, runtimeProcessAbi, kind, blockers) {
   if (kind === "template") {
     if (nodeRuntimeEntries.length !== 0) {
       blockers.push(`${label} must be a slim template without prepackaged Node runtime JNI libraries`);
+    }
+    const abi = stringValue(runtimeProcessAbi);
+    if (!abi) {
+      blockers.push(`${label} target ABI is missing`);
+      return inspection;
+    }
+    const packagedAbis = [...new Set(nativeEntries.map((entry) => entry.split("/")[1]))];
+    if (packagedAbis.length !== 1 || packagedAbis[0] !== abi) {
+      blockers.push(`${label} must contain exactly the ${abi} native ABI`);
+    }
+    for (const library of ["libjackpal-termexec2.so", "libc++_shared.so"]) {
+      if (!entries.includes(`lib/${abi}/${library}`)) {
+        blockers.push(`${label} is missing baseline template JNI dependency lib/${abi}/${library}`);
+      }
     }
     return inspection;
   }
