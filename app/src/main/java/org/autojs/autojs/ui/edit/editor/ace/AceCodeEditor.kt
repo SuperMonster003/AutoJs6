@@ -2368,7 +2368,22 @@ class AceCodeEditor @JvmOverloads constructor(
         return WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream(ByteArray(0)))
     }
 
+    private fun emptyOptionalResourceResponse(): WebResourceResponse {
+        return WebResourceResponse(
+            "image/x-icon",
+            null,
+            204,
+            "No Content",
+            mapOf("Cache-Control" to "no-store"),
+            ByteArrayInputStream(ByteArray(0)),
+        )
+    }
+
     private fun interceptResource(url: String?): WebResourceResponse? {
+        if (AceOptionalWebResourceRoute.matches(url)) {
+            postToMain { eventHistory.record("optional_resource_ignored", "favicon") }
+            return emptyOptionalResourceResponse()
+        }
         if (!isAllowedUrl(url)) {
             return emptyBlockedResponse().also { reportBlockedUrl("resource", url) }
         }

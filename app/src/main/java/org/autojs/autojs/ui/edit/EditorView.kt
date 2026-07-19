@@ -2209,7 +2209,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val width = fonts.size.toString().length.coerceAtLeast(2)
         val index = fonts.indexOfFirst { it.id == option.id }.takeIf { it >= 0 }?.plus(1)
         mThemePreviewIndex.text = "${index?.toString()?.padStart(width, '0') ?: "--"}/${fonts.size.toString().padStart(width, '0')}"
-        mThemePreviewFilter.setImageResource(R.drawable.ic_filter)
+        mThemePreviewFilter.setImageResource(R.drawable.ic_filter_bigger)
         mThemePreviewFilter.contentDescription = context.getString(R.string.text_filter)
 
         val downloading = mFontPreviewDownloadId == option.id && mAceFontManager.isDownloading(option.id)

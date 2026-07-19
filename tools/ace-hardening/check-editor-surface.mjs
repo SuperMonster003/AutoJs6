@@ -580,6 +580,14 @@ assertIncludes(bridge, "setFontDescriptor: setFontDescriptor", "dynamic font des
 assertIncludes(bridge, 'applyFontFamilyAndRefresh(BUNDLED_FONT_FAMILY, "font_load_fallback")', "dynamic font load bundled fallback");
 assertIncludes(aceCodeEditor, 'payload.optBoolean("invalidateInstalledCache", false)', "native cache deletion requires an explicit JS invalidation signal");
 assertIncludes(aceCodeEditor, "fontManager.invalidateInstalled(fontId, sha256)", "native cache invalidation is digest-bound");
+assertIncludes(aceCodeEditor, "AceOptionalWebResourceRoute.matches(url)", "browser-generated favicon has an exact optional-resource route");
+assertIncludes(aceCodeEditor, 'eventHistory.record("optional_resource_ignored", "favicon")', "ignored favicon remains visible in diagnostics");
+assertIncludes(aceCodeEditor, '"image/x-icon",\n            null,\n            204,', "ignored favicon receives a local no-content response");
+assertOrder(
+  aceCodeEditor,
+  ["if (AceOptionalWebResourceRoute.matches(url))", "if (!isAllowedUrl(url))"],
+  "optional favicon handling precedes fatal blocked-resource handling",
+);
 assertIncludes(aceFontManager, "fun observeCatalogChanges(", "accepted font catalog observer API");
 assertIncludes(aceCodeEditor, "fontManager.observeCatalogChanges", "active editor catalog revocation observer");
 assertIncludes(aceFontDialog, ".options(", "font dialog title overflow menu");

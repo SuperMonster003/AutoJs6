@@ -711,12 +711,12 @@ object AceEditorFontDialog {
                 MaterialDialog.Builder(context)
                     .title(font.displayName)
                     .content(content)
-                    .positiveText(R.string.dialog_button_confirm)
-                    .positiveColorRes(R.color.dialog_button_attraction)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
                     .apply {
                         font.remoteFont?.licenseUrl?.let { licenseUrl ->
                             neutralText(R.string.text_ace_editor_font_license)
-                            neutralColorRes(R.color.dialog_button_default)
+                            neutralColorRes(R.color.dialog_button_hint)
                             onNeutral { _, _ -> IntentUtils.browse(context, licenseUrl) }
                         }
                     }
