@@ -101,6 +101,7 @@ class AceEditorFontUiPreferencesTest {
     fun narrowingFeaturesRequiresAtLeastOneExplicitSelectedFeature() {
         val cnOnly = AceEditorFontPreviewFilter(
             excludedFeatures = FontFeature.entries.toSet() - FontFeature.CN,
+            excludeOther = true,
         )
 
         assertTrue(cnOnly.allows(optionWithFeatures(FontFeature.CN)))
@@ -112,12 +113,34 @@ class AceEditorFontUiPreferencesTest {
     @Test
     fun selectedFeatureSubsetUsesOrSemantics() {
         val nerdOrCn = AceEditorFontPreviewFilter(
-            excludedFeatures = setOf(FontFeature.VARIABLE),
+            excludedFeatures = FontFeature.entries.toSet() - setOf(FontFeature.NERD, FontFeature.CN),
+            excludeOther = true,
         )
 
         assertTrue(nerdOrCn.allows(optionWithFeatures(FontFeature.NERD)))
         assertTrue(nerdOrCn.allows(optionWithFeatures(FontFeature.CN, FontFeature.VARIABLE)))
         assertFalse(nerdOrCn.allows(optionWithFeatures(FontFeature.VARIABLE)))
+    }
+
+    @Test
+    fun otherMatchesOnlyFontsWithoutAnyNamedFeature() {
+        val otherOnly = AceEditorFontPreviewFilter(
+            excludedFeatures = FontFeature.entries.toSet(),
+        )
+
+        assertTrue(otherOnly.hasSelectedFeatures)
+        assertTrue(otherOnly.allows(option("plain", "Plain", AceEditorFontType.NOT_INSTALLED)))
+        assertFalse(otherOnly.allows(optionWithFeatures(FontFeature.MONO)))
+        assertFalse(otherOnly.allows(optionWithFeatures(FontFeature.JP)))
+    }
+
+    @Test
+    fun excludingOtherHidesOnlyFontsWithoutNamedFeaturesWhenAllFeaturesRemainSelected() {
+        val withoutOther = AceEditorFontPreviewFilter(excludeOther = true)
+
+        assertFalse(withoutOther.allows(option("plain", "Plain", AceEditorFontType.NOT_INSTALLED)))
+        assertTrue(withoutOther.allows(optionWithFeatures(FontFeature.MONO)))
+        assertTrue(withoutOther.allows(optionWithFeatures(FontFeature.NERD, FontFeature.CN)))
     }
 
     @Test
@@ -135,7 +158,10 @@ class AceEditorFontUiPreferencesTest {
 
     @Test
     fun emptyFeatureOrTypeSelectionIsInvalid() {
-        val noFeatures = AceEditorFontPreviewFilter(excludedFeatures = FontFeature.entries.toSet())
+        val noFeatures = AceEditorFontPreviewFilter(
+            excludedFeatures = FontFeature.entries.toSet(),
+            excludeOther = true,
+        )
         val noTypes = AceEditorFontPreviewFilter(excludedTypes = AceEditorFontType.entries.toSet())
 
         assertFalse(noFeatures.hasSelectedFeatures)

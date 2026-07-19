@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="text_ace_editor_font_sort_type_locked">類型鎖定</string>
-    <string name="text_ace_editor_font_filter_feature_item">字型特性 · %1$s</string>
-    <string name="text_ace_editor_font_filter_type_item">類型 · %1$s</string>
+    <string name="text_ace_editor_font_filter_feature_title">字型特性</string>
+    <string name="text_ace_editor_font_filter_type_title">類型</string>
+    <string name="text_ace_editor_font_feature_mono">Mono (等寬字型)</string>
+    <string name="text_ace_editor_font_feature_jp">JP (日語)</string>
+    <string name="text_ace_editor_font_feature_other">其他</string>
     <string name="text_ace_editor_font_filter_feature_required">請至少選擇一個字型特性篩選條件</string>
     <string name="text_ace_editor_font_filter_type_required">請至少選擇一個字型類型篩選條件</string>
     <string name="text_ace_editor_font_filter_no_matches">沒有符合目前篩選條件的字型</string>

@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="text_ace_editor_font_sort_type_locked">Lock type</string>
-    <string name="text_ace_editor_font_filter_feature_item">Font feature · %1$s</string>
-    <string name="text_ace_editor_font_filter_type_item">Type · %1$s</string>
+    <string name="text_ace_editor_font_filter_feature_title">Font features</string>
+    <string name="text_ace_editor_font_filter_type_title">Type</string>
+    <string name="text_ace_editor_font_feature_mono">Mono (monospaced font)</string>
+    <string name="text_ace_editor_font_feature_jp">JP (Japanese)</string>
+    <string name="text_ace_editor_font_feature_other">Other</string>
     <string name="text_ace_editor_font_filter_feature_required">Select at least one font feature filter</string>
     <string name="text_ace_editor_font_filter_type_required">Select at least one font type filter</string>
     <string name="text_ace_editor_font_filter_no_matches">No fonts match the selected filters</string>

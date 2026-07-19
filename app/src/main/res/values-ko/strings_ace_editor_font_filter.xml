@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="text_ace_editor_font_sort_type_locked">유형 고정</string>
-    <string name="text_ace_editor_font_filter_feature_item">글꼴 특성 · %1$s</string>
-    <string name="text_ace_editor_font_filter_type_item">유형 · %1$s</string>
+    <string name="text_ace_editor_font_filter_feature_title">글꼴 특성</string>
+    <string name="text_ace_editor_font_filter_type_title">유형</string>
+    <string name="text_ace_editor_font_feature_mono">Mono (고정폭 글꼴)</string>
+    <string name="text_ace_editor_font_feature_jp">JP (일본어)</string>
+    <string name="text_ace_editor_font_feature_other">기타</string>
     <string name="text_ace_editor_font_filter_feature_required">글꼴 특성을 하나 이상 선택하세요</string>
     <string name="text_ace_editor_font_filter_type_required">글꼴 유형을 하나 이상 선택하세요</string>
     <string name="text_ace_editor_font_filter_no_matches">선택한 필터와 일치하는 글꼴이 없습니다</string>

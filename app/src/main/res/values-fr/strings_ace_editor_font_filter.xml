@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="text_ace_editor_font_sort_type_locked">Verrouiller le type</string>
-    <string name="text_ace_editor_font_filter_feature_item">Caractéristique de police · %1$s</string>
-    <string name="text_ace_editor_font_filter_type_item">Type · %1$s</string>
+    <string name="text_ace_editor_font_filter_feature_title">Caractéristiques de police</string>
+    <string name="text_ace_editor_font_filter_type_title">Type</string>
+    <string name="text_ace_editor_font_feature_mono">Mono (police à chasse fixe)</string>
+    <string name="text_ace_editor_font_feature_jp">JP (japonais)</string>
+    <string name="text_ace_editor_font_feature_other">Autres</string>
     <string name="text_ace_editor_font_filter_feature_required">Sélectionnez au moins une caractéristique de police</string>
     <string name="text_ace_editor_font_filter_type_required">Sélectionnez au moins un type de police</string>
     <string name="text_ace_editor_font_filter_no_matches">Aucune police ne correspond aux filtres sélectionnés</string>

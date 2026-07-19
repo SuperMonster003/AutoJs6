@@ -425,6 +425,29 @@ const FRAGMENT_HOST_MATERIAL_DIALOG_PATH = path.join(
   "settings",
   "FragmentHostMaterialDialog.kt",
 );
+const MD_ROOT_LAYOUT_PATH = path.join(
+  PROJECT_ROOT,
+  "modules",
+  "material-dialogs",
+  "src",
+  "main",
+  "java",
+  "com",
+  "afollestad",
+  "materialdialogs",
+  "internal",
+  "MDRootLayout.java",
+);
+const MD_DIMENS_PATH = path.join(
+  PROJECT_ROOT,
+  "modules",
+  "material-dialogs",
+  "src",
+  "main",
+  "res",
+  "values",
+  "dimens.xml",
+);
 const DIAGNOSTICS_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -510,6 +533,8 @@ const aceLspFileTypesPreference = read(ACE_LSP_FILE_TYPES_PREFERENCE_PATH);
 const editorSettingActionRegistry = read(EDITOR_SETTING_ACTION_REGISTRY_PATH);
 const codeEditorSettingsXml = read(CODE_EDITOR_SETTINGS_XML_PATH);
 const fragmentHostMaterialDialog = read(FRAGMENT_HOST_MATERIAL_DIALOG_PATH);
+const mdRootLayout = read(MD_ROOT_LAYOUT_PATH);
+const mdDimens = read(MD_DIMENS_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
 assertOrder(
@@ -1116,6 +1141,9 @@ assertIncludes(editorSettingActionRegistry, "R.string.key_editor_shortcut_input_
 assertIncludes(fragmentHostMaterialDialog, "class FragmentHostMaterialDialog", "fragment-hosting MaterialDialog wrapper");
 assertIncludes(fragmentHostMaterialDialog, "override fun setContentView(view: View)", "fragment host intercepts DialogFragment content view");
 assertIncludes(fragmentHostMaterialDialog, "customView(", "fragment host uses MaterialDialog custom view container");
+assertIncludes(fragmentHostMaterialDialog, "md_button_frame_vertical_padding_compact", "fragment host uses native action-area padding");
+assertIncludes(mdRootLayout, "public void setButtonBarPadding(int verticalPadding)", "MaterialDialog root exposes action-area padding");
+assertIncludes(mdDimens, '<dimen name="md_button_frame_vertical_padding_compact">4dp</dimen>', "native action-area vertical padding");
 
 assertIncludes(diagnostics, "lastFirstPaintAtUptimeMillis", "first-paint diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeScheduledReason", "resize scheduled diagnostics field");

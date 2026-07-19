@@ -26,6 +26,7 @@ import org.autojs.autojs.ui.edit.editor.ace.font.FontDownloadSubscription
 import org.autojs.autojs.ui.edit.editor.ace.font.FontFileValidationException
 import org.autojs.autojs.ui.edit.editor.ace.font.FontInstallationState
 import org.autojs.autojs.ui.edit.editor.ace.font.FontInstallationStatus
+import org.autojs.autojs.ui.edit.editor.ace.font.RemoteFont
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
@@ -59,7 +60,7 @@ object AceEditorFontDialog {
         val adapter = Adapter(
             context = context,
             manager = manager,
-            fonts = manager.options(context),
+            fonts = manager.options(context, currentFontId),
             currentFontId = currentFontId,
             onPersistedFontDeleted = onSelected,
         )
@@ -120,7 +121,9 @@ object AceEditorFontDialog {
             }
             refreshSubscription = manager.refreshAsync { result ->
                 if (!adapter.isDisposed) {
-                    result.onSuccess { adapter.submit(manager.options(context)) }
+                    result.onSuccess {
+                        adapter.submit(manager.options(context, adapter.selectedFontId))
+                    }
                 }
             }
         }
@@ -300,10 +303,12 @@ object AceEditorFontDialog {
 
         init {
             if (fonts.none { it.id == selectedId }) selectedId = AceFontIds.BUNDLED_IOSEVKA
-            fonts.filter { font ->
-                font.remoteFont?.artifact?.sha256 == manager.activeDownloadSha256(font.id)
-            }.forEach {
-                startDownload(it, selectOnSuccess = false, notifyOnSuccess = false)
+            fonts.mapNotNull { font ->
+                font.variants.firstOrNull { variant ->
+                    variant.artifact.sha256 == manager.activeDownloadSha256(variant.id)
+                }?.let { variant -> font.withVariant(variant) }
+            }.forEach { active ->
+                startDownload(active, selectOnSuccess = false, notifyOnSuccess = false)
             }
         }
 
@@ -332,12 +337,16 @@ object AceEditorFontDialog {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val font = fonts[position]
-            val download = downloads[font.id]
+            val download = activeDownload(font)
             val state = manager.installationState(font)
             val selectable = isSelectable(font, state?.status)
             holder.title.text = font.displayName
-            holder.subtitle.text = font.author
-            holder.subtitle.visibility = if (font.author.isBlank()) View.GONE else View.VISIBLE
+            val subtitle = buildList {
+                if (font.variants.size > 1) font.remoteFont?.variantName?.let(::add)
+                font.author.takeIf { it.isNotBlank() }?.let(::add)
+            }.joinToString(" · ")
+            holder.subtitle.text = subtitle
+            holder.subtitle.visibility = if (subtitle.isBlank()) View.GONE else View.VISIBLE
             holder.status.text = statusText(font, state, download)
             holder.radioButton.buttonTintList = choiceTint
             holder.radioButton.isEnabled = selectable
@@ -425,7 +434,7 @@ object AceEditorFontDialog {
                         typeLockedByField.forEach { (field, typeLocked) ->
                             AceEditorFontUiPreferences.setTypeLocked(context, field, typeLocked)
                         }
-                        submit(manager.options(context))
+                        submit(manager.options(context, selectedId))
                     }
                     .negativeText(R.string.dialog_button_cancel)
                     .negativeColorRes(R.color.dialog_button_default)
@@ -437,7 +446,7 @@ object AceEditorFontDialog {
 
         fun swipeDirections(position: Int): Int {
             val font = fonts.getOrNull(position) ?: return 0
-            if (downloads.containsKey(font.id) || manager.isDownloading(font.id)) return 0
+            if (isGroupDownloading(font)) return 0
             if (font.delivery != AceEditorFontOption.Delivery.DOWNLOADABLE) return 0
             val state = manager.installationState(font) ?: return 0
             var directions = 0
@@ -468,8 +477,8 @@ object AceEditorFontDialog {
                 ViewUtils.showToast(context, R.string.text_ace_editor_font_download_all_running)
                 return
             }
-            val candidates = fonts.filter { font ->
-                if (font.remoteFont == null || downloads.containsKey(font.id)) return@filter false
+            val candidates = manager.downloadOptions(context).filter { font ->
+                if (font.remoteFont == null || isGroupDownloading(font)) return@filter false
                 manager.installationState(font)?.status in setOf(
                     FontInstallationStatus.NOT_INSTALLED,
                     FontInstallationStatus.UPDATE_AVAILABLE,
@@ -556,7 +565,9 @@ object AceEditorFontDialog {
             val previous = fonts.indexOfFirst { it.id == selectedId }
             selectedId = fontId
             if (previous >= 0) notifyItemChanged(previous)
-            fonts.indexOfFirst { it.id == selectedId }.takeIf { it >= 0 }?.let(::notifyItemChanged)
+            fonts.indexOfFirst { it.id == selectedId }
+                .takeIf { it >= 0 }
+                ?.let(::notifyItemChanged)
         }
 
         private fun isSelectable(font: AceEditorFontOption, status: FontInstallationStatus?): Boolean {
@@ -569,14 +580,15 @@ object AceEditorFontDialog {
 
         private fun confirmDownload(font: AceEditorFontOption) {
             val remote = font.remoteFont ?: return
-            if (downloads.containsKey(font.id)) return
+            if (isGroupDownloading(font)) return
+            val displayName = font.variantDisplayName()
             DialogUtils.buildAndShowAdaptive {
                 MaterialDialog.Builder(context)
-                    .title(font.displayName)
+                    .title(displayName)
                     .content(
                         context.getString(
                             R.string.text_ace_editor_font_download_confirmation,
-                            font.displayName,
+                            displayName,
                             PFiles.formatSizeWithUnit(remote.artifact.sizeBytes),
                         ),
                     )
@@ -599,7 +611,7 @@ object AceEditorFontDialog {
                 finishBulkDownload(bulk, font.id, successful = false)
                 return
             }
-            if (disposed || downloads.containsKey(font.id)) {
+            if (disposed || downloads.containsKey(font.id) || isSiblingDownloading(font)) {
                 finishBulkDownload(bulk, font.id, successful = false)
                 return
             }
@@ -620,7 +632,7 @@ object AceEditorFontDialog {
                         is FontDownloadEvent.Success -> {
                             downloads.remove(font.id)
                             if (selectOnSuccess) selectedId = font.id
-                            submit(manager.options(context))
+                            submit(manager.options(context, selectedId))
                             if (notifyOnSuccess) ViewUtils.showToast(context, R.string.text_installed)
                             finishBulkDownload(bulk, font.id, successful = true)
                         }
@@ -728,7 +740,7 @@ object AceEditorFontDialog {
                 AceEditorFontPreferences.setId(AceFontIds.BUNDLED_IOSEVKA)
                 onPersistedFontDeleted(AceFontIds.BUNDLED_IOSEVKA)
             }
-            submit(manager.options(context))
+            submit(manager.options(context, selectedId))
         }
 
         private fun showDetails(font: AceEditorFontOption) {
@@ -745,6 +757,11 @@ object AceEditorFontDialog {
                     .positiveText(R.string.dialog_button_dismiss)
                     .positiveColorRes(R.color.dialog_button_default)
                     .apply {
+                        if (font.variants.size > 1) {
+                            negativeText(R.string.text_ace_editor_font_filter_feature_title)
+                            negativeColorRes(R.color.dialog_button_advanced_settings)
+                            onNegative { _, _ -> showVariants(font) }
+                        }
                         font.remoteFont?.licenseUrl?.let { licenseUrl ->
                             neutralText(R.string.text_ace_editor_font_license)
                             neutralColorRes(R.color.dialog_button_hint)
@@ -755,8 +772,102 @@ object AceEditorFontDialog {
             }
         }
 
+        private fun showVariants(font: AceEditorFontOption) {
+            val variants = font.variants.sortedWith(
+                compareBy<RemoteFont> { it.variantOrder }
+                    .thenBy { it.id },
+            )
+            if (variants.size <= 1) return
+            val preferredId = AceEditorFontUiPreferences.getSelectedVariantId(context, font.groupId)
+            var selected = variants.indexOfFirst { it.id == preferredId }
+                .takeIf { it >= 0 }
+                ?: variants.indexOfFirst { it.id == font.id }.coerceAtLeast(0)
+            val items = variants.map { variant ->
+                val stateText = context.getString(
+                    when (manager.installationState(variant).status) {
+                        FontInstallationStatus.INSTALLED -> R.string.text_installed
+                        FontInstallationStatus.UPDATE_AVAILABLE -> R.string.text_update
+                        FontInstallationStatus.REVOKED -> R.string.text_unavailable
+                        FontInstallationStatus.NOT_INSTALLED -> R.string.text_not_installed
+                    },
+                )
+                listOfNotNull(
+                    variant.variantName,
+                    stateText,
+                    PFiles.formatSizeWithUnit(variant.artifact.sizeBytes),
+                ).joinToString(" · ")
+            }
+            DialogUtils.buildAndShowAdaptive {
+                MaterialDialog.Builder(context)
+                    .title(font.displayName)
+                    .items(items)
+                    .itemsCallbackSingleChoice(selected) { _, _, which, _ ->
+                        selected = which
+                        true
+                    }
+                    .choiceWidgetThemeColor()
+                    .alwaysCallSingleChoiceCallback()
+                    .negativeText(R.string.dialog_button_cancel)
+                    .negativeColorRes(R.color.dialog_button_default)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_attraction)
+                    .onPositive { _, _ -> selectVariant(font, variants[selected]) }
+                    .build()
+            }
+        }
+
+        private fun selectVariant(
+            previous: AceEditorFontOption,
+            variant: RemoteFont,
+        ) {
+            if (!manager.selectVariant(previous.groupId, variant.id)) return
+            val option = manager.options(context, variant.id)
+                .firstOrNull { it.groupId == previous.groupId && it.id == variant.id }
+                ?: return
+            val state = manager.installationState(option)
+            if (isSelectable(option, state?.status)) {
+                select(variant.id)
+                submit(manager.options(context, selectedId))
+            } else if (state?.status == FontInstallationStatus.NOT_INSTALLED) {
+                confirmDownload(option)
+            }
+        }
+
+        private fun AceEditorFontOption.variantDisplayName(): String {
+            val variant = remoteFont?.variantName?.takeIf { variants.size > 1 }
+            return variant?.let { "$displayName · $it" } ?: displayName
+        }
+
+        private fun AceEditorFontOption.withVariant(variant: RemoteFont): AceEditorFontOption = copy(
+            id = variant.id,
+            family = variant.family,
+            author = variant.author,
+            licenseName = variant.licenseName,
+            type = if (manager.installationState(variant).installed == null) {
+                AceEditorFontType.NOT_INSTALLED
+            } else {
+                AceEditorFontType.INSTALLED
+            },
+            remoteFont = variant,
+            features = variant.features,
+            sizeBytes = variant.artifact.sizeBytes,
+        )
+
+        private fun activeDownload(font: AceEditorFontOption): DownloadUi? =
+            downloads[font.id] ?: font.variants.firstNotNullOfOrNull { downloads[it.id] }
+
+        private fun isGroupDownloading(font: AceEditorFontOption): Boolean =
+            font.variants.any { downloads.containsKey(it.id) || manager.isDownloading(it.id) }
+
+        private fun isSiblingDownloading(font: AceEditorFontOption): Boolean =
+            font.variants.any {
+                it.id != font.id && (downloads.containsKey(it.id) || manager.isDownloading(it.id))
+            }
+
         private fun notifyFontChanged(fontId: String) {
-            fonts.indexOfFirst { it.id == fontId }.takeIf { it >= 0 }?.let(::notifyItemChanged)
+            fonts.indexOfFirst { it.containsFontId(fontId) }
+                .takeIf { it >= 0 }
+                ?.let(::notifyItemChanged)
         }
 
         private fun containsIntegrityFailure(error: Throwable): Boolean {

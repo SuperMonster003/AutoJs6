@@ -8,10 +8,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.R as MaterialDialogR
+import com.afollestad.materialdialogs.internal.MDRootLayout
 
 internal class FragmentHostMaterialDialog private constructor(
     builder: Builder,
 ) : MaterialDialog(builder) {
+
+    init {
+        (getView() as? MDRootLayout)?.setButtonBarPadding(
+            context.resources.getDimensionPixelSize(MaterialDialogR.dimen.md_button_frame_vertical_padding_compact),
+        )
+    }
 
     override fun setContentView(layoutResID: Int) {
         setContentView(LayoutInflater.from(context).inflate(layoutResID, null))

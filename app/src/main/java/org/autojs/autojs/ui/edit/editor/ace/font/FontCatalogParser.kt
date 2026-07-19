@@ -68,6 +68,7 @@ class FontCatalogParser(
                 }
             }
         }.sortedWith(compareBy<RemoteFont> { it.order }.thenBy { it.displayName }.thenBy { it.id })
+        validateGroups(fonts)
 
         return FontCatalog(
             schemaVersion = schemaVersion,
@@ -89,6 +90,17 @@ class FontCatalogParser(
         if (id in reservedRemoteIds) {
             throw FontCatalogParseException("$path.id '$id' is reserved by the host application")
         }
+        val groupId = obj.optionalString("groupId", path) ?: id
+        if (!AceFontIds.validId.matches(groupId)) {
+            throw FontCatalogParseException("$path.groupId is not a valid stable font group id")
+        }
+        if (groupId in reservedRemoteIds) {
+            throw FontCatalogParseException("$path.groupId '$groupId' is reserved by the host application")
+        }
+        val variantOrder = obj.optionalInt("variantOrder", path) ?: 0
+        if (variantOrder < 0) {
+            throw FontCatalogParseException("$path.variantOrder must not be negative")
+        }
 
         val license = parseLicense(obj.get("license"), "$path.license")
         val source = parseSource(obj.get("source"), "$path.source")
@@ -103,7 +115,43 @@ class FontCatalogParser(
             source = source,
             artifact = artifact,
             features = parseFeatures(obj, path),
+            groupId = groupId,
+            variantName = obj.optionalString("variantName", path),
+            variantOrder = variantOrder,
+            isDefaultVariant = obj.optionalBoolean("isDefaultVariant", path) ?: true,
         )
+    }
+
+    private fun validateGroups(fonts: List<RemoteFont>) {
+        fonts.groupBy(RemoteFont::groupId).forEach { (groupId, variants) ->
+            val defaults = variants.count(RemoteFont::isDefaultVariant)
+            if (defaults != 1) {
+                throw FontCatalogParseException(
+                    "Font group '$groupId' must contain exactly one default variant (found $defaults)",
+                )
+            }
+            if (variants.size == 1) return@forEach
+            if (variants.map(RemoteFont::displayName).distinct().size != 1) {
+                throw FontCatalogParseException(
+                    "Font group '$groupId' must use one shared displayName",
+                )
+            }
+            if (variants.any { it.variantName == null }) {
+                throw FontCatalogParseException(
+                    "Every entry in font group '$groupId' must declare variantName",
+                )
+            }
+            if (variants.map(RemoteFont::variantName).distinct().size != variants.size) {
+                throw FontCatalogParseException(
+                    "Font group '$groupId' contains duplicate variantName values",
+                )
+            }
+            if (variants.map(RemoteFont::variantOrder).distinct().size != variants.size) {
+                throw FontCatalogParseException(
+                    "Font group '$groupId' contains duplicate variantOrder values",
+                )
+            }
+        }
     }
 
     private fun parseFeatures(obj: JsonObject, path: String): Set<FontFeature> {
@@ -301,6 +349,14 @@ class FontCatalogParser(
             throw FontCatalogParseException("$path.$name must be a string")
         }
         return value.asString.nonBlank("$path.$name")
+    }
+
+    private fun JsonObject.optionalBoolean(name: String, path: String): Boolean? {
+        val value = get(name)?.takeUnless { it.isJsonNull } ?: return null
+        if (!value.isJsonPrimitive || !value.asJsonPrimitive.isBoolean) {
+            throw FontCatalogParseException("$path.$name must be a boolean")
+        }
+        return value.asBoolean
     }
 
     private fun JsonObject.requiredFlexibleString(name: String, path: String): String =

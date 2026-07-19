@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.edit.editor.ace
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.core.content.edit
+import org.autojs.autojs.ui.edit.editor.ace.font.AceFontIds
 import org.autojs.autojs.ui.edit.editor.ace.font.FontFeature
 import org.autojs.autojs6.R
 
@@ -49,10 +50,11 @@ enum class AceEditorFontType(
 
 data class AceEditorFontPreviewFilter(
     val excludedFeatures: Set<FontFeature> = emptySet(),
+    val excludeOther: Boolean = false,
     val excludedTypes: Set<AceEditorFontType> = emptySet(),
 ) {
     val hasSelectedFeatures: Boolean
-        get() = excludedFeatures.size < FontFeature.entries.size
+        get() = FILTERABLE_FEATURES.any { it !in excludedFeatures } || !excludeOther
 
     val hasSelectedTypes: Boolean
         get() = excludedTypes.size < AceEditorFontType.entries.size
@@ -60,13 +62,23 @@ data class AceEditorFontPreviewFilter(
     fun allows(option: AceEditorFontOption): Boolean {
         if (!hasSelectedFeatures || !hasSelectedTypes || option.type in excludedTypes) return false
 
-        // Selecting every feature means no feature restriction, so fonts without optional
-        // catalog features remain visible by default. Once the user narrows the selection,
-        // an option must explicitly advertise at least one selected feature.
-        return excludedFeatures.isEmpty() || option.features.any { it !in excludedFeatures }
+        val selectedFeatureMatches = option.features.any {
+            it in FILTERABLE_FEATURES && it !in excludedFeatures
+        }
+        val isOther = option.features.none { it in FILTERABLE_FEATURES }
+        return selectedFeatureMatches || (!excludeOther && isOther)
     }
 
     companion object {
+        /** Features represented by dedicated checkboxes; OTHER means having none of these. */
+        val FILTERABLE_FEATURES: Set<FontFeature> = setOf(
+            FontFeature.MONO,
+            FontFeature.NERD,
+            FontFeature.VARIABLE,
+            FontFeature.CN,
+            FontFeature.JP,
+        )
+
         val DEFAULT = AceEditorFontPreviewFilter()
     }
 }
@@ -80,6 +92,8 @@ object AceEditorFontUiPreferences {
     private const val KEY_SIZE_SORT_TYPE_LOCKED = "key_\$_ace_editor_font_size_sort_type_locked"
     private const val KEY_EXCLUDED_PREVIEW_FEATURES = "key_\$_ace_editor_font_preview_excluded_features"
     private const val KEY_EXCLUDED_PREVIEW_TYPES = "key_\$_ace_editor_font_preview_excluded_types"
+    private const val OTHER_FEATURE_STORAGE_VALUE = "other"
+    private const val KEY_SELECTED_VARIANT_PREFIX = "key_\$_ace_editor_font_selected_variant_"
 
     fun getSortMode(context: Context): AceEditorFontSortMode =
         AceEditorFontSortMode.fromStoredValue(preferences(context).getString(KEY_SORT_MODE, null))
@@ -138,31 +152,42 @@ object AceEditorFontUiPreferences {
 
     fun getPreviewFilter(context: Context): AceEditorFontPreviewFilter {
         val byCatalogValue = FontFeature.entries.associateBy(FontFeature::catalogValue)
-        val excluded = preferences(context)
+        val storedFeatures = preferences(context)
             .getStringSet(KEY_EXCLUDED_PREVIEW_FEATURES, emptySet())
             .orEmpty()
+        val excluded = storedFeatures
             .mapNotNullTo(linkedSetOf()) { byCatalogValue[it] }
         val byTypeValue = AceEditorFontType.entries.associateBy(AceEditorFontType::storageValue)
         val excludedTypes = preferences(context)
             .getStringSet(KEY_EXCLUDED_PREVIEW_TYPES, emptySet())
             .orEmpty()
             .mapNotNullTo(linkedSetOf()) { byTypeValue[it] }
-        return AceEditorFontPreviewFilter(excluded, excludedTypes)
+        return AceEditorFontPreviewFilter(
+            excludedFeatures = excluded,
+            excludeOther = OTHER_FEATURE_STORAGE_VALUE in storedFeatures,
+            excludedTypes = excludedTypes,
+        )
     }
 
     fun setPreviewFilter(context: Context, filter: AceEditorFontPreviewFilter) {
-        setExcludedFeatures(context, filter.excludedFeatures)
+        setExcludedFeatures(context, filter.excludedFeatures, filter.excludeOther)
         setExcludedTypes(context, filter.excludedTypes)
     }
 
-    fun setExcludedFeatures(context: Context, features: Set<FontFeature>) {
+    fun setExcludedFeatures(
+        context: Context,
+        features: Set<FontFeature>,
+        excludeOther: Boolean = false,
+    ) {
         preferences(context).edit {
-            if (features.isEmpty()) {
+            if (features.isEmpty() && !excludeOther) {
                 remove(KEY_EXCLUDED_PREVIEW_FEATURES)
             } else {
                 putStringSet(
                     KEY_EXCLUDED_PREVIEW_FEATURES,
-                    features.mapTo(linkedSetOf(), FontFeature::catalogValue),
+                    features.mapTo(linkedSetOf(), FontFeature::catalogValue).apply {
+                        if (excludeOther) add(OTHER_FEATURE_STORAGE_VALUE)
+                    },
                 )
             }
         }
@@ -185,6 +210,20 @@ object AceEditorFontUiPreferences {
         preferences(context).edit {
             remove(KEY_EXCLUDED_PREVIEW_FEATURES)
             remove(KEY_EXCLUDED_PREVIEW_TYPES)
+        }
+    }
+
+    fun getSelectedVariantId(context: Context, groupId: String): String? {
+        if (!AceFontIds.validId.matches(groupId)) return null
+        return preferences(context).getString(KEY_SELECTED_VARIANT_PREFIX + groupId, null)
+            ?.takeIf(AceFontIds.validId::matches)
+    }
+
+    fun setSelectedVariantId(context: Context, groupId: String, fontId: String) {
+        require(AceFontIds.validId.matches(groupId)) { "Invalid ACE font group id: $groupId" }
+        require(AceFontIds.validId.matches(fontId)) { "Invalid ACE font variant id: $fontId" }
+        preferences(context).edit {
+            putString(KEY_SELECTED_VARIANT_PREFIX + groupId, fontId)
         }
     }
 

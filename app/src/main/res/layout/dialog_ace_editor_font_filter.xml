@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/font_feature_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="36dp"
+            android:text="@string/text_ace_editor_font_filter_feature_title"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+            android:id="@+id/font_feature_mono"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="42dp"
+            android:text="@string/text_ace_editor_font_feature_mono" />
+
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+            android:id="@+id/font_feature_nerd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="42dp"
+            android:text="@string/text_ace_editor_font_feature_nerd" />
+
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+            android:id="@+id/font_feature_variable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="42dp"
+            android:text="@string/text_ace_editor_font_feature_variable" />
+
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+            android:id="@+id/font_feature_cn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="42dp"
+            android:text="@string/text_ace_editor_font_feature_cn" />
+
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+            android:id="@+id/font_feature_jp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="42dp"
+            android:text="@string/text_ace_editor_font_feature_jp" />
+
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+            android:id="@+id/font_feature_other"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="42dp"
+            android:text="@string/text_ace_editor_font_feature_other" />
+
+        <TextView
+            android:id="@+id/font_type_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:minHeight="36dp"
+            android:text="@string/text_ace_editor_font_filter_type_title"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+            android:id="@+id/font_type_built_in"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="42dp"
+            android:text="@string/text_ace_editor_font_built_in" />
+
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+            android:id="@+id/font_type_installed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="42dp"
+            android:text="@string/text_installed" />
+
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
+            android:id="@+id/font_type_not_installed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="42dp"
+            android:text="@string/text_not_installed" />
+
+    </LinearLayout>
+
+</ScrollView>

@@ -22,6 +22,7 @@ import android.text.InputType
 import android.util.AttributeSet
 import android.util.SparseBooleanArray
 import android.view.Choreographer
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
@@ -153,6 +154,7 @@ import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.R.string.text_unknown
+import org.autojs.autojs6.databinding.DialogAceEditorFontFilterBinding
 import org.autojs.autojs6.databinding.EditorViewBinding
 import org.json.JSONObject
 import java.io.File
@@ -2074,62 +2076,64 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Refresh the type snapshot so installed/uninstalled filters reflect downloads or deletes
         // that completed while the previewer was already open.
         mFontPreviewOptions = mAceFontManager.options(context)
-        val features = FontFeature.entries.toList()
-        val types = AceEditorFontType.entries.toList()
-        val featureLabels = features.map { feature ->
-            val labelRes = when (feature) {
-                FontFeature.NERD -> R.string.text_ace_editor_font_feature_nerd
-                FontFeature.VARIABLE -> R.string.text_ace_editor_font_feature_variable
-                FontFeature.CN -> R.string.text_ace_editor_font_feature_cn
-            }
-            context.getString(
-                R.string.text_ace_editor_font_filter_feature_item,
-                context.getString(labelRes),
-            )
-        }
-        val typeLabels = types.map { type ->
-            val labelRes = when (type) {
-                AceEditorFontType.BUILT_IN -> R.string.text_ace_editor_font_built_in
-                AceEditorFontType.INSTALLED -> R.string.text_installed
-                AceEditorFontType.NOT_INSTALLED -> R.string.text_not_installed
-            }
-            context.getString(
-                R.string.text_ace_editor_font_filter_type_item,
-                context.getString(labelRes),
-            )
-        }
-        val labels = featureLabels + typeLabels
+        val binding = DialogAceEditorFontFilterBinding.inflate(LayoutInflater.from(context))
+        val featureCheckBoxes = linkedMapOf(
+            FontFeature.MONO to binding.fontFeatureMono,
+            FontFeature.NERD to binding.fontFeatureNerd,
+            FontFeature.VARIABLE to binding.fontFeatureVariable,
+            FontFeature.CN to binding.fontFeatureCn,
+            FontFeature.JP to binding.fontFeatureJp,
+        )
+        val typeCheckBoxes = linkedMapOf(
+            AceEditorFontType.BUILT_IN to binding.fontTypeBuiltIn,
+            AceEditorFontType.INSTALLED to binding.fontTypeInstalled,
+            AceEditorFontType.NOT_INSTALLED to binding.fontTypeNotInstalled,
+        )
         val filter = AceEditorFontUiPreferences.getPreviewFilter(context)
-        val checked = buildList {
-            features.forEachIndexed { index, feature ->
-                if (feature !in filter.excludedFeatures) add(index)
-            }
-            types.forEachIndexed { index, type ->
-                if (type !in filter.excludedTypes) add(features.size + index)
-            }
-        }.toTypedArray()
+        featureCheckBoxes.forEach { (feature, checkBox) ->
+            checkBox.isChecked = feature !in filter.excludedFeatures
+        }
+        binding.fontFeatureOther.isChecked = !filter.excludeOther
+        typeCheckBoxes.forEach { (type, checkBox) ->
+            checkBox.isChecked = type !in filter.excludedTypes
+        }
+        val categoryColor = ColorUtils.adjustColorForContrast(
+            context.getColor(R.color.window_background),
+            ThemeColorManager.colorPrimary,
+            3.2,
+        )
+        binding.fontFeatureTitle.setTextColor(categoryColor)
+        binding.fontTypeTitle.setTextColor(categoryColor)
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(context)
                 .title(R.string.text_filter)
                 .options(
                     listOf(
-                        MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) { dialog ->
-                            dialog.setSelectedIndices(labels.indices.toList().toTypedArray())
+                        MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) {
+                            featureCheckBoxes.values.forEach { it.isChecked = true }
+                            binding.fontFeatureOther.isChecked = true
+                            typeCheckBoxes.values.forEach { it.isChecked = true }
                         },
                     ),
                 )
-                .items(labels)
-                .itemsCallbackMultiChoice(checked) { dialog, which, _ ->
-                    val selectedIndices = which.toSet()
-                    val includedFeatures = features.filterIndexedTo(linkedSetOf()) { index, _ ->
-                        index in selectedIndices
-                    }
-                    val includedTypes = types.filterIndexedTo(linkedSetOf()) { index, _ ->
-                        features.size + index in selectedIndices
-                    }
+                .customView(binding.root, false)
+                .autoDismiss(false)
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .onNegative { dialog, _ -> dialog.dismiss() }
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .onPositive { dialog, _ ->
+                    val includedFeatures = featureCheckBoxes
+                        .filterValues { it.isChecked }
+                        .keys
+                    val includedTypes = typeCheckBoxes
+                        .filterValues { it.isChecked }
+                        .keys
                     val nextFilter = AceEditorFontPreviewFilter(
-                        excludedFeatures = features.toSet() - includedFeatures,
-                        excludedTypes = types.toSet() - includedTypes,
+                        excludedFeatures = featureCheckBoxes.keys - includedFeatures,
+                        excludeOther = !binding.fontFeatureOther.isChecked,
+                        excludedTypes = typeCheckBoxes.keys - includedTypes,
                     )
                     when {
                         !nextFilter.hasSelectedFeatures -> {
@@ -2162,15 +2166,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                             dialog.dismiss()
                         }
                     }
-                    true
                 }
-                .choiceWidgetThemeColor()
-                .autoDismiss(false)
-                .negativeText(R.string.dialog_button_cancel)
-                .negativeColorRes(R.color.dialog_button_default)
-                .onNegative { dialog, _ -> dialog.dismiss() }
-                .positiveText(R.string.dialog_button_confirm)
-                .positiveColorRes(R.color.dialog_button_attraction)
                 .build()
         }
     }

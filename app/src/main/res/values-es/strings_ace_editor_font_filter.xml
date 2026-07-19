@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="text_ace_editor_font_sort_type_locked">Bloquear tipo</string>
-    <string name="text_ace_editor_font_filter_feature_item">Característica de fuente · %1$s</string>
-    <string name="text_ace_editor_font_filter_type_item">Tipo · %1$s</string>
+    <string name="text_ace_editor_font_filter_feature_title">Características de fuente</string>
+    <string name="text_ace_editor_font_filter_type_title">Tipo</string>
+    <string name="text_ace_editor_font_feature_mono">Mono (fuente monoespaciada)</string>
+    <string name="text_ace_editor_font_feature_jp">JP (japonés)</string>
+    <string name="text_ace_editor_font_feature_other">Otros</string>
     <string name="text_ace_editor_font_filter_feature_required">Selecciona al menos una característica de fuente</string>
     <string name="text_ace_editor_font_filter_type_required">Selecciona al menos un tipo de fuente</string>
     <string name="text_ace_editor_font_filter_no_matches">Ninguna fuente coincide con los filtros seleccionados</string>

@@ -35,14 +35,40 @@ data class AceEditorFontOption(
     val delivery: Delivery,
     val type: AceEditorFontType,
     val remoteFont: RemoteFont? = null,
+    val groupId: String = id,
+    val variants: List<RemoteFont> = remoteFont?.let { listOf(it) }.orEmpty(),
     val features: Set<FontFeature> = emptySet(),
     val sizeBytes: Long? = null,
 ) {
+    fun containsFontId(fontId: String?): Boolean = fontId != null &&
+        (id == fontId || variants.any { it.id == fontId })
+
     enum class Delivery {
         SYSTEM,
         BUNDLED,
         DOWNLOADABLE,
     }
+}
+
+internal data class AceEditorRemoteFontGroup(
+    val groupId: String,
+    val variants: List<RemoteFont>,
+    val selected: RemoteFont,
+)
+
+internal fun resolveRemoteFontGroups(
+    fonts: List<RemoteFont>,
+    activeFontId: String?,
+    preferredVariantId: (String) -> String?,
+): List<AceEditorRemoteFontGroup> = fonts.groupBy(RemoteFont::groupId).values.map { group ->
+    val variants = group.sortedWith(compareBy<RemoteFont> { it.variantOrder }.thenBy { it.id })
+    val groupId = variants.first().groupId
+    val preferredId = preferredVariantId(groupId)
+    val selected = variants.firstOrNull { it.id == activeFontId }
+        ?: variants.firstOrNull { it.id == preferredId }
+        ?: variants.singleOrNull(RemoteFont::isDefaultVariant)
+        ?: variants.maxWith(compareBy<RemoteFont> { it.variantOrder }.thenBy { it.id })
+    AceEditorRemoteFontGroup(groupId, variants, selected)
 }
 
 class AceFontCatalogRefreshSubscription internal constructor(
@@ -101,7 +127,10 @@ class AceEditorFontManager private constructor(context: Context) {
 
     fun catalog(): FontCatalog? = repository.current()
 
-    fun options(context: Context = appContext): List<AceEditorFontOption> {
+    fun options(
+        context: Context = appContext,
+        activeFontId: String? = AceEditorFontPreferences.getId(),
+    ): List<AceEditorFontOption> {
         val installedFonts = store.installedFonts()
         val installedFontIds = installedFonts.asSequence().mapTo(hashSetOf()) { it.fontId }
         val system = AceEditorFontOption(
@@ -113,6 +142,7 @@ class AceEditorFontManager private constructor(context: Context) {
             order = Int.MIN_VALUE,
             delivery = AceEditorFontOption.Delivery.SYSTEM,
             type = AceEditorFontType.BUILT_IN,
+            features = setOf(FontFeature.MONO),
         )
         val bundled = AceEditorFontOption(
             id = AceFontIds.BUNDLED_IOSEVKA,
@@ -123,16 +153,23 @@ class AceEditorFontManager private constructor(context: Context) {
             order = Int.MIN_VALUE + 1,
             delivery = AceEditorFontOption.Delivery.BUNDLED,
             type = AceEditorFontType.BUILT_IN,
+            features = setOf(FontFeature.MONO),
             sizeBytes = bundledIosevkaSizeBytes,
         )
-        val catalogOptions = catalog()?.fonts.orEmpty().map { font ->
+        val catalogFonts = catalog()?.fonts.orEmpty()
+        val catalogOptions = resolveRemoteFontGroups(catalogFonts, activeFontId) { groupId ->
+            AceEditorFontUiPreferences.getSelectedVariantId(context, groupId)
+        }.map { group ->
+            val variants = group.variants
+            val groupId = group.groupId
+            val font = group.selected
             AceEditorFontOption(
                 id = font.id,
                 displayName = font.displayName,
                 family = font.family,
                 author = font.author,
                 licenseName = font.licenseName,
-                order = font.order,
+                order = variants.minOf(RemoteFont::order),
                 delivery = AceEditorFontOption.Delivery.DOWNLOADABLE,
                 type = if (font.id in installedFontIds) {
                     AceEditorFontType.INSTALLED
@@ -140,11 +177,13 @@ class AceEditorFontManager private constructor(context: Context) {
                     AceEditorFontType.NOT_INSTALLED
                 },
                 remoteFont = font,
+                groupId = groupId,
+                variants = variants,
                 features = font.features,
                 sizeBytes = font.artifact.sizeBytes,
             )
         }
-        val catalogIds = catalogOptions.asSequence().map { it.id }.toHashSet()
+        val catalogIds = catalogFonts.asSequence().mapTo(hashSetOf(), RemoteFont::id)
         val orphanedInstalled = installedFonts
             .filterNot { it.fontId in catalogIds }
             .mapIndexed { index, installed ->
@@ -170,19 +209,44 @@ class AceEditorFontManager private constructor(context: Context) {
     }
 
     fun option(fontId: String, context: Context = appContext): AceEditorFontOption? {
-        return options(context).firstOrNull { it.id == fontId }
+        return options(context, fontId).firstOrNull { it.id == fontId }
+    }
+
+    fun downloadOptions(context: Context = appContext): List<AceEditorFontOption> =
+        options(context, activeFontId = null)
+
+    fun selectVariant(groupId: String, fontId: String): Boolean {
+        val belongsToGroup = catalog()?.fonts.orEmpty().any {
+            it.groupId == groupId && it.id == fontId
+        }
+        if (!belongsToGroup) return false
+        AceEditorFontUiPreferences.setSelectedVariantId(appContext, groupId, fontId)
+        return true
     }
 
     fun displayName(fontId: String, context: Context = appContext): String {
-        return AceEditorFont.entries.firstOrNull { it.preferenceValue == fontId }
-            ?.displayName(context)
-            ?: catalog()?.find(fontId)?.displayName
-            ?: fontId
+        AceEditorFont.entries.firstOrNull { it.preferenceValue == fontId }
+            ?.let { return it.displayName(context) }
+        val catalog = catalog()
+        val font = catalog?.find(fontId) ?: return fontId
+        val isGrouped = catalog.fonts.count { it.groupId == font.groupId } > 1
+        return font.variantName?.takeIf { isGrouped }
+            ?.let { "${font.displayName} · $it" }
+            ?: font.displayName
     }
 
     fun installationState(option: AceEditorFontOption): FontInstallationState? {
         if (option.delivery != AceEditorFontOption.Delivery.DOWNLOADABLE) return null
         val installed = store.installedFont(option.id)
+        return option.remoteFont?.let(::installationState)
+            ?: FontInstallationState(
+                if (installed == null) FontInstallationStatus.NOT_INSTALLED else FontInstallationStatus.INSTALLED,
+                installed,
+            )
+    }
+
+    fun installationState(font: RemoteFont): FontInstallationState {
+        val installed = store.installedFont(font.id)
         val catalog = catalog()
         if (catalog?.remoteArtifactsAllowed != true) {
             return FontInstallationState(FontInstallationStatus.REVOKED, installed)
@@ -190,11 +254,7 @@ class AceEditorFontManager private constructor(context: Context) {
         if (installed != null && installed.sha256 in catalog.revokedSha256) {
             return FontInstallationState(FontInstallationStatus.REVOKED, installed)
         }
-        return option.remoteFont?.let(store::installationState)
-            ?: FontInstallationState(
-                if (installed == null) FontInstallationStatus.NOT_INSTALLED else FontInstallationStatus.INSTALLED,
-                installed,
-            )
+        return store.installationState(font)
     }
 
     fun descriptor(fontId: String): AceFontDescriptor {

@@ -30,9 +30,11 @@ data class FontCatalog(
 
 /** Optional, catalog-owned capabilities used to filter downloadable font variants. */
 enum class FontFeature(val catalogValue: String) {
+    MONO("mono"),
     NERD("nerd"),
     VARIABLE("variable"),
     CN("cn"),
+    JP("jp"),
     ;
 
     companion object {
@@ -52,6 +54,14 @@ data class RemoteFont(
     val source: FontSource,
     val artifact: FontArtifact,
     val features: Set<FontFeature> = emptySet(),
+    /** Stable UI grouping key. Legacy catalogs omit it and remain one-entry groups. */
+    val groupId: String = id,
+    /** Short label shown only when a group offers more than one artifact. */
+    val variantName: String? = null,
+    /** Increasing capability/complexity order within [groupId]. */
+    val variantOrder: Int = 0,
+    /** Exactly one entry in every group is the catalog-selected default. */
+    val isDefaultVariant: Boolean = true,
 ) {
     val licenseName: String get() = license.name
     val licenseUrl: String? get() = license.files.firstNotNullOfOrNull { it.url }
