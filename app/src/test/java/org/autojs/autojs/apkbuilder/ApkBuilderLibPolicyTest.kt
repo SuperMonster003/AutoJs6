@@ -1,10 +1,20 @@
 package org.autojs.autojs.apkbuilder
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ApkBuilderLibPolicyTest {
+
+    @Test
+    fun installedNativeLibraryDirectoryMustMatchRequestedAbi() {
+        assertTrue(ApkBuilder.nativeLibraryDirectoryMatchesAbi("arm64", listOf("arm64-v8a")))
+        assertTrue(ApkBuilder.nativeLibraryDirectoryMatchesAbi("arm", listOf("armeabi-v7a")))
+        assertTrue(ApkBuilder.nativeLibraryDirectoryMatchesAbi("x86_64", listOf("x86_64")))
+        assertFalse(ApkBuilder.nativeLibraryDirectoryMatchesAbi("arm64", listOf("armeabi-v7a", "arm")))
+        assertFalse(ApkBuilder.nativeLibraryDirectoryMatchesAbi("arm", listOf("arm64-v8a", "arm64")))
+    }
 
     @Test
     fun mlKitOcrUsesPluginVariantForPackaging() {

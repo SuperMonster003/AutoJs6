@@ -1632,7 +1632,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             return null
         }
         return buildList {
-            add(nativeLibraryDir.resolve(soName))
+            if (nativeLibraryDirectoryMatchesAbi(nativeLibraryDir.name, abiCandidates)) {
+                add(nativeLibraryDir.resolve(soName))
+            }
             abiCandidates.forEach { abi ->
                 add(nativeLibraryDir.resolve("$abi/$soName"))
             }
@@ -2205,6 +2207,24 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 .filter { (_, pi) -> pi.variant.normalizedPluginVariantKey() in supportedVariantKeys }
                 .maxByOrNull { (_, pi) -> pi.variant.pluginVariantNumber() }
                 ?: infos.firstOrNull()
+        }
+
+        @JvmStatic
+        @VisibleForTesting
+        internal fun nativeLibraryDirectoryMatchesAbi(
+            directoryName: String,
+            abiCandidates: List<String>,
+        ): Boolean {
+            val directoryAbi = directoryName.canonicalNativeLibraryAbiName()
+            return abiCandidates.any { candidate ->
+                candidate.canonicalNativeLibraryAbiName() == directoryAbi
+            }
+        }
+
+        private fun String.canonicalNativeLibraryAbiName(): String = when (trim().lowercase()) {
+            "arm64" -> "arm64-v8a"
+            "arm" -> "armeabi-v7a"
+            else -> trim().lowercase()
         }
 
         val appApkFile by lazy {

@@ -309,8 +309,9 @@ async function main() {
       currentIdentity(repoRoot, pluginRoot),
       "after the packaged smoke template build",
     );
-    const packagedTemplateApk = selectUniversalApk(
+    const packagedTemplateApk = selectAbiApk(
       path.join(repoRoot, "app/build/outputs/apk/inrt/debug"),
+      requirement.runtimeProcessAbi,
       "packaged smoke template",
     );
     assertFreshArtifact(packagedTemplateApk, packagedTemplateBuild.startedAt, "Packaged smoke template APK");
@@ -321,7 +322,11 @@ async function main() {
       context,
       "packaged-template-signature",
     );
-    validatePackagedTemplateApk(packagedTemplateMetadata, packagedTemplateApk);
+    validatePackagedTemplateApk(
+      packagedTemplateMetadata,
+      packagedTemplateApk,
+      requirement.runtimeProcessAbi,
+    );
     const packagedTemplateCopy = copyArtifact(
       packagedTemplateApk,
       artifactDir,
@@ -1119,11 +1124,17 @@ function validatePluginApk(metadata, apk, expectedAbi) {
   }
 }
 
-function validatePackagedTemplateApk(metadata, apk) {
+function validatePackagedTemplateApk(metadata, apk, expectedAbi) {
   if (metadata.packageName !== PACKAGED_TEMPLATE_PACKAGE) {
     throw new Error(
       `Packaged smoke template APK package must be ${PACKAGED_TEMPLATE_PACKAGE}, ` +
         `got ${metadata.packageName || "missing"}: ${apk}`,
+    );
+  }
+  if (metadata.nativeAbis.length !== 1 || metadata.nativeAbis[0] !== expectedAbi) {
+    throw new Error(
+      `Packaged smoke template must contain exactly the target ABI ${expectedAbi}; ` +
+        `declared native-code is ${metadata.nativeAbis.join(", ") || "missing"}.`,
     );
   }
 }
@@ -1136,17 +1147,6 @@ function selectAbiApk(root, abi, label) {
   if (matches.length === 0) throw new Error(`No ${label} APK for ABI ${abi} was found under ${root}.`);
   if (matches.length > 1 && fs.statSync(matches[0]).mtimeMs === fs.statSync(matches[1]).mtimeMs) {
     throw new Error(`Multiple equally recent ${label} APKs for ABI ${abi} were found under ${root}.`);
-  }
-  return matches[0];
-}
-
-function selectUniversalApk(root, label) {
-  const matches = listFiles(root)
-    .filter((file) => path.basename(file).toLowerCase().endsWith("-universal.apk"))
-    .sort((left, right) => fs.statSync(right).mtimeMs - fs.statSync(left).mtimeMs);
-  if (matches.length === 0) throw new Error(`No universal ${label} APK was found under ${root}.`);
-  if (matches.length > 1 && fs.statSync(matches[0]).mtimeMs === fs.statSync(matches[1]).mtimeMs) {
-    throw new Error(`Multiple equally recent universal ${label} APKs were found under ${root}.`);
   }
   return matches[0];
 }
@@ -1851,7 +1851,7 @@ Operational timeouts:
   --plugin-build-timeout-ms MS   Plugin build timeout (5 minutes..4 hours).
 
 The runner fixes nodePlugin/plugin/node24_5, the target profile and packaged-smoke ABI,
-builds and pushes a fresh slim Inrt template to a run-token-derived exact path, verifies
+builds and pushes a fresh target-ABI slim Inrt template to a run-token-derived exact path, verifies
 its device hash before and after testing, cleans it up, runs 30 R5 warm samples and a
 30-second smoke lifecycle with 2-second samples, and fixes the exact verifier selectors
 plus a generated 64-character hexadecimal run token.
@@ -1870,6 +1870,7 @@ module.exports = {
   parseRequiredJUnit,
   parseRequiredJUnitXml,
   packagedTemplatePathForRunToken,
+  selectAbiApk,
   selectFreshJUnit,
   snapshotJUnitFiles,
 };

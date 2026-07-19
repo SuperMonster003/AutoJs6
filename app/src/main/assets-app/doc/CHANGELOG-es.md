@@ -52,6 +52,7 @@
 * `Corrección` Las compilaciones nodePlugin sin un runtime Node en el host excluían incorrectamente las bibliotecas JNI/AAR de todas las ABI, lo que provocaba un cierre inesperado al inicializar Rhino Shell por la ausencia de libjackpal-termexec2.so
 * `Corrección` La recopilación y verificación de evidencias de Node.js R6 rechazaban las identidades de firma de APK informadas por Android Build Tools 37 porque apksigner cambió el formato de salida del resumen del certificado
 * `Corrección` La evidencia de APK empaquetado de Node.js R6 se omitía o quedaba vinculada a arm64 porque el recopilador no preparaba una plantilla Inrt nueva ni pasaba la ABI de destino
+* `Corrección` El empaquetado de aplicaciones entre ABI podía copiar bibliotecas nativas del proceso host instalado a un directorio de otra ABI, lo que hacía que las aplicaciones empaquetadas de 32 bits cargaran bibliotecas de terminal de 64 bits y se cerraran inesperadamente
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos de clase compilados para versiones posteriores de Java
 * `Corrección` app.isInstalled/kill y otros métodos no podían usar correctamente argumentos con nombres de paquete _[`issue #495`](http://issues.autojs6.com/495)_
 * `Corrección` Los métodos relacionados con shell podían dejar de responder en dispositivos sin acceso Root

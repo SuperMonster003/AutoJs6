@@ -27,6 +27,7 @@ const {
   buildPackagedTemplateGradleArgs,
   packagedTemplatePathForRunToken,
   parseApkSignerOutput,
+  selectAbiApk,
   selectFreshJUnit,
   snapshotJUnitFiles: snapshotDeviceJUnitFiles,
 } = require("./run-device-evidence");
@@ -60,6 +61,7 @@ function main() {
     prepareContractApkTools();
     assertApkSignerOutputContracts();
     assertDeviceRunnerGradleContracts();
+    assertPackagedTemplateAbiSelectionContract(root);
     assertPackagedTemplateSourceContract();
     for (const requirement of DEVICE_REQUIREMENTS) {
       writeJson(root, requirement.relative, validDeviceReport(requirement));
@@ -772,6 +774,24 @@ function assertDeviceRunnerGradleContracts() {
   assert(!templateArgs.some((value) => value.startsWith("-Pautojs.nodejs.releaseFlavor=")));
   assert(REQUIRED_DEVICE_ARTIFACT_HASHES.includes("packagedTemplateApkSha256"));
   assert(!REQUIRED_ARTIFACT_HASHES.includes("packagedTemplateApkSha256"));
+}
+
+function assertPackagedTemplateAbiSelectionContract(root) {
+  const outputRoot = path.join(root, "packaged-template-selection");
+  fs.mkdirSync(outputRoot, { recursive: true });
+  fs.writeFileSync(path.join(outputRoot, "inrt-v6.8.0-alpha7-universal.apk"), "universal");
+  DEVICE_REQUIREMENTS.forEach((requirement) => {
+    fs.writeFileSync(
+      path.join(outputRoot, `inrt-v6.8.0-alpha7-${requirement.runtimeProcessAbi}.apk`),
+      requirement.runtimeProcessAbi,
+    );
+  });
+  DEVICE_REQUIREMENTS.forEach((requirement) => {
+    assert.strictEqual(
+      path.basename(selectAbiApk(outputRoot, requirement.runtimeProcessAbi, "packaged smoke template")),
+      `inrt-v6.8.0-alpha7-${requirement.runtimeProcessAbi}.apk`,
+    );
+  });
 }
 
 function assertPackagedTemplateSourceContract() {
