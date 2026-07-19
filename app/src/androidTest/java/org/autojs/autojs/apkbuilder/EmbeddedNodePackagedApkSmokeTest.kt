@@ -15485,12 +15485,11 @@ $nodeConfigJson
     }
 
     private fun bringTestHostToForeground(delaySeconds: Long = 0L) {
-        val command = if (delaySeconds > 0L) {
-            "sh ${writeTestHostForegroundRescueScript(delaySeconds)}"
-        } else {
-            "am start -n ${context.packageName}/org.autojs.autojs.launcher.AdaptiveIconAlias 2>&1"
+        val activity = "${context.packageName}/org.autojs.autojs.launcher.AdaptiveIconAlias"
+        if (delaySeconds > 0L) {
+            SystemClock.sleep(delaySeconds * 1_000L)
         }
-        val output = shellWithTimeout(command, PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS + delaySeconds)
+        val output = shellWithTimeout("am start -n $activity 2>&1", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)
         assertTrue(
             "Could not bring test host to foreground after packaged launch.\n$output",
             (output.contains("Starting", ignoreCase = true) ||
@@ -15498,19 +15497,6 @@ $nodeConfigJson
                     !output.contains("Error:", ignoreCase = true) &&
                     !output.contains("Exception", ignoreCase = true),
         )
-    }
-
-    private fun writeTestHostForegroundRescueScript(delaySeconds: Long): String {
-        val scriptFile = File(PACKAGED_SMOKE_PUBLIC_EXPORT_DIR, "autojs6-p13-host-rescue.sh")
-        scriptFile.parentFile?.mkdirs()
-        scriptFile.writeText(
-            """
-            #!/system/bin/sh
-            sleep $delaySeconds
-            exec am start -n ${context.packageName}/org.autojs.autojs.launcher.AdaptiveIconAlias 2>&1
-            """.trimIndent() + "\n",
-        )
-        return scriptFile.absolutePath
     }
 
     private fun stopPackagedLongRunningViaRunAs(
