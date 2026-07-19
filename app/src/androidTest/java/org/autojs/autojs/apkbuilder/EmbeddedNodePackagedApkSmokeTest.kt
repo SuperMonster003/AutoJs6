@@ -15225,7 +15225,7 @@ $nodeConfigJson
                 packagePath.contains("package:", ignoreCase = true),
             )
 
-            val launchOutput = shellWithTimeout("am start -n ${failureCase.packageName}/org.autojs.autojs.inrt.SplashActivity")
+            val launchOutput = launchPackagedSplashActivity(failureCase.packageName)
             assumeTrue(
                 "Could not launch packaged launch failure SplashActivity.\n$launchOutput",
                 launchOutput.contains("Starting", ignoreCase = true) ||
@@ -15297,7 +15297,7 @@ $nodeConfigJson
                 packagePath.contains("package:", ignoreCase = true),
             )
 
-            val launchOutput = shellWithTimeout("am start -n $packageName/org.autojs.autojs.inrt.SplashActivity")
+            val launchOutput = launchPackagedSplashActivity(packageName)
             assumeTrue(
                 "Could not launch $label SplashActivity.\n$launchOutput",
                 launchOutput.contains("Starting", ignoreCase = true) ||
@@ -15477,10 +15477,14 @@ $nodeConfigJson
     }
 
     private fun launchCrashEvidenceSplashActivity(): String {
+        return launchPackagedSplashActivity(CRASH_EVIDENCE_PACKAGE_NAME)
+    }
+
+    private fun launchPackagedSplashActivity(packageName: String): String {
         val hostActivity = "${context.packageName}/org.autojs.autojs.launcher.AdaptiveIconAlias"
         // UiAutomation tokenizes the command by whitespace before sh receives its -c payload.
         val shellCommand = listOf(
-            "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity 2>&1",
+            "am start -n $packageName/org.autojs.autojs.inrt.SplashActivity 2>&1",
             "sleep $PACKAGED_SMOKE_PACKAGED_LAUNCH_SETTLE_SECONDS",
             "echo $PACKAGED_SMOKE_HOST_RESCUE_MARKER",
             "am start -n $hostActivity 2>&1",
