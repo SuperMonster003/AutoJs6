@@ -15477,26 +15477,29 @@ $nodeConfigJson
     }
 
     private fun launchCrashEvidenceSplashActivity(): String {
-        val output = shellWithTimeout(
+        val hostActivity = "${context.packageName}/org.autojs.autojs.launcher.AdaptiveIconAlias"
+        // UiAutomation tokenizes the command by whitespace before sh receives its -c payload.
+        val shellCommand = listOf(
             "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity 2>&1",
+            "sleep $PACKAGED_SMOKE_PACKAGED_LAUNCH_SETTLE_SECONDS",
+            "echo $PACKAGED_SMOKE_HOST_RESCUE_MARKER",
+            "am start -n $hostActivity 2>&1",
+        ).joinToString(";").replace(" ", "\${IFS}")
+        val output = shellWithTimeout(
+            "sh -c $shellCommand",
+            PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS + PACKAGED_SMOKE_PACKAGED_LAUNCH_SETTLE_SECONDS,
         )
-        bringTestHostToForeground(delaySeconds = PACKAGED_SMOKE_PACKAGED_LAUNCH_SETTLE_SECONDS)
-        return output
-    }
-
-    private fun bringTestHostToForeground(delaySeconds: Long = 0L) {
-        val activity = "${context.packageName}/org.autojs.autojs.launcher.AdaptiveIconAlias"
-        if (delaySeconds > 0L) {
-            SystemClock.sleep(delaySeconds * 1_000L)
-        }
-        val output = shellWithTimeout("am start -n $activity 2>&1", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)
+        val sections = output.split(PACKAGED_SMOKE_HOST_RESCUE_MARKER, limit = 2)
+        assertEquals("Packaged host foreground rescue marker is missing.\n$output", 2, sections.size)
+        val rescueOutput = sections[1]
         assertTrue(
-            "Could not bring test host to foreground after packaged launch.\n$output",
-            (output.contains("Starting", ignoreCase = true) ||
-                    output.contains("Warning: Activity not started", ignoreCase = true)) &&
-                    !output.contains("Error:", ignoreCase = true) &&
-                    !output.contains("Exception", ignoreCase = true),
+            "Could not bring the test host to the foreground after packaged launch.\n$rescueOutput",
+            (rescueOutput.contains("Starting", ignoreCase = true) ||
+                    rescueOutput.contains("Warning: Activity not started", ignoreCase = true)) &&
+                    !rescueOutput.contains("Error:", ignoreCase = true) &&
+                    !rescueOutput.contains("Exception", ignoreCase = true),
         )
+        return sections[0]
     }
 
     private fun stopPackagedLongRunningViaRunAs(
@@ -17182,6 +17185,7 @@ $nodeConfigJson
         private const val PACKAGED_STATUS_WAIT_POLL_MS = 250L
         private const val PACKAGED_NOTIFICATION_WAIT_TIMEOUT_MS = 15_000L
         private const val PACKAGED_SMOKE_TEST_TAG = "P13PackagedSmoke"
+        private const val PACKAGED_SMOKE_HOST_RESCUE_MARKER = "AUTOJS6_HOST_RESCUE"
         private const val PACKAGED_SMOKE_LOGCAT_MARKER_SETTLE_MS = 4_000L
         private const val PACKAGED_SMOKE_PACKAGED_LAUNCH_SETTLE_SECONDS = 4L
         private const val PACKAGED_SMOKE_LOGCAT_TAIL_LINES = 12_000
