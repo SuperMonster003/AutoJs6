@@ -149,6 +149,8 @@ const REQUIRED_SOAK_METRICS = [
   "rssKb",
   "javaHeapKb",
   "nativeHeapKb",
+  "nativeHeapCommittedKb",
+  "nativePssKb",
   "threadCount",
   "fdCount",
   "nodeHeapUsedKb",
@@ -550,10 +552,18 @@ function evaluateSoakReport(evidenceRoot, requirement, identity, repoRoot = null
     requirePositiveInteger(sample, "pluginSessionGeneration", `sample ${index}`, blockers);
     requirePositiveInteger(sample, "processRuntimeGeneration", `sample ${index}`, blockers);
     requirePositiveInteger(sample, "executionSequence", `sample ${index}`, blockers);
-    for (const metric of ["rssKb", "javaHeapKb", "nativeHeapKb", "threadCount", "fdCount", "nodeHeapUsedKb"]) {
+    for (const metric of [
+      "rssKb",
+      "javaHeapKb",
+      "nativeHeapCommittedKb",
+      "nativePssKb",
+      "threadCount",
+      "fdCount",
+      "nodeHeapUsedKb",
+    ]) {
       requirePositiveNumber(sample, metric, `sample ${index}`, blockers);
     }
-    for (const metric of ["libuvHandleCount", "activeBridgeResourceCount"]) {
+    for (const metric of ["nativeHeapKb", "libuvHandleCount", "activeBridgeResourceCount"]) {
       requireNonNegativeNumber(sample, metric, `sample ${index}`, blockers);
     }
     if (stringValue(sample && sample.fdCountSource) !== "plugin_uid_proc_self_fd") {

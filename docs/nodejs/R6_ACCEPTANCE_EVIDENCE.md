@@ -135,6 +135,12 @@ descriptors, libuv handles, and active bridge resources. Sampling may be no
 slower than five minutes and must provide at least 97 samples for quick and 289
 for final evidence.
 
+Android may legitimately report zero currently allocated native-heap bytes
+after the allocator releases all tracked blocks. Therefore `nativeHeapKb` is a
+required non-negative metric, while `nativeHeapCommittedKb` and `nativePssKb`
+must both remain positive so a zero allocated value cannot hide unavailable
+native-memory diagnostics.
+
 For a development-only smoke:
 
 ```powershell

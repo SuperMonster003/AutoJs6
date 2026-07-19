@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/19
+###### 2026/07/20
 
 * `新增` Node.js 24.5.0 腳本運行時, 支持通過 "nodejs" 指令或 .node.js/.cjs/.mjs 等擴展名運行腳本
 * `新增` Node.js 運行時支持 CommonJS/部分 ESM/僅限本地的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 源碼
@@ -51,6 +51,7 @@
 * `修復` Android 私有目錄 /data/user/0 與 /data/data 別名未規範化寫回插件請求, 導致合法 Node.js workingDirectory 被誤判為越過 sandboxRoot 的問題
 * `修復` nodePlugin 在宿主不含 Node 運行時時錯誤排除所有 ABI 的 JNI/AAR 庫, 導致 Rhino Shell 初始化因缺少 libjackpal-termexec2.so 而崩潰的問題
 * `修復` Node.js R6 證據收集及驗證因 apksigner 證書摘要輸出格式變更而拒絕 Android Build Tools 37 報告的 APK 簽名身份的問題
+* `修復` Android 報告目前已分配原生堆位元組數為零時, 健康的 Node.js R6 持久運行時 soak 證據被錯誤拒絕的問題
 * `修復` Node.js R6 打包 APK 證據因收集器未準備當前 Inrt 模板或傳入目標 ABI 而被跳過或錯誤綁定 arm64 的問題
 * `修復` 跨 ABI 打包應用時錯誤將已安裝宿主進程的原生庫複製到其他 ABI 目錄, 導致 32 位打包應用加載 64 位終端庫並崩潰的問題
 * `修復` runtime.loadJar 無法正常動態加載由較高 Java 版本編譯的 class 文件的問題

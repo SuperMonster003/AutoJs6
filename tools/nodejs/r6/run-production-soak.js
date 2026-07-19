@@ -35,6 +35,8 @@ const REQUIRED_SAMPLE_METRICS = [
   "rssKb",
   "javaHeapKb",
   "nativeHeapKb",
+  "nativeHeapCommittedKb",
+  "nativePssKb",
   "threadCount",
   "fdCount",
   "nodeHeapUsedKb",

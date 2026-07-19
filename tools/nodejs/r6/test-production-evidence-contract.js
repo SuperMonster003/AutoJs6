@@ -95,6 +95,47 @@ function main() {
       const result = evaluateSoakReport(root, requirement, identity, root);
       assert.strictEqual(result.ready, true, `${requirement.id}: ${result.blockers.join("; ")}`);
     }
+    assert(REQUIRED_SOAK_METRICS.includes("nativeHeapCommittedKb"));
+    assert(REQUIRED_SOAK_METRICS.includes("nativePssKb"));
+
+    const zeroAllocatedNativeHeapRequirement = SOAK_REQUIREMENTS[0];
+    const zeroAllocatedNativeHeap = validSoakReport(zeroAllocatedNativeHeapRequirement);
+    zeroAllocatedNativeHeap.samples.forEach((sample) => {
+      sample.nativeHeapKb = 0;
+    });
+    zeroAllocatedNativeHeap.analysis.growth = growthAnalysis(zeroAllocatedNativeHeap.samples);
+    writeJson(root, zeroAllocatedNativeHeapRequirement.relative, zeroAllocatedNativeHeap);
+    const zeroAllocatedNativeHeapResult = evaluateSoakReport(
+      root,
+      zeroAllocatedNativeHeapRequirement,
+      identity,
+      root,
+    );
+    assert.strictEqual(
+      zeroAllocatedNativeHeapResult.ready,
+      true,
+      `zero allocated native heap must remain valid: ${zeroAllocatedNativeHeapResult.blockers.join("; ")}`,
+    );
+
+    const missingNativeMemoryProofRequirement = SOAK_REQUIREMENTS[0];
+    const missingNativeMemoryProof = validSoakReport(missingNativeMemoryProofRequirement);
+    missingNativeMemoryProof.samples[1].nativeHeapCommittedKb = 0;
+    missingNativeMemoryProof.samples[1].nativePssKb = 0;
+    writeJson(root, missingNativeMemoryProofRequirement.relative, missingNativeMemoryProof);
+    const missingNativeMemoryProofResult = evaluateSoakReport(
+      root,
+      missingNativeMemoryProofRequirement,
+      identity,
+      root,
+    );
+    assert.strictEqual(missingNativeMemoryProofResult.ready, false);
+    assert(
+      missingNativeMemoryProofResult.blockers.some((message) =>
+        message.includes("nativeHeapCommittedKb must be positive")),
+    );
+    assert(
+      missingNativeMemoryProofResult.blockers.some((message) => message.includes("nativePssKb must be positive")),
+    );
 
     const invalidDeviceTokenRequirement = DEVICE_REQUIREMENTS[0];
     const invalidDeviceToken = validDeviceReport(invalidDeviceTokenRequirement);
@@ -207,11 +248,13 @@ function main() {
     const invalidMetricsRequirement = SOAK_REQUIREMENTS[0];
     const invalidMetrics = validSoakReport(invalidMetricsRequirement);
     invalidMetrics.samples[1].fdCount = -1;
+    invalidMetrics.samples[1].nativeHeapKb = -1;
     invalidMetrics.samples[1].servicePid = 101;
     writeJson(root, invalidMetricsRequirement.relative, invalidMetrics);
     const invalidMetricsResult = evaluateSoakReport(root, invalidMetricsRequirement, identity, root);
     assert.strictEqual(invalidMetricsResult.ready, false);
     assert(invalidMetricsResult.blockers.some((message) => message.includes("fdCount must be positive")));
+    assert(invalidMetricsResult.blockers.some((message) => message.includes("nativeHeapKb must be non-negative")));
     assert(invalidMetricsResult.blockers.some((message) => message.includes("changed servicePid")));
 
     const insufficientSamplesRequirement = SOAK_REQUIREMENTS[1];
@@ -983,6 +1026,8 @@ function soakSample(sequence, capturedAtEpochMs, elapsedMs) {
     rssKb: 64_000 + sequence % 2,
     javaHeapKb: 8_000 + sequence % 2,
     nativeHeapKb: 16_000 + sequence % 2,
+    nativeHeapCommittedKb: 32_000 + sequence % 2,
+    nativePssKb: 24_000 + sequence % 2,
     threadCount: 20,
     fdCount: 80,
     fdCountSource: "plugin_uid_proc_self_fd",

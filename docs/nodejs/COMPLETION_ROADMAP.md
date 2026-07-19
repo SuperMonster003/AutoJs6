@@ -1,6 +1,6 @@
 # AutoJs6 Node.js Completion Roadmap
 
-Last updated: 2026-07-19
+Last updated: 2026-07-20
 
 This checklist separates two completion targets:
 
@@ -424,6 +424,15 @@ cycles, 6 resource samples, 3 liveness/recoverability checks, clean JUnit, and
 verified installed/fresh APK identity. This validates the collection path and
 the `/data/user/0` to `/data/data` workspace alias handling only; it does not
 close either production-soak checkbox.
+
+The first real 8-hour quick soak completed its full workload on 2026-07-20
+with 961 cycles, 108 samples, 49 liveness/recoverability checks, clean JUnit,
+stable runtime identity, and no detected leak or cleanup failure. It was
+correctly left unarchived because the final verifier treated Android's valid
+zero currently allocated native-heap value as a missing metric. The evidence
+contract now accepts non-negative allocated native heap only when committed
+native heap and native PSS remain positive; both production soaks still require
+fresh execution against that corrected source commit.
 
 Core completion command:
 

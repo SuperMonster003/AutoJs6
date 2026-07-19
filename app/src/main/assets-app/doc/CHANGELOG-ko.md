@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/19
+###### 2026/07/20
 
 * `추가` Node.js 24.5.0 스크립트 런타임, "nodejs" 지시문 또는 .node.js/.cjs/.mjs 등의 확장자를 통한 스크립트 실행 지원
 * `추가` Node.js 런타임에서 CommonJS/부분 ESM/로컬 전용 동적 import()/경량 TypeScript 소스 (.ts/.mts/.cts) 지원
@@ -51,6 +51,7 @@
 * `수정` Android 프라이빗 디렉터리 /data/user/0 및 /data/data 별칭을 정규화하여 플러그인 요청에 다시 기록하지 않아, 올바른 Node.js workingDirectory가 sandboxRoot를 벗어난 것으로 잘못 판단되는 문제
 * `수정` 호스트에 Node 런타임이 없는 nodePlugin 빌드에서 모든 ABI의 JNI/AAR 라이브러리를 잘못 제외하여, libjackpal-termexec2.so 누락으로 Rhino Shell 초기화 중 앱이 충돌하는 문제
 * `수정` apksigner의 인증서 다이제스트 출력 형식 변경으로 인해 Node.js R6 증거 수집 및 검증에서 Android Build Tools 37이 보고한 APK 서명자 ID를 거부하는 문제
+* `수정` Android가 현재 할당된 네이티브 힙 바이트를 0으로 보고할 때 정상적인 Node.js R6 상주 런타임 soak 증거가 거부되는 문제
 * `수정` 수집기가 최신 Inrt 템플릿을 준비하거나 대상 ABI를 전달하지 않아 Node.js R6 패키지 APK 증거를 건너뛰거나 arm64에 고정하는 문제
 * `수정` ABI 간 앱 패키징에서 설치된 호스트 프로세스의 네이티브 라이브러리를 다른 ABI 디렉터리로 복사하여, 32비트 패키지 앱이 64비트 터미널 라이브러리를 로드하고 충돌하는 문제
 * `수정` runtime.loadJar에서 더 높은 Java 버전을 대상으로 컴파일된 class 파일을 정상적으로 동적 로드하지 못하는 문제
