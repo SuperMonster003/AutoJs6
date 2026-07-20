@@ -9,12 +9,18 @@ class AceLspServerManager(
     private val documentAllowedProvider: (String?) -> Boolean = { AceEditorLspPreferences.isDocumentAllowed(it) },
 ) {
 
+    @Volatile
     private var attached = false
-    private var sessionRevision = 0L
-    private var documentPath: String? = SYNTHETIC_DOCUMENT_URI
 
+    @Volatile
+    private var sessionRevision = 0L
+
+    @Volatile
+    private var documentPath: String = SYNTHETIC_DOCUMENT_URI
+
+    @Synchronized
     fun setDocumentPath(path: String?) {
-        val normalized = path?.takeIf { it.isNotBlank() }
+        val normalized = path?.takeIf { it.isNotBlank() } ?: SYNTHETIC_DOCUMENT_URI
         if (documentPath == normalized) {
             return
         }
@@ -22,6 +28,7 @@ class AceLspServerManager(
         sessionRevision += 1
     }
 
+    @Synchronized
     fun attach() {
         if (!attached) {
             attached = true
@@ -29,6 +36,7 @@ class AceLspServerManager(
         }
     }
 
+    @Synchronized
     fun detach() {
         if (attached) {
             attached = false
@@ -36,6 +44,7 @@ class AceLspServerManager(
         }
     }
 
+    @Synchronized
     fun snapshot(): AceLspServerSnapshot {
         val enabled = enabledProvider()
         if (!enabled) {
@@ -68,11 +77,12 @@ class AceLspServerManager(
             startSupported = false,
             serverAvailable = false,
             reason = REASON_LOCAL_LANGUAGE_SERVICE,
-            completionProvider = COMPLETION_PROVIDER_TYPESCRIPT,
-            hoverProvider = HOVER_PROVIDER_TYPESCRIPT,
-            diagnosticProvider = DIAGNOSTIC_PROVIDER_TYPESCRIPT,
-            signatureProvider = SIGNATURE_PROVIDER_TYPESCRIPT,
+            completionProvider = COMPLETION_PROVIDER_LOCAL_INDEX,
+            hoverProvider = HOVER_PROVIDER_LOCAL_INDEX,
+            diagnosticProvider = DIAGNOSTIC_PROVIDER_ACE_JSHINT,
+            signatureProvider = SIGNATURE_PROVIDER_STATIC_LOCAL,
             features = DEFAULT_FEATURES,
+            maxDocumentLength = MAX_DOCUMENT_LENGTH,
             sessionRevision = sessionRevision,
         )
     }
@@ -103,6 +113,7 @@ class AceLspServerManager(
             append(",\"signatureProvider\":").appendJsonString(snapshot.signatureProvider)
             append(",\"features\":")
             append(snapshot.features.joinToString(prefix = "[", postfix = "]") { jsonString(it) })
+            append(",\"maxDocumentLength\":").append(snapshot.maxDocumentLength)
             append("}")
         }
     }
@@ -112,17 +123,14 @@ class AceLspServerManager(
     }
 
     companion object {
-        const val MANAGER_NAME = "native-preview"
+        const val MANAGER_NAME = "native-local"
         const val STATE_DISABLED = "disabled"
         const val STATE_DISABLED_FILE_TYPE = "disabled-file-type"
-        const val STATE_CONFIGURED_NO_SERVER = "configured-no-server"
         const val STATE_LOCAL_LANGUAGE_SERVICE = "local-language-service"
-        const val TRANSPORT_UNAVAILABLE = "unavailable"
         const val TRANSPORT_IN_PROCESS = "in-process"
         const val FALLBACK_STATIC_COMPLETION = "static-completion"
-        const val REASON_NO_ALPHA_SERVER_ENDPOINT = "no-alpha-server-endpoint"
         const val REASON_DISABLED_FILE_TYPE = "file-type-disabled"
-        const val REASON_LOCAL_LANGUAGE_SERVICE = "browser-local-language-service"
+        const val REASON_LOCAL_LANGUAGE_SERVICE = "bundled-typescript-language-service"
         const val COMPLETION_PROVIDER_LOCAL_INDEX = "local-index"
         const val HOVER_PROVIDER_LOCAL_INDEX = "local-index"
         const val COMPLETION_PROVIDER_TYPESCRIPT = "typescript-language-service"
@@ -133,6 +141,7 @@ class AceLspServerManager(
         const val SIGNATURE_PROVIDER_TYPESCRIPT = "typescript-language-service"
         const val SYNTHETIC_ROOT_URI = "file:///autojs6/editor"
         const val SYNTHETIC_DOCUMENT_URI = "file:///autojs6/editor/current.js"
+        const val MAX_DOCUMENT_LENGTH = 512 * 1024
 
         val DEFAULT_LIBRARY_URIS = listOf(
             "autojs6/typescript/lib.es2020.d.ts",
@@ -214,5 +223,6 @@ data class AceLspServerSnapshot(
     val diagnosticProvider: String? = null,
     val signatureProvider: String? = null,
     val features: List<String> = emptyList(),
+    val maxDocumentLength: Int = 0,
     val sessionRevision: Long = 0L,
 )

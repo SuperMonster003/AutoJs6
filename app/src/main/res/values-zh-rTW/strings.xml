@@ -74,7 +74,7 @@
     <string name="description_ace_font_styles_enabled_preference">允許 Ace 主題和語法醒目提示使用粗體, 斜體等字型樣式. 關閉後, 程式碼文字會強制使用一般樣式, 不會改變色彩或程式碼內容.</string>
     <string name="description_ace_indent_guides_enabled_preference">顯示或隱藏程式碼區域中的縮排參考線. 此設定只會改變程式碼的顯示方式.</string>
     <string name="description_ace_line_numbers_enabled_preference">顯示或隱藏編輯器邊欄行號. 程式碼摺疊, 中斷點和邊欄版面配置仍然可用.</string>
-    <string name="description_ace_lsp_enabled_preference">LSP 預覽支援預設為關閉. 啟用後, 編輯器會使用本機 TypeScript 語言服務提供補全, 暫留提示, 簽章提示和診斷, 並保留靜態補全作為後備方案.</string>
+    <string name="description_ace_lsp_enabled_preference">LSP 智慧補全預設啟用. 編輯器會使用內建的 TypeScript 語言服務提供補全, 暫留提示, 簽章提示和診斷, 並保留靜態補全作為後備方案. 此功能可隨時關閉.</string>
     <string name="description_ace_lsp_file_types_preference">LSP 只會針對檔名符合所選副檔名的檔案啟動. 使用預設值會還原 JavaScript, TypeScript, JSON, Auto.js 和 Node.js 相關副檔名.</string>
     <string name="description_ace_print_margin_enabled_preference">顯示或隱藏 Ace 編輯器右側的列印邊界參考線. 此設定只會改變程式碼的顯示方式.</string>
     <string name="description_ace_word_wrap_enabled_preference">為長行啟用編輯器自動換行模式. 此設定不會修改檔案內容.</string>
@@ -504,7 +504,7 @@
     <string name="summary_ace_font_styles_enabled">允許程式碼顯示粗體, 斜體等字型樣式</string>
     <string name="summary_ace_indent_guides_enabled">顯示程式碼縮排位置的垂直參考線</string>
     <string name="summary_ace_line_numbers_enabled">在編輯器邊欄中顯示行號</string>
-    <string name="summary_ace_lsp_enabled">啟用 LSP 驅動的編輯輔助預覽</string>
+    <string name="summary_ace_lsp_enabled">啟用 LSP 驅動的編輯輔助</string>
     <string name="summary_ace_lsp_file_types">選擇可啟用 LSP 功能的檔案類型</string>
     <string name="summary_ace_print_margin_enabled">顯示編輯器右側的欄數限制參考線</string>
     <string name="summary_ace_word_wrap_enabled">在編輯器檢視區內對長行自動換行</string>
@@ -599,7 +599,7 @@
     <string name="text_ace_insert">插入</string>
     <string name="text_ace_large_file_uses_native_editor">目前的後備原則已將 Ace 編輯器切換至 JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">行號</string>
-    <string name="text_ace_lsp_enabled">LSP 智慧補全 (預覽)</string>
+    <string name="text_ace_lsp_enabled">LSP 智慧補全</string>
     <string name="text_ace_lsp_file_types">LSP 檔案類型</string>
     <string name="text_ace_no_last_action">暫無最近一次編輯器動作</string>
     <string name="text_ace_print_margin_enabled">列印邊界</string>

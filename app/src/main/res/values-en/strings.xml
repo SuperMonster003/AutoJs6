@@ -74,7 +74,7 @@
     <string name="description_ace_font_styles_enabled_preference">Allow Ace themes and syntax highlighting to use bold, italic, and other font styles. When disabled, code text is forced to the regular normal style without changing colors or content.</string>
     <string name="description_ace_indent_guides_enabled_preference">Show or hide vertical indentation guides in the code area. This only changes how code is displayed.</string>
     <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
-    <string name="description_ace_lsp_enabled_preference">Preview LSP support is off by default. When enabled, the editor uses a local TypeScript language service for completion, hover, signature help, and diagnostics, with static completion kept as a fallback.</string>
+    <string name="description_ace_lsp_enabled_preference">LSP smart completion is enabled by default. The editor uses the bundled TypeScript language service for completion, hover, signature help, and diagnostics, with static completion kept as a fallback. You can turn it off at any time.</string>
     <string name="description_ace_lsp_file_types_preference">LSP is only started for files whose names end with one of the selected suffixes. Use default restores the JavaScript, TypeScript, JSON, Auto.js, and Node.js suffix set.</string>
     <string name="description_ace_print_margin_enabled_preference">Show or hide the Ace editor print margin guide. This is the right-side column limit line and only changes how code is displayed.</string>
     <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
@@ -504,7 +504,7 @@
     <string name="summary_ace_font_styles_enabled">Allow bold, italic, and other code-font styles</string>
     <string name="summary_ace_indent_guides_enabled">Show vertical guides for code indentation</string>
     <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter</string>
-    <string name="summary_ace_lsp_enabled">Enable LSP-powered editor assistance preview</string>
+    <string name="summary_ace_lsp_enabled">Enable LSP-powered editor assistance</string>
     <string name="summary_ace_lsp_file_types">Choose file types that can use LSP features</string>
     <string name="summary_ace_print_margin_enabled">Show the right-side column limit guide</string>
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
@@ -599,7 +599,7 @@
     <string name="text_ace_insert">Insert</string>
     <string name="text_ace_large_file_uses_native_editor">Ace editor is routed to JsDroidEditor by the active fallback policy</string>
     <string name="text_ace_line_numbers_enabled">Line numbers</string>
-    <string name="text_ace_lsp_enabled">LSP smart completion (preview)</string>
+    <string name="text_ace_lsp_enabled">LSP smart completion</string>
     <string name="text_ace_lsp_file_types">LSP file types</string>
     <string name="text_ace_no_last_action">No last editor action</string>
     <string name="text_ace_print_margin_enabled">Print margin</string>

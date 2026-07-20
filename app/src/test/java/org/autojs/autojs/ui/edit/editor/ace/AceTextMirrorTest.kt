@@ -132,4 +132,55 @@ class AceTextMirrorTest {
         assertFalse(applied)
         assertEquals("abc", mirror.text)
     }
+
+    @Test
+    fun crlfInsertPreservesDocumentLineSeparator() {
+        val mirror = AceTextMirror("a\r\nb")
+
+        val applied = mirror.applyDelta(
+            AceTextDelta(
+                action = AceTextDelta.Action.INSERT,
+                start = AceTextDelta.Position(0, 1),
+                end = AceTextDelta.Position(1, 1),
+                lines = listOf("X", "Y"),
+            ),
+        )
+
+        assertTrue(applied)
+        assertEquals("aX\r\nY\r\nb", mirror.text)
+    }
+
+    @Test
+    fun mismatchedRemovalTriggersResyncWithoutChangingMirror() {
+        val mirror = AceTextMirror("hello\nworld")
+
+        val applied = mirror.applyDelta(
+            AceTextDelta(
+                action = AceTextDelta.Action.REMOVE,
+                start = AceTextDelta.Position(0, 1),
+                end = AceTextDelta.Position(0, 4),
+                lines = listOf("wrong"),
+            ),
+        )
+
+        assertFalse(applied)
+        assertEquals("hello\nworld", mirror.text)
+    }
+
+    @Test
+    fun outOfBoundsPositionDoesNotClampOrChangeMirror() {
+        val mirror = AceTextMirror("abc")
+
+        val applied = mirror.applyDelta(
+            AceTextDelta(
+                action = AceTextDelta.Action.INSERT,
+                start = AceTextDelta.Position(3, 99),
+                end = AceTextDelta.Position(3, 100),
+                lines = listOf("x"),
+            ),
+        )
+
+        assertFalse(applied)
+        assertEquals("abc", mirror.text)
+    }
 }

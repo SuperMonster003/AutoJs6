@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.edit.editor.ace
 class AceTextMirror(initialText: String = "") {
 
     private var builder = StringBuilder(initialText)
+    private var lineSeparator = detectLineSeparator(initialText)
 
     var revision: Long = 0L
         private set
@@ -15,6 +16,7 @@ class AceTextMirror(initialText: String = "") {
 
     fun reset(text: String) {
         builder = StringBuilder(text)
+        lineSeparator = detectLineSeparator(text)
         revision++
     }
 
@@ -32,30 +34,41 @@ class AceTextMirror(initialText: String = "") {
     }
 
     private fun applyInsert(delta: AceTextDelta): Boolean {
-        builder.insert(offsetForPosition(delta.start), delta.text)
+        val startOffset = offsetForPosition(delta.start) ?: return false
+        builder.insert(startOffset, deltaText(delta))
         return true
     }
 
     private fun applyRemove(delta: AceTextDelta): Boolean {
-        val startOffset = offsetForPosition(delta.start)
-        val endOffset = offsetForPosition(delta.end)
+        val startOffset = offsetForPosition(delta.start) ?: return false
+        val endOffset = offsetForPosition(delta.end) ?: return false
         if (endOffset < startOffset) {
+            return false
+        }
+        if (builder.substring(startOffset, endOffset) != deltaText(delta)) {
             return false
         }
         builder.delete(startOffset, endOffset)
         return true
     }
 
-    private fun offsetForPosition(position: AceTextDelta.Position): Int {
-        val targetRow = position.row.coerceAtLeast(0)
-        val targetColumn = position.column.coerceAtLeast(0)
+    private fun deltaText(delta: AceTextDelta): String {
+        return delta.lines.joinToString(lineSeparator)
+    }
+
+    private fun offsetForPosition(position: AceTextDelta.Position): Int? {
+        if (position.row < 0 || position.column < 0) {
+            return null
+        }
+        val targetRow = position.row
+        val targetColumn = position.column
         var offset = 0
         var row = 0
 
-        while (row < targetRow && offset < builder.length) {
+        while (row < targetRow) {
             val nextLine = builder.indexOf("\n", offset)
             if (nextLine < 0) {
-                return builder.length
+                return null
             }
             offset = nextLine + 1
             row++
@@ -64,10 +77,18 @@ class AceTextMirror(initialText: String = "") {
         val lineEnd = builder.indexOf("\n", offset).let { index ->
             if (index < 0) builder.length else index
         }
-        return (offset + targetColumn).coerceAtMost(lineEnd)
+        val logicalLineEnd = if (lineEnd > offset && builder[lineEnd - 1] == '\r') lineEnd - 1 else lineEnd
+        if (targetColumn > logicalLineEnd - offset) {
+            return null
+        }
+        return offset + targetColumn
     }
 
     companion object {
         const val SMALL_TEXT_CALIBRATION_LIMIT = 512 * 1024
+
+        private fun detectLineSeparator(text: String): String {
+            return if (text.contains("\r\n")) "\r\n" else "\n"
+        }
     }
 }

@@ -11,6 +11,11 @@
     var TS_LIB_ASSET_ROOT = "./autojs6/typescript/";
     var DEFAULT_LIB = "lib.es2020.d.ts";
     var TS_DIAGNOSTIC_SOURCE = "autojs6-ts";
+    var SINGLE_FILE_UNRELIABLE_DIAGNOSTIC_CODES = {
+        2307: true,
+        2792: true,
+        7016: true
+    };
 
     var TS_LIB_NAMES = [
         "lib.d.ts",
@@ -64,6 +69,10 @@
         "lib.esnext.weakref.d.ts",
         "lib.scripthost.d.ts"
     ];
+    var TS_LIB_NAME_SET = Object.create(null);
+    TS_LIB_NAMES.forEach(function(name) {
+        TS_LIB_NAME_SET[name] = true;
+    });
 
     function noop() {
     }
@@ -125,7 +134,8 @@
         if (/\.jsx$/.test(clean) && ts.ScriptKind && typeof ts.ScriptKind.JSX !== "undefined") {
             return ts.ScriptKind.JSX;
         }
-        if ((/\.ts$/.test(clean) || /\.d\.ts$/.test(clean)) && ts.ScriptKind && typeof ts.ScriptKind.TS !== "undefined") {
+        if ((/\.(?:ts|mts|cts)$/.test(clean) || /\.d\.(?:ts|mts|cts)$/.test(clean)) &&
+            ts.ScriptKind && typeof ts.ScriptKind.TS !== "undefined") {
             return ts.ScriptKind.TS;
         }
         return ts.ScriptKind && typeof ts.ScriptKind.JS !== "undefined" ? ts.ScriptKind.JS : undefined;
@@ -211,6 +221,12 @@
     }
 
     function partsToString(parts) {
+        if (typeof parts === "string") {
+            return parts;
+        }
+        if (!Array.isArray(parts)) {
+            return parts && typeof parts.text === "string" ? parts.text : "";
+        }
         return (parts || []).map(function(part) {
             return part && part.text || "";
         }).join("");
@@ -344,7 +360,9 @@
         var currentText = "";
         var currentFile = normalizeDocumentUri(config.documentUri);
         var libraryUris = [];
+        var disposed = false;
         var diagnosticsLimit = Math.max(1, Number(config.diagnosticsLimit) || 100);
+        var completionLimit = Math.max(1, Number(config.completionLimit) || 300);
 
         function compilerOptions() {
             return {
@@ -355,6 +373,7 @@
                 target: ts.ScriptTarget.ES2020 || ts.ScriptTarget.ES2019 || ts.ScriptTarget.Latest,
                 module: ts.ModuleKind.CommonJS,
                 moduleResolution: ts.ModuleResolutionKind.NodeJs,
+                jsx: ts.JsxEmit && ts.JsxEmit.Preserve,
                 lib: [DEFAULT_LIB],
                 skipLibCheck: true,
                 skipDefaultLibCheck: true
@@ -381,7 +400,31 @@
             return loadText(assetUrl);
         }
 
+        function ensureTsLibrary(fileName) {
+            fileName = normalizeFileName(fileName);
+            if (hasOwn(files, fileName)) {
+                return true;
+            }
+            if (fileName.indexOf(TS_LIB_ROOT) !== 0) {
+                return false;
+            }
+            var name = fileName.substring(TS_LIB_ROOT.length);
+            if (!TS_LIB_NAME_SET[name]) {
+                return false;
+            }
+            var text = readConfiguredText(fileName, TS_LIB_ASSET_ROOT + name);
+            if (text === null || text === undefined) {
+                return false;
+            }
+            libraryUris.push(addFile(fileName, text));
+            return true;
+        }
+
         function initialize() {
+            if (disposed) {
+                reason = "typescript language service disposed";
+                return false;
+            }
             if (ready || reason) {
                 return ready;
             }
@@ -390,13 +433,7 @@
                 return false;
             }
             try {
-                TS_LIB_NAMES.forEach(function(name) {
-                    var uri = TS_LIB_ROOT + name;
-                    var text = readConfiguredText(uri, TS_LIB_ASSET_ROOT + name);
-                    if (text !== null && text !== undefined) {
-                        libraryUris.push(addFile(uri, text));
-                    }
-                });
+                ensureTsLibrary(TS_LIB_ROOT + DEFAULT_LIB);
                 var autojsText = readConfiguredText(AUTOJS6_LIB, AUTOJS6_LIB_ASSET);
                 if (autojsText !== null && autojsText !== undefined) {
                     libraryUris.push(addFile(AUTOJS6_LIB, autojsText));
@@ -417,13 +454,21 @@
                 service = ts.createLanguageService({
                     getCompilationSettings: compilerOptions,
                     getScriptFileNames: function() {
-                        return [currentFile].concat(libraryUris);
+                        return [
+                            currentFile,
+                            TS_LIB_ROOT + DEFAULT_LIB,
+                            AUTOJS6_LIB,
+                            AUTOJS6_EXTRA_LIB
+                        ].filter(function(fileName) {
+                            return hasOwn(files, fileName);
+                        });
                     },
                     getScriptVersion: function(fileName) {
                         return versions[normalizeFileName(fileName)] || "0";
                     },
                     getScriptSnapshot: function(fileName) {
                         fileName = normalizeFileName(fileName);
+                        ensureTsLibrary(fileName);
                         return hasOwn(files, fileName) ? ts.ScriptSnapshot.fromString(files[fileName]) : undefined;
                     },
                     getScriptKind: function(fileName) {
@@ -437,10 +482,12 @@
                     },
                     readFile: function(fileName) {
                         fileName = normalizeFileName(fileName);
+                        ensureTsLibrary(fileName);
                         return hasOwn(files, fileName) ? files[fileName] : undefined;
                     },
                     fileExists: function(fileName) {
-                        return hasOwn(files, normalizeFileName(fileName));
+                        fileName = normalizeFileName(fileName);
+                        return hasOwn(files, fileName) || ensureTsLibrary(fileName);
                     },
                     directoryExists: function() {
                         return true;
@@ -465,6 +512,9 @@
         }
 
         function setDocumentUri(documentUri) {
+            if (disposed) {
+                return false;
+            }
             var nextFile = normalizeDocumentUri(documentUri);
             if (nextFile === currentFile) {
                 return false;
@@ -481,6 +531,9 @@
         }
 
         function updateDocument(text, documentUri) {
+            if (disposed) {
+                return false;
+            }
             if (documentUri) {
                 setDocumentUri(documentUri);
             }
@@ -496,8 +549,8 @@
             return true;
         }
 
-        function syncSession(session) {
-            return updateDocument(textFromSession(session));
+        function syncSession(session, documentText) {
+            return updateDocument(typeof documentText === "string" ? documentText : textFromSession(session));
         }
 
         function signatureForCompletionEntry(entry, offset) {
@@ -519,10 +572,10 @@
             }
         }
 
-        function getCompletions(session, pos, prefix, callback) {
+        function getCompletions(session, pos, prefix, callback, documentText) {
             callback = typeof callback === "function" ? callback : noop;
             try {
-                if (!syncSession(session)) {
+                if (!syncSession(session, documentText)) {
                     callback(null, []);
                     return false;
                 }
@@ -535,28 +588,46 @@
                 });
                 var completions = (result && result.entries || [])
                     .filter(function(entry) {
-                        return !isNoisyCompletionEntry(entry);
+                        return !isNoisyCompletionEntry(entry) &&
+                            matchesCompletionFilter(entry && entry.name, prefix);
                     })
+                    .slice(0, completionLimit)
                     .map(function(entry, index) {
                         var name = entry.name || "";
                         var caption = name;
+                        var insertText = entry.insertText || name;
                         var completion = {
                             caption: caption,
-                            value: name,
+                            value: insertText,
                             meta: entry.kind || "ts",
                             score: 1200 - Math.min(index, 300),
                             docText: entry.kindModifiers || "",
+                            sortText: entry.sortText || "",
                             autojs6Ts: true
                         };
+                        var replacementSpan = entry.replacementSpan;
+                        if (replacementSpan && typeof replacementSpan.start === "number") {
+                            var replacementStart = Math.max(0, replacementSpan.start);
+                            var replacementEnd = replacementStart + Math.max(0, Number(replacementSpan.length) || 0);
+                            completion.replaceRange = {
+                                start: positionFromIndex(currentText, replacementStart),
+                                end: positionFromIndex(currentText, replacementEnd)
+                            };
+                        }
                         var shouldResolveSignature = memberContext ||
                             (prefix && (
                                 matchesCompletionFilter(name, prefix) ||
                                 matchesCompletionFilter(caption, prefix)
                             ));
                         var signature = shouldResolveSignature ? signatureForCompletionEntry(entry, offset) : "";
-                        var snippet = completionSnippet(name, entry.kind, signature);
+                        var replacementStartsInString = replacementSpan &&
+                            /["'`]$/.test(currentText.substring(0, replacementSpan.start));
+                        var snippet = !entry.insertText && !replacementStartsInString ?
+                            completionSnippet(name, entry.kind, signature) : "";
                         if (snippet) {
                             completion.snippet = snippet;
+                        } else if (entry.isSnippet && entry.insertText) {
+                            completion.snippet = entry.insertText;
                         }
                         if (signature) {
                             completion.docText = signature;
@@ -572,9 +643,9 @@
             }
         }
 
-        function getHover(session, pos) {
+        function getHover(session, pos, documentText) {
             try {
-                if (!syncSession(session)) {
+                if (!syncSession(session, documentText)) {
                     return null;
                 }
                 var offset = positionToIndex(session, pos);
@@ -611,9 +682,9 @@
             }
         }
 
-        function getSignatureHelp(session, pos) {
+        function getSignatureHelp(session, pos, documentText) {
             try {
-                if (!syncSession(session)) {
+                if (!syncSession(session, documentText)) {
                     return null;
                 }
                 var offset = positionToIndex(session, pos);
@@ -647,14 +718,16 @@
             }
         }
 
-        function getDiagnostics(session) {
+        function getDiagnostics(session, documentText) {
             try {
-                if (!syncSession(session)) {
+                if (!syncSession(session, documentText)) {
                     return null;
                 }
                 var diagnostics = []
                     .concat(service.getSyntacticDiagnostics(currentFile) || [])
-                    .concat(service.getSemanticDiagnostics(currentFile) || []);
+                    .concat((service.getSemanticDiagnostics(currentFile) || []).filter(function(diagnostic) {
+                        return !SINGLE_FILE_UNRELIABLE_DIAGNOSTIC_CODES[Number(diagnostic && diagnostic.code)];
+                    }));
                 return diagnostics.slice(0, diagnosticsLimit).map(function(diagnostic) {
                     return annotationFromDiagnostic(ts, currentText, diagnostic);
                 });
@@ -665,7 +738,9 @@
         }
 
         function getState() {
-            initialize();
+            if (!disposed) {
+                initialize();
+            }
             return {
                 ready: ready,
                 reason: reason,
@@ -677,6 +752,27 @@
             };
         }
 
+        function dispose() {
+            if (disposed) {
+                return;
+            }
+            disposed = true;
+            ready = false;
+            if (service && typeof service.dispose === "function") {
+                try {
+                    service.dispose();
+                } catch (error) {
+                    notify(config, "ACE TS language service disposal failed: " + error, error);
+                }
+            }
+            service = null;
+            files = Object.create(null);
+            versions = Object.create(null);
+            libraryUris = [];
+            currentText = "";
+            reason = "typescript language service disposed";
+        }
+
         return {
             initialize: initialize,
             setDocumentUri: setDocumentUri,
@@ -686,6 +782,7 @@
             getSignatureHelp: getSignatureHelp,
             getDiagnostics: getDiagnostics,
             getState: getState,
+            dispose: dispose,
             isReady: function() {
                 return initialize();
             }

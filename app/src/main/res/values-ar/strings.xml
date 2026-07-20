@@ -79,7 +79,7 @@
     <string name="description_ace_font_styles_enabled_preference">اسمح لسمات Ace وتمييز بناء الجملة باستخدام الخط العريض والمائل وأنماط خطوط أخرى. عند التعطيل, يفرض النمط العادي المنتظم على نص الشفرة من دون تغيير الألوان أو المحتوى.</string>
     <string name="description_ace_indent_guides_enabled_preference">أظهر أدلة المسافة البادئة العمودية في منطقة الشفرة أو أخفها. يغير هذا طريقة عرض الشفرة فقط.</string>
     <string name="description_ace_line_numbers_enabled_preference">أظهر أرقام الأسطر في هامش المحرر أو أخفها. يظل الطي ونقاط التوقف وتخطيط الهامش متاحة.</string>
-    <string name="description_ace_lsp_enabled_preference">دعم LSP التجريبي معطل افتراضيا. عند تمكينه, يستخدم المحرر خدمة لغة TypeScript محلية للإكمال ومعلومات التحويم ومساعدة التوقيع والتشخيصات, مع إبقاء الإكمال الثابت خيارا احتياطيا.</string>
+    <string name="description_ace_lsp_enabled_preference">إكمال LSP الذكي مفعّل افتراضيا. يستخدم المحرر خدمة لغة TypeScript المضمنة للإكمال ومعلومات التحويم ومساعدة التوقيع والتشخيصات, مع إبقاء الإكمال الثابت خيارا احتياطيا. يمكن تعطيل هذه الميزة في أي وقت.</string>
     <string name="description_ace_lsp_file_types_preference">لا يبدأ LSP إلا للملفات التي تنتهي أسماؤها بإحدى اللواحق المحددة. يعيد خيار \"استخدام الافتراضي\" مجموعة لواحق JavaScript و TypeScript و JSON و Auto.js و Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">أظهر دليل هامش الطباعة في محرر Ace أو أخفه. هذا هو خط حد العمود على الجانب الأيمن, وهو يغير طريقة عرض الشفرة فقط.</string>
     <string name="description_ace_word_wrap_enabled_preference">فعّل التفاف الأسطر الطويلة في المحرر. لا يؤدي هذا إلى تعديل محتويات الملف.</string>
@@ -509,7 +509,7 @@
     <string name="summary_ace_font_styles_enabled">السماح بالخط العريض والمائل وأنماط الخطوط البرمجية الأخرى</string>
     <string name="summary_ace_indent_guides_enabled">إظهار أدلة عمودية للمسافة البادئة للشفرة</string>
     <string name="summary_ace_line_numbers_enabled">إظهار أرقام الأسطر في هامش المحرر</string>
-    <string name="summary_ace_lsp_enabled">تمكين المعاينة التجريبية لمساعدة المحرر المدعومة من LSP</string>
+    <string name="summary_ace_lsp_enabled">تمكين مساعدة المحرر المدعومة من LSP</string>
     <string name="summary_ace_lsp_file_types">اختيار أنواع الملفات التي يمكنها استخدام ميزات LSP</string>
     <string name="summary_ace_print_margin_enabled">إظهار دليل حد العمود على الجانب الأيمن</string>
     <string name="summary_ace_word_wrap_enabled">التفاف الأسطر الطويلة داخل إطار عرض المحرر</string>
@@ -604,7 +604,7 @@
     <string name="text_ace_insert">إدراج</string>
     <string name="text_ace_large_file_uses_native_editor">توجه سياسة الخيار الاحتياطي النشطة محرر Ace إلى JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">أرقام الأسطر</string>
-    <string name="text_ace_lsp_enabled">إكمال LSP الذكي (تجريبي)</string>
+    <string name="text_ace_lsp_enabled">إكمال LSP الذكي</string>
     <string name="text_ace_lsp_file_types">أنواع ملفات LSP</string>
     <string name="text_ace_no_last_action">لا يوجد إجراء محرر أخير</string>
     <string name="text_ace_print_margin_enabled">هامش الطباعة</string>

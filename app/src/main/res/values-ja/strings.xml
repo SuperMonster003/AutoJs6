@@ -78,7 +78,7 @@
     <string name="description_ace_font_styles_enabled_preference">Ace テーマと構文強調表示で太字, 斜体, その他のフォントスタイルを使用できるようにします. 無効にすると, 色や内容を変更せずにコード文字が標準の通常スタイルに固定されます.</string>
     <string name="description_ace_indent_guides_enabled_preference">コード領域の縦方向のインデントガイドを表示または非表示にします. 変更されるのはコードの表示だけです.</string>
     <string name="description_ace_line_numbers_enabled_preference">エディターガターの行番号を表示または非表示にします. 折りたたみ, ブレークポイント, ガターレイアウトは引き続き利用できます.</string>
-    <string name="description_ace_lsp_enabled_preference">プレビュー版の LSP サポートはデフォルトで無効です. 有効にすると, エディターはローカルの TypeScript 言語サービスを使用して補完, ホバー情報, シグネチャヘルプ, 診断を提供し, 静的補完をフォールバックとして維持します.</string>
+    <string name="description_ace_lsp_enabled_preference">LSP スマート補完はデフォルトで有効です. エディターは内蔵の TypeScript 言語サービスを使用して補完, ホバー情報, シグネチャヘルプ, 診断を提供し, 静的補完をフォールバックとして維持します. この機能はいつでも無効にできます.</string>
     <string name="description_ace_lsp_file_types_preference">LSP は, ファイル名が選択した接尾辞のいずれかで終わる場合にのみ起動します. \"デフォルトを使用\" を選ぶと, JavaScript, TypeScript, JSON, Auto.js, Node.js の接尾辞セットに戻ります.</string>
     <string name="description_ace_print_margin_enabled_preference">Ace エディターのプリントマージンガイドを表示または非表示にします. これは右側の列制限線であり, 変更されるのはコードの表示だけです.</string>
     <string name="description_ace_word_wrap_enabled_preference">長い行に対するエディターの折り返しモードを有効にします. ファイルの内容は変更されません.</string>
@@ -508,7 +508,7 @@
     <string name="summary_ace_font_styles_enabled">太字, 斜体, その他のコードフォントスタイルを許可</string>
     <string name="summary_ace_indent_guides_enabled">コードのインデントを示す縦線を表示</string>
     <string name="summary_ace_line_numbers_enabled">エディターガターに行番号を表示</string>
-    <string name="summary_ace_lsp_enabled">LSP によるエディター支援のプレビューを有効化</string>
+    <string name="summary_ace_lsp_enabled">LSP によるエディター支援を有効化</string>
     <string name="summary_ace_lsp_file_types">LSP 機能を使用できるファイル形式を選択</string>
     <string name="summary_ace_print_margin_enabled">右側の列制限ガイドを表示</string>
     <string name="summary_ace_word_wrap_enabled">エディターのビューポート内で長い行を折り返す</string>
@@ -603,7 +603,7 @@
     <string name="text_ace_insert">挿入</string>
     <string name="text_ace_large_file_uses_native_editor">有効なフォールバックポリシーにより, Ace エディターでは JsDroidEditor が使用されます</string>
     <string name="text_ace_line_numbers_enabled">行番号</string>
-    <string name="text_ace_lsp_enabled">LSP スマート補完 (プレビュー)</string>
+    <string name="text_ace_lsp_enabled">LSP スマート補完</string>
     <string name="text_ace_lsp_file_types">LSP ファイル形式</string>
     <string name="text_ace_no_last_action">直前のエディター操作はありません</string>
     <string name="text_ace_print_margin_enabled">プリントマージン</string>

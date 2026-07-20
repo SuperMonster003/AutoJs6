@@ -6,7 +6,7 @@
     <bool name="pref_ace_font_ligatures_enabled">true</bool>
     <bool name="pref_ace_font_styles_enabled">true</bool>
     <bool name="pref_ace_line_numbers_enabled">true</bool>
-    <bool name="pref_ace_lsp_enabled">false</bool>
+    <bool name="pref_ace_lsp_enabled">true</bool>
     <bool name="pref_ace_print_margin_enabled">false</bool>
     <bool name="pref_ace_indent_guides_enabled">true</bool>
     <bool name="pref_ace_word_wrap_enabled">false</bool>

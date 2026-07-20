@@ -70,17 +70,6 @@ class AceLspFileTypesPreference : MaterialPreference {
     }
 
     companion object {
-        private val SUPPORTED_FILE_TYPES = listOf(
-            ".js",
-            ".mjs",
-            ".cjs",
-            ".jsx",
-            ".ts",
-            ".tsx",
-            ".d.ts",
-            ".json",
-            ".auto.js",
-            ".node.js",
-        )
+        private val SUPPORTED_FILE_TYPES = AceEditorLspPreferences.DEFAULT_FILE_TYPES
     }
 }

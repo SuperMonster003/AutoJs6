@@ -77,7 +77,7 @@
     <string name="description_ace_font_styles_enabled_preference">Разрешает темам Ace и подсветке синтаксиса использовать полужирное, курсивное и другое начертание. Если параметр отключён, для текста кода принудительно используется обычное начертание без изменения цветов или содержимого.</string>
     <string name="description_ace_indent_guides_enabled_preference">Показывает или скрывает вертикальные направляющие отступов в области кода. Изменяется только отображение кода.</string>
     <string name="description_ace_line_numbers_enabled_preference">Показывает или скрывает номера строк в поле редактора. Сворачивание кода, точки останова и разметка поля остаются доступными.</string>
-    <string name="description_ace_lsp_enabled_preference">Предварительная поддержка LSP по умолчанию отключена. После включения редактор использует локальную языковую службу TypeScript для автодополнения, всплывающих подсказок, сведений о сигнатурах и диагностики, сохраняя статическое автодополнение в качестве резервного варианта.</string>
+    <string name="description_ace_lsp_enabled_preference">Интеллектуальное автодополнение LSP включено по умолчанию. Редактор использует встроенную языковую службу TypeScript для автодополнения, всплывающих подсказок, сведений о сигнатурах и диагностики, сохраняя статическое автодополнение в качестве резервного варианта. Эту функцию можно отключить в любое время.</string>
     <string name="description_ace_lsp_file_types_preference">LSP запускается только для файлов, имена которых заканчиваются одним из выбранных суффиксов. Значение по умолчанию восстанавливает набор суффиксов JavaScript, TypeScript, JSON, Auto.js и Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Показывает или скрывает линию границы печати в правой части редактора Ace. Изменяется только отображение кода.</string>
     <string name="description_ace_word_wrap_enabled_preference">Включает перенос длинных строк в редакторе. Содержимое файла не изменяется.</string>
@@ -507,7 +507,7 @@
     <string name="summary_ace_font_styles_enabled">Разрешить полужирное, курсивное и другое начертание шрифта кода</string>
     <string name="summary_ace_indent_guides_enabled">Показывать вертикальные направляющие отступов кода</string>
     <string name="summary_ace_line_numbers_enabled">Показывать номера строк в поле редактора</string>
-    <string name="summary_ace_lsp_enabled">Включить предварительную интеллектуальную помощь редактора на основе LSP</string>
+    <string name="summary_ace_lsp_enabled">Включить интеллектуальную помощь редактора на основе LSP</string>
     <string name="summary_ace_lsp_file_types">Выбрать типы файлов, для которых доступны функции LSP</string>
     <string name="summary_ace_print_margin_enabled">Показывать справа линию ограничения ширины строки</string>
     <string name="summary_ace_word_wrap_enabled">Переносить длинные строки в пределах области редактора</string>
@@ -602,7 +602,7 @@
     <string name="text_ace_insert">Вставить</string>
     <string name="text_ace_large_file_uses_native_editor">Текущая политика резервирования переключила редактор Ace на JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">Номера строк</string>
-    <string name="text_ace_lsp_enabled">Интеллектуальное автодополнение LSP (предварительная версия)</string>
+    <string name="text_ace_lsp_enabled">Интеллектуальное автодополнение LSP</string>
     <string name="text_ace_lsp_file_types">Типы файлов LSP</string>
     <string name="text_ace_no_last_action">Последнее действие редактора отсутствует</string>
     <string name="text_ace_print_margin_enabled">Граница печати</string>

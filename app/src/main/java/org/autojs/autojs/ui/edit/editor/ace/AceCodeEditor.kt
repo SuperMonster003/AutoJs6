@@ -88,6 +88,8 @@ class AceCodeEditor @JvmOverloads constructor(
     ).coerceAtLeast(1f)
     private val eventHistory = AceRuntimeEventHistory()
     private val lspServerManager = AceLspServerManager()
+    @Volatile
+    private var lspRuntimeState: String? = null
     private val healthMonitor = AceRuntimeHealthMonitor(mainHandler) { failure ->
         notifyFallbackRequired(failure)
     }
@@ -277,6 +279,7 @@ class AceCodeEditor @JvmOverloads constructor(
             lspServerAvailable = lspSnapshot.serverAvailable,
             lspStartSupported = lspSnapshot.startSupported,
             lspSessionRevision = lspSnapshot.sessionRevision,
+            lspRuntimeState = lspRuntimeState,
             aceFont = requestedFontId,
             fileSizeBytes = fileSizeBytes,
             largeFilePolicy = largeFilePolicy,
@@ -931,6 +934,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleEvent(name: String, payloadJson: String?) {
         postToMain {
+            if (destroyed) return@postToMain
             recordBridgeEvent("notifyEvent:$name")
             healthMonitor.markStateEvent()
             eventHistory.record("js_event", "name=$name")
@@ -944,6 +948,7 @@ class AceCodeEditor @JvmOverloads constructor(
                 "firstPaint" -> handleFirstPaint()
                 "resizeDone" -> handleResizeDone(payloadJson)
                 "changeDelta" -> handleChangeDelta(payloadJson)
+                "lspStateChanged" -> handleLspStateChanged(payloadJson)
             }
             listener?.onEvent(name, payloadJson)
         }
@@ -951,6 +956,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleReady(stateJson: String?) {
         postToMain {
+            if (destroyed) return@postToMain
             recordBridgeEvent("notifyReady")
             if (AceEditorTestHooks.shouldForceReadyTimeout()) {
                 return@postToMain
@@ -973,6 +979,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleStateChanged(stateJson: String?) {
         postToMain {
+            if (destroyed) return@postToMain
             recordBridgeEvent("notifyStateChanged")
             healthMonitor.markStateEvent()
             val state = updateState(stateJson)
@@ -982,6 +989,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleTextChanged(stateJson: String?) {
         postToMain {
+            if (destroyed) return@postToMain
             recordBridgeEvent("notifyTextChanged")
             healthMonitor.markChangeEvent()
             val state = updateState(stateJson)
@@ -991,6 +999,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleCursorChanged(lineText: String, line: Int, column: Int, stateJson: String?) {
         postToMain {
+            if (destroyed) return@postToMain
             recordBridgeEvent("notifyCursorChanged")
             healthMonitor.markStateEvent()
             val state = updateState(stateJson).copy(
@@ -1006,6 +1015,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleBreakpointChanged(line: Int, enabled: Boolean, stateJson: String?) {
         postToMain {
+            if (destroyed) return@postToMain
             recordBridgeEvent("notifyBreakpointChanged")
             healthMonitor.markStateEvent()
             val state = updateState(stateJson)
@@ -1015,6 +1025,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun handleError(message: String) {
         postToMain {
+            if (destroyed) return@postToMain
             recordBridgeEvent("notifyError")
             listener?.onError(message.ifBlank { "Unknown ACE editor error" })
         }
@@ -1022,6 +1033,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     private fun notifyFallbackRequired(failure: AceFailure) {
         postToMain {
+            if (destroyed) return@postToMain
             eventHistory.record("fallback", "type=${failure.type.name},fatal=${failure.fatal},message=${failure.message}")
             listener?.onFailure(failure)
         }
@@ -1133,6 +1145,34 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun bridgeFontFamily(): String {
         return AceEditorFontPreferences.get().cssFontFamily
+    }
+
+    private fun handleLspStateChanged(payloadJson: String?) {
+        val state = runCatching { JSONObject(payloadJson.orEmpty()) }.getOrNull() ?: return
+        val loader = state.optJSONObject("tsLoader")
+        val service = state.optJSONObject("tsService")
+        lspRuntimeState = JSONObject().apply {
+            put("serviceStatus", state.optString("serviceStatus", "unknown"))
+            put("completionProvider", state.optString("completionProvider", "unknown"))
+            put("hoverProvider", state.optString("hoverProvider", "unknown"))
+            put("diagnosticProvider", state.optString("diagnosticProvider", "unknown"))
+            put("signatureProvider", state.optString("signatureProvider", "unknown"))
+            put("semanticServiceSuppressed", state.optBoolean("semanticServiceSuppressed", false))
+            put("semanticServiceReason", state.optString("semanticServiceReason", ""))
+            put("documentLength", state.optLong("documentLength", 0L))
+            put("maxDocumentLength", state.optLong("maxDocumentLength", 0L))
+            put("lastSemanticOperation", state.optString("lastSemanticOperation", ""))
+            put("lastSemanticDurationMs", state.optLong("lastSemanticDurationMs", 0L))
+            put("tsLoaderState", loader?.optString("state", "unknown") ?: "unknown")
+            put("tsLoaderAttempts", loader?.optInt("attempts", 0) ?: 0)
+            put("tsReady", service?.optBoolean("ready", false) ?: false)
+            put("tsVersion", service?.optString("version", "") ?: "")
+            put("tsReason", service?.optString("reason", "") ?: "")
+        }.toString()
+        eventHistory.record(
+            "lsp_runtime",
+            "status=${state.optString("serviceStatus", "unknown")},provider=${state.optString("completionProvider", "unknown")}",
+        )
     }
 
     /** A browser-decode failure invalidates only the downloaded cache; the requested preference is retained. */
@@ -2237,8 +2277,11 @@ class AceCodeEditor @JvmOverloads constructor(
         if (destroyed || !isReady || textMirror.length > AceTextMirror.SMALL_TEXT_CALIBRATION_LIMIT) {
             return
         }
+        val requestedRevision = textMirror.revision
         getText { latestText ->
-            if (latestText.length <= AceTextMirror.SMALL_TEXT_CALIBRATION_LIMIT) {
+            if (!destroyed && textMirror.revision == requestedRevision &&
+                latestText.length <= AceTextMirror.SMALL_TEXT_CALIBRATION_LIMIT
+            ) {
                 resetTextMirror(latestText)
             }
         }

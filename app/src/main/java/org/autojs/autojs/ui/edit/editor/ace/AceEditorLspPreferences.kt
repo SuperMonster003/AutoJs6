@@ -5,6 +5,7 @@ import org.autojs.autojs.core.pref.Pref
 object AceEditorLspPreferences {
     const val KEY_ACE_LSP_ENABLED = "key_\$_ace_lsp_enabled"
     const val KEY_ACE_LSP_FILE_TYPES = "key_\$_ace_lsp_file_types"
+    const val DEFAULT_ENABLED = true
     private val TYPE_SCRIPT_DECLARATION_EXTENSIONS = listOf(".d.ts", ".d.mts", ".d.cts")
 
     val DEFAULT_FILE_TYPES = listOf(
@@ -22,12 +23,17 @@ object AceEditorLspPreferences {
 
     @JvmStatic
     fun isEnabled(): Boolean {
-        return Pref.getBoolean(KEY_ACE_LSP_ENABLED, false)
+        return Pref.getBoolean(KEY_ACE_LSP_ENABLED, DEFAULT_ENABLED)
     }
 
     @JvmStatic
     fun setEnabled(enabled: Boolean) {
         Pref.putBoolean(KEY_ACE_LSP_ENABLED, enabled)
+    }
+
+    @JvmStatic
+    fun resetEnabled() {
+        Pref.remove(KEY_ACE_LSP_ENABLED)
     }
 
     @JvmStatic

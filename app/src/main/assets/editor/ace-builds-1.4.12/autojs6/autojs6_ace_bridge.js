@@ -8,6 +8,9 @@
     var staticCompleter = null;
     var lspCompletionCompleter = null;
     var lspClient = null;
+    var lastPublishedLspStateJson = "";
+    var lspWarmUpHandle = null;
+    var lspWarmUpUsesIdleCallback = false;
     var tooltipController = null;
     var signatureHelpController = null;
     var dirty = false;
@@ -652,16 +655,64 @@
     }
 
     function warmUpLspAfterFirstPaint() {
-        if (!lspClient || typeof lspClient.warmUp !== "function") {
+        if (!lspClient || typeof lspClient.warmUp !== "function" || lspWarmUpHandle !== null) {
             return;
         }
-        setTimeout(function() {
+        var run = function() {
+            lspWarmUpHandle = null;
+            lspWarmUpUsesIdleCallback = false;
             try {
-                lspClient.warmUp();
+                lspClient.warmUp(function(ok, state) {
+                    publishLspState(state);
+                });
             } catch (error) {
                 notifyRecoverableError("lspWarmUp", error);
             }
-        }, 48);
+        };
+        if (typeof global.requestIdleCallback === "function") {
+            lspWarmUpUsesIdleCallback = true;
+            lspWarmUpHandle = global.requestIdleCallback(run, { timeout: 1500 });
+        } else {
+            lspWarmUpHandle = setTimeout(run, 250);
+        }
+    }
+
+    function publishLspState(state) {
+        if (!state && lspClient && typeof lspClient.getState === "function") {
+            state = lspClient.getState();
+        }
+        if (state) {
+            var json = JSON.stringify(state);
+            if (json !== lastPublishedLspStateJson) {
+                lastPublishedLspStateJson = json;
+                callBridge("notifyEvent", ["lspStateChanged", json]);
+            }
+        }
+        return state || null;
+    }
+
+    function refreshLspAndPublish() {
+        return publishLspState(lspClient && lspClient.refresh ? lspClient.refresh() : null);
+    }
+
+    function getLspStateAndPublish() {
+        return publishLspState(lspClient && lspClient.getState ? lspClient.getState() : null);
+    }
+
+    function destroyLspClient() {
+        if (lspWarmUpHandle !== null) {
+            if (lspWarmUpUsesIdleCallback && typeof global.cancelIdleCallback === "function") {
+                global.cancelIdleCallback(lspWarmUpHandle);
+            } else {
+                clearTimeout(lspWarmUpHandle);
+            }
+            lspWarmUpHandle = null;
+            lspWarmUpUsesIdleCallback = false;
+        }
+        if (lspClient && typeof lspClient.destroy === "function") {
+            lspClient.destroy();
+            publishLspState(lspClient.getState ? lspClient.getState() : null);
+        }
     }
 
     function afterTwoFrames(callback) {
@@ -2878,6 +2929,54 @@
         return true;
     }
 
+    function insertLspCompletion(activeEditor, completion) {
+        if (!completion || !completion.autojs6Ts || !completion.replaceRange) {
+            return staticCompleter && typeof staticCompleter.insertMatch === "function" ?
+                staticCompleter.insertMatch(activeEditor, completion) : false;
+        }
+        var activeSession = activeEditor && activeEditor.session;
+        var replaceRange = completion.replaceRange;
+        if (!activeSession || typeof activeSession.replace !== "function" ||
+            !replaceRange.start || !replaceRange.end) {
+            return false;
+        }
+        var range = Range ? new Range(
+            replaceRange.start.row,
+            replaceRange.start.column,
+            replaceRange.end.row,
+            replaceRange.end.column
+        ) : replaceRange;
+        if (completion.snippet) {
+            activeSession.replace(range, "");
+            if (activeEditor && typeof activeEditor.moveCursorTo === "function") {
+                activeEditor.moveCursorTo(range.start.row, range.start.column);
+            }
+            try {
+                var snippetManager = global.ace.require("ace/snippets").snippetManager;
+                if (snippetManager && typeof snippetManager.insertSnippet === "function") {
+                    snippetManager.insertSnippet(activeEditor, completion.snippet);
+                    return true;
+                }
+            } catch (ignore) {
+                // Fall through to plain insertion when the snippet module is unavailable.
+            }
+            var plainSnippet = String(completion.snippet || "")
+                .replace(/\$\{\d+:([^}]*)\}/g, "$1")
+                .replace(/\$\{\d+\}/g, "")
+                .replace(/\$\d+/g, "");
+            if (activeEditor && typeof activeEditor.insert === "function") {
+                activeEditor.insert(plainSnippet);
+                return true;
+            }
+            return false;
+        }
+        var end = activeSession.replace(range, String(completion.value || completion.caption || ""));
+        if (end && activeEditor && typeof activeEditor.moveCursorTo === "function") {
+            activeEditor.moveCursorTo(end.row, end.column);
+        }
+        return true;
+    }
+
     function installLspCompletionCompleter() {
         if (lspCompletionCompleter || !lspClient) {
             return;
@@ -2894,7 +2993,10 @@
                     callback(null, []);
                     return;
                 }
-                lspClient.getCompletions(activeEditor, activeSession, pos, prefix, callback);
+                lspClient.getCompletions(activeEditor, activeSession, pos, prefix, function(error, results) {
+                    publishLspState();
+                    callback(error, results);
+                });
             },
             getDocTooltip: function(item) {
                 if (item && item.docText) {
@@ -2906,10 +3008,7 @@
                 return null;
             },
             insertMatch: function(activeEditor, completion) {
-                if (staticCompleter && typeof staticCompleter.insertMatch === "function") {
-                    return staticCompleter.insertMatch(activeEditor, completion);
-                }
-                return false;
+                return insertLspCompletion(activeEditor, completion);
             }
         };
         languageTools.addCompleter(lspCompletionCompleter);
@@ -4236,16 +4335,20 @@
             read: function(uri) { return callBridge("read", [uri || ""]); },
             write: function(uri, text) { return callBridge("write", [uri || "", text || ""]); },
             getLspOptions: function() { return callBridge("getLspOptions") || "{}"; },
-            refreshLsp: function() { return lspClient ? lspClient.refresh() : null; },
-            getLspState: function() { return lspClient ? lspClient.getState() : null; },
+            refreshLsp: function() { return refreshLspAndPublish(); },
+            getLspState: function() { return getLspStateAndPublish(); },
             getLspHover: function(row, column) {
-                return lspClient ? lspClient.getHover({ row: row, column: column }) : null;
+                var result = lspClient ? lspClient.getHover({ row: row, column: column }) : null;
+                publishLspState();
+                return result;
             },
             getLspDiagnostics: function() {
                 return lspClient && lspClient.getDiagnostics ? lspClient.getDiagnostics() : [];
             },
             validateLsp: function() {
-                return lspClient && lspClient.validateNow ? lspClient.validateNow() : [];
+                var results = lspClient && lspClient.validateNow ? lspClient.validateNow() : [];
+                publishLspState();
+                return results;
             },
             showLspTooltip: function(row, column) {
                 return tooltipController ?
@@ -4262,7 +4365,9 @@
             },
             getSignatureHelp: function(row, column) {
                 if (lspClient && lspClient.getSignatureHelp) {
-                    return lspClient.getSignatureHelp({ row: row, column: column });
+                    var result = lspClient.getSignatureHelp({ row: row, column: column });
+                    publishLspState();
+                    return result;
                 }
                 return global.AutoJsAceSignatureHelp ?
                     global.AutoJsAceSignatureHelp.findSignatureHelp(session, { row: row, column: column }) :
@@ -4302,6 +4407,10 @@
                     notifyError: notifyLspError
                 });
                 installLspCompletionCompleter();
+                publishLspState();
+                if (global.addEventListener) {
+                    global.addEventListener("pagehide", destroyLspClient, { once: true });
+                }
             } catch (error) {
                 notifyLspError("ACE LSP client disabled: " + error, error);
             }
@@ -4313,7 +4422,9 @@
                     editor: editor,
                     session: session,
                     getHover: function(pos) {
-                        return lspClient ? lspClient.getHover(pos) : null;
+                        var result = lspClient ? lspClient.getHover(pos) : null;
+                        publishLspState();
+                        return result;
                     },
                     notifyError: function(message, error) {
                         notifyRecoverableError("tooltip", error || message);
@@ -4331,7 +4442,9 @@
                     session: session,
                     getSignatureHelp: function(pos) {
                         if (lspClient && lspClient.getSignatureHelp) {
-                            return lspClient.getSignatureHelp(pos);
+                            var result = lspClient.getSignatureHelp(pos);
+                            publishLspState();
+                            return result;
                         }
                         return global.AutoJsAceSignatureHelp.findSignatureHelp(session, pos);
                     },

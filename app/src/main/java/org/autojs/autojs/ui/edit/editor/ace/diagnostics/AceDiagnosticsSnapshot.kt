@@ -23,6 +23,7 @@ data class AceDiagnosticsSnapshot(
     val lspServerAvailable: Boolean = false,
     val lspStartSupported: Boolean = false,
     val lspSessionRevision: Long = 0L,
+    val lspRuntimeState: String? = null,
     val aceFont: String?,
     val fileSizeBytes: Long?,
     val largeFilePolicy: String,

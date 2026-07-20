@@ -73,7 +73,7 @@
     <string name="description_ace_font_styles_enabled_preference">允许 Ace 主题和语法高亮使用粗体, 斜体等字体样式. 关闭后, 代码文本会强制使用常规样式, 不改变颜色或代码内容.</string>
     <string name="description_ace_indent_guides_enabled_preference">显示或隐藏代码区域中的缩进参考线. 此设置只改变代码的显示方式.</string>
     <string name="description_ace_line_numbers_enabled_preference">显示或隐藏编辑器边栏行号. 代码折叠/断点和边栏布局仍然可用.</string>
-    <string name="description_ace_lsp_enabled_preference">LSP 预览支持默认关闭. 启用后, 编辑器会使用本地 TypeScript 语言服务提供补全, 悬停提示, 参数提示和语法诊断, 并保留静态补全作为后备方案.</string>
+    <string name="description_ace_lsp_enabled_preference">LSP 智能补全默认开启. 编辑器会使用内置的 TypeScript 语言服务提供补全, 悬停提示, 参数提示和语法诊断, 并保留静态补全作为后备方案. 此功能可随时关闭.</string>
     <string name="description_ace_lsp_file_types_preference">LSP 仅会针对文件名符合所选后缀的文件启动. 使用默认值会恢复 JavaScript, TypeScript, JSON, Auto.js 与 Node.js 相关后缀.</string>
     <string name="description_ace_print_margin_enabled_preference">显示或隐藏 Ace 编辑器右侧的打印参考线. 此设置只改变代码的显示方式.</string>
     <string name="description_ace_word_wrap_enabled_preference">为长行启用编辑器自动换行模式. 此设置不会修改文件内容.</string>
@@ -503,7 +503,7 @@
     <string name="summary_ace_font_styles_enabled">允许代码显示粗体, 斜体等字体样式</string>
     <string name="summary_ace_indent_guides_enabled">显示代码缩进位置的竖直参考线</string>
     <string name="summary_ace_line_numbers_enabled">在编辑器边栏中显示行号</string>
-    <string name="summary_ace_lsp_enabled">启用 LSP 驱动的编辑辅助预览</string>
+    <string name="summary_ace_lsp_enabled">启用 LSP 驱动的编辑辅助</string>
     <string name="summary_ace_lsp_file_types">选择可启用 LSP 功能的文件类型</string>
     <string name="summary_ace_print_margin_enabled">显示编辑器右侧的列数限制参考线</string>
     <string name="summary_ace_word_wrap_enabled">在编辑器可视区域内对长行自动换行</string>
@@ -611,7 +611,7 @@
     <string name="text_ace_insert">插入</string>
     <string name="text_ace_large_file_uses_native_editor">当前后备策略已将 Ace 编辑器切换到 JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">行号</string>
-    <string name="text_ace_lsp_enabled">LSP 智能补全 (预览)</string>
+    <string name="text_ace_lsp_enabled">LSP 智能补全</string>
     <string name="text_ace_lsp_file_types">LSP 文件类型</string>
     <string name="text_ace_no_last_action">暂无上一次编辑器操作</string>
     <string name="text_ace_print_margin_enabled">打印参考线</string>
