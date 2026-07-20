@@ -234,7 +234,7 @@ internal data class RhinoCompilationProfile(
 
         fun from(context: Context) = RhinoCompilationProfile(
             context.languageVersion,
-            context.optimizationLevel,
+            context.evaluationMethod.level(),
             context.isInterpretedMode,
             context.isGeneratingDebug,
             context.isGeneratingSource,

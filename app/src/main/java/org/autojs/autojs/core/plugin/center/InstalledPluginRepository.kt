@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.core.os.BundleCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
@@ -18,6 +19,7 @@ import org.autojs.autojs.util.StringUtils.truncateForSafeBinder
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginInfo
 import java.io.File
+import java.io.Serializable
 
 /**
  * Local installed plugin discovery.
@@ -92,7 +94,11 @@ class InstalledPluginRepository {
             val pluginDescription = PluginResourceResolver.resolveStringValue(context, packageName, d.pluginInfo?.description)
             val pluginInstruction = PluginResourceResolver.resolveStringValue(context, packageName, d.pluginInfo?.instruction)
             val pluginAuthor = PluginResourceResolver.resolveStringValue(context, packageName, d.pluginInfo?.author)
-            val manifestAuthor = PluginResourceResolver.resolveStringValue(context, packageName, appInfo?.metaData?.get(KEY_AUTHOR))
+            val manifestAuthor = PluginResourceResolver.resolveStringValue(
+                context,
+                packageName,
+                appInfo?.metaData?.let { BundleCompat.getSerializable(it, KEY_AUTHOR, Serializable::class.java) },
+            )
 
             val pkgInfo = runCatching { pm.getPackageInfo(packageName, 0) }.getOrNull()
             val versionName = pkgInfo?.versionName ?: d.pluginInfo?.versionName ?: context.getString(R.string.text_unknown)

@@ -44,7 +44,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.locks.ReentrantLock
 import java.util.UUID
+import kotlin.concurrent.withLock
 import kotlin.system.exitProcess
 
 private fun File.deleteRecursivelyIfExists(): Boolean {
@@ -98,7 +100,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
     }
     private val runtimeControlValues = AtomicReference<Map<String, String>>(emptyMap())
     private val terminalShutdownStarted = AtomicBoolean(false)
-    private val serviceExecutionLock = Object()
+    private val serviceExecutionLock = ReentrantLock()
+    private val serviceExecutionChanged = serviceExecutionLock.newCondition()
     private var activeServiceExecutionRequests = 0
     private var terminalShutdownFuture: Future<*>? = null
     @Volatile
@@ -331,7 +334,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         }
     }
 
-    private fun beginServiceExecutionRequest(): Boolean = synchronized(serviceExecutionLock) {
+    private fun beginServiceExecutionRequest(): Boolean = serviceExecutionLock.withLock {
         if (!retireAfterExecutionReason.isNullOrBlank()) {
             false
         } else {
@@ -341,9 +344,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
     }
 
     private fun finishServiceExecutionRequest() {
-        val retirementReason = synchronized(serviceExecutionLock) {
+        val retirementReason = serviceExecutionLock.withLock {
             activeServiceExecutionRequests = (activeServiceExecutionRequests - 1).coerceAtLeast(0)
-            serviceExecutionLock.notifyAll()
+            serviceExecutionChanged.signalAll()
             retireAfterExecutionReason?.takeIf { activeServiceExecutionRequests == 0 && it.isNotBlank() }
         }
         retirementReason?.let { reason ->
@@ -1944,11 +1947,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
     ) {
         val normalizedReason = reason.ifBlank { "unspecified" }
         val deadline = android.os.SystemClock.elapsedRealtime() + RUNTIME_CONTROL_TIMEOUT_MS
-        val readyToShutdown = synchronized(serviceExecutionLock) {
+        val readyToShutdown = serviceExecutionLock.withLock {
             if (retireAfterExecutionReason.isNullOrBlank()) {
                 retireAfterExecutionReason = normalizedReason
             }
-            serviceExecutionLock.notifyAll()
+            serviceExecutionChanged.signalAll()
             activeServiceExecutionRequests == 0
         }
         if (!NodeEmbeddedProcessSessionManager.isEnabled()) {
@@ -1967,7 +1970,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             return
         }
         runCatching {
-            synchronized(serviceExecutionLock) {
+            serviceExecutionLock.withLock {
                 while (activeServiceExecutionRequests > 0) {
                     val remaining = deadline - android.os.SystemClock.elapsedRealtime()
                     if (remaining <= 0L) {
@@ -1975,7 +1978,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                             "Timed out waiting for $activeServiceExecutionRequests embedded Node execution cleanup(s).",
                         )
                     }
-                    serviceExecutionLock.wait(remaining.coerceAtMost(250L))
+                    serviceExecutionChanged.await(remaining.coerceAtMost(250L), TimeUnit.MILLISECONDS)
                 }
             }
             val shutdownFuture = ensureTerminalShutdownQueued(normalizedReason)
@@ -1994,10 +1997,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
         }
     }
 
-    private fun ensureTerminalShutdownQueued(reason: String): Future<*>? = synchronized(serviceExecutionLock) {
-        terminalShutdownFuture?.let { return@synchronized it }
+    private fun ensureTerminalShutdownQueued(reason: String): Future<*>? = serviceExecutionLock.withLock {
+        terminalShutdownFuture?.let { return@withLock it }
         if (runtimeExecutor.isShutdown) {
-            return@synchronized null
+            return@withLock null
         }
         runCatching {
             runtimeExecutor.submit {
@@ -3104,7 +3107,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                         if (!key.startsWith(MODULE_SOURCE_PROVIDER_DIAGNOSTIC_PREFIX)) {
                             return@mapNotNull null
                         }
-                        (bundle.get(key) as? String)?.let { value -> key to value }
+                        bundle.getString(key)?.let { value -> key to value }
                     }?.toMap().orEmpty()
                 },
                 onFailure = { error ->
