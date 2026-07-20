@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/18
+###### 2026/07/20
 
 * `Fonctionnalité` Environnement d'exécution de scripts Node.js 24.5.0, prenant en charge les scripts lancés avec la directive "nodejs" ou des extensions comme .node.js/.cjs/.mjs
 * `Fonctionnalité` L'environnement d'exécution Node.js prend en charge CommonJS/ESM partiel/import() dynamique uniquement local/sources TypeScript légères (.ts/.mts/.cts)
@@ -29,7 +29,7 @@
 * `Fonctionnalité` Les tâches planifiées prennent en charge les tâches mensuelles/annuelles/avec compte à rebours et les conditions de fin de répétition _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Fonctionnalité` Le gestionnaire de fichiers prend en charge la sélection multiple et les opérations groupées de copie/déplacement/suppression
 * `Fonctionnalité` L'éditeur de code prend en charge le moteur Ace, interchangeable avec l'éditeur natif dans les paramètres
-* `Fonctionnalité` L'éditeur Ace prend en charge la complétion de code pour l'API AutoJs6/l'aide aux signatures/les informations au survol/l'aperçu LSP
+* `Fonctionnalité` L'éditeur Ace active désormais par défaut sa complétion intelligente TypeScript locale intégrée, avec complétion de l'API AutoJs6, aide aux signatures, informations au survol et diagnostics ; elle peut être désactivée dans les paramètres
 * `Fonctionnalité` L'éditeur Ace prend en charge un panneau de raccourcis/l'historique des actions/les actions favorites/la sélection de texte sur mobile/le zoom par pincement et plus encore
 * `Fonctionnalité` L'éditeur de code prend en charge un panneau de journal inférieur (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Fonctionnalité` Le panneau de journal inférieur de l'éditeur de code permet d'accéder au code source depuis les cadres de pile (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_

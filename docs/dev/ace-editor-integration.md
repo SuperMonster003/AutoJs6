@@ -18,11 +18,13 @@ This document tracks the current AutoJs6 ACE editor deployment state. ACE is the
 - The font dialog uses the same download icon as Plugin Center for missing fonts. Its title overflow menu can download every missing or outdated authorized font in one confirmed batch; batch downloads keep the current selection and use the downloader's two-worker limit.
 - The signed catalog is published from the `ace-fonts` component of `SuperMonster003/AutoJs6-Shared-Assets`. Font Release tags and signing keys are scoped to that component so unrelated shared assets can evolve independently.
 - AutoJs6 static completion is generated from bundled selected `@sm003/autojs6-dts` declaration files under `autojs6/types/autojs6`, then emitted through `tools/ace-completion/autojs6_indices.source.json`; the legacy `autojs_indices.js` remains only as a compatibility fallback.
-- ACE LSP is an experimental setting and is disabled by default. The native
-  alpha manager exposes deterministic no-server options when enabled. The ACE
-  LSP client facade exposes completion and hover hooks, but default-off and
-  no-server paths use the static completion index as fallback and do not load
-  `lsp.js`, create a WebSocket, or start a server.
+- ACE LSP smart completion is a stable, default-on feature backed by the
+  bundled TypeScript language service. The `native-local` manager exposes
+  deterministic in-process options for completion, hover, diagnostics, and
+  signature help. It does not load Pro's `lsp.js`, create a WebSocket, or start
+  an external server. Users can explicitly disable it, and startup, failure,
+  large-document, and opt-out paths keep the static completion index as a
+  fallback.
 - ACE hover tooltips are optional at the bridge boundary. The tooltip layer
   creates DOM lazily, uses the local safe markdown subset renderer, escapes raw
   HTML, and does not fetch external markdown resources.
@@ -45,7 +47,8 @@ The snapshot includes:
 - asset URL
 - WebView package version
 - Android version
-- LSP enabled/state, transport, URI, fallback, and server availability fields
+- LSP enabled/state, transport, URI, fallback, provider, TypeScript loader,
+  document-size limit, semantic-suppression, and server availability fields
 - file size and large-file policy
 - TextMirror revision
 - ready/state/heartbeat timestamps
@@ -90,7 +93,7 @@ is a real second host or lifecycle requirement.
 
 ## Release Gate
 
-Before ACE is presented as a gray-release experimental editor:
+Before an ACE release candidate is published:
 
 - Run `node tools/ace-ci/check-ace-release-gate.mjs`.
 - Run `node tools/ace-ci/check-ace-editor-gate.mjs`.
@@ -122,7 +125,9 @@ Before ACE is presented as a gray-release experimental editor:
   counters for keyboard and viewport failures.
 - Confirm `app/src/main/assets/editor/ace-builds-1.4.12/autojs6/types/lib.autojs6.d.ts` is generated from the same completion source.
 - Confirm selected AutoJs6 declaration sources remain bundled under `app/src/main/assets/editor/ace-builds-1.4.12/autojs6/types/autojs6`.
-- Confirm `docs/dev/ace-lsp-design.md` still marks server-backed LSP as experimental and default-off.
+- Confirm `docs/dev/ace-lsp-design.md` keeps local smart completion default-on,
+  preserves explicit opt-out and static degradation, and does not present an
+  external/server-backed LSP as shipped.
 - Confirm `fonts/iosevka/Iosevka-Regular.woff2` and its `LICENSE.md` remain bundled and that no optional ACE WOFF2 files are present in the merged APK assets.
 - Confirm the eight optional fonts, including Iosevka Slab, are listed by the signed catalog and that font bytes pass declared size, WOFF2 structure, and SHA-256 checks before installation.
 - Confirm `Editor font -> More -> Download all` downloads every missing/updateable font, does not change the selected font, skips revoked/current/in-progress rows, and reports a single aggregate result without per-font Toast storms.
@@ -138,9 +143,9 @@ Before ACE is presented as a gray-release experimental editor:
   `docs/dev/visual-editor-ace-investigation.md`; do not add an exposed
   `VISUAL_ACE` enum or UI entry until the ordinary ACE editor has recorded
   keyboard and viewport matrix results on representative devices.
-- LSP remains a separate experimental path. The native alpha manager, diagnostics
-  schema, feature flag, and client-side completion/hover fallback hooks are in
-  place, but server startup and WebSocket transport are deferred.
-- Server-backed LSP transport and public VisualEditorAce engine exposure are not
-  primary targets until the keyboard and viewport matrix is stable on
-  representative devices.
+- External/server-backed LSP remains a separate deferred path. The released
+  `native-local` feature uses the bundled TypeScript language service and local
+  declarations only; server startup and WebSocket transport are not exposed.
+- Server-backed LSP transport and public VisualEditorAce engine exposure are
+  not primary targets until their own scope, security, lifecycle, and
+  representative-device gates are defined.

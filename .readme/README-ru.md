@@ -56,7 +56,7 @@ AutoJs6 разработан на основе финальной версии �
 
 | <span style="word-break:keep-all;white-space:nowrap">Проект</span> | <span style="word-break:keep-all;white-space:nowrap">Название приложения</span> | <span style="word-break:keep-all;white-space:nowrap">Основные Разработчики</span> | <span style="word-break:keep-all;white-space:nowrap">Дата создания</span> | <span style="word-break:keep-all;white-space:nowrap">Последняя активность</span> | <span style="word-break:keep-all;white-space:nowrap">Период активного обслуживания (год)</span> |
 |:------:|:------:|:------:|:------:|:------:|:------:|
-| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2024/04/21`](https://github.com/aiselp/AutoX/commit/c76e80b0d049947b0f3ac49ada2d16d0b10c2800)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/06/13`](https://github.com/aiselp/AutoX/commit/d4c24eb348b49117b057ee8642e906768c037d94)</span> | <span style="word-break:keep-all;white-space:nowrap">2.15</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span> | <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/blob/484491fd5fe12b8203d0b09c181eb0f471c0ea9f/app/build.gradle.kts#L124)</span> | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2024/04/21`](https://github.com/aiselp/AutoX/commit/c76e80b0d049947b0f3ac49ada2d16d0b10c2800)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/07/19`](https://github.com/aiselp/AutoX/commit/61116f48f7716cbe96abe60c0ee431ddc6d79033)</span> | <span style="word-break:keep-all;white-space:nowrap">2.24</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Autoxjs_v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi)</span> | <span style="white-space:pre">[Autox.js&#160;v6_ozobi](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/blob/a651d02246e09cfbbfa87e6eaccf900fab/app/build.gradle.kts#L143)</span> | <span style="word-break:keep-all;white-space:nowrap">[ozobiozobi](https://github.com/ozobiozobi)</span> | <span style="word-break:keep-all;white-space:nowrap">`2024/10/01`</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/04/16`](https://github.com/ozobiozobi/Autoxjs_v6_ozobi/commit/e8563000af8068f07f821a4a8b23d4457167c1ab)</span> | <span style="word-break:keep-all;white-space:nowrap">1.54</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6/blob/a8ce1b9acb541e9736c33134be3194c3148a15a3/common/src/main/res/values/strings.xml#L27)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2021/12/01`](https://github.com/SuperMonster003/AutoJs6/commit/99a1d8490fac5b6d55f6f183db59ad833a2064ed)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/03/16`](https://github.com/SuperMonster003/AutoJs6/commit/ed3eb10e88db5a8425fd94bdddefa4176e5e1c94)</span> | <span style="word-break:keep-all;white-space:nowrap">4.29</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4)</span> | <span style="word-break:keep-all;white-space:nowrap">[AutoJs4](https://github.com/SuperMonster003/AutoJs4/blob/a6b952704b8305aed1bb6265f40acb3598ac80df/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2023/04/11`](https://github.com/SuperMonster003/AutoJs4/commit/8de11699b608be1c1f49f0f10e2e2826f8c77978)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2026/03/15`](https://github.com/SuperMonster003/AutoJs4/commit/3fb08269198ebd49a880ab3ca2621383eaa10443)</span> | <span style="word-break:keep-all;white-space:nowrap">2.93</span> |
@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 18 July 2026 года.
+Данные обновлены на 20 July 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -166,7 +166,7 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/07/18
+###### 2026/07/20
 
 * `Новое` Среда выполнения скриптов Node.js 24.5.0 с поддержкой запуска с помощью директивы "nodejs" или таких расширений, как .node.js/.cjs/.mjs
 * `Новое` Среда выполнения Node.js поддерживает CommonJS/частичный ESM/локальный динамический import()/облегченный исходный код TypeScript (.ts/.mts/.cts)
@@ -189,7 +189,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Новое` Задачи по расписанию поддерживают ежемесячные/ежегодные задачи/задачи с обратным отсчетом и условия завершения повторения _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Новое` Файловый менеджер поддерживает множественный выбор и пакетное копирование/перемещение/удаление
 * `Новое` Редактор кода поддерживает движок Ace с возможностью переключения на нативный редактор в настройках
-* `Новое` Редактор Ace поддерживает автодополнение API AutoJs6/подсказки сигнатур/информацию при наведении/предпросмотр LSP
+* `Новое` В редакторе Ace встроенное локальное интеллектуальное дополнение TypeScript стало стабильной функцией и включено по умолчанию; доступны дополнение API AutoJs6, подсказки сигнатур, информация при наведении и диагностика, а отключить функцию можно в настройках
 * `Новое` Редактор Ace поддерживает панель сочетаний клавиш/историю действий/избранные действия/выделение текста на мобильных устройствах/масштабирование жестом и другие функции
 * `Новое` Редактор кода поддерживает нижнюю панель журнала (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Новое` Нижняя панель журнала редактора кода поддерживает переход по кадрам стека к исходному коду (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
@@ -525,7 +525,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 18 July 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 20 July 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

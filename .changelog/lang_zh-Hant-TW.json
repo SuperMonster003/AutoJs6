@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/18",
+      "released_date": "2026/07/20",
       "feature": [
         "Node.js 24.5.0 腳本執行環境, 支援透過 \"nodejs\" 指令或 .node.js/.cjs/.mjs 等副檔名執行腳本",
         "Node.js 執行環境支援 CommonJS/部分 ESM/僅限本機的動態 import()/輕量 TypeScript (.ts/.mts/.cts) 原始碼",
@@ -24,7 +24,7 @@
         "定時任務支援按月/按年/倒數任務及重複結束條件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_",
         "檔案管理器支援多選檔案及批次複製/移動/刪除操作",
         "程式碼編輯器支援 Ace 編輯器引擎, 可在設定中與原生編輯器切換",
-        "Ace 編輯器支援 AutoJs6 API 程式碼補全/簽名說明/懸浮提示及 LSP 預覽",
+        "Ace 編輯器的內建本機 TypeScript 智慧補全成為正式功能並預設開啟, 支援 AutoJs6 API 補全/簽名說明/懸浮提示/診斷, 可在設定中關閉",
         "Ace 編輯器支援快速鍵面板/操作歷史/操作收藏/行動端文字選取/雙指縮放等功能",
         "程式碼編輯器支援底部日誌面板顯示 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_",
         "程式碼編輯器底部日誌面板支援從堆疊幀跳轉至原始碼 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_",

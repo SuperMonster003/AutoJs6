@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/07/18
+###### 2026/07/20
 
 * `Feature` Node.js 24.5.0 script runtime, supporting scripts launched with the "nodejs" directive or extensions such as .node.js/.cjs/.mjs
 * `Feature` Node.js runtime supports CommonJS/partial ESM/local-only dynamic import()/lightweight TypeScript (.ts/.mts/.cts) source code
@@ -29,7 +29,7 @@
 * `Feature` Timed tasks support monthly/yearly/countdown tasks and repeat termination conditions _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Feature` File manager supports multi-selection and batch copy/move/delete operations
 * `Feature` Code editor supports the Ace editor engine, switchable with the native editor in Settings
-* `Feature` Ace editor supports AutoJs6 API code completion/signature help/hover information and LSP preview
+* `Feature` Ace editor now enables its bundled local TypeScript smart completion by default, with AutoJs6 API completion, signature help, hover information, and diagnostics; it can be disabled in settings
 * `Feature` Ace editor supports a shortcut panel/action history/action favorites/mobile text selection/pinch zoom and more
 * `Feature` Code editor supports a bottom log panel (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Feature` Code editor bottom log panel supports jumping from stack frames to source code (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_

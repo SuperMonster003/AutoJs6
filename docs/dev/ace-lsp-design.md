@@ -1,106 +1,127 @@
-# ACE LSP Design
+# ACE LSP Smart Completion Design
 
-ACE LSP support is a preview feature and disabled by default. The stable editor path must remain usable without loading Pro's `lsp.js`, opening a WebSocket, or starting an external language server.
+ACE LSP smart completion is a released, default-on editor feature. Despite the
+setting's historical LSP name, the shipped implementation is a bundled,
+in-process TypeScript Language Service. It does not load Ace Pro's `lsp.js`,
+open a WebSocket, start a process, or connect to an external language server.
+Users can explicitly disable the feature; static AutoJs6 and ECMAScript
+completion remains available when it is disabled or degraded.
 
-## Current State
+The bundled TypeScript language service runs entirely in process and is the
+only semantic engine covered by this release.
 
-- Setting key: `key_ace_lsp_enabled`
-- Default: `false`
+## Shipped Scope
+
+- Setting resource/value: `key_ace_lsp_enabled` /
+  `key_$_ace_lsp_enabled`
+- Default: `true`
 - Bridge method: `autojs.getLspOptions()`
-- Default bridge response: `{}`
 - Native manager: `AceLspServerManager`
-- Enabled bridge response: structured options with `manager=native-preview`,
-  `state=local-language-service`, `transport=in-process`,
-  `serverAvailable=false`, `startSupported=false`, and
-  `fallback=static-completion`
+- Enabled manager identity: `manager=native-local`
+- State and transport: `state=local-language-service` and
+  `transport=in-process`
+- External-server fields: `serverAvailable=false`, `startSupported=false`, and
+  no `serverUri`
+- Fallback: `fallback=static-completion`
 - Bundled declaration file: `autojs6/types/lib.autojs6.d.ts`
-- Bundled declaration source: selected `@sm003/autojs6-dts` `aj6-int-*.d.ts` files under `autojs6/types/autojs6`
+- Declaration source: selected `@sm003/autojs6-dts` `aj6-int-*.d.ts` files
+  under `autojs6/types/autojs6`
 
-The current build has a native preview manager for deterministic state,
-diagnostics, file-type gating, and bridge options. It does not start or connect
-to an external LSP server, open a WebSocket, or load Pro's `lsp.js`. The
-selected upstream declaration files feed both the generated static AutoJs6
-index and the local TypeScript language service declaration set. Loading a full
-project-wide Android/library declaration graph into a server is still deferred.
+The local service provides semantic completion, hover, diagnostics, and
+signature help for JavaScript and TypeScript documents. JSON documents use the
+JSON-aware diagnostic path. The generated AutoJs6 index and local syntax
+diagnostics stay active during startup and after any semantic-service failure.
+Semantic results are authoritative when available, so a local variable that
+shadows an AutoJs6 global is described by TypeScript rather than merged with an
+unrelated static-global result.
 
-The ACE page has a local LSP client facade. It reads
-`autojs.getLspOptions()`, exposes completion, hover, diagnostics, and signature
-hooks, and reports `static-fallback` providers when LSP is disabled. When
-enabled it starts with the generated local AutoJs6 index and local syntax
-diagnostics while the TypeScript service is loading. The ACE page intentionally
-does not load `typescriptServices.js` during the bootstrap path; after first
-paint, the client lazily loads and warms the bundled TypeScript language
-service. Once ready, completion, hover, diagnostics, and signature help can
-report `typescript-language-service` providers. JSON files use JSON-aware
-diagnostics. The generated AutoJs6 index remains the fast startup fallback.
+Supported default suffixes are `.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.tsx`,
+`.d.ts`, `.json`, `.auto.js`, and `.node.js`. An untitled buffer uses the synthetic
+`file:///autojs6/editor/current.js` document URI.
 
-Hover tooltip rendering is handled by `AutoJsAceTooltip`. It is optional at the
-bridge boundary, creates its DOM lazily, and loads only the local safe markdown
-subset renderer when a tooltip is requested. The renderer escapes raw HTML and
-does not fetch markdown resources.
+The bundled TypeScript 4.2.4 runtime provides a TypeScript 4.2 syntax baseline
+and local, single-file semantics. Project-wide module resolution is not part of
+this release; unreliable module-not-found diagnostics are suppressed rather
+than presenting missing in-memory project files as editor errors. Modern
+NodeNext/`.mts`/`.cts` module semantics are not claimed by this scope.
 
-## Server Lifecycle
+Hover tooltip rendering is handled by `AutoJsAceTooltip`. It creates its DOM
+lazily, uses a local safe-markdown subset, escapes raw HTML, and does not fetch
+markdown resources.
 
-The current implementation intentionally has no external server lifecycle. A
-future server-backed implementation should define these items before any
-default-on behavior:
+## Loading And Lifecycle
 
-- Server location: local Android process, embedded JS runtime, or external debug endpoint.
-- Transport: WebSocket is the most likely option, but it must be created only when the feature flag is enabled.
-- `serverUri`: generated by native code after the server is ready.
-- `rootUri`: project directory for project mode; a synthetic root for single-file mode.
-- `documentUri`: stable URI for the edited file, with a synthetic URI for untitled buffers.
-- Ownership: one server per project when feasible; single-file sessions can share a lightweight server.
-- Restart: failed server starts should be bounded and should never crash or replace the editor.
-- Permissions: LSP file reads must be limited to the current project root unless the user grants broader access.
-- Compatibility: Android API 24+ must fall back to static completion when WebSocket or process support is unavailable.
-- Declaration scope: start from the bundled selected `aj6-int-*.d.ts` set and avoid loading `aj6-main-app.d.ts`, Android, collections, and libraries until memory and startup cost are measured.
+The ACE bootstrap path does not synchronously load the roughly 9 MB TypeScript
+runtime. After first paint, an idle callback (with a bounded timeout fallback)
+starts the local service warm-up. Turning the setting on while the same editor
+page is open schedules the same warm-up, so a WebView reload is not required.
 
-## Failure Policy
+Runtime and service-script loading has a five-second timeout and is retried once
+after a short bounded delay. Service initialization itself also gets one
+bounded reconstruction attempt. Standard TypeScript declaration libraries are
+loaded lazily from the packaged assets, and a semantic request reuses one
+document snapshot instead of copying the Ace session twice.
+A stale callback cannot re-enable a disabled or destroyed client because load
+results are guarded by the current configuration revision. Disabling LSP,
+destroying the editor page, or opening the slow-operation circuit disposes the
+TypeScript service and cancels pending retry/warm-up work.
 
-LSP failures are non-fatal editor failures.
+`getLspState()` is observational: reading diagnostics does not create or warm a
+TypeScript service by itself.
 
-- LSP initialization failure: disable LSP for the current ACE instance and keep static completion.
-- Diagnostic engine load failure: keep editing and use the local syntax fallback.
-- Invalid future `serverUri`: emit `lspError`, disable the server transport, keep editing.
-- Completion or hover failure: record diagnostics and keep static completion.
-- Native ACE fallback is reserved for editor runtime failures such as page load errors, ready timeout, JS fatal errors, and renderer process loss.
+Runtime state distinguishes `configured`, `ready`, and `degraded`. Provider,
+loader, suppression, document-limit, TypeScript-version, and last-operation
+timing fields are sent through a sanitized bridge event and cached in Native
+ACE diagnostics; source text is never included in that event.
 
-## Minimal Feature Scope
+## Resource Limits And Degradation
 
-The current client-side preview supports:
+- Documents longer than 512 KiB (measured as JavaScript string length) do not
+  enter the semantic TypeScript path. The editor remains usable with static
+  completion; diagnostics are cleared to avoid another whole-document pass,
+  and state reports the document length, limit, and suppression reason.
+- A completion response is capped at 300 items before it reaches Ace.
+- The first semantic operation taking at least 1,000 ms opens the local
+  slow-operation circuit for that editor instance and disposes the service.
+- Load, completion, hover, diagnostic, or signature failures are non-fatal.
+  They keep editing available and fall back to the generated local index or
+  local syntax checks.
+- Fatal Native fallback remains reserved for editor-runtime failures such as a
+  page-load error, ready timeout, JavaScript fatal error, or renderer loss.
 
-- completion through the bundled TypeScript language service, with local AutoJs6 index fallback
-- hover through the bundled TypeScript language service, with local AutoJs6 index fallback
-- diagnostics through the bundled TypeScript language service, JSON syntax diagnostics, and local syntax fallback
-- signature help through the bundled TypeScript language service, with local signature-table fallback
-- configurable file-type gating for JavaScript, TypeScript, JSON, Auto.js, and Node.js suffixes
-- optional hover tooltip rendering with local safe markdown
+## Explicit Opt-Out
 
-Deferred:
+The static default and the runtime preference fallback are both enabled. An
+explicit stored `false` remains respected, and the settings UI continues to
+expose the switch. When disabled, `autojs.getLspOptions()` returns `{}`, no
+TypeScript runtime is loaded, no network transport is created, and the client
+reports static providers.
 
-- server-backed completion transport
-- server-backed hover transport
-- definition
-- references
-- rename
-- document symbols
-- formatting and code actions
-- project-wide indexing
+File-type selection remains independently configurable. Restoring it returns
+to the stable suffix set listed above.
+
+## External Server Boundary
+
+External/server-backed LSP is not part of this released feature. Any future
+implementation must separately define server ownership, transport, restart
+policy, project-root permissions, document synchronization, and Android API
+compatibility. Definition, references, rename, document symbols, formatting,
+code actions, and project-wide indexing remain deferred rather than silently
+promised by the local smart-completion setting.
 
 ## Verification
 
-- Default setting produces no WebSocket.
-- `getLspOptions()` returns `{}` when disabled.
-- Enabling the setting returns native-preview structured options for the
-  in-process local language service.
-- `AutoJsAceLspClient` reports local-index/static providers immediately after
-  bootstrap, then can switch to `typescript-language-service` providers after
-  the first-paint warm-up completes.
-- `AceDiagnostics` reports `lspEnabled`, `lspState`, `lspTransport`,
-  `lspRootUri`, `lspDocumentUri`, `lspFallback`, and provider labels.
-- `node tools/ace-lsp/test-lsp-client.mjs` passes and verifies local
-  completion/hover plus diagnostics behavior without WebSocket or worker
-  transport.
-- `node tools/ace-tooltip/test-tooltip.mjs` passes and verifies lazy tooltip DOM
-  creation plus local escaped markdown rendering.
+- Preference tests verify the default-on behavior, explicit opt-out, reset
+  behavior, and stable file-type gating.
+- Manager tests verify `native-local`, in-process state, the synthetic untitled
+  URI, local startup providers, and the 512 KiB semantic limit.
+- `node tools/ace-lsp/test-lsp-client.mjs` loads the real bundled TypeScript
+  runtime and service, then verifies semantic completion, hover/JSDoc,
+  diagnostics, signature help, hot enable/disable, bounded retries, disposal,
+  completion limits, large-document degradation, and static fallback behavior.
+- `AceCodeEditorSmokeTest` covers default-on and hot-enable behavior in the
+  WebView, verifies real TypeScript semantic providers without any network
+  transport, and confirms that sanitized runtime readiness reaches Native
+  diagnostics.
+- `node tools/ace-tooltip/test-tooltip.mjs` verifies lazy tooltip creation and
+  local escaped-markdown rendering.

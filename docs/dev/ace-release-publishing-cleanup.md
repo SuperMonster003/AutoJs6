@@ -55,15 +55,22 @@ Handling:
 - If a release version bump is needed, commit `version.properties` separately
   with an explicit release-version message.
 
-## Default Editor And Experimental Features
+## Default Editor And Local Smart Completion
 
 Confirmed:
 
 - ACE is now the static default editor:
   `default_key_editor_engine` points to `key_editor_engine_ace`.
 - Native remains an explicit editor entry and the runtime fallback target.
-- LSP remains default-off:
-  `AceEditorLspPreferences.isEnabled()` uses `Pref.getBoolean(..., false)`.
+- LSP smart completion is default-on in both resources and the runtime
+  preference fallback. `AceEditorLspPreferences.isEnabled()` uses
+  `DEFAULT_ENABLED=true`, while an explicitly stored `false` remains respected.
+- The released feature uses `manager=native-local` and the bundled TypeScript
+  language service in process. It does not start or connect to an external LSP
+  server.
+- The local service is bounded by a 512 KiB semantic-document limit and a
+  300-item completion cap, and falls back to static completion after load,
+  runtime, or slow-operation failures.
 - VisualEditorAce has no public enum, settings entry, or editor menu item.
 
 Device note:
@@ -71,3 +78,7 @@ Device note:
 - The Sony XQ-AT72 test install may still carry an explicit
   `key_$_editor_engine=ace` preference from earlier gates. A fresh install now
   reaches ACE from the static default as long as ACE assets are present.
+- Existing test installs may also carry an explicit
+  `key_$_ace_lsp_enabled=false` from the earlier preview. Clear or reset that
+  key when validating the new default-on behavior; do not override an explicit
+  opt-out during normal upgrades.

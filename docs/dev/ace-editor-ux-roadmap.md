@@ -7,7 +7,8 @@ replacing `Roadmap.md`.
 
 - Keep Native and ACE editor behavior isolated.
 - Keep user-facing strings bilingual for English and Simplified Chinese.
-- Keep ACE as the preferred editor while LSP remains disabled by default.
+- Keep ACE as the preferred editor with local LSP smart completion default-on,
+  while preserving a user opt-out and static fallback.
 - Prefer instrumentation or static gates for every small UX fix; record manual
   device-only items explicitly.
 
@@ -28,7 +29,8 @@ Acceptance:
 - [x] English and Simplified Chinese resources both contain every new or
   changed editor string.
 - [x] Settings and editor menu agree on the selected engine.
-- [x] LSP stays default-off.
+- [x] LSP smart completion is default-on and an explicit stored opt-out remains
+  respected.
 - [x] Large files opened with ACE remain ACE unless an ACE failure or explicit
   debug hook requests Native fallback.
 
@@ -108,13 +110,24 @@ Acceptance:
   script-mutating editor actions.
 - [x] Read-only state is not persisted after leaving the editor.
 
-## Gate UX-4: Completion And Signature Help
+## Gate UX-4: Completion, Signature Help, And Local TypeScript Semantics
 
 - [x] Add ECMAScript built-in function parameter/signature help.
 - [x] Prioritize common built-ins such as `Function.prototype.apply`.
 - [x] Add a curated ECMAScript built-in completion layer for common globals,
   constructors, and prototypes such as `Object.prototype.hasOwnProperty`.
 - [x] Keep static completion working when LSP is disabled or unavailable.
+- [x] Promote local LSP smart completion from preview to a released,
+  default-on feature backed by the bundled TypeScript language service.
+- [x] Support semantic completion, hover/JSDoc, diagnostics, and signature help
+  without an external LSP server or network transport.
+- [x] Support hot enable/disable, bounded loader retry, stale-callback guards,
+  and TypeScript service disposal.
+- [x] Degrade documents longer than 512 KiB to static behavior and cap
+  completion responses at 300 items.
+- [x] Keep the released semantic scope on the bundled TypeScript 4.2.4
+  single-file baseline; suppress unreliable module-not-found diagnostics and
+  defer project resolution and NodeNext `.mts`/`.cts` semantics.
 - [x] Document the future Node.js type-completion plan for the Node engine
   branch without enabling Node globals in the Rhino/AutoJs6 editor profile.
 
@@ -124,6 +137,10 @@ Acceptance:
 - [x] Built-in completion appears for common ECMAScript objects and prototypes
   without requiring LSP.
 - [x] Tooltip/signature failures do not fallback the whole editor.
+- [x] Real bundled-runtime tests cover TypeScript semantic results, lifecycle,
+  loader retry, resource limits, and fallback behavior.
+- [x] External/server-backed LSP, project-wide indexing, rename, references,
+  and code actions remain clearly outside the released local feature scope.
 
 ## Gate UX-5: ACE Shortcut Panel And Action Favorites
 
