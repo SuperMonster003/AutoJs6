@@ -9,7 +9,9 @@ const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const STATIC_ONLY = process.argv.includes("--static-only");
 
 const FILES = {
-  roadmap: "Roadmap.md",
+  roadmap: "docs/dev/ace-editor-ux-roadmap.md",
+  lspDesign: "docs/dev/ace-lsp-design.md",
+  editorTestPlan: "docs/dev/ace-editor-test-plan.md",
   releaseStatus: "docs/dev/ace-release-gate-status.md",
   sonyReport: "docs/dev/ace-release-device-report-sony-xq-at72.md",
   publishingCleanup: "docs/dev/ace-release-publishing-cleanup.md",
@@ -17,7 +19,9 @@ const FILES = {
   keyboardViewportPlan: "docs/dev/ace-keyboard-viewport-test-plan.md",
   visualInvestigation: "docs/dev/visual-editor-ace-investigation.md",
   strings: "app/src/main/res/values/strings.xml",
+  stringsDoNotTranslate: "app/src/main/res/values/strings_donottranslate.xml",
   stringsZh: "app/src/main/res/values-zh/strings.xml",
+  bools: "app/src/main/res/values/bools.xml",
   arrays: "app/src/main/res/values/arrays.xml",
   fragmentPreferences: "app/src/main/res/xml/fragment_preferences.xml",
   codeEditorSettings: "app/src/main/res/xml/fragment_code_editor_settings.xml",
@@ -36,8 +40,11 @@ const FILES = {
   aceTestHooks: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceEditorTestHooks.kt",
   aceJsErrorClassifier: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceJsErrorClassifier.kt",
   aceFallbackPolicy: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/health/AceFallbackPolicy.kt",
+  aceLspPreferences: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceEditorLspPreferences.kt",
   aceLspServerManager: "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/lsp/AceLspServerManager.kt",
   aceLspClient: "app/src/main/assets/editor/ace-builds-1.4.12/autojs6/autojs6_lsp_client.js",
+  aceTsLanguageService: "app/src/main/assets/editor/ace-builds-1.4.12/autojs6/autojs6_ts_language_service.js",
+  aceLspClientTest: "tools/ace-lsp/test-lsp-client.mjs",
   editorView: "app/src/main/java/org/autojs/autojs/ui/edit/EditorView.kt",
 };
 
@@ -131,41 +138,84 @@ if (!STATIC_ONLY) {
   runNodeScript("ACE editor CI gate", "tools/ace-ci/check-ace-editor-gate.mjs");
 }
 
-assertIncludes(FILES.roadmap, "`node tools/ace-ci/check-ace-release-gate.mjs`");
-assertIncludes(FILES.roadmap, "# AutoJs6 ACE Phase 9 Roadmap");
-assertIncludes(FILES.roadmap, "## Feature Freeze");
+assertIncludes(FILES.roadmap, "# ACE Editor UX Roadmap");
+assertIncludes(FILES.roadmap, "## Gate UX-4: Completion, Signature Help, And Local TypeScript Semantics");
+assertIncludes(FILES.roadmap, "LSP smart completion is default-on and an explicit stored opt-out remains");
+assertIncludes(FILES.roadmap, "bundled TypeScript language service");
+assertIncludes(FILES.roadmap, "Support hot enable/disable, bounded loader retry, stale-callback guards,");
+assertIncludes(FILES.roadmap, "Degrade documents longer than 512 KiB to static behavior and cap");
+assertIncludes(FILES.roadmap, "Real bundled-runtime tests cover TypeScript semantic results, lifecycle,");
+assertIncludes(FILES.roadmap, "External/server-backed LSP, project-wide indexing, rename, references,");
 assertIncludes(FILES.roadmap, "Sony XQ-AT72");
-assertIncludes(FILES.roadmap, "Automated/static gate:");
-assertIncludes(FILES.roadmap, "Manual device gate:");
+assertNotIncludes(FILES.roadmap, "LSP stays default-off", "obsolete default-off LSP roadmap policy");
+assertNotIncludes(FILES.roadmap, "LSP remains disabled by default", "obsolete disabled-by-default LSP roadmap policy");
+assertIncludes(FILES.lspDesign, "# ACE LSP Smart Completion Design");
+assertIncludes(FILES.lspDesign, "released, default-on editor feature");
+assertIncludes(FILES.lspDesign, "manager=native-local");
+assertIncludes(FILES.lspDesign, "## Loading And Lifecycle");
+assertIncludes(FILES.lspDesign, "## Resource Limits And Degradation");
+assertIncludes(FILES.lspDesign, "Documents longer than 512 KiB");
+assertIncludes(FILES.lspDesign, "A completion response is capped at 300 items");
+assertIncludes(FILES.lspDesign, "## Explicit Opt-Out");
+assertIncludes(FILES.lspDesign, "## External Server Boundary");
+assertIncludes(FILES.lspDesign, "loads the real bundled TypeScript");
 assertIncludes(FILES.releaseStatus, "# ACE Release Gate Status");
 assertIncludes(FILES.releaseStatus, "docs/dev/ace-release-device-report-sony-xq-at72.md");
 assertIncludes(FILES.releaseStatus, "docs/dev/ace-release-publishing-cleanup.md");
 assertIncludes(FILES.releaseStatus, "## Feature Freeze");
+assertIncludes(FILES.releaseStatus, "LSP smart completion is default-on");
+assertIncludes(FILES.releaseStatus, "manager=native-local");
+assertIncludes(FILES.releaseStatus, "real bundled TypeScript runtime");
+assertIncludes(FILES.releaseStatus, "512 KiB degradation boundary");
+assertIncludes(FILES.releaseStatus, "### LSP promotion result - 2026-07-20");
+assertIncludes(FILES.releaseStatus, "Sony XQ-DQ72");
+assertIncludes(FILES.releaseStatus, "External/server-backed LSP transport remains outside");
+assertNotIncludes(FILES.releaseStatus, "preview path", "obsolete ACE LSP preview-path release status");
 assertIncludes(FILES.sonyReport, "# ACE Release Device Report - Sony XQ-AT72");
 assertIncludes(FILES.sonyReport, "Publishing cleanup audit");
 assertIncludes(FILES.sonyReport, "## Automated Gate");
 assertIncludes(FILES.sonyReport, "## Manual Gate Summary");
+assertIncludes(FILES.sonyReport, "## LSP Formal-Release Addendum - 2026-07-20");
+assertIncludes(FILES.sonyReport, "lspDefaultsOnAndCanBeEnabledWithoutReloadingEditor");
+assertIncludes(FILES.sonyReport, "tooltipAndLspFallbackStayStaticAndLocal");
+assertIncludes(FILES.sonyReport, "Sony XQ-DQ72");
 assertIncludes(FILES.sonyReport, "Release candidate accepted");
 assertIncludes(FILES.publishingCleanup, "# ACE Release Publishing Cleanup");
 assertIncludes(FILES.publishingCleanup, "defaultConfig.applicationId");
 assertIncludes(FILES.publishingCleanup, "VERSION_BUILD");
 assertIncludes(FILES.publishingCleanup, "ACE is now the static default editor");
-assertIncludes(FILES.publishingCleanup, "LSP remains default-off");
+assertIncludes(FILES.publishingCleanup, "LSP smart completion is default-on");
+assertIncludes(FILES.publishingCleanup, "DEFAULT_ENABLED=true");
+assertIncludes(FILES.publishingCleanup, "manager=native-local");
+assertIncludes(FILES.publishingCleanup, "512 KiB semantic-document limit");
+assertNotIncludes(FILES.publishingCleanup, "LSP remains default-off", "obsolete default-off LSP publishing policy");
 assertIncludes(FILES.publishingCleanup, "VisualEditorAce has no public enum");
 assertIncludes(FILES.integrationDoc, "Run `node tools/ace-ci/check-ace-release-gate.mjs`.");
 assertIncludes(FILES.integrationDoc, "docs/dev/ace-release-device-report-sony-xq-at72.md");
+assertIncludes(FILES.integrationDoc, "ACE LSP smart completion is a stable, default-on feature");
+assertIncludes(FILES.integrationDoc, "bundled TypeScript language service");
+assertIncludes(FILES.integrationDoc, "native-local");
+assertNotIncludes(FILES.integrationDoc, "native alpha manager", "obsolete ACE LSP alpha manager documentation");
+assertNotIncludes(FILES.integrationDoc, "LSP remains a separate experimental path", "obsolete experimental LSP documentation");
+assertIncludes(FILES.editorTestPlan, "ACE LSP smart completion is default-on");
+assertIncludes(FILES.editorTestPlan, "manager=native-local");
+assertIncludes(FILES.editorTestPlan, "semanticServiceReason=document-too-large");
+assertIncludes(FILES.editorTestPlan, "Re-enable it without reloading the page");
 assertIncludes(FILES.keyboardViewportPlan, "Sony XQ-AT72");
 
 assertIncludes(
-  FILES.strings,
+  FILES.stringsDoNotTranslate,
   '<string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_ace</string>',
   "ACE editor resource default",
 );
-assertIncludes(FILES.strings, '<string name="key_editor_engine_native" translatable="false">native</string>');
-assertIncludes(FILES.strings, '<string name="key_editor_engine_ace" translatable="false">ace</string>');
+assertIncludes(FILES.stringsDoNotTranslate, '<string name="key_editor_engine_native" translatable="false">native</string>');
+assertIncludes(FILES.stringsDoNotTranslate, '<string name="key_editor_engine_ace" translatable="false">ace</string>');
 assertIncludes(FILES.strings, '<string name="entry_editor_engine_ace">Ace</string>');
-assertIncludes(FILES.strings, '<string name="text_ace_lsp_enabled">LSP smart completion (experimental)</string>');
-assertIncludes(FILES.strings, '<string name="summary_ace_lsp_enabled">Enable experimental LSP configuration</string>');
+assertIncludes(FILES.strings, '<string name="text_ace_lsp_enabled">LSP smart completion</string>');
+assertIncludes(FILES.strings, '<string name="summary_ace_lsp_enabled">Enable LSP-powered editor assistance</string>');
+assertIncludes(FILES.bools, '<bool name="pref_ace_lsp_enabled">true</bool>', "ACE LSP resource default-on value");
+assertTextAbsentInRoots("LSP smart completion (experimental)", ["app/src/main/res/values"]);
+assertTextAbsentInRoots("Enable experimental LSP configuration", ["app/src/main/res/values"]);
 assertIncludes(FILES.strings, 'name="text_editor_gutter_width_mode"', "English editor gutter width mode string");
 assertIncludes(FILES.stringsZh, 'name="entry_editor_engine_ace"', "Simplified Chinese ACE editor engine entry");
 assertIncludes(FILES.stringsZh, 'name="text_ace_lsp_enabled"', "Simplified Chinese ACE LSP string");
@@ -236,7 +286,7 @@ assertOrder(
     'app:title="@string/text_editor_shortcut_input_bar"',
     'app:key="@string/key_ace_lsp_enabled"',
     'app:title="@string/text_editor_gestures"',
-    'app:key="@string/key_editor_pinch_to_zoom_strategy"',
+    'app:key="@string/key_editor_pinch_to_zoom_change_text_size_enabled"',
     'app:title="@string/text_editor_gutter_markers"',
     'app:key="@string/key_editor_gutter_width_mode"',
     'app:key="@string/key_editor_breakpoint_markers_enabled"',
@@ -278,9 +328,10 @@ assertIncludes(
 );
 assertIncludes(
   FILES.codeEditorSettingsFragment,
-  "setPreferenceAvailable(R.string.key_editor_word_wrap_indent_style, aceSelected, R.string.summary_editor_word_wrap_indent_style)",
-  "word wrap indentation style disabled outside ACE",
+  "syncWordWrapIndentPreferenceVisibility(aceSelected)",
+  "word wrap indentation style visibility follows ACE and wrap state",
 );
+assertIncludes(FILES.codeEditorSettingsFragment, "R.string.key_editor_word_wrap_indent_style");
 assertIncludes(
   FILES.codeEditorSettingsFragment,
   "setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected, R.string.summary_editor_gutter_width_mode)",
@@ -344,19 +395,61 @@ assertIncludes(FILES.aceCodeEditor, "override fun onRenderProcessGone");
 assertIncludes(FILES.aceJsErrorClassifier, "AceFailureType.JS_INIT_ERROR");
 assertIncludes(FILES.aceFallbackPolicy, "else -> true");
 
+assertIncludes(FILES.aceLspPreferences, "const val DEFAULT_ENABLED = true");
+assertIncludes(FILES.aceLspPreferences, "Pref.getBoolean(KEY_ACE_LSP_ENABLED, DEFAULT_ENABLED)");
+assertIncludes(FILES.aceLspPreferences, "fun resetEnabled()");
+
+assertIncludes(FILES.aceLspServerManager, 'MANAGER_NAME = "native-local"');
 assertIncludes(FILES.aceLspServerManager, 'STATE_DISABLED = "disabled"');
-assertIncludes(FILES.aceLspServerManager, 'STATE_CONFIGURED_NO_SERVER = "configured-no-server"');
+assertIncludes(FILES.aceLspServerManager, 'STATE_DISABLED_FILE_TYPE = "disabled-file-type"');
 assertIncludes(FILES.aceLspServerManager, 'STATE_LOCAL_LANGUAGE_SERVICE = "local-language-service"');
-assertIncludes(FILES.aceLspServerManager, 'TRANSPORT_UNAVAILABLE = "unavailable"');
 assertIncludes(FILES.aceLspServerManager, 'TRANSPORT_IN_PROCESS = "in-process"');
+assertIncludes(FILES.aceLspServerManager, 'FALLBACK_STATIC_COMPLETION = "static-completion"');
+assertIncludes(FILES.aceLspServerManager, 'REASON_LOCAL_LANGUAGE_SERVICE = "bundled-typescript-language-service"');
+assertIncludes(FILES.aceLspServerManager, 'COMPLETION_PROVIDER_LOCAL_INDEX = "local-index"');
+assertIncludes(FILES.aceLspServerManager, 'HOVER_PROVIDER_LOCAL_INDEX = "local-index"');
 assertIncludes(FILES.aceLspServerManager, 'DIAGNOSTIC_PROVIDER_ACE_JSHINT = "ace-jshint"');
+assertIncludes(FILES.aceLspServerManager, 'SIGNATURE_PROVIDER_STATIC_LOCAL = "static-local"');
+assertIncludes(FILES.aceLspServerManager, "MAX_DOCUMENT_LENGTH = 512 * 1024");
+assertIncludes(FILES.aceLspServerManager, "maxDocumentLength = MAX_DOCUMENT_LENGTH");
 assertIncludes(FILES.aceLspServerManager, "startSupported = false");
 assertIncludes(FILES.aceLspServerManager, "serverAvailable = false");
+assertNotIncludes(FILES.aceLspServerManager, "native-preview");
+assertNotIncludes(FILES.aceLspServerManager, "configured-no-server");
+assertNotIncludes(FILES.aceLspServerManager, "TRANSPORT_UNAVAILABLE");
 assertNotIncludes(FILES.aceLspServerManager, "WebSocket");
 assertNotIncludes(FILES.aceLspServerManager, "ProcessBuilder");
 assertNotIncludes(FILES.aceLspServerManager, "Runtime.getRuntime()");
+
+assertIncludes(FILES.aceLspClient, "DEFAULT_MAX_DOCUMENT_LENGTH = 512 * 1024");
+assertIncludes(FILES.aceLspClient, "MAX_COMPLETION_ITEMS = 300");
+assertIncludes(FILES.aceLspClient, "TS_LOAD_MAX_ATTEMPTS = 2");
+assertIncludes(FILES.aceLspClient, "function scheduleTsLoadRetry(revision)");
+assertIncludes(FILES.aceLspClient, "function disposeTsService()");
+assertIncludes(FILES.aceLspClient, "semanticServiceSuppressed");
+assertIncludes(FILES.aceLspClient, "document-too-large");
+assertIncludes(FILES.aceLspClient, "slow-operation-circuit-open");
+assertIncludes(FILES.aceLspClient, "destroy: destroy");
 assertNotIncludes(FILES.aceLspClient, "WebSocket");
 assertNotIncludes(FILES.aceLspClient, "new Worker");
+
+assertIncludes(FILES.aceTsLanguageService, "global.AutoJsAceTsLanguageService");
+assertIncludes(FILES.aceTsLanguageService, "jsx: ts.JsxEmit && ts.JsxEmit.Preserve");
+assertIncludes(FILES.aceTsLanguageService, "entry.replacementSpan");
+assertIncludes(FILES.aceTsLanguageService, "completion.replaceRange");
+assertIncludes(FILES.aceTsLanguageService, "dispose: dispose");
+
+assertIncludes(FILES.aceBridgeAsset, "global.requestIdleCallback(run, { timeout: 1500 })");
+assertIncludes(FILES.aceBridgeAsset, 'global.addEventListener("pagehide", destroyLspClient, { once: true })');
+assertIncludes(FILES.aceBridgeAsset, "function insertLspCompletion(activeEditor, completion)");
+
+assertIncludes(FILES.aceLspClientTest, 'manager: "native-local"');
+assertIncludes(FILES.aceLspClientTest, "real TypeScript service");
+assertIncludes(FILES.aceLspClientTest, "typescript-language-service");
+assertIncludes(FILES.aceLspClientTest, "Hot disable should disable the semantic service");
+assertIncludes(FILES.aceLspClientTest, "Hot enable should recreate a ready TS service");
+assertIncludes(FILES.aceLspClientTest, "Destroyed client should expose its terminal reason");
+assertIncludes(FILES.aceLspClientTest, "document-too-large");
 assertNotIncludes(FILES.editorEngineType, "VISUAL_ACE");
 assertNotIncludes(FILES.editorEngineFactory, "Visual");
 assertNotIncludes(FILES.policyFactory, "VISUAL_ACE");

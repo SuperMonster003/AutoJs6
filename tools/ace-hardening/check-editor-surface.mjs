@@ -52,6 +52,21 @@ const ACE_CODE_EDITOR_PATH = path.join(
   "ace",
   "AceCodeEditor.kt",
 );
+const ACE_EDITOR_ASSETS_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "ace",
+  "AceEditorAssets.kt",
+);
 const ACE_FONT_MANAGER_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -412,6 +427,15 @@ const CODE_EDITOR_SETTINGS_XML_PATH = path.join(
   "xml",
   "fragment_code_editor_settings.xml",
 );
+const BOOLS_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "res",
+  "values",
+  "bools.xml",
+);
 const FRAGMENT_HOST_MATERIAL_DIALOG_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -475,6 +499,12 @@ function assertIncludes(content, text, label = text) {
   }
 }
 
+function assertNotIncludes(content, text, label = text) {
+  if (content.includes(text)) {
+    throw new Error(`Must not contain ${label}`);
+  }
+}
+
 function assertMatch(content, regex, label = regex.toString()) {
   if (!regex.test(content)) {
     throw new Error(`Missing ${label}`);
@@ -505,6 +535,7 @@ const tooltip = read(TOOLTIP_PATH);
 const signatureHelp = read(SIGNATURE_HELP_PATH);
 const aceBridgeKt = read(ACE_BRIDGE_KT_PATH);
 const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
+const aceEditorAssets = read(ACE_EDITOR_ASSETS_PATH);
 const aceFontManager = read(ACE_FONT_MANAGER_PATH);
 const aceFontDialog = read(ACE_FONT_DIALOG_PATH);
 const aceFontDialogItem = read(ACE_FONT_DIALOG_ITEM_PATH);
@@ -532,6 +563,7 @@ const codeEditorSettingsFragment = read(CODE_EDITOR_SETTINGS_FRAGMENT_PATH);
 const aceLspFileTypesPreference = read(ACE_LSP_FILE_TYPES_PREFERENCE_PATH);
 const editorSettingActionRegistry = read(EDITOR_SETTING_ACTION_REGISTRY_PATH);
 const codeEditorSettingsXml = read(CODE_EDITOR_SETTINGS_XML_PATH);
+const bools = read(BOOLS_PATH);
 const fragmentHostMaterialDialog = read(FRAGMENT_HOST_MATERIAL_DIALOG_PATH);
 const mdRootLayout = read(MD_ROOT_LAYOUT_PATH);
 const mdDimens = read(MD_DIMENS_PATH);
@@ -785,12 +817,17 @@ assertIncludes(bridge, "var lspClient = null;", "ACE LSP client bridge slot");
 assertIncludes(bridge, "var lspCompletionCompleter = null;", "ACE LSP completion proxy slot");
 assertIncludes(bridge, "global.AutoJsAceLspClient.install", "ACE LSP client install");
 assertIncludes(bridge, "warmUpLspAfterFirstPaint", "ACE LSP first-paint warm-up hook");
+assertIncludes(bridge, "global.requestIdleCallback(run, { timeout: 1500 })", "ACE LSP idle first-paint warm-up");
+assertIncludes(bridge, 'global.addEventListener("pagehide", destroyLspClient, { once: true })', "ACE LSP page lifecycle disposal");
 assertIncludes(bridge, "function firstPaintReadinessSnapshot()", "ACE first-paint visual readiness check");
 assertIncludes(bridge, "FIRST_PAINT_STABLE_FRAME_COUNT", "ACE first-paint stable-frame gate");
 assertIncludes(bridge, "isFirstPaintThemeReady", "ACE first-paint waits for theme consistency");
 assertIncludes(bridge, "firstPaintForced", "ACE first-paint timeout fallback event");
 assertIncludes(bridge, "function installLspCompletionCompleter()", "ACE LSP completion proxy installer");
 assertIncludes(bridge, "removeLanguageToolCompleter(staticCompleter)", "ACE LSP proxy replaces standalone static completer");
+assertIncludes(bridge, "function insertLspCompletion(activeEditor, completion)", "ACE TypeScript completion insertion hook");
+assertIncludes(bridge, "completion.replaceRange", "ACE TypeScript completion replacement range");
+assertIncludes(bridge, 'global.ace.require("ace/snippets").snippetManager', "ACE TypeScript snippet insertion support");
 assertIncludes(bridge, "getLspState: function()", "ACE LSP state public API");
 assertIncludes(bridge, "getLspHover: function(row, column)", "ACE LSP hover public API");
 assertIncludes(bridge, "global.AutoJsAceTooltip.install", "ACE tooltip install");
@@ -813,12 +850,27 @@ assertIncludes(lspClient, "documentUri: state.documentUri", "ACE LSP passes docu
 assertIncludes(lspClient, "isJsonDocumentUri", "ACE LSP JSON document detection");
 assertIncludes(lspClient, "jsonSyntaxDiagnostics", "ACE LSP JSON syntax diagnostics");
 assertIncludes(lspClient, "tsService.setDocumentUri(state.documentUri)", "ACE LSP refresh updates TypeScript document URI");
-assertIncludes(lspClient, "getTsServiceState(state.enabled || !!tsService)", "ACE LSP avoids loading TS service while disabled");
+assertIncludes(lspClient, "if (destroyed || !state.enabled)", "ACE LSP avoids creating TypeScript service while disabled or destroyed");
+assertIncludes(lspClient, "function scheduleTsLoadRetry(revision)", "ACE LSP transient TypeScript loader retry");
+assertIncludes(lspClient, "TS_LOAD_MAX_ATTEMPTS = 2", "ACE LSP bounded TypeScript loader retries");
+assertIncludes(lspClient, "TS_LOAD_TIMEOUT_MS = 5000", "ACE LSP bounded TypeScript asset load timeout");
+assertIncludes(lspClient, "function scheduleTsServiceRetry(revision)", "ACE LSP transient service initialization retry");
+assertIncludes(lspClient, "function disposeTsService()", "ACE LSP TypeScript service lifecycle disposal");
+assertIncludes(lspClient, "if (shouldWarmUp && !state.semanticServiceSuppressed && !tsServiceReady())", "ACE LSP hot-enable warm-up");
+assertIncludes(lspClient, "DEFAULT_MAX_DOCUMENT_LENGTH = 512 * 1024", "ACE LSP 512 KiB semantic document limit");
+assertIncludes(lspClient, '"document-too-large"', "ACE LSP large-document semantic fallback reason");
+assertIncludes(lspClient, '"slow-operation-circuit-open"', "ACE LSP slow semantic operation circuit breaker");
+assertIncludes(lspClient, "SEMANTIC_SLOW_OPERATION_MAX_COUNT = 1", "ACE LSP first-slow-operation degradation");
+assertIncludes(lspClient, "MAX_COMPLETION_ITEMS = 300", "ACE LSP bounded semantic completion results");
+assertIncludes(lspClient, "function onSessionChange(delta)", "ACE LSP cached document length updates");
+assertIncludes(lspClient, 'state.localServiceReady ? "ready" : "configured"', "ACE LSP configured/ready state distinction");
+assertIncludes(lspClient, "tsService: getTsServiceState()", "ACE LSP state inspection does not instantiate TypeScript service");
+assertIncludes(lspClient, "destroy: destroy", "ACE LSP explicit destroy hook");
 assertIncludes(lspClient, "warmUp: warmUp", "ACE LSP exposes lazy warm-up hook");
 assertIncludes(lspClient, "getCompletions: getCompletions", "ACE LSP completion hook");
 assertIncludes(lspClient, "getHover: getHover", "ACE LSP hover hook");
 if (lspClient.includes("WebSocket") || lspClient.includes("new Worker")) {
-  throw new Error("LSP client must stay off WebSocket and worker transports in preview path");
+  throw new Error("Bundled LSP client must stay off WebSocket and worker transports");
 }
 
 assertIncludes(tsService, "global.AutoJsAceTsLanguageService", "ACE TypeScript service global");
@@ -826,12 +878,29 @@ assertIncludes(tsService, "typescriptServices.js unavailable", "ACE TypeScript s
 assertIncludes(tsService, "loadTextFromBridge", "ACE TypeScript service native asset loader");
 assertIncludes(tsService, "file:///autojs6/types/lib.autojs6.extra.d.ts", "ACE TypeScript service extra declaration lib");
 assertIncludes(tsService, "function scriptKindForFileName", "ACE TypeScript service script-kind selection");
+assertIncludes(tsService, "(?:ts|mts|cts)", "ACE TypeScript service recognizes compatible TypeScript script kinds");
 assertIncludes(tsService, "ts.ScriptKind.JSON", "ACE TypeScript service JSON script kind");
 assertIncludes(tsService, "getScriptKind: function(fileName)", "ACE TypeScript host exposes script kind");
 assertIncludes(tsService, "setDocumentUri: setDocumentUri", "ACE TypeScript service can change current document URI");
 assertIncludes(tsService, "getCompletionsAtPosition", "ACE TypeScript service completion API");
 assertIncludes(tsService, "getSignatureHelpItems", "ACE TypeScript service signature API");
 assertIncludes(tsService, "getSemanticDiagnostics", "ACE TypeScript service diagnostics API");
+assertIncludes(tsService, "SINGLE_FILE_UNRELIABLE_DIAGNOSTIC_CODES", "ACE TypeScript single-file diagnostic suppression");
+assertIncludes(tsService, "function ensureTsLibrary(fileName)", "ACE TypeScript lazy standard-library loading");
+assertIncludes(tsService, "typeof documentText === \"string\"", "ACE TypeScript reuses the caller document snapshot");
+assertIncludes(tsService, "function partsToString(parts)", "ACE TypeScript hover text normalization");
+assertIncludes(tsService, 'typeof parts === "string"', "ACE TypeScript JSDoc string compatibility");
+assertIncludes(tsService, "jsx: ts.JsxEmit && ts.JsxEmit.Preserve", "ACE TypeScript JSX/TSX compiler mode");
+assertIncludes(tsService, ".slice(0, completionLimit)", "ACE TypeScript completion limit");
+assertIncludes(tsService, "entry.replacementSpan", "ACE TypeScript replacement-span propagation");
+assertIncludes(tsService, "completion.replaceRange", "ACE TypeScript ACE replacement range mapping");
+assertIncludes(tsService, "dispose: dispose", "ACE TypeScript service disposal API");
+
+assertIncludes(aceEditorAssets, "internal val requiredAssetPaths = listOf(", "ACE required asset manifest");
+assertIncludes(aceEditorAssets, '"$EDITOR_ASSET_ROOT/autojs6/autojs6_lsp_client.js"', "ACE LSP client asset integrity check");
+assertIncludes(aceEditorAssets, '"$EDITOR_ASSET_ROOT/autojs6/typescript/typescriptServices.js"', "ACE TypeScript runtime asset integrity check");
+assertIncludes(aceEditorAssets, '"$EDITOR_ASSET_ROOT/autojs6/types/lib.autojs6.d.ts"', "ACE AutoJs6 declaration asset integrity check");
+assertIncludes(aceEditorAssets, "validateRequiredAssets", "ACE full asset validation");
 
 assertIncludes(aceBridgeKt, "fun read(uri: String?): String", "native ACE bridge asset read hook");
 assertIncludes(aceBridgeKt, "isAllowedReadAsset", "native ACE bridge read whitelist");
@@ -840,15 +909,27 @@ assertIncludes(aceBridgeKt, "fun write(uri: String?, text: String?): String", "n
 assertIncludes(aceBridgeKt, "File access is not available from the ACE editor bridge", "native ACE bridge keeps write disabled");
 
 assertIncludes(aceLspPreferences, "KEY_ACE_LSP_FILE_TYPES", "ACE LSP file-type preference key");
+assertIncludes(aceLspPreferences, "const val DEFAULT_ENABLED = true", "ACE LSP default-on preference");
+assertIncludes(aceLspPreferences, "Pref.getBoolean(KEY_ACE_LSP_ENABLED, DEFAULT_ENABLED)", "ACE LSP runtime default follows declared default");
+assertIncludes(aceLspPreferences, "fun resetEnabled()", "ACE LSP default preference reset");
 assertIncludes(aceLspPreferences, "DEFAULT_FILE_TYPES", "ACE LSP default file-type suffixes");
 assertIncludes(aceLspPreferences, "fun getFileTypes()", "ACE LSP file-type getter");
 assertIncludes(aceLspPreferences, "fun resetFileTypes()", "ACE LSP file-type default reset");
 assertIncludes(aceLspPreferences, "fun isDocumentAllowed(documentPathOrName: String?)", "ACE LSP document type gate");
 assertIncludes(aceLspPreferences, "fun normalizeFileTypes", "ACE LSP file-type normalization");
 assertIncludes(aceLspPreferences, '".node.js"', "ACE LSP default Node.js suffix");
+assertIncludes(bools, '<bool name="pref_ace_lsp_enabled">true</bool>', "ACE LSP resource default-on value");
 
 assertIncludes(aceLspServerManager, "documentAllowedProvider", "ACE LSP manager injectable document-type gate");
-assertIncludes(aceLspServerManager, 'MANAGER_NAME = "native-preview"', "ACE LSP manager uses preview identity");
+assertIncludes(aceLspServerManager, 'MANAGER_NAME = "native-local"', "ACE LSP manager uses stable local identity");
+assertIncludes(aceLspServerManager, 'REASON_LOCAL_LANGUAGE_SERVICE = "bundled-typescript-language-service"', "ACE LSP manager identifies bundled TypeScript service");
+assertIncludes(aceLspServerManager, "MAX_DOCUMENT_LENGTH = 512 * 1024", "ACE LSP manager advertises the 512 KiB semantic limit");
+assertIncludes(aceLspServerManager, "maxDocumentLength = MAX_DOCUMENT_LENGTH", "ACE LSP manager snapshot carries the semantic limit");
+assertIncludes(aceLspServerManager, 'COMPLETION_PROVIDER_LOCAL_INDEX = "local-index"', "ACE LSP manager starts with honest local-index provider state");
+assertIncludes(aceLspServerManager, 'SIGNATURE_PROVIDER_STATIC_LOCAL = "static-local"', "ACE LSP manager starts with honest signature fallback state");
+assertNotIncludes(aceLspServerManager, "native-preview", "obsolete ACE LSP preview manager identity");
+assertNotIncludes(aceLspServerManager, "configured-no-server", "obsolete ACE LSP no-server state");
+assertNotIncludes(aceLspServerManager, 'TRANSPORT_UNAVAILABLE = "unavailable"', "obsolete ACE LSP unavailable transport");
 assertIncludes(aceLspServerManager, "fun setDocumentPath(path: String?)", "ACE LSP manager document path setter");
 assertIncludes(aceLspServerManager, "fun documentUriForPath(path: String?)", "ACE LSP manager derives document URI from path");
 assertIncludes(aceLspServerManager, "encodePathSegment", "ACE LSP manager escapes synthetic document URI file name");
