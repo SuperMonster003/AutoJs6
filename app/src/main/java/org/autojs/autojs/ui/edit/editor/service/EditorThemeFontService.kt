@@ -33,6 +33,11 @@ class EditorThemeFontService(
     private val invalidateHost: () -> Unit,
 ) {
 
+    data class PreviewProgressColors(
+        val indicatorColor: Int,
+        val trackColor: Int,
+    )
+
     private val aceFontManager = AceEditorFontManager.get(context)
 
     var currentTheme: Theme? = null
@@ -100,6 +105,20 @@ class EditorThemeFontService(
 
     fun inputMethodBarForegroundColor(theme: Theme): Int = resolveImeBarForegroundColor(theme)
 
+    fun editorPreviewProgressColors(backgroundColor: Int): PreviewProgressColors {
+        val indicatorColor = appThemeColorForContrast(backgroundColor, minimumContrast = 2.3)
+        return PreviewProgressColors(
+            indicatorColor = indicatorColor,
+            trackColor = ColorUtils.applyAlpha(indicatorColor, 0.20),
+        )
+    }
+
+    fun fontFilterCategoryColor(backgroundColor: Int): Int =
+        appThemeColorForContrast(backgroundColor, minimumContrast = 3.2)
+
+    fun editorPreviewFallbackForegroundColor(backgroundColor: Int): Int =
+        appThemeColorForContrast(backgroundColor, minimumContrast = 3.0)
+
     private fun resolveImeBarForegroundColor(theme: Theme): Int {
         val themeTone = theme.foregroundColor
         if (!isChromaticThemeTone(themeTone)) {
@@ -123,6 +142,14 @@ class EditorThemeFontService(
         val hsv = FloatArray(3)
         Color.RGBToHSV(red, green, blue, hsv)
         return hsv[1] >= CHROMATIC_SATURATION_THRESHOLD
+    }
+
+    private fun appThemeColorForContrast(backgroundColor: Int, minimumContrast: Double): Int {
+        return ColorUtils.adjustColorForContrast(
+            backgroundColor,
+            ThemeColorManager.colorPrimary,
+            minimumContrast,
+        )
     }
 
     fun currentAceFont(): String = AceEditorFontPreferences.getId()

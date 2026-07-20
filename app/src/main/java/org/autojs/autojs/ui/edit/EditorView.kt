@@ -68,7 +68,6 @@ import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.JavaScriptFileSource
-import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
@@ -136,7 +135,6 @@ import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.settings.EditorSettingActionRegistry
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.util.ClipboardUtils
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
@@ -1841,15 +1839,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mThemePreviewBar.setBackgroundColor(backgroundColor)
         themePreviewTextViews().forEach { it.setTextColor(foregroundColor) }
         themePreviewImageViews().forEach { it.imageTintList = ColorStateList.valueOf(foregroundColor) }
-        val progressColor = ColorUtils.adjustColorForContrast(
-            backgroundColor,
-            ThemeColorManager.colorPrimary,
-            minimumContrast = 2.3,
-        )
-        mFontPreviewProgress.progressTintList = ColorStateList.valueOf(progressColor)
-        mFontPreviewProgress.indeterminateTintList = ColorStateList.valueOf(progressColor)
+        val progressColors = themeFontService.editorPreviewProgressColors(backgroundColor)
+        mFontPreviewProgress.progressTintList = ColorStateList.valueOf(progressColors.indicatorColor)
+        mFontPreviewProgress.indeterminateTintList = ColorStateList.valueOf(progressColors.indicatorColor)
         mFontPreviewProgress.progressBackgroundTintList = ColorStateList.valueOf(
-            ColorUtils.applyAlpha(progressColor, 0.20),
+            progressColors.trackColor,
         )
     }
 
@@ -2097,10 +2091,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         typeCheckBoxes.forEach { (type, checkBox) ->
             checkBox.isChecked = type !in filter.excludedTypes
         }
-        val categoryColor = ColorUtils.adjustColorForContrast(
+        val categoryColor = themeFontService.fontFilterCategoryColor(
             context.getColor(R.color.window_background),
-            ThemeColorManager.colorPrimary,
-            3.2,
         )
         binding.fontFeatureTitle.setTextColor(categoryColor)
         binding.fontTypeTitle.setTextColor(categoryColor)
@@ -2340,7 +2332,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val theme = themeFontService.currentTheme
         val backgroundColor = theme?.let(themeFontService::inputMethodBarBackgroundColor) ?: Color.WHITE
         val foregroundColor = theme?.let(themeFontService::inputMethodBarForegroundColor)
-            ?: ColorUtils.adjustColorForContrast(backgroundColor, ThemeColorManager.colorPrimary, 3.0)
+            ?: themeFontService.editorPreviewFallbackForegroundColor(backgroundColor)
         applyEditorPreviewColors(backgroundColor, foregroundColor)
     }
 
