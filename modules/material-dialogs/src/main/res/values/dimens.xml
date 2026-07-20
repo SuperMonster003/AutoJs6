@@ -58,6 +58,7 @@
   <!-- actual content padding bottom is 16dp, but we split between button bar and content -->
   <dimen name="md_content_padding_bottom">8dp</dimen>
   <dimen name="md_button_frame_vertical_padding">8dp</dimen>
+  <dimen name="md_button_frame_vertical_padding_compact">4dp</dimen>
   <dimen name="md_button_height">48dp</dimen>
   <dimen name="md_title_textsize">20sp</dimen>
   <dimen name="md_content_textsize">16sp</dimen>

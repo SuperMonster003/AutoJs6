@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import {
   GENERATED_DTS_PATH,
+  normalizeLineEndings,
   readSource,
   relativeToRoot,
   renderDts,
@@ -11,7 +12,7 @@ import {
 const source = readSource();
 const expected = renderDts(source);
 const actual = fs.existsSync(GENERATED_DTS_PATH)
-  ? fs.readFileSync(GENERATED_DTS_PATH, "utf8")
+  ? normalizeLineEndings(fs.readFileSync(GENERATED_DTS_PATH, "utf8"))
   : "";
 
 if (actual !== expected) {

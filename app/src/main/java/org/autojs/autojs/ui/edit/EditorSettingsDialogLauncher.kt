@@ -12,6 +12,7 @@ object EditorSettingsDialogLauncher {
         recordAceActionFavorites: Boolean = false,
         suppressInitialActionRecord: Boolean = false,
         themePreviewHandler: ((Theme) -> Unit)? = null,
+        fontPreviewHandler: ((String) -> Unit)? = null,
     ) {
         CodeEditorSettingsDialog.show(
             context = context,
@@ -19,6 +20,7 @@ object EditorSettingsDialogLauncher {
             recordAceActionFavorites = recordAceActionFavorites,
             suppressInitialActionRecord = suppressInitialActionRecord,
             themePreviewHandler = themePreviewHandler,
+            fontPreviewHandler = fontPreviewHandler,
         )
     }
 }

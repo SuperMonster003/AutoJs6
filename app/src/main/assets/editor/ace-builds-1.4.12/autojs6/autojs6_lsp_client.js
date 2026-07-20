@@ -19,6 +19,14 @@
     var SIGNATURE_PROVIDER_TYPESCRIPT = "typescript-language-service";
     var DIAGNOSTIC_SOURCE = "autojs6-lsp";
     var VALIDATION_DELAY_MS = 450;
+    var DEFAULT_MAX_DOCUMENT_LENGTH = 512 * 1024;
+    var MAX_COMPLETION_ITEMS = 300;
+    var TS_LOAD_MAX_ATTEMPTS = 2;
+    var TS_LOAD_RETRY_DELAY_MS = 750;
+    var TS_LOAD_TIMEOUT_MS = 5000;
+    var TS_SERVICE_INIT_MAX_ATTEMPTS = 2;
+    var SEMANTIC_SLOW_OPERATION_LIMIT_MS = 1000;
+    var SEMANTIC_SLOW_OPERATION_MAX_COUNT = 1;
     var JSHINT_SCRIPT_SRC = "./src-min-noconflict/worker-javascript.js";
     var TS_RUNTIME_SCRIPT_SRC = "./autojs6/typescript/typescriptServices.js";
     var TS_SERVICE_SCRIPT_SRC = "./autojs6/autojs6_ts_language_service.js";
@@ -27,6 +35,7 @@
     var jshintCallbacks = [];
     var tsLoadState = "idle";
     var tsLoadCallbacks = [];
+    var tsLoadAttempts = 0;
 
     function noop() {
     }
@@ -41,6 +50,11 @@
 
     function copyArray(value) {
         return Array.isArray(value) ? value.slice(0) : [];
+    }
+
+    function positiveInteger(value, fallback) {
+        value = Number(value);
+        return isFinite(value) && value > 0 ? Math.floor(value) : fallback;
     }
 
     function timerSet(callback, delayMs) {
@@ -95,7 +109,7 @@
             startSupported: !!(options && options.startSupported),
             serverAvailable: !!(options && options.serverAvailable),
             serverReady: false,
-            localServiceReady: enabled,
+            localServiceReady: false,
             reason: options && options.reason || "",
             completionProvider: enabled ?
                 (options && options.completionProvider || COMPLETION_PROVIDER_LOCAL_INDEX) :
@@ -107,7 +121,16 @@
                 (options && options.diagnosticProvider || DIAGNOSTIC_PROVIDER_ACE_JSHINT) :
                 DIAGNOSTIC_PROVIDER_DISABLED,
             signatureProvider: options && options.signatureProvider || SIGNATURE_PROVIDER_STATIC_LOCAL,
-            features: copyArray(options && options.features)
+            features: copyArray(options && options.features),
+            maxDocumentLength: positiveInteger(
+                options && options.maxDocumentLength,
+                DEFAULT_MAX_DOCUMENT_LENGTH
+            ),
+            documentLength: 0,
+            semanticServiceSuppressed: false,
+            semanticServiceReason: "",
+            lastSemanticOperation: "",
+            lastSemanticDurationMs: 0
         };
     }
 
@@ -212,29 +235,62 @@
             typeof global.AutoJsAceTsLanguageService.create === "function");
     }
 
+    function hasTsRuntime() {
+        return !!(global.ts && typeof global.ts.createLanguageService === "function");
+    }
+
     function appendScript(src, onload, onerror) {
         if (!global.document || !global.document.createElement) {
             onerror("document unavailable");
             return;
         }
+        var script = null;
+        var settled = false;
+        var timeoutHandle = null;
+
+        function finish(callback, value) {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            if (timeoutHandle !== null) {
+                timerClear(timeoutHandle);
+                timeoutHandle = null;
+            }
+            if (script) {
+                script.onload = null;
+                script.onerror = null;
+            }
+            callback(value);
+        }
+
         try {
-            var script = global.document.createElement("script");
+            script = global.document.createElement("script");
+            var parent = global.document.head || global.document.body || global.document.documentElement;
+            if (!parent || !parent.appendChild) {
+                finish(onerror, "document head unavailable");
+                return;
+            }
             script.src = src;
             script.async = true;
             script.onload = function() {
-                onload();
+                finish(onload);
             };
             script.onerror = function(error) {
-                onerror(error);
+                finish(onerror, error || (src + " unavailable"));
             };
-            var parent = global.document.head || global.document.body || global.document.documentElement;
-            if (!parent || !parent.appendChild) {
-                onerror("document head unavailable");
-                return;
+            var timeoutFn = global.setTimeout || (typeof setTimeout === "function" ? setTimeout : null);
+            if (timeoutFn) {
+                timeoutHandle = timeoutFn(function() {
+                    if (script.parentNode && typeof script.parentNode.removeChild === "function") {
+                        script.parentNode.removeChild(script);
+                    }
+                    finish(onerror, src + " timed out after " + TS_LOAD_TIMEOUT_MS + " ms");
+                }, TS_LOAD_TIMEOUT_MS);
             }
             parent.appendChild(script);
         } catch (error) {
-            onerror(error);
+            finish(onerror, error);
         }
     }
 
@@ -245,16 +301,21 @@
             callback(true);
             return true;
         }
-        if (tsLoadState === "failed") {
+        if (tsLoadState === "failed" && tsLoadAttempts >= TS_LOAD_MAX_ATTEMPTS) {
             callback(false);
             return false;
+        }
+        if (tsLoadState === "failed") {
+            tsLoadState = "idle";
         }
         tsLoadCallbacks.push(callback);
         if (tsLoadState === "loading") {
             return false;
         }
         tsLoadState = "loading";
-        appendScript(TS_RUNTIME_SCRIPT_SRC, function() {
+        tsLoadAttempts++;
+
+        function loadServiceScript() {
             appendScript(TS_SERVICE_SCRIPT_SRC, function() {
                 tsLoadState = hasTsLanguageService() ? "loaded" : "failed";
                 if (tsLoadState === "failed") {
@@ -266,11 +327,17 @@
                 notify(config, "ACE TypeScript language service script unavailable", error);
                 flushTsLoadCallbacks(false);
             });
-        }, function(error) {
-            tsLoadState = "failed";
-            notify(config, "ACE TypeScript runtime script unavailable", error);
-            flushTsLoadCallbacks(false);
-        });
+        }
+
+        if (hasTsRuntime()) {
+            loadServiceScript();
+        } else {
+            appendScript(TS_RUNTIME_SCRIPT_SRC, loadServiceScript, function(error) {
+                tsLoadState = "failed";
+                notify(config, "ACE TypeScript runtime script unavailable", error);
+                flushTsLoadCallbacks(false);
+            });
+        }
         return false;
     }
 
@@ -610,7 +677,7 @@
             }
             seen[key] = true;
             return true;
-        });
+        }).slice(0, MAX_COMPLETION_ITEMS);
     }
 
     function createClient(config) {
@@ -620,9 +687,17 @@
         var options = {};
         var state = stateFromOptions(options);
         var attached = false;
+        var destroyed = false;
+        var hasRefreshed = false;
+        var configurationRevision = 0;
         var validationTimer = null;
+        var tsRetryTimer = null;
         var lastAnnotations = [];
         var tsService = null;
+        var tsServiceInitAttempts = 0;
+        var documentLengthKnown = false;
+        var semanticCircuitOpen = false;
+        var consecutiveSlowSemanticOperations = 0;
 
         function getStaticCompleter() {
             if (typeof config.getStaticCompleter === "function") {
@@ -635,55 +710,208 @@
         }
 
         function getTsService() {
+            if (destroyed || !state.enabled) {
+                return null;
+            }
             if (!tsService && hasTsLanguageService()) {
+                tsServiceInitAttempts++;
                 tsService = global.AutoJsAceTsLanguageService.create({
                     notifyError: config.notifyError,
                     checkJs: options && options.checkJs === true,
+                    completionLimit: MAX_COMPLETION_ITEMS,
                     documentUri: state.documentUri
                 });
             }
             return tsService;
         }
 
-        function warmUp(callback) {
-            callback = typeof callback === "function" ? callback : noop;
-            if (!state.enabled) {
-                callback(false, getState());
-                return false;
-            }
-            ensureTsLanguageServiceLoaded(config, function(ok) {
-                if (ok) {
-                    getTsService();
-                    applyTsProviderState();
-                    scheduleDiagnostics();
+        function disposeTsService() {
+            var service = tsService;
+            tsService = null;
+            if (service && typeof service.dispose === "function") {
+                try {
+                    service.dispose();
+                } catch (error) {
+                    notify(config, "ACE TS language service disposal failed: " + error, error);
                 }
-                callback(!!ok, getState());
-            });
-            return true;
+            }
         }
 
-        function getTsServiceState(allowCreate) {
-            var service = allowCreate ? getTsService() : tsService;
-            if (!service || typeof service.getState !== "function") {
-                return { ready: false, reason: "typescript language service unavailable" };
+        function cancelTsRetry() {
+            if (tsRetryTimer !== null) {
+                timerClear(tsRetryTimer);
+                tsRetryTimer = null;
             }
-            return service.getState();
+        }
+
+        function resetProviderState() {
+            state.localServiceReady = false;
+            if (!state.enabled) {
+                state.completionProvider = COMPLETION_PROVIDER_STATIC;
+                state.hoverProvider = HOVER_PROVIDER_STATIC;
+                state.diagnosticProvider = DIAGNOSTIC_PROVIDER_DISABLED;
+                state.signatureProvider = SIGNATURE_PROVIDER_STATIC_LOCAL;
+                return;
+            }
+            state.completionProvider = options.completionProvider || COMPLETION_PROVIDER_LOCAL_INDEX;
+            state.hoverProvider = options.hoverProvider || HOVER_PROVIDER_LOCAL_INDEX;
+            state.diagnosticProvider = options.diagnosticProvider || DIAGNOSTIC_PROVIDER_ACE_JSHINT;
+            state.signatureProvider = options.signatureProvider || SIGNATURE_PROVIDER_STATIC_LOCAL;
+        }
+
+        function documentLengthFromSession(activeSession) {
+            var target = activeSession || session;
+            if (target === session && documentLengthKnown) {
+                return state.documentLength;
+            }
+            try {
+                if (target && typeof target.getValue === "function") {
+                    var length = String(target.getValue() || "").length;
+                    if (target === session) {
+                        state.documentLength = length;
+                        documentLengthKnown = true;
+                    }
+                    return length;
+                }
+                return textFromSession(target).length;
+            } catch (ignore) {
+                return 0;
+            }
+        }
+
+        function updateSemanticState(activeSession, knownLength) {
+            var target = activeSession || session;
+            var length = typeof knownLength === "number" ? knownLength : documentLengthFromSession(target);
+            if (target === session && typeof knownLength === "number") {
+                state.documentLength = knownLength;
+                documentLengthKnown = true;
+            }
+            var tooLarge = state.enabled && state.maxDocumentLength > 0 && length > state.maxDocumentLength;
+            state.documentLength = length;
+            state.semanticServiceSuppressed = !!(tooLarge || semanticCircuitOpen);
+            state.semanticServiceReason = tooLarge ?
+                "document-too-large" :
+                semanticCircuitOpen ? "slow-operation-circuit-open" : "";
+            if (state.semanticServiceSuppressed) {
+                resetProviderState();
+            }
+            return state.enabled && !state.semanticServiceSuppressed;
+        }
+
+        function getTsServiceState() {
+            if (!tsService || typeof tsService.getState !== "function") {
+                return {
+                    ready: false,
+                    reason: state.semanticServiceReason || "typescript language service unavailable"
+                };
+            }
+            return tsService.getState();
         }
 
         function tsServiceReady() {
-            var tsState = getTsServiceState(true);
+            var tsState = getTsServiceState();
             return !!(tsState && tsState.ready);
         }
 
         function applyTsProviderState() {
-            if (!state.enabled || !tsServiceReady()) {
-                return;
+            if (!state.enabled || state.semanticServiceSuppressed || !tsServiceReady()) {
+                return false;
             }
             state.completionProvider = COMPLETION_PROVIDER_TYPESCRIPT;
             state.hoverProvider = HOVER_PROVIDER_TYPESCRIPT;
             state.diagnosticProvider = DIAGNOSTIC_PROVIDER_TYPESCRIPT;
             state.signatureProvider = SIGNATURE_PROVIDER_TYPESCRIPT;
             state.localServiceReady = true;
+            return true;
+        }
+
+        function openSemanticCircuit(operation, durationMs) {
+            if (semanticCircuitOpen) {
+                return;
+            }
+            semanticCircuitOpen = true;
+            updateSemanticState(session);
+            disposeTsService();
+            notify(
+                config,
+                "ACE TypeScript language service switched to static fallback after slow " +
+                    operation + " (" + durationMs + " ms)"
+            );
+        }
+
+        function recordSemanticOperation(startedAt, operation, circuitEligible) {
+            var durationMs = Math.max(0, Date.now() - startedAt);
+            state.lastSemanticOperation = operation;
+            state.lastSemanticDurationMs = durationMs;
+            if (circuitEligible !== false && durationMs >= SEMANTIC_SLOW_OPERATION_LIMIT_MS) {
+                consecutiveSlowSemanticOperations++;
+                if (consecutiveSlowSemanticOperations >= SEMANTIC_SLOW_OPERATION_MAX_COUNT) {
+                    openSemanticCircuit(operation, durationMs);
+                }
+            } else if (circuitEligible !== false) {
+                consecutiveSlowSemanticOperations = 0;
+            }
+            return durationMs;
+        }
+
+        function scheduleTsLoadRetry(revision) {
+            if (destroyed || !state.enabled || revision !== configurationRevision ||
+                tsLoadAttempts >= TS_LOAD_MAX_ATTEMPTS) {
+                return;
+            }
+            cancelTsRetry();
+            tsRetryTimer = timerSet(function() {
+                tsRetryTimer = null;
+                if (!destroyed && state.enabled && revision === configurationRevision) {
+                    warmUp();
+                }
+            }, TS_LOAD_RETRY_DELAY_MS);
+        }
+
+        function scheduleTsServiceRetry(revision) {
+            if (destroyed || !state.enabled || revision !== configurationRevision ||
+                tsServiceInitAttempts >= TS_SERVICE_INIT_MAX_ATTEMPTS) {
+                return;
+            }
+            cancelTsRetry();
+            tsRetryTimer = timerSet(function() {
+                tsRetryTimer = null;
+                if (!destroyed && state.enabled && revision === configurationRevision) {
+                    disposeTsService();
+                    warmUp();
+                }
+            }, TS_LOAD_RETRY_DELAY_MS);
+        }
+
+        function warmUp(callback) {
+            callback = typeof callback === "function" ? callback : noop;
+            if (destroyed || !state.enabled || !updateSemanticState(session)) {
+                callback(false, getState());
+                return false;
+            }
+            var revision = configurationRevision;
+            ensureTsLanguageServiceLoaded(config, function(ok) {
+                if (destroyed || !state.enabled || revision !== configurationRevision) {
+                    callback(false, getState());
+                    return;
+                }
+                if (!ok) {
+                    scheduleTsLoadRetry(revision);
+                    callback(false, getState());
+                    return;
+                }
+                var startedAt = Date.now();
+                getTsService();
+                var ready = applyTsProviderState();
+                recordSemanticOperation(startedAt, "initialize", false);
+                if (ready && !semanticCircuitOpen) {
+                    scheduleDiagnostics();
+                } else if (!semanticCircuitOpen) {
+                    scheduleTsServiceRetry(revision);
+                }
+                callback(ready && !semanticCircuitOpen, getState());
+            });
+            return true;
         }
 
         function setSessionAnnotations(annotations) {
@@ -705,19 +933,26 @@
         }
 
         function validateNow() {
-            if (!state.enabled) {
+            if (destroyed || !state.enabled) {
                 clearDiagnostics();
                 return [];
             }
             var text = textFromSession(session);
+            if (!updateSemanticState(session, text.length)) {
+                clearDiagnostics();
+                return [];
+            }
             if (isJsonDocumentUri(state.documentUri)) {
                 setSessionAnnotations(jsonSyntaxDiagnostics(text));
                 return getDiagnostics();
             }
+            var startedAt = Date.now();
             var service = getTsService();
             if (service && typeof service.getDiagnostics === "function") {
-                var tsAnnotations = service.getDiagnostics(session);
-                if (tsAnnotations) {
+                var tsAnnotations = service.getDiagnostics(session, text);
+                recordSemanticOperation(startedAt, "diagnostics");
+                if (tsAnnotations && !semanticCircuitOpen) {
+                    applyTsProviderState();
                     setSessionAnnotations(tsAnnotations);
                     return getDiagnostics();
                 }
@@ -725,7 +960,7 @@
             var annotations = runJshintDiagnostics(text, getStaticCompleter, config);
             if (annotations === null) {
                 ensureJshintLoaded(config, function(lint) {
-                    if (lint && state.enabled) {
+                    if (lint && state.enabled && !destroyed) {
                         validateNow();
                     }
                 });
@@ -740,14 +975,55 @@
                 timerClear(validationTimer);
                 validationTimer = null;
             }
-            if (!state.enabled) {
+            if (destroyed || !state.enabled || !updateSemanticState(session)) {
                 clearDiagnostics();
                 return;
             }
             validationTimer = timerSet(function() {
                 validationTimer = null;
+                if (!tsService && tsLoadState !== "loading") {
+                    warmUp();
+                }
                 validateNow();
             }, VALIDATION_DELAY_MS);
+        }
+
+        function changedTextLength(delta) {
+            if (!delta || !Array.isArray(delta.lines) || delta.lines.length === 0) {
+                return null;
+            }
+            var newLineLength = 1;
+            try {
+                var document = session && typeof session.getDocument === "function" ?
+                    session.getDocument() : session && session.doc;
+                if (document && typeof document.getNewLineCharacter === "function") {
+                    newLineLength = Math.max(1, String(document.getNewLineCharacter() || "\n").length);
+                }
+            } catch (ignore) {
+                newLineLength = 1;
+            }
+            return delta.lines.reduce(function(total, line) {
+                return total + String(line || "").length;
+            }, Math.max(0, delta.lines.length - 1) * newLineLength);
+        }
+
+        function onSessionChange(delta) {
+            var changedLength = changedTextLength(delta);
+            if (documentLengthKnown && changedLength !== null) {
+                if (delta.action === "insert") {
+                    state.documentLength += changedLength;
+                } else if (delta.action === "remove") {
+                    state.documentLength = Math.max(0, state.documentLength - changedLength);
+                } else {
+                    documentLengthKnown = false;
+                }
+            } else {
+                documentLengthKnown = false;
+            }
+            if (documentLengthKnown) {
+                updateSemanticState(session, state.documentLength);
+            }
+            scheduleDiagnostics();
         }
 
         function attachDiagnostics() {
@@ -755,7 +1031,7 @@
                 scheduleDiagnostics();
                 return;
             }
-            session.on("change", scheduleDiagnostics);
+            session.on("change", onSessionChange);
             attached = true;
             scheduleDiagnostics();
         }
@@ -766,29 +1042,55 @@
                 validationTimer = null;
             }
             if (attached && session && typeof session.off === "function") {
-                session.off("change", scheduleDiagnostics);
+                session.off("change", onSessionChange);
             }
             attached = false;
         }
 
         function refresh() {
+            if (destroyed) {
+                return getState();
+            }
+            var shouldWarmUp = hasRefreshed;
+            configurationRevision++;
+            cancelTsRetry();
+            semanticCircuitOpen = false;
+            consecutiveSlowSemanticOperations = 0;
             var rawOptions = typeof config.getOptions === "function" ? config.getOptions() : "{}";
             options = parseOptions(rawOptions, config);
             state = stateFromOptions(options);
-            if (tsService && typeof tsService.setDocumentUri === "function") {
-                tsService.setDocumentUri(state.documentUri);
-            }
-            applyTsProviderState();
+            documentLengthKnown = false;
+            updateSemanticState(session);
             if (state.enabled) {
+                if (tsService && typeof tsService.setDocumentUri === "function") {
+                    tsService.setDocumentUri(state.documentUri);
+                }
+                applyTsProviderState();
                 attachDiagnostics();
+                if (shouldWarmUp && !state.semanticServiceSuppressed && !tsServiceReady()) {
+                    var revision = configurationRevision;
+                    tsRetryTimer = timerSet(function() {
+                        tsRetryTimer = null;
+                        if (!destroyed && state.enabled && revision === configurationRevision) {
+                            warmUp();
+                        }
+                    }, 0);
+                }
             } else {
                 detachDiagnostics();
                 clearDiagnostics();
+                disposeTsService();
+                tsServiceInitAttempts = 0;
             }
+            hasRefreshed = true;
             return getState();
         }
 
         function getState() {
+            if (!destroyed && state.enabled) {
+                updateSemanticState(session);
+                applyTsProviderState();
+            }
             return {
                 enabled: state.enabled,
                 manager: state.manager,
@@ -808,8 +1110,24 @@
                 hoverProvider: state.hoverProvider,
                 diagnosticProvider: state.diagnosticProvider,
                 signatureProvider: state.signatureProvider,
-                tsService: getTsServiceState(state.enabled || !!tsService),
-                diagnosticsReady: state.enabled && (isJsonDocumentUri(state.documentUri) || getJshint() !== null || lastAnnotations.length > 0),
+                tsLoader: {
+                    state: tsLoadState,
+                    attempts: tsLoadAttempts,
+                    maxAttempts: TS_LOAD_MAX_ATTEMPTS
+                },
+                tsService: getTsServiceState(),
+                maxDocumentLength: state.maxDocumentLength,
+                documentLength: state.documentLength,
+                semanticServiceSuppressed: state.semanticServiceSuppressed,
+                semanticServiceReason: state.semanticServiceReason,
+                lastSemanticOperation: state.lastSemanticOperation,
+                lastSemanticDurationMs: state.lastSemanticDurationMs,
+                serviceStatus: !state.enabled ? "disabled" :
+                    state.semanticServiceSuppressed ? "degraded" :
+                    state.localServiceReady ? "ready" : "configured",
+                diagnosticsReady: state.enabled && !state.semanticServiceSuppressed &&
+                    (isJsonDocumentUri(state.documentUri) || state.localServiceReady ||
+                        getJshint() !== null || lastAnnotations.length > 0),
                 diagnosticsCount: lastAnnotations.length,
                 features: copyArray(state.features)
             };
@@ -832,46 +1150,69 @@
 
         function getCompletions(activeEditor, activeSession, pos, prefix, callback) {
             callback = typeof callback === "function" ? callback : noop;
+            var targetSession = activeSession || session;
             try {
-                var service = state.enabled && getTsService();
+                var text = textFromSession(targetSession);
+                var semanticAllowed = updateSemanticState(targetSession, text.length);
+                if (isJsonDocumentUri(state.documentUri)) {
+                    callback(null, []);
+                    return;
+                }
+                if (!semanticAllowed) {
+                    getStaticCompletions(activeEditor, targetSession, pos, prefix, callback);
+                    return;
+                }
+                var service = getTsService();
                 if (service && typeof service.getCompletions === "function") {
                     var tsCompletions = [];
                     var tsError = null;
-                    service.getCompletions(activeSession || session, normalizePosition(pos), prefix || "", function(error, result) {
+                    var startedAt = Date.now();
+                    service.getCompletions(targetSession, normalizePosition(pos), prefix || "", function(error, result) {
                         tsError = error || null;
                         tsCompletions = result || [];
-                    });
+                    }, text);
+                    recordSemanticOperation(startedAt, "completion");
                     if (tsError) {
                         notify(config, "ACE TS completion failed: " + tsError, tsError);
-                    } else if (tsCompletions.length > 0) {
-                        getStaticCompletions(activeEditor, activeSession, pos, prefix, function(error, staticCompletions) {
-                            callback(error, dedupeCompletions(tsCompletions.concat(staticCompletions || [])));
-                        });
+                    } else if (tsCompletions.length > 0 && !semanticCircuitOpen) {
+                        applyTsProviderState();
+                        callback(null, dedupeCompletions(tsCompletions));
                         return;
                     }
+                } else if (state.enabled && tsLoadState !== "loading") {
+                    warmUp();
                 }
-                getStaticCompletions(activeEditor, activeSession, pos, prefix, callback);
+                getStaticCompletions(activeEditor, targetSession, pos, prefix, callback);
             } catch (error) {
                 notify(config, "ACE LSP completion failed: " + error, error);
-                callback(error, []);
+                getStaticCompletions(activeEditor, targetSession, pos, prefix, callback);
             }
         }
 
         function getHover(pos) {
             try {
-                var completer = getStaticCompleter();
-                if (completer && typeof completer.getHover === "function") {
-                    var indexedHover = completer.getHover(session, normalizePosition(pos));
-                    if (indexedHover) {
-                        return indexedHover;
+                var text = textFromSession(session);
+                if (isJsonDocumentUri(state.documentUri)) {
+                    updateSemanticState(session, text.length);
+                    return null;
+                }
+                if (updateSemanticState(session, text.length)) {
+                    var service = getTsService();
+                    if (service && typeof service.getHover === "function") {
+                        var startedAt = Date.now();
+                        var tsHover = service.getHover(session, normalizePosition(pos), text);
+                        recordSemanticOperation(startedAt, "hover");
+                        if (tsHover && !semanticCircuitOpen) {
+                            applyTsProviderState();
+                            return tsHover;
+                        }
+                    } else if (state.enabled && tsLoadState !== "loading") {
+                        warmUp();
                     }
                 }
-                var service = state.enabled && getTsService();
-                if (service && typeof service.getHover === "function") {
-                    var tsHover = service.getHover(session, normalizePosition(pos));
-                    if (tsHover) {
-                        return tsHover;
-                    }
+                var completer = getStaticCompleter();
+                if (completer && typeof completer.getHover === "function") {
+                    return completer.getHover(session, normalizePosition(pos));
                 }
                 return null;
             } catch (error) {
@@ -882,18 +1223,30 @@
 
         function getSignatureHelp(pos) {
             try {
+                var text = textFromSession(session);
+                if (isJsonDocumentUri(state.documentUri)) {
+                    updateSemanticState(session, text.length);
+                    return null;
+                }
+                if (updateSemanticState(session, text.length)) {
+                    var service = getTsService();
+                    if (service && typeof service.getSignatureHelp === "function") {
+                        var startedAt = Date.now();
+                        var tsHelp = service.getSignatureHelp(session, normalizePosition(pos), text);
+                        recordSemanticOperation(startedAt, "signatureHelp");
+                        if (tsHelp && !semanticCircuitOpen) {
+                            applyTsProviderState();
+                            return tsHelp;
+                        }
+                    } else if (state.enabled && tsLoadState !== "loading") {
+                        warmUp();
+                    }
+                }
                 var completer = getStaticCompleter();
                 if (completer && typeof completer.getSignatureHelp === "function") {
                     var indexedHelp = completer.getSignatureHelp(session, normalizePosition(pos));
                     if (indexedHelp) {
                         return indexedHelp;
-                    }
-                }
-                var service = state.enabled && getTsService();
-                if (service && typeof service.getSignatureHelp === "function") {
-                    var tsHelp = service.getSignatureHelp(session, normalizePosition(pos));
-                    if (tsHelp) {
-                        return tsHelp;
                     }
                 }
                 if (!global.AutoJsAceSignatureHelp ||
@@ -908,8 +1261,20 @@
         }
 
         function destroy() {
+            if (destroyed) {
+                return;
+            }
             detachDiagnostics();
             clearDiagnostics();
+            cancelTsRetry();
+            configurationRevision++;
+            destroyed = true;
+            disposeTsService();
+            state.enabled = false;
+            state.state = STATE_DISABLED;
+            state.semanticServiceSuppressed = false;
+            state.semanticServiceReason = "destroyed";
+            resetProviderState();
         }
 
         refresh();

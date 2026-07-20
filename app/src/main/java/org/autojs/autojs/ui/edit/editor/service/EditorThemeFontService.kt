@@ -12,7 +12,7 @@ import org.autojs.autojs.core.pref.Pref.getEditorTextSize
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorFont
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontPreferences
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
@@ -33,16 +33,27 @@ class EditorThemeFontService(
     private val invalidateHost: () -> Unit,
 ) {
 
+    data class PreviewProgressColors(
+        val indicatorColor: Int,
+        val trackColor: Int,
+    )
+
+    private val aceFontManager = AceEditorFontManager.get(context)
+
     var currentTheme: Theme? = null
         private set
 
     fun loadCurrentTheme(): Observable<Theme?> = Themes.getCurrent(context, currentEditor().engineType)
 
     fun applyEditorPreferences() {
+        applyPreferredTextSize()
+        currentEditor().notifyDisplayPreferencesChanged()
+        applyPreferredAceFont()
+    }
+
+    fun applyPreferredTextSize() {
         val editor = currentEditor()
         editor.setTextSizeSp(getEditorTextSize(editor.getTextSizeSp().toInt()).toFloat())
-        editor.notifyDisplayPreferencesChanged()
-        applyPreferredAceFont()
     }
 
     fun applyTheme(theme: Theme?): Theme? {
@@ -94,6 +105,20 @@ class EditorThemeFontService(
 
     fun inputMethodBarForegroundColor(theme: Theme): Int = resolveImeBarForegroundColor(theme)
 
+    fun editorPreviewProgressColors(backgroundColor: Int): PreviewProgressColors {
+        val indicatorColor = appThemeColorForContrast(backgroundColor, minimumContrast = 2.3)
+        return PreviewProgressColors(
+            indicatorColor = indicatorColor,
+            trackColor = ColorUtils.applyAlpha(indicatorColor, 0.20),
+        )
+    }
+
+    fun fontFilterCategoryColor(backgroundColor: Int): Int =
+        appThemeColorForContrast(backgroundColor, minimumContrast = 3.2)
+
+    fun editorPreviewFallbackForegroundColor(backgroundColor: Int): Int =
+        appThemeColorForContrast(backgroundColor, minimumContrast = 3.0)
+
     private fun resolveImeBarForegroundColor(theme: Theme): Int {
         val themeTone = theme.foregroundColor
         if (!isChromaticThemeTone(themeTone)) {
@@ -119,23 +144,35 @@ class EditorThemeFontService(
         return hsv[1] >= CHROMATIC_SATURATION_THRESHOLD
     }
 
-    fun currentAceFont(): AceEditorFont = AceEditorFontPreferences.get()
+    private fun appThemeColorForContrast(backgroundColor: Int, minimumContrast: Double): Int {
+        return ColorUtils.adjustColorForContrast(
+            backgroundColor,
+            ThemeColorManager.colorPrimary,
+            minimumContrast,
+        )
+    }
+
+    fun currentAceFont(): String = AceEditorFontPreferences.getId()
 
     fun applyPreferredAceFont() {
         applyAceFont(currentAceFont(), persist = false)
     }
 
-    fun persistAndApplyAceFont(font: AceEditorFont) {
-        applyAceFont(font, persist = true)
+    fun persistAndApplyAceFont(fontId: String) {
+        applyAceFont(fontId, persist = true)
     }
 
-    fun aceEditorFontLabel(font: AceEditorFont): String = font.displayName(context)
+    fun previewAceFont(fontId: String) {
+        applyAceFont(fontId, persist = false)
+    }
 
-    private fun applyAceFont(font: AceEditorFont, persist: Boolean) {
+    fun aceEditorFontLabel(fontId: String): String = aceFontManager.displayName(fontId, context)
+
+    private fun applyAceFont(fontId: String, persist: Boolean) {
         if (persist) {
-            AceEditorFontPreferences.set(font)
+            AceEditorFontPreferences.setId(fontId)
         }
-        (currentEditor() as? AceScriptEditorEngine)?.setAceEditorFont(font)
+        (currentEditor() as? AceScriptEditorEngine)?.setAceEditorFont(fontId)
     }
 
     private companion object {

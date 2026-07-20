@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.autojs.autojs.theme.preference.MaterialDialogPreference
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.theme.Theme
@@ -74,6 +75,13 @@ class EditorThemePreference : MaterialPreference {
                         MaterialDialog.OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_use_default)) { dialog ->
                             dialog.selectedIndex = defaultIndex
                         },
+                        MaterialDialog.OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_details)) {
+                            MaterialDialogPreference.displayDetailsOptionMenuItemSpecDialog(
+                                context = prefContext,
+                                dialogTitle = prefContext.getString(R.string.text_editor_theme),
+                                longClickPrompt = prefContext.getString(R.string.description_editor_theme_dialog),
+                            )
+                        },
                     ),
                 )
                 .itemsCallbackSingleChoice(selectedIndex) { _, _, which, _ ->
@@ -87,7 +95,7 @@ class EditorThemePreference : MaterialPreference {
             if (themePreviewHandler != null) {
                 builder
                     .neutralText(R.string.dialog_button_preview)
-                    .neutralColorRes(R.color.dialog_button_default)
+                    .neutralColorRes(R.color.dialog_button_hint)
                     .onNeutral { dialog, _ -> previewFromDialog(dialog) }
             }
 

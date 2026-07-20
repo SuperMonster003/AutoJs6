@@ -53,6 +53,29 @@
             android:textSize="12sp"
             tools:text="JetBrains; Philipp Nurullin / Konstantin Bulenkov" />
 
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif"
+            android:maxLines="1"
+            android:textColor="@color/day_night_alpha_60"
+            android:textSize="12sp"
+            tools:text="Not installed · 148.8 KB" />
+
+        <ProgressBar
+            android:id="@+id/progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_marginTop="5dp"
+            android:max="100"
+            android:visibility="gone"
+            tools:progress="42"
+            tools:visibility="visible" />
+
     </LinearLayout>
 
 </LinearLayout>

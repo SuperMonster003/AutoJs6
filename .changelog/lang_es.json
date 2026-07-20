@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/07/20",
+      "released_date": "2026/07/21",
       "feature": [
         "Entorno de ejecución de scripts Node.js 24.5.0, compatible con scripts iniciados mediante la directiva \"nodejs\" o extensiones como .node.js/.cjs/.mjs",
         "El entorno de ejecución Node.js admite CommonJS/ESM parcial/import() dinámico solo local/código fuente TypeScript ligero (.ts/.mts/.cts)",
@@ -26,7 +26,7 @@
         "Las tareas programadas admiten tareas mensuales/anuales/con cuenta atrás y condiciones para finalizar la repetición _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_",
         "El administrador de archivos admite selección múltiple y operaciones por lotes de copia/movimiento/eliminación",
         "El editor de código admite el motor Ace, intercambiable con el editor nativo desde Configuración",
-        "El editor Ace admite completado de código de la API AutoJs6/ayuda de firmas/información al pasar el cursor/vista previa LSP",
+        "El editor Ace activa por defecto como función estable el completado inteligente local de TypeScript integrado, con completado de la API AutoJs6, ayuda de firmas, información al pasar el cursor y diagnósticos; se puede desactivar en los ajustes",
         "El editor Ace admite un panel de accesos directos/historial de acciones/acciones favoritas/selección de texto en dispositivos móviles/zoom con pellizco y más",
         "El editor de código admite un panel de registro inferior (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_",
         "El panel de registro inferior del editor de código permite saltar desde marcos de pila al código fuente (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_",

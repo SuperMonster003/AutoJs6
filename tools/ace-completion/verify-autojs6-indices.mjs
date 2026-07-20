@@ -5,6 +5,7 @@ import vm from "node:vm";
 import {
   GENERATED_INDEX_PATH,
   buildRuntimeIndices,
+  normalizeLineEndings,
   readSource,
   relativeToRoot,
   renderIndexJs,
@@ -22,7 +23,7 @@ if (errors.length > 0) {
 
 const expected = renderIndexJs(buildRuntimeIndices(source));
 const actual = fs.existsSync(GENERATED_INDEX_PATH)
-  ? fs.readFileSync(GENERATED_INDEX_PATH, "utf8")
+  ? normalizeLineEndings(fs.readFileSync(GENERATED_INDEX_PATH, "utf8"))
   : "";
 if (actual !== expected) {
   console.error(`${relativeToRoot(GENERATED_INDEX_PATH)} is stale. Run node tools/ace-completion/generate-autojs6-indices.mjs.`);

@@ -21,6 +21,7 @@ import kotlin.math.roundToInt
 class CodeEditorSettingsDialog : DialogFragment() {
 
     private var themePreviewHandler: ((Theme) -> Unit)? = null
+    private var fontPreviewHandler: ((String) -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,6 +45,7 @@ class CodeEditorSettingsDialog : DialogFragment() {
                         suppressInitialActionRecord = suppressInitialActionRecord,
                     ).apply {
                         setThemePreviewHandler(createThemePreviewHandler())
+                        setFontPreviewHandler(createFontPreviewHandler())
                     },
                 )
                 .commit()
@@ -75,7 +77,9 @@ class CodeEditorSettingsDialog : DialogFragment() {
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 height,
-            )
+            ).apply {
+                setPadding(context.dp(8), 0, context.dp(8), 0)
+            }
         }
     }
 
@@ -101,11 +105,28 @@ class CodeEditorSettingsDialog : DialogFragment() {
             ?.setThemePreviewHandler(createThemePreviewHandler())
     }
 
+    fun setFontPreviewHandler(handler: ((String) -> Unit)?) {
+        fontPreviewHandler = handler
+        if (!isAdded) {
+            return
+        }
+        (childFragmentManager.findFragmentById(R.id.code_editor_settings_dialog_container) as? CodeEditorSettingsFragment)
+            ?.setFontPreviewHandler(createFontPreviewHandler())
+    }
+
     private fun createThemePreviewHandler(): ((Theme) -> Unit)? {
         val handler = themePreviewHandler ?: return null
         return { theme ->
             dismissAllowingStateLoss()
             handler(theme)
+        }
+    }
+
+    private fun createFontPreviewHandler(): ((String) -> Unit)? {
+        val handler = fontPreviewHandler ?: return null
+        return { fontId ->
+            dismissAllowingStateLoss()
+            handler(fontId)
         }
     }
 
@@ -133,6 +154,7 @@ class CodeEditorSettingsDialog : DialogFragment() {
             recordAceActionFavorites: Boolean = false,
             suppressInitialActionRecord: Boolean = false,
             themePreviewHandler: ((Theme) -> Unit)? = null,
+            fontPreviewHandler: ((String) -> Unit)? = null,
         ) {
             val activity = context.findActivity()
             if (activity !is FragmentActivity || activity.isFinishing || activity.isDestroyed) {
@@ -147,11 +169,13 @@ class CodeEditorSettingsDialog : DialogFragment() {
             val existingDialog = fragmentManager.findFragmentByTag(TAG) as? CodeEditorSettingsDialog
             if (existingDialog != null) {
                 existingDialog.setThemePreviewHandler(themePreviewHandler)
+                existingDialog.setFontPreviewHandler(fontPreviewHandler)
                 initialPreferenceKey?.let { existingDialog.openPreference(it, suppressInitialActionRecord) }
                 return
             }
             CodeEditorSettingsDialog().apply {
                 setThemePreviewHandler(themePreviewHandler)
+                setFontPreviewHandler(fontPreviewHandler)
                 arguments = Bundle().apply {
                     putBoolean(ARG_RECORD_ACE_ACTION_FAVORITES, recordAceActionFavorites)
                     putBoolean(ARG_SUPPRESS_INITIAL_ACTION_RECORD, suppressInitialActionRecord)

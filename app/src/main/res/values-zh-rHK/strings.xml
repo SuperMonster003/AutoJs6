@@ -69,12 +69,13 @@
     <string name="description_about_app_tips_preference">1. 在 \"關於應用與開發者\" 頁面長按應用圖標可跳轉至 AutoJs6 開發者選項頁面</string>
     <string name="description_accessibility_service">無障礙服務是 AutoJs6 實現自動化操作的核心能力, 用於讀取屏幕控件信息並模擬 [ 點擊 / 滑動 / 輸入 ] 等交互.\n\n自動化相關的大部分功能函數以及佈局分析工具等, 均需要啓用無障礙服務才能正常工作.</string>
     <string name="description_ace_action_favorites">操作收藏夾會記錄常用的編輯器操作, 例如運行/保存/格式化/菜單操作/長按操作及編輯器設置操作. 點擊星形按鈕可打開此列表, 點擊條目可重新執行相應操作, 長按星形按鈕可重複上一次操作, 拖動條目可調整順序, 向右滑動可固定或取消固定, 向左滑動可刪除.</string>
+    <string name="description_ace_editor_font_dialog">Nerd/NF 字體額外包含程式設計符號和圖示字形. Var 表示可變字體. CN/SC 表示包含簡體中文字形.\n\n點按已安裝字體即可選取; 點按未安裝字體可開啟下載提示. 向右滑動可下載或更新, 向左滑動可刪除.\n\n預覽時可使用 \"清單\" 和 \"篩選\" 選擇字體, 使用 \"上一個\" 和 \"下一個\" 瀏覽, 使用 \"退出\" 還原原字體, 使用 \"確定\" 保留目前字體. 字體未安裝時, \"確定\" 會變為 \"下載\"; 下載期間會變為 \"停止\". 下載完成後預覽會立即生效. 預覽篩選條件會被記住, 並可還原預設值.</string>
     <string name="description_ace_editor_font_preference">選擇 Ace 編輯器字體. 列表包含 Android 系統默認等寬字體, 以及附有作者/開發者資料的開源代碼字體; 系統等寬字體的實際字形由 Android 系統和設備廠商決定.</string>
     <string name="description_ace_font_ligatures_enabled_preference">為支援字體連字的字體啓用 OpenType 連字功能. ===, !==, =&gt; 和 &lt;= 等運算符可能顯示為連寫字形. 此設置只會改變代碼的顯示方式.</string>
     <string name="description_ace_font_styles_enabled_preference">允許 Ace 主題和語法高亮使用粗體, 斜體等字體樣式. 關閉後, 代碼文字會強制使用一般樣式, 不會改變顏色或代碼內容.</string>
     <string name="description_ace_indent_guides_enabled_preference">顯示或隱藏代碼區域中的縮進參考線. 此設置只會改變代碼的顯示方式.</string>
     <string name="description_ace_line_numbers_enabled_preference">顯示或隱藏編輯器邊欄行號. 代碼折疊, 斷點和邊欄佈局仍然可用.</string>
-    <string name="description_ace_lsp_enabled_preference">LSP 預覽支援默認關閉. 啓用後, 編輯器會使用本機 TypeScript 語言服務提供補全, 懸停提示, 簽名提示和診斷, 並保留靜態補全作為後備方案.</string>
+    <string name="description_ace_lsp_enabled_preference">LSP 智能補全默認啓用. 編輯器會使用內置的 TypeScript 語言服務提供補全, 懸停提示, 簽名提示和診斷, 並保留靜態補全作為後備方案. 此功能可隨時關閉.</string>
     <string name="description_ace_lsp_file_types_preference">LSP 只會針對檔名符合所選後綴的文件啓動. 使用默認值會恢復 JavaScript, TypeScript, JSON, Auto.js 和 Node.js 相關後綴.</string>
     <string name="description_ace_print_margin_enabled_preference">顯示或隱藏 Ace 編輯器右側的打印邊界參考線. 此設置只會改變代碼的顯示方式.</string>
     <string name="description_ace_word_wrap_enabled_preference">為長行啓用編輯器自動換行模式. 此設置不會修改文件內容.</string>
@@ -95,6 +96,7 @@
     <string name="description_editor_gutter_width_mode_preference">動態寬度會隨目前可見行號的位數變化. 固定寬度會預留穩定的最小寬度, 並且只在出現位數更多的行號時增大.</string>
     <string name="description_editor_large_file_mode_threshold">根據文件大小決定是否使用大文件模式加載文件.\n大文件模式可一定程度提升文件加載效率及穩定性, 但 \"撤銷\" 及 \"重做\" 功能在大文件模式下將被禁用.</string>
     <string name="description_editor_log_button_behavior_preference">控制代碼編輯器菜單中 \"日誌\" 按鈕打開日誌的方式.\n\n底部日誌面板: 彈出底部日誌面板, 點擊 \"最大化\" 按鈕或向上拖動手柄至接近頂部均可進入全屏日誌頁面.\n全屏日誌頁面: 直接進入全屏日誌頁面.</string>
+    <string name="description_editor_theme_dialog">編輯器主題用於控制語法配色和編輯區域的外觀. 預覽時可使用 \"清單\" 選擇主題, 使用 \"全部/暗色/亮色\" 循環切換篩選條件, 使用 \"上一個\" 和 \"下一個\" 瀏覽, 使用 \"退出\" 還原原主題, 使用 \"確定\" 保留目前主題.</string>
     <string name="description_editor_theme_mode_preference">選擇代碼編輯器是否在 AutoJs6 亮色模式和暗色模式下分別記錄主題, 或在兩種模式下使用同一主題.</string>
     <string name="description_editor_word_wrap_indent_style_preference">延續縮進會讓自動換行後的視覺續行與原行縮進對齊. 頂格續行會讓視覺續行從可視區域邊緣開始.</string>
     <string name="description_extending_js_build_in_objects">擴展 JavaScript 內置對象可以增加代碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啓後所有腳本均默認啓用內置擴展.\n內置擴展往往是不安全的, 除非明確瞭解內置擴展的原理及風險, 否則不建議啓用.\n選項關閉後, 仍然可以通過 plugins 全局對象啓用內置擴展, 詳見項目文檔.</string>
@@ -504,7 +506,7 @@
     <string name="summary_ace_font_styles_enabled">允許代碼顯示粗體, 斜體等字體樣式</string>
     <string name="summary_ace_indent_guides_enabled">顯示代碼縮進位置的垂直參考線</string>
     <string name="summary_ace_line_numbers_enabled">在編輯器邊欄中顯示行號</string>
-    <string name="summary_ace_lsp_enabled">啓用 LSP 驅動的編輯輔助預覽</string>
+    <string name="summary_ace_lsp_enabled">啓用 LSP 驅動的編輯輔助</string>
     <string name="summary_ace_lsp_file_types">選擇可啓用 LSP 功能的文件類型</string>
     <string name="summary_ace_print_margin_enabled">顯示編輯器右側的列數限制參考線</string>
     <string name="summary_ace_word_wrap_enabled">在編輯器可視區域內對長行自動換行</string>
@@ -587,7 +589,23 @@
     <string name="text_ace_editor_debug_text_length">Ace 文字長度: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Ace 編輯器失敗 (%1$s); 已切換到 JsDroidEditor. 可在更多菜單中複製 Ace 診斷資料.</string>
     <string name="text_ace_editor_font">編輯器字體</string>
+    <string name="text_ace_editor_font_built_in">內置</string>
     <string name="text_ace_editor_font_changed" formatted="true">編輯器字體已切換為 %s</string>
+    <string name="text_ace_editor_font_delete_confirmation" formatted="true">刪除已下載的字體 %1$s?</string>
+    <string name="text_ace_editor_font_download_all_completed" formatted="true">字體下載完成: %1$d 款成功</string>
+    <string name="text_ace_editor_font_download_all_confirmation" formatted="true">有 %1$d 款可用字體可下載 (%2$s). 是否立即下載? 包括可用更新.</string>
+    <string name="text_ace_editor_font_download_all_empty">所有可用字體均已安裝或正在下載</string>
+    <string name="text_ace_editor_font_download_all_result" formatted="true">字體下載結束: %1$d 款成功, %2$d 款失敗或取消</string>
+    <string name="text_ace_editor_font_download_all_running">全部字體下載任務已在進行中</string>
+    <string name="text_ace_editor_font_download_confirmation" formatted="true">下載 %1$s (%2$s)?</string>
+    <string name="text_ace_editor_font_download_failed" formatted="true">字體下載失敗: %1$s</string>
+    <string name="text_ace_editor_font_download_to_use">下載後即可使用此字體</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (簡體中文)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (圖示字形)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (可變字體)</string>
+    <string name="text_ace_editor_font_integrity_failed">下載的字體未通過完整性驗證</string>
+    <string name="text_ace_editor_font_license">許可證</string>
+    <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
     <string name="text_ace_font_ligatures_enabled">字體連字</string>
     <string name="text_ace_font_styles_enabled">特殊字體樣式</string>
     <string name="text_ace_get_text">取得文字</string>
@@ -598,7 +616,7 @@
     <string name="text_ace_insert">插入</string>
     <string name="text_ace_large_file_uses_native_editor">目前的後備策略已將 Ace 編輯器切換到 JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">行號</string>
-    <string name="text_ace_lsp_enabled">LSP 智能補全 (預覽)</string>
+    <string name="text_ace_lsp_enabled">LSP 智能補全</string>
     <string name="text_ace_lsp_file_types">LSP 文件類型</string>
     <string name="text_ace_no_last_action">暫無上一次編輯器操作</string>
     <string name="text_ace_print_margin_enabled">打印邊界</string>
@@ -887,6 +905,7 @@
     <string name="text_documentation_source">文檔源</string>
     <string name="text_done">完成</string>
     <string name="text_download">下載</string>
+    <string name="text_download_all">下載全部</string>
     <string name="text_download_and_install_autojs6_including_above_abi">下載安裝包含上述 ABI 架構的 AutoJs6 版本 (文件名包含 \"%s\" 字樣)</string>
     <string name="text_download_and_install_autojs6_including_all_abis">下載安裝包含全部 ABI 架構的 AutoJs6 版本 (文件名包含 \"universal\" 字樣)</string>
     <string name="text_download_cancelled">下載已取消</string>
@@ -1535,6 +1554,7 @@
     <string name="text_sort">排序</string>
     <string name="text_sort_ascending">升序</string>
     <string name="text_sort_by_name_asc">名稱 (A-Z)</string>
+    <string name="text_sort_by_name_desc">名稱 (Z-A)</string>
     <string name="text_sort_by_path_asc">路徑 (A-Z)</string>
     <string name="text_sort_by_size_asc">大小 (最小優先)</string>
     <string name="text_sort_by_size_desc">大小 (最大優先)</string>

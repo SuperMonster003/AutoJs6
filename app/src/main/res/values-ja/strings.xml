@@ -73,12 +73,13 @@
     <string name="description_about_app_tips_preference">1. アプリと開発者について ページでアプリのアイコンを長押しすると, AutoJs6 の開発者向けオプションページにジャンプします</string>
     <string name="description_accessibility_service">アクセシビリティサービスは, AutoJs6 が自動化を実現するための中核機能です. 画面上のウィジェット情報を読み取り, [ タップ / スワイプ / 入力 ] などの操作をシミュレートします.\n\n自動化関連の大半の機能やレイアウト解析ツールなどは, アクセシビリティサービスを有効にしないと正常に動作しません.</string>
     <string name="description_ace_action_favorites">アクションのお気に入りには, 実行, 保存, 整形, メニュー操作, 長押し操作, エディター設定操作など, よく使うエディター操作が記録されます. 星ボタンをタップすると一覧が開き, 項目をタップすると操作を繰り返せます. 星ボタンを長押しすると直前の操作を繰り返し, 項目をドラッグすると並べ替え, 右にスワイプすると固定または固定解除, 左にスワイプすると削除できます.</string>
+    <string name="description_ace_editor_font_dialog">Nerd/NF フォントには, プログラミング記号とアイコングリフが追加されています. Var は可変フォントを, CN/SC は簡体字中国語のグリフを示します.\n\nインストール済みのフォントをタップすると選択できます. 未インストールのフォントをタップするとダウンロード確認が開きます. 右スワイプでダウンロードまたは更新, 左スワイプで削除します.\n\nプレビューでは, 一覧とフィルタでフォントを選び, 前へと次へで移動します. 終了で元のフォントに戻り, 確定で現在のフォントを保持します. 未インストールの場合, 確定はダウンロードに変わり, ダウンロード中は停止に変わります. 完了するとプレビューへすぐ反映されます. フィルタ設定は保存され, 初期値に戻せます.</string>
     <string name="description_ace_editor_font_preference">Ace エディターのフォントを選択します. 一覧には Android システム等幅フォントと, 作者/開発者情報を含むオープンソースのコードフォントが表示されます. 実際のシステム等幅フォントは Android と端末ベンダーによって決まります.</string>
     <string name="description_ace_font_ligatures_enabled_preference">対応フォントで OpenType フォントリガチャを有効にします. ===, !==, =&gt;, &lt;= などの演算子が結合されたグリフとして描画されることがあります. 変更されるのはコードの表示だけです.</string>
     <string name="description_ace_font_styles_enabled_preference">Ace テーマと構文強調表示で太字, 斜体, その他のフォントスタイルを使用できるようにします. 無効にすると, 色や内容を変更せずにコード文字が標準の通常スタイルに固定されます.</string>
     <string name="description_ace_indent_guides_enabled_preference">コード領域の縦方向のインデントガイドを表示または非表示にします. 変更されるのはコードの表示だけです.</string>
     <string name="description_ace_line_numbers_enabled_preference">エディターガターの行番号を表示または非表示にします. 折りたたみ, ブレークポイント, ガターレイアウトは引き続き利用できます.</string>
-    <string name="description_ace_lsp_enabled_preference">プレビュー版の LSP サポートはデフォルトで無効です. 有効にすると, エディターはローカルの TypeScript 言語サービスを使用して補完, ホバー情報, シグネチャヘルプ, 診断を提供し, 静的補完をフォールバックとして維持します.</string>
+    <string name="description_ace_lsp_enabled_preference">LSP スマート補完はデフォルトで有効です. エディターは内蔵の TypeScript 言語サービスを使用して補完, ホバー情報, シグネチャヘルプ, 診断を提供し, 静的補完をフォールバックとして維持します. この機能はいつでも無効にできます.</string>
     <string name="description_ace_lsp_file_types_preference">LSP は, ファイル名が選択した接尾辞のいずれかで終わる場合にのみ起動します. \"デフォルトを使用\" を選ぶと, JavaScript, TypeScript, JSON, Auto.js, Node.js の接尾辞セットに戻ります.</string>
     <string name="description_ace_print_margin_enabled_preference">Ace エディターのプリントマージンガイドを表示または非表示にします. これは右側の列制限線であり, 変更されるのはコードの表示だけです.</string>
     <string name="description_ace_word_wrap_enabled_preference">長い行に対するエディターの折り返しモードを有効にします. ファイルの内容は変更されません.</string>
@@ -99,6 +100,7 @@
     <string name="description_editor_gutter_width_mode_preference">動的幅は現在表示されている行番号の桁数に従います. 固定幅は安定した最小幅を事前に確保し, より大きな行番号の表示に必要な場合だけ拡張します.</string>
     <string name="description_editor_large_file_mode_threshold">ファイルサイズに応じて大容量ファイルモードで読み込むかどうかを決定します.\n大容量ファイルモードは読み込み効率と安定性をある程度向上できますが, このモードでは \"元に戻す\" と \"やり直し\" 機能が無効になります.</string>
     <string name="description_editor_log_button_behavior_preference">コードエディタのメニューにある \"ログ\" ボタンでログを開く方法を制御します.\n\n下部ログパネル: 下部ログパネルを開きます. \"最大化\" ボタンをタップするか, ハンドルを上方向へ上端付近までドラッグすると全画面ログページに入れます.\n全画面ログページ: 直接全画面ログページに入ります.</string>
+    <string name="description_editor_theme_dialog">エディターテーマは構文の配色と編集領域の外観を制御します. プレビューでは, 一覧でテーマを選び, すべて/ダーク/ライトでフィルタを切り替え, 前へと次へで移動します. 終了で元のテーマに戻り, 確定で現在のテーマを保持します.</string>
     <string name="description_editor_theme_mode_preference">エディターが AutoJs6 のライトモードとダークモードで別々のテーマを記憶するか, 両方のモードで1つの共通テーマを使用するかを選択します.</string>
     <string name="description_editor_word_wrap_indent_style_preference">継続インデントでは, 折り返された表示行が元のインデントに揃います. 行頭からの継続では, 折り返された表示行がビューポートの端から始まります.</string>
     <string name="description_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張すると, コードの柔軟性が増し, より豊かな機能を実現できますが, 衝突や破損を引き起こす可能性もあります.\nこのオプションをオンにすると, すべてのスクリプトはデフォルトで組み込みの拡張機能を有効にします.\n組み込みの拡張機能は安全でないことが多いので, 組み込みの拡張機能の原理とリスクが明確に理解されていない限り, 推奨されません.\nこのオプションをオフにした場合でも, プロジェクトのドキュメントで説明されているように, plugins グローバルオブジェクトを使用して組み込み拡張機能を有効にすることができます</string>
@@ -508,7 +510,7 @@
     <string name="summary_ace_font_styles_enabled">太字, 斜体, その他のコードフォントスタイルを許可</string>
     <string name="summary_ace_indent_guides_enabled">コードのインデントを示す縦線を表示</string>
     <string name="summary_ace_line_numbers_enabled">エディターガターに行番号を表示</string>
-    <string name="summary_ace_lsp_enabled">LSP によるエディター支援のプレビューを有効化</string>
+    <string name="summary_ace_lsp_enabled">LSP によるエディター支援を有効化</string>
     <string name="summary_ace_lsp_file_types">LSP 機能を使用できるファイル形式を選択</string>
     <string name="summary_ace_print_margin_enabled">右側の列制限ガイドを表示</string>
     <string name="summary_ace_word_wrap_enabled">エディターのビューポート内で長い行を折り返す</string>
@@ -591,7 +593,23 @@
     <string name="text_ace_editor_debug_text_length">Ace テキスト長: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Ace エディターでエラーが発生したため (%1$s), JsDroidEditor に切り替えました. 詳細を確認するには, その他メニューから Ace 診断情報をコピーしてください</string>
     <string name="text_ace_editor_font">エディターフォント</string>
+    <string name="text_ace_editor_font_built_in">組み込み</string>
     <string name="text_ace_editor_font_changed" formatted="true">エディターフォントを %s に切り替えました</string>
+    <string name="text_ace_editor_font_delete_confirmation" formatted="true">ダウンロード済みのフォント %1$s を削除しますか?</string>
+    <string name="text_ace_editor_font_download_all_completed" formatted="true">フォントのダウンロードが完了しました: %1$d 件成功</string>
+    <string name="text_ace_editor_font_download_all_confirmation" formatted="true">ダウンロード可能なフォント: %1$d 件 (%2$s). 今すぐダウンロードしますか? 利用可能な更新も含まれます.</string>
+    <string name="text_ace_editor_font_download_all_empty">利用可能なフォントはすべてインストール済みかダウンロード中です</string>
+    <string name="text_ace_editor_font_download_all_result" formatted="true">フォントのダウンロードが終了しました: %1$d 件成功, %2$d 件失敗またはキャンセル</string>
+    <string name="text_ace_editor_font_download_all_running">すべてのフォントのダウンロードはすでに進行中です</string>
+    <string name="text_ace_editor_font_download_confirmation" formatted="true">%1$s (%2$s) をダウンロードしますか?</string>
+    <string name="text_ace_editor_font_download_failed" formatted="true">フォントのダウンロードに失敗しました: %1$s</string>
+    <string name="text_ace_editor_font_download_to_use">このフォントを使用するにはダウンロードしてください</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (簡体字中国語)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (アイコングリフ)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (可変フォント)</string>
+    <string name="text_ace_editor_font_integrity_failed">ダウンロードしたフォントの整合性検証に失敗しました</string>
+    <string name="text_ace_editor_font_license">ライセンス</string>
+    <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
     <string name="text_ace_font_ligatures_enabled">フォントリガチャ</string>
     <string name="text_ace_font_styles_enabled">フォントスタイル</string>
     <string name="text_ace_get_text">テキストを取得</string>
@@ -602,7 +620,7 @@
     <string name="text_ace_insert">挿入</string>
     <string name="text_ace_large_file_uses_native_editor">有効なフォールバックポリシーにより, Ace エディターでは JsDroidEditor が使用されます</string>
     <string name="text_ace_line_numbers_enabled">行番号</string>
-    <string name="text_ace_lsp_enabled">LSP スマート補完 (プレビュー)</string>
+    <string name="text_ace_lsp_enabled">LSP スマート補完</string>
     <string name="text_ace_lsp_file_types">LSP ファイル形式</string>
     <string name="text_ace_no_last_action">直前のエディター操作はありません</string>
     <string name="text_ace_print_margin_enabled">プリントマージン</string>
@@ -891,6 +909,7 @@
     <string name="text_documentation_source">ドキュメントのソース</string>
     <string name="text_done">完了</string>
     <string name="text_download">ダウンロード</string>
+    <string name="text_download_all">すべてダウンロード</string>
     <string name="text_download_and_install_autojs6_including_above_abi">上記の ABI を含むバージョンの AutoJs6 をダウンロードしてインストールします (ファイル名に \"%s\" が含まれています)</string>
     <string name="text_download_and_install_autojs6_including_all_abis">すべての ABI を含むバージョンの AutoJs6 をダウンロードしてインストールする (ファイル名に \"universal\" が含まれている)</string>
     <string name="text_download_cancelled">ダウンロード中止</string>
@@ -1539,6 +1558,7 @@
     <string name="text_sort">並べ替え</string>
     <string name="text_sort_ascending">昇順</string>
     <string name="text_sort_by_name_asc">名前 (A-Z)</string>
+    <string name="text_sort_by_name_desc">名前 (Z-A)</string>
     <string name="text_sort_by_path_asc">パス (A-Z)</string>
     <string name="text_sort_by_size_asc">サイズ (小さい順)</string>
     <string name="text_sort_by_size_desc">サイズ (大きい順)</string>

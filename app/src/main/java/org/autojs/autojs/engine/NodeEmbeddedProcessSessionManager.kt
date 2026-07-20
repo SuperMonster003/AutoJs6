@@ -153,7 +153,7 @@ object NodeEmbeddedProcessSessionManager {
     private val bindingToken = AtomicLong(0L)
     private val leaseToken = AtomicLong(0L)
     private val managerEpoch = AtomicLong(0L)
-    private val managerLifecycleLock = Object()
+    private val managerLifecycleLock = Any()
     private val sessions = ConcurrentHashMap<String, SlotSession>()
     @Volatile
     private var closing = false
@@ -221,6 +221,7 @@ object NodeEmbeddedProcessSessionManager {
     private class SlotSession(
         val slot: NodeEmbeddedProcessPoolPolicy.ProcessSlot,
     ) {
+        @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
         val lock = Object()
         var state = State.COLD
         var epoch = 0L
@@ -1662,7 +1663,7 @@ object NodeEmbeddedProcessSessionManager {
 
     private fun Bundle?.toStringMap(): Map<String, String> {
         this ?: return emptyMap()
-        return keySet().associateTo(linkedMapOf()) { key -> key to (get(key)?.toString().orEmpty()) }
+        return keySet().associateTo(linkedMapOf()) { key -> key to getString(key).orEmpty() }
     }
 
     private fun isServiceDeclared(context: Context, component: ComponentName): Boolean {

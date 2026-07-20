@@ -72,12 +72,13 @@
     <string name="description_about_app_tips_preference">1. Нажмите и удерживайте значок приложения на странице \"О приложении и разработчике\", чтобы перейти на страницу параметров разработчика AutoJs6.</string>
     <string name="description_accessibility_service">Служба доступности - ключевая возможность AutoJs6 для автоматизации. Она используется для чтения информации об элементах интерфейса на экране и для имитации взаимодействий, таких как [ нажатие / свайп / ввод ].\n\nБольшинство функций, связанных с автоматизацией, а также инструменты вроде анализа макета, требуют включения службы доступности для корректной работы.</string>
     <string name="description_ace_action_favorites">Избранные действия сохраняют часто используемые действия редактора, такие как запуск, сохранение, форматирование, действия меню, действия по долгому нажатию и изменение настроек редактора. Нажмите кнопку со звездой, чтобы открыть список; нажмите элемент, чтобы повторить действие; удерживайте кнопку со звездой, чтобы повторить последнее действие; перетаскивайте элементы, чтобы изменить порядок; проведите вправо, чтобы закрепить или открепить; проведите влево, чтобы удалить.</string>
+    <string name="description_ace_editor_font_dialog">Шрифты Nerd/NF содержат дополнительные символы программирования и значки. Var означает вариативный шрифт. CN/SC указывает на поддержку упрощённых китайских символов.\n\nНажмите установленный шрифт, чтобы выбрать его. Нажмите неустановленный шрифт, чтобы открыть подтверждение загрузки. Проведите вправо для загрузки или обновления и влево для удаления.\n\nВ предпросмотре используйте Список и Фильтр для выбора, Назад и Далее для перехода, Выход для возврата исходного шрифта и Применить для сохранения текущего. Для неустановленного шрифта Применить меняется на Скачать, а во время загрузки — на Остановить. После завершения предпросмотр применяется сразу. Фильтры сохраняются и могут быть сброшены.</string>
     <string name="description_ace_editor_font_preference">Выберите шрифт редактора Ace. В список входят системный моноширинный шрифт Android и шрифты с открытым исходным кодом для программирования с информацией об авторах и разработчиках; фактический системный моноширинный шрифт определяется Android и производителем устройства.</string>
     <string name="description_ace_font_ligatures_enabled_preference">Включает лигатуры OpenType для поддерживающих их шрифтов. Операторы ===, !==, =&gt; и &lt;= могут отображаться объединёнными символами. Изменяется только отображение кода.</string>
     <string name="description_ace_font_styles_enabled_preference">Разрешает темам Ace и подсветке синтаксиса использовать полужирное, курсивное и другое начертание. Если параметр отключён, для текста кода принудительно используется обычное начертание без изменения цветов или содержимого.</string>
     <string name="description_ace_indent_guides_enabled_preference">Показывает или скрывает вертикальные направляющие отступов в области кода. Изменяется только отображение кода.</string>
     <string name="description_ace_line_numbers_enabled_preference">Показывает или скрывает номера строк в поле редактора. Сворачивание кода, точки останова и разметка поля остаются доступными.</string>
-    <string name="description_ace_lsp_enabled_preference">Предварительная поддержка LSP по умолчанию отключена. После включения редактор использует локальную языковую службу TypeScript для автодополнения, всплывающих подсказок, сведений о сигнатурах и диагностики, сохраняя статическое автодополнение в качестве резервного варианта.</string>
+    <string name="description_ace_lsp_enabled_preference">Интеллектуальное автодополнение LSP включено по умолчанию. Редактор использует встроенную языковую службу TypeScript для автодополнения, всплывающих подсказок, сведений о сигнатурах и диагностики, сохраняя статическое автодополнение в качестве резервного варианта. Эту функцию можно отключить в любое время.</string>
     <string name="description_ace_lsp_file_types_preference">LSP запускается только для файлов, имена которых заканчиваются одним из выбранных суффиксов. Значение по умолчанию восстанавливает набор суффиксов JavaScript, TypeScript, JSON, Auto.js и Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Показывает или скрывает линию границы печати в правой части редактора Ace. Изменяется только отображение кода.</string>
     <string name="description_ace_word_wrap_enabled_preference">Включает перенос длинных строк в редакторе. Содержимое файла не изменяется.</string>
@@ -98,6 +99,7 @@
     <string name="description_editor_gutter_width_mode_preference">Динамическая ширина соответствует количеству цифр в видимых номерах строк. Фиксированная ширина резервирует стабильное минимальное пространство и увеличивается только при появлении более длинных видимых номеров.</string>
     <string name="description_editor_large_file_mode_threshold">Определяет, использовать ли режим больших файлов для загрузки файлов в зависимости от размера файла.\nРежим больших файлов может в некоторой степени повысить эффективность и стабильность загрузки, но функции \"Отменить\" и \"Повторить\" будут отключены в этом режиме.</string>
     <string name="description_editor_log_button_behavior_preference">Управляет тем, как кнопка \"Логи\" в меню редактора кода открывает журналы.\n\nНижняя панель логов: Открывает нижнюю панель логов. Перейти на полноэкранную страницу логов можно, нажав кнопку \"Развернуть\" или перетащив ручку вверх почти до верхнего края.\nПолноэкранная страница логов: Сразу открывает полноэкранную страницу логов.</string>
+    <string name="description_editor_theme_dialog">Темы редактора управляют цветами синтаксиса и видом области редактирования. В предпросмотре используйте Список для выбора темы, Все/Тёмные/Светлые для переключения фильтра, Назад и Далее для перехода, Выход для возврата исходной темы и Применить для сохранения текущей.</string>
     <string name="description_editor_theme_mode_preference">Выберите, будет ли редактор запоминать отдельные темы для светлого и тёмного режимов AutoJs6 или использовать одну тему в обоих режимах.</string>
     <string name="description_editor_word_wrap_indent_style_preference">Продолжающий отступ выравнивает перенесённые визуальные строки по исходному отступу. Перенос без отступа начинает визуальные строки у края области просмотра.</string>
     <string name="description_extending_js_build_in_objects">Расширение встроенных объектов JavaScript может повысить гибкость кода и обеспечить более богатую функциональность, но может привести к конфликтам и даже поломкам.\nВсе сценарии имеют встроенные расширения, включенные по умолчанию, когда опция включена.\nВстроенные расширения часто небезопасны, и их не рекомендуется использовать, пока принципы и риски встроенных расширений не будут четко поняты.\nКогда опция выключена, встроенные расширения все еще можно включить через глобальный объект plugins, как описано в документации проекта.</string>
@@ -507,7 +509,7 @@
     <string name="summary_ace_font_styles_enabled">Разрешить полужирное, курсивное и другое начертание шрифта кода</string>
     <string name="summary_ace_indent_guides_enabled">Показывать вертикальные направляющие отступов кода</string>
     <string name="summary_ace_line_numbers_enabled">Показывать номера строк в поле редактора</string>
-    <string name="summary_ace_lsp_enabled">Включить предварительную интеллектуальную помощь редактора на основе LSP</string>
+    <string name="summary_ace_lsp_enabled">Включить интеллектуальную помощь редактора на основе LSP</string>
     <string name="summary_ace_lsp_file_types">Выбрать типы файлов, для которых доступны функции LSP</string>
     <string name="summary_ace_print_margin_enabled">Показывать справа линию ограничения ширины строки</string>
     <string name="summary_ace_word_wrap_enabled">Переносить длинные строки в пределах области редактора</string>
@@ -590,7 +592,23 @@
     <string name="text_ace_editor_debug_text_length">Длина текста Ace: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Сбой редактора Ace (%1$s); выполнено переключение на JsDroidEditor. Подробные сведения можно получить, скопировав диагностические данные Ace через меню дополнительных действий</string>
     <string name="text_ace_editor_font">Шрифт редактора</string>
+    <string name="text_ace_editor_font_built_in">Встроено</string>
     <string name="text_ace_editor_font_changed" formatted="true">Шрифт редактора изменён на %s</string>
+    <string name="text_ace_editor_font_delete_confirmation" formatted="true">Удалить загруженный шрифт %1$s?</string>
+    <string name="text_ace_editor_font_download_all_completed" formatted="true">Загрузка шрифтов завершена: успешно загружено — %1$d</string>
+    <string name="text_ace_editor_font_download_all_confirmation" formatted="true">Доступно шрифтов для загрузки: %1$d (%2$s). Загрузить их сейчас? Обновления включены.</string>
+    <string name="text_ace_editor_font_download_all_empty">Все доступные шрифты уже установлены или загружаются</string>
+    <string name="text_ace_editor_font_download_all_result" formatted="true">Загрузка шрифтов завершена: успешно — %1$d, с ошибкой или отменено — %2$d</string>
+    <string name="text_ace_editor_font_download_all_running">Загрузка всех шрифтов уже выполняется</string>
+    <string name="text_ace_editor_font_download_confirmation" formatted="true">Загрузить %1$s (%2$s)?</string>
+    <string name="text_ace_editor_font_download_failed" formatted="true">Не удалось загрузить шрифт: %1$s</string>
+    <string name="text_ace_editor_font_download_to_use">Загрузите этот шрифт, чтобы использовать его</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (упрощённый китайский)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (значки)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (вариативный шрифт)</string>
+    <string name="text_ace_editor_font_integrity_failed">Загруженный шрифт не прошёл проверку целостности</string>
+    <string name="text_ace_editor_font_license">Лицензия</string>
+    <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
     <string name="text_ace_font_ligatures_enabled">Лигатуры шрифта</string>
     <string name="text_ace_font_styles_enabled">Начертания шрифта</string>
     <string name="text_ace_get_text">Получить текст</string>
@@ -601,7 +619,7 @@
     <string name="text_ace_insert">Вставить</string>
     <string name="text_ace_large_file_uses_native_editor">Текущая политика резервирования переключила редактор Ace на JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">Номера строк</string>
-    <string name="text_ace_lsp_enabled">Интеллектуальное автодополнение LSP (предварительная версия)</string>
+    <string name="text_ace_lsp_enabled">Интеллектуальное автодополнение LSP</string>
     <string name="text_ace_lsp_file_types">Типы файлов LSP</string>
     <string name="text_ace_no_last_action">Последнее действие редактора отсутствует</string>
     <string name="text_ace_print_margin_enabled">Граница печати</string>
@@ -890,6 +908,7 @@
     <string name="text_documentation_source">Источник документации</string>
     <string name="text_done">Готово</string>
     <string name="text_download">Скачать</string>
+    <string name="text_download_all">Скачать все</string>
     <string name="text_download_and_install_autojs6_including_above_abi">Загрузите и установите версию AutoJs6, включающую вышеуказанный ABI (в имени файла содержится \"%s\")</string>
     <string name="text_download_and_install_autojs6_including_all_abis">Загрузить и установить версию AutoJs6, включающую все ABI (имя файла содержит \"universal\")</string>
     <string name="text_download_cancelled">Загрузка отменена</string>
@@ -1538,6 +1557,7 @@
     <string name="text_sort">Сортировать</string>
     <string name="text_sort_ascending">По возрастанию</string>
     <string name="text_sort_by_name_asc">Имя (A-Z)</string>
+    <string name="text_sort_by_name_desc">Имя (Z-A)</string>
     <string name="text_sort_by_path_asc">Путь (A-Z)</string>
     <string name="text_sort_by_size_asc">Размер (сначала маленькие)</string>
     <string name="text_sort_by_size_desc">Размер (сначала большие)</string>

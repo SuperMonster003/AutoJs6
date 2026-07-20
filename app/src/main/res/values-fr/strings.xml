@@ -72,12 +72,13 @@
     <string name="description_about_app_tips_preference">1. Maintenez enfoncée l\'icône de l\'application sur la page \"À propos de l\'application et du développeur\" pour accéder à la page des options de développement d\'AutoJs6.</string>
     <string name="description_accessibility_service">Le service d\'accessibilité est la capacité centrale d\'AutoJs6 pour l\'automatisation. Il sert à lire les informations des contrôles à l\'écran et à simuler des interactions telles que [ appuyer / faire glisser / saisir ].\n\nLa plupart des fonctions liées à l\'automatisation, ainsi que des outils comme l\'analyse de mise en page, nécessitent l\'activation du service d\'accessibilité pour fonctionner correctement.</string>
     <string name="description_ace_action_favorites">Les actions favorites enregistrent les actions de l\'éditeur utilisées fréquemment, comme exécuter, enregistrer, mettre en forme, utiliser les actions de menu, effectuer un appui prolongé et modifier les paramètres de l\'éditeur. Appuyez sur l\'étoile pour ouvrir la liste, sur un élément pour répéter l\'action, maintenez l\'étoile pour répéter l\'action la plus récente, faites glisser les éléments pour les réorganiser, balayez vers la droite pour les épingler ou les désépingler et vers la gauche pour les supprimer.</string>
+    <string name="description_ace_editor_font_dialog">Les polices Nerd/NF incluent des symboles de programmation et des glyphes d\'icônes supplémentaires. Var désigne une police variable. CN/SC indique la prise en charge des glyphes chinois simplifiés.\n\nTouchez une police installée pour la sélectionner. Touchez une police non installée pour ouvrir la confirmation de téléchargement. Balayez vers la droite pour télécharger ou mettre à jour, et vers la gauche pour supprimer.\n\nDans l\'aperçu, utilisez Liste et Filtre pour choisir les polices, Précédent et Suivant pour les parcourir, Quitter pour restaurer la police initiale et Utiliser pour conserver la police actuelle. Si elle n\'est pas installée, Utiliser devient Télécharger; pendant le téléchargement, il devient Arrêter. Une fois terminé, l\'aperçu est appliqué immédiatement. Les filtres sont mémorisés et peuvent être réinitialisés.</string>
     <string name="description_ace_editor_font_preference">Choisissez la police de l\'éditeur Ace. La liste inclut la police à chasse fixe du système Android et des polices de code open source avec les informations sur leur auteur ou développeur; Android et le fabricant de l\'appareil déterminent la police système réellement utilisée.</string>
     <string name="description_ace_font_ligatures_enabled_preference">Activez les ligatures OpenType pour les polices compatibles. Les opérateurs comme ===, !==, =&gt; et &lt;= peuvent être dessinés sous forme de glyphes liés. Seul l\'affichage du code est modifié.</string>
     <string name="description_ace_font_styles_enabled_preference">Autorisez les thèmes Ace et la coloration syntaxique à utiliser le gras, l\'italique et d\'autres styles de police. Lorsque cette option est désactivée, le texte du code utilise le style normal sans modifier les couleurs ni le contenu.</string>
     <string name="description_ace_indent_guides_enabled_preference">Affichez ou masquez les guides verticaux d\'indentation dans la zone de code. Seul l\'affichage du code est modifié.</string>
     <string name="description_ace_line_numbers_enabled_preference">Affichez ou masquez les numéros de ligne dans la gouttière de l\'éditeur. Le pliage, les points d\'arrêt et la disposition de la gouttière restent disponibles.</string>
-    <string name="description_ace_lsp_enabled_preference">La préversion de la prise en charge LSP est désactivée par défaut. Lorsqu\'elle est activée, l\'éditeur utilise un service de langage TypeScript local pour la saisie semi-automatique, les informations au survol, l\'aide sur les signatures et les diagnostics; la saisie semi-automatique statique reste disponible comme solution de secours.</string>
+    <string name="description_ace_lsp_enabled_preference">La saisie semi-automatique intelligente LSP est activée par défaut. L\'éditeur utilise le service de langage TypeScript intégré pour la saisie semi-automatique, les informations au survol, l\'aide sur les signatures et les diagnostics; la saisie semi-automatique statique reste disponible comme solution de secours. Cette fonction peut être désactivée à tout moment.</string>
     <string name="description_ace_lsp_file_types_preference">LSP démarre uniquement pour les fichiers dont le nom se termine par un des suffixes sélectionnés. Utiliser les valeurs par défaut restaure les suffixes JavaScript, TypeScript, JSON, Auto.js et Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Affichez ou masquez le repère de marge d\'impression de l\'éditeur Ace. Cette ligne indique la limite de colonne à droite et modifie uniquement l\'affichage du code.</string>
     <string name="description_ace_word_wrap_enabled_preference">Activez le retour à la ligne de l\'éditeur pour les lignes longues. Le contenu du fichier n\'est pas modifié.</string>
@@ -98,6 +99,7 @@
     <string name="description_editor_gutter_width_mode_preference">La largeur dynamique suit le nombre de chiffres des numéros de ligne visibles. La largeur fixe réserve un minimum stable et augmente uniquement lorsque des numéros de ligne visibles plus grands l\'exigent.</string>
     <string name="description_editor_large_file_mode_threshold">Determine si le mode gros fichier est utilise pour charger les fichiers selon leur taille.\nLe mode gros fichier peut ameliorer dans une certaine mesure l\'efficacite et la stabilite du chargement, mais les fonctions \"Annuler\" et \"Retablir\" seront desactivees dans ce mode.</string>
     <string name="description_editor_log_button_behavior_preference">Controle la maniere dont le bouton \"Logs\" du menu de l\'editeur de code ouvre les logs.\n\nPanneau de logs inferieur: Ouvre le panneau de logs inferieur. Vous pouvez acceder a la page de logs en plein ecran en appuyant sur le bouton \"Agrandir\" ou en faisant glisser la poignee vers le haut, pres du bord superieur.\nPage de logs en plein ecran: Ouvre directement la page de logs en plein ecran.</string>
+    <string name="description_editor_theme_dialog">Les thèmes de l\'éditeur contrôlent les couleurs de syntaxe et l\'apparence de la zone d\'édition. Dans l\'aperçu, utilisez Liste pour choisir un thème, Tous/Sombre/Clair pour alterner le filtre, Précédent et Suivant pour les parcourir, Quitter pour restaurer le thème initial et Utiliser pour conserver le thème actuel.</string>
     <string name="description_editor_theme_mode_preference">Choisissez si l\'éditeur mémorise des thèmes distincts pour les modes clair et sombre d\'AutoJs6 ou utilise un thème commun dans les deux modes.</string>
     <string name="description_editor_word_wrap_indent_style_preference">L\'indentation de continuation aligne les lignes visuelles renvoyées avec l\'indentation d\'origine. La continuation sans indentation commence les lignes visuelles renvoyées au bord de la zone visible.</string>
     <string name="description_extending_js_build_in_objects">L\'extension des objets JavaScript intégrés peut augmenter la flexibilité du code et permettre des fonctionnalités plus riches, mais elle peut provoquer des conflits et même des pannes.\nTous les scripts ont des extensions intégrées activées par défaut lorsque l\'option est activée.\nLes extensions intégrées sont souvent peu sûres et ne sont pas recommandées, sauf si les principes et les risques des extensions intégrées sont clairement compris.\nLorsque l\'option est désactivée, les extensions intégrées peuvent toujours être activées via l\'objet global plugins, comme décrit dans la documentation du projet.</string>
@@ -507,7 +509,7 @@
     <string name="summary_ace_font_styles_enabled">Autoriser le gras, l\'italique et d\'autres styles de police de code</string>
     <string name="summary_ace_indent_guides_enabled">Afficher les guides verticaux d\'indentation du code</string>
     <string name="summary_ace_line_numbers_enabled">Afficher les numéros de ligne dans la gouttière de l\'éditeur</string>
-    <string name="summary_ace_lsp_enabled">Activer la préversion de l\'assistance de l\'éditeur fournie par LSP</string>
+    <string name="summary_ace_lsp_enabled">Activer l\'assistance de l\'éditeur fournie par LSP</string>
     <string name="summary_ace_lsp_file_types">Choisir les types de fichiers qui peuvent utiliser les fonctions LSP</string>
     <string name="summary_ace_print_margin_enabled">Afficher le repère de limite de colonne à droite</string>
     <string name="summary_ace_word_wrap_enabled">Renvoyer les lignes longues dans la zone visible de l\'éditeur</string>
@@ -590,7 +592,23 @@
     <string name="text_ace_editor_debug_text_length">Longueur du texte Ace: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Échec de l\'éditeur Ace (%1$s); passage à JsDroidEditor. Copiez les diagnostics Ace depuis le menu Plus pour obtenir des détails</string>
     <string name="text_ace_editor_font">Police de l\'éditeur</string>
+    <string name="text_ace_editor_font_built_in">Intégré</string>
     <string name="text_ace_editor_font_changed" formatted="true">Police de l\'éditeur remplacée par %s</string>
+    <string name="text_ace_editor_font_delete_confirmation" formatted="true">Supprimer la police téléchargée %1$s?</string>
+    <string name="text_ace_editor_font_download_all_completed" formatted="true">Téléchargements de polices terminés: %1$d réussis</string>
+    <string name="text_ace_editor_font_download_all_confirmation" formatted="true">Polices disponibles au téléchargement: %1$d (%2$s). Les télécharger maintenant? Les mises à jour sont incluses.</string>
+    <string name="text_ace_editor_font_download_all_empty">Toutes les polices disponibles sont déjà installées ou en cours de téléchargement</string>
+    <string name="text_ace_editor_font_download_all_result" formatted="true">Téléchargements de polices terminés: %1$d réussis, %2$d échoués ou annulés</string>
+    <string name="text_ace_editor_font_download_all_running">Le téléchargement de toutes les polices est déjà en cours</string>
+    <string name="text_ace_editor_font_download_confirmation" formatted="true">Télécharger %1$s (%2$s)?</string>
+    <string name="text_ace_editor_font_download_failed" formatted="true">Échec du téléchargement de la police: %1$s</string>
+    <string name="text_ace_editor_font_download_to_use">Téléchargez cette police pour l\'utiliser</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (chinois simplifié)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (glyphes d’icônes)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (police variable)</string>
+    <string name="text_ace_editor_font_integrity_failed">La police téléchargée n\'a pas passé la vérification d\'intégrité</string>
+    <string name="text_ace_editor_font_license">Licence</string>
+    <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
     <string name="text_ace_font_ligatures_enabled">Ligatures de police</string>
     <string name="text_ace_font_styles_enabled">Styles de police</string>
     <string name="text_ace_get_text">Obtenir le texte</string>
@@ -601,7 +619,7 @@
     <string name="text_ace_insert">Insérer</string>
     <string name="text_ace_large_file_uses_native_editor">La politique de secours active redirige l\'éditeur Ace vers JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">Numéros de ligne</string>
-    <string name="text_ace_lsp_enabled">Saisie semi-automatique intelligente LSP (préversion)</string>
+    <string name="text_ace_lsp_enabled">Saisie semi-automatique intelligente LSP</string>
     <string name="text_ace_lsp_file_types">Types de fichiers LSP</string>
     <string name="text_ace_no_last_action">Aucune dernière action de l\'éditeur</string>
     <string name="text_ace_print_margin_enabled">Marge d\'impression</string>
@@ -890,6 +908,7 @@
     <string name="text_documentation_source">Source de la documentation</string>
     <string name="text_done">Terminé</string>
     <string name="text_download">Téléchargement</string>
+    <string name="text_download_all">Tout télécharger</string>
     <string name="text_download_and_install_autojs6_including_above_abi">Téléchargez et installez la version d\'AutoJs6 qui inclut l\'ABI ci-dessus (le nom du fichier contient \"%s\")</string>
     <string name="text_download_and_install_autojs6_including_all_abis">Télécharger et installer la version d\'AutoJs6 qui inclut tous les ABI (le nom du fichier contient \"universal\")</string>
     <string name="text_download_cancelled">Téléchargement annulé</string>
@@ -1538,6 +1557,7 @@
     <string name="text_sort">Trier</string>
     <string name="text_sort_ascending">Croissant</string>
     <string name="text_sort_by_name_asc">Nom (A-Z)</string>
+    <string name="text_sort_by_name_desc">Nom (Z-A)</string>
     <string name="text_sort_by_path_asc">Chemin (A-Z)</string>
     <string name="text_sort_by_size_asc">Taille (plus petit d\'abord)</string>
     <string name="text_sort_by_size_desc">Taille (plus grand d\'abord)</string>

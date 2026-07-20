@@ -52,6 +52,69 @@ const ACE_CODE_EDITOR_PATH = path.join(
   "ace",
   "AceCodeEditor.kt",
 );
+const ACE_EDITOR_ASSETS_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "ace",
+  "AceEditorAssets.kt",
+);
+const ACE_FONT_MANAGER_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "ace",
+  "AceEditorFontManager.kt",
+);
+const ACE_FONT_DIALOG_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "editor",
+  "ace",
+  "AceEditorFontDialog.kt",
+);
+const ACE_FONT_DIALOG_ITEM_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "res",
+  "layout",
+  "dialog_ace_editor_font_item.xml",
+);
+const EDITOR_VIEW_LAYOUT_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "res",
+  "layout",
+  "editor_view.xml",
+);
 const ACE_LSP_PREFERENCES_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -364,6 +427,15 @@ const CODE_EDITOR_SETTINGS_XML_PATH = path.join(
   "xml",
   "fragment_code_editor_settings.xml",
 );
+const BOOLS_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "res",
+  "values",
+  "bools.xml",
+);
 const FRAGMENT_HOST_MATERIAL_DIALOG_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -376,6 +448,29 @@ const FRAGMENT_HOST_MATERIAL_DIALOG_PATH = path.join(
   "ui",
   "settings",
   "FragmentHostMaterialDialog.kt",
+);
+const MD_ROOT_LAYOUT_PATH = path.join(
+  PROJECT_ROOT,
+  "modules",
+  "material-dialogs",
+  "src",
+  "main",
+  "java",
+  "com",
+  "afollestad",
+  "materialdialogs",
+  "internal",
+  "MDRootLayout.java",
+);
+const MD_DIMENS_PATH = path.join(
+  PROJECT_ROOT,
+  "modules",
+  "material-dialogs",
+  "src",
+  "main",
+  "res",
+  "values",
+  "dimens.xml",
 );
 const DIAGNOSTICS_PATH = path.join(
   PROJECT_ROOT,
@@ -395,12 +490,18 @@ const DIAGNOSTICS_PATH = path.join(
 );
 
 function read(filePath) {
-  return fs.readFileSync(filePath, "utf8");
+  return fs.readFileSync(filePath, "utf8").replace(/\r\n/g, "\n");
 }
 
 function assertIncludes(content, text, label = text) {
   if (!content.includes(text)) {
     throw new Error(`Missing ${label}`);
+  }
+}
+
+function assertNotIncludes(content, text, label = text) {
+  if (content.includes(text)) {
+    throw new Error(`Must not contain ${label}`);
   }
 }
 
@@ -434,6 +535,11 @@ const tooltip = read(TOOLTIP_PATH);
 const signatureHelp = read(SIGNATURE_HELP_PATH);
 const aceBridgeKt = read(ACE_BRIDGE_KT_PATH);
 const aceCodeEditor = read(ACE_CODE_EDITOR_PATH);
+const aceEditorAssets = read(ACE_EDITOR_ASSETS_PATH);
+const aceFontManager = read(ACE_FONT_MANAGER_PATH);
+const aceFontDialog = read(ACE_FONT_DIALOG_PATH);
+const aceFontDialogItem = read(ACE_FONT_DIALOG_ITEM_PATH);
+const editorViewLayout = read(EDITOR_VIEW_LAYOUT_PATH);
 const aceLspPreferences = read(ACE_LSP_PREFERENCES_PATH);
 const aceLspServerManager = read(ACE_LSP_SERVER_MANAGER_PATH);
 const aceScriptEditorEngine = read(ACE_SCRIPT_EDITOR_ENGINE_PATH);
@@ -457,7 +563,10 @@ const codeEditorSettingsFragment = read(CODE_EDITOR_SETTINGS_FRAGMENT_PATH);
 const aceLspFileTypesPreference = read(ACE_LSP_FILE_TYPES_PREFERENCE_PATH);
 const editorSettingActionRegistry = read(EDITOR_SETTING_ACTION_REGISTRY_PATH);
 const codeEditorSettingsXml = read(CODE_EDITOR_SETTINGS_XML_PATH);
+const bools = read(BOOLS_PATH);
 const fragmentHostMaterialDialog = read(FRAGMENT_HOST_MATERIAL_DIALOG_PATH);
+const mdRootLayout = read(MD_ROOT_LAYOUT_PATH);
+const mdDimens = read(MD_DIMENS_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
 assertOrder(
@@ -486,7 +595,11 @@ assertMatch(css, /#editor\s*\{[\s\S]*visibility:\s*hidden/, "hidden editor befor
 assertMatch(css, /body\.ace-ready #editor\s*\{[\s\S]*visibility:\s*visible/, "visible editor after first paint");
 assertMatch(css, /html\s*\{[\s\S]*background:\s*#f7f8fa/, "light first-paint background");
 assertMatch(css, /html\.ace-theme-dark,\s*body\.ace-theme-dark,\s*body\.ace-theme-dark #editor\s*\{[\s\S]*background:\s*#1e1e1e/, "dark first-paint background");
-assertIncludes(css, '--autojs6-editor-font-family: "Iosevka", "JetBrains Mono", "Source Code Pro", monospace;', "stable ACE font stack variable");
+assertIncludes(css, '--autojs6-editor-font-family: "Iosevka", monospace;', "stable bundled ACE font stack variable");
+assertIncludes(css, 'src: url("../fonts/iosevka/Iosevka-Regular.woff2") format("woff2");', "bundled Iosevka font source");
+if ((css.match(/@font-face\s*\{/g) || []).length !== 1) {
+  throw new Error("Only the bundled Iosevka font may have a static ACE @font-face declaration");
+}
 assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*font-family:\s*var\(--autojs6-editor-font-family\)/, "stable ACE font stack usage");
 assertMatch(css, /#editor,\s*\.ace_editor\s*\{[\s\S]*-webkit-user-select:\s*text/, "ACE text selection enabled");
 assertMatch(css, /\.ace_gutter-cell\.ace_breakpoint\s*\{[\s\S]*radial-gradient/, "breakpoint gutter marker");
@@ -517,6 +630,66 @@ if (/^\.ace_mobile-menu\s*\{[^}]*display:\s*none/m.test(css)) {
 }
 
 assertIncludes(bridge, "var firstPaintNotified = false;", "first-paint idempotency flag");
+assertIncludes(bridge, 'var INSTALLED_FONT_URL_PREFIX = "https://appassets.androidplatform.net/autojs6-fonts/";', "installed font virtual URL boundary");
+assertIncludes(bridge, "if (!/^[a-f0-9]{64}$/.test(normalized.sha256))", "installed font requires a SHA-256 identity");
+assertIncludes(bridge, "if (normalized.url !== expectedUrl)", "installed font URL must match id and SHA-256");
+assertIncludes(bridge, "var FONT_LOAD_TIMEOUT_MS = 30000;", "installed FontFace load timeout");
+assertIncludes(bridge, "Promise.resolve(document.fonts.ready)", "font metrics refresh after bundled font readiness");
+assertIncludes(bridge, 'reject(new Error("Timed out while loading installed font"))', "installed FontFace timeout rejection");
+assertIncludes(bridge, "!pendingFontDescriptorLoad &&", "first paint waits for the selected installed font");
+assertIncludes(bridge, "!bundledFontLoadPending;", "first paint waits for bundled Iosevka decoding");
+assertIncludes(bridge, "document.fonts.load(BUNDLED_FONT_LOAD_PROBE)", "bundled Iosevka has an explicit first-paint load gate");
+assertIncludes(bridge, "isFontFamilyMetricsRefreshReason(reason)", "font-family refreshes preserve the browsed viewport");
+assertIncludes(bridge, "fallbackWhilePendingFontLoadsForFirstPaint();", "first-paint deadline falls back without cancelling a pending font load");
+assertIncludes(bridge, "hasInitialFontDescriptor ? DEFAULT_FONT_FAMILY", "invalid initial descriptor falls back to bundled Iosevka");
+assertIncludes(bridge, "if (requestSerial !== fontDescriptorRequestSerial)", "stale installed font request guard");
+assertIncludes(bridge, "wrapped.autojs6InvalidateInstalledFontCache = true;", "only a definitive FontFace rejection invalidates the installed cache");
+assertIncludes(bridge, "invalidateInstalledCache: !!(", "font load errors carry an explicit cache invalidation recommendation");
+assertIncludes(bridge, "sha256: descriptor && descriptor.sha256", "font load errors identify the exact rejected digest");
+assertIncludes(bridge, "setFontDescriptor: setFontDescriptor", "dynamic font descriptor public API");
+assertIncludes(bridge, 'applyFontFamilyAndRefresh(BUNDLED_FONT_FAMILY, "font_load_fallback")', "dynamic font load bundled fallback");
+assertIncludes(aceCodeEditor, 'payload.optBoolean("invalidateInstalledCache", false)', "native cache deletion requires an explicit JS invalidation signal");
+assertIncludes(aceCodeEditor, "fontManager.invalidateInstalled(fontId, sha256)", "native cache invalidation is digest-bound");
+assertIncludes(aceCodeEditor, "AceOptionalWebResourceRoute.matches(url)", "browser-generated favicon has an exact optional-resource route");
+assertIncludes(aceCodeEditor, 'eventHistory.record("optional_resource_ignored", "favicon")', "ignored favicon remains visible in diagnostics");
+assertIncludes(aceCodeEditor, '"image/x-icon",\n            null,\n            204,', "ignored favicon receives a local no-content response");
+assertOrder(
+  aceCodeEditor,
+  ["if (AceOptionalWebResourceRoute.matches(url))", "if (!isAllowedUrl(url))"],
+  "optional favicon handling precedes fatal blocked-resource handling",
+);
+assertIncludes(aceFontManager, "fun observeCatalogChanges(", "accepted font catalog observer API");
+assertIncludes(aceCodeEditor, "fontManager.observeCatalogChanges", "active editor catalog revocation observer");
+assertIncludes(aceFontDialog, ".options(", "font dialog title overflow menu");
+assertIncludes(aceFontDialog, "R.string.text_download_all", "font dialog download-all menu item");
+assertIncludes(aceFontDialog, "selectOnSuccess = false", "bulk font downloads never change selection");
+assertIncludes(aceFontDialog, "notifyOnSuccess = false", "background and bulk downloads suppress per-font toast storms");
+assertIncludes(aceFontDialog, "FontInstallationStatus.UPDATE_AVAILABLE", "download all includes available font updates");
+assertIncludes(aceFontDialog, "bulk.pendingIds.remove(fontId)", "bulk font completion is counted exactly once");
+assertIncludes(aceFontDialog, "iconRes = R.drawable.ic_download_thicker", "font swipe action reuses the plugin-center download icon");
+assertIncludes(aceFontDialog, "label = context.getString(R.string.text_download)", "font swipe action carries the download label");
+assertIncludes(editorViewLayout, "<me.zhanghai.android.materialprogressbar.MaterialProgressBar", "font preview uses the shared thin material progress bar");
+assertIncludes(editorViewLayout, 'app:mpb_setBothDrawables="true"', "font preview supplies matching determinate and indeterminate progress drawables");
+assertIncludes(editorViewLayout, 'app:mpb_useIntrinsicPadding="false"', "font preview progress line has no asymmetric intrinsic padding");
+assertOrder(
+  editorViewLayout,
+  [
+    'android:id="@+id/font_preview_info_type"',
+    'android:id="@+id/font_preview_info_separator"',
+    'android:id="@+id/font_preview_info_size"',
+  ],
+  "font preview metadata keeps its fixed center separator between equal side fields",
+);
+assertMatch(
+  editorViewLayout,
+  /font_preview_info_type[\s\S]*?android:layout_width="0dp"[\s\S]*?android:layout_weight="1"/,
+  "font preview metadata type occupies one equal half",
+);
+assertMatch(
+  editorViewLayout,
+  /font_preview_info_size[\s\S]*?android:layout_width="0dp"[\s\S]*?android:layout_weight="1"/,
+  "font preview metadata size occupies one equal half",
+);
 assertIncludes(bridge, "function callBridgeBoolean(name, defaultValue)", "bridge boolean option helper");
 assertIncludes(bridge, "var STATE_NOTIFY_THROTTLE_MS = 100;", "state event throttle");
 assertIncludes(bridge, "var TEXT_NOTIFY_THROTTLE_MS = 100;", "text event throttle");
@@ -644,12 +817,17 @@ assertIncludes(bridge, "var lspClient = null;", "ACE LSP client bridge slot");
 assertIncludes(bridge, "var lspCompletionCompleter = null;", "ACE LSP completion proxy slot");
 assertIncludes(bridge, "global.AutoJsAceLspClient.install", "ACE LSP client install");
 assertIncludes(bridge, "warmUpLspAfterFirstPaint", "ACE LSP first-paint warm-up hook");
+assertIncludes(bridge, "global.requestIdleCallback(run, { timeout: 1500 })", "ACE LSP idle first-paint warm-up");
+assertIncludes(bridge, 'global.addEventListener("pagehide", destroyLspClient, { once: true })', "ACE LSP page lifecycle disposal");
 assertIncludes(bridge, "function firstPaintReadinessSnapshot()", "ACE first-paint visual readiness check");
 assertIncludes(bridge, "FIRST_PAINT_STABLE_FRAME_COUNT", "ACE first-paint stable-frame gate");
 assertIncludes(bridge, "isFirstPaintThemeReady", "ACE first-paint waits for theme consistency");
 assertIncludes(bridge, "firstPaintForced", "ACE first-paint timeout fallback event");
 assertIncludes(bridge, "function installLspCompletionCompleter()", "ACE LSP completion proxy installer");
 assertIncludes(bridge, "removeLanguageToolCompleter(staticCompleter)", "ACE LSP proxy replaces standalone static completer");
+assertIncludes(bridge, "function insertLspCompletion(activeEditor, completion)", "ACE TypeScript completion insertion hook");
+assertIncludes(bridge, "completion.replaceRange", "ACE TypeScript completion replacement range");
+assertIncludes(bridge, 'global.ace.require("ace/snippets").snippetManager', "ACE TypeScript snippet insertion support");
 assertIncludes(bridge, "getLspState: function()", "ACE LSP state public API");
 assertIncludes(bridge, "getLspHover: function(row, column)", "ACE LSP hover public API");
 assertIncludes(bridge, "global.AutoJsAceTooltip.install", "ACE tooltip install");
@@ -672,12 +850,27 @@ assertIncludes(lspClient, "documentUri: state.documentUri", "ACE LSP passes docu
 assertIncludes(lspClient, "isJsonDocumentUri", "ACE LSP JSON document detection");
 assertIncludes(lspClient, "jsonSyntaxDiagnostics", "ACE LSP JSON syntax diagnostics");
 assertIncludes(lspClient, "tsService.setDocumentUri(state.documentUri)", "ACE LSP refresh updates TypeScript document URI");
-assertIncludes(lspClient, "getTsServiceState(state.enabled || !!tsService)", "ACE LSP avoids loading TS service while disabled");
+assertIncludes(lspClient, "if (destroyed || !state.enabled)", "ACE LSP avoids creating TypeScript service while disabled or destroyed");
+assertIncludes(lspClient, "function scheduleTsLoadRetry(revision)", "ACE LSP transient TypeScript loader retry");
+assertIncludes(lspClient, "TS_LOAD_MAX_ATTEMPTS = 2", "ACE LSP bounded TypeScript loader retries");
+assertIncludes(lspClient, "TS_LOAD_TIMEOUT_MS = 5000", "ACE LSP bounded TypeScript asset load timeout");
+assertIncludes(lspClient, "function scheduleTsServiceRetry(revision)", "ACE LSP transient service initialization retry");
+assertIncludes(lspClient, "function disposeTsService()", "ACE LSP TypeScript service lifecycle disposal");
+assertIncludes(lspClient, "if (shouldWarmUp && !state.semanticServiceSuppressed && !tsServiceReady())", "ACE LSP hot-enable warm-up");
+assertIncludes(lspClient, "DEFAULT_MAX_DOCUMENT_LENGTH = 512 * 1024", "ACE LSP 512 KiB semantic document limit");
+assertIncludes(lspClient, '"document-too-large"', "ACE LSP large-document semantic fallback reason");
+assertIncludes(lspClient, '"slow-operation-circuit-open"', "ACE LSP slow semantic operation circuit breaker");
+assertIncludes(lspClient, "SEMANTIC_SLOW_OPERATION_MAX_COUNT = 1", "ACE LSP first-slow-operation degradation");
+assertIncludes(lspClient, "MAX_COMPLETION_ITEMS = 300", "ACE LSP bounded semantic completion results");
+assertIncludes(lspClient, "function onSessionChange(delta)", "ACE LSP cached document length updates");
+assertIncludes(lspClient, 'state.localServiceReady ? "ready" : "configured"', "ACE LSP configured/ready state distinction");
+assertIncludes(lspClient, "tsService: getTsServiceState()", "ACE LSP state inspection does not instantiate TypeScript service");
+assertIncludes(lspClient, "destroy: destroy", "ACE LSP explicit destroy hook");
 assertIncludes(lspClient, "warmUp: warmUp", "ACE LSP exposes lazy warm-up hook");
 assertIncludes(lspClient, "getCompletions: getCompletions", "ACE LSP completion hook");
 assertIncludes(lspClient, "getHover: getHover", "ACE LSP hover hook");
 if (lspClient.includes("WebSocket") || lspClient.includes("new Worker")) {
-  throw new Error("LSP client must stay off WebSocket and worker transports in preview path");
+  throw new Error("Bundled LSP client must stay off WebSocket and worker transports");
 }
 
 assertIncludes(tsService, "global.AutoJsAceTsLanguageService", "ACE TypeScript service global");
@@ -685,12 +878,29 @@ assertIncludes(tsService, "typescriptServices.js unavailable", "ACE TypeScript s
 assertIncludes(tsService, "loadTextFromBridge", "ACE TypeScript service native asset loader");
 assertIncludes(tsService, "file:///autojs6/types/lib.autojs6.extra.d.ts", "ACE TypeScript service extra declaration lib");
 assertIncludes(tsService, "function scriptKindForFileName", "ACE TypeScript service script-kind selection");
+assertIncludes(tsService, "(?:ts|mts|cts)", "ACE TypeScript service recognizes compatible TypeScript script kinds");
 assertIncludes(tsService, "ts.ScriptKind.JSON", "ACE TypeScript service JSON script kind");
 assertIncludes(tsService, "getScriptKind: function(fileName)", "ACE TypeScript host exposes script kind");
 assertIncludes(tsService, "setDocumentUri: setDocumentUri", "ACE TypeScript service can change current document URI");
 assertIncludes(tsService, "getCompletionsAtPosition", "ACE TypeScript service completion API");
 assertIncludes(tsService, "getSignatureHelpItems", "ACE TypeScript service signature API");
 assertIncludes(tsService, "getSemanticDiagnostics", "ACE TypeScript service diagnostics API");
+assertIncludes(tsService, "SINGLE_FILE_UNRELIABLE_DIAGNOSTIC_CODES", "ACE TypeScript single-file diagnostic suppression");
+assertIncludes(tsService, "function ensureTsLibrary(fileName)", "ACE TypeScript lazy standard-library loading");
+assertIncludes(tsService, "typeof documentText === \"string\"", "ACE TypeScript reuses the caller document snapshot");
+assertIncludes(tsService, "function partsToString(parts)", "ACE TypeScript hover text normalization");
+assertIncludes(tsService, 'typeof parts === "string"', "ACE TypeScript JSDoc string compatibility");
+assertIncludes(tsService, "jsx: ts.JsxEmit && ts.JsxEmit.Preserve", "ACE TypeScript JSX/TSX compiler mode");
+assertIncludes(tsService, ".slice(0, completionLimit)", "ACE TypeScript completion limit");
+assertIncludes(tsService, "entry.replacementSpan", "ACE TypeScript replacement-span propagation");
+assertIncludes(tsService, "completion.replaceRange", "ACE TypeScript ACE replacement range mapping");
+assertIncludes(tsService, "dispose: dispose", "ACE TypeScript service disposal API");
+
+assertIncludes(aceEditorAssets, "internal val requiredAssetPaths = listOf(", "ACE required asset manifest");
+assertIncludes(aceEditorAssets, '"$EDITOR_ASSET_ROOT/autojs6/autojs6_lsp_client.js"', "ACE LSP client asset integrity check");
+assertIncludes(aceEditorAssets, '"$EDITOR_ASSET_ROOT/autojs6/typescript/typescriptServices.js"', "ACE TypeScript runtime asset integrity check");
+assertIncludes(aceEditorAssets, '"$EDITOR_ASSET_ROOT/autojs6/types/lib.autojs6.d.ts"', "ACE AutoJs6 declaration asset integrity check");
+assertIncludes(aceEditorAssets, "validateRequiredAssets", "ACE full asset validation");
 
 assertIncludes(aceBridgeKt, "fun read(uri: String?): String", "native ACE bridge asset read hook");
 assertIncludes(aceBridgeKt, "isAllowedReadAsset", "native ACE bridge read whitelist");
@@ -699,15 +909,27 @@ assertIncludes(aceBridgeKt, "fun write(uri: String?, text: String?): String", "n
 assertIncludes(aceBridgeKt, "File access is not available from the ACE editor bridge", "native ACE bridge keeps write disabled");
 
 assertIncludes(aceLspPreferences, "KEY_ACE_LSP_FILE_TYPES", "ACE LSP file-type preference key");
+assertIncludes(aceLspPreferences, "const val DEFAULT_ENABLED = true", "ACE LSP default-on preference");
+assertIncludes(aceLspPreferences, "Pref.getBoolean(KEY_ACE_LSP_ENABLED, DEFAULT_ENABLED)", "ACE LSP runtime default follows declared default");
+assertIncludes(aceLspPreferences, "fun resetEnabled()", "ACE LSP default preference reset");
 assertIncludes(aceLspPreferences, "DEFAULT_FILE_TYPES", "ACE LSP default file-type suffixes");
 assertIncludes(aceLspPreferences, "fun getFileTypes()", "ACE LSP file-type getter");
 assertIncludes(aceLspPreferences, "fun resetFileTypes()", "ACE LSP file-type default reset");
 assertIncludes(aceLspPreferences, "fun isDocumentAllowed(documentPathOrName: String?)", "ACE LSP document type gate");
 assertIncludes(aceLspPreferences, "fun normalizeFileTypes", "ACE LSP file-type normalization");
 assertIncludes(aceLspPreferences, '".node.js"', "ACE LSP default Node.js suffix");
+assertIncludes(bools, '<bool name="pref_ace_lsp_enabled">true</bool>', "ACE LSP resource default-on value");
 
 assertIncludes(aceLspServerManager, "documentAllowedProvider", "ACE LSP manager injectable document-type gate");
-assertIncludes(aceLspServerManager, 'MANAGER_NAME = "native-preview"', "ACE LSP manager uses preview identity");
+assertIncludes(aceLspServerManager, 'MANAGER_NAME = "native-local"', "ACE LSP manager uses stable local identity");
+assertIncludes(aceLspServerManager, 'REASON_LOCAL_LANGUAGE_SERVICE = "bundled-typescript-language-service"', "ACE LSP manager identifies bundled TypeScript service");
+assertIncludes(aceLspServerManager, "MAX_DOCUMENT_LENGTH = 512 * 1024", "ACE LSP manager advertises the 512 KiB semantic limit");
+assertIncludes(aceLspServerManager, "maxDocumentLength = MAX_DOCUMENT_LENGTH", "ACE LSP manager snapshot carries the semantic limit");
+assertIncludes(aceLspServerManager, 'COMPLETION_PROVIDER_LOCAL_INDEX = "local-index"', "ACE LSP manager starts with honest local-index provider state");
+assertIncludes(aceLspServerManager, 'SIGNATURE_PROVIDER_STATIC_LOCAL = "static-local"', "ACE LSP manager starts with honest signature fallback state");
+assertNotIncludes(aceLspServerManager, "native-preview", "obsolete ACE LSP preview manager identity");
+assertNotIncludes(aceLspServerManager, "configured-no-server", "obsolete ACE LSP no-server state");
+assertNotIncludes(aceLspServerManager, 'TRANSPORT_UNAVAILABLE = "unavailable"', "obsolete ACE LSP unavailable transport");
 assertIncludes(aceLspServerManager, "fun setDocumentPath(path: String?)", "ACE LSP manager document path setter");
 assertIncludes(aceLspServerManager, "fun documentUriForPath(path: String?)", "ACE LSP manager derives document URI from path");
 assertIncludes(aceLspServerManager, "encodePathSegment", "ACE LSP manager escapes synthetic document URI file name");
@@ -846,7 +1068,16 @@ assertIncludes(editorView, "key(R.string.key_editor_text_size)", "editor text-si
 assertIncludes(editorView, "key(R.string.key_editor_theme)", "editor theme preference changes apply to current editor");
 assertIncludes(editorView, "key(R.string.key_editor_engine)", "editor engine preference changes apply to current editor");
 assertIncludes(editorView, "key(R.string.key_ace_lsp_file_types)", "LSP file-type preference changes refresh current ACE editor");
-assertIncludes(editorView, "themeFontService.applyEditorPreferences()", "editor font/text-size live preference applier");
+assertMatch(
+  editorView,
+  /key\(R\.string\.key_editor_text_size\)\s*->\s*post\s*\{\s*themeFontService\.applyPreferredTextSize\(\)\s*\}/,
+  "text-size preference changes do not reapply the persisted font during preview",
+);
+assertMatch(
+  editorView,
+  /key\(R\.string\.key_ace_editor_font\)\s*->\s*post\s*\{\s*themeFontService\.applyPreferredAceFont\(\)\s*\}/,
+  "font preference changes apply the persisted font",
+);
 assertIncludes(editorView, "applyCurrentEditorThemePreference", "editor theme live preference applier");
 assertIncludes(editorView, "applyCurrentEditorEnginePreference", "editor engine live preference applier");
 assertIncludes(editorView, "switchEditorEngine(EditorEnginePreferences.get())", "editor engine live preference switcher");
@@ -991,6 +1222,9 @@ assertIncludes(editorSettingActionRegistry, "R.string.key_editor_shortcut_input_
 assertIncludes(fragmentHostMaterialDialog, "class FragmentHostMaterialDialog", "fragment-hosting MaterialDialog wrapper");
 assertIncludes(fragmentHostMaterialDialog, "override fun setContentView(view: View)", "fragment host intercepts DialogFragment content view");
 assertIncludes(fragmentHostMaterialDialog, "customView(", "fragment host uses MaterialDialog custom view container");
+assertIncludes(fragmentHostMaterialDialog, "md_button_frame_vertical_padding_compact", "fragment host uses native action-area padding");
+assertIncludes(mdRootLayout, "public void setButtonBarPadding(int verticalPadding)", "MaterialDialog root exposes action-area padding");
+assertIncludes(mdDimens, '<dimen name="md_button_frame_vertical_padding_compact">4dp</dimen>', "native action-area vertical padding");
 
 assertIncludes(diagnostics, "lastFirstPaintAtUptimeMillis", "first-paint diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeScheduledReason", "resize scheduled diagnostics field");

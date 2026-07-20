@@ -6,7 +6,6 @@ import android.view.View
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.ace.AceCodeEditor
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorFont
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontPreferences
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
 import org.autojs.autojs.ui.edit.editor.ace.health.AceFailure
@@ -23,14 +22,13 @@ class AceScriptEditorEngine(
 
     private val cursorCallbacks = LinkedHashSet<EditorCursorChangeListener>()
     private val textChangeCallbacks = LinkedHashSet<EditorTextChangeListener>()
-
     private var breakpointChangeListener: EditorBreakpointChangeListener? = null
     private var readOnly = false
     private var redoUndoEnabled = true
     private var loadingText = false
     private var debuggingLine = -1
     private var fontSizeSp = DEFAULT_TEXT_SIZE_SP
-    private var editorFont = AceEditorFontPreferences.get()
+    private var editorFontId = AceEditorFontPreferences.getId()
     private var themeKey: String? = null
     private var searchQuery: String? = null
     private var searchOptions: EditorSearchOptions? = null
@@ -126,12 +124,12 @@ class AceScriptEditorEngine(
             }
         }
         aceCodeEditor.setTextSizeSp(fontSizeSp)
-        aceCodeEditor.setFontFamily(editorFont.cssFontFamily)
+        aceCodeEditor.setAceEditorFont(editorFontId)
     }
 
-    fun setAceEditorFont(font: AceEditorFont) {
-        editorFont = font
-        aceCodeEditor.setFontFamily(font.cssFontFamily)
+    fun setAceEditorFont(fontId: String) {
+        editorFontId = fontId
+        aceCodeEditor.setAceEditorFont(fontId)
     }
 
     override fun setInitialText(text: String?) {

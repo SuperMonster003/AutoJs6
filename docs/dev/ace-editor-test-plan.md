@@ -42,7 +42,7 @@ The following hooks are available in debug builds through `AceEditorTestHooks`. 
 
 Use `More -> Copy ACE diagnostics` from the editor menu when reporting ACE issues. The same export is available from the isolated ACE debug page through the `Copy ACE diagnostics` button.
 
-Diagnostics should include the current engine type, ACE health state, last failure, Android/WebView versions, LSP state, file size, large-file policy, TextMirror revision, viewport policy, host IME event, ACE resize schedule/dispatch/complete fields, bridge event window counters, and recent runtime event history.
+Diagnostics should include the current engine type, ACE health state, last failure, Android/WebView versions, configured LSP state, sanitized LSP runtime readiness/degradation state, file size, large-file policy, TextMirror revision, viewport policy, host IME event, ACE resize schedule/dispatch/complete fields, bridge event window counters, and recent runtime event history.
 
 The isolated ACE debug page also has an `IME stress` action. It is a quick
 debug-only helper for repeated programmatic show/hide cycles and diagnostics,
@@ -57,20 +57,36 @@ selection handles, and CJK composition.
 - Accepting a highlighted completion with Enter or by tapping the popup must insert the item without an ACE fallback.
 - `autojs_indices.js` is a fallback only; AutoJs6-specific entries should be added to the source JSON.
 - Broad AutoJs6 API entries should come from the bundled `aj6-int-*.d.ts` declaration source first; source JSON fallback entries are for parser gaps and curated global member exposure.
-- `ACE LSP smart completion (preview)` is off by default.
-- With LSP off, `getLspOptions()` returns `{}` and no WebSocket is created.
-- With LSP off or on without a server, `AutoJsAceLspClient` reports
-  `completionProvider=static-fallback` and `hoverProvider=static-fallback`.
-- With LSP on and no server available, ACE remains editable, static completion
-  still works, and hover hooks can resolve AutoJs6 declaration doc text from
-  the static index.
-- With LSP on, the bundled TypeScript language service should become active
-  after first paint and provide completion, hover, diagnostics, and signature
-  help while keeping static completion as fallback.
+- ACE LSP smart completion is default-on. A fresh preference state should
+  enable the bundled TypeScript language service; a stored explicit `false`
+  should keep it disabled.
+- With LSP off, `getLspOptions()` returns `{}`, no TypeScript runtime or
+  WebSocket is created, and `AutoJsAceLspClient` reports static providers.
+- With LSP on, `getLspOptions()` reports `manager=native-local`,
+  `state=local-language-service`, `transport=in-process`,
+  `serverAvailable=false`, and `startSupported=false`. No external server or
+  network transport is expected.
+- The bundled TypeScript language service should become active after first
+  paint and provide semantic completion, hover/JSDoc, diagnostics, and
+  signature help while keeping the generated AutoJs6 index as fallback.
+- Turning LSP off and back on in an existing editor page should dispose and
+  recreate the service without a WebView reload. A transient script-load
+  failure should receive only the bounded retry, and destruction must cancel
+  pending work.
+- Completion responses contain at most 300 entries. Documents longer than
+  512 KiB report `semanticServiceSuppressed=true` and
+  `semanticServiceReason=document-too-large`, remain editable, and use static
+  fallback instead of constructing a large semantic snapshot.
 - Valid JSON files should not receive JavaScript semicolon diagnostics, and
   invalid JSON files should receive JSON syntax diagnostics.
 - The LSP file-type preference should hide while LSP is disabled, support
-  restoring defaults, and gate LSP startup by selected file suffixes.
+  restoring defaults, and gate LSP startup by the stable JavaScript,
+  TypeScript, JSON, Auto.js, and Node.js suffix set.
+- Semantic checks use the bundled TypeScript 4.2.4 syntax baseline and a local
+  single-file model. Project-wide resolution and NodeNext `.mts`/`.cts`
+  semantics are out of scope, and unresolved imports must not produce
+  misleading module-not-found annotations for files the local host cannot
+  resolve.
 - `AutoJsAceTooltip` creates its DOM and safe markdown renderer lazily when a
   hover tooltip is requested.
 - Tooltip markdown rendering is local only, escapes raw HTML, and does not fetch
@@ -114,7 +130,7 @@ Run this checklist on at least one gesture-navigation device and one 3-button-na
 Setup:
 - ACE editor is selected in settings.
 - Open `ace-basic.js` with at least 80 lines so the top, middle, and bottom viewport areas can be tested.
-- Use JetBrains Mono first, then repeat a quick pass with Source Code Pro.
+- Use the bundled ordinary Iosevka first, then download Iosevka Slab and repeat a quick pass with it.
 - Test with the default Latin keyboard and one CJK IME when available.
 
 Checklist:
@@ -426,8 +442,15 @@ Steps:
 Expected:
 - ACE theme follows app theme.
 - Font size is restored after engine switch.
-- ACE text uses JetBrains Mono by default.
-- `More -> ACE editor font` can switch to Source Code Pro and system monospace.
+- ACE text uses the bundled ordinary Iosevka by default, including when the network and remote catalog are unavailable.
+- `More -> ACE editor font` can download and switch to Iosevka Slab, delete it, and switch to system monospace; ordinary Iosevka never offers a download or delete action.
+- Missing fonts use the same download icon as Plugin Center rather than a localized text-width-dependent button.
+- `Editor font -> More -> Download all` confirms the font count and total size once, downloads every missing or outdated authorized font with at most two concurrent transfers, leaves the current selection unchanged, and reports one aggregate result.
+- Running `Download all` again while its batch is active does not enqueue duplicates. Revoked, current, and already-downloading fonts are skipped.
+- A cancelled, truncated, oversized, malformed, or SHA-256-mismatched download is not installed or selectable, and interrupted `.part` files do not accumulate across launches.
+- If a signed catalog refresh revokes the font used by an already open editor, that editor switches to bundled Iosevka without requiring a restart or manual font change.
+- Closing or rotating the font dialog does not cancel an active transfer; reopening the dialog reattaches its progress, while the row-level cancel action stops it.
+- Reopening during a background batch does not emit one success Toast per completed font.
 - The settings page persists the ACE editor font for future ACE sessions.
 - Text remains readable and markers stay visible.
 
@@ -468,11 +491,11 @@ Failure logs:
 - `Generated AutoJs6 d.ts is missing signature`
 - `contains Pro-only completion`
 
-### ACE-LSP-001: LSP default-off behavior
+### ACE-LSP-001: LSP explicit opt-out behavior
 
 Preconditions:
 - ACE editor is selected in settings.
-- `ACE LSP smart completion (preview)` is off.
+- `ACE LSP smart completion` has been explicitly switched off.
 
 Steps:
 1. Open `ace-basic.js`.
@@ -483,8 +506,8 @@ Expected:
 - ACE opens normally.
 - Diagnostics include `lspEnabled=false` and `lspState=disabled`.
 - `getLspOptions()` returns `{}`.
-- `getLspState()` reports `completionProvider=static-fallback` and
-  `hoverProvider=static-fallback`.
+- `getLspState()` reports static completion/hover providers and does not create
+  a TypeScript service merely because state was queried.
 - Static completion continues to work.
 
 Failure logs:
@@ -495,23 +518,32 @@ Failure logs:
 
 Preconditions:
 - ACE editor is selected in settings.
-- `ACE LSP smart completion (preview)` is on.
+- The LSP preference key is absent, exercising the default-on path.
+- Open a TypeScript file such as `ace-semantic.ts`.
 
 Steps:
-1. Open `ace-basic.js`.
-2. Trigger completion for `console.lo`.
-3. Hover-query or debug-query `app.launch`.
-4. Enter a syntax error such as `function bad(` and run `validateLsp()`.
-5. Copy ACE diagnostics.
+1. Wait for first-paint warm-up and inspect `getLspState()`.
+2. Trigger completion for a TypeScript value whose members are known only from
+   its inferred type.
+3. Hover-query a local declaration with JSDoc.
+4. Request signature help for a typed local function call.
+5. Enter a TypeScript type/syntax error and run `validateLsp()`.
+6. Copy ACE diagnostics.
 
 Expected:
 - ACE remains editable.
-- Static completion returns `console.log`.
+- Semantic completion returns the inferred member and does not merge an
+  unrelated shadowed AutoJs6 global.
+- Hover returns the local type and JSDoc, signature help returns the typed local
+  parameters, and the error produces a TypeScript diagnostic.
 - Diagnostics include `lspEnabled=true` and `lspState=local-language-service`.
+- Native diagnostics include a sanitized `lspRuntimeState` with
+  `serviceStatus=ready`, `tsReady=true`, active providers, loader state, and no
+  document text.
 - Diagnostics include `lspTransport=in-process`,
-  `lspDocumentUri=file:///autojs6/editor/current.js`, and
+  a stable encoded `lspDocumentUri` under `file:///autojs6/editor/`, and
   `lspFallback=static-completion`.
-- `getLspOptions()` includes `manager=native-preview`,
+- `getLspOptions()` includes `manager=native-local`,
   `serverAvailable=false`, and `startSupported=false`.
 - Immediately after bootstrap, `getLspState()` can report
   `completionProvider=local-index`, `hoverProvider=local-index`,
@@ -519,8 +551,6 @@ Expected:
 - After first paint and TypeScript warm-up, `getLspState()` can report
   `typescript-language-service` for completion, hover, diagnostics, and
   signature help.
-- `getLspHover()` can return declaration doc text for `app.launch` from the
-  static index.
 - `validateLsp()` returns at least one diagnostic for the syntax error.
 - `showLspTooltip()` can show the same hover content through the local tooltip
   renderer without external resource loading.
@@ -528,6 +558,30 @@ Expected:
 Failure logs:
 - `lspError`
 - `AceFailureType.LSP_ERROR`
+
+### ACE-LSP-003: Hot lifecycle, bounds, and fallback
+
+Preconditions:
+- ACE editor is selected and LSP has reached
+  `typescript-language-service` readiness.
+
+Steps:
+1. Disable LSP while keeping the editor page open and inspect state.
+2. Re-enable it without reloading the page and wait for readiness again.
+3. Request a broad completion list and count the results.
+4. Open or inject a document longer than 512 KiB and inspect state.
+5. Return to a small document and verify semantic warm-up can resume.
+6. Close the page while retry or warm-up work is pending.
+
+Expected:
+- Disable disposes the service, retains editing/static completion, and does not
+  let an old load callback reactivate it.
+- Re-enable warms a fresh service in the same page.
+- The completion list has no more than 300 items.
+- The large document reports `document-too-large`, avoids semantic work, and
+  remains editable with static fallback; the small document can recover.
+- Page destruction cancels timers and disposes the service without a late
+  callback or editor fallback.
 
 ### ACE-IME-001: Input method and symbols/function bars
 
@@ -684,7 +738,7 @@ Record each run with the actual Android System WebView version from device setti
 
 ## Release Gate
 
-ACE can remain the default experimental editor only if:
+ACE can remain the default editor, with LSP smart completion default-on, only if:
 
 - ACE remains the default editor and Native remains a selectable fallback.
 - The dedicated `docs/dev/ace-keyboard-viewport-test-plan.md` matrix is runnable
@@ -700,7 +754,9 @@ ACE can remain the default experimental editor only if:
 - No blocked URL, file bridge, or LSP error prevents basic edit/save/run.
 - `lib.autojs6.d.ts` is generated from the same AutoJs6 completion source.
 - Selected AutoJs6 declaration files and their MPL-2.0 license are bundled under `autojs6/types/autojs6`.
-- `docs/dev/ace-lsp-design.md` still keeps server-backed LSP experimental and default-off.
+- `docs/dev/ace-lsp-design.md` documents the bundled local TypeScript service
+  as released and default-on while preserving explicit opt-out, resource
+  limits, static degradation, and the boundary excluding external servers.
 - Third-party asset and license checks remain clean.
 - ACE diagnostics can be copied from an active ACE editor and after ACE fallback to Native.
 - ACE diagnostics include runtime event history and bridge event window counters

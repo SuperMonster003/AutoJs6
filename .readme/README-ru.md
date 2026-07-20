@@ -71,7 +71,7 @@ AutoJs6 разработан на основе финальной версии �
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-Данные обновлены на 20 July 2026 года.
+Данные обновлены на 21 July 2026 года.
 
 Данные отсортированы по `последней активности` в порядке убывания.
 
@@ -166,7 +166,7 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.8.0
 
-###### 2026/07/20
+###### 2026/07/21
 
 * `Новое` Среда выполнения скриптов Node.js 24.5.0 с поддержкой запуска с помощью директивы "nodejs" или таких расширений, как .node.js/.cjs/.mjs
 * `Новое` Среда выполнения Node.js поддерживает CommonJS/частичный ESM/локальный динамический import()/облегченный исходный код TypeScript (.ts/.mts/.cts)
@@ -191,7 +191,7 @@ AutoJs6 разработан на основе финальной версии �
 * `Новое` Задачи по расписанию поддерживают ежемесячные/ежегодные задачи/задачи с обратным отсчетом и условия завершения повторения _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `Новое` Файловый менеджер поддерживает множественный выбор и пакетное копирование/перемещение/удаление
 * `Новое` Редактор кода поддерживает движок Ace с возможностью переключения на нативный редактор в настройках
-* `Новое` Редактор Ace поддерживает автодополнение API AutoJs6/подсказки сигнатур/информацию при наведении/предпросмотр LSP
+* `Новое` В редакторе Ace встроенное локальное интеллектуальное дополнение TypeScript стало стабильной функцией и включено по умолчанию; доступны дополнение API AutoJs6, подсказки сигнатур, информация при наведении и диагностика, а отключить функцию можно в настройках
 * `Новое` Редактор Ace поддерживает панель сочетаний клавиш/историю действий/избранные действия/выделение текста на мобильных устройствах/масштабирование жестом и другие функции
 * `Новое` Редактор кода поддерживает нижнюю панель журнала (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Новое` Нижняя панель журнала редактора кода поддерживает переход по кадрам стека к исходному коду (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
@@ -542,7 +542,7 @@ File (Файл) | Settings (Настройки) | Appearance & Behavior (Вне�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `21`.
 
-По состоянию на 20 July 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
+По состоянию на 21 July 2026 года AutoJs6 поддерживает JDK максимальной версии `26`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 

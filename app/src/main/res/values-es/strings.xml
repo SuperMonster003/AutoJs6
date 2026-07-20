@@ -72,12 +72,13 @@
     <string name="description_about_app_tips_preference">1. Mantenga pulsado el icono de la aplicación en la página \"Acerca de la aplicación y el desarrollador\" para saltar a la página de opciones de desarrollo de AutoJs6</string>
     <string name="description_accessibility_service">El servicio de accesibilidad es la capacidad central de AutoJs6 para realizar automatización. Se utiliza para leer la información de los controles en pantalla y simular interacciones como [ tocar / deslizar / escribir ].\n\nLa mayoría de las funciones relacionadas con la automatización, así como herramientas como el análisis de diseño, requieren que el servicio de accesibilidad esté habilitado para funcionar correctamente.</string>
     <string name="description_ace_action_favorites">Los favoritos de acciones registran las acciones del editor que se usan con frecuencia, como ejecutar, guardar, aplicar formato, usar acciones de menú, mantener pulsado y cambiar ajustes del editor. Toca el botón de estrella para abrir la lista, toca un elemento para repetir la acción, mantén pulsada la estrella para repetir la acción más reciente, arrastra los elementos para reordenarlos, desliza a la derecha para fijarlos o soltarlos y desliza a la izquierda para eliminarlos.</string>
+    <string name="description_ace_editor_font_dialog">Las fuentes Nerd/NF incluyen símbolos de programación y glifos de iconos adicionales. Var significa fuente variable. CN/SC indica compatibilidad con glifos de chino simplificado.\n\nToca una fuente instalada para seleccionarla. Toca una fuente no instalada para abrir la confirmación de descarga. Desliza a la derecha para descargar o actualizar y a la izquierda para eliminar.\n\nEn la vista previa, usa Lista y Filtro para elegir fuentes, Anterior y Siguiente para recorrerlas, Salir para restaurar la fuente original y Usar para conservar la actual. Si no está instalada, Usar cambia a Descargar; durante la descarga cambia a Detener. Al terminar, la vista previa se aplica de inmediato. Los filtros se guardan y se pueden restablecer.</string>
     <string name="description_ace_editor_font_preference">Elige la fuente del editor Ace. La lista incluye la fuente monoespaciada del sistema Android y fuentes de código abierto con información de autor o desarrollador; Android y el fabricante del dispositivo determinan la fuente monoespaciada real del sistema.</string>
     <string name="description_ace_font_ligatures_enabled_preference">Activa las ligaduras OpenType en las fuentes compatibles. Los operadores como ===, !==, =&gt; y &lt;= pueden mostrarse como glifos unidos. Esto solo cambia la presentación del código.</string>
     <string name="description_ace_font_styles_enabled_preference">Permite que los temas de Ace y el resaltado de sintaxis usen negrita, cursiva y otros estilos de fuente. Al desactivarlo, el texto del código usa el estilo normal sin cambiar los colores ni el contenido.</string>
     <string name="description_ace_indent_guides_enabled_preference">Muestra u oculta las guías verticales de sangría en el área de código. Esto solo cambia la presentación del código.</string>
     <string name="description_ace_line_numbers_enabled_preference">Muestra u oculta los números de línea del margen lateral del editor. El plegado, los puntos de interrupción y la disposición del margen siguen disponibles.</string>
-    <string name="description_ace_lsp_enabled_preference">La vista previa de compatibilidad con LSP está desactivada de forma predeterminada. Al activarla, el editor usa un servicio de lenguaje TypeScript local para autocompletado, información al pasar el puntero, ayuda de firmas y diagnósticos; conserva el autocompletado estático como alternativa.</string>
+    <string name="description_ace_lsp_enabled_preference">El autocompletado inteligente LSP está activado de forma predeterminada. El editor usa el servicio de lenguaje TypeScript incluido para autocompletado, información al pasar el puntero, ayuda de firmas y diagnósticos; conserva el autocompletado estático como alternativa. Puede desactivarse en cualquier momento.</string>
     <string name="description_ace_lsp_file_types_preference">LSP solo se inicia para archivos cuyos nombres terminan con uno de los sufijos seleccionados. Usar valores predeterminados restaura el conjunto de sufijos de JavaScript, TypeScript, JSON, Auto.js y Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">Muestra u oculta la guía del margen de impresión del editor Ace. Es la línea de límite de columna del lado derecho y solo cambia la presentación del código.</string>
     <string name="description_ace_word_wrap_enabled_preference">Activa el ajuste de línea del editor para líneas largas. Esto no modifica el contenido del archivo.</string>
@@ -98,6 +99,7 @@
     <string name="description_editor_gutter_width_mode_preference">El ancho dinámico sigue la cantidad de dígitos de los números de línea visibles. El ancho fijo reserva un mínimo estable y solo aumenta cuando lo exigen números de línea visibles más grandes.</string>
     <string name="description_editor_large_file_mode_threshold">Determina si se usa el modo de archivo grande para cargar archivos según el tamano del archivo.\nEl modo de archivo grande puede mejorar en cierta medida la eficiencia y la estabilidad de carga, pero las funciones \"Deshacer\" y \"Rehacer\" se desactivaran en este modo.</string>
     <string name="description_editor_log_button_behavior_preference">Controla como el boton \"Registros\" del menu del editor de codigo abre los registros.\n\nPanel inferior de registros: Abre el panel inferior de registros. Puedes entrar en la página de registros a pantalla completa tocando el boton \"Maximizar\" o arrastrando hacia arriba el asa hasta cerca de la parte superior.\nPágina de registros a pantalla completa: Entra directamente en la página de registros a pantalla completa.</string>
+    <string name="description_editor_theme_dialog">Los temas del editor controlan los colores de sintaxis y el aspecto del área de edición. En la vista previa, usa Lista para elegir un tema, Todo/Oscuro/Claro para alternar el filtro, Anterior y Siguiente para recorrerlos, Salir para restaurar el tema original y Usar para conservar el actual.</string>
     <string name="description_editor_theme_mode_preference">Elige si el editor recuerda temas separados para los modos claro y oscuro de AutoJs6 o usa un único tema compartido en ambos modos.</string>
     <string name="description_editor_word_wrap_indent_style_preference">La sangría de continuación alinea las líneas visuales ajustadas con la sangría original. La continuación sin sangría inicia las líneas visuales ajustadas en el borde del área visible.</string>
     <string name="description_extending_js_build_in_objects">La ampliación de los objetos incorporados de JavaScript puede aumentar la flexibilidad del código y permitir una funcionalidad más rica, pero puede causar conflictos e incluso roturas.\nTodos los scripts tienen las extensiones incorporadas habilitadas por defecto cuando la opción está activada.\nLas extensiones incorporadas suelen ser inseguras y no se recomiendan a menos que se comprendan claramente los principios y riesgos de las extensiones incorporadas.\nCuando la opción está desactivada, las extensiones incorporadas aún pueden ser habilitadas a través del objeto global plugins, como se describe en la documentación del proyecto.</string>
@@ -507,7 +509,7 @@
     <string name="summary_ace_font_styles_enabled">Permitir negrita, cursiva y otros estilos de la fuente de código</string>
     <string name="summary_ace_indent_guides_enabled">Mostrar guías verticales para la sangría del código</string>
     <string name="summary_ace_line_numbers_enabled">Mostrar números de línea en el margen lateral del editor</string>
-    <string name="summary_ace_lsp_enabled">Activar la vista previa de la asistencia del editor mediante LSP</string>
+    <string name="summary_ace_lsp_enabled">Activar la asistencia del editor mediante LSP</string>
     <string name="summary_ace_lsp_file_types">Elegir los tipos de archivo que pueden usar funciones de LSP</string>
     <string name="summary_ace_print_margin_enabled">Mostrar la guía de límite de columna del lado derecho</string>
     <string name="summary_ace_word_wrap_enabled">Ajustar las líneas largas dentro del área visible del editor</string>
@@ -590,7 +592,23 @@
     <string name="text_ace_editor_debug_text_length">Longitud del texto de Ace: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">El editor Ace falló (%1$s); se cambió a JsDroidEditor. Copia el diagnóstico de Ace desde el menú Más para obtener detalles</string>
     <string name="text_ace_editor_font">Fuente del editor</string>
+    <string name="text_ace_editor_font_built_in">Integrado</string>
     <string name="text_ace_editor_font_changed" formatted="true">La fuente del editor cambió a %s</string>
+    <string name="text_ace_editor_font_delete_confirmation" formatted="true">¿Eliminar la fuente descargada %1$s?</string>
+    <string name="text_ace_editor_font_download_all_completed" formatted="true">Descargas de fuentes completadas: %1$d correctas</string>
+    <string name="text_ace_editor_font_download_all_confirmation" formatted="true">Fuentes disponibles para descargar: %1$d (%2$s). ¿Descargarlas ahora? Se incluyen las actualizaciones.</string>
+    <string name="text_ace_editor_font_download_all_empty">Todas las fuentes disponibles ya están instaladas o en proceso de descarga</string>
+    <string name="text_ace_editor_font_download_all_result" formatted="true">Descargas de fuentes finalizadas: %1$d correctas, %2$d fallidas o canceladas</string>
+    <string name="text_ace_editor_font_download_all_running">La descarga de todas las fuentes ya está en curso</string>
+    <string name="text_ace_editor_font_download_confirmation" formatted="true">¿Descargar %1$s (%2$s)?</string>
+    <string name="text_ace_editor_font_download_failed" formatted="true">La descarga de la fuente falló: %1$s</string>
+    <string name="text_ace_editor_font_download_to_use">Descarga esta fuente para usarla</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (chino simplificado)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (glifos de iconos)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (fuente variable)</string>
+    <string name="text_ace_editor_font_integrity_failed">La fuente descargada no superó la verificación de integridad</string>
+    <string name="text_ace_editor_font_license">Licencia</string>
+    <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
     <string name="text_ace_font_ligatures_enabled">Ligaduras de fuente</string>
     <string name="text_ace_font_styles_enabled">Estilos de fuente</string>
     <string name="text_ace_get_text">Obtener texto</string>
@@ -601,7 +619,7 @@
     <string name="text_ace_insert">Insertar</string>
     <string name="text_ace_large_file_uses_native_editor">La política de alternativa activa dirige el editor Ace a JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">Números de línea</string>
-    <string name="text_ace_lsp_enabled">Autocompletado inteligente LSP (vista previa)</string>
+    <string name="text_ace_lsp_enabled">Autocompletado inteligente LSP</string>
     <string name="text_ace_lsp_file_types">Tipos de archivo LSP</string>
     <string name="text_ace_no_last_action">No hay una última acción del editor</string>
     <string name="text_ace_print_margin_enabled">Margen de impresión</string>
@@ -890,6 +908,7 @@
     <string name="text_documentation_source">Fuente de la documentación</string>
     <string name="text_done">Hecho</string>
     <string name="text_download">Descargar</string>
+    <string name="text_download_all">Descargar todo</string>
     <string name="text_download_and_install_autojs6_including_above_abi">Descargue e instale la versión de AutoJs6 que incluye la ABI anterior (el nombre del archivo contiene \"%s\")</string>
     <string name="text_download_and_install_autojs6_including_all_abis">Descargar e instalar la versión de AutoJs6 que incluye todas las ABIs (el nombre del archivo contiene \"universal\")</string>
     <string name="text_download_cancelled">Descarga cancelada</string>
@@ -1538,6 +1557,7 @@
     <string name="text_sort">Ordenar</string>
     <string name="text_sort_ascending">Ascendente</string>
     <string name="text_sort_by_name_asc">Nombre (A-Z)</string>
+    <string name="text_sort_by_name_desc">Nombre (Z-A)</string>
     <string name="text_sort_by_path_asc">Ruta (A-Z)</string>
     <string name="text_sort_by_size_asc">Tamano (mas pequeno primero)</string>
     <string name="text_sort_by_size_desc">Tamano (mas grande primero)</string>

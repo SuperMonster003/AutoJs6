@@ -199,6 +199,11 @@ public class MDRootLayout extends ViewGroup {
         noTitleNoPadding = true;
     }
 
+    /** Sets the vertical padding outside the action-button frame. */
+    public void setButtonBarPadding(int verticalPadding) {
+        buttonPaddingFull = Math.max(0, verticalPadding);
+    }
+
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();

@@ -8,6 +8,9 @@
     var staticCompleter = null;
     var lspCompletionCompleter = null;
     var lspClient = null;
+    var lastPublishedLspStateJson = "";
+    var lspWarmUpHandle = null;
+    var lspWarmUpUsesIdleCallback = false;
     var tooltipController = null;
     var signatureHelpController = null;
     var dirty = false;
@@ -29,6 +32,10 @@
     var memberCompletionRestartTimer = null;
     var fontMetricsRefreshTimer = null;
     var fontMetricsRefreshFrameScheduled = false;
+    var fontMetricsReadySerial = 0;
+    var bundledFontLoadPending = false;
+    var bundledFontLoadSettled = false;
+    var bundledFontLoadTimer = null;
     var lastActionModeSelectedText = "";
     var nativeActionModeActive = false;
     var selectionMenuSuppressed = false;
@@ -78,7 +85,13 @@
     var lastImeTextInputSelectionNotifyAt = 0;
     var imeTextInputSelectionSuppressUntil = 0;
     var imeTextInputSelectionSuppressReason = "";
-    var DEFAULT_FONT_FAMILY = '"JetBrains Mono", "Source Code Pro", monospace';
+    var BUNDLED_FONT_FAMILY = '"Iosevka", monospace';
+    var SYSTEM_FONT_FAMILY = "monospace";
+    var DEFAULT_FONT_FAMILY = BUNDLED_FONT_FAMILY;
+    var fontDescriptorRequestSerial = 0;
+    var installedFontLoads = Object.create(null);
+    var activeInstalledFontFace = null;
+    var pendingFontDescriptorLoad = null;
     var STATE_NOTIFY_THROTTLE_MS = 100;
     var TEXT_NOTIFY_THROTTLE_MS = 100;
     var CURSOR_NOTIFY_THROTTLE_MS = 50;
@@ -92,6 +105,10 @@
     var IME_TEXT_INPUT_PROGRAMMATIC_SELECTION_SUPPRESS_MS = 800;
     var FIRST_PAINT_STABLE_FRAME_COUNT = 3;
     var FIRST_PAINT_MAX_WAIT_MS = 1800;
+    var BUNDLED_FONT_LOAD_TIMEOUT_MS = 5000;
+    var FONT_LOAD_TIMEOUT_MS = 30000;
+    var BUNDLED_FONT_LOAD_PROBE = '14px "Iosevka"';
+    var INSTALLED_FONT_URL_PREFIX = "https://appassets.androidplatform.net/autojs6-fonts/";
     var PINCH_CURSOR_REVEAL_SUPPRESS_MS = 3000;
     var PINCH_IME_SUPPRESS_MS = 1800;
     var PINCH_POST_TOUCH_SUPPRESS_MS = 650;
@@ -219,6 +236,386 @@
         return resolved;
     }
 
+    function normalizeFontDescriptor(value) {
+        var descriptor = value;
+        if (typeof descriptor === "string") {
+            if (!descriptor.trim()) {
+                throw new Error("Font descriptor is empty");
+            }
+            descriptor = JSON.parse(descriptor);
+        }
+        if (!descriptor || typeof descriptor !== "object" || Array.isArray(descriptor)) {
+            throw new Error("Font descriptor must be a JSON object");
+        }
+
+        var source = String(descriptor.source || descriptor.type || "").trim().toLowerCase();
+        if (source !== "system" && source !== "bundled" && source !== "installed") {
+            throw new Error("Unsupported font descriptor source: " + source);
+        }
+
+        var normalized = {
+            source: source,
+            id: String(descriptor.id || "").trim(),
+            family: String(descriptor.family || descriptor.fontFamily || "").trim(),
+            url: String(descriptor.url || "").trim(),
+            sha256: String(descriptor.sha256 || descriptor.digest || "").trim().toLowerCase(),
+            format: String(descriptor.format || "woff2").trim().toLowerCase()
+        };
+
+        if (source === "system") {
+            normalized.id = normalized.id || "system_monospace";
+            normalized.family = "monospace";
+            normalized.url = "";
+            normalized.sha256 = "";
+            return normalized;
+        }
+
+        if (source === "bundled") {
+            normalized.id = normalized.id || "iosevka";
+            if (normalized.id !== "iosevka") {
+                throw new Error("Unsupported bundled font: " + normalized.id);
+            }
+            normalized.family = "Iosevka";
+            normalized.url = "";
+            normalized.sha256 = "";
+            return normalized;
+        }
+
+        if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(normalized.id)) {
+            throw new Error("Installed font id is missing or invalid");
+        }
+        if (!normalized.url || normalized.url.length > 4096 || /[\u0000-\u001f\u007f]/.test(normalized.url)) {
+            throw new Error("Installed font URL is missing or invalid");
+        }
+        if (normalized.format !== "woff2") {
+            throw new Error("Unsupported installed font format: " + normalized.format);
+        }
+        if (!/^[a-f0-9]{64}$/.test(normalized.sha256)) {
+            throw new Error("Installed font SHA-256 is invalid");
+        }
+        var expectedUrl = INSTALLED_FONT_URL_PREFIX + encodeURIComponent(normalized.id) + "/" + normalized.sha256 + ".woff2";
+        if (normalized.url !== expectedUrl) {
+            throw new Error("Installed font URL does not match its verified virtual asset route");
+        }
+        if (!normalized.family) {
+            normalized.family = normalized.id;
+        }
+        return normalized;
+    }
+
+    function fontDescriptorInitialFamily(descriptor) {
+        return descriptor && descriptor.source === "system" ? SYSTEM_FONT_FAMILY : DEFAULT_FONT_FAMILY;
+    }
+
+    function fontAliasHash(value) {
+        var hash = 2166136261;
+        var text = String(value || "");
+        for (var i = 0; i < text.length; i += 1) {
+            hash ^= text.charCodeAt(i);
+            hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+        }
+        return ("00000000" + (hash >>> 0).toString(16)).slice(-8);
+    }
+
+    function installedFontAlias(descriptor) {
+        var safeId = descriptor.id.replace(/[^A-Za-z0-9_]/g, "_").slice(0, 48) || "font";
+        var identity = [descriptor.id, descriptor.sha256, descriptor.url].join("\n");
+        return "AutoJs6Font_" + safeId + "_" + fontAliasHash(identity);
+    }
+
+    function cssString(value) {
+        return '"' + String(value || "")
+            .replace(/\\/g, "\\\\")
+            .replace(/"/g, '\\"') + '"';
+    }
+
+    function installedFontCacheKey(descriptor) {
+        return [descriptor.id, descriptor.sha256, descriptor.url].join("\n");
+    }
+
+    function installedFontDecodeError(error) {
+        var message = String(error && error.message ? error.message : error || "Installed font decoding failed");
+        var wrapped = new Error(message);
+        wrapped.autojs6InvalidateInstalledFontCache = true;
+        return wrapped;
+    }
+
+    function loadInstalledFont(descriptor) {
+        if (typeof global.FontFace !== "function" || !document.fonts || typeof document.fonts.add !== "function") {
+            throw new Error("This WebView does not support dynamic FontFace loading");
+        }
+
+        var cacheKey = installedFontCacheKey(descriptor);
+        var cached = installedFontLoads[cacheKey];
+        if (cached) {
+            return cached.promise;
+        }
+
+        var alias = installedFontAlias(descriptor);
+        var source = "url(" + cssString(descriptor.url) + ') format("woff2")';
+        var face = new global.FontFace(alias, source, {
+            style: "normal",
+            weight: "400"
+        });
+        var entry = {
+            alias: alias,
+            face: face,
+            promise: null
+        };
+        installedFontLoads[cacheKey] = entry;
+        try {
+            var loadResult = face.load();
+            entry.promise = new Promise(function(resolve, reject) {
+                var settled = false;
+                var timeout = global.setTimeout(function() {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    if (installedFontLoads[cacheKey] === entry) {
+                        delete installedFontLoads[cacheKey];
+                    }
+                    reject(new Error("Timed out while loading installed font"));
+                }, FONT_LOAD_TIMEOUT_MS);
+
+                Promise.resolve(loadResult).then(function() {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    global.clearTimeout(timeout);
+                    resolve(entry);
+                }, function(error) {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    global.clearTimeout(timeout);
+                    if (installedFontLoads[cacheKey] === entry) {
+                        delete installedFontLoads[cacheKey];
+                    }
+                    reject(installedFontDecodeError(error));
+                });
+            });
+        } catch (error) {
+            delete installedFontLoads[cacheKey];
+            throw error;
+        }
+        return entry.promise;
+    }
+
+    function replaceActiveInstalledFontFace(nextFace) {
+        if (
+            activeInstalledFontFace &&
+            activeInstalledFontFace !== nextFace &&
+            document.fonts &&
+            typeof document.fonts.delete === "function"
+        ) {
+            try {
+                document.fonts.delete(activeInstalledFontFace);
+            } catch (ignore) {
+                // The loaded face can remain registered without affecting the selected family.
+            }
+        }
+        activeInstalledFontFace = nextFace || null;
+    }
+
+    function ensureBundledFontLoaded() {
+        if (bundledFontLoadSettled || bundledFontLoadPending) {
+            return;
+        }
+        if (!document.fonts || typeof document.fonts.load !== "function") {
+            bundledFontLoadSettled = true;
+            return;
+        }
+
+        bundledFontLoadPending = true;
+        var completed = false;
+        var finish = function(error) {
+            if (completed) {
+                return;
+            }
+            completed = true;
+            bundledFontLoadPending = false;
+            bundledFontLoadSettled = true;
+            if (bundledFontLoadTimer !== null) {
+                global.clearTimeout(bundledFontLoadTimer);
+                bundledFontLoadTimer = null;
+            }
+            if (error) {
+                notifyRecoverableError("bundledFontLoad", error);
+                return;
+            }
+            scheduleFontMetricsRefresh("bundled_font_ready");
+        };
+
+        var loadResult;
+        try {
+            loadResult = document.fonts.load(BUNDLED_FONT_LOAD_PROBE);
+        } catch (error) {
+            finish(error);
+            return;
+        }
+        bundledFontLoadTimer = global.setTimeout(function() {
+            finish(new Error("Timed out while loading bundled Iosevka font"));
+        }, BUNDLED_FONT_LOAD_TIMEOUT_MS);
+        Promise.resolve(loadResult).then(function() {
+            finish(null);
+        }, finish);
+    }
+
+    function applyFontFamilyAndRefresh(fontFamily, reason) {
+        var resolved = applyFontFamily(fontFamily);
+        if (editor && editor.setOption) {
+            editor.setOption("fontFamily", resolved);
+            forceRendererCoordinateRefresh(reason || "font_family_changed");
+            scheduleFontMetricsRefresh(reason || "font_family_changed");
+            scheduleResize(reason || "font_family_changed");
+        }
+        return resolved;
+    }
+
+    function notifyFontChanged(descriptor, cssFamily, alias) {
+        callBridge("notifyEvent", [
+            "fontChanged",
+            JSON.stringify({
+                id: descriptor.id,
+                source: descriptor.source,
+                family: descriptor.family,
+                cssFamily: cssFamily,
+                alias: alias || ""
+            })
+        ]);
+    }
+
+    function notifyFontLoadError(descriptor, error) {
+        var message = String(error && error.message ? error.message : error || "Unknown font load error");
+        callBridge("notifyEvent", [
+            "fontLoadError",
+            JSON.stringify({
+                id: descriptor && descriptor.id ? descriptor.id : "",
+                source: descriptor && descriptor.source ? descriptor.source : "",
+                sha256: descriptor && descriptor.sha256 ? descriptor.sha256 : "",
+                error: message,
+                recoverable: true,
+                invalidateInstalledCache: !!(
+                    error && error.autojs6InvalidateInstalledFontCache === true
+                )
+            })
+        ]);
+        notifyRecoverableError("fontLoad", error || new Error(message));
+    }
+
+    function commitFontDescriptor(descriptor, entry) {
+        var cssFamily;
+        var alias = "";
+        if (descriptor.source === "system") {
+            replaceActiveInstalledFontFace(null);
+            cssFamily = SYSTEM_FONT_FAMILY;
+        } else if (descriptor.source === "bundled") {
+            ensureBundledFontLoaded();
+            replaceActiveInstalledFontFace(null);
+            cssFamily = BUNDLED_FONT_FAMILY;
+        } else {
+            if (!entry || !entry.face || !entry.alias) {
+                throw new Error("Installed font did not finish loading");
+            }
+            document.fonts.add(entry.face);
+            replaceActiveInstalledFontFace(entry.face);
+            alias = entry.alias;
+            cssFamily = '"' + alias + '", ' + BUNDLED_FONT_FAMILY;
+        }
+        cssFamily = applyFontFamilyAndRefresh(cssFamily, "font_descriptor_changed");
+        notifyStateChanged("fontFamilyChanged");
+        notifyFontChanged(descriptor, cssFamily, alias);
+        return true;
+    }
+
+    function applyFontLoadFallback(descriptor, error) {
+        try {
+            ensureBundledFontLoaded();
+            replaceActiveInstalledFontFace(null);
+            applyFontFamilyAndRefresh(BUNDLED_FONT_FAMILY, "font_load_fallback");
+            notifyStateChanged("fontFamilyFallback");
+        } catch (fallbackError) {
+            notifyRecoverableError("fontFallback", fallbackError);
+        }
+        notifyFontLoadError(descriptor, error);
+        return false;
+    }
+
+    function clearPendingFontDescriptorLoad(requestSerial) {
+        if (pendingFontDescriptorLoad && pendingFontDescriptorLoad.requestSerial === requestSerial) {
+            pendingFontDescriptorLoad = null;
+        }
+    }
+
+    function fallbackWhilePendingFontLoadsForFirstPaint() {
+        if (!pendingFontDescriptorLoad) {
+            return false;
+        }
+        if (pendingFontDescriptorLoad.firstPaintFallbackApplied) {
+            return false;
+        }
+        pendingFontDescriptorLoad.firstPaintFallbackApplied = true;
+        try {
+            ensureBundledFontLoaded();
+            replaceActiveInstalledFontFace(null);
+            applyFontFamilyAndRefresh(BUNDLED_FONT_FAMILY, "font_first_paint_fallback");
+            notifyStateChanged("fontFamilyFirstPaintFallback");
+        } catch (error) {
+            notifyRecoverableError("fontFirstPaintFallback", error);
+        }
+        return true;
+    }
+
+    function setFontDescriptor(value) {
+        var requestSerial = ++fontDescriptorRequestSerial;
+        pendingFontDescriptorLoad = null;
+        var descriptor;
+        try {
+            descriptor = normalizeFontDescriptor(value);
+        } catch (error) {
+            return Promise.resolve(applyFontLoadFallback(null, error));
+        }
+
+        if (descriptor.source !== "installed") {
+            try {
+                return Promise.resolve(commitFontDescriptor(descriptor, null));
+            } catch (error) {
+                return Promise.resolve(applyFontLoadFallback(descriptor, error));
+            }
+        }
+
+        var loadPromise;
+        try {
+            loadPromise = loadInstalledFont(descriptor);
+        } catch (error) {
+            return Promise.resolve(applyFontLoadFallback(descriptor, error));
+        }
+        pendingFontDescriptorLoad = {
+            requestSerial: requestSerial,
+            descriptor: descriptor
+        };
+        return loadPromise.then(function(entry) {
+            if (requestSerial !== fontDescriptorRequestSerial) {
+                return false;
+            }
+            clearPendingFontDescriptorLoad(requestSerial);
+            try {
+                return commitFontDescriptor(descriptor, entry);
+            } catch (error) {
+                return applyFontLoadFallback(descriptor, error);
+            }
+        }, function(error) {
+            if (requestSerial !== fontDescriptorRequestSerial) {
+                return false;
+            }
+            clearPendingFontDescriptorLoad(requestSerial);
+            return applyFontLoadFallback(descriptor, error);
+        });
+    }
+
     function applyFontLigaturesEnabled(enabled) {
         var enabledValue = enabled === true || String(enabled).toLowerCase() === "true";
         if (document && document.documentElement && document.documentElement.style) {
@@ -258,16 +655,64 @@
     }
 
     function warmUpLspAfterFirstPaint() {
-        if (!lspClient || typeof lspClient.warmUp !== "function") {
+        if (!lspClient || typeof lspClient.warmUp !== "function" || lspWarmUpHandle !== null) {
             return;
         }
-        setTimeout(function() {
+        var run = function() {
+            lspWarmUpHandle = null;
+            lspWarmUpUsesIdleCallback = false;
             try {
-                lspClient.warmUp();
+                lspClient.warmUp(function(ok, state) {
+                    publishLspState(state);
+                });
             } catch (error) {
                 notifyRecoverableError("lspWarmUp", error);
             }
-        }, 48);
+        };
+        if (typeof global.requestIdleCallback === "function") {
+            lspWarmUpUsesIdleCallback = true;
+            lspWarmUpHandle = global.requestIdleCallback(run, { timeout: 1500 });
+        } else {
+            lspWarmUpHandle = setTimeout(run, 250);
+        }
+    }
+
+    function publishLspState(state) {
+        if (!state && lspClient && typeof lspClient.getState === "function") {
+            state = lspClient.getState();
+        }
+        if (state) {
+            var json = JSON.stringify(state);
+            if (json !== lastPublishedLspStateJson) {
+                lastPublishedLspStateJson = json;
+                callBridge("notifyEvent", ["lspStateChanged", json]);
+            }
+        }
+        return state || null;
+    }
+
+    function refreshLspAndPublish() {
+        return publishLspState(lspClient && lspClient.refresh ? lspClient.refresh() : null);
+    }
+
+    function getLspStateAndPublish() {
+        return publishLspState(lspClient && lspClient.getState ? lspClient.getState() : null);
+    }
+
+    function destroyLspClient() {
+        if (lspWarmUpHandle !== null) {
+            if (lspWarmUpUsesIdleCallback && typeof global.cancelIdleCallback === "function") {
+                global.cancelIdleCallback(lspWarmUpHandle);
+            } else {
+                clearTimeout(lspWarmUpHandle);
+            }
+            lspWarmUpHandle = null;
+            lspWarmUpUsesIdleCallback = false;
+        }
+        if (lspClient && typeof lspClient.destroy === "function") {
+            lspClient.destroy();
+            publishLspState(lspClient.getState ? lspClient.getState() : null);
+        }
     }
 
     function afterTwoFrames(callback) {
@@ -357,7 +802,9 @@
             !!textLayer &&
             lineHeight > 0 &&
             characterWidth > 0 &&
-            themeReady;
+            themeReady &&
+            !pendingFontDescriptorLoad &&
+            !bundledFontLoadPending;
         var containerStyle = computedStyleOf(container);
         var gutterStyle = computedStyleOf(gutter);
         return {
@@ -370,6 +817,8 @@
                 Math.round(gutterRect.width),
                 Math.round(lineHeight),
                 Math.round(characterWidth),
+                pendingFontDescriptorLoad ? "font-loading" : "font-ready",
+                bundledFontLoadPending ? "bundled-font-loading" : "bundled-font-ready",
                 container.className,
                 containerStyle && containerStyle.backgroundColor || "",
                 gutterStyle && gutterStyle.backgroundColor || ""
@@ -394,15 +843,18 @@
             return;
         }
         if (firstPaintRequestStartedAt > 0 && now - firstPaintRequestStartedAt >= FIRST_PAINT_MAX_WAIT_MS) {
-            callBridge("notifyEvent", [
-                "firstPaintForced",
-                JSON.stringify({
-                    reason: String(reason || ""),
-                    signature: String(snapshot.signature || "")
-                })
-            ]);
-            notifyFirstPaint();
-            return;
+            fallbackWhilePendingFontLoadsForFirstPaint();
+            if (!bundledFontLoadPending) {
+                callBridge("notifyEvent", [
+                    "firstPaintForced",
+                    JSON.stringify({
+                        reason: String(reason || ""),
+                        signature: String(snapshot.signature || "")
+                    })
+                ]);
+                notifyFirstPaint();
+                return;
+            }
         }
         var raf = global.requestAnimationFrame || function(run) { return setTimeout(run, 16); };
         raf(function() {
@@ -2011,10 +2463,13 @@
     }
 
     function shouldSkipCursorReveal(reason) {
+        reason = String(reason || "").toLowerCase();
+        if (isFontFamilyMetricsRefreshReason(reason)) {
+            return true;
+        }
         if (!hasActiveSelection()) {
             return false;
         }
-        reason = String(reason || "").toLowerCase();
         if (isExplicitViewportRevealReason(reason)) {
             return false;
         }
@@ -2028,6 +2483,13 @@
             reason.indexOf("resize:") === 0 ||
             reason.indexOf("action_mode") >= 0 ||
             reason.indexOf("window_resize") >= 0;
+    }
+
+    function isFontFamilyMetricsRefreshReason(reason) {
+        return reason.indexOf("font_descriptor") >= 0 ||
+            reason.indexOf("font_family") >= 0 ||
+            reason.indexOf("font_load_fallback") >= 0 ||
+            reason.indexOf("font_first_paint_fallback") >= 0;
     }
 
     function isExplicitViewportRevealReason(reason) {
@@ -2467,6 +2929,54 @@
         return true;
     }
 
+    function insertLspCompletion(activeEditor, completion) {
+        if (!completion || !completion.autojs6Ts || !completion.replaceRange) {
+            return staticCompleter && typeof staticCompleter.insertMatch === "function" ?
+                staticCompleter.insertMatch(activeEditor, completion) : false;
+        }
+        var activeSession = activeEditor && activeEditor.session;
+        var replaceRange = completion.replaceRange;
+        if (!activeSession || typeof activeSession.replace !== "function" ||
+            !replaceRange.start || !replaceRange.end) {
+            return false;
+        }
+        var range = Range ? new Range(
+            replaceRange.start.row,
+            replaceRange.start.column,
+            replaceRange.end.row,
+            replaceRange.end.column
+        ) : replaceRange;
+        if (completion.snippet) {
+            activeSession.replace(range, "");
+            if (activeEditor && typeof activeEditor.moveCursorTo === "function") {
+                activeEditor.moveCursorTo(range.start.row, range.start.column);
+            }
+            try {
+                var snippetManager = global.ace.require("ace/snippets").snippetManager;
+                if (snippetManager && typeof snippetManager.insertSnippet === "function") {
+                    snippetManager.insertSnippet(activeEditor, completion.snippet);
+                    return true;
+                }
+            } catch (ignore) {
+                // Fall through to plain insertion when the snippet module is unavailable.
+            }
+            var plainSnippet = String(completion.snippet || "")
+                .replace(/\$\{\d+:([^}]*)\}/g, "$1")
+                .replace(/\$\{\d+\}/g, "")
+                .replace(/\$\d+/g, "");
+            if (activeEditor && typeof activeEditor.insert === "function") {
+                activeEditor.insert(plainSnippet);
+                return true;
+            }
+            return false;
+        }
+        var end = activeSession.replace(range, String(completion.value || completion.caption || ""));
+        if (end && activeEditor && typeof activeEditor.moveCursorTo === "function") {
+            activeEditor.moveCursorTo(end.row, end.column);
+        }
+        return true;
+    }
+
     function installLspCompletionCompleter() {
         if (lspCompletionCompleter || !lspClient) {
             return;
@@ -2483,7 +2993,10 @@
                     callback(null, []);
                     return;
                 }
-                lspClient.getCompletions(activeEditor, activeSession, pos, prefix, callback);
+                lspClient.getCompletions(activeEditor, activeSession, pos, prefix, function(error, results) {
+                    publishLspState();
+                    callback(error, results);
+                });
             },
             getDocTooltip: function(item) {
                 if (item && item.docText) {
@@ -2495,10 +3008,7 @@
                 return null;
             },
             insertMatch: function(activeEditor, completion) {
-                if (staticCompleter && typeof staticCompleter.insertMatch === "function") {
-                    return staticCompleter.insertMatch(activeEditor, completion);
-                }
-                return false;
+                return insertLspCompletion(activeEditor, completion);
             }
         };
         languageTools.addCompleter(lspCompletionCompleter);
@@ -2761,6 +3271,7 @@
     }
 
     function scheduleFontMetricsRefresh(reason) {
+        var readySerial = ++fontMetricsReadySerial;
         var refresh = function() {
             fontMetricsRefreshFrameScheduled = false;
             forceRendererCoordinateRefresh(reason || "font_size_deferred");
@@ -2779,6 +3290,15 @@
             fontMetricsRefreshTimer = null;
             forceRendererCoordinateRefresh(reason || "font_size_deferred");
         }, 32);
+        if (document.fonts && document.fonts.ready) {
+            Promise.resolve(document.fonts.ready).then(function() {
+                if (readySerial === fontMetricsReadySerial) {
+                    forceRendererCoordinateRefresh(reason || "font_ready");
+                }
+            }, function() {
+                // The immediate/frame/timer refreshes remain the compatibility fallback.
+            });
+        }
     }
 
     function setFontSizeSp(size) {
@@ -2883,7 +3403,10 @@
     }
 
     function setFontFamily(fontFamily) {
-        editor.setOption("fontFamily", applyFontFamily(fontFamily));
+        fontDescriptorRequestSerial += 1;
+        pendingFontDescriptorLoad = null;
+        replaceActiveInstalledFontFace(null);
+        applyFontFamilyAndRefresh(fontFamily, "legacy_font_family_changed");
         notifyStateChanged("fontFamilyChanged");
     }
 
@@ -3632,7 +4155,21 @@
         breakpointMarkersEnabled = callBridgeBoolean("isBreakpointMarkersEnabled", true);
         foldMarkersEnabled = callBridgeBoolean("isFoldMarkersEnabled", true);
         gutterWidthMode = normalizeGutterWidthMode(callBridgeString("getGutterWidthMode", "dynamic"));
-        var initialFontFamily = applyFontFamily(callBridge("getFontFamily") || DEFAULT_FONT_FAMILY);
+        var initialFontDescriptor = null;
+        var initialFontDescriptorValue = callBridge("getFontDescriptor");
+        var hasInitialFontDescriptor = initialFontDescriptorValue !== null &&
+            typeof initialFontDescriptorValue !== "undefined" &&
+            !!String(initialFontDescriptorValue).trim();
+        if (hasInitialFontDescriptor) {
+            try {
+                initialFontDescriptor = normalizeFontDescriptor(initialFontDescriptorValue);
+            } catch (error) {
+                notifyRecoverableError("initialFontDescriptor", error);
+            }
+        }
+        var initialFontFamily = initialFontDescriptor ?
+            applyFontFamily(fontDescriptorInitialFamily(initialFontDescriptor)) :
+            applyFontFamily(hasInitialFontDescriptor ? DEFAULT_FONT_FAMILY : callBridge("getFontFamily") || DEFAULT_FONT_FAMILY);
         applyFontLigaturesEnabled(callBridgeBoolean("isFontLigaturesEnabled", true));
         applyFontStylesEnabled(callBridgeBoolean("isFontStylesEnabled", true));
         applyThemeClass(initialTheme);
@@ -3776,6 +4313,7 @@
             setFontSizeSp: setFontSizeSp,
             setFontSizeSpKeepingFocus: setFontSizeSpKeepingFocus,
             setFontFamily: setFontFamily,
+            setFontDescriptor: setFontDescriptor,
             setFontLigaturesEnabled: setFontLigaturesEnabled,
             setFontStylesEnabled: setFontStylesEnabled,
             setWordWrapEnabled: setWordWrapEnabled,
@@ -3797,16 +4335,20 @@
             read: function(uri) { return callBridge("read", [uri || ""]); },
             write: function(uri, text) { return callBridge("write", [uri || "", text || ""]); },
             getLspOptions: function() { return callBridge("getLspOptions") || "{}"; },
-            refreshLsp: function() { return lspClient ? lspClient.refresh() : null; },
-            getLspState: function() { return lspClient ? lspClient.getState() : null; },
+            refreshLsp: function() { return refreshLspAndPublish(); },
+            getLspState: function() { return getLspStateAndPublish(); },
             getLspHover: function(row, column) {
-                return lspClient ? lspClient.getHover({ row: row, column: column }) : null;
+                var result = lspClient ? lspClient.getHover({ row: row, column: column }) : null;
+                publishLspState();
+                return result;
             },
             getLspDiagnostics: function() {
                 return lspClient && lspClient.getDiagnostics ? lspClient.getDiagnostics() : [];
             },
             validateLsp: function() {
-                return lspClient && lspClient.validateNow ? lspClient.validateNow() : [];
+                var results = lspClient && lspClient.validateNow ? lspClient.validateNow() : [];
+                publishLspState();
+                return results;
             },
             showLspTooltip: function(row, column) {
                 return tooltipController ?
@@ -3823,7 +4365,9 @@
             },
             getSignatureHelp: function(row, column) {
                 if (lspClient && lspClient.getSignatureHelp) {
-                    return lspClient.getSignatureHelp({ row: row, column: column });
+                    var result = lspClient.getSignatureHelp({ row: row, column: column });
+                    publishLspState();
+                    return result;
                 }
                 return global.AutoJsAceSignatureHelp ?
                     global.AutoJsAceSignatureHelp.findSignatureHelp(session, { row: row, column: column }) :
@@ -3844,6 +4388,10 @@
             }
         };
 
+        if (initialFontDescriptor) {
+            setFontDescriptor(initialFontDescriptor);
+        }
+
         if (global.AutoJsAceLspClient) {
             try {
                 lspClient = global.AutoJsAceLspClient.install({
@@ -3859,6 +4407,10 @@
                     notifyError: notifyLspError
                 });
                 installLspCompletionCompleter();
+                publishLspState();
+                if (global.addEventListener) {
+                    global.addEventListener("pagehide", destroyLspClient, { once: true });
+                }
             } catch (error) {
                 notifyLspError("ACE LSP client disabled: " + error, error);
             }
@@ -3870,7 +4422,9 @@
                     editor: editor,
                     session: session,
                     getHover: function(pos) {
-                        return lspClient ? lspClient.getHover(pos) : null;
+                        var result = lspClient ? lspClient.getHover(pos) : null;
+                        publishLspState();
+                        return result;
                     },
                     notifyError: function(message, error) {
                         notifyRecoverableError("tooltip", error || message);
@@ -3888,7 +4442,9 @@
                     session: session,
                     getSignatureHelp: function(pos) {
                         if (lspClient && lspClient.getSignatureHelp) {
-                            return lspClient.getSignatureHelp(pos);
+                            var result = lspClient.getSignatureHelp(pos);
+                            publishLspState();
+                            return result;
                         }
                         return global.AutoJsAceSignatureHelp.findSignatureHelp(session, pos);
                     },

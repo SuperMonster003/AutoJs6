@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text_ace_editor_font_feature_jp">JP (اليابانية)</string>
+    <string name="text_ace_editor_font_feature_mono">Mono (خط أحادي المسافة)</string>
+    <string name="text_ace_editor_font_feature_other">أخرى</string>
+    <string name="text_ace_editor_font_filter_feature_required">حدد ميزة خط واحدة على الأقل</string>
+    <string name="text_ace_editor_font_filter_feature_title">ميزات الخط</string>
+    <string name="text_ace_editor_font_filter_no_matches">لا توجد خطوط تطابق عوامل التصفية المحددة</string>
+    <string name="text_ace_editor_font_filter_type_required">حدد نوع خط واحدًا على الأقل</string>
+    <string name="text_ace_editor_font_filter_type_title">النوع</string>
+    <string name="text_ace_editor_font_sort_type_locked">تثبيت النوع</string>
+</resources>

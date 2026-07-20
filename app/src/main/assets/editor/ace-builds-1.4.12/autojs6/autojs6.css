@@ -1,20 +1,4 @@
 @font-face {
-    font-family: "JetBrains Mono";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("../fonts/jetbrains-mono/JetBrainsMono-Regular.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "Source Code Pro";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("../fonts/source-code-pro/SourceCodePro-Regular.woff2") format("woff2");
-}
-
-@font-face {
     font-family: "Iosevka";
     font-style: normal;
     font-weight: 400;
@@ -22,56 +6,8 @@
     src: url("../fonts/iosevka/Iosevka-Regular.woff2") format("woff2");
 }
 
-@font-face {
-    font-family: "Iosevka Slab";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("../fonts/iosevka-slab/IosevkaSlab-Regular.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "Fira Code";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("../fonts/fira-code/FiraCode-Regular.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "Cascadia Code";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("../fonts/cascadia-code/CascadiaCode-Regular.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "Intel One Mono";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("../fonts/intel-one-mono/IntelOneMono-Regular.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "IBM Plex Mono";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("../fonts/ibm-plex-mono/IBMPlexMono-Regular.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "Hack";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("../fonts/hack/Hack-Regular.woff2") format("woff2");
-}
-
 :root {
-    --autojs6-editor-font-family: "Iosevka", "JetBrains Mono", "Source Code Pro", monospace;
+    --autojs6-editor-font-family: "Iosevka", monospace;
     --autojs6-editor-font-ligatures: normal;
     --autojs6-editor-font-feature-settings: "liga" 1, "calt" 1;
 }

@@ -401,6 +401,42 @@ Record copied ACE diagnostics for every failure or ambiguous result.
 - Gate 8 continues to cover fallback diagnostics export. This smoke covers the
   normal user-facing ACE export path.
 
+## LSP Formal-Release Addendum - 2026-07-20
+
+The default-off entries above are retained as historical evidence for the
+2026-06 experimental baseline. They do not describe the promoted LSP smart
+completion behavior validated in this addendum.
+
+### Devices
+
+| Device | Android / API | Android System WebView |
+| --- | --- | --- |
+| Sony XQ-AT72 | Android 12 / API 31 | 145.0.7632.120 |
+| Sony XQ-DQ72 | Android 13 / API 33 | 150.0.7871.47 |
+
+### Automated and physical-device results
+
+| Check | XQ-AT72 | XQ-DQ72 | Notes |
+| --- | --- | --- | --- |
+| Full ACE release gate | PASS | PASS | Host gate passed API model, generated declarations, completion index, real TypeScript LSP client, tooltip, and signature-help checks. |
+| Fresh preference default | PASS | PASS | Removing the stored LSP preference produced `enabled=true` and `manager=native-local`. |
+| Hot disable/re-enable | PASS | PASS | The same editor page switched to static fallback, disposed the semantic service, then returned to `typescript-language-service` without a WebView reload. |
+| Semantic providers | PASS | PASS | Bundled TypeScript completion, hover/JSDoc, signature help, and semantic diagnostics were exercised; Native diagnostics received sanitized `serviceStatus=ready` and `tsReady=true` runtime state. |
+| Static isolation/fallback | PASS | PASS | Explicit disable retained local static completion/tooltip behavior without creating the TypeScript service. |
+
+Commands:
+
+```powershell
+node tools/ace-ci/check-ace-release-gate.mjs
+.\gradlew.bat :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.ui.edit.editor.ace.AceCodeEditorSmokeTest#lspDefaultsOnAndCanBeEnabledWithoutReloadingEditor" "-Pautojs.gradle.build.number.auto.increment.enabled=false" "-Pautojs.gradle.build.time.update.enabled=false"
+.\gradlew.bat :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.ui.edit.editor.ace.AceCodeEditorSmokeTest#tooltipAndLspFallbackStayStaticAndLocal" "-Pautojs.gradle.build.number.auto.increment.enabled=false" "-Pautojs.gradle.build.time.update.enabled=false"
+```
+
+Both instrumentation commands completed one test on each device with zero
+failures. This accepts the bundled, in-process TypeScript 4.2.4 single-document
+service as a formal default-on feature. It does not promote an external LSP
+server, project-wide module resolution, or NodeNext `.mts`/`.cts` semantics.
+
 ## Blockers
 
 ### P0

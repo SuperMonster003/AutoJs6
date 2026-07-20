@@ -53,6 +53,11 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun getFontDescriptor(): String {
+        return editor.bridgeFontDescriptor()
+    }
+
+    @JavascriptInterface
     fun isFontLigaturesEnabled(): Boolean {
         return editor.bridgeFontLigaturesEnabled()
     }

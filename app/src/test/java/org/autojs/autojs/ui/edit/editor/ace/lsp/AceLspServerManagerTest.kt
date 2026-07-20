@@ -34,11 +34,12 @@ class AceLspServerManagerTest {
         assertFalse(snapshot.startSupported)
         assertFalse(snapshot.serverAvailable)
         assertEquals(AceLspServerManager.FALLBACK_STATIC_COMPLETION, snapshot.fallback)
-        assertEquals(AceLspServerManager.COMPLETION_PROVIDER_TYPESCRIPT, snapshot.completionProvider)
-        assertEquals(AceLspServerManager.HOVER_PROVIDER_TYPESCRIPT, snapshot.hoverProvider)
-        assertEquals(AceLspServerManager.DIAGNOSTIC_PROVIDER_TYPESCRIPT, snapshot.diagnosticProvider)
-        assertEquals(AceLspServerManager.SIGNATURE_PROVIDER_TYPESCRIPT, snapshot.signatureProvider)
+        assertEquals(AceLspServerManager.COMPLETION_PROVIDER_LOCAL_INDEX, snapshot.completionProvider)
+        assertEquals(AceLspServerManager.HOVER_PROVIDER_LOCAL_INDEX, snapshot.hoverProvider)
+        assertEquals(AceLspServerManager.DIAGNOSTIC_PROVIDER_ACE_JSHINT, snapshot.diagnosticProvider)
+        assertEquals(AceLspServerManager.SIGNATURE_PROVIDER_STATIC_LOCAL, snapshot.signatureProvider)
         assertEquals(AceLspServerManager.DEFAULT_FEATURES, snapshot.features)
+        assertEquals(AceLspServerManager.MAX_DOCUMENT_LENGTH, snapshot.maxDocumentLength)
         assertEquals(AceLspServerManager.SYNTHETIC_ROOT_URI, snapshot.rootUri)
         assertEquals(AceLspServerManager.SYNTHETIC_DOCUMENT_URI, snapshot.documentUri)
 
@@ -56,11 +57,12 @@ class AceLspServerManagerTest {
         assertTrue(optionsJson.contains("\"startSupported\":false"))
         assertTrue(optionsJson.contains("\"serverAvailable\":false"))
         assertTrue(optionsJson.contains("\"reason\":\"${AceLspServerManager.REASON_LOCAL_LANGUAGE_SERVICE}\""))
-        assertTrue(optionsJson.contains("\"completionProvider\":\"${AceLspServerManager.COMPLETION_PROVIDER_TYPESCRIPT}\""))
-        assertTrue(optionsJson.contains("\"hoverProvider\":\"${AceLspServerManager.HOVER_PROVIDER_TYPESCRIPT}\""))
-        assertTrue(optionsJson.contains("\"diagnosticProvider\":\"${AceLspServerManager.DIAGNOSTIC_PROVIDER_TYPESCRIPT}\""))
-        assertTrue(optionsJson.contains("\"signatureProvider\":\"${AceLspServerManager.SIGNATURE_PROVIDER_TYPESCRIPT}\""))
+        assertTrue(optionsJson.contains("\"completionProvider\":\"${AceLspServerManager.COMPLETION_PROVIDER_LOCAL_INDEX}\""))
+        assertTrue(optionsJson.contains("\"hoverProvider\":\"${AceLspServerManager.HOVER_PROVIDER_LOCAL_INDEX}\""))
+        assertTrue(optionsJson.contains("\"diagnosticProvider\":\"${AceLspServerManager.DIAGNOSTIC_PROVIDER_ACE_JSHINT}\""))
+        assertTrue(optionsJson.contains("\"signatureProvider\":\"${AceLspServerManager.SIGNATURE_PROVIDER_STATIC_LOCAL}\""))
         assertTrue(optionsJson.contains("\"features\":[\"completion\", \"hover\", \"diagnostics\", \"signatureHelp\"]"))
+        assertTrue(optionsJson.contains("\"maxDocumentLength\":${AceLspServerManager.MAX_DOCUMENT_LENGTH}"))
     }
 
     @Test
@@ -88,6 +90,18 @@ class AceLspServerManagerTest {
         assertEquals(AceLspServerManager.STATE_DISABLED_FILE_TYPE, snapshot.state)
         assertEquals(AceLspServerManager.REASON_DISABLED_FILE_TYPE, snapshot.reason)
         assertEquals("{}", manager.bridgeOptionsJson())
+    }
+
+    @Test
+    fun untitledDocumentUsesStableSyntheticJavaScriptUri() {
+        val manager = manager(enabled = true)
+
+        manager.setDocumentPath(null)
+        val snapshot = manager.snapshot()
+
+        assertTrue(snapshot.enabled)
+        assertEquals(0L, snapshot.sessionRevision)
+        assertEquals(AceLspServerManager.SYNTHETIC_DOCUMENT_URI, snapshot.documentUri)
     }
 
     @Test

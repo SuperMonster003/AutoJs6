@@ -247,7 +247,7 @@ internal class NodeModuleSourceFileTransportSession(
                         throw error
                     }
                     sourceBytes.addAndGet(expectedBytes)
-                    put("sourcePath", sourceFile!!.absolutePath)
+                    put("sourcePath", sourceFile.absolutePath)
                 } else {
                     runCatching { descriptor?.close() }
                 }

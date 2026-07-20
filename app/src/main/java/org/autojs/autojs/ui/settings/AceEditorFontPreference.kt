@@ -3,12 +3,14 @@ package org.autojs.autojs.ui.settings
 import android.content.Context
 import android.util.AttributeSet
 import org.autojs.autojs.theme.preference.MaterialPreference
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorFont
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontDialog
+import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontPreferences
 import org.autojs.autojs.util.DialogUtils
 
 class AceEditorFontPreference : MaterialPreference {
+
+    private var fontPreviewHandler: ((String) -> Unit)? = null
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         init()
@@ -42,7 +44,8 @@ class AceEditorFontPreference : MaterialPreference {
 
     private fun useCurrentFontSummaryProvider() {
         summaryProvider = SummaryProvider<AceEditorFontPreference> {
-            currentFont().displayName(prefContext)
+            val manager = AceEditorFontManager.get(prefContext)
+            manager.displayName(currentFontId(), prefContext)
         }
     }
 
@@ -51,13 +54,22 @@ class AceEditorFontPreference : MaterialPreference {
             return
         }
         DialogUtils.buildAndShowAdaptive {
-            AceEditorFontDialog.build(prefContext, currentFont()) { font ->
-                AceEditorFontPreferences.set(font)
-                notifyChanged()
-            }
+            AceEditorFontDialog.build(
+                context = prefContext,
+                currentFontId = currentFontId(),
+                onSelected = { fontId ->
+                    AceEditorFontPreferences.setId(fontId)
+                    notifyChanged()
+                },
+                onPreviewRequested = fontPreviewHandler,
+            )
         }
     }
 
-    private fun currentFont(): AceEditorFont = AceEditorFontPreferences.get()
+    fun setFontPreviewHandler(handler: ((String) -> Unit)?) {
+        fontPreviewHandler = handler
+    }
+
+    private fun currentFontId(): String = AceEditorFontPreferences.getId()
 
 }

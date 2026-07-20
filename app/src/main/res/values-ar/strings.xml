@@ -74,12 +74,13 @@
     <string name="description_about_app_tips_preference">1. اضغط مع الاستمرار على رمز التطبيق في صفحة \"حول التطبيق والمطور\" للانتقال إلى صفحة خيارات مطور AutoJs6</string>
     <string name="description_accessibility_service">تُعد خدمة تسهيل الاستخدام القدرة الأساسية في AutoJs6 لتنفيذ الأتمتة. تُستخدم لقراءة معلومات عناصر الواجهة على الشاشة ومحاكاة تفاعلات مثل [ النقر / السحب / الإدخال ].\n\nتتطلب معظم دوال الأتمتة وكذلك أدوات مثل تحليل التخطيط تمكين خدمة تسهيل الاستخدام لكي تعمل بشكل صحيح.</string>
     <string name="description_ace_action_favorites">تسجل مفضلة الإجراءات إجراءات المحرر التي تستخدمها كثيرا, مثل التشغيل والحفظ والتنسيق وإجراءات القائمة وإجراءات الضغط المطول وإجراءات إعدادات المحرر. اضغط زر النجمة لفتح القائمة, واضغط عنصرا لتكرار الإجراء, واضغط زر النجمة مطولا لتكرار أحدث إجراء, واسحب العناصر لإعادة ترتيبها, واسحب يمينا للتثبيت أو إلغاء التثبيت, واسحب يسارا للحذف.</string>
+    <string name="description_ace_editor_font_dialog">تتضمن خطوط Nerd/NF رموز برمجة ورموزا أيقونية إضافية. تعني Var خطا متغيرا، وتشير CN/SC إلى دعم محارف الصينية المبسطة.\n\nاضغط على خط مثبت لتحديده. اضغط على خط غير مثبت لفتح تأكيد التنزيل. اسحب يمينا للتنزيل أو التحديث ويسارا للحذف.\n\nفي المعاينة، استخدم القائمة والتصفية لاختيار الخطوط، والسابق والتالي للتنقل، والخروج لاستعادة الخط الأصلي، واستخدام للاحتفاظ بالخط الحالي. إذا لم يكن الخط مثبتا يتحول استخدام إلى تنزيل، وأثناء التنزيل يتحول إلى إيقاف. تطبق المعاينة فور اكتمال التنزيل. تحفظ عوامل التصفية ويمكن استعادتها إلى الإعدادات الافتراضية.</string>
     <string name="description_ace_editor_font_preference">اختر خط محرر Ace. تشمل القائمة خط Android أحادي المسافة وخطوط برمجية مفتوحة المصدر مع معلومات المؤلف/المطور; ويحدد Android ومورد الجهاز الشكل الفعلي لخط النظام أحادي المسافة.</string>
     <string name="description_ace_font_ligatures_enabled_preference">فعّل أربطة خطوط OpenType للخطوط التي تدعمها. قد تعرض عوامل التشغيل مثل === و !== و =&gt; و &lt;= كرموز متصلة. يغير هذا طريقة عرض الشفرة فقط.</string>
     <string name="description_ace_font_styles_enabled_preference">اسمح لسمات Ace وتمييز بناء الجملة باستخدام الخط العريض والمائل وأنماط خطوط أخرى. عند التعطيل, يفرض النمط العادي المنتظم على نص الشفرة من دون تغيير الألوان أو المحتوى.</string>
     <string name="description_ace_indent_guides_enabled_preference">أظهر أدلة المسافة البادئة العمودية في منطقة الشفرة أو أخفها. يغير هذا طريقة عرض الشفرة فقط.</string>
     <string name="description_ace_line_numbers_enabled_preference">أظهر أرقام الأسطر في هامش المحرر أو أخفها. يظل الطي ونقاط التوقف وتخطيط الهامش متاحة.</string>
-    <string name="description_ace_lsp_enabled_preference">دعم LSP التجريبي معطل افتراضيا. عند تمكينه, يستخدم المحرر خدمة لغة TypeScript محلية للإكمال ومعلومات التحويم ومساعدة التوقيع والتشخيصات, مع إبقاء الإكمال الثابت خيارا احتياطيا.</string>
+    <string name="description_ace_lsp_enabled_preference">إكمال LSP الذكي مفعّل افتراضيا. يستخدم المحرر خدمة لغة TypeScript المضمنة للإكمال ومعلومات التحويم ومساعدة التوقيع والتشخيصات, مع إبقاء الإكمال الثابت خيارا احتياطيا. يمكن تعطيل هذه الميزة في أي وقت.</string>
     <string name="description_ace_lsp_file_types_preference">لا يبدأ LSP إلا للملفات التي تنتهي أسماؤها بإحدى اللواحق المحددة. يعيد خيار \"استخدام الافتراضي\" مجموعة لواحق JavaScript و TypeScript و JSON و Auto.js و Node.js.</string>
     <string name="description_ace_print_margin_enabled_preference">أظهر دليل هامش الطباعة في محرر Ace أو أخفه. هذا هو خط حد العمود على الجانب الأيمن, وهو يغير طريقة عرض الشفرة فقط.</string>
     <string name="description_ace_word_wrap_enabled_preference">فعّل التفاف الأسطر الطويلة في المحرر. لا يؤدي هذا إلى تعديل محتويات الملف.</string>
@@ -100,6 +101,7 @@
     <string name="description_editor_gutter_width_mode_preference">يتبع العرض الديناميكي عدد خانات أرقام الأسطر المرئية حاليا. يحجز العرض الثابت حدا أدنى مستقرا ولا يتسع إلا عندما تتطلب أرقام الأسطر المرئية الأكبر ذلك.</string>
     <string name="description_editor_large_file_mode_threshold">يحدد ما اذا كان سيتم استخدام وضع الملفات الكبيرة لتحميل الملفات بناء على حجم الملف.\nيمكن لوضع الملفات الكبيرة ان يحسن كفاءة التحميل والاستقرار الى حد ما, لكن ميزتي \"تراجع\" و \"اعادة\" سيتم تعطيلهما في هذا الوضع.</string>
     <string name="description_editor_log_button_behavior_preference">يتحكم في الطريقة التي يفتح بها زر \"السجلات\" في قائمة محرر الشفرة السجلات.\n\nلوحة السجلات السفلية: تفتح لوحة السجلات السفلية. يمكنك الدخول الى صفحة السجلات بملء الشاشة عبر الضغط على زر \"تكبير\" او سحب المقبض الى الاعلى حتى يقترب من الاعلى.\nصفحة السجلات بملء الشاشة: تفتح صفحة السجلات بملء الشاشة مباشرة.</string>
+    <string name="description_editor_theme_dialog">تتحكم سمات المحرر في ألوان بناء الجملة ومظهر منطقة التحرير. في المعاينة، استخدم القائمة لاختيار سمة، والكل/داكن/فاتح للتبديل بين عوامل التصفية، والسابق والتالي للتنقل، والخروج لاستعادة السمة الأصلية، واستخدام للاحتفاظ بالسمة الحالية.</string>
     <string name="description_editor_theme_mode_preference">اختر ما إذا كان المحرر يتذكر سمتين منفصلتين لوضعي AutoJs6 الفاتح والداكن أو يستخدم سمة مشتركة في كلا الوضعين.</string>
     <string name="description_editor_word_wrap_indent_style_preference">تحافظ المسافة البادئة للاستمرار على محاذاة الأسطر المرئية الملتفة مع المسافة البادئة الأصلية. تبدأ المتابعة بمحاذاة الحافة من حافة إطار العرض.</string>
     <string name="description_extending_js_build_in_objects">يمكن أن يؤدي توسيع كائنات JavaScript المضمنة إلى زيادة مرونة التعليمات البرمجية وتمكين وظائف أكثر ثراءً ، ولكن يمكن أن يتسبب في حدوث تعارضات وحتى حدوث تعطل.\nتحتوي جميع البرامج النصية على امتدادات مضمنة يتم تمكينها افتراضيًا عند تشغيل الخيار.\nغالبًا ما تكون الامتدادات المضمنة غير آمنة ، ولا يوصى بها ما لم يتم فهم مبادئ ومخاطر الإضافات المضمنة بوضوح.\nعند إيقاف تشغيل الخيار ، لا يزال من الممكن تمكين الامتدادات المضمنة من خلال الكائن العام للمكونات الإضافية ، كما هو موضح في وثائق المشروع.</string>
@@ -509,7 +511,7 @@
     <string name="summary_ace_font_styles_enabled">السماح بالخط العريض والمائل وأنماط الخطوط البرمجية الأخرى</string>
     <string name="summary_ace_indent_guides_enabled">إظهار أدلة عمودية للمسافة البادئة للشفرة</string>
     <string name="summary_ace_line_numbers_enabled">إظهار أرقام الأسطر في هامش المحرر</string>
-    <string name="summary_ace_lsp_enabled">تمكين المعاينة التجريبية لمساعدة المحرر المدعومة من LSP</string>
+    <string name="summary_ace_lsp_enabled">تمكين مساعدة المحرر المدعومة من LSP</string>
     <string name="summary_ace_lsp_file_types">اختيار أنواع الملفات التي يمكنها استخدام ميزات LSP</string>
     <string name="summary_ace_print_margin_enabled">إظهار دليل حد العمود على الجانب الأيمن</string>
     <string name="summary_ace_word_wrap_enabled">التفاف الأسطر الطويلة داخل إطار عرض المحرر</string>
@@ -592,7 +594,23 @@
     <string name="text_ace_editor_debug_text_length">طول نص Ace: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">فشل محرر Ace (%1$s); تم التبديل إلى JsDroidEditor. انسخ تشخيصات Ace من قائمة المزيد للاطلاع على التفاصيل</string>
     <string name="text_ace_editor_font">خط المحرر</string>
+    <string name="text_ace_editor_font_built_in">مدمج</string>
     <string name="text_ace_editor_font_changed" formatted="true">تم تبديل خط المحرر إلى %s</string>
+    <string name="text_ace_editor_font_delete_confirmation" formatted="true">هل تريد حذف الخط المنزّل %1$s?</string>
+    <string name="text_ace_editor_font_download_all_completed" formatted="true">اكتملت تنزيلات الخطوط: نجح %1$d منها</string>
+    <string name="text_ace_editor_font_download_all_confirmation" formatted="true">الخطوط المتاحة للتنزيل: %1$d (%2$s). هل تريد تنزيلها الآن? التحديثات مشمولة.</string>
+    <string name="text_ace_editor_font_download_all_empty">جميع الخطوط المتاحة مثبتة بالفعل أو قيد التنزيل</string>
+    <string name="text_ace_editor_font_download_all_result" formatted="true">انتهت تنزيلات الخطوط: نجح %1$d منها, وفشل أو ألغي %2$d</string>
+    <string name="text_ace_editor_font_download_all_running">تنزيل جميع الخطوط قيد التنفيذ بالفعل</string>
+    <string name="text_ace_editor_font_download_confirmation" formatted="true">هل تريد تنزيل %1$s (%2$s)?</string>
+    <string name="text_ace_editor_font_download_failed" formatted="true">فشل تنزيل الخط: %1$s</string>
+    <string name="text_ace_editor_font_download_to_use">قم بتنزيل هذا الخط لاستخدامه</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (الصينية المبسطة)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (رموز أيقونية)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (خط متغير)</string>
+    <string name="text_ace_editor_font_integrity_failed">فشل الخط الذي تم تنزيله في التحقق من السلامة</string>
+    <string name="text_ace_editor_font_license">الترخيص</string>
+    <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
     <string name="text_ace_font_ligatures_enabled">أربطة الخط</string>
     <string name="text_ace_font_styles_enabled">أنماط الخط</string>
     <string name="text_ace_get_text">الحصول على النص</string>
@@ -603,7 +621,7 @@
     <string name="text_ace_insert">إدراج</string>
     <string name="text_ace_large_file_uses_native_editor">توجه سياسة الخيار الاحتياطي النشطة محرر Ace إلى JsDroidEditor</string>
     <string name="text_ace_line_numbers_enabled">أرقام الأسطر</string>
-    <string name="text_ace_lsp_enabled">إكمال LSP الذكي (تجريبي)</string>
+    <string name="text_ace_lsp_enabled">إكمال LSP الذكي</string>
     <string name="text_ace_lsp_file_types">أنواع ملفات LSP</string>
     <string name="text_ace_no_last_action">لا يوجد إجراء محرر أخير</string>
     <string name="text_ace_print_margin_enabled">هامش الطباعة</string>
@@ -892,6 +910,7 @@
     <string name="text_documentation_source">مصدر الوثائق</string>
     <string name="text_done">فعله</string>
     <string name="text_download">تحميل</string>
+    <string name="text_download_all">تنزيل الكل</string>
     <string name="text_download_and_install_autojs6_including_above_abi">قم بتنزيل وتثبيت إصدار AutoJs6 الذي يتضمن ABI أعلاه (يحتوي اسم الملف على \"%s\")</string>
     <string name="text_download_and_install_autojs6_including_all_abis">قم بتنزيل وتثبيت إصدار AutoJs6 الذي يتضمن كافة واجهات برمجة التطبيقات (يحتوي اسم الملف على \"universal\")</string>
     <string name="text_download_cancelled">تنزيل إلغاء</string>
@@ -1540,6 +1559,7 @@
     <string name="text_sort">فرز</string>
     <string name="text_sort_ascending">تصاعدي</string>
     <string name="text_sort_by_name_asc">الاسم (A-Z)</string>
+    <string name="text_sort_by_name_desc">الاسم (Z-A)</string>
     <string name="text_sort_by_path_asc">المسار (A-Z)</string>
     <string name="text_sort_by_size_asc">الحجم (الاصغر اولا)</string>
     <string name="text_sort_by_size_desc">الحجم (الاكبر اولا)</string>

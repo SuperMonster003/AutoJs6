@@ -416,11 +416,18 @@ export function renderReport(source, indices) {
 
 export function writeIfChanged(filePath, content) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  if (fs.existsSync(filePath) && fs.readFileSync(filePath, "utf8") === content) {
+  if (
+    fs.existsSync(filePath) &&
+    normalizeLineEndings(fs.readFileSync(filePath, "utf8")) === normalizeLineEndings(content)
+  ) {
     return false;
   }
   fs.writeFileSync(filePath, content, "utf8");
   return true;
+}
+
+export function normalizeLineEndings(content) {
+  return content.replace(/\r\n?/g, "\n");
 }
 
 export function relativeToRoot(filePath) {

@@ -817,6 +817,36 @@ class AceCodeEditorSmokeTest {
     }
 
     @Test
+    fun lspDefaultsOnAndCanBeEnabledWithoutReloadingEditor() {
+        AceEditorLspPreferences.resetEnabled()
+        val defaultEditor = launchReadyEditor(lspEnabled = null)
+        val defaultState = evaluateJsonObject(defaultEditor, "JSON.stringify(window.AutoJsAce.getLspState());")
+        assertTrue("LSP should be enabled when no preference has been stored", defaultState.getBoolean("enabled"))
+        assertEquals("native-local", defaultState.getString("manager"))
+
+        runOnMainSync {
+            AceEditorLspPreferences.setEnabled(false)
+            defaultEditor.refreshLsp()
+        }
+        waitUntil("LSP should turn off without recreating ACE") {
+            !evaluateJsonObject(defaultEditor, "JSON.stringify(window.AutoJsAce.getLspState());")
+                .getBoolean("enabled")
+        }
+
+        runOnMainSync {
+            AceEditorLspPreferences.setEnabled(true)
+            defaultEditor.refreshLsp()
+        }
+        waitUntil("LSP should warm the TypeScript service after being enabled at runtime") {
+            val state = evaluateJsonObject(defaultEditor, "JSON.stringify(window.AutoJsAce.getLspState());")
+            state.optJSONObject("tsService")?.optBoolean("ready") == true
+        }
+        val enabledState = evaluateJsonObject(defaultEditor, "JSON.stringify(window.AutoJsAce.getLspState());")
+        assertEquals("typescript-language-service", enabledState.getString("completionProvider"))
+        assertEquals("loaded", enabledState.getJSONObject("tsLoader").getString("state"))
+    }
+
+    @Test
     fun tooltipAndLspFallbackStayStaticAndLocal() {
         val editor = launchReadyEditor(lspEnabled = false)
         runOnMainSync {
@@ -865,6 +895,10 @@ class AceCodeEditorSmokeTest {
         activity = null
 
         val lspEditor = launchReadyEditor(lspEnabled = true)
+        waitUntil("Bundled TypeScript language service should become ready") {
+            val state = evaluateJsonObject(lspEditor, "JSON.stringify(window.AutoJsAce.getLspState());")
+            state.optJSONObject("tsService")?.optBoolean("ready") == true
+        }
         val enabledLocalService = evaluateJsonObject(
             lspEditor,
             """
@@ -884,6 +918,14 @@ class AceCodeEditorSmokeTest {
         assertFalse(enabledLocalService.getBoolean("serverReady"))
         assertFalse(enabledLocalService.getBoolean("serverAvailable"))
         assertTrue(enabledLocalService.getBoolean("localServiceReady"))
+        waitUntil("Native diagnostics should receive the sanitized LSP runtime state") {
+            runOnMainSync { lspEditor.createDiagnosticsSnapshot().lspRuntimeState }
+                ?.contains("typescript-language-service") == true
+        }
+        val lspRuntimeState = runOnMainSync { lspEditor.createDiagnosticsSnapshot().lspRuntimeState }
+        assertNotNull(lspRuntimeState)
+        assertTrue(lspRuntimeState!!.contains("\"serviceStatus\":\"ready\""))
+        assertTrue(lspRuntimeState.contains("\"tsReady\":true"))
 
         runOnMainSync {
             lspEditor.setText("function bad(\n")
@@ -907,12 +949,56 @@ class AceCodeEditorSmokeTest {
         val fallbackResult = runCompletionAcceptSmoke(lspEditor)
         assertTrue("LSP local-service completion smoke should finish", fallbackResult.getBoolean("ok"))
         assertCompletionText(fallbackResult, "files.read", "files.read")
+
+        runOnMainSync {
+            lspEditor.setDocumentPath("current.ts")
+            lspEditor.setText(
+                "/** @param value text to echo */\n" +
+                    "function echo(value: string): string { return value; }\n" +
+                    "const localOnly: string = 42;\n" +
+                    "echo(\n",
+            )
+        }
+        waitForEditorText(
+            lspEditor,
+            "/** @param value text to echo */\n" +
+                "function echo(value: string): string { return value; }\n" +
+                "const localOnly: string = 42;\n" +
+                "echo(\n",
+            "TypeScript text should be ready before semantic LSP smoke",
+        )
+        val semanticResult = evaluateJsonObject(
+            lspEditor,
+            """
+                (function() {
+                    return JSON.stringify({
+                        hover: window.AutoJsAce.getLspHover(2, 8),
+                        jsdoc: window.AutoJsAce.getLspHover(1, 10),
+                        signature: window.AutoJsAce.getSignatureHelp(3, 5),
+                        diagnostics: window.AutoJsAce.validateLsp(),
+                        state: window.AutoJsAce.getLspState()
+                    });
+                })();
+            """.trimIndent(),
+        )
+        assertEquals("ts", semanticResult.getJSONObject("hover").getString("meta"))
+        assertTrue(semanticResult.getJSONObject("hover").getString("docText").contains("string"))
+        assertTrue(semanticResult.getJSONObject("jsdoc").getString("docText").contains("text to echo"))
+        assertTrue(semanticResult.getJSONObject("signature").getString("signature").contains("value: string"))
+        assertTrue(
+            "TypeScript semantic diagnostics should report the number-to-string assignment",
+            semanticResult.getJSONArray("diagnostics").let { diagnostics ->
+                (0 until diagnostics.length()).any { index -> diagnostics.getJSONObject(index).optString("code") == "2322" }
+            },
+        )
+        assertTrue(semanticResult.getJSONObject("state").getJSONObject("tsService").getBoolean("ready"))
+
         val snapshot = runOnMainSync { lspEditor.createDiagnosticsSnapshot() }
         assertEquals(AceHealthState.RUNNING.name, snapshot.aceHealthState)
         assertEquals("local-language-service", snapshot.lspState)
         assertEquals("in-process", snapshot.lspTransport)
-        assertEquals("typescript-language-service", snapshot.lspCompletionProvider)
-        assertEquals("typescript-language-service", snapshot.lspDiagnosticProvider)
+        assertEquals("local-index", snapshot.lspCompletionProvider)
+        assertEquals("ace-jshint", snapshot.lspDiagnosticProvider)
         assertNull(snapshot.lastFailureType)
         assertFalse(snapshot.runtimeEventHistory.any { it.contains("fallback") })
     }
@@ -1124,8 +1210,8 @@ class AceCodeEditorSmokeTest {
         }
     }
 
-    private fun launchReadyEditor(lspEnabled: Boolean = false): AceCodeEditor {
-        AceEditorLspPreferences.setEnabled(lspEnabled)
+    private fun launchReadyEditor(lspEnabled: Boolean? = false): AceCodeEditor {
+        lspEnabled?.let(AceEditorLspPreferences::setEnabled)
         val launched = instrumentation.startActivitySync(
             Intent(instrumentation.targetContext, AceEditorDebugActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),

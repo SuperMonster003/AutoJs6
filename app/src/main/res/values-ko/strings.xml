@@ -74,12 +74,13 @@
     <string name="description_about_app_tips_preference">1. \"앱 및 개발자 정보\" 페이지에서 앱 아이콘을 길게 눌러 AutoJs6 개발자 옵션 페이지로 이동합니다.</string>
     <string name="description_accessibility_service">접근성 서비스는 AutoJs6 가 자동화를 구현하는 핵심 기능입니다. 화면의 UI 컨트롤 정보를 읽고 [ 탭 / 스와이프 / 입력 ] 등의 상호작용을 시뮬레이션하는 데 사용됩니다.\n\n자동화 관련 대부분의 기능과 레이아웃 분석 도구 등은 접근성 서비스를 활성화해야 정상적으로 동작합니다.</string>
     <string name="description_ace_action_favorites">작업 즐겨찾기는 실행, 저장, 서식 지정, 메뉴 작업, 길게 누르기 작업, 편집기 설정 작업처럼 자주 사용하는 편집기 작업을 기록합니다. 별표 버튼을 탭하면 목록이 열리고, 항목을 탭하면 작업을 반복합니다. 별표 버튼을 길게 누르면 가장 최근 작업을 반복하고, 항목을 끌면 순서를 바꾸며, 오른쪽으로 밀면 고정하거나 고정을 해제하고, 왼쪽으로 밀면 삭제합니다.</string>
+    <string name="description_ace_editor_font_dialog">Nerd/NF 글꼴에는 프로그래밍 기호와 아이콘 글리프가 추가되어 있습니다. Var는 가변 글꼴을, CN/SC는 중국어 간체 글리프를 의미합니다.\n\n설치된 글꼴을 탭하면 선택할 수 있습니다. 설치되지 않은 글꼴을 탭하면 다운로드 확인 창이 열립니다. 오른쪽으로 밀면 다운로드 또는 업데이트하고 왼쪽으로 밀면 삭제합니다.\n\n미리보기에서는 목록과 필터로 글꼴을 선택하고 이전과 다음으로 이동합니다. 종료는 원래 글꼴을 복원하고 확인은 현재 글꼴을 유지합니다. 설치되지 않은 글꼴에서는 확인이 다운로드로 바뀌며 다운로드 중에는 중지로 바뀝니다. 완료되면 미리보기에 즉시 적용됩니다. 필터 설정은 저장되며 기본값으로 복원할 수 있습니다.</string>
     <string name="description_ace_editor_font_preference">Ace 편집기 글꼴을 선택합니다. 목록에는 Android 시스템 고정폭 글꼴과 작성자/개발자 정보가 포함된 오픈 소스 코드 글꼴이 표시됩니다. 실제 시스템 고정폭 글꼴은 Android와 기기 공급업체가 결정합니다.</string>
     <string name="description_ace_font_ligatures_enabled_preference">지원하는 글꼴에서 OpenType 글꼴 합자를 사용합니다. ===, !==, =&gt;, &lt;= 같은 연산자가 결합된 글리프로 표시될 수 있습니다. 코드 표시 방식만 변경됩니다.</string>
     <string name="description_ace_font_styles_enabled_preference">Ace 테마와 구문 강조에서 굵게, 기울임꼴 및 다른 글꼴 스타일을 사용할 수 있도록 합니다. 사용하지 않으면 색상이나 내용을 변경하지 않고 코드 텍스트를 일반 스타일로 고정합니다.</string>
     <string name="description_ace_indent_guides_enabled_preference">코드 영역에서 세로 들여쓰기 안내선을 표시하거나 숨깁니다. 코드 표시 방식만 변경됩니다.</string>
     <string name="description_ace_line_numbers_enabled_preference">편집기 거터의 줄 번호를 표시하거나 숨깁니다. 코드 접기, 중단점 및 거터 레이아웃은 계속 사용할 수 있습니다.</string>
-    <string name="description_ace_lsp_enabled_preference">미리 보기 LSP 지원은 기본적으로 꺼져 있습니다. 사용하면 편집기가 로컬 TypeScript 언어 서비스를 통해 자동 완성, 마우스 오버 정보, 시그니처 도움말 및 진단을 제공하며, 정적 자동 완성을 대체 수단으로 유지합니다.</string>
+    <string name="description_ace_lsp_enabled_preference">LSP 스마트 자동 완성은 기본적으로 켜져 있습니다. 편집기는 내장 TypeScript 언어 서비스를 통해 자동 완성, 마우스 오버 정보, 시그니처 도움말 및 진단을 제공하며, 정적 자동 완성을 대체 수단으로 유지합니다. 이 기능은 언제든지 끌 수 있습니다.</string>
     <string name="description_ace_lsp_file_types_preference">LSP는 파일 이름이 선택한 접미사 중 하나로 끝날 때만 시작됩니다. \"기본값 사용\"을 선택하면 JavaScript, TypeScript, JSON, Auto.js 및 Node.js 접미사 모음으로 복원됩니다.</string>
     <string name="description_ace_print_margin_enabled_preference">Ace 편집기의 인쇄 여백 안내선을 표시하거나 숨깁니다. 오른쪽 열 제한선이며 코드 표시 방식만 변경됩니다.</string>
     <string name="description_ace_word_wrap_enabled_preference">긴 줄에 대한 편집기 줄 바꿈 모드를 사용합니다. 파일 내용은 변경되지 않습니다.</string>
@@ -100,6 +101,7 @@
     <string name="description_editor_gutter_width_mode_preference">동적 너비는 현재 보이는 줄 번호의 자릿수를 따릅니다. 고정 너비는 안정적인 최소 너비를 미리 확보하고 더 큰 줄 번호를 표시할 때만 확장됩니다.</string>
     <string name="description_editor_large_file_mode_threshold">파일 크기에 따라 대용량 파일 모드로 파일을 로드할지 결정합니다.\n대용량 파일 모드는 파일 로딩 효율과 안정성을 어느 정도 높일 수 있지만, 이 모드에서는 \"실행 취소\" 및 \"다시 실행\" 기능이 비활성화됩니다.</string>
     <string name="description_editor_log_button_behavior_preference">코드 편집기 메뉴의 \"로그\" 버튼이 로그를 여는 방식을 제어합니다.\n\n하단 로그 패널: 하단 로그 패널을 엽니다. \"최대화\" 버튼을 누르거나 핸들을 위쪽으로 상단 가까이 끌어올리면 전체 화면 로그 페이지로 들어갈 수 있습니다.\n전체 화면 로그 페이지: 전체 화면 로그 페이지로 바로 들어갑니다.</string>
+    <string name="description_editor_theme_dialog">편집기 테마는 구문 색상과 편집 영역의 모양을 제어합니다. 미리보기에서는 목록으로 테마를 선택하고 전체/어두운/밝은 모드로 필터를 순환하며 이전과 다음으로 이동합니다. 종료는 원래 테마를 복원하고 확인은 현재 테마를 유지합니다.</string>
     <string name="description_editor_theme_mode_preference">편집기가 AutoJs6 밝은 모드와 어두운 모드의 테마를 따로 기억할지, 두 모드에서 하나의 공통 테마를 사용할지 선택합니다.</string>
     <string name="description_editor_word_wrap_indent_style_preference">연속 줄 들여쓰기는 줄 바꿈된 표시 줄을 원래 들여쓰기에 맞춥니다. 가장자리에서 시작을 선택하면 줄 바꿈된 표시 줄이 뷰포트 가장자리에서 시작됩니다.</string>
     <string name="description_extending_js_build_in_objects">JavaScript 내장 개체를 확장하면 코드 유연성이 향상되고 더 풍부한 기능을 사용할 수 있지만 충돌이 발생하고 파손될 수도 있습니다.\n옵션이 켜져 있을 때 모든 스크립트에는 기본적으로 활성화된 내장 확장이 있습니다.\n기본 제공 확장은 종종 안전하지 않으며 기본 제공 확장의 원칙과 위험을 명확하게 이해하지 않는 한 권장되지 않습니다.\n옵션이 꺼져 있어도 프로젝트 문서에 설명된 대로 플러그인 전역 개체를 통해 내장 확장을 계속 활성화할 수 있습니다.</string>
@@ -509,7 +511,7 @@
     <string name="summary_ace_font_styles_enabled">굵게, 기울임꼴 및 다른 코드 글꼴 스타일 허용</string>
     <string name="summary_ace_indent_guides_enabled">코드 들여쓰기를 위한 세로 안내선 표시</string>
     <string name="summary_ace_line_numbers_enabled">편집기 거터에 줄 번호 표시</string>
-    <string name="summary_ace_lsp_enabled">LSP 기반 편집기 지원 미리 보기 사용</string>
+    <string name="summary_ace_lsp_enabled">LSP 기반 편집기 지원 사용</string>
     <string name="summary_ace_lsp_file_types">LSP 기능을 사용할 수 있는 파일 형식 선택</string>
     <string name="summary_ace_print_margin_enabled">오른쪽 열 제한 안내선 표시</string>
     <string name="summary_ace_word_wrap_enabled">편집기 뷰포트 안에서 긴 줄 바꿈</string>
@@ -592,7 +594,23 @@
     <string name="text_ace_editor_debug_text_length">Ace 텍스트 길이: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Ace 편집기에 오류가 발생하여 (%1$s) JsDroidEditor로 전환했습니다. 자세한 내용은 더보기 메뉴에서 Ace 진단 정보를 복사하세요</string>
     <string name="text_ace_editor_font">편집기 글꼴</string>
+    <string name="text_ace_editor_font_built_in">내장</string>
     <string name="text_ace_editor_font_changed" formatted="true">편집기 글꼴을 %s(으)로 전환했습니다</string>
+    <string name="text_ace_editor_font_delete_confirmation" formatted="true">다운로드한 글꼴 %1$s을(를) 삭제하시겠습니까?</string>
+    <string name="text_ace_editor_font_download_all_completed" formatted="true">글꼴 다운로드 완료: %1$d개 성공</string>
+    <string name="text_ace_editor_font_download_all_confirmation" formatted="true">다운로드 가능한 글꼴: %1$d개 (%2$s). 지금 다운로드할까요? 사용 가능한 업데이트가 포함됩니다.</string>
+    <string name="text_ace_editor_font_download_all_empty">사용 가능한 모든 글꼴이 이미 설치되었거나 다운로드 중입니다</string>
+    <string name="text_ace_editor_font_download_all_result" formatted="true">글꼴 다운로드 종료: %1$d개 성공, %2$d개 실패 또는 취소</string>
+    <string name="text_ace_editor_font_download_all_running">전체 다운로드가 이미 진행 중입니다</string>
+    <string name="text_ace_editor_font_download_confirmation" formatted="true">%1$s (%2$s)을(를) 다운로드할까요?</string>
+    <string name="text_ace_editor_font_download_failed" formatted="true">글꼴 다운로드 실패: %1$s</string>
+    <string name="text_ace_editor_font_download_to_use">이 글꼴을 사용하려면 다운로드하세요</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (중국어 간체)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (아이콘 글리프)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (가변 글꼴)</string>
+    <string name="text_ace_editor_font_integrity_failed">다운로드한 글꼴이 무결성 검증을 통과하지 못했습니다</string>
+    <string name="text_ace_editor_font_license">라이선스</string>
+    <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
     <string name="text_ace_font_ligatures_enabled">글꼴 합자</string>
     <string name="text_ace_font_styles_enabled">글꼴 스타일</string>
     <string name="text_ace_get_text">텍스트 가져오기</string>
@@ -603,7 +621,7 @@
     <string name="text_ace_insert">삽입</string>
     <string name="text_ace_large_file_uses_native_editor">활성 대체 정책에 따라 Ace 편집기에서 JsDroidEditor를 사용합니다</string>
     <string name="text_ace_line_numbers_enabled">줄 번호</string>
-    <string name="text_ace_lsp_enabled">LSP 스마트 자동 완성 (미리 보기)</string>
+    <string name="text_ace_lsp_enabled">LSP 스마트 자동 완성</string>
     <string name="text_ace_lsp_file_types">LSP 파일 형식</string>
     <string name="text_ace_no_last_action">마지막 편집기 작업 없음</string>
     <string name="text_ace_print_margin_enabled">인쇄 여백</string>
@@ -892,6 +910,7 @@
     <string name="text_documentation_source">문서 소스</string>
     <string name="text_done">완료</string>
     <string name="text_download">다운로드</string>
+    <string name="text_download_all">모두 다운로드</string>
     <string name="text_download_and_install_autojs6_including_above_abi">위의 ABI 가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"%s\" 포함)</string>
     <string name="text_download_and_install_autojs6_including_all_abis">모든 ABI 가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"universal\" 포함)</string>
     <string name="text_download_cancelled">다운로드 취소</string>
@@ -1540,6 +1559,7 @@
     <string name="text_sort">정렬</string>
     <string name="text_sort_ascending">오름차순</string>
     <string name="text_sort_by_name_asc">이름 (A-Z)</string>
+    <string name="text_sort_by_name_desc">이름 (Z-A)</string>
     <string name="text_sort_by_path_asc">경로 (A-Z)</string>
     <string name="text_sort_by_size_asc">크기 (작은순)</string>
     <string name="text_sort_by_size_desc">크기 (큰순)</string>

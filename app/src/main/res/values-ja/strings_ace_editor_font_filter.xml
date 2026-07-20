@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text_ace_editor_font_feature_jp">JP (日本語)</string>
+    <string name="text_ace_editor_font_feature_mono">Mono (等幅フォント)</string>
+    <string name="text_ace_editor_font_feature_other">その他</string>
+    <string name="text_ace_editor_font_filter_feature_required">フォント特性を1つ以上選択してください</string>
+    <string name="text_ace_editor_font_filter_feature_title">フォント特性</string>
+    <string name="text_ace_editor_font_filter_no_matches">選択したフィルターに一致するフォントがありません</string>
+    <string name="text_ace_editor_font_filter_type_required">フォントの種類を1つ以上選択してください</string>
+    <string name="text_ace_editor_font_filter_type_title">種類</string>
+    <string name="text_ace_editor_font_sort_type_locked">種類を固定</string>
+</resources>

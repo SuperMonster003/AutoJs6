@@ -108,6 +108,7 @@ object AceDiagnostics {
             appendLine("lspServerAvailable=${snapshot.lspServerAvailable}")
             appendLine("lspStartSupported=${snapshot.lspStartSupported}")
             appendLine("lspSessionRevision=${snapshot.lspSessionRevision}")
+            appendLine("lspRuntimeState=${snapshot.lspRuntimeState.orUnknown()}")
             appendLine("aceFont=${snapshot.aceFont.orUnknown()}")
             appendLine("fileSizeBytes=${snapshot.fileSizeBytes?.toString().orUnknown()}")
             appendLine("largeFilePolicy=${snapshot.largeFilePolicy}")
@@ -182,6 +183,5 @@ object AceDiagnostics {
     private fun String?.orUnknown(): String = this?.takeIf { it.isNotBlank() } ?: "unknown"
 
     const val LSP_DISABLED = AceLspServerManager.STATE_DISABLED
-    const val LSP_CONFIGURED_NO_SERVER = AceLspServerManager.STATE_CONFIGURED_NO_SERVER
     const val LSP_LOCAL_LANGUAGE_SERVICE = AceLspServerManager.STATE_LOCAL_LANGUAGE_SERVICE
 }

@@ -67,12 +67,13 @@
     <string name="description_about_app_tips_preference">1. Press and hold the app icon on the \"About app and developer\" page to jump to AutoJs6 developer options page</string>
     <string name="description_accessibility_service">The accessibility service is AutoJs6\'s core capability for automation. It is used to read on-screen widget information and simulate interactions such as [ click / swipe / input ].\n\nMost automation-related functions, as well as tools like layout analysis, require the accessibility service to be enabled to work properly.</string>
     <string name="description_ace_action_favorites">Action favorites records editor actions you use often, such as run, save, formatting, menu actions, long-press actions, and editor setting actions. Tap the star button to open this list, tap an item to repeat the action, long-press the star button to repeat the most recent action, drag items to reorder them, swipe right to pin or unpin, and swipe left to delete.</string>
+    <string name="description_ace_editor_font_dialog">Nerd/NF fonts include extra programming and icon glyphs. Var means variable font. CN/SC indicates Simplified Chinese glyph coverage.\n\nTap an installed font to select it. Tap a font that is not installed to open its download prompt. Swipe right to download or update and swipe left to delete.\n\nIn preview, use List and Filter to choose fonts, Previous and Next to browse, Exit to restore the original font, and Use to keep the previewed font. For a font that is not installed, Use becomes Download; while downloading it becomes Stop. The preview is applied as soon as downloading finishes. Preview filters are remembered and can be reset to their defaults.</string>
     <string name="description_ace_editor_font_preference">Choose the Ace editor font. The list includes Android system monospace and open-source code fonts with author/developer information; the actual system monospace face is decided by Android and the device vendor.</string>
     <string name="description_ace_font_ligatures_enabled_preference">Enable OpenType font ligatures for fonts that support them. Operators such as ===, !==, =&gt;, and &lt;= may be drawn as joined glyphs. This only changes how code is displayed.</string>
     <string name="description_ace_font_styles_enabled_preference">Allow Ace themes and syntax highlighting to use bold, italic, and other font styles. When disabled, code text is forced to the regular normal style without changing colors or content.</string>
     <string name="description_ace_indent_guides_enabled_preference">Show or hide vertical indentation guides in the code area. This only changes how code is displayed.</string>
     <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
-    <string name="description_ace_lsp_enabled_preference">Preview LSP support is off by default. When enabled, the editor uses a local TypeScript language service for completion, hover, signature help, and diagnostics, with static completion kept as a fallback.</string>
+    <string name="description_ace_lsp_enabled_preference">LSP smart completion is enabled by default. The editor uses the bundled TypeScript language service for completion, hover, signature help, and diagnostics, with static completion kept as a fallback. You can turn it off at any time.</string>
     <string name="description_ace_lsp_file_types_preference">LSP is only started for files whose names end with one of the selected suffixes. Use default restores the JavaScript, TypeScript, JSON, Auto.js, and Node.js suffix set.</string>
     <string name="description_ace_print_margin_enabled_preference">Show or hide the Ace editor print margin guide. This is the right-side column limit line and only changes how code is displayed.</string>
     <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
@@ -93,6 +94,7 @@
     <string name="description_editor_gutter_width_mode_preference">Dynamic width follows currently visible line-number digits. Fixed width preallocates a stable minimum and grows only when larger visible line numbers require it.</string>
     <string name="description_editor_large_file_mode_threshold">Determines whether large file mode is used to load files based on file size.\nLarge file mode can improve file loading efficiency and stability to some extent, but the \"Undo\" and \"Redo\" features will be disabled in large file mode.</string>
     <string name="description_editor_log_button_behavior_preference">Controls how the \"Logs\" button in the code editor menu opens logs.\n\nBottom log panel: Opens the bottom log panel. You can enter the fullscreen log page by tapping the \"Maximize\" button or dragging the handle upward near the top.\nFullscreen log page: Opens the fullscreen log page directly.</string>
+    <string name="description_editor_theme_dialog">Editor themes control syntax colors and the editing surface. In preview, use List to choose a theme, All/Dark/Light to cycle the theme filter, Previous and Next to browse, Exit to restore the original theme, and Use to keep the previewed theme.</string>
     <string name="description_editor_theme_mode_preference">Choose whether the editor remembers separate themes for AutoJs6 light and dark modes, or uses one shared theme in both modes.</string>
     <string name="description_editor_word_wrap_indent_style_preference">Continuation indent keeps wrapped visual lines aligned with the original indentation. Flush continuation starts wrapped visual lines at the viewport edge.</string>
     <string name="description_extending_js_build_in_objects">Extending JavaScript built-in objects can increase code flexibility and enable richer functionality, but can cause conflicts and even breakage.\nAll scripts have built-in extensions enabled by default when the option is turned on.\nBuilt-in extensions are often insecure, and are not recommended unless the principles and risks of built-in extensions are clearly understood.\nWhen the option is turned off, built-in extensions can still be enabled through the plugins global object, as described in the project documentation.</string>
@@ -502,7 +504,7 @@
     <string name="summary_ace_font_styles_enabled">Allow bold, italic, and other code-font styles</string>
     <string name="summary_ace_indent_guides_enabled">Show vertical guides for code indentation</string>
     <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter</string>
-    <string name="summary_ace_lsp_enabled">Enable LSP-powered editor assistance preview</string>
+    <string name="summary_ace_lsp_enabled">Enable LSP-powered editor assistance</string>
     <string name="summary_ace_lsp_file_types">Choose file types that can use LSP features</string>
     <string name="summary_ace_print_margin_enabled">Show the right-side column limit guide</string>
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport</string>
@@ -585,7 +587,23 @@
     <string name="text_ace_editor_debug_text_length">Ace text length: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Ace editor failed (%1$s); switched to JsDroidEditor. Copy Ace diagnostics from the More menu for details</string>
     <string name="text_ace_editor_font">Editor font</string>
+    <string name="text_ace_editor_font_built_in">Built in</string>
     <string name="text_ace_editor_font_changed" formatted="true">Editor font switched to %s</string>
+    <string name="text_ace_editor_font_delete_confirmation" formatted="true">Delete the downloaded font %1$s?</string>
+    <string name="text_ace_editor_font_download_all_completed" formatted="true">Font downloads completed: %1$d succeeded</string>
+    <string name="text_ace_editor_font_download_all_confirmation" formatted="true">Available fonts to download: %1$d (%2$s). Download them now? Updates are included.</string>
+    <string name="text_ace_editor_font_download_all_empty">All available fonts are already installed or downloading</string>
+    <string name="text_ace_editor_font_download_all_result" formatted="true">Font downloads finished: %1$d succeeded, %2$d failed or cancelled</string>
+    <string name="text_ace_editor_font_download_all_running">Download all is already in progress</string>
+    <string name="text_ace_editor_font_download_confirmation" formatted="true">Download %1$s (%2$s)?</string>
+    <string name="text_ace_editor_font_download_failed" formatted="true">Font download failed: %1$s</string>
+    <string name="text_ace_editor_font_download_to_use">Download to use this font</string>
+    <string name="text_ace_editor_font_feature_cn">CN / SC (Simplified Chinese)</string>
+    <string name="text_ace_editor_font_feature_nerd">Nerd / NF (icon glyphs)</string>
+    <string name="text_ace_editor_font_feature_variable">Var (variable font)</string>
+    <string name="text_ace_editor_font_integrity_failed">The downloaded font failed integrity verification</string>
+    <string name="text_ace_editor_font_license">License</string>
+    <string name="text_ace_editor_font_status" formatted="true">%1$s · %2$s</string>
     <string name="text_ace_font_ligatures_enabled">Font ligatures</string>
     <string name="text_ace_font_styles_enabled">Font styles</string>
     <string name="text_ace_get_text">Get text</string>
@@ -596,7 +614,7 @@
     <string name="text_ace_insert">Insert</string>
     <string name="text_ace_large_file_uses_native_editor">Ace editor is routed to JsDroidEditor by the active fallback policy</string>
     <string name="text_ace_line_numbers_enabled">Line numbers</string>
-    <string name="text_ace_lsp_enabled">LSP smart completion (preview)</string>
+    <string name="text_ace_lsp_enabled">LSP smart completion</string>
     <string name="text_ace_lsp_file_types">LSP file types</string>
     <string name="text_ace_no_last_action">No last editor action</string>
     <string name="text_ace_print_margin_enabled">Print margin</string>
@@ -885,6 +903,7 @@
     <string name="text_documentation_source">Documentation source</string>
     <string name="text_done">Done</string>
     <string name="text_download">Download</string>
+    <string name="text_download_all">Download all</string>
     <string name="text_download_and_install_autojs6_including_above_abi">Download and install the version of AutoJs6 that includes the above ABI (the file name contains \"%s\")</string>
     <string name="text_download_and_install_autojs6_including_all_abis">Download and install the version of AutoJs6 that includes all ABIs (the file name contains \"universal\")</string>
     <string name="text_download_cancelled">Download cancelled</string>
@@ -1533,6 +1552,7 @@
     <string name="text_sort">Sort</string>
     <string name="text_sort_ascending">Ascending</string>
     <string name="text_sort_by_name_asc">Name (A-Z)</string>
+    <string name="text_sort_by_name_desc">Name (Z-A)</string>
     <string name="text_sort_by_path_asc">Path (A-Z)</string>
     <string name="text_sort_by_size_asc">Size (smallest first)</string>
     <string name="text_sort_by_size_desc">Size (largest first)</string>
