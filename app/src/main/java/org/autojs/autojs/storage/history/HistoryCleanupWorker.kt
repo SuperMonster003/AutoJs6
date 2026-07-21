@@ -3,6 +3,7 @@ package org.autojs.autojs.storage.history
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import org.autojs.autojs.storage.file.EmergencyDraftDirectoryGuard
 import org.autojs.autojs.storage.history.TrashBlobStore.Companion.TRASH_BLOB_DIR_REL
 import java.io.File
 
@@ -180,6 +181,13 @@ class HistoryCleanupWorker(
     private fun cleanupEmergencyDrafts() {
         val draftsDir = File(applicationContext.filesDir, "drafts")
         if (!draftsDir.exists() || !draftsDir.isDirectory) return
+        EmergencyDraftDirectoryGuard.withLock(draftsDir) {
+            cleanupEmergencyDraftsLocked(draftsDir)
+        }
+    }
+
+    private fun cleanupEmergencyDraftsLocked(draftsDir: File) {
+        if (!draftsDir.exists() || !draftsDir.isDirectory) return
 
         val now = System.currentTimeMillis()
 
@@ -188,7 +196,9 @@ class HistoryCleanupWorker(
         val maxDaysMs = HistoryPrefs.draftsMaxDays().coerceAtLeast(0).toLong() * 24L * 60L * 60L * 1000L
         val expiredBefore = now - maxDaysMs
         draftsDir.listFiles()?.forEach { f ->
-            if (f.isFile && f.lastModified() < expiredBefore) {
+            if (f.isFile && !EmergencyDraftDirectoryGuard.isProtectedFromDeletion(f, now) &&
+                f.lastModified() < expiredBefore
+            ) {
                 // noinspection ResultOfMethodCallIgnored
                 f.delete()
             }
@@ -207,6 +217,7 @@ class HistoryCleanupWorker(
 
         for (f in remained.asReversed()) {
             if (total <= limit) break
+            if (EmergencyDraftDirectoryGuard.isProtectedFromDeletion(f, now)) continue
             val len = f.length().coerceAtLeast(0L)
             if (f.delete()) {
                 total -= len

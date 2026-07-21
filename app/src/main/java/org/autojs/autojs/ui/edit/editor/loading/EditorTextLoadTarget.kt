@@ -11,6 +11,7 @@ interface EditorTextLoadTarget {
     fun beginProgressiveTextLoad()
     fun appendTextChunk(chunk: CharSequence)
     fun finishProgressiveTextLoad(markClean: Boolean)
+    fun cancelProgressiveTextLoad()
     fun beginStreamedLargeTextLoad()
     fun finishStreamedLargeTextLoad(markClean: Boolean)
     fun cancelStreamedLargeTextLoad()
@@ -57,6 +58,12 @@ class EngineTextLoadTarget(
         if (markClean) {
             editor.markUndoRedoBaselineAsUnchanged()
         }
+        editor.setProgress(false)
+    }
+
+    override fun cancelProgressiveTextLoad() {
+        editor.setLoadingText(false)
+        editor.setRedoUndoEnabled(true)
         editor.setProgress(false)
     }
 

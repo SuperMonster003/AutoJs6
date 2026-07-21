@@ -15,6 +15,8 @@
     var signatureHelpController = null;
     var dirty = false;
     var suppressChange = false;
+    var documentLongLineSafetyMode = false;
+    var preferredWordWrapEnabled = false;
     var breakpoints = [];
     var lineNumbersEnabled = true;
     var breakpointMarkersEnabled = true;
@@ -107,6 +109,12 @@
     var FIRST_PAINT_MAX_WAIT_MS = 1800;
     var BUNDLED_FONT_LOAD_TIMEOUT_MS = 5000;
     var FONT_LOAD_TIMEOUT_MS = 30000;
+    // ACE 1.4.12 does not apply Text.MAX_LINE_LENGTH to the first token in an
+    // unwrapped line. Text mode emits the whole line as that first token, so a
+    // wrongly decoded file can otherwise create hundreds of thousands of DOM
+    // nodes and monopolize Android WebView during a whole-document Redo.
+    var LONG_LINE_SAFETY_RENDER_TRIGGER = 16 * 1024;
+    var LONG_LINE_SAFETY_RENDER_LIMIT = 4096;
     var BUNDLED_FONT_LOAD_PROBE = '14px "Iosevka"';
     var INSTALLED_FONT_URL_PREFIX = "https://appassets.androidplatform.net/autojs6-fonts/";
     var PINCH_CURSOR_REVEAL_SUPPRESS_MS = 3000;
@@ -904,7 +912,7 @@
     function buildState(includeText) {
         var position = editor ? editor.getCursorPosition() : { row: 0, column: 0 };
         var undoManager = getUndoManager();
-        var selection = getSelectionState();
+        var selection = getSelectionState(includeText !== false);
         var readOnly = isReadOnly();
         var state = {
             dirty: dirty,
@@ -914,8 +922,7 @@
             lineCount: session ? session.getLength() : 1,
             cursor: {
                 row: position.row || 0,
-                column: position.column || 0,
-                lineText: getLine(position.row || 0)
+                column: position.column || 0
             },
             selection: selection,
             selectedText: selection.text,
@@ -941,7 +948,7 @@
         return session.doc.indexToPosition(index, 0);
     }
 
-    function getSelectionState() {
+    function getSelectionState(includeText) {
         if (!editor || !session) {
             return {
                 startOffset: 0,
@@ -963,7 +970,7 @@
             startColumn: range.start.column,
             endLine: range.end.row,
             endColumn: range.end.column,
-            text: session.getTextRange(range)
+            text: includeText === false ? "" : session.getTextRange(range)
         };
     }
 
@@ -2010,7 +2017,6 @@
     function dispatchStateChanged(eventName) {
         var json = lightweightStateJson();
         callBridge("notifyStateChanged", [json]);
-        callBridge("notifyEvent", [eventName || "stateChanged", json]);
     }
 
     function flushStateChanged() {
@@ -2115,7 +2121,6 @@
     function dispatchTextChanged(includeText) {
         var json = stateJson(includeText === true);
         callBridge("notifyTextChanged", [json]);
-        callBridge("notifyEvent", ["textChanged", json]);
     }
 
     function flushTextChanged() {
@@ -2172,12 +2177,11 @@
         var position = editor.getCursorPosition();
         var json = lightweightStateJson();
         callBridge("notifyCursorChanged", [
-            getLine(position.row),
+            "",
             position.row || 0,
             position.column || 0,
             json
         ]);
-        callBridge("notifyEvent", ["cursorChanged", json]);
     }
 
     function flushCursorChanged() {
@@ -2579,8 +2583,29 @@
     }
 
     function markClean() {
+        var undoManager = getUndoManager();
+        if (undoManager && undoManager.markClean) {
+            undoManager.markClean();
+        }
         dirty = false;
         notifyStateChanged("cleanChanged");
+        return true;
+    }
+
+    function markDirty() {
+        var undoManager = getUndoManager();
+        if (undoManager && undoManager.markClean && undoManager.getRevision &&
+            undoManager.isClean && undoManager.isClean()) {
+            undoManager.markClean(undoManager.getRevision() - 1);
+        }
+        dirty = true;
+        notifyStateChanged("dirtyChanged");
+        return true;
+    }
+
+    function refreshState() {
+        dispatchStateChanged("hostRefresh");
+        return true;
     }
 
     function notifyReadOnlyMutationBlocked(operation) {
@@ -2634,10 +2659,102 @@
         notifyStateChanged("debugLineChanged");
     }
 
-    function setText(text) {
+    function installDocumentLongLineRenderGuard() {
+        var textLayer = editor && editor.renderer && editor.renderer.$textLayer;
+        if (!textLayer || textLayer.__autojs6LongLineRenderGuardInstalled ||
+            typeof textLayer.$renderSimpleLine !== "function") {
+            return;
+        }
+        textLayer.__autojs6LongLineRenderGuardInstalled = true;
+        var originalRenderSimpleLine = textLayer.$renderSimpleLine;
+        textLayer.$renderSimpleLine = function(parent, tokens) {
+            if (!documentLongLineSafetyMode || !tokens || !tokens.length) {
+                return originalRenderSimpleLine.call(this, parent, tokens);
+            }
+
+            var observedLength = 0;
+            for (var index = 0; index < tokens.length; index++) {
+                observedLength += String(tokens[index] && tokens[index].value || "").length;
+                if (observedLength > LONG_LINE_SAFETY_RENDER_TRIGGER) {
+                    break;
+                }
+            }
+            if (observedLength <= LONG_LINE_SAFETY_RENDER_TRIGGER) {
+                return originalRenderSimpleLine.call(this, parent, tokens);
+            }
+
+            var remaining = LONG_LINE_SAFETY_RENDER_LIMIT;
+            var clippedTokens = [];
+            for (var tokenIndex = 0; tokenIndex < tokens.length && remaining > 0; tokenIndex++) {
+                var token = tokens[tokenIndex] || {};
+                var value = String(token.value || "");
+                var clippedValue = value.slice(0, remaining);
+                if (clippedValue) {
+                    clippedTokens.push({
+                        type: token.type || "text",
+                        value: clippedValue
+                    });
+                    remaining -= clippedValue.length;
+                }
+            }
+            originalRenderSimpleLine.call(this, parent, clippedTokens);
+            var indicator = this.dom.createElement("span");
+            indicator.className = "ace_keyword autojs6_long_line_truncated";
+            indicator.textContent = "...";
+            parent.appendChild(indicator);
+        };
+    }
+
+    function applyDocumentAccessibilityLightweightMode(enabled) {
+        var textLayer = editor && editor.renderer && editor.renderer.$textLayer;
+        var textLayerElement = textLayer && textLayer.element;
+        if (!textLayerElement || !textLayerElement.setAttribute) {
+            return;
+        }
+        // A pathological single line can contain hundreds of thousands of characters. Android
+        // WebView otherwise attempts to expose every rendered character through Chromium's
+        // accessibility tree whenever the document is replaced or history is navigated. That
+        // tree rebuild can monopolize the renderer for tens of seconds even in ACE text mode.
+        // ACE's separate textarea remains available for focus and keyboard input.
+        if (enabled) {
+            textLayerElement.setAttribute("aria-hidden", "true");
+        } else {
+            textLayerElement.removeAttribute("aria-hidden");
+        }
+    }
+
+    function applyDocumentLongLineSafetyMode(enabled) {
+        enabled = !!enabled;
+        var changed = documentLongLineSafetyMode !== enabled;
+        documentLongLineSafetyMode = enabled;
+        if (!session || !editor) {
+            return;
+        }
+        session.$autojs6LongLineSafetyMode = enabled;
+        applyDocumentAccessibilityLightweightMode(enabled);
+        if (!changed) {
+            return;
+        }
+        session.setMode(enabled ? "ace/mode/text" : "ace/mode/javascript");
+        session.setUseWrapMode(enabled ? false : preferredWordWrapEnabled);
+        editor.setOption("wrap", enabled ? false : preferredWordWrapEnabled);
+        editor.setOption("enableBasicAutocompletion", !enabled);
+        editor.setOption("enableLiveAutocompletion", !enabled);
+        if (enabled && typeof session.setAnnotations === "function") {
+            session.setAnnotations([]);
+        }
+        applyGutterOptions("long_line_safety_mode_changed");
+    }
+
+    function setText(text, echoText, unsafeLine) {
+        var targetUnsafeLine = !!unsafeLine;
+        if (documentLongLineSafetyMode || targetUnsafeLine) {
+            applyDocumentLongLineSafetyMode(true);
+        }
         suppressChange = true;
         session.setValue(text || "");
         suppressChange = false;
+        applyDocumentLongLineSafetyMode(targetUnsafeLine);
         dirty = false;
         var undoManager = getUndoManager();
         if (undoManager && undoManager.reset) {
@@ -2645,17 +2762,260 @@
         }
         editor.clearSelection();
         editor.moveCursorTo(0, 0);
-        notifyTextChanged(true);
+        notifyTextChanged(echoText !== false);
         notifyCursorChanged();
     }
 
-    function setTextDirty(text) {
+    function setTextDirty(text, echoText, unsafeLine) {
+        var targetUnsafeLine = !!unsafeLine;
+        if (documentLongLineSafetyMode || targetUnsafeLine) {
+            applyDocumentLongLineSafetyMode(true);
+        }
         suppressChange = true;
         session.setValue(text || "");
         suppressChange = false;
-        dirty = true;
-        notifyTextChanged(true);
+        applyDocumentLongLineSafetyMode(targetUnsafeLine);
+        markDirty();
+        notifyTextChanged(echoText !== false);
         notifyCursorChanged();
+    }
+
+    function cloneHistoryPosition(position) {
+        return {
+            row: Math.max(0, Number(position && position.row) || 0),
+            column: Math.max(0, Number(position && position.column) || 0)
+        };
+    }
+
+    function captureDocumentNewLineState() {
+        var document = session && session.doc;
+        if (!document || typeof document.getNewLineMode !== "function" ||
+            typeof document.getNewLineCharacter !== "function") {
+            return null;
+        }
+        return {
+            mode: String(document.getNewLineMode() || "auto"),
+            character: String(document.getNewLineCharacter() || "\n")
+        };
+    }
+
+    function applyDocumentNewLineState(state) {
+        var document = session && session.doc;
+        if (!state || !document) {
+            return;
+        }
+        var character = String(state.character || "\n");
+        if (character !== "\r\n" && character !== "\r" && character !== "\n") {
+            character = "\n";
+        }
+        var mode = String(state.mode || "auto");
+        var autoNewLineChanged = document.$autoNewLine !== character;
+        document.$autoNewLine = character;
+        if (typeof document.setNewLineMode === "function" &&
+            typeof document.getNewLineMode === "function" &&
+            document.getNewLineMode() !== mode) {
+            document.setNewLineMode(mode);
+        } else if (autoNewLineChanged && typeof document._signal === "function") {
+            document._signal("changeNewLineMode");
+        }
+    }
+
+    function attachHistoryOperationToken(
+        group,
+        token,
+        beforeUnsafeLine,
+        afterUnsafeLine,
+        beforeNewLineState,
+        afterNewLineState
+    ) {
+        if (!group || !token) {
+            return false;
+        }
+        group.autojs6HistoryToken = String(token);
+        group.autojs6LongLineSafetyBefore = !!beforeUnsafeLine;
+        group.autojs6LongLineSafetyAfter = !!afterUnsafeLine;
+        group.autojs6NewLineBefore = beforeNewLineState || captureDocumentNewLineState();
+        group.autojs6NewLineAfter = afterNewLineState || group.autojs6NewLineBefore;
+        if (editor && editor.selection && editor.selection.toJSON) {
+            var selection = editor.selection.toJSON();
+            group.selectionBefore = selection;
+            group.selectionAfter = selection;
+        }
+        return true;
+    }
+
+    function addUndoableHistoryMarker(token, beforeUnsafeLine, afterUnsafeLine) {
+        token = String(token || "");
+        var undoManager = getUndoManager();
+        if (!token || !undoManager || !undoManager.add) {
+            return false;
+        }
+
+        beforeUnsafeLine = typeof beforeUnsafeLine === "boolean" ? beforeUnsafeLine : documentLongLineSafetyMode;
+        afterUnsafeLine = typeof afterUnsafeLine === "boolean" ? afterUnsafeLine : beforeUnsafeLine;
+        var newLineState = captureDocumentNewLineState();
+        if (beforeUnsafeLine || afterUnsafeLine) {
+            applyDocumentLongLineSafetyMode(true);
+        }
+        session.markUndoGroup();
+        var position = cloneHistoryPosition(editor && editor.getCursorPosition && editor.getCursorPosition());
+        // ACE's Document.applyDelta() explicitly ignores this empty insertion. Its inverse is an
+        // empty removal, which is ignored as well, while UndoManager still advances its revision.
+        undoManager.add({
+            action: "insert",
+            start: cloneHistoryPosition(position),
+            end: cloneHistoryPosition(position),
+            lines: [""]
+        }, false);
+        var attached = attachHistoryOperationToken(
+            undoManager.lastDeltas,
+            token,
+            beforeUnsafeLine,
+            afterUnsafeLine,
+            newLineState,
+            newLineState
+        );
+        session.markUndoGroup();
+        if (!attached) {
+            applyDocumentLongLineSafetyMode(beforeUnsafeLine);
+            return false;
+        }
+        applyDocumentLongLineSafetyMode(afterUnsafeLine);
+        dirty = !(undoManager.isClean && undoManager.isClean());
+        notifyStateChanged("historyMarkerAdded");
+        return true;
+    }
+
+    function replaceAllTextUndoably(text, token, echoText, unsafeLine) {
+        text = String(text || "");
+        token = String(token || "");
+        if (!token || !session || !Range) {
+            return false;
+        }
+        var beforeUnsafeLine = documentLongLineSafetyMode;
+        var afterUnsafeLine = !!unsafeLine;
+        var beforeNewLineState = captureDocumentNewLineState();
+        if (session.getValue() === text) {
+            return addUndoableHistoryMarker(token, beforeUnsafeLine, afterUnsafeLine);
+        }
+
+        if (beforeUnsafeLine || afterUnsafeLine) {
+            applyDocumentLongLineSafetyMode(true);
+        }
+        session.markUndoGroup();
+        var lastRow = Math.max(0, session.getLength() - 1);
+        var fullRange = new Range(0, 0, lastRow, session.getLine(lastRow).length);
+        suppressChange = true;
+        try {
+            session.replace(fullRange, text);
+        } finally {
+            suppressChange = false;
+        }
+        var afterNewLineState = captureDocumentNewLineState();
+
+        var undoManager = getUndoManager();
+        var attached = attachHistoryOperationToken(
+            undoManager && undoManager.lastDeltas,
+            token,
+            beforeUnsafeLine,
+            afterUnsafeLine,
+            beforeNewLineState,
+            afterNewLineState
+        );
+        session.markUndoGroup();
+        if (!attached) {
+            return false;
+        }
+        applyDocumentLongLineSafetyMode(afterUnsafeLine);
+        dirty = !(undoManager.isClean && undoManager.isClean());
+        editor.clearSelection();
+        editor.moveCursorTo(0, 0);
+        notifyTextChanged(echoText !== false);
+        notifyCursorChanged();
+        return true;
+    }
+
+    function installHistoryOperationHooks() {
+        if (!session || session.__autojs6HistoryOperationHooksInstalled) {
+            return;
+        }
+        session.__autojs6HistoryOperationHooksInstalled = true;
+        var originalUndoChanges = session.undoChanges;
+        var originalRedoChanges = session.redoChanges;
+
+        function historySafetyTarget(group, direction) {
+            // If either side of a tagged group contains a pathological line, keep lightweight
+            // text mode for the whole undo/redo branch. Re-enabling JavaScript tokenization for a
+            // large restored document can monopolize Android WebView for tens of seconds before
+            // the matching Redo; a fresh load will leave safety mode normally when appropriate.
+            if (group && group.autojs6HistoryToken &&
+                (group.autojs6LongLineSafetyBefore || group.autojs6LongLineSafetyAfter)) {
+                return true;
+            }
+            var property = direction === "undo" ?
+                "autojs6LongLineSafetyBefore" :
+                "autojs6LongLineSafetyAfter";
+            return group && typeof group[property] === "boolean" ?
+                group[property] :
+                documentLongLineSafetyMode;
+        }
+
+        function scheduleHistoryState(group, direction, targetUnsafeLine) {
+            var token = group && group.autojs6HistoryToken ? String(group.autojs6HistoryToken) : "";
+            setTimeout(function() {
+                applyDocumentLongLineSafetyMode(targetUnsafeLine);
+                var undoManager = getUndoManager();
+                if (undoManager && undoManager.isClean) {
+                    dirty = !undoManager.isClean();
+                }
+                // A document change schedules throttled text/state callbacks before this timer.
+                // Flush them first so historyOperation is the final, authoritative notification
+                // for the navigation. Otherwise a late text callback can mark an async toolbar
+                // Undo/Redo as a direct edit and rewind only the encoding UI.
+                if (textNotifyTimer !== null) {
+                    clearTimeout(textNotifyTimer);
+                    flushTextChanged();
+                }
+                if (stateNotifyTimer !== null) {
+                    clearTimeout(stateNotifyTimer);
+                    flushStateChanged();
+                }
+                callBridge("notifyEvent", [
+                    "historyOperation",
+                    JSON.stringify({
+                        token: token,
+                        direction: direction,
+                        state: {
+                            dirty: dirty,
+                            readOnly: isReadOnly(),
+                            canUndo: !!(undoManager && undoManager.hasUndo && undoManager.hasUndo()),
+                            canRedo: !!(undoManager && undoManager.hasRedo && undoManager.hasRedo())
+                        }
+                    })
+                ]);
+            }, 0);
+        }
+
+        session.undoChanges = function(group, dontSelect) {
+            var targetUnsafeLine = historySafetyTarget(group, "undo");
+            if (documentLongLineSafetyMode || targetUnsafeLine) {
+                applyDocumentLongLineSafetyMode(true);
+            }
+            var result = originalUndoChanges.call(this, group, dontSelect);
+            applyDocumentNewLineState(group && group.autojs6NewLineBefore);
+            scheduleHistoryState(group, "undo", targetUnsafeLine);
+            return result;
+        };
+        session.redoChanges = function(group, dontSelect) {
+            var targetUnsafeLine = historySafetyTarget(group, "redo");
+            if (documentLongLineSafetyMode || targetUnsafeLine) {
+                applyDocumentLongLineSafetyMode(true);
+            }
+            var result = originalRedoChanges.call(this, group, dontSelect);
+            applyDocumentNewLineState(group && group.autojs6NewLineAfter);
+            scheduleHistoryState(group, "redo", targetUnsafeLine);
+            return result;
+        };
     }
 
     function selectRange(startOffset, endOffset) {
@@ -3424,8 +3784,9 @@
 
     function setWordWrapEnabled(enabled) {
         enabled = !!enabled;
-        session.setUseWrapMode(enabled);
-        editor.setOption("wrap", enabled);
+        preferredWordWrapEnabled = enabled;
+        session.setUseWrapMode(documentLongLineSafetyMode ? false : enabled);
+        editor.setOption("wrap", documentLongLineSafetyMode ? false : enabled);
         applyGutterOptions("word_wrap_changed");
         notifyStateChanged("wordWrapChanged");
     }
@@ -4132,6 +4493,8 @@
         // ACE 1.4.12 ext-language_tools references a global `editor` in insertMatch().
         global.editor = editor;
         session = editor.getSession();
+        installDocumentLongLineRenderGuard();
+        installHistoryOperationHooks();
         installCompletionPopupTouchScrollPatch();
         installAceBuiltInPinchZoomSuppression();
         if (document && document.body && document.body.classList) {
@@ -4148,6 +4511,7 @@
 
         var initialTheme = callBridge("getTheme") || "ace/theme/textmate";
         var wordWrapEnabled = callBridgeBoolean("isWordWrapEnabled", false);
+        preferredWordWrapEnabled = wordWrapEnabled;
         var wordWrapIndentStyle = callBridgeString("getWordWrapIndentStyle", "continuation");
         var printMarginEnabled = callBridgeBoolean("isPrintMarginEnabled", false);
         var indentGuidesEnabled = callBridgeBoolean("isIndentGuidesEnabled", true);
@@ -4192,6 +4556,7 @@
         installMemberCompletionDotTrigger();
         installTouchCursorSelectionGuard();
         session.setUseWrapMode(wordWrapEnabled);
+        session.$autojs6LongLineSafetyMode = false;
         setEditorContainerClass("autojs6-hide-breakpoint-markers", !breakpointMarkersEnabled);
         setEditorContainerClass("autojs6-hide-fold-markers", !foldMarkersEnabled);
         setEditorContainerClass("autojs6-hide-gutter", !hasVisibleGutterContent());
@@ -4213,7 +4578,8 @@
                 scheduleMemberCompletionAfterDot();
             }
             markTextMutationSelectionMenuSuppressed("session_change:" + String(delta && delta.action || ""));
-            dirty = true;
+            var undoManager = getUndoManager();
+            dirty = !(undoManager && undoManager.isClean && undoManager.isClean());
             notifyTextChanged(!notifyChangeDelta(delta));
         });
 
@@ -4276,6 +4642,10 @@
             setText: setText,
             setTextDirty: setTextDirty,
             markClean: markClean,
+            markDirty: markDirty,
+            refreshState: refreshState,
+            replaceAllTextUndoably: replaceAllTextUndoably,
+            addUndoableHistoryMarker: addUndoableHistoryMarker,
             insert: insert,
             insertShortcutText: insertShortcutText,
             insertTab: insertTab,

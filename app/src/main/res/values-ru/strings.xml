@@ -94,6 +94,13 @@
     <string name="description_documentation_source_preference_more">Для поддержки темной темы на страницах документов должны быть выполнены следующие условия:\n1. В AutoJs6 включен ночной режим\n2. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P] и ниже: версия >= 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Показывает или скрывает маркеры точек останова в поле редактора. Данные точек останова и действия меню отладки остаются доступными.</string>
     <string name="description_editor_code_highlight_threshold">Определяет, включать ли подсветку синтаксиса в зависимости от размера файла.\nДля больших файлов отключение подсветки синтаксиса может в некоторой степени повысить эффективность загрузки файла.</string>
+    <string name="description_editor_encoding_convert_persists_replacement_characters">Сохранение после преобразования перезапишет исходные недопустимые байты и навсегда сохранит символы замены, отображаемые в редакторе.</string>
+    <string name="description_editor_encoding_convert_unavailable">Преобразование недоступно, поскольку текущий текст невозможно закодировать в %1$s.</string>
+    <string name="description_editor_encoding_convert_unavailable_read_only">Преобразование недоступно, поскольку файл доступен только для чтения.</string>
+    <string name="description_editor_encoding_reload_discards_unsaved_changes">При перезагрузке без сохранения несохраненные изменения в редакторе будут потеряны.</string>
+    <string name="description_editor_encoding_reload_or_convert">Изменить кодировку файла \"%2$s\" на %1$s?\n\nПерезагрузка повторно считывает файл с диска в новой кодировке и заменяет содержимое редактора. Преобразование сохраняет текст в редакторе и задает новую кодировку для следующего сохранения; файл не записывается немедленно.</string>
+    <string name="description_editor_encoding_reload_replaces_invalid_bytes">При перезагрузке недопустимые последовательности байтов заменяются символами замены.</string>
+    <string name="description_editor_encoding_reload_save_prompt">В файле "%1$s" есть несохраненные изменения. Сохранить их в текущей кодировке перед перезагрузкой?</string>
     <string name="description_editor_engine_preference">Ace является движком редактора по умолчанию. JsDroidEditor остаётся доступным как резервный вариант и может быть выбран вручную.</string>
     <string name="description_editor_fold_markers_enabled_preference">Показывает или скрывает маркеры сворачивания кода в поле редактора. В JsDroidEditor маркеры сворачивания не отображаются.</string>
     <string name="description_editor_gutter_width_mode_preference">Динамическая ширина соответствует количеству цифр в видимых номерах строк. Фиксированная ширина резервирует стабильное минимальное пространство и увеличивается только при появлении более длинных видимых номеров.</string>
@@ -155,6 +162,7 @@
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Подключиться</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_convert">Преобразовать</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_copy_path">Копировать</string>
     <string name="dialog_button_default_prefix">Префикс деф.</string>
@@ -177,12 +185,15 @@
     <string name="dialog_button_preview">Предпросмотр</string>
     <string name="dialog_button_quit">Выйти</string>
     <string name="dialog_button_release_history">История</string>
+    <string name="dialog_button_reload">Перезагрузить</string>
+    <string name="dialog_button_reload_without_saving">Перезагрузить без сохранения</string>
     <string name="dialog_button_remove">Удалить</string>
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">Получить</string>
     <string name="dialog_button_retry">Повторная попытка</string>
     <string name="dialog_button_save">Сохранить</string>
     <string name="dialog_button_save_and_continue">Сохранить и продолжить</string>
+    <string name="dialog_button_save_and_reload">Сохранить и перезагрузить</string>
     <string name="dialog_button_save_as">Сохранить как</string>
     <string name="dialog_button_system_settings">Системные настройки</string>
     <string name="dialog_button_system_settings_simplified">Система</string>
@@ -278,6 +289,7 @@
     <string name="error_corresponding_github_release_may_not_published">Соответствующий релиз на GitHub может быть еще не опубликован</string>
     <string name="error_dot_decimal_notation_num_over_255">Точечно-десятичное число больше 255</string>
     <string name="error_download_interrupted">Загрузка прервана</string>
+    <string name="error_editor_encoding_validation_incomplete">Проверка кодировки файла не завершена. Перед сохранением откройте кодировку файла и выполните перезагрузку или преобразование.</string>
     <string name="error_email_taken">Электронная почта занята</string>
     <string name="error_empty_broadcast_selection">Должна быть выбрана хотя бы одна трансляция</string>
     <string name="error_empty_github_release_assets">Нет активов релиза GitHub для загрузки</string>
@@ -312,7 +324,9 @@
     <string name="error_failed_to_run_script">Ошибка выполнения скрипта</string>
     <string name="error_failed_to_save">Не удалось сохранить</string>
     <string name="error_failed_to_save_project_config">Не удалось сохранить конфигурацию проекта</string>
+    <string name="error_file_contains_unaccepted_decoding_replacements">Сохранение заблокировано, поскольку недопустимые исходные байты были заменены. Откройте кодировку файла и явно выполните перезагрузку или преобразование.</string>
     <string name="error_file_in_path_does_not_exist">Файл в пути \"%1$s\" не существует</string>
+    <string name="error_file_state_unknown_reload_required">Состояние исходного файла неизвестно. Перезагрузите файл перед продолжением.</string>
     <string name="error_function_called_in_ui_thread">Поток пользовательского интерфейса не может быть заблокирован. Попробуйте запустить %s() в подпотоке или подскрипте</string>
     <string name="error_function_called_more_than_once">%s() вызывается более одного раза</string>
     <string name="error_get_github_latest_release">\"Не удается получить последний релиз GitHub\".</string>
@@ -398,9 +412,11 @@
     <string name="error_shizuku_service_may_be_not_running">Служба Shizuku может быть не запущена</string>
     <string name="error_shizuku_version_is_not_supported">Версия Shizuku не поддерживается</string>
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Указанный номер версии AutoJs6 должен быть больше 461</string>
+    <string name="error_text_cannot_be_encoded_with_charset">Текущий текст невозможно закодировать в %1$s</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">Преобразователь для требуемого свойства \"%1$s\" не может возвращать пустое значение</string>
     <string name="error_thread_is_not_alive">Нить не жива</string>
     <string name="error_timeout_while_querying_plugin_info">Тайм-аут при запросе информации о плагине %1$s.</string>
+    <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно изменить кодировку файла</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно показать сведения о файле</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно показать историю версий</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Текущий путь к файлу неизвестен; невозможно открыть в других приложениях</string>
@@ -637,6 +653,7 @@
     <string name="text_activated_successfully">Активация выполнена</string>
     <string name="text_activity_not_found_for_apk_installing">Нет установщика APK</string>
     <string name="text_adb_tool_needed">Необходим инструмент ADB</string>
+    <string name="text_add_bom">Добавить BOM</string>
     <string name="text_add_color_library">Добавить цветовую библиотеку</string>
     <string name="text_add_symbol_hint">Добавить символ</string>
     <string name="text_alias">псевдоним</string>
@@ -851,6 +868,7 @@
     <string name="text_country_code">Код страны (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Код страны должен состоять из двух заглавных букв</string>
     <string name="text_creating_unsigned_apk">Создание неподписанного APK</string>
+    <string name="text_current">Текущая</string>
     <string name="text_current_page_configuration">Конфигурация страницы</string>
     <string name="text_current_version">Текущая версия</string>
     <string name="text_daily_task">Ежедневная задача</string>
@@ -960,6 +978,13 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Включить службу доступа с безопасными настройками по таймеру</string>
     <string name="text_enable_plugin">Включить плагин</string>
     <string name="text_enabled">Включено</string>
+    <string name="text_encoding_cannot_decode_file">Невозможно декодировать файл</string>
+    <string name="text_encoding_cannot_represent_current_text">Невозможно представить текущий текст</string>
+    <string name="text_encoding_compatible">Совместима</string>
+    <string name="text_encoding_detected_with_confidence">Определена с уверенностью %1$d%%</string>
+    <string name="text_encoding_may_change_content">Может изменить содержимое</string>
+    <string name="text_encoding_risk_error">Ошибка</string>
+    <string name="text_encoding_risk_warning">Предупреждение</string>
     <string name="text_encrypting_script">Шифрование скрипта</string>
     <string name="text_error">Ошибка</string>
     <string name="text_error_copy_file" formatted="true">Не удалось скопировать файл: %s</string>
@@ -1012,6 +1037,9 @@
     <string name="text_file">Файл</string>
     <string name="text_file_colon_value">Файл: %1$s</string>
     <string name="text_file_details">Сведения о файле</string>
+    <string name="text_file_encoding">Кодировка файла</string>
+    <string name="text_file_encoding_converted">Кодировка файла изменена. Сохраните файл, чтобы записать его на диск.</string>
+    <string name="text_file_encoding_status">Кодировка файла: %1$s</string>
     <string name="text_file_exists">Файл уже существует</string>
     <string name="text_file_explorer">Проводник файлов</string>
     <string name="text_file_extensions_title">Расширения файлов</string>
@@ -1244,6 +1272,7 @@
     <string name="text_organization">Название организации</string>
     <string name="text_organizational_unit">Организационная единица</string>
     <string name="text_original_developer">Оригинальный разработчик</string>
+    <string name="text_original_file_recovery_path">Путь восстановления исходного файла</string>
     <string name="text_others">Другие</string>
     <string name="text_output_apk_path">Путь вывода APK</string>
     <string name="text_overwrite">Перезаписать</string>
@@ -1436,6 +1465,7 @@
     <string name="text_registering">Регистрация</string>
     <string name="text_release_history">История релизов</string>
     <string name="text_release_notes">Примечания к выпуску</string>
+    <string name="text_reload_or_convert_to_encoding">Перезагрузить или преобразовать в %1$s</string>
     <string name="text_remote">удаленный</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Удаленный файл успешно сохранен в локальном хранилище</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Удаленный проект успешно сохранен в локальном хранилище</string>
@@ -1655,6 +1685,7 @@
     <string name="text_unknown_description_for_plugin">Неизвестное Описание</string>
     <string name="text_unknown_title_for_plugin">Неизвестный Заголовок</string>
     <string name="text_unknown_version_for_plugin">Неизвестная Версия</string>
+    <string name="text_unsaved_changes">Несохраненные изменения</string>
     <string name="text_unsigned_apk_created">Неподписанный APK создан</string>
     <string name="text_unverified">Не подтверждено</string>
     <string name="text_updatable">Доступно обновление</string>

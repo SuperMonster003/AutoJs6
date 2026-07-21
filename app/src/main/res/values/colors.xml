@@ -125,6 +125,9 @@
 
     <color name="dialog_options_button_tint">@color/day</color>
 
+    <color name="editor_encoding_risk_error">@color/md_red_600</color>
+    <color name="editor_encoding_risk_warning">@color/md_amber_700</color>
+
     <color name="item_background">#FAFAFA</color>
     <color name="item_background_dark">#FAFAFA</color>
 

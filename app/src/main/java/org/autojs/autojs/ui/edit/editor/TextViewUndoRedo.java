@@ -53,9 +53,19 @@ public class TextViewUndoRedo {
     // zh-CN: "未修改" 状态的基线位置.
     private int mInitialHistoryPosition;
 
+    // Stable identity of the saved history state. Unlike a numeric position, this never collides
+    // when a redo branch is discarded and a new branch grows to the same position.
+    private long mInitialHistoryStateId;
+
     private final Handler mHandler = new Handler();
     private int mTextChangeId = 0;
     private final boolean mTextChanging = false;
+
+    private HistoryOperationListener mHistoryOperationListener;
+
+    public interface HistoryOperationListener {
+        void onHistoryOperation(String token, boolean undo);
+    }
 
     // =================================================================== //
 
@@ -77,6 +87,10 @@ public class TextViewUndoRedo {
 
     public void setEnabled(boolean enabled) {
         mEnabled = enabled;
+    }
+
+    public void setHistoryOperationListener(HistoryOperationListener listener) {
+        mHistoryOperationListener = listener;
     }
 
     /**
@@ -124,18 +138,47 @@ public class TextViewUndoRedo {
         // 重要:
         // 使用 history position 而不是 history size.
         // undo/redo 会改变 mmPosition, 但 history size 往往不变.
-        return mInitialHistoryPosition != mEditHistory.mmPosition;
+        return mInitialHistoryStateId != mEditHistory.mmCurrentStateId;
     }
 
     public void markTextAsUnchanged() {
         mInitialHistoryStackSize = mEditHistory.size();
         mInitialHistoryPosition = mEditHistory.mmPosition;
+        mInitialHistoryStateId = mEditHistory.mmCurrentStateId;
     }
 
     public void markTextAsChanged() {
-        if (mInitialHistoryPosition == mEditHistory.mmPosition) {
-            mInitialHistoryPosition = mEditHistory.mmPosition - 1;
+        if (mInitialHistoryStateId == mEditHistory.mmCurrentStateId) {
+            mInitialHistoryStateId = Long.MIN_VALUE;
         }
+    }
+
+    /**
+     * Replace the complete document while recording exactly one history entry.
+     */
+    public void replaceAllTextUndoably(CharSequence text, String token) {
+        Editable editable = mTextView.getEditableText();
+        String before = editable.toString();
+        String after = text == null ? "" : text.toString();
+        if (before.equals(after)) {
+            addUndoableHistoryMarker(token);
+            return;
+        }
+
+        mIsUndoOrRedo = true;
+        try {
+            editable.replace(0, editable.length(), after);
+        } finally {
+            mIsUndoOrRedo = false;
+        }
+        mEditHistory.add(new EditItem(0, before, after, token, true));
+    }
+
+    /**
+     * Add a history entry which changes host document metadata but not its text.
+     */
+    public void addUndoableHistoryMarker(String token) {
+        mEditHistory.add(new EditItem(0, "", "", token, false));
     }
 
     // =================================================================== //
@@ -162,6 +205,7 @@ public class TextViewUndoRedo {
         mEditHistory.clear();
         mInitialHistoryStackSize = 0;
         mInitialHistoryPosition = 0;
+        mInitialHistoryStateId = mEditHistory.mmCurrentStateId;
     }
 
     /**
@@ -180,22 +224,22 @@ public class TextViewUndoRedo {
             return;
         }
 
-        Editable text = mTextView.getEditableText();
-        int start = edit.mmStart;
-        int end = start + (edit.mmAfter != null ? edit.mmAfter.length() : 0);
+        if (edit.mmChangesText) {
+            Editable text = mTextView.getEditableText();
+            int start = edit.mmStart;
+            int end = start + edit.mmAfter.length();
 
-        mIsUndoOrRedo = true;
-        text.replace(start, end, edit.mmBefore);
-        mIsUndoOrRedo = false;
+            mIsUndoOrRedo = true;
+            try {
+                text.replace(start, end, edit.mmBefore);
+            } finally {
+                mIsUndoOrRedo = false;
+            }
 
-        // This will get rid of underlines inserted when editor tries to come
-        // up with a suggestion.
-        for (Object o : text.getSpans(0, text.length(), UnderlineSpan.class)) {
-            text.removeSpan(o);
+            removeSuggestionUnderlines(text);
+            Selection.setSelection(text, start + edit.mmBefore.length());
         }
-
-        Selection.setSelection(text, edit.mmBefore == null ? start
-                : (start + edit.mmBefore.length()));
+        notifyHistoryOperation(edit, true);
     }
 
     /**
@@ -214,22 +258,38 @@ public class TextViewUndoRedo {
             return;
         }
 
-        Editable text = mTextView.getEditableText();
-        int start = edit.mmStart;
-        int end = start + (edit.mmBefore != null ? edit.mmBefore.length() : 0);
+        if (edit.mmChangesText) {
+            Editable text = mTextView.getEditableText();
+            int start = edit.mmStart;
+            int end = start + edit.mmBefore.length();
 
-        mIsUndoOrRedo = true;
-        text.replace(start, end, edit.mmAfter);
-        mIsUndoOrRedo = false;
+            mIsUndoOrRedo = true;
+            try {
+                text.replace(start, end, edit.mmAfter);
+            } finally {
+                mIsUndoOrRedo = false;
+            }
 
+            removeSuggestionUnderlines(text);
+            Selection.setSelection(text, start + edit.mmAfter.length());
+        }
+        notifyHistoryOperation(edit, false);
+    }
+
+    private void removeSuggestionUnderlines(Editable text) {
         // This will get rid of underlines inserted when editor tries to come
         // up with a suggestion.
         for (Object o : text.getSpans(0, text.length(), UnderlineSpan.class)) {
             text.removeSpan(o);
         }
+    }
 
-        Selection.setSelection(text, edit.mmAfter == null ? start
-                : (start + edit.mmAfter.length()));
+    private void notifyHistoryOperation(EditItem edit, boolean undo) {
+        if (mHistoryOperationListener != null) {
+            mHistoryOperationListener.onHistoryOperation(
+                    edit.mmHistoryToken == null ? "" : edit.mmHistoryToken,
+                    undo);
+        }
     }
 
     /**
@@ -251,6 +311,8 @@ public class TextViewUndoRedo {
             editor.putInt(pre + ".start", ei.mmStart);
             editor.putString(pre + ".before", ei.mmBefore.toString());
             editor.putString(pre + ".after", ei.mmAfter.toString());
+            editor.putBoolean(pre + ".changes_text", ei.mmChangesText);
+            editor.putString(pre + ".history_token", ei.mmHistoryToken);
 
             i++;
         }
@@ -300,14 +362,17 @@ public class TextViewUndoRedo {
             int start = sp.getInt(pre + ".start", -1);
             String before = sp.getString(pre + ".before", null);
             String after = sp.getString(pre + ".after", null);
+            boolean changesText = sp.getBoolean(pre + ".changes_text", true);
+            String historyToken = sp.getString(pre + ".history_token", null);
 
             if (start == -1 || before == null || after == null) {
                 return false;
             }
-            mEditHistory.add(new EditItem(start, before, after));
+            mEditHistory.add(new EditItem(start, before, after, historyToken, changesText));
         }
 
         mEditHistory.mmPosition = sp.getInt(prefix + ".position", -1);
+        mEditHistory.syncCurrentStateIdForPosition();
         return mEditHistory.mmPosition != -1;
     }
 
@@ -325,6 +390,10 @@ public class TextViewUndoRedo {
          */
         private int mmPosition = 0;
 
+        private long mmNextStateId = 0;
+
+        private long mmCurrentStateId = 0;
+
         /**
          * Maximum undo history size.
          */
@@ -341,6 +410,7 @@ public class TextViewUndoRedo {
         private void clear() {
             mmPosition = 0;
             mmHistory.clear();
+            mmCurrentStateId = ++mmNextStateId;
         }
 
         /**
@@ -352,8 +422,11 @@ public class TextViewUndoRedo {
             while (mmHistory.size() > mmPosition) {
                 mmHistory.removeLast();
             }
+            item.mmBeforeStateId = mmCurrentStateId;
+            item.mmAfterStateId = ++mmNextStateId;
             mmHistory.add(item);
             mmPosition++;
+            mmCurrentStateId = item.mmAfterStateId;
 
             if (mmMaxHistorySize >= 0) {
                 trimHistory();
@@ -398,7 +471,9 @@ public class TextViewUndoRedo {
                 return null;
             }
             mmPosition--;
-            return mmHistory.get(mmPosition);
+            EditItem item = mmHistory.get(mmPosition);
+            mmCurrentStateId = item.mmBeforeStateId;
+            return item;
         }
 
         /**
@@ -412,7 +487,19 @@ public class TextViewUndoRedo {
 
             EditItem item = mmHistory.get(mmPosition);
             mmPosition++;
+            mmCurrentStateId = item.mmAfterStateId;
             return item;
+        }
+
+        private void syncCurrentStateIdForPosition() {
+            if (mmHistory.isEmpty()) {
+                return;
+            }
+            if (mmPosition <= 0) {
+                mmCurrentStateId = mmHistory.getFirst().mmBeforeStateId;
+            } else if (mmPosition <= mmHistory.size()) {
+                mmCurrentStateId = mmHistory.get(mmPosition - 1).mmAfterStateId;
+            }
         }
     }
 
@@ -423,15 +510,30 @@ public class TextViewUndoRedo {
         private final int mmStart;
         private final CharSequence mmBefore;
         private final CharSequence mmAfter;
+        private final String mmHistoryToken;
+        private final boolean mmChangesText;
+        private long mmBeforeStateId;
+        private long mmAfterStateId;
 
         /**
          * Constructs EditItem of a modification that was applied at position
          * start and replaced CharSequence before with CharSequence after.
          */
         public EditItem(int start, CharSequence before, CharSequence after) {
+            this(start, before, after, null, true);
+        }
+
+        public EditItem(
+                int start,
+                CharSequence before,
+                CharSequence after,
+                String historyToken,
+                boolean changesText) {
             mmStart = start;
             mmBefore = before;
             mmAfter = after;
+            mmHistoryToken = historyToken;
+            mmChangesText = changesText;
         }
     }
 

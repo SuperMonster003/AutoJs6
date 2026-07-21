@@ -99,7 +99,7 @@ object EditableFileInfoDialogManager {
                     val charsetMatch = StringUtils.detectCharset(bytes)
                     val charset = charsetMatch.charsetOrDefault()
                     val text = withContext(Dispatchers.IO) {
-                        fileContentGetter?.invoke() ?: dropBom(bytes, charset).decodeToString()
+                        fileContentGetter?.invoke() ?: String(dropBom(bytes, charset), charset)
                     }
                     setCopyableTextIfAbsent(
                         binding.fileCharsetValue,

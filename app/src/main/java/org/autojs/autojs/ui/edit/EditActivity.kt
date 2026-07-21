@@ -31,6 +31,11 @@ import org.autojs.autojs.core.permission.RequestPermissionCallbacks
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.edit.editor.service.EditorDraftService
+import org.autojs.autojs.ui.edit.editor.service.editorDocumentIdentity
+import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsObservation
+import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsRecord
+import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsRegistration
+import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsStore
 import org.autojs.autojs.ui.error.ErrorDialogActivity
 import org.autojs.autojs.ui.log.LogBottomSheet
 import org.autojs.autojs.ui.log.StackFrameTargetResolver
@@ -46,6 +51,7 @@ import org.autojs.autojs.util.ViewUtils.titleView
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
 import java.io.File
+import java.util.UUID
 
 /**
  * Created by Stardust on Jan 29, 2017.
@@ -89,10 +95,17 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     private var mNewTask = false
 
     private lateinit var draftService: EditorDraftService
+    private lateinit var mEditorSessionId: String
+    private var mPendingSaveAsRegistration: EditorPendingSaveAsRegistration? = null
+    private var mEditorIntentHandled = false
+    private var mActivityDestroyed = false
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
-
+        mEditorSessionId = ensureEditorSessionId()
+        EditorPendingSaveAsStore.peekCompleted(mEditorSessionId)?.let {
+            applyPendingSaveAsRecordToIntent(it)
+        }
         super.onCreate(savedInstanceState)
 
         val binding = ActivityEditBinding.inflate(layoutInflater).also {
@@ -106,6 +119,13 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         }
         val editorView = binding.editorView.also {
             mEditorView = it
+            it.setEditorSessionId(mEditorSessionId)
+            it.setCompletedSaveAsAdoptedListener { record, exactSavedSnapshot ->
+                if (exactSavedSnapshot) {
+                    draftService.deleteDraft()
+                }
+                EditorPendingSaveAsStore.removeIfSame(record)
+            }
         }
         EditorMenu(editorView, readOnly).also {
             mEditorMenu = it
@@ -113,16 +133,34 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
         // Use a stable key from intent instead of editorView.uri (which is not set yet here).
         // zh-CN: 使用 intent 中的稳定 key, 避免此处 editorView.uri 尚未赋值导致 key 为 null.
-        val draftKeyPath = intent.getStringExtra(EditorView.EXTRA_PATH) ?: intent.data?.path
+        val draftKeyPath = intent.getStringExtra(EditorView.EXTRA_PATH)
+            ?.let { Uri.fromFile(File(it)).editorDocumentIdentity() }
+            ?: intent.data?.editorDocumentIdentity()
 
         draftService = EditorDraftService(
             context = this,
             draftKeyPath = draftKeyPath,
-            currentEditor = { mEditorView.editor },
-            shouldSaveDraft = { mEditorView.isTextChanged || mEditorView.saveStickyDirty },
+            currentText = { mEditorView.textForDraftSaving() },
+            shouldSaveDraft = { mEditorView.shouldSaveDraft() },
             restoreDraftText = { draftText -> mEditorView.restoreDraftTextForThisSession(draftText) },
+            onRestorePendingChanged = { pending -> mEditorView.setDraftRestorePending(pending) },
             log = { message -> Log.d(LOG_TAG, message) },
         )
+        editorView.setDocumentLocationChangedListener { documentUri, documentName ->
+            val newDraftKey = documentUri.editorDocumentIdentity()
+            draftService.rebindDraftKeyPath(newDraftKey)
+            intent = Intent(intent).apply {
+                data = documentUri
+                removeExtra(EditorView.EXTRA_CONTENT)
+                if (documentUri.scheme.equals("file", ignoreCase = true)) {
+                    putExtra(EditorView.EXTRA_PATH, documentUri.path)
+                } else {
+                    removeExtra(EditorView.EXTRA_PATH)
+                }
+                putExtra(EditorView.EXTRA_NAME, documentName)
+            }
+            mToolbar?.title = documentName
+        }
 
         // Restore draft as early as possible to avoid being overwritten by async file loading.
         // We intentionally do this in onCreate(), not in onRestoreInstanceState(),
@@ -147,15 +185,72 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 }
             }
         }
-        editorView.handleIntent(intent)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(Observers.emptyConsumer()) { ex: Throwable -> onLoadFileError(ex.message) }
-
-        setToolbarAsBack(editorView.name)
+        setToolbarAsBack(intent.getStringExtra(EditorView.EXTRA_NAME) ?: editorView.name)
+        handleEditorIntentWhenSaveAsSettles()
         onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
 
         // Setup log bottom sheet
         setUpLogSheet()
+    }
+
+    private fun ensureEditorSessionId(): String {
+        intent.getStringExtra(EditorView.EXTRA_EDITOR_SESSION_ID)
+            ?.takeIf(String::isNotBlank)
+            ?.let { return it }
+        return UUID.randomUUID().toString().also { sessionId ->
+            intent = Intent(intent).putExtra(EditorView.EXTRA_EDITOR_SESSION_ID, sessionId)
+        }
+    }
+
+    private fun applyPendingSaveAsRecordToIntent(record: EditorPendingSaveAsRecord) {
+        val destinationUri = Uri.fromFile(record.destination)
+        intent = Intent(intent).apply {
+            data = destinationUri
+            removeExtra(EditorView.EXTRA_CONTENT)
+            putExtra(EditorView.EXTRA_PATH, record.destination.path)
+            putExtra(EditorView.EXTRA_NAME, record.destination.nameWithoutExtension)
+        }
+        if (::draftService.isInitialized) {
+            draftService.rebindDraftKeyPath(destinationUri.editorDocumentIdentity())
+        }
+        mToolbar?.title = record.destination.nameWithoutExtension
+    }
+
+    private fun handleEditorIntentWhenSaveAsSettles() {
+        when (val observation = EditorPendingSaveAsStore.consumeOrObserve(
+            mEditorSessionId,
+            ::onPendingSaveAsSettled,
+        )) {
+            EditorPendingSaveAsObservation.None -> handleEditorIntentOnce()
+            is EditorPendingSaveAsObservation.Completed -> {
+                mEditorView.prepareCompletedSaveAsAdoption(observation.record)
+                applyPendingSaveAsRecordToIntent(observation.record)
+                handleEditorIntentOnce()
+            }
+            is EditorPendingSaveAsObservation.Waiting -> {
+                mPendingSaveAsRegistration = observation.registration
+                mEditorView.setSaveAsRecreationPending(true)
+            }
+        }
+    }
+
+    private fun onPendingSaveAsSettled(record: EditorPendingSaveAsRecord?) {
+        if (mActivityDestroyed) return
+        mPendingSaveAsRegistration = null
+        if (record != null) {
+            mEditorView.prepareCompletedSaveAsAdoption(record)
+            applyPendingSaveAsRecordToIntent(record)
+        }
+        mEditorView.setSaveAsRecreationPending(false)
+        handleEditorIntentOnce()
+    }
+
+    private fun handleEditorIntentOnce() {
+        if (mEditorIntentHandled || mActivityDestroyed) return
+        mEditorIntentHandled = true
+        mEditorView.handleIntent(intent)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(Observers.emptyConsumer()) { ex: Throwable -> onLoadFileError(ex.message) }
     }
 
     private fun setUpLogSheet() {
@@ -499,8 +594,12 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        mActivityDestroyed = true
+        mPendingSaveAsRegistration?.close()
+        mPendingSaveAsRegistration = null
+        draftService.destroy()
         mEditorView.destroy()
+        super.onDestroy()
     }
 
     override fun getOnActivityResultDelegateMediator(): OnActivityResultDelegate.Mediator {
@@ -559,11 +658,27 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
         @JvmStatic
         fun editFile(context: Context, uri: Uri?, newTask: Boolean) =
-            when {
-                newIntent(context).setData(uri).startSafely(context) -> true
-                newIntentFallback(context, newTask).setData(uri).startSafely(context) -> true
+            editFile(context, uri, newTask, 0)
+
+        @JvmStatic
+        fun editFile(context: Context, uri: Uri?, newTask: Boolean, uriPermissionFlags: Int): Boolean {
+            val allowedPermissionFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or
+                Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+            val forwardedPermissionFlags = uriPermissionFlags and allowedPermissionFlags
+            return when {
+                newIntent(context).apply {
+                    data = uri
+                    addFlags(forwardedPermissionFlags)
+                }.startSafely(context) -> true
+                newIntentFallback(context, newTask).apply {
+                    data = uri
+                    addFlags(forwardedPermissionFlags)
+                }.startSafely(context) -> true
                 else -> false
             }
+        }
 
         @JvmStatic
         fun editFile(context: Context, name: String?, path: String?, newTask: Boolean) =

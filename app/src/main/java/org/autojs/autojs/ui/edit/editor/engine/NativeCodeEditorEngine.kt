@@ -8,6 +8,7 @@ import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.CodeEditor
 import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.LayoutHelper
+import org.autojs.autojs.ui.edit.editor.TextViewUndoRedo
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.ui.widget.SimpleTextWatcher
 import org.autojs.autojs.util.DisplayUtils.pxToSp
@@ -22,6 +23,7 @@ class NativeCodeEditorEngine(
     private val tmpCursorRect = Rect()
 
     private var breakpointChangeListener: CodeEditor.BreakpointChangeListener? = null
+    private var historyOperationListener: TextViewUndoRedo.HistoryOperationListener? = null
     private var readOnly = false
     private var themeKey: String? = null
     private var searchQuery: String? = null
@@ -115,6 +117,39 @@ class NativeCodeEditorEngine(
 
     override fun markTextAsSaved() {
         codeEditor.markTextAsSaved()
+    }
+
+    override fun markTextAsChanged() {
+        codeEditor.markTextAsChanged()
+    }
+
+    override fun replaceAllTextUndoably(
+        text: String,
+        token: String,
+        onComplete: ((Boolean) -> Unit)?,
+    ) {
+        codeEditor.replaceAllTextUndoably(text, token)
+        onComplete?.invoke(true)
+    }
+
+    override fun addUndoableHistoryMarker(
+        token: String,
+        onComplete: ((Boolean) -> Unit)?,
+    ) {
+        codeEditor.addUndoableHistoryMarker(token)
+        onComplete?.invoke(true)
+    }
+
+    override fun setHistoryOperationListener(listener: EditorHistoryOperationListener?) {
+        historyOperationListener = listener?.let {
+            TextViewUndoRedo.HistoryOperationListener { token, undo ->
+                it.onHistoryOperation(
+                    token,
+                    if (undo) EditorHistoryDirection.UNDO else EditorHistoryDirection.REDO,
+                )
+            }
+        }
+        codeEditor.setHistoryOperationListener(historyOperationListener)
     }
 
     override fun insert(text: String?) {
@@ -501,6 +536,8 @@ class NativeCodeEditorEngine(
     }
 
     override fun destroy() {
+        codeEditor.setHistoryOperationListener(null)
+        historyOperationListener = null
         codeEditor.destroy()
     }
 

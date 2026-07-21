@@ -471,6 +471,18 @@ class CodeEditor : HVScrollView {
         mTextViewRedoUndo.setDefaultText(text)
     }
 
+    fun replaceAllTextUndoably(text: String, token: String) {
+        mTextViewRedoUndo.replaceAllTextUndoably(text, token)
+    }
+
+    fun addUndoableHistoryMarker(token: String) {
+        mTextViewRedoUndo.addUndoableHistoryMarker(token)
+    }
+
+    fun setHistoryOperationListener(listener: TextViewUndoRedo.HistoryOperationListener?) {
+        mTextViewRedoUndo.setHistoryOperationListener(listener)
+    }
+
     fun jumpTo(line: Int, col: Int) {
         if (line >= 0 && line < codeEditText.getLogicalLineCount()) {
             val lineStart = codeEditText.getLogicalLineStart(line)

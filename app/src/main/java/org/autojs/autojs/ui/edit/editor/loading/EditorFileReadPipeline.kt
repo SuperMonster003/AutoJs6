@@ -6,11 +6,14 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingCodec
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingStreamDecoder
+import org.autojs.autojs.ui.edit.editor.service.EditorFileIoCoordinator
 import org.autojs.autojs.util.StringUtils
 import java.io.BufferedInputStream
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
-import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -22,24 +25,34 @@ class EditorFileReadPipeline(
     private val resolver = context.contentResolver
 
     fun queryContentLengthOrNull(uri: Uri): Long? {
-        return when (uri.scheme?.lowercase()) {
-            "file" -> uri.path?.let { File(it).length().coerceAtLeast(0L) }
-            "content" -> queryContentSizeOrNull(uri)
-            else -> null
+        return EditorFileIoCoordinator.withReadAccess(uri) {
+            when (uri.scheme?.lowercase()) {
+                "file" -> uri.path?.let { File(it).length().coerceAtLeast(0L) }
+                "content" -> queryContentSizeOrNull(uri)
+                else -> null
+            }
         }
     }
 
-    fun readText(uri: Uri): EditorFileReadResult {
-        val rawBytes = resolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
-        val metadata = detectMetadata(rawBytes)
-        val offset = if (metadata.hadBom) {
-            StringUtils.bomBytes(metadata.charset).size.coerceAtMost(rawBytes.size)
-        } else 0
-        val len = (rawBytes.size - offset).coerceAtLeast(0)
-        return EditorFileReadResult(
-            text = String(rawBytes, offset, len, metadata.charset),
-            metadata = metadata,
-        )
+    fun readText(uri: Uri, charsetOverride: Charset? = null): EditorFileReadResult {
+        return EditorFileIoCoordinator.withReadAccess(uri) {
+            val rawBytes = resolver.openInputStream(uri)?.use { it.readBytes() }
+                ?: throw IOException("Cannot open input stream for $uri")
+            val metadata = detectMetadata(rawBytes, charsetOverride)
+            val offset = if (metadata.hadBom) {
+                StringUtils.bomBytes(metadata.charset).size.coerceAtMost(rawBytes.size)
+            } else 0
+            val len = (rawBytes.size - offset).coerceAtLeast(0)
+            val payload = rawBytes.copyOfRange(offset, offset + len)
+            val strictText = EditorEncodingCodec.decodeStrictOrNull(payload, metadata.charset)
+            EditorFileReadResult(
+                text = strictText ?: EditorEncodingCodec.decodeReplacing(payload, metadata.charset),
+                metadata = metadata.copy(
+                    hadDecodingErrors = strictText == null,
+                    decodingErrorsWereAccepted = strictText == null && charsetOverride != null,
+                ),
+            )
+        }
     }
 
     fun streamTextChunks(
@@ -47,29 +60,39 @@ class EditorFileReadPipeline(
         cancel: AtomicBoolean,
         streamRef: AtomicReference<InputStream?>,
         onMetadata: (EditorFileReadMetadata) -> Unit,
+        charsetOverride: Charset? = null,
     ): Observable<String> {
         return Observable.create { emitter ->
-            // Emit an early placeholder so the caller can continue its editor-load flow.
-            emitter.onNext("")
+            EditorFileIoCoordinator.withReadAccess(uri) {
+                // Emit an early placeholder so the caller can continue its editor-load flow.
+                emitter.onNext("")
 
-            val raw = resolver.openInputStream(uri) ?: run {
-                emitter.onError(IllegalStateException("Cannot open input stream for $uri"))
-                return@create
-            }
-            streamRef.set(raw)
-
-            try {
-                BufferedInputStream(raw).use { input ->
-                    if (cancel.get() || emitter.isDisposed) {
-                        return@use
-                    }
-
-                    val metadata = detectStreamMetadata(input, uri, cancel, emitter) ?: return@use
-                    onMetadata(metadata)
-                    streamDecodeAndEmit(input, metadata, cancel, emitter)
+                val raw = resolver.openInputStream(uri) ?: run {
+                    emitter.onError(IllegalStateException("Cannot open input stream for $uri"))
+                    return@withReadAccess
                 }
-            } finally {
-                streamRef.set(null)
+                streamRef.set(raw)
+
+                try {
+                    BufferedInputStream(raw).use { input ->
+                        if (cancel.get() || emitter.isDisposed) {
+                            return@use
+                        }
+
+                        val metadata = detectStreamMetadata(input, uri, cancel, emitter, charsetOverride) ?: return@use
+                        onMetadata(metadata)
+                        streamDecodeAndEmit(
+                            input = input,
+                            metadata = metadata,
+                            cancel = cancel,
+                            emitter = emitter,
+                            decodingErrorsWereAccepted = charsetOverride != null,
+                            onMetadata = onMetadata,
+                        )
+                    }
+                } finally {
+                    streamRef.set(null)
+                }
             }
         }
     }
@@ -89,12 +112,23 @@ class EditorFileReadPipeline(
         }
     }
 
-    private fun detectMetadata(bytes: ByteArray): EditorFileReadMetadata {
-        val detected = StringUtils.detectCharset(bytes)
-        val charset = detected.charsetOrDefault()
+    private fun detectMetadata(
+        bytes: ByteArray,
+        charsetOverride: Charset? = null,
+        endOfInput: Boolean = true,
+    ): EditorFileReadMetadata {
+        if (charsetOverride != null) {
+            return EditorFileReadMetadata(
+                charset = charsetOverride,
+                charsetConfidence = 100,
+                hadBom = StringUtils.hasBom(bytes, charsetOverride),
+            )
+        }
+        val detected = StringUtils.detectEncoding(bytes, endOfInput)
+        val charset = detected.charset
         return EditorFileReadMetadata(
             charset = charset,
-            charsetConfidence = detected.confidence ?: 0,
+            charsetConfidence = detected.confidence,
             hadBom = StringUtils.hasBom(bytes, charset),
         )
     }
@@ -104,14 +138,27 @@ class EditorFileReadPipeline(
         uri: Uri,
         cancel: AtomicBoolean,
         emitter: ObservableEmitter<String>,
+        charsetOverride: Charset?,
     ): EditorFileReadMetadata? {
-        val sampleLimitBytes = 64 * 1024
-        input.mark(sampleLimitBytes + 8)
+        val sampleLimitBytes = 256 * 1024
+        input.mark(sampleLimitBytes + 16)
 
-        val sample = ByteArray(sampleLimitBytes)
-        val sampleRead = input.read(sample).coerceAtLeast(0)
-        val sampleBytes = if (sampleRead == sample.size) sample else sample.copyOf(sampleRead)
-        val metadata = detectMetadata(sampleBytes)
+        val sample = ByteArray(sampleLimitBytes + 1)
+        var sampleRead = 0
+        while (sampleRead < sample.size && !cancel.get() && !emitter.isDisposed) {
+            val read = input.read(sample, sampleRead, sample.size - sampleRead)
+            if (read < 0) break
+            if (read == 0) {
+                val oneByte = input.read()
+                if (oneByte < 0) break
+                sample[sampleRead++] = oneByte.toByte()
+                continue
+            }
+            sampleRead += read
+        }
+        val truncated = sampleRead > sampleLimitBytes
+        val sampleBytes = sample.copyOf(sampleRead.coerceAtMost(sampleLimitBytes))
+        val metadata = detectMetadata(sampleBytes, charsetOverride, endOfInput = !truncated)
 
         runCatching { input.reset() }.getOrElse {
             if (!emitter.isDisposed && !cancel.get()) {
@@ -128,6 +175,8 @@ class EditorFileReadPipeline(
         metadata: EditorFileReadMetadata,
         cancel: AtomicBoolean,
         emitter: ObservableEmitter<String>,
+        decodingErrorsWereAccepted: Boolean,
+        onMetadata: (EditorFileReadMetadata) -> Unit,
     ) {
         val bomBytes = StringUtils.bomBytes(metadata.charset)
         if (metadata.hadBom && bomBytes.isNotEmpty()) {
@@ -142,17 +191,22 @@ class EditorFileReadPipeline(
             }
         }
 
-        val reader = InputStreamReader(input, metadata.charset)
-        val buf = CharArray(32 * 1024)
-        while (!emitter.isDisposed && !cancel.get()) {
-            val n = reader.read(buf)
-            if (n <= 0) break
-            emitter.onNext(String(buf, 0, n))
+        val result = EditorEncodingStreamDecoder.decode(
+            input = input,
+            charset = metadata.charset,
+            isCancelled = { emitter.isDisposed || cancel.get() },
+            onDecodedText = emitter::onNext,
+        )
+        if (!result.completed) return
+        if (result.hadDecodingErrors) {
+            onMetadata(
+                metadata.copy(
+                    hadDecodingErrors = true,
+                    decodingErrorsWereAccepted = decodingErrorsWereAccepted,
+                ),
+            )
         }
-
-        if (!emitter.isDisposed && !cancel.get()) {
-            emitter.onComplete()
-        }
+        emitter.onComplete()
     }
 }
 
@@ -165,4 +219,6 @@ data class EditorFileReadMetadata(
     val charset: Charset,
     val charsetConfidence: Int,
     val hadBom: Boolean,
+    val hadDecodingErrors: Boolean = false,
+    val decodingErrorsWereAccepted: Boolean = false,
 )

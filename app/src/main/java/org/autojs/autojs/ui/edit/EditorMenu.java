@@ -57,6 +57,10 @@ public class EditorMenu {
         }
         prepareReadOnlyMenu(menu);
         setReadOnlySensitiveMenuItemsVisible(menu, !mEditorView.isReadOnly());
+        MenuItem encodingItem = menu.findItem(R.id.action_file_encoding);
+        if (encodingItem != null) {
+            encodingItem.setEnabled(mEditorView.canChangeFileEncoding());
+        }
     }
 
     private void setReadOnlySensitiveMenuItemsVisible(Menu menu, boolean mutable) {
@@ -109,6 +113,8 @@ public class EditorMenu {
         } else if (itemId == R.id.action_editor_settings) {
             mEditorView.showEditorSettingsDialog();
             handled = true;
+        } else if (itemId == R.id.action_file_encoding) {
+            handled = tryDoing(mEditorView::showEncodingDialog);
         } else {
             handled = onEditOptionsSelected(item)
                     || onJumpOptionsSelected(item)

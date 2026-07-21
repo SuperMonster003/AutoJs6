@@ -89,6 +89,13 @@
     <string name="description_documentation_source_preference_more">The following conditions must be met for dark theme support on document pages:\n1. AutoJs6 has night mode enabled\n2. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P] and below: version >= 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
     <string name="description_editor_code_highlight_threshold">Determines whether syntax highlighting is enabled based on file size.\nFor large files, disabling syntax highlighting can improve file loading efficiency to some extent.</string>
+    <string name="description_editor_encoding_convert_persists_replacement_characters">Saving after Convert will overwrite the original invalid bytes and permanently preserve the replacement characters currently shown in the editor.</string>
+    <string name="description_editor_encoding_convert_unavailable">Convert is unavailable because the current text cannot be encoded with %1$s.</string>
+    <string name="description_editor_encoding_convert_unavailable_read_only">Convert is unavailable because the file is read-only.</string>
+    <string name="description_editor_encoding_reload_discards_unsaved_changes">Reloading without saving discards unsaved changes in the editor.</string>
+    <string name="description_editor_encoding_reload_or_convert">Change the encoding of \"%2$s\" to %1$s?\n\nReload reads the file again from disk using the new encoding and replaces the editor content. Convert keeps the editor text and sets the new encoding for the next save; it does not write the file immediately.</string>
+    <string name="description_editor_encoding_reload_replaces_invalid_bytes">Reload replaces invalid byte sequences with replacement characters.</string>
+    <string name="description_editor_encoding_reload_save_prompt">"%1$s" has unsaved changes. Save them using the current encoding before reloading?</string>
     <string name="description_editor_engine_preference">Ace is the default editor engine. JsDroidEditor remains available as a fallback and can be selected explicitly.</string>
     <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>
     <string name="description_editor_gutter_width_mode_preference">Dynamic width follows currently visible line-number digits. Fixed width preallocates a stable minimum and grows only when larger visible line numbers require it.</string>
@@ -150,6 +157,7 @@
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Connect</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_convert">Convert</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_copy_path">Copy path</string>
     <string name="dialog_button_default_prefix">Def prefix</string>
@@ -172,12 +180,15 @@
     <string name="dialog_button_preview">Preview</string>
     <string name="dialog_button_quit">Quit</string>
     <string name="dialog_button_release_history">History</string>
+    <string name="dialog_button_reload">Reload</string>
+    <string name="dialog_button_reload_without_saving">Reload Without Saving</string>
     <string name="dialog_button_remove">Remove</string>
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">Retrieve</string>
     <string name="dialog_button_retry">Retry</string>
     <string name="dialog_button_save">Save</string>
     <string name="dialog_button_save_and_continue">Save and continue</string>
+    <string name="dialog_button_save_and_reload">Save and Reload</string>
     <string name="dialog_button_save_as">Save as</string>
     <string name="dialog_button_system_settings">System Settings</string>
     <string name="dialog_button_system_settings_simplified">System</string>
@@ -273,6 +284,7 @@
     <string name="error_corresponding_github_release_may_not_published">Corresponding GitHub release may have not been published yet</string>
     <string name="error_dot_decimal_notation_num_over_255">Dot-decimal number over 255</string>
     <string name="error_download_interrupted">Download interrupted</string>
+    <string name="error_editor_encoding_validation_incomplete">File encoding validation is incomplete. Choose File encoding and use Reload or Convert before saving.</string>
     <string name="error_email_taken">The e-mail is taken</string>
     <string name="error_empty_broadcast_selection">At least one broadcast must be selected</string>
     <string name="error_empty_github_release_assets">No GitHub release assets to download</string>
@@ -307,7 +319,9 @@
     <string name="error_failed_to_run_script">Failed to run script</string>
     <string name="error_failed_to_save">Failed to save</string>
     <string name="error_failed_to_save_project_config">Failed to save project config</string>
+    <string name="error_file_contains_unaccepted_decoding_replacements">Saving is blocked because invalid source bytes were replaced. Use File encoding to Reload or Convert explicitly.</string>
     <string name="error_file_in_path_does_not_exist">File in path \"%1$s\" does not exist</string>
+    <string name="error_file_state_unknown_reload_required">The original file state is unknown. Reload the file before continuing.</string>
     <string name="error_function_called_in_ui_thread">UI thread cannot be blocked. Try running %s() in sub-thread or sub-script</string>
     <string name="error_function_called_more_than_once">%s() called more than once</string>
     <string name="error_get_github_latest_release">Cannot get latest GitHub release</string>
@@ -393,9 +407,11 @@
     <string name="error_shizuku_service_may_be_not_running">Shizuku service may be not running</string>
     <string name="error_shizuku_version_is_not_supported">Shizuku version is not supported</string>
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Specified AutoJs6 version number must be greater than 461</string>
+    <string name="error_text_cannot_be_encoded_with_charset">The current text cannot be encoded with %1$s</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">The transformer for required property \"%1$s\" cannot return nullish</string>
     <string name="error_thread_is_not_alive">Thread is not alive</string>
     <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
+    <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Current file path is unknown, unable to change file encoding</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Current file path is unknown, unable to display file details</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Current file path is unknown, unable to display version history</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Current file path is unknown, unable to open with other apps</string>
@@ -632,6 +648,7 @@
     <string name="text_activated_successfully">Activated successfully</string>
     <string name="text_activity_not_found_for_apk_installing">No APK installer</string>
     <string name="text_adb_tool_needed">ADB tool is needed</string>
+    <string name="text_add_bom">Add BOM</string>
     <string name="text_add_color_library">Add a color library</string>
     <string name="text_add_symbol_hint">Add a symbol</string>
     <string name="text_alias">alias</string>
@@ -846,6 +863,7 @@
     <string name="text_country_code">Country Code (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
     <string name="text_creating_unsigned_apk">Creating unsigned APK</string>
+    <string name="text_current">Current</string>
     <string name="text_current_page_configuration">Current page configuration</string>
     <string name="text_current_version">Current version</string>
     <string name="text_daily_task">Daily task</string>
@@ -955,6 +973,13 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Enable accessibility service with secure settings timed out</string>
     <string name="text_enable_plugin">Enable plugin</string>
     <string name="text_enabled">Enabled</string>
+    <string name="text_encoding_cannot_decode_file">Cannot decode the file</string>
+    <string name="text_encoding_cannot_represent_current_text">Cannot represent the current text</string>
+    <string name="text_encoding_compatible">Compatible</string>
+    <string name="text_encoding_detected_with_confidence">Detected with %1$d%% confidence</string>
+    <string name="text_encoding_may_change_content">May change content</string>
+    <string name="text_encoding_risk_error">Error</string>
+    <string name="text_encoding_risk_warning">Warning</string>
     <string name="text_encrypting_script">Encrypting script</string>
     <string name="text_error">Error</string>
     <string name="text_error_copy_file" formatted="true">Failed to copy file: %s</string>
@@ -1007,6 +1032,9 @@
     <string name="text_file">File</string>
     <string name="text_file_colon_value">File: %1$s</string>
     <string name="text_file_details">File details</string>
+    <string name="text_file_encoding">File encoding</string>
+    <string name="text_file_encoding_converted">File encoding changed. Save the file to write it to disk.</string>
+    <string name="text_file_encoding_status">File encoding: %1$s</string>
     <string name="text_file_exists">File already exists</string>
     <string name="text_file_explorer">File explorer</string>
     <string name="text_file_extensions_title">File extensions</string>
@@ -1239,6 +1267,7 @@
     <string name="text_organization">Organization Name</string>
     <string name="text_organizational_unit">Organizational Unit</string>
     <string name="text_original_developer">Original developer</string>
+    <string name="text_original_file_recovery_path">Original file recovery path</string>
     <string name="text_others">Others</string>
     <string name="text_output_apk_path">APK output path</string>
     <string name="text_overwrite">Overwrite</string>
@@ -1431,6 +1460,7 @@
     <string name="text_registering">Registering</string>
     <string name="text_release_history">Release history</string>
     <string name="text_release_notes">Release notes</string>
+    <string name="text_reload_or_convert_to_encoding">Reload or convert to %1$s</string>
     <string name="text_remote">remote</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Remote file saved to local storage successfully</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Remote project saved to local storage successfully</string>
@@ -1650,6 +1680,7 @@
     <string name="text_unknown_description_for_plugin">Unknown Description</string>
     <string name="text_unknown_title_for_plugin">Unknown Title</string>
     <string name="text_unknown_version_for_plugin">Unknown Version</string>
+    <string name="text_unsaved_changes">Unsaved changes</string>
     <string name="text_unsigned_apk_created">Unsigned APK created</string>
     <string name="text_unverified">Unverified</string>
     <string name="text_updatable">Updatable</string>

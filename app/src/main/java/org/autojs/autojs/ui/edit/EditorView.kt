@@ -39,6 +39,7 @@ import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
@@ -97,19 +98,29 @@ import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher
 import org.autojs.autojs.ui.edit.editor.engine.AceScriptEditorEngine
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineFactory
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
+import org.autojs.autojs.ui.edit.editor.engine.EditorHistoryDirection
 import org.autojs.autojs.ui.edit.editor.engine.EditorCursorChangeListener
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchOptions
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
 import org.autojs.autojs.ui.edit.editor.engine.EditorSelection
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingCandidate
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingCodec
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingDetector
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingDialog
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingRisk
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingRiskEvaluator
 import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadMetadata
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
 import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.loading.EngineTextLoadTarget
 import org.autojs.autojs.ui.edit.editor.service.EditorBreakpointModelStore
+import org.autojs.autojs.ui.edit.editor.service.EditorFileRollbackFailedException
 import org.autojs.autojs.ui.edit.editor.service.EditorFileSaveEncoding
 import org.autojs.autojs.ui.edit.editor.service.EditorFileService
+import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsRecord
+import org.autojs.autojs.ui.edit.editor.service.EditorPendingSaveAsResult
 import org.autojs.autojs.ui.edit.editor.service.EditorTextProvider
 import org.autojs.autojs.ui.edit.editor.service.EditorThemeFontService
 import org.autojs.autojs.ui.edit.editor.service.EditorVersionHistoryService
@@ -145,6 +156,7 @@ import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ScriptOriginResolver
+import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.showSnack
@@ -159,8 +171,12 @@ import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.Locale
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.UUID
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import java.util.regex.Pattern
 
@@ -186,9 +202,39 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private var mLogPanelCallback: LogPanelCallback? = null
     private var mScriptRunningStateListener: ScriptRunningStateListener? = null
+    private var mDocumentLocationChangedListener: ((Uri, String) -> Unit)? = null
+    private var mCompletedSaveAsAdoptedListener: ((EditorPendingSaveAsRecord, Boolean) -> Unit)? = null
+    private var mEditorSessionId: String = UUID.randomUUID().toString()
 
     fun setLogPanelCallback(callback: LogPanelCallback) {
         mLogPanelCallback = callback
+    }
+
+    fun setDocumentLocationChangedListener(listener: (Uri, String) -> Unit) {
+        mDocumentLocationChangedListener = listener
+    }
+
+    fun setEditorSessionId(sessionId: String) {
+        require(sessionId.isNotBlank())
+        mEditorSessionId = sessionId
+    }
+
+    fun setCompletedSaveAsAdoptedListener(
+        listener: (EditorPendingSaveAsRecord, Boolean) -> Unit,
+    ) {
+        mCompletedSaveAsAdoptedListener = listener
+    }
+
+    fun prepareCompletedSaveAsAdoption(record: EditorPendingSaveAsRecord) {
+        mPendingCompletedSaveAs = record
+        mCurrentCharset = record.encoding.charset
+        mCurrentCharsetConfidence = 100
+        mHadBom = record.encoding.hadBom
+        mPersistedFileEncoding = record.encoding
+        mCurrentHadDecodingErrors = false
+        mCurrentDecodingErrorsWereAccepted = false
+        mFileEncodingValidationComplete = true
+        updateEncodingStatus()
     }
 
     fun showLogPanel() {
@@ -281,16 +327,56 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         context = context,
         hostView = this,
         versionHistoryService = versionHistoryService,
-        onSaveAsSucceeded = { dest ->
-            uri = Uri.fromFile(dest)
-            name = getNameWithoutExtension(dest.path)
-            syncEditorDocumentPath()
+        editorSessionIdProvider = { mEditorSessionId },
+        onSaveAsSucceeded = ::handleSaveAsSucceeded,
+        onSaveAsInProgressChanged = { inProgress ->
+            if (!mDestroyed) {
+                mSaveAsInProgress = inProgress
+                syncPrimaryMenuState()
+            }
+        },
+    )
+
+    private fun handleSaveAsSucceeded(
+        result: EditorPendingSaveAsResult,
+    ): Boolean {
+        if (mDestroyed) return false
+        val sourceUri = result.record.sourceUri
+        val destination = result.record.destination
+        val encoding = result.record.encoding
+        val savedText = result.savedText
+        val destinationUri = Uri.fromFile(destination)
+        uri = destinationUri
+        name = getNameWithoutExtension(destination.path)
+        syncEditorDocumentPath()
+        mCurrentCharset = encoding.charset
+        mCurrentCharsetConfidence = 100
+        mHadBom = encoding.hadBom
+        mPersistedFileEncoding = encoding
+        mCurrentHadDecodingErrors = false
+        mCurrentDecodingErrorsWereAccepted = false
+        mFileStateRequiresReload = false
+        mCurrentFileSizeBytes = runCatching { destination.length() }.getOrNull()
+        mDraftEncodingValidationPending = false
+        mFileEncodingValidationComplete = true
+        updateEncodingStatus()
+        if (editor.textSnapshot == savedText) {
+            fileService.discardStableDraft(sourceUri)
             editor.markTextAsSaved()
             saveStickyDirty = false
             mHadDirectEditSinceSave = false
             setMenuItemStatus(R.id.save, false)
-        },
-    )
+        } else {
+            // The failure dialog may remain open while the editor changes. Save As establishes
+            // the new document URI, but only the actual saved snapshot may become the baseline.
+            // zh-CN: 保存失败对话框停留期间编辑器内容可能继续变化. Save As 会建立新的文档 URI,
+            // 但只有实际写入的文本快照才可成为已保存基线.
+            saveStickyDirty = true
+            syncPrimaryMenuState()
+        }
+        mDocumentLocationChangedListener?.invoke(destinationUri, name)
+        return true
+    }
 
     // Whether a draft has been restored in this session.
     // If true, subsequent async file-load setInitialText() must NOT overwrite the restored draft.
@@ -300,15 +386,29 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // 若为 true, 则后续异步文件加载触发的 setInitialText() 不得覆盖已恢复的草稿.
     @Volatile
     private var mDraftRestoredInThisSession: Boolean = false
+    @Volatile
+    private var mDraftEncodingValidationPending: Boolean = false
+    @Volatile
+    private var mDraftRestoreInProgress: Boolean = false
+    @Volatile
+    private var mFileEncodingValidationComplete: Boolean = true
 
-    // Guard flag to mark text changes caused by undo/redo button actions.
-    // This is used to distinguish direct edits from history navigation.
+    /**
+     * Encoding metadata restored alongside a lifecycle draft. The on-disk file is still read to
+     * validate the source bytes, so this state is applied only after that validation completes.
+     */
+    private var mPendingRestoredDraftEncodingState: EncodingHistoryState? = null
+
+    // ACE applies toolbar history commands asynchronously. Keep the requested direction pending
+    // until the matching history event arrives so its text deltas are never mistaken for direct
+    // edits and encoding metadata advances atomically with the document history.
     //
     // zh-CN:
-    // 用于标记由撤销/重做按钮动作导致的文本变化的哨兵标记.
-    // 用于区分直接编辑与历史导航.
+    // ACE 会异步执行工具栏历史命令. 在对应历史事件抵达前保留请求方向,
+    // 避免把文本增量误判为直接编辑, 并让编码元数据与文档历史原子推进.
     @Volatile
-    private var mUndoRedoButtonInProgress: Boolean = false
+    private var mPendingHistoryNavigation: EditorHistoryDirection? = null
+    private var mHistoryNavigationGeneration = 0L
 
     // Whether user has touched/moved caret during large file loading.
     // If true, we should NOT force caret to 0 on load completion.
@@ -394,8 +494,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // zh-CN: 流式追加的 Choreographer 回调引用 (用于取消帧回调).
     @Volatile
     private var mLargeFileFrameCallback: Choreographer.FrameCallback? = null
+    private var mProgressiveTextLoadActive = false
 
     private val mCodeCompletionBar: CodeCompletionBar = binding.codeCompletionBar
+    private val mEditorStatusBar: View = binding.editorStatusBar
+    private val mEditorEncodingStatus: TextView = binding.editorEncodingStatus
     private val mInputMethodEnhanceBar: View = binding.inputMethodEnhanceBar
     private val mNativeInputMethodEnhanceContent: View = binding.nativeInputMethodEnhanceContent
     private val mAceInputMethodEnhanceContent: View = binding.aceInputMethodEnhanceContent
@@ -426,6 +529,39 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mCurrentCharsetConfidence: Int = 0
     private var mCurrentCharset: Charset = EditorFileService.DEFAULT_CHARSET_TO_WRITE_FILE
     private var mHadBom = false
+    private var mPersistedFileEncoding = EditorFileSaveEncoding(
+        charset = EditorFileService.DEFAULT_CHARSET_TO_WRITE_FILE,
+        hadBom = false,
+    )
+    private var mCurrentHadDecodingErrors = false
+    private var mCurrentDecodingErrorsWereAccepted = false
+    private var mFileStateRequiresReload = false
+    @Volatile
+    private var mCurrentFileSizeBytes: Long? = null
+    @Volatile
+    private var mEncodingDialogLoading = false
+    @Volatile
+    private var mEncodingOperationInProgress = false
+    @Volatile
+    private var mFileSaveInProgress = false
+    @Volatile
+    private var mSaveThenReloadInProgress = false
+    @Volatile
+    private var mSaveAsInProgress = false
+    private var mPendingCompletedSaveAs: EditorPendingSaveAsRecord? = null
+    private var mSaveAsAdoptionValidationInProgress = false
+    private var mSaveAsAdoptionDisposable: Disposable? = null
+    private var mTextRevision = 0L
+    @Volatile
+    private var mEncodingReloadRollback: EncodingReloadRollback? = null
+    private var mEncodingReloadReplacementStarted = false
+    private val mEncodingHistoryEntries = LinkedHashMap<String, EncodingHistoryEntry>()
+    private var mEncodingOperationGeneration = 0L
+    private val mFileLoadGeneration = AtomicLong(0L)
+    private var mEncodingDialogDisposable: Disposable? = null
+    private var mEncodingOperationDisposable: Disposable? = null
+    @Volatile
+    private var mDestroyed = false
     private var mReadOnly = false
     private var mAutoCompletion: AutoCompletion? = null
     private var mFunctionsKeyboardHelper: FunctionsKeyboardHelper? = null
@@ -497,6 +633,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         context = context,
         activity = activity,
         currentEditor = { editor },
+        editorStatusBar = mEditorStatusBar,
+        editorEncodingStatus = mEditorEncodingStatus,
         inputMethodEnhanceBar = mInputMethodEnhanceBar,
         loadingBarContainer = mLoadingBarContainer,
         loadingBarText = mLoadingBarText,
@@ -613,6 +751,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         setUpFunctionsKeyboard()
         setUpEditorPreviewer()
         setUpImeInsetsHandling()
+        mEditorEncodingStatus.setOnClickListener { showEncodingDialog() }
+        updateEncodingStatus()
         setMenuItemStatus(R.id.save, false)
         mDocsWebView.apply {
             webView.settings.displayZoomControls = true
@@ -709,11 +849,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     editor.setReadOnly(true)
                 }
 
-                // Loading is finished for intent-handling stage (actual file loading may continue).
-                // zh-CN: Intent 处理阶段结束 (实际文件加载可能仍在继续).
+                applyInitialPositionIfRequested(intent)
+            }
+            .doOnError {
                 mEditorLoading = false
                 syncPrimaryMenuState()
-                applyInitialPositionIfRequested(intent)
             }
     }
 
@@ -749,10 +889,82 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
      * - 标记为未保存并刷新菜单状态.
      */
     fun restoreDraftTextForThisSession(text: String) {
+        val encodingValidationWasComplete = mFileEncodingValidationComplete
+        if (mEditorLoading || editor.isLoadingText || mLargeFileFrameCallback != null) {
+            // A file load may already be appending when a large on-disk draft finishes reading.
+            // Stop it before applying the draft so no later frame can mix file chunks into it.
+            // zh-CN: 磁盘中的大草稿读取完成时, 文件加载可能已经开始追加文本.
+            // 应先停止加载再应用草稿, 防止后续帧把文件分片混入草稿.
+            cancelLargeFileLoading()
+        }
         mDraftRestoredInThisSession = true
+        mDraftEncodingValidationPending = uri != null && !encodingValidationWasComplete
         mRestoredText = text
         editor.text = text
+        applyPendingRestoredDraftEncodingStateIfReady()
+        updateEncodingStatus()
         markRestoredDraftAsDirty()
+    }
+
+    private fun applyPendingRestoredDraftEncodingStateIfReady() {
+        val state = mPendingRestoredDraftEncodingState ?: return
+        if (!mDraftRestoredInThisSession || !mFileEncodingValidationComplete) return
+        mPendingRestoredDraftEncodingState = null
+        applyEncodingHistoryState(
+            state.copy(
+                draftEncodingValidationPending = false,
+                fileEncodingValidationComplete = true,
+            ),
+        )
+    }
+
+    fun setDraftRestorePending(pending: Boolean) {
+        mDraftRestoreInProgress = pending
+        if (!mReadOnly) {
+            if (pending) {
+                editor.setReadOnly(true)
+            } else if (!mEditorLoading && !mEncodingOperationInProgress &&
+                !mSaveAsInProgress && !mFileSaveInProgress
+            ) {
+                editor.setReadOnly(false)
+            }
+        }
+        syncPrimaryMenuState()
+        if (!pending) {
+            tryFinalizeCompletedSaveAsAdoption()
+        }
+    }
+
+    /** Keeps a recreated editor inert while the previous Activity finishes Save As IO. */
+    fun setSaveAsRecreationPending(pending: Boolean) {
+        mSaveAsInProgress = pending
+        if (pending) {
+            mLoadingBarText.text = context.getString(R.string.text_saving)
+            setEnhanceBarInteractive(false)
+            setLoadingBar(true)
+            if (!mReadOnly) {
+                editor.setReadOnly(true)
+            }
+        } else {
+            setLoadingBar(false)
+            setEnhanceBarInteractive(!mReadOnly)
+            if (!mReadOnly && !mDraftRestoreInProgress && !mEditorLoading &&
+                !mEncodingOperationInProgress && !mFileSaveInProgress
+            ) {
+                editor.setReadOnly(false)
+            }
+        }
+        syncPrimaryMenuState()
+    }
+
+    fun textForDraftSaving(): String =
+        mEncodingReloadRollback?.text ?: editor.textSnapshot
+
+    fun shouldSaveDraft(): Boolean = when {
+        mEncodingReloadRollback != null -> mEncodingReloadRollback?.saveStickyDirty == true
+        mDraftRestoreInProgress -> false
+        mEditorLoading && !mDraftRestoredInThisSession -> false
+        else -> editor.isTextChanged || saveStickyDirty
     }
 
     /**
@@ -788,6 +1000,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             Uri.fromFile(File(it))
         } ?: intent.data
         this.uri = uri
+        mEditorStatusBar.visibility = if (uri == null) GONE else VISIBLE
 
         if (_name == null && uri != null) {
             uri.path?.let {
@@ -798,7 +1011,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         return when {
             content != null -> Observable.just(content)
-            uri != null -> loadUri(uri)
+            uri != null -> loadUri(uri, mPendingCompletedSaveAs?.encoding?.charset)
             else -> Observable.error(IllegalArgumentException("path and content is empty"))
         }
     }
@@ -976,13 +1189,65 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // Restore read-only state.
         // zh-CN: 恢复只读状态.
-        if (!mWasReadOnlyBeforeLoading) {
+        if (!mWasReadOnlyBeforeLoading && !mDraftRestoreInProgress) {
             editor.setReadOnly(false)
         }
     }
 
-    private fun loadUri(uri: Uri): Observable<String> {
-        val sizeOrNull = runCatching { fileService.queryContentLengthOrNull(uri) }.getOrNull()
+    private fun loadUri(uri: Uri, charsetOverride: Charset? = null): Observable<String> {
+        val loadGeneration = mFileLoadGeneration.incrementAndGet()
+        val reloadToken = if (charsetOverride != null) mEncodingReloadRollback else null
+        mFileEncodingValidationComplete = false
+        mDraftEncodingValidationPending = charsetOverride == null && mDraftRestoredInThisSession
+        return Observable.fromCallable {
+            ContentLengthResult(runCatching { fileService.queryContentLengthOrNull(uri) }.getOrNull())
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .flatMap { result ->
+                if (!isCurrentFileLoad(loadGeneration)) {
+                    Observable.empty()
+                } else {
+                    mCurrentFileSizeBytes = result.sizeOrNull
+                    loadUriWithKnownSize(
+                        uri = uri,
+                        charsetOverride = charsetOverride,
+                        reloadToken = reloadToken,
+                        loadGeneration = loadGeneration,
+                        sizeOrNull = result.sizeOrNull,
+                    )
+                }
+            }
+            .doOnSubscribe {
+                if (isCurrentFileLoad(loadGeneration)) {
+                    beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
+                    mEditorLoading = true
+                    syncPrimaryMenuState()
+                }
+            }
+            .onErrorResumeNext { error: Throwable ->
+                if (isCurrentFileLoad(loadGeneration)) {
+                    Observable.error(error)
+                } else {
+                    Observable.empty()
+                }
+            }
+            .doOnError {
+                if (mDestroyed || !isCurrentFileLoad(loadGeneration)) return@doOnError
+                endEditorLoadingUi()
+                mEditorLoading = false
+                updateEncodingStatus()
+                syncPrimaryMenuState()
+            }
+    }
+
+    private fun loadUriWithKnownSize(
+        uri: Uri,
+        charsetOverride: Charset?,
+        reloadToken: EncodingReloadRollback?,
+        loadGeneration: Long,
+        sizeOrNull: Long?,
+    ): Observable<String> {
         val shouldStreamAsLargeFile = EditorTextLoadPolicy.shouldStreamAsLargeFile(sizeOrNull)
         if (EditorTextLoadPolicy.shouldRouteAceToNative(editor.engineType, shouldStreamAsLargeFile, shouldForceLargeFileNativeRoute())) {
             if (!ensureNativeEditorForLargeFile()) {
@@ -991,49 +1256,45 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
         if (shouldStreamAsLargeFile && editor.engineType == EditorEngineType.NATIVE) {
-            // Large file: show loading in enhance bar, allow viewing/scrolling (read-only).
-            // zh-CN: 大文件: 在增强栏显示加载提示, 允许查看/滚动 (只读).
-            beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
-            return loadUriStreamed(uri)
+            return loadUriStreamed(uri, charsetOverride, reloadToken, loadGeneration)
         }
 
         return Observable
             .fromCallable {
-                fileService.readText(uri)
+                fileService.readText(uri, charsetOverride)
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe {
-                beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
-                mEditorLoading = true
-                syncPrimaryMenuState()
-            }
+            .filter { isCurrentFileLoad(loadGeneration) }
             .doOnNext { result ->
                 post {
+                    if (mDestroyed || !isCurrentFileLoad(loadGeneration)) return@post
+                    if (reloadToken != null && mEncodingReloadRollback !== reloadToken) {
+                        return@post
+                    }
                     runCatching {
-                        applyReadMetadata(result.metadata)
-                        setInitialText(result.text)
-
-                        // IMPORTANT: end loading UI on success.
-                        // zh-CN: 重要: 成功时必须结束加载 UI.
-                        endEditorLoadingUi()
-
-                        mEditorLoading = false
-                        syncPrimaryMenuState()
+                        mFileEncodingValidationComplete = true
+                        applyReadMetadataOnMain(result.metadata)
+                        setInitialText(
+                            text = result.text,
+                            endLoadingUiWhenFinished = true,
+                            loadGeneration = loadGeneration,
+                        )
                     }.onFailure {
                         endEditorLoadingUi()
                         mEditorLoading = false
                         syncPrimaryMenuState()
+                        if (!rollbackEncodingReload(it)) {
+                            showEncodingOperationError(it.message ?: it.toString())
+                        }
                     }
                 }
             }
             .map { it.text }
-            .doOnError {
-                endEditorLoadingUi()
-                mEditorLoading = false
-                syncPrimaryMenuState()
-            }
     }
+
+    private fun isCurrentFileLoad(loadGeneration: Long): Boolean =
+        mFileLoadGeneration.get() == loadGeneration
 
     private fun ensureNativeEditorForLargeFile(): Boolean {
         if (editor.engineType != EditorEngineType.ACE) {
@@ -1077,6 +1338,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     // Cancel current large-file loading as soon as possible.
     // zh-CN: 尽快取消当前大文件加载.
     fun cancelLargeFileLoading() {
+        // Invalidate every read path, including a non-streaming read that cannot be interrupted
+        // once ContentResolver IO has started. Its eventual callback must not mutate editor state.
+        // zh-CN: 使所有读取路径失效, 包括 ContentResolver IO 开始后无法中断的非流式读取.
+        // 它稍后的回调不得再修改编辑器状态.
+        mFileLoadGeneration.incrementAndGet()
+
         // Mark cancel first so both IO/UI can observe it.
         // zh-CN: 先标记取消, 让 IO/UI 两侧都能观察到.
         mLargeFileCancel.set(true)
@@ -1101,50 +1368,198 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             runCatching { s.close() }
         }
 
+        mEncodingDialogDisposable?.dispose()
+        mEncodingDialogDisposable = null
+        mEncodingDialogLoading = false
+
+        cancelActiveEditorTextLoad()
+
+        // Reload owns a complete editor snapshot. Restore it synchronously before the host checks
+        // dirty state or offers Save and exit, so a partial decode can never be persisted.
+        // zh-CN: Reload 持有完整的编辑器快照. 必须在宿主检查脏状态或提供保存退出前同步恢复,
+        // 确保部分解码内容永远不会被写回文件.
+        if (mEncodingReloadRollback != null) {
+            mEncodingOperationDisposable?.dispose()
+            mEncodingOperationDisposable = null
+            rollbackEncodingReload(
+                error = IllegalStateException("Encoding reload cancelled"),
+                showError = false,
+            )
+            return
+        }
+
+        // Convert is a transactional write and cannot be interrupted safely once it starts. Keep
+        // its read-only/loading lock until its own completion callback runs.
+        // zh-CN: Convert 是事务式写入, 开始后无法安全中断. 在其完成回调执行前保持只读和加载锁.
+        if (mEncodingOperationInProgress) {
+            return
+        }
+
         // Cleanup UI state best-effort (do NOT re-enable editing in read-only editor).
         // zh-CN: 尽力清理 UI 状态 (只读编辑器不要被重新启用编辑).
-        post {
-            runCatching {
-                endEditorLoadingUi()
-            }
-            mEditorLoading = false
-            syncPrimaryMenuState()
-        }
+        runCatching { endEditorLoadingUi() }
+        mEditorLoading = false
+        updateEncodingStatus()
+        syncPrimaryMenuState()
     }
 
-    private fun loadUriStreamed(uri: Uri): Observable<String> {
+    private fun cancelActiveEditorTextLoad() {
+        if (!editor.isLoadingText) {
+            mProgressiveTextLoadActive = false
+            return
+        }
+        runCatching {
+            if (mProgressiveTextLoadActive) {
+                textLoadTarget.cancelProgressiveTextLoad()
+            } else {
+                textLoadTarget.cancelStreamedLargeTextLoad()
+            }
+        }
+        mProgressiveTextLoadActive = false
+    }
+
+    private fun loadUriStreamed(
+        uri: Uri,
+        charsetOverride: Charset? = null,
+        reloadToken: EncodingReloadRollback? = null,
+        loadGeneration: Long,
+    ): Observable<String> {
+        // Fully stop an older producer/frame loop before reusing the shared cancel flag.
+        // zh-CN: 复用共享取消标记前, 完整停止上一个生产者和帧循环.
+        mLargeFileCancel.set(true)
+        mLargeFileFrameCallback?.let { callback ->
+            runCatching { Choreographer.getInstance().removeFrameCallback(callback) }
+        }
+        mLargeFileFrameCallback = null
+        runCatching { mLargeFileIoDisposable?.dispose() }
+        mLargeFileIoDisposable = null
+        mLargeFileStreamRef.getAndSet(null)?.let { stream -> runCatching { stream.close() } }
+        cancelActiveEditorTextLoad()
+
         // Reset cancel state for a new session.
         // zh-CN: 新的加载会话开始前重置取消标记.
         mLargeFileCancel.set(false)
+        val pendingMetadata = AtomicReference<EditorFileReadMetadata?>(null)
+        val preserveExistingText = mDraftRestoredInThisSession
 
         return fileService
             .streamTextChunks(
                 uri = uri,
                 cancel = mLargeFileCancel,
                 streamRef = mLargeFileStreamRef,
-                onMetadata = ::applyReadMetadata,
+                // Metadata is produced on an IO thread. Keep it immutable here and apply it from
+                // the frame callback, where the reload token check and all editor-state mutations
+                // happen together on the main thread.
+                // zh-CN: 元数据由 IO 线程生成. 此处仅保存不可变快照, 再由帧回调在主线程内
+                // 同时完成 Reload 令牌校验和编辑器状态修改.
+                onMetadata = pendingMetadata::set,
+                charsetOverride = charsetOverride,
             )
             .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
             .let { upstream ->
                 bridgeStreamToUiWithProgress(
                     upstream = upstream,
+                    pendingMetadata = pendingMetadata,
+                    reloadToken = reloadToken,
+                    loadGeneration = loadGeneration,
+                    preserveExistingText = preserveExistingText,
                 )
             }
     }
 
-    private fun applyReadMetadata(metadata: EditorFileReadMetadata) {
+    private fun applyReadMetadataOnMain(metadata: EditorFileReadMetadata) {
         mCurrentCharsetConfidence = metadata.charsetConfidence
         mCurrentCharset = metadata.charset
         mHadBom = metadata.hadBom
+        mPersistedFileEncoding = EditorFileSaveEncoding(
+            charset = metadata.charset,
+            hadBom = metadata.hadBom,
+        )
+        mCurrentHadDecodingErrors = metadata.hadDecodingErrors
+        mCurrentDecodingErrorsWereAccepted = metadata.decodingErrorsWereAccepted
+        updateEncodingStatus()
     }
+
+    private fun applyPendingStreamMetadataOnMain(
+        pendingMetadata: AtomicReference<EditorFileReadMetadata?>,
+        reloadToken: EncodingReloadRollback?,
+        loadGeneration: Long,
+    ) {
+        val metadata = pendingMetadata.getAndSet(null) ?: return
+        if (!isCurrentFileLoad(loadGeneration)) return
+        if (reloadToken != null && mEncodingReloadRollback !== reloadToken) return
+        applyReadMetadataOnMain(metadata)
+    }
+
+    private fun updateEncodingStatus() {
+        val label = buildString {
+            append(mCurrentCharset.name())
+            if (mHadBom) append(" BOM")
+        }
+        mEditorEncodingStatus.text = label
+        val showWarning = mCurrentHadDecodingErrors || mDraftEncodingValidationPending
+        if (mFileStateRequiresReload || showWarning) {
+            val iconSize = (16f * resources.displayMetrics.density).toInt()
+            val riskIcon = context.getDrawable(
+                if (mFileStateRequiresReload) {
+                    R.drawable.ic_error_black_48dp
+                } else {
+                    R.drawable.ic_warning_black_48dp
+                },
+            )?.mutate()?.apply {
+                setBounds(0, 0, iconSize, iconSize)
+            }
+            mEditorEncodingStatus.setCompoundDrawablesRelative(riskIcon, null, null, null)
+            mEditorEncodingStatus.compoundDrawableTintList = ColorStateList.valueOf(
+                context.getColor(
+                    if (mFileStateRequiresReload) {
+                        R.color.editor_encoding_risk_error
+                    } else {
+                        R.color.editor_encoding_risk_warning
+                    },
+                ),
+            )
+            mEditorEncodingStatus.compoundDrawablePadding =
+                (4f * resources.displayMetrics.density).toInt()
+        } else {
+            mEditorEncodingStatus.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, 0, 0)
+            mEditorEncodingStatus.compoundDrawableTintList = null
+        }
+        mEditorEncodingStatus.contentDescription = buildString {
+            append(context.getString(R.string.text_file_encoding_status, label))
+            if (mFileStateRequiresReload) {
+                append(". ")
+                append(context.getString(R.string.error_file_state_unknown_reload_required))
+            } else if (mCurrentHadDecodingErrors) {
+                append(". ")
+                append(context.getString(R.string.text_encoding_cannot_decode_file))
+            } else if (mDraftEncodingValidationPending) {
+                append(". ")
+                append(context.getString(R.string.error_editor_encoding_validation_incomplete))
+            }
+        }
+    }
+
+    fun canChangeFileEncoding(): Boolean =
+        uri != null && editor.isReady && !mEditorLoading && !mSwitchingEditorEngine &&
+            !editor.isLoadingText && mLargeFileFrameCallback == null &&
+            !mEncodingDialogLoading && !mEncodingOperationInProgress && !mFileSaveInProgress &&
+            !mSaveAsInProgress && !mDraftRestoreInProgress
 
     private fun bridgeStreamToUiWithProgress(
         upstream: Observable<String>,
+        pendingMetadata: AtomicReference<EditorFileReadMetadata?>,
+        reloadToken: EncodingReloadRollback?,
+        loadGeneration: Long,
+        preserveExistingText: Boolean,
     ): Observable<String> {
-        val queue = ConcurrentLinkedQueue<String>()
+        // Bound decoded text waiting for the UI. This keeps a fast disk/decoder producer from
+        // materializing an entire large file in an unbounded queue.
+        // zh-CN: 限制等待 UI 消费的已解码文本, 避免磁盘/解码速度较快时把整个大文件堆积到内存.
+        val queue: BlockingQueue<String> = LinkedBlockingQueue(STREAM_UI_QUEUE_CAPACITY)
         val done = AtomicBoolean(false)
         val started = AtomicBoolean(false)
+        val failure = AtomicReference<Throwable?>(null)
 
         // Dispose previous session if any.
         // zh-CN: 若存在上一会话, 则先取消.
@@ -1154,23 +1569,31 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Subscribe on IO side, push chunks into queue.
         // zh-CN: 在 IO 侧订阅, 将分片推入队列.
         mLargeFileIoDisposable = upstream
-            .observeOn(Schedulers.io())
             .subscribe({ chunk ->
-                if (mLargeFileCancel.get()) {
+                if (mLargeFileCancel.get() || !isCurrentFileLoad(loadGeneration)) {
                     // Stop producing.
                     // zh-CN: 停止生产.
                     done.set(true)
                     return@subscribe
                 }
-                if (chunk.isNotEmpty()) {
-                    queue.add(chunk)
+                if (!preserveExistingText && chunk.isNotEmpty()) {
+                    while (!mLargeFileCancel.get() && isCurrentFileLoad(loadGeneration)) {
+                        val enqueued = try {
+                            queue.offer(chunk, STREAM_UI_QUEUE_OFFER_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+                        } catch (_: InterruptedException) {
+                            Thread.currentThread().interrupt()
+                            break
+                        }
+                        if (enqueued) break
+                        // Re-check cancellation between bounded waits.
+                        // zh-CN: 在有界等待之间重新检查取消状态.
+                    }
                 }
             }, { e ->
+                failure.compareAndSet(null, e)
+                queue.clear()
                 done.set(true)
-                if (!mLargeFileCancel.get()) {
-                    post { endEditorLoadingUi() }
-                    e.printStackTrace()
-                }
+                if (!mLargeFileCancel.get()) e.printStackTrace()
             }, {
                 done.set(true)
             })
@@ -1178,24 +1601,44 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return Observable
             .just("")
             .observeOn(AndroidSchedulers.mainThread())
+            .filter { isCurrentFileLoad(loadGeneration) }
             .doOnNext {
                 if (started.compareAndSet(false, true)) {
-                    startStreamingAppendWithProgress(queue, done)
+                    if (!isCurrentFileLoad(loadGeneration)) return@doOnNext
+                    startStreamingAppendWithProgress(
+                        queue = queue,
+                        done = done,
+                        failure = failure,
+                        pendingMetadata = pendingMetadata,
+                        reloadToken = reloadToken,
+                        loadGeneration = loadGeneration,
+                        preserveExistingText = preserveExistingText,
+                    )
                 }
             }
     }
 
     private fun startStreamingAppendWithProgress(
-        queue: ConcurrentLinkedQueue<String>,
+        queue: BlockingQueue<String>,
         done: AtomicBoolean,
+        failure: AtomicReference<Throwable?>,
+        pendingMetadata: AtomicReference<EditorFileReadMetadata?>,
+        reloadToken: EncodingReloadRollback?,
+        loadGeneration: Long,
+        preserveExistingText: Boolean,
     ) {
-        mLargeFileMode = true
+        mProgressiveTextLoadActive = false
+        if (!preserveExistingText) {
+            mLargeFileMode = true
+        }
         mEditorLoading = true
         mUserMovedCursorDuringLoading = false
         syncPrimaryMenuState()
 
         val loadTarget = textLoadTarget
-        loadTarget.beginStreamedLargeTextLoad()
+        if (!preserveExistingText) {
+            loadTarget.beginStreamedLargeTextLoad()
+        }
 
         val choreographer = Choreographer.getInstance()
 
@@ -1215,10 +1658,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         val callback = object : Choreographer.FrameCallback {
             override fun doFrame(frameTimeNanos: Long) {
+                if (!isCurrentFileLoad(loadGeneration)) {
+                    return
+                }
                 if (mLargeFileCancel.get()) {
                     // Cancel: stop immediately and do not schedule next frame.
                     // zh-CN: 取消: 立即停止且不再调度下一帧.
-                    loadTarget.cancelStreamedLargeTextLoad()
+                    if (!preserveExistingText) {
+                        loadTarget.cancelStreamedLargeTextLoad()
+                    }
                     mEditorLoading = false
                     syncPrimaryMenuState()
                     endEditorLoadingUi()
@@ -1226,9 +1674,37 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     return
                 }
 
+                applyPendingStreamMetadataOnMain(pendingMetadata, reloadToken, loadGeneration)
+
                 val finished = done.get() && queue.isEmpty()
                 if (finished) {
-                    loadTarget.finishStreamedLargeTextLoad(markClean = true)
+                    failure.get()?.let { error ->
+                        if (!preserveExistingText) {
+                            loadTarget.cancelStreamedLargeTextLoad()
+                        }
+                        mEditorLoading = false
+                        endEditorLoadingUi()
+                        if (!rollbackEncodingReload(error)) {
+                            mLargeFileMode = false
+                            syncPrimaryMenuState()
+                            showEncodingOperationError(error.message ?: error.toString())
+                        }
+                        mLargeFileFrameCallback = null
+                        return
+                    }
+                    // Drain the final metadata update (for example, a malformed sequence found at
+                    // EOF) before completing this load session.
+                    // zh-CN: 完成加载会话前应用最后一次元数据更新, 例如在 EOF 处发现的坏序列.
+                    applyPendingStreamMetadataOnMain(pendingMetadata, reloadToken, loadGeneration)
+                    if (!preserveExistingText) {
+                        loadTarget.finishStreamedLargeTextLoad(markClean = true)
+                        saveStickyDirty = false
+                        mHadDirectEditSinceSave = false
+                    }
+                    mDraftEncodingValidationPending = false
+                    mFileEncodingValidationComplete = true
+                    applyPendingRestoredDraftEncodingStateIfReady()
+                    updateEncodingStatus()
 
                     mEditorLoading = false
                     syncPrimaryMenuState()
@@ -1247,6 +1723,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     // - 若用户在加载期间触摸过: 保持当前光标, 不强制跳回 0.
                     val textLength = editor.textSnapshot.length
                     post {
+                        if (!isCurrentFileLoad(loadGeneration)) return@post
                         if (!mUserMovedCursorDuringLoading) {
                             runCatching { editor.jumpToStart() }
                         }
@@ -1299,9 +1776,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         choreographer.postFrameCallback(callback)
     }
 
-    private fun setInitialText(text: String) {
-        // NOTE: This method should not manage loading UI lifecycle anymore.
-        // zh-CN: 注意: 此方法不再管理加载 UI 的生命周期.
+    private fun setInitialText(
+        text: String,
+        endLoadingUiWhenFinished: Boolean = false,
+        loadGeneration: Long? = null,
+    ) {
+        if (loadGeneration != null && !isCurrentFileLoad(loadGeneration)) return
+        // A baseline load resets the engine history, so tokens owned by the previous history
+        // must not be allowed to mutate this document's encoding metadata.
+        // zh-CN: 基线加载会重置引擎历史, 因此旧历史拥有的令牌不能再修改当前文档的编码元数据.
+        if (mEncodingReloadRollback == null) {
+            mEncodingHistoryEntries.clear()
+        }
         mEditorLoading = true
         syncPrimaryMenuState()
 
@@ -1312,8 +1798,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // 若本会话已恢复草稿, 则不要用异步文件加载结果覆盖它.
         // 但仍需结束 loading 标记并同步菜单状态, 保持 UI 一致.
         if (mDraftRestoredInThisSession) {
-            mEditorLoading = false
-            syncPrimaryMenuState()
+            mDraftEncodingValidationPending = false
+            applyPendingRestoredDraftEncodingStateIfReady()
+            updateEncodingStatus()
+            finishInitialTextLoad(endLoadingUiWhenFinished)
             return
         }
 
@@ -1326,8 +1814,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             saveStickyDirty = false
             mHadDirectEditSinceSave = false
 
-            mEditorLoading = false
-            syncPrimaryMenuState()
+            finishInitialTextLoad(endLoadingUiWhenFinished)
 
             // Refresh highlight for restored text if size allows.
             // zh-CN: 若大小允许, 则对恢复文本刷新一次高亮.
@@ -1339,15 +1826,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val shouldLoadProgressively = EditorTextLoadPolicy.shouldLoadProgressively(text.length)
         if (EditorTextLoadPolicy.shouldRouteAceToNative(editor.engineType, shouldLoadProgressively, shouldForceLargeFileNativeRoute())) {
             if (!ensureNativeEditorForLargeFile()) {
-                mEditorLoading = false
-                syncPrimaryMenuState()
+                finishInitialTextLoad(endLoadingUiWhenFinished)
                 return
             }
         }
 
         if (shouldLoadProgressively && editor.engineType == EditorEngineType.NATIVE) {
             mLargeFileMode = true
-            setInitialTextProgressively(text)
+            setInitialTextProgressively(text, endLoadingUiWhenFinished, loadGeneration)
             return
         }
 
@@ -1357,9 +1843,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 因刚刚建立了新的基线, 重置 sticky 脏标记.
         saveStickyDirty = false
         mHadDirectEditSinceSave = false
-
-        mEditorLoading = false
-        syncPrimaryMenuState()
+        finishInitialTextLoad(endLoadingUiWhenFinished)
 
         // Ensure caret/focus after fast load.
         // zh-CN: 快速加载完成后确保光标/焦点.
@@ -1376,7 +1860,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // Unified primary buttons state.
         // zh-CN: 统一主按钮状态.
         when {
-            mEditorLoading -> {
+            mEditorLoading || mEncodingOperationInProgress || mFileSaveInProgress ||
+                mSaveThenReloadInProgress ||
+                mSaveAsInProgress || mDraftRestoreInProgress -> {
                 setMenuItemStatus(R.id.run, false)
                 setMenuItemStatus(R.id.undo, false)
                 setMenuItemStatus(R.id.redo, false)
@@ -1388,22 +1874,99 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 setMenuItemStatus(R.id.run, true)
                 setMenuItemStatus(R.id.undo, false)
                 setMenuItemStatus(R.id.redo, false)
-                setMenuItemStatus(R.id.save, saveStickyDirty)
+                setMenuItemStatus(R.id.save, saveStickyDirty && !mFileStateRequiresReload)
             }
             else -> {
                 // Normal mode.
                 // zh-CN: 普通模式.
                 setMenuItemStatus(R.id.run, true)
-                setMenuItemStatus(R.id.undo, !mReadOnly && editor.canUndo)
-                setMenuItemStatus(R.id.redo, !mReadOnly && editor.canRedo)
-                setMenuItemStatus(R.id.save, saveStickyDirty)
+                val historyNavigationIdle = mPendingHistoryNavigation == null
+                setMenuItemStatus(R.id.undo, historyNavigationIdle && !mReadOnly && editor.canUndo)
+                setMenuItemStatus(R.id.redo, historyNavigationIdle && !mReadOnly && editor.canRedo)
+                setMenuItemStatus(R.id.save, saveStickyDirty && !mFileStateRequiresReload)
             }
         }
         updateRunButtonVisualState()
     }
 
-    private fun setInitialTextProgressively(text: String) {
+    private fun finishInitialTextLoad(endLoadingUi: Boolean) {
+        mEditorLoading = false
+        if (endLoadingUi) {
+            endEditorLoadingUi()
+        }
+        syncPrimaryMenuState()
+        tryFinalizeCompletedSaveAsAdoption()
+    }
+
+    private fun tryFinalizeCompletedSaveAsAdoption() {
+        val record = mPendingCompletedSaveAs ?: return
+        if (mSaveAsAdoptionValidationInProgress || mDestroyed || mEditorLoading ||
+            editor.isLoadingText || mDraftRestoreInProgress || mLargeFileFrameCallback != null
+        ) {
+            return
+        }
+        if (uri != Uri.fromFile(record.destination)) return
+
+        val textSnapshot = editor.textSnapshot
+        val revision = mTextRevision
+        mSaveAsAdoptionValidationInProgress = true
+        mSaveAsAdoptionDisposable?.dispose()
+        mSaveAsAdoptionDisposable = Observable.fromCallable {
+            EditorEncodingCodec.encodedDigest(
+                text = textSnapshot,
+                charset = record.encoding.charset,
+                includeBom = record.encoding.hadBom,
+            )
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doFinally {
+                mSaveAsAdoptionValidationInProgress = false
+                mSaveAsAdoptionDisposable = null
+            }
+            .subscribe({ digest ->
+                if (mDestroyed || mPendingCompletedSaveAs?.operationId != record.operationId) {
+                    return@subscribe
+                }
+                val exactSavedSnapshot = mTextRevision == revision &&
+                    digest.byteCount == record.savedByteCount &&
+                    digest.sha256 == record.savedSha256
+                completeCompletedSaveAsAdoption(record, exactSavedSnapshot)
+            }, {
+                if (!mDestroyed && mPendingCompletedSaveAs?.operationId == record.operationId) {
+                    completeCompletedSaveAsAdoption(record, exactSavedSnapshot = false)
+                }
+            })
+    }
+
+    private fun completeCompletedSaveAsAdoption(
+        record: EditorPendingSaveAsRecord,
+        exactSavedSnapshot: Boolean,
+    ) {
+        if (mPendingCompletedSaveAs?.operationId != record.operationId) return
+        mPendingCompletedSaveAs = null
+        if (exactSavedSnapshot) {
+            editor.markTextAsSaved()
+            saveStickyDirty = false
+            mHadDirectEditSinceSave = false
+            mDraftRestoredInThisSession = false
+            mDraftEncodingValidationPending = false
+            mRestoredText = null
+            setMenuItemStatus(R.id.save, false)
+        } else if (mDraftRestoredInThisSession || editor.isTextChanged || saveStickyDirty) {
+            saveStickyDirty = true
+            syncPrimaryMenuState()
+        }
+        mCompletedSaveAsAdoptedListener?.invoke(record, exactSavedSnapshot)
+    }
+
+    private fun setInitialTextProgressively(
+        text: String,
+        endLoadingUiWhenFinished: Boolean,
+        loadGeneration: Long?,
+    ) {
         val loadTarget = textLoadTarget
+        mProgressiveTextLoadActive = true
         loadTarget.beginProgressiveTextLoad()
 
         // Do NOT call editor.setProgress(true) here.
@@ -1426,10 +1989,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         val callback = object : Choreographer.FrameCallback {
             override fun doFrame(frameTimeNanos: Long) {
+                if (loadGeneration != null && !isCurrentFileLoad(loadGeneration)) {
+                    return
+                }
                 if (index >= text.length) {
                     // Finish: mark current content as baseline without re-setting text.
                     // zh-CN: 完成: 将当前内容设为基线, 避免再次 setText.
                     loadTarget.finishProgressiveTextLoad(markClean = true)
+                    mProgressiveTextLoadActive = false
+                    saveStickyDirty = false
+                    mHadDirectEditSinceSave = false
+                    mLargeFileFrameCallback = null
+                    finishInitialTextLoad(endLoadingUiWhenFinished)
                     if (Pref.isCodeHighlightEnabledForLength(text.length)) {
                         post { editor.refreshHighlightTokensIfAllowed() }
                     }
@@ -1470,6 +2041,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // Start on next frame to let the progress dialog animate.
         // zh-CN: 下一帧开始, 让进度对话框先跑起来.
+        mLargeFileFrameCallback = callback
         choreographer.postFrameCallback(callback)
     }
 
@@ -2448,7 +3020,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun isReadOnlyLockedByIntent(): Boolean = mReadOnlyLockedByIntent
 
     fun canToggleReadOnlyMode(): Boolean {
-        return !mReadOnlyLockedByIntent && !mEditorLoading
+        return !mReadOnlyLockedByIntent && !mEditorLoading && !mEncodingOperationInProgress &&
+            !mFileSaveInProgress && !mSaveThenReloadInProgress && !mSaveAsInProgress &&
+            !mDraftRestoreInProgress
     }
 
     fun toggleReadOnlyMode() {
@@ -2493,7 +3067,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             showAceLargeFileNativeToastOnce()
             return
         }
-        if (mEditorLoading) {
+        if (mEditorLoading || mEncodingOperationInProgress || mFileSaveInProgress ||
+            mSaveThenReloadInProgress || mSaveAsInProgress || mDraftRestoreInProgress
+        ) {
             showToast(context, R.string.text_loading_with_dots)
             return
         }
@@ -2563,10 +3139,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
         (oldEditor as? AceScriptEditorEngine)?.onAceStateChanged = null
         (oldEditor as? AceScriptEditorEngine)?.onSelectionAction = null
+        oldEditor.setHistoryOperationListener(null)
         oldEditor.onUserTouchInTextArea = null
         binding.editorContainer.removeView(oldEditor.view)
 
         editor = newEditor
+        mEncodingHistoryEntries.clear()
         breakpointModelStore.onEditorChanged()
         mViewportPolicy = EditorViewportPolicyFactory.create(editor, this)
         attachEditorEngineView()
@@ -2637,6 +3215,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (oldEditor.engineType != EditorEngineType.ACE) {
             mAceFallbackInProgress.set(false)
             return
+        }
+
+        when {
+            mEncodingReloadRollback != null -> rollbackEncodingReload(
+                IllegalStateException(failure.message),
+                showError = false,
+            )
+            mEncodingOperationInProgress -> finishEncodingOperation()
         }
 
         mSwitchingEditorEngine = true
@@ -2747,8 +3333,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun currentFileSizeOrNull(): Long? {
-        val currentUri = uri ?: return null
-        return runCatching { fileService.queryContentLengthOrNull(currentUri) }.getOrNull()
+        // Diagnostics are built on the main thread. Use the value captured by the asynchronous
+        // load probe so a queued writer can never make this path block behind the URI lock.
+        // zh-CN: 诊断快照在主线程构建. 使用异步加载探测时缓存的值, 避免排队中的写入者
+        // 让此路径在 URI 锁之后阻塞主线程.
+        return mCurrentFileSizeBytes
     }
 
     private fun currentLargeFilePolicyLabel(): String {
@@ -2762,6 +3351,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         configureAceFallback(editor)
         configureAceActionHistory(editor)
         editor.let { editor ->
+            editor.setHistoryOperationListener { token, direction ->
+                // Both engines dispatch history completion on the main thread. Applying it here
+                // keeps encoding metadata in the same ordered callback stream as ACE text/state.
+                applyEncodingHistoryOperation(token, direction)
+            }
             // Observe user touch in text area to preserve caret position after large-file load.
             // zh-CN: 监听用户在文本区域的触摸, 以便大文件加载完成后保留光标位置.
             editor.onUserTouchInTextArea = {
@@ -2777,13 +3371,19 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     return@addTextChangeListener
                 }
 
+                // A save writes a point-in-time text snapshot. Every later text mutation advances
+                // the revision so its completion cannot mark newer editor content as saved.
+                // zh-CN: 保存操作写入的是某一时刻的文本快照. 后续每次文本变化都会推进修订号,
+                // 避免保存完成回调把更新后的编辑器内容误标为已保存.
+                mTextRevision++
+
                 // If this change is not caused by undo/redo buttons, treat it as a direct edit.
                 // Direct edits keep Save sticky until next successful save.
                 //
                 // zh-CN:
                 // 若本次变化并非由撤销/重做按钮触发, 则视为直接编辑.
                 // 直接编辑会使保存按钮保持 sticky, 直到下一次保存成功.
-                if (!mUndoRedoButtonInProgress) {
+                if (mPendingHistoryNavigation == null) {
                     mHadDirectEditSinceSave = true
                     saveStickyDirty = true
                 } else {
@@ -2872,6 +3472,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             } else {
                 mDrawerLayout.closeDrawer(GravityCompat.START)
             }
+            return true
+        }
+        if (mDraftRestoreInProgress || mFileSaveInProgress || mSaveThenReloadInProgress ||
+            mSaveAsInProgress ||
+            (mEncodingOperationInProgress && mEncodingReloadRollback == null)
+        ) {
+            showSnack(this, R.string.text_please_wait)
             return true
         }
         return false
@@ -2976,14 +3583,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun undo() {
-        // Mark undo/redo button action so TextWatcher can distinguish it.
-        // zh-CN: 标记撤销/重做按钮动作, 以便 TextWatcher 区分来源.
-        mUndoRedoButtonInProgress = true
-        try {
-            mCommandDispatcher.undo()
-        } finally {
-            mUndoRedoButtonInProgress = false
-        }
+        if (!beginHistoryNavigation(EditorHistoryDirection.UNDO)) return
+        mCommandDispatcher.undo()
 
         // Recompute Save state after history navigation.
         // zh-CN: 历史导航后重新计算保存按钮状态.
@@ -2993,14 +3594,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun redo() {
-        // Mark undo/redo button action so TextWatcher can distinguish it.
-        // zh-CN: 标记撤销/重做按钮动作, 以便 TextWatcher 区分来源.
-        mUndoRedoButtonInProgress = true
-        try {
-            mCommandDispatcher.redo()
-        } finally {
-            mUndoRedoButtonInProgress = false
-        }
+        if (!beginHistoryNavigation(EditorHistoryDirection.REDO)) return
+        mCommandDispatcher.redo()
 
         // Recompute Save state after history navigation.
         // This makes "edit -> save -> undo -> redo" turn Save off again,
@@ -3015,45 +3610,134 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         schedulePrimaryMenuStateSync()
     }
 
-    fun save(): Observable<String> =
-        editorTextProvider.getTextForSaving()
-            .flatMap { latestText ->
-                Observable.fromCallable {
-                    when (val uri = uri) {
-                        null -> {
-                            throw IllegalStateException(context.getString(R.string.error_unable_to_save_file_as_current_file_path_is_unknown))
-                        }
-                        else -> {
-                            // Use a transactional save flow for both file:// and content://.
-                            // zh-CN: 对 file:// 与 content:// 统一使用事务式保存流程.
-                            fileService.saveTextTransactional(
-                                uri = uri,
-                                text = latestText,
-                                encoding = EditorFileSaveEncoding(
-                                    charsetConfidence = mCurrentCharsetConfidence,
-                                    charset = mCurrentCharset,
-                                    hadBom = mHadBom,
-                                ),
-                                displayName = name,
-                            )
-                            latestText
-                        }
+    fun save(): Observable<String> {
+        return Observable.defer {
+            if (mDraftRestoreInProgress || mFileSaveInProgress || mSaveAsInProgress ||
+                mEditorLoading || editor.isLoadingText
+            ) {
+                return@defer Observable.error(
+                    IllegalStateException(context.getString(R.string.text_please_wait)),
+                )
+            }
+            if (mFileStateRequiresReload) {
+                return@defer Observable.error(
+                    IllegalStateException(
+                        context.getString(R.string.error_file_state_unknown_reload_required),
+                    ),
+                )
+            }
+            if (mCurrentHadDecodingErrors && !mCurrentDecodingErrorsWereAccepted) {
+                return@defer Observable.error(
+                    IllegalStateException(
+                        context.getString(R.string.error_file_contains_unaccepted_decoding_replacements),
+                    ),
+                )
+            }
+            if (mDraftEncodingValidationPending) {
+                return@defer Observable.error(
+                    IllegalStateException(
+                        context.getString(R.string.error_editor_encoding_validation_incomplete),
+                    ),
+                )
+            }
+
+            mFileSaveInProgress = true
+            syncPrimaryMenuState()
+
+            editorTextProvider.getTextForSaving()
+                .flatMap { latestText ->
+                    // getTextForSaving() is delivered on the main thread, so the text and revision
+                    // form one consistent editor snapshot.
+                    // zh-CN: getTextForSaving() 在主线程回传, 因此文本与修订号构成一致快照.
+                    val currentUri = uri ?: return@flatMap Observable.error(
+                        IllegalStateException(
+                            context.getString(R.string.error_unable_to_save_file_as_current_file_path_is_unknown),
+                        ),
+                    )
+                    val encoding = EditorFileSaveEncoding(
+                        charset = mCurrentCharset,
+                        hadBom = mHadBom,
+                    )
+                    val previousEncoding = mPersistedFileEncoding
+                    val writeResult = SaveWriteResult(
+                        text = latestText,
+                        revision = mTextRevision,
+                        currentUri = currentUri,
+                        encoding = encoding,
+                    )
+                    val displayName = name
+                    Observable.fromCallable {
+                        // Use a transactional save flow for both file:// and content://.
+                        // zh-CN: 对 file:// 与 content:// 统一使用事务式保存流程.
+                        fileService.saveTextTransactional(
+                            uri = currentUri,
+                            text = latestText,
+                            encoding = encoding,
+                            displayName = displayName,
+                            previousEncoding = previousEncoding,
+                            discardStableDraftOnSuccess = false,
+                        )
+                        writeResult
+                    }.subscribeOn(Schedulers.io())
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError { error ->
+                    if (!mDestroyed && error is EditorFileRollbackFailedException) {
+                        markFileStateRequiresReload()
                     }
-                }.subscribeOn(Schedulers.io())
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
-                editor.markTextAsSaved()
+                }
+                .doOnNext { result ->
+                    if (mDestroyed) return@doOnNext
+                    mCurrentFileSizeBytes = null
+                    // The write has completed even if the editor changed while IO was in flight.
+                    // Keep the external disk baseline independent from undo/redo history state.
+                    mPersistedFileEncoding = result.encoding
 
-                // Reset sticky dirty only on successful save.
-                // zh-CN: 仅在保存成功后重置 sticky 脏标记.
-                saveStickyDirty = false
-                mHadDirectEditSinceSave = false
+                    if (mTextRevision == result.revision &&
+                        mCurrentCharset == result.encoding.charset &&
+                        mHadBom == result.encoding.hadBom
+                    ) {
+                        mCurrentHadDecodingErrors = false
+                        mCurrentDecodingErrorsWereAccepted = false
+                        fileService.discardStableDraft(result.currentUri)
+                        editor.markTextAsSaved()
 
-                setMenuItemStatus(R.id.save, false)
-            }
+                        // Reset sticky dirty only when the current text is the exact snapshot that
+                        // reached disk. Edits made while IO was in flight remain dirty.
+                        // zh-CN: 仅当当前文本正是已写入磁盘的快照时重置 sticky 脏标记.
+                        // IO 期间产生的新编辑必须继续保持未保存状态.
+                        saveStickyDirty = false
+                        mHadDirectEditSinceSave = false
+                        setMenuItemStatus(R.id.save, false)
+                    } else {
+                        saveStickyDirty = true
+                        syncPrimaryMenuState()
+                    }
+                }
+                .map { it.text }
+                .doFinally {
+                    mUiHandler.post {
+                        if (mDestroyed) return@post
+                        mFileSaveInProgress = false
+                        syncPrimaryMenuState()
+                    }
+                }
+        }
+    }
+
+    private fun markFileStateRequiresReload() {
+        mFileStateRequiresReload = true
+        updateEncodingStatus()
+        syncPrimaryMenuState()
+    }
 
     fun showVersionHistoryDialog() {
+        if (mEncodingOperationInProgress || mFileSaveInProgress || mSaveAsInProgress ||
+            mEditorLoading || editor.isLoadingText || mDraftRestoreInProgress
+        ) {
+            showSnack(this, R.string.text_please_wait)
+            return
+        }
         versionHistoryService.showDialog(uri)
     }
 
@@ -3161,6 +3845,613 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .negativeColorRes(R.color.dialog_button_default)
             .widgetThemeColor()
         builder.show()
+    }
+
+    fun showEncodingDialog() {
+        val currentUri = uri
+        if (currentUri == null) {
+            showEncodingOperationError(
+                context.getString(R.string.error_unable_to_change_file_encoding_as_current_file_path_is_unknown),
+            )
+            return
+        }
+        if (!canChangeFileEncoding()) return
+
+        val currentCharset = mCurrentCharset
+        val currentHadBom = mHadBom
+        // Acceptance controls ordinary Save only. Convert would still make replacement characters
+        // permanent on disk, so its risk remains yellow after an explicitly accepted Reload.
+        // zh-CN: 接受状态仅控制普通保存. Convert 仍会把替换字符永久写入磁盘,
+        // 因此即使用户已明确接受 Reload, 转换风险仍应保持黄色.
+        val currentTextHadDecodingErrors = mCurrentHadDecodingErrors
+        mEncodingDialogLoading = true
+        mEditorEncodingStatus.isEnabled = false
+        mEditorEncodingStatus.setText(R.string.text_loading_with_dots)
+
+        mEncodingDialogDisposable?.dispose()
+        mEncodingDialogDisposable = editorTextProvider.getTextForSaving()
+            .flatMap { currentText ->
+                Observable.fromCallable {
+                    val probe = fileService.readEncodingProbe(currentUri)
+                    val detection = StringUtils.detectEncoding(probe.bytes, endOfInput = !probe.truncated)
+                    val riskProbe = if (probe.bytes.size > ENCODING_RISK_PROBE_LIMIT_BYTES) {
+                        probe.copy(
+                            bytes = probe.bytes.copyOf(ENCODING_RISK_PROBE_LIMIT_BYTES),
+                            truncated = true,
+                        )
+                    } else {
+                        probe
+                    }
+                    val textSample = EditorEncodingCodec.takeCodePointSafePrefix(
+                        currentText,
+                        ENCODING_TEXT_PROBE_LIMIT_CHARS,
+                    )
+                    EncodingDialogData(
+                        candidates = EditorEncodingRiskEvaluator.evaluate(
+                            probe = riskProbe,
+                            currentTextSample = textSample,
+                            currentTextTruncated = currentText.length > textSample.length,
+                            currentCharset = currentCharset,
+                            currentHadBom = currentHadBom,
+                            detection = detection,
+                            currentTextHadDecodingErrors = currentTextHadDecodingErrors,
+                        ),
+                    )
+                }.subscribeOn(Schedulers.io())
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .doFinally {
+                mEncodingDialogLoading = false
+                post {
+                    mEditorEncodingStatus.isEnabled = true
+                    updateEncodingStatus()
+                }
+            }
+            .subscribe({ data ->
+                if (mFileSaveInProgress || mSaveAsInProgress ||
+                    mEncodingOperationInProgress || mEditorLoading ||
+                    editor.isLoadingText || mLargeFileFrameCallback != null
+                ) {
+                    return@subscribe
+                }
+                DialogUtils.buildAndShowAdaptive {
+                    EditorEncodingDialog.build(
+                        context = context,
+                        candidates = data.candidates,
+                        onSelected = ::showReloadOrConvertEncodingDialog,
+                    )
+                }
+            }, { error ->
+                showEncodingOperationError(error.message ?: error.toString())
+            })
+    }
+
+    private fun showReloadOrConvertEncodingDialog(candidate: EditorEncodingCandidate) {
+        if (!canChangeFileEncoding()) return
+        val currentUri = uri ?: return
+        val targetName = candidate.charset.name()
+        val supportsBom = EditorEncodingDetector.supportsBom(candidate.charset)
+        val initialAddBom = EditorEncodingDetector.shouldWriteBomOnConvert(
+            targetCharset = candidate.charset,
+            currentCharset = mCurrentCharset,
+            currentHadBom = mHadBom,
+        )
+        val details = buildString {
+            append(
+                context.getString(
+                    R.string.description_editor_encoding_reload_or_convert,
+                    targetName,
+                    name,
+                ),
+            )
+            if (saveStickyDirty || editor.isTextChanged) {
+                append("\n\n")
+                append(context.getString(R.string.description_editor_encoding_reload_discards_unsaved_changes))
+            }
+            if (candidate.reloadRisk == EditorEncodingRisk.ERROR) {
+                append("\n\n")
+                append(context.getString(R.string.description_editor_encoding_reload_replaces_invalid_bytes))
+            }
+            if (candidate.convertRisk == EditorEncodingRisk.ERROR) {
+                append("\n\n")
+                append(context.getString(R.string.description_editor_encoding_convert_unavailable, targetName))
+            } else if (candidate.convertRisk == EditorEncodingRisk.WARNING) {
+                append("\n\n")
+                append(
+                    context.getString(
+                        if (mCurrentHadDecodingErrors) {
+                            R.string.description_editor_encoding_convert_persists_replacement_characters
+                        } else {
+                            R.string.text_encoding_may_change_content
+                        },
+                    ),
+                )
+            }
+            if (mReadOnly) {
+                append("\n\n")
+                append(context.getString(R.string.description_editor_encoding_convert_unavailable_read_only))
+            }
+            if (mFileStateRequiresReload) {
+                append("\n\n")
+                append(context.getString(R.string.error_file_state_unknown_reload_required))
+            }
+        }
+        val builder = MaterialDialog.Builder(context)
+            .title(context.getString(R.string.text_reload_or_convert_to_encoding, targetName))
+            .content(details)
+            .neutralText(R.string.dialog_button_reload)
+            .neutralColorRes(
+                if (candidate.reloadRisk == EditorEncodingRisk.SAFE &&
+                    !saveStickyDirty && !editor.isTextChanged
+                ) {
+                    R.color.dialog_button_hint
+                } else {
+                    R.color.dialog_button_warn
+                },
+            )
+            .onNeutral { _, _ -> requestReloadWithEncoding(currentUri, candidate.charset) }
+            .negativeText(R.string.dialog_button_convert)
+            .negativeColorRes(
+                if (candidate.convertRisk == EditorEncodingRisk.SAFE) {
+                    R.color.dialog_button_attraction
+                } else {
+                    R.color.dialog_button_warn
+                },
+            )
+            .onNegative { dialog, _ ->
+                convertToEncoding(
+                    charset = candidate.charset,
+                    addBom = supportsBom && dialog.isPromptCheckBoxChecked,
+                )
+            }
+            .positiveText(R.string.dialog_button_cancel)
+            .positiveColorRes(R.color.dialog_button_default)
+            .widgetThemeColor()
+        if (supportsBom) {
+            builder.checkBoxPrompt(
+                context.getString(R.string.text_add_bom),
+                initialAddBom,
+                null,
+            )
+        }
+        val dialog = builder.build()
+        dialog.setOnShowListener {
+            dialog.getActionButton(DialogAction.NEGATIVE).isEnabled =
+                !mReadOnly && !mFileStateRequiresReload &&
+                    candidate.convertRisk != EditorEncodingRisk.ERROR
+        }
+        DialogUtils.buildAndShowAdaptive {
+            if (supportsBom) DialogUtils.fixCheckBoxGravity(dialog) else dialog
+        }
+    }
+
+    private fun requestReloadWithEncoding(currentUri: Uri, charset: Charset) {
+        if (saveStickyDirty || editor.isTextChanged) {
+            showSaveBeforeEncodingReloadDialog(currentUri, charset)
+        } else {
+            reloadWithEncoding(currentUri, charset)
+        }
+    }
+
+    private fun showSaveBeforeEncodingReloadDialog(currentUri: Uri, charset: Charset) {
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_unsaved_changes)
+                .content(context.getString(R.string.description_editor_encoding_reload_save_prompt, name))
+                .positiveText(R.string.dialog_button_save_and_reload)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .onPositive { _, _ -> saveBeforeEncodingReload(currentUri, charset) }
+                .neutralText(R.string.dialog_button_reload_without_saving)
+                .neutralColorRes(R.color.dialog_button_warn)
+                .onNeutral { _, _ -> reloadWithEncoding(currentUri, charset) }
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .widgetThemeColor()
+                .build()
+        }
+    }
+
+    private fun saveBeforeEncodingReload(currentUri: Uri, charset: Charset) {
+        if (mSaveThenReloadInProgress) return
+        mSaveThenReloadInProgress = true
+        if (!mReadOnly) {
+            editor.setReadOnly(true)
+        }
+        activity.invalidateOptionsMenu()
+        save()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { /* Wait for save()'s finalizer before starting another editor operation. */ },
+                { error ->
+                    afterSaveThenReloadFinalized {
+                        showEncodingOperationError(error.message ?: error.toString())
+                    }
+                },
+                { reloadAfterSaveFinalized(currentUri, charset) },
+            )
+    }
+
+    private fun afterSaveThenReloadFinalized(onReleased: () -> Unit) {
+        post {
+            if (mDestroyed) return@post
+            if (mFileSaveInProgress) {
+                afterSaveThenReloadFinalized(onReleased)
+                return@post
+            }
+            mSaveThenReloadInProgress = false
+            if (!mReadOnly && !mEditorLoading && !mEncodingOperationInProgress &&
+                !mSaveAsInProgress && !mDraftRestoreInProgress
+            ) {
+                editor.setReadOnly(false)
+            }
+            syncPrimaryMenuState()
+            activity.invalidateOptionsMenu()
+            onReleased()
+        }
+    }
+
+    private fun reloadAfterSaveFinalized(currentUri: Uri, charset: Charset) {
+        post {
+            if (mDestroyed) return@post
+            if (mFileSaveInProgress) {
+                reloadAfterSaveFinalized(currentUri, charset)
+            } else {
+                mSaveThenReloadInProgress = false
+                if (!reloadWithEncoding(currentUri, charset) && !mReadOnly) {
+                    editor.setReadOnly(false)
+                    syncPrimaryMenuState()
+                }
+                activity.invalidateOptionsMenu()
+            }
+        }
+    }
+
+    private fun reloadWithEncoding(currentUri: Uri, charset: Charset): Boolean {
+        if (mEncodingOperationInProgress || mFileSaveInProgress || mSaveAsInProgress ||
+            mEditorLoading || editor.isLoadingText || mDraftRestoreInProgress
+        ) {
+            return false
+        }
+        val historyBefore = captureEncodingHistoryState()
+        val rollback = EncodingReloadRollback(
+            uri = currentUri,
+            text = editor.textSnapshot,
+            charset = mCurrentCharset,
+            charsetConfidence = mCurrentCharsetConfidence,
+            hadBom = mHadBom,
+            hadDecodingErrors = mCurrentHadDecodingErrors,
+            decodingErrorsWereAccepted = mCurrentDecodingErrorsWereAccepted,
+            draftEncodingValidationPending = mDraftEncodingValidationPending,
+            fileEncodingValidationComplete = mFileEncodingValidationComplete,
+            saveStickyDirty = saveStickyDirty,
+            hadDirectEditSinceSave = mHadDirectEditSinceSave,
+            draftRestoredInThisSession = mDraftRestoredInThisSession,
+            restoredText = mRestoredText,
+            largeFileMode = mLargeFileMode,
+            fileStateRequiresReload = mFileStateRequiresReload,
+        )
+        mEncodingReloadRollback = rollback
+        mEncodingOperationGeneration++
+        mEncodingReloadReplacementStarted = false
+        mEncodingOperationInProgress = true
+        mEditorEncodingStatus.isEnabled = false
+        mEditorLoading = true
+        mDraftRestoredInThisSession = false
+        mRestoredText = null
+        beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
+        syncPrimaryMenuState()
+
+        mEncodingOperationDisposable?.dispose()
+        mEncodingOperationDisposable = Observable.fromCallable {
+            EncodingReloadReadResult(
+                readResult = fileService.readText(currentUri, charset),
+                sizeOrNull = runCatching { fileService.queryContentLengthOrNull(currentUri) }.getOrNull(),
+            )
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ result ->
+                if (mDestroyed || mEncodingReloadRollback !== rollback) return@subscribe
+                val token = UUID.randomUUID().toString()
+                val historyAfter = historyBefore.copy(
+                    charset = result.readResult.metadata.charset,
+                    charsetConfidence = result.readResult.metadata.charsetConfidence,
+                    hadBom = result.readResult.metadata.hadBom,
+                    hadDecodingErrors = result.readResult.metadata.hadDecodingErrors,
+                    decodingErrorsWereAccepted = result.readResult.metadata.decodingErrorsWereAccepted,
+                    draftEncodingValidationPending = false,
+                    fileEncodingValidationComplete = true,
+                )
+                mEncodingReloadReplacementStarted = true
+                editor.setLoadingText(true)
+                editor.setRedoUndoEnabled(true)
+                editor.replaceAllTextUndoably(result.readResult.text, token) { succeeded ->
+                    post {
+                        if (mDestroyed || mEncodingReloadRollback !== rollback) return@post
+                        if (!succeeded) {
+                            rollbackEncodingReload(
+                                IllegalStateException(context.getString(R.string.text_failed)),
+                            )
+                            return@post
+                        }
+                        mEncodingHistoryEntries[token] = EncodingHistoryEntry(historyBefore, historyAfter)
+                        applyEncodingHistoryState(historyAfter)
+                        mPersistedFileEncoding = EditorFileSaveEncoding(
+                            charset = result.readResult.metadata.charset,
+                            hadBom = result.readResult.metadata.hadBom,
+                        )
+                        mFileStateRequiresReload = false
+                        mCurrentFileSizeBytes = result.sizeOrNull
+                        mDraftRestoredInThisSession = false
+                        mRestoredText = null
+                        mLargeFileMode = false
+                        mTextRevision++
+                        editor.markTextAsSaved()
+                        editor.setLoadingText(false)
+                        saveStickyDirty = false
+                        mHadDirectEditSinceSave = false
+                        finishEncodingReload(rollback)
+                    }
+                }
+            }, { error ->
+                if (mEncodingOperationInProgress && !rollbackEncodingReload(error)) {
+                    showEncodingOperationError(error.message ?: error.toString())
+                }
+            })
+        return true
+    }
+
+    private fun finishEncodingReload(rollback: EncodingReloadRollback) {
+        if (mEncodingReloadRollback !== rollback) return
+        mEncodingReloadRollback = null
+        mEncodingOperationGeneration++
+        mEncodingReloadReplacementStarted = false
+        mEncodingOperationInProgress = false
+        mEncodingOperationDisposable?.dispose()
+        mEncodingOperationDisposable = null
+        mEditorEncodingStatus.isEnabled = true
+        mEditorLoading = false
+        endEditorLoadingUi()
+        updateEncodingStatus()
+        syncPrimaryMenuState()
+        refreshAceStateAfterEncodingOperation()
+        fileService.discardStableDraft(rollback.uri)
+    }
+
+    private fun rollbackEncodingReload(error: Throwable, showError: Boolean = true): Boolean {
+        val rollback = mEncodingReloadRollback ?: return false
+        mEncodingReloadRollback = null
+        mEncodingOperationGeneration++
+        val replacementStarted = mEncodingReloadReplacementStarted
+        mEncodingReloadReplacementStarted = false
+        mEncodingOperationInProgress = false
+        mEncodingOperationDisposable?.dispose()
+        mEncodingOperationDisposable = null
+        mEditorEncodingStatus.isEnabled = true
+        if (replacementStarted) runCatching {
+            try {
+                textLoadTarget.loadRestoredText(
+                    rollback.text,
+                    undoRedoEnabled = !rollback.largeFileMode,
+                )
+            } finally {
+                editor.setLoadingText(false)
+            }
+            mEncodingHistoryEntries.clear()
+        } else {
+            editor.setLoadingText(false)
+        }
+        mCurrentCharset = rollback.charset
+        mCurrentCharsetConfidence = rollback.charsetConfidence
+        mHadBom = rollback.hadBom
+        mCurrentHadDecodingErrors = rollback.hadDecodingErrors
+        mCurrentDecodingErrorsWereAccepted = rollback.decodingErrorsWereAccepted
+        mDraftEncodingValidationPending = rollback.draftEncodingValidationPending
+        mFileEncodingValidationComplete = rollback.fileEncodingValidationComplete
+        saveStickyDirty = rollback.saveStickyDirty
+        mHadDirectEditSinceSave = rollback.hadDirectEditSinceSave
+        mDraftRestoredInThisSession = rollback.draftRestoredInThisSession
+        mRestoredText = rollback.restoredText
+        mLargeFileMode = rollback.largeFileMode
+        mFileStateRequiresReload = rollback.fileStateRequiresReload
+        mEditorLoading = false
+        updateEncodingStatus()
+        endEditorLoadingUi()
+        syncPrimaryMenuState()
+        if (showError) {
+            showEncodingOperationError(error.message ?: error.toString())
+        }
+        return true
+    }
+
+    private fun convertToEncoding(charset: Charset, addBom: Boolean) {
+        if (mReadOnly || mEncodingOperationInProgress || mFileSaveInProgress ||
+            mSaveAsInProgress || mEditorLoading || editor.isLoadingText || mDraftRestoreInProgress
+        ) {
+            return
+        }
+        if (mFileStateRequiresReload) {
+            showEncodingOperationError(
+                context.getString(R.string.error_file_state_unknown_reload_required),
+            )
+            return
+        }
+        if (mDestroyed) return
+        val targetHadBom = EditorEncodingDetector.normalizeBomPreference(charset, addBom)
+        if (charset == mCurrentCharset && targetHadBom == mHadBom &&
+            !mCurrentHadDecodingErrors
+        ) {
+            return
+        }
+
+        mEncodingOperationInProgress = true
+        val operationGeneration = ++mEncodingOperationGeneration
+        mEditorEncodingStatus.isEnabled = false
+        mEditorLoading = true
+        beginEditorLoadingUi(context.getString(R.string.text_loading_with_dots))
+        syncPrimaryMenuState()
+        val historyBefore = captureEncodingHistoryState()
+        val historyAfter = historyBefore.copy(
+            charset = charset,
+            charsetConfidence = 100,
+            hadBom = targetHadBom,
+            decodingErrorsWereAccepted = historyBefore.decodingErrorsWereAccepted ||
+                historyBefore.hadDecodingErrors,
+            draftEncodingValidationPending = false,
+            fileEncodingValidationComplete = true,
+        )
+        mEncodingOperationDisposable?.dispose()
+        mEncodingOperationDisposable = editorTextProvider.getTextForSaving()
+            .flatMap { latestText ->
+                Observable.fromCallable {
+                    if (!EditorEncodingCodec.canEncode(latestText, charset)) {
+                        throw IllegalArgumentException(
+                            context.getString(R.string.error_text_cannot_be_encoded_with_charset, charset.name()),
+                        )
+                    }
+                    latestText
+                }.subscribeOn(Schedulers.io())
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                if (mDestroyed || !mEncodingOperationInProgress ||
+                    mEncodingOperationGeneration != operationGeneration
+                ) {
+                    return@subscribe
+                }
+                val token = UUID.randomUUID().toString()
+                editor.addUndoableHistoryMarker(token) { succeeded ->
+                    post {
+                        if (mDestroyed || !mEncodingOperationInProgress ||
+                            mEncodingOperationGeneration != operationGeneration
+                        ) {
+                            return@post
+                        }
+                        if (!succeeded) {
+                            finishEncodingOperation(operationGeneration)
+                            showEncodingOperationError(context.getString(R.string.text_failed))
+                            return@post
+                        }
+                        mEncodingHistoryEntries[token] = EncodingHistoryEntry(historyBefore, historyAfter)
+                        applyEncodingHistoryState(historyAfter)
+                        mTextRevision++
+                        saveStickyDirty = true
+                        finishEncodingOperation(operationGeneration)
+                        showSnack(this, R.string.text_file_encoding_converted)
+                    }
+                }
+            }, { error ->
+                if (!mDestroyed && mEncodingOperationInProgress &&
+                    mEncodingOperationGeneration == operationGeneration
+                ) {
+                    finishEncodingOperation(operationGeneration)
+                    showEncodingOperationError(error.message ?: error.toString())
+                }
+            })
+    }
+
+    private fun finishEncodingOperation(expectedGeneration: Long? = null) {
+        if (expectedGeneration != null && mEncodingOperationGeneration != expectedGeneration) return
+        mEncodingOperationGeneration++
+        mEncodingOperationInProgress = false
+        mEncodingOperationDisposable?.dispose()
+        mEncodingOperationDisposable = null
+        mEditorEncodingStatus.isEnabled = true
+        mEditorLoading = false
+        endEditorLoadingUi()
+        syncPrimaryMenuState()
+        refreshAceStateAfterEncodingOperation()
+    }
+
+    private fun refreshAceStateAfterEncodingOperation() {
+        val aceEditor = editor as? AceScriptEditorEngine ?: return
+        aceEditor.refreshState()
+        // ACE commits a document delta to UndoManager on its own event-loop turn. Refresh once
+        // more after that turn so the host toolbar observes the newly available history item.
+        mUiHandler.postDelayed({
+            if (!mDestroyed && editor === aceEditor) {
+                aceEditor.refreshState()
+            }
+        }, ACE_HISTORY_STATE_SETTLE_DELAY_MS)
+    }
+
+    private fun captureEncodingHistoryState(): EncodingHistoryState = EncodingHistoryState(
+        charset = mCurrentCharset,
+        charsetConfidence = mCurrentCharsetConfidence,
+        hadBom = mHadBom,
+        hadDecodingErrors = mCurrentHadDecodingErrors,
+        decodingErrorsWereAccepted = mCurrentDecodingErrorsWereAccepted,
+        draftEncodingValidationPending = mDraftEncodingValidationPending,
+        fileEncodingValidationComplete = mFileEncodingValidationComplete,
+    )
+
+    private fun applyEncodingHistoryOperation(token: String, direction: EditorHistoryDirection) {
+        // Toolbar commands are asynchronous in ACE. Prefer the direction requested by the host
+        // while it is pending so delayed bridge events cannot temporarily rewind only metadata.
+        val effectiveDirection = mPendingHistoryNavigation ?: direction
+        mEncodingHistoryEntries[token]?.let { entry ->
+            applyEncodingHistoryState(
+                when (effectiveDirection) {
+                    EditorHistoryDirection.UNDO -> entry.before
+                    EditorHistoryDirection.REDO -> entry.after
+                },
+            )
+        }
+        // This is a document-state revision, so metadata-only Convert markers and their history
+        // navigation invalidate an in-flight save snapshot just like text edits do.
+        mTextRevision++
+        if (!editor.isTextChanged) {
+            mHadDirectEditSinceSave = false
+        }
+        saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
+        completeHistoryNavigation()
+        syncPrimaryMenuState()
+        schedulePrimaryMenuStateSync()
+    }
+
+    private fun beginHistoryNavigation(direction: EditorHistoryDirection): Boolean {
+        if (mPendingHistoryNavigation != null) return false
+        mPendingHistoryNavigation = direction
+        val generation = ++mHistoryNavigationGeneration
+        syncPrimaryMenuState()
+        mUiHandler.postDelayed({
+            if (!mDestroyed && mHistoryNavigationGeneration == generation &&
+                mPendingHistoryNavigation == direction
+            ) {
+                mPendingHistoryNavigation = null
+                mHistoryNavigationGeneration++
+                syncPrimaryMenuState()
+            }
+        }, HISTORY_NAVIGATION_TIMEOUT_MS)
+        return true
+    }
+
+    private fun completeHistoryNavigation() {
+        if (mPendingHistoryNavigation == null) return
+        mPendingHistoryNavigation = null
+        mHistoryNavigationGeneration++
+    }
+
+    private fun applyEncodingHistoryState(state: EncodingHistoryState) {
+        mCurrentCharset = state.charset
+        mCurrentCharsetConfidence = state.charsetConfidence
+        mHadBom = state.hadBom
+        mCurrentHadDecodingErrors = state.hadDecodingErrors
+        mCurrentDecodingErrorsWereAccepted = state.decodingErrorsWereAccepted
+        mDraftEncodingValidationPending = state.draftEncodingValidationPending
+        mFileEncodingValidationComplete = state.fileEncodingValidationComplete
+        updateEncodingStatus()
+    }
+
+    private fun showEncodingOperationError(message: String) {
+        DialogUtils.buildAndShowAdaptive {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_file_encoding)
+                .content(message)
+                .positiveText(R.string.dialog_button_dismiss)
+                .positiveColorRes(R.color.dialog_button_default)
+                .build()
+        }
     }
 
     fun showFileDetailsDialog() {
@@ -4383,25 +5674,85 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     override fun onSaveInstanceState() = Bundle().apply {
-        putParcelable("super_data", super.onSaveInstanceState())
-        putInt("script_execution_id", scriptExecutionId)
+        putParcelable(STATE_SUPER_DATA, super.onSaveInstanceState())
+        putInt(STATE_SCRIPT_EXECUTION_ID, scriptExecutionId)
+        // The Activity persists draft text/path separately. Keeping this metadata in the view
+        // state avoids duplicating large text while preserving a deferred Convert across process
+        // recreation. It is ignored unless a draft is actually restored.
+        putString(STATE_DRAFT_CHARSET, mCurrentCharset.name())
+        putInt(STATE_DRAFT_CHARSET_CONFIDENCE, mCurrentCharsetConfidence)
+        putBoolean(STATE_DRAFT_HAD_BOM, mHadBom)
+        putBoolean(STATE_DRAFT_HAD_DECODING_ERRORS, mCurrentHadDecodingErrors)
+        putBoolean(
+            STATE_DRAFT_DECODING_ERRORS_ACCEPTED,
+            mCurrentDecodingErrorsWereAccepted,
+        )
+        putBoolean(
+            STATE_DRAFT_ENCODING_VALIDATION_PENDING,
+            mDraftEncodingValidationPending,
+        )
+        putBoolean(
+            STATE_FILE_ENCODING_VALIDATION_COMPLETE,
+            mFileEncodingValidationComplete,
+        )
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
         val bundle = state as Bundle
 
         @Suppress("DEPRECATION")
-        val superData = bundle.getParcelable<Parcelable>("super_data")
-        scriptExecutionId = bundle.getInt("script_execution_id", ScriptExecution.NO_ID)
+        val superData = bundle.getParcelable<Parcelable>(STATE_SUPER_DATA)
+        scriptExecutionId = bundle.getInt(STATE_SCRIPT_EXECUTION_ID, ScriptExecution.NO_ID)
         super.onRestoreInstanceState(superData)
+        bundle.getString(STATE_DRAFT_CHARSET)
+            ?.let { charsetName -> runCatching { Charset.forName(charsetName) }.getOrNull() }
+            ?.let { charset ->
+                mPendingRestoredDraftEncodingState = EncodingHistoryState(
+                    charset = charset,
+                    charsetConfidence = bundle.getInt(STATE_DRAFT_CHARSET_CONFIDENCE, 100),
+                    hadBom = EditorEncodingDetector.normalizeBomPreference(
+                        charset,
+                        bundle.getBoolean(STATE_DRAFT_HAD_BOM, false),
+                    ),
+                    hadDecodingErrors = bundle.getBoolean(
+                        STATE_DRAFT_HAD_DECODING_ERRORS,
+                        false,
+                    ),
+                    decodingErrorsWereAccepted = bundle.getBoolean(
+                        STATE_DRAFT_DECODING_ERRORS_ACCEPTED,
+                        false,
+                    ),
+                    draftEncodingValidationPending = bundle.getBoolean(
+                        STATE_DRAFT_ENCODING_VALIDATION_PENDING,
+                        false,
+                    ),
+                    fileEncodingValidationComplete = bundle.getBoolean(
+                        STATE_FILE_ENCODING_VALIDATION_COMPLETE,
+                        true,
+                    ),
+                )
+            }
+        applyPendingRestoredDraftEncodingStateIfReady()
         syncPrimaryMenuState()
         notifyScriptRunningStateChanged()
     }
 
     fun destroy() {
+        mDestroyed = true
         // Cancel loading before destroying editor resources.
         // zh-CN: 销毁前先取消加载, 再销毁编辑器相关资源.
         cancelLargeFileLoading()
+        mEncodingDialogDisposable?.dispose()
+        mEncodingDialogDisposable = null
+        mSaveAsAdoptionDisposable?.dispose()
+        mSaveAsAdoptionDisposable = null
+        fileService.destroy()
+        mEncodingOperationDisposable?.dispose()
+        mEncodingOperationDisposable = null
+        mEncodingOperationGeneration++
+        mEncodingHistoryEntries.clear()
+        mPendingHistoryNavigation = null
+        mHistoryNavigationGeneration++
 
         // Cancel search stats.
         // zh-CN: 取消搜索统计任务.
@@ -4413,6 +5764,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mFontPreviewCatalogRefreshSubscription = null
 
         editor.destroy()
+        mDocumentLocationChangedListener = null
         mAutoCompletion?.shutdown()
         if (mDebugging) {
             exitDebugging()
@@ -4441,6 +5793,59 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private data class InitialPositionRequest(
         val lineNumber: Int,
         val columnNumber: Int,
+    )
+
+    private data class EncodingDialogData(
+        val candidates: List<EditorEncodingCandidate>,
+    )
+
+    private data class SaveWriteResult(
+        val text: String,
+        val revision: Long,
+        val currentUri: Uri,
+        val encoding: EditorFileSaveEncoding,
+    )
+
+    private data class ContentLengthResult(
+        val sizeOrNull: Long?,
+    )
+
+    private data class EncodingReloadReadResult(
+        val readResult: org.autojs.autojs.ui.edit.editor.loading.EditorFileReadResult,
+        val sizeOrNull: Long?,
+    )
+
+    private data class EncodingHistoryState(
+        val charset: Charset,
+        val charsetConfidence: Int,
+        val hadBom: Boolean,
+        val hadDecodingErrors: Boolean,
+        val decodingErrorsWereAccepted: Boolean,
+        val draftEncodingValidationPending: Boolean,
+        val fileEncodingValidationComplete: Boolean,
+    )
+
+    private data class EncodingHistoryEntry(
+        val before: EncodingHistoryState,
+        val after: EncodingHistoryState,
+    )
+
+    private data class EncodingReloadRollback(
+        val uri: Uri,
+        val text: String,
+        val charset: Charset,
+        val charsetConfidence: Int,
+        val hadBom: Boolean,
+        val hadDecodingErrors: Boolean,
+        val decodingErrorsWereAccepted: Boolean,
+        val draftEncodingValidationPending: Boolean,
+        val fileEncodingValidationComplete: Boolean,
+        val saveStickyDirty: Boolean,
+        val hadDirectEditSinceSave: Boolean,
+        val draftRestoredInThisSession: Boolean,
+        val restoredText: String?,
+        val largeFileMode: Boolean,
+        val fileStateRequiresReload: Boolean,
     )
 
     private enum class ThemePreviewFilter(
@@ -4476,6 +5881,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // zh-CN: 内部存储根目录 (不访问外置 SD).
 
+        private const val STATE_SUPER_DATA = "super_data"
+        private const val STATE_SCRIPT_EXECUTION_ID = "script_execution_id"
+        private const val STATE_DRAFT_CHARSET = "draft_charset"
+        private const val STATE_DRAFT_CHARSET_CONFIDENCE = "draft_charset_confidence"
+        private const val STATE_DRAFT_HAD_BOM = "draft_had_bom"
+        private const val STATE_DRAFT_HAD_DECODING_ERRORS = "draft_had_decoding_errors"
+        private const val STATE_DRAFT_DECODING_ERRORS_ACCEPTED = "draft_decoding_errors_accepted"
+        private const val STATE_DRAFT_ENCODING_VALIDATION_PENDING =
+            "draft_encoding_validation_pending"
+        private const val STATE_FILE_ENCODING_VALIDATION_COMPLETE =
+            "file_encoding_validation_complete"
+
         const val EXTRA_PATH = "path"
         const val EXTRA_NAME = "name"
         const val EXTRA_CONTENT = "content"
@@ -4484,6 +5901,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         const val EXTRA_RUN_ENABLED = "runEnabled"
         const val EXTRA_INITIAL_LINE = "initialLine"
         const val EXTRA_INITIAL_COLUMN = "initialColumn"
+        const val EXTRA_EDITOR_SESSION_ID = "editorSessionId"
 
         private const val ACTION_RUN = "editor:run"
         private const val ACTION_FORCE_STOP = "editor:force_stop"
@@ -4527,6 +5945,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_JUMP_TO_PREVIOUS_CURSOR = "editor:jump_to_previous_cursor"
 
         private const val ACE_SHORTCUT_ITEM_WIDTH_DP = 40f
+        private const val ACE_HISTORY_STATE_SETTLE_DELAY_MS = 160L
+        private const val HISTORY_NAVIGATION_TIMEOUT_MS = 10_000L
+        private const val ENCODING_RISK_PROBE_LIMIT_BYTES = 64 * 1024
+        private const val ENCODING_TEXT_PROBE_LIMIT_CHARS = 64 * 1024
+        private const val STREAM_UI_QUEUE_CAPACITY = 32
+        private const val STREAM_UI_QUEUE_OFFER_TIMEOUT_MS = 50L
 
         private const val PAYLOAD_QUERY = "query"
         private const val PAYLOAD_REPLACEMENT = "replacement"

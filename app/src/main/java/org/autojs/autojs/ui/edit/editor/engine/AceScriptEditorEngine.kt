@@ -23,6 +23,7 @@ class AceScriptEditorEngine(
     private val cursorCallbacks = LinkedHashSet<EditorCursorChangeListener>()
     private val textChangeCallbacks = LinkedHashSet<EditorTextChangeListener>()
     private var breakpointChangeListener: EditorBreakpointChangeListener? = null
+    private var historyOperationListener: EditorHistoryOperationListener? = null
     private var readOnly = false
     private var redoUndoEnabled = true
     private var loadingText = false
@@ -144,6 +145,33 @@ class AceScriptEditorEngine(
 
     override fun markTextAsSaved() {
         aceCodeEditor.markClean()
+    }
+
+    override fun markTextAsChanged() {
+        aceCodeEditor.markDirty()
+    }
+
+    fun refreshState() {
+        aceCodeEditor.refreshState()
+    }
+
+    override fun replaceAllTextUndoably(
+        text: String,
+        token: String,
+        onComplete: ((Boolean) -> Unit)?,
+    ) {
+        aceCodeEditor.replaceAllTextUndoably(text, token, onComplete)
+    }
+
+    override fun addUndoableHistoryMarker(
+        token: String,
+        onComplete: ((Boolean) -> Unit)?,
+    ) {
+        aceCodeEditor.addUndoableHistoryMarker(token, onComplete)
+    }
+
+    override fun setHistoryOperationListener(listener: EditorHistoryOperationListener?) {
+        historyOperationListener = listener
     }
 
     override fun insert(text: String?) {
@@ -520,6 +548,7 @@ class AceScriptEditorEngine(
     }
 
     override fun destroy() {
+        historyOperationListener = null
         aceCodeEditor.destroy()
     }
 
@@ -551,6 +580,13 @@ class AceScriptEditorEngine(
 
             override fun onSelectionAction(action: AceCodeEditor.SelectionAction) {
                 onSelectionAction?.invoke(action.toEngineSelectionAction())
+            }
+
+            override fun onHistoryOperation(token: String, undo: Boolean) {
+                historyOperationListener?.onHistoryOperation(
+                    token,
+                    if (undo) EditorHistoryDirection.UNDO else EditorHistoryDirection.REDO,
+                )
             }
 
             override fun onFailure(failure: AceFailure) {

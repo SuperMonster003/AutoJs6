@@ -52,6 +52,7 @@ import org.autojs.autojs.ui.edit.editor.ace.health.AceHealthState
 import org.autojs.autojs.ui.edit.editor.ace.health.AceJsErrorClassifier
 import org.autojs.autojs.ui.edit.editor.ace.health.AceRuntimeHealthMonitor
 import org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManager
+import org.autojs.autojs.ui.edit.editor.loading.EditorTextLoadPolicy
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -392,18 +393,74 @@ class AceCodeEditor @JvmOverloads constructor(
     fun setText(text: String?) {
         resetTextMirror(text.orEmpty())
         dirty = false
-        invokeAce("setText", quote(textSnapshot))
+        invokeAce(
+            "setText",
+            "${quote(textSnapshot)}, false, ${EditorTextLoadPolicy.requiresAceLightweightMode(textSnapshot)}",
+        )
     }
 
     fun setTextDirty(text: String?) {
         resetTextMirror(text.orEmpty())
         dirty = true
-        invokeAce("setTextDirty", quote(textSnapshot))
+        invokeAce(
+            "setTextDirty",
+            "${quote(textSnapshot)}, false, ${EditorTextLoadPolicy.requiresAceLightweightMode(textSnapshot)}",
+        )
     }
 
     fun markClean() {
         dirty = false
         invokeAce("markClean")
+    }
+
+    fun markDirty() {
+        dirty = true
+        invokeAce("markDirty")
+    }
+
+    fun refreshState() {
+        invokeAce("refreshState")
+    }
+
+    fun replaceAllTextUndoably(
+        text: String,
+        token: String,
+        onComplete: ((Boolean) -> Unit)? = null,
+    ) {
+        val previousText = textSnapshot
+        resetTextMirror(text)
+        invokeAceBoolean(
+            method = "replaceAllTextUndoably",
+            args = "${quote(text)}, ${quote(token)}, false, ${EditorTextLoadPolicy.requiresAceLightweightMode(text)}",
+        ) { succeeded ->
+            if (succeeded) {
+                // A true bridge acknowledgement means the group is already attached to ACE's
+                // UndoManager. Keep the host cache authoritative while read-only loading-state
+                // notifications are still draining.
+                canUndo = true
+                canRedo = false
+            }
+            if (!succeeded && textSnapshot == text) {
+                resetTextMirror(previousText)
+            }
+            onComplete?.invoke(succeeded)
+        }
+    }
+
+    fun addUndoableHistoryMarker(
+        token: String,
+        onComplete: ((Boolean) -> Unit)? = null,
+    ) {
+        invokeAceBoolean(
+            method = "addUndoableHistoryMarker",
+            args = quote(token),
+        ) { succeeded ->
+            if (succeeded) {
+                canUndo = true
+                canRedo = false
+            }
+            onComplete?.invoke(succeeded)
+        }
     }
 
     fun getText(callback: (String) -> Unit) {
@@ -902,7 +959,9 @@ class AceCodeEditor @JvmOverloads constructor(
         mainHandler.removeCallbacks(imeSettleRunnable)
         mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
         mainHandler.removeCallbacks(restoreSelectionActionModeRunnable)
-        pendingScripts.clear()
+        while (pendingScripts.isNotEmpty()) {
+            pendingScripts.removeFirst().callback?.onReceiveValue(null)
+        }
         webView.stopLoading()
         runCatching { webView.removeJavascriptInterface(JS_BRIDGE_NAME) }
         webView.webChromeClient = null
@@ -948,6 +1007,7 @@ class AceCodeEditor @JvmOverloads constructor(
                 "firstPaint" -> handleFirstPaint()
                 "resizeDone" -> handleResizeDone(payloadJson)
                 "changeDelta" -> handleChangeDelta(payloadJson)
+                "historyOperation" -> handleHistoryOperation(payloadJson)
                 "lspStateChanged" -> handleLspStateChanged(payloadJson)
             }
             listener?.onEvent(name, payloadJson)
@@ -1002,14 +1062,15 @@ class AceCodeEditor @JvmOverloads constructor(
             if (destroyed) return@postToMain
             recordBridgeEvent("notifyCursorChanged")
             healthMonitor.markStateEvent()
+            val mirroredLineText = lineTextAt(line)
             val state = updateState(stateJson).copy(
-                cursor = AceCursor(line = line, column = column, lineText = lineText),
+                cursor = AceCursor(line = line, column = column, lineText = mirroredLineText),
             ).also {
                 cursorLine = it.cursor.line
                 cursorColumn = it.cursor.column
                 cursorLineText = it.cursor.lineText
             }
-            listener?.onCursorChanged(lineText, line, column, state)
+            listener?.onCursorChanged(mirroredLineText, line, column, state)
         }
     }
 
@@ -1145,6 +1206,21 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun bridgeFontFamily(): String {
         return AceEditorFontPreferences.get().cssFontFamily
+    }
+
+    private fun handleHistoryOperation(payloadJson: String?) {
+        val payload = runCatching { JSONObject(payloadJson.orEmpty()) }.getOrNull() ?: return
+        val token = payload.optString("token")
+        val undo = when (payload.optString("direction")) {
+            "undo" -> true
+            "redo" -> false
+            else -> return
+        }
+        val state = payload.optJSONObject("state")?.let {
+            updateState(it.toString(), acceptTextSnapshot = false)
+        } ?: currentState()
+        listener?.onStateChanged(state)
+        listener?.onHistoryOperation(token, undo)
     }
 
     private fun handleLspStateChanged(payloadJson: String?) {
@@ -2114,6 +2190,31 @@ class AceCodeEditor @JvmOverloads constructor(
         evaluateOrQueue("window.AutoJsAce && window.AutoJsAce.$method($args);")
     }
 
+    private fun invokeAceBoolean(
+        method: String,
+        args: String = "",
+        onComplete: ((Boolean) -> Unit)? = null,
+    ) {
+        var completed = false
+        val timeout = Runnable {
+            if (completed) return@Runnable
+            completed = true
+            eventHistory.record("ace_boolean_ack_timeout", "method=$method")
+            onComplete?.invoke(false)
+        }
+        mainHandler.postDelayed(timeout, BOOLEAN_ACK_TIMEOUT_MS)
+        val callback = ValueCallback<String> { result ->
+            if (completed) return@ValueCallback
+            completed = true
+            mainHandler.removeCallbacks(timeout)
+            onComplete?.invoke(result == "true")
+        }
+        evaluateOrQueue(
+            "!!(window.AutoJsAce && window.AutoJsAce.$method($args))",
+            callback,
+        )
+    }
+
     private fun evaluateOrQueue(script: String, callback: ValueCallback<String>? = null) {
         if (!isReady) {
             pendingScripts.add(PendingScript(script, callback))
@@ -2178,7 +2279,17 @@ class AceCodeEditor @JvmOverloads constructor(
         } else {
             textSnapshot = textMirror.text
         }
-        val state = parsedState.copy(text = textSnapshot)
+        val selectionStart = parsedState.selection.startOffset.coerceIn(0, textSnapshot.length)
+        val selectionEnd = parsedState.selection.endOffset.coerceIn(0, textSnapshot.length)
+        val selectedText = textSnapshot.substring(
+            minOf(selectionStart, selectionEnd),
+            maxOf(selectionStart, selectionEnd),
+        )
+        val state = parsedState.copy(
+            text = textSnapshot,
+            cursor = parsedState.cursor.copy(lineText = lineTextAt(parsedState.cursor.line)),
+            selectedText = selectedText,
+        )
         dirty = state.dirty
         canUndo = state.canUndo
         canRedo = state.canRedo
@@ -2715,6 +2826,7 @@ class AceCodeEditor @JvmOverloads constructor(
         fun onTextChanged(text: String, state: AceEditorState) = Unit
         fun onCursorChanged(lineText: String, line: Int, column: Int, state: AceEditorState) = Unit
         fun onBreakpointChanged(line: Int, enabled: Boolean, state: AceEditorState) = Unit
+        fun onHistoryOperation(token: String, undo: Boolean) = Unit
         fun onSelectionAction(action: SelectionAction) = Unit
         fun onEvent(name: String, payloadJson: String?) = Unit
         fun onError(message: String) = Unit
@@ -2748,6 +2860,7 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val APP_ASSET_PATH = "/assets/"
         private const val VIRTUAL_FONT_PATH = "/autojs6-fonts/"
         private const val APP_ASSET_ORIGIN = "https://appassets.androidplatform.net"
+        private const val BOOLEAN_ACK_TIMEOUT_MS = 10_000L
         private const val ASSET_URL_PREFIX = "$APP_ASSET_ORIGIN${APP_ASSET_PATH}editor/ace-builds-1.4.12/"
         private const val EDITOR_URL = "${ASSET_URL_PREFIX}autojs6_editor.html"
         private const val ACE_RUNTIME_REVISION = "ace-builds-1.4.12-autojs6"

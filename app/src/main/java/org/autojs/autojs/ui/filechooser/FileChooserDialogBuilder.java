@@ -126,6 +126,7 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
             result.onNext(file);
             result.onComplete();
         });
+        onNegative((dialog, which) -> result.onComplete());
         show();
         return result;
     }

@@ -47,6 +47,9 @@
 
     <color name="dialog_options_button_tint">#DEA9A9A9</color>
 
+    <color name="editor_encoding_risk_error">@color/md_red_400</color>
+    <color name="editor_encoding_risk_warning">@color/md_amber_400</color>
+
     <color name="item_background">#333333</color>
     <color name="item_background_dark">@color/dawn_full</color>
 

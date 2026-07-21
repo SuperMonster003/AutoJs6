@@ -96,6 +96,13 @@
     <string name="description_documentation_source_preference_more">문서 페이지에서 어두운 테마를 지원하려면 다음 조건이 충족되어야 합니다.\n1. AutoJs6 에는 야간 모드가 활성화되어 있습니다.\n2. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P] 이하: 버전 >= 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">편집기 거터에서 중단점 마커를 표시하거나 숨깁니다. 중단점 데이터와 디버그 메뉴 작업은 계속 사용할 수 있습니다.</string>
     <string name="description_editor_code_highlight_threshold">파일 크기에 따라 구문 하이라이트 기능을 활성화할지 결정합니다.\n대용량 파일에서는 구문 하이라이트를 비활성화하면 파일 로딩 효율을 어느 정도 높일 수 있습니다.</string>
+    <string name="description_editor_encoding_convert_persists_replacement_characters">변환 후 저장하면 원래의 잘못된 바이트를 덮어쓰고 편집기에 현재 표시된 대체 문자를 영구적으로 유지합니다.</string>
+    <string name="description_editor_encoding_convert_unavailable">현재 텍스트를 %1$s 인코딩으로 표현할 수 없어 변환할 수 없습니다.</string>
+    <string name="description_editor_encoding_convert_unavailable_read_only">파일이 읽기 전용이므로 변환할 수 없습니다.</string>
+    <string name="description_editor_encoding_reload_discards_unsaved_changes">저장하지 않고 다시 로드하면 편집기의 저장되지 않은 변경 사항이 삭제됩니다.</string>
+    <string name="description_editor_encoding_reload_or_convert">\"%2$s\"의 인코딩을 %1$s 방식으로 변경하시겠습니까?\n\n다시 로드는 새 인코딩을 사용하여 디스크에서 파일을 다시 읽고 편집기 내용을 바꿉니다. 변환은 편집기 텍스트를 유지하고 다음 저장에 사용할 새 인코딩을 설정합니다. 파일을 즉시 쓰지는 않습니다.</string>
+    <string name="description_editor_encoding_reload_replaces_invalid_bytes">다시 로드는 유효하지 않은 바이트 시퀀스를 대체 문자로 바꿉니다.</string>
+    <string name="description_editor_encoding_reload_save_prompt">"%1$s"에 저장되지 않은 변경 사항이 있습니다. 현재 인코딩으로 저장한 후 다시 로드할까요?</string>
     <string name="description_editor_engine_preference">Ace는 기본 편집기 엔진입니다. JsDroidEditor는 대체 수단으로 계속 사용할 수 있으며 명시적으로 선택할 수도 있습니다.</string>
     <string name="description_editor_fold_markers_enabled_preference">편집기 거터에서 코드 접기 마커를 표시하거나 숨깁니다. JsDroidEditor에는 접기 마커 영역이 없습니다.</string>
     <string name="description_editor_gutter_width_mode_preference">동적 너비는 현재 보이는 줄 번호의 자릿수를 따릅니다. 고정 너비는 안정적인 최소 너비를 미리 확보하고 더 큰 줄 번호를 표시할 때만 확장됩니다.</string>
@@ -157,6 +164,7 @@
     <string name="dialog_button_confirm">확인</string>
     <string name="dialog_button_connect">연결</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_convert">변환</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_copy_path">복사</string>
     <string name="dialog_button_default_prefix">기본 접두사</string>
@@ -179,12 +187,15 @@
     <string name="dialog_button_preview">미리보기</string>
     <string name="dialog_button_quit">그만두다</string>
     <string name="dialog_button_release_history">기록</string>
+    <string name="dialog_button_reload">다시 로드</string>
+    <string name="dialog_button_reload_without_saving">저장하지 않고 다시 로드</string>
     <string name="dialog_button_remove">제거하다</string>
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">가져오기</string>
     <string name="dialog_button_retry">다시 해 보다</string>
     <string name="dialog_button_save">구하다</string>
     <string name="dialog_button_save_and_continue">저장 후 계속</string>
+    <string name="dialog_button_save_and_reload">저장 후 다시 로드</string>
     <string name="dialog_button_save_as">다른 이름으로 저장</string>
     <string name="dialog_button_system_settings">환경 설정</string>
     <string name="dialog_button_system_settings_simplified">시스템</string>
@@ -280,6 +291,7 @@
     <string name="error_corresponding_github_release_may_not_published">해당 GitHub 릴리스는 아직 게시되지 않았을 수 있습니다</string>
     <string name="error_dot_decimal_notation_num_over_255">255 를 초과하는 점 십진수</string>
     <string name="error_download_interrupted">다운로드가 중단되었습니다</string>
+    <string name="error_editor_encoding_validation_incomplete">파일 인코딩 검증이 완료되지 않았습니다. 저장하기 전에 파일 인코딩을 열고 다시 로드 또는 변환을 사용하세요.</string>
     <string name="error_email_taken">이메일이 가져옵니다</string>
     <string name="error_empty_broadcast_selection">적어도 하나의 방송이 선택되어야합니다</string>
     <string name="error_empty_github_release_assets">다운로드 할 자산이 없습니다</string>
@@ -314,7 +326,9 @@
     <string name="error_failed_to_run_script">스크립트 실행 실패</string>
     <string name="error_failed_to_save">저장에 실패했습니다</string>
     <string name="error_failed_to_save_project_config">프로젝트 설정을 저장하지 못했습니다</string>
+    <string name="error_file_contains_unaccepted_decoding_replacements">잘못된 원본 바이트가 대체되어 저장이 차단되었습니다. 파일 인코딩을 열고 다시 로드 또는 변환을 명시적으로 사용하세요.</string>
     <string name="error_file_in_path_does_not_exist">경로 \"%1$s\" 에 파일이 존재하지 않습니다</string>
+    <string name="error_file_state_unknown_reload_required">원본 파일 상태를 알 수 없습니다. 계속하기 전에 파일을 다시 로드하세요.</string>
     <string name="error_function_called_in_ui_thread">UI 스레드는 차단할 수 없습니다. 하위 스레드 또는 하위 스크립트에서 %s() 를 실행하십시오</string>
     <string name="error_function_called_more_than_once">%s() 가 두 번 이상 호출됩니다</string>
     <string name="error_get_github_latest_release">최신 GitHub 릴리스를 얻을 수 없습니다</string>
@@ -400,9 +414,11 @@
     <string name="error_shizuku_service_may_be_not_running">Shizuku 서비스가 실행되고 있지 않을 수 있습니다</string>
     <string name="error_shizuku_version_is_not_supported">지원되지 않는 Shizuku 버전</string>
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">지정된 AutoJs6 버전 번호는 461보다 커야 합니다</string>
+    <string name="error_text_cannot_be_encoded_with_charset">현재 텍스트를 %1$s 인코딩으로 표현할 수 없습니다</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">필수 속성 \"%1$s\" 에 대한 변환기는 null 값을 반환할 수 없습니다</string>
     <string name="error_thread_is_not_alive">스레드는 살아 있지 않습니다</string>
     <string name="error_timeout_while_querying_plugin_info">%1$s 플러그인 정보 조회가 시간 초과되었습니다.</string>
+    <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 파일 인코딩을 변경할 수 없습니다</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 파일 정보를 표시할 수 없습니다</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 버전 기록을 표시할 수 없습니다</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">현재 파일 경로를 알 수 없어 다른 앱으로 열 수 없습니다</string>
@@ -639,6 +655,7 @@
     <string name="text_activated_successfully">활성화되었습니다</string>
     <string name="text_activity_not_found_for_apk_installing">APK 설치 프로그램이 없습니다</string>
     <string name="text_adb_tool_needed">ADB 도구가 필요합니다</string>
+    <string name="text_add_bom">BOM 추가</string>
     <string name="text_add_color_library">색상 라이브러리 추가</string>
     <string name="text_add_symbol_hint">기호 추가</string>
     <string name="text_alias">별칭</string>
@@ -853,6 +870,7 @@
     <string name="text_country_code">국가 코드 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">국가 코드는 두 개의 대문자로 입력해야 합니다</string>
     <string name="text_creating_unsigned_apk">서명되지 않은 APK 생성 중</string>
+    <string name="text_current">현재</string>
     <string name="text_current_page_configuration">현재 페이지 설정</string>
     <string name="text_current_version">현재 버전</string>
     <string name="text_daily_task">일상적인 작업</string>
@@ -962,6 +980,13 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">안전한 설정 시간이 초과되는 접근성 서비스를 활성화하십시오</string>
     <string name="text_enable_plugin">플러그인 활성화</string>
     <string name="text_enabled">활성화됨</string>
+    <string name="text_encoding_cannot_decode_file">파일을 디코딩할 수 없음</string>
+    <string name="text_encoding_cannot_represent_current_text">현재 텍스트를 표현할 수 없음</string>
+    <string name="text_encoding_compatible">호환됨</string>
+    <string name="text_encoding_detected_with_confidence">신뢰도 %1$d%%로 감지됨</string>
+    <string name="text_encoding_may_change_content">내용이 변경될 수 있음</string>
+    <string name="text_encoding_risk_error">오류</string>
+    <string name="text_encoding_risk_warning">경고</string>
     <string name="text_encrypting_script">스크립트 암호화 중</string>
     <string name="text_error">오류</string>
     <string name="text_error_copy_file" formatted="true">파일을 복사하지 못했습니다: %s</string>
@@ -1014,6 +1039,9 @@
     <string name="text_file">파일</string>
     <string name="text_file_colon_value">파일: %1$s</string>
     <string name="text_file_details">파일 세부정보</string>
+    <string name="text_file_encoding">파일 인코딩</string>
+    <string name="text_file_encoding_converted">파일 인코딩이 변경되었습니다. 디스크에 쓰려면 파일을 저장하세요.</string>
+    <string name="text_file_encoding_status">파일 인코딩: %1$s</string>
     <string name="text_file_exists">존재하는 파일입니다</string>
     <string name="text_file_explorer">파일 탐색기</string>
     <string name="text_file_extensions_title">파일 확장자</string>
@@ -1246,6 +1274,7 @@
     <string name="text_organization">조직명</string>
     <string name="text_organizational_unit">조직 단위</string>
     <string name="text_original_developer">원래 개발자</string>
+    <string name="text_original_file_recovery_path">원본 파일 복구 경로</string>
     <string name="text_others">기타</string>
     <string name="text_output_apk_path">APK 출력 경로</string>
     <string name="text_overwrite">덮어쓰기</string>
@@ -1438,6 +1467,7 @@
     <string name="text_registering">등록</string>
     <string name="text_release_history">릴리스 기록</string>
     <string name="text_release_notes">릴리스 노트</string>
+    <string name="text_reload_or_convert_to_encoding">%1$s 인코딩으로 다시 로드 또는 변환</string>
     <string name="text_remote">원격</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">원격 파일이 로컬 저장소에 성공적으로 저장됨</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">원격 프로젝트가 로컬 저장소에 성공적으로 저장되었습니다</string>
@@ -1657,6 +1687,7 @@
     <string name="text_unknown_description_for_plugin">알 수 없는 설명</string>
     <string name="text_unknown_title_for_plugin">알 수 없는 제목</string>
     <string name="text_unknown_version_for_plugin">알 수 없는 버전</string>
+    <string name="text_unsaved_changes">저장되지 않은 변경 사항</string>
     <string name="text_unsigned_apk_created">서명되지 않은 APK가 생성됨</string>
     <string name="text_unverified">미확인</string>
     <string name="text_updatable">업데이트 가능</string>

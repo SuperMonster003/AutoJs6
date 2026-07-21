@@ -57,7 +57,25 @@ public class EditIntentActivity extends BaseActivity {
         if (!TextUtils.isEmpty(path)) {
             EditActivity.editFile(this, path, false);
         } else {
-            EditActivity.editFile(this, uri, false);
+            int permissionFlags = intent.getFlags() & (
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                            | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                            | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+            );
+            if ((permissionFlags & Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION) != 0) {
+                int persistableAccess = permissionFlags & (
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                );
+                if (persistableAccess != 0) {
+                    try {
+                        getContentResolver().takePersistableUriPermission(uri, persistableAccess);
+                    } catch (SecurityException ignored) {
+                        // Some providers advertise the flag without accepting a persisted grant.
+                    }
+                }
+            }
+            EditActivity.editFile(this, uri, false, permissionFlags);
         }
     }
 }

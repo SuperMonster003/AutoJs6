@@ -787,13 +787,17 @@
                 documentLengthKnown = true;
             }
             var tooLarge = state.enabled && state.maxDocumentLength > 0 && length > state.maxDocumentLength;
+            var unsafeLine = !!(target && target.$autojs6LongLineSafetyMode);
             state.documentLength = length;
-            state.semanticServiceSuppressed = !!(tooLarge || semanticCircuitOpen);
-            state.semanticServiceReason = tooLarge ?
+            state.semanticServiceSuppressed = !!(unsafeLine || tooLarge || semanticCircuitOpen);
+            state.semanticServiceReason = unsafeLine ?
+                "line-too-long" :
+                tooLarge ?
                 "document-too-large" :
                 semanticCircuitOpen ? "slow-operation-circuit-open" : "";
             if (state.semanticServiceSuppressed) {
                 resetProviderState();
+                clearDiagnostics();
             }
             return state.enabled && !state.semanticServiceSuppressed;
         }

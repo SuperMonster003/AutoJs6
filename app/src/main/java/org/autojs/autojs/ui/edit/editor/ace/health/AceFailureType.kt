@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.edit.editor.ace.health
 enum class AceFailureType {
     ASSET_MISSING,
     PAGE_LOAD_ERROR,
+    PAGE_LOAD_TIMEOUT,
     READY_TIMEOUT,
     BRIDGE_NOT_READY,
     JS_INIT_ERROR,

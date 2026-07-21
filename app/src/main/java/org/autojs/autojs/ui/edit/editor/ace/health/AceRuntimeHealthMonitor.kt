@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 class AceRuntimeHealthMonitor(
     private val mainHandler: Handler,
     private val fallbackPolicy: AceFallbackPolicy = AceFallbackPolicy(),
+    private val pageLoadTimeoutMillis: Long = PAGE_LOAD_TIMEOUT_MS,
+    private val bridgeReadyTimeoutMillis: Long = READY_TIMEOUT_MS,
     private val onFallbackRequired: (AceFailure) -> Unit,
 ) {
 
@@ -51,12 +53,23 @@ class AceRuntimeHealthMonitor(
     private var heartbeatFailures = 0
     private var heartbeatSuspendedUntilUptimeMillis = 0L
 
-    private val readyTimeoutRunnable = Runnable {
-        if (!isTerminal() && state != AceHealthState.RUNNING && state != AceHealthState.BRIDGE_READY) {
+    private val pageLoadTimeoutRunnable = Runnable {
+        if (!isTerminal() && state == AceHealthState.LOADING_PAGE) {
+            reportFailure(
+                AceFailure(
+                    type = AceFailureType.PAGE_LOAD_TIMEOUT,
+                    message = "ACE editor page did not finish loading within ${pageLoadTimeoutMillis}ms",
+                ),
+            )
+        }
+    }
+
+    private val bridgeReadyTimeoutRunnable = Runnable {
+        if (!isTerminal() && state == AceHealthState.PAGE_LOADED) {
             reportFailure(
                 AceFailure(
                     type = AceFailureType.READY_TIMEOUT,
-                    message = "ACE editor did not report ready within ${READY_TIMEOUT_MS}ms",
+                    message = "ACE editor did not report ready within ${bridgeReadyTimeoutMillis}ms after page load",
                 ),
             )
         }
@@ -77,13 +90,15 @@ class AceRuntimeHealthMonitor(
 
     fun markLoadingPage() {
         transitionTo(AceHealthState.LOADING_PAGE)
-        mainHandler.removeCallbacks(readyTimeoutRunnable)
-        mainHandler.postDelayed(readyTimeoutRunnable, READY_TIMEOUT_MS)
+        cancelStartupTimeouts()
+        mainHandler.postDelayed(pageLoadTimeoutRunnable, pageLoadTimeoutMillis)
     }
 
     fun markPageLoaded() {
         if (!isTerminal() && state == AceHealthState.LOADING_PAGE) {
+            mainHandler.removeCallbacks(pageLoadTimeoutRunnable)
             transitionTo(AceHealthState.PAGE_LOADED)
+            mainHandler.postDelayed(bridgeReadyTimeoutRunnable, bridgeReadyTimeoutMillis)
         }
     }
 
@@ -91,7 +106,7 @@ class AceRuntimeHealthMonitor(
         if (isTerminal()) {
             return
         }
-        mainHandler.removeCallbacks(readyTimeoutRunnable)
+        cancelStartupTimeouts()
         lastReadyAtUptimeMillis = SystemClock.uptimeMillis()
         transitionTo(AceHealthState.BRIDGE_READY)
         transitionTo(AceHealthState.RUNNING)
@@ -193,11 +208,16 @@ class AceRuntimeHealthMonitor(
 
     fun markDestroyed() {
         transitionTo(AceHealthState.DESTROYED)
-        mainHandler.removeCallbacks(readyTimeoutRunnable)
+        cancelStartupTimeouts()
         mainHandler.removeCallbacks(heartbeatRunnable)
         heartbeatSuspendedUntilUptimeMillis = 0L
         heartbeatSuspendedReason = null
         heartbeatCheck = null
+    }
+
+    private fun cancelStartupTimeouts() {
+        mainHandler.removeCallbacks(pageLoadTimeoutRunnable)
+        mainHandler.removeCallbacks(bridgeReadyTimeoutRunnable)
     }
 
     private fun scheduleHeartbeat(delayMillis: Long = HEARTBEAT_INTERVAL_MS) {
@@ -233,6 +253,7 @@ class AceRuntimeHealthMonitor(
     }
 
     companion object {
+        const val PAGE_LOAD_TIMEOUT_MS = 15_000L
         const val READY_TIMEOUT_MS = 5_000L
         private const val HEARTBEAT_INTERVAL_MS = 15_000L
         private const val HEARTBEAT_DEGRADED_FAILURES = 2

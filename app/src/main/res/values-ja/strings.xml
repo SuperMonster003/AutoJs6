@@ -95,6 +95,13 @@
     <string name="description_documentation_source_preference_more">ドキュメントページでダークテーマをサポートするには, 以下の条件を満たす必要があります.\n1. AutoJs6 でナイトモードが有効になっている\n2. Android System WebView (または Google Chrome などのブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P] 以下: バージョン >= 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">エディターガターのブレークポイントマーカーを表示または非表示にします. ブレークポイントデータとデバッグメニュー操作は引き続き利用できます.</string>
     <string name="description_editor_code_highlight_threshold">ファイルサイズに応じて構文ハイライト機能を有効にするかどうかを決定します.\n大きなファイルでは, 構文ハイライトを無効にすることで読み込み効率をある程度向上できます.</string>
+    <string name="description_editor_encoding_convert_persists_replacement_characters">変換後に保存すると元の無効なバイトが上書きされ, エディターに現在表示されている置換文字が永続的に保持されます.</string>
+    <string name="description_editor_encoding_convert_unavailable">現在のテキストを %1$s でエンコードできないため, 変換できません.</string>
+    <string name="description_editor_encoding_convert_unavailable_read_only">ファイルが読み取り専用のため, 変換できません.</string>
+    <string name="description_editor_encoding_reload_discards_unsaved_changes">保存せずに再読み込みすると, エディター内の未保存の変更は破棄されます.</string>
+    <string name="description_editor_encoding_reload_or_convert">\"%2$s\" のエンコーディングを %1$s に変更しますか?\n\n再読み込みでは, 新しいエンコーディングを使用してディスクからファイルを再度読み込み, エディターの内容を置き換えます. 変換では, エディターのテキストを保持し, 次回の保存に使用する新しいエンコーディングを設定します. ファイルはすぐには書き込まれません.</string>
+    <string name="description_editor_encoding_reload_replaces_invalid_bytes">再読み込みでは, 無効なバイト列を置換文字に置き換えます.</string>
+    <string name="description_editor_encoding_reload_save_prompt">"%1$s" には未保存の変更があります. 現在のエンコーディングで保存してから再読み込みしますか?</string>
     <string name="description_editor_engine_preference">Ace はデフォルトのエディターエンジンです. JsDroidEditor はフォールバックとして引き続き利用でき, 明示的に選択することもできます.</string>
     <string name="description_editor_fold_markers_enabled_preference">エディターガターのコード折りたたみマーカーを表示または非表示にします. JsDroidEditor には折りたたみマーカーの表示領域がありません.</string>
     <string name="description_editor_gutter_width_mode_preference">動的幅は現在表示されている行番号の桁数に従います. 固定幅は安定した最小幅を事前に確保し, より大きな行番号の表示に必要な場合だけ拡張します.</string>
@@ -156,6 +163,7 @@
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">接続</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_convert">変換</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_copy_path">コピー</string>
     <string name="dialog_button_default_prefix">デフォ前置</string>
@@ -178,12 +186,15 @@
     <string name="dialog_button_preview">プレビュー</string>
     <string name="dialog_button_quit">終了する</string>
     <string name="dialog_button_release_history">履歴</string>
+    <string name="dialog_button_reload">再読み込み</string>
+    <string name="dialog_button_reload_without_saving">保存せずに再読み込み</string>
     <string name="dialog_button_remove">削除</string>
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">取得</string>
     <string name="dialog_button_retry">再試行</string>
     <string name="dialog_button_save">保存する</string>
     <string name="dialog_button_save_and_continue">保存して続行</string>
+    <string name="dialog_button_save_and_reload">保存して再読み込み</string>
     <string name="dialog_button_save_as">名前を付けて保存</string>
     <string name="dialog_button_system_settings">システム設定</string>
     <string name="dialog_button_system_settings_simplified">システム</string>
@@ -279,6 +290,7 @@
     <string name="error_corresponding_github_release_may_not_published">対応する GitHub のリリースがまだ公開されていない可能性があります</string>
     <string name="error_dot_decimal_notation_num_over_255">255 を超えるドット 10 進数</string>
     <string name="error_download_interrupted">ダウンロードが中断される</string>
+    <string name="error_editor_encoding_validation_incomplete">ファイルのエンコーディング検証が完了していません. 保存する前にファイルエンコーディングを開き, 再読み込みまたは変換を実行してください.</string>
     <string name="error_email_taken">メールが取られている</string>
     <string name="error_empty_broadcast_selection">少なくとも一つのブロードキャストが選択されていなければならない</string>
     <string name="error_empty_github_release_assets">ダウンロードする GitHub リリースアセットがない</string>
@@ -313,7 +325,9 @@
     <string name="error_failed_to_run_script">スクリプトの実行に失敗しました</string>
     <string name="error_failed_to_save">保存に失敗しました</string>
     <string name="error_failed_to_save_project_config">プロジェクト設定の保存に失敗しました</string>
+    <string name="error_file_contains_unaccepted_decoding_replacements">無効なソースバイトが置換されたため, 保存はブロックされました. ファイルエンコーディングを開き, 再読み込みまたは変換を明示的に実行してください.</string>
     <string name="error_file_in_path_does_not_exist">パス \"%1$s\" にファイルが存在しません</string>
+    <string name="error_file_state_unknown_reload_required">元のファイルの状態が不明です. 続行する前にファイルを再読み込みしてください.</string>
     <string name="error_function_called_in_ui_thread">\"UI スレッドをブロックできません. サブスレッドまたはサブスクリプトで %s() を実行してみてください</string>
     <string name="error_function_called_more_than_once">%s() が複数回呼び出されました</string>
     <string name="error_get_github_latest_release">最新の GitHub リリースを取得できません</string>
@@ -399,9 +413,11 @@
     <string name="error_shizuku_service_may_be_not_running">Shizuku サービスが実行されていない可能性があります</string>
     <string name="error_shizuku_version_is_not_supported">Shizuku のバージョンがサポートされていない</string>
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定された AutoJs6 のバージョン番号は 461 より大きくなければなりません</string>
+    <string name="error_text_cannot_be_encoded_with_charset">現在のテキストを %1$s でエンコードできません</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必要なプロパティ \"%1$s\" のトランスフォーマーは null を返すことができません</string>
     <string name="error_thread_is_not_alive">スレッドが生きていない</string>
     <string name="error_timeout_while_querying_plugin_info">%1$s プラグイン情報の取得がタイムアウトしました.</string>
+    <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">現在のファイルパスが不明なため, ファイルのエンコーディングを変更できません</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">現在のファイルパスが不明のため, ファイル詳細を表示できません</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">現在のファイルパスが不明のため, バージョン履歴を表示できません</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">現在のファイルパスが不明のため, 他のアプリで開けません</string>
@@ -638,6 +654,7 @@
     <string name="text_activated_successfully">有効化しました</string>
     <string name="text_activity_not_found_for_apk_installing">APK インストーラーなし</string>
     <string name="text_adb_tool_needed">ADB ツールが必要</string>
+    <string name="text_add_bom">BOM を追加</string>
     <string name="text_add_color_library">カラーライブラリを追加</string>
     <string name="text_add_symbol_hint">記号を追加</string>
     <string name="text_alias">別名</string>
@@ -852,6 +869,7 @@
     <string name="text_country_code">国コード (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国コードは 2 文字の大文字でなければなりません</string>
     <string name="text_creating_unsigned_apk">未署名 APK を作成中</string>
+    <string name="text_current">現在</string>
     <string name="text_current_page_configuration">現在のページ設定</string>
     <string name="text_current_version">現在のバージョン</string>
     <string name="text_daily_task">デイリータスク</string>
@@ -961,6 +979,13 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">セキュアな設定でアクセシビリティサービスを有効化するとタイムアウトする</string>
     <string name="text_enable_plugin">プラグインを有効化</string>
     <string name="text_enabled">有効</string>
+    <string name="text_encoding_cannot_decode_file">ファイルをデコードできません</string>
+    <string name="text_encoding_cannot_represent_current_text">現在のテキストを表現できません</string>
+    <string name="text_encoding_compatible">互換</string>
+    <string name="text_encoding_detected_with_confidence">信頼度 %1$d%% で検出</string>
+    <string name="text_encoding_may_change_content">内容が変わる可能性があります</string>
+    <string name="text_encoding_risk_error">エラー</string>
+    <string name="text_encoding_risk_warning">警告</string>
     <string name="text_encrypting_script">スクリプトを暗号化中</string>
     <string name="text_error">エラー</string>
     <string name="text_error_copy_file" formatted="true">ファイルのコピーに失敗しました. %s</string>
@@ -1013,6 +1038,9 @@
     <string name="text_file">ファイル</string>
     <string name="text_file_colon_value">ファイル: %1$s</string>
     <string name="text_file_details">ファイルの詳細</string>
+    <string name="text_file_encoding">ファイルのエンコーディング</string>
+    <string name="text_file_encoding_converted">ファイルのエンコーディングを変更しました. ディスクに書き込むにはファイルを保存してください.</string>
+    <string name="text_file_encoding_status">ファイルのエンコーディング: %1$s</string>
     <string name="text_file_exists">ファイルは既に存在しています</string>
     <string name="text_file_explorer">ファイルエクスプローラー</string>
     <string name="text_file_extensions_title">ファイル拡張子</string>
@@ -1245,6 +1273,7 @@
     <string name="text_organization">組織名</string>
     <string name="text_organizational_unit">組織単位</string>
     <string name="text_original_developer">オリジナル開発者</string>
+    <string name="text_original_file_recovery_path">元のファイルの復元パス</string>
     <string name="text_others">その他</string>
     <string name="text_output_apk_path">APK 出力パス</string>
     <string name="text_overwrite">上書き</string>
@@ -1437,6 +1466,7 @@
     <string name="text_registering">登録中</string>
     <string name="text_release_history">リリース履歴</string>
     <string name="text_release_notes">リリースノート</string>
+    <string name="text_reload_or_convert_to_encoding">再読み込みまたは %1$s に変換</string>
     <string name="text_remote">リモート</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">リモートファイルがローカルストレージに正常に保存されました</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">リモートプロジェクトがローカルストレージに正常に保存された</string>
@@ -1656,6 +1686,7 @@
     <string name="text_unknown_description_for_plugin">不明な説明</string>
     <string name="text_unknown_title_for_plugin">不明なタイトル</string>
     <string name="text_unknown_version_for_plugin">不明なバージョン</string>
+    <string name="text_unsaved_changes">未保存の変更</string>
     <string name="text_unsigned_apk_created">未署名 APK を作成しました</string>
     <string name="text_unverified">未確認</string>
     <string name="text_updatable">更新あり</string>

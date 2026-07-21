@@ -94,6 +94,13 @@
     <string name="description_documentation_source_preference_more">Para que el tema oscuro sea compatible con las páginas de los documentos, deben cumplirse las siguientes condiciones\n1. AutoJs6 tiene activado el modo nocturno\n2. Sistema Android WebView (o navegadores como Google Chrome):\n- Android API Level 29 (Android 10) [Q] y superior: versión >= 76\n- Android API Level 28 (Android 9) [P] e inferiores: versión >= 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Muestra u oculta los marcadores de puntos de interrupción en el margen lateral del editor. Los datos de los puntos de interrupción y las acciones del menú de depuración siguen disponibles.</string>
     <string name="description_editor_code_highlight_threshold">Determina si se activa el resaltado de sintaxis según el tamano del archivo.\nEn archivos grandes, desactivar el resaltado de sintaxis puede mejorar en cierta medida la eficiencia de carga.</string>
+    <string name="description_editor_encoding_convert_persists_replacement_characters">Al guardar después de convertir se sobrescribirán los bytes no válidos originales y se conservarán permanentemente los caracteres de reemplazo que se muestran en el editor.</string>
+    <string name="description_editor_encoding_convert_unavailable">La conversión no está disponible porque el texto actual no se puede codificar con %1$s.</string>
+    <string name="description_editor_encoding_convert_unavailable_read_only">La conversión no está disponible porque el archivo es de solo lectura.</string>
+    <string name="description_editor_encoding_reload_discards_unsaved_changes">Al recargar sin guardar se descartan los cambios no guardados en el editor.</string>
+    <string name="description_editor_encoding_reload_or_convert">Cambiar la codificación de \"%2$s\" a %1$s?\n\nRecargar vuelve a leer el archivo desde el disco con la nueva codificación y reemplaza el contenido del editor. Convertir conserva el texto del editor y establece la nueva codificación para el próximo guardado; no escribe el archivo inmediatamente.</string>
+    <string name="description_editor_encoding_reload_replaces_invalid_bytes">Al recargar, las secuencias de bytes no válidas se sustituyen por caracteres de reemplazo.</string>
+    <string name="description_editor_encoding_reload_save_prompt">"%1$s" tiene cambios sin guardar. Guardarlos con la codificación actual antes de recargar?</string>
     <string name="description_editor_engine_preference">Ace es el motor de editor predeterminado. JsDroidEditor sigue disponible como alternativa y se puede seleccionar de forma explícita.</string>
     <string name="description_editor_fold_markers_enabled_preference">Muestra u oculta los marcadores de plegado de código en el margen lateral del editor. JsDroidEditor no dispone de una superficie para estos marcadores.</string>
     <string name="description_editor_gutter_width_mode_preference">El ancho dinámico sigue la cantidad de dígitos de los números de línea visibles. El ancho fijo reserva un mínimo estable y solo aumenta cuando lo exigen números de línea visibles más grandes.</string>
@@ -155,6 +162,7 @@
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Conectar</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_convert">Convertir</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_copy_path">Copiar</string>
     <string name="dialog_button_default_prefix">Prefijo def</string>
@@ -177,12 +185,15 @@
     <string name="dialog_button_preview">Vista previa</string>
     <string name="dialog_button_quit">Salir</string>
     <string name="dialog_button_release_history">Historial</string>
+    <string name="dialog_button_reload">Recargar</string>
+    <string name="dialog_button_reload_without_saving">Recargar sin guardar</string>
     <string name="dialog_button_remove">Eliminar</string>
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">Obtener</string>
     <string name="dialog_button_retry">Reintentar</string>
     <string name="dialog_button_save">Guardar</string>
     <string name="dialog_button_save_and_continue">Guardar y continuar</string>
+    <string name="dialog_button_save_and_reload">Guardar y recargar</string>
     <string name="dialog_button_save_as">Guardar como</string>
     <string name="dialog_button_system_settings">Configuración del sistema</string>
     <string name="dialog_button_system_settings_simplified">Sistema</string>
@@ -278,6 +289,7 @@
     <string name="error_corresponding_github_release_may_not_published">Es posible que la versión correspondiente de GitHub no se haya publicado todavía</string>
     <string name="error_dot_decimal_notation_num_over_255">Número punto-decimal superior a 255</string>
     <string name="error_download_interrupted">Descarga interrumpida</string>
+    <string name="error_editor_encoding_validation_incomplete">La validación de la codificación del archivo está incompleta. Abra Codificación del archivo y use Recargar o Convertir antes de guardar.</string>
     <string name="error_email_taken">El correo electrónico está ocupado</string>
     <string name="error_empty_broadcast_selection">Debe seleccionarse al menos una emisión</string>
     <string name="error_empty_github_release_assets">No hay activos de la versión de GitHub para descargar</string>
@@ -312,7 +324,9 @@
     <string name="error_failed_to_run_script">Error al ejecutar el script</string>
     <string name="error_failed_to_save">Error al guardar</string>
     <string name="error_failed_to_save_project_config">No se pudo guardar la configuración del proyecto</string>
+    <string name="error_file_contains_unaccepted_decoding_replacements">El guardado está bloqueado porque se reemplazaron bytes de origen no válidos. Abra Codificación del archivo y use Recargar o Convertir explícitamente.</string>
     <string name="error_file_in_path_does_not_exist">El archivo en la ruta \"%1$s\" no existe</string>
+    <string name="error_file_state_unknown_reload_required">Se desconoce el estado del archivo original. Recargue el archivo antes de continuar.</string>
     <string name="error_function_called_in_ui_thread">El hilo de la interfaz de usuario no se puede bloquear. Intenta ejecutar %s() en un subhilo o subguión</string>
     <string name="error_function_called_more_than_once">%s() se ha llamado más de una vez</string>
     <string name="error_get_github_latest_release">No se puede obtener la última versión de GitHub</string>
@@ -398,9 +412,11 @@
     <string name="error_shizuku_service_may_be_not_running">Puede que el servicio Shizuku no se esté ejecutando</string>
     <string name="error_shizuku_version_is_not_supported">No se admite la versión de Shizuku</string>
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">El número de versión especificado de AutoJs6 debe ser mayor que 461</string>
+    <string name="error_text_cannot_be_encoded_with_charset">El texto actual no se puede codificar con %1$s</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">El transformador para la propiedad requerida \"%1$s\" no puede devolver un valor nulo</string>
     <string name="error_thread_is_not_alive">El hilo no está vivo</string>
     <string name="error_timeout_while_querying_plugin_info">Tiempo de espera agotado al consultar la información del plugin %1$s.</string>
+    <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se puede cambiar la codificación del archivo</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se pueden mostrar los detalles del archivo</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se puede mostrar el historial de versiones</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">La ruta del archivo actual es desconocida; no se puede abrir con otras apps</string>
@@ -637,6 +653,7 @@
     <string name="text_activated_successfully">Activado correctamente</string>
     <string name="text_activity_not_found_for_apk_installing">No hay instalador de APK</string>
     <string name="text_adb_tool_needed">Se necesita la herramienta ADB</string>
+    <string name="text_add_bom">Agregar BOM</string>
     <string name="text_add_color_library">Agregar biblioteca de colores</string>
     <string name="text_add_symbol_hint">Anadir un simbolo</string>
     <string name="text_alias">alias</string>
@@ -851,6 +868,7 @@
     <string name="text_country_code">Código de país (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">El código del país debe ser de dos letras mayúsculas</string>
     <string name="text_creating_unsigned_apk">Creando APK sin firmar</string>
+    <string name="text_current">Actual</string>
     <string name="text_current_page_configuration">Configuracion de la página actual</string>
     <string name="text_current_version">Versión actual</string>
     <string name="text_daily_task">Tarea diaria</string>
@@ -960,6 +978,13 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Habilitación del servicio de accesibilidad con configuración segura agotada</string>
     <string name="text_enable_plugin">Activar complemento</string>
     <string name="text_enabled">Activado</string>
+    <string name="text_encoding_cannot_decode_file">No se puede decodificar el archivo</string>
+    <string name="text_encoding_cannot_represent_current_text">No se puede representar el texto actual</string>
+    <string name="text_encoding_compatible">Compatible</string>
+    <string name="text_encoding_detected_with_confidence">Detectada con una confianza del %1$d%%</string>
+    <string name="text_encoding_may_change_content">Puede cambiar el contenido</string>
+    <string name="text_encoding_risk_error">Error</string>
+    <string name="text_encoding_risk_warning">Advertencia</string>
     <string name="text_encrypting_script">Cifrando script</string>
     <string name="text_error">Error</string>
     <string name="text_error_copy_file" formatted="true">No se ha podido copiar el archivo: %s</string>
@@ -1012,6 +1037,9 @@
     <string name="text_file">Archivo</string>
     <string name="text_file_colon_value">Archivo: %1$s</string>
     <string name="text_file_details">Detalles del archivo</string>
+    <string name="text_file_encoding">Codificación del archivo</string>
+    <string name="text_file_encoding_converted">Codificación del archivo cambiada. Guarda el archivo para escribirlo en el disco.</string>
+    <string name="text_file_encoding_status">Codificación del archivo: %1$s</string>
     <string name="text_file_exists">El archivo ya existe</string>
     <string name="text_file_explorer">Explorador de archivos</string>
     <string name="text_file_extensions_title">Extensiones de archivo</string>
@@ -1244,6 +1272,7 @@
     <string name="text_organization">Nombre de la organización</string>
     <string name="text_organizational_unit">Unidad organizacional</string>
     <string name="text_original_developer">Desarrollador original</string>
+    <string name="text_original_file_recovery_path">Ruta de recuperación del archivo original</string>
     <string name="text_others">Otros</string>
     <string name="text_output_apk_path">Ruta de salida del APK</string>
     <string name="text_overwrite">Sobrescribir</string>
@@ -1436,6 +1465,7 @@
     <string name="text_registering">Registro de</string>
     <string name="text_release_history">Historial de lanzamientos</string>
     <string name="text_release_notes">Notas de la versión</string>
+    <string name="text_reload_or_convert_to_encoding">Recargar o convertir a %1$s</string>
     <string name="text_remote">remoto</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">El archivo remoto se ha guardado correctamente en el almacenamiento local</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">El proyecto remoto se ha guardado correctamente en el almacenamiento local</string>
@@ -1655,6 +1685,7 @@
     <string name="text_unknown_description_for_plugin">Descripción Desconocida</string>
     <string name="text_unknown_title_for_plugin">Título Desconocido</string>
     <string name="text_unknown_version_for_plugin">Versión Desconocida</string>
+    <string name="text_unsaved_changes">Cambios sin guardar</string>
     <string name="text_unsigned_apk_created">APK sin firmar creado</string>
     <string name="text_unverified">No verificado</string>
     <string name="text_updatable">Actualizable</string>

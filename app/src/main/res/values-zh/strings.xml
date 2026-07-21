@@ -90,6 +90,13 @@
     <string name="description_documentation_source_preference_more">文档页面的深色主题支持需要满足以下条件:\n1. AutoJs6 开启夜间模式\n2. WebView (或 Google Chrome 等浏览器) 版本要求:\n- API 级别 29 (安卓 10) [Q] 及以上: 版本不低于 76\n- API 级别 28 (安卓 9) [P] 及以下: 版本不低于 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">显示或隐藏编辑器边栏中的断点标记. 断点数据和调试菜单操作仍然可用.</string>
     <string name="description_editor_code_highlight_threshold">根据文件大小决定是否启用语法高亮功能.\n对于大文件, 禁用语法高亮功能可一定程度提升文件加载效率.</string>
+    <string name="description_editor_encoding_convert_persists_replacement_characters">转换后保存时会覆盖原始无效字节, 并永久保留编辑器中当前显示的替换字符.</string>
+    <string name="description_editor_encoding_convert_unavailable">当前文本无法使用 %1$s 编码, 因此无法转换.</string>
+    <string name="description_editor_encoding_convert_unavailable_read_only">文件为只读, 因此无法转换.</string>
+    <string name="description_editor_encoding_reload_discards_unsaved_changes">不保存并重新加载会丢弃编辑器中未保存的更改.</string>
+    <string name="description_editor_encoding_reload_or_convert">要将 \"%2$s\" 的编码更改为 %1$s 吗?\n\n重新加载会使用新编码从磁盘重新读取文件并替换编辑器内容. 转换会保留编辑器文本, 并为下次保存设置新编码, 不会立即写入文件.</string>
+    <string name="description_editor_encoding_reload_replaces_invalid_bytes">重新加载会用替换字符替换无效的字节序列.</string>
+    <string name="description_editor_encoding_reload_save_prompt">"%1$s" 中有未保存的更改. 是否先使用当前编码保存再重新加载?</string>
     <string name="description_editor_engine_preference">Ace 是默认编辑器引擎. JsDroidEditor 仍可作为后备编辑器使用, 也可以手动选择.</string>
     <string name="description_editor_fold_markers_enabled_preference">显示或隐藏编辑器边栏中的代码折叠标记. JsDroidEditor 没有折叠标记显示面.</string>
     <string name="description_editor_gutter_width_mode_preference">动态宽度会跟随当前可见行号位数变化. 固定宽度会预留稳定的最小宽度, 并且只在看到更高位数的行号时增大.</string>
@@ -151,6 +158,7 @@
     <string name="dialog_button_confirm">确定</string>
     <string name="dialog_button_connect">连接</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_convert">转换</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_copy_path">复制路径</string>
     <string name="dialog_button_default_prefix">默认前缀</string>
@@ -173,12 +181,15 @@
     <string name="dialog_button_preview">预览</string>
     <string name="dialog_button_quit">放弃</string>
     <string name="dialog_button_release_history">发行历史</string>
+    <string name="dialog_button_reload">重新加载</string>
+    <string name="dialog_button_reload_without_saving">不保存并重新加载</string>
     <string name="dialog_button_remove">移除</string>
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">获取</string>
     <string name="dialog_button_retry">重试</string>
     <string name="dialog_button_save">保存</string>
     <string name="dialog_button_save_and_continue">保存并继续</string>
+    <string name="dialog_button_save_and_reload">保存并重新加载</string>
     <string name="dialog_button_save_as">另存为</string>
     <string name="dialog_button_system_settings">系统设置</string>
     <string name="dialog_button_system_settings_simplified">系统</string>
@@ -274,6 +285,7 @@
     <string name="error_corresponding_github_release_may_not_published">对应的 GitHub 发行版可能还未发布</string>
     <string name="error_dot_decimal_notation_num_over_255">点分十进制数超过 255</string>
     <string name="error_download_interrupted">下载中断</string>
+    <string name="error_editor_encoding_validation_incomplete">文件编码验证尚未完成. 保存前请打开文件编码并使用重新加载或转换.</string>
     <string name="error_email_taken">邮箱已被占用</string>
     <string name="error_empty_broadcast_selection">需至少选择一个广播事件</string>
     <string name="error_empty_github_release_assets">无可供下载的 GitHub 发行版资源</string>
@@ -308,7 +320,9 @@
     <string name="error_failed_to_run_script">脚本运行失败</string>
     <string name="error_failed_to_save">保存失败</string>
     <string name="error_failed_to_save_project_config">保存项目配置失败</string>
+    <string name="error_file_contains_unaccepted_decoding_replacements">由于无效源字节已被替换, 保存已被阻止. 请打开文件编码并明确使用重新加载或转换.</string>
     <string name="error_file_in_path_does_not_exist">路径 \"%1$s\" 对应文件不存在</string>
+    <string name="error_file_state_unknown_reload_required">原始文件状态未知. 请先重新加载文件再继续.</string>
     <string name="error_function_called_in_ui_thread">UI 线程内无法执行阻塞操作. 可尝试在子线程或子脚本中执行 %s()</string>
     <string name="error_function_called_more_than_once">%s() 调用不能超过一次</string>
     <string name="error_get_github_latest_release">无法获取最新的 GitHub 发行版</string>
@@ -394,9 +408,11 @@
     <string name="error_shizuku_service_may_be_not_running">Shizuku 服务可能未运行</string>
     <string name="error_shizuku_version_is_not_supported">Shizuku 版本不支持</string>
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">指定的 AutoJs6 应用版本号需大于 461</string>
+    <string name="error_text_cannot_be_encoded_with_charset">当前文本无法使用 %1$s 编码</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">必需属性 \"%1$s\" 的转换器不能返回空值</string>
     <string name="error_thread_is_not_alive">线程处于非活动状态</string>
     <string name="error_timeout_while_querying_plugin_info">查询 %1$s 插件信息超时.</string>
+    <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">当前文件路径未知, 无法更改文件编码</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">当前文件路径未知, 无法显示文件详情</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">当前文件路径未知, 无法显示版本历史</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">当前文件路径未知, 无法使用其他应用打开</string>
@@ -633,6 +649,7 @@
     <string name="text_activated_successfully">激活成功</string>
     <string name="text_activity_not_found_for_apk_installing">找不到 APK 安装器</string>
     <string name="text_adb_tool_needed">需要 ADB 命令行工具</string>
+    <string name="text_add_bom">添加 BOM</string>
     <string name="text_add_color_library">添加颜色库</string>
     <string name="text_add_symbol_hint">添加一个符号</string>
     <string name="text_alias">别名</string>
@@ -847,6 +864,7 @@
     <string name="text_country_code">国家代码 (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">国家代码必须为两个大写字母</string>
     <string name="text_creating_unsigned_apk">正在创建未签名 APK</string>
+    <string name="text_current">当前</string>
     <string name="text_current_page_configuration">当前页面配置</string>
     <string name="text_current_version">当前版本</string>
     <string name="text_daily_task">每日任务</string>
@@ -956,6 +974,13 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">使用修改安全设置权限启用无障碍服务超时</string>
     <string name="text_enable_plugin">启用插件</string>
     <string name="text_enabled">已启用</string>
+    <string name="text_encoding_cannot_decode_file">无法解码文件</string>
+    <string name="text_encoding_cannot_represent_current_text">无法表示当前文本</string>
+    <string name="text_encoding_compatible">兼容</string>
+    <string name="text_encoding_detected_with_confidence">检测置信度为 %1$d%%</string>
+    <string name="text_encoding_may_change_content">可能更改内容</string>
+    <string name="text_encoding_risk_error">错误</string>
+    <string name="text_encoding_risk_warning">警告</string>
     <string name="text_encrypting_script">正在加密脚本</string>
     <string name="text_error">错误</string>
     <string name="text_error_copy_file" formatted="true">文件复制失败: %s</string>
@@ -1008,6 +1033,9 @@
     <string name="text_file">文件</string>
     <string name="text_file_colon_value">文件: %1$s</string>
     <string name="text_file_details">文件详情</string>
+    <string name="text_file_encoding">文件编码</string>
+    <string name="text_file_encoding_converted">文件编码已更改. 保存文件后才会写入本地.</string>
+    <string name="text_file_encoding_status">文件编码: %1$s</string>
     <string name="text_file_exists">文件已存在</string>
     <string name="text_file_explorer">文件管理器</string>
     <string name="text_file_extensions_title">文件扩展名</string>
@@ -1240,6 +1268,7 @@
     <string name="text_organization">组织名称</string>
     <string name="text_organizational_unit">组织单位</string>
     <string name="text_original_developer">原始开发者</string>
+    <string name="text_original_file_recovery_path">原始文件恢复路径</string>
     <string name="text_others">其他</string>
     <string name="text_output_apk_path">打包应用保存路径</string>
     <string name="text_overwrite">覆盖</string>
@@ -1432,6 +1461,7 @@
     <string name="text_registering">注册中</string>
     <string name="text_release_history">发行历史</string>
     <string name="text_release_notes">发行说明</string>
+    <string name="text_reload_or_convert_to_encoding">重新加载或转换为 %1$s</string>
     <string name="text_remote">远程</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">远程文件已保存至本地</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">远程项目已保存至本地</string>
@@ -1651,6 +1681,7 @@
     <string name="text_unknown_description_for_plugin">未知描述</string>
     <string name="text_unknown_title_for_plugin">未知标题</string>
     <string name="text_unknown_version_for_plugin">未知版本</string>
+    <string name="text_unsaved_changes">未保存的更改</string>
     <string name="text_unsigned_apk_created">未签名 APK 已创建</string>
     <string name="text_unverified">未验证</string>
     <string name="text_updatable">可更新</string>

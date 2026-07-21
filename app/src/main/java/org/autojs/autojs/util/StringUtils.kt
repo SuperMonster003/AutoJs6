@@ -5,11 +5,11 @@ import android.content.res.Configuration
 import android.text.TextUtils
 import androidx.annotation.StringRes
 import androidx.core.net.toUri
-import com.ibm.icu.text.CharsetDetector
-import com.ibm.icu.text.CharsetMatch
 import org.autojs.autojs.annotation.LocaleNonRelated
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingDetector
+import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingDetection
 import org.autojs.autojs.util.NumberUtils.roundToString
 import org.opencv.core.Point
 import java.io.File
@@ -225,49 +225,34 @@ object StringUtils {
 
     @JvmStatic
     fun detectCharset(bytes: ByteArray): CharsetMatchWrapper {
-        val matches = kotlin.runCatching {
-            CharsetDetector().apply { setText(bytes).setDeclaredEncoding("UTF-8") }.detectAll()
-        }.getOrNull() ?: return CharsetMatchWrapper(null)
+        val detected = detectEncoding(bytes)
+        return CharsetMatchWrapper(detected.charset.name(), detected.confidence)
+    }
 
-        matches.firstOrNull {
-            it.name.startsWith("UTF-", true) && it.confidence >= 30
-        }?.let {
-            return CharsetMatchWrapper(it)
-        }
-
-        val topScore = matches.maxOfOrNull { it.confidence } ?: -1
-        val candidates = matches.filter { it.confidence == topScore }
+    @JvmStatic
+    @JvmOverloads
+    fun detectEncoding(bytes: ByteArray, endOfInput: Boolean = true): EditorEncodingDetection {
         val localeTag = Language.getPrefLanguage().getLocalCompatibleLanguageTag()
         val prefList = localePref[localeTag] ?: emptyList()
-        val best = candidates.minByOrNull {
-            prefList.indexOf(it.name).takeIf { i -> i >= 0 } ?: Int.MAX_VALUE
-        } ?: candidates.first()
-
-        return CharsetMatchWrapper(best)
+        return EditorEncodingDetector.detect(
+            bytes = bytes,
+            preferredCharsetNames = prefList,
+            localeTag = localeTag,
+            endOfInput = endOfInput,
+        )
     }
 
     @JvmStatic
     fun hasBom(bytes: ByteArray, charset: Charset): Boolean {
-        val bom = bomBytes(charset)
-        return bom.isNotEmpty() && bytes.take(bom.size).toByteArray().contentEquals(bom)
+        return EditorEncodingDetector.hasBom(bytes, charset)
     }
 
     @JvmStatic
-    fun bomBytes(charset: Charset): ByteArray = when (charset) {
-        StandardCharsets.UTF_8 -> byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
-        StandardCharsets.UTF_16LE -> byteArrayOf(0xFF.toByte(), 0xFE.toByte())
-        StandardCharsets.UTF_16BE -> byteArrayOf(0xFE.toByte(), 0xFF.toByte())
-        else -> ByteArray(0)
-    }
+    fun bomBytes(charset: Charset): ByteArray = EditorEncodingDetector.bomBytes(charset)
 
     @JvmStatic
-    fun dropBom(bytes: ByteArray, charset: Charset): ByteArray {
-        val bom = bomBytes(charset)
-        if (bom.isEmpty() || bytes.size < bom.size || !bytes.take(bom.size).toByteArray().contentEquals(bom)) {
-            return bytes
-        }
-        return bytes.copyOfRange(bom.size, bytes.size)
-    }
+    fun dropBom(bytes: ByteArray, charset: Charset): ByteArray =
+        EditorEncodingDetector.payloadWithoutMatchingBom(bytes, charset)
 
     val String.estimateVisualWidth: Int
         get() {
@@ -391,10 +376,10 @@ object StringUtils {
     @JvmStatic
     fun String.truncateForSafeBinder() = truncateToLength(64 * 1024)
 
-    class CharsetMatchWrapper(private val charsetMatch: CharsetMatch?) {
-
-        val name: String? by lazy { charsetMatch?.name }
-        val confidence: Int? by lazy { charsetMatch?.confidence }
+    class CharsetMatchWrapper(
+        val name: String?,
+        val confidence: Int?,
+    ) {
 
         fun charsetOrNull(): Charset? = runCatching {
             name?.let { Charset.forName(it) }

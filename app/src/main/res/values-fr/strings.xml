@@ -94,6 +94,13 @@
     <string name="description_documentation_source_preference_more">Les conditions suivantes doivent être remplies pour la prise en charge du thème sombre sur les pages de la documentation :\n1. Le mode nuit d\'AutoJs6 est activé\n2. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et supérieur : version >= 76\n- Android API Niveau 28 (Android 9) [P] et inférieur : version >= 105</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Affichez ou masquez les repères de points d\'arrêt dans la gouttière de l\'éditeur. Les données des points d\'arrêt et les actions du menu de débogage restent disponibles.</string>
     <string name="description_editor_code_highlight_threshold">Determine si la coloration syntaxique est activee selon la taille du fichier.\nPour les gros fichiers, la desactivation de la coloration syntaxique peut ameliorer dans une certaine mesure l\'efficacite du chargement.</string>
+    <string name="description_editor_encoding_convert_persists_replacement_characters">L\'enregistrement après la conversion écrasera les octets non valides d\'origine et conservera définitivement les caractères de remplacement actuellement affichés dans l\'éditeur.</string>
+    <string name="description_editor_encoding_convert_unavailable">La conversion n\'est pas disponible car le texte actuel ne peut pas être encodé en %1$s.</string>
+    <string name="description_editor_encoding_convert_unavailable_read_only">La conversion n\'est pas disponible car le fichier est en lecture seule.</string>
+    <string name="description_editor_encoding_reload_discards_unsaved_changes">Le rechargement sans enregistrement supprime les modifications non enregistrées dans l\'éditeur.</string>
+    <string name="description_editor_encoding_reload_or_convert">Modifier l\'encodage de \"%2$s\" en %1$s?\n\nRecharger relit le fichier depuis le disque avec le nouvel encodage et remplace le contenu de l\'éditeur. Convertir conserve le texte de l\'éditeur et définit le nouvel encodage pour le prochain enregistrement; le fichier n\'est pas écrit immédiatement.</string>
+    <string name="description_editor_encoding_reload_replaces_invalid_bytes">Le rechargement remplace les séquences d\'octets non valides par des caractères de remplacement.</string>
+    <string name="description_editor_encoding_reload_save_prompt">"%1$s" contient des modifications non enregistrées. Les enregistrer avec l\'encodage actuel avant de recharger?</string>
     <string name="description_editor_engine_preference">Ace est le moteur d\'éditeur par défaut. JsDroidEditor reste disponible comme solution de secours et peut être sélectionné explicitement.</string>
     <string name="description_editor_fold_markers_enabled_preference">Affichez ou masquez les repères de pliage du code dans la gouttière de l\'éditeur. JsDroidEditor ne dispose pas de surface pour ces repères.</string>
     <string name="description_editor_gutter_width_mode_preference">La largeur dynamique suit le nombre de chiffres des numéros de ligne visibles. La largeur fixe réserve un minimum stable et augmente uniquement lorsque des numéros de ligne visibles plus grands l\'exigent.</string>
@@ -155,6 +162,7 @@
     <string name="dialog_button_confirm">OK</string>
     <string name="dialog_button_connect">Se connecter</string>
     <string name="dialog_button_continue">@string/text_continue</string>
+    <string name="dialog_button_convert">Convertir</string>
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_copy_path">Copier</string>
     <string name="dialog_button_default_prefix">Préfixe def</string>
@@ -177,12 +185,15 @@
     <string name="dialog_button_preview">Apercu</string>
     <string name="dialog_button_quit">Quitter</string>
     <string name="dialog_button_release_history">Historique</string>
+    <string name="dialog_button_reload">Recharger</string>
+    <string name="dialog_button_reload_without_saving">Recharger sans enregistrer</string>
     <string name="dialog_button_remove">Supprimer</string>
     <string name="dialog_button_restore">@string/text_restore</string>
     <string name="dialog_button_retrieve">Récupérer</string>
     <string name="dialog_button_retry">Retourner</string>
     <string name="dialog_button_save">Enregistrer</string>
     <string name="dialog_button_save_and_continue">Enregistrer et continuer</string>
+    <string name="dialog_button_save_and_reload">Enregistrer et recharger</string>
     <string name="dialog_button_save_as">Enregistrer sous</string>
     <string name="dialog_button_system_settings">Paramètres du système</string>
     <string name="dialog_button_system_settings_simplified">Système</string>
@@ -278,6 +289,7 @@
     <string name="error_corresponding_github_release_may_not_published">La version GitHub correspondante n\'a peut-être pas encore été publiée.</string>
     <string name="error_dot_decimal_notation_num_over_255">Nombre de points décimaux supérieur à 255</string>
     <string name="error_download_interrupted">Téléchargement interrompu</string>
+    <string name="error_editor_encoding_validation_incomplete">La vérification de l\'encodage du fichier est incomplète. Ouvrez l\'encodage du fichier et utilisez Recharger ou Convertir avant d\'enregistrer.</string>
     <string name="error_email_taken">L\'e-mail est pris</string>
     <string name="error_empty_broadcast_selection">Il faut sélectionner au moins une diffusion.</string>
     <string name="error_empty_github_release_assets">Aucun actif de la version GitHub à télécharger.</string>
@@ -312,7 +324,9 @@
     <string name="error_failed_to_run_script">Échec de l\'exécution du script</string>
     <string name="error_failed_to_save">Echec de l\'enregistrement</string>
     <string name="error_failed_to_save_project_config">Échec de l\'enregistrement de la configuration du projet</string>
+    <string name="error_file_contains_unaccepted_decoding_replacements">L\'enregistrement est bloqué car des octets source non valides ont été remplacés. Ouvrez l\'encodage du fichier et utilisez explicitement Recharger ou Convertir.</string>
     <string name="error_file_in_path_does_not_exist">Le fichier dans le chemin \"%1$s\" n\'existe pas</string>
+    <string name="error_file_state_unknown_reload_required">L\'état du fichier d\'origine est inconnu. Rechargez le fichier avant de continuer.</string>
     <string name="error_function_called_in_ui_thread">Le thread d\'interface utilisateur ne peut pas être bloqué. Essayez d\'exécuter %s() dans un thread secondaire ou un sous-script.</string>
     <string name="error_function_called_more_than_once">%s() appelé plus d\'une fois</string>
     <string name="error_get_github_latest_release">Impossible d\'obtenir la dernière version GitHub</string>
@@ -398,9 +412,11 @@
     <string name="error_shizuku_service_may_be_not_running">Le service Shizuku n\'est peut-être pas en cours d\'exécution</string>
     <string name="error_shizuku_version_is_not_supported">La version de Shizuku n\'est pas prise en charge</string>
     <string name="error_specified_autojs6_version_number_must_be_greater_than_461">Le numéro de version AutoJs6 spécifié doit être supérieur à 461</string>
+    <string name="error_text_cannot_be_encoded_with_charset">Le texte actuel ne peut pas être encodé en %1$s</string>
     <string name="error_the_transformer_for_required_property_cannot_return_nullish">Le transformateur pour la propriété requise \"%1$s\" ne peut pas retourner une valeur nulle</string>
     <string name="error_thread_is_not_alive">Thread n\'est pas vivant</string>
     <string name="error_timeout_while_querying_plugin_info">Délai d\'attente dépassé lors de la requête des informations du plugin %1$s.</string>
+    <string name="error_unable_to_change_file_encoding_as_current_file_path_is_unknown">Le chemin du fichier actuel est inconnu; impossible de modifier l\'encodage du fichier</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Le chemin du fichier actuel est inconnu; impossible d\'afficher les details du fichier</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Le chemin du fichier actuel est inconnu; impossible d\'afficher l\'historique des versions</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Le chemin du fichier actuel est inconnu; impossible d\'ouvrir avec d\'autres applis</string>
@@ -637,6 +653,7 @@
     <string name="text_activated_successfully">Activation reussie</string>
     <string name="text_activity_not_found_for_apk_installing">Pas d\'installateur d\'APK</string>
     <string name="text_adb_tool_needed">L\'outil ADB est nécessaire</string>
+    <string name="text_add_bom">Ajouter un BOM</string>
     <string name="text_add_color_library">Ajouter une bibliothèque de couleurs</string>
     <string name="text_add_symbol_hint">Ajouter un symbole</string>
     <string name="text_alias">alias</string>
@@ -851,6 +868,7 @@
     <string name="text_country_code">Code du pays (XX)</string>
     <string name="text_country_code_must_be_two_capital_letters">Le code du pays doit être composé de deux lettres majuscules</string>
     <string name="text_creating_unsigned_apk">Creation de l\'APK non signe</string>
+    <string name="text_current">Actuel</string>
     <string name="text_current_page_configuration">Config de la page</string>
     <string name="text_current_version">Version actuelle</string>
     <string name="text_daily_task">Tâche quotidienne</string>
@@ -960,6 +978,13 @@
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Délai d\'activation du service d\'accessibilité avec les paramètres sécurisés dépassé</string>
     <string name="text_enable_plugin">Activer le plugin</string>
     <string name="text_enabled">Activé</string>
+    <string name="text_encoding_cannot_decode_file">Impossible de décoder le fichier</string>
+    <string name="text_encoding_cannot_represent_current_text">Impossible de représenter le texte actuel</string>
+    <string name="text_encoding_compatible">Compatible</string>
+    <string name="text_encoding_detected_with_confidence">Détecté avec une confiance de %1$d%%</string>
+    <string name="text_encoding_may_change_content">Peut modifier le contenu</string>
+    <string name="text_encoding_risk_error">Erreur</string>
+    <string name="text_encoding_risk_warning">Avertissement</string>
     <string name="text_encrypting_script">Chiffrement du script</string>
     <string name="text_error">Erreur</string>
     <string name="text_error_copy_file" formatted="true">Failed to copy file : %s</string>
@@ -1012,6 +1037,9 @@
     <string name="text_file">Fichier</string>
     <string name="text_file_colon_value">Fichier: %1$s</string>
     <string name="text_file_details">Détails du fichier</string>
+    <string name="text_file_encoding">Encodage du fichier</string>
+    <string name="text_file_encoding_converted">Encodage du fichier modifié. Enregistrez le fichier pour l\'écrire sur le disque.</string>
+    <string name="text_file_encoding_status">Encodage du fichier: %1$s</string>
     <string name="text_file_exists">Fichier déjà existant</string>
     <string name="text_file_explorer">Explorateur de fichiers</string>
     <string name="text_file_extensions_title">Extensions de fichier</string>
@@ -1244,6 +1272,7 @@
     <string name="text_organization">Nom de l\'organisation</string>
     <string name="text_organizational_unit">Unité organisationnelle</string>
     <string name="text_original_developer">Développeur d\'origine</string>
+    <string name="text_original_file_recovery_path">Chemin de récupération du fichier d\'origine</string>
     <string name="text_others">Autres</string>
     <string name="text_output_apk_path">Chemin de sortie de l\'APK</string>
     <string name="text_overwrite">Ecraser</string>
@@ -1436,6 +1465,7 @@
     <string name="text_registering">Register</string>
     <string name="text_release_history">Historique des versions</string>
     <string name="text_release_notes">Notes de version</string>
+    <string name="text_reload_or_convert_to_encoding">Recharger ou convertir en %1$s</string>
     <string name="text_remote">à distance</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">Fichier distant enregistré avec succès dans la mémoire locale</string>
     <string name="text_remote_project_saved_to_local_storage_successfully">Projet distant sauvegardé avec succès dans le stockage local</string>
@@ -1655,6 +1685,7 @@
     <string name="text_unknown_description_for_plugin">Description Inconnue</string>
     <string name="text_unknown_title_for_plugin">Titre Inconnu</string>
     <string name="text_unknown_version_for_plugin">Version Inconnue</string>
+    <string name="text_unsaved_changes">Modifications non enregistrées</string>
     <string name="text_unsigned_apk_created">APK non signe cree</string>
     <string name="text_unverified">Non vérifié</string>
     <string name="text_updatable">Mise a jour dispo</string>

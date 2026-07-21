@@ -32,6 +32,22 @@ interface ScriptEditorEngine {
     fun setInitialText(text: String?)
     fun getTextForSaving(callback: (String) -> Unit)
     fun markTextAsSaved()
+    fun markTextAsChanged()
+
+    /** Replaces the complete document as one undoable history entry. */
+    fun replaceAllTextUndoably(
+        text: String,
+        token: String,
+        onComplete: ((Boolean) -> Unit)? = null,
+    )
+
+    /** Adds an undoable history entry without changing the document text. */
+    fun addUndoableHistoryMarker(
+        token: String,
+        onComplete: ((Boolean) -> Unit)? = null,
+    )
+
+    fun setHistoryOperationListener(listener: EditorHistoryOperationListener?)
 
     fun insert(text: String?)
     fun insert(line: Int, text: String?)

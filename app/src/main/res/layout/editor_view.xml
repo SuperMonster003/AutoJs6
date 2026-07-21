@@ -51,6 +51,33 @@
                 android:layout_weight="1" />
 
             <FrameLayout
+                android:id="@+id/editor_status_bar"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="#77f2f3f7"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:id="@+id/editor_encoding_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="@string/text_file_encoding"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:minWidth="72dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textColor="@color/day_night_full"
+                    android:textSize="12sp"
+                    tools:text="UTF-8" />
+
+            </FrameLayout>
+
+            <FrameLayout
                 android:id="@+id/input_method_enhance_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
