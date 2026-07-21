@@ -193,6 +193,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Code editor supports the Ace editor engine, switchable with the native editor in Settings
 * `Feature` Ace editor now enables its bundled local TypeScript smart completion by default, with AutoJs6 API completion, signature help, hover information, and diagnostics; it can be disabled in settings
 * `Feature` Ace editor supports a shortcut panel/action history/action favorites/mobile text selection/pinch zoom and more
+* `Feature` Code editor supports reloading or converting files with a selected encoding, optional BOM, encoding risk indicators, and undo/redo
 * `Feature` Code editor supports a bottom log panel (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Feature` Code editor bottom log panel supports jumping from stack frames to source code (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Feature` Code editor bottom log panel provides a "Run/Stop" button for quickly starting and stopping scripts
@@ -229,6 +230,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` The original path might not be preserved when running scripts through external URIs or in the background, causing relative paths to resolve incorrectly _[`issue #545`](http://issues.autojs6.com/545)_
 * `Fix` Tasker could not invoke and run scripts correctly _[`issue #501`](http://issues.autojs6.com/501)_
 * `Fix` Multiple Ace editor interaction issues involving IME input/text selection/code folding/pinch zoom/stack navigation and related scenarios
+* `Fix` Ace editor could become unresponsive and fall back to the native editor after an incompatible-encoding reload of a large file produced an extremely long text line
 * `Fix` Plugin Center icon cache and swipe refresh state could become inconsistent in some scenarios
 * `Fix` Installed plugin icons on the Home Plugins tab did not switch dynamically when night mode changed
 * `Fix` Plugin Center could install an APK from the wrong distribution variant when a plugin release contained multiple variants
@@ -254,6 +256,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly
 * `Improvement` Improved code editor interactions for themes/fonts/toolbars/read-only mode/folding/selection menus and more
+* `Improvement` Improved code editor file-encoding detection and save safety; encoding conversions are written to disk only when the user saves the file
 * `Improvement` Bottom log panel supports jumping to source code by clicking stack frames on the standalone log page
 * `Improvement` Switching the project documentation source takes effect immediately
 * `Improvement` Improved the style and functionality of the Plugin Center "Sort" and "Filter" dialogs

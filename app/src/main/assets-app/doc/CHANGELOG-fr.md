@@ -33,6 +33,7 @@
 * `Fonctionnalité` L'éditeur de code prend en charge le moteur Ace, interchangeable avec l'éditeur natif dans les paramètres
 * `Fonctionnalité` L'éditeur Ace active désormais par défaut sa complétion intelligente TypeScript locale intégrée, avec complétion de l'API AutoJs6, aide aux signatures, informations au survol et diagnostics ; elle peut être désactivée dans les paramètres
 * `Fonctionnalité` L'éditeur Ace prend en charge un panneau de raccourcis/l'historique des actions/les actions favorites/la sélection de texte sur mobile/le zoom par pincement et plus encore
+* `Fonctionnalité` L'éditeur de code prend en charge le rechargement ou la conversion des fichiers avec un encodage sélectionné, un BOM facultatif, des indicateurs de risque d'encodage et l'annulation/rétablissement
 * `Fonctionnalité` L'éditeur de code prend en charge un panneau de journal inférieur (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Fonctionnalité` Le panneau de journal inférieur de l'éditeur de code permet d'accéder au code source depuis les cadres de pile (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Fonctionnalité` Le panneau de journal inférieur de l'éditeur de code propose un bouton "Exécuter/Arrêter" pour démarrer et arrêter rapidement les scripts
@@ -69,6 +70,7 @@
 * `Correction` Le chemin d'origine pouvait ne pas être conservé lors de l'exécution de scripts via des URI externes ou en arrière-plan, entraînant une résolution incorrecte des chemins relatifs _[`issue #545`](http://issues.autojs6.com/545)_
 * `Correction` Tasker ne pouvait pas invoquer et exécuter correctement les scripts _[`issue #501`](http://issues.autojs6.com/501)_
 * `Correction` Plusieurs problèmes d'interaction de l'éditeur Ace concernant l'IME/la sélection de texte/le pliage du code/le zoom par pincement/la navigation dans la pile et d'autres scénarios
+* `Correction` L'éditeur Ace pouvait rester longtemps sans répondre et revenir à l'éditeur natif lorsqu'un fichier volumineux rechargé avec un encodage incompatible produisait une ligne de texte extrêmement longue
 * `Correction` Le cache des icônes et l'état d'actualisation par glissement du Centre des plugins pouvaient devenir incohérents dans certains cas
 * `Correction` Les icônes des plugins installés dans l'onglet Plugins de la page d'accueil ne changeaient pas dynamiquement lors du basculement du mode nuit
 * `Correction` Le Centre des plugins pouvait installer l'APK d'une mauvaise variante lorsqu'une version de plugin en contenait plusieurs
@@ -94,6 +96,7 @@
 * `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Amélioration` Le bouton "Exécuter" de l'éditeur de code devient "Arrêter" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts
 * `Amélioration` Amélioration des interactions de l'éditeur de code pour les thèmes/polices/barres d'outils/mode lecture seule/pliage/menus de sélection et plus encore
+* `Amélioration` Amélioration de la détection de l'encodage et de la sécurité d'enregistrement dans l'éditeur de code; les conversions d'encodage ne sont écrites sur le disque que lorsque l'utilisateur enregistre le fichier
 * `Amélioration` Le panneau de journal inférieur permet d'accéder au code source en cliquant sur les cadres de pile de la page de journal indépendante
 * `Amélioration` Les changements de source de la documentation du projet prennent effet immédiatement
 * `Amélioration` Amélioration du style et des fonctions des boîtes de dialogue "Trier" et "Filtrer" du Centre des plugins

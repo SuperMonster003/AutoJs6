@@ -193,6 +193,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` El editor de código admite el motor Ace, intercambiable con el editor nativo desde Configuración
 * `Nuevo` El editor Ace activa por defecto como función estable el completado inteligente local de TypeScript integrado, con completado de la API AutoJs6, ayuda de firmas, información al pasar el cursor y diagnósticos; se puede desactivar en los ajustes
 * `Nuevo` El editor Ace admite un panel de accesos directos/historial de acciones/acciones favoritas/selección de texto en dispositivos móviles/zoom con pellizco y más
+* `Nuevo` El editor de código permite recargar o convertir archivos con una codificación seleccionada, BOM opcional, indicadores de riesgo de codificación y deshacer/rehacer
 * `Nuevo` El editor de código admite un panel de registro inferior (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Nuevo` El panel de registro inferior del editor de código permite saltar desde marcos de pila al código fuente (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
 * `Nuevo` El panel de registro inferior del editor de código ofrece un botón "Ejecutar/Detener" para iniciar y detener scripts rápidamente
@@ -229,6 +230,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` La ruta original podía no conservarse al ejecutar scripts mediante URI externos o en segundo plano, lo que provocaba una resolución incorrecta de rutas relativas _[`issue #545`](http://issues.autojs6.com/545)_
 * `Corrección` Tasker no podía invocar y ejecutar scripts correctamente _[`issue #501`](http://issues.autojs6.com/501)_
 * `Corrección` Diversos problemas de interacción del editor Ace relacionados con IME/selección de texto/plegado de código/zoom con pellizco/navegación de pila y otros escenarios
+* `Corrección` El editor Ace podía dejar de responder durante mucho tiempo y volver al editor nativo cuando al recargar un archivo grande con una codificación incompatible se generaba una línea de texto extremadamente larga
 * `Corrección` La caché de iconos y el estado de actualización por deslizamiento del Centro de plugins podían ser incoherentes en algunos casos
 * `Corrección` Los iconos de los plugins instalados en la pestaña Plugins de la página de inicio no cambiaban dinámicamente al alternar el modo nocturno
 * `Corrección` El Centro de plugins podía instalar el APK de una variante incorrecta cuando una versión del plugin contenía varias variantes
@@ -254,6 +256,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
 * `Mejora` Mejoradas las interacciones del editor de código para temas/fuentes/barras de herramientas/modo de solo lectura/plegado/menús de selección y más
+* `Mejora` Mejoradas la detección de codificación y la seguridad de guardado del editor de código; las conversiones de codificación solo se escriben en disco cuando el usuario guarda el archivo
 * `Mejora` El panel de registro inferior permite saltar al código fuente pulsando marcos de pila en la página de registro independiente
 * `Mejora` El cambio de la fuente de documentación del proyecto surte efecto inmediatamente
 * `Mejora` Mejorados el estilo y las funciones de los diálogos "Ordenar" y "Filtrar" del Centro de plugins
