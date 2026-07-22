@@ -691,13 +691,19 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun resize(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 2..3) {
             val (o, size, interpolation) = it
+            val resizeArguments = OpenCvImageArgumentPolicy.parseResize(size, interpolation)
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.resize must be a ImageWrapper" }
             try {
                 ApiImages.initOpenCvIfNeeded()
                 val mat = AutoJsMat()
-                resizeInternal(image, mat, size, 0.0, 0.0, interpolation)
-                matToImage(scriptRuntime, arrayOf(mat))
+                var ownershipTransferred = false
+                try {
+                    resizeInternal(image, mat, resizeArguments.size, 0.0, 0.0, resizeArguments.interpolation)
+                    matToImage(scriptRuntime, arrayOf(mat)).also { ownershipTransferred = true }
+                } finally {
+                    if (!ownershipTransferred) mat.release()
+                }
             } finally {
                 image.shoot()
             }
@@ -707,13 +713,21 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun scale(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 3..4) {
             val (o, fx, fy, interpolation) = it
+            val scaleX = coerceNumber(fx)
+            val scaleY = coerceNumber(fy)
+            val interpolationValue = OpenCvImageArgumentPolicy.parseInterpolation(interpolation)
             val image = if (o.isJsString()) read(scriptRuntime, arrayOf<Any>(coerceString(o), true))?.oneShot() else o
             require(image is ImageWrapper) { "Argument \"image\" ${image.jsBrief()} for images.scale must be a ImageWrapper" }
             try {
                 ApiImages.initOpenCvIfNeeded()
                 val mat = AutoJsMat()
-                resizeInternal(image, mat, 0, coerceNumber(fx), coerceNumber(fy), interpolation)
-                matToImage(scriptRuntime, arrayOf(mat))
+                var ownershipTransferred = false
+                try {
+                    resizeInternal(image, mat, OpencvSize(0.0, 0.0), scaleX, scaleY, interpolationValue)
+                    matToImage(scriptRuntime, arrayOf(mat)).also { ownershipTransferred = true }
+                } finally {
+                    if (!ownershipTransferred) mat.release()
+                }
             } finally {
                 image.shoot()
             }
@@ -1702,8 +1716,8 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             return opt.inquire("weakThreshold", ::coerceNumber, def)
         }
 
-        private fun resizeInternal(image: ImageWrapper, mat: AutoJsMat, size: Any?, fx: Double, fy: Double, interpolation: Any?) {
-            Imgproc.resize(image.mat, mat, parseSize(size), fx, fy, parseInterpolation(interpolation))
+        private fun resizeInternal(image: ImageWrapper, mat: AutoJsMat, size: OpencvSize, fx: Double, fy: Double, interpolation: Int) {
+            Imgproc.resize(image.mat, mat, size, fx, fy, interpolation)
         }
 
         @SuppressLint("RtlHardcoded")
@@ -1743,20 +1757,6 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             }
             o.isJsNumber() -> coerceIntNumber(o)
             else -> throw WrappedIllegalArgumentException("Unknown threshold type: ${o.jsBrief()}")
-        }
-
-        private fun parseInterpolation(o: Any?): Int = when {
-            o.isJsNullish() -> Imgproc.INTER_LINEAR
-            o.isJsString() -> {
-                val s = coerceString(o)
-                val name = when {
-                    s.startsWith("INTER_", true) -> s
-                    else -> "INTER_$s"
-                }.uppercase().replace("-", "_")
-                Imgproc::class.java.getField(name).getInt(null)
-            }
-            o.isJsNumber() -> coerceIntNumber(o)
-            else -> throw WrappedIllegalArgumentException("Unknown image interpolation: ${o.jsBrief()}")
         }
 
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
