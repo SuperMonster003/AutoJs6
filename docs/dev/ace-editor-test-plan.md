@@ -1,10 +1,12 @@
 # ACE Editor Test Plan
 
-This plan covers manual device validation for the ACE editor experiment. ACE is the default editor when bundled assets are present. Native remains selectable and every fatal ACE failure must fall back to Native without losing the best available editor state.
+This plan covers manual device validation for the external ACE editor plugin. ACE is the default logical editor choice when a compatible trusted plugin is installed. Native remains selectable and every plugin discovery, load, or fatal runtime failure must fall back to Native without losing the best available editor state.
 
 ## Prerequisites
 
 - Build variant: debug app build.
+- Install a compatible debug build of `AutoJs6-Plugin-Ace-Editor`, enable it in
+  Plugin Center, and restart the host before ACE cases.
 - Test devices or emulators: at least API 26, API 29, API 33, and API 35 when available.
 - Settings: keep `Editor engine` on `ACE editor (experimental)` for ACE cases, and switch to `Native editor` for native comparison cases.
 - Test files:
@@ -18,41 +20,40 @@ This plan covers manual device validation for the ACE editor experiment. ACE is 
   - `Blocked ACE`
   - `lspError`
 - Local tool checks:
-  - `node tools/ace-ci/check-ace-editor-gate.mjs`
-  - `node tools/ace-completion/generate-autojs6-indices-from-dts.mjs`
-  - `node tools/ace-completion/verify-autojs6-indices.mjs`
-  - `node tools/ace-completion/test-completer.mjs`
-  - `node tools/ace-lsp/test-lsp-client.mjs`
-  - `node tools/ace-tooltip/test-tooltip.mjs`
-  - `node tools/ace-hardening/check-editor-surface.mjs`
+  - Host: `node tools/ace-ci/check-ace-release-gate.mjs`
+  - Host: run `AceEditorPluginPolicyTest`, `AceEditorPluginMappingsTest`, and
+    `AceLspServerManagerTest` through `:app:testAppDebugUnitTest`.
+  - Host: compile `AceEditorPluginHostDeviceTest` through
+    `:app:compileAppDebugAndroidTestKotlin`.
+  - Plugin: `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug`.
 
 ## Debug Hooks
 
-The following hooks are available in debug builds through `AceEditorTestHooks`. Set them from a debugger or a debug-only local test entry before opening the editor, then call `AceEditorTestHooks.reset()` after each case.
+The host and plugin own different debug hooks. The host hook can be changed
+directly and reset to `false`. Runtime failure hooks live inside the plugin
+ClassLoader and must be set and reset from a plugin-local debugger or test
+entry; they are not part of the public Editor API.
 
-| Hook | Purpose | Expected result |
-| --- | --- | --- |
-| `forceAssetMissing` | Simulate missing ACE assets before engine creation. | Native editor opens instead of ACE. |
-| `forceReadyTimeout` | Suppress the JS ready event. | Fallback to Native after the ready timeout. |
-| `forceJsInitThrow` | Throw during ACE JS initialization. | Fallback to Native with a JS init failure. |
-| `forceRendererGoneFallback` | Simulate renderer-gone fallback before page load. | Fallback to Native without app crash. |
-| `forceLargeFileNativeRoute` | Force ACE large-file routing to Native. | Native editor is used even for a small test file. |
+| Owner | Hook | Purpose | Expected result |
+| --- | --- | --- | --- |
+| Plugin | `forceAssetMissing` | Simulate missing ACE assets before session creation. | Host keeps or switches to Native. |
+| Plugin | `forceReadyTimeout` | Suppress the JS ready event. | Host falls back to Native after the ready timeout. |
+| Plugin | `forceJsInitThrow` | Throw during ACE JS initialization. | Host falls back to Native with a JS init failure. |
+| Plugin | `forceRendererGoneFallback` | Simulate renderer-gone fallback before page load. | Host falls back to Native without app crash. |
+| Host | `forceLargeFileNativeRoute` | Force ACE large-file routing to Native. | Native editor is used even for a small test file. |
 
 ## Diagnostics
 
-Use `More -> Copy ACE diagnostics` from the editor menu when reporting ACE issues. The same export is available from the isolated ACE debug page through the `Copy ACE diagnostics` button.
+Use `More -> Copy ACE diagnostics` from the host editor menu when reporting ACE issues.
 
 Diagnostics should include the current engine type, ACE health state, last failure, Android/WebView versions, configured LSP state, sanitized LSP runtime readiness/degradation state, file size, large-file policy, TextMirror revision, viewport policy, host IME event, ACE resize schedule/dispatch/complete fields, bridge event window counters, and recent runtime event history.
 
-The isolated ACE debug page also has an `IME stress` action. It is a quick
-debug-only helper for repeated programmatic show/hide cycles and diagnostics,
-but it does not replace the manual device cases that validate real tap anchors,
-selection handles, and CJK composition.
-
 ## Completion And LSP Checks
 
-- `autojs6_indices.js` must be regenerated from `tools/ace-completion/autojs6_indices.source.json`.
-- `autojs6_indices.source.json` must be regenerated from the bundled selected AutoJs6 declaration files when those files change.
+- The plugin's `autojs6_indices.js` must be regenerated from its canonical
+  completion source when declarations change.
+- Generated declarations, indices, and runtime assets must be verified in the
+  plugin repository before publishing its APK.
 - Static completion must work for `toast`, `app.launch`, `files.read`, `images.findImage`, `device.getBattery`, `console.log`, `threads.start`, and `engines.myEngine`.
 - Accepting a highlighted completion with Enter or by tapping the popup must insert the item without an ACE fallback.
 - `autojs_indices.js` is a fallback only; AutoJs6-specific entries should be added to the source JSON.
@@ -94,11 +95,12 @@ selection handles, and CJK composition.
 
 ## Automation Status
 
-The app module keeps a lightweight instrumentation setup without a complete
-editor UI automation stack such as Espresso actions and ActivityScenario rules.
-`AceCodeEditorSmokeTest` covers the current ACE basics by launching the isolated
-debug activity, waiting for WebView ready/first-paint diagnostics, round-tripping
-text through the bridge, and checking breakpoint/resize diagnostics.
+The host `AceEditorPluginHostDeviceTest` performs a cross-APK smoke test for
+discovery, trust and contract validation, ClassLoader identity, view attachment,
+ready state, text mirroring, and idempotent destruction. It skips when the
+plugin is absent, so a skipped test is not a release pass. The plugin's own
+`AceCodeEditorSmokeTest` provides lightweight direct-runtime coverage; neither
+suite replaces the manual editor, fallback, completion, rotation, or IME matrix.
 
 This document remains the broader acceptance source for the richer editor flows
 that still need future automation. The case IDs below map directly to future
@@ -339,11 +341,11 @@ Failure logs:
 
 Preconditions:
 - ACE editor is selected.
-- Set `AceEditorTestHooks.forceAssetMissing = true`.
+- In the plugin debug runtime, set `AceEditorTestHooks.forceAssetMissing = true`.
 
 Steps:
 1. Open `ace-basic.js`.
-2. Reset hooks.
+2. Reset the plugin hook.
 
 Expected:
 - Native editor opens.
@@ -358,12 +360,12 @@ Failure logs:
 
 Preconditions:
 - ACE editor is selected.
-- Set `AceEditorTestHooks.forceReadyTimeout = true`.
+- In the plugin debug runtime, set `AceEditorTestHooks.forceReadyTimeout = true`.
 
 Steps:
 1. Open `ace-basic.js`.
 2. Wait at least 5 seconds.
-3. Reset hooks.
+3. Reset the plugin hook.
 
 Expected:
 - ACE falls back to Native.
@@ -378,11 +380,11 @@ Failure logs:
 
 Preconditions:
 - ACE editor is selected.
-- Set `AceEditorTestHooks.forceJsInitThrow = true`.
+- In the plugin debug runtime, set `AceEditorTestHooks.forceJsInitThrow = true`.
 
 Steps:
 1. Open `ace-basic.js`.
-2. Reset hooks.
+2. Reset the plugin hook.
 
 Expected:
 - ACE reports JS init failure.
@@ -397,11 +399,11 @@ Failure logs:
 
 Preconditions:
 - ACE editor is selected.
-- Set `AceEditorTestHooks.forceRendererGoneFallback = true`.
+- In the plugin debug runtime, set `AceEditorTestHooks.forceRendererGoneFallback = true`.
 
 Steps:
 1. Open `ace-basic.js`.
-2. Reset hooks.
+2. Reset the plugin hook.
 
 Expected:
 - Editor falls back to Native.
@@ -461,22 +463,16 @@ Failure logs:
 ### ACE-COMPLETION-001: Static completion smoke test
 
 Preconditions:
-- Node.js is available on the development machine.
+- The `AutoJs6-Plugin-Ace-Editor` repository and its generated runtime assets
+  are available.
 
 Steps:
-1. Run `node tools/ace-completion/generate-autojs6-indices-from-dts.mjs`.
-2. Run `node tools/ace-completion/generate-autojs6-indices.mjs`.
-3. Run `node tools/ace-completion/generate-dts.mjs`.
-4. Run `node tools/ace-completion/verify-autojs6-api-model.mjs`.
-5. Run `node tools/ace-completion/verify-autojs6-pro-only.mjs`.
-6. Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
-7. Run `node tools/ace-completion/verify-autojs6-dts.mjs`.
-8. Run `node tools/ace-completion/test-completer.mjs`.
-9. Run `node tools/ace-lsp/test-lsp-client.mjs`.
-10. Run `node tools/ace-tooltip/test-tooltip.mjs`.
+1. Run `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug` in the plugin repository.
+2. Install the resulting compatible trusted plugin APK.
+3. Run the host cross-APK smoke test and the completion/LSP manual cases below.
 
 Expected:
-- All commands pass.
+- Plugin unit tests, assembly, and the host cross-APK smoke test pass.
 - Common AutoJs6 API completions are present.
 - Common AutoJs6 module member completions are declaration-backed in the intermediate API model.
 - Declaration-backed member signatures are preserved in runtime indices and generated `lib.autojs6.d.ts`.

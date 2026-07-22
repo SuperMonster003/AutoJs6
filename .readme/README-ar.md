@@ -71,7 +71,7 @@
 | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/hyb1996/Auto.js)</span> | <span style="word-break:keep-all;white-space:nowrap">[Auto.js](https://github.com/SuperMonster003/AutoJs6/blob/ab2ad906e767f188c70c33e22224104b5c2c0135/app/src/main/res/values/strings.xml#L2)</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2017/01/27`](https://github.com/SuperMonster003/AutoJs6/commit/307dbe8859692c48f1d3594d99077c0a2638bb39)</span> | <span style="word-break:keep-all;white-space:nowrap">[`2020/03/13`](https://github.com/SuperMonster003/AutoJs6/commit/483c6492b7fa8aaf3f29544fbb9b55c46c3dc9e0)</span> | <span style="word-break:keep-all;white-space:nowrap">3.13</span> |
 | <span style="word-break:keep-all;white-space:nowrap">Auto.js Pro 7</span> | <span style="word-break:keep-all;white-space:nowrap">Auto.js</span> | <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/03/13`</span> | <span style="word-break:keep-all;white-space:nowrap">`2019/07/08`</span> | <span style="word-break:keep-all;white-space:nowrap">0.32</span> |
 
-تم تحديث البيانات في 21 July 2026.
+تم تحديث البيانات في 22 July 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `آخر نشاط`.
 
@@ -166,7 +166,7 @@
 
 # v6.8.0
 
-###### 2026/07/21
+###### 2026/07/22
 
 * `إضافة جديدة` بيئة تشغيل نصوص Node.js 24.5.0, تدعم التشغيل عبر توجيه "nodejs" او امتدادات مثل .node.js/.cjs/.mjs
 * `إضافة جديدة` بيئة تشغيل Node.js تدعم CommonJS و ESM جزئيا و import() الديناميكي المحلي فقط ومصادر TypeScript الخفيفة (.ts/.mts/.cts)
@@ -190,7 +190,7 @@
 * `إضافة جديدة` الطريقة device.getMarketName, للحصول على "الاسم التجاري" للجهاز _[`issue #513`](http://issues.autojs6.com/513)_
 * `إضافة جديدة` المهام المجدولة تدعم المهام الشهرية والسنوية ومهام العد التنازلي وشروط نهاية التكرار _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
 * `إضافة جديدة` مدير الملفات يدعم التحديد المتعدد وعمليات النسخ والنقل والحذف المجمعة
-* `إضافة جديدة` محرر الشفرة يدعم محرك محرر Ace, مع امكانية التبديل بينه وبين المحرر الاصلي من الاعدادات
+* `إضافة جديدة` يدعم محرر الشفرة تحميل Ace من مكون اضافي خارجي, مع التحقق من هوية الموقع/الثقة/عقد Editor API/اصدار المضيف/توافق ABI الثنائي, والرجوع تلقائيا الى المحرر الاصلي عند عدم توفر المكون الاضافي
 * `إضافة جديدة` أصبح الإكمال الذكي المحلي المضمّن لـ TypeScript في محرر Ace ميزة مستقرة ومفعّلة افتراضياً، مع إكمال API الخاص بـ AutoJs6 ومساعدة التوقيعات ومعلومات التحويم والتشخيصات؛ ويمكن تعطيله من الإعدادات
 * `إضافة جديدة` محرر Ace يدعم لوحة اختصارات وسجل عمليات وعمليات مفضلة وتحديد النص على الهاتف والتكبير بالقرص وغيرها
 * `إضافة جديدة` يدعم محرر الشفرة إعادة تحميل الملفات أو تحويلها بترميز محدد, وإضافة BOM اختياريا, ومؤشرات مخاطر الترميز, والتراجع/الإعادة
@@ -254,6 +254,7 @@
 * `تحسين` تحقق Node.js الاصلي يحل ويتحقق من جذور شفرة المصدر والبناء لاضافة بيئة التشغيل الخارجية
 * `تحسين` بوابات التكامل النهائي والاصدار لـ Node.js تعتمد سياسة fail-closed عند فقدان التقارير المطلوبة او ادلة المصدر الحالي او عناصر قبول الانتاج او انتهاء صلاحيتها
 * `تحسين` تحويل وظائف ML Kit OCR و ML Kit Barcode و Rapid OCR و OpenCC و Pinyin و Pinyin4j و MediaInfo الى اضافات
+* `تحسين` تم تحويل بيئة تشغيل WebView الخاصة بمحرر Ace وجسر JavaScript وخدمات اللغة المضمنة والموارد الثابتة الى مكون اضافي قابل للتثبيت بشكل مستقل, مما يقلل الارتباط ب APK المضيف ويدعم التحديث المستقل
 * `تحسين` يتحول زر "تشغيل" في محرر الشفرة الى "ايقاف" بعد الضغط عليه لايقاف النصوص البرمجية بسرعة
 * `تحسين` تحسين تفاعلات محرر الشفرة للسمات والخطوط واشرطة الادوات ووضع القراءة فقط وطي الشفرة وقوائم التحديد وغيرها
 * `تحسين` تحسين اكتشاف ترميز الملفات وأمان الحفظ في محرر الشفرة, ولا تكتب تحويلات الترميز إلى القرص إلا عند حفظ المستخدم للملف
@@ -545,7 +546,7 @@ File (ملف) | Settings (إعدادات) | Appearance & Behavior (المظهر 
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `21`.
 
-اعتبارًا من 21 July 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
+اعتبارًا من 22 July 2026، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `26`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 

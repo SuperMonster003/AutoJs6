@@ -2,10 +2,11 @@
 
 ACE LSP smart completion is a released, default-on editor feature. Despite the
 setting's historical LSP name, the shipped implementation is a bundled,
-in-process TypeScript Language Service. It does not load Ace Pro's `lsp.js`,
-open a WebSocket, start a process, or connect to an external language server.
-Users can explicitly disable the feature; static AutoJs6 and ECMAScript
-completion remains available when it is disabled or degraded.
+in-process TypeScript Language Service inside the external Ace editor plugin
+APK. It does not load Ace Pro's `lsp.js`, open a WebSocket, start a process, or
+connect to an external language server. Users can explicitly disable the
+feature; static AutoJs6 and ECMAScript completion remains available when it is
+disabled or degraded.
 
 The bundled TypeScript language service runs entirely in process and is the
 only semantic engine covered by this release.
@@ -111,17 +112,15 @@ promised by the local smart-completion setting.
 
 ## Verification
 
-- Preference tests verify the default-on behavior, explicit opt-out, reset
-  behavior, and stable file-type gating.
-- Manager tests verify `native-local`, in-process state, the synthetic untitled
-  URI, local startup providers, and the 512 KiB semantic limit.
-- `node tools/ace-lsp/test-lsp-client.mjs` loads the real bundled TypeScript
-  runtime and service, then verifies semantic completion, hover/JSDoc,
-  diagnostics, signature help, hot enable/disable, bounded retries, disposal,
-  completion limits, large-document degradation, and static fallback behavior.
-- `AceCodeEditorSmokeTest` covers default-on and hot-enable behavior in the
-  WebView, verifies real TypeScript semantic providers without any network
-  transport, and confirms that sanitized runtime readiness reaches Native
-  diagnostics.
-- `node tools/ace-tooltip/test-tooltip.mjs` verifies lazy tooltip creation and
-  local escaped-markdown rendering.
+- Host preference and manager tests verify default-on behavior, explicit
+  opt-out, reset behavior, stable file-type gating, `native-local` options, and
+  the 512 KiB semantic limit passed through the Editor API.
+- The `AutoJs6-Plugin-Ace-Editor` unit suite verifies the plugin-side manager,
+  preferences, runtime isolation, assets, and lifecycle contracts.
+- `AceEditorPluginHostDeviceTest` verifies that the trusted plugin reaches
+  ready state through the cross-APK ClassLoader boundary and returns sanitized
+  diagnostics-capable state. It does not claim semantic-provider coverage.
+- Release validation must additionally exercise real TypeScript completion,
+  hover/JSDoc, diagnostics, signature help, hot enable/disable, bounded retry,
+  disposal, completion limits, large-document degradation, static fallback,
+  and local escaped-markdown rendering in the installed plugin WebView.

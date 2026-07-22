@@ -7,8 +7,10 @@ representative-device validation. Run the automated gate with:
 node tools/ace-ci/check-ace-release-gate.mjs
 ```
 
-The script first runs the existing ACE editor CI gate, then verifies release
-invariants that are easy to regress during later ACE work.
+The script verifies the host-side Editor API, secure plugin loader, engine
+adapter, Native fallback, absence of the embedded ACE runtime, and the current
+cross-APK documentation boundary. Runtime-specific gates belong to the
+`AutoJs6-Plugin-Ace-Editor` repository.
 
 Phase 9 is the active release-candidate stabilization phase. The release device
 report for the preferred representative device is:
@@ -25,27 +27,34 @@ docs/dev/ace-release-publishing-cleanup.md
 
 ## Automated Gate
 
-- ACE is the default editor in resources, preferences, enum fallback, and
-  `EditorEngineFactory`; Native remains selectable and is still the fallback
-  target.
+- ACE is the default logical editor in resources and preferences. The host
+  loads it only from an enabled compatible plugin with an accepted signer or
+  `OFFICIAL`/`TRUSTED` state; Native remains selectable and is the fallback.
+- Editor API contract, host-version metadata, entrypoint type, ClassLoader
+  identity, signer/trust policy, and repeated pre-execution validation are
+  covered by the host static gate and policy tests.
+- The host adapter maps editor state without exposing plugin implementation
+  types to common editor services, and plugin load/linkage failures preserve a
+  diagnostic code before creating Native.
 - ACE remains on the clean-host viewport path through
   `AceEditorViewportPolicy`; no `key_ace_clean_host_layout` flag is exposed.
-- Native-only boundary checks, ACE surface smoke checks, API model checks,
-  completion checks, LSP client checks, and tooltip checks run through the ACE
-  editor CI gate.
+- The host APK contains no Ace WebView runtime classes or embedded editor asset
+  tree. Plugin runtime, completion, LSP, tooltip, IME, font, and WebView tests
+  run in the separate plugin repository.
 - LSP smart completion is default-on in both the resource and preference
   fallback, preserves an explicit user opt-out, and reports
-  `manager=native-local` for the bundled TypeScript language service.
-- The real bundled TypeScript runtime is covered for semantic completion,
-  hover/JSDoc, diagnostics, signature help, hot enable/disable, retry/disposal,
-  the 512 KiB degradation boundary, and the 300-item completion cap.
+  `manager=native-local` to the plugin through the Editor API.
+- Host unit tests cover policy and model mapping. The host instrumentation test
+  covers cross-APK discovery, ClassLoader identity, view attachment, ready
+  state, text mirroring, and idempotent destruction; it must not be counted as
+  a pass when skipped because the plugin is absent.
 - The released semantic scope is the TypeScript 4.2.4 single-file baseline;
   project module resolution and NodeNext `.mts`/`.cts` semantics remain
   deferred, and misleading module-not-found annotations are suppressed.
 - ACE fallback still routes to Native without persisting the editor preference
-  and uses the latest `textSnapshot`, which is TextMirror-backed for ACE.
-- Renderer-gone and JS-init fatal debug hooks remain present for device/debug
-  validation.
+  and uses the latest plugin-provided text snapshot.
+- Renderer-gone, JS-init, ready-timeout, and asset-missing hooks remain in the
+  plugin debug build; the host retains the large-file Native-routing hook.
 - External/server-backed LSP transport remains outside the released local
   feature; no WebSocket, worker, process, or runtime server startup is exposed.
 - Public `VisualEditorAce` exposure remains deferred; no `VISUAL_ACE` enum,
@@ -68,7 +77,10 @@ static checks alone. The preferred representative device for this branch is
 Sony XQ-AT72.
 
 - Record the device environment and every result in
-  `docs/dev/ace-release-device-report-sony-xq-at72.md`.
+  a new cross-APK test report. The existing Sony report is historical
+  pre-extraction evidence.
+- Install a host-compatible trusted plugin, restart the host, and confirm
+  `AceEditorPluginHostDeviceTest` executes rather than skips.
 - Phase 6 mobile selection paths: long-press, double-tap, copy, paste, CJK
   composition, completion accept, and IME show/hide.
 - Keyboard and viewport matrix: file-manager open first paint, top/middle/bottom
@@ -76,9 +88,10 @@ Sony XQ-AT72.
   ACE large-file direct loading, and Native large-file regression coverage.
 - Continuous user-driven keyboard show/hide cycles must keep ACE active and
   avoid fallback.
-- Fallback debug hooks must preserve recent small-file text through TextMirror.
-- Renderer-gone and JS-init fatal debug hooks must still switch to Native and
-  record useful diagnostics.
+- Plugin-side fallback debug hooks must preserve recent small-file text through
+  the session snapshot.
+- Renderer-gone and JS-init fatal plugin hooks must still switch the host to
+  Native and record useful diagnostics.
 - With a fresh LSP preference, confirm first-paint warm-up reaches
   `typescript-language-service` providers; then explicitly disable and
   re-enable it in the same editor page and confirm static fallback, disposal,

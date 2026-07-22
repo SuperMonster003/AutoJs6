@@ -1,23 +1,24 @@
 # ACE Editor Integration
 
-This document tracks the current AutoJs6 ACE editor deployment state. ACE is the default editor when bundled assets are present. Native remains selectable and is still the fallback target.
+This document tracks the current AutoJs6 ACE editor deployment state. ACE is the default logical editor choice and is loaded from the separately installed `AutoJs6-Plugin-Ace-Editor` APK. Native remains selectable and is the fallback when no compatible trusted plugin is available or the plugin runtime fails.
 
 ## Stable Path
 
 - ACE is the default value for `Editor engine`.
 - Native remains available from settings and from the editor engine menu.
-- ACE opens when bundled assets are present; if required assets are missing, the editor falls back to Native.
+- ACE opens when the host discovers an enabled plugin with an accepted signer or trust state and compatible Editor API, host-version, and binary ABI metadata. Any discovery or load failure falls back to Native.
+- The host APK contains the typed Editor API, secure loader, engine adapter, preferences, and diagnostics integration. The Ace WebView runtime, JavaScript bridge, language services, IME implementation, and static assets live in the plugin APK.
 - Ordinary large files stay on ACE. The old progressive large-file path remains Native-only.
 - Runtime ACE failures fall back to Native through the editor engine switch path.
 - Fallback snapshots preserve text, dirty state, cursor, selection, breakpoints, debug line, read-only state, theme, and font size as far as each engine supports them.
 - ACE text is mirrored on the Kotlin side through change deltas, so fallback can keep recent edits even when the WebView cannot be queried.
-- ACE bundles ordinary Iosevka as its default WOFF2 font, with system `monospace` as the final fallback. Iosevka Slab and the other optional open-source fonts are installed on demand from the signed AutoJs6 font catalog; they are not APK assets.
+- The plugin bundles ordinary Iosevka as its default WOFF2 font, with system `monospace` as the final fallback. Iosevka Slab and the other optional open-source fonts are installed on demand from the signed AutoJs6 font catalog; they are not bundled assets.
 - ACE font selection is available from settings and from the editor `More -> ACE editor font` menu.
 - Font downloads are application-scoped: closing or recreating the selection dialog detaches its observer without stopping the transfer; only the row-level cancel action cancels the download.
 - When a refreshed signed catalog revokes or replaces the selected download, every attached ACE editor re-resolves that selection and immediately falls back to bundled Iosevka when it is no longer authorized.
 - The font dialog uses the same download icon as Plugin Center for missing fonts. Its title overflow menu can download every missing or outdated authorized font in one confirmed batch; batch downloads keep the current selection and use the downloader's two-worker limit.
 - The signed catalog is published from the `ace-fonts` component of `SuperMonster003/AutoJs6-Shared-Assets`. Font Release tags and signing keys are scoped to that component so unrelated shared assets can evolve independently.
-- AutoJs6 static completion is generated from bundled selected `@sm003/autojs6-dts` declaration files under `autojs6/types/autojs6`, then emitted through `tools/ace-completion/autojs6_indices.source.json`; the legacy `autojs_indices.js` remains only as a compatibility fallback.
+- The plugin bundles selected `@sm003/autojs6-dts` declaration files and generated AutoJs6 static-completion indices. The legacy `autojs_indices.js` remains only as a compatibility fallback inside the plugin runtime.
 - ACE LSP smart completion is a stable, default-on feature backed by the
   bundled TypeScript language service. The `native-local` manager exposes
   deterministic in-process options for completion, hover, diagnostics, and
@@ -36,8 +37,6 @@ This document tracks the current AutoJs6 ACE editor deployment state. ACE is the
 ```text
 More -> Copy ACE diagnostics
 ```
-
-The debug activity also exposes a `Copy ACE diagnostics` button for isolated WebView validation.
 
 The snapshot includes:
 
@@ -82,8 +81,8 @@ ACE does not need a separate clean-host experiment flag at this stage. The ACE p
   anchors, repeated IME stress, completion accept, long-press selection, CJK
   input, rotation, fallback, ACE large-file direct loading, and bridge event storm
   diagnostics.
-- The isolated ACE debug activity includes an `IME stress` helper for quick
-  repeated show/hide diagnostics before running the full physical-device matrix.
+- Cross-APK instrumentation attaches the plugin-provided view to a real host
+  activity. Repeated IME stress remains part of the physical-device matrix.
 
 Do not add `key_ace_clean_host_layout` unless there is a concrete second ACE host layout to compare. A flag without another implementation would add state, test matrix size, and ambiguous diagnostics without improving the stable path.
 
@@ -95,46 +94,37 @@ is a real second host or lifecycle requirement.
 
 Before an ACE release candidate is published:
 
-- Run `node tools/ace-ci/check-ace-release-gate.mjs`.
-- Run `node tools/ace-ci/check-ace-editor-gate.mjs`.
-- Run `node tools/ace-completion/verify-autojs6-api-model.mjs`.
-- Run `node tools/ace-completion/verify-autojs6-pro-only.mjs`.
-- Run `node tools/ace-completion/verify-autojs6-indices.mjs`.
-- Run `node tools/ace-completion/verify-autojs6-dts.mjs`.
-- Run `node tools/ace-completion/test-completer.mjs`.
-- Run `node tools/ace-lsp/test-lsp-client.mjs`.
-- Run `node tools/ace-tooltip/test-tooltip.mjs`.
-- Run `node tools/ace-hardening/check-editor-surface.mjs`.
-- Run `.\gradlew.bat :app:testAppDebugUnitTest --tests org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManagerTest`.
-- Run the manual cases in `docs/dev/ace-editor-test-plan.md`.
-- Run the `IME Show/Hide Manual Checklist` in `docs/dev/ace-editor-test-plan.md`.
-- Run the dedicated keyboard and viewport matrix in
+- In the AutoJs6 host repository, run `node tools/ace-ci/check-ace-release-gate.mjs`.
+- Run the host policy, mapping, and LSP preference unit tests, then compile
+  `AceEditorPluginHostDeviceTest`.
+- In the `AutoJs6-Plugin-Ace-Editor` repository, run
+  `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug` and the plugin's
+  connected-device smoke tests.
+- Install a host-compatible plugin signed by the host or marked
+  `OFFICIAL`/`TRUSTED`, then run the host cross-APK
+  `AceEditorPluginHostDeviceTest`; a skipped test is not a release pass.
+- Verify missing, disabled, untrusted, contract-incompatible, host-version
+  incompatible, and linkage-failing plugins all keep the Native editor usable.
+- Run the manual cases and IME checklist in
+  `docs/dev/ace-editor-test-plan.md`, plus the dedicated matrix in
   `docs/dev/ace-keyboard-viewport-test-plan.md`.
-- Track the automated/manual split in
-  `docs/dev/ace-release-gate-status.md`.
-- Record Sony XQ-AT72 physical-device results in
-  `docs/dev/ace-release-device-report-sony-xq-at72.md`.
-- Track package/label and `version.properties` cleanup in
-  `docs/dev/ace-release-publishing-cleanup.md`.
-- Use the isolated ACE debug activity `IME stress` helper as a quick preflight;
-  do not treat it as a replacement for physical tap-anchor and CJK validation.
-- Verify asset-missing, ready-timeout, JS-init, renderer-gone, and large-file debug hooks.
-- Verify recent small-file input survives fallback through TextMirror.
-- Copy diagnostics from both an active ACE editor and after ACE fallback to Native.
-- Confirm diagnostics include runtime event history and bridge event window
-  counters for keyboard and viewport failures.
-- Confirm `app/src/main/assets/editor/ace-builds-1.4.12/autojs6/types/lib.autojs6.d.ts` is generated from the same completion source.
-- Confirm selected AutoJs6 declaration sources remain bundled under `app/src/main/assets/editor/ace-builds-1.4.12/autojs6/types/autojs6`.
+- Track the automated/manual split in `docs/dev/ace-release-gate-status.md`.
+- Treat `docs/dev/ace-release-device-report-sony-xq-at72.md` as historical
+  pre-extraction evidence; record new cross-APK results separately.
+- Verify plugin-side asset-missing, ready-timeout, JS-init, and renderer-gone
+  hooks, plus the host-side large-file Native-routing hook.
+- Verify recent small-file input survives fallback through the plugin text
+  snapshot, and copy diagnostics both before and after fallback.
 - Confirm `docs/dev/ace-lsp-design.md` keeps local smart completion default-on,
   preserves explicit opt-out and static degradation, and does not present an
   external/server-backed LSP as shipped.
-- Confirm `fonts/iosevka/Iosevka-Regular.woff2` and its `LICENSE.md` remain bundled and that no optional ACE WOFF2 files are present in the merged APK assets.
-- Confirm the eight optional fonts, including Iosevka Slab, are listed by the signed catalog and that font bytes pass declared size, WOFF2 structure, and SHA-256 checks before installation.
-- Confirm `Editor font -> More -> Download all` downloads every missing/updateable font, does not change the selected font, skips revoked/current/in-progress rows, and reports a single aggregate result without per-font Toast storms.
-- Confirm a missing, invalid, rolled-back, or revoked remote catalog cannot authorize a new download or serve a revoked installed font; ordinary Iosevka must remain usable offline.
-- Confirm AutoJs6 TypeScript Declarations `LICENSE` remains bundled under `autojs6/types/autojs6`.
-- Confirm no font files with unclear redistribution rights exist under the ACE asset tree.
-- Confirm `THIRD_PARTY_NOTICES.md` and `app/src/main/assets/editor/ace-builds-1.4.12/LICENSE` are present.
+- In the plugin repository, confirm `autojs6/types/lib.autojs6.d.ts`, selected
+  declarations under `autojs6/types/autojs6`, ordinary Iosevka, and their
+  licenses remain bundled in the plugin editor asset tree.
+- Confirm optional fonts remain absent from the plugin APK and are accepted
+  only through the signed catalog after size, WOFF2, and SHA-256 validation.
+- Confirm the plugin repository includes `THIRD_PARTY_NOTICES.md`, the Ace
+  license, the TypeScript license and notices, and the declaration license.
 
 ## Deferred Work
 
