@@ -15,7 +15,7 @@ The boundary is:
 | Plugin discovery, policy validation, staging, lifecycle checks, and loading | AutoJs6 host |
 | Android system libraries such as `libz`, `liblog`, and `libjnigraphics` | Android platform |
 
-The standalone implementation is maintained as the sibling `AutoJs6-Plugin-Image-Quantization` project. It publishes four single-ABI APKs plus a universal APK. Each ABI contains one private native payload, `libpngquant_bridge.so`; it must not package a separate `libimagequant.so`, `libpng.so`, `libpng16.so`, or `libc++_shared.so`. Every plugin artifact also carries the required material below `assets/licenses/imagequant/`.
+The standalone implementation is maintained as the sibling `AutoJs6-Plugin-Image-Quantization` project. It publishes four single-ABI APKs plus a universal APK. Each ABI contains one private native payload, `libpngquant_bridge.so`; it must not package a separate `libimagequant.so`, `libpng.so`, `libpng16.so`, or `libc++_shared.so`. Every plugin artifact also carries the required GPLv3, libimagequant, libpng, and Android NDK r26b LLVM license material below `assets/licenses/imagequant/`.
 
 ## Contract and discovery
 
@@ -106,7 +106,7 @@ APK Builder also uses the host-owned copy when producing applications that selec
 
 ## APK Builder and INRT behavior
 
-`ApkBuilder.Lib.IMAGE_QUANT` is a plugin-supplied build dependency. APK Builder selects an eligible service by action, engine, and the `2.17.0` variant, then copies `libpngquant_bridge.so` for the target ABI and the complete `assets/licenses/imagequant/` directory into the generated application. The license directory includes GPLv3, the libimagequant copyright file, the libpng license, a source offer, and native build documentation.
+`ApkBuilder.Lib.IMAGE_QUANT` is a plugin-supplied build dependency. APK Builder selects an eligible service by action, engine, and the `2.17.0` variant, then copies `libpngquant_bridge.so` for the target ABI and the complete `assets/licenses/imagequant/` directory into the generated application. The license directory includes GPLv3, the libimagequant copyright file, the libpng license, the Android NDK r26b LLVM notice for the statically linked C++ runtime, a source offer, and native build documentation.
 
 Generated applications must be self-contained. They retain the `PngQuantBridge` Java ABI in the template and receive the selected native bridge at build time. At runtime an INRT application loads that bundled library and never discovers an Image Quantization plugin installed on the target device. If the requested library is absent, the build must fail; if an invalid package somehow reaches runtime, initialization fails as a packaging error.
 
@@ -126,7 +126,7 @@ The vendored libimagequant 2.17.0 sources state GPL version 3 or later and also 
 3. Mark modified source versions and keep an auditable mapping from each released binary to its source revision and toolchain.
 4. Ensure the terms applied to the conveyed combined artifact are GPL-compatible. Moving the native binary to another APK is not, by itself, a licensing exception.
 
-libpng 1.6.49 is distributed under the PNG Reference Library License. Its `LICENSE`, copyright, disclaimer, origin, and modification notices must remain intact. Plugin release gates require that every plugin APK contain GPLv3, the libimagequant copyright file, the libpng license, a source offer, and native build documentation under `assets/licenses/imagequant/`. APK Builder treats that complete directory as a mandatory part of the `2.17.0` plugin variant and copies it into every generated APK containing the bridge. Packaging fails rather than producing an Image Quantization artifact without those assets. The source offer must identify a durable corresponding-source location for the exact binary revision.
+libpng 1.6.49 is distributed under the PNG Reference Library License. Its `LICENSE`, copyright, disclaimer, origin, and modification notices must remain intact. The LLVM C++ runtime components statically linked by `c++_static` use Apache License 2.0 with LLVM Exceptions, so the authoritative Android NDK r26b LLVM notice is also mandatory. Plugin release gates verify immutable license fingerprints and require every plugin APK to contain GPLv3, the libimagequant copyright file, the libpng license, the NDK LLVM notice, a source offer, and native build documentation under `assets/licenses/imagequant/`. APK Builder treats that complete directory as a mandatory part of the `2.17.0` plugin variant and copies it into every generated APK containing the bridge. Packaging fails rather than producing an Image Quantization artifact without those assets. The source offer must identify a durable corresponding-source location for the exact binary revision.
 
 This section defines project release requirements and is not a substitute for legal review.
 
