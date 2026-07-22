@@ -598,11 +598,6 @@
     <string name="text_ace_action_pinned">已釘選</string>
     <string name="text_ace_action_unpin">取消釘選</string>
     <string name="text_ace_diagnostics_copied">Ace 診斷資訊已複製到剪貼簿</string>
-    <string name="text_ace_editor_debug">Ace 編輯器偵錯</string>
-    <string name="text_ace_editor_debug_description">開啟獨立的 Ace WebView 編輯器測試頁面</string>
-    <string name="text_ace_editor_debug_status">%1$s | 行 %2$d | 游標 %3$d:%4$d | 中斷點 %5$d | 已修改 %6$s</string>
-    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">正在載入 Ace 編輯器...</string>
-    <string name="text_ace_editor_debug_text_length">Ace 文字長度: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Ace 編輯器失敗 (%1$s); 已切換至 JsDroidEditor. 可在更多選單中複製 Ace 診斷資訊.</string>
     <string name="text_ace_editor_font">編輯器字型</string>
     <string name="text_ace_editor_font_built_in">內置</string>

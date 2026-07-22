@@ -76,7 +76,6 @@ import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListene
 import org.autojs.autojs.ui.edit.debug.DebugBar
 import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorAssets
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontDialog
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontOption
@@ -744,7 +743,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
-        recordAceAssetMissingFallbackIfNeeded()
+        recordAcePluginUnavailableFallbackIfNeeded()
         attachEditorEngineView()
         setUpEditor()
         setUpInputMethodEnhancedBar()
@@ -3109,6 +3108,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val newEditor = EditorEngineFactory.create(context, targetType)
         if (newEditor.engineType != targetType) {
             newEditor.destroy()
+            if (targetType == EditorEngineType.ACE) {
+                recordAcePluginUnavailableFallbackIfNeeded(requireAcePreference = false)
+            }
             showToast(context, R.string.error_ace_editor_unavailable, true)
             return false
         }
@@ -3278,24 +3280,26 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
-    private fun recordAceAssetMissingFallbackIfNeeded() {
-        if (EditorEnginePreferences.get() != EditorEngineType.ACE) {
+    private fun recordAcePluginUnavailableFallbackIfNeeded(requireAcePreference: Boolean = true) {
+        if (requireAcePreference && EditorEnginePreferences.get() != EditorEngineType.ACE) {
             return
         }
-        if (editor.engineType == EditorEngineType.ACE || AceEditorAssets.hasRequired(context)) {
+        if (editor.engineType == EditorEngineType.ACE) {
             return
         }
         val now = SystemClock.uptimeMillis()
-        val message = "ACE editor assets are unavailable"
+        val failure = EditorEngineFactory.lastAcePluginFailure()
+        val code = failure?.code ?: "PLUGIN_UNAVAILABLE"
+        val message = failure?.message ?: "ACE editor plugin is unavailable"
         mLastAceDiagnosticsSnapshot = AceDiagnostics
             .createNativeSnapshot(EditorEngineType.ACE, fileSizeBytes = null, largeFilePolicy = "auto")
             .copy(
                 aceHealthState = AceHealthState.FAILED.name,
-                lastFailureType = AceFailureType.ASSET_MISSING.name,
+                lastFailureType = AceFailureType.UNKNOWN.name,
                 lastFailureMessage = message,
                 lastFailureFatal = true,
                 runtimeEventHistory = listOf(
-                    "$now:failure:type=${AceFailureType.ASSET_MISSING.name},fatal=true,message=$message",
+                    "$now:failure:type=${AceFailureType.UNKNOWN.name},code=$code,fatal=true,message=$message",
                 ),
             )
     }

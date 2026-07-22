@@ -603,11 +603,6 @@
     <string name="text_ace_action_pinned">고정됨</string>
     <string name="text_ace_action_unpin">고정 해제</string>
     <string name="text_ace_diagnostics_copied">Ace 진단 정보를 클립보드에 복사했습니다</string>
-    <string name="text_ace_editor_debug">Ace 편집기 디버그</string>
-    <string name="text_ace_editor_debug_description">격리된 Ace WebView 편집기 테스트 페이지 열기</string>
-    <string name="text_ace_editor_debug_status">%1$s | 줄 %2$d | 커서 %3$d:%4$d | 중단점 %5$d | 수정됨 %6$s</string>
-    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">Ace 편집기 로드 중...</string>
-    <string name="text_ace_editor_debug_text_length">Ace 텍스트 길이: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Ace 편집기에 오류가 발생하여 (%1$s) JsDroidEditor로 전환했습니다. 자세한 내용은 더보기 메뉴에서 Ace 진단 정보를 복사하세요</string>
     <string name="text_ace_editor_font">편집기 글꼴</string>
     <string name="text_ace_editor_font_built_in">내장</string>

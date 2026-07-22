@@ -596,11 +596,6 @@
     <string name="text_ace_action_pinned">Pinned</string>
     <string name="text_ace_action_unpin">Unpin</string>
     <string name="text_ace_diagnostics_copied">Ace diagnostics copied to clipboard</string>
-    <string name="text_ace_editor_debug">Ace editor debug</string>
-    <string name="text_ace_editor_debug_description">Open an isolated Ace WebView editor test page</string>
-    <string name="text_ace_editor_debug_status">%1$s | lines %2$d | cursor %3$d:%4$d | breakpoints %5$d | dirty %6$s</string>
-    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">Loading Ace editor...</string>
-    <string name="text_ace_editor_debug_text_length">Ace text length: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Ace editor failed (%1$s); switched to JsDroidEditor. Copy Ace diagnostics from the More menu for details</string>
     <string name="text_ace_editor_font">Editor font</string>
     <string name="text_ace_editor_font_built_in">Built in</string>

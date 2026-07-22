@@ -597,11 +597,6 @@
     <string name="text_ace_action_pinned">已固定</string>
     <string name="text_ace_action_unpin">取消固定</string>
     <string name="text_ace_diagnostics_copied">Ace 诊断信息已复制到剪贴板</string>
-    <string name="text_ace_editor_debug">Ace 编辑器调试</string>
-    <string name="text_ace_editor_debug_description">打开独立的 Ace WebView 编辑器测试页面</string>
-    <string name="text_ace_editor_debug_status">%1$s | 行 %2$d | 光标 %3$d:%4$d | 断点 %5$d | 已修改 %6$s</string>
-    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">正在加载 Ace 编辑器...</string>
-    <string name="text_ace_editor_debug_text_length">Ace 文本长度: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Ace 编辑器失败 (%1$s); 已切换到 JsDroidEditor. 可在更多菜单中复制 Ace 诊断信息.</string>
     <string name="text_ace_editor_font">编辑器字体</string>
     <string name="text_ace_editor_font_built_in">内置</string>

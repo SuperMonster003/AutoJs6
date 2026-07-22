@@ -1,7 +1,6 @@
 package org.autojs.autojs.ui.edit.editor.ace
 
 import android.content.Context
-import android.content.res.AssetManager
 import android.os.Handler
 import android.os.Looper
 import okhttp3.OkHttpClient
@@ -154,7 +153,6 @@ class AceEditorFontManager private constructor(context: Context) {
             delivery = AceEditorFontOption.Delivery.BUNDLED,
             type = AceEditorFontType.BUILT_IN,
             features = setOf(FontFeature.MONO),
-            sizeBytes = bundledIosevkaSizeBytes,
         )
         val catalogFonts = catalog()?.fonts.orEmpty()
         val catalogOptions = resolveRemoteFontGroups(catalogFonts, activeFontId) { groupId ->
@@ -479,28 +477,7 @@ class AceEditorFontManager private constructor(context: Context) {
 
     private class RetainedDownload(val sha256: String)
 
-    private val bundledIosevkaSizeBytes: Long? by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        runCatching {
-            appContext.assets.openFd(BUNDLED_IOSEVKA_ASSET_PATH).use { descriptor ->
-                descriptor.length.takeIf { it >= 0L }
-            }
-        }.getOrNull() ?: runCatching {
-            appContext.assets.open(BUNDLED_IOSEVKA_ASSET_PATH, AssetManager.ACCESS_STREAMING).use { input ->
-                val buffer = ByteArray(64 * 1024)
-                var total = 0L
-                while (true) {
-                    val read = input.read(buffer)
-                    if (read < 0) break
-                    if (read > 0) total += read
-                }
-                total
-            }
-        }.getOrNull()
-    }
-
     companion object {
-        private const val BUNDLED_IOSEVKA_ASSET_PATH =
-            "editor/ace-builds-1.4.12/fonts/iosevka/Iosevka-Regular.woff2"
         private const val CATALOG_KEY_ID = "p256-fc433f8ba81333f7"
         private const val CATALOG_URL =
             "https://raw.githubusercontent.com/SuperMonster003/AutoJs6-Shared-Assets/main/ace-fonts/catalogs/catalog-v1.json"

@@ -601,11 +601,6 @@
     <string name="text_ace_action_pinned">Закреплено</string>
     <string name="text_ace_action_unpin">Открепить</string>
     <string name="text_ace_diagnostics_copied">Диагностические данные Ace скопированы в буфер обмена</string>
-    <string name="text_ace_editor_debug">Отладка редактора Ace</string>
-    <string name="text_ace_editor_debug_description">Открыть изолированную тестовую страницу редактора Ace WebView</string>
-    <string name="text_ace_editor_debug_status">%1$s | строк: %2$d | курсор: %3$d:%4$d | точек останова: %5$d | изменён: %6$s</string>
-    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">Загрузка редактора Ace...</string>
-    <string name="text_ace_editor_debug_text_length">Длина текста Ace: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Сбой редактора Ace (%1$s); выполнено переключение на JsDroidEditor. Подробные сведения можно получить, скопировав диагностические данные Ace через меню дополнительных действий</string>
     <string name="text_ace_editor_font">Шрифт редактора</string>
     <string name="text_ace_editor_font_built_in">Встроено</string>

@@ -601,11 +601,6 @@
     <string name="text_ace_action_pinned">Épinglé</string>
     <string name="text_ace_action_unpin">Désépingler</string>
     <string name="text_ace_diagnostics_copied">Diagnostics Ace copiés dans le presse-papiers</string>
-    <string name="text_ace_editor_debug">Débogage de l\'éditeur Ace</string>
-    <string name="text_ace_editor_debug_description">Ouvrir une page de test isolée de l\'éditeur Ace WebView</string>
-    <string name="text_ace_editor_debug_status">%1$s | lignes %2$d | curseur %3$d:%4$d | points d\'arrêt %5$d | modifié %6$s</string>
-    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">Chargement de l\'éditeur Ace...</string>
-    <string name="text_ace_editor_debug_text_length">Longueur du texte Ace: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Échec de l\'éditeur Ace (%1$s); passage à JsDroidEditor. Copiez les diagnostics Ace depuis le menu Plus pour obtenir des détails</string>
     <string name="text_ace_editor_font">Police de l\'éditeur</string>
     <string name="text_ace_editor_font_built_in">Intégré</string>

@@ -4,17 +4,6 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
-        app:title="@string/text_debug">
-
-        <org.autojs.autojs.ui.settings.AceEditorDebugPreference
-            app:layout="@layout/preference_custom"
-            app:summary="@string/text_ace_editor_debug_description"
-            app:title="@string/text_ace_editor_debug" />
-
-    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
-
-    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-        app:layout="@layout/preference_category_custom"
         app:title="@string/text_updates">
 
         <org.autojs.autojs.ui.settings.ClearUpdatesCheckedStatesPreference

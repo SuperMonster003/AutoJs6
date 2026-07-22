@@ -1,68 +1,104 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-const CHECKS = [
-  {
-    label: "Editor boundary checks",
-    script: "tools/editor-refactor/check-editor-boundaries.mjs",
-  },
-  {
-    label: "ACE surface hardening checks",
-    script: "tools/ace-hardening/check-editor-surface.mjs",
-  },
-  {
-    label: "AutoJs6 API model verification",
-    script: "tools/ace-completion/verify-autojs6-api-model.mjs",
-  },
-  {
-    label: "AutoJs6 Pro-only API detection",
-    script: "tools/ace-completion/verify-autojs6-pro-only.mjs",
-  },
-  {
-    label: "AutoJs6 completion index verification",
-    script: "tools/ace-completion/verify-autojs6-indices.mjs",
-  },
-  {
-    label: "AutoJs6 generated d.ts verification",
-    script: "tools/ace-completion/verify-autojs6-dts.mjs",
-  },
-  {
-    label: "ACE completer tests",
-    script: "tools/ace-completion/test-completer.mjs",
-  },
-  {
-    label: "ACE LSP client tests",
-    script: "tools/ace-lsp/test-lsp-client.mjs",
-  },
-  {
-    label: "ACE tooltip tests",
-    script: "tools/ace-tooltip/test-tooltip.mjs",
-  },
-  {
-    label: "ACE signature help tests",
-    script: "tools/ace-signature/test-signature-help.mjs",
-  },
-];
+const FILES = {
+  settings: "settings.gradle.kts",
+  appBuild: "app/build.gradle.kts",
+  manifest: "app/src/main/AndroidManifest.xml",
+  contract: "plugin-api/editor-api/src/main/java/org/autojs/plugin/editor/api/EditorPluginContract.kt",
+  entrypoint: "plugin-api/editor-api/src/main/java/org/autojs/plugin/editor/api/EditorPluginEntrypoint.kt",
+  session: "plugin-api/editor-api/src/main/java/org/autojs/plugin/editor/api/EditorPluginSession.kt",
+  consumerRules: "plugin-api/editor-api/consumer-rules.pro",
+  host: "app/src/main/java/org/autojs/autojs/core/plugin/editor/AceEditorPluginHost.kt",
+  engine: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/AceScriptEditorEngine.kt",
+  factory: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineFactory.kt",
+  policyTest: "app/src/test/java/org/autojs/autojs/core/plugin/editor/AceEditorPluginPolicyTest.kt",
+  mappingsTest: "app/src/test/java/org/autojs/autojs/ui/edit/editor/engine/AceEditorPluginMappingsTest.kt",
+  deviceTest: "app/src/androidTest/java/org/autojs/autojs/core/plugin/editor/AceEditorPluginHostDeviceTest.kt",
+};
 
-for (const check of CHECKS) {
-  console.log(`\n[ACE gate] ${check.label}`);
-  const result = spawnSync(process.execPath, [check.script], {
-    cwd: PROJECT_ROOT,
-    stdio: "inherit",
-  });
-  if (result.error) {
-    console.error(`[ACE gate] Failed to start ${check.script}: ${result.error.message}`);
-    process.exit(1);
-  }
-  if (result.status !== 0) {
-    console.error(`[ACE gate] ${check.label} failed with exit code ${result.status ?? "unknown"}.`);
-    process.exit(result.status || 1);
+function resolve(relativePath) {
+  return path.join(PROJECT_ROOT, relativePath);
+}
+
+function read(relativePath) {
+  return fs.readFileSync(resolve(relativePath), "utf8").replaceAll("\r\n", "\n");
+}
+
+function assertExists(relativePath) {
+  if (!fs.existsSync(resolve(relativePath))) {
+    throw new Error(`${relativePath}: required file is missing`);
   }
 }
 
-console.log("\nACE editor CI gate passed.");
+function assertMissing(relativePath) {
+  if (fs.existsSync(resolve(relativePath))) {
+    throw new Error(`${relativePath}: embedded ACE runtime file must stay outside the host`);
+  }
+}
+
+function assertIncludes(relativePath, text, label = text) {
+  if (!read(relativePath).includes(text)) {
+    throw new Error(`${relativePath}: missing ${label}`);
+  }
+}
+
+for (const file of Object.values(FILES)) {
+  assertExists(file);
+}
+
+assertIncludes(FILES.settings, '"editor-api"', "editor-api Gradle module registration");
+assertIncludes(FILES.appBuild, 'implementation(project(":plugin-api:editor-api"))');
+assertIncludes(FILES.manifest, '<action android:name="org.autojs.plugin.EDITOR" />');
+assertIncludes(FILES.manifest, '<category android:name="ace-editor" />');
+
+assertIncludes(FILES.contract, "const val VERSION = 1");
+assertIncludes(FILES.contract, 'const val ACTION_EDITOR = "org.autojs.plugin.EDITOR"');
+assertIncludes(FILES.contract, 'const val CATEGORY_ACE = "ace-editor"');
+assertIncludes(FILES.contract, "META_DATA_REQUIRES_HOST_VERSION");
+assertIncludes(FILES.contract, "META_DATA_MAX_HOST_VERSION");
+assertIncludes(FILES.entrypoint, "The plugin must package this API as `compileOnly`");
+assertIncludes(FILES.session, "fun destroy()");
+assertIncludes(FILES.consumerRules, "-keep class org.autojs.plugin.editor.api.** { *; }");
+
+assertIncludes(FILES.host, "PathClassLoader(");
+assertIncludes(FILES.host, "queryIntentServices(");
+assertIncludes(FILES.host, "sameSignerAsHost");
+assertIncludes(FILES.host, "PluginAuthorizedState.OFFICIAL");
+assertIncludes(FILES.host, "PluginAuthorizedState.TRUSTED");
+assertIncludes(FILES.host, "Re-resolve package, component, metadata, version and signer");
+assertIncludes(FILES.host, "candidateEligibilityError(currentCandidate)");
+assertIncludes(FILES.host, "ensureMainThread(");
+assertIncludes(FILES.host, "destroyed.compareAndSet(false, true)");
+
+assertIncludes(FILES.engine, "AceEditorPluginHost.createSession(");
+assertIncludes(FILES.engine, "loadedSession.destroy()");
+assertIncludes(FILES.factory, "AceScriptEditorEngine.create(context)");
+assertIncludes(FILES.factory, "createAceFallback(context");
+assertIncludes(FILES.factory, "lastAcePluginFailure");
+
+assertIncludes(FILES.policyTest, "user grant is insufficient for in-process execution");
+assertIncludes(FILES.policyTest, "required host version is enforced");
+assertIncludes(FILES.policyTest, "maximum host version is enforced");
+assertIncludes(FILES.mappingsTest, "snapshot round trip preserves editor state");
+assertIncludes(FILES.deviceTest, "Cross-APK smoke test");
+assertIncludes(FILES.deviceTest, "AceEditorPluginHost.createSession(");
+assertIncludes(FILES.deviceTest, "assumeTrue(");
+
+[
+  "app/src/main/assets/editor/ace-builds-1.4.12",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceBridge.kt",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceCodeEditor.kt",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceEditorAssets.kt",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceEditorDebugActivity.kt",
+  "app/src/main/java/org/autojs/autojs/ui/edit/editor/ace/AceImeController.kt",
+  "app/src/main/res/layout/activity_ace_editor_debug.xml",
+  "app/src/androidTest/java/org/autojs/autojs/ui/edit/editor/ace/AceCodeEditorSmokeTest.kt",
+].forEach(assertMissing);
+
+console.log("Editor plugin host gate passed.");

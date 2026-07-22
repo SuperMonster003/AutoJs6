@@ -603,11 +603,6 @@
     <string name="text_ace_action_pinned">مثبت</string>
     <string name="text_ace_action_unpin">إلغاء التثبيت</string>
     <string name="text_ace_diagnostics_copied">نسخت تشخيصات Ace إلى الحافظة</string>
-    <string name="text_ace_editor_debug">تصحيح محرر Ace</string>
-    <string name="text_ace_editor_debug_description">فتح صفحة اختبار معزولة لمحرر Ace WebView</string>
-    <string name="text_ace_editor_debug_status">%1$s | الأسطر %2$d | المؤشر %3$d:%4$d | نقاط التوقف %5$d | معدل %6$s</string>
-    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">جار تحميل محرر Ace...</string>
-    <string name="text_ace_editor_debug_text_length">طول نص Ace: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">فشل محرر Ace (%1$s); تم التبديل إلى JsDroidEditor. انسخ تشخيصات Ace من قائمة المزيد للاطلاع على التفاصيل</string>
     <string name="text_ace_editor_font">خط المحرر</string>
     <string name="text_ace_editor_font_built_in">مدمج</string>

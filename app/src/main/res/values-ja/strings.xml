@@ -602,11 +602,6 @@
     <string name="text_ace_action_pinned">固定済み</string>
     <string name="text_ace_action_unpin">固定解除</string>
     <string name="text_ace_diagnostics_copied">Ace 診断情報をクリップボードにコピーしました</string>
-    <string name="text_ace_editor_debug">Ace エディターのデバッグ</string>
-    <string name="text_ace_editor_debug_description">分離された Ace WebView エディターのテストページを開きます</string>
-    <string name="text_ace_editor_debug_status">%1$s | 行数 %2$d | カーソル %3$d:%4$d | ブレークポイント %5$d | 変更あり %6$s</string>
-    <string name="text_ace_editor_debug_status_loading" tools:ignore="TypographyEllipsis">Ace エディターを読み込んでいます...</string>
-    <string name="text_ace_editor_debug_text_length">Ace テキスト長: %1$d</string>
     <string name="text_ace_editor_fallback_native" formatted="true">Ace エディターでエラーが発生したため (%1$s), JsDroidEditor に切り替えました. 詳細を確認するには, その他メニューから Ace 診断情報をコピーしてください</string>
     <string name="text_ace_editor_font">エディターフォント</string>
     <string name="text_ace_editor_font_built_in">組み込み</string>

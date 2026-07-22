@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Run ACE editor gate
+      - name: Run editor plugin host gate
         run: node tools/ace-ci/check-ace-editor-gate.mjs
 
       - name: Set up JDK 21 and Gradle dependency cache
@@ -52,12 +52,24 @@ jobs:
       - name: Verify preinstalled Ninja
         run: ninja --version
 
-      - name: Build Runtime Kit, app and APK Builder plugin
+      - name: Test editor plugin host and build distributions
         run: |
           set -euo pipefail
           chmod +x gradlew
           bash .github/scripts/run-gradle-ci.sh \
-            ./gradlew assembleApkBuilderTemplateDistribution \
+            ./gradlew \
+            :app:testAppDebugUnitTest \
+            --tests org.autojs.autojs.core.plugin.editor.AceEditorPluginPolicyTest \
+            --tests org.autojs.autojs.ui.edit.editor.engine.AceEditorPluginMappingsTest \
+            --tests org.autojs.autojs.ui.edit.editor.ace.lsp.AceLspServerManagerTest \
+            --no-daemon \
+            --build-cache \
+            --console=plain \
+            --stacktrace
+          bash .github/scripts/run-gradle-ci.sh \
+            ./gradlew \
+            :app:compileAppDebugAndroidTestKotlin \
+            assembleApkBuilderTemplateDistribution \
             -x :app:lintVitalAnalyzeInrtRelease \
             --no-daemon \
             --build-cache \
