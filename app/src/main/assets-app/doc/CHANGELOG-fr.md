@@ -17,7 +17,7 @@
 * `Fonctionnalité` Backend de plugin d'exécution Node.js externe avec mode `plugin` obligatoire et mode `pluginOptional` avec repli, sessions Binder persistantes et runtime à l'échelle du processus, validation de confiance/contrat/ABI et contre-pression sans file pour une seule exécution active
 * `Fonctionnalité` Le backend du plugin d'exécution Node.js externe prend en charge le transport d'archive d'espace de travail v2 limité à la requête, avec mappage explicite des entrées, réécriture des sorties et manifeste tombstone de suppression, sans analyser le sandbox hôte
 * `Fonctionnalité` La fonction d'empaquetage prend en charge les projets de scripts Node.js et inclut automatiquement les bibliothèques d'exécution requises
-* `Fonctionnalité` Le système de plugins prend en charge des interfaces d'extension pour Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/conversion de texte/informations multimédias et plus encore
+* `Fonctionnalité` Le système de plugins prend en charge des interfaces d'extension pour Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/conversion de texte/informations multimédias et plus encore
 * `Fonctionnalité` Le Centre des plugins propose une page de paramètres globaux et une page d'instructions
 * `Fonctionnalité` Le Centre des plugins prend en charge le montage automatique des plugins SDK
 * `Fonctionnalité` Le Centre des plugins prend en charge le tri par priorité de plusieurs variantes
@@ -95,7 +95,7 @@
 * `Amélioration` Ajout de tests soak du runtime persistant du plugin externe et de portes de preuves de production Node.js couvrant la matrice appareils/ABI, le cycle de vie du runtime, les mesures de ressources et la stabilité sur 8 h/24 h
 * `Amélioration` La vérification native de Node.js résout et valide désormais les racines des sources et de la compilation du plugin d'exécution externe
 * `Amélioration` Les portes d'intégration finale et de livraison Node.js appliquent une stratégie fail-closed lorsque des rapports requis, des preuves correspondant aux sources actuelles ou des artefacts d'acceptation en production sont absents ou périmés
-* `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
+* `Amélioration` Modularisation sous forme de plugins des fonctions liées à ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Amélioration` Modularisation du runtime WebView Ace/du bridge JavaScript/des services de langage intégrés/des ressources statiques sous forme de plugin installable séparément, afin de réduire le couplage avec l'APK hôte et de permettre des mises à jour indépendantes
 * `Amélioration` La sélection du moteur de l'éditeur respecte les choix explicites de l'utilisateur et propose un accès au Centre de plugins lorsqu'Ace est indisponible
 * `Amélioration` Le bouton "Exécuter" de l'éditeur de code devient "Arrêter" après avoir été pressé, ce qui permet d'arrêter rapidement les scripts
@@ -110,6 +110,7 @@
 * `Amélioration` Le système de compilation sélectionne dynamiquement les versions compatibles de Kotlin/KSP/AGP/R8 et réduit la pression mémoire au démarrage de Gradle
 * `Dépendance` Android AXML modularise
 * `Dépendance` Android ARSC Editor modularise
+* `Dépendance` OpenCV modularise version 4.8.0
 * `Dépendance` Ajout de Apache Commons Codec version 1.15
 * `Dépendance` Suppression de AndroidX MultiDex version 2.0.1
 * `Dépendance` Suppression de MLKit Barcode Scanning version 17.3.0

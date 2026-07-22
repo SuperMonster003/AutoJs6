@@ -17,7 +17,7 @@
 * `Nuevo` Backend de plugin de runtime Node.js externo con modo `plugin` obligatorio y modo `pluginOptional` con fallback, sesiones Binder persistentes y runtime de proceso, validación de confianza/contrato/ABI y contrapresión sin cola para una sola ejecución activa
 * `Nuevo` El backend del plugin de runtime Node.js externo admite el transporte de archivo de espacio de trabajo v2 por solicitud, con mapeo explícito de entradas, escritura de resultados y manifiesto tombstone de eliminación, sin escanear el sandbox del host
 * `Nuevo` La función de empaquetado admite proyectos de scripts Node.js e incluye automáticamente las bibliotecas de ejecución necesarias
-* `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/conversión de texto/información multimedia y más
+* `Nuevo` El sistema de plugins admite interfaces de extensión para Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/conversión de texto/información multimedia y más
 * `Nuevo` El Centro de plugins ofrece una página de configuración global y una página de instrucciones
 * `Nuevo` El Centro de plugins admite el montaje automático de plugins SDK
 * `Nuevo` El Centro de plugins admite la ordenación por prioridad de múltiples variantes
@@ -95,7 +95,7 @@
 * `Mejora` Añadidas pruebas soak del runtime persistente del plugin externo y puertas de evidencia de producción de Node.js que cubren matriz de dispositivos/ABI, ciclo de vida del runtime, métricas de recursos y estabilidad de 8 h/24 h
 * `Mejora` La verificación nativa de Node.js ahora resuelve y valida las raíces de código fuente y compilación del plugin de runtime externo
 * `Mejora` Las puertas de integración final y lanzamiento de Node.js aplican fail-closed cuando faltan o están obsoletos los informes requeridos, las evidencias de las fuentes actuales o los artefactos de aceptación de producción
-* `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo
+* `Mejora` Modularizadas como plugins las funciones relacionadas con ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/OpenCC/Pinyin/Pinyin4j/MediaInfo
 * `Mejora` Modularizados como plugin instalable por separado el runtime WebView de Ace/el bridge JavaScript/los servicios de lenguaje integrados/los recursos estáticos, reduciendo el acoplamiento con el APK anfitrión y permitiendo actualizaciones independientes
 * `Mejora` La selección del motor del editor respeta las elecciones explícitas del usuario y ofrece acceso al Centro de plugins cuando Ace no está disponible
 * `Mejora` El botón "Ejecutar" del editor de código cambia a "Detener" después de pulsarlo, permitiendo detener scripts rápidamente
@@ -110,6 +110,7 @@
 * `Mejora` El sistema de compilación permite seleccionar dinámicamente versiones compatibles de Kotlin/KSP/AGP/R8 y reduce la presión de memoria al iniciar Gradle
 * `Dependencia` Android AXML modularizado
 * `Dependencia` Android ARSC Editor modularizado
+* `Dependencia` OpenCV modularizado version 4.8.0
 * `Dependencia` Se agrega Apache Commons Codec version 1.15
 * `Dependencia` Se elimina AndroidX MultiDex version 2.0.1
 * `Dependencia` Se elimina MLKit Barcode Scanning version 17.3.0

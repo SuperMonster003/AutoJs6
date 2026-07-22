@@ -177,7 +177,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` External Node.js runtime plugin backend with required `plugin` and fallback-capable `pluginOptional` modes, persistent Binder sessions and process runtimes, trust/contract/ABI validation, and single-active zero-queue backpressure
 * `Feature` External Node.js runtime plugin backend supports request-scoped workspace archive transport v2 with explicit input mapping, output writeback, and deletion tombstone manifests without scanning the host sandbox
 * `Feature` App packaging supports Node.js script projects and automatically includes the required runtime libraries
-* `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/text conversion/media information and more
+* `Feature` Plugin system supports extension interfaces for Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/text conversion/media information and more
 * `Feature` Plugin Center provides a global settings page and a user guide page
 * `Feature` Plugin Center supports automatic SDK plugin mounting
 * `Feature` Plugin Center supports multi-variant priority sorting
@@ -255,7 +255,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Added persistent external-plugin runtime soak testing and Node.js production-evidence gates covering device/ABI matrices, runtime lifecycle, resource metrics, and 8-hour/24-hour stability
 * `Improvement` Updated Node.js native verification to resolve and validate the external runtime plugin source and build roots
 * `Improvement` Made Node.js final integration and release gates fail closed when required reports, current-source evidence, or production acceptance artifacts are missing or stale
-* `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
+* `Improvement` Modularized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/OpenCC/Pinyin/Pinyin4j/MediaInfo as plugins
 * `Improvement` Modularized the Ace WebView runtime/JavaScript bridge/built-in language services/static assets as a separately installable plugin, reducing host APK coupling and allowing independent updates
 * `Improvement` Code editor engine selection respects explicit user choices and provides access to Plugin Center when Ace is unavailable
 * `Improvement` Code editor "Run" button changes to "Stop" after being tapped, allowing scripts to be stopped quickly

@@ -17,7 +17,7 @@
 * `新增` Node.js 外部運行時插件後端, 支援強制 `plugin` 與可選回退 `pluginOptional` 模式, 常駐 Binder 會話及進程運行時, 信任/合約/ABI 校驗和單活動零隊列背壓
 * `新增` Node.js 外部運行時插件後端支援請求級工作區歸檔傳輸 v2, 包含顯式輸入映射/輸出回寫/刪除 tombstone 清單, 且不掃描宿主沙盒
 * `新增` 打包功能支持 Node.js 腳本項目, 並自動包含所需運行庫
-* `新增` 插件系統支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/文本轉換/媒體信息等擴展接口
+* `新增` 插件系統支持 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/文本轉換/媒體信息等擴展接口
 * `新增` 插件中心支持全局設置頁面及使用說明頁面
 * `新增` 插件中心支持 SDK 插件自動掛載功能
 * `新增` 插件中心支持多變體優先級排序功能
@@ -95,7 +95,7 @@
 * `優化` Node.js 外部插件常駐運行時加入 soak 測試及生產證據門禁, 覆蓋設備/ABI 矩陣/運行時生命週期/資源指標及 8 小時/24 小時穩定性
 * `優化` Node.js 原生校驗支持解析並驗證外部運行時插件的源碼及構建根目錄
 * `優化` Node.js 最終集成及發佈門禁在所需報告/當前源碼證據/生產驗收產物缺失或過期時採用 fail-closed 策略
-* `優化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
+* `優化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
 * `優化` Ace WebView 運行時/JavaScript bridge/內置語言服務/靜態資源完成插件化, 降低宿主 APK 耦合並支持獨立安裝及更新
 * `優化` 代碼編輯器引擎選擇尊重用戶顯式設置, Ace 不可用時提供插件中心跳轉入口
 * `優化` 代碼編輯器 "運行" 按鈕點擊後變換為 "停止" 按鈕, 可便捷停止腳本
@@ -110,6 +110,7 @@
 * `優化` 構建系統支持動態匹配 Kotlin/KSP/AGP/R8 兼容版本並降低 Gradle 啟動內存壓力
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
+* `依賴` 模塊化 OpenCV 版本 4.8.0
 * `依賴` 附加 Apache Commons Codec 版本 1.15
 * `依賴` 移除 AndroidX MultiDex 版本 2.0.1
 * `依賴` 移除 MLKit Barcode Scanning 版本 17.3.0
