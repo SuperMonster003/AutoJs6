@@ -42,6 +42,7 @@ private val libs = listOf(
 
 private val pluginApi = listOf(
     "common-plugin-api",
+    "editor-api",
     "nodejs-api",
     "apk-builder-template",
     "opencc-api",

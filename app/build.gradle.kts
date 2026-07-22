@@ -508,6 +508,9 @@ dependencies /* Unclassified */ {
     // Plugin API: Common API
     implementation(project(":plugin-api:common-plugin-api"))
 
+    // Plugin API: Editor API
+    implementation(project(":plugin-api:editor-api"))
+
     // Plugin API: Node.js API
     implementation(project(":plugin-api:nodejs-api"))
 
