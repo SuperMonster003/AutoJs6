@@ -177,7 +177,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` Node.js 外部執行階段插件後端, 支援強制 `plugin` 與可選回退 `pluginOptional` 模式, 常駐 Binder 工作階段及處理程序執行環境, 信任/合約/ABI 驗證和單一活動零佇列背壓
 * `新增` Node.js 外部執行階段插件後端支援請求層級工作區封存傳輸 v2, 包含明確輸入對應/輸出回寫/刪除 tombstone 清單, 且不掃描宿主沙盒
 * `新增` 打包功能支援 Node.js 腳本專案, 並自動包含所需執行階段程式庫
-* `新增` 外掛系統支援 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/文字轉換/媒體資訊等擴充介面
+* `新增` 外掛系統支援 Node.js/ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/文字轉換/媒體資訊等擴充介面
 * `新增` 外掛中心支援全域設定頁面及使用說明頁面
 * `新增` 外掛中心支援 SDK 外掛自動掛載功能
 * `新增` 外掛中心支援多變體優先順序排序功能
@@ -256,7 +256,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` Node.js 外部外掛常駐執行環境加入 soak 測試及生產證據閘門, 涵蓋裝置/ABI 矩陣/執行環境生命週期/資源指標及 8 小時/24 小時穩定性
 * `最佳化` Node.js 原生驗證支援解析並驗證外部執行階段外掛的原始碼及建置根目錄
 * `最佳化` Node.js 最終整合及發佈閘門在必要報告/目前原始碼證據/生產驗收產物缺失或過期時採用 fail-closed 策略
-* `最佳化` 外掛化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
+* `最佳化` 外掛化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization/OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
 * `最佳化` Ace WebView 執行階段/JavaScript bridge/內建語言服務/靜態資源完成外掛化, 降低宿主 APK 耦合並支援獨立安裝及更新
 * `最佳化` 程式碼編輯器引擎選擇尊重使用者明確設定, Ace 無法使用時提供前往外掛中心的入口
 * `最佳化` 程式碼編輯器 "執行" 按鈕點選後變換為 "停止" 按鈕, 可便捷停止腳本
